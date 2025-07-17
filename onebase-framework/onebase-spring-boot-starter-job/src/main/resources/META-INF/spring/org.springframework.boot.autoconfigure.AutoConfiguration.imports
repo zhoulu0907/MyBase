@@ -1,0 +1,2 @@
+com.cmsr.onebase.framework.quartz.config.YudaoXxlJobAutoConfiguration
+com.cmsr.onebase.framework.quartz.config.YudaoAsyncAutoConfiguration

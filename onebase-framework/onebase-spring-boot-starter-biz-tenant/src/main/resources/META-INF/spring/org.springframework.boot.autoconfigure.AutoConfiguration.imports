@@ -1,0 +1,2 @@
+com.cmsr.onebase.framework.tenant.config.YudaoTenantRpcAutoConfiguration
+com.cmsr.onebase.framework.tenant.config.YudaoTenantAutoConfiguration

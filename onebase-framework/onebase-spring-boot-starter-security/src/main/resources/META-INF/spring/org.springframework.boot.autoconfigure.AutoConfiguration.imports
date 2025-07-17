@@ -1,0 +1,5 @@
+com.cmsr.onebase.framework.security.config.YudaoSecurityRpcAutoConfiguration
+com.cmsr.onebase.framework.security.config.YudaoSecurityAutoConfiguration
+com.cmsr.onebase.framework.security.config.YudaoWebSecurityConfigurerAdapter
+com.cmsr.onebase.framework.operatelog.config.YudaoOperateLogConfiguration
+com.cmsr.onebase.framework.operatelog.config.YudaoOperateLogRpcAutoConfiguration

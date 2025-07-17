@@ -1,0 +1,6 @@
+com.cmsr.onebase.framework.apilog.config.YudaoApiLogAutoConfiguration
+com.cmsr.onebase.framework.jackson.config.YudaoJacksonAutoConfiguration
+com.cmsr.onebase.framework.swagger.config.YudaoSwaggerAutoConfiguration
+com.cmsr.onebase.framework.web.config.YudaoWebAutoConfiguration
+com.cmsr.onebase.framework.apilog.config.YudaoApiLogRpcAutoConfiguration
+com.cmsr.onebase.framework.banner.config.YudaoBannerAutoConfiguration

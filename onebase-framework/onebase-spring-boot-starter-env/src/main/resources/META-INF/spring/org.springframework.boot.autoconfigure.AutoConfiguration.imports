@@ -1,0 +1,2 @@
+com.cmsr.onebase.framework.env.config.YudaoEnvWebAutoConfiguration
+com.cmsr.onebase.framework.env.config.YudaoEnvRpcAutoConfiguration

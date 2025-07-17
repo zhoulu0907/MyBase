@@ -1,0 +1,2 @@
+com.cmsr.onebase.framework.tracer.config.YudaoTracerAutoConfiguration
+com.cmsr.onebase.framework.tracer.config.YudaoMetricsAutoConfiguration
