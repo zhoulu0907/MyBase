@@ -36,6 +36,8 @@ public class DataRepository {
         ConfigTable.IS_AUTO_CHECK_METADATA = true;
         ConfigTable.IS_INSERT_NULL_COLUMN = false;
         ConfigTable.IS_INSERT_NULL_FIELD = false;
+        ConfigTable.IS_INSERT_EMPTY_FIELD = false;
+        ConfigTable.IS_INSERT_EMPTY_COLUMN = false;
         this.service = service;
         if (service == null) {
             throw new IllegalArgumentException("AnylineService cannot be null");
