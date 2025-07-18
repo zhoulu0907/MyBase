@@ -30,6 +30,11 @@
             <version>${revision}</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+        </dependency>
+
         <!-- 工作流。默认注释，保证编译速度 -->
 <!--        <dependency>-->
 <!--            <groupId>com.cmsr.onebase</groupId>-->
