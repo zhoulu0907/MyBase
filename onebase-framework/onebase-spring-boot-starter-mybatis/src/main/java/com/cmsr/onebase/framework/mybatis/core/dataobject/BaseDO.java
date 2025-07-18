@@ -3,8 +3,10 @@ package com.cmsr.onebase.framework.mybatis.core.dataobject;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableLogic;
+import com.cmsr.onebase.framework.mybatis.config.IntBoolConverter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fhs.core.trans.vo.TransPojo;
+import jakarta.persistence.Convert;
 import lombok.Data;
 import org.apache.ibatis.type.JdbcType;
 
@@ -50,6 +52,7 @@ public abstract class BaseDO implements Serializable, TransPojo {
      * 是否删除
      */
     @TableLogic
+//    @Convert(converter = IntBoolConverter.class)
     private Boolean deleted;
 
     /**

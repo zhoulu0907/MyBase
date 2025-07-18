@@ -2,8 +2,11 @@ package com.cmsr.onebase.module.system.service.dept;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjectUtil;
+import com.cmsr.onebase.framework.aynline.DataRepository;
+import com.cmsr.onebase.framework.common.anyline.web.MyAnyLineService;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.framework.common.util.snowflake.SnowflakeId;
 import com.cmsr.onebase.framework.datapermission.core.annotation.DataPermission;
 import com.cmsr.onebase.module.system.controller.admin.dept.vo.dept.DeptListReqVO;
 import com.cmsr.onebase.module.system.controller.admin.dept.vo.dept.DeptSaveReqVO;
@@ -13,6 +16,7 @@ import com.cmsr.onebase.module.system.dal.redis.RedisKeyConstants;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.anyline.service.AnylineService;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -36,6 +40,10 @@ public class DeptServiceImpl implements DeptService {
     @Resource
     private DeptMapper deptMapper;
 
+
+    private AnylineService<?> service = MyAnyLineService.getInstance().getService();
+    private DataRepository dataRepository = new DataRepository(service);
+
     @Override
     @CacheEvict(cacheNames = RedisKeyConstants.DEPT_CHILDREN_ID_LIST,
             allEntries = true) // allEntries 清空所有缓存，因为操作一个部门，涉及到多个缓存
@@ -50,7 +58,10 @@ public class DeptServiceImpl implements DeptService {
 
         // 插入部门
         DeptDO dept = BeanUtils.toBean(createReqVO, DeptDO.class);
-        deptMapper.insert(dept);
+//        deptMapper.insert(dept);
+        dept.setId(SnowflakeId.nextId());
+//        dept.setDeleted(false);
+        dataRepository.saveNew(dept);
         return dept.getId();
     }
 

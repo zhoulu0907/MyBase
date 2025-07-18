@@ -1,4 +1,4 @@
-package com.cmsr.onebase.framework.common.anyline.repository;
+package com.cmsr.onebase.framework.aynline;
 
 import com.cmsr.onebase.framework.common.anyline.entity.BaseDO;
 import com.cmsr.onebase.framework.common.anyline.utils.JpaUtils;
@@ -14,6 +14,7 @@ import org.anyline.entity.*;
 import org.anyline.metadata.Constraint;
 import org.anyline.metadata.Table;
 import org.anyline.service.AnylineService;
+import org.anyline.util.ConfigTable;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -21,7 +22,7 @@ import java.util.Optional;
 
 /**
  * DataRepository - JPA风格的CRUD操作工具类
- *
+ * <p>
  * 提供标准的CRUD操作接口，遵循Spring Data JPA的设计模式
  * 支持实体类的增删改查操作，包含分页、排序、条件查询等功能
  *
@@ -29,10 +30,12 @@ import java.util.Optional;
  */
 @Slf4j
 public class DataRepository {
-
     private final AnylineService<?> service;
 
     public DataRepository(AnylineService<?> service) {
+        ConfigTable.IS_AUTO_CHECK_METADATA = true;
+        ConfigTable.IS_INSERT_NULL_COLUMN = false;
+        ConfigTable.IS_INSERT_NULL_FIELD = false;
         this.service = service;
         if (service == null) {
             throw new IllegalArgumentException("AnylineService cannot be null");
@@ -54,7 +57,39 @@ public class DataRepository {
      * 保存实体（插入或更新）
      *
      * @param entity 要保存的实体
-     * @param <T> 实体类型
+     * @param <T>    实体类型
+     * @return 保存后的实体
+     */
+    public <T extends com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO> T saveNew(T entity) {
+        try {
+//            if (entity.getPkey() == null en) {
+            // 新增
+            entity.setCreateTime(LocalDateTime.now());
+//                entity.set(SnowflakeId.nextId());
+            Long result = service.insert(entity);
+            if (result == 0) {
+                throw new BizException(StatusCode.DB_INSERT_ERROR);
+            }
+//            } else {
+//                // 更新
+//                entity.setUpdateTime(LocalDateTime.now());
+//                Long result = service.update(entity);
+//                if (result == 0) {
+//                    throw new BizException(StatusCode.DB_UPDATE_ERROR);
+//                }
+//            }
+            return entity;
+        } catch (Exception e) {
+            log.error("保存实体失败: {}", entity.getClass().getSimpleName(), e);
+            throw new BizException(StatusCode.DB_INSERT_ERROR);
+        }
+    }
+
+    /**
+     * 保存实体（插入或更新）
+     *
+     * @param entity 要保存的实体
+     * @param <T>    实体类型
      * @return 保存后的实体
      */
     public <T extends BaseDO> T save(T entity) {
@@ -86,7 +121,7 @@ public class DataRepository {
      * 批量保存实体
      *
      * @param entities 实体列表
-     * @param <T> 实体类型
+     * @param <T>      实体类型
      * @return 保存后的实体列表
      */
     public <T extends BaseDO> List<T> saveAll(List<T> entities) {
@@ -105,8 +140,8 @@ public class DataRepository {
      * 根据ID查找实体
      *
      * @param clazz 实体类
-     * @param id 实体ID
-     * @param <T> 实体类型
+     * @param id    实体ID
+     * @param <T>   实体类型
      * @return 实体对象，如果不存在返回null
      */
     public <T extends BaseDO> T findById(Class<T> clazz, Long id) {
@@ -126,8 +161,8 @@ public class DataRepository {
      * 根据ID查找实体（返回Optional）
      *
      * @param clazz 实体类
-     * @param id 实体ID
-     * @param <T> 实体类型
+     * @param id    实体ID
+     * @param <T>   实体类型
      * @return Optional包装的实体对象
      */
     public <T extends BaseDO> Optional<T> findByIdOptional(Class<T> clazz, Long id) {
@@ -139,8 +174,8 @@ public class DataRepository {
      * 检查实体是否存在
      *
      * @param clazz 实体类
-     * @param id 实体ID
-     * @param <T> 实体类型
+     * @param id    实体ID
+     * @param <T>   实体类型
      * @return 是否存在
      */
     public <T extends BaseDO> boolean existsById(Class<T> clazz, Long id) {
@@ -151,7 +186,7 @@ public class DataRepository {
      * 查找所有实体
      *
      * @param clazz 实体类
-     * @param <T> 实体类型
+     * @param <T>   实体类型
      * @return 实体列表
      */
     public <T extends BaseDO> List<T> findAll(Class<T> clazz) {
@@ -172,8 +207,8 @@ public class DataRepository {
      * 根据ID列表查找实体
      *
      * @param clazz 实体类
-     * @param ids ID列表
-     * @param <T> 实体类型
+     * @param ids   ID列表
+     * @param <T>   实体类型
      * @return 实体列表
      */
     public <T extends BaseDO> List<T> findAllById(Class<T> clazz, List<Long> ids) {
@@ -195,7 +230,7 @@ public class DataRepository {
      * 统计实体数量
      *
      * @param clazz 实体类
-     * @param <T> 实体类型
+     * @param <T>   实体类型
      * @return 实体数量
      */
     public <T extends BaseDO> long count(Class<T> clazz) {
@@ -216,8 +251,8 @@ public class DataRepository {
      * 根据ID删除实体（软删除）
      *
      * @param clazz 实体类
-     * @param id 实体ID
-     * @param <T> 实体类型
+     * @param id    实体ID
+     * @param <T>   实体类型
      */
     public <T extends BaseDO> void deleteById(Class<T> clazz, Long id) {
         try {
@@ -242,7 +277,7 @@ public class DataRepository {
      * 删除实体（软删除）
      *
      * @param entity 要删除的实体
-     * @param <T> 实体类型
+     * @param <T>    实体类型
      */
     public <T extends BaseDO> void delete(T entity) {
         if (entity != null && entity.getId() != null) {
@@ -256,7 +291,7 @@ public class DataRepository {
      * 批量删除实体（软删除）
      *
      * @param entities 实体列表
-     * @param <T> 实体类型
+     * @param <T>      实体类型
      */
     public <T extends BaseDO> void deleteAll(List<T> entities) {
         for (T entity : entities) {
@@ -268,8 +303,8 @@ public class DataRepository {
      * 根据ID列表删除实体（软删除）
      *
      * @param clazz 实体类
-     * @param ids ID列表
-     * @param <T> 实体类型
+     * @param ids   ID列表
+     * @param <T>   实体类型
      */
     public <T extends BaseDO> void deleteAllById(Class<T> clazz, List<Long> ids) {
         try {
@@ -294,7 +329,7 @@ public class DataRepository {
      * 删除所有实体（软删除）
      *
      * @param clazz 实体类
-     * @param <T> 实体类型
+     * @param <T>   实体类型
      */
     public <T extends BaseDO> void deleteAll(Class<T> clazz) {
         try {
@@ -314,10 +349,10 @@ public class DataRepository {
     /**
      * 分页查询
      *
-     * @param clazz 实体类
+     * @param clazz     实体类
      * @param pageIndex 页码（从1开始）
-     * @param pageSize 页大小
-     * @param <T> 实体类型
+     * @param pageSize  页大小
+     * @param <T>       实体类型
      * @return 分页结果
      */
     public <T extends BaseDO> PageResult<T> findAll(Class<T> clazz, int pageIndex, int pageSize) {
@@ -332,14 +367,14 @@ public class DataRepository {
             DataSet dataSet = service.querys(tableName, configs);
 
             return new PageResult<>(
-                dataSet.entitys(clazz).stream().toList(),
-                pageIndex,
-                pageSize,
-                dataSet.total()
+                    dataSet.entitys(clazz).stream().toList(),
+                    pageIndex,
+                    pageSize,
+                    dataSet.total()
             );
         } catch (Exception e) {
             log.error("分页查询失败: class={}, pageIndex={}, pageSize={}",
-                clazz.getSimpleName(), pageIndex, pageSize, e);
+                    clazz.getSimpleName(), pageIndex, pageSize, e);
             throw new BizException(StatusCode.DB_SELECT_ERROR);
         }
     }
@@ -347,9 +382,9 @@ public class DataRepository {
     /**
      * 条件查询
      *
-     * @param clazz 实体类
+     * @param clazz   实体类
      * @param configs 查询条件
-     * @param <T> 实体类型
+     * @param <T>     实体类型
      * @return 实体列表
      */
     public <T extends BaseDO> List<T> findAll(Class<T> clazz, ConfigStore configs) {
@@ -368,9 +403,9 @@ public class DataRepository {
     /**
      * 条件查询单个实体
      *
-     * @param clazz 实体类
+     * @param clazz   实体类
      * @param configs 查询条件
-     * @param <T> 实体类型
+     * @param <T>     实体类型
      * @return 实体对象，如果不存在返回null
      */
     public <T extends BaseDO> T findOne(Class<T> clazz, ConfigStore configs) {
@@ -387,9 +422,9 @@ public class DataRepository {
     /**
      * 条件查询单个实体（返回Optional）
      *
-     * @param clazz 实体类
+     * @param clazz   实体类
      * @param configs 查询条件
-     * @param <T> 实体类型
+     * @param <T>     实体类型
      * @return Optional包装的实体对象
      */
     public <T extends BaseDO> Optional<T> findOneOptional(Class<T> clazz, ConfigStore configs) {
@@ -400,8 +435,8 @@ public class DataRepository {
     /**
      * 创建表
      *
-     * @param clazz 实体类
-     * @param reset 是否删除已存在的表
+     * @param clazz   实体类
+     * @param reset   是否删除已存在的表
      * @param execute 是否执行DDL
      * @throws Exception 异常
      */
@@ -424,15 +459,15 @@ public class DataRepository {
         // 处理唯一约束
         if (clazz.isAnnotationPresent(jakarta.persistence.Table.class)) {
             jakarta.persistence.Table tableAnnotation =
-                (jakarta.persistence.Table) clazz.getAnnotation(jakarta.persistence.Table.class);
+                    (jakarta.persistence.Table) clazz.getAnnotation(jakarta.persistence.Table.class);
             jakarta.persistence.UniqueConstraint[] uniqueConstraints = tableAnnotation.uniqueConstraints();
 
             for (jakarta.persistence.UniqueConstraint constraint : uniqueConstraints) {
                 log.info("表名: {} 约束名称: {} 约束列名 {}",
-                    table.getName(), constraint.name(), constraint.columnNames());
+                        table.getName(), constraint.name(), constraint.columnNames());
 
                 Constraint<?> uk = new Constraint<>(table, constraint.name())
-                    .setType(Constraint.TYPE.UNIQUE);
+                        .setType(Constraint.TYPE.UNIQUE);
 
                 for (String column : constraint.columnNames()) {
                     log.info(column);
