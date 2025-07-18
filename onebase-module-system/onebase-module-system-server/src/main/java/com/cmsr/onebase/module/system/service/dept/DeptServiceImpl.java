@@ -8,6 +8,7 @@ import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.common.util.snowflake.SnowflakeId;
 import com.cmsr.onebase.framework.datapermission.core.annotation.DataPermission;
+import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
 import com.cmsr.onebase.module.system.controller.admin.dept.vo.dept.DeptListReqVO;
 import com.cmsr.onebase.module.system.controller.admin.dept.vo.dept.DeptSaveReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
@@ -58,9 +59,15 @@ public class DeptServiceImpl implements DeptService {
 
         // 插入部门
         DeptDO dept = BeanUtils.toBean(createReqVO, DeptDO.class);
-//        deptMapper.insert(dept);
         dept.setId(SnowflakeId.nextId());
-//        dept.setDeleted(false);
+        System.out.println("雪花id生成dept.getId():"+dept.getId());
+        
+        // 设置租户ID
+        Long tenantId = TenantContextHolder.getTenantId();
+        if (tenantId != null) {
+            dept.setTenantId(tenantId);
+        }
+        
         dataRepository.saveNew(dept);
         return dept.getId();
     }

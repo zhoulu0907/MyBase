@@ -60,7 +60,7 @@ public class TokenAuthenticationFilter implements GlobalFilter, Ordered {
      * key1：多租户的编号
      * key2：访问令牌
      */
-    private final LoadingCache<KeyValue<Long, String>, LoginUser> loginUserCache = buildAsyncReloadingCache(Duration.ofMinutes(1),
+    private final LoadingCache<KeyValue<Long, String>, LoginUser> loginUserCache = buildAsyncReloadingCache(Duration.ofMinutes(24*60),
             new CacheLoader<KeyValue<Long, String>, LoginUser>() {
 
                 @Override

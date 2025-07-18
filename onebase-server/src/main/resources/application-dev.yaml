@@ -44,14 +44,16 @@ spring:
       primary: master
       datasource:
         master:
-          url: jdbc:mysql://10.0.104.38:3306/onebase_cloud_v3?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&nullCatalogMeansCurrent=true&rewriteBatchedStatements=true # MySQL Connector/J 8.X 连接的示例
-          username: root
+          url: jdbc:postgresql://10.0.104.38:5432/onebase_cloud_v3 
+          username: postgres
           password: onebase@2025
+          driver-class-name: org.postgresql.Driver
         slave: # 模拟从库，可根据自己需要修改 # 模拟从库，可根据自己需要修改
           lazy: true # 开启懒加载，保证启动速度
-          url: jdbc:mysql://10.0.104.38:3306/onebase_cloud_v3?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&nullCatalogMeansCurrent=true&rewriteBatchedStatements=true # MySQL Connector/J 8.X 连接的示例
-          username: root
+          url: jdbc:postgresql://10.0.104.38:5432/onebase_cloud_v3 
+          username: postgres
           password: onebase@2025
+          driver-class-name: org.postgresql.Driver
 
   # Redis 配置。Redisson 默认的配置足够使用，一般不需要进行调优
   data:

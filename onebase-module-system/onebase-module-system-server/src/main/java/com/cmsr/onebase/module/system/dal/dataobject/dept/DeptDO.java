@@ -30,7 +30,7 @@ public class DeptDO extends TenantBaseDO {
     /**
      * 部门ID
      */
-    @TableId
+    @TableId(type = IdType.INPUT)
     private Long id;
     /**
      * 部门名称

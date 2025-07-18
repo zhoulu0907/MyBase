@@ -19,6 +19,8 @@ import org.anyline.util.ConfigTable;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * DataRepository - JPA风格的CRUD操作工具类
@@ -64,22 +66,22 @@ public class DataRepository {
      */
     public <T extends com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO> T saveNew(T entity) {
         try {
-//            if (entity.getPkey() == null en) {
             // 新增
             entity.setCreateTime(LocalDateTime.now());
-//                entity.set(SnowflakeId.nextId());
+            System.out.println("查看entity.getId():"+entity.getId());
+            
+            // 设置Anyline配置，避免类型转换问题
+            ConfigTable.IS_AUTO_CHECK_METADATA = false;
+            ConfigTable.IS_INSERT_NULL_COLUMN = true;
+            ConfigTable.IS_INSERT_NULL_FIELD = true;
+            ConfigTable.IS_INSERT_EMPTY_FIELD = true;
+            ConfigTable.IS_INSERT_EMPTY_COLUMN = true;
+            
             Long result = service.insert(entity);
             if (result == 0) {
                 throw new BizException(StatusCode.DB_INSERT_ERROR);
             }
-//            } else {
-//                // 更新
-//                entity.setUpdateTime(LocalDateTime.now());
-//                Long result = service.update(entity);
-//                if (result == 0) {
-//                    throw new BizException(StatusCode.DB_UPDATE_ERROR);
-//                }
-//            }
+            
             return entity;
         } catch (Exception e) {
             log.error("保存实体失败: {}", entity.getClass().getSimpleName(), e);
