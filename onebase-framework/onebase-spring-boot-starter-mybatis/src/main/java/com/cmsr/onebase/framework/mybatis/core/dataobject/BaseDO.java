@@ -26,8 +26,8 @@ public abstract class BaseDO implements Serializable, TransPojo {
     /**
      * 创建时间
      */
-//    @TableField(fill = FieldFill.INSERT)
-//    private Long id;
+    @TableField(fill = FieldFill.INSERT)
+    private Long id;
     /**
      * 创建时间
      */

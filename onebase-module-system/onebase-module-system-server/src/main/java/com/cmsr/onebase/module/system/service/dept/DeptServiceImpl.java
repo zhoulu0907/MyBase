@@ -65,7 +65,6 @@ public class DeptServiceImpl implements DeptService {
         // 插入部门
         DeptDO dept = BeanUtils.toBean(createReqVO, DeptDO.class);
         dataRepository.insert(dept);
-        System.out.println("aft -------> 查看entity :"+dept.toString());
 
         return dept.getId();
     }
@@ -86,7 +85,7 @@ public class DeptServiceImpl implements DeptService {
 
         // 更新部门
         DeptDO updateObj = BeanUtils.toBean(updateReqVO, DeptDO.class);
-        deptMapper.updateById(updateObj);
+        dataRepository.save(updateObj);
     }
 
     @Override
@@ -100,7 +99,7 @@ public class DeptServiceImpl implements DeptService {
             throw exception(DEPT_EXITS_CHILDREN);
         }
         // 删除部门
-        deptMapper.deleteById(id);
+        dataRepository.deleteById(DeptDO.class, id);
     }
 
     @VisibleForTesting
@@ -108,7 +107,7 @@ public class DeptServiceImpl implements DeptService {
         if (id == null) {
             return;
         }
-        DeptDO dept = deptMapper.selectById(id);
+        DeptDO dept = dataRepository.findById(DeptDO.class, id);
         if (dept == null) {
             throw exception(DEPT_NOT_FOUND);
         }
@@ -124,7 +123,7 @@ public class DeptServiceImpl implements DeptService {
             throw exception(DEPT_PARENT_ERROR);
         }
         // 2. 父部门不存在
-        DeptDO parentDept = deptMapper.selectById(parentId);
+        DeptDO parentDept = dataRepository.findById(DeptDO.class, parentId);
         if (parentDept == null) {
             throw exception(DEPT_PARENT_NOT_EXITS);
         }
@@ -142,7 +141,7 @@ public class DeptServiceImpl implements DeptService {
             if (parentId == null || DeptDO.PARENT_ID_ROOT.equals(parentId)) {
                 break;
             }
-            parentDept = deptMapper.selectById(parentId);
+            parentDept = dataRepository.findById(DeptDO.class, parentId);
             if (parentDept == null) {
                 break;
             }
@@ -166,7 +165,7 @@ public class DeptServiceImpl implements DeptService {
 
     @Override
     public DeptDO getDept(Long id) {
-        return deptMapper.selectById(id);
+        return dataRepository.findById(DeptDO.class, id);
     }
 
     @Override
@@ -174,7 +173,7 @@ public class DeptServiceImpl implements DeptService {
         if (CollUtil.isEmpty(ids)) {
             return Collections.emptyList();
         }
-        return deptMapper.selectBatchIds(ids);
+        return dataRepository.findAllById(DeptDO.class, new ArrayList<>(ids));
     }
 
     @Override

@@ -77,11 +77,11 @@ public class DataRepository {
      * @param <T>    实体类型
      * @return 保存后的实体
      */
-    public <T extends BaseDO> T save(T entity) {
+    public <T extends com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO> T save(T entity) {
         try {
             if (entity.getId() == null || entity.getId() == 0) {
                 // 新增
-                entity.setCreatedTime(LocalDateTime.now());
+                entity.setCreateTime(LocalDateTime.now());
                 entity.setId(SnowflakeId.nextId());
                 Long result = anylineService.insert(entity);
                 if (result == 0) {
@@ -89,7 +89,7 @@ public class DataRepository {
                 }
             } else {
                 // 更新
-                entity.setUpdatedTime(LocalDateTime.now());
+                entity.setUpdateTime(LocalDateTime.now());
                 Long result = anylineService.update(entity);
                 if (result == 0) {
                     throw new BizException(StatusCode.DB_UPDATE_ERROR);
@@ -109,7 +109,7 @@ public class DataRepository {
      * @param <T>      实体类型
      * @return 保存后的实体列表
      */
-    public <T extends BaseDO> List<T> saveAll(List<T> entities) {
+    public <T extends com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO> List<T> saveAll(List<T> entities) {
         try {
             for (T entity : entities) {
                 save(entity);
@@ -129,11 +129,11 @@ public class DataRepository {
      * @param <T>   实体类型
      * @return 实体对象，如果不存在返回null
      */
-    public <T extends BaseDO> T findById(Class<T> clazz, Long id) {
+    public <T extends com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO> T findById(Class<T> clazz, Long id) {
         try {
             ConfigStore configs = new DefaultConfigStore();
             configs.and(Compare.EQUAL, "id", id);
-            configs.and(Compare.NULL, "deleted_time");
+
 
             return clazz.cast(anylineService.select(clazz, configs));
         } catch (Exception e) {
@@ -150,7 +150,7 @@ public class DataRepository {
      * @param <T>   实体类型
      * @return Optional包装的实体对象
      */
-    public <T extends BaseDO> Optional<T> findByIdOptional(Class<T> clazz, Long id) {
+    public <T extends com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO> Optional<T> findByIdOptional(Class<T> clazz, Long id) {
         T entity = findById(clazz, id);
         return Optional.ofNullable(entity);
     }
@@ -163,7 +163,7 @@ public class DataRepository {
      * @param <T>   实体类型
      * @return 是否存在
      */
-    public <T extends BaseDO> boolean existsById(Class<T> clazz, Long id) {
+    public <T extends com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO> boolean existsById(Class<T> clazz, Long id) {
         return findById(clazz, id) != null;
     }
 
@@ -174,10 +174,10 @@ public class DataRepository {
      * @param <T>   实体类型
      * @return 实体列表
      */
-    public <T extends BaseDO> List<T> findAll(Class<T> clazz) {
+    public <T extends com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO> List<T> findAll(Class<T> clazz) {
         try {
             ConfigStore configs = new DefaultConfigStore();
-            configs.and(Compare.NULL, "deleted_time");
+
 
             String tableName = getTableName(clazz);
             DataSet dataSet = anylineService.querys(tableName, configs);
@@ -196,11 +196,11 @@ public class DataRepository {
      * @param <T>   实体类型
      * @return 实体列表
      */
-    public <T extends BaseDO> List<T> findAllById(Class<T> clazz, List<Long> ids) {
+    public <T extends com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO> List<T> findAllById(Class<T> clazz, List<Long> ids) {
         try {
             ConfigStore configs = new DefaultConfigStore();
             configs.and(Compare.IN, "id", ids);
-            configs.and(Compare.NULL, "deleted_time");
+
 
             String tableName = getTableName(clazz);
             DataSet dataSet = anylineService.querys(tableName, configs);
@@ -218,10 +218,10 @@ public class DataRepository {
      * @param <T>   实体类型
      * @return 实体数量
      */
-    public <T extends BaseDO> long count(Class<T> clazz) {
+    public <T extends com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO> long count(Class<T> clazz) {
         try {
             ConfigStore configs = new DefaultConfigStore();
-            configs.and(Compare.NULL, "deleted_time");
+
 
             String tableName = getTableName(clazz);
             DataSet dataSet = anylineService.querys(tableName, configs);
@@ -239,14 +239,14 @@ public class DataRepository {
      * @param id    实体ID
      * @param <T>   实体类型
      */
-    public <T extends BaseDO> void deleteById(Class<T> clazz, Long id) {
+    public <T extends com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO> void deleteById(Class<T> clazz, Long id) {
         try {
             ConfigStore configs = new DefaultConfigStore();
             configs.and(Compare.EQUAL, "id", id);
-            configs.and(Compare.NULL, "deleted_time");
+
 
             DataRow row = new DataRow();
-            row.put("deleted_time", LocalDateTime.now());
+
 
             long result = anylineService.update(getTableName(clazz), row, configs);
             if (result == 0) {
@@ -264,7 +264,7 @@ public class DataRepository {
      * @param entity 要删除的实体
      * @param <T>    实体类型
      */
-    public <T extends BaseDO> void delete(T entity) {
+    public <T extends com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO> void delete(T entity) {
         if (entity != null && entity.getId() != null) {
             @SuppressWarnings("unchecked")
             Class<T> entityClass = (Class<T>) entity.getClass();
@@ -278,7 +278,7 @@ public class DataRepository {
      * @param entities 实体列表
      * @param <T>      实体类型
      */
-    public <T extends BaseDO> void deleteAll(List<T> entities) {
+    public <T extends com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO> void deleteAll(List<T> entities) {
         for (T entity : entities) {
             delete(entity);
         }
@@ -291,14 +291,14 @@ public class DataRepository {
      * @param ids   ID列表
      * @param <T>   实体类型
      */
-    public <T extends BaseDO> void deleteAllById(Class<T> clazz, List<Long> ids) {
+    public <T extends com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO> void deleteAllById(Class<T> clazz, List<Long> ids) {
         try {
             ConfigStore configs = new DefaultConfigStore();
             configs.and(Compare.IN, "id", ids);
-            configs.and(Compare.NULL, "deleted_time");
+
 
             DataRow row = new DataRow();
-            row.put("deleted_time", LocalDateTime.now());
+
 
             long result = anylineService.update(getTableName(clazz), row, configs);
             if (result == 0) {
@@ -316,13 +316,13 @@ public class DataRepository {
      * @param clazz 实体类
      * @param <T>   实体类型
      */
-    public <T extends BaseDO> void deleteAll(Class<T> clazz) {
+    public <T extends com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO> void deleteAll(Class<T> clazz) {
         try {
             ConfigStore configs = new DefaultConfigStore();
-            configs.and(Compare.NULL, "deleted_time");
+
 
             DataRow row = new DataRow();
-            row.put("deleted_time", LocalDateTime.now());
+
 
             anylineService.update(getTableName(clazz), row, configs);
         } catch (Exception e) {
@@ -340,10 +340,10 @@ public class DataRepository {
      * @param <T>       实体类型
      * @return 分页结果
      */
-    public <T extends BaseDO> PageResult<T> findAll(Class<T> clazz, int pageIndex, int pageSize) {
+    public <T extends com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO> PageResult<T> findAll(Class<T> clazz, int pageIndex, int pageSize) {
         try {
             ConfigStore configs = new DefaultConfigStore();
-            configs.and(Compare.NULL, "deleted_time");
+
 
             PageNavi page = new DefaultPageNavi(pageIndex, pageSize);
             configs.setPageNavi(page);
@@ -372,9 +372,8 @@ public class DataRepository {
      * @param <T>     实体类型
      * @return 实体列表
      */
-    public <T extends BaseDO> List<T> findAll(Class<T> clazz, ConfigStore configs) {
+    public <T extends com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO> List<T> findAll(Class<T> clazz, ConfigStore configs) {
         try {
-            configs.and(Compare.NULL, "deleted_time");
 
             String tableName = getTableName(clazz);
             DataSet dataSet = anylineService.querys(tableName, configs);
@@ -393,9 +392,9 @@ public class DataRepository {
      * @param <T>     实体类型
      * @return 实体对象，如果不存在返回null
      */
-    public <T extends BaseDO> T findOne(Class<T> clazz, ConfigStore configs) {
+    public <T extends com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO> T findOne(Class<T> clazz, ConfigStore configs) {
         try {
-            configs.and(Compare.NULL, "deleted_time");
+
 
             return clazz.cast(anylineService.select(clazz, configs));
         } catch (Exception e) {
@@ -412,7 +411,7 @@ public class DataRepository {
      * @param <T>     实体类型
      * @return Optional包装的实体对象
      */
-    public <T extends BaseDO> Optional<T> findOneOptional(Class<T> clazz, ConfigStore configs) {
+    public <T extends com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO> Optional<T> findOneOptional(Class<T> clazz, ConfigStore configs) {
         T entity = findOne(clazz, configs);
         return Optional.ofNullable(entity);
     }
