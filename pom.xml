@@ -125,8 +125,17 @@
         </plugins>
     </build>
 
-    <!-- 使用 huawei / aliyun 的 Maven 源，提升下载速度 -->
     <repositories>
+        <!-- anyline snapshot 源 -->
+        <repository>
+            <id>ossrh</id>
+            <url>https://central.sonatype.com/repository/maven-snapshots/</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+
+        <!-- 使用 huawei / aliyun 的 Maven 源，提升下载速度 -->
         <repository>
             <id>huaweicloud</id>
             <name>huawei</name>

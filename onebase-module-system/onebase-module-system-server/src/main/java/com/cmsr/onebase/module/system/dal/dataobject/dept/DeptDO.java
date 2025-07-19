@@ -7,8 +7,6 @@ import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.baomidou.mybatisplus.annotation.KeySequence;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -20,8 +18,6 @@ import lombok.EqualsAndHashCode;
 @TableName("system_dept")
 @KeySequence("system_dept_seq") // 用于 Oracle、PostgreSQL、Kingbase、DB2、H2 数据库的主键自增。如果是 MySQL 等数据库，可不写。
 @Data
-//@Entity
-//@Table(name="system_dept")
 @EqualsAndHashCode(callSuper = true)
 public class DeptDO extends TenantBaseDO {
 
@@ -30,7 +26,7 @@ public class DeptDO extends TenantBaseDO {
     /**
      * 部门ID
      */
-    @TableId(type = IdType.INPUT)
+    @TableId(type = IdType.AUTO)
     private Long id;
     /**
      * 部门名称

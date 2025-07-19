@@ -10,3 +10,8 @@ Win: mvn clean package '-Dmaven.test.skip=true'
 
 服务启动：
 sh deploy.sh start
+
+## 数据库设置
+
+自增ID设置从最大值开始：
+SELECT setval('system_dept_id_seq', (SELECT MAX(id) FROM system_dept));

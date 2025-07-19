@@ -19,8 +19,6 @@ import org.anyline.util.ConfigTable;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.ArrayList;
-import java.util.Collections;
 
 /**
  * DataRepository - JPA风格的CRUD操作工具类
@@ -32,15 +30,11 @@ import java.util.Collections;
  */
 @Slf4j
 public class DataRepository {
-    private final AnylineService<?> service;
+    private final AnylineService<?> anylineService;
 
     public DataRepository(AnylineService<?> service) {
-        ConfigTable.IS_AUTO_CHECK_METADATA = true;
-        ConfigTable.IS_INSERT_NULL_COLUMN = false;
-        ConfigTable.IS_INSERT_NULL_FIELD = false;
-        ConfigTable.IS_INSERT_EMPTY_FIELD = false;
-        ConfigTable.IS_INSERT_EMPTY_COLUMN = false;
-        this.service = service;
+
+        this.anylineService = service;
         if (service == null) {
             throw new IllegalArgumentException("AnylineService cannot be null");
         }
@@ -68,16 +62,14 @@ public class DataRepository {
         try {
             // 新增
             entity.setCreateTime(LocalDateTime.now());
-            System.out.println("查看entity.getId():"+entity.getId());
-            
-            // 设置Anyline配置，避免类型转换问题
-            ConfigTable.IS_AUTO_CHECK_METADATA = false;
-            ConfigTable.IS_INSERT_NULL_COLUMN = true;
-            ConfigTable.IS_INSERT_NULL_FIELD = true;
-            ConfigTable.IS_INSERT_EMPTY_FIELD = true;
-            ConfigTable.IS_INSERT_EMPTY_COLUMN = true;
-            
-            Long result = service.insert(entity);
+//            System.out.println("查看entity.getId():"+entity.getId());
+
+            ConfigTable.IS_AUTO_CHECK_METADATA = true;
+            ConfigTable.IS_INSERT_NULL_COLUMN = false;
+            ConfigTable.IS_INSERT_NULL_FIELD = false;
+            ConfigTable.IS_INSERT_EMPTY_FIELD = false;
+            ConfigTable.IS_INSERT_EMPTY_COLUMN = false;
+            Long result = anylineService.insert(entity);
             if (result == 0) {
                 throw new BizException(StatusCode.DB_INSERT_ERROR);
             }
@@ -102,14 +94,14 @@ public class DataRepository {
                 // 新增
                 entity.setCreatedTime(LocalDateTime.now());
                 entity.setId(SnowflakeId.nextId());
-                Long result = service.insert(entity);
+                Long result = anylineService.insert(entity);
                 if (result == 0) {
                     throw new BizException(StatusCode.DB_INSERT_ERROR);
                 }
             } else {
                 // 更新
                 entity.setUpdatedTime(LocalDateTime.now());
-                Long result = service.update(entity);
+                Long result = anylineService.update(entity);
                 if (result == 0) {
                     throw new BizException(StatusCode.DB_UPDATE_ERROR);
                 }
@@ -154,7 +146,7 @@ public class DataRepository {
             configs.and(Compare.EQUAL, "id", id);
             configs.and(Compare.NULL, "deleted_time");
 
-            return clazz.cast(service.select(clazz, configs));
+            return clazz.cast(anylineService.select(clazz, configs));
         } catch (Exception e) {
             log.error("根据ID查找实体失败: class={}, id={}", clazz.getSimpleName(), id, e);
             throw new BizException(StatusCode.DB_SELECT_ERROR);
@@ -199,7 +191,7 @@ public class DataRepository {
             configs.and(Compare.NULL, "deleted_time");
 
             String tableName = getTableName(clazz);
-            DataSet dataSet = service.querys(tableName, configs);
+            DataSet dataSet = anylineService.querys(tableName, configs);
             return dataSet.entitys(clazz).stream().toList();
         } catch (Exception e) {
             log.error("查找所有实体失败: class={}", clazz.getSimpleName(), e);
@@ -222,7 +214,7 @@ public class DataRepository {
             configs.and(Compare.NULL, "deleted_time");
 
             String tableName = getTableName(clazz);
-            DataSet dataSet = service.querys(tableName, configs);
+            DataSet dataSet = anylineService.querys(tableName, configs);
             return dataSet.entitys(clazz).stream().toList();
         } catch (Exception e) {
             log.error("根据ID列表查找实体失败: class={}, ids={}", clazz.getSimpleName(), ids, e);
@@ -243,7 +235,7 @@ public class DataRepository {
             configs.and(Compare.NULL, "deleted_time");
 
             String tableName = getTableName(clazz);
-            DataSet dataSet = service.querys(tableName, configs);
+            DataSet dataSet = anylineService.querys(tableName, configs);
             return dataSet.total();
         } catch (Exception e) {
             log.error("统计实体数量失败: class={}", clazz.getSimpleName(), e);
@@ -267,7 +259,7 @@ public class DataRepository {
             DataRow row = new DataRow();
             row.put("deleted_time", LocalDateTime.now());
 
-            long result = service.update(getTableName(clazz), row, configs);
+            long result = anylineService.update(getTableName(clazz), row, configs);
             if (result == 0) {
                 throw new BizException(StatusCode.DB_DELETE_ERROR);
             }
@@ -319,7 +311,7 @@ public class DataRepository {
             DataRow row = new DataRow();
             row.put("deleted_time", LocalDateTime.now());
 
-            long result = service.update(getTableName(clazz), row, configs);
+            long result = anylineService.update(getTableName(clazz), row, configs);
             if (result == 0) {
                 throw new BizException(StatusCode.DB_DELETE_ERROR);
             }
@@ -343,7 +335,7 @@ public class DataRepository {
             DataRow row = new DataRow();
             row.put("deleted_time", LocalDateTime.now());
 
-            service.update(getTableName(clazz), row, configs);
+            anylineService.update(getTableName(clazz), row, configs);
         } catch (Exception e) {
             log.error("删除所有实体失败: class={}", clazz.getSimpleName(), e);
             throw new BizException(StatusCode.DB_DELETE_ERROR);
@@ -368,7 +360,7 @@ public class DataRepository {
             configs.setPageNavi(page);
 
             String tableName = getTableName(clazz);
-            DataSet dataSet = service.querys(tableName, configs);
+            DataSet dataSet = anylineService.querys(tableName, configs);
 
             return new PageResult<>(
                     dataSet.entitys(clazz).stream().toList(),
@@ -396,7 +388,7 @@ public class DataRepository {
             configs.and(Compare.NULL, "deleted_time");
 
             String tableName = getTableName(clazz);
-            DataSet dataSet = service.querys(tableName, configs);
+            DataSet dataSet = anylineService.querys(tableName, configs);
             return dataSet.entitys(clazz).stream().toList();
         } catch (Exception e) {
             log.error("条件查询失败: class={}", clazz.getSimpleName(), e);
@@ -416,7 +408,7 @@ public class DataRepository {
         try {
             configs.and(Compare.NULL, "deleted_time");
 
-            return clazz.cast(service.select(clazz, configs));
+            return clazz.cast(anylineService.select(clazz, configs));
         } catch (Exception e) {
             log.error("条件查询单个实体失败: class={}", clazz.getSimpleName(), e);
             throw new BizException(StatusCode.DB_SELECT_ERROR);
@@ -445,20 +437,20 @@ public class DataRepository {
      * @throws Exception 异常
      */
     public void createTable(Class<?> clazz, boolean reset, boolean execute) throws Exception {
-        if (service == null) {
+        if (anylineService == null) {
             throw new Exception("[DataRepository.createTable] AnylineService is null.");
         }
 
         log.info("CreateTable: {}", clazz);
         Table<?> table = Table.from(clazz);
 
-        if (service.metadata().exists(table) && reset) {
+        if (anylineService.metadata().exists(table) && reset) {
             log.info("DropTable: {}", clazz);
-            service.ddl().drop(table);
+            anylineService.ddl().drop(table);
         }
 
         table.execute(execute);
-        service.ddl().create(table);
+        anylineService.ddl().create(table);
 
         // 处理唯一约束
         if (clazz.isAnnotationPresent(jakarta.persistence.Table.class)) {
@@ -478,7 +470,7 @@ public class DataRepository {
                     uk.addColumn(column);
                 }
 
-                service.ddl().add(uk);
+                anylineService.ddl().add(uk);
             }
         }
 

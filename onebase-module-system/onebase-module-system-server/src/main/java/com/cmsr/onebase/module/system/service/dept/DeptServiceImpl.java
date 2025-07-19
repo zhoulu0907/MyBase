@@ -18,6 +18,7 @@ import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.service.AnylineService;
+import org.anyline.util.ConfigTable;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -41,7 +42,13 @@ public class DeptServiceImpl implements DeptService {
     @Resource
     private DeptMapper deptMapper;
 
-
+    static{
+        ConfigTable.IS_AUTO_CHECK_METADATA = true;
+        ConfigTable.IS_INSERT_NULL_COLUMN = false;
+        ConfigTable.IS_INSERT_NULL_FIELD = false;
+        ConfigTable.IS_INSERT_EMPTY_FIELD = false;
+        ConfigTable.IS_INSERT_EMPTY_COLUMN = false;
+    }
     private AnylineService<?> service = MyAnyLineService.getInstance().getService();
     private DataRepository dataRepository = new DataRepository(service);
 
@@ -59,7 +66,7 @@ public class DeptServiceImpl implements DeptService {
 
         // 插入部门
         DeptDO dept = BeanUtils.toBean(createReqVO, DeptDO.class);
-        dept.setId(SnowflakeId.nextId());
+//        dept.setId(SnowflakeId.nextId());
         System.out.println("雪花id生成dept.getId():"+dept.getId());
         
         // 设置租户ID
@@ -68,7 +75,10 @@ public class DeptServiceImpl implements DeptService {
             dept.setTenantId(tenantId);
         }
         
+        System.out.println("pre 查看entity.getId():"+dept.getId());
         dataRepository.saveNew(dept);
+        System.out.println("aft 查看entity.getId():"+dept.getId());
+
         return dept.getId();
     }
 
