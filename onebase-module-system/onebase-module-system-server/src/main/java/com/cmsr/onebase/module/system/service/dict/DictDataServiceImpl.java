@@ -1,6 +1,8 @@
 package com.cmsr.onebase.module.system.service.dict;
 
 import cn.hutool.core.collection.CollUtil;
+import com.cmsr.onebase.framework.aynline.DataRepository;
+import com.cmsr.onebase.framework.common.anyline.web.MyAnyLineService;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
@@ -13,6 +15,8 @@ import com.cmsr.onebase.module.system.dal.mysql.dict.DictDataMapper;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.anyline.service.AnylineService;
+import org.anyline.util.ConfigTable;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -45,6 +49,16 @@ public class DictDataServiceImpl implements DictDataService {
     @Resource
     private DictDataMapper dictDataMapper;
 
+    static{
+        ConfigTable.IS_AUTO_CHECK_METADATA = true;
+        ConfigTable.IS_INSERT_NULL_COLUMN = false;
+        ConfigTable.IS_INSERT_NULL_FIELD = false;
+        ConfigTable.IS_INSERT_EMPTY_FIELD = false;
+        ConfigTable.IS_INSERT_EMPTY_COLUMN = false;
+    }
+    private AnylineService<?> service = MyAnyLineService.getInstance().getService();
+    private DataRepository dataRepository = new DataRepository(service);
+
     @Override
     public List<DictDataDO> getDictDataList(Integer status, String dictType) {
         List<DictDataDO> list = dictDataMapper.selectListByStatusAndDictType(status, dictType);
@@ -71,7 +85,7 @@ public class DictDataServiceImpl implements DictDataService {
 
         // 插入字典类型
         DictDataDO dictData = BeanUtils.toBean(createReqVO, DictDataDO.class);
-        dictDataMapper.insert(dictData);
+        dataRepository.insert(dictData);
         return dictData.getId();
     }
 
@@ -86,7 +100,7 @@ public class DictDataServiceImpl implements DictDataService {
 
         // 更新字典类型
         DictDataDO updateObj = BeanUtils.toBean(updateReqVO, DictDataDO.class);
-        dictDataMapper.updateById(updateObj);
+        dataRepository.save(updateObj);
     }
 
     @Override
@@ -95,7 +109,7 @@ public class DictDataServiceImpl implements DictDataService {
         validateDictDataExists(id);
 
         // 删除字典数据
-        dictDataMapper.deleteById(id);
+        dataRepository.deleteById(DictDataDO.class, id);
     }
 
     @Override
@@ -123,7 +137,7 @@ public class DictDataServiceImpl implements DictDataService {
         if (id == null) {
             return;
         }
-        DictDataDO dictData = dictDataMapper.selectById(id);
+        DictDataDO dictData = dataRepository.findById(DictDataDO.class, id);
         if (dictData == null) {
             throw exception(DICT_DATA_NOT_EXISTS);
         }

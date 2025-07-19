@@ -1,6 +1,8 @@
 package com.cmsr.onebase.module.system.service.auth;
 
 import cn.hutool.core.util.ObjectUtil;
+import com.cmsr.onebase.framework.aynline.DataRepository;
+import com.cmsr.onebase.framework.common.anyline.web.MyAnyLineService;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.common.util.monitor.TracerUtils;
@@ -32,6 +34,8 @@ import jakarta.annotation.Resource;
 import jakarta.validation.Validator;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.anyline.service.AnylineService;
+import org.anyline.util.ConfigTable;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -73,6 +77,16 @@ public class AdminAuthServiceImpl implements AdminAuthService {
     @Value("${yudao.captcha.enable:true}")
     @Setter // 为了单测：开启或者关闭验证码
     private Boolean captchaEnable;
+
+    static{
+        ConfigTable.IS_AUTO_CHECK_METADATA = true;
+        ConfigTable.IS_INSERT_NULL_COLUMN = false;
+        ConfigTable.IS_INSERT_NULL_FIELD = false;
+        ConfigTable.IS_INSERT_EMPTY_FIELD = false;
+        ConfigTable.IS_INSERT_EMPTY_COLUMN = false;
+    }
+    private AnylineService<?> service = MyAnyLineService.getInstance().getService();
+    private DataRepository dataRepository = new DataRepository(service);
 
     @Override
     public AdminUserDO authenticate(String username, String password) {

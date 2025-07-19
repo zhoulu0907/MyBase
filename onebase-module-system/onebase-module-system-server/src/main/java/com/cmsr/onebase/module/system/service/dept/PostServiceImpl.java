@@ -1,6 +1,8 @@
 package com.cmsr.onebase.module.system.service.dept;
 
 import cn.hutool.core.collection.CollUtil;
+import com.cmsr.onebase.framework.aynline.DataRepository;
+import com.cmsr.onebase.framework.common.anyline.web.MyAnyLineService;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
@@ -8,14 +10,13 @@ import com.cmsr.onebase.module.system.controller.admin.dept.vo.post.PostPageReqV
 import com.cmsr.onebase.module.system.controller.admin.dept.vo.post.PostSaveReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.PostDO;
 import com.cmsr.onebase.module.system.dal.mysql.dept.PostMapper;
+import org.anyline.service.AnylineService;
+import org.anyline.util.ConfigTable;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
 import jakarta.annotation.Resource;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.convertMap;
@@ -32,6 +33,16 @@ public class PostServiceImpl implements PostService {
     @Resource
     private PostMapper postMapper;
 
+    static{
+        ConfigTable.IS_AUTO_CHECK_METADATA = true;
+        ConfigTable.IS_INSERT_NULL_COLUMN = false;
+        ConfigTable.IS_INSERT_NULL_FIELD = false;
+        ConfigTable.IS_INSERT_EMPTY_FIELD = false;
+        ConfigTable.IS_INSERT_EMPTY_COLUMN = false;
+    }
+    private AnylineService<?> service = MyAnyLineService.getInstance().getService();
+    private DataRepository dataRepository = new DataRepository(service);
+
     @Override
     public Long createPost(PostSaveReqVO createReqVO) {
         // 校验正确性
@@ -39,7 +50,7 @@ public class PostServiceImpl implements PostService {
 
         // 插入岗位
         PostDO post = BeanUtils.toBean(createReqVO, PostDO.class);
-        postMapper.insert(post);
+        dataRepository.insert(post);
         return post.getId();
     }
 
@@ -50,7 +61,7 @@ public class PostServiceImpl implements PostService {
 
         // 更新岗位
         PostDO updateObj = BeanUtils.toBean(updateReqVO, PostDO.class);
-        postMapper.updateById(updateObj);
+        dataRepository.save(updateObj);
     }
 
     @Override
@@ -58,7 +69,7 @@ public class PostServiceImpl implements PostService {
         // 校验是否存在
         validatePostExists(id);
         // 删除部门
-        postMapper.deleteById(id);
+        dataRepository.deleteById(PostDO.class, id);
     }
 
     private void validatePostForCreateOrUpdate(Long id, String name, String code) {
@@ -102,7 +113,7 @@ public class PostServiceImpl implements PostService {
         if (id == null) {
             return;
         }
-        if (postMapper.selectById(id) == null) {
+        if (dataRepository.findById(PostDO.class, id) == null) {
             throw exception(POST_NOT_FOUND);
         }
     }
@@ -112,7 +123,7 @@ public class PostServiceImpl implements PostService {
         if (CollUtil.isEmpty(ids)) {
             return Collections.emptyList();
         }
-        return postMapper.selectBatchIds(ids);
+        return dataRepository.findAllById(PostDO.class, new ArrayList<>(ids));
     }
 
     @Override
@@ -127,7 +138,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public PostDO getPost(Long id) {
-        return postMapper.selectById(id);
+        return dataRepository.findById(PostDO.class, id);
     }
 
     @Override
@@ -136,7 +147,7 @@ public class PostServiceImpl implements PostService {
             return;
         }
         // 获得岗位信息
-        List<PostDO> posts = postMapper.selectBatchIds(ids);
+        List<PostDO> posts = dataRepository.findAllById(PostDO.class, new ArrayList<>(ids));
         Map<Long, PostDO> postMap = convertMap(posts, PostDO::getId);
         // 校验
         ids.forEach(id -> {

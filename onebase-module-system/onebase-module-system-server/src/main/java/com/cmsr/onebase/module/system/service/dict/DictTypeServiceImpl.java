@@ -1,6 +1,8 @@
 package com.cmsr.onebase.module.system.service.dict;
 
 import cn.hutool.core.util.StrUtil;
+import com.cmsr.onebase.framework.aynline.DataRepository;
+import com.cmsr.onebase.framework.common.anyline.web.MyAnyLineService;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.date.LocalDateTimeUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
@@ -9,6 +11,8 @@ import com.cmsr.onebase.module.system.controller.admin.dict.vo.type.DictTypeSave
 import com.cmsr.onebase.module.system.dal.dataobject.dict.DictTypeDO;
 import com.cmsr.onebase.module.system.dal.mysql.dict.DictTypeMapper;
 import com.google.common.annotations.VisibleForTesting;
+import org.anyline.service.AnylineService;
+import org.anyline.util.ConfigTable;
 import org.springframework.stereotype.Service;
 
 import jakarta.annotation.Resource;
@@ -30,6 +34,16 @@ public class DictTypeServiceImpl implements DictTypeService {
 
     @Resource
     private DictTypeMapper dictTypeMapper;
+
+    static{
+        ConfigTable.IS_AUTO_CHECK_METADATA = true;
+        ConfigTable.IS_INSERT_NULL_COLUMN = false;
+        ConfigTable.IS_INSERT_NULL_FIELD = false;
+        ConfigTable.IS_INSERT_EMPTY_FIELD = false;
+        ConfigTable.IS_INSERT_EMPTY_COLUMN = false;
+    }
+    private AnylineService<?> service = MyAnyLineService.getInstance().getService();
+    private DataRepository dataRepository = new DataRepository(service);
 
     @Override
     public PageResult<DictTypeDO> getDictTypePage(DictTypePageReqVO pageReqVO) {
@@ -56,7 +70,7 @@ public class DictTypeServiceImpl implements DictTypeService {
         // 插入字典类型
         DictTypeDO dictType = BeanUtils.toBean(createReqVO, DictTypeDO.class);
         dictType.setDeletedTime(LocalDateTimeUtils.EMPTY); // 唯一索引，避免 null 值
-        dictTypeMapper.insert(dictType);
+        dataRepository.insert(dictType);
         return dictType.getId();
     }
 
@@ -71,7 +85,7 @@ public class DictTypeServiceImpl implements DictTypeService {
 
         // 更新字典类型
         DictTypeDO updateObj = BeanUtils.toBean(updateReqVO, DictTypeDO.class);
-        dictTypeMapper.updateById(updateObj);
+        dataRepository.save(updateObj);
     }
 
     @Override
@@ -129,7 +143,7 @@ public class DictTypeServiceImpl implements DictTypeService {
         if (id == null) {
             return null;
         }
-        DictTypeDO dictType = dictTypeMapper.selectById(id);
+        DictTypeDO dictType = dataRepository.findById(DictTypeDO.class, id);
         if (dictType == null) {
             throw exception(DICT_TYPE_NOT_EXISTS);
         }
