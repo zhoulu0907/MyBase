@@ -6,9 +6,7 @@ import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.anyline.web.MyAnyLineService;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.framework.common.util.snowflake.SnowflakeId;
 import com.cmsr.onebase.framework.datapermission.core.annotation.DataPermission;
-import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
 import com.cmsr.onebase.module.system.controller.admin.dept.vo.dept.DeptListReqVO;
 import com.cmsr.onebase.module.system.controller.admin.dept.vo.dept.DeptSaveReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
@@ -66,18 +64,8 @@ public class DeptServiceImpl implements DeptService {
 
         // 插入部门
         DeptDO dept = BeanUtils.toBean(createReqVO, DeptDO.class);
-//        dept.setId(SnowflakeId.nextId());
-        System.out.println("雪花id生成dept.getId():"+dept.getId());
-        
-        // 设置租户ID
-        Long tenantId = TenantContextHolder.getTenantId();
-        if (tenantId != null) {
-            dept.setTenantId(tenantId);
-        }
-        
-        System.out.println("pre 查看entity.getId():"+dept.getId());
-        dataRepository.saveNew(dept);
-        System.out.println("aft 查看entity.getId():"+dept.getId());
+        dataRepository.insert(dept);
+        System.out.println("aft -------> 查看entity :"+dept.toString());
 
         return dept.getId();
     }

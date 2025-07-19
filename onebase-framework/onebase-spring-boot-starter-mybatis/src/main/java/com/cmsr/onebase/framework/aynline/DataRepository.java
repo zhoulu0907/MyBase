@@ -14,7 +14,6 @@ import org.anyline.entity.*;
 import org.anyline.metadata.Constraint;
 import org.anyline.metadata.Table;
 import org.anyline.service.AnylineService;
-import org.anyline.util.ConfigTable;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -58,22 +57,12 @@ public class DataRepository {
      * @param <T>    实体类型
      * @return 保存后的实体
      */
-    public <T extends com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO> T saveNew(T entity) {
+    public <T extends com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO> T insert(T entity) {
         try {
-            // 新增
-            entity.setCreateTime(LocalDateTime.now());
-//            System.out.println("查看entity.getId():"+entity.getId());
-
-            ConfigTable.IS_AUTO_CHECK_METADATA = true;
-            ConfigTable.IS_INSERT_NULL_COLUMN = false;
-            ConfigTable.IS_INSERT_NULL_FIELD = false;
-            ConfigTable.IS_INSERT_EMPTY_FIELD = false;
-            ConfigTable.IS_INSERT_EMPTY_COLUMN = false;
             Long result = anylineService.insert(entity);
             if (result == 0) {
                 throw new BizException(StatusCode.DB_INSERT_ERROR);
             }
-            
             return entity;
         } catch (Exception e) {
             log.error("保存实体失败: {}", entity.getClass().getSimpleName(), e);

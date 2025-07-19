@@ -17,7 +17,7 @@ import javax.sql.DataSource;
  * @Date 2025/6/27 22:11
  */
 @Data
-@Component
+//@Component
 @ConfigurationProperties(prefix = "spring.datasource")
 public class MyAnyLineService {
     private final AnylineService<?> service;
