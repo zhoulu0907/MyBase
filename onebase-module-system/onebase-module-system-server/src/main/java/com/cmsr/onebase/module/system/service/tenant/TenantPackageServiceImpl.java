@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.system.service.tenant;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
+import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
@@ -12,6 +13,8 @@ import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantPackageDO;
 import com.cmsr.onebase.module.system.dal.mysql.tenant.TenantPackageMapper;
 import com.baomidou.dynamic.datasource.annotation.DSTransactional;
 import com.google.common.annotations.VisibleForTesting;
+import org.anyline.data.param.init.DefaultConfigStore;
+import org.anyline.entity.Order;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
@@ -38,13 +41,17 @@ public class TenantPackageServiceImpl implements TenantPackageService {
     @Lazy // 避免循环依赖的报错
     private TenantService tenantService;
 
+    @Resource
+    private DataRepository dataRepository;
+
     @Override
     public Long createTenantPackage(TenantPackageSaveReqVO createReqVO) {
         // 校验套餐名是否重复
         validateTenantPackageNameUnique(null, createReqVO.getName());
         // 插入
         TenantPackageDO tenantPackage = BeanUtils.toBean(createReqVO, TenantPackageDO.class);
-        tenantPackageMapper.insert(tenantPackage);
+//        tenantPackageMapper.insert(tenantPackage);
+        dataRepository.insert(tenantPackage);
         // 返回
         return tenantPackage.getId();
     }
@@ -58,7 +65,8 @@ public class TenantPackageServiceImpl implements TenantPackageService {
         validateTenantPackageNameUnique(updateReqVO.getId(), updateReqVO.getName());
         // 更新
         TenantPackageDO updateObj = BeanUtils.toBean(updateReqVO, TenantPackageDO.class);
-        tenantPackageMapper.updateById(updateObj);
+//        tenantPackageMapper.updateById(updateObj);
+        dataRepository.update(updateObj);
         // 如果菜单发生变化，则修改每个租户的菜单
         if (!CollUtil.isEqualList(tenantPackage.getMenuIds(), updateReqVO.getMenuIds())) {
             List<TenantDO> tenants = tenantService.getTenantListByPackageId(tenantPackage.getId());
@@ -73,11 +81,13 @@ public class TenantPackageServiceImpl implements TenantPackageService {
         // 校验正在使用
         validateTenantUsed(id);
         // 删除
-        tenantPackageMapper.deleteById(id);
+//        tenantPackageMapper.deleteById(id);
+        dataRepository.deleteById(TenantPackageDO.class, id);
     }
 
     private TenantPackageDO validateTenantPackageExists(Long id) {
-        TenantPackageDO tenantPackage = tenantPackageMapper.selectById(id);
+//        TenantPackageDO tenantPackage = tenantPackageMapper.selectById(id);
+        TenantPackageDO tenantPackage = dataRepository.findById(TenantPackageDO.class, id);
         if (tenantPackage == null) {
             throw exception(TENANT_PACKAGE_NOT_EXISTS);
         }
@@ -92,17 +102,21 @@ public class TenantPackageServiceImpl implements TenantPackageService {
 
     @Override
     public TenantPackageDO getTenantPackage(Long id) {
-        return tenantPackageMapper.selectById(id);
+        return dataRepository.findById(TenantPackageDO.class, id);
+//        return tenantPackageMapper.selectById(id);
     }
 
     @Override
     public PageResult<TenantPackageDO> getTenantPackagePage(TenantPackagePageReqVO pageReqVO) {
-        return tenantPackageMapper.selectPage(pageReqVO);
+        return dataRepository.findPageWithConditions(TenantPackageDO.class, new DefaultConfigStore().order("id", Order.TYPE.DESC),
+        pageReqVO.getPageNo(),pageReqVO.getPageSize());
+//        return tenantPackageMapper.selectPage(pageReqVO);
     }
 
     @Override
     public TenantPackageDO validTenantPackage(Long id) {
-        TenantPackageDO tenantPackage = tenantPackageMapper.selectById(id);
+//        TenantPackageDO tenantPackage = tenantPackageMapper.selectById(id);
+        TenantPackageDO tenantPackage = dataRepository.findById(TenantPackageDO.class, id);
         if (tenantPackage == null) {
             throw exception(TENANT_PACKAGE_NOT_EXISTS);
         }
@@ -114,7 +128,8 @@ public class TenantPackageServiceImpl implements TenantPackageService {
 
     @Override
     public List<TenantPackageDO> getTenantPackageListByStatus(Integer status) {
-        return tenantPackageMapper.selectListByStatus(status);
+//        return tenantPackageMapper.selectListByStatus(status);
+        return dataRepository.findAll(TenantPackageDO.class, new DefaultConfigStore().eq("status", status));
     }
 
 
@@ -123,7 +138,8 @@ public class TenantPackageServiceImpl implements TenantPackageService {
         if (StrUtil.isBlank(name)) {
             return;
         }
-        TenantPackageDO tenantPackage = tenantPackageMapper.selectByName(name);
+//        TenantPackageDO tenantPackage = tenantPackageMapper.selectByName(name);
+        TenantPackageDO tenantPackage = dataRepository.findOne(TenantPackageDO.class, new DefaultConfigStore().eq("name", name));
         if (tenantPackage == null) {
             return;
         }

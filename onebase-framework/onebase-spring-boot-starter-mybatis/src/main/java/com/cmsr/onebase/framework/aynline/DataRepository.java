@@ -301,6 +301,26 @@ public class DataRepository {
     }
 
     /**
+     * 统计实体数量
+     *
+     * @param clazz 实体类
+     * @param <T>   实体类型
+     * @return 实体数量
+     */
+    public <T extends BaseDO> long countByConfig(Class<T> clazz, ConfigStore configs) {
+        try {
+            configs.and(Compare.EQUAL, "deleted", false);  // 排除已删除的记录
+
+            String tableName = getTableName(clazz);
+            DataSet dataSet = anylineService.querys(tableName, configs);
+            return dataSet.total();
+        } catch (Exception e) {
+            log.error("统计实体数量失败: class={}", clazz.getSimpleName(), e);
+            throw new BizException(StatusCode.DB_SELECT_ERROR);
+        }
+    }
+
+    /**
      * 根据ID删除实体（软删除）
      *
      * @param clazz   实体类

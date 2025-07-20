@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
+import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
@@ -32,12 +33,14 @@ import com.cmsr.onebase.module.system.service.tenant.handler.TenantMenuHandler;
 import com.cmsr.onebase.module.system.service.user.AdminUserService;
 import com.baomidou.dynamic.datasource.annotation.DSTransactional;
 import lombok.extern.slf4j.Slf4j;
+import org.anyline.data.param.init.DefaultConfigStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
 import jakarta.annotation.Resource;
+
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -48,7 +51,6 @@ import static java.util.Collections.singleton;
 
 /**
  * 租户 Service 实现类
- *
  */
 @Service
 @Validated
@@ -73,10 +75,13 @@ public class TenantServiceImpl implements TenantService {
     private MenuService menuService;
     @Resource
     private PermissionService permissionService;
+    @Resource
+    private DataRepository dataRepository;
 
     @Override
     public List<Long> getTenantIdList() {
-        List<TenantDO> tenants = tenantMapper.selectList();
+//        List<TenantDO> tenants = tenantMapper.selectList();
+        List<TenantDO> tenants = dataRepository.findAll(TenantDO.class);
         return CollectionUtils.convertList(tenants, TenantDO::getId);
     }
 
@@ -107,7 +112,8 @@ public class TenantServiceImpl implements TenantService {
 
         // 创建租户
         TenantDO tenant = BeanUtils.toBean(createReqVO, TenantDO.class);
-        tenantMapper.insert(tenant);
+//        tenantMapper.insert(tenant);
+        dataRepository.insert(tenant);
         // 创建租户的管理员
         TenantUtils.execute(tenant.getId(), () -> {
             // 创建角色
@@ -115,7 +121,8 @@ public class TenantServiceImpl implements TenantService {
             // 创建用户，并分配角色
             Long userId = createUser(roleId, createReqVO);
             // 修改租户的管理员
-            tenantMapper.updateById(new TenantDO().setId(tenant.getId()).setContactUserId(userId));
+//            tenantMapper.updateById(new TenantDO().setId(tenant.getId()).setContactUserId(userId));
+            dataRepository.update(new TenantDO().setId(tenant.getId()).setContactUserId(userId));
         });
         return tenant.getId();
     }
@@ -153,7 +160,8 @@ public class TenantServiceImpl implements TenantService {
 
         // 更新租户
         TenantDO updateObj = BeanUtils.toBean(updateReqVO, TenantDO.class);
-        tenantMapper.updateById(updateObj);
+//        tenantMapper.updateById(updateObj);
+        dataRepository.update(updateObj);
         // 如果套餐发生变化，则修改其角色的权限
         if (ObjectUtil.notEqual(tenant.getPackageId(), updateReqVO.getPackageId())) {
             updateTenantRoleMenu(tenant.getId(), tenantPackage.getMenuIds());
@@ -161,7 +169,9 @@ public class TenantServiceImpl implements TenantService {
     }
 
     private void validTenantNameDuplicate(String name, Long id) {
-        TenantDO tenant = tenantMapper.selectByName(name);
+//        TenantDO tenant = tenantMapper.selectByName(name);
+        TenantDO tenant = dataRepository.findOne(TenantDO.class, new DefaultConfigStore().eq("name", name));
+
         if (tenant == null) {
             return;
         }
@@ -178,7 +188,9 @@ public class TenantServiceImpl implements TenantService {
         if (StrUtil.isEmpty(website)) {
             return;
         }
-        TenantDO tenant = tenantMapper.selectByWebsite(website);
+//        TenantDO tenant = tenantMapper.selectByWebsite(website);
+        TenantDO tenant = dataRepository.findOne(TenantDO.class, new DefaultConfigStore().eq("website", website));
+
         if (tenant == null) {
             return;
         }
@@ -221,11 +233,14 @@ public class TenantServiceImpl implements TenantService {
         // 校验存在
         validateUpdateTenant(id);
         // 删除
-        tenantMapper.deleteById(id);
+//        tenantMapper.deleteById(id);
+        dataRepository.deleteById(TenantDO.class, id);
     }
 
     private TenantDO validateUpdateTenant(Long id) {
-        TenantDO tenant = tenantMapper.selectById(id);
+//        TenantDO tenant = tenantMapper.selectById(id);
+        TenantDO tenant = dataRepository.findById(TenantDO.class, id);
+
         if (tenant == null) {
             throw exception(TENANT_NOT_EXISTS);
         }
@@ -238,37 +253,45 @@ public class TenantServiceImpl implements TenantService {
 
     @Override
     public TenantDO getTenant(Long id) {
-        return tenantMapper.selectById(id);
+//        return tenantMapper.selectById(id);
+        return dataRepository.findById(TenantDO.class, id);
     }
 
     @Override
     public PageResult<TenantDO> getTenantPage(TenantPageReqVO pageReqVO) {
-        return tenantMapper.selectPage(pageReqVO);
+        return dataRepository.findPageWithConditions(TenantDO.class, new DefaultConfigStore(), pageReqVO.getPageNo(), pageReqVO.getPageSize());
+//        return tenantMapper.selectPage(pageReqVO);
     }
 
     @Override
     public TenantDO getTenantByName(String name) {
-        return tenantMapper.selectByName(name);
+        return dataRepository.findOne(TenantDO.class, new DefaultConfigStore().eq("name", name));
+//        return tenantMapper.selectByName(name);
     }
 
     @Override
     public TenantDO getTenantByWebsite(String website) {
-        return tenantMapper.selectByWebsite(website);
+//        return tenantMapper.selectByWebsite(website);
+        return dataRepository.findOne(TenantDO.class, new DefaultConfigStore().eq("website", website));
+
     }
 
     @Override
     public Long getTenantCountByPackageId(Long packageId) {
-        return tenantMapper.selectCountByPackageId(packageId);
+        return dataRepository.countByConfig(TenantDO.class, new DefaultConfigStore().eq("package_id", packageId));
+//        return tenantMapper.selectCountByPackageId(packageId);
     }
 
     @Override
     public List<TenantDO> getTenantListByPackageId(Long packageId) {
-        return tenantMapper.selectListByPackageId(packageId);
+        return dataRepository.findAllByConfig(TenantDO.class, new DefaultConfigStore().eq("package_id", packageId));
+//        return tenantMapper.selectListByPackageId(packageId);
     }
 
     @Override
     public List<TenantDO> getTenantListByStatus(Integer status) {
-        return tenantMapper.selectListByStatus(status);
+        return dataRepository.findAllByConfig(TenantDO.class, new DefaultConfigStore().eq("status", status));
+//        return tenantMapper.selectListByStatus(status);
     }
 
     @Override
