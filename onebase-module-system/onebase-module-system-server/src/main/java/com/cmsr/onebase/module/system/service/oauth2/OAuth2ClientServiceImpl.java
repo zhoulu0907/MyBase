@@ -4,17 +4,20 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
+import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.common.util.string.StrUtils;
 import com.cmsr.onebase.module.system.controller.admin.oauth2.vo.client.OAuth2ClientPageReqVO;
 import com.cmsr.onebase.module.system.controller.admin.oauth2.vo.client.OAuth2ClientSaveReqVO;
+import com.cmsr.onebase.module.system.dal.dataobject.notify.NotifyMessageDO;
 import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2ClientDO;
 import com.cmsr.onebase.module.system.dal.mysql.oauth2.OAuth2ClientMapper;
 import com.cmsr.onebase.module.system.dal.redis.RedisKeyConstants;
 import com.google.common.annotations.VisibleForTesting;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -38,12 +41,15 @@ public class OAuth2ClientServiceImpl implements OAuth2ClientService {
     @Resource
     private OAuth2ClientMapper oauth2ClientMapper;
 
+    @Resource
+    private DataRepository dataRepository;
+
     @Override
     public Long createOAuth2Client(OAuth2ClientSaveReqVO createReqVO) {
         validateClientIdExists(null, createReqVO.getClientId());
         // 插入
         OAuth2ClientDO client = BeanUtils.toBean(createReqVO, OAuth2ClientDO.class);
-        oauth2ClientMapper.insert(client);
+        dataRepository.insert(client);
         return client.getId();
     }
 
@@ -58,7 +64,7 @@ public class OAuth2ClientServiceImpl implements OAuth2ClientService {
 
         // 更新
         OAuth2ClientDO updateObj = BeanUtils.toBean(updateReqVO, OAuth2ClientDO.class);
-        oauth2ClientMapper.updateById(updateObj);
+        dataRepository.save(updateObj);
     }
 
     @Override
@@ -68,18 +74,20 @@ public class OAuth2ClientServiceImpl implements OAuth2ClientService {
         // 校验存在
         validateOAuth2ClientExists(id);
         // 删除
-        oauth2ClientMapper.deleteById(id);
+        dataRepository.deleteById(OAuth2ClientDO.class,id);
     }
 
     private void validateOAuth2ClientExists(Long id) {
-        if (oauth2ClientMapper.selectById(id) == null) {
+        if (dataRepository.findById(OAuth2ClientDO.class,id) == null) {
             throw exception(OAUTH2_CLIENT_NOT_EXISTS);
         }
     }
 
     @VisibleForTesting
     void validateClientIdExists(Long id, String clientId) {
-        OAuth2ClientDO client = oauth2ClientMapper.selectByClientId(clientId);
+        ConfigStore configStore = new DefaultConfigStore()
+                .and(Compare.EQUAL, "client_id", clientId);
+        OAuth2ClientDO client = dataRepository.findOne(OAuth2ClientDO.class,configStore);
         if (client == null) {
             return;
         }
@@ -94,19 +102,36 @@ public class OAuth2ClientServiceImpl implements OAuth2ClientService {
 
     @Override
     public OAuth2ClientDO getOAuth2Client(Long id) {
-        return oauth2ClientMapper.selectById(id);
+        return dataRepository.findById(OAuth2ClientDO.class,id);
     }
 
     @Override
     @Cacheable(cacheNames = RedisKeyConstants.OAUTH_CLIENT, key = "#clientId",
             unless = "#result == null")
     public OAuth2ClientDO getOAuth2ClientFromCache(String clientId) {
-        return oauth2ClientMapper.selectByClientId(clientId);
+
+        ConfigStore configStore = new DefaultConfigStore()
+                .and(Compare.EQUAL, "client_id", clientId);
+        return dataRepository.findOne(OAuth2ClientDO.class,configStore);
+
+        //return oauth2ClientMapper.selectByClientId(clientId);
     }
 
     @Override
     public PageResult<OAuth2ClientDO> getOAuth2ClientPage(OAuth2ClientPageReqVO pageReqVO) {
-        return oauth2ClientMapper.selectPage(pageReqVO);
+
+        ConfigStore configStore = new DefaultConfigStore();
+
+        if (StringUtils.isNotBlank(pageReqVO.getName())) {
+            configStore.and(Compare.LIKE, "name", pageReqVO.getName());
+        }
+        if (null != pageReqVO.getStatus()) {
+            configStore.and(Compare.EAUAL, "status", pageReqVO.getStatus());
+        }
+
+        return dataRepository.findPageWithConditions(OAuth2ClientDO.class,configStore, pageReqVO.getPageNo(), pageReqVO.getPageSize());
+
+        //return oauth2ClientMapper.selectPage(pageReqVO);
     }
 
     @Override

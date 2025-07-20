@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.extra.spring.SpringUtil;
+import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import com.cmsr.onebase.framework.datapermission.core.annotation.DataPermission;
@@ -57,6 +58,9 @@ public class PermissionServiceImpl implements PermissionService {
     private DeptService deptService;
     @Resource
     private AdminUserService userService;
+
+    @Resource
+    private DataRepository dataRepository;
 
     @Override
     public boolean hasAnyPermissions(Long userId, String... permissions) {
@@ -168,14 +172,18 @@ public class PermissionServiceImpl implements PermissionService {
     })
     public void processRoleDeleted(Long roleId) {
         // 标记删除 UserRole
-        userRoleMapper.deleteListByRoleId(roleId);
+        dataRepository.deleteById(UserRoleDO.class,roleId);
+        //userRoleMapper.deleteListByRoleId(roleId);
         // 标记删除 RoleMenu
-        roleMenuMapper.deleteListByRoleId(roleId);
+        dataRepository.deleteById(RoleDO.class,roleId);
+        //roleMenuMapper.deleteListByRoleId(roleId);
     }
 
     @Override
     @CacheEvict(value = RedisKeyConstants.MENU_ROLE_ID_LIST, key = "#menuId")
     public void processMenuDeleted(Long menuId) {
+
+        //dataRepository.deleteListByMenuId(menuId);
         roleMenuMapper.deleteListByMenuId(menuId);
     }
 
@@ -229,7 +237,7 @@ public class PermissionServiceImpl implements PermissionService {
     @Override
     @CacheEvict(value = RedisKeyConstants.USER_ROLE_ID_LIST, key = "#userId")
     public void processUserDeleted(Long userId) {
-        userRoleMapper.deleteListByUserId(userId);
+        dataRepository.deleteById(UserRoleDO.class,userId);
     }
 
     @Override

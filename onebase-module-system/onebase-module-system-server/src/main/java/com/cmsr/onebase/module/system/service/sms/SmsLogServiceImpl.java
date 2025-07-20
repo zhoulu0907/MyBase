@@ -1,13 +1,16 @@
 package com.cmsr.onebase.module.system.service.sms;
 
+import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.system.controller.admin.sms.vo.log.SmsLogPageReqVO;
+import com.cmsr.onebase.module.system.dal.dataobject.sms.SmsChannelDO;
 import com.cmsr.onebase.module.system.dal.dataobject.sms.SmsLogDO;
 import com.cmsr.onebase.module.system.dal.dataobject.sms.SmsTemplateDO;
 import com.cmsr.onebase.module.system.dal.mysql.sms.SmsLogMapper;
 import com.cmsr.onebase.module.system.enums.sms.SmsReceiveStatusEnum;
 import com.cmsr.onebase.module.system.enums.sms.SmsSendStatusEnum;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import jakarta.annotation.Resource;
@@ -26,6 +29,9 @@ public class SmsLogServiceImpl implements SmsLogService {
 
     @Resource
     private SmsLogMapper smsLogMapper;
+
+    @Resource
+    private DataRepository dataRepository;
 
     @Override
     public Long createSmsLog(String mobile, Long userId, Integer userType, Boolean isSend,
@@ -47,7 +53,7 @@ public class SmsLogServiceImpl implements SmsLogService {
 
         // 插入数据库
         SmsLogDO logDO = logBuilder.build();
-        smsLogMapper.insert(logDO);
+        dataRepository.insert(logDO);
         return logDO.getId();
     }
 
@@ -56,10 +62,14 @@ public class SmsLogServiceImpl implements SmsLogService {
                                     String apiSendCode, String apiSendMsg,
                                     String apiRequestId, String apiSerialNo) {
         SmsSendStatusEnum sendStatus = success ? SmsSendStatusEnum.SUCCESS : SmsSendStatusEnum.FAILURE;
-        smsLogMapper.updateById(SmsLogDO.builder().id(id)
+        dataRepository.save(SmsLogDO.builder().id(id)
                 .sendStatus(sendStatus.getStatus()).sendTime(LocalDateTime.now())
                 .apiSendCode(apiSendCode).apiSendMsg(apiSendMsg)
                 .apiRequestId(apiRequestId).apiSerialNo(apiSerialNo).build());
+        //smsLogMapper.updateById(SmsLogDO.builder().id(id)
+        //        .sendStatus(sendStatus.getStatus()).sendTime(LocalDateTime.now())
+        //        .apiSendCode(apiSendCode).apiSendMsg(apiSendMsg)
+        //        .apiRequestId(apiRequestId).apiSerialNo(apiSerialNo).build());
     }
 
     @Override
@@ -67,12 +77,31 @@ public class SmsLogServiceImpl implements SmsLogService {
                                        String apiReceiveCode, String apiReceiveMsg) {
         SmsReceiveStatusEnum receiveStatus = Objects.equals(success, true) ?
                 SmsReceiveStatusEnum.SUCCESS : SmsReceiveStatusEnum.FAILURE;
-        smsLogMapper.updateById(SmsLogDO.builder().id(id).receiveStatus(receiveStatus.getStatus())
+
+        dataRepository.save(SmsLogDO.builder().id(id).receiveStatus(receiveStatus.getStatus())
                 .receiveTime(receiveTime).apiReceiveCode(apiReceiveCode).apiReceiveMsg(apiReceiveMsg).build());
+
+        //smsLogMapper.updateById(SmsLogDO.builder().id(id).receiveStatus(receiveStatus.getStatus())
+        //        .receiveTime(receiveTime).apiReceiveCode(apiReceiveCode).apiReceiveMsg(apiReceiveMsg).build());
     }
 
     @Override
     public PageResult<SmsLogDO> getSmsLogPage(SmsLogPageReqVO pageReqVO) {
+
+        //ConfigStore configStore = new DefaultConfigStore();
+        //
+        //if (StringUtils.isNotBlank(pageReqVO.getSignature())) {
+        //    configStore.and(Compare.LIKE, "signature", pageReqVO.getSignature());
+        //}
+        //if (null != pageReqVO.getStatus()) {
+        //    configStore.and(Compare.EAUAL, "status", pageReqVO.getStatus());
+        //}
+        //if (null != pageReqVO.getCreateTime()) {
+        //    configStore.and(Compare.EAUAL, "create_time", pageReqVO.getCreateTime());
+        //}
+        //
+        //return dataRepository.findPageWithConditions(SmsChannelDO.class,configStore, pageReqVO.getPageNo(), pageReqVO.getPageSize());
+
         return smsLogMapper.selectPage(pageReqVO);
     }
 

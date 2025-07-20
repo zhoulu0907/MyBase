@@ -5,7 +5,7 @@ DATE=$(date +%Y%m%d%H%M)
 # 基础路径
 BASE_PATH=/data/onebase_v3
 # 服务名称。同时约定部署服务的 jar 包名字也为它。
-SERVER_NAME=onebase-server.jar
+SERVER_NAME=onebase-server
 # 环境
 PROFILES_ACTIVE=local
 

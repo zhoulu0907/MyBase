@@ -16,6 +16,7 @@ import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.DesensitizedUtil;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.ReflectUtil;
+import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
@@ -152,6 +153,9 @@ public class SocialClientServiceImpl implements SocialClientService {
     @Resource
     private SocialClientMapper socialClientMapper;
 
+    @Resource
+    private DataRepository dataRepository;
+
     @Override
     public String getAuthorizeUrl(Integer socialType, Integer userType, String redirectUri) {
         // 获得对应的 AuthRequest 实现
@@ -189,7 +193,11 @@ public class SocialClientServiceImpl implements SocialClientService {
         AuthRequest request = authRequestFactory.get(SocialTypeEnum.valueOfType(socialType).getSource());
         Assert.notNull(request, String.format("社交平台(%d) 不存在", socialType));
         // 2. 查询 DB 的配置项，如果存在则进行覆盖
-        SocialClientDO client = socialClientMapper.selectBySocialTypeAndUserType(socialType, userType);
+        ConfigStore cs = new DefaultConfigStore()
+                .and(Compare.EQUAL, "social_type", socialType)
+                .and(Compare.EQUAL, "user_type", userType);
+        SocialClientDO client = dataRepository.findOne(SocialClientDO.class, cs);
+        //SocialClientDO client = socialClientMapper.selectBySocialTypeAndUserType(socialType, userType);
         if (client != null && Objects.equals(client.getStatus(), CommonStatusEnum.ENABLE.getStatus())) {
             // 2.1 构造新的 AuthConfig 对象
             AuthConfig authConfig = (AuthConfig) ReflectUtil.getFieldValue(request, "config");
@@ -225,8 +233,12 @@ public class SocialClientServiceImpl implements SocialClientService {
     @VisibleForTesting
     WxMpService getWxMpService(Integer userType) {
         // 第一步，查询 DB 的配置项，获得对应的 WxMpService 对象
-        SocialClientDO client = socialClientMapper.selectBySocialTypeAndUserType(
-                SocialTypeEnum.WECHAT_MP.getType(), userType);
+        ConfigStore cs = new DefaultConfigStore()
+                .and(Compare.EQUAL, "social_type", SocialTypeEnum.WECHAT_MP.getType())
+                .and(Compare.EQUAL, "user_type", userType);
+        SocialClientDO client = dataRepository.findOne(SocialClientDO.class, cs);
+        //SocialClientDO client = socialClientMapper.selectBySocialTypeAndUserType(
+        //        SocialTypeEnum.WECHAT_MP.getType(), userType);
         if (client != null && Objects.equals(client.getStatus(), CommonStatusEnum.ENABLE.getStatus())) {
             return wxMpServiceCache.getUnchecked(client.getClientId() + ":" + client.getClientSecret());
         }
@@ -402,8 +414,12 @@ public class SocialClientServiceImpl implements SocialClientService {
     @VisibleForTesting
     WxMaService getWxMaService(Integer userType) {
         // 第一步，查询 DB 的配置项，获得对应的 WxMaService 对象
-        SocialClientDO client = socialClientMapper.selectBySocialTypeAndUserType(
-                SocialTypeEnum.WECHAT_MINI_PROGRAM.getType(), userType);
+        ConfigStore cs = new DefaultConfigStore()
+                .and(Compare.EQUAL, "social_type", SocialTypeEnum.WECHAT_MP.getType())
+                .and(Compare.EQUAL, "user_type", userType);
+        SocialClientDO client = dataRepository.findOne(SocialClientDO.class, cs);
+        //SocialClientDO client = socialClientMapper.selectBySocialTypeAndUserType(
+        //        SocialTypeEnum.WECHAT_MINI_PROGRAM.getType(), userType);
         if (client != null && Objects.equals(client.getStatus(), CommonStatusEnum.ENABLE.getStatus())) {
             return wxMaServiceCache.getUnchecked(client.getClientId() + ":" + client.getClientSecret());
         }
@@ -441,7 +457,7 @@ public class SocialClientServiceImpl implements SocialClientService {
 
         // 插入
         SocialClientDO client = BeanUtils.toBean(createReqVO, SocialClientDO.class);
-        socialClientMapper.insert(client);
+        dataRepository.insert(client);
         return client.getId();
     }
 
@@ -454,7 +470,7 @@ public class SocialClientServiceImpl implements SocialClientService {
 
         // 更新
         SocialClientDO updateObj = BeanUtils.toBean(updateReqVO, SocialClientDO.class);
-        socialClientMapper.updateById(updateObj);
+        dataRepository.save(updateObj);
     }
 
     @Override
@@ -462,11 +478,11 @@ public class SocialClientServiceImpl implements SocialClientService {
         // 校验存在
         validateSocialClientExists(id);
         // 删除
-        socialClientMapper.deleteById(id);
+        dataRepository.findById(SocialClientDO.class,id);
     }
 
     private void validateSocialClientExists(Long id) {
-        if (socialClientMapper.selectById(id) == null) {
+        if (dataRepository.findById(SocialClientDO.class,id) == null) {
             throw exception(SOCIAL_CLIENT_NOT_EXISTS);
         }
     }
@@ -481,8 +497,12 @@ public class SocialClientServiceImpl implements SocialClientService {
      * @param socialType 社交类型
      */
     private void validateSocialClientUnique(Long id, Integer userType, Integer socialType) {
-        SocialClientDO client = socialClientMapper.selectBySocialTypeAndUserType(
-                socialType, userType);
+        ConfigStore cs = new DefaultConfigStore()
+                .and(Compare.EQUAL, "social_type", socialType)
+                .and(Compare.EQUAL, "user_type", userType);
+        SocialClientDO client = dataRepository.findOne(SocialClientDO.class, cs);
+        //SocialClientDO client = socialClientMapper.selectBySocialTypeAndUserType(
+        //        socialType, userType);
         if (client == null) {
             return;
         }
@@ -494,7 +514,8 @@ public class SocialClientServiceImpl implements SocialClientService {
 
     @Override
     public SocialClientDO getSocialClient(Long id) {
-        return socialClientMapper.selectById(id);
+        return dataRepository.findById(SocialClientDO.class,id);
+        //return socialClientMapper.selectById(id);
     }
 
     @Override

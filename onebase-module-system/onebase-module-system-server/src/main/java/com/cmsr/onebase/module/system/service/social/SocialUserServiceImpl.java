@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.system.service.social;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
+import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.exception.ServiceException;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.system.api.social.dto.SocialUserBindReqDTO;
@@ -44,6 +45,9 @@ public class SocialUserServiceImpl implements SocialUserService {
 
     @Resource
     private SocialClientService socialClientService;
+
+    @Resource
+    private DataRepository dataRepository;
 
     @Override
     public List<SocialUserDO> getSocialUserList(Long userId, Integer userType) {
@@ -150,9 +154,9 @@ public class SocialUserServiceImpl implements SocialUserService {
                 .setOpenid(authUser.getUuid()).setToken(authUser.getToken().getAccessToken()).setRawTokenInfo((toJsonString(authUser.getToken())))
                 .setNickname(authUser.getNickname()).setAvatar(authUser.getAvatar()).setRawUserInfo(toJsonString(authUser.getRawUserInfo()));
         if (socialUser.getId() == null) {
-            socialUserMapper.insert(socialUser);
+            dataRepository.insert(socialUser);
         } else {
-            socialUserMapper.updateById(socialUser);
+            dataRepository.save(socialUser);
         }
         return socialUser;
     }
@@ -161,7 +165,7 @@ public class SocialUserServiceImpl implements SocialUserService {
 
     @Override
     public SocialUserDO getSocialUser(Long id) {
-        return socialUserMapper.selectById(id);
+        return dataRepository.findById(SocialUserDO.class,id);
     }
 
     @Override

@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.system.service.sms;
 import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.map.MapUtil;
+import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.module.system.api.sms.dto.code.SmsCodeSendReqDTO;
 import com.cmsr.onebase.module.system.api.sms.dto.code.SmsCodeUseReqDTO;
 import com.cmsr.onebase.module.system.api.sms.dto.code.SmsCodeValidateReqDTO;
@@ -38,6 +39,9 @@ public class SmsCodeServiceImpl implements SmsCodeService {
     @Resource
     private SmsSendService smsSendService;
 
+    @Resource
+    private DataRepository dataRepository;
+
     @Override
     public void sendSmsCode(SmsCodeSendReqDTO reqDTO) {
         SmsSceneEnum sceneEnum = SmsSceneEnum.getCodeByScene(reqDTO.getScene());
@@ -51,7 +55,10 @@ public class SmsCodeServiceImpl implements SmsCodeService {
 
     private String createSmsCode(String mobile, Integer scene, String ip) {
         // 校验是否可以发送验证码，不用筛选场景
-        SmsCodeDO lastSmsCode = smsCodeMapper.selectLastByMobile(mobile, null, null);
+        ConfigStore cs = new DefaultConfigStore()
+                .and(Compare.EQUAL, "mobile", mobile);
+        SmsCodeDO lastSmsCode = dataRepository.findOne(SmsCodeDO.class, cs);
+        //SmsCodeDO lastSmsCode = smsCodeMapper.selectLastByMobile(mobile, null, null);
         if (lastSmsCode != null) {
             if (LocalDateTimeUtil.between(lastSmsCode.getCreateTime(), LocalDateTime.now()).toMillis()
                     < smsCodeProperties.getSendFrequency().toMillis()) { // 发送过于频繁
@@ -71,7 +78,7 @@ public class SmsCodeServiceImpl implements SmsCodeService {
         SmsCodeDO newSmsCode = SmsCodeDO.builder().mobile(mobile).code(code).scene(scene)
                 .todayIndex(lastSmsCode != null && isToday(lastSmsCode.getCreateTime()) ? lastSmsCode.getTodayIndex() + 1 : 1)
                 .createIp(ip).used(false).build();
-        smsCodeMapper.insert(newSmsCode);
+        dataRepository.insert(newSmsCode);
         return code;
     }
 
@@ -80,7 +87,7 @@ public class SmsCodeServiceImpl implements SmsCodeService {
         // 检测验证码是否有效
         SmsCodeDO lastSmsCode = validateSmsCode0(reqDTO.getMobile(), reqDTO.getCode(), reqDTO.getScene());
         // 使用验证码
-        smsCodeMapper.updateById(SmsCodeDO.builder().id(lastSmsCode.getId())
+        dataRepository.save(SmsCodeDO.builder().id(lastSmsCode.getId())
                 .used(true).usedTime(LocalDateTime.now()).usedIp(reqDTO.getUsedIp()).build());
     }
 
@@ -91,7 +98,12 @@ public class SmsCodeServiceImpl implements SmsCodeService {
 
     private SmsCodeDO validateSmsCode0(String mobile, String code, Integer scene) {
         // 校验验证码
-        SmsCodeDO lastSmsCode = smsCodeMapper.selectLastByMobile(mobile, code, scene);
+        ConfigStore cs = new DefaultConfigStore()
+                .and(Compare.EQUAL, "mobile", mobile)
+                .and(Compare.EQUAL, "code", code)
+                .and(Compare.EQUAL, "scene", scene);
+        SmsCodeDO lastSmsCode = dataRepository.findOne(SmsCodeDO.class, cs);
+        //SmsCodeDO lastSmsCode = smsCodeMapper.selectLastByMobile(mobile, code, scene);
         // 若验证码不存在，抛出异常
         if (lastSmsCode == null) {
             throw exception(SMS_CODE_NOT_FOUND);
