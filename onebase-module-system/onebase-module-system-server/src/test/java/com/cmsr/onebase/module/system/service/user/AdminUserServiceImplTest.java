@@ -153,7 +153,7 @@ public class AdminUserServiceImplTest extends BaseDbUnitTest {
     @Test
     public void testUpdateUser_success() {
         // mock 数据
-        AdminUserDO dbUser = randomAdminUserDO(o -> o.setPostIds(CollUtil.newArrayList(1L, 2L)));
+        AdminUserDO dbUser = randomAdminUserDO(o -> o.setPostIds(CollUtil.newHashSet(1L, 2L)));
         userMapper.insert(dbUser);
         userPostMapper.insert(new UserPostDO().setUserId(dbUser.getId()).setPostId(1L));
         userPostMapper.insert(new UserPostDO().setUserId(dbUser.getId()).setPostId(2L));
@@ -634,12 +634,12 @@ public class AdminUserServiceImplTest extends BaseDbUnitTest {
         // 准备参数
         Collection<Long> postIds = asSet(10L, 20L);
         // mock user1 数据
-        AdminUserDO user1 = randomAdminUserDO(o -> o.setPostIds(CollUtil.newArrayList(10L, 30L)));
+        AdminUserDO user1 = randomAdminUserDO(o -> o.setPostIds(CollUtil.newHashSet(10L, 30L)));
         userMapper.insert(user1);
         userPostMapper.insert(new UserPostDO().setUserId(user1.getId()).setPostId(10L));
         userPostMapper.insert(new UserPostDO().setUserId(user1.getId()).setPostId(30L));
         // mock user2 数据
-        AdminUserDO user2 = randomAdminUserDO(o -> o.setPostIds(CollUtil.newArrayList(100L)));
+        AdminUserDO user2 = randomAdminUserDO(o -> o.setPostIds(CollUtil.newHashSet(100L)));
         userMapper.insert(user2);
         userPostMapper.insert(new UserPostDO().setUserId(user2.getId()).setPostId(100L));
 

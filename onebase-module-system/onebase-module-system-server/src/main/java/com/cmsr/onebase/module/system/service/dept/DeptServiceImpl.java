@@ -173,7 +173,7 @@ public class DeptServiceImpl implements DeptService {
         if (CollUtil.isEmpty(ids)) {
             return Collections.emptyList();
         }
-        return dataRepository.findAllById(DeptDO.class, new ArrayList<>(ids));
+        return dataRepository.findAllByIds(DeptDO.class, new ArrayList<>(ids));
     }
 
     @Override

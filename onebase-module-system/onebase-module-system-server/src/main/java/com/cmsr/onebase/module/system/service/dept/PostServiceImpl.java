@@ -123,7 +123,7 @@ public class PostServiceImpl implements PostService {
         if (CollUtil.isEmpty(ids)) {
             return Collections.emptyList();
         }
-        return dataRepository.findAllById(PostDO.class, new ArrayList<>(ids));
+        return dataRepository.findAllByIds(PostDO.class, new ArrayList<>(ids));
     }
 
     @Override
@@ -147,7 +147,7 @@ public class PostServiceImpl implements PostService {
             return;
         }
         // 获得岗位信息
-        List<PostDO> posts = dataRepository.findAllById(PostDO.class, new ArrayList<>(ids));
+        List<PostDO> posts = dataRepository.findAllByIds(PostDO.class, new ArrayList<>(ids));
         Map<Long, PostDO> postMap = convertMap(posts, PostDO::getId);
         // 校验
         ids.forEach(id -> {

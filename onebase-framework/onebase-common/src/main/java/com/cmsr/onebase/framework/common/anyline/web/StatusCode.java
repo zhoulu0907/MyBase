@@ -14,6 +14,7 @@ public enum StatusCode {
     DB_UPDATE_ERROR(Module.COMMON, SubModule.DB, 02, "数据更新失败"),
     DB_DELETE_ERROR(Module.COMMON, SubModule.DB, 03, "数据删除失败"),
     DB_SELECT_ERROR(Module.COMMON, SubModule.DB, 04, "数据查询失败"),
+    DB_ID_NULL(Module.COMMON, SubModule.DB, 05, "数据ID为空"),
 
 
     // 租户模块状态码

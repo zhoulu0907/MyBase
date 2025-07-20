@@ -14,9 +14,9 @@ import org.anyline.entity.*;
 import org.anyline.metadata.Constraint;
 import org.anyline.metadata.Table;
 import org.anyline.service.AnylineService;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,7 +34,8 @@ public class DataRepository {
     @Resource
     private AnylineService<?> anylineService;
 
-    public DataRepository(){}
+    public DataRepository() {
+    }
 
     public DataRepository(AnylineService<?> service) {
 
@@ -56,7 +57,7 @@ public class DataRepository {
     }
 
     /**
-     * 保存实体（插入或更新）
+     * 保存实体（插入）
      *
      * @param entity 要保存的实体
      * @param <T>    实体类型
@@ -67,6 +68,49 @@ public class DataRepository {
             Long result = anylineService.insert(entity);
             if (result == 0) {
                 throw new BizException(StatusCode.DB_INSERT_ERROR);
+            }
+            return entity;
+        } catch (Exception e) {
+            log.error("保存实体失败: {}", entity.getClass().getSimpleName(), e);
+            throw new BizException(StatusCode.DB_INSERT_ERROR);
+        }
+    }
+
+    /**
+     * 批量插入实体
+     *
+     * @param entities 实体列表
+     * @param <T>      实体类型
+     * @return 保存后的实体列表
+     */
+    public <T extends BaseDO> List<T> insertBatch(List<T> entities) {
+        try {
+            for (T entity : entities) {
+                insert(entity);
+            }
+            return entities;
+        } catch (Exception e) {
+            log.error("批量保存实体失败", e);
+            throw new BizException(StatusCode.DB_INSERT_ERROR);
+        }
+    }
+
+    /**
+     * 更新
+     *
+     * @param entity 要保存的实体
+     * @param <T>    实体类型
+     * @return 保存后的实体
+     */
+    public <T extends BaseDO> T update(T entity) {
+        if (entity.getId() == null || entity.getId() == 0) {
+            throw new BizException(StatusCode.DB_ID_NULL);
+        }
+        try {
+            // 更新
+            Long result = anylineService.update(entity);
+            if (result == 0) {
+                throw new BizException(StatusCode.DB_UPDATE_ERROR);
             }
             return entity;
         } catch (Exception e) {
@@ -138,8 +182,6 @@ public class DataRepository {
         try {
             ConfigStore configs = new DefaultConfigStore();
             configs.and(Compare.EQUAL, "id", id);
-
-
             return clazz.cast(anylineService.select(clazz, configs));
         } catch (Exception e) {
             log.error("根据ID查找实体失败: class={}, id={}", clazz.getSimpleName(), id, e);
@@ -182,13 +224,30 @@ public class DataRepository {
     public <T extends BaseDO> List<T> findAll(Class<T> clazz) {
         try {
             ConfigStore configs = new DefaultConfigStore();
-
-
             String tableName = getTableName(clazz);
             DataSet dataSet = anylineService.querys(tableName, configs);
             return dataSet.entitys(clazz).stream().toList();
         } catch (Exception e) {
             log.error("查找所有实体失败: class={}", clazz.getSimpleName(), e);
+            throw new BizException(StatusCode.DB_SELECT_ERROR);
+        }
+    }
+
+    /**
+     * 自定义查找实体列表
+     *
+     * @param clazz   实体类
+     * @param configs configs
+     * @param <T>     实体类型
+     * @return 实体列表
+     */
+    public <T extends BaseDO> List<T> findAllByConfig(Class<T> clazz, ConfigStore configs) {
+        try {
+            String tableName = getTableName(clazz);
+            DataSet dataSet = anylineService.querys(tableName, configs);
+            return dataSet.entitys(clazz).stream().toList();
+        } catch (Exception e) {
+            log.error("根据ID列表查找实体失败: class={}, configs={}", clazz.getSimpleName(), configs, e);
             throw new BizException(StatusCode.DB_SELECT_ERROR);
         }
     }
@@ -201,7 +260,7 @@ public class DataRepository {
      * @param <T>   实体类型
      * @return 实体列表
      */
-    public <T extends BaseDO> List<T> findAllById(Class<T> clazz, List<Long> ids) {
+    public <T extends BaseDO> List<T> findAllByIds(Class<T> clazz, Collection<Long> ids) {
         try {
             ConfigStore configs = new DefaultConfigStore();
             configs.and(Compare.IN, "id", ids);
@@ -240,6 +299,25 @@ public class DataRepository {
     /**
      * 根据ID删除实体（软删除）
      *
+     * @param clazz   实体类
+     * @param configs configs
+     * @param <T>     实体类型
+     */
+    public <T extends BaseDO> void deleteByConfig(Class<T> clazz, ConfigStore configs) {
+        try {
+            long result = anylineService.delete(getTableName(clazz), configs);
+            if (result == 0) {
+                throw new BizException(StatusCode.DB_DELETE_ERROR);
+            }
+        } catch (Exception e) {
+            log.error("根据ID删除实体失败: class={}, configs={}", clazz.getSimpleName(), configs, e);
+            throw new BizException(StatusCode.DB_DELETE_ERROR);
+        }
+    }
+
+    /**
+     * 根据ID删除实体（软删除）
+     *
      * @param clazz 实体类
      * @param id    实体ID
      * @param <T>   实体类型
@@ -253,7 +331,7 @@ public class DataRepository {
             DataRow row = new DataRow();
 
 
-            long result = anylineService.update(getTableName(clazz), row, configs);
+            long result = anylineService.delete(getTableName(clazz), configs);
             if (result == 0) {
                 throw new BizException(StatusCode.DB_DELETE_ERROR);
             }
@@ -399,8 +477,6 @@ public class DataRepository {
      */
     public <T extends BaseDO> T findOne(Class<T> clazz, ConfigStore configs) {
         try {
-
-
             return clazz.cast(anylineService.select(clazz, configs));
         } catch (Exception e) {
             log.error("条件查询单个实体失败: class={}", clazz.getSimpleName(), e);
