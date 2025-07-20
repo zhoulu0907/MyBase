@@ -35,7 +35,32 @@ public class AnyLineDBInfoListener implements DMListener {
         // 可以根据需要添加更多表
     }
     public SWITCH beforeExecute(DataRuntime runtime, String random, Run run) {
-        System.out.println("----------> " + run.getFinalExecute());
+        String sql = run.getFinalExecute();
+        System.out.println("=== beforeExecute SQL: " + sql);
+        
+        // 检查是否是查询语句且包含需要忽略租户过滤的表
+        if (sql != null && !TenantContextHolder.isIgnore()) {
+            String lowerSql = sql.toLowerCase().trim();
+            if (lowerSql.startsWith("select")) {
+                // 检查是否包含需要忽略租户过滤的表名
+                for (String tableName : TENANT_IGNORE_TABLES) {
+                    if (lowerSql.contains("from " + tableName.toLowerCase()) || 
+                        lowerSql.contains("from `" + tableName.toLowerCase() + "`") ||
+                        lowerSql.contains("from \"" + tableName.toLowerCase() + "\"")) {
+                        System.out.println("=== Found tenant-ignored table " + tableName + " in SQL, blocking execution");
+                        // 找到需要忽略租户过滤的表，但SQL已经包含了tenant_id条件
+                        // 我们需要在这里修改SQL或者阻止执行
+                        if (lowerSql.contains("tenant_id")) {
+                            System.out.println("=== SQL contains tenant_id but should not for table " + tableName + ", this will cause error");
+                            // 这里我们发现了问题SQL，但在beforeExecute阶段修改SQL比较复杂
+                            // 我们需要回到prepareQuery阶段解决
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+        
         return SWITCH.CONTINUE;
     }
 
@@ -129,7 +154,14 @@ public class AnyLineDBInfoListener implements DMListener {
      */
     private boolean isTableTenantIgnored(RunPrepare prepare) {
         try {
-            // 尝试从 prepare 对象中获取表名
+            // 方法1: 检查调用栈中是否有@TenantIgnore注解的实体类
+            boolean ignoredByAnnotation = checkStackTraceForTenantIgnore();
+            if (ignoredByAnnotation) {
+                System.out.println("=== Found @TenantIgnore annotation in call stack, ignoring tenant filtering");
+                return true;
+            }
+            
+            // 方法2: 尝试从 prepare 对象中获取表名
             String sql = prepare.getText();
             System.out.println("=== PrepareQuery: SQL = " + sql);
             
@@ -193,6 +225,43 @@ public class AnyLineDBInfoListener implements DMListener {
             // 如果无法获取表名，则不忽略（安全做法）
             System.err.println("Error checking table name for tenant filtering: " + e.getMessage());
             e.printStackTrace();
+        }
+        
+        return false;
+    }
+    
+    /**
+     * 检查调用栈中是否有@TenantIgnore注解的实体类
+     */
+    private boolean checkStackTraceForTenantIgnore() {
+        try {
+            StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+            for (StackTraceElement element : stackTrace) {
+                String className = element.getClassName();
+                
+                // 跳过系统类和框架类
+                if (className.startsWith("java.") || 
+                    className.startsWith("org.springframework.") ||
+                    className.startsWith("org.anyline.") ||
+                    className.startsWith("com.cmsr.onebase.framework.") ||
+                    className.contains("$")) {
+                    continue;
+                }
+                
+                try {
+                    Class<?> clazz = Class.forName(className);
+                    // 检查类是否有@TenantIgnore注解
+                    if (clazz.isAnnotationPresent(com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore.class)) {
+                        System.out.println("=== Found @TenantIgnore annotation on class: " + className);
+                        return true;
+                    }
+                } catch (ClassNotFoundException e) {
+                    // 忽略找不到的类
+                    continue;
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("=== Error checking stack trace for @TenantIgnore: " + e.getMessage());
         }
         
         return false;

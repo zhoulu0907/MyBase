@@ -184,7 +184,9 @@ public class DictDataServiceImpl implements DictDataService {
         if (id == null) {
             return;
         }
-        DictDataDO dictData = dataRepository.findById(DictDataDO.class, id);
+        
+        // 由于 DictDataDO 有 @TenantIgnore 注解，需要忽略租户过滤
+        DictDataDO dictData = TenantUtils.executeIgnore(() -> dataRepository.findById(DictDataDO.class, id));
         if (dictData == null) {
             throw exception(DICT_DATA_NOT_EXISTS);
         }
