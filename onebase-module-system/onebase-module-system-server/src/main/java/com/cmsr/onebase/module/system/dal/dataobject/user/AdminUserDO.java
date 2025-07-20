@@ -60,7 +60,7 @@ public class AdminUserDO extends TenantBaseDO {
      */
     @TableField(typeHandler = JacksonTypeHandler.class)
 //    @Transient //fixed NullP问题: 2025/7/20 需要以数组方式插入库里，anyline可能有bug导致null pointer，暂时Transient屏蔽
-    @Transient // TODO 新的问题 any插入的是逗号分隔，mp插入的是json数组，格式不对。
+    @Transient // TODO 新的问题 any插入的是逗号分隔，mp通过handler干预插入的是json数组，格式不对。
     private Set<Long> postIds;
     /**
      * 用户邮箱

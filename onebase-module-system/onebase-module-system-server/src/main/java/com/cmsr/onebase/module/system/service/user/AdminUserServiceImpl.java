@@ -161,7 +161,7 @@ public class AdminUserServiceImpl implements AdminUserService {
         // 2.1 更新用户
         AdminUserDO updateObj = BeanUtils.toBean(updateReqVO, AdminUserDO.class);
 //        userMapper.updateById(updateObj);
-        dataRepository.save(updateObj);
+        dataRepository.update(updateObj);
         // 2.2 更新岗位
         updateUserPost(updateReqVO, updateObj);
 
