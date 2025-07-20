@@ -37,6 +37,7 @@ import jakarta.annotation.Resource;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.init.DefaultConfigStore;
+import org.anyline.entity.Order;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -47,6 +48,7 @@ import java.util.*;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.*;
+import static com.cmsr.onebase.framework.common.util.date.DateUtils.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
 import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
 import static com.cmsr.onebase.module.system.enums.LogRecordConstants.*;
 
@@ -289,8 +291,9 @@ public class AdminUserServiceImpl implements AdminUserService {
                 permissionService.getUserRoleIdListByRoleId(singleton(reqVO.getRoleId())) : null;
 
         // 分页查询
-//        dataRepository.
-        return userMapper.selectPage(reqVO, getDeptCondition(reqVO.getDeptId()), userIds);
+        return dataRepository.findPageWithConditions(AdminUserDO.class, new DefaultConfigStore().order("id", Order.TYPE.DESC),
+                reqVO.getPageNo(), reqVO.getPageSize());
+//        return userMapper.selectPage(reqVO, getDeptCondition(reqVO.getDeptId()), userIds);
     }
 
     @Override

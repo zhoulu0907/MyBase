@@ -18,6 +18,7 @@ import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Compare;
 import org.anyline.service.AnylineService;
 import org.anyline.util.ConfigTable;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -31,7 +32,6 @@ import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
 
 /**
  * 部门 Service 实现类
- *
  */
 @Service
 @Validated
@@ -41,13 +41,14 @@ public class DeptServiceImpl implements DeptService {
     //@Resource
     //private DeptMapper deptMapper;
 
-    static{
+    static {
         ConfigTable.IS_AUTO_CHECK_METADATA = true;
         ConfigTable.IS_INSERT_NULL_COLUMN = false;
         ConfigTable.IS_INSERT_NULL_FIELD = false;
         ConfigTable.IS_INSERT_EMPTY_FIELD = true;
         ConfigTable.IS_INSERT_EMPTY_COLUMN = true;
     }
+
     private AnylineService<?> service = MyAnyLineService.getInstance().getService();
     private DataRepository dataRepository = new DataRepository(service);
 
@@ -207,7 +208,7 @@ public class DeptServiceImpl implements DeptService {
     public List<DeptDO> getDeptList(DeptListReqVO reqVO) {
         try {
             ConfigStore configs = new DefaultConfigStore();
-            
+
             // 构建查询条件
             if (reqVO.getName() != null) {
                 configs.and(Compare.LIKE, "name", reqVO.getName());
@@ -215,9 +216,11 @@ public class DeptServiceImpl implements DeptService {
             if (reqVO.getStatus() != null) {
                 configs.and(Compare.EQUAL, "status", reqVO.getStatus());
             }
-            
+
             List<DeptDO> list = dataRepository.findAll(DeptDO.class, configs);
-            list.sort(Comparator.comparing(DeptDO::getSort));
+            if (CollectionUtils.isNotEmpty(list)) {
+                list.sort(Comparator.comparing(DeptDO::getSort));
+            }
             return list;
         } catch (Exception e) {
             log.error("查询部门列表失败", e);

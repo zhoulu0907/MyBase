@@ -8,7 +8,6 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
-import jakarta.persistence.Transient;
 import lombok.*;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
@@ -60,7 +59,7 @@ public class AdminUserDO extends TenantBaseDO {
      */
     @TableField(typeHandler = JacksonTypeHandler.class)
 //    @Transient //fixed NullP问题: 2025/7/20 需要以数组方式插入库里，anyline可能有bug导致null pointer，暂时Transient屏蔽
-    @Transient // TODO 新的问题 any插入的是逗号分隔，mp通过handler干预插入的是json数组，格式不对。
+//    @Transient // TODO 新的问题 any插入的是逗号分隔，mp通过handler干预插入的是json数组，格式不对。(字段使用json解决)
     private Set<Long> postIds;
     /**
      * 用户邮箱
