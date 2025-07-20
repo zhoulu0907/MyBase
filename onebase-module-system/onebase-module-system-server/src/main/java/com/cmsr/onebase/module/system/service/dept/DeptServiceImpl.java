@@ -10,11 +10,12 @@ import com.cmsr.onebase.framework.datapermission.core.annotation.DataPermission;
 import com.cmsr.onebase.module.system.controller.admin.dept.vo.dept.DeptListReqVO;
 import com.cmsr.onebase.module.system.controller.admin.dept.vo.dept.DeptSaveReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
-import com.cmsr.onebase.module.system.dal.mysql.dept.DeptMapper;
 import com.cmsr.onebase.module.system.dal.redis.RedisKeyConstants;
 import com.google.common.annotations.VisibleForTesting;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.anyline.data.param.ConfigStore;
+import org.anyline.data.param.init.DefaultConfigStore;
+import org.anyline.entity.Compare;
 import org.anyline.service.AnylineService;
 import org.anyline.util.ConfigTable;
 import org.springframework.cache.annotation.CacheEvict;
@@ -37,8 +38,8 @@ import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
 @Slf4j
 public class DeptServiceImpl implements DeptService {
 
-    @Resource
-    private DeptMapper deptMapper;
+    //@Resource
+    //private DeptMapper deptMapper;
 
     static{
         ConfigTable.IS_AUTO_CHECK_METADATA = true;
@@ -95,11 +96,26 @@ public class DeptServiceImpl implements DeptService {
         // 校验是否存在
         validateDeptExists(id);
         // 校验是否有子部门
-        if (deptMapper.selectCountByParentId(id) > 0) {
+        if (getChildDeptCount(id) > 0) {
             throw exception(DEPT_EXITS_CHILDREN);
         }
         // 删除部门
         dataRepository.deleteById(DeptDO.class, id);
+    }
+
+    /**
+     * 获取子部门数量
+     */
+    private long getChildDeptCount(Long parentId) {
+        try {
+            ConfigStore configs = new DefaultConfigStore();
+            configs.and(Compare.EQUAL, "parent_id", parentId);
+            configs.and(Compare.EQUAL, "deleted", false);
+            return dataRepository.findAll(DeptDO.class, configs).size();
+        } catch (Exception e) {
+            log.error("获取子部门数量失败: parentId={}", parentId, e);
+            return 0;
+        }
     }
 
     @VisibleForTesting
@@ -150,15 +166,26 @@ public class DeptServiceImpl implements DeptService {
 
     @VisibleForTesting
     void validateDeptNameUnique(Long id, Long parentId, String name) {
-        DeptDO dept = deptMapper.selectByParentIdAndName(parentId, name);
-        if (dept == null) {
-            return;
-        }
-        // 如果 id 为空，说明不用比较是否为相同 id 的部门
-        if (id == null) {
-            throw exception(DEPT_NAME_DUPLICATE);
-        }
-        if (ObjectUtil.notEqual(dept.getId(), id)) {
+        try {
+            ConfigStore configs = new DefaultConfigStore();
+            configs.and(Compare.EQUAL, "parent_id", parentId);
+            configs.and(Compare.EQUAL, "name", name);
+            DeptDO dept = dataRepository.findOne(DeptDO.class, configs);
+            if (dept == null) {
+                return;
+            }
+            // 如果 id 为空，说明不用比较是否为相同 id 的部门
+            if (id == null) {
+                throw exception(DEPT_NAME_DUPLICATE);
+            }
+            if (ObjectUtil.notEqual(dept.getId(), id)) {
+                throw exception(DEPT_NAME_DUPLICATE);
+            }
+        } catch (Exception e) {
+            if (e instanceof com.cmsr.onebase.framework.common.exception.ServiceException) {
+                throw e;
+            }
+            log.error("验证部门名称唯一性失败: parentId={}, name={}", parentId, name, e);
             throw exception(DEPT_NAME_DUPLICATE);
         }
     }
@@ -178,9 +205,24 @@ public class DeptServiceImpl implements DeptService {
 
     @Override
     public List<DeptDO> getDeptList(DeptListReqVO reqVO) {
-        List<DeptDO> list = deptMapper.selectList(reqVO);
-        list.sort(Comparator.comparing(DeptDO::getSort));
-        return list;
+        try {
+            ConfigStore configs = new DefaultConfigStore();
+            
+            // 构建查询条件
+            if (reqVO.getName() != null) {
+                configs.and(Compare.LIKE, "name", reqVO.getName());
+            }
+            if (reqVO.getStatus() != null) {
+                configs.and(Compare.EQUAL, "status", reqVO.getStatus());
+            }
+            
+            List<DeptDO> list = dataRepository.findAll(DeptDO.class, configs);
+            list.sort(Comparator.comparing(DeptDO::getSort));
+            return list;
+        } catch (Exception e) {
+            log.error("查询部门列表失败", e);
+            return Collections.emptyList();
+        }
     }
 
     @Override
@@ -190,7 +232,7 @@ public class DeptServiceImpl implements DeptService {
         Collection<Long> parentIds = ids;
         for (int i = 0; i < Short.MAX_VALUE; i++) { // 使用 Short.MAX_VALUE 避免 bug 场景下，存在死循环
             // 查询当前层，所有的子部门
-            List<DeptDO> depts = deptMapper.selectListByParentId(parentIds);
+            List<DeptDO> depts = getDeptListByParentIds(parentIds);
             // 1. 如果没有子部门，则结束遍历
             if (CollUtil.isEmpty(depts)) {
                 break;
@@ -202,9 +244,30 @@ public class DeptServiceImpl implements DeptService {
         return children;
     }
 
+    /**
+     * 根据父部门ID列表查询子部门
+     */
+    private List<DeptDO> getDeptListByParentIds(Collection<Long> parentIds) {
+        try {
+            ConfigStore configs = new DefaultConfigStore();
+            configs.and(Compare.IN, "parent_id", parentIds);
+            return dataRepository.findAll(DeptDO.class, configs);
+        } catch (Exception e) {
+            log.error("根据父部门ID列表查询子部门失败: parentIds={}", parentIds, e);
+            return Collections.emptyList();
+        }
+    }
+
     @Override
     public List<DeptDO> getDeptListByLeaderUserId(Long id) {
-        return deptMapper.selectListByLeaderUserId(id);
+        try {
+            ConfigStore configs = new DefaultConfigStore();
+            configs.and(Compare.EQUAL, "leader_user_id", id);
+            return dataRepository.findAll(DeptDO.class, configs);
+        } catch (Exception e) {
+            log.error("根据负责人用户ID查询部门列表失败: id={}", id, e);
+            return Collections.emptyList();
+        }
     }
 
     @Override

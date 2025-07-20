@@ -17,9 +17,23 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.HashSet;
 
 @Component()
+@SuppressWarnings("rawtypes") // AnyLine 框架的接口使用原始类型
 public class AnyLineDBInfoListener implements DMListener {
+    
+    // 需要忽略租户过滤的表名列表
+    private static final Set<String> TENANT_IGNORE_TABLES = new HashSet<>();
+    
+    static {
+        // 添加不需要租户过滤的表
+        TENANT_IGNORE_TABLES.add("system_dict_data");
+        TENANT_IGNORE_TABLES.add("system_dict_type");
+        TENANT_IGNORE_TABLES.add("system_config");
+        // 可以根据需要添加更多表
+    }
     public SWITCH beforeExecute(DataRuntime runtime, String random, Run run) {
         System.out.println("----------> " + run.getFinalExecute());
         return SWITCH.CONTINUE;
@@ -86,9 +100,102 @@ public class AnyLineDBInfoListener implements DMListener {
      */
     @Override
     public SWITCH prepareQuery(DataRuntime runtime, String random, RunPrepare prepare, ConfigStore configs, String... conditions) {
-        configs.and("tenant_id = " + TenantContextHolder.getRequiredTenantId());
+        System.out.println("=== PrepareQuery called, TenantContextHolder.isIgnore(): " + TenantContextHolder.isIgnore());
+        
+        // 只有在不忽略租户的情况下才添加租户条件
+        if (!TenantContextHolder.isIgnore()) {
+            // 检查当前查询的表是否需要忽略租户过滤
+            boolean shouldIgnore = isTableTenantIgnored(prepare);
+            System.out.println("=== Should ignore tenant filtering: " + shouldIgnore);
+            
+            if (!shouldIgnore) {
+                System.out.println("=== Adding tenant_id condition");
+                configs.and("tenant_id = " + TenantContextHolder.getRequiredTenantId());
+            } else {
+                System.out.println("=== Skipping tenant_id condition for this table");
+            }
+        } else {
+            System.out.println("=== TenantContextHolder.isIgnore() is true, skipping tenant filtering");
+        }
 
         return SWITCH.CONTINUE;
+    }
+    
+    /**
+     * 检查表是否需要忽略租户过滤
+     * 
+     * @param prepare RunPrepare对象
+     * @return 如果表需要忽略租户过滤则返回true
+     */
+    private boolean isTableTenantIgnored(RunPrepare prepare) {
+        try {
+            // 尝试从 prepare 对象中获取表名
+            String sql = prepare.getText();
+            System.out.println("=== PrepareQuery: SQL = " + sql);
+            
+            if (sql != null) {
+                String lowerSql = sql.toLowerCase().trim();
+                System.out.println("=== Checking SQL for tenant filtering: " + lowerSql);
+                
+                // 检查SQL中是否包含需要忽略的表名
+                for (String tableName : TENANT_IGNORE_TABLES) {
+                    if (lowerSql.contains(tableName.toLowerCase())) {
+                        System.out.println("=== Table " + tableName + " found in SQL, ignoring tenant filtering");
+                        return true;
+                    }
+                }
+            } else {
+                System.out.println("=== PrepareQuery: SQL is null, checking other methods");
+                
+                // 尝试获取表信息的其他方式
+                try {
+                    // 检查 prepare 对象的其他方法
+                    System.out.println("=== Prepare object class: " + prepare.getClass().getName());
+                    System.out.println("=== Prepare object toString: " + prepare.toString());
+                    
+                    // 尝试反射获取表名
+                    try {
+                        java.lang.reflect.Method getTableMethod = prepare.getClass().getMethod("getTable");
+                        Object table = getTableMethod.invoke(prepare);
+                        if (table != null) {
+                            String tableName = table.toString();
+                            System.out.println("=== Found table name via getTable(): " + tableName);
+                            if (TENANT_IGNORE_TABLES.contains(tableName.toLowerCase())) {
+                                System.out.println("=== Table " + tableName + " is in ignore list, ignoring tenant filtering");
+                                return true;
+                            }
+                        }
+                    } catch (Exception ex) {
+                        System.out.println("=== getTable() method not available: " + ex.getMessage());
+                    }
+                    
+                    // 尝试反射获取dest信息
+                    try {
+                        java.lang.reflect.Method getDestMethod = prepare.getClass().getMethod("getDest");
+                        Object dest = getDestMethod.invoke(prepare);
+                        if (dest != null) {
+                            String destName = dest.toString();
+                            System.out.println("=== Found dest name via getDest(): " + destName);
+                            if (TENANT_IGNORE_TABLES.contains(destName.toLowerCase())) {
+                                System.out.println("=== Dest " + destName + " is in ignore list, ignoring tenant filtering");
+                                return true;
+                            }
+                        }
+                    } catch (Exception ex) {
+                        System.out.println("=== getDest() method not available: " + ex.getMessage());
+                    }
+                    
+                } catch (Exception ex) {
+                    System.out.println("=== Error during reflection: " + ex.getMessage());
+                }
+            }
+        } catch (Exception e) {
+            // 如果无法获取表名，则不忽略（安全做法）
+            System.err.println("Error checking table name for tenant filtering: " + e.getMessage());
+            e.printStackTrace();
+        }
+        
+        return false;
     }
 
     /**

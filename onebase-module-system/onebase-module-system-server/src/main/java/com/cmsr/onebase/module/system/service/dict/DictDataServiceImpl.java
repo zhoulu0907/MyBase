@@ -2,23 +2,25 @@ package com.cmsr.onebase.module.system.service.dict;
 
 import cn.hutool.core.collection.CollUtil;
 import com.cmsr.onebase.framework.aynline.DataRepository;
-import com.cmsr.onebase.framework.common.anyline.web.MyAnyLineService;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
+import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.module.system.controller.admin.dict.vo.data.DictDataPageReqVO;
 import com.cmsr.onebase.module.system.controller.admin.dict.vo.data.DictDataSaveReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.dict.DictDataDO;
 import com.cmsr.onebase.module.system.dal.dataobject.dict.DictTypeDO;
-import com.cmsr.onebase.module.system.dal.mysql.dict.DictDataMapper;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.anyline.service.AnylineService;
-import org.anyline.util.ConfigTable;
+import org.anyline.data.param.ConfigStore;
+import org.anyline.data.param.init.DefaultConfigStore;
+import org.anyline.entity.Compare;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
@@ -46,34 +48,71 @@ public class DictDataServiceImpl implements DictDataService {
     @Resource
     private DictTypeService dictTypeService;
 
+    //@Resource
+    //private DictDataMapper dictDataMapper;
+
     @Resource
-    private DictDataMapper dictDataMapper;
-
-    static{
-        ConfigTable.IS_AUTO_CHECK_METADATA = true;
-        ConfigTable.IS_INSERT_NULL_COLUMN = false;
-        ConfigTable.IS_INSERT_NULL_FIELD = false;
-        ConfigTable.IS_INSERT_EMPTY_FIELD = false;
-        ConfigTable.IS_INSERT_EMPTY_COLUMN = false;
-    }
-    private AnylineService<?> service = MyAnyLineService.getInstance().getService();
-    private DataRepository dataRepository = new DataRepository(service);
+    private DataRepository dataRepository;
 
     @Override
+    @TenantIgnore
     public List<DictDataDO> getDictDataList(Integer status, String dictType) {
-        List<DictDataDO> list = dictDataMapper.selectListByStatusAndDictType(status, dictType);
-        list.sort(COMPARATOR_TYPE_AND_SORT);
-        return list;
+        return TenantUtils.executeIgnore(() -> {
+            ConfigStore cs = new DefaultConfigStore()
+                    .and(Compare.EQUAL, "deleted", false);
+            if (status != null) {
+                cs.and(Compare.EQUAL, "status", status);
+            }
+            if (cn.hutool.core.util.StrUtil.isNotBlank(dictType)) {
+                cs.and(Compare.EQUAL, "dict_type", dictType);
+            }
+            List<DictDataDO> list = dataRepository.findAll(DictDataDO.class, cs);
+            // 创建可变列表的副本以支持排序
+            List<DictDataDO> mutableList = new ArrayList<>(list);
+            mutableList.sort(COMPARATOR_TYPE_AND_SORT);
+            return mutableList;
+        });
     }
 
     @Override
+    @TenantIgnore
     public PageResult<DictDataDO> getDictDataPage(DictDataPageReqVO pageReqVO) {
-        return dictDataMapper.selectPage(pageReqVO);
+        return TenantUtils.executeIgnore(() -> {
+            try {
+                ConfigStore cs = new DefaultConfigStore()
+                        .and(Compare.EQUAL, "deleted", false);
+                
+                // 构建查询条件
+                if (cn.hutool.core.util.StrUtil.isNotBlank(pageReqVO.getLabel())) {
+                    cs.and(Compare.LIKE, "label", pageReqVO.getLabel());
+                }
+                if (cn.hutool.core.util.StrUtil.isNotBlank(pageReqVO.getDictType())) {
+                    cs.and(Compare.LIKE, "dict_type", pageReqVO.getDictType());
+                }
+                if (pageReqVO.getStatus() != null) {
+                    cs.and(Compare.EQUAL, "status", pageReqVO.getStatus());
+                }
+                
+                // 添加排序条件，按ID降序排列
+                cs.order("id", "DESC");
+                
+                return dataRepository.findPageWithConditions(
+                        DictDataDO.class, 
+                        cs, 
+                        pageReqVO.getPageNo(), 
+                        pageReqVO.getPageSize()
+                );
+            } catch (Exception e) {
+                log.error("分页查询字典数据失败", e);
+                throw new RuntimeException("分页查询字典数据失败", e);
+            }
+        });
     }
 
     @Override
+    @TenantIgnore
     public DictDataDO getDictData(Long id) {
-        return dictDataMapper.selectById(id);
+        return TenantUtils.executeIgnore(() -> dataRepository.findById(DictDataDO.class, id));
     }
 
     @Override
@@ -114,12 +153,20 @@ public class DictDataServiceImpl implements DictDataService {
 
     @Override
     public long getDictDataCountByDictType(String dictType) {
-        return dictDataMapper.selectCountByDictType(dictType);
+        ConfigStore cs = new DefaultConfigStore()
+                .and(Compare.EQUAL, "dict_type", dictType)
+                .and(Compare.EQUAL, "deleted", false);
+        List<DictDataDO> list = dataRepository.findAll(DictDataDO.class, cs);
+        return list.size();
     }
 
     @VisibleForTesting
     public void validateDictDataValueUnique(Long id, String dictType, String value) {
-        DictDataDO dictData = dictDataMapper.selectByDictTypeAndValue(dictType, value);
+        ConfigStore cs = new DefaultConfigStore()
+                .and(Compare.EQUAL, "dict_type", dictType)
+                .and(Compare.EQUAL, "value", value)
+                .and(Compare.EQUAL, "deleted", false);
+        DictDataDO dictData = dataRepository.findOne(DictDataDO.class, cs);
         if (dictData == null) {
             return;
         }
@@ -159,8 +206,12 @@ public class DictDataServiceImpl implements DictDataService {
         if (CollUtil.isEmpty(values)) {
             return;
         }
-        Map<String, DictDataDO> dictDataMap = CollectionUtils.convertMap(
-                dictDataMapper.selectByDictTypeAndValues(dictType, values), DictDataDO::getValue);
+        ConfigStore cs = new DefaultConfigStore()
+                .and(Compare.EQUAL, "dict_type", dictType)
+                .and(Compare.EQUAL, "deleted", false)
+                .in("value", values);
+        List<DictDataDO> dictDataList = dataRepository.findAll(DictDataDO.class, cs);
+        Map<String, DictDataDO> dictDataMap = CollectionUtils.convertMap(dictDataList, DictDataDO::getValue);
         // 校验
         values.forEach(value -> {
             DictDataDO dictData = dictDataMap.get(value);
@@ -174,20 +225,42 @@ public class DictDataServiceImpl implements DictDataService {
     }
 
     @Override
+    @TenantIgnore
     public DictDataDO getDictData(String dictType, String value) {
-        return dictDataMapper.selectByDictTypeAndValue(dictType, value);
+        return TenantUtils.executeIgnore(() -> {
+            ConfigStore cs = new DefaultConfigStore()
+                    .and(Compare.EQUAL, "dict_type", dictType)
+                    .and(Compare.EQUAL, "value", value)
+                    .and(Compare.EQUAL, "deleted", false);
+            return dataRepository.findOne(DictDataDO.class, cs);
+        });
     }
 
     @Override
+    @TenantIgnore
     public DictDataDO parseDictData(String dictType, String label) {
-        return dictDataMapper.selectByDictTypeAndLabel(dictType, label);
+        return TenantUtils.executeIgnore(() -> {
+            ConfigStore cs = new DefaultConfigStore()
+                    .and(Compare.EQUAL, "dict_type", dictType)
+                    .and(Compare.EQUAL, "label", label)
+                    .and(Compare.EQUAL, "deleted", false);
+            return dataRepository.findOne(DictDataDO.class, cs);
+        });
     }
 
     @Override
+    @TenantIgnore
     public List<DictDataDO> getDictDataListByDictType(String dictType) {
-        List<DictDataDO> list = dictDataMapper.selectList(DictDataDO::getDictType, dictType);
-        list.sort(Comparator.comparing(DictDataDO::getSort));
-        return list;
+        return TenantUtils.executeIgnore(() -> {
+            ConfigStore cs = new DefaultConfigStore()
+                    .and(Compare.EQUAL, "dict_type", dictType)
+                    .and(Compare.EQUAL, "deleted", false);
+            List<DictDataDO> list = dataRepository.findAll(DictDataDO.class, cs);
+            // 创建可变列表的副本以支持排序
+            List<DictDataDO> mutableList = new ArrayList<>(list);
+            mutableList.sort(Comparator.comparing(DictDataDO::getSort));
+            return mutableList;
+        });
     }
 
 }
