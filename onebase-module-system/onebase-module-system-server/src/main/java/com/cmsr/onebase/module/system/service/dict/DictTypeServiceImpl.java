@@ -2,7 +2,6 @@ package com.cmsr.onebase.module.system.service.dict;
 
 import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.framework.aynline.DataRepository;
-import com.cmsr.onebase.framework.common.anyline.web.MyAnyLineService;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.date.LocalDateTimeUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
@@ -11,8 +10,10 @@ import com.cmsr.onebase.module.system.controller.admin.dict.vo.type.DictTypeSave
 import com.cmsr.onebase.module.system.dal.dataobject.dict.DictTypeDO;
 import com.cmsr.onebase.module.system.dal.mysql.dict.DictTypeMapper;
 import com.google.common.annotations.VisibleForTesting;
-import org.anyline.service.AnylineService;
-import org.anyline.util.ConfigTable;
+import lombok.extern.slf4j.Slf4j;
+import org.anyline.data.param.ConfigStore;
+import org.anyline.data.param.init.DefaultConfigStore;
+import org.anyline.entity.Compare;
 import org.springframework.stereotype.Service;
 
 import jakarta.annotation.Resource;
@@ -27,6 +28,7 @@ import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
  *
  */
 @Service
+@Slf4j
 public class DictTypeServiceImpl implements DictTypeService {
 
     @Resource
@@ -35,29 +37,65 @@ public class DictTypeServiceImpl implements DictTypeService {
     @Resource
     private DictTypeMapper dictTypeMapper;
 
-    static{
-        ConfigTable.IS_AUTO_CHECK_METADATA = true;
-        ConfigTable.IS_INSERT_NULL_COLUMN = false;
-        ConfigTable.IS_INSERT_NULL_FIELD = false;
-        ConfigTable.IS_INSERT_EMPTY_FIELD = false;
-        ConfigTable.IS_INSERT_EMPTY_COLUMN = false;
-    }
-    private AnylineService<?> service = MyAnyLineService.getInstance().getService();
-    private DataRepository dataRepository = new DataRepository(service);
+    @Resource
+    private DataRepository dataRepository;
 
     @Override
     public PageResult<DictTypeDO> getDictTypePage(DictTypePageReqVO pageReqVO) {
-        return dictTypeMapper.selectPage(pageReqVO);
+        try {
+            ConfigStore configs = new DefaultConfigStore();
+            
+            // 构建查询条件
+            if (StrUtil.isNotBlank(pageReqVO.getName())) {
+                configs.and(Compare.LIKE, "name", pageReqVO.getName());
+            }
+            if (StrUtil.isNotBlank(pageReqVO.getType())) {
+                configs.and(Compare.LIKE, "type", pageReqVO.getType());
+            }
+            if (pageReqVO.getStatus() != null) {
+                configs.and(Compare.EQUAL, "status", pageReqVO.getStatus());
+            }
+            if (pageReqVO.getCreateTime() != null && pageReqVO.getCreateTime().length == 2) {
+                LocalDateTime startTime = pageReqVO.getCreateTime()[0];
+                LocalDateTime endTime = pageReqVO.getCreateTime()[1];
+                if (startTime != null) {
+                    configs.and(Compare.GREAT_EQUAL, "create_time", startTime);
+                }
+                if (endTime != null) {
+                    configs.and(Compare.LESS_EQUAL, "create_time", endTime);
+                }
+            }
+            
+            // 添加排序条件，按ID降序排列
+            configs.order("id", "DESC");
+            
+            return dataRepository.findPageWithConditions(
+                    DictTypeDO.class, 
+                    configs, 
+                    pageReqVO.getPageNo(), 
+                    pageReqVO.getPageSize()
+            );
+        } catch (Exception e) {
+            log.error("分页查询字典类型失败", e);
+            throw new RuntimeException("分页查询字典类型失败", e);
+        }
     }
 
     @Override
     public DictTypeDO getDictType(Long id) {
-        return dictTypeMapper.selectById(id);
+        return dataRepository.findById(DictTypeDO.class, id);
     }
 
     @Override
     public DictTypeDO getDictType(String type) {
-        return dictTypeMapper.selectByType(type);
+        try {
+            ConfigStore configs = new DefaultConfigStore();
+            configs.and(Compare.EQUAL, "type", type);
+            return dataRepository.findOne(DictTypeDO.class, configs);
+        } catch (Exception e) {
+            log.error("根据类型查询字典类型失败: type={}", type, e);
+            return null;
+        }
     }
 
     @Override
@@ -96,26 +134,36 @@ public class DictTypeServiceImpl implements DictTypeService {
         if (dictDataService.getDictDataCountByDictType(dictType.getType()) > 0) {
             throw exception(DICT_TYPE_HAS_CHILDREN);
         }
-        // 删除字典类型
-        dictTypeMapper.updateToDelete(id, LocalDateTime.now());
+        // 删除字典类型（软删除）
+        dataRepository.deleteById(DictTypeDO.class, id);
     }
 
     @Override
     public List<DictTypeDO> getDictTypeList() {
-        return dictTypeMapper.selectList();
+        return dataRepository.findAll(DictTypeDO.class);
     }
 
     @VisibleForTesting
     void validateDictTypeNameUnique(Long id, String name) {
-        DictTypeDO dictType = dictTypeMapper.selectByName(name);
-        if (dictType == null) {
-            return;
-        }
-        // 如果 id 为空，说明不用比较是否为相同 id 的字典类型
-        if (id == null) {
-            throw exception(DICT_TYPE_NAME_DUPLICATE);
-        }
-        if (!dictType.getId().equals(id)) {
+        try {
+            ConfigStore configs = new DefaultConfigStore();
+            configs.and(Compare.EQUAL, "name", name);
+            DictTypeDO dictType = dataRepository.findOne(DictTypeDO.class, configs);
+            if (dictType == null) {
+                return;
+            }
+            // 如果 id 为空，说明不用比较是否为相同 id 的字典类型
+            if (id == null) {
+                throw exception(DICT_TYPE_NAME_DUPLICATE);
+            }
+            if (!dictType.getId().equals(id)) {
+                throw exception(DICT_TYPE_NAME_DUPLICATE);
+            }
+        } catch (Exception e) {
+            if (e instanceof com.cmsr.onebase.framework.common.exception.ServiceException) {
+                throw e;
+            }
+            log.error("验证字典类型名称唯一性失败: name={}", name, e);
             throw exception(DICT_TYPE_NAME_DUPLICATE);
         }
     }
@@ -125,15 +173,25 @@ public class DictTypeServiceImpl implements DictTypeService {
         if (StrUtil.isEmpty(type)) {
             return;
         }
-        DictTypeDO dictType = dictTypeMapper.selectByType(type);
-        if (dictType == null) {
-            return;
-        }
-        // 如果 id 为空，说明不用比较是否为相同 id 的字典类型
-        if (id == null) {
-            throw exception(DICT_TYPE_TYPE_DUPLICATE);
-        }
-        if (!dictType.getId().equals(id)) {
+        try {
+            ConfigStore configs = new DefaultConfigStore();
+            configs.and(Compare.EQUAL, "type", type);
+            DictTypeDO dictType = dataRepository.findOne(DictTypeDO.class, configs);
+            if (dictType == null) {
+                return;
+            }
+            // 如果 id 为空，说明不用比较是否为相同 id 的字典类型
+            if (id == null) {
+                throw exception(DICT_TYPE_TYPE_DUPLICATE);
+            }
+            if (!dictType.getId().equals(id)) {
+                throw exception(DICT_TYPE_TYPE_DUPLICATE);
+            }
+        } catch (Exception e) {
+            if (e instanceof com.cmsr.onebase.framework.common.exception.ServiceException) {
+                throw e;
+            }
+            log.error("验证字典类型唯一性失败: type={}", type, e);
             throw exception(DICT_TYPE_TYPE_DUPLICATE);
         }
     }

@@ -13,6 +13,7 @@ import com.cmsr.onebase.framework.mybatis.core.util.MyBatisUtils;
 import com.cmsr.onebase.framework.security.core.LoginUser;
 import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.common.biz.system.permission.dto.DeptDataPermissionRespDTO;
+import com.baomidou.mybatisplus.core.metadata.TableInfo;
 import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -180,8 +181,21 @@ public class DeptDataPermissionRule implements DataPermissionRule {
     }
 
     public void addDeptColumn(Class<? extends BaseDO> entityClass, String columnName) {
-        String tableName = TableInfoHelper.getTableInfo(entityClass).getTableName();
-        addDeptColumn(tableName, columnName);
+        try {
+            TableInfo tableInfo = TableInfoHelper.getTableInfo(entityClass);
+            if (tableInfo != null) {
+                String tableName = tableInfo.getTableName();
+                addDeptColumn(tableName, columnName);
+            } else {
+                // 如果 TableInfo 为 null，尝试根据实体类名推断表名
+                String tableName = getTableNameFromClass(entityClass);
+                addDeptColumn(tableName, columnName);
+            }
+        } catch (Exception e) {
+            // 如果出现异常，尝试根据实体类名推断表名
+            String tableName = getTableNameFromClass(entityClass);
+            addDeptColumn(tableName, columnName);
+        }
     }
 
     public void addDeptColumn(String tableName, String columnName) {
@@ -194,13 +208,66 @@ public class DeptDataPermissionRule implements DataPermissionRule {
     }
 
     public void addUserColumn(Class<? extends BaseDO> entityClass, String columnName) {
-        String tableName = TableInfoHelper.getTableInfo(entityClass).getTableName();
-        addUserColumn(tableName, columnName);
+        try {
+            TableInfo tableInfo = TableInfoHelper.getTableInfo(entityClass);
+            if (tableInfo != null) {
+                String tableName = tableInfo.getTableName();
+                addUserColumn(tableName, columnName);
+            } else {
+                // 如果 TableInfo 为 null，尝试根据实体类名推断表名
+                String tableName = getTableNameFromClass(entityClass);
+                addUserColumn(tableName, columnName);
+            }
+        } catch (Exception e) {
+            // 如果出现异常，尝试根据实体类名推断表名
+            String tableName = getTableNameFromClass(entityClass);
+            addUserColumn(tableName, columnName);
+        }
     }
 
     public void addUserColumn(String tableName, String columnName) {
         userColumns.put(tableName, columnName);
         TABLE_NAMES.add(tableName);
+    }
+
+    /**
+     * 根据实体类名推断表名
+     * 这是一个简单的后备方案，当 MyBatis-Plus TableInfo 不可用时使用
+     */
+    private String getTableNameFromClass(Class<? extends BaseDO> entityClass) {
+        // 处理常见的实体类到表名的映射
+        String className = entityClass.getSimpleName();
+        if (className.endsWith("DO")) {
+            className = className.substring(0, className.length() - 2);
+        }
+        
+        // 根据已知的实体类返回正确的表名
+        if (className.equals("AdminUser")) {
+            return "system_users";
+        } else if (className.equals("Dept")) {
+            return "system_dept";
+        } else if (className.equals("DictData")) {
+            return "system_dict_data";
+        } else if (className.equals("DictType")) {
+            return "system_dict_type";
+        } else if (className.equals("Post")) {
+            return "system_post";
+        } else if (className.equals("LoginLog")) {
+            return "system_login_log";
+        } else if (className.equals("OperateLog")) {
+            return "system_operate_log";
+        }
+        
+        // 默认转换：将驼峰命名转换为下划线命名，并添加 system_ 前缀
+        StringBuilder tableName = new StringBuilder("system_");
+        for (int i = 0; i < className.length(); i++) {
+            char c = className.charAt(i);
+            if (Character.isUpperCase(c) && i > 0) {
+                tableName.append("_");
+            }
+            tableName.append(Character.toLowerCase(c));
+        }
+        return tableName.toString();
     }
 
 }

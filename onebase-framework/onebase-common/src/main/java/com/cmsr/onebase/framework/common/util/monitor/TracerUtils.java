@@ -1,6 +1,7 @@
 package com.cmsr.onebase.framework.common.util.monitor;
 
 import org.apache.skywalking.apm.toolkit.trace.TraceContext;
+import java.util.UUID;
 
 /**
  * 链路追踪工具类
@@ -18,12 +19,18 @@ public class TracerUtils {
 
     /**
      * 获得链路追踪编号，直接返回 SkyWalking 的 TraceId。
-     * 如果不存在的话为空字符串！！！
+     * 如果不存在的话生成一个 UUID 作为备用 trace_id
      *
      * @return 链路追踪编号
      */
     public static String getTraceId() {
-        return TraceContext.traceId();
+        String traceId = TraceContext.traceId();
+        // 如果 SkyWalking Agent 未启动，TraceContext.traceId() 会返回空字符串
+        // 此时我们生成一个 UUID 作为备用的 trace_id，确保日志记录的完整性
+        if (traceId == null || traceId.isEmpty()) {
+            traceId = UUID.randomUUID().toString().replace("-", "");
+        }
+        return traceId;
     }
 
 }

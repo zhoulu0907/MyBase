@@ -24,6 +24,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -78,9 +79,10 @@ public class PostController {
     public CommonResult<List<PostSimpleRespVO>> getSimplePostList() {
         // 获得岗位列表，只要开启状态的
         List<PostDO> list = postService.getPostList(null, Collections.singleton(CommonStatusEnum.ENABLE.getStatus()));
-        // 排序后，返回给前端
-        list.sort(Comparator.comparing(PostDO::getSort));
-        return success(BeanUtils.toBean(list, PostSimpleRespVO.class));
+        // 创建一个新的可变列表，然后排序，返回给前端
+        List<PostDO> sortedList = new ArrayList<>(list);
+        sortedList.sort(Comparator.comparing(PostDO::getSort));
+        return success(BeanUtils.toBean(sortedList, PostSimpleRespVO.class));
     }
 
     @GetMapping("/page")

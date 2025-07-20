@@ -2,16 +2,16 @@ package com.cmsr.onebase.module.system.service.dept;
 
 import cn.hutool.core.collection.CollUtil;
 import com.cmsr.onebase.framework.aynline.DataRepository;
-import com.cmsr.onebase.framework.common.anyline.web.MyAnyLineService;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.system.controller.admin.dept.vo.post.PostPageReqVO;
 import com.cmsr.onebase.module.system.controller.admin.dept.vo.post.PostSaveReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.PostDO;
-import com.cmsr.onebase.module.system.dal.mysql.dept.PostMapper;
-import org.anyline.service.AnylineService;
-import org.anyline.util.ConfigTable;
+import lombok.extern.slf4j.Slf4j;
+import org.anyline.data.param.ConfigStore;
+import org.anyline.data.param.init.DefaultConfigStore;
+import org.anyline.entity.Compare;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
@@ -28,20 +28,14 @@ import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
  */
 @Service
 @Validated
+@Slf4j
 public class PostServiceImpl implements PostService {
 
-    @Resource
-    private PostMapper postMapper;
+    //@Resource
+    //private PostMapper postMapper;
 
-    static{
-        ConfigTable.IS_AUTO_CHECK_METADATA = true;
-        ConfigTable.IS_INSERT_NULL_COLUMN = false;
-        ConfigTable.IS_INSERT_NULL_FIELD = false;
-        ConfigTable.IS_INSERT_EMPTY_FIELD = false;
-        ConfigTable.IS_INSERT_EMPTY_COLUMN = false;
-    }
-    private AnylineService<?> service = MyAnyLineService.getInstance().getService();
-    private DataRepository dataRepository = new DataRepository(service);
+    @Resource
+    private DataRepository dataRepository;
 
     @Override
     public Long createPost(PostSaveReqVO createReqVO) {
@@ -82,7 +76,10 @@ public class PostServiceImpl implements PostService {
     }
 
     private void validatePostNameUnique(Long id, String name) {
-        PostDO post = postMapper.selectByName(name);
+        ConfigStore cs = new DefaultConfigStore()
+                .and(Compare.EQUAL, "name", name)
+                .and(Compare.EQUAL, "deleted", false);
+        PostDO post = dataRepository.findOne(PostDO.class, cs);
         if (post == null) {
             return;
         }
@@ -96,7 +93,10 @@ public class PostServiceImpl implements PostService {
     }
 
     private void validatePostCodeUnique(Long id, String code) {
-        PostDO post = postMapper.selectByCode(code);
+        ConfigStore cs = new DefaultConfigStore()
+                .and(Compare.EQUAL, "code", code)
+                .and(Compare.EQUAL, "deleted", false);
+        PostDO post = dataRepository.findOne(PostDO.class, cs);
         if (post == null) {
             return;
         }
@@ -128,12 +128,47 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public List<PostDO> getPostList(Collection<Long> ids, Collection<Integer> statuses) {
-        return postMapper.selectList(ids, statuses);
+        ConfigStore cs = new DefaultConfigStore()
+                .and(Compare.EQUAL, "deleted", false);
+        if (CollUtil.isNotEmpty(ids)) {
+            cs.in("id", ids);
+        }
+        if (CollUtil.isNotEmpty(statuses)) {
+            cs.in("status", statuses);
+        }
+        return dataRepository.findAll(PostDO.class, cs);
     }
 
     @Override
     public PageResult<PostDO> getPostPage(PostPageReqVO reqVO) {
-        return postMapper.selectPage(reqVO);
+        try {
+            ConfigStore cs = new DefaultConfigStore()
+                    .and(Compare.EQUAL, "deleted", false);
+            
+            // 构建查询条件
+            if (cn.hutool.core.util.StrUtil.isNotBlank(reqVO.getCode())) {
+                cs.and(Compare.LIKE, "code", reqVO.getCode());
+            }
+            if (cn.hutool.core.util.StrUtil.isNotBlank(reqVO.getName())) {
+                cs.and(Compare.LIKE, "name", reqVO.getName());
+            }
+            if (reqVO.getStatus() != null) {
+                cs.and(Compare.EQUAL, "status", reqVO.getStatus());
+            }
+            
+            // 添加排序条件，按ID降序排列
+            cs.order("id", "DESC");
+            
+            return dataRepository.findPageWithConditions(
+                    PostDO.class, 
+                    cs, 
+                    reqVO.getPageNo(), 
+                    reqVO.getPageSize()
+            );
+        } catch (Exception e) {
+            log.error("分页查询岗位失败", e);
+            throw new RuntimeException("分页查询岗位失败", e);
+        }
     }
 
     @Override
