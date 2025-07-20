@@ -68,8 +68,8 @@ public class AnyLineDBInfoListener implements DMListener {
     private void autoInjectTenantID(Object obj) {
         if (Objects.nonNull(obj) && obj instanceof TenantBaseDO) {
             TenantBaseDO tenantBaseDO = (TenantBaseDO) obj;
-            System.out.println("tenantBaseDO id  ----------> " + tenantBaseDO.getTenantId());
             tenantBaseDO.setTenantId(TenantContextHolder.getRequiredTenantId());
+            System.out.println("tenantBaseDO id  ----------> " + tenantBaseDO.getTenantId());
         }
     }
 

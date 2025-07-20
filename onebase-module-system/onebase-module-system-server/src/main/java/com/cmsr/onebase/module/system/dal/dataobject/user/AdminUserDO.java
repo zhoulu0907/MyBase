@@ -8,10 +8,12 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
+import jakarta.persistence.Transient;
 import lombok.*;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -58,7 +60,8 @@ public class AdminUserDO extends TenantBaseDO {
      * 岗位编号数组
      */
     @TableField(typeHandler = JacksonTypeHandler.class)
-    private Set<Long> postIds;
+    @Transient // TODO: 2025/7/20 需要以数组方式插入库里，但anyline有bug，暂时Transient屏蔽
+    private List<Long> postIds;
     /**
      * 用户邮箱
      */

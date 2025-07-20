@@ -44,8 +44,8 @@ public class DeptServiceImpl implements DeptService {
         ConfigTable.IS_AUTO_CHECK_METADATA = true;
         ConfigTable.IS_INSERT_NULL_COLUMN = false;
         ConfigTable.IS_INSERT_NULL_FIELD = false;
-        ConfigTable.IS_INSERT_EMPTY_FIELD = false;
-        ConfigTable.IS_INSERT_EMPTY_COLUMN = false;
+        ConfigTable.IS_INSERT_EMPTY_FIELD = true;
+        ConfigTable.IS_INSERT_EMPTY_COLUMN = true;
     }
     private AnylineService<?> service = MyAnyLineService.getInstance().getService();
     private DataRepository dataRepository = new DataRepository(service);

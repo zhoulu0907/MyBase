@@ -1,5 +1,6 @@
-package com.cmsr.onebase.framework.common.anyline.utils;
+package com.cmsr.onebase.framework.aynline;
 
+import com.baomidou.mybatisplus.annotation.TableName;
 import jakarta.persistence.Table;
 
 /**
@@ -10,7 +11,7 @@ import jakarta.persistence.Table;
  */
 public class JpaUtils {
     public static String getTableName(Class<?> entityClass) {
-        Table annotation = entityClass.getAnnotation(Table.class);
-        return annotation != null ? annotation.name() : null;
+        TableName annotation = entityClass.getAnnotation(TableName.class);
+        return annotation != null ? annotation.value() : null;
     }
 }

@@ -64,7 +64,7 @@ public class YudaoSecurityAutoConfiguration {
     }
 
     /**
-     * Token 认证过滤器 Bean
+     * Token 认证过滤器 Bean`
      */
     @Bean
     public TokenAuthenticationFilter authenticationTokenFilter(GlobalExceptionHandler globalExceptionHandler,

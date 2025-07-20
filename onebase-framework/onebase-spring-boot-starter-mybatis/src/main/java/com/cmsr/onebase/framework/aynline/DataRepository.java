@@ -1,11 +1,11 @@
 package com.cmsr.onebase.framework.aynline;
 
-import com.cmsr.onebase.framework.common.anyline.entity.BaseDO;
-import com.cmsr.onebase.framework.common.anyline.utils.JpaUtils;
 import com.cmsr.onebase.framework.common.anyline.web.BizException;
 import com.cmsr.onebase.framework.common.anyline.web.PageResult;
 import com.cmsr.onebase.framework.common.anyline.web.StatusCode;
 import com.cmsr.onebase.framework.common.util.snowflake.SnowflakeId;
+import com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.Run;
 import org.anyline.data.param.ConfigStore;
@@ -14,6 +14,7 @@ import org.anyline.entity.*;
 import org.anyline.metadata.Constraint;
 import org.anyline.metadata.Table;
 import org.anyline.service.AnylineService;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -29,7 +30,11 @@ import java.util.Optional;
  */
 @Slf4j
 public class DataRepository {
-    private final AnylineService<?> anylineService;
+
+    @Resource
+    private AnylineService<?> anylineService;
+
+    public DataRepository(){}
 
     public DataRepository(AnylineService<?> service) {
 
@@ -57,7 +62,7 @@ public class DataRepository {
      * @param <T>    实体类型
      * @return 保存后的实体
      */
-    public <T extends com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO> T insert(T entity) {
+    public <T extends BaseDO> T insert(T entity) {
         try {
             Long result = anylineService.insert(entity);
             if (result == 0) {
@@ -77,7 +82,7 @@ public class DataRepository {
      * @param <T>    实体类型
      * @return 保存后的实体
      */
-    public <T extends com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO> T save(T entity) {
+    public <T extends BaseDO> T save(T entity) {
         try {
             if (entity.getId() == null || entity.getId() == 0) {
                 // 新增
@@ -109,7 +114,7 @@ public class DataRepository {
      * @param <T>      实体类型
      * @return 保存后的实体列表
      */
-    public <T extends com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO> List<T> saveAll(List<T> entities) {
+    public <T extends BaseDO> List<T> saveAll(List<T> entities) {
         try {
             for (T entity : entities) {
                 save(entity);
@@ -129,7 +134,7 @@ public class DataRepository {
      * @param <T>   实体类型
      * @return 实体对象，如果不存在返回null
      */
-    public <T extends com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO> T findById(Class<T> clazz, Long id) {
+    public <T extends BaseDO> T findById(Class<T> clazz, Long id) {
         try {
             ConfigStore configs = new DefaultConfigStore();
             configs.and(Compare.EQUAL, "id", id);
@@ -150,7 +155,7 @@ public class DataRepository {
      * @param <T>   实体类型
      * @return Optional包装的实体对象
      */
-    public <T extends com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO> Optional<T> findByIdOptional(Class<T> clazz, Long id) {
+    public <T extends BaseDO> Optional<T> findByIdOptional(Class<T> clazz, Long id) {
         T entity = findById(clazz, id);
         return Optional.ofNullable(entity);
     }
@@ -163,7 +168,7 @@ public class DataRepository {
      * @param <T>   实体类型
      * @return 是否存在
      */
-    public <T extends com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO> boolean existsById(Class<T> clazz, Long id) {
+    public <T extends BaseDO> boolean existsById(Class<T> clazz, Long id) {
         return findById(clazz, id) != null;
     }
 
@@ -174,7 +179,7 @@ public class DataRepository {
      * @param <T>   实体类型
      * @return 实体列表
      */
-    public <T extends com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO> List<T> findAll(Class<T> clazz) {
+    public <T extends BaseDO> List<T> findAll(Class<T> clazz) {
         try {
             ConfigStore configs = new DefaultConfigStore();
 
@@ -196,7 +201,7 @@ public class DataRepository {
      * @param <T>   实体类型
      * @return 实体列表
      */
-    public <T extends com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO> List<T> findAllById(Class<T> clazz, List<Long> ids) {
+    public <T extends BaseDO> List<T> findAllById(Class<T> clazz, List<Long> ids) {
         try {
             ConfigStore configs = new DefaultConfigStore();
             configs.and(Compare.IN, "id", ids);
@@ -218,7 +223,7 @@ public class DataRepository {
      * @param <T>   实体类型
      * @return 实体数量
      */
-    public <T extends com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO> long count(Class<T> clazz) {
+    public <T extends BaseDO> long count(Class<T> clazz) {
         try {
             ConfigStore configs = new DefaultConfigStore();
 
@@ -239,7 +244,7 @@ public class DataRepository {
      * @param id    实体ID
      * @param <T>   实体类型
      */
-    public <T extends com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO> void deleteById(Class<T> clazz, Long id) {
+    public <T extends BaseDO> void deleteById(Class<T> clazz, Long id) {
         try {
             ConfigStore configs = new DefaultConfigStore();
             configs.and(Compare.EQUAL, "id", id);
@@ -264,7 +269,7 @@ public class DataRepository {
      * @param entity 要删除的实体
      * @param <T>    实体类型
      */
-    public <T extends com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO> void delete(T entity) {
+    public <T extends BaseDO> void delete(T entity) {
         if (entity != null && entity.getId() != null) {
             @SuppressWarnings("unchecked")
             Class<T> entityClass = (Class<T>) entity.getClass();
@@ -278,7 +283,7 @@ public class DataRepository {
      * @param entities 实体列表
      * @param <T>      实体类型
      */
-    public <T extends com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO> void deleteAll(List<T> entities) {
+    public <T extends BaseDO> void deleteAll(List<T> entities) {
         for (T entity : entities) {
             delete(entity);
         }
@@ -291,7 +296,7 @@ public class DataRepository {
      * @param ids   ID列表
      * @param <T>   实体类型
      */
-    public <T extends com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO> void deleteAllById(Class<T> clazz, List<Long> ids) {
+    public <T extends BaseDO> void deleteAllById(Class<T> clazz, List<Long> ids) {
         try {
             ConfigStore configs = new DefaultConfigStore();
             configs.and(Compare.IN, "id", ids);
@@ -316,7 +321,7 @@ public class DataRepository {
      * @param clazz 实体类
      * @param <T>   实体类型
      */
-    public <T extends com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO> void deleteAll(Class<T> clazz) {
+    public <T extends BaseDO> void deleteAll(Class<T> clazz) {
         try {
             ConfigStore configs = new DefaultConfigStore();
 
@@ -340,7 +345,7 @@ public class DataRepository {
      * @param <T>       实体类型
      * @return 分页结果
      */
-    public <T extends com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO> PageResult<T> findAll(Class<T> clazz, int pageIndex, int pageSize) {
+    public <T extends BaseDO> PageResult<T> findAll(Class<T> clazz, int pageIndex, int pageSize) {
         try {
             ConfigStore configs = new DefaultConfigStore();
 
@@ -372,7 +377,7 @@ public class DataRepository {
      * @param <T>     实体类型
      * @return 实体列表
      */
-    public <T extends com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO> List<T> findAll(Class<T> clazz, ConfigStore configs) {
+    public <T extends BaseDO> List<T> findAll(Class<T> clazz, ConfigStore configs) {
         try {
 
             String tableName = getTableName(clazz);
@@ -392,7 +397,7 @@ public class DataRepository {
      * @param <T>     实体类型
      * @return 实体对象，如果不存在返回null
      */
-    public <T extends com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO> T findOne(Class<T> clazz, ConfigStore configs) {
+    public <T extends BaseDO> T findOne(Class<T> clazz, ConfigStore configs) {
         try {
 
 
@@ -411,7 +416,7 @@ public class DataRepository {
      * @param <T>     实体类型
      * @return Optional包装的实体对象
      */
-    public <T extends com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO> Optional<T> findOneOptional(Class<T> clazz, ConfigStore configs) {
+    public <T extends BaseDO> Optional<T> findOneOptional(Class<T> clazz, ConfigStore configs) {
         T entity = findOne(clazz, configs);
         return Optional.ofNullable(entity);
     }

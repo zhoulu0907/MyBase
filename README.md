@@ -13,5 +13,5 @@ sh deploy.sh start
 
 ## 数据库设置
 
-自增ID设置从最大值开始：
+自增ID设置从最大值开始(以部门system_dept为例)：
 SELECT setval('system_dept_id_seq', (SELECT MAX(id) FROM system_dept));

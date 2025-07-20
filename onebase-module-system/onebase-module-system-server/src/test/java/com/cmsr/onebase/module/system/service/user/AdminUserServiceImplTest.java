@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.system.service.user;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.RandomUtil;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.exception.ServiceException;
@@ -129,6 +130,7 @@ public class AdminUserServiceImplTest extends BaseDbUnitTest {
         assertEquals(CommonStatusEnum.ENABLE.getStatus(), user.getStatus());
         // 断言关联岗位
         List<UserPostDO> userPosts = userPostMapper.selectListByUserId(user.getId());
+        System.out.println("post:" + userPosts.toString());
         assertEquals(1L, userPosts.get(0).getPostId());
         assertEquals(2L, userPosts.get(1).getPostId());
     }
@@ -151,7 +153,7 @@ public class AdminUserServiceImplTest extends BaseDbUnitTest {
     @Test
     public void testUpdateUser_success() {
         // mock 数据
-        AdminUserDO dbUser = randomAdminUserDO(o -> o.setPostIds(asSet(1L, 2L)));
+        AdminUserDO dbUser = randomAdminUserDO(o -> o.setPostIds(CollUtil.newArrayList(1L, 2L)));
         userMapper.insert(dbUser);
         userPostMapper.insert(new UserPostDO().setUserId(dbUser.getId()).setPostId(1L));
         userPostMapper.insert(new UserPostDO().setUserId(dbUser.getId()).setPostId(2L));
@@ -632,12 +634,12 @@ public class AdminUserServiceImplTest extends BaseDbUnitTest {
         // 准备参数
         Collection<Long> postIds = asSet(10L, 20L);
         // mock user1 数据
-        AdminUserDO user1 = randomAdminUserDO(o -> o.setPostIds(asSet(10L, 30L)));
+        AdminUserDO user1 = randomAdminUserDO(o -> o.setPostIds(CollUtil.newArrayList(10L, 30L)));
         userMapper.insert(user1);
         userPostMapper.insert(new UserPostDO().setUserId(user1.getId()).setPostId(10L));
         userPostMapper.insert(new UserPostDO().setUserId(user1.getId()).setPostId(30L));
         // mock user2 数据
-        AdminUserDO user2 = randomAdminUserDO(o -> o.setPostIds(singleton(100L)));
+        AdminUserDO user2 = randomAdminUserDO(o -> o.setPostIds(CollUtil.newArrayList(100L)));
         userMapper.insert(user2);
         userPostMapper.insert(new UserPostDO().setUserId(user2.getId()).setPostId(100L));
 
