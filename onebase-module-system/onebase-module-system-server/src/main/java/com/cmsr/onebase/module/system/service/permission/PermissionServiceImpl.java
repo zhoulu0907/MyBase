@@ -30,6 +30,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.annotation.Resource;
+
 import java.util.*;
 import java.util.function.Supplier;
 
@@ -38,7 +39,6 @@ import static com.cmsr.onebase.framework.common.util.json.JsonUtils.toJsonString
 
 /**
  * 权限 Service 实现类
- *
  */
 @Service
 @Slf4j
@@ -85,7 +85,7 @@ public class PermissionServiceImpl implements PermissionService {
     /**
      * 判断指定角色，是否拥有该 permission 权限
      *
-     * @param roles 指定角色数组
+     * @param roles      指定角色数组
      * @param permission 权限标识
      * @return 是否拥有
      */
@@ -133,9 +133,9 @@ public class PermissionServiceImpl implements PermissionService {
     @DSTransactional // 多数据源，使用 @DSTransactional 保证本地事务，以及数据源的切换
     @Caching(evict = {
             @CacheEvict(value = RedisKeyConstants.MENU_ROLE_ID_LIST,
-            allEntries = true),
+                    allEntries = true),
             @CacheEvict(value = RedisKeyConstants.PERMISSION_MENU_ID_LIST,
-            allEntries = true) // allEntries 清空所有缓存，主要一次更新涉及到的 menuIds 较多，反倒批量会更快
+                    allEntries = true) // allEntries 清空所有缓存，主要一次更新涉及到的 menuIds 较多，反倒批量会更快
     })
     public void assignRoleMenu(Long roleId, Set<Long> menuIds) {
         // 获得角色拥有菜单编号
@@ -146,12 +146,19 @@ public class PermissionServiceImpl implements PermissionService {
         Collection<Long> deleteMenuIds = CollUtil.subtract(dbMenuIds, menuIdList);
         // 执行新增和删除。对于已经授权的菜单，不用做任何处理
         if (CollUtil.isNotEmpty(createMenuIds)) {
-            roleMenuMapper.insertBatch(CollectionUtils.convertList(createMenuIds, menuId -> {
-                RoleMenuDO entity = new RoleMenuDO();
-                entity.setRoleId(roleId);
-                entity.setMenuId(menuId);
-                return entity;
-            }));
+//            bug fixed: class java.lang.String cannot be cast to class java.lang.Long
+            List<RoleMenuDO> entities = new ArrayList<>();
+            for (Object menuId : createMenuIds) {
+                Long mId = Long.parseLong(menuId.toString());
+                entities.add(new RoleMenuDO().setMenuId(mId).setRoleId(roleId));
+            }
+            roleMenuMapper.insertBatch(entities);
+//            roleMenuMapper.insertBatch(CollectionUtils.convertList(createMenuIds, menuId -> {
+//                RoleMenuDO entity = new RoleMenuDO();
+//                entity.setRoleId(roleId);
+//                entity.setMenuId(menuId);
+//                return entity;
+//            }));
         }
         if (CollUtil.isNotEmpty(deleteMenuIds)) {
             roleMenuMapper.deleteListByRoleIdAndMenuIds(roleId, deleteMenuIds);

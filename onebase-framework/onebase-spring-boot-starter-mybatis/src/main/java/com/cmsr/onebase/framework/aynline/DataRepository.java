@@ -14,6 +14,7 @@ import org.anyline.entity.*;
 import org.anyline.metadata.Constraint;
 import org.anyline.metadata.Table;
 import org.anyline.service.AnylineService;
+import org.anyline.util.ConfigTable;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -65,6 +66,7 @@ public class DataRepository {
      */
     public <T extends BaseDO> T insert(T entity) {
         try {
+            ConfigTable.IS_AUTO_CHECK_METADATA = true;
             Long result = anylineService.insert(entity);
             if (result == 0) {
                 throw new BizException(StatusCode.DB_INSERT_ERROR);
@@ -183,8 +185,8 @@ public class DataRepository {
             ConfigStore configs = new DefaultConfigStore();
             configs.and(Compare.EQUAL, "id", id);
             configs.and(Compare.EQUAL, "deleted", false);  // 排除已删除的记录
-
-            return clazz.cast(anylineService.select(clazz, configs));
+            String tableName = getTableName(clazz);
+            return anylineService.select(tableName, clazz, configs);
         } catch (Exception e) {
             log.error("根据ID查找实体失败: class={}, id={}", clazz.getSimpleName(), id, e);
             throw new BizException(StatusCode.DB_SELECT_ERROR);
@@ -502,8 +504,8 @@ public class DataRepository {
         try {
             // 添加排除已删除记录的条件
             configs.and(Compare.EQUAL, "deleted", false);
-
-            return clazz.cast(anylineService.select(clazz, configs));
+            String tableName = getTableName(clazz);
+            return anylineService.select(tableName,clazz, configs);
         } catch (Exception e) {
             log.error("条件查询单个实体失败: class={}", clazz.getSimpleName(), e);
             throw new BizException(StatusCode.DB_SELECT_ERROR);

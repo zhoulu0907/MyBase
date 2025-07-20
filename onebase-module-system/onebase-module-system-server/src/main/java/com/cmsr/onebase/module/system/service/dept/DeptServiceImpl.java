@@ -12,6 +12,7 @@ import com.cmsr.onebase.module.system.controller.admin.dept.vo.dept.DeptSaveReqV
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.module.system.dal.redis.RedisKeyConstants;
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
@@ -49,8 +50,8 @@ public class DeptServiceImpl implements DeptService {
         ConfigTable.IS_INSERT_EMPTY_COLUMN = true;
     }
 
-    private AnylineService<?> service = MyAnyLineService.getInstance().getService();
-    private DataRepository dataRepository = new DataRepository(service);
+    @Resource
+    private DataRepository dataRepository;
 
     @Override
     @CacheEvict(cacheNames = RedisKeyConstants.DEPT_CHILDREN_ID_LIST,
