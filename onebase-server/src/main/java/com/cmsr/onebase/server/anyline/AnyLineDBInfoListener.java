@@ -1,6 +1,7 @@
 package com.cmsr.onebase.server.anyline;
 
 import com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO;
+import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
 import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
@@ -23,30 +24,33 @@ import java.util.HashSet;
 @Component()
 @SuppressWarnings("rawtypes") // AnyLine 框架的接口使用原始类型
 public class AnyLineDBInfoListener implements DMListener {
-    
+
     // 需要忽略租户过滤的表名列表
     private static final Set<String> TENANT_IGNORE_TABLES = new HashSet<>();
-    
+
     static {
         // 添加不需要租户过滤的表
         TENANT_IGNORE_TABLES.add("system_dict_data");
         TENANT_IGNORE_TABLES.add("system_dict_type");
         TENANT_IGNORE_TABLES.add("system_config");
+        TENANT_IGNORE_TABLES.add("system_tenant");
+        TENANT_IGNORE_TABLES.add("system_tenant_package");
         // 可以根据需要添加更多表
     }
+
     public SWITCH beforeExecute(DataRuntime runtime, String random, Run run) {
         String sql = run.getFinalExecute();
         System.out.println("=== beforeExecute SQL: " + sql);
-        
+
         // 检查是否是查询语句且包含需要忽略租户过滤的表
         if (sql != null && !TenantContextHolder.isIgnore()) {
             String lowerSql = sql.toLowerCase().trim();
             if (lowerSql.startsWith("select")) {
                 // 检查是否包含需要忽略租户过滤的表名
                 for (String tableName : TENANT_IGNORE_TABLES) {
-                    if (lowerSql.contains("from " + tableName.toLowerCase()) || 
-                        lowerSql.contains("from `" + tableName.toLowerCase() + "`") ||
-                        lowerSql.contains("from \"" + tableName.toLowerCase() + "\"")) {
+                    if (lowerSql.contains("from " + tableName.toLowerCase()) ||
+                            lowerSql.contains("from `" + tableName.toLowerCase() + "`") ||
+                            lowerSql.contains("from \"" + tableName.toLowerCase() + "\"")) {
                         System.out.println("=== Found tenant-ignored table " + tableName + " in SQL, blocking execution");
                         // 找到需要忽略租户过滤的表，但SQL已经包含了tenant_id条件
                         // 我们需要在这里修改SQL或者阻止执行
@@ -60,7 +64,7 @@ public class AnyLineDBInfoListener implements DMListener {
                 }
             }
         }
-        
+
         return SWITCH.CONTINUE;
     }
 
@@ -105,7 +109,9 @@ public class AnyLineDBInfoListener implements DMListener {
     }
 
     private void autoInjectTenantID(Object obj) {
-        if (Objects.nonNull(obj) && obj instanceof TenantBaseDO) {
+        boolean shouldIgnore = isTableTenantIgnored2(obj);
+        System.out.println("=== Should ignore tenant filtering: " + shouldIgnore);
+        if (shouldIgnore && Objects.nonNull(obj) && obj instanceof TenantBaseDO) {
             TenantBaseDO tenantBaseDO = (TenantBaseDO) obj;
             tenantBaseDO.setTenantId(TenantContextHolder.getRequiredTenantId());
             System.out.println("tenantBaseDO id  ----------> " + tenantBaseDO.getTenantId());
@@ -126,29 +132,42 @@ public class AnyLineDBInfoListener implements DMListener {
     @Override
     public SWITCH prepareQuery(DataRuntime runtime, String random, RunPrepare prepare, ConfigStore configs, String... conditions) {
         System.out.println("=== PrepareQuery called, TenantContextHolder.isIgnore(): " + TenantContextHolder.isIgnore());
-        
+
         // 只有在不忽略租户的情况下才添加租户条件
-        if (!TenantContextHolder.isIgnore()) {
-            // 检查当前查询的表是否需要忽略租户过滤
-            boolean shouldIgnore = isTableTenantIgnored(prepare);
-            System.out.println("=== Should ignore tenant filtering: " + shouldIgnore);
-            
-            if (!shouldIgnore) {
-                System.out.println("=== Adding tenant_id condition");
-                configs.and("tenant_id = " + TenantContextHolder.getRequiredTenantId());
-            } else {
-                System.out.println("=== Skipping tenant_id condition for this table");
-            }
+        // 检查当前查询的表是否需要忽略租户过滤
+        boolean shouldIgnore = isTableTenantIgnored2(prepare);
+        System.out.println("=== Should ignore tenant filtering: " + shouldIgnore);
+
+        if (shouldIgnore) {
+            System.out.println("=== Skipping tenant_id condition for this table");
         } else {
-            System.out.println("=== TenantContextHolder.isIgnore() is true, skipping tenant filtering");
+            System.out.println("=== Adding tenant_id condition");
+            configs.and("tenant_id = " + TenantContextHolder.getRequiredTenantId());
         }
 
         return SWITCH.CONTINUE;
     }
-    
+
     /**
-     * 检查表是否需要忽略租户过滤
-     * 
+     * 检查表是否需要忽略租户过滤 by matianyu
+     *
+     * @param obj RunPrepare对象
+     * @return 如果表需要忽略租户过滤则返回true
+     */
+    private boolean isTableTenantIgnored2(Object obj) {
+        return obj != null && obj.getClass().isAnnotationPresent(TenantIgnore.class);
+    }
+
+    private boolean isTableTenantIgnored2(RunPrepare prepare) {
+        if (TenantContextHolder.isIgnore()) {
+            return true;
+        }
+        return prepare != null && TENANT_IGNORE_TABLES.contains(prepare.getTableName());
+    }
+
+    /**
+     * 检查表是否需要忽略租户过滤 by AI
+     *
      * @param prepare RunPrepare对象
      * @return 如果表需要忽略租户过滤则返回true
      */
@@ -160,15 +179,15 @@ public class AnyLineDBInfoListener implements DMListener {
                 System.out.println("=== Found @TenantIgnore annotation in call stack, ignoring tenant filtering");
                 return true;
             }
-            
+
             // 方法2: 尝试从 prepare 对象中获取表名
             String sql = prepare.getText();
             System.out.println("=== PrepareQuery: SQL = " + sql);
-            
+
             if (sql != null) {
                 String lowerSql = sql.toLowerCase().trim();
                 System.out.println("=== Checking SQL for tenant filtering: " + lowerSql);
-                
+
                 // 检查SQL中是否包含需要忽略的表名
                 for (String tableName : TENANT_IGNORE_TABLES) {
                     if (lowerSql.contains(tableName.toLowerCase())) {
@@ -178,13 +197,13 @@ public class AnyLineDBInfoListener implements DMListener {
                 }
             } else {
                 System.out.println("=== PrepareQuery: SQL is null, checking other methods");
-                
+
                 // 尝试获取表信息的其他方式
                 try {
                     // 检查 prepare 对象的其他方法
                     System.out.println("=== Prepare object class: " + prepare.getClass().getName());
                     System.out.println("=== Prepare object toString: " + prepare.toString());
-                    
+
                     // 尝试反射获取表名
                     try {
                         java.lang.reflect.Method getTableMethod = prepare.getClass().getMethod("getTable");
@@ -200,7 +219,7 @@ public class AnyLineDBInfoListener implements DMListener {
                     } catch (Exception ex) {
                         System.out.println("=== getTable() method not available: " + ex.getMessage());
                     }
-                    
+
                     // 尝试反射获取dest信息
                     try {
                         java.lang.reflect.Method getDestMethod = prepare.getClass().getMethod("getDest");
@@ -216,7 +235,7 @@ public class AnyLineDBInfoListener implements DMListener {
                     } catch (Exception ex) {
                         System.out.println("=== getDest() method not available: " + ex.getMessage());
                     }
-                    
+
                 } catch (Exception ex) {
                     System.out.println("=== Error during reflection: " + ex.getMessage());
                 }
@@ -226,10 +245,10 @@ public class AnyLineDBInfoListener implements DMListener {
             System.err.println("Error checking table name for tenant filtering: " + e.getMessage());
             e.printStackTrace();
         }
-        
+
         return false;
     }
-    
+
     /**
      * 检查调用栈中是否有@TenantIgnore注解的实体类
      */
@@ -238,16 +257,16 @@ public class AnyLineDBInfoListener implements DMListener {
             StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
             for (StackTraceElement element : stackTrace) {
                 String className = element.getClassName();
-                
+
                 // 跳过系统类和框架类
-                if (className.startsWith("java.") || 
-                    className.startsWith("org.springframework.") ||
-                    className.startsWith("org.anyline.") ||
-                    className.startsWith("com.cmsr.onebase.framework.") ||
-                    className.contains("$")) {
+                if (className.startsWith("java.") ||
+                        className.startsWith("org.springframework.") ||
+                        className.startsWith("org.anyline.") ||
+                        className.startsWith("com.cmsr.onebase.framework.") ||
+                        className.contains("$")) {
                     continue;
                 }
-                
+
                 try {
                     Class<?> clazz = Class.forName(className);
                     // 检查类是否有@TenantIgnore注解
@@ -263,7 +282,7 @@ public class AnyLineDBInfoListener implements DMListener {
         } catch (Exception e) {
             System.out.println("=== Error checking stack trace for @TenantIgnore: " + e.getMessage());
         }
-        
+
         return false;
     }
 
