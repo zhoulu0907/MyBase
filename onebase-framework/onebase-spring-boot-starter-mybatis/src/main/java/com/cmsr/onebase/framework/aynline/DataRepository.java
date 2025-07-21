@@ -17,9 +17,11 @@ import org.anyline.service.AnylineService;
 import org.anyline.util.ConfigTable;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * DataRepository - JPA风格的CRUD操作工具类
@@ -485,7 +487,7 @@ public class DataRepository {
 
             String tableName = getTableName(clazz);
             DataSet dataSet = anylineService.querys(tableName, configs);
-            return dataSet.entitys(clazz).stream().toList();
+            return dataSet.entity(clazz);
         } catch (Exception e) {
             log.error("条件查询失败: class={}", clazz.getSimpleName(), e);
             throw new BizException(StatusCode.DB_SELECT_ERROR);

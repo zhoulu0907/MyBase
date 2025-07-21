@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Compare;
+import org.anyline.entity.Order;
 import org.anyline.service.AnylineService;
 import org.anyline.util.ConfigTable;
 import org.apache.commons.collections4.CollectionUtils;
@@ -217,11 +218,8 @@ public class DeptServiceImpl implements DeptService {
             if (reqVO.getStatus() != null) {
                 configs.and(Compare.EQUAL, "status", reqVO.getStatus());
             }
-
+            configs.order("sort", Order.TYPE.ASC);
             List<DeptDO> list = dataRepository.findAll(DeptDO.class, configs);
-            if (CollectionUtils.isNotEmpty(list)) {
-                list.sort(Comparator.comparing(DeptDO::getSort));
-            }
             return list;
         } catch (Exception e) {
             log.error("查询部门列表失败", e);

@@ -10,6 +10,7 @@ import org.anyline.data.param.ConfigStore;
 import org.anyline.data.prepare.RunPrepare;
 import org.anyline.data.run.Run;
 import org.anyline.data.runtime.DataRuntime;
+import org.anyline.entity.Compare;
 import org.anyline.entity.DataSet;
 import org.anyline.metadata.ACTION.SWITCH;
 import org.anyline.metadata.Table;
@@ -52,8 +53,7 @@ public class AnyLineDBInfoListener implements DMListener {
     @Override
     public SWITCH prepareInsert(DataRuntime runtime, String random, int batch, Table dest, Object obj, List<String> columns) {
         autoInjectTenantID(obj);
-        if (Objects.nonNull(obj) && obj instanceof BaseDO) {
-            BaseDO baseDO = (BaseDO) obj;
+        if (Objects.nonNull(obj) && obj instanceof BaseDO baseDO) {
 
             LocalDateTime current = LocalDateTime.now();
             // 创建时间为空，则以当前时间为插入时间
@@ -81,8 +81,7 @@ public class AnyLineDBInfoListener implements DMListener {
     private void autoInjectTenantID(Object obj) {
         boolean shouldIgnore = isTableTenantIgnored2(obj);
         System.out.println("=== Should ignore tenant filtering: " + shouldIgnore);
-        if (shouldIgnore && Objects.nonNull(obj) && obj instanceof TenantBaseDO) {
-            TenantBaseDO tenantBaseDO = (TenantBaseDO) obj;
+        if (shouldIgnore && obj instanceof TenantBaseDO tenantBaseDO) {
             tenantBaseDO.setTenantId(TenantContextHolder.getRequiredTenantId());
             System.out.println("tenantBaseDO id  ----------> " + tenantBaseDO.getTenantId());
         }
@@ -114,7 +113,7 @@ public class AnyLineDBInfoListener implements DMListener {
             System.out.println("=== Adding tenant_id condition");
             configs.and("tenant_id = " + TenantContextHolder.getRequiredTenantId());
         }
-
+        configs.and(Compare.EQUAL, "deleted", false);
         return SWITCH.CONTINUE;
     }
 
@@ -189,13 +188,6 @@ public class AnyLineDBInfoListener implements DMListener {
      */
     @Override
     public SWITCH prepareDelete(DataRuntime runtime, String random, int batch, Table dest, Object obj, String... columns) {
-//        if(obj instanceof DataRow){
-//            DataRow row = (DataRow)obj;
-//            row.put("UPT_TIME", DateUtil.format());
-//            if(row.getInt("ROLE_ID", 0) == 99){
-//                return SWITCH.BREAK;
-//            }
-//        }
         autoInjectTenantID(obj);
         return SWITCH.CONTINUE;
     }
@@ -231,8 +223,8 @@ public class AnyLineDBInfoListener implements DMListener {
      */
     @Override
     public SWITCH afterQuery(DataRuntime runtime, String random, Run run, boolean success, DataSet set, long millis) {
-        System.out.println(run.getFinalQuery());
-        System.out.println(run.getValues());
+//        System.out.println(run.getFinalQuery());
+//        System.out.println(run.getValues());
         return SWITCH.CONTINUE;
     }
 }
