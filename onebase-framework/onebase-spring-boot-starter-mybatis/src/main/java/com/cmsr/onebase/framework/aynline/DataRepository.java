@@ -1,5 +1,6 @@
 package com.cmsr.onebase.framework.aynline;
 
+import com.baomidou.mybatisplus.annotation.TableName;
 import com.cmsr.onebase.framework.common.anyline.web.BizException;
 import com.cmsr.onebase.framework.common.anyline.web.PageResult;
 import com.cmsr.onebase.framework.common.anyline.web.StatusCode;
@@ -39,15 +40,6 @@ public class DataRepository {
 
     public DataRepository() {
     }
-
-    public DataRepository(AnylineService<?> service) {
-
-        this.anylineService = service;
-        if (service == null) {
-            throw new IllegalArgumentException("AnylineService cannot be null");
-        }
-    }
-
     /**
      * 获取实体对应的表名
      *
@@ -55,8 +47,8 @@ public class DataRepository {
      * @return 表名
      */
     private String getTableName(Class<?> clazz) {
-        String tableName = JpaUtils.getTableName(clazz);
-        return tableName != null ? tableName : clazz.getSimpleName().toLowerCase();
+        TableName annotation = clazz.getAnnotation(TableName.class);
+        return annotation != null ? annotation.value() : clazz.getSimpleName().toLowerCase();
     }
 
     /**
@@ -156,25 +148,6 @@ public class DataRepository {
     }
 
     /**
-     * 批量保存实体
-     *
-     * @param entities 实体列表
-     * @param <T>      实体类型
-     * @return 保存后的实体列表
-     */
-    public <T extends BaseDO> List<T> saveAll(List<T> entities) {
-        try {
-            for (T entity : entities) {
-                save(entity);
-            }
-            return entities;
-        } catch (Exception e) {
-            log.error("批量保存实体失败", e);
-            throw new BizException(StatusCode.DB_INSERT_ERROR);
-        }
-    }
-
-    /**
      * 根据ID查找实体
      *
      * @param clazz 实体类
@@ -186,7 +159,6 @@ public class DataRepository {
         try {
             ConfigStore configs = new DefaultConfigStore();
             configs.and(Compare.EQUAL, "id", id);
-            configs.and(Compare.EQUAL, "deleted", false);  // 排除已删除的记录
             String tableName = getTableName(clazz);
             return anylineService.select(tableName, clazz, configs);
         } catch (Exception e) {
@@ -230,8 +202,6 @@ public class DataRepository {
     public <T extends BaseDO> List<T> findAll(Class<T> clazz) {
         try {
             ConfigStore configs = new DefaultConfigStore();
-            configs.and(Compare.EQUAL, "deleted", false);  // 排除已删除的记录
-
             String tableName = getTableName(clazz);
             DataSet dataSet = anylineService.querys(tableName, configs);
             return dataSet.entitys(clazz).stream().toList();
@@ -272,7 +242,6 @@ public class DataRepository {
         try {
             ConfigStore configs = new DefaultConfigStore();
             configs.and(Compare.IN, "id", ids);
-            configs.and(Compare.EQUAL, "deleted", false);  // 排除已删除的记录
 
             String tableName = getTableName(clazz);
             DataSet dataSet = anylineService.querys(tableName, configs);
@@ -293,7 +262,6 @@ public class DataRepository {
     public <T extends BaseDO> long count(Class<T> clazz) {
         try {
             ConfigStore configs = new DefaultConfigStore();
-            configs.and(Compare.EQUAL, "deleted", false);  // 排除已删除的记录
 
             String tableName = getTableName(clazz);
             DataSet dataSet = anylineService.querys(tableName, configs);
@@ -313,8 +281,6 @@ public class DataRepository {
      */
     public <T extends BaseDO> long countByConfig(Class<T> clazz, ConfigStore configs) {
         try {
-            configs.and(Compare.EQUAL, "deleted", false);  // 排除已删除的记录
-
             String tableName = getTableName(clazz);
             DataSet dataSet = anylineService.querys(tableName, configs);
             return dataSet.total();
@@ -356,7 +322,6 @@ public class DataRepository {
             configs.and(Compare.EQUAL, "id", id);
 
             DataRow row = new DataRow();
-            row.put("deleted", true);  // 设置逻辑删除标记
 
             long result = anylineService.delete(getTableName(clazz), configs);
             if (result == 0) {
@@ -451,7 +416,6 @@ public class DataRepository {
     public <T extends BaseDO> PageResult<T> findAll(Class<T> clazz, int pageIndex, int pageSize) {
         try {
             ConfigStore configs = new DefaultConfigStore();
-            configs.and(Compare.EQUAL, "deleted", false);  // 排除已删除的记录
 
             PageNavi page = new DefaultPageNavi(pageIndex, pageSize);
             configs.setPageNavi(page);
@@ -482,9 +446,6 @@ public class DataRepository {
      */
     public <T extends BaseDO> List<T> findAll(Class<T> clazz, ConfigStore configs) {
         try {
-            // 添加排除已删除记录的条件
-            configs.and(Compare.EQUAL, "deleted", false);
-
             String tableName = getTableName(clazz);
             DataSet dataSet = anylineService.querys(tableName, configs);
             return dataSet.entity(clazz);
@@ -504,8 +465,6 @@ public class DataRepository {
      */
     public <T extends BaseDO> T findOne(Class<T> clazz, ConfigStore configs) {
         try {
-            // 添加排除已删除记录的条件
-            configs.and(Compare.EQUAL, "deleted", false);
             String tableName = getTableName(clazz);
             return anylineService.select(tableName,clazz, configs);
         } catch (Exception e) {
@@ -540,8 +499,6 @@ public class DataRepository {
     public <T extends BaseDO> com.cmsr.onebase.framework.common.pojo.PageResult<T> findPageWithConditions(
             Class<T> clazz, ConfigStore configs, int pageIndex, int pageSize) {
         try {
-            // 添加排除已删除记录的条件
-            configs.and(Compare.EQUAL, "deleted", false);
 
             PageNavi page = new DefaultPageNavi(pageIndex, pageSize);
             configs.setPageNavi(page);
