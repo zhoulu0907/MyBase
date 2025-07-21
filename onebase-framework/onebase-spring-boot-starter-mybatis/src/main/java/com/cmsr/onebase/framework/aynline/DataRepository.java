@@ -107,7 +107,8 @@ public class DataRepository {
             ConfigStore configs = new DefaultConfigStore();
             configs.and(Compare.EQUAL, "id", entity.getId());
             // 加入软删判断
-            configs.and(Compare.EQUAL, "deleted", false);
+            // configs.and(Compare.EQUAL, "deleted", false);
+            // configs.and(Compare.EQUAL, "tenant_id", TenantContextHolder.getRequiredTenantId());
             Long result = anylineService.update(entity, configs);
             if (result == 0) {
                 throw new BizException(StatusCode.DB_UPDATE_ERROR);
@@ -115,7 +116,7 @@ public class DataRepository {
             return entity;
         } catch (Exception e) {
             log.error("保存实体失败: {}", entity.getClass().getSimpleName(), e);
-            throw new BizException(StatusCode.DB_INSERT_ERROR);
+            throw new BizException(StatusCode.DB_UPDATE_ERROR);
         }
     }
 

@@ -1,5 +1,7 @@
 package com.cmsr.onebase.server.anyline;
 
+import com.cmsr.onebase.framework.common.anyline.web.BizException;
+import com.cmsr.onebase.framework.common.anyline.web.StatusCode;
 import com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
@@ -137,10 +139,18 @@ public class AnyLineDBInfoListener implements DMListener {
      */
     @Override public SWITCH prepareUpdate(DataRuntime runtime, String random, int batch, Table dest, Object obj,
         ConfigStore configs, List<String> columns) {
-        // 加入软删判断 (bug: 这里config可能为空)
-        // configs.and(Compare.EQUAL, "deleted", false);
+        // 这里config可能为空，强制异常提前发现问题。
+        if(configs == null){
+            throw new BizException(StatusCode.UPDATE_WHERE_IS_NULL);
+        }
+        // 加入软删判断 (opt: 框架这里config可能为空)
+        configs.and(Compare.EQUAL, "deleted", false);
         // 加入租户标志
-        autoInjectTenantID(obj);
+        boolean shouldIgnore = isTableTenantIgnored2(obj);
+        log.info("prepareUpdate--------------> isTableTenantIgnored: {}", shouldIgnore);
+        if (!shouldIgnore) {
+            configs.and(Compare.EQUAL, "tenant_id", TenantContextHolder.getRequiredTenantId());
+        }
         // 加入更新时间和更新人
         if (Objects.nonNull(obj) && obj instanceof BaseDO) {
             BaseDO baseDO = (BaseDO)obj;
