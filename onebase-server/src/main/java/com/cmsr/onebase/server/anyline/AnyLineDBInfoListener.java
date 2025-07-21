@@ -5,6 +5,7 @@ import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
 import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.listener.DMListener;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.prepare.RunPrepare;
@@ -22,8 +23,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.HashSet;
 
-@Component()
-@SuppressWarnings("rawtypes") // AnyLine 框架的接口使用原始类型
+@Slf4j @Component() @SuppressWarnings("rawtypes") // AnyLine 框架的接口使用原始类型
 public class AnyLineDBInfoListener implements DMListener {
 
     // 需要忽略租户过滤的表名列表
@@ -50,8 +50,8 @@ public class AnyLineDBInfoListener implements DMListener {
      * @param columns 需要抛入的列 如果不指定  则根据实体属性解析
      * @return 如果返回false 则中断执行
      */
-    @Override
-    public SWITCH prepareInsert(DataRuntime runtime, String random, int batch, Table dest, Object obj, List<String> columns) {
+    @Override public SWITCH prepareInsert(DataRuntime runtime, String random, int batch, Table dest, Object obj,
+        List<String> columns) {
         // 加入租户标志
         autoInjectTenantID(obj);
         // 加入创建时间和创建人等参数
@@ -90,17 +90,16 @@ public class AnyLineDBInfoListener implements DMListener {
      * @param conditions 查询条件
      * @return 如果返回false 则中断执行
      */
-    @Override
-    public SWITCH prepareQuery(DataRuntime runtime, String random, RunPrepare prepare, ConfigStore configs, String... conditions) {
+    @Override public SWITCH prepareQuery(DataRuntime runtime, String random, RunPrepare prepare, ConfigStore configs,
+        String... conditions) {
 
         // 加入软删判断
         configs.and(Compare.EQUAL, "deleted", false);
 
         // 只有在不忽略租户的情况下才添加租户条件
         // 检查当前查询的表是否需要忽略租户过滤
-        System.out.println("=== PrepareQuery called, TenantContextHolder.isIgnore(): " + TenantContextHolder.isIgnore());
         boolean shouldIgnore = isTableTenantIgnored2(prepare);
-        System.out.println("=== Should ignore tenant filtering: " + shouldIgnore);
+        log.info("prepareQuery--------------> isTableTenantIgnored: {}", shouldIgnore);
         if (!shouldIgnore) {
             configs.and("tenant_id = " + TenantContextHolder.getRequiredTenantId());
         }
@@ -136,15 +135,15 @@ public class AnyLineDBInfoListener implements DMListener {
      * @param configs 更新条件
      * @return 如果返回false 则中断执行
      */
-    @Override
-    public SWITCH prepareUpdate(DataRuntime runtime, String random, int batch, Table dest, Object obj, ConfigStore configs, List<String> columns) {
-        // 加入软删判断
-        configs.and(Compare.EQUAL, "deleted", false);
+    @Override public SWITCH prepareUpdate(DataRuntime runtime, String random, int batch, Table dest, Object obj,
+        ConfigStore configs, List<String> columns) {
+        // 加入软删判断 (bug: 这里config可能为空)
+        // configs.and(Compare.EQUAL, "deleted", false);
         // 加入租户标志
         autoInjectTenantID(obj);
         // 加入更新时间和更新人
         if (Objects.nonNull(obj) && obj instanceof BaseDO) {
-            BaseDO baseDO = (BaseDO) obj;
+            BaseDO baseDO = (BaseDO)obj;
 
             LocalDateTime current = LocalDateTime.now();
             baseDO.setUpdateTime(current);
@@ -168,8 +167,8 @@ public class AnyLineDBInfoListener implements DMListener {
      * @param columns 删除条件的我
      * @return 如果返回false 则中断执行
      */
-    @Override
-    public SWITCH prepareDelete(DataRuntime runtime, String random, int batch, Table dest, Object obj, String... columns) {
+    @Override public SWITCH prepareDelete(DataRuntime runtime, String random, int batch, Table dest, Object obj,
+        String... columns) {
         autoInjectTenantID(obj);
         return SWITCH.CONTINUE;
     }
@@ -187,8 +186,8 @@ public class AnyLineDBInfoListener implements DMListener {
      * @param obj     obj
      * @return 如果返回false 则中断执行
      */
-    @Override
-    public SWITCH prepareDelete(DataRuntime runtime, String random, int batch, Table table, String key, Object obj) {
+    @Override public SWITCH prepareDelete(DataRuntime runtime, String random, int batch, Table table, String key,
+        Object obj) {
         autoInjectTenantID(obj);
         return SWITCH.CONTINUE;
     }
@@ -203,21 +202,22 @@ public class AnyLineDBInfoListener implements DMListener {
      * @param set     查询结果
      * @param millis  耗时(毫秒)
      */
-    @Override
-    public SWITCH afterQuery(DataRuntime runtime, String random, Run run, boolean success, DataSet set, long millis) {
+    @Override public SWITCH afterQuery(DataRuntime runtime, String random, Run run, boolean success, DataSet set,
+        long millis) {
         return SWITCH.CONTINUE;
     }
 
     /**
      * 注入租户标志
+     *
      * @param obj
      */
     private void autoInjectTenantID(Object obj) {
         boolean shouldIgnore = isTableTenantIgnored2(obj);
-        System.out.println("=== Should ignore tenant filtering: " + shouldIgnore);
-        if (shouldIgnore && obj instanceof TenantBaseDO tenantBaseDO) {
+        log.info("autoInjectTenantID--------------> isTableTenantIgnored: {}", shouldIgnore);
+        if (!shouldIgnore && obj instanceof TenantBaseDO tenantBaseDO) {
             tenantBaseDO.setTenantId(TenantContextHolder.getRequiredTenantId());
-            System.out.println("tenantBaseDO id  ----------> " + tenantBaseDO.getTenantId());
+            log.info("tenantBaseDO--------------> setTenantId: {}", tenantBaseDO.getTenantId());
         }
     }
 

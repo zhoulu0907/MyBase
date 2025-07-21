@@ -104,7 +104,11 @@ public class DataRepository {
         }
         try {
             // 更新
-            Long result = anylineService.update(entity);
+            ConfigStore configs = new DefaultConfigStore();
+            configs.and(Compare.EQUAL, "id", entity.getId());
+            // 加入软删判断
+            configs.and(Compare.EQUAL, "deleted", false);
+            Long result = anylineService.update(entity, configs);
             if (result == 0) {
                 throw new BizException(StatusCode.DB_UPDATE_ERROR);
             }
@@ -338,7 +342,8 @@ public class DataRepository {
         try {
             ConfigStore configs = new DefaultConfigStore();
             configs.and(Compare.IN, "id", ids);
-
+            // 加入软删判断
+            configs.and(Compare.EQUAL, "deleted", false);
             DataRow row = new DataRow();
             row.put("deleted", true);  // 设置逻辑删除标记
 
@@ -361,7 +366,8 @@ public class DataRepository {
     public <T extends BaseDO> void deleteAll(Class<T> clazz) {
         try {
             ConfigStore configs = new DefaultConfigStore();
-
+            // 加入软删判断
+            configs.and(Compare.EQUAL, "deleted", false);
             DataRow row = new DataRow();
             row.put("deleted", true);  // 设置逻辑删除标记
 
