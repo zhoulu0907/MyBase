@@ -53,6 +53,7 @@ public class OAuth2ClientServiceImpl implements OAuth2ClientService {
         // 插入
         OAuth2ClientDO client = BeanUtils.toBean(createReqVO, OAuth2ClientDO.class);
         dataRepository.insert(client);
+		//oauth2ClientMapper.insert(client);
         return client.getId();
     }
 
@@ -68,6 +69,7 @@ public class OAuth2ClientServiceImpl implements OAuth2ClientService {
         // 更新
         OAuth2ClientDO updateObj = BeanUtils.toBean(updateReqVO, OAuth2ClientDO.class);
         dataRepository.save(updateObj);
+		//oauth2ClientMapper.updateById(updateObj);
     }
 
     @Override
@@ -78,12 +80,16 @@ public class OAuth2ClientServiceImpl implements OAuth2ClientService {
         validateOAuth2ClientExists(id);
         // 删除
         dataRepository.deleteById(OAuth2ClientDO.class,id);
+		//oauth2ClientMapper.deleteById(id);
     }
 
     private void validateOAuth2ClientExists(Long id) {
         if (dataRepository.findById(OAuth2ClientDO.class,id) == null) {
             throw exception(OAUTH2_CLIENT_NOT_EXISTS);
         }
+		//if (oauth2ClientMapper.selectById(id) == null) {
+          //  throw exception(OAUTH2_CLIENT_NOT_EXISTS);
+        //}
     }
 
     @VisibleForTesting
@@ -91,6 +97,7 @@ public class OAuth2ClientServiceImpl implements OAuth2ClientService {
         ConfigStore configStore = new DefaultConfigStore()
                 .and(Compare.EQUAL, "client_id", clientId);
         OAuth2ClientDO client = dataRepository.findOne(OAuth2ClientDO.class,configStore);
+		//OAuth2ClientDO client = oauth2ClientMapper.selectByClientId(clientId);
         if (client == null) {
             return;
         }
@@ -106,6 +113,7 @@ public class OAuth2ClientServiceImpl implements OAuth2ClientService {
     @Override
     public OAuth2ClientDO getOAuth2Client(Long id) {
         return dataRepository.findById(OAuth2ClientDO.class,id);
+		//return oauth2ClientMapper.selectById(id);
     }
 
     @Override

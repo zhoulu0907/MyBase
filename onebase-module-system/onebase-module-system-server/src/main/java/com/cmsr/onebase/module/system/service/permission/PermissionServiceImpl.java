@@ -150,12 +150,19 @@ public class PermissionServiceImpl implements PermissionService {
         Collection<Long> deleteMenuIds = CollUtil.subtract(dbMenuIds, menuIdList);
         // 执行新增和删除。对于已经授权的菜单，不用做任何处理
         if (CollUtil.isNotEmpty(createMenuIds)) {
-            roleMenuMapper.insertBatch(CollectionUtils.convertList(createMenuIds, menuId -> {
-                RoleMenuDO entity = new RoleMenuDO();
-                entity.setRoleId(roleId);
-                entity.setMenuId(menuId);
-                return entity;
-            }));
+//            bug fixed: class java.lang.String cannot be cast to class java.lang.Long
+            List<RoleMenuDO> entities = new ArrayList<>();
+            for (Object menuId : createMenuIds) {
+                Long mId = Long.parseLong(menuId.toString());
+                entities.add(new RoleMenuDO().setMenuId(mId).setRoleId(roleId));
+            }
+            roleMenuMapper.insertBatch(entities);
+//            roleMenuMapper.insertBatch(CollectionUtils.convertList(createMenuIds, menuId -> {
+//                RoleMenuDO entity = new RoleMenuDO();
+//                entity.setRoleId(roleId);
+//                entity.setMenuId(menuId);
+//                return entity;
+//            }));
         }
         if (CollUtil.isNotEmpty(deleteMenuIds)) {
             roleMenuMapper.deleteListByRoleIdAndMenuIds(roleId, deleteMenuIds);
@@ -238,6 +245,7 @@ public class PermissionServiceImpl implements PermissionService {
     @CacheEvict(value = RedisKeyConstants.USER_ROLE_ID_LIST, key = "#userId")
     public void processUserDeleted(Long userId) {
         dataRepository.deleteById(UserRoleDO.class,userId);
+		//userRoleMapper.deleteListByUserId(userId);
     }
 
     @Override

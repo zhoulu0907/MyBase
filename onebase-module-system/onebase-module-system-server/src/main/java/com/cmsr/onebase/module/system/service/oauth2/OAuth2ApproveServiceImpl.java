@@ -110,8 +110,11 @@ public class OAuth2ApproveServiceImpl implements OAuth2ApproveService {
         dataRepository.save(approveDO);
         return;
 
-        //// 失败，则说明不存在，进行更新
-        //dataRepository.insert(approveDO);
+		//if (oauth2ApproveMapper.update(approveDO) == 1) {
+          //  return;
+        //}
+        // 失败，则说明不存在，进行更新
+        //oauth2ApproveMapper.insert(approveDO);
     }
 
 }

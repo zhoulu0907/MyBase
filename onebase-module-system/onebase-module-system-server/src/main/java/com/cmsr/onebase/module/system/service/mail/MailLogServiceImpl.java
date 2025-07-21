@@ -64,11 +64,14 @@ public class MailLogServiceImpl implements MailLogService {
         }
 
         return dataRepository.findPageWithConditions(MailLogDO.class,configStore, pageVO.getPageNo(), pageVO.getPageSize());
-    }
+    
+		//return mailLogMapper.selectPage(pageVO);
+	}
 
     @Override
     public MailLogDO getMailLog(Long id) {
         return dataRepository.findById(MailLogDO.class,id);
+		//return mailLogMapper.selectById(id);
     }
 
     @Override
@@ -89,6 +92,7 @@ public class MailLogServiceImpl implements MailLogService {
         // 插入数据库
         MailLogDO logDO = logDOBuilder.build();
         dataRepository.insert(logDO);
+		//mailLogMapper.insert(logDO);
         return logDO.getId();
     }
 
@@ -98,11 +102,15 @@ public class MailLogServiceImpl implements MailLogService {
         if (exception == null) {
             dataRepository.save(new MailLogDO().setId(logId).setSendTime(LocalDateTime.now())
                     .setSendStatus(MailSendStatusEnum.SUCCESS.getStatus()).setSendMessageId(messageId));
+					 //mailLogMapper.updateById(new MailLogDO().setId(logId).setSendTime(LocalDateTime.now())
+                    //.setSendStatus(MailSendStatusEnum.SUCCESS.getStatus()).setSendMessageId(messageId));
             return;
         }
         // 2. 失败
         dataRepository.save(new MailLogDO().setId(logId).setSendTime(LocalDateTime.now())
                 .setSendStatus(MailSendStatusEnum.FAILURE.getStatus()).setSendException(getRootCauseMessage(exception)));
+	 	//mailLogMapper.updateById(new MailLogDO().setId(logId).setSendTime(LocalDateTime.now())
+                //.setSendStatus(MailSendStatusEnum.FAILURE.getStatus()).setSendException(getRootCauseMessage(exception)));
 
     }
 

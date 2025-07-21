@@ -50,6 +50,7 @@ public class SmsChannelServiceImpl implements SmsChannelService {
     public Long createSmsChannel(SmsChannelSaveReqVO createReqVO) {
         SmsChannelDO channel = BeanUtils.toBean(createReqVO, SmsChannelDO.class);
         dataRepository.insert(channel);
+		//smsChannelMapper.insert(channel);
         return channel.getId();
     }
 
@@ -60,6 +61,7 @@ public class SmsChannelServiceImpl implements SmsChannelService {
         // 更新
         SmsChannelDO updateObj = BeanUtils.toBean(updateReqVO, SmsChannelDO.class);
         dataRepository.save(updateObj);
+		//smsChannelMapper.updateById(updateObj);
     }
 
     @Override
@@ -72,10 +74,12 @@ public class SmsChannelServiceImpl implements SmsChannelService {
         }
         // 删除
         dataRepository.deleteById(SmsChannelDO.class,id);
+		//smsChannelMapper.deleteById(id);
     }
 
     private SmsChannelDO validateSmsChannelExists(Long id) {
         SmsChannelDO channel = dataRepository.findById(SmsChannelDO.class,id);
+		//SmsChannelDO channel = smsChannelMapper.selectById(id);
         if (channel == null) {
             throw exception(SMS_CHANNEL_NOT_EXISTS);
         }
@@ -85,11 +89,13 @@ public class SmsChannelServiceImpl implements SmsChannelService {
     @Override
     public SmsChannelDO getSmsChannel(Long id) {
         return dataRepository.findById(SmsChannelDO.class,id);
+		//return smsChannelMapper.selectById(id);
     }
 
     @Override
     public List<SmsChannelDO> getSmsChannelList() {
         return dataRepository.findAll(SmsChannelDO.class);
+		//return smsChannelMapper.selectList();
     }
 
     @Override
@@ -115,6 +121,7 @@ public class SmsChannelServiceImpl implements SmsChannelService {
     @Override
     public SmsClient getSmsClient(Long id) {
         SmsChannelDO channel = dataRepository.findById(SmsChannelDO.class,id);
+		//SmsChannelDO channel = smsChannelMapper.selectById(id);
         SmsChannelProperties properties = BeanUtils.toBean(channel, SmsChannelProperties.class);
         return smsClientFactory.createOrUpdateSmsClient(properties);
     }

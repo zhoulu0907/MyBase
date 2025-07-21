@@ -67,6 +67,7 @@ public class MenuServiceImpl implements MenuService {
         MenuDO menu = BeanUtils.toBean(createReqVO, MenuDO.class);
         initMenuProperty(menu);
         dataRepository.insert(menu);
+		//menuMapper.insert(menu);
         // 返回
         return menu.getId();
     }
@@ -79,6 +80,9 @@ public class MenuServiceImpl implements MenuService {
         if (dataRepository.findById(MenuDO.class,updateReqVO.getId()) == null) {
             throw exception(MENU_NOT_EXISTS);
         }
+		//if (menuMapper.selectById(updateReqVO.getId()) == null) {
+          //  throw exception(MENU_NOT_EXISTS);
+        //}
         // 校验父菜单存在
         validateParentMenu(updateReqVO.getParentId(), updateReqVO.getId());
         // 校验菜单（自己）
@@ -89,6 +93,7 @@ public class MenuServiceImpl implements MenuService {
         MenuDO updateObj = BeanUtils.toBean(updateReqVO, MenuDO.class);
         initMenuProperty(updateObj);
         dataRepository.save(updateObj);
+		//menuMapper.updateById(updateObj);
     }
 
     @Override
@@ -105,8 +110,12 @@ public class MenuServiceImpl implements MenuService {
         if (dataRepository.findById(MenuDO.class,id) == null) {
             throw exception(MENU_NOT_EXISTS);
         }
+		//if (menuMapper.selectById(id) == null) {
+          //  throw exception(MENU_NOT_EXISTS);
+        //}
         // 标记删除
         dataRepository.deleteById(MenuDO.class,id);
+		//menuMapper.deleteById(id);
         // 删除授予给角色的权限
         permissionService.processMenuDeleted(id);
     }
@@ -114,6 +123,7 @@ public class MenuServiceImpl implements MenuService {
     @Override
     public List<MenuDO> getMenuList() {
         return dataRepository.findAll(MenuDO.class);
+		//return menuMapper.selectList();
     }
 
     @Override
@@ -194,6 +204,7 @@ public class MenuServiceImpl implements MenuService {
     @Override
     public MenuDO getMenu(Long id) {
         return dataRepository.findById(MenuDO.class,id);
+		//return menuMapper.selectById(id);
     }
 
     @Override
@@ -226,6 +237,7 @@ public class MenuServiceImpl implements MenuService {
             throw exception(MENU_PARENT_ERROR);
         }
         MenuDO menu = dataRepository.findById(MenuDO.class,parentId);
+		//MenuDO menu = menuMapper.selectById(parentId);
         // 父菜单不存在
         if (menu == null) {
             throw exception(MENU_PARENT_NOT_EXISTS);

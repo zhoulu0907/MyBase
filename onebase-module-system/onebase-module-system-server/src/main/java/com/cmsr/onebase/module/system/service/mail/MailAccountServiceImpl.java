@@ -49,6 +49,7 @@ public class MailAccountServiceImpl implements MailAccountService {
     public Long createMailAccount(MailAccountSaveReqVO createReqVO) {
         MailAccountDO account = BeanUtils.toBean(createReqVO, MailAccountDO.class);
         dataRepository.insert(account);
+        //mailAccountMapper.insert(account);
         return account.getId();
     }
 
@@ -61,6 +62,7 @@ public class MailAccountServiceImpl implements MailAccountService {
         // 更新
         MailAccountDO updateObj = BeanUtils.toBean(updateReqVO, MailAccountDO.class);
         dataRepository.save(updateObj);
+		//mailAccountMapper.updateById(updateObj);
     }
 
     @Override
@@ -75,17 +77,22 @@ public class MailAccountServiceImpl implements MailAccountService {
 
         // 删除
         dataRepository.deleteById(MailAccountDO.class,id);
+		//mailAccountMapper.deleteById(id);
     }
 
     private void validateMailAccountExists(Long id) {
         if (dataRepository.findById(MailAccountDO.class,id) == null) {
             throw exception(MAIL_ACCOUNT_NOT_EXISTS);
         }
+		// if (mailAccountMapper.selectById(id) == null) {
+          //  throw exception(MAIL_ACCOUNT_NOT_EXISTS);
+        //}
     }
 
     @Override
     public MailAccountDO getMailAccount(Long id) {
         return dataRepository.findById(MailAccountDO.class,id);
+		//return mailAccountMapper.selectById(id);
     }
 
     @Override
@@ -105,11 +112,13 @@ public class MailAccountServiceImpl implements MailAccountService {
             configStore.and(Compare.EQUAL, "username", pageReqVO.getUsername());
         }
         return dataRepository.findPageWithConditions(MailAccountDO.class,configStore, pageReqVO.getPageNo(), pageReqVO.getPageSize());
+		//return mailAccountMapper.selectPage(pageReqVO);
     }
 
     @Override
     public List<MailAccountDO> getMailAccountList() {
         return dataRepository.findAll(MailAccountDO.class);
+		//return mailAccountMapper.selectList();
     }
 
 }

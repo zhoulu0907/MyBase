@@ -42,6 +42,7 @@ public class NotifyMessageServiceImpl implements NotifyMessageService {
                 .setTemplateType(template.getType()).setTemplateNickname(template.getNickname())
                 .setTemplateContent(templateContent).setTemplateParams(templateParams).setReadStatus(false);
         dataRepository.insert(message);
+		//notifyMessageMapper.insert(message);
         return message.getId();
     }
 
@@ -66,7 +67,7 @@ public class NotifyMessageServiceImpl implements NotifyMessageService {
         }
 
         return dataRepository.findPageWithConditions(NotifyMessageDO.class,configStore, pageReqVO.getPageNo(), pageReqVO.getPageSize());
-
+		//return notifyMessageMapper.selectPage(pageReqVO);
     }
 
     @Override
@@ -81,12 +82,13 @@ public class NotifyMessageServiceImpl implements NotifyMessageService {
         }
 
         return dataRepository.findPageWithConditions(NotifyMessageDO.class,configStore, pageReqVO.getPageNo(), pageReqVO.getPageSize());
-
+		//return notifyMessageMapper.selectPage(pageReqVO, userId, userType);
     }
 
     @Override
     public NotifyMessageDO getNotifyMessage(Long id) {
         return dataRepository.findById(NotifyMessageDO.class,id);
+		//return notifyMessageMapper.selectById(id);
     }
 
     @Override
@@ -103,7 +105,7 @@ public class NotifyMessageServiceImpl implements NotifyMessageService {
             configStore.limit(size);
         }
         return dataRepository.findAll(NotifyMessageDO.class,configStore);
-
+		//return notifyMessageMapper.selectUnreadListByUserIdAndUserType(userId, userType, size);
     }
 
     @Override
@@ -119,6 +121,7 @@ public class NotifyMessageServiceImpl implements NotifyMessageService {
 
         List<NotifyMessageDO> notifyMessageDOList = dataRepository.findAll(NotifyMessageDO.class, configStore);
         return (long) notifyMessageDOList.size();
+		//return notifyMessageMapper.selectUnreadCountByUserIdAndUserType(userId, userType);
 
     }
 

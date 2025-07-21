@@ -73,6 +73,7 @@ public class SmsTemplateServiceImpl implements SmsTemplateService {
         template.setParams(parseTemplateContentParams(template.getContent()));
         template.setChannelCode(channelDO.getCode());
         dataRepository.insert(template);
+		//smsTemplateMapper.insert(template);
         // 返回
         return template.getId();
     }
@@ -106,6 +107,7 @@ public class SmsTemplateServiceImpl implements SmsTemplateService {
         validateSmsTemplateExists(id);
         // 更新
         dataRepository.deleteById(SmsTemplateDO.class,id);
+		//smsTemplateMapper.deleteById(id);
     }
 
     private void validateSmsTemplateExists(Long id) {
@@ -117,6 +119,7 @@ public class SmsTemplateServiceImpl implements SmsTemplateService {
     @Override
     public SmsTemplateDO getSmsTemplate(Long id) {
         return dataRepository.findById(SmsTemplateDO.class,id);
+		//return smsTemplateMapper.selectById(id);
     }
 
     @Override

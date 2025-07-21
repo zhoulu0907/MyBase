@@ -155,8 +155,10 @@ public class SocialUserServiceImpl implements SocialUserService {
                 .setNickname(authUser.getNickname()).setAvatar(authUser.getAvatar()).setRawUserInfo(toJsonString(authUser.getRawUserInfo()));
         if (socialUser.getId() == null) {
             dataRepository.insert(socialUser);
+			//socialUserMapper.insert(socialUser);
         } else {
             dataRepository.save(socialUser);
+			//socialUserMapper.updateById(socialUser);
         }
         return socialUser;
     }
@@ -166,6 +168,7 @@ public class SocialUserServiceImpl implements SocialUserService {
     @Override
     public SocialUserDO getSocialUser(Long id) {
         return dataRepository.findById(SocialUserDO.class,id);
+		//return socialUserMapper.selectById(id);
     }
 
     @Override

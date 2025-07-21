@@ -47,6 +47,7 @@ public class OAuth2CodeServiceImpl implements OAuth2CodeService {
                 .setExpiresTime(LocalDateTime.now().plusSeconds(TIMEOUT))
                 .setRedirectUri(redirectUri).setState(state);
         dataRepository.insert(codeDO);
+		//oauth2CodeMapper.insert(codeDO);
         return codeDO;
     }
 
@@ -66,6 +67,7 @@ public class OAuth2CodeServiceImpl implements OAuth2CodeService {
             throw exception(OAUTH2_CODE_EXPIRE);
         }
         dataRepository.deleteById(OAuth2CodeDO.class,codeDO.getId());
+		//oauth2CodeMapper.deleteById(codeDO.getId());
         return codeDO;
     }
 

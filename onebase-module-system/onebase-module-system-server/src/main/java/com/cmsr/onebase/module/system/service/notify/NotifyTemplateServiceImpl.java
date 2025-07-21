@@ -61,6 +61,7 @@ public class NotifyTemplateServiceImpl implements NotifyTemplateService {
         NotifyTemplateDO notifyTemplate = BeanUtils.toBean(createReqVO, NotifyTemplateDO.class);
         notifyTemplate.setParams(parseTemplateContentParams(notifyTemplate.getContent()));
         dataRepository.insert(notifyTemplate);
+		//notifyTemplateMapper.insert(notifyTemplate);
         return notifyTemplate.getId();
     }
 
@@ -77,6 +78,7 @@ public class NotifyTemplateServiceImpl implements NotifyTemplateService {
         NotifyTemplateDO updateObj = BeanUtils.toBean(updateReqVO, NotifyTemplateDO.class);
         updateObj.setParams(parseTemplateContentParams(updateObj.getContent()));
         dataRepository.save(updateObj);
+		//notifyTemplateMapper.updateById(updateObj);
     }
 
     @VisibleForTesting
@@ -92,17 +94,22 @@ public class NotifyTemplateServiceImpl implements NotifyTemplateService {
         validateNotifyTemplateExists(id);
         // 删除
         dataRepository.deleteById(NotifyTemplateDO.class,id);
+		//notifyTemplateMapper.deleteById(id);
     }
 
     private void validateNotifyTemplateExists(Long id) {
         if (dataRepository.findById(NotifyTemplateDO.class,id) == null) {
             throw exception(NOTIFY_TEMPLATE_NOT_EXISTS);
         }
+		//if (notifyTemplateMapper.selectById(id) == null) {
+          //  throw exception(NOTIFY_TEMPLATE_NOT_EXISTS);
+        //}
     }
 
     @Override
     public NotifyTemplateDO getNotifyTemplate(Long id) {
         return dataRepository.findById(NotifyTemplateDO.class,id);
+		//return notifyTemplateMapper.selectById(id);
     }
 
     @Override

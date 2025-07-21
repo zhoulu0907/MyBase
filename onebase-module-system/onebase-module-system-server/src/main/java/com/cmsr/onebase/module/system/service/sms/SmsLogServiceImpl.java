@@ -54,6 +54,7 @@ public class SmsLogServiceImpl implements SmsLogService {
         // 插入数据库
         SmsLogDO logDO = logBuilder.build();
         dataRepository.insert(logDO);
+		//smsLogMapper.insert(logDO);
         return logDO.getId();
     }
 

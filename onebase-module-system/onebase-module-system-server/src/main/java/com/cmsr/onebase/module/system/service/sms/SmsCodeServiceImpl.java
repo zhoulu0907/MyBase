@@ -82,6 +82,7 @@ public class SmsCodeServiceImpl implements SmsCodeService {
                 .todayIndex(lastSmsCode != null && isToday(lastSmsCode.getCreateTime()) ? lastSmsCode.getTodayIndex() + 1 : 1)
                 .createIp(ip).used(false).build();
         dataRepository.insert(newSmsCode);
+		//smsCodeMapper.insert(newSmsCode);
         return code;
     }
 
@@ -92,7 +93,11 @@ public class SmsCodeServiceImpl implements SmsCodeService {
         // 使用验证码
         dataRepository.save(SmsCodeDO.builder().id(lastSmsCode.getId())
                 .used(true).usedTime(LocalDateTime.now()).usedIp(reqDTO.getUsedIp()).build());
-    }
+    
+	//smsCodeMapper.updateById(SmsCodeDO.builder().id(lastSmsCode.getId())
+                //.used(true).usedTime(LocalDateTime.now()).usedIp(reqDTO.getUsedIp()).build());
+	
+	}
 
     @Override
     public void validateSmsCode(SmsCodeValidateReqDTO reqDTO) {

@@ -461,6 +461,7 @@ public class SocialClientServiceImpl implements SocialClientService {
         // 插入
         SocialClientDO client = BeanUtils.toBean(createReqVO, SocialClientDO.class);
         dataRepository.insert(client);
+		//socialClientMapper.insert(client);
         return client.getId();
     }
 
@@ -474,6 +475,7 @@ public class SocialClientServiceImpl implements SocialClientService {
         // 更新
         SocialClientDO updateObj = BeanUtils.toBean(updateReqVO, SocialClientDO.class);
         dataRepository.save(updateObj);
+		//socialClientMapper.updateById(updateObj);
     }
 
     @Override
@@ -482,12 +484,17 @@ public class SocialClientServiceImpl implements SocialClientService {
         validateSocialClientExists(id);
         // 删除
         dataRepository.findById(SocialClientDO.class,id);
+		//socialClientMapper.deleteById(id);
     }
 
     private void validateSocialClientExists(Long id) {
         if (dataRepository.findById(SocialClientDO.class,id) == null) {
             throw exception(SOCIAL_CLIENT_NOT_EXISTS);
         }
+		//if (socialClientMapper.selectById(id) == null) {
+          //  throw exception(SOCIAL_CLIENT_NOT_EXISTS);
+        //}
+		
     }
 
     /**

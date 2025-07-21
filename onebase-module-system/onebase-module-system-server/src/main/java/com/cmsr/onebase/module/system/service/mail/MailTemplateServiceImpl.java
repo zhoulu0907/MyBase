@@ -64,6 +64,7 @@ public class MailTemplateServiceImpl implements MailTemplateService {
         MailTemplateDO template = BeanUtils.toBean(createReqVO, MailTemplateDO.class)
                 .setParams(parseTemplateContentParams(createReqVO.getContent()));
         dataRepository.insert(template);
+		//mailTemplateMapper.insert(template);
         return template.getId();
     }
 
@@ -80,6 +81,7 @@ public class MailTemplateServiceImpl implements MailTemplateService {
         MailTemplateDO updateObj = BeanUtils.toBean(updateReqVO, MailTemplateDO.class)
                 .setParams(parseTemplateContentParams(updateReqVO.getContent()));
         dataRepository.save(updateObj);
+		//mailTemplateMapper.updateById(updateObj);
     }
 
     @VisibleForTesting
@@ -89,6 +91,8 @@ public class MailTemplateServiceImpl implements MailTemplateService {
                 .and(Compare.EQUAL, "code", code)
                 .and(Compare.EQUAL, "deleted", false);
         MailTemplateDO template = dataRepository.findOne(MailTemplateDO.class,configStore);
+
+		//MailTemplateDO template = mailTemplateMapper.selectByCode(code);
 
         if (template == null) {
             return;
@@ -109,16 +113,23 @@ public class MailTemplateServiceImpl implements MailTemplateService {
 
         // 删除
         dataRepository.deleteById(MailTemplateDO.class,id);
+		//mailTemplateMapper.deleteById(id);
     }
 
     private void validateMailTemplateExists(Long id) {
         if (dataRepository.findById(MailTemplateDO.class,id) == null) {
             throw exception(MAIL_TEMPLATE_NOT_EXISTS);
         }
+		//if (mailTemplateMapper.selectById(id) == null) {
+          //  throw exception(MAIL_TEMPLATE_NOT_EXISTS);
+        //}
     }
 
     @Override
-    public MailTemplateDO getMailTemplate(Long id) {return dataRepository.findById(MailTemplateDO.class,id);}
+    public MailTemplateDO getMailTemplate(Long id) {
+		return dataRepository.findById(MailTemplateDO.class,id);
+		//return mailTemplateMapper.selectById(id);
+	}
 
     @Override
     @Cacheable(value = RedisKeyConstants.MAIL_TEMPLATE, key = "#code", unless = "#result == null")
@@ -127,6 +138,7 @@ public class MailTemplateServiceImpl implements MailTemplateService {
                 .and(Compare.EQUAL, "code", code)
                 .and(Compare.EQUAL, "deleted", false);
         return dataRepository.findOne(MailTemplateDO.class,configStore);
+		//return mailTemplateMapper.selectByCode(code);
     }
 
     @Override
@@ -160,10 +172,14 @@ public class MailTemplateServiceImpl implements MailTemplateService {
                 pageReqVO.getPageNo(),
                 pageReqVO.getPageSize()
         );
+		//return mailTemplateMapper.selectPage(pageReqVO);
     }
 
     @Override
-    public List<MailTemplateDO> getMailTemplateList() {return dataRepository.findAll(MailTemplateDO.class);}
+    public List<MailTemplateDO> getMailTemplateList() {
+		return dataRepository.findAll(MailTemplateDO.class);
+		//return mailTemplateMapper.selectList();
+	}
 
     @Override
     public String formatMailTemplateContent(String content, Map<String, Object> params) {
@@ -184,6 +200,9 @@ public class MailTemplateServiceImpl implements MailTemplateService {
         List<MailTemplateDO> list = dataRepository.findAll(MailTemplateDO.class, configStore);
 
         return list.size();
+		
+		//return mailTemplateMapper.selectCountByAccountId(accountId);
+		
     }
 
 }

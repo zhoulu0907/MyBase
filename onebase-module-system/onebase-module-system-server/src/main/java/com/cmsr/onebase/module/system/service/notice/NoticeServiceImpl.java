@@ -37,6 +37,7 @@ public class NoticeServiceImpl implements NoticeService {
     public Long createNotice(NoticeSaveReqVO createReqVO) {
         NoticeDO notice = BeanUtils.toBean(createReqVO, NoticeDO.class);
         dataRepository.insert(notice);
+		//noticeMapper.insert(notice);
         return notice.getId();
     }
 
@@ -47,6 +48,7 @@ public class NoticeServiceImpl implements NoticeService {
         // 更新通知公告
         NoticeDO updateObj = BeanUtils.toBean(updateReqVO, NoticeDO.class);
         dataRepository.save(updateObj);
+		//noticeMapper.updateById(updateObj);
     }
 
     @Override
@@ -55,6 +57,7 @@ public class NoticeServiceImpl implements NoticeService {
         validateNoticeExists(id);
         // 删除通知公告
         dataRepository.deleteById(NoticeDO.class,id);
+		//noticeMapper.deleteById(id);
     }
 
     @Override
@@ -70,12 +73,15 @@ public class NoticeServiceImpl implements NoticeService {
         }
 
         return dataRepository.findPageWithConditions(NoticeDO.class,configStore, reqVO.getPageNo(), reqVO.getPageSize());
+		
+		//return noticeMapper.selectPage(reqVO);
 
     }
 
     @Override
     public NoticeDO getNotice(Long id) {
         return dataRepository.findById(NoticeDO.class,id);
+		//return noticeMapper.selectById(id);
     }
 
     @VisibleForTesting
@@ -84,6 +90,7 @@ public class NoticeServiceImpl implements NoticeService {
             return;
         }
         NoticeDO notice = dataRepository.findById(NoticeDO.class,id);
+		//NoticeDO notice = noticeMapper.selectById(id);
         if (notice == null) {
             throw exception(NOTICE_NOT_FOUND);
         }
