@@ -4,6 +4,7 @@ import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
+import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
@@ -18,6 +19,9 @@ import com.cmsr.onebase.module.system.dal.mysql.sms.SmsTemplateMapper;
 import com.cmsr.onebase.module.system.dal.redis.RedisKeyConstants;
 import com.google.common.annotations.VisibleForTesting;
 import lombok.extern.slf4j.Slf4j;
+import org.anyline.data.param.ConfigStore;
+import org.anyline.data.param.init.DefaultConfigStore;
+import org.anyline.entity.Compare;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -52,6 +56,9 @@ public class SmsTemplateServiceImpl implements SmsTemplateService {
     @Resource
     private SmsChannelService smsChannelService;
 
+    @Resource
+    private DataRepository dataRepository;
+
     @Override
     public Long createSmsTemplate(SmsTemplateSaveReqVO createReqVO) {
         // 校验短信渠道
@@ -65,7 +72,8 @@ public class SmsTemplateServiceImpl implements SmsTemplateService {
         SmsTemplateDO template = BeanUtils.toBean(createReqVO, SmsTemplateDO.class);
         template.setParams(parseTemplateContentParams(template.getContent()));
         template.setChannelCode(channelDO.getCode());
-        smsTemplateMapper.insert(template);
+        dataRepository.insert(template);
+		//smsTemplateMapper.insert(template);
         // 返回
         return template.getId();
     }
@@ -87,7 +95,8 @@ public class SmsTemplateServiceImpl implements SmsTemplateService {
         SmsTemplateDO updateObj = BeanUtils.toBean(updateReqVO, SmsTemplateDO.class);
         updateObj.setParams(parseTemplateContentParams(updateObj.getContent()));
         updateObj.setChannelCode(channelDO.getCode());
-        smsTemplateMapper.updateById(updateObj);
+        dataRepository.save(updateObj);
+        //smsTemplateMapper.updateById(updateObj);
     }
 
     @Override
@@ -97,7 +106,8 @@ public class SmsTemplateServiceImpl implements SmsTemplateService {
         // 校验存在
         validateSmsTemplateExists(id);
         // 更新
-        smsTemplateMapper.deleteById(id);
+        dataRepository.deleteById(SmsTemplateDO.class,id);
+		//smsTemplateMapper.deleteById(id);
     }
 
     private void validateSmsTemplateExists(Long id) {
@@ -108,14 +118,19 @@ public class SmsTemplateServiceImpl implements SmsTemplateService {
 
     @Override
     public SmsTemplateDO getSmsTemplate(Long id) {
-        return smsTemplateMapper.selectById(id);
+        return dataRepository.findById(SmsTemplateDO.class,id);
+		//return smsTemplateMapper.selectById(id);
     }
 
     @Override
     @Cacheable(cacheNames = RedisKeyConstants.SMS_TEMPLATE, key = "#code",
             unless = "#result == null")
     public SmsTemplateDO getSmsTemplateByCodeFromCache(String code) {
-        return smsTemplateMapper.selectByCode(code);
+        ConfigStore cs = new DefaultConfigStore()
+                .and(Compare.EQUAL, "code", code);
+
+        return dataRepository.findOne(SmsTemplateDO.class,cs);
+        //return smsTemplateMapper.selectByCode(code);
     }
 
     @Override
@@ -125,7 +140,11 @@ public class SmsTemplateServiceImpl implements SmsTemplateService {
 
     @Override
     public Long getSmsTemplateCountByChannelId(Long channelId) {
-        return smsTemplateMapper.selectCountByChannelId(channelId);
+        ConfigStore cs = new DefaultConfigStore()
+                .and(Compare.EQUAL, "channel_id", channelId);
+        List<SmsTemplateDO> smsTemplateDOS = dataRepository.findAll(SmsTemplateDO.class, cs);
+        return (long) smsTemplateDOS.size();
+        //return smsTemplateMapper.selectCountByChannelId(channelId);
     }
 
     @VisibleForTesting
@@ -142,7 +161,10 @@ public class SmsTemplateServiceImpl implements SmsTemplateService {
 
     @VisibleForTesting
     public void validateSmsTemplateCodeDuplicate(Long id, String code) {
-        SmsTemplateDO template = smsTemplateMapper.selectByCode(code);
+        ConfigStore cs = new DefaultConfigStore()
+                .and(Compare.EQUAL, "code", code);
+        SmsTemplateDO template = dataRepository.findOne(SmsTemplateDO.class,cs);
+        //SmsTemplateDO template = smsTemplateMapper.selectByCode(code);
         if (template == null) {
             return;
         }

@@ -3,15 +3,21 @@ package com.cmsr.onebase.module.system.service.mail;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
+import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.system.controller.admin.mail.vo.template.MailTemplatePageReqVO;
 import com.cmsr.onebase.module.system.controller.admin.mail.vo.template.MailTemplateSaveReqVO;
+import com.cmsr.onebase.module.system.dal.dataobject.mail.MailAccountDO;
 import com.cmsr.onebase.module.system.dal.dataobject.mail.MailTemplateDO;
 import com.cmsr.onebase.module.system.dal.mysql.mail.MailTemplateMapper;
 import com.cmsr.onebase.module.system.dal.redis.RedisKeyConstants;
 import com.google.common.annotations.VisibleForTesting;
 import lombok.extern.slf4j.Slf4j;
+import org.anyline.data.param.ConfigStore;
+import org.anyline.data.param.init.DefaultConfigStore;
+import org.anyline.entity.Compare;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -43,8 +49,11 @@ public class MailTemplateServiceImpl implements MailTemplateService {
      */
     private static final Pattern PATTERN_PARAMS = Pattern.compile("\\{(.*?)}");
 
+    //@Resource
+    //private MailTemplateMapper mailTemplateMapper;
+
     @Resource
-    private MailTemplateMapper mailTemplateMapper;
+    private DataRepository dataRepository;
 
     @Override
     public Long createMailTemplate(MailTemplateSaveReqVO createReqVO) {
@@ -54,7 +63,8 @@ public class MailTemplateServiceImpl implements MailTemplateService {
         // 插入
         MailTemplateDO template = BeanUtils.toBean(createReqVO, MailTemplateDO.class)
                 .setParams(parseTemplateContentParams(createReqVO.getContent()));
-        mailTemplateMapper.insert(template);
+        dataRepository.insert(template);
+		//mailTemplateMapper.insert(template);
         return template.getId();
     }
 
@@ -70,12 +80,20 @@ public class MailTemplateServiceImpl implements MailTemplateService {
         // 更新
         MailTemplateDO updateObj = BeanUtils.toBean(updateReqVO, MailTemplateDO.class)
                 .setParams(parseTemplateContentParams(updateReqVO.getContent()));
-        mailTemplateMapper.updateById(updateObj);
+        dataRepository.save(updateObj);
+		//mailTemplateMapper.updateById(updateObj);
     }
 
     @VisibleForTesting
     void validateCodeUnique(Long id, String code) {
-        MailTemplateDO template = mailTemplateMapper.selectByCode(code);
+
+        ConfigStore configStore = new DefaultConfigStore()
+                .and(Compare.EQUAL, "code", code)
+                .and(Compare.EQUAL, "deleted", false);
+        MailTemplateDO template = dataRepository.findOne(MailTemplateDO.class,configStore);
+
+		//MailTemplateDO template = mailTemplateMapper.selectByCode(code);
+
         if (template == null) {
             return;
         }
@@ -94,31 +112,74 @@ public class MailTemplateServiceImpl implements MailTemplateService {
         validateMailTemplateExists(id);
 
         // 删除
-        mailTemplateMapper.deleteById(id);
+        dataRepository.deleteById(MailTemplateDO.class,id);
+		//mailTemplateMapper.deleteById(id);
     }
 
     private void validateMailTemplateExists(Long id) {
-        if (mailTemplateMapper.selectById(id) == null) {
+        if (dataRepository.findById(MailTemplateDO.class,id) == null) {
             throw exception(MAIL_TEMPLATE_NOT_EXISTS);
         }
+		//if (mailTemplateMapper.selectById(id) == null) {
+          //  throw exception(MAIL_TEMPLATE_NOT_EXISTS);
+        //}
     }
 
     @Override
-    public MailTemplateDO getMailTemplate(Long id) {return mailTemplateMapper.selectById(id);}
+    public MailTemplateDO getMailTemplate(Long id) {
+		return dataRepository.findById(MailTemplateDO.class,id);
+		//return mailTemplateMapper.selectById(id);
+	}
 
     @Override
     @Cacheable(value = RedisKeyConstants.MAIL_TEMPLATE, key = "#code", unless = "#result == null")
     public MailTemplateDO getMailTemplateByCodeFromCache(String code) {
-        return mailTemplateMapper.selectByCode(code);
+        ConfigStore configStore = new DefaultConfigStore()
+                .and(Compare.EQUAL, "code", code)
+                .and(Compare.EQUAL, "deleted", false);
+        return dataRepository.findOne(MailTemplateDO.class,configStore);
+		//return mailTemplateMapper.selectByCode(code);
     }
 
     @Override
     public PageResult<MailTemplateDO> getMailTemplatePage(MailTemplatePageReqVO pageReqVO) {
-        return mailTemplateMapper.selectPage(pageReqVO);
+
+        ConfigStore configStore = new DefaultConfigStore()
+                .and(Compare.EQUAL, "deleted", false);
+
+        // 构建查询条件
+        if (null != pageReqVO.getStatus()) {
+            configStore.and(Compare.EQUAL, "status", pageReqVO.getStatus());
+        }
+        if (StringUtils.isNotBlank(pageReqVO.getCode())) {
+            configStore.and(Compare.LIKE, "code", pageReqVO.getCode());
+        }
+        if (StringUtils.isNotBlank(pageReqVO.getName())) {
+            configStore.and(Compare.LIKE, "name", pageReqVO.getName());
+        }
+        if (null != pageReqVO.getAccountId()) {
+            configStore.and(Compare.EQUAL, "account_id", pageReqVO.getAccountId());
+        }
+        if (null != pageReqVO.getCreateTime()) {
+            configStore.and(Compare.EQUAL, "create_time", pageReqVO.getCreateTime());
+        }
+        // 添加排序条件，按ID降序排列
+        configStore.order("id", "DESC");
+
+        return dataRepository.findPageWithConditions(
+                MailTemplateDO.class,
+                configStore,
+                pageReqVO.getPageNo(),
+                pageReqVO.getPageSize()
+        );
+		//return mailTemplateMapper.selectPage(pageReqVO);
     }
 
     @Override
-    public List<MailTemplateDO> getMailTemplateList() {return mailTemplateMapper.selectList();}
+    public List<MailTemplateDO> getMailTemplateList() {
+		return dataRepository.findAll(MailTemplateDO.class);
+		//return mailTemplateMapper.selectList();
+	}
 
     @Override
     public String formatMailTemplateContent(String content, Map<String, Object> params) {
@@ -132,7 +193,16 @@ public class MailTemplateServiceImpl implements MailTemplateService {
 
     @Override
     public long getMailTemplateCountByAccountId(Long accountId) {
-        return mailTemplateMapper.selectCountByAccountId(accountId);
+
+        ConfigStore configStore = new DefaultConfigStore()
+                .and(Compare.EQUAL, "account_id", accountId)
+                .and(Compare.EQUAL, "deleted", false);
+        List<MailTemplateDO> list = dataRepository.findAll(MailTemplateDO.class, configStore);
+
+        return list.size();
+		
+		//return mailTemplateMapper.selectCountByAccountId(accountId);
+		
     }
 
 }

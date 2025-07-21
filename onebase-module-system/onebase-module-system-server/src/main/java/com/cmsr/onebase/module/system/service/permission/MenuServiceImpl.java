@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.system.service.permission;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
+import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.system.controller.admin.permission.vo.menu.MenuListReqVO;
@@ -16,6 +17,9 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.anyline.data.param.ConfigStore;
+import org.anyline.data.param.init.DefaultConfigStore;
+import org.anyline.entity.Compare;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
@@ -46,6 +50,9 @@ public class MenuServiceImpl implements MenuService {
     @Lazy // 延迟，避免循环依赖报错
     private TenantService tenantService;
 
+    @Resource
+    private DataRepository dataRepository;
+
     @Override
     @CacheEvict(value = RedisKeyConstants.PERMISSION_MENU_ID_LIST, key = "#createReqVO.permission",
             condition = "#createReqVO.permission != null")
@@ -59,7 +66,8 @@ public class MenuServiceImpl implements MenuService {
         // 插入数据库
         MenuDO menu = BeanUtils.toBean(createReqVO, MenuDO.class);
         initMenuProperty(menu);
-        menuMapper.insert(menu);
+        dataRepository.insert(menu);
+		//menuMapper.insert(menu);
         // 返回
         return menu.getId();
     }
@@ -69,9 +77,12 @@ public class MenuServiceImpl implements MenuService {
             allEntries = true) // allEntries 清空所有缓存，因为 permission 如果变更，涉及到新老两个 permission。直接清理，简单有效
     public void updateMenu(MenuSaveVO updateReqVO) {
         // 校验更新的菜单是否存在
-        if (menuMapper.selectById(updateReqVO.getId()) == null) {
+        if (dataRepository.findById(MenuDO.class,updateReqVO.getId()) == null) {
             throw exception(MENU_NOT_EXISTS);
         }
+		//if (menuMapper.selectById(updateReqVO.getId()) == null) {
+          //  throw exception(MENU_NOT_EXISTS);
+        //}
         // 校验父菜单存在
         validateParentMenu(updateReqVO.getParentId(), updateReqVO.getId());
         // 校验菜单（自己）
@@ -81,7 +92,8 @@ public class MenuServiceImpl implements MenuService {
         // 更新到数据库
         MenuDO updateObj = BeanUtils.toBean(updateReqVO, MenuDO.class);
         initMenuProperty(updateObj);
-        menuMapper.updateById(updateObj);
+        dataRepository.save(updateObj);
+		//menuMapper.updateById(updateObj);
     }
 
     @Override
@@ -90,22 +102,28 @@ public class MenuServiceImpl implements MenuService {
             allEntries = true) // allEntries 清空所有缓存，因为此时不知道 id 对应的 permission 是多少。直接清理，简单有效
     public void deleteMenu(Long id) {
         // 校验是否还有子菜单
+
         if (menuMapper.selectCountByParentId(id) > 0) {
             throw exception(MENU_EXISTS_CHILDREN);
         }
         // 校验删除的菜单是否存在
-        if (menuMapper.selectById(id) == null) {
+        if (dataRepository.findById(MenuDO.class,id) == null) {
             throw exception(MENU_NOT_EXISTS);
         }
+		//if (menuMapper.selectById(id) == null) {
+          //  throw exception(MENU_NOT_EXISTS);
+        //}
         // 标记删除
-        menuMapper.deleteById(id);
+        dataRepository.deleteById(MenuDO.class,id);
+		//menuMapper.deleteById(id);
         // 删除授予给角色的权限
         permissionService.processMenuDeleted(id);
     }
 
     @Override
     public List<MenuDO> getMenuList() {
-        return menuMapper.selectList();
+        return dataRepository.findAll(MenuDO.class);
+		//return menuMapper.selectList();
     }
 
     @Override
@@ -165,19 +183,28 @@ public class MenuServiceImpl implements MenuService {
 
     @Override
     public List<MenuDO> getMenuList(MenuListReqVO reqVO) {
-        return menuMapper.selectList(reqVO);
+
+        ConfigStore configStore = new DefaultConfigStore()
+                .and(Compare.EQUAL, "name", reqVO.getName())
+                .and(Compare.EQUAL, "status", reqVO.getStatus());
+        return dataRepository.findAll(MenuDO.class,configStore);
+        //return menuMapper.selectList(reqVO);
     }
 
     @Override
     @Cacheable(value = RedisKeyConstants.PERMISSION_MENU_ID_LIST, key = "#permission")
     public List<Long> getMenuIdListByPermissionFromCache(String permission) {
-        List<MenuDO> menus = menuMapper.selectListByPermission(permission);
+        ConfigStore configStore = new DefaultConfigStore()
+                .and(Compare.EQUAL, "permission", permission);
+        List<MenuDO> menus = dataRepository.findAll(MenuDO.class,configStore);
+        //List<MenuDO> menus = menuMapper.selectListByPermission(permission);
         return convertList(menus, MenuDO::getId);
     }
 
     @Override
     public MenuDO getMenu(Long id) {
-        return menuMapper.selectById(id);
+        return dataRepository.findById(MenuDO.class,id);
+		//return menuMapper.selectById(id);
     }
 
     @Override
@@ -186,7 +213,8 @@ public class MenuServiceImpl implements MenuService {
         if (CollUtil.isEmpty(ids)) {
             return Lists.newArrayList();
         }
-        return menuMapper.selectBatchIds(ids);
+        return dataRepository.findAllByIds(MenuDO.class, (List<Long>) ids);
+        //return menuMapper.selectBatchIds(ids);
     }
 
     /**
@@ -208,7 +236,8 @@ public class MenuServiceImpl implements MenuService {
         if (parentId.equals(childId)) {
             throw exception(MENU_PARENT_ERROR);
         }
-        MenuDO menu = menuMapper.selectById(parentId);
+        MenuDO menu = dataRepository.findById(MenuDO.class,parentId);
+		//MenuDO menu = menuMapper.selectById(parentId);
         // 父菜单不存在
         if (menu == null) {
             throw exception(MENU_PARENT_NOT_EXISTS);
@@ -255,7 +284,11 @@ public class MenuServiceImpl implements MenuService {
         if (StrUtil.isBlank(componentName)) {
             return;
         }
-        MenuDO menu = menuMapper.selectByComponentName(componentName);
+
+        ConfigStore configStore = new DefaultConfigStore()
+                .and(Compare.EQUAL, "component_name", componentName);
+        MenuDO menu = dataRepository.findOne(MenuDO.class,configStore);
+        //MenuDO menu = menuMapper.selectByComponentName(componentName);
         if (menu == null) {
             return;
         }

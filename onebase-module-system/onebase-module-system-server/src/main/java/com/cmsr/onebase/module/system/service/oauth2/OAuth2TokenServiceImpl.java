@@ -5,6 +5,7 @@ import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
+import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.common.exception.enums.GlobalErrorCodeConstants;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
@@ -14,6 +15,7 @@ import com.cmsr.onebase.framework.security.core.LoginUser;
 import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.module.system.controller.admin.oauth2.vo.token.OAuth2AccessTokenPageReqVO;
+import com.cmsr.onebase.module.system.dal.dataobject.notify.NotifyMessageDO;
 import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2AccessTokenDO;
 import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2ClientDO;
 import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2RefreshTokenDO;
@@ -23,6 +25,10 @@ import com.cmsr.onebase.module.system.dal.mysql.oauth2.OAuth2RefreshTokenMapper;
 import com.cmsr.onebase.module.system.dal.redis.oauth2.OAuth2AccessTokenRedisDAO;
 import com.cmsr.onebase.module.system.service.user.AdminUserService;
 import jakarta.annotation.Resource;
+import org.anyline.data.param.ConfigStore;
+import org.anyline.data.param.init.DefaultConfigStore;
+import org.anyline.entity.Compare;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +37,7 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception0;
 import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.convertSet;
@@ -55,6 +62,9 @@ public class OAuth2TokenServiceImpl implements OAuth2TokenService {
     @Resource
     @Lazy // 懒加载，避免循环依赖
     private AdminUserService adminUserService;
+
+    @Resource
+    private DataRepository dataRepository;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -82,15 +92,23 @@ public class OAuth2TokenServiceImpl implements OAuth2TokenService {
         }
 
         // 移除相关的访问令牌
-        List<OAuth2AccessTokenDO> accessTokenDOs = oauth2AccessTokenMapper.selectListByRefreshToken(refreshToken);
+
+        ConfigStore cs = new DefaultConfigStore()
+                .and(Compare.EQUAL, "refresh_token", refreshToken)
+                .and(Compare.EQUAL, "deleted", false);
+        List<OAuth2AccessTokenDO> accessTokenDOs = dataRepository.findAll(OAuth2AccessTokenDO.class,cs);
+        //List<OAuth2AccessTokenDO> accessTokenDOs = oauth2AccessTokenMapper.selectListByRefreshToken(refreshToken);
         if (CollUtil.isNotEmpty(accessTokenDOs)) {
-            oauth2AccessTokenMapper.deleteByIds(convertSet(accessTokenDOs, OAuth2AccessTokenDO::getId));
+            List<Long> ids = accessTokenDOs.stream().map(accessTokenDO -> accessTokenDO.getId()).collect(Collectors.toUnmodifiableList());
+            dataRepository.deleteAllById(OAuth2AccessTokenDO.class,ids);
+            //oauth2AccessTokenMapper.deleteByIds(convertSet(accessTokenDOs, OAuth2AccessTokenDO::getId));
             oauth2AccessTokenRedisDAO.deleteList(convertSet(accessTokenDOs, OAuth2AccessTokenDO::getAccessToken));
         }
 
         // 已过期的情况下，删除刷新令牌
         if (DateUtils.isExpired(refreshTokenDO.getExpiresTime())) {
-            oauth2RefreshTokenMapper.deleteById(refreshTokenDO.getId());
+            dataRepository.deleteById(OAuth2AccessTokenDO.class,refreshTokenDO.getId());
+			//oauth2RefreshTokenMapper.deleteById(refreshTokenDO.getId());
             throw exception0(GlobalErrorCodeConstants.UNAUTHORIZED.getCode(), "刷新令牌已过期");
         }
 
@@ -107,12 +125,20 @@ public class OAuth2TokenServiceImpl implements OAuth2TokenService {
         }
 
         // 获取不到，从 MySQL 中获取访问令牌
-        accessTokenDO = oauth2AccessTokenMapper.selectByAccessToken(accessToken);
+        ConfigStore cs = new DefaultConfigStore()
+                .and(Compare.EQUAL, "access_token", accessToken)
+                .and(Compare.EQUAL, "deleted", false);
+        accessTokenDO = dataRepository.findOne(OAuth2AccessTokenDO.class,cs);
+        //accessTokenDO = oauth2AccessTokenMapper.selectByAccessToken(accessToken);
         if (accessTokenDO == null) {
             // 特殊：从 MySQL 中获取刷新令牌。原因：解决部分场景不方便刷新访问令牌场景
             // 例如说，积木报表只允许传递 token，不允许传递 refresh_token，导致无法刷新访问令牌
             // 再例如说，前端 WebSocket 的 token 直接跟在 url 上，无法传递 refresh_token
-            OAuth2RefreshTokenDO refreshTokenDO = oauth2RefreshTokenMapper.selectByRefreshToken(accessToken);
+            ConfigStore configStore = new DefaultConfigStore()
+                    .and(Compare.EQUAL, "access_token", accessToken)
+                    .and(Compare.EQUAL, "deleted", false);
+            OAuth2RefreshTokenDO refreshTokenDO = dataRepository.findOne(OAuth2RefreshTokenDO.class,configStore);
+            //OAuth2RefreshTokenDO refreshTokenDO = oauth2RefreshTokenMapper.selectByRefreshToken(accessToken);
             if (refreshTokenDO != null && !DateUtils.isExpired(refreshTokenDO.getExpiresTime())) {
                 accessTokenDO = convertToAccessToken(refreshTokenDO);
             }
@@ -141,20 +167,47 @@ public class OAuth2TokenServiceImpl implements OAuth2TokenService {
     @Transactional(rollbackFor = Exception.class)
     public OAuth2AccessTokenDO removeAccessToken(String accessToken) {
         // 删除访问令牌
-        OAuth2AccessTokenDO accessTokenDO = oauth2AccessTokenMapper.selectByAccessToken(accessToken);
+
+        ConfigStore configStore = new DefaultConfigStore()
+                .and(Compare.EQUAL, "access_token", accessToken)
+                .and(Compare.EQUAL, "deleted", false);
+        OAuth2AccessTokenDO accessTokenDO = dataRepository.findOne(OAuth2AccessTokenDO.class,configStore);
+        //OAuth2AccessTokenDO accessTokenDO = oauth2AccessTokenMapper.selectByAccessToken(accessToken);
         if (accessTokenDO == null) {
             return null;
         }
-        oauth2AccessTokenMapper.deleteById(accessTokenDO.getId());
+
+        dataRepository.deleteById(OAuth2AccessTokenDO.class,accessTokenDO.getId());
+
+        //oauth2AccessTokenMapper.deleteById(accessTokenDO.getId());
         oauth2AccessTokenRedisDAO.delete(accessToken);
         // 删除刷新令牌
+        ConfigStore configStore2 = new DefaultConfigStore()
+                .and(Compare.EQUAL, "access_token", accessTokenDO.getRefreshToken())
+                .and(Compare.EQUAL, "deleted", false);
+        //dataRepository.deleteById(OAuth2RefreshTokenDO.class,configStore2);
         oauth2RefreshTokenMapper.deleteByRefreshToken(accessTokenDO.getRefreshToken());
         return accessTokenDO;
     }
 
     @Override
     public PageResult<OAuth2AccessTokenDO> getAccessTokenPage(OAuth2AccessTokenPageReqVO reqVO) {
-        return oauth2AccessTokenMapper.selectPage(reqVO);
+
+        ConfigStore configStore = new DefaultConfigStore();
+        if (null != reqVO.getUserId()) {
+            configStore.and(Compare.EQUAL, "user_id", reqVO.getUserId());
+        }
+        if (null != reqVO.getUserType()) {
+            configStore.and(Compare.EQUAL, "user_type", reqVO.getUserType());
+        }
+        if (StringUtils.isNotBlank(reqVO.getClientId())) {
+            configStore.and(Compare.EQUAL, "client_id", reqVO.getClientId());
+        }
+
+
+        return dataRepository.findPageWithConditions(OAuth2AccessTokenDO.class,configStore, reqVO.getPageNo(), reqVO.getPageSize());
+
+        //return oauth2AccessTokenMapper.selectPage(reqVO);
     }
 
     private OAuth2AccessTokenDO createOAuth2AccessToken(OAuth2RefreshTokenDO refreshTokenDO, OAuth2ClientDO clientDO) {
@@ -165,7 +218,8 @@ public class OAuth2TokenServiceImpl implements OAuth2TokenService {
                 .setRefreshToken(refreshTokenDO.getRefreshToken())
                 .setExpiresTime(LocalDateTime.now().plusSeconds(clientDO.getAccessTokenValiditySeconds()));
         accessTokenDO.setTenantId(TenantContextHolder.getTenantId()); // 手动设置租户编号，避免缓存到 Redis 的时候，无对应的租户编号
-        oauth2AccessTokenMapper.insert(accessTokenDO);
+        dataRepository.insert(accessTokenDO);
+		//oauth2AccessTokenMapper.insert(accessTokenDO);
         // 记录到 Redis 中
         oauth2AccessTokenRedisDAO.set(accessTokenDO);
         return accessTokenDO;
@@ -176,7 +230,8 @@ public class OAuth2TokenServiceImpl implements OAuth2TokenService {
                 .setUserId(userId).setUserType(userType)
                 .setClientId(clientDO.getClientId()).setScopes(scopes)
                 .setExpiresTime(LocalDateTime.now().plusSeconds(clientDO.getRefreshTokenValiditySeconds()));
-        oauth2RefreshTokenMapper.insert(refreshToken);
+        dataRepository.insert(refreshToken);
+		//oauth2RefreshTokenMapper.insert(refreshToken);
         return refreshToken;
     }
 

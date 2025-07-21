@@ -1,9 +1,13 @@
 package com.cmsr.onebase.module.system.service.oauth2;
 
 import cn.hutool.core.util.IdUtil;
+import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.util.date.DateUtils;
 import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2CodeDO;
 import com.cmsr.onebase.module.system.dal.mysql.oauth2.OAuth2CodeMapper;
+import org.anyline.data.param.ConfigStore;
+import org.anyline.data.param.init.DefaultConfigStore;
+import org.anyline.entity.Compare;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
@@ -31,6 +35,9 @@ public class OAuth2CodeServiceImpl implements OAuth2CodeService {
     @Resource
     private OAuth2CodeMapper oauth2CodeMapper;
 
+    @Resource
+    private DataRepository dataRepository;
+
     @Override
     public OAuth2CodeDO createAuthorizationCode(Long userId, Integer userType, String clientId,
                                                 List<String> scopes, String redirectUri, String state) {
@@ -39,20 +46,28 @@ public class OAuth2CodeServiceImpl implements OAuth2CodeService {
                 .setClientId(clientId).setScopes(scopes)
                 .setExpiresTime(LocalDateTime.now().plusSeconds(TIMEOUT))
                 .setRedirectUri(redirectUri).setState(state);
-        oauth2CodeMapper.insert(codeDO);
+        dataRepository.insert(codeDO);
+		//oauth2CodeMapper.insert(codeDO);
         return codeDO;
     }
 
     @Override
     public OAuth2CodeDO consumeAuthorizationCode(String code) {
-        OAuth2CodeDO codeDO = oauth2CodeMapper.selectByCode(code);
+
+        ConfigStore cs = new DefaultConfigStore()
+                .and(Compare.EQUAL, "code", code);
+
+        OAuth2CodeDO codeDO = dataRepository.findOne(OAuth2CodeDO.class,cs);
+
+        //OAuth2CodeDO codeDO = oauth2CodeMapper.selectByCode(code);
         if (codeDO == null) {
             throw exception(OAUTH2_CODE_NOT_EXISTS);
         }
         if (DateUtils.isExpired(codeDO.getExpiresTime())) {
             throw exception(OAUTH2_CODE_EXPIRE);
         }
-        oauth2CodeMapper.deleteById(codeDO.getId());
+        dataRepository.deleteById(OAuth2CodeDO.class,codeDO.getId());
+		//oauth2CodeMapper.deleteById(codeDO.getId());
         return codeDO;
     }
 
