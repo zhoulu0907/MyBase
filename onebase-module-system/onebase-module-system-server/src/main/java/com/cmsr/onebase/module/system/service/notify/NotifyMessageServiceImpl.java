@@ -7,6 +7,9 @@ import com.cmsr.onebase.module.system.controller.admin.notify.vo.message.NotifyM
 import com.cmsr.onebase.module.system.dal.dataobject.notify.NotifyMessageDO;
 import com.cmsr.onebase.module.system.dal.dataobject.notify.NotifyTemplateDO;
 import com.cmsr.onebase.module.system.dal.mysql.notify.NotifyMessageMapper;
+import org.anyline.data.param.ConfigStore;
+import org.anyline.data.param.init.DefaultConfigStore;
+import org.anyline.entity.Compare;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
@@ -47,19 +50,19 @@ public class NotifyMessageServiceImpl implements NotifyMessageService {
 
         ConfigStore configStore = new DefaultConfigStore();
         if (null != pageReqVO.getUserId()) {
-            configStore.and(Compare.EAUALS, "user_id", pageReqVO.getUserId());
+            configStore.and(Compare.EQUAL, "user_id", pageReqVO.getUserId());
         }
         if (null != pageReqVO.getUserType()) {
-            configStore.and(Compare.EAUAL, "user_type", pageReqVO.getUserType());
+            configStore.and(Compare.EQUAL, "user_type", pageReqVO.getUserType());
         }
         if (StringUtils.isNotBlank(pageReqVO.getTemplateCode())) {
             configStore.and(Compare.LIKE, "template_code", pageReqVO.getTemplateCode());
         }
         if (null != pageReqVO.getTemplateType()) {
-            configStore.and(Compare.EAUAL, "template_type", pageReqVO.getTemplateType());
+            configStore.and(Compare.EQUAL, "template_type", pageReqVO.getTemplateType());
         }
         if (null != pageReqVO.getCreateTime()) {
-            configStore.and(Compare.EAUAL, "create_time", pageReqVO.getCreateTime());
+            configStore.and(Compare.EQUAL, "create_time", pageReqVO.getCreateTime());
         }
 
         return dataRepository.findPageWithConditions(NotifyMessageDO.class,configStore, pageReqVO.getPageNo(), pageReqVO.getPageSize());
@@ -70,11 +73,11 @@ public class NotifyMessageServiceImpl implements NotifyMessageService {
     public PageResult<NotifyMessageDO> getMyMyNotifyMessagePage(NotifyMessageMyPageReqVO pageReqVO, Long userId, Integer userType) {
 
         ConfigStore configStore = new DefaultConfigStore();
-        if (null != pageReqVO.getUserId()) {
-            configStore.and(Compare.EAUALS, "user_id", pageReqVO.getUserId());
+        if (null != userId) {
+            configStore.and(Compare.EQUAL, "user_id", userId);
         }
-        if (null != pageReqVO.getUserType()) {
-            configStore.and(Compare.EAUAL, "user_type", pageReqVO.getUserType());
+        if (null != userType) {
+            configStore.and(Compare.EQUAL, "user_type", userType);
         }
 
         return dataRepository.findPageWithConditions(NotifyMessageDO.class,configStore, pageReqVO.getPageNo(), pageReqVO.getPageSize());
@@ -91,10 +94,10 @@ public class NotifyMessageServiceImpl implements NotifyMessageService {
 
         ConfigStore configStore = new DefaultConfigStore();
         if (null != userId) {
-            configStore.and(Compare.EAUAL, "user_id", userId);
+            configStore.and(Compare.EQUAL, "user_id", userId);
         }
         if (null != userType) {
-            configStore.and(Compare.EAUAL, "user_type", userType);
+            configStore.and(Compare.EQUAL, "user_type", userType);
         }
         if (null != size) {
             configStore.limit(size);
@@ -108,10 +111,10 @@ public class NotifyMessageServiceImpl implements NotifyMessageService {
 
         ConfigStore configStore = new DefaultConfigStore();
         if (null != userId) {
-            configStore.and(Compare.EAUAL, "user_id", userId);
+            configStore.and(Compare.EQUAL, "user_id", userId);
         }
         if (null != userType) {
-            configStore.and(Compare.EAUAL, "user_type", userType);
+            configStore.and(Compare.EQUAL, "user_type", userType);
         }
 
         List<NotifyMessageDO> notifyMessageDOList = dataRepository.findAll(NotifyMessageDO.class, configStore);

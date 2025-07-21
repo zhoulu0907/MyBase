@@ -13,6 +13,9 @@ import com.cmsr.onebase.module.system.framework.sms.core.client.SmsClientFactory
 import com.cmsr.onebase.module.system.framework.sms.core.property.SmsChannelProperties;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.anyline.data.param.ConfigStore;
+import org.anyline.data.param.init.DefaultConfigStore;
+import org.anyline.entity.Compare;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -98,10 +101,10 @@ public class SmsChannelServiceImpl implements SmsChannelService {
             configStore.and(Compare.LIKE, "signature", pageReqVO.getSignature());
         }
         if (null != pageReqVO.getStatus()) {
-            configStore.and(Compare.EAUAL, "status", pageReqVO.getStatus());
+            configStore.and(Compare.EQUAL, "status", pageReqVO.getStatus());
         }
         if (null != pageReqVO.getCreateTime()) {
-            configStore.and(Compare.EAUAL, "create_time", pageReqVO.getCreateTime());
+            configStore.and(Compare.EQUAL, "create_time", pageReqVO.getCreateTime());
         }
 
         return dataRepository.findPageWithConditions(SmsChannelDO.class,configStore, pageReqVO.getPageNo(), pageReqVO.getPageSize());

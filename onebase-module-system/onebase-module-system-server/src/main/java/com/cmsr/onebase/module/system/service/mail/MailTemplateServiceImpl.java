@@ -14,6 +14,9 @@ import com.cmsr.onebase.module.system.dal.mysql.mail.MailTemplateMapper;
 import com.cmsr.onebase.module.system.dal.redis.RedisKeyConstants;
 import com.google.common.annotations.VisibleForTesting;
 import lombok.extern.slf4j.Slf4j;
+import org.anyline.data.param.ConfigStore;
+import org.anyline.data.param.init.DefaultConfigStore;
+import org.anyline.entity.Compare;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -120,7 +123,10 @@ public class MailTemplateServiceImpl implements MailTemplateService {
     @Override
     @Cacheable(value = RedisKeyConstants.MAIL_TEMPLATE, key = "#code", unless = "#result == null")
     public MailTemplateDO getMailTemplateByCodeFromCache(String code) {
-        return dataRepository.findOne(code);
+        ConfigStore configStore = new DefaultConfigStore()
+                .and(Compare.EQUAL, "code", code)
+                .and(Compare.EQUAL, "deleted", false);
+        return dataRepository.findOne(MailTemplateDO.class,configStore);
     }
 
     @Override
@@ -143,7 +149,7 @@ public class MailTemplateServiceImpl implements MailTemplateService {
             configStore.and(Compare.EQUAL, "account_id", pageReqVO.getAccountId());
         }
         if (null != pageReqVO.getCreateTime()) {
-            configStore.and(Compare.EAUAL, "create_time", pageReqVO.getCreateTime());
+            configStore.and(Compare.EQUAL, "create_time", pageReqVO.getCreateTime());
         }
         // 添加排序条件，按ID降序排列
         configStore.order("id", "DESC");

@@ -8,6 +8,9 @@ import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2ApproveDO;
 import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2ClientDO;
 import com.cmsr.onebase.module.system.dal.mysql.oauth2.OAuth2ApproveMapper;
 import com.google.common.annotations.VisibleForTesting;
+import org.anyline.data.param.ConfigStore;
+import org.anyline.data.param.init.DefaultConfigStore;
+import org.anyline.entity.Compare;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -104,11 +107,11 @@ public class OAuth2ApproveServiceImpl implements OAuth2ApproveService {
         // 先更新
         OAuth2ApproveDO approveDO = new OAuth2ApproveDO().setUserId(userId).setUserType(userType)
                 .setClientId(clientId).setScope(scope).setApproved(approved).setExpiresTime(expireTime);
-        if (dataRepository.update(approveDO) == 1) {
-            return;
-        }
-        // 失败，则说明不存在，进行更新
-        dataRepository.insert(approveDO);
+        dataRepository.save(approveDO);
+        return;
+
+        //// 失败，则说明不存在，进行更新
+        //dataRepository.insert(approveDO);
     }
 
 }

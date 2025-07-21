@@ -13,6 +13,9 @@ import com.cmsr.onebase.module.system.dal.mysql.notify.NotifyTemplateMapper;
 import com.cmsr.onebase.module.system.dal.redis.RedisKeyConstants;
 import com.google.common.annotations.VisibleForTesting;
 import lombok.extern.slf4j.Slf4j;
+import org.anyline.data.param.ConfigStore;
+import org.anyline.data.param.init.DefaultConfigStore;
+import org.anyline.entity.Compare;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -122,16 +125,16 @@ public class NotifyTemplateServiceImpl implements NotifyTemplateService {
         ConfigStore configStore = new DefaultConfigStore();
 
         if (StringUtils.isNotBlank(pageReqVO.getCode())) {
-            configStore.and(Compare.EAUAL, "code", pageReqVO.getCode());
+            configStore.and(Compare.EQUAL, "code", pageReqVO.getCode());
         }
         if (StringUtils.isNotBlank(pageReqVO.getName())) {
-            configStore.and(Compare.EAUAL, "name", pageReqVO.getPageNo());
+            configStore.and(Compare.EQUAL, "name", pageReqVO.getPageNo());
         }
         if (null != pageReqVO.getStatus()) {
-            configStore.and(Compare.EAUAL, "status", pageReqVO.getStatus());
+            configStore.and(Compare.EQUAL, "status", pageReqVO.getStatus());
         }
         if (null != pageReqVO.getCreateTime()) {
-            configStore.and(Compare.EAUAL, "create_time", pageReqVO.getCreateTime());
+            configStore.and(Compare.EQUAL, "create_time", pageReqVO.getCreateTime());
         }
 
         return dataRepository.findPageWithConditions(NotifyTemplateDO.class,configStore, pageReqVO.getPageNo(), pageReqVO.getPageSize());

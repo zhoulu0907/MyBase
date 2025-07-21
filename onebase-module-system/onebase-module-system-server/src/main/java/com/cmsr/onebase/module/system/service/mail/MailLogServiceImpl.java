@@ -6,8 +6,10 @@ import com.cmsr.onebase.module.system.controller.admin.mail.vo.log.MailLogPageRe
 import com.cmsr.onebase.module.system.dal.dataobject.mail.MailAccountDO;
 import com.cmsr.onebase.module.system.dal.dataobject.mail.MailLogDO;
 import com.cmsr.onebase.module.system.dal.dataobject.mail.MailTemplateDO;
-import com.cmsr.onebase.module.system.dal.mysql.mail.MailLogMapper;
 import com.cmsr.onebase.module.system.enums.mail.MailSendStatusEnum;
+import org.anyline.data.param.ConfigStore;
+import org.anyline.data.param.init.DefaultConfigStore;
+import org.anyline.entity.Compare;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
@@ -40,25 +42,25 @@ public class MailLogServiceImpl implements MailLogService {
 
         ConfigStore configStore = new DefaultConfigStore();
         if (null != pageVO.getUserId()) {
-            configStore.and(Compare.EAUALS, "user_id", pageVO.getUserId());
+            configStore.and(Compare.EQUAL, "user_id", pageVO.getUserId());
         }
         if (null != pageVO.getUserType()) {
-            configStore.and(Compare.EAUAL, "user_type", pageVO.getUserType());
+            configStore.and(Compare.EQUAL, "user_type", pageVO.getUserType());
         }
         if (StringUtils.isNotBlank(pageVO.getToMail())) {
             configStore.and(Compare.LIKE, "to_mail", pageVO.getToMail());
         }
         if (null != pageVO.getAccountId()) {
-            configStore.and(Compare.EAUAL, "accound_id", pageVO.getAccountId());
+            configStore.and(Compare.EQUAL, "accound_id", pageVO.getAccountId());
         }
         if (null != pageVO.getTemplateId()) {
-            configStore.and(Compare.EAUAL, "template_id", pageVO.getTemplateId());
+            configStore.and(Compare.EQUAL, "template_id", pageVO.getTemplateId());
         }
         if (null != pageVO.getSendStatus()) {
-            configStore.and(Compare.EAUAL, "send_status", pageVO.getSendStatus());
+            configStore.and(Compare.EQUAL, "send_status", pageVO.getSendStatus());
         }
         if (null != pageVO.getSendTime()) {
-            configStore.and(Compare.EAUAL, "send_time", pageVO.getSendTime());
+            configStore.and(Compare.EQUAL, "send_time", pageVO.getSendTime());
         }
 
         return dataRepository.findPageWithConditions(MailLogDO.class,configStore, pageVO.getPageNo(), pageVO.getPageSize());

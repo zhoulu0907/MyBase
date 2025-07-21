@@ -9,6 +9,9 @@ import com.cmsr.onebase.module.system.dal.dataobject.mail.MailLogDO;
 import com.cmsr.onebase.module.system.dal.dataobject.notice.NoticeDO;
 import com.cmsr.onebase.module.system.dal.mysql.notice.NoticeMapper;
 import com.google.common.annotations.VisibleForTesting;
+import org.anyline.data.param.ConfigStore;
+import org.anyline.data.param.init.DefaultConfigStore;
+import org.anyline.entity.Compare;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -63,7 +66,7 @@ public class NoticeServiceImpl implements NoticeService {
             configStore.and(Compare.LIKE, "title", reqVO.getTitle());
         }
         if (null != reqVO.getStatus()) {
-            configStore.and(Compare.EAUAL, "status", reqVO.getStatus());
+            configStore.and(Compare.EQUAL, "status", reqVO.getStatus());
         }
 
         return dataRepository.findPageWithConditions(NoticeDO.class,configStore, reqVO.getPageNo(), reqVO.getPageSize());

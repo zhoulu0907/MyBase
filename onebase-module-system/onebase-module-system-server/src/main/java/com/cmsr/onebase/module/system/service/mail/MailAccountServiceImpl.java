@@ -11,6 +11,7 @@ import com.cmsr.onebase.module.system.dal.redis.RedisKeyConstants;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import lombok.extern.slf4j.Slf4j;
+import org.anyline.entity.Compare;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -98,10 +99,10 @@ public class MailAccountServiceImpl implements MailAccountService {
 
         ConfigStore configStore = new DefaultConfigStore();
         if (StringUtils.isNotBlank(pageReqVO.getMail())) {
-            configStore.and(Compare.EAUALS, "mail", pageReqVO.getMail());
+            configStore.and(Compare.EQUAL, "mail", pageReqVO.getMail());
         }
         if (StringUtils.isNotBlank(pageReqVO.getUsername())) {
-            configStore.and(Compare.EAUALS, "username", pageReqVO.getUsername());
+            configStore.and(Compare.EQUAL, "username", pageReqVO.getUsername());
         }
         return dataRepository.findPageWithConditions(MailAccountDO.class,configStore, pageReqVO.getPageNo(), pageReqVO.getPageSize());
     }

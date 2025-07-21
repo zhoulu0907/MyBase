@@ -25,6 +25,9 @@ import com.cmsr.onebase.module.system.dal.mysql.oauth2.OAuth2RefreshTokenMapper;
 import com.cmsr.onebase.module.system.dal.redis.oauth2.OAuth2AccessTokenRedisDAO;
 import com.cmsr.onebase.module.system.service.user.AdminUserService;
 import jakarta.annotation.Resource;
+import org.anyline.data.param.ConfigStore;
+import org.anyline.data.param.init.DefaultConfigStore;
+import org.anyline.entity.Compare;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -191,13 +194,13 @@ public class OAuth2TokenServiceImpl implements OAuth2TokenService {
 
         ConfigStore configStore = new DefaultConfigStore();
         if (null != reqVO.getUserId()) {
-            configStore.and(Compare.EAUALS, "user_id", reqVO.getUserId());
+            configStore.and(Compare.EQUAL, "user_id", reqVO.getUserId());
         }
         if (null != reqVO.getUserType()) {
-            configStore.and(Compare.EAUAL, "user_type", reqVO.getUserType());
+            configStore.and(Compare.EQUAL, "user_type", reqVO.getUserType());
         }
         if (StringUtils.isNotBlank(reqVO.getClientId())) {
-            configStore.and(Compare.EAUAL, "client_id", reqVO.getClientId());
+            configStore.and(Compare.EQUAL, "client_id", reqVO.getClientId());
         }
 
 
