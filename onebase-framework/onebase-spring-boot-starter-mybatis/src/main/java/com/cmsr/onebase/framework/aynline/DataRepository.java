@@ -116,38 +116,6 @@ public class DataRepository {
     }
 
     /**
-     * 保存实体（插入或更新）
-     *
-     * @param entity 要保存的实体
-     * @param <T>    实体类型
-     * @return 保存后的实体
-     */
-    public <T extends BaseDO> T save(T entity) {
-        try {
-            if (entity.getId() == null || entity.getId() == 0) {
-                // 新增
-                entity.setCreateTime(LocalDateTime.now());
-                entity.setId(SnowflakeId.nextId());
-                Long result = anylineService.insert(entity);
-                if (result == 0) {
-                    throw new BizException(StatusCode.DB_INSERT_ERROR);
-                }
-            } else {
-                // 更新
-                entity.setUpdateTime(LocalDateTime.now());
-                Long result = anylineService.update(entity);
-                if (result == 0) {
-                    throw new BizException(StatusCode.DB_UPDATE_ERROR);
-                }
-            }
-            return entity;
-        } catch (Exception e) {
-            log.error("保存实体失败: {}", entity.getClass().getSimpleName(), e);
-            throw new BizException(StatusCode.DB_INSERT_ERROR);
-        }
-    }
-
-    /**
      * 根据ID查找实体
      *
      * @param clazz 实体类

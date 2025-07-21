@@ -86,7 +86,7 @@ public class DeptServiceImpl implements DeptService {
 
         // 更新部门
         DeptDO updateObj = BeanUtils.toBean(updateReqVO, DeptDO.class);
-        dataRepository.save(updateObj);
+        dataRepository.update(updateObj);
     }
 
     @Override
