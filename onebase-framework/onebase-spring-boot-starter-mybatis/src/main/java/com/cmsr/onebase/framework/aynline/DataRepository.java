@@ -2,9 +2,8 @@ package com.cmsr.onebase.framework.aynline;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.cmsr.onebase.framework.common.anyline.web.BizException;
-import com.cmsr.onebase.framework.common.anyline.web.PageResult;
 import com.cmsr.onebase.framework.common.anyline.web.StatusCode;
-import com.cmsr.onebase.framework.common.util.snowflake.SnowflakeId;
+import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -399,10 +398,8 @@ public class DataRepository {
             DataSet dataSet = anylineService.querys(tableName, configs);
 
             return new PageResult<>(
-                    dataSet.entitys(clazz).stream().toList(),
-                    pageIndex,
-                    pageSize,
-                    dataSet.total()
+                dataSet.entitys(clazz).stream().toList(),
+                dataSet.total()
             );
         } catch (Exception e) {
             log.error("分页查询失败: class={}, pageIndex={}, pageSize={}",
