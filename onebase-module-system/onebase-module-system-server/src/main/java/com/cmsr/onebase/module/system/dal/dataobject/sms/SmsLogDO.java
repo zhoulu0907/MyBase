@@ -31,10 +31,6 @@ import java.util.Map;
 @TenantIgnore
 public class SmsLogDO extends BaseDO {
 
-    /**
-     * 自增编号
-     */
-    private Long id;
 
     // ========= 渠道相关字段 =========
 

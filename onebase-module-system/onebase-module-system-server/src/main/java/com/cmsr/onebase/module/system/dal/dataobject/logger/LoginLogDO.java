@@ -24,10 +24,6 @@ import lombok.ToString;
 public class LoginLogDO extends BaseDO {
 
     /**
-     * 日志主键
-     */
-    private Long id;
-    /**
      * 日志类型
      *
      * 枚举 {@link LoginLogTypeEnum}

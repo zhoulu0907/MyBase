@@ -17,16 +17,16 @@ import lombok.Data;
 @Data
 @TenantIgnore
 public class DataSourceConfigDO extends BaseDO {
-
+    // builder模式可正常运作
+    public DataSourceConfigDO setId(Long id){
+        super.setId(id);
+        return this;
+    }
     /**
      * 主键编号 - Master 数据源
      */
     public static final Long ID_MASTER = 0L;
 
-    /**
-     * 主键编号
-     */
-    private Long id;
     /**
      * 连接名
      */

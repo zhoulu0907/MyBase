@@ -24,11 +24,6 @@ public class DeptDO extends TenantBaseDO {
     public static final Long PARENT_ID_ROOT = 0L;
 
     /**
-     * 部门ID
-     */
-    @TableId(type = IdType.AUTO)
-    private Long id;
-    /**
      * 部门名称
      */
     private String name;

@@ -11,6 +11,7 @@ import org.anyline.data.Run;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.*;
+import org.anyline.entity.generator.PrimaryGenerator;
 import org.anyline.metadata.Constraint;
 import org.anyline.metadata.Table;
 import org.anyline.service.AnylineService;
@@ -33,7 +34,14 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 public class DataRepository {
-
+    static {
+        ConfigTable.GENERATOR.set(PrimaryGenerator.GENERATOR.SNOWFLAKE);
+        ConfigTable.IS_AUTO_CHECK_METADATA = true;
+        ConfigTable.IS_INSERT_NULL_COLUMN = false;
+        ConfigTable.IS_INSERT_NULL_FIELD = false;
+        ConfigTable.IS_INSERT_EMPTY_FIELD = true;
+        ConfigTable.IS_INSERT_EMPTY_COLUMN = true;
+    }
     @Resource
     private AnylineService<?> anylineService;
 

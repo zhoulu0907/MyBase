@@ -2,6 +2,7 @@ package com.cmsr.onebase.server.anyline;
 
 import com.cmsr.onebase.framework.common.anyline.web.BizException;
 import com.cmsr.onebase.framework.common.anyline.web.StatusCode;
+import com.cmsr.onebase.framework.common.util.snowflake.SnowflakeId;
 import com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
@@ -53,13 +54,18 @@ public class AnyLineDBInfoListener implements DMListener {
      * @return 如果返回false 则中断执行
      */
     @Override public SWITCH prepareInsert(DataRuntime runtime, String random, int batch, Table dest, Object obj,
-        List<String> columns) {
+        ConfigStore configs, List<String> columns) {
         // 加入租户标志
         autoInjectTenantID(obj);
+
         // 加入创建时间和创建人等参数
         if (Objects.nonNull(obj) && obj instanceof BaseDO baseDO) {
-            LocalDateTime current = LocalDateTime.now();
+            // 设置雪花ID
+            // baseDO.setId(SnowflakeId.nextId());
+            // log.info("anyline global prepareInsert ---------> snow id:{}",baseDO.getId());
+
             // 创建时间为空，则以当前时间为插入时间
+            LocalDateTime current = LocalDateTime.now();
             if (Objects.isNull(baseDO.getCreateTime())) {
                 baseDO.setCreateTime(current);
             }
@@ -71,11 +77,11 @@ public class AnyLineDBInfoListener implements DMListener {
             Long userId = WebFrameworkUtils.getLoginUserId();
             // 当前登录用户不为空，创建人为空，则当前登录用户为创建人
             if (Objects.nonNull(userId) && Objects.isNull(baseDO.getCreator())) {
-                baseDO.setCreator(userId.toString());
+                baseDO.setCreator(userId);
             }
             // 当前登录用户不为空，更新人为空，则当前登录用户为更新人
             if (Objects.nonNull(userId) && Objects.isNull(baseDO.getUpdater())) {
-                baseDO.setUpdater(userId.toString());
+                baseDO.setUpdater(userId);
             }
         }
         return SWITCH.CONTINUE;
@@ -159,7 +165,7 @@ public class AnyLineDBInfoListener implements DMListener {
             baseDO.setUpdateTime(current);
 
             Long userId = WebFrameworkUtils.getLoginUserId();
-            baseDO.setUpdater(userId.toString());
+            baseDO.setUpdater(userId);
         }
         return SWITCH.CONTINUE;
     }
@@ -178,7 +184,7 @@ public class AnyLineDBInfoListener implements DMListener {
      * @return 如果返回false 则中断执行
      */
     @Override public SWITCH prepareDelete(DataRuntime runtime, String random, int batch, Table dest, Object obj,
-        String... columns) {
+        ConfigStore configs, String... columns) {
         autoInjectTenantID(obj);
         return SWITCH.CONTINUE;
     }
@@ -193,12 +199,12 @@ public class AnyLineDBInfoListener implements DMListener {
      * @param random  用来标记同一组SQL、执行结构、参数等
      * @param table   表
      * @param key     key
-     * @param obj     obj
+     * @param values     obj
      * @return 如果返回false 则中断执行
      */
-    @Override public SWITCH prepareDelete(DataRuntime runtime, String random, int batch, Table table, String key,
-        Object obj) {
-        autoInjectTenantID(obj);
+    public SWITCH prepareDelete(DataRuntime runtime, String random, int batch, Table table, ConfigStore configs,
+        String key, Object values) {
+        autoInjectTenantID(values);
         return SWITCH.CONTINUE;
     }
 

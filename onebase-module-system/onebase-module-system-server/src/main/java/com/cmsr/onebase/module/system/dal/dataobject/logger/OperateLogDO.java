@@ -16,11 +16,7 @@ import lombok.Data;
 @Data
 public class OperateLogDO extends BaseDO {
 
-    /**
-     * 日志主键
-     */
-    @TableId
-    private Long id;
+
     /**
      * 链路追踪编号
      *

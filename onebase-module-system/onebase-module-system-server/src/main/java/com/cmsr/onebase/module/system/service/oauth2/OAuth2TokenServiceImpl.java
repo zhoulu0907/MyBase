@@ -5,6 +5,7 @@ import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
+import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.common.exception.enums.GlobalErrorCodeConstants;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
@@ -55,6 +56,9 @@ public class OAuth2TokenServiceImpl implements OAuth2TokenService {
     @Resource
     @Lazy // 懒加载，避免循环依赖
     private AdminUserService adminUserService;
+
+    @Resource
+    private DataRepository dataRepository;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -165,7 +169,8 @@ public class OAuth2TokenServiceImpl implements OAuth2TokenService {
                 .setRefreshToken(refreshTokenDO.getRefreshToken())
                 .setExpiresTime(LocalDateTime.now().plusSeconds(clientDO.getAccessTokenValiditySeconds()));
         accessTokenDO.setTenantId(TenantContextHolder.getTenantId()); // 手动设置租户编号，避免缓存到 Redis 的时候，无对应的租户编号
-        oauth2AccessTokenMapper.insert(accessTokenDO);
+        // oauth2AccessTokenMapper.insert(accessTokenDO);
+        dataRepository.insert(accessTokenDO);
         // 记录到 Redis 中
         oauth2AccessTokenRedisDAO.set(accessTokenDO);
         return accessTokenDO;
@@ -176,7 +181,9 @@ public class OAuth2TokenServiceImpl implements OAuth2TokenService {
                 .setUserId(userId).setUserType(userType)
                 .setClientId(clientDO.getClientId()).setScopes(scopes)
                 .setExpiresTime(LocalDateTime.now().plusSeconds(clientDO.getRefreshTokenValiditySeconds()));
-        oauth2RefreshTokenMapper.insert(refreshToken);
+
+        // oauth2RefreshTokenMapper.insert(refreshToken);
+        dataRepository.insert(refreshToken);
         return refreshToken;
     }
 

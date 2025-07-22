@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.system.service.sms;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.system.controller.admin.sms.vo.log.SmsLogPageReqVO;
+import com.cmsr.onebase.module.system.dal.dataobject.sms.SmsCodeDO;
 import com.cmsr.onebase.module.system.dal.dataobject.sms.SmsLogDO;
 import com.cmsr.onebase.module.system.dal.dataobject.sms.SmsTemplateDO;
 import com.cmsr.onebase.module.system.dal.mysql.sms.SmsLogMapper;
@@ -56,10 +57,12 @@ public class SmsLogServiceImpl implements SmsLogService {
                                     String apiSendCode, String apiSendMsg,
                                     String apiRequestId, String apiSerialNo) {
         SmsSendStatusEnum sendStatus = success ? SmsSendStatusEnum.SUCCESS : SmsSendStatusEnum.FAILURE;
-        smsLogMapper.updateById(SmsLogDO.builder().id(id)
-                .sendStatus(sendStatus.getStatus()).sendTime(LocalDateTime.now())
-                .apiSendCode(apiSendCode).apiSendMsg(apiSendMsg)
-                .apiRequestId(apiRequestId).apiSerialNo(apiSerialNo).build());
+        SmsLogDO smsLogDO = SmsLogDO.builder()
+            .sendStatus(sendStatus.getStatus()).sendTime(LocalDateTime.now())
+            .apiSendCode(apiSendCode).apiSendMsg(apiSendMsg)
+            .apiRequestId(apiRequestId).apiSerialNo(apiSerialNo).build();
+        smsLogDO.setId(id);
+        smsLogMapper.updateById(smsLogDO);
     }
 
     @Override
@@ -67,8 +70,10 @@ public class SmsLogServiceImpl implements SmsLogService {
                                        String apiReceiveCode, String apiReceiveMsg) {
         SmsReceiveStatusEnum receiveStatus = Objects.equals(success, true) ?
                 SmsReceiveStatusEnum.SUCCESS : SmsReceiveStatusEnum.FAILURE;
-        smsLogMapper.updateById(SmsLogDO.builder().id(id).receiveStatus(receiveStatus.getStatus())
-                .receiveTime(receiveTime).apiReceiveCode(apiReceiveCode).apiReceiveMsg(apiReceiveMsg).build());
+        SmsLogDO smsLogDO = SmsLogDO.builder().receiveStatus(receiveStatus.getStatus()).receiveTime(receiveTime)
+            .apiReceiveCode(apiReceiveCode).apiReceiveMsg(apiReceiveMsg).build();
+        smsLogDO.setId(id);
+        smsLogMapper.updateById(smsLogDO);
     }
 
     @Override

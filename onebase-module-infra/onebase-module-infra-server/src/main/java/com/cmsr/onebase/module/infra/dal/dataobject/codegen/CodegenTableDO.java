@@ -26,11 +26,7 @@ import lombok.experimental.Accessors;
 @TenantIgnore
 public class CodegenTableDO extends BaseDO {
 
-    /**
-     * ID 编号
-     */
-    @TableId
-    private Long id;
+
 
     /**
      * 数据源编号

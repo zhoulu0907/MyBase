@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.infra.dal.dataobject.codegen;
 
 import com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
+import com.cmsr.onebase.module.infra.dal.dataobject.file.FileConfigDO;
 import com.cmsr.onebase.module.infra.enums.codegen.CodegenColumnHtmlTypeEnum;
 import com.cmsr.onebase.module.infra.enums.codegen.CodegenColumnListConditionEnum;
 import com.baomidou.mybatisplus.annotation.KeySequence;
@@ -24,11 +25,11 @@ import lombok.experimental.Accessors;
 @TenantIgnore
 public class CodegenColumnDO extends BaseDO {
 
-    /**
-     * ID 编号
-     */
-    @TableId
-    private Long id;
+    // builder模式可正常运作
+    public CodegenColumnDO setId(Long id){
+        super.setId(id);
+        return this;
+    }
     /**
      * 表编号
      * <p>

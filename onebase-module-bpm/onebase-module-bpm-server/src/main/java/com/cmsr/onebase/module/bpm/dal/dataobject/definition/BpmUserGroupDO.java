@@ -26,11 +26,7 @@ import java.util.Set;
 @AllArgsConstructor
 public class BpmUserGroupDO extends BaseDO {
 
-    /**
-     * 编号，自增
-     */
-    @TableId
-    private Long id;
+
     /**
      * 组名
      */

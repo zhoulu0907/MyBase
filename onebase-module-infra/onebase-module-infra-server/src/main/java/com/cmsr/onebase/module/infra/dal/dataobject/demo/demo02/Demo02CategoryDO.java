@@ -22,11 +22,7 @@ public class Demo02CategoryDO extends BaseDO {
 
     public static final Long PARENT_ID_ROOT = 0L;
 
-    /**
-     * 编号
-     */
-    @TableId
-    private Long id;
+
     /**
      * 名字
      */

@@ -19,11 +19,7 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 public class UserPostDO extends BaseDO {
 
-    /**
-     * 自增主键
-     */
-    @TableId
-    private Long id;
+
     /**
      * 用户 ID
      *

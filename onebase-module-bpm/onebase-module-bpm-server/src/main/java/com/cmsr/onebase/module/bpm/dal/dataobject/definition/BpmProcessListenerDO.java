@@ -24,11 +24,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class BpmProcessListenerDO extends BaseDO {
 
-    /**
-     * 主键 ID，自增
-     */
-    @TableId
-    private Long id;
+
     /**
      * 监听器名字
      */

@@ -20,11 +20,7 @@ import lombok.*;
 @AllArgsConstructor
 public class BpmProcessExpressionDO extends BaseDO {
 
-    /**
-     * 编号
-     */
-    @TableId
-    private Long id;
+
     /**
      * 表达式名字
      */
