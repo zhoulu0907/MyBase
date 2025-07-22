@@ -123,7 +123,7 @@ public class DictTypeServiceImpl implements DictTypeService {
 
         // 更新字典类型
         DictTypeDO updateObj = BeanUtils.toBean(updateReqVO, DictTypeDO.class);
-        dataRepository.save(updateObj);
+        dataRepository.update(updateObj);
     }
 
     @Override

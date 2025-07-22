@@ -139,7 +139,7 @@ public class DictDataServiceImpl implements DictDataService {
 
         // 更新字典类型
         DictDataDO updateObj = BeanUtils.toBean(updateReqVO, DictDataDO.class);
-        dataRepository.save(updateObj);
+        dataRepository.update(updateObj);
     }
 
     @Override

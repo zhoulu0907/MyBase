@@ -1,15 +1,19 @@
 package com.cmsr.onebase.server.anyline;
 
+import com.cmsr.onebase.framework.common.anyline.web.BizException;
+import com.cmsr.onebase.framework.common.anyline.web.StatusCode;
 import com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
 import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.listener.DMListener;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.prepare.RunPrepare;
 import org.anyline.data.run.Run;
 import org.anyline.data.runtime.DataRuntime;
+import org.anyline.entity.Compare;
 import org.anyline.entity.DataSet;
 import org.anyline.metadata.ACTION.SWITCH;
 import org.anyline.metadata.Table;
@@ -21,8 +25,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.HashSet;
 
-@Component()
-@SuppressWarnings("rawtypes") // AnyLine 框架的接口使用原始类型
+@Slf4j @Component() @SuppressWarnings("rawtypes") // AnyLine 框架的接口使用原始类型
 public class AnyLineDBInfoListener implements DMListener {
 
     // 需要忽略租户过滤的表名列表
@@ -49,12 +52,12 @@ public class AnyLineDBInfoListener implements DMListener {
      * @param columns 需要抛入的列 如果不指定  则根据实体属性解析
      * @return 如果返回false 则中断执行
      */
-    @Override
-    public SWITCH prepareInsert(DataRuntime runtime, String random, int batch, Table dest, Object obj, List<String> columns) {
+    @Override public SWITCH prepareInsert(DataRuntime runtime, String random, int batch, Table dest, Object obj,
+        List<String> columns) {
+        // 加入租户标志
         autoInjectTenantID(obj);
-        if (Objects.nonNull(obj) && obj instanceof BaseDO) {
-            BaseDO baseDO = (BaseDO) obj;
-
+        // 加入创建时间和创建人等参数
+        if (Objects.nonNull(obj) && obj instanceof BaseDO baseDO) {
             LocalDateTime current = LocalDateTime.now();
             // 创建时间为空，则以当前时间为插入时间
             if (Objects.isNull(baseDO.getCreateTime())) {
@@ -78,16 +81,6 @@ public class AnyLineDBInfoListener implements DMListener {
         return SWITCH.CONTINUE;
     }
 
-    private void autoInjectTenantID(Object obj) {
-        boolean shouldIgnore = isTableTenantIgnored2(obj);
-        System.out.println("=== Should ignore tenant filtering: " + shouldIgnore);
-        if (shouldIgnore && Objects.nonNull(obj) && obj instanceof TenantBaseDO) {
-            TenantBaseDO tenantBaseDO = (TenantBaseDO) obj;
-            tenantBaseDO.setTenantId(TenantContextHolder.getRequiredTenantId());
-            System.out.println("tenantBaseDO id  ----------> " + tenantBaseDO.getTenantId());
-        }
-    }
-
     /**
      * 创建查相关的SQL之前调用,包括slect exists count等<br/>
      * 要修改查询条件可以在这一步实现,注意不是在beforeQuery
@@ -99,22 +92,19 @@ public class AnyLineDBInfoListener implements DMListener {
      * @param conditions 查询条件
      * @return 如果返回false 则中断执行
      */
-    @Override
-    public SWITCH prepareQuery(DataRuntime runtime, String random, RunPrepare prepare, ConfigStore configs, String... conditions) {
-        System.out.println("=== PrepareQuery called, TenantContextHolder.isIgnore(): " + TenantContextHolder.isIgnore());
+    @Override public SWITCH prepareQuery(DataRuntime runtime, String random, RunPrepare prepare, ConfigStore configs,
+        String... conditions) {
+
+        // 加入软删判断
+        configs.and(Compare.EQUAL, "deleted", false);
 
         // 只有在不忽略租户的情况下才添加租户条件
         // 检查当前查询的表是否需要忽略租户过滤
         boolean shouldIgnore = isTableTenantIgnored2(prepare);
-        System.out.println("=== Should ignore tenant filtering: " + shouldIgnore);
-
-        if (shouldIgnore) {
-            System.out.println("=== Skipping tenant_id condition for this table");
-        } else {
-            System.out.println("=== Adding tenant_id condition");
+        log.info("prepareQuery--------------> isTableTenantIgnored: {}", shouldIgnore);
+        if (!shouldIgnore) {
             configs.and("tenant_id = " + TenantContextHolder.getRequiredTenantId());
         }
-
         return SWITCH.CONTINUE;
     }
 
@@ -147,11 +137,23 @@ public class AnyLineDBInfoListener implements DMListener {
      * @param configs 更新条件
      * @return 如果返回false 则中断执行
      */
-    @Override
-    public SWITCH prepareUpdate(DataRuntime runtime, String random, int batch, Table dest, Object obj, ConfigStore configs, List<String> columns) {
-        autoInjectTenantID(obj);
+    @Override public SWITCH prepareUpdate(DataRuntime runtime, String random, int batch, Table dest, Object obj,
+        ConfigStore configs, List<String> columns) {
+        // 这里config可能为空，强制异常提前发现问题。
+        if(configs == null){
+            throw new BizException(StatusCode.UPDATE_WHERE_IS_NULL);
+        }
+        // 加入软删判断 (opt: 框架这里config可能为空)
+        configs.and(Compare.EQUAL, "deleted", false);
+        // 加入租户标志
+        boolean shouldIgnore = isTableTenantIgnored2(obj);
+        log.info("prepareUpdate--------------> isTableTenantIgnored: {}", shouldIgnore);
+        if (!shouldIgnore) {
+            configs.and(Compare.EQUAL, "tenant_id", TenantContextHolder.getRequiredTenantId());
+        }
+        // 加入更新时间和更新人
         if (Objects.nonNull(obj) && obj instanceof BaseDO) {
-            BaseDO baseDO = (BaseDO) obj;
+            BaseDO baseDO = (BaseDO)obj;
 
             LocalDateTime current = LocalDateTime.now();
             baseDO.setUpdateTime(current);
@@ -159,18 +161,6 @@ public class AnyLineDBInfoListener implements DMListener {
             Long userId = WebFrameworkUtils.getLoginUserId();
             baseDO.setUpdater(userId.toString());
         }
-        // 更新时间为空，则以当前时间为更新时间
-//        Object modifyTime = getFieldValByName("updateTime", metaObject);
-//        if (Objects.isNull(modifyTime)) {
-//            setFieldValByName("updateTime", LocalDateTime.now(), metaObject);
-//        }
-//
-//        // 当前登录用户不为空，更新人为空，则当前登录用户为更新人
-//        Object modifier = getFieldValByName("updater", metaObject);
-//        Long userId = WebFrameworkUtils.getLoginUserId();
-//        if (Objects.nonNull(userId) && Objects.isNull(modifier)) {
-//            setFieldValByName("updater", userId.toString(), metaObject);
-//        }
         return SWITCH.CONTINUE;
     }
 
@@ -187,15 +177,8 @@ public class AnyLineDBInfoListener implements DMListener {
      * @param columns 删除条件的我
      * @return 如果返回false 则中断执行
      */
-    @Override
-    public SWITCH prepareDelete(DataRuntime runtime, String random, int batch, Table dest, Object obj, String... columns) {
-//        if(obj instanceof DataRow){
-//            DataRow row = (DataRow)obj;
-//            row.put("UPT_TIME", DateUtil.format());
-//            if(row.getInt("ROLE_ID", 0) == 99){
-//                return SWITCH.BREAK;
-//            }
-//        }
+    @Override public SWITCH prepareDelete(DataRuntime runtime, String random, int batch, Table dest, Object obj,
+        String... columns) {
         autoInjectTenantID(obj);
         return SWITCH.CONTINUE;
     }
@@ -213,8 +196,8 @@ public class AnyLineDBInfoListener implements DMListener {
      * @param obj     obj
      * @return 如果返回false 则中断执行
      */
-    @Override
-    public SWITCH prepareDelete(DataRuntime runtime, String random, int batch, Table table, String key, Object obj) {
+    @Override public SWITCH prepareDelete(DataRuntime runtime, String random, int batch, Table table, String key,
+        Object obj) {
         autoInjectTenantID(obj);
         return SWITCH.CONTINUE;
     }
@@ -229,10 +212,23 @@ public class AnyLineDBInfoListener implements DMListener {
      * @param set     查询结果
      * @param millis  耗时(毫秒)
      */
-    @Override
-    public SWITCH afterQuery(DataRuntime runtime, String random, Run run, boolean success, DataSet set, long millis) {
-        System.out.println(run.getFinalQuery());
-        System.out.println(run.getValues());
+    @Override public SWITCH afterQuery(DataRuntime runtime, String random, Run run, boolean success, DataSet set,
+        long millis) {
         return SWITCH.CONTINUE;
     }
+
+    /**
+     * 注入租户标志
+     *
+     * @param obj
+     */
+    private void autoInjectTenantID(Object obj) {
+        boolean shouldIgnore = isTableTenantIgnored2(obj);
+        log.info("autoInjectTenantID--------------> isTableTenantIgnored: {}", shouldIgnore);
+        if (!shouldIgnore && obj instanceof TenantBaseDO tenantBaseDO) {
+            tenantBaseDO.setTenantId(TenantContextHolder.getRequiredTenantId());
+            log.info("tenantBaseDO--------------> setTenantId: {}", tenantBaseDO.getTenantId());
+        }
+    }
+
 }

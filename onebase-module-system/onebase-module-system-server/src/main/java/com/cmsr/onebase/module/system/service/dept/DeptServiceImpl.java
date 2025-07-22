@@ -3,7 +3,6 @@ package com.cmsr.onebase.module.system.service.dept;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.cmsr.onebase.framework.aynline.DataRepository;
-import com.cmsr.onebase.framework.common.anyline.web.MyAnyLineService;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.datapermission.core.annotation.DataPermission;
@@ -17,9 +16,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Compare;
-import org.anyline.service.AnylineService;
+import org.anyline.entity.Order;
 import org.anyline.util.ConfigTable;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -88,7 +86,7 @@ public class DeptServiceImpl implements DeptService {
 
         // 更新部门
         DeptDO updateObj = BeanUtils.toBean(updateReqVO, DeptDO.class);
-        dataRepository.save(updateObj);
+        dataRepository.update(updateObj);
     }
 
     @Override
@@ -217,11 +215,8 @@ public class DeptServiceImpl implements DeptService {
             if (reqVO.getStatus() != null) {
                 configs.and(Compare.EQUAL, "status", reqVO.getStatus());
             }
-
+            configs.order("sort", Order.TYPE.ASC);
             List<DeptDO> list = dataRepository.findAll(DeptDO.class, configs);
-            if (CollectionUtils.isNotEmpty(list)) {
-                list.sort(Comparator.comparing(DeptDO::getSort));
-            }
             return list;
         } catch (Exception e) {
             log.error("查询部门列表失败", e);
