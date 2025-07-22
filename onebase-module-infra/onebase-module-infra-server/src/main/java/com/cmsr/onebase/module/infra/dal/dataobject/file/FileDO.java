@@ -23,10 +23,6 @@ import lombok.*;
 public class FileDO extends BaseDO {
 
     /**
-     * 编号，数据库自增
-     */
-    private Long id;
-    /**
      * 配置编号
      *
      * 关联 {@link FileConfigDO#getId()}

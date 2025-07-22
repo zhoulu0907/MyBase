@@ -20,11 +20,7 @@ import lombok.*;
 @AllArgsConstructor
 public class Demo03CourseDO extends BaseDO {
 
-    /**
-     * 编号
-     */
-    @TableId
-    private Long id;
+
     /**
      * 学生编号
      */

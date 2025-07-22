@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.system.dal.dataobject.permission;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
+import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2ApproveDO;
 import com.cmsr.onebase.module.system.enums.permission.MenuTypeEnum;
 import com.baomidou.mybatisplus.annotation.KeySequence;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -22,16 +23,18 @@ import lombok.EqualsAndHashCode;
 @TenantIgnore
 public class MenuDO extends BaseDO {
 
+    // builder模式可正常运作
+    public MenuDO setId(Long id){
+        super.setId(id);
+        return this;
+    }
+    
     /**
      * 菜单编号 - 根节点
      */
     public static final Long ID_ROOT = 0L;
 
-    /**
-     * 菜单编号
-     */
-    @TableId
-    private Long id;
+
     /**
      * 菜单名称
      */

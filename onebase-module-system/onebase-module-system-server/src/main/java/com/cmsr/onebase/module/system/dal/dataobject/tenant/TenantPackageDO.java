@@ -27,10 +27,6 @@ import java.util.Set;
 public class TenantPackageDO extends BaseDO {
 
     /**
-     * 套餐编号，自增
-     */
-    private Long id;
-    /**
      * 套餐名，唯一
      */
     private String name;

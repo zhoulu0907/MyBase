@@ -22,11 +22,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class Demo03StudentDO extends BaseDO {
 
-    /**
-     * 编号
-     */
-    @TableId
-    private Long id;
+
     /**
      * 名字
      */

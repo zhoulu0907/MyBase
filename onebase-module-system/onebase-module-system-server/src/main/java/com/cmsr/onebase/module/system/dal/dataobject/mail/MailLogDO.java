@@ -32,10 +32,6 @@ import java.util.Map;
 @TenantIgnore
 public class MailLogDO extends BaseDO implements Serializable {
 
-    /**
-     * 日志编号，自增
-     */
-    private Long id;
 
     /**
      * 用户编码

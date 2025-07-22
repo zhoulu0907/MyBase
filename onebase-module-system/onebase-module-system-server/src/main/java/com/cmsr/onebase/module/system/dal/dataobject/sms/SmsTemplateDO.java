@@ -28,10 +28,6 @@ import java.util.List;
 @TenantIgnore
 public class SmsTemplateDO extends BaseDO {
 
-    /**
-     * 自增编号
-     */
-    private Long id;
 
     // ========= 模板相关字段 =========
 

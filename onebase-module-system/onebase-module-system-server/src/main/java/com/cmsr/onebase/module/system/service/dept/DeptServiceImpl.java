@@ -17,6 +17,7 @@ import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Compare;
 import org.anyline.entity.Order;
+import org.anyline.entity.generator.PrimaryGenerator;
 import org.anyline.util.ConfigTable;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -39,14 +40,6 @@ public class DeptServiceImpl implements DeptService {
 
     //@Resource
     //private DeptMapper deptMapper;
-
-    static {
-        ConfigTable.IS_AUTO_CHECK_METADATA = true;
-        ConfigTable.IS_INSERT_NULL_COLUMN = false;
-        ConfigTable.IS_INSERT_NULL_FIELD = false;
-        ConfigTable.IS_INSERT_EMPTY_FIELD = true;
-        ConfigTable.IS_INSERT_EMPTY_COLUMN = true;
-    }
 
     @Resource
     private DataRepository dataRepository;

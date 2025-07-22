@@ -122,7 +122,9 @@ public class TenantServiceImpl implements TenantService {
             Long userId = createUser(roleId, createReqVO);
             // 修改租户的管理员
 //            tenantMapper.updateById(new TenantDO().setId(tenant.getId()).setContactUserId(userId));
-            dataRepository.update(new TenantDO().setId(tenant.getId()).setContactUserId(userId));
+            TenantDO tenantDO = new TenantDO().setContactUserId(userId);
+            tenantDO.setId(tenant.getId());
+            dataRepository.update(tenantDO);
         });
         return tenant.getId();
     }

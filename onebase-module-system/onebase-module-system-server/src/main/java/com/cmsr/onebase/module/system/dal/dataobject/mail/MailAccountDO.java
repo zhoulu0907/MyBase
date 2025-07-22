@@ -23,11 +23,7 @@ import lombok.EqualsAndHashCode;
 @TenantIgnore
 public class MailAccountDO extends BaseDO {
 
-    /**
-     * 主键
-     */
-    @TableId
-    private Long id;
+
     /**
      * 邮箱
      */

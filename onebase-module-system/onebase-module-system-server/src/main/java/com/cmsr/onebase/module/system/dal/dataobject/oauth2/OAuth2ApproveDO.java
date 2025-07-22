@@ -5,6 +5,7 @@ import com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO;
 import com.baomidou.mybatisplus.annotation.KeySequence;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -22,11 +23,10 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode(callSuper = true)
 public class OAuth2ApproveDO extends BaseDO {
 
-    /**
-     * 编号，数据库自增
-     */
-    @TableId
-    private Long id;
+    public OAuth2ApproveDO setId(Long id){
+        super.setId(id);
+        return this;
+    }
     /**
      * 用户编号
      */

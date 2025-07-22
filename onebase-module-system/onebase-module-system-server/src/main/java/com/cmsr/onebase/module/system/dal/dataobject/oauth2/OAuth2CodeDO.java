@@ -23,10 +23,6 @@ import java.util.List;
 public class OAuth2CodeDO extends BaseDO {
 
     /**
-     * 编号，数据库递增
-     */
-    private Long id;
-    /**
      * 授权码
      */
     private String code;

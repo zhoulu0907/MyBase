@@ -26,10 +26,6 @@ import java.util.List;
 public class OAuth2RefreshTokenDO extends TenantBaseDO {
 
     /**
-     * 编号，数据库字典
-     */
-    private Long id;
-    /**
      * 刷新令牌
      */
     private String refreshToken;

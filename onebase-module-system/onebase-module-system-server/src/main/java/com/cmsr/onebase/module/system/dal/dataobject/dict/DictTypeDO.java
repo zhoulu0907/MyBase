@@ -26,11 +26,7 @@ import java.time.LocalDateTime;
 @TenantIgnore
 public class DictTypeDO extends BaseDO {
 
-    /**
-     * 字典主键
-     */
-    @TableId
-    private Long id;
+
     /**
      * 字典名称
      */

@@ -19,11 +19,7 @@ import lombok.EqualsAndHashCode;
 @TenantIgnore
 public class DictDataDO extends BaseDO {
 
-    /**
-     * 字典数据编号
-     */
-    @TableId
-    private Long id;
+
     /**
      * 字典排序
      */

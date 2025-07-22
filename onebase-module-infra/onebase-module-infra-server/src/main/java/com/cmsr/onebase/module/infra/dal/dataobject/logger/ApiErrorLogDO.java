@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.infra.dal.dataobject.logger;
 
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO;
+import com.cmsr.onebase.module.infra.dal.dataobject.file.FileConfigDO;
 import com.cmsr.onebase.module.infra.enums.logger.ApiErrorLogProcessStatusEnum;
 import com.baomidou.mybatisplus.annotation.KeySequence;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -23,17 +24,17 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @KeySequence(value = "infra_api_error_log_seq")
 public class ApiErrorLogDO extends BaseDO {
-
+    // builder模式可正常运作
+    public ApiErrorLogDO setId(Long id){
+        super.setId(id);
+        return this;
+    }
     /**
      * {@link #requestParams} 的最大长度
      */
     public static final Integer REQUEST_PARAMS_MAX_LENGTH = 8000;
 
-    /**
-     * 编号
-     */
-    @TableId
-    private Long id;
+
     /**
      * 用户编号
      */

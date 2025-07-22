@@ -25,10 +25,6 @@ import lombok.ToString;
 public class SmsChannelDO extends BaseDO {
 
     /**
-     * 渠道编号
-     */
-    private Long id;
-    /**
      * 短信签名
      */
     private String signature;
