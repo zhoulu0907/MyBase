@@ -17,7 +17,7 @@
         <module>onebase-module-system</module>
         <module>onebase-module-infra</module>
         <module>onebase-module-bpm</module>
-        <module>onebase-module-app-resource</module>
+        <module>onebase-module-app</module>
     </modules>
 
     <name>${project.artifactId}</name>

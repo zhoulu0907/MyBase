@@ -1,10 +1,9 @@
-package com.cmsr.onebase.mudule.appresource.enums.protocol.pageSet;
+package com.cmsr.onebase.mudule.appresource.enums.protocol.pageset;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
@@ -21,13 +20,11 @@ public class PageRef {
     /**
      * 页面名称
      */
-    @NotNull(message = "页面名称不能为空")
     private String name;
 
     /**
      * 页面引用,唯一
      */
-    @NotNull(message = "页面引用不能为空")
     private String ref;
 
     /**
@@ -43,7 +40,7 @@ public class PageRef {
     /**
      * 是否为默认页面
      */
-    private Boolean default;
+    private Boolean defaultPage;
 
     /**
      * 路由参数配置
