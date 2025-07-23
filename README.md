@@ -19,23 +19,34 @@ SELECT setval('system_dept_id_seq', (SELECT MAX(id) FROM system_dept));
 ## 工程结构和开发约定
 ### 1. 后端工程结构
 #### 通用模块
-- gateway，统一网关。
-- onebase-server，打包服务和统一工程配置项。
-- dependencies ，统一管理所有依赖项目。
-- framework，统一管理common公共能力和各类中间件。
+```
+onebase/
+├── onebase-server/     # 打包服务、统一工程配置
+├── gateway/            # 统一网关
+├── dependencies/       # 统一管理所有依赖项目
+├── framework/          # 统一管理common公共能力和各类中间件
+├── module-xxx/         # 各个业务模块
+├── pom.xml             # 主POM
+```
 #### 业务模块
-- module-infra，基础设施模块，例如代码生成、API日志、配置管理、监控中心、文件管理、定时任务等。
-- module-system，系统能力模块，例如租户管理、角色管理、菜单管理、部门管理、字段管理、审计日志等。
-- module-bpm，工作流模块。
-- module-data(计划新增)，元数据和数据管理模块。
-- module-app(计划新增)，应用管理模块。
-- module-app-resource(计划新增)，应用资源和协议管理。
-- module-runtime(计划新增)，运行态支持，模块流量大，性能要求高。
+注意每个模块均是一级module，将来具备独立微服务部署能力
+```
+onebase/
+├── module-infra        # 基础设施模块，例如代码生成、API日志、配置管理、监控中心、文件管理、定时任务等。
+├── module-system       # 系统能力模块，例如租户管理、角色管理、菜单管理、部门管理、字段管理、审计日志等。
+├── module-bpm          # 工作流模块。
+├── module-data         # 元数据和数据管理模块。
+├── module-app          # 应用管理模块。
+├── module-runtime(计划) # 运行态支持，模块流量大，性能要求高。
+```
 
 ### 2. 前端工程结构
-- app-console，管理后台。
-- app-builder，应用管理和页面编辑器。
-- app-runtime(计划新增)，面向C端用户，运行态。
+```
+onebase/
+├── admin-console，管理后台。
+├── app-builder，应用管理和页面编辑器。
+├── app-runtime(计划新增)，面向C端用户，运行态。
+```
 
 ### 3. 包名约定
 通用模块遵循现有方式；新建业务模块和moudle保持一致如system模块主包名：com.cmsr.onebase.module.system
