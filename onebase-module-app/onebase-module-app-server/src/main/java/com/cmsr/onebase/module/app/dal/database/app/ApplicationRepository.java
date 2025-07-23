@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.app.dal.database;
+package com.cmsr.onebase.module.app.dal.database.app;
 
 import com.cmsr.onebase.framework.aynline.DataRepository;
 

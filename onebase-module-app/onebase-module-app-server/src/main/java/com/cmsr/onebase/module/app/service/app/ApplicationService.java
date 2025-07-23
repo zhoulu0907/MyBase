@@ -1,9 +1,9 @@
-package com.cmsr.onebase.module.app.service;
+package com.cmsr.onebase.module.app.service.app;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.app.controller.vo.ApplicationCreateReqVO;
-import com.cmsr.onebase.module.app.controller.vo.ApplicationPageReqVO;
-import com.cmsr.onebase.module.app.controller.vo.ApplicationPageRespVO;
+import com.cmsr.onebase.module.app.controller.app.vo.ApplicationCreateReqVO;
+import com.cmsr.onebase.module.app.controller.app.vo.ApplicationPageReqVO;
+import com.cmsr.onebase.module.app.controller.app.vo.ApplicationPageRespVO;
 
 /**
  * @Author：huangjie

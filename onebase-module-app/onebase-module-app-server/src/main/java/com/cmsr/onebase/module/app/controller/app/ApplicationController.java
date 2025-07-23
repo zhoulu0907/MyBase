@@ -1,11 +1,11 @@
-package com.cmsr.onebase.module.app.controller;
+package com.cmsr.onebase.module.app.controller.app;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.app.controller.vo.ApplicationCreateReqVO;
-import com.cmsr.onebase.module.app.controller.vo.ApplicationPageReqVO;
-import com.cmsr.onebase.module.app.controller.vo.ApplicationPageRespVO;
-import com.cmsr.onebase.module.app.service.ApplicationService;
+import com.cmsr.onebase.module.app.controller.app.vo.ApplicationCreateReqVO;
+import com.cmsr.onebase.module.app.controller.app.vo.ApplicationPageReqVO;
+import com.cmsr.onebase.module.app.controller.app.vo.ApplicationPageRespVO;
+import com.cmsr.onebase.module.app.service.app.ApplicationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;

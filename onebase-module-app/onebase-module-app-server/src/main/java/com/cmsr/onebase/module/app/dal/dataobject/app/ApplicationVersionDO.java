@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.app.dal.dataobject;
+package com.cmsr.onebase.module.app.dal.dataobject.app;
 
 import com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO;
 
