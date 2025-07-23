@@ -12,7 +12,7 @@
     <modules>
         <module>onebase-common</module>
         <module>onebase-spring-boot-starter-env</module>
-        <module>onebase-spring-boot-starter-mybatis</module>
+        <module>onebase-spring-boot-starter-orm</module>
         <module>onebase-spring-boot-starter-redis</module>
         <module>onebase-spring-boot-starter-web</module>
         <module>onebase-spring-boot-starter-security</module>

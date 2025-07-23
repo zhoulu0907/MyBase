@@ -21,11 +21,7 @@ import lombok.*;
 @AllArgsConstructor
 public class SocialUserBindDO extends BaseDO {
 
-    /**
-     * 编号
-     */
-    @TableId
-    private Long id;
+
     /**
      * 关联的用户编号
      *

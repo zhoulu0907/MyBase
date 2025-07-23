@@ -25,10 +25,6 @@ import java.time.LocalDateTime;
 public class SmsCodeDO extends BaseDO {
 
     /**
-     * 编号
-     */
-    private Long id;
-    /**
      * 手机号
      */
     private String mobile;

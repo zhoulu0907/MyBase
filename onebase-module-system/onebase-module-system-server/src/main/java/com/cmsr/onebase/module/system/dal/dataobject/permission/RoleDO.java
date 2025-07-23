@@ -25,11 +25,12 @@ import java.util.Set;
 @EqualsAndHashCode(callSuper = true)
 public class RoleDO extends TenantBaseDO {
 
-    /**
-     * 角色ID
-     */
-    @TableId
-    private Long id;
+    // builder模式可正常运作
+    public RoleDO setId(Long id){
+        super.setId(id);
+        return this;
+    }
+
     /**
      * 角色名称
      */

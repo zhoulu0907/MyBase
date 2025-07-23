@@ -21,11 +21,7 @@ import lombok.*;
 @AllArgsConstructor
 public class SocialUserDO extends BaseDO {
 
-    /**
-     * 自增主键
-     */
-    @TableId
-    private Long id;
+
     /**
      * 社交平台的类型
      *

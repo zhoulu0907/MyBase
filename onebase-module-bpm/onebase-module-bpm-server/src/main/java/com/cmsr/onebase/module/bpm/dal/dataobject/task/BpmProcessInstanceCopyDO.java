@@ -25,11 +25,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class BpmProcessInstanceCopyDO extends BaseDO {
 
-    /**
-     * 编号
-     */
-    @TableId
-    private Long id;
+
 
     /**
      * 发起人 Id

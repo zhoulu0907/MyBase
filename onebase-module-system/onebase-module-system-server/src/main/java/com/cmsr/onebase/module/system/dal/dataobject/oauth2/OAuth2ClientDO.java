@@ -26,13 +26,6 @@ import java.util.List;
 public class OAuth2ClientDO extends BaseDO {
 
     /**
-     * 编号，数据库自增
-     *
-     * 由于 SQL Server 在存储 String 主键有点问题，所以暂时使用 Long 类型
-     */
-    @TableId
-    private Long id;
-    /**
      * 客户端编号
      */
     private String clientId;

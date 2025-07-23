@@ -201,7 +201,7 @@
             <!-- DB 相关 -->
             <dependency>
                 <groupId>com.cmsr.onebase</groupId>
-                <artifactId>onebase-spring-boot-starter-mybatis</artifactId>
+                <artifactId>onebase-spring-boot-starter-orm</artifactId>
                 <version>${revision}</version>
             </dependency>
 

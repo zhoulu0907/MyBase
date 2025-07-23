@@ -55,7 +55,7 @@ public class PostServiceImpl implements PostService {
 
         // 更新岗位
         PostDO updateObj = BeanUtils.toBean(updateReqVO, PostDO.class);
-        dataRepository.save(updateObj);
+        dataRepository.update(updateObj);
     }
 
     @Override

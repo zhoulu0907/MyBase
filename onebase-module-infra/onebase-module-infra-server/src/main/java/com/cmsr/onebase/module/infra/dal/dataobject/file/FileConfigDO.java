@@ -4,6 +4,7 @@ import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
+import com.cmsr.onebase.module.infra.dal.dataobject.db.DataSourceConfigDO;
 import com.cmsr.onebase.module.infra.framework.file.core.client.FileClientConfig;
 import com.cmsr.onebase.module.infra.framework.file.core.client.db.DBFileClientConfig;
 import com.cmsr.onebase.module.infra.framework.file.core.client.ftp.FtpFileClientConfig;
@@ -34,11 +35,11 @@ import java.lang.reflect.Field;
 @AllArgsConstructor
 @TenantIgnore
 public class FileConfigDO extends BaseDO {
-
-    /**
-     * 配置编号，数据库自增
-     */
-    private Long id;
+    // builder模式可正常运作
+    public FileConfigDO setId(Long id){
+        super.setId(id);
+        return this;
+    }
     /**
      * 配置名
      */

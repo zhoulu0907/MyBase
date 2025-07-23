@@ -93,11 +93,11 @@ public class SmsCodeServiceImpl implements SmsCodeService {
         // 使用验证码
         dataRepository.update(SmsCodeDO.builder().id(lastSmsCode.getId())
                 .used(true).usedTime(LocalDateTime.now()).usedIp(reqDTO.getUsedIp()).build());
-    
-	//smsCodeMapper.updateById(SmsCodeDO.builder().id(lastSmsCode.getId())
-                //.used(true).usedTime(LocalDateTime.now()).usedIp(reqDTO.getUsedIp()).build());
-	
-	}
+
+        //SmsCodeDO smsCodeDO = SmsCodeDO.builder().used(true).usedTime(LocalDateTime.now()).usedIp(reqDTO.getUsedIp()).build();
+        //smsCodeDO.setId(lastSmsCode.getId());
+        //smsCodeMapper.updateById(smsCodeDO);
+    }
 
     @Override
     public void validateSmsCode(SmsCodeValidateReqDTO reqDTO) {

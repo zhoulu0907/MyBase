@@ -25,11 +25,7 @@ import lombok.*;
 @TenantIgnore
 public class FileContentDO extends BaseDO {
 
-    /**
-     * 编号，数据库自增
-     */
-    @TableId
-    private Long id;
+
     /**
      * 配置编号
      *

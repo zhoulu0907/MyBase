@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.system.dal.dataobject.tenant;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
+import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.baomidou.mybatisplus.annotation.KeySequence;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -25,15 +26,17 @@ import java.time.LocalDateTime;
 @TenantIgnore
 public class TenantDO extends BaseDO {
 
+    // builder模式可正常运作
+    public TenantDO setId(Long id){
+        super.setId(id);
+        return this;
+    }
+
     /**
      * 套餐编号 - 系统
      */
     public static final Long PACKAGE_ID_SYSTEM = 0L;
 
-    /**
-     * 租户编号，自增
-     */
-    private Long id;
     /**
      * 租户名，唯一
      */
