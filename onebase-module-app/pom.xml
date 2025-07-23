@@ -9,10 +9,10 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <modules>
-        <module>onebase-module-app-resource-api</module>
-        <module>onebase-module-app-resource-server</module>
+        <module>onebase-module-app-api</module>
+        <module>onebase-module-app-server</module>
     </modules>
-    <artifactId>onebase-module-app-resource</artifactId>
+    <artifactId>onebase-module-app</artifactId>
     <packaging>pom</packaging>
 
     <name>${project.artifactId}</name>
