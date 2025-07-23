@@ -5,6 +5,7 @@ import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.extra.spring.SpringUtil;
+import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
@@ -23,6 +24,8 @@ import com.mzt.logapi.service.impl.DiffParseFunction;
 import com.mzt.logapi.starter.annotation.LogRecord;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.anyline.data.param.init.DefaultConfigStore;
+import org.anyline.entity.Compare;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -50,6 +53,8 @@ public class RoleServiceImpl implements RoleService {
     @Resource
     private RoleMapper roleMapper;
 
+    @Resource
+    private DataRepository dataRepository;
     @Override
     @Transactional(rollbackFor = Exception.class)
     @LogRecord(type = SYSTEM_ROLE_TYPE, subType = SYSTEM_ROLE_CREATE_SUB_TYPE, bizNo = "{{#role.id}}",
@@ -63,7 +68,8 @@ public class RoleServiceImpl implements RoleService {
                 .setType(ObjectUtil.defaultIfNull(type, RoleTypeEnum.CUSTOM.getType()))
                 .setStatus(ObjUtil.defaultIfNull(createReqVO.getStatus(), CommonStatusEnum.ENABLE.getStatus()))
                 .setDataScope(DataScopeEnum.ALL.getScope()); // 默认可查看所有数据。原因是，可能一些项目不需要项目权限
-        roleMapper.insert(role);
+        dataRepository.insert(role);
+        //roleMapper.insert(role);
 
         // 3. 记录操作日志上下文
         LogRecordContext.putVariable("role", role);
@@ -82,7 +88,8 @@ public class RoleServiceImpl implements RoleService {
 
         // 2. 更新到数据库
         RoleDO updateObj = BeanUtils.toBean(updateReqVO, RoleDO.class);
-        roleMapper.updateById(updateObj);
+        dataRepository.update(updateObj);
+        //roleMapper.updateById(updateObj);
 
         // 3. 记录操作日志上下文
         LogRecordContext.putVariable(DiffParseFunction.OLD_OBJECT, BeanUtils.toBean(role, RoleSaveReqVO.class));
@@ -100,7 +107,8 @@ public class RoleServiceImpl implements RoleService {
         updateObject.setId(id);
         updateObject.setDataScope(dataScope);
         updateObject.setDataScopeDeptIds(dataScopeDeptIds);
-        roleMapper.updateById(updateObject);
+        dataRepository.update(updateObject);
+        //roleMapper.updateById(updateObject);
     }
 
     @Override
@@ -113,7 +121,8 @@ public class RoleServiceImpl implements RoleService {
         RoleDO role = validateRoleForUpdate(id);
 
         // 2.1 标记删除
-        roleMapper.deleteById(id);
+        dataRepository.deleteById(RoleDO.class,id);
+        //roleMapper.deleteById(id);
         // 2.2 删除相关数据
         permissionService.processRoleDeleted(id);
 
@@ -138,7 +147,8 @@ public class RoleServiceImpl implements RoleService {
             throw exception(ROLE_ADMIN_CODE_ERROR, code);
         }
         // 1. 该 name 名字被其它角色所使用
-        RoleDO role = roleMapper.selectByName(name);
+        RoleDO role = dataRepository.findOne(RoleDO.class,new DefaultConfigStore().and(Compare.EQUAL, "name", name));
+        //RoleDO role = roleMapper.selectByName(name);
         if (role != null && !role.getId().equals(id)) {
             throw exception(ROLE_NAME_DUPLICATE, name);
         }
@@ -147,7 +157,8 @@ public class RoleServiceImpl implements RoleService {
             return;
         }
         // 该 code 编码被其它角色所使用
-        role = roleMapper.selectByCode(code);
+        role = dataRepository.findOne(RoleDO.class,new DefaultConfigStore().and(Compare.EQUAL, "code", code));
+        //role = roleMapper.selectByCode(code);
         if (role != null && !role.getId().equals(id)) {
             throw exception(ROLE_CODE_DUPLICATE, code);
         }
@@ -160,7 +171,8 @@ public class RoleServiceImpl implements RoleService {
      */
     @VisibleForTesting
     RoleDO validateRoleForUpdate(Long id) {
-        RoleDO role = roleMapper.selectById(id);
+        RoleDO role = dataRepository.findById(RoleDO.class,id);
+        //RoleDO role = roleMapper.selectById(id);
         if (role == null) {
             throw exception(ROLE_NOT_EXISTS);
         }
@@ -173,25 +185,29 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public RoleDO getRole(Long id) {
-        return roleMapper.selectById(id);
+        return dataRepository.findById(RoleDO.class,id);
+        //return roleMapper.selectById(id);
     }
 
     @Override
     @Cacheable(value = RedisKeyConstants.ROLE, key = "#id",
             unless = "#result == null")
     public RoleDO getRoleFromCache(Long id) {
-        return roleMapper.selectById(id);
+        return dataRepository.findById(RoleDO.class,id);
+        //return roleMapper.selectById(id);
     }
 
 
     @Override
     public List<RoleDO> getRoleListByStatus(Collection<Integer> statuses) {
-        return roleMapper.selectListByStatus(statuses);
+        return dataRepository.findAll(RoleDO.class,new DefaultConfigStore().and(Compare.EQUAL, "status", statuses));
+        //return roleMapper.selectListByStatus(statuses);
     }
 
     @Override
     public List<RoleDO> getRoleList() {
-        return roleMapper.selectList();
+        return dataRepository.findAll(RoleDO.class);
+        //return roleMapper.selectList();
     }
 
     @Override
@@ -199,7 +215,8 @@ public class RoleServiceImpl implements RoleService {
         if (CollectionUtil.isEmpty(ids)) {
             return Collections.emptyList();
         }
-        return roleMapper.selectBatchIds(ids);
+        return dataRepository.findAllByIds(RoleDO.class,ids);
+        //return roleMapper.selectBatchIds(ids);
     }
 
     @Override
@@ -214,7 +231,11 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public PageResult<RoleDO> getRolePage(RolePageReqVO reqVO) {
-        return roleMapper.selectPage(reqVO);
+        return dataRepository.findPageWithConditions(RoleDO.class,new DefaultConfigStore()
+                .and(Compare.LIKE, "name", reqVO.getName()).and(Compare.LIKE, "code", reqVO.getCode())
+                .and(Compare.EQUAL, "status", reqVO.getStatus()).and(Compare.EQUAL, "create_time", reqVO.getCreateTime()),
+                reqVO.getPageNo(), reqVO.getPageSize());
+        //return roleMapper.selectPage(reqVO);
     }
 
     @Override
@@ -235,7 +256,8 @@ public class RoleServiceImpl implements RoleService {
             return;
         }
         // 获得角色信息
-        List<RoleDO> roles = roleMapper.selectBatchIds(ids);
+        List<RoleDO> roles = dataRepository.findAllByIds(RoleDO.class,ids);
+        //List<RoleDO> roles = roleMapper.selectBatchIds(ids);
         Map<Long, RoleDO> roleMap = convertMap(roles, RoleDO::getId);
         // 校验
         ids.forEach(id -> {

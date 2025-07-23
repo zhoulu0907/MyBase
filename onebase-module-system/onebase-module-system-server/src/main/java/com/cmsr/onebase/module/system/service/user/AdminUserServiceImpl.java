@@ -262,12 +262,12 @@ public class AdminUserServiceImpl implements AdminUserService {
         AdminUserDO user = validateUserExists(id);
 
         // 2.1 删除用户
-        userMapper.deleteById(id);
+        //userMapper.deleteById(id);
         dataRepository.deleteById(AdminUserDO.class, id);
         // 2.2 删除用户关联数据
         permissionService.processUserDeleted(id);
         // 2.2 删除用户岗位
-        userPostMapper.deleteByUserId(id);
+        //userPostMapper.deleteByUserId(id);
         dataRepository.deleteByConfig(UserPostDO.class, new DefaultConfigStore().eq("user_id", id));
 
         // 3. 记录操作日志上下文

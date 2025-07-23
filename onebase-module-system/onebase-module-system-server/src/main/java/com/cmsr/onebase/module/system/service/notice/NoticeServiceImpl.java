@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.system.service.notice;
 import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.system.controller.admin.notice.vo.NoticePageReqVO;
 import com.cmsr.onebase.module.system.controller.admin.notice.vo.NoticeSaveReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.mail.MailLogDO;
@@ -27,8 +28,8 @@ import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.NOTICE_NOT
 @Service
 public class NoticeServiceImpl implements NoticeService {
 
-    //@Resource
-    //private NoticeMapper noticeMapper;
+    @Resource
+    private NoticeMapper noticeMapper;
 
     @Resource
     private DataRepository dataRepository;

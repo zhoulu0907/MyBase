@@ -127,6 +127,7 @@ public class NotifyMessageServiceImpl implements NotifyMessageService {
 
     @Override
     public int updateNotifyMessageRead(Collection<Long> ids, Long userId, Integer userType) {
+        //dataRepository.update(NotifyMessageDO.class);
         return notifyMessageMapper.updateListRead(ids, userId, userType);
     }
 

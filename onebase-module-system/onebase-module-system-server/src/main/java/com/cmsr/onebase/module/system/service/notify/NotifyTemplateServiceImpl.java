@@ -23,6 +23,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
 import jakarta.annotation.Resource;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -59,7 +61,8 @@ public class NotifyTemplateServiceImpl implements NotifyTemplateService {
 
         // 插入
         NotifyTemplateDO notifyTemplate = BeanUtils.toBean(createReqVO, NotifyTemplateDO.class);
-        notifyTemplate.setParams(parseTemplateContentParams(notifyTemplate.getContent()));
+        List<String> strings = parseTemplateContentParams(notifyTemplate.getContent());
+        notifyTemplate.setParams(strings);
         dataRepository.insert(notifyTemplate);
 		//notifyTemplateMapper.insert(notifyTemplate);
         return notifyTemplate.getId();
@@ -135,7 +138,7 @@ public class NotifyTemplateServiceImpl implements NotifyTemplateService {
             configStore.and(Compare.EQUAL, "code", pageReqVO.getCode());
         }
         if (StringUtils.isNotBlank(pageReqVO.getName())) {
-            configStore.and(Compare.EQUAL, "name", pageReqVO.getPageNo());
+            configStore.and(Compare.EQUAL, "name", pageReqVO.getName());
         }
         if (null != pageReqVO.getStatus()) {
             configStore.and(Compare.EQUAL, "status", pageReqVO.getStatus());

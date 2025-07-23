@@ -102,10 +102,13 @@ public class MenuServiceImpl implements MenuService {
             allEntries = true) // allEntries 清空所有缓存，因为此时不知道 id 对应的 permission 是多少。直接清理，简单有效
     public void deleteMenu(Long id) {
         // 校验是否还有子菜单
-
-        if (menuMapper.selectCountByParentId(id) > 0) {
+        List<MenuDO> menuDOS = dataRepository.findAll(MenuDO.class, new DefaultConfigStore().and(Compare.EQUAL, "parent_id", id));
+        if (menuDOS.size() > 0) {
             throw exception(MENU_EXISTS_CHILDREN);
         }
+        //if (menuMapper.selectCountByParentId(id) > 0) {
+        //    throw exception(MENU_EXISTS_CHILDREN);
+        //}
         // 校验删除的菜单是否存在
         if (dataRepository.findById(MenuDO.class,id) == null) {
             throw exception(MENU_NOT_EXISTS);
@@ -260,7 +263,11 @@ public class MenuServiceImpl implements MenuService {
      */
     @VisibleForTesting
     void validateMenuName(Long parentId, String name, Long id) {
-        MenuDO menu = menuMapper.selectByParentIdAndName(parentId, name);
+
+        MenuDO menu = dataRepository.findOne(MenuDO.class,new DefaultConfigStore().and(Compare.EQUAL,"parent_id",id)
+                .and(Compare.EQUAL,"name",name));
+
+        //MenuDO menu = menuMapper.selectByParentIdAndName(parentId, name);
         if (menu == null) {
             return;
         }

@@ -80,7 +80,8 @@ public class OAuth2TokenServiceImpl implements OAuth2TokenService {
     @Transactional(rollbackFor = Exception.class)
     public OAuth2AccessTokenDO refreshAccessToken(String refreshToken, String clientId) {
         // 查询访问令牌
-        OAuth2RefreshTokenDO refreshTokenDO = oauth2RefreshTokenMapper.selectByRefreshToken(refreshToken);
+        OAuth2RefreshTokenDO refreshTokenDO = dataRepository.findOne(OAuth2RefreshTokenDO.class,new DefaultConfigStore().and(Compare.EQUAL,"refresh_token",refreshToken));
+        //OAuth2RefreshTokenDO refreshTokenDO = oauth2RefreshTokenMapper.selectByRefreshToken(refreshToken);
         if (refreshTokenDO == null) {
             throw exception0(GlobalErrorCodeConstants.BAD_REQUEST.getCode(), "无效的刷新令牌");
         }
@@ -134,10 +135,9 @@ public class OAuth2TokenServiceImpl implements OAuth2TokenService {
             // 特殊：从 MySQL 中获取刷新令牌。原因：解决部分场景不方便刷新访问令牌场景
             // 例如说，积木报表只允许传递 token，不允许传递 refresh_token，导致无法刷新访问令牌
             // 再例如说，前端 WebSocket 的 token 直接跟在 url 上，无法传递 refresh_token
-            ConfigStore configStore = new DefaultConfigStore()
-                    .and(Compare.EQUAL, "access_token", accessToken)
-                    .and(Compare.EQUAL, "deleted", false);
-            OAuth2RefreshTokenDO refreshTokenDO = dataRepository.findOne(OAuth2RefreshTokenDO.class,configStore);
+
+            OAuth2RefreshTokenDO refreshTokenDO = dataRepository.findOne(OAuth2RefreshTokenDO.class,new DefaultConfigStore()
+                    .and(Compare.EQUAL, "access_token", accessToken));
             //OAuth2RefreshTokenDO refreshTokenDO = oauth2RefreshTokenMapper.selectByRefreshToken(accessToken);
             if (refreshTokenDO != null && !DateUtils.isExpired(refreshTokenDO.getExpiresTime())) {
                 accessTokenDO = convertToAccessToken(refreshTokenDO);
@@ -182,11 +182,8 @@ public class OAuth2TokenServiceImpl implements OAuth2TokenService {
         //oauth2AccessTokenMapper.deleteById(accessTokenDO.getId());
         oauth2AccessTokenRedisDAO.delete(accessToken);
         // 删除刷新令牌
-        ConfigStore configStore2 = new DefaultConfigStore()
-                .and(Compare.EQUAL, "access_token", accessTokenDO.getRefreshToken())
-                .and(Compare.EQUAL, "deleted", false);
-        //dataRepository.deleteById(OAuth2RefreshTokenDO.class,configStore2);
-        oauth2RefreshTokenMapper.deleteByRefreshToken(accessTokenDO.getRefreshToken());
+        dataRepository.deleteByConfig(OAuth2RefreshTokenDO.class,new DefaultConfigStore().and(Compare.EQUAL,"refresh_token",accessTokenDO.getRefreshToken()));
+        //oauth2RefreshTokenMapper.deleteByRefreshToken(accessTokenDO.getRefreshToken());
         return accessTokenDO;
     }
 

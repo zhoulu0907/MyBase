@@ -24,6 +24,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.Sets;
 import lombok.extern.slf4j.Slf4j;
+import org.anyline.data.param.init.DefaultConfigStore;
+import org.anyline.entity.Compare;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
@@ -143,7 +145,9 @@ public class PermissionServiceImpl implements PermissionService {
     })
     public void assignRoleMenu(Long roleId, Set<Long> menuIds) {
         // 获得角色拥有菜单编号
-        Set<Long> dbMenuIds = convertSet(roleMenuMapper.selectListByRoleId(roleId), RoleMenuDO::getMenuId);
+        Set<Long> dbMenuIds = convertSet(dataRepository.findAll(RoleMenuDO.class,new DefaultConfigStore()
+                        .and(Compare.EQUAL,"roleId", roleId)), RoleMenuDO::getMenuId);
+        //Set<Long> dbMenuIds = convertSet(roleMenuMapper.selectListByRoleId(roleId), RoleMenuDO::getMenuId);
         // 计算新增和删除的菜单编号
         Set<Long> menuIdList = CollUtil.emptyIfNull(menuIds);
         Collection<Long> createMenuIds = CollUtil.subtract(menuIdList, dbMenuIds);
@@ -156,7 +160,8 @@ public class PermissionServiceImpl implements PermissionService {
                 Long mId = Long.parseLong(menuId.toString());
                 entities.add(new RoleMenuDO().setMenuId(mId).setRoleId(roleId));
             }
-            roleMenuMapper.insertBatch(entities);
+            dataRepository.insertBatch(entities);
+            //roleMenuMapper.insertBatch(entities);
 //            roleMenuMapper.insertBatch(CollectionUtils.convertList(createMenuIds, menuId -> {
 //                RoleMenuDO entity = new RoleMenuDO();
 //                entity.setRoleId(roleId);
@@ -179,10 +184,10 @@ public class PermissionServiceImpl implements PermissionService {
     })
     public void processRoleDeleted(Long roleId) {
         // 标记删除 UserRole
-        dataRepository.deleteById(UserRoleDO.class,roleId);
+        dataRepository.deleteByConfig(UserRoleDO.class,new DefaultConfigStore().and(Compare.EQUAL,"role_id", roleId));
         //userRoleMapper.deleteListByRoleId(roleId);
         // 标记删除 RoleMenu
-        dataRepository.deleteById(RoleDO.class,roleId);
+        dataRepository.deleteByConfig(RoleMenuDO.class,new DefaultConfigStore().and(Compare.EQUAL,"role_id", roleId));
         //roleMenuMapper.deleteListByRoleId(roleId);
     }
 
@@ -190,8 +195,8 @@ public class PermissionServiceImpl implements PermissionService {
     @CacheEvict(value = RedisKeyConstants.MENU_ROLE_ID_LIST, key = "#menuId")
     public void processMenuDeleted(Long menuId) {
 
-        //dataRepository.deleteListByMenuId(menuId);
-        roleMenuMapper.deleteListByMenuId(menuId);
+        dataRepository.deleteByConfig(RoleMenuDO.class,new DefaultConfigStore().and(Compare.EQUAL,"menu_id", menuId));
+        //roleMenuMapper.deleteListByMenuId(menuId);
     }
 
     @Override
@@ -205,13 +210,16 @@ public class PermissionServiceImpl implements PermissionService {
             return convertSet(menuService.getMenuList(), MenuDO::getId);
         }
         // 如果是非管理员的情况下，获得拥有的菜单编号
-        return convertSet(roleMenuMapper.selectListByRoleId(roleIds), RoleMenuDO::getMenuId);
+        return convertSet(dataRepository.findAllByIds(RoleMenuDO.class,roleIds), RoleMenuDO::getMenuId);
+        //return convertSet(roleMenuMapper.selectListByRoleId(roleIds), RoleMenuDO::getMenuId);
     }
 
     @Override
     @Cacheable(value = RedisKeyConstants.MENU_ROLE_ID_LIST, key = "#menuId")
     public Set<Long> getMenuRoleIdListByMenuIdFromCache(Long menuId) {
-        return convertSet(roleMenuMapper.selectListByMenuId(menuId), RoleMenuDO::getRoleId);
+        return convertSet(dataRepository.findAll(RoleMenuDO.class,new DefaultConfigStore().
+                and(Compare.EQUAL,"menu_id", menuId)), RoleMenuDO::getRoleId);
+        //return convertSet(roleMenuMapper.selectListByMenuId(menuId), RoleMenuDO::getRoleId);
     }
 
     // ========== 用户-角色的相关方法  ==========
@@ -221,22 +229,33 @@ public class PermissionServiceImpl implements PermissionService {
     @CacheEvict(value = RedisKeyConstants.USER_ROLE_ID_LIST, key = "#userId")
     public void assignUserRole(Long userId, Set<Long> roleIds) {
         // 获得角色拥有角色编号
-        Set<Long> dbRoleIds = convertSet(userRoleMapper.selectListByUserId(userId),
+        Set<Long> dbRoleIds = convertSet(dataRepository.findAll(UserRoleDO.class,new DefaultConfigStore()
+                        .and(Compare.EQUAL,"user_id",userId)),
                 UserRoleDO::getRoleId);
+        //Set<Long> dbRoleIds = convertSet(userRoleMapper.selectListByUserId(userId),
+        //        UserRoleDO::getRoleId);
         // 计算新增和删除的角色编号
         Set<Long> roleIdList = CollUtil.emptyIfNull(roleIds);
         Collection<Long> createRoleIds = CollUtil.subtract(roleIdList, dbRoleIds);
         Collection<Long> deleteMenuIds = CollUtil.subtract(dbRoleIds, roleIdList);
         // 执行新增和删除。对于已经授权的角色，不用做任何处理
         if (!CollectionUtil.isEmpty(createRoleIds)) {
-            userRoleMapper.insertBatch(CollectionUtils.convertList(createRoleIds, roleId -> {
+            dataRepository.insertBatch(CollectionUtils.convertList(createRoleIds, roleId -> {
                 UserRoleDO entity = new UserRoleDO();
                 entity.setUserId(userId);
                 entity.setRoleId(roleId);
                 return entity;
             }));
+            //userRoleMapper.insertBatch(CollectionUtils.convertList(createRoleIds, roleId -> {
+            //    UserRoleDO entity = new UserRoleDO();
+            //    entity.setUserId(userId);
+            //    entity.setRoleId(roleId);
+            //    return entity;
+            //}));
         }
         if (!CollectionUtil.isEmpty(deleteMenuIds)) {
+            //dataRepository.deleteByConfig(UserRoleDO.class,new DefaultConfigStore().and(Compare.EQUAL,"user_id",userId)
+            //        .and(Compare.EQUAL,"role_id",deleteMenuIds));
             userRoleMapper.deleteListByUserIdAndRoleIdIds(userId, deleteMenuIds);
         }
     }
@@ -250,7 +269,10 @@ public class PermissionServiceImpl implements PermissionService {
 
     @Override
     public Set<Long> getUserRoleIdListByUserId(Long userId) {
-        return convertSet(userRoleMapper.selectListByUserId(userId), UserRoleDO::getRoleId);
+
+        return convertSet(dataRepository.findAll(UserRoleDO.class,new DefaultConfigStore().and(Compare.EQUAL,"user_id",userId)),
+                UserRoleDO::getRoleId);
+        //return convertSet(userRoleMapper.selectListByUserId(userId), UserRoleDO::getRoleId);
     }
 
     @Override
@@ -261,7 +283,8 @@ public class PermissionServiceImpl implements PermissionService {
 
     @Override
     public Set<Long> getUserRoleIdListByRoleId(Collection<Long> roleIds) {
-        return convertSet(userRoleMapper.selectListByRoleIds(roleIds), UserRoleDO::getUserId);
+        return convertSet(dataRepository.findAllByIds(UserRoleDO.class,roleIds), UserRoleDO::getUserId);
+        //return convertSet(userRoleMapper.selectListByRoleIds(roleIds), UserRoleDO::getUserId);
     }
 
     /**

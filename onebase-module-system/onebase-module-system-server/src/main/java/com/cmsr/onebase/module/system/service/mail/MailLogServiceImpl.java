@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.system.service.mail;
 
 import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.system.controller.admin.mail.vo.log.MailLogPageReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.mail.MailAccountDO;
 import com.cmsr.onebase.module.system.dal.dataobject.mail.MailLogDO;
@@ -38,6 +39,7 @@ public class MailLogServiceImpl implements MailLogService {
     private DataRepository dataRepository;
 
     @Override
+    @TenantIgnore
     public PageResult<MailLogDO> getMailLogPage(MailLogPageReqVO pageVO) {
 
         ConfigStore configStore = new DefaultConfigStore();
@@ -69,6 +71,7 @@ public class MailLogServiceImpl implements MailLogService {
 	}
 
     @Override
+    @TenantIgnore
     public MailLogDO getMailLog(Long id) {
         return dataRepository.findById(MailLogDO.class,id);
 		//return mailLogMapper.selectById(id);

@@ -38,7 +38,7 @@ public class NotifyMessageController {
     @GetMapping("/get")
     @Operation(summary = "获得站内信")
     @Parameter(name = "id", description = "编号", required = true, example = "1024")
-    @PreAuthorize("@ss.hasPermission('system:notify-message:query')")
+    //@PreAuthorize("@ss.hasPermission('system:notify-message:query')")
     public CommonResult<NotifyMessageRespVO> getNotifyMessage(@RequestParam("id") Long id) {
         NotifyMessageDO message = notifyMessageService.getNotifyMessage(id);
         return success(BeanUtils.toBean(message, NotifyMessageRespVO.class));
@@ -46,7 +46,7 @@ public class NotifyMessageController {
 
     @GetMapping("/page")
     @Operation(summary = "获得站内信分页")
-    @PreAuthorize("@ss.hasPermission('system:notify-message:query')")
+    //@PreAuthorize("@ss.hasPermission('system:notify-message:query')")
     public CommonResult<PageResult<NotifyMessageRespVO>> getNotifyMessagePage(@Valid NotifyMessagePageReqVO pageVO) {
         PageResult<NotifyMessageDO> pageResult = notifyMessageService.getNotifyMessagePage(pageVO);
         return success(BeanUtils.toBean(pageResult, NotifyMessageRespVO.class));
@@ -64,7 +64,7 @@ public class NotifyMessageController {
 
     @PutMapping("/update-read")
     @Operation(summary = "标记站内信为已读")
-    @Parameter(name = "ids", description = "编号列表", required = true, example = "1024,2048")
+    //@Parameter(name = "ids", description = "编号列表", required = true, example = "1024,2048")
     public CommonResult<Boolean> updateNotifyMessageRead(@RequestParam("ids") List<Long> ids) {
         notifyMessageService.updateNotifyMessageRead(ids, getLoginUserId(), UserTypeEnum.ADMIN.getValue());
         return success(Boolean.TRUE);
