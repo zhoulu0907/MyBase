@@ -60,7 +60,7 @@ public class SmsChannelServiceImpl implements SmsChannelService {
         validateSmsChannelExists(updateReqVO.getId());
         // 更新
         SmsChannelDO updateObj = BeanUtils.toBean(updateReqVO, SmsChannelDO.class);
-        dataRepository.save(updateObj);
+        dataRepository.update(updateObj);
 		//smsChannelMapper.updateById(updateObj);
     }
 

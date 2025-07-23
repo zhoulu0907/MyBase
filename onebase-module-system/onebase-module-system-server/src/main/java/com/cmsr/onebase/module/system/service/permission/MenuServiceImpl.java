@@ -92,7 +92,7 @@ public class MenuServiceImpl implements MenuService {
         // 更新到数据库
         MenuDO updateObj = BeanUtils.toBean(updateReqVO, MenuDO.class);
         initMenuProperty(updateObj);
-        dataRepository.save(updateObj);
+        dataRepository.update(updateObj);
 		//menuMapper.updateById(updateObj);
     }
 

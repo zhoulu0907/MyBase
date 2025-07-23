@@ -68,7 +68,7 @@ public class OAuth2ClientServiceImpl implements OAuth2ClientService {
 
         // 更新
         OAuth2ClientDO updateObj = BeanUtils.toBean(updateReqVO, OAuth2ClientDO.class);
-        dataRepository.save(updateObj);
+        dataRepository.update(updateObj);
 		//oauth2ClientMapper.updateById(updateObj);
     }
 

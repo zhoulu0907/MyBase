@@ -157,7 +157,7 @@ public class SocialUserServiceImpl implements SocialUserService {
             dataRepository.insert(socialUser);
 			//socialUserMapper.insert(socialUser);
         } else {
-            dataRepository.save(socialUser);
+            dataRepository.update(socialUser);
 			//socialUserMapper.updateById(socialUser);
         }
         return socialUser;

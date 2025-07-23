@@ -47,7 +47,7 @@ public class NoticeServiceImpl implements NoticeService {
         validateNoticeExists(updateReqVO.getId());
         // 更新通知公告
         NoticeDO updateObj = BeanUtils.toBean(updateReqVO, NoticeDO.class);
-        dataRepository.save(updateObj);
+        dataRepository.update(updateObj);
 		//noticeMapper.updateById(updateObj);
     }
 

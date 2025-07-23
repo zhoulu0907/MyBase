@@ -184,7 +184,7 @@ public class DataRepository {
         try {
             ConfigStore configs = new DefaultConfigStore();
             configs.and(Compare.EQUAL, "id", id);
-            configs.and(Compare.EQUAL, "deleted", false);  // 排除已删除的记录
+            //configs.and(Compare.EQUAL, "deleted", 0);  // 排除已删除的记录
             String tableName = getTableName(clazz);
             return anylineService.select(tableName, clazz, configs);
         } catch (Exception e) {

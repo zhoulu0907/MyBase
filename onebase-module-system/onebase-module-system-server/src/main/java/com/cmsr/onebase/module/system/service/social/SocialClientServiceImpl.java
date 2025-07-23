@@ -474,7 +474,7 @@ public class SocialClientServiceImpl implements SocialClientService {
 
         // 更新
         SocialClientDO updateObj = BeanUtils.toBean(updateReqVO, SocialClientDO.class);
-        dataRepository.save(updateObj);
+        dataRepository.update(updateObj);
 		//socialClientMapper.updateById(updateObj);
     }
 

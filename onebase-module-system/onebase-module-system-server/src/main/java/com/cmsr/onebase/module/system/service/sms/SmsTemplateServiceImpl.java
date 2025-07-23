@@ -95,7 +95,7 @@ public class SmsTemplateServiceImpl implements SmsTemplateService {
         SmsTemplateDO updateObj = BeanUtils.toBean(updateReqVO, SmsTemplateDO.class);
         updateObj.setParams(parseTemplateContentParams(updateObj.getContent()));
         updateObj.setChannelCode(channelDO.getCode());
-        dataRepository.save(updateObj);
+        dataRepository.update(updateObj);
         //smsTemplateMapper.updateById(updateObj);
     }
 

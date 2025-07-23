@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.system.service.mail;
 import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.system.controller.admin.mail.vo.account.MailAccountPageReqVO;
 import com.cmsr.onebase.module.system.controller.admin.mail.vo.account.MailAccountSaveReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.mail.MailAccountDO;
@@ -46,6 +47,7 @@ public class MailAccountServiceImpl implements MailAccountService {
     private DataRepository dataRepository;
 
     @Override
+    @TenantIgnore
     public Long createMailAccount(MailAccountSaveReqVO createReqVO) {
         MailAccountDO account = BeanUtils.toBean(createReqVO, MailAccountDO.class);
         dataRepository.insert(account);
@@ -55,18 +57,20 @@ public class MailAccountServiceImpl implements MailAccountService {
 
     @Override
     @CacheEvict(value = RedisKeyConstants.MAIL_ACCOUNT, key = "#updateReqVO.id")
+    @TenantIgnore
     public void updateMailAccount(MailAccountSaveReqVO updateReqVO) {
         // 校验是否存在
         validateMailAccountExists(updateReqVO.getId());
 
         // 更新
         MailAccountDO updateObj = BeanUtils.toBean(updateReqVO, MailAccountDO.class);
-        dataRepository.save(updateObj);
+        dataRepository.update(updateObj);
 		//mailAccountMapper.updateById(updateObj);
     }
 
     @Override
     @CacheEvict(value = RedisKeyConstants.MAIL_ACCOUNT, key = "#id")
+    @TenantIgnore
     public void deleteMailAccount(Long id) {
         // 校验是否存在账号
         validateMailAccountExists(id);
@@ -90,6 +94,7 @@ public class MailAccountServiceImpl implements MailAccountService {
     }
 
     @Override
+    @TenantIgnore
     public MailAccountDO getMailAccount(Long id) {
         return dataRepository.findById(MailAccountDO.class,id);
 		//return mailAccountMapper.selectById(id);
@@ -97,11 +102,13 @@ public class MailAccountServiceImpl implements MailAccountService {
 
     @Override
     @Cacheable(value = RedisKeyConstants.MAIL_ACCOUNT, key = "#id", unless = "#result == null")
+    @TenantIgnore
     public MailAccountDO getMailAccountFromCache(Long id) {
         return getMailAccount(id);
     }
 
     @Override
+    @TenantIgnore
     public PageResult<MailAccountDO> getMailAccountPage(MailAccountPageReqVO pageReqVO) {
 
         ConfigStore configStore = new DefaultConfigStore();
@@ -116,6 +123,7 @@ public class MailAccountServiceImpl implements MailAccountService {
     }
 
     @Override
+    @TenantIgnore
     public List<MailAccountDO> getMailAccountList() {
         return dataRepository.findAll(MailAccountDO.class);
 		//return mailAccountMapper.selectList();

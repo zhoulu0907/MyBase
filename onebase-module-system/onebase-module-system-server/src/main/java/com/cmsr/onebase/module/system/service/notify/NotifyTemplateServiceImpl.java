@@ -77,7 +77,7 @@ public class NotifyTemplateServiceImpl implements NotifyTemplateService {
         // 更新
         NotifyTemplateDO updateObj = BeanUtils.toBean(updateReqVO, NotifyTemplateDO.class);
         updateObj.setParams(parseTemplateContentParams(updateObj.getContent()));
-        dataRepository.save(updateObj);
+        dataRepository.update(updateObj);
 		//notifyTemplateMapper.updateById(updateObj);
     }
 

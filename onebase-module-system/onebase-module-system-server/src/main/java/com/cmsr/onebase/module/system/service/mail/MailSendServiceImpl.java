@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.system.service.mail;
 import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
+import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.system.dal.dataobject.mail.MailAccountDO;
 import com.cmsr.onebase.module.system.dal.dataobject.mail.MailTemplateDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
@@ -74,6 +75,7 @@ public class MailSendServiceImpl implements MailSendService {
     }
 
     @Override
+    @TenantIgnore
     public Long sendSingleMail(String mail, Long userId, Integer userType,
                                String templateCode, Map<String, Object> templateParams) {
         // 校验邮箱模版是否合法
