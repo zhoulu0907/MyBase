@@ -101,21 +101,18 @@ public class MailLogServiceImpl implements MailLogService {
         // 1. 成功
         if (exception == null) {
 
-            dataRepository.update(new MailLogDO().setId(logId).setSendTime(LocalDateTime.now())
-                    .setSendStatus(MailSendStatusEnum.SUCCESS.getStatus()).setSendMessageId(messageId));
-
-            //MailLogDO mailLogDO =  new MailLogDO().setSendTime(LocalDateTime.now())
-            //    .setSendStatus(MailSendStatusEnum.SUCCESS.getStatus()).setSendMessageId(messageId);
-            //mailLogDO.setId(logId);
+            MailLogDO mailLogDO =  new MailLogDO().setSendTime(LocalDateTime.now())
+                .setSendStatus(MailSendStatusEnum.SUCCESS.getStatus()).setSendMessageId(messageId);
+            mailLogDO.setId(logId);
+            dataRepository.update(mailLogDO);
             //mailLogMapper.updateById(mailLogDO);
             return;
         }
         // 2. 失败
-        dataRepository.update(new MailLogDO().setId(logId).setSendTime(LocalDateTime.now())
-                .setSendStatus(MailSendStatusEnum.FAILURE.getStatus()).setSendException(getRootCauseMessage(exception)));
-        //MailLogDO mailLogDO =new MailLogDO().setSendTime(LocalDateTime.now())
-        //    .setSendStatus(MailSendStatusEnum.FAILURE.getStatus()).setSendException(getRootCauseMessage(exception));
-        //mailLogDO.setId(logId);
+        MailLogDO mailLogDO =new MailLogDO().setSendTime(LocalDateTime.now())
+            .setSendStatus(MailSendStatusEnum.FAILURE.getStatus()).setSendException(getRootCauseMessage(exception));
+        mailLogDO.setId(logId);
+        dataRepository.update(mailLogDO);
         //mailLogMapper.updateById(mailLogDO);
 
     }

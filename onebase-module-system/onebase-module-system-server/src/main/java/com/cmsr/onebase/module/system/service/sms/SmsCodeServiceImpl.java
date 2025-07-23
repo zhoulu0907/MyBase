@@ -91,11 +91,9 @@ public class SmsCodeServiceImpl implements SmsCodeService {
         // 检测验证码是否有效
         SmsCodeDO lastSmsCode = validateSmsCode0(reqDTO.getMobile(), reqDTO.getCode(), reqDTO.getScene());
         // 使用验证码
-        dataRepository.update(SmsCodeDO.builder().id(lastSmsCode.getId())
-                .used(true).usedTime(LocalDateTime.now()).usedIp(reqDTO.getUsedIp()).build());
-
-        //SmsCodeDO smsCodeDO = SmsCodeDO.builder().used(true).usedTime(LocalDateTime.now()).usedIp(reqDTO.getUsedIp()).build();
-        //smsCodeDO.setId(lastSmsCode.getId());
+        SmsCodeDO smsCodeDO = SmsCodeDO.builder().used(true).usedTime(LocalDateTime.now()).usedIp(reqDTO.getUsedIp()).build();
+        smsCodeDO.setId(lastSmsCode.getId());
+        dataRepository.update(smsCodeDO);
         //smsCodeMapper.updateById(smsCodeDO);
     }
 
