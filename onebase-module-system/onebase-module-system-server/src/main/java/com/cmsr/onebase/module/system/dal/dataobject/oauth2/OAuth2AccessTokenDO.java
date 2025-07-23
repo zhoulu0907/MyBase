@@ -27,11 +27,7 @@ import java.util.Map;
 @EqualsAndHashCode(callSuper = true)
 public class OAuth2AccessTokenDO extends TenantBaseDO {
 
-    /**
-     * 编号，数据库递增
-     */
-    @TableId
-    private Long id;
+
     /**
      * 访问令牌
      */

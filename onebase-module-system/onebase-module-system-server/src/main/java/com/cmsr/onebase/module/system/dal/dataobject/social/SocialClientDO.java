@@ -25,11 +25,7 @@ import me.zhyd.oauth.config.AuthConfig;
 @AllArgsConstructor
 public class SocialClientDO extends TenantBaseDO {
 
-    /**
-     * 编号，自增
-     */
-    @TableId
-    private Long id;
+
     /**
      * 应用名
      */

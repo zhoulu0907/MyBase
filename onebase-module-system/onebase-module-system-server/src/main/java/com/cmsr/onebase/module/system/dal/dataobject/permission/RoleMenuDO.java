@@ -18,11 +18,7 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 public class RoleMenuDO extends TenantBaseDO {
 
-    /**
-     * 自增主键
-     */
-    @TableId
-    private Long id;
+
     /**
      * 角色ID
      */

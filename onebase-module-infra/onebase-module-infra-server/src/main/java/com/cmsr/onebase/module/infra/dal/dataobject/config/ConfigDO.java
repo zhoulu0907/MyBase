@@ -22,11 +22,7 @@ import lombok.ToString;
 @TenantIgnore
 public class ConfigDO extends BaseDO {
 
-    /**
-     * 参数主键
-     */
-    @TableId
-    private Long id;
+
     /**
      * 参数分类
      */

@@ -21,11 +21,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class BpmCategoryDO extends BaseDO {
 
-    /**
-     * 分类编号
-     */
-    @TableId
-    private Long id;
+
     /**
      * 分类名
      */

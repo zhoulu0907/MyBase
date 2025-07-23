@@ -19,11 +19,7 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 public class PostDO extends BaseDO {
 
-    /**
-     * 岗位序号
-     */
-    @TableId
-    private Long id;
+
     /**
      * 岗位名称
      */

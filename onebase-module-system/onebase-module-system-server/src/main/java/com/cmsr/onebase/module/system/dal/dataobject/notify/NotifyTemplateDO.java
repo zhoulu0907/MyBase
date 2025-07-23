@@ -28,11 +28,7 @@ import java.util.List;
 @TenantIgnore
 public class NotifyTemplateDO extends BaseDO {
 
-    /**
-     * ID
-     */
-    @TableId
-    private Long id;
+
     /**
      * 模版名称
      */

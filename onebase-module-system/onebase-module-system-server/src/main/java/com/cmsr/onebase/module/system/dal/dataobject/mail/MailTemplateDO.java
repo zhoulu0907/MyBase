@@ -26,10 +26,6 @@ import java.util.List;
 public class MailTemplateDO extends BaseDO {
 
     /**
-     * 主键
-     */
-    private Long id;
-    /**
      * 模版名称
      */
     private String name;

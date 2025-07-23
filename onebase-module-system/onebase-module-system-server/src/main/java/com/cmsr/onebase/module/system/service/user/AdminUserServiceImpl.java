@@ -330,7 +330,7 @@ public class AdminUserServiceImpl implements AdminUserService {
             return Collections.emptyList();
         }
         return dataRepository.findAllByIds(AdminUserDO.class, ids);
-//        return userMapper.selectBatchIds(ids);
+        // return userMapper.selectBatchIds(ids);
     }
 
     @Override

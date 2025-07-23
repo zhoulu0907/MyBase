@@ -27,11 +27,7 @@ import java.util.Map;
 @AllArgsConstructor
 public class NotifyMessageDO extends BaseDO {
 
-    /**
-     * 站内信编号，自增
-     */
-    @TableId
-    private Long id;
+
     /**
      * 用户编号
      *

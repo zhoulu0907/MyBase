@@ -35,11 +35,7 @@ public class ApiAccessLogDO extends BaseDO {
      */
     public static final Integer RESULT_MSG_MAX_LENGTH = 512;
 
-    /**
-     * 编号
-     */
-    @TableId
-    private Long id;
+
     /**
      * 链路追踪编号
      *

@@ -2,9 +2,8 @@ package com.cmsr.onebase.framework.aynline;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.cmsr.onebase.framework.common.anyline.web.BizException;
-import com.cmsr.onebase.framework.common.anyline.web.PageResult;
 import com.cmsr.onebase.framework.common.anyline.web.StatusCode;
-import com.cmsr.onebase.framework.common.util.snowflake.SnowflakeId;
+import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +11,7 @@ import org.anyline.data.Run;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.*;
+import org.anyline.entity.generator.PrimaryGenerator;
 import org.anyline.metadata.Constraint;
 import org.anyline.metadata.Table;
 import org.anyline.service.AnylineService;
@@ -34,7 +34,14 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 public class DataRepository {
-
+    static {
+        ConfigTable.GENERATOR.set(PrimaryGenerator.GENERATOR.SNOWFLAKE);
+        ConfigTable.IS_AUTO_CHECK_METADATA = true;
+        ConfigTable.IS_INSERT_NULL_COLUMN = false;
+        ConfigTable.IS_INSERT_NULL_FIELD = false;
+        ConfigTable.IS_INSERT_EMPTY_FIELD = true;
+        ConfigTable.IS_INSERT_EMPTY_COLUMN = true;
+    }
     @Resource
     private AnylineService<?> anylineService;
 
@@ -399,10 +406,8 @@ public class DataRepository {
             DataSet dataSet = anylineService.querys(tableName, configs);
 
             return new PageResult<>(
-                    dataSet.entitys(clazz).stream().toList(),
-                    pageIndex,
-                    pageSize,
-                    dataSet.total()
+                dataSet.entitys(clazz).stream().toList(),
+                dataSet.total()
             );
         } catch (Exception e) {
             log.error("分页查询失败: class={}, pageIndex={}, pageSize={}",

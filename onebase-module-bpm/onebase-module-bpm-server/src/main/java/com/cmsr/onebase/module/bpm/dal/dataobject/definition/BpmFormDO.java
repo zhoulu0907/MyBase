@@ -26,11 +26,7 @@ import java.util.List;
 @AllArgsConstructor
 public class BpmFormDO extends BaseDO {
 
-    /**
-     * 编号
-     */
-    @TableId
-    private Long id;
+
     /**
      * 表单名
      */

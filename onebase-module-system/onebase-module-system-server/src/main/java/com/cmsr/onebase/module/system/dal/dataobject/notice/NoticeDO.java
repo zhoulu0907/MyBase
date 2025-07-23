@@ -20,10 +20,6 @@ import lombok.EqualsAndHashCode;
 public class NoticeDO extends BaseDO {
 
     /**
-     * 公告ID
-     */
-    private Long id;
-    /**
      * 公告标题
      */
     private String title;

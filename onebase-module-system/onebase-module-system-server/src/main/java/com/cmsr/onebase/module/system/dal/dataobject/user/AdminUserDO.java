@@ -27,11 +27,11 @@ import java.util.Set;
 @AllArgsConstructor
 public class AdminUserDO extends TenantBaseDO {
 
-    /**
-     * 用户ID
-     */
-    @TableId
-    private Long id;
+    public AdminUserDO setId(Long id){
+        super.setId(id);
+        return this;
+    }
+
     /**
      * 用户账号
      */
