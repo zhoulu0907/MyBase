@@ -17,7 +17,7 @@
 
     <name>${project.artifactId}</name>
     <description>
-        app-resource 模块，主要提供应用资源解析、导入导出模块
+        app 模块，主要提供应用版本、资源管理、导入导出模块
     </description>
 
 </project>
