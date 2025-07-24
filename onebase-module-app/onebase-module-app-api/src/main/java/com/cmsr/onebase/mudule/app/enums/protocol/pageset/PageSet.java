@@ -1,6 +1,6 @@
 package com.cmsr.onebase.mudule.app.enums.protocol.pageset;
 
-import com.onebase.protocols.common.Common;
+import com.cmsr.onebase.mudule.app.enums.protocol.common.Common;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

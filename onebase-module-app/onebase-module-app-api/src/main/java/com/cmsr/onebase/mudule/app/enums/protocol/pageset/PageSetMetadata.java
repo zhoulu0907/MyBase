@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
@@ -21,7 +20,6 @@ public class PageSetMetadata {
     /**
      * 主元数据
      */
-    @NotNull(message = "主元数据数据不能为空")
     private String mainMetadata;
 
     /**
