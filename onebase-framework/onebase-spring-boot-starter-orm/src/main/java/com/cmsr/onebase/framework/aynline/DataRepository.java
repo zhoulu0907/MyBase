@@ -326,10 +326,8 @@ public class DataRepository {
         }
     }
 
-    public <T extends BaseDO> void delete(T entity, ConfigStore configs) {
-        Class<T> clazz = null;
+    public <T extends BaseDO> void delete(Class<T> clazz, ConfigStore configs) {
         try {
-            clazz = (Class<T>) entity.getClass();
             long result = anylineService.delete(getTableName(clazz), configs);
             if (result == 0) {
                 throw new BizException(StatusCode.DB_DELETE_ERROR);
