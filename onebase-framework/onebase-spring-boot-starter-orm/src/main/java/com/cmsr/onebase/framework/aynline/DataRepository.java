@@ -17,12 +17,9 @@ import org.anyline.metadata.Table;
 import org.anyline.service.AnylineService;
 import org.anyline.util.ConfigTable;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * DataRepository - JPA风格的CRUD操作工具类
@@ -42,11 +39,13 @@ public class DataRepository {
         ConfigTable.IS_INSERT_EMPTY_FIELD = true;
         ConfigTable.IS_INSERT_EMPTY_COLUMN = true;
     }
+
     @Resource
     private AnylineService<?> anylineService;
 
     public DataRepository() {
     }
+
     /**
      * 获取实体对应的表名
      *
@@ -327,6 +326,20 @@ public class DataRepository {
         }
     }
 
+    public <T extends BaseDO> void delete(T entity, ConfigStore configs) {
+        Class<T> clazz = null;
+        try {
+            clazz = (Class<T>) entity.getClass();
+            long result = anylineService.delete(getTableName(clazz), configs);
+            if (result == 0) {
+                throw new BizException(StatusCode.DB_DELETE_ERROR);
+            }
+        } catch (Exception e) {
+            log.error("根据删除实体失败: class={}, configs={}", clazz.getSimpleName(), configs, e);
+            throw new BizException(StatusCode.DB_DELETE_ERROR);
+        }
+    }
+
     /**
      * 批量删除实体（软删除）
      *
@@ -406,8 +419,8 @@ public class DataRepository {
             DataSet dataSet = anylineService.querys(tableName, configs);
 
             return new PageResult<>(
-                dataSet.entitys(clazz).stream().toList(),
-                dataSet.total()
+                    dataSet.entitys(clazz).stream().toList(),
+                    dataSet.total()
             );
         } catch (Exception e) {
             log.error("分页查询失败: class={}, pageIndex={}, pageSize={}",
@@ -446,7 +459,7 @@ public class DataRepository {
     public <T extends BaseDO> T findOne(Class<T> clazz, ConfigStore configs) {
         try {
             String tableName = getTableName(clazz);
-            return anylineService.select(tableName,clazz, configs);
+            return anylineService.select(tableName, clazz, configs);
         } catch (Exception e) {
             log.error("条件查询单个实体失败: class={}", clazz.getSimpleName(), e);
             throw new BizException(StatusCode.DB_SELECT_ERROR);
