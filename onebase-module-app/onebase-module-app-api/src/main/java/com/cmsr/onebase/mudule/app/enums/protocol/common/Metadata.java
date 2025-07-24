@@ -1,4 +1,4 @@
-package com.cmsr.onebase.mudule.appresource.enums.protocol.common;
+package com.cmsr.onebase.mudule.app.enums.protocol.common;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
