@@ -5,6 +5,7 @@ import com.cmsr.onebase.module.app.controller.app.vo.ApplicationVersionCreateReq
 import com.cmsr.onebase.module.app.controller.app.vo.ApplicationVersionListRespVO;
 import com.cmsr.onebase.module.app.service.app.ApplicationVersionService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import org.springframework.validation.annotation.Validated;
@@ -30,28 +31,29 @@ public class ApplicationVersionController {
     @GetMapping("/list")
     @Operation(summary = "应用版本列表")
     public CommonResult<List<ApplicationVersionListRespVO>> listApplicationVersion(@RequestParam("applicationId") Long applicationId) {
-        return success(applicationVersionService.listApplicationVersion(applicationId));
+        return CommonResult.success(applicationVersionService.listApplicationVersion(applicationId));
     }
 
     @PostMapping("/create")
     @Operation(summary = "创建应用版本")
-    public CommonResult<Long> createApplicationVersion(@RequestBody ApplicationVersionCreateReqVO applicationVersionCreateReqVO) {
-        return success(applicationVersionService.createApplicationVersion(applicationVersionCreateReqVO));
+    public CommonResult<Boolean> createApplicationVersion(@RequestBody ApplicationVersionCreateReqVO createReqVO) {
+        applicationVersionService.createApplicationVersion(createReqVO);
+        return CommonResult.success(true);
     }
 
-    @PostMapping("/turn-on")
+    @PostMapping("/restore ")
     @Operation(summary = "应用版本启用")
-    public CommonResult<Boolean> turnOnApplicationVersion(@RequestParam("applicationId") Long applicationId,
-                                                          @RequestParam("versionNumber") String versionNumber) {
-        applicationVersionService.turnOnApplicationVersion(applicationId, versionNumber);
+    @Parameter(name = "applicationId", description = "应用id", required = true)
+    public CommonResult<Boolean> restoreApplicationVersion(@RequestParam("versionId") Long versionId) {
+        applicationVersionService.restoreApplicationVersion(versionId);
         return CommonResult.success(true);
     }
 
     @DeleteMapping("/delete")
     @Operation(summary = "删除应用版本")
-    public CommonResult<Boolean> deleteApplicationVersion(@RequestParam("applicationId") Long applicationId,
-                                                          @RequestParam("versionNumber") String versionNumber) {
-        applicationVersionService.deleteApplicationVersion(applicationId, versionNumber);
+    @Parameter(name = "applicationId", description = "应用id", required = true)
+    public CommonResult<Boolean> deleteApplicationVersion(@RequestParam("versionId") Long versionId) {
+        applicationVersionService.deleteApplicationVersion(versionId);
         return CommonResult.success(true);
     }
 

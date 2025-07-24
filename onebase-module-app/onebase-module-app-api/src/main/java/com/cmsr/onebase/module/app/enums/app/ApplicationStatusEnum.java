@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.app.api.enums;
+package com.cmsr.onebase.module.app.enums.app;
 
 import java.util.Arrays;
 

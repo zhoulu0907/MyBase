@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.app.service.app;
 
 import com.cmsr.onebase.module.app.controller.app.vo.ApplicationMenuCreateReqVO;
-import com.cmsr.onebase.module.app.controller.app.vo.ApplicationVersionListRespVO;
+import com.cmsr.onebase.module.app.controller.app.vo.ApplicationMenuListRespVO;
 
 import java.util.List;
 
@@ -11,11 +11,11 @@ import java.util.List;
  */
 public interface ApplicationMenuService {
 
-    public List<ApplicationVersionListRespVO> listApplicationMenu(Long applicationId);
+    List<ApplicationMenuListRespVO> listApplicationMenu(Long applicationId);
 
-    public Long createApplicationMenu(ApplicationMenuCreateReqVO applicationMenuCreateReqVO);
+    Long createApplicationMenu(ApplicationMenuCreateReqVO applicationMenuCreateReqVO);
 
-    public void deleteApplicationMenu(Long applicationId, String menuUuid);
+    void deleteApplicationMenu(Long applicationId, String menuUuid);
 
-    public void updateApplicationMenuName(Long applicationId, String menuUuid, String menuName);
+    void updateApplicationMenuName(Long applicationId, String menuUuid, String menuName);
 }

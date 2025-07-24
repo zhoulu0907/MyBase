@@ -15,6 +15,8 @@ public class ApplicationVersionCreateReqVO {
     private Long applicationId;
 
     @Schema(description = "版本名称")
-    private String name;
+    private String versionName;
 
+    @Schema(description = "版本号")
+    private String versionNumber;
 }

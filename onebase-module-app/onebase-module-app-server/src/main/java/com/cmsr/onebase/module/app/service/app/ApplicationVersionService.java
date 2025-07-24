@@ -13,9 +13,9 @@ public interface ApplicationVersionService {
 
     List<ApplicationVersionListRespVO> listApplicationVersion(Long applicationId);
 
-    Long createApplicationVersion(ApplicationVersionCreateReqVO applicationVersionCreateReqVO);
+    void createApplicationVersion(ApplicationVersionCreateReqVO createReqVO);
 
-    void turnOnApplicationVersion(Long applicationId, String versionNumber);
+    void restoreApplicationVersion(Long versionId);
 
-    void deleteApplicationVersion(Long applicationId, String versionNumber);
+    void deleteApplicationVersion(Long versionId);
 }

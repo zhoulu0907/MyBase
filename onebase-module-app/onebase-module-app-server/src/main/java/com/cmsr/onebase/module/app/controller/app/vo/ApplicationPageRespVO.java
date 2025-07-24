@@ -10,7 +10,6 @@ import lombok.Data;
  */
 @Schema(description = "应用管理 - 应用分页 Response VO")
 @Data
-@Builder
 public class ApplicationPageRespVO {
 
     @Schema(description = "应用名称")

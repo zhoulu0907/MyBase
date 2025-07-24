@@ -4,13 +4,16 @@ import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.module.app.api.enums.AppErrorCodeConstants;
-import com.cmsr.onebase.module.app.api.enums.ApplicationStatusEnum;
+import com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO;
 import com.cmsr.onebase.module.app.controller.app.vo.ApplicationCreateReqVO;
 import com.cmsr.onebase.module.app.controller.app.vo.ApplicationPageReqVO;
 import com.cmsr.onebase.module.app.controller.app.vo.ApplicationPageRespVO;
 import com.cmsr.onebase.module.app.dal.dataobject.app.*;
+import com.cmsr.onebase.module.app.enums.app.AppErrorCodeConstants;
+import com.cmsr.onebase.module.app.enums.app.ApplicationStatusEnum;
+import com.cmsr.onebase.module.app.util.VersionUtils;
 import jakarta.annotation.Resource;
+import lombok.Setter;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Compare;
@@ -26,12 +29,16 @@ import java.util.List;
  * @Author：huangjie
  * @Date：2025/7/23 17:11
  */
+@Setter
 @Service
 @Validated
 public class ApplicationServiceImpl implements ApplicationService {
 
     @Resource
     private DataRepository dataRepository;
+
+    @Resource
+    private AppCommonService appCommonService;
 
     @Override
     public PageResult<ApplicationPageRespVO> getApplicationPage(ApplicationPageReqVO pageReqVO) {
@@ -43,10 +50,10 @@ public class ApplicationServiceImpl implements ApplicationService {
             configs.and(Compare.EQUAL, "status", pageReqVO.getStatus());
         }
         if (StringUtils.equalsIgnoreCase(pageReqVO.getOrderByTime(), "create")) {
-            configs.order("create_time", Order.TYPE.DESC);
+            configs.order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
         }
         if (StringUtils.equalsIgnoreCase(pageReqVO.getOrderByTime(), "update")) {
-            configs.order("update_time", Order.TYPE.DESC);
+            configs.order(BaseDO.UPDATE_TIME, Order.TYPE.DESC);
         }
         PageResult<ApplicationDO> pageResult = dataRepository.findPageWithConditions(ApplicationDO.class, configs,
                 pageReqVO.getPageNo(), pageReqVO.getPageSize());
@@ -64,20 +71,21 @@ public class ApplicationServiceImpl implements ApplicationService {
     public Long createApplication(ApplicationCreateReqVO createReqVO) {
         createReqVO.setId(null);
         ApplicationDO applicationDO = BeanUtils.toBean(createReqVO, ApplicationDO.class);
+        applicationDO.setVersionNumber(VersionUtils.INIT_VERSION);
         applicationDO = dataRepository.insert(applicationDO);
         return applicationDO.getId();
     }
 
     @Override
     public void updateApplication(ApplicationCreateReqVO createReqVO) {
-        validateApplicationExist(createReqVO.getId());
+        appCommonService.validateApplicationExist(createReqVO.getId());
         ApplicationDO updateObj = BeanUtils.toBean(createReqVO, ApplicationDO.class);
         dataRepository.update(updateObj);
     }
 
     @Override
     public void updateApplicationName(Long id, String name) {
-        validateApplicationExist(id);
+        appCommonService.validateApplicationExist(id);
         ApplicationDO applicationDO = new ApplicationDO();
         applicationDO.setId(id);
         applicationDO.setAppName(name);
@@ -87,7 +95,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteApplication(Long id, String name) {
-        ApplicationDO applicationDO = validateApplicationExist(id);
+        ApplicationDO applicationDO = appCommonService.validateApplicationExist(id);
         if (!StringUtils.equals(name, applicationDO.getAppName())) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_NAME_ERROR);
         }
@@ -102,11 +110,5 @@ public class ApplicationServiceImpl implements ApplicationService {
         dataRepository.delete(ApplicationVersionResourceDO.class, configStore);
     }
 
-    private ApplicationDO validateApplicationExist(Long id) {
-        ApplicationDO applicationDO = dataRepository.findById(ApplicationDO.class, id);
-        if (applicationDO == null) {
-            throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_NOT_EXIST);
-        }
-        return applicationDO;
-    }
+
 }

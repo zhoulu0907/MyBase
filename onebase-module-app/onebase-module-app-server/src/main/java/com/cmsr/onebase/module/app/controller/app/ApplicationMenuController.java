@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.app.controller.app;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.module.app.controller.app.vo.ApplicationMenuCreateReqVO;
+import com.cmsr.onebase.module.app.controller.app.vo.ApplicationMenuListRespVO;
 import com.cmsr.onebase.module.app.controller.app.vo.ApplicationVersionListRespVO;
 import com.cmsr.onebase.module.app.service.app.ApplicationMenuService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -29,7 +30,7 @@ public class ApplicationMenuController {
 
     @GetMapping("/list")
     @Operation(summary = "应用菜单列表")
-    public CommonResult<List<ApplicationVersionListRespVO>> listApplicationMenu(@RequestParam("applicationId") Long applicationId) {
+    public CommonResult<List<ApplicationMenuListRespVO>> listApplicationMenu(@RequestParam("applicationId") Long applicationId) {
         return success(applicationMenuService.listApplicationMenu(applicationId));
     }
 
