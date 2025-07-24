@@ -13,9 +13,7 @@ public interface ApplicationVersionService {
 
     List<ApplicationVersionListRespVO> listApplicationVersion(Long applicationId);
 
-
     Long createApplicationVersion(ApplicationVersionCreateReqVO applicationVersionCreateReqVO);
-
 
     void turnOnApplicationVersion(Long applicationId, String versionNumber);
 

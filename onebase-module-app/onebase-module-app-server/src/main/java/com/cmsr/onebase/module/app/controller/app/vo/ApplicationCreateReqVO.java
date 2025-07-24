@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.app.controller.app.vo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 /**
@@ -11,17 +12,22 @@ import lombok.Data;
 @Data
 public class ApplicationCreateReqVO {
 
+    @Schema(description = "应用ID")
+    private Long id;
+
     @Schema(description = "应用名称")
+    @NotBlank(message = "应用名称不能为空")
     private String name;
 
     @Schema(description = "应用描述")
     private String description;
 
     @Schema(description = "图标类型")
-    private String iconType;
+    @NotBlank(message = "图标类型不能为空")
+    private String iconName;
 
     @Schema(description = "图标颜色")
+    @NotBlank(message = "图标颜色不能为空")
     private String iconColor;
-
 
 }

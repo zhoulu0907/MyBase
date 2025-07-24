@@ -19,5 +19,5 @@ public interface ApplicationService {
 
     void updateApplicationName(Long id, String name);
 
-    void deleteApplication(Long id, String name);
+    void deleteApplication(Long id,String name);
 }

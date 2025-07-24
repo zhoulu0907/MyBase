@@ -26,5 +26,5 @@ public class ApplicationPageReqVO extends PageParam {
     private String orderByTime;
 
     @Schema(description = "应用状态")
-    private int state;
+    private Integer status;
 }
