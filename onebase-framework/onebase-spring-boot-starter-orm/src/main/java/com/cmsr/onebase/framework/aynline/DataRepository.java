@@ -20,6 +20,7 @@ import org.anyline.util.ConfigTable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * DataRepository - JPA风格的CRUD操作工具类
@@ -183,7 +184,7 @@ public class DataRepository {
             ConfigStore configs = new DefaultConfigStore();
             String tableName = getTableName(clazz);
             DataSet dataSet = anylineService.querys(tableName, configs);
-            return dataSet.entitys(clazz).stream().toList();
+            return dataSet.entity(clazz);
         } catch (Exception e) {
             log.error("查找所有实体失败: class={}", clazz.getSimpleName(), e);
             throw new BizException(StatusCode.DB_SELECT_ERROR);
@@ -202,7 +203,7 @@ public class DataRepository {
         try {
             String tableName = getTableName(clazz);
             DataSet dataSet = anylineService.querys(tableName, configs);
-            return dataSet.entitys(clazz).stream().toList();
+            return dataSet.entity(clazz);
         } catch (Exception e) {
             log.error("根据ID列表查找实体失败: class={}, configs={}", clazz.getSimpleName(), configs, e);
             throw new BizException(StatusCode.DB_SELECT_ERROR);
@@ -224,7 +225,7 @@ public class DataRepository {
 
             String tableName = getTableName(clazz);
             DataSet dataSet = anylineService.querys(tableName, configs);
-            return dataSet.entitys(clazz).stream().toList();
+            return dataSet.entity(clazz);
         } catch (Exception e) {
             log.error("根据ID列表查找实体失败: class={}, ids={}", clazz.getSimpleName(), ids, e);
             throw new BizException(StatusCode.DB_SELECT_ERROR);
