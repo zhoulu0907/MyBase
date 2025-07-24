@@ -9,6 +9,7 @@ import com.cmsr.onebase.module.app.controller.app.vo.ApplicationCreateReqVO;
 import com.cmsr.onebase.module.app.controller.app.vo.ApplicationPageReqVO;
 import com.cmsr.onebase.module.app.controller.app.vo.ApplicationPageRespVO;
 import com.cmsr.onebase.module.app.dal.dataobject.app.ApplicationDO;
+import com.cmsr.onebase.module.app.dal.dataobject.app.ApplicationMenuDO;
 import jakarta.annotation.Resource;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
@@ -85,7 +86,7 @@ public class ApplicationServiceImpl implements ApplicationService {
         }
         //TODO 删除应用下的全部资源
         dataRepository.deleteById(ApplicationDO.class, id);
-
+        dataRepository.delete(ApplicationMenuDO.class, new DefaultConfigStore().eq("application_id", id));
     }
 
     private ApplicationDO validateApplicationExist(Long id) {
