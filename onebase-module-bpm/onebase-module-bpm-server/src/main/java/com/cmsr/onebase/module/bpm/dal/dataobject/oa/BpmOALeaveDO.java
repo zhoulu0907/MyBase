@@ -26,7 +26,11 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class BpmOALeaveDO extends BaseDO {
-
+    // builder模式可正常运作
+    public BpmOALeaveDO setId(Long id){
+        super.setId(id);
+        return this;
+    }
 
     /**
      * 申请人的用户编号
