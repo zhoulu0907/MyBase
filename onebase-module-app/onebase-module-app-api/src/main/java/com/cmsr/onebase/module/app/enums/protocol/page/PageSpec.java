@@ -1,4 +1,4 @@
-package com.cmsr.onebase.mudule.app.enums.protocol.page;
+package com.cmsr.onebase.module.app.enums.protocol.page;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
