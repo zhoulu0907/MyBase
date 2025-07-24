@@ -18,6 +18,12 @@
     </description>
 
     <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
         <!-- Spring Cloud 基础 -->
         <dependency>
             <groupId>com.cmsr.onebase</groupId>

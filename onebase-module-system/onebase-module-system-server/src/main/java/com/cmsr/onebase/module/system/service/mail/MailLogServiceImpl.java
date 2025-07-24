@@ -1,12 +1,17 @@
 package com.cmsr.onebase.module.system.service.mail;
 
+import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.system.controller.admin.mail.vo.log.MailLogPageReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.mail.MailAccountDO;
 import com.cmsr.onebase.module.system.dal.dataobject.mail.MailLogDO;
 import com.cmsr.onebase.module.system.dal.dataobject.mail.MailTemplateDO;
-import com.cmsr.onebase.module.system.dal.mysql.mail.MailLogMapper;
 import com.cmsr.onebase.module.system.enums.mail.MailSendStatusEnum;
+import org.anyline.data.param.ConfigStore;
+import org.anyline.data.param.init.DefaultConfigStore;
+import org.anyline.entity.Compare;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
@@ -27,17 +32,49 @@ import static cn.hutool.core.exceptions.ExceptionUtil.getRootCauseMessage;
 @Validated
 public class MailLogServiceImpl implements MailLogService {
 
+    //@Resource
+    //private MailLogMapper mailLogMapper;
+
     @Resource
-    private MailLogMapper mailLogMapper;
+    private DataRepository dataRepository;
 
     @Override
+    @TenantIgnore
     public PageResult<MailLogDO> getMailLogPage(MailLogPageReqVO pageVO) {
-        return mailLogMapper.selectPage(pageVO);
-    }
+
+        ConfigStore configStore = new DefaultConfigStore();
+        if (null != pageVO.getUserId()) {
+            configStore.and(Compare.EQUAL, "user_id", pageVO.getUserId());
+        }
+        if (null != pageVO.getUserType()) {
+            configStore.and(Compare.EQUAL, "user_type", pageVO.getUserType());
+        }
+        if (StringUtils.isNotBlank(pageVO.getToMail())) {
+            configStore.and(Compare.LIKE, "to_mail", pageVO.getToMail());
+        }
+        if (null != pageVO.getAccountId()) {
+            configStore.and(Compare.EQUAL, "accound_id", pageVO.getAccountId());
+        }
+        if (null != pageVO.getTemplateId()) {
+            configStore.and(Compare.EQUAL, "template_id", pageVO.getTemplateId());
+        }
+        if (null != pageVO.getSendStatus()) {
+            configStore.and(Compare.EQUAL, "send_status", pageVO.getSendStatus());
+        }
+        if (null != pageVO.getSendTime()) {
+            configStore.and(Compare.EQUAL, "send_time", pageVO.getSendTime());
+        }
+
+        return dataRepository.findPageWithConditions(MailLogDO.class,configStore, pageVO.getPageNo(), pageVO.getPageSize());
+
+		//return mailLogMapper.selectPage(pageVO);
+	}
 
     @Override
+    @TenantIgnore
     public MailLogDO getMailLog(Long id) {
-        return mailLogMapper.selectById(id);
+        return dataRepository.findById(MailLogDO.class,id);
+		//return mailLogMapper.selectById(id);
     }
 
     @Override
@@ -57,7 +94,8 @@ public class MailLogServiceImpl implements MailLogService {
 
         // 插入数据库
         MailLogDO logDO = logDOBuilder.build();
-        mailLogMapper.insert(logDO);
+        dataRepository.insert(logDO);
+		//mailLogMapper.insert(logDO);
         return logDO.getId();
     }
 
@@ -65,17 +103,20 @@ public class MailLogServiceImpl implements MailLogService {
     public void updateMailSendResult(Long logId, String messageId, Exception exception) {
         // 1. 成功
         if (exception == null) {
+
             MailLogDO mailLogDO =  new MailLogDO().setSendTime(LocalDateTime.now())
                 .setSendStatus(MailSendStatusEnum.SUCCESS.getStatus()).setSendMessageId(messageId);
             mailLogDO.setId(logId);
-            mailLogMapper.updateById(mailLogDO);
+            dataRepository.update(mailLogDO);
+            //mailLogMapper.updateById(mailLogDO);
             return;
         }
         // 2. 失败
         MailLogDO mailLogDO =new MailLogDO().setSendTime(LocalDateTime.now())
             .setSendStatus(MailSendStatusEnum.FAILURE.getStatus()).setSendException(getRootCauseMessage(exception));
         mailLogDO.setId(logId);
-        mailLogMapper.updateById(mailLogDO);
+        dataRepository.update(mailLogDO);
+        //mailLogMapper.updateById(mailLogDO);
 
     }
 

@@ -88,7 +88,7 @@ public class RoleController {
     @GetMapping("/export-excel")
     @Operation(summary = "导出角色 Excel")
     @ApiAccessLog(operateType = EXPORT)
-    @PreAuthorize("@ss.hasPermission('system:role:export')")
+    //@PreAuthorize("@ss.hasPermission('system:role:export')")
     public void export(HttpServletResponse response, @Validated RolePageReqVO exportReqVO) throws IOException {
         exportReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
         List<RoleDO> list = roleService.getRolePage(exportReqVO).getList();
