@@ -66,7 +66,7 @@ public class BpmProcessInstanceCopyController {
         Map<String, HistoricProcessInstance> processInstanceMap = processInstanceService.getHistoricProcessInstanceMap(
                 convertSet(pageResult.getList(), BpmProcessInstanceCopyDO::getProcessInstanceId));
         Map<Long, AdminUserRespDTO> userMap = adminUserApi.getUserMap(convertListByFlatMap(pageResult.getList(),
-                copy -> Stream.of(copy.getStartUserId(), Long.parseLong(copy.getCreator()))));
+                copy -> Stream.of(copy.getStartUserId(), copy.getCreator())));
         Map<String, BpmProcessDefinitionInfoDO> processDefinitionInfoMap = processDefinitionService.getProcessDefinitionInfoMap(
                 convertSet(pageResult.getList(), BpmProcessInstanceCopyDO::getProcessDefinitionId));
         return success(convertPage(pageResult, copy -> {

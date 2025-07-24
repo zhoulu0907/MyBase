@@ -4,6 +4,7 @@ import com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO;
 import com.baomidou.mybatisplus.annotation.KeySequence;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.cmsr.onebase.module.bpm.dal.dataobject.oa.BpmOALeaveDO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,7 +22,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class BpmCategoryDO extends BaseDO {
 
-
+    // builder模式可正常运作
+    public BpmCategoryDO setId(Long id){
+        super.setId(id);
+        return this;
+    }
     /**
      * 分类名
      */
