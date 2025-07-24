@@ -1,4 +1,4 @@
-package com.cmsr.onebase.mudule.appresource.enums.protocol.pageset;
+package com.cmsr.onebase.mudule.app.enums.protocol.pageset;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -20,18 +20,15 @@ public class PageRefs {
     /**
      * 列表页面配置
      */
-    @JsonInclude(Include.ALWAYS)
     private List<PageRef> listPages;
 
     /**
      * 详情页面配置
      */
-    @JsonInclude(Include.ALWAYS)
     private List<PageRef> detailPages;
 
     /**
      * 编辑页面配置
      */
-    @JsonInclude(Include.ALWAYS)
     private List<PageRef> editPages;
 }

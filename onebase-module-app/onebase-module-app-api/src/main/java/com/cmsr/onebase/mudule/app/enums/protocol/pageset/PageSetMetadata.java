@@ -1,25 +1,27 @@
-package com.cmsr.onebase.mudule.appresource.enums.protocol.page;
+package com.cmsr.onebase.mudule.app.enums.protocol.pageset;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
- * @ClassName Metadata
- * @Description 页面数据模型，包含主元数据和元数据列表
+ * @ClassName PageSetMetadata
+ * @Description 页面级核心数据定义
  * @Author mickey
  * @Date 2025/1/27 10:30
  */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Metadata {
+public class PageSetMetadata {
 
     /**
      * 主元数据
      */
+    @NotNull(message = "主元数据数据不能为空")
     private String mainMetadata;
 
     /**
