@@ -4,8 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.NotNull;
-
 
 
 /**
@@ -27,6 +25,5 @@ public class PageSetSpec {
     /**
      * 页面引用配置
      */
-    @NotNull(message = "页面引用配置不能为空")
     private PageRefs pageRefs;
 }
