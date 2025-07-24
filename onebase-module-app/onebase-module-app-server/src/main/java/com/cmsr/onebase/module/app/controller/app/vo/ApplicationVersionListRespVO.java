@@ -3,6 +3,8 @@ package com.cmsr.onebase.module.app.controller.app.vo;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 /**
  * @Author：huangjie
  * @Date：2025/7/22 16:43
@@ -18,18 +20,15 @@ public class ApplicationVersionListRespVO {
     private Long applicationId;
 
     @Schema(description = "版本名称")
-    private String name;
+    private String versionName;
+
+    @Schema(description = "版本号")
+    private String versionNumber;
 
     @Schema(description = "创建时间")
-    private String createTime;
-
-    @Schema(description = "更新时间")
-    private String updateTime;
+    private LocalDateTime createTime;
 
     @Schema(description = "创建人")
-    private String createUser;
-
-    @Schema(description = "更新人")
-    private String updateUser;
+    private String creatorName;
 
 }

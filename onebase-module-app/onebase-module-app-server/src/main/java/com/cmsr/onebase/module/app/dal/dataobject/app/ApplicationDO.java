@@ -23,7 +23,7 @@ public class ApplicationDO extends BaseDO {
     private String description;
 
     @Column(name = "status", nullable = false, comment = "状态")
-    private Short status;
+    private Integer status;
 
     @Column(name = "icon_name", length = 256, comment = "图标名称")
     private String iconName;

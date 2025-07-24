@@ -5,17 +5,19 @@ import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.app.api.enums.AppErrorCodeConstants;
+import com.cmsr.onebase.module.app.api.enums.ApplicationStatusEnum;
 import com.cmsr.onebase.module.app.controller.app.vo.ApplicationCreateReqVO;
 import com.cmsr.onebase.module.app.controller.app.vo.ApplicationPageReqVO;
 import com.cmsr.onebase.module.app.controller.app.vo.ApplicationPageRespVO;
-import com.cmsr.onebase.module.app.dal.dataobject.app.ApplicationDO;
-import com.cmsr.onebase.module.app.dal.dataobject.app.ApplicationMenuDO;
+import com.cmsr.onebase.module.app.dal.dataobject.app.*;
 import jakarta.annotation.Resource;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Compare;
+import org.anyline.entity.Order;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
@@ -41,15 +43,19 @@ public class ApplicationServiceImpl implements ApplicationService {
             configs.and(Compare.EQUAL, "status", pageReqVO.getStatus());
         }
         if (StringUtils.equalsIgnoreCase(pageReqVO.getOrderByTime(), "create")) {
-            configs.order("create_time", "DESC");
+            configs.order("create_time", Order.TYPE.DESC);
         }
         if (StringUtils.equalsIgnoreCase(pageReqVO.getOrderByTime(), "update")) {
-            configs.order("update_time", "DESC");
+            configs.order("update_time", Order.TYPE.DESC);
         }
         PageResult<ApplicationDO> pageResult = dataRepository.findPageWithConditions(ApplicationDO.class, configs,
                 pageReqVO.getPageNo(), pageReqVO.getPageSize());
         List<ApplicationPageRespVO> respVOS = pageResult.getList().stream()
-                .map(v -> BeanUtils.toBean(v, ApplicationPageRespVO.class))
+                .map(v -> {
+                    ApplicationPageRespVO bean = BeanUtils.toBean(v, ApplicationPageRespVO.class);
+                    bean.setStatusText(ApplicationStatusEnum.getText(v.getStatus()));
+                    return bean;
+                })
                 .toList();
         return new PageResult<>(respVOS, pageResult.getTotal());
     }
@@ -79,6 +85,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void deleteApplication(Long id, String name) {
         ApplicationDO applicationDO = validateApplicationExist(id);
         if (!StringUtils.equals(name, applicationDO.getAppName())) {
@@ -86,7 +93,13 @@ public class ApplicationServiceImpl implements ApplicationService {
         }
         //TODO 删除应用下的全部资源
         dataRepository.deleteById(ApplicationDO.class, id);
-        dataRepository.delete(ApplicationMenuDO.class, new DefaultConfigStore().eq("application_id", id));
+        ConfigStore configStore = new DefaultConfigStore();
+        configStore.eq("application_id", id);
+        dataRepository.delete(ApplicationMenuDO.class, configStore);
+        dataRepository.delete(ApplicationResourceDO.class, configStore);
+        dataRepository.delete(ApplicationVersionDO.class, configStore);
+        dataRepository.delete(ApplicationVersionMenuDO.class, configStore);
+        dataRepository.delete(ApplicationVersionResourceDO.class, configStore);
     }
 
     private ApplicationDO validateApplicationExist(Long id) {

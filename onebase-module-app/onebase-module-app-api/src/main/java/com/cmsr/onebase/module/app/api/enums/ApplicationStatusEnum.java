@@ -6,7 +6,7 @@ import java.util.Arrays;
  * @Author：huangjie
  * @Date：2025/7/22 15:39
  */
-public enum ApplicationStatus {
+public enum ApplicationStatusEnum {
 
     /**
      * 编辑中
@@ -21,27 +21,27 @@ public enum ApplicationStatus {
 
     private final Integer value;
 
-    private final String name;
+    private final String text;
 
 
-    ApplicationStatus(Integer value, String name) {
+    ApplicationStatusEnum(Integer value, String text) {
         this.value = value;
-        this.name = name;
+        this.text = text;
     }
 
     public Integer getValue() {
         return value;
     }
 
-    public String getName() {
-        return name;
+    public String getText() {
+        return text;
     }
 
-    public static String getStatusName(Integer value) {
+    public static String getText(Integer value) {
         return Arrays.stream(values())
                 .filter(item -> item.value.equals(value))
                 .findFirst()
-                .map(ApplicationStatus::getName)
+                .map(ApplicationStatusEnum::getText)
                 .orElseThrow(() -> new IllegalArgumentException("未知用状态[" + value + "]"));
     }
 }

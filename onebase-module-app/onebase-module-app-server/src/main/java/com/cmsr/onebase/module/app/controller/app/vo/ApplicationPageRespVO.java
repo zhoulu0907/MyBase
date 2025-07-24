@@ -26,7 +26,7 @@ public class ApplicationPageRespVO {
     private String iconColor;
 
     @Schema(description = "应用状态")
-    private String status;
+    private String statusText;
 
     @Schema(description = "创建时间")
     private String createTime;
