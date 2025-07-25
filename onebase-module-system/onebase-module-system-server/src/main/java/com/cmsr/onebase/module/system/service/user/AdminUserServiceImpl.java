@@ -298,7 +298,8 @@ public class AdminUserServiceImpl implements AdminUserService {
 
     @Override
     public AdminUserDO getUser(Long id) {
-        return userMapper.selectById(id);
+        return dataRepository.findById(AdminUserDO.class,id);
+        //return userMapper.selectById(id);
     }
 
     @Override
