@@ -10,7 +10,7 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>onebase-module-metadata</artifactId>
+    <artifactId>onebase-module-data</artifactId>
     <packaging>pom</packaging>
     <modules>
         <module>onebase-module-metadata-api</module>
