@@ -1,0 +1,31 @@
+package com.cmsr.onebase.module.metadata.controller.admin.entity.vo;
+
+import com.cmsr.onebase.framework.common.pojo.PageParam;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+@Schema(description = "管理后台 - 业务实体分页 Request VO")
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class BusinessEntityPageReqVO extends PageParam {
+
+    @Schema(description = "实体名称", example = "用户实体")
+    private String displayName;
+
+    @Schema(description = "实体编码", example = "user_entity")
+    private String code;
+
+    @Schema(description = "实体类型", example = "1")
+    private Integer entityType;
+
+    @Schema(description = "数据源ID", example = "1")
+    private Long datasourceId;
+
+    @Schema(description = "运行模式", example = "0")
+    private Integer runMode;
+
+    @Schema(description = "应用ID", example = "1")
+    private Long appId;
+
+}

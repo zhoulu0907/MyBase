@@ -18,6 +18,7 @@
         <module>onebase-module-infra</module>
         <module>onebase-module-bpm</module>
         <module>onebase-module-app</module>
+        <module>onebase-module-metadata</module>
     </modules>
 
     <name>${project.artifactId}</name>
@@ -25,7 +26,7 @@
     <url>https://cmsr.com</url>
 
     <properties>
-        <revision>2.6.0-SNAPSHOT</revision>
+        <revision>1.0.0-SNAPSHOT</revision>
         <!-- Maven 相关 -->
         <java.version>17</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>

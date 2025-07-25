@@ -73,3 +73,9 @@ functions/mock
 screenshot
 .firebase
 sessionStore
+
+# cursor editor
+/.cursor
+
+# requirements documentation
+/需求文档
