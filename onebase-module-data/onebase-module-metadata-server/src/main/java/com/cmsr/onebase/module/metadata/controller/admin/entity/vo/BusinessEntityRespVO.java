@@ -3,8 +3,6 @@ package com.cmsr.onebase.module.metadata.controller.admin.entity.vo;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
-import java.time.LocalDateTime;
-
 @Schema(description = "管理后台 - 业务实体 Response VO")
 @Data
 public class BusinessEntityRespVO {
@@ -35,23 +33,5 @@ public class BusinessEntityRespVO {
 
     @Schema(description = "应用ID", example = "1")
     private Long appId;
-
-    @Schema(description = "版本锁标识", example = "0")
-    private Integer lockVersion;
-
-    @Schema(description = "创建时间")
-    private LocalDateTime createTime;
-
-    @Schema(description = "更新时间")
-    private LocalDateTime updateTime;
-
-    @Schema(description = "创建人")
-    private Long creator;
-
-    @Schema(description = "更新人")
-    private Long updater;
-
-    @Schema(description = "租户ID")
-    private Long tenantId;
 
 }

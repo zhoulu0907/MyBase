@@ -1,6 +1,5 @@
 package com.cmsr.onebase.module.metadata.dal.dataobject.relationship;
 
-import com.baomidou.mybatisplus.annotation.KeySequence;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
 import lombok.*;
@@ -9,7 +8,6 @@ import lombok.*;
  * 实体关系表 DO
  */
 @TableName(value = "metadata_entity_relationship")
-@KeySequence("metadata_entity_relationship_seq")
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Builder

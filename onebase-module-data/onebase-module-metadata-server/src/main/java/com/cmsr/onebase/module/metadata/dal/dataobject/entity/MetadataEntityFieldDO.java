@@ -1,6 +1,5 @@
 package com.cmsr.onebase.module.metadata.dal.dataobject.entity;
 
-import com.baomidou.mybatisplus.annotation.KeySequence;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
 import lombok.*;
@@ -9,7 +8,6 @@ import lombok.*;
  * 实体字段表 DO
  */
 @TableName(value = "metadata_entity_field")
-@KeySequence("metadata_entity_field_seq")
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Builder
@@ -95,7 +93,7 @@ public class MetadataEntityFieldDO extends TenantBaseDO {
     /**
      * 校验规则配置
      */
-    private Long validationRulesId;
+    private String validationRules;
 
     /**
      * 运行模式：0 编辑态，1 运行态

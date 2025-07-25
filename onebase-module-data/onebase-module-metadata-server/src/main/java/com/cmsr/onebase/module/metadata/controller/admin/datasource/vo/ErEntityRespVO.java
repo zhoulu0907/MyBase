@@ -5,9 +5,9 @@ import lombok.Data;
 
 import java.util.List;
 
-@Schema(description = "管理后台 - 业务实体信息 Response VO")
+@Schema(description = "管理后台 - ER图实体信息 Response VO")
 @Data
-public class BusinessEntityRespVO {
+public class ErEntityRespVO {
 
     @Schema(description = "实体名称", example = "用户表")
     private String entityName;
@@ -15,7 +15,7 @@ public class BusinessEntityRespVO {
     @Schema(description = "实体编码", example = "user")
     private String entityCode;
 
-    @Schema(description = "实体类型", example = "TABLE")
+    @Schema(description = "实体类型", example = "SYSTEM")
     private String entityType;
 
     @Schema(description = "实体描述", example = "系统用户信息表")

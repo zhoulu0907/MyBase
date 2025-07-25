@@ -1,6 +1,5 @@
 package com.cmsr.onebase.module.metadata.dal.dataobject.validation;
 
-import com.baomidou.mybatisplus.annotation.KeySequence;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
 import lombok.*;
@@ -9,7 +8,6 @@ import lombok.*;
  * 校验规则表 DO
  */
 @TableName(value = "metadata_validation_rule")
-@KeySequence("metadata_validation_rule_seq")
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Builder

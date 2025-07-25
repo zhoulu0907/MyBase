@@ -1,6 +1,5 @@
 package com.cmsr.onebase.module.metadata.dal.dataobject.datasource;
 
-import com.baomidou.mybatisplus.annotation.KeySequence;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
@@ -13,7 +12,6 @@ import java.util.Map;
  * 数据源表 DO
  */
 @TableName(value = "metadata_datasource", autoResultMap = true)
-@KeySequence("metadata_datasource_seq")
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Builder
