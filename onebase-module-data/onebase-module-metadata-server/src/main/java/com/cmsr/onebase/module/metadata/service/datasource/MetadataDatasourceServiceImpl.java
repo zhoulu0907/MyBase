@@ -5,16 +5,23 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.metadata.controller.admin.datasource.vo.DatasourcePageReqVO;
 import com.cmsr.onebase.module.metadata.controller.admin.datasource.vo.DatasourceSaveReqVO;
+import com.cmsr.onebase.module.metadata.controller.admin.datasource.vo.DatasourceTestConnectionReqVO;
+import com.cmsr.onebase.module.metadata.controller.admin.datasource.vo.DatasourceTestConnectionRespVO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.datasource.MetadataDatasourceDO;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.anyline.data.jdbc.util.DataSourceUtil;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Order;
+import org.anyline.proxy.ServiceProxy;
+import org.anyline.service.AnylineService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.sql.DataSource;
 import java.util.List;
+import java.util.Map;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.module.metadata.enums.ErrorCodeConstants.DATASOURCE_NOT_EXISTS;
@@ -128,6 +135,116 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.and("code", code);
         return dataRepository.findOne(MetadataDatasourceDO.class, configStore);
+    }
+
+    /**
+     * 测试数据源连接
+     *
+     * @param reqVO 测试连接请求参数
+     * @return 测试结果，包含连接状态、错误信息和耗时
+     */
+    @Override
+    public DatasourceTestConnectionRespVO testConnection(@Valid DatasourceTestConnectionReqVO reqVO) {
+        long startTime = System.currentTimeMillis();
+        
+        try {
+            // 从配置中获取连接参数
+            Map<String, Object> config = reqVO.getConfig();
+            String url = (String) config.get("url");
+            String username = (String) config.get("username");
+            String password = (String) config.get("password");
+            
+            // 参数校验
+            if (url == null || url.trim().isEmpty()) {
+                return DatasourceTestConnectionRespVO.failed("数据源URL不能为空");
+            }
+            if (username == null || username.trim().isEmpty()) {
+                return DatasourceTestConnectionRespVO.failed("用户名不能为空");
+            }
+            if (password == null) {
+                password = ""; // 密码可以为空
+            }
+            
+            // 测试连接
+            boolean connectionOK = testDatabaseConnection(reqVO.getDatasourceType(), url, username, password);
+            
+            long duration = System.currentTimeMillis() - startTime;
+            
+            if (connectionOK) {
+                return DatasourceTestConnectionRespVO.success(duration);
+            } else {
+                return DatasourceTestConnectionRespVO.failed("连接失败，请检查数据源配置信息");
+            }
+            
+        } catch (Exception e) {
+            long duration = System.currentTimeMillis() - startTime;
+            log.error("数据源连接测试失败", e);
+            DatasourceTestConnectionRespVO respVO = DatasourceTestConnectionRespVO.failed("连接测试异常：" + e.getMessage());
+            respVO.setDuration(duration);
+            return respVO;
+        }
+    }
+    
+    /**
+     * 测试数据库连接
+     *
+     * @param datasourceType 数据源类型
+     * @param url JDBC URL
+     * @param username 用户名
+     * @param password 密码
+     * @return 是否连接成功
+     */
+    private boolean testDatabaseConnection(String datasourceType, String url, String username, String password) {
+        try {
+            // 构建数据源配置，添加连接池类型
+            Map<String, Object> config = Map.of(
+                    "url", url,
+                    "user", username,
+                    "password", password,
+                    "driver", getDriverByType(datasourceType),
+                    "pool", "com.zaxxer.hikari.HikariDataSource"  // 指定连接池类型
+            );
+            
+            // 使用 anyline 的 DataSourceUtil 构建数据源
+            DataSource dataSource = DataSourceUtil.build(config);
+            
+            // 创建临时的 AnylineService 来测试连接
+            AnylineService<?> temporaryService = ServiceProxy.temporary(dataSource);
+            
+            // 使用 query 方法执行查询语句，避免框架的租户、软删除等特性影响
+            temporaryService.query("SELECT 1");
+            
+            return true;
+        } catch (Exception e) {
+            log.error("数据库连接测试失败: datasourceType={}, url={}, username={}", 
+                    datasourceType, url, username, e);
+            return false;
+        }
+    }
+
+    /**
+     * 根据数据源类型获取驱动类名
+     *
+     * @param datasourceType 数据源类型
+     * @return 驱动类名
+     */
+    private String getDriverByType(String datasourceType) {
+        return switch (datasourceType.toUpperCase()) {
+            case "MYSQL" -> "com.mysql.cj.jdbc.Driver";
+            case "POSTGRESQL" -> "org.postgresql.Driver";
+            case "ORACLE" -> "oracle.jdbc.driver.OracleDriver";
+            case "SQLSERVER" -> "com.microsoft.sqlserver.jdbc.SQLServerDriver";
+            case "KINGBASE" -> "com.kingbase8.Driver";
+            case "TDENGINE" -> "com.taosdata.jdbc.TSDBDriver";
+            case "CLICKHOUSE" -> "ru.yandex.clickhouse.ClickHouseDriver";
+            case "DM" -> "dm.jdbc.driver.DmDriver";
+            case "OPENGAUSS" -> "org.opengauss.Driver";
+            case "DB2" -> "com.ibm.db2.jcc.DB2Driver";
+            default -> {
+                log.warn("未知的数据源类型: {}", datasourceType);
+                yield ""; // 返回空字符串作为默认值
+            }
+        };
     }
 
 }

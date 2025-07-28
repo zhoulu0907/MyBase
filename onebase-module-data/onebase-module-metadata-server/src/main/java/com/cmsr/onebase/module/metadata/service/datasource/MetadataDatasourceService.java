@@ -3,6 +3,8 @@ package com.cmsr.onebase.module.metadata.service.datasource;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.metadata.controller.admin.datasource.vo.DatasourcePageReqVO;
 import com.cmsr.onebase.module.metadata.controller.admin.datasource.vo.DatasourceSaveReqVO;
+import com.cmsr.onebase.module.metadata.controller.admin.datasource.vo.DatasourceTestConnectionReqVO;
+import com.cmsr.onebase.module.metadata.controller.admin.datasource.vo.DatasourceTestConnectionRespVO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.datasource.MetadataDatasourceDO;
 import jakarta.validation.Valid;
 
@@ -65,5 +67,13 @@ public interface MetadataDatasourceService {
      * @return 数据源
      */
     MetadataDatasourceDO getDatasourceByCode(String code);
+
+    /**
+     * 测试数据源连接
+     *
+     * @param reqVO 测试连接请求
+     * @return 测试结果
+     */
+    DatasourceTestConnectionRespVO testConnection(@Valid DatasourceTestConnectionReqVO reqVO);
 
 }
