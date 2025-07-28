@@ -77,8 +77,7 @@ public class PostServiceImpl implements PostService {
 
     private void validatePostNameUnique(Long id, String name) {
         ConfigStore cs = new DefaultConfigStore()
-                .and(Compare.EQUAL, "name", name)
-                .and(Compare.EQUAL, "deleted", false);
+                .and(Compare.EQUAL, "name", name);
         PostDO post = dataRepository.findOne(PostDO.class, cs);
         if (post == null) {
             return;
@@ -94,8 +93,7 @@ public class PostServiceImpl implements PostService {
 
     private void validatePostCodeUnique(Long id, String code) {
         ConfigStore cs = new DefaultConfigStore()
-                .and(Compare.EQUAL, "code", code)
-                .and(Compare.EQUAL, "deleted", false);
+                .and(Compare.EQUAL, "code", code);
         PostDO post = dataRepository.findOne(PostDO.class, cs);
         if (post == null) {
             return;
@@ -128,8 +126,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public List<PostDO> getPostList(Collection<Long> ids, Collection<Integer> statuses) {
-        ConfigStore cs = new DefaultConfigStore()
-                .and(Compare.EQUAL, "deleted", false);
+        ConfigStore cs = new DefaultConfigStore();
         if (CollUtil.isNotEmpty(ids)) {
             cs.in("id", ids);
         }
@@ -142,8 +139,7 @@ public class PostServiceImpl implements PostService {
     @Override
     public PageResult<PostDO> getPostPage(PostPageReqVO reqVO) {
         try {
-            ConfigStore cs = new DefaultConfigStore()
-                    .and(Compare.EQUAL, "deleted", false);
+            ConfigStore cs = new DefaultConfigStore();
             
             // 构建查询条件
             if (cn.hutool.core.util.StrUtil.isNotBlank(reqVO.getCode())) {

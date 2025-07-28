@@ -92,8 +92,7 @@ public class MailTemplateServiceImpl implements MailTemplateService {
     void validateCodeUnique(Long id, String code) {
 
         ConfigStore configStore = new DefaultConfigStore()
-                .and(Compare.EQUAL, "code", code)
-                .and(Compare.EQUAL, "deleted", false);
+                .and(Compare.EQUAL, "code", code);
         MailTemplateDO template = dataRepository.findOne(MailTemplateDO.class,configStore);
 
 		//MailTemplateDO template = mailTemplateMapper.selectByCode(code);
@@ -142,8 +141,7 @@ public class MailTemplateServiceImpl implements MailTemplateService {
     @TenantIgnore
     public MailTemplateDO getMailTemplateByCodeFromCache(String code) {
         ConfigStore configStore = new DefaultConfigStore()
-                .and(Compare.EQUAL, "code", code)
-                .and(Compare.EQUAL, "deleted", false);
+                .and(Compare.EQUAL, "code", code);
         return dataRepository.findOne(MailTemplateDO.class,configStore);
 		//return mailTemplateMapper.selectByCode(code);
     }
@@ -152,8 +150,7 @@ public class MailTemplateServiceImpl implements MailTemplateService {
     @TenantIgnore
     public PageResult<MailTemplateDO> getMailTemplatePage(MailTemplatePageReqVO pageReqVO) {
 
-        ConfigStore configStore = new DefaultConfigStore()
-                .and(Compare.EQUAL, "deleted", false);
+        ConfigStore configStore = new DefaultConfigStore();
 
         // 构建查询条件
         if (null != pageReqVO.getStatus()) {
@@ -207,8 +204,7 @@ public class MailTemplateServiceImpl implements MailTemplateService {
     public long getMailTemplateCountByAccountId(Long accountId) {
 
         ConfigStore configStore = new DefaultConfigStore()
-                .and(Compare.EQUAL, "account_id", accountId)
-                .and(Compare.EQUAL, "deleted", false);
+                .and(Compare.EQUAL, "account_id", accountId);
         List<MailTemplateDO> list = dataRepository.findAll(MailTemplateDO.class, configStore);
 
         return list.size();

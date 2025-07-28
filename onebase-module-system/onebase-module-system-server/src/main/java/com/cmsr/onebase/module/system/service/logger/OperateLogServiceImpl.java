@@ -39,8 +39,7 @@ public class OperateLogServiceImpl implements OperateLogService {
     @Override
     public PageResult<OperateLogDO> getOperateLogPage(OperateLogPageReqVO pageReqVO) {
         try {
-            ConfigStore cs = new DefaultConfigStore()
-                    .and(Compare.EQUAL, "deleted", false);
+            ConfigStore cs = new DefaultConfigStore();
             
             // 构建查询条件
             if (pageReqVO.getUserId() != null) {
@@ -85,8 +84,7 @@ public class OperateLogServiceImpl implements OperateLogService {
     @Override
     public PageResult<OperateLogDO> getOperateLogPage(OperateLogPageReqDTO pageReqDTO) {
         try {
-            ConfigStore cs = new DefaultConfigStore()
-                    .and(Compare.EQUAL, "deleted", false);
+            ConfigStore cs = new DefaultConfigStore();
             
             // 构建查询条件
             if (cn.hutool.core.util.StrUtil.isNotBlank(pageReqDTO.getType())) {

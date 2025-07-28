@@ -103,7 +103,7 @@ public class DeptServiceImpl implements DeptService {
         try {
             ConfigStore configs = new DefaultConfigStore();
             configs.and(Compare.EQUAL, "parent_id", parentId);
-            configs.and(Compare.EQUAL, "deleted", false);
+    
             return dataRepository.findAll(DeptDO.class, configs).size();
         } catch (Exception e) {
             log.error("获取子部门数量失败: parentId={}", parentId, e);

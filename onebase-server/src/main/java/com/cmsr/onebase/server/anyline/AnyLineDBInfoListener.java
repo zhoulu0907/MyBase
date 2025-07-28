@@ -268,7 +268,7 @@ public class AnyLineDBInfoListener implements DMListener {
             configs.and(Compare.EQUAL, "tenant_id", TenantContextHolder.getRequiredTenantId());
         }
         // 加入软删判断
-        configs.and(Compare.EQUAL, "deleted", 0); 
+        configs.and(Compare.EQUAL, "deleted", false); 
     }
     
 

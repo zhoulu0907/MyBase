@@ -3,9 +3,8 @@ package com.cmsr.onebase.module.infra.dal.dataobject.logger;
 import com.cmsr.onebase.framework.apilog.core.enums.OperateTypeEnum;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
-import com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO;
+import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
 import com.baomidou.mybatisplus.annotation.KeySequence;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.*;
 
@@ -23,7 +22,7 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ApiAccessLogDO extends BaseDO {
+public class ApiAccessLogDO extends TenantBaseDO {
 
     /**
      * {@link #requestParams} 的最大长度
