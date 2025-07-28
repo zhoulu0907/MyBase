@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.infra.dal.dataobject.logger;
 
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO;
+import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
 import com.cmsr.onebase.module.infra.dal.dataobject.file.FileConfigDO;
 import com.cmsr.onebase.module.infra.enums.logger.ApiErrorLogProcessStatusEnum;
 import com.baomidou.mybatisplus.annotation.KeySequence;
@@ -23,7 +24,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @KeySequence(value = "infra_api_error_log_seq")
-public class ApiErrorLogDO extends BaseDO {
+public class ApiErrorLogDO extends TenantBaseDO {
     // builder模式可正常运作
     public ApiErrorLogDO setId(Long id){
         super.setId(id);

@@ -90,8 +90,7 @@ public class LicenseServiceImpl implements LicenseService {
     @Override
     public PageResult<LicenseDO> getLicensePage(LicensePageReqVO reqVO) {
         try {
-            ConfigStore cs = new DefaultConfigStore()
-                    .and(Compare.EQUAL, "deleted", false);
+            ConfigStore cs = new DefaultConfigStore();
 
             // 按LicensePageReqVO实际参数动态构建查询条件
             if (StrUtil.isNotBlank(reqVO.getEnterpriseName())) {
@@ -134,8 +133,7 @@ public class LicenseServiceImpl implements LicenseService {
      */
     @Override
     public List<LicenseDO> getSimpleLicenseList() {
-        ConfigStore cs = new DefaultConfigStore()
-                .and(Compare.EQUAL, "deleted", false);
+        ConfigStore cs = new DefaultConfigStore();
         return dataRepository.findAll(LicenseDO.class, cs);
     }
 }
