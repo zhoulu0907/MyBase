@@ -2,7 +2,6 @@ package com.cmsr.onebase.server.anyline;
 
 import com.cmsr.onebase.framework.common.anyline.web.BizException;
 import com.cmsr.onebase.framework.common.anyline.web.StatusCode;
-import com.cmsr.onebase.framework.common.util.snowflake.SnowflakeId;
 import com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
@@ -43,7 +42,6 @@ public class AnyLineDBInfoListener implements DMListener {
         TENANT_IGNORE_TABLES.add("system_menu");
         TENANT_IGNORE_TABLES.add("system_notify_template");
         TENANT_IGNORE_TABLES.add("system_oauth2_client");
-
         // 可以根据需要添加更多表
     }
 
