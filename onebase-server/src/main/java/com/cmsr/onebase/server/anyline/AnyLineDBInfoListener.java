@@ -59,7 +59,7 @@ public class AnyLineDBInfoListener implements DMListener {
     @Override public SWITCH prepareInsert(DataRuntime runtime, String random, int batch, Table dest, Object obj,
         ConfigStore configs, List<String> columns) {
         // 加入租户标志
-        autoInjectTenantID(obj);
+        injectTenantIdToObject(obj);
 
         // 加入创建时间和创建人等参数
         if (Objects.nonNull(obj) && obj instanceof BaseDO baseDO) {
@@ -118,7 +118,7 @@ public class AnyLineDBInfoListener implements DMListener {
     }
 
     /**
-     * 检查表是否需要忽略租户过滤 by matianyu
+     * 检查表是否需要忽略租户过滤 
      *
      * @param obj RunPrepare对象
      * @return 如果表需要忽略租户过滤则返回true
@@ -127,11 +127,27 @@ public class AnyLineDBInfoListener implements DMListener {
         return obj != null && obj.getClass().isAnnotationPresent(TenantIgnore.class);
     }
 
+    /**
+     * 检查表名是否需要忽略租户过滤 
+     *
+     * @param prepare RunPrepare对象
+     * @return 如果表名在忽略列表中则返回true
+     */
     private boolean isTableTenantIgnored2(RunPrepare prepare) {
+        return prepare != null && isTableTenantIgnored2(prepare.getTableName());
+    }
+    
+    /**
+     * 检查表名是否需要忽略租户过滤
+     *
+     * @param tableName 表名
+     * @return 如果表名在忽略列表中则返回true
+     */
+    private boolean isTableTenantIgnored2(String tableName) {
         if (TenantContextHolder.isIgnore()) {
             return true;
         }
-        return prepare != null && TENANT_IGNORE_TABLES.contains(prepare.getTableName());
+        return TENANT_IGNORE_TABLES.contains(tableName);
     }
 
     /**
@@ -181,14 +197,14 @@ public class AnyLineDBInfoListener implements DMListener {
      *
      * @param runtime 包含数据源(key)、适配器、JDBCTemplate、dao
      * @param random  用来标记同一组SQL、执行结构、参数等
-     * @param dest    表
+     * @param table    表
      * @param obj     entity或DataRow
      * @param columns 删除条件的我
      * @return 如果返回false 则中断执行
      */
-    @Override public SWITCH prepareDelete(DataRuntime runtime, String random, int batch, Table dest, Object obj,
+    @Override public SWITCH prepareDelete(DataRuntime runtime, String random, int batch, Table table, Object obj,
         ConfigStore configs, String... columns) {
-        autoInjectTenantID(obj);
+        injectTenantIdAndDeleteToQuery(table.getName(), configs);
         return SWITCH.CONTINUE;
     }
 
@@ -207,7 +223,7 @@ public class AnyLineDBInfoListener implements DMListener {
      */
     public SWITCH prepareDelete(DataRuntime runtime, String random, int batch, Table table, ConfigStore configs,
         String key, Object values) {
-        autoInjectTenantID(values);
+        injectTenantIdAndDeleteToQuery(table.getName(), configs);
         return SWITCH.CONTINUE;
     }
 
@@ -227,17 +243,33 @@ public class AnyLineDBInfoListener implements DMListener {
     }
 
     /**
-     * 注入租户标志
+     * 向实体注入租户标志
      *
      * @param obj
      */
-    private void autoInjectTenantID(Object obj) {
+    private void injectTenantIdToObject(Object obj) {
         boolean shouldIgnore = isTableTenantIgnored2(obj);
-        log.info("autoInjectTenantID--------------> isTableTenantIgnored: {}", shouldIgnore);
+        log.info("injectTenantIdToObject--------------> isTableTenantIgnored: {}", shouldIgnore);
         if (!shouldIgnore && obj instanceof TenantBaseDO tenantBaseDO) {
             tenantBaseDO.setTenantId(TenantContextHolder.getRequiredTenantId());
-            log.info("tenantBaseDO--------------> setTenantId: {}", tenantBaseDO.getTenantId());
+            log.info("injectTenantIdToObject--------------> setTenantId: {}", tenantBaseDO.getTenantId());
         }
     }
+
+     /**
+     * 向查询条件注入租户标志
+     *
+     * @param obj
+     */
+    private void injectTenantIdAndDeleteToQuery(String table, ConfigStore configs) {
+        boolean shouldIgnore = isTableTenantIgnored2(table);
+        log.info("[{}] injectTenantIdAndDeleteToQuery --------------> isTableTenantIgnored: {}", table, shouldIgnore);
+        if (!shouldIgnore) {
+            configs.and(Compare.EQUAL, "tenant_id", TenantContextHolder.getRequiredTenantId());
+        }
+        // 加入软删判断
+        configs.and(Compare.EQUAL, "deleted", 1); 
+    }
+    
 
 }

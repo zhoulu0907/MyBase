@@ -184,10 +184,11 @@ public class PermissionServiceImpl implements PermissionService {
     })
     public void processRoleDeleted(Long roleId) {
         // 标记删除 UserRole
-        dataRepository.deleteByConfig(UserRoleDO.class,new DefaultConfigStore().and(Compare.EQUAL,"role_id", roleId));
+        dataRepository.deleteByConfig(UserRoleDO.class, new DefaultConfigStore().eq("role_id", roleId));
+        
         //userRoleMapper.deleteListByRoleId(roleId);
         // 标记删除 RoleMenu
-        dataRepository.deleteByConfig(RoleMenuDO.class,new DefaultConfigStore().and(Compare.EQUAL,"role_id", roleId));
+        dataRepository.deleteByConfig(RoleMenuDO.class, new DefaultConfigStore().eq("role_id", roleId));
         //roleMenuMapper.deleteListByRoleId(roleId);
     }
 
@@ -195,7 +196,7 @@ public class PermissionServiceImpl implements PermissionService {
     @CacheEvict(value = RedisKeyConstants.MENU_ROLE_ID_LIST, key = "#menuId")
     public void processMenuDeleted(Long menuId) {
 
-        dataRepository.deleteByConfig(RoleMenuDO.class,new DefaultConfigStore().and(Compare.EQUAL,"menu_id", menuId));
+        dataRepository.deleteByConfig(RoleMenuDO.class, new DefaultConfigStore().eq("menu_id", menuId));
         //roleMenuMapper.deleteListByMenuId(menuId);
     }
 
