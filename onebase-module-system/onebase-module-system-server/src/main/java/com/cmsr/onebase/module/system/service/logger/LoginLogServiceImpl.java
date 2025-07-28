@@ -32,8 +32,7 @@ public class LoginLogServiceImpl implements LoginLogService {
     @Override
     public PageResult<LoginLogDO> getLoginLogPage(LoginLogPageReqVO pageReqVO) {
         try {
-            ConfigStore cs = new DefaultConfigStore()
-                    .and(Compare.EQUAL, "deleted", false);
+            ConfigStore cs = new DefaultConfigStore();
             
             // 构建查询条件
             if (cn.hutool.core.util.StrUtil.isNotBlank(pageReqVO.getUserIp())) {

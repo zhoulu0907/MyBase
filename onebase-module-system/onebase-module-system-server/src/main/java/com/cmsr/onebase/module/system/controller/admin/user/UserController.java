@@ -46,6 +46,40 @@ public class UserController {
     @Resource
     private DeptService deptService;
 
+    // ——————————————— 以下是平台管理员 ———————————————
+    @PostMapping("/platform-admin/create")
+    @Operation(summary = "新增平台管理员用户")
+    @PreAuthorize("@ss.hasPermission('system:platform-admin:create')")
+    public CommonResult<Long> createPlatformAdmin(@Valid @RequestBody UserSaveReqVO reqVO) {
+        Long id = userService.createUser(reqVO);
+        return success(id);
+    }
+
+    @GetMapping("/platform-admin/page")
+    @Operation(summary = "获得平台管理员列表")
+    @PreAuthorize("@ss.hasPermission('system:platform-admin:query')")
+    public CommonResult<PageResult<UserRespVO>> getPlatformAdminPage(@Valid UserPageReqVO pageReqVO) {
+        return null;
+    }
+    @PutMapping("/platform-admin/update")
+    @Operation(summary = "修改平台管理员")
+    @PreAuthorize("@ss.hasPermission('system:platform-admin:update')")
+    public CommonResult<Boolean> updatePlatformAdmin(@Valid @RequestBody UserSaveReqVO reqVO) {
+        userService.updateUser(reqVO);
+        return success(true);
+    }
+
+    @DeleteMapping("/platform-admin/delete")
+    @Operation(summary = "删除平台管理员")
+    @Parameter(name = "id", description = "编号", required = true, example = "1024")
+    @PreAuthorize("@ss.hasPermission('system:platform-admin:delete')")
+    public CommonResult<Boolean> deletePlatformAdmin(@RequestParam("id") Long id) {
+        userService.deleteUser(id);
+        return success(true);
+    }
+
+
+    // ——————————————— 以下是普通用户管理 ———————————————
     @PostMapping("/create")
     @Operation(summary = "新增用户")
     @PreAuthorize("@ss.hasPermission('system:user:create')")
@@ -54,7 +88,7 @@ public class UserController {
         return success(id);
     }
 
-    @PutMapping("update")
+    @PutMapping("/update")
     @Operation(summary = "修改用户")
     @PreAuthorize("@ss.hasPermission('system:user:update')")
     public CommonResult<Boolean> updateUser(@Valid @RequestBody UserSaveReqVO reqVO) {

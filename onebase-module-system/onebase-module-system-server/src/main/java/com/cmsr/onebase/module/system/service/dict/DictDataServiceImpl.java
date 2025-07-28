@@ -58,8 +58,7 @@ public class DictDataServiceImpl implements DictDataService {
     @TenantIgnore
     public List<DictDataDO> getDictDataList(Integer status, String dictType) {
         return TenantUtils.executeIgnore(() -> {
-            ConfigStore cs = new DefaultConfigStore()
-                    .and(Compare.EQUAL, "deleted", false);
+            ConfigStore cs = new DefaultConfigStore();
             if (status != null) {
                 cs.and(Compare.EQUAL, "status", status);
             }
@@ -79,8 +78,7 @@ public class DictDataServiceImpl implements DictDataService {
     public PageResult<DictDataDO> getDictDataPage(DictDataPageReqVO pageReqVO) {
         return TenantUtils.executeIgnore(() -> {
             try {
-                ConfigStore cs = new DefaultConfigStore()
-                        .and(Compare.EQUAL, "deleted", false);
+                ConfigStore cs = new DefaultConfigStore();
                 
                 // 构建查询条件
                 if (cn.hutool.core.util.StrUtil.isNotBlank(pageReqVO.getLabel())) {
@@ -154,8 +152,7 @@ public class DictDataServiceImpl implements DictDataService {
     @Override
     public long getDictDataCountByDictType(String dictType) {
         ConfigStore cs = new DefaultConfigStore()
-                .and(Compare.EQUAL, "dict_type", dictType)
-                .and(Compare.EQUAL, "deleted", false);
+                .and(Compare.EQUAL, "dict_type", dictType);
         List<DictDataDO> list = dataRepository.findAll(DictDataDO.class, cs);
         return list.size();
     }
@@ -164,8 +161,7 @@ public class DictDataServiceImpl implements DictDataService {
     public void validateDictDataValueUnique(Long id, String dictType, String value) {
         ConfigStore cs = new DefaultConfigStore()
                 .and(Compare.EQUAL, "dict_type", dictType)
-                .and(Compare.EQUAL, "value", value)
-                .and(Compare.EQUAL, "deleted", false);
+                .and(Compare.EQUAL, "value", value);
         DictDataDO dictData = dataRepository.findOne(DictDataDO.class, cs);
         if (dictData == null) {
             return;
@@ -210,7 +206,6 @@ public class DictDataServiceImpl implements DictDataService {
         }
         ConfigStore cs = new DefaultConfigStore()
                 .and(Compare.EQUAL, "dict_type", dictType)
-                .and(Compare.EQUAL, "deleted", false)
                 .in("value", values);
         List<DictDataDO> dictDataList = dataRepository.findAll(DictDataDO.class, cs);
         Map<String, DictDataDO> dictDataMap = CollectionUtils.convertMap(dictDataList, DictDataDO::getValue);
@@ -232,8 +227,7 @@ public class DictDataServiceImpl implements DictDataService {
         return TenantUtils.executeIgnore(() -> {
             ConfigStore cs = new DefaultConfigStore()
                     .and(Compare.EQUAL, "dict_type", dictType)
-                    .and(Compare.EQUAL, "value", value)
-                    .and(Compare.EQUAL, "deleted", false);
+                    .and(Compare.EQUAL, "value", value);
             return dataRepository.findOne(DictDataDO.class, cs);
         });
     }
@@ -244,8 +238,7 @@ public class DictDataServiceImpl implements DictDataService {
         return TenantUtils.executeIgnore(() -> {
             ConfigStore cs = new DefaultConfigStore()
                     .and(Compare.EQUAL, "dict_type", dictType)
-                    .and(Compare.EQUAL, "label", label)
-                    .and(Compare.EQUAL, "deleted", false);
+                    .and(Compare.EQUAL, "label", label);
             return dataRepository.findOne(DictDataDO.class, cs);
         });
     }
@@ -255,8 +248,7 @@ public class DictDataServiceImpl implements DictDataService {
     public List<DictDataDO> getDictDataListByDictType(String dictType) {
         return TenantUtils.executeIgnore(() -> {
             ConfigStore cs = new DefaultConfigStore()
-                    .and(Compare.EQUAL, "dict_type", dictType)
-                    .and(Compare.EQUAL, "deleted", false);
+                    .and(Compare.EQUAL, "dict_type", dictType);
             List<DictDataDO> list = dataRepository.findAll(DictDataDO.class, cs);
             // 创建可变列表的副本以支持排序
             List<DictDataDO> mutableList = new ArrayList<>(list);
