@@ -3,23 +3,32 @@ package com.cmsr.onebase.module.metadata.service.datasource;
 import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.module.metadata.controller.admin.datasource.vo.ColumnInfoRespVO;
 import com.cmsr.onebase.module.metadata.controller.admin.datasource.vo.DatasourcePageReqVO;
 import com.cmsr.onebase.module.metadata.controller.admin.datasource.vo.DatasourceSaveReqVO;
 import com.cmsr.onebase.module.metadata.controller.admin.datasource.vo.DatasourceTestConnectionReqVO;
 import com.cmsr.onebase.module.metadata.controller.admin.datasource.vo.DatasourceTestConnectionRespVO;
+import com.cmsr.onebase.module.metadata.controller.admin.datasource.vo.DatasourceTypeRespVO;
+import com.cmsr.onebase.module.metadata.controller.admin.datasource.vo.TableInfoRespVO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.datasource.MetadataDatasourceDO;
+import com.cmsr.onebase.module.metadata.enums.DatasourceTypeEnum;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.jdbc.util.DataSourceUtil;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Order;
+import org.anyline.metadata.Column;
+import org.anyline.metadata.Table;
 import org.anyline.proxy.ServiceProxy;
 import org.anyline.service.AnylineService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import javax.sql.DataSource;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -36,6 +45,174 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
 
     @Resource
     private DataRepository dataRepository;
+
+    @Override
+    public List<DatasourceTypeRespVO> getDatasourceTypes() {
+        return Arrays.stream(DatasourceTypeEnum.values())
+                .map(this::convertToTypeRespVO)
+                .toList();
+    }
+
+    @Override
+    public List<TableInfoRespVO> getTablesByDatasourceId(Long datasourceId, String schemaName, String keyword) {
+        // 获取数据源信息
+        MetadataDatasourceDO datasource = getDatasource(datasourceId);
+        if (datasource == null) {
+            throw exception(DATASOURCE_NOT_EXISTS);
+        }
+
+        try {
+            // 创建临时数据源连接
+            AnylineService<?> temporaryService = createTemporaryService(datasource);
+            
+            // 获取所有表信息
+            List<String> tableNames = temporaryService.tables();
+            
+            List<TableInfoRespVO> result = new ArrayList<>();
+            for (String tableNameStr : tableNames) {
+                // 过滤条件
+                if (StringUtils.hasText(keyword) && !tableNameStr.toLowerCase().contains(keyword.toLowerCase())) {
+                    continue;
+                }
+                
+                // 构建Table对象来获取详细信息
+                Table table = new Table(tableNameStr);
+                if (StringUtils.hasText(schemaName)) {
+                    table.setSchema(schemaName);
+                }
+                
+                // 获取表的详细信息
+                Table tableDetail = temporaryService.metadata().table(tableNameStr);
+                if (tableDetail == null) {
+                    tableDetail = table; // 如果获取不到详细信息，使用基本信息
+                }
+                
+                TableInfoRespVO tableInfo = new TableInfoRespVO();
+                tableInfo.setTableName(tableDetail.getName());
+                tableInfo.setDisplayName(StringUtils.hasText(tableDetail.getComment()) ? tableDetail.getComment() : tableDetail.getName());
+                tableInfo.setTableComment(tableDetail.getComment());
+                tableInfo.setTableType("TABLE");
+                tableInfo.setSchemaName(tableDetail.getSchema() != null ? tableDetail.getSchema().toString() : schemaName);
+                // 获取行数（可能比较耗时，这里暂时设为0）
+                tableInfo.setRowCount(0L);
+                
+                result.add(tableInfo);
+            }
+            
+            return result;
+        } catch (Exception e) {
+            log.error("获取数据源表列表失败: datasourceId={}", datasourceId, e);
+            throw new RuntimeException("获取数据源表列表失败: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public List<ColumnInfoRespVO> getColumnsByTableName(Long datasourceId, String tableName, String schemaName) {
+        // 获取数据源信息
+        MetadataDatasourceDO datasource = getDatasource(datasourceId);
+        if (datasource == null) {
+            throw exception(DATASOURCE_NOT_EXISTS);
+        }
+
+        try {
+            // 创建临时数据源连接
+            AnylineService<?> temporaryService = createTemporaryService(datasource);
+            
+            // 构建表对象
+            Table table = new Table(tableName);
+            if (StringUtils.hasText(schemaName)) {
+                table.setSchema(schemaName);
+            }
+            
+            // 获取表的所有字段信息
+            List<String> columnNames = temporaryService.columns(table);
+            
+            List<ColumnInfoRespVO> result = new ArrayList<>();
+            for (String columnName : columnNames) {
+                // 构建Column对象来获取详细信息
+                Column column = new Column(columnName);
+                
+                // 获取字段的详细信息
+                Column columnDetail = temporaryService.metadata().column(table, columnName);
+                if (columnDetail == null) {
+                    columnDetail = column; // 如果获取不到详细信息，使用基本信息
+                }
+                
+                ColumnInfoRespVO columnInfo = new ColumnInfoRespVO();
+                columnInfo.setColumnName(columnDetail.getName());
+                columnInfo.setDisplayName(StringUtils.hasText(columnDetail.getComment()) ? columnDetail.getComment() : columnDetail.getName());
+                columnInfo.setDataType(columnDetail.getTypeName());
+                columnInfo.setDataLength(columnDetail.getPrecision());
+                columnInfo.setDecimalPlaces(columnDetail.getScale());
+                columnInfo.setIsNullable(columnDetail.isNullable());
+                columnInfo.setIsPrimaryKey(columnDetail.isPrimaryKey());
+                columnInfo.setIsAutoIncrement(columnDetail.isAutoIncrement());
+                columnInfo.setDefaultValue(columnDetail.getDefaultValue() != null ? columnDetail.getDefaultValue().toString() : null);
+                columnInfo.setColumnComment(columnDetail.getComment());
+                columnInfo.setOrdinalPosition(columnDetail.getPosition());
+                
+                result.add(columnInfo);
+            }
+            
+            return result;
+        } catch (Exception e) {
+            log.error("获取表字段信息失败: datasourceId={}, tableName={}", datasourceId, tableName, e);
+            throw new RuntimeException("获取表字段信息失败: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 创建临时的AnylineService用于数据库操作
+     *
+     * @param datasource 数据源配置
+     * @return AnylineService实例
+     */
+    private AnylineService<?> createTemporaryService(MetadataDatasourceDO datasource) {
+        try {
+            // 从数据源配置中获取连接参数
+            Map<String, Object> config = datasource.getConfig();
+            String url = (String) config.get("url");
+            String username = (String) config.get("username");
+            String password = (String) config.get("password");
+            
+            // 构建数据源配置
+            Map<String, Object> dsConfig = Map.of(
+                    "url", url,
+                    "user", username,
+                    "password", password != null ? password : "",
+                    "driver", getDriverByType(datasource.getDatasourceType()),
+                    "pool", "com.zaxxer.hikari.HikariDataSource"
+            );
+            
+            // 使用 anyline 的 DataSourceUtil 构建数据源
+            DataSource dataSource = DataSourceUtil.build(dsConfig);
+            
+            // 创建临时的 AnylineService
+            return ServiceProxy.temporary(dataSource);
+        } catch (Exception e) {
+            log.error("创建临时数据源连接失败", e);
+            throw new RuntimeException("创建数据源连接失败: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 将数据源类型枚举转换为响应VO
+     *
+     * @param typeEnum 数据源类型枚举
+     * @return 数据源类型响应VO
+     */
+    private DatasourceTypeRespVO convertToTypeRespVO(DatasourceTypeEnum typeEnum) {
+        DatasourceTypeRespVO respVO = new DatasourceTypeRespVO();
+        respVO.setDatasourceType(typeEnum.getCode());
+        respVO.setDisplayName(typeEnum.getDisplayName());
+        respVO.setDescription(typeEnum.getDescription());
+        respVO.setDefaultPort(typeEnum.getDefaultPort());
+        respVO.setJdbcDriverClass(typeEnum.getJdbcDriverClass());
+        respVO.setUrlTemplate(typeEnum.getUrlTemplate());
+        // 所有数据源类型都支持读写和模式发现功能
+        respVO.setSupportFeatures(Arrays.asList("READ", "WRITE", "SCHEMA_DISCOVERY"));
+        return respVO;
+    }
 
     @Override
     @Transactional(rollbackFor = Exception.class)

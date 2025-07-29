@@ -21,7 +21,7 @@ import java.util.List;
 
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 
-@Tag(name = "管理后台 - 业务实体")
+@Tag(name = "管理后台 - 业务实体管理")
 @RestController
 @RequestMapping("/metadata/business-entity")
 @Validated
@@ -30,54 +30,49 @@ public class BusinessEntityController {
     @Resource
     private MetadataBusinessEntityService businessEntityService;
 
-    @PostMapping("/create")
-    @Operation(summary = "新增业务实体")
+    @PostMapping
+    @Operation(summary = "创建业务实体")
     @PreAuthorize("@ss.hasPermission('metadata:business-entity:create')")
-    public CommonResult<Long> createBusinessEntity(@Valid @RequestBody BusinessEntitySaveReqVO reqVO) {
+    public CommonResult<BusinessEntityRespVO> createBusinessEntity(@Valid @RequestBody BusinessEntitySaveReqVO reqVO) {
         Long id = businessEntityService.createBusinessEntity(reqVO);
-        return success(id);
-    }
-
-    @PutMapping("/update")
-    @Operation(summary = "修改业务实体")
-    @PreAuthorize("@ss.hasPermission('metadata:business-entity:update')")
-    public CommonResult<Boolean> updateBusinessEntity(@Valid @RequestBody BusinessEntitySaveReqVO reqVO) {
-        businessEntityService.updateBusinessEntity(reqVO);
-        return success(true);
-    }
-
-    @DeleteMapping("/delete")
-    @Operation(summary = "删除业务实体")
-    @Parameter(name = "id", description = "编号", required = true, example = "1024")
-    @PreAuthorize("@ss.hasPermission('metadata:business-entity:delete')")
-    public CommonResult<Boolean> deleteBusinessEntity(@RequestParam("id") Long id) {
-        businessEntityService.deleteBusinessEntity(id);
-        return success(true);
-    }
-
-    @GetMapping("/get")
-    @Operation(summary = "获得业务实体详情")
-    @Parameter(name = "id", description = "编号", required = true, example = "1024")
-    @PreAuthorize("@ss.hasPermission('metadata:business-entity:query')")
-    public CommonResult<BusinessEntityRespVO> getBusinessEntity(@RequestParam("id") Long id) {
         MetadataBusinessEntityDO businessEntity = businessEntityService.getBusinessEntity(id);
         return success(BusinessEntityConvert.INSTANCE.convert(businessEntity));
     }
 
-    @GetMapping("/page")
-    @Operation(summary = "获得业务实体分页列表")
+    @PutMapping("/{id}")
+    @Operation(summary = "更新业务实体信息")
+    @Parameter(name = "id", description = "业务实体ID", required = true, example = "1024")
+    @PreAuthorize("@ss.hasPermission('metadata:business-entity:update')")
+    public CommonResult<Boolean> updateBusinessEntity(@PathVariable("id") Long id, @Valid @RequestBody BusinessEntitySaveReqVO reqVO) {
+        reqVO.setId(id);
+        businessEntityService.updateBusinessEntity(reqVO);
+        return success(true);
+    }
+
+    @DeleteMapping("/{id}")
+    @Operation(summary = "软删除业务实体")
+    @Parameter(name = "id", description = "业务实体ID", required = true, example = "1024")
+    @PreAuthorize("@ss.hasPermission('metadata:business-entity:delete')")
+    public CommonResult<Boolean> deleteBusinessEntity(@PathVariable("id") Long id) {
+        businessEntityService.deleteBusinessEntity(id);
+        return success(true);
+    }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "根据ID获取业务实体详细信息")
+    @Parameter(name = "id", description = "业务实体ID", required = true, example = "1024")
     @PreAuthorize("@ss.hasPermission('metadata:business-entity:query')")
-    public CommonResult<PageResult<BusinessEntityRespVO>> getBusinessEntityPage(@Valid BusinessEntityPageReqVO pageReqVO) {
-        PageResult<MetadataBusinessEntityDO> pageResult = businessEntityService.getBusinessEntityPage(pageReqVO);
-        return success(BusinessEntityConvert.INSTANCE.convertPage(pageResult));
+    public CommonResult<BusinessEntityRespVO> getBusinessEntity(@PathVariable("id") Long id) {
+        MetadataBusinessEntityDO businessEntity = businessEntityService.getBusinessEntity(id);
+        return success(BusinessEntityConvert.INSTANCE.convert(businessEntity));
     }
 
     @GetMapping("/list")
-    @Operation(summary = "获得业务实体列表")
+    @Operation(summary = "分页查询业务实体列表")
     @PreAuthorize("@ss.hasPermission('metadata:business-entity:query')")
-    public CommonResult<List<BusinessEntityRespVO>> getBusinessEntityList() {
-        List<MetadataBusinessEntityDO> list = businessEntityService.getBusinessEntityList();
-        return success(BusinessEntityConvert.INSTANCE.convertList(list));
+    public CommonResult<PageResult<BusinessEntityRespVO>> getBusinessEntityList(@Valid BusinessEntityPageReqVO pageReqVO) {
+        PageResult<MetadataBusinessEntityDO> pageResult = businessEntityService.getBusinessEntityPage(pageReqVO);
+        return success(BusinessEntityConvert.INSTANCE.convertPage(pageResult));
     }
 
     @GetMapping("/list-by-datasource")

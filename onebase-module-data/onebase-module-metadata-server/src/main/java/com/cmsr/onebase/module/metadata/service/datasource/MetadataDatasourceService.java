@@ -1,10 +1,13 @@
 package com.cmsr.onebase.module.metadata.service.datasource;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.module.metadata.controller.admin.datasource.vo.ColumnInfoRespVO;
 import com.cmsr.onebase.module.metadata.controller.admin.datasource.vo.DatasourcePageReqVO;
 import com.cmsr.onebase.module.metadata.controller.admin.datasource.vo.DatasourceSaveReqVO;
 import com.cmsr.onebase.module.metadata.controller.admin.datasource.vo.DatasourceTestConnectionReqVO;
 import com.cmsr.onebase.module.metadata.controller.admin.datasource.vo.DatasourceTestConnectionRespVO;
+import com.cmsr.onebase.module.metadata.controller.admin.datasource.vo.DatasourceTypeRespVO;
+import com.cmsr.onebase.module.metadata.controller.admin.datasource.vo.TableInfoRespVO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.datasource.MetadataDatasourceDO;
 import jakarta.validation.Valid;
 
@@ -14,6 +17,33 @@ import java.util.List;
  * 数据源 Service 接口
  */
 public interface MetadataDatasourceService {
+
+    /**
+     * 获取所有支持的数据源类型
+     *
+     * @return 数据源类型列表
+     */
+    List<DatasourceTypeRespVO> getDatasourceTypes();
+
+    /**
+     * 根据数据源ID查询表名列表
+     *
+     * @param datasourceId 数据源ID
+     * @param schemaName 数据库模式名(可选)
+     * @param keyword 表名搜索关键词(可选)
+     * @return 表信息列表
+     */
+    List<TableInfoRespVO> getTablesByDatasourceId(Long datasourceId, String schemaName, String keyword);
+
+    /**
+     * 根据表名查询字段信息
+     *
+     * @param datasourceId 数据源ID
+     * @param tableName 表名
+     * @param schemaName 数据库模式名(可选)
+     * @return 字段信息列表
+     */
+    List<ColumnInfoRespVO> getColumnsByTableName(Long datasourceId, String tableName, String schemaName);
 
     /**
      * 创建数据源

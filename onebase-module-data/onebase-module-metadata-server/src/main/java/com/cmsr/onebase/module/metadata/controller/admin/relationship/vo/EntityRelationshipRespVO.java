@@ -3,41 +3,58 @@ package com.cmsr.onebase.module.metadata.controller.admin.relationship.vo;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
+/**
+ * 管理后台 - 实体关系 Response VO
+ *
+ * @author bty418
+ * @date 2025-01-25
+ */
 @Schema(description = "管理后台 - 实体关系 Response VO")
 @Data
 public class EntityRelationshipRespVO {
 
-    @Schema(description = "关系编号", example = "1024")
+    @Schema(description = "关系ID", example = "5001")
     private Long id;
 
-    @Schema(description = "关系名称", example = "用户部门关系")
+    @Schema(description = "关系名称", example = "用户订单关系")
     private String relationName;
 
-    @Schema(description = "源实体ID", example = "1")
+    @Schema(description = "源实体ID", example = "2001")
     private Long sourceEntityId;
 
-    @Schema(description = "目标实体ID", example = "2")
+    @Schema(description = "源实体名称", example = "用户信息")
+    private String sourceEntityName;
+
+    @Schema(description = "目标实体ID", example = "2002")
     private Long targetEntityId;
+
+    @Schema(description = "目标实体名称", example = "订单信息")
+    private String targetEntityName;
 
     @Schema(description = "关系类型", example = "ONE_TO_MANY")
     private String relationshipType;
 
-    @Schema(description = "源字段id", example = "1")
-    private String sourceFieldId;
+    @Schema(description = "源字段ID", example = "3001")
+    private Long sourceFieldId;
 
-    @Schema(description = "目标字段id", example = "2")
-    private String targetFieldId;
+    @Schema(description = "源字段名称", example = "id")
+    private String sourceFieldName;
 
-    @Schema(description = "级联操作类型", example = "read")
+    @Schema(description = "目标字段ID", example = "3010")
+    private Long targetFieldId;
+
+    @Schema(description = "目标字段名称", example = "userId")
+    private String targetFieldName;
+
+    @Schema(description = "级联类型", example = "READ")
     private String cascadeType;
 
-    @Schema(description = "关系描述", example = "用户与部门的关联关系")
+    @Schema(description = "描述信息", example = "用户与订单的一对多关系")
     private String description;
 
-    @Schema(description = "运行模式", example = "0")
-    private Integer runMode;
-
-    @Schema(description = "应用ID", example = "1")
-    private Long appId;
+    @Schema(description = "创建时间", example = "2025-07-28T10:30:00")
+    private LocalDateTime createTime;
 
 }

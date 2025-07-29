@@ -3,9 +3,20 @@ package com.cmsr.onebase.module.metadata.service.entity;
 import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldBatchCreateReqVO;
+import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldBatchCreateRespVO;
+import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldBatchSortReqVO;
+import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldBatchUpdateReqVO;
+import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldBatchUpdateRespVO;
+import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldCreateItemVO;
+import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldDetailRespVO;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldPageReqVO;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldSaveReqVO;
+import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldSortItemVO;
+import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldUpdateItemVO;
+import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.FieldTypeConfigRespVO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataEntityFieldDO;
+import com.cmsr.onebase.module.metadata.enums.FieldTypeEnum;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -13,7 +24,10 @@ import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Order;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
@@ -29,6 +43,173 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
 
     @Resource
     private DataRepository dataRepository;
+
+    @Override
+    public List<FieldTypeConfigRespVO> getFieldTypes() {
+        return Arrays.stream(FieldTypeEnum.values())
+                .map(this::convertToFieldTypeConfigRespVO)
+                .toList();
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public EntityFieldBatchCreateRespVO batchCreateEntityFields(@Valid EntityFieldBatchCreateReqVO reqVO) {
+        EntityFieldBatchCreateRespVO result = new EntityFieldBatchCreateRespVO();
+        List<Long> fieldIds = new ArrayList<>();
+        int successCount = 0;
+        int failureCount = 0;
+
+        for (EntityFieldCreateItemVO fieldItem : reqVO.getFields()) {
+            try {
+                // 校验字段名唯一性
+                validateEntityFieldNameUnique(null, reqVO.getEntityId(), fieldItem.getFieldName());
+
+                // 创建字段
+                MetadataEntityFieldDO entityField = new MetadataEntityFieldDO();
+                entityField.setEntityId(reqVO.getEntityId());
+                entityField.setFieldName(fieldItem.getFieldName());
+                entityField.setDisplayName(fieldItem.getDisplayName());
+                entityField.setFieldType(fieldItem.getFieldType());
+                entityField.setDataLength(fieldItem.getDataLength());
+                entityField.setDescription(fieldItem.getDescription());
+                entityField.setIsRequired(fieldItem.getIsRequired() != null ? fieldItem.getIsRequired() : false);
+                entityField.setIsUnique(fieldItem.getIsUnique() != null ? fieldItem.getIsUnique() : false);
+                entityField.setAllowNull(fieldItem.getAllowNull() != null ? fieldItem.getAllowNull() : true);
+                entityField.setDefaultValue(fieldItem.getDefaultValue());
+                entityField.setSortOrder(fieldItem.getSortOrder() != null ? fieldItem.getSortOrder() : 0);
+                entityField.setIsSystemField(false);
+                entityField.setIsPrimaryKey(false);
+                entityField.setAppId(reqVO.getAppId());
+
+                dataRepository.insert(entityField);
+                fieldIds.add(entityField.getId());
+                successCount++;
+            } catch (Exception e) {
+                log.error("批量创建字段失败: fieldName={}", fieldItem.getFieldName(), e);
+                failureCount++;
+            }
+        }
+
+        result.setSuccessCount(successCount);
+        result.setFailureCount(failureCount);
+        result.setFieldIds(fieldIds);
+        return result;
+    }
+
+    @Override
+    public List<MetadataEntityFieldDO> getEntityFieldListByConditions(Long entityId, Boolean isSystemField, String keyword) {
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        configStore.and("entity_id", entityId);
+        
+        if (isSystemField != null) {
+            configStore.and("is_system_field", isSystemField);
+        }
+        
+        if (StringUtils.hasText(keyword)) {
+            configStore.and("field_name", "LIKE", "%" + keyword + "%")
+                      .or("display_name", "LIKE", "%" + keyword + "%");
+        }
+        
+        configStore.order("sort_order", Order.TYPE.ASC);
+        configStore.order("create_time", Order.TYPE.ASC);
+        return dataRepository.findAllByConfig(MetadataEntityFieldDO.class, configStore);
+    }
+
+    @Override
+    public EntityFieldDetailRespVO getEntityFieldDetail(Long id) {
+        MetadataEntityFieldDO entityField = dataRepository.findById(MetadataEntityFieldDO.class, id);
+        if (entityField == null) {
+            throw exception(ENTITY_FIELD_NOT_EXISTS);
+        }
+
+        EntityFieldDetailRespVO result = BeanUtils.toBean(entityField, EntityFieldDetailRespVO.class);
+        
+        // 获取实体名称（这里简化处理，实际项目中可能需要关联查询）
+        result.setEntityName("实体名称");
+        
+        // 获取校验规则（这里暂时返回空列表，后续实现校验规则管理时再完善）
+        result.setValidationRules(new ArrayList<>());
+        
+        return result;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public EntityFieldBatchUpdateRespVO batchUpdateEntityFields(@Valid EntityFieldBatchUpdateReqVO reqVO) {
+        EntityFieldBatchUpdateRespVO result = new EntityFieldBatchUpdateRespVO();
+        int successCount = 0;
+        int failureCount = 0;
+
+        for (EntityFieldUpdateItemVO fieldItem : reqVO.getFields()) {
+            try {
+                // 校验字段存在
+                validateEntityFieldExists(fieldItem.getId());
+
+                // 更新字段
+                MetadataEntityFieldDO updateObj = new MetadataEntityFieldDO();
+                updateObj.setId(fieldItem.getId());
+                if (StringUtils.hasText(fieldItem.getDisplayName())) {
+                    updateObj.setDisplayName(fieldItem.getDisplayName());
+                }
+                if (StringUtils.hasText(fieldItem.getDescription())) {
+                    updateObj.setDescription(fieldItem.getDescription());
+                }
+                if (fieldItem.getIsRequired() != null) {
+                    updateObj.setIsRequired(fieldItem.getIsRequired());
+                }
+                if (fieldItem.getDataLength() != null) {
+                    updateObj.setDataLength(fieldItem.getDataLength());
+                }
+
+                dataRepository.update(updateObj);
+                successCount++;
+            } catch (Exception e) {
+                log.error("批量更新字段失败: fieldId={}", fieldItem.getId(), e);
+                failureCount++;
+            }
+        }
+
+        result.setSuccessCount(successCount);
+        result.setFailureCount(failureCount);
+        return result;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void batchSortEntityFields(@Valid EntityFieldBatchSortReqVO reqVO) {
+        for (EntityFieldSortItemVO sortItem : reqVO.getFieldSorts()) {
+            // 校验字段存在
+            validateEntityFieldExists(sortItem.getFieldId());
+
+            // 更新排序
+            MetadataEntityFieldDO updateObj = new MetadataEntityFieldDO();
+            updateObj.setId(sortItem.getFieldId());
+            updateObj.setSortOrder(sortItem.getSortOrder());
+            dataRepository.update(updateObj);
+        }
+    }
+
+    /**
+     * 将字段类型枚举转换为响应VO
+     *
+     * @param fieldTypeEnum 字段类型枚举
+     * @return 字段类型配置响应VO
+     */
+    private FieldTypeConfigRespVO convertToFieldTypeConfigRespVO(FieldTypeEnum fieldTypeEnum) {
+        FieldTypeConfigRespVO respVO = new FieldTypeConfigRespVO();
+        respVO.setFieldType(fieldTypeEnum.getFieldType());
+        respVO.setDisplayName(fieldTypeEnum.getDisplayName());
+        respVO.setCategory(fieldTypeEnum.getCategory());
+        respVO.setSupportLength(fieldTypeEnum.getSupportLength());
+        respVO.setSupportDecimal(fieldTypeEnum.getSupportDecimal());
+        respVO.setDefaultLength(fieldTypeEnum.getDefaultLength());
+        respVO.setMaxLength(fieldTypeEnum.getMaxLength());
+        // 对于支持小数位的类型，设置默认小数位数
+        if (fieldTypeEnum.getSupportDecimal()) {
+            respVO.setDefaultDecimal(2);
+        }
+        return respVO;
+    }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -63,25 +244,11 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
         validateEntityFieldExists(id);
         
         // 删除实体字段
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.in("id", id);
-        dataRepository.deleteByConfig(MetadataEntityFieldDO.class, configStore);
-    }
-
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public void deleteEntityFieldsByEntityId(Long entityId) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and("entity_id", entityId);
-        
-        // 直接使用配置删除
-        dataRepository.deleteByConfig(MetadataEntityFieldDO.class, configStore);
+        dataRepository.deleteById(MetadataEntityFieldDO.class, id);
     }
 
     private void validateEntityFieldExists(Long id) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.in("id", id);
-        if (dataRepository.findOne(MetadataEntityFieldDO.class, configStore) == null) {
+        if (dataRepository.findById(MetadataEntityFieldDO.class, id) == null) {
             throw exception(ENTITY_FIELD_NOT_EXISTS);
         }
     }
@@ -102,9 +269,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
 
     @Override
     public MetadataEntityFieldDO getEntityField(Long id) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.in("id", id);
-        return dataRepository.findOne(MetadataEntityFieldDO.class, configStore);
+        return dataRepository.findById(MetadataEntityFieldDO.class, id);
     }
 
     @Override
@@ -127,25 +292,9 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
         if (pageReqVO.getIsSystemField() != null) {
             configStore.and("is_system_field", pageReqVO.getIsSystemField());
         }
-        if (pageReqVO.getIsPrimaryKey() != null) {
-            configStore.and("is_primary_key", pageReqVO.getIsPrimaryKey());
-        }
-        if (pageReqVO.getIsRequired() != null) {
-            configStore.and("is_required", pageReqVO.getIsRequired());
-        }
-        if (pageReqVO.getRunMode() != null) {
-            configStore.and("run_mode", pageReqVO.getRunMode());
-        }
-        if (pageReqVO.getAppId() != null) {
-            configStore.and("app_id", pageReqVO.getAppId());
-        }
         
         // 分页查询
-        configStore.order("sort_order", Order.TYPE.ASC);
-        configStore.order("create_time", Order.TYPE.DESC);
-        
-        return dataRepository.findPageWithConditions(MetadataEntityFieldDO.class, configStore, 
-            pageReqVO.getPageNo(), pageReqVO.getPageSize());
+        return dataRepository.findPageWithConditions(MetadataEntityFieldDO.class, configStore, pageReqVO.getPageNo(), pageReqVO.getPageSize());
     }
 
     @Override
@@ -163,6 +312,18 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
         configStore.order("sort_order", Order.TYPE.ASC);
         configStore.order("create_time", Order.TYPE.DESC);
         return dataRepository.findAllByConfig(MetadataEntityFieldDO.class, configStore);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteEntityFieldsByEntityId(Long entityId) {
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        configStore.and("entity_id", entityId);
+        List<MetadataEntityFieldDO> fields = dataRepository.findAllByConfig(MetadataEntityFieldDO.class, configStore);
+        
+        for (MetadataEntityFieldDO field : fields) {
+            dataRepository.deleteById(MetadataEntityFieldDO.class, field.getId());
+        }
     }
 
 }

@@ -28,6 +28,41 @@ public class DatasourceController {
     @Resource
     private MetadataDatasourceService datasourceService;
 
+    @GetMapping("/types")
+    @Operation(summary = "获取所有支持的数据源类型")
+    public CommonResult<List<DatasourceTypeRespVO>> getDatasourceTypes() {
+        List<DatasourceTypeRespVO> types = datasourceService.getDatasourceTypes();
+        return success(types);
+    }
+
+    @GetMapping("/{datasourceId}/tables")
+    @Operation(summary = "根据数据源ID查询表名列表")
+    @Parameter(name = "datasourceId", description = "数据源ID", required = true, example = "1001")
+    @Parameter(name = "schemaName", description = "数据库模式名", required = false, example = "public")
+    @Parameter(name = "keyword", description = "表名搜索关键词", required = false, example = "user")
+    @PreAuthorize("@ss.hasPermission('metadata:datasource:query')")
+    public CommonResult<List<TableInfoRespVO>> getTablesByDatasourceId(
+            @PathVariable("datasourceId") Long datasourceId,
+            @RequestParam(value = "schemaName", required = false) String schemaName,
+            @RequestParam(value = "keyword", required = false) String keyword) {
+        List<TableInfoRespVO> tables = datasourceService.getTablesByDatasourceId(datasourceId, schemaName, keyword);
+        return success(tables);
+    }
+
+    @GetMapping("/{datasourceId}/tables/{tableName}/columns")
+    @Operation(summary = "根据表名查询字段信息")
+    @Parameter(name = "datasourceId", description = "数据源ID", required = true, example = "1001")
+    @Parameter(name = "tableName", description = "表名", required = true, example = "users")
+    @Parameter(name = "schemaName", description = "数据库模式名", required = false, example = "public")
+    @PreAuthorize("@ss.hasPermission('metadata:datasource:query')")
+    public CommonResult<List<ColumnInfoRespVO>> getColumnsByTableName(
+            @PathVariable("datasourceId") Long datasourceId,
+            @PathVariable("tableName") String tableName,
+            @RequestParam(value = "schemaName", required = false) String schemaName) {
+        List<ColumnInfoRespVO> columns = datasourceService.getColumnsByTableName(datasourceId, tableName, schemaName);
+        return success(columns);
+    }
+
     @PostMapping("/create")
     @Operation(summary = "新增数据源")
     @PreAuthorize("@ss.hasPermission('metadata:datasource:create')")
