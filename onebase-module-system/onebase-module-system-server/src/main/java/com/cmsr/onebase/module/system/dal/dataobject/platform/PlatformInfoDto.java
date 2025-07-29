@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.system.controller.admin.platform.vo;
+package com.cmsr.onebase.module.system.dal.dataobject.platform;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;

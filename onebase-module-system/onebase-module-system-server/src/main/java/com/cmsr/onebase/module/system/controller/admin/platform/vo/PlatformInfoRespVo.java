@@ -1,10 +1,10 @@
 package com.cmsr.onebase.module.system.controller.admin.platform.vo;
 
 import com.cmsr.onebase.module.system.dal.dataobject.license.LicenseDO;
+import com.cmsr.onebase.module.system.dal.dataobject.platform.PlatformInfoDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 /**
