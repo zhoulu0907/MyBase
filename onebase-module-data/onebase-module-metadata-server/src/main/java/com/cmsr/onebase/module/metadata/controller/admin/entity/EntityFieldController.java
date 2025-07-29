@@ -9,6 +9,7 @@ import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldBa
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldBatchUpdateRespVO;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldDetailRespVO;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldPageReqVO;
+import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldQueryReqVO;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldRespVO;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldSaveReqVO;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.FieldTypeConfigRespVO;
@@ -28,6 +29,12 @@ import java.util.List;
 
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 
+/**
+ * 管理后台 - 实体字段管理
+ *
+ * @author matianyu
+ * @date 2025-01-25
+ */
 @Tag(name = "管理后台 - 实体字段管理")
 @RestController
 @RequestMapping("/metadata/entity-field")
@@ -44,7 +51,7 @@ public class EntityFieldController {
         return success(fieldTypes);
     }
 
-    @PostMapping("/batch")
+    @PostMapping("/batch-create")
     @Operation(summary = "批量为业务实体创建字段")
     @PreAuthorize("@ss.hasPermission('metadata:entity-field:create')")
     public CommonResult<EntityFieldBatchCreateRespVO> batchCreateEntityFields(@Valid @RequestBody EntityFieldBatchCreateReqVO reqVO) {
@@ -52,7 +59,7 @@ public class EntityFieldController {
         return success(result);
     }
 
-    @PostMapping
+    @PostMapping("/create")
     @Operation(summary = "为业务实体创建新字段")
     @PreAuthorize("@ss.hasPermission('metadata:entity-field:create')")
     public CommonResult<EntityFieldRespVO> createEntityField(@Valid @RequestBody EntityFieldSaveReqVO reqVO) {
@@ -63,28 +70,22 @@ public class EntityFieldController {
 
     @GetMapping("/list")
     @Operation(summary = "查询指定实体的字段列表")
-    @Parameter(name = "entityId", description = "实体ID", required = true, example = "1024")
-    @Parameter(name = "isSystemField", description = "是否系统字段", required = false, example = "false")
-    @Parameter(name = "keyword", description = "搜索关键词", required = false, example = "name")
     @PreAuthorize("@ss.hasPermission('metadata:entity-field:query')")
-    public CommonResult<List<EntityFieldRespVO>> getEntityFieldList(
-            @RequestParam("entityId") Long entityId,
-            @RequestParam(value = "isSystemField", required = false) Boolean isSystemField,
-            @RequestParam(value = "keyword", required = false) String keyword) {
-        List<MetadataEntityFieldDO> list = entityFieldService.getEntityFieldListByConditions(entityId, isSystemField, keyword);
+    public CommonResult<List<EntityFieldRespVO>> getEntityFieldList(@Valid EntityFieldQueryReqVO reqVO) {
+        List<MetadataEntityFieldDO> list = entityFieldService.getEntityFieldListByConditions(reqVO.getEntityId(), reqVO.getIsSystemField(), reqVO.getKeyword());
         return success(EntityFieldConvert.INSTANCE.convertList(list));
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/get")
     @Operation(summary = "根据ID获取字段详细信息")
     @Parameter(name = "id", description = "字段ID", required = true, example = "1024")
     @PreAuthorize("@ss.hasPermission('metadata:entity-field:query')")
-    public CommonResult<EntityFieldDetailRespVO> getEntityField(@PathVariable("id") Long id) {
+    public CommonResult<EntityFieldDetailRespVO> getEntityField(@RequestParam("id") Long id) {
         EntityFieldDetailRespVO entityField = entityFieldService.getEntityFieldDetail(id);
         return success(entityField);
     }
 
-    @PutMapping("/batch")
+    @PutMapping("/batch-update")
     @Operation(summary = "批量更新实体字段信息")
     @PreAuthorize("@ss.hasPermission('metadata:entity-field:update')")
     public CommonResult<EntityFieldBatchUpdateRespVO> batchUpdateEntityFields(@Valid @RequestBody EntityFieldBatchUpdateReqVO reqVO) {
@@ -92,21 +93,19 @@ public class EntityFieldController {
         return success(result);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/update")
     @Operation(summary = "更新实体字段信息")
-    @Parameter(name = "id", description = "字段ID", required = true, example = "1024")
     @PreAuthorize("@ss.hasPermission('metadata:entity-field:update')")
-    public CommonResult<Boolean> updateEntityField(@PathVariable("id") Long id, @Valid @RequestBody EntityFieldSaveReqVO reqVO) {
-        reqVO.setId(id);
+    public CommonResult<Boolean> updateEntityField(@Valid @RequestBody EntityFieldSaveReqVO reqVO) {
         entityFieldService.updateEntityField(reqVO);
         return success(true);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/delete")
     @Operation(summary = "软删除实体字段")
     @Parameter(name = "id", description = "字段ID", required = true, example = "1024")
     @PreAuthorize("@ss.hasPermission('metadata:entity-field:delete')")
-    public CommonResult<Boolean> deleteEntityField(@PathVariable("id") Long id) {
+    public CommonResult<Boolean> deleteEntityField(@RequestParam("id") Long id) {
         entityFieldService.deleteEntityField(id);
         return success(true);
     }

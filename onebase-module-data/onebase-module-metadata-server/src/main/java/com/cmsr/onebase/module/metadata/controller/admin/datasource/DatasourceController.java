@@ -19,6 +19,12 @@ import java.util.List;
 
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 
+/**
+ * 管理后台 - 数据源管理
+ *
+ * @author matianyu
+ * @date 2025-01-25
+ */
 @Tag(name = "管理后台 - 数据源管理")
 @RestController
 @RequestMapping("/metadata/datasource")
@@ -35,31 +41,19 @@ public class DatasourceController {
         return success(types);
     }
 
-    @GetMapping("/{datasourceId}/tables")
+    @GetMapping("/tables")
     @Operation(summary = "根据数据源ID查询表名列表")
-    @Parameter(name = "datasourceId", description = "数据源ID", required = true, example = "1001")
-    @Parameter(name = "schemaName", description = "数据库模式名", required = false, example = "public")
-    @Parameter(name = "keyword", description = "表名搜索关键词", required = false, example = "user")
     @PreAuthorize("@ss.hasPermission('metadata:datasource:query')")
-    public CommonResult<List<TableInfoRespVO>> getTablesByDatasourceId(
-            @PathVariable("datasourceId") Long datasourceId,
-            @RequestParam(value = "schemaName", required = false) String schemaName,
-            @RequestParam(value = "keyword", required = false) String keyword) {
-        List<TableInfoRespVO> tables = datasourceService.getTablesByDatasourceId(datasourceId, schemaName, keyword);
+    public CommonResult<List<TableInfoRespVO>> getTablesByDatasourceId(@Valid TableQueryReqVO reqVO) {
+        List<TableInfoRespVO> tables = datasourceService.getTablesByDatasourceId(reqVO.getDatasourceId(), reqVO.getSchemaName(), reqVO.getKeyword());
         return success(tables);
     }
 
-    @GetMapping("/{datasourceId}/tables/{tableName}/columns")
+    @GetMapping("/columns")
     @Operation(summary = "根据表名查询字段信息")
-    @Parameter(name = "datasourceId", description = "数据源ID", required = true, example = "1001")
-    @Parameter(name = "tableName", description = "表名", required = true, example = "users")
-    @Parameter(name = "schemaName", description = "数据库模式名", required = false, example = "public")
     @PreAuthorize("@ss.hasPermission('metadata:datasource:query')")
-    public CommonResult<List<ColumnInfoRespVO>> getColumnsByTableName(
-            @PathVariable("datasourceId") Long datasourceId,
-            @PathVariable("tableName") String tableName,
-            @RequestParam(value = "schemaName", required = false) String schemaName) {
-        List<ColumnInfoRespVO> columns = datasourceService.getColumnsByTableName(datasourceId, tableName, schemaName);
+    public CommonResult<List<ColumnInfoRespVO>> getColumnsByTableName(@Valid ColumnQueryReqVO reqVO) {
+        List<ColumnInfoRespVO> columns = datasourceService.getColumnsByTableName(reqVO.getDatasourceId(), reqVO.getTableName(), reqVO.getSchemaName());
         return success(columns);
     }
 
