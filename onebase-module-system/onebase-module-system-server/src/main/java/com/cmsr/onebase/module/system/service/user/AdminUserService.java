@@ -11,6 +11,8 @@ import com.cmsr.onebase.module.system.controller.admin.user.vo.user.UserImportRe
 import com.cmsr.onebase.module.system.controller.admin.user.vo.user.UserPageReqVO;
 import com.cmsr.onebase.module.system.controller.admin.user.vo.user.UserSaveReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
+import com.cmsr.onebase.module.system.enums.permission.RoleCodeEnum;
+import com.cmsr.onebase.module.system.enums.permission.RoleTypeEnum;
 import jakarta.validation.Valid;
 
 import java.util.Collection;
@@ -46,6 +48,14 @@ public interface AdminUserService {
      * @param updateReqVO 用户信息
      */
     void updateUser(@Valid UserSaveReqVO updateReqVO);
+
+    /**
+     * 修改用户
+     *
+     * @param email  修改平台管理员邮箱
+     * @param id 用户编号
+     */
+    void updatePlatformUserEmail(Long id, String email);
 
     /**
      * 更新用户的最后登陆信息
@@ -206,4 +216,10 @@ public interface AdminUserService {
      */
     boolean isPasswordMatch(String rawPassword, String encodedPassword);
 
+    /**
+     * 查询所有管理员用户
+     * @param roleCodeEnum 枚举
+     * @return 列表
+     */
+    List<AdminUserDO> getUserListByRoleCode(RoleTypeEnum roleCodeEnum);
 }

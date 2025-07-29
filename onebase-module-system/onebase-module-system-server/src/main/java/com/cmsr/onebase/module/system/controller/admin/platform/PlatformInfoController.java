@@ -11,12 +11,14 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import com.cmsr.onebase.module.system.controller.admin.platform.vo.PlatformInfoReqVo;
 import com.cmsr.onebase.module.system.controller.admin.platform.vo.PlatformInfoRespVo;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
@@ -128,5 +130,28 @@ public class PlatformInfoController {
         return success(license);
 
     }
+    /**
+     * 导出凭证
+     */
+    @GetMapping("/export/{id}")
+    @Operation(summary = "导出凭证")
+    @PreAuthorize("@ss.hasPermission('system:platform-admin:query')")
+    public void exportLicense(@PathVariable Long id, HttpServletResponse response) throws IOException {
+        // 从数据库中根据ID查询license
+        LicenseDO license = licenseService.getLicense(id);
 
+        if (license == null) {
+            throw new RuntimeException("未找到ID为 " + id + " 的凭证");
+        }
+
+        // 设置响应头
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        response.setHeader("Content-Disposition", "attachment; filename=\"license_" + id + ".json\"");
+
+        // 将对象写入响应输出流
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.writeValue(response.getOutputStream(), license);
+    }
 }

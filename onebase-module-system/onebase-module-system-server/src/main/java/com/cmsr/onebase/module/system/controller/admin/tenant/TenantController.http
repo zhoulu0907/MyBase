@@ -1,6 +1,6 @@
 ### 获取租户编号 /admin-api/system/get-id-by-name
-GET {{baseUrl}}/system/tenant/get-id-by-name?name=用户
-
+GET http://127.0.0.1:48080/admin-api/system/tenant/simple-list
+Authorization: Bearer eb33f553e1194b52935de6fcc6a3f4f5
 ### 创建租户 /admin-api/system/tenant/create
 POST {{baseUrl}}/system/tenant/create
 Content-Type: application/json
