@@ -18,7 +18,7 @@
         <module>onebase-module-infra</module>
         <module>onebase-module-bpm</module>
         <module>onebase-module-app</module>
-        <module>onebase-module-metadata</module>
+        <module>onebase-module-data</module>
     </modules>
 
     <name>${project.artifactId}</name>
