@@ -79,7 +79,7 @@ public class DictTypeController {
         return success(BeanUtils.toBean(dictType, DictTypeRespVO.class));
     }
 
-    @GetMapping(value = {"/list-all-simple", "simple-list"})
+    @GetMapping("/simple-list")
     @Operation(summary = "获得全部字典类型列表", description = "包括开启 + 禁用的字典类型，主要用于前端的下拉选项")
     // 无需添加权限认证，因为前端全局都需要
     public CommonResult<List<DictTypeSimpleRespVO>> getSimpleDictTypeList() {
