@@ -1,0 +1,21 @@
+package com.cmsr.onebase.module.app.service.app;
+
+import com.cmsr.onebase.module.app.controller.app.vo.ApplicationVersionCreateReqVO;
+import com.cmsr.onebase.module.app.controller.app.vo.ApplicationVersionListRespVO;
+
+import java.util.List;
+
+/**
+ * @Author：huangjie
+ * @Date：2025/7/22 16:37
+ */
+public interface ApplicationVersionService {
+
+    List<ApplicationVersionListRespVO> listApplicationVersion(Long applicationId);
+
+    void createApplicationVersion(ApplicationVersionCreateReqVO createReqVO);
+
+    void restoreApplicationVersion(Long versionId);
+
+    void deleteApplicationVersion(Long versionId);
+}
