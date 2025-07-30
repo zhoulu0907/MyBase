@@ -1,0 +1,33 @@
+package com.cmsr.onebase.module.app.controller.app.vo;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import lombok.Data;
+
+/**
+ * @Author：huangjie
+ * @Date：2025/7/22 16:15
+ */
+@Schema(description = "应用管理 - 应用创建/修改 Request VO")
+@Data
+public class ApplicationCreateReqVO {
+
+    @Schema(description = "应用ID")
+    private Long id;
+
+    @Schema(description = "应用名称")
+    @NotBlank(message = "应用名称不能为空")
+    private String name;
+
+    @Schema(description = "应用描述")
+    private String description;
+
+    @Schema(description = "图标类型")
+    @NotBlank(message = "图标类型不能为空")
+    private String iconName;
+
+    @Schema(description = "图标颜色")
+    @NotBlank(message = "图标颜色不能为空")
+    private String iconColor;
+
+}

@@ -31,42 +31,55 @@ public class BaseDO implements Serializable, TransPojo {
     public static final String UPDATE_TIME = "update_time";
     public static final String CREATOR = "creator";
     public static final String UPDATER = "updater";
+    public static final String DELETED = "deleted";
 
     /**
      * 创建时间
      */
     @TableField(fill = FieldFill.INSERT)
+    @Column(name = "id")
     private Long id;
     /**
      * 创建时间
      */
     @TableField(fill = FieldFill.INSERT)
+    @Column(name = "create_time")
     private LocalDateTime createTime;
     /**
      * 最后更新时间
      */
     @TableField(fill = FieldFill.INSERT_UPDATE)
+    @Column(name = "update_time")
     private LocalDateTime updateTime;
     /**
      * 创建者，目前使用 SysUser 的 id 编号
      *
-     * 使用 String 类型的原因是，未来可能会存在非数值的情况，留好拓展性。
      */
     @TableField(fill = FieldFill.INSERT, jdbcType = JdbcType.BIGINT)
+    @Column(name = "creator")
     private Long creator;
     /**
      * 更新者，目前使用 SysUser 的 id 编号
      *
-     * 使用 String 类型的原因是，未来可能会存在非数值的情况，留好拓展性。
      */
     @TableField(fill = FieldFill.INSERT_UPDATE, jdbcType = JdbcType.BIGINT)
+    @Column(name = "updater")
     private Long updater;
+  
     /**
      * 是否删除
      */
+    // @Convert(converter = IntBoolConverter.class)
     @TableLogic
-//    @Convert(converter = IntBoolConverter.class)
+    @Column(name = "deleted")
     private Boolean deleted;
+
+       /**
+     * 乐观锁版本号
+     */
+    @Column(name = "lock_version")
+    @TableField(exist = false)
+    private Long lockVersion;
 
     /**
      * 把 creator、createTime、updateTime、updater 都清空，避免前端直接传递 creator 之类的字段，直接就被更新了
