@@ -10,6 +10,8 @@ import com.cmsr.onebase.module.metadata.controller.admin.datasource.vo.Datasourc
 import com.cmsr.onebase.module.metadata.controller.admin.datasource.vo.DatasourceTestConnectionRespVO;
 import com.cmsr.onebase.module.metadata.controller.admin.datasource.vo.DatasourceTypeRespVO;
 import com.cmsr.onebase.module.metadata.controller.admin.datasource.vo.TableInfoRespVO;
+import com.cmsr.onebase.module.metadata.service.datasource.vo.ColumnQueryVO;
+import com.cmsr.onebase.module.metadata.service.datasource.vo.TableQueryVO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.datasource.MetadataDatasourceDO;
 import com.cmsr.onebase.module.metadata.enums.DatasourceTypeEnum;
 import jakarta.annotation.Resource;
@@ -54,9 +56,9 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
     }
 
     @Override
-    public List<TableInfoRespVO> getTablesByDatasourceId(Long datasourceId, String schemaName, String keyword) {
+    public List<TableInfoRespVO> getTablesByDatasourceId(TableQueryVO queryVO) {
         // 获取数据源信息
-        MetadataDatasourceDO datasource = getDatasource(datasourceId);
+        MetadataDatasourceDO datasource = getDatasource(queryVO.getDatasourceId());
         if (datasource == null) {
             throw exception(DATASOURCE_NOT_EXISTS);
         }
@@ -71,14 +73,14 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
             List<TableInfoRespVO> result = new ArrayList<>();
             for (String tableNameStr : tableNames) {
                 // 过滤条件
-                if (StringUtils.hasText(keyword) && !tableNameStr.toLowerCase().contains(keyword.toLowerCase())) {
+                if (StringUtils.hasText(queryVO.getKeyword()) && !tableNameStr.toLowerCase().contains(queryVO.getKeyword().toLowerCase())) {
                     continue;
                 }
                 
                 // 构建Table对象来获取详细信息
                 Table table = new Table(tableNameStr);
-                if (StringUtils.hasText(schemaName)) {
-                    table.setSchema(schemaName);
+                if (StringUtils.hasText(queryVO.getSchemaName())) {
+                    table.setSchema(queryVO.getSchemaName());
                 }
                 
                 // 获取表的详细信息
@@ -92,7 +94,7 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
                 tableInfo.setDisplayName(StringUtils.hasText(tableDetail.getComment()) ? tableDetail.getComment() : tableDetail.getName());
                 tableInfo.setTableComment(tableDetail.getComment());
                 tableInfo.setTableType("TABLE");
-                tableInfo.setSchemaName(tableDetail.getSchema() != null ? tableDetail.getSchema().toString() : schemaName);
+                tableInfo.setSchemaName(tableDetail.getSchema() != null ? tableDetail.getSchema().toString() : queryVO.getSchemaName());
                 // 获取行数（可能比较耗时，这里暂时设为0）
                 tableInfo.setRowCount(0L);
                 
@@ -101,15 +103,15 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
             
             return result;
         } catch (Exception e) {
-            log.error("获取数据源表列表失败: datasourceId={}", datasourceId, e);
+            log.error("获取数据源表列表失败: datasourceId={}", queryVO.getDatasourceId(), e);
             throw new RuntimeException("获取数据源表列表失败: " + e.getMessage(), e);
         }
     }
 
     @Override
-    public List<ColumnInfoRespVO> getColumnsByTableName(Long datasourceId, String tableName, String schemaName) {
+    public List<ColumnInfoRespVO> getColumnsByTableName(ColumnQueryVO queryVO) {
         // 获取数据源信息
-        MetadataDatasourceDO datasource = getDatasource(datasourceId);
+        MetadataDatasourceDO datasource = getDatasource(queryVO.getDatasourceId());
         if (datasource == null) {
             throw exception(DATASOURCE_NOT_EXISTS);
         }
@@ -119,9 +121,9 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
             AnylineService<?> temporaryService = createTemporaryService(datasource);
             
             // 构建表对象
-            Table table = new Table(tableName);
-            if (StringUtils.hasText(schemaName)) {
-                table.setSchema(schemaName);
+            Table table = new Table(queryVO.getTableName());
+            if (StringUtils.hasText(queryVO.getSchemaName())) {
+                table.setSchema(queryVO.getSchemaName());
             }
             
             // 获取表的所有字段信息
@@ -156,7 +158,7 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
             
             return result;
         } catch (Exception e) {
-            log.error("获取表字段信息失败: datasourceId={}, tableName={}", datasourceId, tableName, e);
+            log.error("获取表字段信息失败: datasourceId={}, tableName={}", queryVO.getDatasourceId(), queryVO.getTableName(), e);
             throw new RuntimeException("获取表字段信息失败: " + e.getMessage(), e);
         }
     }

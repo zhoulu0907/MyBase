@@ -8,6 +8,8 @@ import com.cmsr.onebase.module.metadata.controller.admin.datasource.vo.Datasourc
 import com.cmsr.onebase.module.metadata.controller.admin.datasource.vo.DatasourceTestConnectionRespVO;
 import com.cmsr.onebase.module.metadata.controller.admin.datasource.vo.DatasourceTypeRespVO;
 import com.cmsr.onebase.module.metadata.controller.admin.datasource.vo.TableInfoRespVO;
+import com.cmsr.onebase.module.metadata.service.datasource.vo.ColumnQueryVO;
+import com.cmsr.onebase.module.metadata.service.datasource.vo.TableQueryVO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.datasource.MetadataDatasourceDO;
 import jakarta.validation.Valid;
 
@@ -28,22 +30,18 @@ public interface MetadataDatasourceService {
     /**
      * 根据数据源ID查询表名列表
      *
-     * @param datasourceId 数据源ID
-     * @param schemaName 数据库模式名(可选)
-     * @param keyword 表名搜索关键词(可选)
+     * @param queryVO 查询条件VO
      * @return 表信息列表
      */
-    List<TableInfoRespVO> getTablesByDatasourceId(Long datasourceId, String schemaName, String keyword);
+    List<TableInfoRespVO> getTablesByDatasourceId(TableQueryVO queryVO);
 
     /**
      * 根据表名查询字段信息
      *
-     * @param datasourceId 数据源ID
-     * @param tableName 表名
-     * @param schemaName 数据库模式名(可选)
+     * @param queryVO 查询条件VO
      * @return 字段信息列表
      */
-    List<ColumnInfoRespVO> getColumnsByTableName(Long datasourceId, String tableName, String schemaName);
+    List<ColumnInfoRespVO> getColumnsByTableName(ColumnQueryVO queryVO);
 
     /**
      * 创建数据源

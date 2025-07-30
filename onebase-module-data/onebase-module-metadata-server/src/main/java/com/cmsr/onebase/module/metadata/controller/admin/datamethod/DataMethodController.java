@@ -6,6 +6,7 @@ import com.cmsr.onebase.module.metadata.controller.admin.datamethod.vo.DataMetho
 import com.cmsr.onebase.module.metadata.controller.admin.datamethod.vo.DataMethodQueryReqVO;
 import com.cmsr.onebase.module.metadata.controller.admin.datamethod.vo.DataMethodRespVO;
 import com.cmsr.onebase.module.metadata.service.datamethod.MetadataDataMethodService;
+import com.cmsr.onebase.module.metadata.service.datamethod.vo.DataMethodQueryVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
@@ -35,7 +36,9 @@ public class DataMethodController {
     @GetMapping("/list")
     @Operation(summary = "查询业务实体的数据方法列表")
     public CommonResult<List<DataMethodRespVO>> getDataMethodList(@Valid DataMethodQueryReqVO reqVO) {
-        List<DataMethodRespVO> methods = dataMethodService.getDataMethodList(reqVO.getEntityId(), reqVO.getMethodType(), reqVO.getKeyword());
+        // 将Controller层的VO转换为Service层的VO
+        DataMethodQueryVO queryVO = new DataMethodQueryVO(reqVO.getEntityId(), reqVO.getMethodType(), reqVO.getKeyword());
+        List<DataMethodRespVO> methods = dataMethodService.getDataMethodList(queryVO);
         return success(methods);
     }
 

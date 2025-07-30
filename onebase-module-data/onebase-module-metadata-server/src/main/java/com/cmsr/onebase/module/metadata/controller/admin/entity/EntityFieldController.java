@@ -16,6 +16,7 @@ import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.FieldTypeConf
 import com.cmsr.onebase.module.metadata.convert.entity.EntityFieldConvert;
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.service.entity.MetadataEntityFieldService;
+import com.cmsr.onebase.module.metadata.service.entity.vo.EntityFieldQueryVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -72,7 +73,9 @@ public class EntityFieldController {
     @Operation(summary = "查询指定实体的字段列表")
     @PreAuthorize("@ss.hasPermission('metadata:entity-field:query')")
     public CommonResult<List<EntityFieldRespVO>> getEntityFieldList(@Valid EntityFieldQueryReqVO reqVO) {
-        List<MetadataEntityFieldDO> list = entityFieldService.getEntityFieldListByConditions(reqVO.getEntityId(), reqVO.getIsSystemField(), reqVO.getKeyword());
+        // 将Controller层的VO转换为Service层的VO
+        EntityFieldQueryVO queryVO = new EntityFieldQueryVO(reqVO.getEntityId(), reqVO.getIsSystemField(), reqVO.getKeyword());
+        List<MetadataEntityFieldDO> list = entityFieldService.getEntityFieldListByConditions(queryVO);
         return success(EntityFieldConvert.INSTANCE.convertList(list));
     }
 
