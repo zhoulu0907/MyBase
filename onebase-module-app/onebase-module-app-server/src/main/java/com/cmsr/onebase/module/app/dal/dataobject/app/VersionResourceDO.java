@@ -11,8 +11,8 @@ import lombok.EqualsAndHashCode;
  * @Date：2025/7/23 16:54
  */
 @Data
-@Table(name = "app_application_version_resource")
-public class ApplicationVersionResourceDO extends BaseDO {
+@Table(name = "app_version_resource")
+public class VersionResourceDO extends BaseDO {
 
     @Column(name = "application_id", nullable = false, comment = "应用ID")
     private Long applicationId;
