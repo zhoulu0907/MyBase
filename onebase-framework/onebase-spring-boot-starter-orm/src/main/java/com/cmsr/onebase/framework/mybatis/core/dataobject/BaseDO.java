@@ -78,6 +78,7 @@ public class BaseDO implements Serializable, TransPojo {
      * 乐观锁版本号
      */
     @Column(name = "lock_version")
+    @TableField(exist = false)
     private Long lockVersion;
 
     /**
