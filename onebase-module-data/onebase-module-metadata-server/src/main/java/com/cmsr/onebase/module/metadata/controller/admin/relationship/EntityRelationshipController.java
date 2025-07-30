@@ -24,7 +24,7 @@ import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 /**
  * 管理后台 - 实体关系管理
  *
- * @author bty418
+ * @author matianyu
  * @date 2025-01-25
  */
 @Tag(name = "管理后台 - 实体关系管理")
@@ -36,7 +36,7 @@ public class EntityRelationshipController {
     @Resource
     private MetadataEntityRelationshipService entityRelationshipService;
 
-    @PostMapping
+    @PostMapping("/create")
     @Operation(summary = "创建实体间的关联关系")
     @PreAuthorize("@ss.hasPermission('metadata:entity-relationship:create')")
     public CommonResult<EntityRelationshipRespVO> createEntityRelationship(@Valid @RequestBody EntityRelationshipSaveReqVO reqVO) {
@@ -45,44 +45,36 @@ public class EntityRelationshipController {
         return success(result);
     }
 
-    @GetMapping("/list")
+    @GetMapping("/page")
     @Operation(summary = "查询实体关系列表")
-    @Parameter(name = "appId", description = "应用ID", required = true, example = "12345")
-    @Parameter(name = "sourceEntityId", description = "源实体ID", required = false, example = "2001")
-    @Parameter(name = "targetEntityId", description = "目标实体ID", required = false, example = "2002")
-    @Parameter(name = "relationshipType", description = "关系类型", required = false, example = "ONE_TO_MANY")
-    @Parameter(name = "pageNum", description = "页码", required = false, example = "1")
-    @Parameter(name = "pageSize", description = "每页大小", required = false, example = "20")
     @PreAuthorize("@ss.hasPermission('metadata:entity-relationship:query')")
-    public CommonResult<PageResult<EntityRelationshipRespVO>> getEntityRelationshipList(@Valid EntityRelationshipPageReqVO pageReqVO) {
+    public CommonResult<PageResult<EntityRelationshipRespVO>> getEntityRelationshipPage(@Valid EntityRelationshipPageReqVO pageReqVO) {
         PageResult<EntityRelationshipRespVO> result = entityRelationshipService.getEntityRelationshipPage(pageReqVO);
         return success(result);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/get")
     @Operation(summary = "根据ID获取关系详细信息")
     @Parameter(name = "id", description = "关系ID", required = true, example = "5001")
     @PreAuthorize("@ss.hasPermission('metadata:entity-relationship:query')")
-    public CommonResult<EntityRelationshipRespVO> getEntityRelationship(@PathVariable("id") Long id) {
+    public CommonResult<EntityRelationshipRespVO> getEntityRelationship(@RequestParam("id") Long id) {
         EntityRelationshipRespVO result = entityRelationshipService.getEntityRelationshipDetail(id);
         return success(result);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/update")
     @Operation(summary = "更新实体关系信息")
-    @Parameter(name = "id", description = "关系ID", required = true, example = "5001")
     @PreAuthorize("@ss.hasPermission('metadata:entity-relationship:update')")
-    public CommonResult<Boolean> updateEntityRelationship(@PathVariable("id") Long id, @Valid @RequestBody EntityRelationshipSaveReqVO reqVO) {
-        reqVO.setId(id);
+    public CommonResult<Boolean> updateEntityRelationship(@Valid @RequestBody EntityRelationshipSaveReqVO reqVO) {
         entityRelationshipService.updateEntityRelationship(reqVO);
         return success(true);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/delete")
     @Operation(summary = "软删除实体关系")
     @Parameter(name = "id", description = "关系ID", required = true, example = "5001")
     @PreAuthorize("@ss.hasPermission('metadata:entity-relationship:delete')")
-    public CommonResult<Boolean> deleteEntityRelationship(@PathVariable("id") Long id) {
+    public CommonResult<Boolean> deleteEntityRelationship(@RequestParam("id") Long id) {
         entityRelationshipService.deleteEntityRelationship(id);
         return success(true);
     }

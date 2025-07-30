@@ -10,6 +10,7 @@ import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldDe
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldPageReqVO;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldSaveReqVO;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.FieldTypeConfigRespVO;
+import com.cmsr.onebase.module.metadata.service.entity.vo.EntityFieldQueryVO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataEntityFieldDO;
 import jakarta.validation.Valid;
 
@@ -46,12 +47,10 @@ public interface MetadataEntityFieldService {
     /**
      * 根据条件查询实体字段列表
      *
-     * @param entityId 实体ID
-     * @param isSystemField 是否系统字段
-     * @param keyword 搜索关键词
+     * @param queryVO 查询条件VO
      * @return 字段列表
      */
-    List<MetadataEntityFieldDO> getEntityFieldListByConditions(Long entityId, Boolean isSystemField, String keyword);
+    List<MetadataEntityFieldDO> getEntityFieldListByConditions(EntityFieldQueryVO queryVO);
 
     /**
      * 获取字段详细信息
