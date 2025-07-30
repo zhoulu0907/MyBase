@@ -62,7 +62,7 @@ public class TenantController {
     @PermitAll
     @TenantIgnore
     @Operation(summary = "使用域名，获得租户信息", description = "登录界面，根据用户的域名，获得租户信息")
-    @Parameter(name = "website", description = "域名", required = true, example = "www.iocoder.cn")
+    @Parameter(name = "website", description = "域名", required = true, example = "www.abc.cn")
     public CommonResult<TenantRespVO> getTenantByWebsite(@RequestParam("website") String website) {
         TenantDO tenant = tenantService.getTenantByWebsite(website);
         if (tenant == null || CommonStatusEnum.isDisable(tenant.getStatus())) {

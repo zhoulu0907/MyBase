@@ -10,8 +10,8 @@ import lombok.Data;
  * @Date：2025/7/23 16:51
  */
 @Data
-@Table(name = "app_application_version_menu")
-public class ApplicationVersionMenuDO extends BaseDO {
+@Table(name = "app_version_menu")
+public class VersionMenuDO extends BaseDO {
 
     /**
      * 应用Id
