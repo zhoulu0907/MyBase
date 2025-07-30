@@ -276,12 +276,14 @@ public class AdminUserServiceImpl implements AdminUserService {
 
     @Override
     public AdminUserDO getUserByUsername(String username) {
-        return userMapper.selectByUsername(username);
+        return dataRepository.findOne(AdminUserDO.class, new DefaultConfigStore().eq("username", username));
+        // return userMapper.selectByUsername(username);
     }
 
     @Override
     public AdminUserDO getUserByMobile(String mobile) {
-        return userMapper.selectByMobile(mobile);
+        return dataRepository.findOne(AdminUserDO.class, new DefaultConfigStore().eq("mobile", mobile));
+        // return userMapper.selectByMobile(mobile);
     }
 
     @Override
@@ -298,7 +300,8 @@ public class AdminUserServiceImpl implements AdminUserService {
 
     @Override
     public AdminUserDO getUser(Long id) {
-        return userMapper.selectById(id);
+        return dataRepository.findById(AdminUserDO.class, id);
+        // return userMapper.selectById(id);
     }
 
     @Override
