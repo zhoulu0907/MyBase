@@ -39,7 +39,7 @@ public class DataRepository {
         ConfigTable.IS_INSERT_NULL_FIELD = false;
         ConfigTable.IS_INSERT_EMPTY_FIELD = true;
         ConfigTable.IS_INSERT_EMPTY_COLUMN = true;
-        ConfigTable.IS_ENABLE_SQL_DATATYPE_CONVERT = true;
+        // ConfigTable.IS_ENABLE_SQL_DATATYPE_CONVERT = true;
     }
 
     @Resource
