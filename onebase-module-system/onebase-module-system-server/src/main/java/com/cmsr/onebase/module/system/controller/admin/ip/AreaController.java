@@ -36,7 +36,7 @@ public class AreaController {
 
     @GetMapping("/get-by-ip")
     @Operation(summary = "获得 IP 对应的地区名")
-    @Parameter(name = "ip", description = "IP", required = true)
+        @Parameter(name = "ip", description = "IP", required = true)
     public CommonResult<String> getAreaByIp(@RequestParam("ip") String ip) {
         // 获得城市
         Area area = IPUtils.getArea(ip);
