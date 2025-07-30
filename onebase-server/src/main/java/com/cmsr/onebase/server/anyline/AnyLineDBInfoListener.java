@@ -33,6 +33,8 @@ public class AnyLineDBInfoListener implements DMListener {
 
     static {
         // 添加不需要租户过滤的表
+        TENANT_IGNORE_TABLES.add("system_tenant");
+        TENANT_IGNORE_TABLES.add("system_tenant_package");
         TENANT_IGNORE_TABLES.add("system_dict_data");
         TENANT_IGNORE_TABLES.add("system_dict_type");
         TENANT_IGNORE_TABLES.add("system_config");
@@ -42,6 +44,7 @@ public class AnyLineDBInfoListener implements DMListener {
         TENANT_IGNORE_TABLES.add("system_menu");
         TENANT_IGNORE_TABLES.add("system_notify_template");
         TENANT_IGNORE_TABLES.add("system_oauth2_client");
+        TENANT_IGNORE_TABLES.add("system_license");
         // 可以根据需要添加更多表
     }
 
@@ -105,7 +108,7 @@ public class AnyLineDBInfoListener implements DMListener {
         String... conditions) {
 
         // 加入软删判断
-        configs.and(Compare.EQUAL, "deleted", false);
+        configs.and(Compare.EQUAL, BaseDO.DELETED, false);
 
         // 只有在不忽略租户的情况下才添加租户条件
         // 检查当前查询的表是否需要忽略租户过滤
@@ -169,12 +172,12 @@ public class AnyLineDBInfoListener implements DMListener {
             throw new BizException(StatusCode.UPDATE_WHERE_IS_NULL);
         }
         // 加入软删判断 (opt: 框架这里config可能为空)
-        configs.and(Compare.EQUAL, "deleted", false);
+        configs.and(Compare.EQUAL, BaseDO.DELETED, false);
         // 加入租户标志
-        boolean shouldIgnore = isTableTenantIgnored2(obj);
+        boolean shouldIgnore = isTableTenantIgnored2(dest.getName());
         log.info("prepareUpdate--------------> isTableTenantIgnored: {}", shouldIgnore);
         if (!shouldIgnore) {
-            configs.and(Compare.EQUAL, "tenant_id", TenantContextHolder.getRequiredTenantId());
+            configs.and(Compare.EQUAL, TenantBaseDO.TENANT_ID, TenantContextHolder.getRequiredTenantId());
         }
         // 加入更新时间和更新人
         if (Objects.nonNull(obj) && obj instanceof BaseDO) {
@@ -188,6 +191,7 @@ public class AnyLineDBInfoListener implements DMListener {
         }
         return SWITCH.CONTINUE;
     }
+
 
     /**
      * 创建删除SQL前调用(根据Entity/DataRow),修改删除条件可以在这一步实现<br/>
@@ -268,7 +272,7 @@ public class AnyLineDBInfoListener implements DMListener {
             configs.and(Compare.EQUAL, "tenant_id", TenantContextHolder.getRequiredTenantId());
         }
         // 加入软删判断
-        configs.and(Compare.EQUAL, "deleted", false); 
+        configs.and(Compare.EQUAL, BaseDO.DELETED, false); 
     }
     
 

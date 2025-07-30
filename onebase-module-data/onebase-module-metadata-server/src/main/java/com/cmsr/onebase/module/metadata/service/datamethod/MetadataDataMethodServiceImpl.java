@@ -8,6 +8,7 @@ import com.cmsr.onebase.module.metadata.controller.admin.datamethod.vo.DataMetho
 import com.cmsr.onebase.module.metadata.controller.admin.datamethod.vo.DataMethodParameterVO;
 import com.cmsr.onebase.module.metadata.controller.admin.datamethod.vo.DataMethodPropertyVO;
 import com.cmsr.onebase.module.metadata.controller.admin.datamethod.vo.DataMethodRespVO;
+import com.cmsr.onebase.module.metadata.service.datamethod.vo.DataMethodQueryVO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataBusinessEntityDO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataEntityFieldDO;
 import jakarta.annotation.Resource;
@@ -39,32 +40,32 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
     private DataRepository dataRepository;
 
     @Override
-    public List<DataMethodRespVO> getDataMethodList(Long entityId, String methodType, String keyword) {
+    public List<DataMethodRespVO> getDataMethodList(DataMethodQueryVO queryVO) {
         // 校验实体存在
-        MetadataBusinessEntityDO entity = dataRepository.findById(MetadataBusinessEntityDO.class, entityId);
+        MetadataBusinessEntityDO entity = dataRepository.findById(MetadataBusinessEntityDO.class, queryVO.getEntityId());
         if (entity == null) {
             throw exception(BUSINESS_ENTITY_NOT_EXISTS);
         }
 
         // 获取实体字段，用于生成方法参数
         DefaultConfigStore fieldConfigStore = new DefaultConfigStore();
-        fieldConfigStore.and("entity_id", entityId);
+        fieldConfigStore.and("entity_id", queryVO.getEntityId());
         List<MetadataEntityFieldDO> fields = dataRepository.findAllByConfig(MetadataEntityFieldDO.class, fieldConfigStore);
 
         // 生成系统内置的数据方法
         List<DataMethodRespVO> methods = generateBuiltInMethods(entity, fields);
 
         // 根据条件过滤
-        if (StringUtils.hasText(methodType)) {
+        if (StringUtils.hasText(queryVO.getMethodType())) {
             methods = methods.stream()
-                    .filter(method -> methodType.equals(method.getMethodType()))
+                    .filter(method -> queryVO.getMethodType().equals(method.getMethodType()))
                     .toList();
         }
         
-        if (StringUtils.hasText(keyword)) {
+        if (StringUtils.hasText(queryVO.getKeyword())) {
             methods = methods.stream()
-                    .filter(method -> method.getMethodName().contains(keyword) 
-                                   || method.getDescription().contains(keyword))
+                    .filter(method -> method.getMethodName().contains(queryVO.getKeyword()) 
+                                   || method.getDescription().contains(queryVO.getKeyword()))
                     .toList();
         }
 

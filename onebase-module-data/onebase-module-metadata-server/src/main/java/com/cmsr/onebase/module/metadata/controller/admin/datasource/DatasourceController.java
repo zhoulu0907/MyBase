@@ -6,6 +6,8 @@ import com.cmsr.onebase.module.metadata.controller.admin.datasource.vo.*;
 import com.cmsr.onebase.module.metadata.convert.datasource.DatasourceConvert;
 import com.cmsr.onebase.module.metadata.dal.dataobject.datasource.MetadataDatasourceDO;
 import com.cmsr.onebase.module.metadata.service.datasource.MetadataDatasourceService;
+import com.cmsr.onebase.module.metadata.service.datasource.vo.ColumnQueryVO;
+import com.cmsr.onebase.module.metadata.service.datasource.vo.TableQueryVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -19,6 +21,12 @@ import java.util.List;
 
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 
+/**
+ * 管理后台 - 数据源管理
+ *
+ * @author matianyu
+ * @date 2025-01-25
+ */
 @Tag(name = "管理后台 - 数据源管理")
 @RestController
 @RequestMapping("/metadata/datasource")
@@ -35,31 +43,23 @@ public class DatasourceController {
         return success(types);
     }
 
-    @GetMapping("/{datasourceId}/tables")
+    @GetMapping("/tables")
     @Operation(summary = "根据数据源ID查询表名列表")
-    @Parameter(name = "datasourceId", description = "数据源ID", required = true, example = "1001")
-    @Parameter(name = "schemaName", description = "数据库模式名", required = false, example = "public")
-    @Parameter(name = "keyword", description = "表名搜索关键词", required = false, example = "user")
     @PreAuthorize("@ss.hasPermission('metadata:datasource:query')")
-    public CommonResult<List<TableInfoRespVO>> getTablesByDatasourceId(
-            @PathVariable("datasourceId") Long datasourceId,
-            @RequestParam(value = "schemaName", required = false) String schemaName,
-            @RequestParam(value = "keyword", required = false) String keyword) {
-        List<TableInfoRespVO> tables = datasourceService.getTablesByDatasourceId(datasourceId, schemaName, keyword);
+    public CommonResult<List<TableInfoRespVO>> getTablesByDatasourceId(@Valid TableQueryReqVO reqVO) {
+        // 将Controller层的VO转换为Service层的VO
+        TableQueryVO queryVO = new TableQueryVO(reqVO.getDatasourceId(), reqVO.getSchemaName(), reqVO.getKeyword());
+        List<TableInfoRespVO> tables = datasourceService.getTablesByDatasourceId(queryVO);
         return success(tables);
     }
 
-    @GetMapping("/{datasourceId}/tables/{tableName}/columns")
+    @GetMapping("/columns")
     @Operation(summary = "根据表名查询字段信息")
-    @Parameter(name = "datasourceId", description = "数据源ID", required = true, example = "1001")
-    @Parameter(name = "tableName", description = "表名", required = true, example = "users")
-    @Parameter(name = "schemaName", description = "数据库模式名", required = false, example = "public")
     @PreAuthorize("@ss.hasPermission('metadata:datasource:query')")
-    public CommonResult<List<ColumnInfoRespVO>> getColumnsByTableName(
-            @PathVariable("datasourceId") Long datasourceId,
-            @PathVariable("tableName") String tableName,
-            @RequestParam(value = "schemaName", required = false) String schemaName) {
-        List<ColumnInfoRespVO> columns = datasourceService.getColumnsByTableName(datasourceId, tableName, schemaName);
+    public CommonResult<List<ColumnInfoRespVO>> getColumnsByTableName(@Valid ColumnQueryReqVO reqVO) {
+        // 将Controller层的VO转换为Service层的VO
+        ColumnQueryVO queryVO = new ColumnQueryVO(reqVO.getDatasourceId(), reqVO.getTableName(), reqVO.getSchemaName());
+        List<ColumnInfoRespVO> columns = datasourceService.getColumnsByTableName(queryVO);
         return success(columns);
     }
 

@@ -82,6 +82,17 @@ public class LicenseServiceImpl implements LicenseService {
     }
 
     /**
+     * 根据状态获取License
+     *
+     * @param status License主键ID
+     * @return License
+     */
+    @Override
+    public LicenseDO getLicenseByStatus(String status) {
+        return dataRepository.findOne(LicenseDO.class, new DefaultConfigStore().and(Compare.EQUAL,"status",status));
+    }
+
+    /**
      * 分页查询License
      *
      * @param reqVO 分页查询参数

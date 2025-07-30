@@ -105,9 +105,6 @@ public class MetadataEntityFieldDO extends TenantBaseDO {
      */
     private Long appId;
 
-    /**
-     * 版本锁标识
-     */
-    private Integer lockVersion;
+
 
 }

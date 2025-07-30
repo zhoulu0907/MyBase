@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.metadata.service.datamethod;
 
 import com.cmsr.onebase.module.metadata.controller.admin.datamethod.vo.DataMethodDetailRespVO;
 import com.cmsr.onebase.module.metadata.controller.admin.datamethod.vo.DataMethodRespVO;
+import com.cmsr.onebase.module.metadata.service.datamethod.vo.DataMethodQueryVO;
 
 import java.util.List;
 
@@ -16,12 +17,10 @@ public interface MetadataDataMethodService {
     /**
      * 查询业务实体的数据方法列表
      *
-     * @param entityId 实体ID
-     * @param methodType 方法类型
-     * @param keyword 搜索关键词
+     * @param queryVO 查询条件VO
      * @return 数据方法列表
      */
-    List<DataMethodRespVO> getDataMethodList(Long entityId, String methodType, String keyword);
+    List<DataMethodRespVO> getDataMethodList(DataMethodQueryVO queryVO);
 
     /**
      * 获取指定数据方法的详细信息

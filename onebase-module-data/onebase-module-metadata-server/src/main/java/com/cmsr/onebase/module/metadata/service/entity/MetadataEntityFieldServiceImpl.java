@@ -15,6 +15,7 @@ import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldSa
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldSortItemVO;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldUpdateItemVO;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.FieldTypeConfigRespVO;
+import com.cmsr.onebase.module.metadata.service.entity.vo.EntityFieldQueryVO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.enums.FieldTypeEnum;
 import jakarta.annotation.Resource;
@@ -23,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Order;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
@@ -97,17 +99,17 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
     }
 
     @Override
-    public List<MetadataEntityFieldDO> getEntityFieldListByConditions(Long entityId, Boolean isSystemField, String keyword) {
+    public List<MetadataEntityFieldDO> getEntityFieldListByConditions(EntityFieldQueryVO queryVO) {
         DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and("entity_id", entityId);
+        configStore.and("entity_id", queryVO.getEntityId());
         
-        if (isSystemField != null) {
-            configStore.and("is_system_field", isSystemField);
+        if (queryVO.getIsSystemField() != null) {
+            configStore.and("is_system_field", queryVO.getIsSystemField());
         }
         
-        if (StringUtils.hasText(keyword)) {
-            configStore.and("field_name", "LIKE", "%" + keyword + "%")
-                      .or("display_name", "LIKE", "%" + keyword + "%");
+        if (StringUtils.hasText(queryVO.getKeyword())) {
+            configStore.and("field_name", "LIKE", "%" + queryVO.getKeyword() + "%")
+                      .or("display_name", "LIKE", "%" + queryVO.getKeyword() + "%");
         }
         
         configStore.order("sort_order", Order.TYPE.ASC);

@@ -39,6 +39,7 @@ public class DataRepository {
         ConfigTable.IS_INSERT_NULL_FIELD = false;
         ConfigTable.IS_INSERT_EMPTY_FIELD = true;
         ConfigTable.IS_INSERT_EMPTY_COLUMN = true;
+        // ConfigTable.IS_ENABLE_SQL_DATATYPE_CONVERT = true;
     }
 
     @Resource
@@ -67,7 +68,6 @@ public class DataRepository {
      */
     public <T extends BaseDO> T insert(T entity) {
         try {
-            ConfigTable.IS_AUTO_CHECK_METADATA = true;
             Long result = anylineService.insert(entity);
             if (result == 0) {
                 throw new BizException(StatusCode.DB_INSERT_ERROR);
@@ -113,6 +113,7 @@ public class DataRepository {
             // 更新
             ConfigStore configs = new DefaultConfigStore();
             configs.and(Compare.EQUAL, "id", entity.getId());
+            ConfigTable.IS_AUTO_CHECK_METADATA = true;
             Long result = anylineService.update(entity, configs);
             if (result == 0) {
                 throw new BizException(StatusCode.DB_UPDATE_ERROR);
