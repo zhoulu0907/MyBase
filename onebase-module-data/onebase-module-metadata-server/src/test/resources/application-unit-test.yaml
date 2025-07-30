@@ -1,0 +1,57 @@
+spring:
+  main:
+    lazy-initialization: true # 开启懒加载，加快速度
+    banner-mode: off # 单元测试，禁用 Banner
+
+--- #################### 数据库相关配置 ####################
+
+spring:
+  # 数据源配置项
+  datasource:
+    name: metadata_test
+    url: jdbc:h2:mem:metadata_testdb;MODE=MYSQL;DATABASE_TO_UPPER=false;NON_KEYWORDS=value;
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+    druid:
+      async-init: true # 单元测试，异步初始化 Druid 连接池，提升启动速度
+      initial-size: 1 # 单元测试，配置为 1，提升启动速度
+  sql:
+    init:
+      schema-locations: classpath:/sql/create_tables.sql
+
+  # Redis 配置（测试环境使用内存Redis）
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+      database: 1 # 使用数据库1进行测试
+
+--- #################### 定时任务相关配置 ####################
+
+spring:
+  quartz:
+    auto-startup: false # 单元测试，禁用 Quartz 的自动启动
+
+--- #################### 配置中心相关配置 ####################
+
+spring:
+  cloud:
+    nacos:
+      config:
+        server-addr: 127.0.0.1:8848 # 配置中心地址
+
+--- #################### RPC 相关配置 ####################
+
+onebase:
+  security:
+    mock-enable: true
+  xss:
+    enable: false
+  demo: false # 关闭演示模式
+
+logging:
+  level:
+    # 配置自己写的 MyBatis Mapper 打印日志
+    com.cmsr.onebase.module.metadata.dal.mysql: debug
+    com.cmsr.onebase.module.metadata.dal.dataobject: debug 

@@ -95,8 +95,7 @@ public class OAuth2TokenServiceImpl implements OAuth2TokenService {
         // 移除相关的访问令牌
 
         ConfigStore cs = new DefaultConfigStore()
-                .and(Compare.EQUAL, "refresh_token", refreshToken)
-                .and(Compare.EQUAL, "deleted", false);
+                .and(Compare.EQUAL, "refresh_token", refreshToken);
         List<OAuth2AccessTokenDO> accessTokenDOs = dataRepository.findAll(OAuth2AccessTokenDO.class,cs);
         //List<OAuth2AccessTokenDO> accessTokenDOs = oauth2AccessTokenMapper.selectListByRefreshToken(refreshToken);
         if (CollUtil.isNotEmpty(accessTokenDOs)) {
@@ -127,8 +126,7 @@ public class OAuth2TokenServiceImpl implements OAuth2TokenService {
 
         // 获取不到，从 MySQL 中获取访问令牌
         ConfigStore cs = new DefaultConfigStore()
-                .and(Compare.EQUAL, "access_token", accessToken)
-                .and(Compare.EQUAL, "deleted", false);
+                .and(Compare.EQUAL, "access_token", accessToken);
         accessTokenDO = dataRepository.findOne(OAuth2AccessTokenDO.class,cs);
         //accessTokenDO = oauth2AccessTokenMapper.selectByAccessToken(accessToken);
         if (accessTokenDO == null) {
@@ -169,8 +167,7 @@ public class OAuth2TokenServiceImpl implements OAuth2TokenService {
         // 删除访问令牌
 
         ConfigStore configStore = new DefaultConfigStore()
-                .and(Compare.EQUAL, "access_token", accessToken)
-                .and(Compare.EQUAL, "deleted", false);
+                .and(Compare.EQUAL, "access_token", accessToken);
         OAuth2AccessTokenDO accessTokenDO = dataRepository.findOne(OAuth2AccessTokenDO.class,configStore);
         //OAuth2AccessTokenDO accessTokenDO = oauth2AccessTokenMapper.selectByAccessToken(accessToken);
         if (accessTokenDO == null) {

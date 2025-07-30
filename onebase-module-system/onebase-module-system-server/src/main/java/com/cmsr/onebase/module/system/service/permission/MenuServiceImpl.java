@@ -216,7 +216,7 @@ public class MenuServiceImpl implements MenuService {
         if (CollUtil.isEmpty(ids)) {
             return Lists.newArrayList();
         }
-        return dataRepository.findAllByIds(MenuDO.class, (List<Long>) ids);
+        return dataRepository.findAllByIds(MenuDO.class, ids);
         //return menuMapper.selectBatchIds(ids);
     }
 
