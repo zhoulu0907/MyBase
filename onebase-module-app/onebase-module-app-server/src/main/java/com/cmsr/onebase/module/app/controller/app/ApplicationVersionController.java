@@ -41,7 +41,7 @@ public class ApplicationVersionController {
         return CommonResult.success(true);
     }
 
-    @PostMapping("/restore ")
+    @PostMapping("/restore")
     @Operation(summary = "应用版本启用")
     @Parameter(name = "applicationId", description = "应用id", required = true)
     public CommonResult<Boolean> restoreApplicationVersion(@RequestParam("versionId") Long versionId) {

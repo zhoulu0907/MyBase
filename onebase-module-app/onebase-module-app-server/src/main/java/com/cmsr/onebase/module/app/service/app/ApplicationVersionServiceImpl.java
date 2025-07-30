@@ -88,8 +88,8 @@ public class ApplicationVersionServiceImpl implements ApplicationVersionService 
         //删除主表数据
         ConfigStore configs = new DefaultConfigStore();
         configs.eq("application_id", applicationVersionDO.getApplicationId());
-        dataRepository.delete(ApplicationMenuDO.class, configs);
-        dataRepository.delete(ApplicationResourceDO.class, configs);
+        dataRepository.deleteByConfig(ApplicationMenuDO.class, configs);
+        dataRepository.deleteByConfig(ApplicationResourceDO.class, configs);
         //查询版本数据
         configs = new DefaultConfigStore();
         configs.eq("version_id", versionId);
@@ -116,8 +116,8 @@ public class ApplicationVersionServiceImpl implements ApplicationVersionService 
         dataRepository.deleteById(ApplicationVersionDO.class, versionId);
         ConfigStore configs = new DefaultConfigStore();
         configs.eq("version_id", versionId);
-        dataRepository.delete(ApplicationVersionMenuDO.class, configs);
-        dataRepository.delete(ApplicationVersionResourceDO.class, configs);
+        dataRepository.deleteByConfig(ApplicationVersionMenuDO.class, configs);
+        dataRepository.deleteByConfig(ApplicationVersionResourceDO.class, configs);
     }
 
     private ApplicationVersionDO validateApplicationVersionExist(Long id) {
