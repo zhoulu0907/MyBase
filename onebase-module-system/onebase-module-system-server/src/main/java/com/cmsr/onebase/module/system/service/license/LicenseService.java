@@ -48,6 +48,14 @@ public interface LicenseService {
     LicenseDO getLicense(Long id);
 
     /**
+     * 根据状态获取License
+     *
+     * @param status License主键ID
+     * @return License
+     */
+    LicenseDO getLicenseByStatus(String status);
+
+    /**
      * 分页查询License
      *
      * @param reqVO 分页查询参数
