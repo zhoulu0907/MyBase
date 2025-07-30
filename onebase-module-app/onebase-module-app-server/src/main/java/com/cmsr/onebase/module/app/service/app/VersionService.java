@@ -9,7 +9,7 @@ import java.util.List;
  * @Author：huangjie
  * @Date：2025/7/22 16:37
  */
-public interface ApplicationVersionService {
+public interface VersionService {
 
     List<ApplicationVersionListRespVO> listApplicationVersion(Long applicationId);
 
