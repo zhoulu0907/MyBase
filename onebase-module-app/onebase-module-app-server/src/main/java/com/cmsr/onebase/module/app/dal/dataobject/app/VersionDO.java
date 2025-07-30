@@ -10,8 +10,8 @@ import lombok.Data;
  * @Date：2025/7/22 17:54
  */
 @Data
-@Table(name = "app_application_version")
-public class ApplicationVersionDO extends BaseDO {
+@Table(name = "app_version")
+public class VersionDO extends BaseDO {
 
     @Column(name = "application_id", nullable = false, comment = "应用ID")
     private Long applicationId;
