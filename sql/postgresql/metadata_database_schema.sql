@@ -64,6 +64,7 @@ CREATE TABLE metadata_business_entity (
     table_name VARCHAR(128),
     run_mode INTEGER NOT NULL DEFAULT 0,
     app_id BIGINT NOT NULL,
+    display_config TEXT,
     deleted INTEGER NOT NULL DEFAULT 0,
     creator BIGINT NOT NULL,
     create_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -84,6 +85,7 @@ COMMENT ON COLUMN metadata_business_entity.datasource_id IS '数据源ID';
 COMMENT ON COLUMN metadata_business_entity.table_name IS '对应数据表名';
 COMMENT ON COLUMN metadata_business_entity.run_mode IS '运行模式：0 编辑态，1 运行态';
 COMMENT ON COLUMN metadata_business_entity.app_id IS '应用ID';
+COMMENT ON COLUMN metadata_business_entity.display_config IS '前端显示配置json';
 COMMENT ON COLUMN metadata_business_entity.deleted IS '软删除标识';
 COMMENT ON COLUMN metadata_business_entity.creator IS '创建人ID';
 COMMENT ON COLUMN metadata_business_entity.create_time IS '创建时间';
