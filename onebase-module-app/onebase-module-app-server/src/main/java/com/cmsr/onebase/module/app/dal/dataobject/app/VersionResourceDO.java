@@ -1,10 +1,10 @@
 package com.cmsr.onebase.module.app.dal.dataobject.app;
 
 import com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Table;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 /**
  * @Author：huangjie
