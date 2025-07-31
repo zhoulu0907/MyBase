@@ -1,4 +1,5 @@
-import { Input, Button, Space } from '@arco-design/web-react';
+import { Input, Button } from '@arco-design/web-react';
+import { IconPlus } from '@arco-design/web-react/icon'
 import s from '../../index.module.less';
 interface TableHeaderProps {
   searchValue: string;
@@ -8,21 +9,17 @@ interface TableHeaderProps {
 export function TableHeader({ searchValue, onSearchChange, onAdd }: TableHeaderProps) {
   return (
     <div className={s.tableHeader}>
-      <div>数据字典列表</div>
-      <div>
-        <Space>
-          <Input.Search
-            value={searchValue}
-            onChange={onSearchChange}
-            placeholder="搜索字典项"
-            style={{ width: 200 }}
-            allowClear
-          />
-          <Button type="primary" onClick={onAdd}>
-            添加
-          </Button>
-        </Space>
-      </div>
+      <Button type="primary" onClick={onAdd}>
+        <IconPlus />
+        添加
+      </Button>
+      <Input.Search
+        value={searchValue}
+        onChange={onSearchChange}
+        placeholder="搜索字典项"
+        style={{ width: 200 }}
+        allowClear
+      />
     </div>
   );
 } 
