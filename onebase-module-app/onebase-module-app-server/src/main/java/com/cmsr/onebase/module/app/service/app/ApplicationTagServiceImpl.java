@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.app.service.app;
 
-import com.cmsr.onebase.module.app.controller.app.vo.ApplicationTagListRespVO;
+import com.cmsr.onebase.module.app.controller.admin.app.vo.ApplicationTagListRespVO;
 import lombok.Setter;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
@@ -18,7 +18,12 @@ import java.util.List;
 @Validated
 public class ApplicationTagServiceImpl implements ApplicationTagService{
     @Override
-    public List<ApplicationTagListRespVO> listApplicationTags(Long tenantId, String query) {
+    public List<ApplicationTagListRespVO> listApplicationTags(String tagName) {
         return null;
+    }
+
+    @Override
+    public void createApplicationTag(String tagName) {
+
     }
 }

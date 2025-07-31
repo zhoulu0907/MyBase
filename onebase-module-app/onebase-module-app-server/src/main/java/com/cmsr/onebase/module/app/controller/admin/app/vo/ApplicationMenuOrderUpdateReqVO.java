@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.app.controller.app.vo;
+package com.cmsr.onebase.module.app.controller.admin.app.vo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;

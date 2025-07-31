@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.app.service.app;
 
 import java.util.List;
 
-import com.cmsr.onebase.module.app.controller.app.vo.ApplicationTagListRespVO;
+import com.cmsr.onebase.module.app.controller.admin.app.vo.ApplicationTagListRespVO;
 
 /**
  * @Author：mickey
@@ -10,5 +10,7 @@ import com.cmsr.onebase.module.app.controller.app.vo.ApplicationTagListRespVO;
  */
 public interface ApplicationTagService {
 
-    List<ApplicationTagListRespVO> listApplicationTags(Long tenantId, String query);
+    List<ApplicationTagListRespVO> listApplicationTags(String tagName);
+
+    void createApplicationTag(String tagName);
 }
