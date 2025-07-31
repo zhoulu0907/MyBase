@@ -10,6 +10,7 @@ import lombok.EqualsAndHashCode;
 
 @Table(name="app_pageset_label")
 @Data
+@Entity
 @EqualsAndHashCode(callSuper = true)
 public class PageSetLabelDO extends TenantBaseDO {
 
