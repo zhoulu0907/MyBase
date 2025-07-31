@@ -6,6 +6,9 @@
     ],
     "scripts": {
         "build:app-builder": "pnpm --filter ./packages/common... build && pnpm --filter ./packages/platform-center... build && pnpm --filter ./apps/app-builder... devops_build",
-        "build:devops-app-builder": "npm run build --workspace=@onebase/common && npm run build --workspace=@onebase/platform-center && npm run devops_build --workspace=app-builder"
+
+        "build:devops-common": "npm install --workspace=@onebase/common && npm run build --workspace=@onebase/common",
+        "build:devops-platform-center": "npm install --workspace=@onebase/platform-center && npm run build --workspace=@onebase/platform-center",
+        "build:devops-app-builder": "npm install --workspace=app-builder && npm run devops_build --workspace=app-builder"
     }
 }
