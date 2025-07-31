@@ -39,6 +39,21 @@ public interface DatasourceConvert {
             return null;
         }
         
+        // 处理16进制编码格式（PostgreSQL的字节数组格式）
+        if (configStr.startsWith("\\x")) {
+            try {
+                // 移除 \x 前缀并解码16进制
+                String hexString = configStr.substring(2);
+                byte[] bytes = hexStringToByteArray(hexString);
+                String jsonStr = new String(bytes, "UTF-8");
+                ObjectMapper objectMapper = new ObjectMapper();
+                return objectMapper.readValue(jsonStr, new TypeReference<Map<String, Object>>() {});
+            } catch (Exception e) {
+                // 如果16进制解码失败，返回空Map
+                return new java.util.HashMap<>();
+            }
+        }
+        
         // 检查是否是数字串（可能是旧的字节数组格式）
         if (configStr.matches("^[0-9,]+$")) {
             // 如果是数字串，尝试转换为字节数组再解析
@@ -68,7 +83,7 @@ public interface DatasourceConvert {
     }
 
     /**
-     * 将Map转换为JSON字符串
+     * 将Map转换为JSON字符串（明文格式）
      */
     default String mapToString(Map<String, Object> configMap) {
         if (configMap == null) {
@@ -76,6 +91,7 @@ public interface DatasourceConvert {
         }
         try {
             ObjectMapper objectMapper = new ObjectMapper();
+            // 确保返回的是明文JSON字符串，不进行16进制编码
             return objectMapper.writeValueAsString(configMap);
         } catch (Exception e) {
             // 如果序列化失败，返回null或者抛出运行时异常
@@ -83,4 +99,16 @@ public interface DatasourceConvert {
         }
     }
 
+    /**
+     * 将16进制字符串转换为字节数组
+     */
+    private byte[] hexStringToByteArray(String hex) {
+        int len = hex.length();
+        byte[] data = new byte[len / 2];
+        for (int i = 0; i < len; i += 2) {
+            data[i / 2] = (byte) ((Character.digit(hex.charAt(i), 16) << 4)
+                    + Character.digit(hex.charAt(i + 1), 16));
+        }
+        return data;
+    }
 }

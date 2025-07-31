@@ -38,6 +38,7 @@ import java.util.Map;
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.module.metadata.enums.ErrorCodeConstants.DATASOURCE_NOT_EXISTS;
 import static com.cmsr.onebase.module.metadata.enums.ErrorCodeConstants.DATASOURCE_CODE_DUPLICATE;
+import org.anyline.entity.Compare;
 
 /**
  * 数据源 Service 实现类
@@ -264,7 +265,7 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
         configStore.and("code", code);
         configStore.and("app_id", appId);
         if (id != null) {
-            configStore.and("id", "!=", id);
+            configStore.and(Compare.NOT_EQUAL, "id", id);
         }
         
         long count = dataRepository.countByConfig(MetadataDatasourceDO.class, configStore);
@@ -284,10 +285,10 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
         
         // 添加查询条件
         if (pageReqVO.getDatasourceName() != null) {
-            configStore.and("datasource_name", "LIKE", "%" + pageReqVO.getDatasourceName() + "%");
+            configStore.and(Compare.LIKE, "datasource_name", "%" + pageReqVO.getDatasourceName() + "%");
         }
         if (pageReqVO.getCode() != null) {
-            configStore.and("code", "LIKE", "%" + pageReqVO.getCode() + "%");
+            configStore.and(Compare.LIKE, "code", "%" + pageReqVO.getCode() + "%");
         }
         if (pageReqVO.getDatasourceType() != null) {
             configStore.and("datasource_type", pageReqVO.getDatasourceType());

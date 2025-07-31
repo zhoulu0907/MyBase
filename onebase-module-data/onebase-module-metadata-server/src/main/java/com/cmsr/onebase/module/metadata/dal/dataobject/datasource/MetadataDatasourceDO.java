@@ -2,7 +2,6 @@ package com.cmsr.onebase.module.metadata.dal.dataobject.datasource;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
 import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
 import lombok.*;
 
@@ -41,8 +40,9 @@ public class MetadataDatasourceDO extends TenantBaseDO {
 
     /**
      * 数据源配置信息(JSON格式存储所有连接参数)
+     * 使用自定义TypeHandler确保明文JSON存储
      */
-    @TableField(typeHandler = JacksonTypeHandler.class)
+    @TableField(typeHandler = PlainJsonTypeHandler.class)
     private String config;
 
     /**
@@ -60,6 +60,25 @@ public class MetadataDatasourceDO extends TenantBaseDO {
      */
     private Long appId;
 
+    /**
+     * 自定义TypeHandler，确保JSON以明文格式存储
+     */
+    public static class PlainJsonTypeHandler extends com.baomidou.mybatisplus.extension.handlers.AbstractJsonTypeHandler<String> {
+        
+        public PlainJsonTypeHandler() {
+            super(String.class);
+        }
 
+        @Override
+        public String parse(String json) {
+            // 直接返回JSON字符串，不进行任何编码转换
+            return json;
+        }
 
+        @Override
+        public String toJson(String obj) {
+            // 直接返回JSON字符串，不进行任何编码转换
+            return obj;
+        }
+    }
 }
