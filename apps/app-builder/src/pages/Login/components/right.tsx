@@ -1,4 +1,4 @@
-import LogoSVG from '@/assets/images/logo.svg';
+// import LogoSVG from '@/assets/images/logo.svg';
 import {
     Button,
     Checkbox,
@@ -11,6 +11,7 @@ import {
 } from '@arco-design/web-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import LogoSVG from '../../../assets/images/logo.svg';
 
 /**
  * // @ts-expect-error: no types for sm-crypto
