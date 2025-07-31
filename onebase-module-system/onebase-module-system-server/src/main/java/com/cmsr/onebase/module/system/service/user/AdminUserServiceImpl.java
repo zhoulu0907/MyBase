@@ -296,6 +296,11 @@ public class AdminUserServiceImpl implements AdminUserService {
     }
 
     @Override
+    public AdminUserDO getUserByTenantIDAndUserName(String username, Long tenantId) {
+        return dataRepository.findOne(AdminUserDO.class, new DefaultConfigStore().eq("username", username).eq("tenant_id", tenantId));
+    }
+
+    @Override
     public AdminUserDO getUserByMobile(String mobile) {
         return dataRepository.findOne(AdminUserDO.class, new DefaultConfigStore().eq("mobile", mobile));
         // return userMapper.selectByMobile(mobile);
@@ -580,6 +585,11 @@ public class AdminUserServiceImpl implements AdminUserService {
         Set<Long> userIds = userRoleDOS.stream().map(UserRoleDO::getUserId).collect(Collectors.toSet());
         List<AdminUserDO> allByIds = dataRepository.findAllByIds(AdminUserDO.class, userIds);
         return allByIds;
+    }
+
+    @Override
+    public Long getUserCountByStatus(Integer status) {
+        return dataRepository.countByConfig(AdminUserDO.class,new DefaultConfigStore().eq("status", status));
     }
 
     /**

@@ -144,7 +144,6 @@ public class LicenseServiceImpl implements LicenseService {
      */
     @Override
     public List<LicenseDO> getSimpleLicenseList() {
-        ConfigStore cs = new DefaultConfigStore();
-        return dataRepository.findAll(LicenseDO.class, cs);
+        return dataRepository.findAll(LicenseDO.class, new DefaultConfigStore());
     }
 }

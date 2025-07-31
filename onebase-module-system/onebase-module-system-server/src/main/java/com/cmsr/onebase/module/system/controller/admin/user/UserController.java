@@ -121,7 +121,7 @@ public class UserController {
     public CommonResult<List<UserRespVO>> getPlatformAdminList() {
 
         // 获取所有平台管理员用户
-        List<AdminUserDO> userList = userService.getUserListByRoleCode(RoleTypeEnum.SYSTEM);
+        List<AdminUserDO> userList = userService.getUserListByStatus(0);
         // 转换为响应对象
         List<UserRespVO> respList = BeanUtils.toBean(userList, UserRespVO.class);
 

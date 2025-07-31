@@ -52,15 +52,15 @@ public interface AdminUserService {
     /**
      * 修改用户
      *
-     * @param email  修改平台管理员邮箱
-     * @param id 用户编号
+     * @param email 修改平台管理员邮箱
+     * @param id    用户编号
      */
     void updatePlatformUserEmail(Long id, String email);
 
     /**
      * 更新用户的最后登陆信息
      *
-     * @param id 用户编号
+     * @param id      用户编号
      * @param loginIp 登陆 IP
      */
     void updateUserLogin(Long id, String loginIp);
@@ -68,7 +68,7 @@ public interface AdminUserService {
     /**
      * 修改用户个人信息
      *
-     * @param id 用户编号
+     * @param id    用户编号
      * @param reqVO 用户个人信息
      */
     void updateUserProfile(Long id, @Valid UserProfileUpdateReqVO reqVO);
@@ -76,7 +76,7 @@ public interface AdminUserService {
     /**
      * 修改用户个人密码
      *
-     * @param id 用户编号
+     * @param id    用户编号
      * @param reqVO 更新用户个人密码
      */
     void updateUserPassword(Long id, @Valid UserProfileUpdatePasswordReqVO reqVO);
@@ -111,6 +111,15 @@ public interface AdminUserService {
      * @return 用户对象信息
      */
     AdminUserDO getUserByUsername(String username);
+
+    /**
+     * 通过租户id和用户名
+     * @param tenantId 租户id
+     * @param username 用户名
+     * @return 用户对象信息
+     */
+    AdminUserDO getUserByTenantIDAndUserName(String username,Long tenantId);
+
 
     /**
      * 通过手机号获取用户
@@ -210,7 +219,7 @@ public interface AdminUserService {
     /**
      * 判断密码是否匹配
      *
-     * @param rawPassword 未加密的密码
+     * @param rawPassword     未加密的密码
      * @param encodedPassword 加密后的密码
      * @return 是否匹配
      */
@@ -218,8 +227,18 @@ public interface AdminUserService {
 
     /**
      * 查询所有管理员用户
+     *
      * @param roleCodeEnum 枚举
      * @return 列表
      */
     List<AdminUserDO> getUserListByRoleCode(RoleTypeEnum roleCodeEnum);
+
+    /**
+     * 获得指定状态的租户数量
+     *
+     * @param status 状态
+     * @return 租户数量
+     */
+    Long getUserCountByStatus(Integer status);
+
 }

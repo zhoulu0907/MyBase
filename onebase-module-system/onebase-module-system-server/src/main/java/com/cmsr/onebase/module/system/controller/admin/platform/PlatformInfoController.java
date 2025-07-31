@@ -73,7 +73,7 @@ public class PlatformInfoController {
     /**
      * 获取平台信息列表
      */
-    @GetMapping("/list-simple")
+    @GetMapping("/simple-list")
     @Operation(summary = "获得平台信息和凭证列表")
     @PreAuthorize("@ss.hasPermission('system:platform-admin:query')")
     public CommonResult<PlatformInfoRespVo> listPlatformInfos() {
