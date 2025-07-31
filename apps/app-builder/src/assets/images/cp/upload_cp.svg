@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="68" height="48" viewBox="0 0 68 48" fill="none">
+<path    style="mix-blend-mode:normal" fill="#F2F3F5"  d="M0 44L0 4C0 1.79086 1.79086 0 4 0L64 0C66.2091 0 68 1.79086 68 4L68 44C68 46.2091 66.2091 48 64 48L4 48C1.79086 48 0 46.2091 0 44Z">
+</path>
+<path  transform="translate(4, 6)"  style="mix-blend-mode:normal" fill="#FFFFFF"  d="M0 34L0 2C0 0.89543 0.89543 0 2 0L58 0C59.1046 0 60 0.89543 60 2L60 34C60 35.1046 59.1046 36 58 36L2 36C0.89543 36 0 35.1046 0 34Z">
+</path>
+<path    style="mix-blend-mode:normal" fill="#BDC2C9"  d="M36.5 11L44 18.5L36.5 18.5L36.5 11Z">
+</path>
+<path fill-rule="evenodd"  fill="rgba(189, 194, 201, 1)" style="mix-blend-mode:normal" d="M36.5 12.4142L36.5 18.5L44 18.5L36.5 11L36.5 12.4142ZM37.5 13.4142L37.5 17.5L41.5858 17.5L37.5 13.4142Z">
+</path>
+<path d="M36.5 12.5L42.5 18.5L36.5 18.5L36.5 12.5Z"  style="mix-blend-mode:normal" fill="#E4E6E9" >
+</path>
+<path    style="mix-blend-mode:normal" fill="#FDFEFF"  d="M27.43 11L36.5 11L36.5 17.5C36.5 18.0523 36.9477 18.5 37.5 18.5L44 18.5L44 33.57C44 35.4643 42.4643 37 40.57 37L27.43 37C25.5357 37 24 35.4643 24 33.57L24 14.43C24 12.5357 25.5357 11 27.43 11Z">
+</path>
+<path fill-rule="evenodd"  fill="rgba(189, 194, 201, 1)" style="mix-blend-mode:normal" d="M35.7 11L27.43 11C25.5357 11 24 12.5357 24 14.43L24 33.57C24 35.4643 25.5357 37 27.43 37L40.57 37C42.4643 37 44 35.4643 44 33.57L44 18.5L37.5 18.5C36.9477 18.5 36.5 18.0523 36.5 17.5L36.5 11L35.7 11ZM35.7 11.8L27.43 11.8C25.9775 11.8 24.8 12.9775 24.8 14.43L24.8 33.57C24.8 35.0225 25.9775 36.2 27.43 36.2L40.57 36.2C42.0225 36.2 43.2 35.0225 43.2 33.57L43.2 19.3L37.5 19.3C36.5059 19.3 35.7 18.4941 35.7 17.5L35.7 11.8Z">
+</path>
+<path    stroke="rgba(51, 150, 100, 1)" stroke-width="1.600000023841858" stroke-linejoin="round" stroke-linecap="round" style="mix-blend-mode:normal" d="M30.5332 27.4787L34.0005 24L37.5664 27.5382">
+</path>
+<path    stroke="rgba(51, 150, 100, 1)" stroke-width="1.600000023841858" stroke-linejoin="round" stroke-linecap="round" style="mix-blend-mode:normal" d="M34 32.5381L34 25.769">
+</path>
+<rect  x="28" y="20" width="5" height="1" rx="0.5"   style="mix-blend-mode:normal" fill="#BDC2C9" >
+</rect>
+<rect  x="28" y="17" width="5" height="1" rx="0.5"   style="mix-blend-mode:normal" fill="#BDC2C9" >
+</rect>
+<path   fill="rgba(189, 194, 201, 1)" style="mix-blend-mode:normal" d="M36.5 11L36.5 17L36 17L36.5 17C36.5 17.8284 37.1716 18.5 38 18.5L38 19L38 18.5L44 18.5L44 19.5L38 19.5L38 19.5C36.6193 19.5 35.5 18.3807 35.5 17L35.5 17L35.5 11L36.5 11Z">
+</path>
+<path fill-rule="evenodd"  fill="rgba(229, 230, 235, 1)" style="mix-blend-mode:normal" d="M0 4L0 44C0 46.2091 1.79086 48 4 48L64 48C66.2091 48 68 46.2091 68 44L68 4C68 1.79086 66.2091 0 64 0L4 0C1.79086 0 0 1.79086 0 4ZM4 47C2.34315 47 1 45.6569 1 44L1 4C1 2.34315 2.34315 1 4 1L64 1C65.6569 1 67 2.34315 67 4L67 44C67 45.6569 65.6569 47 64 47L4 47Z">
+</path>
+</svg>

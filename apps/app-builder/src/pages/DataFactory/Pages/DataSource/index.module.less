@@ -1,0 +1,71 @@
+@import '../../styles/variables.less';
+
+/* 空数据源页面样式 */
+.emptyDsPage {
+  text-align: center;
+  padding: @spacingXl 0;
+}
+
+/* 操作头部样式 */
+.operationHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: @spacingLg;
+  padding: @spacingMd 0;
+  border-bottom: 1px solid @borderColor;
+
+  &Left {
+    font-size: @fontSizeLg;
+    font-weight: 500;
+    color: @textColor;
+  }
+}
+
+/* 创建数据源表单样式 */
+.dataSourceForm {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: @spacingLg;
+
+  &Host {
+    display: inline-block;
+    width: calc(100% - @inputMinWidth - @formItemMarginRight);
+    margin-right: @formItemMarginRight;
+  }
+
+  &Port {
+    display: inline-block;
+    width: @inputMinWidth;
+  }
+}
+
+// 操作按钮样式
+.operationButton {
+  &Edit {
+    color: @primaryColor;
+    margin-right: @operationButtonMargin;
+  }
+
+  &Delete {
+    color: @errorColor;
+  }
+}
+
+// 状态标签样式
+.statusTag {
+  &Success {
+    background-color: @successColor;
+    color: white;
+  }
+
+  &Warning {
+    background-color: @warningColor;
+    color: white;
+  }
+
+  &Error {
+    background-color: @errorColor;
+    color: white;
+  }
+}

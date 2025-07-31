@@ -1,0 +1,45 @@
+.userPage {
+  height: 100%;
+  width: 100%;
+  background: #f7f8fa;
+  display: flex;
+  .leftPanel {
+    background: #fff;
+    height: 100%;
+    box-shadow: 1px 0 0 #f0f0f0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding-right: 16px !important;
+  }
+  
+  .rightPanel {
+    background: #fff;
+    height: 100%;
+    flex: 1;
+    min-width: 0;
+    overflow: auto;
+    padding-left: 16px;
+  }
+}
+
+.selected {
+  color: #009E9E;
+  font-weight: bold;
+  background: #F0F6FF;
+  border-radius: 4px;
+  padding: 4px 8px;
+}
+
+.allItem {
+  color: #1D2129;
+  cursor: pointer;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.tableColumnUsername {
+  cursor: pointer;
+  &:hover {
+    color: #009E9E;
+  }
+}

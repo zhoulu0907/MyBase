@@ -1,0 +1,155 @@
+.myAppPage {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+
+    /* 页面样式可根据需求自定义 */
+    .myAppPageHeader {
+        position: relative;
+        height: 110px;
+        width: 100%;
+
+        display: flex;
+
+        background-image: url("@/assets/images/banner.svg");
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-position: center;
+
+        .myAppWelcome {
+            position: absolute;
+            left: 159px;
+            top: 40px;
+            font-size: 26px;
+            font-weight: 500;
+            letter-spacing: 0px;
+            color: rgba(255, 255, 255, 1);
+        }
+
+        .createAppButton {
+            position: absolute;
+            right: 130px;
+            top: 35px;
+            margin-left: 10px;
+
+            width: 130;
+            height: 43px;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 500;
+            line-height: 18px;
+        }
+    }
+
+    .myAppContainer {
+        padding: 30px 108px 10px 108px;
+        padding-top: 30px;
+        flex: 1;
+
+        .myAppFilter {
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+            width: 100%;
+            box-sizing: border-box;
+
+            .myAppInput {
+                width: 316px;
+                height: 42px;
+            }
+        }
+
+        .myAppList {
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .myAppCard {
+            height: 160px;
+            border-radius: 10px;
+            border: 1px solid rgba(222, 222, 222, 1);
+            padding: 20px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+
+            .myAppCardHeader {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+
+                .myAppName {
+                    display: flex;
+                    align-items: center;
+                    font-size: 14px;
+                    font-weight: 500;
+                    letter-spacing: 0px;
+                    line-height: 18px;
+                    color: rgba(51, 51, 51, 1);
+
+                    img {
+                        margin-right: 8px;
+                    }
+                }
+            }
+
+            .myAppCardBody {
+                font-size: 12px;
+                font-weight: 500;
+                letter-spacing: 0px;
+                line-height: 18px;
+                color: rgba(222, 222, 222, 1);
+
+                .myAppDesc {
+                    margin-bottom: 5px;
+                    display: -webkit-box;
+                    -webkit-box-orient: vertical;
+                    -webkit-line-clamp: 2; /* 控制显示行数 */
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+
+                .myAppTime {
+                    color: rgba(229, 229, 229, 1);
+                }
+            }
+
+            .myAppCardFooter {
+                display: flex;
+                justify-content: space-between;
+
+                img {
+                    width: 20px;
+                    height: 20px;
+                    cursor: pointer;
+                }
+
+                img:last-child {
+                    margin-left: 16px;
+                }
+
+                .myAppCreator {
+                    display: flex;
+                    align-items: center;
+                    font-size: 14px;
+                    font-weight: 500;
+                    letter-spacing: 0px;
+                    line-height: 18px;
+                    color: rgba(166, 166, 166, 1);
+                }
+
+                .myAppOperate {
+                    display: flex;
+                }
+            }
+        }
+
+
+
+
+    }
+}

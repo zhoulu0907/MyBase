@@ -1,0 +1,249 @@
+.loginPage {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  background: rgba(245, 245, 245, 1);
+
+  // 左侧区域
+  .loginPageLeft {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    position: relative;
+    overflow: hidden;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+
+
+    .loginPageLeftContent {
+      z-index: 2;
+      text-align: left;
+      color: white;
+      width: 100%;
+      position: absolute;
+      top: 40px;
+      left: 40px;
+    }
+
+    .loginPageLeftTitle {
+      margin-bottom: 60px;
+      width: 100%;
+
+      h1 {
+        width: 100%;
+        text-align: left;
+        font-size: 28px;
+        font-weight: 500;
+        color: rgba(48, 55, 92, 1);
+        margin-bottom: 16px;
+        word-wrap: break-word;
+        word-break: break-word;
+        line-height: 1.4;
+      }
+
+    }
+
+
+  }
+
+  // 右侧区域
+  .loginPageRight {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    background: rgba(255, 255, 255, 1);
+    backdrop-filter: blur(20px);
+
+    .loginPageHeader {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 10px;
+      position: absolute;
+      top: 0;
+      left: 0;
+      padding: 40px;
+      z-index: 10;
+      color: rgba(102, 102, 102, 1);
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .loginFormContainer {
+      width: 100%;
+      max-width: 370px;
+      padding: 40px;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .loginForm {
+      // 确保表单在固定高度内正确显示
+      display: flex;
+      flex-direction: column;
+      min-height: 40vh;
+
+      .smsContainer {
+        width: 100%;
+
+        .smsButton {
+          flex: 1;
+          min-width: 120px;
+          height: 40px;
+          border-radius: 6px;
+          font-weight: 500;
+        }
+      }
+
+      .formActions {
+        width: 100%;
+        justify-content: space-between;
+        margin-bottom: 8px;
+      }
+
+      .loginButton {
+        height: 40px;
+        font-size: 14px;
+        font-weight: 400;
+        transition: all 0.3s ease;
+
+        &:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        &:active {
+          transform: translateY(0);
+        }
+      }
+    }
+
+    .loginFooter {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      text-align: center;
+      padding: 20px;
+
+      .footerText {
+        font-size: 14px;
+        color: #c9cdd4;
+        margin: 0;
+
+        :global(.arco-btn) {
+          color: #667eea;
+          font-weight: 500;
+          padding: 0 4px;
+
+          &:hover {
+            color: #764ba2;
+          }
+        }
+      }
+    }
+  }
+}
+
+// 响应式设计
+@media (max-width: 1024px) {
+  .loginPage {
+    flex-direction: column;
+
+    .loginPageLeft {
+      flex: none;
+      height: 200px;
+      padding: 20px;
+
+      .loginPageLeftContent {
+        .loginPageLeftTitle {
+          margin-bottom: 20px;
+
+          h1 {
+            font-size: 32px;
+          }
+
+          p {
+            font-size: 16px;
+          }
+        }
+
+        .loginPageLeftFeatures {
+          display: none;
+        }
+      }
+    }
+
+    .loginPageRight {
+      flex: 1;
+      padding: 20px;
+
+      .loginFormContainer {
+        padding: 30px 20px;
+        position: relative;
+
+
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .loginPage {
+    .loginPageLeft {
+      height: 150px;
+
+      .loginPageLeftContent {
+        .loginPageLeftTitle {
+          h1 {
+            font-size: 24px;
+          }
+
+          p {
+            font-size: 14px;
+          }
+        }
+      }
+    }
+
+    .loginPageRight {
+      .loginFormContainer {
+        padding: 20px 16px;
+
+        .loginForm {
+            width: 200px;
+
+          .smsContainer {
+            .smsButton {
+              min-width: 100px;
+              height: 36px;
+              font-size: 14px;
+            }
+          }
+
+          .loginButton {
+            height: 40px;
+            font-size: 14px;
+          }
+        }
+
+        .otherLoginMethods {
+          flex-direction: column;
+          gap: 12px;
+
+          .otherLoginBtn {
+            padding: 10px 20px;
+          }
+        }
+      }
+    }
+  }
+}
