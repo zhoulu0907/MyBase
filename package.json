@@ -1,8 +1,11 @@
 {
-    "name": "onebase-platform-fe"
-,
+    "name": "onebase-platform-fe",
+    "workspaces": [
+        "packages/*",
+        "apps/*"
+    ],
     "scripts": {
         "build:app-builder": "pnpm --filter ./packages/common... build && pnpm --filter ./packages/platform-center... build && pnpm --filter ./apps/app-builder... devops_build",
-        "build:devops-app-builder": "npm --filter ./packages/common... build && npm --filter ./packages/platform-center... build && npm --filter ./apps/app-builder... build"
+        "build:devops-app-builder": "npm run build --workspace=@onebase/common && npm run build --workspace=@onebase/platform-center && npm run devops_build --workspace=app-builder"
     }
 }
