@@ -10,7 +10,7 @@ import {
     Typography
 } from '@arco-design/web-react';
 import { Captcha, TokenManager, type CaptchaRef } from '@onebase/common';
-import { getBackendURL, getSm2PublicKey, login as sessionLogin, type LoginRequest } from '@onebase/platform-center';
+import { getBackendURL, getSm2PublicKey, login as sessionLogin } from '@onebase/platform-center';
 import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 // @ts-expect-error: no types for sm-crypto
@@ -18,6 +18,8 @@ import { sm2 } from 'sm-crypto';
 import { useI18n } from '../../../hooks/useI18n';
 import { useRememberMe } from '../../../hooks/useRememberMe';
 import styles from '../index.module.less';
+import { login } from '@/services/login';
+import type { LoginRequest } from '@/types/login';
 
 const { Paragraph } = Typography;
 const TabPane = Tabs.TabPane;
@@ -196,10 +198,12 @@ const Right: React.FC = () => {
   };
 
   // 表单提交处理
-  const handleSubmit = (values: LoginFormData) => {
+  const handleSubmit = (values: LoginRequest) => {
     // // 校验验证码
     // captchaRef.current?.checkCaptcha();
-
+    console.log('values:', values);
+    const res = login(values);
+    console.log('login res:', res);
     // TODO(mickey): 对接后端接口
     Message.success(t('auth.loginSuccess'));
     navigate('/onebase');
@@ -213,11 +217,12 @@ const Right: React.FC = () => {
 
       if (loginType === 'account') {
         handleAccountLogin(values, captchaToken);
-      } else if (loginType === 'mobile') {
-        handleMobileLogin(values, captchaToken);
       } else{
         Message.error('登录方式不支持');
       }
+      // else if (loginType === 'mobile') {
+      //   handleMobileLogin(values, captchaToken);
+      // }
     }).catch(() => {
       // 表单验证失败，不执行登录
       Message.error('登录失败');
@@ -283,9 +288,9 @@ const Right: React.FC = () => {
                   >
                     {t('auth.rememberMe')}
                   </Checkbox>
-                  <Button type="text" size="small">
+                  {/* <Button type="text" size="small">
                     {t('auth.forgotPassword')}
-                  </Button>
+                  </Button> */}
                 </Space>
               </Form.Item>
 
@@ -304,7 +309,7 @@ const Right: React.FC = () => {
             </Form>
           </TabPane>
 
-          <TabPane key="mobile" title={t('auth.smsLogin')}>
+          {/* <TabPane key="mobile" title={t('auth.smsLogin')}>
             <Form
               form={form}
               layout="vertical"
@@ -376,7 +381,7 @@ const Right: React.FC = () => {
                 </Button>
               </Form.Item>
             </Form>
-          </TabPane>
+          </TabPane> */}
         </Tabs>
 
         <div className={styles.captchaBox}>
