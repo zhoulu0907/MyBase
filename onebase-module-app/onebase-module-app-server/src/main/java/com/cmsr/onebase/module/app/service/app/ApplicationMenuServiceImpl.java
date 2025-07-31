@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.app.service.app;
 import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.module.app.controller.app.vo.ApplicationMenuCopyReqVO;
 import com.cmsr.onebase.module.app.controller.app.vo.ApplicationMenuGroupCreateReqVO;
 import com.cmsr.onebase.module.app.controller.app.vo.ApplicationMenuListRespVO;
 import com.cmsr.onebase.module.app.controller.app.vo.ApplicationMenuOrderUpdateReqVO;
@@ -101,8 +102,27 @@ public class ApplicationMenuServiceImpl implements ApplicationMenuService {
         menuDO.setParentUuid(updateReqVO.getParentUuid());
         dataRepository.update(menuDO);
         List<ApplicationMenuListRespVO> menuListRespList = listApplicationMenu(menuDO.getApplicationId());
-        
 
+
+    }
+
+    @Override
+    public void updateApplicationMenuVisible(Long id, Boolean visible) {
+        ApplicationMenuDO menuDO = validateApplicationMenuExist(id);
+        menuDO.setIsVisible(visible ? ApplicationMenuVisible.YES.getValue() : ApplicationMenuVisible.NO.getValue());
+        dataRepository.update(menuDO);
+    }
+
+    @Override
+    public void copyApplicationMenu(ApplicationMenuCopyReqVO copyReqVO) {
+        ApplicationMenuDO menuDO = validateApplicationMenuExist(copyReqVO.getId());
+        if (menuDO.getMenuType() == ApplicationMenuTypeEnum.GROUP.getValue()) {
+            throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_MENU_GROUP_NOT_ALLOW_COPY);
+        }
+        menuDO.setMenuName(copyReqVO.getMenuName());
+        menuDO.setParentUuid(copyReqVO.getParentUuid());
+        menuDO.setId(null);
+        dataRepository.insert(menuDO);
     }
 
     @Override

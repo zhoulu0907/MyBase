@@ -18,4 +18,6 @@ public interface AppErrorCodeConstants {
 
     ErrorCode APP_MENU_GROUP_HAS_CHILDREN = new ErrorCode(10005, "分组内有页面不可删除，如需删除请先移出页面");
 
+    ErrorCode APP_MENU_GROUP_NOT_ALLOW_COPY = new ErrorCode(10006, "分组内不可复制");
+
 }

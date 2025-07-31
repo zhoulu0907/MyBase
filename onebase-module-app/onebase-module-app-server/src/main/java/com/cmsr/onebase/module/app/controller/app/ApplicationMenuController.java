@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.app.controller.app;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.module.app.controller.app.vo.ApplicationMenuCopyReqVO;
 import com.cmsr.onebase.module.app.controller.app.vo.ApplicationMenuGroupCreateReqVO;
 import com.cmsr.onebase.module.app.controller.app.vo.ApplicationMenuListRespVO;
 import com.cmsr.onebase.module.app.controller.app.vo.ApplicationMenuOrderUpdateReqVO;
@@ -52,6 +53,21 @@ public class ApplicationMenuController {
     @Operation(summary = "更新应用菜单排序")
     public CommonResult<Boolean> updateApplicationMenuOrder(@RequestBody ApplicationMenuOrderUpdateReqVO updateReqVO) {
         applicationMenuService.updateApplicationMenuOrder(updateReqVO);
+        return CommonResult.success(true);
+    }
+
+    @PutMapping("/update-visible")
+    @Operation(summary = "更新应用菜单可见性")
+    public CommonResult<Boolean> updateApplicationMenuVisible(@RequestParam("id") Long id,
+                                                              @RequestParam("visible") Boolean visible) {
+        applicationMenuService.updateApplicationMenuVisible(id, visible);
+        return CommonResult.success(true);
+    }
+
+    @PutMapping("/copy")
+    @Operation(summary = "复制应用菜单")
+    public CommonResult<Boolean> copyApplicationMenu(@RequestBody ApplicationMenuCopyReqVO copyReqVO) {
+        applicationMenuService.copyApplicationMenu(copyReqVO);
         return CommonResult.success(true);
     }
 
