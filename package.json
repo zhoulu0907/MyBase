@@ -2,6 +2,7 @@
     "name": "onebase-platform-fe"
 ,
     "scripts": {
-        "build:app-builder": "pnpm --filter ./packages/common... build && pnpm --filter ./packages/platform-center... build && pnpm --filter ./apps/app-builder... devops_build"
+        "build:app-builder": "pnpm --filter ./packages/common... build && pnpm --filter ./packages/platform-center... build && pnpm --filter ./apps/app-builder... devops_build",
+        "build:devops-app-builder": "npm --filter ./packages/common... build && npm --filter ./packages/platform-center... build && npm --filter ./apps/app-builder... build"
     }
 }
