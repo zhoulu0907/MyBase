@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.app.controller.app.vo;
+package com.cmsr.onebase.module.app.controller.admin.app.vo;
 
 import com.cmsr.onebase.framework.common.pojo.PageParam;
 import io.swagger.v3.oas.annotations.media.Schema;
