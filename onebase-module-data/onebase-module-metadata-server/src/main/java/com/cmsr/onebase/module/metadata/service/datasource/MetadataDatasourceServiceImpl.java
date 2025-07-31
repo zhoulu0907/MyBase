@@ -241,6 +241,8 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
 
         // 更新数据源
         MetadataDatasourceDO updateObj = DatasourceConvert.INSTANCE.convert(updateReqVO);
+        // 手动设置ID，确保更新操作正常进行
+        updateObj.setId(updateReqVO.getId());
         dataRepository.update(updateObj);
     }
 
