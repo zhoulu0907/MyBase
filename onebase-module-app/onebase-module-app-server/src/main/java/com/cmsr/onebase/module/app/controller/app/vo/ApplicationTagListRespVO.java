@@ -5,9 +5,10 @@ import lombok.Data;
 
 /**
  * @Author：huangjie
- * @Date：2025/7/23 13:52
+ * @Date：2025/7/22 16:48
  */
-@Schema(description = "应用管理 - 应用菜单创建/修改 Request VO")
+@Schema(description = "应用管理 - 标签列表 Request VO")
 @Data
-public class ApplicationMenuCreateReqVO {
+public class ApplicationTagListRespVO {
+
 }

@@ -13,6 +13,9 @@ import java.util.List;
 @Data
 public class ApplicationMenuListRespVO {
 
+    @Schema(description = "菜单id")
+    private Long Id;
+
     @Schema(description = "菜单uuid")
     private String menuUuid;
 

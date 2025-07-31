@@ -1,10 +1,9 @@
 package com.cmsr.onebase.module.app.dal.dataobject.app;
 
-import com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO;
+import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
 import jakarta.persistence.Column;
 import jakarta.persistence.Table;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 /**
  * @Author：huangjie
@@ -12,7 +11,7 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @Table(name = "app_version_resource")
-public class VersionResourceDO extends BaseDO {
+public class VersionResourceDO extends TenantBaseDO {
 
     @Column(name = "application_id", nullable = false, comment = "应用ID")
     private Long applicationId;
