@@ -1,12 +1,14 @@
 # OneBase Platform Frontend - 根目录 Makefile
 # 提供整个项目的便捷命令
 
-.PHONY: help install dev build clean lint test
+.PHONY: help install dev build clean lint test init
 
 # 默认目标
 help:
 	@echo "OneBase Platform Frontend - 可用命令:"
 	@echo ""
+	@echo "初始化子项目:"
+	@echo "  make init        - 下载所有子项目"
 	@echo "安装依赖:"
 	@echo "  make install     - 安装所有依赖"
 	@echo "  make install-dev - 仅安装开发依赖"
@@ -27,6 +29,7 @@ help:
 	@echo "  make lint        - 运行代码检查"
 	@echo "  make test        - 运行测试"
 	@echo "  make preview     - 预览构建结果"
+	@echo "  make init        - 初始化所有 git 子模块"
 
 # 安装依赖
 install:
@@ -93,3 +96,16 @@ test:
 preview:
 	@echo "👀 预览构建结果..."
 	cd apps/admin-console && pnpm preview
+
+# 初始化 git 子模块
+init:
+	@echo "🔄 初始化所有 git 子模块..."
+	git submodule update --init
+
+	@echo "🔄 切换 apps 和 packages 下所有子项目到 dev 分支..."
+	@for dir in apps/* packages/*; do \
+		if [ -f "$$dir/.git" ] || [ -d "$$dir/.git" ]; then \
+			echo "切换到 $$dir 并执行 git checkout dev"; \
+			cd "$$dir" && git checkout dev && cd - > /dev/null; \
+		fi \
+	done
