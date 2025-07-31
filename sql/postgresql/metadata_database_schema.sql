@@ -12,7 +12,7 @@ CREATE TABLE metadata_datasource (
     datasource_name VARCHAR(256) NOT NULL,
     code VARCHAR(128) NOT NULL,
     datasource_type VARCHAR(64) NOT NULL,
-    config JSONB NOT NULL,
+    config TEXT NOT NULL,
     description TEXT,
     run_mode INTEGER NOT NULL DEFAULT 0,
     app_id BIGINT NOT NULL,
@@ -47,7 +47,9 @@ COMMENT ON COLUMN metadata_datasource.tenant_id IS '租户ID';
 CREATE UNIQUE INDEX uk_datasource_code ON metadata_datasource(code, app_id, tenant_id) WHERE deleted = 0;
 CREATE INDEX idx_datasource_tenant_app ON metadata_datasource(app_id, tenant_id, deleted);
 CREATE INDEX idx_datasource_type ON metadata_datasource(datasource_type, deleted);
-CREATE INDEX idx_datasource_config ON metadata_datasource USING GIN(config);
+-- 注释：config字段改为TEXT类型后，不再需要GIN索引
+-- 如果需要按config内容查询，可以考虑使用全文搜索索引：
+-- CREATE INDEX idx_datasource_config_fulltext ON metadata_datasource USING gin(to_tsvector('english', config));
 
 -- ====================================================================
 -- 2. 业务实体管理模块

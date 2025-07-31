@@ -43,7 +43,7 @@ public class MetadataDatasourceDO extends TenantBaseDO {
      * 数据源配置信息(JSON格式存储所有连接参数)
      */
     @TableField(typeHandler = JacksonTypeHandler.class)
-    private Map<String, Object> config;
+    private String config;
 
     /**
      * 描述

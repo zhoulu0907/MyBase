@@ -7,6 +7,7 @@ import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
 import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
+
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.listener.DMListener;
 import org.anyline.data.param.ConfigStore;
@@ -17,16 +18,20 @@ import org.anyline.entity.Compare;
 import org.anyline.entity.DataSet;
 import org.anyline.metadata.ACTION.SWITCH;
 import org.anyline.metadata.Table;
+
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.List;
+
 import java.util.Objects;
 import java.util.Set;
 import java.util.HashSet;
 
 @Slf4j @Component() @SuppressWarnings("rawtypes") // AnyLine 框架的接口使用原始类型
 public class AnyLineDBInfoListener implements DMListener {
+
+
 
     // 需要忽略租户过滤的表名列表
     private static final Set<String> TENANT_IGNORE_TABLES = new HashSet<>();
@@ -63,6 +68,9 @@ public class AnyLineDBInfoListener implements DMListener {
         ConfigStore configs, List<String> columns) {
         // 加入租户标志
         injectTenantIdToObject(obj);
+
+        // 注释：由于config字段已改为String类型使用JacksonTypeHandler处理，不再需要JSONB转换
+        // handleJsonbFields(runtime, dest, obj);
 
         // 加入创建时间和创建人等参数
         if (Objects.nonNull(obj) && obj instanceof BaseDO baseDO) {
@@ -107,6 +115,18 @@ public class AnyLineDBInfoListener implements DMListener {
     @Override public SWITCH prepareQuery(DataRuntime runtime, String random, RunPrepare prepare, ConfigStore configs,
         String... conditions) {
 
+        // 检查是否是简单的测试查询，如果是则跳过添加条件
+        if (isSimpleTestQuery(prepare)) {
+            log.info("prepareQuery--------------> 检测到简单测试查询，跳过添加租户和软删除条件");
+            return SWITCH.CONTINUE;
+        }
+
+        // 检查是否有表名，如果没有表名则跳过添加条件
+        if (prepare == null || prepare.getTableName() == null || prepare.getTableName().trim().isEmpty()) {
+            log.info("prepareQuery--------------> 没有表名，跳过添加租户和软删除条件");
+            return SWITCH.CONTINUE;
+        }
+
         // 加入软删判断
         configs.and(Compare.EQUAL, BaseDO.DELETED, false);
 
@@ -118,6 +138,33 @@ public class AnyLineDBInfoListener implements DMListener {
             configs.and("tenant_id = " + TenantContextHolder.getRequiredTenantId());
         }
         return SWITCH.CONTINUE;
+    }
+
+    /**
+     * 检查是否是简单的测试查询
+     *
+     * @param prepare RunPrepare对象
+     * @return 如果是简单测试查询则返回true
+     */
+    private boolean isSimpleTestQuery(RunPrepare prepare) {
+        if (prepare == null) {
+            return false;
+        }
+        
+        // 获取SQL文本进行判断
+        String sql = prepare.getText();
+        if (sql == null) {
+            return false;
+        }
+        
+        // 去除空白字符并转为大写
+        String normalizedSql = sql.trim().toUpperCase();
+        
+        // 检查是否是常见的测试查询
+        return normalizedSql.equals("SELECT 1") ||
+               normalizedSql.equals("SELECT 1 FROM DUAL") ||
+               normalizedSql.matches("SELECT\\s+1\\s*") ||
+               normalizedSql.matches("SELECT\\s+1\\s+FROM\\s+DUAL\\s*");
     }
 
     /**
@@ -274,6 +321,8 @@ public class AnyLineDBInfoListener implements DMListener {
         // 加入软删判断
         configs.and(Compare.EQUAL, BaseDO.DELETED, false); 
     }
+
+
     
 
 }

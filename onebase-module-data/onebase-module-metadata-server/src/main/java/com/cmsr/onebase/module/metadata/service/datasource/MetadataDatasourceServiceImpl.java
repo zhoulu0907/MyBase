@@ -13,6 +13,7 @@ import com.cmsr.onebase.module.metadata.controller.admin.datasource.vo.TableInfo
 import com.cmsr.onebase.module.metadata.service.datasource.vo.ColumnQueryVO;
 import com.cmsr.onebase.module.metadata.service.datasource.vo.TableQueryVO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.datasource.MetadataDatasourceDO;
+import com.cmsr.onebase.module.metadata.convert.datasource.DatasourceConvert;
 import com.cmsr.onebase.module.metadata.enums.DatasourceTypeEnum;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
@@ -172,7 +173,7 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
     private AnylineService<?> createTemporaryService(MetadataDatasourceDO datasource) {
         try {
             // 从数据源配置中获取连接参数
-            Map<String, Object> config = datasource.getConfig();
+            Map<String, Object> config = DatasourceConvert.INSTANCE.stringToMap(datasource.getConfig());
             String url = (String) config.get("url");
             String username = (String) config.get("username");
             String password = (String) config.get("password");
@@ -223,7 +224,7 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
         validateDatasourceCodeUnique(null, createReqVO.getCode(), createReqVO.getAppId());
 
         // 插入数据源
-        MetadataDatasourceDO datasource = BeanUtils.toBean(createReqVO, MetadataDatasourceDO.class);
+        MetadataDatasourceDO datasource = DatasourceConvert.INSTANCE.convert(createReqVO);
         dataRepository.insert(datasource);
         
         return datasource.getId();
@@ -238,7 +239,7 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
         validateDatasourceCodeUnique(updateReqVO.getId(), updateReqVO.getCode(), updateReqVO.getAppId());
 
         // 更新数据源
-        MetadataDatasourceDO updateObj = BeanUtils.toBean(updateReqVO, MetadataDatasourceDO.class);
+        MetadataDatasourceDO updateObj = DatasourceConvert.INSTANCE.convert(updateReqVO);
         dataRepository.update(updateObj);
     }
 
@@ -375,13 +376,13 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
      */
     private boolean testDatabaseConnection(String datasourceType, String url, String username, String password) {
         try {
-            // 构建数据源配置，添加连接池类型
+            // 构建数据源配置，不指定连接池类型，使用默认连接池
             Map<String, Object> config = Map.of(
                     "url", url,
                     "user", username,
                     "password", password,
-                    "driver", getDriverByType(datasourceType),
-                    "pool", "com.zaxxer.hikari.HikariDataSource"  // 指定连接池类型
+                    "driver", getDriverByType(datasourceType)
+                    // 移除 pool 配置，让 AnyLine 使用默认连接池
             );
             
             // 使用 anyline 的 DataSourceUtil 构建数据源

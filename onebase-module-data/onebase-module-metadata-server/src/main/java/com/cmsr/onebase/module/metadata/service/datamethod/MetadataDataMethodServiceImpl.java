@@ -9,11 +9,11 @@ import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataEntityFiel
 import com.cmsr.onebase.module.metadata.dal.dataobject.datasource.MetadataDatasourceDO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.anyline.data.entity.DataRow;
-import org.anyline.data.entity.DataSet;
+import org.anyline.entity.DataRow;
+import org.anyline.entity.DataSet;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Order;
-import org.anyline.entity.OrderByColumn;
+
 import org.anyline.service.AnylineService;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -591,29 +591,30 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
             }
             
             // 构建排序
-            Order order = new Order();
             if (StringUtils.hasText(reqVO.getSortField())) {
-                String direction = "desc".equalsIgnoreCase(reqVO.getSortDirection()) ? "DESC" : "ASC";
-                order.addColumn(new OrderByColumn(reqVO.getSortField(), direction));
+                Order.TYPE direction = "desc".equalsIgnoreCase(reqVO.getSortDirection()) ? Order.TYPE.DESC : Order.TYPE.ASC;
+                configStore.order(reqVO.getSortField(), direction);
             } else {
                 // 默认按主键倒序
                 String primaryKeyField = getPrimaryKeyFieldName(fields);
-                order.addColumn(new OrderByColumn(primaryKeyField, "DESC"));
+                configStore.order(primaryKeyField, Order.TYPE.DESC);
             }
             
             // 执行分页查询
-            DataSet dataSet = anylineService.querys(entity.getTableName(), configStore, order, 
-                    (reqVO.getPageNo() - 1) * reqVO.getPageSize(), reqVO.getPageSize());
+            DataSet dataSet = anylineService.querys(entity.getTableName(), configStore);
+            
+            // 手动实现分页
+            long total = dataSet.total();
+            int startIndex = (reqVO.getPageNo() - 1) * reqVO.getPageSize();
+            int endIndex = Math.min(startIndex + reqVO.getPageSize(), dataSet.size());
             
             // 4. 转换结果
-            List<DynamicDataRespVO> list = dataSet.getRows().stream()
-                    .map(row -> {
-                        Map<String, Object> data = convertDataRowToMap(row, fields);
-                        return buildDynamicDataRespVO(entity, data);
-                    })
-                    .collect(Collectors.toList());
-            
-            long total = dataSet.getTotal();
+            List<DynamicDataRespVO> list = new ArrayList<>();
+            for (int i = startIndex; i < endIndex; i++) {
+                DataRow row = dataSet.getRow(i);
+                Map<String, Object> data = convertDataRowToMap(row, fields);
+                list.add(buildDynamicDataRespVO(entity, data));
+            }
             log.info("分页查询数据成功，实体ID: {}, 表名: {}, 页码: {}, 页大小: {}, 总记录数: {}", 
                     reqVO.getEntityId(), entity.getTableName(), reqVO.getPageNo(), reqVO.getPageSize(), total);
             
@@ -772,10 +773,11 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.and(primaryKeyField, id);
         
-        DataRow dataRow = anylineService.queryRow(tableName, configStore);
-        if (dataRow == null) {
+        DataSet dataSet = anylineService.querys(tableName, configStore);
+        if (dataSet == null || dataSet.size() == 0) {
             return null;
         }
+        DataRow dataRow = dataSet.getRow(0);
         
         return convertDataRowToMap(dataRow, fields);
     }
