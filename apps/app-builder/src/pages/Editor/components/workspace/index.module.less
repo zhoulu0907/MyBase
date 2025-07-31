@@ -1,0 +1,112 @@
+@import '../../../Editor/variables.module.less';
+
+// 定义表单编辑器工作区头部高度变量
+@form-editor-workspace-header-height: 30px;
+@form-editor-workspace-padding: 24px;
+
+
+.formEditorWorkspace {
+    flex: 1 1 0%;
+    width: auto;
+    height: calc(100vh - var(--editor-header-height));
+    box-sizing: border-box;
+    background-color: #fff;
+    display: flex;
+    flex-direction: column;
+
+    .workspaceHeader {
+        height: @form-editor-workspace-header-height;
+        background-color: white;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+
+        .pageModeIcon {
+            width: 32px;
+            height: 32px;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+    }
+
+    .workspaceBody {
+        height: 100%;
+        display: block;
+        padding: @form-editor-workspace-padding;
+        box-sizing: border-box;
+        background-color: #DEE4ED;
+
+        overflow-y: auto;
+
+        /* 自定义滚动条样式 */
+        &::-webkit-scrollbar {
+            width: 5px;
+            background: transparent;
+        }
+        &::-webkit-scrollbar-thumb {
+            background: #e0e0e0;
+            border-radius: 0px;
+        }
+        &::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .workspaceContent {
+            // background-color: rgb(172, 237, 181);
+            background-color: #fff;
+
+            min-height: calc(100vh - var(--editor-header-height) - @form-editor-workspace-header-height - @form-editor-workspace-padding * 2);
+            width: 100%;
+            padding: 16px;
+            box-sizing: border-box;
+
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            align-content: flex-start;
+        }
+
+        // 组件样式
+        .componentItem {
+            cursor: move;
+            padding: 6px;
+            box-sizing: border-box;
+            border: 1px dashed transparent;
+            border-radius: 4px;
+            transition: border-color 0.2s ease;
+            position: relative;
+
+            &:hover {
+                border-color: #4FAE7B;
+            }
+        }
+
+        // 删除按钮样式
+        .deleteButton {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            width: 20px;
+            height: 20px;
+            background-color: #c9c9c9;
+            border: 1px solid #fff;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            transition: all 0.2s ease;
+            font-size: 12px;
+            color: #fff;
+            font-weight: bold;
+
+            &:hover {
+                background-color: #ff7875;
+                transform: scale(1.1);
+            }
+
+        }
+    }
+}

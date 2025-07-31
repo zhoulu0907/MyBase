@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="68" height="48" viewBox="0 0 68 48" fill="none">
+<path    style="mix-blend-mode:normal" fill="#F2F3F5"  d="M0 44L0 4C0 1.79086 1.79086 0 4 0L64 0C66.2091 0 68 1.79086 68 4L68 44C68 46.2091 66.2091 48 64 48L4 48C1.79086 48 0 46.2091 0 44Z">
+</path>
+<path  transform="translate(4, 6)"  style="mix-blend-mode:normal" fill="#FFFFFF"  d="M0 34L0 2C0 0.89543 0.89543 0 2 0L58 0C59.1046 0 60 0.89543 60 2L60 34C60 35.1046 59.1046 36 58 36L2 36C0.89543 36 0 35.1046 0 34Z">
+</path>
+<rect  x="23" y="14" width="22" height="9" rx="4.5"   style="mix-blend-mode:normal" fill="#339664" >
+</rect>
+<path fill-rule="evenodd"  fill="rgba(28, 125, 80, 1)" style="mix-blend-mode:normal" d="M40.5 14L27.5 14C25.0147 14 23 16.0147 23 18.5C23 20.9853 25.0147 23 27.5 23L40.5 23C42.9853 23 45 20.9853 45 18.5C45 16.0147 42.9853 14 40.5 14ZM24.8837 15.8837Q25.9674 14.8 27.5 14.8L40.5 14.8C42.5435 14.8 44.2 16.4565 44.2 18.5C44.2 20.5435 42.5435 22.2 40.5 22.2L27.5 22.2C25.4565 22.2 23.8 20.5435 23.8 18.5Q23.8 16.9674 24.8837 15.8837Z">
+</path>
+<rect  x="23" y="25" width="22" height="9" rx="4.5"   style="mix-blend-mode:normal" fill="#EAECEE" >
+</rect>
+<path fill-rule="evenodd"  fill="rgba(189, 194, 201, 1)" style="mix-blend-mode:normal" d="M40.5 25L27.5 25C25.0147 25 23 27.0147 23 29.5C23 31.9853 25.0147 34 27.5 34L40.5 34C42.9853 34 45 31.9853 45 29.5C45 27.0147 42.9853 25 40.5 25ZM24.8837 26.8837Q25.9674 25.8 27.5 25.8L40.5 25.8C42.5435 25.8 44.2 27.4565 44.2 29.5C44.2 31.5435 42.5435 33.2 40.5 33.2L27.5 33.2C25.4565 33.2 23.8 31.5435 23.8 29.5Q23.8 27.9674 24.8837 26.8837Z">
+</path>
+<circle cx="40.5" cy="18.5" r="2.5"  style="mix-blend-mode:normal" fill="#FFFFFF" >
+</circle>
+<circle cx="27.5" cy="29.5" r="2.5"  style="mix-blend-mode:normal" fill="#FFFFFF" >
+</circle>
+<path fill-rule="evenodd"  fill="rgba(229, 230, 235, 1)" style="mix-blend-mode:normal" d="M0 4L0 44C0 46.2091 1.79086 48 4 48L64 48C66.2091 48 68 46.2091 68 44L68 4C68 1.79086 66.2091 0 64 0L4 0C1.79086 0 0 1.79086 0 4ZM4 47C2.34315 47 1 45.6569 1 44L1 4C1 2.34315 2.34315 1 4 1L64 1C65.6569 1 67 2.34315 67 4L67 44C67 45.6569 65.6569 47 64 47L4 47Z">
+</path>
+</svg>

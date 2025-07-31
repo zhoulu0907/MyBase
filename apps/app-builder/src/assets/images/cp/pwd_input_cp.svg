@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="68" height="48" viewBox="0 0 68 48" fill="none">
+<path    style="mix-blend-mode:normal" fill="#F2F3F5"  d="M0 44L0 4C0 1.79086 1.79086 0 4 0L64 0C66.2091 0 68 1.79086 68 4L68 44C68 46.2091 66.2091 48 64 48L4 48C1.79086 48 0 46.2091 0 44Z">
+</path>
+<path  transform="translate(4, 6)"  style="mix-blend-mode:normal" fill="#FFFFFF"  d="M0 34L0 2C0 0.89543 0.89543 0 2 0L58 0C59.1046 0 60 0.89543 60 2L60 34C60 35.1046 59.1046 36 58 36L2 36C0.89543 36 0 35.1046 0 34Z">
+</path>
+<rect  x="16" y="16" width="36" height="16" rx="3.430000066757202"   style="mix-blend-mode:normal" fill="#FDFEFF" >
+</rect>
+<path fill-rule="evenodd"  fill="rgba(189, 194, 201, 1)" style="mix-blend-mode:normal" d="M48.57 16L19.43 16C17.5357 16 16 17.5357 16 19.43L16 28.57C16 30.4643 17.5357 32 19.43 32L48.57 32C50.4643 32 52 30.4643 52 28.57L52 19.43C52 17.5357 50.4643 16 48.57 16ZM16.8 19.43C16.8 17.9775 17.9775 16.8 19.43 16.8L48.57 16.8C50.0225 16.8 51.2 17.9775 51.2 19.43L51.2 28.57C51.2 30.0225 50.0225 31.2 48.57 31.2L19.43 31.2C17.9775 31.2 16.8 30.0225 16.8 28.57L16.8 19.43Z">
+</path>
+<rect  x="35" y="23" width="12" height="2" rx="1"   style="mix-blend-mode:normal" fill="#BDC2C9" >
+</rect>
+<g >
+<text transform="translate(20, 20)">
+<tspan x="0.3523643147200346" y="8.252717293798923" font-size="9.516521453857422" line-height="18.22" style="mix-blend-mode:normal" fill="#339664"  font-family="Roboto-Regular" letter-spacing="0" >
+***</tspan>
+</text>
+</g>
+<path fill-rule="evenodd"  fill="rgba(229, 230, 235, 1)" style="mix-blend-mode:normal" d="M0 4L0 44C0 46.2091 1.79086 48 4 48L64 48C66.2091 48 68 46.2091 68 44L68 4C68 1.79086 66.2091 0 64 0L4 0C1.79086 0 0 1.79086 0 4ZM4 47C2.34315 47 1 45.6569 1 44L1 4C1 2.34315 2.34315 1 4 1L64 1C65.6569 1 67 2.34315 67 4L67 44C67 45.6569 65.6569 47 64 47L4 47Z">
+</path>
+</svg>

@@ -1,0 +1,7 @@
+{
+    "name": "onebase-platform-fe"
+,
+    "scripts": {
+        "build:app-builder": "pnpm --filter ./packages/common... build && pnpm --filter ./packages/platform-center... build && pnpm --filter ./apps/app-builder... build"
+    }
+}

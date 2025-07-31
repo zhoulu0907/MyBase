@@ -1,0 +1,72 @@
+.platformInfo {
+  padding: 24px;
+  background-color: #fff;
+  min-height: 100vh;
+
+  .pageHeader {
+    margin-bottom: 24px;
+
+    .pageTitle {
+      display: flex;
+      align-items: center;
+      margin-bottom: 8px;
+      color: #1d2129;
+
+      .titleIcon {
+        margin-right: 8px;
+        color: #165dff;
+      }
+    }
+  }
+
+  .infoCard {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+
+    :global(.arco-card-header) {
+      border-bottom: 1px solid #e5e6eb;
+      padding: 16px 24px;
+    }
+
+    :global(.arco-card-body) {
+      padding: 24px;
+    }
+  }
+
+  .statusRunning {
+    color: #00b42a;
+    font-weight: 500;
+    background-color: #e8ffea;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+  }
+
+  .statusGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 24px;
+    margin-top: 16px;
+  }
+
+  .statusItem {
+    text-align: center;
+    padding: 20px;
+    background: #f7f8fa;
+    border-radius: 8px;
+    border: 1px solid #e5e6eb;
+
+    .statusLabel {
+      color: #86909c;
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    .statusValue {
+      color: #1d2129;
+      font-size: 24px;
+      font-weight: 600;
+    }
+  }
+}

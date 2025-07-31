@@ -1,0 +1,1 @@
+export const COMPONENT_GROUP_NAME = "component-list";

@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="68" height="48" viewBox="0 0 68 48" fill="none">
+<path    style="mix-blend-mode:normal" fill="#F2F3F5"  d="M0 44L0 4C0 1.79086 1.79086 0 4 0L64 0C66.2091 0 68 1.79086 68 4L68 44C68 46.2091 66.2091 48 64 48L4 48C1.79086 48 0 46.2091 0 44Z">
+</path>
+<path  transform="translate(4, 6)"  style="mix-blend-mode:normal" fill="#FFFFFF"  d="M0 34L0 2C0 0.89543 0.89543 0 2 0L58 0C59.1046 0 60 0.89543 60 2L60 34C60 35.1046 59.1046 36 58 36L2 36C0.89543 36 0 35.1046 0 34Z">
+</path>
+<circle  cx="25" cy="17" r="3"   style="mix-blend-mode:normal" fill="#FFFFFF" >
+</circle>
+<path fill-rule="evenodd"  fill="rgba(51, 150, 100, 1)" style="mix-blend-mode:normal" d="M25 20C26.6569 20 28 18.6569 28 17C28 15.3431 26.6569 14 25 14C23.3431 14 22 15.3431 22 17C22 18.6569 23.3431 20 25 20ZM25 15.4C25.8837 15.4 26.6 16.1163 26.6 17C26.6 17.8837 25.8837 18.6 25 18.6C24.1163 18.6 23.4 17.8837 23.4 17C23.4 16.1163 24.1163 15.4 25 15.4Z">
+</path>
+<rect  x="31" y="16" width="15" height="2" rx="1"   style="mix-blend-mode:normal" fill="#339664" >
+</rect>
+<circle  cx="25" cy="24" r="3"   style="mix-blend-mode:normal" fill="#FFFFFF" >
+</circle>
+<path fill-rule="evenodd"  fill="rgba(189, 194, 201, 1)" style="mix-blend-mode:normal" d="M25 27C26.6569 27 28 25.6569 28 24C28 22.3431 26.6569 21 25 21C23.3431 21 22 22.3431 22 24C22 25.6569 23.3431 27 25 27ZM25 21.4571C26.4044 21.4571 27.5429 22.5956 27.5429 24C27.5429 25.4044 26.4044 26.5429 25 26.5429C23.5956 26.5429 22.4571 25.4044 22.4571 24C22.4571 22.5956 23.5956 21.4571 25 21.4571Z">
+</path>
+<circle  cx="25" cy="31" r="3"   style="mix-blend-mode:normal" fill="#FFFFFF" >
+</circle>
+<path fill-rule="evenodd"  fill="rgba(189, 194, 201, 1)" style="mix-blend-mode:normal" d="M25 34C26.6569 34 28 32.6569 28 31C28 29.3431 26.6569 28 25 28C23.3431 28 22 29.3431 22 31C22 32.6569 23.3431 34 25 34ZM25 28.4571C26.4044 28.4571 27.5429 29.5956 27.5429 31C27.5429 32.4044 26.4044 33.5429 25 33.5429C23.5956 33.5429 22.4571 32.4044 22.4571 31C22.4571 29.5956 23.5956 28.4571 25 28.4571Z">
+</path>
+<rect  x="31" y="23" width="15" height="2" rx="1"   style="mix-blend-mode:normal" fill="#BDC2C9" >
+</rect>
+<rect  x="31" y="30" width="15" height="2" rx="1"   style="mix-blend-mode:normal" fill="#BDC2C9" >
+</rect>
+<path fill-rule="evenodd"  fill="rgba(229, 230, 235, 1)" style="mix-blend-mode:normal" d="M0 4L0 44C0 46.2091 1.79086 48 4 48L64 48C66.2091 48 68 46.2091 68 44L68 4C68 1.79086 66.2091 0 64 0L4 0C1.79086 0 0 1.79086 0 4ZM4 47C2.34315 47 1 45.6569 1 44L1 4C1 2.34315 2.34315 1 4 1L64 1C65.6569 1 67 2.34315 67 4L67 44C67 45.6569 65.6569 47 64 47L4 47Z">
+</path>
+</svg>
