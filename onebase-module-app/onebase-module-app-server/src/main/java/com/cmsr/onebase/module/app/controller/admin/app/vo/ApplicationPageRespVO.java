@@ -1,8 +1,9 @@
-package com.cmsr.onebase.module.app.controller.app.vo;
+package com.cmsr.onebase.module.app.controller.admin.app.vo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Builder;
 import lombok.Data;
+
+import java.util.List;
 
 /**
  * @Author：huangjie
@@ -26,6 +27,8 @@ public class ApplicationPageRespVO {
 
     @Schema(description = "应用状态")
     private String statusText;
+
+    private List<String> tagNames;
 
     @Schema(description = "创建时间")
     private String createTime;

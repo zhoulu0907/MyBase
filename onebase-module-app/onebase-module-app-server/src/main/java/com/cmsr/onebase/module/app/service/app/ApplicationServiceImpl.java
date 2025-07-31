@@ -5,9 +5,9 @@ import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO;
-import com.cmsr.onebase.module.app.controller.app.vo.ApplicationCreateReqVO;
-import com.cmsr.onebase.module.app.controller.app.vo.ApplicationPageReqVO;
-import com.cmsr.onebase.module.app.controller.app.vo.ApplicationPageRespVO;
+import com.cmsr.onebase.module.app.controller.admin.app.vo.ApplicationCreateReqVO;
+import com.cmsr.onebase.module.app.controller.admin.app.vo.ApplicationPageReqVO;
+import com.cmsr.onebase.module.app.controller.admin.app.vo.ApplicationPageRespVO;
 import com.cmsr.onebase.module.app.dal.dataobject.app.*;
 import com.cmsr.onebase.module.app.enums.app.AppErrorCodeConstants;
 import com.cmsr.onebase.module.app.enums.app.ApplicationStatusEnum;
@@ -61,10 +61,24 @@ public class ApplicationServiceImpl implements ApplicationService {
                 .map(v -> {
                     ApplicationPageRespVO bean = BeanUtils.toBean(v, ApplicationPageRespVO.class);
                     bean.setStatusText(ApplicationStatusEnum.getText(v.getStatus()));
+                    bean.setTagNames(queryAppTagNames(v.getId()));
                     return bean;
                 })
                 .toList();
         return new PageResult<>(respVOS, pageResult.getTotal());
+    }
+
+    private List<String> queryAppTagNames(Long appId) {
+        ConfigStore configStore = new DefaultConfigStore();
+        configStore.eq("application_id", appId);
+        List<Long> tagIds = dataRepository.findAll(ApplicationTagDO.class, configStore).stream()
+                .map(ApplicationTagDO::getTagId)
+                .toList();
+        configStore = new DefaultConfigStore();
+        configStore.in("id", tagIds);
+        return dataRepository.findAll(TagDO.class, configStore).stream()
+                .map(TagDO::getTagName)
+                .toList();
     }
 
     @Override

@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.app.controller.app.vo;
+package com.cmsr.onebase.module.app.controller.admin.app.vo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
@@ -12,6 +12,9 @@ import java.util.List;
 @Schema(description = "应用管理 - 应用菜单列表 Resp VO")
 @Data
 public class ApplicationMenuListRespVO {
+
+    @Schema(description = "菜单id")
+    private Long Id;
 
     @Schema(description = "菜单uuid")
     private String menuUuid;
