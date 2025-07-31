@@ -13,6 +13,7 @@ import com.cmsr.onebase.module.system.controller.admin.tenant.vo.tenant.TenantRe
 import com.cmsr.onebase.module.system.controller.admin.user.vo.user.*;
 import com.cmsr.onebase.module.system.convert.user.UserConvert;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
+import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.enums.common.SexEnum;
 import com.cmsr.onebase.module.system.enums.permission.RoleCodeEnum;
@@ -20,6 +21,7 @@ import com.cmsr.onebase.module.system.enums.permission.RoleTypeEnum;
 import com.cmsr.onebase.module.system.enums.permission.UserTypeEnum;
 import com.cmsr.onebase.module.system.service.dept.DeptService;
 import com.cmsr.onebase.module.system.service.permission.PermissionService;
+import com.cmsr.onebase.module.system.service.permission.RoleService;
 import com.cmsr.onebase.module.system.service.user.AdminUserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -29,6 +31,7 @@ import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -56,6 +59,8 @@ public class UserController {
 
     @Resource
     private PermissionService permissionService;
+    @Autowired
+    private RoleService roleService;
 
     // ——————————————— 以下是平台管理员 ———————————————
     @PostMapping("/platform-admin/create")
@@ -70,8 +75,10 @@ public class UserController {
 
         //如果获取到当前用户ID，则复制其角色给新用户
         if (currentUserId != null) {
-            Set<Long> currentUserRoleIds = permissionService.getUserRoleIdListByUserId(currentUserId);
-            permissionService.assignUserRole(id, currentUserRoleIds);
+            RoleDO roleDO = roleService.getRoleIdsByCode(RoleCodeEnum.SUPER_ADMIN.getCode());
+            Set<Long> roleIds = new HashSet<>();
+            roleIds.add(roleDO.getId());
+            permissionService.assignUserRole(id,roleIds);
         }
 
         return success(id);
