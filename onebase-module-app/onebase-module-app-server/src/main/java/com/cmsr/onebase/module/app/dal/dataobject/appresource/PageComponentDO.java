@@ -29,7 +29,6 @@ public class PageComponentDO extends TenantBaseDO {
     @Column(name = "component_ref", columnDefinition= "VARCHAR(255) NOT NULL", comment = "关联静态组件")
     private String componentRef;
 
-
     /**
      * 是否在子表中
      */

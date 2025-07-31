@@ -24,10 +24,9 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @RequestMapping("/app/appresource")
 @Validated
-@PermitAll
+
 public class HealthCheckController {
-
-
+    @PermitAll
     @GetMapping("/health-check")
     public CommonResult healthCheck() {
         return success(true);
