@@ -39,7 +39,6 @@
             <artifactId>onebase-module-app-server</artifactId>
             <version>${revision}</version>
         </dependency>
-
         <!-- 工作流。默认注释，保证编译速度 -->
 <!--        <dependency>-->
 <!--            <groupId>com.cmsr.onebase</groupId>-->

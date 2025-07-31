@@ -81,4 +81,9 @@ public class TenantDO extends BaseDO {
      */
     private Integer accountCount;
 
+    /**
+     * 分配人员数量
+     */
+    private Integer allocatePersonCount;
+
 }

@@ -89,6 +89,14 @@ public interface TenantService {
     Long getTenantCountByPackageId(Long packageId);
 
     /**
+     * 获得指定状态的租户数量
+     *
+     * @param status 状态
+     * @return 租户数量
+     */
+    Long getTenantCountByStatus(Integer status);
+
+    /**
      * 获得使用指定套餐的租户数组
      *
      * @param packageId 租户套餐编号

@@ -190,6 +190,11 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
+    public RoleDO getRoleIdsByCode(String code) {
+        return dataRepository.findOne(RoleDO.class,new DefaultConfigStore().eq("code", code));
+    }
+
+    @Override
     @Cacheable(value = RedisKeyConstants.ROLE, key = "#id",
             unless = "#result == null")
     public RoleDO getRoleFromCache(Long id) {
