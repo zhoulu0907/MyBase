@@ -1,7 +1,6 @@
 package com.cmsr.onebase.module.app.dal.dataobject.app;
 
-import com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO;
-
+import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
 import jakarta.persistence.Column;
 import jakarta.persistence.Table;
 import lombok.Data;
@@ -12,7 +11,7 @@ import lombok.Data;
  */
 @Data
 @Table(name = "app_version_menu")
-public class VersionMenuDO extends BaseDO {
+public class VersionMenuDO extends TenantBaseDO {
 
     /**
      * 应用Id

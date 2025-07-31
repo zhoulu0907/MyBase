@@ -123,7 +123,7 @@ public class  VersionServiceImpl implements VersionService {
     private VersionDO validateApplicationVersionExist(Long id) {
         VersionDO applicationVersionDO = dataRepository.findById(VersionDO.class, id);
         if (applicationVersionDO == null) {
-            throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APPLICATION_VERSION_NOT_EXIST);
+            throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_VERSION_NOT_EXIST);
         }
         return applicationVersionDO;
     }

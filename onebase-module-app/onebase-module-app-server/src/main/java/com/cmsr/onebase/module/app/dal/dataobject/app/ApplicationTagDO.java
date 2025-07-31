@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.app.dal.dataobject.app;
 
-import com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO;
+import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
 import jakarta.persistence.Column;
 import jakarta.persistence.Table;
 import lombok.Data;
@@ -11,7 +11,7 @@ import lombok.Data;
  */
 @Data
 @Table(name = "app_application_tag")
-public class ApplicationTagDO extends BaseDO {
+public class ApplicationTagDO extends TenantBaseDO {
 
     @Column(name = "application_id", nullable = false, comment = "应用ID")
     private Long applicationId;

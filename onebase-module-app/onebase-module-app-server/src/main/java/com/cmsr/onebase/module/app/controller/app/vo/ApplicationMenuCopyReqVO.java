@@ -10,4 +10,10 @@ import lombok.Data;
 @Schema(description = "应用管理 - 应用菜单复制 Request VO")
 @Data
 public class ApplicationMenuCopyReqVO {
+
+    private Long id;
+
+    private String menuName;
+
+    private String parentUuid;
 }
