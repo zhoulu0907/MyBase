@@ -1,6 +1,6 @@
 import DictList from '@/pages/SystemDict/components/dict-list';
 import DictionaryTable from '@/pages/SystemDict/components/dict-table';
-import { Layout, Message, Modal, Button, Space, Empty } from '@arco-design/web-react';
+import { Layout, Message, Modal, Button, Space, Empty, Divider } from '@arco-design/web-react';
 import {
     createDict,
     deleteDict,
@@ -231,28 +231,30 @@ export default function SystemDictPage() {
             <Empty /> :
             (
               <>
-              <Header>
-                <InfoPanel
-                  title={activeDict?.name}
-                  description={activeDict?.remark}
-                  rightChildren={OperationButtons}
-                  wrapperClassName={styles.infoPanel}
-                >
-                </InfoPanel>
-              </Header>
-              <DictionaryTable
-                data={tableData}
-                currentPage={currentPage}
-                pageSize={pageSize}
-                total={total}
-                onPageChange={handlePageChange}
-                searchValue={itemSearch}
-                onSearchChange={setItemSearch}
-                onAdd={() => { setDictDataModalVisible(true); setEditItem(null); }}
-                onEdit={(item) => handleDictDataEdit(item)}
-                onDelete={(id) => handleDeleteDictData(id)}
-              />
-            </>)}
+                <Header>
+                  <InfoPanel
+                    title={activeDict?.name}
+                    description={activeDict?.remark}
+                    rightChildren={OperationButtons}
+                    wrapperClassName={styles.infoPanel}
+                  >
+                  </InfoPanel>
+                  <Divider style={{ margin: '16px 0' }} />
+                </Header>
+                <DictionaryTable
+                  data={tableData}
+                  currentPage={currentPage}
+                  pageSize={pageSize}
+                  total={total}
+                  onPageChange={handlePageChange}
+                  searchValue={itemSearch}
+                  onSearchChange={setItemSearch}
+                  onAdd={() => { setDictDataModalVisible(true); setEditItem(null); }}
+                  onEdit={(item) => handleDictDataEdit(item)}
+                  onDelete={(id) => handleDeleteDictData(id)}
+                />
+              </>
+            )}
         </Content>
       </Layout>
       <DictModal

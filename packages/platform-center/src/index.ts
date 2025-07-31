@@ -12,3 +12,5 @@ export { getSm2PublicKey, login, SessionService, sessionService } from './servic
 export * from './services/dict';
 
 export * from './services/user'
+
+export * from './services/dept'

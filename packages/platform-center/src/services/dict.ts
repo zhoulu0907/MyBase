@@ -19,7 +19,7 @@ import { PageParam, PageResult } from '../types/common';
   /**
    * 删除字典
    */
-  export const deleteDict = (id: string): Promise<void> => {
+  export const deleteDict = (id: number): Promise<void> => {
     return systemClient.delete(`/dict-type/delete?id=${id}`);
   };
 
@@ -40,7 +40,7 @@ import { PageParam, PageResult } from '../types/common';
   /**
    * 获取字典详情
    */
-  export const getDictDetail = (id: string): Promise<DictItem> => {
+  export const getDictDetail = (id: number): Promise<DictItem> => {
     return systemClient.get(`/dict-type/get?id=${id}`);
   };
 
@@ -61,7 +61,7 @@ import { PageParam, PageResult } from '../types/common';
   /**
    * 删除字典数据
    */
-  export const deleteDictData = (id: string): Promise<void> => {
+  export const deleteDictData = (id: number): Promise<void> => {
     return systemClient.delete(`/dict-data/delete?id=${id}`);
   };
 
@@ -75,6 +75,6 @@ import { PageParam, PageResult } from '../types/common';
   /**
    * 获取字典数据详情
    */
-  export const getDictDataDetail = (id: string): Promise<DictData> => {
+  export const getDictDataDetail = (id: number): Promise<DictData> => {
     return systemClient.get(`/dict-data/get?id=${id}`);
   };
