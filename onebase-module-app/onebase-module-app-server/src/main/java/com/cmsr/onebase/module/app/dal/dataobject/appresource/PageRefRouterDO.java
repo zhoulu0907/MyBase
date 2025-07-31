@@ -10,10 +10,10 @@ import lombok.EqualsAndHashCode;
 @Table(name="app_pageset_detail_page_ref_router")
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class DetailPageRefRouterDO extends TenantBaseDO {
+public class PageRefRouterDO extends TenantBaseDO {
 
-    @Column(name = "page_ref_id", columnDefinition= "BIGINT NOT NULL", comment = "页面编码")
-    private Long pageRefId;
+    @Column(name = "page_ref", columnDefinition= "BIGINT NOT NULL", comment = "页面编码")
+    private Long pageRef;
 
     @Column(name = "router_name", columnDefinition= "VARCHAR(255) NOT NULL", comment = "路由名称")
     private String routerName;

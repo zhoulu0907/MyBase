@@ -24,5 +24,4 @@ public class PageSetDO extends TenantBaseDO {
     @Column(name = "description", columnDefinition= "VARCHAR(255) NOT NULL", comment = "页面集描述")
     private String description;
 
-
 }

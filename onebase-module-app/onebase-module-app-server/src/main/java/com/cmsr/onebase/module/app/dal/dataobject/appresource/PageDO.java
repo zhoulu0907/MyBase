@@ -18,6 +18,12 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 public class PageDO extends TenantBaseDO {
 
+    @Column(name = "page_code", columnDefinition= "VARCHAR(255) NOT NULL", comment = "页面编码")
+    private String pageCode;
+
+    @Column(name = "page_name", columnDefinition= "VARCHAR(255) NOT NULL", comment = "页面名称")
+    private String pageName;
+
     /**
      * 页面标题
      */
@@ -48,8 +54,6 @@ public class PageDO extends TenantBaseDO {
     @Column(name = "background_color", columnDefinition= "VARCHAR(255) NOT NULL", comment = "页面背景色")
     private String backgroundColor;
 
-
-
     /**
      * 页面主元数据
      */
@@ -62,9 +66,6 @@ public class PageDO extends TenantBaseDO {
      */
     @Column(name = "bpm_enabled", columnDefinition= "BOOLEAN NOT NULL", comment = "是否启用 BPM")
     private Boolean bpmEnabled;
-
-
-
 
     /**
      * 路由路径
