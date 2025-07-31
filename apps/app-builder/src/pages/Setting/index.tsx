@@ -30,7 +30,7 @@ const SettingPage: React.FC = () => {
           collapsed={collapsed}
           onCollapse={handleCollapse}
         />
-        <Layout>
+        <Layout className={styles.settingPageContentMain}>
           <AppBreadcrumb />
 
           <Content className={styles.content}>

@@ -2,6 +2,7 @@ import { Button, Pagination, Table } from '@arco-design/web-react';
 import { type DictData } from '@onebase/platform-center';
 import s from '../../index.module.less';
 import { TableHeader } from './TableHeader';
+import StatusTag from '@/components/StatusTag';
 
 interface DictionaryTableProps {
   data: DictData[];
@@ -13,7 +14,7 @@ interface DictionaryTableProps {
   onSearchChange: (value: string) => void;
   onAdd: () => void;
   onEdit: (item: DictData) => void;
-  onDelete: (id: string) => void;
+  onDelete: (id: number) => void;
 }
 
 export default function DictionaryTable({
@@ -29,21 +30,13 @@ export default function DictionaryTable({
   onDelete
 }: DictionaryTableProps) {
   const columns = [
-    { title: '索引', dataIndex: 'index' },
-    { title: '选项名称', dataIndex: 'name' },
-    { title: '选项编码', dataIndex: 'code' },
+    { title: '字典值', dataIndex: 'name' },
+    { title: '字典值编码', dataIndex: 'code' },
     { title: '显示顺序', dataIndex: 'order' },
-    { title: '描述', dataIndex: 'description' },
     {
       title: '状态',
       dataIndex: 'status',
-      render: (status: 'active' | 'inactive') => (
-        <span className={
-          `${s.statusTag} ${status === 'active' ? s.active : s.inactive}`
-        }>
-          {status === 'active' ? '启用' : '停用'}
-        </span>
-      ),
+      render: (val: number) => (<StatusTag status={val} />)
     },
     {
       title: '操作',
@@ -53,7 +46,7 @@ export default function DictionaryTable({
           <Button type='text' style={{ marginRight: 8 }} onClick={() => onEdit(record)}>
             编辑
           </Button>
-          <Button type='text' style={{ color: '#f53f3f' }} onClick={() => onDelete(record.id)}>删除</Button>
+          <Button type='text' onClick={() => onDelete(record.id!)}>删除</Button>
         </>
       ),
     },
@@ -68,6 +61,7 @@ export default function DictionaryTable({
       />
       <div className={s.tableContainer}>
         <Table
+          rowKey='id'
           columns={columns}
           data={data}
           pagination={false}

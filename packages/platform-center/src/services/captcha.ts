@@ -30,6 +30,7 @@ export class CaptchaService {
       this.httpClient = new HttpClient({
         baseURL: this.baseURL || getBackendURL(),
         timeout: 10000,
+        prefix: '/captcha'
       });
     }
     return this.httpClient;
@@ -42,7 +43,7 @@ export class CaptchaService {
    */
   async getCaptcha(captchaType: CaptchaType = 'WORD_IMAGE_CLICK'): Promise<CaptchaResponse> {
     const client = this.getHttpClient();
-    return client.post<CaptchaResponse>(`${this.baseUrl}/get?captcha_type=${captchaType}`);
+    return client.post<CaptchaResponse>(`/get?captcha_type=${captchaType}`);
   }
 
   /**
@@ -64,7 +65,7 @@ export class CaptchaService {
     };
 
     const client = this.getHttpClient();
-    return client.post<VerifyCaptchaResponse>(`${this.baseUrl}/verify`, requestData);
+    return client.post<VerifyCaptchaResponse>(`/verify`, requestData);
   }
 
 }

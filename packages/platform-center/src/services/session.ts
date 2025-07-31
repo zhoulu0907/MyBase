@@ -23,6 +23,7 @@ export class SessionService {
         this.httpClient = new HttpClient({
           baseURL: this.baseURL || getBackendURL(),
           timeout: 10000,
+          prefix: '/session'
         });
       }
       return this.httpClient;
@@ -37,7 +38,7 @@ export class SessionService {
      */
     async login(req: LoginRequest): Promise<any> {
       const client = this.getHttpClient();
-      return client.post<any>(`${this.baseUrl}/login`, req);
+      return client.post<any>(`/login`, req);
     }
 
     /**
@@ -46,7 +47,7 @@ export class SessionService {
      */
     async getSm2PublicKey(): Promise<Sm2PublicKeyResponse> {
       const client = this.getHttpClient();
-      return client.get<Sm2PublicKeyResponse>(`${this.baseUrl}/sm2_public_key`);
+      return client.get<Sm2PublicKeyResponse>(`/sm2_public_key`);
     }
 
   }

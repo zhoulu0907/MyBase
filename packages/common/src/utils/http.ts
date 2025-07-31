@@ -3,6 +3,22 @@ import { BaseResponse, RequestConfig, RequestInterceptor, ResponseInterceptor } 
 import TokenManager from './token';
 
 /**
+ * 拼接域名和服务路径
+ * @param domain 域名
+ * @param path 路径
+ * @returns 拼接后的完整URL
+ */
+export function getConcatnatedBaseUrl(domain: string, path: string = ''): string {
+  const trimedDomain = domain.endsWith('/') ? domain.slice(0, -1) : domain;
+  const trimedPath = path.startsWith('/') ? path.slice(1) : path;
+  
+  if (!trimedPath) {
+    return trimedDomain;
+  }
+  return `${trimedDomain}/${trimedPath}`;
+}
+
+/**
  * HTTP 请求工具类
  * 基于 Axios 封装，提供统一的请求接口和错误处理
  */
@@ -12,8 +28,9 @@ export class HttpClient {
   private responseInterceptors: ResponseInterceptor[] = [];
 
   constructor(config: RequestConfig = {}) {
+    const baseURL = getConcatnatedBaseUrl(config.baseURL || 'http://127.0.0.1:9524', config.prefix)
     this.instance = axios.create({
-      baseURL: config.baseURL || 'http://127.0.0.1:9524',
+      baseURL,
       timeout: config.timeout || 10000,
       headers: {
         'Content-Type': 'application/json',

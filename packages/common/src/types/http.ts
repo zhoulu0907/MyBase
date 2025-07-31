@@ -13,6 +13,7 @@ export interface BaseResponse<T = any> {
     timeout?: number;
     headers?: Record<string, string>;
     withCredentials?: boolean;
+    prefix?: string;
   }
 
   // 请求拦截器

@@ -6,15 +6,6 @@ declare global {
         API_BASE_URL?: string;
       };
     }
-  }
-
-  // 扩展 ImportMeta 接口
-declare global {
-    interface ImportMeta {
-        env?: {
-        VITE_API_BASE_URL?: string;
-        };
-    }
 }
 
 /**
@@ -28,8 +19,9 @@ export const getBackendURL = (): string => {
     }
 
     // 支持 Vite 环境变量
-    if (import.meta.env?.VITE_API_BASE_URL) {
-      return import.meta.env.VITE_API_BASE_URL;
+    const metaEnv = (import.meta as any)?.env;
+    if (metaEnv?.VITE_API_BASE_URL) {
+      return metaEnv.VITE_API_BASE_URL;
     }
 
     // 默认后端地址

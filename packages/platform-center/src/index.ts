@@ -8,3 +8,9 @@ export { CaptchaService, captchaService, getCaptcha, verifyCaptcha } from './ser
 
 // 导出会话服务
 export { getSm2PublicKey, login, SessionService, sessionService } from './services/session';
+
+export * from './services/dict';
+
+export * from './services/user'
+
+export * from './services/dept'

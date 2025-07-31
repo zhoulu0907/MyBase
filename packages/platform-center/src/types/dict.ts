@@ -1,0 +1,29 @@
+// 字典
+export interface Dict {
+  name: string; // 字典名称
+  type: string; // 字典编码
+  status: number; // 字典状态
+  remark?: string; // 备注
+}
+
+// 字典数据
+export interface DictData {
+  id?: number
+  sort: number
+  label: string
+  value: string
+  dictType?: string
+  status: number
+  remark?: string
+  createTime?: string
+}
+
+// 字典项（类型）
+export interface DictItem {
+  id?: number;
+  name: string; // 字典名称
+  type: string; // 字典编码
+  status: number; // 字典状态
+  remark?: string; // 备注
+  createTime?: string; // 创建时间
+}
