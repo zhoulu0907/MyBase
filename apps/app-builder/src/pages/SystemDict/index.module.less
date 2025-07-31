@@ -1,63 +1,46 @@
+@panel-background-color: #fff;
+@panel-padding: 16px;
 .systemDictPage {
   height: 100%;
-  padding: 24px 0 0 0;
-  width: 100%;
+  .pageLayout {
+    height: 100%;
+    background-color: transparent;
+  }
   .leftPanel {
-    background: #fff;
-    min-height: 600px;
+    margin-right: 16px;
+    min-height: 400px;
     display: flex;
     flex-direction: column;
     align-items: stretch;
+    padding: @panel-padding;
+    box-shadow: none;
+    background-color: @panel-background-color;
     .searchInput {
-      margin-bottom: 16px;
-    }
-
-    .addButton {
-      margin: 12px 0 8px 0;
-      width: 100%;
-    }
-
-    .importButton {
-      width: 100%;
-    }
-
-    .dictList {
-      max-height: 100%;
-      overflow-y: auto;
-      overflow-x: hidden;
-    }
-
-    .dictItem {
-      padding: 12px;
-      border-radius: 4px;
-      margin-bottom: 8px;
-      max-width: 0;
-      cursor: pointer;
-      transition: all 0.2s;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border: 1px solid #e5e5e5;
-      background: #fff;
-      &:hover {
-        background: #f5f5f5;
+      .arco-input-group {
+        border-radius: 24px !important;
+        & > .arco-input-inner-wrapper {
+          border-radius: 24px !important;
+        }
       }
     }
 
-    .active {
-      background: #e6f7ff;
-      border-color: #4096ff;
-    }
-
-    .typeCode {
-      color: #666;
-      font-size: 12px;
+    .dictList {
+      padding-left: 24px;
+      max-height: 100%;
+      overflow-y: auto;
+      overflow-x: hidden;
     }
   }
 
   .rightPanel {
     display: flex;
     flex-direction: column;
+    padding: @panel-padding;
+    background-color: @panel-background-color;
+    .infoPanel {
+      margin-bottom: 16px;
+      border-bottom: 1px solid #E5E6EB;
+    }
     .tableHeader {
       display: flex;
       justify-content: space-between;
@@ -74,24 +57,13 @@
     .tableContainer {
       flex: 1;
       margin-bottom: 16px;
-      .statusTag {
-        display: inline-block;
-        padding: 0 12px;
-        height: 24px;
-        line-height: 24px;
-        border-radius: 12px;
-        background: #eafff1;
-        color: #00b96b;
-        font-size: 13px;
-        font-weight: 500;
-      }
       .paginationContainer {
         margin-top: 12px;
         display: flex;
         justify-content: flex-end;
       }
       .active {
-        color: #4096ff;
+        color: #009E9E;
       }
       .inactive {
         color: #8c8c8c;
