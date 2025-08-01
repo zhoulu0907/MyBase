@@ -9,12 +9,8 @@ import {
     Tabs,
     Typography
 } from '@arco-design/web-react';
-import { Captcha, TokenManager, type CaptchaRef } from '@onebase/common';
-import { getBackendURL, getSm2PublicKey, login as sessionLogin } from '@onebase/platform-center';
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-// @ts-expect-error: no types for sm-crypto
-import { sm2 } from 'sm-crypto';
 import { useI18n } from '../../../hooks/useI18n';
 import { useRememberMe } from '../../../hooks/useRememberMe';
 import styles from '../index.module.less';
@@ -23,19 +19,11 @@ import type { LoginRequest } from '@/types/login';
 const { Paragraph } = Typography;
 const TabPane = Tabs.TabPane;
 
-interface LoginFormData {
-  account?: string;
-  password?: string;
-  mobile?: string;
-  smsCode?: string;
-}
-
 const Right: React.FC = () => {
   const navigate = useNavigate();
   const [form] = Form.useForm();
   const { t } = useI18n();
 
-  // const captchaRef = useRef<CaptchaRef>(null);
 
   // 使用记住我hook
   const { rememberMe, savedAccount, saveRememberMe } = useRememberMe();
@@ -43,7 +31,6 @@ const Right: React.FC = () => {
   // 状态管理
   const [loginType, setLoginType] = useState<'account' | 'mobile'>('account');
   const [loading, setLoading] = useState(false);
-  // const [smsCountdown, setSmsCountdown] = useState(0);
 
   // 组件初始化时设置保存的账号
   useState(() => {
@@ -61,8 +48,6 @@ const Right: React.FC = () => {
 
   // 表单提交处理
   const handleSubmit = async (values: LoginRequest) => {
-    values.username = values.account;
-    delete values.account;
 
     console.log('values:', values);
 

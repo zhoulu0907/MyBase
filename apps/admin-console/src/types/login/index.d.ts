@@ -3,6 +3,7 @@
 export interface LoginRequest {
   username: string;
   password: string;
+  account: string;
   // captchaCode?: string;
   // captchaUuid?: string;
 }

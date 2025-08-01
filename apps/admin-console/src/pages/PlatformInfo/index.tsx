@@ -1,4 +1,4 @@
-import { Card, Descriptions, Space, Typography, Table, Tag, type TableColumnProps, Modal, Upload, Button } from '@arco-design/web-react';
+import { Card, Descriptions, Space, Typography, Table, Tag, type TableColumnProps, Modal, Upload } from '@arco-design/web-react';
 // import { IconInfoCircle } from '@arco-design/web-react/icon';
 import React, { useEffect } from 'react';
 import { useState } from 'react';
@@ -17,7 +17,7 @@ interface CertificationRecord {
 const PlatformInfo: React.FC = () => {
   const { t } = useTranslation();
   const [visible, setVisible] = useState(false);
-  const [selectedRecord, setSelectedRecord] = useState<CertificationRecord[]>([]);
+  const [selectedRecord, setSelectedRecord] = useState<CertificationRecord | null>(null);
 
   // 模拟平台信息数据 license 获取
   const platformData = {
@@ -113,7 +113,7 @@ const PlatformInfo: React.FC = () => {
         <div className={styles.operation}>
           <a href="#" className={styles.btn} onClick={(e) => {
             e.preventDefault();
-            setSelectedRecord(record as CertificationRecord);
+            setSelectedRecord(record);
             setVisible(true);
           }}>{t('platformInfo.check')}</a>
           
@@ -276,11 +276,11 @@ const PlatformInfo: React.FC = () => {
             data={[
               {
                 label: t('platformInfo.companyName') || '公司名称',
-                value: selectedRecord.companyName,
+                value: 'selectedRecord.companyName',
               },
               {
                 label: t('platformInfo.certificationContent') || '认证内容',
-                value: selectedRecord.certificationContent,
+                value: 'selectedRecord.certificationContent',
               },
               {
                 label: t('platformInfo.status') || '当前状态',
@@ -292,7 +292,7 @@ const PlatformInfo: React.FC = () => {
               },
               {
                 label: t('platformInfo.expireTime') || '到期时间',
-                value: selectedRecord.expireTime,
+                value: 'selectedRecord.expireTime',
               },
             ]}
             labelStyle={{ fontWeight: 'bold', width: '100px' }}
