@@ -12,6 +12,9 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 public class PageSetDO extends TenantBaseDO {
 
+    @Column(name = "menu_id", columnDefinition= "BIGINT NOT NULL", comment = "菜单ID")
+    private Long menuId;
+
     @Column(name = "pageset_name", columnDefinition= "VARCHAR(255) NOT NULL", comment = "页面集名称")
     private String pageSetName;
 
@@ -21,7 +24,7 @@ public class PageSetDO extends TenantBaseDO {
     @Column(name = "display_name", columnDefinition= "VARCHAR(255) NOT NULL", comment = "页面集显示名称")
     private String displayName;
 
-    @Column(name = "description", columnDefinition= "VARCHAR(255) NOT NULL", comment = "页面集描述")
+    @Column(name = "description", columnDefinition= "TEXT", comment = "页面集描述")
     private String description;
 
 }

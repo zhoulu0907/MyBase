@@ -1,5 +1,7 @@
 package com.cmsr.onebase.module.app.service.appresource;
 
+import java.util.UUID;
+
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Compare;
@@ -26,6 +28,7 @@ public class PageSetServiceImpl implements PageSetService {
     @Override
     public Long createPageSet(CreatePageSetDTO createPageSetDTO) {
         PageSetDO pageSetDO = BeanUtils.toBean(createPageSetDTO, PageSetDO.class);
+        pageSetDO.setPageSetCode(UUID.randomUUID().toString());
         pageSetDO = dataRepository.insert(pageSetDO);
         return pageSetDO.getId();
     }
