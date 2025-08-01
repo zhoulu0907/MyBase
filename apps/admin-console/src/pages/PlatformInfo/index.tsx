@@ -4,7 +4,6 @@ import React, { useEffect } from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styles from './index.module.less';
-import { getPlatformInfoListApi } from '@/services/platformInfo';
 
 const { Title, Text } = Typography;
 // 定义认证记录的数据类型
@@ -74,10 +73,7 @@ const PlatformInfo: React.FC = () => {
   ];
 
   const getPlatformInfoList = async () => {
-    const res = await getPlatformInfoListApi();
-    console.log('getPlatformInfoList res: ', res);
-    // setPlatformInfoList(res.data.list);
-    // setTotal(res.data.total);
+    console.log('获取认证记录:');
   };
 
   useEffect(() => {

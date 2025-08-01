@@ -18,7 +18,6 @@ import { sm2 } from 'sm-crypto';
 import { useI18n } from '../../../hooks/useI18n';
 import { useRememberMe } from '../../../hooks/useRememberMe';
 import styles from '../index.module.less';
-import { loginApi } from '@/services/login';
 import type { LoginRequest } from '@/types/login';
 
 const { Paragraph } = Typography;
@@ -59,143 +58,6 @@ const Right: React.FC = () => {
     saveRememberMe(account, checked);
   };
 
-  // // 发送短信验证码
-  // const sendSmsCode = async () => {
-  //   try {
-  //     const mobile = form.getFieldValue('mobile');
-  //     if (!mobile) {
-  //       Message.error('请先输入手机号');
-  //       return;
-  //     }
-
-  //     // 验证手机号格式
-  //     const mobileRegex = /^1[3-9]\d{9}$/;
-  //     if (!mobileRegex.test(mobile)) {
-  //       Message.error('请输入正确的手机号');
-  //       return;
-  //     }
-
-  //     setLoading(true);
-
-  //     // TODO: 调用发送短信验证码接口
-  //     // await smsService.sendSmsCode({ mobile });
-
-  //     // 模拟发送短信验证码
-  //     await new Promise(resolve => setTimeout(resolve, 1000));
-
-  //     Message.success('验证码已发送');
-  //     setSmsCountdown(60);
-
-  //     // 倒计时
-  //     const timer = setInterval(() => {
-  //       setSmsCountdown(prev => {
-  //         if (prev <= 1) {
-  //           clearInterval(timer);
-  //           return 0;
-  //         }
-  //         return prev - 1;
-  //       });
-  //     }, 1000);
-
-  //   } catch (error) {
-  //     Message.error('发送失败，请重试');
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
-  // 账号密码登录
-  // const handleAccountLogin = async (values: LoginFormData, captchaToken: string) => {
-  //   try {
-  //     if (!captchaToken) {
-  //       Message.error('请先完成验证码验证');
-  //       return;
-  //     }
-
-  //     setLoading(true);
-
-  //     // 1. 获取SM2公钥
-  //     const pubKeyRes = await getSm2PublicKey();
-  //     if (!pubKeyRes || !pubKeyRes.public_key) {
-  //       Message.error('获取加密公钥失败');
-  //       return;
-  //     }
-
-  //     // 2. 加密密码
-  //     // 这里的 1 是 sm2.doEncrypt 的参数，表示加密输出为 C1C3C2 格式（国密标准推荐的密文格式）
-  //     // 具体可参考 sm-crypto 库文档：https://github.com/JuneAndGreen/sm-crypto
-  //     const encryptedPassword = sm2.doEncrypt(values.password!, pubKeyRes.public_key, 1);
-
-  //     const loginData : LoginRequest= {
-  //       account: values.account!,
-  //       // 04 是国密标准推荐的密文格式 需要手工传入
-  //       password: "04"+encryptedPassword,
-  //       captcha_token: captchaToken
-  //     };
-
-  //     const response = await sessionLogin(loginData);
-
-  //     if (response.is_login) {
-  //       Message.success(t('auth.loginSuccess'));
-
-  //       // 使用 TokenManager 存储 token 信息
-  //       TokenManager.setToken({
-  //         isLogin: response.is_login,
-  //         account: response.account,
-  //         accountID: response.account_id,
-  //         username: response.username,
-  //         tokenName: response.token_name,
-  //         tokenValue: response.token_value,
-  //         expiresIn: response.expires_in,
-  //       }, rememberMe);
-
-  //       // 保存记住我状态和账号信息
-  //       saveRememberMe(values.account!, rememberMe);
-
-  //       // 跳转到首页
-  //       navigate('/onebase');
-  //     } else {
-  //       Message.error(t('auth.loginFailed'));
-  //     }
-
-  //   } catch (error: any) {
-  //     console.error('登录失败:', error);
-  //     Message.error(error.message || t('auth.invalidCredentials'));
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
-  // 手机号登录
-  // const handleMobileLogin = async (values: LoginFormData, captchaToken: string) => {
-  //   try {
-  //     if (!captchaToken) {
-  //       Message.error('请先完成验证码验证');
-  //       return;
-  //     }
-
-  //     setLoading(true);
-
-  //     // TODO: 调用手机号登录接口
-  //     // const response = await mobileLoginService.login({
-  //     //   mobile: values.mobile!,
-  //     //   smsCode: values.smsCode!,
-  //     //   captcha_token: captchaToken
-  //     // });
-
-  //     // 模拟登录请求
-  //     await new Promise(resolve => setTimeout(resolve, 1500));
-
-  //     Message.success(t('auth.loginSuccess'));
-  //     navigate('/onebase');
-
-  //   } catch (error: any) {
-  //     console.error('登录失败:', error);
-  //     Message.error(error.message || '登录失败，请检查验证码');
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
 
   // 表单提交处理
   const handleSubmit = async (values: LoginRequest) => {
@@ -203,66 +65,12 @@ const Right: React.FC = () => {
     delete values.account;
 
     console.log('values:', values);
-    try {
-      const res = await loginApi(values);
-      // console.log('login res:', res);
-      const { code, data, msg } = res;
-      
-      if (code === 0) {
-        // 登录成功处理
-        console.log('data:', data);
-        const { accessToken, refreshToken, expiresIn, userId } = data;
-        // console.log("res data:______>", accessToken, refreshToken, expiresIn, userId);
-        
-        // 使用 TokenManager 存储 token 信息
-        TokenManager.setToken({
-          isLogin: true,
-          account: values.username!,
-          accountID: userId,
-          username: values.username!,
-          tokenName: 'Authorization',
-          tokenValue: accessToken,
-          expiresIn: expiresIn,
-        }, rememberMe);
 
-        // 保存记住我状态和账号信息
-        saveRememberMe(values.username!, rememberMe);
+    // 显示成功消息并跳转
+    Message.success(t('auth.loginSuccess'));
+    navigate('/onebase');
 
-        // 显示成功消息并跳转
-        Message.success(t('auth.loginSuccess'));
-        navigate('/onebase');
-        const token = localStorage.getItem('access_token');
-        console.log('token', token);
-      } else {
-        // 登录失败处理
-        Message.error(msg || t('auth.loginFailed'));
-      }
-    } catch (error: any) {
-      // console.error('登录失败:', error);
-      Message.error(error.message || t('auth.invalidCredentials'));
-    }
-    setLoading(false);
   };
-
-  // const handleCaptchaSuccess = (captchaToken: string) => {
-  //   console.log('验证码验证成功:', captchaToken);
-
-  //   // 验证码验证成功后，自动提交表单
-  //   form.validate().then((values: LoginFormData) => {
-
-  //     if (loginType === 'account') {
-  //       handleAccountLogin(values, captchaToken);
-  //     } else{
-  //       Message.error('登录方式不支持');
-  //     }
-  //     // else if (loginType === 'mobile') {
-  //     //   handleMobileLogin(values, captchaToken);
-  //     // }
-  //   }).catch(() => {
-  //     // 表单验证失败，不执行登录
-  //     Message.error('登录失败');
-  //   });
-  // };
 
   return (
     <div className={styles.loginPageRight}>
