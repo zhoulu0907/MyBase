@@ -38,4 +38,7 @@ public class LicenseDO extends BaseDO{
     private Boolean isTrial;
     /** License文件 */
     private String licenseFile;
+    /** 创建时间 */
+    private LocalDateTime createTime;
+
 }

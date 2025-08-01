@@ -123,7 +123,7 @@ public class LicenseServiceImpl implements LicenseService {
                 cs.and(Compare.LESS_EQUAL, "expire_time", reqVO.getExpireTimeTo());
             }
 
-            cs.order("id", "DESC");
+            cs.order("status","desc");
 
             return dataRepository.findPageWithConditions(
                     LicenseDO.class,

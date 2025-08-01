@@ -115,16 +115,22 @@ public class TenantServiceImpl implements TenantService {
         // 校验租户名称是否重复
         validTenantNameDuplicate(createReqVO.getName(), null);
         // 校验租户域名是否重复
-        if (createReqVO.getWebsite() != null) {
-        validTenantWebsiteDuplicate(createReqVO.getWebsite(), null);
+        if (StringUtils.isNotEmpty(createReqVO.getWebsite())) {
+            validTenantWebsiteDuplicate(createReqVO.getWebsite(), null);
         }
-        // 校验套餐被禁用
-        createReqVO.setPackageId(112L);
+        if (createReqVO.getPackageId() == null) {
+            createReqVO.setPackageId(112L);
+        }
+        TenantPackageDO tenantPackage = tenantPackageService.validTenantPackage(createReqVO.getPackageId());
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         LocalDateTime expireTime = LocalDateTime.parse("2099-02-19 00:00:00", formatter);
-        createReqVO.setExpireTime(expireTime);
-        createReqVO.setAccountCount(100);
-        TenantPackageDO tenantPackage = tenantPackageService.validTenantPackage(createReqVO.getPackageId());
+        if (createReqVO.getExpireTime() == null) {
+            createReqVO.setExpireTime(expireTime);
+        }
+        if (createReqVO.getAccountCount() == null) {
+            createReqVO.setAccountCount(100);
+        }
+
         LicenseDO license = licenseService.getLicenseByStatus("enable");
         // 检查分配人员数量是否超过license限制
         if (license != null) {
@@ -216,12 +222,12 @@ public class TenantServiceImpl implements TenantService {
                 throw exception(USER_USERNAME_EXISTS);
             }
         });
-        // 如果联系人不为空，根据tenant_id和username去查询，判断是否为空，不为空则异常，租户管理员名称已存在
-        if (StringUtils.isNotEmpty(updateReqVO.getContactName())) {
-                if (userService.getUserByUsername(updateReqVO.getContactName()) != null) {
-                    throw exception(USER_USERNAME_EXISTS);
-                }
-        }
+//        // 如果联系人不为空，根据tenant_id和username去查询，判断是否为空，不为空则异常，租户管理员名称已存在
+//        if (StringUtils.isNotEmpty(updateReqVO.getContactName())) {
+//                if (userService.getUserByUsername(updateReqVO.getContactName()) != null) {
+//                    throw exception(USER_USERNAME_EXISTS);
+//                }
+//        }
 
         LicenseDO license = licenseService.getLicenseByStatus("enable");
         // 检查分配人员数量是否超过license限制
@@ -251,7 +257,23 @@ public class TenantServiceImpl implements TenantService {
         TenantDO updateObj = BeanUtils.toBean(updateReqVO, TenantDO.class);
         // tenantMapper.updateById(updateObj);
         dataRepository.update(updateObj);
-        
+        TenantUtils.execute(updateObj.getId(), () -> {
+            // 创建角色
+            Long roleId = createRole(tenantPackage);
+            // 创建用户，并分配角色
+            TenantSaveReqVO reqVO = new TenantSaveReqVO();
+            reqVO.setUsername(updateReqVO.getContactName());
+            if (StringUtils.isEmpty(updateReqVO.getPassword())) {
+                reqVO.setPassword("admin123");
+            }
+            Long userId = createUser(roleId, reqVO);
+            // 修改租户的管理员
+//            tenantMapper.updateById(new TenantDO().setId(tenant.getId()).setContactUserId(userId));
+            TenantDO tenantDO = new TenantDO().setContactUserId(userId);
+            tenantDO.setId(updateObj.getId());
+            dataRepository.update(tenantDO);
+
+        });
         // 如果套餐发生变化，则修改其角色的权限
         if (ObjectUtil.notEqual(tenant.getPackageId(), updateReqVO.getPackageId())) {
             updateTenantRoleMenu(tenant.getId(), tenantPackage.getMenuIds());
