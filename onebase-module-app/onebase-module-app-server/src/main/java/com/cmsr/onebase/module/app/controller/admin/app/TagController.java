@@ -1,8 +1,8 @@
 package com.cmsr.onebase.module.app.controller.admin.app;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
-import com.cmsr.onebase.module.app.controller.admin.app.vo.ApplicationTagListRespVO;
-import com.cmsr.onebase.module.app.service.app.ApplicationTagService;
+import com.cmsr.onebase.module.app.controller.admin.app.vo.TagListRespVO;
+import com.cmsr.onebase.module.app.service.app.TagService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
@@ -19,23 +19,23 @@ import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
  */
 @Tag(name = "应用管理-标签管理")
 @RestController
-@RequestMapping("/app/application-tag")
+@RequestMapping("/app/tag")
 @Validated
-public class ApplicationTagController {
+public class TagController {
 
     @Resource
-    private ApplicationTagService applicationTagService;
+    private TagService tagService;
 
     @GetMapping("/list")
     @Operation(summary = "应用标签列表")
-    public CommonResult<List<ApplicationTagListRespVO>> listApplicationTag(@RequestParam("tagName") String tagName) {
-        return success(applicationTagService.listApplicationTags(tagName));
+    public CommonResult<List<TagListRespVO>> listTag(@RequestParam("tagName") String tagName) {
+        return success(tagService.listTags(tagName));
     }
 
     @PostMapping("/create")
     @Operation(summary = "创建应用标签")
-    public CommonResult<Boolean> createApplicationTag(@RequestParam("tagName") String tagName) {
-        applicationTagService.createApplicationTag(tagName);
+    public CommonResult<Boolean> createTag(@RequestParam("tagName") String tagName) {
+        tagService.createTag(tagName);
         return success(true);
     }
 
