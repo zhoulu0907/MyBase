@@ -35,7 +35,7 @@
         <kingbase.jdbc.version>8.6.0</kingbase.jdbc.version>
         <opengauss.jdbc.version>5.1.0</opengauss.jdbc.version>
         <taos.version>3.3.3</taos.version>
-        <anyline.version>8.7.2-jdk17-SNAPSHOT</anyline.version>
+        <anyline.version>8.7.2-jdk17-20250722</anyline.version>
 <!--        <anyline.version>8.7.2-jdk17-20250603</anyline.version>-->
         <jakarta.persistence-api.version>3.2.0</jakarta.persistence-api.version>
         <jakarta.validation-api.version>3.1.1</jakarta.validation-api.version>
