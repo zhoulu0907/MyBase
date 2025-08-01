@@ -1,25 +1,69 @@
 .platformInfo {
-  padding: 24px;
   background-color: #fff;
   min-height: 100vh;
-
   .pageHeader {
-    margin-bottom: 24px;
-
-    .pageTitle {
+    padding: 24px;
+    display: flex;
+    justify-content: space-between;
+    // margin-bottom: 24px;
+    // border-bottom: 1px solid #ccc;
+    .pageHeaderLeft {
+      // background-color: skyblue;
+      .pageHeaderTitle {
+        margin:auto;
+        display: flex;
+        align-items: center;
+      }
+    }
+    .pageHeaderRight {
+      // background-color: greenyellow;
       display: flex;
-      align-items: center;
-      margin-bottom: 8px;
-      color: #1d2129;
-
-      .titleIcon {
-        margin-right: 8px;
-        color: #165dff;
+      justify-content: space-between;
+      align-items: end;
+      .superAdmin{
+        .superAdminText { 
+          // 单行文本省略
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+      }
+      .createdAt {
+        margin-left: 20px;
       }
     }
   }
 
   .infoCard {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+
+    :global(.arco-card-header) {
+      border-bottom: 1px solid #e5e6eb;
+      padding: 16px 24px;
+    }
+
+    :global(.arco-card-body) {
+      padding: 24px;
+    }
+  }
+  .authRecord {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    .uploadAuth {
+      // 自定义上传按钮的样式
+      color: #00b42a;
+      text-decoration: none;
+      cursor: pointer;
+      font-size: 14px;
+      margin-right: 10px;
+      &:hover {
+      }
+    }
+  }
+  .authRecordCard {
     background: #fff;
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
@@ -67,6 +111,21 @@
       color: #1d2129;
       font-size: 24px;
       font-weight: 600;
+    }
+  }
+  .operation {
+    .btn {
+      // 去除a标签下划线
+      text-decoration: none;
+      color: #00b42a;
+    }
+  }
+}
+.tablePagination {
+  :global {
+    .arco-pagination-item-active {
+      background-color: #e8ffea !important;
+      color: #00b42a !important;
     }
   }
 }
