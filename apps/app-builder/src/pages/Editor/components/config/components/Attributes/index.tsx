@@ -9,7 +9,8 @@ import {
     InputNumber,
     Message,
     Radio,
-    Switch
+    Switch,
+    ColorPicker,
 } from "@arco-design/web-react";
 import { IconDelete, IconDragDotVertical } from "@arco-design/web-react/icon";
 import { useEffect, useState } from "react";
@@ -45,7 +46,7 @@ const Attributes = ({ cpID }: ConfigsProps) => {
 
     }, [cpID, curComponentSchema]);
 
-    const handlePropsChange = (key: string, value: string | boolean | any[]) => {
+    const handlePropsChange = (key: string, value: string | number | boolean | any[]) => {
         console.log(`更新了属性: ${key} 值为: ${value}`)
 
         const newCurComponentSchema = {
@@ -106,8 +107,21 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                                     || item.type === CONFIG_TYPES.LABEL_INPUT
                                     || item.type === CONFIG_TYPES.TOOLTIP_INPUT
                                     || item.type === CONFIG_TYPES.PLACEHOLDER_INPUT
+                                    || item.type === CONFIG_TYPES.UPLOAD_SIZE
+                                    || item.type === CONFIG_TYPES.UPLOAD_LIMIT
+                                    || item.type === CONFIG_TYPES.UPLOAD_COMPRESS
                                 ) &&
                                     <Input
+                                        placeholder={`请输入${item.name}`}
+                                        value={configs[item.key]}
+                                        onChange={(value) => {
+                                            handlePropsChange(item.key, value)
+                                        }}
+                                    />
+                                }
+                                {
+                                    (item.type === CONFIG_TYPES.NUMBER_INPUT) &&
+                                    <InputNumber
                                         placeholder={`请输入${item.name}`}
                                         value={configs[item.key]}
                                         onChange={(value) => {
@@ -126,7 +140,17 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                                     />
                                 }
                                 {
-                                    (item.type === CONFIG_TYPES.WIDTH_RADIO) &&
+                                    (item.type === CONFIG_TYPES.COLOR) &&
+                                    <ColorPicker
+                                        showText
+                                        value={configs[item.key]}
+                                        onChange={(value) => {
+                                            handlePropsChange(item.key, value)
+                                        }}
+                                    />
+                                }
+                                {
+                                    item.type === CONFIG_TYPES.WIDTH_RADIO &&
                                     <Radio.Group
                                         type="button"
                                         direction="horizontal"
@@ -148,7 +172,11 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                                     </Radio.Group>
                                 }
                                 {
-                                    (item.type === CONFIG_TYPES.STATUS_RADIO) &&
+                                    (item.type === CONFIG_TYPES.STATUS_RADIO
+                                        || item.type === CONFIG_TYPES.DATE_TYPE
+                                        || item.type === CONFIG_TYPES.FORM_LAYOUT
+                                        || item.type === CONFIG_TYPES.TEXT_ALIGN
+                                    ) &&
                                     <Radio.Group
                                         type="button"
                                         size="default"
@@ -168,6 +196,7 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                                                 style={{
                                                     flex: 1,
                                                     textAlign: 'center',
+                                                    whiteSpace: 'nowrap'
                                                 }}
                                             >
                                                 {item.text && item.text.startsWith('formEditor.')
@@ -218,6 +247,17 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                                             </Radio>
                                         ))}
                                     </Radio.Group>
+                                }
+                                {
+                                    (item.type === CONFIG_TYPES.TABLE_PAGE_SIZE) &&
+                                    <Input
+                                        type="number"
+                                        size="large" 
+                                        value={configs[item.key]}
+                                        onChange={(value) => {
+                                            handlePropsChange(item.key, value)
+                                        }}
+                                    />
                                 }
                                 {
                                     (item.type === CONFIG_TYPES.TABLE_COLUMN_LIST) &&

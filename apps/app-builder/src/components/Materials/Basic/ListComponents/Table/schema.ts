@@ -1,7 +1,7 @@
 import { baseConfig, baseDefault, statusConfig, widthConfig, type ICommonBaseType, type TPagePositionSelectKeyType, type TStatusSelectKeyType, type TWidthSelectKeyType } from "@/components/Materials/common";
 import type { TableColumnProps } from "@arco-design/web-react";
-import { CONFIG_TYPES, PAGINATION_POSITION_OPTIONS, PAGINATION_POSITION_VALUES, WIDTH_OPTIONS, WIDTH_VALUES } from "../../../constants";
-import type { IBooleanConfigType, ILabelConfigType, IStatusConfigType, ITableColumnConfigType, ITablePagePositionConfigType, ITextConfigType, IWidthConfigType, TBooleanDefaultType, TRadioDefaultType, TSelectDefaultType, TTextDefaultType } from "../../../types";
+import { CONFIG_TYPES, PAGINATION_POSITION_OPTIONS, PAGINATION_POSITION_VALUES, WIDTH_OPTIONS, WIDTH_VALUES, STATUS_VALUES, STATUS_OPTIONS } from "@/components/Materials/constants";
+import type { IBooleanConfigType, ILabelConfigType, IStatusConfigType, ITableColumnConfigType, ITablePagePositionConfigType, ITextConfigType, IWidthConfigType, TBooleanDefaultType, TRadioDefaultType, TSelectDefaultType, TTextDefaultType, TNumberDefaultType, ITablePageSizeConfigType } from "@/components/Materials/types";
 
 
 export interface XTableSchema {
@@ -16,7 +16,8 @@ export type TXTableEditData = Array<
   IStatusConfigType<TStatusSelectKeyType> |
   ITableColumnConfigType|
   IBooleanConfigType|
-  ITablePagePositionConfigType<TPagePositionSelectKeyType>
+  ITablePagePositionConfigType<TPagePositionSelectKeyType> |
+  ITablePageSizeConfigType
 >;
 
 
@@ -52,6 +53,11 @@ export interface XTableConfig extends ICommonBaseType {
     stripe?: TBooleanDefaultType;
 
     /**
+     * 是否显示表格总数
+     */
+    showTotal?: TBooleanDefaultType;
+
+    /**
      * 是否显示表头
      */
     showHeader?: TBooleanDefaultType;
@@ -65,7 +71,21 @@ export interface XTableConfig extends ICommonBaseType {
      * 分页位置
      */
     pagePosition?: TSelectDefaultType<TPagePositionSelectKeyType>;
+    
+    /**
+     * 分页数量
+     */
+    pageSize?: TNumberDefaultType;
 
+    /**
+     * 是否开启操作项
+     */
+    showOpearate?: TBooleanDefaultType;
+
+    /**
+     * 是否固定操作项
+     */
+    fixedOpearate?: TBooleanDefaultType;
 
     /**
      * 组件状态：可用、隐藏、只读
@@ -77,6 +97,11 @@ export interface XTableConfig extends ICommonBaseType {
      * 字段宽度
      */
     width: TSelectDefaultType<TWidthSelectKeyType>;
+
+    /**
+     * 隐藏时是否提交数据，开启后隐藏状态仍会保存值
+     */
+    saveWithHidden?: TBooleanDefaultType;
 }
 
 const pagePositionConfig: ITablePagePositionConfigType<TPagePositionSelectKeyType> = {
@@ -84,21 +109,6 @@ const pagePositionConfig: ITablePagePositionConfigType<TPagePositionSelectKeyTyp
     name: '分页位置',
     type: CONFIG_TYPES.TABLE_PAGE_POSITION_RADIO,
     range: [
-        {
-            key: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.BR],
-            text: PAGINATION_POSITION_OPTIONS.BR,
-            value: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.BR],
-        },
-        {
-            key: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.BL],
-            text: PAGINATION_POSITION_OPTIONS.BL,
-            value: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.BL],
-        },
-        {
-            key: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.TR],
-            text: PAGINATION_POSITION_OPTIONS.TR,
-            value: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.TR],
-        },
         {
             key: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.TL],
             text: PAGINATION_POSITION_OPTIONS.TL,
@@ -110,13 +120,27 @@ const pagePositionConfig: ITablePagePositionConfigType<TPagePositionSelectKeyTyp
             value: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.TOP_CENTER],
         },
         {
+            key: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.TR],
+            text: PAGINATION_POSITION_OPTIONS.TR,
+            value: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.TR],
+        },
+        {
+            key: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.BL],
+            text: PAGINATION_POSITION_OPTIONS.BL,
+            value: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.BL],
+        },
+        {
             key: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.BOTTOM_CENTER],
             text: PAGINATION_POSITION_OPTIONS.BOTTOM_CENTER,
             value: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.BOTTOM_CENTER],
         },
+        {
+            key: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.BR],
+            text: PAGINATION_POSITION_OPTIONS.BR,
+            value: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.BR],
+        }
     ],
 }
-
 
 const XTable: XTableSchema = {
     editData: [
@@ -151,14 +175,39 @@ const XTable: XTableSchema = {
             name: '开启斑马纹',
             type: CONFIG_TYPES.SWITCH_INPUT,
         },
-        pagePositionConfig,
-        statusConfig,
-        widthConfig,
+        {
+            key: 'showTotal',
+            name: '显示表格总数',
+            type: CONFIG_TYPES.SWITCH_INPUT,
+        },
+        {
+            key: 'showOpearate',
+            name: '开启操作项',
+            type: CONFIG_TYPES.SWITCH_INPUT,
+        },
+        {
+            key: 'fixedOpearate',
+            name: '固定操作项',
+            type: CONFIG_TYPES.SWITCH_INPUT,
+        },
+        {
+            key: 'saveWithHidden',
+            name: '隐藏时提交数据',
+            type: CONFIG_TYPES.SWITCH_INPUT,
+        },
+        {
+            key: 'pageSize',
+            name: '分页数量',
+            type: CONFIG_TYPES.TABLE_PAGE_SIZE,
+        },
         {
             key: 'columns',
             name: '表头配置',
             type: CONFIG_TYPES.TABLE_COLUMN_LIST,
         },
+        widthConfig,
+        statusConfig,
+        pagePositionConfig,
     ],
     config: {
         ...baseDefault,
@@ -168,8 +217,14 @@ const XTable: XTableSchema = {
         borderCell: true,
         showHeader: true,
         hover: true,
+        showTotal: true,
+        showOpearate: true,
+        fixedOpearate: true,
+        saveWithHidden: false,
         width: WIDTH_VALUES[WIDTH_OPTIONS.FULL],
+        status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
         pagePosition: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.BR],
+        pageSize: 5,
         defaultValue: [
             {
                 key: "1",
@@ -189,6 +244,30 @@ const XTable: XTableSchema = {
             },
             {
                 key: "3",
+                name: "Kevin Sandra",
+                salary: 22000,
+                address: "31 Park Road, London",
+                email: "kevin.sandra@example.com",
+                gender: "male",
+            },
+            {
+                key: "4",
+                name: "Kevin Sandra",
+                salary: 22000,
+                address: "31 Park Road, London",
+                email: "kevin.sandra@example.com",
+                gender: "male",
+            },
+            {
+                key: "5",
+                name: "Kevin Sandra",
+                salary: 22000,
+                address: "31 Park Road, London",
+                email: "kevin.sandra@example.com",
+                gender: "male",
+            },
+            {
+                key: "6",
                 name: "Kevin Sandra",
                 salary: 22000,
                 address: "31 Park Road, London",
@@ -219,11 +298,6 @@ const XTable: XTableSchema = {
                 title: "gender",
                 dataIndex: "gender",
             },
-            {
-                title: "opearate",
-                dataIndex: "opearate",
-                fixed: 'right',
-            }
         ],
     }
 };

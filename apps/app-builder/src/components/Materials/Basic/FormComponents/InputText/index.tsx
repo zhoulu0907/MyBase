@@ -1,7 +1,10 @@
-import { Input, Tooltip } from "@arco-design/web-react";
 import { memo } from "react";
-import styles from './index.module.less';
+import { Input, Tooltip, Form } from "@arco-design/web-react";
 import { type XInputTextConfig } from "./schema";
+import {
+    STATUS_VALUES,
+    STATUS_OPTIONS,
+} from "@/components/Materials/constants";
 
 const XInputText = memo((props: XInputTextConfig) => {
     const {
@@ -10,22 +13,39 @@ const XInputText = memo((props: XInputTextConfig) => {
         tooltip,
         status,
         defaultValue,
+        required,
+        align,
+        layout,
+        color,
+        bgColor,
+        saveWithHidden,
     } = props;
-    return status === "hidden" ? null : (
-        <Tooltip content={tooltip}
-        >
-            <div className={styles.XInput}>
-                <div className={styles.label}
-                    hidden={!label}
-                >
-                    {label}
-                </div>
+
+    return status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? null : (
+        <Tooltip content={tooltip}>
+            <Form.Item
+                label={label}
+                layout={layout}
+                rules={[{ required }]}
+                style={{
+                    pointerEvents:
+                        status === STATUS_VALUES[STATUS_OPTIONS.READONLY]
+                            ? "none"
+                            : "unset",
+                }}
+            >
                 <Input
-                    className={styles.input}
+                    readOnly={status === STATUS_VALUES[STATUS_OPTIONS.READONLY]}
                     defaultValue={defaultValue}
                     placeholder={placeholder}
+                    style={{
+                        width: "100%",
+                        textAlign: align,
+                        color,
+                        backgroundColor: bgColor,
+                    }}
                 />
-            </div>
+            </Form.Item>
         </Tooltip>
     );
 });

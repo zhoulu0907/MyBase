@@ -23,7 +23,6 @@ const componentSchemaMap: Partial<Record<ComponentType, ComponentSchema>> = {
     [ALL_COMPONENT_TYPES.CHECKBOX]: BasicSchema.XCheckbox,
     [ALL_COMPONENT_TYPES.SELECT_ONE]: BasicSchema.XSelectOne,
     [ALL_COMPONENT_TYPES.SELECT_MUTIPLE]: BasicSchema.XSelectMutiple,
-    [ALL_COMPONENT_TYPES.READONLY_BOX]: BasicSchema.XReadonlyBox,
     [ALL_COMPONENT_TYPES.USER_SELECT]: BasicSchema.XUserSelect,
     [ALL_COMPONENT_TYPES.DEPT_SELECT]: BasicSchema.XDeptSelect,
     [ALL_COMPONENT_TYPES.FILE_UPLOAD]: BasicSchema.XFileUpload,

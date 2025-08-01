@@ -1,5 +1,5 @@
-import { CONFIG_TYPES, PAGINATION_POSITION_OPTIONS, PAGINATION_POSITION_VALUES, STATUS_OPTIONS, STATUS_VALUES, WIDTH_OPTIONS, WIDTH_VALUES } from "./constants";
-import type { ISelectConfigType, IStatusConfigType, ITextConfigType, IWidthConfigType, TTextDefaultType } from "./types";
+import { CONFIG_TYPES, PAGINATION_POSITION_OPTIONS, PAGINATION_POSITION_VALUES, STATUS_OPTIONS, STATUS_VALUES, WIDTH_OPTIONS, WIDTH_VALUES, ALIGN_VALUES, ALIGN_OPTIONS, UPLOAD_OPTIONS, UPLOAD_VALUES, DATE_VALUES, DATE_OPTIONS, LAYOUT_VALUES, LAYOUT_OPTIONS } from "./constants";
+import type { ISelectConfigType, IStatusConfigType, ITextConfigType, IWidthConfigType, TTextDefaultType, IDateTypeConfigType, ILayoutConfigType, IAlignConfigType } from "./types";
 
 
 export interface ICommonBaseType {
@@ -76,6 +76,103 @@ export const statusConfig: IStatusConfigType<TStatusSelectKeyType> = {
             key: STATUS_OPTIONS.HIDDEN,
             text: STATUS_OPTIONS.HIDDEN,
             value: STATUS_VALUES[STATUS_OPTIONS.HIDDEN],
+        },
+    ],
+}
+
+export type TAlignSelectKeyType = typeof ALIGN_VALUES[keyof typeof ALIGN_VALUES];
+export const alignConfig: IAlignConfigType<TAlignSelectKeyType> = {
+    key: 'align',
+    name: '对齐方式',
+    type: CONFIG_TYPES.TEXT_ALIGN,
+    range: [
+        {
+            key: ALIGN_OPTIONS.LEFT,
+            text: ALIGN_OPTIONS.LEFT,
+            value: ALIGN_VALUES[ALIGN_OPTIONS.LEFT],
+        },
+        {
+            key: ALIGN_OPTIONS.CENTER,
+            text: ALIGN_OPTIONS.CENTER,
+            value: ALIGN_VALUES[ALIGN_OPTIONS.CENTER],
+        },
+        {
+            key: ALIGN_OPTIONS.RIGHT,
+            text: ALIGN_OPTIONS.RIGHT,
+            value: ALIGN_VALUES[ALIGN_OPTIONS.RIGHT],
+        },
+    ],
+}
+
+export type TDateTypeSelectKeyType = typeof DATE_VALUES[keyof typeof DATE_VALUES];
+export const dateTypeConfig: IDateTypeConfigType<TDateTypeSelectKeyType> = {
+    key: 'dateType',
+    name: '日期格式',
+    type: CONFIG_TYPES.DATE_TYPE,
+    range: [
+        {
+            key: DATE_OPTIONS.ONLY_YEAR,
+            text: DATE_OPTIONS.ONLY_YEAR,
+            value: DATE_VALUES[DATE_OPTIONS.ONLY_YEAR],
+        },
+        {
+            key: DATE_OPTIONS.ONLY_MONTH,
+            text: DATE_OPTIONS.ONLY_MONTH,
+            value: DATE_VALUES[DATE_OPTIONS.ONLY_MONTH],
+        },
+        {
+            key: DATE_OPTIONS.ONLY_DATE,
+            text: DATE_OPTIONS.ONLY_DATE,
+            value: DATE_VALUES[DATE_OPTIONS.ONLY_DATE],
+        },
+        {
+            key: DATE_OPTIONS.FULL,
+            text: DATE_OPTIONS.FULL,
+            value: DATE_VALUES[DATE_OPTIONS.FULL],
+        },
+    ],
+}
+
+export type TLayoutSelectKeyType = typeof LAYOUT_VALUES[keyof typeof LAYOUT_VALUES];
+export const layoutConfig: ILayoutConfigType<TLayoutSelectKeyType> = {
+    key: 'layout',
+    name: '布局方式',
+    type: CONFIG_TYPES.FORM_LAYOUT,
+    range: [
+        {
+            key: LAYOUT_OPTIONS.HORIZONTAL,
+            text: LAYOUT_OPTIONS.HORIZONTAL,
+            value: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
+        },
+        {
+            key: LAYOUT_OPTIONS.VERTICAL,
+            text: LAYOUT_OPTIONS.VERTICAL,
+            value: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
+        },
+    ],
+}
+
+// 文件列表
+export type TUploadSelectKeyType = typeof UPLOAD_VALUES[keyof typeof UPLOAD_VALUES];
+export const listTypeConfig: IStatusConfigType<TUploadSelectKeyType> = {
+    key: 'listType',
+    name: '展示样式',
+    type: CONFIG_TYPES.STATUS_RADIO,
+    range: [
+        {
+            key: UPLOAD_OPTIONS.TEXT,
+            text: UPLOAD_OPTIONS.TEXT,
+            value: UPLOAD_VALUES[UPLOAD_OPTIONS.TEXT],
+        },
+        {
+            key: UPLOAD_OPTIONS.LIST,
+            text: UPLOAD_OPTIONS.LIST,
+            value: UPLOAD_VALUES[UPLOAD_OPTIONS.LIST],
+        },
+        {
+            key: UPLOAD_OPTIONS.CARD,
+            text: UPLOAD_OPTIONS.CARD,
+            value: UPLOAD_VALUES[UPLOAD_OPTIONS.CARD],
         },
     ],
 }

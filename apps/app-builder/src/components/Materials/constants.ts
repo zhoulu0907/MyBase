@@ -31,6 +31,22 @@ export const CONFIG_TYPES = {
   TABLE_PAGE_POSITION_RADIO: 'TablePagePositionRadio',
   // 表格列配置
   TABLE_COLUMN_LIST: 'TableColumnList',
+  // 表格分页数量
+  TABLE_PAGE_SIZE: 'TablePageSize',
+  // 图片、附件上传大小限制
+  UPLOAD_SIZE: 'UploadSize',
+  // 图片、附件上传数量限制
+  UPLOAD_LIMIT: 'UploadLimit',
+  // 图片压缩率
+  UPLOAD_COMPRESS: 'UploadCompress',
+  // 日期类型
+  DATE_TYPE: 'DateType',
+  // 表单布局方式
+  FORM_LAYOUT: 'FormLayout',
+  // 文本对齐方式
+  TEXT_ALIGN: 'TextAlign',
+  // 颜色
+  COLOR: 'Color',
 
 } as const;
 
@@ -43,9 +59,9 @@ export const STATUS_OPTIONS = {
 } as const;
 
 export const STATUS_VALUES = {
-  [STATUS_OPTIONS.DEFAULT]: 'default',
-  [STATUS_OPTIONS.READONLY]: 'readonly',
-  [STATUS_OPTIONS.HIDDEN]: 'hidden',
+    [STATUS_OPTIONS.DEFAULT]: 'default',
+    [STATUS_OPTIONS.READONLY]: 'readonly',
+    [STATUS_OPTIONS.HIDDEN]: 'hidden',
 } as const;
 
 
@@ -100,4 +116,57 @@ export const PAGINATION_POSITION_VALUES = {
   [PAGINATION_POSITION_OPTIONS.TL]: 'tl',
   [PAGINATION_POSITION_OPTIONS.TOP_CENTER]: 'topCenter',
   [PAGINATION_POSITION_OPTIONS.BOTTOM_CENTER]: 'bottomCenter',
+} as const;
+
+// 内容对齐方式
+export const ALIGN_OPTIONS = {
+    LEFT: '左',
+    CENTER: '中',
+    RIGHT: '右',
+} as const;
+
+export const ALIGN_VALUES = {
+    [ALIGN_OPTIONS.LEFT]: 'left',
+    [ALIGN_OPTIONS.CENTER]: 'center',
+    [ALIGN_OPTIONS.RIGHT]: 'right',
+} as const;
+
+// 上传组件展示格式
+export const UPLOAD_OPTIONS = {
+    TEXT: '文本',
+    LIST: '列表',
+    CARD: '平铺',
+} as const;
+
+export const UPLOAD_VALUES = {
+    [UPLOAD_OPTIONS.TEXT]: 'text',
+    [UPLOAD_OPTIONS.LIST]: 'picture-list',
+    [UPLOAD_OPTIONS.CARD]: 'picture-card',
+} as const;
+
+// 日期选择格式
+export const DATE_OPTIONS = {
+    ONLY_YEAR: '年',
+    ONLY_MONTH: '年月',
+    ONLY_DATE: '年月日',
+    FULL: '年月日时',
+} as const;
+
+export const DATE_VALUES = {
+    [DATE_OPTIONS.ONLY_YEAR]: 'ONLY_YEAR',
+    [DATE_OPTIONS.ONLY_MONTH]: 'ONLY_MONTH',
+    [DATE_OPTIONS.ONLY_DATE]: 'ONLY_DATE',
+    [DATE_OPTIONS.FULL]: 'FULL',
+} as const;
+
+
+// 表单的布局
+export const LAYOUT_OPTIONS = {
+    HORIZONTAL: '水平',
+    VERTICAL: '垂直',
+} as const;
+
+export const LAYOUT_VALUES = {
+    [LAYOUT_OPTIONS.HORIZONTAL]: 'horizontal',
+    [LAYOUT_OPTIONS.VERTICAL]: 'vertical',
 } as const;

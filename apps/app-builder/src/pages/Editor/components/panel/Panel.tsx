@@ -12,7 +12,10 @@ import styles from './index.module.less';
 const CATEGORY_KEYS = ['navigate', 'layout', 'form', 'list'] as const;
 type CategoryKey = typeof CATEGORY_KEYS[number];
 
-export default function EditorPanel() {
+interface IProps {
+    onDragComponents: (val: boolean) => void;
+}
+export default function EditorPanel(props: IProps) {
     const [activeTab, setActiveTab] = useState('form-design');
     const [activeComponentTab, setActiveComponentTab] = useState('base-component');
     const { t } = useTranslation();
@@ -133,11 +136,9 @@ export default function EditorPanel() {
                                             }}
                                             sort={false}
                                             className={styles.componentCollapseContent}
-
                                             forceFallback={true}
                                             animation={150}
                                             onClone={(e)=>{
-
                                                 // console.log("onClone", e);
 
                                                 // 每次拖拽组件到面板时重新分配ID
@@ -150,9 +151,13 @@ export default function EditorPanel() {
                                                 }));
                                                 setBaseItems(newBaseItems);
                                             }}
-                                            // onEnd={(e)=>{
-                                            //     console.log("onEnd", e);
-                                            // }}
+                                            onMove={(e) => {
+                                                // 若拖拽目标是编辑区（蒙版所在容器），则隐藏蒙版
+                                                if (e.to?.id === 'workspace-content') {
+                                                    props.onDragComponents(false);
+                                                }
+                                                return e.to !== e.from;
+                                            }}
                                         >
                                             {
                                                 cat.items.map(item => (

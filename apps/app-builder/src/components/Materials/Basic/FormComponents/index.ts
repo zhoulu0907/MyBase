@@ -12,7 +12,6 @@ import XInputPhone from "./InputPhone";
 import XInputText from "./InputText";
 import XInputTextArea from "./InputTextArea";
 import XRadio from "./Radio";
-import XReadonlyBox from "./ReadonlyBox";
 import XSelectMutiple from "./SelectMutiple";
 import XSelectOne from "./SelectOne";
 import XSwitch from "./Switch";
@@ -34,7 +33,6 @@ export default {
     XCheckbox,
     XSelectOne,
     XSelectMutiple,
-    XReadonlyBox,
     XUserSelect,
     XDeptSelect,
     XFileUpload,

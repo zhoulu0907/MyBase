@@ -1,6 +1,6 @@
-import { baseConfig, baseDefault, statusConfig, widthConfig, type ICommonBaseType, type TStatusSelectKeyType, type TWidthSelectKeyType } from "@/components/Materials/common";
-import { CONFIG_TYPES, STATUS_OPTIONS, STATUS_VALUES, WIDTH_OPTIONS, WIDTH_VALUES } from "../../../constants";
-import type { IDescriptionConfigType, ILabelConfigType, INumberConfigType, IPlaceholderConfigType, ISelectConfigType, IStatusConfigType, ITextAreaConfigType, ITextConfigType, ITooltipConfigType, IWidthConfigType, TSelectDefaultType, TTextAreaDefaultType, TTextDefaultType } from "../../../types";
+import { baseConfig, baseDefault, statusConfig, /* widthConfig, */ listTypeConfig, layoutConfig, type ICommonBaseType, type TStatusSelectKeyType, type TWidthSelectKeyType, type TUploadSelectKeyType, type TLayoutSelectKeyType } from "@/components/Materials/common";
+import { CONFIG_TYPES, STATUS_OPTIONS, STATUS_VALUES, /* WIDTH_OPTIONS, WIDTH_VALUES, */ LAYOUT_OPTIONS, LAYOUT_VALUES, UPLOAD_OPTIONS, UPLOAD_VALUES } from "@/components/Materials/constants";
+import type { IDescriptionConfigType, ILabelConfigType, INumberConfigType, IPlaceholderConfigType, ISelectConfigType, IStatusConfigType, ITextAreaConfigType, ITextConfigType, ITooltipConfigType, IWidthConfigType, TSelectDefaultType, TTextAreaDefaultType, TTextDefaultType, TNumberDefaultType, TBooleanDefaultType, IUploadSizeConfigType, IUploadLimitConfigType, IBooleanConfigType, ILayoutConfigType } from "@/components/Materials/types";
 
 
 
@@ -20,7 +20,12 @@ export type TXInputFileUploadEditData = Array<
   IWidthConfigType<TWidthSelectKeyType> |
   INumberConfigType |
   ISelectConfigType<TWidthSelectKeyType | TStatusSelectKeyType > |
-  ITextAreaConfigType
+  ITextAreaConfigType|
+  IUploadSizeConfigType|
+  IUploadLimitConfigType|
+  IBooleanConfigType|
+  IStatusConfigType<TUploadSelectKeyType>|
+  ILayoutConfigType<TLayoutSelectKeyType>
 >;
 
 
@@ -54,7 +59,49 @@ export interface XInputFileUploadConfig extends ICommonBaseType {
     /**
      * 字段宽度
      */
-    width: TSelectDefaultType<TWidthSelectKeyType>;
+    // width: TSelectDefaultType<TWidthSelectKeyType>;
+
+    /**
+     * 是否必填，未填写时提交报错
+     */
+    required: TBooleanDefaultType;
+
+    /**
+     * 表单的布局：水平、垂直（默认）
+     * 可选值: 'vertical' | 'horizontal'
+     */
+    layout?: TLayoutSelectKeyType;
+
+    /**
+     * 单个文件大小限制（MB），最大 100, 默认10
+     */
+    uploadSize?: TNumberDefaultType;
+
+    /**
+     * 上传数量限制，默认无限制
+     */
+    uploadLimit?: TNumberDefaultType;
+
+    /**
+     * 是否允许预览文件
+     */
+    showPreview?: TBooleanDefaultType;
+
+    /**
+     * 是否允许下载文件
+     */
+    showDownload?: TBooleanDefaultType;
+
+    /**
+     * 文件/图片展示样式：文本、平铺、列表
+     * 可选值: 'text' | 'picture-card' | 'picture-list'
+     */
+    listType?: TSelectDefaultType<TUploadSelectKeyType>;
+
+    /**
+     * 隐藏时是否提交数据，开启后隐藏状态仍会保存值
+     */
+    saveWithHidden?: TBooleanDefaultType;
 }
 
 
@@ -76,17 +123,58 @@ const XFileUpload: XInputFileUploadSchema = {
             name: '提示文字',
             type: CONFIG_TYPES.TOOLTIP_INPUT,
         },
+        {
+            key: 'required',
+            name: '开启必填',
+            type: CONFIG_TYPES.SWITCH_INPUT,
+        },
+        {
+            key: 'uploadSize',
+            name: '文件大小限制',
+            type: CONFIG_TYPES.UPLOAD_SIZE,
+        },
+        {
+            key: 'uploadLimit',
+            name: '上传数量限制',
+            type: CONFIG_TYPES.UPLOAD_LIMIT,
+        },
+        {
+            key: 'showPreview',
+            name: '允许预览文件',
+            type: CONFIG_TYPES.SWITCH_INPUT,
+        },
+        {
+            key: 'showDownload',
+            name: '允许下载文件',
+            type: CONFIG_TYPES.SWITCH_INPUT,
+        },
+        {
+            key: 'saveWithHidden',
+            name: '隐藏时提交数据',
+            type: CONFIG_TYPES.SWITCH_INPUT,
+        },
         statusConfig,
-        widthConfig
+        // widthConfig,
+        listTypeConfig,
+        layoutConfig,
+
     ],
     config: {
         ...baseDefault,
         label: '',
         description: '',
         tooltip: '',
-        width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
+        // width: WIDTH_VALUES[WIDTH_OPTIONS.QUARTER],
         status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
         defaultValue: '',
+        required: false,
+        uploadSize: 10,
+        uploadLimit: -1,
+        showPreview: false,
+        showDownload: false,
+        listType: UPLOAD_VALUES[UPLOAD_OPTIONS.CARD],
+        layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
+        saveWithHidden: false,
     }
 };
 

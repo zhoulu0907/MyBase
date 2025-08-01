@@ -12,7 +12,6 @@ import XInputPhone from "./FormComponents/InputPhone/schema";
 import XInputText from "./FormComponents/InputText/schema";
 import XInputTextArea from "./FormComponents/InputTextArea/schema";
 import XRadio from "./FormComponents/Radio/schema";
-import XReadonlyBox from "./FormComponents/ReadonlyBox/schema";
 import XSelectMutiple from "./FormComponents/SelectMutiple/schema";
 import XSelectOne from "./FormComponents/SelectOne/schema";
 import XSwitch from "./FormComponents/Switch/schema";
@@ -36,7 +35,6 @@ const baseSchema = {
     XCheckbox,
     XSelectOne,
     XSelectMutiple,
-    XReadonlyBox,
     XUserSelect,
     XDeptSelect,
     XFileUpload,

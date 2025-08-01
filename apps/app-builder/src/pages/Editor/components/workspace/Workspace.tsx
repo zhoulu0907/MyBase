@@ -1,19 +1,22 @@
-import MobileIcon from '@/assets/images/mobile_icon.svg';
-import MobileActiveIcon from '@/assets/images/mobile_icon_active.svg';
-import PCIcon from '@/assets/images/pc_icon.svg';
-import PCActiveIcon from '@/assets/images/pc_icon_active.svg';
-import { getComponentSchema } from '@/components/Materials/schema';
-import { ALL_COMPONENT_TYPES } from '@/constants/componentTypes';
-import { usePageEditorStore } from '@/hooks/useStore';
-import ComponentRender from '@/pages/Editor/components/render';
-import { IconDelete } from '@arco-design/web-react/icon';
-import { useState } from 'react';
-import 'react-grid-layout/css/styles.css';
+import { useState } from "react";
 import { ReactSortable } from "react-sortablejs";
-import { COMPONENT_GROUP_NAME } from '../const';
-import { getComponentWidth } from '../utils';
-import styles from './index.module.less';
+import { IconDelete } from "@arco-design/web-react/icon";
 
+import { usePageEditorStore } from '@/hooks/useStore';
+import { getComponentSchema } from "@/components/Materials/schema";
+import ComponentRender from "@/pages/Editor/components/render";
+import { ALL_COMPONENT_TYPES } from '@/constants/componentTypes';
+import { COMPONENT_GROUP_NAME } from "../const";
+import { getComponentWidth } from "../utils";
+
+import PCIcon from "@/assets/images/pc_icon.svg";
+import EmptyIcon from "@/assets/images/empty.svg";
+import MobileIcon from "@/assets/images/mobile_icon.svg";
+import PCActiveIcon from "@/assets/images/pc_icon_active.svg";
+import MobileActiveIcon from "@/assets/images/mobile_icon_active.svg";
+
+import "react-grid-layout/css/styles.css";
+import styles from "./index.module.less";
 
 interface GridItem {
     id: string;
@@ -21,8 +24,12 @@ interface GridItem {
     displayName: string;
 }
 
+interface IProps {
+    showEmpty: boolean;
+}
 
-export default function EditorWorkspace() {
+export default function EditorWorkspace(props: IProps) {
+    const { showEmpty } = props;
     const { curComponentID, setCurComponentID, clearCurComponentID, setCurComponentSchema,
         pageComponentSchemas, setPageComponentSchemas, delPageComponentSchemas,
         components, setComponents, delComponents,
@@ -48,36 +55,38 @@ export default function EditorWorkspace() {
     return (
         <div className={styles.formEditorWorkspace}>
             <div className={styles.workspaceHeader}>
-                {
-                    pageMode === "pc" &&
+                {pageMode === "pc" && (
                     <>
-                    <img className={styles.pageModeIcon} src={PCActiveIcon}/>
-                    <img
-                        className={styles.pageModeIcon}
-                        style={{
-                            cursor: "pointer",
-                        }}
-                        src={MobileIcon}
-                        onClick={() => setPageMode("mobile")}
-                    />
+                        <img
+                            className={styles.pageModeIcon}
+                            src={PCActiveIcon}
+                        />
+                        <img
+                            className={styles.pageModeIcon}
+                            style={{
+                                cursor: "pointer",
+                            }}
+                            src={MobileIcon}
+                            onClick={() => setPageMode("mobile")}
+                        />
                     </>
-                }
-                {
-                    pageMode === "mobile" &&
+                )}
+                {pageMode === "mobile" && (
                     <>
-                    <img
-                        className={styles.pageModeIcon}
-                        src={PCIcon}
-                        style={{
-                            cursor: "pointer",
-                        }}
-                        onClick={() => setPageMode("pc")}
-                    />
-                    <img
-                        className={styles.pageModeIcon}
-                        src={MobileActiveIcon}/>
+                        <img
+                            className={styles.pageModeIcon}
+                            src={PCIcon}
+                            style={{
+                                cursor: "pointer",
+                            }}
+                            onClick={() => setPageMode("pc")}
+                        />
+                        <img
+                            className={styles.pageModeIcon}
+                            src={MobileActiveIcon}
+                        />
                     </>
-                }
+                )}
             </div>
 
             <div
@@ -89,14 +98,14 @@ export default function EditorWorkspace() {
                     const target = e.target as HTMLElement;
                     if (target.id === "workspace-content") {
                         clearCurComponentID();
-                        setShowDeleteButton(false)
+                        setShowDeleteButton(false);
                     }
                 }}
             >
                 <ReactSortable
                     id="workspace-content"
                     list={components}
-                    setList={(newList)=>{
+                    setList={(newList) => {
                         // console.debug("setList", newList);
                         setComponents(newList);
                         // console.log("pageComponentSchemas", pageComponentSchemas);
@@ -116,11 +125,11 @@ export default function EditorWorkspace() {
                         schema.config.cpName = itemDisplayName
                         schema.config.id = cpID
 
-                        const props =  {
+                        const props = {
                             id: cpID,
                             type: itemType,
                             ...schema,
-                        }
+                        };
 
                         if (itemType === ALL_COMPONENT_TYPES.COLUMN_LAYOUT) {
                             // 拖入布局组件，根据配置创建初始化
@@ -130,8 +139,8 @@ export default function EditorWorkspace() {
                         setPageComponentSchemas(cpID!, props)
                         setCurComponentID(cpID!)
 
-                        setCurComponentSchema(props)
-                        setShowDeleteButton(false)
+                        setCurComponentSchema(props);
+                        setShowDeleteButton(false);
                     }}
                     group={{ name: COMPONENT_GROUP_NAME }}
                     sort={true}
@@ -154,20 +163,33 @@ export default function EditorWorkspace() {
                             data-cp-id={cp.id}
                             className={styles.componentItem}
                             style={{
-                                width: getComponentWidth(pageComponentSchemas.get(cp.id), cp.type),
+                                width: getComponentWidth(
+                                    pageComponentSchemas.get(cp.id),
+                                    cp.type
+                                ),
                             }}
-                            onClick={(e: React.MouseEvent<HTMLDivElement>)=>{
+                            onClick={(e: React.MouseEvent<HTMLDivElement>) => {
                                 e.stopPropagation();
-                                console.log("点击组件: ", cp.id)
-                                setCurComponentID(cp.id)
+                                console.log("点击组件: ", cp.id);
+                                setCurComponentID(cp.id);
 
-                                const curComponentSchema = pageComponentSchemas.get(cp.id)
-                                setCurComponentSchema(curComponentSchema)
-                                console.log("当前组件的配置: ", curComponentSchema)
-                                setShowDeleteButton(true)
+                                const curComponentSchema =
+                                    pageComponentSchemas.get(cp.id);
+                                setCurComponentSchema(curComponentSchema);
+                                console.log(
+                                    "当前组件的配置: ",
+                                    curComponentSchema
+                                );
+                                setShowDeleteButton(true);
                             }}
                         >
-                            <ComponentRender cpId={cp.id} cpType={cp.type} pageComponentSchema={pageComponentSchemas.get(cp.id)}/>
+                            <ComponentRender
+                                cpId={cp.id}
+                                cpType={cp.type}
+                                pageComponentSchema={pageComponentSchemas.get(
+                                    cp.id
+                                )}
+                            />
 
                             {/* 删除按钮 */}
                             {/* TODO(mickey): 组件继续封装，和layout中的共用一套 */}
@@ -176,7 +198,7 @@ export default function EditorWorkspace() {
                                     className={styles.deleteButton}
                                     onClick={(e) => {
                                         e.stopPropagation();
-                                        console.log("删除组件: ", cp.id)
+                                        console.log("删除组件: ", cp.id);
                                         handleDeleteComponent(cp.id);
                                     }}
                                 >
@@ -187,9 +209,17 @@ export default function EditorWorkspace() {
                     ))}
                 </ReactSortable>
 
-
+                {showEmpty && (
+                    <div className={styles.formEmpty}>
+                        <div className={styles.formEmptyContent}>
+                            <img src={EmptyIcon} alt="页面无组件" />
+                            拖拽左侧面板里的组件到这里
+                            <br />
+                            开始使用吧！
+                        </div>
+                    </div>
+                )}
             </div>
-
         </div>
     );
 }

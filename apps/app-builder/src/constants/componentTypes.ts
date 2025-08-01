@@ -19,7 +19,6 @@ export const FORM_COMPONENT_TYPES = {
   CHECKBOX: 'XCheckbox',
   SELECT_ONE: 'XSelectOne',
   SELECT_MUTIPLE: 'XSelectMutiple',
-  READONLY_BOX: 'XReadonlyBox',
   USER_SELECT: 'XUserSelect',
   DEPT_SELECT: 'XDeptSelect',
   FILE_UPLOAD: 'XFileUpload',
