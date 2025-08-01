@@ -43,10 +43,9 @@ export const importUserTemplate = () => {
 }
 
 // 用户密码重置
-export const resetUserPassword = (id: number, password: string) => {
+export const resetUserPassword = (id: number) => {
   const data = {
-    id,
-    password
+    id
   }
   return systemClient.put('/user/update-password', data)
 }
