@@ -1,9 +1,10 @@
 import { Card, Descriptions, Space, Typography, Table, Tag, type TableColumnProps, Modal, Upload, Button } from '@arco-design/web-react';
 // import { IconInfoCircle } from '@arco-design/web-react/icon';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styles from './index.module.less';
+import { getPlatformInfoListApi } from '@/services/platformInfo';
 
 const { Title, Text } = Typography;
 // 定义认证记录的数据类型
@@ -17,7 +18,7 @@ interface CertificationRecord {
 const PlatformInfo: React.FC = () => {
   const { t } = useTranslation();
   const [visible, setVisible] = useState(false);
-  const [selectedRecord, setSelectedRecord] = useState<CertificationRecord>(null);
+  const [selectedRecord, setSelectedRecord] = useState<CertificationRecord[]>([]);
 
   // 模拟平台信息数据 license 获取
   const platformData = {
@@ -54,6 +55,34 @@ const PlatformInfo: React.FC = () => {
     }
   };
 
+  // 模拟认证记录数据
+  const allData: CertificationRecord[] = [
+    {
+      key: '1',
+      companyName: '${companyName}',
+      certificationContent: '租户数量：${租户数量}，用户数量：${用户数量}',
+      status: '已认证',
+      expireTime: '2026-06-13 08:00:00',
+    },
+    {
+      key: '2',
+      companyName: '${companyName}',
+      certificationContent: '租户数量：${租户数量}，用户数量：${用户数量}',
+      status: '未认证',
+      expireTime: '2026-06-13 08:00:00',
+    },
+  ];
+
+  const getPlatformInfoList = async () => {
+    const res = await getPlatformInfoListApi();
+    console.log('getPlatformInfoList res: ', res);
+    // setPlatformInfoList(res.data.list);
+    // setTotal(res.data.total);
+  };
+
+  useEffect(() => {
+    getPlatformInfoList();
+  }, [])
   // 认证记录table结构
   const columns: TableColumnProps[] = [
     {
@@ -97,23 +126,7 @@ const PlatformInfo: React.FC = () => {
     },
   ];
 
-  // 模拟认证记录数据
-  const allData: CertificationRecord[] = [
-    {
-      key: '1',
-      companyName: '${companyName}',
-      certificationContent: '租户数量：${租户数量}，用户数量：${用户数量}',
-      status: '已认证',
-      expireTime: '2026-06-13 08:00:00',
-    },
-    {
-      key: '2',
-      companyName: '${companyName}',
-      certificationContent: '租户数量：${租户数量}，用户数量：${用户数量}',
-      status: '未认证',
-      expireTime: '2026-06-13 08:00:00',
-    },
-  ];
+  
   // 上传认证
   const handleUploadCertification = () => {
     console.log('认证已经上传了');

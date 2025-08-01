@@ -22,7 +22,6 @@ const Home: React.FC = () => {
   return (
     <Layout className={styles.homePage}>
       <AppHeader className={styles.homePageHeader} />
-
       <Layout className={styles.homePageContent}>
         <AppSider
           collapsed={collapsed}
