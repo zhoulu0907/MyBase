@@ -9,4 +9,10 @@ export interface DeptVO {
   email: string
   createTime: Date
   userCount: number
+  remark: string
+}
+
+export interface DeptTree extends DeptVO {
+  userCount: number;
+  children?: DeptVO[];
 }

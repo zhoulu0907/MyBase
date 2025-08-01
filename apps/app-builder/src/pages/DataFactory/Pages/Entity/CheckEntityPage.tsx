@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Typography, Button, Tag, Radio } from '@arco-design/web-react';
+import { Button, Tag, Radio } from '@arco-design/web-react';
 import { IconPlus, IconNav, IconMindMapping } from '@arco-design/web-react/icon';
 import EntityERWithModeSwitch from '../../components/EntityERExample';
 import EntityTable from '../../components/EntityTable';

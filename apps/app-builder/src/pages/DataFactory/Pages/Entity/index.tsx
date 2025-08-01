@@ -3,7 +3,7 @@ import CheckEntityPage from './CheckEntityPage';
 import CreateEntityPage from './CreateEntityPage';
 import EmptyEntityPage from './EmptyEntityPage';
 
-const EntityPage: React.FC<{ updateUrl: (tab: string) => void }> = ({ updateUrl }) => {
+const EntityPage: React.FC = () => {
   const [pageType, setPageType] = useState('check-entity');
 
   const handlePageType = (type: string) => {
