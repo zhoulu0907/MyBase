@@ -23,7 +23,7 @@ export default function UserFormModal({
   onOk,
   initialValues,
   mode = 'create',
-  isDetail = false, // 添加详情模式参数
+  isDetail = false, // 详情模式
   deptTree = [],
   deptLoading = false
 }: UserFormModalProps) {

@@ -1,12 +1,12 @@
 import StatusTag from '@/components/StatusTag';
-import { Button, Dropdown, Form, Input, Menu, Message, Modal, Pagination, Space, Table, TreeSelect } from '@arco-design/web-react';
-import { IconDownload, IconMoreVertical, IconSearch } from '@arco-design/web-react/icon';
+import { Button, Dropdown, Form, Input, Menu, Message, Modal, Pagination, Space, Table, TreeSelect, Typography } from '@arco-design/web-react';
+import { IconMoreVertical, IconSearch, IconPlus } from '@arco-design/web-react/icon';
 import {
-    deleteUser,
-    exportUser,
-    getUserPage,
-    resetUserPassword,
-    updateUserStatus
+  deleteUser,
+  exportUser,
+  getUserPage,
+  resetUserPassword,
+  updateUserStatus
 } from '@onebase/platform-center/src/services/user';
 import { useEffect, useState } from 'react';
 import s from '../index.module.less';
@@ -27,30 +27,32 @@ export default function UserTable({ selectedDeptId = undefined, onTotalUserCount
   const [editingUser, setEditingUser] = useState<any | undefined>();
   const [data, setData] = useState<any[]>([]);
   const [total, setTotal] = useState(0);
-  const [passwordModalVisible, setPasswordModalVisible] = useState(false);
   const [currentUser, setCurrentUser] = useState<any | undefined>();
-  const [passwordType, setPasswordType] = useState<'reset' | 'modify'>('reset');
   const [detailModalVisible, setDetailModalVisible] = useState(false);
   const [detailUser, setDetailUser] = useState<any | undefined>();
-  const [exportModalVisible, setExportModalVisible] = useState(false); // 导出对话框状态
-  const [exportForm] = Form.useForm(); // 导出表单
+  const [exportModalVisible, setExportModalVisible] = useState(false);
+  const [exportForm] = Form.useForm();
+
+  // 查询用户列表
+  const getUserList = async () => {
+    const params: any = {
+      pageNo: page,
+      pageSize,
+    };
+    if (selectedDeptId) params.deptId = selectedDeptId;
+    if (search) params.username = search;
+    // TODO: 联调后移除mock数据
+    // const res = await getUserPage(params)
+    // setData(res.list || []);
+    // setTotal(res.total || 0);
+    // onTotalUserCountChange(res.total || 0);
+    getUserPage(params).catch(() => {
+      setData([{ id: 1, nickname: '用户1', username: '用户1' }]);
+    })
+  };
 
   useEffect(() => {
-    // 查询用户列表
-    const fetch = async () => {
-      const params: any = {
-        pageNo: page,
-        pageSize,
-      };
-      if (selectedDeptId) params.deptId = selectedDeptId;
-      // 添加用户名搜索参数
-      if (search) params.username = search;
-      const res = await getUserPage(params);
-      setData(res.list || []);
-      setTotal(res.total || 0);
-      onTotalUserCountChange(res.total || 0);
-    };
-    fetch();
+    getUserList();
   }, [selectedDeptId, page, pageSize, search, onTotalUserCountChange]);
 
   const handleEdit = (record: any) => {
@@ -63,21 +65,20 @@ export default function UserTable({ selectedDeptId = undefined, onTotalUserCount
     setUserModalVisible(true);
   }
 
-  // 添加搜索处理函数
+  // 搜索
   const handleSearch = () => {
-    setPage(1); // 重置页码到第一页
+    setPage(1);
   }
 
-  // 处理导出按钮点击
-  const handleExport = () => {
-    setExportModalVisible(true);
-  }
+  // 导出功能 本期暂不实现
+  // const handleExport = () => {
+  //   setExportModalVisible(true);
+  // }
 
   // 处理导出确认
   const handleExportOk = async () => {
     try {
       const values = await exportForm.validate();
-      // 调用导出接口
       await exportUser('用户列表', {
         deptIds: values.deptIds,
         username: search || undefined
@@ -92,25 +93,34 @@ export default function UserTable({ selectedDeptId = undefined, onTotalUserCount
 
   const handleModalOk = () => {
     setUserModalVisible(false);
-    // TODO: 刷新用户列表
+    getUserList()
   }
 
-  // 打开密码弹窗
-  const handlePassword = (record: any, type: 'reset' | 'modify') => {
-    setCurrentUser(record);
-    setPasswordType(type);
-    setPasswordModalVisible(true);
+  // 重置密码
+  const handleResetPassword = (record: any) => {
+    Modal.confirm({
+      title: `确定重置账号 ${record.nickname} 的密码？`,
+      content: '密码重置后，原密码失效，请将新密码发送至用户。',
+      onOk: async () => {
+        const res = await resetUserPassword(record.id);
+        Modal.success({ 
+          title: '重置成功',
+          okText: '我已知晓',
+          content: <Typography.Text copyable>新密码为：{res}</Typography.Text>
+        })
+      }
+    });
   }
 
   // 禁用
   const handleDisable = (record: any) => {
     Modal.confirm({
-      title: '确认禁用',
-      content: `确定要禁用用户 ${record.nickname} 吗？`,
+      title: `确定要禁用账号 ${record.nickname} 吗？`,
+      content: '禁用状态下，用户无法登录系统，再次启用时用户可恢复正常使用',
       onOk: async () => {
         await updateUserStatus(record.id, 0);
         Message.success('禁用成功');
-        // TODO: 刷新列表
+        getUserList();
       }
     });
   }
@@ -118,12 +128,12 @@ export default function UserTable({ selectedDeptId = undefined, onTotalUserCount
   // 删除
   const handleDelete = (record: any) => {
     Modal.confirm({
-      title: '确认删除',
-      content: `确定要删除用户 ${record.nickname} 吗？`,
+      title: `确认要删除用户 ${record.nickname} 吗？`,
+      content: '删除用户后，用户将无法登录，用户数据将被永久删除，请谨慎操作。',
       onOk: async () => {
         await deleteUser(record.id);
         Message.success('删除成功');
-        // TODO: 刷新列表
+        getUserList();
       }
     });
   }
@@ -166,11 +176,10 @@ export default function UserTable({ selectedDeptId = undefined, onTotalUserCount
         render: (_: any, record: any) => (
           <Space>
             <Button type='text' onClick={() => handleEdit(record)}>编辑</Button>
-            <Button type='text' onClick={() => handlePassword(record, 'modify')}>修改密码</Button>
+            <Button type='text' onClick={() => handleResetPassword(record)}>重置密码</Button>
             <Dropdown
               droplist={
                 <Menu>
-                  <Menu.Item key='reset' onClick={() => handlePassword(record, 'reset')}>重置密码</Menu.Item>
                   <Menu.Item key='disable' onClick={() => handleDisable(record)}>禁用</Menu.Item>
                   <Menu.Item key='del' onClick={() => handleDelete(record)}>删除</Menu.Item>
                 </Menu>
@@ -193,19 +202,19 @@ export default function UserTable({ selectedDeptId = undefined, onTotalUserCount
       {/* 顶部操作区 */}
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: 16 }}>
         <Space>
-          <Button type="primary" onClick={handleCreate}>+ 新建</Button>
-          <Button>批量导入</Button>
+          <Button type="primary" icon={<IconPlus />} onClick={handleCreate}>新建</Button>
         </Space>
         <div style={{ flex: 1 }} />
         <Input
           style={{ width: 220, marginRight: 12, borderRadius: 24 }}
           prefix={<IconSearch />}
-          placeholder="输入用户名"
+          placeholder="输入用户名称"
           value={search}
           onChange={setSearch}
           onPressEnter={handleSearch}
         />
-        <Button icon={<IconDownload />} onClick={handleExport}>导出</Button>
+        {/* 导出本期暂不实现 */}
+        {/* <Button icon={<IconDownload />} onClick={handleExport}>导出</Button> */}
       </div>
       {/* 表格 */}
       <Table
@@ -250,13 +259,6 @@ export default function UserTable({ selectedDeptId = undefined, onTotalUserCount
         deptTree={deptTree}
         deptLoading={deptLoading}
       />
-      <PasswordModal
-        visible={passwordModalVisible}
-        onOk={() => setPasswordModalVisible(false)}
-        onCancel={() => setPasswordModalVisible(false)}
-        user={currentUser}
-        type={passwordType}
-      />
       {/* 导出对话框 */}
       <Modal
         title="导出用户"
@@ -285,44 +287,5 @@ export default function UserTable({ selectedDeptId = undefined, onTotalUserCount
         </Form>
       </Modal>
     </div>
-  );
-}
-
-function PasswordModal({ visible, onOk, onCancel, user, type }: any) {
-  const [form] = Form.useForm();
-  const [loading, setLoading] = useState(false);
-
-  const handleSubmit = async () => {
-    const { password } = await form.validate();
-    setLoading(true);
-    await resetUserPassword(user.id, password);
-    Message.success(type === 'reset' ? '重置成功' : '修改成功');
-    setLoading(false);
-    onOk();
-  };
-
-  useEffect(() => {
-    if (visible) form.resetFields();
-  }, [visible]);
-
-  return (
-    <Modal
-      title={type === 'reset' ? '重置密码' : '修改密码'}
-      visible={visible}
-      onOk={handleSubmit}
-      onCancel={onCancel}
-      confirmLoading={loading}
-      unmountOnExit
-    >
-      <Form form={form} layout="vertical">
-        <Form.Item
-          label="新密码"
-          field="password"
-          rules={[{ required: true, message: '请输入新密码' }]}
-        >
-          <Input placeholder="请输入新密码" />
-        </Form.Item>
-      </Form>
-    </Modal>
   );
 }

@@ -1,10 +1,4 @@
-import type { DeptVO } from '@onebase/platform-center/src/types/dept';
-
-// 添加用户数量字段到部门数据
-export interface DeptTree extends DeptVO {
-  userCount: number;
-  children?: DeptVO[];
-}
+import type { DeptVO, DeptTree } from '@onebase/platform-center/src/types/dept';
 
 // 将部门列表转换为树形结构（用于部门树展示）
 export const convertDeptListToTree = (list: DeptTree[]): any[] => {
@@ -45,6 +39,7 @@ export const convertDeptListToSelectTree = (deptList: DeptVO[]): any[] => {
       }
     }
   });
+  console.log(tree)
 
   return tree;
 };
