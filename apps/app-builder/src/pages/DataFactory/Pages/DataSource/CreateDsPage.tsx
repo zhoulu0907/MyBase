@@ -31,16 +31,6 @@ const CreateDataSource: React.FC<{ handlePageType: (tab: string) => void }> = ({
   const isInternal = false;
   const [formValues, setFormValues] = useState<Partial<DataSourceFormValues>>({});
 
-  // 拼接 URL
-  // const url = useMemo(() => {
-  //   console.log('url', formValues);
-  //   const values = formValues;
-  //   const typeObj = dbTypes.find(t => t.value === values.datasourceType) || dbTypes[0];
-  //   if (!values.host || !values.port || !values.database) return '';
-  //   console.log('url 111', `${typeObj.urlPrefix}${values.host}:${values.port}/${values.database}`);
-  //   return `${typeObj.urlPrefix}${values.host}:${values.port}/${values.database}`;
-  // }, [formValues.datasourceType, formValues.host, formValues.port, formValues.database]);
-
   // 监听表单变化
   const handleFormChange = (changedValues: Partial<DataSourceFormValues>, allValues: Partial<DataSourceFormValues>) => {   
     const relevantFields = ['host', 'port', 'database', 'datasourceType'];

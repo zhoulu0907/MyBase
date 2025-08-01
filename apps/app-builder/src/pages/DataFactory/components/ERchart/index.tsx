@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Graph } from '@antv/x6';
-// import { ReactShape } from '@antv/x6-react-shape';
 import { register } from '@antv/x6-react-shape';
 import DetailDrawer from '../Drawer/DetailDrawer';
-// import EditDrawer from '../Drawer/EditDrawer';
 import { type EntityNode, type EntityERProps } from '../../utils/interface';
 import styles from './ERchart.module.less';
 import EntityNodeComponent from './ERnode';
@@ -21,19 +19,8 @@ const ERchart: React.FC<EntityERProps> = ({
 }) => {
   const [selectedNode, setSelectedNode] = useState<EntityNode | null>(null);
   const [drawerVisible, setDrawerVisible] = useState(false);
-  // const [editDrawerVisible, seteditDrawerVisible] = useState(false);
-  // const [editingNode, setEditingNode] = useState<EntityNode | null>(null);
   const graphRef = useRef<Graph | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-
-  // 处理节点编辑
-  // const handleNodeEdit = (nodeId: string) => {
-  //   const nodeData = data.nodes.find(n => n.id === nodeId);
-  //   if (nodeData) {
-  //     setEditingNode(nodeData);
-  //     seteditDrawerVisible(true);
-  //   }
-  // };
 
   // 注册自定义节点
   useEffect(() => {
@@ -65,82 +52,6 @@ const ERchart: React.FC<EntityERProps> = ({
       height: 200,
       component: EntityNodeComponent,
       effect: ['data'],
-      // component: TestNodeComponent,
-
-        // render:(node: { getData: () => EntityNode }) => {
-        //   const data = node.getData();
-        //   console.log('Rendering node with data:', data); // 调试信息
-        //   console.log('Mode:', mode); // 调试信息
-        //   console.log('Collapsed sections:', collapsedSections); // 调试信息
-        //   return (
-        //     <EntityNodeComponent
-        //       nodeData={data}
-        //       mode={mode}
-        //       onEdit={handleNodeEdit}
-        //       onToggleSection={toggleSection}
-        //       collapsedSections={collapsedSections}
-        //     />
-        //   );
-        // },
-      // },
-      // attrs: {
-      //   body: {
-      //     fill: 'transparent',
-      //     stroke: 'transparent',
-      //   },
-      // },
-      // ports: {
-      //   groups: {
-      //     top: {
-      //       position: 'top',
-      //       attrs: {
-      //         circle: {
-      //           r: 4,
-      //           magnet: true,
-      //           stroke: '#5F95FF',
-      //           strokeWidth: 1,
-      //           fill: '#fff',
-      //         },
-      //       },
-      //     },
-      //     bottom: {
-      //       position: 'bottom',
-      //       attrs: {
-      //         circle: {
-      //           r: 4,
-      //           magnet: true,
-      //           stroke: '#5F95FF',
-      //           strokeWidth: 1,
-      //           fill: '#fff',
-      //         },
-      //       },
-      //     },
-      //     left: {
-      //       position: 'left',
-      //       attrs: {
-      //         circle: {
-      //           r: 4,
-      //           magnet: true,
-      //           stroke: '#5F95FF',
-      //           strokeWidth: 1,
-      //           fill: '#fff',
-      //         },
-      //       },
-      //     },
-      //     right: {
-      //       position: 'right',
-      //       attrs: {
-      //         circle: {
-      //           r: 4,
-      //           magnet: true,
-      //           stroke: '#5F95FF',
-      //           strokeWidth: 1,
-      //           fill: '#fff',
-      //         },
-      //       },
-      //     },
-      //   },
-      // },
     });
 
     return () => {
@@ -404,33 +315,11 @@ const ERchart: React.FC<EntityERProps> = ({
 
   return (
     <div className={styles['entity-er-container']}>
-      {/* <div className={styles['toolbar']}>
-        <Button onClick={() => graphRef.current?.zoomToFit()}>适应画布</Button>
-        <Button onClick={() => graphRef.current?.centerContent()}>居中</Button>
-        {mode === 'edit' && (
-          <>
-            <Button onClick={onNodeAdd}>添加节点</Button>
-            <Button onClick={() => {
-              // TODO: 实现连线模式功能
-              console.log('连线模式功能待实现');
-            }}>连线模式</Button>
-          </>
-        )}
-      </div> */}
-      
+     
       <div ref={containerRef} className={styles['graph-container']} />
 
       {/* 节点详情抽屉 */}
       <DetailDrawer selectedNode={selectedNode as EntityNode} visible={drawerVisible} setVisible={setDrawerVisible} />
-
-      {/* 编辑节点抽屉 */}
-      {/* <EditDrawer
-        editingNode={editingNode as EntityNode}
-        visible={editDrawerVisible}
-        setVisible={seteditDrawerVisible}
-        setEditingNode={(node: EntityNode | null) => setEditingNode(node)}
-        onNodeEdit={onNodeEdit as (data: EntityNode) => void}
-      /> */}
     </div>
   );
 };
