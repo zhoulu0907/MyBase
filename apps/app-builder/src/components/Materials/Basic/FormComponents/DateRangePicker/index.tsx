@@ -4,7 +4,7 @@ import type { XInputDateRangePickerConfig } from "./schema";
 import { STATUS_VALUES, STATUS_OPTIONS } from "@/components/Materials/constants";
 
 const XDateRangePicker = memo((props: XInputDateRangePickerConfig) => {
-    const { label, status, tooltip, required, defaultValue, layout, saveWithHidden } = props;
+    const { label, status, tooltip, required, layout } = props;
 
     return status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? null : (
         <Tooltip content={tooltip}>

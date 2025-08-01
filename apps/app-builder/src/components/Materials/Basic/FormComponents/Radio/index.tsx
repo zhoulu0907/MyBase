@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { Radio, Tooltip, Form, type RadioProps } from "@arco-design/web-react";
+import { Radio, Tooltip, Form } from "@arco-design/web-react";
 import type { XInputRadioConfig } from "./schema";
 import {
     STATUS_VALUES,
@@ -15,7 +15,6 @@ const XRadio = memo((props: XInputRadioConfig) => {
         defaultValue,
         required,
         layout,
-        saveWithHidden,
     } = props;
 
     return status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? null : (

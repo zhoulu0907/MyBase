@@ -165,7 +165,7 @@ const Right: React.FC = () => {
   };
 
   // 手机号登录
-  const handleMobileLogin = async (values: LoginFormData, captchaToken: string) => {
+  const handleMobileLogin = async (_values: LoginFormData, captchaToken: string) => {
     try {
       if (!captchaToken) {
         Message.error('请先完成验证码验证');
@@ -196,7 +196,7 @@ const Right: React.FC = () => {
   };
 
   // 表单提交处理
-  const handleSubmit = (values: LoginFormData) => {
+  const handleSubmit = (_values: LoginFormData) => {
     // // 校验验证码
     // captchaRef.current?.checkCaptcha();
 

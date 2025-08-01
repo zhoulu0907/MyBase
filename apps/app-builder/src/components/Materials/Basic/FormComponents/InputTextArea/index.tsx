@@ -20,7 +20,6 @@ const XInputTextArea = memo((props: XInputTextAreaConfig) => {
         layout,
         color,
         bgColor,
-        saveWithHidden,
     } = props;
     return status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? null : (
         <Tooltip content={tooltip}>

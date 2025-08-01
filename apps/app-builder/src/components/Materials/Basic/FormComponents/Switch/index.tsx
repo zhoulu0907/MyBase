@@ -14,7 +14,6 @@ const XSwitch = memo((props: XInputSwitchConfig) => {
         defaultValue,
         required,
         layout,
-        saveWithHidden,
     } = props;
 
     return status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? null : (

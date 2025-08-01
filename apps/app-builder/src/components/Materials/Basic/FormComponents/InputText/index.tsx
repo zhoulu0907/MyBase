@@ -18,7 +18,6 @@ const XInputText = memo((props: XInputTextConfig) => {
         layout,
         color,
         bgColor,
-        saveWithHidden,
     } = props;
 
     return status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? null : (

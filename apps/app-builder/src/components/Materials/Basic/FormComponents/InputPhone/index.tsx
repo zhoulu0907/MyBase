@@ -18,7 +18,6 @@ const XInputPhone = memo((props: XInputPhoneConfig) => {
         layout,
         color,
         bgColor,
-        saveWithHidden,
     } = props;
 
     const [value, setValue] = useState("");

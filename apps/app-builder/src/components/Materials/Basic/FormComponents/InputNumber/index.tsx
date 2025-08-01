@@ -20,9 +20,6 @@ const XInputNumber = memo((props: XInputNumberConfig) => {
         step,
         precision,
         layout,
-        color,
-        bgColor,
-        saveWithHidden,
     } = props;
 
     return status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? null : (

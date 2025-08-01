@@ -18,7 +18,6 @@ const XInputEmail = memo((props: XInputEmailConfig) => {
         layout,
         color,
         bgColor,
-        saveWithHidden,
     } = props;
 
     const [value, setValue] = useState("");
