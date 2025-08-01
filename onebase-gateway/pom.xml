@@ -81,13 +81,13 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>${spring.boot.version}</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>repackage</goal> <!-- 将引入的 jar 打入其中 -->
-                        </goals>
-                    </execution>
-                </executions>
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <goals>-->
+<!--                            <goal>repackage</goal> &lt;!&ndash; 将引入的 jar 打入其中 &ndash;&gt;-->
+<!--                        </goals>-->
+<!--                    </execution>-->
+<!--                </executions>-->
                 <!-- 注意，单体模式打包需要这个配置，Cloud模式不需要。 -->
                 <configuration>
                     <skip>true</skip>
