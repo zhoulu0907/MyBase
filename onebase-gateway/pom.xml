@@ -90,7 +90,7 @@
                 </executions>
                 <!-- 注意，单体模式打包需要这个配置，Cloud模式不需要。 -->
                 <configuration>
-                    <skip>false</skip>
+                    <skip>true</skip>
                 </configuration>
             </plugin>
         </plugins>
