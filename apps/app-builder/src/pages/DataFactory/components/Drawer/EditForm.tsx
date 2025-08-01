@@ -1,12 +1,12 @@
 import React from 'react';
-import { Form, Input, Switch, Divider, Button } from '@arco-design/web-react';
+import { Form, Input, Switch, Divider } from '@arco-design/web-react';
 import { type EntityNode } from '../../utils/interface';
 import styles from './EditForm.module.less';
 
 // 节点编辑表单组件
 interface NodeEditFormProps {
   node: EntityNode;
-  onSave: (data: Record<string, unknown>) => void;
+  onSave: (data: EntityNode) => void;
   onCancel: () => void;
 }
 
@@ -24,7 +24,7 @@ interface FormValues {
   };
 }
 
-const NodeEditForm: React.FC<NodeEditFormProps> = ({ node, onSave, onCancel }) => {
+const NodeEditForm: React.FC<NodeEditFormProps> = ({ node }) => {
   const [form] = Form.useForm<FormValues>();
   
   // 初始化表单数据
@@ -50,21 +50,6 @@ const NodeEditForm: React.FC<NodeEditFormProps> = ({ node, onSave, onCancel }) =
     { field: 'systemFields.dataOwner', label: '记录数据拥有者'},
     { field: 'systemFields.dataDepartment', label: '记录数据拥有部门'}, 
   ]
-
-  const handleSave = async () => {
-    try {
-      const values = await form.validate();
-      onSave({
-        ...node,
-        title: values.name,
-        code: values.code,
-        description: values.description,
-        systemFields: values.systemFields,
-      });
-    } catch (error) {
-      console.error('表单验证失败:', error);
-    }
-  };
 
   return (
     <div className={styles['node-edit-form']}>

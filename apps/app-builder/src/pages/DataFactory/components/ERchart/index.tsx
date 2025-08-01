@@ -1,53 +1,39 @@
-import React, { useState, useEffect, useRef, Component } from 'react';
-import { Button } from '@arco-design/web-react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Graph } from '@antv/x6';
 // import { ReactShape } from '@antv/x6-react-shape';
 import { register } from '@antv/x6-react-shape';
 import DetailDrawer from '../Drawer/DetailDrawer';
-import EditDrawer from '../Drawer/EditDrawer';
-import { type EntityNode } from '../../utils/interface';
+// import EditDrawer from '../Drawer/EditDrawer';
+import { type EntityNode, type EntityERProps } from '../../utils/interface';
 import styles from './ERchart.module.less';
 import EntityNodeComponent from './ERnode';
-// import TestNodeComponent from './TestNodeComponent'; // 临时导入测试组件
 
-const LINE_HEIGHT = 24
-const NODE_WIDTH = 150
-
-interface EntityERProps {
-  mode: 'view' | 'edit'; // 查看模式或编辑模式
-  data: {
-    nodes: EntityNode[];
-    edges: Array<{
-      source: string;
-      target: string;
-      label?: string;
-    }>;
-  };
-  onNodeEdit?: (nodeId: string, data: EntityNode) => void;
-  onNodeAdd?: () => void;
-}
+const LINE_HEIGHT = 34;
+const NODE_WIDTH = 280;
+const NODE_HEIGHT = 200;
 
 const ERchart: React.FC<EntityERProps> = ({
   mode = 'edit',
   data,
   onNodeEdit,
-  onNodeAdd
+  onNodeAdd,
+  onNodeDelete
 }) => {
   const [selectedNode, setSelectedNode] = useState<EntityNode | null>(null);
   const [drawerVisible, setDrawerVisible] = useState(false);
-  const [editDrawerVisible, seteditDrawerVisible] = useState(false);
-  const [editingNode, setEditingNode] = useState<EntityNode | null>(null);
+  // const [editDrawerVisible, seteditDrawerVisible] = useState(false);
+  // const [editingNode, setEditingNode] = useState<EntityNode | null>(null);
   const graphRef = useRef<Graph | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // 处理节点编辑
-  const handleNodeEdit = (nodeId: string) => {
-    const nodeData = data.nodes.find(n => n.id === nodeId);
-    if (nodeData) {
-      setEditingNode(nodeData);
-      seteditDrawerVisible(true);
-    }
-  };
+  // const handleNodeEdit = (nodeId: string) => {
+  //   const nodeData = data.nodes.find(n => n.id === nodeId);
+  //   if (nodeData) {
+  //     setEditingNode(nodeData);
+  //     seteditDrawerVisible(true);
+  //   }
+  // };
 
   // 注册自定义节点
   useEffect(() => {
@@ -97,64 +83,64 @@ const ERchart: React.FC<EntityERProps> = ({
         //   );
         // },
       // },
-      attrs: {
-        body: {
-          fill: 'transparent',
-          stroke: 'transparent',
-        },
-      },
-      ports: {
-        groups: {
-          top: {
-            position: 'top',
-            attrs: {
-              circle: {
-                r: 4,
-                magnet: true,
-                stroke: '#5F95FF',
-                strokeWidth: 1,
-                fill: '#fff',
-              },
-            },
-          },
-          bottom: {
-            position: 'bottom',
-            attrs: {
-              circle: {
-                r: 4,
-                magnet: true,
-                stroke: '#5F95FF',
-                strokeWidth: 1,
-                fill: '#fff',
-              },
-            },
-          },
-          left: {
-            position: 'left',
-            attrs: {
-              circle: {
-                r: 4,
-                magnet: true,
-                stroke: '#5F95FF',
-                strokeWidth: 1,
-                fill: '#fff',
-              },
-            },
-          },
-          right: {
-            position: 'right',
-            attrs: {
-              circle: {
-                r: 4,
-                magnet: true,
-                stroke: '#5F95FF',
-                strokeWidth: 1,
-                fill: '#fff',
-              },
-            },
-          },
-        },
-      },
+      // attrs: {
+      //   body: {
+      //     fill: 'transparent',
+      //     stroke: 'transparent',
+      //   },
+      // },
+      // ports: {
+      //   groups: {
+      //     top: {
+      //       position: 'top',
+      //       attrs: {
+      //         circle: {
+      //           r: 4,
+      //           magnet: true,
+      //           stroke: '#5F95FF',
+      //           strokeWidth: 1,
+      //           fill: '#fff',
+      //         },
+      //       },
+      //     },
+      //     bottom: {
+      //       position: 'bottom',
+      //       attrs: {
+      //         circle: {
+      //           r: 4,
+      //           magnet: true,
+      //           stroke: '#5F95FF',
+      //           strokeWidth: 1,
+      //           fill: '#fff',
+      //         },
+      //       },
+      //     },
+      //     left: {
+      //       position: 'left',
+      //       attrs: {
+      //         circle: {
+      //           r: 4,
+      //           magnet: true,
+      //           stroke: '#5F95FF',
+      //           strokeWidth: 1,
+      //           fill: '#fff',
+      //         },
+      //       },
+      //     },
+      //     right: {
+      //       position: 'right',
+      //       attrs: {
+      //         circle: {
+      //           r: 4,
+      //           magnet: true,
+      //           stroke: '#5F95FF',
+      //           strokeWidth: 1,
+      //           fill: '#fff',
+      //         },
+      //       },
+      //     },
+      //   },
+      // },
     });
 
     return () => {
@@ -166,7 +152,7 @@ const ERchart: React.FC<EntityERProps> = ({
         console.log(e)
       }
     };
-  }, [mode, handleNodeEdit]); // 添加 mode 到依赖项
+  }, [mode]); // 添加 mode 到依赖项
 
   // 初始化图形
   useEffect(() => {
@@ -181,7 +167,7 @@ const ERchart: React.FC<EntityERProps> = ({
         // width: 800, // 默认父容器宽高
         // height: 600,
         background: {
-          color: 'rgb(229, 235, 230, 0.5)',
+          color: 'rgba(173, 219, 179, 0.5)',
         },
         grid: {
           visible: true,
@@ -193,8 +179,8 @@ const ERchart: React.FC<EntityERProps> = ({
           },
         },
         connecting: {
-          anchor: 'center',
-          connector: 'rounded',
+          anchor: 'right',
+          connector: 'rounded', // 或 'smooth', 'jumpover', 或自定义
           connectionPoint: 'anchor',
           allowBlank: false,
           highlight: true,
@@ -251,21 +237,19 @@ const ERchart: React.FC<EntityERProps> = ({
 
     // 添加节点
     data.nodes.forEach(nodeData => {
-      console.log('Adding node:', nodeData); // 调试信息
-      
-      // 确保节点数据有必要的属性
-      const nodeConfig = {
+      const node = graphRef.current!.createNode({
         id: nodeData.id,
-        x: nodeData.x || 100,
-        y: nodeData.y || 100,
-        width: 280,
-        height: 200,
+        x: nodeData.x,
+        y: nodeData.y,
+        width:  NODE_WIDTH,
+        height:  NODE_HEIGHT,
         shape: 'er-entity-node',
         data: {
-          ...nodeData,
-          mode,
+          data: nodeData,
+          // mode,
           onNodeEdit,
           onNodeAdd,
+          onNodeDelete,
         },
         attrs: {
           body: {
@@ -276,60 +260,79 @@ const ERchart: React.FC<EntityERProps> = ({
             ry: 4,
           },
         },
-        ports: {
-          groups: {
-            list: {
-              markup: [
-                {
-                  tagName: 'rect',
-                  selector: 'portBody',
-                },
-                {
-                  tagName: 'text',
-                  selector: 'portNameLabel',
-                },
-                {
-                  tagName: 'text',
-                  selector: 'portTypeLabel',
-                },
-              ],
-              attrs: {
-                portBody: {
-                  width: NODE_WIDTH,
-                  height: LINE_HEIGHT,
-                  strokeWidth: 1,
-                  stroke: '#5F95FF',
-                  fill: '#EFF4FF',
-                  magnet: true,
-                },
-                portNameLabel: {
-                  ref: 'portBody',
-                  refX: 6,
-                  refY: 6,
-                  fontSize: 10,
-                },
-                portTypeLabel: {
-                  ref: 'portBody',
-                  refX: 95,
-                  refY: 6,
-                  fontSize: 10,
-                },
-              },
-              position: 'erPortPosition',
-            },
-          },
-        },
-      };
-      
-      const node = graphRef.current!.addNode(nodeConfig);
-      console.log('Node created:', node); // 调试信息
+        // --- 动态添加 ports ---
+        // ports: {
+        //   groups: {
+        //     // 保留您已定义的 groups (top, bottom, left, right, list)
+        //     // ... (保留 top, bottom, left, right groups 定义) ...
+        //     list: {
+        //       markup: [
+        //         {
+        //           tagName: 'rect',
+        //           selector: 'portBody',
+        //         },
+        //         {
+        //           tagName: 'text',
+        //           selector: 'portNameLabel',
+        //         },
+        //         {
+        //           tagName: 'text',
+        //           selector: 'portTypeLabel',
+        //         },
+        //       ],
+        //       attrs: {
+        //         portBody: {
+        //           width: NODE_WIDTH,
+        //           height: LINE_HEIGHT,
+        //           strokeWidth: 1,
+        //           stroke: '#5F95FF',
+        //           fill: '#EFF4FF', // 可以根据需要调整颜色
+        //           magnet: true, // 确保 port 是可以连接的
+        //         },
+        //         portNameLabel: {
+        //           ref: 'portBody',
+        //           refX: 6,
+        //           refY: 6,
+        //           fontSize: 10,
+        //         },
+        //         portTypeLabel: {
+        //           ref: 'portBody',
+        //           refX: 95, // 根据需要调整
+        //           refY: 6,
+        //           fontSize: 10,
+        //         },
+        //       },
+        //       position: 'erPortPosition', // 使用您自定义的布局
+        //     },
+        //   },
+        //   // --- 动态生成 port items ---
+        //   items: nodeData.fields.map((field, index) => ({
+        //     id: field.id, // 使用字段的唯一 ID 作为 port ID
+        //     group: 'list', // 指定属于 'list' 组
+        //     // args: { index }, // 传递字段索引，用于布局
+        //     // 可以通过 args 传递额外信息给布局函数或样式
+        //     // args: { index },
+        //     // 可以自定义 attrs 来覆盖 group 的默认 attrs
+        //     // attrs: {
+        //     //   portBody: {
+        //     //     fill: field.isSystem ? '#f0f0f0' : '#e6f7ff', // 示例：区分系统和自定义字段
+        //     //   }
+        //     // }
+        //   })),
+        // },
+      });
+      graphRef.current?.addNode(node);
     });
 
     // 添加边
     data.edges.forEach(edgeData => {
+      // 确保 source 和 target 是对象，并包含 port
+      const source = typeof edgeData.source === 'string' ? { cell: edgeData.source } : edgeData.source;
+      const target = typeof edgeData.target === 'string' ? { cell: edgeData.target } : edgeData.target;
+    
       const edge = graphRef.current!.createEdge({
-        source: edgeData.source,
-        target: edgeData.target,
+        source,
+        target,
         attrs: {
           line: {
             stroke: '#5F95FF',
@@ -355,6 +358,9 @@ const ERchart: React.FC<EntityERProps> = ({
             },
           },
         ] : [],
+        // 可以添加其他边的属性，如 router, connector 等来优化连线路径
+        // router: 'manhattan', // 例如使用直角路由
+        // connector: { name: 'rounded', args: { radius: 8 }}, // 例如使用圆角连接
       });
       graphRef.current?.addEdge(edge);
     });
@@ -418,13 +424,13 @@ const ERchart: React.FC<EntityERProps> = ({
       <DetailDrawer selectedNode={selectedNode as EntityNode} visible={drawerVisible} setVisible={setDrawerVisible} />
 
       {/* 编辑节点抽屉 */}
-      <EditDrawer
+      {/* <EditDrawer
         editingNode={editingNode as EntityNode}
         visible={editDrawerVisible}
         setVisible={seteditDrawerVisible}
         setEditingNode={(node: EntityNode | null) => setEditingNode(node)}
-        onNodeEdit={onNodeEdit as (nodeId: string, data: EntityNode) => void}
-      />
+        onNodeEdit={onNodeEdit as (data: EntityNode) => void}
+      /> */}
     </div>
   );
 };

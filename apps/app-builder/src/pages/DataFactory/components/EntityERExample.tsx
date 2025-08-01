@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button, Space } from '@arco-design/web-react';
 import ERchart from './ERchart';
 import EditDrawer from './Drawer/EditDrawer';
-import type { EntityNode } from '../utils/interface';
+import type { EntityNode, EntityERProps } from '../utils/interface';
 
 // 修改示例数据，添加字段级别的关联
 const mockData = {
@@ -86,7 +86,7 @@ const mockData = {
   ],
   edges: [
     {
-      source: { cell: 'sub-table', port: 'sub-table-field-2' }, // 从子表的自定义字段
+      source: { cell: 'sub-table', port: 'sub-table-field-3' }, // 从子表的自定义字段
       target: { cell: 'user-system', port: 'user-system-field-5' }, // 到测试前台的子表字段
       // label: '主子关系',
     },
@@ -98,74 +98,6 @@ const mockData = {
   ],
 };
 
-// 查看模式页面
-export const EntityERViewPage: React.FC = () => {
-  const handleNodeEdit = (nodeId: string, data: EntityNode) => {
-    console.log('节点编辑:', nodeId, data);
-  };
-
-  return (
-    <div style={{ height: '100%' }}>
-      {/* <h2>ER图查看模式</h2> */}
-      <ERchart
-        mode="view"
-        data={mockData}
-        onNodeEdit={handleNodeEdit}
-      />
-    </div>
-  );
-};
-
-// 编辑模式页面
-export const EntityEREditPage: React.FC = () => {
-  const [data, setData] = useState(mockData);
-
-  const handleNodeEdit = (nodeId: string, data: EntityNode) => {
-    console.log('节点编辑:', nodeId, data);
-    // 这里可以调用API更新节点信息
-  };
-
-  const handleNodeAdd = () => {
-    const newNode = {
-      id: `node-${Date.now()}`,
-      title: '新节点',
-      x: Math.random() * 800 + 100,
-      y: Math.random() * 400 + 100,
-      fields: [
-        { name: '系统字段', type: '系统字段 (13)', isSystem: true },
-        { name: '新字段', type: '文本', isSystem: false },
-      ],
-    };
-
-    setData(prev => ({
-      ...prev,
-      nodes: [...prev.nodes, newNode],
-    }));
-  };
-
-  return (
-    <div style={{ height: '100%' }}>
-      <div style={{ marginBottom: '16px' }}>
-        <h2>ER图编辑模式</h2>
-        {/* <Space>
-          <Button type="primary" onClick={handleNodeAdd}>
-            添加新节点
-          </Button>
-          <Button onClick={() => console.log('保存数据:', data)}>
-            保存
-          </Button>
-        </Space> */}
-      </div>
-      <ERchart
-        mode="edit"
-        data={data}
-        onNodeEdit={handleNodeEdit}
-        onNodeAdd={handleNodeAdd}
-      />
-    </div>
-  );
-};
-
 // 模式切换示例
 export const EntityERWithModeSwitch: React.FC = () => {
   const [mode, setMode] = useState<'view' | 'edit'>('view');
@@ -173,8 +105,8 @@ export const EntityERWithModeSwitch: React.FC = () => {
   const [editDrawerVisible, setEditDrawerVisible] = useState(false);
   const [editingNode, setEditingNode] = useState<EntityNode | null>(null);
 
-  const handleNodeEdit = (nodeId: string, editData: EntityNode) => {
-    console.log('节点编辑:', nodeId, editData);
+  const handleNodeEdit = (editData: EntityNode) => {
+    console.log('节点编辑:', editData);
     // 这里可以更新节点数据
     setEditDrawerVisible(true);
     setEditingNode(editData);
@@ -219,7 +151,7 @@ export const EntityERWithModeSwitch: React.FC = () => {
       
       <ERchart
         mode={mode}
-        data={data}
+        data={data as unknown as EntityERProps['data']}
         onNodeEdit={handleNodeEdit}
         onNodeAdd={handleNodeAdd}
       />

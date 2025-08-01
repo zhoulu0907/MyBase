@@ -9,7 +9,7 @@ import styles from './index.module.less';
 
 const DataFactoryPage: React.FC = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('empty-ds');
+  const [activeTab, setActiveTab] = useState('data-source');
   const urlParams = new URLSearchParams(window.location.search);
 
   const updateUrl = (tab: string) => {
@@ -29,7 +29,7 @@ const DataFactoryPage: React.FC = () => {
     if (urlParams.get('fac-tab')) {
       setActiveTab(urlParams.get('fac-tab') as string);
     } else {
-      updateUrl('empty-ds');
+      updateUrl('data-source');
     }
   }, []);
 
@@ -40,7 +40,7 @@ const DataFactoryPage: React.FC = () => {
       className={styles['sider']}
     >
       {/* 左侧菜单 */}
-      <Menu className={styles['menu']} mode='pop' onClickMenuItem={handleMenuClick}>
+      <Menu className={styles['menu']} mode='pop' onClickMenuItem={handleMenuClick} selectedKeys={[activeTab]}>
         <Menu.Item key='check-entity'>
           <Tooltip content='业务实体管理' position='right'>
             <IconCommon />
@@ -56,7 +56,7 @@ const DataFactoryPage: React.FC = () => {
 
     {/* 右侧内容 */}
     <Layout.Content className={styles['content']}>
-      {activeTab === 'data-source' && <DataSourcePage updateUrl={updateUrl} />}
+      {activeTab === 'data-source' && <DataSourcePage />}
       {activeTab === 'check-entity' && <EntityPage />}
     </Layout.Content>
   </Layout>;

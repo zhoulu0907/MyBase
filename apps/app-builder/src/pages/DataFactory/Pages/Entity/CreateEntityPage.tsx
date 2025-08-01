@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Form, Input, Button, Message, Radio } from '@arco-design/web-react';
 import styles from './index.module.less';
-import { DS_RESOURCE_TYPE, DS_RESOURCE_TYPE_LABEL } from '../../utils/constans';
+import { DS_RESOURCE_TYPE } from '../../utils/constans';
 
 interface EntityFormValues {
   source: string;
@@ -17,8 +17,8 @@ const entitySources = [
 
 const CreateEntityPage: React.FC<{ handlePageType: (tab: string) => void }> = ({ handlePageType }) => {
   const [form] = Form.useForm<EntityFormValues>();
-  const [dsResource, setDsResource] = useState<string>(DS_RESOURCE_TYPE.INTERNAL); // 数据源来源：内部数据源、外部数据源、外部数据源中引用自有数据源已有资产
-
+  // const [dsResource, setDsResource] = useState<string>(DS_RESOURCE_TYPE.INTERNAL); // 数据源来源：内部数据源、外部数据源、外部数据源中引用自有数据源已有资产
+  const dsResource = DS_RESOURCE_TYPE.INTERNAL;
   // 提交
   const handleFinish = () => {
     // TODO: 提交表单数据

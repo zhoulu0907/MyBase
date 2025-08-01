@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { Drawer } from '@arco-design/web-react';
 import { type EntityNode } from '../../utils/interface';
 
