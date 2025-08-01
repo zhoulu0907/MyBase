@@ -82,6 +82,15 @@ public class BaseDO implements Serializable, TransPojo {
     private Long lockVersion;
 
     /**
+     * 获取ID
+     *
+     * @return ID
+     */
+    public Long getId() {
+        return id;
+    }
+
+    /**
      * 把 creator、createTime、updateTime、updater 都清空，避免前端直接传递 creator 之类的字段，直接就被更新了
      */
     public void clean(){

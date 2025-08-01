@@ -60,6 +60,10 @@ public class MetadataBusinessEntityDO extends TenantBaseDO {
      */
     private Long appId;
 
+    /**
+     * 前端显示配置json
+     */
+    private String displayConfig;
 
 
 }
