@@ -1,6 +1,10 @@
-import { InputNumber, Tooltip } from "@arco-design/web-react";
+import { InputNumber, Tooltip, Form } from "@arco-design/web-react";
 import { memo } from "react";
 import type { XInputNumberConfig } from "./schema";
+import {
+    STATUS_VALUES,
+    STATUS_OPTIONS,
+} from "@/components/Materials/constants";
 
 const XInputNumber = memo((props: XInputNumberConfig) => {
     const {
@@ -9,21 +13,52 @@ const XInputNumber = memo((props: XInputNumberConfig) => {
         tooltip,
         status,
         defaultValue,
+        required,
+        align,
+        min,
+        max,
+        step,
+        precision,
+        layout,
+        color,
+        bgColor,
+        saveWithHidden,
     } = props;
-    return status === "hidden" ? null : (
+
+    return status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? null : (
         <Tooltip content={tooltip}>
-            <div>
-                <div>{label}</div>
+            <Form.Item
+                label={label}
+                layout={layout}
+                rules={[
+                    {
+                        required,
+                        type: "number",
+                        min,
+                        max,
+                    },
+                ]}
+                style={{
+                    pointerEvents:
+                        status === STATUS_VALUES[STATUS_OPTIONS.READONLY]
+                            ? "none"
+                            : "unset",
+                }}
+            >
                 <InputNumber
-                    readOnly={status === "readonly"}
+                    readOnly={status === STATUS_VALUES[STATUS_OPTIONS.READONLY]}
                     defaultValue={defaultValue}
-                    style={{ width: "100%" }}
                     placeholder={placeholder}
-                    // TODO(mickey): 加入配置中
-                    // min={0}
-                    // max={15}
+                    step={step}
+                    min={min}
+                    max={max}
+                    precision={precision}
+                    style={{
+                        width: "100%",
+                        textAlignLast: align,
+                    }}
                 />
-            </div>
+            </Form.Item>
         </Tooltip>
     );
 });

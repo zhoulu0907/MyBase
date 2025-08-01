@@ -1,6 +1,6 @@
 import { baseConfig, baseDefault, widthConfig, type ICommonBaseType } from "@/components/Materials/common";
-import { COLUMN_COUNT_OPTIONS, COLUMN_COUNT_VALUES, CONFIG_TYPES, WIDTH_OPTIONS, WIDTH_VALUES } from "../../../constants";
-import type { IColumnCountConfigType, ILabelConfigType, ISelectConfigType, ITextConfigType, IWidthConfigType, TRadioDefaultType, TSelectDefaultType } from "../../../types";
+import { COLUMN_COUNT_OPTIONS, COLUMN_COUNT_VALUES, CONFIG_TYPES, WIDTH_OPTIONS, WIDTH_VALUES } from "@/components/Materials/constants";
+import type { IColumnCountConfigType, ILabelConfigType, ISelectConfigType, ITextConfigType, IWidthConfigType, TRadioDefaultType, TSelectDefaultType } from "@/components/Materials/types";
 
 export type TColumnCountSelectKeyType = typeof COLUMN_COUNT_OPTIONS[keyof typeof COLUMN_COUNT_OPTIONS];
 export type TColumnLayouTWidthSelectKeyType = typeof WIDTH_VALUES[keyof typeof WIDTH_VALUES];

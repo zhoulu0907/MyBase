@@ -1,6 +1,10 @@
-import { Input, Tooltip } from "@arco-design/web-react";
 import { memo } from "react";
+import { Input, Tooltip, Form } from "@arco-design/web-react";
 import type { XInputTextAreaConfig } from "./schema";
+import {
+    STATUS_VALUES,
+    STATUS_OPTIONS,
+} from "@/components/Materials/constants";
 
 const TextArea = Input.TextArea;
 
@@ -11,18 +15,38 @@ const XInputTextArea = memo((props: XInputTextAreaConfig) => {
         tooltip,
         status,
         defaultValue,
+        required,
+        align,
+        layout,
+        color,
+        bgColor,
+        saveWithHidden,
     } = props;
-    return status === "hidden" ? null : (
+    return status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? null : (
         <Tooltip content={tooltip}>
-            <div>
-                <div>{label}</div>
+            <Form.Item
+                label={label}
+                layout={layout}
+                rules={[{ required }]}
+                style={{
+                    pointerEvents:
+                        status === STATUS_VALUES[STATUS_OPTIONS.READONLY]
+                            ? "none"
+                            : "unset",
+                }}
+            >
                 <TextArea
-                    readOnly={status === "readonly"}
+                    readOnly={status === STATUS_VALUES[STATUS_OPTIONS.READONLY]}
                     defaultValue={defaultValue}
-                    style={{ width: "100%" }}
                     placeholder={placeholder}
+                    style={{
+                        width: "100%",
+                        textAlign: align,
+                        color,
+                        backgroundColor: bgColor,
+                    }}
                 />
-            </div>
+            </Form.Item>
         </Tooltip>
     );
 });

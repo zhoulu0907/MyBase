@@ -60,8 +60,6 @@ const ComponentRender: React.FC<ComponentRenderProps> = ({
         return <FormComp.XSelectOne cpName={cpId} id={cpId} {...componentConfig} />;
       case FORM_COMPONENT_TYPES.SELECT_MUTIPLE:
         return <FormComp.XSelectMutiple cpName={cpId} id={cpId} {...componentConfig} />;
-      case FORM_COMPONENT_TYPES.READONLY_BOX:
-        return <FormComp.XReadonlyBox cpName={cpId} id={cpId} {...componentConfig} />;
       case FORM_COMPONENT_TYPES.USER_SELECT:
         return <FormComp.XUserSelect cpName={cpId} id={cpId} {...componentConfig} />;
       case FORM_COMPONENT_TYPES.DEPT_SELECT:

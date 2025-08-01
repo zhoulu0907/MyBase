@@ -136,14 +136,6 @@ const allTemplate = {
                     icon: 'select_mutiple_cp.svg',
                     category: 'base'
                 },
-                // {
-                //     type: FORM_COMPONENT_TYPES.READONLY_BOX,
-                //     h: 48,
-                //     w: 68,
-                //     displayName: '只读展示框',
-                //     icon: 'readonly_cp.svg',
-                //     category: 'base'
-                // },
                 {
                     type: FORM_COMPONENT_TYPES.USER_SELECT,
                     h: 48,

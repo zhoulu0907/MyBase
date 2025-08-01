@@ -1,6 +1,10 @@
-import { Input, Tooltip } from "@arco-design/web-react";
 import { memo, useEffect, useState } from "react";
+import { Input, Tooltip, Form } from "@arco-design/web-react";
 import type { XInputEmailConfig } from "./schema";
+import {
+    STATUS_VALUES,
+    STATUS_OPTIONS,
+} from "@/components/Materials/constants";
 
 const XInputEmail = memo((props: XInputEmailConfig) => {
     const {
@@ -9,6 +13,12 @@ const XInputEmail = memo((props: XInputEmailConfig) => {
         tooltip,
         status,
         defaultValue,
+        required,
+        align,
+        layout,
+        color,
+        bgColor,
+        saveWithHidden,
     } = props;
 
     const [value, setValue] = useState("");
@@ -17,7 +27,8 @@ const XInputEmail = memo((props: XInputEmailConfig) => {
     >();
 
     // 邮箱校验正则
-    const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    const validateEmail = (email: string) =>
+        /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
     useEffect(() => {
         if (value && !validateEmail(value)) {
@@ -27,19 +38,43 @@ const XInputEmail = memo((props: XInputEmailConfig) => {
         setInputStatus(undefined);
     }, [value]);
 
-    return status === "hidden" ? null : (
+    return status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? null : (
         <Tooltip content={tooltip}>
-            <div>
-                <div>{label}</div>
+            <Form.Item
+                label={label}
+                layout={layout}
+                rules={[
+                    { required },
+                    // { type: "email", message: "请输入合法的邮件地址" },
+                    // {
+                    //     validator: (value) => {
+                    //         if (!value) return true;
+                    //         const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    //         return regex.test(value);
+                    //     },
+                    // },
+                ]}
+                style={{
+                    pointerEvents:
+                        status === STATUS_VALUES[STATUS_OPTIONS.READONLY]
+                            ? "none"
+                            : "unset",
+                }}
+            >
                 <Input
                     status={InputStatus}
-                    readOnly={status === "readonly"}
+                    readOnly={status === STATUS_VALUES[STATUS_OPTIONS.READONLY]}
                     defaultValue={defaultValue}
-                    style={{ width: "100%" }}
+                    style={{
+                        width: "100%",
+                        textAlign: align,
+                        color,
+                        backgroundColor: bgColor,
+                    }}
                     placeholder={placeholder}
                     onChange={setValue}
                 />
-            </div>
+            </Form.Item>
         </Tooltip>
     );
 });
