@@ -93,5 +93,9 @@ public class AdminUserDO extends TenantBaseDO {
      * 最后登录时间
      */
     private LocalDateTime loginDate;
+    /**
+     * 用户类型
+     */
+    private Integer userType;
 
 }

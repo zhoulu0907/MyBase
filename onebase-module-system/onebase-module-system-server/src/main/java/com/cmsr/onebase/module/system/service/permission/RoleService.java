@@ -57,6 +57,14 @@ public interface RoleService {
     RoleDO getRole(Long id);
 
     /**
+     * 通过授权码获取角色信息
+     *
+     * @param code 授权码
+     * @return 角色编号集合
+     */
+    RoleDO getRoleIdsByCode(String code);
+
+    /**
      * 获得角色，从缓存中
      *
      * @param id 角色编号

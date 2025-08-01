@@ -1,5 +1,6 @@
 # OneBase管理后台脚手架
 ## 核心指令
+### 正式打包
 单体模式打包命令：
 Mac:  mvn package -am -pl onebase-server -Dmaven.test.skip=true
 Win:  mvn package -am -pl onebase-server '-Dmaven.test.skip=true'
@@ -10,6 +11,17 @@ Win: mvn clean package '-Dmaven.test.skip=true'
 
 服务启动：
 sh deploy.sh start
+
+### 日常构建
+加载Maven依赖
+首先，在项目根目录执行以下命令来下载所有依赖：
+mvn clean install -Dmaven.test.skip=true
+或者如果您想包含测试：
+mvn clean install
+
+使用Maven直接运行
+cd onebase-server
+mvn spring-boot:run
 
 ## 数据库设置
 

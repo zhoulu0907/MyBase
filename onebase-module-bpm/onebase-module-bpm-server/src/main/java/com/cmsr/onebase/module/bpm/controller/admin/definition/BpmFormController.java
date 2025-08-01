@@ -64,7 +64,7 @@ public class BpmFormController {
         return success(BeanUtils.toBean(form, BpmFormRespVO.class));
     }
 
-    @GetMapping({"/list-all-simple", "/simple-list"})
+    @GetMapping("/simple-list")
     @Operation(summary = "获得动态表单的精简列表", description = "用于表单下拉框")
     public CommonResult<List<BpmFormRespVO>> getFormSimpleList() {
         List<BpmFormDO> list = formService.getFormList();

@@ -22,9 +22,12 @@ import com.cmsr.onebase.module.system.controller.admin.user.vo.user.UserPageReqV
 import com.cmsr.onebase.module.system.controller.admin.user.vo.user.UserSaveReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.UserPostDO;
+import com.cmsr.onebase.module.system.dal.dataobject.permission.UserRoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.dal.mysql.dept.UserPostMapper;
 import com.cmsr.onebase.module.system.dal.mysql.user.AdminUserMapper;
+import com.cmsr.onebase.module.system.enums.permission.RoleCodeEnum;
+import com.cmsr.onebase.module.system.enums.permission.RoleTypeEnum;
 import com.cmsr.onebase.module.system.service.dept.DeptService;
 import com.cmsr.onebase.module.system.service.dept.PostService;
 import com.cmsr.onebase.module.system.service.permission.PermissionService;
@@ -37,7 +40,9 @@ import jakarta.annotation.Resource;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.init.DefaultConfigStore;
+import org.anyline.entity.Compare;
 import org.anyline.entity.Order;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -45,6 +50,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.*;
@@ -172,6 +178,15 @@ public class AdminUserServiceImpl implements AdminUserService {
         LogRecordContext.putVariable("user", oldUser);
     }
 
+    @Override
+    public void updatePlatformUserEmail(Long id, String email) {
+        // 校验正确性
+        validateUserExists(id);
+//        validateEmailUnique(id, email);
+        // 2.1 更新用户
+        dataRepository.update(new AdminUserDO().setId(id).setEmail(email).setUpdateTime(LocalDateTime.now()));
+    }
+
     private void updateUserPost(UserSaveReqVO reqVO, AdminUserDO updateObj) {
         Long userId = reqVO.getId();
 
@@ -278,6 +293,11 @@ public class AdminUserServiceImpl implements AdminUserService {
     public AdminUserDO getUserByUsername(String username) {
         return dataRepository.findOne(AdminUserDO.class, new DefaultConfigStore().eq("username", username));
         // return userMapper.selectByUsername(username);
+    }
+
+    @Override
+    public AdminUserDO getUserByTenantIDAndUserName(String username, Long tenantId) {
+        return dataRepository.findOne(AdminUserDO.class, new DefaultConfigStore().eq("username", username).eq("tenant_id", tenantId));
     }
 
     @Override
@@ -556,6 +576,20 @@ public class AdminUserServiceImpl implements AdminUserService {
     @Override
     public boolean isPasswordMatch(String rawPassword, String encodedPassword) {
         return passwordEncoder.matches(rawPassword, encodedPassword);
+    }
+
+    @Override
+    public List<AdminUserDO> getUserListByRoleCode(RoleTypeEnum roleCodeEnum) {
+
+        List<UserRoleDO> userRoleDOS = dataRepository.findAll(UserRoleDO.class, new DefaultConfigStore().and(Compare.EQUAL, "id", roleCodeEnum.getType().longValue()));
+        Set<Long> userIds = userRoleDOS.stream().map(UserRoleDO::getUserId).collect(Collectors.toSet());
+        List<AdminUserDO> allByIds = dataRepository.findAllByIds(AdminUserDO.class, userIds);
+        return allByIds;
+    }
+
+    @Override
+    public Long getUserCountByStatus(Integer status) {
+        return dataRepository.countByConfig(AdminUserDO.class,new DefaultConfigStore().eq("status", status));
     }
 
     /**

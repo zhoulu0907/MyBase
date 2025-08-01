@@ -46,6 +46,9 @@ public interface ErrorCodeConstants {
     ErrorCode USER_IMPORT_INIT_PASSWORD = new ErrorCode(1_002_003_009, "初始密码不能为空");
     ErrorCode USER_MOBILE_NOT_EXISTS = new ErrorCode(1_002_003_010, "该手机号尚未注册");
     ErrorCode USER_REGISTER_DISABLED = new ErrorCode(1_002_003_011, "注册功能已关闭");
+    ErrorCode USER_PASSWORD_NOT_ALLOW_DEL = new ErrorCode(1_002_003_012, "内置用户不允许删除，只允许修改密码");
+    ErrorCode LICENSE_USER_COUNT_NOT_ENOUGH = new ErrorCode(1_002_003_013, "可分配人员数量不足，license总人数是({}), 剩余({})");
+    ErrorCode LENANT_ALLOCATE_PERSON_COUNT_LESS_THEN_ALLOCATED = new ErrorCode(1_002_003_014, "租户内已使用用户数量为({})，分配的用户数量不能低于此数量");
 
     // ========== 部门模块 1-002-004-000 ==========
     ErrorCode DEPT_NAME_DUPLICATE = new ErrorCode(1_002_004_000, "已经存在该名字的部门");
