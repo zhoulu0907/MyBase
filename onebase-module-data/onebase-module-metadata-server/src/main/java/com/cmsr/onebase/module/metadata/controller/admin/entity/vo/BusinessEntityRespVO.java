@@ -34,4 +34,7 @@ public class BusinessEntityRespVO {
     @Schema(description = "应用ID", example = "1")
     private Long appId;
 
+    @Schema(description = "前端显示配置json", example = "{\"showFields\":[\"name\",\"code\"]}")
+    private String displayConfig;
+
 }

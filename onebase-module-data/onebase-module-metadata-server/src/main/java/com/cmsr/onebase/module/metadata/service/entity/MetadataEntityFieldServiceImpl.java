@@ -23,6 +23,7 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Order;
+import org.anyline.entity.Compare;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.transaction.annotation.Transactional;
@@ -101,19 +102,21 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
     @Override
     public List<MetadataEntityFieldDO> getEntityFieldListByConditions(EntityFieldQueryVO queryVO) {
         DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and("entity_id", queryVO.getEntityId());
         
+        if (queryVO.getEntityId() != null) {
+            configStore.and("entity_id", queryVO.getEntityId());
+        }
+        if (queryVO.getKeyword() != null) {
+            configStore.and(Compare.LIKE, "field_name", "%" + queryVO.getKeyword() + "%")
+                    .or(Compare.LIKE, "display_name", "%" + queryVO.getKeyword() + "%");
+        }
         if (queryVO.getIsSystemField() != null) {
             configStore.and("is_system_field", queryVO.getIsSystemField());
         }
         
-        if (StringUtils.hasText(queryVO.getKeyword())) {
-            configStore.and("field_name", "LIKE", "%" + queryVO.getKeyword() + "%")
-                      .or("display_name", "LIKE", "%" + queryVO.getKeyword() + "%");
-        }
-        
         configStore.order("sort_order", Order.TYPE.ASC);
-        configStore.order("create_time", Order.TYPE.ASC);
+        configStore.order("create_time", Order.TYPE.DESC);
+        
         return dataRepository.findAllByConfig(MetadataEntityFieldDO.class, configStore);
     }
 
@@ -260,7 +263,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
         configStore.and("entity_id", entityId);
         configStore.and("field_name", fieldName);
         if (id != null) {
-            configStore.and("id", "!=", id);
+            configStore.and(Compare.NOT_EQUAL, "id", id);
         }
         
         long count = dataRepository.countByConfig(MetadataEntityFieldDO.class, configStore);
@@ -283,10 +286,10 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
             configStore.and("entity_id", pageReqVO.getEntityId());
         }
         if (pageReqVO.getFieldName() != null) {
-            configStore.and("field_name", "LIKE", "%" + pageReqVO.getFieldName() + "%");
+            configStore.and(Compare.LIKE, "field_name", "%" + pageReqVO.getFieldName() + "%");
         }
         if (pageReqVO.getDisplayName() != null) {
-            configStore.and("display_name", "LIKE", "%" + pageReqVO.getDisplayName() + "%");
+            configStore.and(Compare.LIKE, "display_name", "%" + pageReqVO.getDisplayName() + "%");
         }
         if (pageReqVO.getFieldType() != null) {
             configStore.and("field_type", pageReqVO.getFieldType());
