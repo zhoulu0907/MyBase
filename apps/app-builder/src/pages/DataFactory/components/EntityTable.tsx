@@ -1,4 +1,3 @@
-import React from 'react';
 import { Button, Table, type TableColumnProps } from '@arco-design/web-react';
 
 const columns: TableColumnProps[] = [
