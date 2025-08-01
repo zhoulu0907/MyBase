@@ -7,6 +7,7 @@ export default defineConfig({
     server: {
         port: 4400,
     },
+    base: './',
     plugins: [react()],
     resolve: {
         alias: {
