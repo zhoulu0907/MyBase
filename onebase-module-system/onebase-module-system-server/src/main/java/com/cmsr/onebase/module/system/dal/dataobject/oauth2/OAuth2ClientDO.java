@@ -1,101 +1,122 @@
 package com.cmsr.onebase.module.system.dal.dataobject.oauth2;
 
+import java.util.List;
+
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.system.enums.oauth2.OAuth2GrantTypeEnum;
-import com.baomidou.mybatisplus.annotation.KeySequence;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
-import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
 
-import java.util.List;
+import jakarta.persistence.Column;
+import jakarta.persistence.Table;
+import lombok.Data;
 
 /**
  * OAuth2 客户端 DO
  *
  */
-@TableName(value = "system_oauth2_client", autoResultMap = true)
-@KeySequence("system_oauth2_client_seq") // 用于 Oracle、PostgreSQL、Kingbase、DB2、H2 数据库的主键自增。如果是 MySQL 等数据库，可不写。
 @Data
-@EqualsAndHashCode(callSuper = true)
 @TenantIgnore
+@Table(name = "system_oauth2_client")
 public class OAuth2ClientDO extends BaseDO {
+
+    // 字段常量
+    public static final String CLIENT_ID                     = "client_id";
+    public static final String SECRET                        = "secret";
+    public static final String NAME                          = "name";
+    public static final String LOGO                          = "logo";
+    public static final String DESCRIPTION                   = "description";
+    public static final String STATUS                        = "status";
+    public static final String ACCESS_TOKEN_VALIDITY_SECONDS = "access_token_validity_seconds";
+    public static final String REFRESH_TOKEN_VALIDITY_SECONDS= "refresh_token_validity_seconds";
+    public static final String REDIRECT_URIS                 = "redirect_uris";
+    public static final String AUTHORIZED_GRANT_TYPES        = "authorized_grant_types";
+    public static final String SCOPES                        = "scopes";
+    public static final String AUTO_APPROVE_SCOPES           = "auto_approve_scopes";
+    public static final String AUTHORITIES                   = "authorities";
+    public static final String RESOURCE_IDS                  = "resource_ids";
+    public static final String ADDITIONAL_INFORMATION        = "additional_information";
 
     /**
      * 客户端编号
      */
+    @Column(name = CLIENT_ID)
     private String clientId;
     /**
      * 客户端密钥
      */
+    @Column(name = SECRET)
     private String secret;
     /**
      * 应用名
      */
+    @Column(name = NAME)
     private String name;
     /**
      * 应用图标
      */
+    @Column(name = LOGO)
     private String logo;
     /**
      * 应用描述
      */
+    @Column(name = DESCRIPTION)
     private String description;
     /**
      * 状态
      *
      * 枚举 {@link CommonStatusEnum}
      */
+    @Column(name = STATUS)
     private Integer status;
     /**
      * 访问令牌的有效期
      */
+    @Column(name = ACCESS_TOKEN_VALIDITY_SECONDS)
     private Integer accessTokenValiditySeconds;
     /**
      * 刷新令牌的有效期
      */
+    @Column(name = REFRESH_TOKEN_VALIDITY_SECONDS)
     private Integer refreshTokenValiditySeconds;
     /**
      * 可重定向的 URI 地址
      */
-    @TableField(typeHandler = JacksonTypeHandler.class)
+    @Column(name = REDIRECT_URIS)
     private List<String> redirectUris;
     /**
      * 授权类型（模式）
      *
      * 枚举 {@link OAuth2GrantTypeEnum}
      */
-    @TableField(typeHandler = JacksonTypeHandler.class)
+    @Column(name = AUTHORIZED_GRANT_TYPES)
     private List<String> authorizedGrantTypes;
     /**
      * 授权范围
      */
-    @TableField(typeHandler = JacksonTypeHandler.class)
+    @Column(name = SCOPES)
     private List<String> scopes;
     /**
      * 自动授权的 Scope
      *
      * code 授权时，如果 scope 在这个范围内，则自动通过
      */
-    @TableField(typeHandler = JacksonTypeHandler.class)
+    @Column(name = AUTO_APPROVE_SCOPES)
     private List<String> autoApproveScopes;
     /**
      * 权限
      */
-    @TableField(typeHandler = JacksonTypeHandler.class)
+    @Column(name = AUTHORITIES)
     private List<String> authorities;
     /**
      * 资源
      */
-    @TableField(typeHandler = JacksonTypeHandler.class)
+    @Column(name = RESOURCE_IDS)
     private List<String> resourceIds;
     /**
      * 附加信息，JSON 格式
      */
+    @Column(name = ADDITIONAL_INFORMATION)
     private String additionalInformation;
 
 }
