@@ -33,6 +33,7 @@ const Home: React.FC = () => {
           <Content className={styles.content}>
             <div className={styles.contentInner}>
               <Routes>
+                <Route index element={<MyAppPage />} /> 
                 <Route path="my-app" element={<MyAppPage />} />
                 <Route path="app-center" element={<AppCenterPage />} />
                 <Route path="mall-center" element={<MallCenterPage />} />

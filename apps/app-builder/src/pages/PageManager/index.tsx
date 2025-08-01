@@ -99,8 +99,6 @@ const PageManagerPage: FC = () => {
         setValue("");
     };
 
-    console.log(activeMenu, 999);
-
     return (
         <div className={styles.pageManagerPage}>
             <Layout style={{ height: "100%" }}>

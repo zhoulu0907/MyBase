@@ -136,7 +136,9 @@
     "formDesign": "Form Design",
     "listDesign": "List Design",
     "pageSetting": "Page Setting",
-    "metadataManage": "Source Data"
+    "metadataManage": "Source Data",
+    "newApplication": "New Application",
+    "saved": "Saved, not published"
   },
   "createApp": {
     "pageManager": "Page Manager",
