@@ -82,22 +82,41 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Long createApplication(ApplicationCreateReqVO createReqVO) {
         createReqVO.setId(null);
         ApplicationDO applicationDO = BeanUtils.toBean(createReqVO, ApplicationDO.class);
         applicationDO.setVersionNumber(VersionUtils.INIT_VERSION);
         applicationDO = dataRepository.insert(applicationDO);
+        mergeApplicationTags(applicationDO.getId(), createReqVO.getTagIds());
         return applicationDO.getId();
+    }
+
+    private void mergeApplicationTags(Long id, List<Long> tagIds) {
+        ConfigStore configStore = new DefaultConfigStore();
+        configStore.eq("application_id", id);
+        dataRepository.deleteByConfig(ApplicationTagDO.class, configStore);
+        if (tagIds == null || tagIds.isEmpty()) {
+            return;
+        }
+        for (Long tagId : tagIds) {
+            ApplicationTagDO applicationTagDO = new ApplicationTagDO();
+            applicationTagDO.setApplicationId(id);
+            applicationTagDO.setTagId(tagId);
+            dataRepository.insert(applicationTagDO);
+        }
     }
 
     @Override
     public void updateApplication(ApplicationCreateReqVO createReqVO) {
         appCommonService.validateApplicationExist(createReqVO.getId());
         ApplicationDO updateObj = BeanUtils.toBean(createReqVO, ApplicationDO.class);
+        mergeApplicationTags(createReqVO.getId(), createReqVO.getTagIds());
         dataRepository.update(updateObj);
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void updateApplicationName(Long id, String name) {
         appCommonService.validateApplicationExist(id);
         ApplicationDO applicationDO = new ApplicationDO();

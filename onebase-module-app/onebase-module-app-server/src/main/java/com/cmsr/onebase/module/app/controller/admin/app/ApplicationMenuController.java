@@ -41,7 +41,7 @@ public class ApplicationMenuController {
         return success(applicationMenuService.createApplicationMenuGroup(createReqVO));
     }
 
-    @PutMapping("/update-name")
+    @PostMapping("/update-name")
     @Operation(summary = "更新应用菜单名称")
     public CommonResult<Boolean> updateApplicationMenuName(@RequestParam("id") Long id,
                                                            @RequestParam("menuName") String menuName) {
@@ -49,14 +49,14 @@ public class ApplicationMenuController {
         return CommonResult.success(true);
     }
 
-    @PutMapping("/update-order")
+    @PostMapping("/update-order")
     @Operation(summary = "更新应用菜单排序")
     public CommonResult<Boolean> updateApplicationMenuOrder(@RequestBody ApplicationMenuOrderUpdateReqVO updateReqVO) {
         applicationMenuService.updateApplicationMenuOrder(updateReqVO);
         return CommonResult.success(true);
     }
 
-    @PutMapping("/update-visible")
+    @PostMapping("/update-visible")
     @Operation(summary = "更新应用菜单可见性")
     public CommonResult<Boolean> updateApplicationMenuVisible(@RequestParam("id") Long id,
                                                               @RequestParam("visible") Boolean visible) {
@@ -64,14 +64,14 @@ public class ApplicationMenuController {
         return CommonResult.success(true);
     }
 
-    @PutMapping("/copy")
+    @PostMapping("/copy")
     @Operation(summary = "复制应用菜单")
     public CommonResult<Boolean> copyApplicationMenu(@RequestBody ApplicationMenuCopyReqVO copyReqVO) {
         applicationMenuService.copyApplicationMenu(copyReqVO);
         return CommonResult.success(true);
     }
 
-    @DeleteMapping("/delete")
+    @PostMapping("/delete")
     @Operation(summary = "删除应用菜单")
     public CommonResult<Boolean> deleteApplicationMenu(@RequestParam("id") Long id) {
         applicationMenuService.deleteApplicationMenu(id);

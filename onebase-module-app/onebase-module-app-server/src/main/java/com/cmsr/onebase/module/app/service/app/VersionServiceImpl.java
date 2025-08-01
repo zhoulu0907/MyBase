@@ -40,9 +40,10 @@ public class  VersionServiceImpl implements VersionService {
         ConfigStore configs = new DefaultConfigStore();
         configs.order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
         List<VersionDO> dos = dataRepository.findAll(VersionDO.class, configs);
+        AppCommonService.UserHelper userHelper = appCommonService.getUserHelper(dos);
         return dos.stream().map(v -> {
             ApplicationVersionListRespVO vo = BeanUtils.toBean(v, ApplicationVersionListRespVO.class);
-            vo.setCreatorName(appCommonService.getUserName(v.getCreator()));
+            vo.setCreatorName(userHelper.getUserName(v.getCreator()));
             return vo;
         }).toList();
     }

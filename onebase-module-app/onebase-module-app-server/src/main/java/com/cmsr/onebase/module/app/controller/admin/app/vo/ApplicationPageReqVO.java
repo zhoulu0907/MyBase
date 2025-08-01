@@ -20,7 +20,7 @@ public class ApplicationPageReqVO extends PageParam {
     private String name;
 
     @Schema(description = "是否查询当前用户创建的应用还是全部的应用")
-    private boolean ownerTag;
+    private Boolean ownerTag;
 
     @Schema(description = "根据创建时间或者更新时间排序", example = "create,update")
     private String orderByTime;

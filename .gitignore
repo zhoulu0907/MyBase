@@ -22,6 +22,7 @@ target/
 *.ipr
 *.class
 target/*
+.run
 
 ### NetBeans ###
 /nbproject/private/
