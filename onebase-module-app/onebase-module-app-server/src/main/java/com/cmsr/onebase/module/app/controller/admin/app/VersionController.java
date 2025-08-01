@@ -47,7 +47,7 @@ public class VersionController {
         return CommonResult.success(true);
     }
 
-    @DeleteMapping("/delete")
+    @PostMapping("/delete")
     @Operation(summary = "删除应用版本")
     @Parameter(name = "applicationId", description = "应用id", required = true)
     public CommonResult<Boolean> deleteApplicationVersion(@RequestParam("versionId") Long versionId) {

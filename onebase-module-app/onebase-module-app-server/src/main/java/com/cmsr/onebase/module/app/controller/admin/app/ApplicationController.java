@@ -40,7 +40,7 @@ public class ApplicationController {
         return CommonResult.success(applicationService.createApplication(applicationCreateReqVO));
     }
 
-    @PutMapping("/update")
+    @PostMapping("/update")
     @Operation(summary = "更新应用")
     public CommonResult<Boolean> updateApplication(@Validated @RequestBody ApplicationCreateReqVO applicationCreateReqVO) {
         applicationService.updateApplication(applicationCreateReqVO);
@@ -48,7 +48,7 @@ public class ApplicationController {
     }
 
 
-    @PutMapping("/update-name")
+    @PostMapping("/update-name")
     @Operation(summary = "更新应用名称")
     @Parameters({
             @Parameter(name = "id", description = "应用id", required = true),
@@ -61,7 +61,7 @@ public class ApplicationController {
     }
 
 
-    @DeleteMapping("/delete")
+    @PostMapping("/delete")
     @Operation(summary = "删除应用")
     @Parameters({
             @Parameter(name = "id", description = "应用id", required = true),
