@@ -5,6 +5,7 @@ import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
 import com.cmsr.onebase.module.system.controller.admin.tenant.vo.tenant.TenantPageReqVO;
 import com.cmsr.onebase.module.system.controller.admin.tenant.vo.tenant.TenantSaveReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
+import com.cmsr.onebase.module.system.enums.tenant.TenantStatusEnum;
 import com.cmsr.onebase.module.system.service.tenant.handler.TenantInfoHandler;
 import com.cmsr.onebase.module.system.service.tenant.handler.TenantMenuHandler;
 
@@ -91,10 +92,10 @@ public interface TenantService {
     /**
      * 获得指定状态的租户数量
      *
-     * @param status 状态
+     * @param tenantStatusEnum 状态
      * @return 租户数量
      */
-    Long getTenantCountByStatus(Integer status);
+    Integer getTenantCountByStatus(TenantStatusEnum tenantStatusEnum);
 
     /**
      * 获得使用指定套餐的租户数组

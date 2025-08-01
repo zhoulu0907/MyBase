@@ -27,6 +27,8 @@ import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.dal.mysql.tenant.TenantMapper;
 import com.cmsr.onebase.module.system.enums.permission.RoleCodeEnum;
 import com.cmsr.onebase.module.system.enums.permission.RoleTypeEnum;
+import com.cmsr.onebase.module.system.enums.tenant.TenantStatusEnum;
+import com.cmsr.onebase.module.system.enums.user.UserStatusEnum;
 import com.cmsr.onebase.module.system.service.license.LicenseService;
 import com.cmsr.onebase.module.system.service.permission.MenuService;
 import com.cmsr.onebase.module.system.service.permission.PermissionService;
@@ -85,6 +87,8 @@ public class TenantServiceImpl implements TenantService {
     private DataRepository dataRepository;
     @Resource
     private LicenseService licenseService;
+    @Autowired
+    private TenantService tenantService;
 
 
     @Override
@@ -137,13 +141,13 @@ public class TenantServiceImpl implements TenantService {
             // 获取license总人数限制
             Integer licenseTotalCount = license.getTenantLimit();
             // 获取已分配人员数量
-            Long allocatedCount = userService.getUserCountByStatus(0);
+            Integer allocatedCount = userService.getUserCountByStatus(UserStatusEnum.NORMAL);
 
             // 如果传入的分配人员数量加上已分配数量超过license限制，则报错
             if (createReqVO.getAllocatePersonCount()!= null &&
                     (allocatedCount + createReqVO.getAllocatePersonCount()) > licenseTotalCount) {
 
-                Long remainingCount = licenseTotalCount - allocatedCount;
+                Integer remainingCount = licenseTotalCount - allocatedCount;
                 throw exception(LICENSE_USER_COUNT_NOT_ENOUGH,
                         licenseTotalCount,
                         remainingCount);
@@ -235,13 +239,13 @@ public class TenantServiceImpl implements TenantService {
             // 获取license总人数限制
             Integer licenseTotalCount = license.getTenantLimit();
             // 获取已分配人员数量
-            Long allocatedCount = userService.getUserCountByStatus(0);
+            Integer allocatedCount = tenantService.getTenantCountByStatus(TenantStatusEnum.NORMAL);
 
             // 如果传入的分配人员数量加上已分配数量超过license限制，则报错
             if (updateReqVO.getAllocatePersonCount()!= null &&
                     (allocatedCount + updateReqVO.getAllocatePersonCount()) > licenseTotalCount) {
 
-                Long remainingCount = licenseTotalCount - allocatedCount;
+                Integer remainingCount = licenseTotalCount - allocatedCount;
                 throw exception(LICENSE_USER_COUNT_NOT_ENOUGH,
                         licenseTotalCount,
                         remainingCount);
@@ -395,8 +399,8 @@ public class TenantServiceImpl implements TenantService {
     }
 
     @Override
-    public Long getTenantCountByStatus(Integer status) {
-        return dataRepository.countByConfig(TenantDO.class, new DefaultConfigStore().eq("status", status));
+    public Integer getTenantCountByStatus(TenantStatusEnum tenantStatusEnum) {
+        return (int) dataRepository.countByConfig(TenantDO.class, new DefaultConfigStore().eq("status", tenantStatusEnum.getStatus()));
     }
 
     @Override

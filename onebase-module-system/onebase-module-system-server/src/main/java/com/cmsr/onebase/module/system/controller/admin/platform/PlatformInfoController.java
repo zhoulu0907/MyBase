@@ -4,9 +4,11 @@ import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.system.controller.admin.license.LicensePageReqVO;
-import com.cmsr.onebase.module.system.controller.admin.license.LicensePageRespVO;
 import com.cmsr.onebase.module.system.controller.admin.license.LicenseSaveReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.license.LicenseDO;
+import com.cmsr.onebase.module.system.enums.license.LicenseStatusEnum;
+import com.cmsr.onebase.module.system.enums.tenant.TenantStatusEnum;
+import com.cmsr.onebase.module.system.enums.user.UserStatusEnum;
 import com.cmsr.onebase.module.system.service.license.LicenseService;
 import com.cmsr.onebase.module.system.service.tenant.TenantService;
 import com.cmsr.onebase.module.system.service.user.AdminUserService;
@@ -26,9 +28,6 @@ import com.cmsr.onebase.module.system.controller.admin.platform.vo.PlatformInfoR
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 
@@ -113,13 +112,13 @@ public class PlatformInfoController {
         reqVO.setPageNo(platformInfoReqVo.getPageNo());
         PageResult<LicenseDO> pageResult = licenseService.getLicensePage(reqVO);
         PageResult<PlatformInfoRespVo> voPageResult = BeanUtils.toBean(pageResult, PlatformInfoRespVo.class);
-        Long tenantCount = tenantService.getTenantCountByStatus(0);
-        Long userCount = adminUserService.getUserCountByStatus(0);
+        Integer tenantCount = tenantService.getTenantCountByStatus(TenantStatusEnum.NORMAL);
+        Integer userCount = adminUserService.getUserCountByStatus(UserStatusEnum.NORMAL);
         voPageResult.getList().stream()
-                .filter(vo -> "enable".equals(vo.getStatus()))
+                .filter(vo -> LicenseStatusEnum.ENABLE.equals(vo.getStatus()))
                 .forEach(vo -> {
-                    vo.setActualTenantCount(Math.toIntExact(tenantCount));
-                    vo.setActualUserCount(Math.toIntExact(userCount));
+                    vo.setActualTenantCount(tenantCount);
+                    vo.setActualUserCount(userCount);
                 });
 
 

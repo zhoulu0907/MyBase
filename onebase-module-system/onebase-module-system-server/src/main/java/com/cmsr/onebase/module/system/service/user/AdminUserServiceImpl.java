@@ -26,8 +26,8 @@ import com.cmsr.onebase.module.system.dal.dataobject.permission.UserRoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.dal.mysql.dept.UserPostMapper;
 import com.cmsr.onebase.module.system.dal.mysql.user.AdminUserMapper;
-import com.cmsr.onebase.module.system.enums.permission.RoleCodeEnum;
 import com.cmsr.onebase.module.system.enums.permission.RoleTypeEnum;
+import com.cmsr.onebase.module.system.enums.user.UserStatusEnum;
 import com.cmsr.onebase.module.system.service.dept.DeptService;
 import com.cmsr.onebase.module.system.service.dept.PostService;
 import com.cmsr.onebase.module.system.service.permission.PermissionService;
@@ -42,7 +42,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Compare;
 import org.anyline.entity.Order;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -54,7 +53,6 @@ import java.util.stream.Collectors;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.*;
-import static com.cmsr.onebase.framework.common.util.date.DateUtils.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
 import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
 import static com.cmsr.onebase.module.system.enums.LogRecordConstants.*;
 
@@ -589,8 +587,8 @@ public class AdminUserServiceImpl implements AdminUserService {
     }
 
     @Override
-    public Long getUserCountByStatus(Integer status) {
-        return dataRepository.countByConfig(AdminUserDO.class,new DefaultConfigStore().eq("status", status));
+    public Integer getUserCountByStatus(UserStatusEnum userStatusEnum) {
+        return (int) dataRepository.countByConfig(AdminUserDO.class,new DefaultConfigStore().eq("status", userStatusEnum.getStatus()));
     }
 
     /**
