@@ -1,7 +1,7 @@
 import MaterialCard from '@/components/MaterialCard';
 import allTemplate from '@/components/Materials/template';
-import { Collapse, Tabs } from '@arco-design/web-react';
-import { IconBranch, IconLayout, IconSend, IconStorage } from '@arco-design/web-react/icon';
+import { Button, Collapse, Tabs } from '@arco-design/web-react';
+import { IconBranch, IconLayout, IconLeft, IconRight, IconSend, IconStorage } from '@arco-design/web-react/icon';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ReactSortable } from 'react-sortablejs';
@@ -16,6 +16,7 @@ interface IProps {
     onDragComponents: (val: boolean) => void;
 }
 export default function EditorPanel(props: IProps) {
+    const [showDrawer, setShowDrawer] = useState(true);
     const [activeTab, setActiveTab] = useState('form-design');
     const [activeComponentTab, setActiveComponentTab] = useState('base-component');
     const { t } = useTranslation();
@@ -61,7 +62,19 @@ export default function EditorPanel(props: IProps) {
     }, []);
 
     return (
-      <div className={styles.formEditorPanel}>
+      <div className={styles.editorPanel}
+        style={{
+            width: showDrawer ? "340px" : "0px",
+            transition: "width 0.3s cubic-bezier(0.4, 0, 0.4, 1)",
+        }}
+      >
+        <Button
+            size="mini"
+            className={styles.drawerButton}
+            icon={showDrawer ? <IconLeft /> : <IconRight />}
+            type="dashed"
+            onClick={() => setShowDrawer(!showDrawer)}
+        />
         <div className={styles.left}>
           <Tabs
               type="text"
@@ -80,7 +93,12 @@ export default function EditorPanel(props: IProps) {
           </Tabs>
         </div>
 
-        <div className={styles.right}>
+        <div className={styles.right}
+          style={{
+            width: showDrawer ? "100%" : "0px",
+          }}
+
+        >
             <div className={styles.rightHeader}>
                 {t('formEditor.component')}
             </div>

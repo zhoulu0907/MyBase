@@ -7,7 +7,7 @@ import activeSourceDataSVG from "@/assets/images/source_data_active_icon.svg";
 import defaultSourceDataSVG from "@/assets/images/source_data_default_icon.svg";
 import { Button, Tabs } from "@arco-design/web-react";
 import { IconArrowLeft } from "@arco-design/web-react/icon";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "./index.module.less";
 
@@ -42,7 +42,23 @@ const tabData = [
 
 export default function EditorHeader() {
     const navigate = useNavigate();
-    const [activeTab, setActiveTab] = useState("form-design");
+    const [activeTab, setActiveTab] = useState("");
+
+
+    useEffect(() => {
+        // 根据当前 URL 动态设置 activeTab
+        const hash = window.location.hash;
+        if (hash.endsWith("form_editor")) {
+            setActiveTab("form-design");
+        } else if (hash.endsWith("list_editor")) {
+            setActiveTab("list-design");
+        } else if (hash.endsWith("page-setting")) {
+            setActiveTab("page-setting");
+        } else if (hash.endsWith("metadata-manage")) {
+            setActiveTab("metadata-manage");
+        }
+    }, []);
+
 
     return (
         <div className={styles.editorHeader}>

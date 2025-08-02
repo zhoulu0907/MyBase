@@ -1,13 +1,14 @@
-# OneBase Platform Frontend
+# OneBase V3 Frontend
 
 OneBase 平台前端项目，基于 React + TypeScript + Vite 构建的现代化前端应用。
 
 ## 项目结构
 
 ```
-onebase-platform-fe/
+onebase-v3-fe/
 ├── apps/
 │   └── admin-console/     # 管理控制台应用
+│   └── app-builder/       # 管理应用
 ├── packages/
 │   ├── common/           # 公共包
 │   ├── ui-kit/          # UI组件库
