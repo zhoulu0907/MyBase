@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.infra.service.file;
 
 import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.util.IdUtil;
+import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.common.util.validation.ValidationUtils;
@@ -20,6 +21,7 @@ import jakarta.annotation.Resource;
 import jakarta.validation.Validator;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.anyline.data.param.init.DefaultConfigStore;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -70,6 +72,9 @@ public class FileConfigServiceImpl implements FileConfigService {
     private FileConfigMapper fileConfigMapper;
 
     @Resource
+    private DataRepository dataRepository;
+
+    @Resource
     private Validator validator;
 
     @Override
@@ -77,7 +82,8 @@ public class FileConfigServiceImpl implements FileConfigService {
         FileConfigDO fileConfig = FileConfigConvert.INSTANCE.convert(createReqVO)
                 .setConfig(parseClientConfig(createReqVO.getStorage(), createReqVO.getConfig()))
                 .setMaster(false); // 默认非 master
-        fileConfigMapper.insert(fileConfig);
+        dataRepository.insert(fileConfig);
+//        fileConfigMapper.insert(fileConfig);
         return fileConfig.getId();
     }
 
@@ -88,7 +94,8 @@ public class FileConfigServiceImpl implements FileConfigService {
         // 更新
         FileConfigDO updateObj = FileConfigConvert.INSTANCE.convert(updateReqVO)
                 .setConfig(parseClientConfig(config.getStorage(), updateReqVO.getConfig()));
-        fileConfigMapper.updateById(updateObj);
+        dataRepository.update(updateObj);
+//        fileConfigMapper.updateById(updateObj);
 
         // 清空缓存
         clearCache(config.getId(), null);
@@ -100,9 +107,11 @@ public class FileConfigServiceImpl implements FileConfigService {
         // 校验存在
         validateFileConfigExists(id);
         // 更新其它为非 master
-        fileConfigMapper.updateBatch(new FileConfigDO().setMaster(false));
+        dataRepository.update(new FileConfigDO().setMaster(false));
+//        fileConfigMapper.updateBatch(new FileConfigDO().setMaster(false));
         // 更新
-        fileConfigMapper.updateById(new FileConfigDO().setId(id).setMaster(true));
+        dataRepository.update(new FileConfigDO().setId(id).setMaster(true));
+//        fileConfigMapper.updateById(new FileConfigDO().setId(id).setMaster(true));
 
         // 清空缓存
         clearCache(null, true);
@@ -127,7 +136,8 @@ public class FileConfigServiceImpl implements FileConfigService {
             throw exception(FILE_CONFIG_DELETE_FAIL_MASTER);
         }
         // 删除
-        fileConfigMapper.deleteById(id);
+        dataRepository.deleteById(FileConfigDO.class,id);
+//        fileConfigMapper.deleteById(id);
 
         // 清空缓存
         clearCache(id, null);
@@ -149,7 +159,8 @@ public class FileConfigServiceImpl implements FileConfigService {
     }
 
     private FileConfigDO validateFileConfigExists(Long id) {
-        FileConfigDO config = fileConfigMapper.selectById(id);
+        FileConfigDO config = dataRepository.findById(FileConfigDO.class,id);
+//        FileConfigDO config = fileConfigMapper.selectById(id);
         if (config == null) {
             throw exception(FILE_CONFIG_NOT_EXISTS);
         }
@@ -158,12 +169,26 @@ public class FileConfigServiceImpl implements FileConfigService {
 
     @Override
     public FileConfigDO getFileConfig(Long id) {
-        return fileConfigMapper.selectById(id);
+        return dataRepository.findById(FileConfigDO.class,id);
+//        return fileConfigMapper.selectById(id);
     }
 
     @Override
     public PageResult<FileConfigDO> getFileConfigPage(FileConfigPageReqVO pageReqVO) {
-        return fileConfigMapper.selectPage(pageReqVO);
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        configStore.eq("name", pageReqVO.getName())
+                .eq("storage", pageReqVO.getStorage());
+        if (pageReqVO.getCreateTime() != null && pageReqVO.getCreateTime().length == 2) {
+            configStore.ge("create_time", pageReqVO.getCreateTime()[0]);
+            configStore.le("create_time", pageReqVO.getCreateTime()[1]);
+        }
+        return dataRepository.findPageWithConditions(
+                FileConfigDO.class,
+                configStore,
+                pageReqVO.getPageNo(),
+                pageReqVO.getPageSize()
+        );
+//        return fileConfigMapper.selectPage(pageReqVO);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.infra.service.config;
 
+import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.infra.controller.admin.config.vo.ConfigPageReqVO;
 import com.cmsr.onebase.module.infra.controller.admin.config.vo.ConfigSaveReqVO;
@@ -9,6 +10,7 @@ import com.cmsr.onebase.module.infra.dal.mysql.config.ConfigMapper;
 import com.cmsr.onebase.module.infra.enums.config.ConfigTypeEnum;
 import com.google.common.annotations.VisibleForTesting;
 import lombok.extern.slf4j.Slf4j;
+import org.anyline.data.param.init.DefaultConfigStore;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
@@ -28,6 +30,9 @@ public class ConfigServiceImpl implements ConfigService {
     @Resource
     private ConfigMapper configMapper;
 
+    @Resource
+    private DataRepository dataRepository;
+
     @Override
     public Long createConfig(ConfigSaveReqVO createReqVO) {
         // 校验参数配置 key 的唯一性
@@ -36,7 +41,8 @@ public class ConfigServiceImpl implements ConfigService {
         // 插入参数配置
         ConfigDO config = ConfigConvert.INSTANCE.convert(createReqVO);
         config.setType(ConfigTypeEnum.CUSTOM.getType());
-        configMapper.insert(config);
+        dataRepository.insert(config);
+//        configMapper.insert(config);
         return config.getId();
     }
 
@@ -49,7 +55,8 @@ public class ConfigServiceImpl implements ConfigService {
 
         // 更新参数配置
         ConfigDO updateObj = ConfigConvert.INSTANCE.convert(updateReqVO);
-        configMapper.updateById(updateObj);
+        dataRepository.update(updateObj);
+//        configMapper.updateById(updateObj);
     }
 
     @Override
@@ -61,22 +68,34 @@ public class ConfigServiceImpl implements ConfigService {
             throw exception(CONFIG_CAN_NOT_DELETE_SYSTEM_TYPE);
         }
         // 删除
-        configMapper.deleteById(id);
+        dataRepository.deleteById(ConfigDO.class,id);
+//        configMapper.deleteById(id);
     }
 
     @Override
     public ConfigDO getConfig(Long id) {
-        return configMapper.selectById(id);
+        return dataRepository.findById(ConfigDO.class,id);
+//        return configMapper.selectById(id);
     }
 
     @Override
     public ConfigDO getConfigByKey(String key) {
-        return configMapper.selectByKey(key);
+        return dataRepository.findOne(ConfigDO.class,new DefaultConfigStore().eq("key", key));
+//        return configMapper.selectByKey(key);
     }
 
     @Override
     public PageResult<ConfigDO> getConfigPage(ConfigPageReqVO pageReqVO) {
-        return configMapper.selectPage(pageReqVO);
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        configStore.like("name", pageReqVO.getName())
+                .like("key", pageReqVO.getKey())
+                .eq("type", pageReqVO.getType());
+        if (pageReqVO.getCreateTime() != null && pageReqVO.getCreateTime().length == 2) {
+            configStore.ge("create_time", pageReqVO.getCreateTime()[0]);
+            configStore.le("create_time", pageReqVO.getCreateTime()[1]);
+        }
+        return dataRepository.findPageWithConditions(ConfigDO.class, configStore,pageReqVO.getPageNo(),pageReqVO.getPageSize());
+//        return configMapper.selectPage(pageReqVO);
     }
 
     @VisibleForTesting
@@ -84,7 +103,8 @@ public class ConfigServiceImpl implements ConfigService {
         if (id == null) {
             return null;
         }
-        ConfigDO config = configMapper.selectById(id);
+        ConfigDO config = dataRepository.findById(ConfigDO.class,id);
+//        ConfigDO config = configMapper.selectById(id);
         if (config == null) {
             throw exception(CONFIG_NOT_EXISTS);
         }
@@ -93,7 +113,8 @@ public class ConfigServiceImpl implements ConfigService {
 
     @VisibleForTesting
     public void validateConfigKeyUnique(Long id, String key) {
-        ConfigDO config = configMapper.selectByKey(key);
+        ConfigDO config = dataRepository.findOne(ConfigDO.class,new DefaultConfigStore().eq("key", key));
+//        ConfigDO config = configMapper.selectByKey(key);
         if (config == null) {
             return;
         }
