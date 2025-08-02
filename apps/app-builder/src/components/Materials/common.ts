@@ -1,5 +1,5 @@
-import { CONFIG_TYPES, PAGINATION_POSITION_OPTIONS, PAGINATION_POSITION_VALUES, STATUS_OPTIONS, STATUS_VALUES, WIDTH_OPTIONS, WIDTH_VALUES, ALIGN_VALUES, ALIGN_OPTIONS, UPLOAD_OPTIONS, UPLOAD_VALUES, DATE_VALUES, DATE_OPTIONS, LAYOUT_VALUES, LAYOUT_OPTIONS } from "./constants";
-import type { ISelectConfigType, IStatusConfigType, ITextConfigType, IWidthConfigType, TTextDefaultType, IDateTypeConfigType, ILayoutConfigType, IAlignConfigType } from "./types";
+import { ALIGN_OPTIONS, ALIGN_VALUES, CONFIG_TYPES, DATE_OPTIONS, DATE_VALUES, LAYOUT_OPTIONS, LAYOUT_VALUES, PAGINATION_POSITION_OPTIONS, PAGINATION_POSITION_VALUES, STATUS_OPTIONS, STATUS_VALUES, UPLOAD_OPTIONS, UPLOAD_VALUES, WIDTH_OPTIONS, WIDTH_VALUES } from "./constants";
+import type { IAlignConfigType, IDateTypeConfigType, IDynamicSelectConfigType, ILayoutConfigType, ISelectConfigType, IStatusConfigType, ITextConfigType, IWidthConfigType, TTextDefaultType } from "./types";
 
 
 export interface ICommonBaseType {
@@ -17,7 +17,6 @@ export const baseConfig: ITextConfigType[] = [
 
 
 export type TWidthSelectKeyType = typeof WIDTH_VALUES[keyof typeof WIDTH_VALUES];
-
 export const widthConfig: IWidthConfigType<TWidthSelectKeyType>  = {
     key: 'width',
     name: '宽度',
@@ -214,6 +213,18 @@ export const pagePositionConfig: ISelectConfigType<TPagePositionSelectKeyType> =
             value: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.BOTTOM_CENTER],
         },
     ]
+}
+
+export const metaDataConfig: IDynamicSelectConfigType = {
+    key: 'metaData',
+    name: '数据',
+    type: CONFIG_TYPES.DYNAMIC_SELECT_INPUT,
+}
+
+export const keyDataConfig: IDynamicSelectConfigType = {
+    key: 'keyData',
+    name: '主键',
+    type: CONFIG_TYPES.DYNAMIC_SELECT_INPUT,
 }
 
 export const baseDefault = {
