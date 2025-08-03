@@ -1,9 +1,9 @@
 import { type PageParam } from '../types/common';
-import { type DeptVO } from '../types/dept';
+import { type DeptVO, type DeptForm } from '../types/dept';
 import systemClient from './clients/system';
 
 // 查询部门（精简)列表
-export const getSimpleDeptList = (): Promise<DeptVO[]> => {
+export const getSimpleDeptList = (): Promise<Partial<DeptVO>[]> => {
   return systemClient.get('/dept/simple-list')
 }
 
@@ -23,12 +23,12 @@ export const getDept = (id: number) => {
 }
 
 // 新增部门
-export const createDept = (data: DeptVO) => {
+export const createDept = (data: DeptForm) => {
   return systemClient.post('/dept/create', data)
 }
 
 // 修改部门
-export const updateDept = (data: DeptVO) => {
+export const updateDept = (data: DeptForm) => {
   return systemClient.put( '/dept/update', data)
 }
 

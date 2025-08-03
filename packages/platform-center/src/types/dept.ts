@@ -7,12 +7,15 @@ export interface DeptVO {
   leaderUserId: number
   phone: string
   email: string
-  createTime: Date
+  createTime: string
   userCount: number
   remark: string
+  [key: string]: any
 }
 
 export interface DeptTree extends DeptVO {
   userCount: number;
   children?: DeptVO[];
 }
+
+export type DeptForm = Partial<DeptVO>;
