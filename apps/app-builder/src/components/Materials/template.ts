@@ -1,4 +1,4 @@
-import { FORM_COMPONENT_TYPES, LAYOUT_COMPONENT_TYPES, LIST_COMPONENT_TYPES } from '@/constants/componentTypes';
+import { FORM_COMPONENT_TYPES, LAYOUT_COMPONENT_TYPES, LIST_COMPONENT_TYPES, SHOW_COMPONENT_TYPES } from '@/constants/componentTypes';
 
 const allTemplate = {
     base: [
@@ -191,7 +191,7 @@ const allTemplate = {
                     category: 'base'
                 },
                 {
-                    type: LIST_COMPONENT_TYPES.TABLE,
+                    type: LIST_COMPONENT_TYPES.CALENDAR,
                     h: 48,
                     w: 68,
                     displayName: '日历',
@@ -199,7 +199,7 @@ const allTemplate = {
                     category: 'base'
                 },
                 {
-                    type: LIST_COMPONENT_TYPES.TABLE,
+                    type: LIST_COMPONENT_TYPES.TIMELINE,
                     h: 48,
                     w: 68,
                     displayName: '时间轴',
@@ -223,15 +223,15 @@ const allTemplate = {
                     category: 'base'
                 },
                 {
-                    type: LIST_COMPONENT_TYPES.TABLE,
+                    type: LIST_COMPONENT_TYPES.CAROUSEL,
                     h: 48,
                     w: 68,
-                    displayName: '画布图片',
+                    displayName: '图片轮播',
                     icon: 'display_image_cp.svg',
                     category: 'base'
                 },
                 {
-                    type: LIST_COMPONENT_TYPES.TABLE,
+                    type: LIST_COMPONENT_TYPES.LIST,
                     h: 48,
                     w: 68,
                     displayName: '画布列表',
@@ -261,7 +261,7 @@ const allTemplate = {
                     category: 'base'
                 },
                 {
-                    type: FORM_COMPONENT_TYPES.INPUT_TEXT,
+                    type: SHOW_COMPONENT_TYPES.TEXT,
                     h: 48,
                     w: 68,
                     displayName: '展示文本',
@@ -269,7 +269,7 @@ const allTemplate = {
                     category: 'base'
                 },
                 {
-                    type: FORM_COMPONENT_TYPES.INPUT_TEXT,
+                    type: SHOW_COMPONENT_TYPES.IMAGE,
                     h: 48,
                     w: 68,
                     displayName: '展示图片',

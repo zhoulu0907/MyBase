@@ -18,7 +18,13 @@ import XSwitch from "./FormComponents/Switch/schema";
 import XTimePicker from "./FormComponents/TimePicker/schema";
 import XUserSelect from "./FormComponents/UserSelect/schema";
 import XColumnLayout from "./LayoutComponents/ColumnLayout/schema";
+import XCalendar from "./ListComponents/Calendar/schema";
+import XCarousel from "./ListComponents/Carousel/schema";
+import XList from "./ListComponents/List/schema";
 import XTable from "./ListComponents/Table/schema";
+import XTimeline from "./ListComponents/Timeline/schema";
+import XImage from "./ShowComponents/Image/schema";
+import XText from "./ShowComponents/Text/schema";
 
 const baseSchema = {
     XInputText,
@@ -39,10 +45,18 @@ const baseSchema = {
     XDeptSelect,
     XFileUpload,
     XImgUpload,
+
     XTable,
+    XCalendar,
+    XTimeline,
     XAutoCode,
+    XCarousel,
+    XList,
 
     XColumnLayout,
+
+    XImage,
+    XText,
 }
 
 export default baseSchema;
