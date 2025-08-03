@@ -2,12 +2,13 @@ import { FORM_COMPONENT_TYPES, LAYOUT_COMPONENT_TYPES, LIST_COMPONENT_TYPES } fr
 
 const allTemplate = {
     base: [
-        {
-            category: 'navigate',
-            items: [
+        // Mickey: 导航组件为空，先隐藏
+        // {
+        //     category: 'navigate',
+        //     items: [
 
-            ]
-        },
+        //     ]
+        // },
         {
             category: 'layout',
             items: [
@@ -186,11 +187,105 @@ const allTemplate = {
                     h: 48,
                     w: 68,
                     displayName: '表格',
-                    icon: 'text_input_cp.svg',
+                    icon: 'table_cp.svg',
+                    category: 'base'
+                },
+                {
+                    type: LIST_COMPONENT_TYPES.TABLE,
+                    h: 48,
+                    w: 68,
+                    displayName: '日历',
+                    icon: 'calendar_cp.svg',
+                    category: 'base'
+                },
+                {
+                    type: LIST_COMPONENT_TYPES.TABLE,
+                    h: 48,
+                    w: 68,
+                    displayName: '时间轴',
+                    icon: 'timeline_cp.svg',
+                    category: 'base'
+                },
+                {
+                    type: LIST_COMPONENT_TYPES.TABLE,
+                    h: 48,
+                    w: 68,
+                    displayName: '目录',
+                    icon: 'directory_cp.svg',
+                    category: 'base'
+                },
+                {
+                    type: LIST_COMPONENT_TYPES.TABLE,
+                    h: 48,
+                    w: 68,
+                    displayName: '看板',
+                    icon: 'kanban_cp.svg',
+                    category: 'base'
+                },
+                {
+                    type: LIST_COMPONENT_TYPES.TABLE,
+                    h: 48,
+                    w: 68,
+                    displayName: '画布图片',
+                    icon: 'display_image_cp.svg',
+                    category: 'base'
+                },
+                {
+                    type: LIST_COMPONENT_TYPES.TABLE,
+                    h: 48,
+                    w: 68,
+                    displayName: '画布列表',
+                    icon: 'canvas_list_cp.svg',
+                    category: 'base'
+                },
+                {
+                    type: LIST_COMPONENT_TYPES.TABLE,
+                    h: 48,
+                    w: 68,
+                    displayName: '列表容器',
+                    icon: 'list_container_cp.svg',
                     category: 'base'
                 },
             ]
         },
+        {
+            // TODO(Mickey): 假的，配合演示使用，后续需要填坑：）
+            category: 'show',
+            items: [
+                {
+                    type: FORM_COMPONENT_TYPES.INPUT_TEXT,
+                    h: 48,
+                    w: 68,
+                    displayName: '信息公告',
+                    icon: 'info_notice_cp.svg',
+                    category: 'base'
+                },
+                {
+                    type: FORM_COMPONENT_TYPES.INPUT_TEXT,
+                    h: 48,
+                    w: 68,
+                    displayName: '展示文本',
+                    icon: 'display_text_cp.svg',
+                    category: 'base'
+                },
+                {
+                    type: FORM_COMPONENT_TYPES.INPUT_TEXT,
+                    h: 48,
+                    w: 68,
+                    displayName: '展示图片',
+                    icon: 'display_image_cp.svg',
+                    category: 'base'
+                },
+                {
+                    type: FORM_COMPONENT_TYPES.INPUT_TEXT,
+                    h: 48,
+                    w: 68,
+                    displayName: '网页组件',
+                    icon: 'web_component_cp.svg',
+                    category: 'base'
+                },
+            ]
+        }
 
     ]
 }

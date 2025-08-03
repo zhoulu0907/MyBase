@@ -93,7 +93,6 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
                 }
             }}
             size="large"
-            inkBarSize={{ width: 20, height: 3 }}
             >
             <Tabs.TabPane key="my-app" title="我的应用" />
             <Tabs.TabPane key="app-center" title="应用中心" />

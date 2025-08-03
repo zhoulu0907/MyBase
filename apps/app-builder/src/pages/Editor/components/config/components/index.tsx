@@ -24,7 +24,6 @@ const MaterialConfiger = ({ cpID }: MaterialConfigerProps) => {
             <Tabs
                 defaultActiveTab="attributes"
                 type="line"
-                inkBarSize={{ width: '100%', height: 3 }}
                 size='default'
             >
                 <TabPane key="attributes"
