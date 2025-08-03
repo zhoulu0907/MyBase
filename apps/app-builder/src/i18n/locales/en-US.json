@@ -129,6 +129,7 @@
     "layout": "Layout",
     "form": "Form",
     "list": "List",
+    "show": "展示组件",
     "empty": "No components",
     "attribute": "Attribute",
     "data": "Data",

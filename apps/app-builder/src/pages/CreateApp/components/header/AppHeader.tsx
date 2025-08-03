@@ -1,3 +1,4 @@
+import helpSVG from "@/assets/images/help_icon.svg";
 import {
     Avatar,
     Button,
@@ -6,12 +7,11 @@ import {
     Menu,
     Tabs,
 } from "@arco-design/web-react";
-import { IconPoweroff, IconUser, IconMenu } from "@arco-design/web-react/icon";
+import { IconMenu, IconPoweroff, IconUser } from "@arco-design/web-react/icon";
 import { TokenManager } from "@onebase/common";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "react-router-dom";
-import helpSVG from "@/assets/images/help_icon.svg";
 import styles from "./header.module.less";
 
 const { Header } = Layout;
@@ -84,6 +84,9 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
                     <Button
                         shape="square"
                         icon={<IconMenu />}
+                        onClick={() => {
+                            navigate("/onebase/my-app");
+                        }}
                         className={styles.menuIcon}
                     />
 
@@ -127,7 +130,6 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
                         }
                     }}
                     size="large"
-                    inkBarSize={{ width: 20, height: 4.5 }}
                 >
                     <Tabs.TabPane
                         key="create-app/page-manager"

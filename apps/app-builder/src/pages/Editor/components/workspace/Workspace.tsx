@@ -1,5 +1,5 @@
 import { IconDelete } from "@arco-design/web-react/icon";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ReactSortable } from "react-sortablejs";
 
 import { getComponentSchema } from "@/components/Materials/schema";
@@ -24,12 +24,10 @@ interface GridItem {
     displayName: string;
 }
 
-interface IProps {
-    showEmpty: boolean;
-}
 
-export default function EditorWorkspace(props: IProps) {
-    const { showEmpty } = props;
+export default function EditorWorkspace() {
+    const [showEmpty, setShowEmpty] = useState(true);
+
     const { curComponentID, setCurComponentID, clearCurComponentID, setCurComponentSchema,
         pageComponentSchemas, setPageComponentSchemas, delPageComponentSchemas,
         components, setComponents, delComponents,
@@ -37,8 +35,15 @@ export default function EditorWorkspace(props: IProps) {
     } = usePageEditorStore();
 
 
-
     const [pageMode, setPageMode] = useState<string>("pc");
+
+    useEffect(() => {
+        if (components.length === 0) {
+            setShowEmpty(true);
+        } else {
+            setShowEmpty(false);
+        }
+    }, [components])
 
     // 删除组件
     const handleDeleteComponent = (componentId: string) => {

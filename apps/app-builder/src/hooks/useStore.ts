@@ -1,10 +1,11 @@
+import { EDITOR_TYPES } from '@/pages/Editor/components/const';
 import { useBasicEditorStore, useFromEditorStore, useListEditorStore } from '@/store';
 import { useLocation } from "react-router-dom";
 
 
 export function usePageEditorStore(){
     const path = useLocation().pathname;
-    const useList = path.endsWith('/list_editor');
+    const useList = path.endsWith(`/${EDITOR_TYPES.LIST_EDITOR}`);
 
     const curComponentID = useBasicEditorStore(state => state.curComponentID);
     const setCurComponentID = useBasicEditorStore(state => state.setCurComponentID);
