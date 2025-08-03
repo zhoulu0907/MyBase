@@ -29,7 +29,7 @@ const NodeEditForm: React.FC<NodeEditFormProps> = ({ node }) => {
   
   // 初始化表单数据
   const initialValues: FormValues = {
-    code: node.title || '',
+    code: node.code || '',
     name: node.title || '',
     description: '',
     systemFields: {
@@ -105,8 +105,6 @@ const NodeEditForm: React.FC<NodeEditFormProps> = ({ node }) => {
             />
           </Form.Item>
         </div>
-
-        <Divider />
 
         {/* 系统字段 */}
         <div className={styles['form-section']}>

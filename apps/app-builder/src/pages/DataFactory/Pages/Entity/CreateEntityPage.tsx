@@ -1,5 +1,5 @@
-import React from 'react';
-import { Form, Input, Button, Message, Radio } from '@arco-design/web-react';
+import React, { useState } from 'react';
+import { Form, Input, Select, Message, Radio, Modal } from '@arco-design/web-react';
 import styles from './index.module.less';
 import { DS_RESOURCE_TYPE } from '../../utils/constans';
 
@@ -8,6 +8,8 @@ interface EntityFormValues {
   code: string;
   name: string;
   description: string;
+  dsResource: string;
+  dsTable: string;
 }
 
 const entitySources = [
@@ -15,20 +17,52 @@ const entitySources = [
   { label: '使用自有数据源中的数据表', value: 'existing' },
 ];
 
-const CreateEntityPage: React.FC<{ handlePageType: (tab: string) => void }> = ({ handlePageType }) => {
+const dsOptions: { label: string, value: string }[] = [];
+const dsTables: { label: string, value: string }[] = [];
+
+const CreateEntityPage: React.FC<{ visible: boolean, setVisible: (visible: boolean) => void, handlePageType: (tab: string) => void, setRefreshEntityList: (refresh: boolean) => void }> = ({ visible, setVisible, handlePageType, setRefreshEntityList }) => {
   const [form] = Form.useForm<EntityFormValues>();
-  // const [dsResource, setDsResource] = useState<string>(DS_RESOURCE_TYPE.INTERNAL); // 数据源来源：内部数据源、外部数据源、外部数据源中引用自有数据源已有资产
-  const dsResource = DS_RESOURCE_TYPE.INTERNAL;
+  const [dsResource, setDsResource] = useState<string>(DS_RESOURCE_TYPE.EXTERNAL); // 数据源来源：内部数据源、外部数据源、外部数据源中引用自有数据源已有资产
   // 提交
   const handleFinish = () => {
     // TODO: 提交表单数据
-    Message.success('保存成功');
-    handlePageType('check-entity');
+    form.validate().then(values => {
+      const { nodes } = JSON.parse(localStorage.getItem('entityFormValues') || JSON.stringify({nodes: []}));
+
+      nodes.push({
+        ...values,
+        id: values.code,
+        title: values.name,
+        x: nodes.length * 300,
+        y: 0,
+        fields: [
+          {id: 'ID', name: 'ID', type: '自增ID', isSystem: true},
+        ],
+      }); 
+      localStorage.setItem('entityFormValues', JSON.stringify({ nodes }));
+      console.log(values);
+      Message.success('保存成功');
+      setVisible(false);
+      setRefreshEntityList(true);
+    });
+  };
+
+  const handleSourceChange = (value: string) => {
+    setDsResource(value);
+    form.setFieldValue('source', value);
+    form.setFieldValue('dsResource', '');
+    form.setFieldValue('dsTable', '');
   };
 
   return (
-    <div className={styles['create-entity-page']}>
-      <h2 className={styles['page-title']}>创建业务实体</h2>
+    <Modal 
+      className={styles['create-entity-modal']} 
+      title='创建业务实体' visible={visible} 
+      onOk={handleFinish} 
+      onCancel={() => setVisible(false)} 
+      okText='创建'
+      cancelText='取消'
+    >
       <Form
         form={form}
         layout="vertical"
@@ -42,13 +76,33 @@ const CreateEntityPage: React.FC<{ handlePageType: (tab: string) => void }> = ({
             rules={[{ required: true, message: '请选择业务实体来源' }]}
             initialValue={entitySources[0].value}
           >
-            <Radio.Group>
+            <Radio.Group onChange={handleSourceChange}>
               {entitySources.map(source => (
                 <Radio value={source.value} key={source.value}>{source.label}</Radio>
               ))}
             </Radio.Group>
           </Form.Item>
         }
+
+        {form.getFieldValue('source') === entitySources[1].value && (
+          <>
+            <Form.Item
+              label="外部数据源"
+              field="dsResource"
+              rules={[{ required: true, message: '请选择外部数据源' }]}
+            >
+              <Select placeholder="请选择自有数据源，可选已接入的外部数据源" options={dsOptions} />
+            </Form.Item>
+
+            <Form.Item
+              label="数据表"
+              field="dsTable"
+              rules={[{ required: true, message: '请选择数据表' }]}
+              >
+              <Select placeholder="请选择自有数据源中的数据表" options={dsTables} />
+            </Form.Item>
+          </>
+        )}
         
         <Form.Item
           label="业务实体编码"
@@ -83,17 +137,9 @@ const CreateEntityPage: React.FC<{ handlePageType: (tab: string) => void }> = ({
             showWordLimit
           />
         </Form.Item>
-        
-        <Form.Item className={styles['form-item-operation']}>
-          <Button type="secondary" onClick={() => handlePageType('check-entity')}>
-            取消
-          </Button>
-          <Button type="primary" onClick={() => handleFinish()}>
-            创建
-          </Button>
-        </Form.Item>
+      
       </Form>
-    </div>
+    </Modal>
   );
 };
 

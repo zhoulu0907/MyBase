@@ -1,12 +1,17 @@
 // 业务对象节点数据
 export interface EntityNode {
   id: string;
+  code: string;
   title: string;
   fields: Array<{
     id: string;
+    code: string;
     name: string;
     type: string;
     isSystem?: boolean;
+    in?: boolean; // 输入端口，连接点在左侧
+    out?: boolean; // 输出端口，连接点在右侧
+    isTitle?: boolean; // 是否为标题字段，使用不同的高度
   }>;
   x: number;
   y: number;

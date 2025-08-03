@@ -15,15 +15,15 @@ interface NodeData {
   data: EntityNode;
   onNodeEdit?: (data: EntityNode) => void;
   onNodeAdd?: () => void;
-  onNodeDelete?: (id: string) => void;
+  onNodeDelete?: (id: string) => void;  
+  onNodeAddField?: (id: string) => void;
+  onNodeAddRelation?: (id: string) => void;
 }
 
 const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
   const [nodeCollapsed, setNodeCollapsed] = useState({ system: false, custom: false });
-
   // 从 node 的 data 中获取节点数据
   const nodeData = (node.getData() as NodeData)?.data;
-  console.log('nodeData', nodeData);
 
   if (!nodeData) {
     console.error('nodeData is undefined');
@@ -46,20 +46,27 @@ const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
   const handleRefresh = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log('refresh');
   };
 
   const handleAddField = (e: Event) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log('add field');
+    const data = node.getData() as NodeData;
+    const onNodeAddField = data?.onNodeAddField;
+    if (onNodeAddField && nodeData) {
+      onNodeAddField(nodeData.id);
+    }
   };
 
   const handleAddRelation = (e: Event) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log('add relation');
-  };
+    const data = node.getData() as NodeData;
+    const onNodeAddRelation = data?.onNodeAddRelation;
+    if (onNodeAddRelation && nodeData) {
+      onNodeAddRelation(nodeData.id);
+    }
+    };
 
   const handleEdit = (e: Event) => {
     e.stopPropagation(); // 阻止事件冒泡
@@ -74,7 +81,6 @@ const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
   const handleDelete = (e: Event) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log('delete');
     // 从 node 的 data 中获取回调函数
     const data = node.getData() as NodeData;
     const onNodeDelete = data?.onNodeDelete;
@@ -169,10 +175,10 @@ const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
 
       {/* 节点底部 */}
       <div className={styles['node-footer']}>
-        <Button type="text" onClick={handleAddField}>
+        <Button type="text" onClick={handleAddField} className={styles['node-footer-button']}>
           添加字段
         </Button>
-        <Button type="text" onClick={handleAddRelation}>
+        <Button type="text" onClick={handleAddRelation} className={styles['node-footer-button']}>
           添加关系
         </Button>
       </div>
