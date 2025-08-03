@@ -133,7 +133,8 @@ const ERchart: React.FC<EntityERProps> = ({
     }
 
     // 添加节点
-    data.nodes.forEach(nodeData => {
+    if (data.nodes) {
+      data.nodes.forEach(nodeData => {
       const portsItems = (nodeData: EntityNode) => {
         const items: object[] = []
         nodeData.fields.forEach((field, index) => {
@@ -270,10 +271,12 @@ const ERchart: React.FC<EntityERProps> = ({
         },
       });
       graphRef.current?.addNode(node);
-    });
+      });
+    }
 
     // 添加边
-    data.edges.forEach(edgeData => {
+    if (data.edges) {
+      data.edges.forEach(edgeData => {
       // 确保 source 和 target 是对象，并包含 port
       const source = edgeData.source;
       const target = edgeData.target;
@@ -316,7 +319,8 @@ const ERchart: React.FC<EntityERProps> = ({
         // connector: { name: 'rounded', args: { radius: 8 }}, // 例如使用圆角连接
       });
       graphRef.current?.addEdge(edge);
-    });
+      });
+    }
 
     // 事件监听
     graphRef.current.on('node:click', ({ node }) => {

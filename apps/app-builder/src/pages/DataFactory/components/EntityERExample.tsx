@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 // import { Button, Space } from '@arco-design/web-react';
 import ERchart from './ERchart';
 import EditDrawer from './Drawer/EditEntityDrawer';
-import type { EntityNode, EntityERProps } from '../utils/interface';
+import type { EntityNode, EntityERProps, EntityData, EdgeData } from '../utils/interface';
 import CreateFieldModal from '../Pages/Entity/CreateFieldModal';
+import { Modal } from '@arco-design/web-react';
 
 // 修改示例数据，添加字段级别的关联
 const mockData = {
@@ -96,11 +97,13 @@ const mockData = {
 // 模式切换示例
 export const EntityERWithModeSwitch: React.FC<{ refreshEntityList: boolean, setRefreshEntityList: (refresh: boolean) => void }> = ({ refreshEntityList, setRefreshEntityList }) => {
   // const [mode, setMode] = useState<'view' | 'edit'>('view');
-  const [data, setData] = useState(mockData);
+  const [data, setData] = useState<EntityERProps['data']>(JSON.parse(localStorage.getItem('entityFormValues') || JSON.stringify({nodes: [], edges: []})) as unknown as EntityData);
   const [editDrawerVisible, setEditDrawerVisible] = useState(false);
   const [editingNode, setEditingNode] = useState<EntityNode | null>(null);
   const [createFieldModalVisible, setCreateFieldModalVisible] = useState(false);
   const [nodeId, setNodeId] = useState('');
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const handleNodeEdit = (editData: EntityNode) => {
     console.log('节点编辑:', editData);
@@ -116,6 +119,33 @@ export const EntityERWithModeSwitch: React.FC<{ refreshEntityList: boolean, setR
 
   const handleNodeAddRelation = (id: string) => {
     console.log('添加关联:', id);
+  };
+
+  const handleNodeDelete = (id: string) => {
+    console.log('删除节点:', id);
+    setDeleteModalVisible(true);
+    setNodeId(id);
+  };
+
+  const confirmDelete = () => {
+    setDeleteLoading(true);
+    console.log('删除节点:', nodeId);
+    const { nodes, edges } = JSON.parse(localStorage.getItem('entityFormValues') || JSON.stringify({nodes: [], edges: []})) ;
+
+    const newNodes = nodes.filter((node: EntityNode) => node.id !== nodeId);
+    const newEdges = edges?.filter((edge: EdgeData) => edge.source.cell !== nodeId && edge.target.cell !== nodeId);
+    setData({
+      nodes: newNodes,
+      edges: newEdges,
+    });
+    localStorage.setItem('entityFormValues', JSON.stringify({nodes: newNodes, edges: newEdges}));
+    setDeleteModalVisible(false);
+    setDeleteLoading(false);
+    setRefreshEntityList(true);
+  };
+
+  const cancelDelete = () => {
+    setDeleteModalVisible(false);
   };
 
   useEffect(() => {
@@ -154,6 +184,7 @@ export const EntityERWithModeSwitch: React.FC<{ refreshEntityList: boolean, setR
         onNodeEdit={handleNodeEdit}
         onNodeAddField={handleNodeAddField}
         onNodeAddRelation={handleNodeAddRelation}
+        onNodeDelete={handleNodeDelete}
       />
       <EditDrawer
         visible={editDrawerVisible}
@@ -168,6 +199,18 @@ export const EntityERWithModeSwitch: React.FC<{ refreshEntityList: boolean, setR
         setRefreshEntityList={setRefreshEntityList}
         entityId={nodeId}
       />
+      {/* 删除确认对话框 */}
+      <Modal
+        title="确认删除"
+        visible={deleteModalVisible}
+        onOk={confirmDelete}
+        onCancel={cancelDelete}
+        confirmLoading={deleteLoading}
+        okText="确认删除"
+        cancelText="取消"
+      >
+        <p>确定要删除这个业务实体吗？删除后无法恢复。</p>
+      </Modal>
     </div>
   );
 };
