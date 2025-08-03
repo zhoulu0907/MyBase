@@ -34,6 +34,16 @@ export const LAYOUT_COMPONENT_TYPES = {
 // 列表组件类型
 export const LIST_COMPONENT_TYPES = {
   TABLE: 'XTable',
+  CALENDAR: 'XCalendar',
+  TIMELINE: 'XTimeline',
+  CAROUSEL: 'XCarousel',
+  LIST: 'XList',
+} as const;
+
+// 展示组件类型
+export const SHOW_COMPONENT_TYPES = {
+  IMAGE: 'XImage',
+  TEXT: 'XText',
 } as const;
 
 // 所有组件类型
@@ -41,6 +51,7 @@ export const ALL_COMPONENT_TYPES = {
   ...FORM_COMPONENT_TYPES,
   ...LAYOUT_COMPONENT_TYPES,
   ...LIST_COMPONENT_TYPES,
+  ...SHOW_COMPONENT_TYPES,
 } as const;
 
 // 组件类型值数组（用于类型检查）

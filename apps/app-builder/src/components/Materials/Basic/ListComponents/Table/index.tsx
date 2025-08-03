@@ -10,7 +10,7 @@ const opearate: any = {
     title: "操作",
     dataIndex: "op",
     fixed: null,
-    width: 100,
+    width: '110px',
     render: () => (
         <>
             <Button
