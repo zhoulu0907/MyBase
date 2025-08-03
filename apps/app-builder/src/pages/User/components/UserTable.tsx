@@ -11,7 +11,8 @@ import {
 import { useEffect, useState } from 'react';
 import s from '../index.module.less';
 import UserFormModal from './UserFormModal';
-
+import type { UserVO } from '@onebase/platform-center/src/types/user';
+import type { PageParam } from '@onebase/platform-center/src/types/common';
 interface UserTableProps {
   selectedDeptId?: number;
   onTotalUserCountChange: (count: number) => void;
@@ -19,23 +20,25 @@ interface UserTableProps {
   deptLoading: boolean; // 部门数据加载状态
 }
 
+type UserRecord = Pick<UserVO, 'id' | 'username' | 'nickname'> & Partial<UserVO>;
+
 export default function UserTable({ selectedDeptId = undefined, onTotalUserCountChange, deptTree, deptLoading }: UserTableProps) {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [search, setSearch] = useState('');
   const [userModalVisible, setUserModalVisible] = useState(false);
-  const [editingUser, setEditingUser] = useState<any | undefined>();
-  const [data, setData] = useState<any[]>([]);
+  const [editingUser, setEditingUser] = useState<UserRecord | undefined>();
+  const [data, setData] = useState<UserRecord[]>([]);
   const [total, setTotal] = useState(0);
-  const [currentUser, setCurrentUser] = useState<any | undefined>();
+  const [currentUser, setCurrentUser] = useState<UserRecord | undefined>();
   const [detailModalVisible, setDetailModalVisible] = useState(false);
-  const [detailUser, setDetailUser] = useState<any | undefined>();
+  const [detailUser, setDetailUser] = useState<UserRecord | undefined>();
   const [exportModalVisible, setExportModalVisible] = useState(false);
   const [exportForm] = Form.useForm();
 
   // 查询用户列表
   const getUserList = async () => {
-    const params: any = {
+    const params: PageParam = {
       pageNo: page,
       pageSize,
     };
@@ -47,7 +50,7 @@ export default function UserTable({ selectedDeptId = undefined, onTotalUserCount
     // setTotal(res.total || 0);
     // onTotalUserCountChange(res.total || 0);
     getUserPage(params).catch(() => {
-      setData([{ id: 1, nickname: '用户1', username: '用户1' }]);
+      setData([{ id: 1, nickname: '用户1', username: '用户1' }, { id: 2, nickname: '用户2', status: 1, username: '用户1' }]);
     })
   };
 
@@ -55,7 +58,7 @@ export default function UserTable({ selectedDeptId = undefined, onTotalUserCount
     getUserList();
   }, [selectedDeptId, page, pageSize, search, onTotalUserCountChange]);
 
-  const handleEdit = (record: any) => {
+  const handleEdit = (record: UserRecord) => {
     setEditingUser(record);
     setUserModalVisible(true);
   }
@@ -97,7 +100,7 @@ export default function UserTable({ selectedDeptId = undefined, onTotalUserCount
   }
 
   // 重置密码
-  const handleResetPassword = (record: any) => {
+  const handleResetPassword = (record: UserRecord) => {
     Modal.confirm({
       title: `确定重置账号 ${record.nickname} 的密码？`,
       content: '密码重置后，原密码失效，请将新密码发送至用户。',
@@ -113,7 +116,7 @@ export default function UserTable({ selectedDeptId = undefined, onTotalUserCount
   }
 
   // 禁用
-  const handleDisable = (record: any) => {
+  const handleDisable = (record: UserRecord) => {
     Modal.confirm({
       title: `确定要禁用账号 ${record.nickname} 吗？`,
       content: '禁用状态下，用户无法登录系统，再次启用时用户可恢复正常使用',
@@ -126,7 +129,7 @@ export default function UserTable({ selectedDeptId = undefined, onTotalUserCount
   }
 
   // 删除
-  const handleDelete = (record: any) => {
+  const handleDelete = (record: UserRecord) => {
     Modal.confirm({
       title: `确认要删除用户 ${record.nickname} 吗？`,
       content: '删除用户后，用户将无法登录，用户数据将被永久删除，请谨慎操作。',
@@ -139,18 +142,18 @@ export default function UserTable({ selectedDeptId = undefined, onTotalUserCount
   }
 
   // 查看详情
-  const handleViewDetail = (record: any) => {
+  const handleViewDetail = (record: UserRecord) => {
     setDetailUser(record);
     setDetailModalVisible(true);
   }
 
-  const getColumns = (handleEdit: (record: any) => void) => {
+  const getColumns = (handleEdit: (record: UserRecord) => void) => {
     return [
       {
         title: '姓名',
         dataIndex: 'username',
         width: 100,
-        render: (_: any, record: any) => (
+        render: (_: any, record: UserRecord) => (
           <span
             className={s.tableColumnUsername}
             onClick={() => handleViewDetail(record)}
@@ -218,6 +221,7 @@ export default function UserTable({ selectedDeptId = undefined, onTotalUserCount
       </div>
       {/* 表格 */}
       <Table
+        rowKey='id'
         columns={getColumns(handleEdit)}
         data={data}
         pagination={false}

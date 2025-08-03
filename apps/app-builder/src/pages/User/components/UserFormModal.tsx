@@ -12,7 +12,7 @@ interface UserFormModalProps {
   onOk: () => void;
   initialValues?: Partial<UserVO>;
   mode?: 'create' | 'edit';
-  isDetail?: boolean; // 添加详情模式标志
+  isDetail?: boolean; // 详情模式标志
   deptTree?: any[]; // 部门树数据
   deptLoading?: boolean; // 部门数据加载状态
 }
@@ -71,7 +71,7 @@ export default function UserFormModal({
       confirmLoading={loading}
       unmountOnExit
       style={{ width: 700 }}
-      // 详情模式下自定义footer
+      // 详情模式下自定义footer 只有关闭按钮
       footer={isDetail ? 
         [
           <Button key="close" onClick={onCancel}>
