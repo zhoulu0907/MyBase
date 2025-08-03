@@ -38,12 +38,15 @@ export const LIST_COMPONENT_TYPES = {
   TIMELINE: 'XTimeline',
   CAROUSEL: 'XCarousel',
   LIST: 'XList',
+  COLLAPSE: 'XCollapse',
 } as const;
 
 // 展示组件类型
 export const SHOW_COMPONENT_TYPES = {
+  INFO_NOTICE: 'XInfoNotice',
   IMAGE: 'XImage',
   TEXT: 'XText',
+  WEB_VIEW: 'XWebView',
 } as const;
 
 // 所有组件类型

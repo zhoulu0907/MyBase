@@ -87,12 +87,18 @@ const ComponentRender: React.FC<ComponentRenderProps> = ({
         return <ListComp.XCarousel cpName={cpId} id={cpId} {...componentConfig} />;
       case LIST_COMPONENT_TYPES.LIST:
         return <ListComp.XList cpName={cpId} id={cpId} {...componentConfig} />;
+      case LIST_COMPONENT_TYPES.COLLAPSE:
+        return <ListComp.XCollapse cpName={cpId} id={cpId} {...componentConfig} />;
 
       //  展示组件
+      case SHOW_COMPONENT_TYPES.INFO_NOTICE:
+        return <ShowComp.XInfoNotice cpName={cpId} id={cpId} {...componentConfig} />;
       case SHOW_COMPONENT_TYPES.IMAGE:
         return <ShowComp.XImage cpName={cpId} id={cpId} {...componentConfig} />;
       case SHOW_COMPONENT_TYPES.TEXT:
         return <ShowComp.XText cpName={cpId} id={cpId} {...componentConfig} />;
+      case SHOW_COMPONENT_TYPES.WEB_VIEW:
+        return <ShowComp.XWebView cpName={cpId} id={cpId} {...componentConfig} />;
 
       default:
         return <div>未知组件类型: {cpType}</div>;

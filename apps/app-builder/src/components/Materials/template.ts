@@ -215,7 +215,7 @@ const allTemplate = {
                     category: 'base'
                 },
                 {
-                    type: LIST_COMPONENT_TYPES.TABLE,
+                    type: LIST_COMPONENT_TYPES.COLLAPSE,
                     h: 48,
                     w: 68,
                     displayName: '看板',
@@ -253,7 +253,7 @@ const allTemplate = {
             category: 'show',
             items: [
                 {
-                    type: FORM_COMPONENT_TYPES.INPUT_TEXT,
+                    type: SHOW_COMPONENT_TYPES.INFO_NOTICE,
                     h: 48,
                     w: 68,
                     displayName: '信息公告',
@@ -277,7 +277,7 @@ const allTemplate = {
                     category: 'base'
                 },
                 {
-                    type: FORM_COMPONENT_TYPES.INPUT_TEXT,
+                    type: SHOW_COMPONENT_TYPES.WEB_VIEW,
                     h: 48,
                     w: 68,
                     displayName: '网页组件',

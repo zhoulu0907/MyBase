@@ -35,10 +35,13 @@ const componentSchemaMap: Partial<Record<ComponentType, ComponentSchema>> = {
     [ALL_COMPONENT_TYPES.CALENDAR]: BasicSchema.XCalendar,
     [ALL_COMPONENT_TYPES.TIMELINE]: BasicSchema.XTimeline,
     [ALL_COMPONENT_TYPES.CAROUSEL]: BasicSchema.XCarousel,
+    [ALL_COMPONENT_TYPES.COLLAPSE]: BasicSchema.XCollapse,
     [ALL_COMPONENT_TYPES.LIST]: BasicSchema.XList,
 
+    [ALL_COMPONENT_TYPES.INFO_NOTICE]: BasicSchema.XInfoNotice,
     [ALL_COMPONENT_TYPES.IMAGE]: BasicSchema.XImage,
     [ALL_COMPONENT_TYPES.TEXT]: BasicSchema.XText,
+    [ALL_COMPONENT_TYPES.WEB_VIEW]: BasicSchema.XWebView,
 };
 
 /**
