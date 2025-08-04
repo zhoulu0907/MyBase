@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button, Tag, Radio } from '@arco-design/web-react';
 import { IconPlus, IconNav, IconMindMapping } from '@arco-design/web-react/icon';
 import EntityTable from '../../components/EntityTable';
@@ -59,7 +59,7 @@ const CheckEntityPage: React.FC<{ handlePageType: (tab: string) => void }> = ({ 
         setVisible={setCreateEntityModalVisible}
         handlePageType={handlePageType}
         successCallback={() => {
-          setRefreshEntityList(prev => !prev);
+          setRefreshEntityList(true);
         }}
       />
     </div>

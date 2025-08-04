@@ -24,6 +24,7 @@ export interface EntityNodeProps {
   onNodeDelete?: (id: string) => void;
   onNodeAddField?: (id: string) => void;
   onNodeAddRelation?: (id: string) => void;
+  onlyUpdateNode?: Boolean,
   // mode?: 'view' | 'edit';
   nodeData: EntityNode;
 }

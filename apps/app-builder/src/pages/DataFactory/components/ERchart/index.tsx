@@ -22,6 +22,7 @@ const ERchart: React.FC<EntityERProps> = ({
   onNodeDelete,
   onNodeAddField,
   onNodeAddRelation,
+  onlyUpdateNode,
 }) => {
   const [selectedNode, setSelectedNode] = useState<EntityNode | null>(null);
   const [drawerVisible, setDrawerVisible] = useState(false);
@@ -29,6 +30,7 @@ const ERchart: React.FC<EntityERProps> = ({
   // const [editingNode, setEditingNode] = useState<EntityNode | null>(null);
   const graphRef = useRef<Graph | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const isGraphInitialized = useRef(false); // 标记是否已初始化
 
 
   useEffect(() => {
@@ -53,74 +55,156 @@ const ERchart: React.FC<EntityERProps> = ({
     };
   }, []); // 添加 mode 到依赖项
 
-  // 初始化图形
-  useEffect(() => {
-    if (!containerRef.current) {
-      console.warn('Container ref is not available');
-      return;
-    }
+    // 初始化图形
+    useEffect(() => {
+      
 
-    try {
-      graphRef.current = new Graph({
-        container: containerRef.current,
-        // width: 800, // 默认父容器宽高
-        // height: 600,
-        background: {
-          // color: 'rgba(173, 219, 179, 0.5)',
-        },
-        grid: {
-          visible: true,
-          type: 'mesh',
-          size: 20,
-          args: {
-            color: '#eee',
-            thickness: 1,
-          },
-        },
-        connecting: {
-          anchor: 'right',
-          connector: 'rounded', // 或 'smooth', 'jumpover', 或自定义
-          connectionPoint: 'anchor',
-          allowBlank: false,
-          highlight: true,
-          snap: true,
-          createEdge() {
-            return graphRef.current!.createEdge({
-              shape: 'edge',
-              attrs: {
-                line: {
-                  stroke: '#39B85F',
-                  strokeWidth: 2,
-                  targetMarker: {
-                    name: 'block',
-                    width: 12,
-                    height: 8,
+      const initGraph = () => {
+        if (!containerRef.current) {
+          console.warn('Container ref is not available');
+          return;
+        }
+
+        try {
+          graphRef.current = new Graph({
+            container: containerRef.current,
+            // width: 800, // 默认父容器宽高
+            // height: 600,
+            background: {
+              // color: 'rgba(173, 219, 179, 0.5)',
+            },
+            grid: {
+              visible: true,
+              type: 'mesh',
+              size: 20,
+              args: {
+                color: '#eee',
+                thickness: 1,
+              },
+            },
+            connecting: {
+              anchor: 'right',
+              connector: 'rounded', // 或 'smooth', 'jumpover', 或自定义
+              connectionPoint: 'anchor',
+              allowBlank: false,
+              highlight: true,
+              snap: true,
+              createEdge() {
+                return graphRef.current!.createEdge({
+                  shape: 'edge',
+                  attrs: {
+                    line: {
+                      stroke: '#39B85F',
+                      strokeWidth: 2,
+                      targetMarker: {
+                        name: 'block',
+                        width: 12,
+                        height: 8,
+                      },
+                    },
                   },
-                },
+                });
+              },
+            },
+            interacting: {
+              nodeMovable: mode === 'edit',
+              edgeMovable: mode === 'edit',
+              edgeLabelMovable: mode === 'edit',
+            },
+            panning: true, // 支持拖拽平移
+            mousewheel: true, // 支持鼠标滚轮缩放
+            // zooming: true, // 支持缩放
+            // zoomingOptions: {
+            //   min: 0.5,
+            //   max: 2,
+            //   step: 0.1,
+            // },
+          });
+
+          
+        } catch (error) {
+          console.error('Failed to create graph:', error);
+          return;
+        }
+
+              // 事件监听
+        graphRef.current.on('node:click', ({ node }) => {
+          const nodeData = node.getData() as EntityNode;
+          if (nodeData) {
+            setSelectedNode(nodeData);
+            // setDrawerVisible(true);
+          }
+        });
+    
+        graphRef.current.on('node:mouseenter', ({ node }) => {
+          if (mode === 'edit') {
+            node.setAttrs({
+              body: {
+                stroke: '#39B85F',
+                strokeWidth: 2,
               },
             });
-          },
-        },
-        interacting: {
-          nodeMovable: mode === 'edit',
-          edgeMovable: mode === 'edit',
-          edgeLabelMovable: mode === 'edit',
-        },
-        panning: true, // 支持拖拽平移
-        mousewheel: true, // 支持鼠标滚轮缩放
-        // zooming: true, // 支持缩放
-        // zoomingOptions: {
-        //   min: 0.5,
-        //   max: 2,
-        //   step: 0.1,
-        // },
-      });
-    } catch (error) {
-      console.error('Failed to create graph:', error);
+          }
+        });
+    
+        graphRef.current.on('node:mouseleave', ({ node }) => {
+          node.setAttrs({
+            body: {
+              stroke: '#d9d9d9',
+              strokeWidth: 1,
+            },
+          });
+        });
+    
+        graphRef.current.on('node:moved', ({ e, x, y, node, view }) => {
+          console.log('node:moved', e, x, y, node, view);
+          const { nodes, edges } = JSON.parse(localStorage.getItem('entityFormValues') || JSON.stringify({ nodes: [], edges: [] }));
+          const nodeData = nodes.find((n: EntityNode) => n.id === node.id);
+          if (nodeData) {
+            nodeData.x = x;
+            nodeData.y = y;
+          }
+          localStorage.setItem('entityFormValues', JSON.stringify({ nodes, edges }));
+        });
+
+        isGraphInitialized.current = true; // 标记已初始化
+      }
+  
+
+      // graphRef.current?.centerContent(); // 居中
+  
+      // graphRef.current?.centerContent(); // 居中
+      // graphRef.current?.zoomToFit({ maxScale: 1 }); // 适应画布
+  
+      initGraph();
+  
+      return () => {
+        if (graphRef.current) {
+          graphRef.current.dispose();
+          graphRef.current = null;
+          isGraphInitialized.current = false;
+        }
+      };
+    }, []);
+
+  // 更新数据
+  useEffect(() => {
+    if (!containerRef.current || !isGraphInitialized.current) {
+      console.warn('Graph not initialized yet, skipping data update.');
       return;
     }
 
-    graphRef.current?.centerContent(); // 居中
+    graphRef.current.clearCells();
+
+
+    if (!onlyUpdateNode) {
+      // 或者更简单地，只在初始化后第一次调用
+      // if (!graph.isFrozen()) { // 或者使用一个初始化标志
+      console.log("First data load, centering content.");
+      graphRef.current?.centerContent();
+      graphRef.current?.zoomToFit({ maxScale: 1 });
+    }
+    
 
     // 添加节点
     if (data.nodes) {
@@ -312,55 +396,14 @@ const ERchart: React.FC<EntityERProps> = ({
       });
     }
 
-    graphRef.current?.centerContent(); // 居中
-    graphRef.current?.zoomToFit({ maxScale: 1 }); // 适应画布
+    if (!onlyUpdateNode) {
+      // 或者更简单地，只在初始化后第一次调用
+      // if (!graph.isFrozen()) { // 或者使用一个初始化标志
+      console.log("First data load, centering content.");
+      graphRef.current?.centerContent();
+      graphRef.current?.zoomToFit({ maxScale: 1 });
+    }
 
-    // 事件监听
-    graphRef.current.on('node:click', ({ node }) => {
-      const nodeData = node.getData() as EntityNode;
-      if (nodeData) {
-        setSelectedNode(nodeData);
-        // setDrawerVisible(true);
-      }
-    });
-
-    graphRef.current.on('node:mouseenter', ({ node }) => {
-      if (mode === 'edit') {
-        node.setAttrs({
-          body: {
-            stroke: '#39B85F',
-            strokeWidth: 2,
-          },
-        });
-      }
-    });
-
-    graphRef.current.on('node:mouseleave', ({ node }) => {
-      node.setAttrs({
-        body: {
-          stroke: '#d9d9d9',
-          strokeWidth: 1,
-        },
-      });
-    });
-
-    graphRef.current.on('node:moved', ({ e, x, y, node, view }) => {
-      console.log('node:moved', e, x, y, node, view);
-      const { nodes, edges } = JSON.parse(localStorage.getItem('entityFormValues') || JSON.stringify({ nodes: [], edges: [] }));
-      const nodeData = nodes.find((n: EntityNode) => n.id === node.id);
-      if (nodeData) {
-        nodeData.x = x;
-        nodeData.y = y;
-      }
-      localStorage.setItem('entityFormValues', JSON.stringify({ nodes, edges }));
-    });
-
-    return () => {
-      if (graphRef.current) {
-        graphRef.current.dispose();
-        graphRef.current = null;
-      }
-    };
   }, [data]);
 
   return (

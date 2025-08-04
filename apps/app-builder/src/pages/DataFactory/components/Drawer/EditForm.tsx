@@ -8,7 +8,6 @@ interface NodeEditFormProps {
   node: EntityNode;
   onSave: (data: Partial<FormValues>) => void;
   onCancel: () => void;
-  successCallback: () => void;
 }
 
 interface FormItem {
