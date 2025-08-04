@@ -120,6 +120,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
                     <Dropdown droplist={userMenu} position='bottom'>
                         <div className={styles.userDropdown}>
                             <Avatar size={32} style={{ backgroundColor: '#4FAE7B' }}>
+                                {/* TODO(Ming): 用户信息获取 */}
                                 {tokenInfo?.userId?.toString().charAt(0) || 'U'}
                             </Avatar>
                         </div>
