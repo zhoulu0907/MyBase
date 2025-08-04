@@ -10,6 +10,8 @@
     justify-content: space-between;
     // margin-bottom: 16px;
     padding: 34px 16px;
+    height: 48px;
+    box-sizing: border-box;
     &-left {
       display: flex;
       align-items: center;
@@ -18,7 +20,7 @@
       }
     }
   }
-  
+
   &-create-button {
     position: absolute;
     left: 16px;
@@ -70,24 +72,24 @@
     display: flex;
     gap: 16px;
     align-items: flex-start;
-    
+
     .left-entity-section,
     .right-entity-section {
       flex: 1;
       min-width: 200px;
-      
+
       .arco-form-item {
         margin-bottom: 16px;
       }
     }
-    
+
     .relation-type-section {
       flex: 0 0 150px;
       display: flex;
       align-items: center;
       justify-content: center;
       padding-top: 32px; // 调整垂直对齐
-      
+
       .arco-form-item {
         margin-bottom: 0;
         width: 100%;
