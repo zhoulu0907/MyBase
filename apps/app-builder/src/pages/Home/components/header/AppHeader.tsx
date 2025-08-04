@@ -38,8 +38,6 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
         getTabKeyFromPath(location.pathname)
     );
 
-    console.log(getTabKeyFromPath(location.pathname), 999);
-
     useEffect(() => {
         setActiveTab(getTabKeyFromPath(location.pathname));
     }, [location.pathname]);
