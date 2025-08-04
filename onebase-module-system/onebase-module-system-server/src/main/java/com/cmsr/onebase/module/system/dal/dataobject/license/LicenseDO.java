@@ -4,7 +4,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Column;
 import lombok.*;
 import java.time.LocalDateTime;
-import com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO;
+import com.cmsr.onebase.framework.data.base.BaseDO;
 
 /**
  * 平台License信息

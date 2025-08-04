@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.system.dal.dataobject.mail;
 
 import jakarta.persistence.Table;
 import jakarta.persistence.Column;
-import com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO;
+import com.cmsr.onebase.framework.data.base.BaseDO;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import lombok.Data;
 

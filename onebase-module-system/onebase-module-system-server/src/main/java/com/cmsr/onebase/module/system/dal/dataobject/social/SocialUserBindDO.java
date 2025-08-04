@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.system.dal.dataobject.social;
 
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
-import com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO;
+import com.cmsr.onebase.framework.data.base.BaseDO;
 import jakarta.persistence.Column;
 import jakarta.persistence.Table;
 import lombok.*;

@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.infra.dal.dataobject.db;
 
-import com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO;
+import com.cmsr.onebase.framework.data.base.BaseDO;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Table;

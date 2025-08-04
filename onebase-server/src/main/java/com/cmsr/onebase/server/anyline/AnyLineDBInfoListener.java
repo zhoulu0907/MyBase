@@ -3,7 +3,7 @@ package com.cmsr.onebase.server.anyline;
 import com.cmsr.onebase.framework.common.anyline.web.BizException;
 import com.cmsr.onebase.framework.common.anyline.web.StatusCode;
 import com.cmsr.onebase.framework.common.util.snowflake.SnowflakeId;
-import com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO;
+import com.cmsr.onebase.framework.data.base.BaseDO;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
 import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;

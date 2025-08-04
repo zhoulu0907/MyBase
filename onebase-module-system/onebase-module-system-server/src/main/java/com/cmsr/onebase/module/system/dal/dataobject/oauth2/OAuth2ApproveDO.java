@@ -3,7 +3,7 @@ package com.cmsr.onebase.module.system.dal.dataobject.oauth2;
 import jakarta.persistence.Table;
 import jakarta.persistence.Column;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
-import com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO;
+import com.cmsr.onebase.framework.data.base.BaseDO;
 import lombok.Data;
 
 import java.time.LocalDateTime;

@@ -1,25 +1,15 @@
 package com.cmsr.onebase.module.infra.dal.dataobject.file;
 
-import cn.hutool.core.util.StrUtil;
-import com.cmsr.onebase.framework.common.util.json.JsonUtils;
-import com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO;
+import com.cmsr.onebase.framework.data.base.BaseDO;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.infra.framework.file.core.client.FileClientConfig;
-import com.cmsr.onebase.module.infra.framework.file.core.client.db.DBFileClientConfig;
-import com.cmsr.onebase.module.infra.framework.file.core.client.ftp.FtpFileClientConfig;
-import com.cmsr.onebase.module.infra.framework.file.core.client.local.LocalFileClientConfig;
-import com.cmsr.onebase.module.infra.framework.file.core.client.s3.S3FileClientConfig;
-import com.cmsr.onebase.module.infra.framework.file.core.client.sftp.SftpFileClientConfig;
 import com.cmsr.onebase.module.infra.framework.file.core.enums.FileStorageEnum;
-import com.fasterxml.jackson.core.type.TypeReference;
 import jakarta.persistence.Column;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.lang.reflect.Field;
 
 /**
  * 文件配置表
