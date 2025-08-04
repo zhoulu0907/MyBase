@@ -55,7 +55,7 @@ const DataSourceTable = ({
   };
 
   useEffect(() => {
-    getTableData();
+    // getTableData();
   }, []);
 
   const gotoEdit = (id: number) => {
@@ -162,6 +162,7 @@ const DataSourceTable = ({
           },
         }}
         loading={tableLoading}
+        style={{ margin: '0 16px' }}
       />
       
       {/* 删除确认对话框 */}
