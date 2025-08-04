@@ -55,35 +55,11 @@ const AppBreadcrumb: React.FC<BreadcrumbProps> = ({ className, items }) => {
         case 'platform-info':
           title = t('breadcrumb.platformInfo');
           break;
-        case 'user':
-          title = t('breadcrumb.user');
+        case 'tenant':
+          title = t('breadcrumb.tenant');
           break;
-        case 'content':
-          title = t('breadcrumb.content');
-          break;
-        case 'system':
-          title = t('breadcrumb.system');
-          break;
-        case 'list':
-          title = t('breadcrumb.userList');
-          break;
-        case 'profile':
-          title = t('breadcrumb.userProfile');
-          break;
-        case 'permissions':
-          title = t('breadcrumb.permissions');
-          break;
-        case 'article':
-          title = t('breadcrumb.article');
-          break;
-        case 'media':
-          title = t('breadcrumb.media');
-          break;
-        case 'general':
-          title = t('breadcrumb.general');
-          break;
-        case 'security':
-          title = t('breadcrumb.security');
+        case 'administrator':
+          title = t('breadcrumb.administrator');
           break;
         default:
           title = segment;

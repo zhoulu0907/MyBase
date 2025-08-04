@@ -25,7 +25,7 @@ export const useAuthCheck = () => {
 
           // 如果在登录页面，重定向到首页
           if (location.pathname === '/login') {
-            navigate('/onebase', { replace: true });
+            navigate('/onebase/platform-info', { replace: true });
           }
         } else {
           // 未登录

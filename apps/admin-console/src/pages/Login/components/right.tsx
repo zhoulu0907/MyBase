@@ -53,7 +53,7 @@ const Right: React.FC = () => {
 
     // 显示成功消息并跳转
     Message.success(t('auth.loginSuccess'));
-    navigate('/onebase');
+    navigate('/onebase/platform-info');
 
   };
 
