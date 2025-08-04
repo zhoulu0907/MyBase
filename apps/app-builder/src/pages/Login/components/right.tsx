@@ -17,6 +17,8 @@ import { useNavigate } from 'react-router-dom';
 import { sm2 } from 'sm-crypto';
  */
 
+import { TokenManager } from '@onebase/common';
+import { login, type LoginRequest, type LoginResponse } from '@onebase/platform-center';
 import { useI18n } from '../../../hooks/useI18n';
 import { useRememberMe } from '../../../hooks/useRememberMe';
 import styles from '../index.module.less';
@@ -103,125 +105,53 @@ const Right: React.FC = () => {
   };
 
 //   TODO(mickey): 调通后解除注释
-//   // 账号密码登录
-//   const handleAccountLogin = async (values: LoginFormData, captchaToken: string) => {
-//     try {
-//       if (!captchaToken) {
-//         Message.error('请先完成验证码验证');
-//         return;
-//       }
+// 账号密码登录
+  const handleAccountLogin = async (values: LoginFormData) => {
+    try {
 
-//       setLoading(true);
+      setLoading(true);
 
-//       // 1. 获取SM2公钥
-//       const pubKeyRes = await getSm2PublicKey();
-//       if (!pubKeyRes || !pubKeyRes.public_key) {
-//         Message.error('获取加密公钥失败');
-//         return;
-//       }
+      const loginData : LoginRequest= {
+        username: values.account!,
+        password: values.password!
+      };
 
-//       // 2. 加密密码
-//       // 这里的 1 是 sm2.doEncrypt 的参数，表示加密输出为 C1C3C2 格式（国密标准推荐的密文格式）
-//       // 具体可参考 sm-crypto 库文档：https://github.com/JuneAndGreen/sm-crypto
-//       const encryptedPassword = sm2.doEncrypt(values.password!, pubKeyRes.public_key, 1);
+      const response: LoginResponse = await login(loginData);
+      console.log(response);
 
-//       const loginData : LoginRequest= {
-//         account: values.account!,
-//         // 04 是国密标准推荐的密文格式 需要手工传入
-//         password: "04"+encryptedPassword,
-//         captcha_token: captchaToken
-//       };
+      if (response.accessToken) {
+        // 使用 TokenManager 存储 token 信息
+        TokenManager.setToken({
+            userId: response.userId,
+            accessToken: response.accessToken,
+            refreshToken: response.refreshToken,
+            expiresTime: response.expiresTime,
+            }, rememberMe);
 
-//       const response = await sessionLogin(loginData);
+            // 保存记住我状态和账号信息
+            saveRememberMe(values.account!, rememberMe);
 
-//       if (response.is_login) {
-//         Message.success(t('auth.loginSuccess'));
+            Message.success(t('auth.loginSuccess'));
+            // 跳转到首页
+            navigate('/onebase/my-app');
 
-//         // 使用 TokenManager 存储 token 信息
-//         TokenManager.setToken({
-//           isLogin: response.is_login,
-//           account: response.account,
-//           accountID: response.account_id,
-//           username: response.username,
-//           tokenName: response.token_name,
-//           tokenValue: response.token_value,
-//           expiresIn: response.expires_in,
-//         }, rememberMe);
+            return;
+        } else {
+            Message.error(t('auth.loginFailed'));
+        }
 
-//         // 保存记住我状态和账号信息
-//         saveRememberMe(values.account!, rememberMe);
-
-//         // 跳转到首页
-//         navigate('/onebase/my-app');
-//       } else {
-//         Message.error(t('auth.loginFailed'));
-//       }
-
-//     } catch (error: any) {
-//       console.error('登录失败:', error);
-//       Message.error(error.message || t('auth.invalidCredentials'));
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   // 手机号登录
-//   const handleMobileLogin = async (_values: LoginFormData, captchaToken: string) => {
-//     try {
-//       if (!captchaToken) {
-//         Message.error('请先完成验证码验证');
-//         return;
-//       }
-
-//       setLoading(true);
-
-//       // TODO: 调用手机号登录接口
-//       // const response = await mobileLoginService.login({
-//       //   mobile: values.mobile!,
-//       //   smsCode: values.smsCode!,
-//       //   captcha_token: captchaToken
-//       // });
-
-//       // 模拟登录请求
-//       await new Promise(resolve => setTimeout(resolve, 1500));
-
-//       Message.success(t('auth.loginSuccess'));
-//       navigate('/onebase');
-
-//     } catch (error: any) {
-//       console.error('登录失败:', error);
-//       Message.error(error.message || '登录失败，请检查验证码');
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
+    } catch (error: any) {
+      console.error('登录失败:', error);
+      Message.error(error.message || t('auth.invalidCredentials'));
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // 表单提交处理
   const handleSubmit = (_values: LoginFormData) => {
-    Message.success(t('auth.loginSuccess'));
-    // navigate('/onebase');
-    navigate('/onebase/my-app');
+    handleAccountLogin(_values);
   };
-
-//   TODO(mickey): 调通后解除注释
-//   const handleCaptchaSuccess = (captchaToken: string) => {
-//     console.log('验证码验证成功:', captchaToken);
-
-//     // 验证码验证成功后，自动提交表单
-//     form.validate().then((values: LoginFormData) => {
-
-//       if (loginType === 'account') {
-//         handleAccountLogin(values, captchaToken);
-//       } else if (loginType === 'mobile') {
-//         handleMobileLogin(values, captchaToken);
-//       } else{
-//         Message.error('登录方式不支持');
-//       }
-//     }).catch(() => {
-//       // 表单验证失败，不执行登录
-//       Message.error('登录失败');
-//     });
-//   };
 
   return (
     <div className={styles.loginPageRight}>

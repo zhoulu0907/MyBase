@@ -7,10 +7,10 @@ export { getBackendURL } from './services/base';
 export { CaptchaService, captchaService, getCaptcha, verifyCaptcha } from './services/captcha';
 
 // 导出会话服务
-export { getSm2PublicKey, login, SessionService, sessionService } from './services/session';
+export * from './services/session';
 
 export * from './services/dict';
 
-export * from './services/user'
+export * from './services/user';
 
-export * from './services/dept'
+export * from './services/dept';
