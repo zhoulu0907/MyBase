@@ -1,10 +1,10 @@
-import { memo } from "react";
-import { TimePicker, Tooltip, Form } from "@arco-design/web-react";
-import type { XInputTimePickerConfig } from "./schema";
 import {
-    STATUS_VALUES,
     STATUS_OPTIONS,
+    STATUS_VALUES,
 } from "@/components/Materials/constants";
+import { Form, TimePicker, Tooltip } from "@arco-design/web-react";
+import { memo } from "react";
+import type { XInputTimePickerConfig } from "./schema";
 
 const XTimePicker = memo((props: XInputTimePickerConfig) => {
     const {
@@ -27,6 +27,7 @@ const XTimePicker = memo((props: XInputTimePickerConfig) => {
                         status === STATUS_VALUES[STATUS_OPTIONS.READONLY]
                             ? "none"
                             : "unset",
+                    margin: '0px',
                 }}
             >
                 <TimePicker

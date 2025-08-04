@@ -1,6 +1,6 @@
-import { baseConfig, baseDefault, statusConfig, /* widthConfig, */ listTypeConfig, layoutConfig, type ICommonBaseType, type TStatusSelectKeyType, type TWidthSelectKeyType, type TUploadSelectKeyType, type TLayoutSelectKeyType } from "@/components/Materials/common";
-import { CONFIG_TYPES, STATUS_OPTIONS, STATUS_VALUES, /* WIDTH_OPTIONS, WIDTH_VALUES, */ LAYOUT_OPTIONS, LAYOUT_VALUES, UPLOAD_OPTIONS, UPLOAD_VALUES } from "@/components/Materials/constants";
-import type { IDescriptionConfigType, ILabelConfigType, INumberConfigType, IPlaceholderConfigType, ISelectConfigType, IStatusConfigType, ITextAreaConfigType, ITextConfigType, ITooltipConfigType, IWidthConfigType, TSelectDefaultType, TTextAreaDefaultType, TTextDefaultType, TNumberDefaultType, TBooleanDefaultType, IUploadSizeConfigType, IUploadLimitConfigType, IBooleanConfigType, ILayoutConfigType } from "@/components/Materials/types";
+import { baseConfig, baseDefault, layoutConfig, /* widthConfig, */ listTypeConfig, statusConfig, type ICommonBaseType, type TLayoutSelectKeyType, type TStatusSelectKeyType, type TUploadSelectKeyType, type TWidthSelectKeyType } from "@/components/Materials/common";
+import { CONFIG_TYPES, /* WIDTH_OPTIONS, WIDTH_VALUES, */ LAYOUT_OPTIONS, LAYOUT_VALUES, STATUS_OPTIONS, STATUS_VALUES, UPLOAD_OPTIONS, UPLOAD_VALUES } from "@/components/Materials/constants";
+import type { IBooleanConfigType, IDescriptionConfigType, ILabelConfigType, ILayoutConfigType, INumberConfigType, IPlaceholderConfigType, ISelectConfigType, IStatusConfigType, ITextAreaConfigType, ITextConfigType, ITooltipConfigType, IUploadLimitConfigType, IUploadSizeConfigType, IWidthConfigType, TBooleanDefaultType, TNumberDefaultType, TSelectDefaultType, TTextAreaDefaultType, TTextDefaultType } from "@/components/Materials/types";
 
 
 
@@ -161,7 +161,7 @@ const XFileUpload: XInputFileUploadSchema = {
     ],
     config: {
         ...baseDefault,
-        label: '',
+        label: '标题',
         description: '',
         tooltip: '',
         // width: WIDTH_VALUES[WIDTH_OPTIONS.QUARTER],
@@ -173,7 +173,7 @@ const XFileUpload: XInputFileUploadSchema = {
         showPreview: false,
         showDownload: false,
         listType: UPLOAD_VALUES[UPLOAD_OPTIONS.CARD],
-        layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
+        layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
         saveWithHidden: false,
     }
 };

@@ -1,10 +1,10 @@
-import { memo } from 'react';
-import { Input, Form } from '@arco-design/web-react';
-import { type XInputTextConfig } from './schema';
 import {
-    STATUS_VALUES,
     STATUS_OPTIONS,
+    STATUS_VALUES,
 } from '@/components/Materials/constants';
+import { Form, Input } from '@arco-design/web-react';
+import { memo } from 'react';
+import { type XInputTextConfig } from './schema';
 
 const XInputText = memo((props: XInputTextConfig) => {
     const {
@@ -34,6 +34,7 @@ const XInputText = memo((props: XInputTextConfig) => {
             style={{
                 pointerEvents:
                     status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset',
+                margin: '0px',
             }}
         >
             <Input

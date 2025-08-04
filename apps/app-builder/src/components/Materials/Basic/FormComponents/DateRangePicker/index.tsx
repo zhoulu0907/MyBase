@@ -1,7 +1,7 @@
+import { STATUS_OPTIONS, STATUS_VALUES } from "@/components/Materials/constants";
+import { DatePicker, Form, Tooltip } from "@arco-design/web-react";
 import { memo } from "react";
-import { DatePicker, Tooltip, Form } from "@arco-design/web-react";
 import type { XInputDateRangePickerConfig } from "./schema";
-import { STATUS_VALUES, STATUS_OPTIONS } from "@/components/Materials/constants";
 
 const XDateRangePicker = memo((props: XInputDateRangePickerConfig) => {
     const { label, status, tooltip, required, layout } = props;
@@ -17,6 +17,7 @@ const XDateRangePicker = memo((props: XInputDateRangePickerConfig) => {
                         status === STATUS_VALUES[STATUS_OPTIONS.READONLY]
                             ? "none"
                             : "unset",
+                    margin: '0px',
                 }}
             >
                 <DatePicker.RangePicker style={{ width: "100%" }} />

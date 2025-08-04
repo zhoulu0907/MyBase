@@ -1,10 +1,10 @@
-import { memo, useEffect, useState } from 'react';
-import { Input, Form } from '@arco-design/web-react';
-import type { XInputEmailConfig } from './schema';
 import {
-    STATUS_VALUES,
     STATUS_OPTIONS,
+    STATUS_VALUES,
 } from '@/components/Materials/constants';
+import { Form, Input } from '@arco-design/web-react';
+import { memo, useEffect, useState } from 'react';
+import type { XInputEmailConfig } from './schema';
 
 const XInputEmail = memo((props: XInputEmailConfig) => {
     const {
@@ -62,6 +62,7 @@ const XInputEmail = memo((props: XInputEmailConfig) => {
                 flex: 1,
                 pointerEvents:
                     status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset',
+                margin: '0px',
             }}
         >
             <Input
