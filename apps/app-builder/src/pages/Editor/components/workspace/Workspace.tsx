@@ -116,14 +116,13 @@ export default function EditorWorkspace() {
                         // console.log("pageComponentSchemas", pageComponentSchemas);
                     }}
                     onAdd={(e)=>{
-                        // console.log("onAdd", e);
+                        console.log("onAdd", e);
 
-                        const cpID = e.item.id || e.item.getAttribute('data-cp-id')
+                        let cpID = e.item.id || e.item.getAttribute('data-cp-id')
                         const itemType = e.item.getAttribute('data-cp-type')
                         const itemDisplayName = e.item.getAttribute('data-cp-displayname')
 
-                        console.log(`拖入组件 ${cpID}`)
-
+                        console.log(`拖入组件 ${cpID} ${itemType}`)
 
                         const schema = getComponentSchema(itemType as any);
                         // console.log("schema", schema)

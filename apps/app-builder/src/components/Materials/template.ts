@@ -206,14 +206,14 @@ const allTemplate = {
                     icon: 'timeline_cp.svg',
                     category: 'base'
                 },
-                {
-                    type: LIST_COMPONENT_TYPES.TABLE,
-                    h: 48,
-                    w: 68,
-                    displayName: '目录',
-                    icon: 'directory_cp.svg',
-                    category: 'base'
-                },
+                // {
+                //     type: LIST_COMPONENT_TYPES.TABLE,
+                //     h: 48,
+                //     w: 68,
+                //     displayName: '目录',
+                //     icon: 'directory_cp.svg',
+                //     category: 'base'
+                // },
                 {
                     type: LIST_COMPONENT_TYPES.COLLAPSE,
                     h: 48,
@@ -238,14 +238,14 @@ const allTemplate = {
                     icon: 'canvas_list_cp.svg',
                     category: 'base'
                 },
-                {
-                    type: LIST_COMPONENT_TYPES.TABLE,
-                    h: 48,
-                    w: 68,
-                    displayName: '列表容器',
-                    icon: 'list_container_cp.svg',
-                    category: 'base'
-                },
+                // {
+                //     type: LIST_COMPONENT_TYPES.TABLE,
+                //     h: 48,
+                //     w: 68,
+                //     displayName: '列表容器',
+                //     icon: 'list_container_cp.svg',
+                //     category: 'base'
+                // },
             ]
         },
         {

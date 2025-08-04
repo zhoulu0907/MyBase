@@ -121,7 +121,9 @@
     "createApp": "创建应用"
   },
   "formEditor": {
-    "component": "组件",
+    "material": "组件",
+    "metadata": "元数据项",
+    "telegram": "页面分享",
     "baseComponent": "基础",
     "templateComponent": "模板",
     "customComponent": "自定义",
@@ -133,6 +135,7 @@
     "empty": "暂无组件",
     "attribute": "属性",
     "data": "数据",
+    "advanced": "高级",
     "full": "整行",
     "formDesign": "表单设计",
     "listDesign": "列表设计",
