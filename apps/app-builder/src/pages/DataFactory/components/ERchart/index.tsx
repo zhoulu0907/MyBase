@@ -75,7 +75,7 @@ const ERchart: React.FC<EntityERProps> = ({
         // width: 800, // 默认父容器宽高
         // height: 600,
         background: {
-          color: 'rgba(173, 219, 179, 0.5)',
+          // color: 'rgba(173, 219, 179, 0.5)',
         },
         grid: {
           visible: true,
@@ -98,7 +98,7 @@ const ERchart: React.FC<EntityERProps> = ({
               shape: 'edge',
               attrs: {
                 line: {
-                  stroke: '#5F95FF',
+                  stroke: '#39B85F',
                   strokeWidth: 2,
                   targetMarker: {
                     name: 'block',
@@ -283,7 +283,7 @@ const ERchart: React.FC<EntityERProps> = ({
         target: { cell: target.cell, port: target.port + '_target' },
         attrs: {
           line: { // 连线样式
-            stroke: '#5F95FF',
+            stroke: '#39B85F',
             strokeWidth: 2,
             targetMarker: {
               name: 'block',
@@ -303,7 +303,7 @@ const ERchart: React.FC<EntityERProps> = ({
             attrs: {
               label: {
                 text: edgeData.label,
-                fill: '#5F95FF',
+                fill: '#39B85F',
                 fontSize: 12,
                 textAnchor: 'middle',
                 textVerticalAnchor: 'middle',
@@ -332,7 +332,7 @@ const ERchart: React.FC<EntityERProps> = ({
       if (mode === 'edit') {
         node.setAttrs({
           body: {
-            stroke: '#5F95FF',
+            stroke: '#39B85F',
             strokeWidth: 2,
           },
         });
