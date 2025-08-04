@@ -2,43 +2,56 @@ package com.cmsr.onebase.module.infra.dal.dataobject.file;
 
 import com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
-import com.cmsr.onebase.module.infra.framework.file.core.client.db.DBFileClient;
 import com.baomidou.mybatisplus.annotation.KeySequence;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import jakarta.persistence.Column;
+import jakarta.persistence.Table;
 import lombok.*;
 
 /**
  * 文件内容表
  *
- * 专门用于存储 {@link DBFileClient} 的文件内容
- *
  */
-@TableName("infra_file_content")
-@KeySequence("infra_file_content_seq") // 用于 Oracle、PostgreSQL、Kingbase、DB2、H2 数据库的主键自增。如果是 MySQL 等数据库，可不写。
 @Data
-@EqualsAndHashCode(callSuper = true)
-@ToString(callSuper = true)
 @Builder
+@TenantIgnore
 @NoArgsConstructor
 @AllArgsConstructor
-@TenantIgnore
+@Table(name = "infra_file_content")
 public class FileContentDO extends BaseDO {
+    // builder模式可正常运作
+    public FileContentDO setId(Long id){
+        super.setId(id);
+        return this;
+    }
 
+    // 字段常量定义
+    public static final String COLUMN_CONFIG_ID = "config_id";
+    public static final String COLUMN_PATH = "path";
+    public static final String COLUMN_CONTENT = "content";
+    public static final String COLUMN_SIZE = "size";
 
     /**
      * 配置编号
      *
      * 关联 {@link FileConfigDO#getId()}
      */
+    @Column(name = COLUMN_CONFIG_ID)
     private Long configId;
     /**
-     * 路径，即文件名
+     * 文件路径
      */
+    @Column(name = COLUMN_PATH)
     private String path;
     /**
      * 文件内容
      */
+    @Column(name = COLUMN_CONTENT)
     private byte[] content;
+    /**
+     * 文件大小
+     */
+    @Column(name = COLUMN_SIZE)
+    private Long size;
 
 }

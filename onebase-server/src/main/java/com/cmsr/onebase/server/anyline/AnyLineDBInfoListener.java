@@ -50,6 +50,16 @@ public class AnyLineDBInfoListener implements DMListener {
         TENANT_IGNORE_TABLES.add("system_notify_template");
         TENANT_IGNORE_TABLES.add("system_oauth2_client");
         TENANT_IGNORE_TABLES.add("system_license");
+        TENANT_IGNORE_TABLES.add("infra_codegen_column");
+        TENANT_IGNORE_TABLES.add("infra_codegen_table");
+        TENANT_IGNORE_TABLES.add("infra_config");
+        TENANT_IGNORE_TABLES.add("infra_data_source_config");
+        TENANT_IGNORE_TABLES.add("infra_file_config");
+        TENANT_IGNORE_TABLES.add("infra_file_content");
+        TENANT_IGNORE_TABLES.add("infra_file");
+        TENANT_IGNORE_TABLES.add("infra_api_access_log");
+        TENANT_IGNORE_TABLES.add("infra_api_error_log");
+
         // 可以根据需要添加更多表
     }
 
@@ -310,7 +320,7 @@ public class AnyLineDBInfoListener implements DMListener {
      /**
      * 向查询条件注入租户标志
      *
-     * @param obj
+     * @param
      */
     private void injectTenantIdAndDeleteToQuery(String table, ConfigStore configs) {
         boolean shouldIgnore = isTableTenantIgnored2(table);

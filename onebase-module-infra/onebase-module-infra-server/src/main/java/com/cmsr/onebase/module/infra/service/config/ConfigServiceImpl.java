@@ -6,7 +6,6 @@ import com.cmsr.onebase.module.infra.controller.admin.config.vo.ConfigPageReqVO;
 import com.cmsr.onebase.module.infra.controller.admin.config.vo.ConfigSaveReqVO;
 import com.cmsr.onebase.module.infra.convert.config.ConfigConvert;
 import com.cmsr.onebase.module.infra.dal.dataobject.config.ConfigDO;
-import com.cmsr.onebase.module.infra.dal.mysql.config.ConfigMapper;
 import com.cmsr.onebase.module.infra.enums.config.ConfigTypeEnum;
 import com.google.common.annotations.VisibleForTesting;
 import lombok.extern.slf4j.Slf4j;
@@ -27,9 +26,6 @@ import static com.cmsr.onebase.module.infra.enums.ErrorCodeConstants.*;
 @Validated
 public class ConfigServiceImpl implements ConfigService {
 
-//    @Resource
-//    private ConfigMapper configMapper;
-
     @Resource
     private DataRepository dataRepository;
 
@@ -42,7 +38,6 @@ public class ConfigServiceImpl implements ConfigService {
         ConfigDO config = ConfigConvert.INSTANCE.convert(createReqVO);
         config.setType(ConfigTypeEnum.CUSTOM.getType());
         dataRepository.insert(config);
-//        configMapper.insert(config);
         return config.getId();
     }
 
@@ -56,7 +51,6 @@ public class ConfigServiceImpl implements ConfigService {
         // 更新参数配置
         ConfigDO updateObj = ConfigConvert.INSTANCE.convert(updateReqVO);
         dataRepository.update(updateObj);
-//        configMapper.updateById(updateObj);
     }
 
     @Override
@@ -68,20 +62,17 @@ public class ConfigServiceImpl implements ConfigService {
             throw exception(CONFIG_CAN_NOT_DELETE_SYSTEM_TYPE);
         }
         // 删除
-        dataRepository.deleteById(ConfigDO.class,id);
-//        configMapper.deleteById(id);
+        dataRepository.deleteById(ConfigDO.class, id);
     }
 
     @Override
     public ConfigDO getConfig(Long id) {
-        return dataRepository.findById(ConfigDO.class,id);
-//        return configMapper.selectById(id);
+        return dataRepository.findById(ConfigDO.class, id);
     }
 
     @Override
     public ConfigDO getConfigByKey(String key) {
-        return dataRepository.findOne(ConfigDO.class,new DefaultConfigStore().eq("key", key));
-//        return configMapper.selectByKey(key);
+        return dataRepository.findOne(ConfigDO.class, new DefaultConfigStore().eq("key", key));
     }
 
     @Override
@@ -94,8 +85,7 @@ public class ConfigServiceImpl implements ConfigService {
             configStore.ge("create_time", pageReqVO.getCreateTime()[0]);
             configStore.le("create_time", pageReqVO.getCreateTime()[1]);
         }
-        return dataRepository.findPageWithConditions(ConfigDO.class, configStore,pageReqVO.getPageNo(),pageReqVO.getPageSize());
-//        return configMapper.selectPage(pageReqVO);
+        return dataRepository.findPageWithConditions(ConfigDO.class, configStore, pageReqVO.getPageNo(), pageReqVO.getPageSize());
     }
 
     @VisibleForTesting
@@ -103,8 +93,7 @@ public class ConfigServiceImpl implements ConfigService {
         if (id == null) {
             return null;
         }
-        ConfigDO config = dataRepository.findById(ConfigDO.class,id);
-//        ConfigDO config = configMapper.selectById(id);
+        ConfigDO config = dataRepository.findById(ConfigDO.class, id);
         if (config == null) {
             throw exception(CONFIG_NOT_EXISTS);
         }
@@ -113,8 +102,7 @@ public class ConfigServiceImpl implements ConfigService {
 
     @VisibleForTesting
     public void validateConfigKeyUnique(Long id, String key) {
-        ConfigDO config = dataRepository.findOne(ConfigDO.class,new DefaultConfigStore().eq("key", key));
-//        ConfigDO config = configMapper.selectByKey(key);
+        ConfigDO config = dataRepository.findOne(ConfigDO.class, new DefaultConfigStore().eq("key", key));
         if (config == null) {
             return;
         }
