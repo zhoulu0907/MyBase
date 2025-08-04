@@ -48,6 +48,8 @@ export const CONFIG_TYPES = {
   FORM_LAYOUT: 'FormLayout',
   // 文本对齐方式
   TEXT_ALIGN: 'TextAlign',
+  // 标签宽度
+  LABEL_COL_SPAN: 'LabelColSpan',
   // 颜色
   COLOR: 'Color',
 
