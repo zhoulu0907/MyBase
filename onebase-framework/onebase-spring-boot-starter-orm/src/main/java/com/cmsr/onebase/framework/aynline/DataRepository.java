@@ -1,6 +1,5 @@
 package com.cmsr.onebase.framework.aynline;
 
-import com.baomidou.mybatisplus.annotation.TableName;
 import com.cmsr.onebase.framework.common.anyline.web.BizException;
 import com.cmsr.onebase.framework.common.anyline.web.StatusCode;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
@@ -20,7 +19,6 @@ import org.anyline.util.ConfigTable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * DataRepository - JPA风格的CRUD操作工具类
@@ -55,8 +53,8 @@ public class DataRepository {
      * @return 表名
      */
     private String getTableName(Class<?> clazz) {
-        TableName annotation = clazz.getAnnotation(TableName.class);
-        return annotation != null ? annotation.value() : clazz.getSimpleName().toLowerCase();
+        jakarta.persistence.Table annotation = clazz.getAnnotation(jakarta.persistence.Table.class);
+        return annotation != null ? annotation.name() : clazz.getSimpleName().toLowerCase();
     }
 
     /**
