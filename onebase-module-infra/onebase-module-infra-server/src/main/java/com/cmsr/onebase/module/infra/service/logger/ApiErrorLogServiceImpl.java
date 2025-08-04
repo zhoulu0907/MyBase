@@ -52,11 +52,11 @@ public class ApiErrorLogServiceImpl implements ApiErrorLogService {
     @Override
     public PageResult<ApiErrorLogDO> getApiErrorLogPage(ApiErrorLogPageReqVO pageReqVO) {
         DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.eq("user_id", pageReqVO.getUserId())
-                .eq("user_type", pageReqVO.getUserType())
-                .eq("application_name", pageReqVO.getApplicationName())
-                .eq("request_url", pageReqVO.getRequestUrl())
-                .eq("process_status", pageReqVO.getProcessStatus())
+        configStore.eq(ApiErrorLogDO.COLUMN_USER_ID, pageReqVO.getUserId())
+                .eq(ApiErrorLogDO.COLUMN_USER_TYPE, pageReqVO.getUserType())
+                .eq(ApiErrorLogDO.COLUMN_APPLICATION_NAME, pageReqVO.getApplicationName())
+                .eq(ApiErrorLogDO.COLUMN_REQUEST_URL, pageReqVO.getRequestUrl())
+                .eq(ApiErrorLogDO.COLUMN_PROCESS_STATUS, pageReqVO.getProcessStatus())
                 .eq("exceptionTime",pageReqVO.getExceptionTime());
         return dataRepository.findPageWithConditions(ApiErrorLogDO.class, configStore,pageReqVO.getPageNo(),pageReqVO.getPageSize());
     }
@@ -85,7 +85,7 @@ public class ApiErrorLogServiceImpl implements ApiErrorLogService {
         // 循环删除，直到没有满足条件的数据
         for (int i = 0; i < Short.MAX_VALUE; i++) {
             int deleteCount = (int) dataRepository.deleteByConfigReturn(ApiAccessLogDO.class, new DefaultConfigStore()
-                    .le("create_time", expireDate).limit(deleteLimit));
+                    .le(ApiAccessLogDO.CREATE_TIME, expireDate).limit(deleteLimit));
             count += deleteCount;
             // 达到删除预期条数，说明到底了
             if (deleteCount < deleteLimit) {
