@@ -1,28 +1,11 @@
 package com.cmsr.onebase.framework.websocket.config;
 
-import com.cmsr.onebase.framework.mq.redis.config.YudaoRedisMQConsumerAutoConfiguration;
-import com.cmsr.onebase.framework.mq.redis.core.RedisMQTemplate;
-import com.cmsr.onebase.framework.websocket.core.handler.JsonWebSocketMessageHandler;
-import com.cmsr.onebase.framework.websocket.core.listener.WebSocketMessageListener;
-import com.cmsr.onebase.framework.websocket.core.security.LoginUserHandshakeInterceptor;
-import com.cmsr.onebase.framework.websocket.core.security.WebSocketAuthorizeRequestsCustomizer;
-import com.cmsr.onebase.framework.websocket.core.sender.kafka.KafkaWebSocketMessageConsumer;
-import com.cmsr.onebase.framework.websocket.core.sender.kafka.KafkaWebSocketMessageSender;
-import com.cmsr.onebase.framework.websocket.core.sender.local.LocalWebSocketMessageSender;
-import com.cmsr.onebase.framework.websocket.core.sender.rabbitmq.RabbitMQWebSocketMessageConsumer;
-import com.cmsr.onebase.framework.websocket.core.sender.rabbitmq.RabbitMQWebSocketMessageSender;
-import com.cmsr.onebase.framework.websocket.core.sender.redis.RedisWebSocketMessageConsumer;
-import com.cmsr.onebase.framework.websocket.core.sender.redis.RedisWebSocketMessageSender;
-import com.cmsr.onebase.framework.websocket.core.sender.rocketmq.RocketMQWebSocketMessageConsumer;
-import com.cmsr.onebase.framework.websocket.core.sender.rocketmq.RocketMQWebSocketMessageSender;
-import com.cmsr.onebase.framework.websocket.core.session.WebSocketSessionHandlerDecorator;
-import com.cmsr.onebase.framework.websocket.core.session.WebSocketSessionManager;
-import com.cmsr.onebase.framework.websocket.core.session.WebSocketSessionManagerImpl;
+import java.util.List;
+
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -33,14 +16,26 @@ import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.server.HandshakeInterceptor;
 
-import java.util.List;
+import com.cmsr.onebase.framework.websocket.core.handler.JsonWebSocketMessageHandler;
+import com.cmsr.onebase.framework.websocket.core.listener.WebSocketMessageListener;
+import com.cmsr.onebase.framework.websocket.core.security.LoginUserHandshakeInterceptor;
+import com.cmsr.onebase.framework.websocket.core.security.WebSocketAuthorizeRequestsCustomizer;
+import com.cmsr.onebase.framework.websocket.core.sender.kafka.KafkaWebSocketMessageConsumer;
+import com.cmsr.onebase.framework.websocket.core.sender.kafka.KafkaWebSocketMessageSender;
+import com.cmsr.onebase.framework.websocket.core.sender.local.LocalWebSocketMessageSender;
+import com.cmsr.onebase.framework.websocket.core.sender.rabbitmq.RabbitMQWebSocketMessageConsumer;
+import com.cmsr.onebase.framework.websocket.core.sender.rabbitmq.RabbitMQWebSocketMessageSender;
+import com.cmsr.onebase.framework.websocket.core.sender.rocketmq.RocketMQWebSocketMessageConsumer;
+import com.cmsr.onebase.framework.websocket.core.sender.rocketmq.RocketMQWebSocketMessageSender;
+import com.cmsr.onebase.framework.websocket.core.session.WebSocketSessionHandlerDecorator;
+import com.cmsr.onebase.framework.websocket.core.session.WebSocketSessionManager;
+import com.cmsr.onebase.framework.websocket.core.session.WebSocketSessionManagerImpl;
 
 /**
  * WebSocket 自动配置
  *
  * @author xingyu4j
  */
-@AutoConfiguration(before = YudaoRedisMQConsumerAutoConfiguration.class) // before YudaoRedisMQConsumerAutoConfiguration 的原因是，需要保证 RedisWebSocketMessageConsumer 先创建，才能创建 RedisMessageListenerContainer
 @EnableWebSocket // 开启 websocket
 @ConditionalOnProperty(prefix = "yudao.websocket", value = "enable", matchIfMissing = true) // 允许使用 yudao.websocket.enable=false 禁用 websocket
 @EnableConfigurationProperties(WebSocketProperties.class)
@@ -92,25 +87,6 @@ public class YudaoWebSocketAutoConfiguration {
         public LocalWebSocketMessageSender localWebSocketMessageSender(WebSocketSessionManager sessionManager) {
             return new LocalWebSocketMessageSender(sessionManager);
         }
-
-    }
-
-    @Configuration
-    @ConditionalOnProperty(prefix = "yudao.websocket", name = "sender-type", havingValue = "redis")
-    public class RedisWebSocketMessageSenderConfiguration {
-
-        @Bean
-        public RedisWebSocketMessageSender redisWebSocketMessageSender(WebSocketSessionManager sessionManager,
-                                                                       RedisMQTemplate redisMQTemplate) {
-            return new RedisWebSocketMessageSender(sessionManager, redisMQTemplate);
-        }
-
-        @Bean
-        public RedisWebSocketMessageConsumer redisWebSocketMessageConsumer(
-                RedisWebSocketMessageSender redisWebSocketMessageSender) {
-            return new RedisWebSocketMessageConsumer(redisWebSocketMessageSender);
-        }
-
     }
 
     @Configuration

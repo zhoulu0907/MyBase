@@ -9,7 +9,6 @@ import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.datapermission.core.rule.DataPermissionRule;
 import com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO;
-import com.cmsr.onebase.framework.mybatis.core.util.MyBatisUtils;
 import com.cmsr.onebase.framework.security.core.LoginUser;
 import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.common.biz.system.permission.dto.DeptDataPermissionRespDTO;

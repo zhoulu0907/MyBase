@@ -1,13 +1,13 @@
 package com.cmsr.onebase.module.system.service.oauth2;
 
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.lang.Assert;
-import com.cmsr.onebase.framework.aynline.DataRepository;
-import com.cmsr.onebase.framework.common.util.date.DateUtils;
-import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2ApproveDO;
-import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2ClientDO;
-import com.cmsr.onebase.module.system.dal.mysql.oauth2.OAuth2ApproveMapper;
-import com.google.common.annotations.VisibleForTesting;
+import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.convertSet;
+
+import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Compare;
@@ -15,11 +15,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
-import jakarta.annotation.Resource;
-import java.time.LocalDateTime;
-import java.util.*;
+import com.cmsr.onebase.framework.aynline.DataRepository;
+import com.cmsr.onebase.framework.common.util.date.DateUtils;
+import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2ApproveDO;
+import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2ClientDO;
+import com.google.common.annotations.VisibleForTesting;
 
-import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.convertSet;
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.lang.Assert;
+import jakarta.annotation.Resource;
 
 /**
  * OAuth2 批准 Service 实现类
@@ -36,9 +40,6 @@ public class OAuth2ApproveServiceImpl implements OAuth2ApproveService {
 
     @Resource
     private OAuth2ClientService oauth2ClientService;
-
-    @Resource
-    private OAuth2ApproveMapper oauth2ApproveMapper;
 
     @Resource
     private DataRepository dataRepository;

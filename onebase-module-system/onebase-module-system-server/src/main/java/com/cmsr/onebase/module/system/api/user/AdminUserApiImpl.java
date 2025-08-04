@@ -4,7 +4,6 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjUtil;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.framework.datapermission.core.util.DataPermissionUtils;
 import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
@@ -67,10 +66,12 @@ public class AdminUserApiImpl implements AdminUserApi {
 
     @Override
     public CommonResult<List<AdminUserRespDTO>> getUserList(Collection<Long> ids) {
-        return DataPermissionUtils.executeIgnore(() -> { // 禁用数据权限。原因是，一般基于指定 id 的 API 查询，都是数据拼接为主
-            List<AdminUserDO> users = userService.getUserList(ids);
-            return success(BeanUtils.toBean(users, AdminUserRespDTO.class));
-        });
+//        return DataPermissionUtils.executeIgnore(() -> { // 禁用数据权限。原因是，一般基于指定 id 的 API 查询，都是数据拼接为主
+//            List<AdminUserDO> users = userService.getUserList(ids);
+//            return success(BeanUtils.toBean(users, AdminUserRespDTO.class));
+//        });
+        List<AdminUserDO> users = userService.getUserList(ids);
+        return success(BeanUtils.toBean(users, AdminUserRespDTO.class));
     }
 
     @Override

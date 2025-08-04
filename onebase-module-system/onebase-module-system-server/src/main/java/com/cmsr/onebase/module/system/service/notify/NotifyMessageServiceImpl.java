@@ -1,12 +1,9 @@
 package com.cmsr.onebase.module.system.service.notify;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
-import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.system.controller.admin.notify.vo.message.NotifyMessageMyPageReqVO;
-import com.cmsr.onebase.module.system.controller.admin.notify.vo.message.NotifyMessagePageReqVO;
-import com.cmsr.onebase.module.system.dal.dataobject.notify.NotifyMessageDO;
-import com.cmsr.onebase.module.system.dal.dataobject.notify.NotifyTemplateDO;
-import com.cmsr.onebase.module.system.dal.mysql.notify.NotifyMessageMapper;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Compare;
@@ -14,10 +11,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
+import com.cmsr.onebase.framework.aynline.DataRepository;
+import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.module.system.controller.admin.notify.vo.message.NotifyMessageMyPageReqVO;
+import com.cmsr.onebase.module.system.controller.admin.notify.vo.message.NotifyMessagePageReqVO;
+import com.cmsr.onebase.module.system.dal.dataobject.notify.NotifyMessageDO;
+import com.cmsr.onebase.module.system.dal.dataobject.notify.NotifyTemplateDO;
+
 import jakarta.annotation.Resource;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
 
 /**
  * 站内信 Service 实现类
@@ -27,9 +28,6 @@ import java.util.Map;
 @Service
 @Validated
 public class NotifyMessageServiceImpl implements NotifyMessageService {
-
-    @Resource
-    private NotifyMessageMapper notifyMessageMapper;
 
     @Resource
     private DataRepository dataRepository;
@@ -127,13 +125,17 @@ public class NotifyMessageServiceImpl implements NotifyMessageService {
 
     @Override
     public int updateNotifyMessageRead(Collection<Long> ids, Long userId, Integer userType) {
-        //dataRepository.update(NotifyMessageDO.class);
-        return notifyMessageMapper.updateListRead(ids, userId, userType);
+        return (int) dataRepository.updateByConfig(NotifyMessageDO.class, new DefaultConfigStore()
+                .and(Compare.IN, "id", ids)
+                .and(Compare.EQUAL, "user_id", userId)
+                .and(Compare.EQUAL, "user_type", userType));
     }
 
     @Override
     public int updateAllNotifyMessageRead(Long userId, Integer userType) {
-        return notifyMessageMapper.updateListRead(userId, userType);
+        return (int) dataRepository.updateByConfig(NotifyMessageDO.class, new DefaultConfigStore()
+                .and(Compare.EQUAL, "user_id", userId)
+                .and(Compare.EQUAL, "user_type", userType));
     }
 
 }

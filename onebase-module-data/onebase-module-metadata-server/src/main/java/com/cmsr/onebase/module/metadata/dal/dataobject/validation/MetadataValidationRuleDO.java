@@ -1,18 +1,19 @@
 package com.cmsr.onebase.module.metadata.dal.dataobject.validation;
 
-import com.baomidou.mybatisplus.annotation.TableName;
+import jakarta.persistence.Table;
 import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
+import jakarta.persistence.Table;
 import lombok.*;
 
 /**
  * 校验规则表 DO
  */
-@TableName(value = "metadata_validation_rule")
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "metadata_validation_rule")
 public class MetadataValidationRuleDO extends TenantBaseDO {
 
     public MetadataValidationRuleDO setId(Long id) {

@@ -1,23 +1,24 @@
 package com.cmsr.onebase.module.system.service.oauth2;
 
-import cn.hutool.core.util.IdUtil;
-import com.cmsr.onebase.framework.aynline.DataRepository;
-import com.cmsr.onebase.framework.common.util.date.DateUtils;
-import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2CodeDO;
-import com.cmsr.onebase.module.system.dal.mysql.oauth2.OAuth2CodeMapper;
+import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.OAUTH2_CODE_EXPIRE;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.OAUTH2_CODE_NOT_EXISTS;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Compare;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
-import jakarta.annotation.Resource;
-import java.time.LocalDateTime;
-import java.util.List;
+import com.cmsr.onebase.framework.aynline.DataRepository;
+import com.cmsr.onebase.framework.common.util.date.DateUtils;
+import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2CodeDO;
 
-import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.OAUTH2_CODE_EXPIRE;
-import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.OAUTH2_CODE_NOT_EXISTS;
+import cn.hutool.core.util.IdUtil;
+import jakarta.annotation.Resource;
 
 /**
  * OAuth2.0 授权码 Service 实现类
@@ -31,9 +32,6 @@ public class OAuth2CodeServiceImpl implements OAuth2CodeService {
      * 授权码的过期时间，默认 5 分钟
      */
     private static final Integer TIMEOUT = 5 * 60;
-
-    @Resource
-    private OAuth2CodeMapper oauth2CodeMapper;
 
     @Resource
     private DataRepository dataRepository;

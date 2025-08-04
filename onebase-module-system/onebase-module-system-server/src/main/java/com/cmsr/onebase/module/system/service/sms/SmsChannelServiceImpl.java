@@ -1,29 +1,29 @@
 package com.cmsr.onebase.module.system.service.sms;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
-import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.module.system.controller.admin.sms.vo.channel.SmsChannelPageReqVO;
-import com.cmsr.onebase.module.system.controller.admin.sms.vo.channel.SmsChannelSaveReqVO;
-import com.cmsr.onebase.module.system.dal.dataobject.notify.NotifyTemplateDO;
-import com.cmsr.onebase.module.system.dal.dataobject.sms.SmsChannelDO;
-import com.cmsr.onebase.module.system.dal.mysql.sms.SmsChannelMapper;
-import com.cmsr.onebase.module.system.framework.sms.core.client.SmsClient;
-import com.cmsr.onebase.module.system.framework.sms.core.client.SmsClientFactory;
-import com.cmsr.onebase.module.system.framework.sms.core.property.SmsChannelProperties;
-import jakarta.annotation.Resource;
-import lombok.extern.slf4j.Slf4j;
+import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.SMS_CHANNEL_HAS_CHILDREN;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.SMS_CHANNEL_NOT_EXISTS;
+
+import java.util.List;
+
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Compare;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import com.cmsr.onebase.framework.aynline.DataRepository;
+import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.module.system.controller.admin.sms.vo.channel.SmsChannelPageReqVO;
+import com.cmsr.onebase.module.system.controller.admin.sms.vo.channel.SmsChannelSaveReqVO;
+import com.cmsr.onebase.module.system.dal.dataobject.sms.SmsChannelDO;
+import com.cmsr.onebase.module.system.framework.sms.core.client.SmsClient;
+import com.cmsr.onebase.module.system.framework.sms.core.client.SmsClientFactory;
+import com.cmsr.onebase.module.system.framework.sms.core.property.SmsChannelProperties;
 
-import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.SMS_CHANNEL_HAS_CHILDREN;
-import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.SMS_CHANNEL_NOT_EXISTS;
+import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 短信渠道 Service 实现类
@@ -36,9 +36,6 @@ public class SmsChannelServiceImpl implements SmsChannelService {
 
     @Resource
     private SmsClientFactory smsClientFactory;
-
-    @Resource
-    private SmsChannelMapper smsChannelMapper;
 
     @Resource
     private SmsTemplateService smsTemplateService;
