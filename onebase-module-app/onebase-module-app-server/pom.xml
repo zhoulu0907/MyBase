@@ -18,12 +18,14 @@
 
     <dependencies>
         <!-- Spring Cloud 基础 -->
-        <dependency>
-            <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-spring-boot-starter-env</artifactId>
-        </dependency>
+
 
         <!-- 依赖服务 -->
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-module-app-api</artifactId>
+            <version>${revision}</version>
+        </dependency>
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-module-system-api</artifactId>
@@ -36,18 +38,12 @@
         </dependency>
 
         <!-- 业务组件 -->
-        <dependency>
-            <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-spring-boot-starter-biz-data-permission</artifactId>
-        </dependency>
+
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-spring-boot-starter-biz-tenant</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-spring-boot-starter-biz-ip</artifactId>
-        </dependency>
+
 
         <!-- Web 相关 -->
         <dependency>
@@ -56,6 +52,14 @@
         </dependency>
 
         <!-- DB 相关 -->
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-spring-boot-starter-orm</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-spring-boot-starter-biz-tenant</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-spring-boot-starter-redis</artifactId>
@@ -79,23 +83,11 @@
             <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
         </dependency>
 
-        <!-- Job 定时任务相关 -->
-        <dependency>
-            <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-spring-boot-starter-job</artifactId>
-        </dependency>
-
-        <!-- 消息队列相关 -->
-        <dependency>
-            <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-spring-boot-starter-mq</artifactId>
-        </dependency>
-
         <!-- 服务保障相关 TODO 开发者：暂时去掉 -->
-        <!--        <dependency>-->
-        <!--            <groupId>com.cmsr.onebase</groupId>-->
-        <!--            <artifactId>yudao-spring-boot-starter-protection</artifactId>-->
-        <!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>com.cmsr.onebase</groupId>-->
+<!--            <artifactId>yudao-spring-boot-starter-protection</artifactId>-->
+<!--        </dependency>-->
 
         <!-- Test 测试相关 -->
         <dependency>
@@ -113,12 +105,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-mail</artifactId>
-        </dependency>
-
-        <!-- 监控相关 -->
-        <dependency>
-            <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-spring-boot-starter-monitor</artifactId>
         </dependency>
 
         <!-- 三方云服务相关 -->

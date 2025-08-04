@@ -1,0 +1,46 @@
+package com.cmsr.onebase.module.system.convert.license;
+
+import com.cmsr.onebase.module.system.controller.admin.license.LicenseSaveReqVO;
+import com.cmsr.onebase.module.system.controller.admin.license.LicenseRespVO;
+import com.cmsr.onebase.module.system.controller.admin.license.LicensePageRespVO;
+import com.cmsr.onebase.module.system.dal.dataobject.license.LicenseDO;
+import org.mapstruct.Mapper;
+import org.mapstruct.factory.Mappers;
+import java.util.List;
+
+/**
+ * License 对象转换器
+ *
+ * 用于VO与DO之间的对象转换。
+ *
+ * @author matianyu
+ * @date 2025-07-25
+ */
+@Mapper
+public interface LicenseConvert {
+    LicenseConvert INSTANCE = Mappers.getMapper(LicenseConvert.class);
+
+    /**
+     * LicenseSaveReqVO 转 LicenseDO
+     *
+     * @param bean LicenseSaveReqVO
+     * @return LicenseDO
+     */
+    LicenseDO convert(LicenseSaveReqVO bean);
+
+    /**
+     * LicenseDO 转 LicenseRespVO
+     *
+     * @param bean LicenseDO
+     * @return LicenseRespVO
+     */
+    LicenseRespVO convert(LicenseDO bean);
+
+    /**
+     * LicenseDO 列表转 LicensePageRespVO 列表
+     *
+     * @param list LicenseDO列表
+     * @return LicensePageRespVO列表
+     */
+    List<LicensePageRespVO> convertList(List<LicenseDO> list);
+}

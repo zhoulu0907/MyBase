@@ -22,6 +22,7 @@ target/
 *.ipr
 *.class
 target/*
+.run
 
 ### NetBeans ###
 /nbproject/private/
@@ -73,3 +74,14 @@ functions/mock
 screenshot
 .firebase
 sessionStore
+
+# cursor editor
+/.cursor
+
+# requirements documentation
+/需求文档
+/.github/copilot-instructions.md
+/元数据管理接口实现情况检查报告.md
+/元数据管理接口单元测试报告.md
+/datasource_api_test_improved.sh
+/datasource_api_test.sh

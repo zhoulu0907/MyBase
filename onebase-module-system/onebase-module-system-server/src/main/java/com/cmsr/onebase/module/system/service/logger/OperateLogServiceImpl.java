@@ -1,19 +1,21 @@
 package com.cmsr.onebase.module.system.service.logger;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
-import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.framework.common.biz.system.logger.dto.OperateLogCreateReqDTO;
-import com.cmsr.onebase.module.system.api.logger.dto.OperateLogPageReqDTO;
-import com.cmsr.onebase.module.system.controller.admin.logger.vo.operatelog.OperateLogPageReqVO;
-import com.cmsr.onebase.module.system.dal.dataobject.logger.OperateLogDO;
-import jakarta.annotation.Resource;
-import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Compare;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
+
+import com.cmsr.onebase.framework.aynline.DataRepository;
+import com.cmsr.onebase.framework.common.biz.system.logger.dto.OperateLogCreateReqDTO;
+import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.module.system.api.logger.dto.OperateLogPageReqDTO;
+import com.cmsr.onebase.module.system.controller.admin.logger.vo.operatelog.OperateLogPageReqVO;
+import com.cmsr.onebase.module.system.dal.dataobject.logger.OperateLogDO;
+
+import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 操作日志 Service 实现类
@@ -23,9 +25,6 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 @Slf4j
 public class OperateLogServiceImpl implements OperateLogService {
-
-    //@Resource
-    //private OperateLogMapper operateLogMapper;
 
     @Resource
     private DataRepository dataRepository;
@@ -39,8 +38,7 @@ public class OperateLogServiceImpl implements OperateLogService {
     @Override
     public PageResult<OperateLogDO> getOperateLogPage(OperateLogPageReqVO pageReqVO) {
         try {
-            ConfigStore cs = new DefaultConfigStore()
-                    .and(Compare.EQUAL, "deleted", false);
+            ConfigStore cs = new DefaultConfigStore();
             
             // 构建查询条件
             if (pageReqVO.getUserId() != null) {
@@ -85,8 +83,7 @@ public class OperateLogServiceImpl implements OperateLogService {
     @Override
     public PageResult<OperateLogDO> getOperateLogPage(OperateLogPageReqDTO pageReqDTO) {
         try {
-            ConfigStore cs = new DefaultConfigStore()
-                    .and(Compare.EQUAL, "deleted", false);
+            ConfigStore cs = new DefaultConfigStore();
             
             // 构建查询条件
             if (cn.hutool.core.util.StrUtil.isNotBlank(pageReqDTO.getType())) {

@@ -1,21 +1,29 @@
 ### 获取租户编号 /admin-api/system/get-id-by-name
-GET {{baseUrl}}/system/tenant/get-id-by-name?name=用户
-
+GET http://127.0.0.1:48080/admin-api/system/tenant/simple-list
+Authorization: Bearer eb33f553e1194b52935de6fcc6a3f4f5
 ### 创建租户 /admin-api/system/tenant/create
-POST {{baseUrl}}/system/tenant/create
+POST http://127.0.0.1:48080/admin-api/system/tenant/create
 Content-Type: application/json
-Authorization: Bearer {{token}}
-tenant-id: {{adminTenantId}}
+Authorization: Bearer 90e1197e54c04056aaee79a9488e0ce2
+tenant-id: 1
 
 {
-  "name": "OneBase",
-  "contactName": "开发者",
-  "contactMobile": "15601691300",
-  "status": 0,
-  "domain": "https://www.iocoder.cn",
-  "packageId": 110,
-  "expireTime": 1699545600000,
-  "accountCount": 20,
-  "username": "admin",
-  "password": "123321"
+  "name": "租户6",
+  "allocatePersonCount": "50",
+  "contactName": "test",
+  "status": 0
+}
+
+### 更新租户 /admin-api/system/tenant/update
+POST http://127.0.0.1:48080/admin-api/system/tenant/update
+Content-Type: application/json
+Authorization: Bearer 1c274ed6c3a04877814c315ea207b39c
+tenant-id: 1
+
+{
+  "id": "3385601779470176256",
+  "name": "租户6",
+  "allocatePersonCount": "50",
+  "contactName": "test1",
+  "status": 0
 }

@@ -1,25 +1,23 @@
 package com.cmsr.onebase.module.system.service.notice;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
-import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
-import com.cmsr.onebase.module.system.controller.admin.notice.vo.NoticePageReqVO;
-import com.cmsr.onebase.module.system.controller.admin.notice.vo.NoticeSaveReqVO;
-import com.cmsr.onebase.module.system.dal.dataobject.mail.MailLogDO;
-import com.cmsr.onebase.module.system.dal.dataobject.notice.NoticeDO;
-import com.cmsr.onebase.module.system.dal.mysql.notice.NoticeMapper;
-import com.google.common.annotations.VisibleForTesting;
+import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.NOTICE_NOT_FOUND;
+
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Compare;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
-import jakarta.annotation.Resource;
+import com.cmsr.onebase.framework.aynline.DataRepository;
+import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.module.system.controller.admin.notice.vo.NoticePageReqVO;
+import com.cmsr.onebase.module.system.controller.admin.notice.vo.NoticeSaveReqVO;
+import com.cmsr.onebase.module.system.dal.dataobject.notice.NoticeDO;
+import com.google.common.annotations.VisibleForTesting;
 
-import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.NOTICE_NOT_FOUND;
+import jakarta.annotation.Resource;
 
 /**
  * 通知公告 Service 实现类
@@ -27,9 +25,6 @@ import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.NOTICE_NOT
  */
 @Service
 public class NoticeServiceImpl implements NoticeService {
-
-    @Resource
-    private NoticeMapper noticeMapper;
 
     @Resource
     private DataRepository dataRepository;

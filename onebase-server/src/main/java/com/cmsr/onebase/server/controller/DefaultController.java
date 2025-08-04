@@ -19,12 +19,6 @@ import static com.cmsr.onebase.framework.common.exception.enums.GlobalErrorCodeC
 @Slf4j
 public class DefaultController {
 
-    @RequestMapping("/admin-api/bpm/**")
-    public CommonResult<Boolean> bpm404() {
-        return CommonResult.error(NOT_IMPLEMENTED.getCode(),
-                "[工作流模块 onebase-module-bpm - 已禁用]");
-    }
-
     /**
      * 测试接口：打印 query、header、body
      */

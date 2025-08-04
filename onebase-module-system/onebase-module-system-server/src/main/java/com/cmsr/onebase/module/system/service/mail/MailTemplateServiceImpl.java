@@ -1,20 +1,13 @@
 package com.cmsr.onebase.module.system.service.mail;
 
-import cn.hutool.core.util.ObjUtil;
-import cn.hutool.core.util.ReUtil;
-import cn.hutool.core.util.StrUtil;
-import com.cmsr.onebase.framework.aynline.DataRepository;
-import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
-import com.cmsr.onebase.module.system.controller.admin.mail.vo.template.MailTemplatePageReqVO;
-import com.cmsr.onebase.module.system.controller.admin.mail.vo.template.MailTemplateSaveReqVO;
-import com.cmsr.onebase.module.system.dal.dataobject.mail.MailAccountDO;
-import com.cmsr.onebase.module.system.dal.dataobject.mail.MailTemplateDO;
-import com.cmsr.onebase.module.system.dal.mysql.mail.MailTemplateMapper;
-import com.cmsr.onebase.module.system.dal.redis.RedisKeyConstants;
-import com.google.common.annotations.VisibleForTesting;
-import lombok.extern.slf4j.Slf4j;
+import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.MAIL_TEMPLATE_CODE_EXISTS;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.MAIL_TEMPLATE_NOT_EXISTS;
+
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
+
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Compare;
@@ -24,15 +17,22 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
+import com.cmsr.onebase.framework.aynline.DataRepository;
+import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
+import com.cmsr.onebase.module.system.controller.admin.mail.vo.template.MailTemplatePageReqVO;
+import com.cmsr.onebase.module.system.controller.admin.mail.vo.template.MailTemplateSaveReqVO;
+import com.cmsr.onebase.module.system.dal.dataobject.mail.MailTemplateDO;
+import com.cmsr.onebase.module.system.dal.redis.RedisKeyConstants;
+import com.google.common.annotations.VisibleForTesting;
+
+import cn.hutool.core.util.ObjUtil;
+import cn.hutool.core.util.ReUtil;
+import cn.hutool.core.util.StrUtil;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Pattern;
-
-import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.MAIL_TEMPLATE_CODE_EXISTS;
-import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.MAIL_TEMPLATE_NOT_EXISTS;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 邮箱模版 Service 实现类
@@ -92,8 +92,7 @@ public class MailTemplateServiceImpl implements MailTemplateService {
     void validateCodeUnique(Long id, String code) {
 
         ConfigStore configStore = new DefaultConfigStore()
-                .and(Compare.EQUAL, "code", code)
-                .and(Compare.EQUAL, "deleted", false);
+                .and(Compare.EQUAL, "code", code);
         MailTemplateDO template = dataRepository.findOne(MailTemplateDO.class,configStore);
 
 		//MailTemplateDO template = mailTemplateMapper.selectByCode(code);
@@ -142,8 +141,7 @@ public class MailTemplateServiceImpl implements MailTemplateService {
     @TenantIgnore
     public MailTemplateDO getMailTemplateByCodeFromCache(String code) {
         ConfigStore configStore = new DefaultConfigStore()
-                .and(Compare.EQUAL, "code", code)
-                .and(Compare.EQUAL, "deleted", false);
+                .and(Compare.EQUAL, "code", code);
         return dataRepository.findOne(MailTemplateDO.class,configStore);
 		//return mailTemplateMapper.selectByCode(code);
     }
@@ -152,8 +150,7 @@ public class MailTemplateServiceImpl implements MailTemplateService {
     @TenantIgnore
     public PageResult<MailTemplateDO> getMailTemplatePage(MailTemplatePageReqVO pageReqVO) {
 
-        ConfigStore configStore = new DefaultConfigStore()
-                .and(Compare.EQUAL, "deleted", false);
+        ConfigStore configStore = new DefaultConfigStore();
 
         // 构建查询条件
         if (null != pageReqVO.getStatus()) {
@@ -207,8 +204,7 @@ public class MailTemplateServiceImpl implements MailTemplateService {
     public long getMailTemplateCountByAccountId(Long accountId) {
 
         ConfigStore configStore = new DefaultConfigStore()
-                .and(Compare.EQUAL, "account_id", accountId)
-                .and(Compare.EQUAL, "deleted", false);
+                .and(Compare.EQUAL, "account_id", accountId);
         List<MailTemplateDO> list = dataRepository.findAll(MailTemplateDO.class, configStore);
 
         return list.size();

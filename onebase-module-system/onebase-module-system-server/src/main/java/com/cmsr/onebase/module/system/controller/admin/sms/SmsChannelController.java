@@ -71,7 +71,7 @@ public class SmsChannelController {
         return success(BeanUtils.toBean(pageResult, SmsChannelRespVO.class));
     }
 
-    @GetMapping({"/list-all-simple", "/simple-list"})
+    @GetMapping("/simple-list")
     @Operation(summary = "获得短信渠道精简列表", description = "包含被禁用的短信渠道")
     public CommonResult<List<SmsChannelSimpleRespVO>> getSimpleSmsChannelList() {
         List<SmsChannelDO> list = smsChannelService.getSmsChannelList();

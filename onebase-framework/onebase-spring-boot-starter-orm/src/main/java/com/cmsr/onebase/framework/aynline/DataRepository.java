@@ -1,10 +1,9 @@
 package com.cmsr.onebase.framework.aynline;
 
-import com.baomidou.mybatisplus.annotation.TableName;
 import com.cmsr.onebase.framework.common.anyline.web.BizException;
 import com.cmsr.onebase.framework.common.anyline.web.StatusCode;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO;
+import com.cmsr.onebase.framework.data.base.BaseDO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.Run;
@@ -20,7 +19,6 @@ import org.anyline.util.ConfigTable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * DataRepository - JPA风格的CRUD操作工具类
@@ -39,6 +37,7 @@ public class DataRepository {
         ConfigTable.IS_INSERT_NULL_FIELD = false;
         ConfigTable.IS_INSERT_EMPTY_FIELD = true;
         ConfigTable.IS_INSERT_EMPTY_COLUMN = true;
+        // ConfigTable.IS_ENABLE_SQL_DATATYPE_CONVERT = true;
     }
 
     @Resource
@@ -54,8 +53,8 @@ public class DataRepository {
      * @return 表名
      */
     private String getTableName(Class<?> clazz) {
-        TableName annotation = clazz.getAnnotation(TableName.class);
-        return annotation != null ? annotation.value() : clazz.getSimpleName().toLowerCase();
+        jakarta.persistence.Table annotation = clazz.getAnnotation(jakarta.persistence.Table.class);
+        return annotation != null ? annotation.name() : clazz.getSimpleName().toLowerCase();
     }
 
     /**
@@ -67,7 +66,6 @@ public class DataRepository {
      */
     public <T extends BaseDO> T insert(T entity) {
         try {
-            ConfigTable.IS_AUTO_CHECK_METADATA = true;
             Long result = anylineService.insert(entity);
             if (result == 0) {
                 throw new BizException(StatusCode.DB_INSERT_ERROR);
@@ -113,10 +111,9 @@ public class DataRepository {
             // 更新
             ConfigStore configs = new DefaultConfigStore();
             configs.and(Compare.EQUAL, "id", entity.getId());
-            // 加入软删判断
-            // configs.and(Compare.EQUAL, "deleted", false);
-            // configs.and(Compare.EQUAL, "tenant_id", TenantContextHolder.getRequiredTenantId());
             Long result = anylineService.update(entity, configs);
+            log.info("[{}] update  ---> effect rows = {}", entity.getClass().getSimpleName(), result);
+
             if (result == 0) {
                 throw new BizException(StatusCode.DB_UPDATE_ERROR);
             }
@@ -127,6 +124,30 @@ public class DataRepository {
         }
     }
 
+
+    /**
+     * 更新
+     * @param <T>
+     *
+     * @param entity 要保存的实体
+     * @param <T>    实体类型
+     * @return 保存后的实体
+     */
+    public <T> long updateByConfig(Class<T> clazz, ConfigStore configs) {
+        if (clazz== null) {
+            throw new BizException(StatusCode.DB_UPDATE_ERROR);
+        }
+        try {
+            // 更新
+            long result = anylineService.update(clazz, configs);
+            log.info("[{}] updateByConfig  ---> effect rows = {}", clazz.getSimpleName(), result);
+            return result;
+        } catch (Exception e) {
+            log.error("保存实体失败: {}", clazz.getSimpleName(), e);
+            throw new BizException(StatusCode.DB_UPDATE_ERROR);
+        }
+    }
+    
     /**
      * 根据ID查找实体
      *
@@ -279,10 +300,46 @@ public class DataRepository {
      */
     public <T extends BaseDO> void deleteByConfig(Class<T> clazz, ConfigStore configs) {
         try {
-            long result = anylineService.delete(getTableName(clazz), configs);
-            if (result == 0) {
-                throw new BizException(StatusCode.DB_DELETE_ERROR);
-            }
+            DataRow row = new DataRow();
+            row.put("deleted", 1);  // 设置逻辑删除标记
+            long result = anylineService.update(getTableName(clazz), row, configs);
+            log.info("[{}] deleteByConfig  ---> effect rows = {}", clazz, result);
+
+            // 这里使用anylineService.delete会直接删除记录，不符合软删除逻辑
+            // long result = anylineService.delete(getTableName(clazz), configs);
+            
+            // 下面异常注释掉，允许删除 0 行
+            // if (result == 0) {
+            //     throw new BizException(StatusCode.DB_DELETE_ERROR);
+            // }
+        } catch (Exception e) {
+            log.error("根据ID删除实体失败: class={}, configs={}", clazz.getSimpleName(), configs, e);
+            throw new BizException(StatusCode.DB_DELETE_ERROR);
+        }
+    }
+
+    /**
+     * 根据ID删除实体（软删除）
+     *
+     * @param clazz   实体类
+     * @param configs configs
+     * @param <T>     实体类型
+     */
+    public <T extends BaseDO> long deleteByConfigReturn(Class<T> clazz, ConfigStore configs) {
+        try {
+            DataRow row = new DataRow();
+            row.put("deleted", 1);  // 设置逻辑删除标记
+            long result = anylineService.update(getTableName(clazz), row, configs);
+            log.info("[{}] deleteByConfig  ---> effect rows = {}", clazz, result);
+
+            // 这里使用anylineService.delete会直接删除记录，不符合软删除逻辑
+            // long result = anylineService.delete(getTableName(clazz), configs);
+
+            // 下面异常注释掉，允许删除 0 行
+            // if (result == 0) {
+            //     throw new BizException(StatusCode.DB_DELETE_ERROR);
+            // }
+            return result;
         } catch (Exception e) {
             log.error("根据ID删除实体失败: class={}, configs={}", clazz.getSimpleName(), configs, e);
             throw new BizException(StatusCode.DB_DELETE_ERROR);
@@ -300,13 +357,18 @@ public class DataRepository {
         try {
             ConfigStore configs = new DefaultConfigStore();
             configs.and(Compare.EQUAL, "id", id);
-
             DataRow row = new DataRow();
+            row.put("deleted", 1);  // 设置逻辑删除标记
+            long result = anylineService.update(getTableName(clazz), row, configs);
+            log.info("[{}] deleteById  ---> effect rows = {}, id = {}", clazz, result, id);
 
-            long result = anylineService.delete(getTableName(clazz), configs);
-            if (result == 0) {
-                throw new BizException(StatusCode.DB_DELETE_ERROR);
-            }
+            // 这里使用anylineService.delete会直接删除记录，不符合软删除逻辑
+            // long result = anylineService.delete(getTableName(clazz), configs);
+            
+            // 下面异常注释掉，允许删除 0 行
+            // if (result == 0) {
+            //     throw new BizException(StatusCode.DB_DELETE_ERROR);
+            // }
         } catch (Exception e) {
             log.error("根据ID删除实体失败: class={}, id={}", clazz.getSimpleName(), id, e);
             throw new BizException(StatusCode.DB_DELETE_ERROR);
@@ -324,18 +386,6 @@ public class DataRepository {
             @SuppressWarnings("unchecked")
             Class<T> entityClass = (Class<T>) entity.getClass();
             deleteById(entityClass, entity.getId());
-        }
-    }
-
-    public <T extends BaseDO> void delete(Class<T> clazz, ConfigStore configs) {
-        try {
-            long result = anylineService.delete(getTableName(clazz), configs);
-            if (result == 0) {
-                throw new BizException(StatusCode.DB_DELETE_ERROR);
-            }
-        } catch (Exception e) {
-            log.error("根据删除实体失败: class={}, configs={}", clazz.getSimpleName(), configs, e);
-            throw new BizException(StatusCode.DB_DELETE_ERROR);
         }
     }
 
@@ -358,19 +408,20 @@ public class DataRepository {
      * @param ids   ID列表
      * @param <T>   实体类型
      */
-    public <T extends BaseDO> void deleteAllById(Class<T> clazz, List<Long> ids) {
+    public <T extends BaseDO> void deleteAllById(Class<T> clazz, Collection<Long> ids) {
         try {
             ConfigStore configs = new DefaultConfigStore();
             configs.and(Compare.IN, "id", ids);
-            // 加入软删判断
-            configs.and(Compare.EQUAL, "deleted", false);
             DataRow row = new DataRow();
-            row.put("deleted", true);  // 设置逻辑删除标记
+            row.put("deleted", 1);  // 设置逻辑删除标记
 
             long result = anylineService.update(getTableName(clazz), row, configs);
-            if (result == 0) {
-                throw new BizException(StatusCode.DB_DELETE_ERROR);
-            }
+            log.info("[{}] deleteAllById  ---> effect rows={}, ids={}", clazz, result,ids);
+
+            // 下面异常注释掉，允许删除 0 行
+            // if (result == 0) {
+            //     throw new BizException(StatusCode.DB_DELETE_ERROR);
+            // }
         } catch (Exception e) {
             log.error("根据ID列表删除实体失败: class={}, ids={}", clazz.getSimpleName(), ids, e);
             throw new BizException(StatusCode.DB_DELETE_ERROR);
@@ -386,12 +437,12 @@ public class DataRepository {
     public <T extends BaseDO> void deleteAll(Class<T> clazz) {
         try {
             ConfigStore configs = new DefaultConfigStore();
-            // 加入软删判断
-            configs.and(Compare.EQUAL, "deleted", false);
             DataRow row = new DataRow();
-            row.put("deleted", true);  // 设置逻辑删除标记
+            row.put("deleted", 1);  // 设置逻辑删除标记
 
-            anylineService.update(getTableName(clazz), row, configs);
+            long result = anylineService.update(getTableName(clazz), row, configs);
+            log.info("[{}] deleteAll  ---> effect rows={}", clazz, result);
+
         } catch (Exception e) {
             log.error("删除所有实体失败: class={}", clazz.getSimpleName(), e);
             throw new BizException(StatusCode.DB_DELETE_ERROR);

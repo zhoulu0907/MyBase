@@ -1,46 +1,52 @@
 package com.cmsr.onebase.module.system.dal.dataobject.dept;
 
+import jakarta.persistence.Table;
+import jakarta.persistence.Column;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
-import com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO;
-import com.baomidou.mybatisplus.annotation.KeySequence;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.cmsr.onebase.framework.data.base.BaseDO;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 /**
  * 岗位表
  *
  * @author ruoyi
  */
-@TableName("system_post")
-@KeySequence("system_post_seq") // 用于 Oracle、PostgreSQL、Kingbase、DB2、H2 数据库的主键自增。如果是 MySQL 等数据库，可不写。
+@Table(name = "system_post")
 @Data
-@EqualsAndHashCode(callSuper = true)
 public class PostDO extends BaseDO {
 
+    public static final String NAME   = "name";
+    public static final String CODE   = "code";
+    public static final String SORT   = "sort";
+    public static final String STATUS = "status";
+    public static final String REMARK = "remark";
 
     /**
      * 岗位名称
      */
+    @Column(name = NAME)
     private String name;
     /**
      * 岗位编码
      */
+    @Column(name = CODE)
     private String code;
     /**
      * 岗位排序
      */
+    @Column(name = SORT)
     private Integer sort;
     /**
      * 状态
      *
      * 枚举 {@link CommonStatusEnum}
      */
+    @Column(name = STATUS)
     private Integer status;
     /**
      * 备注
      */
+    @Column(name = REMARK)
     private String remark;
 
 }

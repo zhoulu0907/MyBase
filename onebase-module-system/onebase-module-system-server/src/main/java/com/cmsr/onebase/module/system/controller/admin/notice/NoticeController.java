@@ -1,11 +1,8 @@
 package com.cmsr.onebase.module.system.controller.admin.notice;
 
-import cn.hutool.core.lang.Assert;
-import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.module.infra.api.websocket.WebSocketSenderApi;
 import com.cmsr.onebase.module.system.controller.admin.notice.vo.NoticePageReqVO;
 import com.cmsr.onebase.module.system.controller.admin.notice.vo.NoticeRespVO;
 import com.cmsr.onebase.module.system.controller.admin.notice.vo.NoticeSaveReqVO;
@@ -14,12 +11,11 @@ import com.cmsr.onebase.module.system.service.notice.NoticeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.Resource;
+import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import jakarta.annotation.Resource;
-import jakarta.validation.Valid;
 
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 
@@ -32,8 +28,8 @@ public class NoticeController {
     @Resource
     private NoticeService noticeService;
 
-    @Resource
-    private WebSocketSenderApi webSocketSenderApi;
+    // @Resource
+    // private WebSocketSenderApi webSocketSenderApi;
 
     @PostMapping("/create")
     @Operation(summary = "创建通知公告")
@@ -77,16 +73,16 @@ public class NoticeController {
         return success(BeanUtils.toBean(notice, NoticeRespVO.class));
     }
 
-    @PostMapping("/push")
-    @Operation(summary = "推送通知公告", description = "只发送给 websocket 连接在线的用户")
-    @Parameter(name = "id", description = "编号", required = true, example = "1024")
-    @PreAuthorize("@ss.hasPermission('system:notice:update')")
-    public CommonResult<Boolean> push(@RequestParam("id") Long id) {
-        NoticeDO notice = noticeService.getNotice(id);
-        Assert.notNull(notice, "公告不能为空");
-        // 通过 websocket 推送给在线的用户
-        webSocketSenderApi.sendObject(UserTypeEnum.ADMIN.getValue(), "notice-push", notice);
-        return success(true);
-    }
+    // @PostMapping("/push")
+    // @Operation(summary = "推送通知公告", description = "只发送给 websocket 连接在线的用户")
+    // @Parameter(name = "id", description = "编号", required = true, example = "1024")
+    // @PreAuthorize("@ss.hasPermission('system:notice:update')")
+    // public CommonResult<Boolean> push(@RequestParam("id") Long id) {
+    //     NoticeDO notice = noticeService.getNotice(id);
+    //     Assert.notNull(notice, "公告不能为空");
+    //     // 通过 websocket 推送给在线的用户
+    //     webSocketSenderApi.sendObject(UserTypeEnum.ADMIN.getValue(), "notice-push", notice);
+    //     return success(true);
+    // }
 
 }

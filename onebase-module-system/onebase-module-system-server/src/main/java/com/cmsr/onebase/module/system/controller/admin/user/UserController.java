@@ -6,13 +6,22 @@ import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageParam;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.excel.core.util.ExcelUtils;
+import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
+import com.cmsr.onebase.module.system.controller.admin.tenant.vo.tenant.TenantRespVO;
 import com.cmsr.onebase.module.system.controller.admin.user.vo.user.*;
 import com.cmsr.onebase.module.system.convert.user.UserConvert;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
+import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.enums.common.SexEnum;
+import com.cmsr.onebase.module.system.enums.permission.RoleCodeEnum;
+import com.cmsr.onebase.module.system.enums.permission.RoleTypeEnum;
+import com.cmsr.onebase.module.system.enums.permission.UserTypeEnum;
 import com.cmsr.onebase.module.system.service.dept.DeptService;
+import com.cmsr.onebase.module.system.service.permission.PermissionService;
+import com.cmsr.onebase.module.system.service.permission.RoleService;
 import com.cmsr.onebase.module.system.service.user.AdminUserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -21,19 +30,21 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.cmsr.onebase.framework.apilog.core.enums.OperateTypeEnum.EXPORT;
+import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.convertList;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
 
 @Tag(name = "管理后台 - 用户")
 @RestController
@@ -46,6 +57,86 @@ public class UserController {
     @Resource
     private DeptService deptService;
 
+    @Resource
+    private PermissionService permissionService;
+    @Autowired
+    private RoleService roleService;
+
+    // ——————————————— 以下是平台管理员 ———————————————
+    @PostMapping("/platform-admin/create")
+    @Operation(summary = "新增平台管理员用户")
+    @PreAuthorize("@ss.hasPermission('system:platform-admin:create')")
+    public CommonResult<Long> createPlatformAdmin(@Valid @RequestBody UserSaveReqVO reqVO) {
+
+        reqVO.setNickname(RoleCodeEnum.SUPER_ADMIN.getName());
+        Long id = userService.createUser(reqVO);
+        // 获取当前登录用户ID（假设项目中有相关工具类）
+        Long currentUserId = SecurityFrameworkUtils.getLoginUserId();
+
+        //如果获取到当前用户ID，则复制其角色给新用户
+        if (currentUserId != null) {
+            RoleDO roleDO = roleService.getRoleIdsByCode(RoleCodeEnum.SUPER_ADMIN.getCode());
+            Set<Long> roleIds = new HashSet<>();
+            roleIds.add(roleDO.getId());
+            permissionService.assignUserRole(id,roleIds);
+        }
+
+        return success(id);
+    }
+
+    @GetMapping("/platform-admin/page")
+    @Operation(summary = "获得平台管理员列表")
+    @PreAuthorize("@ss.hasPermission('system:platform-admin:query')")
+    public CommonResult<PageResult<UserRespVO>> getPlatformAdminPage(@Valid UserPageReqVO pageReqVO) {
+// 获得用户分页列表
+        PageResult<AdminUserDO> pageResult = userService.getUserPage(pageReqVO);
+        return success(BeanUtils.toBean(pageResult, UserRespVO.class));
+    }
+
+    @PutMapping("/platform-admin/update")
+    @Operation(summary = "修改平台管理员邮箱")
+    @PreAuthorize("@ss.hasPermission('system:platform-admin:update')")
+    public CommonResult<Boolean> updatePlatformAdmin(@Valid @RequestBody Map map) {
+        userService.updatePlatformUserEmail((Long) map.get("id"), (String) map.get("email"));
+        return success(true);
+    }
+
+    @DeleteMapping("/platform-admin/delete")
+    @Operation(summary = "删除平台管理员")
+    @Parameter(name = "id", description = "编号", required = true, example = "1024")
+    @PreAuthorize("@ss.hasPermission('system:platform-admin:delete')")
+    public CommonResult<Boolean> deletePlatformAdmin(@RequestParam("id") Long id) {
+        AdminUserDO adminUserDO = userService.getUser(id);
+        if (UserTypeEnum.SYSTEM.equals(adminUserDO.getUserType())) {
+            throw exception(USER_PASSWORD_NOT_ALLOW_DEL);
+        }
+        userService.deleteUser(id);
+        return success(true);
+    }
+
+    @PutMapping("/update-platform-password")
+    @Operation(summary = "重置平台用户密码")
+    @PreAuthorize("@ss.hasPermission('system:platform-admin:update-password')")
+    public CommonResult<Boolean> updatePlatformUserPassword(@Valid @RequestBody UserUpdatePasswordReqVO reqVO) {
+        userService.updateUserPassword(reqVO.getId(), reqVO.getPassword());
+        return success(true);
+    }
+
+    @GetMapping("/platform-admin/list")
+    @Operation(summary = "获得所有平台管理员列表")
+    @PreAuthorize("@ss.hasPermission('system:platform-admin:query')")
+    public CommonResult<List<UserRespVO>> getPlatformAdminList() {
+
+        // 获取所有平台管理员用户
+        List<AdminUserDO> userList = userService.getUserListByStatus(0);
+        // 转换为响应对象
+        List<UserRespVO> respList = BeanUtils.toBean(userList, UserRespVO.class);
+
+        return success(respList);
+    }
+
+
+    // ——————————————— 以下是普通用户管理 ———————————————
     @PostMapping("/create")
     @Operation(summary = "新增用户")
     @PreAuthorize("@ss.hasPermission('system:user:create')")
@@ -54,7 +145,7 @@ public class UserController {
         return success(id);
     }
 
-    @PutMapping("update")
+    @PutMapping("/update")
     @Operation(summary = "修改用户")
     @PreAuthorize("@ss.hasPermission('system:user:update')")
     public CommonResult<Boolean> updateUser(@Valid @RequestBody UserSaveReqVO reqVO) {
@@ -103,7 +194,7 @@ public class UserController {
                 pageResult.getTotal()));
     }
 
-    @GetMapping({"/list-all-simple", "/simple-list"})
+    @GetMapping("/simple-list")
     @Operation(summary = "获取用户精简信息列表", description = "只包含被开启的用户，主要用于前端的下拉选项")
     public CommonResult<List<UserSimpleRespVO>> getSimpleUserList() {
         List<AdminUserDO> list = userService.getUserListByStatus(CommonStatusEnum.ENABLE.getStatus());

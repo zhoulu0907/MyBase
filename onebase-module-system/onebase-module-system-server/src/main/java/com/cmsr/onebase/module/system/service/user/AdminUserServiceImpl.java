@@ -1,9 +1,48 @@
 package com.cmsr.onebase.module.system.service.user;
 
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.util.ObjUtil;
-import cn.hutool.core.util.StrUtil;
+import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.convertList;
+import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.convertSet;
+import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.singleton;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.USER_COUNT_MAX;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.USER_EMAIL_EXISTS;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.USER_IMPORT_INIT_PASSWORD;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.USER_IMPORT_LIST_IS_EMPTY;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.USER_IS_DISABLE;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.USER_MOBILE_EXISTS;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.USER_NOT_EXISTS;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.USER_PASSWORD_FAILED;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.USER_REGISTER_DISABLED;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.USER_USERNAME_EXISTS;
+import static com.cmsr.onebase.module.system.enums.LogRecordConstants.SYSTEM_USER_CREATE_SUB_TYPE;
+import static com.cmsr.onebase.module.system.enums.LogRecordConstants.SYSTEM_USER_CREATE_SUCCESS;
+import static com.cmsr.onebase.module.system.enums.LogRecordConstants.SYSTEM_USER_DELETE_SUB_TYPE;
+import static com.cmsr.onebase.module.system.enums.LogRecordConstants.SYSTEM_USER_DELETE_SUCCESS;
+import static com.cmsr.onebase.module.system.enums.LogRecordConstants.SYSTEM_USER_TYPE;
+import static com.cmsr.onebase.module.system.enums.LogRecordConstants.SYSTEM_USER_UPDATE_PASSWORD_SUB_TYPE;
+import static com.cmsr.onebase.module.system.enums.LogRecordConstants.SYSTEM_USER_UPDATE_PASSWORD_SUCCESS;
+import static com.cmsr.onebase.module.system.enums.LogRecordConstants.SYSTEM_USER_UPDATE_SUB_TYPE;
+import static com.cmsr.onebase.module.system.enums.LogRecordConstants.SYSTEM_USER_UPDATE_SUCCESS;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.anyline.data.param.init.DefaultConfigStore;
+import org.anyline.entity.Compare;
+import org.anyline.entity.Order;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.exception.ServiceException;
@@ -11,7 +50,6 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.common.util.validation.ValidationUtils;
-import com.cmsr.onebase.framework.datapermission.core.util.DataPermissionUtils;
 import com.cmsr.onebase.module.infra.api.config.ConfigApi;
 import com.cmsr.onebase.module.system.controller.admin.auth.vo.AuthRegisterReqVO;
 import com.cmsr.onebase.module.system.controller.admin.user.vo.profile.UserProfileUpdatePasswordReqVO;
@@ -22,9 +60,9 @@ import com.cmsr.onebase.module.system.controller.admin.user.vo.user.UserPageReqV
 import com.cmsr.onebase.module.system.controller.admin.user.vo.user.UserSaveReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.UserPostDO;
+import com.cmsr.onebase.module.system.dal.dataobject.permission.UserRoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
-import com.cmsr.onebase.module.system.dal.mysql.dept.UserPostMapper;
-import com.cmsr.onebase.module.system.dal.mysql.user.AdminUserMapper;
+import com.cmsr.onebase.module.system.enums.permission.RoleTypeEnum;
 import com.cmsr.onebase.module.system.service.dept.DeptService;
 import com.cmsr.onebase.module.system.service.dept.PostService;
 import com.cmsr.onebase.module.system.service.permission.PermissionService;
@@ -33,24 +71,14 @@ import com.google.common.annotations.VisibleForTesting;
 import com.mzt.logapi.context.LogRecordContext;
 import com.mzt.logapi.service.impl.DiffParseFunction;
 import com.mzt.logapi.starter.annotation.LogRecord;
+
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.util.ObjUtil;
+import cn.hutool.core.util.StrUtil;
 import jakarta.annotation.Resource;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.Order;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.util.*;
-
-import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.*;
-import static com.cmsr.onebase.framework.common.util.date.DateUtils.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
-import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
-import static com.cmsr.onebase.module.system.enums.LogRecordConstants.*;
 
 /**
  * 后台用户 Service 实现类
@@ -64,9 +92,6 @@ public class AdminUserServiceImpl implements AdminUserService {
     static final String USER_REGISTER_ENABLED_KEY = "system.user.register-enabled";
 
     @Resource
-    private AdminUserMapper userMapper;
-
-    @Resource
     private DeptService deptService;
     @Resource
     private PostService postService;
@@ -77,9 +102,6 @@ public class AdminUserServiceImpl implements AdminUserService {
     @Resource
     @Lazy // 延迟，避免循环依赖报错
     private TenantService tenantService;
-
-    @Resource
-    private UserPostMapper userPostMapper;
 
     @Resource
     private ConfigApi configApi;
@@ -170,6 +192,15 @@ public class AdminUserServiceImpl implements AdminUserService {
         // 3. 记录操作日志上下文
         LogRecordContext.putVariable(DiffParseFunction.OLD_OBJECT, BeanUtils.toBean(oldUser, UserSaveReqVO.class));
         LogRecordContext.putVariable("user", oldUser);
+    }
+
+    @Override
+    public void updatePlatformUserEmail(Long id, String email) {
+        // 校验正确性
+        validateUserExists(id);
+//        validateEmailUnique(id, email);
+        // 2.1 更新用户
+        dataRepository.update(new AdminUserDO().setId(id).setEmail(email).setUpdateTime(LocalDateTime.now()));
     }
 
     private void updateUserPost(UserSaveReqVO reqVO, AdminUserDO updateObj) {
@@ -276,12 +307,19 @@ public class AdminUserServiceImpl implements AdminUserService {
 
     @Override
     public AdminUserDO getUserByUsername(String username) {
-        return userMapper.selectByUsername(username);
+        return dataRepository.findOne(AdminUserDO.class, new DefaultConfigStore().eq("username", username));
+        // return userMapper.selectByUsername(username);
+    }
+
+    @Override
+    public AdminUserDO getUserByTenantIDAndUserName(String username, Long tenantId) {
+        return dataRepository.findOne(AdminUserDO.class, new DefaultConfigStore().eq("username", username).eq("tenant_id", tenantId));
     }
 
     @Override
     public AdminUserDO getUserByMobile(String mobile) {
-        return userMapper.selectByMobile(mobile);
+        return dataRepository.findOne(AdminUserDO.class, new DefaultConfigStore().eq("mobile", mobile));
+        // return userMapper.selectByMobile(mobile);
     }
 
     @Override
@@ -298,8 +336,8 @@ public class AdminUserServiceImpl implements AdminUserService {
 
     @Override
     public AdminUserDO getUser(Long id) {
-        return dataRepository.findById(AdminUserDO.class,id);
-        //return userMapper.selectById(id);
+        return dataRepository.findById(AdminUserDO.class, id);
+        // return userMapper.selectById(id);
     }
 
     @Override
@@ -379,7 +417,7 @@ public class AdminUserServiceImpl implements AdminUserService {
     private AdminUserDO validateUserForCreateOrUpdate(Long id, String username, String mobile, String email,
                                                       Long deptId, Set<Long> postIds) {
         // 关闭数据权限，避免因为没有数据权限，查询不到数据，进而导致唯一校验不正确
-        return DataPermissionUtils.executeIgnore(() -> {
+//        return DataPermissionUtils.executeIgnore(() -> {
             // 校验用户存在
             AdminUserDO user = validateUserExists(id);
             // 校验用户名唯一
@@ -393,7 +431,8 @@ public class AdminUserServiceImpl implements AdminUserService {
             // 校验岗位处于开启状态
             postService.validatePostList(postIds);
             return user;
-        });
+//        });
+
     }
 
     @VisibleForTesting
@@ -522,7 +561,8 @@ public class AdminUserServiceImpl implements AdminUserService {
             }
 
             // 2.2.1 判断如果不存在，在进行插入
-            AdminUserDO existUser = userMapper.selectByUsername(importUser.getUsername());
+            // AdminUserDO existUser = userMapper.selectByUsername(importUser.getUsername());
+            AdminUserDO existUser = dataRepository.findOne(AdminUserDO.class, new DefaultConfigStore().eq(AdminUserDO.USERNAME, importUser.getUsername()));
             if (existUser == null) {
 //                userMapper.insert(BeanUtils.toBean(importUser, AdminUserDO.class)
 //                        .setPassword(encodePassword(initPassword)).setPostIds(new ArrayList<>())); // 设置默认密码及空岗位编号数组
@@ -554,6 +594,20 @@ public class AdminUserServiceImpl implements AdminUserService {
     @Override
     public boolean isPasswordMatch(String rawPassword, String encodedPassword) {
         return passwordEncoder.matches(rawPassword, encodedPassword);
+    }
+
+    @Override
+    public List<AdminUserDO> getUserListByRoleCode(RoleTypeEnum roleCodeEnum) {
+
+        List<UserRoleDO> userRoleDOS = dataRepository.findAll(UserRoleDO.class, new DefaultConfigStore().and(Compare.EQUAL, "id", roleCodeEnum.getType().longValue()));
+        Set<Long> userIds = userRoleDOS.stream().map(UserRoleDO::getUserId).collect(Collectors.toSet());
+        List<AdminUserDO> allByIds = dataRepository.findAllByIds(AdminUserDO.class, userIds);
+        return allByIds;
+    }
+
+    @Override
+    public Long getUserCountByStatus(Integer status) {
+        return dataRepository.countByConfig(AdminUserDO.class,new DefaultConfigStore().eq("status", status));
     }
 
     /**

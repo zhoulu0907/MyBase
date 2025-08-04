@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.system.controller.admin.tenant.vo.tenant;
 
 import cn.hutool.core.util.ObjectUtil;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
@@ -23,6 +24,10 @@ public class TenantSaveReqVO {
     @NotNull(message = "租户名不能为空")
     private String name;
 
+    @Schema(description = "分配人员数量", requiredMode = Schema.RequiredMode.REQUIRED, example = "100")
+    @NotNull(message = "分配人员数量")
+    private Integer allocatePersonCount;
+
     @Schema(description = "联系人", requiredMode = Schema.RequiredMode.REQUIRED, example = "onebase")
     @NotNull(message = "联系人不能为空")
     private String contactName;
@@ -38,15 +43,16 @@ public class TenantSaveReqVO {
     private String website;
 
     @Schema(description = "租户套餐编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "1024")
-    @NotNull(message = "租户套餐编号不能为空")
+//    @NotNull(message = "租户套餐编号不能为空")
     private Long packageId;
 
     @Schema(description = "过期时间", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotNull(message = "过期时间不能为空")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+//    @NotNull(message = "过期时间不能为空")
     private LocalDateTime expireTime;
 
     @Schema(description = "账号数量", requiredMode = Schema.RequiredMode.REQUIRED, example = "1024")
-    @NotNull(message = "账号数量不能为空")
+//    @NotNull(message = "账号数量不能为空")
     private Integer accountCount;
 
     // ========== 仅【创建】时，需要传递的字段 ==========
@@ -60,11 +66,13 @@ public class TenantSaveReqVO {
     @Length(min = 4, max = 16, message = "密码长度为 4-16 位")
     private String password;
 
-    @AssertTrue(message = "用户账号、密码不能为空")
-    @JsonIgnore
-    public boolean isUsernameValid() {
-        return id != null // 修改时，不需要传递
-                || (ObjectUtil.isAllNotEmpty(username, password)); // 新增时，必须都传递 username、password
-    }
+//    @AssertTrue(message = "用户账号、密码不能为空")
+//    @JsonIgnore
+//    public boolean isUsernameValid() {
+//        return id != null // 修改时，不需要传递
+//                || (ObjectUtil.isAllNotEmpty(username, password)); // 新增时，必须都传递 username、password
+//    }
+
+
 
 }

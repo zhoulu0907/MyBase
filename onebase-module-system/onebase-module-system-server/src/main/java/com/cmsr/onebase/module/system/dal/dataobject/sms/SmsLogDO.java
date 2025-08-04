@@ -1,18 +1,18 @@
 package com.cmsr.onebase.module.system.dal.dataobject.sms;
 
-import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
-import com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO;
-import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
-import com.cmsr.onebase.module.system.enums.sms.SmsReceiveStatusEnum;
-import com.cmsr.onebase.module.system.enums.sms.SmsSendStatusEnum;
-import com.baomidou.mybatisplus.annotation.KeySequence;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableName;
-import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
-import lombok.*;
-
 import java.time.LocalDateTime;
 import java.util.Map;
+
+import com.cmsr.onebase.framework.data.base.BaseDO;
+import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 /**
  * 短信日志 DO
@@ -20,10 +20,8 @@ import java.util.Map;
  * @author zzf
  * @since 2021-01-25
  */
-@TableName(value = "system_sms_log", autoResultMap = true)
-@KeySequence("system_sms_log_seq") // 用于 Oracle、PostgreSQL、Kingbase、DB2、H2 数据库的主键自增。如果是 MySQL 等数据库，可不写。
+@Table(name = "system_sms_log")
 @Data
-@EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 @Builder
 @AllArgsConstructor
@@ -31,56 +29,73 @@ import java.util.Map;
 @TenantIgnore
 public class SmsLogDO extends BaseDO {
 
+    // 字段列名常量
+    public static final String CHANNEL_ID         = "channel_id";
+    public static final String CHANNEL_CODE       = "channel_code";
+    public static final String TEMPLATE_ID        = "template_id";
+    public static final String TEMPLATE_CODE      = "template_code";
+    public static final String TEMPLATE_TYPE      = "template_type";
+    public static final String TEMPLATE_CONTENT   = "template_content";
+    public static final String TEMPLATE_PARAMS    = "template_params";
+    public static final String API_TEMPLATE_ID    = "api_template_id";
+    public static final String MOBILE             = "mobile";
+    public static final String USER_ID            = "user_id";
+    public static final String USER_TYPE          = "user_type";
+    public static final String SEND_STATUS        = "send_status";
+    public static final String SEND_TIME          = "send_time";
+    public static final String API_SEND_CODE      = "api_send_code";
+    public static final String API_SEND_MSG       = "api_send_msg";
+    public static final String API_REQUEST_ID     = "api_request_id";
+    public static final String API_SERIAL_NO      = "api_serial_no";
+    public static final String RECEIVE_STATUS     = "receive_status";
+    public static final String RECEIVE_TIME       = "receive_time";
+    public static final String API_RECEIVE_CODE   = "api_receive_code";
+    public static final String API_RECEIVE_MSG    = "api_receive_msg";
 
     // ========= 渠道相关字段 =========
 
     /**
      * 短信渠道编号
-     *
-     * 关联 {@link SmsChannelDO#getId()}
      */
+    @Column(name = CHANNEL_ID)
     private Long channelId;
     /**
      * 短信渠道编码
-     *
-     * 冗余 {@link SmsChannelDO#getCode()}
      */
+    @Column(name = CHANNEL_CODE)
     private String channelCode;
 
     // ========= 模板相关字段 =========
 
     /**
      * 模板编号
-     *
-     * 关联 {@link SmsTemplateDO#getId()}
      */
+    @Column(name = TEMPLATE_ID)
     private Long templateId;
     /**
      * 模板编码
-     *
-     * 冗余 {@link SmsTemplateDO#getCode()}
      */
+    @Column(name = TEMPLATE_CODE)
     private String templateCode;
     /**
      * 短信类型
-     *
-     * 冗余 {@link SmsTemplateDO#getType()}
      */
+    @Column(name = TEMPLATE_TYPE)
     private Integer templateType;
     /**
-     * 基于 {@link SmsTemplateDO#getContent()} 格式化后的内容
+     * 基于内容格式化后的内容
      */
+    @Column(name = TEMPLATE_CONTENT)
     private String templateContent;
     /**
-     * 基于 {@link SmsTemplateDO#getParams()} 输入后的参数
+     * 基于参数生成的参数映射
      */
-    @TableField(typeHandler = JacksonTypeHandler.class)
+    @Column(name = TEMPLATE_PARAMS)
     private Map<String, Object> templateParams;
     /**
      * 短信 API 的模板编号
-     *
-     * 冗余 {@link SmsTemplateDO#getApiTemplateId()}
      */
+    @Column(name = API_TEMPLATE_ID)
     private String apiTemplateId;
 
     // ========= 手机相关字段 =========
@@ -88,72 +103,72 @@ public class SmsLogDO extends BaseDO {
     /**
      * 手机号
      */
+    @Column(name = MOBILE)
     private String mobile;
     /**
      * 用户编号
      */
+    @Column(name = USER_ID)
     private Long userId;
     /**
      * 用户类型
-     *
-     * 枚举 {@link UserTypeEnum}
      */
+    @Column(name = USER_TYPE)
     private Integer userType;
 
     // ========= 发送相关字段 =========
 
     /**
      * 发送状态
-     *
-     * 枚举 {@link SmsSendStatusEnum}
      */
+    @Column(name = SEND_STATUS)
     private Integer sendStatus;
     /**
      * 发送时间
      */
+    @Column(name = SEND_TIME)
     private LocalDateTime sendTime;
     /**
      * 短信 API 发送结果的编码
-     *
-     * 由于第三方的错误码可能是字符串，所以使用 String 类型
      */
+    @Column(name = API_SEND_CODE)
     private String apiSendCode;
     /**
      * 短信 API 发送失败的提示
      */
+    @Column(name = API_SEND_MSG)
     private String apiSendMsg;
     /**
-     * 短信 API 发送返回的唯一请求 ID
-     *
-     * 用于和短信 API 进行定位于排错
+     * 短信 API 请求 ID
      */
+    @Column(name = API_REQUEST_ID)
     private String apiRequestId;
     /**
-     * 短信 API 发送返回的序号
-     *
-     * 用于和短信 API 平台的发送记录关联
+     * 短信 API 序号
      */
+    @Column(name = API_SERIAL_NO)
     private String apiSerialNo;
 
     // ========= 接收相关字段 =========
 
     /**
      * 接收状态
-     *
-     * 枚举 {@link SmsReceiveStatusEnum}
      */
+    @Column(name = RECEIVE_STATUS)
     private Integer receiveStatus;
     /**
      * 接收时间
      */
+    @Column(name = RECEIVE_TIME)
     private LocalDateTime receiveTime;
     /**
-     * 短信 API 接收结果的编码
+     * 接收结果编码
      */
+    @Column(name = API_RECEIVE_CODE)
     private String apiReceiveCode;
     /**
-     * 短信 API 接收结果的提示
+     * 接收结果提示
      */
+    @Column(name = API_RECEIVE_MSG)
     private String apiReceiveMsg;
-
 }

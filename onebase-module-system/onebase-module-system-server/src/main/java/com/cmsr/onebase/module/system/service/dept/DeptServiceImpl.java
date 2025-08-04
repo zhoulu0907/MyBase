@@ -5,7 +5,6 @@ import cn.hutool.core.util.ObjectUtil;
 import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.framework.datapermission.core.annotation.DataPermission;
 import com.cmsr.onebase.module.system.controller.admin.dept.vo.dept.DeptListReqVO;
 import com.cmsr.onebase.module.system.controller.admin.dept.vo.dept.DeptSaveReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
@@ -103,7 +102,7 @@ public class DeptServiceImpl implements DeptService {
         try {
             ConfigStore configs = new DefaultConfigStore();
             configs.and(Compare.EQUAL, "parent_id", parentId);
-            configs.and(Compare.EQUAL, "deleted", false);
+    
             return dataRepository.findAll(DeptDO.class, configs).size();
         } catch (Exception e) {
             log.error("获取子部门数量失败: parentId={}", parentId, e);
@@ -263,7 +262,6 @@ public class DeptServiceImpl implements DeptService {
     }
 
     @Override
-    @DataPermission(enable = false) // 禁用数据权限，避免建立不正确的缓存
     @Cacheable(cacheNames = RedisKeyConstants.DEPT_CHILDREN_ID_LIST, key = "#id")
     public Set<Long> getChildDeptIdListFromCache(Long id) {
         List<DeptDO> children = getChildDeptList(id);
