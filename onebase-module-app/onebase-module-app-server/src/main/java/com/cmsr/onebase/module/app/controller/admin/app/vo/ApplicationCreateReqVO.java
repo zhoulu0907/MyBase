@@ -5,6 +5,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
+import java.util.List;
+
 /**
  * @Author：huangjie
  * @Date：2025/7/22 16:15
@@ -44,4 +46,7 @@ public class ApplicationCreateReqVO {
 
     @Schema(description = "应用描述")
     private String description;
+
+    @Schema(description = "标签ID")
+    private List<Long> tagIds;
 }

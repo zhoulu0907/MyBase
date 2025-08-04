@@ -9,6 +9,8 @@ import lombok.Data;
  */
 @Schema(description = "应用管理 - 标签列表 Request VO")
 @Data
-public class ApplicationTagListRespVO {
+public class TagListRespVO {
 
+    @Schema(description = "标签名称")
+    private String tagName;
 }
