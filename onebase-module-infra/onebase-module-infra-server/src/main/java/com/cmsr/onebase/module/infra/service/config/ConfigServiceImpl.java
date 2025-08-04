@@ -72,18 +72,18 @@ public class ConfigServiceImpl implements ConfigService {
 
     @Override
     public ConfigDO getConfigByKey(String key) {
-        return dataRepository.findOne(ConfigDO.class, new DefaultConfigStore().eq("key", key));
+        return dataRepository.findOne(ConfigDO.class, new DefaultConfigStore().eq(ConfigDO.CONFIG_KEY, key));
     }
 
     @Override
     public PageResult<ConfigDO> getConfigPage(ConfigPageReqVO pageReqVO) {
         DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.like("name", pageReqVO.getName())
-                .like("key", pageReqVO.getKey())
-                .eq("type", pageReqVO.getType());
+        configStore.like(ConfigDO.NAME, pageReqVO.getName())
+                .like(ConfigDO.CONFIG_KEY, pageReqVO.getKey())
+                .eq(ConfigDO.TYPE, pageReqVO.getType());
         if (pageReqVO.getCreateTime() != null && pageReqVO.getCreateTime().length == 2) {
-            configStore.ge("create_time", pageReqVO.getCreateTime()[0]);
-            configStore.le("create_time", pageReqVO.getCreateTime()[1]);
+            configStore.ge(ConfigDO.CREATE_TIME, pageReqVO.getCreateTime()[0]);
+            configStore.le(ConfigDO.CREATE_TIME, pageReqVO.getCreateTime()[1]);
         }
         return dataRepository.findPageWithConditions(ConfigDO.class, configStore, pageReqVO.getPageNo(), pageReqVO.getPageSize());
     }
@@ -102,7 +102,7 @@ public class ConfigServiceImpl implements ConfigService {
 
     @VisibleForTesting
     public void validateConfigKeyUnique(Long id, String key) {
-        ConfigDO config = dataRepository.findOne(ConfigDO.class, new DefaultConfigStore().eq("key", key));
+        ConfigDO config = dataRepository.findOne(ConfigDO.class, new DefaultConfigStore().eq(ConfigDO.CONFIG_KEY, key));
         if (config == null) {
             return;
         }

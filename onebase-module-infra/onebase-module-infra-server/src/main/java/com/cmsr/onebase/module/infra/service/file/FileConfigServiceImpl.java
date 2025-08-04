@@ -56,8 +56,8 @@ public class FileConfigServiceImpl implements FileConfigService {
 
 
                     FileConfigDO config = Objects.equals(CACHE_MASTER_ID, id) ?
-                            dataRepository.findOne(FileConfigDO.class, new DefaultConfigStore().eq("master", true))
-                            : dataRepository.findOne(FileConfigDO.class, new DefaultConfigStore().eq("id", id));
+                            dataRepository.findOne(FileConfigDO.class, new DefaultConfigStore().eq(FileConfigDO.COLUMN_MASTER, true))
+                            : dataRepository.findOne(FileConfigDO.class, new DefaultConfigStore().eq(FileConfigDO.ID, id));
                     ;
                     if (config != null) {
                         fileClientFactory.createOrUpdateFileClient(config.getId(), config.getStorage(), config.getConfig());
@@ -168,11 +168,11 @@ public class FileConfigServiceImpl implements FileConfigService {
     @Override
     public PageResult<FileConfigDO> getFileConfigPage(FileConfigPageReqVO pageReqVO) {
         DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.eq("name", pageReqVO.getName())
-                .eq("storage", pageReqVO.getStorage());
+        configStore.eq(FileConfigDO.COLUMN_NAME, pageReqVO.getName())
+                .eq(FileConfigDO.COLUMN_STORAGE, pageReqVO.getStorage());
         if (pageReqVO.getCreateTime() != null && pageReqVO.getCreateTime().length == 2) {
-            configStore.ge("create_time", pageReqVO.getCreateTime()[0]);
-            configStore.le("create_time", pageReqVO.getCreateTime()[1]);
+            configStore.ge(FileConfigDO.CREATE_TIME, pageReqVO.getCreateTime()[0]);
+            configStore.le(FileConfigDO.CREATE_TIME, pageReqVO.getCreateTime()[1]);
         }
         return dataRepository.findPageWithConditions(
                 FileConfigDO.class,

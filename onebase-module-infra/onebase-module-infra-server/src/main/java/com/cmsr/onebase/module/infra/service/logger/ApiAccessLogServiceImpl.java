@@ -48,15 +48,15 @@ public class ApiAccessLogServiceImpl implements ApiAccessLogService {
     @Override
     public PageResult<ApiAccessLogDO> getApiAccessLogPage(ApiAccessLogPageReqVO pageReqVO) {
         DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.eq("user_id", pageReqVO.getUserId())
-                .eq("user_type", pageReqVO.getUserType())
-                .eq("application_name", pageReqVO.getApplicationName())
-                .like("request_url", pageReqVO.getRequestUrl())
-                .eq("duration", pageReqVO.getDuration())
-                .eq("result_code", pageReqVO.getResultCode());
+        configStore.eq(ApiAccessLogDO.COLUMN_USER_ID, pageReqVO.getUserId())
+                .eq(ApiAccessLogDO.COLUMN_USER_TYPE, pageReqVO.getUserType())
+                .eq(ApiAccessLogDO.COLUMN_APPLICATION_NAME, pageReqVO.getApplicationName())
+                .like(ApiAccessLogDO.COLUMN_REQUEST_URL, pageReqVO.getRequestUrl())
+                .eq(ApiAccessLogDO.COLUMN_DURATION, pageReqVO.getDuration())
+                .eq(ApiAccessLogDO.COLUMN_RESULT_CODE, pageReqVO.getResultCode());
         if (pageReqVO.getBeginTime() != null && pageReqVO.getBeginTime().length == 2) {
-            configStore.ge("create_time", pageReqVO.getBeginTime()[0]);
-            configStore.le("create_time", pageReqVO.getBeginTime()[1]);
+            configStore.ge(ApiAccessLogDO.CREATE_TIME, pageReqVO.getBeginTime()[0]);
+            configStore.le(ApiAccessLogDO.CREATE_TIME, pageReqVO.getBeginTime()[1]);
         }
         return dataRepository.findPageWithConditions(ApiAccessLogDO.class, configStore, pageReqVO.getPageNo(), pageReqVO.getPageSize());
     }
@@ -69,7 +69,7 @@ public class ApiAccessLogServiceImpl implements ApiAccessLogService {
         // 循环删除，直到没有满足条件的数据
         for (int i = 0; i < Short.MAX_VALUE; i++) {
             int deleteCount = (int) dataRepository.deleteByConfigReturn(ApiAccessLogDO.class, new DefaultConfigStore()
-                    .le("create_time", expireDate).limit(deleteLimit));
+                    .le(ApiAccessLogDO.CREATE_TIME, expireDate).limit(deleteLimit));
             count += deleteCount;
             // 达到删除预期条数，说明到底了
             if (deleteCount < deleteLimit) {
