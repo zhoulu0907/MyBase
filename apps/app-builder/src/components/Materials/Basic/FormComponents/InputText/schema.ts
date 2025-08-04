@@ -1,6 +1,6 @@
 import { alignConfig, baseConfig, baseDefault, labelColSpanConfig, layoutConfig, statusConfig, widthConfig, type ICommonBaseType, type TAlignSelectKeyType, type TLayoutSelectKeyType, type TStatusSelectKeyType, type TWidthSelectKeyType } from "@/components/Materials/common";
 import { ALIGN_OPTIONS, ALIGN_VALUES, CONFIG_TYPES, LAYOUT_OPTIONS, LAYOUT_VALUES, STATUS_OPTIONS, STATUS_VALUES, WIDTH_OPTIONS, WIDTH_VALUES } from "@/components/Materials/constants";
-import type { IAlignConfigType, IBooleanConfigType, IColorConfigType, IDescriptionConfigType, ILabelConfigType, ILayoutConfigType, INumberConfigType, IPlaceholderConfigType, IStatusConfigType, ITextAreaConfigType, ITextConfigType, ITooltipConfigType, IWidthConfigType, TBooleanDefaultType, TNumberDefaultType, TRadioDefaultType, TSelectDefaultType, TTextAreaDefaultType, TTextDefaultType } from "@/components/Materials/types";
+import type { IAlignConfigType, IBooleanConfigType, IColorConfigType, IDescriptionConfigType, ILabelColSpanConfigType, ILabelConfigType, ILayoutConfigType, INumberConfigType, IPlaceholderConfigType, IStatusConfigType, ITextAreaConfigType, ITextConfigType, ITooltipConfigType, IWidthConfigType, TBooleanDefaultType, TNumberDefaultType, TRadioDefaultType, TSelectDefaultType, TTextAreaDefaultType, TTextDefaultType } from "@/components/Materials/types";
 
 
 // 输入框组件的schema
@@ -21,6 +21,7 @@ export type TXInputTextEditData = Array<
   IStatusConfigType<TStatusSelectKeyType> |
   IWidthConfigType<TWidthSelectKeyType> |
   INumberConfigType |
+  ILabelColSpanConfigType |
   ITextAreaConfigType|
   IBooleanConfigType|
   IStatusConfigType<TAlignSelectKeyType>|
