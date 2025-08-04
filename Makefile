@@ -18,6 +18,7 @@ help:
 	@echo "  make dev-admin   - 仅启动管理控制台开发模式"
 	@echo "  make dev-common  - 仅启动公共包开发模式"
 	@echo "  make dev-ui      - 仅启动UI组件库开发模式"
+	@echo "  make dev-app     - 仅启动应用包开发模式"
 	@echo ""
 	@echo "构建命令:"
 	@echo "  make build       - 构建所有项目"
@@ -57,6 +58,10 @@ dev-ui:
 	@echo "🚀 启动UI组件库开发模式..."
 	cd packages/ui-kit && pnpm dev
 
+dev-app:
+	@echo "🚀 启动应用包开发模式..."
+	cd packages/app && pnpm dev
+
 # 构建命令
 build:
 	@echo "🔨 构建所有项目..."
@@ -70,6 +75,7 @@ build-packages:
 	@echo "🔨 构建所有包..."
 	cd packages/common && pnpm build
 	cd packages/ui-kit && pnpm build
+	cd packages/app && pnpm build
 
 # 清理命令
 clean:
@@ -77,6 +83,7 @@ clean:
 	rm -rf apps/admin-console/dist
 	rm -rf packages/common/dist
 	rm -rf packages/ui-kit/dist
+	rm -rf packages/app/dist
 	rm -rf node_modules
 	rm -rf apps/admin-console/node_modules
 	rm -rf packages/common/node_modules

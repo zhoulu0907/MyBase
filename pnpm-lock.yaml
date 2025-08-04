@@ -202,6 +202,25 @@ importers:
         specifier: ^7.0.4
         version: 7.0.4(@types/node@20.19.7)(less@4.3.0)
 
+  packages/app:
+    dependencies:
+      '@onebase/common':
+        specifier: workspace:*
+        version: link:../common
+      axios:
+        specifier: ^1.10.0
+        version: 1.10.0
+    devDependencies:
+      '@types/node':
+        specifier: ^20.0.0
+        version: 20.19.7
+      tsup:
+        specifier: ^8.3.5
+        version: 8.5.0(@swc/core@1.13.1)(postcss@8.5.6)(typescript@5.8.3)
+      typescript:
+        specifier: ~5.8.3
+        version: 5.8.3
+
   packages/common:
     dependencies:
       '@arco-design/web-react':
