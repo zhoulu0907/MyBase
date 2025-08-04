@@ -114,7 +114,7 @@ const XCheckbox: XInputCheckboxSchema = {
         status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
         defaultValue: '',
         required: false,
-        layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
+        layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
         saveWithHidden: false,
     }
 };

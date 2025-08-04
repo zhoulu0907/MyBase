@@ -129,7 +129,7 @@ const XRadio: XInputRadioSchema = {
           },
         ],
         required: false,
-        layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
+        layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
         saveWithHidden: false,
     }
 };
