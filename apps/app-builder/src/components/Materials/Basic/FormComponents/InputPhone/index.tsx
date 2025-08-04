@@ -37,7 +37,7 @@ const XInputPhone = memo((props: XInputPhoneConfig) => {
         setInputStatus(undefined);
     }, [value]);
 
-    return status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? null : (
+    return (
         <Form.Item
             label={label}
             layout={layout}
@@ -48,6 +48,7 @@ const XInputPhone = memo((props: XInputPhoneConfig) => {
             wrapperCol={{ span: 24 - labelColSpan }}
             rules={[{ required }]}
             style={{
+                opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,
                 pointerEvents:
                     status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset',
             }}
@@ -58,8 +59,8 @@ const XInputPhone = memo((props: XInputPhoneConfig) => {
                 defaultValue={defaultValue}
                 style={{
                     width: '100%',
-                    textAlign: align,
                     color,
+                    textAlign: align,
                     backgroundColor: bgColor,
                 }}
                 placeholder={placeholder}

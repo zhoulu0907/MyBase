@@ -1,10 +1,10 @@
-import { memo } from "react";
-import { Input, Tooltip, Form } from "@arco-design/web-react";
-import type { XInputAutoCodeConfig } from "./schema";
+import { memo } from 'react';
+import { Input, Form } from '@arco-design/web-react';
+import type { XInputAutoCodeConfig } from './schema';
 import {
     STATUS_VALUES,
     STATUS_OPTIONS,
-} from "@/components/Materials/constants";
+} from '@/components/Materials/constants';
 
 const XAutoCode = memo((props: XInputAutoCodeConfig) => {
     const {
@@ -16,25 +16,36 @@ const XAutoCode = memo((props: XInputAutoCodeConfig) => {
         layout,
         color,
         bgColor,
+        labelColSpan = 0,
     } = props;
 
     const defaultValue = crypto.randomUUID();
 
-    return status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? null : (
-        <Tooltip content={tooltip}>
-            <Form.Item label={label} layout={layout} rules={[{ required }]}>
-                <Input
-                    readOnly={true}
-                    defaultValue={defaultValue}
-                    style={{
-                        width: "100%",
-                        textAlign: align,
-                        color,
-                        backgroundColor: bgColor,
-                    }}
-                />
-            </Form.Item>
-        </Tooltip>
+    return (
+        <Form.Item
+            label={label}
+            layout={layout}
+            rules={[{ required }]}
+            labelCol={{
+                span: labelColSpan,
+            }}
+            tooltip={tooltip}
+            wrapperCol={{ span: 24 - labelColSpan }}
+            style={{
+                opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,
+            }}
+        >
+            <Input
+                readOnly={true}
+                defaultValue={defaultValue}
+                style={{
+                    width: '100%',
+                    color,
+                    textAlign: align,
+                    backgroundColor: bgColor,
+                }}
+            />
+        </Form.Item>
     );
 });
 

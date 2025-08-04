@@ -38,7 +38,7 @@ const XInputEmail = memo((props: XInputEmailConfig) => {
         setInputStatus(undefined);
     }, [value]);
 
-    return status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? null : (
+    return (
         <Form.Item
             label={label}
             layout={layout}
@@ -60,6 +60,7 @@ const XInputEmail = memo((props: XInputEmailConfig) => {
             ]}
             style={{
                 flex: 1,
+                opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,
                 pointerEvents:
                     status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset',
             }}
@@ -70,8 +71,8 @@ const XInputEmail = memo((props: XInputEmailConfig) => {
                 defaultValue={defaultValue}
                 style={{
                     width: '100%',
-                    textAlign: align,
                     color,
+                    textAlign: align,
                     backgroundColor: bgColor,
                 }}
                 placeholder={placeholder}

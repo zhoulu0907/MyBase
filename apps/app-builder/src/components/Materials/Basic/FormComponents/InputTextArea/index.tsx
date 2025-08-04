@@ -22,7 +22,7 @@ const XInputTextArea = memo((props: XInputTextAreaConfig) => {
         bgColor,
         labelColSpan = 0,
     } = props;
-    return status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? null : (
+    return (
         <Form.Item
             label={label}
             layout={layout}
@@ -33,6 +33,7 @@ const XInputTextArea = memo((props: XInputTextAreaConfig) => {
             wrapperCol={{ span: 24 - labelColSpan }}
             rules={[{ required }]}
             style={{
+                opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,
                 pointerEvents:
                     status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset',
             }}
@@ -43,8 +44,8 @@ const XInputTextArea = memo((props: XInputTextAreaConfig) => {
                 placeholder={placeholder}
                 style={{
                     width: '100%',
-                    textAlign: align,
                     color,
+                    textAlign: align,
                     backgroundColor: bgColor,
                 }}
             />

@@ -14,11 +14,14 @@ const XCollapse = memo((props: XCollapseConfig) => {
     } = props;
 
 
-    return status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? null : (
+    return (
 
         <Collapse
             defaultActiveKey={['1', '2']}
-            style={{ maxWidth: '100%' }}
+            style={{
+                maxWidth: '100%',
+                opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,
+            }}
         >
             <CollapseItem header='Beijing Toutiao Technology Co., Ltd.' name='1'>
                 Beijing Toutiao Technology Co., Ltd.

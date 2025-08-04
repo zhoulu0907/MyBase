@@ -14,10 +14,12 @@ const XList = memo((props: XListConfig) => {
 
 
 
-    return status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? null : (
-
+    return (
         <List
-            style={{ width: '100%' }}
+            style={{
+                width: '100%',
+                opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,
+            }}
             size='small'
             header='List title'
             dataSource={[

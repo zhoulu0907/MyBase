@@ -1,6 +1,6 @@
 import { baseConfig, baseDefault, statusConfig, widthConfig, alignConfig, layoutConfig, type ICommonBaseType, type TStatusSelectKeyType, type TWidthSelectKeyType, type TAlignSelectKeyType, type TLayoutSelectKeyType } from "@/components/Materials/common";
 import { CONFIG_TYPES, STATUS_OPTIONS, STATUS_VALUES, WIDTH_OPTIONS, WIDTH_VALUES, ALIGN_OPTIONS, ALIGN_VALUES, LAYOUT_OPTIONS, LAYOUT_VALUES } from "@/components/Materials/constants";
-import type { IDescriptionConfigType, ILabelConfigType, INumberConfigType, IPlaceholderConfigType, ISelectConfigType, IStatusConfigType, ITextAreaConfigType, ITextConfigType, ITooltipConfigType, IWidthConfigType, TSelectDefaultType, TTextAreaDefaultType, TTextDefaultType, TBooleanDefaultType, IBooleanConfigType, ILayoutConfigType, IAlignConfigType, IColorConfigType } from "@/components/Materials/types";
+import type { IDescriptionConfigType, ILabelConfigType, INumberConfigType, IPlaceholderConfigType, ISelectConfigType, IStatusConfigType, ITextAreaConfigType, ITextConfigType, ITooltipConfigType, IWidthConfigType, TSelectDefaultType, TTextAreaDefaultType, TTextDefaultType, TBooleanDefaultType, IBooleanConfigType, ILayoutConfigType, IAlignConfigType, IColorConfigType, TNumberDefaultType } from "@/components/Materials/types";
 
 
 export interface XInputAutoCodeSchema {
@@ -24,7 +24,8 @@ export type TXInputAutoCodeEditData = Array<
   IStatusConfigType<TAlignSelectKeyType>|
   ILayoutConfigType<TLayoutSelectKeyType>|
   IAlignConfigType<TAlignSelectKeyType>|
-  IColorConfigType
+  IColorConfigType|
+  TNumberDefaultType
 >;
 
 
@@ -86,6 +87,11 @@ export interface XInputAutoCodeConfig extends ICommonBaseType {
      * 背景颜色
      */
     bgColor?: TTextDefaultType;
+    
+    /**
+     * 标签宽度
+     */
+    labelColSpan?: TNumberDefaultType;
 }
 
 
@@ -107,6 +113,11 @@ const XAutoCode: XInputAutoCodeSchema = {
             key: 'tooltip',
             name: '提示文字',
             type: CONFIG_TYPES.TOOLTIP_INPUT,
+        },
+        {
+            key: 'labelColSpan',
+            name: '标签宽度',
+            type: CONFIG_TYPES.NUMBER_INPUT,
         },
         {
             key: 'saveWithHidden',
@@ -141,6 +152,7 @@ const XAutoCode: XInputAutoCodeSchema = {
         saveWithHidden: false,
         color: '',
         bgColor: '',
+        labelColSpan: 5,
         
     }
 };
