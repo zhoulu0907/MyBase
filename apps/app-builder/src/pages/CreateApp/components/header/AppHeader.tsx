@@ -132,6 +132,10 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
                     size="large"
                 >
                     <Tabs.TabPane
+                        key="create-app/data-factory"
+                        title={t("createApp.dataFactory")}
+                    />
+                    <Tabs.TabPane
                         key="create-app/page-manager"
                         title={t("createApp.pageManager")}
                     />
@@ -139,10 +143,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
                         key="create-app/integrated-management"
                         title={t("createApp.integratedManagement")}
                     />
-                    <Tabs.TabPane
-                        key="create-app/data-factory"
-                        title={t("createApp.dataFactory")}
-                    />
+
                     <Tabs.TabPane
                         key="create-app/app-setting"
                         title={t("createApp.appSetting")}
