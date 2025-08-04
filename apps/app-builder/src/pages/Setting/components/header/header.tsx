@@ -50,8 +50,10 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
   return (
     <Header className={`${styles.header} ${className || ''}`}>
       <div className={styles.headerContent}>
-        <div className={styles.logo}>
-          <img src={logoSVG} alt="Logo" className={styles.logoSvg} />
+        <div className={styles.logo}
+          onClick={() => navigate('/onebase/')}
+        >
+          <img src={logoSVG} alt="Logo" className={styles.logoSvg}/>
           <h1>{t('header.title')}</h1>
         </div>
 
