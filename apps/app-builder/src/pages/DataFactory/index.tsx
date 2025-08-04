@@ -22,15 +22,15 @@ const DataFactoryPage: React.FC = () => {
 
   const handleMenuClick = (key: string) => {
     setActiveTab(key);
-    updateUrl(key);
+    // updateUrl(key);
   };
 
   useEffect(() => {
-    if (urlParams.get('fac-tab')) {
-      setActiveTab(urlParams.get('fac-tab') as string);
-    } else {
-      updateUrl('data-source');
-    }
+    // if (urlParams.get('fac-tab')) {
+    //   setActiveTab(urlParams.get('fac-tab') as string);
+    // } else {
+    //   updateUrl('data-source');
+    // }
   }, []);
 
   return <Layout className={styles['data-factory-page']}>
