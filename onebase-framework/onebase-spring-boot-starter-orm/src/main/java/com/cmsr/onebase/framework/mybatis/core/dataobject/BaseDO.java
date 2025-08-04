@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
 import lombok.Data;
 
 /**
@@ -23,7 +25,10 @@ public class BaseDO implements Serializable {
 
     /**
      * 创建时间
+     * 设置为注入雪花ID
      */
+    @Id
+    @GeneratedValue(generator = "SnowflakeIdGenerator")
     @Column(name = ID)
     private Long id;
     /**

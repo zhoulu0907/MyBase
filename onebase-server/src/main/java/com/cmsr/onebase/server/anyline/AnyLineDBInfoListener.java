@@ -2,6 +2,7 @@ package com.cmsr.onebase.server.anyline;
 
 import com.cmsr.onebase.framework.common.anyline.web.BizException;
 import com.cmsr.onebase.framework.common.anyline.web.StatusCode;
+import com.cmsr.onebase.framework.common.util.snowflake.SnowflakeId;
 import com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
@@ -85,8 +86,10 @@ public class AnyLineDBInfoListener implements DMListener {
         // 加入创建时间和创建人等参数
         if (Objects.nonNull(obj) && obj instanceof BaseDO baseDO) {
             // 设置雪花ID
-            // baseDO.setId(SnowflakeId.nextId());
-            // log.info("anyline global prepareInsert ---------> snow id:{}",baseDO.getId());
+            if(baseDO.getId() == null) {
+                baseDO.setId(SnowflakeId.nextId());
+                log.info("anyline global prepareInsert ---------> snow id:{}",baseDO.getId());
+            }
 
             // 创建时间为空，则以当前时间为插入时间
             LocalDateTime current = LocalDateTime.now();
