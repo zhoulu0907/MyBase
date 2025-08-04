@@ -12,9 +12,14 @@ const XText = memo((props: XTextConfig) => {
         content,
     } = props;
 
-    return status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? null : (
+    return (
 
-        <div>
+        <div
+            style={{
+                width: '100%',
+                opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,
+            }}
+        >
             {content}
         </div>
 

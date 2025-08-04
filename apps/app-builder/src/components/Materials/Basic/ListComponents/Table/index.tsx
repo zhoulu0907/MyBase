@@ -61,83 +61,87 @@ const XTable = memo((props: XTableConfig) => {
         }
     }, [showOpearate, columns, fixedOpearate]);
 
-    return status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? null : (
-        <>
-        <div className={styles.tableHeader}>
-            <div className={styles.searchGroup}>
-                {searchItems?.map((item, idx) => (
-                    <Form.Item
-                        key={idx}
-                        className={styles.searchItem}
-                        label={
-                            <div style={{
-                                width: '50px',
-                                textAlign: 'left',
-                                whiteSpace: 'nowrap',
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis'
-                            }}>
-                                {`${item.label}`}
-                            </div>
-                        }
+    return (
+        <div
+            style={{
+                opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,
+            }}
+        >
+            <div className={styles.tableHeader}>
+                <div className={styles.searchGroup}>
+                    {searchItems?.map((item, idx) => (
+                        <Form.Item
+                            key={idx}
+                            className={styles.searchItem}
+                            label={
+                                <div style={{
+                                    width: '50px',
+                                    textAlign: 'left',
+                                    whiteSpace: 'nowrap',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis'
+                                }}>
+                                    {`${item.label}`}
+                                </div>
+                            }
+                            style={{
+                                width: '200px',
+                                marginBottom: 0,
+                            }}
+                            layout={"horizontal"}
+                        >
+                            <Input placeholder={`请输入${item.label}`} />
+                        </Form.Item>
+                    ))}
+
+                </div>
+
+                <div className={styles.tableHeaderButton}>
+                    <Button type="primary">查询</Button>
+                    <Button type="primary">重置</Button>
+                    <Button type="outline"
                         style={{
-                            width: '200px',
-                            marginBottom: 0,
+                            border: 'none',
                         }}
-                        layout={"horizontal"}
                     >
-                        <Input placeholder={`请输入${item.label}`} />
-                    </Form.Item>
-                ))}
+                        <IconDown />
+                        <span>展开</span>
+                    </Button>
 
+                </div>
             </div>
-
-            <div className={styles.tableHeaderButton}>
-                <Button type="primary">查询</Button>
-                <Button type="primary">重置</Button>
-                <Button type="outline"
+            <div>
+                <Form.Item
+                    label={label}
+                    layout={"vertical"}
                     style={{
-                        border: 'none',
+                        width: "100%",
+                        pointerEvents:
+                            status === STATUS_VALUES[STATUS_OPTIONS.READONLY]
+                                ? "none"
+                                : "unset",
                     }}
                 >
-                    <IconDown />
-                    <span>展开</span>
-                </Button>
-
+                    <Table
+                        scroll={{
+                            x: "max-content",
+                        }}
+                        border={border}
+                        borderCell={borderCell}
+                        showHeader={showHeader}
+                        stripe={stripe}
+                        hover={hover}
+                        columns={finalColumns}
+                        data={defaultValue}
+                        pagePosition={pagePosition}
+                        pagination={{
+                            pageSize,
+                            showTotal,
+                        }}
+                    />
+                </Form.Item>
             </div>
         </div>
-        <div>
-            <Form.Item
-                label={label}
-                layout={"vertical"}
-                style={{
-                    width: "100%",
-                    pointerEvents:
-                        status === STATUS_VALUES[STATUS_OPTIONS.READONLY]
-                            ? "none"
-                            : "unset",
-                }}
-            >
-                <Table
-                    scroll={{
-                        x: "max-content",
-                    }}
-                    border={border}
-                    borderCell={borderCell}
-                    showHeader={showHeader}
-                    stripe={stripe}
-                    hover={hover}
-                    columns={finalColumns}
-                    data={defaultValue}
-                    pagePosition={pagePosition}
-                    pagination={{
-                        pageSize,
-                        showTotal,
-                    }}
-                />
-            </Form.Item>
-        </div>
-        </>
     );
 });
 

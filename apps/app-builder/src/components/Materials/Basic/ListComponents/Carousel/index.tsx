@@ -19,19 +19,22 @@ const XCarousel = memo((props: XCarouselConfig) => {
         '//p1-arco.byteimg.com/tos-cn-i-uwbnlip3yd/24e0dd27418d2291b65db1b21aa62254.png~tplv-uwbnlip3yd-webp.webp',
     ];
 
-    return status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? null : (
-
+    return (
         <Carousel
-        style={{ width: '100%', height: '100%'}}
+            style={{ 
+                width: '100%',
+                height: '100%',
+                opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,
+            }}
         >
-        {imageSrc.map((src, index) => (
-            <div key={index}>
-            <img
-                src={src}
-                style={{ width: '100%' }}
-            />
-            </div>
-        ))}
+            {imageSrc.map((src, index) => (
+                <div key={index}>
+                    <img
+                        src={src}
+                        style={{ width: '100%' }}
+                    />
+                </div>
+            ))}
         </Carousel>
 
     );

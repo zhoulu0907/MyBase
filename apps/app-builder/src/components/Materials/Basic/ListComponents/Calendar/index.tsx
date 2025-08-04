@@ -11,8 +11,12 @@ const XCalendar = memo((props: XCalendarConfig) => {
         status,
     } = props;
 
-    return status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? null : (
-        <Calendar />
+    return (
+        <Calendar
+            style={{
+                opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,
+            }}
+        />
     );
 });
 

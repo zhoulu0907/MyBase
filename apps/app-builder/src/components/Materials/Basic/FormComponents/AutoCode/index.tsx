@@ -1,11 +1,11 @@
+import { memo } from 'react';
+import type { XInputAutoCodeConfig } from './schema';
 import {
     STATUS_OPTIONS,
     STATUS_VALUES,
 } from "@/components/Materials/constants";
-import { Form, Input, Tooltip } from "@arco-design/web-react";
-import { memo } from "react";
+import { Form, Input } from "@arco-design/web-react";
 import { v4 as uuidv4 } from 'uuid';
-import type { XInputAutoCodeConfig } from "./schema";
 
 const XAutoCode = memo((props: XInputAutoCodeConfig) => {
     const {
@@ -17,30 +17,37 @@ const XAutoCode = memo((props: XInputAutoCodeConfig) => {
         layout,
         color,
         bgColor,
+        labelColSpan = 0,
     } = props;
 
     const defaultValue = uuidv4();
 
-    return status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? null : (
-        <Tooltip content={tooltip}>
-            <Form.Item
-                label={label} layout={layout} rules={[{ required }]}
+    return (
+        <Form.Item
+            label={label}
+            layout={layout}
+            rules={[{ required }]}
+            labelCol={{
+                span: labelColSpan,
+            }}
+            tooltip={tooltip}
+            wrapperCol={{ span: 24 - labelColSpan }}
+            style={{
+                margin: 0,
+                opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,
+            }}
+        >
+            <Input
+                readOnly={true}
+                defaultValue={defaultValue}
                 style={{
-                    margin: '0px',
+                    width: '100%',
+                    color,
+                    textAlign: align,
+                    backgroundColor: bgColor,
                 }}
-            >
-                <Input
-                    readOnly={true}
-                    defaultValue={defaultValue}
-                    style={{
-                        width: "100%",
-                        textAlign: align,
-                        color,
-                        backgroundColor: bgColor,
-                    }}
-                />
-            </Form.Item>
-        </Tooltip>
+            />
+        </Form.Item>
     );
 });
 

@@ -25,7 +25,8 @@ export type TXInputAutoCodeEditData = Array<
   IStatusConfigType<TAlignSelectKeyType>|
   ILayoutConfigType<TLayoutSelectKeyType>|
   IAlignConfigType<TAlignSelectKeyType>|
-  IColorConfigType
+  IColorConfigType|
+  TNumberDefaultType
 >;
 
 

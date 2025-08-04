@@ -16,13 +16,14 @@ const XTimePicker = memo((props: XInputTimePickerConfig) => {
         layout,
     } = props;
 
-    return status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? null : (
+    return (
         <Tooltip content={tooltip}>
             <Form.Item
                 label={label}
                 layout={layout}
                 rules={[{ required }]}
                 style={{
+                    opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,
                     pointerEvents:
                         status === STATUS_VALUES[STATUS_OPTIONS.READONLY]
                             ? "none"

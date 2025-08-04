@@ -23,7 +23,7 @@ const XInputNumber = memo((props: XInputNumberConfig) => {
         labelColSpan = 0,
     } = props;
 
-    return status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? null : (
+    return (
         <Form.Item
             label={label}
             layout={layout}
@@ -41,6 +41,7 @@ const XInputNumber = memo((props: XInputNumberConfig) => {
                 },
             ]}
             style={{
+                opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,
                 pointerEvents:
                     status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset',
                 margin: '0px',

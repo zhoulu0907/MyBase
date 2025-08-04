@@ -14,11 +14,6 @@ const XWebView = memo((props: XWebViewConfig) => {
 
     const [iframeError, setIframeError] = useState(false);
 
-    // 如果状态为隐藏，不渲染组件
-    if (status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]) {
-        return null;
-    }
-
     // 处理 URL，确保有协议前缀
     const getValidUrl = (url: string) => {
         if (!url) return '';
@@ -67,6 +62,9 @@ const XWebView = memo((props: XWebViewConfig) => {
 
     return (
             <div
+                style={{
+                    opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,
+                }}
             >
                 {title}
                 <iframe
