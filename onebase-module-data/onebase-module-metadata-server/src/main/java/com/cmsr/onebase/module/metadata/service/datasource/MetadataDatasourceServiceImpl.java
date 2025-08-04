@@ -2,7 +2,6 @@ package com.cmsr.onebase.module.metadata.service.datasource;
 
 import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.metadata.controller.admin.datasource.vo.ColumnInfoRespVO;
 import com.cmsr.onebase.module.metadata.controller.admin.datasource.vo.DatasourcePageReqVO;
 import com.cmsr.onebase.module.metadata.controller.admin.datasource.vo.DatasourceSaveReqVO;
@@ -13,6 +12,7 @@ import com.cmsr.onebase.module.metadata.controller.admin.datasource.vo.TableInfo
 import com.cmsr.onebase.module.metadata.service.datasource.vo.ColumnQueryVO;
 import com.cmsr.onebase.module.metadata.service.datasource.vo.TableQueryVO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.datasource.MetadataDatasourceDO;
+import com.cmsr.onebase.module.metadata.convert.datasource.DatasourceConvert;
 import com.cmsr.onebase.module.metadata.enums.DatasourceTypeEnum;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
@@ -37,6 +37,7 @@ import java.util.Map;
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.module.metadata.enums.ErrorCodeConstants.DATASOURCE_NOT_EXISTS;
 import static com.cmsr.onebase.module.metadata.enums.ErrorCodeConstants.DATASOURCE_CODE_DUPLICATE;
+import org.anyline.entity.Compare;
 
 /**
  * 数据源 Service 实现类
@@ -66,29 +67,29 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
         try {
             // 创建临时数据源连接
             AnylineService<?> temporaryService = createTemporaryService(datasource);
-            
+
             // 获取所有表信息
             List<String> tableNames = temporaryService.tables();
-            
+
             List<TableInfoRespVO> result = new ArrayList<>();
             for (String tableNameStr : tableNames) {
                 // 过滤条件
                 if (StringUtils.hasText(queryVO.getKeyword()) && !tableNameStr.toLowerCase().contains(queryVO.getKeyword().toLowerCase())) {
                     continue;
                 }
-                
+
                 // 构建Table对象来获取详细信息
                 Table table = new Table(tableNameStr);
                 if (StringUtils.hasText(queryVO.getSchemaName())) {
                     table.setSchema(queryVO.getSchemaName());
                 }
-                
+
                 // 获取表的详细信息
                 Table tableDetail = temporaryService.metadata().table(tableNameStr);
                 if (tableDetail == null) {
                     tableDetail = table; // 如果获取不到详细信息，使用基本信息
                 }
-                
+
                 TableInfoRespVO tableInfo = new TableInfoRespVO();
                 tableInfo.setTableName(tableDetail.getName());
                 tableInfo.setDisplayName(StringUtils.hasText(tableDetail.getComment()) ? tableDetail.getComment() : tableDetail.getName());
@@ -97,10 +98,10 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
                 tableInfo.setSchemaName(tableDetail.getSchema() != null ? tableDetail.getSchema().toString() : queryVO.getSchemaName());
                 // 获取行数（可能比较耗时，这里暂时设为0）
                 tableInfo.setRowCount(0L);
-                
+
                 result.add(tableInfo);
             }
-            
+
             return result;
         } catch (Exception e) {
             log.error("获取数据源表列表失败: datasourceId={}", queryVO.getDatasourceId(), e);
@@ -119,27 +120,27 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
         try {
             // 创建临时数据源连接
             AnylineService<?> temporaryService = createTemporaryService(datasource);
-            
+
             // 构建表对象
             Table table = new Table(queryVO.getTableName());
             if (StringUtils.hasText(queryVO.getSchemaName())) {
                 table.setSchema(queryVO.getSchemaName());
             }
-            
+
             // 获取表的所有字段信息
             List<String> columnNames = temporaryService.columns(table);
-            
+
             List<ColumnInfoRespVO> result = new ArrayList<>();
             for (String columnName : columnNames) {
                 // 构建Column对象来获取详细信息
                 Column column = new Column(columnName);
-                
+
                 // 获取字段的详细信息
                 Column columnDetail = temporaryService.metadata().column(table, columnName);
                 if (columnDetail == null) {
                     columnDetail = column; // 如果获取不到详细信息，使用基本信息
                 }
-                
+
                 ColumnInfoRespVO columnInfo = new ColumnInfoRespVO();
                 columnInfo.setColumnName(columnDetail.getName());
                 columnInfo.setDisplayName(StringUtils.hasText(columnDetail.getComment()) ? columnDetail.getComment() : columnDetail.getName());
@@ -152,10 +153,10 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
                 columnInfo.setDefaultValue(columnDetail.getDefaultValue() != null ? columnDetail.getDefaultValue().toString() : null);
                 columnInfo.setColumnComment(columnDetail.getComment());
                 columnInfo.setOrdinalPosition(columnDetail.getPosition());
-                
+
                 result.add(columnInfo);
             }
-            
+
             return result;
         } catch (Exception e) {
             log.error("获取表字段信息失败: datasourceId={}, tableName={}", queryVO.getDatasourceId(), queryVO.getTableName(), e);
@@ -172,23 +173,53 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
     private AnylineService<?> createTemporaryService(MetadataDatasourceDO datasource) {
         try {
             // 从数据源配置中获取连接参数
-            Map<String, Object> config = datasource.getConfig();
+            Map<String, Object> config = DatasourceConvert.INSTANCE.stringToMap(datasource.getConfig());
             String url = (String) config.get("url");
             String username = (String) config.get("username");
             String password = (String) config.get("password");
-            
+
+            // 如果配置中没有完整的URL，则根据host、port、database构建JDBC URL
+            if (url == null || url.trim().isEmpty()) {
+                String host = (String) config.get("host");
+                Object portObj = config.get("port");
+                String database = (String) config.get("database");
+                
+                if (host != null && !host.trim().isEmpty()) {
+                    int port = 5432; // PostgreSQL默认端口
+                    if (portObj != null) {
+                        if (portObj instanceof Integer) {
+                            port = (Integer) portObj;
+                        } else if (portObj instanceof String) {
+                            try {
+                                port = Integer.parseInt((String) portObj);
+                            } catch (NumberFormatException e) {
+                                log.warn("端口号格式错误，使用默认端口: {}", portObj);
+                            }
+                        }
+                    }
+                    
+                    // 根据数据源类型构建JDBC URL
+                    url = buildJdbcUrl(datasource.getDatasourceType(), host, port, database);
+                }
+            }
+
+            // 参数校验
+            if (url == null || url.trim().isEmpty()) {
+                throw new RuntimeException("无法构建数据源连接URL，请检查配置信息");
+            }
+
             // 构建数据源配置
             Map<String, Object> dsConfig = Map.of(
                     "url", url,
-                    "user", username,
+                    "user", username != null ? username : "",
                     "password", password != null ? password : "",
                     "driver", getDriverByType(datasource.getDatasourceType()),
                     "pool", "com.zaxxer.hikari.HikariDataSource"
             );
-            
+
             // 使用 anyline 的 DataSourceUtil 构建数据源
             DataSource dataSource = DataSourceUtil.build(dsConfig);
-            
+
             // 创建临时的 AnylineService
             return ServiceProxy.temporary(dataSource);
         } catch (Exception e) {
@@ -223,9 +254,9 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
         validateDatasourceCodeUnique(null, createReqVO.getCode(), createReqVO.getAppId());
 
         // 插入数据源
-        MetadataDatasourceDO datasource = BeanUtils.toBean(createReqVO, MetadataDatasourceDO.class);
+        MetadataDatasourceDO datasource = DatasourceConvert.INSTANCE.convert(createReqVO);
         dataRepository.insert(datasource);
-        
+
         return datasource.getId();
     }
 
@@ -238,7 +269,9 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
         validateDatasourceCodeUnique(updateReqVO.getId(), updateReqVO.getCode(), updateReqVO.getAppId());
 
         // 更新数据源
-        MetadataDatasourceDO updateObj = BeanUtils.toBean(updateReqVO, MetadataDatasourceDO.class);
+        MetadataDatasourceDO updateObj = DatasourceConvert.INSTANCE.convert(updateReqVO);
+        // 手动设置ID，确保更新操作正常进行
+        updateObj.setId(updateReqVO.getId());
         dataRepository.update(updateObj);
     }
 
@@ -247,7 +280,7 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
     public void deleteDatasource(Long id) {
         // 校验存在
         validateDatasourceExists(id);
-        
+
         // 删除数据源
         dataRepository.deleteById(MetadataDatasourceDO.class, id);
     }
@@ -263,9 +296,9 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
         configStore.and("code", code);
         configStore.and("app_id", appId);
         if (id != null) {
-            configStore.and("id", "!=", id);
+            configStore.and(Compare.NOT_EQUAL, "id", id);
         }
-        
+
         long count = dataRepository.countByConfig(MetadataDatasourceDO.class, configStore);
         if (count > 0) {
             throw exception(DATASOURCE_CODE_DUPLICATE);
@@ -280,13 +313,13 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
     @Override
     public PageResult<MetadataDatasourceDO> getDatasourcePage(DatasourcePageReqVO pageReqVO) {
         DefaultConfigStore configStore = new DefaultConfigStore();
-        
+
         // 添加查询条件
         if (pageReqVO.getDatasourceName() != null) {
-            configStore.and("datasource_name", "LIKE", "%" + pageReqVO.getDatasourceName() + "%");
+            configStore.and(Compare.LIKE, "datasource_name", "%" + pageReqVO.getDatasourceName() + "%");
         }
         if (pageReqVO.getCode() != null) {
-            configStore.and("code", "LIKE", "%" + pageReqVO.getCode() + "%");
+            configStore.and(Compare.LIKE, "code", "%" + pageReqVO.getCode() + "%");
         }
         if (pageReqVO.getDatasourceType() != null) {
             configStore.and("datasource_type", pageReqVO.getDatasourceType());
@@ -297,7 +330,7 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
         if (pageReqVO.getAppId() != null) {
             configStore.and("app_id", pageReqVO.getAppId());
         }
-        
+
         // 分页查询
         return dataRepository.findPageWithConditions(MetadataDatasourceDO.class, configStore, pageReqVO.getPageNo(), pageReqVO.getPageSize());
     }
@@ -325,14 +358,14 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
     @Override
     public DatasourceTestConnectionRespVO testConnection(@Valid DatasourceTestConnectionReqVO reqVO) {
         long startTime = System.currentTimeMillis();
-        
+
         try {
             // 从配置中获取连接参数
             Map<String, Object> config = reqVO.getConfig();
             String url = (String) config.get("url");
             String username = (String) config.get("username");
             String password = (String) config.get("password");
-            
+
             // 参数校验
             if (url == null || url.trim().isEmpty()) {
                 return DatasourceTestConnectionRespVO.failed("数据源URL不能为空");
@@ -343,18 +376,18 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
             if (password == null) {
                 password = ""; // 密码可以为空
             }
-            
+
             // 测试连接
             boolean connectionOK = testDatabaseConnection(reqVO.getDatasourceType(), url, username, password);
-            
+
             long duration = System.currentTimeMillis() - startTime;
-            
+
             if (connectionOK) {
                 return DatasourceTestConnectionRespVO.success(duration);
             } else {
                 return DatasourceTestConnectionRespVO.failed("连接失败，请检查数据源配置信息");
             }
-            
+
         } catch (Exception e) {
             long duration = System.currentTimeMillis() - startTime;
             log.error("数据源连接测试失败", e);
@@ -363,7 +396,7 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
             return respVO;
         }
     }
-    
+
     /**
      * 测试数据库连接
      *
@@ -375,34 +408,34 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
      */
     private boolean testDatabaseConnection(String datasourceType, String url, String username, String password) {
         try {
-            // 构建数据源配置，添加连接池类型
+            // 构建数据源配置，不指定连接池类型，使用默认连接池
             Map<String, Object> config = Map.of(
                     "url", url,
                     "user", username,
                     "password", password,
-                    "driver", getDriverByType(datasourceType),
-                    "pool", "com.zaxxer.hikari.HikariDataSource"  // 指定连接池类型
+                    "driver", getDriverByType(datasourceType)
+                    // 移除 pool 配置，让 AnyLine 使用默认连接池
             );
-            
+
             // 使用 anyline 的 DataSourceUtil 构建数据源
             DataSource dataSource = DataSourceUtil.build(config);
-            
+
             // 创建临时的 AnylineService 来测试连接
             AnylineService<?> temporaryService = ServiceProxy.temporary(dataSource);
-            
+
             // 使用 query 方法执行查询语句，避免框架的租户、软删除等特性影响
             temporaryService.query("SELECT 1");
-            
+
             return true;
         } catch (Exception e) {
-            log.error("数据库连接测试失败: datasourceType={}, url={}, username={}", 
+            log.error("数据库连接测试失败: datasourceType={}, url={}, username={}",
                     datasourceType, url, username, e);
             return false;
         }
     }
 
     /**
-     * 根据数据源类型获取驱动类名
+     * 根据数据源类型获取对应的驱动类名
      *
      * @param datasourceType 数据源类型
      * @return 驱动类名
@@ -422,6 +455,41 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
             default -> {
                 log.warn("未知的数据源类型: {}", datasourceType);
                 yield ""; // 返回空字符串作为默认值
+            }
+        };
+    }
+
+    /**
+     * 根据数据源类型和连接参数构建JDBC URL
+     *
+     * @param datasourceType 数据源类型
+     * @param host 主机地址
+     * @param port 端口号
+     * @param database 数据库名称
+     * @return JDBC URL
+     */
+    private String buildJdbcUrl(String datasourceType, String host, int port, String database) {
+        if (host == null || host.trim().isEmpty()) {
+            throw new RuntimeException("主机地址不能为空");
+        }
+        
+        String databasePart = (database != null && !database.trim().isEmpty()) ? database : "";
+        
+        return switch (datasourceType.toUpperCase()) {
+            case "MYSQL" -> String.format("jdbc:mysql://%s:%d/%s?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai", 
+                    host, port, databasePart);
+            case "POSTGRESQL" -> String.format("jdbc:postgresql://%s:%d/%s", host, port, databasePart);
+            case "ORACLE" -> String.format("jdbc:oracle:thin:@%s:%d:%s", host, port, databasePart);
+            case "SQLSERVER" -> String.format("jdbc:sqlserver://%s:%d;DatabaseName=%s", host, port, databasePart);
+            case "KINGBASE" -> String.format("jdbc:kingbase8://%s:%d/%s", host, port, databasePart);
+            case "TDENGINE" -> String.format("jdbc:TAOS-RS://%s:%d/%s", host, port, databasePart);
+            case "CLICKHOUSE" -> String.format("jdbc:clickhouse://%s:%d/%s", host, port, databasePart);
+            case "DM" -> String.format("jdbc:dm://%s:%d/%s", host, port, databasePart);
+            case "OPENGAUSS" -> String.format("jdbc:opengauss://%s:%d/%s", host, port, databasePart);
+            case "DB2" -> String.format("jdbc:db2://%s:%d/%s", host, port, databasePart);
+            default -> {
+                log.warn("未知的数据源类型，使用通用格式: {}", datasourceType);
+                yield String.format("jdbc:%s://%s:%d/%s", datasourceType.toLowerCase(), host, port, databasePart);
             }
         };
     }

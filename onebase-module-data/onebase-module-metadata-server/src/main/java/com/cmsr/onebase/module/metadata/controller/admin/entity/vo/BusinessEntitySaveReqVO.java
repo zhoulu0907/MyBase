@@ -48,4 +48,8 @@ public class BusinessEntitySaveReqVO {
     @Schema(description = "版本锁标识", example = "0")
     private Integer lockVersion;
 
+    @Schema(description = "前端显示配置json", example = "{\"showFields\":[\"name\",\"code\"]}")
+    @Size(max = 2000, message = "前端显示配置长度不能超过2000个字符")
+    private String displayConfig;
+
 }

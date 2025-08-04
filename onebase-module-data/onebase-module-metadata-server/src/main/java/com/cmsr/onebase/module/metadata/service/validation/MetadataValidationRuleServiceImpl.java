@@ -14,6 +14,7 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Order;
+import org.anyline.entity.Compare;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -93,24 +94,23 @@ public class MetadataValidationRuleServiceImpl implements MetadataValidationRule
         if (pageReqVO.getAppId() != null) {
             configStore.and("app_id", pageReqVO.getAppId());
         }
+        if (pageReqVO.getKeyword() != null) {
+            configStore.and(Compare.LIKE, "validation_name", "%" + pageReqVO.getKeyword() + "%")
+                    .or(Compare.LIKE, "validation_code", "%" + pageReqVO.getKeyword() + "%");
+        }
         if (pageReqVO.getEntityId() != null) {
             configStore.and("entity_id", pageReqVO.getEntityId());
         }
         if (pageReqVO.getFieldId() != null) {
             configStore.and("field_id", pageReqVO.getFieldId());
         }
-        if (StringUtils.hasText(pageReqVO.getValidationType())) {
+        if (pageReqVO.getValidationType() != null) {
             configStore.and("validation_type", pageReqVO.getValidationType());
         }
-        if (StringUtils.hasText(pageReqVO.getKeyword())) {
-            configStore.and("validation_name", "LIKE", "%" + pageReqVO.getKeyword() + "%")
-                      .or("validation_code", "LIKE", "%" + pageReqVO.getKeyword() + "%");
-        }
-        
-        configStore.order("sort_order", Order.TYPE.ASC);
-        configStore.order("create_time", Order.TYPE.DESC);
         
         // 分页查询
+        configStore.order("create_time", Order.TYPE.DESC);
+        
         PageResult<MetadataValidationRuleDO> pageResult = dataRepository.findPageWithConditions(
             MetadataValidationRuleDO.class, configStore, pageReqVO.getPageNo(), pageReqVO.getPageSize());
         

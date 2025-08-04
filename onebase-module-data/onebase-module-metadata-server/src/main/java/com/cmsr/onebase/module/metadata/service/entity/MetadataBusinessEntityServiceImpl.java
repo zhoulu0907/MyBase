@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Order;
+import org.anyline.entity.Compare;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -81,7 +82,7 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
         configStore.and("code", code);
         configStore.and("app_id", appId);
         if (id != null) {
-            configStore.and("id", "!=", id);
+            configStore.and(Compare.NOT_EQUAL, "id", id);
         }
         
         long count = dataRepository.countByConfig(MetadataBusinessEntityDO.class, configStore);
@@ -103,10 +104,10 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
         
         // 添加查询条件
         if (pageReqVO.getDisplayName() != null) {
-            configStore.and("display_name", "LIKE", "%" + pageReqVO.getDisplayName() + "%");
+            configStore.and(Compare.LIKE, "display_name", "%" + pageReqVO.getDisplayName() + "%");
         }
         if (pageReqVO.getCode() != null) {
-            configStore.and("code", "LIKE", "%" + pageReqVO.getCode() + "%");
+            configStore.and(Compare.LIKE, "code", "%" + pageReqVO.getCode() + "%");
         }
         if (pageReqVO.getEntityType() != null) {
             configStore.and("entity_type", pageReqVO.getEntityType());

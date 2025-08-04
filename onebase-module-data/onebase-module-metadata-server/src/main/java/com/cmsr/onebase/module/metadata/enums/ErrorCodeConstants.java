@@ -31,4 +31,14 @@ public interface ErrorCodeConstants {
     ErrorCode VALIDATION_RULE_NOT_EXISTS = new ErrorCode(1_001_004_001, "校验规则不存在");
     ErrorCode VALIDATION_RULE_CODE_DUPLICATE = new ErrorCode(1_001_004_002, "校验规则编码重复");
 
+    // ========== 动态数据操作 1-001-005-000 ==========
+    ErrorCode DATA_CREATE_FAILED = new ErrorCode(1_001_005_001, "数据创建失败：{}");
+    ErrorCode DATA_UPDATE_FAILED = new ErrorCode(1_001_005_002, "数据更新失败：{}");
+    ErrorCode DATA_DELETE_FAILED = new ErrorCode(1_001_005_003, "数据删除失败：{}");
+    ErrorCode DATA_QUERY_FAILED = new ErrorCode(1_001_005_004, "数据查询失败：{}");
+    ErrorCode DATA_NOT_EXISTS = new ErrorCode(1_001_005_005, "数据不存在");
+    ErrorCode FIELD_REQUIRED = new ErrorCode(1_001_005_006, "字段 {} 为必填项");
+    ErrorCode FIELD_NOT_EXISTS = new ErrorCode(1_001_005_007, "字段 {} 不存在");
+    ErrorCode PRIMARY_KEY_UPDATE_NOT_ALLOWED = new ErrorCode(1_001_005_008, "不允许更新主键字段");
+
 } 
