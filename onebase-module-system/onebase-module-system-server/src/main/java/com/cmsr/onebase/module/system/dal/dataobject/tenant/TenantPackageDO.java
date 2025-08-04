@@ -1,22 +1,25 @@
 package com.cmsr.onebase.module.system.dal.dataobject.tenant;
 
+import java.util.Set;
+
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
-import com.baomidou.mybatisplus.annotation.KeySequence;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableName;
-import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
-import lombok.*;
 
-import java.util.Set;
+import jakarta.persistence.Column;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 /**
  * 租户套餐 DO
  *
  */
-@TableName(value = "system_tenant_package", autoResultMap = true)
-@KeySequence("system_tenant_package_seq") // 用于 Oracle、PostgreSQL、Kingbase、DB2、H2 数据库的主键自增。如果是 MySQL 等数据库，可不写。
+@Table(name = "system_tenant_package")
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
@@ -26,24 +29,33 @@ import java.util.Set;
 @TenantIgnore
 public class TenantPackageDO extends BaseDO {
 
+    // 字段列名常量
+    public static final String NAME     = "name";
+    public static final String STATUS   = "status";
+    public static final String REMARK   = "remark";
+    public static final String MENU_IDS = "menu_ids";
+
     /**
      * 套餐名，唯一
      */
+    @Column(name = NAME)
     private String name;
     /**
      * 租户套餐状态
      *
      * 枚举 {@link CommonStatusEnum}
      */
+    @Column(name = STATUS)
     private Integer status;
     /**
      * 备注
      */
+    @Column(name = REMARK)
     private String remark;
     /**
      * 关联的菜单编号
      */
-    @TableField(typeHandler = JacksonTypeHandler.class)
+    @Column(name = MENU_IDS)
     private Set<Long> menuIds;
 
 }

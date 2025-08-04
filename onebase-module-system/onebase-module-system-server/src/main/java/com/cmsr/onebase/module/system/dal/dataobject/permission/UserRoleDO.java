@@ -1,32 +1,32 @@
 package com.cmsr.onebase.module.system.dal.dataobject.permission;
 
-import com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO;
 import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
-import com.baomidou.mybatisplus.annotation.KeySequence;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Table;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 /**
  * 用户和角色关联
  *
  * @author ruoyi
  */
-@TableName("system_user_role")
-@KeySequence("system_user_role_seq") // 用于 Oracle、PostgreSQL、Kingbase、DB2、H2 数据库的主键自增。如果是 MySQL 等数据库，可不写。
 @Data
-@EqualsAndHashCode(callSuper = true)
+@Table(name = "system_user_role")
 public class UserRoleDO extends TenantBaseDO {
 
+    public static final String USER_ID = "user_id";
+    public static final String ROLE_ID = "role_id";
 
     /**
      * 用户 ID
      */
+    @Column(name = USER_ID)
     private Long userId;
     /**
      * 角色 ID
      */
+    @Column(name = ROLE_ID)
     private Long roleId;
 
 }
