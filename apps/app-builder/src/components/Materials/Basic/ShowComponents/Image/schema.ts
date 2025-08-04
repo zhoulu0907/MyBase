@@ -37,7 +37,7 @@ const XImage: XImageSchema = {
     ],
     config: {
         ...baseDefault,
-        width: WIDTH_VALUES[WIDTH_OPTIONS.QUARTER],
+        width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
         status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     }
 };
