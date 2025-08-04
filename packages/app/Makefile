@@ -1,11 +1,11 @@
-# Platform Center Package - Makefile
-# 平台中心包的便捷命令
+# App Package - Makefile
+# 应用包的便捷命令
 
 .PHONY: help install dev build clean
 
 # 默认目标
 help:
-	@echo "Common Package - 可用命令:"
+	@echo "App Package - 可用命令:"
 	@echo ""
 	@echo "安装依赖:"
 	@echo "  make install     - 安装依赖"
