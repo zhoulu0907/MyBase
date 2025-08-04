@@ -14,10 +14,8 @@ const XSelectOne = memo((props: XInputSelectOneConfig) => {
         label,
         tooltip,
         status,
-        defaultValue,
         required,
         layout,
-        saveWithHidden,
     } = props;
 
     return status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? null : (

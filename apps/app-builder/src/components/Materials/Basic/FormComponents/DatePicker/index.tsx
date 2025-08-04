@@ -5,7 +5,7 @@ import { DATE_OPTIONS, DATE_VALUES, STATUS_VALUES, STATUS_OPTIONS } from "@/comp
 
 const { YearPicker, MonthPicker } = DatePicker;
 const XDatePicker = memo((props: XInputDatePickerConfig) => {
-    const { label, tooltip, status, defaultValue, required, dateType, layout, saveWithHidden } =
+    const { label, tooltip, status, required, dateType, layout } =
         props;
 
     return status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? null : (

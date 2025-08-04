@@ -16,7 +16,6 @@ const XAutoCode = memo((props: XInputAutoCodeConfig) => {
         layout,
         color,
         bgColor,
-        saveWithHidden,
     } = props;
 
     const defaultValue = crypto.randomUUID();

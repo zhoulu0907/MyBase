@@ -8,14 +8,11 @@ const XImgUpload = memo((props: XInputImgUploadConfig) => {
         label,
         status,
         tooltip,
-        // defaultValue,
         uploadSize = 10,
         uploadLimit,
-        uploadCompress, // todo
         listType,
         required,
         layout,
-        saveWithHidden,
     } = props;
 
     return status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? null : (

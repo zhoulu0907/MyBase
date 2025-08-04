@@ -114,6 +114,11 @@ export interface XInputNumberConfig extends ICommonBaseType {
      * 隐藏时是否提交数据，开启后隐藏状态仍会保存值
      */
     saveWithHidden?: TBooleanDefaultType;
+
+    /**
+     * 标签宽度
+     */
+    labelColSpan?: TNumberDefaultType;
 }
 
 
@@ -139,6 +144,12 @@ const XInputNumber: XInputNumberSchema = {
             key: 'tooltip',
             name: '提示文字',
             type: CONFIG_TYPES.TOOLTIP_INPUT,
+        },
+        layoutConfig,
+        {
+            key: 'labelColSpan',
+            name: '标签宽度',
+            type: CONFIG_TYPES.NUMBER_INPUT,
         },
         {
             key: 'required',
@@ -183,11 +194,10 @@ const XInputNumber: XInputNumberSchema = {
         statusConfig,
         widthConfig,
         alignConfig,
-        layoutConfig,
     ],
     config: {
         ...baseDefault,
-        label: '',
+        label: '标题',
         placeholder: '请输入数字',
         description: '',
         tooltip: '',
@@ -196,7 +206,7 @@ const XInputNumber: XInputNumberSchema = {
         defaultValue: '',
         required: false,
         align: ALIGN_VALUES[ALIGN_OPTIONS.LEFT],
-        layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
+        layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
         min: 0,
         max: 15,
         step: 1,
@@ -204,6 +214,7 @@ const XInputNumber: XInputNumberSchema = {
         saveWithHidden: false,
         color: '',
         bgColor: '',
+        labelColSpan: 5,
     }
 };
 

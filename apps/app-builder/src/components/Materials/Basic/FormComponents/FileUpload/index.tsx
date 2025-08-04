@@ -8,15 +8,13 @@ const XFileUpload = memo((props: XInputFileUploadConfig) => {
         label,
         status,
         tooltip,
-        defaultValue,
         uploadSize = 10,
         uploadLimit,
-        showPreview, // todo
-        showDownload, // todo
+        // showPreview, // todo
+        // showDownload, // todo
         listType,
         required,
         layout,
-        saveWithHidden,
     } = props;
 
     return status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? null : (

@@ -14,7 +14,6 @@ const XTimePicker = memo((props: XInputTimePickerConfig) => {
         defaultValue,
         required,
         layout,
-        saveWithHidden,
     } = props;
 
     return status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? null : (

@@ -4,7 +4,7 @@ import type { XInputCheckboxConfig } from "./schema";
 import { STATUS_VALUES, STATUS_OPTIONS } from "@/components/Materials/constants";
 
 const XCheckbox = memo((props: XInputCheckboxConfig) => {
-    const { label, tooltip, status, defaultValue, required, layout, saveWithHidden } = props;
+    const { label, tooltip, status, defaultValue, required, layout } = props;
 
     return status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? null : (
         <Tooltip content={tooltip}>

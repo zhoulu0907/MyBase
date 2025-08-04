@@ -40,10 +40,8 @@ const XUserSelect = memo((props: XInputUserSelectConfig) => {
         label,
         tooltip,
         status,
-        defaultValue,
         required,
         layout,
-        saveWithHidden,
     } = props;
 
     return status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? null : (
