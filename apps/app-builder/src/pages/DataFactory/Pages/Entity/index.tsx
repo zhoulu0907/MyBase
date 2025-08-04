@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import CheckEntityPage from './CheckEntityPage';
 import CreateEntityPage from './CreateEntityPage';
 import EmptyEntityPage from './EmptyEntityPage';
-import EntityERExample from '../../components/EntityERExample';
 
 const EntityPage: React.FC = () => {
   const [pageType, setPageType] = useState('check-entity');
@@ -17,7 +16,7 @@ const EntityPage: React.FC = () => {
   return (
     <>
       { pageType === 'check-entity' && <CheckEntityPage handlePageType={handlePageType} />}
-      { pageType === 'create-entity' && <CreateEntityPage handlePageType={handlePageType} />}
+      { pageType === 'create-entity' && <CreateEntityPage visible={true} setVisible={() => {}} handlePageType={() => {}} setRefreshEntityList={() => {}} />}
       { pageType === 'empty-entity' && <EmptyEntityPage handlePageType={handlePageType} />}
     </>
   );

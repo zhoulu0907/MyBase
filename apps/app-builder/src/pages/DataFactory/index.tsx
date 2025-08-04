@@ -36,7 +36,7 @@ const DataFactoryPage: React.FC = () => {
   return <Layout className={styles['data-factory-page']}>
     <Layout.Sider
       breakpoint='xl'
-      width={50}
+      width={48}
       className={styles['sider']}
     >
       {/* 左侧菜单 */}
