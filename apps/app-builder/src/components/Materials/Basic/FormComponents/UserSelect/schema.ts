@@ -1,6 +1,6 @@
-import { baseConfig, baseDefault, layoutConfig, statusConfig, widthConfig, type ICommonBaseType, type TStatusSelectKeyType, type TWidthSelectKeyType, type TLayoutSelectKeyType  } from "@/components/Materials/common";
-import { CONFIG_TYPES, STATUS_OPTIONS, STATUS_VALUES, WIDTH_OPTIONS, WIDTH_VALUES, LAYOUT_OPTIONS, LAYOUT_VALUES } from "@/components/Materials/constants";
-import type { IDescriptionConfigType, ILabelConfigType, INumberConfigType, IPlaceholderConfigType, ISelectConfigType, IStatusConfigType, ITextAreaConfigType, ITextConfigType, ITooltipConfigType, IWidthConfigType, TSelectDefaultType, TTextAreaDefaultType, TTextDefaultType, TBooleanDefaultType, IBooleanConfigType, ILayoutConfigType } from "@/components/Materials/types";
+import { baseConfig, baseDefault, labelColSpanConfig, layoutConfig, statusConfig, widthConfig, type ICommonBaseType, type TLayoutSelectKeyType, type TStatusSelectKeyType, type TWidthSelectKeyType } from "@/components/Materials/common";
+import { CONFIG_TYPES, LAYOUT_OPTIONS, LAYOUT_VALUES, STATUS_OPTIONS, STATUS_VALUES, WIDTH_OPTIONS, WIDTH_VALUES } from "@/components/Materials/constants";
+import type { IBooleanConfigType, IDescriptionConfigType, ILabelColSpanConfigType, ILabelConfigType, ILayoutConfigType, INumberConfigType, IPlaceholderConfigType, ISelectConfigType, IStatusConfigType, ITextAreaConfigType, ITextConfigType, ITooltipConfigType, IWidthConfigType, TBooleanDefaultType, TNumberDefaultType, TSelectDefaultType, TTextAreaDefaultType, TTextDefaultType } from "@/components/Materials/types";
 
 export interface XInputUserSelectSchema {
     editData: TXInputUserSelectEditData;
@@ -16,6 +16,7 @@ export type TXInputUserSelectEditData = Array<
   IStatusConfigType<TStatusSelectKeyType> |
   IWidthConfigType<TWidthSelectKeyType> |
   INumberConfigType |
+  ILabelColSpanConfigType |
   ISelectConfigType<TWidthSelectKeyType | TStatusSelectKeyType > |
   ITextAreaConfigType|
   IBooleanConfigType|
@@ -67,6 +68,11 @@ export interface XInputUserSelectConfig extends ICommonBaseType {
     layout?: TLayoutSelectKeyType;
 
     /**
+     * 标签宽度
+     */
+    labelColSpan?: TNumberDefaultType;
+
+    /**
      * 隐藏时是否提交数据，开启后隐藏状态仍会保存值
      */
     saveWithHidden?: TBooleanDefaultType;
@@ -96,6 +102,8 @@ const XUserSelect: XInputUserSelectSchema = {
             name: '开启必填',
             type: CONFIG_TYPES.SWITCH_INPUT,
         },
+        layoutConfig,
+        labelColSpanConfig,
         {
             key: 'saveWithHidden',
             name: '隐藏时提交数据',
@@ -103,18 +111,18 @@ const XUserSelect: XInputUserSelectSchema = {
         },
         statusConfig,
         widthConfig,
-        layoutConfig,
     ],
     config: {
         ...baseDefault,
-        label: '',
+        label: '标题',
         description: '',
         tooltip: '',
         width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
         status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
         defaultValue: '',
         required: false,
-        layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
+        layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
+        labelColSpan: 5,
         saveWithHidden: false,
     }
 };

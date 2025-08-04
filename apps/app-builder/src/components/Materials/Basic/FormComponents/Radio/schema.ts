@@ -1,6 +1,6 @@
-import { baseConfig, baseDefault, statusConfig, /* widthConfig, */ layoutConfig, type ICommonBaseType, type TStatusSelectKeyType, type TWidthSelectKeyType, type TLayoutSelectKeyType } from "@/components/Materials/common";
-import { CONFIG_TYPES, STATUS_OPTIONS, STATUS_VALUES, /* WIDTH_OPTIONS, WIDTH_VALUES, */ LAYOUT_OPTIONS, LAYOUT_VALUES } from "@/components/Materials/constants";
-import type { IDescriptionConfigType, ILabelConfigType, INumberConfigType, IPlaceholderConfigType, ISelectConfigType, IStatusConfigType, ITextAreaConfigType, ITextConfigType, ITooltipConfigType, IWidthConfigType, TSelectDefaultType, TTextAreaDefaultType, TTextDefaultType, TBooleanDefaultType, IBooleanConfigType, ILayoutConfigType } from "@/components/Materials/types";
+import { baseConfig, baseDefault, labelColSpanConfig, /* widthConfig, */ layoutConfig, statusConfig, widthConfig, type ICommonBaseType, type TLayoutSelectKeyType, type TStatusSelectKeyType, type TWidthSelectKeyType } from "@/components/Materials/common";
+import { CONFIG_TYPES, /* WIDTH_OPTIONS, WIDTH_VALUES, */ LAYOUT_OPTIONS, LAYOUT_VALUES, STATUS_OPTIONS, STATUS_VALUES, WIDTH_OPTIONS, WIDTH_VALUES } from "@/components/Materials/constants";
+import type { IBooleanConfigType, IDescriptionConfigType, ILabelColSpanConfigType, ILabelConfigType, ILayoutConfigType, INumberConfigType, IPlaceholderConfigType, ISelectConfigType, IStatusConfigType, ITextAreaConfigType, ITextConfigType, ITooltipConfigType, IWidthConfigType, TBooleanDefaultType, TNumberDefaultType, TSelectDefaultType, TTextAreaDefaultType, TTextDefaultType } from "@/components/Materials/types";
 
 export interface XInputRadioSchema {
     editData: TXInputRadioEditData;
@@ -16,6 +16,7 @@ export type TXInputRadioEditData = Array<
   IStatusConfigType<TStatusSelectKeyType> |
   IWidthConfigType<TWidthSelectKeyType> |
   INumberConfigType |
+  ILabelColSpanConfigType |
   ISelectConfigType<TWidthSelectKeyType | TStatusSelectKeyType > |
   ITextAreaConfigType|
   IBooleanConfigType|
@@ -53,7 +54,7 @@ export interface XInputRadioConfig extends ICommonBaseType {
     /**
      * 字段宽度
      */
-    // width: TSelectDefaultType<TWidthSelectKeyType>;
+    width: TSelectDefaultType<TWidthSelectKeyType>;
 
     /**
      * 是否必填，未填写时提交报错
@@ -70,6 +71,11 @@ export interface XInputRadioConfig extends ICommonBaseType {
      * 隐藏时是否提交数据，开启后隐藏状态仍会保存值
      */
     saveWithHidden?: TBooleanDefaultType;
+
+    /**
+     * 标签宽度
+     */
+    labelColSpan?: TNumberDefaultType;
 }
 
 
@@ -92,6 +98,8 @@ const XRadio: XInputRadioSchema = {
             name: '提示文字',
             type: CONFIG_TYPES.TOOLTIP_INPUT,
         },
+        layoutConfig,
+        labelColSpanConfig,
         {
             key: 'required',
             name: '开启必填',
@@ -103,15 +111,14 @@ const XRadio: XInputRadioSchema = {
             type: CONFIG_TYPES.SWITCH_INPUT,
         },
         statusConfig,
-        // widthConfig,
-        layoutConfig,
+        widthConfig,
     ],
     config: {
         ...baseDefault,
-        label: '',
+        label: '标题',
         description: '',
         tooltip: '',
-        // width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
+        width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
         status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
         defaultValue: [
           {
@@ -129,7 +136,8 @@ const XRadio: XInputRadioSchema = {
           },
         ],
         required: false,
-        layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
+        layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
+        labelColSpan: 5,
         saveWithHidden: false,
     }
 };

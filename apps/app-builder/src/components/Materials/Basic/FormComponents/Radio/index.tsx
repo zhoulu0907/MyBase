@@ -1,10 +1,10 @@
-import { memo } from "react";
-import { Radio, Tooltip, Form } from "@arco-design/web-react";
-import type { XInputRadioConfig } from "./schema";
 import {
-    STATUS_VALUES,
     STATUS_OPTIONS,
+    STATUS_VALUES,
 } from "@/components/Materials/constants";
+import { Form, Radio, Tooltip } from "@arco-design/web-react";
+import { memo } from "react";
+import type { XInputRadioConfig } from "./schema";
 
 const RadioGroup = Radio.Group;
 const XRadio = memo((props: XInputRadioConfig) => {
@@ -29,10 +29,11 @@ const XRadio = memo((props: XInputRadioConfig) => {
                         status === STATUS_VALUES[STATUS_OPTIONS.READONLY]
                             ? "none"
                             : "unset",
+                    margin: '0px',
                 }}
             >
                 <RadioGroup options={defaultValue} />
-                
+
             </Form.Item>
         </Tooltip>
     );

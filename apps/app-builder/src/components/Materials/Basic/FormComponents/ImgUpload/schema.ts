@@ -1,6 +1,6 @@
-import { baseConfig, baseDefault, statusConfig, /* widthConfig, */ listTypeConfig, layoutConfig, type ICommonBaseType, type TStatusSelectKeyType, type TWidthSelectKeyType, type TUploadSelectKeyType, type TLayoutSelectKeyType } from "@/components/Materials/common";
-import { CONFIG_TYPES, STATUS_OPTIONS, STATUS_VALUES, /* WIDTH_OPTIONS, WIDTH_VALUES, */ LAYOUT_OPTIONS, LAYOUT_VALUES, UPLOAD_OPTIONS, UPLOAD_VALUES } from "@/components/Materials/constants";
-import type { IDescriptionConfigType, ILabelConfigType, INumberConfigType, IPlaceholderConfigType, ISelectConfigType, IStatusConfigType, ITextAreaConfigType, ITextConfigType, ITooltipConfigType, IWidthConfigType, TSelectDefaultType, TTextAreaDefaultType, TTextDefaultType, TNumberDefaultType, IUploadSizeConfigType,IUploadLimitConfigType, IUploadCompressConfigType, TBooleanDefaultType, IBooleanConfigType, ILayoutConfigType } from "@/components/Materials/types";
+import { baseConfig, baseDefault, labelColSpanConfig, layoutConfig, /* widthConfig, */ listTypeConfig, statusConfig, type ICommonBaseType, type TLayoutSelectKeyType, type TStatusSelectKeyType, type TUploadSelectKeyType, type TWidthSelectKeyType } from "@/components/Materials/common";
+import { CONFIG_TYPES, /* WIDTH_OPTIONS, WIDTH_VALUES, */ LAYOUT_OPTIONS, LAYOUT_VALUES, STATUS_OPTIONS, STATUS_VALUES, UPLOAD_OPTIONS, UPLOAD_VALUES } from "@/components/Materials/constants";
+import type { IBooleanConfigType, IDescriptionConfigType, ILabelColSpanConfigType, ILabelConfigType, ILayoutConfigType, INumberConfigType, IPlaceholderConfigType, ISelectConfigType, IStatusConfigType, ITextAreaConfigType, ITextConfigType, ITooltipConfigType, IUploadCompressConfigType, IUploadLimitConfigType, IUploadSizeConfigType, IWidthConfigType, TBooleanDefaultType, TNumberDefaultType, TSelectDefaultType, TTextAreaDefaultType, TTextDefaultType } from "@/components/Materials/types";
 
 
 
@@ -19,6 +19,7 @@ export type TXInputImgUploadEditData = Array<
   IStatusConfigType<TStatusSelectKeyType> |
   IWidthConfigType<TWidthSelectKeyType> |
   INumberConfigType |
+  ILabelColSpanConfigType |
   ISelectConfigType<TWidthSelectKeyType | TStatusSelectKeyType > |
   ITextAreaConfigType|
   IBooleanConfigType|
@@ -74,6 +75,11 @@ export interface XInputImgUploadConfig extends ICommonBaseType {
     layout?: TLayoutSelectKeyType;
 
     /**
+     * 标签宽度
+     */
+    labelColSpan?: TNumberDefaultType;
+
+    /**
      * 单个文件大小限制（MB），最大 100, 默认10
      */
     uploadSize?: TNumberDefaultType;
@@ -120,6 +126,8 @@ const XImgUpload: XInputImgUploadSchema = {
             name: '提示文字',
             type: CONFIG_TYPES.TOOLTIP_INPUT,
         },
+        layoutConfig,
+        labelColSpanConfig,
         {
             key: 'uploadSize',
             name: '文件大小限制',
@@ -148,11 +156,10 @@ const XImgUpload: XInputImgUploadSchema = {
         statusConfig,
         // widthConfig,
         listTypeConfig,
-        layoutConfig,
     ],
     config: {
         ...baseDefault,
-        label: '',
+        label: '标题',
         description: '',
         tooltip: '',
         // width: WIDTH_VALUES[WIDTH_OPTIONS.QUARTER],
@@ -163,7 +170,7 @@ const XImgUpload: XInputImgUploadSchema = {
         uploadLimit: -1,
         uploadCompress: -1,
         listType: UPLOAD_VALUES[UPLOAD_OPTIONS.CARD],
-        layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
+        layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
         saveWithHidden: false,
     }
 };

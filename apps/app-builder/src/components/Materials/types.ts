@@ -34,6 +34,15 @@ export interface INumberConfigType {
     step?: number;
 }
 
+// 数字输入框配置
+export interface ILabelColSpanConfigType {
+    key: string;
+    name: string;
+    type: typeof CONFIG_TYPES.LABEL_COL_SPAN;
+    range?: [number, number];
+    step?: number;
+}
+
 // 文本区域输入框配置
 export interface ITextAreaConfigType {
     key: string;

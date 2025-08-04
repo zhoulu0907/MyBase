@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { Button, Tag, Radio } from '@arco-design/web-react';
-import { IconPlus, IconNav, IconMindMapping } from '@arco-design/web-react/icon';
-import EntityTable from '../../components/EntityTable';
-import styles from './index.module.less';
+import { Button, Radio, Tag } from '@arco-design/web-react';
+import { IconMindMapping, IconNav, IconPlus } from '@arco-design/web-react/icon';
+import React, { useState } from 'react';
 import EntityERWithModeSwitch from '../../components/EntityERExample';
+import EntityTable from '../../components/EntityTable';
 import CreateEntityPage from './CreateEntityPage';
+import styles from './index.module.less';
 
 const CheckEntityPage: React.FC<{ handlePageType: (tab: string) => void }> = ({ handlePageType }) => {
   const [activeTab, setActiveTab] = useState('ER');
@@ -49,7 +49,7 @@ const CheckEntityPage: React.FC<{ handlePageType: (tab: string) => void }> = ({ 
           <div className={styles['entity-page-content']}><EntityERWithModeSwitch refreshEntityList={refreshEntityList} setRefreshEntityList={setRefreshEntityList} /></div>
         </>
       )}
-      
+
       { activeTab === 'table' && (
           <div className={styles['entity-page-content']}><EntityTable /></div>
       )}
@@ -58,7 +58,9 @@ const CheckEntityPage: React.FC<{ handlePageType: (tab: string) => void }> = ({ 
         visible={createEntityModalVisible}
         setVisible={setCreateEntityModalVisible}
         handlePageType={handlePageType}
-        setRefreshEntityList={setRefreshEntityList}
+        successCallback={() => {
+          setRefreshEntityList(true);
+        }}
       />
     </div>
   );

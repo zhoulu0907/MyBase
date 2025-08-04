@@ -1,5 +1,5 @@
 import { ALIGN_OPTIONS, ALIGN_VALUES, CONFIG_TYPES, DATE_OPTIONS, DATE_VALUES, LAYOUT_OPTIONS, LAYOUT_VALUES, PAGINATION_POSITION_OPTIONS, PAGINATION_POSITION_VALUES, STATUS_OPTIONS, STATUS_VALUES, UPLOAD_OPTIONS, UPLOAD_VALUES, WIDTH_OPTIONS, WIDTH_VALUES } from "./constants";
-import type { IAlignConfigType, IDateTypeConfigType, IDynamicSelectConfigType, ILayoutConfigType, ISelectConfigType, IStatusConfigType, ITextConfigType, IWidthConfigType, TTextDefaultType } from "./types";
+import type { IAlignConfigType, IDateTypeConfigType, IDynamicSelectConfigType, ILabelColSpanConfigType, ILayoutConfigType, ISelectConfigType, IStatusConfigType, ITextConfigType, IWidthConfigType, TTextDefaultType } from "./types";
 
 
 export interface ICommonBaseType {
@@ -149,6 +149,13 @@ export const layoutConfig: ILayoutConfigType<TLayoutSelectKeyType> = {
             value: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
         },
     ],
+}
+
+// 标签宽度
+export const labelColSpanConfig: ILabelColSpanConfigType = {
+    key: 'labelColSpan',
+    name: '标签宽度',
+    type: CONFIG_TYPES.LABEL_COL_SPAN,
 }
 
 // 文件列表

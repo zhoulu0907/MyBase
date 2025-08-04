@@ -49,7 +49,7 @@ const XText: XTextSchema = {
     config: {
         ...baseDefault,
         content: '展示文本内容',
-        width: WIDTH_VALUES[WIDTH_OPTIONS.QUARTER],
+        width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
         status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     }
 };

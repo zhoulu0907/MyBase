@@ -1,10 +1,10 @@
-import { memo, useEffect, useState } from 'react';
-import { Input, Form } from '@arco-design/web-react';
-import type { XInputPhoneConfig } from './schema';
 import {
-    STATUS_VALUES,
     STATUS_OPTIONS,
+    STATUS_VALUES,
 } from '@/components/Materials/constants';
+import { Form, Input } from '@arco-design/web-react';
+import { memo, useEffect, useState } from 'react';
+import type { XInputPhoneConfig } from './schema';
 
 const XInputPhone = memo((props: XInputPhoneConfig) => {
     const {
@@ -51,6 +51,7 @@ const XInputPhone = memo((props: XInputPhoneConfig) => {
                 opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,
                 pointerEvents:
                     status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset',
+                margin: '0px',
             }}
         >
             <Input

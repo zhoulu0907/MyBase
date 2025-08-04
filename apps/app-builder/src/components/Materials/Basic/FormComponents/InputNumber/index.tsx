@@ -1,10 +1,10 @@
-import { memo } from 'react';
-import { InputNumber, Form } from '@arco-design/web-react';
-import type { XInputNumberConfig } from './schema';
 import {
-    STATUS_VALUES,
     STATUS_OPTIONS,
+    STATUS_VALUES,
 } from '@/components/Materials/constants';
+import { Form, InputNumber } from '@arco-design/web-react';
+import { memo } from 'react';
+import type { XInputNumberConfig } from './schema';
 
 const XInputNumber = memo((props: XInputNumberConfig) => {
     const {
@@ -44,6 +44,7 @@ const XInputNumber = memo((props: XInputNumberConfig) => {
                 opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,
                 pointerEvents:
                     status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset',
+                margin: '0px',
             }}
         >
             <InputNumber

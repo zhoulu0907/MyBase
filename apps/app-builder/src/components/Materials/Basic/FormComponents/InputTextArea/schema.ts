@@ -1,6 +1,6 @@
-import { baseConfig, baseDefault, statusConfig, widthConfig, alignConfig, layoutConfig, type ICommonBaseType, type TStatusSelectKeyType, type TWidthSelectKeyType, type TAlignSelectKeyType, type TLayoutSelectKeyType  } from "@/components/Materials/common";
-import { CONFIG_TYPES, STATUS_OPTIONS, STATUS_VALUES, WIDTH_OPTIONS, WIDTH_VALUES, LAYOUT_OPTIONS, LAYOUT_VALUES, ALIGN_OPTIONS, ALIGN_VALUES } from "@/components/Materials/constants";
-import type { IDescriptionConfigType, ILabelConfigType, INumberConfigType, IPlaceholderConfigType, ISelectConfigType, IStatusConfigType, ITextAreaConfigType, ITextConfigType, ITooltipConfigType, IWidthConfigType, TSelectDefaultType, TTextAreaDefaultType, TTextDefaultType, TBooleanDefaultType, IBooleanConfigType, ILayoutConfigType, IAlignConfigType, IColorConfigType, TNumberDefaultType } from "@/components/Materials/types";
+import { alignConfig, baseConfig, baseDefault, labelColSpanConfig, layoutConfig, statusConfig, widthConfig, type ICommonBaseType, type TAlignSelectKeyType, type TLayoutSelectKeyType, type TStatusSelectKeyType, type TWidthSelectKeyType } from "@/components/Materials/common";
+import { ALIGN_OPTIONS, ALIGN_VALUES, CONFIG_TYPES, LAYOUT_OPTIONS, LAYOUT_VALUES, STATUS_OPTIONS, STATUS_VALUES, WIDTH_OPTIONS, WIDTH_VALUES } from "@/components/Materials/constants";
+import type { IAlignConfigType, IBooleanConfigType, IColorConfigType, IDescriptionConfigType, ILabelColSpanConfigType, ILabelConfigType, ILayoutConfigType, INumberConfigType, IPlaceholderConfigType, ISelectConfigType, IStatusConfigType, ITextAreaConfigType, ITextConfigType, ITooltipConfigType, IWidthConfigType, TBooleanDefaultType, TNumberDefaultType, TSelectDefaultType, TTextAreaDefaultType, TTextDefaultType } from "@/components/Materials/types";
 
 export interface XInputTextAreaSchema {
     editData: TXInputTextAreaEditData;
@@ -16,6 +16,7 @@ export type TXInputTextAreaEditData = Array<
   IStatusConfigType<TStatusSelectKeyType> |
   IWidthConfigType<TWidthSelectKeyType> |
   INumberConfigType |
+  ILabelColSpanConfigType |
   ISelectConfigType<TWidthSelectKeyType | TStatusSelectKeyType > |
   ITextAreaConfigType|
   IBooleanConfigType|
@@ -94,7 +95,7 @@ export interface XInputTextAreaConfig extends ICommonBaseType {
      * 背景颜色
      */
     bgColor?: TTextDefaultType;
-    
+
     /**
      * 标签宽度
      */
@@ -126,11 +127,7 @@ const XInputTextArea: XInputTextAreaSchema = {
             type: CONFIG_TYPES.TOOLTIP_INPUT,
         },
         layoutConfig,
-        {
-            key: 'labelColSpan',
-            name: '标签宽度',
-            type: CONFIG_TYPES.NUMBER_INPUT,
-        },
+        labelColSpanConfig,
         {
             key: 'required',
             name: '开启必填',
@@ -161,6 +158,7 @@ const XInputTextArea: XInputTextAreaSchema = {
         placeholder: '请输入文字',
         description: '',
         tooltip: '',
+        labelColSpan: 5,
         width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
         status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
         defaultValue: '',
@@ -170,7 +168,6 @@ const XInputTextArea: XInputTextAreaSchema = {
         saveWithHidden: false,
         color: '',
         bgColor: '',
-        labelColSpan: 5,
     }
 };
 

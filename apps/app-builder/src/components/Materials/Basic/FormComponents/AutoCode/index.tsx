@@ -1,10 +1,11 @@
 import { memo } from 'react';
-import { Input, Form } from '@arco-design/web-react';
 import type { XInputAutoCodeConfig } from './schema';
 import {
-    STATUS_VALUES,
     STATUS_OPTIONS,
-} from '@/components/Materials/constants';
+    STATUS_VALUES,
+} from "@/components/Materials/constants";
+import { Form, Input } from "@arco-design/web-react";
+import { v4 as uuidv4 } from 'uuid';
 
 const XAutoCode = memo((props: XInputAutoCodeConfig) => {
     const {
@@ -19,7 +20,7 @@ const XAutoCode = memo((props: XInputAutoCodeConfig) => {
         labelColSpan = 0,
     } = props;
 
-    const defaultValue = crypto.randomUUID();
+    const defaultValue = uuidv4();
 
     return (
         <Form.Item
@@ -32,6 +33,7 @@ const XAutoCode = memo((props: XInputAutoCodeConfig) => {
             tooltip={tooltip}
             wrapperCol={{ span: 24 - labelColSpan }}
             style={{
+                margin: 0,
                 opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,
             }}
         >
