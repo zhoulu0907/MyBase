@@ -11,9 +11,7 @@ import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.infra.controller.admin.file.vo.file.FileCreateReqVO;
 import com.cmsr.onebase.module.infra.controller.admin.file.vo.file.FilePageReqVO;
 import com.cmsr.onebase.module.infra.controller.admin.file.vo.file.FilePresignedUrlRespVO;
-import com.cmsr.onebase.module.infra.dal.dataobject.file.FileConfigDO;
 import com.cmsr.onebase.module.infra.dal.dataobject.file.FileDO;
-import com.cmsr.onebase.module.infra.dal.mysql.file.FileMapper;
 import com.cmsr.onebase.module.infra.framework.file.core.client.FileClient;
 import com.cmsr.onebase.module.infra.framework.file.core.client.s3.FilePresignedUrlRespDTO;
 import com.cmsr.onebase.module.infra.framework.file.core.utils.FileTypeUtils;
@@ -52,9 +50,6 @@ public class FileServiceImpl implements FileService {
     private FileConfigService fileConfigService;
 
     @Resource
-    private FileMapper fileMapper;
-
-    @Resource
     private DataRepository dataRepository;
 
     @Override
@@ -73,7 +68,6 @@ public class FileServiceImpl implements FileService {
                 pageReqVO.getPageNo(),
                 pageReqVO.getPageSize()
         );
-//        return fileMapper.selectPage(pageReqVO);
     }
 
     @Override
@@ -106,9 +100,6 @@ public class FileServiceImpl implements FileService {
         dataRepository.insert(new FileDO().setConfigId(client.getId())
                 .setName(name).setPath(path).setUrl(url)
                 .setType(type).setSize(content.length));
-//        fileMapper.insert(new FileDO().setConfigId(client.getId())
-//                .setName(name).setPath(path).setUrl(url)
-//                .setType(type).setSize(content.length));
         return url;
     }
 
@@ -161,7 +152,6 @@ public class FileServiceImpl implements FileService {
     public Long createFile(FileCreateReqVO createReqVO) {
         FileDO file = BeanUtils.toBean(createReqVO, FileDO.class);
         dataRepository.insert(file);
-//        fileMapper.insert(file);
         return file.getId();
     }
 
@@ -177,12 +167,10 @@ public class FileServiceImpl implements FileService {
 
         // 删除记录
         dataRepository.deleteById(FileDO.class,id);
-//        fileMapper.deleteById(id);
     }
 
     private FileDO validateFileExists(Long id) {
         FileDO fileDO = dataRepository.findById(FileDO.class,id);
-//        FileDO fileDO = fileMapper.selectById(id);
         if (fileDO == null) {
             throw exception(FILE_NOT_EXISTS);
         }

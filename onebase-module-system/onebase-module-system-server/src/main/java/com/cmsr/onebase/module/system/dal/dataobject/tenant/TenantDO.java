@@ -2,6 +2,8 @@ package com.cmsr.onebase.module.system.dal.dataobject.tenant;
 
 import java.time.LocalDateTime;
 
+import com.baomidou.mybatisplus.annotation.KeySequence;
+import com.baomidou.mybatisplus.annotation.TableName;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
@@ -26,6 +28,8 @@ import lombok.ToString;
 @AllArgsConstructor
 @NoArgsConstructor
 @TenantIgnore
+//@TableName(value = "system_tenant", autoResultMap = true)
+//@KeySequence("system_tenant_seq")
 @Table(name = "system_tenant")
 public class TenantDO extends BaseDO {
 

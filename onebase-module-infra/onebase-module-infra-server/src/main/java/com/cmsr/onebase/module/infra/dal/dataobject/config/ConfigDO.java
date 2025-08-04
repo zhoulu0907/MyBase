@@ -6,56 +6,71 @@ import com.cmsr.onebase.module.infra.enums.config.ConfigTypeEnum;
 import com.baomidou.mybatisplus.annotation.KeySequence;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
+import jakarta.persistence.Column;
+import jakarta.persistence.Table;
+import lombok.*;
 
 /**
  * 参数配置表
  *
  */
-@TableName("infra_config")
-@KeySequence("infra_config_seq") // 用于 Oracle、PostgreSQL、Kingbase、DB2、H2 数据库的主键自增。如果是 MySQL 等数据库，可不写。
 @Data
-@EqualsAndHashCode(callSuper = true)
-@ToString(callSuper = true)
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Table(name = "infra_config")
 @TenantIgnore
 public class ConfigDO extends BaseDO {
 
+    // 新增各字段对应的常量
+    public static final String CATEGORY = "category";
+    public static final String NAME = "name";
+    public static final String CONFIG_KEY = "config_key";
+    public static final String VALUE = "value";
+    public static final String TYPE = "type";
+    public static final String VISIBLE = "visible";
+    public static final String REMARK = "remark";
 
     /**
      * 参数分类
      */
+    @Column(name = CATEGORY)
     private String category;
     /**
      * 参数名称
      */
+    @Column(name = NAME)
     private String name;
     /**
      * 参数键名
      *
      * 支持多 DB 类型时，无法直接使用 key + @TableField("config_key") 来实现转换，原因是 "config_key" AS key 而存在报错
      */
+    @Column(name = CONFIG_KEY)
     private String configKey;
     /**
      * 参数键值
      */
+    @Column(name = VALUE)
     private String value;
     /**
      * 参数类型
      *
      * 枚举 {@link ConfigTypeEnum}
      */
+    @Column(name = TYPE)
     private Integer type;
     /**
      * 是否可见
      *
      * 不可见的参数，一般是敏感参数，前端不可获取
      */
+    @Column(name = VISIBLE)
     private Boolean visible;
     /**
      * 备注
      */
+    @Column(name = REMARK)
     private String remark;
 
 }

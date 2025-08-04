@@ -5,7 +5,6 @@ import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.mybatis.core.util.JdbcUtils;
 import com.cmsr.onebase.module.infra.controller.admin.db.vo.DataSourceConfigSaveReqVO;
 import com.cmsr.onebase.module.infra.dal.dataobject.db.DataSourceConfigDO;
-import com.cmsr.onebase.module.infra.dal.mysql.db.DataSourceConfigMapper;
 import com.baomidou.dynamic.datasource.creator.DataSourceProperty;
 import com.baomidou.dynamic.datasource.spring.boot.autoconfigure.DynamicDataSourceProperties;
 import org.springframework.stereotype.Service;
@@ -27,9 +26,6 @@ import static com.cmsr.onebase.module.infra.enums.ErrorCodeConstants.DATA_SOURCE
 @Validated
 public class DataSourceConfigServiceImpl implements DataSourceConfigService {
 
-//    @Resource
-//    private DataSourceConfigMapper dataSourceConfigMapper;
-
     @Resource
     private DataRepository dataRepository;
 
@@ -43,7 +39,6 @@ public class DataSourceConfigServiceImpl implements DataSourceConfigService {
 
         // 插入
         dataRepository.insert(config);
-//        dataSourceConfigMapper.insert(config);
         // 返回
         return config.getId();
     }
@@ -57,7 +52,6 @@ public class DataSourceConfigServiceImpl implements DataSourceConfigService {
 
         // 更新
         dataRepository.update(updateObj);
-//        dataSourceConfigMapper.updateById(updateObj);
     }
 
     @Override
@@ -66,16 +60,12 @@ public class DataSourceConfigServiceImpl implements DataSourceConfigService {
         validateDataSourceConfigExists(id);
         // 删除
         dataRepository.deleteById(DataSourceConfigDO.class,id);
-//        dataSourceConfigMapper.deleteById(id);
     }
 
     private void validateDataSourceConfigExists(Long id) {
         if (dataRepository.findById(DataSourceConfigDO.class,id) == null) {
             throw exception(DATA_SOURCE_CONFIG_NOT_EXISTS);
         }
-//        if (dataSourceConfigMapper.selectById(id) == null) {
-//            throw exception(DATA_SOURCE_CONFIG_NOT_EXISTS);
-//        }
     }
 
     @Override
@@ -86,13 +76,11 @@ public class DataSourceConfigServiceImpl implements DataSourceConfigService {
         }
         // 从 DB 中读取
         return dataRepository.findById(DataSourceConfigDO.class,id);
-//        return dataSourceConfigMapper.selectById(id);
     }
 
     @Override
     public List<DataSourceConfigDO> getDataSourceConfigList() {
         List<DataSourceConfigDO> result = dataRepository.findAll(DataSourceConfigDO.class);
-//        List<DataSourceConfigDO> result = dataSourceConfigMapper.selectList();
         // 补充 master 数据源
         result.add(0, buildMasterDataSourceConfig());
         return result;

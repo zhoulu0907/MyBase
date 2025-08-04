@@ -17,6 +17,7 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.extension.handlers.AbstractJsonTypeHandler;
 import com.fasterxml.jackson.core.type.TypeReference;
+import jakarta.persistence.Table;
 import lombok.*;
 
 import java.lang.reflect.Field;
@@ -25,46 +26,55 @@ import java.lang.reflect.Field;
  * 文件配置表
  *
  */
-@TableName(value = "infra_file_config", autoResultMap = true)
-@KeySequence("infra_file_config_seq") // 用于 Oracle、PostgreSQL、Kingbase、DB2、H2 数据库的主键自增。如果是 MySQL 等数据库，可不写。
 @Data
-@EqualsAndHashCode(callSuper = true)
-@ToString(callSuper = true)
 @Builder
+@TenantIgnore
 @NoArgsConstructor
 @AllArgsConstructor
-@TenantIgnore
+@Table(name = "infra_file_config")
 public class FileConfigDO extends BaseDO {
     // builder模式可正常运作
     public FileConfigDO setId(Long id){
         super.setId(id);
         return this;
     }
+    
+    // 字段常量定义
+    public static final String COLUMN_NAME = "name";
+    public static final String COLUMN_STORAGE = "storage";
+    public static final String COLUMN_REMARK = "remark";
+    public static final String COLUMN_MASTER = "master";
+    public static final String COLUMN_CONFIG = "config";
+
     /**
      * 配置名
      */
+    @TableField(value = COLUMN_NAME)
     private String name;
     /**
      * 存储器
      *
      * 枚举 {@link FileStorageEnum}
      */
+    @TableField(value = COLUMN_STORAGE)
     private Integer storage;
     /**
      * 备注
      */
+    @TableField(value = COLUMN_REMARK)
     private String remark;
     /**
      * 是否为主配置
      *
      * 由于我们可以配置多个文件配置，默认情况下，使用主配置进行文件的上传
      */
+    @TableField(value = COLUMN_MASTER)
     private Boolean master;
 
     /**
      * 支付渠道配置
      */
-    @TableField(typeHandler = FileClientConfigTypeHandler.class)
+    @TableField(value = COLUMN_CONFIG, typeHandler = FileClientConfigTypeHandler.class)
     private FileClientConfig config;
 
     public static class FileClientConfigTypeHandler extends AbstractJsonTypeHandler<Object> {

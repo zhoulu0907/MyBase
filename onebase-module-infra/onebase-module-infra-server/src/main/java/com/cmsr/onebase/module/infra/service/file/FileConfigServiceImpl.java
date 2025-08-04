@@ -10,7 +10,6 @@ import com.cmsr.onebase.module.infra.controller.admin.file.vo.config.FileConfigP
 import com.cmsr.onebase.module.infra.controller.admin.file.vo.config.FileConfigSaveReqVO;
 import com.cmsr.onebase.module.infra.convert.file.FileConfigConvert;
 import com.cmsr.onebase.module.infra.dal.dataobject.file.FileConfigDO;
-import com.cmsr.onebase.module.infra.dal.mysql.file.FileConfigMapper;
 import com.cmsr.onebase.module.infra.framework.file.core.client.FileClient;
 import com.cmsr.onebase.module.infra.framework.file.core.client.FileClientConfig;
 import com.cmsr.onebase.module.infra.framework.file.core.client.FileClientFactory;
@@ -60,8 +59,6 @@ public class FileConfigServiceImpl implements FileConfigService {
                             dataRepository.findOne(FileConfigDO.class, new DefaultConfigStore().eq("master", true))
                             : dataRepository.findOne(FileConfigDO.class, new DefaultConfigStore().eq("id", id));
                     ;
-//                    FileConfigDO config = Objects.equals(CACHE_MASTER_ID, id) ?
-//                            fileConfigMapper.selectByMaster() : fileConfigMapper.selectById(id);
                     if (config != null) {
                         fileClientFactory.createOrUpdateFileClient(config.getId(), config.getStorage(), config.getConfig());
                     }
@@ -72,9 +69,6 @@ public class FileConfigServiceImpl implements FileConfigService {
 
     @Resource
     private FileClientFactory fileClientFactory;
-
-//    @Resource
-//    private FileConfigMapper fileConfigMapper;
 
     @Resource
     private DataRepository dataRepository;
@@ -88,7 +82,6 @@ public class FileConfigServiceImpl implements FileConfigService {
                 .setConfig(parseClientConfig(createReqVO.getStorage(), createReqVO.getConfig()))
                 .setMaster(false); // 默认非 master
         dataRepository.insert(fileConfig);
-//        fileConfigMapper.insert(fileConfig);
         return fileConfig.getId();
     }
 
@@ -100,7 +93,6 @@ public class FileConfigServiceImpl implements FileConfigService {
         FileConfigDO updateObj = FileConfigConvert.INSTANCE.convert(updateReqVO)
                 .setConfig(parseClientConfig(config.getStorage(), updateReqVO.getConfig()));
         dataRepository.update(updateObj);
-//        fileConfigMapper.updateById(updateObj);
 
         // 清空缓存
         clearCache(config.getId(), null);
@@ -113,10 +105,8 @@ public class FileConfigServiceImpl implements FileConfigService {
         validateFileConfigExists(id);
         // 更新其它为非 master
         dataRepository.update(new FileConfigDO().setMaster(false));
-//        fileConfigMapper.updateBatch(new FileConfigDO().setMaster(false));
         // 更新
         dataRepository.update(new FileConfigDO().setId(id).setMaster(true));
-//        fileConfigMapper.updateById(new FileConfigDO().setId(id).setMaster(true));
 
         // 清空缓存
         clearCache(null, true);
@@ -142,7 +132,6 @@ public class FileConfigServiceImpl implements FileConfigService {
         }
         // 删除
         dataRepository.deleteById(FileConfigDO.class, id);
-//        fileConfigMapper.deleteById(id);
 
         // 清空缓存
         clearCache(id, null);
@@ -165,7 +154,6 @@ public class FileConfigServiceImpl implements FileConfigService {
 
     private FileConfigDO validateFileConfigExists(Long id) {
         FileConfigDO config = dataRepository.findById(FileConfigDO.class, id);
-//        FileConfigDO config = fileConfigMapper.selectById(id);
         if (config == null) {
             throw exception(FILE_CONFIG_NOT_EXISTS);
         }
@@ -175,7 +163,6 @@ public class FileConfigServiceImpl implements FileConfigService {
     @Override
     public FileConfigDO getFileConfig(Long id) {
         return dataRepository.findById(FileConfigDO.class, id);
-//        return fileConfigMapper.selectById(id);
     }
 
     @Override
@@ -193,7 +180,6 @@ public class FileConfigServiceImpl implements FileConfigService {
                 pageReqVO.getPageNo(),
                 pageReqVO.getPageSize()
         );
-//        return fileConfigMapper.selectPage(pageReqVO);
     }
 
     @Override
