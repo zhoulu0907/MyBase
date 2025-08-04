@@ -108,21 +108,21 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
                     onChange={(key) => {
                         setActiveTab(key);
                         switch (key) {
-                            case "create-app/page-manager":
+                            case "page-manager":
                                 navigate("/onebase/create-app/page-manager");
                                 break;
-                            case "create-app/integrated-management":
+                            case "integrated-management":
                                 navigate(
                                     "/onebase/create-app/integrated-management"
                                 );
                                 break;
-                            case "create-app/data-factory":
+                            case "data-factory":
                                 navigate("/onebase/create-app/data-factory");
                                 break;
-                            case "create-app/app-setting":
+                            case "app-setting":
                                 navigate("/onebase/create-app/app-setting");
                                 break;
-                            case "create-app/app-release":
+                            case "app-release":
                                 navigate("/onebase/create-app/app-release");
                                 break;
                             default:
@@ -132,24 +132,24 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
                     size="large"
                 >
                     <Tabs.TabPane
-                        key="create-app/data-factory"
+                        key="data-factory"
                         title={t("createApp.dataFactory")}
                     />
                     <Tabs.TabPane
-                        key="create-app/page-manager"
+                        key="page-manager"
                         title={t("createApp.pageManager")}
                     />
                     <Tabs.TabPane
-                        key="create-app/integrated-management"
+                        key="integrated-management"
                         title={t("createApp.integratedManagement")}
                     />
 
                     <Tabs.TabPane
-                        key="create-app/app-setting"
+                        key="app-setting"
                         title={t("createApp.appSetting")}
                     />
                     <Tabs.TabPane
-                        key="create-app/app-release"
+                        key="app-release"
                         title={t("createApp.appRelease")}
                     />
                 </Tabs>
