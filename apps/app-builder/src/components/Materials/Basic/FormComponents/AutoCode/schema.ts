@@ -118,11 +118,6 @@ const XAutoCode: XInputAutoCodeSchema = {
         layoutConfig,
         labelColSpanConfig,
         {
-            key: 'labelColSpan',
-            name: '标签宽度',
-            type: CONFIG_TYPES.NUMBER_INPUT,
-        },
-        {
             key: 'saveWithHidden',
             name: '隐藏时提交数据',
             type: CONFIG_TYPES.SWITCH_INPUT,
