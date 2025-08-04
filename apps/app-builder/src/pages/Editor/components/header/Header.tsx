@@ -43,7 +43,7 @@ const tabData = [
 ];
 
 export default function EditorHeader() {
-    const { clearCurComponentID } = usePageEditorStore();
+    const { clearCurComponentID, components, pageComponentSchemas } = usePageEditorStore();
 
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState("");
@@ -64,6 +64,8 @@ export default function EditorHeader() {
 
     const handleSaveApp = () => {
         console.log("save app");
+        console.log(components);
+        console.log(pageComponentSchemas);
     }
 
     return (
