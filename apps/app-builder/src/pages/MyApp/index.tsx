@@ -50,7 +50,7 @@ const MyAppPage: React.FC = () => {
                     size="large"
                     icon={<IconPlusCircle />}
                     className={styles.createAppButton}
-                    onClick={() => navigate("/onebase/create-app")}
+                    onClick={() => navigate("/onebase/create-app/data-factory")}
                 >
                     {t("myApp.createApp")}
                 </Button>
