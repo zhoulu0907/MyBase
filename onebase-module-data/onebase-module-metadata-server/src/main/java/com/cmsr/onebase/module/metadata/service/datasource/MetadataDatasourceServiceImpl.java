@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.module.metadata.enums.ErrorCodeConstants.DATASOURCE_NOT_EXISTS;
@@ -265,6 +266,9 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
         reqVO.setRunMode(1);
         reqVO.setDatasourceOrigin(0);
         reqVO.setAppId(appId);
+        // 生成唯一的数据源编码，避免重复
+        String uniqueCode = database + "_" + UUID.randomUUID().toString().replace("-", "");
+        reqVO.setCode(uniqueCode);
         // 调用已有创建方法
         return createDatasource(reqVO);
     }

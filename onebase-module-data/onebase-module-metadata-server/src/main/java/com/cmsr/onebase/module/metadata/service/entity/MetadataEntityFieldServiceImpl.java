@@ -58,39 +58,33 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
     @Transactional(rollbackFor = Exception.class)
     public EntityFieldBatchCreateRespVO batchCreateEntityFields(@Valid EntityFieldBatchCreateReqVO reqVO) {
         EntityFieldBatchCreateRespVO result = new EntityFieldBatchCreateRespVO();
-        List<Long> fieldIds = new ArrayList<>();
+        List<String> fieldIds = new ArrayList<>();
         int successCount = 0;
         int failureCount = 0;
 
         for (EntityFieldCreateItemVO fieldItem : reqVO.getFields()) {
-            try {
-                // 校验字段名唯一性
-                validateEntityFieldNameUnique(null, reqVO.getEntityId(), fieldItem.getFieldName());
+            // 直接执行创建逻辑，异常由全局统一处理
+            validateEntityFieldNameUnique(null, reqVO.getEntityId(), fieldItem.getFieldName());
+            // 创建字段及数据库插入操作
+            MetadataEntityFieldDO entityField = new MetadataEntityFieldDO();
+            entityField.setEntityId(reqVO.getEntityId());
+            entityField.setFieldName(fieldItem.getFieldName());
+            entityField.setDisplayName(fieldItem.getDisplayName());
+            entityField.setFieldType(fieldItem.getFieldType());
+            entityField.setDataLength(fieldItem.getDataLength());
+            entityField.setDescription(fieldItem.getDescription());
+            entityField.setIsRequired(fieldItem.getIsRequired() != null ? fieldItem.getIsRequired() : false);
+            entityField.setIsUnique(fieldItem.getIsUnique() != null ? fieldItem.getIsUnique() : false);
+            entityField.setAllowNull(fieldItem.getAllowNull() != null ? fieldItem.getAllowNull() : true);
+            entityField.setDefaultValue(fieldItem.getDefaultValue());
+            entityField.setSortOrder(fieldItem.getSortOrder() != null ? fieldItem.getSortOrder() : 0);
+            entityField.setIsSystemField(false);
+            entityField.setIsPrimaryKey(false);
+            entityField.setAppId(reqVO.getAppId());
 
-                // 创建字段
-                MetadataEntityFieldDO entityField = new MetadataEntityFieldDO();
-                entityField.setEntityId(reqVO.getEntityId());
-                entityField.setFieldName(fieldItem.getFieldName());
-                entityField.setDisplayName(fieldItem.getDisplayName());
-                entityField.setFieldType(fieldItem.getFieldType());
-                entityField.setDataLength(fieldItem.getDataLength());
-                entityField.setDescription(fieldItem.getDescription());
-                entityField.setIsRequired(fieldItem.getIsRequired() != null ? fieldItem.getIsRequired() : false);
-                entityField.setIsUnique(fieldItem.getIsUnique() != null ? fieldItem.getIsUnique() : false);
-                entityField.setAllowNull(fieldItem.getAllowNull() != null ? fieldItem.getAllowNull() : true);
-                entityField.setDefaultValue(fieldItem.getDefaultValue());
-                entityField.setSortOrder(fieldItem.getSortOrder() != null ? fieldItem.getSortOrder() : 0);
-                entityField.setIsSystemField(false);
-                entityField.setIsPrimaryKey(false);
-                entityField.setAppId(reqVO.getAppId());
-
-                dataRepository.insert(entityField);
-                fieldIds.add(entityField.getId());
-                successCount++;
-            } catch (Exception e) {
-                log.error("批量创建字段失败: fieldName={}", fieldItem.getFieldName(), e);
-                failureCount++;
-            }
+            dataRepository.insert(entityField);
+            fieldIds.add(entityField.getId().toString());
+            successCount++;
         }
 
         result.setSuccessCount(successCount);
@@ -146,32 +140,26 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
         int failureCount = 0;
 
         for (EntityFieldUpdateItemVO fieldItem : reqVO.getFields()) {
-            try {
-                // 校验字段存在
-                validateEntityFieldExists(fieldItem.getId());
-
-                // 更新字段
-                MetadataEntityFieldDO updateObj = new MetadataEntityFieldDO();
-                updateObj.setId(fieldItem.getId());
-                if (StringUtils.hasText(fieldItem.getDisplayName())) {
-                    updateObj.setDisplayName(fieldItem.getDisplayName());
-                }
-                if (StringUtils.hasText(fieldItem.getDescription())) {
-                    updateObj.setDescription(fieldItem.getDescription());
-                }
-                if (fieldItem.getIsRequired() != null) {
-                    updateObj.setIsRequired(fieldItem.getIsRequired());
-                }
-                if (fieldItem.getDataLength() != null) {
-                    updateObj.setDataLength(fieldItem.getDataLength());
-                }
-
-                dataRepository.update(updateObj);
-                successCount++;
-            } catch (Exception e) {
-                log.error("批量更新字段失败: fieldId={}", fieldItem.getId(), e);
-                failureCount++;
+            // 校验字段存在
+            validateEntityFieldExists(fieldItem.getId());
+            // 更新字段
+            MetadataEntityFieldDO updateObj = new MetadataEntityFieldDO();
+            updateObj.setId(fieldItem.getId());
+            if (StringUtils.hasText(fieldItem.getDisplayName())) {
+                updateObj.setDisplayName(fieldItem.getDisplayName());
             }
+            if (StringUtils.hasText(fieldItem.getDescription())) {
+                updateObj.setDescription(fieldItem.getDescription());
+            }
+            if (fieldItem.getIsRequired() != null) {
+                updateObj.setIsRequired(fieldItem.getIsRequired());
+            }
+            if (fieldItem.getDataLength() != null) {
+                updateObj.setDataLength(fieldItem.getDataLength());
+            }
+
+            dataRepository.update(updateObj);
+            successCount++;
         }
 
         result.setSuccessCount(successCount);

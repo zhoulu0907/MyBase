@@ -340,3 +340,11 @@ debug: false
 # 插件配置
 pf4j:
   pluginsDir: /Users/one/code/gitee/onebase_v3/plugins # 插件目录
+
+default:
+  datasource:
+    host: 10.0.104.38
+    port: 5432
+    database: onebase_business
+    username: postgres
+    password: onebase@2025
