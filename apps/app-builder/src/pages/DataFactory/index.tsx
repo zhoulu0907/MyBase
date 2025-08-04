@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+// import { useNavigate } from 'react-router-dom';
 import { Layout, Menu, Tooltip } from '@arco-design/web-react';
 import { IconShareAlt, IconCommon } from '@arco-design/web-react/icon';
 import DataSourcePage from './Pages/DataSource';
@@ -8,17 +8,17 @@ import styles from './index.module.less';
 
 
 const DataFactoryPage: React.FC = () => {
-  const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('data-source');
-  const urlParams = new URLSearchParams(window.location.search);
+  // const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState('check-entity');
+  // const urlParams = new URLSearchParams(window.location.search);
 
-  const updateUrl = (tab: string) => {
-    if (tab) {
-      urlParams.set('fac-tab', tab);
-      setActiveTab(tab);
-    }
-    navigate(`${window.location.pathname}?${urlParams.toString()}`);
-  };
+  // const updateUrl = (tab: string) => {
+  //   if (tab) {
+  //     urlParams.set('fac-tab', tab);
+  //     setActiveTab(tab);
+  //   }
+  //   navigate(`${window.location.pathname}?${urlParams.toString()}`);
+  // };
 
   const handleMenuClick = (key: string) => {
     setActiveTab(key);
