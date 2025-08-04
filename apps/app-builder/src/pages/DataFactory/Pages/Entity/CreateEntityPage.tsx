@@ -20,14 +20,14 @@ const entitySources = [
 const dsOptions: { label: string, value: string }[] = [];
 const dsTables: { label: string, value: string }[] = [];
 
-const CreateEntityPage: React.FC<{ visible: boolean, setVisible: (visible: boolean) => void, handlePageType: (tab: string) => void, setRefreshEntityList: (refresh: boolean) => void }> = ({ visible, setVisible, handlePageType, setRefreshEntityList }) => {
+const CreateEntityPage: React.FC<{ visible: boolean, setVisible: (visible: boolean) => void, handlePageType: (tab: string) => void, successCallback: () => void }> = ({ visible, setVisible, handlePageType, successCallback }) => {
   const [form] = Form.useForm<EntityFormValues>();
   const [dsResource, setDsResource] = useState<string>(DS_RESOURCE_TYPE.EXTERNAL); // 数据源来源：内部数据源、外部数据源、外部数据源中引用自有数据源已有资产
   // 提交
   const handleFinish = () => {
     // TODO: 提交表单数据
     form.validate().then(values => {
-      const { nodes } = JSON.parse(localStorage.getItem('entityFormValues') || JSON.stringify({nodes: []}));
+      const { nodes, edges } = JSON.parse(localStorage.getItem('entityFormValues') || JSON.stringify({nodes: [], edges: []}));
 
       nodes.push({
         ...values,
@@ -39,11 +39,12 @@ const CreateEntityPage: React.FC<{ visible: boolean, setVisible: (visible: boole
           {id: 'ID', name: 'ID', type: '自增ID', isSystem: true},
         ],
       }); 
-      localStorage.setItem('entityFormValues', JSON.stringify({ nodes }));
+      localStorage.setItem('entityFormValues', JSON.stringify({ nodes, edges }));
       console.log(values);
+      form.resetFields();
       Message.success('保存成功');
+      successCallback();
       setVisible(false);
-      setRefreshEntityList(true);
     });
   };
 

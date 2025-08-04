@@ -150,6 +150,7 @@ const CreateDataSource: React.FC<{ handlePageType: (tab: string) => void }> = ({
         Message.error('创建失败，请检查表单数据');
       }
     } finally {
+      form.resetFields();
       setSubmitting(false);
     }
   };

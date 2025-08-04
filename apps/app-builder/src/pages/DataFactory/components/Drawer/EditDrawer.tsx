@@ -23,14 +23,12 @@ const DetailDrawer: React.FC<{
   setVisible: (visible: boolean) => void, 
   onNodeEdit: (data: EntityNode) => void, 
   setEditingNode: (node: EntityNode | null) => void,
-  successCallback: () => void
 }> = ({ 
   editingNode, 
   visible, 
   setVisible, 
   onNodeEdit, 
   setEditingNode,
-  successCallback
 }) => {
   
   useEffect(() => {
@@ -40,14 +38,16 @@ const DetailDrawer: React.FC<{
   const handleNodeEdit = (formData: Partial<FormValues>) => {
     if (editingNode && onNodeEdit) {
       // onNodeEdit(formData);
-      const { nodes } = JSON.parse(localStorage.getItem('entityFormValues') || JSON.stringify({ nodes: [] }));
+      const { nodes } = JSON.parse(localStorage.getItem('entityFormValues') || JSON.stringify({ nodes: [], edges: [] }));
       const nodeData = nodes.find((n: EntityNode) => n.id === editingNode.id);
+      console.log('handleNodeEdit====',nodeData);
       if (nodeData) {
         nodeData.id = editingNode.id;
         nodeData.code = formData.code || nodeData.code;
         nodeData.title = formData.name || nodeData.title;
         nodeData.description = formData.description || nodeData.description;
         nodeData.fields = nodeData.fields || [];
+        console.log(formData.systemFields);
         if (formData.systemFields) {
           Object.keys(formData.systemFields).forEach((key: string) => {
             if (formData.systemFields && formData.systemFields[key as keyof typeof formData.systemFields]) {
@@ -60,6 +60,7 @@ const DetailDrawer: React.FC<{
             }
           });
         }
+        console.log(nodeData);
       }
       onNodeEdit(nodeData);
       setVisible(false);
@@ -81,7 +82,6 @@ const DetailDrawer: React.FC<{
             node={editingNode}
             onSave={(data: Partial<FormValues>) => handleNodeEdit(data)}
             onCancel={() => setVisible(false)}
-            successCallback={successCallback}
           />
         )}
     </Drawer>
