@@ -36,11 +36,6 @@
             <version>${revision}</version>
         </dependency>
 
-        <!-- 权限基础 -->
-        <dependency>
-            <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-spring-boot-starter-biz-data-permission</artifactId>
-        </dependency>
         <!-- 租户基础 -->
         <dependency>
             <groupId>com.cmsr.onebase</groupId>

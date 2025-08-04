@@ -1,10 +1,23 @@
 package com.cmsr.onebase.framework.tenant.config;
 
-import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.convertList;
-
-import java.util.Map;
-import java.util.Objects;
-
+import cn.hutool.extra.spring.SpringUtil;
+import com.cmsr.onebase.framework.common.biz.system.tenant.TenantCommonApi;
+import com.cmsr.onebase.framework.common.enums.WebFilterOrderEnum;
+import com.cmsr.onebase.framework.redis.config.YudaoCacheProperties;
+import com.cmsr.onebase.framework.security.core.service.SecurityFrameworkService;
+import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
+import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnoreAspect;
+import com.cmsr.onebase.framework.tenant.core.mq.rabbitmq.TenantRabbitMQInitializer;
+import com.cmsr.onebase.framework.tenant.core.mq.rocketmq.TenantRocketMQInitializer;
+import com.cmsr.onebase.framework.tenant.core.redis.TenantRedisCacheManager;
+import com.cmsr.onebase.framework.tenant.core.security.TenantSecurityWebFilter;
+import com.cmsr.onebase.framework.tenant.core.service.TenantFrameworkService;
+import com.cmsr.onebase.framework.tenant.core.service.TenantFrameworkServiceImpl;
+import com.cmsr.onebase.framework.tenant.core.web.TenantContextWebFilter;
+import com.cmsr.onebase.framework.tenant.core.web.TenantVisitContextInterceptor;
+import com.cmsr.onebase.framework.web.config.WebProperties;
+import com.cmsr.onebase.framework.web.core.handler.GlobalExceptionHandler;
+import jakarta.annotation.Resource;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -26,29 +39,10 @@ import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.util.pattern.PathPattern;
 
-import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
-import com.baomidou.mybatisplus.extension.plugins.inner.TenantLineInnerInterceptor;
-import com.cmsr.onebase.framework.common.biz.system.tenant.TenantCommonApi;
-import com.cmsr.onebase.framework.common.enums.WebFilterOrderEnum;
-import com.cmsr.onebase.framework.mybatis.core.util.MyBatisUtils;
-import com.cmsr.onebase.framework.redis.config.YudaoCacheProperties;
-import com.cmsr.onebase.framework.security.core.service.SecurityFrameworkService;
-import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
-import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnoreAspect;
-import com.cmsr.onebase.framework.tenant.core.db.TenantDatabaseInterceptor;
-import com.cmsr.onebase.framework.tenant.core.mq.rabbitmq.TenantRabbitMQInitializer;
-import com.cmsr.onebase.framework.tenant.core.mq.rocketmq.TenantRocketMQInitializer;
-import com.cmsr.onebase.framework.tenant.core.redis.TenantRedisCacheManager;
-import com.cmsr.onebase.framework.tenant.core.security.TenantSecurityWebFilter;
-import com.cmsr.onebase.framework.tenant.core.service.TenantFrameworkService;
-import com.cmsr.onebase.framework.tenant.core.service.TenantFrameworkServiceImpl;
-import com.cmsr.onebase.framework.tenant.core.web.TenantContextWebFilter;
-import com.cmsr.onebase.framework.tenant.core.web.TenantVisitContextInterceptor;
-import com.cmsr.onebase.framework.web.config.WebProperties;
-import com.cmsr.onebase.framework.web.core.handler.GlobalExceptionHandler;
+import java.util.Map;
+import java.util.Objects;
 
-import cn.hutool.extra.spring.SpringUtil;
-import jakarta.annotation.Resource;
+import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.convertList;
 
 @AutoConfiguration
 @ConditionalOnProperty(prefix = "yudao.tenant", value = "enable", matchIfMissing = true) // 允许使用 yudao.tenant.enable=false 禁用多租户

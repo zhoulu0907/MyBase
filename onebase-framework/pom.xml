@@ -21,10 +21,9 @@
         <module>onebase-spring-boot-starter-rpc</module>
 
         <module>onebase-spring-boot-starter-excel</module>
-<!--        <module>onebase-spring-boot-starter-test</module>-->
+        <module>onebase-spring-boot-starter-test</module>
 
         <module>onebase-spring-boot-starter-biz-tenant</module>
-        <module>onebase-spring-boot-starter-biz-data-permission</module>
     </modules>
 
     <artifactId>onebase-framework</artifactId>

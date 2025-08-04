@@ -38,10 +38,7 @@
         </dependency>
 
         <!-- 业务组件 -->
-        <dependency>
-            <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-spring-boot-starter-biz-data-permission</artifactId>
-        </dependency>
+
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-spring-boot-starter-biz-tenant</artifactId>

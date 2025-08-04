@@ -6,7 +6,6 @@ import com.cmsr.onebase.framework.common.pojo.PageParam;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.excel.core.util.ExcelUtils;
-import com.cmsr.onebase.framework.translate.core.TranslateUtils;
 import com.cmsr.onebase.module.system.controller.admin.logger.vo.operatelog.OperateLogPageReqVO;
 import com.cmsr.onebase.module.system.controller.admin.logger.vo.operatelog.OperateLogRespVO;
 import com.cmsr.onebase.module.system.dal.dataobject.logger.OperateLogDO;
