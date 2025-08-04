@@ -158,6 +158,7 @@ const XInputTextArea: XInputTextAreaSchema = {
         placeholder: '请输入文字',
         description: '',
         tooltip: '',
+        labelColSpan: 5,
         width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
         status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
         defaultValue: '',
@@ -167,7 +168,6 @@ const XInputTextArea: XInputTextAreaSchema = {
         saveWithHidden: false,
         color: '',
         bgColor: '',
-        labelColSpan: 5,
     }
 };
 

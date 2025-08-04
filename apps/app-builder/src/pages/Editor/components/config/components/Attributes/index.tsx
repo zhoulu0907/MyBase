@@ -134,7 +134,7 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                                 }
                                 {
                                     (item.type === CONFIG_TYPES.LABEL_COL_SPAN) &&
-                                    <Input
+                                    <InputNumber
                                         placeholder={`请输入${item.name}`}
                                         value={configs[item.key]}
                                         max={10}
