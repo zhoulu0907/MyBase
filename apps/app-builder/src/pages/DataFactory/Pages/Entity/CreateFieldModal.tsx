@@ -1,14 +1,13 @@
 import React from 'react';
 import { Form, Input, Select, Message, Modal } from '@arco-design/web-react';
 import styles from './index.module.less';
+import type { EntityField, EntityNode } from '../../utils/interface';
 
 interface EntityFormValues {
-  source: string;
   code: string;
   name: string;
   description: string;
-  dsResource: string;
-  dsTable: string;
+  type: string;
 }
 
 const dataTypes = [
@@ -40,28 +39,33 @@ const dataTypes = [
   { label: '聚合统计', value: 'AGGREGATE' },
 ];
 
-const CreateFieldModal: React.FC<{ visible: boolean, setVisible: (visible: boolean) => void, setRefreshEntityList: (refresh: boolean) => void, entityId: string }> = ({ visible, setVisible, setRefreshEntityList, entityId }) => {
+const CreateFieldModal: React.FC<{ visible: boolean, setVisible: (visible: boolean) => void, setRefreshEntityList: (refresh: boolean) => void, entityId: string, successCallback: () => void }> = ({ visible, setVisible, entityId, successCallback }) => {
   const [form] = Form.useForm<EntityFormValues>();
   // 提交
   const handleFinish = () => {
     // TODO: 提交表单数据
     form.validate().then(values => {
       const { nodes } = JSON.parse(localStorage.getItem('entityFormValues') || JSON.stringify({ nodes: [] }));
-      const entity = nodes.find((node: any) => node.id === entityId);
+      const entity = nodes.find((node: EntityNode) => node.id === entityId);
       if (entity) {
+        if (entity.fields.find((field: EntityField) => field.id === values.code)) {
+          Message.error('字段编码已存在');
+          return;
+        }
         entity.fields.push({
           id: values.code,
+          code: values.code,
           name: values.name,
-          type: '自增ID',
-          isSystem: true,
+          type: values.type,
+          isSystem: false,
         });
       }
 
       localStorage.setItem('entityFormValues', JSON.stringify({ nodes }));
-      console.log(values);
+      // console.log(values);
       Message.success('保存成功');
       setVisible(false);
-      setRefreshEntityList(true);
+      successCallback();
     });
   };
 

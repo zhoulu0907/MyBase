@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Graph, Markup } from '@antv/x6';
+import { Graph } from '@antv/x6';
 // import { ReactShape } from '@antv/x6-react-shape';
 import { register } from '@antv/x6-react-shape';
 import DetailDrawer from '../Drawer/DetailDrawer';
@@ -7,9 +7,6 @@ import DetailDrawer from '../Drawer/DetailDrawer';
 import { type EntityNode, type EntityERProps } from '../../utils/interface';
 import styles from './ERchart.module.less';
 import EntityNodeComponent from './ERnode';
-import { Tooltip } from '@arco-design/web-react';
-import ReactDOM from 'react-dom';
-import type { circle } from '@antv/x6/lib/registry/marker/circle';
 
 const LINE_HEAD_HEIGHT = 48;
 const LINE_HEIGHT = 34.8;
@@ -215,11 +212,11 @@ const ERchart: React.FC<EntityERProps> = ({
                   // stroke: '#5F95FF',
                   // fill: '#EFF4FF', // 可以根据需要调整颜色
                   // magnet: true, // 确保 port 是可以连接的
-                  r: 6,
+                  r: 1,
                   magnet: true,
-                  stroke: '#31d0c6',
-                  fill: '#fff',
-                  strokeWidth: 2,
+                  stroke: 'transparent',
+                  fill: 'transparent',  
+                  strokeWidth: 0,
                 },
               },
               // position: 'erPortPosition', // 使用您自定义的布局
@@ -231,11 +228,11 @@ const ERchart: React.FC<EntityERProps> = ({
             right: {
               attrs: {
                 circle: {
-                  r: 6,
+                  r: 1,
                   magnet: true,
-                  stroke: '#31d0c6',
-                  fill: '#fff',
-                  strokeWidth: 2,
+                  stroke: 'transparent',
+                  fill: 'transparent',
+                  strokeWidth: 0,
                 },
               },
               position: {
@@ -349,6 +346,17 @@ const ERchart: React.FC<EntityERProps> = ({
           strokeWidth: 1,
         },
       });
+    });
+
+    graphRef.current.on('node:moved', ({ e, x, y, node, view }) => {
+      console.log('node:moved', e, x, y, node, view);
+      const { nodes } = JSON.parse(localStorage.getItem('entityFormValues') || JSON.stringify({ nodes: [] }));
+      const nodeData = nodes.find((n: EntityNode) => n.id === node.id);
+      if (nodeData) {
+        nodeData.x = x;
+        nodeData.y = y;
+      }
+      localStorage.setItem('entityFormValues', JSON.stringify({ nodes }));
     });
 
     graphRef.current?.centerContent(); // 居中

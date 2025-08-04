@@ -10,13 +10,15 @@ const DetailDrawer: React.FC<{
   visible: boolean, 
   setVisible: (visible: boolean) => void, 
   onNodeEdit: (data: EntityNode) => void, 
-  setEditingNode: (node: EntityNode | null) => void
+  setEditingNode: (node: EntityNode | null) => void,
+  successCallback?: () => void
 }> = ({ 
   editingNode, 
   visible, 
   setVisible, 
   onNodeEdit, 
-  setEditingNode 
+  setEditingNode,
+  successCallback
 }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   
@@ -34,6 +36,9 @@ const DetailDrawer: React.FC<{
       setVisible(false);
       setEditingNode(null);
       Message.success('节点信息已更新');
+      if (successCallback) {
+        successCallback();
+      }
     }
   };
 
@@ -81,6 +86,7 @@ const DetailDrawer: React.FC<{
             node={editingNode}
             onSave={handleNodeEdit}
             onCancel={handleClose}
+            successCallback={successCallback || (() => {})}
           />
         )}
       </Drawer>
