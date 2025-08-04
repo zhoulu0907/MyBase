@@ -1,6 +1,6 @@
-import { baseConfig, baseDefault, layoutConfig, statusConfig, widthConfig, type ICommonBaseType, type TLayoutSelectKeyType, type TStatusSelectKeyType, type TWidthSelectKeyType } from "@/components/Materials/common";
+import { baseConfig, baseDefault, labelColSpanConfig, layoutConfig, statusConfig, widthConfig, type ICommonBaseType, type TLayoutSelectKeyType, type TStatusSelectKeyType, type TWidthSelectKeyType } from "@/components/Materials/common";
 import { CONFIG_TYPES, LAYOUT_OPTIONS, LAYOUT_VALUES, STATUS_OPTIONS, STATUS_VALUES, WIDTH_OPTIONS, WIDTH_VALUES } from "@/components/Materials/constants";
-import type { IBooleanConfigType, IDescriptionConfigType, ILabelConfigType, ILayoutConfigType, INumberConfigType, IPlaceholderConfigType, ISelectConfigType, IStatusConfigType, ITextAreaConfigType, ITextConfigType, ITooltipConfigType, IWidthConfigType, TBooleanDefaultType, TSelectDefaultType, TTextAreaDefaultType, TTextDefaultType } from "@/components/Materials/types";
+import type { IBooleanConfigType, IDescriptionConfigType, ILabelConfigType, ILayoutConfigType, INumberConfigType, IPlaceholderConfigType, ISelectConfigType, IStatusConfigType, ITextAreaConfigType, ITextConfigType, ITooltipConfigType, IWidthConfigType, TBooleanDefaultType, TNumberDefaultType, TSelectDefaultType, TTextAreaDefaultType, TTextDefaultType } from "@/components/Materials/types";
 
 export interface XInputSwitchSchema {
     editData: TXInputSwitchEditData;
@@ -66,6 +66,11 @@ export interface XInputSwitchConfig extends ICommonBaseType {
     layout?: TLayoutSelectKeyType;
 
     /**
+     * 标签宽度
+     */
+    labelColSpan?: TNumberDefaultType;
+
+    /**
      * 隐藏时是否提交数据，开启后隐藏状态仍会保存值
      */
     saveWithHidden?: TBooleanDefaultType;
@@ -91,6 +96,8 @@ const XSwitch: XInputSwitchSchema = {
             name: '提示文字',
             type: CONFIG_TYPES.TOOLTIP_INPUT,
         },
+        layoutConfig,
+        labelColSpanConfig,
         {
             key: 'required',
             name: '开启必填',
@@ -103,7 +110,6 @@ const XSwitch: XInputSwitchSchema = {
         },
         statusConfig,
         widthConfig,
-        layoutConfig,
     ],
     config: {
         ...baseDefault,
@@ -115,6 +121,7 @@ const XSwitch: XInputSwitchSchema = {
         defaultValue: '',
         required: false,
         layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
+        labelColSpan: 5,
         saveWithHidden: false,
     }
 };

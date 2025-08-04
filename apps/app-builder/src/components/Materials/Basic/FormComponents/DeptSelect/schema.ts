@@ -1,6 +1,6 @@
-import { baseConfig, baseDefault, layoutConfig, statusConfig, widthConfig, type ICommonBaseType, type TLayoutSelectKeyType, type TStatusSelectKeyType, type TWidthSelectKeyType } from "@/components/Materials/common";
+import { baseConfig, baseDefault, labelColSpanConfig, layoutConfig, statusConfig, widthConfig, type ICommonBaseType, type TLayoutSelectKeyType, type TStatusSelectKeyType, type TWidthSelectKeyType } from "@/components/Materials/common";
 import { CONFIG_TYPES, LAYOUT_OPTIONS, LAYOUT_VALUES, STATUS_OPTIONS, STATUS_VALUES, WIDTH_OPTIONS, WIDTH_VALUES } from "@/components/Materials/constants";
-import type { IBooleanConfigType, IDescriptionConfigType, ILabelConfigType, ILayoutConfigType, INumberConfigType, IPlaceholderConfigType, ISelectConfigType, IStatusConfigType, ITextAreaConfigType, ITextConfigType, ITooltipConfigType, IWidthConfigType, TBooleanDefaultType, TSelectDefaultType, TTextAreaDefaultType, TTextDefaultType } from "@/components/Materials/types";
+import type { IBooleanConfigType, IDescriptionConfigType, ILabelConfigType, ILayoutConfigType, INumberConfigType, IPlaceholderConfigType, ISelectConfigType, IStatusConfigType, ITextAreaConfigType, ITextConfigType, ITooltipConfigType, IWidthConfigType, TBooleanDefaultType, TNumberDefaultType, TSelectDefaultType, TTextAreaDefaultType, TTextDefaultType } from "@/components/Materials/types";
 
 export interface XInputDeptSelectSchema {
     editData: TXInputDeptSelectEditData;
@@ -67,6 +67,11 @@ export interface XInputDeptSelectConfig extends ICommonBaseType {
     layout?: TLayoutSelectKeyType;
 
     /**
+     * 标签宽度
+     */
+    labelColSpan?: TNumberDefaultType;
+
+    /**
      * 隐藏时是否提交数据，开启后隐藏状态仍会保存值
      */
     saveWithHidden?: TBooleanDefaultType;
@@ -86,6 +91,8 @@ const XDeptSelect: XInputDeptSelectSchema = {
             name: '描述信息',
             type: CONFIG_TYPES.DESCRIPTION_INPUT,
         },
+        layoutConfig,
+        labelColSpanConfig,
         {
             key: 'tooltip',
             name: '提示文字',
@@ -103,7 +110,6 @@ const XDeptSelect: XInputDeptSelectSchema = {
         },
         statusConfig,
         widthConfig,
-        layoutConfig,
     ],
     config: {
         ...baseDefault,
@@ -116,6 +122,7 @@ const XDeptSelect: XInputDeptSelectSchema = {
         required: false,
         layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
         saveWithHidden: false,
+        labelColSpan: 5,
     }
 };
 

@@ -1,6 +1,6 @@
-import { baseConfig, baseDefault, /* widthConfig, */ layoutConfig, statusConfig, widthConfig, type ICommonBaseType, type TLayoutSelectKeyType, type TStatusSelectKeyType, type TWidthSelectKeyType } from "@/components/Materials/common";
+import { baseConfig, baseDefault, labelColSpanConfig, /* widthConfig, */ layoutConfig, statusConfig, widthConfig, type ICommonBaseType, type TLayoutSelectKeyType, type TStatusSelectKeyType, type TWidthSelectKeyType } from "@/components/Materials/common";
 import { CONFIG_TYPES, /* WIDTH_OPTIONS, WIDTH_VALUES, */ LAYOUT_OPTIONS, LAYOUT_VALUES, STATUS_OPTIONS, STATUS_VALUES, WIDTH_OPTIONS, WIDTH_VALUES } from "@/components/Materials/constants";
-import type { IBooleanConfigType, IDescriptionConfigType, ILabelConfigType, ILayoutConfigType, INumberConfigType, IPlaceholderConfigType, ISelectConfigType, IStatusConfigType, ITextAreaConfigType, ITextConfigType, ITooltipConfigType, IWidthConfigType, TBooleanDefaultType, TSelectDefaultType, TTextAreaDefaultType, TTextDefaultType } from "@/components/Materials/types";
+import type { IBooleanConfigType, IDescriptionConfigType, ILabelConfigType, ILayoutConfigType, INumberConfigType, IPlaceholderConfigType, ISelectConfigType, IStatusConfigType, ITextAreaConfigType, ITextConfigType, ITooltipConfigType, IWidthConfigType, TBooleanDefaultType, TNumberDefaultType, TSelectDefaultType, TTextAreaDefaultType, TTextDefaultType } from "@/components/Materials/types";
 
 export interface XInputRadioSchema {
     editData: TXInputRadioEditData;
@@ -70,6 +70,11 @@ export interface XInputRadioConfig extends ICommonBaseType {
      * 隐藏时是否提交数据，开启后隐藏状态仍会保存值
      */
     saveWithHidden?: TBooleanDefaultType;
+
+    /**
+     * 标签宽度
+     */
+    labelColSpan?: TNumberDefaultType;
 }
 
 
@@ -92,6 +97,8 @@ const XRadio: XInputRadioSchema = {
             name: '提示文字',
             type: CONFIG_TYPES.TOOLTIP_INPUT,
         },
+        layoutConfig,
+        labelColSpanConfig,
         {
             key: 'required',
             name: '开启必填',
@@ -104,7 +111,6 @@ const XRadio: XInputRadioSchema = {
         },
         statusConfig,
         widthConfig,
-        layoutConfig,
     ],
     config: {
         ...baseDefault,
@@ -130,6 +136,7 @@ const XRadio: XInputRadioSchema = {
         ],
         required: false,
         layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
+        labelColSpan: 5,
         saveWithHidden: false,
     }
 };

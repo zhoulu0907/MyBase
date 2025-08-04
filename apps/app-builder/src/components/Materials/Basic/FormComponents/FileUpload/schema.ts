@@ -1,4 +1,4 @@
-import { baseConfig, baseDefault, layoutConfig, /* widthConfig, */ listTypeConfig, statusConfig, type ICommonBaseType, type TLayoutSelectKeyType, type TStatusSelectKeyType, type TUploadSelectKeyType, type TWidthSelectKeyType } from "@/components/Materials/common";
+import { baseConfig, baseDefault, labelColSpanConfig, layoutConfig, /* widthConfig, */ listTypeConfig, statusConfig, type ICommonBaseType, type TLayoutSelectKeyType, type TStatusSelectKeyType, type TUploadSelectKeyType, type TWidthSelectKeyType } from "@/components/Materials/common";
 import { CONFIG_TYPES, /* WIDTH_OPTIONS, WIDTH_VALUES, */ LAYOUT_OPTIONS, LAYOUT_VALUES, STATUS_OPTIONS, STATUS_VALUES, UPLOAD_OPTIONS, UPLOAD_VALUES } from "@/components/Materials/constants";
 import type { IBooleanConfigType, IDescriptionConfigType, ILabelConfigType, ILayoutConfigType, INumberConfigType, IPlaceholderConfigType, ISelectConfigType, IStatusConfigType, ITextAreaConfigType, ITextConfigType, ITooltipConfigType, IUploadLimitConfigType, IUploadSizeConfigType, IWidthConfigType, TBooleanDefaultType, TNumberDefaultType, TSelectDefaultType, TTextAreaDefaultType, TTextDefaultType } from "@/components/Materials/types";
 
@@ -73,6 +73,11 @@ export interface XInputFileUploadConfig extends ICommonBaseType {
     layout?: TLayoutSelectKeyType;
 
     /**
+     * 标签宽度
+     */
+    labelColSpan?: TNumberDefaultType;
+
+    /**
      * 单个文件大小限制（MB），最大 100, 默认10
      */
     uploadSize?: TNumberDefaultType;
@@ -123,6 +128,8 @@ const XFileUpload: XInputFileUploadSchema = {
             name: '提示文字',
             type: CONFIG_TYPES.TOOLTIP_INPUT,
         },
+        layoutConfig,
+        labelColSpanConfig,
         {
             key: 'required',
             name: '开启必填',
@@ -156,8 +163,6 @@ const XFileUpload: XInputFileUploadSchema = {
         statusConfig,
         // widthConfig,
         listTypeConfig,
-        layoutConfig,
-
     ],
     config: {
         ...baseDefault,
@@ -175,6 +180,7 @@ const XFileUpload: XInputFileUploadSchema = {
         listType: UPLOAD_VALUES[UPLOAD_OPTIONS.CARD],
         layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
         saveWithHidden: false,
+        labelColSpan: 5,
     }
 };
 
