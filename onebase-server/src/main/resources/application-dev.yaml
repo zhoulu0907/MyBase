@@ -4,6 +4,11 @@ server:
 --- #################### 数据库相关配置 ####################
 
 spring:
+  cloud:
+    nacos:
+      config:
+        import-check:
+          enabled: false
   autoconfigure:
     exclude:
       - org.springframework.ai.autoconfigure.vectorstore.qdrant.QdrantVectorStoreAutoConfiguration # 禁用 AI 模块的 Qdrant，手动创建
@@ -44,13 +49,13 @@ spring:
       primary: master
       datasource:
         master:
-          url: jdbc:postgresql://10.0.104.38:5432/onebase_cloud_v3 
+          url: jdbc:postgresql://10.0.104.38:5432/onebase_cloud_v3
           username: postgres
           password: onebase@2025
           driver-class-name: org.postgresql.Driver
         slave: # 模拟从库，可根据自己需要修改 # 模拟从库，可根据自己需要修改
           lazy: true # 开启懒加载，保证启动速度
-          url: jdbc:postgresql://10.0.104.38:5432/onebase_cloud_v3 
+          url: jdbc:postgresql://10.0.104.38:5432/onebase_cloud_v3
           username: postgres
           password: onebase@2025
           driver-class-name: org.postgresql.Driver
@@ -145,6 +150,10 @@ wx: # 参见 https://github.com/Wechat-Group/WxJava/blob/develop/spring-boot-sta
 
 # OneBase配置项，设置当前项目所有自定义的配置
 yudao:
+  web:
+    adminUi: http://your-admin-ui-url
+  info:
+    base-package: com.cmsr.onebase
   pay:
     order-notify-url: http://yunai.natapp1.cc/admin-api/pay/notify/order # 支付渠道的【支付】回调地址
     refund-notify-url: http://yunai.natapp1.cc/admin-api/pay/notify/refund # 支付渠道的【退款】回调地址

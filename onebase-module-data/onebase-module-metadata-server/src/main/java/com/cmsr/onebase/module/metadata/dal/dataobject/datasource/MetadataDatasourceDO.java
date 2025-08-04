@@ -61,6 +61,11 @@ public class MetadataDatasourceDO extends TenantBaseDO {
     private Long appId;
 
     /**
+     * 数据源来源 0.系统默认，1.自有数据源，2 外部数据源
+     */
+    private Integer datasourceOrigin;
+
+    /**
      * 自定义TypeHandler，确保JSON以明文格式存储
      */
     public static class PlainJsonTypeHandler extends com.baomidou.mybatisplus.extension.handlers.AbstractJsonTypeHandler<String> {

@@ -115,15 +115,14 @@ public class AnyLineDBInfoListener implements DMListener {
     @Override public SWITCH prepareQuery(DataRuntime runtime, String random, RunPrepare prepare, ConfigStore configs,
         String... conditions) {
 
-        // 检查是否是简单的测试查询，如果是则跳过添加条件
-        if (isSimpleTestQuery(prepare)) {
-            log.info("prepareQuery--------------> 检测到简单测试查询，跳过添加租户和软删除条件");
-            return SWITCH.CONTINUE;
-        }
-
         // 检查是否有表名，如果没有表名则跳过添加条件
         if (prepare == null || prepare.getTableName() == null || prepare.getTableName().trim().isEmpty()) {
             log.info("prepareQuery--------------> 没有表名，跳过添加租户和软删除条件");
+            return SWITCH.CONTINUE;
+        }
+        // 检查是否是简单的测试查询，如果是则跳过添加条件
+        if (isSimpleTestQuery(prepare)) {
+            log.info("prepareQuery--------------> 检测到简单测试查询，跳过添加租户和软删除条件");
             return SWITCH.CONTINUE;
         }
 
@@ -150,16 +149,16 @@ public class AnyLineDBInfoListener implements DMListener {
         if (prepare == null) {
             return false;
         }
-        
+
         // 获取SQL文本进行判断
         String sql = prepare.getText();
         if (sql == null) {
             return false;
         }
-        
+
         // 去除空白字符并转为大写
         String normalizedSql = sql.trim().toUpperCase();
-        
+
         // 检查是否是常见的测试查询
         return normalizedSql.equals("SELECT 1") ||
                normalizedSql.equals("SELECT 1 FROM DUAL") ||
@@ -168,7 +167,7 @@ public class AnyLineDBInfoListener implements DMListener {
     }
 
     /**
-     * 检查表是否需要忽略租户过滤 
+     * 检查表是否需要忽略租户过滤
      *
      * @param obj RunPrepare对象
      * @return 如果表需要忽略租户过滤则返回true
@@ -178,7 +177,7 @@ public class AnyLineDBInfoListener implements DMListener {
     }
 
     /**
-     * 检查表名是否需要忽略租户过滤 
+     * 检查表名是否需要忽略租户过滤
      *
      * @param prepare RunPrepare对象
      * @return 如果表名在忽略列表中则返回true
@@ -186,7 +185,7 @@ public class AnyLineDBInfoListener implements DMListener {
     private boolean isTableTenantIgnored2(RunPrepare prepare) {
         return prepare != null && isTableTenantIgnored2(prepare.getTableName());
     }
-    
+
     /**
      * 检查表名是否需要忽略租户过滤
      *
@@ -319,10 +318,10 @@ public class AnyLineDBInfoListener implements DMListener {
             configs.and(Compare.EQUAL, "tenant_id", TenantContextHolder.getRequiredTenantId());
         }
         // 加入软删判断
-        configs.and(Compare.EQUAL, BaseDO.DELETED, false); 
+        configs.and(Compare.EQUAL, BaseDO.DELETED, false);
     }
 
 
-    
+
 
 }

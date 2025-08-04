@@ -44,7 +44,7 @@ public class ValidationRuleController {
         return success(result);
     }
 
-    @GetMapping("/page")
+    @PostMapping("/page")
     @Operation(summary = "分页查询校验规则列表")
     @PreAuthorize("@ss.hasPermission('metadata:validation-rule:query')")
     public CommonResult<PageResult<ValidationRuleRespVO>> getValidationRulePage(@Valid ValidationRulePageReqVO pageReqVO) {
@@ -52,7 +52,7 @@ public class ValidationRuleController {
         return success(result);
     }
 
-    @GetMapping("/get")
+    @PostMapping("/get")
     @Operation(summary = "根据ID获取校验规则详细信息")
     @Parameter(name = "id", description = "规则ID", required = true, example = "4001")
     @PreAuthorize("@ss.hasPermission('metadata:validation-rule:query')")
@@ -61,7 +61,7 @@ public class ValidationRuleController {
         return success(result);
     }
 
-    @PutMapping("/update")
+    @PostMapping("/update")
     @Operation(summary = "更新校验规则信息")
     @PreAuthorize("@ss.hasPermission('metadata:validation-rule:update')")
     public CommonResult<Boolean> updateValidationRule(@Valid @RequestBody ValidationRuleSaveReqVO reqVO) {
@@ -69,7 +69,7 @@ public class ValidationRuleController {
         return success(true);
     }
 
-    @DeleteMapping("/delete")
+    @PostMapping("/delete")
     @Operation(summary = "软删除校验规则")
     @Parameter(name = "id", description = "规则ID", required = true, example = "4001")
     @PreAuthorize("@ss.hasPermission('metadata:validation-rule:delete')")
@@ -78,7 +78,7 @@ public class ValidationRuleController {
         return success(true);
     }
 
-    @GetMapping("/validation-types")
+    @PostMapping("/validation-types")
     @Operation(summary = "获取系统支持的校验类型列表")
     public CommonResult<List<ValidationTypeConfigRespVO>> getValidationTypes() {
         List<ValidationTypeConfigRespVO> types = validationRuleService.getValidationTypes();

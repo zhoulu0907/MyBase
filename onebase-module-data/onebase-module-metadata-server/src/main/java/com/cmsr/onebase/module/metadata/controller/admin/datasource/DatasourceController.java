@@ -36,14 +36,14 @@ public class DatasourceController {
     @Resource
     private MetadataDatasourceService datasourceService;
 
-    @GetMapping("/types")
+    @PostMapping("/types")
     @Operation(summary = "获取所有支持的数据源类型")
     public CommonResult<List<DatasourceTypeRespVO>> getDatasourceTypes() {
         List<DatasourceTypeRespVO> types = datasourceService.getDatasourceTypes();
         return success(types);
     }
 
-    @GetMapping("/tables")
+    @PostMapping("/tables")
     @Operation(summary = "根据数据源ID查询表名列表")
     @PreAuthorize("@ss.hasPermission('metadata:datasource:query')")
     public CommonResult<List<TableInfoRespVO>> getTablesByDatasourceId(@Valid TableQueryReqVO reqVO) {
@@ -53,7 +53,7 @@ public class DatasourceController {
         return success(tables);
     }
 
-    @GetMapping("/columns")
+    @PostMapping("/columns")
     @Operation(summary = "根据表名查询字段信息")
     @PreAuthorize("@ss.hasPermission('metadata:datasource:query')")
     public CommonResult<List<ColumnInfoRespVO>> getColumnsByTableName(@Valid ColumnQueryReqVO reqVO) {
@@ -66,12 +66,12 @@ public class DatasourceController {
     @PostMapping("/create")
     @Operation(summary = "新增数据源")
     @PreAuthorize("@ss.hasPermission('metadata:datasource:create')")
-    public CommonResult<Long> createDatasource(@Valid @RequestBody DatasourceSaveReqVO reqVO) {
+    public CommonResult<String> createDatasource(@Valid @RequestBody DatasourceSaveReqVO reqVO) {
         Long id = datasourceService.createDatasource(reqVO);
-        return success(id);
+        return success(id.toString());
     }
 
-    @PutMapping("/update")
+    @PostMapping("/update")
     @Operation(summary = "修改数据源")
     @PreAuthorize("@ss.hasPermission('metadata:datasource:update')")
     public CommonResult<Boolean> updateDatasource(@Valid @RequestBody DatasourceSaveReqVO reqVO) {
@@ -79,7 +79,7 @@ public class DatasourceController {
         return success(true);
     }
 
-    @DeleteMapping("/delete")
+    @PostMapping("/delete")
     @Operation(summary = "删除数据源")
     @Parameter(name = "id", description = "编号", required = true, example = "1024")
     @PreAuthorize("@ss.hasPermission('metadata:datasource:delete')")
@@ -88,7 +88,7 @@ public class DatasourceController {
         return success(true);
     }
 
-    @GetMapping("/get")
+    @PostMapping("/get")
     @Operation(summary = "获得数据源详情")
     @Parameter(name = "id", description = "编号", required = true, example = "1024")
     @PreAuthorize("@ss.hasPermission('metadata:datasource:query')")
@@ -97,7 +97,7 @@ public class DatasourceController {
         return success(DatasourceConvert.INSTANCE.convert(datasource));
     }
 
-    @GetMapping("/page")
+    @PostMapping("/page")
     @Operation(summary = "获得数据源分页列表")
     @PreAuthorize("@ss.hasPermission('metadata:datasource:query')")
     public CommonResult<PageResult<DatasourceRespVO>> getDatasourcePage(@Valid DatasourcePageReqVO pageReqVO) {
@@ -105,7 +105,7 @@ public class DatasourceController {
         return success(DatasourceConvert.INSTANCE.convertPage(pageResult));
     }
 
-    @GetMapping("/list")
+    @PostMapping("/list")
     @Operation(summary = "获得数据源列表")
     @PreAuthorize("@ss.hasPermission('metadata:datasource:query')")
     public CommonResult<List<DatasourceRespVO>> getDatasourceList() {
@@ -113,7 +113,7 @@ public class DatasourceController {
         return success(DatasourceConvert.INSTANCE.convertList(list));
     }
 
-    @GetMapping("/get-by-code")
+    @PostMapping("/get-by-code")
     @Operation(summary = "根据编码获得数据源")
     @Parameter(name = "code", description = "数据源编码", required = true, example = "user_db")
     @PreAuthorize("@ss.hasPermission('metadata:datasource:query')")
@@ -127,6 +127,14 @@ public class DatasourceController {
     @PreAuthorize("@ss.hasPermission('metadata:datasource:test')")
     public CommonResult<DatasourceTestConnectionRespVO> testConnection(@Valid @RequestBody DatasourceTestConnectionReqVO reqVO) {
         return success(datasourceService.testConnection(reqVO));
+    }
+
+    @PostMapping("/create-default")
+    @Operation(summary = "创建默认数据源")
+    @PreAuthorize("@ss.hasPermission('metadata:datasource:create')")
+    public CommonResult<String> createDefaultDatasource(@RequestParam("appId") Long appId) {
+        Long id = datasourceService.createDefaultDatasource(appId);
+        return success(id.toString());
     }
 
 }

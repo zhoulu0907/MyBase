@@ -105,6 +105,11 @@ public class MetadataEntityFieldDO extends TenantBaseDO {
      */
     private Long appId;
 
+    /**
+     * 字段状态 0：开启，1：关闭
+     */
+    private Integer status;
+
 
 
 }

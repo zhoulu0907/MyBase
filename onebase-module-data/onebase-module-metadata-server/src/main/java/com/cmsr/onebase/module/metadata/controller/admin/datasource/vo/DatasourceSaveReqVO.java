@@ -44,6 +44,9 @@ public class DatasourceSaveReqVO {
     @NotNull(message = "应用ID不能为空")
     private Long appId;
 
+    @Schema(description = "数据源来源，0：系统默认，1：自有数据源，2：外部数据源", example = "1")
+    private Integer datasourceOrigin;
+
     @Schema(description = "版本锁标识", example = "0")
     private Integer lockVersion;
 

@@ -32,5 +32,8 @@ public class DatasourceRespVO {
 
     @Schema(description = "应用ID", example = "1")
     private Long appId;
+    
+    @Schema(description = "数据源来源，0：系统默认，1：自有数据源，2：外部数据源", example = "1")
+    private Integer datasourceOrigin;
 
 }

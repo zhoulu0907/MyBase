@@ -60,5 +60,8 @@ public class EntityFieldRespVO {
 
     @Schema(description = "应用ID", example = "1")
     private Long appId;
+    
+    @Schema(description = "字段状态，0：开启，1：关闭", example = "0")
+    private Integer status;
 
 }

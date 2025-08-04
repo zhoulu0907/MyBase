@@ -185,3 +185,12 @@ yudao:
     end-code: 9999 # 这里配置 9999 的原因是，测试方便。
 
 debug: false
+
+default:
+  datasource:
+    host: 10.0.104.38
+    port: 5432
+    database: onebase_business
+    username: postgres
+    password: onebase@2025
+    
