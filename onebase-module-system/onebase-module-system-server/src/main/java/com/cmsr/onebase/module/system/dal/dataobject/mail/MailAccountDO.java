@@ -1,12 +1,10 @@
 package com.cmsr.onebase.module.system.dal.dataobject.mail;
 
+import jakarta.persistence.Table;
+import jakarta.persistence.Column;
 import com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
-import com.baomidou.mybatisplus.annotation.KeySequence;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 /**
  * 邮箱账号 DO
@@ -16,42 +14,54 @@ import lombok.EqualsAndHashCode;
  * @author wangjingyi
  * @since 2022-03-21
  */
-@TableName(value = "system_mail_account", autoResultMap = true)
-@KeySequence("system_mail_account_seq") // 用于 Oracle、PostgreSQL、Kingbase、DB2、H2 数据库的主键自增。如果是 MySQL 等数据库，可不写。
+@Table(name = "system_mail_account")
 @Data
-@EqualsAndHashCode(callSuper = true)
 @TenantIgnore
 public class MailAccountDO extends BaseDO {
 
+    public static final String MAIL             = "mail";
+    public static final String USERNAME         = "username";
+    public static final String PASSWORD         = "password";
+    public static final String HOST             = "host";
+    public static final String PORT             = "port";
+    public static final String SSL_ENABLE       = "ssl_enable";
+    public static final String STARTTLS_ENABLE  = "starttls_enable";
 
     /**
      * 邮箱
      */
+    @Column(name = MAIL)
     private String mail;
 
     /**
      * 用户名
      */
+    @Column(name = USERNAME)
     private String username;
     /**
      * 密码
      */
+    @Column(name = PASSWORD)
     private String password;
     /**
      * SMTP 服务器域名
      */
+    @Column(name = HOST)
     private String host;
     /**
      * SMTP 服务器端口
      */
+    @Column(name = PORT)
     private Integer port;
     /**
      * 是否开启 SSL
      */
+    @Column(name = SSL_ENABLE)
     private Boolean sslEnable;
     /**
      * 是否开启 STARTTLS
      */
+    @Column(name = STARTTLS_ENABLE)
     private Boolean starttlsEnable;
 
 }
