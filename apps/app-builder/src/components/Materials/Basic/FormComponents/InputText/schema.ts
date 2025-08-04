@@ -1,6 +1,6 @@
 import { baseConfig, baseDefault, statusConfig, widthConfig, alignConfig, layoutConfig, type ICommonBaseType, type TStatusSelectKeyType, type TWidthSelectKeyType, type TAlignSelectKeyType, type TLayoutSelectKeyType } from "@/components/Materials/common";
 import { CONFIG_TYPES, STATUS_OPTIONS, STATUS_VALUES, WIDTH_OPTIONS, WIDTH_VALUES, LAYOUT_OPTIONS, LAYOUT_VALUES, ALIGN_OPTIONS, ALIGN_VALUES } from "@/components/Materials/constants";
-import type { IDescriptionConfigType, ILabelConfigType, INumberConfigType, IPlaceholderConfigType, IStatusConfigType, ITextAreaConfigType, ITextConfigType, ITooltipConfigType, IWidthConfigType, TRadioDefaultType, TTextAreaDefaultType, TTextDefaultType, TBooleanDefaultType, IBooleanConfigType, TSelectDefaultType, ILayoutConfigType, IAlignConfigType, IColorConfigType } from "@/components/Materials/types";
+import type { IDescriptionConfigType, ILabelConfigType, INumberConfigType, IPlaceholderConfigType, IStatusConfigType, ITextAreaConfigType, ITextConfigType, ITooltipConfigType, IWidthConfigType, TRadioDefaultType, TTextAreaDefaultType, TTextDefaultType, TBooleanDefaultType, IBooleanConfigType, TSelectDefaultType, ILayoutConfigType, IAlignConfigType, IColorConfigType, TNumberDefaultType } from "@/components/Materials/types";
 
 
 // 输入框组件的schema
@@ -98,6 +98,11 @@ export interface XInputTextConfig extends ICommonBaseType {
      * 背景颜色
      */
     bgColor?: TTextDefaultType;
+    
+    /**
+     * 标签宽度
+     */
+    labelColSpan?: TNumberDefaultType;
 }
 
 const XInputText: XInputTextSchema = {
@@ -123,6 +128,12 @@ const XInputText: XInputTextSchema = {
             name: '提示文字',
             type: CONFIG_TYPES.TOOLTIP_INPUT,
         },
+        layoutConfig,
+        {
+            key: 'labelColSpan',
+            name: '标签宽度',
+            type: CONFIG_TYPES.NUMBER_INPUT,
+        },
         {
             key: 'required',
             name: '开启必填',
@@ -146,7 +157,6 @@ const XInputText: XInputTextSchema = {
         statusConfig,
         widthConfig,
         alignConfig,
-        layoutConfig,
     ],
     config: {
         ...baseDefault,
@@ -159,10 +169,11 @@ const XInputText: XInputTextSchema = {
         defaultValue: '',
         required: false,
         align: ALIGN_VALUES[ALIGN_OPTIONS.LEFT],
-        layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
+        layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
         saveWithHidden: false,
         color: '',
         bgColor: '',
+        labelColSpan: 5,
     }
 };
 
