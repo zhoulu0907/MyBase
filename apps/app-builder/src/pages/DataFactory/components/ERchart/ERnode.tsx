@@ -15,15 +15,44 @@ interface NodeData {
   data: EntityNode;
   onNodeEdit?: (data: EntityNode) => void;
   onNodeAdd?: () => void;
-  onNodeDelete?: (id: string) => void;
+  onNodeDelete?: (id: string) => void;  
+  onNodeAddField?: (id: string) => void;
+  onNodeAddRelation?: (id: string) => void;
 }
+
+const typeMap = {
+  'TEXT': '常规短文本',
+  'LONG_TEXT': '长文本内容',
+  'EMAIL': '邮箱地址',
+  'PHONE': '电话号码',
+  'URL': '网址链接',
+  'ADDRESS': '详细地址',
+  'NUMBER': '通用数字',
+  'CURRENCY': '货币金额',
+  'DATE': '日期',
+  'DATETIME': '日期时间',
+  'BOOLEAN': '布尔值',
+  'PICKLIST': '单选列表',
+  'MULTI_PICKLIST': '多选列表',
+  'AUTO_CODE': '自动编码',
+  'USER': '用户引用',
+  'DEPARTMENT': '部门引用',
+  'DATA_SELECTION': '数据选择',
+  'RELATION': '关联关系',
+  'STRUCTURE': '结构化对象',
+  'ARRAY': '数组列表',
+  'FILE': '文件',
+  'IMAGE': '图片',
+  'GEOGRAPHY': '地理位置',
+  'PASSWORD': '密码',
+  'ENCRYPTED': '加密字段',
+  'AGGREGATE': '聚合统计',
+};
 
 const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
   const [nodeCollapsed, setNodeCollapsed] = useState({ system: false, custom: false });
-
   // 从 node 的 data 中获取节点数据
   const nodeData = (node.getData() as NodeData)?.data;
-  console.log('nodeData', nodeData);
 
   if (!nodeData) {
     console.error('nodeData is undefined');
@@ -46,20 +75,27 @@ const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
   const handleRefresh = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log('refresh');
   };
 
   const handleAddField = (e: Event) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log('add field');
+    const data = node.getData() as NodeData;
+    const onNodeAddField = data?.onNodeAddField;
+    if (onNodeAddField && nodeData) {
+      onNodeAddField(nodeData.id);
+    }
   };
 
   const handleAddRelation = (e: Event) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log('add relation');
-  };
+    const data = node.getData() as NodeData;
+    const onNodeAddRelation = data?.onNodeAddRelation;
+    if (onNodeAddRelation && nodeData) {
+      onNodeAddRelation(nodeData.id);
+    }
+    };
 
   const handleEdit = (e: Event) => {
     e.stopPropagation(); // 阻止事件冒泡
@@ -74,7 +110,6 @@ const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
   const handleDelete = (e: Event) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log('delete');
     // 从 node 的 data 中获取回调函数
     const data = node.getData() as NodeData;
     const onNodeDelete = data?.onNodeDelete;
@@ -132,7 +167,7 @@ const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
                   className={`${styles['field-item']} ${styles['system-field']}`}
                 >
                   <span className={styles['field-name']}>{field.name}</span>
-                  <span className={styles['field-type']}>{field.type}</span>
+                  <span className={styles['field-type']}>{typeMap[field.type as keyof typeof typeMap]}</span>
                 </div>
               ))}
             </div>
@@ -159,7 +194,7 @@ const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
                   className={`${styles['field-item']} ${styles['custom-field']}`}
                 >
                   <span className={styles['field-name']}>{field.name}</span>
-                  <span className={styles['field-type']}>{field.type}</span>
+                  <span className={styles['field-type']}>{typeMap[field.type as keyof typeof typeMap] || field.type}</span>
                 </div>
               ))}
             </div>
@@ -169,10 +204,10 @@ const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
 
       {/* 节点底部 */}
       <div className={styles['node-footer']}>
-        <Button type="text" onClick={handleAddField}>
+        <Button type="text" onClick={handleAddField} className={styles['node-footer-button']}>
           添加字段
         </Button>
-        <Button type="text" onClick={handleAddRelation}>
+        <Button type="text" onClick={handleAddRelation} className={styles['node-footer-button']}>
           添加关系
         </Button>
       </div>

@@ -1,13 +1,19 @@
 import React from 'react';
-import { Form, Input, Switch, Divider } from '@arco-design/web-react';
-import { type EntityNode } from '../../utils/interface';
+import { Button, Form, Input, Switch } from '@arco-design/web-react';
+import { type EntityField, type EntityNode } from '../../utils/interface';
 import styles from './EditForm.module.less';
 
 // 节点编辑表单组件
 interface NodeEditFormProps {
   node: EntityNode;
-  onSave: (data: EntityNode) => void;
+  onSave: (data: Partial<FormValues>) => void;
   onCancel: () => void;
+  successCallback: () => void;
+}
+
+interface FormItem {
+  field: string;
+  label: string;
 }
 
 interface FormValues {
@@ -24,21 +30,21 @@ interface FormValues {
   };
 }
 
-const NodeEditForm: React.FC<NodeEditFormProps> = ({ node }) => {
+const NodeEditForm: React.FC<NodeEditFormProps> = ({ node, onCancel, onSave, successCallback }) => {
   const [form] = Form.useForm<FormValues>();
   
   // 初始化表单数据
   const initialValues: FormValues = {
-    code: node.title || '',
+    code: node.code || '',
     name: node.title || '',
-    description: '',
+    description: node.description || '',
     systemFields: {
-      creator: true,
-      updater: true,
-      createTime: true,
-      updateTime: true,
-      dataOwner: true,
-      dataDepartment: true,
+      creator: node.fields.find((field: EntityField) => field.id === 'creator') ? true : false,
+      updater: node.fields.find((field: EntityField) => field.id === 'updater') ? true : false,
+      createTime: node.fields.find((field: EntityField) => field.id === 'createTime') ? true : false,
+      updateTime: node.fields.find((field: EntityField) => field.id === 'updateTime') ? true : false,
+      dataOwner: node.fields.find((field: EntityField) => field.id === 'dataOwner') ? true : false,
+      dataDepartment: node.fields.find((field: EntityField) => field.id === 'dataDepartment') ? true : false,
     }
   };
 
@@ -50,6 +56,13 @@ const NodeEditForm: React.FC<NodeEditFormProps> = ({ node }) => {
     { field: 'systemFields.dataOwner', label: '记录数据拥有者'},
     { field: 'systemFields.dataDepartment', label: '记录数据拥有部门'}, 
   ]
+
+  const handleSwitchChange = (value: boolean, item: FormItem) => {
+    // form.setFieldValue(item.field as keyof FormValues, value);
+    form.setFieldValue('systemFields', {
+      [item.field]: value,
+    } as FormValues['systemFields']);
+  };
 
   return (
     <div className={styles['node-edit-form']}>
@@ -106,8 +119,6 @@ const NodeEditForm: React.FC<NodeEditFormProps> = ({ node }) => {
           </Form.Item>
         </div>
 
-        <Divider />
-
         {/* 系统字段 */}
         <div className={styles['form-section']}>
           <h4>系统字段</h4>
@@ -116,11 +127,16 @@ const NodeEditForm: React.FC<NodeEditFormProps> = ({ node }) => {
             <Form.Item field={item.field} key={item.field}>
             <div className={styles['switch-item']}>
               <span>{item.label}</span>
-              <Switch />
+              <Switch onChange={(value: boolean) => handleSwitchChange(value, item)}/>
             </div>
           </Form.Item>
           ))}
         </div>
+
+        <Form.Item>
+          <Button onClick={onCancel}>取消</Button>
+          <Button type="primary" onClick={() => onSave(form.getFieldsValue())}>保存</Button>
+        </Form.Item>
       </Form>
     </div>
   );

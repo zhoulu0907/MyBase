@@ -1,15 +1,20 @@
 // 业务对象节点数据
 export interface EntityNode {
   id: string;
+  code: string;
   title: string;
-  fields: Array<{
-    id: string;
-    name: string;
-    type: string;
-    isSystem?: boolean;
-  }>;
+  description: string;
+  fields: Array<EntityField>;
   x: number;
   y: number;
+}
+
+export interface EntityField {
+  id: string;
+  code: string;
+  name: string;
+  type: string;
+  isSystem: boolean;
 }
 
 // 节点信息
@@ -17,6 +22,8 @@ export interface EntityNodeProps {
   onNodeEdit?: (data: EntityNode) => void;
   onNodeAdd?: () => void;
   onNodeDelete?: (id: string) => void;
+  onNodeAddField?: (id: string) => void;
+  onNodeAddRelation?: (id: string) => void;
   // mode?: 'view' | 'edit';
   nodeData: EntityNode;
 }
@@ -48,4 +55,6 @@ export interface EntityERProps {
   onNodeEdit?: (data: EntityNode) => void;
   onNodeAdd?: () => void;
   onNodeDelete?: (id: string) => void;
+  onNodeAddField?: (id: string) => void;
+  onNodeAddRelation?: (id: string) => void;
 }
