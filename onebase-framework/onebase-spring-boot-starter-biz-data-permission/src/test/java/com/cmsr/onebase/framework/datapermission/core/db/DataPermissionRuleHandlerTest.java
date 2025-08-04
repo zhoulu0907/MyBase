@@ -2,7 +2,6 @@ package com.cmsr.onebase.framework.datapermission.core.db;
 
 import com.cmsr.onebase.framework.datapermission.core.rule.DataPermissionRule;
 import com.cmsr.onebase.framework.datapermission.core.rule.DataPermissionRuleFactory;
-import com.cmsr.onebase.framework.mybatis.core.util.MyBatisUtils;
 import com.cmsr.onebase.framework.test.core.ut.BaseMockitoUnitTest;
 import com.baomidou.mybatisplus.extension.plugins.inner.DataPermissionInterceptor;
 import net.sf.jsqlparser.expression.Alias;

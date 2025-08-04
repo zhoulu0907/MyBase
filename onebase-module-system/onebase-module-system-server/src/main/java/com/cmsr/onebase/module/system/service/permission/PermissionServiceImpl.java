@@ -1,30 +1,13 @@
 package com.cmsr.onebase.module.system.service.permission;
 
-import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.convertSet;
-import static com.cmsr.onebase.framework.common.util.json.JsonUtils.toJsonString;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.function.Supplier;
-
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.Compare;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.baomidou.dynamic.datasource.annotation.DSTransactional;
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.util.ArrayUtil;
+import cn.hutool.extra.spring.SpringUtil;
 import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.biz.system.permission.dto.DeptDataPermissionRespDTO;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
-import com.cmsr.onebase.framework.datapermission.core.annotation.DataPermission;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.MenuDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleMenuDO;
@@ -36,13 +19,21 @@ import com.cmsr.onebase.module.system.service.user.AdminUserService;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.Sets;
-
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.util.ArrayUtil;
-import cn.hutool.extra.spring.SpringUtil;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.anyline.data.param.init.DefaultConfigStore;
+import org.anyline.entity.Compare;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.*;
+import java.util.function.Supplier;
+
+import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.convertSet;
+import static com.cmsr.onebase.framework.common.util.json.JsonUtils.toJsonString;
 
 /**
  * 权限 Service 实现类
@@ -135,7 +126,6 @@ public class PermissionServiceImpl implements PermissionService {
     // ========== 角色-菜单的相关方法  ==========
 
     @Override
-    @DSTransactional // 多数据源，使用 @DSTransactional 保证本地事务，以及数据源的切换
     @Caching(evict = {
             @CacheEvict(value = RedisKeyConstants.MENU_ROLE_ID_LIST,
                     allEntries = true),
@@ -219,7 +209,6 @@ public class PermissionServiceImpl implements PermissionService {
     // ========== 用户-角色的相关方法  ==========
 
     @Override
-    @DSTransactional // 多数据源，使用 @DSTransactional 保证本地事务，以及数据源的切换
     @CacheEvict(value = RedisKeyConstants.USER_ROLE_ID_LIST, key = "#userId")
     public void assignUserRole(Long userId, Set<Long> roleIds) {
         // 获得角色拥有角色编号
@@ -305,7 +294,6 @@ public class PermissionServiceImpl implements PermissionService {
     }
 
     @Override
-    @DataPermission(enable = false) // 关闭数据权限，不然就会出现递归获取数据权限的问题
     public DeptDataPermissionRespDTO getDeptDataPermission(Long userId) {
         // 获得用户的角色
         List<RoleDO> roles = getEnableUserRoleListByUserIdFromCache(userId);

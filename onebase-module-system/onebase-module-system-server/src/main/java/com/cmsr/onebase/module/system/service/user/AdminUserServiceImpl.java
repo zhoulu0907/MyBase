@@ -50,7 +50,6 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.common.util.validation.ValidationUtils;
-import com.cmsr.onebase.framework.datapermission.core.util.DataPermissionUtils;
 import com.cmsr.onebase.module.infra.api.config.ConfigApi;
 import com.cmsr.onebase.module.system.controller.admin.auth.vo.AuthRegisterReqVO;
 import com.cmsr.onebase.module.system.controller.admin.user.vo.profile.UserProfileUpdatePasswordReqVO;
@@ -418,7 +417,7 @@ public class AdminUserServiceImpl implements AdminUserService {
     private AdminUserDO validateUserForCreateOrUpdate(Long id, String username, String mobile, String email,
                                                       Long deptId, Set<Long> postIds) {
         // 关闭数据权限，避免因为没有数据权限，查询不到数据，进而导致唯一校验不正确
-        return DataPermissionUtils.executeIgnore(() -> {
+//        return DataPermissionUtils.executeIgnore(() -> {
             // 校验用户存在
             AdminUserDO user = validateUserExists(id);
             // 校验用户名唯一
@@ -432,7 +431,8 @@ public class AdminUserServiceImpl implements AdminUserService {
             // 校验岗位处于开启状态
             postService.validatePostList(postIds);
             return user;
-        });
+//        });
+
     }
 
     @VisibleForTesting

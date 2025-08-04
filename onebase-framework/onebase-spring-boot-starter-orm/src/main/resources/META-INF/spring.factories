@@ -1,2 +1,2 @@
-org.springframework.boot.env.EnvironmentPostProcessor=\
-  com.cmsr.onebase.framework.mybatis.config.IdTypeEnvironmentPostProcessor
+#org.springframework.boot.env.EnvironmentPostProcessor=\
+#  com.cmsr.onebase.framework.mybatis.config.IdTypeEnvironmentPostProcessor

@@ -93,15 +93,6 @@ spring:
         instance:
           service-host-type: IP # 注册实例时，优先使用 IP [IP, HOST_NAME, CANONICAL_HOST_NAME]
 
-# 日志文件配置
-logging:
-  level:
-    # 配置自己写的 MyBatis Mapper 打印日志
-    com.cmsr.onebase.module.system.dal.mysql: debug
-    com.cmsr.onebase.module.system.dal.mysql.sms.SmsChannelMapper: INFO # 配置 SmsChannelMapper 的日志级别为 info
-    org.springframework.context.support.PostProcessorRegistrationDelegate: ERROR # TODO 开发者：先禁用，Spring Boot 3.X 存在部分错误的 WARN 提示
-
-
 --- #################### OneBase相关配置 ####################
 
 # OneBase配置项，设置当前项目所有自定义的配置

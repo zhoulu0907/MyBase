@@ -4,13 +4,8 @@ import com.cmsr.onebase.framework.common.util.object.ObjectUtils;
 import com.cmsr.onebase.framework.common.util.spring.SpringUtils;
 import com.cmsr.onebase.framework.mybatis.core.enums.DbTypeEnum;
 import com.baomidou.dynamic.datasource.DynamicRoutingDataSource;
-import com.baomidou.mybatisplus.annotation.DbType;
+import org.jsoup.Connection;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
 
 /**
  * JDBC 工具类

@@ -2,12 +2,12 @@ package com.cmsr.onebase.module.infra.dal.dataobject.file;
 
 import com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
-import com.baomidou.mybatisplus.annotation.KeySequence;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableName;
 import jakarta.persistence.Column;
 import jakarta.persistence.Table;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * 文件表
@@ -40,32 +40,32 @@ public class FileDO extends BaseDO {
      *
      * 关联 {@link FileConfigDO#getId()}
      */
-    @TableField(value = COLUMN_CONFIG_ID)
+    @Column(name = COLUMN_CONFIG_ID)
     private Long configId;
     /**
      * 原文件名
      */
-    @TableField(value = COLUMN_NAME)
+    @Column(name = COLUMN_NAME)
     private String name;
     /**
      * 路径，即文件名
      */
-    @TableField(value = COLUMN_PATH)
+    @Column(name = COLUMN_PATH)
     private String path;
     /**
      * 访问地址
      */
-    @TableField(value = COLUMN_URL)
+    @Column(name = COLUMN_URL)
     private String url;
     /**
      * 文件的 MIME 类型，例如 "application/octet-stream"
      */
-    @TableField(value = COLUMN_TYPE)
+    @Column(name = COLUMN_TYPE)
     private String type;
     /**
      * 文件大小
      */
-    @TableField(value = COLUMN_SIZE)
+    @Column(name = COLUMN_SIZE)
     private Integer size;
 
 }

@@ -1,17 +1,15 @@
 package com.cmsr.onebase.module.infra.dal.dataobject.logger;
 
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
-import com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
-import com.cmsr.onebase.module.infra.dal.dataobject.file.FileConfigDO;
 import com.cmsr.onebase.module.infra.enums.logger.ApiErrorLogProcessStatusEnum;
-import com.baomidou.mybatisplus.annotation.KeySequence;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableName;
 import jakarta.persistence.Column;
 import jakarta.persistence.Table;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
@@ -62,28 +60,28 @@ public class ApiErrorLogDO extends TenantBaseDO {
     /**
      * 用户编号
      */
-    @TableField(value = COLUMN_USER_ID)
+    @Column(name = COLUMN_USER_ID)
     private Long userId;
     /**
      * 链路追踪编号
      *
      * 一般来说，通过链路追踪编号，可以将访问日志，错误日志，链路追踪日志，logger 打印日志等，结合在一起，从而进行排错。
      */
-    @TableField(value = COLUMN_TRACE_ID)
+    @Column(name = COLUMN_TRACE_ID)
     private String traceId;
     /**
      * 用户类型
      *
      * 枚举 {@link UserTypeEnum}
      */
-    @TableField(value = COLUMN_USER_TYPE)
+    @Column(name = COLUMN_USER_TYPE)
     private Integer userType;
     /**
      * 应用名
      *
      * 目前读取 spring.application.name
      */
-    @TableField(value = COLUMN_APPLICATION_NAME)
+    @Column(name = COLUMN_APPLICATION_NAME)
     private String applicationName;
 
     // ========== 请求相关字段 ==========
@@ -91,12 +89,12 @@ public class ApiErrorLogDO extends TenantBaseDO {
     /**
      * 请求方法名
      */
-    @TableField(value = COLUMN_REQUEST_METHOD)
+    @Column(name = COLUMN_REQUEST_METHOD)
     private String requestMethod;
     /**
      * 访问地址
      */
-    @TableField(value = COLUMN_REQUEST_URL)
+    @Column(name = COLUMN_REQUEST_URL)
     private String requestUrl;
     /**
      * 请求参数
@@ -104,17 +102,17 @@ public class ApiErrorLogDO extends TenantBaseDO {
      * query: Query String
      * body: Quest Body
      */
-    @TableField(value = COLUMN_REQUEST_PARAMS)
+    @Column(name = COLUMN_REQUEST_PARAMS)
     private String requestParams;
     /**
      * 用户 IP
      */
-    @TableField(value = COLUMN_USER_IP)
+    @Column(name = COLUMN_USER_IP)
     private String userIp;
     /**
      * 浏览器 UA
      */
-    @TableField(value = COLUMN_USER_AGENT)
+    @Column(name = COLUMN_USER_AGENT)
     private String userAgent;
 
     // ========== 异常相关字段 ==========
@@ -122,63 +120,63 @@ public class ApiErrorLogDO extends TenantBaseDO {
     /**
      * 异常发生时间
      */
-    @TableField(value = COLUMN_EXCEPTION_TIME)
+    @Column(name = COLUMN_EXCEPTION_TIME)
     private LocalDateTime exceptionTime;
     /**
      * 异常名
      *
      * {@link Throwable#getClass()} 的类全名
      */
-    @TableField(value = COLUMN_EXCEPTION_NAME)
+    @Column(name = COLUMN_EXCEPTION_NAME)
     private String exceptionName;
     /**
      * 异常导致的消息
      *
      * {@link cn.hutool.core.exceptions.ExceptionUtil#getMessage(Throwable)}
      */
-    @TableField(value = COLUMN_EXCEPTION_MESSAGE)
+    @Column(name = COLUMN_EXCEPTION_MESSAGE)
     private String exceptionMessage;
     /**
      * 异常导致的根消息
      *
      * {@link cn.hutool.core.exceptions.ExceptionUtil#getRootCauseMessage(Throwable)}
      */
-    @TableField(value = COLUMN_EXCEPTION_ROOT_CAUSE_MESSAGE)
+    @Column(name = COLUMN_EXCEPTION_ROOT_CAUSE_MESSAGE)
     private String exceptionRootCauseMessage;
     /**
      * 异常的栈轨迹
      *
      * {@link org.apache.commons.lang3.exception.ExceptionUtils#getStackTrace(Throwable)}
      */
-    @TableField(value = COLUMN_EXCEPTION_STACK_TRACE)
+    @Column(name = COLUMN_EXCEPTION_STACK_TRACE)
     private String exceptionStackTrace;
     /**
      * 异常发生的类全名
      *
      * {@link StackTraceElement#getClassName()}
      */
-    @TableField(value = COLUMN_EXCEPTION_CLASS_NAME)
+    @Column(name = COLUMN_EXCEPTION_CLASS_NAME)
     private String exceptionClassName;
     /**
      * 异常发生的类文件
      *
      * {@link StackTraceElement#getFileName()}
      */
-    @TableField(value = COLUMN_EXCEPTION_FILE_NAME)
+    @Column(name = COLUMN_EXCEPTION_FILE_NAME)
     private String exceptionFileName;
     /**
      * 异常发生的方法名
      *
      * {@link StackTraceElement#getMethodName()}
      */
-    @TableField(value = COLUMN_EXCEPTION_METHOD_NAME)
+    @Column(name = COLUMN_EXCEPTION_METHOD_NAME)
     private String exceptionMethodName;
     /**
      * 异常发生的方法所在行
      *
      * {@link StackTraceElement#getLineNumber()}
      */
-    @TableField(value = COLUMN_EXCEPTION_LINE_NUMBER)
+    @Column(name = COLUMN_EXCEPTION_LINE_NUMBER)
     private Integer exceptionLineNumber;
 
     // ========== 处理相关字段 ==========
@@ -188,19 +186,19 @@ public class ApiErrorLogDO extends TenantBaseDO {
      *
      * 枚举 {@link ApiErrorLogProcessStatusEnum}
      */
-    @TableField(value = COLUMN_PROCESS_STATUS)
+    @Column(name = COLUMN_PROCESS_STATUS)
     private Integer processStatus;
     /**
      * 处理时间
      */
-    @TableField(value = COLUMN_PROCESS_TIME)
+    @Column(name = COLUMN_PROCESS_TIME)
     private LocalDateTime processTime;
     /**
      * 处理用户编号
      *
      * 关联 com.cmsr.onebase.adminserver.modules.system.dal.dataobject.user.SysUserDO.SysUserDO#getId()
      */
-    @TableField(value = COLUMN_PROCESS_USER_ID)
+    @Column(name = COLUMN_PROCESS_USER_ID)
     private Long processUserId;
 
 }

@@ -1,13 +1,13 @@
 package com.cmsr.onebase.module.metadata.dal.dataobject.relationship;
 
-import com.baomidou.mybatisplus.annotation.TableName;
+import jakarta.persistence.Table;
 import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
 import lombok.*;
 
 /**
  * 实体关系表 DO
  */
-@TableName(value = "metadata_entity_relationship")
+@Table(name = "metadata_entity_relationship")
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Builder

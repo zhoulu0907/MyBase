@@ -7,7 +7,6 @@ import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import jakarta.persistence.Table;
 import jakarta.persistence.Column;
 
-import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 
 /**
@@ -69,7 +68,6 @@ public class DictDataDO extends BaseDO {
     /**
      * css 样式
      */
-    @TableField(updateStrategy = FieldStrategy.ALWAYS)
     @Column(name = FIELD_CSS_CLASS)
     private String cssClass;
     /**

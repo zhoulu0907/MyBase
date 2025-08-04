@@ -4,7 +4,6 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Column;
 import lombok.*;
 import java.time.LocalDateTime;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO;
 
 /**
@@ -29,7 +28,7 @@ public class LicenseDO extends BaseDO{
     public static final String LICENSE_FILE       = "license_file";
 
     /** 主键 */
-    @TableId
+    @Column
     private Long id;
     /** 企业名称 */
     @Column(name = ENTERPRISE_NAME)

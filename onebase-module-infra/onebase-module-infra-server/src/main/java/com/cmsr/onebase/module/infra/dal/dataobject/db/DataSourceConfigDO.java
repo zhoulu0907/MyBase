@@ -1,11 +1,8 @@
 package com.cmsr.onebase.module.infra.dal.dataobject.db;
 
 import com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO;
-import com.cmsr.onebase.framework.mybatis.core.type.EncryptTypeHandler;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
-import com.baomidou.mybatisplus.annotation.KeySequence;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableName;
+import jakarta.persistence.Column;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -42,23 +39,23 @@ public class DataSourceConfigDO extends BaseDO {
     /**
      * 连接名
      */
-    @TableField(value = COLUMN_NAME)
+    @Column(name = COLUMN_NAME)
     private String name;
 
     /**
      * 数据源连接
      */
-    @TableField(value = COLUMN_URL)
+    @Column(name = COLUMN_URL)
     private String url;
     /**
      * 用户名
      */
-    @TableField(value = COLUMN_USERNAME)
+    @Column(name = COLUMN_USERNAME)
     private String username;
     /**
      * 密码
      */
-    @TableField(value = COLUMN_PASSWORD, typeHandler = EncryptTypeHandler.class)
+    @Column(name = COLUMN_PASSWORD)
     private String password;
 
 }
