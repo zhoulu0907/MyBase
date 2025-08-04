@@ -106,6 +106,7 @@ export const EntityERWithModeSwitch: React.FC<{ refreshEntityList: boolean, setR
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [createRelationModalVisible, setCreateRelationModalVisible] = useState(false);
+  const [onlyUpdateNode, setOnlyUpdateNode] = useState(false);
 
   const handleNodeEdit = (editData: EntityNode) => {
     console.log('节点编辑:', editData);
@@ -121,6 +122,7 @@ export const EntityERWithModeSwitch: React.FC<{ refreshEntityList: boolean, setR
     setEditDrawerVisible(true);
     setEditingNode(editData);
     setRefreshEntityList(!refreshEntityList);
+    setOnlyUpdateNode(true);
   };
 
   const handleNodeAddField = (id: string) => {
@@ -153,7 +155,8 @@ export const EntityERWithModeSwitch: React.FC<{ refreshEntityList: boolean, setR
     localStorage.setItem('entityFormValues', JSON.stringify({nodes: newNodes, edges: newEdges}));
     setDeleteModalVisible(false);
     setDeleteLoading(false);
-    setRefreshEntityList(!refreshEntityList);
+    setRefreshEntityList(true);
+    setOnlyUpdateNode(true);
   };
 
   const cancelDelete = () => {
@@ -161,18 +164,19 @@ export const EntityERWithModeSwitch: React.FC<{ refreshEntityList: boolean, setR
   };
 
   const handleSuccessCallback = () => {
-    setRefreshEntityList(!refreshEntityList);
+    setRefreshEntityList(true);
+    setOnlyUpdateNode(true);
   };
 
   useEffect(() => {
-    // if (refreshEntityList) {
+    if (refreshEntityList) {
       const { nodes, edges } = JSON.parse(localStorage.getItem('entityFormValues') || JSON.stringify({nodes: [], edges: []}));
       setData({
         nodes: nodes,
         edges: edges,
       });
-      // setRefreshEntityList(false);
-    // }
+      setRefreshEntityList(false);
+    }
   }, [refreshEntityList]);
 
   return (
@@ -201,6 +205,7 @@ export const EntityERWithModeSwitch: React.FC<{ refreshEntityList: boolean, setR
         onNodeAddField={handleNodeAddField}
         onNodeAddRelation={handleNodeAddRelation}
         onNodeDelete={handleNodeDelete}
+        onlyUpdateNode={onlyUpdateNode}
       />
       <EditDrawer
         visible={editDrawerVisible}

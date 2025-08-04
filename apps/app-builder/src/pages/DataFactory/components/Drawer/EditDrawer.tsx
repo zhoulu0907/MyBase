@@ -39,6 +39,7 @@ const DetailDrawer: React.FC<{
     if (editingNode && onNodeEdit) {
       // onNodeEdit(formData);
       const { nodes } = JSON.parse(localStorage.getItem('entityFormValues') || JSON.stringify({ nodes: [], edges: [] }));
+      console.log('handleNodeEdit====',nodes);
       const nodeData = nodes.find((n: EntityNode) => n.id === editingNode.id);
       console.log('handleNodeEdit====',nodeData);
       if (nodeData) {

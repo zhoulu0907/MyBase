@@ -59,7 +59,7 @@ const CheckEntityPage: React.FC<{ handlePageType: (tab: string) => void }> = ({ 
         setVisible={setCreateEntityModalVisible}
         handlePageType={handlePageType}
         successCallback={() => {
-          setRefreshEntityList(prev => !prev);
+          setRefreshEntityList(true);
         }}
       />
     </div>
