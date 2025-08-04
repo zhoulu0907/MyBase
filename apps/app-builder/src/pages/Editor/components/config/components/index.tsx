@@ -1,8 +1,8 @@
 import { Tabs, Typography } from '@arco-design/web-react';
 import { useTranslation } from 'react-i18next';
+import Advanced from './Advanced';
 import Attributes from './Attributes';
 import TabTitle from './components/TabTitle';
-import Data from './Data';
 import styles from './index.module.less';
 
 const TabPane = Tabs.TabPane;
@@ -33,11 +33,11 @@ const MaterialConfiger = ({ cpID }: MaterialConfigerProps) => {
                         <Attributes cpID={cpID} />
                     </Typography.Paragraph>
                 </TabPane>
-                <TabPane key="data"
-                    title={<TabTitle title={t("formEditor.data")}/>}
+                <TabPane key="advanced"
+                    title={<TabTitle title={t("formEditor.advanced")}/>}
                 >
                     <Typography.Paragraph>
-                        <Data />
+                        <Advanced />
                     </Typography.Paragraph>
                 </TabPane>
             </Tabs>

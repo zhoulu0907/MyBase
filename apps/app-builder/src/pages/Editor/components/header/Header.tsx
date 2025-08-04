@@ -3,8 +3,6 @@ import activeFormDesignSVG from "@/assets/images/form_design_active_icon.svg";
 import defaultFormDesignSVG from "@/assets/images/form_design_default_icon.svg";
 import activeListDesignSVG from "@/assets/images/list_design_active_icon.svg";
 import defaultListDesignSVG from "@/assets/images/list_design_default_icon.svg";
-import activeSourceDataSVG from "@/assets/images/source_data_active_icon.svg";
-import defaultSourceDataSVG from "@/assets/images/source_data_default_icon.svg";
 import { usePageEditorStore } from "@/hooks/useStore";
 import { Button, Tabs } from "@arco-design/web-react";
 import { IconArrowLeft } from "@arco-design/web-react/icon";
@@ -33,13 +31,13 @@ const tabData = [
         title: "页面设置",
         alt: "",
     },
-    {
-        key: EDITOR_TYPES.METADATA_MANAGE,
-        title: "元数据管理",
-        alt: "Source Data",
-        defaultIcon: defaultSourceDataSVG,
-        activeIcon: activeSourceDataSVG,
-    },
+    // {
+    //     key: EDITOR_TYPES.METADATA_MANAGE,
+    //     title: "元数据管理",
+    //     alt: "Source Data",
+    //     defaultIcon: defaultSourceDataSVG,
+    //     activeIcon: activeSourceDataSVG,
+    // },
 ];
 
 export default function EditorHeader() {

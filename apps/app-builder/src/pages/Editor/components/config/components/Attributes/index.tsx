@@ -94,8 +94,12 @@ const Attributes = ({ cpID }: ConfigsProps) => {
     return (
          <div className={styles.attributes}>
             {cpID &&<Form autoComplete="off" layout="vertical">
-                <FormItem label="组件ID">
-                    <span>{cpID}</span>
+                <FormItem label="组件ID"
+                    labelCol={{
+                        span: 5,
+                    }}
+                >
+                    <div className={styles.cpID}>{cpID}</div>
                 </FormItem>
 
                 {editData.map((item: any, index: number) => {

@@ -121,7 +121,9 @@
     "createApp": "Create App"
   },
   "formEditor": {
-    "component": "Component",
+    "material": "Material",
+    "metadata": "Metadata",
+    "telegram": "Page Share",
     "baseComponent": "Base",
     "templateComponent": "Template",
     "customComponent": "Custom",
@@ -133,6 +135,7 @@
     "empty": "No components",
     "attribute": "Attribute",
     "data": "Data",
+    "advanced": "Advanced",
     "full": "Full",
     "formDesign": "Form Design",
     "listDesign": "List Design",
