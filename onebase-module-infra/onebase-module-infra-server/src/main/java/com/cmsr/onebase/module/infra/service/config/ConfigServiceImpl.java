@@ -27,8 +27,8 @@ import static com.cmsr.onebase.module.infra.enums.ErrorCodeConstants.*;
 @Validated
 public class ConfigServiceImpl implements ConfigService {
 
-    @Resource
-    private ConfigMapper configMapper;
+//    @Resource
+//    private ConfigMapper configMapper;
 
     @Resource
     private DataRepository dataRepository;

@@ -8,6 +8,7 @@ import com.cmsr.onebase.framework.common.util.string.StrUtils;
 import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.module.infra.controller.admin.logger.vo.apierrorlog.ApiErrorLogPageReqVO;
+import com.cmsr.onebase.module.infra.dal.dataobject.logger.ApiAccessLogDO;
 import com.cmsr.onebase.module.infra.dal.dataobject.logger.ApiErrorLogDO;
 import com.cmsr.onebase.module.infra.dal.mysql.logger.ApiErrorLogMapper;
 import com.cmsr.onebase.module.infra.enums.logger.ApiErrorLogProcessStatusEnum;
@@ -33,8 +34,8 @@ import static com.cmsr.onebase.module.infra.enums.ErrorCodeConstants.API_ERROR_L
 @Slf4j
 public class ApiErrorLogServiceImpl implements ApiErrorLogService {
 
-    @Resource
-    private ApiErrorLogMapper apiErrorLogMapper;
+//    @Resource
+//    private ApiErrorLogMapper apiErrorLogMapper;
 
     @Resource
     private DataRepository dataRepository;
@@ -92,7 +93,9 @@ public class ApiErrorLogServiceImpl implements ApiErrorLogService {
         LocalDateTime expireDate = LocalDateTime.now().minusDays(exceedDay);
         // 循环删除，直到没有满足条件的数据
         for (int i = 0; i < Short.MAX_VALUE; i++) {
-            int deleteCount = apiErrorLogMapper.deleteByCreateTimeLt(expireDate, deleteLimit);
+            int deleteCount = (int) dataRepository.deleteByConfigReturn(ApiAccessLogDO.class, new DefaultConfigStore()
+                    .le("create_time", expireDate).limit(deleteLimit));
+//            int deleteCount = apiErrorLogMapper.deleteByCreateTimeLt(expireDate, deleteLimit);
             count += deleteCount;
             // 达到删除预期条数，说明到底了
             if (deleteCount < deleteLimit) {

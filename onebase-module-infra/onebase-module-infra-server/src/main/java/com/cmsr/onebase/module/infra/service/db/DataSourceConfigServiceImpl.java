@@ -27,8 +27,8 @@ import static com.cmsr.onebase.module.infra.enums.ErrorCodeConstants.DATA_SOURCE
 @Validated
 public class DataSourceConfigServiceImpl implements DataSourceConfigService {
 
-    @Resource
-    private DataSourceConfigMapper dataSourceConfigMapper;
+//    @Resource
+//    private DataSourceConfigMapper dataSourceConfigMapper;
 
     @Resource
     private DataRepository dataRepository;
@@ -66,7 +66,7 @@ public class DataSourceConfigServiceImpl implements DataSourceConfigService {
         validateDataSourceConfigExists(id);
         // 删除
         dataRepository.deleteById(DataSourceConfigDO.class,id);
-        dataSourceConfigMapper.deleteById(id);
+//        dataSourceConfigMapper.deleteById(id);
     }
 
     private void validateDataSourceConfigExists(Long id) {

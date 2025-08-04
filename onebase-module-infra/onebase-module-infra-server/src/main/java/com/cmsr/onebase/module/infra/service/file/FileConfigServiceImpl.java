@@ -37,7 +37,6 @@ import static com.cmsr.onebase.module.infra.enums.ErrorCodeConstants.FILE_CONFIG
 
 /**
  * 文件配置 Service 实现类
- *
  */
 @Service
 @Validated
@@ -55,8 +54,14 @@ public class FileConfigServiceImpl implements FileConfigService {
 
                 @Override
                 public FileClient load(Long id) {
+
+
                     FileConfigDO config = Objects.equals(CACHE_MASTER_ID, id) ?
-                            fileConfigMapper.selectByMaster() : fileConfigMapper.selectById(id);
+                            dataRepository.findOne(FileConfigDO.class, new DefaultConfigStore().eq("master", true))
+                            : dataRepository.findOne(FileConfigDO.class, new DefaultConfigStore().eq("id", id));
+                    ;
+//                    FileConfigDO config = Objects.equals(CACHE_MASTER_ID, id) ?
+//                            fileConfigMapper.selectByMaster() : fileConfigMapper.selectById(id);
                     if (config != null) {
                         fileClientFactory.createOrUpdateFileClient(config.getId(), config.getStorage(), config.getConfig());
                     }
@@ -68,8 +73,8 @@ public class FileConfigServiceImpl implements FileConfigService {
     @Resource
     private FileClientFactory fileClientFactory;
 
-    @Resource
-    private FileConfigMapper fileConfigMapper;
+//    @Resource
+//    private FileConfigMapper fileConfigMapper;
 
     @Resource
     private DataRepository dataRepository;
@@ -136,7 +141,7 @@ public class FileConfigServiceImpl implements FileConfigService {
             throw exception(FILE_CONFIG_DELETE_FAIL_MASTER);
         }
         // 删除
-        dataRepository.deleteById(FileConfigDO.class,id);
+        dataRepository.deleteById(FileConfigDO.class, id);
 //        fileConfigMapper.deleteById(id);
 
         // 清空缓存
@@ -159,7 +164,7 @@ public class FileConfigServiceImpl implements FileConfigService {
     }
 
     private FileConfigDO validateFileConfigExists(Long id) {
-        FileConfigDO config = dataRepository.findById(FileConfigDO.class,id);
+        FileConfigDO config = dataRepository.findById(FileConfigDO.class, id);
 //        FileConfigDO config = fileConfigMapper.selectById(id);
         if (config == null) {
             throw exception(FILE_CONFIG_NOT_EXISTS);
@@ -169,7 +174,7 @@ public class FileConfigServiceImpl implements FileConfigService {
 
     @Override
     public FileConfigDO getFileConfig(Long id) {
-        return dataRepository.findById(FileConfigDO.class,id);
+        return dataRepository.findById(FileConfigDO.class, id);
 //        return fileConfigMapper.selectById(id);
     }
 

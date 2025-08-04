@@ -47,10 +47,10 @@ public class CodegenServiceImpl implements CodegenService {
     @Resource
     private DatabaseTableService databaseTableService;
 
-    @Resource
-    private CodegenTableMapper codegenTableMapper;
-    @Resource
-    private CodegenColumnMapper codegenColumnMapper;
+//    @Resource
+//    private CodegenTableMapper codegenTableMapper;
+//    @Resource
+//    private CodegenColumnMapper codegenColumnMapper;
 
     @Resource
     private DataRepository dataRepository;
@@ -225,7 +225,8 @@ public class CodegenServiceImpl implements CodegenService {
 //        codegenColumnMapper.insertBatch(columns);
         // 4.2 删除不存在的字段
         if (CollUtil.isNotEmpty(deleteColumnIds)) {
-            codegenColumnMapper.deleteBatchIds(deleteColumnIds);
+            dataRepository.deleteAllById(CodegenColumnDO.class, deleteColumnIds);
+//            codegenColumnMapper.deleteBatchIds(deleteColumnIds);
         }
     }
 

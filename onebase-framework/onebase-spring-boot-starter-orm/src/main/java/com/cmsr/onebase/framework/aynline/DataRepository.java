@@ -298,6 +298,34 @@ public class DataRepository {
     /**
      * 根据ID删除实体（软删除）
      *
+     * @param clazz   实体类
+     * @param configs configs
+     * @param <T>     实体类型
+     */
+    public <T extends BaseDO> long deleteByConfigReturn(Class<T> clazz, ConfigStore configs) {
+        try {
+            DataRow row = new DataRow();
+            row.put("deleted", 1);  // 设置逻辑删除标记
+            long result = anylineService.update(getTableName(clazz), row, configs);
+            log.info("[{}] deleteByConfig  ---> effect rows = {}", clazz, result);
+
+            // 这里使用anylineService.delete会直接删除记录，不符合软删除逻辑
+            // long result = anylineService.delete(getTableName(clazz), configs);
+
+            // 下面异常注释掉，允许删除 0 行
+            // if (result == 0) {
+            //     throw new BizException(StatusCode.DB_DELETE_ERROR);
+            // }
+            return result;
+        } catch (Exception e) {
+            log.error("根据ID删除实体失败: class={}, configs={}", clazz.getSimpleName(), configs, e);
+            throw new BizException(StatusCode.DB_DELETE_ERROR);
+        }
+    }
+
+    /**
+     * 根据ID删除实体（软删除）
+     *
      * @param clazz 实体类
      * @param id    实体ID
      * @param <T>   实体类型
@@ -357,7 +385,7 @@ public class DataRepository {
      * @param ids   ID列表
      * @param <T>   实体类型
      */
-    public <T extends BaseDO> void deleteAllById(Class<T> clazz, List<Long> ids) {
+    public <T extends BaseDO> void deleteAllById(Class<T> clazz, Collection<Long> ids) {
         try {
             ConfigStore configs = new DefaultConfigStore();
             configs.and(Compare.IN, "id", ids);
