@@ -1,29 +1,10 @@
 package com.cmsr.onebase.framework.tenant.config;
 
-import cn.hutool.extra.spring.SpringUtil;
-import com.cmsr.onebase.framework.common.enums.WebFilterOrderEnum;
-import com.cmsr.onebase.framework.mybatis.core.util.MyBatisUtils;
-import com.cmsr.onebase.framework.redis.config.YudaoCacheProperties;
-import com.cmsr.onebase.framework.security.core.service.SecurityFrameworkService;
-import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
-import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnoreAspect;
-import com.cmsr.onebase.framework.tenant.core.db.TenantDatabaseInterceptor;
-import com.cmsr.onebase.framework.tenant.core.job.TenantJobAspect;
-import com.cmsr.onebase.framework.tenant.core.mq.rabbitmq.TenantRabbitMQInitializer;
-import com.cmsr.onebase.framework.tenant.core.mq.redis.TenantRedisMessageInterceptor;
-import com.cmsr.onebase.framework.tenant.core.mq.rocketmq.TenantRocketMQInitializer;
-import com.cmsr.onebase.framework.tenant.core.redis.TenantRedisCacheManager;
-import com.cmsr.onebase.framework.tenant.core.security.TenantSecurityWebFilter;
-import com.cmsr.onebase.framework.tenant.core.service.TenantFrameworkService;
-import com.cmsr.onebase.framework.tenant.core.service.TenantFrameworkServiceImpl;
-import com.cmsr.onebase.framework.tenant.core.web.TenantContextWebFilter;
-import com.cmsr.onebase.framework.tenant.core.web.TenantVisitContextInterceptor;
-import com.cmsr.onebase.framework.web.config.WebProperties;
-import com.cmsr.onebase.framework.web.core.handler.GlobalExceptionHandler;
-import com.cmsr.onebase.framework.common.biz.system.tenant.TenantCommonApi;
-import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
-import com.baomidou.mybatisplus.extension.plugins.inner.TenantLineInnerInterceptor;
-import jakarta.annotation.Resource;
+import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.convertList;
+
+import java.util.Map;
+import java.util.Objects;
+
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -31,7 +12,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.cache.BatchStrategies;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
@@ -46,10 +26,29 @@ import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.util.pattern.PathPattern;
 
-import java.util.Map;
-import java.util.Objects;
+import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
+import com.baomidou.mybatisplus.extension.plugins.inner.TenantLineInnerInterceptor;
+import com.cmsr.onebase.framework.common.biz.system.tenant.TenantCommonApi;
+import com.cmsr.onebase.framework.common.enums.WebFilterOrderEnum;
+import com.cmsr.onebase.framework.mybatis.core.util.MyBatisUtils;
+import com.cmsr.onebase.framework.redis.config.YudaoCacheProperties;
+import com.cmsr.onebase.framework.security.core.service.SecurityFrameworkService;
+import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
+import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnoreAspect;
+import com.cmsr.onebase.framework.tenant.core.db.TenantDatabaseInterceptor;
+import com.cmsr.onebase.framework.tenant.core.mq.rabbitmq.TenantRabbitMQInitializer;
+import com.cmsr.onebase.framework.tenant.core.mq.rocketmq.TenantRocketMQInitializer;
+import com.cmsr.onebase.framework.tenant.core.redis.TenantRedisCacheManager;
+import com.cmsr.onebase.framework.tenant.core.security.TenantSecurityWebFilter;
+import com.cmsr.onebase.framework.tenant.core.service.TenantFrameworkService;
+import com.cmsr.onebase.framework.tenant.core.service.TenantFrameworkServiceImpl;
+import com.cmsr.onebase.framework.tenant.core.web.TenantContextWebFilter;
+import com.cmsr.onebase.framework.tenant.core.web.TenantVisitContextInterceptor;
+import com.cmsr.onebase.framework.web.config.WebProperties;
+import com.cmsr.onebase.framework.web.core.handler.GlobalExceptionHandler;
 
-import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.convertList;
+import cn.hutool.extra.spring.SpringUtil;
+import jakarta.annotation.Resource;
 
 @AutoConfiguration
 @ConditionalOnProperty(prefix = "yudao.tenant", value = "enable", matchIfMissing = true) // 允许使用 yudao.tenant.enable=false 禁用多租户
@@ -158,32 +157,6 @@ public class YudaoTenantAutoConfiguration {
                 globalExceptionHandler, tenantFrameworkService));
         registrationBean.setOrder(WebFilterOrderEnum.TENANT_SECURITY_FILTER);
         return registrationBean;
-    }
-
-    // ========== Job ==========
-
-    @Bean
-    @ConditionalOnClass(name = "com.xxl.job.core.handler.annotation.XxlJob")
-    public TenantJobAspect tenantJobAspect(TenantFrameworkService tenantFrameworkService) {
-        return new TenantJobAspect(tenantFrameworkService);
-    }
-
-    // ========== MQ ==========
-
-    /**
-     * 多租户 Redis 消息队列的配置类
-     *
-     * 为什么要单独一个配置类呢？如果直接把 TenantRedisMessageInterceptor Bean 的初始化放外面，会报 RedisMessageInterceptor 类不存在的错误
-     */
-    @Configuration
-    @ConditionalOnClass(name = "com.cmsr.onebase.framework.mq.redis.core.RedisMQTemplate")
-    public static class TenantRedisMQAutoConfiguration {
-
-        @Bean
-        public TenantRedisMessageInterceptor tenantRedisMessageInterceptor() {
-            return new TenantRedisMessageInterceptor();
-        }
-
     }
 
     @Bean

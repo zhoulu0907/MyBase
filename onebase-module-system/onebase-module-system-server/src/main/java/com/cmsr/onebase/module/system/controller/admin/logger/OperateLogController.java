@@ -53,7 +53,7 @@ public class OperateLogController {
         exportReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
         List<OperateLogDO> list = operateLogService.getOperateLogPage(exportReqVO).getList();
         ExcelUtils.write(response, "操作日志.xls", "数据列表", OperateLogRespVO.class,
-                TranslateUtils.translate(BeanUtils.toBean(list, OperateLogRespVO.class)));
+                BeanUtils.toBean(list, OperateLogRespVO.class));
     }
 
 }

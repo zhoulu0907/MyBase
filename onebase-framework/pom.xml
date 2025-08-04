@@ -11,18 +11,13 @@
     <packaging>pom</packaging>
     <modules>
         <module>onebase-common</module>
-        <module>onebase-spring-boot-starter-env</module>
+        <module>onebase-spring-boot-starter-monitor</module>
         <module>onebase-spring-boot-starter-orm</module>
         <module>onebase-spring-boot-starter-redis</module>
         <module>onebase-spring-boot-starter-web</module>
         <module>onebase-spring-boot-starter-security</module>
         <module>onebase-spring-boot-starter-websocket</module>
-
-        <module>onebase-spring-boot-starter-monitor</module>
         <module>onebase-spring-boot-starter-protection</module>
-<!--        <module>yudao-spring-boot-starter-config</module>-->
-        <module>onebase-spring-boot-starter-job</module>
-        <module>onebase-spring-boot-starter-mq</module>
         <module>onebase-spring-boot-starter-rpc</module>
 
         <module>onebase-spring-boot-starter-excel</module>

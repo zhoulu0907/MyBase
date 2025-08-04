@@ -153,12 +153,7 @@
                 <version>${spring.boot.version}</version>
             </dependency>
 
-            <dependency>
-                <groupId>com.cmsr.onebase</groupId>
-                <artifactId>onebase-spring-boot-starter-env</artifactId>
-                <version>${revision}</version>
-            </dependency>
-
+    
             <!-- Web 相关 -->
             <dependency>
                 <groupId>com.cmsr.onebase</groupId>
@@ -193,7 +188,12 @@
                 <artifactId>knife4j-gateway-spring-boot-starter</artifactId>
                 <version>4.5.0</version> <!-- TODO 开发者：等 4.5.0 => 4.6.0 -->
             </dependency>
-
+            <!-- 监控 -->
+            <dependency>
+                <groupId>com.cmsr.onebase</groupId>
+                <artifactId>onebase-spring-boot-starter-monitor</artifactId>
+                <version>${revision}</version>
+            </dependency>
             <!-- DB 相关 -->
             <dependency>
                 <groupId>com.cmsr.onebase</groupId>
@@ -307,29 +307,6 @@
                 <version>${revision}</version>
             </dependency>
 
-            <!-- Registry 注册中心相关 -->
-
-            <!-- Config 配置中心相关 -->
-
-            <!-- Job 定时任务相关 -->
-            <dependency>
-                <groupId>com.xuxueli</groupId>
-                <artifactId>xxl-job-core</artifactId>
-                <version>${xxl-job.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.cmsr.onebase</groupId>
-                <artifactId>onebase-spring-boot-starter-job</artifactId>
-                <version>${revision}</version>
-            </dependency>
-
-            <!-- 消息队列相关 -->
-            <dependency>
-                <groupId>com.cmsr.onebase</groupId>
-                <artifactId>onebase-spring-boot-starter-mq</artifactId>
-                <version>${revision}</version>
-            </dependency>
-
             <dependency>
                 <groupId>org.apache.rocketmq</groupId>
                 <artifactId>rocketmq-spring-boot-starter</artifactId>
@@ -353,13 +330,6 @@
                         <groupId>org.redisson</groupId>
                     </exclusion>
                 </exclusions>
-            </dependency>
-
-            <!-- 监控相关 -->
-            <dependency>
-                <groupId>com.cmsr.onebase</groupId>
-                <artifactId>onebase-spring-boot-starter-monitor</artifactId>
-                <version>${revision}</version>
             </dependency>
 
             <dependency>
