@@ -55,6 +55,8 @@
   "breadcrumb": {
     "onebase": "首页",
     "platformInfo": "平台信息",
+    "tenant": "租户管理",
+    "administrator": "平台管理员",
     "user": "用户管理",
     "content": "内容管理",
     "system": "系统设置",

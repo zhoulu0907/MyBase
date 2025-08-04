@@ -168,14 +168,25 @@ const TenantManagement: React.FC = () => {
         return;
       }
       
-      // 检查状态变更 (启用 -> 禁用)
+      // // 检查状态变更 (启用 -> 禁用)
+      // if (currentTenant && 
+      //     currentTenant.status === 'enabled' && 
+      //     values.status === 'disabled') {
+      //   setConfirmDisableVisible(true);
+      //   return;
+      // }
+      // 如果是从禁用状态切换到启用状态
       if (currentTenant && 
-          currentTenant.status === 'enabled' && 
-          values.status === 'disabled') {
-        setConfirmDisableVisible(true);
+          currentTenant.status === 'disabled' && 
+          values.status === 'enabled') {
+        // 更新数据状态
+        setData(data.map(item => 
+          item.id === Number(currentTenant.id) ? { ...item, status: 'enabled' } : item
+        ));
+        Message.success('已启用用户');
+        setModalVisible(false);
         return;
       }
-      
       // 这里应该是API调用
       if (currentTenant) {
         // 更新
@@ -396,8 +407,6 @@ const TenantManagement: React.FC = () => {
                   console.log('checked', checked);
                   setConfirmDisableVisible(true)
                 } else if (currentTenant && currentTenant.status === 'disabled') {
-                  // 当从禁用状态切换到启用状态时，直接更新状态
-                  // 更新数据状态
                   setData(data.map(item => 
                     item.id === Number(currentTenant.id) ? { ...item, status: 'enabled' } : item
                   ));
