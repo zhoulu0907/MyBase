@@ -1,18 +1,18 @@
+import helpSVG from "@/assets/images/help_icon.svg";
 import {
-	Avatar,
-	Button,
-	Dropdown,
-	Layout,
-	Menu,
-	Tabs,
-} from '@arco-design/web-react';
-import { IconPoweroff, IconUser, IconMenu } from '@arco-design/web-react/icon';
-import { TokenManager } from '@onebase/common';
-import React, { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useLocation, useNavigate } from 'react-router-dom';
-import helpSVG from '@/assets/images/help_icon.svg';
-import styles from './header.module.less';
+    Avatar,
+    Button,
+    Dropdown,
+    Layout,
+    Menu,
+    Tabs,
+} from "@arco-design/web-react";
+import { IconMenu, IconPoweroff, IconUser } from "@arco-design/web-react/icon";
+import { TokenManager } from "@onebase/common";
+import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useLocation, useNavigate } from "react-router-dom";
+import styles from "./header.module.less";
 
 const { Header } = Layout;
 
@@ -77,15 +77,18 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
 		</Menu>
 	);
 
-	return (
-		<Header className={`${styles.header} ${className || ''}`}>
-			<div className={styles.headerContent}>
-				<div className={styles.appInfo}>
-					<Button
-						shape='square'
-						icon={<IconMenu />}
-						className={styles.menuIcon}
-					/>
+    return (
+        <Header className={`${styles.header} ${className || ""}`}>
+            <div className={styles.headerContent}>
+                <div className={styles.appInfo}>
+                    <Button
+                        shape="square"
+                        icon={<IconMenu />}
+                        onClick={() => {
+                            navigate("/onebase/my-app");
+                        }}
+                        className={styles.menuIcon}
+                    />
 
 					<Button
 						iconOnly
@@ -99,55 +102,56 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
 					</Button>
 				</div>
 
-				<Tabs
-					type='line'
-					activeTab={activeTab}
-					onChange={(key) => {
-						setActiveTab(key);
-						switch (key) {
-							case 'page-manager':
-								navigate('/onebase/create-app/page-manager');
-								break;
-							case 'integrated-management':
-								navigate('/onebase/create-app/integrated-management');
-								break;
-							case 'data-factory':
-								navigate('/onebase/create-app/data-factory');
-								break;
-							case 'app-setting':
-								navigate('/onebase/create-app/app-setting');
-								break;
-							case 'app-release':
-								navigate('/onebase/create-app/app-release');
-								break;
-							default:
-								break;
-						}
-					}}
-					size='large'
-					inkBarSize={{ width: 20, height: 4.5 }}
-				>
-					<Tabs.TabPane
-						key='page-manager'
-						title={t('createApp.pageManager')}
-					/>
-					<Tabs.TabPane
-						key='integrated-management'
-						title={t('createApp.integratedManagement')}
-					/>
-					<Tabs.TabPane
-						key='data-factory'
-						title={t('createApp.dataFactory')}
-					/>
-					<Tabs.TabPane
-						key='app-setting'
-						title={t('createApp.appSetting')}
-					/>
-					<Tabs.TabPane
-						key='app-release'
-						title={t('createApp.appRelease')}
-					/>
-				</Tabs>
+                <Tabs
+                    type="line"
+                    activeTab={activeTab}
+                    onChange={(key) => {
+                        setActiveTab(key);
+                        switch (key) {
+                            case "create-app/page-manager":
+                                navigate("/onebase/create-app/page-manager");
+                                break;
+                            case "create-app/integrated-management":
+                                navigate(
+                                    "/onebase/create-app/integrated-management"
+                                );
+                                break;
+                            case "create-app/data-factory":
+                                navigate("/onebase/create-app/data-factory");
+                                break;
+                            case "create-app/app-setting":
+                                navigate("/onebase/create-app/app-setting");
+                                break;
+                            case "create-app/app-release":
+                                navigate("/onebase/create-app/app-release");
+                                break;
+                            default:
+                                break;
+                        }
+                    }}
+                    size="large"
+                >
+                    <Tabs.TabPane
+                        key="create-app/page-manager"
+                        title={t("createApp.pageManager")}
+                    />
+                    <Tabs.TabPane
+                        key="create-app/integrated-management"
+                        title={t("createApp.integratedManagement")}
+                    />
+                    <Tabs.TabPane
+                        key="create-app/data-factory"
+                        title={t("createApp.dataFactory")}
+                    />
+                    <Tabs.TabPane
+                        key="create-app/app-setting"
+                        title={t("createApp.appSetting")}
+                    />
+                    <Tabs.TabPane
+                        key="create-app/app-release"
+                        title={t("createApp.appRelease")}
+                    />
+                </Tabs>
 
 				<div className={styles.userInfo}>
 					<Button

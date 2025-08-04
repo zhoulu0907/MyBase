@@ -1,7 +1,6 @@
-import { baseConfig, baseDefault, statusConfig, widthConfig, type ICommonBaseType, type TPagePositionSelectKeyType, type TStatusSelectKeyType, type TWidthSelectKeyType } from "@/components/Materials/common";
-import type { TableColumnProps } from "@arco-design/web-react";
-import { CONFIG_TYPES, PAGINATION_POSITION_OPTIONS, PAGINATION_POSITION_VALUES, WIDTH_OPTIONS, WIDTH_VALUES, STATUS_VALUES, STATUS_OPTIONS } from "@/components/Materials/constants";
-import type { IBooleanConfigType, ILabelConfigType, IStatusConfigType, ITableColumnConfigType, ITablePagePositionConfigType, ITextConfigType, IWidthConfigType, TBooleanDefaultType, TRadioDefaultType, TSelectDefaultType, TTextDefaultType, TNumberDefaultType, ITablePageSizeConfigType } from "@/components/Materials/types";
+import { baseConfig, baseDefault, keyDataConfig, metaDataConfig, statusConfig, widthConfig, type ICommonBaseType, type TPagePositionSelectKeyType, type TStatusSelectKeyType, type TWidthSelectKeyType } from "@/components/Materials/common";
+import { CONFIG_TYPES, PAGINATION_POSITION_OPTIONS, PAGINATION_POSITION_VALUES, STATUS_OPTIONS, STATUS_VALUES, WIDTH_OPTIONS, WIDTH_VALUES } from "@/components/Materials/constants";
+import type { IBooleanConfigType, IDynamicSelectConfigType, ILabelConfigType, ISearchItemListConfigType, IStatusConfigType, ITableColumnConfigType, ITablePagePositionConfigType, ITablePageSizeConfigType, ITextConfigType, IWidthConfigType, TBooleanDefaultType, TNumberDefaultType, TRadioDefaultType, TSelectDefaultType, TTextDefaultType } from "@/components/Materials/types";
 
 
 export interface XTableSchema {
@@ -17,7 +16,9 @@ export type TXTableEditData = Array<
   ITableColumnConfigType|
   IBooleanConfigType|
   ITablePagePositionConfigType<TPagePositionSelectKeyType> |
-  ITablePageSizeConfigType
+  ITablePageSizeConfigType |
+  IDynamicSelectConfigType |
+  ISearchItemListConfigType
 >;
 
 
@@ -33,9 +34,14 @@ export interface XTableConfig extends ICommonBaseType {
     defaultValue?: any[];
 
     /**
+     * 搜索项
+     */
+    searchItems?: any[];
+
+    /**
      * 默认表头
      */
-    columns?: TableColumnProps[];
+    columns?: any[];
 
     /**
      * 是否显示边框
@@ -71,7 +77,7 @@ export interface XTableConfig extends ICommonBaseType {
      * 分页位置
      */
     pagePosition?: TSelectDefaultType<TPagePositionSelectKeyType>;
-    
+
     /**
      * 分页数量
      */
@@ -150,6 +156,25 @@ const XTable: XTableSchema = {
             name: '标题',
             type: CONFIG_TYPES.LABEL_INPUT,
         },
+        metaDataConfig,
+        keyDataConfig,
+        {
+            key: 'columns',
+            name: '表头配置',
+            type: CONFIG_TYPES.TABLE_COLUMN_LIST,
+        },
+        {
+            key: 'searchItems',
+            name: '搜索项',
+            type: CONFIG_TYPES.SEARCH_ITEM_LIST,
+        },
+        pagePositionConfig,
+        {
+            key: 'pageSize',
+            name: '分页数量',
+            type: CONFIG_TYPES.TABLE_PAGE_SIZE,
+        },
+
         {
             key: 'border',
             name: '显示边框',
@@ -195,19 +220,8 @@ const XTable: XTableSchema = {
             name: '隐藏时提交数据',
             type: CONFIG_TYPES.SWITCH_INPUT,
         },
-        {
-            key: 'pageSize',
-            name: '分页数量',
-            type: CONFIG_TYPES.TABLE_PAGE_SIZE,
-        },
-        {
-            key: 'columns',
-            name: '表头配置',
-            type: CONFIG_TYPES.TABLE_COLUMN_LIST,
-        },
         widthConfig,
         statusConfig,
-        pagePositionConfig,
     ],
     config: {
         ...baseDefault,
@@ -277,28 +291,47 @@ const XTable: XTableSchema = {
         ],
         columns: [
             {
-                title: "name",
+                title: "姓名",
                 dataIndex: "name",
                 fixed: 'left',
                 width: 140,
             },
             {
-                title: "salary",
+                title: "工资",
                 dataIndex: "salary",
             },
             {
-                title: "address",
+                title: "地址",
                 dataIndex: "address",
             },
             {
-                title: "Email",
+                title: "邮箱",
                 dataIndex: "email",
             },
             {
-                title: "gender",
+                title: "性别",
                 dataIndex: "gender",
             },
         ],
+        searchItems: [
+            // {
+            //     label: '姓名',
+            //     value: 'name',
+            // },
+            // {
+            //     label: '邮箱',
+            //     value: 'email',
+            // },
+            // {
+            //     label: '性别',
+            //     value: 'gender',
+            // },
+            // {
+            //     label: '工资',
+            //     value: 'salary',
+            // },
+        ]
+
     }
 };
 

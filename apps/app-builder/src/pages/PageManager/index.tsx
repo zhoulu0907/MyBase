@@ -1,23 +1,21 @@
-import { type FC, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import {
-    Layout,
-    Input,
-    Dropdown,
     Button,
+    Dropdown,
+    Input,
+    Layout,
     Menu,
     Modal,
 } from "@arco-design/web-react";
-import { IconPlus } from "@arco-design/web-react/icon";
 import {
     IconFile,
     IconFolder,
     IconHome,
-    IconPhone,
-    IconStorage,
-    IconSearch,
+    IconPhone, IconPlus, IconSearch, IconStorage
 } from "@arco-design/web-react/icon";
+import { useState, type FC } from 'react';
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
+import { EDITOR_TYPES } from '../Editor/components/const';
 import styles from "./index.module.less";
 
 const MenuItem = Menu.Item;
@@ -141,7 +139,7 @@ const PageManagerPage: FC = () => {
                             <div className={styles.contentTitle}>
                                 {activeMenu.title}
                             </div>
-                            <Button type="primary" onClick={() => navigate('/onebase/editor/form_editor')}>编辑</Button>
+                            <Button type="primary" onClick={() => navigate(`/onebase/editor/${EDITOR_TYPES.FORM_EDITOR}`)}>编辑</Button>
                         </div>
                         <Content className={styles.content}>content</Content>
                     </Content>

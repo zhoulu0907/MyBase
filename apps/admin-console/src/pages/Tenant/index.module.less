@@ -1,0 +1,56 @@
+.tenant {
+  width: 100%;
+  .tenantHeader {
+    padding: 20px 0;
+    display: flex;
+    justify-content: space-between;
+    .tenantAdd {
+      .addBtn {
+        background-color: #4FAE7B;
+        color: white;
+      }
+    }
+    .tenantRight {
+      display: flex;
+      .statusSearch {
+        .action {
+          background-color: white;
+          color: #00b42a;
+          border:1px solid #00b42a;
+          z-index: 1;
+        }
+        .default {
+          background-color: white;
+          color: #000;
+          border: 1px solid #ccc;
+        }
+      }
+      .iptSearch {
+        margin-left: 10px;
+      }
+    }
+  }
+}
+.tenantContainer {
+
+  .tenantTop {
+    margin-bottom: 16px;
+    display: flex;
+    justify-content: space-between;
+  }
+}
+/* 在对应的CSS文件中添加以下样式 */
+.tenant-management .enabled-row {
+  background-color: rgba(0, 180, 42, 0.1); /* 启用行的背景色 */
+}
+
+.tenant-management .toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+}
+
+.tenant-management .arco-table-cell {
+  white-space: nowrap;
+}

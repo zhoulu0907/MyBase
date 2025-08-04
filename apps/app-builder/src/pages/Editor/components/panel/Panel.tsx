@@ -1,22 +1,21 @@
 import MaterialCard from '@/components/MaterialCard';
 import allTemplate from '@/components/Materials/template';
-import { Collapse, Tabs } from '@arco-design/web-react';
-import { IconBranch, IconLayout, IconSend, IconStorage } from '@arco-design/web-react/icon';
+import { Button, Collapse, Tabs } from '@arco-design/web-react';
+import { IconBranch, IconLayout, IconLeft, IconRight, IconSend, IconStorage } from '@arco-design/web-react/icon';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ReactSortable } from 'react-sortablejs';
-import { COMPONENT_GROUP_NAME } from '../const';
+import type { EditorType } from '../const';
+import { COMPONENT_GROUP_NAME, EDITOR_TYPES } from '../const';
 import styles from './index.module.less';
 
 // 定义类型
-const CATEGORY_KEYS = ['navigate', 'layout', 'form', 'list'] as const;
+const CATEGORY_KEYS = ['navigate', 'layout', 'form', 'list', 'show'] as const;
 type CategoryKey = typeof CATEGORY_KEYS[number];
 
-interface IProps {
-    onDragComponents: (val: boolean) => void;
-}
-export default function EditorPanel(props: IProps) {
-    const [activeTab, setActiveTab] = useState('form-design');
+export default function EditorPanel() {
+    const [showDrawer, setShowDrawer] = useState(true);
+    const [activeTab, setActiveTab] = useState<EditorType>(EDITOR_TYPES.FORM_EDITOR);
     const [activeComponentTab, setActiveComponentTab] = useState('base-component');
     const { t } = useTranslation();
 
@@ -25,6 +24,7 @@ export default function EditorPanel(props: IProps) {
     const baseLayoutItems = allTemplate.base.find(cat => cat.category === 'layout')?.items || [];
     const baseFormItems = allTemplate.base.find(cat => cat.category === 'form')?.items || [];
     const baseListItems = allTemplate.base.find(cat => cat.category === 'list')?.items || [];
+    const baseShowItems = allTemplate.base.find(cat => cat.category === 'show')?.items || [];
 
     // category 对应的国际化 key
     const categoryI18nMap: Record<CategoryKey, string> = {
@@ -32,16 +32,33 @@ export default function EditorPanel(props: IProps) {
         layout: t('formEditor.layout', '布局'),
         form: t('formEditor.form', '表单组件'),
         list: t('formEditor.list', '列表组件'),
+        show: t('formEditor.show', '展示组件'),
     };
 
     const baseCategories: { key: CategoryKey, items: any[] }[] = [
-        { key: 'navigate', items: baseNavigateItems },
+        // { key: 'navigate', items: baseNavigateItems },
         { key: 'layout', items: baseLayoutItems },
         { key: 'form', items: baseFormItems },
         { key: 'list', items: baseListItems },
+        { key: 'show', items: baseShowItems },
     ];
 
+
     const [baseItems, setBaseItems] = useState<{ key: CategoryKey, items: any[] }[]>([]);
+
+    useEffect(() => {
+        // 根据当前 URL 动态设置 activeTab
+        const hash = window.location.hash;
+        if (hash.endsWith(EDITOR_TYPES.FORM_EDITOR)) {
+            setActiveTab(EDITOR_TYPES.FORM_EDITOR);
+        } else if (hash.endsWith(EDITOR_TYPES.LIST_EDITOR)) {
+            setActiveTab(EDITOR_TYPES.LIST_EDITOR);
+        } else if (hash.endsWith(EDITOR_TYPES.PAGE_SETTING)) {
+            setActiveTab(EDITOR_TYPES.PAGE_SETTING);
+        } else if (hash.endsWith(EDITOR_TYPES.METADATA_MANAGE)) {
+            setActiveTab(EDITOR_TYPES.METADATA_MANAGE);
+        }
+    }, []);
 
     useEffect(()=>{
         // 初始化，为每个组件分配配置和默认值
@@ -61,26 +78,42 @@ export default function EditorPanel(props: IProps) {
     }, []);
 
     return (
-      <div className={styles.formEditorPanel}>
+      <div className={styles.editorPanel}
+        style={{
+            width: showDrawer ? "340px" : "0px",
+            transition: "width 0.3s cubic-bezier(0.4, 0, 0.4, 1)",
+        }}
+      >
+        <Button
+            size="mini"
+            className={styles.drawerButton}
+            icon={showDrawer ? <IconLeft /> : <IconRight />}
+            type="dashed"
+            onClick={() => setShowDrawer(!showDrawer)}
+        />
         <div className={styles.left}>
           <Tabs
               type="text"
               activeTab={activeTab}
               onChange={(key) => {
-                setActiveTab(key);
+                setActiveTab(key as EditorType);
               }}
               size="large"
               direction="vertical"
-              inkBarSize={{ width: 20, height: 3 }}
           >
-              <Tabs.TabPane key="form-design" title={<IconLayout fontSize={20}/>} />
-              <Tabs.TabPane key="list-design" title={<IconBranch fontSize={20}/>} />
-              <Tabs.TabPane key="page-setting" title={<IconSend fontSize={20}/>} />
-              <Tabs.TabPane key="metadata-manage" title={<IconStorage fontSize={20}/>} />
+              <Tabs.TabPane key={EDITOR_TYPES.FORM_EDITOR} title={<IconLayout fontSize={20}/>} />
+              <Tabs.TabPane key={EDITOR_TYPES.LIST_EDITOR} title={<IconBranch fontSize={20}/>} />
+              <Tabs.TabPane key={EDITOR_TYPES.PAGE_SETTING} title={<IconSend fontSize={20}/>} />
+              <Tabs.TabPane key={EDITOR_TYPES.METADATA_MANAGE} title={<IconStorage fontSize={20}/>} />
           </Tabs>
         </div>
 
-        <div className={styles.right}>
+        <div className={styles.right}
+          style={{
+            width: showDrawer ? "100%" : "0px",
+          }}
+
+        >
             <div className={styles.rightHeader}>
                 {t('formEditor.component')}
             </div>
@@ -113,68 +146,70 @@ export default function EditorPanel(props: IProps) {
                             accordion={false}
                             bordered={false}
                         >
-                            {baseCategories.map(cat => (
-                                <Collapse.Item
-                                    header={categoryI18nMap[cat.key]} name={cat.key} key={cat.key}
-                                    style={{ border: 'none' }}
-                                    contentStyle={{ backgroundColor: '#fff', border: 'none' }}
-                                >
-                                    <div>
-                                    {cat.items.length === 0
-                                        ?
-                                        <div className={styles.emptyTip}>
-                                            {t('formEditor.empty')}
-                                        </div>
-                                        :
-                                        <ReactSortable
-                                            list={baseItems.find(c => c.key === cat.key)?.items || []}
-                                            setList={()=>{}}
-                                            group={{
-                                                name: COMPONENT_GROUP_NAME,
-                                                pull: "clone",
-                                                put: false,
-                                            }}
-                                            sort={false}
-                                            className={styles.componentCollapseContent}
-                                            forceFallback={true}
-                                            animation={150}
-                                            onClone={(e)=>{
-                                                // console.log("onClone", e);
+                            {baseCategories.map((cat) => {
+                                if (activeTab === EDITOR_TYPES.LIST_EDITOR && cat.key === 'form' ){
+                                    return null;
+                                }
+                                if (activeTab === EDITOR_TYPES.FORM_EDITOR &&(cat.key === 'list' || cat.key === 'show' )) {
+                                    return null;
+                                }
 
-                                                // 每次拖拽组件到面板时重新分配ID
-                                                const cpType = e.item.getAttribute('data-cp-type')
-                                                e.item.id = `${cpType}-${Date.now()}`;
+                                return (
+                                    <Collapse.Item
+                                        header={categoryI18nMap[cat.key]} name={cat.key} key={cat.key}
+                                        style={{ border: 'none' }}
+                                        contentStyle={{ backgroundColor: '#fff', border: 'none' }}
+                                    >
+                                        <div>
+                                        {cat.items.length === 0
+                                            ?
+                                            <div className={styles.emptyTip}>
+                                                {t('formEditor.empty')}
+                                            </div>
+                                            :
+                                            <ReactSortable
+                                                list={baseItems.find(c => c.key === cat.key)?.items || []}
+                                                setList={()=>{}}
+                                                group={{
+                                                    name: COMPONENT_GROUP_NAME,
+                                                    pull: "clone",
+                                                    put: false,
+                                                }}
+                                                sort={false}
+                                                className={styles.componentCollapseContent}
+                                                forceFallback={true}
+                                                animation={150}
+                                                onClone={(e)=>{
+                                                    // console.log("onClone", e);
 
-                                                const newBaseItems = baseItems.map(c => ({
-                                                    ...c,
-                                                    items: c.items.map(item => ({ ...item, id: `${item.type}-${Date.now()}` }))
-                                                }));
-                                                setBaseItems(newBaseItems);
-                                            }}
-                                            onMove={(e) => {
-                                                // 若拖拽目标是编辑区（蒙版所在容器），则隐藏蒙版
-                                                if (e.to?.id === 'workspace-content') {
-                                                    props.onDragComponents(false);
+                                                    // 每次拖拽组件到面板时重新分配ID
+                                                    const cpType = e.item.getAttribute('data-cp-type')
+                                                    e.item.id = `${cpType}-${Date.now()}`;
+
+                                                    const newBaseItems = baseItems.map(c => ({
+                                                        ...c,
+                                                        items: c.items.map(item => ({ ...item, id: `${item.type}-${Date.now()}` }))
+                                                    }));
+                                                    setBaseItems(newBaseItems);
+                                                }}
+                                            >
+                                                {
+                                                    cat.items.map(item => (
+                                                        <MaterialCard
+                                                            key={item.type}
+                                                            id={item.id || `${item.type}-${Date.now()}`}
+                                                            displayName={item.displayName}
+                                                            type={item.type}
+                                                            icon={item.icon}
+                                                        />
+                                                    ))
                                                 }
-                                                return e.to !== e.from;
-                                            }}
-                                        >
-                                            {
-                                                cat.items.map(item => (
-                                                    <MaterialCard
-                                                        key={item.type}
-                                                        id={item.id || `${item.type}-${Date.now()}`}
-                                                        displayName={item.displayName}
-                                                        type={item.type}
-                                                        icon={item.icon}
-                                                    />
-                                                ))
-                                            }
-                                        </ReactSortable>
-                                    }
-                                    </div>
-                                </Collapse.Item>
-                            ))}
+                                            </ReactSortable>
+                                        }
+                                        </div>
+                                    </Collapse.Item>
+                                )
+                            })}
                         </Collapse>
                     )}
                 </div>

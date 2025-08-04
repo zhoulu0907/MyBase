@@ -1,16 +1,16 @@
 import { Layout } from '@arco-design/web-react';
 import React from 'react';
-import { Route, Routes, useLocation } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import AppCenterPage from '../AppCenter';
+import AppReleasePage from '../AppRelease';
+import AppSettingPage from '../AppSetting';
+import CreateAppPage from '../CreateApp';
+import DataFactoryPage from '../DataFactory';
 import HelpCenterPage from '../HelpCenter';
+import IntegratedManagementPage from '../IntegratedManagement';
 import MallCenterPage from '../MallCenter';
 import MyAppPage from '../MyApp';
-import CreateAppPage from '../CreateApp';
 import PageManagerPage from '../PageManager';
-import IntegratedManagementPage from '../IntegratedManagement';
-import DataFactoryPage from '../DataFactory';
-import AppSettingPage from '../AppSetting';
-import AppReleasePage from '../AppRelease';
 import { AppHeader } from './components/header';
 import styles from './index.module.less';
 
@@ -33,21 +33,21 @@ const Home: React.FC = () => {
           <Content className={styles.content}>
             <div className={styles.contentInner}>
               <Routes>
-                <Route index element={<MyAppPage />} /> 
+                <Route path="/" element={<Navigate to="my-app" replace />} />
                 <Route path="my-app" element={<MyAppPage />} />
                 <Route path="app-center" element={<AppCenterPage />} />
                 <Route path="mall-center" element={<MallCenterPage />} />
                 <Route path="help-center" element={<HelpCenterPage />} />
 
                 <Route path="create-app" element={<CreateAppPage />}>
-                  <Route index element={<PageManagerPage />} /> 
+                  <Route index element={<PageManagerPage />} />
                   <Route path="page-manager" element={<PageManagerPage />} />
                   <Route path="integrated-management" element={<IntegratedManagementPage />} />
                   <Route path="data-factory" element={<DataFactoryPage />} />
                   <Route path="app-setting" element={<AppSettingPage />} />
                   <Route path="app-release" element={<AppReleasePage />} />
                 </Route>
-                
+
               </Routes>
             </div>
           </Content>

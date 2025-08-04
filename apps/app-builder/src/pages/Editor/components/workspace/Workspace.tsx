@@ -1,19 +1,19 @@
-import { useState } from "react";
-import { ReactSortable } from "react-sortablejs";
 import { IconDelete } from "@arco-design/web-react/icon";
+import { useEffect, useState } from "react";
+import { ReactSortable } from "react-sortablejs";
 
-import { usePageEditorStore } from '@/hooks/useStore';
 import { getComponentSchema } from "@/components/Materials/schema";
-import ComponentRender from "@/pages/Editor/components/render";
 import { ALL_COMPONENT_TYPES } from '@/constants/componentTypes';
+import { usePageEditorStore } from '@/hooks/useStore';
+import ComponentRender from "@/pages/Editor/components/render";
 import { COMPONENT_GROUP_NAME } from "../const";
 import { getComponentWidth } from "../utils";
 
-import PCIcon from "@/assets/images/pc_icon.svg";
 import EmptyIcon from "@/assets/images/empty.svg";
 import MobileIcon from "@/assets/images/mobile_icon.svg";
-import PCActiveIcon from "@/assets/images/pc_icon_active.svg";
 import MobileActiveIcon from "@/assets/images/mobile_icon_active.svg";
+import PCIcon from "@/assets/images/pc_icon.svg";
+import PCActiveIcon from "@/assets/images/pc_icon_active.svg";
 
 import "react-grid-layout/css/styles.css";
 import styles from "./index.module.less";
@@ -24,12 +24,10 @@ interface GridItem {
     displayName: string;
 }
 
-interface IProps {
-    showEmpty: boolean;
-}
 
-export default function EditorWorkspace(props: IProps) {
-    const { showEmpty } = props;
+export default function EditorWorkspace() {
+    const [showEmpty, setShowEmpty] = useState(true);
+
     const { curComponentID, setCurComponentID, clearCurComponentID, setCurComponentSchema,
         pageComponentSchemas, setPageComponentSchemas, delPageComponentSchemas,
         components, setComponents, delComponents,
@@ -37,8 +35,15 @@ export default function EditorWorkspace(props: IProps) {
     } = usePageEditorStore();
 
 
-
     const [pageMode, setPageMode] = useState<string>("pc");
+
+    useEffect(() => {
+        if (components.length === 0) {
+            setShowEmpty(true);
+        } else {
+            setShowEmpty(false);
+        }
+    }, [components])
 
     // 删除组件
     const handleDeleteComponent = (componentId: string) => {
@@ -167,6 +172,7 @@ export default function EditorWorkspace(props: IProps) {
                                     pageComponentSchemas.get(cp.id),
                                     cp.type
                                 ),
+                                borderColor: curComponentID === cp.id ? "#4FAE7B" : "transparent",
                             }}
                             onClick={(e: React.MouseEvent<HTMLDivElement>) => {
                                 e.stopPropagation();

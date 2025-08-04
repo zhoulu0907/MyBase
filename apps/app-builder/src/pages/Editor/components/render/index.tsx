@@ -1,7 +1,8 @@
 import FormComp from '@/components/Materials/Basic/FormComponents';
 import LayoutComp from '@/components/Materials/Basic/LayoutComponents';
 import ListComp from '@/components/Materials/Basic/ListComponents';
-import { FORM_COMPONENT_TYPES, LAYOUT_COMPONENT_TYPES, LIST_COMPONENT_TYPES } from '@/constants/componentTypes';
+import ShowComp from '@/components/Materials/Basic/ShowComponents';
+import { FORM_COMPONENT_TYPES, LAYOUT_COMPONENT_TYPES, LIST_COMPONENT_TYPES, SHOW_COMPONENT_TYPES } from '@/constants/componentTypes';
 import React from 'react';
 import { getComponentConfig } from '../utils';
 
@@ -70,12 +71,35 @@ const ComponentRender: React.FC<ComponentRenderProps> = ({
         return <FormComp.XImgUpload cpName={cpId} id={cpId} {...componentConfig} />;
       case FORM_COMPONENT_TYPES.AUTO_CODE:
         return <FormComp.XAutoCode cpName={cpId} id={cpId} {...componentConfig} />;
-      case LIST_COMPONENT_TYPES.TABLE:
-        return <ListComp.XTable cpName={cpId} id={cpId} {...componentConfig} />;
 
       //  布局组件
       case LAYOUT_COMPONENT_TYPES.COLUMN_LAYOUT:
         return <LayoutComp.XColumnLayout {...componentConfig} cpName={cpId} id={cpId} />;
+
+      //  列表组件
+      case LIST_COMPONENT_TYPES.TABLE:
+        return <ListComp.XTable cpName={cpId} id={cpId} {...componentConfig} />;
+      case LIST_COMPONENT_TYPES.CALENDAR:
+        return <ListComp.XCalendar cpName={cpId} id={cpId} {...componentConfig} />;
+      case LIST_COMPONENT_TYPES.TIMELINE:
+        return <ListComp.XTimeline cpName={cpId} id={cpId} {...componentConfig} />;
+      case LIST_COMPONENT_TYPES.CAROUSEL:
+        return <ListComp.XCarousel cpName={cpId} id={cpId} {...componentConfig} />;
+      case LIST_COMPONENT_TYPES.LIST:
+        return <ListComp.XList cpName={cpId} id={cpId} {...componentConfig} />;
+      case LIST_COMPONENT_TYPES.COLLAPSE:
+        return <ListComp.XCollapse cpName={cpId} id={cpId} {...componentConfig} />;
+
+      //  展示组件
+      case SHOW_COMPONENT_TYPES.INFO_NOTICE:
+        return <ShowComp.XInfoNotice cpName={cpId} id={cpId} {...componentConfig} />;
+      case SHOW_COMPONENT_TYPES.IMAGE:
+        return <ShowComp.XImage cpName={cpId} id={cpId} {...componentConfig} />;
+      case SHOW_COMPONENT_TYPES.TEXT:
+        return <ShowComp.XText cpName={cpId} id={cpId} {...componentConfig} />;
+      case SHOW_COMPONENT_TYPES.WEB_VIEW:
+        return <ShowComp.XWebView cpName={cpId} id={cpId} {...componentConfig} />;
+
       default:
         return <div>未知组件类型: {cpType}</div>;
     }

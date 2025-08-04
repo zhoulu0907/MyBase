@@ -1,5 +1,5 @@
 import { Button, Layout, Menu } from '@arco-design/web-react';
-import { IconDesktop, IconFile, IconMenuFold, IconMenuUnfold, IconSettings, IconUser } from '@arco-design/web-react/icon';
+import { IconDesktop, IconMenuFold, IconMenuUnfold,  IconUser } from '@arco-design/web-react/icon';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import type { MenuItemType } from './menuData';
@@ -35,71 +35,16 @@ const AppSider: React.FC<SiderProps> = ({
         path: '/onebase/platform-info',
     },
     {
-      key: 'user',
-      title: '用户管理',
-      icon: <IconUser />,
-      children: [
-        {
-          key: 'user-list',
-          title: '用户列表',
-          path: '/onebase/user/list',
-        },
-        {
-          key: 'user-profile',
-          title: '用户档案',
-          path: '/onebase/user/profile',
-        },
-        {
-          key: 'user-permissions',
-          title: '权限管理',
-          children: [
-            {
-              key: 'role-management',
-              title: '角色管理',
-              path: '/onebase/user/permissions/roles',
-            },
-            {
-              key: 'permission-settings',
-              title: '权限设置',
-              path: '/onebase/user/permissions/settings',
-            },
-          ],
-        },
-      ],
+        key: 'tenant',
+        title: '租户管理',
+        icon: <IconDesktop />,
+        path: '/onebase/tenant',
     },
     {
-      key: 'content',
-      title: '内容管理',
-      icon: <IconFile />,
-      children: [
-        {
-          key: 'article',
-          title: '文章管理',
-          path: '/onebase/content/article',
-        },
-        {
-          key: 'media',
-          title: '媒体管理',
-          path: '/onebase/content/media',
-        },
-      ],
-    },
-    {
-      key: 'system',
-      title: '系统设置',
-      icon: <IconSettings />,
-      children: [
-        {
-          key: 'general',
-          title: '常规设置',
-          path: '/onebase/system/general',
-        },
-        {
-          key: 'security',
-          title: '安全设置',
-          path: '/onebase/system/security',
-        },
-      ],
+        key: 'administrator',
+        title: '平台管理员',
+        icon: <IconUser />,
+        path: '/onebase/administrator',
     },
   ], []);
 

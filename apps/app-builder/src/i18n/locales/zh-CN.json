@@ -129,6 +129,7 @@
     "layout": "布局",
     "form": "表单组件",
     "list": "列表组件",
+    "show": "展示组件",
     "empty": "暂无组件",
     "attribute": "属性",
     "data": "数据",

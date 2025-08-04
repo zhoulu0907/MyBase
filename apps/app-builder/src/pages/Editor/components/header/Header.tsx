@@ -1,146 +1,158 @@
-import AppIcon from '@/assets/images/app_icon.svg';
-import activeFormDesignSVG from '@/assets/images/form_design_active_icon.svg';
-import defaultFormDesignSVG from '@/assets/images/form_design_default_icon.svg';
-import activeListDesignSVG from '@/assets/images/list_design_active_icon.svg';
-import defaultListDesignSVG from '@/assets/images/list_design_default_icon.svg';
-import activeSourceDataSVG from '@/assets/images/source_data_active_icon.svg';
-import defaultSourceDataSVG from '@/assets/images/source_data_default_icon.svg';
-import { Button, Tabs } from '@arco-design/web-react';
-import { IconArrowLeft } from '@arco-design/web-react/icon';
-import { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import styles from './index.module.less';
+import AppIcon from "@/assets/images/app_icon.svg";
+import activeFormDesignSVG from "@/assets/images/form_design_active_icon.svg";
+import defaultFormDesignSVG from "@/assets/images/form_design_default_icon.svg";
+import activeListDesignSVG from "@/assets/images/list_design_active_icon.svg";
+import defaultListDesignSVG from "@/assets/images/list_design_default_icon.svg";
+import activeSourceDataSVG from "@/assets/images/source_data_active_icon.svg";
+import defaultSourceDataSVG from "@/assets/images/source_data_default_icon.svg";
+import { usePageEditorStore } from "@/hooks/useStore";
+import { Button, Tabs } from "@arco-design/web-react";
+import { IconArrowLeft } from "@arco-design/web-react/icon";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { EDITOR_TYPES } from '../const';
+import styles from "./index.module.less";
+
+const tabData = [
+    {
+        key: EDITOR_TYPES.FORM_EDITOR,
+        title: "表单设计",
+        alt: "Form Design",
+        defaultIcon: defaultFormDesignSVG,
+        activeIcon: activeFormDesignSVG,
+    },
+    {
+        key: EDITOR_TYPES.LIST_EDITOR,
+        title: "列表设计",
+        alt: "List Design",
+        defaultIcon: defaultListDesignSVG,
+        activeIcon: activeListDesignSVG,
+    },
+    {
+        key: EDITOR_TYPES.PAGE_SETTING,
+        title: "页面设置",
+        alt: "",
+    },
+    {
+        key: EDITOR_TYPES.METADATA_MANAGE,
+        title: "元数据管理",
+        alt: "Source Data",
+        defaultIcon: defaultSourceDataSVG,
+        activeIcon: activeSourceDataSVG,
+    },
+];
 
 export default function EditorHeader() {
-	const navigate = useNavigate();
-	const location = useLocation();
-	const { t } = useTranslation();
+    const { clearCurComponentID } = usePageEditorStore();
 
-	const tabData = [
-		{
-			key: 'form-design',
-			title: t('formEditor.formDesign'),
-			alt: 'Form Design',
-			defaultIcon: defaultFormDesignSVG,
-			activeIcon: activeFormDesignSVG,
-		},
-		{
-			key: 'list-design',
-			title: t('formEditor.listDesign'),
-			alt: 'List Design',
-			defaultIcon: defaultListDesignSVG,
-			activeIcon: activeListDesignSVG,
-		},
-		{
-			key: 'page-setting',
-			title: t('formEditor.pageSetting'),
-			alt: '',
-		},
-		{
-			key: 'metadata-manage',
-			title: t('formEditor.metadataManage'),
-			alt: 'Source Data',
-			defaultIcon: defaultSourceDataSVG,
-			activeIcon: activeSourceDataSVG,
-		},
-	];
+    const navigate = useNavigate();
+    const [activeTab, setActiveTab] = useState("");
 
-	// Tab 切换
-	// 根据当前路径设置 activeTab
-	const getTabKeyFromPath = (pathname: string) => {
-		if (pathname.includes('onebase/editor/form_editor')) return 'form-design';
-		if (pathname.includes('onebase/editor/list_editor')) return 'list-design';
-		if (pathname.includes('onebase/editor/page-setting')) return 'page-setting';
-		if (pathname.includes('onebase/editor/metadata-manage'))
-			return 'metadata-manage';
-		return 'form_editor';
-	};
-	const [activeTab, setActiveTab] = useState(
-		getTabKeyFromPath(location.pathname)
-	);
+    useEffect(() => {
+        // 根据当前 URL 动态设置 activeTab
+        const hash = window.location.hash;
+        if (hash.endsWith(EDITOR_TYPES.FORM_EDITOR)) {
+            setActiveTab(EDITOR_TYPES.FORM_EDITOR);
+        } else if (hash.endsWith(EDITOR_TYPES.LIST_EDITOR)) {
+            setActiveTab(EDITOR_TYPES.LIST_EDITOR);
+        } else if (hash.endsWith(EDITOR_TYPES.PAGE_SETTING)) {
+            setActiveTab(EDITOR_TYPES.PAGE_SETTING);
+        } else if (hash.endsWith(EDITOR_TYPES.METADATA_MANAGE)) {
+            setActiveTab(EDITOR_TYPES.METADATA_MANAGE);
+        }
+    }, []);
 
-	useEffect(() => {
-		setActiveTab(getTabKeyFromPath(location.pathname));
-	}, [location.pathname]);
+    const handleSaveApp = () => {
+        console.log("save app");
+    }
 
-	return (
-		<div className={styles.editorHeader}>
-			{/* 左侧 */}
-			<div className={styles.left}>
-				<Button shape='circle' type='default' icon={<IconArrowLeft />} />
+    return (
+        <div className={styles.editorHeader}>
+            {/* 左侧 */}
+            <div className={styles.left}>
+                <Button
+                    shape="circle"
+                    type="default"
+                    size="small"
+                    onClick={() => {
+                        navigate("/onebase/create-app");
+                    }}
+                    icon={<IconArrowLeft />}
+                />
 
 				<img src={AppIcon} style={{ width: 28, height: 28 }} />
 
-				<span>{t('formEditor.newApplication')}</span>
+				<span>新应用</span>
 				<span>&gt;</span>
 				<span>页面一</span>
 			</div>
 
-			{/* 中间 */}
-			<div className={styles.center}>
-				<Tabs
-					type='line'
-					activeTab={activeTab}
-					onChange={(key) => {
-						setActiveTab(key);
-						switch (key) {
-							case 'form-design':
-								navigate('/onebase/editor/form_editor');
-								break;
-							case 'list-design':
-								navigate('/onebase/editor/list_editor');
-								break;
-							case 'page-setting':
-								navigate('/onebase/editor/page-setting');
-								break;
-							case 'metadata-manage':
-								navigate('/onebase/editor/metadata-manage');
-								break;
-							default:
-								break;
-						}
-					}}
-					size='large'
-					inkBarSize={{ width: 106, height: 3 }}
-				>
-					{tabData.map((tab) => (
-						<Tabs.TabPane
-							key={tab.key}
-							title={
-								<div className={styles.tabIcon}>
-									<img
-										src={
-											tab.key === activeTab ? tab.activeIcon : tab.defaultIcon
-										}
-										alt={tab.alt}
-									/>
-									{tab.title}
-								</div>
-							}
-						/>
-					))}
-				</Tabs>
-			</div>
+            {/* 中间 */}
+            <div className={styles.center}>
+                <Tabs
+                    type="line"
+                    activeTab={activeTab}
+                    onChange={(key) => {
+                        setActiveTab(key);
+                        clearCurComponentID();
+                        switch (key) {
+                            case EDITOR_TYPES.FORM_EDITOR:
+                                navigate(`/onebase/editor/${EDITOR_TYPES.FORM_EDITOR}`);
+                                break;
+                            case EDITOR_TYPES.LIST_EDITOR:
+                                navigate(`/onebase/editor/${EDITOR_TYPES.LIST_EDITOR}`);
+                                break;
+                            case EDITOR_TYPES.PAGE_SETTING:
+                                navigate(`/onebase/editor/${EDITOR_TYPES.PAGE_SETTING}`);
+                                break;
+                            case EDITOR_TYPES.METADATA_MANAGE:
+                                navigate(`/onebase/editor/${EDITOR_TYPES.METADATA_MANAGE}`);
+                                break;
+                            default:
+                                break;
+                        }
+                    }}
+                    size="large"
+                >
+                    {tabData.map((tab) => (
+                        <Tabs.TabPane
+                            key={tab.key}
+                            title={
+                                <div className={styles.tabIcon}>
+                                    <img
+                                        src={
+                                            tab.key === activeTab
+                                                ? tab.activeIcon
+                                                : tab.defaultIcon
+                                        }
+                                        alt={tab.alt}
+                                    />
+                                    {tab.title}
+                                </div>
+                            }
+                        />
+                    ))}
+                </Tabs>
+            </div>
 
-			<div className={styles.right}>
-				<div className={styles.editorStatus}>{t('formEditor.saved')}</div>
-				<Button
-					onClick={() => {
-						/* 预览逻辑 */
-					}}
-				>
-					{t('createApp.preview')}
-				</Button>
-				<Button
-					type='primary'
-					onClick={() => {
-						/* 保存逻辑 */
-					}}
-				>
-					{t('common.save')}
-				</Button>
-			</div>
-		</div>
-	);
+            <div className={styles.right}>
+                <div className={styles.editorStatus}>已保存，未发布</div>
+                <Button
+                    onClick={() => {
+                        /* 预览逻辑 */
+                    }}
+                >
+                    预览
+                </Button>
+                <Button
+                    type="primary"
+                    onClick={() => {
+                        handleSaveApp();
+                    }}
+                >
+                    保存
+                </Button>
+            </div>
+        </div>
+    );
 }

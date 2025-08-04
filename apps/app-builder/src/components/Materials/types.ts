@@ -46,11 +46,23 @@ export interface ISelectConfigType<KeyType> {
     key: string;
     name: string;
     type: typeof CONFIG_TYPES.SELECT_INPUT;
-    range: Array<{
+    range?: Array<{
       key: string;
       text: string;
       value: KeyType;
     }>;
+}
+
+export interface IDynamicSelectConfigType {
+    key: string;
+    name: string;
+    type: typeof CONFIG_TYPES.DYNAMIC_SELECT_INPUT;
+}
+
+export interface ISearchItemListConfigType {
+    key: string;
+    name: string;
+    type: typeof CONFIG_TYPES.SEARCH_ITEM_LIST;
 }
 
 export interface IBooleanConfigType  {
@@ -58,6 +70,8 @@ export interface IBooleanConfigType  {
     name: string;
     type: typeof CONFIG_TYPES.SWITCH_INPUT;
 }
+
+
 
 
 /**

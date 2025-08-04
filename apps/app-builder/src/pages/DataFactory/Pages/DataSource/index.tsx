@@ -3,20 +3,13 @@ import DataSourceTable from './DataSourceTable';
 import CreateDsPage from './CreateDsPage';
 import EmptyDsPage from './EmptyDsPage';
 import EditDsDrawer from './EditDsDrawer';
+import { getDatasource } from '@/services';
+import type { DatasourceSaveReqVO } from '@/types/datafactoryApi';
 
-const DataSource: React.FC = () => {
+const DataSourcePage: React.FC = () => {
   const [pageType, setPageType] = useState('check-ds');
   const [editDrawerVisible, setEditDrawerVisible] = useState(false);
-  const [currentDataSource, setCurrentDataSource] = useState<{
-    id: number;
-    datasourceName: string;
-    code: string;
-    datasourceType: string;
-    config: Record<string, unknown>;
-    description: string;
-    runMode: number;
-    appId: number;
-  } | null>(null);
+  const [currentDataSource, setCurrentDataSource] = useState<DatasourceSaveReqVO | null>(null);
 
   const handlePageType = (tab: string) => {
     setPageType(tab);
@@ -24,31 +17,12 @@ const DataSource: React.FC = () => {
 
   const handleEdit = async (id: number) => {
     try {
-      // TODO: 调用获取数据源详情接口
-      // const res = await getDatasource(id);
-      // if (res.code === 0) {
-      //   setCurrentDataSource(res.data);
-      //   setEditDrawerVisible(true);
-      // }
-      
-      // 临时模拟数据
-      setCurrentDataSource({
-        id,
-        datasourceName: '测试数据源',
-        code: 'test_ds',
-        datasourceType: 'MySQL',
-        config: {
-          host: 'localhost',
-          port: 3306,
-          database: 'test',
-          username: 'root',
-          password: 'password',
-        },
-        description: '测试用的数据源',
-        runMode: 0,
-        appId: 1,
-      });
-      setEditDrawerVisible(true);
+      const res = await getDatasource(id);
+      console.log('handleEdit res', res);
+      if (res) {
+        setCurrentDataSource(res);
+        setEditDrawerVisible(true);
+      }
     } catch (error) {
       console.error('获取数据源详情失败:', error);
     }
@@ -56,7 +30,8 @@ const DataSource: React.FC = () => {
 
   const handleEditSuccess = () => {
     // 编辑成功后刷新数据
-    setPageType('check-ds');
+    setPageType('check-ds'); 
+    // getTableData();
   };
 
   const renderContent = () => {
@@ -76,11 +51,11 @@ const DataSource: React.FC = () => {
       <EditDsDrawer
         visible={editDrawerVisible}
         onClose={() => setEditDrawerVisible(false)}
-        dataSource={currentDataSource}
+        dataSource={currentDataSource || undefined}
         onSuccess={handleEditSuccess}
       />
     </div>
   );
 };
 
-export default DataSource;
+export default DataSourcePage;

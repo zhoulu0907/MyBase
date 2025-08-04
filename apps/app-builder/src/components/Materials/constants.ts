@@ -4,8 +4,11 @@ export const CONFIG_TYPES = {
   TEXT_INPUT: 'TextInput',
   TEXT_AREA_INPUT: 'TextAreaInput',
   SELECT_INPUT: 'SelectInput',
+  DYNAMIC_SELECT_INPUT: 'DynamicSelectInput',
   NUMBER_INPUT: 'NumberInput',
   SWITCH_INPUT: 'SwitchInput',
+
+  SEARCH_ITEM_LIST: 'SearchItemList',
 
   // 组件标题输入
   LABEL_INPUT: 'LabelInput',

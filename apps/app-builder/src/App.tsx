@@ -1,6 +1,6 @@
 import "@arco-design/web-react/dist/css/arco.css";
 import "@arco-themes/react-onebase/index.less";
-import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
+import { Navigate, Route, HashRouter as Router, Routes } from 'react-router-dom';
 import { EditorPage } from "./pages/Editor";
 import Home from './pages/Home';
 import Login from './pages/Login';
