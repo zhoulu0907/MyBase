@@ -111,8 +111,9 @@ public class DataRepository {
             // 更新
             ConfigStore configs = new DefaultConfigStore();
             configs.and(Compare.EQUAL, "id", entity.getId());
-            ConfigTable.IS_AUTO_CHECK_METADATA = true;
             Long result = anylineService.update(entity, configs);
+            log.info("[{}] update  ---> effect rows = {}", entity.getClass().getSimpleName(), result);
+
             if (result == 0) {
                 throw new BizException(StatusCode.DB_UPDATE_ERROR);
             }
@@ -123,6 +124,30 @@ public class DataRepository {
         }
     }
 
+
+    /**
+     * 更新
+     * @param <T>
+     *
+     * @param entity 要保存的实体
+     * @param <T>    实体类型
+     * @return 保存后的实体
+     */
+    public <T> long updateByConfig(Class<T> clazz, ConfigStore configs) {
+        if (clazz== null) {
+            throw new BizException(StatusCode.DB_UPDATE_ERROR);
+        }
+        try {
+            // 更新
+            long result = anylineService.update(clazz, configs);
+            log.info("[{}] updateByConfig  ---> effect rows = {}", clazz.getSimpleName(), result);
+            return result;
+        } catch (Exception e) {
+            log.error("保存实体失败: {}", clazz.getSimpleName(), e);
+            throw new BizException(StatusCode.DB_UPDATE_ERROR);
+        }
+    }
+    
     /**
      * 根据ID查找实体
      *

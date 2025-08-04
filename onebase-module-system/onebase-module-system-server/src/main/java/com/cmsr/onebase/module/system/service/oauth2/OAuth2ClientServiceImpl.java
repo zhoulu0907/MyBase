@@ -1,22 +1,16 @@
 package com.cmsr.onebase.module.system.service.oauth2;
 
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.core.util.StrUtil;
-import cn.hutool.extra.spring.SpringUtil;
-import com.cmsr.onebase.framework.aynline.DataRepository;
-import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
-import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.framework.common.util.string.StrUtils;
-import com.cmsr.onebase.module.system.controller.admin.oauth2.vo.client.OAuth2ClientPageReqVO;
-import com.cmsr.onebase.module.system.controller.admin.oauth2.vo.client.OAuth2ClientSaveReqVO;
-import com.cmsr.onebase.module.system.dal.dataobject.notify.NotifyMessageDO;
-import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2ClientDO;
-import com.cmsr.onebase.module.system.dal.mysql.oauth2.OAuth2ClientMapper;
-import com.cmsr.onebase.module.system.dal.redis.RedisKeyConstants;
-import com.google.common.annotations.VisibleForTesting;
-import lombok.extern.slf4j.Slf4j;
+import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.OAUTH2_CLIENT_AUTHORIZED_GRANT_TYPE_NOT_EXISTS;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.OAUTH2_CLIENT_CLIENT_SECRET_ERROR;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.OAUTH2_CLIENT_DISABLE;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.OAUTH2_CLIENT_EXISTS;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.OAUTH2_CLIENT_NOT_EXISTS;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.OAUTH2_CLIENT_REDIRECT_URI_NOT_MATCH;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.OAUTH2_CLIENT_SCOPE_OVER;
+
+import java.util.Collection;
+
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Compare;
@@ -26,11 +20,23 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
-import jakarta.annotation.Resource;
-import java.util.Collection;
+import com.cmsr.onebase.framework.aynline.DataRepository;
+import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
+import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.framework.common.util.string.StrUtils;
+import com.cmsr.onebase.module.system.controller.admin.oauth2.vo.client.OAuth2ClientPageReqVO;
+import com.cmsr.onebase.module.system.controller.admin.oauth2.vo.client.OAuth2ClientSaveReqVO;
+import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2ClientDO;
+import com.cmsr.onebase.module.system.dal.redis.RedisKeyConstants;
+import com.google.common.annotations.VisibleForTesting;
 
-import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.extra.spring.SpringUtil;
+import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * OAuth2.0 Client Service 实现类
@@ -40,10 +46,6 @@ import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
 @Validated
 @Slf4j
 public class OAuth2ClientServiceImpl implements OAuth2ClientService {
-
-    @Resource
-    private OAuth2ClientMapper oauth2ClientMapper;
-
     @Resource
     private DataRepository dataRepository;
 

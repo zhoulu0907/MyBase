@@ -1,29 +1,16 @@
 package com.cmsr.onebase.module.system.service.permission;
 
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.util.ArrayUtil;
-import cn.hutool.extra.spring.SpringUtil;
-import com.cmsr.onebase.framework.aynline.DataRepository;
-import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
-import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
-import com.cmsr.onebase.framework.datapermission.core.annotation.DataPermission;
-import com.cmsr.onebase.framework.common.biz.system.permission.dto.DeptDataPermissionRespDTO;
-import com.cmsr.onebase.module.system.dal.dataobject.permission.MenuDO;
-import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
-import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleMenuDO;
-import com.cmsr.onebase.module.system.dal.dataobject.permission.UserRoleDO;
-import com.cmsr.onebase.module.system.dal.mysql.permission.RoleMenuMapper;
-import com.cmsr.onebase.module.system.dal.mysql.permission.UserRoleMapper;
-import com.cmsr.onebase.module.system.dal.redis.RedisKeyConstants;
-import com.cmsr.onebase.module.system.enums.permission.DataScopeEnum;
-import com.cmsr.onebase.module.system.service.dept.DeptService;
-import com.cmsr.onebase.module.system.service.user.AdminUserService;
-import com.baomidou.dynamic.datasource.annotation.DSTransactional;
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Suppliers;
-import com.google.common.collect.Sets;
-import lombok.extern.slf4j.Slf4j;
+import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.convertSet;
+import static com.cmsr.onebase.framework.common.util.json.JsonUtils.toJsonString;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.function.Supplier;
+
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Compare;
 import org.springframework.cache.annotation.CacheEvict;
@@ -32,13 +19,30 @@ import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.baomidou.dynamic.datasource.annotation.DSTransactional;
+import com.cmsr.onebase.framework.aynline.DataRepository;
+import com.cmsr.onebase.framework.common.biz.system.permission.dto.DeptDataPermissionRespDTO;
+import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
+import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
+import com.cmsr.onebase.framework.datapermission.core.annotation.DataPermission;
+import com.cmsr.onebase.module.system.dal.dataobject.permission.MenuDO;
+import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
+import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleMenuDO;
+import com.cmsr.onebase.module.system.dal.dataobject.permission.UserRoleDO;
+import com.cmsr.onebase.module.system.dal.redis.RedisKeyConstants;
+import com.cmsr.onebase.module.system.enums.permission.DataScopeEnum;
+import com.cmsr.onebase.module.system.service.dept.DeptService;
+import com.cmsr.onebase.module.system.service.user.AdminUserService;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Suppliers;
+import com.google.common.collect.Sets;
+
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.util.ArrayUtil;
+import cn.hutool.extra.spring.SpringUtil;
 import jakarta.annotation.Resource;
-
-import java.util.*;
-import java.util.function.Supplier;
-
-import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.convertSet;
-import static com.cmsr.onebase.framework.common.util.json.JsonUtils.toJsonString;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 权限 Service 实现类
@@ -46,11 +50,6 @@ import static com.cmsr.onebase.framework.common.util.json.JsonUtils.toJsonString
 @Service
 @Slf4j
 public class PermissionServiceImpl implements PermissionService {
-
-    @Resource
-    private RoleMenuMapper roleMenuMapper;
-    @Resource
-    private UserRoleMapper userRoleMapper;
 
     @Resource
     private RoleService roleService;
@@ -161,16 +160,9 @@ public class PermissionServiceImpl implements PermissionService {
                 entities.add(new RoleMenuDO().setMenuId(mId).setRoleId(roleId));
             }
             dataRepository.insertBatch(entities);
-            //roleMenuMapper.insertBatch(entities);
-//            roleMenuMapper.insertBatch(CollectionUtils.convertList(createMenuIds, menuId -> {
-//                RoleMenuDO entity = new RoleMenuDO();
-//                entity.setRoleId(roleId);
-//                entity.setMenuId(menuId);
-//                return entity;
-//            }));
         }
         if (CollUtil.isNotEmpty(deleteMenuIds)) {
-            roleMenuMapper.deleteListByRoleIdAndMenuIds(roleId, deleteMenuIds);
+            dataRepository.deleteByConfig(RoleMenuDO.class, new DefaultConfigStore().eq(RoleMenuDO.ROLE_ID, roleId).in(RoleMenuDO.MENU_ID, deleteMenuIds));
         }
     }
 

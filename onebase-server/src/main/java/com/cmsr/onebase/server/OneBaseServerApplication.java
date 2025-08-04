@@ -11,22 +11,16 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SuppressWarnings("SpringComponentScan") // 忽略 IDEA 无法识别 ${yudao.info.base-package}
 @SpringBootApplication(scanBasePackages = {"${yudao.info.base-package}.server", "${yudao.info.base-package}.module"},
         excludeName = {
-            // RPC 相关
-//            "org.springframework.cloud.openfeign.FeignAutoConfiguration",
-//            "com.cmsr.onebase.module.system.framework.rpc.config.RpcConfiguration"
+        // RPC 相关
+        //    "org.springframework.cloud.openfeign.FeignAutoConfiguration",
+        //    "com.cmsr.onebase.module.system.framework.rpc.config.RpcConfiguration"
         })
 public class OneBaseServerApplication {
 
     public static void main(String[] args) {
 
 
-        SpringApplication.run(OneBaseServerApplication.class, args);
-//        new SpringApplicationBuilder(OneBaseServerApplication.class)
-//                .applicationStartup(new BufferingApplicationStartup(20480))
-//                .run(args);
-
-        
-        
+        SpringApplication.run(OneBaseServerApplication.class, args);     
         
     }
 

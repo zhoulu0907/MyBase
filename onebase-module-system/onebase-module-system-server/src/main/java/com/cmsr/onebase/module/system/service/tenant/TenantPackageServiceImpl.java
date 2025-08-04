@@ -1,7 +1,20 @@
 package com.cmsr.onebase.module.system.service.tenant;
 
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.util.StrUtil;
+import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.TENANT_PACKAGE_DISABLE;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.TENANT_PACKAGE_NAME_DUPLICATE;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.TENANT_PACKAGE_NOT_EXISTS;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.TENANT_PACKAGE_USED;
+
+import java.util.List;
+
+import org.anyline.data.param.init.DefaultConfigStore;
+import org.anyline.entity.Order;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
+
+import com.baomidou.dynamic.datasource.annotation.DSTransactional;
 import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
@@ -10,21 +23,11 @@ import com.cmsr.onebase.module.system.controller.admin.tenant.vo.packages.Tenant
 import com.cmsr.onebase.module.system.controller.admin.tenant.vo.packages.TenantPackageSaveReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
 import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantPackageDO;
-import com.cmsr.onebase.module.system.dal.mysql.tenant.TenantPackageMapper;
-import com.baomidou.dynamic.datasource.annotation.DSTransactional;
 import com.google.common.annotations.VisibleForTesting;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.Order;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.stereotype.Service;
-import org.springframework.validation.annotation.Validated;
 
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.StrUtil;
 import jakarta.annotation.Resource;
-import java.util.List;
-
-import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
-import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.TENANT_PACKAGE_NAME_DUPLICATE;
 
 /**
  * 租户套餐 Service 实现类
@@ -33,9 +36,6 @@ import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.TENANT_PAC
 @Service
 @Validated
 public class TenantPackageServiceImpl implements TenantPackageService {
-
-    @Resource
-    private TenantPackageMapper tenantPackageMapper;
 
     @Resource
     @Lazy // 避免循环依赖的报错

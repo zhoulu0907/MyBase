@@ -1,9 +1,31 @@
 package com.cmsr.onebase.module.system.service.tenant;
 
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.lang.Assert;
-import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.core.util.StrUtil;
+import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.LENANT_ALLOCATE_PERSON_COUNT_LESS_THEN_ALLOCATED;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.LICENSE_USER_COUNT_NOT_ENOUGH;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.TENANT_CAN_NOT_UPDATE_SYSTEM;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.TENANT_DISABLE;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.TENANT_EXPIRE;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.TENANT_NAME_DUPLICATE;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.TENANT_NOT_EXISTS;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.TENANT_WEBSITE_DUPLICATE;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.USER_USERNAME_EXISTS;
+import static java.util.Collections.singleton;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+
+import org.anyline.data.param.init.DefaultConfigStore;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
+
+import com.baomidou.dynamic.datasource.annotation.DSTransactional;
 import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
@@ -24,7 +46,6 @@ import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
 import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantPackageDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
-import com.cmsr.onebase.module.system.dal.mysql.tenant.TenantMapper;
 import com.cmsr.onebase.module.system.enums.permission.RoleCodeEnum;
 import com.cmsr.onebase.module.system.enums.permission.RoleTypeEnum;
 import com.cmsr.onebase.module.system.service.license.LicenseService;
@@ -34,26 +55,13 @@ import com.cmsr.onebase.module.system.service.permission.RoleService;
 import com.cmsr.onebase.module.system.service.tenant.handler.TenantInfoHandler;
 import com.cmsr.onebase.module.system.service.tenant.handler.TenantMenuHandler;
 import com.cmsr.onebase.module.system.service.user.AdminUserService;
-import com.baomidou.dynamic.datasource.annotation.DSTransactional;
-import lombok.extern.slf4j.Slf4j;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.stereotype.Service;
-import org.springframework.validation.annotation.Validated;
 
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.lang.Assert;
+import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
 import jakarta.annotation.Resource;
-
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-
-import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
-import static java.util.Collections.singleton;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 租户 Service 实现类
@@ -66,9 +74,6 @@ public class TenantServiceImpl implements TenantService {
     @SuppressWarnings("SpringJavaAutowiredFieldsWarningInspection")
     @Autowired(required = false) // 由于 yudao.tenant.enable 配置项，可以关闭多租户的功能，所以这里只能不强制注入
     private TenantProperties tenantProperties;
-
-    @Resource
-    private TenantMapper tenantMapper;
 
     @Resource
     private TenantPackageService tenantPackageService;
