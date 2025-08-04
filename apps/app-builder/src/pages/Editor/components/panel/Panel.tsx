@@ -92,7 +92,11 @@ export default function EditorPanel() {
             type="dashed"
             onClick={() => setShowDrawer(!showDrawer)}
         />
-        <div className={styles.left}>
+        <div className={styles.left}
+            style={{
+                width: showDrawer ? "48px" : "0px",
+            }}
+        >
           <Tabs
               type="text"
               activeTab={activeLeftTabKey}
