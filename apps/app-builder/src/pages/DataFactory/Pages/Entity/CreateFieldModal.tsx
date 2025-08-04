@@ -39,13 +39,13 @@ const dataTypes = [
   { label: '聚合统计', value: 'AGGREGATE' },
 ];
 
-const CreateFieldModal: React.FC<{ visible: boolean, setVisible: (visible: boolean) => void, setRefreshEntityList: (refresh: boolean) => void, entityId: string, successCallback: () => void }> = ({ visible, setVisible, entityId, successCallback }) => {
+const CreateFieldModal: React.FC<{ visible: boolean, setVisible: (visible: boolean) => void, entityId: string, successCallback: () => void }> = ({ visible, setVisible, entityId, successCallback }) => {
   const [form] = Form.useForm<EntityFormValues>();
   // 提交
   const handleFinish = () => {
     // TODO: 提交表单数据
     form.validate().then(values => {
-      const { nodes } = JSON.parse(localStorage.getItem('entityFormValues') || JSON.stringify({ nodes: [] }));
+      const { nodes, edges } = JSON.parse(localStorage.getItem('entityFormValues') || JSON.stringify({ nodes: [], edges: [] }));
       const entity = nodes.find((node: EntityNode) => node.id === entityId);
       if (entity) {
         if (entity.fields.find((field: EntityField) => field.id === values.code)) {
@@ -61,8 +61,9 @@ const CreateFieldModal: React.FC<{ visible: boolean, setVisible: (visible: boole
         });
       }
 
-      localStorage.setItem('entityFormValues', JSON.stringify({ nodes }));
+      localStorage.setItem('entityFormValues', JSON.stringify({ nodes, edges }));
       // console.log(values);
+      form.resetFields();
       Message.success('保存成功');
       setVisible(false);
       successCallback();

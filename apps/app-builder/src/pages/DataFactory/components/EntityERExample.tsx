@@ -165,14 +165,14 @@ export const EntityERWithModeSwitch: React.FC<{ refreshEntityList: boolean, setR
   };
 
   useEffect(() => {
-    if (refreshEntityList) {
+    // if (refreshEntityList) {
       const { nodes, edges } = JSON.parse(localStorage.getItem('entityFormValues') || JSON.stringify({nodes: [], edges: []}));
       setData({
         nodes: nodes,
         edges: edges,
       });
       // setRefreshEntityList(false);
-    }
+    // }
   }, [refreshEntityList]);
 
   return (
@@ -213,7 +213,6 @@ export const EntityERWithModeSwitch: React.FC<{ refreshEntityList: boolean, setR
       <CreateFieldModal
         visible={createFieldModalVisible}
         setVisible={setCreateFieldModalVisible}
-        setRefreshEntityList={setRefreshEntityList}
         entityId={nodeId}
         successCallback={handleSuccessCallback}
       />

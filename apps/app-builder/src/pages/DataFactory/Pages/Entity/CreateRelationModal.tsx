@@ -43,7 +43,7 @@ const CreateRelationModal: React.FC<{
   // 初始化实体选项
   useEffect(() => {
     // 从localStorage获取实体数据
-    const { nodes } = JSON.parse(localStorage.getItem('entityFormValues') || JSON.stringify({ nodes: [] }));
+    const { nodes } = JSON.parse(localStorage.getItem('entityFormValues') || JSON.stringify({ nodes: [], edges: [] }));
     const entityOptions = nodes?.length ? nodes.map((node: EntityNode) => ({
       label: node.title, // 使用title作为label
       value: node.id,
@@ -99,6 +99,7 @@ const CreateRelationModal: React.FC<{
       };
       newEdges.push(edge);
       localStorage.setItem('entityFormValues', JSON.stringify({ nodes, edges: newEdges }));
+      form.resetFields();
       Message.success('关联关系创建成功');
       setVisible(false);
       successCallback();

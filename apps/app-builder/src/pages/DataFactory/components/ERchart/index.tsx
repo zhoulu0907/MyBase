@@ -30,15 +30,6 @@ const ERchart: React.FC<EntityERProps> = ({
   const graphRef = useRef<Graph | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // 处理节点编辑
-  // const handleNodeEdit = (nodeId: string) => {
-  //   const nodeData = data.nodes.find(n => n.id === nodeId);
-  //   if (nodeData) {
-  //     setEditingNode(nodeData);
-  //     seteditDrawerVisible(true);
-  //   }
-  // };
-
 
   useEffect(() => {
 
@@ -60,7 +51,7 @@ const ERchart: React.FC<EntityERProps> = ({
         console.log(e)
       }
     };
-  }, [mode]); // 添加 mode 到依赖项
+  }, []); // 添加 mode 到依赖项
 
   // 初始化图形
   useEffect(() => {
@@ -128,6 +119,8 @@ const ERchart: React.FC<EntityERProps> = ({
       console.error('Failed to create graph:', error);
       return;
     }
+
+    graphRef.current?.centerContent(); // 居中
 
     // 添加节点
     if (data.nodes) {
@@ -319,6 +312,9 @@ const ERchart: React.FC<EntityERProps> = ({
       });
     }
 
+    graphRef.current?.centerContent(); // 居中
+    graphRef.current?.zoomToFit({ maxScale: 1 }); // 适应画布
+
     // 事件监听
     graphRef.current.on('node:click', ({ node }) => {
       const nodeData = node.getData() as EntityNode;
@@ -350,16 +346,14 @@ const ERchart: React.FC<EntityERProps> = ({
 
     graphRef.current.on('node:moved', ({ e, x, y, node, view }) => {
       console.log('node:moved', e, x, y, node, view);
-      const { nodes } = JSON.parse(localStorage.getItem('entityFormValues') || JSON.stringify({ nodes: [] }));
+      const { nodes, edges } = JSON.parse(localStorage.getItem('entityFormValues') || JSON.stringify({ nodes: [], edges: [] }));
       const nodeData = nodes.find((n: EntityNode) => n.id === node.id);
       if (nodeData) {
         nodeData.x = x;
         nodeData.y = y;
       }
-      localStorage.setItem('entityFormValues', JSON.stringify({ nodes }));
+      localStorage.setItem('entityFormValues', JSON.stringify({ nodes, edges }));
     });
-
-    graphRef.current?.centerContent(); // 居中
 
     return () => {
       if (graphRef.current) {
@@ -367,37 +361,14 @@ const ERchart: React.FC<EntityERProps> = ({
         graphRef.current = null;
       }
     };
-  }, [data, mode]);
+  }, [data]);
 
   return (
-    <div className={styles['entity-er-container']}>
-      {/* <div className={styles['toolbar']}>
-        <Button onClick={() => graphRef.current?.zoomToFit()}>适应画布</Button>
-        <Button onClick={() => graphRef.current?.centerContent()}>居中</Button>
-        {mode === 'edit' && (
-          <>
-            <Button onClick={onNodeAdd}>添加节点</Button>
-            <Button onClick={() => {
-              // TODO: 实现连线模式功能
-              console.log('连线模式功能待实现');
-            }}>连线模式</Button>
-          </>
-        )}
-      </div> */}
-      
+    <div className={styles['entity-er-container']}>      
       <div ref={containerRef} className={styles['graph-container']} />
 
       {/* 节点详情抽屉 */}
       <DetailDrawer selectedNode={selectedNode as EntityNode} visible={drawerVisible} setVisible={setDrawerVisible} />
-
-      {/* 编辑节点抽屉 */}
-      {/* <EditDrawer
-        editingNode={editingNode as EntityNode}
-        visible={editDrawerVisible}
-        setVisible={seteditDrawerVisible}
-        setEditingNode={(node: EntityNode | null) => setEditingNode(node)}
-        onNodeEdit={onNodeEdit as (data: EntityNode) => void}
-      /> */}
     </div>
   );
 };

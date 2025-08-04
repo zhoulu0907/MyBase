@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Button, Form, Input, Switch } from '@arco-design/web-react';
 import { type EntityField, type EntityNode } from '../../utils/interface';
 import styles from './EditForm.module.less';
@@ -30,7 +30,7 @@ interface FormValues {
   };
 }
 
-const NodeEditForm: React.FC<NodeEditFormProps> = ({ node, onCancel, onSave, successCallback }) => {
+const NodeEditForm: React.FC<NodeEditFormProps> = ({ node, onCancel, onSave }) => {
   const [form] = Form.useForm<FormValues>();
   
   // 初始化表单数据
@@ -63,6 +63,18 @@ const NodeEditForm: React.FC<NodeEditFormProps> = ({ node, onCancel, onSave, suc
       [item.field]: value,
     } as FormValues['systemFields']);
   };
+
+  useEffect(() => {
+    form.setFieldValue('code', node.code);
+    form.setFieldValue('name', node.title);
+    form.setFieldValue('description', node.description);
+    form.setFieldValue('systemFields', {
+      creator: node.fields.find((field: EntityField) => field.id === 'creator') ? true : false,
+      updater: node.fields.find((field: EntityField) => field.id === 'updater') ? true : false,
+      createTime: node.fields.find((field: EntityField) => field.id === 'createTime') ? true : false,
+      updateTime: node.fields.find((field: EntityField) => field.id === 'updateTime') ? true : false,
+    } as FormValues['systemFields']);
+  }, [node]);
 
   return (
     <div className={styles['node-edit-form']}>
@@ -133,8 +145,8 @@ const NodeEditForm: React.FC<NodeEditFormProps> = ({ node, onCancel, onSave, suc
           ))}
         </div>
 
-        <Form.Item>
-          <Button onClick={onCancel}>取消</Button>
+        <Form.Item className={styles['form-actions']}>
+          <Button onClick={onCancel} style={{ marginRight: 16 }}>取消</Button>
           <Button type="primary" onClick={() => onSave(form.getFieldsValue())}>保存</Button>
         </Form.Item>
       </Form>
