@@ -1,3 +1,4 @@
+import { Message } from '@arco-design/web-react';
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { BaseResponse, RequestConfig, RequestInterceptor, ResponseInterceptor } from '../types';
 import TokenManager from './token';
@@ -11,7 +12,7 @@ import TokenManager from './token';
 export function getConcatnatedBaseUrl(domain: string, path: string = ''): string {
   const trimedDomain = domain.endsWith('/') ? domain.slice(0, -1) : domain;
   const trimedPath = path.startsWith('/') ? path.slice(1) : path;
-  
+
   if (!trimedPath) {
     return trimedDomain;
   }
@@ -57,8 +58,8 @@ export class HttpClient {
 
         // 自动添加 token 到请求头
         const tokenInfo = TokenManager.getTokenInfo();
-        if (tokenInfo?.tokenName && tokenInfo?.tokenValue) {
-          config.headers[tokenInfo.tokenName] = tokenInfo.tokenValue;
+        if (tokenInfo?.accessToken) {
+          config.headers['accessToken'] = tokenInfo.accessToken;
         }
 
         // 执行自定义请求拦截器
@@ -97,10 +98,11 @@ export class HttpClient {
 
         const { data } = response;
         if (data && typeof data === 'object') {
-          // 如果响应包含 success 字段，检查是否成功
-          if ('success' in data && !data.success) {
-            return Promise.reject(new Error(data.message || '请求失败'));
-          }
+
+            if (data.code !== 0) {
+                Message.error(data.msg || '请求失败');
+                return Promise.reject(new Error(data.msg || '请求失败'));
+            }
         }
 
         return response;
