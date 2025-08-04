@@ -1,7 +1,7 @@
+import { STATUS_OPTIONS, STATUS_VALUES } from "@/components/Materials/constants";
+import { Form, Message, Tooltip, Upload } from "@arco-design/web-react";
 import { memo } from "react";
-import { Form, Upload, Message, Tooltip } from "@arco-design/web-react";
 import type { XInputFileUploadConfig } from "./schema";
-import { STATUS_VALUES, STATUS_OPTIONS } from "@/components/Materials/constants";
 
 const XFileUpload = memo((props: XInputFileUploadConfig) => {
     const {
@@ -28,6 +28,7 @@ const XFileUpload = memo((props: XInputFileUploadConfig) => {
                         status === STATUS_VALUES[STATUS_OPTIONS.READONLY]
                             ? "none"
                             : "unset",
+                    margin: '0px',
                 }}
             >
                 <Upload

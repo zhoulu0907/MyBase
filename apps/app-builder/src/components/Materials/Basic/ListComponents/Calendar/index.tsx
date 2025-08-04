@@ -12,9 +12,7 @@ const XCalendar = memo((props: XCalendarConfig) => {
     } = props;
 
     return status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? null : (
-
         <Calendar />
-
     );
 });
 

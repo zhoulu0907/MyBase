@@ -1,6 +1,6 @@
-import { baseConfig, baseDefault, statusConfig, widthConfig, dateTypeConfig, layoutConfig, type ICommonBaseType, type TStatusSelectKeyType, type TWidthSelectKeyType, type TDateTypeSelectKeyType, type TLayoutSelectKeyType } from "@/components/Materials/common";
-import { CONFIG_TYPES, DATE_OPTIONS, DATE_VALUES, STATUS_OPTIONS, STATUS_VALUES, WIDTH_OPTIONS, WIDTH_VALUES, LAYOUT_OPTIONS, LAYOUT_VALUES } from "@/components/Materials/constants";
-import type { IDescriptionConfigType, ILabelConfigType, INumberConfigType, ISelectConfigType, IStatusConfigType, ITextAreaConfigType, ITextConfigType, ITooltipConfigType, IWidthConfigType, TSelectDefaultType, TTextAreaDefaultType, TTextDefaultType, TBooleanDefaultType, IBooleanConfigType, IDateTypeConfigType, ILayoutConfigType } from "@/components/Materials/types";
+import { baseConfig, baseDefault, dateTypeConfig, layoutConfig, statusConfig, widthConfig, type ICommonBaseType, type TDateTypeSelectKeyType, type TLayoutSelectKeyType, type TStatusSelectKeyType, type TWidthSelectKeyType } from "@/components/Materials/common";
+import { CONFIG_TYPES, DATE_OPTIONS, DATE_VALUES, LAYOUT_OPTIONS, LAYOUT_VALUES, STATUS_OPTIONS, STATUS_VALUES, WIDTH_OPTIONS, WIDTH_VALUES } from "@/components/Materials/constants";
+import type { IBooleanConfigType, IDateTypeConfigType, IDescriptionConfigType, ILabelConfigType, ILayoutConfigType, INumberConfigType, ISelectConfigType, IStatusConfigType, ITextAreaConfigType, ITextConfigType, ITooltipConfigType, IWidthConfigType, TBooleanDefaultType, TSelectDefaultType, TTextAreaDefaultType, TTextDefaultType } from "@/components/Materials/types";
 
 
 export interface XInputDatePickerSchema {
@@ -116,7 +116,7 @@ const XDatePicker: XInputDatePickerSchema = {
     ],
     config: {
         ...baseDefault,
-        label: '',
+        label: '标题',
         description: '',
         tooltip: '',
         width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
@@ -124,7 +124,7 @@ const XDatePicker: XInputDatePickerSchema = {
         defaultValue: '',
         required: false,
         dateType: DATE_VALUES[DATE_OPTIONS.ONLY_DATE],
-        layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
+        layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
         saveWithHidden: false,
     }
 };
