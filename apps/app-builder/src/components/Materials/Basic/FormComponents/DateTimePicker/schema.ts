@@ -1,6 +1,6 @@
-import { baseConfig, baseDefault, statusConfig, widthConfig, layoutConfig, type ICommonBaseType, type TStatusSelectKeyType, type TWidthSelectKeyType, type TLayoutSelectKeyType } from "@/components/Materials/common";
-import { CONFIG_TYPES, STATUS_OPTIONS, STATUS_VALUES, WIDTH_OPTIONS, WIDTH_VALUES, LAYOUT_OPTIONS, LAYOUT_VALUES } from "@/components/Materials/constants";
-import type { IDescriptionConfigType, ILabelConfigType, INumberConfigType, IPlaceholderConfigType, ISelectConfigType, IStatusConfigType, ITextAreaConfigType, ITextConfigType, ITooltipConfigType, IWidthConfigType, TSelectDefaultType, TTextAreaDefaultType, TTextDefaultType, TBooleanDefaultType, IBooleanConfigType, ILayoutConfigType } from "@/components/Materials/types";
+import { baseConfig, baseDefault, labelColSpanConfig, layoutConfig, statusConfig, widthConfig, type ICommonBaseType, type TLayoutSelectKeyType, type TStatusSelectKeyType, type TWidthSelectKeyType } from "@/components/Materials/common";
+import { CONFIG_TYPES, LAYOUT_OPTIONS, LAYOUT_VALUES, STATUS_OPTIONS, STATUS_VALUES, WIDTH_OPTIONS, WIDTH_VALUES } from "@/components/Materials/constants";
+import type { IBooleanConfigType, IDescriptionConfigType, ILabelColSpanConfigType, ILabelConfigType, ILayoutConfigType, INumberConfigType, IPlaceholderConfigType, ISelectConfigType, IStatusConfigType, ITextAreaConfigType, ITextConfigType, ITooltipConfigType, IWidthConfigType, TBooleanDefaultType, TSelectDefaultType, TTextAreaDefaultType, TTextDefaultType } from "@/components/Materials/types";
 
 
 export interface XInputDateTimePickerSchema {
@@ -18,6 +18,7 @@ export type TXInputDateTimePickerEditData = Array<
   IStatusConfigType<TStatusSelectKeyType> |
   IWidthConfigType<TWidthSelectKeyType> |
   INumberConfigType |
+  ILabelColSpanConfigType |
   ISelectConfigType<TWidthSelectKeyType | TStatusSelectKeyType > |
   ITextAreaConfigType|
   IBooleanConfigType|
@@ -94,6 +95,8 @@ const XDateTimePicker: XInputDateTimePickerSchema = {
             name: '提示文字',
             type: CONFIG_TYPES.TOOLTIP_INPUT,
         },
+        layoutConfig,
+        labelColSpanConfig,
         {
             key: 'required',
             name: '开启必填',
@@ -106,18 +109,17 @@ const XDateTimePicker: XInputDateTimePickerSchema = {
         },
         statusConfig,
         widthConfig,
-        layoutConfig,
     ],
     config: {
         ...baseDefault,
-        label: '',
+        label: '标题',
         description: '',
         tooltip: '',
         width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
         status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
         defaultValue: '',
         required: false,
-        layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
+        layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
         saveWithHidden: false,
     }
 };

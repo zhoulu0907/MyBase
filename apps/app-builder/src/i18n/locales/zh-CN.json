@@ -137,7 +137,9 @@
     "formDesign": "表单设计",
     "listDesign": "列表设计",
     "pageSetting": "页面设置",
-    "metadataManage": "元数据管理"
+    "metadataManage": "元数据管理",
+    "newApplication": "新应用",
+    "saved": "已保存，未发布"
   },
   "createApp": {
     "pageManager": "页面管理",

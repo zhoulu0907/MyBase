@@ -37,7 +37,7 @@ const XCarousel: XCarouselSchema = {
     ],
     config: {
         ...baseDefault,
-        width: WIDTH_VALUES[WIDTH_OPTIONS.THREE_QUARTERS],
+        width: WIDTH_VALUES[WIDTH_OPTIONS.FULL],
         status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     }
 };

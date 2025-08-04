@@ -1,6 +1,6 @@
-import { baseConfig, baseDefault, statusConfig, widthConfig, alignConfig, layoutConfig, type ICommonBaseType, type TStatusSelectKeyType, type TWidthSelectKeyType, type TAlignSelectKeyType, type TLayoutSelectKeyType } from "@/components/Materials/common";
-import { CONFIG_TYPES, STATUS_OPTIONS, STATUS_VALUES, WIDTH_OPTIONS, WIDTH_VALUES, LAYOUT_OPTIONS, LAYOUT_VALUES, ALIGN_OPTIONS, ALIGN_VALUES } from "@/components/Materials/constants";
-import type { IDescriptionConfigType, ILabelConfigType, INumberConfigType, IPlaceholderConfigType, ISelectConfigType, IStatusConfigType, ITextAreaConfigType, ITextConfigType, ITooltipConfigType, IWidthConfigType, TSelectDefaultType, TTextAreaDefaultType, TTextDefaultType, IBooleanConfigType, TBooleanDefaultType, ILayoutConfigType, IAlignConfigType, IColorConfigType } from "@/components/Materials/types";
+import { alignConfig, baseConfig, baseDefault, labelColSpanConfig, layoutConfig, statusConfig, widthConfig, type ICommonBaseType, type TAlignSelectKeyType, type TLayoutSelectKeyType, type TStatusSelectKeyType, type TWidthSelectKeyType } from "@/components/Materials/common";
+import { ALIGN_OPTIONS, ALIGN_VALUES, CONFIG_TYPES, LAYOUT_OPTIONS, LAYOUT_VALUES, STATUS_OPTIONS, STATUS_VALUES, WIDTH_OPTIONS, WIDTH_VALUES } from "@/components/Materials/constants";
+import type { IAlignConfigType, IBooleanConfigType, IColorConfigType, IDescriptionConfigType, ILabelColSpanConfigType, ILabelConfigType, ILayoutConfigType, INumberConfigType, IPlaceholderConfigType, ISelectConfigType, IStatusConfigType, ITextAreaConfigType, ITextConfigType, ITooltipConfigType, IWidthConfigType, TBooleanDefaultType, TNumberDefaultType, TSelectDefaultType, TTextAreaDefaultType, TTextDefaultType } from "@/components/Materials/types";
 
 export interface XInputPhoneSchema {
     editData: TXInputPhoneEditData;
@@ -16,6 +16,7 @@ export type TXInputPhoneEditData = Array<
   IStatusConfigType<TStatusSelectKeyType> |
   IWidthConfigType<TWidthSelectKeyType> |
   INumberConfigType |
+  ILabelColSpanConfigType |
   ISelectConfigType<TWidthSelectKeyType | TStatusSelectKeyType > |
   ITextAreaConfigType|
   IBooleanConfigType|
@@ -94,6 +95,11 @@ export interface XInputPhoneConfig extends ICommonBaseType {
      * 背景颜色
      */
     bgColor?: TTextDefaultType;
+
+    /**
+     * 标签宽度
+     */
+    labelColSpan?: TNumberDefaultType;
 }
 
 const XInputPhone: XInputPhoneSchema = {
@@ -119,6 +125,8 @@ const XInputPhone: XInputPhoneSchema = {
             name: '提示文字',
             type: CONFIG_TYPES.TOOLTIP_INPUT,
         },
+        layoutConfig,
+        labelColSpanConfig,
         {
             key: 'required',
             name: '开启必填',
@@ -142,11 +150,10 @@ const XInputPhone: XInputPhoneSchema = {
         statusConfig,
         widthConfig,
         alignConfig,
-        layoutConfig,
     ],
     config: {
         ...baseDefault,
-        label: '',
+        label: '标题',
         placeholder: '请输入手机号',
         description: '',
         tooltip: '',
@@ -155,10 +162,11 @@ const XInputPhone: XInputPhoneSchema = {
         defaultValue: '',
         required: false,
         align: ALIGN_VALUES[ALIGN_OPTIONS.LEFT],
-        layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
+        layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
         saveWithHidden: false,
         color: '',
         bgColor: '',
+        labelColSpan: 5,
     }
 };
 

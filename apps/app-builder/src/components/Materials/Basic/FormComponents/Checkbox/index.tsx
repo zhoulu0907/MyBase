@@ -1,14 +1,18 @@
+import { STATUS_OPTIONS, STATUS_VALUES } from "@/components/Materials/constants";
+import { Checkbox, Form, Tooltip } from "@arco-design/web-react";
 import { memo } from "react";
-import { Checkbox, Tooltip, Form } from "@arco-design/web-react";
 import type { XInputCheckboxConfig } from "./schema";
-import { STATUS_VALUES, STATUS_OPTIONS } from "@/components/Materials/constants";
 
 const XCheckbox = memo((props: XInputCheckboxConfig) => {
-    const { label, tooltip, status, defaultValue, required, layout, saveWithHidden } = props;
+    const { label, tooltip, status, defaultValue, required, layout } = props;
 
     return status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? null : (
         <Tooltip content={tooltip}>
-            <Form.Item label={label} layout={layout} rules={[{ required }]}>
+            <Form.Item label={label} layout={layout} rules={[{ required }]}
+                style={{
+                    margin: '0px',
+                }}
+            >
                 <Checkbox
                     defaultChecked={defaultValue === "true"}
                     style={{

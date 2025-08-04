@@ -1,6 +1,6 @@
-import { baseConfig, baseDefault, statusConfig, widthConfig, alignConfig, layoutConfig, type ICommonBaseType, type TStatusSelectKeyType, type TWidthSelectKeyType, type TAlignSelectKeyType, type TLayoutSelectKeyType } from "@/components/Materials/common";
-import { CONFIG_TYPES, STATUS_OPTIONS, STATUS_VALUES, WIDTH_OPTIONS, WIDTH_VALUES, ALIGN_OPTIONS, ALIGN_VALUES, LAYOUT_OPTIONS, LAYOUT_VALUES } from "@/components/Materials/constants";
-import type { IDescriptionConfigType, ILabelConfigType, INumberConfigType, IPlaceholderConfigType, ISelectConfigType, IStatusConfigType, ITextAreaConfigType, ITextConfigType, ITooltipConfigType, IWidthConfigType, TSelectDefaultType, TTextAreaDefaultType, TTextDefaultType, TBooleanDefaultType, IBooleanConfigType, ILayoutConfigType, IAlignConfigType, IColorConfigType } from "@/components/Materials/types";
+import { alignConfig, baseConfig, baseDefault, labelColSpanConfig, layoutConfig, statusConfig, widthConfig, type ICommonBaseType, type TAlignSelectKeyType, type TLayoutSelectKeyType, type TStatusSelectKeyType, type TWidthSelectKeyType } from "@/components/Materials/common";
+import { ALIGN_OPTIONS, ALIGN_VALUES, CONFIG_TYPES, LAYOUT_OPTIONS, LAYOUT_VALUES, STATUS_OPTIONS, STATUS_VALUES, WIDTH_OPTIONS, WIDTH_VALUES } from "@/components/Materials/constants";
+import type { IAlignConfigType, IBooleanConfigType, IColorConfigType, IDescriptionConfigType, ILabelColSpanConfigType, ILabelConfigType, ILayoutConfigType, INumberConfigType, IPlaceholderConfigType, ISelectConfigType, IStatusConfigType, ITextAreaConfigType, ITextConfigType, ITooltipConfigType, IWidthConfigType, TBooleanDefaultType, TNumberDefaultType, TSelectDefaultType, TTextAreaDefaultType, TTextDefaultType } from "@/components/Materials/types";
 
 
 export interface XInputAutoCodeSchema {
@@ -18,6 +18,7 @@ export type TXInputAutoCodeEditData = Array<
   IStatusConfigType<TStatusSelectKeyType> |
   IWidthConfigType<TWidthSelectKeyType> |
   INumberConfigType |
+  ILabelColSpanConfigType |
   ISelectConfigType<TWidthSelectKeyType | TStatusSelectKeyType > |
   ITextAreaConfigType|
   IBooleanConfigType|
@@ -67,6 +68,11 @@ export interface XInputAutoCodeConfig extends ICommonBaseType {
     layout?: TLayoutSelectKeyType;
 
     /**
+     * 标签宽度
+     */
+    labelColSpan?: TNumberDefaultType;
+
+    /**
      * 内容对齐方式：左、中、右
      * 可选值: 'left' | 'center' | 'right'
      */
@@ -108,6 +114,8 @@ const XAutoCode: XInputAutoCodeSchema = {
             name: '提示文字',
             type: CONFIG_TYPES.TOOLTIP_INPUT,
         },
+        layoutConfig,
+        labelColSpanConfig,
         {
             key: 'saveWithHidden',
             name: '隐藏时提交数据',
@@ -126,22 +134,21 @@ const XAutoCode: XInputAutoCodeSchema = {
         statusConfig,
         widthConfig,
         alignConfig,
-        layoutConfig,
     ],
     config: {
         ...baseDefault,
-        label: '',
+        label: '标题',
         description: '',
         tooltip: '',
         width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
         status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
         required: false,
         align: ALIGN_VALUES[ALIGN_OPTIONS.LEFT],
-        layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
+        layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
         saveWithHidden: false,
         color: '',
         bgColor: '',
-        
+        labelColSpan: 5,
     }
 };
 

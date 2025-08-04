@@ -1,21 +1,18 @@
+import { STATUS_OPTIONS, STATUS_VALUES } from "@/components/Materials/constants";
+import { Form, Message, Tooltip, Upload } from "@arco-design/web-react";
 import { memo } from "react";
-import { Form, Upload, Message, Tooltip } from "@arco-design/web-react";
 import type { XInputImgUploadConfig } from "./schema";
-import { STATUS_VALUES, STATUS_OPTIONS } from "@/components/Materials/constants";
 
 const XImgUpload = memo((props: XInputImgUploadConfig) => {
     const {
         label,
         status,
         tooltip,
-        // defaultValue,
         uploadSize = 10,
         uploadLimit,
-        uploadCompress, // todo
         listType,
         required,
         layout,
-        saveWithHidden,
     } = props;
 
     return status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? null : (
@@ -29,6 +26,7 @@ const XImgUpload = memo((props: XInputImgUploadConfig) => {
                         status === STATUS_VALUES[STATUS_OPTIONS.READONLY]
                             ? "none"
                             : "unset",
+                    margin: '0px',
                 }}
             >
                 <Upload

@@ -1,10 +1,10 @@
-import { memo } from "react";
-import { Switch, Tooltip, Form } from "@arco-design/web-react";
-import type { XInputSwitchConfig } from "./schema";
 import {
-    STATUS_VALUES,
     STATUS_OPTIONS,
+    STATUS_VALUES,
 } from "@/components/Materials/constants";
+import { Form, Switch, Tooltip } from "@arco-design/web-react";
+import { memo } from "react";
+import type { XInputSwitchConfig } from "./schema";
 
 const XSwitch = memo((props: XInputSwitchConfig) => {
     const {
@@ -14,7 +14,6 @@ const XSwitch = memo((props: XInputSwitchConfig) => {
         defaultValue,
         required,
         layout,
-        saveWithHidden,
     } = props;
 
     return status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? null : (
@@ -28,6 +27,7 @@ const XSwitch = memo((props: XInputSwitchConfig) => {
                         status === STATUS_VALUES[STATUS_OPTIONS.READONLY]
                             ? "none"
                             : "unset",
+                    margin: '0px',
                 }}
             >
                 <Switch defaultChecked={defaultValue === "true"} />

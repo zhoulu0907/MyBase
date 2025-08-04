@@ -84,7 +84,7 @@ export default function EditorHeader() {
 
                 <img src={AppIcon} style={{ width: 28, height: 28 }} />
 
-                <span>新应用 </span>
+                <span>新应用</span>
                 <span>&gt;</span>
                 <span>页面一</span>
             </div>

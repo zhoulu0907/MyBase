@@ -1,10 +1,10 @@
-import { memo } from "react";
-import { TreeSelect, Tooltip, Form } from "@arco-design/web-react";
-import type { XInputDeptSelectConfig } from "./schema";
 import {
-    STATUS_VALUES,
     STATUS_OPTIONS,
+    STATUS_VALUES,
 } from "@/components/Materials/constants";
+import { Form, Tooltip, TreeSelect } from "@arco-design/web-react";
+import { memo } from "react";
+import type { XInputDeptSelectConfig } from "./schema";
 
 // TODO(Mickey): 放到schema的config中
 // 示例树形结构：部门
@@ -40,10 +40,8 @@ const XDeptSelect = memo((props: XInputDeptSelectConfig) => {
         label,
         tooltip,
         status,
-        defaultValue,
         required,
         layout,
-        saveWithHidden,
     } = props;
 
     return status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? null : (
@@ -57,6 +55,7 @@ const XDeptSelect = memo((props: XInputDeptSelectConfig) => {
                         status === STATUS_VALUES[STATUS_OPTIONS.READONLY]
                             ? "none"
                             : "unset",
+                    margin: '0px',
                 }}
             >
                 <TreeSelect

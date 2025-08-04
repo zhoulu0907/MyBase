@@ -1,10 +1,10 @@
-import { memo, useEffect, useState } from "react";
-import { Input, Tooltip, Form } from "@arco-design/web-react";
-import type { XInputEmailConfig } from "./schema";
 import {
-    STATUS_VALUES,
     STATUS_OPTIONS,
-} from "@/components/Materials/constants";
+    STATUS_VALUES,
+} from '@/components/Materials/constants';
+import { Form, Input } from '@arco-design/web-react';
+import { memo, useEffect, useState } from 'react';
+import type { XInputEmailConfig } from './schema';
 
 const XInputEmail = memo((props: XInputEmailConfig) => {
     const {
@@ -18,12 +18,12 @@ const XInputEmail = memo((props: XInputEmailConfig) => {
         layout,
         color,
         bgColor,
-        saveWithHidden,
+        labelColSpan = 0,
     } = props;
 
-    const [value, setValue] = useState("");
+    const [value, setValue] = useState('');
     const [InputStatus, setInputStatus] = useState<
-        undefined | "error" | "warning"
+        undefined | 'error' | 'warning'
     >();
 
     // 邮箱校验正则
@@ -32,50 +32,53 @@ const XInputEmail = memo((props: XInputEmailConfig) => {
 
     useEffect(() => {
         if (value && !validateEmail(value)) {
-            setInputStatus("error");
+            setInputStatus('error');
             return;
         }
         setInputStatus(undefined);
     }, [value]);
 
     return status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? null : (
-        <Tooltip content={tooltip}>
-            <Form.Item
-                label={label}
-                layout={layout}
-                rules={[
-                    { required },
-                    // { type: "email", message: "请输入合法的邮件地址" },
-                    // {
-                    //     validator: (value) => {
-                    //         if (!value) return true;
-                    //         const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                    //         return regex.test(value);
-                    //     },
-                    // },
-                ]}
+        <Form.Item
+            label={label}
+            layout={layout}
+            labelCol={{
+                span: labelColSpan,
+            }}
+            tooltip={tooltip}
+            wrapperCol={{ span: 24 - labelColSpan }}
+            rules={[
+                { required },
+                // { type: "email", message: "请输入合法的邮件地址" },
+                // {
+                //     validator: (value) => {
+                //         if (!value) return true;
+                //         const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                //         return regex.test(value);
+                //     },
+                // },
+            ]}
+            style={{
+                flex: 1,
+                pointerEvents:
+                    status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset',
+                margin: '0px',
+            }}
+        >
+            <Input
+                status={InputStatus}
+                readOnly={status === STATUS_VALUES[STATUS_OPTIONS.READONLY]}
+                defaultValue={defaultValue}
                 style={{
-                    pointerEvents:
-                        status === STATUS_VALUES[STATUS_OPTIONS.READONLY]
-                            ? "none"
-                            : "unset",
+                    width: '100%',
+                    textAlign: align,
+                    color,
+                    backgroundColor: bgColor,
                 }}
-            >
-                <Input
-                    status={InputStatus}
-                    readOnly={status === STATUS_VALUES[STATUS_OPTIONS.READONLY]}
-                    defaultValue={defaultValue}
-                    style={{
-                        width: "100%",
-                        textAlign: align,
-                        color,
-                        backgroundColor: bgColor,
-                    }}
-                    placeholder={placeholder}
-                    onChange={setValue}
-                />
-            </Form.Item>
-        </Tooltip>
+                placeholder={placeholder}
+                onChange={setValue}
+            />
+        </Form.Item>
     );
 });
 

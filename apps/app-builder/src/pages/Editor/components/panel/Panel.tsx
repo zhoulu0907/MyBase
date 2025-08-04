@@ -16,6 +16,7 @@ type CategoryKey = typeof CATEGORY_KEYS[number];
 export default function EditorPanel() {
     const [showDrawer, setShowDrawer] = useState(true);
     const [activeTab, setActiveTab] = useState<EditorType>(EDITOR_TYPES.FORM_EDITOR);
+    const [activeLeftTabKey, setActiveLeftTabKey] = useState('key1');
     const [activeComponentTab, setActiveComponentTab] = useState('base-component');
     const { t } = useTranslation();
 
@@ -91,20 +92,24 @@ export default function EditorPanel() {
             type="dashed"
             onClick={() => setShowDrawer(!showDrawer)}
         />
-        <div className={styles.left}>
+        <div className={styles.left}
+            style={{
+                width: showDrawer ? "48px" : "0px",
+            }}
+        >
           <Tabs
               type="text"
-              activeTab={activeTab}
+              activeTab={activeLeftTabKey}
               onChange={(key) => {
-                setActiveTab(key as EditorType);
+                setActiveLeftTabKey(key);
               }}
               size="large"
               direction="vertical"
           >
-              <Tabs.TabPane key={EDITOR_TYPES.FORM_EDITOR} title={<IconLayout fontSize={20}/>} />
-              <Tabs.TabPane key={EDITOR_TYPES.LIST_EDITOR} title={<IconBranch fontSize={20}/>} />
-              <Tabs.TabPane key={EDITOR_TYPES.PAGE_SETTING} title={<IconSend fontSize={20}/>} />
-              <Tabs.TabPane key={EDITOR_TYPES.METADATA_MANAGE} title={<IconStorage fontSize={20}/>} />
+              <Tabs.TabPane key={"key1"} title={<IconLayout fontSize={20}/>} />
+              <Tabs.TabPane key={"key2"} title={<IconBranch fontSize={20}/>} />
+              <Tabs.TabPane key={"key3"} title={<IconSend fontSize={20}/>} />
+              <Tabs.TabPane key={"key4"} title={<IconStorage fontSize={20}/>} />
           </Tabs>
         </div>
 

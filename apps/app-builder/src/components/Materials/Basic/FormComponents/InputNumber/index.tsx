@@ -1,10 +1,10 @@
-import { InputNumber, Tooltip, Form } from "@arco-design/web-react";
-import { memo } from "react";
-import type { XInputNumberConfig } from "./schema";
 import {
-    STATUS_VALUES,
     STATUS_OPTIONS,
-} from "@/components/Materials/constants";
+    STATUS_VALUES,
+} from '@/components/Materials/constants';
+import { Form, InputNumber } from '@arco-design/web-react';
+import { memo } from 'react';
+import type { XInputNumberConfig } from './schema';
 
 const XInputNumber = memo((props: XInputNumberConfig) => {
     const {
@@ -20,46 +20,46 @@ const XInputNumber = memo((props: XInputNumberConfig) => {
         step,
         precision,
         layout,
-        color,
-        bgColor,
-        saveWithHidden,
+        labelColSpan = 0,
     } = props;
 
     return status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? null : (
-        <Tooltip content={tooltip}>
-            <Form.Item
-                label={label}
-                layout={layout}
-                rules={[
-                    {
-                        required,
-                        type: "number",
-                        min,
-                        max,
-                    },
-                ]}
+        <Form.Item
+            label={label}
+            layout={layout}
+            labelCol={{
+                span: labelColSpan,
+            }}
+            tooltip={tooltip}
+            wrapperCol={{ span: 24 - labelColSpan }}
+            rules={[
+                {
+                    required,
+                    type: 'number',
+                    min,
+                    max,
+                },
+            ]}
+            style={{
+                pointerEvents:
+                    status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset',
+                margin: '0px',
+            }}
+        >
+            <InputNumber
+                readOnly={status === STATUS_VALUES[STATUS_OPTIONS.READONLY]}
+                defaultValue={defaultValue}
+                placeholder={placeholder}
+                step={step}
+                min={min}
+                max={max}
+                precision={precision}
                 style={{
-                    pointerEvents:
-                        status === STATUS_VALUES[STATUS_OPTIONS.READONLY]
-                            ? "none"
-                            : "unset",
+                    width: '100%',
+                    textAlignLast: align,
                 }}
-            >
-                <InputNumber
-                    readOnly={status === STATUS_VALUES[STATUS_OPTIONS.READONLY]}
-                    defaultValue={defaultValue}
-                    placeholder={placeholder}
-                    step={step}
-                    min={min}
-                    max={max}
-                    precision={precision}
-                    style={{
-                        width: "100%",
-                        textAlignLast: align,
-                    }}
-                />
-            </Form.Item>
-        </Tooltip>
+            />
+        </Form.Item>
     );
 });
 

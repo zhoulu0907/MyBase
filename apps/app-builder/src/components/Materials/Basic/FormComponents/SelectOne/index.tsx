@@ -1,10 +1,10 @@
-import { memo } from "react";
-import { Select, Tooltip, Form } from "@arco-design/web-react";
-import type { XInputSelectOneConfig } from "./schema";
 import {
-    STATUS_VALUES,
     STATUS_OPTIONS,
+    STATUS_VALUES,
 } from "@/components/Materials/constants";
+import { Form, Select, Tooltip } from "@arco-design/web-react";
+import { memo } from "react";
+import type { XInputSelectOneConfig } from "./schema";
 
 const Option = Select.Option;
 const options = ["Beijing", "Shanghai", "Guangzhou", "Disabled"];
@@ -14,10 +14,8 @@ const XSelectOne = memo((props: XInputSelectOneConfig) => {
         label,
         tooltip,
         status,
-        defaultValue,
         required,
         layout,
-        saveWithHidden,
     } = props;
 
     return status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? null : (
@@ -31,6 +29,7 @@ const XSelectOne = memo((props: XInputSelectOneConfig) => {
                         status === STATUS_VALUES[STATUS_OPTIONS.READONLY]
                             ? "none"
                             : "unset",
+                    margin: '0px',
                 }}
             >
                 <Select

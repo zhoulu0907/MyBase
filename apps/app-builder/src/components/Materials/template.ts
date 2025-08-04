@@ -65,14 +65,14 @@ const allTemplate = {
                     icon: 'number_input_cp.svg',
                     category: 'base'
                 },
-                {
-                    type: FORM_COMPONENT_TYPES.DATE_RANGE_PICKER,
-                    h: 48,
-                    w: 68,
-                    displayName: '时间段',
-                    icon: 'date_picker_cp.svg',
-                    category: 'base'
-                },
+                // {
+                //     type: FORM_COMPONENT_TYPES.DATE_RANGE_PICKER,
+                //     h: 48,
+                //     w: 68,
+                //     displayName: '时间段',
+                //     icon: 'date_picker_cp.svg',
+                //     category: 'base'
+                // },
                 {
                     type: FORM_COMPONENT_TYPES.DATE_PICKER,
                     h: 48,

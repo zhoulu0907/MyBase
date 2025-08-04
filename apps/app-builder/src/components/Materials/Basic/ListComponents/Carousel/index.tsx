@@ -22,7 +22,7 @@ const XCarousel = memo((props: XCarouselConfig) => {
     return status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? null : (
 
         <Carousel
-        style={{ width: '100%'}}
+        style={{ width: '100%', height: '100%'}}
         >
         {imageSrc.map((src, index) => (
             <div key={index}>

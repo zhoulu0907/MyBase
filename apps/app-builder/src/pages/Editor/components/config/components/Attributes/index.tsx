@@ -133,6 +133,18 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                                     />
                                 }
                                 {
+                                    (item.type === CONFIG_TYPES.LABEL_COL_SPAN) &&
+                                    <InputNumber
+                                        placeholder={`请输入${item.name}`}
+                                        value={configs[item.key]}
+                                        max={10}
+                                        min={0}
+                                        onChange={(value) => {
+                                            handlePropsChange(item.key, value)
+                                        }}
+                                    />
+                                }
+                                {
                                     (item.type === CONFIG_TYPES.DESCRIPTION_INPUT) &&
                                     <Input.TextArea
                                         placeholder={`请输入${item.name}`}
