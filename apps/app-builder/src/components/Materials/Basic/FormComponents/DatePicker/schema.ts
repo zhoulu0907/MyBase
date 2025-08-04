@@ -1,4 +1,4 @@
-import { baseConfig, baseDefault, dateTypeConfig, layoutConfig, statusConfig, widthConfig, type ICommonBaseType, type TDateTypeSelectKeyType, type TLayoutSelectKeyType, type TStatusSelectKeyType, type TWidthSelectKeyType } from "@/components/Materials/common";
+import { baseConfig, baseDefault, dateTypeConfig, labelColSpanConfig, layoutConfig, statusConfig, widthConfig, type ICommonBaseType, type TDateTypeSelectKeyType, type TLayoutSelectKeyType, type TStatusSelectKeyType, type TWidthSelectKeyType } from "@/components/Materials/common";
 import { CONFIG_TYPES, DATE_OPTIONS, DATE_VALUES, LAYOUT_OPTIONS, LAYOUT_VALUES, STATUS_OPTIONS, STATUS_VALUES, WIDTH_OPTIONS, WIDTH_VALUES } from "@/components/Materials/constants";
 import type { IBooleanConfigType, IDateTypeConfigType, IDescriptionConfigType, ILabelConfigType, ILayoutConfigType, INumberConfigType, ISelectConfigType, IStatusConfigType, ITextAreaConfigType, ITextConfigType, ITooltipConfigType, IWidthConfigType, TBooleanDefaultType, TSelectDefaultType, TTextAreaDefaultType, TTextDefaultType } from "@/components/Materials/types";
 
@@ -99,6 +99,8 @@ const XDatePicker: XInputDatePickerSchema = {
             name: '提示文字',
             type: CONFIG_TYPES.TOOLTIP_INPUT,
         },
+        layoutConfig,
+        labelColSpanConfig,
         {
             key: 'required',
             name: '开启必填',
@@ -111,7 +113,6 @@ const XDatePicker: XInputDatePickerSchema = {
         },
         statusConfig,
         widthConfig,
-        layoutConfig,
         dateTypeConfig,
     ],
     config: {
