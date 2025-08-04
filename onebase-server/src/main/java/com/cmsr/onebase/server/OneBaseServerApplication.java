@@ -12,8 +12,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication(scanBasePackages = {"${yudao.info.base-package}.server", "${yudao.info.base-package}.module"},
         excludeName = {
         // RPC 相关
-        //    "org.springframework.cloud.openfeign.FeignAutoConfiguration",
-        //    "com.cmsr.onebase.module.system.framework.rpc.config.RpcConfiguration"
+        // "org.springframework.cloud.openfeign.FeignAutoConfiguration",
+        // "com.cmsr.onebase.module.system.framework.rpc.config.RpcConfiguration"
         })
 public class OneBaseServerApplication {
 

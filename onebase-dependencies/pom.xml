@@ -143,11 +143,7 @@
                 <artifactId>onebase-spring-boot-starter-biz-data-permission</artifactId>
                 <version>${revision}</version>
             </dependency>
-            <dependency>
-                <groupId>com.cmsr.onebase</groupId>
-                <artifactId>onebase-spring-boot-starter-biz-ip</artifactId>
-                <version>${revision}</version>
-            </dependency>
+    
 
             <!-- Spring 核心 -->
             <dependency>

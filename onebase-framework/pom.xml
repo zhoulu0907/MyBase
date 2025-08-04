@@ -30,7 +30,6 @@
 
         <module>onebase-spring-boot-starter-biz-tenant</module>
         <module>onebase-spring-boot-starter-biz-data-permission</module>
-        <module>onebase-spring-boot-starter-biz-ip</module>
     </modules>
 
     <artifactId>onebase-framework</artifactId>
