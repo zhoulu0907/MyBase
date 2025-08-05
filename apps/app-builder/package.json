@@ -17,6 +17,7 @@
     "@arco-themes/react-onebase": "^0.0.5",
     "@onebase/common": "workspace:*",
     "@onebase/platform-center": "workspace:*",
+    "@onebase/app": "workspace:*",
     "@preact/signals-react": "^3.2.1",
     "@types/react-grid-layout": "^1.3.5",
     "@types/sortablejs": "^1.15.8",

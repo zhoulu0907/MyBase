@@ -20,7 +20,7 @@ const entitySources = [
 const dsOptions: { label: string, value: string }[] = [];
 const dsTables: { label: string, value: string }[] = [];
 
-const CreateEntityPage: React.FC<{ visible: boolean, setVisible: (visible: boolean) => void, handlePageType: (tab: string) => void, successCallback: () => void }> = ({ visible, setVisible, handlePageType, successCallback }) => {
+const CreateEntityPage: React.FC<{ visible: boolean, setVisible: (visible: boolean) => void, handlePageType: (tab: string) => void, successCallback: () => void }> = ({ visible, setVisible, successCallback }) => {
   const [form] = Form.useForm<EntityFormValues>();
   const [dsResource, setDsResource] = useState<string>(DS_RESOURCE_TYPE.EXTERNAL); // 数据源来源：内部数据源、外部数据源、外部数据源中引用自有数据源已有资产
   // 提交

@@ -3,8 +3,8 @@ import DataSourceTable from './DataSourceTable';
 import CreateDsPage from './CreateDsPage';
 import EmptyDsPage from './EmptyDsPage';
 import EditDsDrawer from './EditDsDrawer';
-import { getDatasource } from '@/services';
-import type { DatasourceSaveReqVO } from '@/types/datafactoryApi';
+import { getDatasource } from '@onebase/app/src/services/dataresource';
+import type { DatasourceSaveReqVO } from '@onebase/app/src/types';
 
 const DataSourcePage: React.FC = () => {
   const [pageType, setPageType] = useState('check-ds');
