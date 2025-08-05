@@ -62,7 +62,7 @@ public class  VersionServiceImpl implements VersionService {
         ConfigStore configs = new DefaultConfigStore();
         configs.eq("application_id", applicationDO.getId());
         //备份菜单
-        List<ApplicationMenuDO> menuDOS = dataRepository.findAll(ApplicationMenuDO.class, configs);
+        List<MenuDO> menuDOS = dataRepository.findAll(MenuDO.class, configs);
         List<VersionMenuDO> versionMenuDOS = menuDOS.stream().map(v -> {
             VersionMenuDO versionMenuDO = BeanUtils.toBean(v, VersionMenuDO.class);
             versionMenuDO.setVersionId(applicationVersionDO.getId());
@@ -70,7 +70,7 @@ public class  VersionServiceImpl implements VersionService {
         }).toList();
         dataRepository.insertBatch(versionMenuDOS);
         //备份资源
-        List<ApplicationResourceDO> resourceDOS = dataRepository.findAll(ApplicationResourceDO.class, configs);
+        List<ResourceDO> resourceDOS = dataRepository.findAll(ResourceDO.class, configs);
         List<VersionResourceDO> versionResourceDOS = resourceDOS.stream().map(v -> {
             VersionResourceDO versionResourceDO = BeanUtils.toBean(v, VersionResourceDO.class);
             versionResourceDO.setVersionId(applicationVersionDO.getId());
@@ -89,23 +89,23 @@ public class  VersionServiceImpl implements VersionService {
         //删除主表数据
         ConfigStore configs = new DefaultConfigStore();
         configs.eq("application_id", applicationVersionDO.getApplicationId());
-        dataRepository.deleteByConfig(ApplicationMenuDO.class, configs);
-        dataRepository.deleteByConfig(ApplicationResourceDO.class, configs);
+        dataRepository.deleteByConfig(MenuDO.class, configs);
+        dataRepository.deleteByConfig(ResourceDO.class, configs);
         //查询版本数据
         configs = new DefaultConfigStore();
         configs.eq("version_id", versionId);
         //恢复菜单
         List<VersionMenuDO> versionMenuDOS = dataRepository.findAll(VersionMenuDO.class, configs);
-        List<ApplicationMenuDO> menuDOS = versionMenuDOS.stream().map(v -> {
-            ApplicationMenuDO menuDO = BeanUtils.toBean(v, ApplicationMenuDO.class);
+        List<MenuDO> menuDOS = versionMenuDOS.stream().map(v -> {
+            MenuDO menuDO = BeanUtils.toBean(v, MenuDO.class);
             menuDO.setId(null);
             return menuDO;
         }).toList();
         dataRepository.insertBatch(menuDOS);
         //恢复资源
         List<VersionResourceDO> versionResourceDOS = dataRepository.findAll(VersionResourceDO.class, configs);
-        List<ApplicationResourceDO> resourceDOS = versionResourceDOS.stream().map(v -> {
-            ApplicationResourceDO resourceDO = BeanUtils.toBean(v, ApplicationResourceDO.class);
+        List<ResourceDO> resourceDOS = versionResourceDOS.stream().map(v -> {
+            ResourceDO resourceDO = BeanUtils.toBean(v, ResourceDO.class);
             resourceDO.setId(null);
             return resourceDO;
         }).toList();

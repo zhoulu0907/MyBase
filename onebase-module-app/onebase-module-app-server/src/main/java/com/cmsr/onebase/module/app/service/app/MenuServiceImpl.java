@@ -7,7 +7,7 @@ import com.cmsr.onebase.module.app.controller.admin.app.vo.ApplicationMenuCopyRe
 import com.cmsr.onebase.module.app.controller.admin.app.vo.ApplicationMenuGroupCreateReqVO;
 import com.cmsr.onebase.module.app.controller.admin.app.vo.ApplicationMenuListRespVO;
 import com.cmsr.onebase.module.app.controller.admin.app.vo.ApplicationMenuOrderUpdateReqVO;
-import com.cmsr.onebase.module.app.dal.dataobject.app.ApplicationMenuDO;
+import com.cmsr.onebase.module.app.dal.dataobject.app.MenuDO;
 import com.cmsr.onebase.module.app.enums.app.AppErrorCodeConstants;
 import com.cmsr.onebase.module.app.enums.app.ApplicationMenuTypeEnum;
 import com.cmsr.onebase.module.app.enums.app.ApplicationMenuVisible;
@@ -31,7 +31,7 @@ import java.util.List;
 @Setter
 @Service
 @Validated
-public class ApplicationMenuServiceImpl implements ApplicationMenuService {
+public class MenuServiceImpl implements MenuService {
 
     @Resource
     private DataRepository dataRepository;
@@ -44,7 +44,7 @@ public class ApplicationMenuServiceImpl implements ApplicationMenuService {
         ConfigStore configs = new DefaultConfigStore();
         configs.eq("application_id", applicationId);
         configs.order("menu_sort", Order.TYPE.ASC);
-        List<ApplicationMenuDO> menuDOS = dataRepository.findAll(ApplicationMenuDO.class, configs);
+        List<MenuDO> menuDOS = dataRepository.findAll(MenuDO.class, configs);
         List<ApplicationMenuListRespVO> menuListRespList = new ArrayList<>();
         // 把第一层的菜单添加到列表中
         List<ApplicationMenuListRespVO> levelOneMenus = menuDOS.stream()
@@ -60,9 +60,9 @@ public class ApplicationMenuServiceImpl implements ApplicationMenuService {
         return menuListRespList;
     }
 
-    private List<ApplicationMenuListRespVO> recursiveGetChildren(ApplicationMenuListRespVO parent, List<ApplicationMenuDO> menuDOS) {
+    private List<ApplicationMenuListRespVO> recursiveGetChildren(ApplicationMenuListRespVO parent, List<MenuDO> menuDOS) {
         List<ApplicationMenuListRespVO> children = new ArrayList<>();
-        for (ApplicationMenuDO menuDO : menuDOS) {
+        for (MenuDO menuDO : menuDOS) {
             if (StringUtils.equalsIgnoreCase(menuDO.getParentUuid(), parent.getMenuUuid())) {
                 // 只有父菜单的uuid等于当前菜单的父菜单的uuid时，才添加子菜单，继续递归
                 ApplicationMenuListRespVO child = BeanUtils.toBean(menuDO, ApplicationMenuListRespVO.class);
@@ -75,7 +75,7 @@ public class ApplicationMenuServiceImpl implements ApplicationMenuService {
 
     @Override
     public Long createApplicationMenuGroup(ApplicationMenuGroupCreateReqVO createReqVO) {
-        ApplicationMenuDO menuDO = new ApplicationMenuDO();
+        MenuDO menuDO = new MenuDO();
         menuDO.setApplicationId(createReqVO.getApplicationId());
         if (StringUtils.isNoneBlank(createReqVO.getParentUuid())) {
             menuDO.setParentUuid(createReqVO.getParentUuid());
@@ -91,14 +91,14 @@ public class ApplicationMenuServiceImpl implements ApplicationMenuService {
 
     @Override
     public void updateApplicationMenuName(Long id, String menuName) {
-        ApplicationMenuDO menuDO = validateApplicationMenuExist(id);
+        MenuDO menuDO = validateApplicationMenuExist(id);
         menuDO.setMenuName(menuName);
         dataRepository.update(menuDO);
     }
 
     @Override
     public void updateApplicationMenuOrder(ApplicationMenuOrderUpdateReqVO updateReqVO) {
-        ApplicationMenuDO menuDO = validateApplicationMenuExist(updateReqVO.getId());
+        MenuDO menuDO = validateApplicationMenuExist(updateReqVO.getId());
         menuDO.setParentUuid(updateReqVO.getParentUuid());
         dataRepository.update(menuDO);
         List<ApplicationMenuListRespVO> menuListRespList = listApplicationMenu(menuDO.getApplicationId());
@@ -108,14 +108,14 @@ public class ApplicationMenuServiceImpl implements ApplicationMenuService {
 
     @Override
     public void updateApplicationMenuVisible(Long id, Boolean visible) {
-        ApplicationMenuDO menuDO = validateApplicationMenuExist(id);
+        MenuDO menuDO = validateApplicationMenuExist(id);
         menuDO.setIsVisible(visible ? ApplicationMenuVisible.YES.getValue() : ApplicationMenuVisible.NO.getValue());
         dataRepository.update(menuDO);
     }
 
     @Override
     public void copyApplicationMenu(ApplicationMenuCopyReqVO copyReqVO) {
-        ApplicationMenuDO menuDO = validateApplicationMenuExist(copyReqVO.getId());
+        MenuDO menuDO = validateApplicationMenuExist(copyReqVO.getId());
         if (menuDO.getMenuType() == ApplicationMenuTypeEnum.GROUP.getValue()) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_MENU_GROUP_NOT_ALLOW_COPY);
         }
@@ -127,16 +127,16 @@ public class ApplicationMenuServiceImpl implements ApplicationMenuService {
 
     @Override
     public void deleteApplicationMenu(Long id) {
-        ApplicationMenuDO menuDO = validateApplicationMenuExist(id);
+        MenuDO menuDO = validateApplicationMenuExist(id);
         if (menuDO.getMenuType() == ApplicationMenuTypeEnum.GROUP.getValue()
                 && validateApplicationMenuGroupHasChildren(menuDO.getMenuUuid())) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_MENU_GROUP_HAS_CHILDREN);
         }
-        dataRepository.deleteById(ApplicationMenuDO.class, id);
+        dataRepository.deleteById(MenuDO.class, id);
     }
 
-    private ApplicationMenuDO validateApplicationMenuExist(Long id) {
-        ApplicationMenuDO menuDO = dataRepository.findById(ApplicationMenuDO.class, id);
+    private MenuDO validateApplicationMenuExist(Long id) {
+        MenuDO menuDO = dataRepository.findById(MenuDO.class, id);
         if (menuDO == null) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_MENU_NOT_EXIST);
         }
@@ -146,7 +146,7 @@ public class ApplicationMenuServiceImpl implements ApplicationMenuService {
     private boolean validateApplicationMenuGroupHasChildren(String menuUuid) {
         ConfigStore configs = new DefaultConfigStore();
         configs.eq("parent_uuid", menuUuid);
-        return dataRepository.countByConfig(ApplicationMenuDO.class, configs) > 0;
+        return dataRepository.countByConfig(MenuDO.class, configs) > 0;
     }
 
 }

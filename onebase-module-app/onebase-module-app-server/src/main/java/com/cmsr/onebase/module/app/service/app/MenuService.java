@@ -11,7 +11,7 @@ import java.util.List;
  * @Author：huangjie
  * @Date：2025/7/23 13:40
  */
-public interface ApplicationMenuService {
+public interface MenuService {
 
     List<ApplicationMenuListRespVO> listApplicationMenu(Long applicationId);
 

@@ -136,8 +136,8 @@ public class ApplicationServiceImpl implements ApplicationService {
         dataRepository.deleteById(ApplicationDO.class, id);
         ConfigStore configStore = new DefaultConfigStore();
         configStore.eq("application_id", id);
-        dataRepository.deleteByConfig(ApplicationMenuDO.class, configStore);
-        dataRepository.deleteByConfig(ApplicationResourceDO.class, configStore);
+        dataRepository.deleteByConfig(MenuDO.class, configStore);
+        dataRepository.deleteByConfig(ResourceDO.class, configStore);
         dataRepository.deleteByConfig(VersionDO.class, configStore);
         dataRepository.deleteByConfig(VersionMenuDO.class, configStore);
         dataRepository.deleteByConfig(VersionResourceDO.class, configStore);
