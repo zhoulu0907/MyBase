@@ -4,26 +4,24 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
-import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.core.KeyValue;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
-import com.cmsr.onebase.framework.datapermission.core.annotation.DataPermission;
-import com.cmsr.onebase.module.system.framework.sms.core.client.SmsClient;
-import com.cmsr.onebase.module.system.framework.sms.core.client.dto.SmsReceiveRespDTO;
-import com.cmsr.onebase.module.system.framework.sms.core.client.dto.SmsSendRespDTO;
 import com.cmsr.onebase.module.system.dal.dataobject.sms.SmsChannelDO;
 import com.cmsr.onebase.module.system.dal.dataobject.sms.SmsTemplateDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
+import com.cmsr.onebase.module.system.framework.sms.core.client.SmsClient;
+import com.cmsr.onebase.module.system.framework.sms.core.client.dto.SmsReceiveRespDTO;
+import com.cmsr.onebase.module.system.framework.sms.core.client.dto.SmsSendRespDTO;
 import com.cmsr.onebase.module.system.mq.message.sms.SmsSendMessage;
 import com.cmsr.onebase.module.system.mq.producer.sms.SmsProducer;
 import com.cmsr.onebase.module.system.service.member.MemberService;
 import com.cmsr.onebase.module.system.service.user.AdminUserService;
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import jakarta.annotation.Resource;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -54,7 +52,6 @@ public class SmsSendServiceImpl implements SmsSendService {
     private SmsProducer smsProducer;
 
     @Override
-    @DataPermission(enable = false) // 发送短信时，无需考虑数据权限
     public Long sendSingleSmsToAdmin(String mobile, Long userId, String templateCode, Map<String, Object> templateParams) {
         // 如果 mobile 为空，则加载用户编号对应的手机号
         if (StrUtil.isEmpty(mobile)) {

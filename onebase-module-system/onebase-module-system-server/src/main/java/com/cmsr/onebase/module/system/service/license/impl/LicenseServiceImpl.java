@@ -1,24 +1,24 @@
 package com.cmsr.onebase.module.system.service.license.impl;
 
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.util.StrUtil;
-import com.cmsr.onebase.framework.aynline.DataRepository;
-import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.module.system.controller.admin.license.LicenseSaveReqVO;
-import com.cmsr.onebase.module.system.controller.admin.license.LicensePageReqVO;
-import com.cmsr.onebase.module.system.dal.dataobject.license.LicenseDO;
-import com.cmsr.onebase.module.system.service.license.LicenseService;
-import lombok.extern.slf4j.Slf4j;
+import java.util.List;
+
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Compare;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
+import com.cmsr.onebase.framework.aynline.DataRepository;
+import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.module.system.controller.admin.license.LicensePageReqVO;
+import com.cmsr.onebase.module.system.controller.admin.license.LicenseSaveReqVO;
+import com.cmsr.onebase.module.system.dal.dataobject.license.LicenseDO;
+import com.cmsr.onebase.module.system.service.license.LicenseService;
+
+import cn.hutool.core.util.StrUtil;
 import jakarta.annotation.Resource;
-import java.util.Collections;
-import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * License 服务实现类

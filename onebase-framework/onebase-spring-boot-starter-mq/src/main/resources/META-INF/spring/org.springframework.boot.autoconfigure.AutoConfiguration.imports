@@ -1,3 +1,0 @@
-com.cmsr.onebase.framework.mq.redis.config.YudaoRedisMQProducerAutoConfiguration
-com.cmsr.onebase.framework.mq.redis.config.YudaoRedisMQConsumerAutoConfiguration
-com.cmsr.onebase.framework.mq.rabbitmq.config.YudaoRabbitMQAutoConfiguration

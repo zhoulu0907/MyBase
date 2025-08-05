@@ -1,14 +1,13 @@
 package com.cmsr.onebase.module.system.api.user.dto;
 
-import com.fhs.core.trans.vo.VO;
+import java.util.Set;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
-import java.util.Set;
-
 @Schema(description = "RPC 服务 - Admin 用户 Response DTO")
 @Data
-public class AdminUserRespDTO implements VO {
+public class AdminUserRespDTO {
 
     @Schema(description = "用户 ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "1024")
     private Long id;

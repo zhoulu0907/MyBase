@@ -1,29 +1,34 @@
 package com.cmsr.onebase.module.system.service.sms;
 
-import cn.hutool.core.date.LocalDateTimeUtil;
-import cn.hutool.core.lang.Assert;
-import cn.hutool.core.map.MapUtil;
-import com.cmsr.onebase.framework.aynline.DataRepository;
-import com.cmsr.onebase.module.system.api.sms.dto.code.SmsCodeSendReqDTO;
-import com.cmsr.onebase.module.system.api.sms.dto.code.SmsCodeUseReqDTO;
-import com.cmsr.onebase.module.system.api.sms.dto.code.SmsCodeValidateReqDTO;
-import com.cmsr.onebase.module.system.dal.dataobject.sms.SmsCodeDO;
-import com.cmsr.onebase.module.system.dal.mysql.sms.SmsCodeMapper;
-import com.cmsr.onebase.module.system.enums.sms.SmsSceneEnum;
-import com.cmsr.onebase.module.system.framework.sms.config.SmsCodeProperties;
+import static cn.hutool.core.util.RandomUtil.randomInt;
+import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static com.cmsr.onebase.framework.common.util.date.DateUtils.isToday;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.SMS_CODE_EXCEED_SEND_MAXIMUM_QUANTITY_PER_DAY;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.SMS_CODE_EXPIRED;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.SMS_CODE_NOT_FOUND;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.SMS_CODE_SEND_TOO_FAST;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.SMS_CODE_USED;
+
+import java.time.LocalDateTime;
+
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Compare;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
-import jakarta.annotation.Resource;
-import java.time.LocalDateTime;
+import com.cmsr.onebase.framework.aynline.DataRepository;
+import com.cmsr.onebase.module.system.api.sms.dto.code.SmsCodeSendReqDTO;
+import com.cmsr.onebase.module.system.api.sms.dto.code.SmsCodeUseReqDTO;
+import com.cmsr.onebase.module.system.api.sms.dto.code.SmsCodeValidateReqDTO;
+import com.cmsr.onebase.module.system.dal.dataobject.sms.SmsCodeDO;
+import com.cmsr.onebase.module.system.enums.sms.SmsSceneEnum;
+import com.cmsr.onebase.module.system.framework.sms.config.SmsCodeProperties;
 
-import static cn.hutool.core.util.RandomUtil.randomInt;
-import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static com.cmsr.onebase.framework.common.util.date.DateUtils.isToday;
-import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
+import cn.hutool.core.date.LocalDateTimeUtil;
+import cn.hutool.core.lang.Assert;
+import cn.hutool.core.map.MapUtil;
+import jakarta.annotation.Resource;
 
 /**
  * 短信验证码 Service 实现类
@@ -35,9 +40,6 @@ public class SmsCodeServiceImpl implements SmsCodeService {
 
     @Resource
     private SmsCodeProperties smsCodeProperties;
-
-    @Resource
-    private SmsCodeMapper smsCodeMapper;
 
     @Resource
     private SmsSendService smsSendService;

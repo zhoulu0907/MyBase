@@ -1,39 +1,48 @@
 package com.cmsr.onebase.module.system.service.sms;
 
-import cn.hutool.core.exceptions.ExceptionUtil;
-import cn.hutool.core.lang.Assert;
-import cn.hutool.core.util.ReUtil;
-import cn.hutool.core.util.StrUtil;
-import com.cmsr.onebase.framework.aynline.DataRepository;
-import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
-import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.module.system.framework.sms.core.client.SmsClient;
-import com.cmsr.onebase.module.system.framework.sms.core.client.dto.SmsTemplateRespDTO;
-import com.cmsr.onebase.module.system.framework.sms.core.enums.SmsTemplateAuditStatusEnum;
-import com.cmsr.onebase.module.system.controller.admin.sms.vo.template.SmsTemplatePageReqVO;
-import com.cmsr.onebase.module.system.controller.admin.sms.vo.template.SmsTemplateSaveReqVO;
-import com.cmsr.onebase.module.system.dal.dataobject.sms.SmsChannelDO;
-import com.cmsr.onebase.module.system.dal.dataobject.sms.SmsTemplateDO;
-import com.cmsr.onebase.module.system.dal.mysql.sms.SmsTemplateMapper;
-import com.cmsr.onebase.module.system.dal.redis.RedisKeyConstants;
-import com.google.common.annotations.VisibleForTesting;
-import lombok.extern.slf4j.Slf4j;
-import org.anyline.data.param.ConfigStore;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.Compare;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.stereotype.Service;
+import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.SMS_CHANNEL_DISABLE;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.SMS_CHANNEL_NOT_EXISTS;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.SMS_TEMPLATE_API_AUDIT_CHECKING;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.SMS_TEMPLATE_API_AUDIT_FAIL;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.SMS_TEMPLATE_API_ERROR;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.SMS_TEMPLATE_API_NOT_FOUND;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.SMS_TEMPLATE_CODE_DUPLICATE;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.SMS_TEMPLATE_NOT_EXISTS;
 
-import jakarta.annotation.Resource;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
-import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
+import org.anyline.data.param.ConfigStore;
+import org.anyline.data.param.init.DefaultConfigStore;
+import org.anyline.entity.Compare;
+import org.anyline.entity.Order;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.stereotype.Service;
+
+import com.cmsr.onebase.framework.aynline.DataRepository;
+import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
+import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.module.system.controller.admin.sms.vo.template.SmsTemplatePageReqVO;
+import com.cmsr.onebase.module.system.controller.admin.sms.vo.template.SmsTemplateSaveReqVO;
+import com.cmsr.onebase.module.system.dal.dataobject.sms.SmsChannelDO;
+import com.cmsr.onebase.module.system.dal.dataobject.sms.SmsTemplateDO;
+import com.cmsr.onebase.module.system.dal.redis.RedisKeyConstants;
+import com.cmsr.onebase.module.system.framework.sms.core.client.SmsClient;
+import com.cmsr.onebase.module.system.framework.sms.core.client.dto.SmsTemplateRespDTO;
+import com.cmsr.onebase.module.system.framework.sms.core.enums.SmsTemplateAuditStatusEnum;
+import com.google.common.annotations.VisibleForTesting;
+
+import cn.hutool.core.exceptions.ExceptionUtil;
+import cn.hutool.core.lang.Assert;
+import cn.hutool.core.util.ReUtil;
+import cn.hutool.core.util.StrUtil;
+import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 短信模板 Service 实现类
@@ -49,9 +58,6 @@ public class SmsTemplateServiceImpl implements SmsTemplateService {
      * 正则表达式，匹配 {} 中的变量
      */
     private static final Pattern PATTERN_PARAMS = Pattern.compile("\\{(.*?)}");
-
-    @Resource
-    private SmsTemplateMapper smsTemplateMapper;
 
     @Resource
     private SmsChannelService smsChannelService;
@@ -111,7 +117,11 @@ public class SmsTemplateServiceImpl implements SmsTemplateService {
     }
 
     private void validateSmsTemplateExists(Long id) {
-        if (smsTemplateMapper.selectById(id) == null) {
+        // if (smsTemplateMapper.selectById(id) == null) {
+        //     throw exception(SMS_TEMPLATE_NOT_EXISTS);
+        // }
+        SmsTemplateDO template = dataRepository.findById(SmsTemplateDO.class,id);
+        if (template == null) {
             throw exception(SMS_TEMPLATE_NOT_EXISTS);
         }
     }
@@ -135,7 +145,9 @@ public class SmsTemplateServiceImpl implements SmsTemplateService {
 
     @Override
     public PageResult<SmsTemplateDO> getSmsTemplatePage(SmsTemplatePageReqVO pageReqVO) {
-        return smsTemplateMapper.selectPage(pageReqVO);
+        // return smsTemplateMapper.selectPage(pageReqVO);
+        return dataRepository.findPageWithConditions(SmsTemplateDO.class, new DefaultConfigStore()
+                .order("id", Order.TYPE.DESC), pageReqVO.getPageNo(), pageReqVO.getPageSize());
     }
 
     @Override

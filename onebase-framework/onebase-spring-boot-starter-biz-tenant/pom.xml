@@ -44,20 +44,6 @@
             <artifactId>onebase-spring-boot-starter-rpc</artifactId>
             <optional>true</optional>
         </dependency>
-
-        <!-- Job 定时任务相关 -->
-        <dependency>
-            <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-spring-boot-starter-job</artifactId>
-            <optional>true</optional>
-        </dependency>
-
-        <!-- 消息队列相关 -->
-        <dependency>
-            <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-spring-boot-starter-mq</artifactId>
-            <optional>true</optional>
-        </dependency>
         <dependency>
             <groupId>org.springframework.kafka</groupId>
             <artifactId>spring-kafka</artifactId>

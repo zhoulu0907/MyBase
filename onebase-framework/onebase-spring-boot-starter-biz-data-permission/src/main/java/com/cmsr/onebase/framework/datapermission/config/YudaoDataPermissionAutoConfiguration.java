@@ -5,9 +5,8 @@ import com.cmsr.onebase.framework.datapermission.core.db.DataPermissionRuleHandl
 import com.cmsr.onebase.framework.datapermission.core.rule.DataPermissionRule;
 import com.cmsr.onebase.framework.datapermission.core.rule.DataPermissionRuleFactory;
 import com.cmsr.onebase.framework.datapermission.core.rule.DataPermissionRuleFactoryImpl;
-import com.cmsr.onebase.framework.mybatis.core.util.MyBatisUtils;
-import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
-import com.baomidou.mybatisplus.extension.plugins.inner.DataPermissionInterceptor;
+//import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
+//import com.baomidou.mybatisplus.extension.plugins.inner.DataPermissionInterceptor;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
 

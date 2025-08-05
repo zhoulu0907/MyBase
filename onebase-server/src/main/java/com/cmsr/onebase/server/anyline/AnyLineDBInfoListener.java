@@ -2,7 +2,8 @@ package com.cmsr.onebase.server.anyline;
 
 import com.cmsr.onebase.framework.common.anyline.web.BizException;
 import com.cmsr.onebase.framework.common.anyline.web.StatusCode;
-import com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO;
+import com.cmsr.onebase.framework.common.util.snowflake.SnowflakeId;
+import com.cmsr.onebase.framework.data.base.BaseDO;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
 import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
@@ -50,6 +51,16 @@ public class AnyLineDBInfoListener implements DMListener {
         TENANT_IGNORE_TABLES.add("system_notify_template");
         TENANT_IGNORE_TABLES.add("system_oauth2_client");
         TENANT_IGNORE_TABLES.add("system_license");
+        TENANT_IGNORE_TABLES.add("infra_codegen_column");
+        TENANT_IGNORE_TABLES.add("infra_codegen_table");
+        TENANT_IGNORE_TABLES.add("infra_config");
+        TENANT_IGNORE_TABLES.add("infra_data_source_config");
+        TENANT_IGNORE_TABLES.add("infra_file_config");
+        TENANT_IGNORE_TABLES.add("infra_file_content");
+        TENANT_IGNORE_TABLES.add("infra_file");
+        TENANT_IGNORE_TABLES.add("infra_api_access_log");
+        TENANT_IGNORE_TABLES.add("infra_api_error_log");
+
         // 可以根据需要添加更多表
     }
 
@@ -75,8 +86,10 @@ public class AnyLineDBInfoListener implements DMListener {
         // 加入创建时间和创建人等参数
         if (Objects.nonNull(obj) && obj instanceof BaseDO baseDO) {
             // 设置雪花ID
-            // baseDO.setId(SnowflakeId.nextId());
-            // log.info("anyline global prepareInsert ---------> snow id:{}",baseDO.getId());
+            if(baseDO.getId() == null) {
+                baseDO.setId(SnowflakeId.nextId());
+                log.info("anyline global prepareInsert ---------> snow id:{}",baseDO.getId());
+            }
 
             // 创建时间为空，则以当前时间为插入时间
             LocalDateTime current = LocalDateTime.now();
@@ -310,7 +323,7 @@ public class AnyLineDBInfoListener implements DMListener {
      /**
      * 向查询条件注入租户标志
      *
-     * @param obj
+     * @param
      */
     private void injectTenantIdAndDeleteToQuery(String table, ConfigStore configs) {
         boolean shouldIgnore = isTableTenantIgnored2(table);
