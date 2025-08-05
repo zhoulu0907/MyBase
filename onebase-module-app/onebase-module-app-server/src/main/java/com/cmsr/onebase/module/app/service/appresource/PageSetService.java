@@ -4,15 +4,15 @@ import com.cmsr.onebase.module.app.api.appresource.dto.CreatePageSetDTO;
 import com.cmsr.onebase.module.app.api.appresource.dto.PageSetRespDTO;
 import com.cmsr.onebase.module.app.controller.admin.appresource.vo.LoadPageSetReqVO;
 import com.cmsr.onebase.module.app.controller.admin.appresource.vo.LoadPageSetRespVO;
-import com.cmsr.onebase.module.app.controller.admin.appresource.vo.SavePageSetVO;
+import com.cmsr.onebase.module.app.controller.admin.appresource.vo.SavePageSetReqVO;
 
 public interface PageSetService {
 
-    Long createPageSet(CreatePageSetDTO createPageSetDTO);
+    String createPageSet(CreatePageSetDTO createPageSetDTO);
 
-    void deletePageSet(String code);
+    void deletePageSet(String pageSetCode);
 
-    Boolean savePageSet(SavePageSetVO savePageSetVO);
+    Boolean savePageSet(SavePageSetReqVO savePageSetReqVO);
 
     LoadPageSetRespVO loadPageSet(LoadPageSetReqVO loadPageSetReqVO);
 

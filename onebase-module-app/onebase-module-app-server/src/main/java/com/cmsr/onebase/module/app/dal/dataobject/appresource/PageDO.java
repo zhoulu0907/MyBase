@@ -13,7 +13,7 @@ import lombok.EqualsAndHashCode;
  * @Author mickey
  * @Date 2025/7/30 14:51
  */
-@Table(name="app_page")
+@Table(name="app_resource_page")
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class PageDO extends TenantBaseDO {
@@ -23,6 +23,9 @@ public class PageDO extends TenantBaseDO {
 
     @Column(name = "page_name", columnDefinition= "VARCHAR(255) NOT NULL", comment = "页面名称")
     private String pageName;
+
+    @Column(name = "page_type", columnDefinition= "VARCHAR(64) NOT NULL", comment = "页面类型 list edit detail")
+    private String pageType;
 
     /**
      * 页面标题

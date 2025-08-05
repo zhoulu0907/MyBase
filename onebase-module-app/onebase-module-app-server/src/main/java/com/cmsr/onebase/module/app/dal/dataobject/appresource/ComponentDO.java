@@ -7,7 +7,7 @@ import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-@Table(name="app_component")
+@Table(name="app_resource_component")
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class ComponentDO extends TenantBaseDO {
@@ -58,8 +58,8 @@ public class ComponentDO extends TenantBaseDO {
     /**
      * readOnly
      */
-    @Column(name = "read_only", columnDefinition = "VARCHAR(255) NOT NULL", comment = "只读绑定（如PageData.isViewMode）")
-    private String readOnly;
+    @Column(name = "read_only", columnDefinition = "BOOLEAN NOT NULL", comment = "只读绑定（如PageData.isViewMode）")
+    private Boolean readOnly;
 
     /**
      * 是否必填

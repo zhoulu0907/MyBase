@@ -4,7 +4,7 @@ import com.cmsr.onebase.module.app.dal.dataobject.appresource.PageDO;
 
 public class PageUtils {
 
-    public static PageDO initPage(String pageCode, String pageName, String routerPath) {
+    public static PageDO initPage(String pageCode, String pageName, String routerPath, String pageType) {
         PageDO pageDO = new PageDO();
         pageDO.setPageCode(pageCode);
         pageDO.setPageName(pageName);
@@ -13,12 +13,13 @@ public class PageUtils {
         pageDO.setWidth("auto");
         pageDO.setMargin("0");
         pageDO.setBackgroundColor("#FFFFFF");
-        pageDO.setMainMetadata("");
+        pageDO.setMainMetadata("{}");
         pageDO.setBpmEnabled(false);
         pageDO.setRouterPath(routerPath);
         pageDO.setRouterName(pageName);
         pageDO.setRouterMetaAuthRequired(false);
         pageDO.setRouterMetaTitle(pageName);
+        pageDO.setPageType(pageType);
 
         return pageDO;
     }

@@ -31,9 +31,9 @@ public class PageSetApiImpl implements PageSetApi{
     }
 
     @Override
-    public CommonResult<Long> createPageSet(CreatePageSetDTO createPageSetDTO) {
-        Long id = pageSetService.createPageSet(createPageSetDTO);
-        return CommonResult.success(id);
+    public CommonResult<String> createPageSet(CreatePageSetDTO createPageSetDTO) {
+        String pageSetCode = pageSetService.createPageSet(createPageSetDTO);
+        return CommonResult.success(pageSetCode);
     }
 
     @Override

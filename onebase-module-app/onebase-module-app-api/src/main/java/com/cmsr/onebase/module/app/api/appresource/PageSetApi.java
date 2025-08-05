@@ -30,7 +30,7 @@ public interface PageSetApi{
 
     @PostMapping(PREFIX + "/create")
     @Operation(summary = "创建pageSet")
-    CommonResult<Long> createPageSet(@RequestBody CreatePageSetDTO createPageSetDTO);
+    CommonResult<String> createPageSet(@RequestBody CreatePageSetDTO createPageSetDTO);
 
     @DeleteMapping(PREFIX + "/delete")
     @Operation(summary = "删除pageSet")
