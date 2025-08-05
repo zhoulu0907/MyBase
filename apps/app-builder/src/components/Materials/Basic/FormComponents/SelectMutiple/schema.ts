@@ -115,7 +115,7 @@ const XSelectMutiple: XInputSelectMutipleSchema = {
     ],
     config: {
         ...baseDefault,
-        label: '标题',
+        label: '下拉多选',
         description: '',
         tooltip: '',
         width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],

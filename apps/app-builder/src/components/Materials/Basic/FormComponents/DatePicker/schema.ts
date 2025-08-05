@@ -118,7 +118,7 @@ const XDatePicker: XInputDatePickerSchema = {
     ],
     config: {
         ...baseDefault,
-        label: '标题',
+        label: '日期选择',
         description: '',
         tooltip: '',
         width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],

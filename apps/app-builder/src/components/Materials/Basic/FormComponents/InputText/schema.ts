@@ -157,7 +157,7 @@ const XInputText: XInputTextSchema = {
     ],
     config: {
         ...baseDefault,
-        label: '标题',
+        label: '单行文本',
         placeholder: '请输入文字',
         description: '',
         tooltip: '',
