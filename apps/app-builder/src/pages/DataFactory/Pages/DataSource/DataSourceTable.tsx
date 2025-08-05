@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Button, Table, type TableColumnProps, Space, Modal, Message } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
-import { getDatasourcePage, deleteDatasource } from '@/services';
+import { getDatasourcePage, deleteDatasource } from '@onebase/app/src/services/dataresource';
 import styles from './index.module.less';
 
 // 数据源记录类型
@@ -55,7 +55,7 @@ const DataSourceTable = ({
   };
 
   useEffect(() => {
-    // getTableData();
+    getTableData();
   }, []);
 
   const gotoEdit = (id: number) => {

@@ -1,9 +1,3 @@
-// 分页结果类型
-export interface PageResult<T = any> {
-  list: T[];
-  total: number;
-}
-
 // 数据源配置类型
 export interface DatasourceConfig {
   host: string;
