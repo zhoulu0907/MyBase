@@ -90,9 +90,6 @@ public class TenantServiceImpl implements TenantService {
     private DataRepository dataRepository;
     @Resource
     private LicenseService licenseService;
-    @Autowired
-    private TenantService tenantService;
-
 
     @Override
     public List<Long> getTenantIdList() {
@@ -239,7 +236,7 @@ public class TenantServiceImpl implements TenantService {
             // 获取license总人数限制
             Integer licenseTotalCount = license.getTenantLimit();
             // 获取已分配人员数量
-            Integer allocatedCount = tenantService.getTenantCountByStatus(TenantStatusEnum.NORMAL);
+            Integer allocatedCount = getTenantCountByStatus(TenantStatusEnum.NORMAL);
 
             // 如果传入的分配人员数量加上已分配数量超过license限制，则报错
             if (updateReqVO.getAllocatePersonCount()!= null &&
