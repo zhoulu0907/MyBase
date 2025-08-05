@@ -145,6 +145,6 @@ yudao:
   env: # 多环境的配置项
     tag: ${HOSTNAME}
   security:
-    mock-enable: true
+    mock-enable: false
   access-log: # 访问日志的配置项
     enable: true
