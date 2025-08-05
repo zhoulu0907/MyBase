@@ -1,6 +1,6 @@
-import { baseConfig, baseDefault, statusConfig, widthConfig, type ICommonBaseType, type TStatusSelectKeyType, type TWidthSelectKeyType } from "@/components/Materials/common";
-import { CONFIG_TYPES, STATUS_OPTIONS, STATUS_VALUES, WIDTH_OPTIONS, WIDTH_VALUES } from "../../../constants";
-import type { IDescriptionConfigType, ILabelConfigType, INumberConfigType, IPlaceholderConfigType, ISelectConfigType, IStatusConfigType, ITextAreaConfigType, ITextConfigType, ITooltipConfigType, IWidthConfigType, TSelectDefaultType, TTextAreaDefaultType, TTextDefaultType } from "../../../types";
+import { baseConfig, baseDefault, labelColSpanConfig, layoutConfig, statusConfig, widthConfig, type ICommonBaseType, type TLayoutSelectKeyType, type TStatusSelectKeyType, type TWidthSelectKeyType } from "@/components/Materials/common";
+import { CONFIG_TYPES, LAYOUT_OPTIONS, LAYOUT_VALUES, STATUS_OPTIONS, STATUS_VALUES, WIDTH_OPTIONS, WIDTH_VALUES } from "@/components/Materials/constants";
+import type { IBooleanConfigType, IDescriptionConfigType, ILabelColSpanConfigType, ILabelConfigType, ILayoutConfigType, INumberConfigType, IPlaceholderConfigType, ISelectConfigType, IStatusConfigType, ITextAreaConfigType, ITextConfigType, ITooltipConfigType, IWidthConfigType, TBooleanDefaultType, TNumberDefaultType, TSelectDefaultType, TTextAreaDefaultType, TTextDefaultType } from "@/components/Materials/types";
 
 
 export interface XInputTimePickerSchema {
@@ -18,8 +18,11 @@ export type TXInputTimePickerEditData = Array<
   IStatusConfigType<TStatusSelectKeyType> |
   IWidthConfigType<TWidthSelectKeyType> |
   INumberConfigType |
+  ILabelColSpanConfigType |
   ISelectConfigType<TWidthSelectKeyType | TStatusSelectKeyType > |
-  ITextAreaConfigType
+  ITextAreaConfigType|
+  IBooleanConfigType|
+  ILayoutConfigType<TLayoutSelectKeyType>
 >;
 
 
@@ -54,6 +57,27 @@ export interface XInputTimePickerConfig extends ICommonBaseType {
      * 字段宽度
      */
     width: TSelectDefaultType<TWidthSelectKeyType>;
+
+    /**
+     * 是否必填，未填写时提交报错
+     */
+    required: TBooleanDefaultType;
+
+    /**
+     * 表单的布局：水平、垂直（默认）
+     * 可选值: 'vertical' | 'horizontal'
+     */
+    layout?: TLayoutSelectKeyType;
+
+    /**
+     * 标签宽度
+     */
+    labelColSpan?: TNumberDefaultType;
+
+    /**
+     * 隐藏时是否提交数据，开启后隐藏状态仍会保存值
+     */
+    saveWithHidden?: TBooleanDefaultType;
 }
 
 
@@ -76,17 +100,33 @@ const XTimePicker: XInputTimePickerSchema = {
             name: '提示文字',
             type: CONFIG_TYPES.TOOLTIP_INPUT,
         },
+        layoutConfig,
+        labelColSpanConfig,
+        {
+            key: 'required',
+            name: '开启必填',
+            type: CONFIG_TYPES.SWITCH_INPUT,
+        },
+        {
+            key: 'saveWithHidden',
+            name: '隐藏时提交数据',
+            type: CONFIG_TYPES.SWITCH_INPUT,
+        },
         statusConfig,
-        widthConfig
+        widthConfig,
     ],
     config: {
         ...baseDefault,
-        label: '',
+        label: '标题',
         description: '',
         tooltip: '',
         width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
         status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
         defaultValue: '',
+        required: false,
+        layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
+        labelColSpan: 5,
+        saveWithHidden: false,
     }
 };
 

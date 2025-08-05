@@ -1,3 +1,4 @@
+import helpSVG from "@/assets/images/help_icon.svg";
 import {
     Avatar,
     Button,
@@ -6,12 +7,11 @@ import {
     Menu,
     Tabs,
 } from "@arco-design/web-react";
-import { IconPoweroff, IconUser, IconMenu } from "@arco-design/web-react/icon";
+import { IconMenu, IconPoweroff, IconUser } from "@arco-design/web-react/icon";
 import { TokenManager } from "@onebase/common";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "react-router-dom";
-import helpSVG from "@/assets/images/help_icon.svg";
 import styles from "./header.module.less";
 
 const { Header } = Layout;
@@ -28,17 +28,17 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     // Tab 切换
     // 根据当前路径设置 activeTab
     const getTabKeyFromPath = (pathname: string) => {
-        if (pathname.includes("onebase/create-app/page-manager"))
-            return "create-app/page-manager";
-        if (pathname.includes("onebase/create-app/integrated-management"))
-            return "create-app/integrated-management";
-        if (pathname.includes("onebase/create-app/data-factory"))
-            return "create-app/data-factory";
-        if (pathname.includes("onebase/create-app/app-setting"))
-            return "create-app/app-setting";
-        if (pathname.includes("onebase/create-app/app-release"))
-            return "create-app/app-release";
-        return "create-app/page-manager";
+        if (pathname.includes('onebase/create-app/page-manager'))
+            return 'page-manager';
+        if (pathname.includes('onebase/create-app/integrated-management'))
+            return 'integrated-management';
+        if (pathname.includes('onebase/create-app/data-factory'))
+            return 'data-factory';
+        if (pathname.includes('onebase/create-app/app-setting'))
+            return 'app-setting';
+        if (pathname.includes('onebase/create-app/app-release'))
+            return 'app-release';
+        return 'page-manager';
     };
     const [activeTab, setActiveTab] = useState(() =>
         getTabKeyFromPath(location.pathname)
@@ -60,19 +60,19 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
         // 清除 token
         TokenManager.clearToken();
         // 跳转到登录页
-        navigate("/login");
+        navigate('/login');
     };
 
     // 用户菜单
     const userMenu = (
         <Menu>
-            <Menu.Item key="profile">
+            <Menu.Item key='profile'>
                 <IconUser />
-                {t("header.profile")}
+                {t('header.profile')}
             </Menu.Item>
-            <Menu.Item key="logout" onClick={handleLogout}>
+            <Menu.Item key='logout' onClick={handleLogout}>
                 <IconPoweroff />
-                {t("header.logout")}
+                {t('header.logout')}
             </Menu.Item>
         </Menu>
     );
@@ -84,18 +84,21 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
                     <Button
                         shape="square"
                         icon={<IconMenu />}
+                        onClick={() => {
+                            navigate("/onebase/my-app");
+                        }}
                         className={styles.menuIcon}
                     />
 
                     <Button
                         iconOnly
-                        shape="square"
+                        shape='square'
                         icon={<IconUser />}
-                        style={{ backgroundColor: "#E0A951" }}
+                        style={{ backgroundColor: '#E0A951' }}
                     />
                     <div className={styles.appName}>未命名应用</div>
-                    <Button type="text" style={{ background: "#eaf0fd" }}>
-                        {t("header.developing")}
+                    <Button type='text' style={{ background: '#eaf0fd' }}>
+                        {t('header.developing')}
                     </Button>
                 </div>
 
@@ -105,21 +108,21 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
                     onChange={(key) => {
                         setActiveTab(key);
                         switch (key) {
-                            case "create-app/page-manager":
+                            case "page-manager":
                                 navigate("/onebase/create-app/page-manager");
                                 break;
-                            case "create-app/integrated-management":
+                            case "integrated-management":
                                 navigate(
                                     "/onebase/create-app/integrated-management"
                                 );
                                 break;
-                            case "create-app/data-factory":
+                            case "data-factory":
                                 navigate("/onebase/create-app/data-factory");
                                 break;
-                            case "create-app/app-setting":
+                            case "app-setting":
                                 navigate("/onebase/create-app/app-setting");
                                 break;
-                            case "create-app/app-release":
+                            case "app-release":
                                 navigate("/onebase/create-app/app-release");
                                 break;
                             default:
@@ -127,58 +130,48 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
                         }
                     }}
                     size="large"
-                    inkBarSize={{ width: 20, height: 4.5 }}
                 >
                     <Tabs.TabPane
-                        key="create-app/page-manager"
-                        title={t("createApp.pageManager")}
-                    />
-                    <Tabs.TabPane
-                        key="create-app/integrated-management"
-                        title={t("createApp.integratedManagement")}
-                    />
-                    <Tabs.TabPane
-                        key="create-app/data-factory"
+                        key="data-factory"
                         title={t("createApp.dataFactory")}
                     />
                     <Tabs.TabPane
-                        key="create-app/app-setting"
+                        key="page-manager"
+                        title={t("createApp.pageManager")}
+                    />
+                    <Tabs.TabPane
+                        key="integrated-management"
+                        title={t("createApp.integratedManagement")}
+                    />
+
+                    <Tabs.TabPane
+                        key="app-setting"
                         title={t("createApp.appSetting")}
                     />
                     <Tabs.TabPane
-                        key="create-app/app-release"
+                        key="app-release"
                         title={t("createApp.appRelease")}
                     />
                 </Tabs>
 
                 <div className={styles.userInfo}>
                     <Button
-                        type="text"
-                        shape="circle"
-                        icon={
-                            <img
-                                src={helpSVG}
-                                alt="Help"
-                                style={{ width: 30 }}
-                            />
-                        }
+                        type='text'
+                        shape='circle'
+                        icon={<img src={helpSVG} alt='Help' style={{ width: 30 }} />}
                         // onClick={() => navigate('/onebase/setting')}
                     />
 
                     <Button
-                        type="outline" /* onClick={() => navigate('/onebase/setting')} */
+                        type='outline' /* onClick={() => navigate('/onebase/setting')} */
                     >
-                        {t("createApp.preview")}
+                        {t('createApp.preview')}
                     </Button>
 
-                    <Dropdown droplist={userMenu} position="bottom">
+                    <Dropdown droplist={userMenu} position='bottom'>
                         <div className={styles.userDropdown}>
-                            <Avatar
-                                size={32}
-                                style={{ backgroundColor: "#4FAE7B" }}
-                            >
-                                {tokenInfo?.username?.toString().charAt(0) ||
-                                    "U"}
+                            <Avatar size={32} style={{ backgroundColor: '#4FAE7B' }}>
+                                {tokenInfo?.username?.toString().charAt(0) || 'U'}
                             </Avatar>
                         </div>
                     </Dropdown>

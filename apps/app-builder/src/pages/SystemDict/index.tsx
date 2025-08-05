@@ -1,27 +1,31 @@
 import DictList from '@/pages/SystemDict/components/dict-list';
 import DictionaryTable from '@/pages/SystemDict/components/dict-table';
-import { Grid, Message, Modal } from '@arco-design/web-react';
+import { Layout, Message, Modal, Button, Space, Empty, Divider } from '@arco-design/web-react';
 import {
     createDict,
     deleteDict,
     deleteDictData,
     getAllDictList,
     getDictDataListByPage,
-    updateDict
+    updateDict,
+    getDictDetail
 } from '@onebase/platform-center';
 import type { PageParam } from '@onebase/platform-center/src/types/common';
 import type { DictData, DictItem } from '@onebase/platform-center/src/types/dict';
 import { useEffect, useState } from 'react';
 import DictDataModal from './components/dict-data-modal';
 import DictModal from './components/dict-modal';
+import InfoPanel from '@/components/InfoPanel';
 import styles from './index.module.less';
 
-const { Row, Col } = Grid;
-// 移除所有dictItemToUI、uiToDictItem、dictDataToUI、uiToDictData等转换函数
+const Sider = Layout.Sider;
+const Header = Layout.Header;
+const Content = Layout.Content;
 
 export default function SystemDictPage() {
   const [dictList, setDictList] = useState<DictItem[]>([]);
-  const [activeDictId, setDctiveDictId] = useState<string | undefined>(undefined);
+  const [activeDictId, setActiveDictId] = useState<number | undefined>(undefined);
+  const [activeDict, setActiveDict] = useState<DictItem | undefined>(undefined);
   const [tableData, setTableData] = useState<DictData[]>([]);
   const [_loading, setLoading] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -39,22 +43,23 @@ export default function SystemDictPage() {
 
   useEffect(() => {
     const loadDictList = async () => {
+      // TODO: 联调后移除mock数据
       // const data = await getAllDictList();
       // setDictList(data);
       // if (data.length > 0) {
-      //   setDctiveDictId(data[0].id);
+      //   setActiveDictId(data[0].id);
       // }
       getAllDictList().then(data => {
         setDictList(data)
       }).catch(err => {
         console.log(err)
-        setDictList([{ id: '1', name: '用户类型', type: 'user_type', status: 1 },
-          { id: '2', name: '角色权限', type: 'role_permission', status: 0 },
-          { id: '3', name: '系统配置', type: 'system_config', remark: 'hahaha', status: 1 }])
+        setDictList([{ id: 1, name: '用户类型', type: 'user_type', status: 1, remark: '描述' },
+          { id: 2, name: '角色权限', type: 'role_permission', status: 0 },
+          { id: 3, name: '系统配置', type: 'system_config', remark: '这是一段描述', status: 1 }])
         })
-        if (dictList.length > 0) {
-          setDctiveDictId(dictList[0].id);
-        }
+      if (dictList.length > 0) {
+        setActiveDictId(dictList[0].id);
+      }
     };
     loadDictList();
   }, []);
@@ -68,14 +73,31 @@ export default function SystemDictPage() {
           pageNo: currentPage,
           pageSize,
         };
-        const res = await getDictDataListByPage(params);
-        setTableData(res.list);
-        setTotal(res.total);
-        setLoading(false);
+        // TODO: 调接口后移除mock data
+        // const res = await getDictDataListByPage(params);
+        // setTableData(res.list);
+        // setTotal(res.total);
+        // setLoading(false);
+        getDictDataListByPage(params).then(() => { 
+        }).catch(() => {
+          setTableData([{ id: 10, label: '1', value: '1', status: 1, remark: '1', sort: 1}]);
+        })
+        
       };
       loadTableData();
     }
   }, [activeDictId, currentPage, pageSize, dictList]);
+
+  useEffect(() => {
+    if (!activeDictId) 
+      return;
+    const activeDict = dictList.find(item => item.id === activeDictId);
+    setActiveDict(activeDict);
+    // 描述从详情接口获取
+    getDictDetail(activeDictId).then(res => {
+      setActiveDict(prev => ({ ...prev, ...res }))
+    });
+  }, [activeDictId])
 
   useEffect(() => {
     setFilteredDictList(
@@ -85,8 +107,27 @@ export default function SystemDictPage() {
     );
   }, [dictList, dictSearch]);
 
-  const handleDictSelect = (id: string | undefined) => {
-    setDctiveDictId(id);
+  // 编辑/删除字典按钮
+  const OperationButtons = (
+    <Space size='small'>
+      <Button
+        type="secondary"
+        onClick={() => {
+          setAddDictModalVisible(true);
+          setEditDict(activeDict!)
+        }}
+      >编辑</Button>
+      <Button
+        type="secondary"
+        onClick={() => {
+          handleDeleteDict(activeDict?.id!)
+        }}
+      >删除</Button>
+    </Space>
+  )
+
+  const handleDictSelect = (id: number | undefined) => {
+    setActiveDictId(id);
     setCurrentPage(1);
   };
 
@@ -94,7 +135,7 @@ export default function SystemDictPage() {
     setCurrentPage(page);
   };
   // 删除字典
-  const handleDeleteDict = async (id: string) => {
+  const handleDeleteDict = async (id: number) => {
     Modal.confirm({
       title: '确认删除',
       content: '确定要删除这条数据吗？',
@@ -108,7 +149,7 @@ export default function SystemDictPage() {
     })
   }
   // 删除字典数据
-  const handleDeleteDictData = async (id: string) => {
+  const handleDeleteDictData = async (id: number) => {
     Modal.confirm({
       title: '确认删除',
       content: '确定要删除这条数据吗？',
@@ -122,7 +163,7 @@ export default function SystemDictPage() {
     });
   };
 
-  // 新增/编辑
+  // 新增/编辑字典
   const handleDictModalOk = async (values: DictItem) => {
     setModalLoading(true);
     try {
@@ -141,7 +182,11 @@ export default function SystemDictPage() {
     }
   };
 
-  // 字典项新增/编辑提交
+  const handleDictDataEdit= (item: DictData) => {
+    setEditItem(tableData.find(d => d.id === item.id) || null)
+    setDictDataModalVisible(true)
+  };
+// 字典项新增/编辑提交
 //   const handleDictDataModalOk = async (values: DictData) => {
 //     setItemModalLoading(true);
 //     try {
@@ -170,35 +215,48 @@ export default function SystemDictPage() {
 
   return (
     <div className={styles.systemDictPage}>
-      <Row align="stretch" gutter={20} style={{height: '100%'}}>
-        <Col flex="240px" className={styles.leftPanel}>
+      <Layout className={styles.pageLayout}>
+        <Sider width={252} className={styles.leftPanel}>
           <DictList
             list={filteredDictList}
-            activeId={activeDictId || ''}
+            activeId={activeDictId || undefined}
             searchValue={dictSearch}
             onSearchChange={setDictSearch}
             onAdd={() => { setAddDictModalVisible(true); setEditDict(null); }}
-            onImport={() => {/* TODO: 导入字典 */}}
-            onEdit={(item) => { setAddDictModalVisible(true); setEditDict(item) }}
-            onDelete={async (id) => handleDeleteDict(id || '')}
             onSelect={(id) => handleDictSelect(id)}
           />
-        </Col>
-        <Col flex='1' className={styles.rightPanel}>
-          <DictionaryTable
-            data={tableData}
-            currentPage={currentPage}
-            pageSize={pageSize}
-            total={total}
-            onPageChange={handlePageChange}
-            searchValue={itemSearch}
-            onSearchChange={setItemSearch}
-            onAdd={() => { setDictDataModalVisible(true); setEditItem(null); }}
-            onEdit={(item) => setEditItem(tableData.find(d => d.id.toString() === item.id) || null)}
-            onDelete={(id) => handleDeleteDictData(id)}
-          />
-        </Col>
-      </Row>
+        </Sider>
+        <Content className={styles.rightPanel}>
+          {!activeDictId ? 
+            <Empty /> :
+            (
+              <>
+                <Header>
+                  <InfoPanel
+                    title={activeDict?.name}
+                    description={activeDict?.remark}
+                    rightChildren={OperationButtons}
+                    wrapperClassName={styles.infoPanel}
+                  >
+                  </InfoPanel>
+                  <Divider style={{ margin: '16px 0' }} />
+                </Header>
+                <DictionaryTable
+                  data={tableData}
+                  currentPage={currentPage}
+                  pageSize={pageSize}
+                  total={total}
+                  onPageChange={handlePageChange}
+                  searchValue={itemSearch}
+                  onSearchChange={setItemSearch}
+                  onAdd={() => { setDictDataModalVisible(true); setEditItem(null); }}
+                  onEdit={(item) => handleDictDataEdit(item)}
+                  onDelete={(id) => handleDeleteDictData(id)}
+                />
+              </>
+            )}
+        </Content>
+      </Layout>
       <DictModal
         visible={addDictModalVisible}
         loading={modalLoading}
@@ -210,7 +268,7 @@ export default function SystemDictPage() {
         } : undefined}
         onOk={handleDictModalOk}
         onCancel={() => { setAddDictModalVisible(false); setEditDict(null); }}
-        title={editDict ? '编辑数据字典' : '新增数据字典'}
+        title={editDict ? '编辑数据字典' : '新建数据字典'}
       />
       <DictDataModal
         visible={dictDataModalVisible}
@@ -227,7 +285,7 @@ export default function SystemDictPage() {
         // TODO(Fix Bug): 调通后解除注释
         // onOk={handleDictDataModalOk}
         onCancel={() => { setDictDataModalVisible(false); setEditItem(null); }}
-        title={editItem ? '编辑字典项' : '新增字典项'}
+        title={editItem ? '编辑字典值' : '添加字典值'}
       />
     </div>
   );

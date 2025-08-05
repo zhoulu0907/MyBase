@@ -19,7 +19,6 @@ export const FORM_COMPONENT_TYPES = {
   CHECKBOX: 'XCheckbox',
   SELECT_ONE: 'XSelectOne',
   SELECT_MUTIPLE: 'XSelectMutiple',
-  READONLY_BOX: 'XReadonlyBox',
   USER_SELECT: 'XUserSelect',
   DEPT_SELECT: 'XDeptSelect',
   FILE_UPLOAD: 'XFileUpload',
@@ -35,6 +34,19 @@ export const LAYOUT_COMPONENT_TYPES = {
 // 列表组件类型
 export const LIST_COMPONENT_TYPES = {
   TABLE: 'XTable',
+  CALENDAR: 'XCalendar',
+  TIMELINE: 'XTimeline',
+  CAROUSEL: 'XCarousel',
+  LIST: 'XList',
+  COLLAPSE: 'XCollapse',
+} as const;
+
+// 展示组件类型
+export const SHOW_COMPONENT_TYPES = {
+  INFO_NOTICE: 'XInfoNotice',
+  IMAGE: 'XImage',
+  TEXT: 'XText',
+  WEB_VIEW: 'XWebView',
 } as const;
 
 // 所有组件类型
@@ -42,6 +54,7 @@ export const ALL_COMPONENT_TYPES = {
   ...FORM_COMPONENT_TYPES,
   ...LAYOUT_COMPONENT_TYPES,
   ...LIST_COMPONENT_TYPES,
+  ...SHOW_COMPONENT_TYPES,
 } as const;
 
 // 组件类型值数组（用于类型检查）

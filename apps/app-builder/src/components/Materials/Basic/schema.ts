@@ -12,14 +12,22 @@ import XInputPhone from "./FormComponents/InputPhone/schema";
 import XInputText from "./FormComponents/InputText/schema";
 import XInputTextArea from "./FormComponents/InputTextArea/schema";
 import XRadio from "./FormComponents/Radio/schema";
-import XReadonlyBox from "./FormComponents/ReadonlyBox/schema";
 import XSelectMutiple from "./FormComponents/SelectMutiple/schema";
 import XSelectOne from "./FormComponents/SelectOne/schema";
 import XSwitch from "./FormComponents/Switch/schema";
 import XTimePicker from "./FormComponents/TimePicker/schema";
 import XUserSelect from "./FormComponents/UserSelect/schema";
 import XColumnLayout from "./LayoutComponents/ColumnLayout/schema";
+import XCalendar from "./ListComponents/Calendar/schema";
+import XCarousel from "./ListComponents/Carousel/schema";
+import XCollapse from "./ListComponents/Collapse/schema";
+import XList from "./ListComponents/List/schema";
 import XTable from "./ListComponents/Table/schema";
+import XTimeline from "./ListComponents/Timeline/schema";
+import XImage from "./ShowComponents/Image/schema";
+import XInfoNotice from "./ShowComponents/InfoNotice/schema";
+import XText from "./ShowComponents/Text/schema";
+import XWebView from "./ShowComponents/WebView/schema";
 
 const baseSchema = {
     XInputText,
@@ -36,15 +44,25 @@ const baseSchema = {
     XCheckbox,
     XSelectOne,
     XSelectMutiple,
-    XReadonlyBox,
     XUserSelect,
     XDeptSelect,
     XFileUpload,
     XImgUpload,
+
     XTable,
+    XCalendar,
+    XTimeline,
     XAutoCode,
+    XCarousel,
+    XCollapse,
+    XList,
 
     XColumnLayout,
+
+    XInfoNotice,
+    XImage,
+    XText,
+    XWebView,
 }
 
 export default baseSchema;

@@ -44,7 +44,7 @@ export default function DictionaryTypeModal({
 
   return (
     <Modal
-      title={title}
+      title={<div style={{ textAlign: 'left' }}>{title}</div>}
       visible={visible}
       onOk={() => {
         form.validate().then(values => {

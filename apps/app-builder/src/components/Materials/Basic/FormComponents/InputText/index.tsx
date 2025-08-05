@@ -1,7 +1,10 @@
-import { Input, Tooltip } from "@arco-design/web-react";
-import { memo } from "react";
-import styles from './index.module.less';
-import { type XInputTextConfig } from "./schema";
+import {
+    STATUS_OPTIONS,
+    STATUS_VALUES,
+} from '@/components/Materials/constants';
+import { Form, Input } from '@arco-design/web-react';
+import { memo } from 'react';
+import { type XInputTextConfig } from './schema';
 
 const XInputText = memo((props: XInputTextConfig) => {
     const {
@@ -10,23 +13,43 @@ const XInputText = memo((props: XInputTextConfig) => {
         tooltip,
         status,
         defaultValue,
+        required,
+        align,
+        layout,
+        color,
+        bgColor,
+        labelColSpan = 0,
     } = props;
-    return status === "hidden" ? null : (
-        <Tooltip content={tooltip}
+
+    return (
+        <Form.Item
+            label={label}
+            layout={layout}
+            labelCol={{
+                span: labelColSpan,
+            }}
+            tooltip={tooltip}
+            wrapperCol={{ span: 24 - labelColSpan }}
+            rules={[{ required }]}
+            style={{
+                opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,
+                pointerEvents:
+                    status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset',
+                margin: '0px',
+            }}
         >
-            <div className={styles.XInput}>
-                <div className={styles.label}
-                    hidden={!label}
-                >
-                    {label}
-                </div>
-                <Input
-                    className={styles.input}
-                    defaultValue={defaultValue}
-                    placeholder={placeholder}
-                />
-            </div>
-        </Tooltip>
+            <Input
+                readOnly={status === STATUS_VALUES[STATUS_OPTIONS.READONLY]}
+                defaultValue={defaultValue}
+                placeholder={placeholder}
+                style={{
+                    width: '100%',
+                    color,
+                    textAlign: align,
+                    backgroundColor: bgColor,
+                }}
+            />
+        </Form.Item>
     );
 });
 

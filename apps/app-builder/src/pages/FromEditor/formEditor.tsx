@@ -6,6 +6,7 @@ import EditorWorkspace from "../Editor/components/workspace/Workspace";
 import styles from "./index.module.less";
 
 const FormEditor: React.FC = () => {
+
     return (
         <div className={styles.formEditorPage}>
             <EditorPanel />

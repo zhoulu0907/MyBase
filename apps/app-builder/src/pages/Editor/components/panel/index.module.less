@@ -1,94 +1,56 @@
-.formEditorPanel {
-    height: 100%;
-    overflow: hidden;
-    box-sizing: border-box;
+@import '../../variables.module.less';
+
+.editorPanel {
+    height: calc(100vh - var(--editor-header-height));
     width: 340px;
+    box-sizing: border-box;
     background-color: #ffffff;
-    border-right: 1px solid #e8e8e8;
     display: flex;
     float: row;
     align-items: flex-start;
     justify-content: flex-start;
+    position: relative;
+    z-index: 1;
+    padding: 0px;
+
+    .drawerButton {
+        position: absolute;
+        right: -15px;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 5;
+        width: 15px;
+        height: 30px;
+        color: #4E5969;
+        background: #F7F8FA;
+        border: 0px ;
+        border-radius: 0px 2px 2px 0px;
+        &:hover {
+            background: #ffffff !important;
+        }
+    }
 
     .left {
-        padding-top: 16px;
+        flex: none;
+        overflow: hidden;
         box-sizing: border-box;
         height: 100%;
         width: 48px;
+        padding-top: 16px;
         border-right: 1px solid #e8e8e8;
 
         display: flex;
         flex-direction: row;
         align-items: flex-start;
         justify-content: center;
-
+        position: relative;
     }
 
     .right {
+        overflow: hidden;
         width: 100%;
         height: 100%;
         box-sizing: border-box;
-
-        .rightHeader {
-            padding: 16px;
-            height: 40px;
-            border-bottom: 1px solid #e8e8e8;
-            box-sizing: border-box;
-            font-size: 16px;
-            font-weight: 500;
-            color: #000000;
-            display: flex;
-            align-items: center;
-        }
-
-        .rightBody {
-            width: 100%;
-            height: 100%;
-            padding-top: 8px;
-
-            .componentTabs {
-                display: flex;
-                flex-direction: row;
-                align-items: center;
-                justify-content: center;
-                height: 40px;
-
-                .componentTabTitle {
-                    width: 55px;
-                    text-align: center;
-                }
-            }
-
-            .componentList {
-                margin-top: 16px;
-
-                max-height: calc(100vh - 40px - 40px - 70px);
-
-                overflow-y: auto;
-                /* 自定义滚动条样式 */
-                &::-webkit-scrollbar {
-                    width: 0px;
-                    background: transparent;
-                }
-                &::-webkit-scrollbar-thumb {
-                    background: #e0e0e0;
-                    border-radius: 0px;
-                }
-                &::-webkit-scrollbar-track {
-                    background: transparent;
-                }
-
-
-                .componentCollapseContent {
-                    display: flex;
-                    flex-direction: row;
-                    align-items: flex-start;
-                    justify-content: flex-start;
-                    flex-wrap: wrap;
-                    gap: 12px;
-                }
-
-            }
-        }
+        position: relative;
     }
 }

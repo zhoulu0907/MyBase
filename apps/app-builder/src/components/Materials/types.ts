@@ -34,6 +34,15 @@ export interface INumberConfigType {
     step?: number;
 }
 
+// 数字输入框配置
+export interface ILabelColSpanConfigType {
+    key: string;
+    name: string;
+    type: typeof CONFIG_TYPES.LABEL_COL_SPAN;
+    range?: [number, number];
+    step?: number;
+}
+
 // 文本区域输入框配置
 export interface ITextAreaConfigType {
     key: string;
@@ -46,11 +55,23 @@ export interface ISelectConfigType<KeyType> {
     key: string;
     name: string;
     type: typeof CONFIG_TYPES.SELECT_INPUT;
-    range: Array<{
+    range?: Array<{
       key: string;
       text: string;
       value: KeyType;
     }>;
+}
+
+export interface IDynamicSelectConfigType {
+    key: string;
+    name: string;
+    type: typeof CONFIG_TYPES.DYNAMIC_SELECT_INPUT;
+}
+
+export interface ISearchItemListConfigType {
+    key: string;
+    name: string;
+    type: typeof CONFIG_TYPES.SEARCH_ITEM_LIST;
 }
 
 export interface IBooleanConfigType  {
@@ -58,6 +79,8 @@ export interface IBooleanConfigType  {
     name: string;
     type: typeof CONFIG_TYPES.SWITCH_INPUT;
 }
+
+
 
 
 /**
@@ -175,4 +198,76 @@ export interface ITablePagePositionConfigType<KeyType> {
         text: string;
         value: KeyType;
     }>;
+}
+
+// 表格分页
+export interface ITablePageSizeConfigType {
+    key: string;
+    name: string;
+    type: typeof CONFIG_TYPES.TABLE_PAGE_SIZE;
+}
+
+// 文件上传大小限制
+export interface IUploadSizeConfigType {
+    key: string;
+    name: string;
+    type: typeof CONFIG_TYPES.UPLOAD_SIZE;
+}
+
+// 文件上传数量限制
+export interface IUploadLimitConfigType {
+    key: string;
+    name: string;
+    type: typeof CONFIG_TYPES.UPLOAD_LIMIT;
+}
+
+// 图片压缩率
+export interface IUploadCompressConfigType {
+    key: string;
+    name: string;
+    type: typeof CONFIG_TYPES.UPLOAD_COMPRESS;
+}
+
+// 日期格式
+export interface IDateTypeConfigType<KeyType> {
+    key: string;
+    name: string;
+    type: typeof CONFIG_TYPES.DATE_TYPE;
+    range: Array<{
+        key: string;
+        text: string;
+        value: KeyType;
+    }>;
+}
+
+// 表单布局方式
+export interface ILayoutConfigType<KeyType> {
+    key: string;
+    name: string;
+    type: typeof CONFIG_TYPES.FORM_LAYOUT;
+    range: Array<{
+        key: string;
+        text: string;
+        value: KeyType;
+    }>;
+}
+
+// 文本对齐方式
+export interface IAlignConfigType<KeyType> {
+    key: string;
+    name: string;
+    type: typeof CONFIG_TYPES.TEXT_ALIGN;
+    range: Array<{
+        key: string;
+        text: string;
+        value: KeyType;
+    }>;
+}
+
+// 颜色配置
+export interface IColorConfigType {
+    key: string;
+    name: string;
+    type: typeof CONFIG_TYPES.COLOR;
+    placeholder?: string;
 }

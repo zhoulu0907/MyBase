@@ -1,8 +1,17 @@
 import logoSVG from '@/assets/images/logo.svg';
 import settingSVG from '@/assets/images/setting_icon.svg';
-import { Avatar, Button, Dropdown, Layout, Menu, Tabs } from '@arco-design/web-react';
+import { UserPermissionManager } from '@/utils/permission';
+import {
+    Avatar,
+    Button,
+    Dropdown,
+    Layout,
+    Menu,
+    Tabs,
+} from '@arco-design/web-react';
 import { IconPoweroff, IconUser } from '@arco-design/web-react/icon';
 import { TokenManager } from '@onebase/common';
+import { getPermissionInfo } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -11,115 +20,127 @@ import styles from './header.module.less';
 const { Header } = Layout;
 
 interface HeaderProps {
-  className?: string;
+    className?: string;
 }
 
 const AppHeader: React.FC<HeaderProps> = ({ className }) => {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const { t } = useTranslation();
+    const navigate = useNavigate();
+    const location = useLocation();
+    const { t } = useTranslation();
 
-  // Tab 切换
-  // 根据当前路径设置 activeTab
-  const getTabKeyFromPath = (pathname: string) => {
-    if (pathname.includes('/onebase/app-center')) return 'app-center';
-    if (pathname.includes('/onebase/mall-center')) return 'mall-center';
-    if (pathname.includes('/onebase/help-center')) return 'help-center';
-    return 'my-app';
-  };
-  const [activeTab, setActiveTab] = useState(() => getTabKeyFromPath(location.pathname));
+    const [nickname, setNickname] = useState('U');
 
-  useEffect(() => {
-    setActiveTab(getTabKeyFromPath(location.pathname));
-  }, [location.pathname]);
+    // Tab 切换
+    // 根据当前路径设置 activeTab
+    const getTabKeyFromPath = (pathname: string) => {
+        if (pathname.includes('/onebase/app-center')) return 'app-center';
+        if (pathname.includes('/onebase/mall-center')) return 'mall-center';
+        if (pathname.includes('/onebase/help-center')) return 'help-center';
+        return 'my-app';
+    };
+    const [activeTab, setActiveTab] = useState(() =>
+        getTabKeyFromPath(location.pathname)
+    );
 
-  // 获取用户信息
-  const tokenInfo = TokenManager.getTokenInfo();
+    useEffect(() => {
+        setActiveTab(getTabKeyFromPath(location.pathname));
+    }, [location.pathname]);
 
-  useEffect(() => {
-    console.log(tokenInfo);
-  }, [tokenInfo]);
+    // 获取用户信息
+    const tokenInfo = TokenManager.getTokenInfo();
 
-  // 登出处理
-  const handleLogout = () => {
-    // 清除 token
-    TokenManager.clearToken();
-    // 跳转到登录页
-    navigate('/login');
-  };
+    useEffect(() => {
+        console.log(tokenInfo);
+        if (tokenInfo?.accessToken) {
+            getInfo();
+        }
+    }, [tokenInfo]);
 
-  // 用户菜单
-  const userMenu = (
-    <Menu>
-      <Menu.Item key="profile">
-        <IconUser />
-        {t('header.profile')}
-      </Menu.Item>
-      <Menu.Item key="logout" onClick={handleLogout}>
-        <IconPoweroff />
-        {t('header.logout')}
-      </Menu.Item>
-    </Menu>
-  );
+    const getInfo = async () => {
+        const res = await getPermissionInfo();
+        UserPermissionManager.setUserPermissionInfo(res);
+        setNickname(res.user.nickname);
+    };
 
-  return (
-    <Header className={`${styles.header} ${className || ''}`}>
-      <div className={styles.headerContent}>
-        <div className={styles.logo}>
-          <img src={logoSVG} alt="Logo" className={styles.logoSvg} />
-          <h1>{t('header.title')}</h1>
-        </div>
+    // 登出处理
+    const handleLogout = () => {
+        // 清除 token
+        TokenManager.clearToken();
+        // 跳转到登录页
+        navigate('/login');
+    };
 
-        <Tabs
-            type="line"
-            activeTab={activeTab}
-            onChange={(key) => {
-                setActiveTab(key);
-                switch (key) {
-                case 'my-app':
-                    navigate('/onebase/my-app');
-                    break;
-                case 'app-center':
-                    navigate('/onebase/app-center');
-                    break;
-                case 'mall-center':
-                    navigate('/onebase/mall-center');
-                    break;
-                case 'help-center':
-                    navigate('/onebase/help-center');
-                    break;
-                default:
-                    break;
-                }
-            }}
-            size="large"
-            inkBarSize={{ width: 20, height: 3 }}
-            >
-            <Tabs.TabPane key="my-app" title="我的应用" />
-            <Tabs.TabPane key="app-center" title="应用中心" />
-            <Tabs.TabPane key="mall-center" title="商超中心" />
-            <Tabs.TabPane key="help-center" title="帮助中心" />
-        </Tabs>
+    // 用户菜单
+    const userMenu = (
+        <Menu>
+            <Menu.Item key='profile'>
+                <IconUser />
+                {t('header.profile')}
+            </Menu.Item>
+            <Menu.Item key='logout' onClick={handleLogout}>
+                <IconPoweroff />
+                {t('header.logout')}
+            </Menu.Item>
+        </Menu>
+    );
 
+    return (
+        <Header className={`${styles.header} ${className || ''}`}>
+            <div className={styles.headerContent}>
+                <div className={styles.logo}>
+                    <img src={logoSVG} alt='Logo' className={styles.logoSvg} />
+                    <h1>{t('header.title')}</h1>
+                </div>
 
-        <div className={styles.userInfo}>
-          <Button
-            shape="circle"
-            icon={<img src={settingSVG} alt="Setting" />}
-            onClick={() => navigate('/onebase/setting')}
-          />
+                <Tabs
+                    type='line'
+                    activeTab={activeTab}
+                    onChange={(key) => {
+                        setActiveTab(key);
+                        switch (key) {
+                            case 'my-app':
+                                navigate('/onebase/my-app');
+                                break;
+                            case 'app-center':
+                                navigate('/onebase/app-center');
+                                break;
+                            case 'mall-center':
+                                navigate('/onebase/mall-center');
+                                break;
+                            case 'help-center':
+                                navigate('/onebase/help-center');
+                                break;
+                            default:
+                                break;
+                        }
+                    }}
+                    size='large'
+                    inkBarSize={{ width: 20, height: 3 }}
+                >
+                    <Tabs.TabPane key='my-app' title='我的应用' />
+                    <Tabs.TabPane key='app-center' title='应用中心' />
+                    <Tabs.TabPane key='mall-center' title='商超中心' />
+                    <Tabs.TabPane key='help-center' title='帮助中心' />
+                </Tabs>
 
-          <Dropdown droplist={userMenu} position="bottom">
-            <div className={styles.userDropdown}>
-              <Avatar size={32} style={{ backgroundColor: '#4FAE7B' }}>
-                {tokenInfo?.username?.toString().charAt(0) || 'U'}
-              </Avatar>
+                <div className={styles.userInfo}>
+                    <Button
+                        shape='circle'
+                        icon={<img src={settingSVG} alt='Setting' />}
+                        onClick={() => navigate('/onebase/setting')}
+                    />
+
+                    <Dropdown droplist={userMenu} position='bottom'>
+                        <div className={styles.userDropdown}>
+                            <Avatar size={32} style={{ backgroundColor: '#4FAE7B' }}>
+                                {nickname?.charAt(0) || 'U'}
+                            </Avatar>
+                        </div>
+                    </Dropdown>
+                </div>
             </div>
-          </Dropdown>
-        </div>
-      </div>
-    </Header>
-  );
+        </Header>
+    );
 };
 
 export { AppHeader };

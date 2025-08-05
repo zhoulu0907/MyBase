@@ -11,9 +11,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: @spacingLg;
-  padding: @spacingMd 0;
-  border-bottom: 1px solid @borderColor;
+  // margin-bottom: @spacingLg;
+  padding: 34px 16px;
 
   &Left {
     font-size: @fontSizeLg;
@@ -24,19 +23,26 @@
 
 /* 创建数据源表单样式 */
 .dataSourceForm {
-  max-width: 800px;
+  max-width: 500px;
   margin: 0 auto;
   padding: @spacingLg;
 
-  &Host {
+
+  &Url {
     display: inline-block;
     width: calc(100% - @inputMinWidth - @formItemMarginRight);
     margin-right: @formItemMarginRight;
   }
 
-  &Port {
-    display: inline-block;
+  &TestButton {
     width: @inputMinWidth;
+    display: inline-block;
+    text-align: right;
+  }
+
+  &Button { 
+    display: flex;
+    justify-content: flex-end;
   }
 }
 

@@ -1,5 +1,5 @@
-# Common Package - Makefile
-# 公共包的便捷命令
+# Platform Center Package - Makefile
+# 平台中心包的便捷命令
 
 .PHONY: help install dev build clean
 

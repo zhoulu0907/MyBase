@@ -1,45 +1,19 @@
-import React from 'react';
-import { Button, Table, type TableColumnProps, Space } from '@arco-design/web-react';
+import { useEffect, useState } from 'react';
+import { Button, Table, type TableColumnProps, Space, Modal, Message } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
+import { getDatasourcePage, deleteDatasource } from '@/services';
 import styles from './index.module.less';
 
-const data = [
-  {
-    key: '1',
-    name: 'Jane Doe',
-    salary: 23000,
-    address: '32 Park Road, London',
-    email: 'jane.doe@example.com',
-  },
-  {
-    key: '2',
-    name: 'Alisa Ross',
-    salary: 25000,
-    address: '35 Park Road, London',
-    email: 'alisa.ross@example.com',
-  },
-  {
-    key: '3',
-    name: 'Kevin Sandra',
-    salary: 22000,
-    address: '31 Park Road, London',
-    email: 'kevin.sandra@example.com',
-  },
-  {
-    key: '4',
-    name: 'Ed Hellen',
-    salary: 17000,
-    address: '42 Park Road, London',
-    email: 'ed.hellen@example.com',
-  },
-  {
-    key: '5',
-    name: 'William Smith',
-    salary: 27000,
-    address: '62 Park Road, London',
-    email: 'william.smith@example.com',
-  },
-];
+// 数据源记录类型
+interface DatasourceRecord {
+  id: number;
+  datasourceName: string;
+  code: string;
+  datasourceType: string;
+  description: string;
+  runMode: number;
+  appId: number;
+}
 
 const DataSourceTable = ({ 
   handlePageType, 
@@ -48,46 +22,117 @@ const DataSourceTable = ({
   handlePageType: (tab: string) => void;
   onEdit: (id: number) => void;
 }) => {
+  const [dataSourceList, setDataSourceList] = useState<DatasourceRecord[]>([]);
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [currentDeleteId, setCurrentDeleteId] = useState<number | null>(null);
+  const [tableLoading, setTableLoading] = useState(false);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState({
+    pageNo: 1,
+    pageSize: 10,
+  });
+
+  const getTableData = async () => {
+    setTableLoading(true);
+    const params = {
+      pageNo: page.pageNo,
+      pageSize: page.pageSize,
+      // datasourceName: '',
+      // datasourceType: '',
+      // code: '',
+      // runMode: 0,
+      // appId: '',
+    };
+    const res = await getDatasourcePage(params);
+
+    console.log('getTableData res', res);
+    if (res) {
+      setDataSourceList(res?.list || []);
+      setTotal(res?.total || 0);
+    }
+    setTableLoading(false);
+  };
+
+  useEffect(() => {
+    // getTableData();
+  }, []);
+
   const gotoEdit = (id: number) => {
     onEdit(id);
   };
 
-  const gotoDelete = () => {
-    // TODO: 删除数据源
+  const handleDelete = (id: number) => {
+    setCurrentDeleteId(id);
+    setDeleteModalVisible(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!currentDeleteId) return;
+    
+    setDeleteLoading(true);
+    try {
+      const res = await deleteDatasource(currentDeleteId);
+      if (res) {
+        Message.success('删除成功');
+        setDeleteModalVisible(false);
+        setCurrentDeleteId(null);
+        // 重新获取数据
+        await getTableData();
+      } else {
+        Message.error(res.msg || '删除失败');
+      }
+    } catch (error) {
+      Message.error('删除失败，请稍后重试');
+      console.error('删除数据源失败:', error);
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
+  const cancelDelete = () => {
+    setDeleteModalVisible(false);
+    setCurrentDeleteId(null);
   };
 
   const columns: TableColumnProps[] = [
     {
-      title: 'Name',
-      dataIndex: 'name',
+      title: '序号',
+      dataIndex: 'id',
+      width: 100,
+      render: (_, __, index) => index + 1,
     },
     {
-      title: 'Salary',
-      dataIndex: 'salary',
+      title: '数据源名称',
+      dataIndex: 'datasourceName',
     },
     {
-      title: 'Address',
-      dataIndex: 'address',
+      title: '数据源编码',
+      dataIndex: 'code',
     },
     {
-      title: 'Email',
-      dataIndex: 'email',
+      title: '数据源类型',
+      dataIndex: 'datasourceType',
+    },
+    {
+      title: '描述',
+      dataIndex: 'description',
     },
     {
       title: '操作',
       dataIndex: 'operation',
-      render: (_, record: { key: string }) => (
+      render: (_, record: DatasourceRecord) => (
         <Space>
-          <Button type='text' size='mini' style={{ marginRight: 8 }} onClick={() => gotoEdit(parseInt(record.key))}>
+          <Button type='text' size='mini' style={{ marginRight: 8 }} onClick={() => gotoEdit(record.id)}>
             编辑
           </Button>
-          <Button type='text' size='mini' onClick={() => gotoDelete()}>
+          <Button type='text' size='mini' status='danger' onClick={() => handleDelete(record.id)}>
             删除
           </Button>
         </Space>
       ),
       fixed: 'right',
-      width: 100,
+      width: 120,
     }
   ];
 
@@ -104,7 +149,34 @@ const DataSourceTable = ({
           创建数据源
         </Button>
       </div>
-      <Table columns={columns} data={data} />
+      <Table 
+        columns={columns} 
+        data={dataSourceList} 
+        pagination={{
+          total,
+          pageSize: page.pageSize,
+          current: page.pageNo,
+          onChange: (current, pageSize) => {
+            setPage({ pageNo: current, pageSize });
+            getTableData();
+          },
+        }}
+        loading={tableLoading}
+        style={{ margin: '0 16px' }}
+      />
+      
+      {/* 删除确认对话框 */}
+      <Modal
+        title="确认删除"
+        visible={deleteModalVisible}
+        onOk={confirmDelete}
+        onCancel={cancelDelete}
+        confirmLoading={deleteLoading}
+        okText="确认删除"
+        cancelText="取消"
+      >
+        <p>确定要删除这个数据源吗？删除后无法恢复。</p>
+      </Modal>
     </div>
   );
 };

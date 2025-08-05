@@ -9,6 +9,16 @@
     align-items: center;
     justify-content: flex-start;
 
+    .formItem {
+        width: 100%;
+    }
+
+    .cpID {
+        width: 260px;
+        text-align: left;
+        text-overflow: ellipsis;
+    }
+
     .widthRadio {
         font-size: 10px;
         font-weight: 500;
@@ -32,12 +42,24 @@
         text-align: center;
     }
 
-    .pagePositionRadio {
-        width: 32%;
-        font-size: 14px;
-        text-align: center;
-        white-space: nowrap;
+    .pagePositionRadioGroup {
+        width: 270px;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
         padding: 0px;
+        margin: 0px;
+
+        .pagePositionRadio {
+            width: 32%;
+            font-size: 12px;
+            text-align: center;
+            white-space: nowrap;
+        }
+    }
+
+    .tableColumnList {
+        width: 270px;
     }
 
     .tableColumnItem {

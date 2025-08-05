@@ -1,9 +1,31 @@
 .editorConfig {
     /* 右侧：选项配置区样式 */
+    position: relative;
     width: 310px;
     height: 100%;
     box-sizing: border-box;
     background-color: #ffffff;
     border-left: 1px solid #e8e8e8;
-    padding: 16px;
+
+
+    z-index: 1;
+    border-left-width: 0;
+
+    .drawerButton {
+        position: absolute;
+        left: -15px;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 5;
+        width: 15px;
+        height: 30px;
+        color: #4E5969;
+        background: #F7F8FA;
+        border: 0px ;
+        border-radius: 2px 0px 0px 2px;
+
+        &:hover {
+            background: #ffffff !important;
+        }
+    }
 }

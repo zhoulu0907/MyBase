@@ -1,7 +1,6 @@
-import { baseConfig, baseDefault, statusConfig, widthConfig, type ICommonBaseType, type TPagePositionSelectKeyType, type TStatusSelectKeyType, type TWidthSelectKeyType } from "@/components/Materials/common";
-import type { TableColumnProps } from "@arco-design/web-react";
-import { CONFIG_TYPES, PAGINATION_POSITION_OPTIONS, PAGINATION_POSITION_VALUES, WIDTH_OPTIONS, WIDTH_VALUES } from "../../../constants";
-import type { IBooleanConfigType, ILabelConfigType, IStatusConfigType, ITableColumnConfigType, ITablePagePositionConfigType, ITextConfigType, IWidthConfigType, TBooleanDefaultType, TRadioDefaultType, TSelectDefaultType, TTextDefaultType } from "../../../types";
+import { baseConfig, baseDefault, keyDataConfig, metaDataConfig, statusConfig, widthConfig, type ICommonBaseType, type TPagePositionSelectKeyType, type TStatusSelectKeyType, type TWidthSelectKeyType } from "@/components/Materials/common";
+import { CONFIG_TYPES, PAGINATION_POSITION_OPTIONS, PAGINATION_POSITION_VALUES, STATUS_OPTIONS, STATUS_VALUES, WIDTH_OPTIONS, WIDTH_VALUES } from "@/components/Materials/constants";
+import type { IBooleanConfigType, IDynamicSelectConfigType, ILabelConfigType, ISearchItemListConfigType, IStatusConfigType, ITableColumnConfigType, ITablePagePositionConfigType, ITablePageSizeConfigType, ITextConfigType, IWidthConfigType, TBooleanDefaultType, TNumberDefaultType, TRadioDefaultType, TSelectDefaultType, TTextDefaultType } from "@/components/Materials/types";
 
 
 export interface XTableSchema {
@@ -16,7 +15,10 @@ export type TXTableEditData = Array<
   IStatusConfigType<TStatusSelectKeyType> |
   ITableColumnConfigType|
   IBooleanConfigType|
-  ITablePagePositionConfigType<TPagePositionSelectKeyType>
+  ITablePagePositionConfigType<TPagePositionSelectKeyType> |
+  ITablePageSizeConfigType |
+  IDynamicSelectConfigType |
+  ISearchItemListConfigType
 >;
 
 
@@ -32,9 +34,14 @@ export interface XTableConfig extends ICommonBaseType {
     defaultValue?: any[];
 
     /**
+     * 搜索项
+     */
+    searchItems?: any[];
+
+    /**
      * 默认表头
      */
-    columns?: TableColumnProps[];
+    columns?: any[];
 
     /**
      * 是否显示边框
@@ -52,6 +59,11 @@ export interface XTableConfig extends ICommonBaseType {
     stripe?: TBooleanDefaultType;
 
     /**
+     * 是否显示表格总数
+     */
+    showTotal?: TBooleanDefaultType;
+
+    /**
      * 是否显示表头
      */
     showHeader?: TBooleanDefaultType;
@@ -66,6 +78,20 @@ export interface XTableConfig extends ICommonBaseType {
      */
     pagePosition?: TSelectDefaultType<TPagePositionSelectKeyType>;
 
+    /**
+     * 分页数量
+     */
+    pageSize?: TNumberDefaultType;
+
+    /**
+     * 是否开启操作项
+     */
+    showOpearate?: TBooleanDefaultType;
+
+    /**
+     * 是否固定操作项
+     */
+    fixedOpearate?: TBooleanDefaultType;
 
     /**
      * 组件状态：可用、隐藏、只读
@@ -77,6 +103,11 @@ export interface XTableConfig extends ICommonBaseType {
      * 字段宽度
      */
     width: TSelectDefaultType<TWidthSelectKeyType>;
+
+    /**
+     * 隐藏时是否提交数据，开启后隐藏状态仍会保存值
+     */
+    saveWithHidden?: TBooleanDefaultType;
 }
 
 const pagePositionConfig: ITablePagePositionConfigType<TPagePositionSelectKeyType> = {
@@ -84,21 +115,6 @@ const pagePositionConfig: ITablePagePositionConfigType<TPagePositionSelectKeyTyp
     name: '分页位置',
     type: CONFIG_TYPES.TABLE_PAGE_POSITION_RADIO,
     range: [
-        {
-            key: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.BR],
-            text: PAGINATION_POSITION_OPTIONS.BR,
-            value: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.BR],
-        },
-        {
-            key: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.BL],
-            text: PAGINATION_POSITION_OPTIONS.BL,
-            value: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.BL],
-        },
-        {
-            key: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.TR],
-            text: PAGINATION_POSITION_OPTIONS.TR,
-            value: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.TR],
-        },
         {
             key: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.TL],
             text: PAGINATION_POSITION_OPTIONS.TL,
@@ -110,13 +126,27 @@ const pagePositionConfig: ITablePagePositionConfigType<TPagePositionSelectKeyTyp
             value: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.TOP_CENTER],
         },
         {
+            key: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.TR],
+            text: PAGINATION_POSITION_OPTIONS.TR,
+            value: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.TR],
+        },
+        {
+            key: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.BL],
+            text: PAGINATION_POSITION_OPTIONS.BL,
+            value: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.BL],
+        },
+        {
             key: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.BOTTOM_CENTER],
             text: PAGINATION_POSITION_OPTIONS.BOTTOM_CENTER,
             value: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.BOTTOM_CENTER],
         },
+        {
+            key: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.BR],
+            text: PAGINATION_POSITION_OPTIONS.BR,
+            value: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.BR],
+        }
     ],
 }
-
 
 const XTable: XTableSchema = {
     editData: [
@@ -126,6 +156,25 @@ const XTable: XTableSchema = {
             name: '标题',
             type: CONFIG_TYPES.LABEL_INPUT,
         },
+        metaDataConfig,
+        keyDataConfig,
+        {
+            key: 'columns',
+            name: '表头配置',
+            type: CONFIG_TYPES.TABLE_COLUMN_LIST,
+        },
+        {
+            key: 'searchItems',
+            name: '搜索项',
+            type: CONFIG_TYPES.SEARCH_ITEM_LIST,
+        },
+        pagePositionConfig,
+        {
+            key: 'pageSize',
+            name: '分页数量',
+            type: CONFIG_TYPES.TABLE_PAGE_SIZE,
+        },
+
         {
             key: 'border',
             name: '显示边框',
@@ -151,14 +200,28 @@ const XTable: XTableSchema = {
             name: '开启斑马纹',
             type: CONFIG_TYPES.SWITCH_INPUT,
         },
-        pagePositionConfig,
-        statusConfig,
-        widthConfig,
         {
-            key: 'columns',
-            name: '表头配置',
-            type: CONFIG_TYPES.TABLE_COLUMN_LIST,
+            key: 'showTotal',
+            name: '显示表格总数',
+            type: CONFIG_TYPES.SWITCH_INPUT,
         },
+        {
+            key: 'showOpearate',
+            name: '开启操作项',
+            type: CONFIG_TYPES.SWITCH_INPUT,
+        },
+        {
+            key: 'fixedOpearate',
+            name: '固定操作项',
+            type: CONFIG_TYPES.SWITCH_INPUT,
+        },
+        {
+            key: 'saveWithHidden',
+            name: '隐藏时提交数据',
+            type: CONFIG_TYPES.SWITCH_INPUT,
+        },
+        widthConfig,
+        statusConfig,
     ],
     config: {
         ...baseDefault,
@@ -168,8 +231,14 @@ const XTable: XTableSchema = {
         borderCell: true,
         showHeader: true,
         hover: true,
+        showTotal: true,
+        showOpearate: true,
+        fixedOpearate: true,
+        saveWithHidden: false,
         width: WIDTH_VALUES[WIDTH_OPTIONS.FULL],
+        status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
         pagePosition: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.BR],
+        pageSize: 5,
         defaultValue: [
             {
                 key: "1",
@@ -194,37 +263,75 @@ const XTable: XTableSchema = {
                 address: "31 Park Road, London",
                 email: "kevin.sandra@example.com",
                 gender: "male",
+            },
+            {
+                key: "4",
+                name: "Kevin Sandra",
+                salary: 22000,
+                address: "31 Park Road, London",
+                email: "kevin.sandra@example.com",
+                gender: "male",
+            },
+            {
+                key: "5",
+                name: "Kevin Sandra",
+                salary: 22000,
+                address: "31 Park Road, London",
+                email: "kevin.sandra@example.com",
+                gender: "male",
+            },
+            {
+                key: "6",
+                name: "Kevin Sandra",
+                salary: 22000,
+                address: "31 Park Road, London",
+                email: "kevin.sandra@example.com",
+                gender: "male",
             }
         ],
         columns: [
             {
-                title: "name",
+                title: "姓名",
                 dataIndex: "name",
                 fixed: 'left',
                 width: 140,
             },
             {
-                title: "salary",
+                title: "工资",
                 dataIndex: "salary",
             },
             {
-                title: "address",
+                title: "地址",
                 dataIndex: "address",
             },
             {
-                title: "Email",
+                title: "邮箱",
                 dataIndex: "email",
             },
             {
-                title: "gender",
+                title: "性别",
                 dataIndex: "gender",
             },
-            {
-                title: "opearate",
-                dataIndex: "opearate",
-                fixed: 'right',
-            }
         ],
+        searchItems: [
+            // {
+            //     label: '姓名',
+            //     value: 'name',
+            // },
+            // {
+            //     label: '邮箱',
+            //     value: 'email',
+            // },
+            // {
+            //     label: '性别',
+            //     value: 'gender',
+            // },
+            // {
+            //     label: '工资',
+            //     value: 'salary',
+            // },
+        ]
+
     }
 };
 

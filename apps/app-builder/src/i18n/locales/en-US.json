@@ -121,7 +121,9 @@
     "createApp": "Create App"
   },
   "formEditor": {
-    "component": "Component",
+    "material": "Material",
+    "metadata": "Metadata",
+    "telegram": "Page Share",
     "baseComponent": "Base",
     "templateComponent": "Template",
     "customComponent": "Custom",
@@ -129,14 +131,18 @@
     "layout": "Layout",
     "form": "Form",
     "list": "List",
+    "show": "展示组件",
     "empty": "No components",
     "attribute": "Attribute",
     "data": "Data",
+    "advanced": "Advanced",
     "full": "Full",
     "formDesign": "Form Design",
     "listDesign": "List Design",
     "pageSetting": "Page Setting",
-    "metadataManage": "Source Data"
+    "metadataManage": "Source Data",
+    "newApplication": "New Application",
+    "saved": "Saved, not published"
   },
   "createApp": {
     "pageManager": "Page Manager",

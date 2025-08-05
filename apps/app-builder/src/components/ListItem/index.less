@@ -1,0 +1,27 @@
+.list-item-with-dropdown {
+  max-width: 100%;
+  overflow: hidden;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 4px;
+  cursor: pointer;
+
+  &__title {
+    margin-right: 6px;
+    flex: 1;
+    width: 0;
+    overflow: hidden;
+  }
+
+  &__actions {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+  }
+  
+  &.active {
+    color: #009E9E;
+    background-color: #F7F8FA;
+  }
+}

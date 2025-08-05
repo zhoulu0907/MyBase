@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { Drawer } from '@arco-design/web-react';
 import { type EntityNode } from '../../utils/interface';
 
@@ -30,11 +30,11 @@ const DetailDrawer: React.FC<{ selectedNode: EntityNode, visible: boolean, setVi
           </div>
           <div className="detail-item">
             <label>字段数量:</label>
-            <span>{selectedNode.fields.length}</span>
+            <span>{selectedNode?.fields?.length}</span>
           </div>
           <div className="fields-list">
             <h4>字段列表:</h4>
-            {selectedNode.fields.map((field, index) => (
+            {selectedNode?.fields?.length && selectedNode.fields.map((field, index) => (
               <div key={index} className="field-item">
                 <span className="field-name">{field.name}</span>
                 <span className="field-type">{field.type}</span>

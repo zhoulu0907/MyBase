@@ -1,20 +1,16 @@
-import ListItemWithDropdown from '@/components/ListItemWithDropdown';
-import { Menu } from '@arco-design/web-react';
+import ListItem from '@/components/ListItem';
+import { Input, Button } from '@arco-design/web-react';
 import { type DictItem } from '@onebase/platform-center';
 import styles from '../../index.module.less';
-import ListActions from './ListActions';
-import ListSearch from './ListSearch';
+import { IconPlus } from '@arco-design/web-react/icon';
 
 interface DictionaryListProps {
   list: DictItem[];
-  activeId: string;
+  activeId: number | undefined;
   searchValue: string;
   onSearchChange: (value: string) => void;
-  onSelect: (id: string) => void;
+  onSelect: (id: number | undefined) => void;
   onAdd: () => void;
-  onImport: () => void;
-  onEdit: (vakue: DictItem) => void;
-  onDelete: (value: string | undefined) => void
 }
 
 export default function DictionaryListProps({
@@ -24,31 +20,33 @@ export default function DictionaryListProps({
   searchValue,
   onSearchChange,
   onAdd,
-  onImport,
-  onEdit,
-  onDelete,
 }: DictionaryListProps) {
+  const listTitle = `全部(${list?.length})`
   return (
     <>
       <div className={styles.searchInput}>
-        <ListSearch value={searchValue} onChange={onSearchChange} />
+        <Input.Search
+          value={searchValue}
+          onChange={onSearchChange}
+          placeholder="输入字典名称"
+          allowClear
+          style={{ borderRadius: 24 }}
+        />
       </div>
-      <div style={{ marginBottom: 16 }}>
-        <ListActions onAdd={onAdd} onImport={onImport} />
-      </div>
+      <ListItem title={listTitle}>
+        <Button type="text" onClick={onAdd} style={{ paddingLeft: '8px', paddingRight: '8px' }}>
+          <IconPlus />新建
+        </Button>
+      </ListItem>
       <div className={styles.dictList}>
         {list?.map((item) => (
-          <ListItemWithDropdown
+          <ListItem
             key={item.id}
             title={item.name}
-            droplist={<Menu>
-              <Menu.Item key='edit' onClick={() => onEdit(item)}>编辑</Menu.Item>
-              <Menu.Item key='delete' onClick={() => onDelete(item.id)}>删除</Menu.Item>
-            </Menu>}
             active={item.id?.toString() === activeId}
-            onClick={() => onSelect(item.id?.toString() || '')}
+            onClick={() => onSelect(item.id)}
           >
-          </ListItemWithDropdown>
+          </ListItem>
         ))}
       </div>
     </>

@@ -1,10 +1,9 @@
 
 // 基础响应类型
 export interface BaseResponse<T = any> {
-    code: string;
-    message: string;
+    code: number;
+    msg: string;
     data: T;
-    success: boolean;
   }
 
   // HTTP 请求配置

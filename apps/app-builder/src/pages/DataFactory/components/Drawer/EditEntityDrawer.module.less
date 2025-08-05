@@ -1,0 +1,51 @@
+.edit-entity-drawer {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+  border-left: 1px solid #F2F3F5 !important;
+  top: 55px !important;
+}
+
+.drawerHandleButton {
+  position: fixed !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  z-index: 1000 !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  border: none !important;
+  width: 8px !important;
+  height: 48px !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background-color: #fff !important;
+  color: #383f45 !important;
+  border-radius: 70% 0 0 70% !important;
+
+  &:hover {
+    background-color: #9ea4a9 !important;
+    color: #fff !important;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2) !important;
+    transform: translateY(-50%) scale(1.05) !important;
+  }
+
+  &.collapsed {
+    right: 0;
+  }
+
+  &.expanded {
+    right: 500px;
+  }
+}
+
+.icon {
+  transition: transform 0.3s ease;
+  
+  &.collapsed {
+    transform: rotate(180deg);
+  }
+  
+  &.expanded {
+    transform: rotate(0deg);
+  }
+} 
