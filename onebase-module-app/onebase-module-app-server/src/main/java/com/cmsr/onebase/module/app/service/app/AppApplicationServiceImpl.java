@@ -8,6 +8,7 @@ import com.cmsr.onebase.framework.data.base.BaseDO;
 import com.cmsr.onebase.module.app.controller.admin.app.vo.ApplicationCreateReqVO;
 import com.cmsr.onebase.module.app.controller.admin.app.vo.ApplicationPageReqVO;
 import com.cmsr.onebase.module.app.controller.admin.app.vo.ApplicationPageRespVO;
+import com.cmsr.onebase.module.app.controller.admin.app.vo.TagRespVO;
 import com.cmsr.onebase.module.app.dal.dataobject.app.*;
 import com.cmsr.onebase.module.app.enums.app.AppErrorCodeConstants;
 import com.cmsr.onebase.module.app.enums.app.ApplicationStatusEnum;
@@ -32,7 +33,7 @@ import java.util.List;
 @Setter
 @Service
 @Validated
-public class ApplicationServiceImpl implements ApplicationService {
+public class AppApplicationServiceImpl implements AppApplicationService {
 
     @Resource
     private DataRepository dataRepository;
@@ -57,18 +58,21 @@ public class ApplicationServiceImpl implements ApplicationService {
         }
         PageResult<ApplicationDO> pageResult = dataRepository.findPageWithConditions(ApplicationDO.class, configs,
                 pageReqVO.getPageNo(), pageReqVO.getPageSize());
+        AppCommonService.UserHelper userHelper = appCommonService.getUserHelper(pageResult.getList());
         List<ApplicationPageRespVO> respVOS = pageResult.getList().stream()
                 .map(v -> {
                     ApplicationPageRespVO bean = BeanUtils.toBean(v, ApplicationPageRespVO.class);
-                    bean.setStatusText(ApplicationStatusEnum.getText(v.getStatus()));
-                    bean.setTagNames(queryAppTagNames(v.getId()));
+                    bean.setAppStatusText(ApplicationStatusEnum.getText(v.getAppStatus()));
+                    bean.setTags(queryAppTags(v.getId()));
+                    bean.setCreateUser(userHelper.getUserName(v.getCreator()));
+                    bean.setUpdateUser(userHelper.getUserName(v.getUpdater()));
                     return bean;
                 })
                 .toList();
         return new PageResult<>(respVOS, pageResult.getTotal());
     }
 
-    private List<String> queryAppTagNames(Long appId) {
+    private List<TagRespVO> queryAppTags(Long appId) {
         ConfigStore configStore = new DefaultConfigStore();
         configStore.eq("application_id", appId);
         List<Long> tagIds = dataRepository.findAll(ApplicationTagDO.class, configStore).stream()
@@ -77,16 +81,17 @@ public class ApplicationServiceImpl implements ApplicationService {
         configStore = new DefaultConfigStore();
         configStore.in("id", tagIds);
         return dataRepository.findAll(TagDO.class, configStore).stream()
-                .map(TagDO::getTagName)
+                .map(v -> BeanUtils.toBean(v, TagRespVO.class))
                 .toList();
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long createApplication(ApplicationCreateReqVO createReqVO) {
-        createReqVO.setId(null);
+        validApplicationCodeDuplicate(createReqVO.getAppCode(), null);
         ApplicationDO applicationDO = BeanUtils.toBean(createReqVO, ApplicationDO.class);
         applicationDO.setVersionNumber(VersionUtils.INIT_VERSION);
+        applicationDO.setAppStatus(ApplicationStatusEnum.EDITING.getValue());
         applicationDO = dataRepository.insert(applicationDO);
         mergeApplicationTags(applicationDO.getId(), createReqVO.getTagIds());
         return applicationDO.getId();
@@ -110,6 +115,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     @Override
     public void updateApplication(ApplicationCreateReqVO createReqVO) {
         appCommonService.validateApplicationExist(createReqVO.getId());
+        validApplicationCodeDuplicate(createReqVO.getAppCode(), createReqVO.getId());
         ApplicationDO updateObj = BeanUtils.toBean(createReqVO, ApplicationDO.class);
         mergeApplicationTags(createReqVO.getId(), createReqVO.getTagIds());
         dataRepository.update(updateObj);
@@ -143,5 +149,23 @@ public class ApplicationServiceImpl implements ApplicationService {
         dataRepository.deleteByConfig(VersionResourceDO.class, configStore);
     }
 
+
+    /**
+     * 检查 ApplicationDO 表 code 码是否重复，重复跑出异常
+     */
+    private void validApplicationCodeDuplicate(String code, Long id) {
+        ConfigStore configs = new DefaultConfigStore();
+        configs.eq("app_code", code);
+        if (id == null) {
+            if (dataRepository.findOne(ApplicationDO.class, configs) != null) {
+                throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_CODE_DUPLICATE);
+            }
+        } else {
+            configs.ne("id", id);
+            if (dataRepository.findOne(ApplicationDO.class, configs) != null) {
+                throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_CODE_DUPLICATE);
+            }
+        }
+    }
 
 }

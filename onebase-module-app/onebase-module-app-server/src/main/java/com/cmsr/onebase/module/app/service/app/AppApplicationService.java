@@ -9,7 +9,7 @@ import com.cmsr.onebase.module.app.controller.admin.app.vo.ApplicationPageRespVO
  * @Author：huangjie
  * @Date：2025/7/22 15:07
  */
-public interface ApplicationService {
+public interface AppApplicationService {
 
     PageResult<ApplicationPageRespVO> getApplicationPage(ApplicationPageReqVO pageReqVO);
 

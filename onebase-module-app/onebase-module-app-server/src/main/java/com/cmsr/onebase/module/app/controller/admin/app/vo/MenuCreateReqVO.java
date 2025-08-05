@@ -10,10 +10,13 @@ import lombok.Data;
  */
 @Schema(description = "应用管理 - 应用菜单分组创建/修改 Request VO")
 @Data
-public class ApplicationMenuGroupCreateReqVO {
+public class MenuCreateReqVO {
 
     @Schema(description = "应用ID")
     private Long applicationId;
+
+    @Schema(description = "菜单类型")
+    private Integer menuType;
 
     @Schema(description = "父菜单ID")
     private String parentUuid;

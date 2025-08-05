@@ -14,7 +14,10 @@ import java.util.List;
 public class ApplicationPageRespVO {
 
     @Schema(description = "应用名称")
-    private String name;
+    private String appName;
+
+    @Schema(description = "应用编码")
+    private String appCode;
 
     @Schema(description = "应用描述")
     private String description;
@@ -26,9 +29,9 @@ public class ApplicationPageRespVO {
     private String iconColor;
 
     @Schema(description = "应用状态")
-    private String statusText;
+    private String appStatusText;
 
-    private List<String> tagNames;
+    private List<TagRespVO> tags;
 
     @Schema(description = "创建时间")
     private String createTime;

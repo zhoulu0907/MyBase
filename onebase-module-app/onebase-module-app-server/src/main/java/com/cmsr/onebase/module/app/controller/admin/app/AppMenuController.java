@@ -1,11 +1,11 @@
 package com.cmsr.onebase.module.app.controller.admin.app;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
-import com.cmsr.onebase.module.app.controller.admin.app.vo.ApplicationMenuCopyReqVO;
-import com.cmsr.onebase.module.app.controller.admin.app.vo.ApplicationMenuGroupCreateReqVO;
-import com.cmsr.onebase.module.app.controller.admin.app.vo.ApplicationMenuListRespVO;
-import com.cmsr.onebase.module.app.controller.admin.app.vo.ApplicationMenuOrderUpdateReqVO;
-import com.cmsr.onebase.module.app.service.app.MenuService;
+import com.cmsr.onebase.module.app.controller.admin.app.vo.MenuCopyReqVO;
+import com.cmsr.onebase.module.app.controller.admin.app.vo.MenuCreateReqVO;
+import com.cmsr.onebase.module.app.controller.admin.app.vo.MenuListRespVO;
+import com.cmsr.onebase.module.app.controller.admin.app.vo.MenuOrderUpdateReqVO;
+import com.cmsr.onebase.module.app.service.app.AppMenuService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
@@ -24,35 +24,35 @@ import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 @RestController
 @RequestMapping("/app/menu")
 @Validated
-public class MenuController {
+public class AppMenuController {
 
     @Resource
-    private MenuService menuService;
+    private AppMenuService appMenuService;
 
     @GetMapping("/list")
     @Operation(summary = "应用菜单列表")
-    public CommonResult<List<ApplicationMenuListRespVO>> listApplicationMenu(@RequestParam("applicationId") Long applicationId) {
-        return success(menuService.listApplicationMenu(applicationId));
+    public CommonResult<List<MenuListRespVO>> listApplicationMenu(@RequestParam("applicationId") Long applicationId) {
+        return success(appMenuService.listApplicationMenu(applicationId));
     }
 
-    @PostMapping("/create-group")
+    @PostMapping("/create")
     @Operation(summary = "创建应用菜单分组")
-    public CommonResult<Long> createApplicationMenuGroup(@RequestBody ApplicationMenuGroupCreateReqVO createReqVO) {
-        return success(menuService.createApplicationMenuGroup(createReqVO));
+    public CommonResult<Long> createApplicationMenu(@RequestBody MenuCreateReqVO createReqVO) {
+        return success(appMenuService.createApplicationMenu(createReqVO));
     }
 
     @PostMapping("/update-name")
     @Operation(summary = "更新应用菜单名称")
     public CommonResult<Boolean> updateApplicationMenuName(@RequestParam("id") Long id,
                                                            @RequestParam("menuName") String menuName) {
-        menuService.updateApplicationMenuName(id, menuName);
+        appMenuService.updateApplicationMenuName(id, menuName);
         return CommonResult.success(true);
     }
 
     @PostMapping("/update-order")
     @Operation(summary = "更新应用菜单排序")
-    public CommonResult<Boolean> updateApplicationMenuOrder(@RequestBody ApplicationMenuOrderUpdateReqVO updateReqVO) {
-        menuService.updateApplicationMenuOrder(updateReqVO);
+    public CommonResult<Boolean> updateApplicationMenuOrder(@RequestBody MenuOrderUpdateReqVO updateReqVO) {
+        appMenuService.updateApplicationMenuOrder(updateReqVO);
         return CommonResult.success(true);
     }
 
@@ -60,21 +60,21 @@ public class MenuController {
     @Operation(summary = "更新应用菜单可见性")
     public CommonResult<Boolean> updateApplicationMenuVisible(@RequestParam("id") Long id,
                                                               @RequestParam("visible") Boolean visible) {
-        menuService.updateApplicationMenuVisible(id, visible);
+        appMenuService.updateApplicationMenuVisible(id, visible);
         return CommonResult.success(true);
     }
 
     @PostMapping("/copy")
     @Operation(summary = "复制应用菜单")
-    public CommonResult<Boolean> copyApplicationMenu(@RequestBody ApplicationMenuCopyReqVO copyReqVO) {
-        menuService.copyApplicationMenu(copyReqVO);
+    public CommonResult<Boolean> copyApplicationMenu(@RequestBody MenuCopyReqVO copyReqVO) {
+        appMenuService.copyApplicationMenu(copyReqVO);
         return CommonResult.success(true);
     }
 
     @PostMapping("/delete")
     @Operation(summary = "删除应用菜单")
     public CommonResult<Boolean> deleteApplicationMenu(@RequestParam("id") Long id) {
-        menuService.deleteApplicationMenu(id);
+        appMenuService.deleteApplicationMenu(id);
         return CommonResult.success(true);
     }
 

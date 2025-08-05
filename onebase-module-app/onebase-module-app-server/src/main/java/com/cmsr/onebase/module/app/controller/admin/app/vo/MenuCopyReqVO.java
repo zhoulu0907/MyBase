@@ -9,7 +9,7 @@ import lombok.Data;
  */
 @Schema(description = "应用管理 - 应用菜单复制 Request VO")
 @Data
-public class ApplicationMenuCopyReqVO {
+public class MenuCopyReqVO {
 
     private Long id;
 

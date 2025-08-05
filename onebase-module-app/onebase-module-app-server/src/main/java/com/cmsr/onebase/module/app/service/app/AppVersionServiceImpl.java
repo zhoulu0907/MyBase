@@ -4,8 +4,8 @@ import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.data.base.BaseDO;
-import com.cmsr.onebase.module.app.controller.admin.app.vo.ApplicationVersionCreateReqVO;
-import com.cmsr.onebase.module.app.controller.admin.app.vo.ApplicationVersionListRespVO;
+import com.cmsr.onebase.module.app.controller.admin.app.vo.VersionCreateReqVO;
+import com.cmsr.onebase.module.app.controller.admin.app.vo.VersionListRespVO;
 import com.cmsr.onebase.module.app.dal.dataobject.app.*;
 import com.cmsr.onebase.module.app.enums.app.AppErrorCodeConstants;
 import com.cmsr.onebase.module.app.util.VersionUtils;
@@ -27,7 +27,7 @@ import java.util.List;
 @Setter
 @Service
 @Validated
-public class  VersionServiceImpl implements VersionService {
+public class AppVersionServiceImpl implements AppVersionService {
 
     @Resource
     private DataRepository dataRepository;
@@ -36,13 +36,13 @@ public class  VersionServiceImpl implements VersionService {
     private AppCommonService appCommonService;
 
     @Override
-    public List<ApplicationVersionListRespVO> listApplicationVersion(Long applicationId) {
+    public List<VersionListRespVO> listApplicationVersion(Long applicationId) {
         ConfigStore configs = new DefaultConfigStore();
         configs.order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
         List<VersionDO> dos = dataRepository.findAll(VersionDO.class, configs);
         AppCommonService.UserHelper userHelper = appCommonService.getUserHelper(dos);
         return dos.stream().map(v -> {
-            ApplicationVersionListRespVO vo = BeanUtils.toBean(v, ApplicationVersionListRespVO.class);
+            VersionListRespVO vo = BeanUtils.toBean(v, VersionListRespVO.class);
             vo.setCreatorName(userHelper.getUserName(v.getCreator()));
             return vo;
         }).toList();
@@ -50,7 +50,7 @@ public class  VersionServiceImpl implements VersionService {
 
     @Transactional
     @Override
-    public void createApplicationVersion(ApplicationVersionCreateReqVO createReqVO) {
+    public void createApplicationVersion(VersionCreateReqVO createReqVO) {
         ApplicationDO applicationDO = appCommonService.validateApplicationExist(createReqVO.getApplicationId());
         //先备份老的相关数据
         //创建新版本

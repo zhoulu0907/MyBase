@@ -9,10 +9,12 @@ import com.cmsr.onebase.module.app.enums.app.AppErrorCodeConstants;
 import com.cmsr.onebase.module.system.api.user.AdminUserApi;
 import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
 import jakarta.annotation.Resource;
+import org.apache.commons.collections4.SetUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -37,7 +39,9 @@ public class AppCommonService {
     }
 
     public UserHelper getUserHelper(List<? extends BaseDO> baseDOS) {
-        List<Long> ids = baseDOS.stream().map(BaseDO::getCreator).toList();
+        Set<Long> ids1 = baseDOS.stream().map(BaseDO::getCreator).collect(Collectors.toSet());
+        Set<Long> ids2 = baseDOS.stream().map(BaseDO::getUpdater).collect(Collectors.toSet());
+        Set<Long> ids = SetUtils.union(ids1, ids2);
         CommonResult<List<AdminUserRespDTO>> dtos = adminUserApi.getUserList(ids);
         Map<Long, AdminUserRespDTO> dtoMap = dtos.getData().stream().collect(Collectors.toMap(AdminUserRespDTO::getId, v -> v));
         return new UserHelper(dtoMap);
