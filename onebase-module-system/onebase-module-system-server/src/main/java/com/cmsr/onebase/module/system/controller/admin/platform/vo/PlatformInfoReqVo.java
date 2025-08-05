@@ -1,12 +1,13 @@
 package com.cmsr.onebase.module.system.controller.admin.platform.vo;
 
+import com.cmsr.onebase.framework.common.pojo.PageParam;
 import lombok.Data;
 
 /**
  * 平台信息请求VO
  */
 @Data
-public class PlatformInfoReqVo {
+public class PlatformInfoReqVo extends PageParam {
 
     /**
      * 平台ID

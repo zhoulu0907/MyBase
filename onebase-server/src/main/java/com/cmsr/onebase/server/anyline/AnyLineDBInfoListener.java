@@ -16,6 +16,7 @@ import org.anyline.data.prepare.RunPrepare;
 import org.anyline.data.run.Run;
 import org.anyline.data.runtime.DataRuntime;
 import org.anyline.entity.Compare;
+import org.anyline.entity.DataRow;
 import org.anyline.entity.DataSet;
 import org.anyline.metadata.ACTION.SWITCH;
 import org.anyline.metadata.Table;
@@ -236,24 +237,43 @@ public class AnyLineDBInfoListener implements DMListener {
         configs.and(Compare.EQUAL, BaseDO.DELETED, false);
         // 加入租户标志
         boolean shouldIgnore = isTableTenantIgnored2(dest.getName());
-        log.info("prepareUpdate--------------> isTableTenantIgnored: {}", shouldIgnore);
+        log.info("prepareUpdate obj--------------> isTableTenantIgnored: {}", shouldIgnore);
         if (!shouldIgnore) {
             configs.and(Compare.EQUAL, TenantBaseDO.TENANT_ID, TenantContextHolder.getRequiredTenantId());
         }
         // 加入更新时间和更新人
         if (Objects.nonNull(obj) && obj instanceof BaseDO) {
             BaseDO baseDO = (BaseDO)obj;
-
-            LocalDateTime current = LocalDateTime.now();
-            baseDO.setUpdateTime(current);
-
+            baseDO.setUpdateTime(LocalDateTime.now());
             Long userId = WebFrameworkUtils.getLoginUserId();
             baseDO.setUpdater(userId);
         }
         return SWITCH.CONTINUE;
     }
 
-
+    @Override
+    public SWITCH prepareUpdate(DataRuntime runtime, String random, RunPrepare prepare, DataRow data,
+            ConfigStore configs) {
+           // 这里config可能为空，强制异常提前发现问题。
+        if(configs == null){
+            throw new BizException(StatusCode.UPDATE_WHERE_IS_NULL);
+        }     
+        // 加入软删判断 (opt: 框架这里config可能为空)
+        configs.and(Compare.EQUAL, BaseDO.DELETED, false);
+        // 加入租户标志
+        boolean shouldIgnore = isTableTenantIgnored2(prepare.getTableName());
+        log.info("prepareUpdate row--------------> isTableTenantIgnored: {}", shouldIgnore);
+        if (!shouldIgnore) {
+            configs.and(Compare.EQUAL, TenantBaseDO.TENANT_ID, TenantContextHolder.getRequiredTenantId());
+        }
+        // 加入更新时间和更新人
+        if (Objects.nonNull(data)) {
+            data.put(BaseDO.UPDATE_TIME, LocalDateTime.now());
+            Long userId = WebFrameworkUtils.getLoginUserId();
+            data.put(BaseDO.UPDATER, userId);
+        }
+        return SWITCH.CONTINUE;
+    }
     /**
      * 创建删除SQL前调用(根据Entity/DataRow),修改删除条件可以在这一步实现<br/>
      * 注意不是beforeDelete<br/>
