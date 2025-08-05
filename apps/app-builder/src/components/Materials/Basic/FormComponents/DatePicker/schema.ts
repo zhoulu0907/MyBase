@@ -1,6 +1,6 @@
 import { baseConfig, baseDefault, dateTypeConfig, labelColSpanConfig, layoutConfig, statusConfig, widthConfig, type ICommonBaseType, type TDateTypeSelectKeyType, type TLayoutSelectKeyType, type TStatusSelectKeyType, type TWidthSelectKeyType } from "@/components/Materials/common";
 import { CONFIG_TYPES, DATE_OPTIONS, DATE_VALUES, LAYOUT_OPTIONS, LAYOUT_VALUES, STATUS_OPTIONS, STATUS_VALUES, WIDTH_OPTIONS, WIDTH_VALUES } from "@/components/Materials/constants";
-import type { IBooleanConfigType, IDateTypeConfigType, IDescriptionConfigType, ILabelColSpanConfigType, ILabelConfigType, ILayoutConfigType, INumberConfigType, ISelectConfigType, IStatusConfigType, ITextAreaConfigType, ITextConfigType, ITooltipConfigType, IWidthConfigType, TBooleanDefaultType, TSelectDefaultType, TTextAreaDefaultType, TTextDefaultType } from "@/components/Materials/types";
+import type { IBooleanConfigType, IDateTypeConfigType, IDescriptionConfigType, ILabelColSpanConfigType, ILabelConfigType, ILayoutConfigType, INumberConfigType, ISelectConfigType, IStatusConfigType, ITextAreaConfigType, ITextConfigType, ITooltipConfigType, IWidthConfigType, TBooleanDefaultType, TSelectDefaultType, TTextAreaDefaultType, TTextDefaultType, TNumberDefaultType } from "@/components/Materials/types";
 
 
 export interface XInputDatePickerSchema {
@@ -74,6 +74,11 @@ export interface XInputDatePickerConfig extends ICommonBaseType {
      * 可选值: 'vertical' | 'horizontal'
      */
     layout?: TLayoutSelectKeyType;
+    
+    /**
+     * 标签宽度
+     */
+    labelColSpan?: TNumberDefaultType;
 
     /**
      * 隐藏时是否提交数据，开启后隐藏状态仍会保存值
@@ -128,6 +133,7 @@ const XDatePicker: XInputDatePickerSchema = {
         dateType: DATE_VALUES[DATE_OPTIONS.ONLY_DATE],
         layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
         saveWithHidden: false,
+        labelColSpan: 5,
     }
 };
 

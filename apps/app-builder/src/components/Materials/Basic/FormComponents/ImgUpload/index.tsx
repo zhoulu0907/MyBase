@@ -51,6 +51,9 @@ const XImgUpload = memo((props: XInputImgUploadConfig) => {
                     }
                 }}
                 showUploadList
+                style={{
+                    width: '100%',
+                }}
             />
         </Form.Item>
     );
