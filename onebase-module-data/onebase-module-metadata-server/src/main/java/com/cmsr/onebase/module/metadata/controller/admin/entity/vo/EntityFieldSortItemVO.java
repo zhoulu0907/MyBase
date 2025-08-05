@@ -16,7 +16,7 @@ public class EntityFieldSortItemVO {
 
     @Schema(description = "字段ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "3001")
     @NotNull(message = "字段ID不能为空")
-    private Long fieldId;
+    private String fieldId;
 
     @Schema(description = "排序顺序", requiredMode = Schema.RequiredMode.REQUIRED, example = "10")
     @NotNull(message = "排序顺序不能为空")

@@ -58,7 +58,7 @@ public interface MetadataEntityFieldService {
      * @param id 字段ID
      * @return 字段详情
      */
-    EntityFieldDetailRespVO getEntityFieldDetail(Long id);
+    EntityFieldDetailRespVO getEntityFieldDetail(String id);
 
     /**
      * 批量更新实体字段信息
@@ -80,7 +80,7 @@ public interface MetadataEntityFieldService {
      *
      * @param id 编号
      */
-    void deleteEntityField(Long id);
+    void deleteEntityField(String id);
 
     /**
      * 批量更新字段排序
@@ -95,7 +95,7 @@ public interface MetadataEntityFieldService {
      * @param id 编号
      * @return 实体字段
      */
-    MetadataEntityFieldDO getEntityField(Long id);
+    MetadataEntityFieldDO getEntityField(String id);
 
     /**
      * 获得实体字段分页
@@ -118,13 +118,13 @@ public interface MetadataEntityFieldService {
      * @param entityId 实体ID
      * @return 字段列表
      */
-    List<MetadataEntityFieldDO> getEntityFieldListByEntityId(Long entityId);
+    List<MetadataEntityFieldDO> getEntityFieldListByEntityId(String entityId);
 
     /**
      * 批量删除实体字段
      *
      * @param entityId 实体ID
      */
-    void deleteEntityFieldsByEntityId(Long entityId);
+    void deleteEntityFieldsByEntityId(String entityId);
 
 }

@@ -20,7 +20,7 @@ public class EntityFieldBatchSortReqVO {
 
     @Schema(description = "实体ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "2001")
     @NotNull(message = "实体ID不能为空")
-    private Long entityId;
+    private String entityId;
 
     @Schema(description = "字段排序列表", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotEmpty(message = "字段排序列表不能为空")

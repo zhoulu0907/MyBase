@@ -20,7 +20,7 @@ public class EntityFieldBatchCreateReqVO {
 
     @Schema(description = "实体ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "2001")
     @NotNull(message = "实体ID不能为空")
-    private Long entityId;
+    private String entityId;
 
     @Schema(description = "字段列表", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotEmpty(message = "字段列表不能为空")
@@ -29,6 +29,6 @@ public class EntityFieldBatchCreateReqVO {
 
     @Schema(description = "应用ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "12345")
     @NotNull(message = "应用ID不能为空")
-    private Long appId;
+    private String appId;
 
 } 

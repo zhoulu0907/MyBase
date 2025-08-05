@@ -18,7 +18,7 @@ public class DynamicDataUpdateReqVO {
 
     @Schema(description = "实体ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
     @NotNull(message = "实体ID不能为空")
-    private Long entityId;
+    private String entityId;
 
     @Schema(description = "数据主键ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
     @NotNull(message = "数据主键ID不能为空")

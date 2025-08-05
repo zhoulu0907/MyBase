@@ -21,7 +21,7 @@ public class DynamicDataPageReqVO extends PageParam {
 
     @Schema(description = "实体ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
     @NotNull(message = "实体ID不能为空")
-    private Long entityId;
+    private String entityId;
 
     @Schema(description = "查询条件，key为字段名，value为字段值", example = "{\"name\": \"张三\", \"status\": 1}")
     private Map<String, Object> filters;

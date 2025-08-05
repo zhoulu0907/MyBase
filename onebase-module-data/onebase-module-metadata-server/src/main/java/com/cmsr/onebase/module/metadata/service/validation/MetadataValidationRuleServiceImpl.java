@@ -17,7 +17,6 @@ import org.anyline.entity.Order;
 import org.anyline.entity.Compare;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 import java.util.Arrays;
 import java.util.List;
@@ -43,6 +42,9 @@ public class MetadataValidationRuleServiceImpl implements MetadataValidationRule
     public Long createValidationRule(@Valid ValidationRuleSaveReqVO createReqVO) {
         // 插入校验规则
         MetadataValidationRuleDO validationRule = BeanUtils.toBean(createReqVO, MetadataValidationRuleDO.class);
+        validationRule.setEntityId(Long.valueOf(createReqVO.getEntityId()));
+        validationRule.setFieldId(Long.valueOf(createReqVO.getFieldId()));
+        validationRule.setAppId(Long.valueOf(createReqVO.getAppId()));
         dataRepository.insert(validationRule);
         
         return validationRule.getId();
@@ -52,10 +54,14 @@ public class MetadataValidationRuleServiceImpl implements MetadataValidationRule
     @Transactional(rollbackFor = Exception.class)
     public void updateValidationRule(@Valid ValidationRuleSaveReqVO updateReqVO) {
         // 校验存在
-        validateValidationRuleExists(updateReqVO.getId());
+        validateValidationRuleExists(Long.valueOf(updateReqVO.getId()));
 
         // 更新校验规则
         MetadataValidationRuleDO updateObj = BeanUtils.toBean(updateReqVO, MetadataValidationRuleDO.class);
+        updateObj.setId(Long.valueOf(updateReqVO.getId()));
+        updateObj.setEntityId(Long.valueOf(updateReqVO.getEntityId()));
+        updateObj.setFieldId(Long.valueOf(updateReqVO.getFieldId()));
+        updateObj.setAppId(Long.valueOf(updateReqVO.getAppId()));
         dataRepository.update(updateObj);
     }
 

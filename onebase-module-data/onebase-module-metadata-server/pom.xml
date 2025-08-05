@@ -66,6 +66,12 @@
             <artifactId>onebase-spring-boot-starter-orm</artifactId>
         </dependency>
 
+        <!-- HikariCP 连接池 -->
+        <dependency>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-spring-boot-starter-redis</artifactId>

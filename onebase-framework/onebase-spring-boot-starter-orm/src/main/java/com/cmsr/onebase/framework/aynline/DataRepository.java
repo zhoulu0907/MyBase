@@ -15,9 +15,13 @@ import org.anyline.metadata.Constraint;
 import org.anyline.metadata.Table;
 import org.anyline.service.AnylineService;
 import org.anyline.util.ConfigTable;
+import org.anyline.data.jdbc.util.DataSourceUtil;
+import org.anyline.proxy.ServiceProxy;
 
+import javax.sql.DataSource;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -220,7 +224,7 @@ public class DataRepository {
      * @param <T>     实体类型
      * @return 实体列表
      */
-    public <T extends BaseDO> List<T> findAllByConfig(Class<T> clazz, ConfigStore configs) {
+    public <T> List<T> findAllByConfig(Class<T> clazz, ConfigStore configs) {
         try {
             String tableName = getTableName(clazz);
             DataSet dataSet = anylineService.querys(tableName, configs);
@@ -609,6 +613,172 @@ public class DataRepository {
         List<Run> ddls = (List<Run>) table.runs();
         for (Run ddl : ddls) {
             log.info(ddl.getFinalUpdate());
+        }
+    }
+
+    // ==================== 数据源动态连接相关的公共方法 ====================
+    
+    /**
+     * 创建临时的AnylineService用于数据库操作
+     * @param datasourceConfig 数据源配置信息 
+     * @return AnylineService实例
+     */
+    public AnylineService<?> createTemporaryService(Map<String, Object> datasourceConfig) {
+        try {
+            String url = (String) datasourceConfig.get("url");
+            String username = (String) datasourceConfig.get("username");
+            String password = (String) datasourceConfig.get("password");
+            String datasourceType = (String) datasourceConfig.get("datasourceType");
+
+            // 如果配置中没有完整的URL，则根据host、port、database构建JDBC URL
+            if (url == null || url.trim().isEmpty()) {
+                String host = (String) datasourceConfig.get("host");
+                Object portObj = datasourceConfig.get("port");
+                String database = (String) datasourceConfig.get("database");
+                if (host != null && !host.trim().isEmpty()) {
+                    int port = getDefaultPort(datasourceType);
+                    if (portObj instanceof Integer) {
+                        port = (Integer) portObj;
+                    } else if (portObj instanceof String) {
+                        port = Integer.parseInt((String) portObj);
+                    }
+                    // 根据数据源类型构建JDBC URL
+                    url = buildJdbcUrl(datasourceType, host, port, database);
+                }
+            }
+
+            // 参数校验
+            if (url == null || url.trim().isEmpty()) {
+                throw new RuntimeException("无法构建数据源连接URL，请检查配置信息");
+            }
+
+        // 构建数据源配置 - 不使用连接池参数，让AnyLine使用默认处理
+        Map<String, Object> dsConfig = Map.of(
+                "url", url,
+                "user", username != null ? username : "",
+                "password", password != null ? password : "",
+                "driver", getDriverByType(datasourceType)
+        );            // 使用 anyline 的 DataSourceUtil 构建数据源
+            DataSource dataSource = DataSourceUtil.build(dsConfig);
+
+            // 创建临时的 AnylineService
+            return ServiceProxy.temporary(dataSource);
+        } catch (Exception e) {
+            throw new RuntimeException("创建数据库连接失败: " + e.getMessage(), e);
+        }
+    }
+    
+    /**
+     * 执行DDL语句
+     * @param datasourceConfig 数据源配置信息
+     * @param ddl DDL语句
+     */
+    public void executeDDL(Map<String, Object> datasourceConfig, String ddl) {
+        try {
+            AnylineService<?> temporaryService = createTemporaryService(datasourceConfig);
+            temporaryService.execute(ddl);
+            log.info("成功执行DDL: {}", ddl);
+        } catch (Exception e) {
+            log.error("执行DDL失败: {}", ddl, e);
+            throw new RuntimeException("执行DDL失败: " + e.getMessage(), e);
+        }
+    }
+    
+    /**
+     * 根据数据源类型构建JDBC URL
+     */
+    public String buildJdbcUrl(String datasourceType, String host, int port, String database) {
+        if (host == null || host.trim().isEmpty()) {
+            throw new RuntimeException("主机地址不能为空");
+        }
+        
+        String databasePart = (database != null && !database.trim().isEmpty()) ? database : "";
+        
+        switch (datasourceType.toUpperCase()) {
+            case "POSTGRESQL":
+                return String.format("jdbc:postgresql://%s:%d/%s", host, port, databasePart);
+            case "MYSQL":
+                return String.format("jdbc:mysql://%s:%d/%s?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai", 
+                        host, port, databasePart);
+            case "ORACLE":
+                return String.format("jdbc:oracle:thin:@%s:%d:%s", host, port, databasePart);
+            case "SQLSERVER":
+                return String.format("jdbc:sqlserver://%s:%d;DatabaseName=%s", host, port, databasePart);
+            case "KINGBASE":
+                return String.format("jdbc:kingbase8://%s:%d/%s", host, port, databasePart);
+            case "TDENGINE":
+                return String.format("jdbc:TAOS-RS://%s:%d/%s", host, port, databasePart);
+            case "CLICKHOUSE":
+                return String.format("jdbc:clickhouse://%s:%d/%s", host, port, databasePart);
+            case "DM":
+                return String.format("jdbc:dm://%s:%d/%s", host, port, databasePart);
+            case "OPENGAUSS":
+                return String.format("jdbc:opengauss://%s:%d/%s", host, port, databasePart);
+            case "DB2":
+                return String.format("jdbc:db2://%s:%d/%s", host, port, databasePart);
+            default:
+                log.warn("未知的数据源类型，使用通用格式: {}", datasourceType);
+                return String.format("jdbc:%s://%s:%d/%s", datasourceType.toLowerCase(), host, port, databasePart);
+        }
+    }
+    
+    /**
+     * 根据数据源类型获取对应的驱动类名
+     */
+    public String getDriverByType(String datasourceType) {
+        switch (datasourceType.toUpperCase()) {
+            case "POSTGRESQL":
+                return "org.postgresql.Driver";
+            case "MYSQL":
+                return "com.mysql.cj.jdbc.Driver";
+            case "ORACLE":
+                return "oracle.jdbc.driver.OracleDriver";
+            case "SQLSERVER":
+                return "com.microsoft.sqlserver.jdbc.SQLServerDriver";
+            case "KINGBASE":
+                return "com.kingbase8.Driver";
+            case "TDENGINE":
+                return "com.taosdata.jdbc.TSDBDriver";
+            case "CLICKHOUSE":
+                return "ru.yandex.clickhouse.ClickHouseDriver";
+            case "DM":
+                return "dm.jdbc.driver.DmDriver";
+            case "OPENGAUSS":
+                return "org.opengauss.Driver";
+            case "DB2":
+                return "com.ibm.db2.jcc.DB2Driver";
+            default:
+                throw new RuntimeException("不支持的数据源类型: " + datasourceType);
+        }
+    }
+    
+    /**
+     * 根据数据源类型获取默认端口
+     */
+    public int getDefaultPort(String datasourceType) {
+        switch (datasourceType.toUpperCase()) {
+            case "POSTGRESQL":
+                return 5432;
+            case "MYSQL":
+                return 3306;
+            case "ORACLE":
+                return 1521;
+            case "SQLSERVER":
+                return 1433;
+            case "KINGBASE":
+                return 54321;
+            case "TDENGINE":
+                return 6041;
+            case "CLICKHOUSE":
+                return 8123;
+            case "DM":
+                return 5236;
+            case "OPENGAUSS":
+                return 5432;
+            case "DB2":
+                return 50000;
+            default:
+                return 5432; // 默认使用PostgreSQL端口
         }
     }
 

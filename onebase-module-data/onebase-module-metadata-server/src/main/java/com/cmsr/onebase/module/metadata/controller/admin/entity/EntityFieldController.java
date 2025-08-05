@@ -45,7 +45,7 @@ public class EntityFieldController {
     @Resource
     private MetadataEntityFieldService entityFieldService;
 
-    @GetMapping("/field-types")
+    @PostMapping("/field-types")
     @Operation(summary = "获取系统支持的字段类型列表")
     public CommonResult<List<FieldTypeConfigRespVO>> getFieldTypes() {
         List<FieldTypeConfigRespVO> fieldTypes = entityFieldService.getFieldTypes();
@@ -65,30 +65,38 @@ public class EntityFieldController {
     @PreAuthorize("@ss.hasPermission('metadata:entity-field:create')")
     public CommonResult<EntityFieldRespVO> createEntityField(@Valid @RequestBody EntityFieldSaveReqVO reqVO) {
         Long id = entityFieldService.createEntityField(reqVO);
-        MetadataEntityFieldDO entityField = entityFieldService.getEntityField(id);
+        MetadataEntityFieldDO entityField = entityFieldService.getEntityField(String.valueOf(id));
         return success(EntityFieldConvert.INSTANCE.convert(entityField));
     }
 
-    @GetMapping("/list")
+    @PostMapping("/list")
     @Operation(summary = "查询指定实体的字段列表")
     @PreAuthorize("@ss.hasPermission('metadata:entity-field:query')")
-    public CommonResult<List<EntityFieldRespVO>> getEntityFieldList(@Valid EntityFieldQueryReqVO reqVO) {
+    public CommonResult<List<EntityFieldRespVO>> getEntityFieldList(@Valid @RequestBody EntityFieldQueryReqVO reqVO) {
         // 将Controller层的VO转换为Service层的VO
-        EntityFieldQueryVO queryVO = new EntityFieldQueryVO(reqVO.getEntityId(), reqVO.getIsSystemField(), reqVO.getKeyword());
+        EntityFieldQueryVO queryVO = new EntityFieldQueryVO(reqVO.getEntityId(), reqVO.getIsSystemField(), reqVO.getKeyword(), reqVO.getFieldCode());
         List<MetadataEntityFieldDO> list = entityFieldService.getEntityFieldListByConditions(queryVO);
         return success(EntityFieldConvert.INSTANCE.convertList(list));
     }
 
-    @GetMapping("/get")
+    @PostMapping("/page")
+    @Operation(summary = "分页查询指定实体的字段列表")
+    @PreAuthorize("@ss.hasPermission('metadata:entity-field:query')")
+    public CommonResult<PageResult<EntityFieldRespVO>> getEntityFieldPage(@Valid @RequestBody EntityFieldPageReqVO pageReqVO) {
+        PageResult<MetadataEntityFieldDO> pageResult = entityFieldService.getEntityFieldPage(pageReqVO);
+        return success(EntityFieldConvert.INSTANCE.convertPage(pageResult));
+    }
+
+    @PostMapping("/get")
     @Operation(summary = "根据ID获取字段详细信息")
     @Parameter(name = "id", description = "字段ID", required = true, example = "1024")
     @PreAuthorize("@ss.hasPermission('metadata:entity-field:query')")
-    public CommonResult<EntityFieldDetailRespVO> getEntityField(@RequestParam("id") Long id) {
+    public CommonResult<EntityFieldDetailRespVO> getEntityField(@RequestParam("id") String id) {
         EntityFieldDetailRespVO entityField = entityFieldService.getEntityFieldDetail(id);
         return success(entityField);
     }
 
-    @PutMapping("/batch-update")
+    @PostMapping("/batch-update")
     @Operation(summary = "批量更新实体字段信息")
     @PreAuthorize("@ss.hasPermission('metadata:entity-field:update')")
     public CommonResult<EntityFieldBatchUpdateRespVO> batchUpdateEntityFields(@Valid @RequestBody EntityFieldBatchUpdateReqVO reqVO) {
@@ -96,7 +104,7 @@ public class EntityFieldController {
         return success(result);
     }
 
-    @PutMapping("/update")
+    @PostMapping("/update")
     @Operation(summary = "更新实体字段信息")
     @PreAuthorize("@ss.hasPermission('metadata:entity-field:update')")
     public CommonResult<Boolean> updateEntityField(@Valid @RequestBody EntityFieldSaveReqVO reqVO) {
@@ -104,16 +112,16 @@ public class EntityFieldController {
         return success(true);
     }
 
-    @DeleteMapping("/delete")
+    @PostMapping("/delete")
     @Operation(summary = "软删除实体字段")
     @Parameter(name = "id", description = "字段ID", required = true, example = "1024")
     @PreAuthorize("@ss.hasPermission('metadata:entity-field:delete')")
     public CommonResult<Boolean> deleteEntityField(@RequestParam("id") Long id) {
-        entityFieldService.deleteEntityField(id);
+        entityFieldService.deleteEntityField(String.valueOf(id));
         return success(true);
     }
 
-    @PutMapping("/batch-sort")
+    @PostMapping("/batch-sort")
     @Operation(summary = "批量更新字段排序")
     @PreAuthorize("@ss.hasPermission('metadata:entity-field:update')")
     public CommonResult<Boolean> batchSortEntityFields(@Valid @RequestBody EntityFieldBatchSortReqVO reqVO) {

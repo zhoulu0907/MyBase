@@ -17,11 +17,11 @@ import lombok.Data;
 public class EntityFieldSaveReqVO {
 
     @Schema(description = "字段ID", example = "3001")
-    private Long id;
+    private String id;
 
     @Schema(description = "实体ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "2001")
     @NotNull(message = "实体ID不能为空")
-    private Long entityId;
+    private String entityId;
 
     @Schema(description = "字段名", requiredMode = Schema.RequiredMode.REQUIRED, example = "username")
     @NotBlank(message = "字段名不能为空")
@@ -64,6 +64,10 @@ public class EntityFieldSaveReqVO {
 
     @Schema(description = "应用ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "12345")
     @NotNull(message = "应用ID不能为空")
-    private Long appId;
+    private String appId;
+
+    @Schema(description = "字段编码", example = "USER_NAME")
+    @Size(max = 60, message = "字段编码长度不能超过60个字符")
+    private String fieldCode;
 
 }

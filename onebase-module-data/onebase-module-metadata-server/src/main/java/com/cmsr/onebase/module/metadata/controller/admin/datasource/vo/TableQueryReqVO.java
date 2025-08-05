@@ -17,7 +17,7 @@ public class TableQueryReqVO {
 
     @Schema(description = "数据源ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "1001")
     @NotNull(message = "数据源ID不能为空")
-    private Long datasourceId;
+    private String datasourceId;
 
     @Schema(description = "数据库模式名", example = "public")
     private String schemaName;

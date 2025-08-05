@@ -20,12 +20,12 @@ public class BusinessEntityPageReqVO extends PageParam {
     private Integer entityType;
 
     @Schema(description = "数据源ID", example = "1")
-    private Long datasourceId;
+    private String datasourceId;
 
     @Schema(description = "运行模式", example = "0")
     private Integer runMode;
 
     @Schema(description = "应用ID", example = "1")
-    private Long appId;
+    private String appId;
 
 }

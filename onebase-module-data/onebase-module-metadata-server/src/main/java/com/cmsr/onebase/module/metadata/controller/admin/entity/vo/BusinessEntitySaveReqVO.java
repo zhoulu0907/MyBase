@@ -11,7 +11,7 @@ import lombok.Data;
 public class BusinessEntitySaveReqVO {
 
     @Schema(description = "实体编号", example = "1024")
-    private Long id;
+    private String id;
 
     @Schema(description = "实体名称", requiredMode = Schema.RequiredMode.REQUIRED, example = "用户实体")
     @NotBlank(message = "实体名称不能为空")
@@ -23,7 +23,7 @@ public class BusinessEntitySaveReqVO {
     @Size(max = 32, message = "实体编码长度不能超过32个字符")
     private String code;
 
-    @Schema(description = "实体类型", example = "1")
+    @Schema(description = "实体类型(1:自建表，2:复用已有表)", example = "1")
     private Integer entityType;
 
     @Schema(description = "实体描述", example = "用户相关的业务实体")
@@ -32,7 +32,7 @@ public class BusinessEntitySaveReqVO {
 
     @Schema(description = "数据源ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
     @NotNull(message = "数据源ID不能为空")
-    private Long datasourceId;
+    private String datasourceId;
 
     @Schema(description = "对应数据表名", example = "sys_user")
     @Size(max = 128, message = "数据表名长度不能超过128个字符")
@@ -43,7 +43,7 @@ public class BusinessEntitySaveReqVO {
 
     @Schema(description = "应用ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
     @NotNull(message = "应用ID不能为空")
-    private Long appId;
+    private String appId;
 
     @Schema(description = "版本锁标识", example = "0")
     private Integer lockVersion;
