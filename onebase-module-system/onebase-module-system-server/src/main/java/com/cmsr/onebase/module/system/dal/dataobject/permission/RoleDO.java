@@ -1,29 +1,34 @@
 package com.cmsr.onebase.module.system.dal.dataobject.permission;
 
+import java.util.Set;
+
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
 import com.cmsr.onebase.module.system.enums.permission.DataScopeEnum;
 import com.cmsr.onebase.module.system.enums.permission.RoleTypeEnum;
-import com.baomidou.mybatisplus.annotation.KeySequence;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
-import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
 
-import java.util.Set;
+import jakarta.persistence.Column;
+import jakarta.persistence.Table;
+import lombok.Data;
 
 /**
  * 角色 DO
  *
  * @author ruoyi
  */
-@TableName(value = "system_role", autoResultMap = true)
-@KeySequence("system_role_seq") // 用于 Oracle、PostgreSQL、Kingbase、DB2、H2 数据库的主键自增。如果是 MySQL 等数据库，可不写。
 @Data
-@EqualsAndHashCode(callSuper = true)
+@Table(name = "system_role")
 public class RoleDO extends TenantBaseDO {
+
+    // 字段常量
+    public static final String NAME                = "name";
+    public static final String CODE                = "code";
+    public static final String SORT                = "sort";
+    public static final String STATUS              = "status";
+    public static final String TYPE                = "type";
+    public static final String REMARK              = "remark";
+    public static final String DATA_SCOPE          = "data_scope";
+    public static final String DATA_SCOPE_DEPT_IDS = "data_scope_dept_ids";
 
     // builder模式可正常运作
     public RoleDO setId(Long id){
@@ -34,32 +39,38 @@ public class RoleDO extends TenantBaseDO {
     /**
      * 角色名称
      */
+    @Column(name = NAME)
     private String name;
     /**
      * 角色标识
      *
      * 枚举
      */
+    @Column(name = CODE)
     private String code;
     /**
      * 角色排序
      */
+    @Column(name = SORT)
     private Integer sort;
     /**
      * 角色状态
      *
      * 枚举 {@link CommonStatusEnum}
      */
+    @Column(name = STATUS)
     private Integer status;
     /**
      * 角色类型
      *
      * 枚举 {@link RoleTypeEnum}
      */
+    @Column(name = TYPE)
     private Integer type;
     /**
      * 备注
      */
+    @Column(name = REMARK)
     private String remark;
 
     /**
@@ -67,13 +78,14 @@ public class RoleDO extends TenantBaseDO {
      *
      * 枚举 {@link DataScopeEnum}
      */
+    @Column(name = DATA_SCOPE)
     private Integer dataScope;
     /**
      * 数据范围(指定部门数组)
      *
      * 适用于 {@link #dataScope} 的值为 {@link DataScopeEnum#DEPT_CUSTOM} 时
      */
-    @TableField(typeHandler = JacksonTypeHandler.class)
+    @Column(name = DATA_SCOPE_DEPT_IDS)
     private Set<Long> dataScopeDeptIds;
 
 }

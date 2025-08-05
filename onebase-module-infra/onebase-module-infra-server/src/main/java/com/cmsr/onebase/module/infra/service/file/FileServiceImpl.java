@@ -5,19 +5,20 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.digest.DigestUtil;
+import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.infra.controller.admin.file.vo.file.FileCreateReqVO;
 import com.cmsr.onebase.module.infra.controller.admin.file.vo.file.FilePageReqVO;
 import com.cmsr.onebase.module.infra.controller.admin.file.vo.file.FilePresignedUrlRespVO;
 import com.cmsr.onebase.module.infra.dal.dataobject.file.FileDO;
-import com.cmsr.onebase.module.infra.dal.mysql.file.FileMapper;
 import com.cmsr.onebase.module.infra.framework.file.core.client.FileClient;
 import com.cmsr.onebase.module.infra.framework.file.core.client.s3.FilePresignedUrlRespDTO;
 import com.cmsr.onebase.module.infra.framework.file.core.utils.FileTypeUtils;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Resource;
 import lombok.SneakyThrows;
+import org.anyline.data.param.init.DefaultConfigStore;
 import org.springframework.stereotype.Service;
 
 import static cn.hutool.core.date.DatePattern.PURE_DATE_PATTERN;
@@ -49,11 +50,24 @@ public class FileServiceImpl implements FileService {
     private FileConfigService fileConfigService;
 
     @Resource
-    private FileMapper fileMapper;
+    private DataRepository dataRepository;
 
     @Override
     public PageResult<FileDO> getFilePage(FilePageReqVO pageReqVO) {
-        return fileMapper.selectPage(pageReqVO);
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        configStore.like("path", pageReqVO.getPath())
+                .like("type", pageReqVO.getType());
+
+        if (pageReqVO.getCreateTime() != null && pageReqVO.getCreateTime().length == 2) {
+            configStore.ge("create_time", pageReqVO.getCreateTime()[0]);
+            configStore.le("create_time", pageReqVO.getCreateTime()[1]);
+        }
+        return dataRepository.findPageWithConditions(
+                FileDO.class,
+                configStore,
+                pageReqVO.getPageNo(),
+                pageReqVO.getPageSize()
+        );
     }
 
     @Override
@@ -83,7 +97,7 @@ public class FileServiceImpl implements FileService {
         String url = client.upload(content, path, type);
 
         // 3. 保存到数据库
-        fileMapper.insert(new FileDO().setConfigId(client.getId())
+        dataRepository.insert(new FileDO().setConfigId(client.getId())
                 .setName(name).setPath(path).setUrl(url)
                 .setType(type).setSize(content.length));
         return url;
@@ -137,7 +151,7 @@ public class FileServiceImpl implements FileService {
     @Override
     public Long createFile(FileCreateReqVO createReqVO) {
         FileDO file = BeanUtils.toBean(createReqVO, FileDO.class);
-        fileMapper.insert(file);
+        dataRepository.insert(file);
         return file.getId();
     }
 
@@ -152,11 +166,11 @@ public class FileServiceImpl implements FileService {
         client.delete(file.getPath());
 
         // 删除记录
-        fileMapper.deleteById(id);
+        dataRepository.deleteById(FileDO.class,id);
     }
 
     private FileDO validateFileExists(Long id) {
-        FileDO fileDO = fileMapper.selectById(id);
+        FileDO fileDO = dataRepository.findById(FileDO.class,id);
         if (fileDO == null) {
             throw exception(FILE_NOT_EXISTS);
         }

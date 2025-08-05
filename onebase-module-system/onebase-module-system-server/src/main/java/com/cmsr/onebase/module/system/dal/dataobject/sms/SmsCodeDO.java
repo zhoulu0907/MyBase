@@ -1,9 +1,9 @@
 package com.cmsr.onebase.module.system.dal.dataobject.sms;
 
-import com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO;
+import com.cmsr.onebase.framework.data.base.BaseDO;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
-import com.baomidou.mybatisplus.annotation.KeySequence;
-import com.baomidou.mybatisplus.annotation.TableName;
+import jakarta.persistence.Table;
+import jakarta.persistence.Column;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -14,49 +14,62 @@ import java.time.LocalDateTime;
  * idx_mobile 索引：基于 {@link #mobile} 字段
  *
  */
-@TableName("system_sms_code")
-@KeySequence("system_sms_code_seq") // 用于 Oracle、PostgreSQL、Kingbase、DB2、H2 数据库的主键自增。如果是 MySQL 等数据库，可不写。
+@Table(name = "system_sms_code")
 @Data
-@EqualsAndHashCode(callSuper = true)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @TenantIgnore
 public class SmsCodeDO extends BaseDO {
 
+    // 字段列名常量
+    public static final String MOBILE      = "mobile";
+    public static final String CODE        = "code";
+    public static final String SCENE       = "scene";
+    public static final String CREATE_IP   = "create_ip";
+    public static final String TODAY_INDEX = "today_index";
+    public static final String USED        = "used";
+    public static final String USED_TIME   = "used_time";
+    public static final String USED_IP     = "used_ip";
+
     /**
      * 手机号
      */
+    @Column(name = MOBILE)
     private String mobile;
     /**
      * 验证码
      */
+    @Column(name = CODE)
     private String code;
     /**
      * 发送场景
-     *
-     * 枚举 {@link SmsCodeDO}
      */
+    @Column(name = SCENE)
     private Integer scene;
     /**
      * 创建 IP
      */
+    @Column(name = CREATE_IP)
     private String createIp;
     /**
      * 今日发送的第几条
      */
+    @Column(name = TODAY_INDEX)
     private Integer todayIndex;
     /**
      * 是否使用
      */
+    @Column(name = USED)
     private Boolean used;
     /**
      * 使用时间
      */
+    @Column(name = USED_TIME)
     private LocalDateTime usedTime;
     /**
      * 使用 IP
      */
+    @Column(name = USED_IP)
     private String usedIp;
-
 }

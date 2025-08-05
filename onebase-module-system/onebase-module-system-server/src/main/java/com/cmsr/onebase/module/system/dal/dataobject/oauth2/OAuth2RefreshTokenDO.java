@@ -1,58 +1,65 @@
 package com.cmsr.onebase.module.system.dal.dataobject.oauth2;
 
-import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
-import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
-import com.baomidou.mybatisplus.annotation.KeySequence;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableName;
-import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.experimental.Accessors;
-
 import java.time.LocalDateTime;
 import java.util.List;
+
+import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
+import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Table;
+import lombok.Data;
+import lombok.experimental.Accessors;
 
 /**
  * OAuth2 刷新令牌
  *
  */
-@TableName(value = "system_oauth2_refresh_token", autoResultMap = true)
-// 由于 Oracle 的 SEQ 的名字长度有限制，所以就先用 system_oauth2_access_token_seq 吧，反正也没啥问题
-@KeySequence("system_oauth2_access_token_seq") // 用于 Oracle、PostgreSQL、Kingbase、DB2、H2 数据库的主键自增。如果是 MySQL 等数据库，可不写。
+@Table(name = "system_oauth2_refresh_token")
 @Data
-@EqualsAndHashCode(callSuper = true)
 @Accessors(chain = true)
 public class OAuth2RefreshTokenDO extends TenantBaseDO {
+
+    public static final String REFRESH_TOKEN = "refresh_token";
+    public static final String USER_ID        = "user_id";
+    public static final String USER_TYPE      = "user_type";
+    public static final String CLIENT_ID      = "client_id";
+    public static final String SCOPES         = "scopes";
+    public static final String EXPIRES_TIME   = "expires_time";
 
     /**
      * 刷新令牌
      */
+    @Column(name = REFRESH_TOKEN)
     private String refreshToken;
     /**
      * 用户编号
      */
+    @Column(name = USER_ID)
     private Long userId;
     /**
      * 用户类型
      *
      * 枚举 {@link UserTypeEnum}
      */
+    @Column(name = USER_TYPE)
     private Integer userType;
     /**
      * 客户端编号
      *
      * 关联 {@link OAuth2ClientDO#getId()}
      */
+    @Column(name = CLIENT_ID)
     private String clientId;
     /**
      * 授权范围
      */
-    @TableField(typeHandler = JacksonTypeHandler.class)
+    @Column(name = SCOPES)
     private List<String> scopes;
     /**
      * 过期时间
      */
+    @Column(name = EXPIRES_TIME)
     private LocalDateTime expiresTime;
 
 }

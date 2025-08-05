@@ -1,43 +1,49 @@
 package com.cmsr.onebase.module.system.dal.dataobject.notice;
 
+import jakarta.persistence.Table;
+import jakarta.persistence.Column;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
-import com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO;
+import com.cmsr.onebase.framework.data.base.BaseDO;
 import com.cmsr.onebase.module.system.enums.notice.NoticeTypeEnum;
-import com.baomidou.mybatisplus.annotation.KeySequence;
-import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 /**
  * 通知公告表
  *
  * @author ruoyi
  */
-@TableName("system_notice")
-@KeySequence("system_notice_seq") // 用于 Oracle、PostgreSQL、Kingbase、DB2、H2 数据库的主键自增。如果是 MySQL 等数据库，可不写。
+@Table(name = "system_notice")
 @Data
-@EqualsAndHashCode(callSuper = true)
 public class NoticeDO extends BaseDO {
+
+    public static final String TITLE   = "title";
+    public static final String TYPE    = "type";
+    public static final String CONTENT = "content";
+    public static final String STATUS  = "status";
 
     /**
      * 公告标题
      */
+    @Column(name = TITLE)
     private String title;
     /**
      * 公告类型
      *
      * 枚举 {@link NoticeTypeEnum}
      */
+    @Column(name = TYPE)
     private Integer type;
     /**
      * 公告内容
      */
+    @Column(name = CONTENT)
     private String content;
     /**
      * 公告状态
      *
      * 枚举 {@link CommonStatusEnum}
      */
+    @Column(name = STATUS)
     private Integer status;
 
 }

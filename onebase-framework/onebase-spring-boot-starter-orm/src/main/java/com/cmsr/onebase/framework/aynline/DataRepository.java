@@ -1,10 +1,9 @@
 package com.cmsr.onebase.framework.aynline;
 
-import com.baomidou.mybatisplus.annotation.TableName;
 import com.cmsr.onebase.framework.common.anyline.web.BizException;
 import com.cmsr.onebase.framework.common.anyline.web.StatusCode;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO;
+import com.cmsr.onebase.framework.data.base.BaseDO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.Run;
@@ -20,7 +19,6 @@ import org.anyline.util.ConfigTable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * DataRepository - JPA风格的CRUD操作工具类
@@ -55,8 +53,8 @@ public class DataRepository {
      * @return 表名
      */
     private String getTableName(Class<?> clazz) {
-        TableName annotation = clazz.getAnnotation(TableName.class);
-        return annotation != null ? annotation.value() : clazz.getSimpleName().toLowerCase();
+        jakarta.persistence.Table annotation = clazz.getAnnotation(jakarta.persistence.Table.class);
+        return annotation != null ? annotation.name() : clazz.getSimpleName().toLowerCase();
     }
 
     /**
@@ -113,8 +111,9 @@ public class DataRepository {
             // 更新
             ConfigStore configs = new DefaultConfigStore();
             configs.and(Compare.EQUAL, "id", entity.getId());
-            ConfigTable.IS_AUTO_CHECK_METADATA = true;
             Long result = anylineService.update(entity, configs);
+            log.info("[{}] update  ---> effect rows = {}", entity.getClass().getSimpleName(), result);
+
             if (result == 0) {
                 throw new BizException(StatusCode.DB_UPDATE_ERROR);
             }
@@ -125,6 +124,30 @@ public class DataRepository {
         }
     }
 
+
+    /**
+     * 更新
+     * @param <T>
+     *
+     * @param entity 要保存的实体
+     * @param <T>    实体类型
+     * @return 保存后的实体
+     */
+    public <T> long updateByConfig(Class<T> clazz, ConfigStore configs) {
+        if (clazz== null) {
+            throw new BizException(StatusCode.DB_UPDATE_ERROR);
+        }
+        try {
+            // 更新
+            long result = anylineService.update(clazz, configs);
+            log.info("[{}] updateByConfig  ---> effect rows = {}", clazz.getSimpleName(), result);
+            return result;
+        } catch (Exception e) {
+            log.error("保存实体失败: {}", clazz.getSimpleName(), e);
+            throw new BizException(StatusCode.DB_UPDATE_ERROR);
+        }
+    }
+    
     /**
      * 根据ID查找实体
      *
@@ -298,6 +321,34 @@ public class DataRepository {
     /**
      * 根据ID删除实体（软删除）
      *
+     * @param clazz   实体类
+     * @param configs configs
+     * @param <T>     实体类型
+     */
+    public <T extends BaseDO> long deleteByConfigReturn(Class<T> clazz, ConfigStore configs) {
+        try {
+            DataRow row = new DataRow();
+            row.put("deleted", 1);  // 设置逻辑删除标记
+            long result = anylineService.update(getTableName(clazz), row, configs);
+            log.info("[{}] deleteByConfig  ---> effect rows = {}", clazz, result);
+
+            // 这里使用anylineService.delete会直接删除记录，不符合软删除逻辑
+            // long result = anylineService.delete(getTableName(clazz), configs);
+
+            // 下面异常注释掉，允许删除 0 行
+            // if (result == 0) {
+            //     throw new BizException(StatusCode.DB_DELETE_ERROR);
+            // }
+            return result;
+        } catch (Exception e) {
+            log.error("根据ID删除实体失败: class={}, configs={}", clazz.getSimpleName(), configs, e);
+            throw new BizException(StatusCode.DB_DELETE_ERROR);
+        }
+    }
+
+    /**
+     * 根据ID删除实体（软删除）
+     *
      * @param clazz 实体类
      * @param id    实体ID
      * @param <T>   实体类型
@@ -357,7 +408,7 @@ public class DataRepository {
      * @param ids   ID列表
      * @param <T>   实体类型
      */
-    public <T extends BaseDO> void deleteAllById(Class<T> clazz, List<Long> ids) {
+    public <T extends BaseDO> void deleteAllById(Class<T> clazz, Collection<Long> ids) {
         try {
             ConfigStore configs = new DefaultConfigStore();
             configs.and(Compare.IN, "id", ids);

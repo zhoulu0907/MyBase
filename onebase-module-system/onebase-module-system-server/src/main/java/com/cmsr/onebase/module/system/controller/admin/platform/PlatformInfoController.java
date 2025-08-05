@@ -1,9 +1,17 @@
 package com.cmsr.onebase.module.system.controller.admin.platform;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.module.system.controller.admin.license.LicensePageReqVO;
 import com.cmsr.onebase.module.system.controller.admin.license.LicenseSaveReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.license.LicenseDO;
+import com.cmsr.onebase.module.system.enums.license.LicenseStatusEnum;
+import com.cmsr.onebase.module.system.enums.tenant.TenantStatusEnum;
+import com.cmsr.onebase.module.system.enums.user.UserStatusEnum;
 import com.cmsr.onebase.module.system.service.license.LicenseService;
+import com.cmsr.onebase.module.system.service.tenant.TenantService;
+import com.cmsr.onebase.module.system.service.user.AdminUserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,6 +20,7 @@ import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import com.cmsr.onebase.module.system.controller.admin.platform.vo.PlatformInfoReqVo;
@@ -19,7 +28,6 @@ import com.cmsr.onebase.module.system.controller.admin.platform.vo.PlatformInfoR
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.List;
 
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 
@@ -33,6 +41,12 @@ public class PlatformInfoController {
 
     @Resource
     private LicenseService licenseService;
+
+    @Resource
+    private TenantService tenantService;
+
+    @Resource
+    private AdminUserService adminUserService;
 
     /**
      * 创建平台信息
@@ -70,26 +84,52 @@ public class PlatformInfoController {
         return null;
     }
 
+//    /**
+//     * 获取平台信息列表
+//     */
+//    @GetMapping("/simple-list")
+//    @Operation(summary = "获得平台信息和凭证列表")
+//    @PreAuthorize("@ss.hasPermission('system:platform-admin:query')")
+//    public CommonResult<PlatformInfoRespVo> listPlatformInfos() {
+//        // TODO: 实现获取平台信息列表逻辑
+//        PlatformInfoRespVo respVo = new PlatformInfoRespVo();
+//        List<LicenseDO> list = licenseService.getSimpleLicenseList();
+//        respVo.setLicenseList(list);
+//        return success(respVo);
+//    }
     /**
-     * 获取平台信息列表
+     * 分页查询
+     * @param platformInfoReqVo 分页查询参数
+     * @return 分页结果
      */
-    @GetMapping("/simple-list")
-    @Operation(summary = "获得平台信息和凭证列表")
+    @GetMapping("/page")
     @PreAuthorize("@ss.hasPermission('system:platform-admin:query')")
-    public CommonResult<PlatformInfoRespVo> listPlatformInfos() {
-        // TODO: 实现获取平台信息列表逻辑
-        PlatformInfoRespVo respVo = new PlatformInfoRespVo();
-        List<LicenseDO> list = licenseService.getSimpleLicenseList();
-        respVo.setLicenseList(list);
-        return success(respVo);
+    @Operation(summary = "分页查询PlatformInfo")
+    public CommonResult<PageResult<PlatformInfoRespVo>> getPlatformInfoPage(@Valid PlatformInfoReqVo platformInfoReqVo) {
+
+        LicensePageReqVO  reqVO = new LicensePageReqVO();
+        reqVO.setPageSize(platformInfoReqVo.getPageSize());
+        reqVO.setPageNo(platformInfoReqVo.getPageNo());
+        PageResult<LicenseDO> pageResult = licenseService.getLicensePage(reqVO);
+        PageResult<PlatformInfoRespVo> voPageResult = BeanUtils.toBean(pageResult, PlatformInfoRespVo.class);
+        Integer tenantCount = tenantService.getTenantCountByStatus(TenantStatusEnum.NORMAL);
+        Integer userCount = adminUserService.getUserCountByStatus(UserStatusEnum.NORMAL);
+        voPageResult.getList().stream()
+                .filter(vo -> LicenseStatusEnum.ENABLE.equals(vo.getStatus()))
+                .forEach(vo -> {
+                    vo.setActualTenantCount(tenantCount);
+                    vo.setActualUserCount(userCount);
+                });
+
+
+        return CommonResult.success(voPageResult);
     }
-    
     /**
      * 创建凭证
      */
-    @PostMapping("/license/create")
+    @PostMapping("/create")
     @Operation(summary = "创建凭证")
-    @PreAuthorize("@ss.hasPermission('system:platform-admin:query')")
+    @PreAuthorize("@ss.hasPermission('system:platform-admin:create')")
     public Object createLicense(@RequestBody LicenseSaveReqVO reqVo) {
         // TODO: 实现创建凭证逻辑
             return licenseService.createLicense(reqVo);

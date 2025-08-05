@@ -1,31 +1,32 @@
 package com.cmsr.onebase.module.system.dal.dataobject.permission;
 
 import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
-import com.baomidou.mybatisplus.annotation.KeySequence;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import jakarta.persistence.Column;
+import jakarta.persistence.Table;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 /**
  * 角色和菜单关联
  *
  * @author ruoyi
  */
-@TableName("system_role_menu")
-@KeySequence("system_role_menu_seq") // 用于 Oracle、PostgreSQL、Kingbase、DB2、H2 数据库的主键自增。如果是 MySQL 等数据库，可不写。
+@Table(name = "system_role_menu")
 @Data
-@EqualsAndHashCode(callSuper = true)
 public class RoleMenuDO extends TenantBaseDO {
 
+    // 字段常量
+    public static final String ROLE_ID = "role_id";
+    public static final String MENU_ID = "menu_id";
 
     /**
      * 角色ID
      */
+    @Column(name = ROLE_ID)
     private Long roleId;
     /**
      * 菜单ID
      */
+    @Column(name = MENU_ID)
     private Long menuId;
 
 }

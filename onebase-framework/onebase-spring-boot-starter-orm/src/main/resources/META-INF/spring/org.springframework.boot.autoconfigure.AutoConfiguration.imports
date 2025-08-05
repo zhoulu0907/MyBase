@@ -1,4 +1,4 @@
-com.cmsr.onebase.framework.datasource.config.YudaoDataSourceAutoConfiguration
-com.cmsr.onebase.framework.mybatis.config.YudaoMybatisAutoConfiguration
-com.cmsr.onebase.framework.translate.config.YudaoTranslateAutoConfiguration
+#com.cmsr.onebase.framework.datasource.config.YudaoDataSourceAutoConfiguration
+#com.cmsr.onebase.framework.mybatis.config.YudaoMybatisAutoConfiguration
+#com.cmsr.onebase.framework.translate.config.YudaoTranslateAutoConfiguration
 com.cmsr.onebase.framework.aynline.AynlineAutoConfiguration

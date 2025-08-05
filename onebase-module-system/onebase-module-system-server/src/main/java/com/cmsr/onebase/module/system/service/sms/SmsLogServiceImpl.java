@@ -1,23 +1,23 @@
 package com.cmsr.onebase.module.system.service.sms;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
-import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.system.controller.admin.sms.vo.log.SmsLogPageReqVO;
-import com.cmsr.onebase.module.system.dal.dataobject.sms.SmsCodeDO;
-import com.cmsr.onebase.module.system.dal.dataobject.sms.SmsChannelDO;
-import com.cmsr.onebase.module.system.dal.dataobject.sms.SmsLogDO;
-import com.cmsr.onebase.module.system.dal.dataobject.sms.SmsTemplateDO;
-import com.cmsr.onebase.module.system.dal.mysql.sms.SmsLogMapper;
-import com.cmsr.onebase.module.system.enums.sms.SmsReceiveStatusEnum;
-import com.cmsr.onebase.module.system.enums.sms.SmsSendStatusEnum;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Service;
-
-import jakarta.annotation.Resource;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Objects;
+
+import org.anyline.data.param.ConfigStore;
+import org.anyline.data.param.init.DefaultConfigStore;
+import org.springframework.stereotype.Service;
+
+import com.cmsr.onebase.framework.aynline.DataRepository;
+import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.module.system.controller.admin.sms.vo.log.SmsLogPageReqVO;
+import com.cmsr.onebase.module.system.dal.dataobject.sms.SmsLogDO;
+import com.cmsr.onebase.module.system.dal.dataobject.sms.SmsTemplateDO;
+import com.cmsr.onebase.module.system.enums.sms.SmsReceiveStatusEnum;
+import com.cmsr.onebase.module.system.enums.sms.SmsSendStatusEnum;
+
+import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 短信日志 Service 实现类
@@ -27,9 +27,6 @@ import java.util.Objects;
 @Slf4j
 @Service
 public class SmsLogServiceImpl implements SmsLogService {
-
-    @Resource
-    private SmsLogMapper smsLogMapper;
 
     @Resource
     private DataRepository dataRepository;
@@ -87,22 +84,8 @@ public class SmsLogServiceImpl implements SmsLogService {
 
     @Override
     public PageResult<SmsLogDO> getSmsLogPage(SmsLogPageReqVO pageReqVO) {
-
-        //ConfigStore configStore = new DefaultConfigStore();
-        //
-        //if (StringUtils.isNotBlank(pageReqVO.getSignature())) {
-        //    configStore.and(Compare.LIKE, "signature", pageReqVO.getSignature());
-        //}
-        //if (null != pageReqVO.getStatus()) {
-        //    configStore.and(Compare.EAUAL, "status", pageReqVO.getStatus());
-        //}
-        //if (null != pageReqVO.getCreateTime()) {
-        //    configStore.and(Compare.EAUAL, "create_time", pageReqVO.getCreateTime());
-        //}
-        //
-        //return dataRepository.findPageWithConditions(SmsChannelDO.class,configStore, pageReqVO.getPageNo(), pageReqVO.getPageSize());
-
-        return smsLogMapper.selectPage(pageReqVO);
+        ConfigStore configStore = new DefaultConfigStore();
+        return dataRepository.findPageWithConditions(SmsLogDO.class, configStore, pageReqVO.getPageNo(), pageReqVO.getPageSize());
     }
 
 }

@@ -2,7 +2,8 @@ package com.cmsr.onebase.server.anyline;
 
 import com.cmsr.onebase.framework.common.anyline.web.BizException;
 import com.cmsr.onebase.framework.common.anyline.web.StatusCode;
-import com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO;
+import com.cmsr.onebase.framework.common.util.snowflake.SnowflakeId;
+import com.cmsr.onebase.framework.data.base.BaseDO;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
 import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
@@ -15,6 +16,7 @@ import org.anyline.data.prepare.RunPrepare;
 import org.anyline.data.run.Run;
 import org.anyline.data.runtime.DataRuntime;
 import org.anyline.entity.Compare;
+import org.anyline.entity.DataRow;
 import org.anyline.entity.DataSet;
 import org.anyline.metadata.ACTION.SWITCH;
 import org.anyline.metadata.Table;
@@ -50,6 +52,16 @@ public class AnyLineDBInfoListener implements DMListener {
         TENANT_IGNORE_TABLES.add("system_notify_template");
         TENANT_IGNORE_TABLES.add("system_oauth2_client");
         TENANT_IGNORE_TABLES.add("system_license");
+        TENANT_IGNORE_TABLES.add("infra_codegen_column");
+        TENANT_IGNORE_TABLES.add("infra_codegen_table");
+        TENANT_IGNORE_TABLES.add("infra_config");
+        TENANT_IGNORE_TABLES.add("infra_data_source_config");
+        TENANT_IGNORE_TABLES.add("infra_file_config");
+        TENANT_IGNORE_TABLES.add("infra_file_content");
+        TENANT_IGNORE_TABLES.add("infra_file");
+        TENANT_IGNORE_TABLES.add("infra_api_access_log");
+        TENANT_IGNORE_TABLES.add("infra_api_error_log");
+
         // 可以根据需要添加更多表
     }
 
@@ -75,8 +87,10 @@ public class AnyLineDBInfoListener implements DMListener {
         // 加入创建时间和创建人等参数
         if (Objects.nonNull(obj) && obj instanceof BaseDO baseDO) {
             // 设置雪花ID
-            // baseDO.setId(SnowflakeId.nextId());
-            // log.info("anyline global prepareInsert ---------> snow id:{}",baseDO.getId());
+            if(baseDO.getId() == null) {
+                baseDO.setId(SnowflakeId.nextId());
+                log.info("anyline global prepareInsert ---------> snow id:{}",baseDO.getId());
+            }
 
             // 创建时间为空，则以当前时间为插入时间
             LocalDateTime current = LocalDateTime.now();
@@ -222,24 +236,43 @@ public class AnyLineDBInfoListener implements DMListener {
         configs.and(Compare.EQUAL, BaseDO.DELETED, false);
         // 加入租户标志
         boolean shouldIgnore = isTableTenantIgnored2(dest.getName());
-        log.info("prepareUpdate--------------> isTableTenantIgnored: {}", shouldIgnore);
+        log.info("prepareUpdate obj--------------> isTableTenantIgnored: {}", shouldIgnore);
         if (!shouldIgnore) {
             configs.and(Compare.EQUAL, TenantBaseDO.TENANT_ID, TenantContextHolder.getRequiredTenantId());
         }
         // 加入更新时间和更新人
         if (Objects.nonNull(obj) && obj instanceof BaseDO) {
             BaseDO baseDO = (BaseDO)obj;
-
-            LocalDateTime current = LocalDateTime.now();
-            baseDO.setUpdateTime(current);
-
+            baseDO.setUpdateTime(LocalDateTime.now());
             Long userId = WebFrameworkUtils.getLoginUserId();
             baseDO.setUpdater(userId);
         }
         return SWITCH.CONTINUE;
     }
 
-
+    @Override
+    public SWITCH prepareUpdate(DataRuntime runtime, String random, RunPrepare prepare, DataRow data,
+            ConfigStore configs) {
+           // 这里config可能为空，强制异常提前发现问题。
+        if(configs == null){
+            throw new BizException(StatusCode.UPDATE_WHERE_IS_NULL);
+        }     
+        // 加入软删判断 (opt: 框架这里config可能为空)
+        configs.and(Compare.EQUAL, BaseDO.DELETED, false);
+        // 加入租户标志
+        boolean shouldIgnore = isTableTenantIgnored2(prepare.getTableName());
+        log.info("prepareUpdate row--------------> isTableTenantIgnored: {}", shouldIgnore);
+        if (!shouldIgnore) {
+            configs.and(Compare.EQUAL, TenantBaseDO.TENANT_ID, TenantContextHolder.getRequiredTenantId());
+        }
+        // 加入更新时间和更新人
+        if (Objects.nonNull(data)) {
+            data.put(BaseDO.UPDATE_TIME, LocalDateTime.now());
+            Long userId = WebFrameworkUtils.getLoginUserId();
+            data.put(BaseDO.UPDATER, userId);
+        }
+        return SWITCH.CONTINUE;
+    }
     /**
      * 创建删除SQL前调用(根据Entity/DataRow),修改删除条件可以在这一步实现<br/>
      * 注意不是beforeDelete<br/>
@@ -310,7 +343,7 @@ public class AnyLineDBInfoListener implements DMListener {
      /**
      * 向查询条件注入租户标志
      *
-     * @param obj
+     * @param
      */
     private void injectTenantIdAndDeleteToQuery(String table, ConfigStore configs) {
         boolean shouldIgnore = isTableTenantIgnored2(table);

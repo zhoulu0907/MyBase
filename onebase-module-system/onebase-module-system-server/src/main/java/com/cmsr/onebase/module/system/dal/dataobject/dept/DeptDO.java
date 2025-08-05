@@ -1,61 +1,71 @@
 package com.cmsr.onebase.module.system.dal.dataobject.dept;
 
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
-import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
-import com.baomidou.mybatisplus.annotation.KeySequence;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import jakarta.persistence.Table;
+import jakarta.persistence.Column;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 /**
  * 部门表
  *
  * @author ruoyi
  */
-@TableName("system_dept")
-@KeySequence("system_dept_seq") // 用于 Oracle、PostgreSQL、Kingbase、DB2、H2 数据库的主键自增。如果是 MySQL 等数据库，可不写。
+@Table(name = "system_dept")
 @Data
-@EqualsAndHashCode(callSuper = true)
 public class DeptDO extends TenantBaseDO {
 
     public static final Long PARENT_ID_ROOT = 0L;
 
+    // 列名常量
+    public static final String NAME             = "name";
+    public static final String PARENT_ID        = "parent_id";
+    public static final String SORT             = "sort";
+    public static final String LEADER_USER_ID   = "leader_user_id";
+    public static final String PHONE            = "phone";
+    public static final String EMAIL            = "email";
+    public static final String STATUS           = "status";
+
     /**
      * 部门名称
      */
+    @Column(name = NAME)
     private String name;
     /**
      * 父部门ID
      *
      * 关联 {@link #id}
      */
+    @Column(name = PARENT_ID)
     private Long parentId;
     /**
      * 显示顺序
      */
+    @Column(name = SORT)
     private Integer sort;
     /**
      * 负责人
      *
      * 关联 {@link AdminUserDO#getId()}
      */
+    @Column(name = LEADER_USER_ID)
     private Long leaderUserId;
     /**
      * 联系电话
      */
+    @Column(name = PHONE)
     private String phone;
     /**
      * 邮箱
      */
+    @Column(name = EMAIL)
     private String email;
     /**
      * 部门状态
      *
      * 枚举 {@link CommonStatusEnum}
      */
+    @Column(name = STATUS)
     private Integer status;
 
 }

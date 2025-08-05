@@ -23,9 +23,6 @@ import jakarta.annotation.Resource;
 @Slf4j
 public class LoginLogServiceImpl implements LoginLogService {
 
-    //@Resource
-    //private LoginLogMapper loginLogMapper;
-
     @Resource
     private DataRepository dataRepository;
 

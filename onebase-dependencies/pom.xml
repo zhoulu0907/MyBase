@@ -25,18 +25,16 @@
         <knife4j.version>4.6.0</knife4j.version>
         <!-- DB 相关 -->
         <druid.version>1.2.24</druid.version>
-        <mybatis.version>3.5.19</mybatis.version>
-        <mybatis-plus.version>3.5.10.1</mybatis-plus.version>
         <dynamic-datasource.version>4.3.1</dynamic-datasource.version>
-        <mybatis-plus-join.version>1.4.13</mybatis-plus-join.version>
         <easy-trans.version>3.0.6</easy-trans.version>
         <redisson.version>3.41.0</redisson.version>
         <dm8.jdbc.version>8.1.3.140</dm8.jdbc.version>
         <kingbase.jdbc.version>8.6.0</kingbase.jdbc.version>
         <opengauss.jdbc.version>5.1.0</opengauss.jdbc.version>
         <taos.version>3.3.3</taos.version>
-        <anyline.version>8.7.2-jdk17-20250722</anyline.version>
-<!--        <anyline.version>8.7.2-jdk17-20250603</anyline.version>-->
+        <postgresql.version>42.7.4</postgresql.version>
+        <anyline.version>8.7.2-jdk17-SNAPSHOT</anyline.version>
+        <!-- <anyline.version>8.7.2-jdk17-20250722</anyline.version> -->
         <jakarta.persistence-api.version>3.2.0</jakarta.persistence-api.version>
         <jakarta.validation-api.version>3.1.1</jakarta.validation-api.version>
         <!-- 消息队列 -->
@@ -138,16 +136,8 @@
                 <artifactId>onebase-spring-boot-starter-biz-tenant</artifactId>
                 <version>${revision}</version>
             </dependency>
-            <dependency>
-                <groupId>com.cmsr.onebase</groupId>
-                <artifactId>onebase-spring-boot-starter-biz-data-permission</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.cmsr.onebase</groupId>
-                <artifactId>onebase-spring-boot-starter-biz-ip</artifactId>
-                <version>${revision}</version>
-            </dependency>
+
+    
 
             <!-- Spring 核心 -->
             <dependency>
@@ -157,12 +147,7 @@
                 <version>${spring.boot.version}</version>
             </dependency>
 
-            <dependency>
-                <groupId>com.cmsr.onebase</groupId>
-                <artifactId>onebase-spring-boot-starter-env</artifactId>
-                <version>${revision}</version>
-            </dependency>
-
+    
             <!-- Web 相关 -->
             <dependency>
                 <groupId>com.cmsr.onebase</groupId>
@@ -197,7 +182,12 @@
                 <artifactId>knife4j-gateway-spring-boot-starter</artifactId>
                 <version>4.5.0</version> <!-- TODO 开发者：等 4.5.0 => 4.6.0 -->
             </dependency>
-
+            <!-- 监控 -->
+            <dependency>
+                <groupId>com.cmsr.onebase</groupId>
+                <artifactId>onebase-spring-boot-starter-monitor</artifactId>
+                <version>${revision}</version>
+            </dependency>
             <!-- DB 相关 -->
             <dependency>
                 <groupId>com.cmsr.onebase</groupId>
@@ -211,62 +201,31 @@
                 <version>${druid.version}</version>
             </dependency>
             <dependency>
-                <!-- 注意：必须声明，避免 flowable 和 mybatis-plus 引入的 mybatis 版本不一致！！！ -->
-                <groupId>org.mybatis</groupId>
-                <artifactId>mybatis</artifactId>
-                <version>${mybatis.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.baomidou</groupId>
-                <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
-                <version>${mybatis-plus.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.baomidou</groupId>
-                <artifactId>mybatis-plus-jsqlparser</artifactId>
-                <version>${mybatis-plus.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.baomidou</groupId>
-                <artifactId>mybatis-plus-generator</artifactId> <!-- 代码生成器，使用它解析表结构 -->
-                <version>${mybatis-plus.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>com.baomidou</groupId>
                 <artifactId>dynamic-datasource-spring-boot3-starter</artifactId> <!-- 多数据源 -->
                 <version>${dynamic-datasource.version}</version>
             </dependency>
-            <dependency>
-                <groupId>com.github.yulichang</groupId>
-                <artifactId>mybatis-plus-join-boot-starter</artifactId> <!-- MyBatis 联表查询 -->
-                <version>${mybatis-plus-join.version}</version>
-            </dependency>
 
-            <dependency>
-                <groupId>com.fhs-opensource</groupId> <!-- VO 数据翻译 -->
-                <artifactId>easy-trans-spring-boot-starter</artifactId>
-                <version>${easy-trans.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.springframework</groupId>
-                        <artifactId>spring-context</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.springframework.cloud</groupId>
-                        <artifactId>spring-cloud-commons</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>com.fhs-opensource</groupId>
-                <artifactId>easy-trans-mybatis-plus-extend</artifactId>
-                <version>${easy-trans.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fhs-opensource</groupId>
-                <artifactId>easy-trans-anno</artifactId>
-                <version>${easy-trans.version}</version>
-            </dependency>
+<!--            <dependency>-->
+<!--                <groupId>com.fhs-opensource</groupId> &lt;!&ndash; VO 数据翻译 &ndash;&gt;-->
+<!--                <artifactId>easy-trans-spring-boot-starter</artifactId>-->
+<!--                <version>${easy-trans.version}</version>-->
+<!--                <exclusions>-->
+<!--                    <exclusion>-->
+<!--                        <groupId>org.springframework</groupId>-->
+<!--                        <artifactId>spring-context</artifactId>-->
+<!--                    </exclusion>-->
+<!--                    <exclusion>-->
+<!--                        <groupId>org.springframework.cloud</groupId>-->
+<!--                        <artifactId>spring-cloud-commons</artifactId>-->
+<!--                    </exclusion>-->
+<!--                </exclusions>-->
+<!--            </dependency>-->
+<!--            <dependency>-->
+<!--                <groupId>com.fhs-opensource</groupId>-->
+<!--                <artifactId>easy-trans-anno</artifactId>-->
+<!--                <version>${easy-trans.version}</version>-->
+<!--            </dependency>-->
 
             <dependency>
                 <groupId>com.cmsr.onebase</groupId>
@@ -304,33 +263,16 @@
                 <version>${taos.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>org.postgresql</groupId>
+                <artifactId>postgresql</artifactId>
+                <version>${postgresql.version}</version>
+            </dependency>
+
             <!-- RPC 远程调用相关 -->
             <dependency>
                 <groupId>com.cmsr.onebase</groupId>
                 <artifactId>onebase-spring-boot-starter-rpc</artifactId>
-                <version>${revision}</version>
-            </dependency>
-
-            <!-- Registry 注册中心相关 -->
-
-            <!-- Config 配置中心相关 -->
-
-            <!-- Job 定时任务相关 -->
-            <dependency>
-                <groupId>com.xuxueli</groupId>
-                <artifactId>xxl-job-core</artifactId>
-                <version>${xxl-job.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.cmsr.onebase</groupId>
-                <artifactId>onebase-spring-boot-starter-job</artifactId>
-                <version>${revision}</version>
-            </dependency>
-
-            <!-- 消息队列相关 -->
-            <dependency>
-                <groupId>com.cmsr.onebase</groupId>
-                <artifactId>onebase-spring-boot-starter-mq</artifactId>
                 <version>${revision}</version>
             </dependency>
 
@@ -357,13 +299,6 @@
                         <groupId>org.redisson</groupId>
                     </exclusion>
                 </exclusions>
-            </dependency>
-
-            <!-- 监控相关 -->
-            <dependency>
-                <groupId>com.cmsr.onebase</groupId>
-                <artifactId>onebase-spring-boot-starter-monitor</artifactId>
-                <version>${revision}</version>
             </dependency>
 
             <dependency>
