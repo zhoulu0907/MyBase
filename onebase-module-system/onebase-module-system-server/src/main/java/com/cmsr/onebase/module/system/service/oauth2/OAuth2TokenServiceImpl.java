@@ -1,10 +1,22 @@
 package com.cmsr.onebase.module.system.service.oauth2;
 
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.map.MapUtil;
-import cn.hutool.core.util.IdUtil;
-import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.core.util.StrUtil;
+import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception0;
+import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.convertSet;
+
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.anyline.data.param.ConfigStore;
+import org.anyline.data.param.init.DefaultConfigStore;
+import org.anyline.entity.Compare;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.common.exception.enums.GlobalErrorCodeConstants;
@@ -15,32 +27,19 @@ import com.cmsr.onebase.framework.security.core.LoginUser;
 import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.module.system.controller.admin.oauth2.vo.token.OAuth2AccessTokenPageReqVO;
-import com.cmsr.onebase.module.system.dal.dataobject.notify.NotifyMessageDO;
 import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2AccessTokenDO;
 import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2ClientDO;
 import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2RefreshTokenDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
-import com.cmsr.onebase.module.system.dal.mysql.oauth2.OAuth2AccessTokenMapper;
-import com.cmsr.onebase.module.system.dal.mysql.oauth2.OAuth2RefreshTokenMapper;
 import com.cmsr.onebase.module.system.dal.redis.oauth2.OAuth2AccessTokenRedisDAO;
 import com.cmsr.onebase.module.system.service.user.AdminUserService;
+
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.map.MapUtil;
+import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
 import jakarta.annotation.Resource;
-import org.anyline.data.param.ConfigStore;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.Compare;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception0;
-import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.convertSet;
 
 /**
  * OAuth2.0 Token Service 实现类
@@ -48,11 +47,6 @@ import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.
  */
 @Service
 public class OAuth2TokenServiceImpl implements OAuth2TokenService {
-
-    @Resource
-    private OAuth2AccessTokenMapper oauth2AccessTokenMapper;
-    @Resource
-    private OAuth2RefreshTokenMapper oauth2RefreshTokenMapper;
 
     @Resource
     private OAuth2AccessTokenRedisDAO oauth2AccessTokenRedisDAO;

@@ -3,7 +3,7 @@ package com.cmsr.onebase.module.system.dal.dataobject.sms;
 import java.time.LocalDateTime;
 import java.util.Map;
 
-import com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO;
+import com.cmsr.onebase.framework.data.base.BaseDO;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 
 import jakarta.persistence.Column;

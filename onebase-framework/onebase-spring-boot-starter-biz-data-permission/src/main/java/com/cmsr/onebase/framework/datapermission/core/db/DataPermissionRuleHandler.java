@@ -3,7 +3,6 @@ package com.cmsr.onebase.framework.datapermission.core.db;
 import cn.hutool.core.collection.CollUtil;
 import com.cmsr.onebase.framework.datapermission.core.rule.DataPermissionRule;
 import com.cmsr.onebase.framework.datapermission.core.rule.DataPermissionRuleFactory;
-import com.cmsr.onebase.framework.mybatis.core.util.MyBatisUtils;
 import com.baomidou.mybatisplus.extension.plugins.handler.MultiDataPermissionHandler;
 import lombok.RequiredArgsConstructor;
 import net.sf.jsqlparser.expression.Expression;

@@ -32,9 +32,6 @@ import static cn.hutool.core.exceptions.ExceptionUtil.getRootCauseMessage;
 @Validated
 public class MailLogServiceImpl implements MailLogService {
 
-    //@Resource
-    //private MailLogMapper mailLogMapper;
-
     @Resource
     private DataRepository dataRepository;
 

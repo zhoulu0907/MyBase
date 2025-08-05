@@ -10,7 +10,6 @@ import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.module.infra.controller.admin.logger.vo.apierrorlog.ApiErrorLogPageReqVO;
 import com.cmsr.onebase.module.infra.dal.dataobject.logger.ApiAccessLogDO;
 import com.cmsr.onebase.module.infra.dal.dataobject.logger.ApiErrorLogDO;
-import com.cmsr.onebase.module.infra.dal.mysql.logger.ApiErrorLogMapper;
 import com.cmsr.onebase.module.infra.enums.logger.ApiErrorLogProcessStatusEnum;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -34,9 +33,6 @@ import static com.cmsr.onebase.module.infra.enums.ErrorCodeConstants.API_ERROR_L
 @Slf4j
 public class ApiErrorLogServiceImpl implements ApiErrorLogService {
 
-//    @Resource
-//    private ApiErrorLogMapper apiErrorLogMapper;
-
     @Resource
     private DataRepository dataRepository;
 
@@ -47,31 +43,27 @@ public class ApiErrorLogServiceImpl implements ApiErrorLogService {
         apiErrorLog.setRequestParams(StrUtils.maxLength(apiErrorLog.getRequestParams(), REQUEST_PARAMS_MAX_LENGTH));
         if (TenantContextHolder.getTenantId() != null) {
             dataRepository.insert(apiErrorLog);
-//            apiErrorLogMapper.insert(apiErrorLog);
         } else {
             // 极端情况下，上下文中没有租户时，此时忽略租户上下文，避免插入失败！
             TenantUtils.executeIgnore(() -> dataRepository.insert(apiErrorLog));
-//            TenantUtils.executeIgnore(() -> apiErrorLogMapper.insert(apiErrorLog));
         }
     }
 
     @Override
     public PageResult<ApiErrorLogDO> getApiErrorLogPage(ApiErrorLogPageReqVO pageReqVO) {
         DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.eq("user_id", pageReqVO.getUserId())
-                .eq("user_type", pageReqVO.getUserType())
-                .eq("application_name", pageReqVO.getApplicationName())
-                .eq("request_url", pageReqVO.getRequestUrl())
-                .eq("process_status", pageReqVO.getProcessStatus())
+        configStore.eq(ApiErrorLogDO.COLUMN_USER_ID, pageReqVO.getUserId())
+                .eq(ApiErrorLogDO.COLUMN_USER_TYPE, pageReqVO.getUserType())
+                .eq(ApiErrorLogDO.COLUMN_APPLICATION_NAME, pageReqVO.getApplicationName())
+                .eq(ApiErrorLogDO.COLUMN_REQUEST_URL, pageReqVO.getRequestUrl())
+                .eq(ApiErrorLogDO.COLUMN_PROCESS_STATUS, pageReqVO.getProcessStatus())
                 .eq("exceptionTime",pageReqVO.getExceptionTime());
         return dataRepository.findPageWithConditions(ApiErrorLogDO.class, configStore,pageReqVO.getPageNo(),pageReqVO.getPageSize());
-//        return apiErrorLogMapper.selectPage(pageReqVO);
     }
 
     @Override
     public void updateApiErrorLogProcess(Long id, Integer processStatus, Long processUserId) {
         ApiErrorLogDO errorLog = dataRepository.findById(ApiErrorLogDO.class,id);
-//        ApiErrorLogDO errorLog = apiErrorLogMapper.selectById(id);
         if (errorLog == null) {
             throw exception(API_ERROR_LOG_NOT_FOUND);
         }
@@ -83,7 +75,6 @@ public class ApiErrorLogServiceImpl implements ApiErrorLogService {
             .processTime(LocalDateTime.now()).build();
         logDO.setId(id);
         dataRepository.update(logDO);
-//        apiErrorLogMapper.updateById(logDO);
     }
 
     @Override
@@ -94,8 +85,7 @@ public class ApiErrorLogServiceImpl implements ApiErrorLogService {
         // 循环删除，直到没有满足条件的数据
         for (int i = 0; i < Short.MAX_VALUE; i++) {
             int deleteCount = (int) dataRepository.deleteByConfigReturn(ApiAccessLogDO.class, new DefaultConfigStore()
-                    .le("create_time", expireDate).limit(deleteLimit));
-//            int deleteCount = apiErrorLogMapper.deleteByCreateTimeLt(expireDate, deleteLimit);
+                    .le(ApiAccessLogDO.CREATE_TIME, expireDate).limit(deleteLimit));
             count += deleteCount;
             // 达到删除预期条数，说明到底了
             if (deleteCount < deleteLimit) {

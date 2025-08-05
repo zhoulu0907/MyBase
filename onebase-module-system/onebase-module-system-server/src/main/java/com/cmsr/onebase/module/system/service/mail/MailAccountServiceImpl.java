@@ -1,17 +1,13 @@
 package com.cmsr.onebase.module.system.service.mail;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
-import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
-import com.cmsr.onebase.module.system.controller.admin.mail.vo.account.MailAccountPageReqVO;
-import com.cmsr.onebase.module.system.controller.admin.mail.vo.account.MailAccountSaveReqVO;
-import com.cmsr.onebase.module.system.dal.dataobject.mail.MailAccountDO;
-import com.cmsr.onebase.module.system.dal.mysql.mail.MailAccountMapper;
-import com.cmsr.onebase.module.system.dal.redis.RedisKeyConstants;
+import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.MAIL_ACCOUNT_NOT_EXISTS;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.MAIL_ACCOUNT_RELATE_TEMPLATE_EXISTS;
+
+import java.util.List;
+
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
-import lombok.extern.slf4j.Slf4j;
 import org.anyline.entity.Compare;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.cache.annotation.CacheEvict;
@@ -19,12 +15,17 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
-import jakarta.annotation.Resource;
-import java.util.List;
+import com.cmsr.onebase.framework.aynline.DataRepository;
+import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
+import com.cmsr.onebase.module.system.controller.admin.mail.vo.account.MailAccountPageReqVO;
+import com.cmsr.onebase.module.system.controller.admin.mail.vo.account.MailAccountSaveReqVO;
+import com.cmsr.onebase.module.system.dal.dataobject.mail.MailAccountDO;
+import com.cmsr.onebase.module.system.dal.redis.RedisKeyConstants;
 
-import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.MAIL_ACCOUNT_NOT_EXISTS;
-import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.MAIL_ACCOUNT_RELATE_TEMPLATE_EXISTS;
+import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 邮箱账号 Service 实现类
@@ -36,9 +37,6 @@ import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.MAIL_ACCOU
 @Validated
 @Slf4j
 public class MailAccountServiceImpl implements MailAccountService {
-
-    @Resource
-    private MailAccountMapper mailAccountMapper;
 
     @Resource
     private MailTemplateService mailTemplateService;

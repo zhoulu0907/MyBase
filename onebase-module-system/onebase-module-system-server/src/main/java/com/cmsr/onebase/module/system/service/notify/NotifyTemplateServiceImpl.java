@@ -1,18 +1,13 @@
 package com.cmsr.onebase.module.system.service.notify;
 
-import cn.hutool.core.util.ReUtil;
-import cn.hutool.core.util.StrUtil;
-import com.cmsr.onebase.framework.aynline.DataRepository;
-import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.module.system.controller.admin.notify.vo.template.NotifyTemplatePageReqVO;
-import com.cmsr.onebase.module.system.controller.admin.notify.vo.template.NotifyTemplateSaveReqVO;
-import com.cmsr.onebase.module.system.dal.dataobject.notify.NotifyMessageDO;
-import com.cmsr.onebase.module.system.dal.dataobject.notify.NotifyTemplateDO;
-import com.cmsr.onebase.module.system.dal.mysql.notify.NotifyTemplateMapper;
-import com.cmsr.onebase.module.system.dal.redis.RedisKeyConstants;
-import com.google.common.annotations.VisibleForTesting;
-import lombok.extern.slf4j.Slf4j;
+import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.NOTIFY_TEMPLATE_CODE_DUPLICATE;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.NOTIFY_TEMPLATE_NOT_EXISTS;
+
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
+
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Compare;
@@ -22,16 +17,19 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
+import com.cmsr.onebase.framework.aynline.DataRepository;
+import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.module.system.controller.admin.notify.vo.template.NotifyTemplatePageReqVO;
+import com.cmsr.onebase.module.system.controller.admin.notify.vo.template.NotifyTemplateSaveReqVO;
+import com.cmsr.onebase.module.system.dal.dataobject.notify.NotifyTemplateDO;
+import com.cmsr.onebase.module.system.dal.redis.RedisKeyConstants;
+import com.google.common.annotations.VisibleForTesting;
+
+import cn.hutool.core.util.ReUtil;
+import cn.hutool.core.util.StrUtil;
 import jakarta.annotation.Resource;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Pattern;
-
-import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.NOTIFY_TEMPLATE_CODE_DUPLICATE;
-import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.NOTIFY_TEMPLATE_NOT_EXISTS;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 站内信模版 Service 实现类
@@ -47,9 +45,6 @@ public class NotifyTemplateServiceImpl implements NotifyTemplateService {
      * 正则表达式，匹配 {} 中的变量
      */
     private static final Pattern PATTERN_PARAMS = Pattern.compile("\\{(.*?)}");
-
-    @Resource
-    private NotifyTemplateMapper notifyTemplateMapper;
 
     @Resource
     private DataRepository dataRepository;

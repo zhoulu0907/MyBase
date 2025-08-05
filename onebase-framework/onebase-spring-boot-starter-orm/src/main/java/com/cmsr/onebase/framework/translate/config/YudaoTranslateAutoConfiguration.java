@@ -1,18 +1,18 @@
 package com.cmsr.onebase.framework.translate.config;
 
-import com.cmsr.onebase.framework.translate.core.TranslateUtils;
-import com.fhs.trans.service.impl.TransService;
-import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.context.annotation.Bean;
+//import com.cmsr.onebase.framework.translate.core.TranslateUtils;
+//import com.fhs.trans.service.impl.TransService;
+//import org.springframework.boot.autoconfigure.AutoConfiguration;
+//import org.springframework.context.annotation.Bean;
 
-@AutoConfiguration
-public class YudaoTranslateAutoConfiguration {
-
-    @Bean
-    @SuppressWarnings({"InstantiationOfUtilityClass", "SpringJavaInjectionPointsAutowiringInspection"})
-    public TranslateUtils translateUtils(TransService transService) {
-        TranslateUtils.init(transService);
-        return new TranslateUtils();
-    }
-
-}
+//@AutoConfiguration
+//public class YudaoTranslateAutoConfiguration {
+//
+//    @Bean
+//    @SuppressWarnings({"InstantiationOfUtilityClass", "SpringJavaInjectionPointsAutowiringInspection"})
+//    public TranslateUtils translateUtils(TransService transService) {
+//        TranslateUtils.init(transService);
+//        return new TranslateUtils();
+//    }
+//
+//}
