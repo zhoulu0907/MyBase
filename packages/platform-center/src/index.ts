@@ -7,7 +7,7 @@ export { getBackendURL } from './services/base';
 export { CaptchaService, captchaService, getCaptcha, verifyCaptcha } from './services/captcha';
 
 // 导出会话服务
-export * from './services/session';
+export * from './services/auth';
 
 export * from './services/dict';
 
