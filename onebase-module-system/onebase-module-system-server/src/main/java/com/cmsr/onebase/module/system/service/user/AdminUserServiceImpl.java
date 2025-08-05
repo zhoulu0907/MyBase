@@ -35,6 +35,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.cmsr.onebase.module.system.enums.user.UserStatusEnum;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Compare;
 import org.anyline.entity.Order;
@@ -606,6 +607,10 @@ public class AdminUserServiceImpl implements AdminUserService {
     }
 
     @Override
+    public Integer getUserCountByStatus(UserStatusEnum status) {
+        return (int) dataRepository.countByConfig(AdminUserDO.class,new DefaultConfigStore().eq(AdminUserDO.STATUS, status));
+    }
+
     public Long getUserCountByStatus(Integer status) {
         return dataRepository.countByConfig(AdminUserDO.class,new DefaultConfigStore().eq("status", status));
     }
