@@ -14,7 +14,8 @@ import { useNavigate } from 'react-router-dom';
 import { useI18n } from '../../../hooks/useI18n';
 import { useRememberMe } from '../../../hooks/useRememberMe';
 import styles from '../index.module.less';
-import type { LoginRequest } from '@/types/login';
+// import type { LoginRequest } from '@/types/login';
+import { platformLogin } from '@onebase/platform-center';
 
 const { Paragraph } = Typography;
 const TabPane = Tabs.TabPane;
@@ -47,14 +48,21 @@ const Right: React.FC = () => {
 
 
   // 表单提交处理
-  const handleSubmit = async (values: LoginRequest) => {
+  const handleSubmit = async (values) => {
 
     console.log('values:', values);
-
-    // 显示成功消息并跳转
-    Message.success(t('auth.loginSuccess'));
-    navigate('/onebase/platform-info');
-
+    const { account, password } = values;
+    const loginInfo = {username: account, password}
+    try {
+      const LoginRes = await platformLogin(loginInfo);
+      console.log('loginRes:', LoginRes);
+      // 显示成功消息并跳转
+      Message.success(t('auth.loginSuccess'));
+      
+    } catch (error) {
+      Message.error(t('auth.loginFailed'));
+    }
+    // navigate('/onebase/platform-info');
   };
 
   return (

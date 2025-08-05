@@ -14,3 +14,8 @@ export * from './services/dict';
 export * from './services/user';
 
 export * from './services/dept';
+
+
+export { platformLogin, PlatformService } from './services/plantForm';;
+
+export * from './services/dept';

@@ -1,2 +1,2 @@
-import platformService from './adminPlantForm'
+import platformService from './plantForm'
 
