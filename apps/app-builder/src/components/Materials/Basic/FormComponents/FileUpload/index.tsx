@@ -51,6 +51,9 @@ const XFileUpload = memo((props: XInputFileUploadConfig) => {
                         return false;
                     }
                 }}
+                style={{
+                    width: '100%',
+                }}
             />
         </Form.Item>
     );
