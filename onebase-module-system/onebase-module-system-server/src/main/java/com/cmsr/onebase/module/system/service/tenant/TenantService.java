@@ -92,10 +92,10 @@ public interface TenantService {
     /**
      * 获得指定状态的租户数量
      *
-     * @param tenantStatusEnum 状态
+     * @param status 状态
      * @return 租户数量
      */
-    Integer getTenantCountByStatus(TenantStatusEnum tenantStatusEnum);
+    Integer getTenantCountByStatus(Integer status);
 
     /**
      * 获得使用指定套餐的租户数组

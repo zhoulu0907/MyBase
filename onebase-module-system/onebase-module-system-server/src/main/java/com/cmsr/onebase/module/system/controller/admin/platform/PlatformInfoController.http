@@ -1,4 +1,4 @@
 ### 获得平台信息和凭证列表 /admin-api/system/platforminfo/simple-simple
 GET http://127.0.0.1:48080/admin-api/system/platforminfo/page?pageNum=3&pageSize=2
-Authorization: Bearer a6fc88db78d144ed85aec44b1a477a05
+Authorization: Bearer 0dda884beb1d48ae88af24cf9e7cbd34
 

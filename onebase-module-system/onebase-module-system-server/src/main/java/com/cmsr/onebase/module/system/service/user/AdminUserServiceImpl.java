@@ -607,12 +607,8 @@ public class AdminUserServiceImpl implements AdminUserService {
     }
 
     @Override
-    public Integer getUserCountByStatus(UserStatusEnum status) {
+    public Integer getUserCountByStatus(Integer status) {
         return (int) dataRepository.countByConfig(AdminUserDO.class,new DefaultConfigStore().eq(AdminUserDO.STATUS, status));
-    }
-
-    public Long getUserCountByStatus(Integer status) {
-        return dataRepository.countByConfig(AdminUserDO.class,new DefaultConfigStore().eq("status", status));
     }
 
     /**

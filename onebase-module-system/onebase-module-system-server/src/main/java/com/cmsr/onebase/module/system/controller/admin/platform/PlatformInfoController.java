@@ -112,14 +112,16 @@ public class PlatformInfoController {
         reqVO.setPageNo(platformInfoReqVo.getPageNo());
         PageResult<LicenseDO> pageResult = licenseService.getLicensePage(reqVO);
         PageResult<PlatformInfoRespVo> voPageResult = BeanUtils.toBean(pageResult, PlatformInfoRespVo.class);
-        Integer tenantCount = tenantService.getTenantCountByStatus(TenantStatusEnum.NORMAL);
-        Integer userCount = adminUserService.getUserCountByStatus(UserStatusEnum.NORMAL);
-        voPageResult.getList().stream()
-                .filter(vo -> LicenseStatusEnum.ENABLE.equals(vo.getStatus()))
-                .forEach(vo -> {
-                    vo.setActualTenantCount(tenantCount);
-                    vo.setActualUserCount(userCount);
-                });
+        Integer tenantCount = tenantService.getTenantCountByStatus(TenantStatusEnum.NORMAL.getStatus());
+        Integer userCount = adminUserService.getUserCountByStatus(UserStatusEnum.NORMAL.getStatus());
+        
+        // 设置实际租户数和用户数
+        voPageResult.getList().forEach(vo -> {
+            if (LicenseStatusEnum.ENABLE.getStatus().equals(vo.getStatus())) {
+                vo.setActualTenantCount(tenantCount);
+                vo.setActualUserCount(userCount);
+            }
+        });
 
 
         return CommonResult.success(voPageResult);

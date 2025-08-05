@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.system.controller.admin.platform.vo;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -33,6 +34,7 @@ public class PlatformInfoRespVo {
     private Integer userLimit;
 
     @Schema(description = "到期时间")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private LocalDateTime expireTime;
 
     @Schema(description = "状态")
@@ -42,6 +44,7 @@ public class PlatformInfoRespVo {
     private Boolean isTrial;
 
     @Schema(description = "创建时间")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private LocalDateTime createTime;
 
     @Schema(description = "实际租户数量")

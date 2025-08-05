@@ -239,6 +239,6 @@ public interface AdminUserService {
      * @param status 状态
      * @return 租户数量
      */
-    Integer getUserCountByStatus(UserStatusEnum status);
+    Integer getUserCountByStatus(Integer status);
 
 }
