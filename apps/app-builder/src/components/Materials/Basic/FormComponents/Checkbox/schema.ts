@@ -114,7 +114,7 @@ const XCheckbox: XInputCheckboxSchema = {
     ],
     config: {
         ...baseDefault,
-        label: '',
+        label: '复选框',
         description: '',
         tooltip: '',
         width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],

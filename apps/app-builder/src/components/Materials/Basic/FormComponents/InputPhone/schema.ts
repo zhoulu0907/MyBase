@@ -153,7 +153,7 @@ const XInputPhone: XInputPhoneSchema = {
     ],
     config: {
         ...baseDefault,
-        label: '标题',
+        label: '手机号输入',
         placeholder: '请输入手机号',
         description: '',
         tooltip: '',

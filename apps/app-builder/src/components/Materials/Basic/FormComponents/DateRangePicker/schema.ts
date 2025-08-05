@@ -110,7 +110,7 @@ const XDateRangePicker: XInputDateRangePickerSchema = {
     ],
     config: {
         ...baseDefault,
-        label: '标题',
+        label: '时间段',
         description: '',
         tooltip: '',
         width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
