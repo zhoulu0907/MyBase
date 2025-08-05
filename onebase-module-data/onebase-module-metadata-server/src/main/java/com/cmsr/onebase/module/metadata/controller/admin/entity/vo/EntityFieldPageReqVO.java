@@ -11,7 +11,7 @@ import lombok.EqualsAndHashCode;
 public class EntityFieldPageReqVO extends PageParam {
 
     @Schema(description = "实体ID", example = "1")
-    private Long entityId;
+    private String entityId;
 
     @Schema(description = "字段名称", example = "user_name")
     private String fieldName;
@@ -35,6 +35,6 @@ public class EntityFieldPageReqVO extends PageParam {
     private Integer runMode;
 
     @Schema(description = "应用ID", example = "1")
-    private Long appId;
+    private String appId;
 
 }

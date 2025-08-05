@@ -17,7 +17,7 @@ public class EntityFieldUpdateItemVO {
 
     @Schema(description = "字段ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "3001")
     @NotNull(message = "字段ID不能为空")
-    private Long id;
+    private String id;
 
     @Schema(description = "显示名称", example = "登录用户名")
     @Size(max = 50, message = "显示名称长度不能超过50个字符")

@@ -8,7 +8,7 @@ import lombok.Data;
 public class BusinessEntityRespVO {
 
     @Schema(description = "实体编号", example = "1024")
-    private Long id;
+    private String id;
 
     @Schema(description = "实体名称", example = "用户实体")
     private String displayName;
@@ -23,7 +23,7 @@ public class BusinessEntityRespVO {
     private String description;
 
     @Schema(description = "数据源ID", example = "1")
-    private Long datasourceId;
+    private String datasourceId;
 
     @Schema(description = "对应数据表名", example = "sys_user")
     private String tableName;
@@ -32,7 +32,7 @@ public class BusinessEntityRespVO {
     private Integer runMode;
 
     @Schema(description = "应用ID", example = "1")
-    private Long appId;
+    private String appId;
 
     @Schema(description = "前端显示配置json", example = "{\"showFields\":[\"name\",\"code\"]}")
     private String displayConfig;

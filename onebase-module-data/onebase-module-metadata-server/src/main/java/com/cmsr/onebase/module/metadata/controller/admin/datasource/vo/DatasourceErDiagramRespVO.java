@@ -10,7 +10,7 @@ import java.util.List;
 public class DatasourceErDiagramRespVO {
 
     @Schema(description = "数据源ID", example = "1024")
-    private Long datasourceId;
+    private String datasourceId;
 
     @Schema(description = "数据源名称", example = "用户数据库")
     private String datasourceName;

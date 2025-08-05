@@ -10,7 +10,7 @@ import java.util.Map;
 public class DatasourceRespVO {
 
     @Schema(description = "数据源编号", example = "1024")
-    private Long id;
+    private String id;
 
     @Schema(description = "数据源名称", example = "用户数据库")
     private String datasourceName;
@@ -31,7 +31,7 @@ public class DatasourceRespVO {
     private Integer runMode;
 
     @Schema(description = "应用ID", example = "1")
-    private Long appId;
+    private String appId;
     
     @Schema(description = "数据源来源，0：系统默认，1：自有数据源，2：外部数据源", example = "1")
     private Integer datasourceOrigin;

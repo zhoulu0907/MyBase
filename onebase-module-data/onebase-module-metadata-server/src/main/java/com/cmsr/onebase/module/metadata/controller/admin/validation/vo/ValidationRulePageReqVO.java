@@ -17,13 +17,13 @@ import lombok.EqualsAndHashCode;
 public class ValidationRulePageReqVO extends PageParam {
 
     @Schema(description = "应用ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "12345")
-    private Long appId;
+    private String appId;
 
     @Schema(description = "实体ID", example = "2001")
-    private Long entityId;
+    private String entityId;
 
     @Schema(description = "字段ID", example = "3001")
-    private Long fieldId;
+    private String fieldId;
 
     @Schema(description = "校验类型", example = "FORMAT_VALIDATION")
     private String validationType;

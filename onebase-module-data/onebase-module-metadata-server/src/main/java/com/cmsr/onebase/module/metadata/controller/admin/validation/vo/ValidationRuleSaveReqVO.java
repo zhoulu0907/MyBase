@@ -17,7 +17,7 @@ import lombok.Data;
 public class ValidationRuleSaveReqVO {
 
     @Schema(description = "规则ID", example = "4001")
-    private Long id;
+    private String id;
 
     @Schema(description = "校验名称", requiredMode = Schema.RequiredMode.REQUIRED, example = "用户名格式校验")
     @NotBlank(message = "校验名称不能为空")
@@ -31,10 +31,10 @@ public class ValidationRuleSaveReqVO {
 
     @Schema(description = "实体ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "2001")
     @NotNull(message = "实体ID不能为空")
-    private Long entityId;
+    private String entityId;
 
     @Schema(description = "字段ID", example = "3001")
-    private Long fieldId;
+    private String fieldId;
 
     @Schema(description = "校验条件", requiredMode = Schema.RequiredMode.REQUIRED, example = "REGEX_MATCH")
     @NotBlank(message = "校验条件不能为空")
@@ -66,6 +66,6 @@ public class ValidationRuleSaveReqVO {
 
     @Schema(description = "应用ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "12345")
     @NotNull(message = "应用ID不能为空")
-    private Long appId;
+    private String appId;
 
 }

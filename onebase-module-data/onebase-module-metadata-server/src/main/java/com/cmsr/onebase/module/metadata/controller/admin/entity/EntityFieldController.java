@@ -65,7 +65,7 @@ public class EntityFieldController {
     @PreAuthorize("@ss.hasPermission('metadata:entity-field:create')")
     public CommonResult<EntityFieldRespVO> createEntityField(@Valid @RequestBody EntityFieldSaveReqVO reqVO) {
         Long id = entityFieldService.createEntityField(reqVO);
-        MetadataEntityFieldDO entityField = entityFieldService.getEntityField(id);
+        MetadataEntityFieldDO entityField = entityFieldService.getEntityField(String.valueOf(id));
         return success(EntityFieldConvert.INSTANCE.convert(entityField));
     }
 
@@ -83,7 +83,7 @@ public class EntityFieldController {
     @Operation(summary = "根据ID获取字段详细信息")
     @Parameter(name = "id", description = "字段ID", required = true, example = "1024")
     @PreAuthorize("@ss.hasPermission('metadata:entity-field:query')")
-    public CommonResult<EntityFieldDetailRespVO> getEntityField(@RequestParam("id") Long id) {
+    public CommonResult<EntityFieldDetailRespVO> getEntityField(@RequestParam("id") String id) {
         EntityFieldDetailRespVO entityField = entityFieldService.getEntityFieldDetail(id);
         return success(entityField);
     }
@@ -109,7 +109,7 @@ public class EntityFieldController {
     @Parameter(name = "id", description = "字段ID", required = true, example = "1024")
     @PreAuthorize("@ss.hasPermission('metadata:entity-field:delete')")
     public CommonResult<Boolean> deleteEntityField(@RequestParam("id") Long id) {
-        entityFieldService.deleteEntityField(id);
+        entityFieldService.deleteEntityField(String.valueOf(id));
         return success(true);
     }
 

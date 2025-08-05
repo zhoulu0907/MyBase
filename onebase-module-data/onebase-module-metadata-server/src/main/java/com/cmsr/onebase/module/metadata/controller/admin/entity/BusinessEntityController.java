@@ -45,7 +45,7 @@ public class BusinessEntityController {
         return success(BusinessEntityConvert.INSTANCE.convert(businessEntity));
     }
 
-    @PutMapping("/update")
+    @PostMapping("/update")
     @Operation(summary = "更新业务实体信息")
     @PreAuthorize("@ss.hasPermission('metadata:business-entity:update')")
     public CommonResult<Boolean> updateBusinessEntity(@Valid @RequestBody BusinessEntitySaveReqVO reqVO) {
@@ -53,7 +53,7 @@ public class BusinessEntityController {
         return success(true);
     }
 
-    @DeleteMapping("/delete")
+    @PostMapping("/delete")
     @Operation(summary = "软删除业务实体")
     @Parameter(name = "id", description = "业务实体ID", required = true, example = "1024")
     @PreAuthorize("@ss.hasPermission('metadata:business-entity:delete')")
@@ -62,7 +62,7 @@ public class BusinessEntityController {
         return success(true);
     }
 
-    @GetMapping("/get")
+    @PostMapping("/get")
     @Operation(summary = "根据ID获取业务实体详细信息")
     @Parameter(name = "id", description = "业务实体ID", required = true, example = "1024")
     @PreAuthorize("@ss.hasPermission('metadata:business-entity:query')")
@@ -71,7 +71,7 @@ public class BusinessEntityController {
         return success(BusinessEntityConvert.INSTANCE.convert(businessEntity));
     }
 
-    @GetMapping("/page")
+    @PostMapping("/page")
     @Operation(summary = "分页查询业务实体列表")
     @PreAuthorize("@ss.hasPermission('metadata:business-entity:query')")
     public CommonResult<PageResult<BusinessEntityRespVO>> getBusinessEntityPage(@Valid BusinessEntityPageReqVO pageReqVO) {
@@ -79,7 +79,7 @@ public class BusinessEntityController {
         return success(BusinessEntityConvert.INSTANCE.convertPage(pageResult));
     }
 
-    @GetMapping("/list-by-datasource")
+    @PostMapping("/list-by-datasource")
     @Operation(summary = "根据数据源获得业务实体列表")
     @Parameter(name = "datasourceId", description = "数据源ID", required = true, example = "1024")
     @PreAuthorize("@ss.hasPermission('metadata:business-entity:query')")

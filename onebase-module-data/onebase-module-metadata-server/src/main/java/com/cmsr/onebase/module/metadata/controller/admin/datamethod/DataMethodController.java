@@ -32,7 +32,7 @@ public class DataMethodController {
     @Resource
     private MetadataDataMethodService dataMethodService;
 
-    @GetMapping("/list")
+    @PostMapping("/list")
     @Operation(summary = "查询业务实体的数据方法列表")
     public CommonResult<List<DataMethodRespVO>> getDataMethodList(@Valid DataMethodQueryReqVO reqVO) {
         // 将Controller层的VO转换为Service层的VO
@@ -41,16 +41,16 @@ public class DataMethodController {
         return success(methods);
     }
 
-    @GetMapping("/detail")
+    @PostMapping("/detail")
     @Operation(summary = "获取指定数据方法的详细信息")
     public CommonResult<DataMethodDetailRespVO> getDataMethodDetail(@Valid DataMethodDetailQueryReqVO reqVO) {
-        DataMethodDetailRespVO detail = dataMethodService.getDataMethodDetail(reqVO.getEntityId(), reqVO.getMethodCode());
+        DataMethodDetailRespVO detail = dataMethodService.getDataMethodDetail(Long.valueOf(reqVO.getEntityId()), reqVO.getMethodCode());
         return success(detail);
     }
 
     // ========== 系统级别的动态数据操作接口 ==========
 
-    @PostMapping("/data")
+    @PostMapping("/insert")
     @Operation(summary = "新增单条数据")
     @PreAuthorize("@ss.hasPermission('metadata:data:create')")
     public CommonResult<DynamicDataRespVO> createData(@Valid @RequestBody DynamicDataCreateReqVO reqVO) {
@@ -58,7 +58,7 @@ public class DataMethodController {
         return success(result);
     }
 
-    @PutMapping("/data")
+    @PostMapping("/update")
     @Operation(summary = "更新单条数据")
     @PreAuthorize("@ss.hasPermission('metadata:data:update')")
     public CommonResult<DynamicDataRespVO> updateData(@Valid @RequestBody DynamicDataUpdateReqVO reqVO) {
@@ -66,7 +66,7 @@ public class DataMethodController {
         return success(result);
     }
 
-    @DeleteMapping("/data")
+    @PostMapping("/delete")
     @Operation(summary = "删除单条数据")
     @PreAuthorize("@ss.hasPermission('metadata:data:delete')")
     public CommonResult<Boolean> deleteData(@Valid @RequestBody DynamicDataDeleteReqVO reqVO) {
@@ -74,7 +74,7 @@ public class DataMethodController {
         return success(result);
     }
 
-    @GetMapping("/data")
+    @PostMapping("/data")
     @Operation(summary = "根据ID查询数据详情")
     @PreAuthorize("@ss.hasPermission('metadata:data:query')")
     public CommonResult<DynamicDataRespVO> getData(@Valid DynamicDataGetReqVO reqVO) {
@@ -82,7 +82,7 @@ public class DataMethodController {
         return success(result);
     }
 
-    @GetMapping("/data/page")
+    @PostMapping("/data/page")
     @Operation(summary = "分页查询数据列表")
     @PreAuthorize("@ss.hasPermission('metadata:data:query')")
     public CommonResult<PageResult<DynamicDataRespVO>> getDataPage(@Valid DynamicDataPageReqVO reqVO) {
@@ -90,4 +90,4 @@ public class DataMethodController {
         return success(result);
     }
 
-} 
+}

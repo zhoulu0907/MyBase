@@ -63,7 +63,7 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
     @Override
     public List<TableInfoRespVO> getTablesByDatasourceId(TableQueryVO queryVO) {
         // 获取数据源信息
-        MetadataDatasourceDO datasource = getDatasource(queryVO.getDatasourceId());
+        MetadataDatasourceDO datasource = getDatasource(Long.valueOf(queryVO.getDatasourceId()));
         if (datasource == null) {
             throw exception(DATASOURCE_NOT_EXISTS);
         }
@@ -110,7 +110,7 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
     @Override
     public List<ColumnInfoRespVO> getColumnsByTableName(ColumnQueryVO queryVO) {
         // 获取数据源信息
-        MetadataDatasourceDO datasource = getDatasource(queryVO.getDatasourceId());
+        MetadataDatasourceDO datasource = getDatasource(Long.valueOf(queryVO.getDatasourceId()));
         if (datasource == null) {
             throw exception(DATASOURCE_NOT_EXISTS);
         }
@@ -231,10 +231,11 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
     @Transactional(rollbackFor = Exception.class)
     public Long createDatasource(@Valid DatasourceSaveReqVO createReqVO) {
         // 校验编码唯一性
-        validateDatasourceCodeUnique(null, createReqVO.getCode(), createReqVO.getAppId());
+        validateDatasourceCodeUnique(null, createReqVO.getCode(), Long.valueOf(createReqVO.getAppId()));
 
         // 插入数据源
         MetadataDatasourceDO datasource = DatasourceConvert.INSTANCE.convert(createReqVO);
+        datasource.setAppId(Long.valueOf(createReqVO.getAppId()));
         dataRepository.insert(datasource);
 
         return datasource.getId();
@@ -265,7 +266,7 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
         reqVO.setDescription("默认数据源");
         reqVO.setRunMode(1);
         reqVO.setDatasourceOrigin(0);
-        reqVO.setAppId(appId);
+        reqVO.setAppId(String.valueOf(appId));
         // 生成唯一的数据源编码，避免重复
         String uniqueCode = database + "_" + UUID.randomUUID().toString().replace("-", "");
         reqVO.setCode(uniqueCode);
@@ -277,14 +278,15 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
     @Transactional(rollbackFor = Exception.class)
     public void updateDatasource(@Valid DatasourceSaveReqVO updateReqVO) {
         // 校验存在
-        validateDatasourceExists(updateReqVO.getId());
+        validateDatasourceExists(Long.valueOf(updateReqVO.getId()));
         // 校验编码唯一性
-        validateDatasourceCodeUnique(updateReqVO.getId(), updateReqVO.getCode(), updateReqVO.getAppId());
+        validateDatasourceCodeUnique(Long.valueOf(updateReqVO.getId()), updateReqVO.getCode(), Long.valueOf(updateReqVO.getAppId()));
 
         // 更新数据源
         MetadataDatasourceDO updateObj = DatasourceConvert.INSTANCE.convert(updateReqVO);
         // 手动设置ID，确保更新操作正常进行
-        updateObj.setId(updateReqVO.getId());
+        updateObj.setId(Long.valueOf(updateReqVO.getId()));
+        updateObj.setAppId(Long.valueOf(updateReqVO.getAppId()));
         dataRepository.update(updateObj);
     }
 
