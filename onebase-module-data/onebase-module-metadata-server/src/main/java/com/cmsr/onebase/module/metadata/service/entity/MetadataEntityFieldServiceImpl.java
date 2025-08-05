@@ -49,6 +49,8 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
 
     @Resource
     private DataRepository dataRepository;
+    @Resource
+    private DatasourceConvert datasourceConvert;
 
     @Override
     public List<FieldTypeConfigRespVO> getFieldTypes() {
@@ -497,78 +499,96 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
     }
     
     /**
-     * 添加字段到物理表
+     * 添加列到表
      */
     private void addColumnToTable(MetadataDatasourceDO datasource, String tableName, MetadataEntityFieldDO field) {
         try {
-            // 准备数据源配置信息
-            Map<String, Object> config = DatasourceConvert.INSTANCE.stringToMap(datasource.getConfig());
-            config.put("datasourceType", datasource.getDatasourceType());
+            // 从数据源配置中获取连接参数
+            Map<String, Object> config = datasourceConvert.stringToMap(datasource.getConfig());
+            String url = (String) config.get("url");
+            String username = (String) config.get("username");
+            String password = (String) config.get("password");
             
-            // 创建临时的AnylineService用于数据库操作
-            AnylineService<?> temporaryService = dataRepository.createTemporaryService(config);
+            // 创建 AnylineService 实例
+            AnylineService<?> service = createTemporaryService(datasource);
             
-            // 生成ADD COLUMN DDL语句
-            String ddl = generateAddColumnDDL(tableName, field);
+            // 生成添加列 DDL
+            String addColumnDDL = generateAddColumnDDL(tableName, field);
             
-            // 执行DDL
-            temporaryService.execute(ddl);
+            // 执行添加列语句
+            service.execute(addColumnDDL);
             
-            log.info("成功为表 {} 添加字段: {}", tableName, field.getFieldName());
+            log.info("成功为表 {} 添加列: {}", tableName, field.getFieldName());
         } catch (Exception e) {
-            log.error("为表 {} 添加字段 {} 失败: {}", tableName, field.getFieldName(), e.getMessage(), e);
-            // 不抛出异常，避免影响字段的创建
+            log.error("为表 {} 添加列 {} 失败: {}", tableName, field.getFieldName(), e.getMessage(), e);
+            throw new RuntimeException("添加列失败", e);
         }
     }
-    
+
     /**
-     * 修改物理表字段
+     * 修改表中的列
      */
     private void alterColumnInTable(MetadataDatasourceDO datasource, String tableName, MetadataEntityFieldDO field) {
         try {
-            // 准备数据源配置信息
-            Map<String, Object> config = DatasourceConvert.INSTANCE.stringToMap(datasource.getConfig());
-            config.put("datasourceType", datasource.getDatasourceType());
+            // 从数据源配置中获取连接参数
+            Map<String, Object> config = datasourceConvert.stringToMap(datasource.getConfig());
+            String url = (String) config.get("url");
+            String username = (String) config.get("username");
+            String password = (String) config.get("password");
             
-            // 创建临时的AnylineService用于数据库操作
-            AnylineService<?> temporaryService = dataRepository.createTemporaryService(config);
+            // 创建 AnylineService 实例
+            AnylineService<?> service = createTemporaryService(datasource);
             
-            // 生成ALTER COLUMN DDL语句
-            String ddl = generateAlterColumnDDL(tableName, field);
+            // 生成修改列 DDL
+            String alterColumnDDL = generateAlterColumnDDL(tableName, field);
             
-            // 执行DDL
-            temporaryService.execute(ddl);
+            // 执行修改列语句
+            service.execute(alterColumnDDL);
             
-            log.info("成功修改表 {} 的字段: {}", tableName, field.getFieldName());
+            log.info("成功修改表 {} 的列: {}", tableName, field.getFieldName());
         } catch (Exception e) {
-            log.error("修改表 {} 的字段 {} 失败: {}", tableName, field.getFieldName(), e.getMessage(), e);
-            // 不抛出异常，避免影响字段的更新
+            log.error("修改表 {} 的列 {} 失败: {}", tableName, field.getFieldName(), e.getMessage(), e);
+            throw new RuntimeException("修改列失败", e);
         }
     }
-    
+
     /**
-     * 从物理表删除字段
+     * 从表中删除列
      */
     private void dropColumnFromTable(MetadataDatasourceDO datasource, String tableName, String fieldName) {
         try {
-            // 准备数据源配置信息
-            Map<String, Object> config = DatasourceConvert.INSTANCE.stringToMap(datasource.getConfig());
-            config.put("datasourceType", datasource.getDatasourceType());
+            // 从数据源配置中获取连接参数
+            Map<String, Object> config = datasourceConvert.stringToMap(datasource.getConfig());
+            String url = (String) config.get("url");
+            String username = (String) config.get("username");
+            String password = (String) config.get("password");
             
-            // 创建临时的AnylineService用于数据库操作
-            AnylineService<?> temporaryService = dataRepository.createTemporaryService(config);
+            // 创建 AnylineService 实例
+            AnylineService<?> service = createTemporaryService(datasource);
             
-            // 生成DROP COLUMN DDL语句
-            String ddl = generateDropColumnDDL(tableName, fieldName);
+            // 生成删除列 DDL
+            String dropColumnDDL = generateDropColumnDDL(tableName, fieldName);
             
-            // 执行DDL
-            temporaryService.execute(ddl);
+            // 执行删除列语句
+            service.execute(dropColumnDDL);
             
-            log.info("成功从表 {} 删除字段: {}", tableName, fieldName);
+            log.info("成功从表 {} 删除列: {}", tableName, fieldName);
         } catch (Exception e) {
-            log.error("从表 {} 删除字段 {} 失败: {}", tableName, fieldName, e.getMessage(), e);
-            // 不抛出异常，避免影响字段的删除
+            log.error("从表 {} 删除列 {} 失败: {}", tableName, fieldName, e.getMessage(), e);
+            throw new RuntimeException("删除列失败", e);
         }
+    }
+
+    /**
+     * 创建临时的 AnylineService 用于数据库操作
+     */
+    private AnylineService<?> createTemporaryService(MetadataDatasourceDO datasource) {
+        // 从数据源配置中获取连接参数
+        Map<String, Object> config = datasourceConvert.stringToMap(datasource.getConfig());
+        config.put("datasourceType", datasource.getDatasourceType());
+        
+        // 创建临时的AnylineService用于数据库操作
+        return dataRepository.createTemporaryService(config);
     }
     
     /**

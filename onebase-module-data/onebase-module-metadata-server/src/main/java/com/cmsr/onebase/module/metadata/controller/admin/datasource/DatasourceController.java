@@ -35,6 +35,8 @@ public class DatasourceController {
 
     @Resource
     private MetadataDatasourceService datasourceService;
+    @Resource
+    private DatasourceConvert datasourceConvert;
 
     @PostMapping("/types")
     @Operation(summary = "获取所有支持的数据源类型")
@@ -94,7 +96,7 @@ public class DatasourceController {
     @PreAuthorize("@ss.hasPermission('metadata:datasource:query')")
     public CommonResult<DatasourceRespVO> getDatasource(@RequestParam("id") Long id) {
         MetadataDatasourceDO datasource = datasourceService.getDatasource(id);
-        return success(DatasourceConvert.INSTANCE.convert(datasource));
+        return success(datasourceConvert.convert(datasource));
     }
 
     @PostMapping("/page")
@@ -102,7 +104,7 @@ public class DatasourceController {
     @PreAuthorize("@ss.hasPermission('metadata:datasource:query')")
     public CommonResult<PageResult<DatasourceRespVO>> getDatasourcePage(@Valid DatasourcePageReqVO pageReqVO) {
         PageResult<MetadataDatasourceDO> pageResult = datasourceService.getDatasourcePage(pageReqVO);
-        return success(DatasourceConvert.INSTANCE.convertPage(pageResult));
+        return success(datasourceConvert.convertPage(pageResult));
     }
 
     @PostMapping("/list")
@@ -110,7 +112,7 @@ public class DatasourceController {
     @PreAuthorize("@ss.hasPermission('metadata:datasource:query')")
     public CommonResult<List<DatasourceRespVO>> getDatasourceList() {
         List<MetadataDatasourceDO> list = datasourceService.getDatasourceList();
-        return success(DatasourceConvert.INSTANCE.convertList(list));
+        return success(datasourceConvert.convertList(list));
     }
 
     @PostMapping("/get-by-code")
@@ -119,7 +121,7 @@ public class DatasourceController {
     @PreAuthorize("@ss.hasPermission('metadata:datasource:query')")
     public CommonResult<DatasourceRespVO> getDatasourceByCode(@RequestParam("code") String code) {
         MetadataDatasourceDO datasource = datasourceService.getDatasourceByCode(code);
-        return success(DatasourceConvert.INSTANCE.convert(datasource));
+        return success(datasourceConvert.convert(datasource));
     }
 
     @PostMapping("/test-connection")

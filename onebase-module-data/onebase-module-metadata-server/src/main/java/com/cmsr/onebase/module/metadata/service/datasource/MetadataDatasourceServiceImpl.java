@@ -52,6 +52,8 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
     private DataRepository dataRepository;
     @Resource
     private org.springframework.core.env.Environment env;
+    @Resource
+    private DatasourceConvert datasourceConvert;
 
     @Override
     public List<DatasourceTypeRespVO> getDatasourceTypes() {
@@ -165,7 +167,7 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
     @SneakyThrows
     private AnylineService<?> createTemporaryService(MetadataDatasourceDO datasource) {
         // 从数据源配置中获取连接参数
-        Map<String, Object> config = DatasourceConvert.INSTANCE.stringToMap(datasource.getConfig());
+        Map<String, Object> config = datasourceConvert.stringToMap(datasource.getConfig());
         String url = (String) config.get("url");
         String username = (String) config.get("username");
         String password = (String) config.get("password");
@@ -234,7 +236,7 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
         validateDatasourceCodeUnique(null, createReqVO.getCode(), Long.valueOf(createReqVO.getAppId()));
 
         // 插入数据源
-        MetadataDatasourceDO datasource = DatasourceConvert.INSTANCE.convert(createReqVO);
+        MetadataDatasourceDO datasource = datasourceConvert.convert(createReqVO);
         datasource.setAppId(Long.valueOf(createReqVO.getAppId()));
         dataRepository.insert(datasource);
 
@@ -283,7 +285,7 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
         validateDatasourceCodeUnique(Long.valueOf(updateReqVO.getId()), updateReqVO.getCode(), Long.valueOf(updateReqVO.getAppId()));
 
         // 更新数据源
-        MetadataDatasourceDO updateObj = DatasourceConvert.INSTANCE.convert(updateReqVO);
+        MetadataDatasourceDO updateObj = datasourceConvert.convert(updateReqVO);
         // 手动设置ID，确保更新操作正常进行
         updateObj.setId(Long.valueOf(updateReqVO.getId()));
         updateObj.setAppId(Long.valueOf(updateReqVO.getAppId()));

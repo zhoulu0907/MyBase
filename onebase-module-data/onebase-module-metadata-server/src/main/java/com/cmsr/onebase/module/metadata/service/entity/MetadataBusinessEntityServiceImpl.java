@@ -36,6 +36,8 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
 
     @Resource
     private DataRepository dataRepository;
+    @Resource
+    private DatasourceConvert datasourceConvert;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -94,27 +96,41 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
     }
     
     /**
+     * 创建临时的 AnylineService 用于数据库操作
+     */
+    private AnylineService<?> createTemporaryService(MetadataDatasourceDO datasource) {
+        // 从数据源配置中获取连接参数
+        Map<String, Object> config = datasourceConvert.stringToMap(datasource.getConfig());
+        config.put("datasourceType", datasource.getDatasourceType());
+        
+        // 创建临时的AnylineService用于数据库操作
+        return dataRepository.createTemporaryService(config);
+    }
+
+    /**
      * 创建物理表
      */
     private void createPhysicalTable(MetadataDatasourceDO datasource, String tableName, List<MetadataSystemFieldsDO> systemFields) {
         try {
-            // 准备数据源配置信息
-            Map<String, Object> config = DatasourceConvert.INSTANCE.stringToMap(datasource.getConfig());
-            config.put("datasourceType", datasource.getDatasourceType());
+            // 从数据源配置中获取连接参数
+            Map<String, Object> config = datasourceConvert.stringToMap(datasource.getConfig());
+            String url = (String) config.get("url");
+            String username = (String) config.get("username");
+            String password = (String) config.get("password");
             
-            // 创建临时的AnylineService用于数据库操作
-            AnylineService<?> temporaryService = dataRepository.createTemporaryService(config);
+            // 创建 AnylineService 实例
+            AnylineService<?> service = createTemporaryService(datasource);
             
-            // 生成DDL语句
-            String ddl = generateCreateTableDDL(tableName, systemFields);
+            // 生成建表 DDL
+            String createTableDDL = generateCreateTableDDL(tableName, systemFields);
             
-            // 执行DDL
-            temporaryService.execute(ddl);
+            // 执行建表语句
+            service.execute(createTableDDL);
             
             log.info("成功创建物理表: {}", tableName);
         } catch (Exception e) {
-            log.error("创建物理表 {} 失败: {}", tableName, e.getMessage(), e);
-            throw new RuntimeException("创建物理表失败: " + e.getMessage(), e);
+            log.error("创建物理表失败: {}", e.getMessage(), e);
+            throw new RuntimeException("创建物理表失败", e);
         }
     }
     
