@@ -31,7 +31,7 @@ public class PageDO extends TenantBaseDO {
     private String title;
 
     /**
-     * 页面布局方式，vertical（垂直布局）
+     * 页面布局方式，vertical（垂直布局）、horizontal（水平布局）
      */
     @Column(name = "layout", columnDefinition= "VARCHAR(255) NOT NULL", comment = "页面布局方式")
     private String layout;
@@ -43,7 +43,7 @@ public class PageDO extends TenantBaseDO {
     private String width;
 
     /**
-     * 页面外边距，默认 0 auto 居中
+     * 页面外边距，默认 0
      */
     @Column(name = "margin", columnDefinition= "VARCHAR(255) NOT NULL", comment = "页面外边距")
     private String margin;
@@ -97,16 +97,6 @@ public class PageDO extends TenantBaseDO {
 
 
     // TODO(mickey): 补充 Method字段
-
-
-
-
-
-
-
-
-
-
 
 
 }
