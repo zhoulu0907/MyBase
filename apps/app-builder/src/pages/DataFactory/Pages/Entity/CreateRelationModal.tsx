@@ -32,8 +32,10 @@ const relationTypes = [
 const CreateRelationModal: React.FC<{ 
   visible: boolean, 
   setVisible: (visible: boolean) => void, 
-  successCallback: () => void 
-}> = ({ visible, setVisible, successCallback }) => {
+  successCallback: () => void,
+  updateRelationOptions: boolean,
+  setUpdateRelationOptions: (updateRelationOptions: boolean) => void,
+}> = ({ visible, setVisible, successCallback, updateRelationOptions, setUpdateRelationOptions }) => {
   const [form] = Form.useForm<RelationFormValues>();
   const [leftEntityOptions, setLeftEntityOptions] = useState<EntityOption[]>([]);
   const [rightEntityOptions, setRightEntityOptions] = useState<EntityOption[]>([]);
@@ -42,22 +44,28 @@ const CreateRelationModal: React.FC<{
 
   // 初始化实体选项
   useEffect(() => {
-    // 从localStorage获取实体数据
-    const { nodes } = JSON.parse(localStorage.getItem('entityFormValues') || JSON.stringify({ nodes: [], edges: [] }));
-    const entityOptions = nodes?.length ? nodes.map((node: EntityNode) => ({
-      label: node.title, // 使用title作为label
-      value: node.id,
-    })) : [];
-    const fieldOptions = nodes?.fields?.length ? nodes.fields.map((field: EntityField) => ({
-      label: field.name,
-      value: field.id,
-    })) : [];
-    setLeftFieldOptions(fieldOptions);
-    setRightFieldOptions(fieldOptions);
+    if (updateRelationOptions) {
+      // 从localStorage获取实体数据
+      const { nodes } = JSON.parse(localStorage.getItem('entityFormValues') || JSON.stringify({ nodes: [], edges: [] }));
+      const entityOptions = nodes?.length ? nodes.map((node: EntityNode) => ({
+        label: node.title, // 使用title作为label
+        value: node.id,
+      })) : [];
+      const fieldOptions = nodes?.fields?.length ? nodes.fields.map((field: EntityField) => ({
+        label: field.name,
+        value: field.id,
+      })) : [];
+      setLeftFieldOptions(fieldOptions);
+      setRightFieldOptions(fieldOptions);
+      
+      setLeftEntityOptions(entityOptions);
+      setRightEntityOptions(entityOptions);
+    }
+
+    setUpdateRelationOptions(false);
     
-    setLeftEntityOptions(entityOptions);
-    setRightEntityOptions(entityOptions);
-  }, []);
+
+  }, [updateRelationOptions]);
 
   // 当左实体改变时，更新左字段选项
   const handleLeftEntityChange = (value: string) => {

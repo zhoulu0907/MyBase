@@ -96,7 +96,7 @@ import { Modal } from '@arco-design/web-react';
 // };
 
 // 模式切换示例
-export const EntityERWithModeSwitch: React.FC<{ refreshEntityList: boolean, setRefreshEntityList: (refresh: boolean) => void }> = ({ refreshEntityList, setRefreshEntityList }) => {
+export const EntityERWithModeSwitch: React.FC<{ refreshEntityList: boolean, setRefreshEntityList: (refresh: boolean) => void, onlyUpdateNode: boolean, setOnlyUpdateNode: (onlyUpdateNode: boolean) => void }> = ({ refreshEntityList, setRefreshEntityList, onlyUpdateNode, setOnlyUpdateNode }) => {
   // const [mode, setMode] = useState<'view' | 'edit'>('view');
   const [data, setData] = useState<EntityERProps['data']>(JSON.parse(localStorage.getItem('entityFormValues') || JSON.stringify({nodes: [], edges: []})) as unknown as EntityData);
   const [editDrawerVisible, setEditDrawerVisible] = useState(false);
@@ -106,7 +106,8 @@ export const EntityERWithModeSwitch: React.FC<{ refreshEntityList: boolean, setR
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [createRelationModalVisible, setCreateRelationModalVisible] = useState(false);
-  const [onlyUpdateNode, setOnlyUpdateNode] = useState(false);
+  const [updateRelationOptions, setUpdateRelationOptions] = useState(false);
+  // const [onlyUpdateNode, setOnlyUpdateNode] = useState(false);
 
   const handleNodeEdit = (editData: EntityNode) => {
     console.log('节点编辑:', editData);
@@ -133,6 +134,8 @@ export const EntityERWithModeSwitch: React.FC<{ refreshEntityList: boolean, setR
   const handleNodeAddRelation = (id: string) => {
     console.log('添加关联:', id);
     setCreateRelationModalVisible(true);
+    setUpdateRelationOptions(true);
+    setOnlyUpdateNode(false);
   };
 
   const handleNodeDelete = (id: string) => {
@@ -178,6 +181,14 @@ export const EntityERWithModeSwitch: React.FC<{ refreshEntityList: boolean, setR
       setRefreshEntityList(false);
     }
   }, [refreshEntityList]);
+
+  // useEffect(() => {
+  //   const storedData = localStorage.getItem('entityFormValues');
+  //   if (storedData) {
+  //     const parsedData = JSON.parse(storedData);
+  //     setData(parsedData as EntityERProps['data']);
+  //   }
+  // }, []);
 
   return (
     <div style={{ height: '100%' }}>
@@ -225,6 +236,8 @@ export const EntityERWithModeSwitch: React.FC<{ refreshEntityList: boolean, setR
         visible={createRelationModalVisible}
         setVisible={setCreateRelationModalVisible}
         successCallback={handleSuccessCallback}
+        updateRelationOptions={updateRelationOptions}
+        setUpdateRelationOptions={setUpdateRelationOptions}
       />
       {/* 删除确认对话框 */}
       <Modal

@@ -154,7 +154,7 @@ const XInputTextArea: XInputTextAreaSchema = {
     ],
     config: {
         ...baseDefault,
-        label: '标题',
+        label: '多行文本',
         placeholder: '请输入文字',
         description: '',
         tooltip: '',

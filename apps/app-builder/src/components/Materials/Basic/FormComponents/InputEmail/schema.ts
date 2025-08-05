@@ -158,7 +158,7 @@ const XInputEmail: XInputEmailSchema = {
     ],
     config: {
         ...baseDefault,
-        label: '标题',
+        label: '邮箱输入',
         placeholder: '请输入邮箱',
         description: '',
         tooltip: '',
