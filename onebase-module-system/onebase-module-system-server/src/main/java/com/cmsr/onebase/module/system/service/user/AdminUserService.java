@@ -11,8 +11,8 @@ import com.cmsr.onebase.module.system.controller.admin.user.vo.user.UserImportRe
 import com.cmsr.onebase.module.system.controller.admin.user.vo.user.UserPageReqVO;
 import com.cmsr.onebase.module.system.controller.admin.user.vo.user.UserSaveReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
-import com.cmsr.onebase.module.system.enums.permission.RoleCodeEnum;
 import com.cmsr.onebase.module.system.enums.permission.RoleTypeEnum;
+import com.cmsr.onebase.module.system.enums.user.UserStatusEnum;
 import jakarta.validation.Valid;
 
 import java.util.Collection;
@@ -239,6 +239,6 @@ public interface AdminUserService {
      * @param status 状态
      * @return 租户数量
      */
-    Long getUserCountByStatus(Integer status);
+    Integer getUserCountByStatus(UserStatusEnum status);
 
 }
