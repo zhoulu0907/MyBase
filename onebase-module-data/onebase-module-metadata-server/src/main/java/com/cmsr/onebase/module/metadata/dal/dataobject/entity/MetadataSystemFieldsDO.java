@@ -12,10 +12,9 @@ import lombok.*;
  */
 @Table(name = "metadata_system_fields")
 @Data
-@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class MetadataSystemFieldsDO extends BaseDO {
+public class MetadataSystemFieldsDO{
     /**
      * id
      */

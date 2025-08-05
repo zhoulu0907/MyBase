@@ -125,10 +125,10 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
     public List<MetadataEntityFieldDO> getEntityFieldListByConditions(EntityFieldQueryVO queryVO) {
         DefaultConfigStore configStore = new DefaultConfigStore();
         
-        if (queryVO.getEntityId() != null) {
-            configStore.and("entity_id", queryVO.getEntityId());
+        if (queryVO.getEntityId() != null && !queryVO.getEntityId().trim().isEmpty()) {
+            configStore.and("entity_id", Long.valueOf(queryVO.getEntityId()));
         }
-        if (queryVO.getKeyword() != null) {
+        if (queryVO.getKeyword() != null && !queryVO.getKeyword().trim().isEmpty()) {
             configStore.and(Compare.LIKE, "field_name", "%" + queryVO.getKeyword() + "%")
                     .or(Compare.LIKE, "display_name", "%" + queryVO.getKeyword() + "%");
         }
@@ -397,21 +397,37 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
         DefaultConfigStore configStore = new DefaultConfigStore();
         
         // 添加查询条件
-        if (pageReqVO.getEntityId() != null) {
-            configStore.and("entity_id", pageReqVO.getEntityId());
+        if (pageReqVO.getEntityId() != null && !pageReqVO.getEntityId().trim().isEmpty()) {
+            configStore.and("entity_id", Long.valueOf(pageReqVO.getEntityId()));
         }
-        if (pageReqVO.getFieldName() != null) {
+        if (pageReqVO.getFieldName() != null && !pageReqVO.getFieldName().trim().isEmpty()) {
             configStore.and(Compare.LIKE, "field_name", "%" + pageReqVO.getFieldName() + "%");
         }
-        if (pageReqVO.getDisplayName() != null) {
+        if (pageReqVO.getDisplayName() != null && !pageReqVO.getDisplayName().trim().isEmpty()) {
             configStore.and(Compare.LIKE, "display_name", "%" + pageReqVO.getDisplayName() + "%");
         }
-        if (pageReqVO.getFieldType() != null) {
+        if (pageReqVO.getFieldType() != null && !pageReqVO.getFieldType().trim().isEmpty()) {
             configStore.and("field_type", pageReqVO.getFieldType());
         }
         if (pageReqVO.getIsSystemField() != null) {
             configStore.and("is_system_field", pageReqVO.getIsSystemField());
         }
+        if (pageReqVO.getIsPrimaryKey() != null) {
+            configStore.and("is_primary_key", pageReqVO.getIsPrimaryKey());
+        }
+        if (pageReqVO.getIsRequired() != null) {
+            configStore.and("is_required", pageReqVO.getIsRequired());
+        }
+        if (pageReqVO.getRunMode() != null) {
+            configStore.and("run_mode", pageReqVO.getRunMode());
+        }
+        if (pageReqVO.getAppId() != null && !pageReqVO.getAppId().trim().isEmpty()) {
+            configStore.and("app_id", Long.valueOf(pageReqVO.getAppId()));
+        }
+        
+        // 添加排序：按照字段排序优先，然后按创建时间倒序
+        configStore.order("sort_order", Order.TYPE.ASC);
+        configStore.order("create_time", Order.TYPE.DESC);
         
         // 分页查询
         return dataRepository.findPageWithConditions(MetadataEntityFieldDO.class, configStore, pageReqVO.getPageNo(), pageReqVO.getPageSize());

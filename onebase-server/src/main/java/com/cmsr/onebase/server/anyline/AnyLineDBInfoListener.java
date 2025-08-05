@@ -60,6 +60,8 @@ public class AnyLineDBInfoListener implements DMListener {
         TENANT_IGNORE_TABLES.add("infra_file");
         TENANT_IGNORE_TABLES.add("infra_api_access_log");
         TENANT_IGNORE_TABLES.add("infra_api_error_log");
+        TENANT_IGNORE_TABLES.add("metadata_system_fields");
+        TENANT_IGNORE_TABLES.add("metadata_field_type_mapping");
 
         // 可以根据需要添加更多表
     }

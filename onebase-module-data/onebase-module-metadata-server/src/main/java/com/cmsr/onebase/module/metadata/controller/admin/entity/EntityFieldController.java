@@ -72,11 +72,19 @@ public class EntityFieldController {
     @PostMapping("/list")
     @Operation(summary = "查询指定实体的字段列表")
     @PreAuthorize("@ss.hasPermission('metadata:entity-field:query')")
-    public CommonResult<List<EntityFieldRespVO>> getEntityFieldList(@Valid EntityFieldQueryReqVO reqVO) {
+    public CommonResult<List<EntityFieldRespVO>> getEntityFieldList(@Valid @RequestBody EntityFieldQueryReqVO reqVO) {
         // 将Controller层的VO转换为Service层的VO
         EntityFieldQueryVO queryVO = new EntityFieldQueryVO(reqVO.getEntityId(), reqVO.getIsSystemField(), reqVO.getKeyword());
         List<MetadataEntityFieldDO> list = entityFieldService.getEntityFieldListByConditions(queryVO);
         return success(EntityFieldConvert.INSTANCE.convertList(list));
+    }
+
+    @PostMapping("/page")
+    @Operation(summary = "分页查询指定实体的字段列表")
+    @PreAuthorize("@ss.hasPermission('metadata:entity-field:query')")
+    public CommonResult<PageResult<EntityFieldRespVO>> getEntityFieldPage(@Valid @RequestBody EntityFieldPageReqVO pageReqVO) {
+        PageResult<MetadataEntityFieldDO> pageResult = entityFieldService.getEntityFieldPage(pageReqVO);
+        return success(EntityFieldConvert.INSTANCE.convertPage(pageResult));
     }
 
     @PostMapping("/get")

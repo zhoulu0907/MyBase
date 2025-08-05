@@ -194,13 +194,12 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
             throw new RuntimeException("无法构建数据源连接URL，请检查配置信息");
         }
 
-        // 构建数据源配置
+        // 构建数据源配置 - 不使用连接池参数，让AnyLine使用默认处理
         Map<String, Object> dsConfig = Map.of(
                 "url", url,
                 "user", username != null ? username : "",
                 "password", password != null ? password : "",
-                "driver", getDriverByType(datasource.getDatasourceType()),
-                "pool", "com.zaxxer.hikari.HikariDataSource"
+                "driver", getDriverByType(datasource.getDatasourceType())
         );
 
         // 使用 anyline 的 DataSourceUtil 构建数据源

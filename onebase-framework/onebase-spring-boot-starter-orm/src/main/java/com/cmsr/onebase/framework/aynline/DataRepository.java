@@ -224,7 +224,7 @@ public class DataRepository {
      * @param <T>     实体类型
      * @return 实体列表
      */
-    public <T extends BaseDO> List<T> findAllByConfig(Class<T> clazz, ConfigStore configs) {
+    public <T> List<T> findAllByConfig(Class<T> clazz, ConfigStore configs) {
         try {
             String tableName = getTableName(clazz);
             DataSet dataSet = anylineService.querys(tableName, configs);
@@ -652,16 +652,13 @@ public class DataRepository {
                 throw new RuntimeException("无法构建数据源连接URL，请检查配置信息");
             }
 
-            // 构建数据源配置
-            Map<String, Object> dsConfig = Map.of(
-                    "url", url,
-                    "user", username != null ? username : "",
-                    "password", password != null ? password : "",
-                    "driver", getDriverByType(datasourceType),
-                    "pool", "com.zaxxer.hikari.HikariDataSource"
-            );
-
-            // 使用 anyline 的 DataSourceUtil 构建数据源
+        // 构建数据源配置 - 不使用连接池参数，让AnyLine使用默认处理
+        Map<String, Object> dsConfig = Map.of(
+                "url", url,
+                "user", username != null ? username : "",
+                "password", password != null ? password : "",
+                "driver", getDriverByType(datasourceType)
+        );            // 使用 anyline 的 DataSourceUtil 构建数据源
             DataSource dataSource = DataSourceUtil.build(dsConfig);
 
             // 创建临时的 AnylineService

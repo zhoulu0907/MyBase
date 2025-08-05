@@ -6,6 +6,7 @@ import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.BusinessEntityPageReqVO;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.BusinessEntitySaveReqVO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataBusinessEntityDO;
+import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataSystemFieldsDO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.datasource.MetadataDatasourceDO;
 import com.cmsr.onebase.module.metadata.convert.datasource.DatasourceConvert;
@@ -48,6 +49,10 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
         // 插入业务实体
         MetadataBusinessEntityDO businessEntity = BeanUtils.toBean(createReqVO, MetadataBusinessEntityDO.class);
         businessEntity.setAppId(Long.valueOf(createReqVO.getAppId()));
+        // 设置表名，如果没有指定则使用编码作为表名
+        if (businessEntity.getTableName() == null || businessEntity.getTableName().trim().isEmpty()) {
+            businessEntity.setTableName(createReqVO.getCode().toLowerCase());
+        }
         dataRepository.insert(businessEntity);
         
         try {
@@ -59,6 +64,9 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
                 
                 // 3. 生成 DDL 并在数据源内建物理表
                 createPhysicalTable(datasource, businessEntity.getTableName(), systemFields);
+                
+                // 4. 保存实体字段信息到 metadata_entity_field 表
+                saveEntityFields(businessEntity.getId(), systemFields, Long.valueOf(createReqVO.getAppId()));
                 
                 log.info("成功为业务实体 {} 创建物理表: {}", businessEntity.getDisplayName(), businessEntity.getTableName());
             } else {
@@ -96,6 +104,73 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
     }
     
     /**
+     * 保存实体字段信息到 metadata_entity_field 表
+     *
+     * @param entityId 业务实体ID
+     * @param systemFields 系统字段列表
+     * @param appId 应用ID
+     */
+    private void saveEntityFields(Long entityId, List<MetadataSystemFieldsDO> systemFields, Long appId) {
+        int sortOrder = 1;
+        for (MetadataSystemFieldsDO systemField : systemFields) {
+            MetadataEntityFieldDO entityField = MetadataEntityFieldDO.builder()
+                    .entityId(entityId)
+                    .fieldName(systemField.getFieldName())
+                    .displayName(systemField.getFieldName()) // 使用字段名作为显示名称
+                    .fieldType(systemField.getFieldType())
+                    .dataLength(getDefaultDataLength(systemField.getFieldType())) // 根据字段类型设置默认长度
+                    .decimalPlaces(getDefaultDecimalPlaces(systemField.getFieldType())) // 根据字段类型设置默认小数位
+                    .defaultValue(systemField.getDefaultValue())
+                    .description(systemField.getDescription())
+                    .isSystemField(true) // 标记为系统字段
+                    .isPrimaryKey(systemField.getIsSnowflakeId() == 1) // 雪花ID字段设为主键
+                    .isRequired(systemField.getIsRequired() == 1)
+                    .isUnique(systemField.getIsSnowflakeId() == 1) // 主键字段唯一
+                    .allowNull(systemField.getIsRequired() != 1) // 必填字段不允许为空
+                    .sortOrder(sortOrder++)
+                    .validationRules(null) // 系统字段暂不设置校验规则
+                    .runMode(0) // 默认编辑态
+                    .appId(appId)
+                    .status(0) // 默认开启
+                    .build();
+            
+            dataRepository.insert(entityField);
+        }
+        
+        log.info("成功保存 {} 个系统字段到实体字段表", systemFields.size());
+    }
+    
+    /**
+     * 根据字段类型获取默认数据长度
+     */
+    private Integer getDefaultDataLength(String fieldType) {
+        switch (fieldType.toUpperCase()) {
+            case "VARCHAR":
+                return 255;
+            case "BIGINT":
+                return 19;
+            case "INTEGER":
+                return 10;
+            case "DECIMAL":
+                return 18;
+            default:
+                return null;
+        }
+    }
+    
+    /**
+     * 根据字段类型获取默认小数位数
+     */
+    private Integer getDefaultDecimalPlaces(String fieldType) {
+        switch (fieldType.toUpperCase()) {
+            case "DECIMAL":
+                return 2;
+            default:
+                return null;
+        }
+    }
+    
+    /**
      * 创建临时的 AnylineService 用于数据库操作
      */
     private AnylineService<?> createTemporaryService(MetadataDatasourceDO datasource) {
@@ -112,12 +187,6 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
      */
     private void createPhysicalTable(MetadataDatasourceDO datasource, String tableName, List<MetadataSystemFieldsDO> systemFields) {
         try {
-            // 从数据源配置中获取连接参数
-            Map<String, Object> config = datasourceConvert.stringToMap(datasource.getConfig());
-            String url = (String) config.get("url");
-            String username = (String) config.get("username");
-            String password = (String) config.get("password");
-            
             // 创建 AnylineService 实例
             AnylineService<?> service = createTemporaryService(datasource);
             
