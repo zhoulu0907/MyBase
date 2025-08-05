@@ -58,7 +58,7 @@ public class BaseDO implements Serializable {
      * 是否删除
      */
     @Column(name = DELETED)
-    private Boolean deleted;
+    private Long deleted;
 
        /**
      * 乐观锁版本号
