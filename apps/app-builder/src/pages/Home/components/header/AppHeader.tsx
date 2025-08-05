@@ -1,5 +1,6 @@
 import logoSVG from '@/assets/images/logo.svg';
 import settingSVG from '@/assets/images/setting_icon.svg';
+import { UserPermissionManager } from '@/utils/permission';
 import {
     Avatar,
     Button,
@@ -10,6 +11,7 @@ import {
 } from '@arco-design/web-react';
 import { IconPoweroff, IconUser } from '@arco-design/web-react/icon';
 import { TokenManager } from '@onebase/common';
+import { getPermissionInfo } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -25,6 +27,8 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     const navigate = useNavigate();
     const location = useLocation();
     const { t } = useTranslation();
+
+    const [nickname, setNickname] = useState('U');
 
     // Tab 切换
     // 根据当前路径设置 activeTab
@@ -47,7 +51,16 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
 
     useEffect(() => {
         console.log(tokenInfo);
+        if (tokenInfo?.accessToken) {
+            getInfo();
+        }
     }, [tokenInfo]);
+
+    const getInfo = async () => {
+        const res = await getPermissionInfo();
+        UserPermissionManager.setUserPermissionInfo(res);
+        setNickname(res.user.nickname);
+    };
 
     // 登出处理
     const handleLogout = () => {
@@ -120,8 +133,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
                     <Dropdown droplist={userMenu} position='bottom'>
                         <div className={styles.userDropdown}>
                             <Avatar size={32} style={{ backgroundColor: '#4FAE7B' }}>
-                                {/* TODO(Ming): 用户信息获取 */}
-                                {tokenInfo?.userId?.toString().charAt(0) || 'U'}
+                                {nickname?.charAt(0) || 'U'}
                             </Avatar>
                         </div>
                     </Dropdown>
