@@ -8,7 +8,7 @@ import lombok.Data;
 
 @Schema(description = "管理后台 - 菜单创建/修改 Request VO")
 @Data
-public class MenuSaveVO {
+public class SystemMenuSaveVO {
 
     @Schema(description = "菜单编号", example = "1024")
     private Long id;

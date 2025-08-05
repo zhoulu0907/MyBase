@@ -3,10 +3,10 @@ package com.cmsr.onebase.module.system.controller.admin.permission;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.module.system.controller.admin.permission.vo.menu.MenuListReqVO;
-import com.cmsr.onebase.module.system.controller.admin.permission.vo.menu.MenuRespVO;
-import com.cmsr.onebase.module.system.controller.admin.permission.vo.menu.MenuSaveVO;
-import com.cmsr.onebase.module.system.controller.admin.permission.vo.menu.MenuSimpleRespVO;
+import com.cmsr.onebase.module.system.controller.admin.permission.vo.menu.SystemMenuListReqVO;
+import com.cmsr.onebase.module.system.controller.admin.permission.vo.menu.SystemMenuRespVO;
+import com.cmsr.onebase.module.system.controller.admin.permission.vo.menu.SystemMenuSaveVO;
+import com.cmsr.onebase.module.system.controller.admin.permission.vo.menu.SystemMenuSimpleRespVO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.MenuDO;
 import com.cmsr.onebase.module.system.service.permission.MenuService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -27,7 +27,7 @@ import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 @RestController
 @RequestMapping("/system/menu")
 @Validated
-public class MenuController {
+public class SystemMenuController {
 
     @Resource
     private MenuService menuService;
@@ -35,7 +35,7 @@ public class MenuController {
     @PostMapping("/create")
     @Operation(summary = "创建菜单")
     @PreAuthorize("@ss.hasPermission('system:menu:create')")
-    public CommonResult<Long> createMenu(@Valid @RequestBody MenuSaveVO createReqVO) {
+    public CommonResult<Long> createMenu(@Valid @RequestBody SystemMenuSaveVO createReqVO) {
         Long menuId = menuService.createMenu(createReqVO);
         return success(menuId);
     }
@@ -43,7 +43,7 @@ public class MenuController {
     @PutMapping("/update")
     @Operation(summary = "修改菜单")
     @PreAuthorize("@ss.hasPermission('system:menu:update')")
-    public CommonResult<Boolean> updateMenu(@Valid @RequestBody MenuSaveVO updateReqVO) {
+    public CommonResult<Boolean> updateMenu(@Valid @RequestBody SystemMenuSaveVO updateReqVO) {
         menuService.updateMenu(updateReqVO);
         return success(true);
     }
@@ -60,29 +60,29 @@ public class MenuController {
     @GetMapping("/list")
     @Operation(summary = "获取菜单列表", description = "用于【菜单管理】界面")
     @PreAuthorize("@ss.hasPermission('system:menu:query')")
-    public CommonResult<List<MenuRespVO>> getMenuList(MenuListReqVO reqVO) {
+    public CommonResult<List<SystemMenuRespVO>> getMenuList(SystemMenuListReqVO reqVO) {
         List<MenuDO> list = menuService.getMenuList(reqVO);
         list.sort(Comparator.comparing(MenuDO::getSort));
-        return success(BeanUtils.toBean(list, MenuRespVO.class));
+        return success(BeanUtils.toBean(list, SystemMenuRespVO.class));
     }
 
     @GetMapping({"/list-all-simple", "simple-list"})
     @Operation(summary = "获取菜单精简信息列表",
             description = "只包含被开启的菜单，用于【角色分配菜单】功能的选项。在多租户的场景下，会只返回租户所在套餐有的菜单")
-    public CommonResult<List<MenuSimpleRespVO>> getSimpleMenuList() {
+    public CommonResult<List<SystemMenuSimpleRespVO>> getSimpleMenuList() {
         List<MenuDO> list = menuService.getMenuListByTenant(
-                new MenuListReqVO().setStatus(CommonStatusEnum.ENABLE.getStatus()));
+                new SystemMenuListReqVO().setStatus(CommonStatusEnum.ENABLE.getStatus()));
         list = menuService.filterDisableMenus(list);
         list.sort(Comparator.comparing(MenuDO::getSort));
-        return success(BeanUtils.toBean(list, MenuSimpleRespVO.class));
+        return success(BeanUtils.toBean(list, SystemMenuSimpleRespVO.class));
     }
 
     @GetMapping("/get")
     @Operation(summary = "获取菜单信息")
     @PreAuthorize("@ss.hasPermission('system:menu:query')")
-    public CommonResult<MenuRespVO> getMenu(Long id) {
+    public CommonResult<SystemMenuRespVO> getMenu(Long id) {
         MenuDO menu = menuService.getMenu(id);
-        return success(BeanUtils.toBean(menu, MenuRespVO.class));
+        return success(BeanUtils.toBean(menu, SystemMenuRespVO.class));
     }
 
 }

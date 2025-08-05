@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Schema(description = "管理后台 - 菜单列表 Request VO")
 @Data
-public class MenuListReqVO {
+public class SystemMenuListReqVO {
 
     @Schema(description = "菜单名称，模糊匹配", example = "onebase")
     private String name;

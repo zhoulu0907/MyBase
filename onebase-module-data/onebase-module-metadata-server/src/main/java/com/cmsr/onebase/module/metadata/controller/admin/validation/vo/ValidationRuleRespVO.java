@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 public class ValidationRuleRespVO {
 
     @Schema(description = "规则ID", example = "4001")
-    private Long id;
+    private String id;
 
     @Schema(description = "校验名称", example = "用户名格式校验")
     private String validationName;
@@ -25,13 +25,13 @@ public class ValidationRuleRespVO {
     private String validationCode;
 
     @Schema(description = "实体ID", example = "2001")
-    private Long entityId;
+    private String entityId;
 
     @Schema(description = "实体名称", example = "用户信息")
     private String entityName;
 
     @Schema(description = "字段ID", example = "3001")
-    private Long fieldId;
+    private String fieldId;
 
     @Schema(description = "字段名称", example = "username")
     private String fieldName;

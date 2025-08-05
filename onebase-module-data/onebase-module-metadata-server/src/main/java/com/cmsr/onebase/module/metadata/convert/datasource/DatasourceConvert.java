@@ -9,15 +9,12 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.factory.Mappers;
 
 import java.util.List;
 import java.util.Map;
 
-@Mapper
+@Mapper(componentModel = "spring")
 public interface DatasourceConvert {
-
-    DatasourceConvert INSTANCE = Mappers.getMapper(DatasourceConvert.class);
 
     @Mapping(target = "config", expression = "java(stringToMap(bean.getConfig()))")
     DatasourceRespVO convert(MetadataDatasourceDO bean);

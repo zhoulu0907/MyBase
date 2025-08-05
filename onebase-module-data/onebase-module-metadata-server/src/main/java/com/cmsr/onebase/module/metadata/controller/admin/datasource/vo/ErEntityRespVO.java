@@ -15,8 +15,8 @@ public class ErEntityRespVO {
     @Schema(description = "实体编码", example = "user")
     private String entityCode;
 
-    @Schema(description = "实体类型", example = "SYSTEM")
-    private String entityType;
+    @Schema(description = "实体类型（1:自建表，2:复用已有表）", example = "1")
+    private Integer entityType;
 
     @Schema(description = "实体描述", example = "系统用户信息表")
     private String description;

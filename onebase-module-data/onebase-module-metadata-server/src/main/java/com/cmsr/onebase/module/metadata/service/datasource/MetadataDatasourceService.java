@@ -103,5 +103,12 @@ public interface MetadataDatasourceService {
      * @return 测试结果
      */
     DatasourceTestConnectionRespVO testConnection(@Valid DatasourceTestConnectionReqVO reqVO);
+    /**
+     * 创建默认数据源，使用配置文件中 default.datasource 配置
+     *
+     * @param appId 应用ID
+     * @return 数据源编号
+     */
+    Long createDefaultDatasource(Long appId);
 
 }

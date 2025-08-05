@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.system.service.permission;
 
-import com.cmsr.onebase.module.system.controller.admin.permission.vo.menu.MenuListReqVO;
-import com.cmsr.onebase.module.system.controller.admin.permission.vo.menu.MenuSaveVO;
+import com.cmsr.onebase.module.system.controller.admin.permission.vo.menu.SystemMenuListReqVO;
+import com.cmsr.onebase.module.system.controller.admin.permission.vo.menu.SystemMenuSaveVO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.MenuDO;
 
 import java.util.Collection;
@@ -19,14 +19,14 @@ public interface MenuService {
      * @param createReqVO 菜单信息
      * @return 创建出来的菜单编号
      */
-    Long createMenu(MenuSaveVO createReqVO);
+    Long createMenu(SystemMenuSaveVO createReqVO);
 
     /**
      * 更新菜单
      *
      * @param updateReqVO 菜单信息
      */
-    void updateMenu(MenuSaveVO updateReqVO);
+    void updateMenu(SystemMenuSaveVO updateReqVO);
 
     /**
      * 删除菜单
@@ -49,7 +49,7 @@ public interface MenuService {
      * @param reqVO 筛选条件请求 VO
      * @return 菜单列表
      */
-    List<MenuDO> getMenuListByTenant(MenuListReqVO reqVO);
+    List<MenuDO> getMenuListByTenant(SystemMenuListReqVO reqVO);
 
     /**
      * 过滤掉关闭的菜单及其子菜单
@@ -65,7 +65,7 @@ public interface MenuService {
      * @param reqVO 筛选条件请求 VO
      * @return 菜单列表
      */
-    List<MenuDO> getMenuList(MenuListReqVO reqVO);
+    List<MenuDO> getMenuList(SystemMenuListReqVO reqVO);
 
     /**
      * 获得权限对应的菜单编号数组

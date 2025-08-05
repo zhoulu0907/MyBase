@@ -8,10 +8,10 @@ import lombok.Data;
 public class EntityFieldRespVO {
 
     @Schema(description = "字段编号", example = "1024")
-    private Long id;
+    private String id;
 
     @Schema(description = "实体ID", example = "1")
-    private Long entityId;
+    private String entityId;
 
     @Schema(description = "字段名称", example = "user_name")
     private String fieldName;
@@ -53,12 +53,18 @@ public class EntityFieldRespVO {
     private Integer sortOrder;
 
     @Schema(description = "校验规则配置", example = "1")
-    private Long validationRulesId;
+    private String validationRulesId;
 
     @Schema(description = "运行模式", example = "0")
     private Integer runMode;
 
     @Schema(description = "应用ID", example = "1")
-    private Long appId;
+    private String appId;
+    
+    @Schema(description = "字段状态，0：开启，1：关闭", example = "0")
+    private Integer status;
+
+    @Schema(description = "字段编码", example = "USER_NAME")
+    private String fieldCode;
 
 }

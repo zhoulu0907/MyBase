@@ -21,7 +21,7 @@ public class EntityFieldBatchCreateRespVO {
     @Schema(description = "失败数量", example = "0")
     private Integer failureCount;
 
-    @Schema(description = "创建成功的字段ID列表", example = "[3001, 3002]")
-    private List<Long> fieldIds;
+    @Schema(description = "创建成功的字段ID列表", example = "[\"3001\", \"3002\"]")
+    private List<String> fieldIds;
 
 } 

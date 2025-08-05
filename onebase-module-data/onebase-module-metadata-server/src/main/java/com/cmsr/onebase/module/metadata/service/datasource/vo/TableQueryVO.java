@@ -14,7 +14,7 @@ public class TableQueryVO {
     /**
      * 数据源ID
      */
-    private Long datasourceId;
+    private String datasourceId;
 
     /**
      * 数据库模式名(可选)
@@ -33,7 +33,7 @@ public class TableQueryVO {
      * @param schemaName 数据库模式名
      * @param keyword 表名搜索关键词
      */
-    public TableQueryVO(Long datasourceId, String schemaName, String keyword) {
+    public TableQueryVO(String datasourceId, String schemaName, String keyword) {
         this.datasourceId = datasourceId;
         this.schemaName = schemaName;
         this.keyword = keyword;

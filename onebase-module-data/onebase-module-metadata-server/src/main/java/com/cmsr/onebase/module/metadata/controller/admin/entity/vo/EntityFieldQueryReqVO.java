@@ -17,12 +17,15 @@ public class EntityFieldQueryReqVO {
 
     @Schema(description = "实体ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "1024")
     @NotNull(message = "实体ID不能为空")
-    private Long entityId;
+    private String entityId;
 
     @Schema(description = "是否系统字段", example = "false")
     private Boolean isSystemField;
 
     @Schema(description = "搜索关键词", example = "name")
     private String keyword;
+
+    @Schema(description = "字段编码", example = "USER_NAME")
+    private String fieldCode;
 
 } 
