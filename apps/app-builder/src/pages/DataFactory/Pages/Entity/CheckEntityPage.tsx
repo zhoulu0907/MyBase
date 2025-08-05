@@ -10,6 +10,7 @@ const CheckEntityPage: React.FC<{ handlePageType: (tab: string) => void }> = ({ 
   const [activeTab, setActiveTab] = useState('ER');
   const [createEntityModalVisible, setCreateEntityModalVisible] = useState(false);
   const [refreshEntityList, setRefreshEntityList] = useState(false);
+  const [onlyUpdateNode, setOnlyUpdateNode] = useState(false);
   const dsData = {
     name: '数据源',
     code: 'ds_1',
@@ -46,7 +47,7 @@ const CheckEntityPage: React.FC<{ handlePageType: (tab: string) => void }> = ({ 
             <IconPlus />
             创建业务实体
           </Button>
-          <div className={styles['entity-page-content']}><EntityERWithModeSwitch refreshEntityList={refreshEntityList} setRefreshEntityList={setRefreshEntityList} /></div>
+          <div className={styles['entity-page-content']}><EntityERWithModeSwitch refreshEntityList={refreshEntityList} setRefreshEntityList={setRefreshEntityList} onlyUpdateNode={onlyUpdateNode} setOnlyUpdateNode={setOnlyUpdateNode} /></div>
         </>
       )}
 
@@ -60,6 +61,7 @@ const CheckEntityPage: React.FC<{ handlePageType: (tab: string) => void }> = ({ 
         handlePageType={handlePageType}
         successCallback={() => {
           setRefreshEntityList(true);
+          setOnlyUpdateNode(false);
         }}
       />
     </div>
