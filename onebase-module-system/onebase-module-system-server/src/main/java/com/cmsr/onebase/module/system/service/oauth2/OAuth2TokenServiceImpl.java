@@ -129,7 +129,7 @@ public class OAuth2TokenServiceImpl implements OAuth2TokenService {
             // 再例如说，前端 WebSocket 的 token 直接跟在 url 上，无法传递 refresh_token
 
             OAuth2RefreshTokenDO refreshTokenDO = dataRepository.findOne(OAuth2RefreshTokenDO.class,new DefaultConfigStore()
-                    .and(Compare.EQUAL, "access_token", accessToken));
+                    .and(Compare.EQUAL, "refresh_token", accessToken));
             //OAuth2RefreshTokenDO refreshTokenDO = oauth2RefreshTokenMapper.selectByRefreshToken(accessToken);
             if (refreshTokenDO != null && !DateUtils.isExpired(refreshTokenDO.getExpiresTime())) {
                 accessTokenDO = convertToAccessToken(refreshTokenDO);

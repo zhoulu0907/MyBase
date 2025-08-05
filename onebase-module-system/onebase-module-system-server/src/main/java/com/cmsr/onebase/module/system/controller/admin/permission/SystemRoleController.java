@@ -32,7 +32,7 @@ import static java.util.Collections.singleton;
 @RestController
 @RequestMapping("/system/role")
 @Validated
-public class RoleController {
+public class SystemRoleController {
 
     @Resource
     private RoleService roleService;

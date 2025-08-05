@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Schema(description = "管理后台 - 菜单精简信息 Response VO")
 @Data
-public class MenuSimpleRespVO {
+public class SystemMenuSimpleRespVO {
 
     @Schema(description = "菜单编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "1024")
     private Long id;
