@@ -7,7 +7,7 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Data
-public class PlatformInfoDto {
+public class PlatformInfoDo {
 
     @Schema(description = "企业名称")
     private String enterpriseName;

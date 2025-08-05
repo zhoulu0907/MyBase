@@ -60,4 +60,7 @@ public class LicenseDO extends BaseDO{
     /** License文件 */
     @Column(name = LICENSE_FILE)
     private String licenseFile;
+    /** 创建时间 */
+    private LocalDateTime createTime;
+
 }
