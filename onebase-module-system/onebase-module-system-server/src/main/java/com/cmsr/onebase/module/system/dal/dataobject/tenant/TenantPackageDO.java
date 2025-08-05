@@ -3,7 +3,7 @@ package com.cmsr.onebase.module.system.dal.dataobject.tenant;
 import java.util.Set;
 
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
-import com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO;
+import com.cmsr.onebase.framework.data.base.BaseDO;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 
 import jakarta.persistence.Column;

@@ -1,22 +1,25 @@
 package com.cmsr.onebase.module.system.service.permission;
 
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.util.ObjUtil;
-import cn.hutool.core.util.StrUtil;
-import com.cmsr.onebase.framework.aynline.DataRepository;
-import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
-import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.module.system.controller.admin.permission.vo.menu.MenuListReqVO;
-import com.cmsr.onebase.module.system.controller.admin.permission.vo.menu.MenuSaveVO;
-import com.cmsr.onebase.module.system.dal.dataobject.permission.MenuDO;
-import com.cmsr.onebase.module.system.dal.mysql.permission.MenuMapper;
-import com.cmsr.onebase.module.system.dal.redis.RedisKeyConstants;
-import com.cmsr.onebase.module.system.enums.permission.MenuTypeEnum;
-import com.cmsr.onebase.module.system.service.tenant.TenantService;
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Lists;
-import jakarta.annotation.Resource;
-import lombok.extern.slf4j.Slf4j;
+import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.convertList;
+import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.convertMap;
+import static com.cmsr.onebase.module.system.dal.dataobject.permission.MenuDO.ID_ROOT;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.MENU_COMPONENT_NAME_DUPLICATE;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.MENU_EXISTS_CHILDREN;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.MENU_NAME_DUPLICATE;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.MENU_NOT_EXISTS;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.MENU_PARENT_ERROR;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.MENU_PARENT_NOT_DIR_OR_MENU;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.MENU_PARENT_NOT_EXISTS;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Compare;
@@ -26,13 +29,23 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import com.cmsr.onebase.framework.aynline.DataRepository;
+import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
+import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.module.system.controller.admin.permission.vo.menu.MenuListReqVO;
+import com.cmsr.onebase.module.system.controller.admin.permission.vo.menu.MenuSaveVO;
+import com.cmsr.onebase.module.system.dal.dataobject.permission.MenuDO;
+import com.cmsr.onebase.module.system.dal.redis.RedisKeyConstants;
+import com.cmsr.onebase.module.system.enums.permission.MenuTypeEnum;
+import com.cmsr.onebase.module.system.service.tenant.TenantService;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Lists;
 
-import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.convertList;
-import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.convertMap;
-import static com.cmsr.onebase.module.system.dal.dataobject.permission.MenuDO.ID_ROOT;
-import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.ObjUtil;
+import cn.hutool.core.util.StrUtil;
+import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 菜单 Service 实现
@@ -41,9 +54,6 @@ import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
 @Service
 @Slf4j
 public class MenuServiceImpl implements MenuService {
-
-    @Resource
-    private MenuMapper menuMapper;
     @Resource
     private PermissionService permissionService;
     @Resource

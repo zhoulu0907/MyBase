@@ -1,6 +1,6 @@
 package com.cmsr.onebase.framework.tenant.core.db;
 
-import com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO;
+import com.cmsr.onebase.framework.data.base.BaseDO;
 
 import jakarta.persistence.Column;
 import lombok.Data;

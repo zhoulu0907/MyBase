@@ -4,7 +4,7 @@ import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.framework.mybatis.core.dataobject.BaseDO;
+import com.cmsr.onebase.framework.data.base.BaseDO;
 import com.cmsr.onebase.module.app.controller.admin.app.vo.ApplicationCreateReqVO;
 import com.cmsr.onebase.module.app.controller.admin.app.vo.ApplicationPageReqVO;
 import com.cmsr.onebase.module.app.controller.admin.app.vo.ApplicationPageRespVO;

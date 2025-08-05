@@ -140,10 +140,10 @@
             <artifactId>transmittable-thread-local</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>com.fhs-opensource</groupId> <!-- VO 数据翻译 -->
-            <artifactId>easy-trans-anno</artifactId> <!-- 默认引入的原因，方便 xxx-module-api 包使用 -->
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.fhs-opensource</groupId> &lt;!&ndash; VO 数据翻译 &ndash;&gt;-->
+<!--            <artifactId>easy-trans-anno</artifactId> &lt;!&ndash; 默认引入的原因，方便 xxx-module-api 包使用 &ndash;&gt;-->
+<!--        </dependency>-->
 
         <!-- Aynline 相关 -->
         <dependency>

@@ -1,29 +1,27 @@
 package com.cmsr.onebase.module.system.service.permission;
 
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.util.ObjUtil;
-import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.extra.spring.SpringUtil;
-import com.cmsr.onebase.framework.aynline.DataRepository;
-import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
-import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
-import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.module.system.controller.admin.permission.vo.role.RolePageReqVO;
-import com.cmsr.onebase.module.system.controller.admin.permission.vo.role.RoleSaveReqVO;
-import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
-import com.cmsr.onebase.module.system.dal.mysql.permission.RoleMapper;
-import com.cmsr.onebase.module.system.dal.redis.RedisKeyConstants;
-import com.cmsr.onebase.module.system.enums.permission.DataScopeEnum;
-import com.cmsr.onebase.module.system.enums.permission.RoleCodeEnum;
-import com.cmsr.onebase.module.system.enums.permission.RoleTypeEnum;
-import com.google.common.annotations.VisibleForTesting;
-import com.mzt.logapi.context.LogRecordContext;
-import com.mzt.logapi.service.impl.DiffParseFunction;
-import com.mzt.logapi.starter.annotation.LogRecord;
-import jakarta.annotation.Resource;
-import lombok.extern.slf4j.Slf4j;
+import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.convertMap;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.ROLE_ADMIN_CODE_ERROR;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.ROLE_CAN_NOT_UPDATE_SYSTEM_TYPE_ROLE;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.ROLE_CODE_DUPLICATE;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.ROLE_IS_DISABLE;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.ROLE_NAME_DUPLICATE;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.ROLE_NOT_EXISTS;
+import static com.cmsr.onebase.module.system.enums.LogRecordConstants.SYSTEM_ROLE_CREATE_SUB_TYPE;
+import static com.cmsr.onebase.module.system.enums.LogRecordConstants.SYSTEM_ROLE_CREATE_SUCCESS;
+import static com.cmsr.onebase.module.system.enums.LogRecordConstants.SYSTEM_ROLE_DELETE_SUB_TYPE;
+import static com.cmsr.onebase.module.system.enums.LogRecordConstants.SYSTEM_ROLE_DELETE_SUCCESS;
+import static com.cmsr.onebase.module.system.enums.LogRecordConstants.SYSTEM_ROLE_TYPE;
+import static com.cmsr.onebase.module.system.enums.LogRecordConstants.SYSTEM_ROLE_UPDATE_SUB_TYPE;
+import static com.cmsr.onebase.module.system.enums.LogRecordConstants.SYSTEM_ROLE_UPDATE_SUCCESS;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Compare;
 import org.springframework.cache.annotation.CacheEvict;
@@ -32,12 +30,30 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.util.*;
+import com.cmsr.onebase.framework.aynline.DataRepository;
+import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
+import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
+import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.module.system.controller.admin.permission.vo.role.RolePageReqVO;
+import com.cmsr.onebase.module.system.controller.admin.permission.vo.role.RoleSaveReqVO;
+import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
+import com.cmsr.onebase.module.system.dal.redis.RedisKeyConstants;
+import com.cmsr.onebase.module.system.enums.permission.DataScopeEnum;
+import com.cmsr.onebase.module.system.enums.permission.RoleCodeEnum;
+import com.cmsr.onebase.module.system.enums.permission.RoleTypeEnum;
+import com.google.common.annotations.VisibleForTesting;
+import com.mzt.logapi.context.LogRecordContext;
+import com.mzt.logapi.service.impl.DiffParseFunction;
+import com.mzt.logapi.starter.annotation.LogRecord;
 
-import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.convertMap;
-import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
-import static com.cmsr.onebase.module.system.enums.LogRecordConstants.*;
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.util.ObjUtil;
+import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.extra.spring.SpringUtil;
+import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 角色 Service 实现类
@@ -49,9 +65,6 @@ public class RoleServiceImpl implements RoleService {
 
     @Resource
     private PermissionService permissionService;
-
-    @Resource
-    private RoleMapper roleMapper;
 
     @Resource
     private DataRepository dataRepository;

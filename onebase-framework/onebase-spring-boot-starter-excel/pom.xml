@@ -63,12 +63,6 @@
             <artifactId>commons-compress</artifactId> <!-- 解决 https://github.com/alibaba/easyexcel/issues/3954 问题 -->
         </dependency>
 
-        <dependency>
-            <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-spring-boot-starter-biz-ip</artifactId>
-            <optional>true</optional> <!-- 设置为 optional，只有在 AreaConvert 的时候使用 -->
-        </dependency>
-
         <!-- Test 测试相关 -->
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
