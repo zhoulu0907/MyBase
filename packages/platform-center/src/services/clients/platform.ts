@@ -1,6 +1,5 @@
 import { HttpClient } from '@onebase/common';
-import { getBackendURL } from './base';
-import { LoginRequest, LoginResponse } from '../types';
+import { getBackendURL } from '../base';
 
 export class PlatformService { 
   private httpClient: HttpClient | null = null;
@@ -25,12 +24,3 @@ export class PlatformService {
 
 const platformService = new PlatformService();
 export default platformService.getHttpClient();
-
-export const platformLogin = async (req: LoginRequest): Promise<LoginResponse> => {
-  const client = platformService.getHttpClient();
-  return client.post<LoginResponse>('/auth/login', req, {
-    headers: {
-      'Tenant-Id': '1'
-    }
-  });
-};

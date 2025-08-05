@@ -15,7 +15,8 @@ import { useI18n } from '../../../hooks/useI18n';
 import { useRememberMe } from '../../../hooks/useRememberMe';
 import styles from '../index.module.less';
 // import type { LoginRequest } from '@/types/login';
-import { platformLogin } from '@onebase/platform-center';
+import { platformLoginApi, type LoginRequest } from '@onebase/platform-center';
+import { TokenManager } from '@onebase/common';
 
 const { Paragraph } = Typography;
 const TabPane = Tabs.TabPane;
@@ -48,21 +49,35 @@ const Right: React.FC = () => {
 
 
   // 表单提交处理
-  const handleSubmit = async (values) => {
+  const handleSubmit = async (values: LoginRequest) => {
+    setLoading(true);
 
     console.log('values:', values);
-    const { account, password } = values;
-    const loginInfo = {username: account, password}
+
     try {
-      const LoginRes = await platformLogin(loginInfo);
-      console.log('loginRes:', LoginRes);
+      const loginRes = await platformLoginApi(values);
+      console.log('loginRes:', loginRes);
       // 显示成功消息并跳转
-      Message.success(t('auth.loginSuccess'));
-      
-    } catch (error) {
-      Message.error(t('auth.loginFailed'));
+      if (loginRes.userId === 1) {
+
+        Message.success(t('auth.loginSuccess'));
+        // 存储 token 信息（需要导入相应的 token 管理工具）
+        TokenManager.setToken({
+          userId: loginRes.userId,
+          accessToken: loginRes.accessToken,
+          refreshToken: loginRes.refreshToken,
+          expiresTime: loginRes.expiresTime,
+        }, rememberMe);
+        navigate('/onebase/platform-info');
+      } else {
+        Message.error(t('auth.loginFailed'));
+      }
+    } catch (error: any) {
+      console.error('登录error:', error);
+      Message.error(error.message || t('auth.loginFailed'));
+    } finally {
+      setLoading(false);
     }
-    // navigate('/onebase/platform-info');
   };
 
   return (
@@ -87,7 +102,7 @@ const Right: React.FC = () => {
               className={styles.loginForm}
             >
               <Form.Item
-                field="account"
+                field="username"
                 initialValue=""
                 rules={[
                   { required: true, message: '请输入账号' },

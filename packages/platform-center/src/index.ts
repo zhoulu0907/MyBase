@@ -15,7 +15,8 @@ export * from './services/user';
 
 export * from './services/dept';
 
+export { PlatformService } from './services/clients/platform';;
 
-export { platformLogin, PlatformService } from './services/plantForm';;
+export * from './services/platformLogin';
 
-export * from './services/dept';
+export * from './services/platformInfo';

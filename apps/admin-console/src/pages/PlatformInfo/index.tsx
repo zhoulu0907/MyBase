@@ -1,9 +1,10 @@
-import { Card, Descriptions, Space, Typography, Table, Tag, type TableColumnProps, Modal, Upload } from '@arco-design/web-react';
+import { Card, Descriptions, Space, Typography, Table, Tag, type TableColumnProps, Modal, Upload, Message } from '@arco-design/web-react';
 // import { IconInfoCircle } from '@arco-design/web-react/icon';
 import React, { useEffect } from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styles from './index.module.less';
+import { getPlatFormInfoListApi, type PlatformInfoReq, type AuthRecord, type LicenseInfo } from '@onebase/platform-center'
 
 const { Title, Text } = Typography;
 // 定义认证记录的数据类型
@@ -18,7 +19,8 @@ const PlatformInfo: React.FC = () => {
   const { t } = useTranslation();
   const [visible, setVisible] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<CertificationRecord | null>(null);
-
+  const [licenseInfoList, setLicenseInfoList] = useState<LicenseInfo[] | null>(null);
+  const [licenseInfo, setLicenseInfo] = useState<LicenseInfo | null>(null);
   // 模拟平台信息数据 license 获取
   const platformData = {
     name: 'ONE BASE Platform',
@@ -74,11 +76,38 @@ const PlatformInfo: React.FC = () => {
 
   const getPlatformInfoList = async () => {
     console.log('获取认证记录:');
+    try {
+      const res = await getPlatFormInfoListApi({ pageNum: 1, pageSize: 10 })
+      console.log('infoList:', res.list);
+      if (res && Array.isArray(res.list)) {
+        setLicenseInfoList(res.list);
+        if (res.list.length > 0) {
+          setLicenseInfo(res.list[0]);
+        } else {
+          setLicenseInfo(null);
+        }
+      } else {
+        console.warn('Invalid response format:', res);
+        setLicenseInfoList(null);
+        setLicenseInfo(null);
+      }
+    } catch (error: any) {
+      Message.error(error.message || t('auth.loginFailed'));
+    }
+    
   };
 
   useEffect(() => {
     getPlatformInfoList();
   }, [])
+
+  useEffect(() => {
+    console.log('Updated LicenseInfoList:', licenseInfoList);
+  }, [licenseInfoList]);
+
+  useEffect(() => {
+    console.log('Updated LicenseInfo:', licenseInfo);
+  }, [licenseInfo]);
   // 认证记录table结构
   const columns: TableColumnProps[] = [
     {
