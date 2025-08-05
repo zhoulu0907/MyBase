@@ -37,4 +37,7 @@ public class EntityFieldPageReqVO extends PageParam {
     @Schema(description = "应用ID", example = "1")
     private String appId;
 
+    @Schema(description = "字段编码", example = "USER_NAME")
+    private String fieldCode;
+
 }

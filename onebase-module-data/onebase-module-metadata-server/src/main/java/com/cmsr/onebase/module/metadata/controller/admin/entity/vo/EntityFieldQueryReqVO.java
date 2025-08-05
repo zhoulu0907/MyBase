@@ -25,4 +25,7 @@ public class EntityFieldQueryReqVO {
     @Schema(description = "搜索关键词", example = "name")
     private String keyword;
 
+    @Schema(description = "字段编码", example = "USER_NAME")
+    private String fieldCode;
+
 } 

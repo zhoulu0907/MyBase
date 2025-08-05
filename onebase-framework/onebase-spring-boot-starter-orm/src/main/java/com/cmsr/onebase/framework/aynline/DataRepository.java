@@ -688,17 +688,37 @@ public class DataRepository {
      * 根据数据源类型构建JDBC URL
      */
     public String buildJdbcUrl(String datasourceType, String host, int port, String database) {
+        if (host == null || host.trim().isEmpty()) {
+            throw new RuntimeException("主机地址不能为空");
+        }
+        
+        String databasePart = (database != null && !database.trim().isEmpty()) ? database : "";
+        
         switch (datasourceType.toUpperCase()) {
             case "POSTGRESQL":
-                return String.format("jdbc:postgresql://%s:%d/%s", host, port, database);
+                return String.format("jdbc:postgresql://%s:%d/%s", host, port, databasePart);
             case "MYSQL":
-                return String.format("jdbc:mysql://%s:%d/%s?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai", host, port, database);
+                return String.format("jdbc:mysql://%s:%d/%s?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai", 
+                        host, port, databasePart);
             case "ORACLE":
-                return String.format("jdbc:oracle:thin:@%s:%d:%s", host, port, database);
+                return String.format("jdbc:oracle:thin:@%s:%d:%s", host, port, databasePart);
             case "SQLSERVER":
-                return String.format("jdbc:sqlserver://%s:%d;databaseName=%s", host, port, database);
+                return String.format("jdbc:sqlserver://%s:%d;DatabaseName=%s", host, port, databasePart);
+            case "KINGBASE":
+                return String.format("jdbc:kingbase8://%s:%d/%s", host, port, databasePart);
+            case "TDENGINE":
+                return String.format("jdbc:TAOS-RS://%s:%d/%s", host, port, databasePart);
+            case "CLICKHOUSE":
+                return String.format("jdbc:clickhouse://%s:%d/%s", host, port, databasePart);
+            case "DM":
+                return String.format("jdbc:dm://%s:%d/%s", host, port, databasePart);
+            case "OPENGAUSS":
+                return String.format("jdbc:opengauss://%s:%d/%s", host, port, databasePart);
+            case "DB2":
+                return String.format("jdbc:db2://%s:%d/%s", host, port, databasePart);
             default:
-                throw new RuntimeException("不支持的数据源类型: " + datasourceType);
+                log.warn("未知的数据源类型，使用通用格式: {}", datasourceType);
+                return String.format("jdbc:%s://%s:%d/%s", datasourceType.toLowerCase(), host, port, databasePart);
         }
     }
     
@@ -715,6 +735,18 @@ public class DataRepository {
                 return "oracle.jdbc.driver.OracleDriver";
             case "SQLSERVER":
                 return "com.microsoft.sqlserver.jdbc.SQLServerDriver";
+            case "KINGBASE":
+                return "com.kingbase8.Driver";
+            case "TDENGINE":
+                return "com.taosdata.jdbc.TSDBDriver";
+            case "CLICKHOUSE":
+                return "ru.yandex.clickhouse.ClickHouseDriver";
+            case "DM":
+                return "dm.jdbc.driver.DmDriver";
+            case "OPENGAUSS":
+                return "org.opengauss.Driver";
+            case "DB2":
+                return "com.ibm.db2.jcc.DB2Driver";
             default:
                 throw new RuntimeException("不支持的数据源类型: " + datasourceType);
         }
@@ -733,6 +765,18 @@ public class DataRepository {
                 return 1521;
             case "SQLSERVER":
                 return 1433;
+            case "KINGBASE":
+                return 54321;
+            case "TDENGINE":
+                return 6041;
+            case "CLICKHOUSE":
+                return 8123;
+            case "DM":
+                return 5236;
+            case "OPENGAUSS":
+                return 5432;
+            case "DB2":
+                return 50000;
             default:
                 return 5432; // 默认使用PostgreSQL端口
         }

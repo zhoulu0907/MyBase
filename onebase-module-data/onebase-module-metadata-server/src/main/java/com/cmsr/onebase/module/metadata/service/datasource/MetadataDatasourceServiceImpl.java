@@ -14,6 +14,7 @@ import com.cmsr.onebase.module.metadata.service.datasource.vo.TableQueryVO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.datasource.MetadataDatasourceDO;
 import com.cmsr.onebase.module.metadata.convert.datasource.DatasourceConvert;
 import com.cmsr.onebase.module.metadata.enums.DatasourceTypeEnum;
+import com.cmsr.onebase.module.metadata.service.helper.DatasourceServiceHelper;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +30,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import javax.sql.DataSource;
-import lombok.SneakyThrows;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -54,6 +54,8 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
     private org.springframework.core.env.Environment env;
     @Resource
     private DatasourceConvert datasourceConvert;
+    @Resource
+    private DatasourceServiceHelper datasourceServiceHelper;
 
     @Override
     public List<DatasourceTypeRespVO> getDatasourceTypes() {
@@ -71,7 +73,7 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
         }
 
         // 创建临时数据源连接
-        AnylineService<?> temporaryService = createTemporaryService(datasource);
+        AnylineService<?> temporaryService = datasourceServiceHelper.createTemporaryService(datasource);
 
         // 获取所有表信息
         List<String> tableNames = temporaryService.tables();
@@ -118,7 +120,7 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
         }
 
         // 创建临时数据源连接
-        AnylineService<?> temporaryService = createTemporaryService(datasource);
+        AnylineService<?> temporaryService = datasourceServiceHelper.createTemporaryService(datasource);
 
         // 构建表对象
         Table<?> table = new Table<>(queryVO.getTableName());
@@ -156,57 +158,6 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
             result.add(columnInfo);
         }
         return result;
-    }
-
-    /**
-     * 创建临时的AnylineService用于数据库操作
-     *
-     * @param datasource 数据源配置
-     * @return AnylineService实例
-     */
-    @SneakyThrows
-    private AnylineService<?> createTemporaryService(MetadataDatasourceDO datasource) {
-        // 从数据源配置中获取连接参数
-        Map<String, Object> config = datasourceConvert.stringToMap(datasource.getConfig());
-        String url = (String) config.get("url");
-        String username = (String) config.get("username");
-        String password = (String) config.get("password");
-
-        // 如果配置中没有完整的URL，则根据host、port、database构建JDBC URL
-        if (url == null || url.trim().isEmpty()) {
-            String host = (String) config.get("host");
-            Object portObj = config.get("port");
-            String database = (String) config.get("database");
-            if (host != null && !host.trim().isEmpty()) {
-                int port = 5432; // PostgreSQL默认端口
-                if (portObj instanceof Integer) {
-                    port = (Integer) portObj;
-                } else if (portObj instanceof String) {
-                    port = Integer.parseInt((String) portObj);
-                }
-                // 根据数据源类型构建JDBC URL
-                url = buildJdbcUrl(datasource.getDatasourceType(), host, port, database);
-            }
-        }
-
-        // 参数校验
-        if (url == null || url.trim().isEmpty()) {
-            throw new RuntimeException("无法构建数据源连接URL，请检查配置信息");
-        }
-
-        // 构建数据源配置 - 不使用连接池参数，让AnyLine使用默认处理
-        Map<String, Object> dsConfig = Map.of(
-                "url", url,
-                "user", username != null ? username : "",
-                "password", password != null ? password : "",
-                "driver", getDriverByType(datasource.getDatasourceType())
-        );
-
-        // 使用 anyline 的 DataSourceUtil 构建数据源
-        DataSource dataSource = DataSourceUtil.build(dsConfig);
-
-        // 创建临时的 AnylineService
-        return ServiceProxy.temporary(dataSource);
     }
 
     /**
@@ -474,41 +425,6 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
             default -> {
                 log.warn("未知的数据源类型: {}", datasourceType);
                 yield ""; // 返回空字符串作为默认值
-            }
-        };
-    }
-
-    /**
-     * 根据数据源类型和连接参数构建JDBC URL
-     *
-     * @param datasourceType 数据源类型
-     * @param host 主机地址
-     * @param port 端口号
-     * @param database 数据库名称
-     * @return JDBC URL
-     */
-    private String buildJdbcUrl(String datasourceType, String host, int port, String database) {
-        if (host == null || host.trim().isEmpty()) {
-            throw new RuntimeException("主机地址不能为空");
-        }
-        
-        String databasePart = (database != null && !database.trim().isEmpty()) ? database : "";
-        
-        return switch (datasourceType.toUpperCase()) {
-            case "MYSQL" -> String.format("jdbc:mysql://%s:%d/%s?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai", 
-                    host, port, databasePart);
-            case "POSTGRESQL" -> String.format("jdbc:postgresql://%s:%d/%s", host, port, databasePart);
-            case "ORACLE" -> String.format("jdbc:oracle:thin:@%s:%d:%s", host, port, databasePart);
-            case "SQLSERVER" -> String.format("jdbc:sqlserver://%s:%d;DatabaseName=%s", host, port, databasePart);
-            case "KINGBASE" -> String.format("jdbc:kingbase8://%s:%d/%s", host, port, databasePart);
-            case "TDENGINE" -> String.format("jdbc:TAOS-RS://%s:%d/%s", host, port, databasePart);
-            case "CLICKHOUSE" -> String.format("jdbc:clickhouse://%s:%d/%s", host, port, databasePart);
-            case "DM" -> String.format("jdbc:dm://%s:%d/%s", host, port, databasePart);
-            case "OPENGAUSS" -> String.format("jdbc:opengauss://%s:%d/%s", host, port, databasePart);
-            case "DB2" -> String.format("jdbc:db2://%s:%d/%s", host, port, databasePart);
-            default -> {
-                log.warn("未知的数据源类型，使用通用格式: {}", datasourceType);
-                yield String.format("jdbc:%s://%s:%d/%s", datasourceType.toLowerCase(), host, port, databasePart);
             }
         };
     }

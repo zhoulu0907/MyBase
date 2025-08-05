@@ -20,6 +20,7 @@ import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataEntityFiel
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataBusinessEntityDO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.datasource.MetadataDatasourceDO;
 import com.cmsr.onebase.module.metadata.convert.datasource.DatasourceConvert;
+import com.cmsr.onebase.module.metadata.service.helper.DatasourceServiceHelper;
 import com.cmsr.onebase.module.metadata.enums.FieldTypeEnum;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
@@ -34,7 +35,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.module.metadata.enums.ErrorCodeConstants.ENTITY_FIELD_NOT_EXISTS;
@@ -51,6 +51,8 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
     private DataRepository dataRepository;
     @Resource
     private DatasourceConvert datasourceConvert;
+    @Resource
+    private DatasourceServiceHelper datasourceServiceHelper;
 
     @Override
     public List<FieldTypeConfigRespVO> getFieldTypes() {
@@ -134,6 +136,9 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
         }
         if (queryVO.getIsSystemField() != null) {
             configStore.and("is_system_field", queryVO.getIsSystemField());
+        }
+        if (queryVO.getFieldCode() != null && !queryVO.getFieldCode().trim().isEmpty()) {
+            configStore.and(Compare.LIKE, "field_code", "%" + queryVO.getFieldCode() + "%");
         }
         
         configStore.order("sort_order", Order.TYPE.ASC);
@@ -279,6 +284,16 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
 
         // 插入实体字段
         MetadataEntityFieldDO entityField = BeanUtils.toBean(createReqVO, MetadataEntityFieldDO.class);
+        entityField.setEntityId(Long.valueOf(createReqVO.getEntityId()));
+        entityField.setAppId(Long.valueOf(createReqVO.getAppId()));
+        entityField.setIsSystemField(false); // 手动创建的字段不是系统字段
+        entityField.setRunMode(0); // 默认编辑态
+        entityField.setStatus(0); // 默认开启
+        // 如果没有提供fieldCode，则根据fieldName生成
+        if (entityField.getFieldCode() == null || entityField.getFieldCode().trim().isEmpty()) {
+            entityField.setFieldCode(generateFieldCode(createReqVO.getFieldName()));
+        }
+        
         dataRepository.insert(entityField);
         
         // 同步到物理表
@@ -312,6 +327,10 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
         updateObj.setId(Long.valueOf(updateReqVO.getId()));
         updateObj.setEntityId(Long.valueOf(updateReqVO.getEntityId()));
         updateObj.setAppId(Long.valueOf(updateReqVO.getAppId()));
+        // 如果没有提供fieldCode，则根据fieldName生成
+        if (updateObj.getFieldCode() == null || updateObj.getFieldCode().trim().isEmpty()) {
+            updateObj.setFieldCode(generateFieldCode(updateReqVO.getFieldName()));
+        }
         dataRepository.update(updateObj);
         
         // 同步到物理表
@@ -424,6 +443,9 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
         if (pageReqVO.getAppId() != null && !pageReqVO.getAppId().trim().isEmpty()) {
             configStore.and("app_id", Long.valueOf(pageReqVO.getAppId()));
         }
+        if (pageReqVO.getFieldCode() != null && !pageReqVO.getFieldCode().trim().isEmpty()) {
+            configStore.and(Compare.LIKE, "field_code", "%" + pageReqVO.getFieldCode() + "%");
+        }
         
         // 添加排序：按照字段排序优先，然后按创建时间倒序
         configStore.order("sort_order", Order.TYPE.ASC);
@@ -519,14 +541,8 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
      */
     private void addColumnToTable(MetadataDatasourceDO datasource, String tableName, MetadataEntityFieldDO field) {
         try {
-            // 从数据源配置中获取连接参数
-            Map<String, Object> config = datasourceConvert.stringToMap(datasource.getConfig());
-            String url = (String) config.get("url");
-            String username = (String) config.get("username");
-            String password = (String) config.get("password");
-            
             // 创建 AnylineService 实例
-            AnylineService<?> service = createTemporaryService(datasource);
+            AnylineService<?> service = datasourceServiceHelper.createTemporaryService(datasource);
             
             // 生成添加列 DDL
             String addColumnDDL = generateAddColumnDDL(tableName, field);
@@ -546,14 +562,8 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
      */
     private void alterColumnInTable(MetadataDatasourceDO datasource, String tableName, MetadataEntityFieldDO field) {
         try {
-            // 从数据源配置中获取连接参数
-            Map<String, Object> config = datasourceConvert.stringToMap(datasource.getConfig());
-            String url = (String) config.get("url");
-            String username = (String) config.get("username");
-            String password = (String) config.get("password");
-            
             // 创建 AnylineService 实例
-            AnylineService<?> service = createTemporaryService(datasource);
+            AnylineService<?> service = datasourceServiceHelper.createTemporaryService(datasource);
             
             // 生成修改列 DDL
             String alterColumnDDL = generateAlterColumnDDL(tableName, field);
@@ -573,14 +583,8 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
      */
     private void dropColumnFromTable(MetadataDatasourceDO datasource, String tableName, String fieldName) {
         try {
-            // 从数据源配置中获取连接参数
-            Map<String, Object> config = datasourceConvert.stringToMap(datasource.getConfig());
-            String url = (String) config.get("url");
-            String username = (String) config.get("username");
-            String password = (String) config.get("password");
-            
             // 创建 AnylineService 实例
-            AnylineService<?> service = createTemporaryService(datasource);
+            AnylineService<?> service = datasourceServiceHelper.createTemporaryService(datasource);
             
             // 生成删除列 DDL
             String dropColumnDDL = generateDropColumnDDL(tableName, fieldName);
@@ -593,18 +597,6 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
             log.error("从表 {} 删除列 {} 失败: {}", tableName, fieldName, e.getMessage(), e);
             throw new RuntimeException("删除列失败", e);
         }
-    }
-
-    /**
-     * 创建临时的 AnylineService 用于数据库操作
-     */
-    private AnylineService<?> createTemporaryService(MetadataDatasourceDO datasource) {
-        // 从数据源配置中获取连接参数
-        Map<String, Object> config = datasourceConvert.stringToMap(datasource.getConfig());
-        config.put("datasourceType", datasource.getDatasourceType());
-        
-        // 创建临时的AnylineService用于数据库操作
-        return dataRepository.createTemporaryService(config);
     }
     
     /**
@@ -712,6 +704,20 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
             default:
                 return "VARCHAR(" + (dataLength != null && dataLength > 0 ? dataLength : 255) + ")"; // 默认类型
         }
+    }
+    
+    /**
+     * 生成字段编码
+     * 将字段名转换为大写，下划线保持不变
+     *
+     * @param fieldName 字段名
+     * @return 字段编码
+     */
+    private String generateFieldCode(String fieldName) {
+        if (fieldName == null || fieldName.trim().isEmpty()) {
+            return null;
+        }
+        return fieldName.toUpperCase();
     }
 
 }

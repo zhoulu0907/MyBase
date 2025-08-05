@@ -34,7 +34,7 @@ public class DataMethodController {
 
     @PostMapping("/list")
     @Operation(summary = "查询业务实体的数据方法列表")
-    public CommonResult<List<DataMethodRespVO>> getDataMethodList(@Valid DataMethodQueryReqVO reqVO) {
+    public CommonResult<List<DataMethodRespVO>> getDataMethodList(@Valid @RequestBody DataMethodQueryReqVO reqVO) {
         // 将Controller层的VO转换为Service层的VO
         DataMethodQueryVO queryVO = new DataMethodQueryVO(reqVO.getEntityId(), reqVO.getMethodType(), reqVO.getKeyword());
         List<DataMethodRespVO> methods = dataMethodService.getDataMethodList(queryVO);
@@ -43,7 +43,7 @@ public class DataMethodController {
 
     @PostMapping("/detail")
     @Operation(summary = "获取指定数据方法的详细信息")
-    public CommonResult<DataMethodDetailRespVO> getDataMethodDetail(@Valid DataMethodDetailQueryReqVO reqVO) {
+    public CommonResult<DataMethodDetailRespVO> getDataMethodDetail(@Valid @RequestBody DataMethodDetailQueryReqVO reqVO) {
         DataMethodDetailRespVO detail = dataMethodService.getDataMethodDetail(Long.valueOf(reqVO.getEntityId()), reqVO.getMethodCode());
         return success(detail);
     }
@@ -77,7 +77,7 @@ public class DataMethodController {
     @PostMapping("/data")
     @Operation(summary = "根据ID查询数据详情")
     @PreAuthorize("@ss.hasPermission('metadata:data:query')")
-    public CommonResult<DynamicDataRespVO> getData(@Valid DynamicDataGetReqVO reqVO) {
+    public CommonResult<DynamicDataRespVO> getData(@Valid @RequestBody DynamicDataGetReqVO reqVO) {
         DynamicDataRespVO result = dataMethodService.getData(reqVO);
         return success(result);
     }
@@ -85,7 +85,7 @@ public class DataMethodController {
     @PostMapping("/data/page")
     @Operation(summary = "分页查询数据列表")
     @PreAuthorize("@ss.hasPermission('metadata:data:query')")
-    public CommonResult<PageResult<DynamicDataRespVO>> getDataPage(@Valid DynamicDataPageReqVO reqVO) {
+    public CommonResult<PageResult<DynamicDataRespVO>> getDataPage(@Valid @RequestBody DynamicDataPageReqVO reqVO) {
         PageResult<DynamicDataRespVO> result = dataMethodService.getDataPage(reqVO);
         return success(result);
     }

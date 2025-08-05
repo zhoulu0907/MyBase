@@ -66,4 +66,8 @@ public class EntityFieldSaveReqVO {
     @NotNull(message = "应用ID不能为空")
     private String appId;
 
+    @Schema(description = "字段编码", example = "USER_NAME")
+    @Size(max = 60, message = "字段编码长度不能超过60个字符")
+    private String fieldCode;
+
 }

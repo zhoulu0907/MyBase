@@ -110,6 +110,9 @@ public class MetadataEntityFieldDO extends TenantBaseDO {
      */
     private Integer status;
 
-
+    /**
+     * 字段编码
+     */
+    private String fieldCode;
 
 }

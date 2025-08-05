@@ -70,4 +70,7 @@ public class EntityFieldDetailRespVO {
     @Schema(description = "创建时间", example = "2025-07-28T10:30:00")
     private LocalDateTime createTime;
 
+    @Schema(description = "字段编码", example = "USER_NAME")
+    private String fieldCode;
+
 } 

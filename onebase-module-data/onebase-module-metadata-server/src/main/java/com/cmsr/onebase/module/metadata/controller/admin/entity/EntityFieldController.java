@@ -74,7 +74,7 @@ public class EntityFieldController {
     @PreAuthorize("@ss.hasPermission('metadata:entity-field:query')")
     public CommonResult<List<EntityFieldRespVO>> getEntityFieldList(@Valid @RequestBody EntityFieldQueryReqVO reqVO) {
         // 将Controller层的VO转换为Service层的VO
-        EntityFieldQueryVO queryVO = new EntityFieldQueryVO(reqVO.getEntityId(), reqVO.getIsSystemField(), reqVO.getKeyword());
+        EntityFieldQueryVO queryVO = new EntityFieldQueryVO(reqVO.getEntityId(), reqVO.getIsSystemField(), reqVO.getKeyword(), reqVO.getFieldCode());
         List<MetadataEntityFieldDO> list = entityFieldService.getEntityFieldListByConditions(queryVO);
         return success(EntityFieldConvert.INSTANCE.convertList(list));
     }

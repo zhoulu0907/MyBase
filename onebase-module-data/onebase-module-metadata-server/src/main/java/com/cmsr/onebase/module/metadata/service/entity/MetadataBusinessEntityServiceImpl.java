@@ -10,6 +10,7 @@ import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataEntityFiel
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataSystemFieldsDO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.datasource.MetadataDatasourceDO;
 import com.cmsr.onebase.module.metadata.convert.datasource.DatasourceConvert;
+import com.cmsr.onebase.module.metadata.service.helper.DatasourceServiceHelper;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +22,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Map;
 import java.util.StringJoiner;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
@@ -39,6 +39,8 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
     private DataRepository dataRepository;
     @Resource
     private DatasourceConvert datasourceConvert;
+    @Resource
+    private DatasourceServiceHelper datasourceServiceHelper;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -132,6 +134,7 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
                     .runMode(0) // 默认编辑态
                     .appId(appId)
                     .status(0) // 默认开启
+                    .fieldCode(generateFieldCode(systemField.getFieldName())) // 生成字段编码
                     .build();
             
             dataRepository.insert(entityField);
@@ -171,24 +174,26 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
     }
     
     /**
-     * 创建临时的 AnylineService 用于数据库操作
+     * 生成字段编码
+     * 将字段名转换为大写，下划线保持不变
+     *
+     * @param fieldName 字段名
+     * @return 字段编码
      */
-    private AnylineService<?> createTemporaryService(MetadataDatasourceDO datasource) {
-        // 从数据源配置中获取连接参数
-        Map<String, Object> config = datasourceConvert.stringToMap(datasource.getConfig());
-        config.put("datasourceType", datasource.getDatasourceType());
-        
-        // 创建临时的AnylineService用于数据库操作
-        return dataRepository.createTemporaryService(config);
+    private String generateFieldCode(String fieldName) {
+        if (fieldName == null || fieldName.trim().isEmpty()) {
+            return null;
+        }
+        return fieldName.toUpperCase();
     }
-
+    
     /**
      * 创建物理表
      */
     private void createPhysicalTable(MetadataDatasourceDO datasource, String tableName, List<MetadataSystemFieldsDO> systemFields) {
         try {
             // 创建 AnylineService 实例
-            AnylineService<?> service = createTemporaryService(datasource);
+            AnylineService<?> service = datasourceServiceHelper.createTemporaryService(datasource);
             
             // 生成建表 DDL
             String createTableDDL = generateCreateTableDDL(tableName, systemFields);

@@ -64,4 +64,7 @@ public class EntityFieldRespVO {
     @Schema(description = "字段状态，0：开启，1：关闭", example = "0")
     private Integer status;
 
+    @Schema(description = "字段编码", example = "USER_NAME")
+    private String fieldCode;
+
 }
