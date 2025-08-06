@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.module.app.api.appresource.dto.CopyPageSetDTO;
 import com.cmsr.onebase.module.app.api.appresource.dto.CreatePageSetDTO;
 import com.cmsr.onebase.module.app.controller.admin.appresource.vo.DeletePageSetReqVO;
 import com.cmsr.onebase.module.app.controller.admin.appresource.vo.LoadPageSetReqVO;
@@ -32,6 +33,15 @@ public class PageSetController {
     public CommonResult<String> createPageSet(@RequestBody CreatePageSetDTO createPageSetDTO) {
 
         String pageSetCode = pageSetService.createPageSet(createPageSetDTO);
+
+        return CommonResult.success(pageSetCode);
+    }
+
+    @PostMapping("/copy")
+    @Operation(summary = "复制页面集")
+    public CommonResult<String> copyPageSet(@RequestBody CopyPageSetDTO copyPageSetDTO) {
+
+        String pageSetCode = pageSetService.copyPageSet(copyPageSetDTO);
 
         return CommonResult.success(pageSetCode);
     }

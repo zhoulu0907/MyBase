@@ -13,6 +13,7 @@ import org.springframework.validation.annotation.Validated;
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.app.api.appresource.dto.ComponentDTO;
+import com.cmsr.onebase.module.app.api.appresource.dto.CopyPageSetDTO;
 import com.cmsr.onebase.module.app.api.appresource.dto.CreatePageSetDTO;
 import com.cmsr.onebase.module.app.api.appresource.dto.PageDTO;
 import com.cmsr.onebase.module.app.api.appresource.dto.PageSetRespDTO;
@@ -20,12 +21,18 @@ import com.cmsr.onebase.module.app.controller.admin.appresource.vo.LoadPageSetRe
 import com.cmsr.onebase.module.app.controller.admin.appresource.vo.LoadPageSetRespVO;
 import com.cmsr.onebase.module.app.controller.admin.appresource.vo.SavePageSetReqVO;
 import com.cmsr.onebase.module.app.dal.database.appresource.AppComponentRepository;
+import com.cmsr.onebase.module.app.dal.database.appresource.AppPageMetaRepository;
+import com.cmsr.onebase.module.app.dal.database.appresource.AppPageRefRouterRepository;
 import com.cmsr.onebase.module.app.dal.database.appresource.AppPageRepository;
+import com.cmsr.onebase.module.app.dal.database.appresource.AppPageSetLabelRepository;
 import com.cmsr.onebase.module.app.dal.database.appresource.AppPageSetPageRepository;
 import com.cmsr.onebase.module.app.dal.database.appresource.AppPageSetRepository;
 import com.cmsr.onebase.module.app.dal.dataobject.appresource.ComponentDO;
 import com.cmsr.onebase.module.app.dal.dataobject.appresource.PageDO;
+import com.cmsr.onebase.module.app.dal.dataobject.appresource.PageMetadataDO;
+import com.cmsr.onebase.module.app.dal.dataobject.appresource.PageRefRouterDO;
 import com.cmsr.onebase.module.app.dal.dataobject.appresource.PageSetDO;
+import com.cmsr.onebase.module.app.dal.dataobject.appresource.PageSetLabelDO;
 import com.cmsr.onebase.module.app.dal.dataobject.appresource.PageSetPageDO;
 import com.cmsr.onebase.module.app.enums.appresource.AppResourceErrorCodeConstants;
 import com.cmsr.onebase.module.app.util.PageUtils;
@@ -47,6 +54,15 @@ public class PageSetServiceImpl implements PageSetService {
 
     @Resource
     private AppComponentRepository componentDataRepository;
+
+    @Resource
+    private AppPageMetaRepository pageMetaDataRepository;
+
+    @Resource
+    private AppPageSetLabelRepository pageSetLabelDataRepository;
+
+    @Resource
+    private AppPageRefRouterRepository appPageRefRouterDataRepository;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -113,6 +129,75 @@ public class PageSetServiceImpl implements PageSetService {
         pageSetDataRepository.deletePageSetByMenuId(menuId);
 
         return;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public String copyPageSet(CopyPageSetDTO copyPageSetDTO) {
+        PageSetDO pageSetDO = pageSetDataRepository.findPageSetByMenuId(copyPageSetDTO.getMenuId());
+        if (pageSetDO == null) {
+            throw ServiceExceptionUtil.exception(AppResourceErrorCodeConstants.PAGE_SET_NOT_EXIST);
+        }
+
+        // 复制页面集
+        PageSetDO newPageSetDO = BeanUtils.toBean(pageSetDO, PageSetDO.class);
+        newPageSetDO.setId(null);
+        newPageSetDO.setPageSetCode(UUID.randomUUID().toString());
+        pageSetDataRepository.insert(newPageSetDO);
+
+        // 复制页面其余内容
+        pageSetPageDataRepository.findByPageSetCode(pageSetDO.getPageSetCode()).forEach(pageSetPageDO -> {
+            PageDO pageDO = pageDataRepository.selectPageByCode(pageSetPageDO.getPageRef());
+            if (pageDO == null) {
+                throw ServiceExceptionUtil.exception(AppResourceErrorCodeConstants.PAGE_NOT_EXIST);
+            }
+            // 复制页面
+            PageDO newPageDO = BeanUtils.toBean(pageDO, PageDO.class);
+            newPageDO.setId(null);
+            newPageDO.setPageCode(UUID.randomUUID().toString());
+            pageDataRepository.insert(newPageDO);
+
+            // 复制页面集-页面关联表
+            PageSetPageDO newPageSetPageDO = pageSetPageDataRepository.findByPageSetCodeAndPageRef(pageSetDO.getPageSetCode(), pageDO.getPageCode());
+            newPageSetPageDO.setId(null);
+            newPageSetPageDO.setPageSetRef(newPageSetDO.getPageSetCode());
+            newPageSetPageDO.setPageRef(newPageDO.getPageCode());
+            pageSetPageDataRepository.insert(newPageSetPageDO);
+
+            // 复制组件
+            componentDataRepository.findByPageID(pageDO.getId()).forEach(componentDO -> {
+                ComponentDO newComponentDO = BeanUtils.toBean(componentDO, ComponentDO.class);
+                newComponentDO.setId(null);
+                newComponentDO.setPageId(newPageDO.getId());
+                componentDataRepository.insert(newComponentDO);
+            });
+
+            // 复制页面元数据
+            pageMetaDataRepository.findByPageID(pageDO.getId()).forEach(pageMetadataDO -> {
+                PageMetadataDO newPageMetadataDO = BeanUtils.toBean(pageMetadataDO, PageMetadataDO.class);
+                newPageMetadataDO.setId(null);
+                newPageMetadataDO.setPageId(newPageDO.getId());
+                pageMetaDataRepository.insert(newPageMetadataDO);
+            });
+
+            // 复制label
+            pageSetLabelDataRepository.findByPageSetCode(pageSetDO.getPageSetCode()).forEach(pageSetLabelDO -> {
+                PageSetLabelDO newPageSetLabelDO = BeanUtils.toBean(pageSetLabelDO, PageSetLabelDO.class);
+                newPageSetLabelDO.setId(null);
+                newPageSetLabelDO.setPagesetCode(newPageSetDO.getPageSetCode());
+                pageSetLabelDataRepository.insert(newPageSetLabelDO);
+            });
+
+            // 复制RefRouter
+            appPageRefRouterDataRepository.findPageRefRouterByPageCode(pageSetPageDO.getPageRef()).forEach(pageRefRouterDO -> {
+                PageRefRouterDO newPageRefRouterDO = BeanUtils.toBean(pageRefRouterDO, PageRefRouterDO.class);
+                newPageRefRouterDO.setId(null);
+                newPageRefRouterDO.setPageRef(newPageDO.getPageCode());
+                appPageRefRouterDataRepository.insert(newPageRefRouterDO);
+            });
+        });
+
+        return newPageSetDO.getPageSetCode();
     }
 
     @Override
