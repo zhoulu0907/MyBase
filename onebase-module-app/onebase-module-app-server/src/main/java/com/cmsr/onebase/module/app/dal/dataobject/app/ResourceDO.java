@@ -10,8 +10,8 @@ import lombok.Data;
  * @Date：2025/7/23 15:00
  */
 @Data
-@Table(name = "app_application_resource")
-public class ApplicationResourceDO extends TenantBaseDO {
+@Table(name = "app_resource")
+public class ResourceDO extends TenantBaseDO {
 
     @Column(name = "application_id", nullable = false, comment = "应用ID")
     private Long applicationId;

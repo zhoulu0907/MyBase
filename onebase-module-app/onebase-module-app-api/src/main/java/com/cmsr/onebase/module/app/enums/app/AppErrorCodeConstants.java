@@ -21,4 +21,9 @@ public interface AppErrorCodeConstants {
     ErrorCode APP_MENU_GROUP_NOT_ALLOW_COPY = new ErrorCode(10006, "分组内不可复制");
 
     ErrorCode APP_TAG_EXIST = new ErrorCode(10007, "标签已存在");
+
+    ErrorCode APP_CODE_DUPLICATE = new ErrorCode(10008, "应用编码重复");
+
+    ErrorCode MENU_TYPE_ERROR = new ErrorCode(10009, "菜单类型错误");
+
 }

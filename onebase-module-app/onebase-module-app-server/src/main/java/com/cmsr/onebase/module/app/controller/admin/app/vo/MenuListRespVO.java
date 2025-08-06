@@ -11,10 +11,10 @@ import java.util.List;
  */
 @Schema(description = "应用管理 - 应用菜单列表 Resp VO")
 @Data
-public class ApplicationMenuListRespVO {
+public class MenuListRespVO {
 
     @Schema(description = "菜单id")
-    private Long Id;
+    private Long id;
 
     @Schema(description = "菜单uuid")
     private String menuUuid;
@@ -32,6 +32,6 @@ public class ApplicationMenuListRespVO {
     private String menuIcon;
 
     @Schema(description = "子菜单")
-    public List<ApplicationMenuListRespVO> children = null;
+    public List<MenuListRespVO> children = null;
 
 }

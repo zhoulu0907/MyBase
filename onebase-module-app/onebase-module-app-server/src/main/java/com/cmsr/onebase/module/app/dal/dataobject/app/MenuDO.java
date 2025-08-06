@@ -10,8 +10,8 @@ import lombok.Data;
  * @Date：2025/7/23 14:31
  */
 @Data
-@Table(name = "app_application_menu")
-public class ApplicationMenuDO extends TenantBaseDO {
+@Table(name = "app_menu")
+public class MenuDO extends TenantBaseDO {
 
     @Column(name = "application_id", nullable = false, comment = "应用Id")
     private Long applicationId;
