@@ -5,6 +5,8 @@ import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.module.system.controller.admin.permission.vo.permission.PermissionAssignRoleDataScopeReqVO;
 import com.cmsr.onebase.module.system.controller.admin.permission.vo.permission.PermissionAssignRoleMenuReqVO;
 import com.cmsr.onebase.module.system.controller.admin.permission.vo.permission.PermissionAssignUserRoleReqVO;
+import com.cmsr.onebase.module.system.controller.admin.permission.vo.permission.PermissionAssignRoleUsersReqVO;
+import com.cmsr.onebase.module.system.controller.admin.permission.vo.permission.PermissionDeleteRoleUsersReqVO;
 import com.cmsr.onebase.module.system.service.permission.PermissionService;
 import com.cmsr.onebase.module.system.service.tenant.TenantService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -62,7 +64,7 @@ public class PermissionController {
         return success(true);
     }
 
-    @Operation(summary = "获得管理员拥有的角色编号列表")
+    @Operation(summary = "获得用户拥有的角色编号列表")
     @Parameter(name = "userId", description = "用户编号", required = true)
     @GetMapping("/list-user-roles")
     @PreAuthorize("@ss.hasPermission('system:permission:assign-user-role')")
@@ -71,10 +73,26 @@ public class PermissionController {
     }
 
     @Operation(summary = "赋予用户角色")
-    @PostMapping("/assign-user-role")
+    @PostMapping("/assign-user-roles")
     @PreAuthorize("@ss.hasPermission('system:permission:assign-user-role')")
-    public CommonResult<Boolean> assignUserRole(@Validated @RequestBody PermissionAssignUserRoleReqVO reqVO) {
-        permissionService.assignUserRole(reqVO.getUserId(), reqVO.getRoleIds());
+    public CommonResult<Boolean> assignUserRoles(@Validated @RequestBody PermissionAssignUserRoleReqVO reqVO) {
+        permissionService.assignUserRoles(reqVO.getUserId(), reqVO.getRoleIds());
+        return success(true);
+    }
+
+    @Operation(summary = "为角色分配用户")
+    @PostMapping("/assign-role-users")
+    @PreAuthorize("@ss.hasPermission('system:permission:assign-role-user')")
+    public CommonResult<Boolean> assignRoleUsers(@Validated @RequestBody PermissionAssignRoleUsersReqVO reqVO) {
+        permissionService.assignRoleUsers(reqVO.getRoleId(), reqVO.getUserIds());
+        return success(true);
+    }
+
+    @Operation(summary = "从角色中移除用户")
+    @PostMapping("/delete-role-users")
+    @PreAuthorize("@ss.hasPermission('system:permission:assign-role-user')")
+    public CommonResult<Boolean> deleteRoleUsers(@Validated @RequestBody PermissionDeleteRoleUsersReqVO reqVO) {
+        permissionService.deleteRoleUsers(reqVO.getRoleId(), reqVO.getUserIds());
         return success(true);
     }
 

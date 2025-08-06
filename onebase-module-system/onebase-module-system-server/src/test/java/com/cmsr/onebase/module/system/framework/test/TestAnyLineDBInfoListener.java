@@ -1,4 +1,4 @@
-package com.cmsr.onebase.server.anyline;
+package com.cmsr.onebase.module.system.framework.test;
 
 import com.cmsr.onebase.framework.common.anyline.web.BizException;
 import com.cmsr.onebase.framework.common.anyline.web.StatusCode;
@@ -10,6 +10,15 @@ import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
 
 import lombok.extern.slf4j.Slf4j;
+
+import static org.mockito.ArgumentMatchers.refEq;
+
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+
 import org.anyline.data.listener.DMListener;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.prepare.RunPrepare;
@@ -20,50 +29,24 @@ import org.anyline.entity.DataRow;
 import org.anyline.entity.DataSet;
 import org.anyline.metadata.ACTION.SWITCH;
 import org.anyline.metadata.Table;
-
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
-import java.util.List;
-
-import java.util.Objects;
-import java.util.Set;
-import java.util.HashSet;
-
-@Slf4j @Component() @SuppressWarnings("rawtypes") // AnyLine 框架的接口使用原始类型
-public class AnyLineDBInfoListener implements DMListener {
-
+/**
+ * 测试环境专用的AnyLine数据库监听器
+ * <p>
+ * 主要用于在查询时自动添加软删除条件，确保测试结果的正确性
+ *
+ * @author matianyu
+ * @date 2025-08-06
+ */
+@Slf4j
+@Component
+public class TestAnyLineDBInfoListener implements DMListener {
 
 
     // 需要忽略租户过滤的表名列表
     private static final Set<String> TENANT_IGNORE_TABLES = new HashSet<>();
 
-    static {
-        // 添加不需要租户过滤的表
-        TENANT_IGNORE_TABLES.add("system_tenant");
-        TENANT_IGNORE_TABLES.add("system_tenant_package");
-        TENANT_IGNORE_TABLES.add("system_dict_data");
-        TENANT_IGNORE_TABLES.add("system_dict_type");
-        TENANT_IGNORE_TABLES.add("system_config");
-        TENANT_IGNORE_TABLES.add("system_tenant");
-        TENANT_IGNORE_TABLES.add("system_tenant_package");
-        TENANT_IGNORE_TABLES.add("system_mail_account");
-        TENANT_IGNORE_TABLES.add("system_menu");
-        TENANT_IGNORE_TABLES.add("system_notify_template");
-        TENANT_IGNORE_TABLES.add("system_oauth2_client");
-        TENANT_IGNORE_TABLES.add("system_license");
-        TENANT_IGNORE_TABLES.add("infra_codegen_column");
-        TENANT_IGNORE_TABLES.add("infra_codegen_table");
-        TENANT_IGNORE_TABLES.add("infra_config");
-        TENANT_IGNORE_TABLES.add("infra_data_source_config");
-        TENANT_IGNORE_TABLES.add("infra_file_config");
-        TENANT_IGNORE_TABLES.add("infra_file_content");
-        TENANT_IGNORE_TABLES.add("infra_file");
-        TENANT_IGNORE_TABLES.add("infra_api_access_log");
-        TENANT_IGNORE_TABLES.add("infra_api_error_log");
-
-        // 可以根据需要添加更多表
-    }
 
     /**
      * 创建插入相关的SQL之前调用<br/>
@@ -188,7 +171,7 @@ public class AnyLineDBInfoListener implements DMListener {
      * @return 如果表需要忽略租户过滤则返回true
      */
     private boolean isTableTenantIgnored2(Object obj) {
-        return obj != null && obj.getClass().isAnnotationPresent(TenantIgnore.class);
+        return true;
     }
 
     /**
@@ -198,7 +181,7 @@ public class AnyLineDBInfoListener implements DMListener {
      * @return 如果表名在忽略列表中则返回true
      */
     private boolean isTableTenantIgnored2(RunPrepare prepare) {
-        return prepare != null && isTableTenantIgnored2(prepare.getTableName());
+        return true;
     }
     
     /**
@@ -208,10 +191,7 @@ public class AnyLineDBInfoListener implements DMListener {
      * @return 如果表名在忽略列表中则返回true
      */
     private boolean isTableTenantIgnored2(String tableName) {
-        if (TenantContextHolder.isIgnore()) {
-            return true;
-        }
-        return TENANT_IGNORE_TABLES.contains(tableName);
+        return true;
     }
 
     /**
@@ -355,7 +335,5 @@ public class AnyLineDBInfoListener implements DMListener {
         configs.and(Compare.EQUAL, BaseDO.DELETED, false); 
     }
 
-
-    
 
 }
