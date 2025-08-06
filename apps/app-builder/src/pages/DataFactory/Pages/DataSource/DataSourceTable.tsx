@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
-import { Button, Table, type TableColumnProps, Space, Modal, Message } from '@arco-design/web-react';
+import { Button, Message, Modal, Space, Table, type TableColumnProps } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
-import { getDatasourcePage, deleteDatasource } from '@onebase/app/src/services/dataresource';
+import { deleteDatasource, getDatasourcePage } from '@onebase/app';
+import { useEffect, useState } from 'react';
 import styles from './index.module.less';
 
 // 数据源记录类型
@@ -15,10 +15,10 @@ interface DatasourceRecord {
   appId: number;
 }
 
-const DataSourceTable = ({ 
-  handlePageType, 
-  onEdit 
-}: { 
+const DataSourceTable = ({
+  handlePageType,
+  onEdit
+}: {
   handlePageType: (tab: string) => void;
   onEdit: (id: number) => void;
 }) => {
@@ -69,7 +69,7 @@ const DataSourceTable = ({
 
   const confirmDelete = async () => {
     if (!currentDeleteId) return;
-    
+
     setDeleteLoading(true);
     try {
       const res = await deleteDatasource(currentDeleteId);
@@ -149,9 +149,9 @@ const DataSourceTable = ({
           创建数据源
         </Button>
       </div>
-      <Table 
-        columns={columns} 
-        data={dataSourceList} 
+      <Table
+        columns={columns}
+        data={dataSourceList}
         pagination={{
           total,
           pageSize: page.pageSize,
@@ -164,7 +164,7 @@ const DataSourceTable = ({
         loading={tableLoading}
         style={{ margin: '0 16px' }}
       />
-      
+
       {/* 删除确认对话框 */}
       <Modal
         title="确认删除"
