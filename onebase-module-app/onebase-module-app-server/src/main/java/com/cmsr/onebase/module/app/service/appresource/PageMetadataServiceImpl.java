@@ -6,7 +6,7 @@ import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.app.api.appresource.dto.CreatePageMetadataDTO;
 import com.cmsr.onebase.module.app.api.appresource.dto.PageMetadataRespDTO;
 import com.cmsr.onebase.module.app.api.appresource.dto.UpdatePageMetadataDTO;
-import com.cmsr.onebase.module.app.dal.database.appresource.AppPageMetadataRepository;
+import com.cmsr.onebase.module.app.dal.database.appresource.AppPageMetaRepository;
 import com.cmsr.onebase.module.app.dal.dataobject.appresource.PageMetadataDO;
 
 import jakarta.annotation.Resource;
@@ -15,31 +15,31 @@ import jakarta.annotation.Resource;
 public class PageMetadataServiceImpl implements PageMetadataService {
 
     @Resource
-    private AppPageMetadataRepository dataRepository;
+    private AppPageMetaRepository appPageMetaDataRepository;
 
     @Override
     public PageMetadataRespDTO getPageMetadata(Long id) {
-        PageMetadataDO pageMetadataDO = dataRepository.findById(id);
+        PageMetadataDO pageMetadataDO = appPageMetaDataRepository.findById(id);
         return BeanUtils.toBean(pageMetadataDO, PageMetadataRespDTO.class);
     }
 
     @Override
     public Long createPageMetadata(CreatePageMetadataDTO createPageMetadataDTO) {
         PageMetadataDO pageMetadataDO = BeanUtils.toBean(createPageMetadataDTO, PageMetadataDO.class);
-        pageMetadataDO = dataRepository.insert(pageMetadataDO);
+        pageMetadataDO = appPageMetaDataRepository.insert(pageMetadataDO);
         return pageMetadataDO.getId();
     }
 
     @Override
     public Boolean deletePageMetadata(Long id) {
-        dataRepository.deleteById(id);
+        appPageMetaDataRepository.deleteById(id);
         return true;
     }
 
     @Override
     public Boolean updatePageMetadata(UpdatePageMetadataDTO updatePageMetadataDTO) {
         PageMetadataDO pageMetadataDO = BeanUtils.toBean(updatePageMetadataDTO, PageMetadataDO.class);
-        pageMetadataDO = dataRepository.update(pageMetadataDO);
+        pageMetadataDO = appPageMetaDataRepository.update(pageMetadataDO);
         return true;
     }
 }

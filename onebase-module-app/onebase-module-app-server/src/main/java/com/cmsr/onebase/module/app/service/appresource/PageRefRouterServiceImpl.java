@@ -16,37 +16,37 @@ import jakarta.annotation.Resource;
 public class PageRefRouterServiceImpl implements PageRefRouterService {
 
     @Resource
-    private AppPageRefRouterRepository dataRepository;
+    private AppPageRefRouterRepository appPageRefRouterDataRepository;
 
     @Override
     public PageRefRouterRespDTO getPageRefRouter(Long id) {
-        PageRefRouterDO pageRefRouterDO = dataRepository.findById(id);
+        PageRefRouterDO pageRefRouterDO = appPageRefRouterDataRepository.findById(id);
         return BeanUtils.toBean(pageRefRouterDO, PageRefRouterRespDTO.class);
     }
 
     @Override
     public Long createPageRefRouter(CreatePageRefRouterDTO createPageRefRouterDTO) {
         PageRefRouterDO pageRefRouterDO = BeanUtils.toBean(createPageRefRouterDTO, PageRefRouterDO.class);
-        pageRefRouterDO = dataRepository.insert(pageRefRouterDO);
+        pageRefRouterDO = appPageRefRouterDataRepository.insert(pageRefRouterDO);
         return pageRefRouterDO.getId();
     }
 
     @Override
     public Boolean deletePageRefRouter(Long id) {
-        dataRepository.deleteById(id);
+        appPageRefRouterDataRepository.deleteById(id);
         return true;
     }
 
     @Override
     public Boolean updatePageRefRouter(PageRefRouterRespDTO pageRefRouterRespDTO) {
         PageRefRouterDO pageRefRouterDO = BeanUtils.toBean(pageRefRouterRespDTO, PageRefRouterDO.class);
-        pageRefRouterDO = dataRepository.update(pageRefRouterDO);
+        pageRefRouterDO = appPageRefRouterDataRepository.update(pageRefRouterDO);
         return true;
     }
 
     @Override
     public List<PageRefRouterRespDTO> getPageRefRouterList(String pageCode) {
-        List<PageRefRouterDO> pageRefRouterDOList = dataRepository.findPageRefRouterByPageCode(pageCode);
+        List<PageRefRouterDO> pageRefRouterDOList = appPageRefRouterDataRepository.findPageRefRouterByPageCode(pageCode);
         return BeanUtils.toBean(pageRefRouterDOList, PageRefRouterRespDTO.class);
     }
 }

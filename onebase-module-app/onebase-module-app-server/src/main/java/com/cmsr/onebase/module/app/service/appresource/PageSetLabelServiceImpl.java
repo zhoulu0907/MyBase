@@ -17,31 +17,31 @@ import jakarta.annotation.Resource;
 public class PageSetLabelServiceImpl implements PageSetLabelService {
 
     @Resource
-    private AppPageSetLabelRepository dataRepository;
+    private AppPageSetLabelRepository appPageSetLabelDataRepository;
 
     @Override
     public List<PageSetLabelRespDTO> getLabelsByPageSetCode(String pagesetCode) {
-        List<PageSetLabelDO> pageSetLabelDOs = dataRepository.findByPageSetCode(pagesetCode);
+        List<PageSetLabelDO> pageSetLabelDOs = appPageSetLabelDataRepository.findByPageSetCode(pagesetCode);
         return BeanUtils.toBean(pageSetLabelDOs, PageSetLabelRespDTO.class);
     }
 
     @Override
     public Long createPageSetLabel(PageSetLabelCreateDTO createDTO) {
         PageSetLabelDO pageSetLabelDO = BeanUtils.toBean(createDTO, PageSetLabelDO.class);
-        pageSetLabelDO = dataRepository.insert(pageSetLabelDO);
+        pageSetLabelDO = appPageSetLabelDataRepository.insert(pageSetLabelDO);
         return pageSetLabelDO.getId();
     }
 
     @Override
     public void updatePageSetLabel(PageSetLabelUpdateDTO updateDTO) {
         PageSetLabelDO pageSetLabelDO = BeanUtils.toBean(updateDTO, PageSetLabelDO.class);
-        dataRepository.update(pageSetLabelDO);
+        appPageSetLabelDataRepository.update(pageSetLabelDO);
         return;
     }
 
     @Override
     public void deletePageSetLabel(Long id) {
-        dataRepository.deleteById(id);
+        appPageSetLabelDataRepository.deleteById(id);
         return;
     }
 }
