@@ -1,14 +1,17 @@
 # 核心开发原则
 
-## 一、本项目指定的规则（重要）
+## 一、本项目特别指定的规则（important! 重要！强制！请务必要遵守！）
 1. 项目中凡是以onebase-module开头的的一级模块均为可独立部署的微服务模块，每个模块内部分为module-api和module-server两个子模块；
 2. module-api用于放置跨模块、跨微服务调用的Api类（使用open feign定义和访问）和DTO类（用于模块间数据传输）。凡是跨module模块调用的（除去对公共模块如onebase-framework的调用之外）必须在这里定义相关Api和相关DTO；
 3. module-server用于放置本模块的核心服务和实体类等。模块内部的不同类别/领域间服务通过Service层调用，避免跨领域直接调用其他领域的Mapper层，如不可以在UserService中调用RoleMapper；
-4. 带@RestController注解的Controller类统一作为前端访问入口，要注意带上@PreAuthorize权限管控；
-5. 带@FeignClient注解的Api类统一作为跨module调用的API入口，一般无需权限控制，给内部其他module提供服务。
-6. 避免核心模型的类放在内部作为static class，要独立出来；
-7. VO类中需要移除lockversion（乐观锁）、tenantid（租户id）等系统使用且对用户无用的基础字段。
-
+4. 带@RestController注解的Controller类统一作为前端访问入口，要注意带上@PreAuthorize权限管控，注意这里不要写业务逻辑，保持轻量、清晰；
+5. Controller和Service方法大于2个入参优先使用VO，后期增删参数方便 只改VO一处，否则方法都要改签名；
+6. 带@FeignClient注解的Api类统一作为跨module调用的API入口，一般无需权限控制，给内部其他module提供服务；
+7. 带@Service注解的类统一作为业务逻辑处理类，所有的业务逻辑处理在这里实现，数据服务统一调用DataRepository实现；
+8. 避免核心模型的类放在内部作为static class，要独立出来；
+9. VO类中需要移除lockversion（乐观锁）、tenantid（租户id）等系统使用且对用户无用的基础字段；
+10. HTTP请求路径中统一不设置参数，不推荐@GetMapping("/{datasourceId}/tables") ，采用命名方式：Controller层路径采用"/模块/对象"方式，如@RequestMapping("/system/user")，方法层采用“操作”命名，如@PostMapping("/create")，增强可读性和可维护性。
+11. HTTP请求方式建议：get、query、page、list、导入、导出等查询方法使用GET请求方式，create、insert、update、delete等相关方法用POST；未识别操作类型默认采用POST；
 
 ## 二、通用开发原则
 - **可测试性**：编写可测试的代码，组件应保持单一职责
@@ -31,7 +34,7 @@
 - 优先考虑性能和用户体验
 - 确保代码的可读性和可维护性
 
-## 三、Java编程规约
+## 三、Java编程规约（重要！important!）
 ### 性能优化
 - **算法复杂度**：选择合适的算法和数据结构
 - **缓存策略**：合理使用缓存减少重复计算
@@ -56,8 +59,8 @@
    * @date 创建日期(当前日期如2025-07-25)
    */
   ```
-    - 必须包含类/接口的定义、主要用途或功能描述。
-    - 建议注明作者、创建日期等元信息。
+  - 必须包含类/接口的定义、主要用途或功能描述。
+  - 建议注明作者、创建日期等元信息。
 
 - **方法注释**：所有公共方法必须使用JavaDoc注释，包含以下内容：
   ```
@@ -69,9 +72,9 @@
    * @throws 异常类型 异常说明（如有）
    */
   ```
-    - 必须描述方法的主要功能。
-    - 对所有入参、出参进行详细说明。
-    - 如有异常抛出，需注明异常类型及说明。
+  - 必须描述方法的主要功能。
+  - 对所有入参、出参进行详细说明。
+  - 如有异常抛出，需注明异常类型及说明。
 
 - **字段注释**：重要字段应添加注释，说明用途和含义。
 

@@ -39,7 +39,7 @@ public class TenantPackageController {
         return success(tenantPackageService.createTenantPackage(createReqVO));
     }
 
-    @PutMapping("/update")
+    @PostMapping("/update")
     @Operation(summary = "更新租户套餐")
     @PreAuthorize("@ss.hasPermission('system:tenant-package:update')")
     public CommonResult<Boolean> updateTenantPackage(@Valid @RequestBody TenantPackageSaveReqVO updateReqVO) {
@@ -47,7 +47,7 @@ public class TenantPackageController {
         return success(true);
     }
 
-    @DeleteMapping("/delete")
+    @PostMapping("/delete")
     @Operation(summary = "删除租户套餐")
     @Parameter(name = "id", description = "编号", required = true)
     @PreAuthorize("@ss.hasPermission('system:tenant-package:delete')")

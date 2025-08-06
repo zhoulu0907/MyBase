@@ -25,7 +25,6 @@ public class TenantSaveReqVO {
     private String name;
 
     @Schema(description = "分配人员数量", requiredMode = Schema.RequiredMode.REQUIRED, example = "100")
-    @NotNull(message = "分配人员数量")
     private Integer allocatePersonCount;
 
     @Schema(description = "联系人", requiredMode = Schema.RequiredMode.REQUIRED, example = "onebase")
@@ -52,7 +51,7 @@ public class TenantSaveReqVO {
     private LocalDateTime expireTime;
 
     @Schema(description = "账号数量", requiredMode = Schema.RequiredMode.REQUIRED, example = "1024")
-//    @NotNull(message = "账号数量不能为空")
+    @NotNull(message = "账号数量不能为空")
     private Integer accountCount;
 
     // ========== 仅【创建】时，需要传递的字段 ==========

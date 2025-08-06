@@ -37,7 +37,7 @@ public class ApiErrorLogController {
     @Resource
     private ApiErrorLogService apiErrorLogService;
 
-    @PutMapping("/update-status")
+    @PostMapping("/update-status")
     @Operation(summary = "更新 API 错误日志的状态")
     @Parameters({
             @Parameter(name = "id", description = "编号", required = true, example = "1024"),

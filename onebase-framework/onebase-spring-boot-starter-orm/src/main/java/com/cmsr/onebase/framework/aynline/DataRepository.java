@@ -90,7 +90,7 @@ public class DataRepository { // TODO 等改造完成，这个类泛型 <T exten
             return entity;
         } catch (Exception e) {
             log.error("保存实体失败: {}", entity.getClass().getSimpleName(), e);
-            throw new BizException(StatusCode.DB_INSERT_ERROR);
+            throw e;
         }
     }
 
@@ -351,20 +351,13 @@ public class DataRepository { // TODO 等改造完成，这个类泛型 <T exten
      * @param configs configs
      * @param <T>     实体类型
      */
-    public <T extends BaseDO> void deleteByConfig(Class<T> clazz, ConfigStore configs) {
+    public <T extends BaseDO>  long deleteByConfig(Class<T> clazz, ConfigStore configs) {
         try {
             DataRow row = new DataRow();
             row.put("deleted", 1);  // 设置逻辑删除标记
             long result = anylineService.update(getTableName(clazz), row, configs);
             log.info("[{}] deleteByConfig  ---> effect rows = {}", clazz, result);
-
-            // 这里使用anylineService.delete会直接删除记录，不符合软删除逻辑
-            // long result = anylineService.delete(getTableName(clazz), configs);
-
-            // 下面异常注释掉，允许删除 0 行
-            // if (result == 0) {
-            //     throw new BizException(StatusCode.DB_DELETE_ERROR);
-            // }
+            return result;
         } catch (Exception e) {
             log.error("根据ID删除实体失败: class={}, configs={}", clazz.getSimpleName(), configs, e);
             throw new BizException(StatusCode.DB_DELETE_ERROR);
@@ -384,14 +377,6 @@ public class DataRepository { // TODO 等改造完成，这个类泛型 <T exten
             row.put("deleted", 1);  // 设置逻辑删除标记
             long result = anylineService.update(getTableName(clazz), row, configs);
             log.info("[{}] deleteByConfig  ---> effect rows = {}", clazz, result);
-
-            // 这里使用anylineService.delete会直接删除记录，不符合软删除逻辑
-            // long result = anylineService.delete(getTableName(clazz), configs);
-
-            // 下面异常注释掉，允许删除 0 行
-            // if (result == 0) {
-            //     throw new BizException(StatusCode.DB_DELETE_ERROR);
-            // }
             return result;
         } catch (Exception e) {
             log.error("根据ID删除实体失败: class={}, configs={}", clazz.getSimpleName(), configs, e);
@@ -410,8 +395,7 @@ public class DataRepository { // TODO 等改造完成，这个类泛型 <T exten
      * @param id    实体ID
      * @param <T>   实体类型
      */
-    @Deprecated
-    public <T extends BaseDO> void deleteById(Class<T> clazz, Long id) {
+    public <T extends BaseDO> long deleteById(Class<T> clazz, Long id) {
         try {
             ConfigStore configs = new DefaultConfigStore();
             configs.and(Compare.EQUAL, "id", id);
@@ -420,13 +404,7 @@ public class DataRepository { // TODO 等改造完成，这个类泛型 <T exten
             long result = anylineService.update(getTableName(clazz), row, configs);
             log.info("[{}] deleteById  ---> effect rows = {}, id = {}", clazz, result, id);
 
-            // 这里使用anylineService.delete会直接删除记录，不符合软删除逻辑
-            // long result = anylineService.delete(getTableName(clazz), configs);
-
-            // 下面异常注释掉，允许删除 0 行
-            // if (result == 0) {
-            //     throw new BizException(StatusCode.DB_DELETE_ERROR);
-            // }
+            return result;
         } catch (Exception e) {
             log.error("根据ID删除实体失败: class={}, id={}", clazz.getSimpleName(), id, e);
             throw new BizException(StatusCode.DB_DELETE_ERROR);
@@ -439,12 +417,13 @@ public class DataRepository { // TODO 等改造完成，这个类泛型 <T exten
      * @param entity 要删除的实体
      * @param <T>    实体类型
      */
-    public <T extends BaseDO> void delete(T entity) {
+    public <T extends BaseDO> long delete(T entity) {
         if (entity != null && entity.getId() != null) {
             @SuppressWarnings("unchecked")
             Class<T> entityClass = (Class<T>) entity.getClass();
-            deleteById(entityClass, entity.getId());
+            return deleteById(entityClass, entity.getId());
         }
+        return 0;
     }
 
     /**
@@ -471,7 +450,7 @@ public class DataRepository { // TODO 等改造完成，这个类泛型 <T exten
      * @param <T>   实体类型
      */
     @Deprecated
-    public <T extends BaseDO> void deleteAllById(Class<T> clazz, Collection<Long> ids) {
+    public <T extends BaseDO> long deleteAllById(Class<T> clazz, Collection<Long> ids) {
         try {
             ConfigStore configs = new DefaultConfigStore();
             configs.and(Compare.IN, "id", ids);
@@ -479,12 +458,8 @@ public class DataRepository { // TODO 等改造完成，这个类泛型 <T exten
             row.put("deleted", 1);  // 设置逻辑删除标记
 
             long result = anylineService.update(getTableName(clazz), row, configs);
-            log.info("[{}] deleteAllById  ---> effect rows={}, ids={}", clazz, result, ids);
-
-            // 下面异常注释掉，允许删除 0 行
-            // if (result == 0) {
-            //     throw new BizException(StatusCode.DB_DELETE_ERROR);
-            // }
+            log.info("[{}] deleteAllById  ---> effect rows={}, ids={}", clazz, result,ids);
+            return result;
         } catch (Exception e) {
             log.error("根据ID列表删除实体失败: class={}, ids={}", clazz.getSimpleName(), ids, e);
             throw new BizException(StatusCode.DB_DELETE_ERROR);

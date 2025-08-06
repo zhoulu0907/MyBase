@@ -93,6 +93,13 @@
             <artifactId>onebase-spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+        
+        <!-- Anyline H2 适配器 -->
+        <dependency>
+            <groupId>org.anyline</groupId>
+            <artifactId>anyline-data-jdbc-h2</artifactId>
+            <scope>test</scope>
+        </dependency>
 
         <!-- 工具类相关 -->
         <dependency>

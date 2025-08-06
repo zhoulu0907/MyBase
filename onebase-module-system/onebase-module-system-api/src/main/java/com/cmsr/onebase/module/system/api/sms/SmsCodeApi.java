@@ -25,7 +25,7 @@ public interface SmsCodeApi {
     @Operation(summary = "创建短信验证码，并进行发送")
     CommonResult<Boolean> sendSmsCode(@Valid @RequestBody SmsCodeSendReqDTO reqDTO);
 
-    @PutMapping(PREFIX + "/use")
+    @PostMapping(PREFIX + "/use")
     @Operation(summary = "验证短信验证码，并进行使用")
     CommonResult<Boolean> useSmsCode(@Valid @RequestBody SmsCodeUseReqDTO reqDTO);
 
