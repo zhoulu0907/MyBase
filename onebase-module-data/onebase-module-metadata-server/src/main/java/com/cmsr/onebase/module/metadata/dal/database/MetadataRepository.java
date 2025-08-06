@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.metadata.service.helper;
+package com.cmsr.onebase.module.metadata.dal.database;
 
 import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
@@ -30,7 +30,7 @@ import java.util.Map;
  */
 @Component
 @Slf4j
-public class DatasourceServiceHelper extends DataRepository {
+public class MetadataRepository extends DataRepository {
 
     @Resource
     private DataRepository dataRepository;
