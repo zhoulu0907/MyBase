@@ -118,7 +118,11 @@ public class AppMenuServiceImpl implements AppMenuService {
         List<MenuDO> menuDOS = appMenuRepository.findByApplicationId(menuDO.getApplicationId());
         for (MenuDO menu : menuDOS) {
             Integer order = menuSortMap.get(menu.getId());
-            menu.setMenuSort(order);
+            if (order == null) {
+                menu.setMenuSort(Integer.MAX_VALUE);
+            } else {
+                menu.setMenuSort(order);
+            }
             appMenuRepository.update(menu);
         }
     }
