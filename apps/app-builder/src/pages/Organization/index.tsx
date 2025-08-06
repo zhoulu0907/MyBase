@@ -3,7 +3,7 @@ import { Table, Button, Space, Message, Input, Modal } from '@arco-design/web-re
 import { IconSearch } from '@arco-design/web-react/icon';
 import styles from './index.module.less';
 import OrganizationModal from './components/OrganizationModal';
-import { getDeptList, createDept, updateDept, deleteDept } from '@onebase/platform-center/src/services/dept'
+import { getDeptList, createDept, updateDept, deleteDept } from '@onebase/platform-center'
 import { type DeptVO, type DeptForm } from '@onebase/platform-center';
 import { listToTree } from '@/utils/tree'
 // mockData

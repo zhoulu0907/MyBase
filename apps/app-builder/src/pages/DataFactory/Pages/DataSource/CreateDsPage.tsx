@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Form, Input, Select, Button, Message, Grid } from '@arco-design/web-react';
-import { testDatasourceConnection, createDatasource } from '@/services';
-import type { DatasourceSaveReqVO, DatasourceTestConnectionReqVO } from '@/types/datafactoryApi';
+import { Button, Form, Grid, Input, Message, Select } from '@arco-design/web-react';
+import { createDatasource, testDatasourceConnection, type DatasourceSaveReqVO, type DatasourceTestConnectionReqVO } from '@onebase/app';
+import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
 
 const Option = Select.Option;
@@ -42,10 +41,10 @@ const CreateDataSource: React.FC<{ handlePageType: (tab: string) => void }> = ({
   // }, [formValues.datasourceType, formValues.host, formValues.port, formValues.database]);
 
   // 监听表单变化
-  const handleFormChange = (changedValues: Partial<DataSourceFormValues>, allValues: Partial<DataSourceFormValues>) => {   
+  const handleFormChange = (changedValues: Partial<DataSourceFormValues>, allValues: Partial<DataSourceFormValues>) => {
     const relevantFields = ['host', 'port', 'database', 'datasourceType'];
     const hasRelevantChanges = Object.keys(changedValues).some(key => relevantFields.includes(key));
-    
+
     if (hasRelevantChanges) {
       setFormValues(allValues);
     }
@@ -78,7 +77,7 @@ const CreateDataSource: React.FC<{ handlePageType: (tab: string) => void }> = ({
     try {
       const values = await form.validate();
       setTesting(true);
-      
+
       // 构建测试连接参数
       const testParams: DatasourceTestConnectionReqVO = {
         datasourceType: values.datasourceType,
@@ -136,7 +135,7 @@ const CreateDataSource: React.FC<{ handlePageType: (tab: string) => void }> = ({
       const res = await createDatasource(createParams);
 
       console.log('createDatasource res', res);
-      
+
       if (res) {
         Message.success('数据源创建成功');
         handlePageType('check-ds');
@@ -196,7 +195,7 @@ const CreateDataSource: React.FC<{ handlePageType: (tab: string) => void }> = ({
         <Grid.Row gutter={24}>
           <Grid.Col span={12}>
             <Form.Item
-              label="数据库地址" 
+              label="数据库地址"
               field="host"
               required
               rules={rules.host}
@@ -206,7 +205,7 @@ const CreateDataSource: React.FC<{ handlePageType: (tab: string) => void }> = ({
           </Grid.Col>
           <Grid.Col span={12}>
             <Form.Item
-              label="端口" 
+              label="端口"
               field="port"
               rules={rules.port}
               initialValue="3306"
@@ -217,17 +216,17 @@ const CreateDataSource: React.FC<{ handlePageType: (tab: string) => void }> = ({
         </Grid.Row>
         <Grid.Row gutter={24}>
           <Grid.Col span={12}>
-            <Form.Item label="账号" field="username" rules={rules.username}> 
+            <Form.Item label="账号" field="username" rules={rules.username}>
               <Input maxLength={30} placeholder="账号" />
             </Form.Item>
           </Grid.Col>
           <Grid.Col span={12}>
-            <Form.Item label="密码" field="password" rules={rules.password}> 
+            <Form.Item label="密码" field="password" rules={rules.password}>
               <Input.Password maxLength={30} placeholder="密码" />
             </Form.Item>
           </Grid.Col>
         </Grid.Row>
-        <Form.Item label="数据库名称" field="database" rules={[{ required: true, message: '请输入数据库名称' }]}> 
+        <Form.Item label="数据库名称" field="database" rules={[{ required: true, message: '请输入数据库名称' }]}>
           <Input maxLength={30} placeholder="数据库名称" />
         </Form.Item>
         <Form.Item label="URL">
@@ -280,7 +279,7 @@ const CreateDataSource: React.FC<{ handlePageType: (tab: string) => void }> = ({
         </Form.Item>
       </Form>}
     </>
-    
+
   );
 };
 

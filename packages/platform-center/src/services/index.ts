@@ -4,3 +4,5 @@ export * from './captcha';
 export * from './dict';
 export * from './tenant';
 export * from './user';
+export * from './platformInfo';
+// export * from './tenant';

@@ -1,7 +1,6 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { Form, Input, Select, Button, Message, Drawer } from '@arco-design/web-react';
-import { updateDatasource, testDatasourceConnection } from '@/services';
-import type { DatasourceSaveReqVO, DatasourceTestConnectionReqVO } from '@/types/datafactoryApi';
+import { Button, Drawer, Form, Input, Message, Select } from '@arco-design/web-react';
+import { testDatasourceConnection, updateDatasource, type DatasourceSaveReqVO, type DatasourceTestConnectionReqVO } from '@onebase/app';
+import React, { useEffect, useMemo, useState } from 'react';
 import styles from './index.module.less';
 
 const Option = Select.Option;
@@ -28,11 +27,11 @@ const dbTypes = [
   { label: 'MySQL', value: 'MySQL', urlPrefix: 'jdbc:mysql://' },
 ];
 
-const EditDsDrawer: React.FC<EditDsDrawerProps> = ({ 
-  visible, 
-  onClose, 
-  dataSource, 
-  onSuccess 
+const EditDsDrawer: React.FC<EditDsDrawerProps> = ({
+  visible,
+  onClose,
+  dataSource,
+  onSuccess
 }) => {
   const [form] = Form.useForm<DataSourceFormValues>();
   const [testing, setTesting] = useState(false);
@@ -73,7 +72,7 @@ const EditDsDrawer: React.FC<EditDsDrawerProps> = ({
     try {
       const values = await form.validate();
       setTesting(true);
-      
+
       // 构建测试连接参数
       const testParams: DatasourceTestConnectionReqVO = {
         datasourceType: values.type,
@@ -88,7 +87,7 @@ const EditDsDrawer: React.FC<EditDsDrawerProps> = ({
       };
 
       const res = await testDatasourceConnection(testParams);
-      
+
       if (res?.success) {
         Message.success(`连接成功，耗时 ${res.duration}ms`);
       } else {
@@ -223,13 +222,13 @@ const EditDsDrawer: React.FC<EditDsDrawerProps> = ({
             <Input maxLength={10} placeholder="端口" />
           </Form.Item>
         </Form.Item>
-        <Form.Item label="账号" field="username" rules={[{ required: true, message: '请输入账号' }]}> 
+        <Form.Item label="账号" field="username" rules={[{ required: true, message: '请输入账号' }]}>
           <Input maxLength={30} placeholder="账号" />
         </Form.Item>
-        <Form.Item label="密码" field="password" rules={[{ required: true, message: '请输入密码' }]}> 
+        <Form.Item label="密码" field="password" rules={[{ required: true, message: '请输入密码' }]}>
           <Input.Password maxLength={30} placeholder="密码" />
         </Form.Item>
-        <Form.Item label="数据库名称" field="database" rules={[{ required: true, message: '请输入数据库名称' }]}> 
+        <Form.Item label="数据库名称" field="database" rules={[{ required: true, message: '请输入数据库名称' }]}>
           <Input maxLength={30} placeholder="数据库名称" />
         </Form.Item>
         <Form.Item label="URL">
@@ -240,4 +239,4 @@ const EditDsDrawer: React.FC<EditDsDrawerProps> = ({
   );
 };
 
-export default EditDsDrawer; 
+export default EditDsDrawer;

@@ -1,10 +1,9 @@
+import { getDatasource, type DatasourceSaveReqVO } from '@onebase/app';
 import React, { useState } from 'react';
-import DataSourceTable from './DataSourceTable';
 import CreateDsPage from './CreateDsPage';
-import EmptyDsPage from './EmptyDsPage';
+import DataSourceTable from './DataSourceTable';
 import EditDsDrawer from './EditDsDrawer';
-import { getDatasource } from '@/services';
-import type { DatasourceSaveReqVO } from '@/types/datafactoryApi';
+import EmptyDsPage from './EmptyDsPage';
 
 const DataSourcePage: React.FC = () => {
   const [pageType, setPageType] = useState('check-ds');
@@ -30,7 +29,7 @@ const DataSourcePage: React.FC = () => {
 
   const handleEditSuccess = () => {
     // 编辑成功后刷新数据
-    setPageType('check-ds'); 
+    setPageType('check-ds');
     // getTableData();
   };
 

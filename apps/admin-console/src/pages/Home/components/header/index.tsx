@@ -1,8 +1,8 @@
-import logoSVG from '@/assets/images/logo.svg';
-import notificationSVG from '@/assets/images/notification_icon.svg';
-import searchSVG from '@/assets/images/search_icon.svg';
-import settingSVG from '@/assets/images/setting_icon.svg';
-import themeSVG from '@/assets/images/theme_icon.svg';
+import logoSVG from '@/assets/images/logo-ob.svg';
+// import notificationSVG from '@/assets/images/notification_icon.svg';
+// import searchSVG from '@/assets/images/search_icon.svg';
+// import settingSVG from '@/assets/images/setting_icon.svg';
+// import themeSVG from '@/assets/images/theme_icon.svg';
 import { Avatar, Button, Dropdown, Layout, Menu } from '@arco-design/web-react';
 import { IconPoweroff, IconUser } from '@arco-design/web-react/icon';
 import { TokenManager } from '@onebase/common';
@@ -55,18 +55,18 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
       <div className={styles.headerContent}>
         <div className={styles.logo}>
           <img src={logoSVG} alt="Logo" className={styles.logoSvg} />
-          <h1>{t('header.title')}</h1>
+          {/* <h1>{t('header.title')}</h1> */}
         </div>
 
         <div className={styles.userInfo}>
-          <Button shape='circle' icon={<img src={searchSVG} alt="Search" />} />
+          {/* <Button shape='circle' icon={<img src={searchSVG} alt="Search" />} />
           <Button shape='circle' icon={<img src={themeSVG} alt="Theme" />} />
           <Button shape='circle' icon={<img src={notificationSVG} alt="Notification" />} />
-          <Button shape='circle' icon={<img src={settingSVG} alt="Setting" />} />
+          <Button shape='circle' icon={<img src={settingSVG} alt="Setting" />} /> */}
 
           <Dropdown droplist={userMenu} position="bottom">
             <div className={styles.userDropdown}>
-              <Avatar size={32} style={{ backgroundColor: '#165DFF' }}>
+              <Avatar size={32} style={{ backgroundColor: '#00b42a' }}>
                 {tokenInfo?.username?.toString().charAt(0) || 'U'}
               </Avatar>
             </div>

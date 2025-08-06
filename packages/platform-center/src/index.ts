@@ -14,3 +14,7 @@ export * from './services/dict';
 export * from './services/user';
 
 export * from './services/dept';
+
+export * from './services/role';
+
+export * from './services/tenant';

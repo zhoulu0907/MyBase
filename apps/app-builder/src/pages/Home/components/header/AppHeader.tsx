@@ -50,7 +50,6 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     const tokenInfo = TokenManager.getTokenInfo();
 
     useEffect(() => {
-        console.log(tokenInfo);
         if (tokenInfo?.accessToken) {
             getInfo();
         }
