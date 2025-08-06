@@ -93,7 +93,7 @@ public class UserController {
         return success(BeanUtils.toBean(pageResult, UserRespVO.class));
     }
 
-    @PutMapping("/platform-admin/update")
+    @PostMapping("/platform-admin/update")
     @Operation(summary = "修改平台管理员邮箱")
     @PreAuthorize("@ss.hasPermission('system:platform-admin:update')")
     public CommonResult<Boolean> updatePlatformAdmin(@Valid @RequestBody Map map) {
@@ -101,7 +101,7 @@ public class UserController {
         return success(true);
     }
 
-    @DeleteMapping("/platform-admin/delete")
+    @PostMapping("/platform-admin/delete")
     @Operation(summary = "删除平台管理员")
     @Parameter(name = "id", description = "编号", required = true, example = "1024")
     @PreAuthorize("@ss.hasPermission('system:platform-admin:delete')")
@@ -114,7 +114,7 @@ public class UserController {
         return success(true);
     }
 
-    @PutMapping("/update-platform-password")
+    @PostMapping("/update-platform/password")
     @Operation(summary = "重置平台用户密码")
     @PreAuthorize("@ss.hasPermission('system:platform-admin:update-password')")
     public CommonResult<Boolean> updatePlatformUserPassword(@Valid @RequestBody UserUpdatePasswordReqVO reqVO) {

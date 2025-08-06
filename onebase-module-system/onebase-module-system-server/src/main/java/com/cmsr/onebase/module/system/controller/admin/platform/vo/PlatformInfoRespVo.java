@@ -33,8 +33,7 @@ public class PlatformInfoRespVo {
     @Schema(description = "用户数量限制")
     private Integer userLimit;
 
-    @Schema(description = "到期时间")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @Schema(description = "创建时间")
     private LocalDateTime expireTime;
 
     @Schema(description = "状态")
@@ -44,7 +43,6 @@ public class PlatformInfoRespVo {
     private Boolean isTrial;
 
     @Schema(description = "创建时间")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private LocalDateTime createTime;
 
     @Schema(description = "实际租户数量")
@@ -52,5 +50,11 @@ public class PlatformInfoRespVo {
 
     @Schema(description = "实际用户数量")
     private Integer actualUserCount;
+
+    @Schema(description = "创建者")
+    private Long creator;
+
+    @Schema(description = "管理员")
+    private String adminUser;
 
 }

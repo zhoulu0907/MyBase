@@ -5,14 +5,14 @@ Authorization: Bearer eb33f553e1194b52935de6fcc6a3f4f5
 ### 创建用户 /admin-api/system/user/platform-admin/create
 POST http://127.0.0.1:48080/admin-api/system/user/platform-admin/create
 Content-Type: application/json
-Authorization: Bearer d6c2b8f9cc18459aa544a52cdfb5b1b0
+Authorization: Bearer 98fd67477af640a19c18dd4a0c4dcce4
 tenant-id: 1
 
 {
-  "username": "admin3",
+  "username": "adminyu1",
   "password": "admin123",
-  "mobile": "15601691313",
-  "email": "13573@qq.com",
+  "mobile": "15601691314",
+  "email": "13574@qq.com",
   "userType": "2"
 }
 ### 根据状态查询用户信息列表 /admin-api/system/user/platform-admin/list

@@ -73,4 +73,9 @@ public class PlatformInfoReqVo extends PageParam {
      * 租户数量
      */
     private Integer tenantCount;
+
+    /**
+     * 管理员
+     */
+    private String adminUser;
 }
