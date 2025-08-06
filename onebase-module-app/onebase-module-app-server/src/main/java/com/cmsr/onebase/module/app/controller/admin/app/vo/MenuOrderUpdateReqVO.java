@@ -11,7 +11,7 @@ import java.util.List;
  */
 @Schema(description = "应用管理 - 应用菜单更新顺序 Resp VO")
 @Data
-public class ApplicationMenuOrderUpdateReqVO {
+public class MenuOrderUpdateReqVO {
 
     private Long id;
 

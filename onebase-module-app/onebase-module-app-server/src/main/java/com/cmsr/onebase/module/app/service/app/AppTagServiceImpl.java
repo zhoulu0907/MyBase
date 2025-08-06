@@ -17,7 +17,7 @@ import org.springframework.validation.annotation.Validated;
 import java.util.List;
 
 /**
- * @ClassName TagServiceImpl
+ * @ClassName AppTagServiceImpl
  * @Description TODO
  * @Author mickey
  * @Date 2025/7/31 08:31
@@ -25,7 +25,7 @@ import java.util.List;
 @Setter
 @Service
 @Validated
-public class TagServiceImpl implements TagService {
+public class AppTagServiceImpl implements AppTagService {
 
     @Resource
     private DataRepository dataRepository;

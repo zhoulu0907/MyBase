@@ -8,7 +8,7 @@ import com.cmsr.onebase.module.app.controller.admin.app.vo.TagListRespVO;
  * @Author：mickey
  * @Date：2025/7/23 13:40
  */
-public interface TagService {
+public interface AppTagService {
 
     List<TagListRespVO> listTags(String tagName);
 
