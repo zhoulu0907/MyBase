@@ -7,7 +7,7 @@ import Tenant from '../Tenant/index';
 import Administrator from '../Administrator';
 import AppHeader from './components/header';
 import AppSider from './components/sider';
-import Welcome from './components/Welcome';
+// import Welcome from './components/Welcome';
 import styles from './index.module.less';
 
 const Content = Layout.Content;
@@ -36,7 +36,7 @@ const Home: React.FC = () => {
                 <Route path="platform-info" element={<PlatformInfo />} />
                 <Route path="tenant" element={<Tenant />} />
                 <Route path="administrator" element={<Administrator />} />
-                <Route path="" element={<Welcome />} />
+                {/* <Route path="" element={<Welcome />} /> */}
               </Routes>
             </div>
           </Content>

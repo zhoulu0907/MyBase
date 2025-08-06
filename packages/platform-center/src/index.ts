@@ -14,3 +14,5 @@ export * from './services/dict';
 export * from './services/user';
 
 export * from './services/dept';
+
+export * from './services/platformInfo';
