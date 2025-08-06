@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.app.controller.admin.app;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.app.controller.admin.app.vo.ApplicationCreateReqVO;
+import com.cmsr.onebase.module.app.controller.admin.app.vo.ApplicationCreateRespVO;
 import com.cmsr.onebase.module.app.controller.admin.app.vo.ApplicationPageReqVO;
 import com.cmsr.onebase.module.app.controller.admin.app.vo.ApplicationPageRespVO;
 import com.cmsr.onebase.module.app.service.app.AppApplicationService;
@@ -36,7 +37,7 @@ public class AppApplicationController {
 
     @PostMapping("/create")
     @Operation(summary = "创建应用")
-    public CommonResult<Long> createApplication(@Validated @RequestBody ApplicationCreateReqVO applicationCreateReqVO) {
+    public CommonResult<ApplicationCreateRespVO> createApplication(@Validated @RequestBody ApplicationCreateReqVO applicationCreateReqVO) {
         return CommonResult.success(appApplicationService.createApplication(applicationCreateReqVO));
     }
 

@@ -10,7 +10,7 @@ import lombok.Data;
  */
 @Schema(description = "应用管理 - 应用菜单分组创建/修改 Request VO")
 @Data
-public class MenuCreateReqVO {
+public class MenuCreateRespVO {
 
     @Schema(description = "应用ID")
     @NotBlank(message = "应用ID不能为空")
