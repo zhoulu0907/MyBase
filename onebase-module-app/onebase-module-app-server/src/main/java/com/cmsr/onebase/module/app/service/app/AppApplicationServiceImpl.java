@@ -11,7 +11,6 @@ import com.cmsr.onebase.module.app.enums.app.ApplicationStatusEnum;
 import com.cmsr.onebase.module.app.util.VersionUtils;
 import jakarta.annotation.Resource;
 import lombok.Setter;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -87,9 +86,7 @@ public class AppApplicationServiceImpl implements AppApplicationService {
         applicationDO.setVersionNumber(VersionUtils.INIT_VERSION);
         applicationDO.setAppStatus(ApplicationStatusEnum.EDITING.getValue());
         applicationDO = applicationRepository.insert(applicationDO);
-        if (CollectionUtils.isNotEmpty(createReqVO.getTagIds())) {
-            applicationTagRepository.mergeApplicationTags(applicationDO.getId(), createReqVO.getTagIds());
-        }
+        applicationTagRepository.mergeApplicationTags(applicationDO.getId(), createReqVO.getTagIds());
         return BeanUtils.toBean(applicationDO, ApplicationCreateRespVO.class);
     }
 
@@ -99,9 +96,7 @@ public class AppApplicationServiceImpl implements AppApplicationService {
         appCommonService.validateApplicationExist(createReqVO.getId());
         validApplicationCodeDuplicate(createReqVO.getAppCode(), createReqVO.getId());
         ApplicationDO updateObj = BeanUtils.toBean(createReqVO, ApplicationDO.class);
-        if (CollectionUtils.isNotEmpty(createReqVO.getTagIds())) {
-            applicationTagRepository.mergeApplicationTags(createReqVO.getId(), createReqVO.getTagIds());
-        }
+        applicationTagRepository.mergeApplicationTags(createReqVO.getId(), createReqVO.getTagIds());
         applicationRepository.update(updateObj);
     }
 
