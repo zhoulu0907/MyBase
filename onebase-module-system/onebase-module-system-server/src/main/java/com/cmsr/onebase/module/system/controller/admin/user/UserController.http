@@ -5,14 +5,14 @@ Authorization: Bearer eb33f553e1194b52935de6fcc6a3f4f5
 ### 创建用户 /admin-api/system/user/platform-admin/create
 POST http://127.0.0.1:48080/admin-api/system/user/platform-admin/create
 Content-Type: application/json
-Authorization: Bearer 98fd67477af640a19c18dd4a0c4dcce4
+Authorization: Bearer 49f113f25a9f45f99053feb37f56c5d4
 tenant-id: 1
 
 {
-  "username": "adminyu1",
+  "username": "adminzhou1",
   "password": "admin123",
-  "mobile": "15601691314",
-  "email": "13574@qq.com",
+  "mobile": "15601691324",
+  "email": "13524@qq.com",
   "userType": "2"
 }
 ### 根据状态查询用户信息列表 /admin-api/system/user/platform-admin/list
@@ -31,7 +31,7 @@ tenant-id: 1
   "email": "13577@qq.com"
 }
 
-### 修改平台用户密码 /admin-api/system/tenant/create
+### 修改平台用户密码 /admin-api/system/tenant/password
 PUT http://127.0.0.1:48080/admin-api/system/user/update-platform-password
 Content-Type: application/json
 Authorization: Bearer 91dda3f8eb2d46a780b73c529f1c94e8
@@ -51,3 +51,9 @@ tenant-id: 1
 {
   "id": 3385344712104742912
 }
+
+### 修改平台用户密码 /admin-api/system/tenant/list
+GET http://127.0.0.1:48080/admin-api/system/user/platform-admin/list
+Content-Type: application/json
+Authorization: Bearer 3dac9549902340338047f498ae0b8b18
+tenant-id: 1
