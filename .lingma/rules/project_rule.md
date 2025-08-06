@@ -78,6 +78,103 @@
 - **代码注释**：为复杂逻辑、特殊处理等添加行内注释，提升可读性。
 
 - **TODO标记**：使用TODO标记待完成或待优化的工作，便于后续追踪。
-  ```java
-  // TODO: 优化积分计算逻辑
-  ```
+
+### 1. 分层架构原则
+| 层级          | 职责                                        | 约束条件                                                          |
+|---------------|--------------------------------------------|---------------------------------------------------------------|
+| **Controller** | 处理 HTTP 请求与响应，定义 API 接口           | - 禁止直接操作数据库<br>- 必须通过 Service 层调用                             |
+| **Service**    | 业务逻辑实现，事务管理，数据校验                | - 必须通过 Repository 访问数据库<br>- 返回 VO 而非实体类（除非必要）                |
+| **Repository** | 数据持久化操作，定义数据库查询逻辑              | - 必须继承 `DataRepository`                                       |
+| **Entity**     | 数据库表结构映射对象                         | - 必须继承 `TenantBaseDO`<br>- 仅用于数据库交互<br>- 禁止直接返回给前端（需通过 VO 转换） |
+
+---
+
+## 四、核心代码规范
+注意：下面的代码示例为Java语言，请根据实际情况进行修改。其中`Prefix`为模块的名称。
+
+### 1. 实体类（Entity）规范
+```java
+@Entity
+@Data // Lombok 注解
+public class UserDO extends TenantBaseDO {
+
+    @Column(name = "user_name", nullable = false, length = 64, comment = "用户名")
+    private String username;
+
+  @Column(name = "email", nullable = false, length = 64, comment = "邮箱地址")
+    private String email;
+    
+}
+```
+
+### 2. 数据访问层（Repository）规范
+```java
+import com.cmsr.onebase.framework.aynline.DataRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public class PrefixUserRepository extends DataRepository {
+
+  public UserRepository() {
+    super(UserDO.class);
+  }
+  
+}
+```
+
+### 3. 服务层（Service）规范
+```java
+@Service
+public class PrefixUserServiceImpl implements PrefixUserService {
+    @Autowired
+    private UserRepository userRepository;
+
+    @Transactional
+    public ApiResponse<UserDTO> createUser(UserDTO dto) {
+        // 业务逻辑实现
+        User user = User.builder().username(dto.getUsername()).build();
+        User savedUser = userRepository.save(user);
+        return ApiResponse.success(UserDTO.fromEntity(savedUser));
+    }
+}
+```
+
+### 4. 控制器（RestController）规范
+```java
+@RestController
+@RequestMapping("/api/users")
+public class PrefixUserController {
+    @Autowired
+    private UserService userService;
+
+    @PostMapping
+    public CommonResult<CreateUserRespVO> createUser(@RequestBody @Valid CreateUserReqVO dto) {
+        try {
+            CreateUserRespVO response = userService.createUser(dto);
+            return CommonResult.success(response);
+        } catch (Exception e) {
+            return GlobalExceptionHandler.errorResponseEntity(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+}
+```
+
+---
+
+## 五、数据视图对象（VO）规范
+```java
+//  @Data 注解 和 @Schema
+@Data
+@Schema(description = "应用管理 - 创建用户 Request VO")
+public class CreateUserReqVO {
+
+  @Schema(description = "用户名")
+  @NotBlank
+  private String username;
+
+  @Schema(description = "邮箱地址")
+  @Email
+  private String email;
+  
+}
+```
