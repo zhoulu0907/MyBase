@@ -10,13 +10,16 @@ import {
     IconFile,
     IconFolder,
     IconHome,
-    IconPhone, IconPlus, IconSearch, IconStorage
+    IconPhone,
+    IconPlus,
+    IconSearch,
+    IconStorage
 } from "@arco-design/web-react/icon";
 import { useState, type FC } from 'react';
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { EDITOR_TYPES } from '../Editor/components/const';
-import styles from "./index.module.less";
+import styles from './index.module.less';
 
 const MenuItem = Menu.Item;
 const Sider = Layout.Sider;
@@ -25,24 +28,24 @@ const Content = Layout.Content;
 const iconStyle = {
     marginRight: 8,
     fontSize: 16,
-    transform: "translateY(1px)",
+    transform: 'translateY(1px)',
 };
 
 const menuData = [
     {
-        key: "0",
+        key: 'home',
         icon: <IconHome />,
-        title: "首页",
+        title: '首页',
     },
     {
-        key: "1",
+        key: 'contact',
         icon: <IconPhone />,
-        title: "联系我们",
+        title: '联系我们',
     },
     {
-        key: "2",
+        key: 'baseFile',
         icon: <IconStorage />,
-        title: "基础档案",
+        title: '基础档案',
     },
 ];
 
@@ -50,37 +53,36 @@ const PageManagerPage: FC = () => {
     const { t } = useTranslation();
     const navigate = useNavigate();
 
-
-    const [title, setTitle] = useState("");
-    const [value, setValue] = useState("");
+    const [title, setTitle] = useState('');
+    const [value, setValue] = useState('');
     const [menuList, setMenuList] = useState<any>(menuData);
     const [visible, setVisible] = useState(false);
-    const [activeMenu, setActiveMenu] = useState(menuData[0]);
+    const [activeTab, setActiveTab] = useState(menuData[0].key);
 
     const dropList = (
-        <Menu style={{ padding: "10px 0" }}>
-            <label style={{ marginLeft: 12, color: "#999", fontSize: 16 }}>
-                {t("createApp.commom")}
+        <Menu style={{ padding: '10px 0' }}>
+            <label style={{ marginLeft: 12, color: '#999', fontSize: 16 }}>
+                {t('createApp.commom')}
             </label>
             <MenuItem
-                key="1"
+                key='1'
                 onClick={() => {
                     setVisible(true);
-                    setTitle(t("createApp.createForm"));
+                    setTitle(t('createApp.createForm'));
                 }}
             >
                 <IconFile style={iconStyle} />
-                {t("createApp.createForm")}
+                {t('createApp.createForm')}
             </MenuItem>
             <MenuItem
-                key="2"
+                key='2'
                 onClick={() => {
                     setVisible(true);
-                    setTitle(t("createApp.createGroup"));
+                    setTitle(t('createApp.createGroup'));
                 }}
             >
                 <IconFolder style={iconStyle} />
-                {t("createApp.createGroup")}
+                {t('createApp.createGroup')}
             </MenuItem>
         </Menu>
     );
@@ -88,13 +90,13 @@ const PageManagerPage: FC = () => {
     const handleCreate = () => {
         setVisible(false);
         const newItem = {
-            key: Date.now() + "",
+            key: Date.now() + '',
             icon: <IconStorage />,
             title: value,
         };
         const update = menuList.concat(newItem);
         setMenuList(update);
-        setValue("");
+        setValue('');
     };
 
     return (
@@ -126,7 +128,7 @@ const PageManagerPage: FC = () => {
                             {menuList.map((menu: any) => (
                                 <MenuItem
                                     key={menu.key}
-                                    onClick={() => setActiveMenu(menu)}
+                                    onClick={() => setActiveTab(menu)}
                                 >
                                     {menu.icon}
                                     {menu.title}
@@ -137,11 +139,18 @@ const PageManagerPage: FC = () => {
                     <Content className={styles.content}>
                         <div className={styles.contentHeader}>
                             <div className={styles.contentTitle}>
-                                {activeMenu.title}
+                                {menuData.find((v) => v.key === activeTab)?.title}
                             </div>
-                            <Button type="primary" onClick={() => navigate(`/onebase/editor/${EDITOR_TYPES.FORM_EDITOR}`)}>编辑</Button>
+                            <Button
+                                type="primary"
+                                onClick={() => navigate(`/onebase/editor/${EDITOR_TYPES.FORM_EDITOR}`)}
+                            >{t('common.edit')}</Button>
                         </div>
-                        <Content className={styles.content}>content</Content>
+                        <Content className={styles.content}>
+                            {activeTab === 'home' && 'home'}
+                            {activeTab === 'contact' && 'contact'}
+                            {activeTab === 'baseFile' && 'baseFile'}
+                        </Content>
                     </Content>
                 </Layout>
             </Layout>
