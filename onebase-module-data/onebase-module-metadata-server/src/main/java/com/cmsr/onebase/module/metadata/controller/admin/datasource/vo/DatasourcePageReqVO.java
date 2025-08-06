@@ -23,6 +23,9 @@ public class DatasourcePageReqVO extends PageParam {
     private Integer runMode;
 
     @Schema(description = "应用ID", example = "1")
-    private Long appId;
+    private String appId;
+    
+    @Schema(description = "数据源来源", example = "1")
+    private Integer datasourceOrigin;
 
 }

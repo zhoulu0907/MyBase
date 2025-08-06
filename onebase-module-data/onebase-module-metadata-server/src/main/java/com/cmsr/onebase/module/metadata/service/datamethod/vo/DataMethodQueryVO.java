@@ -14,7 +14,7 @@ public class DataMethodQueryVO {
     /**
      * 实体ID
      */
-    private Long entityId;
+    private String entityId;
 
     /**
      * 方法类型
@@ -33,7 +33,7 @@ public class DataMethodQueryVO {
      * @param methodType 方法类型
      * @param keyword 搜索关键词
      */
-    public DataMethodQueryVO(Long entityId, String methodType, String keyword) {
+    public DataMethodQueryVO(String entityId, String methodType, String keyword) {
         this.entityId = entityId;
         this.methodType = methodType;
         this.keyword = keyword;

@@ -32,8 +32,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.module.system.controller.admin.permission.vo.menu.MenuListReqVO;
-import com.cmsr.onebase.module.system.controller.admin.permission.vo.menu.MenuSaveVO;
+import com.cmsr.onebase.module.system.controller.admin.permission.vo.menu.SystemMenuListReqVO;
+import com.cmsr.onebase.module.system.controller.admin.permission.vo.menu.SystemMenuSaveVO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.MenuDO;
 import com.cmsr.onebase.module.system.dal.redis.RedisKeyConstants;
 import com.cmsr.onebase.module.system.enums.permission.MenuTypeEnum;
@@ -66,7 +66,7 @@ public class MenuServiceImpl implements MenuService {
     @Override
     @CacheEvict(value = RedisKeyConstants.PERMISSION_MENU_ID_LIST, key = "#createReqVO.permission",
             condition = "#createReqVO.permission != null")
-    public Long createMenu(MenuSaveVO createReqVO) {
+    public Long createMenu(SystemMenuSaveVO createReqVO) {
         // 校验父菜单存在
         validateParentMenu(createReqVO.getParentId(), null);
         // 校验菜单（自己）
@@ -85,7 +85,7 @@ public class MenuServiceImpl implements MenuService {
     @Override
     @CacheEvict(value = RedisKeyConstants.PERMISSION_MENU_ID_LIST,
             allEntries = true) // allEntries 清空所有缓存，因为 permission 如果变更，涉及到新老两个 permission。直接清理，简单有效
-    public void updateMenu(MenuSaveVO updateReqVO) {
+    public void updateMenu(SystemMenuSaveVO updateReqVO) {
         // 校验更新的菜单是否存在
         if (dataRepository.findById(MenuDO.class,updateReqVO.getId()) == null) {
             throw exception(MENU_NOT_EXISTS);
@@ -140,7 +140,7 @@ public class MenuServiceImpl implements MenuService {
     }
 
     @Override
-    public List<MenuDO> getMenuListByTenant(MenuListReqVO reqVO) {
+    public List<MenuDO> getMenuListByTenant(SystemMenuListReqVO reqVO) {
         // 查询所有菜单，并过滤掉关闭的节点
         List<MenuDO> menus = getMenuList(reqVO);
         // 开启多租户的情况下，需要过滤掉未开通的菜单
@@ -195,7 +195,7 @@ public class MenuServiceImpl implements MenuService {
     }
 
     @Override
-    public List<MenuDO> getMenuList(MenuListReqVO reqVO) {
+    public List<MenuDO> getMenuList(SystemMenuListReqVO reqVO) {
 
         ConfigStore configStore = new DefaultConfigStore()
                 .and(Compare.EQUAL, "name", reqVO.getName())

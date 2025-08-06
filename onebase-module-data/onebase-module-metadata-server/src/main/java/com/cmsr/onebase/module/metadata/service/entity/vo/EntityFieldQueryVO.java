@@ -14,7 +14,7 @@ public class EntityFieldQueryVO {
     /**
      * 实体ID
      */
-    private Long entityId;
+    private String entityId;
 
     /**
      * 是否系统字段
@@ -27,16 +27,36 @@ public class EntityFieldQueryVO {
     private String keyword;
 
     /**
+     * 字段编码
+     */
+    private String fieldCode;
+
+    /**
      * 构造方法
      *
      * @param entityId 实体ID
      * @param isSystemField 是否系统字段
      * @param keyword 搜索关键词
      */
-    public EntityFieldQueryVO(Long entityId, Boolean isSystemField, String keyword) {
+    public EntityFieldQueryVO(String entityId, Boolean isSystemField, String keyword) {
         this.entityId = entityId;
         this.isSystemField = isSystemField;
         this.keyword = keyword;
+    }
+
+    /**
+     * 完整构造方法
+     *
+     * @param entityId 实体ID
+     * @param isSystemField 是否系统字段
+     * @param keyword 搜索关键词
+     * @param fieldCode 字段编码
+     */
+    public EntityFieldQueryVO(String entityId, Boolean isSystemField, String keyword, String fieldCode) {
+        this.entityId = entityId;
+        this.isSystemField = isSystemField;
+        this.keyword = keyword;
+        this.fieldCode = fieldCode;
     }
 
     /**

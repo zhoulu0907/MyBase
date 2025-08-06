@@ -17,13 +17,13 @@ import lombok.EqualsAndHashCode;
 public class EntityRelationshipPageReqVO extends PageParam {
 
     @Schema(description = "应用ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "12345")
-    private Long appId;
+    private String appId;
 
     @Schema(description = "源实体ID", example = "2001")
-    private Long sourceEntityId;
+    private String sourceEntityId;
 
     @Schema(description = "目标实体ID", example = "2002")
-    private Long targetEntityId;
+    private String targetEntityId;
 
     @Schema(description = "关系类型", example = "ONE_TO_MANY")
     private String relationshipType;

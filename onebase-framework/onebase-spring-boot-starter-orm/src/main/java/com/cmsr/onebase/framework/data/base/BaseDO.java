@@ -53,19 +53,19 @@ public class BaseDO implements Serializable {
      */
     @Column(name = UPDATER)
     private Long updater;
-  
+
     /**
      * 是否删除
      */
-    @Column(name = DELETED)
-    private Boolean deleted;
+    @Column(name = DELETED, columnDefinition= "INT8 NOT NULL DEFAULT 0", comment = "是否删除")
+    private Long deleted;
 
        /**
      * 乐观锁版本号
      */
     @Column(name = LOCK_VERSION)
     private Long lockVersion;
-    
+
     /**
      * 把 creator、createTime、updateTime、updater 都清空，避免前端直接传递 creator 之类的字段，直接就被更新了
      */

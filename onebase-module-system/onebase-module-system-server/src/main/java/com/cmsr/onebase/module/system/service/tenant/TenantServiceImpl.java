@@ -179,7 +179,7 @@ public class TenantServiceImpl implements TenantService {
         // 创建用户
         Long userId = userService.createUser(TenantConvert.INSTANCE.convert02(createReqVO));
         // 分配角色
-        permissionService.assignUserRole(userId, singleton(roleId));
+        permissionService.assignUserRoles(userId, singleton(roleId));
         return userId;
     }
 

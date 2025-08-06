@@ -17,10 +17,10 @@ import java.util.List;
 public class EntityFieldDetailRespVO {
 
     @Schema(description = "字段ID", example = "3001")
-    private Long id;
+    private String id;
 
     @Schema(description = "实体ID", example = "2001")
-    private Long entityId;
+    private String entityId;
 
     @Schema(description = "实体名称", example = "用户信息")
     private String entityName;
@@ -69,5 +69,8 @@ public class EntityFieldDetailRespVO {
 
     @Schema(description = "创建时间", example = "2025-07-28T10:30:00")
     private LocalDateTime createTime;
+
+    @Schema(description = "字段编码", example = "USER_NAME")
+    private String fieldCode;
 
 } 

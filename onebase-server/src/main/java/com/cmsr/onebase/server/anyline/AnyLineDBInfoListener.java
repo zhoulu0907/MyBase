@@ -16,6 +16,7 @@ import org.anyline.data.prepare.RunPrepare;
 import org.anyline.data.run.Run;
 import org.anyline.data.runtime.DataRuntime;
 import org.anyline.entity.Compare;
+import org.anyline.entity.DataRow;
 import org.anyline.entity.DataSet;
 import org.anyline.metadata.ACTION.SWITCH;
 import org.anyline.metadata.Table;
@@ -60,6 +61,8 @@ public class AnyLineDBInfoListener implements DMListener {
         TENANT_IGNORE_TABLES.add("infra_file");
         TENANT_IGNORE_TABLES.add("infra_api_access_log");
         TENANT_IGNORE_TABLES.add("infra_api_error_log");
+        TENANT_IGNORE_TABLES.add("metadata_system_fields");
+        TENANT_IGNORE_TABLES.add("metadata_field_type_mapping");
 
         // 可以根据需要添加更多表
     }
@@ -128,15 +131,14 @@ public class AnyLineDBInfoListener implements DMListener {
     @Override public SWITCH prepareQuery(DataRuntime runtime, String random, RunPrepare prepare, ConfigStore configs,
         String... conditions) {
 
-        // 检查是否是简单的测试查询，如果是则跳过添加条件
-        if (isSimpleTestQuery(prepare)) {
-            log.info("prepareQuery--------------> 检测到简单测试查询，跳过添加租户和软删除条件");
-            return SWITCH.CONTINUE;
-        }
-
         // 检查是否有表名，如果没有表名则跳过添加条件
         if (prepare == null || prepare.getTableName() == null || prepare.getTableName().trim().isEmpty()) {
             log.info("prepareQuery--------------> 没有表名，跳过添加租户和软删除条件");
+            return SWITCH.CONTINUE;
+        }
+        // 检查是否是简单的测试查询，如果是则跳过添加条件
+        if (isSimpleTestQuery(prepare)) {
+            log.info("prepareQuery--------------> 检测到简单测试查询，跳过添加租户和软删除条件");
             return SWITCH.CONTINUE;
         }
 
@@ -152,7 +154,7 @@ public class AnyLineDBInfoListener implements DMListener {
         }
         return SWITCH.CONTINUE;
     }
-
+    
     /**
      * 检查是否是简单的测试查询
      *
@@ -163,16 +165,16 @@ public class AnyLineDBInfoListener implements DMListener {
         if (prepare == null) {
             return false;
         }
-        
+
         // 获取SQL文本进行判断
         String sql = prepare.getText();
         if (sql == null) {
             return false;
         }
-        
+
         // 去除空白字符并转为大写
         String normalizedSql = sql.trim().toUpperCase();
-        
+
         // 检查是否是常见的测试查询
         return normalizedSql.equals("SELECT 1") ||
                normalizedSql.equals("SELECT 1 FROM DUAL") ||
@@ -181,7 +183,7 @@ public class AnyLineDBInfoListener implements DMListener {
     }
 
     /**
-     * 检查表是否需要忽略租户过滤 
+     * 检查表是否需要忽略租户过滤
      *
      * @param obj RunPrepare对象
      * @return 如果表需要忽略租户过滤则返回true
@@ -191,7 +193,7 @@ public class AnyLineDBInfoListener implements DMListener {
     }
 
     /**
-     * 检查表名是否需要忽略租户过滤 
+     * 检查表名是否需要忽略租户过滤
      *
      * @param prepare RunPrepare对象
      * @return 如果表名在忽略列表中则返回true
@@ -199,7 +201,7 @@ public class AnyLineDBInfoListener implements DMListener {
     private boolean isTableTenantIgnored2(RunPrepare prepare) {
         return prepare != null && isTableTenantIgnored2(prepare.getTableName());
     }
-    
+
     /**
      * 检查表名是否需要忽略租户过滤
      *
@@ -235,24 +237,43 @@ public class AnyLineDBInfoListener implements DMListener {
         configs.and(Compare.EQUAL, BaseDO.DELETED, false);
         // 加入租户标志
         boolean shouldIgnore = isTableTenantIgnored2(dest.getName());
-        log.info("prepareUpdate--------------> isTableTenantIgnored: {}", shouldIgnore);
+        log.info("prepareUpdate obj--------------> isTableTenantIgnored: {}", shouldIgnore);
         if (!shouldIgnore) {
             configs.and(Compare.EQUAL, TenantBaseDO.TENANT_ID, TenantContextHolder.getRequiredTenantId());
         }
         // 加入更新时间和更新人
         if (Objects.nonNull(obj) && obj instanceof BaseDO) {
             BaseDO baseDO = (BaseDO)obj;
-
-            LocalDateTime current = LocalDateTime.now();
-            baseDO.setUpdateTime(current);
-
+            baseDO.setUpdateTime(LocalDateTime.now());
             Long userId = WebFrameworkUtils.getLoginUserId();
             baseDO.setUpdater(userId);
         }
         return SWITCH.CONTINUE;
     }
 
-
+    @Override
+    public SWITCH prepareUpdate(DataRuntime runtime, String random, RunPrepare prepare, DataRow data,
+            ConfigStore configs) {
+           // 这里config可能为空，强制异常提前发现问题。
+        if(configs == null){
+            throw new BizException(StatusCode.UPDATE_WHERE_IS_NULL);
+        }     
+        // 加入软删判断 (opt: 框架这里config可能为空)
+        configs.and(Compare.EQUAL, BaseDO.DELETED, false);
+        // 加入租户标志
+        boolean shouldIgnore = isTableTenantIgnored2(prepare.getTableName());
+        log.info("prepareUpdate row--------------> isTableTenantIgnored: {}", shouldIgnore);
+        if (!shouldIgnore) {
+            configs.and(Compare.EQUAL, TenantBaseDO.TENANT_ID, TenantContextHolder.getRequiredTenantId());
+        }
+        // 加入更新时间和更新人
+        if (Objects.nonNull(data)) {
+            data.put(BaseDO.UPDATE_TIME, LocalDateTime.now());
+            Long userId = WebFrameworkUtils.getLoginUserId();
+            data.put(BaseDO.UPDATER, userId);
+        }
+        return SWITCH.CONTINUE;
+    }
     /**
      * 创建删除SQL前调用(根据Entity/DataRow),修改删除条件可以在这一步实现<br/>
      * 注意不是beforeDelete<br/>
@@ -332,10 +353,10 @@ public class AnyLineDBInfoListener implements DMListener {
             configs.and(Compare.EQUAL, "tenant_id", TenantContextHolder.getRequiredTenantId());
         }
         // 加入软删判断
-        configs.and(Compare.EQUAL, BaseDO.DELETED, false); 
+        configs.and(Compare.EQUAL, BaseDO.DELETED, false);
     }
 
 
-    
+
 
 }

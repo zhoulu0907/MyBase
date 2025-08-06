@@ -78,7 +78,7 @@ public class UserController {
             RoleDO roleDO = roleService.getRoleIdsByCode(RoleCodeEnum.SUPER_ADMIN.getCode());
             Set<Long> roleIds = new HashSet<>();
             roleIds.add(roleDO.getId());
-            permissionService.assignUserRole(id,roleIds);
+            permissionService.assignUserRoles(id,roleIds);
         }
 
         return success(id);

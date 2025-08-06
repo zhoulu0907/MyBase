@@ -44,6 +44,9 @@ public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRela
     public Long createEntityRelationship(@Valid EntityRelationshipSaveReqVO createReqVO) {
         // 插入实体关系
         MetadataEntityRelationshipDO entityRelationship = BeanUtils.toBean(createReqVO, MetadataEntityRelationshipDO.class);
+        entityRelationship.setSourceEntityId(Long.valueOf(createReqVO.getSourceEntityId()));
+        entityRelationship.setTargetEntityId(Long.valueOf(createReqVO.getTargetEntityId()));
+        entityRelationship.setAppId(Long.valueOf(createReqVO.getAppId()));
         dataRepository.insert(entityRelationship);
         
         return entityRelationship.getId();
@@ -53,10 +56,14 @@ public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRela
     @Transactional(rollbackFor = Exception.class)
     public void updateEntityRelationship(@Valid EntityRelationshipSaveReqVO updateReqVO) {
         // 校验存在
-        validateEntityRelationshipExists(updateReqVO.getId());
+        validateEntityRelationshipExists(Long.valueOf(updateReqVO.getId()));
 
         // 更新实体关系
         MetadataEntityRelationshipDO updateObj = BeanUtils.toBean(updateReqVO, MetadataEntityRelationshipDO.class);
+        updateObj.setId(Long.valueOf(updateReqVO.getId()));
+        updateObj.setSourceEntityId(Long.valueOf(updateReqVO.getSourceEntityId()));
+        updateObj.setTargetEntityId(Long.valueOf(updateReqVO.getTargetEntityId()));
+        updateObj.setAppId(Long.valueOf(updateReqVO.getAppId()));
         dataRepository.update(updateObj);
     }
 
