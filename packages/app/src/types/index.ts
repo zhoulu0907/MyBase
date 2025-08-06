@@ -1,4 +1,3 @@
-
 export * from './app_menu';
 export * from './app_version';
 export * from './application';
