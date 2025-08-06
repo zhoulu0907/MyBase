@@ -9,7 +9,8 @@ import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataEntityFiel
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataSystemFieldsDO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.datasource.MetadataDatasourceDO;
 import com.cmsr.onebase.module.metadata.convert.datasource.DatasourceConvert;
-import com.cmsr.onebase.module.metadata.service.helper.DatasourceServiceHelper;
+import com.cmsr.onebase.module.metadata.dal.database.MetadataRepository;
+import com.cmsr.onebase.module.metadata.dal.database.TemporaryDatasourceService;
 import com.cmsr.onebase.module.metadata.enums.BusinessEntityTypeEnum;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
@@ -38,26 +39,28 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
     @Resource
     private DatasourceConvert datasourceConvert;
     @Resource
-    private DatasourceServiceHelper datasourceServiceHelper;
+    private MetadataRepository metadataRepository;
+    @Resource
+    private TemporaryDatasourceService temporaryDatasourceService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long createBusinessEntity(@Valid BusinessEntitySaveReqVO createReqVO) {
         // 校验编码唯一性
         validateBusinessEntityCodeUnique(null, createReqVO.getCode(), Long.valueOf(createReqVO.getAppId()));
-        
+
         // 校验实体类型
         validateEntityType(createReqVO.getEntityType());
 
         // 插入业务实体
         MetadataBusinessEntityDO businessEntity = BeanUtils.toBean(createReqVO, MetadataBusinessEntityDO.class);
         businessEntity.setAppId(Long.valueOf(createReqVO.getAppId()));
-        
+
         // 根据实体类型处理表名
         handleTableNameByEntityType(businessEntity, createReqVO);
-        
-        datasourceServiceHelper.insert(businessEntity);
-        
+
+        metadataRepository.insert(businessEntity);
+
         // 根据实体类型决定是否创建物理表
         if (BusinessEntityTypeEnum.needCreatePhysicalTable(createReqVO.getEntityType())) {
             createPhysicalTableForEntity(businessEntity, createReqVO);
@@ -66,10 +69,10 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
             String typeName = entityTypeEnum != null ? entityTypeEnum.getName() : "未知类型";
             log.info("实体类型为 {} ({}), 跳过物理表创建", createReqVO.getEntityType(), typeName);
         }
-        
+
         return businessEntity.getId();
     }
-    
+
     /**
      * 校验实体类型有效性
      *
@@ -80,7 +83,7 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
             throw new IllegalArgumentException("无效的实体类型: " + entityType);
         }
     }
-    
+
     /**
      * 根据实体类型处理表名
      *
@@ -100,7 +103,7 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
             }
         }
     }
-    
+
     /**
      * 为实体创建物理表
      *
@@ -114,13 +117,13 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
             if (datasource != null) {
                 // 2. 获取系统字段信息
                 List<MetadataSystemFieldsDO> systemFields = getSystemFields();
-                
+
                 // 3. 生成 DDL 并在数据源内建物理表
                 createPhysicalTable(datasource, businessEntity.getTableName(), systemFields);
-                
+
                 // 4. 保存实体字段信息到 metadata_entity_field 表
                 saveEntityFields(businessEntity.getId(), systemFields, Long.valueOf(createReqVO.getAppId()));
-                
+
                 log.info("成功为业务实体 {} 创建物理表: {}", businessEntity.getDisplayName(), businessEntity.getTableName());
             } else {
                 log.warn("未找到数据源ID为 {} 的数据源配置，跳过物理表创建", createReqVO.getDatasourceId());
@@ -130,7 +133,7 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
             // 不抛出异常，避免影响业务实体的创建
         }
     }
-    
+
     /**
      * 获取数据源信息
      */
@@ -138,12 +141,12 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
         if (datasourceId == null || datasourceId.trim().isEmpty()) {
             return null;
         }
-        
+
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.and("id", Long.valueOf(datasourceId));
-        return datasourceServiceHelper.findOne(MetadataDatasourceDO.class, configStore);
+        return metadataRepository.findOne(MetadataDatasourceDO.class, configStore);
     }
-    
+
     /**
      * 获取系统字段信息
      */
@@ -151,9 +154,9 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.and("is_enabled", 1); // 只获取启用的系统字段
         configStore.order("id", Order.TYPE.ASC);
-        return datasourceServiceHelper.findAllByConfig(MetadataSystemFieldsDO.class, configStore);
+        return metadataRepository.findAllByConfig(MetadataSystemFieldsDO.class, configStore);
     }
-    
+
     /**
      * 保存实体字段信息到 metadata_entity_field 表
      *
@@ -185,13 +188,13 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
                     .status(0) // 默认开启
                     .fieldCode(generateFieldCode(systemField.getFieldName())) // 生成字段编码
                     .build();
-            
-            datasourceServiceHelper.insert(entityField);
+
+            metadataRepository.insert(entityField);
         }
-        
+
         log.info("成功保存 {} 个系统字段到实体字段表", systemFields.size());
     }
-    
+
     /**
      * 根据字段类型获取默认数据长度
      */
@@ -209,7 +212,7 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
                 return null;
         }
     }
-    
+
     /**
      * 根据字段类型获取默认小数位数
      */
@@ -221,7 +224,7 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
                 return null;
         }
     }
-    
+
     /**
      * 生成字段编码
      * 将字段名转换为大写，下划线保持不变
@@ -235,79 +238,94 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
         }
         return fieldName.toUpperCase();
     }
-    
+
     /**
      * 创建物理表
      */
     private void createPhysicalTable(MetadataDatasourceDO datasource, String tableName, List<MetadataSystemFieldsDO> systemFields) {
         try {
-            // 创建 AnylineService 实例
-            AnylineService<?> service = datasourceServiceHelper.createTemporaryService(datasource);
+            log.info("=== 开始创建物理表调试信息 ===");
+            log.info("目标表名: {}", tableName);
+            log.info("数据源配置: {}", datasource.getConfig());
+            log.info("数据源类型: {}", datasource.getDatasourceType());
             
+            // 创建 AnylineService 实例 - 使用新的TemporaryDatasourceService
+            AnylineService<?> service = temporaryDatasourceService.createTemporaryService(datasource);
+
             // 生成建表 DDL
             String createTableDDL = generateCreateTableDDL(tableName, systemFields);
-            
+            log.info("生成的DDL语句: \n{}", createTableDDL);
+
+            // 验证服务连接的数据库
+            try {
+                String currentDatabase = service.query("SELECT current_database()").toString();
+                log.info("当前连接的数据库: {}", currentDatabase);
+            } catch (Exception e) {
+                log.warn("无法获取当前数据库信息: {}", e.getMessage());
+            }
+
             // 执行建表语句
             service.execute(createTableDDL);
-            
+
+            log.info("=== 物理表创建完成 ===");
             log.info("成功创建物理表: {}", tableName);
         } catch (Exception e) {
             log.error("创建物理表失败: {}", e.getMessage(), e);
             throw new RuntimeException("创建物理表失败", e);
         }
     }
-    
+
     /**
      * 生成创建表的DDL语句
      */
     private String generateCreateTableDDL(String tableName, List<MetadataSystemFieldsDO> systemFields) {
         StringJoiner ddl = new StringJoiner("\n");
         ddl.add("CREATE TABLE IF NOT EXISTS \"" + tableName + "\" (");
-        
+
         StringJoiner columns = new StringJoiner(",\n  ");
         String primaryKeyField = null;
-        
+
         for (MetadataSystemFieldsDO field : systemFields) {
             StringBuilder columnDef = new StringBuilder();
             columnDef.append("\"").append(field.getFieldName()).append("\" ");
-            
+
             // 字段类型映射
             String columnType = mapFieldType(field.getFieldType());
             columnDef.append(columnType);
-            
+
             // 是否必填
             if (field.getIsRequired() == 1) {
                 columnDef.append(" NOT NULL");
             }
-            
+
             // 默认值
             if (field.getDefaultValue() != null && !field.getDefaultValue().trim().isEmpty()) {
                 columnDef.append(" DEFAULT ").append(field.getDefaultValue());
             }
-            
+
             // 雪花ID字段设置为主键
             if (field.getIsSnowflakeId() == 1) {
                 primaryKeyField = field.getFieldName();
             }
-            
+
             columns.add(columnDef.toString());
         }
-        
+
         ddl.add("  " + columns.toString());
-        
+
         // 添加主键约束
         if (primaryKeyField != null) {
             ddl.add(",  PRIMARY KEY (\"" + primaryKeyField + "\")");
         }
-        
+
         ddl.add(");");
-        
+
         // 添加表注释
         ddl.add("COMMENT ON TABLE \"" + tableName + "\" IS '业务实体表';");
-        
+
         return ddl.toString();
     }
-    
+
     /**
      * 字段类型映射
      */
@@ -346,11 +364,11 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
         MetadataBusinessEntityDO updateObj = BeanUtils.toBean(updateReqVO, MetadataBusinessEntityDO.class);
         updateObj.setId(Long.valueOf(updateReqVO.getId()));
         updateObj.setAppId(Long.valueOf(updateReqVO.getAppId()));
-        
+
         // 根据实体类型处理表名
         handleTableNameByEntityType(updateObj, updateReqVO);
-        
-        datasourceServiceHelper.update(updateObj);
+
+        metadataRepository.update(updateObj);
     }
 
     @Override
@@ -358,17 +376,17 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
     public void deleteBusinessEntity(Long id) {
         // 校验存在
         validateBusinessEntityExists(id);
-        
+
         // 删除业务实体
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.in("id", id);
-        datasourceServiceHelper.deleteByConfig(MetadataBusinessEntityDO.class, configStore);
+        metadataRepository.deleteByConfig(MetadataBusinessEntityDO.class, configStore);
     }
 
     private void validateBusinessEntityExists(Long id) {
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.in("id", id);
-        if (datasourceServiceHelper.findOne(MetadataBusinessEntityDO.class, configStore) == null) {
+        if (metadataRepository.findOne(MetadataBusinessEntityDO.class, configStore) == null) {
             throw exception(BUSINESS_ENTITY_NOT_EXISTS);
         }
     }
@@ -380,8 +398,8 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
         if (id != null) {
             configStore.and(Compare.NOT_EQUAL, "id", id);
         }
-        
-        long count = datasourceServiceHelper.countByConfig(MetadataBusinessEntityDO.class, configStore);
+
+        long count = metadataRepository.countByConfig(MetadataBusinessEntityDO.class, configStore);
         if (count > 0) {
             throw exception(BUSINESS_ENTITY_CODE_DUPLICATE);
         }
@@ -391,16 +409,16 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
     public MetadataBusinessEntityDO getBusinessEntity(Long id) {
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.in("id", id);
-        return datasourceServiceHelper.findOne(MetadataBusinessEntityDO.class, configStore);
+        return metadataRepository.findOne(MetadataBusinessEntityDO.class, configStore);
     }
 
     @Override
     public PageResult<MetadataBusinessEntityDO> getBusinessEntityPage(BusinessEntityPageReqVO pageReqVO) {
         DefaultConfigStore configStore = new DefaultConfigStore();
-        
+
         // 默认不显示中间表（entity_type = 3）
         configStore.and(Compare.NOT_EQUAL, "entity_type", BusinessEntityTypeEnum.MIDDLE_TABLE.getCode());
-        
+
         // 添加查询条件
         if (pageReqVO.getDisplayName() != null) {
             configStore.and(Compare.LIKE, "display_name", "%" + pageReqVO.getDisplayName() + "%");
@@ -420,11 +438,11 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
         if (pageReqVO.getAppId() != null) {
             configStore.and("app_id", pageReqVO.getAppId());
         }
-        
+
         // 分页查询
         configStore.order("create_time", Order.TYPE.DESC);
-        
-        return datasourceServiceHelper.findPageWithConditions(MetadataBusinessEntityDO.class, configStore, 
+
+        return metadataRepository.findPageWithConditions(MetadataBusinessEntityDO.class, configStore,
             pageReqVO.getPageNo(), pageReqVO.getPageSize());
     }
 
@@ -432,14 +450,14 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
     public List<MetadataBusinessEntityDO> getBusinessEntityList() {
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.order("create_time", Order.TYPE.DESC);
-        return datasourceServiceHelper.findAllByConfig(MetadataBusinessEntityDO.class, configStore);
+        return metadataRepository.findAllByConfig(MetadataBusinessEntityDO.class, configStore);
     }
 
     @Override
     public MetadataBusinessEntityDO getBusinessEntityByCode(String code) {
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.and("code", code);
-        return datasourceServiceHelper.findOne(MetadataBusinessEntityDO.class, configStore);
+        return metadataRepository.findOne(MetadataBusinessEntityDO.class, configStore);
     }
 
     @Override
@@ -447,7 +465,7 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.and("datasource_id", datasourceId);
         configStore.order("create_time", Order.TYPE.DESC);
-        return datasourceServiceHelper.findAllByConfig(MetadataBusinessEntityDO.class, configStore);
+        return metadataRepository.findAllByConfig(MetadataBusinessEntityDO.class, configStore);
     }
 
 }
