@@ -14,7 +14,7 @@ public class ColumnQueryVO {
     /**
      * 数据源ID
      */
-    private Long datasourceId;
+    private String datasourceId;
 
     /**
      * 表名
@@ -33,7 +33,7 @@ public class ColumnQueryVO {
      * @param tableName 表名
      * @param schemaName 数据库模式名
      */
-    public ColumnQueryVO(Long datasourceId, String tableName, String schemaName) {
+    public ColumnQueryVO(String datasourceId, String tableName, String schemaName) {
         this.datasourceId = datasourceId;
         this.tableName = tableName;
         this.schemaName = schemaName;

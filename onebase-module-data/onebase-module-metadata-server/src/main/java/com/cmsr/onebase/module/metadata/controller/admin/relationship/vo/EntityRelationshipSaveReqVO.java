@@ -17,7 +17,7 @@ import lombok.Data;
 public class EntityRelationshipSaveReqVO {
 
     @Schema(description = "关系ID", example = "5001")
-    private Long id;
+    private String id;
 
     @Schema(description = "关系名称", requiredMode = Schema.RequiredMode.REQUIRED, example = "用户订单关系")
     @NotBlank(message = "关系名称不能为空")
@@ -26,11 +26,11 @@ public class EntityRelationshipSaveReqVO {
 
     @Schema(description = "源实体ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "2001")
     @NotNull(message = "源实体ID不能为空")
-    private Long sourceEntityId;
+    private String sourceEntityId;
 
     @Schema(description = "目标实体ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "2002")
     @NotNull(message = "目标实体ID不能为空")
-    private Long targetEntityId;
+    private String targetEntityId;
 
     @Schema(description = "关系类型", requiredMode = Schema.RequiredMode.REQUIRED, example = "ONE_TO_MANY")
     @NotBlank(message = "关系类型不能为空")
@@ -38,11 +38,11 @@ public class EntityRelationshipSaveReqVO {
 
     @Schema(description = "源字段ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "3001")
     @NotNull(message = "源字段ID不能为空")
-    private Long sourceFieldId;
+    private String sourceFieldId;
 
     @Schema(description = "目标字段ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "3010")
     @NotNull(message = "目标字段ID不能为空")
-    private Long targetFieldId;
+    private String targetFieldId;
 
     @Schema(description = "级联类型", example = "READ")
     private String cascadeType;
@@ -53,6 +53,6 @@ public class EntityRelationshipSaveReqVO {
 
     @Schema(description = "应用ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "12345")
     @NotNull(message = "应用ID不能为空")
-    private Long appId;
+    private String appId;
 
 }

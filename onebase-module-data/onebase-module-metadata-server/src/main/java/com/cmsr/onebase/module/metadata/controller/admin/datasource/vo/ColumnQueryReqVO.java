@@ -18,7 +18,7 @@ public class ColumnQueryReqVO {
 
     @Schema(description = "数据源ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "1001")
     @NotNull(message = "数据源ID不能为空")
-    private Long datasourceId;
+    private String datasourceId;
 
     @Schema(description = "表名", requiredMode = Schema.RequiredMode.REQUIRED, example = "users")
     @NotBlank(message = "表名不能为空")
