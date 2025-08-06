@@ -182,8 +182,8 @@ export class HttpClient {
   /**
    * GET 请求
    */
-  public async get<T = any>(url: string, config?: AxiosRequestConfig): Promise<T> {
-    const response = await this.instance.get<BaseResponse<T>>(url, config);
+  public async get<T = any>(url: string, params?: any, config?: AxiosRequestConfig): Promise<T> {
+    const response = await this.instance.get<BaseResponse<T>>(url, { params, ...config });
     return response.data.data;
   }
 
