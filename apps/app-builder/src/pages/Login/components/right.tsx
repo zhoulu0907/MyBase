@@ -117,7 +117,6 @@ const Right: React.FC = () => {
       };
 
       const response: LoginResponse = await login(loginData);
-      console.log(response);
 
       if (response.accessToken) {
         // 使用 TokenManager 存储 token 信息
