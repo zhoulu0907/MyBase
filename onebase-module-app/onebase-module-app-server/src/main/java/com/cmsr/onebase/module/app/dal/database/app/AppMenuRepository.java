@@ -27,7 +27,6 @@ public class AppMenuRepository extends DataRepository {
         return findAll(MenuDO.class, configs);
     }
 
-
     public long countByParentId(Long id) {
         ConfigStore configs = new DefaultConfigStore();
         configs.eq("parent_id", id);

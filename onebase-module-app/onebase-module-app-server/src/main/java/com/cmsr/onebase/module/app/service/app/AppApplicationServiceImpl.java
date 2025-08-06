@@ -3,10 +3,7 @@ package com.cmsr.onebase.module.app.service.app;
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.module.app.controller.admin.app.vo.ApplicationCreateReqVO;
-import com.cmsr.onebase.module.app.controller.admin.app.vo.ApplicationPageReqVO;
-import com.cmsr.onebase.module.app.controller.admin.app.vo.ApplicationPageRespVO;
-import com.cmsr.onebase.module.app.controller.admin.app.vo.TagRespVO;
+import com.cmsr.onebase.module.app.controller.admin.app.vo.*;
 import com.cmsr.onebase.module.app.dal.database.app.*;
 import com.cmsr.onebase.module.app.dal.dataobject.app.ApplicationDO;
 import com.cmsr.onebase.module.app.enums.app.AppErrorCodeConstants;
@@ -83,14 +80,14 @@ public class AppApplicationServiceImpl implements AppApplicationService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Long createApplication(ApplicationCreateReqVO createReqVO) {
+    public ApplicationCreateRespVO createApplication(ApplicationCreateReqVO createReqVO) {
         validApplicationCodeDuplicate(createReqVO.getAppCode(), null);
         ApplicationDO applicationDO = BeanUtils.toBean(createReqVO, ApplicationDO.class);
         applicationDO.setVersionNumber(VersionUtils.INIT_VERSION);
         applicationDO.setAppStatus(ApplicationStatusEnum.EDITING.getValue());
         applicationDO = applicationRepository.insert(applicationDO);
         applicationTagRepository.mergeApplicationTags(applicationDO.getId(), createReqVO.getTagIds());
-        return applicationDO.getId();
+        return BeanUtils.toBean(applicationDO, ApplicationCreateRespVO.class);
     }
 
 

@@ -2,24 +2,23 @@ package com.cmsr.onebase.module.app.service.app;
 
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.module.app.controller.admin.app.vo.MenuCopyReqVO;
-import com.cmsr.onebase.module.app.controller.admin.app.vo.MenuCreateReqVO;
-import com.cmsr.onebase.module.app.controller.admin.app.vo.MenuListRespVO;
-import com.cmsr.onebase.module.app.controller.admin.app.vo.MenuOrderUpdateReqVO;
+import com.cmsr.onebase.module.app.api.appresource.dto.CreatePageSetDTO;
+import com.cmsr.onebase.module.app.controller.admin.app.vo.*;
 import com.cmsr.onebase.module.app.dal.database.app.AppMenuRepository;
 import com.cmsr.onebase.module.app.dal.dataobject.app.MenuDO;
 import com.cmsr.onebase.module.app.enums.app.AppErrorCodeConstants;
 import com.cmsr.onebase.module.app.enums.app.MenuTypeEnum;
 import com.cmsr.onebase.module.app.enums.app.MenuVisibleEnum;
+import com.cmsr.onebase.module.app.service.appresource.PageSetService;
 import com.cmsr.onebase.module.app.util.MenuUtils;
 import jakarta.annotation.Resource;
 import lombok.Setter;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @Author：huangjie
@@ -35,6 +34,9 @@ public class AppMenuServiceImpl implements AppMenuService {
 
     @Resource
     private AppMenuRepository appMenuRepository;
+
+    @Resource
+    private PageSetService pageSetService;
 
     @Override
     public List<MenuListRespVO> listApplicationMenu(Long applicationId) {
@@ -68,12 +70,14 @@ public class AppMenuServiceImpl implements AppMenuService {
     }
 
     @Override
-    public Long createApplicationMenu(MenuCreateReqVO createReqVO) {
+    @Transactional(rollbackFor = Exception.class)
+    public MenuCreateRespVO createApplicationMenu(MenuCreateReqVO createReqVO) {
+        // 菜单类型校验
         MenuTypeEnum.validate(createReqVO.getMenuType());
         appCommonService.validateApplicationExist(createReqVO.getApplicationId());
+        // 创建菜单
         MenuDO menuDO = new MenuDO();
         menuDO.setApplicationId(createReqVO.getApplicationId());
-
         if (createReqVO.getParentId() != null && createReqVO.getParentId() != MenuUtils.ROOT_MENU_ID) {
             validateApplicationMenuExist(createReqVO.getParentId());
             menuDO.setParentId(createReqVO.getParentId());
@@ -86,10 +90,19 @@ public class AppMenuServiceImpl implements AppMenuService {
         menuDO.setMenuIcon(createReqVO.getMenuIcon());
         menuDO.setIsVisible(MenuVisibleEnum.YES.getValue());
         appMenuRepository.insert(menuDO);
-        return menuDO.getId();
+        // 创建页面集
+        CreatePageSetDTO createPageSetDTO = new CreatePageSetDTO();
+        createPageSetDTO.setMenuId(menuDO.getId());
+        createPageSetDTO.setPageSetName(menuDO.getMenuName());
+        createPageSetDTO.setDisplayName(menuDO.getMenuName());
+        pageSetService.createPageSet(createPageSetDTO);
+        // 返回结果
+        MenuCreateRespVO menuCreateRespVO = BeanUtils.toBean(menuDO, MenuCreateRespVO.class);
+        return menuCreateRespVO;
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void updateApplicationMenuName(Long id, String menuName) {
         MenuDO menuDO = validateApplicationMenuExist(id);
         menuDO.setMenuName(menuName);
@@ -101,9 +114,49 @@ public class AppMenuServiceImpl implements AppMenuService {
         MenuDO menuDO = validateApplicationMenuExist(updateReqVO.getId());
         menuDO.setParentId(updateReqVO.getId());
         appMenuRepository.update(menuDO);
-        List<MenuListRespVO> menuListRespList = listApplicationMenu(menuDO.getApplicationId());
+        Map<Long, Integer> menuSortMap = toMenuSortMap(updateReqVO.getMenuTree());
+        List<MenuDO> menuDOS = appMenuRepository.findByApplicationId(menuDO.getApplicationId());
+        for (MenuDO menu : menuDOS) {
+            Integer order = menuSortMap.get(menu.getId());
+            menu.setMenuSort(order);
+            appMenuRepository.update(menu);
+        }
+    }
 
+    /**
+     * 输入的是树结构，需要转换成Map结构。
+     * 返回 Map的Key是菜单的ID，Value是菜单顺序，根据菜单的深度路径查找排序。
+     *
+     * @return
+     */
+    private Map<Long, Integer> toMenuSortMap(List<MenuOrderUpdateReqVO.MenuOrderNode> menuList) {
+        Map<Long, Integer> menuSortMap = new HashMap<>(menuList.size());
+        AtomicInteger sortOrder = new AtomicInteger(1);
+        recursiveBuildMenuSortMap(menuList, menuSortMap, sortOrder);
+        return menuSortMap;
+    }
 
+    /**
+     * 递归构建菜单排序映射
+     *
+     * @param menus       当前层级的菜单列表
+     * @param menuSortMap 菜单排序映射结果
+     * @param sortOrder   当前排序序号
+     */
+    private void recursiveBuildMenuSortMap(List<MenuOrderUpdateReqVO.MenuOrderNode> menus, Map<Long, Integer> menuSortMap, AtomicInteger sortOrder) {
+        if (menus == null || menus.isEmpty()) {
+            return;
+        }
+
+        for (MenuOrderUpdateReqVO.MenuOrderNode menu : menus) {
+            // 按照深度优先遍历的顺序分配序号
+            menuSortMap.put(menu.getId(), sortOrder.getAndIncrement());
+
+            // 递归处理子菜单
+            if (menu.getChildren() != null && !menu.getChildren().isEmpty()) {
+                recursiveBuildMenuSortMap(menu.getChildren(), menuSortMap, sortOrder);
+            }
+        }
     }
 
     @Override
@@ -128,6 +181,7 @@ public class AppMenuServiceImpl implements AppMenuService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void deleteApplicationMenu(Long id) {
         MenuDO menuDO = validateApplicationMenuExist(id);
         if (menuDO.getMenuType() == MenuTypeEnum.GROUP.getValue()
@@ -135,7 +189,8 @@ public class AppMenuServiceImpl implements AppMenuService {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_MENU_GROUP_HAS_CHILDREN);
         }
         appMenuRepository.deleteById(id);
-        //TODO 菜单相关资源都要删除
+        //菜单相关资源都要删除
+        pageSetService.deletePageSet(menuDO.getId());
     }
 
 
