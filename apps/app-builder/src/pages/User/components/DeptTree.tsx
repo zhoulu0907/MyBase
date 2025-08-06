@@ -1,7 +1,16 @@
 import { Input, Tree } from '@arco-design/web-react';
-import React, { useMemo, useState } from 'react';
+import ListItem from '@/components/ListItem';
+import { useMemo, useState, useEffect } from 'react';
 import { treeFilter } from '@/utils/tree'
 import s from '../index.module.less';
+import { type DeptTree } from '@onebase/platform-center';
+
+type TreeDataType = {
+  key?: string;
+  _index?: number;
+  children?: TreeDataType[];
+  [key: string]: any;
+};
 
 interface DeptTreeProps {
   selectedDeptId?: number;
@@ -13,13 +22,24 @@ interface DeptTreeProps {
 
 export default function DeptTree({ selectedDeptId, onDeptSelect, totalUserCount, treeData }: DeptTreeProps) {
   const [search, setSearch] = useState('');
-  const [selectedKey, setSelectedKey] = useState<string | undefined>(selectedDeptId ? String(selectedDeptId) : undefined);
+  const [selectedKeys, setSelectedKeys] = useState<string[]>(
+    selectedDeptId ? [String(selectedDeptId)] : []
+  );
 
   const filteredTree = useMemo(() => treeFilter(treeData, search), [treeData, search]);
 
-  React.useEffect(() => {
-    setSelectedKey(selectedDeptId ? String(selectedDeptId) : undefined);
+  // 同步外部选中状态
+  useEffect(() => {
+    const keys = selectedDeptId ? [String(selectedDeptId)] : [];
+    setSelectedKeys(keys);
   }, [selectedDeptId]);
+
+  const handleSelect = (keys: string[]) => {
+    setSelectedKeys(keys);
+    const deptId = keys.length > 0 ? Number(keys[0]) : undefined;
+    onDeptSelect(deptId);
+  };
+
 
   return (
     <div>
@@ -30,34 +50,23 @@ export default function DeptTree({ selectedDeptId, onDeptSelect, totalUserCount,
         onChange={setSearch}
         style={{ marginBottom: 12 }}
       />
-      <div
-        className={selectedDeptId === undefined ? s.selected : s.allItem}
-        style={{ marginBottom: 8, cursor: 'pointer' }}
-        onClick={() => onDeptSelect(undefined)}
-      >
-        全部（{totalUserCount}）
-      </div>
+      <ListItem 
+        onClick={() => {
+          setSelectedKeys([]);
+          onDeptSelect(undefined);
+        }} 
+        title={`全部（${totalUserCount}）`}
+        active={!selectedDeptId}
+      />
       <Tree
         treeData={filteredTree}
-        selectedKeys={selectedKey ? [selectedKey] : []}
-        onSelect={keys => {
-          const findDeptId = (nodes: any[], key: string): number | undefined => {
-            for (const node of nodes) {
-              if (node.key === key) {
-                return Number(node.key);
-              }
-              if (node.children) {
-                const found = findDeptId(node.children, key);
-                if (found) return found;
-              }
-            }
-            return undefined;
-          };
-
-          const deptId = findDeptId(treeData, keys[0]);
-          if (deptId) onDeptSelect(deptId);
-        }}
+        selectedKeys={selectedKeys}
+        onSelect={handleSelect}
         blockNode
+        className={s.deptTreeNode}
+        renderTitle={(node: TreeDataType) => { 
+          return (<span className="tableColumnUsername">{`${node.title}(${node.userCount || 0})`}</span>)
+        }}
       />
     </div>
   );

@@ -8,7 +8,7 @@ export const getSimpleDeptList = (): Promise<Partial<DeptVO>[]> => {
 }
 
 // 查询部门列表
-export const getDeptList = (params: any) => {
+export const getDeptList = (params?: any) => {
   return systemClient.get('/dept/list', { params })
 }
 

@@ -6,9 +6,20 @@ export interface StatusTagProps {
   status: StatusEnum;
 }
 
+export enum StatusLabelEnum {
+  ENABLE = '启用',
+  DISABLE = '禁用'
+}
+
+export const getStatusLabel = (status: StatusEnum): string => {
+  const isEnable = status === StatusEnum.ENABLE;
+  const text = isEnable ? StatusLabelEnum.ENABLE : StatusLabelEnum.DISABLE;
+  return text
+};
+
 export const StatusTag: React.FC<StatusTagProps> = ({ status }) => {
   const isEnable = status === StatusEnum.ENABLE;
-  const text = isEnable ? '启用' : '未启用';
+  const text = getStatusLabel(status);
   const dotClass = isEnable ? s.enable : s.disable;
 
   return (

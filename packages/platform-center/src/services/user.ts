@@ -4,7 +4,7 @@ import systemClient from './clients/system';
 
 // 查询用户管理列表
 export const getUserPage = (params: PageParam) => {
-  return systemClient.get('/user/page', { params })
+  return systemClient.get('/user/page', params)
 }
 
 // 查询用户详情
@@ -19,17 +19,17 @@ export const createUser = (data: UserVO) => {
 
 // 修改用户
 export const updateUser = (data: UserVO) => {
-  return systemClient.put('/user/update', data)
+  return systemClient.post('/user/update', data)
 }
 
 // 删除用户
 export const deleteUser = (id: number) => {
-  return systemClient.delete('/user/delete?id=' + id)
+  return systemClient.post('/user/delete?id=' + id)
 }
 
 // 批量删除用户
 export const deleteUserList = (ids: number[]) => {
-  return systemClient.delete('/user/delete-list', { params: { ids: ids.join(',') }})
+  return systemClient.post('/user/post-list', { params: { ids: ids.join(',') }})
 }
 
 // 导出用户
@@ -47,7 +47,7 @@ export const resetUserPassword = (id: number) => {
   const data = {
     id
   }
-  return systemClient.put('/user/update-password', data)
+  return systemClient.post('/user/update-password', data)
 }
 
 // 用户状态修改
@@ -56,7 +56,7 @@ export const updateUserStatus = (id: number, status: number) => {
     id,
     status
   }
-  return systemClient.put('/user/update-status', data)
+  return systemClient.post('/user/update-status', data)
 }
 
 // 获取用户精简信息列表
