@@ -1,4 +1,5 @@
 import helpSVG from "@/assets/images/help_icon.svg";
+import { UserPermissionManager } from "@/utils/permission";
 import {
     Avatar,
     Button,
@@ -171,7 +172,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
                     <Dropdown droplist={userMenu} position='bottom'>
                         <div className={styles.userDropdown}>
                             <Avatar size={32} style={{ backgroundColor: '#4FAE7B' }}>
-                                {tokenInfo?.username?.toString().charAt(0) || 'U'}
+                                {UserPermissionManager.getUserPermissionInfo()?.user.nickname?.slice(0, 1) || "U"}
                             </Avatar>
                         </div>
                     </Dropdown>
