@@ -2,6 +2,6 @@
     "name": "onebase-platform-fe",
     "scripts": {
         "build:admin-console": "pnpm --filter ./packages/common... build && pnpm --filter ./packages/platform-center... build && pnpm --filter ./apps/admin-console... devops_build",
-        "build:app-builder": "pnpm --filter ./packages/common... build && pnpm --filter ./packages/platform-center... build && pnpm --filter ./apps/app-builder... devops_build"
+        "build:app-builder": "pnpm --filter ./packages/common... build && pnpm --filter ./packages/app... build && pnpm --filter ./packages/platform-center... build && pnpm --filter ./apps/app-builder... devops_build"
     }
 }
