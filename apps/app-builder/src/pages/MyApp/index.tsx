@@ -173,7 +173,7 @@ const MyAppPage: React.FC = () => {
                     {dataList.map((item, index) => (
                         <div className={styles.myAppCard}
                             key={index}
-                            // TODO(mickey): 代修改
+                            // TODO(mickey): 待修改
                             onClick={() => navigate("/onebase/create-app/data-factory")}
                         >
                             <div className={styles.myAppCardHeader}>
