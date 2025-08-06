@@ -5,4 +5,6 @@ export * from './dict';
 export * from './tenant';
 export * from './user';
 export * from './platformInfo';
-// export * from './tenant';
+export * from './role';
+export * from './dept';
+export * from './tenant';

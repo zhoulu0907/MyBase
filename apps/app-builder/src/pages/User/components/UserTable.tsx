@@ -1,4 +1,4 @@
-import StatusTag from '@/components/StatusTag';
+import StatusTag, { getStatusLabel } from '@/components/StatusTag';
 import { Button, Dropdown, Form, Input, Menu, Message, Modal, Pagination, Space, Table, TreeSelect, Typography } from '@arco-design/web-react';
 import { IconMoreVertical, IconSearch, IconPlus } from '@arco-design/web-react/icon';
 import {
@@ -8,11 +8,13 @@ import {
   resetUserPassword,
   updateUserStatus
 } from '@onebase/platform-center';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import s from '../index.module.less';
 import UserFormModal from './UserFormModal';
-import type { UserVO } from '@onebase/platform-center';
-import type { PageParam } from '@onebase/platform-center';
+import type { UserVO, PageParam } from '@onebase/platform-center';
+import { StatusEnum } from '@onebase/platform-center';
+import { debounce } from '@/utils/common';
+
 interface UserTableProps {
   selectedDeptId?: number;
   onTotalUserCountChange: (count: number) => void;
@@ -30,33 +32,36 @@ export default function UserTable({ selectedDeptId = undefined, onTotalUserCount
   const [editingUser, setEditingUser] = useState<UserRecord | undefined>();
   const [data, setData] = useState<UserRecord[]>([]);
   const [total, setTotal] = useState(0);
-  const [currentUser, setCurrentUser] = useState<UserRecord | undefined>();
   const [detailModalVisible, setDetailModalVisible] = useState(false);
   const [detailUser, setDetailUser] = useState<UserRecord | undefined>();
   const [exportModalVisible, setExportModalVisible] = useState(false);
   const [exportForm] = Form.useForm();
 
   // 查询用户列表
-  const getUserList = async () => {
+  const getUserList = useCallback(async (searchValue?: string) => {
     const params: PageParam = {
       pageNo: page,
       pageSize,
     };
     if (selectedDeptId) params.deptId = selectedDeptId;
-    if (search) params.username = search;
-    // TODO: 联调后移除mock数据
-    // const res = await getUserPage(params)
-    // setData(res.list || []);
-    // setTotal(res.total || 0);
-    // onTotalUserCountChange(res.total || 0);
-    getUserPage(params).catch(() => {
-      setData([{ id: 1, nickname: '用户1', username: '用户1' }, { id: 2, nickname: '用户2', status: 1, username: '用户1' }]);
-    })
-  };
+    if (searchValue) params.nickname = searchValue;
+    const res = await getUserPage(params);
+    setData(res.list || []);
+    setTotal(res.total || 0);
+    onTotalUserCountChange(res.total || 0);
+  }, [page, pageSize, selectedDeptId, onTotalUserCountChange]);
+
+  const debouncedSearch = useCallback(
+    debounce((value: string) => {
+      getUserList(value);
+    }, 300),
+    [getUserList]
+  );
 
   useEffect(() => {
     getUserList();
-  }, [selectedDeptId, page, pageSize, search, onTotalUserCountChange]);
+  }, [selectedDeptId, page, pageSize]);
+
 
   const handleEdit = (record: UserRecord) => {
     setEditingUser(record);
@@ -69,9 +74,11 @@ export default function UserTable({ selectedDeptId = undefined, onTotalUserCount
   }
 
   // 搜索
-  const handleSearch = () => {
+  const handleSearch = useCallback((value: string) => {
     setPage(1);
-  }
+    setSearch(value);
+    debouncedSearch(value);
+  }, [debouncedSearch]);
 
   // 导出功能 本期暂不实现
   // const handleExport = () => {
@@ -105,6 +112,7 @@ export default function UserTable({ selectedDeptId = undefined, onTotalUserCount
       title: `确定重置账号 ${record.nickname} 的密码？`,
       content: '密码重置后，原密码失效，请将新密码发送至用户。',
       onOk: async () => {
+        // TODO: 待接口修改后验证
         const res = await resetUserPassword(record.id);
         Modal.success({ 
           title: '重置成功',
@@ -115,14 +123,17 @@ export default function UserTable({ selectedDeptId = undefined, onTotalUserCount
     });
   }
 
-  // 禁用
-  const handleDisable = (record: UserRecord) => {
+  // 禁用用户，需确认
+  const handleStatusUpdate = (record: UserRecord) => {
+    const newStatus = record.status === StatusEnum.ENABLE ? StatusEnum.DISABLE : StatusEnum.ENABLE;
+    const newLabel = getStatusLabel(newStatus);
     Modal.confirm({
-      title: `确定要禁用账号 ${record.nickname} 吗？`,
-      content: '禁用状态下，用户无法登录系统，再次启用时用户可恢复正常使用',
+      title: `确定要${newLabel}账号 ${record.nickname} 吗？`,
+      content: newStatus === StatusEnum.DISABLE ? '禁用状态下，用户无法登录系统，再次启用时用户可恢复正常使用' : '',
       onOk: async () => {
-        await updateUserStatus(record.id, 0);
-        Message.success('禁用成功');
+        // TODO: 待接口修改后验证
+        await updateUserStatus(record.id, newStatus);
+        Message.success(`${newLabel}成功`);
         getUserList();
       }
     });
@@ -151,21 +162,22 @@ export default function UserTable({ selectedDeptId = undefined, onTotalUserCount
     return [
       {
         title: '姓名',
-        dataIndex: 'username',
-        width: 100,
+        dataIndex: 'nickname',
+        width: 120,
+        ellipsis: true,
         render: (_: any, record: UserRecord) => (
           <span
             className={s.tableColumnUsername}
             onClick={() => handleViewDetail(record)}
           >
-            {record.username}
+            {record.nickname}
           </span>
         )
       },
       { title: '手机号', dataIndex: 'mobile', width: 140 },
-      { title: '邮箱', dataIndex: 'email', width: 180 },
-      { title: '部门', dataIndex: 'deptName', width: 180 },
-      { title: '角色', dataIndex: 'role', width: 120 },
+      { title: '邮箱', dataIndex: 'email', width: 180, placeholder: '-', ellipsis: true },
+      { title: '部门', dataIndex: 'deptName', width: 180, placeholder: '-', ellipsis: true },
+      { title: '角色', dataIndex: 'role', width: 120, placeholder: '-', ellipsis: true },
       {
         title: '状态',
         dataIndex: 'status',
@@ -183,7 +195,9 @@ export default function UserTable({ selectedDeptId = undefined, onTotalUserCount
             <Dropdown
               droplist={
                 <Menu>
-                  <Menu.Item key='disable' onClick={() => handleDisable(record)}>禁用</Menu.Item>
+                  <Menu.Item key='disable' onClick={() => handleStatusUpdate(record)}>
+                    { getStatusLabel(record.status === StatusEnum.DISABLE ? StatusEnum.ENABLE : StatusEnum.DISABLE) }
+                  </Menu.Item>
                   <Menu.Item key='del' onClick={() => handleDelete(record)}>删除</Menu.Item>
                 </Menu>
               }
@@ -202,7 +216,7 @@ export default function UserTable({ selectedDeptId = undefined, onTotalUserCount
 
   return (
     <div>
-      {/* 顶部操作区 */}
+      {/* 操作区 */}
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: 16 }}>
         <Space>
           <Button type="primary" icon={<IconPlus />} onClick={handleCreate}>新建</Button>
@@ -213,8 +227,9 @@ export default function UserTable({ selectedDeptId = undefined, onTotalUserCount
           prefix={<IconSearch />}
           placeholder="输入用户名称"
           value={search}
-          onChange={setSearch}
+          onChange={handleSearch}
           onPressEnter={handleSearch}
+          allowClear
         />
         {/* 导出本期暂不实现 */}
         {/* <Button icon={<IconDownload />} onClick={handleExport}>导出</Button> */}
@@ -222,16 +237,15 @@ export default function UserTable({ selectedDeptId = undefined, onTotalUserCount
       {/* 表格 */}
       <Table
         rowKey='id'
+        hover
         columns={getColumns(handleEdit)}
         data={data}
         pagination={false}
         scroll={{ y: 510 }}
         border={false}
       />
-      {/* 底部操作区 */}
-      <div style={{ display: 'flex', alignItems: 'center', marginTop: 12 }}>
-        <div style={{ flex: 1 }} />
-        <span style={{ marginRight: 16 }}>共{total}条</span>
+      {/* 页码 */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginTop: 12 }}>
         <Pagination
           size="small"
           current={page}

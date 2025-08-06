@@ -15,3 +15,5 @@ export interface RoleVO {
 export type RoleForm = Partial<RoleVO>
 
 export type UpdateStatusForm = Pick<RoleVO, 'id' | 'status'>
+
+export type SimpleRoleVO = Pick<RoleVO, 'id' | 'name'> & Partial<RoleVO>

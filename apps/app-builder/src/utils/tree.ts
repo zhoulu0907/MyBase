@@ -27,7 +27,7 @@ export const DEFAULT_OPTIONS = {
  * @param options.parentId - 用作父级关联的键名，默认为 'parentId'
  * @param options.children - 用作存储子节点的键名，默认为 'children'
  * @param options.label - 用作节点显示文本的键名，默认为 'name'
- * 
+ * @param isKeyTypeString arco-tree中key为string类型，此参数表示是否将key转为string类型, 默认为false，即保留原类型
  * @returns TreeNode[]
  * 
  * @example
@@ -39,7 +39,8 @@ export const DEFAULT_OPTIONS = {
  */
 export const listToTree = <T extends Record<string, any>>(
   list: T[],
-  options: Options = {}
+  options: Options = {},
+  isKeyTypeString = false
 ): TreeNode[] => {
   const {
     key,
@@ -53,7 +54,7 @@ export const listToTree = <T extends Record<string, any>>(
   for (const item of list) {
     nodeMap.set(item[key], {
       ...item,
-      key: item[key], 
+      key: isKeyTypeString ? String(item[key]) : item[key], 
       title: item[label],
       children: item[children] || [],
     });
