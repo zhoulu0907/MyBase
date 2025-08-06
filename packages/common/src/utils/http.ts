@@ -101,6 +101,10 @@ export class HttpClient {
 
             if (data.code !== 0) {
                 Message.error(data.msg || '请求失败');
+                if (data.code === 401) {
+                    TokenManager.clearToken();
+                    window.location.href = '/#/login';
+                }
                 return Promise.reject(new Error(data.msg || '请求失败'));
             }
         }
@@ -178,8 +182,8 @@ export class HttpClient {
   /**
    * GET 请求
    */
-  public async get<T = any>(url: string, config?: AxiosRequestConfig): Promise<T> {
-    const response = await this.instance.get<BaseResponse<T>>(url, config);
+  public async get<T = any>(url: string, params?: any, config?: AxiosRequestConfig): Promise<T> {
+    const response = await this.instance.get<BaseResponse<T>>(url, { params, ...config });
     return response.data.data;
   }
 
