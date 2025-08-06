@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, Form, Input, Select, Message, TreeSelect } from '@arco-design/web-react';
-import { getSimpleUserList } from '@onebase/platform-center/src/services/user'
-import type { UserVO } from '@onebase/platform-center/src/types/user'
-import { type DeptTree, type DeptForm } from '@onebase/platform-center/src/types/dept';
+import { getSimpleUserList } from '@onebase/platform-center'
+import type { UserVO } from '@onebase/platform-center'
+import { type DeptTree, type DeptForm } from '@onebase/platform-center';
 
 const FormItem = Form.Item;
 

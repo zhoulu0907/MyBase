@@ -7,12 +7,12 @@ import {
   getUserPage,
   resetUserPassword,
   updateUserStatus
-} from '@onebase/platform-center/src/services/user';
+} from '@onebase/platform-center';
 import { useEffect, useState } from 'react';
 import s from '../index.module.less';
 import UserFormModal from './UserFormModal';
-import type { UserVO } from '@onebase/platform-center/src/types/user';
-import type { PageParam } from '@onebase/platform-center/src/types/common';
+import type { UserVO } from '@onebase/platform-center';
+import type { PageParam } from '@onebase/platform-center';
 interface UserTableProps {
   selectedDeptId?: number;
   onTotalUserCountChange: (count: number) => void;
