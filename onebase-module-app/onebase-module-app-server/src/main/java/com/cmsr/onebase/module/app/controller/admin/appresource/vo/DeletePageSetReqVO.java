@@ -8,7 +8,7 @@ import lombok.Data;
 @Data
 public class DeletePageSetReqVO {
 
-    @Schema(description = "页面集编码", requiredMode = Schema.RequiredMode.REQUIRED, example = "xxx")
-    @NotNull(message = "页面集编码不能为空")
-    private String pageSetCode;
+    @Schema(description = "菜单ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
+    @NotNull(message = "菜单ID不能为空")
+    private Long menuId;
 }

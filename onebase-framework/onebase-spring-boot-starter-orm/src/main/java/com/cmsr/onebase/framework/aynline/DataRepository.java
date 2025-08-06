@@ -40,7 +40,7 @@ import lombok.extern.slf4j.Slf4j;
  * @author mickey
  */
 @Slf4j
-public class DataRepository {
+public class DataRepository { // TODO 等改造完成，这个类泛型 <T extends BaseDO>
     static {
         ConfigTable.GENERATOR.set(PrimaryGenerator.GENERATOR.SNOWFLAKE);
         ConfigTable.IS_AUTO_CHECK_METADATA = true;
@@ -54,7 +54,13 @@ public class DataRepository {
     @Resource
     private AnylineService<?> anylineService;
 
+    private Class<?> defaultClazz = null;
+
     public DataRepository() {
+    }
+
+    public DataRepository(Class<?> defaultClazz) {
+        this.defaultClazz = defaultClazz;
     }
 
     /**
@@ -138,14 +144,13 @@ public class DataRepository {
 
     /**
      * 更新
-     * @param <T>
      *
-     * @param entity 要保存的实体
-     * @param <T>    实体类型
-     * @return 保存后的实体
+     * @param clazz
+     * @param configs
+     * @return 更新数量
      */
     public <T> long updateByConfig(Class<T> clazz, ConfigStore configs) {
-        if (clazz== null) {
+        if (clazz == null) {
             throw new BizException(StatusCode.DB_UPDATE_ERROR);
         }
         try {
@@ -162,11 +167,22 @@ public class DataRepository {
     /**
      * 根据ID查找实体
      *
+     * @param id
+     * @return
+     */
+    public <T extends BaseDO> T findById(Long id) {
+        return findById((Class<T>) defaultClazz, id);
+    }
+
+    /**
+     * 根据ID查找实体
+     *
      * @param clazz 实体类
      * @param id    实体ID
      * @param <T>   实体类型
      * @return 实体对象，如果不存在返回null
      */
+    @Deprecated
     public <T extends BaseDO> T findById(Class<T> clazz, Long id) {
         try {
             ConfigStore configs = new DefaultConfigStore();
@@ -179,6 +195,10 @@ public class DataRepository {
         }
     }
 
+    public <T extends BaseDO> Optional<T> findByIdOptional(Long id) {
+        return findByIdOptional((Class<T>) defaultClazz, id);
+    }
+
     /**
      * 根据ID查找实体（返回Optional）
      *
@@ -187,9 +207,14 @@ public class DataRepository {
      * @param <T>   实体类型
      * @return Optional包装的实体对象
      */
+    @Deprecated
     public <T extends BaseDO> Optional<T> findByIdOptional(Class<T> clazz, Long id) {
         T entity = findById(clazz, id);
         return Optional.ofNullable(entity);
+    }
+
+    public boolean existsById(Long id) {
+        return existsById((Class<? extends BaseDO>) defaultClazz, id);
     }
 
     /**
@@ -200,8 +225,13 @@ public class DataRepository {
      * @param <T>   实体类型
      * @return 是否存在
      */
+    @Deprecated
     public <T extends BaseDO> boolean existsById(Class<T> clazz, Long id) {
         return findById(clazz, id) != null;
+    }
+
+    public <T extends BaseDO> List<T> findAll() {
+        return findAll((Class<T>) defaultClazz);
     }
 
     /**
@@ -211,6 +241,7 @@ public class DataRepository {
      * @param <T>   实体类型
      * @return 实体列表
      */
+    @Deprecated
     public <T extends BaseDO> List<T> findAll(Class<T> clazz) {
         try {
             ConfigStore configs = new DefaultConfigStore();
@@ -242,6 +273,11 @@ public class DataRepository {
         }
     }
 
+
+    public <T extends BaseDO> List<T> findAllByIds(Collection<Long> ids) {
+        return findAllByIds((Class<T>) defaultClazz, ids);
+    }
+
     /**
      * 根据ID列表查找实体
      *
@@ -250,6 +286,7 @@ public class DataRepository {
      * @param <T>   实体类型
      * @return 实体列表
      */
+    @Deprecated
     public <T extends BaseDO> List<T> findAllByIds(Class<T> clazz, Collection<Long> ids) {
         try {
             ConfigStore configs = new DefaultConfigStore();
@@ -264,6 +301,10 @@ public class DataRepository {
         }
     }
 
+    public long count() {
+        return count((Class<? extends BaseDO>) defaultClazz);
+    }
+
     /**
      * 统计实体数量
      *
@@ -271,6 +312,7 @@ public class DataRepository {
      * @param <T>   实体类型
      * @return 实体数量
      */
+    @Deprecated
     public <T extends BaseDO> long count(Class<T> clazz) {
         try {
             ConfigStore configs = new DefaultConfigStore();
@@ -357,6 +399,10 @@ public class DataRepository {
         }
     }
 
+    public <T extends BaseDO> void deleteById(Long id) {
+        deleteById((Class<? extends BaseDO>) defaultClazz, id);
+    }
+
     /**
      * 根据ID删除实体（软删除）
      *
@@ -364,6 +410,7 @@ public class DataRepository {
      * @param id    实体ID
      * @param <T>   实体类型
      */
+    @Deprecated
     public <T extends BaseDO> void deleteById(Class<T> clazz, Long id) {
         try {
             ConfigStore configs = new DefaultConfigStore();
@@ -412,6 +459,10 @@ public class DataRepository {
         }
     }
 
+    public void deleteAllById(Collection<Long> ids) {
+        deleteAllById((Class<? extends BaseDO>) defaultClazz, ids);
+    }
+
     /**
      * 根据ID列表删除实体（软删除）
      *
@@ -419,6 +470,7 @@ public class DataRepository {
      * @param ids   ID列表
      * @param <T>   实体类型
      */
+    @Deprecated
     public <T extends BaseDO> void deleteAllById(Class<T> clazz, Collection<Long> ids) {
         try {
             ConfigStore configs = new DefaultConfigStore();
@@ -427,7 +479,7 @@ public class DataRepository {
             row.put("deleted", 1);  // 设置逻辑删除标记
 
             long result = anylineService.update(getTableName(clazz), row, configs);
-            log.info("[{}] deleteAllById  ---> effect rows={}, ids={}", clazz, result,ids);
+            log.info("[{}] deleteAllById  ---> effect rows={}, ids={}", clazz, result, ids);
 
             // 下面异常注释掉，允许删除 0 行
             // if (result == 0) {
@@ -437,6 +489,10 @@ public class DataRepository {
             log.error("根据ID列表删除实体失败: class={}, ids={}", clazz.getSimpleName(), ids, e);
             throw new BizException(StatusCode.DB_DELETE_ERROR);
         }
+    }
+
+    public void deleteAll() {
+        deleteAll((Class<? extends BaseDO>) defaultClazz);
     }
 
     /**
@@ -460,6 +516,10 @@ public class DataRepository {
         }
     }
 
+    public <T extends BaseDO> PageResult<T> findAll(int pageIndex, int pageSize) {
+        return findAll((Class<T>) defaultClazz, pageIndex, pageSize);
+    }
+
     /**
      * 分页查询
      *
@@ -469,6 +529,7 @@ public class DataRepository {
      * @param <T>       实体类型
      * @return 分页结果
      */
+    @Deprecated
     public <T extends BaseDO> PageResult<T> findAll(Class<T> clazz, int pageIndex, int pageSize) {
         try {
             ConfigStore configs = new DefaultConfigStore();

@@ -10,7 +10,7 @@ public interface PageSetService {
 
     String createPageSet(CreatePageSetDTO createPageSetDTO);
 
-    void deletePageSet(String pageSetCode);
+    void deletePageSet(Long menuId);
 
     Boolean savePageSet(SavePageSetReqVO savePageSetReqVO);
 

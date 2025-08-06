@@ -9,5 +9,5 @@ import lombok.Data;
  */
 @Schema(description = "应用管理 - 应用菜单隐藏/显示 Request VO")
 @Data
-public class ApplicationMenuSwitchShowReqVO {
+public class MenuSwitchShowReqVO {
 }

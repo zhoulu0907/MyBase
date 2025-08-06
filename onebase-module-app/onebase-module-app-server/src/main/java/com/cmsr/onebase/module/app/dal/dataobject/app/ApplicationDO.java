@@ -37,8 +37,8 @@ public class ApplicationDO extends TenantBaseDO {
     @Column(name = "datasource_id", nullable = false, comment = "数据源ID")
     private Long datasourceId;
 
-    @Column(name = "status", nullable = false, comment = "状态")
-    private Integer status;
+    @Column(name = "app_status", nullable = false, comment = "状态")
+    private Integer appStatus;
 
     @Column(name = "description", length = 1024, comment = "描述")
     private String description;

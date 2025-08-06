@@ -39,7 +39,7 @@ public class PageSetController {
     @PostMapping("/delete")
     @Operation(summary = "删除页面集")
     public CommonResult<Boolean> deletePageSet(@RequestBody DeletePageSetReqVO deletePageSetReqVO) {
-        pageSetService.deletePageSet(deletePageSetReqVO.getPageSetCode());
+        pageSetService.deletePageSet(deletePageSetReqVO.getMenuId());
         return CommonResult.success(true);
     }
 

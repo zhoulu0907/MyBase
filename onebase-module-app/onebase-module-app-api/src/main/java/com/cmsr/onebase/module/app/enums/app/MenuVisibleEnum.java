@@ -4,7 +4,7 @@ package com.cmsr.onebase.module.app.enums.app;
  * @Author：huangjie
  * @Date：2025/7/30 16:32
  */
-public enum ApplicationMenuVisible {
+public enum MenuVisibleEnum {
 
     YES(1, "是"),
     NO(0, "否");
@@ -13,7 +13,7 @@ public enum ApplicationMenuVisible {
 
     private final String text;
 
-    ApplicationMenuVisible(Integer value, String text) {
+    MenuVisibleEnum(Integer value, String text) {
         this.value = value;
         this.text = text;
     }

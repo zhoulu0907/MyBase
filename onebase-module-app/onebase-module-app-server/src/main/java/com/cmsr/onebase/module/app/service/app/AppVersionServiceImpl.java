@@ -4,8 +4,8 @@ import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.data.base.BaseDO;
-import com.cmsr.onebase.module.app.controller.admin.app.vo.ApplicationVersionCreateReqVO;
-import com.cmsr.onebase.module.app.controller.admin.app.vo.ApplicationVersionListRespVO;
+import com.cmsr.onebase.module.app.controller.admin.app.vo.VersionCreateReqVO;
+import com.cmsr.onebase.module.app.controller.admin.app.vo.VersionListRespVO;
 import com.cmsr.onebase.module.app.dal.dataobject.app.*;
 import com.cmsr.onebase.module.app.enums.app.AppErrorCodeConstants;
 import com.cmsr.onebase.module.app.util.VersionUtils;
@@ -27,7 +27,7 @@ import java.util.List;
 @Setter
 @Service
 @Validated
-public class  VersionServiceImpl implements VersionService {
+public class AppVersionServiceImpl implements AppVersionService {
 
     @Resource
     private DataRepository dataRepository;
@@ -36,13 +36,13 @@ public class  VersionServiceImpl implements VersionService {
     private AppCommonService appCommonService;
 
     @Override
-    public List<ApplicationVersionListRespVO> listApplicationVersion(Long applicationId) {
+    public List<VersionListRespVO> listApplicationVersion(Long applicationId) {
         ConfigStore configs = new DefaultConfigStore();
         configs.order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
         List<VersionDO> dos = dataRepository.findAll(VersionDO.class, configs);
         AppCommonService.UserHelper userHelper = appCommonService.getUserHelper(dos);
         return dos.stream().map(v -> {
-            ApplicationVersionListRespVO vo = BeanUtils.toBean(v, ApplicationVersionListRespVO.class);
+            VersionListRespVO vo = BeanUtils.toBean(v, VersionListRespVO.class);
             vo.setCreatorName(userHelper.getUserName(v.getCreator()));
             return vo;
         }).toList();
@@ -50,7 +50,7 @@ public class  VersionServiceImpl implements VersionService {
 
     @Transactional
     @Override
-    public void createApplicationVersion(ApplicationVersionCreateReqVO createReqVO) {
+    public void createApplicationVersion(VersionCreateReqVO createReqVO) {
         ApplicationDO applicationDO = appCommonService.validateApplicationExist(createReqVO.getApplicationId());
         //先备份老的相关数据
         //创建新版本
@@ -62,7 +62,7 @@ public class  VersionServiceImpl implements VersionService {
         ConfigStore configs = new DefaultConfigStore();
         configs.eq("application_id", applicationDO.getId());
         //备份菜单
-        List<ApplicationMenuDO> menuDOS = dataRepository.findAll(ApplicationMenuDO.class, configs);
+        List<MenuDO> menuDOS = dataRepository.findAll(MenuDO.class, configs);
         List<VersionMenuDO> versionMenuDOS = menuDOS.stream().map(v -> {
             VersionMenuDO versionMenuDO = BeanUtils.toBean(v, VersionMenuDO.class);
             versionMenuDO.setVersionId(applicationVersionDO.getId());
@@ -70,7 +70,7 @@ public class  VersionServiceImpl implements VersionService {
         }).toList();
         dataRepository.insertBatch(versionMenuDOS);
         //备份资源
-        List<ApplicationResourceDO> resourceDOS = dataRepository.findAll(ApplicationResourceDO.class, configs);
+        List<ResourceDO> resourceDOS = dataRepository.findAll(ResourceDO.class, configs);
         List<VersionResourceDO> versionResourceDOS = resourceDOS.stream().map(v -> {
             VersionResourceDO versionResourceDO = BeanUtils.toBean(v, VersionResourceDO.class);
             versionResourceDO.setVersionId(applicationVersionDO.getId());
@@ -89,23 +89,23 @@ public class  VersionServiceImpl implements VersionService {
         //删除主表数据
         ConfigStore configs = new DefaultConfigStore();
         configs.eq("application_id", applicationVersionDO.getApplicationId());
-        dataRepository.deleteByConfig(ApplicationMenuDO.class, configs);
-        dataRepository.deleteByConfig(ApplicationResourceDO.class, configs);
+        dataRepository.deleteByConfig(MenuDO.class, configs);
+        dataRepository.deleteByConfig(ResourceDO.class, configs);
         //查询版本数据
         configs = new DefaultConfigStore();
         configs.eq("version_id", versionId);
         //恢复菜单
         List<VersionMenuDO> versionMenuDOS = dataRepository.findAll(VersionMenuDO.class, configs);
-        List<ApplicationMenuDO> menuDOS = versionMenuDOS.stream().map(v -> {
-            ApplicationMenuDO menuDO = BeanUtils.toBean(v, ApplicationMenuDO.class);
+        List<MenuDO> menuDOS = versionMenuDOS.stream().map(v -> {
+            MenuDO menuDO = BeanUtils.toBean(v, MenuDO.class);
             menuDO.setId(null);
             return menuDO;
         }).toList();
         dataRepository.insertBatch(menuDOS);
         //恢复资源
         List<VersionResourceDO> versionResourceDOS = dataRepository.findAll(VersionResourceDO.class, configs);
-        List<ApplicationResourceDO> resourceDOS = versionResourceDOS.stream().map(v -> {
-            ApplicationResourceDO resourceDO = BeanUtils.toBean(v, ApplicationResourceDO.class);
+        List<ResourceDO> resourceDOS = versionResourceDOS.stream().map(v -> {
+            ResourceDO resourceDO = BeanUtils.toBean(v, ResourceDO.class);
             resourceDO.setId(null);
             return resourceDO;
         }).toList();

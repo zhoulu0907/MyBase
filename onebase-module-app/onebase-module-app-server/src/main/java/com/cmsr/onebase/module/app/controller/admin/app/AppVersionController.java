@@ -1,9 +1,9 @@
 package com.cmsr.onebase.module.app.controller.admin.app;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
-import com.cmsr.onebase.module.app.controller.admin.app.vo.ApplicationVersionCreateReqVO;
-import com.cmsr.onebase.module.app.controller.admin.app.vo.ApplicationVersionListRespVO;
-import com.cmsr.onebase.module.app.service.app.VersionService;
+import com.cmsr.onebase.module.app.controller.admin.app.vo.VersionCreateReqVO;
+import com.cmsr.onebase.module.app.controller.admin.app.vo.VersionListRespVO;
+import com.cmsr.onebase.module.app.service.app.AppVersionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -21,21 +21,21 @@ import java.util.List;
 @RestController
 @RequestMapping("/app/version")
 @Validated
-public class VersionController {
+public class AppVersionController {
 
     @Resource
-    private VersionService versionService;
+    private AppVersionService appVersionService;
 
     @GetMapping("/list")
     @Operation(summary = "应用版本列表")
-    public CommonResult<List<ApplicationVersionListRespVO>> listApplicationVersion(@RequestParam("applicationId") Long applicationId) {
-        return CommonResult.success(versionService.listApplicationVersion(applicationId));
+    public CommonResult<List<VersionListRespVO>> listApplicationVersion(@RequestParam("applicationId") Long applicationId) {
+        return CommonResult.success(appVersionService.listApplicationVersion(applicationId));
     }
 
     @PostMapping("/create")
     @Operation(summary = "创建应用版本")
-    public CommonResult<Boolean> createApplicationVersion(@RequestBody ApplicationVersionCreateReqVO createReqVO) {
-        versionService.createApplicationVersion(createReqVO);
+    public CommonResult<Boolean> createApplicationVersion(@RequestBody VersionCreateReqVO createReqVO) {
+        appVersionService.createApplicationVersion(createReqVO);
         return CommonResult.success(true);
     }
 
@@ -43,7 +43,7 @@ public class VersionController {
     @Operation(summary = "应用版本启用")
     @Parameter(name = "applicationId", description = "应用id", required = true)
     public CommonResult<Boolean> restoreApplicationVersion(@RequestParam("versionId") Long versionId) {
-        versionService.restoreApplicationVersion(versionId);
+        appVersionService.restoreApplicationVersion(versionId);
         return CommonResult.success(true);
     }
 
@@ -51,7 +51,7 @@ public class VersionController {
     @Operation(summary = "删除应用版本")
     @Parameter(name = "applicationId", description = "应用id", required = true)
     public CommonResult<Boolean> deleteApplicationVersion(@RequestParam("versionId") Long versionId) {
-        versionService.deleteApplicationVersion(versionId);
+        appVersionService.deleteApplicationVersion(versionId);
         return CommonResult.success(true);
     }
 

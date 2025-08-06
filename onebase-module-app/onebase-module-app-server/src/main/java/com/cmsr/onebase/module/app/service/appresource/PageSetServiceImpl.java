@@ -80,11 +80,16 @@ public class PageSetServiceImpl implements PageSetService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void deletePageSet(String pageSetCode) {
+    public void deletePageSet(Long menuId) {
+
+        // 找到页面集
+        ConfigStore configs = new DefaultConfigStore();
+        configs.and(Compare.EQUAL, "menu_id", menuId);
+        PageSetDO pageSetDO = dataRepository.findOne(PageSetDO.class, configs);
 
         // 删除页面集关联的页面
-        ConfigStore configs = new DefaultConfigStore();
-        configs.and(Compare.EQUAL, "pageset_ref", pageSetCode);
+        configs = new DefaultConfigStore();
+        configs.and(Compare.EQUAL, "pageset_ref", pageSetDO.getPageSetCode());
 
         List<PageSetPageDO> pageSetPageDOs = dataRepository.findAll(PageSetPageDO.class, configs);
         List<String> pageRefs = pageSetPageDOs.stream()
@@ -93,7 +98,7 @@ public class PageSetServiceImpl implements PageSetService {
 
         // 删除页面集-页面关联表
         configs = new DefaultConfigStore();
-        configs.and(Compare.EQUAL, "pageset_ref", pageSetCode);
+        configs.and(Compare.EQUAL, "pageset_ref", pageSetDO.getPageSetCode());
         dataRepository.deleteByConfig(PageSetPageDO.class, configs);
 
         // 删除页面
@@ -103,7 +108,7 @@ public class PageSetServiceImpl implements PageSetService {
 
         // 删除页面集
         configs = new DefaultConfigStore();
-        configs.and(Compare.EQUAL, "pageset_code", pageSetCode);
+        configs.and(Compare.EQUAL, "menu_id", menuId);
         dataRepository.deleteByConfig(PageSetDO.class, configs);
 
         return;
