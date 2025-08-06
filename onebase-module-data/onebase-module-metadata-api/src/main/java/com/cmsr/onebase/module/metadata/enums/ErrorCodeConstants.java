@@ -21,4 +21,7 @@ public interface ErrorCodeConstants {
     ErrorCode ENTITY_FIELD_NOT_EXISTS = new ErrorCode(1_010_003_000, "实体字段不存在");
     ErrorCode ENTITY_FIELD_CODE_DUPLICATE = new ErrorCode(1_010_003_001, "已经存在编码为【{}】的实体字段");
 
+    // ========== 数据方法 1-010-004-000 ==========
+    ErrorCode DATA_METHOD_NOT_EXISTS = new ErrorCode(1_010_004_000, "数据方法不存在");
+
 }

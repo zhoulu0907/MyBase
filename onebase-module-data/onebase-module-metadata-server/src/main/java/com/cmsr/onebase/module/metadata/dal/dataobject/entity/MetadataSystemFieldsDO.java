@@ -14,7 +14,7 @@ import lombok.*;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class MetadataSystemFieldsDO{
+public class MetadataSystemFieldsDO extends BaseDO {
     /**
      * id
      */

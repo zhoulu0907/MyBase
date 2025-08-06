@@ -41,4 +41,7 @@ public interface ErrorCodeConstants {
     ErrorCode FIELD_NOT_EXISTS = new ErrorCode(1_001_005_007, "字段 {} 不存在");
     ErrorCode PRIMARY_KEY_UPDATE_NOT_ALLOWED = new ErrorCode(1_001_005_008, "不允许更新主键字段");
 
+    // ========== 数据方法管理 1-001-006-000 ==========
+    ErrorCode DATA_METHOD_NOT_EXISTS = new ErrorCode(1_001_006_001, "数据方法不存在");
+
 } 
