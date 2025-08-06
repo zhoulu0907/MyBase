@@ -35,6 +35,14 @@
         <kingbase.jdbc.version>8.6.0</kingbase.jdbc.version>
         <opengauss.jdbc.version>5.1.0</opengauss.jdbc.version>
         <taos.version>3.3.3</taos.version>
+<<<<<<< HEAD
+=======
+        <postgresql.version>42.7.4</postgresql.version>
+        <!--<anyline.version>8.7.2-jdk17-SNAPSHOT</anyline.version>-->
+        <anyline.version>8.7.2-jdk17-20250722</anyline.version>
+        <jakarta.persistence-api.version>3.2.0</jakarta.persistence-api.version>
+        <jakarta.validation-api.version>3.1.1</jakarta.validation-api.version>
+>>>>>>> 4a15745bafb6ee9c4ca0f396aacf6f067194c68d
         <!-- 消息队列 -->
         <rocketmq-spring.version>2.3.2</rocketmq-spring.version>
         <!-- RPC 相关 -->
@@ -134,6 +142,7 @@
                 <artifactId>onebase-spring-boot-starter-biz-tenant</artifactId>
                 <version>${revision}</version>
             </dependency>
+<<<<<<< HEAD
             <dependency>
                 <groupId>com.cmsr.onebase</groupId>
                 <artifactId>onebase-spring-boot-starter-biz-data-permission</artifactId>
@@ -144,6 +153,10 @@
                 <artifactId>onebase-spring-boot-starter-biz-ip</artifactId>
                 <version>${revision}</version>
             </dependency>
+=======
+
+
+>>>>>>> 4a15745bafb6ee9c4ca0f396aacf6f067194c68d
 
             <!-- Spring 核心 -->
             <dependency>
@@ -153,11 +166,14 @@
                 <version>${spring.boot.version}</version>
             </dependency>
 
+<<<<<<< HEAD
             <dependency>
                 <groupId>com.cmsr.onebase</groupId>
                 <artifactId>onebase-spring-boot-starter-env</artifactId>
                 <version>${revision}</version>
             </dependency>
+=======
+>>>>>>> 4a15745bafb6ee9c4ca0f396aacf6f067194c68d
 
             <!-- Web 相关 -->
             <dependency>
