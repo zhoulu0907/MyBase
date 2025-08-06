@@ -1,6 +1,5 @@
 package com.cmsr.onebase.module.metadata.service.entity;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.BusinessEntityPageReqVO;
@@ -37,8 +36,6 @@ import static com.cmsr.onebase.module.metadata.enums.ErrorCodeConstants.BUSINESS
 public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntityService {
 
     @Resource
-    private DataRepository dataRepository;
-    @Resource
     private DatasourceConvert datasourceConvert;
     @Resource
     private DatasourceServiceHelper datasourceServiceHelper;
@@ -59,7 +56,7 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
         // 根据实体类型处理表名
         handleTableNameByEntityType(businessEntity, createReqVO);
         
-        dataRepository.insert(businessEntity);
+        datasourceServiceHelper.insert(businessEntity);
         
         // 根据实体类型决定是否创建物理表
         if (BusinessEntityTypeEnum.needCreatePhysicalTable(createReqVO.getEntityType())) {
@@ -144,7 +141,7 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
         
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.and("id", Long.valueOf(datasourceId));
-        return dataRepository.findOne(MetadataDatasourceDO.class, configStore);
+        return datasourceServiceHelper.findOne(MetadataDatasourceDO.class, configStore);
     }
     
     /**
@@ -154,7 +151,7 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.and("is_enabled", 1); // 只获取启用的系统字段
         configStore.order("id", Order.TYPE.ASC);
-        return dataRepository.findAllByConfig(MetadataSystemFieldsDO.class, configStore);
+        return datasourceServiceHelper.findAllByConfig(MetadataSystemFieldsDO.class, configStore);
     }
     
     /**
@@ -189,7 +186,7 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
                     .fieldCode(generateFieldCode(systemField.getFieldName())) // 生成字段编码
                     .build();
             
-            dataRepository.insert(entityField);
+            datasourceServiceHelper.insert(entityField);
         }
         
         log.info("成功保存 {} 个系统字段到实体字段表", systemFields.size());
@@ -353,7 +350,7 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
         // 根据实体类型处理表名
         handleTableNameByEntityType(updateObj, updateReqVO);
         
-        dataRepository.update(updateObj);
+        datasourceServiceHelper.update(updateObj);
     }
 
     @Override
@@ -365,13 +362,13 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
         // 删除业务实体
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.in("id", id);
-        dataRepository.deleteByConfig(MetadataBusinessEntityDO.class, configStore);
+        datasourceServiceHelper.deleteByConfig(MetadataBusinessEntityDO.class, configStore);
     }
 
     private void validateBusinessEntityExists(Long id) {
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.in("id", id);
-        if (dataRepository.findOne(MetadataBusinessEntityDO.class, configStore) == null) {
+        if (datasourceServiceHelper.findOne(MetadataBusinessEntityDO.class, configStore) == null) {
             throw exception(BUSINESS_ENTITY_NOT_EXISTS);
         }
     }
@@ -384,7 +381,7 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
             configStore.and(Compare.NOT_EQUAL, "id", id);
         }
         
-        long count = dataRepository.countByConfig(MetadataBusinessEntityDO.class, configStore);
+        long count = datasourceServiceHelper.countByConfig(MetadataBusinessEntityDO.class, configStore);
         if (count > 0) {
             throw exception(BUSINESS_ENTITY_CODE_DUPLICATE);
         }
@@ -394,7 +391,7 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
     public MetadataBusinessEntityDO getBusinessEntity(Long id) {
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.in("id", id);
-        return dataRepository.findOne(MetadataBusinessEntityDO.class, configStore);
+        return datasourceServiceHelper.findOne(MetadataBusinessEntityDO.class, configStore);
     }
 
     @Override
@@ -427,7 +424,7 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
         // 分页查询
         configStore.order("create_time", Order.TYPE.DESC);
         
-        return dataRepository.findPageWithConditions(MetadataBusinessEntityDO.class, configStore, 
+        return datasourceServiceHelper.findPageWithConditions(MetadataBusinessEntityDO.class, configStore, 
             pageReqVO.getPageNo(), pageReqVO.getPageSize());
     }
 
@@ -435,14 +432,14 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
     public List<MetadataBusinessEntityDO> getBusinessEntityList() {
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.order("create_time", Order.TYPE.DESC);
-        return dataRepository.findAllByConfig(MetadataBusinessEntityDO.class, configStore);
+        return datasourceServiceHelper.findAllByConfig(MetadataBusinessEntityDO.class, configStore);
     }
 
     @Override
     public MetadataBusinessEntityDO getBusinessEntityByCode(String code) {
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.and("code", code);
-        return dataRepository.findOne(MetadataBusinessEntityDO.class, configStore);
+        return datasourceServiceHelper.findOne(MetadataBusinessEntityDO.class, configStore);
     }
 
     @Override
@@ -450,7 +447,7 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.and("datasource_id", datasourceId);
         configStore.order("create_time", Order.TYPE.DESC);
-        return dataRepository.findAllByConfig(MetadataBusinessEntityDO.class, configStore);
+        return datasourceServiceHelper.findAllByConfig(MetadataBusinessEntityDO.class, configStore);
     }
 
 }

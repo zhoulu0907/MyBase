@@ -1,6 +1,5 @@
 package com.cmsr.onebase.module.metadata.service.entity;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldBatchCreateReqVO;
@@ -48,8 +47,6 @@ import static com.cmsr.onebase.module.metadata.enums.ErrorCodeConstants.ENTITY_F
 @Slf4j
 public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldService {
 
-    @Resource
-    private DataRepository dataRepository;
     @Resource
     private DatasourceConvert datasourceConvert;
     @Resource
@@ -103,7 +100,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
             entityField.setIsPrimaryKey(false);
             entityField.setAppId(Long.valueOf(reqVO.getAppId()));
 
-            dataRepository.insert(entityField);
+            datasourceServiceHelper.insert(entityField);
             fieldIds.add(entityField.getId().toString());
             successCount++;
             
@@ -145,13 +142,13 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
         configStore.order("sort_order", Order.TYPE.ASC);
         configStore.order("create_time", Order.TYPE.DESC);
         
-        return dataRepository.findAllByConfig(MetadataEntityFieldDO.class, configStore);
+        return datasourceServiceHelper.findAllByConfig(MetadataEntityFieldDO.class, configStore);
     }
 
     @Override
     public EntityFieldDetailRespVO getEntityFieldDetail(String id) {
         Long longId = Long.valueOf(id);
-        MetadataEntityFieldDO entityField = dataRepository.findById(MetadataEntityFieldDO.class, longId);
+        MetadataEntityFieldDO entityField = datasourceServiceHelper.findById(MetadataEntityFieldDO.class, longId);
         if (entityField == null) {
             throw exception(ENTITY_FIELD_NOT_EXISTS);
         }
@@ -183,7 +180,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
                 String firstFieldId = reqVO.getFields().get(0).getId();
                 DefaultConfigStore configStore = new DefaultConfigStore();
                 configStore.and("id", Long.valueOf(firstFieldId));
-                MetadataEntityFieldDO firstField = dataRepository.findOne(MetadataEntityFieldDO.class, configStore);
+                MetadataEntityFieldDO firstField = datasourceServiceHelper.findOne(MetadataEntityFieldDO.class, configStore);
                 if (firstField != null) {
                     businessEntity = getBusinessEntityById(firstField.getEntityId().toString());
                     if (businessEntity != null && businessEntity.getTableName() != null && 
@@ -215,7 +212,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
                 updateObj.setDataLength(fieldItem.getDataLength());
             }
 
-            dataRepository.update(updateObj);
+            datasourceServiceHelper.update(updateObj);
             successCount++;
             
             // 同步到物理表
@@ -224,7 +221,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
                     // 需要获取完整的字段信息进行更新
                     DefaultConfigStore configStore = new DefaultConfigStore();
                     configStore.and("id", Long.valueOf(fieldItem.getId()));
-                    MetadataEntityFieldDO fullFieldInfo = dataRepository.findOne(MetadataEntityFieldDO.class, configStore);
+                    MetadataEntityFieldDO fullFieldInfo = datasourceServiceHelper.findOne(MetadataEntityFieldDO.class, configStore);
                     if (fullFieldInfo != null) {
                         alterColumnInTable(datasource, businessEntity.getTableName(), fullFieldInfo);
                     }
@@ -251,7 +248,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
             MetadataEntityFieldDO updateObj = new MetadataEntityFieldDO();
             updateObj.setId(Long.valueOf(sortItem.getFieldId()));
             updateObj.setSortOrder(sortItem.getSortOrder());
-            dataRepository.update(updateObj);
+            datasourceServiceHelper.update(updateObj);
         }
     }
 
@@ -298,7 +295,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
             entityField.setFieldCode(generateFieldCode(createReqVO.getFieldName()));
         }
         
-        dataRepository.insert(entityField);
+        datasourceServiceHelper.insert(entityField);
         
         // 同步到物理表
         try {
@@ -337,7 +334,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
         if (updateObj.getFieldCode() == null || updateObj.getFieldCode().trim().isEmpty()) {
             updateObj.setFieldCode(generateFieldCode(updateReqVO.getFieldName()));
         }
-        dataRepository.update(updateObj);
+        datasourceServiceHelper.update(updateObj);
         
         // 同步到物理表
         try {
@@ -365,7 +362,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
         Long longId = Long.valueOf(id);
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.and("id", longId);
-        MetadataEntityFieldDO existingField = dataRepository.findOne(MetadataEntityFieldDO.class, configStore);
+        MetadataEntityFieldDO existingField = datasourceServiceHelper.findOne(MetadataEntityFieldDO.class, configStore);
         
         if (existingField != null) {
             // 校验实体类型是否允许修改表结构
@@ -373,7 +370,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
         }
         
         // 删除实体字段
-        dataRepository.deleteById(MetadataEntityFieldDO.class, longId);
+        datasourceServiceHelper.deleteById(MetadataEntityFieldDO.class, longId);
         
         // 从物理表删除字段
         if (existingField != null) {
@@ -395,7 +392,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
 
     private void validateEntityFieldExists(String id) {
         Long longId = Long.valueOf(id);
-        if (dataRepository.findById(MetadataEntityFieldDO.class, longId) == null) {
+        if (datasourceServiceHelper.findById(MetadataEntityFieldDO.class, longId) == null) {
             throw exception(ENTITY_FIELD_NOT_EXISTS);
         }
     }
@@ -410,7 +407,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
             configStore.and(Compare.NOT_EQUAL, "id", longId);
         }
         
-        long count = dataRepository.countByConfig(MetadataEntityFieldDO.class, configStore);
+        long count = datasourceServiceHelper.countByConfig(MetadataEntityFieldDO.class, configStore);
         if (count > 0) {
             throw exception(ENTITY_FIELD_CODE_DUPLICATE);
         }
@@ -419,7 +416,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
     @Override
     public MetadataEntityFieldDO getEntityField(String id) {
         Long longId = Long.valueOf(id);
-        return dataRepository.findById(MetadataEntityFieldDO.class, longId);
+        return datasourceServiceHelper.findById(MetadataEntityFieldDO.class, longId);
     }
 
     @Override
@@ -463,7 +460,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
         configStore.order("create_time", Order.TYPE.DESC);
         
         // 分页查询
-        return dataRepository.findPageWithConditions(MetadataEntityFieldDO.class, configStore, pageReqVO.getPageNo(), pageReqVO.getPageSize());
+        return datasourceServiceHelper.findPageWithConditions(MetadataEntityFieldDO.class, configStore, pageReqVO.getPageNo(), pageReqVO.getPageSize());
     }
 
     @Override
@@ -471,7 +468,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.order("sort_order", Order.TYPE.ASC);
         configStore.order("create_time", Order.TYPE.DESC);
-        return dataRepository.findAllByConfig(MetadataEntityFieldDO.class, configStore);
+        return datasourceServiceHelper.findAllByConfig(MetadataEntityFieldDO.class, configStore);
     }
 
     @Override
@@ -481,7 +478,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
         configStore.and("entity_id", longEntityId);
         configStore.order("sort_order", Order.TYPE.ASC);
         configStore.order("create_time", Order.TYPE.DESC);
-        return dataRepository.findAllByConfig(MetadataEntityFieldDO.class, configStore);
+        return datasourceServiceHelper.findAllByConfig(MetadataEntityFieldDO.class, configStore);
     }
 
     @Override
@@ -490,7 +487,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
         Long longEntityId = Long.valueOf(entityId);
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.and("entity_id", longEntityId);
-        List<MetadataEntityFieldDO> fields = dataRepository.findAllByConfig(MetadataEntityFieldDO.class, configStore);
+        List<MetadataEntityFieldDO> fields = datasourceServiceHelper.findAllByConfig(MetadataEntityFieldDO.class, configStore);
         
         // 获取业务实体信息，用于批量删除物理表字段
         MetadataBusinessEntityDO businessEntity = null;
@@ -507,7 +504,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
         
         for (MetadataEntityFieldDO field : fields) {
             // 删除数据库记录
-            dataRepository.deleteById(MetadataEntityFieldDO.class, field.getId());
+            datasourceServiceHelper.deleteById(MetadataEntityFieldDO.class, field.getId());
             
             // 从物理表删除字段
             if (businessEntity != null && datasource != null) {
@@ -531,7 +528,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
         
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.and("id", Long.valueOf(entityId));
-        return dataRepository.findOne(MetadataBusinessEntityDO.class, configStore);
+        return datasourceServiceHelper.findOne(MetadataBusinessEntityDO.class, configStore);
     }
     
     /**
@@ -544,7 +541,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
         
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.and("id", Long.valueOf(datasourceId));
-        return dataRepository.findOne(MetadataDatasourceDO.class, configStore);
+        return datasourceServiceHelper.findOne(MetadataDatasourceDO.class, configStore);
     }
     
     /**
@@ -761,7 +758,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
     private MetadataBusinessEntityDO getBusinessEntityById(Long entityId) {
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.and("id", entityId);
-        return dataRepository.findOne(MetadataBusinessEntityDO.class, configStore);
+        return datasourceServiceHelper.findOne(MetadataBusinessEntityDO.class, configStore);
     }
 
 }
