@@ -15,5 +15,5 @@ public class MenuCopyReqVO {
 
     private String menuName;
 
-    private String parentUuid;
+    private Long parentId;
 }
