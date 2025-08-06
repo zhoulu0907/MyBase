@@ -129,17 +129,16 @@ public class TenantServiceImpl implements TenantService {
             // 获取license总人数限制
             Integer licenseTotalCount = license.getTenantLimit();
             // 获取已分配人员数量
-            Integer allocatedCount = userService.getUserCountByStatus(UserStatusEnum.NORMAL.getStatus());
-
+            Integer allocatedCount = getTenantCountByStatus(TenantStatusEnum.NORMAL.getStatus());
             // 如果传入的分配人员数量加上已分配数量超过license限制，则报错
-            if (createReqVO.getAllocatePersonCount()!= null &&
-                    (allocatedCount + createReqVO.getAllocatePersonCount()) > licenseTotalCount) {
-
+            if (createReqVO.getAccountCount()!= null &&
+                    (allocatedCount + createReqVO.getAccountCount()) > licenseTotalCount) {
                 Integer remainingCount = licenseTotalCount - allocatedCount;
                 throw exception(LICENSE_USER_COUNT_NOT_ENOUGH,
                         licenseTotalCount,
                         remainingCount);
             }
+            createReqVO.setAllocatePersonCount(allocatedCount);
         }
         
         // 校验联系人用户名是否已存在

@@ -6,6 +6,7 @@ import com.cmsr.onebase.module.system.enums.DictTypeConstants;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -51,5 +52,9 @@ public class TenantRespVO {
     @Schema(description = "创建时间", requiredMode = Schema.RequiredMode.REQUIRED)
     @ExcelProperty("创建时间")
     private LocalDateTime createTime;
+
+    @Schema(description = "已分配人员数量", requiredMode = Schema.RequiredMode.REQUIRED, example = "100")
+    @NotNull(message = "已分配人员数量")
+    private Integer allocatePersonCount;
 
 }
