@@ -21,7 +21,7 @@ public class MenuCreateReqVO {
     private Integer menuType;
 
     @Schema(description = "父菜单ID")
-    private String parentUuid;
+    private Long parentId;
 
     @Schema(description = "菜单名称")
     @NotBlank(message = "菜单名称不能为空")

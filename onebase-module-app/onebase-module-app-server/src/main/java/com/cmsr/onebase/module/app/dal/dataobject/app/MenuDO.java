@@ -16,11 +16,11 @@ public class MenuDO extends TenantBaseDO {
     @Column(name = "application_id", nullable = false, comment = "应用Id")
     private Long applicationId;
 
-    @Column(name = "parent_uuid", nullable = false, length = 64, comment = "父节点Id")
-    private String parentUuid;
+    @Column(name = "parent_id", nullable = false, length = 64, comment = "父节点Id")
+    private Long parentId;
 
-    @Column(name = "menu_uuid", length = 64, comment = "菜单uuid")
-    private String menuUuid;
+    @Column(name = "menu_code", length = 64, comment = "菜单编码")
+    private String menuCode;
 
     @Column(name = "menu_sort", nullable = false, columnDefinition = "integer default 0", comment = "菜单排序")
     private Integer menuSort;
@@ -38,6 +38,6 @@ public class MenuDO extends TenantBaseDO {
     private String actionTarget;
 
     @Column(name = "is_visible", nullable = false, comment = "是否可见")
-    private Integer isVisible;
+    private Boolean isVisible;
 
 }

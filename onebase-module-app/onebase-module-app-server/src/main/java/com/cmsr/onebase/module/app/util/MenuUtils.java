@@ -8,9 +8,9 @@ import java.util.UUID;
  */
 public class MenuUtils {
 
-    public static final String ROOT_MENU_UUID = "NAV-PARENT-UUID";
+    public static final Long ROOT_MENU_ID = 0L;
 
-    public static String generateMenuUuid() {
+    public static String generateMenuCode() {
         return "NAV-" + UUID.randomUUID().toString().replace("-", "");
     }
 }

@@ -14,12 +14,12 @@ import com.cmsr.onebase.module.app.enums.app.MenuVisibleEnum;
 import com.cmsr.onebase.module.app.util.MenuUtils;
 import jakarta.annotation.Resource;
 import lombok.Setter;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @Author：huangjie
@@ -30,7 +30,6 @@ import java.util.List;
 @Validated
 public class AppMenuServiceImpl implements AppMenuService {
 
-
     @Resource
     private AppCommonService appCommonService;
 
@@ -39,12 +38,12 @@ public class AppMenuServiceImpl implements AppMenuService {
 
     @Override
     public List<MenuListRespVO> listApplicationMenu(Long applicationId) {
-        List<MenuDO> menuDOS = appMenuRepository.findAllByApplicationId(applicationId);
+        List<MenuDO> menuDOS = appMenuRepository.findByApplicationId(applicationId);
         List<MenuListRespVO> menuListRespList = new ArrayList<>();
         // 把第一层的菜单添加到列表中
         List<MenuListRespVO> levelOneMenus = menuDOS.stream()
-                .filter(menuDO -> StringUtils.equalsIgnoreCase(menuDO.getParentUuid(), MenuUtils.ROOT_MENU_UUID))
-                .map(menuDO -> BeanUtils.toBean(menuDO, MenuListRespVO.class))
+                .filter(v -> Objects.equals(v.getParentId(), MenuUtils.ROOT_MENU_ID))
+                .map(v -> BeanUtils.toBean(v, MenuListRespVO.class))
                 .toList();
         menuListRespList.addAll(levelOneMenus);
         //递归实现每个菜单的子菜单
@@ -58,7 +57,7 @@ public class AppMenuServiceImpl implements AppMenuService {
     private List<MenuListRespVO> recursiveGetChildren(MenuListRespVO parent, List<MenuDO> menuDOS) {
         List<MenuListRespVO> children = new ArrayList<>();
         for (MenuDO menuDO : menuDOS) {
-            if (StringUtils.equalsIgnoreCase(menuDO.getParentUuid(), parent.getMenuUuid())) {
+            if (Objects.equals(menuDO.getParentId(), parent.getId())) {
                 // 只有父菜单的uuid等于当前菜单的父菜单的uuid时，才添加子菜单，继续递归
                 MenuListRespVO child = BeanUtils.toBean(menuDO, MenuListRespVO.class);
                 child.setChildren(recursiveGetChildren(child, menuDOS));
@@ -75,13 +74,13 @@ public class AppMenuServiceImpl implements AppMenuService {
         MenuDO menuDO = new MenuDO();
         menuDO.setApplicationId(createReqVO.getApplicationId());
 
-        if (StringUtils.isNoneBlank(createReqVO.getParentUuid())) {
-            validateApplicationMenuExist(createReqVO.getParentUuid());
-            menuDO.setParentUuid(createReqVO.getParentUuid());
+        if (createReqVO.getParentId() != null && createReqVO.getParentId() != MenuUtils.ROOT_MENU_ID) {
+            validateApplicationMenuExist(createReqVO.getParentId());
+            menuDO.setParentId(createReqVO.getParentId());
         } else {
-            menuDO.setParentUuid(MenuUtils.ROOT_MENU_UUID);
+            menuDO.setParentId(MenuUtils.ROOT_MENU_ID);
         }
-        menuDO.setMenuUuid(MenuUtils.generateMenuUuid());
+        menuDO.setMenuCode(MenuUtils.generateMenuCode());
         menuDO.setMenuType(createReqVO.getMenuType());
         menuDO.setMenuName(createReqVO.getMenuName());
         menuDO.setMenuIcon(createReqVO.getMenuIcon());
@@ -100,7 +99,7 @@ public class AppMenuServiceImpl implements AppMenuService {
     @Override
     public void updateApplicationMenuOrder(MenuOrderUpdateReqVO updateReqVO) {
         MenuDO menuDO = validateApplicationMenuExist(updateReqVO.getId());
-        menuDO.setParentUuid(updateReqVO.getParentUuid());
+        menuDO.setParentId(updateReqVO.getId());
         appMenuRepository.update(menuDO);
         List<MenuListRespVO> menuListRespList = listApplicationMenu(menuDO.getApplicationId());
 
@@ -110,7 +109,7 @@ public class AppMenuServiceImpl implements AppMenuService {
     @Override
     public void updateApplicationMenuVisible(Long id, Boolean visible) {
         MenuDO menuDO = validateApplicationMenuExist(id);
-        menuDO.setIsVisible(visible ? MenuVisibleEnum.YES.getValue() : MenuVisibleEnum.NO.getValue());
+        menuDO.setIsVisible(visible);
         appMenuRepository.update(menuDO);
     }
 
@@ -121,34 +120,24 @@ public class AppMenuServiceImpl implements AppMenuService {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_MENU_GROUP_NOT_ALLOW_COPY);
         }
         menuDO.setMenuName(copyReqVO.getMenuName());
-        menuDO.setParentUuid(copyReqVO.getParentUuid());
+        menuDO.setParentId(copyReqVO.getParentId());
         menuDO.setId(null);
         appMenuRepository.insert(menuDO);
+        //TODO 菜单相关的资源都要复制
+
     }
 
     @Override
     public void deleteApplicationMenu(Long id) {
         MenuDO menuDO = validateApplicationMenuExist(id);
         if (menuDO.getMenuType() == MenuTypeEnum.GROUP.getValue()
-                && validateApplicationMenuGroupHasChildren(menuDO.getMenuUuid())) {
+                && validateApplicationMenuGroupHasChildren(menuDO.getId())) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_MENU_GROUP_HAS_CHILDREN);
         }
         appMenuRepository.deleteById(id);
+        //TODO 菜单相关资源都要删除
     }
 
-    /**
-     * 校验menu uuid是否存在
-     *
-     * @param menuUuid
-     * @return
-     */
-    private boolean validateApplicationMenuExist(String menuUuid) {
-        MenuDO menuDO = appMenuRepository.findOneByMenuUuid(menuUuid);
-        if (menuDO == null) {
-            throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_MENU_NOT_EXIST);
-        }
-        return menuDO != null;
-    }
 
     private MenuDO validateApplicationMenuExist(Long id) {
         MenuDO menuDO = appMenuRepository.findById(id);
@@ -158,8 +147,8 @@ public class AppMenuServiceImpl implements AppMenuService {
         return menuDO;
     }
 
-    private boolean validateApplicationMenuGroupHasChildren(String menuUuid) {
-        return appMenuRepository.countByParentUuid(menuUuid) > 0;
+    private boolean validateApplicationMenuGroupHasChildren(Long id) {
+        return appMenuRepository.countByParentId(id) > 0;
     }
 
 }

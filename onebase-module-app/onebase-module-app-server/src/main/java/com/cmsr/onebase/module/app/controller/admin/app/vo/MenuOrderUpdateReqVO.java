@@ -15,7 +15,7 @@ public class MenuOrderUpdateReqVO {
 
     private Long id;
 
-    private String parentUuid;
+    private Long parentId;
 
     private List<Long> ids;
 

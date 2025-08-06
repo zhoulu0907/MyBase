@@ -1,6 +1,7 @@
 package com.cmsr.onebase.framework.aynline;
 
 import org.anyline.data.jdbc.util.DataSourceUtil;
+import org.anyline.metadata.type.Convert;
 import org.anyline.proxy.ServiceProxy;
 import org.anyline.service.AnylineService;
 import org.springframework.beans.factory.annotation.Value;
@@ -49,9 +50,36 @@ public class AynlineAutoConfiguration {
      * 初始化DataRepository
      */
     @Bean("dataRepository")
-    public DataRepository createDataRepostory() {
+    public DataRepository createDataRepository() {
         return new DataRepository();
     }
 
+    @Bean("convertInteger2Boolean")
+    public Convert convertInteger2Boolean() {
+        Convert convert = new Convert() {
+            @Override
+            public Class getOrigin() {
+                return java.lang.Integer.class;
+            }
+
+            @Override
+            public Class getTarget() {
+                return java.lang.Boolean.class;
+            }
+
+            @Override
+            public Object exe(Object value, Object def) {
+                Integer date = (Integer) value;
+                if (date == null) {
+                    return null;
+                } else if (date.intValue() > 0) {
+                    return Boolean.TRUE;
+                } else {
+                    return Boolean.FALSE;
+                }
+            }
+        };
+        return convert;
+    }
 
 }
