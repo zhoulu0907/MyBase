@@ -20,7 +20,6 @@ import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.module.metadata.enums.ErrorCodeConstants.*;
@@ -44,7 +43,7 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
     @Override
     public List<DataMethodRespVO> getDataMethodList(DataMethodQueryVO queryVO) {
         // 校验实体存在
-        MetadataBusinessEntityDO entity = dataRepository.findById(MetadataBusinessEntityDO.class, queryVO.getEntityId());
+        MetadataBusinessEntityDO entity = dataRepository.findById(MetadataBusinessEntityDO.class, Long.valueOf(queryVO.getEntityId()));
         if (entity == null) {
             throw exception(BUSINESS_ENTITY_NOT_EXISTS);
         }
@@ -419,10 +418,10 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
     @Override
     public DynamicDataRespVO createData(DynamicDataCreateReqVO reqVO) {
         // 1. 校验实体存在
-        MetadataBusinessEntityDO entity = validateEntityExists(reqVO.getEntityId());
+        MetadataBusinessEntityDO entity = validateEntityExists(Long.valueOf(reqVO.getEntityId()));
         
         // 2. 获取实体字段信息
-        List<MetadataEntityFieldDO> fields = getEntityFields(reqVO.getEntityId());
+        List<MetadataEntityFieldDO> fields = getEntityFields(Long.valueOf(reqVO.getEntityId()));
         
         // 3. 校验数据完整性
         validateDataForCreate(reqVO.getData(), fields);
@@ -460,10 +459,10 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
     @Override
     public DynamicDataRespVO updateData(DynamicDataUpdateReqVO reqVO) {
         // 1. 校验实体存在
-        MetadataBusinessEntityDO entity = validateEntityExists(reqVO.getEntityId());
+        MetadataBusinessEntityDO entity = validateEntityExists(Long.valueOf(reqVO.getEntityId()));
         
         // 2. 获取实体字段信息
-        List<MetadataEntityFieldDO> fields = getEntityFields(reqVO.getEntityId());
+        List<MetadataEntityFieldDO> fields = getEntityFields(Long.valueOf(reqVO.getEntityId()));
         
         // 3. 校验数据存在
         validateDataExists(entity.getTableName(), reqVO.getId(), fields);
@@ -506,10 +505,10 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
     @Override
     public Boolean deleteData(DynamicDataDeleteReqVO reqVO) {
         // 1. 校验实体存在
-        MetadataBusinessEntityDO entity = validateEntityExists(reqVO.getEntityId());
+        MetadataBusinessEntityDO entity = validateEntityExists(Long.valueOf(reqVO.getEntityId()));
         
         // 2. 获取实体字段信息
-        List<MetadataEntityFieldDO> fields = getEntityFields(reqVO.getEntityId());
+        List<MetadataEntityFieldDO> fields = getEntityFields(Long.valueOf(reqVO.getEntityId()));
         
         // 3. 校验数据存在
         validateDataExists(entity.getTableName(), reqVO.getId(), fields);
@@ -541,10 +540,10 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
     @Override
     public DynamicDataRespVO getData(DynamicDataGetReqVO reqVO) {
         // 1. 校验实体存在
-        MetadataBusinessEntityDO entity = validateEntityExists(reqVO.getEntityId());
+        MetadataBusinessEntityDO entity = validateEntityExists(Long.valueOf(reqVO.getEntityId()));
         
         // 2. 获取实体字段信息
-        List<MetadataEntityFieldDO> fields = getEntityFields(reqVO.getEntityId());
+        List<MetadataEntityFieldDO> fields = getEntityFields(Long.valueOf(reqVO.getEntityId()));
         
         // 3. 使用Anyline查询数据
         try {
@@ -570,10 +569,10 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
     @Override
     public PageResult<DynamicDataRespVO> getDataPage(DynamicDataPageReqVO reqVO) {
         // 1. 校验实体存在
-        MetadataBusinessEntityDO entity = validateEntityExists(reqVO.getEntityId());
+        MetadataBusinessEntityDO entity = validateEntityExists(Long.valueOf(reqVO.getEntityId()));
         
         // 2. 获取实体字段信息
-        List<MetadataEntityFieldDO> fields = getEntityFields(reqVO.getEntityId());
+        List<MetadataEntityFieldDO> fields = getEntityFields(Long.valueOf(reqVO.getEntityId()));
         
         // 3. 使用Anyline执行分页查询
         try {
@@ -823,7 +822,7 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
      */
     private DynamicDataRespVO buildDynamicDataRespVO(MetadataBusinessEntityDO entity, Map<String, Object> data) {
         DynamicDataRespVO respVO = new DynamicDataRespVO();
-        respVO.setEntityId(entity.getId());
+        respVO.setEntityId(String.valueOf(entity.getId()));
         respVO.setEntityName(entity.getDisplayName());
         respVO.setData(data);
         return respVO;

@@ -19,7 +19,7 @@ public class DynamicDataRespVO {
     private Map<String, Object> data;
 
     @Schema(description = "实体ID", example = "1")
-    private Long entityId;
+    private String entityId;
 
     @Schema(description = "实体名称", example = "用户")
     private String entityName;

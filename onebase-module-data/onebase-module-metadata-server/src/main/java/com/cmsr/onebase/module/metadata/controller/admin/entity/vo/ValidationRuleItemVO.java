@@ -14,7 +14,7 @@ import lombok.Data;
 public class ValidationRuleItemVO {
 
     @Schema(description = "规则ID", example = "4001")
-    private Long id;
+    private String id;
 
     @Schema(description = "校验类型", example = "FORMAT_VALIDATION")
     private String validationType;
