@@ -1,7 +1,6 @@
 package com.cmsr.onebase.module.app.api.appresource;
 
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -30,7 +29,7 @@ public interface PageApi {
     @Operation(summary = "创建page")
     CommonResult<Long> createPage(@RequestBody CreatePageDTO createPageDTO);
 
-    @DeleteMapping(PREFIX + "/delete")
+    @PostMapping(PREFIX + "/delete")
     @Operation(summary = "删除page")
     @Parameter(name = "code", description = "page code", required = true)
     CommonResult<Boolean> deletePage(@RequestParam("code") String code);

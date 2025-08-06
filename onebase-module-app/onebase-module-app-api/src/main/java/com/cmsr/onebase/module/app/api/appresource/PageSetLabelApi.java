@@ -3,7 +3,6 @@ package com.cmsr.onebase.module.app.api.appresource;
 import java.util.List;
 
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -39,7 +38,7 @@ public interface PageSetLabelApi {
     @Operation(summary = "更新页面集标签")
     CommonResult<Boolean> updatePageSetLabel(@RequestBody PageSetLabelUpdateDTO updateDTO);
 
-    @DeleteMapping(PREFIX + "/delete")
+    @PostMapping(PREFIX + "/delete")
     @Operation(summary = "删除页面集标签")
     @Parameter(name = "id", description = "标签ID", required = true)
     CommonResult<Boolean> deletePageSetLabel(@RequestParam("id") Long id);

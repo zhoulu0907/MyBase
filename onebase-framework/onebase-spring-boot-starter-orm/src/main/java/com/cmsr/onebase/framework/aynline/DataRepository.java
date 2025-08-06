@@ -1,28 +1,35 @@
 package com.cmsr.onebase.framework.aynline;
 
-import com.cmsr.onebase.framework.common.anyline.web.BizException;
-import com.cmsr.onebase.framework.common.anyline.web.StatusCode;
-import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.framework.data.base.BaseDO;
-import jakarta.annotation.Resource;
-import lombok.extern.slf4j.Slf4j;
-import org.anyline.data.Run;
-import org.anyline.data.param.ConfigStore;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.*;
-import org.anyline.entity.generator.PrimaryGenerator;
-import org.anyline.metadata.Constraint;
-import org.anyline.metadata.Table;
-import org.anyline.service.AnylineService;
-import org.anyline.util.ConfigTable;
-import org.anyline.data.jdbc.util.DataSourceUtil;
-import org.anyline.proxy.ServiceProxy;
-
-import javax.sql.DataSource;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
+import javax.sql.DataSource;
+
+import org.anyline.data.Run;
+import org.anyline.data.jdbc.util.DataSourceUtil;
+import org.anyline.data.param.ConfigStore;
+import org.anyline.data.param.init.DefaultConfigStore;
+import org.anyline.entity.Compare;
+import org.anyline.entity.DataRow;
+import org.anyline.entity.DataSet;
+import org.anyline.entity.DefaultPageNavi;
+import org.anyline.entity.PageNavi;
+import org.anyline.entity.generator.PrimaryGenerator;
+import org.anyline.metadata.Constraint;
+import org.anyline.metadata.Table;
+import org.anyline.proxy.ServiceProxy;
+import org.anyline.service.AnylineService;
+import org.anyline.util.ConfigTable;
+
+import com.cmsr.onebase.framework.common.anyline.web.BizException;
+import com.cmsr.onebase.framework.common.anyline.web.StatusCode;
+import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.data.base.BaseDO;
+
+import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * DataRepository - JPA风格的CRUD操作工具类
@@ -33,7 +40,7 @@ import java.util.Optional;
  * @author mickey
  */
 @Slf4j
-public class DataRepository {
+public class DataRepository { // TODO 等改造完成，这个类泛型 <T extends BaseDO>
     static {
         ConfigTable.GENERATOR.set(PrimaryGenerator.GENERATOR.SNOWFLAKE);
         ConfigTable.IS_AUTO_CHECK_METADATA = true;
@@ -47,7 +54,13 @@ public class DataRepository {
     @Resource
     private AnylineService<?> anylineService;
 
+    private Class<?> defaultClazz = null;
+
     public DataRepository() {
+    }
+
+    public DataRepository(Class<?> defaultClazz) {
+        this.defaultClazz = defaultClazz;
     }
 
     /**
@@ -131,14 +144,13 @@ public class DataRepository {
 
     /**
      * 更新
-     * @param <T>
      *
-     * @param entity 要保存的实体
-     * @param <T>    实体类型
-     * @return 保存后的实体
+     * @param clazz
+     * @param configs
+     * @return 更新数量
      */
     public <T> long updateByConfig(Class<T> clazz, ConfigStore configs) {
-        if (clazz== null) {
+        if (clazz == null) {
             throw new BizException(StatusCode.DB_UPDATE_ERROR);
         }
         try {
@@ -151,7 +163,17 @@ public class DataRepository {
             throw new BizException(StatusCode.DB_UPDATE_ERROR);
         }
     }
-    
+
+    /**
+     * 根据ID查找实体
+     *
+     * @param id
+     * @return
+     */
+    public <T extends BaseDO> T findById(Long id) {
+        return findById((Class<T>) defaultClazz, id);
+    }
+
     /**
      * 根据ID查找实体
      *
@@ -160,6 +182,7 @@ public class DataRepository {
      * @param <T>   实体类型
      * @return 实体对象，如果不存在返回null
      */
+    @Deprecated
     public <T extends BaseDO> T findById(Class<T> clazz, Long id) {
         try {
             ConfigStore configs = new DefaultConfigStore();
@@ -172,6 +195,10 @@ public class DataRepository {
         }
     }
 
+    public <T extends BaseDO> Optional<T> findByIdOptional(Long id) {
+        return findByIdOptional((Class<T>) defaultClazz, id);
+    }
+
     /**
      * 根据ID查找实体（返回Optional）
      *
@@ -180,9 +207,14 @@ public class DataRepository {
      * @param <T>   实体类型
      * @return Optional包装的实体对象
      */
+    @Deprecated
     public <T extends BaseDO> Optional<T> findByIdOptional(Class<T> clazz, Long id) {
         T entity = findById(clazz, id);
         return Optional.ofNullable(entity);
+    }
+
+    public boolean existsById(Long id) {
+        return existsById((Class<? extends BaseDO>) defaultClazz, id);
     }
 
     /**
@@ -193,8 +225,13 @@ public class DataRepository {
      * @param <T>   实体类型
      * @return 是否存在
      */
+    @Deprecated
     public <T extends BaseDO> boolean existsById(Class<T> clazz, Long id) {
         return findById(clazz, id) != null;
+    }
+
+    public <T extends BaseDO> List<T> findAll() {
+        return findAll((Class<T>) defaultClazz);
     }
 
     /**
@@ -204,6 +241,7 @@ public class DataRepository {
      * @param <T>   实体类型
      * @return 实体列表
      */
+    @Deprecated
     public <T extends BaseDO> List<T> findAll(Class<T> clazz) {
         try {
             ConfigStore configs = new DefaultConfigStore();
@@ -235,6 +273,11 @@ public class DataRepository {
         }
     }
 
+
+    public <T extends BaseDO> List<T> findAllByIds(Collection<Long> ids) {
+        return findAllByIds((Class<T>) defaultClazz, ids);
+    }
+
     /**
      * 根据ID列表查找实体
      *
@@ -243,6 +286,7 @@ public class DataRepository {
      * @param <T>   实体类型
      * @return 实体列表
      */
+    @Deprecated
     public <T extends BaseDO> List<T> findAllByIds(Class<T> clazz, Collection<Long> ids) {
         try {
             ConfigStore configs = new DefaultConfigStore();
@@ -257,6 +301,10 @@ public class DataRepository {
         }
     }
 
+    public long count() {
+        return count((Class<? extends BaseDO>) defaultClazz);
+    }
+
     /**
      * 统计实体数量
      *
@@ -264,6 +312,7 @@ public class DataRepository {
      * @param <T>   实体类型
      * @return 实体数量
      */
+    @Deprecated
     public <T extends BaseDO> long count(Class<T> clazz) {
         try {
             ConfigStore configs = new DefaultConfigStore();
@@ -308,7 +357,6 @@ public class DataRepository {
             row.put("deleted", 1);  // 设置逻辑删除标记
             long result = anylineService.update(getTableName(clazz), row, configs);
             log.info("[{}] deleteByConfig  ---> effect rows = {}", clazz, result);
-
             return result;
         } catch (Exception e) {
             log.error("根据ID删除实体失败: class={}, configs={}", clazz.getSimpleName(), configs, e);
@@ -334,6 +382,10 @@ public class DataRepository {
             log.error("根据ID删除实体失败: class={}, configs={}", clazz.getSimpleName(), configs, e);
             throw new BizException(StatusCode.DB_DELETE_ERROR);
         }
+    }
+
+    public <T extends BaseDO> void deleteById(Long id) {
+        deleteById((Class<? extends BaseDO>) defaultClazz, id);
     }
 
     /**
@@ -386,6 +438,10 @@ public class DataRepository {
         }
     }
 
+    public void deleteAllById(Collection<Long> ids) {
+        deleteAllById((Class<? extends BaseDO>) defaultClazz, ids);
+    }
+
     /**
      * 根据ID列表删除实体（软删除）
      *
@@ -393,6 +449,7 @@ public class DataRepository {
      * @param ids   ID列表
      * @param <T>   实体类型
      */
+    @Deprecated
     public <T extends BaseDO> long deleteAllById(Class<T> clazz, Collection<Long> ids) {
         try {
             ConfigStore configs = new DefaultConfigStore();
@@ -407,6 +464,10 @@ public class DataRepository {
             log.error("根据ID列表删除实体失败: class={}, ids={}", clazz.getSimpleName(), ids, e);
             throw new BizException(StatusCode.DB_DELETE_ERROR);
         }
+    }
+
+    public void deleteAll() {
+        deleteAll((Class<? extends BaseDO>) defaultClazz);
     }
 
     /**
@@ -430,6 +491,10 @@ public class DataRepository {
         }
     }
 
+    public <T extends BaseDO> PageResult<T> findAll(int pageIndex, int pageSize) {
+        return findAll((Class<T>) defaultClazz, pageIndex, pageSize);
+    }
+
     /**
      * 分页查询
      *
@@ -439,6 +504,7 @@ public class DataRepository {
      * @param <T>       实体类型
      * @return 分页结果
      */
+    @Deprecated
     public <T extends BaseDO> PageResult<T> findAll(Class<T> clazz, int pageIndex, int pageSize) {
         try {
             ConfigStore configs = new DefaultConfigStore();
@@ -594,10 +660,10 @@ public class DataRepository {
     }
 
     // ==================== 数据源动态连接相关的公共方法 ====================
-    
+
     /**
      * 创建临时的AnylineService用于数据库操作
-     * @param datasourceConfig 数据源配置信息 
+     * @param datasourceConfig 数据源配置信息
      * @return AnylineService实例
      */
     public AnylineService<?> createTemporaryService(Map<String, Object> datasourceConfig) {
@@ -644,7 +710,7 @@ public class DataRepository {
             throw new RuntimeException("创建数据库连接失败: " + e.getMessage(), e);
         }
     }
-    
+
     /**
      * 执行DDL语句
      * @param datasourceConfig 数据源配置信息
@@ -660,7 +726,7 @@ public class DataRepository {
             throw new RuntimeException("执行DDL失败: " + e.getMessage(), e);
         }
     }
-    
+
     /**
      * 根据数据源类型构建JDBC URL
      */
@@ -668,14 +734,14 @@ public class DataRepository {
         if (host == null || host.trim().isEmpty()) {
             throw new RuntimeException("主机地址不能为空");
         }
-        
+
         String databasePart = (database != null && !database.trim().isEmpty()) ? database : "";
-        
+
         switch (datasourceType.toUpperCase()) {
             case "POSTGRESQL":
                 return String.format("jdbc:postgresql://%s:%d/%s", host, port, databasePart);
             case "MYSQL":
-                return String.format("jdbc:mysql://%s:%d/%s?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai", 
+                return String.format("jdbc:mysql://%s:%d/%s?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai",
                         host, port, databasePart);
             case "ORACLE":
                 return String.format("jdbc:oracle:thin:@%s:%d:%s", host, port, databasePart);
@@ -698,7 +764,7 @@ public class DataRepository {
                 return String.format("jdbc:%s://%s:%d/%s", datasourceType.toLowerCase(), host, port, databasePart);
         }
     }
-    
+
     /**
      * 根据数据源类型获取对应的驱动类名
      */
@@ -728,7 +794,7 @@ public class DataRepository {
                 throw new RuntimeException("不支持的数据源类型: " + datasourceType);
         }
     }
-    
+
     /**
      * 根据数据源类型获取默认端口
      */

@@ -8,7 +8,7 @@ import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-@Table(name="app_pageset_label")
+@Table(name="app_resource_pageset_label")
 @Data
 @Entity
 @EqualsAndHashCode(callSuper = true)

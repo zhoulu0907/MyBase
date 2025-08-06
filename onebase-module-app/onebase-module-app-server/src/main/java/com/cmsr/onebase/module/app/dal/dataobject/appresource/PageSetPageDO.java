@@ -7,7 +7,7 @@ import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-@Table(name="app_pageset_detail_page_ref")
+@Table(name="app_resource_pageset_page")
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class PageSetPageDO extends TenantBaseDO {
@@ -15,7 +15,7 @@ public class PageSetPageDO extends TenantBaseDO {
     @Column(name = "pageset_ref", columnDefinition= "VARCHAR(255) NOT NULL", comment = "页面集编码")
     private String pageSetRef;
 
-    @Column(name = "pageset_type", columnDefinition= "VARCHAR(64) NOT NULL", comment = "页面类型 list edit detail")
+    @Column(name = "page_type", columnDefinition= "VARCHAR(64) NOT NULL", comment = "页面类型 list edit detail")
     private String pageType;
 
     @Column(name = "page_ref", columnDefinition= "VARCHAR(255) NOT NULL", comment = "页面编码")

@@ -16,7 +16,7 @@ public class ApplicationTagDO extends TenantBaseDO {
     @Column(name = "application_id", nullable = false, comment = "应用ID")
     private Long applicationId;
 
-    @Column(name = "app_code", nullable = false, comment = "标签ID")
+    @Column(name = "tag_id", nullable = false, comment = "标签ID")
     private Long tagId;
 
 

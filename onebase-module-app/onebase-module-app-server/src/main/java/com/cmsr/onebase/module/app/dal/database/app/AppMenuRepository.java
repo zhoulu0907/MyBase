@@ -1,0 +1,44 @@
+package com.cmsr.onebase.module.app.dal.database.app;
+
+import com.cmsr.onebase.framework.aynline.DataRepository;
+import com.cmsr.onebase.module.app.dal.dataobject.app.MenuDO;
+import org.anyline.data.param.ConfigStore;
+import org.anyline.data.param.init.DefaultConfigStore;
+import org.anyline.entity.Order;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+/**
+ * @Author：huangjie
+ * @Date：2025/8/6 9:31
+ */
+@Repository
+public class AppMenuRepository extends DataRepository {
+
+    public AppMenuRepository() {
+        super(MenuDO.class);
+    }
+
+    public List<MenuDO> findAllByApplicationId(Long applicationId) {
+        ConfigStore configs = new DefaultConfigStore();
+        configs.eq("application_id", applicationId);
+        configs.order("menu_sort", Order.TYPE.ASC);
+        return findAll(MenuDO.class, configs);
+    }
+
+
+    public MenuDO findOneByMenuUuid(String menuUuid) {
+        ConfigStore configs = new DefaultConfigStore();
+        configs.eq("menu_uuid", menuUuid);
+        return findOne(MenuDO.class, configs);
+    }
+
+    public long countByParentUuid(String parentUuid) {
+        ConfigStore configs = new DefaultConfigStore();
+        configs.eq("parent_uuid", parentUuid);
+        return countByConfig(MenuDO.class, configs);
+    }
+
+
+}
