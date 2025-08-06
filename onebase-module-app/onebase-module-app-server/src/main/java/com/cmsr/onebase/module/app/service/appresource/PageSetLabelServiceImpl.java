@@ -2,16 +2,13 @@ package com.cmsr.onebase.module.app.service.appresource;
 
 import java.util.List;
 
-import org.anyline.data.param.ConfigStore;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.Compare;
 import org.springframework.stereotype.Service;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.app.api.appresource.dto.PageSetLabelCreateDTO;
 import com.cmsr.onebase.module.app.api.appresource.dto.PageSetLabelRespDTO;
 import com.cmsr.onebase.module.app.api.appresource.dto.PageSetLabelUpdateDTO;
+import com.cmsr.onebase.module.app.dal.database.appresource.AppPageSetLabelRepository;
 import com.cmsr.onebase.module.app.dal.dataobject.appresource.PageSetLabelDO;
 
 import jakarta.annotation.Resource;
@@ -20,13 +17,11 @@ import jakarta.annotation.Resource;
 public class PageSetLabelServiceImpl implements PageSetLabelService {
 
     @Resource
-    private DataRepository dataRepository;
+    private AppPageSetLabelRepository dataRepository;
 
     @Override
     public List<PageSetLabelRespDTO> getLabelsByPageSetCode(String pagesetCode) {
-        ConfigStore configs = new DefaultConfigStore();
-        configs.and(Compare.EQUAL, "pageset_code", pagesetCode);
-        List<PageSetLabelDO> pageSetLabelDOs = dataRepository.findAll(PageSetLabelDO.class, configs);
+        List<PageSetLabelDO> pageSetLabelDOs = dataRepository.findByPageSetCode(pagesetCode);
         return BeanUtils.toBean(pageSetLabelDOs, PageSetLabelRespDTO.class);
     }
 
@@ -41,12 +36,12 @@ public class PageSetLabelServiceImpl implements PageSetLabelService {
     public void updatePageSetLabel(PageSetLabelUpdateDTO updateDTO) {
         PageSetLabelDO pageSetLabelDO = BeanUtils.toBean(updateDTO, PageSetLabelDO.class);
         dataRepository.update(pageSetLabelDO);
+        return;
     }
 
     @Override
     public void deletePageSetLabel(Long id) {
-        ConfigStore configs = new DefaultConfigStore();
-        configs.and(Compare.EQUAL, "id", id);
-        dataRepository.deleteByConfig(PageSetLabelDO.class, configs);
+        dataRepository.deleteById(id);
+        return;
     }
 }
