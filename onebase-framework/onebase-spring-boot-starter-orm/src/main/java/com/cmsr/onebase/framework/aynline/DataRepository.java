@@ -1,28 +1,35 @@
 package com.cmsr.onebase.framework.aynline;
 
-import com.cmsr.onebase.framework.common.anyline.web.BizException;
-import com.cmsr.onebase.framework.common.anyline.web.StatusCode;
-import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.framework.data.base.BaseDO;
-import jakarta.annotation.Resource;
-import lombok.extern.slf4j.Slf4j;
-import org.anyline.data.Run;
-import org.anyline.data.param.ConfigStore;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.*;
-import org.anyline.entity.generator.PrimaryGenerator;
-import org.anyline.metadata.Constraint;
-import org.anyline.metadata.Table;
-import org.anyline.service.AnylineService;
-import org.anyline.util.ConfigTable;
-import org.anyline.data.jdbc.util.DataSourceUtil;
-import org.anyline.proxy.ServiceProxy;
-
-import javax.sql.DataSource;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
+import javax.sql.DataSource;
+
+import org.anyline.data.Run;
+import org.anyline.data.jdbc.util.DataSourceUtil;
+import org.anyline.data.param.ConfigStore;
+import org.anyline.data.param.init.DefaultConfigStore;
+import org.anyline.entity.Compare;
+import org.anyline.entity.DataRow;
+import org.anyline.entity.DataSet;
+import org.anyline.entity.DefaultPageNavi;
+import org.anyline.entity.PageNavi;
+import org.anyline.entity.generator.PrimaryGenerator;
+import org.anyline.metadata.Constraint;
+import org.anyline.metadata.Table;
+import org.anyline.proxy.ServiceProxy;
+import org.anyline.service.AnylineService;
+import org.anyline.util.ConfigTable;
+
+import com.cmsr.onebase.framework.common.anyline.web.BizException;
+import com.cmsr.onebase.framework.common.anyline.web.StatusCode;
+import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.data.base.BaseDO;
+
+import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * DataRepository - JPA风格的CRUD操作工具类
@@ -678,10 +685,10 @@ public class DataRepository { // TODO 等改造完成，这个类泛型 <T exten
     }
 
     // ==================== 数据源动态连接相关的公共方法 ====================
-    
+
     /**
      * 创建临时的AnylineService用于数据库操作
-     * @param datasourceConfig 数据源配置信息 
+     * @param datasourceConfig 数据源配置信息
      * @return AnylineService实例
      */
     public AnylineService<?> createTemporaryService(Map<String, Object> datasourceConfig) {
@@ -728,7 +735,7 @@ public class DataRepository { // TODO 等改造完成，这个类泛型 <T exten
             throw new RuntimeException("创建数据库连接失败: " + e.getMessage(), e);
         }
     }
-    
+
     /**
      * 执行DDL语句
      * @param datasourceConfig 数据源配置信息
@@ -744,7 +751,7 @@ public class DataRepository { // TODO 等改造完成，这个类泛型 <T exten
             throw new RuntimeException("执行DDL失败: " + e.getMessage(), e);
         }
     }
-    
+
     /**
      * 根据数据源类型构建JDBC URL
      */
@@ -752,14 +759,14 @@ public class DataRepository { // TODO 等改造完成，这个类泛型 <T exten
         if (host == null || host.trim().isEmpty()) {
             throw new RuntimeException("主机地址不能为空");
         }
-        
+
         String databasePart = (database != null && !database.trim().isEmpty()) ? database : "";
-        
+
         switch (datasourceType.toUpperCase()) {
             case "POSTGRESQL":
                 return String.format("jdbc:postgresql://%s:%d/%s", host, port, databasePart);
             case "MYSQL":
-                return String.format("jdbc:mysql://%s:%d/%s?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai", 
+                return String.format("jdbc:mysql://%s:%d/%s?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai",
                         host, port, databasePart);
             case "ORACLE":
                 return String.format("jdbc:oracle:thin:@%s:%d:%s", host, port, databasePart);
@@ -782,7 +789,7 @@ public class DataRepository { // TODO 等改造完成，这个类泛型 <T exten
                 return String.format("jdbc:%s://%s:%d/%s", datasourceType.toLowerCase(), host, port, databasePart);
         }
     }
-    
+
     /**
      * 根据数据源类型获取对应的驱动类名
      */
@@ -812,7 +819,7 @@ public class DataRepository { // TODO 等改造完成，这个类泛型 <T exten
                 throw new RuntimeException("不支持的数据源类型: " + datasourceType);
         }
     }
-    
+
     /**
      * 根据数据源类型获取默认端口
      */

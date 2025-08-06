@@ -1,10 +1,8 @@
 package com.cmsr.onebase.module.app.api.appresource;
 
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -33,12 +31,12 @@ public interface PageMetadataApi {
     @Operation(summary = "创建pageMetadata")
     CommonResult<Long> createPageMetadata(@RequestBody CreatePageMetadataDTO createPageMetadataDTO);
 
-    @DeleteMapping(PREFIX + "/delete")
+    @PostMapping(PREFIX + "/delete")
     @Operation(summary = "删除pageMetadata")
     @Parameter(name = "id", description = "pageMetadata id", required = true)
     CommonResult<Boolean> deletePageMetadata(@RequestParam("id") Long id);
 
-    @PutMapping(PREFIX + "/update")
+    @PostMapping(PREFIX + "/update")
     @Operation(summary = "更新pageMetadata")
     CommonResult<Boolean> updatePageMetadata(@RequestBody UpdatePageMetadataDTO updatePageMetadataDTO);
 
