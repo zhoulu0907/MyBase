@@ -2,11 +2,11 @@ package com.cmsr.onebase.module.app.service.appresource;
 
 import org.springframework.stereotype.Service;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.app.api.appresource.dto.CreatePageMetadataDTO;
 import com.cmsr.onebase.module.app.api.appresource.dto.PageMetadataRespDTO;
 import com.cmsr.onebase.module.app.api.appresource.dto.UpdatePageMetadataDTO;
+import com.cmsr.onebase.module.app.dal.database.appresource.AppPageMetadataRepository;
 import com.cmsr.onebase.module.app.dal.dataobject.appresource.PageMetadataDO;
 
 import jakarta.annotation.Resource;
@@ -15,11 +15,11 @@ import jakarta.annotation.Resource;
 public class PageMetadataServiceImpl implements PageMetadataService {
 
     @Resource
-    private DataRepository dataRepository;
+    private AppPageMetadataRepository dataRepository;
 
     @Override
     public PageMetadataRespDTO getPageMetadata(Long id) {
-        PageMetadataDO pageMetadataDO = dataRepository.findById(PageMetadataDO.class, id);
+        PageMetadataDO pageMetadataDO = dataRepository.findById(id);
         return BeanUtils.toBean(pageMetadataDO, PageMetadataRespDTO.class);
     }
 
@@ -32,7 +32,7 @@ public class PageMetadataServiceImpl implements PageMetadataService {
 
     @Override
     public Boolean deletePageMetadata(Long id) {
-        dataRepository.deleteById(PageMetadataDO.class, id);
+        dataRepository.deleteById(id);
         return true;
     }
 
