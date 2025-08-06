@@ -16,7 +16,7 @@ public class BusinessEntityPageReqVO extends PageParam {
     @Schema(description = "实体编码", example = "user_entity")
     private String code;
 
-    @Schema(description = "实体类型", example = "1")
+    @Schema(description = "实体类型(1:自建表，2:复用已有表，3:中间表)", example = "1")
     private Integer entityType;
 
     @Schema(description = "数据源ID", example = "1")

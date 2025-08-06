@@ -31,7 +31,7 @@ public class MetadataBusinessEntityDO extends TenantBaseDO {
     private String code;
 
     /**
-     * 实体类型(1:自建表 2:复用已有表)
+     * 实体类型(1:自建表 2:复用已有表 3中间表用做多对多关联用不给前端展示)
      */
     private Integer entityType;
 

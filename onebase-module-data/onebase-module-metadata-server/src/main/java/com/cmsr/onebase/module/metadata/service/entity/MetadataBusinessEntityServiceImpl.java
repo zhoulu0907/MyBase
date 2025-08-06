@@ -11,6 +11,7 @@ import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataSystemFiel
 import com.cmsr.onebase.module.metadata.dal.dataobject.datasource.MetadataDatasourceDO;
 import com.cmsr.onebase.module.metadata.convert.datasource.DatasourceConvert;
 import com.cmsr.onebase.module.metadata.service.helper.DatasourceServiceHelper;
+import com.cmsr.onebase.module.metadata.enums.BusinessEntityTypeEnum;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -47,16 +48,69 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
     public Long createBusinessEntity(@Valid BusinessEntitySaveReqVO createReqVO) {
         // 校验编码唯一性
         validateBusinessEntityCodeUnique(null, createReqVO.getCode(), Long.valueOf(createReqVO.getAppId()));
+        
+        // 校验实体类型
+        validateEntityType(createReqVO.getEntityType());
 
         // 插入业务实体
         MetadataBusinessEntityDO businessEntity = BeanUtils.toBean(createReqVO, MetadataBusinessEntityDO.class);
         businessEntity.setAppId(Long.valueOf(createReqVO.getAppId()));
-        // 设置表名，如果没有指定则使用编码作为表名
-        if (businessEntity.getTableName() == null || businessEntity.getTableName().trim().isEmpty()) {
-            businessEntity.setTableName(createReqVO.getCode().toLowerCase());
-        }
+        
+        // 根据实体类型处理表名
+        handleTableNameByEntityType(businessEntity, createReqVO);
+        
         dataRepository.insert(businessEntity);
         
+        // 根据实体类型决定是否创建物理表
+        if (BusinessEntityTypeEnum.needCreatePhysicalTable(createReqVO.getEntityType())) {
+            createPhysicalTableForEntity(businessEntity, createReqVO);
+        } else {
+            BusinessEntityTypeEnum entityTypeEnum = BusinessEntityTypeEnum.getByCode(createReqVO.getEntityType());
+            String typeName = entityTypeEnum != null ? entityTypeEnum.getName() : "未知类型";
+            log.info("实体类型为 {} ({}), 跳过物理表创建", createReqVO.getEntityType(), typeName);
+        }
+        
+        return businessEntity.getId();
+    }
+    
+    /**
+     * 校验实体类型有效性
+     *
+     * @param entityType 实体类型
+     */
+    private void validateEntityType(Integer entityType) {
+        if (entityType != null && !BusinessEntityTypeEnum.isValidCode(entityType)) {
+            throw new IllegalArgumentException("无效的实体类型: " + entityType);
+        }
+    }
+    
+    /**
+     * 根据实体类型处理表名
+     *
+     * @param businessEntity 业务实体DO
+     * @param createReqVO 创建请求VO
+     */
+    private void handleTableNameByEntityType(MetadataBusinessEntityDO businessEntity, BusinessEntitySaveReqVO createReqVO) {
+        if (BusinessEntityTypeEnum.REUSE_EXISTING.getCode().equals(createReqVO.getEntityType())) {
+            // 复用已有表，必须指定表名
+            if (businessEntity.getTableName() == null || businessEntity.getTableName().trim().isEmpty()) {
+                throw new IllegalArgumentException("复用已有表时必须指定表名");
+            }
+        } else {
+            // 自建表或中间表，如果没有指定表名则使用编码作为表名
+            if (businessEntity.getTableName() == null || businessEntity.getTableName().trim().isEmpty()) {
+                businessEntity.setTableName(createReqVO.getCode().toLowerCase());
+            }
+        }
+    }
+    
+    /**
+     * 为实体创建物理表
+     *
+     * @param businessEntity 业务实体
+     * @param createReqVO 创建请求VO
+     */
+    private void createPhysicalTableForEntity(MetadataBusinessEntityDO businessEntity, BusinessEntitySaveReqVO createReqVO) {
         try {
             // 1. 通过数据源 id 获取对应的数据源信息
             MetadataDatasourceDO datasource = getDatasourceById(createReqVO.getDatasourceId());
@@ -78,8 +132,6 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
             log.error("创建业务实体物理表失败: {}", e.getMessage(), e);
             // 不抛出异常，避免影响业务实体的创建
         }
-        
-        return businessEntity.getId();
     }
     
     /**
@@ -290,11 +342,17 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
         validateBusinessEntityExists(Long.valueOf(updateReqVO.getId()));
         // 校验编码唯一性
         validateBusinessEntityCodeUnique(Long.valueOf(updateReqVO.getId()), updateReqVO.getCode(), Long.valueOf(updateReqVO.getAppId()));
+        // 校验实体类型
+        validateEntityType(updateReqVO.getEntityType());
 
         // 更新业务实体
         MetadataBusinessEntityDO updateObj = BeanUtils.toBean(updateReqVO, MetadataBusinessEntityDO.class);
         updateObj.setId(Long.valueOf(updateReqVO.getId()));
         updateObj.setAppId(Long.valueOf(updateReqVO.getAppId()));
+        
+        // 根据实体类型处理表名
+        handleTableNameByEntityType(updateObj, updateReqVO);
+        
         dataRepository.update(updateObj);
     }
 
@@ -342,6 +400,9 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
     @Override
     public PageResult<MetadataBusinessEntityDO> getBusinessEntityPage(BusinessEntityPageReqVO pageReqVO) {
         DefaultConfigStore configStore = new DefaultConfigStore();
+        
+        // 默认不显示中间表（entity_type = 3）
+        configStore.and(Compare.NOT_EQUAL, "entity_type", BusinessEntityTypeEnum.MIDDLE_TABLE.getCode());
         
         // 添加查询条件
         if (pageReqVO.getDisplayName() != null) {

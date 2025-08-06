@@ -22,6 +22,7 @@ import com.cmsr.onebase.module.metadata.dal.dataobject.datasource.MetadataDataso
 import com.cmsr.onebase.module.metadata.convert.datasource.DatasourceConvert;
 import com.cmsr.onebase.module.metadata.service.helper.DatasourceServiceHelper;
 import com.cmsr.onebase.module.metadata.enums.FieldTypeEnum;
+import com.cmsr.onebase.module.metadata.enums.BusinessEntityTypeEnum;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -281,6 +282,9 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
     public Long createEntityField(@Valid EntityFieldSaveReqVO createReqVO) {
         // 校验字段名唯一性
         validateEntityFieldNameUnique(null, createReqVO.getEntityId(), createReqVO.getFieldName());
+        
+        // 校验实体类型是否允许修改表结构
+        validateEntityAllowModifyStructure(Long.valueOf(createReqVO.getEntityId()));
 
         // 插入实体字段
         MetadataEntityFieldDO entityField = BeanUtils.toBean(createReqVO, MetadataEntityFieldDO.class);
@@ -321,6 +325,8 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
         validateEntityFieldExists(updateReqVO.getId());
         // 校验字段名唯一性
         validateEntityFieldNameUnique(updateReqVO.getId(), updateReqVO.getEntityId(), updateReqVO.getFieldName());
+        // 校验实体类型是否允许修改表结构
+        validateEntityAllowModifyStructure(Long.valueOf(updateReqVO.getEntityId()));
 
         // 更新实体字段
         MetadataEntityFieldDO updateObj = BeanUtils.toBean(updateReqVO, MetadataEntityFieldDO.class);
@@ -361,13 +367,18 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
         configStore.and("id", longId);
         MetadataEntityFieldDO existingField = dataRepository.findOne(MetadataEntityFieldDO.class, configStore);
         
+        if (existingField != null) {
+            // 校验实体类型是否允许修改表结构
+            validateEntityAllowModifyStructure(existingField.getEntityId());
+        }
+        
         // 删除实体字段
         dataRepository.deleteById(MetadataEntityFieldDO.class, longId);
         
         // 从物理表删除字段
         if (existingField != null) {
             try {
-                MetadataBusinessEntityDO businessEntity = getBusinessEntityById(existingField.getEntityId().toString());
+                MetadataBusinessEntityDO businessEntity = getBusinessEntityById(existingField.getEntityId());
                 if (businessEntity != null && businessEntity.getTableName() != null && 
                     !businessEntity.getTableName().trim().isEmpty()) {
                     MetadataDatasourceDO datasource = getDatasourceById(businessEntity.getDatasourceId().toString());
@@ -718,6 +729,39 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
             return null;
         }
         return fieldName.toUpperCase();
+    }
+    
+    /**
+     * 校验实体是否允许修改表结构
+     *
+     * @param entityId 实体ID
+     */
+    private void validateEntityAllowModifyStructure(Long entityId) {
+        // 获取业务实体信息
+        MetadataBusinessEntityDO businessEntity = getBusinessEntityById(entityId);
+        if (businessEntity == null) {
+            throw new IllegalArgumentException("业务实体不存在");
+        }
+        
+        // 检查实体类型是否允许修改表结构
+        if (!BusinessEntityTypeEnum.allowModifyTableStructure(businessEntity.getEntityType())) {
+            BusinessEntityTypeEnum entityType = BusinessEntityTypeEnum.getByCode(businessEntity.getEntityType());
+            String typeName = entityType != null ? entityType.getName() : "未知类型";
+            throw new IllegalArgumentException(
+                String.format("实体类型为 %s (%s)，不允许修改表结构", typeName, businessEntity.getEntityType()));
+        }
+    }
+    
+    /**
+     * 根据ID获取业务实体
+     *
+     * @param entityId 实体ID
+     * @return 业务实体DO
+     */
+    private MetadataBusinessEntityDO getBusinessEntityById(Long entityId) {
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        configStore.and("id", entityId);
+        return dataRepository.findOne(MetadataBusinessEntityDO.class, configStore);
     }
 
 }
