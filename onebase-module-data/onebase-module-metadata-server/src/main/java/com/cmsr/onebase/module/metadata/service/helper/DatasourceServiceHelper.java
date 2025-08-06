@@ -30,11 +30,11 @@ import java.util.Map;
  */
 @Component
 @Slf4j
-public class DatasourceServiceHelper {
+public class DatasourceServiceHelper extends DataRepository {
 
     @Resource
     private DataRepository dataRepository;
-    
+
     @Resource
     private DatasourceConvert datasourceConvert;
 
@@ -50,7 +50,7 @@ public class DatasourceServiceHelper {
         // 从数据源配置中获取连接参数
         Map<String, Object> config = datasourceConvert.stringToMap(datasource.getConfig());
         config.put("datasourceType", datasource.getDatasourceType());
-        
+
         // 使用本助手的 Map 版本创建临时服务
         return createTemporaryService(config);
     }
@@ -318,7 +318,7 @@ public class DatasourceServiceHelper {
      * @param <T> 实体类型
      * @return 分页结果
      */
-    public <T extends BaseDO> PageResult<T> findPageWithConditions(Class<T> clazz, ConfigStore configStore, 
+    public <T extends BaseDO> PageResult<T> findPageWithConditions(Class<T> clazz, ConfigStore configStore,
                                                    int pageNo, int pageSize) {
         return dataRepository.findPageWithConditions(clazz, configStore, pageNo, pageSize);
     }
@@ -335,7 +335,7 @@ public class DatasourceServiceHelper {
         if (datasourceId == null || datasourceId.trim().isEmpty()) {
             return null;
         }
-        
+
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.and("id", Long.valueOf(datasourceId));
         return findOne(MetadataDatasourceDO.class, configStore);
