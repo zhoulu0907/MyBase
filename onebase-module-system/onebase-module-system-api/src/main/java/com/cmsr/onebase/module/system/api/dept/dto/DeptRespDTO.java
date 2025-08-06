@@ -16,7 +16,7 @@ public class DeptRespDTO {
     @Schema(description = "父部门编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
     private Long parentId;
 
-    @Schema(description = "负责人的用户编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
+    @Schema(description = "管理员的用户编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
     private Long leaderUserId;
 
     @Schema(description = "部门状态", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")

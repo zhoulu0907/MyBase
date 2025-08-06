@@ -6,13 +6,9 @@ import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import com.cmsr.onebase.module.system.controller.admin.auth.vo.AuthRegisterReqVO;
 import com.cmsr.onebase.module.system.controller.admin.user.vo.profile.UserProfileUpdatePasswordReqVO;
 import com.cmsr.onebase.module.system.controller.admin.user.vo.profile.UserProfileUpdateReqVO;
-import com.cmsr.onebase.module.system.controller.admin.user.vo.user.UserImportExcelVO;
-import com.cmsr.onebase.module.system.controller.admin.user.vo.user.UserImportRespVO;
-import com.cmsr.onebase.module.system.controller.admin.user.vo.user.UserPageReqVO;
-import com.cmsr.onebase.module.system.controller.admin.user.vo.user.UserSaveReqVO;
+import com.cmsr.onebase.module.system.controller.admin.user.vo.user.*;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.enums.permission.RoleTypeEnum;
-import com.cmsr.onebase.module.system.enums.user.UserStatusEnum;
 import jakarta.validation.Valid;
 
 import java.util.Collection;
@@ -240,5 +236,21 @@ public interface AdminUserService {
      * @return 租户数量
      */
     Integer getUserCountByStatus(Integer status);
+
+    /**
+     * 批量获取部门人数统计
+     *
+     * @param deptIds 部门编号集合
+     * @return 部门ID与人数的映射关系
+     */
+    Map<Long, Integer> getUserCountByDeptIds(Collection<Long> deptIds);
+
+    /**
+     * 获取用户详情，包含角色信息
+     *
+     * @param id 用户ID
+     * @return 用户详情响应对象
+     */
+    UserRespVO getUserWithRoles(Long id);
 
 }

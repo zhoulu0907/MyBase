@@ -1,6 +1,9 @@
 package com.cmsr.onebase.module.system.service.auth;
 
 import cn.hutool.core.util.ObjectUtil;
+import com.anji.captcha.model.common.ResponseModel;
+import com.anji.captcha.model.vo.CaptchaVO;
+import com.anji.captcha.service.CaptchaService;
 import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
@@ -9,7 +12,6 @@ import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
 import com.cmsr.onebase.framework.common.util.validation.ValidationUtils;
 import com.cmsr.onebase.module.system.api.logger.dto.LoginLogCreateReqDTO;
 import com.cmsr.onebase.module.system.api.sms.SmsCodeApi;
-import com.cmsr.onebase.module.system.api.sms.dto.code.SmsCodeUseReqDTO;
 import com.cmsr.onebase.module.system.api.social.dto.SocialUserBindReqDTO;
 import com.cmsr.onebase.module.system.api.social.dto.SocialUserRespDTO;
 import com.cmsr.onebase.module.system.controller.admin.auth.vo.*;
@@ -25,9 +27,6 @@ import com.cmsr.onebase.module.system.service.member.MemberService;
 import com.cmsr.onebase.module.system.service.oauth2.OAuth2TokenService;
 import com.cmsr.onebase.module.system.service.social.SocialUserService;
 import com.cmsr.onebase.module.system.service.user.AdminUserService;
-import com.anji.captcha.model.common.ResponseModel;
-import com.anji.captcha.model.vo.CaptchaVO;
-import com.anji.captcha.service.CaptchaService;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Resource;
 import jakarta.validation.Validator;
@@ -289,18 +288,23 @@ public class AdminAuthServiceImpl implements AdminAuthService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void resetPassword(AuthResetPasswordReqVO reqVO) {
-        AdminUserDO userByMobile = userService.getUserByMobile(reqVO.getMobile());
-        if (userByMobile == null) {
+        // 暂时屏蔽验证码功能后续恢复
+        // AdminUserDO userByMobile = userService.getUserByMobile(reqVO.getMobile());
+        // if (userByMobile == null) {
+        //     throw exception(USER_MOBILE_NOT_EXISTS);
+        // }
+        //
+        // smsCodeApi.useSmsCode(new SmsCodeUseReqDTO()
+        //         .setCode(reqVO.getCode())
+        //         .setMobile(reqVO.getMobile())
+        //         .setScene(SmsSceneEnum.ADMIN_MEMBER_RESET_PASSWORD.getScene())
+        //         .setUsedIp(getClientIP())
+        // ).checkError();
+
+        AdminUserDO user = userService.getUser(reqVO.getUserId());
+        if (user == null) {
             throw exception(USER_MOBILE_NOT_EXISTS);
         }
-
-        smsCodeApi.useSmsCode(new SmsCodeUseReqDTO()
-                .setCode(reqVO.getCode())
-                .setMobile(reqVO.getMobile())
-                .setScene(SmsSceneEnum.ADMIN_MEMBER_RESET_PASSWORD.getScene())
-                .setUsedIp(getClientIP())
-        ).checkError();
-
-        userService.updateUserPassword(userByMobile.getId(), reqVO.getPassword());
+        userService.updateUserPassword(user.getId(), reqVO.getPassword());
     }
 }

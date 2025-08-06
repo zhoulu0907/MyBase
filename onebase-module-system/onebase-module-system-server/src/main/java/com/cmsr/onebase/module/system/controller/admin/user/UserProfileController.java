@@ -60,14 +60,14 @@ public class UserProfileController {
         return success(UserConvert.INSTANCE.convert(user, userRoles, dept, posts));
     }
 
-    @PutMapping("/update")
+    @PostMapping("/update")
     @Operation(summary = "修改用户个人信息")
     public CommonResult<Boolean> updateUserProfile(@Valid @RequestBody UserProfileUpdateReqVO reqVO) {
         userService.updateUserProfile(getLoginUserId(), reqVO);
         return success(true);
     }
 
-    @PutMapping("/update-password")
+    @PostMapping("/update-password")
     @Operation(summary = "修改用户个人密码")
     public CommonResult<Boolean> updateUserProfilePassword(@Valid @RequestBody UserProfileUpdatePasswordReqVO reqVO) {
         userService.updateUserPassword(getLoginUserId(), reqVO);

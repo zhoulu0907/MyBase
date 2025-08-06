@@ -61,7 +61,7 @@ public class PlatformInfoController {
     /**
      * 更新平台信息
      */
-    @PutMapping
+    @PostMapping
     public Object updatePlatformInfo(@RequestBody PlatformInfoReqVo reqVo) {
         // TODO: 实现更新平台信息逻辑
         return null;
@@ -70,7 +70,7 @@ public class PlatformInfoController {
     /**
      * 删除平台信息
      */
-    @DeleteMapping("/{id}")
+    @PostMapping("/{id}")
     public Object deletePlatformInfo(@PathVariable Long id) {
         // TODO: 实现删除平台信息逻辑
         return null;

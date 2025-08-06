@@ -45,7 +45,7 @@ public class DictTypeController {
         return success(dictTypeId);
     }
 
-    @PutMapping("/update")
+    @PostMapping("/update")
     @Operation(summary = "修改字典类型")
     @PreAuthorize("@ss.hasPermission('system:dict:update')")
     public CommonResult<Boolean> updateDictType(@Valid @RequestBody DictTypeSaveReqVO updateReqVO) {
@@ -53,7 +53,7 @@ public class DictTypeController {
         return success(true);
     }
 
-    @DeleteMapping("/delete")
+    @PostMapping("/delete")
     @Operation(summary = "删除字典类型")
     @Parameter(name = "id", description = "编号", required = true, example = "1024")
     @PreAuthorize("@ss.hasPermission('system:dict:delete')")

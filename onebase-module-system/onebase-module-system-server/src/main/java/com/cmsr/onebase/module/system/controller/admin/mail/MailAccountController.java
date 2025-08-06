@@ -37,7 +37,7 @@ public class MailAccountController {
         return success(mailAccountService.createMailAccount(createReqVO));
     }
 
-    @PutMapping("/update")
+    @PostMapping("/update")
     @Operation(summary = "修改邮箱账号")
     @PreAuthorize("@ss.hasPermission('system:mail-account:update')")
     public CommonResult<Boolean> updateMailAccount(@Valid @RequestBody MailAccountSaveReqVO updateReqVO) {
@@ -45,7 +45,7 @@ public class MailAccountController {
         return success(true);
     }
 
-    @DeleteMapping("/delete")
+    @PostMapping("/delete")
     @Operation(summary = "删除邮箱账号")
     @Parameter(name = "id", description = "编号", required = true)
     @PreAuthorize("@ss.hasPermission('system:mail-account:delete')")

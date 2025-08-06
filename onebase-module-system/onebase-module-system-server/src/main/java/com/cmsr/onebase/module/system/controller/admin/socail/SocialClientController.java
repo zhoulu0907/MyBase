@@ -39,7 +39,7 @@ public class SocialClientController {
         return success(socialClientService.createSocialClient(createReqVO));
     }
 
-    @PutMapping("/update")
+    @PostMapping("/update")
     @Operation(summary = "更新社交客户端")
     @PreAuthorize("@ss.hasPermission('system:social-client:update')")
     public CommonResult<Boolean> updateSocialClient(@Valid @RequestBody SocialClientSaveReqVO updateReqVO) {
@@ -47,7 +47,7 @@ public class SocialClientController {
         return success(true);
     }
 
-    @DeleteMapping("/delete")
+    @PostMapping("/delete")
     @Operation(summary = "删除社交客户端")
     @Parameter(name = "id", description = "编号", required = true)
     @PreAuthorize("@ss.hasPermission('system:social-client:delete')")

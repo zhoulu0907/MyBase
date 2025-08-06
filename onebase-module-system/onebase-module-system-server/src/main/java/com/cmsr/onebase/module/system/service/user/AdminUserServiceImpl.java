@@ -1,41 +1,41 @@
 package com.cmsr.onebase.module.system.service.user;
 
-import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.convertList;
-import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.convertSet;
-import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.singleton;
-import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.USER_COUNT_MAX;
-import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.USER_EMAIL_EXISTS;
-import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.USER_IMPORT_INIT_PASSWORD;
-import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.USER_IMPORT_LIST_IS_EMPTY;
-import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.USER_IS_DISABLE;
-import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.USER_MOBILE_EXISTS;
-import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.USER_NOT_EXISTS;
-import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.USER_PASSWORD_FAILED;
-import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.USER_REGISTER_DISABLED;
-import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.USER_USERNAME_EXISTS;
-import static com.cmsr.onebase.module.system.enums.LogRecordConstants.SYSTEM_USER_CREATE_SUB_TYPE;
-import static com.cmsr.onebase.module.system.enums.LogRecordConstants.SYSTEM_USER_CREATE_SUCCESS;
-import static com.cmsr.onebase.module.system.enums.LogRecordConstants.SYSTEM_USER_DELETE_SUB_TYPE;
-import static com.cmsr.onebase.module.system.enums.LogRecordConstants.SYSTEM_USER_DELETE_SUCCESS;
-import static com.cmsr.onebase.module.system.enums.LogRecordConstants.SYSTEM_USER_TYPE;
-import static com.cmsr.onebase.module.system.enums.LogRecordConstants.SYSTEM_USER_UPDATE_PASSWORD_SUB_TYPE;
-import static com.cmsr.onebase.module.system.enums.LogRecordConstants.SYSTEM_USER_UPDATE_PASSWORD_SUCCESS;
-import static com.cmsr.onebase.module.system.enums.LogRecordConstants.SYSTEM_USER_UPDATE_SUB_TYPE;
-import static com.cmsr.onebase.module.system.enums.LogRecordConstants.SYSTEM_USER_UPDATE_SUCCESS;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import com.cmsr.onebase.module.system.enums.user.UserStatusEnum;
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.util.ObjUtil;
+import cn.hutool.core.util.StrUtil;
+import com.cmsr.onebase.framework.aynline.DataRepository;
+import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
+import com.cmsr.onebase.framework.common.exception.ServiceException;
+import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
+import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.framework.common.util.validation.ValidationUtils;
+import com.cmsr.onebase.framework.data.base.BaseDO;
+import com.cmsr.onebase.module.infra.api.config.ConfigApi;
+import com.cmsr.onebase.module.system.controller.admin.auth.vo.AuthRegisterReqVO;
+import com.cmsr.onebase.module.system.controller.admin.user.vo.profile.UserProfileUpdatePasswordReqVO;
+import com.cmsr.onebase.module.system.controller.admin.user.vo.profile.UserProfileUpdateReqVO;
+import com.cmsr.onebase.module.system.controller.admin.user.vo.user.*;
+import com.cmsr.onebase.module.system.convert.user.UserConvert;
+import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
+import com.cmsr.onebase.module.system.dal.dataobject.dept.UserPostDO;
+import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
+import com.cmsr.onebase.module.system.dal.dataobject.permission.UserRoleDO;
+import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
+import com.cmsr.onebase.module.system.enums.permission.RoleTypeEnum;
+import com.cmsr.onebase.module.system.service.dept.DeptService;
+import com.cmsr.onebase.module.system.service.dept.PostService;
+import com.cmsr.onebase.module.system.service.permission.PermissionService;
+import com.cmsr.onebase.module.system.service.permission.RoleService;
+import com.cmsr.onebase.module.system.service.tenant.TenantService;
+import com.google.common.annotations.VisibleForTesting;
+import com.mzt.logapi.context.LogRecordContext;
+import com.mzt.logapi.service.impl.DiffParseFunction;
+import com.mzt.logapi.starter.annotation.LogRecord;
+import jakarta.annotation.Resource;
+import jakarta.validation.ConstraintViolationException;
+import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Compare;
 import org.anyline.entity.Order;
@@ -44,42 +44,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
-import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
-import com.cmsr.onebase.framework.common.exception.ServiceException;
-import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
-import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.framework.common.util.validation.ValidationUtils;
-import com.cmsr.onebase.module.infra.api.config.ConfigApi;
-import com.cmsr.onebase.module.system.controller.admin.auth.vo.AuthRegisterReqVO;
-import com.cmsr.onebase.module.system.controller.admin.user.vo.profile.UserProfileUpdatePasswordReqVO;
-import com.cmsr.onebase.module.system.controller.admin.user.vo.profile.UserProfileUpdateReqVO;
-import com.cmsr.onebase.module.system.controller.admin.user.vo.user.UserImportExcelVO;
-import com.cmsr.onebase.module.system.controller.admin.user.vo.user.UserImportRespVO;
-import com.cmsr.onebase.module.system.controller.admin.user.vo.user.UserPageReqVO;
-import com.cmsr.onebase.module.system.controller.admin.user.vo.user.UserSaveReqVO;
-import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
-import com.cmsr.onebase.module.system.dal.dataobject.dept.UserPostDO;
-import com.cmsr.onebase.module.system.dal.dataobject.permission.UserRoleDO;
-import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
-import com.cmsr.onebase.module.system.enums.permission.RoleTypeEnum;
-import com.cmsr.onebase.module.system.service.dept.DeptService;
-import com.cmsr.onebase.module.system.service.dept.PostService;
-import com.cmsr.onebase.module.system.service.permission.PermissionService;
-import com.cmsr.onebase.module.system.service.tenant.TenantService;
-import com.google.common.annotations.VisibleForTesting;
-import com.mzt.logapi.context.LogRecordContext;
-import com.mzt.logapi.service.impl.DiffParseFunction;
-import com.mzt.logapi.starter.annotation.LogRecord;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
 
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.util.ObjUtil;
-import cn.hutool.core.util.StrUtil;
-import jakarta.annotation.Resource;
-import jakarta.validation.ConstraintViolationException;
-import lombok.extern.slf4j.Slf4j;
+import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.*;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
+import static com.cmsr.onebase.module.system.enums.LogRecordConstants.*;
 
 /**
  * 后台用户 Service 实现类
@@ -106,6 +78,9 @@ public class AdminUserServiceImpl implements AdminUserService {
 
     @Resource
     private ConfigApi configApi;
+    @Lazy
+    @Resource
+    private RoleService roleService;
 
     @Resource
     private DataRepository dataRepository;
@@ -325,14 +300,59 @@ public class AdminUserServiceImpl implements AdminUserService {
 
     @Override
     public PageResult<AdminUserDO> getUserPage(UserPageReqVO reqVO) {
+        // 构建查询条件
+        DefaultConfigStore configStore = new DefaultConfigStore();
+
+        // 用户名模糊查询
+        if (StrUtil.isNotBlank(reqVO.getUsername())) {
+            configStore.like(AdminUserDO.USERNAME, reqVO.getUsername());
+        }
+
+        // 手机号模糊查询
+        if (StrUtil.isNotBlank(reqVO.getMobile())) {
+            configStore.like(AdminUserDO.MOBILE, reqVO.getMobile());
+        }
+
+        // 状态精确查询
+        if (reqVO.getStatus() != null) {
+            configStore.and(AdminUserDO.STATUS, reqVO.getStatus());
+        }
+
+        // 创建时间范围查询
+        if (reqVO.getCreateTime() != null && reqVO.getCreateTime().length == 2) {
+            if (reqVO.getCreateTime()[0] != null) {
+                configStore.ge(BaseDO.CREATE_TIME, reqVO.getCreateTime()[0]);
+            }
+            if (reqVO.getCreateTime()[1] != null) {
+                configStore.le(BaseDO.CREATE_TIME, reqVO.getCreateTime()[1]);
+            }
+        }
+
+        // 部门ID条件 - 包括子部门
+        if (reqVO.getDeptId() != null) {
+            Set<Long> deptIds = getDeptCondition(reqVO.getDeptId());
+            if (CollUtil.isNotEmpty(deptIds)) {
+                configStore.in(AdminUserDO.DEPT_ID , deptIds);
+            }
+        }
+
         // 如果有角色编号，查询角色对应的用户编号
-        Set<Long> userIds = reqVO.getRoleId() != null ?
-                permissionService.getUserRoleIdListByRoleId(singleton(reqVO.getRoleId())) : null;
+        Set<Long> userIds = null;
+        if (reqVO.getRoleId() != null) {
+            userIds = permissionService.getUserRoleIdListByRoleId(singleton(reqVO.getRoleId()));
+            if (CollUtil.isEmpty(userIds)) {
+                // 如果角色下没有用户，直接返回空结果
+                return new PageResult<>(Collections.emptyList(), 0L);
+            }
+            configStore.in(BaseDO.ID, userIds);
+        }
+
+        // 添加排序
+        configStore.order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
 
         // 分页查询
-        return dataRepository.findPageWithConditions(AdminUserDO.class, new DefaultConfigStore().order("id", Order.TYPE.DESC),
+        return dataRepository.findPageWithConditions(AdminUserDO.class, configStore,
                 reqVO.getPageNo(), reqVO.getPageSize());
-//        return userMapper.selectPage(reqVO, getDeptCondition(reqVO.getDeptId()), userIds);
     }
 
     @Override
@@ -611,6 +631,27 @@ public class AdminUserServiceImpl implements AdminUserService {
         return (int) dataRepository.countByConfig(AdminUserDO.class,new DefaultConfigStore().eq(AdminUserDO.STATUS, status));
     }
 
+    @Override
+    public Map<Long, Integer> getUserCountByDeptIds(Collection<Long> deptIds) {
+        if (CollUtil.isEmpty(deptIds)) {
+            return Collections.emptyMap();
+        }
+
+        // 批量查询指定部门的所有用户（不过滤状态）
+        List<AdminUserDO> users = dataRepository.findAllByConfig(AdminUserDO.class,
+            new DefaultConfigStore()
+                .in("dept_id", deptIds)
+        );
+
+        // 按部门ID分组统计人数
+        return users.stream()
+            .filter(user -> user.getDeptId() != null)
+            .collect(Collectors.groupingBy(
+                AdminUserDO::getDeptId,
+                Collectors.collectingAndThen(Collectors.counting(), Math::toIntExact)
+            ));
+    }
+
     /**
      * 对密码进行加密
      *
@@ -619,6 +660,28 @@ public class AdminUserServiceImpl implements AdminUserService {
      */
     private String encodePassword(String password) {
         return passwordEncoder.encode(password);
+    }
+
+    @Override
+    public UserRespVO getUserWithRoles(Long id) {
+        // 获取用户基本信息
+        AdminUserDO user = getUser(id);
+        if (user == null) {
+            return null;
+        }
+
+        // 获取部门信息
+        DeptDO dept = deptService.getDept(user.getDeptId());
+
+        // 获取用户角色信息
+        Set<Long> roleIds = permissionService.getUserRoleIdListByUserId(id);
+        List<RoleDO> roles = new ArrayList<>();
+        if (CollUtil.isNotEmpty(roleIds)) {
+            roles = roleService.getRoleList(roleIds);
+        }
+
+        // 转换为响应对象
+        return UserConvert.INSTANCE.convert(user, dept, roles);
     }
 
 }

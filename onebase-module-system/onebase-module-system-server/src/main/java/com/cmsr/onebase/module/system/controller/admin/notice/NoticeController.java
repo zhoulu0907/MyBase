@@ -39,7 +39,7 @@ public class NoticeController {
         return success(noticeId);
     }
 
-    @PutMapping("/update")
+    @PostMapping("/update")
     @Operation(summary = "修改通知公告")
     @PreAuthorize("@ss.hasPermission('system:notice:update')")
     public CommonResult<Boolean> updateNotice(@Valid @RequestBody NoticeSaveReqVO updateReqVO) {
@@ -47,7 +47,7 @@ public class NoticeController {
         return success(true);
     }
 
-    @DeleteMapping("/delete")
+    @PostMapping("/delete")
     @Operation(summary = "删除通知公告")
     @Parameter(name = "id", description = "编号", required = true, example = "1024")
     @PreAuthorize("@ss.hasPermission('system:notice:delete')")

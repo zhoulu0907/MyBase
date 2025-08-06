@@ -35,12 +35,12 @@ public interface OAuth2TokenCommonApi {
     @Parameter(name = "accessToken", description = "访问令牌", required = true, example = "tudou")
     CommonResult<OAuth2AccessTokenCheckRespDTO> checkAccessToken(@RequestParam("accessToken") String accessToken);
 
-    @DeleteMapping(PREFIX + "/remove")
+    @PostMapping(PREFIX + "/remove")
     @Operation(summary = "移除访问令牌")
     @Parameter(name = "accessToken", description = "访问令牌", required = true, example = "tudou")
     CommonResult<OAuth2AccessTokenRespDTO> removeAccessToken(@RequestParam("accessToken") String accessToken);
 
-    @PutMapping(PREFIX + "/refresh")
+    @PostMapping(PREFIX + "/refresh")
     @Operation(summary = "刷新访问令牌")
     @Parameters({
         @Parameter(name = "refreshToken", description = "刷新令牌", required = true, example = "haha"),

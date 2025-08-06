@@ -62,7 +62,7 @@ public class NotifyMessageController {
         return success(BeanUtils.toBean(pageResult, NotifyMessageRespVO.class));
     }
 
-    @PutMapping("/update-read")
+    @PostMapping("/update-read")
     @Operation(summary = "标记站内信为已读")
     @Parameter(name = "ids", description = "编号列表", required = true, example = "1024,2048")
     public CommonResult<Boolean> updateNotifyMessageRead(@RequestParam("ids") List<Long> ids) {
@@ -70,7 +70,7 @@ public class NotifyMessageController {
         return success(Boolean.TRUE);
     }
 
-    @PutMapping("/update-all-read")
+    @PostMapping("/update-all-read")
     @Operation(summary = "标记所有站内信为已读")
     public CommonResult<Boolean> updateAllNotifyMessageRead() {
         notifyMessageService.updateAllNotifyMessageRead(getLoginUserId(), UserTypeEnum.ADMIN.getValue());

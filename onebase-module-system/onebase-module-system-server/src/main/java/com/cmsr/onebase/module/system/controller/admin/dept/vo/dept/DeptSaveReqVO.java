@@ -28,7 +28,7 @@ public class DeptSaveReqVO {
     @NotNull(message = "显示顺序不能为空")
     private Integer sort;
 
-    @Schema(description = "负责人的用户编号", example = "2048")
+    @Schema(description = "管理员的用户ID", example = "2048")
     private Long leaderUserId;
 
     @Schema(description = "联系电话", example = "15601691000")
