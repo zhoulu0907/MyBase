@@ -15,8 +15,17 @@ public class MenuOrderUpdateReqVO {
 
     private Long id;
 
-    private String parentUuid;
+    private Long parentId;
 
-    private List<Long> ids;
+    @Schema(description = "菜单顺序树结构")
+    private List<MenuOrderNode> menuTree;
+
+    @Data
+    public static class MenuOrderNode {
+
+        private Long id;
+
+        private List<MenuOrderNode> children;
+    }
 
 }

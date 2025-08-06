@@ -1,10 +1,7 @@
 package com.cmsr.onebase.module.app.controller.admin.app;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
-import com.cmsr.onebase.module.app.controller.admin.app.vo.MenuCopyReqVO;
-import com.cmsr.onebase.module.app.controller.admin.app.vo.MenuCreateReqVO;
-import com.cmsr.onebase.module.app.controller.admin.app.vo.MenuListRespVO;
-import com.cmsr.onebase.module.app.controller.admin.app.vo.MenuOrderUpdateReqVO;
+import com.cmsr.onebase.module.app.controller.admin.app.vo.*;
 import com.cmsr.onebase.module.app.service.app.AppMenuService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -37,7 +34,7 @@ public class AppMenuController {
 
     @PostMapping("/create")
     @Operation(summary = "创建应用菜单")
-    public CommonResult<Long> createApplicationMenu(@RequestBody MenuCreateReqVO createReqVO) {
+    public CommonResult<MenuCreateRespVO> createApplicationMenu(@RequestBody MenuCreateReqVO createReqVO) {
         return success(appMenuService.createApplicationMenu(createReqVO));
     }
 
