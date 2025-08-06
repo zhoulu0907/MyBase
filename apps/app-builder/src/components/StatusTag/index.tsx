@@ -1,5 +1,5 @@
 import React from 'react';
-import { StatusEnum } from '@onebase/platform-center/src/types/common';
+import { StatusEnum } from '@onebase/platform-center';
 import s from './index.module.less';
 
 export interface StatusTagProps {

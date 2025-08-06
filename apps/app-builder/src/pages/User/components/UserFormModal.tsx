@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { Modal, Form, Input, Grid, Switch, Select, Message, Button, TreeSelect } from '@arco-design/web-react';
-import { createUser, updateUser } from '@onebase/platform-center/src/services/user';
-import type { UserVO } from '@onebase/platform-center/src/types/user';
+import { createUser, updateUser } from '@onebase/platform-center';
+import type { UserVO } from '@onebase/platform-center';
 
 const Row = Grid.Row;
 const Col = Grid.Col;

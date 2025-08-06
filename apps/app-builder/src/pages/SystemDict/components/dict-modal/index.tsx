@@ -1,6 +1,6 @@
 import { Form, Input, Modal, Switch } from '@arco-design/web-react';
 import { type DictItem } from '@onebase/platform-center';
-import { StatusEnum } from '@onebase/platform-center/src/types/common';
+import { StatusEnum } from '@onebase/platform-center';
 import { useEffect } from 'react';
 
 export interface DictForm {

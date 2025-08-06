@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Avatar, Typography, Space, Divider, Empty } from '@arco-design/web-react';
 import { IconUser, IconLoading } from '@arco-design/web-react/icon';
 import styles from './index.module.less';
-import { getTenantInfo } from '@onebase/platform-center/src/services/tenant';
-import type { TenantInfo } from '@onebase/platform-center/src/types/tenant';
+import { getTenantInfo } from '@onebase/platform-center';
+import type { TenantInfo } from '@onebase/platform-center';
 
 const { Title, Text } = Typography;
 const TenantPage:React.FC = () =>{

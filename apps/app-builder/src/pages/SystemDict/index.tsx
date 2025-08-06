@@ -10,8 +10,8 @@ import {
     updateDict,
     getDictDetail
 } from '@onebase/platform-center';
-import type { PageParam } from '@onebase/platform-center/src/types/common';
-import type { DictData, DictItem } from '@onebase/platform-center/src/types/dict';
+import type { PageParam } from '@onebase/platform-center';
+import type { DictData, DictItem } from '@onebase/platform-center';
 import { useEffect, useState } from 'react';
 import DictDataModal from './components/dict-data-modal';
 import DictModal from './components/dict-modal';

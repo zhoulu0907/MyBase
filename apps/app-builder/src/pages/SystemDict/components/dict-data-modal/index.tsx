@@ -1,6 +1,6 @@
 import { Form, Input, InputNumber, Modal, Switch } from '@arco-design/web-react';
 import { type DictData } from '@onebase/platform-center';
-import { StatusEnum } from '@onebase/platform-center/src/types/common';
+import { StatusEnum } from '@onebase/platform-center';
 import { useEffect } from 'react';
 
 

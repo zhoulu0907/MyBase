@@ -1,6 +1,6 @@
 import { Layout } from '@arco-design/web-react';
-import { getSimpleDeptList } from '@onebase/platform-center/src/services/dept';
-import type { DeptVO } from '@onebase/platform-center/src/types/dept';
+import { getSimpleDeptList } from '@onebase/platform-center';
+import type { DeptVO } from '@onebase/platform-center';
 import { useEffect, useState } from 'react';
 import DeptTree from './components/DeptTree';
 import UserTable from './components/UserTable';
