@@ -29,6 +29,16 @@ public enum MenuTypeEnum {
         return text;
     }
 
+
+    public static MenuTypeEnum getByValue(Integer value) {
+        for (MenuTypeEnum menuTypeEnum : values()) {
+            if (menuTypeEnum.getValue().equals(value)) {
+                return menuTypeEnum;
+            }
+        }
+        throw ServiceExceptionUtil.exception(AppErrorCodeConstants.MENU_TYPE_ERROR);
+    }
+
     /**
      * 根据value判断值是否正确，不正确抛出异常
      */

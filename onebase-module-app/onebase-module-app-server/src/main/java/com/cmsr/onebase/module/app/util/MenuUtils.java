@@ -10,7 +10,7 @@ public class MenuUtils {
 
     public static final String ROOT_MENU_UUID = "NAV-PARENT-UUID";
 
-    public static String createMenuUuid() {
+    public static String generateMenuUuid() {
         return "NAV-" + UUID.randomUUID().toString().replace("-", "");
     }
 }

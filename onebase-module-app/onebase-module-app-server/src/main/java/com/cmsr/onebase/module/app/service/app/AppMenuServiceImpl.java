@@ -1,22 +1,19 @@
 package com.cmsr.onebase.module.app.service.app;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.app.controller.admin.app.vo.MenuCopyReqVO;
 import com.cmsr.onebase.module.app.controller.admin.app.vo.MenuCreateReqVO;
 import com.cmsr.onebase.module.app.controller.admin.app.vo.MenuListRespVO;
 import com.cmsr.onebase.module.app.controller.admin.app.vo.MenuOrderUpdateReqVO;
+import com.cmsr.onebase.module.app.dal.database.app.AppMenuRepository;
 import com.cmsr.onebase.module.app.dal.dataobject.app.MenuDO;
 import com.cmsr.onebase.module.app.enums.app.AppErrorCodeConstants;
 import com.cmsr.onebase.module.app.enums.app.MenuTypeEnum;
-import com.cmsr.onebase.module.app.enums.app.MenuVisible;
+import com.cmsr.onebase.module.app.enums.app.MenuVisibleEnum;
 import com.cmsr.onebase.module.app.util.MenuUtils;
 import jakarta.annotation.Resource;
 import lombok.Setter;
-import org.anyline.data.param.ConfigStore;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.Order;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
@@ -33,18 +30,16 @@ import java.util.List;
 @Validated
 public class AppMenuServiceImpl implements AppMenuService {
 
-    @Resource
-    private DataRepository dataRepository;
 
     @Resource
     private AppCommonService appCommonService;
 
+    @Resource
+    private AppMenuRepository appMenuRepository;
+
     @Override
     public List<MenuListRespVO> listApplicationMenu(Long applicationId) {
-        ConfigStore configs = new DefaultConfigStore();
-        configs.eq("application_id", applicationId);
-        configs.order("menu_sort", Order.TYPE.ASC);
-        List<MenuDO> menuDOS = dataRepository.findAll(MenuDO.class, configs);
+        List<MenuDO> menuDOS = appMenuRepository.findAllByApplicationId(applicationId);
         List<MenuListRespVO> menuListRespList = new ArrayList<>();
         // 把第一层的菜单添加到列表中
         List<MenuListRespVO> levelOneMenus = menuDOS.stream()
@@ -79,15 +74,19 @@ public class AppMenuServiceImpl implements AppMenuService {
         appCommonService.validateApplicationExist(createReqVO.getApplicationId());
         MenuDO menuDO = new MenuDO();
         menuDO.setApplicationId(createReqVO.getApplicationId());
+
         if (StringUtils.isNoneBlank(createReqVO.getParentUuid())) {
+            validateApplicationMenuExist(createReqVO.getParentUuid());
             menuDO.setParentUuid(createReqVO.getParentUuid());
         } else {
             menuDO.setParentUuid(MenuUtils.ROOT_MENU_UUID);
         }
+        menuDO.setMenuUuid(MenuUtils.generateMenuUuid());
         menuDO.setMenuType(createReqVO.getMenuType());
         menuDO.setMenuName(createReqVO.getMenuName());
-        menuDO.setIsVisible(MenuVisible.YES.getValue());
-        dataRepository.insert(menuDO);
+        menuDO.setMenuIcon(createReqVO.getMenuIcon());
+        menuDO.setIsVisible(MenuVisibleEnum.YES.getValue());
+        appMenuRepository.insert(menuDO);
         return menuDO.getId();
     }
 
@@ -95,14 +94,14 @@ public class AppMenuServiceImpl implements AppMenuService {
     public void updateApplicationMenuName(Long id, String menuName) {
         MenuDO menuDO = validateApplicationMenuExist(id);
         menuDO.setMenuName(menuName);
-        dataRepository.update(menuDO);
+        appMenuRepository.update(menuDO);
     }
 
     @Override
     public void updateApplicationMenuOrder(MenuOrderUpdateReqVO updateReqVO) {
         MenuDO menuDO = validateApplicationMenuExist(updateReqVO.getId());
         menuDO.setParentUuid(updateReqVO.getParentUuid());
-        dataRepository.update(menuDO);
+        appMenuRepository.update(menuDO);
         List<MenuListRespVO> menuListRespList = listApplicationMenu(menuDO.getApplicationId());
 
 
@@ -111,8 +110,8 @@ public class AppMenuServiceImpl implements AppMenuService {
     @Override
     public void updateApplicationMenuVisible(Long id, Boolean visible) {
         MenuDO menuDO = validateApplicationMenuExist(id);
-        menuDO.setIsVisible(visible ? MenuVisible.YES.getValue() : MenuVisible.NO.getValue());
-        dataRepository.update(menuDO);
+        menuDO.setIsVisible(visible ? MenuVisibleEnum.YES.getValue() : MenuVisibleEnum.NO.getValue());
+        appMenuRepository.update(menuDO);
     }
 
     @Override
@@ -124,7 +123,7 @@ public class AppMenuServiceImpl implements AppMenuService {
         menuDO.setMenuName(copyReqVO.getMenuName());
         menuDO.setParentUuid(copyReqVO.getParentUuid());
         menuDO.setId(null);
-        dataRepository.insert(menuDO);
+        appMenuRepository.insert(menuDO);
     }
 
     @Override
@@ -134,11 +133,25 @@ public class AppMenuServiceImpl implements AppMenuService {
                 && validateApplicationMenuGroupHasChildren(menuDO.getMenuUuid())) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_MENU_GROUP_HAS_CHILDREN);
         }
-        dataRepository.deleteById(MenuDO.class, id);
+        appMenuRepository.deleteById(id);
+    }
+
+    /**
+     * 校验menu uuid是否存在
+     *
+     * @param menuUuid
+     * @return
+     */
+    private boolean validateApplicationMenuExist(String menuUuid) {
+        MenuDO menuDO = appMenuRepository.findOneByMenuUuid(menuUuid);
+        if (menuDO == null) {
+            throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_MENU_NOT_EXIST);
+        }
+        return menuDO != null;
     }
 
     private MenuDO validateApplicationMenuExist(Long id) {
-        MenuDO menuDO = dataRepository.findById(MenuDO.class, id);
+        MenuDO menuDO = appMenuRepository.findById(id);
         if (menuDO == null) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_MENU_NOT_EXIST);
         }
@@ -146,9 +159,7 @@ public class AppMenuServiceImpl implements AppMenuService {
     }
 
     private boolean validateApplicationMenuGroupHasChildren(String menuUuid) {
-        ConfigStore configs = new DefaultConfigStore();
-        configs.eq("parent_uuid", menuUuid);
-        return dataRepository.countByConfig(MenuDO.class, configs) > 0;
+        return appMenuRepository.countByParentUuid(menuUuid) > 0;
     }
 
 }

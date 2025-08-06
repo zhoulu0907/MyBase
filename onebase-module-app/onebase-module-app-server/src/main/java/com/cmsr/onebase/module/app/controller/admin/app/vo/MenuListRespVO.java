@@ -14,7 +14,7 @@ import java.util.List;
 public class MenuListRespVO {
 
     @Schema(description = "菜单id")
-    private Long Id;
+    private Long id;
 
     @Schema(description = "菜单uuid")
     private String menuUuid;

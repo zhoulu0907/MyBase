@@ -13,9 +13,11 @@ import lombok.Data;
 public class MenuCreateReqVO {
 
     @Schema(description = "应用ID")
+    @NotBlank(message = "应用ID不能为空")
     private Long applicationId;
 
     @Schema(description = "菜单类型")
+    @NotBlank(message = "菜单类型不能为空")
     private Integer menuType;
 
     @Schema(description = "父菜单ID")
@@ -24,5 +26,9 @@ public class MenuCreateReqVO {
     @Schema(description = "菜单名称")
     @NotBlank(message = "菜单名称不能为空")
     private String menuName;
+
+    @Schema(description = "菜单图标")
+    @NotBlank(message = "菜单图标不能为空")
+    private String menuIcon;
 
 }

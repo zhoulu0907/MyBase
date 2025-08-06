@@ -36,7 +36,7 @@ public class AppMenuController {
     }
 
     @PostMapping("/create")
-    @Operation(summary = "创建应用菜单分组")
+    @Operation(summary = "创建应用菜单")
     public CommonResult<Long> createApplicationMenu(@RequestBody MenuCreateReqVO createReqVO) {
         return success(appMenuService.createApplicationMenu(createReqVO));
     }
