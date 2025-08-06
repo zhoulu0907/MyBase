@@ -1,4 +1,4 @@
-import {  Space, Table, Button, Modal, Input, Message, Tooltip } from '@arco-design/web-react';
+import {  Space, Table, Button, Modal, Input, Message, Tooltip, Form } from '@arco-design/web-react';
 import React, { useState } from 'react';
 import styles from './index.module.less';
 
@@ -13,8 +13,9 @@ const Administrator: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [passwordForm, setPasswordForm] = useState({ account: '', oldPassword: '', newPassword: '', confirmPassword: '' });
   const [emailForm, setEmailForm] = useState({ account: '', oldEmail: '', newEmail: '' });
-  // const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
+  const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState(null);
+  const [modalType, setModalType] = useState<'email' | 'password' | null>(null);
 
   const columns = [
     {
@@ -58,20 +59,9 @@ const Administrator: React.FC = () => {
             <Tooltip
               position="tr"
               trigger="hover"
-              content={
-                <div style={{ background: '#e6fffa', padding: '12px', borderRadius: '4px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <span style={{ color: '#faad14', marginRight: '8px' }}>!</span>
-                    <span>Are you sure you want to delete?</span>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '12px' }}>
-                    <Button type="default" style={{ marginRight: '8px' }}>取消</Button>
-                    <Button type="primary">确定</Button>
-                  </div>
-                </div>
-              }
+              content="Are you sure you want to delete?"
             >
-              <Button type="text">
+              <Button key={`delete-${record.id}`} type="text" onClick={() => handleDeleteConfirm(record)}>
                 删除
               </Button>
             </Tooltip>
@@ -100,25 +90,44 @@ const Administrator: React.FC = () => {
 
   const handleEditEmail = (record: AdminRecord) => {
     setEmailForm({ account: record.account, oldEmail: record.email, newEmail: '' });
+    setModalType('email');
     setModalVisible(true);
   };
 
   const handleEditPassword = (record: AdminRecord) => {
     setPasswordForm({ account: record.account, oldPassword: '', newPassword: '', confirmPassword: '' });
+    setModalType('password');
     setModalVisible(true);
   };
 
-  // const handleDeleteConfirm = (record: AdminRecord) => {
-  //   setSelectedRecord(record);
-  //   setDeleteConfirmVisible(true);
-  // };
+  const handleDeleteConfirm = (record: AdminRecord) => {
+    setSelectedRecord(record);
+    setDeleteConfirmVisible(true);
+  };
 
-  // const handleDelete = () => {
-  //   // 实现删除逻辑
-  //   Message.success('删除成功');
-  //   setDeleteConfirmVisible(false);
-  // };
+  const handlePasswordSubmit = () => {
+    const { oldPassword, newPassword, confirmPassword } = passwordForm;
 
+    if (!oldPassword) {
+      Message.error('请输入原密码');
+      return;
+    }
+
+    if (!newPassword || newPassword.length < 6) {
+      Message.error('新密码至少需要6位');
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      Message.error('新密码和确认密码不一致');
+      return;
+    }
+
+    // 实际的提交逻辑
+    console.log('提交密码修改:', passwordForm);
+    Message.success('密码修改成功');
+    setModalVisible(false);
+  };
   return (
     <div className={styles.administrator}>
       <Space direction="vertical" size="large" style={{ width: '100%' }}>
@@ -130,53 +139,63 @@ const Administrator: React.FC = () => {
             pageSize: 10,
             showTotal: (total) => `共 ${total} 条`
           }}
+          rowKey="id"
         />
         <Modal
           visible={modalVisible}
-          title={selectedRecord?.type === '系统默认账号' ? '修改密码' : '修改邮箱'}
+          title={modalType === 'password' ? '修改密码' : '修改邮箱'}
           onCancel={() => setModalVisible(false)}
-          onOk={() => console.log('提交')}
+          footer={[
+            <Button key="return" onClick={() => setModalVisible(false)}>Return</Button>,
+            <Button key="submit" type="primary" onClick={handlePasswordSubmit}>Submit</Button>
+          ]}
         >
-          {selectedRecord?.type === 'password' ? (
-            <>
-              <Input value={passwordForm.account} disabled />
-              <Input
-                placeholder="原密码"
-                type="password"
-                value={passwordForm.oldPassword}
-                onChange={
-                  (value) => setEmailForm({ ...emailForm, newEmail: value })
-                }
-              />
-              <Input
-                placeholder="新密码"
-                type="password"
-                value={passwordForm.newPassword}
-                onChange={
-                  (value) => setPasswordForm({ ...passwordForm, newPassword: value })
-                }
-              />
-              <Input
-                placeholder="确认密码"
-                type="password"
-                value={passwordForm.confirmPassword}
-                onChange={
-                  (value) => setPasswordForm({ ...passwordForm, confirmPassword: value })
-                }
-              />
-            </>
+          {modalType === 'password' ? (
+            <Form layout="vertical">
+              <Form.Item label="账号">
+                <Input value={passwordForm.account} disabled />
+              </Form.Item>
+              <Form.Item label="原密码">
+                <Input
+                  placeholder="原密码"
+                  type="password"
+                  value={passwordForm.oldPassword}
+                  onChange={(value) => setPasswordForm({ ...passwordForm, oldPassword: value })}
+                />
+              </Form.Item>
+              <Form.Item label="新密码">
+                <Input
+                  placeholder="新密码"
+                  type="password"
+                  value={passwordForm.newPassword}
+                  onChange={(value) => setPasswordForm({ ...passwordForm, newPassword: value })}
+                />
+              </Form.Item>
+              <Form.Item label="确认密码">
+                <Input
+                  placeholder="确认密码"
+                  type="password"
+                  value={passwordForm.confirmPassword}
+                  onChange={(value) => setPasswordForm({ ...passwordForm, confirmPassword: value })}
+                />
+              </Form.Item>
+            </Form>
           ) : (
-            <>
-              <Input value={emailForm.account} disabled />
-              <Input value={emailForm.oldEmail} disabled />
-              <Input
-                placeholder="新邮箱"
-                value={emailForm.newEmail}
-                onChange={
-                  (value) => setEmailForm({ ...emailForm, newEmail: value })
-                }
-              />
-            </>
+            <Form layout="vertical">
+              <Form.Item label="账号">
+                <Input value={emailForm.account} disabled />
+              </Form.Item>
+              <Form.Item label="原邮箱">
+                <Input value={emailForm.oldEmail} disabled />
+              </Form.Item>
+              <Form.Item label="新邮箱">
+                <Input
+                  placeholder="新邮箱"
+                  value={emailForm.newEmail}
+                  onChange={(value) => setEmailForm({ ...emailForm, newEmail: value })}
+                />
+              </Form.Item>
+            </Form>
           )}
         </Modal>
       </Space>

@@ -15,8 +15,4 @@ export * from './services/user';
 
 export * from './services/dept';
 
-export { PlatformService } from './services/clients/platform';;
-
-export * from './services/platformLogin';
-
 export * from './services/platformInfo';

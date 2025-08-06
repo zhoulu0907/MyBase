@@ -4,7 +4,5 @@ export * from './captcha';
 export * from './dict';
 export * from './tenant';
 export * from './user';
-export * from './clients/platform';
-export * from './platformLogin';
 export * from './platformInfo';
 // export * from './tenant';

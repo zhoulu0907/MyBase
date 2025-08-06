@@ -15,7 +15,7 @@ import { useI18n } from '../../../hooks/useI18n';
 import { useRememberMe } from '../../../hooks/useRememberMe';
 import styles from '../index.module.less';
 // import type { LoginRequest } from '@/types/login';
-import { platformLoginApi, type LoginRequest } from '@onebase/platform-center';
+import { login, type LoginRequest } from '@onebase/platform-center';
 import { TokenManager } from '@onebase/common';
 
 const { Paragraph } = Typography;
@@ -55,18 +55,17 @@ const Right: React.FC = () => {
     console.log('values:', values);
 
     try {
-      const loginRes = await platformLoginApi(values);
-      console.log('loginRes:', loginRes);
+      const loginResp = await login(values);
+      console.log('loginRes:', loginResp);
       // 显示成功消息并跳转
-      if (loginRes.userId === 1) {
-
+      if (loginResp.accessToken) {
         Message.success(t('auth.loginSuccess'));
         // 存储 token 信息（需要导入相应的 token 管理工具）
         TokenManager.setToken({
-          userId: loginRes.userId,
-          accessToken: loginRes.accessToken,
-          refreshToken: loginRes.refreshToken,
-          expiresTime: loginRes.expiresTime,
+          userId: loginResp.userId,
+          accessToken: loginResp.accessToken,
+          refreshToken: loginResp.refreshToken,
+          expiresTime: loginResp.expiresTime,
         }, rememberMe);
         navigate('/onebase/platform-info');
       } else {

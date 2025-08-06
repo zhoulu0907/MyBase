@@ -35,53 +35,61 @@ export interface AuthRecord {
  * 平台信息
  */
 export interface LicenseInfo {
-  id: number;
-  /**
-   * 创建时间
-   */
-  createTime: number;
-  /**
-   * 企业名称
-   */
-  enterpriseName: string;
-  /**
-   * 公司编码
-   */
-  enterpriseCode: string;
-  /**
-   * 公司地址
-   */
-  enterpriseAddress: string;
-  /**
-   * 平台类型
-   */
-  platformType: string;
-  /**
-   * 实际租户数
-   */
-  actualTenantCount: number;
-  /**
-   * 实际用户数
-   */
-  actualUserCount: number;
-  /**
-   * 租户数量限制
-   */
-  tenantLimit: number;
-  /**
-   * 用户数量限制
-   */
-  userLimit: number;
-  /**
-   * 过期时间
-   */
-  expireTime: number;
-  /**
-   * 状态
-   */
-  status: string;
-  /**
-   * 是否是试用
-   */
-  isTrial: boolean;
+    id: number;
+    /**
+     * 创建时间
+     */
+    createTime: number;
+    /**
+     * 创建人
+     */
+    creator: number;
+    /**
+     * 管理员账号
+     */
+    adminUser: string;
+    /**
+     * 企业名称
+     */
+    enterpriseName: string;
+    /**
+     * 公司编码
+     */
+    enterpriseCode: string;
+    /**
+     * 公司地址
+     */
+    enterpriseAddress: string;
+    /**
+     * 平台类型
+     */
+    platformType: string;
+    /**
+     * 实际租户数
+     */
+    actualTenantCount: number;
+    /**
+     * 实际用户数
+     */
+    actualUserCount: number;
+    /**
+     * 租户数量限制
+     */
+    tenantLimit: number;
+    /**
+     * 用户数量限制
+     */
+    userLimit: number;
+    /**
+     * 过期时间
+     */
+    expireTime: number;
+    /**
+     * 状态
+     */
+    status: 'enable' | 'disable';
+    /**
+     * 是否是试用
+     */
+    isTrial: boolean;
 }

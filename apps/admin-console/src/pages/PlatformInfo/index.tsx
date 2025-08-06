@@ -4,7 +4,7 @@ import React, { useEffect } from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styles from './index.module.less';
-import { getPlatFormInfoListApi, type PlatformInfoReq, type AuthRecord, type LicenseInfo } from '@onebase/platform-center'
+import { getPlatFormInfoListApi, uploadPlatformLicenseApi, type PlatformInfoReq, type AuthRecord, type LicenseInfo } from '@onebase/platform-center'
 
 const { Title, Text } = Typography;
 // 定义认证记录的数据类型
@@ -19,23 +19,23 @@ const PlatformInfo: React.FC = () => {
   const { t } = useTranslation();
   const [visible, setVisible] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<CertificationRecord | null>(null);
-  const [licenseInfoList, setLicenseInfoList] = useState<LicenseInfo[] | null>(null);
+  const [licenseInfoList, setLicenseInfoList] = useState<LicenseInfo[]>([]);
   const [licenseInfo, setLicenseInfo] = useState<LicenseInfo | null>(null);
   // 模拟平台信息数据 license 获取
   const platformData = {
     name: 'ONE BASE Platform',
     // 企业编号
-    companyId: 'F2000909',
+    enterpriseCode: 'F2000909',
     // 企业地址
-    address: '中国上海徐汇区',
+    enterpriseAddress: '中国上海徐汇区',
     // 超级管理员
-    superAdmin: 'admin',
+    creator: 'admin',
     // 创建时间
-    createdAt: '2023-01-01 00:00:00',
+    createTime: '2023-01-01 00:00:00',
     // 平台类型
     platformType: '私有化部署',
     // 认证状态
-    authStatus: '已认证', // 已过期/已认证/已失效
+    status: '已认证', // 已过期/已认证/已失效
     // 到期时间
     expireTime: '2023-12-31 23:59:59',
     // 系统版本
@@ -43,7 +43,7 @@ const PlatformInfo: React.FC = () => {
     // 实际租户数量
     actualTenantCount: 5,
     // 系统获取租户数量
-    systemTenantCount: 10,
+    tenantLimit: 10,
     description: '企业级管理平台，提供用户管理、内容管理、系统设置等功能',
     environment: 'Production',
     lastUpdate: '2024-01-15 10:30:00',
@@ -88,7 +88,7 @@ const PlatformInfo: React.FC = () => {
         }
       } else {
         console.warn('Invalid response format:', res);
-        setLicenseInfoList(null);
+        setLicenseInfoList([]);
         setLicenseInfo(null);
       }
     } catch (error: any) {
@@ -101,13 +101,6 @@ const PlatformInfo: React.FC = () => {
     getPlatformInfoList();
   }, [])
 
-  useEffect(() => {
-    console.log('Updated LicenseInfoList:', licenseInfoList);
-  }, [licenseInfoList]);
-
-  useEffect(() => {
-    console.log('Updated LicenseInfo:', licenseInfo);
-  }, [licenseInfo]);
   // 认证记录table结构
   const columns: TableColumnProps[] = [
     {
@@ -153,8 +146,14 @@ const PlatformInfo: React.FC = () => {
 
   
   // 上传认证
-  const handleUploadCertification = () => {
-    console.log('认证已经上传了');
+  const handleUploadCertification = async() => {
+    // console.log('认证已经上传了');
+    try {
+      const resp = await uploadPlatformLicenseApi(data);
+      console.log('uploadPlatformLicense-res: ', resp);
+    } catch (error: any) {
+      Message.error(error.message || '认证上传失败');
+    }
   }
   const [data, setData] = useState(allData);
   // 分页器
@@ -189,13 +188,13 @@ const PlatformInfo: React.FC = () => {
         <div className={styles.pageHeader}>
           <div className={styles.pageHeaderLeft}>
             <Title heading={4} className={styles.pageHeaderTitle}>
-              {platformData.name}
+              {licenseInfo?.enterpriseName}
             </Title>
             <div className="companyId">
-              <Text type="secondary">{platformData.companyId}</Text>
+              <Text type="secondary">{licenseInfo?.enterpriseCode}</Text>
             </div>
             <div className="address">
-              <Text type="secondary">{platformData.address}</Text>
+              <Text type="secondary">{licenseInfo?.enterpriseAddress}</Text>
             </div>
           </div>
           <div className={styles.pageHeaderRight}>
@@ -203,12 +202,12 @@ const PlatformInfo: React.FC = () => {
               <Text type="secondary">
                 {t('platformInfo.superAdmin')}：
                 <span className={styles.superAdminText}>
-                  {platformData.superAdmin}
+                  {licenseInfo?.creator}
                 </span>
               </Text>
             </div>
             <div className={styles.createdAt}>
-              <Text type="secondary">{t('platformInfo.createdAt')}：{platformData.createdAt}</Text>
+              <Text type="secondary">{t('platformInfo.createdAt')}：{licenseInfo?.createTime}</Text>
             </div>
           </div>
         </div>
@@ -220,31 +219,31 @@ const PlatformInfo: React.FC = () => {
             data={[
               {
                 label: t('platformInfo.platformType'),
-                value: platformData.platformType,
+                value: licenseInfo?.platformType,
               },
               {
                 label: t('platformInfo.authStatus'),
                 value: (
                   <span className={styles.statusRunning}>
-                    {platformData.authStatus}
+                    {licenseInfo?.status}
                   </span>
                 ),
               },
               {
                 label: t('platformInfo.expireTime'),
-                value: platformData.expireTime,
+                value: licenseInfo?.expireTime,
               },
               {
                 label: t('platformInfo.version'),
-                value: platformData.version,
+                value: 'v1.0.0',
               },
               {
                 label: t('platformInfo.tenantCount'),
                 value: (
                   <Space>
-                    <span>{platformData.actualTenantCount}</span>
+                    <span>{licenseInfo?.actualTenantCount}</span>
                     <span> / </span>
-                    <span>{platformData.systemTenantCount}</span>
+                    <span>{licenseInfo?.tenantLimit}</span>
                   </Space>
                   ),
               },
@@ -276,7 +275,7 @@ const PlatformInfo: React.FC = () => {
               }}
             >
               <div className={styles.uploadAuthText}>
-                {t('platformInfo.uploadAuth')}  
+                {t('platformInfo.uploadAuth')}
               </div>
             </Upload>
           </span>
