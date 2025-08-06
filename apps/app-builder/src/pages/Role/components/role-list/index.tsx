@@ -1,11 +1,10 @@
 import ListItem from '@/components/ListItem';
-import { Input, Button, Spin } from '@arco-design/web-react';
-import { type RoleVO } from '@onebase/platform-center';
-import s from '../../index.module.less';
+import { Button, Input, Spin } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
-import { useEffect, useRef, forwardRef, useImperativeHandle, useMemo, useState, useCallback } from 'react';
-import { getRolePage } from '@onebase/platform-center';
 import type { PageParam } from '@onebase/platform-center';
+import { getRolePage, type RoleVO } from '@onebase/platform-center';
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
+import s from '../../index.module.less';
 
 interface RoleListProps {
   activeId: number | undefined;
@@ -45,13 +44,13 @@ export default forwardRef(function RoleList({
 
       const res = await getRolePage(params);
       const newRoleList = res.list || [];
-      
+
       if (append) {
         setRoleList(prev => [...prev, ...newRoleList]);
       } else {
         setRoleList(newRoleList);
       }
-      
+
       setHasMore(newRoleList.length === 10);
       setCurrentPage(page);
     } catch (error) {
@@ -63,7 +62,7 @@ export default forwardRef(function RoleList({
         { id: 4, name: 'UI设计师', remark: 'UI设计师' },
         { id: 5, name: '测试工程师', remark: '测试工程师' },
       ];
-      
+
       if (append) {
         setRoleList(prev => [...prev, ...mockRoleList]);
       } else {
@@ -127,7 +126,7 @@ export default forwardRef(function RoleList({
 
   const filteredRoleList = useMemo(() => {
     if (!searchValue) return roleList;
-    return roleList.filter(role => 
+    return roleList.filter(role =>
       role.name?.toLowerCase().includes(searchValue.toLowerCase())
     );
   }, [roleList, searchValue]);
@@ -161,11 +160,11 @@ export default forwardRef(function RoleList({
           <IconPlus />新建
         </Button>
       </ListItem>
-      <div 
+      <div
         ref={scrollContainerRef}
         className={s.roleList}
-        style={{ 
-          height: 'calc(100% - 110px)', 
+        style={{
+          height: 'calc(100% - 110px)',
           overflowY: 'auto',
           position: 'relative'
         }}

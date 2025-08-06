@@ -3,6 +3,7 @@ export * from './captcha';
 export * from './common';
 export * from './dept';
 export * from './dict';
+export * from './platformInfo';
+export * from './role';
 export * from './tenant';
 export * from './user';
-export * from './platformInfo';
