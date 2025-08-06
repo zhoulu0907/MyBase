@@ -2,3 +2,5 @@
 export * from './types';
 
 export { getBackendURL } from './services/base';
+
+export * from './services';
