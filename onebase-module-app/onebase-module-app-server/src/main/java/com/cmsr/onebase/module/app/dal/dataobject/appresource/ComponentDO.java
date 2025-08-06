@@ -7,7 +7,7 @@ import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-@Table(name="app_component")
+@Table(name="app_resource_component")
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class ComponentDO extends TenantBaseDO {
@@ -17,6 +17,19 @@ public class ComponentDO extends TenantBaseDO {
      */
     @Column(name = "component_code", columnDefinition = "VARCHAR(255) NOT NULL", comment = "组件编码")
     private String componentCode;
+
+    /**
+     * 页面ID
+     */
+    @Column(name = "page_id", columnDefinition= "BIGINT NOT NULL", comment = "页面ID")
+    private Long pageId;
+
+
+    /**
+     * 是否在子表中
+     */
+    @Column(name = "in_table", columnDefinition= "BOOLEAN NOT NULL", comment = "是否在子表中")
+    private Boolean inTable;
 
     /**
      * 组件类型
@@ -29,12 +42,6 @@ public class ComponentDO extends TenantBaseDO {
      */
     @Column(name = "label", columnDefinition = "VARCHAR(255) NOT NULL", comment = "组件标题")
     private String label;
-
-    /**
-     *  组件占位符
-     */
-    @Column(name = "placeholder", columnDefinition = "VARCHAR(255) NOT NULL", comment = "组件占位符")
-    private String placeholder;
 
     /**
      * 组件宽度
@@ -51,8 +58,8 @@ public class ComponentDO extends TenantBaseDO {
     /**
      * readOnly
      */
-    @Column(name = "read_only", columnDefinition = "VARCHAR(255) NOT NULL", comment = "只读绑定（如PageData.isViewMode）")
-    private String readOnly;
+    @Column(name = "read_only", columnDefinition = "BOOLEAN NOT NULL", comment = "只读绑定（如PageData.isViewMode）")
+    private Boolean readOnly;
 
     /**
      * 是否必填
@@ -60,7 +67,16 @@ public class ComponentDO extends TenantBaseDO {
     @Column(name = "required", columnDefinition = "BOOLEAN NOT NULL", comment = "是否必填")
     private Boolean required;
 
+    /**
+     * 配置
+     */
+    @Column(name = "config", columnDefinition = "TEXT NOT NULL", comment = "配置")
+    private String config;
 
-    // TODO(mickey): 补充Data部分
+    /**
+     * 编辑数据
+     */
+    @Column(name = "edit_data", columnDefinition = "TEXT NOT NULL", comment = "编辑数据")
+    private String editData;
 
 }

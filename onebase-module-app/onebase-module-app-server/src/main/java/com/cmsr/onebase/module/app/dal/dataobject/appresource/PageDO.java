@@ -13,7 +13,7 @@ import lombok.EqualsAndHashCode;
  * @Author mickey
  * @Date 2025/7/30 14:51
  */
-@Table(name="app_page")
+@Table(name="app_resource_page")
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class PageDO extends TenantBaseDO {
@@ -24,6 +24,9 @@ public class PageDO extends TenantBaseDO {
     @Column(name = "page_name", columnDefinition= "VARCHAR(255) NOT NULL", comment = "页面名称")
     private String pageName;
 
+    @Column(name = "page_type", columnDefinition= "VARCHAR(64) NOT NULL", comment = "页面类型 list edit detail")
+    private String pageType;
+
     /**
      * 页面标题
      */
@@ -31,7 +34,7 @@ public class PageDO extends TenantBaseDO {
     private String title;
 
     /**
-     * 页面布局方式，vertical（垂直布局）
+     * 页面布局方式，vertical（垂直布局）、horizontal（水平布局）
      */
     @Column(name = "layout", columnDefinition= "VARCHAR(255) NOT NULL", comment = "页面布局方式")
     private String layout;
@@ -43,7 +46,7 @@ public class PageDO extends TenantBaseDO {
     private String width;
 
     /**
-     * 页面外边距，默认 0 auto 居中
+     * 页面外边距，默认 0
      */
     @Column(name = "margin", columnDefinition= "VARCHAR(255) NOT NULL", comment = "页面外边距")
     private String margin;
@@ -97,16 +100,6 @@ public class PageDO extends TenantBaseDO {
 
 
     // TODO(mickey): 补充 Method字段
-
-
-
-
-
-
-
-
-
-
 
 
 }

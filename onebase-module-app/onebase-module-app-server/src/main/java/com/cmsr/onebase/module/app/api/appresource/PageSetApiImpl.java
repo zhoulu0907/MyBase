@@ -31,14 +31,14 @@ public class PageSetApiImpl implements PageSetApi{
     }
 
     @Override
-    public CommonResult<Long> createPageSet(CreatePageSetDTO createPageSetDTO) {
-        Long id = pageSetService.createPageSet(createPageSetDTO);
-        return CommonResult.success(id);
+    public CommonResult<String> createPageSet(CreatePageSetDTO createPageSetDTO) {
+        String pageSetCode = pageSetService.createPageSet(createPageSetDTO);
+        return CommonResult.success(pageSetCode);
     }
 
     @Override
-    public CommonResult<Boolean> deletePageSet(String code) {
-        pageSetService.deletePageSet(code);
+    public CommonResult<Boolean> deletePageSet(Long menuId) {
+        pageSetService.deletePageSet(menuId);
         return CommonResult.success(true);
     }
 }
