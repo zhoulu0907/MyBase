@@ -28,7 +28,7 @@ public class AppTagController {
     @Resource
     private AppTagService appTagService;
 
-    @GetMapping("/list")
+    @PostMapping("/list")
     @Operation(summary = "应用标签列表")
     public CommonResult<List<TagListRespVO>> listTag(@RequestBody ListTagReqVO listTagReqVO) {
         return success(appTagService.listTags(listTagReqVO.getTagName()));
