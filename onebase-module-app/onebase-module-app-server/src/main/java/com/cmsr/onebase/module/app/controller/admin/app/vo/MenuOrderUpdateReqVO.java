@@ -1,9 +1,9 @@
 package com.cmsr.onebase.module.app.controller.admin.app.vo;
 
+import java.util.List;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-
-import java.util.List;
 
 /**
  * @Author：huangjie

@@ -1,6 +1,5 @@
 package com.cmsr.onebase.module.metadata.service.datasource;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.metadata.controller.admin.datasource.vo.ColumnInfoRespVO;
 import com.cmsr.onebase.module.metadata.controller.admin.datasource.vo.DatasourcePageReqVO;
@@ -12,6 +11,7 @@ import com.cmsr.onebase.module.metadata.controller.admin.datasource.vo.TableInfo
 import com.cmsr.onebase.module.metadata.service.datasource.vo.ColumnQueryVO;
 import com.cmsr.onebase.module.metadata.service.datasource.vo.TableQueryVO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.datasource.MetadataDatasourceDO;
+import com.cmsr.onebase.module.metadata.config.MetadataConfig;
 import com.cmsr.onebase.module.metadata.convert.datasource.DatasourceConvert;
 import com.cmsr.onebase.module.metadata.enums.DatasourceTypeEnum;
 import com.cmsr.onebase.module.metadata.service.helper.DatasourceServiceHelper;
@@ -49,9 +49,7 @@ import org.anyline.entity.Compare;
 public class MetadataDatasourceServiceImpl implements MetadataDatasourceService {
 
     @Resource
-    private DataRepository dataRepository;
-    @Resource
-    private org.springframework.core.env.Environment env;
+    private MetadataConfig metadataConfig;
     @Resource
     private DatasourceConvert datasourceConvert;
     @Resource
@@ -188,40 +186,39 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
         // 插入数据源
         MetadataDatasourceDO datasource = datasourceConvert.convert(createReqVO);
         datasource.setAppId(Long.valueOf(createReqVO.getAppId()));
-        dataRepository.insert(datasource);
+        datasourceServiceHelper.insert(datasource);
 
         return datasource.getId();
     }
-    
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long createDefaultDatasource(Long appId) {
-        // 从配置文件中读取默认数据源参数
-        String host = env.getProperty("default.datasource.host");
-        Integer port = env.getProperty("default.datasource.port", Integer.class);
-        String database = env.getProperty("default.datasource.database");
-        String username = env.getProperty("default.datasource.username");
-        String password = env.getProperty("default.datasource.password");
+        // 从配置类中读取默认数据源参数
+
         // 构造配置 map
         java.util.Map<String, Object> config = new java.util.HashMap<>();
-        config.put("host", host);
-        config.put("port", port);
-        config.put("database", database);
-        config.put("username", username);
-        config.put("password", password);
+        config.put("host", metadataConfig.getDefaultDatasourceHost());
+        config.put("port", metadataConfig.getDefaultDatasourcePort());
+        config.put("database", metadataConfig.getDefaultDatasourceDatabase());
+        config.put("username", metadataConfig.getDefaultDatasourceUsername());
+        config.put("password", metadataConfig.getDefaultDatasourcePassword());
+
         // 构造保存请求
         DatasourceSaveReqVO reqVO = new DatasourceSaveReqVO();
-        reqVO.setDatasourceName(database);
-        reqVO.setCode(database);
-        reqVO.setDatasourceType("POSTGRESQL");
+        reqVO.setDatasourceName(metadataConfig.getDefaultDatasourceDatabase());
+        reqVO.setCode(metadataConfig.getDefaultDatasourceDatabase());
+        reqVO.setDatasourceType(metadataConfig.getDefaultDatasourceType());
         reqVO.setConfig(config);
-        reqVO.setDescription("默认数据源");
-        reqVO.setRunMode(1);
-        reqVO.setDatasourceOrigin(0);
+        reqVO.setDescription(metadataConfig.getDefaultDatasourceDescription());
+        reqVO.setRunMode(metadataConfig.getDefaultDatasourceRunMode());
+        reqVO.setDatasourceOrigin(metadataConfig.getDefaultDatasourceDatasourceOrigin());
         reqVO.setAppId(String.valueOf(appId));
+
         // 生成唯一的数据源编码，避免重复
-        String uniqueCode = database + "_" + UUID.randomUUID().toString().replace("-", "");
+        String uniqueCode = metadataConfig.getDefaultDatasourceDatabase() + "_" + UUID.randomUUID().toString().replace("-", "");
         reqVO.setCode(uniqueCode);
+
         // 调用已有创建方法
         return createDatasource(reqVO);
     }
@@ -239,7 +236,7 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
         // 手动设置ID，确保更新操作正常进行
         updateObj.setId(Long.valueOf(updateReqVO.getId()));
         updateObj.setAppId(Long.valueOf(updateReqVO.getAppId()));
-        dataRepository.update(updateObj);
+        datasourceServiceHelper.update(updateObj);
     }
 
     @Override
@@ -249,11 +246,11 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
         validateDatasourceExists(id);
 
         // 删除数据源
-        dataRepository.deleteById(MetadataDatasourceDO.class, id);
+        datasourceServiceHelper.deleteById(MetadataDatasourceDO.class, id);
     }
 
     private void validateDatasourceExists(Long id) {
-        if (dataRepository.findById(MetadataDatasourceDO.class, id) == null) {
+        if (datasourceServiceHelper.findById(MetadataDatasourceDO.class, id) == null) {
             throw exception(DATASOURCE_NOT_EXISTS);
         }
     }
@@ -266,7 +263,7 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
             configStore.and(Compare.NOT_EQUAL, "id", id);
         }
 
-        long count = dataRepository.countByConfig(MetadataDatasourceDO.class, configStore);
+        long count = datasourceServiceHelper.countByConfig(MetadataDatasourceDO.class, configStore);
         if (count > 0) {
             throw exception(DATASOURCE_CODE_DUPLICATE);
         }
@@ -274,7 +271,7 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
 
     @Override
     public MetadataDatasourceDO getDatasource(Long id) {
-        return dataRepository.findById(MetadataDatasourceDO.class, id);
+        return datasourceServiceHelper.findById(MetadataDatasourceDO.class, id);
     }
 
     @Override
@@ -302,21 +299,21 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
         }
 
         // 分页查询
-        return dataRepository.findPageWithConditions(MetadataDatasourceDO.class, configStore, pageReqVO.getPageNo(), pageReqVO.getPageSize());
+        return datasourceServiceHelper.findPageWithConditions(MetadataDatasourceDO.class, configStore, pageReqVO.getPageNo(), pageReqVO.getPageSize());
     }
 
     @Override
     public List<MetadataDatasourceDO> getDatasourceList() {
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.order("create_time", Order.TYPE.DESC);
-        return dataRepository.findAllByConfig(MetadataDatasourceDO.class, configStore);
+        return datasourceServiceHelper.findAllByConfig(MetadataDatasourceDO.class, configStore);
     }
 
     @Override
     public MetadataDatasourceDO getDatasourceByCode(String code) {
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.and("code", code);
-        return dataRepository.findOne(MetadataDatasourceDO.class, configStore);
+        return datasourceServiceHelper.findOne(MetadataDatasourceDO.class, configStore);
     }
 
     /**

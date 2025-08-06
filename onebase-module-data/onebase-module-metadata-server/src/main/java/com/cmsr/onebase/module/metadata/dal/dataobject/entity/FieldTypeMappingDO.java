@@ -9,7 +9,7 @@ import lombok.*;
  * @Author mickey
  * @Date 2025/1/27 10:30
  */
-@Table(name = "field_type_mapping")
+@Table(name = "metadata_field_type_mapping")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

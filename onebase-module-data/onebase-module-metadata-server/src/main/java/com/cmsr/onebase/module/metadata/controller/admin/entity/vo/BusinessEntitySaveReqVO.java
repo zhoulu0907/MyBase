@@ -23,7 +23,7 @@ public class BusinessEntitySaveReqVO {
     @Size(max = 32, message = "实体编码长度不能超过32个字符")
     private String code;
 
-    @Schema(description = "实体类型(1:自建表，2:复用已有表)", example = "1")
+    @Schema(description = "实体类型(1:自建表，2:复用已有表，3:中间表)", example = "1")
     private Integer entityType;
 
     @Schema(description = "实体描述", example = "用户相关的业务实体")
