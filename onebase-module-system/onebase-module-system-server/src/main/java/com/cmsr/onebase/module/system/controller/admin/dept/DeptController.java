@@ -22,6 +22,12 @@ import java.util.List;
 
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 
+/**
+ * 管理后台 - 部门 Controller
+ *
+ * @author matianyu
+ * @date 2025-01-27
+ */
 @Tag(name = "管理后台 - 部门")
 @RestController
 @RequestMapping("/system/dept")
@@ -39,7 +45,7 @@ public class DeptController {
         return success(deptId);
     }
 
-    @PutMapping("update")
+    @PostMapping("update")
     @Operation(summary = "更新部门")
     @PreAuthorize("@ss.hasPermission('system:dept:update')")
     public CommonResult<Boolean> updateDept(@Valid @RequestBody DeptSaveReqVO updateReqVO) {
@@ -47,7 +53,7 @@ public class DeptController {
         return success(true);
     }
 
-    @DeleteMapping("delete")
+    @PostMapping("delete")
     @Operation(summary = "删除部门")
     @Parameter(name = "id", description = "编号", required = true, example = "1024")
     @PreAuthorize("@ss.hasPermission('system:dept:delete')")
@@ -60,8 +66,8 @@ public class DeptController {
     @Operation(summary = "获取部门列表")
     @PreAuthorize("@ss.hasPermission('system:dept:query')")
     public CommonResult<List<DeptRespVO>> getDeptList(DeptListReqVO reqVO) {
-        List<DeptDO> list = deptService.getDeptList(reqVO);
-        return success(BeanUtils.toBean(list, DeptRespVO.class));
+        List<DeptRespVO> respList = deptService.getDeptListWithUserCount(reqVO);
+        return success(respList);
     }
 
     @GetMapping(value = {"/list-all-simple", "/simple-list"})

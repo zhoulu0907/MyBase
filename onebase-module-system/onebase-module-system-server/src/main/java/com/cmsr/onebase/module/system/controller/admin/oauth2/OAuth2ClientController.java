@@ -36,7 +36,7 @@ public class OAuth2ClientController {
         return success(oAuth2ClientService.createOAuth2Client(createReqVO));
     }
 
-    @PutMapping("/update")
+    @PostMapping("/update")
     @Operation(summary = "更新 OAuth2 客户端")
     @PreAuthorize("@ss.hasPermission('system:oauth2-client:update')")
     public CommonResult<Boolean> updateOAuth2Client(@Valid @RequestBody OAuth2ClientSaveReqVO updateReqVO) {
@@ -44,7 +44,7 @@ public class OAuth2ClientController {
         return success(true);
     }
 
-    @DeleteMapping("/delete")
+    @PostMapping("/delete")
     @Operation(summary = "删除 OAuth2 客户端")
     @Parameter(name = "id", description = "编号", required = true)
     @PreAuthorize("@ss.hasPermission('system:oauth2-client:delete')")

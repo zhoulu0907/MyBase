@@ -21,7 +21,7 @@ public class DeptRespVO {
     @Schema(description = "显示顺序", requiredMode = Schema.RequiredMode.REQUIRED, example = "1024")
     private Integer sort;
 
-    @Schema(description = "负责人的用户编号", example = "2048")
+    @Schema(description = "管理员的用户编号", example = "2048")
     private Long leaderUserId;
 
     @Schema(description = "联系电话", example = "15601691000")
@@ -35,5 +35,8 @@ public class DeptRespVO {
 
     @Schema(description = "创建时间", requiredMode = Schema.RequiredMode.REQUIRED, example = "时间戳格式")
     private LocalDateTime createTime;
+
+    @Schema(description = "部门人数", example = "10")
+    private Integer userCount;
 
 }

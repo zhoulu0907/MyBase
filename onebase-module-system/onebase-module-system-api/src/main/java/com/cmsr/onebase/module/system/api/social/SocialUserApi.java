@@ -25,7 +25,7 @@ public interface SocialUserApi {
     @Operation(summary = "绑定社交用户")
     CommonResult<String> bindSocialUser(@Valid @RequestBody SocialUserBindReqDTO reqDTO);
 
-    @DeleteMapping(PREFIX + "/unbind")
+    @PostMapping(PREFIX + "/unbind")
     @Operation(summary = "取消绑定社交用户")
     CommonResult<Boolean> unbindSocialUser(@Valid @RequestBody SocialUserUnbindReqDTO reqDTO);
 

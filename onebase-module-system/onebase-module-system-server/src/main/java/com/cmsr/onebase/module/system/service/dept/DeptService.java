@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.system.service.dept;
 
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import com.cmsr.onebase.module.system.controller.admin.dept.vo.dept.DeptListReqVO;
+import com.cmsr.onebase.module.system.controller.admin.dept.vo.dept.DeptRespVO;
 import com.cmsr.onebase.module.system.controller.admin.dept.vo.dept.DeptSaveReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 
@@ -112,5 +113,13 @@ public interface DeptService {
      * @param ids 角色编号数组
      */
     void validateDeptList(Collection<Long> ids);
+
+    /**
+     * 获取部门列表（包含人数统计）
+     *
+     * @param reqVO 查询条件
+     * @return 部门列表（包含人数）
+     */
+    List<DeptRespVO> getDeptListWithUserCount(DeptListReqVO reqVO);
 
 }

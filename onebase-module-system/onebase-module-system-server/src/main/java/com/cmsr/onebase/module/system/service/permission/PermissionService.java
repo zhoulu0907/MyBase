@@ -90,7 +90,7 @@ public interface PermissionService {
      * @param userId  角色编号
      * @param roleIds 角色编号集合
      */
-    void assignUserRole(Long userId, Set<Long> roleIds);
+    void assignUserRoles(Long userId, Set<Long> roleIds);
 
     /**
      * 处理用户删除时，删除关联授权数据
@@ -141,5 +141,23 @@ public interface PermissionService {
      * @return 部门数据权限
      */
     DeptDataPermissionRespDTO getDeptDataPermission(Long userId);
+
+    /**
+     * 为角色分配用户（全量分配）
+     *
+     * @param roleId 角色编号
+     * @param userIds 用户编号列表
+     * @return 变动影响的行数
+     */
+    long assignRoleUsers(Long roleId, Set<Long> userIds);
+
+    /**
+     * 从角色中移除用户
+     *
+     * @param roleId 角色编号
+     * @param userIds 用户编号列表
+     * @return 删除的行数
+     */
+    long deleteRoleUsers(Long roleId, Set<Long> userIds);
 
 }

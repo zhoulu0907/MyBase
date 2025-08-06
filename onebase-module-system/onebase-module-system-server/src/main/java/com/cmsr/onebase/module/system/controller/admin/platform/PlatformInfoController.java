@@ -6,6 +6,7 @@ import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.system.controller.admin.license.LicensePageReqVO;
 import com.cmsr.onebase.module.system.controller.admin.license.LicenseSaveReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.license.LicenseDO;
+import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.enums.license.LicenseStatusEnum;
 import com.cmsr.onebase.module.system.enums.tenant.TenantStatusEnum;
 import com.cmsr.onebase.module.system.enums.user.UserStatusEnum;
@@ -60,7 +61,7 @@ public class PlatformInfoController {
     /**
      * 更新平台信息
      */
-    @PutMapping
+    @PostMapping
     public Object updatePlatformInfo(@RequestBody PlatformInfoReqVo reqVo) {
         // TODO: 实现更新平台信息逻辑
         return null;
@@ -69,7 +70,7 @@ public class PlatformInfoController {
     /**
      * 删除平台信息
      */
-    @DeleteMapping("/{id}")
+    @PostMapping("/{id}")
     public Object deletePlatformInfo(@PathVariable Long id) {
         // TODO: 实现删除平台信息逻辑
         return null;
@@ -84,19 +85,6 @@ public class PlatformInfoController {
         return null;
     }
 
-//    /**
-//     * 获取平台信息列表
-//     */
-//    @GetMapping("/simple-list")
-//    @Operation(summary = "获得平台信息和凭证列表")
-//    @PreAuthorize("@ss.hasPermission('system:platform-admin:query')")
-//    public CommonResult<PlatformInfoRespVo> listPlatformInfos() {
-//        // TODO: 实现获取平台信息列表逻辑
-//        PlatformInfoRespVo respVo = new PlatformInfoRespVo();
-//        List<LicenseDO> list = licenseService.getSimpleLicenseList();
-//        respVo.setLicenseList(list);
-//        return success(respVo);
-//    }
     /**
      * 分页查询
      * @param platformInfoReqVo 分页查询参数
@@ -112,18 +100,45 @@ public class PlatformInfoController {
         reqVO.setPageNo(platformInfoReqVo.getPageNo());
         PageResult<LicenseDO> pageResult = licenseService.getLicensePage(reqVO);
         PageResult<PlatformInfoRespVo> voPageResult = BeanUtils.toBean(pageResult, PlatformInfoRespVo.class);
-        Integer tenantCount = tenantService.getTenantCountByStatus(TenantStatusEnum.NORMAL);
-        Integer userCount = adminUserService.getUserCountByStatus(UserStatusEnum.NORMAL);
-        voPageResult.getList().stream()
-                .filter(vo -> LicenseStatusEnum.ENABLE.equals(vo.getStatus()))
-                .forEach(vo -> {
-                    vo.setActualTenantCount(tenantCount);
-                    vo.setActualUserCount(userCount);
-                });
+        Integer tenantCount = tenantService.getTenantCountByStatus(TenantStatusEnum.NORMAL.getStatus());
+        Integer userCount = adminUserService.getUserCountByStatus(UserStatusEnum.NORMAL.getStatus());
+
+        // 设置实际租户数和用户数
+        voPageResult.getList().forEach(vo -> {
+            AdminUserDO user = adminUserService.getUser(vo.getCreator());
+            vo.setAdminUser(user.getUsername());
+            if (LicenseStatusEnum.ENABLE.getStatus().equals(vo.getStatus())) {
+                vo.setActualTenantCount(tenantCount);
+                vo.setActualUserCount(userCount);
+            }
+        });
 
 
         return CommonResult.success(voPageResult);
     }
+
+    /**
+     * 根据状态查询出enable的license记录
+     */
+    @GetMapping("/license")
+    @Operation(summary = "根据状态查询出enable的license记录")
+    @PreAuthorize("@ss.hasPermission('system:platform-admin:query')")
+    public CommonResult<PlatformInfoRespVo> getEnableLicense() {
+
+        LicenseDO license = licenseService.getLicenseByStatus("enable");
+        PlatformInfoRespVo platformInfoRespVo = BeanUtils.toBean(license, PlatformInfoRespVo.class);
+        Integer tenantCount = tenantService.getTenantCountByStatus(TenantStatusEnum.NORMAL.getStatus());
+        Integer userCount = adminUserService.getUserCountByStatus(UserStatusEnum.NORMAL.getStatus());
+        AdminUserDO user = adminUserService.getUser(platformInfoRespVo.getCreator());
+
+        platformInfoRespVo.setAdminUser(user.getUsername());
+        platformInfoRespVo.setActualTenantCount(tenantCount);
+        platformInfoRespVo.setActualUserCount(userCount);
+
+        return success(platformInfoRespVo);
+
+    }
+
     /**
      * 创建凭证
      */
@@ -170,6 +185,7 @@ public class PlatformInfoController {
         return success(license);
 
     }
+
     /**
      * 导出凭证
      */

@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.system.convert.user;
 
+
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import com.cmsr.onebase.framework.common.util.collection.MapUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
@@ -16,8 +17,10 @@ import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Mapper
 public interface UserConvert {
@@ -51,6 +54,44 @@ public interface UserConvert {
         userVO.setDept(BeanUtils.toBean(dept, DeptSimpleRespVO.class));
         userVO.setPosts(BeanUtils.toBean(posts, PostSimpleRespVO.class));
         return userVO;
+    }
+
+    /**
+     * 转换用户信息，包含部门和角色信息
+     *
+     * @param user 用户信息
+     * @param dept 部门信息
+     * @param roles 角色列表
+     * @return 用户响应对象
+     */
+    default UserRespVO convert(AdminUserDO user, DeptDO dept, List<RoleDO> roles) {
+        UserRespVO userVO = BeanUtils.toBean(user, UserRespVO.class);
+        if (dept != null) {
+            userVO.setDeptName(dept.getName());
+        }
+        userVO.setRoles(convertRoles(roles));
+        return userVO;
+    }
+
+    /**
+     * 转换角色列表为角色响应对象列表
+     *
+     * @param roles 角色列表
+     * @return 角色响应对象列表
+     */
+    default List<UserRespVO.UserRoleRespVO> convertRoles(List<RoleDO> roles) {
+        if (org.springframework.util.CollectionUtils.isEmpty(roles)) {
+            return new ArrayList<>();
+        }
+
+        return roles.stream()
+                .map(role -> {
+                    UserRespVO.UserRoleRespVO roleResp = new UserRespVO.UserRoleRespVO();
+                    roleResp.setId(role.getId());
+                    roleResp.setName(role.getName());
+                    return roleResp;
+                })
+                .collect(Collectors.toList());
     }
 
 }

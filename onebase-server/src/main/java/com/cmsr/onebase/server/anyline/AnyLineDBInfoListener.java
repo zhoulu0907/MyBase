@@ -154,7 +154,7 @@ public class AnyLineDBInfoListener implements DMListener {
         }
         return SWITCH.CONTINUE;
     }
-
+    
     /**
      * 检查是否是简单的测试查询
      *

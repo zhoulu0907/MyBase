@@ -66,7 +66,7 @@ public class FileController {
         return success(fileService.createFile(createReqVO));
     }
 
-    @DeleteMapping("/delete")
+    @PostMapping("/delete")
     @Operation(summary = "删除文件")
     @Parameter(name = "id", description = "编号", required = true)
     @PreAuthorize("@ss.hasPermission('infra:file:delete')")

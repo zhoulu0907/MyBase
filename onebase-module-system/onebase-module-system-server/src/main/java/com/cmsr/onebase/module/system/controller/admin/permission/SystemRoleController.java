@@ -44,7 +44,7 @@ public class SystemRoleController {
         return success(roleService.createRole(createReqVO, null));
     }
 
-    @PutMapping("/update")
+    @PostMapping("/update")
     @Operation(summary = "修改角色")
     @PreAuthorize("@ss.hasPermission('system:role:update')")
     public CommonResult<Boolean> updateRole(@Valid @RequestBody RoleSaveReqVO updateReqVO) {
@@ -52,7 +52,7 @@ public class SystemRoleController {
         return success(true);
     }
 
-    @DeleteMapping("/delete")
+    @PostMapping("/delete")
     @Operation(summary = "删除角色")
     @Parameter(name = "id", description = "角色编号", required = true, example = "1024")
     @PreAuthorize("@ss.hasPermission('system:role:delete')")

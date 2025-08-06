@@ -48,7 +48,7 @@ public class AdminUserApiImpl implements AdminUserApi {
         if (dept == null) {
             return success(Collections.emptyList());
         }
-        if (ObjUtil.notEqual(dept.getLeaderUserId(), id)) { // 校验为负责人
+        if (ObjUtil.notEqual(dept.getLeaderUserId(), id)) { // 校验为管理员
             return success(Collections.emptyList());
         }
         deptIds.add(dept.getId());

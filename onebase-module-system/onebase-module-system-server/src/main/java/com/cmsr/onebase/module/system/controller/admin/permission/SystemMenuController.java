@@ -40,7 +40,7 @@ public class SystemMenuController {
         return success(menuId);
     }
 
-    @PutMapping("/update")
+    @PostMapping("/update")
     @Operation(summary = "修改菜单")
     @PreAuthorize("@ss.hasPermission('system:menu:update')")
     public CommonResult<Boolean> updateMenu(@Valid @RequestBody SystemMenuSaveVO updateReqVO) {
@@ -48,7 +48,7 @@ public class SystemMenuController {
         return success(true);
     }
 
-    @DeleteMapping("/delete")
+    @PostMapping("/delete")
     @Operation(summary = "删除菜单")
     @Parameter(name = "id", description = "菜单编号", required= true, example = "1024")
     @PreAuthorize("@ss.hasPermission('system:menu:delete')")
