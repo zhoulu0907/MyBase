@@ -1,6 +1,8 @@
 package com.cmsr.onebase.module.app.controller.admin.app;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.module.app.controller.admin.app.vo.CreateTagReqVO;
+import com.cmsr.onebase.module.app.controller.admin.app.vo.ListTagReqVO;
 import com.cmsr.onebase.module.app.controller.admin.app.vo.TagListRespVO;
 import com.cmsr.onebase.module.app.service.app.AppTagService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -28,14 +30,14 @@ public class AppTagController {
 
     @GetMapping("/list")
     @Operation(summary = "应用标签列表")
-    public CommonResult<List<TagListRespVO>> listTag(@RequestParam("tagName") String tagName) {
-        return success(appTagService.listTags(tagName));
+    public CommonResult<List<TagListRespVO>> listTag(@RequestBody ListTagReqVO listTagReqVO) {
+        return success(appTagService.listTags(listTagReqVO.getTagName()));
     }
 
     @PostMapping("/create")
     @Operation(summary = "创建应用标签")
-    public CommonResult<Boolean> createTag(@RequestParam("tagName") String tagName) {
-        appTagService.createTag(tagName);
+    public CommonResult<Boolean> createTag(@RequestBody CreateTagReqVO createTagReqVO) {
+        appTagService.createTag(createTagReqVO.getTagName());
         return success(true);
     }
 
