@@ -194,7 +194,7 @@ const XInputNumber: XInputNumberSchema = {
     ],
     config: {
         ...baseDefault,
-        label: '标题',
+        label: '数字输入',
         placeholder: '请输入数字',
         description: '',
         tooltip: '',

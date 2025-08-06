@@ -117,7 +117,7 @@ const XTimePicker: XInputTimePickerSchema = {
     ],
     config: {
         ...baseDefault,
-        label: '标题',
+        label: '时间选择',
         description: '',
         tooltip: '',
         width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],

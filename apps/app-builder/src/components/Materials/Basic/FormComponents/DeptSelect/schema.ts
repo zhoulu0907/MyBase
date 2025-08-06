@@ -92,13 +92,13 @@ const XDeptSelect: XInputDeptSelectSchema = {
             name: '描述信息',
             type: CONFIG_TYPES.DESCRIPTION_INPUT,
         },
-        layoutConfig,
-        labelColSpanConfig,
         {
             key: 'tooltip',
             name: '提示文字',
             type: CONFIG_TYPES.TOOLTIP_INPUT,
         },
+        layoutConfig,
+        labelColSpanConfig,
         {
             key: 'required',
             name: '开启必填',
@@ -114,7 +114,7 @@ const XDeptSelect: XInputDeptSelectSchema = {
     ],
     config: {
         ...baseDefault,
-        label: '标题',
+        label: '部门选择',
         description: '',
         tooltip: '',
         width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],

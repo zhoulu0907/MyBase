@@ -114,7 +114,7 @@ const XSelectOne: XInputSelectOneSchema = {
     ],
     config: {
         ...baseDefault,
-        label: '标题',
+        label: '下拉单选',
         description: '',
         tooltip: '',
         width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],

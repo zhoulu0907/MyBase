@@ -114,7 +114,7 @@ const XSwitch: XInputSwitchSchema = {
     ],
     config: {
         ...baseDefault,
-        label: '标题',
+        label: '开关',
         description: '',
         tooltip: '',
         width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],

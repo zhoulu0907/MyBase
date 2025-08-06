@@ -1,5 +1,5 @@
-import { baseConfig, baseDefault, labelColSpanConfig, layoutConfig, /* widthConfig, */ listTypeConfig, statusConfig, type ICommonBaseType, type TLayoutSelectKeyType, type TStatusSelectKeyType, type TUploadSelectKeyType, type TWidthSelectKeyType } from "@/components/Materials/common";
-import { CONFIG_TYPES, /* WIDTH_OPTIONS, WIDTH_VALUES, */ LAYOUT_OPTIONS, LAYOUT_VALUES, STATUS_OPTIONS, STATUS_VALUES, UPLOAD_OPTIONS, UPLOAD_VALUES } from "@/components/Materials/constants";
+import { baseConfig, baseDefault, labelColSpanConfig, layoutConfig, widthConfig, listTypeConfig, statusConfig, type ICommonBaseType, type TLayoutSelectKeyType, type TStatusSelectKeyType, type TUploadSelectKeyType, type TWidthSelectKeyType } from "@/components/Materials/common";
+import { CONFIG_TYPES, WIDTH_OPTIONS, WIDTH_VALUES, LAYOUT_OPTIONS, LAYOUT_VALUES, STATUS_OPTIONS, STATUS_VALUES, UPLOAD_OPTIONS, UPLOAD_VALUES } from "@/components/Materials/constants";
 import type { IBooleanConfigType, IDescriptionConfigType, ILabelColSpanConfigType, ILabelConfigType, ILayoutConfigType, INumberConfigType, IPlaceholderConfigType, ISelectConfigType, IStatusConfigType, ITextAreaConfigType, ITextConfigType, ITooltipConfigType, IUploadLimitConfigType, IUploadSizeConfigType, IWidthConfigType, TBooleanDefaultType, TNumberDefaultType, TSelectDefaultType, TTextAreaDefaultType, TTextDefaultType } from "@/components/Materials/types";
 
 
@@ -60,7 +60,7 @@ export interface XInputFileUploadConfig extends ICommonBaseType {
     /**
      * 字段宽度
      */
-    // width: TSelectDefaultType<TWidthSelectKeyType>;
+    width: TSelectDefaultType<TWidthSelectKeyType>;
 
     /**
      * 是否必填，未填写时提交报错
@@ -162,15 +162,15 @@ const XFileUpload: XInputFileUploadSchema = {
             type: CONFIG_TYPES.SWITCH_INPUT,
         },
         statusConfig,
-        // widthConfig,
+        widthConfig,
         listTypeConfig,
     ],
     config: {
         ...baseDefault,
-        label: '标题',
+        label: '文件上传',
         description: '',
         tooltip: '',
-        // width: WIDTH_VALUES[WIDTH_OPTIONS.QUARTER],
+        width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
         status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
         defaultValue: '',
         required: false,

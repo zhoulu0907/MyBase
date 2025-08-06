@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Form, Input, Select, Button, Message, Grid } from '@arco-design/web-react';
-import { testDatasourceConnection, createDatasource } from '@/services';
-import type { DatasourceSaveReqVO, DatasourceTestConnectionReqVO } from '@/types/datafactoryApi';
+import { testDatasourceConnection, createDatasource } from '@onebase/app/src/services/dataresource';
+import type { DatasourceSaveReqVO, DatasourceTestConnectionReqVO } from '@onebase/app/src/types';
 import styles from './index.module.less';
 
 const Option = Select.Option;
