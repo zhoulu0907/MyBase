@@ -2,7 +2,7 @@ import { FORM_COMPONENT_TYPES, LAYOUT_COMPONENT_TYPES, LIST_COMPONENT_TYPES, SHO
 
 const allTemplate = {
     base: [
-        // Mickey: 导航组件为空，先隐藏
+        // TODO(Mickey): 导航组件为空，先隐藏
         // {
         //     category: 'navigate',
         //     items: [

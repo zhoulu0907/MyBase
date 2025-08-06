@@ -101,6 +101,10 @@ export class HttpClient {
 
             if (data.code !== 0) {
                 Message.error(data.msg || '请求失败');
+                if (data.code === 401) {
+                    TokenManager.clearToken();
+                    window.location.href = '/#/login';
+                }
                 return Promise.reject(new Error(data.msg || '请求失败'));
             }
         }
