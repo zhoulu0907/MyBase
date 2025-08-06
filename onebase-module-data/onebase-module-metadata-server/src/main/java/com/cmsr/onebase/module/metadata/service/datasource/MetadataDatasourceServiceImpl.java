@@ -8,6 +8,7 @@ import com.cmsr.onebase.module.metadata.controller.admin.datasource.vo.Datasourc
 import com.cmsr.onebase.module.metadata.controller.admin.datasource.vo.DatasourceTestConnectionRespVO;
 import com.cmsr.onebase.module.metadata.controller.admin.datasource.vo.DatasourceTypeRespVO;
 import com.cmsr.onebase.module.metadata.controller.admin.datasource.vo.TableInfoRespVO;
+import com.cmsr.onebase.module.metadata.dal.database.TemporaryDatasourceService;
 import com.cmsr.onebase.module.metadata.service.datasource.vo.ColumnQueryVO;
 import com.cmsr.onebase.module.metadata.service.datasource.vo.TableQueryVO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.datasource.MetadataDatasourceDO;
@@ -54,6 +55,8 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
     private DatasourceConvert datasourceConvert;
     @Resource
     private MetadataRepository metadataRepository;
+    @Resource
+    private TemporaryDatasourceService temporaryDatasourceService;
 
     @Override
     public List<DatasourceTypeRespVO> getDatasourceTypes() {
@@ -71,7 +74,7 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
         }
 
         // 创建临时数据源连接
-        AnylineService<?> temporaryService = metadataRepository.createTemporaryService(datasource);
+        AnylineService<?> temporaryService = temporaryDatasourceService.createTemporaryService(datasource);
 
         // 获取所有表信息
         List<String> tableNames = temporaryService.tables();
@@ -118,7 +121,7 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
         }
 
         // 创建临时数据源连接
-        AnylineService<?> temporaryService = metadataRepository.createTemporaryService(datasource);
+        AnylineService<?> temporaryService = temporaryDatasourceService.createTemporaryService(datasource);
 
         // 构建表对象
         Table<?> table = new Table<>(queryVO.getTableName());

@@ -23,7 +23,7 @@ public class MetadataConfig {
     /**
      * 默认数据源主机地址
      */
-    @Value("${onebase.metadata.default-datasource.host:localhost}")
+    @Value("${onebase.metadata.default-datasource.host:10.0.104.38}")
     private String defaultDatasourceHost;
 
     /**
@@ -35,7 +35,7 @@ public class MetadataConfig {
     /**
      * 默认数据库名称
      */
-    @Value("${onebase.metadata.default-datasource.database:onebase}")
+    @Value("${onebase.metadata.default-datasource.database:onebase_business}")
     private String defaultDatasourceDatabase;
 
     /**
@@ -47,13 +47,13 @@ public class MetadataConfig {
     /**
      * 默认数据源密码
      */
-    @Value("${onebase.metadata.default-datasource.password:123456}")
+    @Value("${onebase.metadata.default-datasource.password:onebase@2025}")
     private String defaultDatasourcePassword;
 
     /**
      * 默认数据源类型
      */
-    @Value("${onebase.metadata.default-datasource.type:POSTGRESQL}")
+    @Value("${onebase.metadata.default-datasource.type:PostgreSQL}")
     private String defaultDatasourceType;
 
     /**

@@ -1,0 +1,227 @@
+package com.cmsr.onebase.module.metadata.dal.database;
+
+import com.cmsr.onebase.module.metadata.convert.datasource.DatasourceConvert;
+import com.cmsr.onebase.module.metadata.dal.dataobject.datasource.MetadataDatasourceDO;
+import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
+import org.anyline.data.jdbc.util.DataSourceUtil;
+import org.anyline.proxy.ServiceProxy;
+import org.anyline.service.AnylineService;
+import org.springframework.stereotype.Component;
+
+import javax.sql.DataSource;
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * 临时数据源服务类
+ * <p>
+ * 专门负责创建临时的AnylineService实例，用于连接到不同的数据源进行操作
+ *
+ * @author matianyu
+ * @date 2025-08-06
+ */
+@Component
+@Slf4j
+public class TemporaryDatasourceService {
+
+    @Resource
+    private DatasourceConvert datasourceConvert;
+
+    /**
+     * 根据数据源DO对象创建临时的AnylineService用于数据库操作
+     *
+     * @param datasource 数据源配置对象
+     * @return AnylineService实例
+     */
+    public AnylineService<?> createTemporaryService(MetadataDatasourceDO datasource) {
+        // 从数据源配置中获取连接参数
+        Map<String, Object> config = datasourceConvert.stringToMap(datasource.getConfig());
+        config.put("datasourceType", datasource.getDatasourceType());
+
+        // 使用本助手的 Map 版本创建临时服务
+        return createTemporaryService(config);
+    }
+
+    /**
+     * 根据数据源配置参数创建临时 AnylineService 服务
+     *
+     * @param datasourceConfig 数据源配置参数
+     * @return AnylineService 实例
+     */
+    public AnylineService<?> createTemporaryService(Map<String, Object> datasourceConfig) {
+        try {
+            String url = (String) datasourceConfig.get("url");
+            String username = (String) datasourceConfig.get("username");
+            String password = (String) datasourceConfig.get("password");
+            String datasourceType = (String) datasourceConfig.get("datasourceType");
+
+            if (url == null || url.trim().isEmpty()) {
+                String host = (String) datasourceConfig.get("host");
+                Object portObj = datasourceConfig.get("port");
+                String database = (String) datasourceConfig.get("database");
+                if (host != null && !host.trim().isEmpty()) {
+                    int port = getDefaultPort(datasourceType);
+                    if (portObj instanceof Integer) {
+                        port = (Integer) portObj;
+                    } else if (portObj instanceof String) {
+                        port = Integer.parseInt((String) portObj);
+                    }
+                    url = buildJdbcUrl(datasourceType, host, port, database);
+                }
+            }
+
+            if (url == null || url.trim().isEmpty()) {
+                throw new RuntimeException("无法构建数据源连接URL，请检查配置信息");
+            }
+
+            log.info("=== 创建临时数据源调试信息 ===");
+            log.info("构建的JDBC URL: {}", url);
+            log.info("用户名: {}", username);
+            log.info("数据库类型: {}", datasourceType);
+
+            // 创建数据源配置 - 添加必要的连接池配置
+            Map<String, Object> dsConfig = new HashMap<>();
+            dsConfig.put("url", url);
+            dsConfig.put("username", username != null ? username : ""); // 使用username而不是user
+            dsConfig.put("password", password != null ? password : "");
+            dsConfig.put("driver", getDriverByType(datasourceType));
+            
+            // 关键配置：明确指定连接池类型
+            dsConfig.put("pool", "com.zaxxer.hikari.HikariDataSource");
+            
+            // HikariCP连接池配置
+            dsConfig.put("maximum-pool-size", 3);
+            dsConfig.put("minimum-idle", 1);
+            dsConfig.put("connection-timeout", 30000);
+            
+            log.info("临时数据源配置: {}", dsConfig);
+            
+            // 先使用配置创建数据源，然后创建临时服务
+            DataSource dataSource = DataSourceUtil.build(dsConfig);
+            AnylineService<?> service = ServiceProxy.temporary(dataSource);
+            
+            log.info("临时服务创建成功，Service实例: {}", service.getClass().getName());
+            log.info("=== 创建临时数据源调试信息结束 ===");
+            
+            return service;
+        } catch (Exception e) {
+            log.error("创建数据库连接失败: {}", e.getMessage(), e);
+            throw new RuntimeException("创建数据库连接失败: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 执行 DDL 语句
+     *
+     * @param datasourceConfig 数据源配置参数
+     * @param ddl DDL 语句
+     */
+    public void executeDDL(Map<String, Object> datasourceConfig, String ddl) {
+        try {
+            AnylineService<?> temporaryService = createTemporaryService(datasourceConfig);
+            temporaryService.execute(ddl);
+            log.info("成功执行DDL: {}", ddl);
+        } catch (Exception e) {
+            log.error("执行DDL失败: {}", ddl, e);
+            throw new RuntimeException("执行DDL失败: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 根据数据源类型构建 JDBC URL
+     */
+    public String buildJdbcUrl(String datasourceType, String host, int port, String database) {
+        if (host == null || host.trim().isEmpty()) {
+            throw new RuntimeException("主机地址不能为空");
+        }
+        String databasePart = (database != null && !database.trim().isEmpty()) ? database : "";
+        switch (datasourceType.toUpperCase()) {
+            case "POSTGRESQL":
+                return String.format("jdbc:postgresql://%s:%d/%s", host, port, databasePart);
+            case "MYSQL":
+                return String.format(
+                        "jdbc:mysql://%s:%d/%s?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai",
+                        host, port, databasePart);
+            case "ORACLE":
+                return String.format("jdbc:oracle:thin:@%s:%d:%s", host, port, databasePart);
+            case "SQLSERVER":
+                return String.format("jdbc:sqlserver://%s:%d;DatabaseName=%s", host, port, databasePart);
+            case "KINGBASE":
+                return String.format("jdbc:kingbase8://%s:%d/%s", host, port, databasePart);
+            case "TDENGINE":
+                return String.format("jdbc:TAOS-RS://%s:%d/%s", host, port, databasePart);
+            case "CLICKHOUSE":
+                return String.format("jdbc:clickhouse://%s:%d/%s", host, port, databasePart);
+            case "DM":
+                return String.format("jdbc:dm://%s:%d/%s", host, port, databasePart);
+            case "OPENGAUSS":
+                return String.format("jdbc:opengauss://%s:%d/%s", host, port, databasePart);
+            case "DB2":
+                return String.format("jdbc:db2://%s:%d/%s", host, port, databasePart);
+            default:
+                log.warn("未知的数据源类型，使用通用格式: {}", datasourceType);
+                return String.format("jdbc:%s://%s:%d/%s", datasourceType.toLowerCase(), host, port, databasePart);
+        }
+    }
+
+    /**
+     * 根据数据源类型获取驱动类名
+     */
+    public String getDriverByType(String datasourceType) {
+        switch (datasourceType.toUpperCase()) {
+            case "POSTGRESQL":
+                return "org.postgresql.Driver";
+            case "MYSQL":
+                return "com.mysql.cj.jdbc.Driver";
+            case "ORACLE":
+                return "oracle.jdbc.driver.OracleDriver";
+            case "SQLSERVER":
+                return "com.microsoft.sqlserver.jdbc.SQLServerDriver";
+            case "KINGBASE":
+                return "com.kingbase8.Driver";
+            case "TDENGINE":
+                return "com.taosdata.jdbc.TSDBDriver";
+            case "CLICKHOUSE":
+                return "ru.yandex.clickhouse.ClickHouseDriver";
+            case "DM":
+                return "dm.jdbc.driver.DmDriver";
+            case "OPENGAUSS":
+                return "org.opengauss.Driver";
+            case "DB2":
+                return "com.ibm.db2.jcc.DB2Driver";
+            default:
+                throw new RuntimeException("不支持的数据源类型: " + datasourceType);
+        }
+    }
+
+    /**
+     * 根据数据源类型获取默认端口
+     */
+    public int getDefaultPort(String datasourceType) {
+        switch (datasourceType.toUpperCase()) {
+            case "POSTGRESQL":
+                return 5432;
+            case "MYSQL":
+                return 3306;
+            case "ORACLE":
+                return 1521;
+            case "SQLSERVER":
+                return 1433;
+            case "KINGBASE":
+                return 54321;
+            case "TDENGINE":
+                return 6041;
+            case "CLICKHOUSE":
+                return 8123;
+            case "DM":
+                return 5236;
+            case "OPENGAUSS":
+                return 5432;
+            case "DB2":
+                return 50000;
+            default:
+                return 5432;
+        }
+    }
+}

@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.metadata.service.datamethod;
 
+import cn.hutool.core.util.IdUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.metadata.controller.admin.datamethod.vo.*;
 import com.cmsr.onebase.module.metadata.service.datamethod.vo.DataMethodQueryVO;
@@ -8,6 +9,7 @@ import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataEntityFiel
 import com.cmsr.onebase.module.metadata.dal.dataobject.datasource.MetadataDatasourceDO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.method.MetadataDataSystemMethodDO;
 import com.cmsr.onebase.module.metadata.dal.database.MetadataRepository;
+import com.cmsr.onebase.module.metadata.dal.database.TemporaryDatasourceService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.entity.DataRow;
@@ -19,6 +21,7 @@ import org.anyline.service.AnylineService;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
@@ -39,6 +42,9 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
 
     @Resource
     private AnylineService<?> anylineService;
+
+    @Resource
+    private TemporaryDatasourceService temporaryDatasourceService;
 
     @Override
     public List<DataMethodRespVO> getDataMethodList(DataMethodQueryVO queryVO) {
@@ -372,12 +378,17 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
         if (datasourceId != null) {
             MetadataDatasourceDO datasource = metadataRepository.findById(MetadataDatasourceDO.class, datasourceId);
             if (datasource != null) {
-                // 使用Anyline切换数据源的方法，具体实现需要根据实际的Anyline版本调整
                 try {
-                    // 这里需要根据实际的Anyline API来实现数据源切换
-                    log.info("切换到数据源：{}", datasource.getCode());
+                    // 使用临时数据源服务创建新的AnylineService实例
+                    AnylineService<?> temporaryService = temporaryDatasourceService.createTemporaryService(datasource);
+                    
+                    // 替换当前的anylineService实例
+                    this.anylineService = temporaryService;
+                    
+                    log.info("成功切换到数据源：{}", datasource.getCode());
                 } catch (Exception e) {
-                    log.warn("切换数据源失败，使用默认数据源：{}", e.getMessage());
+                    log.error("切换数据源失败，使用默认数据源：{}", e.getMessage(), e);
+                    throw new RuntimeException("切换数据源失败: " + e.getMessage(), e);
                 }
             }
         }
@@ -430,15 +441,57 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
     private Map<String, Object> processDataForCreate(Map<String, Object> data, List<MetadataEntityFieldDO> fields) {
         Map<String, Object> processedData = new HashMap<>(data);
 
+        // 获取当前时间
+        LocalDateTime now = LocalDateTime.now();
+
         for (MetadataEntityFieldDO field : fields) {
-            // 跳过主键字段（通常自动生成）
+            String fieldName = field.getFieldName();
+            
+            // 处理主键字段
             if (field.getIsPrimaryKey()) {
+                if (!processedData.containsKey(fieldName)) {
+                    // 生成雪花ID作为主键
+                    processedData.put(fieldName, IdUtil.getSnowflakeNextId());
+                }
                 continue;
             }
 
-            // 设置默认值
-            if (!processedData.containsKey(field.getFieldName()) && StringUtils.hasText(field.getDefaultValue())) {
-                processedData.put(field.getFieldName(), field.getDefaultValue());
+            // 处理系统字段
+            if (field.getIsSystemField()) {
+                switch (fieldName.toLowerCase()) {
+                    case "created_time":
+                    case "createtime":
+                        processedData.put(fieldName, now);
+                        break;
+                    case "updated_time":
+                    case "updatetime":
+                        processedData.put(fieldName, now);
+                        break;
+                    case "deleted":
+                        processedData.put(fieldName, 0);
+                        break;
+                    case "lock_version":
+                    case "lockversion":
+                        processedData.put(fieldName, 0);
+                        break;
+                    case "tenant_id":
+                    case "tenantid":
+                        // 这里可以从当前上下文获取租户ID，暂时设置为1
+                        processedData.put(fieldName, 1L);
+                        break;
+                    default:
+                        // 其他系统字段按默认值处理
+                        if (StringUtils.hasText(field.getDefaultValue())) {
+                            processedData.put(fieldName, field.getDefaultValue());
+                        }
+                        break;
+                }
+                continue;
+            }
+
+            // 设置业务字段默认值
+            if (!processedData.containsKey(fieldName) && StringUtils.hasText(field.getDefaultValue())) {
+                processedData.put(fieldName, field.getDefaultValue());
             }
         }
 
@@ -484,14 +537,41 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
 
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.and(primaryKeyField, id);
-
-        DataSet dataSet = anylineService.querys(tableName, configStore);
-        if (dataSet == null || dataSet.size() == 0) {
-            return null;
+        
+        // 检查表中是否有 tenant_id 字段，如果没有则添加 deleted 条件
+        boolean hasTenantIdField = fields.stream()
+                .anyMatch(field -> "tenant_id".equalsIgnoreCase(field.getFieldName()));
+        
+        boolean hasDeletedField = fields.stream()
+                .anyMatch(field -> "deleted".equalsIgnoreCase(field.getFieldName()));
+        
+        if (hasDeletedField) {
+            configStore.and("deleted", 0);
         }
-        DataRow dataRow = dataSet.getRow(0);
-
-        return convertDataRowToMap(dataRow, fields);
+        
+        // 如果没有 tenant_id 字段，需要禁用租户自动条件
+        if (!hasTenantIdField) {
+            // 使用原始SQL方式查询，避免框架自动添加租户条件
+            String sql = "SELECT * FROM " + tableName + " WHERE " + primaryKeyField + " = ? ";
+            if (hasDeletedField) {
+                sql += "AND deleted = 0";
+            }
+            
+            DataSet dataSet = anylineService.querys(sql, id);
+            if (dataSet == null || dataSet.size() == 0) {
+                return null;
+            }
+            DataRow dataRow = dataSet.getRow(0);
+            return convertDataRowToMap(dataRow, fields);
+        } else {
+            // 有 tenant_id 字段，使用正常查询
+            DataSet dataSet = anylineService.querys(tableName, configStore);
+            if (dataSet == null || dataSet.size() == 0) {
+                return null;
+            }
+            DataRow dataRow = dataSet.getRow(0);
+            return convertDataRowToMap(dataRow, fields);
+        }
     }
 
     /**

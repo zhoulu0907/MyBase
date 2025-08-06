@@ -10,6 +10,7 @@ import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataSystemFiel
 import com.cmsr.onebase.module.metadata.dal.dataobject.datasource.MetadataDatasourceDO;
 import com.cmsr.onebase.module.metadata.convert.datasource.DatasourceConvert;
 import com.cmsr.onebase.module.metadata.dal.database.MetadataRepository;
+import com.cmsr.onebase.module.metadata.dal.database.TemporaryDatasourceService;
 import com.cmsr.onebase.module.metadata.enums.BusinessEntityTypeEnum;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
@@ -39,6 +40,8 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
     private DatasourceConvert datasourceConvert;
     @Resource
     private MetadataRepository metadataRepository;
+    @Resource
+    private TemporaryDatasourceService temporaryDatasourceService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -241,15 +244,30 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
      */
     private void createPhysicalTable(MetadataDatasourceDO datasource, String tableName, List<MetadataSystemFieldsDO> systemFields) {
         try {
-            // 创建 AnylineService 实例
-            AnylineService<?> service = metadataRepository.createTemporaryService(datasource);
+            log.info("=== 开始创建物理表调试信息 ===");
+            log.info("目标表名: {}", tableName);
+            log.info("数据源配置: {}", datasource.getConfig());
+            log.info("数据源类型: {}", datasource.getDatasourceType());
+            
+            // 创建 AnylineService 实例 - 使用新的TemporaryDatasourceService
+            AnylineService<?> service = temporaryDatasourceService.createTemporaryService(datasource);
 
             // 生成建表 DDL
             String createTableDDL = generateCreateTableDDL(tableName, systemFields);
+            log.info("生成的DDL语句: \n{}", createTableDDL);
+
+            // 验证服务连接的数据库
+            try {
+                String currentDatabase = service.query("SELECT current_database()").toString();
+                log.info("当前连接的数据库: {}", currentDatabase);
+            } catch (Exception e) {
+                log.warn("无法获取当前数据库信息: {}", e.getMessage());
+            }
 
             // 执行建表语句
             service.execute(createTableDDL);
 
+            log.info("=== 物理表创建完成 ===");
             log.info("成功创建物理表: {}", tableName);
         } catch (Exception e) {
             log.error("创建物理表失败: {}", e.getMessage(), e);

@@ -20,6 +20,7 @@ import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataBusinessEn
 import com.cmsr.onebase.module.metadata.dal.dataobject.datasource.MetadataDatasourceDO;
 import com.cmsr.onebase.module.metadata.convert.datasource.DatasourceConvert;
 import com.cmsr.onebase.module.metadata.dal.database.MetadataRepository;
+import com.cmsr.onebase.module.metadata.dal.database.TemporaryDatasourceService;
 import com.cmsr.onebase.module.metadata.enums.FieldTypeEnum;
 import com.cmsr.onebase.module.metadata.enums.BusinessEntityTypeEnum;
 import jakarta.annotation.Resource;
@@ -51,6 +52,8 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
     private DatasourceConvert datasourceConvert;
     @Resource
     private MetadataRepository metadataRepository;
+    @Resource
+    private TemporaryDatasourceService temporaryDatasourceService;
 
     @Override
     public List<FieldTypeConfigRespVO> getFieldTypes() {
@@ -550,7 +553,12 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
     private void addColumnToTable(MetadataDatasourceDO datasource, String tableName, MetadataEntityFieldDO field) {
         try {
             // 创建 AnylineService 实例
-            AnylineService<?> service = metadataRepository.createTemporaryService(datasource);
+            AnylineService<?> service = temporaryDatasourceService.createTemporaryService(datasource);
+
+            // 首先检查表是否存在
+            if (!checkTableExists(service, tableName)) {
+                throw new RuntimeException("表 " + tableName + " 不存在，请先创建表");
+            }
 
             // 生成添加列 DDL
             String addColumnDDL = generateAddColumnDDL(tableName, field);
@@ -561,7 +569,27 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
             log.info("成功为表 {} 添加列: {}", tableName, field.getFieldName());
         } catch (Exception e) {
             log.error("为表 {} 添加列 {} 失败: {}", tableName, field.getFieldName(), e.getMessage(), e);
-            throw new RuntimeException("添加列失败", e);
+            throw new RuntimeException("添加列失败: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 检查表是否存在
+     */
+    private boolean checkTableExists(AnylineService<?> service, String tableName) {
+        try {
+            // 使用PostgreSQL语法检查表是否存在
+            String checkSql = "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = ?)";
+            Object result = service.query(checkSql, tableName.toLowerCase());
+            if (result != null) {
+                // 结果应该是一个布尔值或者包含exists字段的记录
+                return Boolean.parseBoolean(result.toString());
+            }
+            return false;
+        } catch (Exception e) {
+            log.warn("检查表 {} 是否存在时出错: {}", tableName, e.getMessage());
+            // 如果检查失败，默认假设表不存在
+            return false;
         }
     }
 
@@ -571,7 +599,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
     private void alterColumnInTable(MetadataDatasourceDO datasource, String tableName, MetadataEntityFieldDO field) {
         try {
             // 创建 AnylineService 实例
-            AnylineService<?> service = metadataRepository.createTemporaryService(datasource);
+            AnylineService<?> service = temporaryDatasourceService.createTemporaryService(datasource);
 
             // 生成修改列 DDL
             String alterColumnDDL = generateAlterColumnDDL(tableName, field);
@@ -592,7 +620,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
     private void dropColumnFromTable(MetadataDatasourceDO datasource, String tableName, String fieldName) {
         try {
             // 创建 AnylineService 实例
-            AnylineService<?> service = metadataRepository.createTemporaryService(datasource);
+            AnylineService<?> service = temporaryDatasourceService.createTemporaryService(datasource);
 
             // 生成删除列 DDL
             String dropColumnDDL = generateDropColumnDDL(tableName, fieldName);
