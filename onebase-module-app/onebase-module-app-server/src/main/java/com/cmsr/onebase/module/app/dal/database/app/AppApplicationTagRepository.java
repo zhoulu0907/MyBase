@@ -4,6 +4,7 @@ import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.module.app.dal.dataobject.app.ApplicationTagDO;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -34,19 +35,25 @@ public class AppApplicationTagRepository extends DataRepository {
      * @param tagIds
      */
     public void mergeApplicationTags(Long applicationId, List<Long> tagIds) {
-        ConfigStore configStore = new DefaultConfigStore();
-        configStore.eq("application_id", applicationId);
-        configStore.notIn("tag_id", tagIds);
-        deleteByConfig(ApplicationTagDO.class, configStore);
-        for (Long tagId : tagIds) {
-            configStore = new DefaultConfigStore();
+        if (CollectionUtils.isEmpty(tagIds)) {
+            ConfigStore configStore = new DefaultConfigStore();
             configStore.eq("application_id", applicationId);
-            configStore.eq("tag_id", tagId);
-            if (this.countByConfig(ApplicationTagDO.class, configStore) == 0) {
-                ApplicationTagDO applicationTagDO = new ApplicationTagDO();
-                applicationTagDO.setApplicationId(applicationId);
-                applicationTagDO.setTagId(tagId);
-                insert(applicationTagDO);
+            this.deleteByConfig(ApplicationTagDO.class, configStore);
+        } else {
+            ConfigStore configStore = new DefaultConfigStore();
+            configStore.eq("application_id", applicationId);
+            configStore.notIn("tag_id", tagIds);
+            deleteByConfig(ApplicationTagDO.class, configStore);
+            for (Long tagId : tagIds) {
+                configStore = new DefaultConfigStore();
+                configStore.eq("application_id", applicationId);
+                configStore.eq("tag_id", tagId);
+                if (this.countByConfig(ApplicationTagDO.class, configStore) == 0) {
+                    ApplicationTagDO applicationTagDO = new ApplicationTagDO();
+                    applicationTagDO.setApplicationId(applicationId);
+                    applicationTagDO.setTagId(tagId);
+                    this.insert(applicationTagDO);
+                }
             }
         }
     }
