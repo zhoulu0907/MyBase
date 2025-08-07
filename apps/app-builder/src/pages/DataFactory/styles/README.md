@@ -1,5 +1,7 @@
 ### 1. 变量系统
+
 在 `styles/variables.less` 中定义了完整的变量系统：
+
 - **颜色变量**: 主色、文本色、边框色、背景色等
 - **字体变量**: 字体大小、字重等
 - **间距变量**: 统一的间距系统
@@ -8,7 +10,9 @@
 - **过渡变量**: 统一的动画效果
 
 ### 2. Mixin 系统
+
 创建了可复用的 mixin：
+
 - **布局 mixin**: `.flex-center()`, `.flex-between()`, `.flex-column()`
 - **文本 mixin**: `.text-ellipsis()`
 - **边框 mixin**: `.border-bottom-light()`, `.border-right-light()`

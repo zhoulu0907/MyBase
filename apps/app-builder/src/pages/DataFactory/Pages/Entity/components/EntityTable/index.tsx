@@ -19,7 +19,7 @@ const EntityTable: React.FC = () => {
       setLoading(true);
       // TODO id暂时写死
       const response = await getEntityPage({ pageNo: 1, pageSize: 100, datasourceId: '542234204218462208' });
-      console.log(response)
+      console.log(response);
       if (response?.list) {
         setEntities(response.list);
         // 如果有实体数据，默认选择第一个
@@ -62,7 +62,7 @@ const EntityTable: React.FC = () => {
   return (
     <Layout className={styles.entityTableContainer}>
       <Sider width={300} className={styles.sider}>
-        <EntityList 
+        <EntityList
           entities={entities}
           selectedEntity={selectedEntity}
           onEntitySelect={handleEntitySelect}
@@ -73,13 +73,11 @@ const EntityTable: React.FC = () => {
         {selectedEntity ? (
           <EntityDetail entity={selectedEntity} />
         ) : (
-          <div className={styles.emptyState}>
-            请选择一个实体查看详情
-          </div>
+          <div className={styles.emptyState}>请选择一个实体查看详情</div>
         )}
       </Content>
     </Layout>
   );
 };
 
-export default EntityTable; 
+export default EntityTable;

@@ -10,14 +10,14 @@ interface DataMethodsProps {
 }
 
 const DataMethods: React.FC<DataMethodsProps> = ({ entity }) => {
-  const [methods, setMethods] = useState([])
+  const [methods, setMethods] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const loadMethods = async () => {
     try {
       setLoading(true);
-      const response = await getEntityMethods({entityId: entity.id});
-      console.log('getEntityMethods' ,response)
+      const response = await getEntityMethods({ entityId: entity.id });
+      console.log('getEntityMethods', response);
       if (response) {
         setMethods(response || []);
       }
@@ -33,30 +33,28 @@ const DataMethods: React.FC<DataMethodsProps> = ({ entity }) => {
     {
       title: '序号',
       dataIndex: 'index',
-      key: 'index',
+      key: 'index'
     },
     {
       title: '方法名称',
       dataIndex: 'methodName',
-      key: 'methodName',
+      key: 'methodName'
     },
     {
       title: '方法编码',
       dataIndex: 'methodCode',
-      key: 'methodCode',
+      key: 'methodCode'
     },
     {
       title: '方法类型',
       dataIndex: 'methodType',
       key: 'methodType',
-      render: (methodType: string) => (
-        <Tag color="cyan">{methodType}</Tag>
-      ),
+      render: (methodType: string) => <Tag color="cyan">{methodType}</Tag>
     },
     {
       title: 'URL',
       dataIndex: 'url',
-      key: 'url',
+      key: 'url'
     }
     // {
     //   title: '方法描述',
@@ -76,8 +74,8 @@ const DataMethods: React.FC<DataMethodsProps> = ({ entity }) => {
   ];
 
   useEffect(() => {
-    loadMethods()
-  }, [])
+    loadMethods();
+  }, []);
 
   return (
     <div className={styles.dataMethods}>
@@ -99,4 +97,4 @@ const DataMethods: React.FC<DataMethodsProps> = ({ entity }) => {
   );
 };
 
-export default DataMethods; 
+export default DataMethods;

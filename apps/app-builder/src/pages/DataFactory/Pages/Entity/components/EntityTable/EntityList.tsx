@@ -12,21 +12,16 @@ interface EntityListProps {
   loading?: boolean;
 }
 
-const EntityList: React.FC<EntityListProps> = ({ 
-  entities, 
-  selectedEntity, 
-  onEntitySelect,
-  loading = false
-}) => {
+const EntityList: React.FC<EntityListProps> = ({ entities, selectedEntity, onEntitySelect, loading = false }) => {
   const [createEntityModalVisible, setCreateEntityModalVisible] = useState(false);
 
   const handleOpenAddModal = () => {
     setCreateEntityModalVisible(true);
-  }
+  };
 
   const successCallback = () => {
     // setCreateEntityModalVisible(false);
-  }
+  };
 
   return (
     <div className={styles.entityList}>
@@ -42,25 +37,23 @@ const EntityList: React.FC<EntityListProps> = ({
           className={styles.list}
           dataSource={entities}
           render={(entity: EntityNode) => (
-          <List.Item
-            key={entity.id}
-            className={`${styles.listItem} ${selectedEntity?.id === entity.id ? styles.selected : ''}`}
-            onClick={() => onEntitySelect(entity)}
-          >
-            <div className={styles.itemContent}>
-              <Avatar className={styles.avatar}>
-                <IconList />
-              </Avatar>
-              <div className={styles.itemInfo}>
-                <div className={styles.entityName}>{entity.title}</div>
-                <div className={styles.entityId}>{entity.id}</div>
-                <div className={styles.fieldCount}>
-                  {entity.fields?.length || 0} 个字段
+            <List.Item
+              key={entity.id}
+              className={`${styles.listItem} ${selectedEntity?.id === entity.id ? styles.selected : ''}`}
+              onClick={() => onEntitySelect(entity)}
+            >
+              <div className={styles.itemContent}>
+                <Avatar className={styles.avatar}>
+                  <IconList />
+                </Avatar>
+                <div className={styles.itemInfo}>
+                  <div className={styles.entityName}>{entity.title}</div>
+                  <div className={styles.entityId}>{entity.id}</div>
+                  <div className={styles.fieldCount}>{entity.fields?.length || 0} 个字段</div>
                 </div>
               </div>
-            </div>
-          </List.Item>
-        )}
+            </List.Item>
+          )}
         />
       </Spin>
 
@@ -73,4 +66,4 @@ const EntityList: React.FC<EntityListProps> = ({
   );
 };
 
-export default EntityList; 
+export default EntityList;

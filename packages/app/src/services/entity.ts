@@ -294,7 +294,7 @@ export const deleteMethod = (id: string) => {
  * @returns 导出文件
  */
 export const exportEntity = (entityId: string) => {
-  return systemService.post('/metadata/business-entity/export', { 
+  return systemService.post('/metadata/business-entity/export', {
     params: { entityId },
     responseType: 'blob'
   });
@@ -322,8 +322,8 @@ export const importEntity = (file: File) => {
  * @returns 是否唯一
  */
 export const validateEntityCode = (code: string, excludeId?: string) => {
-  return systemService.post('/metadata/entity/validate-code', { 
-    params: { code, excludeId } 
+  return systemService.post('/metadata/entity/validate-code', {
+    params: { code, excludeId }
   });
 };
 
@@ -341,7 +341,7 @@ export const getEntityStats = () => {
  * @returns 关系图数据
  */
 export const getEntityGraph = (entityId?: string) => {
-  return systemService.post('/metadata/entity/graph', { 
-    params: entityId ? { entityId } : {} 
+  return systemService.post('/metadata/entity/graph', {
+    params: entityId ? { entityId } : {}
   });
 };

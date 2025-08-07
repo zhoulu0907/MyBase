@@ -21,7 +21,7 @@ const EntityDetail: React.FC<EntityDetailProps> = ({ entity }) => {
           <span>字段数: {entity.fields?.length || 0}</span>
         </div>
       </div>
-      
+
       <Tabs className={styles.tabs}>
         <Tabs.TabPane key="fields" title="数据字段">
           <DataFields entity={entity} />
@@ -40,4 +40,4 @@ const EntityDetail: React.FC<EntityDetailProps> = ({ entity }) => {
   );
 };
 
-export default EntityDetail; 
+export default EntityDetail;

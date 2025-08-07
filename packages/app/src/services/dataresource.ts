@@ -1,11 +1,11 @@
 // 数据源服务
 
 import type {
-    DatasourceSaveReqVO,
-    DatasourceTestConnectionReqVO,
-    GetColumnsParams,
-    GetDatasourcePageParams,
-    GetTablesParams
+  DatasourceSaveReqVO,
+  DatasourceTestConnectionReqVO,
+  GetColumnsParams,
+  GetDatasourcePageParams,
+  GetTablesParams
 } from '../types/dataresource';
 import systemService from './clients/app';
 
@@ -14,7 +14,7 @@ import systemService from './clients/app';
  * @returns 数据源类型列表
  */
 export const getDatasourceTypes = () => {
-  return systemService.post("/metadata/datasource/types");
+  return systemService.post('/metadata/datasource/types');
 };
 
 /**
@@ -23,7 +23,7 @@ export const getDatasourceTypes = () => {
  * @returns 表信息列表
  */
 export const getTables = (params: GetTablesParams) => {
-  return systemService.post("/metadata/datasource/tables", { params });
+  return systemService.post('/metadata/datasource/tables', { params });
 };
 
 /**
@@ -32,7 +32,7 @@ export const getTables = (params: GetTablesParams) => {
  * @returns 字段信息列表
  */
 export const getColumns = (params: GetColumnsParams) => {
-  return systemService.post("/metadata/datasource/columns", { params });
+  return systemService.post('/metadata/datasource/columns', { params });
 };
 
 /**
@@ -50,7 +50,7 @@ export const createDatasource = (data: DatasourceSaveReqVO) => {
  * @returns 操作结果
  */
 export const updateDatasource = (data: DatasourceSaveReqVO) => {
-  return systemService.post("/metadata/datasource/update", data);
+  return systemService.post('/metadata/datasource/update', data);
 };
 
 /**
@@ -59,8 +59,8 @@ export const updateDatasource = (data: DatasourceSaveReqVO) => {
  * @returns 操作结果
  */
 export const deleteDatasource = (id: number) => {
-  return systemService.post("/metadata/datasource/delete", {
-    params: { id },
+  return systemService.post('/metadata/datasource/delete', {
+    params: { id }
   });
 };
 
@@ -70,7 +70,7 @@ export const deleteDatasource = (id: number) => {
  * @returns 数据源详情
  */
 export const getDatasource = (id: number) => {
-  return systemService.post("/metadata/datasource/get", { params: { id } });
+  return systemService.post('/metadata/datasource/get', { params: { id } });
 };
 
 /**
@@ -79,7 +79,7 @@ export const getDatasource = (id: number) => {
  * @returns 数据源分页列表
  */
 export const getDatasourcePage = (params: GetDatasourcePageParams) => {
-  return systemService.post("/metadata/datasource/page", params);
+  return systemService.post('/metadata/datasource/page', params);
 };
 
 /**
@@ -87,7 +87,7 @@ export const getDatasourcePage = (params: GetDatasourcePageParams) => {
  * @returns 数据源列表
  */
 export const getDatasourceList = () => {
-  return systemService.post("/metadata/datasource/list");
+  return systemService.post('/metadata/datasource/list');
 };
 
 /**
@@ -96,8 +96,8 @@ export const getDatasourceList = () => {
  * @returns 数据源详情
  */
 export const getDatasourceByCode = (code: string) => {
-  return systemService.post("/metadata/datasource/get-by-code", {
-    params: { code },
+  return systemService.post('/metadata/datasource/get-by-code', {
+    params: { code }
   });
 };
 
