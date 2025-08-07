@@ -112,7 +112,7 @@ const MyAppPage: React.FC = () => {
     form.validate(async (error, data) => {
       if (error !== null) return;
       setCreateLoading(true);
-      const { appCode, appName, iconColor, iconName, description, tagIds = [1], themeColor } = data;
+      const { appCode, appName, iconColor, iconName, description, tagIds, themeColor } = data;
 
       const params: CreateApplicationReq = {
         appCode,

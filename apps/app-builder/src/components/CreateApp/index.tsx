@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Form, Input, Grid, Button, Select, Divider, Popconfirm, type FormInstance } from '@arco-design/web-react';
+import { Form, Input, Grid, Button, Select, Divider, Popconfirm, type FormInstance, Icon, Message } from '@arco-design/web-react';
 
-import { listApplicationTag, createApplicationTag } from '@onebase/app';
+import { listApplicationTag, createApplicationTag, type ListTagReq, type CreateApplicationTagReq } from '@onebase/app';
+import { sample } from 'lodash-es';
+
 
 import { IconPlus } from '@arco-design/web-react/icon';
 import tickSVG from '@/assets/images/tick_icon.svg';
@@ -9,23 +11,18 @@ import databaseSVG from '@/assets/images/database_icon.svg';
 import formSVG from '@/assets/images/form_icon.svg';
 import arrowSVG from '@/assets/images/arrow_icon.svg';
 import createAppSVG from '@/assets/images/create_app_icon.svg';
+import appIconEditSVG from '@/assets/images/app_icon_edit.svg';
 import classicModeSVG from '@/assets/images/classic_mode_icon.svg';
 import appTypeSVG from '@/assets/images/app_type_selected_icon.svg';
 import themeSelectedSVG from '@/assets/images/theme_selected_icon.svg';
+import { appThemeColor, appIcon, appIconColor } from './const';
 import styles from './index.module.less';
 
 const Option = Select.Option;
 
-//应用主题色
-const appThemeColor = ['#4FAE7B', '#81C1C1', '#6439C1', '#E1BD5E', '#D88946', '#C64C42'];
-
 interface IProps {
   form: FormInstance;
-  previewBgColor: string;
-}
-
-interface ITags {
-  tagName: string;
+  readonly previewBgColor: string;
 }
 
 // 创建/修改应用
@@ -33,39 +30,51 @@ const BasicSetting = (props: IProps) => {
   const { previewBgColor, form } = props;
 
   const [tagValue, setTagValue] = useState<string>(''); // 新增标签值
-  const [tagList, setTagList] = useState<ITags[]>([]); // 标签列表
+  const [tagList, setTagList] = useState<ListTagReq[]>([]); // 标签列表
 
-  const [iconName, setIconName] = useState<number>();
-  const [iconColor, setIconColor] = useState<number>();
+  const [iconName, setIconName] = useState<string>();
+  const [iconColor, setIconColor] = useState<string>();
 
   const [themeColor, setThemeColor] = useState<string>('#4FAE7B'); // 应用主题色
 
   useEffect(() => {
-    const params = {
+    listAppTagReq();
+  }, []);
+
+  const listAppTagReq = async () => {
+    const params: ListTagReq = {
       tagName: ''
     };
     // 查询标签
     listApplicationTag(params).then((data) => {
-      setTagList(data);
+      setTagList(data || []);
     });
-  }, []);
+  }
 
   useEffect(() => {
     form.setFieldsValue({
       ...form.getFieldsValue(),
-      themeColor
+      iconName: iconName || sample(appIcon)!,
+      iconColor: iconColor || sample(appIconColor)!,
+      themeColor,
     });
-  }, [form, themeColor]);
+  }, [form, iconName, iconColor, themeColor]);
 
   /* 新增标签 */
   const handleAddTag = async () => {
-    if (tagValue && tagList.findIndex((t) => t.tagName === tagValue) === -1) {
-      setTagList([...tagList, { tagName: tagValue }]);
-      setTagValue('');
-      await createApplicationTag({
-        tagName: tagValue
-      });
+    if (tagValue === '') {
+      Message.warning('请输入标签内容');
+      return;
     }
+    if (tagList.findIndex((t) => t.tagName === tagValue) !== -1) {
+      Message.warning('标签已存在');
+      return;
+    }
+    setTagValue('');
+    await createApplicationTag({
+      tagName: tagValue
+    } as CreateApplicationTagReq);
+    await listAppTagReq();
   };
 
   return (
@@ -131,49 +140,46 @@ const BasicSetting = (props: IProps) => {
             <Input />
           </Form.Item>
           <Grid.Row justify="space-between" gutter={10}>
-            <Popconfirm
-              icon={null}
-              title={null}
-              position="bl"
-              okText="确认"
-              onOk={() => {
-                form.setFieldsValue({
-                  ...form.getFieldsValue(),
-                  iconName,
-                  iconColor
-                });
-              }}
-              onCancel={() => {
-                setIconName(undefined);
-                setIconColor(undefined);
-                // 随机分配 todo
-                form.setFieldsValue({
-                  ...form.getFields(),
-                  iconName: 1,
-                  iconColor: 1
-                });
-              }}
-              content={
-                <>
-                  <div className={styles.avatarWrapper}>
-                    {Array(24)
-                      .fill('')
-                      .map((icon, index) => (
-                        <div className={styles.avatar} key={index} onClick={() => setIconName(index)} />
+
+            <div className={styles.appIcon} style={{
+              backgroundImage: `url(${createAppSVG})`,
+            }}>
+              <Popconfirm
+                icon={null}
+                title={null}
+                position="bl"
+                okText="确认"
+                onOk={() => {
+                  form.setFieldsValue({
+                    ...form.getFieldsValue(),
+                    iconName,
+                    iconColor
+                  });
+                }}
+                onCancel={() => {
+                  setIconName('');
+                  setIconColor('');
+                }}
+                content={
+                  <>
+                    <div className={styles.avatarWrapper}>
+                      {appIcon.map((icon, index) => (
+                        <div className={styles.avatar} key={index} style={{ color: icon === iconName ? iconColor : '#FFF' }} onClick={() => setIconName(icon)} >
+                          <i className={`iconfont ${icon}`} />
+                        </div>
                       ))}
-                  </div>
-                  <div className={styles.avatarColor}>
-                    {Array(10)
-                      .fill('')
-                      .map((color, index) => (
-                        <div className={styles.color} key={index} onClick={() => setIconColor(index)} />
+                    </div>
+                    <div className={styles.avatarColor}>
+                      {appIconColor.map((color, index) => (
+                        <div className={styles.color} key={index} style={{ backgroundColor: color }} onClick={() => setIconColor(color)} />
                       ))}
-                  </div>
-                </>
-              }
-            >
-              <img style={{ cursor: 'pointer' }} src={createAppSVG} alt="application icon" />
-            </Popconfirm>
+                    </div>
+                  </>
+                }
+              >
+                <img src={appIconEditSVG} alt="Application icon edit" />
+              </Popconfirm>
+            </div>
 
             <Form.Item
               field="appCode"
@@ -228,7 +234,7 @@ const BasicSetting = (props: IProps) => {
               dropdownMenuStyle={{ maxHeight: 300 }}
             >
               {tagList.map((tag) => (
-                <Option key={tag.tagName} value={tag.tagName}>
+                <Option key={tag.id} value={tag.id!}>
                   {tag.tagName}
                 </Option>
               ))}
