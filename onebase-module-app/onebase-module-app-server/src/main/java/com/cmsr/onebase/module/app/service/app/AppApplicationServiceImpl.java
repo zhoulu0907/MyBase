@@ -4,10 +4,18 @@ import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.app.controller.admin.app.vo.*;
+import com.cmsr.onebase.module.app.controller.admin.tag.vo.TagRespVO;
 import com.cmsr.onebase.module.app.dal.database.app.*;
+import com.cmsr.onebase.module.app.dal.database.menu.AppMenuRepository;
+import com.cmsr.onebase.module.app.dal.database.tag.AppApplicationTagRepository;
+import com.cmsr.onebase.module.app.dal.database.tag.AppTagRepository;
+import com.cmsr.onebase.module.app.dal.database.version.AppVersionMenuRepository;
+import com.cmsr.onebase.module.app.dal.database.version.AppVersionRepository;
+import com.cmsr.onebase.module.app.dal.database.version.AppVersionResourceRepository;
 import com.cmsr.onebase.module.app.dal.dataobject.app.ApplicationDO;
 import com.cmsr.onebase.module.app.enums.app.AppErrorCodeConstants;
 import com.cmsr.onebase.module.app.enums.app.ApplicationStatusEnum;
+import com.cmsr.onebase.module.app.service.AppCommonService;
 import com.cmsr.onebase.module.app.util.VersionUtils;
 import jakarta.annotation.Resource;
 import lombok.Setter;
@@ -86,7 +94,7 @@ public class AppApplicationServiceImpl implements AppApplicationService {
         applicationDO.setVersionNumber(VersionUtils.INIT_VERSION);
         applicationDO.setAppStatus(ApplicationStatusEnum.EDITING.getValue());
         applicationDO = applicationRepository.insert(applicationDO);
-        applicationTagRepository.mergeApplicationTags(applicationDO.getId(), createReqVO.getTagIds());
+        applicationTagRepository.saveApplicationTags(applicationDO.getId(), createReqVO.getTagIds());
         return BeanUtils.toBean(applicationDO, ApplicationCreateRespVO.class);
     }
 
@@ -96,7 +104,7 @@ public class AppApplicationServiceImpl implements AppApplicationService {
         appCommonService.validateApplicationExist(createReqVO.getId());
         validApplicationCodeDuplicate(createReqVO.getAppCode(), createReqVO.getId());
         ApplicationDO updateObj = BeanUtils.toBean(createReqVO, ApplicationDO.class);
-        applicationTagRepository.mergeApplicationTags(createReqVO.getId(), createReqVO.getTagIds());
+        applicationTagRepository.saveApplicationTags(createReqVO.getId(), createReqVO.getTagIds());
         applicationRepository.update(updateObj);
     }
 

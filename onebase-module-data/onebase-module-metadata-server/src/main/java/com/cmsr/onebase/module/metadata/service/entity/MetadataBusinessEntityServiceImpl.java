@@ -4,10 +4,15 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.BusinessEntityPageReqVO;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.BusinessEntitySaveReqVO;
+import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.ERDiagramRespVO;
+import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EREntityVO;
+import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.ERFieldVO;
+import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.ERRelationshipVO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataBusinessEntityDO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataSystemFieldsDO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.datasource.MetadataDatasourceDO;
+import com.cmsr.onebase.module.metadata.dal.dataobject.relationship.MetadataEntityRelationshipDO;
 import com.cmsr.onebase.module.metadata.convert.datasource.DatasourceConvert;
 import com.cmsr.onebase.module.metadata.dal.database.MetadataRepository;
 import com.cmsr.onebase.module.metadata.dal.database.TemporaryDatasourceService;
@@ -22,6 +27,7 @@ import org.anyline.service.AnylineService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
 
@@ -466,6 +472,208 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
         configStore.and("datasource_id", datasourceId);
         configStore.order("create_time", Order.TYPE.DESC);
         return metadataRepository.findAllByConfig(MetadataBusinessEntityDO.class, configStore);
+    }
+
+    @Override
+    public ERDiagramRespVO getERDiagramByDatasourceId(Long datasourceId) {
+        // 1. 获取数据源信息
+        MetadataDatasourceDO datasource = getDatasourceById(datasourceId);
+        if (datasource == null) {
+            throw new IllegalArgumentException("数据源不存在，ID: " + datasourceId);
+        }
+
+        // 2. 获取该数据源下的所有业务实体
+        List<MetadataBusinessEntityDO> entities = getBusinessEntityListByDatasourceId(datasourceId);
+
+        // 3. 构建ER图响应对象
+        ERDiagramRespVO result = new ERDiagramRespVO();
+        result.setDatasourceId(datasourceId);
+        result.setDatasourceName(datasource.getDatasourceName());
+
+        // 4. 转换实体信息，包括字段信息
+        List<EREntityVO> erEntities = new ArrayList<>();
+        for (MetadataBusinessEntityDO entity : entities) {
+            EREntityVO erEntity = convertToEREntity(entity);
+            erEntities.add(erEntity);
+        }
+        result.setEntities(erEntities);
+
+        // 5. 构建关联关系（基于外键关系）
+        List<ERRelationshipVO> relationships = buildRelationships(entities);
+        result.setRelationships(relationships);
+
+        return result;
+    }
+
+    /**
+     * 将业务实体转换为ER实体VO
+     *
+     * @param entity 业务实体DO
+     * @return ER实体VO
+     */
+    private EREntityVO convertToEREntity(MetadataBusinessEntityDO entity) {
+        EREntityVO erEntity = new EREntityVO();
+        erEntity.setEntityId(entity.getId());
+        erEntity.setEntityName(entity.getDisplayName());
+        erEntity.setTableName(entity.getTableName());
+        erEntity.setDescription(entity.getDescription());
+        erEntity.setEntityType(entity.getEntityType().toString());
+        
+        // 设置默认坐标（前端可以根据需要调整）
+        erEntity.setPositionX(100);
+        erEntity.setPositionY(100);
+
+        // 获取字段信息
+        List<ERFieldVO> fields = getEntityFields(entity.getId());
+        erEntity.setFields(fields);
+
+        return erEntity;
+    }
+
+    /**
+     * 获取实体的字段信息
+     *
+     * @param entityId 实体ID
+     * @return 字段VO列表
+     */
+    private List<ERFieldVO> getEntityFields(Long entityId) {
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        configStore.and("entity_id", entityId);
+        configStore.order("sort_order", Order.TYPE.ASC);
+        configStore.order("create_time", Order.TYPE.ASC);
+
+        List<MetadataEntityFieldDO> fieldList = metadataRepository.findAllByConfig(MetadataEntityFieldDO.class, configStore);
+        List<ERFieldVO> erFields = new ArrayList<>();
+
+        for (MetadataEntityFieldDO field : fieldList) {
+            ERFieldVO erField = new ERFieldVO();
+            erField.setFieldId(field.getId());
+            erField.setFieldName(field.getFieldName());
+            erField.setDisplayName(field.getDisplayName());
+            erField.setFieldType(field.getFieldType());
+            erField.setDataLength(field.getDataLength());
+            erField.setDescription(field.getDescription());
+            erField.setIsRequired(field.getIsRequired());
+            erField.setIsUnique(field.getIsUnique());
+            erField.setIsPrimaryKey(field.getIsPrimaryKey());
+            erField.setIsSystemField(field.getIsSystemField());
+            erField.setDefaultValue(field.getDefaultValue());
+            erField.setSortOrder(field.getSortOrder());
+            erFields.add(erField);
+        }
+
+        return erFields;
+    }
+
+    /**
+     * 构建实体间的关联关系
+     * 基于实际存储的关系数据
+     *
+     * @param entities 业务实体列表
+     * @return 关联关系列表
+     */
+    private List<ERRelationshipVO> buildRelationships(List<MetadataBusinessEntityDO> entities) {
+        List<ERRelationshipVO> relationships = new ArrayList<>();
+
+        if (entities.isEmpty()) {
+            return relationships;
+        }
+
+        // 获取该数据源下的所有实体关系
+        List<Long> entityIds = entities.stream()
+                .map(MetadataBusinessEntityDO::getId)
+                .toList();
+
+        DefaultConfigStore relationshipConfigStore = new DefaultConfigStore();
+        relationshipConfigStore.and("(source_entity_id in ? or target_entity_id in ?)", entityIds, entityIds);
+        relationshipConfigStore.order("create_time", Order.TYPE.DESC);
+
+        List<MetadataEntityRelationshipDO> relationshipDOs = metadataRepository.findAllByConfig(
+                MetadataEntityRelationshipDO.class, relationshipConfigStore);
+
+        // 转换为ER关系VO
+        for (MetadataEntityRelationshipDO relationshipDO : relationshipDOs) {
+            ERRelationshipVO relationship = convertToERRelationship(relationshipDO, entities);
+            if (relationship != null) {
+                relationships.add(relationship);
+            }
+        }
+
+        return relationships;
+    }
+
+    /**
+     * 将实体关系DO转换为ER关系VO
+     *
+     * @param relationshipDO 实体关系DO
+     * @param entities 实体列表，用于获取实体名称
+     * @return ER关系VO
+     */
+    private ERRelationshipVO convertToERRelationship(MetadataEntityRelationshipDO relationshipDO, 
+                                                    List<MetadataBusinessEntityDO> entities) {
+        // 查找源实体和目标实体
+        MetadataBusinessEntityDO sourceEntity = entities.stream()
+                .filter(entity -> entity.getId().equals(relationshipDO.getSourceEntityId()))
+                .findFirst()
+                .orElse(null);
+                
+        MetadataBusinessEntityDO targetEntity = entities.stream()
+                .filter(entity -> entity.getId().equals(relationshipDO.getTargetEntityId()))
+                .findFirst()
+                .orElse(null);
+
+        if (sourceEntity == null || targetEntity == null) {
+            return null;
+        }
+
+        ERRelationshipVO relationship = new ERRelationshipVO();
+        relationship.setSourceEntityId(relationshipDO.getSourceEntityId());
+        relationship.setSourceEntityName(sourceEntity.getDisplayName());
+        relationship.setSourceFieldId(Long.valueOf(relationshipDO.getSourceFieldId()));
+        relationship.setSourceFieldName(getFieldNameById(relationshipDO.getSourceFieldId()));
+        relationship.setTargetEntityId(relationshipDO.getTargetEntityId());
+        relationship.setTargetEntityName(targetEntity.getDisplayName());
+        relationship.setTargetFieldId(Long.valueOf(relationshipDO.getTargetFieldId()));
+        relationship.setTargetFieldName(getFieldNameById(relationshipDO.getTargetFieldId()));
+        relationship.setRelationshipType(relationshipDO.getRelationshipType());
+        relationship.setRelationshipName(relationshipDO.getRelationName());
+        relationship.setDescription(relationshipDO.getDescription());
+        
+        return relationship;
+    }
+
+    /**
+     * 根据字段ID获取字段名称
+     *
+     * @param fieldId 字段ID
+     * @return 字段名称
+     */
+    private String getFieldNameById(String fieldId) {
+        if (fieldId == null) {
+            return null;
+        }
+        
+        try {
+            DefaultConfigStore configStore = new DefaultConfigStore();
+            configStore.and("id", Long.valueOf(fieldId));
+            MetadataEntityFieldDO field = metadataRepository.findOne(MetadataEntityFieldDO.class, configStore);
+            return field != null ? field.getFieldName() : null;
+        } catch (NumberFormatException e) {
+            log.warn("无效的字段ID: {}", fieldId);
+            return null;
+        }
+    }
+
+    /**
+     * 根据ID获取数据源信息
+     *
+     * @param datasourceId 数据源ID
+     * @return 数据源DO
+     */
+    private MetadataDatasourceDO getDatasourceById(Long datasourceId) {
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        configStore.and("id", datasourceId);
+        return metadataRepository.findOne(MetadataDatasourceDO.class, configStore);
     }
 
 }

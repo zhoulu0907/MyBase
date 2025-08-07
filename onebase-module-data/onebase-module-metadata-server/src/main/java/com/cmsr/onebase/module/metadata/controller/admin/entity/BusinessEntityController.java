@@ -5,6 +5,7 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.BusinessEntityPageReqVO;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.BusinessEntityRespVO;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.BusinessEntitySaveReqVO;
+import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.ERDiagramRespVO;
 import com.cmsr.onebase.module.metadata.convert.entity.BusinessEntityConvert;
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataBusinessEntityDO;
 import com.cmsr.onebase.module.metadata.service.entity.MetadataBusinessEntityService;
@@ -87,5 +88,15 @@ public class BusinessEntityController {
         List<MetadataBusinessEntityDO> list = businessEntityService.getBusinessEntityListByDatasourceId(datasourceId);
         return success(BusinessEntityConvert.INSTANCE.convertList(list));
     }
+
+    @PostMapping("/er-diagram")
+    @Operation(summary = "根据数据源ID获取ER图数据", description = "获取指定数据源下所有实体信息、字段信息以及实体间的关联关系，用于前端绘制ER图")
+    @Parameter(name = "datasourceId", description = "数据源ID", required = true, example = "1024")
+    @PreAuthorize("@ss.hasPermission('metadata:business-entity:query')")
+    public CommonResult<ERDiagramRespVO> getERDiagramByDatasourceId(@RequestParam("datasourceId") Long datasourceId) {
+        ERDiagramRespVO result = businessEntityService.getERDiagramByDatasourceId(datasourceId);
+        return success(result);
+    }
+
 
 }

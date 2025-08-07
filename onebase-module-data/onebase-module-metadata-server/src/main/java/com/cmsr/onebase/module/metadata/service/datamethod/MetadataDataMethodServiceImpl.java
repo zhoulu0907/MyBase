@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.metadata.service.datamethod;
 
 import cn.hutool.core.util.IdUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.module.metadata.controller.admin.datamethod.vo.*;
 import com.cmsr.onebase.module.metadata.service.datamethod.vo.DataMethodQueryVO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataBusinessEntityDO;
@@ -15,6 +16,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.anyline.entity.DataRow;
 import org.anyline.entity.DataSet;
 import org.anyline.data.param.init.DefaultConfigStore;
+import org.anyline.data.param.ConfigStore;
+import org.anyline.entity.Compare;
 import org.anyline.entity.Order;
 
 import org.anyline.service.AnylineService;
@@ -23,6 +26,7 @@ import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.module.metadata.enums.ErrorCodeConstants.*;
@@ -158,10 +162,18 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
             Object insertResult = anylineService.insert(entity.getTableName(), dataRow);
             log.info("创建数据成功，实体ID: {}, 表名: {}, 插入结果: {}", reqVO.getEntityId(), entity.getTableName(), insertResult);
 
-            // 6. 查询插入后的完整数据
-            Object primaryKeyValue = getPrimaryKeyValue(processedData, fields);
-            if (primaryKeyValue == null && insertResult != null) {
-                primaryKeyValue = insertResult;
+            // 6. 查询插入后的完整数据 
+            Object primaryKeyValue;
+            
+            // 优先使用插入操作返回的ID，通常这是影响的行数，我们需要使用实际的主键值
+            primaryKeyValue = getPrimaryKeyValue(processedData, fields);
+            log.info("从处理数据中获取主键值: {}, 插入结果: {}", primaryKeyValue, insertResult);
+            
+            // 确保主键值不为null
+            if (primaryKeyValue == null) {
+                log.warn("无法获取主键值，跳过查询插入后的数据，实体ID: {}, 表名: {}", reqVO.getEntityId(), entity.getTableName());
+                // 返回插入的数据
+                return buildDynamicDataRespVO(entity, processedData);
             }
 
             Map<String, Object> resultData = queryDataById(entity.getTableName(), primaryKeyValue, fields);
@@ -295,48 +307,122 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
 
         // 3. 使用Anyline执行分页查询
         try {
-            // 切换到指定数据源
-            switchToDataSource(entity.getDatasourceId());
+            // 获取临时数据源服务
+            MetadataDatasourceDO datasource = metadataRepository.findById(MetadataDatasourceDO.class, entity.getDatasourceId());
+            if (datasource == null) {
+                throw exception(DATASOURCE_NOT_EXISTS);
+            }
+            
+            AnylineService<?> temporaryService = temporaryDatasourceService.createTemporaryService(datasource);
+            log.info("成功切换到数据源：{}", datasource.getCode());
 
-            // 构建查询条件
-            DefaultConfigStore configStore = new DefaultConfigStore();
+            // 检查表中是否有软删除字段
+            boolean hasDeletedField = fields.stream().anyMatch(f -> "deleted".equalsIgnoreCase(f.getFieldName()));
+
+            // 动态业务表忽略租户条件 - 使用TenantUtils.executeIgnore包装查询
+            return TenantUtils.executeIgnore(() -> {
+
+            // 使用ConfigStore替代SQL字符串拼接
+            ConfigStore configs = new DefaultConfigStore();
+            
+            // 标记是否已添加deleted条件，避免重复
+            boolean deletedConditionAdded = false;
+            
+            // 添加用户筛选条件（只对存在的字段进行过滤，排除系统字段）
             if (reqVO.getFilters() != null && !reqVO.getFilters().isEmpty()) {
+                // 创建字段名集合用于快速查找
+                Set<String> fieldNames = fields.stream()
+                        .map(MetadataEntityFieldDO::getFieldName)
+                        .collect(Collectors.toSet());
+                
                 for (Map.Entry<String, Object> entry : reqVO.getFilters().entrySet()) {
-                    if (entry.getValue() != null) {
-                        configStore.and(entry.getKey(), entry.getValue());
+                    String fieldName = entry.getKey();
+                    Object fieldValue = entry.getValue();
+                    
+                    // 跳过系统字段，避免重复添加deleted等条件
+                    if ("deleted".equalsIgnoreCase(fieldName) || "tenant_id".equalsIgnoreCase(fieldName)) {
+                        log.debug("跳过系统字段过滤条件: {} = {}", fieldName, fieldValue);
+                        continue;
+                    }
+                    
+                    // 只对表中实际存在的字段进行过滤
+                    if (fieldValue != null && fieldNames.contains(fieldName)) {
+                        configs.and(Compare.EQUAL, fieldName, fieldValue);
+                        log.debug("添加过滤条件: {} = {}", fieldName, fieldValue);
+                    } else if (fieldValue != null) {
+                        log.warn("忽略不存在的字段过滤条件: {} = {}", fieldName, fieldValue);
                     }
                 }
             }
 
-            // 构建排序
-            if (StringUtils.hasText(reqVO.getSortField())) {
-                Order.TYPE direction = "desc".equalsIgnoreCase(reqVO.getSortDirection()) ? Order.TYPE.DESC : Order.TYPE.ASC;
-                configStore.order(reqVO.getSortField(), direction);
+            // 添加软删除条件（如果字段存在且未添加）
+            if (hasDeletedField && !deletedConditionAdded) {
+                configs.and(Compare.EQUAL, "deleted", "0");
+                deletedConditionAdded = true;
+                log.debug("添加软删除条件: deleted = 0");
+            }
+
+            log.info("详细配置信息: {}", configs.toString());
+
+            // 不添加租户条件，因为业务表可能没有tenant_id字段
+            // if (hasTenantIdField) {
+            //     configs.and(Compare.EQUAL, "tenant_id", 1L);
+            // }
+
+            // 添加排序（只对存在的字段进行排序）
+            Set<String> fieldNames = fields.stream()
+                    .map(MetadataEntityFieldDO::getFieldName)
+                    .collect(Collectors.toSet());
+                    
+            if (StringUtils.hasText(reqVO.getSortField()) && fieldNames.contains(reqVO.getSortField())) {
+                String orderClause = reqVO.getSortField();
+                if ("desc".equalsIgnoreCase(reqVO.getSortDirection())) {
+                    orderClause += " DESC";
+                } else {
+                    orderClause += " ASC";
+                }
+                configs.order(orderClause);
+                log.debug("添加排序条件: {} {}", reqVO.getSortField(), reqVO.getSortDirection());
             } else {
                 // 默认按主键倒序
                 String primaryKeyField = getPrimaryKeyFieldName(fields);
-                configStore.order(primaryKeyField, Order.TYPE.DESC);
+                configs.order(primaryKeyField + " DESC");
+                if (StringUtils.hasText(reqVO.getSortField())) {
+                    log.warn("忽略不存在的排序字段: {}", reqVO.getSortField());
+                }
             }
 
-            // 执行分页查询
-            DataSet dataSet = anylineService.querys(entity.getTableName(), configStore);
+            // 添加分页 - 手动计算OFFSET，确保从0开始
+            if (reqVO.getPageNo() != null && reqVO.getPageSize() != null) {
+                // 计算正确的offset：第1页从0开始，第2页从pageSize开始
+                int offset = (reqVO.getPageNo() - 1) * reqVO.getPageSize();
+                configs.scope(offset, reqVO.getPageSize());
+                log.debug("分页参数: pageNo={}, pageSize={}, offset={}", reqVO.getPageNo(), reqVO.getPageSize(), offset);
+            }
 
-            // 手动实现分页
-            long total = dataSet.total();
-            int startIndex = (reqVO.getPageNo() - 1) * reqVO.getPageSize();
-            int endIndex = Math.min(startIndex + reqVO.getPageSize(), dataSet.size());
+            log.info("使用ConfigStore查询表: {}", entity.getTableName());
+            log.info("ConfigStore配置: {}", configs.toString());
 
-            // 4. 转换结果
+            // 使用临时服务执行查询
+            DataSet dataSet = temporaryService.querys(entity.getTableName(), configs);
+
+            // 获取总记录数和当前页数据
+            long total = dataSet.total();  // ConfigStore分页后会自动设置总数
+            
+            // 转换结果
             List<DynamicDataRespVO> list = new ArrayList<>();
-            for (int i = startIndex; i < endIndex; i++) {
+            for (int i = 0; i < dataSet.size(); i++) {
                 DataRow row = dataSet.getRow(i);
                 Map<String, Object> data = convertDataRowToMap(row, fields);
                 list.add(buildDynamicDataRespVO(entity, data));
             }
+            
             log.info("分页查询数据成功，实体ID: {}, 表名: {}, 页码: {}, 页大小: {}, 总记录数: {}",
                     reqVO.getEntityId(), entity.getTableName(), reqVO.getPageNo(), reqVO.getPageSize(), total);
 
             return new PageResult<>(list, total);
+            
+            }); // TenantUtils.executeIgnore 闭合
 
         } catch (Exception e) {
             log.error("分页查询数据失败，实体ID: {}, 错误信息: {}", reqVO.getEntityId(), e.getMessage(), e);
@@ -468,7 +554,8 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
                         processedData.put(fieldName, now);
                         break;
                     case "deleted":
-                        processedData.put(fieldName, 0);
+                        // 统一使用字符串类型，避免PostgreSQL类型不匹配问题
+                        processedData.put(fieldName, "0");
                         break;
                     case "lock_version":
                     case "lockversion":
@@ -554,7 +641,8 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
             // 使用原始SQL方式查询，避免框架自动添加租户条件
             String sql = "SELECT * FROM " + tableName + " WHERE " + primaryKeyField + " = ? ";
             if (hasDeletedField) {
-                sql += "AND deleted = 0";
+                // 修复：将deleted字段的值作为字符串传递，以匹配数据库中的character varying类型
+                sql += "AND deleted = '0'";
             }
             
             DataSet dataSet = anylineService.querys(sql, id);
@@ -590,7 +678,12 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
      */
     private Object getPrimaryKeyValue(Map<String, Object> data, List<MetadataEntityFieldDO> fields) {
         String primaryKeyField = getPrimaryKeyFieldName(fields);
-        return data.get(primaryKeyField);
+        Object value = data.get(primaryKeyField);
+        
+        log.debug("获取主键值 - 主键字段名: {}, 数据中的值: {}, 数据内容: {}", 
+                primaryKeyField, value, data);
+                
+        return value;
     }
 
     /**

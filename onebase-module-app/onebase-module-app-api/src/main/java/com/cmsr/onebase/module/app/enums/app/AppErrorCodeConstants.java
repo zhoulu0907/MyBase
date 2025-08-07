@@ -24,6 +24,7 @@ public interface AppErrorCodeConstants {
 
     ErrorCode APP_CODE_DUPLICATE = new ErrorCode(10008, "应用编码重复");
 
-    ErrorCode MENU_TYPE_ERROR = new ErrorCode(10009, "菜单类型错误");
+    ErrorCode APP_MENU_TYPE_ERROR = new ErrorCode(10009, "菜单类型错误");
 
+    ErrorCode APP_AUTH_ROLE_NAME_EXISTS = new ErrorCode(10010, "角色名称已存在");
 }

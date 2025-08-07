@@ -29,7 +29,7 @@ public class AppApplicationRepository extends DataRepository {
             configs.and(Compare.LIKE, "app_name", pageReqVO.getName());
         }
         if (pageReqVO.getStatus() != null) {
-            configs.and(Compare.EQUAL, "status", pageReqVO.getStatus());
+            configs.and(Compare.EQUAL, "app_status", pageReqVO.getStatus());
         }
         if (StringUtils.equalsIgnoreCase(pageReqVO.getOrderByTime(), "create")) {
             configs.order(BaseDO.CREATE_TIME, Order.TYPE.DESC);

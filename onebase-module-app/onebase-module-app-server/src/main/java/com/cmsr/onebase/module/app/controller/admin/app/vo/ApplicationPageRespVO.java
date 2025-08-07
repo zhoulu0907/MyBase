@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.app.controller.admin.app.vo;
 
+import com.cmsr.onebase.module.app.controller.admin.tag.vo.TagRespVO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -12,6 +13,9 @@ import java.util.List;
 @Schema(description = "应用管理 - 应用分页 Response VO")
 @Data
 public class ApplicationPageRespVO {
+
+    @Schema(description = "应用Id")
+    private Long id;
 
     @Schema(description = "应用名称")
     private String appName;
