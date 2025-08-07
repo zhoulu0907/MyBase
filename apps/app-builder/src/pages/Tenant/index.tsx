@@ -1,14 +1,20 @@
-import React, { useEffect, useState } from 'react';
-import { Avatar, Typography, Space, Divider, Empty } from '@arco-design/web-react';
-import { IconUser, IconLoading } from '@arco-design/web-react/icon';
-import styles from './index.module.less';
-import { getTenantInfo } from '@onebase/platform-center';
-import type { TenantInfo } from '@onebase/platform-center';
+import React, { useEffect, useState } from "react";
+import {
+  Avatar,
+  Typography,
+  Space,
+  Divider,
+  Empty,
+} from "@arco-design/web-react";
+import { IconUser, IconLoading } from "@arco-design/web-react/icon";
+import styles from "./index.module.less";
+import { getTenantInfo } from "@onebase/platform-center";
+import type { TenantInfo } from "@onebase/platform-center";
 
 const { Title, Text } = Typography;
-const TenantPage:React.FC = () =>{
-const [tenantInfo, setTenantInfo] = useState<TenantInfo | null>(null);
-  
+const TenantPage: React.FC = () => {
+  const [tenantInfo, setTenantInfo] = useState<TenantInfo | null>(null);
+
   useEffect(() => {
     const fetchTenantInfo = async () => {
       try {
@@ -18,46 +24,61 @@ const [tenantInfo, setTenantInfo] = useState<TenantInfo | null>(null);
         // TODO： 联调后移除mock数据
         setTenantInfo({
           id: 1,
-          name: '租户名',
-          creator: 'admin',
-          contactName: '张三',
-          contactMobile: '13800138000',
+          name: "租户名",
+          creator: "admin",
+          contactName: "张三",
+          contactMobile: "13800138000",
           status: 1,
-          domain: 'example.com',
-          password: 'password',
+          domain: "example.com",
+          password: "password",
           accountCount: 100,
-          createTime: '2024-06-01 12:12:12',
-          expireTime: '2024-06-30',
+          createTime: "2024-06-01 12:12:12",
+          expireTime: "2024-06-30",
           appCount: 10,
-          workbenchUrl: 'http://workbench.example.com',
-          mobileUrl: 'http://mobile.example.com'
+          workbenchUrl: "http://workbench.example.com",
+          mobileUrl: "http://mobile.example.com",
         });
       }
     };
-    
+
     fetchTenantInfo();
   }, []);
 
   // 显示加载状态
   if (!tenantInfo) {
-    return <Empty className={styles.tenantPage} icon={<IconLoading />} description='加载中...'></Empty>;
+    return (
+      <Empty
+        className={styles.tenantPage}
+        icon={<IconLoading />}
+        description="加载中..."
+      ></Empty>
+    );
   }
   return (
     <div className={styles.tenantPage}>
       <div className={styles.tenantPageMain}>
         <div className={styles.basicInfoWrapper}>
           <div className={styles.avatarSection}>
-            <Avatar size={72} style={{ backgroundColor: '#009E9E', borderRadius: '8px' }}>
+            <Avatar
+              size={72}
+              style={{ backgroundColor: "#009E9E", borderRadius: "8px" }}
+            >
               <IconUser />
             </Avatar>
           </div>
           {/* 租户信息 */}
           <div className={styles.infoSection}>
-            <Title heading={5} style={{ margin: 0 }}>{tenantInfo.name}</Title>
+            <Title heading={5} style={{ margin: 0 }}>
+              {tenantInfo.name}
+            </Title>
             <Space className={styles.infoLine}>
               <Text copyable>ID：{tenantInfo.id}</Text>
-              <div className={styles.infoBlock}>创建人:{tenantInfo.creator}</div>
-              <div className={styles.infoBlock}>创建时间：{tenantInfo.createTime}</div>
+              <div className={styles.infoBlock}>
+                创建人:{tenantInfo.creator}
+              </div>
+              <div className={styles.infoBlock}>
+                创建时间：{tenantInfo.createTime}
+              </div>
             </Space>
           </div>
         </div>
@@ -107,6 +128,6 @@ const [tenantInfo, setTenantInfo] = useState<TenantInfo | null>(null);
       </div>
     </div>
   );
-}
+};
 
 export default TenantPage;

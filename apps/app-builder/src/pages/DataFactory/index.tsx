@@ -1,15 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 // import { useNavigate } from 'react-router-dom';
-import { Layout, Menu, Tooltip } from '@arco-design/web-react';
-import { IconShareAlt, IconCommon } from '@arco-design/web-react/icon';
-import DataSourcePage from './Pages/DataSource';
-import EntityPage from './Pages/Entity';
-import styles from './index.module.less';
-
+import { Layout, Menu, Tooltip } from "@arco-design/web-react";
+import { IconShareAlt, IconCommon } from "@arco-design/web-react/icon";
+import DataSourcePage from "./Pages/DataSource";
+import EntityPage from "./Pages/Entity";
+import styles from "./index.module.less";
 
 const DataFactoryPage: React.FC = () => {
   // const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('check-entity');
+  const [activeTab, setActiveTab] = useState("check-entity");
   // const urlParams = new URLSearchParams(window.location.search);
 
   // const updateUrl = (tab: string) => {
@@ -33,33 +32,36 @@ const DataFactoryPage: React.FC = () => {
     // }
   }, []);
 
-  return <Layout className={styles['data-factory-page']}>
-    <Layout.Sider
-      breakpoint='xl'
-      width={48}
-      className={styles['sider']}
-    >
-      {/* 左侧菜单 */}
-      <Menu className={styles['menu']} mode='pop' onClickMenuItem={handleMenuClick} selectedKeys={[activeTab]}>
-        <Menu.Item key='check-entity'>
-          <Tooltip content='业务实体管理' position='right'>
-            <IconCommon />
-          </Tooltip>
-        </Menu.Item>
-        <Menu.Item key='data-source'>
-          <Tooltip content='数据源管理' position='right'>
-            <IconShareAlt />
-          </Tooltip>
-        </Menu.Item>
-      </Menu>
-    </Layout.Sider>
+  return (
+    <Layout className={styles["data-factory-page"]}>
+      <Layout.Sider breakpoint="xl" width={48} className={styles["sider"]}>
+        {/* 左侧菜单 */}
+        <Menu
+          className={styles["menu"]}
+          mode="pop"
+          onClickMenuItem={handleMenuClick}
+          selectedKeys={[activeTab]}
+        >
+          <Menu.Item key="check-entity">
+            <Tooltip content="业务实体管理" position="right">
+              <IconCommon />
+            </Tooltip>
+          </Menu.Item>
+          <Menu.Item key="data-source">
+            <Tooltip content="数据源管理" position="right">
+              <IconShareAlt />
+            </Tooltip>
+          </Menu.Item>
+        </Menu>
+      </Layout.Sider>
 
-    {/* 右侧内容 */}
-    <Layout.Content className={styles['content']}>
-      {activeTab === 'data-source' && <DataSourcePage />}
-      {activeTab === 'check-entity' && <EntityPage />}
-    </Layout.Content>
-  </Layout>;
+      {/* 右侧内容 */}
+      <Layout.Content className={styles["content"]}>
+        {activeTab === "data-source" && <DataSourcePage />}
+        {activeTab === "check-entity" && <EntityPage />}
+      </Layout.Content>
+    </Layout>
+  );
 };
 
 export default DataFactoryPage;

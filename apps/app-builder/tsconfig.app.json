@@ -32,5 +32,5 @@
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true
   },
-  "include": ["src","src/types", "src/vite-env.d.ts"],
+  "include": ["src", "src/types", "src/vite-env.d.ts"]
 }

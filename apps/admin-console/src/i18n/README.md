@@ -7,15 +7,15 @@
 ### 1. 在组件中使用翻译
 
 ```tsx
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from "react-i18next";
 
 const MyComponent = () => {
   const { t } = useTranslation();
 
   return (
     <div>
-      <h1>{t('header.title')}</h1>
-      <p>{t('common.loading')}</p>
+      <h1>{t("header.title")}</h1>
+      <p>{t("common.loading")}</p>
     </div>
   );
 };
@@ -24,7 +24,7 @@ const MyComponent = () => {
 ### 2. 使用自定义 Hook
 
 ```tsx
-import { useI18n } from '../hooks/useI18n';
+import { useI18n } from "../hooks/useI18n";
 
 const MyComponent = () => {
   const { t, changeLanguage, language } = useI18n();
@@ -32,9 +32,7 @@ const MyComponent = () => {
   return (
     <div>
       <p>当前语言: {language}</p>
-      <button onClick={() => changeLanguage('en-US')}>
-        切换到英文
-      </button>
+      <button onClick={() => changeLanguage("en-US")}>切换到英文</button>
     </div>
   );
 };
@@ -43,7 +41,7 @@ const MyComponent = () => {
 ### 3. 使用语言切换器组件
 
 ```tsx
-import LanguageSwitcher from '../components/LanguageSwitcher';
+import LanguageSwitcher from "../components/LanguageSwitcher";
 
 const Header = () => {
   return (
@@ -108,8 +106,8 @@ const { t } = useTranslation();
 
 return (
   <div>
-    <h2>{t('newFeature.title')}</h2>
-    <p>{t('newFeature.description')}</p>
+    <h2>{t("newFeature.title")}</h2>
+    <p>{t("newFeature.description")}</p>
   </div>
 );
 ```
@@ -126,7 +124,7 @@ return (
 
 ```tsx
 const { t } = useTranslation();
-return <p>{t('welcome', { name: '张三' })}</p>;
+return <p>{t("welcome", { name: "张三" })}</p>;
 ```
 
 ### 2. 复数形式
@@ -140,7 +138,7 @@ return <p>{t('welcome', { name: '张三' })}</p>;
 
 ```tsx
 const { t } = useTranslation();
-return <p>{t('item', { count: 5 })}</p>;
+return <p>{t("item", { count: 5 })}</p>;
 ```
 
 ## 格式化工具
@@ -148,7 +146,7 @@ return <p>{t('item', { count: 5 })}</p>;
 ### 数字格式化
 
 ```tsx
-import { formatNumber } from '../utils/i18n';
+import { formatNumber } from "../utils/i18n";
 
 const { i18n } = useTranslation();
 const formattedNumber = formatNumber(1234.56, i18n.language);
@@ -157,7 +155,7 @@ const formattedNumber = formatNumber(1234.56, i18n.language);
 ### 日期格式化
 
 ```tsx
-import { formatDate } from '../utils/i18n';
+import { formatDate } from "../utils/i18n";
 
 const { i18n } = useTranslation();
 const formattedDate = formatDate(new Date(), i18n.language);
@@ -166,7 +164,7 @@ const formattedDate = formatDate(new Date(), i18n.language);
 ### 货币格式化
 
 ```tsx
-import { formatCurrency } from '../utils/i18n';
+import { formatCurrency } from "../utils/i18n";
 
 const { i18n } = useTranslation();
 const formattedCurrency = formatCurrency(1234.56, i18n.language);

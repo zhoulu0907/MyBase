@@ -1,7 +1,5 @@
-
-
 // 验证码类型
-export type CaptchaType = 'WORD_IMAGE_CLICK' | 'ROTATE' | 'SLIDER' | 'CONCAT';
+export type CaptchaType = "WORD_IMAGE_CLICK" | "ROTATE" | "SLIDER" | "CONCAT";
 
 // 获取验证码请求参数
 export interface GetCaptchaRequest {
@@ -14,7 +12,7 @@ export interface CaptchaResponse {
   captcha: {
     type: CaptchaType;
     backgroundImage: string; // base64 编码的背景图片
-    templateImage: string;   // base64 编码的模板图片
+    templateImage: string; // base64 编码的模板图片
     backgroundImageTag: string;
     backgroundImageWidth: number;
     backgroundImageHeight: number;

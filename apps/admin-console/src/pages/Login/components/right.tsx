@@ -1,22 +1,22 @@
-import LogoSVG from '@/assets/images/logo.svg';
+import LogoSVG from "@/assets/images/logo.svg";
 import {
-    Button,
-    Checkbox,
-    Form,
-    Input,
-    Message,
-    Space,
-    Tabs,
-    Typography
-} from '@arco-design/web-react';
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useI18n } from '../../../hooks/useI18n';
-import { useRememberMe } from '../../../hooks/useRememberMe';
-import styles from '../index.module.less';
+  Button,
+  Checkbox,
+  Form,
+  Input,
+  Message,
+  Space,
+  Tabs,
+  Typography,
+} from "@arco-design/web-react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useI18n } from "../../../hooks/useI18n";
+import { useRememberMe } from "../../../hooks/useRememberMe";
+import styles from "../index.module.less";
 // import type { LoginRequest } from '@/types/login';
-import { login, type LoginRequest } from '@onebase/platform-center';
-import { TokenManager } from '@onebase/common';
+import { login, type LoginRequest } from "@onebase/platform-center";
+import { TokenManager } from "@onebase/common";
 
 const { Paragraph } = Typography;
 const TabPane = Tabs.TabPane;
@@ -26,54 +26,55 @@ const Right: React.FC = () => {
   const [form] = Form.useForm();
   const { t } = useI18n();
 
-
   // 使用记住我hook
   const { rememberMe, savedAccount, saveRememberMe } = useRememberMe();
 
   // 状态管理
-  const [loginType, setLoginType] = useState<'account' | 'mobile'>('account');
+  const [loginType, setLoginType] = useState<"account" | "mobile">("account");
   const [loading, setLoading] = useState(false);
 
   // 组件初始化时设置保存的账号
   useState(() => {
     if (savedAccount) {
-      form.setFieldValue('account', savedAccount);
+      form.setFieldValue("account", savedAccount);
     }
   });
 
   // 处理记住我状态变化
   const handleRememberMeChange = (checked: boolean) => {
-    const account = form.getFieldValue('account') || '';
+    const account = form.getFieldValue("account") || "";
     saveRememberMe(account, checked);
   };
-
 
   // 表单提交处理
   const handleSubmit = async (values: LoginRequest) => {
     setLoading(true);
 
-    console.log('values:', values);
+    console.log("values:", values);
 
     try {
       const loginResp = await login(values);
-      console.log('loginRes:', loginResp);
+      console.log("loginRes:", loginResp);
       // 显示成功消息并跳转
       if (loginResp.accessToken) {
-        Message.success(t('auth.loginSuccess'));
+        Message.success(t("auth.loginSuccess"));
         // 存储 token 信息（需要导入相应的 token 管理工具）
-        TokenManager.setToken({
-          userId: loginResp.userId,
-          accessToken: loginResp.accessToken,
-          refreshToken: loginResp.refreshToken,
-          expiresTime: loginResp.expiresTime,
-        }, rememberMe);
-        navigate('/onebase/platform-info');
+        TokenManager.setToken(
+          {
+            userId: loginResp.userId,
+            accessToken: loginResp.accessToken,
+            refreshToken: loginResp.refreshToken,
+            expiresTime: loginResp.expiresTime,
+          },
+          rememberMe,
+        );
+        navigate("/onebase/platform-info");
       } else {
-        Message.error(t('auth.loginFailed'));
+        Message.error(t("auth.loginFailed"));
       }
     } catch (error: any) {
-      console.error('登录error:', error);
-      Message.error(error.message || t('auth.loginFailed'));
+      console.error("登录error:", error);
+      Message.error(error.message || t("auth.loginFailed"));
     } finally {
       setLoading(false);
     }
@@ -86,13 +87,12 @@ const Right: React.FC = () => {
         <div>ONE BASE</div>
       </div>
       <div className={styles.loginFormContainer}>
-
         <Tabs
           activeTab={loginType}
-          onChange={(key) => setLoginType(key as 'account' | 'mobile')}
+          onChange={(key) => setLoginType(key as "account" | "mobile")}
           type="text"
         >
-          <TabPane key="account" title={t('auth.accountLogin')}>
+          <TabPane key="account" title={t("auth.accountLogin")}>
             <Form
               form={form}
               layout="vertical"
@@ -104,12 +104,12 @@ const Right: React.FC = () => {
                 field="username"
                 initialValue=""
                 rules={[
-                  { required: true, message: '请输入账号' },
-                  { minLength: 3, message: '账号至少3个字符' }
+                  { required: true, message: "请输入账号" },
+                  { minLength: 3, message: "账号至少3个字符" },
                 ]}
               >
                 <Input
-                  placeholder={t('auth.userAccount')}
+                  placeholder={t("auth.userAccount")}
                   allowClear
                   size="large"
                 />
@@ -119,12 +119,12 @@ const Right: React.FC = () => {
                 field="password"
                 initialValue=""
                 rules={[
-                  { required: true, message: '请输入密码' },
-                  { minLength: 6, message: '密码至少6个字符' }
+                  { required: true, message: "请输入密码" },
+                  { minLength: 6, message: "密码至少6个字符" },
                 ]}
               >
                 <Input.Password
-                  placeholder={t('auth.password')}
+                  placeholder={t("auth.password")}
                   allowClear
                   size="large"
                 />
@@ -136,7 +136,7 @@ const Right: React.FC = () => {
                     checked={rememberMe}
                     onChange={handleRememberMeChange}
                   >
-                    {t('auth.rememberMe')}
+                    {t("auth.rememberMe")}
                   </Checkbox>
                 </Space>
               </Form.Item>
@@ -150,7 +150,7 @@ const Right: React.FC = () => {
                   size="large"
                   className={styles.loginButton}
                 >
-                  {t('auth.loginButton')}
+                  {t("auth.loginButton")}
                 </Button>
               </Form.Item>
             </Form>
@@ -159,10 +159,14 @@ const Right: React.FC = () => {
       </div>
       <div className={styles.loginFooter}>
         <Paragraph className={styles.footerText}>
-            登录即表示同意
-            <Button type="text" size="small">《用户协议》</Button>
-            和
-            <Button type="text" size="small">《隐私政策》</Button>
+          登录即表示同意
+          <Button type="text" size="small">
+            《用户协议》
+          </Button>
+          和
+          <Button type="text" size="small">
+            《隐私政策》
+          </Button>
         </Paragraph>
       </div>
     </div>

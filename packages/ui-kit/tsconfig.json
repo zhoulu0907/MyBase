@@ -1,15 +1,15 @@
 {
-    "compilerOptions": {
-        "jsx": "react-jsx",
-        "target": "ES2022",
-        "module": "ESNext",
-        "moduleResolution": "node",
-        "baseUrl": ".",
-        "declaration": true,
-        "strict": true,
-        "esModuleInterop": true,
-        "skipLibCheck": true,
-        "forceConsistentCasingInFileNames": true,
-    },
-    "include": ["src/**/*"]
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "baseUrl": ".",
+    "declaration": true,
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["src/**/*"]
 }

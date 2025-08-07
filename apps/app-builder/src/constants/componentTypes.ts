@@ -5,48 +5,48 @@
 
 // 表单组件类型
 export const FORM_COMPONENT_TYPES = {
-  INPUT_TEXT: 'XInputText',
-  INPUT_TEXTAREA: 'XInputTextArea',
-  INPUT_EMAIL: 'XInputEmail',
-  INPUT_PHONE: 'XInputPhone',
-  INPUT_NUMBER: 'XInputNumber',
-  DATE_PICKER: 'XDatePicker',
-  DATE_RANGE_PICKER: 'XDateRangePicker',
-  DATE_TIME_PICKER: 'XDateTimePicker',
-  TIME_PICKER: 'XTimePicker',
-  SWITCH: 'XSwitch',
-  RADIO: 'XRadio',
-  CHECKBOX: 'XCheckbox',
-  SELECT_ONE: 'XSelectOne',
-  SELECT_MUTIPLE: 'XSelectMutiple',
-  USER_SELECT: 'XUserSelect',
-  DEPT_SELECT: 'XDeptSelect',
-  FILE_UPLOAD: 'XFileUpload',
-  IMG_UPLOAD: 'XImgUpload',
-  AUTO_CODE: 'XAutoCode',
+  INPUT_TEXT: "XInputText",
+  INPUT_TEXTAREA: "XInputTextArea",
+  INPUT_EMAIL: "XInputEmail",
+  INPUT_PHONE: "XInputPhone",
+  INPUT_NUMBER: "XInputNumber",
+  DATE_PICKER: "XDatePicker",
+  DATE_RANGE_PICKER: "XDateRangePicker",
+  DATE_TIME_PICKER: "XDateTimePicker",
+  TIME_PICKER: "XTimePicker",
+  SWITCH: "XSwitch",
+  RADIO: "XRadio",
+  CHECKBOX: "XCheckbox",
+  SELECT_ONE: "XSelectOne",
+  SELECT_MUTIPLE: "XSelectMutiple",
+  USER_SELECT: "XUserSelect",
+  DEPT_SELECT: "XDeptSelect",
+  FILE_UPLOAD: "XFileUpload",
+  IMG_UPLOAD: "XImgUpload",
+  AUTO_CODE: "XAutoCode",
 } as const;
 
 // 布局组件类型
 export const LAYOUT_COMPONENT_TYPES = {
-  COLUMN_LAYOUT: 'XColumnLayout',
+  COLUMN_LAYOUT: "XColumnLayout",
 } as const;
 
 // 列表组件类型
 export const LIST_COMPONENT_TYPES = {
-  TABLE: 'XTable',
-  CALENDAR: 'XCalendar',
-  TIMELINE: 'XTimeline',
-  CAROUSEL: 'XCarousel',
-  LIST: 'XList',
-  COLLAPSE: 'XCollapse',
+  TABLE: "XTable",
+  CALENDAR: "XCalendar",
+  TIMELINE: "XTimeline",
+  CAROUSEL: "XCarousel",
+  LIST: "XList",
+  COLLAPSE: "XCollapse",
 } as const;
 
 // 展示组件类型
 export const SHOW_COMPONENT_TYPES = {
-  INFO_NOTICE: 'XInfoNotice',
-  IMAGE: 'XImage',
-  TEXT: 'XText',
-  WEB_VIEW: 'XWebView',
+  INFO_NOTICE: "XInfoNotice",
+  IMAGE: "XImage",
+  TEXT: "XText",
+  WEB_VIEW: "XWebView",
 } as const;
 
 // 所有组件类型
@@ -61,4 +61,5 @@ export const ALL_COMPONENT_TYPES = {
 export const COMPONENT_TYPE_VALUES = Object.values(ALL_COMPONENT_TYPES);
 
 // 组件类型联合类型
-export type ComponentType = typeof ALL_COMPONENT_TYPES[keyof typeof ALL_COMPONENT_TYPES];
+export type ComponentType =
+  (typeof ALL_COMPONENT_TYPES)[keyof typeof ALL_COMPONENT_TYPES];

@@ -1,7 +1,7 @@
 export interface ListTagReq {
-    tagName: string
+  tagName: string;
 }
 
 export interface CreateApplicationTagReq {
-    tagName: string;
+  tagName: string;
 }

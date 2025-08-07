@@ -1,7 +1,7 @@
-import { Form, Input, Modal, Switch } from '@arco-design/web-react';
-import { type DictItem } from '@onebase/platform-center';
-import { StatusEnum } from '@onebase/platform-center';
-import { useEffect } from 'react';
+import { Form, Input, Modal, Switch } from "@arco-design/web-react";
+import { type DictItem } from "@onebase/platform-center";
+import { StatusEnum } from "@onebase/platform-center";
+import { useEffect } from "react";
 
 export interface DictForm {
   type: string;
@@ -25,16 +25,16 @@ export default function DictionaryTypeModal({
   initialValues,
   onOk,
   onCancel,
-  title = '新增数据字典',
+  title = "新增数据字典",
 }: DictionaryTypeModalProps) {
   const [form] = Form.useForm<DictItem>();
 
   useEffect(() => {
     if (visible) {
       form.setFieldsValue({
-        type: initialValues?.type || '',
-        name: initialValues?.name || '',
-        remark: initialValues?.remark || '',
+        type: initialValues?.type || "",
+        name: initialValues?.name || "",
+        remark: initialValues?.remark || "",
         status: initialValues?.status ?? StatusEnum.DISABLE,
       });
     } else {
@@ -44,10 +44,10 @@ export default function DictionaryTypeModal({
 
   return (
     <Modal
-      title={<div style={{ textAlign: 'left' }}>{title}</div>}
+      title={<div style={{ textAlign: "left" }}>{title}</div>}
       visible={visible}
       onOk={() => {
-        form.validate().then(values => {
+        form.validate().then((values) => {
           onOk(values);
         });
       }}
@@ -60,14 +60,14 @@ export default function DictionaryTypeModal({
         <Form.Item
           label="字典编码"
           field="type"
-          rules={[{ required: true, message: '请输入字典编码' }]}
+          rules={[{ required: true, message: "请输入字典编码" }]}
         >
           <Input placeholder="请输入字典编码" maxLength={32} allowClear />
         </Form.Item>
         <Form.Item
           label="字典名称"
           field="name"
-          rules={[{ required: true, message: '请输入字典名称' }]}
+          rules={[{ required: true, message: "请输入字典名称" }]}
         >
           <Input placeholder="请输入字典名称" maxLength={32} allowClear />
         </Form.Item>
@@ -78,8 +78,13 @@ export default function DictionaryTypeModal({
           <Switch
             checkedText="启用"
             uncheckedText="停用"
-            checked={form.getFieldValue('status') === StatusEnum.ENABLE}
-            onChange={(checked) => form.setFieldValue('status', checked ? StatusEnum.ENABLE : StatusEnum.DISABLE)}
+            checked={form.getFieldValue("status") === StatusEnum.ENABLE}
+            onChange={(checked) =>
+              form.setFieldValue(
+                "status",
+                checked ? StatusEnum.ENABLE : StatusEnum.DISABLE,
+              )
+            }
           />
         </Form.Item>
       </Form>

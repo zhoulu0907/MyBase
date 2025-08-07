@@ -1,13 +1,11 @@
-import { HttpClient } from '@onebase/common';
+import { HttpClient } from "@onebase/common";
 import {
-    CaptchaResponse,
-    CaptchaType,
-    VerifyCaptchaRequest,
-    VerifyCaptchaResponse
-} from '../types';
-import { getBackendURL } from './base';
-
-
+  CaptchaResponse,
+  CaptchaType,
+  VerifyCaptchaRequest,
+  VerifyCaptchaResponse,
+} from "../types";
+import { getBackendURL } from "./base";
 
 /**
  * 验证码服务类
@@ -15,7 +13,7 @@ import { getBackendURL } from './base';
  */
 export class CaptchaService {
   private httpClient: HttpClient | null = null;
-  private baseUrl = '/captcha';
+  private baseUrl = "/captcha";
   private baseURL?: string;
 
   constructor(baseURL?: string) {
@@ -30,7 +28,7 @@ export class CaptchaService {
       this.httpClient = new HttpClient({
         baseURL: this.baseURL || getBackendURL(),
         timeout: 10000,
-        prefix: '/captcha'
+        prefix: "/captcha",
       });
     }
     return this.httpClient;
@@ -41,7 +39,9 @@ export class CaptchaService {
    * @param captchaType 验证码类型
    * @returns Promise<CaptchaResponse>
    */
-  async getCaptcha(captchaType: CaptchaType = 'WORD_IMAGE_CLICK'): Promise<CaptchaResponse> {
+  async getCaptcha(
+    captchaType: CaptchaType = "WORD_IMAGE_CLICK",
+  ): Promise<CaptchaResponse> {
     const client = this.getHttpClient();
     return client.post<CaptchaResponse>(`/get?captcha_type=${captchaType}`);
   }
@@ -56,7 +56,7 @@ export class CaptchaService {
   async verifyCaptcha(
     captchaId: string,
     captchaValue: string,
-    captchaType: CaptchaType = 'WORD_IMAGE_CLICK'
+    captchaType: CaptchaType = "WORD_IMAGE_CLICK",
   ): Promise<VerifyCaptchaResponse> {
     const requestData: VerifyCaptchaRequest = {
       captcha_id: captchaId,
@@ -67,7 +67,6 @@ export class CaptchaService {
     const client = this.getHttpClient();
     return client.post<VerifyCaptchaResponse>(`/verify`, requestData);
   }
-
 }
 
 /**
@@ -78,14 +77,16 @@ export const captchaService = new CaptchaService();
 /**
  * 导出验证码相关的工具函数
  */
-export const getCaptcha = (captchaType: CaptchaType = 'WORD_IMAGE_CLICK'): Promise<CaptchaResponse> => {
+export const getCaptcha = (
+  captchaType: CaptchaType = "WORD_IMAGE_CLICK",
+): Promise<CaptchaResponse> => {
   return captchaService.getCaptcha(captchaType);
 };
 
 export const verifyCaptcha = (
   captchaId: string,
   captchaValue: string,
-  captchaType: CaptchaType = 'WORD_IMAGE_CLICK'
+  captchaType: CaptchaType = "WORD_IMAGE_CLICK",
 ): Promise<VerifyCaptchaResponse> => {
   return captchaService.verifyCaptcha(captchaId, captchaValue, captchaType);
 };

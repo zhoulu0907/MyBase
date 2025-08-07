@@ -18,5 +18,5 @@ export interface PageResult<T> {
  */
 export enum StatusEnum {
   DISABLE = 0,
-  ENABLE = 1
+  ENABLE = 1,
 }

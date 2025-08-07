@@ -1,6 +1,6 @@
-import { TokenManager } from '@onebase/common';
-import React from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
+import { TokenManager } from "@onebase/common";
+import React from "react";
+import { Navigate, useLocation } from "react-router-dom";
 
 interface AuthGuardProps {
   children: React.ReactNode;
