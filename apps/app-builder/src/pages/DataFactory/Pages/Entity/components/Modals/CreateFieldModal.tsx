@@ -1,17 +1,18 @@
 import { Form, Input, Message, Modal, Select } from '@arco-design/web-react';
 import React from 'react';
 import type { EntityField, EntityNode } from '../../../../utils/interface';
+import { createField } from '@onebase/app';
 import styles from './modal.module.less';
 
-interface EntityFormValues {
-  code: string;
-  name: string;
+interface FieldFormValues {
+  fieldCode: string;
+  fieldName: string;
   description: string;
-  type: string;
+  fieldType: string;
 }
 
 const dataTypes = [
-  { label: '常规短文本', value: 'TEXT' },
+  { label: '常规文本', value: 'TEXT' },
   { label: '长文本内容', value: 'LONG_TEXT' },
   { label: '邮箱地址', value: 'EMAIL' },
   { label: '电话号码', value: 'PHONE' },
@@ -45,31 +46,38 @@ const CreateFieldModal: React.FC<{
   entityId: string;
   successCallback: () => void;
 }> = ({ visible, setVisible, entityId, successCallback }) => {
-  const [form] = Form.useForm<EntityFormValues>();
+  const [form] = Form.useForm<FieldFormValues>();
   // 提交
   const handleFinish = () => {
     // TODO: 提交表单数据
-    form.validate().then((values) => {
-      const { nodes, edges } = JSON.parse(
-        localStorage.getItem('entityFormValues') || JSON.stringify({ nodes: [], edges: [] })
-      );
-      const entity = nodes.find((node: EntityNode) => node.id === entityId);
-      if (entity) {
-        if (entity.fields.find((field: EntityField) => field.id === values.code)) {
-          Message.error('字段编码已存在');
-          return;
-        }
-        entity.fields.push({
-          id: values.code,
-          code: values.code,
-          name: values.name,
-          type: values.type,
-          isSystem: false
-        });
-      }
+    form.validate().then(async (values) => {
+      // const { nodes, edges } = JSON.parse(
+      //   localStorage.getItem('FieldFormValues') || JSON.stringify({ nodes: [], edges: [] })
+      // );
+      // const entity = nodes.find((node: Entity  Node) => node.id === entityId);
+      // if (entity) {
+      //   if (entity.fields.find((field: EntityField) => field.id === values.fieldCode)) {
+      //     Message.error('字段编码已存在');
+      //     return;
+      //   }
+      //   entity.fields.push({
+      //     ...values,
+      //     isSystem: false
+      //   });
+      // }
 
-      localStorage.setItem('entityFormValues', JSON.stringify({ nodes, edges }));
+      // localStorage.setItem('FieldFormValues', JSON.stringify({ nodes, edges }));
       // console.log(values);
+
+      const res = await createField({
+        entityId,
+        appId: '1',
+        ...values,
+        isSystemField: false
+      });
+
+      console.log('createField', res);
+
       form.resetFields();
       Message.success('保存成功');
       setVisible(false);
@@ -90,7 +98,7 @@ const CreateFieldModal: React.FC<{
       <Form form={form} layout="vertical" onSubmit={handleFinish} className={styles['entity-form']}>
         <Form.Item
           label="字段编码"
-          field="code"
+          field="fieldCode"
           rules={[
             { required: true, message: '请输入字段编码' },
             { max: 40, message: '字段编码不能超过40个字符' }
@@ -101,7 +109,7 @@ const CreateFieldModal: React.FC<{
 
         <Form.Item
           label="字段名称"
-          field="name"
+          field="fieldName"
           rules={[
             { required: true, message: '请输入字段名称' },
             { max: 50, message: '字段名称不能超过50个字符' }
@@ -114,7 +122,7 @@ const CreateFieldModal: React.FC<{
           <Input.TextArea placeholder="请输入描述（选填）" rows={4} maxLength={500} showWordLimit />
         </Form.Item>
 
-        <Form.Item label="数据类型" field="type">
+        <Form.Item label="数据类型" field="fieldType">
           <Select placeholder="请选择数据类型" options={dataTypes} />
         </Form.Item>
       </Form>

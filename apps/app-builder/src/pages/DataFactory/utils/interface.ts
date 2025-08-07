@@ -1,20 +1,20 @@
 // 业务对象节点数据
 export interface EntityNode {
-  id: string;
+  entityId: string;
   code: string;
-  title: string;
+  entityName: string;
   description: string;
   fields: Array<EntityField>;
-  x: number;
-  y: number;
+  positionX: number;
+  positionY: number;
 }
 
 export interface EntityField {
-  id: string;
+  fieldId: string;
   code: string;
-  name: string;
-  type: string;
-  isSystem: boolean;
+  fieldName: string;
+  fieldType: string;
+  isSystemField: boolean;
 }
 
 // 节点信息

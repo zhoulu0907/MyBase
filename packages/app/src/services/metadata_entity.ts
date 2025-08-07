@@ -21,11 +21,13 @@ export interface GetEntityPageParams {
 }
 
 export interface CreateFieldReqVO {
+  appId: string;
   entityId: string;
-  code: string;
-  name: string;
-  type: string;
-  isSystem?: boolean;
+  fieldCode: string;
+  fieldName: string;
+  description: string;
+  fieldType: string;
+  isSystemField?: boolean;
 }
 
 export interface UpdateFieldReqVO extends CreateFieldReqVO {
@@ -37,8 +39,8 @@ export interface CreateRelationReqVO {
   sourceFieldId: string;
   targetEntityId: string;
   targetFieldId: string;
-  relationType?: string;
-  label?: string;
+  relationshipType?: string;
+  relationName?: string;
 }
 
 export interface UpdateRelationReqVO extends CreateRelationReqVO {
@@ -87,7 +89,7 @@ export const getEntityPage = (params: GetEntityPageParams) => {
  * @returns 实体列表
  */
 export const getEntityList = (datasourceId: string) => {
-  return metadataService.post('/business-entity/list-by-datasource', { params: { datasourceId } });
+  return metadataService.post('/business-entity/list-by-datasource?datasourceId=' + datasourceId);
 };
 
 /**
@@ -159,7 +161,7 @@ export const getEntityFields = (params: object) => {
  * @returns 字段ID
  */
 export const createField = (data: CreateFieldReqVO) => {
-  return metadataService.post('/business-entity/field/create', data);
+  return metadataService.post('/entity-field/create', data);
 };
 
 /**
@@ -195,7 +197,7 @@ export const getEntityRelations = (params: object) => {
  * @returns 关联关系ID
  */
 export const createRelation = (data: CreateRelationReqVO) => {
-  return metadataService.post('/business-entity/relation/create', data);
+  return metadataService.post('/entity-relationship/create', data);
 };
 
 /**
@@ -340,8 +342,6 @@ export const getEntityStats = () => {
  * @param entityId 实体ID（可选，不传则获取所有实体的关系图）
  * @returns 关系图数据
  */
-export const getEntityGraph = (entityId?: string) => {
-  return metadataService.post('/entity/graph', {
-    params: entityId ? { entityId } : {}
-  });
+export const getEntityGraph = (datasourceId: string) => {
+  return metadataService.post('/business-entity/er-diagram?datasourceId=' + datasourceId);
 };

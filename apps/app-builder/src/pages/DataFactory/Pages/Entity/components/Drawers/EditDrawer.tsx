@@ -39,9 +39,9 @@ const DetailDrawer: React.FC<{
       if (nodeData) {
         nodeData.id = editingNode.id;
         nodeData.code = formData.code || nodeData.code;
-        nodeData.title = formData.name || nodeData.title;
+        nodeData.displayName = formData.name || nodeData.displayName;
         nodeData.description = formData.description || nodeData.description;
-        nodeData.fields = nodeData.fields || [];
+        nodeData.fields = nodeData?.fields || [];
         console.log(formData.systemFields);
         if (formData.systemFields) {
           Object.keys(formData.systemFields).forEach((key: string) => {
