@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, Form, Input, Select, Message, TreeSelect } from '@arco-design/web-react';
-import { getSimpleUserList } from '@onebase/platform-center';
+import { Modal, Form, Input, Select, TreeSelect } from '@arco-design/web-react';
+import { getSimpleUserList, getSimpleDeptList } from '@onebase/platform-center';
 import type { UserVO } from '@onebase/platform-center';
-import { type DeptTree, type DeptForm } from '@onebase/platform-center';
-
+import type { DeptForm } from '@onebase/platform-center';
+import { listToTree } from '@/utils/tree';
 const FormItem = Form.Item;
 
 interface DepartmentModalProps {
@@ -12,15 +12,15 @@ interface DepartmentModalProps {
   onConfirm: (values: DeptForm) => void;
   loading?: boolean;
   initialValues?: DeptForm;
-  deptTree: DeptTree[];
 }
 
 export type SimpleUserVO = Pick<UserVO, 'id' | 'username' | 'nickname'> & Partial<UserVO>;
 const DepartmentModal: React.FC<DepartmentModalProps> = (props) => {
-  const { visible, onCancel, onConfirm, loading, initialValues, deptTree } = props;
+  const { visible, onCancel, onConfirm, loading, initialValues } = props;
   const [form] = Form.useForm();
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [userList, setUserList] = useState<SimpleUserVO[]>([]);
+  const [deptTree, setDeptTree] = useState<any[]>([]);
 
   useEffect(() => {
     if (visible) {
@@ -28,19 +28,21 @@ const DepartmentModal: React.FC<DepartmentModalProps> = (props) => {
       if (initialValues) {
         form.setFieldsValue({ ...initialValues });
       }
-      // 获取用户列表
+      // 获取用户列表和部门树
       fetchUserList();
+      fetchDeptTree();
     }
   }, [visible, initialValues, form]);
 
   const fetchUserList = async () => {
-    try {
-      const users = await getSimpleUserList();
-      setUserList(users);
-    } catch (error) {
-      // TODO: 联调后移除
-      setUserList([{ id: 1, username: '用户账号', nickname: '用户名', deptId: 1 }]);
-    }
+    const users = await getSimpleUserList();
+    setUserList(users);
+  };
+
+  const fetchDeptTree = async () => {
+    const deptList = await getSimpleDeptList();
+    const tree = listToTree(deptList);
+    setDeptTree(tree);
   };
 
   const handleConfirm = async () => {
@@ -51,7 +53,7 @@ const DepartmentModal: React.FC<DepartmentModalProps> = (props) => {
       await onConfirm(values);
       setConfirmLoading(false);
     } catch (error) {
-      Message.error('操作失败，请重试');
+      console.error(error);
     }
   };
 
@@ -71,7 +73,7 @@ const DepartmentModal: React.FC<DepartmentModalProps> = (props) => {
         <FormItem label="部门描述" field="remark">
           <Input.TextArea placeholder="请输入部门描述" autoSize={{ minRows: 3, maxRows: 5 }} />
         </FormItem>
-        <FormItem label="上级部门" field="parentId" rules={[{ required: true, message: '请选择上级部门' }]}>
+        <FormItem label="上级部门" field="parentId">
           <TreeSelect
             placeholder="请选择上级部门"
             treeData={deptTree}
@@ -95,7 +97,7 @@ const DepartmentModal: React.FC<DepartmentModalProps> = (props) => {
           >
             {userList.map((user) => (
               <Select.Option key={user.id} value={user.id}>
-                {user.nickname} ({user.username})
+                {user.nickname}
               </Select.Option>
             ))}
           </Select>

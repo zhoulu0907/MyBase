@@ -57,7 +57,6 @@ export default function UserTable({
         pageSize
       };
       if (selectedDeptId) params.deptId = selectedDeptId;
-      console.log(searchValue);
       if (searchValue) params.nickname = searchValue;
       const res = await getUserPage(params);
       setData(res.list || []);
@@ -262,7 +261,7 @@ export default function UserTable({
           placeholder="输入用户名称"
           value={search}
           onChange={handleSearch}
-          onPressEnter={handleSearch}
+          onPressEnter={(e) => handleSearch(e.target.value)}
           allowClear
         />
         {/* 导出本期暂不实现 */}
