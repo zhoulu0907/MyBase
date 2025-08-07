@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.app.service.tag;
 
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.module.app.controller.admin.tag.vo.TagListRespVO;
+import com.cmsr.onebase.module.app.controller.admin.tag.vo.TagRespVO;
 import com.cmsr.onebase.module.app.dal.database.tag.AppTagRepository;
 import com.cmsr.onebase.module.app.dal.dataobject.tag.TagDO;
 import com.cmsr.onebase.module.app.enums.app.AppErrorCodeConstants;
@@ -29,9 +29,9 @@ public class AppTagServiceImpl implements AppTagService {
 
 
     @Override
-    public List<TagListRespVO> listTags(String tagName) {
+    public List<TagRespVO> listTags(String tagName) {
         List<TagDO> tagDOS = tagRepository.findByTagNameLike(tagName);
-        return tagDOS.stream().map(tagDO -> BeanUtils.toBean(tagDO, TagListRespVO.class)).toList();
+        return BeanUtils.toBean(tagDOS, TagRespVO.class);
     }
 
     @Override

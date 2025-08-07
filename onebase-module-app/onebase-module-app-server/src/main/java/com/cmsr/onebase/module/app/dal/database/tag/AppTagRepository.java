@@ -5,6 +5,7 @@ import com.cmsr.onebase.module.app.dal.dataobject.tag.TagDO;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Order;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -22,8 +23,10 @@ public class AppTagRepository extends DataRepository {
 
     public List<TagDO> findByTagNameLike(String tagName) {
         ConfigStore configs = new DefaultConfigStore();
-        configs.like("tag_name", tagName);
-        configs.order("tag_name", Order.TYPE.DESC);
+        if (StringUtils.isNotEmpty(tagName)) {
+            configs.like("tag_name", tagName);
+        }
+        configs.order("tag_name", Order.TYPE.ASC);
         return findAll(TagDO.class, configs);
     }
 
