@@ -29,6 +29,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Order;
 import org.anyline.entity.Compare;
+import org.anyline.entity.DataSet;
+import org.anyline.entity.DataRow;
 import org.anyline.service.AnylineService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -75,12 +77,22 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
         MetadataDatasourceDO datasource = null;
         try {
             businessEntity = getBusinessEntityById(reqVO.getEntityId());
+            log.info("获取到业务实体: {}, 表名: {}, 数据源ID: {}", 
+                businessEntity != null ? businessEntity.getId() : "null",
+                businessEntity != null ? businessEntity.getTableName() : "null",
+                businessEntity != null ? businessEntity.getDatasourceId() : "null");
+                
             if (businessEntity != null && businessEntity.getTableName() != null &&
                 !businessEntity.getTableName().trim().isEmpty()) {
                 datasource = getDatasourceById(businessEntity.getDatasourceId().toString());
+                log.info("获取到数据源: {}, 数据源名称: {}, 数据源类型: {}", 
+                    datasource != null ? datasource.getId() : "null",
+                    datasource != null ? datasource.getDatasourceName() : "null",
+                    datasource != null ? datasource.getDatasourceType() : "null");
             }
         } catch (Exception e) {
             log.error("获取业务实体信息失败: {}", e.getMessage(), e);
+            throw new RuntimeException("获取业务实体信息失败: " + e.getMessage(), e);
         }
 
         for (EntityFieldCreateItemVO fieldItem : reqVO.getFields()) {
@@ -107,13 +119,13 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
             fieldIds.add(entityField.getId().toString());
             successCount++;
 
-            // 同步到物理表
+            // 同步到物理表 - 失败时直接抛出异常回滚事务
             if (businessEntity != null && datasource != null) {
                 try {
                     addColumnToTable(datasource, businessEntity.getTableName(), entityField);
                 } catch (Exception e) {
                     log.error("批量创建字段时同步到物理表失败，字段: {} - {}", entityField.getFieldName(), e.getMessage(), e);
-                    // 不抛出异常，继续创建其他字段
+                    throw new RuntimeException("添加列失败: " + e.getMessage(), e);
                 }
             }
         }
@@ -230,6 +242,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
                     }
                 } catch (Exception e) {
                     log.error("批量更新字段时同步到物理表失败，字段ID: {} - {}", fieldItem.getId(), e.getMessage(), e);
+                    failureCount++;
                     // 不抛出异常，继续更新其他字段
                 }
             }
@@ -300,7 +313,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
 
         metadataRepository.insert(entityField);
 
-        // 同步到物理表
+        // 同步到物理表 - 失败时直接抛出异常回滚事务
         try {
             MetadataBusinessEntityDO businessEntity = getBusinessEntityById(createReqVO.getEntityId().toString());
             if (businessEntity != null && businessEntity.getTableName() != null &&
@@ -312,7 +325,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
             }
         } catch (Exception e) {
             log.error("创建字段时同步到物理表失败: {}", e.getMessage(), e);
-            // 不抛出异常，避免影响字段的创建
+            throw new RuntimeException("同步物理表失败: " + e.getMessage(), e);
         }
 
         return entityField.getId();
@@ -351,7 +364,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
             }
         } catch (Exception e) {
             log.error("更新字段时同步到物理表失败: {}", e.getMessage(), e);
-            // 不抛出异常，避免影响字段的更新
+            throw new RuntimeException("更新物理表字段失败: " + e.getMessage(), e);
         }
     }
 
@@ -388,7 +401,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
                 }
             } catch (Exception e) {
                 log.error("删除字段时从物理表删除失败: {}", e.getMessage(), e);
-                // 不抛出异常，避免影响字段的删除
+                throw new RuntimeException("删除物理表字段失败: " + e.getMessage(), e);
             }
         }
     }
@@ -552,8 +565,17 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
      */
     private void addColumnToTable(MetadataDatasourceDO datasource, String tableName, MetadataEntityFieldDO field) {
         try {
+            log.info("开始为表 {} 添加列 {}, 数据源: {} ({})", 
+                tableName, field.getFieldName(), 
+                datasource.getDatasourceName(), datasource.getDatasourceType());
+            log.info("数据源配置: {}", datasource.getConfig());
+                
             // 创建 AnylineService 实例
             AnylineService<?> service = temporaryDatasourceService.createTemporaryService(datasource);
+
+            // 验证连接的数据库
+            String currentDb = getCurrentDatabase(service);
+            log.info("当前连接的数据库: {}, 期望连接的数据库: onebase_business", currentDb);
 
             // 首先检查表是否存在
             if (!checkTableExists(service, tableName)) {
@@ -578,19 +600,34 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
      */
     private boolean checkTableExists(AnylineService<?> service, String tableName) {
         try {
-            // 使用PostgreSQL语法检查表是否存在
-            String checkSql = "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = ?)";
-            Object result = service.query(checkSql, tableName.toLowerCase());
-            if (result != null) {
-                // 结果应该是一个布尔值或者包含exists字段的记录
-                return Boolean.parseBoolean(result.toString());
-            }
-            return false;
+            log.info("检查表是否存在 - 表名: {}", tableName);
+            
+            // 简单尝试查询表，如果表不存在会抛出异常
+            String testSql = "SELECT 1 FROM " + tableName + " LIMIT 1";
+            service.querys(testSql);
+            
+            log.info("表 {} 存在，当前连接的数据库: {}", tableName, getCurrentDatabase(service));
+            return true;
         } catch (Exception e) {
-            log.warn("检查表 {} 是否存在时出错: {}", tableName, e.getMessage());
-            // 如果检查失败，默认假设表不存在
+            log.warn("表 {} 不存在或查询失败: {}", tableName, e.getMessage());
             return false;
         }
+    }
+
+    /**
+     * 获取当前连接的数据库名称（用于调试）
+     */
+    private String getCurrentDatabase(AnylineService<?> service) {
+        try {
+            DataSet resultSet = service.querys("SELECT current_database()");
+            if (resultSet != null && resultSet.size() > 0) {
+                DataRow row = resultSet.getRow(0);
+                return row.get("current_database").toString();
+            }
+        } catch (Exception e) {
+            log.debug("获取当前数据库名称失败: {}", e.getMessage());
+        }
+        return "unknown";
     }
 
     /**

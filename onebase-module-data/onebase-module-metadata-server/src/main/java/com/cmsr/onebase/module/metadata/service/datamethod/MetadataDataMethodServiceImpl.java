@@ -158,10 +158,18 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
             Object insertResult = anylineService.insert(entity.getTableName(), dataRow);
             log.info("创建数据成功，实体ID: {}, 表名: {}, 插入结果: {}", reqVO.getEntityId(), entity.getTableName(), insertResult);
 
-            // 6. 查询插入后的完整数据
-            Object primaryKeyValue = getPrimaryKeyValue(processedData, fields);
-            if (primaryKeyValue == null && insertResult != null) {
-                primaryKeyValue = insertResult;
+            // 6. 查询插入后的完整数据 
+            Object primaryKeyValue;
+            
+            // 优先使用插入操作返回的ID，通常这是影响的行数，我们需要使用实际的主键值
+            primaryKeyValue = getPrimaryKeyValue(processedData, fields);
+            log.info("从处理数据中获取主键值: {}, 插入结果: {}", primaryKeyValue, insertResult);
+            
+            // 确保主键值不为null
+            if (primaryKeyValue == null) {
+                log.warn("无法获取主键值，跳过查询插入后的数据，实体ID: {}, 表名: {}", reqVO.getEntityId(), entity.getTableName());
+                // 返回插入的数据
+                return buildDynamicDataRespVO(entity, processedData);
             }
 
             Map<String, Object> resultData = queryDataById(entity.getTableName(), primaryKeyValue, fields);
@@ -468,7 +476,8 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
                         processedData.put(fieldName, now);
                         break;
                     case "deleted":
-                        processedData.put(fieldName, 0);
+                        // 统一使用字符串类型，避免PostgreSQL类型不匹配问题
+                        processedData.put(fieldName, "0");
                         break;
                     case "lock_version":
                     case "lockversion":
@@ -554,7 +563,8 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
             // 使用原始SQL方式查询，避免框架自动添加租户条件
             String sql = "SELECT * FROM " + tableName + " WHERE " + primaryKeyField + " = ? ";
             if (hasDeletedField) {
-                sql += "AND deleted = 0";
+                // 修复：将deleted字段的值作为字符串传递，以匹配数据库中的character varying类型
+                sql += "AND deleted = '0'";
             }
             
             DataSet dataSet = anylineService.querys(sql, id);
@@ -590,7 +600,12 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
      */
     private Object getPrimaryKeyValue(Map<String, Object> data, List<MetadataEntityFieldDO> fields) {
         String primaryKeyField = getPrimaryKeyFieldName(fields);
-        return data.get(primaryKeyField);
+        Object value = data.get(primaryKeyField);
+        
+        log.debug("获取主键值 - 主键字段名: {}, 数据中的值: {}, 数据内容: {}", 
+                primaryKeyField, value, data);
+                
+        return value;
     }
 
     /**

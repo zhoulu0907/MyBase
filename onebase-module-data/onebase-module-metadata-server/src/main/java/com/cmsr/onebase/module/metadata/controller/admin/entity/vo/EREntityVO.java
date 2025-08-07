@@ -1,0 +1,41 @@
+package com.cmsr.onebase.module.metadata.controller.admin.entity.vo;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
+
+import java.util.List;
+
+/**
+ * ER图实体VO
+ *
+ * @author matianyu
+ * @date 2025-08-07
+ */
+@Schema(description = "管理后台 - ER图实体")
+@Data
+public class EREntityVO {
+
+    @Schema(description = "实体ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "1024")
+    private Long entityId;
+
+    @Schema(description = "实体名称", requiredMode = Schema.RequiredMode.REQUIRED, example = "用户表")
+    private String entityName;
+
+    @Schema(description = "表名", requiredMode = Schema.RequiredMode.REQUIRED, example = "sys_user")
+    private String tableName;
+
+    @Schema(description = "实体描述", example = "系统用户信息表")
+    private String description;
+
+    @Schema(description = "实体类型", requiredMode = Schema.RequiredMode.REQUIRED, example = "TABLE")
+    private String entityType;
+
+    @Schema(description = "实体坐标X", example = "100")
+    private Integer positionX;
+
+    @Schema(description = "实体坐标Y", example = "200")
+    private Integer positionY;
+
+    @Schema(description = "字段列表", requiredMode = Schema.RequiredMode.REQUIRED)
+    private List<ERFieldVO> fields;
+}
