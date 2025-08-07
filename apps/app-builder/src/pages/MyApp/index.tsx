@@ -1,13 +1,21 @@
 import appDeleteSVG from '@/assets/images/app_delete.svg';
 import appEditSVG from '@/assets/images/app_edit.svg';
 import appIconSVG from '@/assets/images/app_icon.svg';
+import CreateApp from '@/components/CreateApp';
 import { useAppStore } from '@/store';
 import { UserPermissionManager } from '@/utils/permission';
-import { Avatar, Button, Input, Modal, Pagination, Select, Spin, Tag } from '@arco-design/web-react';
+import { Avatar, Button, Form, Input, Message, Modal, Pagination, Select, Spin, Tag } from '@arco-design/web-react';
 import { IconPlusCircle, IconSearch } from '@arco-design/web-react/icon';
-import { listApplication, type Application, type ListApplicationReq } from '@onebase/app';
+import {
+  createApplication,
+  listApplication,
+  type Application,
+  type CreateApplicationReq,
+  type ListApplicationReq
+} from '@onebase/app';
 import dayjs from 'dayjs';
-import React, { useEffect, useState } from 'react';
+import { debounce } from 'lodash-es';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import styles from './index.module.less';
@@ -49,6 +57,7 @@ const statusOptions = [
 ];
 
 const MyAppPage: React.FC = () => {
+  const [form] = Form.useForm();
   const navigate = useNavigate();
   const { t } = useTranslation();
 
@@ -62,7 +71,10 @@ const MyAppPage: React.FC = () => {
   const [orderByTime, setOrderByTime] = useState<'create' | 'update'>('create');
   const [status, setStatus] = useState<number | string>('');
 
-  const [visible, setVisible] = useState(false);
+  const [inputValue, setInputValue] = useState<string>('');
+  const [deleteVisible, setDeleteVisible] = useState<boolean>(false);
+  const [createVisible, setCreateVisible] = useState<boolean>(false);
+  const [createLoading, setCreateLoading] = useState<boolean>(false);
 
   const { setCurAppId } = useAppStore();
 
@@ -86,6 +98,56 @@ const MyAppPage: React.FC = () => {
     setLoading(false);
   };
 
+  const debouncedUpdate = useCallback(
+    debounce((value) => {
+      setName(value);
+    }, 500),
+    []
+  );
+
+  useEffect(() => {
+    return () => debouncedUpdate.cancel();
+  }, [debouncedUpdate]);
+
+  const handleSearchChange = (value: string) => {
+    debouncedUpdate(value);
+  };
+
+  /* 创建应用 */
+  const handleCreateApp = async () => {
+    form.validate(async (error, data) => {
+      if (error !== null) return;
+      setCreateLoading(true);
+      const { appCode, appName, iconColor, iconName, description, tagIds, themeColor } = data;
+
+      const params: CreateApplicationReq = {
+        appCode,
+        appMode: 'classic',
+        appName,
+        datasourceId: 1,
+        description,
+        iconColor,
+        iconName,
+        tagIds,
+        themeColor
+      };
+      createApplication(params)
+        .then(() => {
+          setCreateVisible(false);
+          Message.success({
+            content: '应用创建成功，3s后跳转...',
+            duration: 3000,
+            onClose: () => {
+              navigate('/onebase/create-app/data-factory');
+            }
+          });
+        })
+        .finally(() => {
+          setCreateLoading(false);
+        });
+    });
+  };
+
   const nagivateToAppPage = (appId: string) => {
     setCurAppId(appId);
     navigate(`/onebase/create-app/data-factory?appId=${appId}`);
@@ -103,7 +165,7 @@ const MyAppPage: React.FC = () => {
           size="large"
           icon={<IconPlusCircle />}
           className={styles.createAppButton}
-          onClick={() => navigate('/onebase/create-app/data-factory')}
+          onClick={() => setCreateVisible(true)}
         >
           {t('myApp.createApp')}
         </Button>
@@ -115,7 +177,7 @@ const MyAppPage: React.FC = () => {
             allowClear
             style={{ width: 316, height: 42, borderRadius: 6 }}
             suffix={<IconSearch />}
-            onChange={(value) => setName(value)}
+            onChange={handleSearchChange}
             placeholder="请输入应用名称"
           />
 
@@ -235,7 +297,7 @@ const MyAppPage: React.FC = () => {
                       className={styles.operateIcon}
                       onClick={(e) => {
                         e.stopPropagation();
-                        setVisible(true);
+                        setDeleteVisible(true);
                       }}
                     />
                   </div>
@@ -259,12 +321,14 @@ const MyAppPage: React.FC = () => {
 
       <Modal
         title="确认删除应用"
-        visible={visible}
-        onOk={() => setVisible(false)}
-        onCancel={() => setVisible(false)}
+        visible={deleteVisible}
+        onOk={() => setDeleteVisible(false)}
+        onCancel={() => setDeleteVisible(false)}
         autoFocus={false}
         focusLock={true}
+        confirmLoading={false}
         okButtonProps={{
+          disabled: inputValue?.trim().length === 0,
           style: {
             backgroundColor: '#FF4D4F', // 自定义背景色
             borderColor: '#FF4D4F' // 自定义边框色
@@ -285,7 +349,35 @@ const MyAppPage: React.FC = () => {
             为防止误操作，如确定删除，请输入
             <strong>&quot;&lt;应用名称&gt;&quot;</strong>进行确认：
           </div>
-          <Input style={{ width: 476 }} allowClear placeholder="请输入要删除的应用名称" />
+          <Input
+            value={inputValue}
+            allowClear
+            placeholder="请输入要删除的应用名称"
+            style={{ width: 476 }}
+            onChange={setInputValue}
+          />
+        </div>
+      </Modal>
+      <Modal
+        title={<div style={{ textAlign: 'left' }}>创建空白应用</div>}
+        visible={createVisible}
+        simple
+        footer={
+          <div style={{ textAlign: 'right' }}>
+            <Button type="default" onClick={() => setCreateVisible(false)} style={{ marginRight: 12 }}>
+              取消
+            </Button>
+            <Button type="primary" loading={createLoading} onClick={handleCreateApp}>
+              创建
+            </Button>
+          </div>
+        }
+        confirmLoading={true}
+        onCancel={() => setCreateVisible(false)}
+        className={styles.createAppModal}
+      >
+        <div className={styles.createAppWrapper}>
+          <CreateApp form={form} previewBgColor="#F2F3F5BF" />
         </div>
       </Modal>
     </div>

@@ -377,7 +377,7 @@ const PageManagerPage: FC = () => {
             <div className={styles.contentHeader}>
               <div className={styles.contentTitle}>{activeMenu?.menuName}</div>
               <Button type="primary" onClick={() => navigate(`/onebase/editor/${EDITOR_TYPES.FORM_EDITOR}`)}>
-                编辑
+                {t('common.edit')}
               </Button>
             </div>
             <Content className={styles.content}>content</Content>
