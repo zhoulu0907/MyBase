@@ -1,7 +1,6 @@
-
-export * from './app_menu';
-export * from './app_version';
-export * from './application';
-export * from './common';
-export * from './dataresource';
-export * from './tag';
+export * from "./app_menu";
+export * from "./app_version";
+export * from "./application";
+export * from "./common";
+export * from "./dataresource";
+export * from "./tag";

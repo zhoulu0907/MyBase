@@ -1,8 +1,8 @@
-import { Button, Pagination, Table } from '@arco-design/web-react';
-import { type DictData } from '@onebase/platform-center';
-import s from '../../index.module.less';
-import { TableHeader } from './TableHeader';
-import StatusTag from '@/components/StatusTag';
+import { Button, Pagination, Table } from "@arco-design/web-react";
+import { type DictData } from "@onebase/platform-center";
+import s from "../../index.module.less";
+import { TableHeader } from "./TableHeader";
+import StatusTag from "@/components/StatusTag";
 
 interface DictionaryTableProps {
   data: DictData[];
@@ -27,26 +27,32 @@ export default function DictionaryTable({
   onSearchChange,
   onAdd,
   onEdit,
-  onDelete
+  onDelete,
 }: DictionaryTableProps) {
   const columns = [
-    { title: '字典值', dataIndex: 'name' },
-    { title: '字典值编码', dataIndex: 'code' },
-    { title: '显示顺序', dataIndex: 'order' },
+    { title: "字典值", dataIndex: "name" },
+    { title: "字典值编码", dataIndex: "code" },
+    { title: "显示顺序", dataIndex: "order" },
     {
-      title: '状态',
-      dataIndex: 'status',
-      render: (val: number) => (<StatusTag status={val} />)
+      title: "状态",
+      dataIndex: "status",
+      render: (val: number) => <StatusTag status={val} />,
     },
     {
-      title: '操作',
-      dataIndex: 'id',
+      title: "操作",
+      dataIndex: "id",
       render: (_: any, record: DictData) => (
         <>
-          <Button type='text' style={{ marginRight: 8 }} onClick={() => onEdit(record)}>
+          <Button
+            type="text"
+            style={{ marginRight: 8 }}
+            onClick={() => onEdit(record)}
+          >
             编辑
           </Button>
-          <Button type='text' onClick={() => onDelete(record.id!)}>删除</Button>
+          <Button type="text" onClick={() => onDelete(record.id!)}>
+            删除
+          </Button>
         </>
       ),
     },
@@ -61,7 +67,7 @@ export default function DictionaryTable({
       />
       <div className={s.tableContainer}>
         <Table
-          rowKey='id'
+          rowKey="id"
           columns={columns}
           data={data}
           pagination={false}

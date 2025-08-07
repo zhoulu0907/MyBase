@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 
 /**
  * 记住我功能 Hook
@@ -6,21 +6,21 @@ import { useEffect, useState } from 'react';
  */
 export const useRememberMe = () => {
   const [rememberMe, setRememberMe] = useState(false);
-  const [savedAccount, setSavedAccount] = useState('');
+  const [savedAccount, setSavedAccount] = useState("");
 
   // 初始化时检查记住我状态
   useEffect(() => {
     try {
-      const remembered = localStorage.getItem('onebase_remember_me');
-      if (remembered === 'true') {
+      const remembered = localStorage.getItem("onebase_remember_me");
+      if (remembered === "true") {
         setRememberMe(true);
-        const account = localStorage.getItem('onebase_account');
+        const account = localStorage.getItem("onebase_account");
         if (account) {
           setSavedAccount(account);
         }
       }
     } catch (error) {
-      console.error('获取记住我状态失败:', error);
+      console.error("获取记住我状态失败:", error);
     }
   }, []);
 
@@ -28,28 +28,28 @@ export const useRememberMe = () => {
   const saveRememberMe = (account: string, remember: boolean) => {
     try {
       if (remember) {
-        localStorage.setItem('onebase_remember_me', 'true');
-        localStorage.setItem('onebase_account', account);
+        localStorage.setItem("onebase_remember_me", "true");
+        localStorage.setItem("onebase_account", account);
       } else {
-        localStorage.removeItem('onebase_remember_me');
-        localStorage.removeItem('onebase_account');
+        localStorage.removeItem("onebase_remember_me");
+        localStorage.removeItem("onebase_account");
       }
       setRememberMe(remember);
       setSavedAccount(account);
     } catch (error) {
-      console.error('保存记住我状态失败:', error);
+      console.error("保存记住我状态失败:", error);
     }
   };
 
   // 清除记住我状态
   const clearRememberMe = () => {
     try {
-      localStorage.removeItem('onebase_remember_me');
-      localStorage.removeItem('onebase_account');
+      localStorage.removeItem("onebase_remember_me");
+      localStorage.removeItem("onebase_account");
       setRememberMe(false);
-      setSavedAccount('');
+      setSavedAccount("");
     } catch (error) {
-      console.error('清除记住我状态失败:', error);
+      console.error("清除记住我状态失败:", error);
     }
   };
 

@@ -1,7 +1,12 @@
-import { Message } from '@arco-design/web-react';
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
-import { BaseResponse, RequestConfig, RequestInterceptor, ResponseInterceptor } from '../types';
-import TokenManager from './token';
+import { Message } from "@arco-design/web-react";
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
+import {
+  BaseResponse,
+  RequestConfig,
+  RequestInterceptor,
+  ResponseInterceptor,
+} from "../types";
+import TokenManager from "./token";
 
 /**
  * 拼接域名和服务路径
@@ -9,9 +14,12 @@ import TokenManager from './token';
  * @param path 路径
  * @returns 拼接后的完整URL
  */
-export function getConcatnatedBaseUrl(domain: string, path: string = ''): string {
-  const trimedDomain = domain.endsWith('/') ? domain.slice(0, -1) : domain;
-  const trimedPath = path.startsWith('/') ? path.slice(1) : path;
+export function getConcatnatedBaseUrl(
+  domain: string,
+  path: string = "",
+): string {
+  const trimedDomain = domain.endsWith("/") ? domain.slice(0, -1) : domain;
+  const trimedPath = path.startsWith("/") ? path.slice(1) : path;
 
   if (!trimedPath) {
     return trimedDomain;
@@ -29,12 +37,15 @@ export class HttpClient {
   private responseInterceptors: ResponseInterceptor[] = [];
 
   constructor(config: RequestConfig = {}) {
-    const baseURL = getConcatnatedBaseUrl(config.baseURL || 'http://127.0.0.1:9524', config.prefix)
+    const baseURL = getConcatnatedBaseUrl(
+      config.baseURL || "http://127.0.0.1:9524",
+      config.prefix,
+    );
     this.instance = axios.create({
       baseURL,
       timeout: config.timeout || 10000,
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         ...config.headers,
       },
       withCredentials: config.withCredentials || false,
@@ -59,7 +70,7 @@ export class HttpClient {
         // 自动添加 token 到请求头
         const tokenInfo = TokenManager.getTokenInfo();
         if (tokenInfo?.accessToken) {
-          config.headers['Authorization'] = `Bearer ${tokenInfo.accessToken}`;
+          config.headers["Authorization"] = `Bearer ${tokenInfo.accessToken}`;
         }
 
         // 执行自定义请求拦截器
@@ -80,7 +91,7 @@ export class HttpClient {
         });
 
         return Promise.reject(error);
-      }
+      },
     );
 
     // 响应拦截器
@@ -94,19 +105,19 @@ export class HttpClient {
         });
 
         // 统一处理响应数据
+        // TODO(mickey): remove
         console.log(response);
 
         const { data } = response;
-        if (data && typeof data === 'object') {
-
-            if (data.code !== 0) {
-                Message.error(data.msg || '请求失败');
-                if (data.code === 401) {
-                    TokenManager.clearToken();
-                    window.location.href = '/#/login';
-                }
-                return Promise.reject(new Error(data.msg || '请求失败'));
+        if (data && typeof data === "object") {
+          if (data.code !== 0) {
+            Message.error(data.msg || "请求失败");
+            if (data.code === 401) {
+              TokenManager.clearToken();
+              window.location.href = "/#/login";
             }
+            return Promise.reject(new Error(data.msg || "请求失败"));
+          }
         }
 
         return response;
@@ -131,7 +142,7 @@ export class HttpClient {
         // 统一错误处理
         const errorMessage = this.handleError(error);
         return Promise.reject(new Error(errorMessage));
-      }
+      },
     );
   }
 
@@ -144,24 +155,24 @@ export class HttpClient {
       const { status, data } = error.response;
       switch (status) {
         case 400:
-          return data?.message || '请求参数错误';
+          return data?.message || "请求参数错误";
         case 401:
-          return data?.message || '未授权，请重新登录';
+          return data?.message || "未授权，请重新登录";
         case 403:
-          return data?.message || '拒绝访问';
+          return data?.message || "拒绝访问";
         case 404:
-          return data?.message || '请求的资源不存在';
+          return data?.message || "请求的资源不存在";
         case 500:
-          return data?.message || '服务器内部错误';
+          return data?.message || "服务器内部错误";
         default:
           return data?.message || `请求失败 (${status})`;
       }
     } else if (error.request) {
       // 网络错误
-      return '网络连接失败，请检查网络设置';
+      return "网络连接失败，请检查网络设置";
     } else {
       // 其他错误
-      return error.message || '请求失败';
+      return error.message || "请求失败";
     }
   }
 
@@ -182,31 +193,57 @@ export class HttpClient {
   /**
    * GET 请求
    */
-  public async get<T = any>(url: string, params?: any, config?: AxiosRequestConfig): Promise<T> {
-    const response = await this.instance.get<BaseResponse<T>>(url, { params, ...config });
+  public async get<T = any>(
+    url: string,
+    params?: any,
+    config?: AxiosRequestConfig,
+  ): Promise<T> {
+    const response = await this.instance.get<BaseResponse<T>>(url, {
+      params,
+      ...config,
+    });
     return response.data.data;
   }
 
   /**
    * POST 请求
    */
-  public async post<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
-    const response = await this.instance.post<BaseResponse<T>>(url, data, config);
+  public async post<T = any>(
+    url: string,
+    data?: any,
+    config?: AxiosRequestConfig,
+  ): Promise<T> {
+    const response = await this.instance.post<BaseResponse<T>>(
+      url,
+      data,
+      config,
+    );
     return response.data.data;
   }
 
   /**
    * PUT 请求
    */
-  public async put<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
-    const response = await this.instance.put<BaseResponse<T>>(url, data, config);
+  public async put<T = any>(
+    url: string,
+    data?: any,
+    config?: AxiosRequestConfig,
+  ): Promise<T> {
+    const response = await this.instance.put<BaseResponse<T>>(
+      url,
+      data,
+      config,
+    );
     return response.data.data;
   }
 
   /**
    * DELETE 请求
    */
-  public async delete<T = any>(url: string, config?: AxiosRequestConfig): Promise<T> {
+  public async delete<T = any>(
+    url: string,
+    config?: AxiosRequestConfig,
+  ): Promise<T> {
     const response = await this.instance.delete<BaseResponse<T>>(url, config);
     return response.data.data;
   }
@@ -214,22 +251,34 @@ export class HttpClient {
   /**
    * PATCH 请求
    */
-  public async patch<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
-    const response = await this.instance.patch<BaseResponse<T>>(url, data, config);
+  public async patch<T = any>(
+    url: string,
+    data?: any,
+    config?: AxiosRequestConfig,
+  ): Promise<T> {
+    const response = await this.instance.patch<BaseResponse<T>>(
+      url,
+      data,
+      config,
+    );
     return response.data.data;
   }
 
   /**
    * 上传文件
    */
-  public async upload<T = any>(url: string, file: File, config?: AxiosRequestConfig): Promise<T> {
+  public async upload<T = any>(
+    url: string,
+    file: File,
+    config?: AxiosRequestConfig,
+  ): Promise<T> {
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append("file", file);
 
     const response = await this.instance.post<BaseResponse<T>>(url, formData, {
       ...config,
       headers: {
-        'Content-Type': 'multipart/form-data',
+        "Content-Type": "multipart/form-data",
         ...config?.headers,
       },
     });
@@ -240,17 +289,21 @@ export class HttpClient {
   /**
    * 下载文件
    */
-  public async download(url: string, filename?: string, config?: AxiosRequestConfig): Promise<void> {
+  public async download(
+    url: string,
+    filename?: string,
+    config?: AxiosRequestConfig,
+  ): Promise<void> {
     const response = await this.instance.get(url, {
       ...config,
-      responseType: 'blob',
+      responseType: "blob",
     });
 
     const blob = new Blob([response.data]);
     const downloadUrl = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = downloadUrl;
-    link.download = filename || 'download';
+    link.download = filename || "download";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -273,4 +326,12 @@ export const httpClient = new HttpClient();
 /**
  * 导出常用的请求方法
  */
-export const { get, post, put, delete: del, patch, upload, download } = httpClient;
+export const {
+  get,
+  post,
+  put,
+  delete: del,
+  patch,
+  upload,
+  download,
+} = httpClient;

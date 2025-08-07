@@ -4,17 +4,16 @@
  */
 
 export interface TokenInfo {
-  userId: number;                  // 用户ID
-  accessToken: string;             // 访问令牌
-  refreshToken: string;            // 刷新令牌
-  expiresTime: number;             // 令牌过期时间（时间戳，毫秒）
-  expiresAt?: number;
+  userId: number; // 用户ID
+  accessToken: string; // 访问令牌
+  refreshToken: string; // 刷新令牌
+  expiresTime: number; // 令牌过期时间（时间戳，毫秒）
 }
 
 export class TokenManager {
-  private static readonly TOKEN_KEY = 'onebase_token';
-  private static readonly TOKEN_INFO_KEY = 'onebase_token_info';
-  private static readonly REMEMBER_ME_KEY = 'onebase_remember_me';
+  private static readonly TOKEN_KEY = "onebase_token";
+  private static readonly TOKEN_INFO_KEY = "onebase_token_info";
+  private static readonly REMEMBER_ME_KEY = "onebase_remember_me";
 
   /**
    * 存储 token 信息
@@ -23,28 +22,21 @@ export class TokenManager {
    */
   static setToken(tokenInfo: TokenInfo, rememberMe: boolean = false): void {
     try {
-      // 计算过期时间
-      const expiresAt = Date.now() + (tokenInfo.expiresTime * 1000);
-      const tokenData = {
-        ...tokenInfo,
-        expiresAt,
-      };
-
       // 根据记住我选项选择存储方式
       if (rememberMe) {
         // 记住我：使用 localStorage（持久化存储）
         localStorage.setItem(this.TOKEN_KEY, tokenInfo.accessToken);
-        localStorage.setItem(this.TOKEN_INFO_KEY, JSON.stringify(tokenData));
-        localStorage.setItem(this.REMEMBER_ME_KEY, 'true');
+        localStorage.setItem(this.TOKEN_INFO_KEY, JSON.stringify(tokenInfo));
+        localStorage.setItem(this.REMEMBER_ME_KEY, "true");
       } else {
         // 不记住我：使用 sessionStorage（会话存储，关闭浏览器后清除）
         sessionStorage.setItem(this.TOKEN_KEY, tokenInfo.accessToken);
-        sessionStorage.setItem(this.TOKEN_INFO_KEY, JSON.stringify(tokenData));
-        sessionStorage.setItem(this.REMEMBER_ME_KEY, 'false');
+        sessionStorage.setItem(this.TOKEN_INFO_KEY, JSON.stringify(tokenInfo));
+        sessionStorage.setItem(this.REMEMBER_ME_KEY, "false");
       }
     } catch (error) {
-      console.error('存储 token 失败:', error);
-      throw new Error('存储 token 失败');
+      console.error("存储 token 失败:", error);
+      throw new Error("存储 token 失败");
     }
   }
 
@@ -61,7 +53,7 @@ export class TokenManager {
       }
       return token;
     } catch (error) {
-      console.error('获取 token 失败:', error);
+      console.error("获取 token 失败:", error);
       return null;
     }
   }
@@ -85,7 +77,7 @@ export class TokenManager {
       const tokenInfo: TokenInfo = JSON.parse(tokenInfoStr);
       return tokenInfo;
     } catch (error) {
-      console.error('获取 token 信息失败:', error);
+      console.error("获取 token 信息失败:", error);
       return null;
     }
   }
@@ -102,14 +94,14 @@ export class TokenManager {
       }
 
       // 检查是否过期
-      if (tokenInfo.expiresAt && Date.now() > tokenInfo.expiresAt) {
+      if (tokenInfo.expiresTime && Date.now() > tokenInfo.expiresTime) {
         this.clearToken();
         return false;
       }
 
       return true;
     } catch (error) {
-      console.error('验证 token 失败:', error);
+      console.error("验证 token 失败:", error);
       return false;
     }
   }
@@ -127,7 +119,7 @@ export class TokenManager {
       localStorage.removeItem(this.TOKEN_INFO_KEY);
       localStorage.removeItem(this.REMEMBER_ME_KEY);
     } catch (error) {
-      console.error('清除 token 失败:', error);
+      console.error("清除 token 失败:", error);
     }
   }
 
@@ -137,11 +129,12 @@ export class TokenManager {
    */
   static getRememberMe(): boolean {
     try {
-      const remembered = sessionStorage.getItem(this.REMEMBER_ME_KEY) ||
-                       localStorage.getItem(this.REMEMBER_ME_KEY);
-      return remembered === 'true';
+      const remembered =
+        sessionStorage.getItem(this.REMEMBER_ME_KEY) ||
+        localStorage.getItem(this.REMEMBER_ME_KEY);
+      return remembered === "true";
     } catch (error) {
-      console.error('获取记住我状态失败:', error);
+      console.error("获取记住我状态失败:", error);
       return false;
     }
   }
@@ -166,7 +159,7 @@ export class TokenManager {
 
       return false;
     } catch (error) {
-      console.error('刷新 token 失败:', error);
+      console.error("刷新 token 失败:", error);
       return false;
     }
   }
@@ -177,7 +170,7 @@ export class TokenManager {
    */
   static getAuthorizationHeader(): string {
     const token = this.getToken();
-    return token ? `Bearer ${token}` : '';
+    return token ? `Bearer ${token}` : "";
   }
 }
 

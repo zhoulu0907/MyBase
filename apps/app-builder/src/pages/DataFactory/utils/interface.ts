@@ -24,7 +24,7 @@ export interface EntityNodeProps {
   onNodeDelete?: (id: string) => void;
   onNodeAddField?: (id: string) => void;
   onNodeAddRelation?: (id: string) => void;
-  onlyUpdateNode?: boolean,
+  onlyUpdateNode?: boolean;
   // mode?: 'view' | 'edit';
   nodeData: EntityNode;
 }
@@ -38,9 +38,9 @@ export interface FieldEdge {
 
 // 边的数据结构示例
 export interface EdgeData {
-  source: { cell: string; port: string };        // 源节点ID
-  target: { cell: string; port: string };        // 目标节点ID
-  label?: string;        // 关系标签
+  source: { cell: string; port: string }; // 源节点ID
+  target: { cell: string; port: string }; // 目标节点ID
+  label?: string; // 关系标签
 }
 
 // 全部节点数据
@@ -52,7 +52,7 @@ export interface EntityData {
 // 全部节点信息
 export interface EntityERProps {
   data: EntityData;
-  mode?: 'view' | 'edit';
+  mode?: "view" | "edit";
   onNodeEdit?: (data: EntityNode) => void;
   onNodeAdd?: () => void;
   onNodeDelete?: (id: string) => void;

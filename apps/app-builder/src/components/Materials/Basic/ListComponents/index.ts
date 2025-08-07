@@ -5,12 +5,11 @@ import XList from "./List";
 import XTable from "./Table";
 import XTimeline from "./Timeline";
 
-
 export default {
-    XCollapse,
-    XCarousel,
-    XList,
-    XTable,
-    XCalendar,
-    XTimeline,
-}
+  XCollapse,
+  XCarousel,
+  XList,
+  XTable,
+  XCalendar,
+  XTimeline,
+};

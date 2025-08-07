@@ -4,8 +4,8 @@ import XText from "./Text";
 import XWebView from "./WebView";
 
 export default {
-    XImage,
-    XText,
-    XInfoNotice,
-    XWebView,
-}
+  XImage,
+  XText,
+  XInfoNotice,
+  XWebView,
+};

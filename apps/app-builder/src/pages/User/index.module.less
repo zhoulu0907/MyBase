@@ -11,8 +11,9 @@
     overflow-x: hidden;
     overflow-y: auto;
     padding: 16px !important;
+    box-sizing: border-box;
   }
-  
+
   .rightPanel {
     background: #fff;
     height: 100%;
@@ -20,19 +21,21 @@
     min-width: 0;
     overflow: auto;
     padding: 16px;
+    box-sizing: border-box;
   }
 }
 
-.selected {
-  color: #009E9E;
-  font-weight: bold;
-  background: #F0F6FF;
-  border-radius: 4px;
-  padding: 4px 8px;
+.deptTreeNode {
+  :global(.arco-tree-node) {
+    &-selected {
+      :global(.arco-tree-node-title) {
+        background: #f7f8fa !important;
+      }
+    }
+  }
 }
 
 .allItem {
-  color: #1D2129;
   cursor: pointer;
   padding: 2px 8px;
   border-radius: 4px;
@@ -41,6 +44,6 @@
 .tableColumnUsername {
   cursor: pointer;
   &:hover {
-    color: #009E9E;
+    color: rgb(var(--primary-6));
   }
 }

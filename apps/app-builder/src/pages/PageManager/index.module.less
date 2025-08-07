@@ -1,42 +1,38 @@
 .pageManagerPage {
+  width: 100%;
+  height: 100%;
+
+  .header {
     width: 100%;
-    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px;
+    box-sizing: border-box;
 
-    .header {
-        width: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 20px;
-        box-sizing: border-box;
-
-        .menu {
-            padding: 10px;
-        }
+    .menu {
+      padding: 10px;
     }
+  }
 
-    .content {
-        background-color: #f1f2f3;
+  .content {
+    background-color: #f1f2f3;
 
+    .contentHeader {
+      width: 100%;
+      height: 48px;
+      border-top: 3px solid #f1f2f3;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      box-sizing: border-box;
+      background-color: #fff;
+      margin-left: 1px;
 
-        .contentHeader {
-            width: 100%;
-            height: 48px;
-            border-top: 3px solid #f1f2f3;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 24px;
-            box-sizing: border-box;
-            background-color: #fff;
-            margin-left: 1px;
-
-            .contentTitle {
-                font-size: 18px;
-
-            }
-
-        }
-
+      .contentTitle {
+        font-size: 18px;
+      }
     }
+  }
 }

@@ -18,44 +18,44 @@ export interface LoginRequest {
 }
 
 export interface LoginResponse {
-  userId: number;                  // 用户ID
-  accessToken: string;             // 访问令牌
-  refreshToken: string;            // 刷新令牌
-  expiresTime: number;             // 令牌过期时间（时间戳，毫秒）
+  userId: number; // 用户ID
+  accessToken: string; // 访问令牌
+  refreshToken: string; // 刷新令牌
+  expiresTime: number; // 令牌过期时间（时间戳，毫秒）
 }
 
 /**
-   * 当前登录用户的权限信息响应
-   */
+ * 当前登录用户的权限信息响应
+ */
 export interface GetPermissionInfoResponse {
-  user: UserInfo;              // 用户信息
-  roles: string[];             // 角色标识数组
-  permissions: string[];       // 权限标识数组
-  menus: MenuInfo[];           // 菜单信息数组
+  user: UserInfo; // 用户信息
+  roles: string[]; // 角色标识数组
+  permissions: string[]; // 权限标识数组
+  menus: MenuInfo[]; // 菜单信息数组
 }
 
 export interface UserInfo {
-    id: number;                // 用户ID
-    nickname: string;          // 昵称
-    avatar: string;            // 头像URL
-    deptId: number;            // 部门ID
-    username: string;          // 用户名
-    email: string;             // 邮箱
+  id: number; // 用户ID
+  nickname: string; // 昵称
+  avatar: string; // 头像URL
+  deptId: number; // 部门ID
+  username: string; // 用户名
+  email: string; // 邮箱
 }
 
 /**
  * 菜单信息结构
  */
 export interface MenuInfo {
-    id: number;
-    parentId: number;
-    name: string;
-    path: string;
-    component: string | null;
-    componentName: string | null;
-    icon: string;
-    visible: boolean;
-    keepAlive: boolean;
-    alwaysShow: boolean;
-    children: MenuInfo[] | null;
+  id: number;
+  parentId: number;
+  name: string;
+  path: string;
+  component: string | null;
+  componentName: string | null;
+  icon: string;
+  visible: boolean;
+  keepAlive: boolean;
+  alwaysShow: boolean;
+  children: MenuInfo[] | null;
 }

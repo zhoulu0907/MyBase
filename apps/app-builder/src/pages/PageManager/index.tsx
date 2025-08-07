@@ -1,10 +1,10 @@
 import {
-    Button,
-    Dropdown,
-    Input,
-    Layout,
-    Menu,
-    Modal,
+  Button,
+  Dropdown,
+  Input,
+  Layout,
+  Menu,
+  Modal,
 } from "@arco-design/web-react";
 import {
     IconFile,
@@ -15,7 +15,7 @@ import {
     IconSearch,
     IconStorage
 } from "@arco-design/web-react/icon";
-import { useState, type FC } from 'react';
+import { useState, type FC } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { EDITOR_TYPES } from '../Editor/components/const';
@@ -50,8 +50,8 @@ const menuData = [
 ];
 
 const PageManagerPage: FC = () => {
-	const { t } = useTranslation();
-	const navigate = useNavigate();
+    const { t } = useTranslation();
+    const navigate = useNavigate();
 
     const [title, setTitle] = useState('');
     const [value, setValue] = useState('');
@@ -99,61 +99,58 @@ const PageManagerPage: FC = () => {
         setValue('');
     };
 
-    return (
-        <div className={styles.pageManagerPage}>
-            <Layout style={{ height: "100%" }}>
-                <Layout>
-                    <Sider style={{ width: 225 }}>
-                        <div className={styles.header}>
-                            <Input
-                                style={{
-                                    width: 140,
-                                    border: "1px solid #dedede",
-                                    borderRadius: 3,
-                                }}
-                                allowClear
-                                suffix={<IconSearch />}
-                                placeholder={t("common.search")}
-                            />
-                            <Dropdown
-                                droplist={dropList}
-                                trigger="click"
-                                position="bl"
-                            >
-                                <Button type="primary" icon={<IconPlus />} />
-                            </Dropdown>
-                        </div>
+  return (
+    <div className={styles.pageManagerPage}>
+        <Layout style={{ height: "100%" }}>
+            <Layout>
+                <Sider style={{ width: 225 }}>
+                    <div className={styles.header}>
+                        <Input
+                            style={{
+                            width: 140,
+                            border: "1px solid #dedede",
+                            borderRadius: 3,
+                            }}
+                            allowClear
+                            suffix={<IconSearch />}
+                            placeholder={t("common.search")}
+                        />
+                        <Dropdown droplist={dropList} trigger="click" position="bl">
+                            <Button type="primary" icon={<IconPlus />} />
+                        </Dropdown>
+                    </div>
 
-                        <Menu style={{ width: 226, padding: 12 }} defaultSelectedKeys={['0']}>
-                            {menuList.map((menu: any) => (
-                                <MenuItem
-                                    key={menu.key}
-                                    onClick={() => setActiveTab(menu)}
-                                >
-                                    {menu.icon}
-                                    {menu.title}
-                                </MenuItem>
-                            ))}
-                        </Menu>
-                    </Sider>
-                    <Content className={styles.content}>
-                        <div className={styles.contentHeader}>
-                            <div className={styles.contentTitle}>
-                                {menuData.find((v) => v.key === activeTab)?.title}
-                            </div>
-                            <Button
-                                type="primary"
-                                onClick={() => navigate(`/onebase/editor/${EDITOR_TYPES.FORM_EDITOR}`)}
-                            >{t('common.edit')}</Button>
+                    <Menu style={{ width: 226, padding: 12 }} defaultSelectedKeys={['0']}>
+                        {menuList.map((menu: any) => (
+                            <MenuItem
+                                key={menu.key}
+                                onClick={() => setActiveTab(menu)}
+                            >
+                                {menu.icon}
+                                {menu.title}
+                            </MenuItem>
+                        ))}
+                    </Menu>
+                </Sider>
+                <Content className={styles.content}>
+                    <div className={styles.contentHeader}>
+                        <div className={styles.contentTitle}>
+                            {menuData.find((v) => v.key === activeTab)?.title}
                         </div>
-                        <Content className={styles.content}>
-                            {activeTab === 'home' && 'home'}
-                            {activeTab === 'contact' && 'contact'}
-                            {activeTab === 'baseFile' && 'baseFile'}
-                        </Content>
+                        <Button
+                            type="primary"
+                            onClick={() => navigate(`/onebase/editor/${EDITOR_TYPES.FORM_EDITOR}`)}
+                        >{t('common.edit')}</Button>
+                    </div>
+                    <Content className={styles.content}>
+                        {activeTab === 'home' && 'home'}
+                        {activeTab === 'contact' && 'contact'}
+                        {activeTab === 'baseFile' && 'baseFile'}
                     </Content>
-                </Layout>
+                </Content>
             </Layout>
+        </Layout>
+
             <Modal
                 title={title}
                 visible={visible}
@@ -162,14 +159,10 @@ const PageManagerPage: FC = () => {
                 autoFocus={false}
                 focusLock={true}
             >
-                <Input
-                    value={value}
-                    onChange={setValue}
-                    placeholder="请输入名称"
-                />
+                <Input value={value} onChange={setValue} placeholder="请输入名称" />
             </Modal>
-        </div>
-    );
-};
+    </div>
+  );
+}
 
 export default PageManagerPage;

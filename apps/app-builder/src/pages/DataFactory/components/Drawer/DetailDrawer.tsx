@@ -1,11 +1,13 @@
-import React, { useEffect } from 'react';
-import { Drawer } from '@arco-design/web-react';
-import { type EntityNode } from '../../utils/interface';
+import React, { useEffect } from "react";
+import { Drawer } from "@arco-design/web-react";
+import { type EntityNode } from "../../utils/interface";
 
-const DetailDrawer: React.FC<{ selectedNode: EntityNode, visible: boolean, setVisible: (visible: boolean) => void }> = ({ selectedNode, visible, setVisible }) => {
-  useEffect(() => {
-  }, []);
-
+const DetailDrawer: React.FC<{
+  selectedNode: EntityNode;
+  visible: boolean;
+  setVisible: (visible: boolean) => void;
+}> = ({ selectedNode, visible, setVisible }) => {
+  useEffect(() => {}, []);
 
   return (
     <Drawer
@@ -34,13 +36,14 @@ const DetailDrawer: React.FC<{ selectedNode: EntityNode, visible: boolean, setVi
           </div>
           <div className="fields-list">
             <h4>字段列表:</h4>
-            {selectedNode?.fields?.length && selectedNode.fields.map((field, index) => (
-              <div key={index} className="field-item">
-                <span className="field-name">{field.name}</span>
-                <span className="field-type">{field.type}</span>
-                {field.isSystem && <span className="system-tag">系统</span>}
-              </div>
-            ))}
+            {selectedNode?.fields?.length &&
+              selectedNode.fields.map((field, index) => (
+                <div key={index} className="field-item">
+                  <span className="field-name">{field.name}</span>
+                  <span className="field-type">{field.type}</span>
+                  {field.isSystem && <span className="system-tag">系统</span>}
+                </div>
+              ))}
           </div>
         </div>
       )}

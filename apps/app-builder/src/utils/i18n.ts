@@ -1,14 +1,14 @@
 // 支持的语言列表
 export const SUPPORTED_LANGUAGES = {
-  'zh-CN': {
-    name: '中文',
-    flag: '🇨🇳',
-    direction: 'ltr',
+  "zh-CN": {
+    name: "中文",
+    flag: "🇨🇳",
+    direction: "ltr",
   },
-  'en-US': {
-    name: 'English',
-    flag: '🇺🇸',
-    direction: 'ltr',
+  "en-US": {
+    name: "English",
+    flag: "🇺🇸",
+    direction: "ltr",
   },
 } as const;
 
@@ -20,19 +20,31 @@ export const getLanguageInfo = (language: SupportedLanguage) => {
 };
 
 // 格式化数字
-export const formatNumber = (value: number, language: string, options?: Intl.NumberFormatOptions): string => {
+export const formatNumber = (
+  value: number,
+  language: string,
+  options?: Intl.NumberFormatOptions,
+): string => {
   return new Intl.NumberFormat(language, options).format(value);
 };
 
 // 格式化日期
-export const formatDate = (date: Date, language: string, options?: Intl.DateTimeFormatOptions): string => {
+export const formatDate = (
+  date: Date,
+  language: string,
+  options?: Intl.DateTimeFormatOptions,
+): string => {
   return new Intl.DateTimeFormat(language, options).format(date);
 };
 
 // 格式化货币
-export const formatCurrency = (value: number, language: string, currency = 'CNY'): string => {
+export const formatCurrency = (
+  value: number,
+  language: string,
+  currency = "CNY",
+): string => {
   return new Intl.NumberFormat(language, {
-    style: 'currency',
+    style: "currency",
     currency,
   }).format(value);
 };

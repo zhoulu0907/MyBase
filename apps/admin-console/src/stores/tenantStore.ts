@@ -1,6 +1,10 @@
-import { create } from 'zustand';
-import { devtools } from 'zustand/middleware';
-import type { Tenant, TenantStoreState, TenantStoreActions } from '@/types/tenant';
+import { create } from "zustand";
+import { devtools } from "zustand/middleware";
+import type {
+  Tenant,
+  TenantStoreState,
+  TenantStoreActions,
+} from "@/types/tenant";
 
 // 合并状态和动作类型
 export type TenantStore = TenantStoreState & TenantStoreActions;
@@ -16,27 +20,27 @@ const initialState: TenantStoreState = {
 // 模拟API调用
 const mockTenants: Tenant[] = [
   {
-    id: '1',
-    name: '默认用户',
-    code: 'ZH2025070001',
+    id: "1",
+    name: "默认用户",
+    code: "ZH2025070001",
     allocatedCount: 50,
-    admin: '石头',
-    createTime: '2025-08-14T10:30:00Z',
-    status: 'enabled'
+    admin: "石头",
+    createTime: "2025-08-14T10:30:00Z",
+    status: "enabled",
   },
   {
-    id: '2',
-    name: '测试环境验证用户',
-    code: 'ZH2025070002',
+    id: "2",
+    name: "测试环境验证用户",
+    code: "ZH2025070002",
     allocatedCount: 50,
-    admin: '石头',
-    createTime: '2025-08-14T10:30:00Z',
-    status: 'disabled'
-  }
+    admin: "石头",
+    createTime: "2025-08-14T10:30:00Z",
+    status: "disabled",
+  },
 ];
 
 // 模拟API延迟
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export const useTenantStore = create<TenantStore>()(
   devtools(
@@ -67,7 +71,7 @@ export const useTenantStore = create<TenantStore>()(
           ...tenantData,
           createTime: new Date().toISOString(),
         };
-        
+
         set((state) => ({
           tenants: [...state.tenants, newTenant],
         }));
@@ -76,10 +80,10 @@ export const useTenantStore = create<TenantStore>()(
       updateTenant: async (id, updates) => {
         // 模拟API调用
         await delay(300);
-        
+
         set((state) => ({
           tenants: state.tenants.map((tenant) =>
-            tenant.id === id ? { ...tenant, ...updates } : tenant
+            tenant.id === id ? { ...tenant, ...updates } : tenant,
           ),
         }));
       },
@@ -87,10 +91,10 @@ export const useTenantStore = create<TenantStore>()(
       disableTenant: async (id) => {
         // 模拟API调用
         await delay(300);
-        
+
         set((state) => ({
           tenants: state.tenants.map((tenant) =>
-            tenant.id === id ? { ...tenant, status: 'disabled' } : tenant
+            tenant.id === id ? { ...tenant, status: "disabled" } : tenant,
           ),
         }));
       },
@@ -107,6 +111,6 @@ export const useTenantStore = create<TenantStore>()(
         set(initialState);
       },
     }),
-    { name: 'TenantStore' }
-  )
+    { name: "TenantStore" },
+  ),
 );

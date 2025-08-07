@@ -1,6 +1,6 @@
-import { Typography } from '@arco-design/web-react';
-import React from 'react';
-import s from './index.module.less';
+import { Typography } from "@arco-design/web-react";
+import React from "react";
+import s from "./index.module.less";
 
 export interface ListItemProps {
   title: string;
@@ -13,11 +13,11 @@ const ListItem: React.FC<ListItemProps> = ({
   title,
   active = false,
   onClick,
-  children
+  children,
 }) => {
   return (
     <div
-      className={`${s.listItem} ${active ? s.active : ''}`}
+      className={`${s.listItem} ${active ? s.active : ""}`}
       onClick={onClick}
     >
       <div className={s.listItemTitle}>
