@@ -171,14 +171,16 @@ public class AppMenuServiceImpl implements AppMenuService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void copyApplicationMenu(MenuCopyReqVO copyReqVO) {
         MenuDO menuDO = validateApplicationMenuExist(copyReqVO.getId());
         if (menuDO.getMenuType() == MenuTypeEnum.GROUP.getValue()) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_MENU_GROUP_NOT_ALLOW_COPY);
         }
+        menuDO.setId(null);
         menuDO.setMenuName(copyReqVO.getMenuName());
         menuDO.setParentId(copyReqVO.getParentId());
-        menuDO.setId(null);
+        menuDO.setMenuCode(MenuUtils.generateMenuCode());
         appMenuRepository.insert(menuDO);
         //TODO 菜单相关的资源都要复制
 
