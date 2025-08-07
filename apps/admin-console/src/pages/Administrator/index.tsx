@@ -1,33 +1,41 @@
-import {  Space, Table, Button, Modal, Input, Message, Tooltip, Form, Tag } from '@arco-design/web-react';
+import { Space, Table, Button, Modal, Input, Message, Tooltip, Form, Tag, Select } from '@arco-design/web-react';
 import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
 import { IconSearch } from '@arco-design/web-react/icon';
-import { getPlatformAdminListApi, type PlatformAdminInfo, PlatformAdminUserType } from '@onebase/platform-center';
-interface AdminRecord {
-  id: number;
-  account: string;
-  email: string;
-  type: string;
-  createTime: string;
-}
+import { getPlatformAdminListApi, PlatformAdminUserType, createPlatformAdminApi, updatePlatformAdminPasswordApi, updatePlatformAdminMailApi, deletePlatformAdminApi, type PlatformAdminInfo, type cratePlatformAdminReq } from '@onebase/platform-center';
+import { formatTimestamp } from '@/utils/date';
+
+const { useForm } = Form;
+const { Option } = Select;
+
 const Administrator: React.FC = () => {
+  // const [submitData, setSubmitData] = useState<cratePlatformAdminReq>(null);
   const [modalVisible, setModalVisible] = useState(false);
-  const [passwordForm, setPasswordForm] = useState({ account: '', oldPassword: '', newPassword: '', confirmPassword: '' });
-  const [emailForm, setEmailForm] = useState({ account: '', oldEmail: '', newEmail: '' });
+  const [createModalVisible, setCreateModalVisible] = useState(false);
+  // const [createModalLoading, setCreateModalLoading] = useState(false);
+  const [passwordForm, setPasswordForm] = useState({ id: 0, username: '', newPassword: '', confirmPassword: '' });
+  const [emailForm, setEmailForm] = useState({ id: 0, username: '', oldEmail: '', newEmail: '' });
   const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
-  const [selectedRecord, setSelectedRecord] = useState(null);
+  // const [selectedRecord, setSelectedRecord] = useState(null);
   const [modalType, setModalType] = useState<'email' | 'password' | null>(null);
+  const [createForm] = useForm();
+  const [searchKeyword, setSearchKeyword] = useState(''); // 添加搜索关键词状态
+  const [currentPage, setCurrentPage] = useState(1);
 
   const columns = [
-    {
+    // order
+    { 
       title: '序号',
-      dataIndex: 'id',
-      key: 'id',
+      dataIndex: 'order',
+      key: 'order',
+      render: (text: any, record: any, index: number) => index + 1,
+      width: '5%',
+      // fixed: 'left',
     },
     {
       title: '账号',
-      dataIndex: 'nickname',
-      key: 'nickname',
+      dataIndex: 'username',
+      key: 'username',
     },
     {
       title: '邮箱',
@@ -35,23 +43,33 @@ const Administrator: React.FC = () => {
       key: 'email',
     },
     {
+      title: '手机号',
+      dataIndex: 'mobile',
+      key: 'mobile',
+      width: 130,
+    },
+    {
       title: '类型',
       dataIndex: 'userType',
       key: 'userType',
       render: (val: PlatformAdminUserType) => (
-        <Tag color={val === PlatformAdminUserType.系统默认账号 ? 'green' : 'blue'}>{val === PlatformAdminUserType.系统默认账号 ? '系统默认账号' : '普通账号'}</Tag>
+        <Tag color={val === PlatformAdminUserType.系统默认账号 ? 'green' : 'gray'}>{val === PlatformAdminUserType.系统默认账号 ? '系统默认账号' : '普通账号'}</Tag>
       )
     },
     {
       title: '创建时间',
       dataIndex: 'createTime',
       key: 'createTime',
+      width: 180,
+      render: (text) => (
+        <div>{formatTimestamp(text)}</div>
+      )
     },
     {
       title: '操作',
       key: 'action',
       width: 150,
-      render: (_, record: AdminRecord) => (
+      render: (_, record: PlatformAdminInfo) => (
         <Space>
           <Button type="text" onClick={() => handleEditEmail(record)}>
             修改邮箱
@@ -59,13 +77,22 @@ const Administrator: React.FC = () => {
           <Button type="text" onClick={() => handleEditPassword(record)}>
             修改密码
           </Button>
-          {record.type !== '系统默认账号' && (
+          {record.userType !== PlatformAdminUserType.系统默认账号 && (
             <Tooltip
               position="tr"
               trigger="hover"
-              content="Are you sure you want to delete?"
+              color="#fff"
+              content={(
+                <div className={styles.tooltipContainer}>
+                  <div className={styles.tooltipText}>Are you sure you want to delete?</div>
+                  <Space className={styles.tooltipButton}>
+                    <Button type="text" onClick={() => console.log('Cancel')}>取消</Button>
+                    <Button type="primary" onClick={() => handleDeleteConfirm(record)}>确定</Button>
+                  </Space>
+                </div>
+              )}
             >
-              <Button key={`delete-${record.id}`} type="text" onClick={() => handleDeleteConfirm(record)}>
+              <Button key={`delete-${record.id}`} type="text">
                 删除
               </Button>
             </Tooltip>
@@ -75,132 +102,279 @@ const Administrator: React.FC = () => {
     },
   ];
   const [dataSource, setDataSource] = useState<PlatformAdminInfo[]>([]);
-  const getPlatformAdminList = async () => { 
+
+  const getPlatformAdminList = async (pageNum: number = 1, keyword: string = '') => { 
     const res = await getPlatformAdminListApi({
-      pageNum: 1,
+      pageNum: pageNum,
       pageSize: 10,
+      keyword: keyword // 添加搜索关键词参数
     });
     console.log('getPlatformAdminList res', res);
-    setDataSource(res.list)
+    setDataSource(res.list);
   };
 
   useEffect(() => { 
     getPlatformAdminList();
   }, []);
+
   const addAdmin = () => { 
-    console.log('新建管理员');
+    createForm.resetFields();
+    setPasswordForm({ id: 0, username: '', newPassword: '', confirmPassword: '' }); // 重置密码表单状态
+    setEmailForm({ id: 0, username: '', oldEmail: '', newEmail: '' }); // 重置邮箱表单状态
+    setTimeout(() => {
+      setCreateModalVisible(true);
+    }, 0);
   };
-  const handleEditEmail = (record: AdminRecord) => {
-    setEmailForm({ account: record.account, oldEmail: record.email, newEmail: '' });
+
+  const handleCreateAdmin = async () => {
+    try {
+      // setCreateModalLoading(true);
+      const values = await createForm.validate();
+
+      // 构建符合 cratePlatformAdminReq 类型的提交数据
+      const submitData: cratePlatformAdminReq = {
+        username: values.account,
+        password: values.password,
+        email: values.email,
+        mobile: values.mobile,
+        userType: values.userType,
+      };
+      console.log('createTenant', submitData);
+      // 调用创建管理员的API
+      await createPlatformAdminApi(submitData);
+      
+      console.log('创建管理员:', submitData);
+      Message.success('创建管理员成功');
+      setCreateModalVisible(false);
+      getPlatformAdminList();
+    } catch (error) {
+      console.error('表单验证失败或创建失败:', error);
+      Message.error('创建管理员失败');
+    } finally {
+      // setCreateModalLoading(false);
+    }
+  };
+
+  const handleEditEmail = (record: PlatformAdminInfo) => {
+    setEmailForm({ id: record.id, username: record.username, oldEmail: record.email, newEmail: '' });
     setModalType('email');
     setModalVisible(true);
   };
 
-  const handleEditPassword = (record: AdminRecord) => {
-    setPasswordForm({ account: record.account, oldPassword: '', newPassword: '', confirmPassword: '' });
+  const handleEditPassword = (record: PlatformAdminInfo) => {
+    setPasswordForm({ id: record.id, username: record.username, newPassword: '', confirmPassword: '' });
     setModalType('password');
     setModalVisible(true);
   };
 
-  const handleDeleteConfirm = (record: AdminRecord) => {
-    setSelectedRecord(record);
+  const handleDeleteConfirm = async (record: PlatformAdminInfo) => {
+    console.log('record:', record);
+    // setSelectedRecord(record);
+    try {
+      await deletePlatformAdminApi(record.id)
+      
+    } catch (error) {
+      console.log(error);
+    }
+    console.log('delete record', record);
+
     setDeleteConfirmVisible(true);
   };
+  // const handleDeleteConfirm = (record: PlatformAdminInfo) => {
+  //   Modal.confirm({
+  //     title: 'Are you sure you want to delete?',
+  //     content: '点击删除，弹出该提示框，是否确认删除管理员账号',
+  //     onOk: async () => {
+  //       try {
+  //         await deletePlatformAdminApi(record.id);
+  //         Message.success('删除成功');
+  //         getPlatformAdminList();
+  //       } catch (error) {
+  //         console.log(error);
+  //         Message.error('删除失败');
+  //       }
+  //     },
+  //     onCancel: () => {
+  //       console.log('Cancel');
+  //     },
+  //   });
+  // };
 
-  const handlePasswordSubmit = () => {
-    const { oldPassword, newPassword, confirmPassword } = passwordForm;
-
-    if (!oldPassword) {
-      Message.error('请输入原密码');
-      return;
+  const handleUpdata = async () => {
+    const { id: passwordId, newPassword, confirmPassword } = passwordForm;
+    const { id: emailId, newEmail } = emailForm;
+    // modalType
+    if (modalType === 'password') { 
+      if (!newPassword || newPassword.length < 6) {
+        Message.error('新密码至少需要6位');
+        return;
+      }
+  
+      if (newPassword !== confirmPassword) {
+        Message.error('新密码和确认密码不一致');
+        return;
+      }
+      try {
+        const res = await updatePlatformAdminPasswordApi({id: passwordId, password: confirmPassword});
+        console.log('password res:', res);
+        getPlatformAdminList();
+        Message.success('密码修改成功');
+      } catch (error) {
+        console.log(error)
+      }
+    } else {
+      try {
+        const res = await updatePlatformAdminMailApi({id: emailId, email: newEmail})
+        console.log('email res:', res);
+        getPlatformAdminList();
+        Message.success('邮箱修改成功');
+      } catch (error) {
+        console.log(error)
+      }
     }
-
-    if (!newPassword || newPassword.length < 6) {
-      Message.error('新密码至少需要6位');
-      return;
-    }
-
-    if (newPassword !== confirmPassword) {
-      Message.error('新密码和确认密码不一致');
-      return;
-    }
-
-    // 实际的提交逻辑
-    console.log('提交密码修改:', passwordForm);
-    Message.success('密码修改成功');
     setModalVisible(false);
   };
+
+  const handleCancelUpdata = () => {
+    setModalVisible(false);
+  }
+
+  const handleCreateModalCancel = () => {
+    setCreateModalVisible(false);
+    setTimeout(() => {
+      createForm.resetFields();
+    }, 300);
+  };
+
+  // 处理搜索
+  const handleSearch = (value: string) => {
+    setSearchKeyword(value);
+    setCurrentPage(1); // 重置到第一页
+    getPlatformAdminList(1, value);
+  };
+
+  // 处理分页变化
+  const handlePageChange = (pageNum: number) => {
+    setCurrentPage(pageNum);
+    getPlatformAdminList(pageNum, searchKeyword);
+  };
+
   return (
     <div className={styles.administrator}>
       <Space direction="vertical" size="large" className={styles.container}>
         <div className={styles.title}>
           <Button type="primary" onClick={addAdmin}>+ 新建</Button>
           <Input.Search
-            placeholder="搜索租户名称/编码"
+            placeholder="搜索账号/邮箱"
             style={{ width: 300 }}
             allowClear
-            // value={searchParams.keyword}
-            // onChange={value => handleSearch(value)}
+            value={searchKeyword}
+            onChange={(value) => setSearchKeyword(value)}
+            onSearch={handleSearch}
             suffix={<IconSearch />}
           />
         </div>
+        {/* 表格 */}
         <Table
+          border={false}
           columns={columns}
           data={dataSource}
           pagination={{
+            current: currentPage,
             pageSize: 10,
-            showTotal: (total) => `共 ${total} 条`
+            showTotal: (total) => `共 ${total} 条`,
+            onChange: handlePageChange
           }}
           rowKey="id"
         />
+        {/* 删除弹窗 */}
         <Modal
           visible={modalVisible}
           title={modalType === 'password' ? '修改密码' : '修改邮箱'}
           onCancel={() => setModalVisible(false)}
           footer={[
-            <Button key="return" onClick={() => setModalVisible(false)}>Return</Button>,
-            <Button key="submit" type="primary" onClick={handlePasswordSubmit}>Submit</Button>
+            <Button key="return" onClick={handleCancelUpdata}>取消</Button>,
+            <Button key="submit" type="primary" onClick={handleUpdata}>确定</Button>
+          ]}
+        ></Modal>
+        {/* 修改弹窗 */}
+        <Modal
+          visible={modalVisible}
+          title={modalType === 'password' ? '修改密码' : '修改邮箱'}
+          onCancel={() => setModalVisible(false)}
+          footer={[
+            <Button key="return" onClick={handleCancelUpdata}>取消</Button>,
+            <Button key="submit" type="primary" onClick={handleUpdata}>确定</Button>
           ]}
         >
           {modalType === 'password' ? (
             <Form layout="vertical">
               <Form.Item label="账号">
-                <Input value={passwordForm.account} disabled />
+                <Input value={passwordForm.username} disabled />
               </Form.Item>
-              <Form.Item label="原密码">
-                <Input
-                  placeholder="原密码"
-                  type="password"
-                  value={passwordForm.oldPassword}
-                  onChange={(value) => setPasswordForm({ ...passwordForm, oldPassword: value })}
-                />
-              </Form.Item>
-              <Form.Item label="新密码">
+              <Form.Item 
+                label="密码" 
+                field="password"
+                rules={[
+                  { required: true, message: '请输入密码' },
+                  { minLength: 6, message: '密码至少6位' }
+                ]}
+                validateTrigger={['onBlur']}
+              >
                 <Input
                   placeholder="新密码"
                   type="password"
                   value={passwordForm.newPassword}
                   onChange={(value) => setPasswordForm({ ...passwordForm, newPassword: value })}
+                  autoComplete="new-password"
                 />
               </Form.Item>
-              <Form.Item label="确认密码">
+              <Form.Item 
+                label="确认密码" 
+                field="confirmPassword"
+                dependencies={['password']}
+                rules={[
+                  { required: true, message: '请确认密码' },
+                  {
+                    validator: (value, cb) => {
+                      const formValues = createForm.getFieldsValue();
+                      const password = formValues.password;
+                      console.log('passowrd', password, value);
+                      if (value !== password) {
+                        return cb('两次输入的密码不一致');
+                      }
+                      return cb();
+                    },
+                  },
+                ]}
+                validateTrigger={['onBlur']}
+              >
                 <Input
                   placeholder="确认密码"
                   type="password"
                   value={passwordForm.confirmPassword}
                   onChange={(value) => setPasswordForm({ ...passwordForm, confirmPassword: value })}
+                  autoComplete="new-password"
                 />
               </Form.Item>
             </Form>
           ) : (
             <Form layout="vertical">
               <Form.Item label="账号">
-                <Input value={emailForm.account} disabled />
+                <Input value={emailForm.username} disabled />
               </Form.Item>
               <Form.Item label="原邮箱">
                 <Input value={emailForm.oldEmail} disabled />
               </Form.Item>
-              <Form.Item label="新邮箱">
+              <Form.Item 
+                label="邮箱" 
+                field="email"
+                rules={[
+                  { required: true, message: '请输入邮箱'},
+                  { type: 'email', message: '请输入正确的邮箱格式'}
+                ]}
+                validateTrigger={['onBlur']}
+              >
                 <Input
                   placeholder="新邮箱"
                   value={emailForm.newEmail}
@@ -209,6 +383,117 @@ const Administrator: React.FC = () => {
               </Form.Item>
             </Form>
           )}
+        </Modal>
+        
+        {/* 新建管理员弹窗 */}
+        <Modal
+          title="新建管理员"
+          visible={createModalVisible}
+          onOk={handleCreateAdmin}
+          onCancel={handleCreateModalCancel}
+          style={{ width: 600 }}
+        >
+          <Form form={createForm} layout="vertical">
+            <Form.Item 
+              label="账号" 
+              field="account"
+              rules={[
+                { required: true, message: '请输入账号' },
+                // 用户账号由 数字+字母 组成
+                {
+                  validator: (value, cb) => {
+                    if (!value) {
+                      return Promise.resolve();
+                    }
+                    const pattern = /^[a-zA-Z0-9]+$/;
+                    console.log(value);
+                    if (!pattern.test(String(value))) {
+                      return cb('用户账号由数字、字母组成')
+                    }
+                    return cb();
+                  }
+                }
+              ]}
+              validateTrigger={['onBlur']}
+            >
+              <Input placeholder="请输入账号" autoComplete="off" />
+            </Form.Item>
+            <Form.Item 
+              label="手机号" 
+              field="mobile"
+              rules={[
+                { required: true, message: '请输入手机号' },
+                { 
+                  validator: (value, cb) => {
+                    const mobileRegex = /^1[3-9]\d{9}$/;
+                    if (!mobileRegex.test(value)) {
+                      return cb('请输入正确的手机号');
+                    }
+                    return cb();
+                  }
+                }
+              ]}
+              validateTrigger={['onBlur']}
+            >
+              <Input placeholder="请输入手机号" />
+            </Form.Item>
+            <Form.Item 
+              label="邮箱" 
+              field="email"
+              rules={[
+                { required: true, message: '请输入邮箱'},
+                { type: 'email', message: '请输入正确的邮箱格式'}
+              ]}
+              validateTrigger={['onBlur']}
+            >
+              <Input placeholder="请输入邮箱" autoComplete="off" />
+            </Form.Item>
+            <Form.Item 
+              label="密码" 
+              field="password"
+              rules={[
+                { required: true, message: '请输入密码' },
+                { minLength: 6, message: '密码至少6位' }
+              ]}
+              validateTrigger={['onBlur']}
+            >
+              <Input.Password placeholder="请输入密码" autoComplete="new-password" />
+            </Form.Item>
+            <Form.Item 
+              label="确认密码" 
+              field="confirmPassword"
+              dependencies={['password']}
+              rules={[
+                { required: true, message: '请确认密码' },
+                {
+                  validator: (value, cb) => {
+                    const formValues = createForm.getFieldsValue();
+                    const password = formValues.password;
+                    console.log('passowrd', password, value);
+                    if (value !== password) {
+                      return cb('两次输入的密码不一致');
+                    }
+                    return cb();
+                  },
+                },
+              ]}
+              validateTrigger={['onBlur']}
+            >
+              <Input.Password placeholder="请再次输入密码" autoComplete="new-password" />
+            </Form.Item>
+            <Form.Item 
+              label="类型" 
+              field="userType"
+              initialValue={PlatformAdminUserType.普通账号}
+              rules={[{ required: true, message: '请选择类型' }]}
+              validateTrigger={['onBlur']}
+            >
+              <Select placeholder="请选择类型">
+                <Option value={PlatformAdminUserType.系统默认账号}>系统默认账号</Option>
+                <Option value={PlatformAdminUserType.普通账号}>普通账号</Option>
+              </Select>
+            </Form.Item>
+          </Form>
         </Modal>
       </Space>
     </div>

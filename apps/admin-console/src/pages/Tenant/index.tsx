@@ -16,6 +16,7 @@ import {
 import { IconSearch } from '@arco-design/web-react/icon';
 import styles from './index.module.less'
 import { getPlatformTenantListApi, addPlatformTenantApi, updatePlatformTenantApi, getPlatformTenantAdminListApi, type PlatformTenantInfo, PlatformTenantStatus } from "@onebase/platform-center";
+import { formatTimestamp } from '@/utils/date';
 
 const { Text } = Typography;
 const { Option } = Select;
@@ -263,11 +264,19 @@ const TenantManagement: React.FC = () => {
   };
   // 表格列定义
   const columns = [
-    {
+    { 
       title: '序号',
-      dataIndex: 'id',
-      width: 80
+      dataIndex: 'order',
+      key: 'order',
+      render: (text: any, record: any, index: number) => index + 1,
+      width: '5%',
+      fixed: 'left',
     },
+    // {
+    //   title: '序号',
+    //   dataIndex: 'id',
+    //   width: 80
+    // },
     {
       title: '用户名称',
       dataIndex: 'name',
@@ -290,7 +299,10 @@ const TenantManagement: React.FC = () => {
     {
       title: '创建时间',
       dataIndex: 'createTime',
-      sorter: (a: PlatformTenantInfo, b: PlatformTenantInfo) => new Date(a.createTime).getTime() - new Date(b.createTime).getTime()
+      sorter: (a: PlatformTenantInfo, b: PlatformTenantInfo) => new Date(a.createTime).getTime() - new Date(b.createTime).getTime(),
+      render: (text) => (
+        <div>{formatTimestamp(text)}</div>
+      )
     },
     {
       title: '状态',
@@ -346,6 +358,7 @@ const TenantManagement: React.FC = () => {
         
         <Table
           rowKey="id"
+          border={false}
           columns={columns}
           data={tenantList}
           loading={loading}

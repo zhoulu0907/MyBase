@@ -2,10 +2,10 @@ import { PlatformInfoReq } from '../types/platformInfo'
 import systemClient from './clients/system';
 
 // 获取平台信息
-export const getPlatformInfoApi = () => systemClient.get('/platforminfo/license')
+export const getPlatformInfoApi = () => systemClient.get('/platforminfo/get-platform-info')
 
 // 获取平台信息 platforminfoList
-export const getPlatFormInfoListApi = (params: PlatformInfoReq) => systemClient.get(`/platforminfo/page?pageNum=${params.pageNum}&pageSize=${params.pageSize}`)
+export const getPlatFormInfoListApi = (params: PlatformInfoReq) => systemClient.get(`/license/page?pageNum=${params.pageNum}&pageSize=${params.pageSize}`)
 
 // 上传平台 License /platforminfo/upload
 export const uploadPlatformLicenseApi = (data: any) => systemClient.post('/platforminfo/upload', data)

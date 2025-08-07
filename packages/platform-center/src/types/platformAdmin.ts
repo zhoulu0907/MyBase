@@ -1,6 +1,17 @@
 export enum PlatformAdminUserType {
   '系统默认账号'= 1,
-  '新建账号',
+  '普通账号',
+}
+
+/**
+ * 新建管理员 cratePlatformAdminReq
+ */
+export interface cratePlatformAdminReq {
+  username: string;
+  password: string;
+  mobile: string;
+  email: string;
+  userType: PlatformAdminUserType;
 }
 /**
  * 平台管理员信息
@@ -27,7 +38,7 @@ export interface PlatformAdminInfo {
   /**
    * 登录IP
    */
-  loginIp: string;
+  loginIp?: string;
   /**
    * 登录时间
    */

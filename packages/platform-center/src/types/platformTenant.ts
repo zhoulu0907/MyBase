@@ -25,6 +25,10 @@ export interface PlatformTenantInfo {
   /**
    * 租户编码
    */
+  tenantCode: string,
+  /**
+   * 管理员手机号
+   */
   contactMobile: string,
   /**
    * 创建时间

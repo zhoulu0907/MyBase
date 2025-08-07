@@ -4,22 +4,14 @@ import React, { useEffect } from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styles from './index.module.less';
-import { getPlatFormInfoListApi, getPlatformInfoApi, uploadPlatformLicenseApi, type PlatformInfoReq, type AuthRecord, type LicenseInfo } from '@onebase/platform-center'
+import { getPlatFormInfoListApi, getPlatformInfoApi, uploadPlatformLicenseApi,  type LicenseInfo } from '@onebase/platform-center'
 import { formatTimestamp } from '@/utils/date';
 
 const { Title, Text } = Typography;
-// 定义认证记录的数据类型
-// interface CertificationRecord {
-//   key: string;
-//   companyName: string;
-//   certificationContent: string;
-//   status: string;
-//   expireTime: string;
-// }
+
 const PlatformInfo: React.FC = () => {
   const { t } = useTranslation();
   const [visible, setVisible] = useState(false);
-  // const [selectedRecord, setSelectedRecord] = useState<CertificationRecord | null>(null);
   const [licenseInfoList, setLicenseInfoList] = useState<LicenseInfo[]>([]);
   const [licenseInfo, setLicenseInfo] = useState<LicenseInfo | null>(null);
   
@@ -91,7 +83,6 @@ const PlatformInfo: React.FC = () => {
       dataIndex: 'expireTime',
       key: 'expireTime',
       render: (text) => (
-        // 时间戳转为日期 2025-01-01 00:00:00
         <div>{formatTimestamp(text)}</div>
       )
     },
@@ -128,7 +119,7 @@ const PlatformInfo: React.FC = () => {
     // sizeCanChange: true,
     showTotal: true,
     total: 0,
-    pageSize: 1,
+    pageSize: 10,
     pageNum: 1,
     pageSizeChangeResetCurrent: true,
   });
@@ -136,9 +127,7 @@ const PlatformInfo: React.FC = () => {
 
   const onChangeTable = (pagination: { pageNum?: number; pageSize?: number }) => {
     setLoading(true);
-    // const { pageNum = 1, pageSize = 10 } = pagination;
     console.log('pagination: ', pagination);
-    // const pagResp = await setLicenseInfoList({})
     setLoading(false);
   }
 
@@ -251,6 +240,7 @@ const PlatformInfo: React.FC = () => {
           }}
           onChange={onChangeTable}
           rowKey={(record) => record.id}
+          border={false}
         />
       </Space>
       <Modal
