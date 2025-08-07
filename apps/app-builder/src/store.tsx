@@ -120,15 +120,15 @@ export const useListEditorStore = createPageEditorStore();
 
 export interface appStore {
   // 当前应用的appCode
-  curAppCode: Number | null;
+  curAppId: string;
   // 设置当前应用的appCode
-  setCurAppCode: (appCode: Number) => void;
+  setCurAppId: (appId: string) => void;
   // 清除当前应用的appCode
-  clearCurAppCode: () => void;
+  clearCurAppId: () => void;
 }
 
 export const useAppStore = create<appStore>((set) => ({
-  curAppCode: null,
-  setCurAppCode: (appCode: Number) => set(() => ({ curAppCode: appCode })),
-  clearCurAppCode: () => set(() => ({ curAppCode: null }))
+  curAppId: '',
+  setCurAppId: (appId: string) => set(() => ({ curAppId: appId })),
+  clearCurAppId: () => set(() => ({ curAppId: '' }))
 }));

@@ -9,9 +9,43 @@
     justify-content: space-between;
     padding: 20px;
     box-sizing: border-box;
+  }
 
-    .menu {
-      padding: 10px;
+  .menuItem {
+    display: inline-flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 14px;
+    font-weight: 500;
+    box-sizing: border-box;
+    width: 100%;
+
+    .subMenuItemName {
+      width: 100%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .menuItemName {
+      height: 100%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .dropdownContainer {
+      opacity: 0;
+      transition: opacity 0.1s ease;
+      cursor: pointer;
+    }
+
+    &:hover {
+      .dropdownContainer {
+        opacity: 1;
+      }
     }
   }
 

@@ -152,7 +152,9 @@
     "appRelease": "App Release",
     "preview": "Preview",
     "commom": "Common",
+    "createPage": "Create Page",
     "createForm": "Create Form",
-    "createGroup": "Create Group"
+    "createGroup": "Create Group",
+    "copyPage": "Copy Page"
   }
 }

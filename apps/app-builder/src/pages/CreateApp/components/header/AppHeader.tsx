@@ -1,6 +1,5 @@
 import helpSVG from '@/assets/images/help_icon.svg';
 import { useAppStore } from '@/store';
-import { getAppCode } from '@/utils/app';
 import { UserPermissionManager } from '@/utils/permission';
 import { Avatar, Button, Dropdown, Layout, Menu, Tabs } from '@arco-design/web-react';
 import { IconMenu, IconPoweroff, IconUser } from '@arco-design/web-react/icon';
@@ -20,7 +19,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useTranslation();
-  const { curAppCode, setCurAppCode } = useAppStore();
+  const { curAppId, setCurAppId } = useAppStore();
 
   // Tab 切换
   // 根据当前路径设置 activeTab
@@ -36,12 +35,15 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
 
   useEffect(() => {
     setActiveTab(getTabKeyFromPath(location.pathname));
-
-    const appCode = getAppCode();
-    if (appCode) {
-      setCurAppCode(Number(appCode));
-    }
   }, [location.pathname]);
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const appId = searchParams.get('appId');
+    if (appId) {
+      setCurAppId(appId);
+    }
+  }, []);
 
   // 登出处理
   const handleLogout = () => {
@@ -92,19 +94,19 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
             setActiveTab(key);
             switch (key) {
               case 'page-manager':
-                navigate(`/onebase/create-app/page-manager?appCode=${curAppCode}`);
+                navigate(`/onebase/create-app/page-manager?appId=${curAppId}`);
                 break;
               case 'integrated-management':
-                navigate(`/onebase/create-app/integrated-management?appCode=${curAppCode}`);
+                navigate(`/onebase/create-app/integrated-management?appId=${curAppId}`);
                 break;
               case 'data-factory':
-                navigate(`/onebase/create-app/data-factory?appCode=${curAppCode}`);
+                navigate(`/onebase/create-app/data-factory?appId=${curAppId}`);
                 break;
               case 'app-setting':
-                navigate(`/onebase/create-app/app-setting?appCode=${curAppCode}`);
+                navigate(`/onebase/create-app/app-setting?appId=${curAppId}`);
                 break;
               case 'app-release':
-                navigate(`/onebase/create-app/app-release?appCode=${curAppCode}`);
+                navigate(`/onebase/create-app/app-release?appId=${curAppId}`);
                 break;
               default:
                 break;

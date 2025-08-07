@@ -64,7 +64,7 @@ const MyAppPage: React.FC = () => {
 
   const [visible, setVisible] = useState(false);
 
-  const { setCurAppCode } = useAppStore();
+  const { setCurAppId } = useAppStore();
 
   useEffect(() => {
     getApplicationList();
@@ -86,9 +86,9 @@ const MyAppPage: React.FC = () => {
     setLoading(false);
   };
 
-  const nagivateToAppPage = (appCode: Number) => {
-    setCurAppCode(appCode);
-    navigate(`/onebase/create-app/data-factory?appCode=${appCode}`);
+  const nagivateToAppPage = (appId: string) => {
+    setCurAppId(appId);
+    navigate(`/onebase/create-app/data-factory?appId=${appId}`);
   };
 
   return (
@@ -172,13 +172,13 @@ const MyAppPage: React.FC = () => {
                 className={styles.myAppCard}
                 key={index}
                 onClick={() => {
-                  nagivateToAppPage(Number(item.appCode));
+                  nagivateToAppPage(item.id);
                 }}
               >
                 <div className={styles.myAppCardHeader}>
                   <div className={styles.myAppName}>
                     <img className={styles.myAppIcon} src={appIconSVG} alt="应用图标" />
-                    <div className={styles.myAppTitle}>{item.appName}asddddddddddddddddddd</div>
+                    <div className={styles.myAppTitle}>{item.appName}</div>
                   </div>
                   <Tag
                     style={{
@@ -191,7 +191,10 @@ const MyAppPage: React.FC = () => {
                 </div>
 
                 <div className={styles.myAppCardBody}>
-                  <div className={styles.myAppDesc}>{item.description}</div>
+                  <div className={styles.myAppDesc}>
+                    {item.description}
+                    {item.id}
+                  </div>
                   <div className={styles.myAppTags}>
                     {item.tags?.map((tag) => (
                       <Tag key={tag.id} color="green">
@@ -223,7 +226,7 @@ const MyAppPage: React.FC = () => {
                       className={styles.operateIcon}
                       onClick={(e) => {
                         e.stopPropagation();
-                        nagivateToAppPage(Number(item.appCode));
+                        nagivateToAppPage(item.id);
                       }}
                     />
                     <img
