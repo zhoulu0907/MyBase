@@ -1,6 +1,6 @@
 import { type FC, useState } from 'react';
 // import { useNavigate } from 'react-router-dom';
-import { Layout, Button, Menu } from '@arco-design/web-react';
+import { Layout, Button, Menu, Form } from '@arco-design/web-react';
 // import { useTranslation } from 'react-i18next';
 import BasicSetting from './components/BasicSetting';
 import AppPermission from './components/AppPermission';
@@ -19,6 +19,7 @@ const Footer = Layout.Footer;
 const AppSettingPage: FC = () => {
 	// const { t } = useTranslation();
 	// const navigate = useNavigate();
+    const [form] = Form.useForm();
 
 	const [activeTab, setActiveTab] = useState('baseSetting');
 
@@ -54,7 +55,7 @@ const AppSettingPage: FC = () => {
 						</Menu>
 					</Sider>
 					<Content className={styles.content}>
-						{activeTab === 'baseSetting' && <BasicSetting />}
+						{activeTab === 'baseSetting' && <BasicSetting form={form} />}
 						{activeTab === 'appPermission' && <AppPermission />}
 					</Content>
 				</Layout>

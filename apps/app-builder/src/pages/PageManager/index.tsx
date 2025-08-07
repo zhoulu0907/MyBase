@@ -50,8 +50,8 @@ const menuData = [
 ];
 
 const PageManagerPage: FC = () => {
-    const { t } = useTranslation();
-    const navigate = useNavigate();
+	const { t } = useTranslation();
+	const navigate = useNavigate();
 
     const [title, setTitle] = useState('');
     const [value, setValue] = useState('');
