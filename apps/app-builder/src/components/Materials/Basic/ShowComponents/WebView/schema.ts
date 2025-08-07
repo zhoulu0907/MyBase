@@ -5,15 +5,15 @@ import {
   widthConfig,
   type ICommonBaseType,
   type TStatusSelectKeyType,
-  type TWidthSelectKeyType,
-} from "@/components/Materials/common";
+  type TWidthSelectKeyType
+} from '@/components/Materials/common';
 import {
   CONFIG_TYPES,
   STATUS_OPTIONS,
   STATUS_VALUES,
   WIDTH_OPTIONS,
-  WIDTH_VALUES,
-} from "@/components/Materials/constants";
+  WIDTH_VALUES
+} from '@/components/Materials/constants';
 import type {
   IBooleanConfigType,
   IStatusConfigType,
@@ -21,8 +21,8 @@ import type {
   IWidthConfigType,
   TRadioDefaultType,
   TSelectDefaultType,
-  TTextDefaultType,
-} from "@/components/Materials/types";
+  TTextDefaultType
+} from '@/components/Materials/types';
 
 export interface XWebViewSchema {
   editData: TXWebViewEditData;
@@ -30,10 +30,7 @@ export interface XWebViewSchema {
 }
 
 export type TXWebViewEditData = Array<
-  | ITextConfigType
-  | IWidthConfigType<TWidthSelectKeyType>
-  | IStatusConfigType<TStatusSelectKeyType>
-  | IBooleanConfigType
+  ITextConfigType | IWidthConfigType<TWidthSelectKeyType> | IStatusConfigType<TStatusSelectKeyType> | IBooleanConfigType
 >;
 
 export interface XWebViewConfig extends ICommonBaseType {
@@ -63,26 +60,26 @@ const XWebView: XWebViewSchema = {
   editData: [
     ...baseConfig,
     {
-      key: "title",
-      name: "标题",
-      type: CONFIG_TYPES.TEXT_INPUT,
+      key: 'title',
+      name: '标题',
+      type: CONFIG_TYPES.TEXT_INPUT
     },
     {
-      key: "webViewUrl",
-      name: "网页链接",
-      type: CONFIG_TYPES.TEXT_INPUT,
+      key: 'webViewUrl',
+      name: '网页链接',
+      type: CONFIG_TYPES.TEXT_INPUT
     },
     widthConfig,
-    statusConfig,
+    statusConfig
     // TODO(mickey): 补充颜色 背景色配置
   ],
   config: {
     ...baseDefault,
-    title: "网页浏览器",
-    webViewUrl: "https://example.com", // 使用支持 iframe 的示例网站
+    title: '网页浏览器',
+    webViewUrl: 'https://example.com', // 使用支持 iframe 的示例网站
     width: WIDTH_VALUES[WIDTH_OPTIONS.FULL],
-    status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
-  },
+    status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT]
+  }
 };
 
 export default XWebView;

@@ -1,5 +1,5 @@
-import { create } from "zustand";
-import type { EditConfig } from "./components/Materials/types";
+import { create } from 'zustand';
+import type { EditConfig } from './components/Materials/types';
 
 export interface BasicEditorStore {
   // 当前选中的组件ID
@@ -41,10 +41,7 @@ export interface PageEditorStore {
     colComponents: Map<string, any[][]>;
   };
   // 设置列布局组件的列数据
-  setColComponentsMap: (
-    cp_id: string,
-    columnsOrUpdater: any[][] | ((prevColumns: any[][]) => any[][]),
-  ) => void;
+  setColComponentsMap: (cp_id: string, columnsOrUpdater: any[][] | ((prevColumns: any[][]) => any[][])) => void;
   // 删除列布局组件的列数据
   delColComponentsMap: (cp_id: string) => void;
   // 清空列布局组件的列数据
@@ -58,9 +55,7 @@ const createPageEditorStore = () =>
     setComponents: (components: any[]) => set(() => ({ components })),
     delComponents: (cp_id: string) =>
       set((state) => {
-        const newComponents = state.components.filter(
-          (component) => component.id !== cp_id,
-        );
+        const newComponents = state.components.filter((component) => component.id !== cp_id);
         return { components: newComponents };
       }),
     clearComponents: () => set(() => ({ components: [] })),
@@ -78,22 +73,18 @@ const createPageEditorStore = () =>
         newMap.delete(cp_id);
         return { pageComponentSchemas: newMap };
       }),
-    clearPageComponentSchemas: () =>
-      set(() => ({ pageComponentSchemas: new Map() })),
+    clearPageComponentSchemas: () => set(() => ({ pageComponentSchemas: new Map() })),
 
     colComponentsMap: {
-      colComponents: new Map(),
+      colComponents: new Map()
     },
-    setColComponentsMap: (
-      cp_id: string,
-      columnsOrUpdater: any[][] | ((prevColumns: any[][]) => any[][]),
-    ) =>
+    setColComponentsMap: (cp_id: string, columnsOrUpdater: any[][] | ((prevColumns: any[][]) => any[][])) =>
       set((state) => {
         const newMap = new Map(state.colComponentsMap.colComponents);
         const currentColumns = newMap.get(cp_id) || [];
 
         let newColumns: any[][];
-        if (typeof columnsOrUpdater === "function") {
+        if (typeof columnsOrUpdater === 'function') {
           newColumns = columnsOrUpdater(currentColumns);
         } else {
           newColumns = columnsOrUpdater;
@@ -108,24 +99,36 @@ const createPageEditorStore = () =>
         newMap.delete(cp_id);
         return { colComponentsMap: { colComponents: newMap } };
       }),
-    clearColComponentsMap: () =>
-      set(() => ({ colComponentsMap: { colComponents: new Map() } })),
+    clearColComponentsMap: () => set(() => ({ colComponentsMap: { colComponents: new Map() } }))
   }));
 
 export const useBasicEditorStore = create<BasicEditorStore>((set) => ({
-  curComponentID: "",
+  curComponentID: '',
   setCurComponentID: (cp_id: string) => set(() => ({ curComponentID: cp_id })),
-  clearCurComponentID: () => set(() => ({ curComponentID: "" })),
+  clearCurComponentID: () => set(() => ({ curComponentID: '' })),
 
   curComponentSchema: {},
-  setCurComponentSchema: (config: EditConfig) =>
-    set(() => ({ curComponentSchema: config })),
+  setCurComponentSchema: (config: EditConfig) => set(() => ({ curComponentSchema: config })),
 
   showDeleteButton: false,
-  setShowDeleteButton: (show: boolean) =>
-    set(() => ({ showDeleteButton: show })),
+  setShowDeleteButton: (show: boolean) => set(() => ({ showDeleteButton: show }))
 }));
 
 // 使用工厂函数创建两个独立的 store 实例
 export const useFromEditorStore = createPageEditorStore();
 export const useListEditorStore = createPageEditorStore();
+
+export interface appStore {
+  // 当前应用的appCode
+  curAppCode: Number | null;
+  // 设置当前应用的appCode
+  setCurAppCode: (appCode: Number) => void;
+  // 清除当前应用的appCode
+  clearCurAppCode: () => void;
+}
+
+export const useAppStore = create<appStore>((set) => ({
+  curAppCode: null,
+  setCurAppCode: (appCode: Number) => set(() => ({ curAppCode: appCode })),
+  clearCurAppCode: () => set(() => ({ curAppCode: null }))
+}));

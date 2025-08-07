@@ -1,63 +1,51 @@
-import appDeleteSVG from "@/assets/images/app_delete.svg";
-import appEditSVG from "@/assets/images/app_edit.svg";
-import appIconSVG from "@/assets/images/app_icon.svg";
-import { UserPermissionManager } from "@/utils/permission";
-import {
-  Avatar,
-  Button,
-  Input,
-  Modal,
-  Pagination,
-  Select,
-  Spin,
-  Tag,
-} from "@arco-design/web-react";
-import { IconPlusCircle, IconSearch } from "@arco-design/web-react/icon";
-import {
-  listApplication,
-  type Application,
-  type ListApplicationReq,
-} from "@onebase/app";
-import dayjs from "dayjs";
-import React, { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
-import styles from "./index.module.less";
+import appDeleteSVG from '@/assets/images/app_delete.svg';
+import appEditSVG from '@/assets/images/app_edit.svg';
+import appIconSVG from '@/assets/images/app_icon.svg';
+import { useAppStore } from '@/store';
+import { UserPermissionManager } from '@/utils/permission';
+import { Avatar, Button, Input, Modal, Pagination, Select, Spin, Tag } from '@arco-design/web-react';
+import { IconPlusCircle, IconSearch } from '@arco-design/web-react/icon';
+import { listApplication, type Application, type ListApplicationReq } from '@onebase/app';
+import dayjs from 'dayjs';
+import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
+import styles from './index.module.less';
 
 const Option = Select.Option;
 const appOptions = [
   {
-    label: "全部应用",
-    value: 0,
+    label: '全部应用',
+    value: 0
   },
   {
-    label: "我创建的",
-    value: 1,
-  },
+    label: '我创建的',
+    value: 1
+  }
 ];
 const createTimeOptions = [
   {
-    label: "按创建时间排序",
-    value: "create",
+    label: '按创建时间排序',
+    value: 'create'
   },
   {
-    label: "按更新时间排序",
-    value: "update",
-  },
+    label: '按更新时间排序',
+    value: 'update'
+  }
 ];
 const statusOptions = [
   {
-    label: "全部状态",
-    value: "",
+    label: '全部状态',
+    value: ''
   },
   {
-    label: "开发中",
-    value: 0,
+    label: '开发中',
+    value: 0
   },
   {
-    label: "已发布",
-    value: 1,
-  },
+    label: '已发布',
+    value: 1
+  }
 ];
 
 const MyAppPage: React.FC = () => {
@@ -68,13 +56,15 @@ const MyAppPage: React.FC = () => {
   const [pageNo, setPageNo] = useState(1);
   const [dataList, setDataList] = useState<Application[]>([]);
   const [total, setTotal] = useState(0);
-  const [name, setName] = useState("");
+  const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
   const [ownerTag, setOwnerTag] = useState<number>(0);
-  const [orderByTime, setOrderByTime] = useState<"create" | "update">("create");
-  const [status, setStatus] = useState<number | string>("");
+  const [orderByTime, setOrderByTime] = useState<'create' | 'update'>('create');
+  const [status, setStatus] = useState<number | string>('');
 
   const [visible, setVisible] = useState(false);
+
+  const { setCurAppCode } = useAppStore();
 
   useEffect(() => {
     getApplicationList();
@@ -88,7 +78,7 @@ const MyAppPage: React.FC = () => {
       name,
       ownerTag: ownerTag === 1 ? true : false,
       orderByTime,
-      status: status === "" ? null : Number(status),
+      status: status === '' ? null : Number(status)
     };
     const res = await listApplication(req);
     setDataList(res.list || []);
@@ -96,13 +86,16 @@ const MyAppPage: React.FC = () => {
     setLoading(false);
   };
 
+  const nagivateToAppPage = (appCode: Number) => {
+    setCurAppCode(appCode);
+    navigate(`/onebase/create-app/data-factory?appCode=${appCode}`);
+  };
+
   return (
     <div className={styles.myAppPage}>
       <div className={styles.myAppPageHeader}>
         <div className={styles.myAppWelcome}>
-          Hi{" "}
-          {UserPermissionManager.getUserPermissionInfo()?.user.nickname ||
-            "用户"}
+          Hi {UserPermissionManager.getUserPermissionInfo()?.user.nickname || '用户'}
           ，您好！
         </div>
         <Button
@@ -110,9 +103,9 @@ const MyAppPage: React.FC = () => {
           size="large"
           icon={<IconPlusCircle />}
           className={styles.createAppButton}
-          onClick={() => navigate("/onebase/create-app/data-factory")}
+          onClick={() => navigate('/onebase/create-app/data-factory')}
         >
-          {t("myApp.createApp")}
+          {t('myApp.createApp')}
         </Button>
       </div>
 
@@ -172,35 +165,25 @@ const MyAppPage: React.FC = () => {
 
         {/* 我的应用列表 */}
 
-        <Spin
-          loading={loading}
-          size={40}
-          style={{ width: "100%", height: "100%" }}
-          tip="加载中..."
-        >
+        <Spin loading={loading} size={40} style={{ width: '100%', height: '100%' }} tip="加载中...">
           <div className={styles.myAppList}>
             {dataList.map((item, index) => (
               <div
                 className={styles.myAppCard}
                 key={index}
-                // TODO(mickey): 待修改
-                onClick={() => navigate("/onebase/create-app/data-factory")}
+                onClick={() => {
+                  nagivateToAppPage(Number(item.appCode));
+                }}
               >
                 <div className={styles.myAppCardHeader}>
                   <div className={styles.myAppName}>
-                    <img
-                      className={styles.myAppIcon}
-                      src={appIconSVG}
-                      alt="应用图标"
-                    />
-                    <div className={styles.myAppTitle}>
-                      {item.appName}asddddddddddddddddddd
-                    </div>
+                    <img className={styles.myAppIcon} src={appIconSVG} alt="应用图标" />
+                    <div className={styles.myAppTitle}>{item.appName}asddddddddddddddddddd</div>
                   </div>
                   <Tag
                     style={{
                       fontSize: 11,
-                      color: "rgba(42, 130, 228, 1)",
+                      color: 'rgba(42, 130, 228, 1)'
                     }}
                   >
                     {item.appStatusText}
@@ -223,18 +206,14 @@ const MyAppPage: React.FC = () => {
                     <Avatar
                       size={24}
                       style={{
-                        backgroundColor: "#4FAE7B",
+                        backgroundColor: '#4FAE7B'
                       }}
                     >
-                      {item.createUser?.slice(0, 1) || "U"}
+                      {item.createUser?.slice(0, 1) || 'U'}
                     </Avatar>
-                    <div className={styles.myAppCreatorName}>
-                      {item.createUser}
-                    </div>
+                    <div className={styles.myAppCreatorName}>{item.createUser}</div>
 
-                    <div className={styles.myAppTime}>
-                      {dayjs(item.updateTime).format("YYYY-MM-DD HH:mm:ss")}
-                    </div>
+                    <div className={styles.myAppTime}>{dayjs(item.updateTime).format('YYYY-MM-DD HH:mm:ss')}</div>
                   </div>
 
                   <div className={styles.myAppOperate}>
@@ -242,12 +221,19 @@ const MyAppPage: React.FC = () => {
                       src={appEditSVG}
                       alt="菜单"
                       className={styles.operateIcon}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        nagivateToAppPage(Number(item.appCode));
+                      }}
                     />
                     <img
                       src={appDeleteSVG}
                       alt="删除"
                       className={styles.operateIcon}
-                      onClick={() => setVisible(true)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setVisible(true);
+                      }}
                     />
                   </div>
                 </div>
@@ -277,17 +263,17 @@ const MyAppPage: React.FC = () => {
         focusLock={true}
         okButtonProps={{
           style: {
-            backgroundColor: "#FF4D4F", // 自定义背景色
-            borderColor: "#FF4D4F", // 自定义边框色
-          },
+            backgroundColor: '#FF4D4F', // 自定义背景色
+            borderColor: '#FF4D4F' // 自定义边框色
+          }
         }}
       >
         <div
           style={{
             height: 171,
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "space-between",
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between'
           }}
         >
           <div>
@@ -296,11 +282,7 @@ const MyAppPage: React.FC = () => {
             为防止误操作，如确定删除，请输入
             <strong>&quot;&lt;应用名称&gt;&quot;</strong>进行确认：
           </div>
-          <Input
-            style={{ width: 476 }}
-            allowClear
-            placeholder="请输入要删除的应用名称"
-          />
+          <Input style={{ width: 476 }} allowClear placeholder="请输入要删除的应用名称" />
         </div>
       </Modal>
     </div>

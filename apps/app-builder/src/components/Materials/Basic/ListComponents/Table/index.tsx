@@ -1,25 +1,22 @@
-import {
-  STATUS_OPTIONS,
-  STATUS_VALUES,
-} from "@/components/Materials/constants";
-import { Button, Form, Input, Table } from "@arco-design/web-react";
-import { IconDelete, IconDown, IconEdit } from "@arco-design/web-react/icon";
-import { memo, useEffect, useState } from "react";
+import { STATUS_OPTIONS, STATUS_VALUES } from '@/components/Materials/constants';
+import { Button, Form, Input, Table } from '@arco-design/web-react';
+import { IconDelete, IconDown, IconEdit } from '@arco-design/web-react/icon';
+import { memo, useEffect, useState } from 'react';
 
-import styles from "./index.module.less";
-import type { XTableConfig } from "./schema";
+import styles from './index.module.less';
+import type { XTableConfig } from './schema';
 
 const opearate: any = {
-  title: "操作",
-  dataIndex: "op",
+  title: '操作',
+  dataIndex: 'op',
   fixed: null,
-  width: "110px",
+  width: '110px',
   render: () => (
     <>
       <Button type="text" style={{ marginRight: 5 }} icon={<IconEdit />} />
       <Button status="danger" type="text" icon={<IconDelete />} />
     </>
-  ),
+  )
 };
 const XTable = memo((props: XTableConfig) => {
   const {
@@ -37,7 +34,7 @@ const XTable = memo((props: XTableConfig) => {
     pageSize,
     showTotal,
     showOpearate,
-    fixedOpearate,
+    fixedOpearate
   } = props;
 
   const [finalColumns, setFinalColumns] = useState<any[]>();
@@ -48,22 +45,22 @@ const XTable = memo((props: XTableConfig) => {
         return {
           ...v,
           ellipsis: true,
-          width: v.width + "px",
+          width: v.width + 'px'
         };
       });
     }
     if (showOpearate) {
-      opearate.fixed = fixedOpearate ? "right" : null;
+      opearate.fixed = fixedOpearate ? 'right' : null;
       setFinalColumns([...(columns as any), opearate]);
     } else {
-      setFinalColumns((pre) => pre?.filter((v) => v.dataIndex !== "op"));
+      setFinalColumns((pre) => pre?.filter((v) => v.dataIndex !== 'op'));
     }
   }, [showOpearate, columns, fixedOpearate]);
 
   return (
     <div
       style={{
-        opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,
+        opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1
       }}
     >
       <div className={styles.tableHeader}>
@@ -75,21 +72,21 @@ const XTable = memo((props: XTableConfig) => {
               label={
                 <div
                   style={{
-                    width: "50px",
-                    textAlign: "left",
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
+                    width: '50px',
+                    textAlign: 'left',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis'
                   }}
                 >
                   {`${item.label}`}
                 </div>
               }
               style={{
-                width: "200px",
-                marginBottom: 0,
+                width: '200px',
+                marginBottom: 0
               }}
-              layout={"horizontal"}
+              layout={'horizontal'}
             >
               <Input placeholder={`请输入${item.label}`} />
             </Form.Item>
@@ -102,7 +99,7 @@ const XTable = memo((props: XTableConfig) => {
           <Button
             type="outline"
             style={{
-              border: "none",
+              border: 'none'
             }}
           >
             <IconDown />
@@ -113,18 +110,15 @@ const XTable = memo((props: XTableConfig) => {
       <div>
         <Form.Item
           label={label}
-          layout={"vertical"}
+          layout={'vertical'}
           style={{
-            width: "100%",
-            pointerEvents:
-              status === STATUS_VALUES[STATUS_OPTIONS.READONLY]
-                ? "none"
-                : "unset",
+            width: '100%',
+            pointerEvents: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset'
           }}
         >
           <Table
             scroll={{
-              x: "max-content",
+              x: 'max-content'
             }}
             border={border}
             borderCell={borderCell}
@@ -136,7 +130,7 @@ const XTable = memo((props: XTableConfig) => {
             pagePosition={pagePosition}
             pagination={{
               pageSize,
-              showTotal,
+              showTotal
             }}
           />
         </Form.Item>

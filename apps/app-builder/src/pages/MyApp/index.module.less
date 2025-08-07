@@ -1,4 +1,4 @@
-@import "../Home/variables.less";
+@import '../Home/variables.less';
 
 @myAppPageHeaderHeight: 110px;
 @myAppFilterHeight: 76px;
@@ -18,7 +18,7 @@
     flex-shrink: 0;
     width: 100vw;
 
-    background-image: url("@/assets/images/banner.svg");
+    background-image: url('@/assets/images/banner.svg');
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center;
@@ -76,10 +76,7 @@
 
     .myAppList {
       width: 100%;
-      height: calc(
-        100vh - @myAppPageHeaderHeight - @myAppFilterHeight -
-          @myAppPaginationHeight - 180px
-      );
+      height: calc(100vh - @myAppPageHeaderHeight - @myAppFilterHeight - @myAppPaginationHeight - 180px);
       overflow-y: auto;
       box-sizing: border-box;
       display: grid;

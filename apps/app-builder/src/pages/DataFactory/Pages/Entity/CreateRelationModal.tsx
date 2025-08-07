@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
-import { Form, Select, Message, Modal } from "@arco-design/web-react";
-import styles from "./index.module.less";
-import type { EntityNode, EntityField, EdgeData } from "../../utils/interface";
+import React, { useState, useEffect } from 'react';
+import { Form, Select, Message, Modal } from '@arco-design/web-react';
+import styles from './index.module.less';
+import type { EntityNode, EntityField, EdgeData } from '../../utils/interface';
 
 interface RelationFormValues {
   leftEntity: string;
@@ -23,10 +23,10 @@ interface FieldOption {
 
 // 关联关系类型选项
 const relationTypes = [
-  { label: "一对一", value: "ONE_TO_ONE" },
-  { label: "一对多", value: "ONE_TO_MANY" },
-  { label: "多对一", value: "MANY_TO_ONE" },
-  { label: "多对多", value: "MANY_TO_MANY" },
+  { label: '一对一', value: 'ONE_TO_ONE' },
+  { label: '一对多', value: 'ONE_TO_MANY' },
+  { label: '多对一', value: 'MANY_TO_ONE' },
+  { label: '多对多', value: 'MANY_TO_MANY' }
 ];
 
 const CreateRelationModal: React.FC<{
@@ -35,20 +35,10 @@ const CreateRelationModal: React.FC<{
   successCallback: () => void;
   updateRelationOptions: boolean;
   setUpdateRelationOptions: (updateRelationOptions: boolean) => void;
-}> = ({
-  visible,
-  setVisible,
-  successCallback,
-  updateRelationOptions,
-  setUpdateRelationOptions,
-}) => {
+}> = ({ visible, setVisible, successCallback, updateRelationOptions, setUpdateRelationOptions }) => {
   const [form] = Form.useForm<RelationFormValues>();
-  const [leftEntityOptions, setLeftEntityOptions] = useState<EntityOption[]>(
-    [],
-  );
-  const [rightEntityOptions, setRightEntityOptions] = useState<EntityOption[]>(
-    [],
-  );
+  const [leftEntityOptions, setLeftEntityOptions] = useState<EntityOption[]>([]);
+  const [rightEntityOptions, setRightEntityOptions] = useState<EntityOption[]>([]);
   const [leftFieldOptions, setLeftFieldOptions] = useState<FieldOption[]>([]);
   const [rightFieldOptions, setRightFieldOptions] = useState<FieldOption[]>([]);
 
@@ -57,19 +47,18 @@ const CreateRelationModal: React.FC<{
     if (updateRelationOptions) {
       // 从localStorage获取实体数据
       const { nodes } = JSON.parse(
-        localStorage.getItem("entityFormValues") ||
-          JSON.stringify({ nodes: [], edges: [] }),
+        localStorage.getItem('entityFormValues') || JSON.stringify({ nodes: [], edges: [] })
       );
       const entityOptions = nodes?.length
         ? nodes.map((node: EntityNode) => ({
             label: node.title, // 使用title作为label
-            value: node.id,
+            value: node.id
           }))
         : [];
       const fieldOptions = nodes?.fields?.length
         ? nodes.fields.map((field: EntityField) => ({
             label: field.name,
-            value: field.id,
+            value: field.id
           }))
         : [];
       setLeftFieldOptions(fieldOptions);
@@ -85,55 +74,47 @@ const CreateRelationModal: React.FC<{
   // 当左实体改变时，更新左字段选项
   const handleLeftEntityChange = (value: string) => {
     // 这里应该根据选择的实体获取对应的字段
-    const { nodes } = JSON.parse(
-      localStorage.getItem("entityFormValues") || JSON.stringify({ nodes: [] }),
-    );
+    const { nodes } = JSON.parse(localStorage.getItem('entityFormValues') || JSON.stringify({ nodes: [] }));
     const entity = nodes.find((node: EntityNode) => node.id === value);
     const fieldOptions = entity?.fields.map((field: EntityField) => ({
       label: field.name,
-      value: field.id,
+      value: field.id
     }));
     setLeftFieldOptions(fieldOptions);
-    form.setFieldValue("leftField", "");
+    form.setFieldValue('leftField', '');
   };
 
   // 当右实体改变时，更新右字段选项
   const handleRightEntityChange = (value: string) => {
     // 这里应该根据选择的实体获取对应的字段
-    const { nodes } = JSON.parse(
-      localStorage.getItem("entityFormValues") || JSON.stringify({ nodes: [] }),
-    );
+    const { nodes } = JSON.parse(localStorage.getItem('entityFormValues') || JSON.stringify({ nodes: [] }));
     const entity = nodes.find((node: EntityNode) => node.id === value);
     const fieldOptions = entity?.fields.map((field: EntityField) => ({
       label: field.name,
-      value: field.id,
+      value: field.id
     }));
     setRightFieldOptions(fieldOptions);
-    form.setFieldValue("rightField", "");
+    form.setFieldValue('rightField', '');
   };
 
   // 提交
   const handleFinish = () => {
     form.validate().then((values) => {
       // TODO: 提交关联关系数据
-      console.log("关联关系数据:", values);
+      console.log('关联关系数据:', values);
       const { nodes, edges } = JSON.parse(
-        localStorage.getItem("entityFormValues") ||
-          JSON.stringify({ nodes: [], edges: [] }),
+        localStorage.getItem('entityFormValues') || JSON.stringify({ nodes: [], edges: [] })
       );
       const newEdges = edges || [];
       const edge: EdgeData = {
         source: { cell: values.leftEntity, port: values.leftField },
-        target: { cell: values.rightEntity, port: values.rightField },
+        target: { cell: values.rightEntity, port: values.rightField }
         // label: values.relationType,
       };
       newEdges.push(edge);
-      localStorage.setItem(
-        "entityFormValues",
-        JSON.stringify({ nodes, edges: newEdges }),
-      );
+      localStorage.setItem('entityFormValues', JSON.stringify({ nodes, edges: newEdges }));
       form.resetFields();
-      Message.success("关联关系创建成功");
+      Message.success('关联关系创建成功');
       setVisible(false);
       successCallback();
     });
@@ -141,7 +122,7 @@ const CreateRelationModal: React.FC<{
 
   return (
     <Modal
-      className={styles["create-relation-modal"]}
+      className={styles['create-relation-modal']}
       title="添加关联关系"
       visible={visible}
       onOk={handleFinish}
@@ -149,32 +130,19 @@ const CreateRelationModal: React.FC<{
       okText="确认"
       cancelText="取消"
     >
-      <Form
-        form={form}
-        layout="vertical"
-        onSubmit={handleFinish}
-        className={styles["relation-form"]}
-      >
-        <div className={styles["relation-form-container"]}>
+      <Form form={form} layout="vertical" onSubmit={handleFinish} className={styles['relation-form']}>
+        <div className={styles['relation-form-container']}>
           {/* 左关联表 */}
           <Form.Item
             label="左关联表"
             field="leftEntity"
             required
-            rules={[{ required: true, message: "请选择左关联表" }]}
+            rules={[{ required: true, message: '请选择左关联表' }]}
           >
-            <Select
-              placeholder="请选择业务实体"
-              options={leftEntityOptions}
-              onChange={handleLeftEntityChange}
-            />
+            <Select placeholder="请选择业务实体" options={leftEntityOptions} onChange={handleLeftEntityChange} />
           </Form.Item>
 
-          <Form.Item
-            label="请选择字段"
-            field="leftField"
-            rules={[{ required: true, message: "请选择字段" }]}
-          >
+          <Form.Item label="请选择字段" field="leftField" rules={[{ required: true, message: '请选择字段' }]}>
             <Select placeholder="请选择字段" options={leftFieldOptions} />
           </Form.Item>
 
@@ -183,7 +151,7 @@ const CreateRelationModal: React.FC<{
             label="关联关系"
             field="relationType"
             required
-            rules={[{ required: true, message: "请选择关联关系" }]}
+            rules={[{ required: true, message: '请选择关联关系' }]}
           >
             <Select placeholder="请选择关联关系" options={relationTypes} />
           </Form.Item>
@@ -193,20 +161,12 @@ const CreateRelationModal: React.FC<{
             label="右关联表"
             field="rightEntity"
             required
-            rules={[{ required: true, message: "请选择右关联表" }]}
+            rules={[{ required: true, message: '请选择右关联表' }]}
           >
-            <Select
-              placeholder="请选择业务实体"
-              options={rightEntityOptions}
-              onChange={handleRightEntityChange}
-            />
+            <Select placeholder="请选择业务实体" options={rightEntityOptions} onChange={handleRightEntityChange} />
           </Form.Item>
 
-          <Form.Item
-            label="请选择字段"
-            field="rightField"
-            rules={[{ required: true, message: "请选择字段" }]}
-          >
+          <Form.Item label="请选择字段" field="rightField" rules={[{ required: true, message: '请选择字段' }]}>
             <Select placeholder="请选择字段" options={rightFieldOptions} />
           </Form.Item>
         </div>

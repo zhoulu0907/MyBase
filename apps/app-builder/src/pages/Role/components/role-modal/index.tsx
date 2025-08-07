@@ -1,6 +1,6 @@
-import { useEffect, useCallback } from "react";
-import { Modal, Form, Input, Message } from "@arco-design/web-react";
-import type { RoleVO } from "@onebase/platform-center";
+import { useEffect, useCallback } from 'react';
+import { Modal, Form, Input, Message } from '@arco-design/web-react';
+import type { RoleVO } from '@onebase/platform-center';
 
 const FormItem = Form.Item;
 
@@ -12,13 +12,7 @@ interface RoleModalProps {
   initialValues?: RoleVO | null;
 }
 
-export default function RoleModal({
-  visible,
-  onCancel,
-  onOk,
-  confirmLoading,
-  initialValues,
-}: RoleModalProps) {
+export default function RoleModal({ visible, onCancel, onOk, confirmLoading, initialValues }: RoleModalProps) {
   const [form] = Form.useForm();
 
   // 重置表单
@@ -31,7 +25,7 @@ export default function RoleModal({
     if (initialValues) {
       form.setFieldsValue({
         name: initialValues.name,
-        remark: initialValues.remark,
+        remark: initialValues.remark
       });
     } else {
       resetForm();
@@ -53,14 +47,14 @@ export default function RoleModal({
         onOk({
           id: initialValues.id,
           name: values.name,
-          remark: values.remark,
+          remark: values.remark
         });
       } else {
         onOk(values);
       }
     } catch (error) {
-      console.error("表单验证失败:", error);
-      Message.error("请检查表单输入");
+      console.error('表单验证失败:', error);
+      Message.error('请检查表单输入');
     }
   }, [form, initialValues, onOk]);
 
@@ -69,7 +63,7 @@ export default function RoleModal({
     onCancel();
   }, [resetForm, onCancel]);
 
-  const modalTitle = initialValues ? "编辑角色" : "新增角色";
+  const modalTitle = initialValues ? '编辑角色' : '新增角色';
 
   return (
     <Modal
@@ -87,31 +81,22 @@ export default function RoleModal({
           label="角色名称"
           field="name"
           rules={[
-            { required: true, message: "请输入角色名称" },
-            { maxLength: 50, message: "角色名称不能超过50个字符" },
+            { required: true, message: '请输入角色名称' },
+            { maxLength: 50, message: '角色名称不能超过50个字符' },
             {
               validator: (value, cb) => {
                 if (value && value.trim().length === 0) {
-                  cb("角色名称不能为空");
+                  cb('角色名称不能为空');
                 }
                 cb();
-              },
-            },
+              }
+            }
           ]}
         >
           <Input placeholder="请输入角色名称" maxLength={50} showWordLimit />
         </FormItem>
-        <FormItem
-          label="角色描述"
-          field="remark"
-          rules={[{ maxLength: 200, message: "角色描述不能超过200个字符" }]}
-        >
-          <Input.TextArea
-            placeholder="请输入角色描述"
-            rows={4}
-            maxLength={200}
-            showWordLimit
-          />
+        <FormItem label="角色描述" field="remark" rules={[{ maxLength: 200, message: '角色描述不能超过200个字符' }]}>
+          <Input.TextArea placeholder="请输入角色描述" rows={4} maxLength={200} showWordLimit />
         </FormItem>
       </Form>
     </Modal>

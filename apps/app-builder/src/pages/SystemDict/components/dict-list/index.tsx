@@ -1,8 +1,8 @@
-import ListItem from "@/components/ListItem";
-import { Input, Button } from "@arco-design/web-react";
-import { type DictItem } from "@onebase/platform-center";
-import styles from "../../index.module.less";
-import { IconPlus } from "@arco-design/web-react/icon";
+import ListItem from '@/components/ListItem';
+import { Input, Button } from '@arco-design/web-react';
+import { type DictItem } from '@onebase/platform-center';
+import styles from '../../index.module.less';
+import { IconPlus } from '@arco-design/web-react/icon';
 
 interface DictionaryListProps {
   list: DictItem[];
@@ -19,7 +19,7 @@ export default function DictionaryListProps({
   onSelect,
   searchValue,
   onSearchChange,
-  onAdd,
+  onAdd
 }: DictionaryListProps) {
   const listTitle = `全部(${list?.length})`;
   return (
@@ -34,11 +34,7 @@ export default function DictionaryListProps({
         />
       </div>
       <ListItem title={listTitle}>
-        <Button
-          type="text"
-          onClick={onAdd}
-          style={{ paddingLeft: "8px", paddingRight: "8px" }}
-        >
+        <Button type="text" onClick={onAdd} style={{ paddingLeft: '8px', paddingRight: '8px' }}>
           <IconPlus />
           新建
         </Button>

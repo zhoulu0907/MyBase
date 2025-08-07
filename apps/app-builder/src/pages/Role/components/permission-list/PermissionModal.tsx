@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useMemo } from "react";
-import { Modal, Table, Input, Checkbox } from "@arco-design/web-react";
-import type { ColumnProps } from "@arco-design/web-react/es/Table";
-import { getAllPermissions } from "@onebase/platform-center";
-import type { Permission, PermissionAction } from "@onebase/platform-center";
+import React, { useState, useEffect, useMemo } from 'react';
+import { Modal, Table, Input, Checkbox } from '@arco-design/web-react';
+import type { ColumnProps } from '@arco-design/web-react/es/Table';
+import { getAllPermissions } from '@onebase/platform-center';
+import type { Permission, PermissionAction } from '@onebase/platform-center';
 
 const Search = Input.Search;
 const CheckboxGroup = Checkbox.Group;
@@ -20,61 +20,48 @@ const PermissionConfigModal: React.FC<PermissionConfigModalProps> = ({
   onCancel,
   onConfirm,
   confirmLoading = false,
-  configuredPermissions = {},
+  configuredPermissions = {}
 }) => {
-  const [searchValue, setSearchValue] = useState("");
-  const [selectedActions, setSelectedActions] = useState<
-    Record<number, number[]>
-  >({}); // 所选中的操作选线
-  const [indeterminateMap, setIndeterminateMap] = useState<
-    Record<number, boolean>
-  >({}); // 权限功能的半选状态
+  const [searchValue, setSearchValue] = useState('');
+  const [selectedActions, setSelectedActions] = useState<Record<number, number[]>>({}); // 所选中的操作选线
+  const [indeterminateMap, setIndeterminateMap] = useState<Record<number, boolean>>({}); // 权限功能的半选状态
   const [checkAllMap, setCheckAllMap] = useState<Record<number, boolean>>({}); // 权限功能的全选状态
   const [tableData, setTableData] = useState<Permission[]>([]);
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({
     current: 1,
-    pageSize: 10,
+    pageSize: 10
   });
   const [total, setTotal] = useState(0);
   const generateMockPermissions = useMemo(() => {
     const permissionNames = [
-      "用户管理",
-      "角色管理",
-      "权限管理",
-      "系统配置",
-      "日志管理",
-      "数据备份",
-      "监控告警",
-      "任务调度",
-      "文件管理",
-      "消息通知",
-      "API管理",
-      "字典管理",
-      "参数配置",
-      "通知公告",
-      "操作日志",
-      "登录日志",
-      "在线用户",
-      "定时任务",
-      "代码生成",
-      "系统接口",
-      "服务监控",
-      "缓存监控",
-      "表单构建",
-      "图表设计",
+      '用户管理',
+      '角色管理',
+      '权限管理',
+      '系统配置',
+      '日志管理',
+      '数据备份',
+      '监控告警',
+      '任务调度',
+      '文件管理',
+      '消息通知',
+      'API管理',
+      '字典管理',
+      '参数配置',
+      '通知公告',
+      '操作日志',
+      '登录日志',
+      '在线用户',
+      '定时任务',
+      '代码生成',
+      '系统接口',
+      '服务监控',
+      '缓存监控',
+      '表单构建',
+      '图表设计'
     ];
 
-    const actionNames = [
-      "增加",
-      "编辑",
-      "删除",
-      "查询",
-      "导出",
-      "导入",
-      "审核",
-      "发布",
-    ];
+    const actionNames = ['增加', '编辑', '删除', '查询', '导出', '导入', '审核', '发布'];
 
     const permissions: Permission[] = [];
     for (let i = 0; i < permissionNames.length; i++) {
@@ -85,7 +72,7 @@ const PermissionConfigModal: React.FC<PermissionConfigModalProps> = ({
       for (let j = 0; j < actionCount; j++) {
         actions.push({
           id: i * 100 + j + 1,
-          name: actionNames[j % actionNames.length],
+          name: actionNames[j % actionNames.length]
         });
       }
 
@@ -94,7 +81,7 @@ const PermissionConfigModal: React.FC<PermissionConfigModalProps> = ({
         name: permissionNames[i],
         type: `permission:${i + 1}`,
         remark: `管理系统${permissionNames[i]}`,
-        actions,
+        actions
       });
     }
 
@@ -116,7 +103,7 @@ const PermissionConfigModal: React.FC<PermissionConfigModalProps> = ({
         mockData = mockData.filter(
           (permission) =>
             permission.name.toLowerCase().includes(search) ||
-            (permission.remark?.toLowerCase().includes(search) ?? false),
+            (permission.remark?.toLowerCase().includes(search) ?? false)
         );
       }
       setTableData(mockData);
@@ -134,7 +121,7 @@ const PermissionConfigModal: React.FC<PermissionConfigModalProps> = ({
     if (!visible) return;
     setPagination((prev) => ({
       ...prev,
-      current: 1,
+      current: 1
     }));
     loadPermissions();
   }, [visible]);
@@ -147,17 +134,13 @@ const PermissionConfigModal: React.FC<PermissionConfigModalProps> = ({
     const search = searchValue.toLowerCase();
     return tableData.filter(
       (permission) =>
-        permission.name.toLowerCase().includes(search) ||
-        (permission.remark?.toLowerCase().includes(search) ?? false),
+        permission.name.toLowerCase().includes(search) || (permission.remark?.toLowerCase().includes(search) ?? false)
     );
   }, [tableData, searchValue]);
 
   useEffect(() => {
     // 初始化选中状态
-    if (
-      configuredPermissions &&
-      Object.keys(configuredPermissions).length > 0
-    ) {
+    if (configuredPermissions && Object.keys(configuredPermissions).length > 0) {
       setSelectedActions(configuredPermissions);
     }
 
@@ -170,9 +153,7 @@ const PermissionConfigModal: React.FC<PermissionConfigModalProps> = ({
       const actionIds = permission.actions?.map((action) => action.id) || [];
 
       if (actionIds.length > 0) {
-        const allSelected = actionIds.every((id) =>
-          selectedActionIds.includes(id),
-        );
+        const allSelected = actionIds.every((id) => selectedActionIds.includes(id));
         const someSelected = selectedActionIds.length > 0 && !allSelected;
 
         newCheckAllMap[permission.id] = allSelected;
@@ -185,20 +166,14 @@ const PermissionConfigModal: React.FC<PermissionConfigModalProps> = ({
 
     setPagination((prev) => ({
       ...prev,
-      total: filteredPermissions.length,
+      total: filteredPermissions.length
     }));
-  }, [
-    visible,
-    configuredPermissions,
-    tableData,
-    selectedActions,
-    filteredPermissions,
-  ]);
+  }, [visible, configuredPermissions, tableData, selectedActions, filteredPermissions]);
 
   const handleSearch = () => {
     setPagination((prev) => ({
       ...prev,
-      current: 1,
+      current: 1
     }));
   };
 
@@ -212,7 +187,7 @@ const PermissionConfigModal: React.FC<PermissionConfigModalProps> = ({
     if (checked) {
       setSelectedActions((prev) => ({
         ...prev,
-        [permissionId]: actionIds,
+        [permissionId]: actionIds
       }));
     } else {
       setSelectedActions((prev) => {
@@ -229,9 +204,7 @@ const PermissionConfigModal: React.FC<PermissionConfigModalProps> = ({
 
     tableData.forEach((permission) => {
       if (permission.actions) {
-        allActionIds[permission.id] = permission.actions.map(
-          (action) => action.id,
-        );
+        allActionIds[permission.id] = permission.actions.map((action) => action.id);
       }
     });
 
@@ -246,7 +219,7 @@ const PermissionConfigModal: React.FC<PermissionConfigModalProps> = ({
   const handleActionChange = (permissionId: number, actionIds: number[]) => {
     setSelectedActions((prev) => ({
       ...prev,
-      [permissionId]: actionIds,
+      [permissionId]: actionIds
     }));
   };
 
@@ -259,93 +232,78 @@ const PermissionConfigModal: React.FC<PermissionConfigModalProps> = ({
     if (currentPageData.length === 0) {
       return {
         checked: false,
-        indeterminate: false,
+        indeterminate: false
       };
     }
 
-    const allChecked = currentPageData.every(
-      (permission) => checkAllMap[permission.id],
-    );
+    const allChecked = currentPageData.every((permission) => checkAllMap[permission.id]);
     const hasChecked = currentPageData.some(
-      (permission) =>
-        checkAllMap[permission.id] || indeterminateMap[permission.id],
+      (permission) => checkAllMap[permission.id] || indeterminateMap[permission.id]
     );
 
     return {
       checked: allChecked,
-      indeterminate: !allChecked && hasChecked,
+      indeterminate: !allChecked && hasChecked
     };
-  }, [
-    pagination.current,
-    pagination.pageSize,
-    filteredPermissions,
-    checkAllMap,
-    indeterminateMap,
-  ]);
+  }, [pagination.current, pagination.pageSize, filteredPermissions, checkAllMap, indeterminateMap]);
 
   const columns: ColumnProps<Permission>[] = useMemo(
     () => [
       {
         title: (
-          <div style={{ display: "flex", alignItems: "center" }}>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
             <Checkbox
               style={{ marginRight: 8 }}
               indeterminate={headerCheckState.indeterminate}
               checked={headerCheckState.checked}
-              onChange={(checked) =>
-                handleHeaderCheckAllChange(checked as boolean)
-              }
+              onChange={(checked) => handleHeaderCheckAllChange(checked as boolean)}
             />
             权限功能
           </div>
         ),
-        dataIndex: "name",
+        dataIndex: 'name',
         width: 200,
         render: (_, record) => (
-          <div style={{ display: "flex", alignItems: "center" }}>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
             <Checkbox
               style={{ marginRight: 8 }}
               indeterminate={indeterminateMap[record.id]}
               checked={checkAllMap[record.id]}
-              onChange={(checked) =>
-                handleCheckAllChange(record.id, checked as boolean)
-              }
+              onChange={(checked) => handleCheckAllChange(record.id, checked as boolean)}
             />
             {record.name}
           </div>
-        ),
+        )
       },
       {
-        title: "描述",
-        dataIndex: "remark",
+        title: '描述',
+        dataIndex: 'remark',
         width: 150,
-        render: (text) => <span>{text || "-"}</span>,
+        render: (text) => <span>{text || '-'}</span>
       },
       {
-        title: "操作权限",
-        dataIndex: "actions",
+        title: '操作权限',
+        dataIndex: 'actions',
         width: 350,
         render: (_, record) => (
           <div>
             <CheckboxGroup
               value={selectedActions[record.id] || []}
-              onChange={(value) =>
-                handleActionChange(record.id, value as number[])
-              }
+              onChange={(value) => handleActionChange(record.id, value as number[])}
               options={(record.actions || []).map((action) => ({
                 label: action.name,
-                value: action.id,
+                value: action.id
               }))}
               style={{
-                display: "flex",
-                flexWrap: "wrap",
+                display: 'flex',
+                flexWrap: 'wrap',
                 maxHeight: 100,
-                overflowY: "auto",
+                overflowY: 'auto'
               }}
             />
           </div>
-        ),
-      },
+        )
+      }
     ],
     [
       headerCheckState,
@@ -354,15 +312,15 @@ const PermissionConfigModal: React.FC<PermissionConfigModalProps> = ({
       selectedActions,
       handleHeaderCheckAllChange,
       handleCheckAllChange,
-      handleActionChange,
-    ],
+      handleActionChange
+    ]
   );
 
   const handlePaginationChange = (current: number, pageSize: number) => {
     setPagination((prev) => ({
       ...prev,
       current,
-      pageSize,
+      pageSize
     }));
   };
 
@@ -377,9 +335,9 @@ const PermissionConfigModal: React.FC<PermissionConfigModalProps> = ({
       title={
         <div
           style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center'
           }}
         >
           <span>权限配置</span>
@@ -409,7 +367,7 @@ const PermissionConfigModal: React.FC<PermissionConfigModalProps> = ({
           showTotal: true,
           showJumper: true,
           sizeCanChange: true,
-          onChange: handlePaginationChange,
+          onChange: handlePaginationChange
         }}
       />
     </Modal>

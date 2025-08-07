@@ -1,25 +1,13 @@
-import RoleList from "./components/role-list";
-import UserList from "./components/user-list";
-import PermissionList from "./components/permission-list";
-import RoleModal from "./components/role-modal";
-import {
-  Layout,
-  Message,
-  Button,
-  Space,
-  Empty,
-  Divider,
-  Tabs,
-} from "@arco-design/web-react";
-import { useRef, useMemo, useState, useCallback } from "react";
-import InfoPanel from "@/components/InfoPanel";
-import styles from "./index.module.less";
-import {
-  createRole,
-  updateRole,
-  deleteRole,
-} from "@onebase/platform-center/src/services/role";
-import type { RoleVO } from "@onebase/platform-center/src/types/role";
+import RoleList from './components/role-list';
+import UserList from './components/user-list';
+import PermissionList from './components/permission-list';
+import RoleModal from './components/role-modal';
+import { Layout, Message, Button, Space, Empty, Divider, Tabs } from '@arco-design/web-react';
+import { useRef, useMemo, useState, useCallback } from 'react';
+import InfoPanel from '@/components/InfoPanel';
+import styles from './index.module.less';
+import { createRole, updateRole, deleteRole } from '@onebase/platform-center/src/services/role';
+import type { RoleVO } from '@onebase/platform-center/src/types/role';
 
 const Sider = Layout.Sider;
 const Header = Layout.Header;
@@ -27,33 +15,26 @@ const Content = Layout.Content;
 const TabPane = Tabs.TabPane;
 
 export default function RolePage() {
-  const [activeRoleId, setActiveRoleId] = useState<number | undefined>(
-    undefined,
-  );
-  const [activeRole, setActiveRole] = useState<Partial<RoleVO> | undefined>(
-    undefined,
-  );
+  const [activeRoleId, setActiveRoleId] = useState<number | undefined>(undefined);
+  const [activeRole, setActiveRole] = useState<Partial<RoleVO> | undefined>(undefined);
   const [editRole, setEditRole] = useState<Partial<RoleVO> | null>(null);
   const [roleModalVisible, setRoleModalVisible] = useState(false);
   const [modalLoading, setModalLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState("user");
+  const [activeTab, setActiveTab] = useState('user');
 
   const roleListRef = useRef<any>(null);
 
-  const handleRoleSelect = useCallback(
-    (id: number | undefined, role: Partial<RoleVO> | undefined) => {
-      setActiveRoleId(id);
-      setActiveRole(role);
-    },
-    [],
-  );
+  const handleRoleSelect = useCallback((id: number | undefined, role: Partial<RoleVO> | undefined) => {
+    setActiveRoleId(id);
+    setActiveRole(role);
+  }, []);
 
   // 删除角色
   const handleDeleteRole = useCallback(
     async (id: number) => {
       try {
         await deleteRole(id);
-        Message.success("删除成功");
+        Message.success('删除成功');
 
         // 如果删除的是当前选中的角色，清空选中状态
         if (activeRoleId === id) {
@@ -63,11 +44,11 @@ export default function RolePage() {
 
         return true;
       } catch (error) {
-        Message.error("删除失败");
+        Message.error('删除失败');
         return false;
       }
     },
-    [activeRoleId],
+    [activeRoleId]
   );
 
   // 保存角色
@@ -79,11 +60,11 @@ export default function RolePage() {
       } else {
         await createRole(values);
       }
-      Message.success("保存成功");
+      Message.success('保存成功');
       setRoleModalVisible(false);
       roleListRef.current?.refresh?.();
     } catch (error) {
-      Message.error("保存失败");
+      Message.error('保存失败');
     } finally {
       setModalLoading(false);
     }
@@ -107,10 +88,7 @@ export default function RolePage() {
   const OperationButtons = useMemo(
     () => (
       <Space size="small">
-        <Button
-          type="secondary"
-          onClick={() => openRoleModal(activeRole || null)}
-        >
+        <Button type="secondary" onClick={() => openRoleModal(activeRole || null)}>
           编辑
         </Button>
         <Button
@@ -127,7 +105,7 @@ export default function RolePage() {
         </Button>
       </Space>
     ),
-    [activeRole, openRoleModal, handleDeleteRole],
+    [activeRole, openRoleModal, handleDeleteRole]
   );
 
   // TODO: Mock数据 联调后移除
@@ -135,50 +113,50 @@ export default function RolePage() {
     () => [
       {
         id: 1,
-        name: "用户管理",
-        type: "user:manage",
-        remark: "管理系统用户",
+        name: '用户管理',
+        type: 'user:manage',
+        remark: '管理系统用户',
         actions: [
-          { id: 1, name: "查看" },
-          { id: 2, name: "编辑" },
-          { id: 3, name: "删除" },
-        ],
+          { id: 1, name: '查看' },
+          { id: 2, name: '编辑' },
+          { id: 3, name: '删除' }
+        ]
       },
       {
         id: 2,
-        name: "角色管理",
-        type: "role:manage",
-        remark: "管理系统角色",
+        name: '角色管理',
+        type: 'role:manage',
+        remark: '管理系统角色',
         actions: [
-          { id: 4, name: "查看" },
-          { id: 5, name: "编辑" },
-          { id: 6, name: "删除" },
-          { id: 7, name: "分配" },
-        ],
+          { id: 4, name: '查看' },
+          { id: 5, name: '编辑' },
+          { id: 6, name: '删除' },
+          { id: 7, name: '分配' }
+        ]
       },
       {
         id: 3,
-        name: "权限管理",
-        type: "permission:manage",
-        remark: "管理系统权限配置",
+        name: '权限管理',
+        type: 'permission:manage',
+        remark: '管理系统权限配置',
         actions: [
-          { id: 8, name: "查看" },
-          { id: 9, name: "编辑" },
-        ],
+          { id: 8, name: '查看' },
+          { id: 9, name: '编辑' }
+        ]
       },
       {
         id: 4,
-        name: "系统配置",
-        type: "system:config",
-        remark: "管理系统配置",
+        name: '系统配置',
+        type: 'system:config',
+        remark: '管理系统配置',
         actions: [
-          { id: 10, name: "查看" },
-          { id: 11, name: "编辑" },
-          { id: 12, name: "删除" },
-        ],
-      },
+          { id: 10, name: '查看' },
+          { id: 11, name: '编辑' },
+          { id: 12, name: '删除' }
+        ]
+      }
     ],
-    [],
+    []
   );
 
   return (
@@ -205,7 +183,7 @@ export default function RolePage() {
                   rightChildren={OperationButtons}
                   wrapperClassName={styles.infoPanel}
                 ></InfoPanel>
-                <Divider style={{ margin: "16px 0" }} />
+                <Divider style={{ margin: '16px 0' }} />
               </Header>
               <Content>
                 <Tabs activeTab={activeTab} onChange={handleTabChange}>

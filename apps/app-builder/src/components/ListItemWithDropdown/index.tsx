@@ -1,8 +1,8 @@
-import { Dropdown, Typography } from "@arco-design/web-react";
-import { IconMore } from "@arco-design/web-react/icon";
-import React from "react";
+import { Dropdown, Typography } from '@arco-design/web-react';
+import { IconMore } from '@arco-design/web-react/icon';
+import React from 'react';
 
-import "./index.less";
+import './index.less';
 
 export interface ListItemWithDropdownProps {
   title: string;
@@ -11,27 +11,14 @@ export interface ListItemWithDropdownProps {
   onClick?: () => void;
 }
 
-const ListItemWithDropdown: React.FC<ListItemWithDropdownProps> = ({
-  title,
-  droplist,
-  active = false,
-  onClick,
-}) => {
+const ListItemWithDropdown: React.FC<ListItemWithDropdownProps> = ({ title, droplist, active = false, onClick }) => {
   return (
-    <div
-      className={`list-item-with-dropdown${active ? " active" : ""}`}
-      onClick={onClick}
-    >
+    <div className={`list-item-with-dropdown${active ? ' active' : ''}`} onClick={onClick}>
       <div className="list-item-with-dropdown__title">
         <Typography.Ellipsis showTooltip>{title}</Typography.Ellipsis>
       </div>
       <div className="list-item-with-dropdown__actions">
-        <Dropdown
-          position="bl"
-          trigger="click"
-          droplist={droplist}
-          triggerProps={{ style: { minWidth: "100px" } }}
-        >
+        <Dropdown position="bl" trigger="click" droplist={droplist} triggerProps={{ style: { minWidth: '100px' } }}>
           <IconMore />
         </Dropdown>
       </div>

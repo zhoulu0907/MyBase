@@ -1,22 +1,22 @@
-import { IconDelete } from "@arco-design/web-react/icon";
-import { useEffect, useState } from "react";
-import { ReactSortable } from "react-sortablejs";
+import { IconDelete } from '@arco-design/web-react/icon';
+import { useEffect, useState } from 'react';
+import { ReactSortable } from 'react-sortablejs';
 
-import { getComponentSchema } from "@/components/Materials/schema";
-import { ALL_COMPONENT_TYPES } from "@/constants/componentTypes";
-import { usePageEditorStore } from "@/hooks/useStore";
-import ComponentRender from "@/pages/Editor/components/render";
-import { COMPONENT_GROUP_NAME } from "../const";
-import { getComponentWidth } from "../utils";
+import { getComponentSchema } from '@/components/Materials/schema';
+import { ALL_COMPONENT_TYPES } from '@/constants/componentTypes';
+import { usePageEditorStore } from '@/hooks/useStore';
+import ComponentRender from '@/pages/Editor/components/render';
+import { COMPONENT_GROUP_NAME } from '../const';
+import { getComponentWidth } from '../utils';
 
-import EmptyIcon from "@/assets/images/empty.svg";
-import MobileIcon from "@/assets/images/mobile_icon.svg";
-import MobileActiveIcon from "@/assets/images/mobile_icon_active.svg";
-import PCIcon from "@/assets/images/pc_icon.svg";
-import PCActiveIcon from "@/assets/images/pc_icon_active.svg";
+import EmptyIcon from '@/assets/images/empty.svg';
+import MobileIcon from '@/assets/images/mobile_icon.svg';
+import MobileActiveIcon from '@/assets/images/mobile_icon_active.svg';
+import PCIcon from '@/assets/images/pc_icon.svg';
+import PCActiveIcon from '@/assets/images/pc_icon_active.svg';
 
-import "react-grid-layout/css/styles.css";
-import styles from "./index.module.less";
+import 'react-grid-layout/css/styles.css';
+import styles from './index.module.less';
 
 interface GridItem {
   id: string;
@@ -39,10 +39,10 @@ export default function EditorWorkspace() {
     setComponents,
     delComponents,
     showDeleteButton,
-    setShowDeleteButton,
+    setShowDeleteButton
   } = usePageEditorStore();
 
-  const [pageMode, setPageMode] = useState<string>("pc");
+  const [pageMode, setPageMode] = useState<string>('pc');
 
   useEffect(() => {
     if (components.length === 0) {
@@ -67,28 +67,28 @@ export default function EditorWorkspace() {
   return (
     <div className={styles.formEditorWorkspace}>
       <div className={styles.workspaceHeader}>
-        {pageMode === "pc" && (
+        {pageMode === 'pc' && (
           <>
             <img className={styles.pageModeIcon} src={PCActiveIcon} />
             <img
               className={styles.pageModeIcon}
               style={{
-                cursor: "pointer",
+                cursor: 'pointer'
               }}
               src={MobileIcon}
-              onClick={() => setPageMode("mobile")}
+              onClick={() => setPageMode('mobile')}
             />
           </>
         )}
-        {pageMode === "mobile" && (
+        {pageMode === 'mobile' && (
           <>
             <img
               className={styles.pageModeIcon}
               src={PCIcon}
               style={{
-                cursor: "pointer",
+                cursor: 'pointer'
               }}
-              onClick={() => setPageMode("pc")}
+              onClick={() => setPageMode('pc')}
             />
             <img className={styles.pageModeIcon} src={MobileActiveIcon} />
           </>
@@ -102,7 +102,7 @@ export default function EditorWorkspace() {
           // 点击空白区域取消选中
 
           const target = e.target as HTMLElement;
-          if (target.id === "workspace-content") {
+          if (target.id === 'workspace-content') {
             clearCurComponentID();
             setShowDeleteButton(false);
           }
@@ -117,11 +117,11 @@ export default function EditorWorkspace() {
             // console.log("pageComponentSchemas", pageComponentSchemas);
           }}
           onAdd={(e) => {
-            console.log("onAdd", e);
+            console.log('onAdd', e);
 
-            let cpID = e.item.id || e.item.getAttribute("data-cp-id");
-            const itemType = e.item.getAttribute("data-cp-type");
-            const itemDisplayName = e.item.getAttribute("data-cp-displayname");
+            let cpID = e.item.id || e.item.getAttribute('data-cp-id');
+            const itemType = e.item.getAttribute('data-cp-type');
+            const itemDisplayName = e.item.getAttribute('data-cp-displayname');
 
             console.log(`拖入组件 ${cpID} ${itemType}`);
 
@@ -133,12 +133,12 @@ export default function EditorWorkspace() {
             const props = {
               id: cpID,
               type: itemType,
-              ...schema,
+              ...schema
             };
 
             if (itemType === ALL_COMPONENT_TYPES.COLUMN_LAYOUT) {
               // 拖入布局组件，根据配置创建初始化
-              console.log("拖入布局组件，根据配置创建初始化: ", cpID);
+              console.log('拖入布局组件，根据配置创建初始化: ', cpID);
             }
 
             setPageComponentSchemas(cpID!, props);
@@ -152,8 +152,8 @@ export default function EditorWorkspace() {
           forceFallback={true}
           className={styles.workspaceContent}
           onStart={(e) => {
-            console.log("onStart", e);
-            const cpID = e.item.getAttribute("data-cp-id") || "";
+            console.log('onStart', e);
+            const cpID = e.item.getAttribute('data-cp-id') || '';
             setCurComponentID(cpID);
             const curComponentSchema = pageComponentSchemas.get(cpID) || {};
             setCurComponentSchema(curComponentSchema);
@@ -168,29 +168,21 @@ export default function EditorWorkspace() {
               data-cp-id={cp.id}
               className={styles.componentItem}
               style={{
-                width: getComponentWidth(
-                  pageComponentSchemas.get(cp.id),
-                  cp.type,
-                ),
-                borderColor:
-                  curComponentID === cp.id ? "#4FAE7B" : "transparent",
+                width: getComponentWidth(pageComponentSchemas.get(cp.id), cp.type),
+                borderColor: curComponentID === cp.id ? '#4FAE7B' : 'transparent'
               }}
               onClick={(e: React.MouseEvent<HTMLDivElement>) => {
                 e.stopPropagation();
-                console.log("点击组件: ", cp.id);
+                console.log('点击组件: ', cp.id);
                 setCurComponentID(cp.id);
 
                 const curComponentSchema = pageComponentSchemas.get(cp.id);
                 setCurComponentSchema(curComponentSchema);
-                console.log("当前组件的配置: ", curComponentSchema);
+                console.log('当前组件的配置: ', curComponentSchema);
                 setShowDeleteButton(true);
               }}
             >
-              <ComponentRender
-                cpId={cp.id}
-                cpType={cp.type}
-                pageComponentSchema={pageComponentSchemas.get(cp.id)}
-              />
+              <ComponentRender cpId={cp.id} cpType={cp.type} pageComponentSchema={pageComponentSchemas.get(cp.id)} />
 
               {/* 删除按钮 */}
               {/* TODO(mickey): 组件继续封装，和layout中的共用一套 */}
@@ -199,7 +191,7 @@ export default function EditorWorkspace() {
                   className={styles.deleteButton}
                   onClick={(e) => {
                     e.stopPropagation();
-                    console.log("删除组件: ", cp.id);
+                    console.log('删除组件: ', cp.id);
                     handleDeleteComponent(cp.id);
                   }}
                 >

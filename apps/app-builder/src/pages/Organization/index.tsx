@@ -1,23 +1,11 @@
-import React, { useState, useEffect } from "react";
-import {
-  Table,
-  Button,
-  Space,
-  Message,
-  Input,
-  Modal,
-} from "@arco-design/web-react";
-import { IconSearch } from "@arco-design/web-react/icon";
-import styles from "./index.module.less";
-import OrganizationModal from "./components/OrganizationModal";
-import {
-  getDeptList,
-  createDept,
-  updateDept,
-  deleteDept,
-} from "@onebase/platform-center";
-import { type DeptVO, type DeptForm } from "@onebase/platform-center";
-import { listToTree } from "@/utils/tree";
+import React, { useState, useEffect } from 'react';
+import { Table, Button, Space, Message, Input, Modal } from '@arco-design/web-react';
+import { IconSearch } from '@arco-design/web-react/icon';
+import styles from './index.module.less';
+import OrganizationModal from './components/OrganizationModal';
+import { getDeptList, createDept, updateDept, deleteDept } from '@onebase/platform-center';
+import { type DeptVO, type DeptForm } from '@onebase/platform-center';
+import { listToTree } from '@/utils/tree';
 // mockData
 const generateMockData = () => {
   const data = [];
@@ -29,10 +17,10 @@ const generateMockData = () => {
       id: idCounter,
       parentId: 0, // 根节点的parentId为0
       name: `部门${i}`,
-      parent: "根节点",
+      parent: '根节点',
       description: `这是部门${i}的描述信息`,
       manager: `管理员${Math.floor(Math.random() * 100)}`,
-      userCount: Math.floor(Math.random() * 200),
+      userCount: Math.floor(Math.random() * 200)
     });
     idCounter++;
 
@@ -45,7 +33,7 @@ const generateMockData = () => {
         parent: `部门${i}`,
         description: `这是部门${i}-${j}的描述信息`,
         manager: `管理员${Math.floor(Math.random() * 100)}`,
-        userCount: Math.floor(Math.random() * 100),
+        userCount: Math.floor(Math.random() * 100)
       });
       idCounter++;
 
@@ -58,7 +46,7 @@ const generateMockData = () => {
           parent: `部门${i}-${j}`,
           description: `这是部门${i}-${j}-${k}的描述信息`,
           manager: `管理员${Math.floor(Math.random() * 100)}`,
-          userCount: Math.floor(Math.random() * 50),
+          userCount: Math.floor(Math.random() * 50)
         });
         idCounter++;
       }
@@ -70,36 +58,36 @@ const generateMockData = () => {
 const OrganizationPage: React.FC = () => {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchValue, setSearchValue] = useState("");
+  const [searchValue, setSearchValue] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
   const [modalLoading, setModalLoading] = useState(false);
   const [editRecord, setEditRecord] = useState<any>(null);
 
   const columns = [
     {
-      title: "部门名称",
-      dataIndex: "name",
+      title: '部门名称',
+      dataIndex: 'name'
     },
     {
-      title: "部门描述",
-      dataIndex: "description",
+      title: '部门描述',
+      dataIndex: 'description'
     },
     {
-      title: "上级部门",
-      dataIndex: "parent",
+      title: '上级部门',
+      dataIndex: 'parent'
     },
     {
-      title: "管理员",
-      dataIndex: "manager",
+      title: '管理员',
+      dataIndex: 'manager'
     },
     {
-      title: "用户数量",
-      dataIndex: "userCount",
-      align: "center" as const,
+      title: '用户数量',
+      dataIndex: 'userCount',
+      align: 'center' as const
     },
     {
-      title: "操作",
-      dataIndex: "operations",
+      title: '操作',
+      dataIndex: 'operations',
       width: 150,
       render: (_: any, record: any) => (
         <Space size="mini">
@@ -110,8 +98,8 @@ const OrganizationPage: React.FC = () => {
             删除
           </Button>
         </Space>
-      ),
-    },
+      )
+    }
   ];
 
   const handleEdit = (record: any) => {
@@ -121,15 +109,15 @@ const OrganizationPage: React.FC = () => {
 
   const handleDelete = (record: DeptVO) => {
     Modal.confirm({
-      title: "确认删除",
+      title: '确认删除',
       content: `确定要删除部门 "${record.name}" 吗？此操作不可恢复。`,
-      okText: "确认",
-      cancelText: "取消",
+      okText: '确认',
+      cancelText: '取消',
       onOk: async () => {
         deleteDept(record.id).then(() => {
-          Message.success("删除成功");
+          Message.success('删除成功');
         });
-      },
+      }
     });
   };
 
@@ -152,7 +140,7 @@ const OrganizationPage: React.FC = () => {
       handleSearch();
       setModalVisible(false);
     } catch (error) {
-      Message.error("操作失败，请重试");
+      Message.error('操作失败，请重试');
     } finally {
       setModalLoading(false);
     }

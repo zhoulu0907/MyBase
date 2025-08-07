@@ -1,5 +1,5 @@
 // 验证码类型
-export type CaptchaType = "WORD_IMAGE_CLICK" | "ROTATE" | "SLIDER" | "CONCAT";
+export type CaptchaType = 'WORD_IMAGE_CLICK' | 'ROTATE' | 'SLIDER' | 'CONCAT';
 
 // 获取验证码请求参数
 export interface GetCaptchaRequest {

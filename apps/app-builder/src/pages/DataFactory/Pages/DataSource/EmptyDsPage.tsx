@@ -1,11 +1,9 @@
 // import React, { useEffect, useState } from 'react';
-import { Link } from "@arco-design/web-react";
-import styles from "./index.module.less";
-const EmptyDsPage: React.FC<{ handlePageType: (tab: string) => void }> = ({
-  handlePageType,
-}) => {
+import { Link } from '@arco-design/web-react';
+import styles from './index.module.less';
+const EmptyDsPage: React.FC<{ handlePageType: (tab: string) => void }> = ({ handlePageType }) => {
   const gotoCreateDs = () => {
-    handlePageType("create-ds");
+    handlePageType('create-ds');
   };
 
   return (

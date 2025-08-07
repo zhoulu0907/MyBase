@@ -1,4 +1,4 @@
-import type { CONFIG_TYPES } from "./constants";
+import type { CONFIG_TYPES } from './constants';
 
 // TODO(mickey): 后续扩展配置
 export type EditConfig = any;

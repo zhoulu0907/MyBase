@@ -87,7 +87,7 @@ export interface LicenseInfo {
   /**
    * 状态
    */
-  status: "enable" | "disable";
+  status: 'enable' | 'disable';
   /**
    * 是否是试用
    */

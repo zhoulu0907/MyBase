@@ -1,8 +1,5 @@
-import {
-  ALL_COMPONENT_TYPES,
-  type ComponentType as ComponentTypeFromConstants,
-} from "@/constants/componentTypes";
-import BasicSchema from "./Basic/schema";
+import { ALL_COMPONENT_TYPES, type ComponentType as ComponentTypeFromConstants } from '@/constants/componentTypes';
+import BasicSchema from './Basic/schema';
 
 // 定义所有组件类型的联合类型
 export type ComponentType = ComponentTypeFromConstants;
@@ -44,7 +41,7 @@ const componentSchemaMap: Partial<Record<ComponentType, ComponentSchema>> = {
   [ALL_COMPONENT_TYPES.INFO_NOTICE]: BasicSchema.XInfoNotice,
   [ALL_COMPONENT_TYPES.IMAGE]: BasicSchema.XImage,
   [ALL_COMPONENT_TYPES.TEXT]: BasicSchema.XText,
-  [ALL_COMPONENT_TYPES.WEB_VIEW]: BasicSchema.XWebView,
+  [ALL_COMPONENT_TYPES.WEB_VIEW]: BasicSchema.XWebView
 };
 
 /**
@@ -52,9 +49,7 @@ const componentSchemaMap: Partial<Record<ComponentType, ComponentSchema>> = {
  * @param componentType 组件类型，如 ALL_COMPONENT_TYPES.INPUT_TEXT
  * @returns 返回该组件的配置对象，包含 editData 和 config
  */
-export function getComponentSchema(
-  componentType: ComponentType,
-): ComponentSchema {
+export function getComponentSchema(componentType: ComponentType): ComponentSchema {
   const config = componentSchemaMap[componentType];
 
   if (!config) {
@@ -77,14 +72,12 @@ export function getAvailableComponentTypes(): ComponentType[] {
  * @param componentType 组件类型
  * @returns 返回布尔值，表示该组件类型是否存在
  */
-export function hasComponentSchema(
-  componentType: string,
-): componentType is ComponentType {
+export function hasComponentSchema(componentType: string): componentType is ComponentType {
   return componentType in componentSchemaMap;
 }
 
 const schema = {
-  ...BasicSchema,
+  ...BasicSchema
 };
 
 export default schema;

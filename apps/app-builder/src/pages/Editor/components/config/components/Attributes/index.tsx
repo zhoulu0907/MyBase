@@ -1,6 +1,6 @@
-import type { TXInputTextEditData } from "@/components/Materials/Basic/FormComponents/InputText/schema";
-import { CONFIG_TYPES } from "@/components/Materials/constants";
-import { usePageEditorStore } from "@/hooks/useStore";
+import type { TXInputTextEditData } from '@/components/Materials/Basic/FormComponents/InputText/schema';
+import { CONFIG_TYPES } from '@/components/Materials/constants';
+import { usePageEditorStore } from '@/hooks/useStore';
 import {
   Button,
   Checkbox,
@@ -11,13 +11,13 @@ import {
   Message,
   Radio,
   Select,
-  Switch,
-} from "@arco-design/web-react";
-import { IconDelete, IconDragDotVertical } from "@arco-design/web-react/icon";
-import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { ReactSortable } from "react-sortablejs";
-import styles from "./index.module.less";
+  Switch
+} from '@arco-design/web-react';
+import { IconDelete, IconDragDotVertical } from '@arco-design/web-react/icon';
+import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { ReactSortable } from 'react-sortablejs';
+import styles from './index.module.less';
 
 const FormItem = Form.Item;
 
@@ -32,8 +32,7 @@ interface ConfigsProps {
 const Attributes = ({ cpID }: ConfigsProps) => {
   const { t } = useTranslation();
 
-  const { curComponentSchema, setCurComponentSchema, setPageComponentSchemas } =
-    usePageEditorStore();
+  const { curComponentSchema, setCurComponentSchema, setPageComponentSchemas } = usePageEditorStore();
 
   const [editData, setEditData] = useState<TXInputTextEditData>([]);
   const [configs, setConfigs] = useState<any>({});
@@ -42,15 +41,12 @@ const Attributes = ({ cpID }: ConfigsProps) => {
     if (!cpID) {
       return;
     }
-    console.debug("curComponentSchema------", curComponentSchema);
+    console.debug('curComponentSchema------', curComponentSchema);
     setEditData(curComponentSchema.editData);
     setConfigs(curComponentSchema.config);
   }, [cpID, curComponentSchema]);
 
-  const handlePropsChange = (
-    key: string,
-    value: string | number | boolean | any[],
-  ) => {
+  const handlePropsChange = (key: string, value: string | number | boolean | any[]) => {
     console.log(`更新了属性: ${key} 值为: ${value}`);
 
     const newCurComponentSchema = {
@@ -59,9 +55,9 @@ const Attributes = ({ cpID }: ConfigsProps) => {
       editData: curComponentSchema.editData,
       config: {
         ...curComponentSchema.config,
-        [key]: value,
+        [key]: value
       },
-      layout: curComponentSchema.layout,
+      layout: curComponentSchema.layout
     };
 
     // console.log(curComponentSchema.config)
@@ -80,12 +76,12 @@ const Attributes = ({ cpID }: ConfigsProps) => {
       editData: curComponentSchema.editData,
       config: {
         ...curComponentSchema.config,
-        [key]: value,
+        [key]: value
       },
       layout: {
         ...curComponentSchema.layout,
-        [key === "width" ? "w" : key === "height" ? "h" : key]: value,
-      },
+        [key === 'width' ? 'w' : key === 'height' ? 'h' : key]: value
+      }
     };
 
     setCurComponentSchema(newCurComponentSchema);
@@ -100,23 +96,16 @@ const Attributes = ({ cpID }: ConfigsProps) => {
           <FormItem
             label="组件ID"
             labelCol={{
-              span: 5,
+              span: 5
             }}
           >
             <div className={styles.cpID}>{cpID}</div>
           </FormItem>
 
           {editData.map((item: any, index: number) => {
-            if (
-              item.type !== CONFIG_TYPES.SWITCH_INPUT &&
-              item.type !== CONFIG_TYPES.DYNAMIC_SELECT_INPUT
-            ) {
+            if (item.type !== CONFIG_TYPES.SWITCH_INPUT && item.type !== CONFIG_TYPES.DYNAMIC_SELECT_INPUT) {
               return (
-                <FormItem
-                  label={item.name}
-                  key={index}
-                  className={styles.formItem}
-                >
+                <FormItem label={item.name} key={index} className={styles.formItem}>
                   {(item.type === CONFIG_TYPES.TEXT_INPUT ||
                     item.type === CONFIG_TYPES.LABEL_INPUT ||
                     item.type === CONFIG_TYPES.TOOLTIP_INPUT ||
@@ -181,14 +170,8 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                       }}
                     >
                       {item.range.map((item: any) => (
-                        <Radio
-                          key={item.key}
-                          value={item.value}
-                          className={styles.widthRadio}
-                        >
-                          {item.text && item.text.startsWith("formEditor.")
-                            ? t(item.text)
-                            : item.text}
+                        <Radio key={item.key} value={item.value} className={styles.widthRadio}>
+                          {item.text && item.text.startsWith('formEditor.') ? t(item.text) : item.text}
                         </Radio>
                       ))}
                     </Radio.Group>
@@ -205,8 +188,8 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                         handlePropsChange(item.key, value);
                       }}
                       style={{
-                        width: "100%",
-                        display: "flex",
+                        width: '100%',
+                        display: 'flex'
                       }}
                     >
                       {item.range.map((item: any) => (
@@ -215,13 +198,11 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                           value={item.value}
                           style={{
                             flex: 1,
-                            textAlign: "center",
-                            whiteSpace: "nowrap",
+                            textAlign: 'center',
+                            whiteSpace: 'nowrap'
                           }}
                         >
-                          {item.text && item.text.startsWith("formEditor.")
-                            ? t(item.text)
-                            : item.text}
+                          {item.text && item.text.startsWith('formEditor.') ? t(item.text) : item.text}
                         </Radio>
                       ))}
                     </Radio.Group>
@@ -237,14 +218,8 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                       className={styles.columnCountRadioGroup}
                     >
                       {item.range.map((item: any) => (
-                        <Radio
-                          key={item.key}
-                          value={item.value}
-                          className={styles.columnCountRadio}
-                        >
-                          {item.text && item.text.startsWith("formEditor.")
-                            ? t(item.text)
-                            : item.text}
+                        <Radio key={item.key} value={item.value} className={styles.columnCountRadio}>
+                          {item.text && item.text.startsWith('formEditor.') ? t(item.text) : item.text}
                         </Radio>
                       ))}
                     </Radio.Group>
@@ -260,11 +235,7 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                       className={styles.pagePositionRadioGroup}
                     >
                       {item.range.map((item: any) => (
-                        <Radio
-                          key={item.key}
-                          value={item.value}
-                          className={styles.pagePositionRadio}
-                        >
+                        <Radio key={item.key} value={item.value} className={styles.pagePositionRadio}>
                           {item.text}
                         </Radio>
                       ))}
@@ -281,17 +252,14 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                     />
                   )}
                   {item.type === CONFIG_TYPES.TABLE_COLUMN_LIST && (
-                    <Form.List
-                      initialValue={configs[item.key] || []}
-                      field={item.key}
-                    >
+                    <Form.List initialValue={configs[item.key] || []} field={item.key}>
                       {(_fields, { add, remove }) => (
                         <div className={styles.tableColumnList}>
                           <ReactSortable
                             list={configs[item.key]}
                             setList={() => {}}
                             group={{
-                              name: "table-col-item",
+                              name: 'table-col-item'
                             }}
                             swap
                             sort={true}
@@ -305,18 +273,11 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                               // 根据 onSort 事件中的 oldIndex 和 newIndex 交换数组元素
                               const { oldIndex, newIndex } = e;
                               console.log(oldIndex, newIndex);
-                              if (
-                                oldIndex !== undefined &&
-                                newIndex !== undefined &&
-                                oldIndex !== newIndex
-                              ) {
+                              if (oldIndex !== undefined && newIndex !== undefined && oldIndex !== newIndex) {
                                 // 复制一份新数组
                                 const movedList = [...newList];
                                 // 取出被移动的元素
-                                const [movedItem] = movedList.splice(
-                                  oldIndex,
-                                  1,
-                                );
+                                const [movedItem] = movedList.splice(oldIndex, 1);
                                 // 插入到新位置
                                 movedList.splice(newIndex, 0, movedItem);
                                 // 更新属性
@@ -330,21 +291,19 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                                   // 支持拖拽的图标，别误删了：）
                                   className="table-col-item-handle"
                                   style={{
-                                    cursor: "move",
-                                    color: "#555",
+                                    cursor: 'move',
+                                    color: '#555'
                                   }}
                                 />
                                 <Input
                                   size="small"
                                   value={configs[item.key][idx].title}
                                   onChange={(e) => {
-                                    const newList = [
-                                      ...(configs[item.key] || []),
-                                    ];
+                                    const newList = [...(configs[item.key] || [])];
                                     newList[idx] = {
                                       ...newList[idx],
                                       title: e,
-                                      dataIndex: e,
+                                      dataIndex: e
                                     };
 
                                     handlePropsChange(item.key, newList);
@@ -360,12 +319,10 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                                   value={configs[item.key][idx].width}
                                   className={styles.tableColumnItemInput}
                                   onChange={(e) => {
-                                    const newList = [
-                                      ...(configs[item.key] || []),
-                                    ];
+                                    const newList = [...(configs[item.key] || [])];
                                     newList[idx] = {
                                       ...newList[idx],
-                                      width: e,
+                                      width: e
                                     };
 
                                     handlePropsChange(item.key, newList);
@@ -374,21 +331,17 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                                   placeholder="宽度"
                                 />
                                 <Checkbox
-                                  checked={
-                                    configs[item.key][idx].fixed || false
-                                  }
+                                  checked={configs[item.key][idx].fixed || false}
                                   onChange={(e) => {
-                                    const newList = [
-                                      ...(configs[item.key] || []),
-                                    ];
+                                    const newList = [...(configs[item.key] || [])];
                                     if (newList[idx].width === undefined) {
                                       // TODO(mickey): 国际化
-                                      Message.error("请先设置宽度");
+                                      Message.error('请先设置宽度');
                                       return;
                                     }
                                     newList[idx] = {
                                       ...newList[idx],
-                                      fixed: e ? "left" : false,
+                                      fixed: e ? 'left' : false
                                     };
                                     handlePropsChange(item.key, newList);
                                   }}
@@ -402,9 +355,7 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                                   status="danger"
                                   className={styles.tableColumnItemButton}
                                   onClick={() => {
-                                    const newList = [
-                                      ...(configs[item.key] || []),
-                                    ];
+                                    const newList = [...(configs[item.key] || [])];
                                     newList.splice(idx, 1);
                                     handlePropsChange(item.key, newList);
                                     remove(idx);
@@ -416,11 +367,8 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                           <Button
                             type="outline"
                             onClick={() => {
-                              const newList = [
-                                ...(configs[item.key] || []),
-                                { title: "", dataIndex: "" },
-                              ];
-                              add({ title: "", dataIndex: "" });
+                              const newList = [...(configs[item.key] || []), { title: '', dataIndex: '' }];
+                              add({ title: '', dataIndex: '' });
                               handlePropsChange(item.key, newList);
                             }}
                           >
@@ -431,17 +379,14 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                     </Form.List>
                   )}
                   {item.type === CONFIG_TYPES.SEARCH_ITEM_LIST && (
-                    <Form.List
-                      initialValue={configs[item.key] || []}
-                      field={item.key}
-                    >
+                    <Form.List initialValue={configs[item.key] || []} field={item.key}>
                       {(_fields, { add, remove }) => (
                         <div className={styles.tableColumnList}>
                           <ReactSortable
                             list={configs[item.key]}
                             setList={() => {}}
                             group={{
-                              name: "table-col-item",
+                              name: 'table-col-item'
                             }}
                             swap
                             sort={true}
@@ -455,18 +400,11 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                               // 根据 onSort 事件中的 oldIndex 和 newIndex 交换数组元素
                               const { oldIndex, newIndex } = e;
                               console.log(oldIndex, newIndex);
-                              if (
-                                oldIndex !== undefined &&
-                                newIndex !== undefined &&
-                                oldIndex !== newIndex
-                              ) {
+                              if (oldIndex !== undefined && newIndex !== undefined && oldIndex !== newIndex) {
                                 // 复制一份新数组
                                 const movedList = [...newList];
                                 // 取出被移动的元素
-                                const [movedItem] = movedList.splice(
-                                  oldIndex,
-                                  1,
-                                );
+                                const [movedItem] = movedList.splice(oldIndex, 1);
                                 // 插入到新位置
                                 movedList.splice(newIndex, 0, movedItem);
                                 // 更新属性
@@ -480,21 +418,19 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                                   // 支持拖拽的图标，别误删了：）
                                   className="table-col-item-handle"
                                   style={{
-                                    cursor: "move",
-                                    color: "#555",
+                                    cursor: 'move',
+                                    color: '#555'
                                   }}
                                 />
                                 <Select
                                   size="small"
                                   value={configs[item.key][idx].label}
                                   onChange={(e, option: any) => {
-                                    const newList = [
-                                      ...(configs[item.key] || []),
-                                    ];
+                                    const newList = [...(configs[item.key] || [])];
                                     newList[idx] = {
                                       ...newList[idx],
                                       label: option.children,
-                                      value: e,
+                                      value: e
                                     };
 
                                     handlePropsChange(item.key, newList);
@@ -505,18 +441,17 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                                   }}
                                   className={styles.tableColumnItemInput}
                                   placeholder={`请输入第${idx + 1}项`}
-                                  options={configs["columns"]
+                                  options={configs['columns']
                                     .filter(
                                       (col: any) =>
                                         // 过滤掉已在 configs[item.key] 中被选中的 dataIndex
                                         !(configs[item.key] || []).some(
-                                          (selected: any) =>
-                                            selected.value === col.dataIndex,
-                                        ),
+                                          (selected: any) => selected.value === col.dataIndex
+                                        )
                                     )
                                     .map((item: any) => ({
                                       label: item.title,
-                                      value: item.dataIndex,
+                                      value: item.dataIndex
                                     }))}
                                 />
                                 <Button
@@ -526,9 +461,7 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                                   status="danger"
                                   className={styles.tableColumnItemButton}
                                   onClick={() => {
-                                    const newList = [
-                                      ...(configs[item.key] || []),
-                                    ];
+                                    const newList = [...(configs[item.key] || [])];
                                     newList.splice(idx, 1);
                                     handlePropsChange(item.key, newList);
                                     remove(idx);
@@ -540,11 +473,8 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                           <Button
                             type="outline"
                             onClick={() => {
-                              const newList = [
-                                ...(configs[item.key] || []),
-                                { label: "", value: "" },
-                              ];
-                              add({ label: "", value: "" });
+                              const newList = [...(configs[item.key] || []), { label: '', value: '' }];
+                              add({ label: '', value: '' });
                               handlePropsChange(item.key, newList);
                             }}
                           >
@@ -584,17 +514,17 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                   label={
                     <div
                       style={{
-                        textAlign: "left",
+                        textAlign: 'left'
                       }}
                     >
                       <span>{item.name}</span>
                     </div>
                   }
                   labelCol={{
-                    span: 21,
+                    span: 21
                   }}
                   wrapperCol={{
-                    span: 1,
+                    span: 1
                   }}
                   layout="horizontal"
                   className={styles.formItem}

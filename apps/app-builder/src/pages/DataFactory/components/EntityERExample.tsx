@@ -1,16 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
 // import { Button, Space } from '@arco-design/web-react';
-import ERchart from "./ERchart";
-import EditDrawer from "./Drawer/EditEntityDrawer";
-import type {
-  EntityNode,
-  EntityERProps,
-  EntityData,
-  EdgeData,
-} from "../utils/interface";
-import CreateFieldModal from "../Pages/Entity/CreateFieldModal";
-import CreateRelationModal from "../Pages/Entity/CreateRelationModal";
-import { Modal } from "@arco-design/web-react";
+import ERchart from './ERchart';
+import EditDrawer from './Drawer/EditEntityDrawer';
+import type { EntityNode, EntityERProps, EntityData, EdgeData } from '../utils/interface';
+import CreateFieldModal from '../Pages/Entity/CreateFieldModal';
+import CreateRelationModal from '../Pages/Entity/CreateRelationModal';
+import { Modal } from '@arco-design/web-react';
 
 // const mockData = {
 //   nodes: [
@@ -105,36 +100,28 @@ export const EntityERWithModeSwitch: React.FC<{
   setRefreshEntityList: (refresh: boolean) => void;
   onlyUpdateNode: boolean;
   setOnlyUpdateNode: (onlyUpdateNode: boolean) => void;
-}> = ({
-  refreshEntityList,
-  setRefreshEntityList,
-  onlyUpdateNode,
-  setOnlyUpdateNode,
-}) => {
+}> = ({ refreshEntityList, setRefreshEntityList, onlyUpdateNode, setOnlyUpdateNode }) => {
   // const [mode, setMode] = useState<'view' | 'edit'>('view');
-  const [data, setData] = useState<EntityERProps["data"]>(
+  const [data, setData] = useState<EntityERProps['data']>(
     JSON.parse(
-      localStorage.getItem("entityFormValues") ||
-        JSON.stringify({ nodes: [], edges: [] }),
-    ) as unknown as EntityData,
+      localStorage.getItem('entityFormValues') || JSON.stringify({ nodes: [], edges: [] })
+    ) as unknown as EntityData
   );
   const [editDrawerVisible, setEditDrawerVisible] = useState(false);
   const [editingNode, setEditingNode] = useState<EntityNode | null>(null);
   const [createFieldModalVisible, setCreateFieldModalVisible] = useState(false);
-  const [nodeId, setNodeId] = useState("");
+  const [nodeId, setNodeId] = useState('');
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
-  const [createRelationModalVisible, setCreateRelationModalVisible] =
-    useState(false);
+  const [createRelationModalVisible, setCreateRelationModalVisible] = useState(false);
   const [updateRelationOptions, setUpdateRelationOptions] = useState(false);
   // const [onlyUpdateNode, setOnlyUpdateNode] = useState(false);
 
   const handleNodeEdit = (editData: EntityNode) => {
-    console.log("节点编辑:", editData);
+    console.log('节点编辑:', editData);
     // 这里可以更新节点数据
     const { nodes, edges } = JSON.parse(
-      localStorage.getItem("entityFormValues") ||
-        JSON.stringify({ nodes: [], edges: [] }),
+      localStorage.getItem('entityFormValues') || JSON.stringify({ nodes: [], edges: [] })
     );
     const newNodes = nodes.map((node: EntityNode) => {
       if (node.id === editData.id) {
@@ -142,10 +129,7 @@ export const EntityERWithModeSwitch: React.FC<{
       }
       return node;
     });
-    localStorage.setItem(
-      "entityFormValues",
-      JSON.stringify({ nodes: newNodes, edges: edges }),
-    );
+    localStorage.setItem('entityFormValues', JSON.stringify({ nodes: newNodes, edges: edges }));
     setEditDrawerVisible(true);
     setEditingNode(editData);
     setRefreshEntityList(!refreshEntityList);
@@ -158,39 +142,32 @@ export const EntityERWithModeSwitch: React.FC<{
   };
 
   const handleNodeAddRelation = (id: string) => {
-    console.log("添加关联:", id);
+    console.log('添加关联:', id);
     setCreateRelationModalVisible(true);
     setUpdateRelationOptions(true);
     setOnlyUpdateNode(false);
   };
 
   const handleNodeDelete = (id: string) => {
-    console.log("删除节点:", id);
+    console.log('删除节点:', id);
     setDeleteModalVisible(true);
     setNodeId(id);
   };
 
   const confirmDelete = () => {
     setDeleteLoading(true);
-    console.log("删除节点:", nodeId);
+    console.log('删除节点:', nodeId);
     const { nodes, edges } = JSON.parse(
-      localStorage.getItem("entityFormValues") ||
-        JSON.stringify({ nodes: [], edges: [] }),
+      localStorage.getItem('entityFormValues') || JSON.stringify({ nodes: [], edges: [] })
     );
 
     const newNodes = nodes.filter((node: EntityNode) => node.id !== nodeId);
-    const newEdges = edges?.filter(
-      (edge: EdgeData) =>
-        edge.source.cell !== nodeId && edge.target.cell !== nodeId,
-    );
+    const newEdges = edges?.filter((edge: EdgeData) => edge.source.cell !== nodeId && edge.target.cell !== nodeId);
     setData({
       nodes: newNodes,
-      edges: newEdges,
+      edges: newEdges
     });
-    localStorage.setItem(
-      "entityFormValues",
-      JSON.stringify({ nodes: newNodes, edges: newEdges }),
-    );
+    localStorage.setItem('entityFormValues', JSON.stringify({ nodes: newNodes, edges: newEdges }));
     setDeleteModalVisible(false);
     setDeleteLoading(false);
     setRefreshEntityList(true);
@@ -209,12 +186,11 @@ export const EntityERWithModeSwitch: React.FC<{
   useEffect(() => {
     if (refreshEntityList) {
       const { nodes, edges } = JSON.parse(
-        localStorage.getItem("entityFormValues") ||
-          JSON.stringify({ nodes: [], edges: [] }),
+        localStorage.getItem('entityFormValues') || JSON.stringify({ nodes: [], edges: [] })
       );
       setData({
         nodes: nodes,
-        edges: edges,
+        edges: edges
       });
       setRefreshEntityList(false);
     }
@@ -229,7 +205,7 @@ export const EntityERWithModeSwitch: React.FC<{
   // }, []);
 
   return (
-    <div style={{ height: "100%" }}>
+    <div style={{ height: '100%' }}>
       {/* <div style={{ marginBottom: '16px' }}>
         <Space>
           <Button
@@ -249,7 +225,7 @@ export const EntityERWithModeSwitch: React.FC<{
 
       <ERchart
         mode="edit"
-        data={data as unknown as EntityERProps["data"]}
+        data={data as unknown as EntityERProps['data']}
         onNodeEdit={handleNodeEdit}
         onNodeAddField={handleNodeAddField}
         onNodeAddRelation={handleNodeAddRelation}
