@@ -1,44 +1,32 @@
-package com.cmsr.onebase.module.metadata.service.helper;
+package com.cmsr.onebase.module.metadata.dal.database;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
-import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.framework.data.base.BaseDO;
 import com.cmsr.onebase.module.metadata.convert.datasource.DatasourceConvert;
 import com.cmsr.onebase.module.metadata.dal.dataobject.datasource.MetadataDatasourceDO;
-import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataBusinessEntityDO;
-import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataSystemFieldsDO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.jdbc.util.DataSourceUtil;
 import org.anyline.proxy.ServiceProxy;
-import javax.sql.DataSource;
-import org.anyline.data.param.ConfigStore;
-import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.service.AnylineService;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
+import javax.sql.DataSource;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 数据源服务助手类
+ * 临时数据源服务类
  * <p>
- * 提供数据源相关的公共服务方法和统一的数据库操作接口，避免在多个Service中重复相同的逻辑
+ * 专门负责创建临时的AnylineService实例，用于连接到不同的数据源进行操作
  *
  * @author matianyu
- * @date 2025-08-05
+ * @date 2025-08-06
  */
 @Component
 @Slf4j
-public class DatasourceServiceHelper extends DataRepository {
-
-    @Resource
-    private DataRepository dataRepository;
+public class TemporaryDatasourceService {
 
     @Resource
     private DatasourceConvert datasourceConvert;
-
-    // ==================== 数据源相关方法 ====================
 
     /**
      * 根据数据源DO对象创建临时的AnylineService用于数据库操作
@@ -87,15 +75,38 @@ public class DatasourceServiceHelper extends DataRepository {
                 throw new RuntimeException("无法构建数据源连接URL，请检查配置信息");
             }
 
-            Map<String, Object> dsConfig = Map.of(
-                    "url", url,
-                    "user", username != null ? username : "",
-                    "password", password != null ? password : "",
-                    "driver", getDriverByType(datasourceType)
-            );
+            log.info("=== 创建临时数据源调试信息 ===");
+            log.info("构建的JDBC URL: {}", url);
+            log.info("用户名: {}", username);
+            log.info("数据库类型: {}", datasourceType);
+
+            // 创建数据源配置 - 添加必要的连接池配置
+            Map<String, Object> dsConfig = new HashMap<>();
+            dsConfig.put("url", url);
+            dsConfig.put("username", username != null ? username : ""); // 使用username而不是user
+            dsConfig.put("password", password != null ? password : "");
+            dsConfig.put("driver", getDriverByType(datasourceType));
+            
+            // 关键配置：明确指定连接池类型
+            dsConfig.put("pool", "com.zaxxer.hikari.HikariDataSource");
+            
+            // HikariCP连接池配置
+            dsConfig.put("maximum-pool-size", 3);
+            dsConfig.put("minimum-idle", 1);
+            dsConfig.put("connection-timeout", 30000);
+            
+            log.info("临时数据源配置: {}", dsConfig);
+            
+            // 先使用配置创建数据源，然后创建临时服务
             DataSource dataSource = DataSourceUtil.build(dsConfig);
-            return ServiceProxy.temporary(dataSource);
+            AnylineService<?> service = ServiceProxy.temporary(dataSource);
+            
+            log.info("临时服务创建成功，Service实例: {}", service.getClass().getName());
+            log.info("=== 创建临时数据源调试信息结束 ===");
+            
+            return service;
         } catch (Exception e) {
+            log.error("创建数据库连接失败: {}", e.getMessage(), e);
             throw new RuntimeException("创建数据库连接失败: " + e.getMessage(), e);
         }
     }
@@ -212,176 +223,5 @@ public class DatasourceServiceHelper extends DataRepository {
             default:
                 return 5432;
         }
-    }
-
-    // ==================== 通用数据库操作方法 ====================
-
-    /**
-     * 插入实体
-     *
-     * @param entity 要插入的实体
-     * @param <T> 实体类型
-     * @return 插入后的实体（包含生成的ID）
-     */
-    public <T extends BaseDO> T insert(T entity) {
-        return dataRepository.insert(entity);
-    }
-
-    /**
-     * 更新实体
-     *
-     * @param entity 要更新的实体
-     * @param <T> 实体类型
-     * @return 更新后的实体
-     */
-    public <T extends BaseDO> T update(T entity) {
-        return dataRepository.update(entity);
-    }
-
-    /**
-     * 根据ID删除实体
-     *
-     * @param clazz 实体类
-     * @param id 实体ID
-     * @param <T> 实体类型
-     */
-    public <T extends BaseDO> void deleteById(Class<T> clazz, Long id) {
-        dataRepository.deleteById(clazz, id);
-    }
-
-    /**
-     * 根据条件删除实体
-     *
-     * @param clazz 实体类
-     * @param configStore 查询条件
-     * @param <T> 实体类型
-     */
-    public <T extends BaseDO> void deleteByConfig(Class<T> clazz, DefaultConfigStore configStore) {
-        dataRepository.deleteByConfig(clazz, configStore);
-    }
-
-    /**
-     * 根据ID查找实体
-     *
-     * @param clazz 实体类
-     * @param id 实体ID
-     * @param <T> 实体类型
-     * @return 实体对象，不存在则返回null
-     */
-    public <T extends BaseDO> T findById(Class<T> clazz, Long id) {
-        return dataRepository.findById(clazz, id);
-    }
-
-    /**
-     * 根据条件查找单个实体
-     *
-     * @param clazz 实体类
-     * @param configStore 查询条件
-     * @param <T> 实体类型
-     * @return 实体对象，不存在则返回null
-     */
-    public <T extends BaseDO> T findOne(Class<T> clazz, DefaultConfigStore configStore) {
-        return dataRepository.findOne(clazz, configStore);
-    }
-
-    /**
-     * 根据条件查找所有实体
-     *
-     * @param clazz 实体类
-     * @param configStore 查询条件
-     * @param <T> 实体类型
-     * @return 实体列表
-     */
-    public <T extends BaseDO> List<T> findAllByConfig(Class<T> clazz, DefaultConfigStore configStore) {
-        return dataRepository.findAllByConfig(clazz, configStore);
-    }
-
-    /**
-     * 根据条件统计数量
-     *
-     * @param clazz 实体类
-     * @param configStore 查询条件
-     * @param <T> 实体类型
-     * @return 统计数量
-     */
-    public <T extends BaseDO> long countByConfig(Class<T> clazz, ConfigStore configStore) {
-        return dataRepository.countByConfig(clazz, configStore);
-    }
-
-    /**
-     * 分页查询实体
-     *
-     * @param clazz 实体类
-     * @param configStore 查询条件
-     * @param pageNo 页码（从1开始）
-     * @param pageSize 每页大小
-     * @param <T> 实体类型
-     * @return 分页结果
-     */
-    public <T extends BaseDO> PageResult<T> findPageWithConditions(Class<T> clazz, ConfigStore configStore,
-                                                   int pageNo, int pageSize) {
-        return dataRepository.findPageWithConditions(clazz, configStore, pageNo, pageSize);
-    }
-
-    // ==================== 数据源特定操作方法 ====================
-
-    /**
-     * 根据ID获取数据源
-     *
-     * @param datasourceId 数据源ID
-     * @return 数据源对象
-     */
-    public MetadataDatasourceDO getDatasourceById(String datasourceId) {
-        if (datasourceId == null || datasourceId.trim().isEmpty()) {
-            return null;
-        }
-
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and("id", Long.valueOf(datasourceId));
-        return findOne(MetadataDatasourceDO.class, configStore);
-    }
-
-    /**
-     * 根据ID获取数据源
-     *
-     * @param datasourceId 数据源ID
-     * @return 数据源对象
-     */
-    public MetadataDatasourceDO getDatasourceById(Long datasourceId) {
-        return findById(MetadataDatasourceDO.class, datasourceId);
-    }
-
-    /**
-     * 获取系统字段列表
-     *
-     * @return 系统字段列表
-     */
-    public List<MetadataSystemFieldsDO> getSystemFields() {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and("is_system_field", true);
-        return findAllByConfig(MetadataSystemFieldsDO.class, configStore);
-    }
-
-    /**
-     * 根据ID获取业务实体
-     *
-     * @param entityId 实体ID
-     * @return 业务实体对象
-     */
-    public MetadataBusinessEntityDO getBusinessEntityById(Long entityId) {
-        return findById(MetadataBusinessEntityDO.class, entityId);
-    }
-
-    /**
-     * 根据ID获取业务实体
-     *
-     * @param entityId 实体ID（字符串格式）
-     * @return 业务实体对象
-     */
-    public MetadataBusinessEntityDO getBusinessEntityById(String entityId) {
-        if (entityId == null || entityId.trim().isEmpty()) {
-            return null;
-        }
-        return findById(MetadataBusinessEntityDO.class, Long.valueOf(entityId));
     }
 }

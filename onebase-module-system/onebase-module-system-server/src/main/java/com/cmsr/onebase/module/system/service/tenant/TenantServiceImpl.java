@@ -1,30 +1,9 @@
 package com.cmsr.onebase.module.system.service.tenant;
 
-import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.LENANT_ALLOCATE_PERSON_COUNT_LESS_THEN_ALLOCATED;
-import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.LICENSE_USER_COUNT_NOT_ENOUGH;
-import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.TENANT_CAN_NOT_UPDATE_SYSTEM;
-import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.TENANT_DISABLE;
-import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.TENANT_EXPIRE;
-import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.TENANT_NAME_DUPLICATE;
-import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.TENANT_NOT_EXISTS;
-import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.TENANT_WEBSITE_DUPLICATE;
-import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.USER_USERNAME_EXISTS;
-import static java.util.Collections.singleton;
-
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.stereotype.Service;
-import org.springframework.validation.annotation.Validated;
-
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.lang.Assert;
+import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
@@ -55,13 +34,24 @@ import com.cmsr.onebase.module.system.service.permission.RoleService;
 import com.cmsr.onebase.module.system.service.tenant.handler.TenantInfoHandler;
 import com.cmsr.onebase.module.system.service.tenant.handler.TenantMenuHandler;
 import com.cmsr.onebase.module.system.service.user.AdminUserService;
-
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.lang.Assert;
-import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.core.util.StrUtil;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.anyline.data.param.init.DefaultConfigStore;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+
+import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
+import static java.util.Collections.singleton;
 
 /**
  * 租户 Service 实现类
@@ -139,17 +129,16 @@ public class TenantServiceImpl implements TenantService {
             // 获取license总人数限制
             Integer licenseTotalCount = license.getTenantLimit();
             // 获取已分配人员数量
-            Integer allocatedCount = userService.getUserCountByStatus(UserStatusEnum.NORMAL);
-
+            Integer allocatedCount = getTenantCountByStatus(TenantStatusEnum.NORMAL.getStatus());
             // 如果传入的分配人员数量加上已分配数量超过license限制，则报错
-            if (createReqVO.getAllocatePersonCount()!= null &&
-                    (allocatedCount + createReqVO.getAllocatePersonCount()) > licenseTotalCount) {
-
+            if (createReqVO.getAccountCount()!= null &&
+                    (allocatedCount + createReqVO.getAccountCount()) > licenseTotalCount) {
                 Integer remainingCount = licenseTotalCount - allocatedCount;
                 throw exception(LICENSE_USER_COUNT_NOT_ENOUGH,
                         licenseTotalCount,
                         remainingCount);
             }
+            createReqVO.setAllocatePersonCount(allocatedCount);
         }
         
         // 校验联系人用户名是否已存在
@@ -189,7 +178,7 @@ public class TenantServiceImpl implements TenantService {
         // 创建用户
         Long userId = userService.createUser(TenantConvert.INSTANCE.convert02(createReqVO));
         // 分配角色
-        permissionService.assignUserRole(userId, singleton(roleId));
+        permissionService.assignUserRoles(userId, singleton(roleId));
         return userId;
     }
 
@@ -236,7 +225,7 @@ public class TenantServiceImpl implements TenantService {
             // 获取license总人数限制
             Integer licenseTotalCount = license.getTenantLimit();
             // 获取已分配人员数量
-            Integer allocatedCount = getTenantCountByStatus(TenantStatusEnum.NORMAL);
+            Integer allocatedCount = getTenantCountByStatus(TenantStatusEnum.NORMAL.getStatus());
 
             // 如果传入的分配人员数量加上已分配数量超过license限制，则报错
             if (updateReqVO.getAllocatePersonCount()!= null &&
@@ -395,8 +384,8 @@ public class TenantServiceImpl implements TenantService {
     }
 
     @Override
-    public Integer getTenantCountByStatus(TenantStatusEnum tenantStatusEnum) {
-        return (int) dataRepository.countByConfig(TenantDO.class, new DefaultConfigStore().eq("status", tenantStatusEnum.getStatus()));
+    public Integer getTenantCountByStatus(Integer status) {
+        return (int) dataRepository.countByConfig(TenantDO.class, new DefaultConfigStore().eq(TenantDO.STATUS, status));
     }
 
     @Override

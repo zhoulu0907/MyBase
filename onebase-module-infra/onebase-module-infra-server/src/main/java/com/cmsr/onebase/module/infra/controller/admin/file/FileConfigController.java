@@ -36,7 +36,7 @@ public class FileConfigController {
         return success(fileConfigService.createFileConfig(createReqVO));
     }
 
-    @PutMapping("/update")
+    @PostMapping("/update")
     @Operation(summary = "更新文件配置")
     @PreAuthorize("@ss.hasPermission('infra:file-config:update')")
     public CommonResult<Boolean> updateFileConfig(@Valid @RequestBody FileConfigSaveReqVO updateReqVO) {
@@ -44,7 +44,7 @@ public class FileConfigController {
         return success(true);
     }
 
-    @PutMapping("/update-master")
+    @PostMapping("/update-master")
     @Operation(summary = "更新文件配置为 Master")
     @PreAuthorize("@ss.hasPermission('infra:file-config:update')")
     public CommonResult<Boolean> updateFileConfigMaster(@RequestParam("id") Long id) {
@@ -52,7 +52,7 @@ public class FileConfigController {
         return success(true);
     }
 
-    @DeleteMapping("/delete")
+    @PostMapping("/delete")
     @Operation(summary = "删除文件配置")
     @Parameter(name = "id", description = "编号", required = true)
     @PreAuthorize("@ss.hasPermission('infra:file-config:delete')")

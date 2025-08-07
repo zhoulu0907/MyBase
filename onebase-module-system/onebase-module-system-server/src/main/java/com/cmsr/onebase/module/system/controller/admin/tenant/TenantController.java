@@ -78,7 +78,7 @@ public class TenantController {
         return success(tenantService.createTenant(createReqVO));
     }
 
-    @PutMapping("/update")
+    @PostMapping("/update")
     @Operation(summary = "更新租户")
     @PreAuthorize("@ss.hasPermission('system:tenant:update')")
     public CommonResult<Boolean> updateTenant(@Valid @RequestBody TenantSaveReqVO updateReqVO) {
@@ -86,7 +86,7 @@ public class TenantController {
         return success(true);
     }
 
-    @DeleteMapping("/delete")
+    @PostMapping("/delete")
     @Operation(summary = "删除租户")
     @Parameter(name = "id", description = "编号", required = true, example = "1024")
     @PreAuthorize("@ss.hasPermission('system:tenant:delete')")

@@ -42,7 +42,7 @@ public class NotifyTemplateController {
         return success(notifyTemplateService.createNotifyTemplate(createReqVO));
     }
 
-    @PutMapping("/update")
+    @PostMapping("/update")
     @Operation(summary = "更新站内信模版")
     @PreAuthorize("@ss.hasPermission('system:notify-template:update')")
     public CommonResult<Boolean> updateNotifyTemplate(@Valid @RequestBody NotifyTemplateSaveReqVO updateReqVO) {
@@ -50,7 +50,7 @@ public class NotifyTemplateController {
         return success(true);
     }
 
-    @DeleteMapping("/delete")
+    @PostMapping("/delete")
     @Operation(summary = "删除站内信模版")
     @Parameter(name = "id", description = "编号", required = true)
     @PreAuthorize("@ss.hasPermission('system:notify-template:delete')")

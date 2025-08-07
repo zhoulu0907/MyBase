@@ -139,7 +139,7 @@ public class OAuth2OpenController {
         return success(OAuth2OpenConvert.INSTANCE.convert(accessTokenDO));
     }
 
-    @DeleteMapping("/token")
+    @PostMapping("/revoke-token")
     @PermitAll
     @Operation(summary = "删除访问令牌")
     @Parameter(name = "token", required = true, description = "访问令牌", example = "biu")

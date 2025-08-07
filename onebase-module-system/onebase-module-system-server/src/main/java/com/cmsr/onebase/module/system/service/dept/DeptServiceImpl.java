@@ -6,9 +6,11 @@ import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.system.controller.admin.dept.vo.dept.DeptListReqVO;
+import com.cmsr.onebase.module.system.controller.admin.dept.vo.dept.DeptRespVO;
 import com.cmsr.onebase.module.system.controller.admin.dept.vo.dept.DeptSaveReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.module.system.dal.redis.RedisKeyConstants;
+import com.cmsr.onebase.module.system.service.user.AdminUserService;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -16,14 +18,14 @@ import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Compare;
 import org.anyline.entity.Order;
-import org.anyline.entity.generator.PrimaryGenerator;
-import org.anyline.util.ConfigTable;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.convertSet;
@@ -31,6 +33,8 @@ import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
 
 /**
  * 部门 Service 实现类
+ *
+ * @author matianyu
  */
 @Service
 @Validated
@@ -42,6 +46,10 @@ public class DeptServiceImpl implements DeptService {
 
     @Resource
     private DataRepository dataRepository;
+
+    @Lazy
+    @Resource
+    private AdminUserService adminUserService;
 
     @Override
     @CacheEvict(cacheNames = RedisKeyConstants.DEPT_CHILDREN_ID_LIST,
@@ -197,7 +205,6 @@ public class DeptServiceImpl implements DeptService {
 
     @Override
     public List<DeptDO> getDeptList(DeptListReqVO reqVO) {
-        try {
             ConfigStore configs = new DefaultConfigStore();
 
             // 构建查询条件
@@ -210,10 +217,6 @@ public class DeptServiceImpl implements DeptService {
             configs.order("sort", Order.TYPE.ASC);
             List<DeptDO> list = dataRepository.findAll(DeptDO.class, configs);
             return list;
-        } catch (Exception e) {
-            log.error("查询部门列表失败", e);
-            return Collections.emptyList();
-        }
     }
 
     @Override
@@ -256,7 +259,7 @@ public class DeptServiceImpl implements DeptService {
             configs.and(Compare.EQUAL, "leader_user_id", id);
             return dataRepository.findAll(DeptDO.class, configs);
         } catch (Exception e) {
-            log.error("根据负责人用户ID查询部门列表失败: id={}", id, e);
+            log.error("根据管理员用户ID查询部门列表失败: id={}", id, e);
             return Collections.emptyList();
         }
     }
@@ -285,6 +288,27 @@ public class DeptServiceImpl implements DeptService {
                 throw exception(DEPT_NOT_ENABLE, dept.getName());
             }
         });
+    }
+
+    @Override
+    public List<DeptRespVO> getDeptListWithUserCount(DeptListReqVO reqVO) {
+        // 1. 获取部门列表
+        List<DeptDO> deptList = getDeptList(reqVO);
+        List<DeptRespVO> respList = BeanUtils.toBean(deptList, DeptRespVO.class);
+
+        // 2. 批量获取所有部门的人数统计
+        List<Long> deptIds = deptList.stream()
+            .map(DeptDO::getId)
+            .collect(Collectors.toList());
+        Map<Long, Integer> deptUserCountMap = adminUserService.getUserCountByDeptIds(deptIds);
+
+        // 3. 设置每个部门的人数
+        respList.forEach(dept -> {
+            Integer userCount = deptUserCountMap.getOrDefault(dept.getId(), 0);
+            dept.setUserCount(userCount);
+        });
+
+        return respList;
     }
 
 }

@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 
 @Schema(description = "管理后台 - 用户信息 Response VO")
@@ -74,5 +75,31 @@ public class UserRespVO{
 
     @Schema(description = "用户类型", example = "1")
     private Integer userType;
+
+    /**
+     * 用户角色列表
+     */
+    @Schema(description = "用户角色列表")
+    private List<UserRoleRespVO> roles;
+
+    /**
+     * 用户角色响应对象
+     */
+    @Schema(description = "用户角色信息")
+    @Data
+    public static class UserRoleRespVO {
+        
+        /**
+         * 角色ID
+         */
+        @Schema(description = "角色ID", example = "1")
+        private Long id;
+        
+        /**
+         * 角色名称
+         */
+        @Schema(description = "角色名称", example = "管理员")
+        private String name;
+    }
 
 }

@@ -24,16 +24,16 @@ import java.time.LocalDateTime;
 public class TenantDO extends BaseDO {
 
     // 字段列名常量
-    private static final String NAME                    = "name";
-    private static final String CONTACT_USER_ID         = "contact_user_id";
-    private static final String CONTACT_NAME            = "contact_name";
-    private static final String CONTACT_MOBILE          = "contact_mobile";
-    private static final String STATUS                  = "status";
-    private static final String WEBSITE                 = "website";
-    private static final String PACKAGE_ID              = "package_id";
-    private static final String EXPIRE_TIME             = "expire_time";
-    private static final String ACCOUNT_COUNT           = "account_count";
-    private static final String ALLOCATE_PERSON_COUNT   = "allocate_person_count";
+    public static final String NAME                    = "name";
+    public static final String CONTACT_USER_ID         = "contact_user_id";
+    public static final String CONTACT_NAME            = "contact_name";
+    public static final String CONTACT_MOBILE          = "contact_mobile";
+    public static final String STATUS                  = "status";
+    public static final String WEBSITE                 = "website";
+    public static final String PACKAGE_ID              = "package_id";
+    public static final String EXPIRE_TIME             = "expire_time";
+    public static final String ACCOUNT_COUNT           = "account_count";
+    public static final String ALLOCATE_PERSON_COUNT   = "allocate_person_count";
 
     // builder模式可正常运作
     public TenantDO setId(Long id){

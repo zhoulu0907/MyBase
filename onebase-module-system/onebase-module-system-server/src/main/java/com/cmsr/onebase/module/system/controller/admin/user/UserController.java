@@ -9,7 +9,6 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.excel.core.util.ExcelUtils;
 import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
-import com.cmsr.onebase.module.system.controller.admin.tenant.vo.tenant.TenantRespVO;
 import com.cmsr.onebase.module.system.controller.admin.user.vo.user.*;
 import com.cmsr.onebase.module.system.convert.user.UserConvert;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
@@ -17,7 +16,6 @@ import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.enums.common.SexEnum;
 import com.cmsr.onebase.module.system.enums.permission.RoleCodeEnum;
-import com.cmsr.onebase.module.system.enums.permission.RoleTypeEnum;
 import com.cmsr.onebase.module.system.enums.permission.UserTypeEnum;
 import com.cmsr.onebase.module.system.service.dept.DeptService;
 import com.cmsr.onebase.module.system.service.permission.PermissionService;
@@ -30,7 +28,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -44,7 +41,7 @@ import static com.cmsr.onebase.framework.apilog.core.enums.OperateTypeEnum.EXPOR
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.convertList;
-import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.USER_PASSWORD_NOT_ALLOW_DEL;
 
 @Tag(name = "管理后台 - 用户")
 @RestController
@@ -78,7 +75,7 @@ public class UserController {
             RoleDO roleDO = roleService.getRoleIdsByCode(RoleCodeEnum.SUPER_ADMIN.getCode());
             Set<Long> roleIds = new HashSet<>();
             roleIds.add(roleDO.getId());
-            permissionService.assignUserRole(id,roleIds);
+            permissionService.assignUserRoles(id,roleIds);
         }
 
         return success(id);
@@ -93,7 +90,7 @@ public class UserController {
         return success(BeanUtils.toBean(pageResult, UserRespVO.class));
     }
 
-    @PutMapping("/platform-admin/update")
+    @PostMapping("/platform-admin/update")
     @Operation(summary = "修改平台管理员邮箱")
     @PreAuthorize("@ss.hasPermission('system:platform-admin:update')")
     public CommonResult<Boolean> updatePlatformAdmin(@Valid @RequestBody Map map) {
@@ -101,7 +98,7 @@ public class UserController {
         return success(true);
     }
 
-    @DeleteMapping("/platform-admin/delete")
+    @PostMapping("/platform-admin/delete")
     @Operation(summary = "删除平台管理员")
     @Parameter(name = "id", description = "编号", required = true, example = "1024")
     @PreAuthorize("@ss.hasPermission('system:platform-admin:delete')")
@@ -114,7 +111,7 @@ public class UserController {
         return success(true);
     }
 
-    @PutMapping("/update-platform-password")
+    @PostMapping("/update-platform/password")
     @Operation(summary = "重置平台用户密码")
     @PreAuthorize("@ss.hasPermission('system:platform-admin:update-password')")
     public CommonResult<Boolean> updatePlatformUserPassword(@Valid @RequestBody UserUpdatePasswordReqVO reqVO) {
@@ -145,7 +142,7 @@ public class UserController {
         return success(id);
     }
 
-    @PutMapping("/update")
+    @PostMapping("/update")
     @Operation(summary = "修改用户")
     @PreAuthorize("@ss.hasPermission('system:user:update')")
     public CommonResult<Boolean> updateUser(@Valid @RequestBody UserSaveReqVO reqVO) {
@@ -153,7 +150,7 @@ public class UserController {
         return success(true);
     }
 
-    @DeleteMapping("/delete")
+    @PostMapping("/delete")
     @Operation(summary = "删除用户")
     @Parameter(name = "id", description = "编号", required = true, example = "1024")
     @PreAuthorize("@ss.hasPermission('system:user:delete')")
@@ -162,7 +159,7 @@ public class UserController {
         return success(true);
     }
 
-    @PutMapping("/update-password")
+    @PostMapping("/update-password")
     @Operation(summary = "重置用户密码")
     @PreAuthorize("@ss.hasPermission('system:user:update-password')")
     public CommonResult<Boolean> updateUserPassword(@Valid @RequestBody UserUpdatePasswordReqVO reqVO) {
@@ -170,7 +167,7 @@ public class UserController {
         return success(true);
     }
 
-    @PutMapping("/update-status")
+    @PostMapping("/update-status")
     @Operation(summary = "修改用户状态")
     @PreAuthorize("@ss.hasPermission('system:user:update')")
     public CommonResult<Boolean> updateUserStatus(@Valid @RequestBody UserUpdateStatusReqVO reqVO) {
@@ -209,13 +206,8 @@ public class UserController {
     @Parameter(name = "id", description = "编号", required = true, example = "1024")
     @PreAuthorize("@ss.hasPermission('system:user:query')")
     public CommonResult<UserRespVO> getUser(@RequestParam("id") Long id) {
-        AdminUserDO user = userService.getUser(id);
-        if (user == null) {
-            return success(null);
-        }
-        // 拼接数据
-        DeptDO dept = deptService.getDept(user.getDeptId());
-        return success(UserConvert.INSTANCE.convert(user, dept));
+        UserRespVO userDetail = userService.getUserWithRoles(id);
+        return success(userDetail);
     }
 
     @GetMapping("/export")

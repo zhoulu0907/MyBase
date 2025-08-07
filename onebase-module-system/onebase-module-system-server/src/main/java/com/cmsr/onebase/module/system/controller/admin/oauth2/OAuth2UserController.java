@@ -67,7 +67,7 @@ public class OAuth2UserController {
         return success(resp);
     }
 
-    @PutMapping("/update")
+    @PostMapping("/update")
     @Operation(summary = "更新用户基本信息")
     @PreAuthorize("@ss.hasScope('user.write')")
     public CommonResult<Boolean> updateUserInfo(@Valid @RequestBody OAuth2UserUpdateReqVO reqVO) {

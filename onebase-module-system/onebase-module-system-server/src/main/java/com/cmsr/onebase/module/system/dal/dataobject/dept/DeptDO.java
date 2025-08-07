@@ -44,7 +44,7 @@ public class DeptDO extends TenantBaseDO {
     @Column(name = SORT)
     private Integer sort;
     /**
-     * 负责人
+     * 管理员
      *
      * 关联 {@link AdminUserDO#getId()}
      */

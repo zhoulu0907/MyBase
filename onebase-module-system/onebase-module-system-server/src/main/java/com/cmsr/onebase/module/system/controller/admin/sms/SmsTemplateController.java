@@ -45,7 +45,7 @@ public class SmsTemplateController {
         return success(smsTemplateService.createSmsTemplate(createReqVO));
     }
 
-    @PutMapping("/update")
+    @PostMapping("/update")
     @Operation(summary = "更新短信模板")
     @PreAuthorize("@ss.hasPermission('system:sms-template:update')")
     public CommonResult<Boolean> updateSmsTemplate(@Valid @RequestBody SmsTemplateSaveReqVO updateReqVO) {
@@ -53,7 +53,7 @@ public class SmsTemplateController {
         return success(true);
     }
 
-    @DeleteMapping("/delete")
+    @PostMapping("/delete")
     @Operation(summary = "删除短信模板")
     @Parameter(name = "id", description = "编号", required = true)
     @PreAuthorize("@ss.hasPermission('system:sms-template:delete')")

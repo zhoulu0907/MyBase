@@ -38,7 +38,7 @@ public class OAuth2TokenController {
         return success(BeanUtils.toBean(pageResult, OAuth2AccessTokenRespVO.class));
     }
 
-    @DeleteMapping("/delete")
+    @PostMapping("/delete")
     @Operation(summary = "删除访问令牌")
     @Parameter(name = "accessToken", description = "访问令牌", required = true, example = "tudou")
     @PreAuthorize("@ss.hasPermission('system:oauth2-token:delete')")
