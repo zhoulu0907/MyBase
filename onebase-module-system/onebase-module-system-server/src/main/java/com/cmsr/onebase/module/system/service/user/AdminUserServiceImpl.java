@@ -89,7 +89,7 @@ public class AdminUserServiceImpl implements AdminUserService {
     @Transactional(rollbackFor = Exception.class)
     @LogRecord(type = SYSTEM_USER_TYPE, subType = SYSTEM_USER_CREATE_SUB_TYPE, bizNo = "{{#user.id}}",
             success = SYSTEM_USER_CREATE_SUCCESS)
-    public Long createUser(UserSaveReqVO createReqVO) {
+    public Long createUser(UserInsertReqVO createReqVO) {
         // 1.1 校验账户配合
         tenantService.handleTenantInfo(tenant -> {
 //            long count = userMapper.selectCount();
@@ -102,19 +102,24 @@ public class AdminUserServiceImpl implements AdminUserService {
         // 1.2 校验正确性
         validateUserForCreateOrUpdate(null, createReqVO.getUsername(),
                 createReqVO.getMobile(), createReqVO.getEmail(), createReqVO.getDeptId(), createReqVO.getPostIds());
+        // 1.3 校验角色权限
+        validateRoleIds(createReqVO.getRoleIds());
+
         // 2.1 插入用户
         AdminUserDO user = BeanUtils.toBean(createReqVO, AdminUserDO.class);
         user.setStatus(CommonStatusEnum.ENABLE.getStatus()); // 默认开启
         user.setPassword(encodePassword(createReqVO.getPassword())); // 加密密码
         dataRepository.insert(user);
-//        userMapper.insert(user);
 
         // 2.2 插入关联岗位
         if (CollectionUtil.isNotEmpty(user.getPostIds())) {
-//            userPostMapper.insertBatch(convertList(user.getPostIds(),
-//                    postId -> new UserPostDO().setUserId(user.getId()).setPostId(postId)));
             dataRepository.insertBatch(convertList(user.getPostIds(),
                     postId -> new UserPostDO().setUserId(user.getId()).setPostId(postId)));
+        }
+
+        // 2.3 插入用户角色关联
+        if (CollectionUtil.isNotEmpty(createReqVO.getRoleIds())) {
+            permissionService.assignUserRoles(user.getId(), createReqVO.getRoleIds());
         }
 
         // 3. 记录操作日志上下文
@@ -152,11 +157,12 @@ public class AdminUserServiceImpl implements AdminUserService {
     @Transactional(rollbackFor = Exception.class)
     @LogRecord(type = SYSTEM_USER_TYPE, subType = SYSTEM_USER_UPDATE_SUB_TYPE, bizNo = "{{#updateReqVO.id}}",
             success = SYSTEM_USER_UPDATE_SUCCESS)
-    public void updateUser(UserSaveReqVO updateReqVO) {
-        updateReqVO.setPassword(null); // 特殊：此处不更新密码
+    public void updateUser(UserUpdateReqVO updateReqVO) {
         // 1. 校验正确性
         AdminUserDO oldUser = validateUserForCreateOrUpdate(updateReqVO.getId(), updateReqVO.getUsername(),
                 updateReqVO.getMobile(), updateReqVO.getEmail(), updateReqVO.getDeptId(), updateReqVO.getPostIds());
+        // 1.1 校验角色权限
+        validateRoleIds(updateReqVO.getRoleIds());
 
         // 2.1 更新用户
         AdminUserDO updateObj = BeanUtils.toBean(updateReqVO, AdminUserDO.class);
@@ -164,9 +170,11 @@ public class AdminUserServiceImpl implements AdminUserService {
         dataRepository.update(updateObj);
         // 2.2 更新岗位
         updateUserPost(updateReqVO, updateObj);
+        // 2.3 更新用户角色关联
+        permissionService.assignUserRoles(updateReqVO.getId(),updateReqVO.getRoleIds());
 
         // 3. 记录操作日志上下文
-        LogRecordContext.putVariable(DiffParseFunction.OLD_OBJECT, BeanUtils.toBean(oldUser, UserSaveReqVO.class));
+        LogRecordContext.putVariable(DiffParseFunction.OLD_OBJECT, BeanUtils.toBean(oldUser, UserInsertReqVO.class));
         LogRecordContext.putVariable("user", oldUser);
     }
 
@@ -179,7 +187,7 @@ public class AdminUserServiceImpl implements AdminUserService {
         dataRepository.update(new AdminUserDO().setId(id).setEmail(email).setUpdateTime(LocalDateTime.now()));
     }
 
-    private void updateUserPost(UserSaveReqVO reqVO, AdminUserDO updateObj) {
+    private void updateUserPost(UserUpdateReqVO reqVO, AdminUserDO updateObj) {
         Long userId = reqVO.getId();
 
 //        Set<Long> dbPostIds = convertSet(userPostMapper.selectListByUserId(userId), UserPostDO::getPostId);
@@ -304,8 +312,8 @@ public class AdminUserServiceImpl implements AdminUserService {
         DefaultConfigStore configStore = new DefaultConfigStore();
 
         // 用户名模糊查询
-        if (StrUtil.isNotBlank(reqVO.getUsername())) {
-            configStore.like(AdminUserDO.USERNAME, reqVO.getUsername());
+        if (StrUtil.isNotBlank(reqVO.getNickname())) {
+            configStore.like(AdminUserDO.NICKNAME, reqVO.getNickname());
         }
 
         // 手机号模糊查询
@@ -567,7 +575,7 @@ public class AdminUserServiceImpl implements AdminUserService {
         importUsers.forEach(importUser -> {
             // 2.1.1 校验字段是否符合要求
             try {
-                ValidationUtils.validate(BeanUtils.toBean(importUser, UserSaveReqVO.class).setPassword(initPassword));
+                ValidationUtils.validate(BeanUtils.toBean(importUser, UserInsertReqVO.class).setPassword(initPassword));
             } catch (ConstraintViolationException ex) {
                 respVO.getFailureUsernames().put(importUser.getUsername(), ex.getMessage());
                 return;
@@ -682,6 +690,20 @@ public class AdminUserServiceImpl implements AdminUserService {
 
         // 转换为响应对象
         return UserConvert.INSTANCE.convert(user, dept, roles);
+    }
+
+    /**
+     * 校验角色ID列表的有效性
+     *
+     * @param roleIds 角色ID集合
+     */
+    private void validateRoleIds(Set<Long> roleIds) {
+        if (CollUtil.isEmpty(roleIds)) {
+            return;
+        }
+
+        // 校验角色是否存在且有效
+        roleService.validateRoleList(roleIds);
     }
 
 }

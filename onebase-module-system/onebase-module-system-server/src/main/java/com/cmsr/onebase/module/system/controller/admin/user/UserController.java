@@ -28,7 +28,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -56,14 +55,14 @@ public class UserController {
 
     @Resource
     private PermissionService permissionService;
-    @Autowired
+    @Resource
     private RoleService roleService;
 
     // ——————————————— 以下是平台管理员 ———————————————
     @PostMapping("/platform-admin/create")
     @Operation(summary = "新增平台管理员用户")
     @PreAuthorize("@ss.hasPermission('system:platform-admin:create')")
-    public CommonResult<Long> createPlatformAdmin(@Valid @RequestBody UserSaveReqVO reqVO) {
+    public CommonResult<Long> createPlatformAdmin(@Valid @RequestBody UserInsertReqVO reqVO) {
 
         reqVO.setNickname(RoleCodeEnum.SUPER_ADMIN.getName());
         Long id = userService.createUser(reqVO);
@@ -85,7 +84,7 @@ public class UserController {
     @Operation(summary = "获得平台管理员列表")
     @PreAuthorize("@ss.hasPermission('system:platform-admin:query')")
     public CommonResult<PageResult<UserRespVO>> getPlatformAdminPage(@Valid UserPageReqVO pageReqVO) {
-// 获得用户分页列表
+        // 获得用户分页列表
         PageResult<AdminUserDO> pageResult = userService.getUserPage(pageReqVO);
         return success(BeanUtils.toBean(pageResult, UserRespVO.class));
     }
@@ -137,7 +136,7 @@ public class UserController {
     @PostMapping("/create")
     @Operation(summary = "新增用户")
     @PreAuthorize("@ss.hasPermission('system:user:create')")
-    public CommonResult<Long> createUser(@Valid @RequestBody UserSaveReqVO reqVO) {
+    public CommonResult<Long> createUser(@Valid @RequestBody UserInsertReqVO reqVO) {
         Long id = userService.createUser(reqVO);
         return success(id);
     }
@@ -145,7 +144,7 @@ public class UserController {
     @PostMapping("/update")
     @Operation(summary = "修改用户")
     @PreAuthorize("@ss.hasPermission('system:user:update')")
-    public CommonResult<Boolean> updateUser(@Valid @RequestBody UserSaveReqVO reqVO) {
+    public CommonResult<Boolean> updateUser(@Valid @RequestBody UserUpdateReqVO reqVO) {
         userService.updateUser(reqVO);
         return success(true);
     }

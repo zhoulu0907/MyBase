@@ -28,7 +28,7 @@ public interface AdminUserService {
      * @param createReqVO 用户信息
      * @return 用户编号
      */
-    Long createUser(@Valid UserSaveReqVO createReqVO);
+    Long createUser(@Valid UserInsertReqVO createReqVO);
 
     /**
      * 注册用户
@@ -43,7 +43,7 @@ public interface AdminUserService {
      *
      * @param updateReqVO 用户信息
      */
-    void updateUser(@Valid UserSaveReqVO updateReqVO);
+    void updateUser(@Valid UserUpdateReqVO updateReqVO);
 
     /**
      * 修改用户
