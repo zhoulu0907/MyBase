@@ -1,7 +1,7 @@
-import React from "react";
-import { Typography } from "@arco-design/web-react";
+import React from 'react';
+import { Typography } from '@arco-design/web-react';
 
-import "./index.less";
+import './index.less';
 
 export interface InfoPanelProps {
   title: React.ReactNode;
@@ -19,7 +19,7 @@ const InfoPanel: React.FC<InfoPanelProps> = ({
   titleChildren,
   leftChildren,
   rightChildren,
-  wrapperClassName,
+  wrapperClassName
 }) => {
   return (
     <div className={`info-panel ${wrapperClassName}`}>
@@ -27,19 +27,11 @@ const InfoPanel: React.FC<InfoPanelProps> = ({
       <div className="info-panel__main">
         <div className="info-panel__title-wrapper">
           <div className="info-panel__title">{title}</div>
-          {titleChildren && (
-            <div className="info-panel__title-children">{titleChildren}</div>
-          )}
+          {titleChildren && <div className="info-panel__title-children">{titleChildren}</div>}
         </div>
-        {description && (
-          <Typography.Paragraph className="info-panel__description">
-            {description}
-          </Typography.Paragraph>
-        )}
+        {description && <Typography.Paragraph className="info-panel__description">{description}</Typography.Paragraph>}
       </div>
-      {rightChildren && (
-        <div className="info-panel__right">{rightChildren}</div>
-      )}
+      {rightChildren && <div className="info-panel__right">{rightChildren}</div>}
     </div>
   );
 };

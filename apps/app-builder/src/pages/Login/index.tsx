@@ -1,6 +1,6 @@
-import Left from "./components/left";
-import Right from "./components/right";
-import styles from "./index.module.less";
+import Left from './components/left';
+import Right from './components/right';
+import styles from './index.module.less';
 
 export default function Login() {
   return (

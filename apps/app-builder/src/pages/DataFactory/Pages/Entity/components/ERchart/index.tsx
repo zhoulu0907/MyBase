@@ -1,12 +1,12 @@
-import React, { useState, useEffect, useRef } from "react";
-import { Graph } from "@antv/x6";
+import { Graph } from '@antv/x6';
+import React, { useEffect, useRef, useState } from 'react';
 // import { ReactShape } from '@antv/x6-react-shape';
-import { register } from "@antv/x6-react-shape";
-import DetailDrawer from "../Drawer/DetailDrawer";
+import { register } from '@antv/x6-react-shape';
+import DetailDrawer from '../Drawers/DetailDrawer';
 // import EditDrawer from '../Drawer/EditDrawer';
-import { type EntityNode, type EntityERProps } from "../../utils/interface";
-import styles from "./ERchart.module.less";
-import EntityNodeComponent from "./ERnode";
+import { type EntityERProps, type EntityNode } from '../../../../utils/interface';
+import EntityNodeComponent from './ERnode';
+import styles from './index.module.less';
 
 const LINE_HEAD_HEIGHT = 48;
 const LINE_HEIGHT = 34.8;
@@ -15,14 +15,14 @@ const NODE_WIDTH = 280;
 const NODE_HEIGHT = 200;
 
 const ERchart: React.FC<EntityERProps> = ({
-  mode = "edit",
+  mode = 'edit',
   data,
   onNodeEdit,
   onNodeAdd,
   onNodeDelete,
   onNodeAddField,
   onNodeAddRelation,
-  onlyUpdateNode,
+  onlyUpdateNode
 }) => {
   const [selectedNode, setSelectedNode] = useState<EntityNode | null>(null);
   const [drawerVisible, setDrawerVisible] = useState(false);
@@ -35,17 +35,17 @@ const ERchart: React.FC<EntityERProps> = ({
   useEffect(() => {
     // 注册 React 形状节点
     register({
-      shape: "er-entity-node",
+      shape: 'er-entity-node',
       width: 280,
       height: 200,
       component: EntityNodeComponent,
-      effect: ["data"],
+      effect: ['data']
     });
 
     return () => {
       // Cleanup registration if needed
       try {
-        Graph.unregisterNode("er-entity-node");
+        Graph.unregisterNode('er-entity-node');
       } catch (e) {
         // Ignore if node was not registered
         console.log(e);
@@ -55,11 +55,11 @@ const ERchart: React.FC<EntityERProps> = ({
 
   // 初始化图形
   useEffect(() => {
-    console.log("Initializing graph...");
+    console.log('Initializing graph...');
 
     const initGraph = () => {
       if (!containerRef.current) {
-        console.warn("Container ref is not available");
+        console.warn('Container ref is not available');
         return;
       }
 
@@ -73,44 +73,44 @@ const ERchart: React.FC<EntityERProps> = ({
           },
           grid: {
             visible: true,
-            type: "mesh",
+            type: 'mesh',
             size: 20,
             args: {
-              color: "#eee",
-              thickness: 1,
-            },
+              color: '#eee',
+              thickness: 1
+            }
           },
           connecting: {
-            anchor: "right",
-            connector: "rounded", // 或 'smooth', 'jumpover', 或自定义
-            connectionPoint: "anchor",
+            anchor: 'right',
+            connector: 'rounded', // 或 'smooth', 'jumpover', 或自定义
+            connectionPoint: 'anchor',
             allowBlank: false,
             highlight: true,
             snap: true,
             createEdge() {
               return graphRef.current!.createEdge({
-                shape: "edge",
+                shape: 'edge',
                 attrs: {
                   line: {
-                    stroke: "#39B85F",
+                    stroke: '#39B85F',
                     strokeWidth: 2,
                     targetMarker: {
-                      name: "block",
+                      name: 'block',
                       width: 12,
-                      height: 8,
-                    },
-                  },
-                },
+                      height: 8
+                    }
+                  }
+                }
               });
-            },
+            }
           },
           interacting: {
-            nodeMovable: mode === "edit",
-            edgeMovable: mode === "edit",
-            edgeLabelMovable: mode === "edit",
+            nodeMovable: mode === 'edit',
+            edgeMovable: mode === 'edit',
+            edgeLabelMovable: mode === 'edit'
           },
           panning: true, // 支持拖拽平移
-          mousewheel: true, // 支持鼠标滚轮缩放
+          mousewheel: true // 支持鼠标滚轮缩放
           // zooming: true, // 支持缩放
           // zoomingOptions: {
           //   min: 0.5,
@@ -119,12 +119,12 @@ const ERchart: React.FC<EntityERProps> = ({
           // },
         });
       } catch (error) {
-        console.error("Failed to create graph:", error);
+        console.error('Failed to create graph:', error);
         return;
       }
 
       // 事件监听
-      graphRef.current.on("node:click", ({ node }) => {
+      graphRef.current.on('node:click', ({ node }) => {
         const nodeData = node.getData() as EntityNode;
         if (nodeData) {
           setSelectedNode(nodeData);
@@ -132,41 +132,37 @@ const ERchart: React.FC<EntityERProps> = ({
         }
       });
 
-      graphRef.current.on("node:mouseenter", ({ node }) => {
-        if (mode === "edit") {
+      graphRef.current.on('node:mouseenter', ({ node }) => {
+        if (mode === 'edit') {
           node.setAttrs({
             body: {
-              stroke: "#39B85F",
-              strokeWidth: 2,
-            },
+              stroke: '#39B85F',
+              strokeWidth: 2
+            }
           });
         }
       });
 
-      graphRef.current.on("node:mouseleave", ({ node }) => {
+      graphRef.current.on('node:mouseleave', ({ node }) => {
         node.setAttrs({
           body: {
-            stroke: "#d9d9d9",
-            strokeWidth: 1,
-          },
+            stroke: '#d9d9d9',
+            strokeWidth: 1
+          }
         });
       });
 
-      graphRef.current.on("node:moved", ({ e, x, y, node, view }) => {
-        console.log("node:moved", e, x, y, node, view);
+      graphRef.current.on('node:moved', ({ e, x, y, node, view }) => {
+        console.log('node:moved', e, x, y, node, view);
         const { nodes, edges } = JSON.parse(
-          localStorage.getItem("entityFormValues") ||
-            JSON.stringify({ nodes: [], edges: [] }),
+          localStorage.getItem('entityFormValues') || JSON.stringify({ nodes: [], edges: [] })
         );
         const nodeData = nodes.find((n: EntityNode) => n.id === node.id);
         if (nodeData) {
           nodeData.x = x;
           nodeData.y = y;
         }
-        localStorage.setItem(
-          "entityFormValues",
-          JSON.stringify({ nodes, edges }),
-        );
+        localStorage.setItem('entityFormValues', JSON.stringify({ nodes, edges }));
       });
 
       isGraphInitialized.current = true; // 标记已初始化
@@ -184,11 +180,11 @@ const ERchart: React.FC<EntityERProps> = ({
   }, []);
 
   useEffect(() => {
-    console.log("data changed.");
+    console.log('data changed.');
 
     // 只在首次渲染时居中，后续更新保持用户操作的位置
     if (isGraphInitialized.current) {
-      console.log("First data load, centering content.");
+      console.log('First data load, centering content.');
       graphRef?.current?.zoomToFit({ maxScale: 1 });
       // graphRef?.current?.centerContent();
     }
@@ -201,33 +197,23 @@ const ERchart: React.FC<EntityERProps> = ({
         const portsItems = (nodeData: EntityNode) => {
           const items: object[] = [];
           nodeData.fields.forEach((field, index) => {
-            const extraTitleHeight = field.isSystem
-              ? LINE_TITLE_HEIGHT
-              : LINE_TITLE_HEIGHT * 2;
+            const extraTitleHeight = field.isSystem ? LINE_TITLE_HEIGHT : LINE_TITLE_HEIGHT * 2;
             const accumulatedHeight = index >= 1 ? index * LINE_HEIGHT : 0;
 
             const leftItem = {
-              id: field.id + "_target", // 使用字段的唯一 ID 作为 port ID
-              group: "left", // 指定属于 'left' 组
+              id: field.id + '_target', // 使用字段的唯一 ID 作为 port ID
+              group: 'left', // 指定属于 'left' 组
               args: {
                 x: 0,
-                y:
-                  LINE_HEAD_HEIGHT +
-                  extraTitleHeight +
-                  accumulatedHeight +
-                  LINE_HEIGHT / 2, // y = 头部高度 + 累积高度 + 额外标题行高度 + 当前字段高度的一半
-              },
+                y: LINE_HEAD_HEIGHT + extraTitleHeight + accumulatedHeight + LINE_HEIGHT / 2 // y = 头部高度 + 累积高度 + 额外标题行高度 + 当前字段高度的一半
+              }
             };
             const rightItem = {
-              id: field.id + "_source", // 使用字段的唯一 ID 作为 port ID
-              group: "right", // 指定属于 'right' 组
+              id: field.id + '_source', // 使用字段的唯一 ID 作为 port ID
+              group: 'right', // 指定属于 'right' 组
               args: {
                 x: NODE_WIDTH,
-                y:
-                  LINE_HEAD_HEIGHT +
-                  extraTitleHeight +
-                  accumulatedHeight +
-                  LINE_HEIGHT / 2, // y = 头部高度 + 累积高度 + 额外标题行高度 + 当前字段高度的一半
+                y: LINE_HEAD_HEIGHT + extraTitleHeight + accumulatedHeight + LINE_HEIGHT / 2 // y = 头部高度 + 累积高度 + 额外标题行高度 + 当前字段高度的一半
               }, // 传递字段索引，用于布局
               // 可以自定义 attrs 来覆盖 group 的默认 attrs
               attrs: {
@@ -236,7 +222,7 @@ const ERchart: React.FC<EntityERProps> = ({
                 // height: currentFieldHeight,
                 // width: NODE_WIDTH,
                 // }
-              },
+              }
             };
             items.push(leftItem);
             items.push(rightItem);
@@ -249,7 +235,7 @@ const ERchart: React.FC<EntityERProps> = ({
           y: nodeData.y,
           width: NODE_WIDTH,
           height: NODE_HEIGHT,
-          shape: "er-entity-node",
+          shape: 'er-entity-node',
           data: {
             data: nodeData,
             // mode,
@@ -257,16 +243,16 @@ const ERchart: React.FC<EntityERProps> = ({
             onNodeAdd,
             onNodeDelete,
             onNodeAddField,
-            onNodeAddRelation,
+            onNodeAddRelation
           },
           attrs: {
             body: {
-              fill: "#fff",
-              stroke: "#d9d9d9",
+              fill: '#fff',
+              stroke: '#d9d9d9',
               strokeWidth: 1,
               rx: 4,
-              ry: 4,
-            },
+              ry: 4
+            }
           },
           // portMarkup: [Markup.getForeignObjectMarkup()],
           // --- 动态添加 ports ---
@@ -290,34 +276,34 @@ const ERchart: React.FC<EntityERProps> = ({
                     // magnet: true, // 确保 port 是可以连接的
                     r: 1,
                     magnet: true,
-                    stroke: "transparent",
-                    fill: "transparent",
-                    strokeWidth: 0,
-                  },
+                    stroke: 'transparent',
+                    fill: 'transparent',
+                    strokeWidth: 0
+                  }
                 },
                 // position: 'erPortPosition', // 使用您自定义的布局
                 position: {
-                  name: "absolute",
+                  name: 'absolute'
                   // args: { x: 0, y: 0 },
-                },
+                }
               },
               right: {
                 attrs: {
                   circle: {
                     r: 1,
                     magnet: true,
-                    stroke: "transparent",
-                    fill: "transparent",
-                    strokeWidth: 0,
-                  },
+                    stroke: 'transparent',
+                    fill: 'transparent',
+                    strokeWidth: 0
+                  }
                 },
                 position: {
-                  name: "absolute",
-                },
-              },
+                  name: 'absolute'
+                }
+              }
             },
             // 连接桩定义
-            items: portsItems(nodeData),
+            items: portsItems(nodeData)
             // items: nodeData.fields.map((field, index) => {
             //   const currentFieldHeight = LINE_HEIGHT;
             //   const extraTitleHeight = field.isSystem ? LINE_TITLE_HEIGHT : LINE_TITLE_HEIGHT * 2;
@@ -341,7 +327,7 @@ const ERchart: React.FC<EntityERProps> = ({
             //     }
             //   };
             // }),
-          },
+          }
         });
         graphRef.current?.addNode(node);
       });
@@ -355,21 +341,21 @@ const ERchart: React.FC<EntityERProps> = ({
         const target = edgeData.target;
 
         const edge = graphRef.current!.createEdge({
-          source: { cell: source.cell, port: source.port + "_source" },
-          target: { cell: target.cell, port: target.port + "_target" },
+          source: { cell: source.cell, port: source.port + '_source' },
+          target: { cell: target.cell, port: target.port + '_target' },
           attrs: {
             line: {
               // 连线样式
-              stroke: "#39B85F",
+              stroke: '#39B85F',
               strokeWidth: 2,
               targetMarker: {
-                name: "block",
+                name: 'block',
                 width: 12,
-                height: 8,
-              },
-            },
+                height: 8
+              }
+            }
           },
-          connector: { name: "smooth" }, // 曲线
+          connector: { name: 'smooth' }, // 曲线
           // vertices: [ // 路径
           //   { x: 200, y: 200 },
           //   { x: 380, y: 120 },
@@ -381,15 +367,15 @@ const ERchart: React.FC<EntityERProps> = ({
                   attrs: {
                     label: {
                       text: edgeData.label,
-                      fill: "#39B85F",
+                      fill: '#39B85F',
                       fontSize: 12,
-                      textAnchor: "middle",
-                      textVerticalAnchor: "middle",
-                    },
-                  },
-                },
+                      textAnchor: 'middle',
+                      textVerticalAnchor: 'middle'
+                    }
+                  }
+                }
               ]
-            : [],
+            : []
           // 可以添加其他边的属性，如 router, connector 等来优化连线路径
           // router: 'manhattan', // 例如使用直角路由
           // connector: { name: 'rounded', args: { radius: 8 }}, // 例如使用圆角连接
@@ -398,41 +384,27 @@ const ERchart: React.FC<EntityERProps> = ({
       });
     }
 
-    if (
-      !isGraphInitialized.current &&
-      data?.nodes?.length === 1 &&
-      !onlyUpdateNode
-    ) {
-      console.log("onlyUpdateNode.");
+    if (!isGraphInitialized.current && data?.nodes?.length === 1 && !onlyUpdateNode) {
+      console.log('onlyUpdateNode.');
       // graphRef?.current?.centerPoint(data?.nodes?.[0]?.x || 0, data?.nodes?.[0]?.y - 200 || 0);
-      graphRef?.current?.centerPoint(
-        data?.nodes?.[0]?.x || 0,
-        data?.nodes?.[0]?.y - 200 || 0,
-      );
+      graphRef?.current?.centerPoint(data?.nodes?.[0]?.x || 0, data?.nodes?.[0]?.y - 200 || 0);
     }
 
     if (isGraphInitialized.current) {
-      console.log("isFirstRender.");
+      console.log('isFirstRender.');
       // graphRef?.current?.zoomToFit({ maxScale: 1 });
       // graphRef?.current?.centerContent();
-      graphRef?.current?.centerPoint(
-        data?.nodes?.[0]?.x || 0,
-        data?.nodes?.[0]?.y - 200 || 0,
-      );
+      graphRef?.current?.centerPoint(data?.nodes?.[0]?.x || 0, data?.nodes?.[0]?.y - 200 || 0);
       isGraphInitialized.current = false;
     }
   }, [data]);
 
   return (
-    <div className={styles["entity-er-container"]}>
-      <div ref={containerRef} className={styles["graph-container"]} />
+    <div className={styles['entity-er-container']}>
+      <div ref={containerRef} className={styles['graph-container']} />
 
       {/* 节点详情抽屉 */}
-      <DetailDrawer
-        selectedNode={selectedNode as EntityNode}
-        visible={drawerVisible}
-        setVisible={setDrawerVisible}
-      />
+      <DetailDrawer selectedNode={selectedNode as EntityNode} visible={drawerVisible} setVisible={setDrawerVisible} />
     </div>
   );
 };

@@ -1,5 +1,5 @@
-import { HttpClient } from "@onebase/common";
-import { getBackendURL } from "../base";
+import { HttpClient } from '@onebase/common';
+import { getBackendURL } from '../base';
 export class SystemService {
   private httpClient: HttpClient | null = null;
   private baseURL?: string;
@@ -16,12 +16,12 @@ export class SystemService {
       this.httpClient = new HttpClient({
         baseURL: this.baseURL || getBackendURL(),
         timeout: 10000,
-        prefix: "/app",
+        prefix: '/app',
         headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
-          "Tenant-Id": "1",
-        },
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+          'Tenant-Id': '1'
+        }
       });
     }
     return this.httpClient;

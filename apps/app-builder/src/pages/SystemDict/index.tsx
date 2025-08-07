@@ -1,14 +1,6 @@
-import DictList from "@/pages/SystemDict/components/dict-list";
-import DictionaryTable from "@/pages/SystemDict/components/dict-table";
-import {
-  Layout,
-  Message,
-  Modal,
-  Button,
-  Space,
-  Empty,
-  Divider,
-} from "@arco-design/web-react";
+import DictList from '@/pages/SystemDict/components/dict-list';
+import DictionaryTable from '@/pages/SystemDict/components/dict-table';
+import { Layout, Message, Modal, Button, Space, Empty, Divider } from '@arco-design/web-react';
 import {
   createDict,
   deleteDict,
@@ -16,15 +8,15 @@ import {
   getAllDictList,
   getDictDataListByPage,
   updateDict,
-  getDictDetail,
-} from "@onebase/platform-center";
-import type { PageParam } from "@onebase/platform-center";
-import type { DictData, DictItem } from "@onebase/platform-center";
-import { useEffect, useState } from "react";
-import DictDataModal from "./components/dict-data-modal";
-import DictModal from "./components/dict-modal";
-import InfoPanel from "@/components/InfoPanel";
-import styles from "./index.module.less";
+  getDictDetail
+} from '@onebase/platform-center';
+import type { PageParam } from '@onebase/platform-center';
+import type { DictData, DictItem } from '@onebase/platform-center';
+import { useEffect, useState } from 'react';
+import DictDataModal from './components/dict-data-modal';
+import DictModal from './components/dict-modal';
+import InfoPanel from '@/components/InfoPanel';
+import styles from './index.module.less';
 
 const Sider = Layout.Sider;
 const Header = Layout.Header;
@@ -32,18 +24,16 @@ const Content = Layout.Content;
 
 export default function SystemDictPage() {
   const [dictList, setDictList] = useState<DictItem[]>([]);
-  const [activeDictId, setActiveDictId] = useState<number | undefined>(
-    undefined,
-  );
+  const [activeDictId, setActiveDictId] = useState<number | undefined>(undefined);
   const [activeDict, setActiveDict] = useState<DictItem | undefined>(undefined);
   const [tableData, setTableData] = useState<DictData[]>([]);
   const [_loading, setLoading] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageSize, _setPageSize] = useState<number>(10);
   const [total, setTotal] = useState<number>(0);
-  const [dictSearch, setDictSearch] = useState("");
+  const [dictSearch, setDictSearch] = useState('');
   const [filteredDictList, setFilteredDictList] = useState<DictItem[]>([]);
-  const [itemSearch, setItemSearch] = useState("");
+  const [itemSearch, setItemSearch] = useState('');
   const [addDictModalVisible, setAddDictModalVisible] = useState(false);
   const [editDict, setEditDict] = useState<DictItem | null>(null);
   const [modalLoading, setModalLoading] = useState(false);
@@ -68,19 +58,19 @@ export default function SystemDictPage() {
           setDictList([
             {
               id: 1,
-              name: "用户类型",
-              type: "user_type",
+              name: '用户类型',
+              type: 'user_type',
               status: 1,
-              remark: "描述",
+              remark: '描述'
             },
-            { id: 2, name: "角色权限", type: "role_permission", status: 0 },
+            { id: 2, name: '角色权限', type: 'role_permission', status: 0 },
             {
               id: 3,
-              name: "系统配置",
-              type: "system_config",
-              remark: "这是一段描述",
-              status: 1,
-            },
+              name: '系统配置',
+              type: 'system_config',
+              remark: '这是一段描述',
+              status: 1
+            }
           ]);
         });
       if (dictList.length > 0) {
@@ -95,9 +85,9 @@ export default function SystemDictPage() {
       const loadTableData = async () => {
         setLoading(true);
         const params: PageParam & { dictType: string } = {
-          dictType: dictList.find((t) => t.id === activeDictId)?.type || "",
+          dictType: dictList.find((t) => t.id === activeDictId)?.type || '',
           pageNo: currentPage,
-          pageSize,
+          pageSize
         };
         // TODO: 调接口后移除mock data
         // const res = await getDictDataListByPage(params);
@@ -110,12 +100,12 @@ export default function SystemDictPage() {
             setTableData([
               {
                 id: 10,
-                label: "1",
-                value: "1",
+                label: '1',
+                value: '1',
                 status: 1,
-                remark: "1",
-                sort: 1,
-              },
+                remark: '1',
+                sort: 1
+              }
             ]);
           });
       };
@@ -135,11 +125,7 @@ export default function SystemDictPage() {
 
   useEffect(() => {
     setFilteredDictList(
-      dictSearch
-        ? dictList.filter(
-            (t) => t.name.includes(dictSearch) || t.type.includes(dictSearch),
-          )
-        : dictList,
+      dictSearch ? dictList.filter((t) => t.name.includes(dictSearch) || t.type.includes(dictSearch)) : dictList
     );
   }, [dictList, dictSearch]);
 
@@ -177,29 +163,29 @@ export default function SystemDictPage() {
   // 删除字典
   const handleDeleteDict = async (id: number) => {
     Modal.confirm({
-      title: "确认删除",
-      content: "确定要删除这条数据吗？",
-      okText: "确认",
-      cancelText: "取消",
+      title: '确认删除',
+      content: '确定要删除这条数据吗？',
+      okText: '确认',
+      cancelText: '取消',
       onOk: async () => {
         await deleteDict(id);
-        Message.success("删除成功");
+        Message.success('删除成功');
         setDictList(dictList.filter((t) => t.id !== id));
-      },
+      }
     });
   };
   // 删除字典数据
   const handleDeleteDictData = async (id: number) => {
     Modal.confirm({
-      title: "确认删除",
-      content: "确定要删除这条数据吗？",
-      okText: "确认",
-      cancelText: "取消",
+      title: '确认删除',
+      content: '确定要删除这条数据吗？',
+      okText: '确认',
+      cancelText: '取消',
       onOk: async () => {
         await deleteDictData(id);
-        Message.success("删除成功");
+        Message.success('删除成功');
         setDictList(dictList.filter((t) => t.id !== id));
-      },
+      }
     });
   };
 
@@ -209,9 +195,7 @@ export default function SystemDictPage() {
     try {
       if (editDict && editDict.id) {
         await updateDict({ ...editDict, ...values });
-        setDictList((prev) =>
-          prev.map((t) => (t.id === editDict.id ? { ...t, ...values } : t)),
-        );
+        setDictList((prev) => prev.map((t) => (t.id === editDict.id ? { ...t, ...values } : t)));
       } else {
         await createDict(values);
         const data = await getAllDictList();
@@ -283,7 +267,7 @@ export default function SystemDictPage() {
                   rightChildren={OperationButtons}
                   wrapperClassName={styles.infoPanel}
                 ></InfoPanel>
-                <Divider style={{ margin: "16px 0" }} />
+                <Divider style={{ margin: '16px 0' }} />
               </Header>
               <DictionaryTable
                 data={tableData}
@@ -313,7 +297,7 @@ export default function SystemDictPage() {
                 type: editDict.type,
                 name: editDict.name,
                 remark: editDict.remark,
-                status: editDict.status,
+                status: editDict.status
               }
             : undefined
         }
@@ -322,7 +306,7 @@ export default function SystemDictPage() {
           setAddDictModalVisible(false);
           setEditDict(null);
         }}
-        title={editDict ? "编辑数据字典" : "新建数据字典"}
+        title={editDict ? '编辑数据字典' : '新建数据字典'}
       />
       <DictDataModal
         visible={dictDataModalVisible}
@@ -335,7 +319,7 @@ export default function SystemDictPage() {
                 remark: editItem.remark,
                 sort: editItem.sort,
                 status: editItem.status,
-                dictType: editItem.dictType,
+                dictType: editItem.dictType
               }
             : undefined
         }
@@ -346,7 +330,7 @@ export default function SystemDictPage() {
           setDictDataModalVisible(false);
           setEditItem(null);
         }}
-        title={editItem ? "编辑字典值" : "添加字典值"}
+        title={editItem ? '编辑字典值' : '添加字典值'}
       />
     </div>
   );

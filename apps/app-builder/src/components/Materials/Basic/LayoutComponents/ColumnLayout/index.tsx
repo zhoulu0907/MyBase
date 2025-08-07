@@ -1,18 +1,15 @@
-import { getComponentSchema } from "@/components/Materials/schema";
-import { ALL_COMPONENT_TYPES } from "@/constants/componentTypes";
-import { usePageEditorStore } from "@/hooks/useStore";
-import { COMPONENT_GROUP_NAME } from "@/pages/Editor/components/const";
-import ComponentRender from "@/pages/Editor/components/render";
-import {
-  getComponentConfig,
-  getComponentWidth,
-} from "@/pages/Editor/components/utils";
-import { Layout } from "@arco-design/web-react";
-import { IconDelete } from "@arco-design/web-react/icon";
-import { useEffect } from "react";
-import { ReactSortable } from "react-sortablejs";
-import styles from "./index.module.less";
-import { type XColumnLayoutConfig } from "./schema";
+import { getComponentSchema } from '@/components/Materials/schema';
+import { ALL_COMPONENT_TYPES } from '@/constants/componentTypes';
+import { usePageEditorStore } from '@/hooks/useStore';
+import { COMPONENT_GROUP_NAME } from '@/pages/Editor/components/const';
+import ComponentRender from '@/pages/Editor/components/render';
+import { getComponentConfig, getComponentWidth } from '@/pages/Editor/components/utils';
+import { Layout } from '@arco-design/web-react';
+import { IconDelete } from '@arco-design/web-react/icon';
+import { useEffect } from 'react';
+import { ReactSortable } from 'react-sortablejs';
+import styles from './index.module.less';
+import { type XColumnLayoutConfig } from './schema';
 
 // TODO(mickey): 抽出来
 interface GridItem {
@@ -35,14 +32,12 @@ const XColumnLayout = (props: XColumnLayoutConfig) => {
     showDeleteButton,
     setShowDeleteButton,
     colComponentsMap,
-    setColComponentsMap,
+    setColComponentsMap
   } = usePageEditorStore();
 
   // 从 store 中获取当前组件的列数据，如果不存在则初始化为空数组
-  const colComponents =
-    colComponentsMap.colComponents.get(id) ||
-    Array.from({ length: colCount }, () => []);
-  console.log("colComponents", colComponents);
+  const colComponents = colComponentsMap.colComponents.get(id) || Array.from({ length: colCount }, () => []);
+  console.log('colComponents', colComponents);
 
   // 如果列数变了，就重新初始化列
   useEffect(() => {
@@ -50,7 +45,7 @@ const XColumnLayout = (props: XColumnLayoutConfig) => {
     if (!currentColumns || currentColumns.length !== colCount) {
       setColComponentsMap(
         id,
-        Array.from({ length: colCount }, () => []),
+        Array.from({ length: colCount }, () => [])
       );
     }
   }, [colCount, id, colComponentsMap.colComponents, setColComponentsMap]);
@@ -58,9 +53,7 @@ const XColumnLayout = (props: XColumnLayoutConfig) => {
   const handleDeleteComponent = (componentId: string) => {
     // 从组件列表中移除
     // 遍历二维数组的每一列，过滤掉 id 匹配的组件
-    const updatedColumns = colComponents.map((col) =>
-      col.filter((cp) => cp.id !== componentId),
-    );
+    const updatedColumns = colComponents.map((col) => col.filter((cp) => cp.id !== componentId));
     setColComponentsMap(id, updatedColumns);
 
     // 如果删除的是当前选中的组件，清除选中状态
@@ -92,19 +85,12 @@ const XColumnLayout = (props: XColumnLayoutConfig) => {
               // console.log("e.item.getAttribute('data-cp-type')", e.item.getAttribute('data-cp-type'))
               // console.log("e.item.getAttribute('data-cp-displayname')", e.item.getAttribute('data-cp-displayname'))
 
-              const cpID = e.item.id || e.item.getAttribute("data-cp-id");
-              console.log(
-                `拖入组件${id}内， 索引为${index}， 拖入组件为 ${cpID}`,
-              );
-              const itemType = e.item.getAttribute("data-cp-type");
-              const itemDisplayName = e.item.getAttribute(
-                "data-cp-displayname",
-              );
+              const cpID = e.item.id || e.item.getAttribute('data-cp-id');
+              console.log(`拖入组件${id}内， 索引为${index}， 拖入组件为 ${cpID}`);
+              const itemType = e.item.getAttribute('data-cp-type');
+              const itemDisplayName = e.item.getAttribute('data-cp-displayname');
 
-              const schemaConfig = getComponentConfig(
-                pageComponentSchemas.get(cpID!),
-                itemType!,
-              );
+              const schemaConfig = getComponentConfig(pageComponentSchemas.get(cpID!), itemType!);
 
               const schema = getComponentSchema(itemType as any);
 
@@ -115,11 +101,11 @@ const XColumnLayout = (props: XColumnLayoutConfig) => {
               const props = {
                 id: cpID,
                 type: itemType,
-                ...schema,
+                ...schema
               };
 
               if (itemType === ALL_COMPONENT_TYPES.COLUMN_LAYOUT) {
-                console.log("创建布局组件: ", cpID);
+                console.log('创建布局组件: ', cpID);
               }
 
               setPageComponentSchemas(cpID!, props);
@@ -130,13 +116,11 @@ const XColumnLayout = (props: XColumnLayoutConfig) => {
               setShowDeleteButton(false);
             }}
             onRemove={(e) => {
-              const cpID = e.item.getAttribute("data-cp-id");
-              console.log(
-                `删除组件${id}内， 索引为${index}， 删除组件为 ${cpID}`,
-              );
+              const cpID = e.item.getAttribute('data-cp-id');
+              console.log(`删除组件${id}内， 索引为${index}， 删除组件为 ${cpID}`);
             }}
             group={{
-              name: COMPONENT_GROUP_NAME,
+              name: COMPONENT_GROUP_NAME
             }}
             sort={true}
             forceFallback={true}
@@ -145,8 +129,8 @@ const XColumnLayout = (props: XColumnLayoutConfig) => {
             swapThreshold={0.65}
             className={styles.content}
             onStart={(e) => {
-              console.log("onStart", e);
-              const cpID = e.item.getAttribute("data-id") || "";
+              console.log('onStart', e);
+              const cpID = e.item.getAttribute('data-id') || '';
               setCurComponentID(cpID);
               const curComponentSchema = pageComponentSchemas.get(cpID) || {};
               setCurComponentSchema(curComponentSchema);
@@ -162,14 +146,11 @@ const XColumnLayout = (props: XColumnLayoutConfig) => {
                   data-cp-id={cp.id}
                   className={styles.componentItem}
                   style={{
-                    width: getComponentWidth(
-                      pageComponentSchemas.get(cp.id),
-                      cp.type,
-                    ),
+                    width: getComponentWidth(pageComponentSchemas.get(cp.id), cp.type)
                   }}
                   onClick={(e: React.MouseEvent<HTMLDivElement>) => {
                     e.stopPropagation();
-                    console.log("点击组件: ", cp.id);
+                    console.log('点击组件: ', cp.id);
                     setCurComponentID(cp.id);
 
                     const curComponentSchema = pageComponentSchemas.get(cp.id);
@@ -189,7 +170,7 @@ const XColumnLayout = (props: XColumnLayoutConfig) => {
                       className={styles.deleteButton}
                       onClick={(e) => {
                         e.stopPropagation();
-                        console.log("删除组件: ", cp.id);
+                        console.log('删除组件: ', cp.id);
                         handleDeleteComponent(cp.id);
                       }}
                     >

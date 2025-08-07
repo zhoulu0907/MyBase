@@ -1,13 +1,8 @@
-import "@arco-design/web-react/dist/css/arco.css";
-import {
-  Navigate,
-  Route,
-  HashRouter as Router,
-  Routes,
-} from "react-router-dom";
-import Home from "./pages/Home";
-import Login from "./pages/Login";
-import NotFound from "./pages/NotFound";
+import '@arco-design/web-react/dist/css/arco.css';
+import { Navigate, Route, HashRouter as Router, Routes } from 'react-router-dom';
+import Home from './pages/Home';
+import Login from './pages/Login';
+import NotFound from './pages/NotFound';
 
 function AppContent() {
   //   // 启用token自动刷新

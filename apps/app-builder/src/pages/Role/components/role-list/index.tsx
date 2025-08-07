@@ -1,18 +1,10 @@
-import ListItem from "@/components/ListItem";
-import { Button, Input, Spin } from "@arco-design/web-react";
-import { IconPlus } from "@arco-design/web-react/icon";
-import type { PageParam } from "@onebase/platform-center";
-import { getRolePage, type RoleVO } from "@onebase/platform-center";
-import {
-  forwardRef,
-  useCallback,
-  useEffect,
-  useImperativeHandle,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import s from "../../index.module.less";
+import ListItem from '@/components/ListItem';
+import { Button, Input, Spin } from '@arco-design/web-react';
+import { IconPlus } from '@arco-design/web-react/icon';
+import type { PageParam } from '@onebase/platform-center';
+import { getRolePage, type RoleVO } from '@onebase/platform-center';
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
+import s from '../../index.module.less';
 
 interface RoleListProps {
   activeId: number | undefined;
@@ -20,17 +12,14 @@ interface RoleListProps {
   onAdd: () => void;
 }
 
-export default forwardRef(function RoleList(
-  { activeId, onSelect, onAdd }: RoleListProps,
-  ref,
-) {
+export default forwardRef(function RoleList({ activeId, onSelect, onAdd }: RoleListProps, ref) {
   // 状态管理
   const [roleList, setRoleList] = useState<Partial<RoleVO>[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [isScrollLoading, setIsScrollLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [searchValue, setSearchValue] = useState("");
+  const [searchValue, setSearchValue] = useState('');
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -46,7 +35,7 @@ export default forwardRef(function RoleList(
       try {
         const params: PageParam = {
           pageNo: page,
-          pageSize: 10,
+          pageSize: 10
         };
         if (searchValue) params.name = searchValue;
 
@@ -64,11 +53,11 @@ export default forwardRef(function RoleList(
       } catch (error) {
         // TODO 联调后移除
         const mockRoleList = [
-          { id: 1, name: "管理员", remark: "系统管理员" },
-          { id: 2, name: "开发工程师", remark: "开发工程师" },
-          { id: 3, name: "产品经理", remark: "产品经理" },
-          { id: 4, name: "UI设计师", remark: "UI设计师" },
-          { id: 5, name: "测试工程师", remark: "测试工程师" },
+          { id: 1, name: '管理员', remark: '系统管理员' },
+          { id: 2, name: '开发工程师', remark: '开发工程师' },
+          { id: 3, name: '产品经理', remark: '产品经理' },
+          { id: 4, name: 'UI设计师', remark: 'UI设计师' },
+          { id: 5, name: '测试工程师', remark: '测试工程师' }
         ];
 
         if (append) {
@@ -82,7 +71,7 @@ export default forwardRef(function RoleList(
         setIsScrollLoading(false);
       }
     },
-    [searchValue],
+    [searchValue]
   );
 
   // 刷新角色列表
@@ -95,9 +84,9 @@ export default forwardRef(function RoleList(
   useImperativeHandle(
     ref,
     () => ({
-      refresh,
+      refresh
     }),
-    [refresh],
+    [refresh]
   );
 
   // 滚动加载
@@ -106,10 +95,7 @@ export default forwardRef(function RoleList(
     if (!container) return;
 
     const handleScroll = () => {
-      if (
-        container.scrollTop + container.clientHeight >=
-        container.scrollHeight - 10
-      ) {
+      if (container.scrollTop + container.clientHeight >= container.scrollHeight - 10) {
         if (hasMore && !isScrollLoading && !loading) {
           const nextPage = currentPage + 1;
           loadRoleList(nextPage, true);
@@ -117,8 +103,8 @@ export default forwardRef(function RoleList(
       }
     };
 
-    container.addEventListener("scroll", handleScroll);
-    return () => container.removeEventListener("scroll", handleScroll);
+    container.addEventListener('scroll', handleScroll);
+    return () => container.removeEventListener('scroll', handleScroll);
   }, [hasMore, isScrollLoading, loading, currentPage, loadRoleList]);
 
   // 初始加载
@@ -143,9 +129,7 @@ export default forwardRef(function RoleList(
 
   const filteredRoleList = useMemo(() => {
     if (!searchValue) return roleList;
-    return roleList.filter((role) =>
-      role.name?.toLowerCase().includes(searchValue.toLowerCase()),
-    );
+    return roleList.filter((role) => role.name?.toLowerCase().includes(searchValue.toLowerCase()));
   }, [roleList, searchValue]);
 
   const listTitle = `全部(${filteredRoleList?.length})`;
@@ -154,7 +138,7 @@ export default forwardRef(function RoleList(
     return filteredRoleList?.map((item) => (
       <ListItem
         key={item.id}
-        title={item.name || ""}
+        title={item.name || ''}
         active={item.id === activeId}
         onClick={() => item.id && onSelect(item.id, item)}
       />
@@ -173,11 +157,7 @@ export default forwardRef(function RoleList(
         />
       </div>
       <ListItem title={listTitle}>
-        <Button
-          type="text"
-          onClick={onAdd}
-          style={{ paddingLeft: "8px", paddingRight: "8px" }}
-        >
+        <Button type="text" onClick={onAdd} style={{ paddingLeft: '8px', paddingRight: '8px' }}>
           <IconPlus />
           新建
         </Button>
@@ -186,20 +166,20 @@ export default forwardRef(function RoleList(
         ref={scrollContainerRef}
         className={s.roleList}
         style={{
-          height: "calc(100% - 110px)",
-          overflowY: "auto",
-          position: "relative",
+          height: 'calc(100% - 110px)',
+          overflowY: 'auto',
+          position: 'relative'
         }}
       >
         {loading ? (
-          <div style={{ textAlign: "center", padding: "20px" }}>
+          <div style={{ textAlign: 'center', padding: '20px' }}>
             <Spin size={20} />
           </div>
         ) : (
           <>
             {roleListItems}
             {isScrollLoading && (
-              <div style={{ textAlign: "center", padding: "12px" }}>
+              <div style={{ textAlign: 'center', padding: '12px' }}>
                 <Spin size={20} />
               </div>
             )}

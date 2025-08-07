@@ -1,22 +1,7 @@
-import React, { useEffect, useState } from "react";
-import {
-  Modal,
-  Form,
-  Input,
-  Grid,
-  Switch,
-  Select,
-  Message,
-  Button,
-  TreeSelect,
-} from "@arco-design/web-react";
-import {
-  createUser,
-  updateUser,
-  getSimpleRoleList,
-  getUser,
-} from "@onebase/platform-center";
-import type { UserVO, SimpleRoleVO } from "@onebase/platform-center";
+import React, { useEffect, useState } from 'react';
+import { Modal, Form, Input, Grid, Switch, Select, Message, Button, TreeSelect } from '@arco-design/web-react';
+import { createUser, updateUser, getSimpleRoleList, getUser } from '@onebase/platform-center';
+import type { UserVO, SimpleRoleVO } from '@onebase/platform-center';
 
 const Row = Grid.Row;
 const Col = Grid.Col;
@@ -26,7 +11,7 @@ interface UserFormModalProps {
   onCancel: () => void;
   onOk: () => void;
   initialValues?: Partial<UserVO>;
-  mode?: "create" | "edit";
+  mode?: 'create' | 'edit';
   isDetail?: boolean; // 详情模式标志
   deptTree?: any[]; // 部门树数据
   deptLoading?: boolean; // 部门数据加载状态
@@ -37,10 +22,10 @@ export default function UserFormModal({
   onCancel,
   onOk,
   initialValues,
-  mode = "create",
+  mode = 'create',
   isDetail = false, // 详情模式
   deptTree = [],
-  deptLoading = false,
+  deptLoading = false
 }: UserFormModalProps) {
   const [form] = Form.useForm();
   const [loading, setLoading] = React.useState(false);
@@ -65,7 +50,7 @@ export default function UserFormModal({
     });
 
     // 在编辑模式下获取用户信息并设置角色ID为初始值
-    if (mode === "edit" && initialValues?.id) {
+    if (mode === 'edit' && initialValues?.id) {
       getUser(initialValues.id).then((user) => {
         form.setFieldsValue({ roleIds: user.roleId });
       });
@@ -82,13 +67,13 @@ export default function UserFormModal({
     try {
       const values = await form.validate();
       setLoading(true);
-      if (mode === "create") {
+      if (mode === 'create') {
         await createUser({ ...values, status: values.status ? 1 : 0 });
-        Message.success("新建成功");
+        Message.success('新建成功');
       } else {
         // TODO 待接口修改后重新验证
         await updateUser({ ...values, status: values.status ? 1 : 0 });
-        Message.success("编辑成功");
+        Message.success('编辑成功');
       }
       onOk();
     } finally {
@@ -98,9 +83,7 @@ export default function UserFormModal({
 
   return (
     <Modal
-      title={
-        isDetail ? "用户详情" : mode === "create" ? "新建用户" : "编辑用户"
-      }
+      title={isDetail ? '用户详情' : mode === 'create' ? '新建用户' : '编辑用户'}
       visible={visible}
       onCancel={onCancel}
       onOk={handleSubmit}
@@ -113,57 +96,36 @@ export default function UserFormModal({
           ? [
               <Button key="close" onClick={onCancel}>
                 关闭
-              </Button>,
+              </Button>
             ]
           : undefined
       }
     >
-      <Form
-        form={form}
-        layout="vertical"
-        autoComplete="off"
-        disabled={isDetail}
-      >
+      <Form form={form} layout="vertical" autoComplete="off" disabled={isDetail}>
         <Row gutter={24}>
           <Col span={12}>
-            <Form.Item
-              label="姓名"
-              field="nickname"
-              rules={[{ required: true, message: "请输入姓名" }]}
-            >
+            <Form.Item label="姓名" field="nickname" rules={[{ required: true, message: '请输入姓名' }]}>
               <Input placeholder="请输入" />
             </Form.Item>
           </Col>
           <Col span={12}>
-            <Form.Item
-              label="手机号"
-              field="mobile"
-              rules={[{ required: true, message: "请输入手机号" }]}
-            >
+            <Form.Item label="手机号" field="mobile" rules={[{ required: true, message: '请输入手机号' }]}>
               <Input placeholder="请输入" />
             </Form.Item>
           </Col>
         </Row>
         <Row gutter={24}>
           <Col span={12}>
-            <Form.Item
-              label="账号"
-              field="username"
-              rules={[{ required: true, message: "请输入账号" }]}
-            >
+            <Form.Item label="账号" field="username" rules={[{ required: true, message: '请输入账号' }]}>
               <Input placeholder="请输入" />
             </Form.Item>
           </Col>
           <Col span={12}>
-            {mode === "create" && (
+            {mode === 'create' && (
               <Form.Item
                 label="密码"
                 field="password"
-                rules={
-                  mode === "create" && !isDetail
-                    ? [{ required: true, message: "请输入密码" }]
-                    : []
-                }
+                rules={mode === 'create' && !isDetail ? [{ required: true, message: '请输入密码' }] : []}
               >
                 <Input.Password placeholder="请输入" />
               </Form.Item>

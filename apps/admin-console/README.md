@@ -121,8 +121,8 @@ pnpm preview
 项目使用 monorepo 结构，可以引用其他包的组件：
 
 ```typescript
-import { Captcha } from "@onebase/common";
-import { Input } from "@onebase/ui-kit";
+import { Captcha } from '@onebase/common';
+import { Input } from '@onebase/ui-kit';
 ```
 
 ### 样式开发

@@ -10,8 +10,8 @@ import {
   type TAlignSelectKeyType,
   type TLayoutSelectKeyType,
   type TStatusSelectKeyType,
-  type TWidthSelectKeyType,
-} from "@/components/Materials/common";
+  type TWidthSelectKeyType
+} from '@/components/Materials/common';
 import {
   ALIGN_OPTIONS,
   ALIGN_VALUES,
@@ -21,8 +21,8 @@ import {
   STATUS_OPTIONS,
   STATUS_VALUES,
   WIDTH_OPTIONS,
-  WIDTH_VALUES,
-} from "@/components/Materials/constants";
+  WIDTH_VALUES
+} from '@/components/Materials/constants';
 import type {
   IAlignConfigType,
   IBooleanConfigType,
@@ -43,8 +43,8 @@ import type {
   TNumberDefaultType,
   TSelectDefaultType,
   TTextAreaDefaultType,
-  TTextDefaultType,
-} from "@/components/Materials/types";
+  TTextDefaultType
+} from '@/components/Materials/types';
 
 export interface XInputAutoCodeSchema {
   editData: TXInputAutoCodeEditData;
@@ -140,56 +140,56 @@ const XAutoCode: XInputAutoCodeSchema = {
   editData: [
     ...baseConfig,
     {
-      key: "label",
-      name: "标题",
-      type: CONFIG_TYPES.LABEL_INPUT,
+      key: 'label',
+      name: '标题',
+      type: CONFIG_TYPES.LABEL_INPUT
     },
     {
-      key: "description",
-      name: "描述信息",
-      type: CONFIG_TYPES.DESCRIPTION_INPUT,
+      key: 'description',
+      name: '描述信息',
+      type: CONFIG_TYPES.DESCRIPTION_INPUT
     },
     {
-      key: "tooltip",
-      name: "提示文字",
-      type: CONFIG_TYPES.TOOLTIP_INPUT,
+      key: 'tooltip',
+      name: '提示文字',
+      type: CONFIG_TYPES.TOOLTIP_INPUT
     },
     layoutConfig,
     labelColSpanConfig,
     {
-      key: "saveWithHidden",
-      name: "隐藏时提交数据",
-      type: CONFIG_TYPES.SWITCH_INPUT,
+      key: 'saveWithHidden',
+      name: '隐藏时提交数据',
+      type: CONFIG_TYPES.SWITCH_INPUT
     },
     {
-      key: "color",
-      name: "文本颜色",
-      type: CONFIG_TYPES.COLOR,
+      key: 'color',
+      name: '文本颜色',
+      type: CONFIG_TYPES.COLOR
     },
     {
-      key: "bgColor",
-      name: "背景颜色",
-      type: CONFIG_TYPES.COLOR,
+      key: 'bgColor',
+      name: '背景颜色',
+      type: CONFIG_TYPES.COLOR
     },
     statusConfig,
     widthConfig,
-    alignConfig,
+    alignConfig
   ],
   config: {
     ...baseDefault,
-    label: "唯一编码",
-    description: "",
-    tooltip: "",
+    label: '唯一编码',
+    description: '',
+    tooltip: '',
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     required: false,
     align: ALIGN_VALUES[ALIGN_OPTIONS.LEFT],
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
     saveWithHidden: false,
-    color: "",
-    bgColor: "",
-    labelColSpan: 5,
-  },
+    color: '',
+    bgColor: '',
+    labelColSpan: 5
+  }
 };
 
 export default XAutoCode;

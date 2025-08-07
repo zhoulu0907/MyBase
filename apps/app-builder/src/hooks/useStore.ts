@@ -1,34 +1,18 @@
-import { EDITOR_TYPES } from "@/pages/Editor/components/const";
-import {
-  useBasicEditorStore,
-  useFromEditorStore,
-  useListEditorStore,
-} from "@/store";
-import { useLocation } from "react-router-dom";
+import { EDITOR_TYPES } from '@/pages/Editor/components/const';
+import { useBasicEditorStore, useFromEditorStore, useListEditorStore } from '@/store';
+import { useLocation } from 'react-router-dom';
 
 export function usePageEditorStore() {
   const path = useLocation().pathname;
   const useList = path.endsWith(`/${EDITOR_TYPES.LIST_EDITOR}`);
 
   const curComponentID = useBasicEditorStore((state) => state.curComponentID);
-  const setCurComponentID = useBasicEditorStore(
-    (state) => state.setCurComponentID,
-  );
-  const clearCurComponentID = useBasicEditorStore(
-    (state) => state.clearCurComponentID,
-  );
-  const curComponentSchema = useBasicEditorStore(
-    (state) => state.curComponentSchema,
-  );
-  const setCurComponentSchema = useBasicEditorStore(
-    (state) => state.setCurComponentSchema,
-  );
-  const showDeleteButton = useBasicEditorStore(
-    (state) => state.showDeleteButton,
-  );
-  const setShowDeleteButton = useBasicEditorStore(
-    (state) => state.setShowDeleteButton,
-  );
+  const setCurComponentID = useBasicEditorStore((state) => state.setCurComponentID);
+  const clearCurComponentID = useBasicEditorStore((state) => state.clearCurComponentID);
+  const curComponentSchema = useBasicEditorStore((state) => state.curComponentSchema);
+  const setCurComponentSchema = useBasicEditorStore((state) => state.setCurComponentSchema);
+  const showDeleteButton = useBasicEditorStore((state) => state.showDeleteButton);
+  const setShowDeleteButton = useBasicEditorStore((state) => state.setShowDeleteButton);
 
   // 补齐所有 @file_context_0 中定义的 store 字段和方法
   const components = useList
@@ -98,6 +82,6 @@ export function usePageEditorStore() {
     colComponentsMap,
     setColComponentsMap,
     delColComponentsMap,
-    clearColComponentsMap,
+    clearColComponentsMap
   };
 }

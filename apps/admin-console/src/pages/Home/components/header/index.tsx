@@ -1,15 +1,15 @@
-import logoSVG from "@/assets/images/logo-ob.svg";
+import logoSVG from '@/assets/images/logo-ob.svg';
 // import notificationSVG from '@/assets/images/notification_icon.svg';
 // import searchSVG from '@/assets/images/search_icon.svg';
 // import settingSVG from '@/assets/images/setting_icon.svg';
 // import themeSVG from '@/assets/images/theme_icon.svg';
-import { Avatar, Button, Dropdown, Layout, Menu } from "@arco-design/web-react";
-import { IconPoweroff, IconUser } from "@arco-design/web-react/icon";
-import { TokenManager } from "@onebase/common";
-import React, { useEffect } from "react";
-import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
-import styles from "./index.module.less";
+import { Avatar, Button, Dropdown, Layout, Menu } from '@arco-design/web-react';
+import { IconPoweroff, IconUser } from '@arco-design/web-react/icon';
+import { TokenManager } from '@onebase/common';
+import React, { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
+import styles from './index.module.less';
 
 const { Header } = Layout;
 
@@ -33,7 +33,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     // 清除 token
     TokenManager.clearToken();
     // 跳转到登录页
-    navigate("/login");
+    navigate('/login');
   };
 
   // 用户菜单
@@ -41,17 +41,17 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     <Menu>
       <Menu.Item key="profile">
         <IconUser />
-        {t("header.profile")}
+        {t('header.profile')}
       </Menu.Item>
       <Menu.Item key="logout" onClick={handleLogout}>
         <IconPoweroff />
-        {t("header.logout")}
+        {t('header.logout')}
       </Menu.Item>
     </Menu>
   );
 
   return (
-    <Header className={`${styles.header} ${className || ""}`}>
+    <Header className={`${styles.header} ${className || ''}`}>
       <div className={styles.headerContent}>
         <div className={styles.logo}>
           <img src={logoSVG} alt="Logo" className={styles.logoSvg} />
@@ -66,8 +66,8 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
 
           <Dropdown droplist={userMenu} position="bottom">
             <div className={styles.userDropdown}>
-              <Avatar size={32} style={{ backgroundColor: "#00b42a" }}>
-                {tokenInfo?.username?.toString().charAt(0) || "U"}
+              <Avatar size={32} style={{ backgroundColor: '#00b42a' }}>
+                {tokenInfo?.username?.toString().charAt(0) || 'U'}
               </Avatar>
             </div>
           </Dropdown>

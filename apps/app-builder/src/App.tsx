@@ -1,16 +1,11 @@
-import "@arco-design/web-react/dist/css/arco.css";
-import "@arco-themes/react-onebase/index.less";
-import {
-  Navigate,
-  Route,
-  HashRouter as Router,
-  Routes,
-} from "react-router-dom";
-import { EditorPage } from "./pages/Editor";
-import Home from "./pages/Home";
-import Login from "./pages/Login";
-import NotFound from "./pages/NotFound";
-import SettingPage from "./pages/Setting";
+import '@arco-design/web-react/dist/css/arco.css';
+import '@arco-themes/react-onebase/index.less';
+import { Navigate, Route, HashRouter as Router, Routes } from 'react-router-dom';
+import { EditorPage } from './pages/Editor';
+import Home from './pages/Home';
+import Login from './pages/Login';
+import NotFound from './pages/NotFound';
+import SettingPage from './pages/Setting';
 
 function AppContent() {
   //   // 启用token自动刷新

@@ -1,4 +1,4 @@
-import { getComponentSchema } from "@/components/Materials/schema";
+import { getComponentSchema } from '@/components/Materials/schema';
 
 export function getComponentWidth(schema: any, itemType: string): string {
   if (!schema || !schema.config || !schema.config.width) {

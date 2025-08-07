@@ -1,10 +1,7 @@
-import {
-  STATUS_OPTIONS,
-  STATUS_VALUES,
-} from "@/components/Materials/constants";
-import { Form, Message, Upload } from "@arco-design/web-react";
-import { memo } from "react";
-import type { XInputFileUploadConfig } from "./schema";
+import { STATUS_OPTIONS, STATUS_VALUES } from '@/components/Materials/constants';
+import { Form, Message, Upload } from '@arco-design/web-react';
+import { memo } from 'react';
+import type { XInputFileUploadConfig } from './schema';
 
 const XFileUpload = memo((props: XInputFileUploadConfig) => {
   const {
@@ -18,7 +15,7 @@ const XFileUpload = memo((props: XInputFileUploadConfig) => {
     listType,
     required,
     layout,
-    labelColSpan = 0,
+    labelColSpan = 0
   } = props;
 
   return (
@@ -28,14 +25,13 @@ const XFileUpload = memo((props: XInputFileUploadConfig) => {
       tooltip={tooltip}
       rules={[{ required }]}
       labelCol={{
-        span: labelColSpan,
+        span: labelColSpan
       }}
       wrapperCol={{ span: 24 - labelColSpan }}
       style={{
         opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,
-        pointerEvents:
-          status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? "none" : "unset",
-        margin: "0px",
+        pointerEvents: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset',
+        margin: '0px'
       }}
     >
       <Upload
@@ -48,12 +44,12 @@ const XFileUpload = memo((props: XInputFileUploadConfig) => {
           const fileSize = file.size / 1024;
 
           if (fileSize > fileSizeLimit) {
-            Message.warning("文件大小超出限制");
+            Message.warning('文件大小超出限制');
             return false;
           }
         }}
         style={{
-          width: "100%",
+          width: '100%'
         }}
       />
     </Form.Item>

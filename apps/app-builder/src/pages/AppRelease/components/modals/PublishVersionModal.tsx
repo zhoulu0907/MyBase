@@ -1,14 +1,7 @@
-import React, { useState } from "react";
-import {
-  Modal,
-  Form,
-  Input,
-  Tag,
-  Button,
-  Typography,
-} from "@arco-design/web-react";
-import styles from "./PublishVersionModal.module.less";
-import { Grid } from "@arco-design/web-react";
+import React, { useState } from 'react';
+import { Modal, Form, Input, Tag, Button, Typography } from '@arco-design/web-react';
+import styles from './PublishVersionModal.module.less';
+import { Grid } from '@arco-design/web-react';
 
 const TextArea = Input.TextArea;
 
@@ -26,18 +19,13 @@ interface PublishVersionFormData {
   environment: string;
 }
 
-const PublishVersionModal: React.FC<PublishVersionModalProps> = ({
-  visible,
-  onCancel,
-  onOk,
-  loading = false,
-}) => {
+const PublishVersionModal: React.FC<PublishVersionModalProps> = ({ visible, onCancel, onOk, loading = false }) => {
   const [form] = Form.useForm();
   const [formData] = useState<PublishVersionFormData>({
-    versionName: "",
-    versionNumber: "V 1.0.0",
-    description: "",
-    environment: "正式环境",
+    versionName: '',
+    versionNumber: 'V 1.0.0',
+    description: '',
+    environment: '正式环境'
   });
 
   const handleOk = async () => {
@@ -45,7 +33,7 @@ const PublishVersionModal: React.FC<PublishVersionModalProps> = ({
       const values = await form.validate();
       onOk(values);
     } catch (error) {
-      console.error("表单验证失败:", error);
+      console.error('表单验证失败:', error);
     }
   };
 
@@ -64,66 +52,36 @@ const PublishVersionModal: React.FC<PublishVersionModalProps> = ({
       okText="发布"
       className={styles.publishVersionModal}
     >
-      <Form
-        form={form}
-        layout="vertical"
-        initialValues={formData}
-        className={styles.form}
-      >
+      <Form form={form} layout="vertical" initialValues={formData} className={styles.form}>
         <Grid.Row gutter={16}>
           <Grid.Col span={16}>
-            <Form.Item
-              label="版本名称"
-              field="versionName"
-              rules={[{ required: true, message: "请输入版本名称" }]}
-            >
+            <Form.Item label="版本名称" field="versionName" rules={[{ required: true, message: '请输入版本名称' }]}>
               <Input placeholder="请输入" />
             </Form.Item>
           </Grid.Col>
           <Grid.Col span={8}>
-            <Form.Item
-              label="版本号"
-              field="versionNumber"
-              rules={[{ required: true, message: "请输入版本号" }]}
-            >
+            <Form.Item label="版本号" field="versionNumber" rules={[{ required: true, message: '请输入版本号' }]}>
               <Input value={formData.versionNumber} />
             </Form.Item>
           </Grid.Col>
         </Grid.Row>
 
         <Form.Item label="版本描述" field="description">
-          <TextArea
-            placeholder="请简要表述当前版本情况,便于区分不同的版本"
-            rows={4}
-          />
+          <TextArea placeholder="请简要表述当前版本情况,便于区分不同的版本" rows={4} />
         </Form.Item>
 
-        <Form.Item
-          label="发布环境"
-          field="environment"
-          rules={[{ required: true, message: "请选择发布环境" }]}
-        >
+        <Form.Item label="发布环境" field="environment" rules={[{ required: true, message: '请选择发布环境' }]}>
           <Tag color="green" className={styles.environmentTag}>
             正式环境
           </Tag>
         </Form.Item>
 
-        <Form.Item
-          label="版本比对"
-          field="versionComparison"
-          rules={[{ required: true, message: "请查看版本比对" }]}
-        >
+        <Form.Item label="版本比对" field="versionComparison" rules={[{ required: true, message: '请查看版本比对' }]}>
           <div className={styles.versionComparison}>
-            <Typography.Text>
-              与上一发布版本进行比对,变更清单如下:
-            </Typography.Text>
+            <Typography.Text>与上一发布版本进行比对,变更清单如下:</Typography.Text>
             <div className={styles.comparisonList}>
-              <Typography.Text>
-                • xxx、xxx等元数据资源被修改,共计88项
-              </Typography.Text>
-              <Typography.Text>
-                • xxx、xxx等页面资源被修改,共计123项
-              </Typography.Text>
+              <Typography.Text>• xxx、xxx等元数据资源被修改,共计88项</Typography.Text>
+              <Typography.Text>• xxx、xxx等页面资源被修改,共计123项</Typography.Text>
             </div>
             <Button type="text" className={styles.viewDetailsButton}>
               查看详情

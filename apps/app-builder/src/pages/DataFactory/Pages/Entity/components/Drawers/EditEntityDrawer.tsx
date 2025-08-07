@@ -1,9 +1,9 @@
-import { Button, Drawer, Message } from "@arco-design/web-react";
-import { IconCaretRight } from "@arco-design/web-react/icon";
-import React, { useEffect, useState } from "react";
-import type { EntityNode } from "../../utils/interface";
-import styles from "./EditEntityDrawer.module.less";
-import NodeEditForm from "./EditForm";
+import { Button, Drawer, Message } from '@arco-design/web-react';
+import { IconCaretRight } from '@arco-design/web-react/icon';
+import React, { useEffect, useState } from 'react';
+import type { EntityNode } from '../../../../utils/interface';
+import styles from './EditEntityDrawer.module.less';
+import NodeEditForm from './EditForm';
 
 const DetailDrawer: React.FC<{
   editingNode: EntityNode;
@@ -12,14 +12,7 @@ const DetailDrawer: React.FC<{
   onNodeEdit: (data: EntityNode) => void;
   setEditingNode: (node: EntityNode | null) => void;
   successCallback?: () => void;
-}> = ({
-  editingNode,
-  visible,
-  setVisible,
-  onNodeEdit,
-  setEditingNode,
-  successCallback,
-}) => {
+}> = ({ editingNode, visible, setVisible, onNodeEdit, setEditingNode, successCallback }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   useEffect(() => {
@@ -35,7 +28,7 @@ const DetailDrawer: React.FC<{
       onNodeEdit(formData);
       setVisible(false);
       setEditingNode(null);
-      Message.success("节点信息已更新");
+      Message.success('节点信息已更新');
       if (successCallback) {
         successCallback();
       }
@@ -62,11 +55,7 @@ const DetailDrawer: React.FC<{
           type="primary"
           shape="circle"
           size="large"
-          icon={
-            <IconCaretRight
-              className={`${styles.icon} ${isCollapsed ? styles.collapsed : styles.expanded}`}
-            />
-          }
+          icon={<IconCaretRight className={`${styles.icon} ${isCollapsed ? styles.collapsed : styles.expanded}`} />}
           onClick={toggleCollapse}
           className={`${styles.drawerHandleButton} ${isCollapsed ? styles.collapsed : styles.expanded}`}
         />
@@ -79,11 +68,11 @@ const DetailDrawer: React.FC<{
         onCancel={handleClose}
         width={500}
         style={{
-          transition: "transform 0.3s ease",
+          transition: 'transform 0.3s ease'
         }}
         mask={false}
         placement="right"
-        className={styles["edit-entity-drawer"]}
+        className={styles['edit-entity-drawer']}
       >
         {editingNode && (
           <NodeEditForm

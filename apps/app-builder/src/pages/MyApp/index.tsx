@@ -1,16 +1,11 @@
 import appDeleteSVG from '@/assets/images/app_delete.svg';
 import appEditSVG from '@/assets/images/app_edit.svg';
 import appIconSVG from '@/assets/images/app_icon.svg';
+import { useAppStore } from '@/store';
 import { UserPermissionManager } from '@/utils/permission';
 import { Avatar, Button, Input, Modal, Pagination, Select, Spin, Tag, Form, Message } from '@arco-design/web-react';
 import { IconPlusCircle, IconSearch } from '@arco-design/web-react/icon';
-import {
-  listApplication,
-  createApplication,
-  type Application,
-  type ListApplicationReq,
-  type CreateApplicationReq
-} from '@onebase/app';
+import { listApplication, createApplication, type Application, type ListApplicationReq, type CreateApplicationReq } from '@onebase/app';
 import dayjs from 'dayjs';
 import React, { useEffect, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -18,7 +13,6 @@ import { useNavigate } from 'react-router-dom';
 import { debounce } from 'lodash-es';
 import CreateApp from '@/components/CreateApp';
 import styles from './index.module.less';
-import type { FormValidateFn } from '@arco-design/web-react/es/Form/interface';
 
 const Option = Select.Option;
 const appOptions = [
@@ -76,6 +70,8 @@ const MyAppPage: React.FC = () => {
   const [createVisible, setCreateVisible] = useState<boolean>(false);
   const [createLoading, setCreateLoading] = useState<boolean>(false);
 
+  const { setCurAppCode } = useAppStore();
+
   useEffect(() => {
     getApplicationList();
   }, [pageNo, pageSize, name, orderByTime, status]);
@@ -129,7 +125,6 @@ const MyAppPage: React.FC = () => {
         tagIds,
         themeColor
       };
-      console.log('params', params, data);
       createApplication(params)
         .then(() => {
           setCreateVisible(false);
@@ -145,6 +140,11 @@ const MyAppPage: React.FC = () => {
           setCreateLoading(false);
         });
     });
+  };
+
+  const nagivateToAppPage = (appCode: Number) => {
+    setCurAppCode(appCode);
+    navigate(`/onebase/create-app/data-factory?appCode=${appCode}`);
   };
 
   return (
@@ -227,8 +227,9 @@ const MyAppPage: React.FC = () => {
               <div
                 className={styles.myAppCard}
                 key={index}
-                // TODO(mickey): 待修改
-                onClick={() => navigate('/onebase/create-app/data-factory')}
+                onClick={() => {
+                  nagivateToAppPage(Number(item.appCode));
+                }}
               >
                 <div className={styles.myAppCardHeader}>
                   <div className={styles.myAppName}>
@@ -272,12 +273,23 @@ const MyAppPage: React.FC = () => {
                   </div>
 
                   <div className={styles.myAppOperate}>
-                    <img src={appEditSVG} alt="菜单" className={styles.operateIcon} />
+                    <img
+                      src={appEditSVG}
+                      alt="菜单"
+                      className={styles.operateIcon}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        nagivateToAppPage(Number(item.appCode));
+                      }}
+                    />
                     <img
                       src={appDeleteSVG}
                       alt="删除"
                       className={styles.operateIcon}
-                      onClick={() => setDeleteVisible(true)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setDeleteVisible(true);
+                      }}
                     />
                   </div>
                 </div>
@@ -328,13 +340,7 @@ const MyAppPage: React.FC = () => {
             为防止误操作，如确定删除，请输入
             <strong>&quot;&lt;应用名称&gt;&quot;</strong>进行确认：
           </div>
-          <Input
-            value={inputValue}
-            style={{ width: 476 }}
-            allowClear
-            placeholder="请输入要删除的应用名称"
-            onChange={setInputValue}
-          />
+          <Input value={inputValue} allowClear placeholder="请输入要删除的应用名称" style={{ width: 476 }} onChange={setInputValue} />
         </div>
       </Modal>
       <Modal

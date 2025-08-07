@@ -1,14 +1,14 @@
-import React from "react";
-import { StatusEnum } from "@onebase/platform-center";
-import s from "./index.module.less";
+import React from 'react';
+import { StatusEnum } from '@onebase/platform-center';
+import s from './index.module.less';
 
 export interface StatusTagProps {
   status: StatusEnum;
 }
 
 export enum StatusLabelEnum {
-  ENABLE = "启用",
-  DISABLE = "禁用",
+  ENABLE = '启用',
+  DISABLE = '禁用'
 }
 
 export const getStatusLabel = (status: StatusEnum): string => {

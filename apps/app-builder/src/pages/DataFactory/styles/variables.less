@@ -1,5 +1,5 @@
 // 数据源表单相关变量
-@dataSourceFormPrefix: ~"dataSourceForm";
+@dataSourceFormPrefix: ~'dataSourceForm';
 
 // 表单布局变量
 @formItemMarginBottom: 16px;
@@ -23,7 +23,7 @@
 @tableRowHeight: 48px;
 
 // 操作按钮相关变量
-@operationButtonSize: "mini";
+@operationButtonSize: 'mini';
 @operationButtonMargin: 8px;
 
 // 颜色变量
@@ -35,10 +35,26 @@
 @borderColor: #d9d9d9;
 @backgroundColor: #f5f5f5;
 
+// 扩展颜色变量
+@textColorPrimary: #262626;
+@textColorSecondary: #595959;
+@textColorTertiary: #8c8c8c;
+@textColorQuaternary: #bfbfbf;
+@borderColorLight: #e5e5e5;
+@borderColorLighter: #f0f0f0;
+@backgroundColorLight: #fafafa;
+@backgroundColorLighter: #f7f8fa;
+@primaryColorLight: #e6f7ff;
+@white: #ffffff;
+
 // 字体相关变量
 @fontSizeBase: 14px;
 @fontSizeSm: 12px;
 @fontSizeLg: 16px;
+@fontSizeXl: 20px;
+@fontWeightNormal: 400;
+@fontWeightMedium: 500;
+@fontWeightSemibold: 600;
 
 // 间距变量
 @spacingXs: 4px;
@@ -47,7 +63,9 @@
 @spacingLg: 24px;
 @spacingXl: 32px;
 
-// 圆角变量
+// 布局相关变量
+@headerHeight: 48px;
+@sidebarWidth: 280px;
 @borderRadiusBase: 6px;
 @borderRadiusSm: 4px;
 @borderRadiusLg: 8px;
@@ -55,3 +73,134 @@
 // 阴影变量
 @boxShadowBase: 0 2px 8px rgba(0, 0, 0, 0.15);
 @boxShadowCard: 0 1px 2px rgba(0, 0, 0, 0.03);
+@boxShadowHover: 0 4px 12px rgba(0, 0, 0, 0.15);
+@boxShadowDrawer: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+// 过渡动画变量
+@transitionBase: all 0.2s ease;
+@transitionSlow: all 0.3s ease;
+
+// ===== Mixins =====
+
+// 弹性布局 mixin
+.flex-center() {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flex-between() {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.flex-column() {
+  display: flex;
+  flex-direction: column;
+}
+
+// 文本省略 mixin
+.text-ellipsis() {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// 边框 mixin
+.border-bottom-light() {
+  border-bottom: 1px solid @borderColorLight;
+}
+
+.border-right-light() {
+  border-right: 1px solid @borderColorLight;
+}
+
+// 卡片样式 mixin
+.card-style() {
+  background: @white;
+  border-radius: @borderRadiusBase;
+  box-shadow: @boxShadowCard;
+}
+
+// 头部样式 mixin
+.header-style() {
+  padding: @spacingMd @spacingLg;
+  .border-bottom-light();
+  background: @white;
+  .flex-between();
+}
+
+// 表格容器样式 mixin
+.table-container-style() {
+  .flex-column();
+  height: 100%;
+
+  .header {
+    .header-style();
+
+    h3 {
+      margin: 0;
+      font-size: @fontSizeLg;
+      font-weight: @fontWeightSemibold;
+    }
+  }
+
+  .table {
+    flex: 1;
+    overflow: auto;
+  }
+}
+
+// 列表项样式 mixin
+.list-item-style() {
+  cursor: pointer;
+  padding: @spacingSm @spacingMd;
+  .border-bottom-light();
+  transition: @transitionBase;
+
+  &:hover {
+    background-color: @backgroundColorLight;
+  }
+
+  &.selected {
+    background-color: @primaryColorLight;
+    border-right: 2px solid @primaryColor;
+  }
+}
+
+// 抽屉样式 mixin
+.drawer-style() {
+  box-shadow: @boxShadowDrawer !important;
+  border-left: 1px solid @borderColorLighter !important;
+  top: 55px !important;
+}
+
+// 按钮样式 mixin
+.button-style() {
+  height: @buttonHeight;
+  border-radius: @borderRadiusBase;
+  transition: @transitionBase;
+  cursor: pointer;
+}
+
+// 节点样式 mixin
+.node-style() {
+  border-radius: @borderRadiusBase;
+  overflow: hidden;
+  box-shadow: @boxShadowBase;
+}
+
+// 表单样式 mixin
+.form-section-style() {
+  margin-bottom: @formItemMarginBottom;
+}
+
+.form-actions-style() {
+  display: flex;
+  justify-content: flex-end;
+  gap: @spacingMd;
+  margin-top: @spacingLg;
+  padding-top: @spacingMd;
+  border-top: 1px solid @borderColorLighter;
+}

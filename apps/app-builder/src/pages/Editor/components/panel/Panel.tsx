@@ -1,30 +1,21 @@
-import { Button, Tabs } from "@arco-design/web-react";
-import {
-  IconBranch,
-  IconLayout,
-  IconLeft,
-  IconRight,
-  IconSend,
-} from "@arco-design/web-react/icon";
-import { useEffect, useState } from "react";
-import type { EditorType } from "../const";
-import { EDITOR_TYPES } from "../const";
-import MaterialContainer from "./components/material";
-import MetadataContainer from "./components/metadata";
-import TelegramContainer from "./components/telegram";
-import styles from "./index.module.less";
+import { Button, Tabs } from '@arco-design/web-react';
+import { IconBranch, IconLayout, IconLeft, IconRight, IconSend } from '@arco-design/web-react/icon';
+import { useEffect, useState } from 'react';
+import type { EditorType } from '../const';
+import { EDITOR_TYPES } from '../const';
+import MaterialContainer from './components/material';
+import MetadataContainer from './components/metadata';
+import TelegramContainer from './components/telegram';
+import styles from './index.module.less';
 
 // 定义类型
-const PANNEL_KEYS = ["material", "metadata", "telegram"] as const;
+const PANNEL_KEYS = ['material', 'metadata', 'telegram'] as const;
 type PannelKey = (typeof PANNEL_KEYS)[number];
 
 export default function EditorPanel() {
   const [showDrawer, setShowDrawer] = useState(true);
-  const [activeTab, setActiveTab] = useState<EditorType>(
-    EDITOR_TYPES.FORM_EDITOR,
-  );
-  const [activeLeftTabKey, setActiveLeftTabKey] =
-    useState<PannelKey>("material");
+  const [activeTab, setActiveTab] = useState<EditorType>(EDITOR_TYPES.FORM_EDITOR);
+  const [activeLeftTabKey, setActiveLeftTabKey] = useState<PannelKey>('material');
 
   useEffect(() => {
     // 根据当前 URL 动态设置 activeTab
@@ -44,8 +35,8 @@ export default function EditorPanel() {
     <div
       className={styles.editorPanel}
       style={{
-        width: showDrawer ? "340px" : "0px",
-        transition: "width 0.3s cubic-bezier(0.4, 0, 0.4, 1)",
+        width: showDrawer ? '340px' : '0px',
+        transition: 'width 0.3s cubic-bezier(0.4, 0, 0.4, 1)'
       }}
     >
       <Button
@@ -58,7 +49,7 @@ export default function EditorPanel() {
       <div
         className={styles.left}
         style={{
-          width: showDrawer ? "48px" : "0px",
+          width: showDrawer ? '48px' : '0px'
         }}
       >
         <Tabs
@@ -70,10 +61,10 @@ export default function EditorPanel() {
           size="large"
           direction="vertical"
         >
-          <Tabs.TabPane key={"material"} title={<IconLayout fontSize={20} />} />
-          <Tabs.TabPane key={"metadata"} title={<IconBranch fontSize={20} />} />
+          <Tabs.TabPane key={'material'} title={<IconLayout fontSize={20} />} />
+          <Tabs.TabPane key={'metadata'} title={<IconBranch fontSize={20} />} />
           {activeTab === EDITOR_TYPES.FORM_EDITOR && (
-            <Tabs.TabPane key={"telegram"} title={<IconSend fontSize={20} />} />
+            <Tabs.TabPane key={'telegram'} title={<IconSend fontSize={20} />} />
           )}
           {/* <Tabs.TabPane key={"key4"} title={<IconStorage fontSize={20}/>} /> */}
         </Tabs>
@@ -82,14 +73,12 @@ export default function EditorPanel() {
       <div
         className={styles.right}
         style={{
-          width: showDrawer ? "100%" : "0px",
+          width: showDrawer ? '100%' : '0px'
         }}
       >
-        {activeLeftTabKey === "material" && (
-          <MaterialContainer activeTab={activeTab} />
-        )}
-        {activeLeftTabKey === "metadata" && <MetadataContainer />}
-        {activeLeftTabKey === "telegram" && <TelegramContainer />}
+        {activeLeftTabKey === 'material' && <MaterialContainer activeTab={activeTab} />}
+        {activeLeftTabKey === 'metadata' && <MetadataContainer />}
+        {activeLeftTabKey === 'telegram' && <TelegramContainer />}
       </div>
     </div>
   );

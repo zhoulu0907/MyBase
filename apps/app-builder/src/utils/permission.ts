@@ -1,4 +1,4 @@
-import type { MenuInfo, UserInfo } from "@onebase/platform-center";
+import type { MenuInfo, UserInfo } from '@onebase/platform-center';
 
 export interface UserPermissionInfo {
   user: UserInfo; // 用户信息
@@ -8,20 +8,14 @@ export interface UserPermissionInfo {
 }
 
 export class UserPermissionManager {
-  private static readonly USER_PERMISSION_INFO_KEY =
-    "onebase_user_permission_info";
+  private static readonly USER_PERMISSION_INFO_KEY = 'onebase_user_permission_info';
 
   static setUserPermissionInfo(userPermissionInfo: UserPermissionInfo): void {
-    localStorage.setItem(
-      this.USER_PERMISSION_INFO_KEY,
-      JSON.stringify(userPermissionInfo),
-    );
+    localStorage.setItem(this.USER_PERMISSION_INFO_KEY, JSON.stringify(userPermissionInfo));
   }
 
   static getUserPermissionInfo(): UserPermissionInfo | null {
-    const userPermissionInfo = localStorage.getItem(
-      this.USER_PERMISSION_INFO_KEY,
-    );
+    const userPermissionInfo = localStorage.getItem(this.USER_PERMISSION_INFO_KEY);
     return userPermissionInfo ? JSON.parse(userPermissionInfo) : null;
   }
 
