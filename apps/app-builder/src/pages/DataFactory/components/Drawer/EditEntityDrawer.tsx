@@ -1,27 +1,27 @@
-import React, { useEffect, useState } from 'react';
-import { Drawer, Message, Button } from '@arco-design/web-react';
+import { Button, Drawer, Message } from '@arco-design/web-react';
 import { IconCaretRight } from '@arco-design/web-react/icon';
-import NodeEditForm from './EditForm';
+import React, { useEffect, useState } from 'react';
 import type { EntityNode } from '../../utils/interface';
 import styles from './EditEntityDrawer.module.less';
+import NodeEditForm from './EditForm';
 
-const DetailDrawer: React.FC<{ 
-  editingNode: EntityNode, 
-  visible: boolean, 
-  setVisible: (visible: boolean) => void, 
-  onNodeEdit: (data: EntityNode) => void, 
+const DetailDrawer: React.FC<{
+  editingNode: EntityNode,
+  visible: boolean,
+  setVisible: (visible: boolean) => void,
+  onNodeEdit: (data: EntityNode) => void,
   setEditingNode: (node: EntityNode | null) => void,
   successCallback?: () => void
-}> = ({ 
-  editingNode, 
-  visible, 
-  setVisible, 
-  onNodeEdit, 
+}> = ({
+  editingNode,
+  visible,
+  setVisible,
+  onNodeEdit,
   setEditingNode,
   successCallback
 }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
-  
+
   useEffect(() => {
     // 当抽屉关闭时，重置收起状态
     if (!visible) {
@@ -68,7 +68,7 @@ const DetailDrawer: React.FC<{
           />
         // </Tooltip>
       )}
-      
+
       <Drawer
         title={null}
         visible={visible && !isCollapsed}
