@@ -20,60 +20,60 @@ import lombok.Data;
 public class DictDataDO extends BaseDO {
 
     // 字段名常量
-    public static final String FIELD_SORT       = "sort";
-    public static final String FIELD_LABEL      = "label";
-    public static final String FIELD_VALUE      = "value";
-    public static final String FIELD_DICT_TYPE  = "dict_type";
-    public static final String FIELD_STATUS     = "status";
-    public static final String FIELD_COLOR_TYPE = "color_type";
-    public static final String FIELD_CSS_CLASS  = "css_class";
-    public static final String FIELD_REMARK     = "remark";
+    public static final String SORT = "sort";
+    public static final String LABEL = "label";
+    public static final String VALUE = "value";
+    public static final String DICT_TYPE = "dict_type";
+    public static final String STATUS = "status";
+    public static final String COLOR_TYPE = "color_type";
+    public static final String CSS_CLASS = "css_class";
+    public static final String REMARK = "remark";
 
     /**
      * 字典排序
      */
-    @Column(name = FIELD_SORT)
+    @Column(name = SORT)
     private Integer sort;
     /**
      * 字典标签
      */
-    @Column(name = FIELD_LABEL)
+    @Column(name = LABEL)
     private String label;
     /**
      * 字典值
      */
-    @Column(name = FIELD_VALUE)
+    @Column(name = VALUE)
     private String value;
     /**
      * 字典类型
      *
      * 冗余 {@link DictDataDO#getDictType()}
      */
-    @Column(name = FIELD_DICT_TYPE)
+    @Column(name = DICT_TYPE)
     private String dictType;
     /**
      * 状态
      *
      * 枚举 {@link CommonStatusEnum}
      */
-    @Column(name = FIELD_STATUS)
+    @Column(name = STATUS)
     private Integer status;
     /**
      * 颜色类型
      *
      * 对应到 element-ui 为 default、primary、success、info、warning、danger
      */
-    @Column(name = FIELD_COLOR_TYPE)
+    @Column(name = COLOR_TYPE)
     private String colorType;
     /**
      * css 样式
      */
-    @Column(name = FIELD_CSS_CLASS)
+    @Column(name = CSS_CLASS)
     private String cssClass;
     /**
      * 备注
      */
-    @Column(name = FIELD_REMARK)
+    @Column(name = REMARK)
     private String remark;
 
 }

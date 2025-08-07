@@ -235,7 +235,7 @@ public class MenuServiceImpl implements MenuService {
      * <p>
      * 1. 不能设置自己为父菜单
      * 2. 父菜单不存在
-     * 3. 父菜单必须是 {@link MenuTypeEnum#MENU} 菜单类型
+     * 3. 父菜单必须是 {@link MenuTypeEnum#Menu} 菜单类型
      *
      * @param parentId 父菜单编号
      * @param childId  当前菜单编号
@@ -256,8 +256,8 @@ public class MenuServiceImpl implements MenuService {
             throw exception(MENU_PARENT_NOT_EXISTS);
         }
         // 父菜单必须是目录或者菜单类型
-        if (!MenuTypeEnum.DIR.getType().equals(menu.getType())
-                && !MenuTypeEnum.MENU.getType().equals(menu.getType())) {
+        if (!MenuTypeEnum.Module.getType().equals(menu.getType())
+                && !MenuTypeEnum.Menu.getType().equals(menu.getType())) {
             throw exception(MENU_PARENT_NOT_DIR_OR_MENU);
         }
     }
@@ -327,7 +327,7 @@ public class MenuServiceImpl implements MenuService {
      */
     private void initMenuProperty(MenuDO menu) {
         // 菜单为按钮类型时，无需 component、icon、path 属性，进行置空
-        if (MenuTypeEnum.BUTTON.getType().equals(menu.getType())) {
+        if (MenuTypeEnum.Action.getType().equals(menu.getType())) {
             menu.setComponent("");
             menu.setComponentName("");
             menu.setIcon("");

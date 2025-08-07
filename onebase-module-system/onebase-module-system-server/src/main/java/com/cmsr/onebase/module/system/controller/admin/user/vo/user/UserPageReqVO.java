@@ -20,7 +20,7 @@ import static com.cmsr.onebase.framework.common.util.date.DateUtils.FORMAT_YEAR_
 public class UserPageReqVO extends PageParam {
 
     @Schema(description = "用户账号，模糊匹配", example = "yudao")
-    private String username;
+    private String nickname;
 
     @Schema(description = "手机号码，模糊匹配", example = "yudao")
     private String mobile;

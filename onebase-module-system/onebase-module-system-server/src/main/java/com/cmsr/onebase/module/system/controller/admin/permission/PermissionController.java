@@ -84,7 +84,7 @@ public class PermissionController {
     @PostMapping("/assign-role-users")
     @PreAuthorize("@ss.hasPermission('system:permission:assign-role-user')")
     public CommonResult<Boolean> assignRoleUsers(@Validated @RequestBody PermissionAssignRoleUsersReqVO reqVO) {
-        permissionService.assignRoleUsers(reqVO.getRoleId(), reqVO.getUserIds());
+        permissionService.addRoleUsers(reqVO.getRoleId(), reqVO.getUserIds());
         return success(true);
     }
 

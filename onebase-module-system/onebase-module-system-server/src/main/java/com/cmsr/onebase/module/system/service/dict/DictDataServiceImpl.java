@@ -1,7 +1,6 @@
 package com.cmsr.onebase.module.system.service.dict;
 
 import cn.hutool.core.collection.CollUtil;
-import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
@@ -10,14 +9,12 @@ import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.module.system.controller.admin.dict.vo.data.DictDataPageReqVO;
 import com.cmsr.onebase.module.system.controller.admin.dict.vo.data.DictDataSaveReqVO;
+import com.cmsr.onebase.module.system.dal.database.DictDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.dict.DictDataDO;
 import com.cmsr.onebase.module.system.dal.dataobject.dict.DictTypeDO;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.anyline.data.param.ConfigStore;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.Compare;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -48,24 +45,14 @@ public class DictDataServiceImpl implements DictDataService {
     @Resource
     private DictTypeService dictTypeService;
 
-    //@Resource
-    //private DictDataMapper dictDataMapper;
-
     @Resource
-    private DataRepository dataRepository;
+    private DictDataRepository dictDataRepository;
 
     @Override
     @TenantIgnore
     public List<DictDataDO> getDictDataList(Integer status, String dictType) {
         return TenantUtils.executeIgnore(() -> {
-            ConfigStore cs = new DefaultConfigStore();
-            if (status != null) {
-                cs.and(Compare.EQUAL, "status", status);
-            }
-            if (cn.hutool.core.util.StrUtil.isNotBlank(dictType)) {
-                cs.and(Compare.EQUAL, "dict_type", dictType);
-            }
-            List<DictDataDO> list = dataRepository.findAll(DictDataDO.class, cs);
+            List<DictDataDO> list = dictDataRepository.findListByStatusAndDictType(status, dictType);
             // 创建可变列表的副本以支持排序
             List<DictDataDO> mutableList = new ArrayList<>(list);
             mutableList.sort(COMPARATOR_TYPE_AND_SORT);
@@ -76,41 +63,13 @@ public class DictDataServiceImpl implements DictDataService {
     @Override
     @TenantIgnore
     public PageResult<DictDataDO> getDictDataPage(DictDataPageReqVO pageReqVO) {
-        return TenantUtils.executeIgnore(() -> {
-            try {
-                ConfigStore cs = new DefaultConfigStore();
-                
-                // 构建查询条件
-                if (cn.hutool.core.util.StrUtil.isNotBlank(pageReqVO.getLabel())) {
-                    cs.and(Compare.LIKE, "label", pageReqVO.getLabel());
-                }
-                if (cn.hutool.core.util.StrUtil.isNotBlank(pageReqVO.getDictType())) {
-                    cs.and(Compare.LIKE, "dict_type", pageReqVO.getDictType());
-                }
-                if (pageReqVO.getStatus() != null) {
-                    cs.and(Compare.EQUAL, "status", pageReqVO.getStatus());
-                }
-                
-                // 添加排序条件，按ID降序排列
-                cs.order("id", "DESC");
-                
-                return dataRepository.findPageWithConditions(
-                        DictDataDO.class, 
-                        cs, 
-                        pageReqVO.getPageNo(), 
-                        pageReqVO.getPageSize()
-                );
-            } catch (Exception e) {
-                log.error("分页查询字典数据失败", e);
-                throw new RuntimeException("分页查询字典数据失败", e);
-            }
-        });
+        return TenantUtils.executeIgnore(() -> dictDataRepository.findPage(pageReqVO));
     }
 
     @Override
     @TenantIgnore
     public DictDataDO getDictData(Long id) {
-        return TenantUtils.executeIgnore(() -> dataRepository.findById(DictDataDO.class, id));
+        return TenantUtils.executeIgnore(() -> dictDataRepository.findById(id));
     }
 
     @Override
@@ -122,7 +81,7 @@ public class DictDataServiceImpl implements DictDataService {
 
         // 插入字典类型
         DictDataDO dictData = BeanUtils.toBean(createReqVO, DictDataDO.class);
-        dataRepository.insert(dictData);
+        dictDataRepository.insert(dictData);
         return dictData.getId();
     }
 
@@ -137,7 +96,7 @@ public class DictDataServiceImpl implements DictDataService {
 
         // 更新字典类型
         DictDataDO updateObj = BeanUtils.toBean(updateReqVO, DictDataDO.class);
-        dataRepository.update(updateObj);
+        dictDataRepository.update(updateObj);
     }
 
     @Override
@@ -146,23 +105,17 @@ public class DictDataServiceImpl implements DictDataService {
         validateDictDataExists(id);
 
         // 删除字典数据
-        dataRepository.deleteById(DictDataDO.class, id);
+        dictDataRepository.deleteById(id);
     }
 
     @Override
     public long getDictDataCountByDictType(String dictType) {
-        ConfigStore cs = new DefaultConfigStore()
-                .and(Compare.EQUAL, "dict_type", dictType);
-        List<DictDataDO> list = dataRepository.findAll(DictDataDO.class, cs);
-        return list.size();
+        return dictDataRepository.countByDictType(dictType);
     }
 
     @VisibleForTesting
     public void validateDictDataValueUnique(Long id, String dictType, String value) {
-        ConfigStore cs = new DefaultConfigStore()
-                .and(Compare.EQUAL, "dict_type", dictType)
-                .and(Compare.EQUAL, "value", value);
-        DictDataDO dictData = dataRepository.findOne(DictDataDO.class, cs);
+        DictDataDO dictData = dictDataRepository.findOneByDictTypeAndValue(dictType, value);
         if (dictData == null) {
             return;
         }
@@ -182,7 +135,7 @@ public class DictDataServiceImpl implements DictDataService {
         }
         
         // 由于 DictDataDO 有 @TenantIgnore 注解，需要忽略租户过滤
-        DictDataDO dictData = TenantUtils.executeIgnore(() -> dataRepository.findById(DictDataDO.class, id));
+        DictDataDO dictData = TenantUtils.executeIgnore(() -> dictDataRepository.findById(id));
         if (dictData == null) {
             throw exception(DICT_DATA_NOT_EXISTS);
         }
@@ -204,10 +157,7 @@ public class DictDataServiceImpl implements DictDataService {
         if (CollUtil.isEmpty(values)) {
             return;
         }
-        ConfigStore cs = new DefaultConfigStore()
-                .and(Compare.EQUAL, "dict_type", dictType)
-                .in("value", values);
-        List<DictDataDO> dictDataList = dataRepository.findAll(DictDataDO.class, cs);
+        List<DictDataDO> dictDataList = dictDataRepository.findListByDictTypeAndValues(dictType, values);
         Map<String, DictDataDO> dictDataMap = CollectionUtils.convertMap(dictDataList, DictDataDO::getValue);
         // 校验
         values.forEach(value -> {
@@ -224,32 +174,20 @@ public class DictDataServiceImpl implements DictDataService {
     @Override
     @TenantIgnore
     public DictDataDO getDictData(String dictType, String value) {
-        return TenantUtils.executeIgnore(() -> {
-            ConfigStore cs = new DefaultConfigStore()
-                    .and(Compare.EQUAL, "dict_type", dictType)
-                    .and(Compare.EQUAL, "value", value);
-            return dataRepository.findOne(DictDataDO.class, cs);
-        });
+        return TenantUtils.executeIgnore(() -> dictDataRepository.findOneByDictTypeAndValue(dictType, value));
     }
 
     @Override
     @TenantIgnore
     public DictDataDO parseDictData(String dictType, String label) {
-        return TenantUtils.executeIgnore(() -> {
-            ConfigStore cs = new DefaultConfigStore()
-                    .and(Compare.EQUAL, "dict_type", dictType)
-                    .and(Compare.EQUAL, "label", label);
-            return dataRepository.findOne(DictDataDO.class, cs);
-        });
+        return TenantUtils.executeIgnore(() -> dictDataRepository.findOneByDictTypeAndLabel(dictType, label));
     }
 
     @Override
     @TenantIgnore
     public List<DictDataDO> getDictDataListByDictType(String dictType) {
         return TenantUtils.executeIgnore(() -> {
-            ConfigStore cs = new DefaultConfigStore()
-                    .and(Compare.EQUAL, "dict_type", dictType);
-            List<DictDataDO> list = dataRepository.findAll(DictDataDO.class, cs);
+            List<DictDataDO> list = dictDataRepository.findListByDictType(dictType);
             // 创建可变列表的副本以支持排序
             List<DictDataDO> mutableList = new ArrayList<>(list);
             mutableList.sort(Comparator.comparing(DictDataDO::getSort));
