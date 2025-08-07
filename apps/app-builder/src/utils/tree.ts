@@ -1,5 +1,5 @@
 export interface TreeNode {
-  key?: number; // arco-design default tree props
+  key?: number | string; // arco-design default tree props
   title?: string; // arco-design default tree props
   children?: TreeNode[];
   [key: string]: any;
