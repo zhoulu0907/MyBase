@@ -70,4 +70,12 @@ public interface MetadataEntityRelationshipService {
      */
     List<CascadeTypeRespVO> getCascadeTypes();
 
+    /**
+     * 根据数据源ID获取该数据源下所有实体的关系
+     *
+     * @param datasourceId 数据源ID
+     * @return 实体关系列表
+     */
+    List<EntityRelationshipRespVO> getRelationshipsByDatasourceId(Long datasourceId);
+
 } 

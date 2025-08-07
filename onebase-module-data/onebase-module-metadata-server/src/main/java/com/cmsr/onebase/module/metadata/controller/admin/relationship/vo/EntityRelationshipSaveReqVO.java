@@ -19,8 +19,7 @@ public class EntityRelationshipSaveReqVO {
     @Schema(description = "关系ID", example = "5001")
     private String id;
 
-    @Schema(description = "关系名称", requiredMode = Schema.RequiredMode.REQUIRED, example = "用户订单关系")
-    @NotBlank(message = "关系名称不能为空")
+    @Schema(description = "关系名称", example = "用户订单关系")
     @Size(max = 100, message = "关系名称长度不能超过100个字符")
     private String relationName;
 
