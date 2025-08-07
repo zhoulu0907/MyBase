@@ -14,6 +14,9 @@ import java.util.List;
 @Data
 public class ApplicationPageRespVO {
 
+    @Schema(description = "应用Id")
+    private Long id;
+
     @Schema(description = "应用名称")
     private String appName;
 
