@@ -4,6 +4,10 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.BusinessEntityPageReqVO;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.BusinessEntitySaveReqVO;
+import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.ERDiagramRespVO;
+import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EREntityVO;
+import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.ERFieldVO;
+import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.ERRelationshipVO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataBusinessEntityDO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataSystemFieldsDO;
@@ -22,6 +26,7 @@ import org.anyline.service.AnylineService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
 
@@ -466,6 +471,210 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
         configStore.and("datasource_id", datasourceId);
         configStore.order("create_time", Order.TYPE.DESC);
         return metadataRepository.findAllByConfig(MetadataBusinessEntityDO.class, configStore);
+    }
+
+    @Override
+    public ERDiagramRespVO getERDiagramByDatasourceId(Long datasourceId) {
+        // 1. 获取数据源信息
+        MetadataDatasourceDO datasource = getDatasourceById(datasourceId);
+        if (datasource == null) {
+            throw new IllegalArgumentException("数据源不存在，ID: " + datasourceId);
+        }
+
+        // 2. 获取该数据源下的所有业务实体
+        List<MetadataBusinessEntityDO> entities = getBusinessEntityListByDatasourceId(datasourceId);
+
+        // 3. 构建ER图响应对象
+        ERDiagramRespVO result = new ERDiagramRespVO();
+        result.setDatasourceId(datasourceId);
+        result.setDatasourceName(datasource.getDatasourceName());
+
+        // 4. 转换实体信息，包括字段信息
+        List<EREntityVO> erEntities = new ArrayList<>();
+        for (MetadataBusinessEntityDO entity : entities) {
+            EREntityVO erEntity = convertToEREntity(entity);
+            erEntities.add(erEntity);
+        }
+        result.setEntities(erEntities);
+
+        // 5. 构建关联关系（基于外键关系）
+        List<ERRelationshipVO> relationships = buildRelationships(entities);
+        result.setRelationships(relationships);
+
+        return result;
+    }
+
+    /**
+     * 将业务实体转换为ER实体VO
+     *
+     * @param entity 业务实体DO
+     * @return ER实体VO
+     */
+    private EREntityVO convertToEREntity(MetadataBusinessEntityDO entity) {
+        EREntityVO erEntity = new EREntityVO();
+        erEntity.setEntityId(entity.getId());
+        erEntity.setEntityName(entity.getDisplayName());
+        erEntity.setTableName(entity.getTableName());
+        erEntity.setDescription(entity.getDescription());
+        erEntity.setEntityType(entity.getEntityType().toString());
+        
+        // 设置默认坐标（前端可以根据需要调整）
+        erEntity.setPositionX(100);
+        erEntity.setPositionY(100);
+
+        // 获取字段信息
+        List<ERFieldVO> fields = getEntityFields(entity.getId());
+        erEntity.setFields(fields);
+
+        return erEntity;
+    }
+
+    /**
+     * 获取实体的字段信息
+     *
+     * @param entityId 实体ID
+     * @return 字段VO列表
+     */
+    private List<ERFieldVO> getEntityFields(Long entityId) {
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        configStore.and("entity_id", entityId);
+        configStore.order("sort_order", Order.TYPE.ASC);
+        configStore.order("create_time", Order.TYPE.ASC);
+
+        List<MetadataEntityFieldDO> fieldList = metadataRepository.findAllByConfig(MetadataEntityFieldDO.class, configStore);
+        List<ERFieldVO> erFields = new ArrayList<>();
+
+        for (MetadataEntityFieldDO field : fieldList) {
+            ERFieldVO erField = new ERFieldVO();
+            erField.setFieldId(field.getId());
+            erField.setFieldName(field.getFieldName());
+            erField.setDisplayName(field.getDisplayName());
+            erField.setFieldType(field.getFieldType());
+            erField.setDataLength(field.getDataLength());
+            erField.setDescription(field.getDescription());
+            erField.setIsRequired(field.getIsRequired());
+            erField.setIsUnique(field.getIsUnique());
+            erField.setIsPrimaryKey(field.getIsPrimaryKey());
+            erField.setIsSystemField(field.getIsSystemField());
+            erField.setDefaultValue(field.getDefaultValue());
+            erField.setSortOrder(field.getSortOrder());
+            erFields.add(erField);
+        }
+
+        return erFields;
+    }
+
+    /**
+     * 构建实体间的关联关系
+     * 基于字段名称和类型推断外键关系
+     *
+     * @param entities 业务实体列表
+     * @return 关联关系列表
+     */
+    private List<ERRelationshipVO> buildRelationships(List<MetadataBusinessEntityDO> entities) {
+        List<ERRelationshipVO> relationships = new ArrayList<>();
+
+        // 这里实现一个简单的外键推断逻辑
+        // 可以根据实际业务需求进行扩展
+        for (MetadataBusinessEntityDO sourceEntity : entities) {
+            List<ERFieldVO> sourceFields = getEntityFields(sourceEntity.getId());
+            
+            for (ERFieldVO sourceField : sourceFields) {
+                // 检查是否为外键字段（通常以_id结尾）
+                if (isLikelyForeignKey(sourceField)) {
+                    // 查找可能的目标实体
+                    for (MetadataBusinessEntityDO targetEntity : entities) {
+                        if (!sourceEntity.getId().equals(targetEntity.getId())) {
+                            ERRelationshipVO relationship = tryBuildRelationship(
+                                    sourceEntity, sourceField, targetEntity);
+                            if (relationship != null) {
+                                relationships.add(relationship);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return relationships;
+    }
+
+    /**
+     * 判断字段是否可能是外键
+     *
+     * @param field 字段信息
+     * @return 是否为外键
+     */
+    private boolean isLikelyForeignKey(ERFieldVO field) {
+        String fieldName = field.getFieldName().toLowerCase();
+        // 简单的外键判断逻辑：字段名以_id结尾，且不是主键
+        return fieldName.endsWith("_id") && !field.getIsPrimaryKey();
+    }
+
+    /**
+     * 尝试构建关联关系
+     *
+     * @param sourceEntity 源实体
+     * @param sourceField 源字段
+     * @param targetEntity 目标实体
+     * @return 关联关系VO，如果无法建立关系则返回null
+     */
+    private ERRelationshipVO tryBuildRelationship(MetadataBusinessEntityDO sourceEntity, 
+                                                 ERFieldVO sourceField, 
+                                                 MetadataBusinessEntityDO targetEntity) {
+        List<ERFieldVO> targetFields = getEntityFields(targetEntity.getId());
+        
+        // 查找目标实体的主键字段
+        for (ERFieldVO targetField : targetFields) {
+            if (targetField.getIsPrimaryKey()) {
+                // 检查字段名是否匹配（去掉前缀后匹配）
+                if (isFieldNameMatch(sourceField.getFieldName(), targetField.getFieldName(), targetEntity.getTableName())) {
+                    ERRelationshipVO relationship = new ERRelationshipVO();
+                    relationship.setSourceEntityId(sourceEntity.getId());
+                    relationship.setSourceEntityName(sourceEntity.getDisplayName());
+                    relationship.setSourceFieldId(sourceField.getFieldId());
+                    relationship.setSourceFieldName(sourceField.getFieldName());
+                    relationship.setTargetEntityId(targetEntity.getId());
+                    relationship.setTargetEntityName(targetEntity.getDisplayName());
+                    relationship.setTargetFieldId(targetField.getFieldId());
+                    relationship.setTargetFieldName(targetField.getFieldName());
+                    relationship.setRelationshipType("MANY_TO_ONE");
+                    relationship.setRelationshipName(sourceEntity.getDisplayName() + " -> " + targetEntity.getDisplayName());
+                    relationship.setDescription("基于字段 " + sourceField.getFieldName() + " 的外键关联");
+                    return relationship;
+                }
+            }
+        }
+        
+        return null;
+    }
+
+    /**
+     * 检查字段名是否匹配
+     *
+     * @param sourceFieldName 源字段名
+     * @param targetFieldName 目标字段名  
+     * @param targetTableName 目标表名
+     * @return 是否匹配
+     */
+    private boolean isFieldNameMatch(String sourceFieldName, String targetFieldName, String targetTableName) {
+        // 简单的匹配逻辑
+        // 例如：user_id 匹配 user表的id字段
+        String expectedPrefix = targetTableName.toLowerCase() + "_";
+        return sourceFieldName.toLowerCase().startsWith(expectedPrefix) &&
+               sourceFieldName.toLowerCase().endsWith("_" + targetFieldName.toLowerCase());
+    }
+
+    /**
+     * 根据ID获取数据源信息
+     *
+     * @param datasourceId 数据源ID
+     * @return 数据源DO
+     */
+    private MetadataDatasourceDO getDatasourceById(Long datasourceId) {
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        configStore.and("id", datasourceId);
+        return metadataRepository.findOne(MetadataDatasourceDO.class, configStore);
     }
 
 }
