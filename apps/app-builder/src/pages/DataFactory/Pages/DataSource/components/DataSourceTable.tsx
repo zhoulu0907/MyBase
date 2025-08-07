@@ -2,7 +2,7 @@ import { Button, Message, Modal, Space, Table, type TableColumnProps } from '@ar
 import { IconPlus } from '@arco-design/web-react/icon';
 import { deleteDatasource, getDatasourcePage } from '@onebase/app';
 import { useEffect, useState } from 'react';
-import styles from './index.module.less';
+import styles from '../index.module.less';
 
 // 数据源记录类型
 interface DatasourceRecord {

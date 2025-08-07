@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
 import { Drawer } from '@arco-design/web-react';
-import { type EntityNode } from '../../utils/interface';
+import React, { useEffect } from 'react';
+import { type EntityNode } from '../../../../utils/interface';
 
 const DetailDrawer: React.FC<{
   selectedNode: EntityNode;

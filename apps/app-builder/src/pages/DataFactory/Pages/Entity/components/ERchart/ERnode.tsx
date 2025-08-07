@@ -1,9 +1,23 @@
+<<<<<<< HEAD:apps/app-builder/src/pages/DataFactory/components/ERchart/ERnode.tsx
 import React, { useState } from 'react';
 import { Button, Popover, Space } from '@arco-design/web-react';
 import { IconSync, IconMoreVertical, IconCaretDown, IconCaretUp } from '@arco-design/web-react/icon';
 import { Node } from '@antv/x6';
 import { type EntityNode } from '../../utils/interface';
 import styles from './ERnode.module.less';
+=======
+import React, { useState } from "react";
+import { Button, Popover, Space } from "@arco-design/web-react";
+import {
+  IconSync,
+  IconMoreVertical,
+  IconCaretDown,
+  IconCaretUp,
+} from "@arco-design/web-react/icon";
+import { Node } from "@antv/x6";
+import { type EntityNode } from "../../../../utils/interface";
+import styles from "./ERnode.module.less";
+>>>>>>> 3aa8554542cb666fb0f8e58daedc2fbc86438f8d:apps/app-builder/src/pages/DataFactory/Pages/Entity/components/ERchart/ERnode.tsx
 
 // X6 节点组件接口
 interface X6NodeProps {

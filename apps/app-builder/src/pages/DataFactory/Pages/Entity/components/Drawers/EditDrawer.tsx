@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react';
 import { Drawer, Message } from '@arco-design/web-react';
+import React, { useEffect } from 'react';
+import type { EntityNode } from '../../../../utils/interface';
 import NodeEditForm from './EditForm';
-import type { EntityNode } from '../../utils/interface';
 
 interface FormValues {
   code: string;

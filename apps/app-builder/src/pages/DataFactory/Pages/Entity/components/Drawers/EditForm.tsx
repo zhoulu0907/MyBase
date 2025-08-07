@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
 import { Button, Form, Input, Switch } from '@arco-design/web-react';
-import { type EntityField, type EntityNode } from '../../utils/interface';
+import React, { useEffect } from 'react';
+import { type EntityField, type EntityNode } from '../../../../utils/interface';
 import styles from './EditForm.module.less';
 
 // 节点编辑表单组件

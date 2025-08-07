@@ -1,7 +1,7 @@
+import { Form, Input, Message, Modal, Select } from '@arco-design/web-react';
 import React from 'react';
-import { Form, Input, Select, Message, Modal } from '@arco-design/web-react';
-import styles from './index.module.less';
-import type { EntityField, EntityNode } from '../../utils/interface';
+import type { EntityField, EntityNode } from '../../../../utils/interface';
+import styles from './modal.module.less';
 
 interface EntityFormValues {
   code: string;

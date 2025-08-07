@@ -6,7 +6,7 @@ import {
   type DatasourceTestConnectionReqVO
 } from '@onebase/app';
 import React, { useEffect, useMemo, useState } from 'react';
-import styles from './index.module.less';
+import styles from '../index.module.less';
 
 const Option = Select.Option;
 

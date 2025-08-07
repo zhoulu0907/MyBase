@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 // import { Button, Space } from '@arco-design/web-react';
-import ERchart from './ERchart';
-import EditDrawer from './Drawer/EditEntityDrawer';
-import type { EntityNode, EntityERProps, EntityData, EdgeData } from '../utils/interface';
-import CreateFieldModal from '../Pages/Entity/CreateFieldModal';
-import CreateRelationModal from '../Pages/Entity/CreateRelationModal';
 import { Modal } from '@arco-design/web-react';
+import type { EdgeData, EntityData, EntityERProps, EntityNode } from '../../../utils/interface';
+import EditDrawer from '../components/Drawers/EditEntityDrawer';
+import ERchart from '../components/ERchart';
+import CreateFieldModal from '../components/Modals/CreateFieldModal';
+import CreateRelationModal from '../components/Modals/CreateRelationModal';
 
 // const mockData = {
 //   nodes: [

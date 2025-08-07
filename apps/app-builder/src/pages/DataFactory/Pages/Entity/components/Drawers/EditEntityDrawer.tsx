@@ -1,7 +1,7 @@
 import { Button, Drawer, Message } from '@arco-design/web-react';
 import { IconCaretRight } from '@arco-design/web-react/icon';
 import React, { useEffect, useState } from 'react';
-import type { EntityNode } from '../../utils/interface';
+import type { EntityNode } from '../../../../utils/interface';
 import styles from './EditEntityDrawer.module.less';
 import NodeEditForm from './EditForm';
 

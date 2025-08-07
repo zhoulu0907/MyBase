@@ -1,10 +1,10 @@
 import { Button, Radio, Tag } from '@arco-design/web-react';
 import { IconMindMapping, IconNav, IconPlus } from '@arco-design/web-react/icon';
 import React, { useState } from 'react';
-import EntityERWithModeSwitch from '../../components/EntityERExample';
-import EntityTable from '../../components/EntityTable';
-import CreateEntityPage from './CreateEntityPage';
-import styles from './index.module.less';
+import EntityTable from '../components/EntityTable';
+import CreateEntityModal from '../components/Modals/CreateEntityModal';
+import styles from '../index.module.less';
+import EntityERWithModeSwitch from './EntityERExample';
 
 const CheckEntityPage: React.FC<{ handlePageType: (tab: string) => void }> = ({ handlePageType }) => {
   const [activeTab, setActiveTab] = useState('ER');
@@ -76,10 +76,9 @@ const CheckEntityPage: React.FC<{ handlePageType: (tab: string) => void }> = ({ 
         </div>
       )}
 
-      <CreateEntityPage
+      <CreateEntityModal
         visible={createEntityModalVisible}
         setVisible={setCreateEntityModalVisible}
-        handlePageType={handlePageType}
         successCallback={() => {
           setRefreshEntityList(true);
           setOnlyUpdateNode(false);

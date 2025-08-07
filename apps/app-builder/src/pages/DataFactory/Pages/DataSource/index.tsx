@@ -1,9 +1,9 @@
 import { getDatasource, type DatasourceSaveReqVO } from '@onebase/app';
 import React, { useState } from 'react';
-import CreateDsPage from './CreateDsPage';
-import DataSourceTable from './DataSourceTable';
-import EditDsDrawer from './EditDsDrawer';
-import EmptyDsPage from './EmptyDsPage';
+import CreateDsPage from './components/CreateDsPage';
+import DataSourceTable from './components/DataSourceTable';
+import EditDsDrawer from './components/EditDsDrawer';
+import EmptyDsPage from './components/EmptyDsPage';
 
 const DataSourcePage: React.FC = () => {
   const [pageType, setPageType] = useState('check-ds');
