@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import CheckEntityPage from "./CheckEntityPage";
-import EmptyEntityPage from "./EmptyEntityPage";
+import CheckEntityPage from "./main/EntityPage";
+import EmptyEntityPage from "./main/EmptyEntityPage";
 
 const EntityPage: React.FC = () => {
   const [pageType, setPageType] = useState("check-entity");
