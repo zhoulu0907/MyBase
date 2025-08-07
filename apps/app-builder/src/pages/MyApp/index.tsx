@@ -11,12 +11,14 @@ import {
 	Select,
 	Tag,
 	Form,
+	Message,
 } from '@arco-design/web-react';
 import { IconPlusCircle, IconSearch } from '@arco-design/web-react/icon';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import CreateApp from '@/components/CreateApp';
+import { listApplication, createApplication } from '@onebase/app';
 import styles from './index.module.less';
 
 const Option = Select.Option;
@@ -39,7 +41,8 @@ const MyAppPage: React.FC = () => {
 	const [pageSize, setPageSize] = useState<number>(12);
 	const [inputValue, setInputValue] = useState<string>('');
 	const [deleteVisible, setDeleteVisible] = useState<boolean>(false);
-	const [createVisible, setCreateVisible] = useState<boolean>(true);
+	const [createVisible, setCreateVisible] = useState<boolean>(false);
+	const [createLoading, setCreateLoading] = useState<boolean>(false);
 	// const [reqFilter, setReqFilter] = useState({
 	// 	appOwn: "all",
 	// 	timeSort: "create",
@@ -52,6 +55,52 @@ const MyAppPage: React.FC = () => {
 		currentPage * pageSize
 	);
 
+	/* 创建应用 */
+	const handleCreateApp = async () => {
+		form.validate(async (_error, data) => {
+			setCreateLoading(true);
+			const {
+				appCode,
+				appName,
+				iconColor,
+				iconName,
+				description,
+				tagIds = [1],
+				themeColor,
+			} = data;
+
+			const params = {
+				appCode,
+				appMode: 'classic',
+				appName,
+				datasourceId: 1,
+				description,
+				iconColor,
+				iconName,
+				tagIds,
+				themeColor,
+			};
+			console.log('params', params, data);
+			createApplication(params)
+				.then(() => {
+					Message.success({
+                        content: '应用创建成功，3s后跳转...',
+                        duration: 3000,
+                        onClose: () => {
+                            navigate("/onebase/create-app/data-factory");
+                        },
+                    });
+				})
+				.catch(() => {
+					Message.error('应用创建失败');
+				})
+				.finally(() => {
+                    setCreateLoading(false);
+                    setCreateVisible(false);
+				});
+		});
+	};
+
 	return (
 		<div className={styles.myAppPage}>
 			<div className={styles.myAppPageHeader}>
@@ -61,7 +110,6 @@ const MyAppPage: React.FC = () => {
 					size='large'
 					icon={<IconPlusCircle />}
 					className={styles.createAppButton}
-					// onClick={() => navigate("/onebase/create-app/data-factory")}
 					onClick={() => setCreateVisible(true)}
 				>
 					{t('myApp.createApp')}
@@ -257,12 +305,8 @@ const MyAppPage: React.FC = () => {
 						</Button>
 						<Button
 							type='primary'
-							htmlType='submit'
-							onClick={() => {
-								form.validate((errors, data) => {
-									console.log(errors, data);
-								});
-							}}
+							loading={createLoading}
+							onClick={handleCreateApp}
 						>
 							创建
 						</Button>
