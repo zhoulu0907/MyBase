@@ -11,7 +11,7 @@ const BasicSetting = (props: IProps) => {
     const { form } = props;
 	return (
 		<div className={styles.basicSetting}>
-            <EditApp form={form} previewBgColor='#F2F3F5BF' />
+      <EditApp form={form} previewBgColor='#F2F3F5BF' />
 		</div>
 	);
 };
