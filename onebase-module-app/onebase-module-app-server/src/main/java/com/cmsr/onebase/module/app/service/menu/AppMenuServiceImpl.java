@@ -89,7 +89,7 @@ public class AppMenuServiceImpl implements AppMenuService {
         menuDO.setMenuType(createReqVO.getMenuType());
         menuDO.setMenuName(createReqVO.getMenuName());
         menuDO.setMenuIcon(createReqVO.getMenuIcon());
-        menuDO.setIsVisible(MenuVisibleEnum.YES.getValue());
+        menuDO.setVisible(MenuVisibleEnum.YES.getValue());
         appMenuRepository.insert(menuDO);
         // 创建页面集
         CreatePageSetDTO createPageSetDTO = new CreatePageSetDTO();
@@ -167,7 +167,7 @@ public class AppMenuServiceImpl implements AppMenuService {
     @Override
     public void updateApplicationMenuVisible(Long id, Boolean visible) {
         MenuDO menuDO = validateApplicationMenuExist(id);
-        menuDO.setIsVisible(visible);
+        menuDO.setVisible(visible);
         appMenuRepository.update(menuDO);
     }
 

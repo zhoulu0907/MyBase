@@ -32,7 +32,7 @@ public class MenuListRespVO {
     private String menuIcon;
 
     @Schema(description = "菜单可见")
-    private Boolean isVisible;
+    private Boolean visible;
 
     @Schema(description = "子菜单")
     public List<MenuListRespVO> children = null;

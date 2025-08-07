@@ -38,6 +38,6 @@ public class MenuDO extends TenantBaseDO {
     private String actionTarget;
 
     @Column(name = "is_visible", nullable = false, comment = "是否可见")
-    private Boolean isVisible;
+    private Boolean visible;
 
 }

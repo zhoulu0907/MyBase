@@ -22,6 +22,18 @@ public class AuthDataFilterDO extends TenantBaseDO {
     private Long groupId;
 
     /**
+     * 条件组
+     */
+    @Column(name = "condition_group", nullable = false, comment = "条件组")
+    private Integer conditionGroup;
+
+    /**
+     * 条件顺序
+     */
+    @Column(name = "condition_order", nullable = false, comment = "条件顺序")
+    private Integer conditionOrder;
+
+    /**
      * 字段名称
      */
     @Column(name = "field_name", nullable = false, length = 100, comment = "字段名称")
