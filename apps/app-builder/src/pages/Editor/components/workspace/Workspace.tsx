@@ -202,7 +202,7 @@ export default function EditorWorkspace() {
           ))}
         </ReactSortable>
 
-        {showEmpty && !components.length && (
+        {showEmpty && (
           <div className={styles.formEmpty}>
             <div className={styles.formEmptyContent}>
               <img src={EmptyIcon} alt="页面无组件" />
