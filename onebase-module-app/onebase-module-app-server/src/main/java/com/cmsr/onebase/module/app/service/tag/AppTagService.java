@@ -1,8 +1,8 @@
-package com.cmsr.onebase.module.app.service.app;
+package com.cmsr.onebase.module.app.service.tag;
 
 import java.util.List;
 
-import com.cmsr.onebase.module.app.controller.admin.app.vo.TagListRespVO;
+import com.cmsr.onebase.module.app.controller.admin.tag.vo.TagListRespVO;
 
 /**
  * @Author：mickey

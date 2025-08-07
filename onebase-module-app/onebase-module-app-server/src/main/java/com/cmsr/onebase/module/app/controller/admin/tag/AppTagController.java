@@ -1,10 +1,10 @@
-package com.cmsr.onebase.module.app.controller.admin.app;
+package com.cmsr.onebase.module.app.controller.admin.tag;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
-import com.cmsr.onebase.module.app.controller.admin.app.vo.CreateTagReqVO;
-import com.cmsr.onebase.module.app.controller.admin.app.vo.ListTagReqVO;
-import com.cmsr.onebase.module.app.controller.admin.app.vo.TagListRespVO;
-import com.cmsr.onebase.module.app.service.app.AppTagService;
+import com.cmsr.onebase.module.app.controller.admin.tag.vo.CreateTagReqVO;
+import com.cmsr.onebase.module.app.controller.admin.tag.vo.ListTagReqVO;
+import com.cmsr.onebase.module.app.controller.admin.tag.vo.TagListRespVO;
+import com.cmsr.onebase.module.app.service.tag.AppTagService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;

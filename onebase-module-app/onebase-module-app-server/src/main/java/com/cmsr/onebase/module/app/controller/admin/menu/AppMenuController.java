@@ -1,8 +1,8 @@
-package com.cmsr.onebase.module.app.controller.admin.app;
+package com.cmsr.onebase.module.app.controller.admin.menu;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
-import com.cmsr.onebase.module.app.controller.admin.app.vo.*;
-import com.cmsr.onebase.module.app.service.app.AppMenuService;
+import com.cmsr.onebase.module.app.controller.admin.menu.vo.*;
+import com.cmsr.onebase.module.app.service.menu.AppMenuService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;

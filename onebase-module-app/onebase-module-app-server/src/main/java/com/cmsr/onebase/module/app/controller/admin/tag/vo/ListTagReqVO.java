@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.app.controller.admin.app.vo;
+package com.cmsr.onebase.module.app.controller.admin.tag.vo;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;

@@ -1,7 +1,7 @@
-package com.cmsr.onebase.module.app.service.app;
+package com.cmsr.onebase.module.app.service.version;
 
-import com.cmsr.onebase.module.app.controller.admin.app.vo.VersionCreateReqVO;
-import com.cmsr.onebase.module.app.controller.admin.app.vo.VersionListRespVO;
+import com.cmsr.onebase.module.app.controller.admin.version.vo.VersionCreateReqVO;
+import com.cmsr.onebase.module.app.controller.admin.version.vo.VersionListRespVO;
 
 import java.util.List;
 

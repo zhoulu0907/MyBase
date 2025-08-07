@@ -1,6 +1,6 @@
-package com.cmsr.onebase.module.app.service.app;
+package com.cmsr.onebase.module.app.service.menu;
 
-import com.cmsr.onebase.module.app.controller.admin.app.vo.*;
+import com.cmsr.onebase.module.app.controller.admin.menu.vo.*;
 
 import java.util.List;
 

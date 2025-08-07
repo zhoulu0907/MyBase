@@ -1,8 +1,8 @@
-package com.cmsr.onebase.module.app.service.app;
+package com.cmsr.onebase.module.app.service.tag;
 
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.module.app.controller.admin.app.vo.TagListRespVO;
+import com.cmsr.onebase.module.app.controller.admin.tag.vo.TagListRespVO;
 import com.cmsr.onebase.module.app.dal.database.app.AppTagRepository;
 import com.cmsr.onebase.module.app.dal.dataobject.app.TagDO;
 import com.cmsr.onebase.module.app.enums.app.AppErrorCodeConstants;

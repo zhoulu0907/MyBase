@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.app.controller.admin.app.vo;
+package com.cmsr.onebase.module.app.controller.admin.menu.vo;
 
 import java.util.List;
 

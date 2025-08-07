@@ -1,14 +1,15 @@
-package com.cmsr.onebase.module.app.service.app;
+package com.cmsr.onebase.module.app.service.menu;
 
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.app.api.appresource.dto.CreatePageSetDTO;
-import com.cmsr.onebase.module.app.controller.admin.app.vo.*;
+import com.cmsr.onebase.module.app.controller.admin.menu.vo.*;
 import com.cmsr.onebase.module.app.dal.database.app.AppMenuRepository;
 import com.cmsr.onebase.module.app.dal.dataobject.app.MenuDO;
 import com.cmsr.onebase.module.app.enums.app.AppErrorCodeConstants;
 import com.cmsr.onebase.module.app.enums.app.MenuTypeEnum;
 import com.cmsr.onebase.module.app.enums.app.MenuVisibleEnum;
+import com.cmsr.onebase.module.app.service.AppCommonService;
 import com.cmsr.onebase.module.app.service.appresource.PageSetService;
 import com.cmsr.onebase.module.app.util.MenuUtils;
 import jakarta.annotation.Resource;

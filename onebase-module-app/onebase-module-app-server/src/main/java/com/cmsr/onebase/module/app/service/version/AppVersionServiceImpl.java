@@ -1,12 +1,13 @@
-package com.cmsr.onebase.module.app.service.app;
+package com.cmsr.onebase.module.app.service.version;
 
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.module.app.controller.admin.app.vo.VersionCreateReqVO;
-import com.cmsr.onebase.module.app.controller.admin.app.vo.VersionListRespVO;
+import com.cmsr.onebase.module.app.controller.admin.version.vo.VersionCreateReqVO;
+import com.cmsr.onebase.module.app.controller.admin.version.vo.VersionListRespVO;
 import com.cmsr.onebase.module.app.dal.database.app.*;
 import com.cmsr.onebase.module.app.dal.dataobject.app.*;
 import com.cmsr.onebase.module.app.enums.app.AppErrorCodeConstants;
+import com.cmsr.onebase.module.app.service.AppCommonService;
 import com.cmsr.onebase.module.app.util.VersionUtils;
 import jakarta.annotation.Resource;
 import lombok.Setter;

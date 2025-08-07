@@ -1,9 +1,9 @@
-package com.cmsr.onebase.module.app.controller.admin.app;
+package com.cmsr.onebase.module.app.controller.admin.version;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
-import com.cmsr.onebase.module.app.controller.admin.app.vo.VersionCreateReqVO;
-import com.cmsr.onebase.module.app.controller.admin.app.vo.VersionListRespVO;
-import com.cmsr.onebase.module.app.service.app.AppVersionService;
+import com.cmsr.onebase.module.app.controller.admin.version.vo.VersionCreateReqVO;
+import com.cmsr.onebase.module.app.controller.admin.version.vo.VersionListRespVO;
+import com.cmsr.onebase.module.app.service.version.AppVersionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
