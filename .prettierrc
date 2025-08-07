@@ -9,5 +9,6 @@
   "arrowParens": "always",
   "vueIndentScriptAndStyle": false,
   "endOfLine": "auto",
-  "htmlWhitespaceSensitivity": "ignore"
+  "htmlWhitespaceSensitivity": "ignore",
+  "plugins": ["@prettier/plugin-oxc"]
 }
