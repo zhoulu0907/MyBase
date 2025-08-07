@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { Modal, Form, Input, Grid } from '@arco-design/web-react';
-import styles from './EditVersionModal.module.less';
+import React, { useState } from "react";
+import { Modal, Form, Input, Grid } from "@arco-design/web-react";
+import styles from "./EditVersionModal.module.less";
 
 const TextArea = Input.TextArea;
 
@@ -23,13 +23,13 @@ const EditVersionModal: React.FC<EditVersionModalProps> = ({
   onCancel,
   onOk,
   loading = false,
-  initialData
+  initialData,
 }) => {
   const [form] = Form.useForm();
   const [formData] = useState<EditVersionFormData>({
-    versionName: initialData?.versionName || '回退至OB3.0_V2版本',
-    versionNumber: initialData?.versionNumber || 'V 2.0.4',
-    description: initialData?.description || '这是一段描述'
+    versionName: initialData?.versionName || "回退至OB3.0_V2版本",
+    versionNumber: initialData?.versionNumber || "V 2.0.4",
+    description: initialData?.description || "这是一段描述",
   });
 
   const handleOk = async () => {
@@ -37,7 +37,7 @@ const EditVersionModal: React.FC<EditVersionModalProps> = ({
       const values = await form.validate();
       onOk(values);
     } catch (error) {
-      console.error('表单验证失败:', error);
+      console.error("表单验证失败:", error);
     }
   };
 
@@ -55,7 +55,7 @@ const EditVersionModal: React.FC<EditVersionModalProps> = ({
       confirmLoading={loading}
       className={styles.editVersionModal}
       okText="保存"
-    > 
+    >
       <Form
         form={form}
         layout="vertical"
@@ -67,25 +67,19 @@ const EditVersionModal: React.FC<EditVersionModalProps> = ({
             <Form.Item
               label="版本名称"
               field="versionName"
-              rules={[{ required: true, message: '请输入版本名称' }]}
+              rules={[{ required: true, message: "请输入版本名称" }]}
             >
               <Input placeholder="请输入" />
             </Form.Item>
           </Grid.Col>
           <Grid.Col span={8}>
-            <Form.Item
-              label="版本号"
-              field="versionNumber"
-            >
-              <Input value={formData.versionNumber} disabled/>
+            <Form.Item label="版本号" field="versionNumber">
+              <Input value={formData.versionNumber} disabled />
             </Form.Item>
           </Grid.Col>
         </Grid.Row>
 
-        <Form.Item
-          label="版本描述"
-          field="description"
-        >
+        <Form.Item label="版本描述" field="description">
           <TextArea
             placeholder="请简要表述当前版本情况,便于区分不同的版本"
             rows={4}
@@ -96,4 +90,4 @@ const EditVersionModal: React.FC<EditVersionModalProps> = ({
   );
 };
 
-export default EditVersionModal; 
+export default EditVersionModal;

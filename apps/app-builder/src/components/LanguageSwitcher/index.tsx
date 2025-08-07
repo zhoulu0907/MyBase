@@ -1,8 +1,8 @@
-import { Button, Dropdown, Menu } from '@arco-design/web-react';
-import { IconLanguage } from '@arco-design/web-react/icon';
-import React from 'react';
-import { useTranslation } from 'react-i18next';
-import { SUPPORTED_LANGUAGES } from '../../utils/i18n';
+import { Button, Dropdown, Menu } from "@arco-design/web-react";
+import { IconLanguage } from "@arco-design/web-react/icon";
+import React from "react";
+import { useTranslation } from "react-i18next";
+import { SUPPORTED_LANGUAGES } from "../../utils/i18n";
 
 const LanguageSwitcher: React.FC = () => {
   const { i18n } = useTranslation();
@@ -13,7 +13,8 @@ const LanguageSwitcher: React.FC = () => {
     flag: value.flag,
   }));
 
-  const currentLanguage = languages.find(lang => lang.key === i18n.language) || languages[0];
+  const currentLanguage =
+    languages.find((lang) => lang.key === i18n.language) || languages[0];
 
   const handleLanguageChange = (key: string) => {
     i18n.changeLanguage(key);
@@ -21,14 +22,14 @@ const LanguageSwitcher: React.FC = () => {
 
   const menu = (
     <Menu>
-      {languages.map(lang => (
+      {languages.map((lang) => (
         <Menu.Item
           key={lang.key}
           onClick={() => handleLanguageChange(lang.key)}
           style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
           }}
         >
           <span>{lang.flag}</span>
@@ -44,9 +45,9 @@ const LanguageSwitcher: React.FC = () => {
         type="text"
         icon={<IconLanguage />}
         style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '4px',
+          display: "flex",
+          alignItems: "center",
+          gap: "4px",
         }}
       >
         <span>{currentLanguage.flag}</span>

@@ -21,7 +21,6 @@ export interface DatasourceSaveReqVO {
   lockVersion?: number;
 }
 
-
 // 数据源测试连接请求
 export interface DatasourceTestConnectionReqVO {
   datasourceType: string;

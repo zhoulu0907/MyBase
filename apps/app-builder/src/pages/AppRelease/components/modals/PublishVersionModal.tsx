@@ -1,7 +1,14 @@
-import React, { useState } from 'react';
-import { Modal, Form, Input, Tag, Button, Typography } from '@arco-design/web-react';
-import styles from './PublishVersionModal.module.less';
-import { Grid } from '@arco-design/web-react';
+import React, { useState } from "react";
+import {
+  Modal,
+  Form,
+  Input,
+  Tag,
+  Button,
+  Typography,
+} from "@arco-design/web-react";
+import styles from "./PublishVersionModal.module.less";
+import { Grid } from "@arco-design/web-react";
 
 const TextArea = Input.TextArea;
 
@@ -23,14 +30,14 @@ const PublishVersionModal: React.FC<PublishVersionModalProps> = ({
   visible,
   onCancel,
   onOk,
-  loading = false
+  loading = false,
 }) => {
   const [form] = Form.useForm();
   const [formData] = useState<PublishVersionFormData>({
-    versionName: '',
-    versionNumber: 'V 1.0.0',
-    description: '',
-    environment: '正式环境'
+    versionName: "",
+    versionNumber: "V 1.0.0",
+    description: "",
+    environment: "正式环境",
   });
 
   const handleOk = async () => {
@@ -38,7 +45,7 @@ const PublishVersionModal: React.FC<PublishVersionModalProps> = ({
       const values = await form.validate();
       onOk(values);
     } catch (error) {
-      console.error('表单验证失败:', error);
+      console.error("表单验证失败:", error);
     }
   };
 
@@ -68,7 +75,7 @@ const PublishVersionModal: React.FC<PublishVersionModalProps> = ({
             <Form.Item
               label="版本名称"
               field="versionName"
-              rules={[{ required: true, message: '请输入版本名称' }]}
+              rules={[{ required: true, message: "请输入版本名称" }]}
             >
               <Input placeholder="请输入" />
             </Form.Item>
@@ -77,17 +84,14 @@ const PublishVersionModal: React.FC<PublishVersionModalProps> = ({
             <Form.Item
               label="版本号"
               field="versionNumber"
-              rules={[{ required: true, message: '请输入版本号' }]}
+              rules={[{ required: true, message: "请输入版本号" }]}
             >
               <Input value={formData.versionNumber} />
             </Form.Item>
           </Grid.Col>
         </Grid.Row>
 
-        <Form.Item
-          label="版本描述"
-          field="description"
-        >
+        <Form.Item label="版本描述" field="description">
           <TextArea
             placeholder="请简要表述当前版本情况,便于区分不同的版本"
             rows={4}
@@ -97,7 +101,7 @@ const PublishVersionModal: React.FC<PublishVersionModalProps> = ({
         <Form.Item
           label="发布环境"
           field="environment"
-          rules={[{ required: true, message: '请选择发布环境' }]}
+          rules={[{ required: true, message: "请选择发布环境" }]}
         >
           <Tag color="green" className={styles.environmentTag}>
             正式环境
@@ -107,7 +111,7 @@ const PublishVersionModal: React.FC<PublishVersionModalProps> = ({
         <Form.Item
           label="版本比对"
           field="versionComparison"
-          rules={[{ required: true, message: '请查看版本比对' }]}
+          rules={[{ required: true, message: "请查看版本比对" }]}
         >
           <div className={styles.versionComparison}>
             <Typography.Text>
@@ -131,4 +135,4 @@ const PublishVersionModal: React.FC<PublishVersionModalProps> = ({
   );
 };
 
-export default PublishVersionModal; 
+export default PublishVersionModal;

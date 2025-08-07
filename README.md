@@ -70,6 +70,7 @@ make dev-ui         # 仅UI组件库
 ### 构建项目
 
 #### 克隆仓库
+
 ```bash
 git clone https://xxx.git
 
@@ -84,6 +85,7 @@ git checkout ${TARGET_BRANCH}
 ```
 
 #### 构建所有项目
+
 ```bash
 make build
 
@@ -99,28 +101,28 @@ make build-packages # 仅所有包
 
 ### 根目录命令 (Makefile)
 
-| 命令 | 描述 |
-|------|------|
-| `make help` | 显示所有可用命令 |
-| `make init` | 初始化项目（下载子模块并切换到dev分支） |
-| `make install` | 安装所有依赖 |
-| `make dev` | 启动所有项目的开发模式 |
-| `make dev-admin` | 仅启动管理控制台开发模式 |
-| `make dev-common` | 仅启动公共包开发模式 |
-| `make dev-ui` | 仅启动UI组件库开发模式 |
-| `make build` | 构建所有项目 |
-| `make build-admin` | 仅构建管理控制台 |
-| `make build-packages` | 仅构建所有包 |
-| `make clean` | 清理所有构建文件 |
-| `make lint` | 运行代码检查 |
-| `make preview` | 预览构建结果 |
+| 命令                  | 描述                                    |
+| --------------------- | --------------------------------------- |
+| `make help`           | 显示所有可用命令                        |
+| `make init`           | 初始化项目（下载子模块并切换到dev分支） |
+| `make install`        | 安装所有依赖                            |
+| `make dev`            | 启动所有项目的开发模式                  |
+| `make dev-admin`      | 仅启动管理控制台开发模式                |
+| `make dev-common`     | 仅启动公共包开发模式                    |
+| `make dev-ui`         | 仅启动UI组件库开发模式                  |
+| `make build`          | 构建所有项目                            |
+| `make build-admin`    | 仅构建管理控制台                        |
+| `make build-packages` | 仅构建所有包                            |
+| `make clean`          | 清理所有构建文件                        |
+| `make lint`           | 运行代码检查                            |
+| `make preview`        | 预览构建结果                            |
 
 ### 脚本命令
 
-| 脚本 | 描述 |
-|------|------|
-| `./scripts/dev.sh` | 交互式开发启动脚本 |
-| `./scripts/build.sh` | 交互式构建脚本 |
+| 脚本                 | 描述               |
+| -------------------- | ------------------ |
+| `./scripts/dev.sh`   | 交互式开发启动脚本 |
+| `./scripts/build.sh` | 交互式构建脚本     |
 
 ### 子项目命令
 
@@ -169,6 +171,7 @@ make build    # 构建包
 - 构建输出: `dist/` 目录
 
 ### 接口文档
+
 链接: https://apifox.com/apidoc/shared-2faf1349-8c61-4d4f-bf66-f264dbc9dd81?pwd=UUkEVsvp
 
 访问密码: UUkEVsvp
@@ -191,6 +194,6 @@ make build    # 构建包
 4. 推送到分支 (`git push origin feature/AmazingFeature`)
 5. 打开 Pull Request
 
-
 ## 作者
+
 - [Mickey.Zhou](http://git.virtueit.net/zhoumingji)

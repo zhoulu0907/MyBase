@@ -1,9 +1,14 @@
-import { Button, Layout, Menu } from '@arco-design/web-react';
-import { IconDesktop, IconMenuFold, IconMenuUnfold,  IconUser } from '@arco-design/web-react/icon';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import type { MenuItemType } from './menuData';
-import styles from './sider.module.less';
+import { Button, Layout, Menu } from "@arco-design/web-react";
+import {
+  IconDesktop,
+  IconMenuFold,
+  IconMenuUnfold,
+  IconUser,
+} from "@arco-design/web-react/icon";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import type { MenuItemType } from "./menuData";
+import styles from "./sider.module.less";
 
 const { Sider } = Layout;
 const MenuItem = Menu.Item;
@@ -20,33 +25,36 @@ const AppSider: React.FC<SiderProps> = ({
   className,
   collapsed = false,
   onCollapse,
-  menuItems = []
+  menuItems = [],
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
 
   // 默认菜单项
-  const defaultMenuItems = useMemo(() => [
-    {
-        key: 'platform-info',
-        title: '平台信息',
+  const defaultMenuItems = useMemo(
+    () => [
+      {
+        key: "platform-info",
+        title: "平台信息",
         icon: <IconDesktop />,
-        path: '/onebase/platform-info',
-    },
-    {
-        key: 'tenant',
-        title: '租户管理',
+        path: "/onebase/platform-info",
+      },
+      {
+        key: "tenant",
+        title: "租户管理",
         icon: <IconDesktop />,
-        path: '/onebase/tenant',
-    },
-    {
-        key: 'administrator',
-        title: '平台管理员',
+        path: "/onebase/tenant",
+      },
+      {
+        key: "administrator",
+        title: "平台管理员",
         icon: <IconUser />,
-        path: '/onebase/administrator',
-    },
-  ], []);
+        path: "/onebase/administrator",
+      },
+    ],
+    [],
+  );
 
   // 使用传入的菜单项或默认菜单项
   const finalMenuItems = useMemo(() => {
@@ -54,48 +62,56 @@ const AppSider: React.FC<SiderProps> = ({
   }, [menuItems, defaultMenuItems]);
 
   // 查找选中菜单项的函数
-  const findSelectedKeys = React.useCallback((items: MenuItemType[], path: string): string[] => {
-    for (const item of items) {
-      if (item.path === path) {
-        return [item.key];
-      }
-      if (item.children) {
-        const childKeys = findSelectedKeys(item.children, path);
-        if (childKeys.length > 0) {
-          return [item.key, ...childKeys];
+  const findSelectedKeys = React.useCallback(
+    (items: MenuItemType[], path: string): string[] => {
+      for (const item of items) {
+        if (item.path === path) {
+          return [item.key];
+        }
+        if (item.children) {
+          const childKeys = findSelectedKeys(item.children, path);
+          if (childKeys.length > 0) {
+            return [item.key, ...childKeys];
+          }
         }
       }
-    }
-    return [];
-  }, []);
+      return [];
+    },
+    [],
+  );
 
   // 根据当前路径设置选中的菜单项
   useEffect(() => {
     const keys = findSelectedKeys(finalMenuItems, location.pathname);
     setSelectedKeys(keys);
-
   }, [location.pathname, findSelectedKeys]);
 
   // 处理菜单点击
-  const handleMenuClick = useCallback((key: string) => {
-    const findPathByKey = (items: MenuItemType[], targetKey: string): string | null => {
-      for (const item of items) {
-        if (item.key === targetKey) {
-          return item.path || null;
+  const handleMenuClick = useCallback(
+    (key: string) => {
+      const findPathByKey = (
+        items: MenuItemType[],
+        targetKey: string,
+      ): string | null => {
+        for (const item of items) {
+          if (item.key === targetKey) {
+            return item.path || null;
+          }
+          if (item.children) {
+            const path = findPathByKey(item.children, targetKey);
+            if (path) return path;
+          }
         }
-        if (item.children) {
-          const path = findPathByKey(item.children, targetKey);
-          if (path) return path;
-        }
-      }
-      return null;
-    };
+        return null;
+      };
 
-    const path = findPathByKey(finalMenuItems, key);
-    if (path) {
-      navigate(path);
-    }
-  }, [finalMenuItems, navigate]);
+      const path = findPathByKey(finalMenuItems, key);
+      if (path) {
+        navigate(path);
+      }
+    },
+    [finalMenuItems, navigate],
+  );
 
   // 处理折叠按钮点击
   const handleCollapseClick = useCallback(() => {
@@ -105,39 +121,39 @@ const AppSider: React.FC<SiderProps> = ({
   }, [onCollapse, collapsed]);
 
   // 递归渲染菜单项
-  const renderMenuItems = React.useCallback((items: MenuItemType[]): React.ReactNode => {
-    return items.map((item) => {
-      if (item.children && item.children.length > 0) {
-        return (
-          <SubMenu
-            key={item.key}
-            title={
-              <span>
-                {item.icon}
-                <span className={styles.menuTitle}>{item.title}</span>
-              </span>
-            }
-          >
-            {renderMenuItems(item.children)}
-          </SubMenu>
-        );
-      }
+  const renderMenuItems = React.useCallback(
+    (items: MenuItemType[]): React.ReactNode => {
+      return items.map((item) => {
+        if (item.children && item.children.length > 0) {
+          return (
+            <SubMenu
+              key={item.key}
+              title={
+                <span>
+                  {item.icon}
+                  <span className={styles.menuTitle}>{item.title}</span>
+                </span>
+              }
+            >
+              {renderMenuItems(item.children)}
+            </SubMenu>
+          );
+        }
 
-      return (
-        <MenuItem
-          key={item.key}
-          disabled={item.disabled}
-        >
-          {item.icon}
-          <span className={styles.menuTitle}>{item.title}</span>
-        </MenuItem>
-      );
-    });
-  }, []);
+        return (
+          <MenuItem key={item.key} disabled={item.disabled}>
+            {item.icon}
+            <span className={styles.menuTitle}>{item.title}</span>
+          </MenuItem>
+        );
+      });
+    },
+    [],
+  );
 
   return (
     <Sider
-      className={`${styles.sider} ${className || ''}`}
+      className={`${styles.sider} ${className || ""}`}
       collapsed={collapsed}
       onCollapse={onCollapse}
       trigger={null}
