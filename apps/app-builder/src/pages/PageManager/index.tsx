@@ -46,8 +46,8 @@ const menuData = [
 ];
 
 const PageManagerPage: FC = () => {
-  const { t } = useTranslation();
-  const navigate = useNavigate();
+    const { t } = useTranslation();
+    const navigate = useNavigate();
 
   const { curAppCode, setCurAppCode } = useAppStore();
 
@@ -151,25 +151,26 @@ const PageManagerPage: FC = () => {
             <div className={styles.contentHeader}>
               <div className={styles.contentTitle}>{activeMenu.title}</div>
               <Button type="primary" onClick={() => navigate(`/onebase/editor/${EDITOR_TYPES.FORM_EDITOR}`)}>
-                编辑
+                {t('common.edit')}
               </Button>
             </div>
             <Content className={styles.content}>content</Content>
           </Content>
         </Layout>
       </Layout>
+
       <Modal
-        title={title}
-        visible={visible}
-        onOk={handleCreate}
-        onCancel={() => setVisible(false)}
-        autoFocus={false}
-        focusLock={true}
+          title={title}
+          visible={visible}
+          onOk={handleCreate}
+          onCancel={() => setVisible(false)}
+          autoFocus={false}
+          focusLock={true}
       >
-        <Input value={value} onChange={setValue} placeholder="请输入名称" />
+          <Input value={value} onChange={setValue} placeholder="请输入名称" />
       </Modal>
     </div>
   );
-};
+}
 
 export default PageManagerPage;

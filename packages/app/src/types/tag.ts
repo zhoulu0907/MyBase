@@ -1,4 +1,5 @@
 export interface ListTagReq {
+  id?: string;
   tagName: string;
 }
 
