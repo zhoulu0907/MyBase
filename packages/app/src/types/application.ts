@@ -1,6 +1,7 @@
 // 应用类型
 
 export interface Application {
+  id: string;
   /**
    * 应用名称
    */
