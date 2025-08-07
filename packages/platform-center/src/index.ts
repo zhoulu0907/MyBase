@@ -16,3 +16,7 @@ export * from './services/user';
 export * from './services/dept';
 
 export * from './services/platformInfo';
+
+export * from './services/platformTenant';
+
+export * from './services/platformAdmin';

@@ -4,88 +4,44 @@ import React, { useEffect } from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styles from './index.module.less';
-import { getPlatFormInfoListApi, uploadPlatformLicenseApi, type PlatformInfoReq, type AuthRecord, type LicenseInfo } from '@onebase/platform-center'
+import { getPlatFormInfoListApi, getPlatformInfoApi, uploadPlatformLicenseApi, type PlatformInfoReq, type AuthRecord, type LicenseInfo } from '@onebase/platform-center'
+import { formatTimestamp } from '@/utils/date';
 
 const { Title, Text } = Typography;
 // 定义认证记录的数据类型
-interface CertificationRecord {
-  key: string;
-  companyName: string;
-  certificationContent: string;
-  status: string;
-  expireTime: string;
-}
+// interface CertificationRecord {
+//   key: string;
+//   companyName: string;
+//   certificationContent: string;
+//   status: string;
+//   expireTime: string;
+// }
 const PlatformInfo: React.FC = () => {
   const { t } = useTranslation();
   const [visible, setVisible] = useState(false);
-  const [selectedRecord, setSelectedRecord] = useState<CertificationRecord | null>(null);
+  // const [selectedRecord, setSelectedRecord] = useState<CertificationRecord | null>(null);
   const [licenseInfoList, setLicenseInfoList] = useState<LicenseInfo[]>([]);
   const [licenseInfo, setLicenseInfo] = useState<LicenseInfo | null>(null);
-  // 模拟平台信息数据 license 获取
-  const platformData = {
-    name: 'ONE BASE Platform',
-    // 企业编号
-    enterpriseCode: 'F2000909',
-    // 企业地址
-    enterpriseAddress: '中国上海徐汇区',
-    // 超级管理员
-    creator: 'admin',
-    // 创建时间
-    createTime: '2023-01-01 00:00:00',
-    // 平台类型
-    platformType: '私有化部署',
-    // 认证状态
-    status: '已认证', // 已过期/已认证/已失效
-    // 到期时间
-    expireTime: '2023-12-31 23:59:59',
-    // 系统版本
-    version: '1.0.0',
-    // 实际租户数量
-    actualTenantCount: 5,
-    // 系统获取租户数量
-    tenantLimit: 10,
-    description: '企业级管理平台，提供用户管理、内容管理、系统设置等功能',
-    environment: 'Production',
-    lastUpdate: '2024-01-15 10:30:00',
-    status: '运行中',
-    serverInfo: {
-      os: 'Linux Ubuntu 20.04',
-      nodeVersion: 'v18.17.0',
-      database: 'PostgreSQL 14.0',
-      redis: 'Redis 6.2.0'
+  
+  const getPlatformInfo = async () => {
+    const res = await getPlatformInfoApi();
+    console.log('platformInfo res:', res);
+    if(res.id) {
+      setLicenseInfo(res)
     }
   };
-
-  // 模拟认证记录数据
-  const allData: CertificationRecord[] = [
-    {
-      key: '1',
-      companyName: '${companyName}',
-      certificationContent: '租户数量：${租户数量}，用户数量：${用户数量}',
-      status: '已认证',
-      expireTime: '2026-06-13 08:00:00',
-    },
-    {
-      key: '2',
-      companyName: '${companyName}',
-      certificationContent: '租户数量：${租户数量}，用户数量：${用户数量}',
-      status: '未认证',
-      expireTime: '2026-06-13 08:00:00',
-    },
-  ];
 
   const getPlatformInfoList = async () => {
     console.log('获取认证记录:');
     try {
       const res = await getPlatFormInfoListApi({ pageNum: 1, pageSize: 10 })
-      console.log('infoList:', res.list);
+      console.log('infoList res:', res);
       if (res && Array.isArray(res.list)) {
         setLicenseInfoList(res.list);
-        if (res.list.length > 0) {
-          setLicenseInfo(res.list[0]);
-        } else {
-          setLicenseInfo(null);
-        }
+        setPagination((prevPagination) => ({
+          ...prevPagination,
+          total: res.total,
+        }));
       } else {
         console.warn('Invalid response format:', res);
         setLicenseInfoList([]);
@@ -99,33 +55,45 @@ const PlatformInfo: React.FC = () => {
 
   useEffect(() => {
     getPlatformInfoList();
+    getPlatformInfo();
   }, [])
 
   // 认证记录table结构
   const columns: TableColumnProps[] = [
     {
       title: '公司名称',
-      dataIndex: 'companyName',
-      key: 'companyName',
+      dataIndex: 'enterpriseName',
+      key: 'enterpriseName',
     },
     {
       title: '认证内容',
       // 认证内容
       dataIndex: 'certificationContent',
       key: 'certificationContent',
+      render: (text, record) => (
+        <div>
+          租户数量：{record.tenantLimit}，用户数量：{record.userLimit}
+        </div>
+      ),
     },
     {
       title: '当前状态',
       dataIndex: 'status',
       key: 'status',
       render: (text) => (
-        <Tag color={text === '已认证' ? 'green' : 'red'}>{text}</Tag>
+        <Tag color={text === 'enable' ? 'green' : 'red'}>
+          {text === 'enable' ? '已启用' : '已失效'}
+        </Tag>
       )
     },
     {
       title: '到期时间',
       dataIndex: 'expireTime',
       key: 'expireTime',
+      render: (text) => (
+        // 时间戳转为日期 2025-01-01 00:00:00
+        <div>{formatTimestamp(text)}</div>
+      )
     },
     {
       title: '操作',
@@ -135,7 +103,7 @@ const PlatformInfo: React.FC = () => {
         <div className={styles.operation}>
           <a href="#" className={styles.btn} onClick={(e) => {
             e.preventDefault();
-            setSelectedRecord(record);
+            setLicenseInfo(record);
             setVisible(true);
           }}>{t('platformInfo.check')}</a>
           
@@ -144,7 +112,6 @@ const PlatformInfo: React.FC = () => {
     },
   ];
 
-  
   // 上传认证
   const handleUploadCertification = async() => {
     // console.log('认证已经上传了');
@@ -155,30 +122,24 @@ const PlatformInfo: React.FC = () => {
       Message.error(error.message || '认证上传失败');
     }
   }
-  const [data, setData] = useState(allData);
+  const [data, setData] = useState(licenseInfoList);
   // 分页器
   const [pagination, setPagination] = useState({
     // sizeCanChange: true,
     showTotal: true,
-    total: data.length,
-    pageSize: 10,
-    current: 1,
+    total: 0,
+    pageSize: 1,
+    pageNum: 1,
     pageSizeChangeResetCurrent: true,
   });
   const [loading, setLoading] = useState(false);
-   function onChangeTable(
-    pagination: { current?: number; pageSize?: number },
-    // sorter: any,
-    // filters: any,
-    // extra: any
-  ) {
-    const { current = 1, pageSize = 10 } = pagination;
+
+  const onChangeTable = (pagination: { pageNum?: number; pageSize?: number }) => {
     setLoading(true);
-    setTimeout(() => {
-      setData(allData.slice((current - 1) * pageSize, current * pageSize));
-      setPagination((pagination) => ({ ...pagination, current, pageSize }));
-      setLoading(false);
-    }, 1000);
+    // const { pageNum = 1, pageSize = 10 } = pagination;
+    console.log('pagination: ', pagination);
+    // const pagResp = await setLicenseInfoList({})
+    setLoading(false);
   }
 
   return (
@@ -188,13 +149,13 @@ const PlatformInfo: React.FC = () => {
         <div className={styles.pageHeader}>
           <div className={styles.pageHeaderLeft}>
             <Title heading={4} className={styles.pageHeaderTitle}>
-              {licenseInfo?.enterpriseName}
+              {licenseInfo?.enterpriseName || '公司名称'}
             </Title>
-            <div className="companyId">
-              <Text type="secondary">{licenseInfo?.enterpriseCode}</Text>
+            <div className={styles.companyId}>
+              <Text type="secondary">{licenseInfo?.enterpriseCode || '公司编码'}</Text>
             </div>
             <div className="address">
-              <Text type="secondary">{licenseInfo?.enterpriseAddress}</Text>
+              <Text type="secondary">{licenseInfo?.enterpriseAddress || '公司地址'}</Text>
             </div>
           </div>
           <div className={styles.pageHeaderRight}>
@@ -202,12 +163,12 @@ const PlatformInfo: React.FC = () => {
               <Text type="secondary">
                 {t('platformInfo.superAdmin')}：
                 <span className={styles.superAdminText}>
-                  {licenseInfo?.creator}
+                  {licenseInfo?.adminUser || 'admin'}
                 </span>
               </Text>
             </div>
             <div className={styles.createdAt}>
-              <Text type="secondary">{t('platformInfo.createdAt')}：{licenseInfo?.createTime}</Text>
+              <Text type="secondary">{t('platformInfo.createdAt')}：{formatTimestamp(licenseInfo?.createTime)}</Text>
             </div>
           </div>
         </div>
@@ -225,13 +186,13 @@ const PlatformInfo: React.FC = () => {
                 label: t('platformInfo.authStatus'),
                 value: (
                   <span className={styles.statusRunning}>
-                    {licenseInfo?.status}
+                    {licenseInfo?.status ? t('platformInfo.enable') : t('platformInfo.disable')}
                   </span>
                 ),
               },
               {
                 label: t('platformInfo.expireTime'),
-                value: licenseInfo?.expireTime,
+                value: formatTimestamp(licenseInfo?.expireTime),
               },
               {
                 label: t('platformInfo.version'),
@@ -250,6 +211,7 @@ const PlatformInfo: React.FC = () => {
             ]}
           />
         </Card>
+        {/* 认证记录 */}
         <div className={styles.authRecord}>
           <Text>
             {t('platformInfo.authRecord')}
@@ -258,7 +220,6 @@ const PlatformInfo: React.FC = () => {
             {/* {t('platformInfo.uploadAuth')} */}
             <Upload
               className={styles.uploadAuth}
-              // limit={1}
               showUploadList={false}
               action="/api/upload" // 这里需要替换为实际的上传接口地址
               headers={{
@@ -283,12 +244,13 @@ const PlatformInfo: React.FC = () => {
         <Table
           loading={loading}
           columns={columns}
-          data={allData}
+          data={licenseInfoList}
           pagination={{
             ...pagination,
             className: styles.tablePagination
           }}
           onChange={onChangeTable}
+          rowKey={(record) => record.id}
         />
       </Space>
       <Modal
@@ -298,29 +260,33 @@ const PlatformInfo: React.FC = () => {
         footer={null}
         className={styles.licenseModal}
       >
-        {selectedRecord && (
+        {licenseInfo && (
           <Descriptions
             column={1}
             data={[
               {
-                label: t('platformInfo.companyName') || '公司名称',
-                value: 'selectedRecord.companyName',
+                label: t('platformInfo.enterpriseName'),
+                value: licenseInfo.enterpriseName,
               },
               {
-                label: t('platformInfo.certificationContent') || '认证内容',
-                value: 'selectedRecord.certificationContent',
-              },
-              {
-                label: t('platformInfo.status') || '当前状态',
+                label: t('platformInfo.certificationContent'),
                 value: (
-                  <Tag color={selectedRecord.status === '已认证' ? 'green' : 'red'}>
-                    {selectedRecord.status}
+                  <div>
+                    租户数量：{licenseInfo.tenantLimit}，用户数量：{licenseInfo.userLimit}
+                  </div>
+                ),
+              },
+              {
+                label: t('platformInfo.status'),
+                value: (
+                  <Tag color={licenseInfo?.status === 'enable' ? 'green' : 'red'}>
+                    {licenseInfo?.status === 'enable' ? '已启用' : '已失效'}
                   </Tag>
                 ),
               },
               {
-                label: t('platformInfo.expireTime') || '到期时间',
-                value: 'selectedRecord.expireTime',
+                label: t('platformInfo.expireTime'),
+                value: formatTimestamp(licenseInfo.expireTime),
               },
             ]}
             labelStyle={{ fontWeight: 'bold', width: '100px' }}

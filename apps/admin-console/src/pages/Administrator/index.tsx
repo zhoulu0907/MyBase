@@ -1,7 +1,8 @@
-import {  Space, Table, Button, Modal, Input, Message, Tooltip, Form } from '@arco-design/web-react';
-import React, { useState } from 'react';
+import {  Space, Table, Button, Modal, Input, Message, Tooltip, Form, Tag } from '@arco-design/web-react';
+import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
-
+import { IconSearch } from '@arco-design/web-react/icon';
+import { getPlatformAdminListApi, type PlatformAdminInfo, PlatformAdminUserType } from '@onebase/platform-center';
 interface AdminRecord {
   id: number;
   account: string;
@@ -25,8 +26,8 @@ const Administrator: React.FC = () => {
     },
     {
       title: '账号',
-      dataIndex: 'account',
-      key: 'account',
+      dataIndex: 'nickname',
+      key: 'nickname',
     },
     {
       title: '邮箱',
@@ -35,8 +36,11 @@ const Administrator: React.FC = () => {
     },
     {
       title: '类型',
-      dataIndex: 'type',
-      key: 'type',
+      dataIndex: 'userType',
+      key: 'userType',
+      render: (val: PlatformAdminUserType) => (
+        <Tag color={val === PlatformAdminUserType.系统默认账号 ? 'green' : 'blue'}>{val === PlatformAdminUserType.系统默认账号 ? '系统默认账号' : '普通账号'}</Tag>
+      )
     },
     {
       title: '创建时间',
@@ -70,24 +74,22 @@ const Administrator: React.FC = () => {
       ),
     },
   ];
+  const [dataSource, setDataSource] = useState<PlatformAdminInfo[]>([]);
+  const getPlatformAdminList = async () => { 
+    const res = await getPlatformAdminListApi({
+      pageNum: 1,
+      pageSize: 10,
+    });
+    console.log('getPlatformAdminList res', res);
+    setDataSource(res.list)
+  };
 
-  const dataSource = [
-    {
-      id: 1,
-      account: '默认租户',
-      email: 'xxx@csmr.com',
-      type: '系统默认账号',
-      createTime: '2025-08-14 10:30',
-    },
-    {
-      id: 2,
-      account: '测试环境验证租户',
-      email: 'xxx1@csmr.com',
-      type: '新建账号',
-      createTime: '2025-08-14 10:30',
-    },
-  ];
-
+  useEffect(() => { 
+    getPlatformAdminList();
+  }, []);
+  const addAdmin = () => { 
+    console.log('新建管理员');
+  };
   const handleEditEmail = (record: AdminRecord) => {
     setEmailForm({ account: record.account, oldEmail: record.email, newEmail: '' });
     setModalType('email');
@@ -130,8 +132,18 @@ const Administrator: React.FC = () => {
   };
   return (
     <div className={styles.administrator}>
-      <Space direction="vertical" size="large" style={{ width: '100%' }}>
-        <Button type="primary" onClick={() => console.log('新建')}>+ 新建</Button>
+      <Space direction="vertical" size="large" className={styles.container}>
+        <div className={styles.title}>
+          <Button type="primary" onClick={addAdmin}>+ 新建</Button>
+          <Input.Search
+            placeholder="搜索租户名称/编码"
+            style={{ width: 300 }}
+            allowClear
+            // value={searchParams.keyword}
+            // onChange={value => handleSearch(value)}
+            suffix={<IconSearch />}
+          />
+        </div>
         <Table
           columns={columns}
           data={dataSource}

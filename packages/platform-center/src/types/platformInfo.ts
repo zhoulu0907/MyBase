@@ -39,7 +39,7 @@ export interface LicenseInfo {
     /**
      * 创建时间
      */
-    createTime: number;
+    createTime: string;
     /**
      * 创建人
      */
@@ -83,7 +83,7 @@ export interface LicenseInfo {
     /**
      * 过期时间
      */
-    expireTime: number;
+    expireTime: string;
     /**
      * 状态
      */
