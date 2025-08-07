@@ -28,11 +28,11 @@
 - 子模块server用于放置本模块的核心服务和实体类等。
 - 模块分包括：应用管理app、系统管理system、数据管理data等模块。
 - 包结构遵循如下规范：
-  - 控制器: com.cmsr.onebase.module.${moduleName}.controller.app
-  - 视图对象: com.cmsr.onebase.module.${moduleName}.controller.app.vo  
-  - 服务: com.cmsr.onebase.module.${moduleName}.service
-  - 数据访问: com.cmsr.onebase.module.${moduleName}.dal.database
-  - 实体类: com.cmsr.onebase.module.${moduleName}.dal.dataobject
+  - 控制器: com.cmsr.onebase.module.${moduleName}.controller.${subPackageName}
+  - 视图对象: com.cmsr.onebase.module.${moduleName}.controller.${subPackageName}.vo  
+  - 服务: com.cmsr.onebase.module.${moduleName}.service.${subPackageName}
+  - 数据访问: com.cmsr.onebase.module.${moduleName}.dal.database.${subPackageName}
+  - 实体类: com.cmsr.onebase.module.${moduleName}.dal.dataobject.${subPackageName}
   - 公共工具: com.cmsr.onebase.module.${moduleName}.util
   - 配置: com.cmsr.onebase.module.${moduleName}.config
 
@@ -177,6 +177,8 @@ public class PrefixUserServiceImpl implements PrefixUserService {
 ### 4. 控制器（RestController）规范
 
 - 每个接口都要加上swagger的注释，注释内容是接口的用途。
+- 更新、删除接口，都是用Post方法。
+- Post方法接口参数超过2个及以上，使用@RequestBody注解，参数全部放到Body里面。
 
 ```java
 @RestController

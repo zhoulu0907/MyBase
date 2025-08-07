@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.app.controller.admin.auth;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
-import com.cmsr.onebase.module.app.controller.admin.auth.vo.AppAuthRolePermissionReqVO;
+import com.cmsr.onebase.module.app.controller.admin.auth.vo.AuthRolePermissionReqVO;
 import com.cmsr.onebase.module.app.controller.admin.auth.vo.AuthRolePermissionRespVO;
 import com.cmsr.onebase.module.app.service.auth.AppAuthPermissionService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -30,9 +30,9 @@ public class AppAuthPermissionController {
     @GetMapping("/get")
     @Operation(summary = "获取角色-菜单的权限")
     public CommonResult<AuthRolePermissionRespVO> getRolePermission(
-            @RequestParam(value = "applicationId") Long applicationId,
-            @RequestParam(value = "roleId") Long roleId) {
-        return CommonResult.success(authPermissionService.getRolePermission(applicationId, roleId));
+            @RequestParam(value = "roleId") Long roleId,
+            @RequestParam(value = "menuId") Long menuId) {
+        return CommonResult.success(authPermissionService.getRolePermission(roleId, menuId));
     }
 
     /**
@@ -40,7 +40,7 @@ public class AppAuthPermissionController {
      */
     @GetMapping("/update")
     @Operation(summary = "更新角色-菜单的权限")
-    public CommonResult<Boolean> updateRolePermission(@Valid @RequestBody AppAuthRolePermissionReqVO reqVO) {
+    public CommonResult<Boolean> updateRolePermission(@Valid @RequestBody AuthRolePermissionReqVO reqVO) {
         return CommonResult.success(authPermissionService.updateRolePermission(reqVO));
     }
 
