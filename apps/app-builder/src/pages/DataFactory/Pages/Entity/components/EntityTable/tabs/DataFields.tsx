@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Table, Tag, Button, Space, Message, Modal } from '@arco-design/web-react';
 import type { TableColumnProps } from '@arco-design/web-react';
 import type { EntityNode } from '../../../../../utils/interface';
-import { getEntityFields, deleteField } from '@onebase/app/src/services/entity';
+import { getEntityFields, deleteField } from '@onebase/app';
 import styles from './tabs.module.less';
 
 interface DataFieldsProps {
