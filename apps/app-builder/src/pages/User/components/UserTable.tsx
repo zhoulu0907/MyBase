@@ -13,7 +13,7 @@ import s from '../index.module.less';
 import UserFormModal from './UserFormModal';
 import type { UserVO, PageParam } from '@onebase/platform-center';
 import { StatusEnum } from '@onebase/platform-center';
-import { debounce } from '@/utils/common';
+import { debounce } from 'lodash-es';
 
 interface UserTableProps {
   selectedDeptId?: number;
@@ -44,6 +44,7 @@ export default function UserTable({ selectedDeptId = undefined, onTotalUserCount
       pageSize,
     };
     if (selectedDeptId) params.deptId = selectedDeptId;
+    console.log(searchValue)
     if (searchValue) params.nickname = searchValue;
     const res = await getUserPage(params);
     setData(res.list || []);
@@ -177,7 +178,6 @@ export default function UserTable({ selectedDeptId = undefined, onTotalUserCount
       { title: '手机号', dataIndex: 'mobile', width: 140 },
       { title: '邮箱', dataIndex: 'email', width: 180, placeholder: '-', ellipsis: true },
       { title: '部门', dataIndex: 'deptName', width: 180, placeholder: '-', ellipsis: true },
-      { title: '角色', dataIndex: 'role', width: 120, placeholder: '-', ellipsis: true },
       {
         title: '状态',
         dataIndex: 'status',

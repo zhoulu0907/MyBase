@@ -35,7 +35,6 @@ export default function DeptTree({ selectedDeptId, onDeptSelect, totalUserCount,
   }, [selectedDeptId]);
 
   const handleSelect = (keys: string[]) => {
-    setSelectedKeys(keys);
     const deptId = keys.length > 0 ? Number(keys[0]) : undefined;
     onDeptSelect(deptId);
   };
