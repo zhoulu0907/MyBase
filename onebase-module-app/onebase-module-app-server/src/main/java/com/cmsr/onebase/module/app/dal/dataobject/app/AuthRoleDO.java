@@ -22,6 +22,9 @@ public class AuthRoleDO extends TenantBaseDO {
     @Column(name = "role_name", nullable = false, length = 64, comment = "角色名称")
     private String roleName;
 
+    @Column(name = "is_system_default", nullable = false, comment = "是否系统默认角色")
+    private Boolean isSystemDefault;
+
     @Column(name = "description", length = 256, comment = "描述")
     private String description;
 }
