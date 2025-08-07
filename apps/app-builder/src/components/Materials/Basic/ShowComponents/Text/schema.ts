@@ -5,15 +5,15 @@ import {
   widthConfig,
   type ICommonBaseType,
   type TStatusSelectKeyType,
-  type TWidthSelectKeyType,
-} from "@/components/Materials/common";
+  type TWidthSelectKeyType
+} from '@/components/Materials/common';
 import {
   CONFIG_TYPES,
   STATUS_OPTIONS,
   STATUS_VALUES,
   WIDTH_OPTIONS,
-  WIDTH_VALUES,
-} from "@/components/Materials/constants";
+  WIDTH_VALUES
+} from '@/components/Materials/constants';
 import type {
   IBooleanConfigType,
   IStatusConfigType,
@@ -21,8 +21,8 @@ import type {
   IWidthConfigType,
   TRadioDefaultType,
   TSelectDefaultType,
-  TTextDefaultType,
-} from "@/components/Materials/types";
+  TTextDefaultType
+} from '@/components/Materials/types';
 
 export interface XTextSchema {
   editData: TXTextEditData;
@@ -30,10 +30,7 @@ export interface XTextSchema {
 }
 
 export type TXTextEditData = Array<
-  | ITextConfigType
-  | IWidthConfigType<TWidthSelectKeyType>
-  | IStatusConfigType<TStatusSelectKeyType>
-  | IBooleanConfigType
+  ITextConfigType | IWidthConfigType<TWidthSelectKeyType> | IStatusConfigType<TStatusSelectKeyType> | IBooleanConfigType
 >;
 
 export interface XTextConfig extends ICommonBaseType {
@@ -58,20 +55,20 @@ const XText: XTextSchema = {
   editData: [
     ...baseConfig,
     {
-      key: "content",
-      name: "文本内容",
-      type: CONFIG_TYPES.TEXT_INPUT,
+      key: 'content',
+      name: '文本内容',
+      type: CONFIG_TYPES.TEXT_INPUT
     },
     widthConfig,
-    statusConfig,
+    statusConfig
     // TODO(mickey): 补充颜色 背景色配置
   ],
   config: {
     ...baseDefault,
-    content: "展示文本内容",
+    content: '展示文本内容',
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
-    status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
-  },
+    status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT]
+  }
 };
 
 export default XText;

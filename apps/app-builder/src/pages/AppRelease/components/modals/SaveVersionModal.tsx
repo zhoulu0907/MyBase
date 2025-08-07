@@ -1,6 +1,6 @@
-import React, { useState } from "react";
-import { Modal, Form, Input, Grid } from "@arco-design/web-react";
-import styles from "./SaveVersionModal.module.less";
+import React, { useState } from 'react';
+import { Modal, Form, Input, Grid } from '@arco-design/web-react';
+import styles from './SaveVersionModal.module.less';
 
 const TextArea = Input.TextArea;
 
@@ -17,17 +17,12 @@ interface SaveVersionFormData {
   description: string;
 }
 
-const SaveVersionModal: React.FC<SaveVersionModalProps> = ({
-  visible,
-  onCancel,
-  onOk,
-  loading = false,
-}) => {
+const SaveVersionModal: React.FC<SaveVersionModalProps> = ({ visible, onCancel, onOk, loading = false }) => {
   const [form] = Form.useForm();
   const [formData] = useState<SaveVersionFormData>({
-    versionName: "",
-    versionNumber: "V 2.0.4",
-    description: "",
+    versionName: '',
+    versionNumber: 'V 2.0.4',
+    description: ''
   });
 
   const handleOk = async () => {
@@ -35,7 +30,7 @@ const SaveVersionModal: React.FC<SaveVersionModalProps> = ({
       const values = await form.validate();
       onOk(values);
     } catch (error) {
-      console.error("表单验证失败:", error);
+      console.error('表单验证失败:', error);
     }
   };
 
@@ -54,38 +49,22 @@ const SaveVersionModal: React.FC<SaveVersionModalProps> = ({
       confirmLoading={loading}
       className={styles.saveVersionModal}
     >
-      <Form
-        form={form}
-        layout="vertical"
-        initialValues={formData}
-        className={styles.form}
-      >
+      <Form form={form} layout="vertical" initialValues={formData} className={styles.form}>
         <Grid.Row gutter={16}>
           <Grid.Col span={16}>
-            <Form.Item
-              label="版本名称"
-              field="versionName"
-              rules={[{ required: true, message: "请输入版本名称" }]}
-            >
+            <Form.Item label="版本名称" field="versionName" rules={[{ required: true, message: '请输入版本名称' }]}>
               <Input placeholder="请输入" />
             </Form.Item>
           </Grid.Col>
           <Grid.Col span={8}>
-            <Form.Item
-              label="版本号"
-              field="versionNumber"
-              rules={[{ required: true, message: "请输入版本号" }]}
-            >
+            <Form.Item label="版本号" field="versionNumber" rules={[{ required: true, message: '请输入版本号' }]}>
               <Input value={formData.versionNumber} />
             </Form.Item>
           </Grid.Col>
         </Grid.Row>
 
         <Form.Item label="版本描述" field="description">
-          <TextArea
-            placeholder="请简要表述当前版本情况,便于区分不同的版本"
-            rows={4}
-          />
+          <TextArea placeholder="请简要表述当前版本情况,便于区分不同的版本" rows={4} />
         </Form.Item>
       </Form>
     </Modal>

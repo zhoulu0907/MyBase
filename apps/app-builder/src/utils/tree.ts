@@ -13,10 +13,10 @@ export interface Options {
 }
 
 export const DEFAULT_OPTIONS = {
-  key: "id",
-  parentKey: "parentId",
-  children: "children",
-  label: "name",
+  key: 'id',
+  parentKey: 'parentId',
+  children: 'children',
+  label: 'name'
 };
 
 /**
@@ -40,13 +40,9 @@ export const DEFAULT_OPTIONS = {
 export const listToTree = <T extends Record<string, any>>(
   list: T[],
   options: Options = {},
-  isKeyTypeString = false,
+  isKeyTypeString = false
 ): TreeNode[] => {
-  const { key, parentKey, children, label } = Object.assign(
-    {},
-    DEFAULT_OPTIONS,
-    options,
-  );
+  const { key, parentKey, children, label } = Object.assign({}, DEFAULT_OPTIONS, options);
 
   const nodeMap = new Map<any, TreeNode>();
 
@@ -55,7 +51,7 @@ export const listToTree = <T extends Record<string, any>>(
       ...item,
       key: isKeyTypeString ? String(item[key]) : item[key],
       title: item[label],
-      children: item[children] || [],
+      children: item[children] || []
     });
   }
 
@@ -94,9 +90,9 @@ export const listToTree = <T extends Record<string, any>>(
 export const treeFilter = <T = any>(
   data: T[],
   filter: string | ((v: T) => boolean),
-  options: Partial<Options> = {},
+  options: Partial<Options> = {}
 ): T[] => {
-  const isFunc = typeof filter === "function";
+  const isFunc = typeof filter === 'function';
   const mergedOptions = Object.assign({}, DEFAULT_OPTIONS, options);
   const { children: children, label } = mergedOptions;
 
@@ -106,9 +102,7 @@ export const treeFilter = <T = any>(
       .filter((node) => {
         node[children] = node[children] && loop(node[children]);
         return (
-          (isFunc
-            ? filter(node)
-            : node[label].toLowerCase().indexOf(filter.toLowerCase()) > -1) ||
+          (isFunc ? filter(node) : node[label].toLowerCase().indexOf(filter.toLowerCase()) > -1) ||
           (node[children] && node[children].length)
         );
       });

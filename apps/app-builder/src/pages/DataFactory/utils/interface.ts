@@ -52,7 +52,7 @@ export interface EntityData {
 // 全部节点信息
 export interface EntityERProps {
   data: EntityData;
-  mode?: "view" | "edit";
+  mode?: 'view' | 'edit';
   onNodeEdit?: (data: EntityNode) => void;
   onNodeAdd?: () => void;
   onNodeDelete?: (id: string) => void;

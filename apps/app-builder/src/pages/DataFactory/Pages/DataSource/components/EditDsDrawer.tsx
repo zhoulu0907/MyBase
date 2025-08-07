@@ -1,19 +1,12 @@
-import {
-  Button,
-  Drawer,
-  Form,
-  Input,
-  Message,
-  Select,
-} from "@arco-design/web-react";
+import { Button, Drawer, Form, Input, Message, Select } from '@arco-design/web-react';
 import {
   testDatasourceConnection,
   updateDatasource,
   type DatasourceSaveReqVO,
-  type DatasourceTestConnectionReqVO,
-} from "@onebase/app";
-import React, { useEffect, useMemo, useState } from "react";
-import styles from "../index.module.less";
+  type DatasourceTestConnectionReqVO
+} from '@onebase/app';
+import React, { useEffect, useMemo, useState } from 'react';
+import styles from '../index.module.less';
 
 const Option = Select.Option;
 
@@ -35,16 +28,9 @@ interface EditDsDrawerProps {
   onSuccess: () => void;
 }
 
-const dbTypes = [
-  { label: "MySQL", value: "MySQL", urlPrefix: "jdbc:mysql://" },
-];
+const dbTypes = [{ label: 'MySQL', value: 'MySQL', urlPrefix: 'jdbc:mysql://' }];
 
-const EditDsDrawer: React.FC<EditDsDrawerProps> = ({
-  visible,
-  onClose,
-  dataSource,
-  onSuccess,
-}) => {
+const EditDsDrawer: React.FC<EditDsDrawerProps> = ({ visible, onClose, dataSource, onSuccess }) => {
   const [form] = Form.useForm<DataSourceFormValues>();
   const [testing, setTesting] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -53,7 +39,7 @@ const EditDsDrawer: React.FC<EditDsDrawerProps> = ({
   const url = useMemo(() => {
     const values = form.getFieldsValue();
     const typeObj = dbTypes.find((t) => t.value === values.type) || dbTypes[0];
-    if (!values.host || !values.port || !values.database) return "";
+    if (!values.host || !values.port || !values.database) return '';
     return `${typeObj.urlPrefix}${values.host}:${values.port}/${values.database}`;
   }, [form]);
 
@@ -64,12 +50,12 @@ const EditDsDrawer: React.FC<EditDsDrawerProps> = ({
       form.setFieldsValue({
         type: dataSource.datasourceType,
         name: dataSource.datasourceName,
-        host: config.host || "",
-        port: config.port?.toString() || "3306",
-        username: config.username || "",
-        password: config.password || "",
-        database: config.database || "",
-        url: config.url || "",
+        host: config.host || '',
+        port: config.port?.toString() || '3306',
+        username: config.username || '',
+        password: config.password || '',
+        database: config.database || '',
+        url: config.url || ''
       });
     }
   }, [visible, dataSource, form]);
@@ -94,10 +80,8 @@ const EditDsDrawer: React.FC<EditDsDrawerProps> = ({
           database: values.database,
           username: values.username,
           password: values.password,
-          url:
-            values.url ||
-            `jdbc:mysql://${values.host}:${values.port}/${values.database}`,
-        },
+          url: values.url || `jdbc:mysql://${values.host}:${values.port}/${values.database}`
+        }
       };
 
       const res = await testDatasourceConnection(testParams);
@@ -105,13 +89,13 @@ const EditDsDrawer: React.FC<EditDsDrawerProps> = ({
       if (res?.success) {
         Message.success(`连接成功，耗时 ${res.duration}ms`);
       } else {
-        Message.error(res.msg || "连接测试失败");
+        Message.error(res.msg || '连接测试失败');
       }
     } catch (error) {
       if (error instanceof Error) {
         Message.error(error.message);
       } else {
-        Message.error("连接测试失败，请检查表单数据");
+        Message.error('连接测试失败，请检查表单数据');
       }
     } finally {
       setTesting(false);
@@ -125,7 +109,7 @@ const EditDsDrawer: React.FC<EditDsDrawerProps> = ({
       setSubmitting(true);
 
       if (!dataSource) {
-        Message.error("数据源信息不存在");
+        Message.error('数据源信息不存在');
         return;
       }
 
@@ -141,30 +125,28 @@ const EditDsDrawer: React.FC<EditDsDrawerProps> = ({
           database: values.database,
           username: values.username,
           password: values.password,
-          url:
-            values.url ||
-            `jdbc:mysql://${values.host}:${values.port}/${values.database}`,
+          url: values.url || `jdbc:mysql://${values.host}:${values.port}/${values.database}`
         },
         // description: dataSource.description,
         // runMode: dataSource.runMode,
-        appId: dataSource.appId,
+        appId: dataSource.appId
         // lockVersion: dataSource.lockVersion,
       };
 
       const res = await updateDatasource(updateParams);
-      console.log("edit res", res);
+      console.log('edit res', res);
       if (res) {
-        Message.success("数据源更新成功");
+        Message.success('数据源更新成功');
         onSuccess();
         onClose();
       } else {
-        Message.error(res?.msg || "更新失败");
+        Message.error(res?.msg || '更新失败');
       }
     } catch (error) {
       if (error instanceof Error) {
         Message.error(error.message);
       } else {
-        Message.error("更新失败，请检查表单数据");
+        Message.error('更新失败，请检查表单数据');
       }
     } finally {
       setSubmitting(false);
@@ -185,16 +167,11 @@ const EditDsDrawer: React.FC<EditDsDrawerProps> = ({
       onCancel={handleClose}
       className={styles.dataSourceForm}
       footer={
-        <div style={{ textAlign: "right" }}>
+        <div style={{ textAlign: 'right' }}>
           <Button onClick={handleClose} style={{ marginRight: 8 }}>
             取消
           </Button>
-          <Button
-            type="primary"
-            onClick={handleTest}
-            loading={testing}
-            style={{ marginRight: 8 }}
-          >
+          <Button type="primary" onClick={handleTest} loading={testing} style={{ marginRight: 8 }}>
             连接测试
           </Button>
           <Button type="primary" onClick={handleSubmit} loading={submitting}>
@@ -203,17 +180,8 @@ const EditDsDrawer: React.FC<EditDsDrawerProps> = ({
         </div>
       }
     >
-      <Form
-        form={form}
-        layout="vertical"
-        onValuesChange={handleFormChange}
-        className={styles.dataSourceForm}
-      >
-        <Form.Item
-          label="数据源类型"
-          field="type"
-          rules={[{ required: true, message: "请选择数据源类型" }]}
-        >
+      <Form form={form} layout="vertical" onValuesChange={handleFormChange} className={styles.dataSourceForm}>
+        <Form.Item label="数据源类型" field="type" rules={[{ required: true, message: '请选择数据源类型' }]}>
           <Select>
             {dbTypes.map((t) => (
               <Option value={t.value} key={t.value}>
@@ -222,48 +190,32 @@ const EditDsDrawer: React.FC<EditDsDrawerProps> = ({
             ))}
           </Select>
         </Form.Item>
-        <Form.Item
-          label="名称"
-          field="name"
-          rules={[{ required: true, message: "请输入名称" }]}
-        >
+        <Form.Item label="名称" field="name" rules={[{ required: true, message: '请输入名称' }]}>
           <Input maxLength={200} placeholder="自定义数据源" />
         </Form.Item>
         <Form.Item label="数据库地址" required style={{ marginBottom: 0 }}>
           <Form.Item
             field="host"
-            rules={[{ required: true, message: "请输入数据库地址" }]}
+            rules={[{ required: true, message: '请输入数据库地址' }]}
             className={styles.dataSourceFormHost}
           >
             <Input maxLength={200} placeholder="数据库地址" />
           </Form.Item>
           <Form.Item
             field="port"
-            rules={[{ required: true, message: "请输入端口" }]}
+            rules={[{ required: true, message: '请输入端口' }]}
             className={styles.dataSourceFormPort}
           >
             <Input maxLength={10} placeholder="端口" />
           </Form.Item>
         </Form.Item>
-        <Form.Item
-          label="账号"
-          field="username"
-          rules={[{ required: true, message: "请输入账号" }]}
-        >
+        <Form.Item label="账号" field="username" rules={[{ required: true, message: '请输入账号' }]}>
           <Input maxLength={30} placeholder="账号" />
         </Form.Item>
-        <Form.Item
-          label="密码"
-          field="password"
-          rules={[{ required: true, message: "请输入密码" }]}
-        >
+        <Form.Item label="密码" field="password" rules={[{ required: true, message: '请输入密码' }]}>
           <Input.Password maxLength={30} placeholder="密码" />
         </Form.Item>
-        <Form.Item
-          label="数据库名称"
-          field="database"
-          rules={[{ required: true, message: "请输入数据库名称" }]}
-        >
+        <Form.Item label="数据库名称" field="database" rules={[{ required: true, message: '请输入数据库名称' }]}>
           <Input maxLength={30} placeholder="数据库名称" />
         </Form.Item>
         <Form.Item label="URL">

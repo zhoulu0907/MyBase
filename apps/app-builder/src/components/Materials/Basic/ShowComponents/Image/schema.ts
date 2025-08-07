@@ -5,22 +5,17 @@ import {
   widthConfig,
   type ICommonBaseType,
   type TStatusSelectKeyType,
-  type TWidthSelectKeyType,
-} from "@/components/Materials/common";
-import {
-  STATUS_OPTIONS,
-  STATUS_VALUES,
-  WIDTH_OPTIONS,
-  WIDTH_VALUES,
-} from "@/components/Materials/constants";
+  type TWidthSelectKeyType
+} from '@/components/Materials/common';
+import { STATUS_OPTIONS, STATUS_VALUES, WIDTH_OPTIONS, WIDTH_VALUES } from '@/components/Materials/constants';
 import type {
   IBooleanConfigType,
   IStatusConfigType,
   ITextConfigType,
   IWidthConfigType,
   TRadioDefaultType,
-  TSelectDefaultType,
-} from "@/components/Materials/types";
+  TSelectDefaultType
+} from '@/components/Materials/types';
 
 export interface XImageSchema {
   editData: TXImageEditData;
@@ -28,10 +23,7 @@ export interface XImageSchema {
 }
 
 export type TXImageEditData = Array<
-  | ITextConfigType
-  | IWidthConfigType<TWidthSelectKeyType>
-  | IStatusConfigType<TStatusSelectKeyType>
-  | IBooleanConfigType
+  ITextConfigType | IWidthConfigType<TWidthSelectKeyType> | IStatusConfigType<TStatusSelectKeyType> | IBooleanConfigType
 >;
 
 export interface XImageConfig extends ICommonBaseType {
@@ -52,8 +44,8 @@ const XImage: XImageSchema = {
   config: {
     ...baseDefault,
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
-    status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
-  },
+    status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT]
+  }
 };
 
 export default XImage;

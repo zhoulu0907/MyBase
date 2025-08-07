@@ -10,8 +10,8 @@ import {
   type TLayoutSelectKeyType,
   type TStatusSelectKeyType,
   type TUploadSelectKeyType,
-  type TWidthSelectKeyType,
-} from "@/components/Materials/common";
+  type TWidthSelectKeyType
+} from '@/components/Materials/common';
 import {
   CONFIG_TYPES,
   WIDTH_OPTIONS,
@@ -21,8 +21,8 @@ import {
   STATUS_OPTIONS,
   STATUS_VALUES,
   UPLOAD_OPTIONS,
-  UPLOAD_VALUES,
-} from "@/components/Materials/constants";
+  UPLOAD_VALUES
+} from '@/components/Materials/constants';
 import type {
   IBooleanConfigType,
   IDescriptionConfigType,
@@ -43,8 +43,8 @@ import type {
   TNumberDefaultType,
   TSelectDefaultType,
   TTextAreaDefaultType,
-  TTextDefaultType,
-} from "@/components/Materials/types";
+  TTextDefaultType
+} from '@/components/Materials/types';
 
 export interface XInputFileUploadSchema {
   editData: TXInputFileUploadEditData;
@@ -154,64 +154,64 @@ const XFileUpload: XInputFileUploadSchema = {
   editData: [
     ...baseConfig,
     {
-      key: "label",
-      name: "标题",
-      type: CONFIG_TYPES.LABEL_INPUT,
+      key: 'label',
+      name: '标题',
+      type: CONFIG_TYPES.LABEL_INPUT
     },
     {
-      key: "description",
-      name: "描述信息",
-      type: CONFIG_TYPES.DESCRIPTION_INPUT,
+      key: 'description',
+      name: '描述信息',
+      type: CONFIG_TYPES.DESCRIPTION_INPUT
     },
     {
-      key: "tooltip",
-      name: "提示文字",
-      type: CONFIG_TYPES.TOOLTIP_INPUT,
+      key: 'tooltip',
+      name: '提示文字',
+      type: CONFIG_TYPES.TOOLTIP_INPUT
     },
     layoutConfig,
     labelColSpanConfig,
     {
-      key: "required",
-      name: "开启必填",
-      type: CONFIG_TYPES.SWITCH_INPUT,
+      key: 'required',
+      name: '开启必填',
+      type: CONFIG_TYPES.SWITCH_INPUT
     },
     {
-      key: "uploadSize",
-      name: "文件大小限制",
-      type: CONFIG_TYPES.UPLOAD_SIZE,
+      key: 'uploadSize',
+      name: '文件大小限制',
+      type: CONFIG_TYPES.UPLOAD_SIZE
     },
     {
-      key: "uploadLimit",
-      name: "上传数量限制",
-      type: CONFIG_TYPES.UPLOAD_LIMIT,
+      key: 'uploadLimit',
+      name: '上传数量限制',
+      type: CONFIG_TYPES.UPLOAD_LIMIT
     },
     {
-      key: "showPreview",
-      name: "允许预览文件",
-      type: CONFIG_TYPES.SWITCH_INPUT,
+      key: 'showPreview',
+      name: '允许预览文件',
+      type: CONFIG_TYPES.SWITCH_INPUT
     },
     {
-      key: "showDownload",
-      name: "允许下载文件",
-      type: CONFIG_TYPES.SWITCH_INPUT,
+      key: 'showDownload',
+      name: '允许下载文件',
+      type: CONFIG_TYPES.SWITCH_INPUT
     },
     {
-      key: "saveWithHidden",
-      name: "隐藏时提交数据",
-      type: CONFIG_TYPES.SWITCH_INPUT,
+      key: 'saveWithHidden',
+      name: '隐藏时提交数据',
+      type: CONFIG_TYPES.SWITCH_INPUT
     },
     statusConfig,
     widthConfig,
-    listTypeConfig,
+    listTypeConfig
   ],
   config: {
     ...baseDefault,
-    label: "文件上传",
-    description: "",
-    tooltip: "",
+    label: '文件上传',
+    description: '',
+    tooltip: '',
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
-    defaultValue: "",
+    defaultValue: '',
     required: false,
     uploadSize: 10,
     uploadLimit: -1,
@@ -220,8 +220,8 @@ const XFileUpload: XInputFileUploadSchema = {
     listType: UPLOAD_VALUES[UPLOAD_OPTIONS.CARD],
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
     saveWithHidden: false,
-    labelColSpan: 5,
-  },
+    labelColSpan: 5
+  }
 };
 
 export default XFileUpload;

@@ -1,21 +1,14 @@
-import logoSVG from "@/assets/images/logo.svg";
-import settingSVG from "@/assets/images/setting_icon.svg";
-import { UserPermissionManager } from "@/utils/permission";
-import {
-  Avatar,
-  Button,
-  Dropdown,
-  Layout,
-  Menu,
-  Tabs,
-} from "@arco-design/web-react";
-import { IconPoweroff, IconUser } from "@arco-design/web-react/icon";
-import { TokenManager } from "@onebase/common";
-import { getPermissionInfo } from "@onebase/platform-center";
-import React, { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { useLocation, useNavigate } from "react-router-dom";
-import styles from "./header.module.less";
+import logoSVG from '@/assets/images/logo.svg';
+import settingSVG from '@/assets/images/setting_icon.svg';
+import { UserPermissionManager } from '@/utils/permission';
+import { Avatar, Button, Dropdown, Layout, Menu, Tabs } from '@arco-design/web-react';
+import { IconPoweroff, IconUser } from '@arco-design/web-react/icon';
+import { TokenManager } from '@onebase/common';
+import { getPermissionInfo } from '@onebase/platform-center';
+import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useLocation, useNavigate } from 'react-router-dom';
+import styles from './header.module.less';
 
 const { Header } = Layout;
 
@@ -28,19 +21,17 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
   const location = useLocation();
   const { t } = useTranslation();
 
-  const [nickname, setNickname] = useState("U");
+  const [nickname, setNickname] = useState('U');
 
   // Tab 切换
   // 根据当前路径设置 activeTab
   const getTabKeyFromPath = (pathname: string) => {
-    if (pathname.includes("/onebase/app-center")) return "app-center";
-    if (pathname.includes("/onebase/mall-center")) return "mall-center";
-    if (pathname.includes("/onebase/help-center")) return "help-center";
-    return "my-app";
+    if (pathname.includes('/onebase/app-center')) return 'app-center';
+    if (pathname.includes('/onebase/mall-center')) return 'mall-center';
+    if (pathname.includes('/onebase/help-center')) return 'help-center';
+    return 'my-app';
   };
-  const [activeTab, setActiveTab] = useState(() =>
-    getTabKeyFromPath(location.pathname),
-  );
+  const [activeTab, setActiveTab] = useState(() => getTabKeyFromPath(location.pathname));
 
   useEffect(() => {
     setActiveTab(getTabKeyFromPath(location.pathname));
@@ -66,7 +57,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     // 清除 token
     TokenManager.clearToken();
     // 跳转到登录页
-    navigate("/login");
+    navigate('/login');
   };
 
   // 用户菜单
@@ -74,21 +65,21 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     <Menu>
       <Menu.Item key="profile">
         <IconUser />
-        {t("header.profile")}
+        {t('header.profile')}
       </Menu.Item>
       <Menu.Item key="logout" onClick={handleLogout}>
         <IconPoweroff />
-        {t("header.logout")}
+        {t('header.logout')}
       </Menu.Item>
     </Menu>
   );
 
   return (
-    <Header className={`${styles.header} ${className || ""}`}>
+    <Header className={`${styles.header} ${className || ''}`}>
       <div className={styles.headerContent}>
         <div className={styles.logo}>
           <img src={logoSVG} alt="Logo" className={styles.logoSvg} />
-          <h1>{t("header.title")}</h1>
+          <h1>{t('header.title')}</h1>
         </div>
 
         <Tabs
@@ -97,17 +88,17 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
           onChange={(key) => {
             setActiveTab(key);
             switch (key) {
-              case "my-app":
-                navigate("/onebase/my-app");
+              case 'my-app':
+                navigate('/onebase/my-app');
                 break;
-              case "app-center":
-                navigate("/onebase/app-center");
+              case 'app-center':
+                navigate('/onebase/app-center');
                 break;
-              case "mall-center":
-                navigate("/onebase/mall-center");
+              case 'mall-center':
+                navigate('/onebase/mall-center');
                 break;
-              case "help-center":
-                navigate("/onebase/help-center");
+              case 'help-center':
+                navigate('/onebase/help-center');
                 break;
               default:
                 break;
@@ -126,13 +117,13 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
           <Button
             shape="circle"
             icon={<img src={settingSVG} alt="Setting" />}
-            onClick={() => navigate("/onebase/setting")}
+            onClick={() => navigate('/onebase/setting')}
           />
 
           <Dropdown droplist={userMenu} position="bottom">
             <div className={styles.userDropdown}>
-              <Avatar size={32} style={{ backgroundColor: "#4FAE7B" }}>
-                {nickname?.charAt(0) || "U"}
+              <Avatar size={32} style={{ backgroundColor: '#4FAE7B' }}>
+                {nickname?.charAt(0) || 'U'}
               </Avatar>
             </div>
           </Dropdown>

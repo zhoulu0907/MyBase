@@ -5,15 +5,9 @@ import {
   widthConfig,
   type ICommonBaseType,
   type TStatusSelectKeyType,
-  type TWidthSelectKeyType,
-} from "@/components/Materials/common";
-import {
-  CONFIG_TYPES,
-  STATUS_OPTIONS,
-  STATUS_VALUES,
-  WIDTH_OPTIONS,
-  WIDTH_VALUES,
-} from "../../../constants";
+  type TWidthSelectKeyType
+} from '@/components/Materials/common';
+import { CONFIG_TYPES, STATUS_OPTIONS, STATUS_VALUES, WIDTH_OPTIONS, WIDTH_VALUES } from '../../../constants';
 import type {
   IDescriptionConfigType,
   ILabelConfigType,
@@ -27,8 +21,8 @@ import type {
   IWidthConfigType,
   TSelectDefaultType,
   TTextAreaDefaultType,
-  TTextDefaultType,
-} from "../../../types";
+  TTextDefaultType
+} from '../../../types';
 
 export interface XInputReadonlyBoxSchema {
   editData: TXInputReadonlyBoxEditData;
@@ -90,38 +84,38 @@ const XReadonlyBox: XInputReadonlyBoxSchema = {
   editData: [
     ...baseConfig,
     {
-      key: "label",
-      name: "标题",
-      type: CONFIG_TYPES.LABEL_INPUT,
+      key: 'label',
+      name: '标题',
+      type: CONFIG_TYPES.LABEL_INPUT
     },
     {
-      key: "placeholder",
-      name: "占位符",
-      type: CONFIG_TYPES.PLACEHOLDER_INPUT,
+      key: 'placeholder',
+      name: '占位符',
+      type: CONFIG_TYPES.PLACEHOLDER_INPUT
     },
     {
-      key: "description",
-      name: "描述信息",
-      type: CONFIG_TYPES.DESCRIPTION_INPUT,
+      key: 'description',
+      name: '描述信息',
+      type: CONFIG_TYPES.DESCRIPTION_INPUT
     },
     {
-      key: "tooltip",
-      name: "提示文字",
-      type: CONFIG_TYPES.TOOLTIP_INPUT,
+      key: 'tooltip',
+      name: '提示文字',
+      type: CONFIG_TYPES.TOOLTIP_INPUT
     },
     statusConfig,
-    widthConfig,
+    widthConfig
   ],
   config: {
     ...baseDefault,
-    label: "",
-    placeholder: "请输入文字",
-    description: "",
-    tooltip: "",
+    label: '',
+    placeholder: '请输入文字',
+    description: '',
+    tooltip: '',
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
-    defaultValue: "",
-  },
+    defaultValue: ''
+  }
 };
 
 export default XReadonlyBox;

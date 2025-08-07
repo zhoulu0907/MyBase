@@ -10,8 +10,8 @@ import {
   type TAlignSelectKeyType,
   type TLayoutSelectKeyType,
   type TStatusSelectKeyType,
-  type TWidthSelectKeyType,
-} from "@/components/Materials/common";
+  type TWidthSelectKeyType
+} from '@/components/Materials/common';
 import {
   ALIGN_OPTIONS,
   ALIGN_VALUES,
@@ -21,8 +21,8 @@ import {
   STATUS_OPTIONS,
   STATUS_VALUES,
   WIDTH_OPTIONS,
-  WIDTH_VALUES,
-} from "@/components/Materials/constants";
+  WIDTH_VALUES
+} from '@/components/Materials/constants';
 import type {
   IAlignConfigType,
   IBooleanConfigType,
@@ -43,8 +43,8 @@ import type {
   TNumberDefaultType,
   TSelectDefaultType,
   TTextAreaDefaultType,
-  TTextDefaultType,
-} from "@/components/Materials/types";
+  TTextDefaultType
+} from '@/components/Materials/types';
 
 export interface XInputTextAreaSchema {
   editData: TXInputTextAreaEditData;
@@ -149,68 +149,68 @@ const XInputTextArea: XInputTextAreaSchema = {
   editData: [
     ...baseConfig,
     {
-      key: "label",
-      name: "标题",
-      type: CONFIG_TYPES.LABEL_INPUT,
+      key: 'label',
+      name: '标题',
+      type: CONFIG_TYPES.LABEL_INPUT
     },
     {
-      key: "placeholder",
-      name: "占位符",
-      type: CONFIG_TYPES.PLACEHOLDER_INPUT,
+      key: 'placeholder',
+      name: '占位符',
+      type: CONFIG_TYPES.PLACEHOLDER_INPUT
     },
     {
-      key: "description",
-      name: "描述信息",
-      type: CONFIG_TYPES.DESCRIPTION_INPUT,
+      key: 'description',
+      name: '描述信息',
+      type: CONFIG_TYPES.DESCRIPTION_INPUT
     },
     {
-      key: "tooltip",
-      name: "提示文字",
-      type: CONFIG_TYPES.TOOLTIP_INPUT,
+      key: 'tooltip',
+      name: '提示文字',
+      type: CONFIG_TYPES.TOOLTIP_INPUT
     },
     layoutConfig,
     labelColSpanConfig,
     {
-      key: "required",
-      name: "开启必填",
-      type: CONFIG_TYPES.SWITCH_INPUT,
+      key: 'required',
+      name: '开启必填',
+      type: CONFIG_TYPES.SWITCH_INPUT
     },
     {
-      key: "saveWithHidden",
-      name: "隐藏时提交数据",
-      type: CONFIG_TYPES.SWITCH_INPUT,
+      key: 'saveWithHidden',
+      name: '隐藏时提交数据',
+      type: CONFIG_TYPES.SWITCH_INPUT
     },
     {
-      key: "color",
-      name: "文本颜色",
-      type: CONFIG_TYPES.COLOR,
+      key: 'color',
+      name: '文本颜色',
+      type: CONFIG_TYPES.COLOR
     },
     {
-      key: "bgColor",
-      name: "背景颜色",
-      type: CONFIG_TYPES.COLOR,
+      key: 'bgColor',
+      name: '背景颜色',
+      type: CONFIG_TYPES.COLOR
     },
     statusConfig,
     widthConfig,
-    alignConfig,
+    alignConfig
   ],
   config: {
     ...baseDefault,
-    label: "多行文本",
-    placeholder: "请输入文字",
-    description: "",
-    tooltip: "",
+    label: '多行文本',
+    placeholder: '请输入文字',
+    description: '',
+    tooltip: '',
     labelColSpan: 5,
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
-    defaultValue: "",
+    defaultValue: '',
     required: false,
     align: ALIGN_VALUES[ALIGN_OPTIONS.LEFT],
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
     saveWithHidden: false,
-    color: "",
-    bgColor: "",
-  },
+    color: '',
+    bgColor: ''
+  }
 };
 
 export default XInputTextArea;

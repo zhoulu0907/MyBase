@@ -25,16 +25,16 @@ const Relations: React.FC<RelationsProps> = ({ entity }) => {
     // // 从localStorage加载关联关系数据
     // const { edges } = JSON.parse(localStorage.getItem('entityFormValues') || JSON.stringify({ edges: [] }));
     // const { nodes } = JSON.parse(localStorage.getItem('entityFormValues') || JSON.stringify({ nodes: [] }));
-    
+
     // // 过滤出与当前实体相关的关联关系
-    // const entityRelations = edges.filter((edge: EdgeData) => 
+    // const entityRelations = edges.filter((edge: EdgeData) =>
     //   edge.source.cell === entity.id || edge.target.cell === entity.id
     // );
 
     // const relationData = entityRelations.map((edge: EdgeData, index: number) => {
     //   const sourceEntity = nodes.find((node: EntityNode) => node.id === edge.source.cell);
     //   const targetEntity = nodes.find((node: EntityNode) => node.id === edge.target.cell);
-      
+
     //   return {
     //     id: `relation-${index}`,
     //     sourceEntity: sourceEntity?.title || edge.source.cell,
@@ -54,30 +54,28 @@ const Relations: React.FC<RelationsProps> = ({ entity }) => {
     {
       title: '源实体',
       dataIndex: 'sourceEntity',
-      key: 'sourceEntity',
+      key: 'sourceEntity'
     },
     {
       title: '源字段',
       dataIndex: 'sourceField',
-      key: 'sourceField',
+      key: 'sourceField'
     },
     {
       title: '关联类型',
       dataIndex: 'relationType',
       key: 'relationType',
-      render: (type: string) => (
-        <Tag color="purple">{type}</Tag>
-      ),
+      render: (type: string) => <Tag color="purple">{type}</Tag>
     },
     {
       title: '目标实体',
       dataIndex: 'targetEntity',
-      key: 'targetEntity',
+      key: 'targetEntity'
     },
     {
       title: '目标字段',
       dataIndex: 'targetField',
-      key: 'targetField',
+      key: 'targetField'
     },
     {
       title: '操作',
@@ -91,11 +89,11 @@ const Relations: React.FC<RelationsProps> = ({ entity }) => {
             删除
           </Button>
         </Space>
-      ),
-    },
+      )
+    }
   ];
 
-  const getRelation = async() => {
+  const getRelation = async () => {
     try {
       // setLoading(true);
       // TODO 传参后续补充完整
@@ -104,9 +102,9 @@ const Relations: React.FC<RelationsProps> = ({ entity }) => {
         pageNo: 1,
         pageSize: 10,
         appId: 1
-      }
+      };
       const response = await getEntityRelations(params);
-      console.log('getEntityRelations' ,response)
+      console.log('getEntityRelations', response);
       if (response.data) {
         setRelations(response.data);
       }
@@ -116,7 +114,7 @@ const Relations: React.FC<RelationsProps> = ({ entity }) => {
     } finally {
       // setLoading(false);
     }
-  }
+  };
 
   return (
     <div className={styles.relations}>
@@ -126,15 +124,9 @@ const Relations: React.FC<RelationsProps> = ({ entity }) => {
           添加关联
         </Button>
       </div>
-      <Table
-        columns={columns}
-        data={relations}
-        rowKey="id"
-        pagination={false}
-        className={styles.table}
-      />
+      <Table columns={columns} data={relations} rowKey="id" pagination={false} className={styles.table} />
     </div>
   );
 };
 
-export default Relations; 
+export default Relations;

@@ -1,36 +1,36 @@
-import AppIcon from "@/assets/images/app_icon.svg";
-import activeFormDesignSVG from "@/assets/images/form_design_active_icon.svg";
-import defaultFormDesignSVG from "@/assets/images/form_design_default_icon.svg";
-import activeListDesignSVG from "@/assets/images/list_design_active_icon.svg";
-import defaultListDesignSVG from "@/assets/images/list_design_default_icon.svg";
-import { usePageEditorStore } from "@/hooks/useStore";
-import { Button, Tabs } from "@arco-design/web-react";
-import { IconArrowLeft } from "@arco-design/web-react/icon";
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { EDITOR_TYPES } from "../const";
-import styles from "./index.module.less";
+import AppIcon from '@/assets/images/app_icon.svg';
+import activeFormDesignSVG from '@/assets/images/form_design_active_icon.svg';
+import defaultFormDesignSVG from '@/assets/images/form_design_default_icon.svg';
+import activeListDesignSVG from '@/assets/images/list_design_active_icon.svg';
+import defaultListDesignSVG from '@/assets/images/list_design_default_icon.svg';
+import { usePageEditorStore } from '@/hooks/useStore';
+import { Button, Tabs } from '@arco-design/web-react';
+import { IconArrowLeft } from '@arco-design/web-react/icon';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { EDITOR_TYPES } from '../const';
+import styles from './index.module.less';
 
 const tabData = [
   {
     key: EDITOR_TYPES.FORM_EDITOR,
-    title: "表单设计",
-    alt: "Form Design",
+    title: '表单设计',
+    alt: 'Form Design',
     defaultIcon: defaultFormDesignSVG,
-    activeIcon: activeFormDesignSVG,
+    activeIcon: activeFormDesignSVG
   },
   {
     key: EDITOR_TYPES.LIST_EDITOR,
-    title: "列表设计",
-    alt: "List Design",
+    title: '列表设计',
+    alt: 'List Design',
     defaultIcon: defaultListDesignSVG,
-    activeIcon: activeListDesignSVG,
+    activeIcon: activeListDesignSVG
   },
   {
     key: EDITOR_TYPES.PAGE_SETTING,
-    title: "页面设置",
-    alt: "",
-  },
+    title: '页面设置',
+    alt: ''
+  }
   // {
   //     key: EDITOR_TYPES.METADATA_MANAGE,
   //     title: "元数据管理",
@@ -41,11 +41,10 @@ const tabData = [
 ];
 
 export default function EditorHeader() {
-  const { clearCurComponentID, components, pageComponentSchemas } =
-    usePageEditorStore();
+  const { clearCurComponentID, components, pageComponentSchemas } = usePageEditorStore();
 
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("");
+  const [activeTab, setActiveTab] = useState('');
 
   useEffect(() => {
     // 根据当前 URL 动态设置 activeTab
@@ -62,7 +61,7 @@ export default function EditorHeader() {
   }, []);
 
   const handleSaveApp = () => {
-    console.log("save app");
+    console.log('save app');
     console.log(components);
     console.log(pageComponentSchemas);
   };
@@ -76,7 +75,7 @@ export default function EditorHeader() {
           type="default"
           size="small"
           onClick={() => {
-            navigate("/onebase/create-app");
+            navigate('/onebase/create-app');
           }}
           icon={<IconArrowLeft />}
         />
@@ -120,12 +119,7 @@ export default function EditorHeader() {
               key={tab.key}
               title={
                 <div className={styles.tabIcon}>
-                  <img
-                    src={
-                      tab.key === activeTab ? tab.activeIcon : tab.defaultIcon
-                    }
-                    alt={tab.alt}
-                  />
+                  <img src={tab.key === activeTab ? tab.activeIcon : tab.defaultIcon} alt={tab.alt} />
                   {tab.title}
                 </div>
               }

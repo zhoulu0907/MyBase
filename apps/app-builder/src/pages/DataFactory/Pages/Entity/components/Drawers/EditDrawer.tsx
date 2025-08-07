@@ -1,7 +1,7 @@
-import React, { useEffect } from "react";
-import { Drawer, Message } from "@arco-design/web-react";
-import NodeEditForm from "./EditForm";
-import type { EntityNode } from "../../../../utils/interface";
+import { Drawer, Message } from '@arco-design/web-react';
+import React, { useEffect } from 'react';
+import type { EntityNode } from '../../../../utils/interface';
+import NodeEditForm from './EditForm';
 
 interface FormValues {
   code: string;
@@ -31,12 +31,11 @@ const DetailDrawer: React.FC<{
     if (editingNode && onNodeEdit) {
       // onNodeEdit(formData);
       const { nodes } = JSON.parse(
-        localStorage.getItem("entityFormValues") ||
-          JSON.stringify({ nodes: [], edges: [] }),
+        localStorage.getItem('entityFormValues') || JSON.stringify({ nodes: [], edges: [] })
       );
-      console.log("handleNodeEdit====", nodes);
+      console.log('handleNodeEdit====', nodes);
       const nodeData = nodes.find((n: EntityNode) => n.id === editingNode.id);
-      console.log("handleNodeEdit====", nodeData);
+      console.log('handleNodeEdit====', nodeData);
       if (nodeData) {
         nodeData.id = editingNode.id;
         nodeData.code = formData.code || nodeData.code;
@@ -46,15 +45,12 @@ const DetailDrawer: React.FC<{
         console.log(formData.systemFields);
         if (formData.systemFields) {
           Object.keys(formData.systemFields).forEach((key: string) => {
-            if (
-              formData.systemFields &&
-              formData.systemFields[key as keyof typeof formData.systemFields]
-            ) {
+            if (formData.systemFields && formData.systemFields[key as keyof typeof formData.systemFields]) {
               nodeData.fields.push({
                 id: key,
                 name: key,
-                type: "TEXT",
-                isSystem: true,
+                type: 'TEXT',
+                isSystem: true
               });
             }
           });
@@ -64,17 +60,12 @@ const DetailDrawer: React.FC<{
       onNodeEdit(nodeData);
       setVisible(false);
       setEditingNode(null);
-      Message.success("节点信息已更新");
+      Message.success('节点信息已更新');
     }
   };
 
   return (
-    <Drawer
-      title="编辑节点"
-      visible={visible}
-      onCancel={() => setVisible(false)}
-      width={500}
-    >
+    <Drawer title="编辑节点" visible={visible} onCancel={() => setVisible(false)} width={500}>
       {editingNode && (
         <NodeEditForm
           node={editingNode}

@@ -13,5 +13,5 @@ declare global {
  */
 export const getBackendURL = (): string => {
   const baseUrl = (window as any).global_config.BASE_URL;
-  return baseUrl || "http://localhost:9524";
+  return baseUrl || 'http://localhost:9524';
 };

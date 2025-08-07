@@ -1,9 +1,9 @@
-import { Input, Tree } from "@arco-design/web-react";
-import ListItem from "@/components/ListItem";
-import { useMemo, useState, useEffect } from "react";
-import { treeFilter } from "@/utils/tree";
-import s from "../index.module.less";
-import { type DeptTree } from "@onebase/platform-center";
+import { Input, Tree } from '@arco-design/web-react';
+import ListItem from '@/components/ListItem';
+import { useMemo, useState, useEffect } from 'react';
+import { treeFilter } from '@/utils/tree';
+import s from '../index.module.less';
+import { type DeptTree } from '@onebase/platform-center';
 
 type TreeDataType = {
   key?: string;
@@ -20,21 +20,11 @@ interface DeptTreeProps {
   deptLoading?: boolean;
 }
 
-export default function DeptTree({
-  selectedDeptId,
-  onDeptSelect,
-  totalUserCount,
-  treeData,
-}: DeptTreeProps) {
-  const [search, setSearch] = useState("");
-  const [selectedKeys, setSelectedKeys] = useState<string[]>(
-    selectedDeptId ? [String(selectedDeptId)] : [],
-  );
+export default function DeptTree({ selectedDeptId, onDeptSelect, totalUserCount, treeData }: DeptTreeProps) {
+  const [search, setSearch] = useState('');
+  const [selectedKeys, setSelectedKeys] = useState<string[]>(selectedDeptId ? [String(selectedDeptId)] : []);
 
-  const filteredTree = useMemo(
-    () => treeFilter(treeData, search),
-    [treeData, search],
-  );
+  const filteredTree = useMemo(() => treeFilter(treeData, search), [treeData, search]);
 
   // 同步外部选中状态
   useEffect(() => {
@@ -71,9 +61,7 @@ export default function DeptTree({
         blockNode
         className={s.deptTreeNode}
         renderTitle={(node: TreeDataType) => {
-          return (
-            <span className="tableColumnUsername">{`${node.title}(${node.userCount || 0})`}</span>
-          );
+          return <span className="tableColumnUsername">{`${node.title}(${node.userCount || 0})`}</span>;
         }}
       />
     </div>

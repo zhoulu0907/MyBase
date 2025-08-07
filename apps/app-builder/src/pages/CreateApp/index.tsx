@@ -1,8 +1,8 @@
-import { Layout } from "@arco-design/web-react";
-import React from "react";
-import { Outlet } from "react-router-dom";
-import { AppHeader } from "./components/header";
-import styles from "./index.module.less";
+import { Layout } from '@arco-design/web-react';
+import React from 'react';
+import { Outlet } from 'react-router-dom';
+import { AppHeader } from './components/header';
+import styles from './index.module.less';
 
 const Content = Layout.Content;
 

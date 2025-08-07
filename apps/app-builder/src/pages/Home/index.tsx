@@ -1,18 +1,18 @@
-import { Layout } from "@arco-design/web-react";
-import React from "react";
-import { Navigate, Route, Routes, useLocation } from "react-router-dom";
-import AppCenterPage from "../AppCenter";
-import AppReleasePage from "../AppRelease";
-import AppSettingPage from "../AppSetting";
-import CreateAppPage from "../CreateApp";
-import DataFactoryPage from "../DataFactory";
-import HelpCenterPage from "../HelpCenter";
-import IntegratedManagementPage from "../IntegratedManagement";
-import MallCenterPage from "../MallCenter";
-import MyAppPage from "../MyApp";
-import PageManagerPage from "../PageManager";
-import { AppHeader } from "./components/header";
-import styles from "./index.module.less";
+import { Layout } from '@arco-design/web-react';
+import React from 'react';
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import AppCenterPage from '../AppCenter';
+import AppReleasePage from '../AppRelease';
+import AppSettingPage from '../AppSetting';
+import CreateAppPage from '../CreateApp';
+import DataFactoryPage from '../DataFactory';
+import HelpCenterPage from '../HelpCenter';
+import IntegratedManagementPage from '../IntegratedManagement';
+import MallCenterPage from '../MallCenter';
+import MyAppPage from '../MyApp';
+import PageManagerPage from '../PageManager';
+import { AppHeader } from './components/header';
+import styles from './index.module.less';
 
 const Content = Layout.Content;
 
@@ -21,9 +21,7 @@ const Home: React.FC = () => {
 
   return (
     <Layout className={styles.homePage}>
-      {location.pathname.includes("create-app") ? null : (
-        <AppHeader className={styles.myAppPageHeader} />
-      )}
+      {location.pathname.includes('create-app') ? null : <AppHeader className={styles.myAppPageHeader} />}
 
       <Layout className={styles.myAppPageContent}>
         <Layout>
@@ -39,10 +37,7 @@ const Home: React.FC = () => {
                 <Route path="create-app" element={<CreateAppPage />}>
                   <Route index element={<PageManagerPage />} />
                   <Route path="page-manager" element={<PageManagerPage />} />
-                  <Route
-                    path="integrated-management"
-                    element={<IntegratedManagementPage />}
-                  />
+                  <Route path="integrated-management" element={<IntegratedManagementPage />} />
                   <Route path="data-factory" element={<DataFactoryPage />} />
                   <Route path="app-setting" element={<AppSettingPage />} />
                   <Route path="app-release" element={<AppReleasePage />} />

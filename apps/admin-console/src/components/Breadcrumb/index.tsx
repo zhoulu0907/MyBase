@@ -1,9 +1,9 @@
-import { Breadcrumb } from "@arco-design/web-react";
-import { IconHome } from "@arco-design/web-react/icon";
-import React, { useMemo } from "react";
-import { useTranslation } from "react-i18next";
-import { useLocation, useNavigate } from "react-router-dom";
-import styles from "./index.module.less";
+import { Breadcrumb } from '@arco-design/web-react';
+import { IconHome } from '@arco-design/web-react/icon';
+import React, { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useLocation, useNavigate } from 'react-router-dom';
+import styles from './index.module.less';
 
 interface BreadcrumbItemType {
   key: string;
@@ -27,40 +27,39 @@ const AppBreadcrumb: React.FC<BreadcrumbProps> = ({ className, items }) => {
       return items;
     }
 
-    const pathSegments = location.pathname.split("/").filter(Boolean);
+    const pathSegments = location.pathname.split('/').filter(Boolean);
 
     // 如果路径是 /onebase 或 /onebase/，返回空数组（不显示面包屑）
-    if (pathSegments.length === 1 && pathSegments[0] === "onebase") {
+    if (pathSegments.length === 1 && pathSegments[0] === 'onebase') {
       return [];
     }
 
     const result: BreadcrumbItemType[] = [
       {
-        key: "onebase",
-        title: "",
-        path: "/onebase",
-      },
+        key: 'onebase',
+        title: '',
+        path: '/onebase'
+      }
     ];
 
     // 如果路径以/onebase开头，移除/onebase
-    const segments =
-      pathSegments[0] === "onebase" ? pathSegments.slice(1) : pathSegments;
+    const segments = pathSegments[0] === 'onebase' ? pathSegments.slice(1) : pathSegments;
 
-    let currentPath = "/onebase";
+    let currentPath = '/onebase';
     segments.forEach((segment, index) => {
       currentPath += `/${segment}`;
 
       // 根据路径生成对应的标题
       let title = segment;
       switch (segment) {
-        case "platform-info":
-          title = t("breadcrumb.platformInfo");
+        case 'platform-info':
+          title = t('breadcrumb.platformInfo');
           break;
-        case "tenant":
-          title = t("breadcrumb.tenant");
+        case 'tenant':
+          title = t('breadcrumb.tenant');
           break;
-        case "administrator":
-          title = t("breadcrumb.administrator");
+        case 'administrator':
+          title = t('breadcrumb.administrator');
           break;
         default:
           title = segment;
@@ -69,7 +68,7 @@ const AppBreadcrumb: React.FC<BreadcrumbProps> = ({ className, items }) => {
       result.push({
         key: segment,
         title,
-        path: index === segments.length - 1 ? undefined : currentPath,
+        path: index === segments.length - 1 ? undefined : currentPath
       });
     });
 
@@ -88,7 +87,7 @@ const AppBreadcrumb: React.FC<BreadcrumbProps> = ({ className, items }) => {
   }
 
   return (
-    <div className={`${styles.breadcrumbContainer} ${className || ""}`}>
+    <div className={`${styles.breadcrumbContainer} ${className || ''}`}>
       <Breadcrumb separator="/">
         {breadcrumbItems.map((item, index) => (
           <Breadcrumb.Item
@@ -96,11 +95,7 @@ const AppBreadcrumb: React.FC<BreadcrumbProps> = ({ className, items }) => {
             onClick={() => handleBreadcrumbClick(item)}
             className={item.path ? styles.clickable : styles.current}
           >
-            {index === 0 ? (
-              <IconHome className={styles.homeIcon} />
-            ) : (
-              item.title
-            )}
+            {index === 0 ? <IconHome className={styles.homeIcon} /> : item.title}
           </Breadcrumb.Item>
         ))}
       </Breadcrumb>

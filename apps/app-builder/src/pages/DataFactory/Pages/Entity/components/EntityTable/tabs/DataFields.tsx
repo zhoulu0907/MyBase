@@ -17,8 +17,8 @@ const DataFields: React.FC<DataFieldsProps> = ({ entity }) => {
   const loadFields = async () => {
     try {
       setLoading(true);
-      const response = await getEntityFields({entityId: entity.id});
-      console.log('getEntityFields' ,response)
+      const response = await getEntityFields({ entityId: entity.id });
+      console.log('getEntityFields', response);
       if (response) {
         setFields(response);
       }
@@ -56,62 +56,60 @@ const DataFields: React.FC<DataFieldsProps> = ({ entity }) => {
     {
       title: '字段编码',
       dataIndex: 'displayName',
-      key: 'displayName',
+      key: 'displayName'
     },
     {
       title: '字段名称',
       dataIndex: 'fieldName',
-      key: 'fieldName',
+      key: 'fieldName'
     },
     {
       title: '字段描述',
       dataIndex: 'description',
-      key: 'description',
+      key: 'description'
     },
     {
       title: '数据类型',
       dataIndex: 'fieldType',
-      key: 'fieldType',
+      key: 'fieldType'
     },
     {
       title: '字段类型',
       dataIndex: 'isSystemField',
       key: 'isSystemField',
       render: (isSystemField: boolean) => (
-        <Tag color={isSystemField ? 'red' : 'green'}>
-          {isSystemField ? '系统字段' : '自定义字段'}
-        </Tag>
+        <Tag color={isSystemField ? 'red' : 'green'}>{isSystemField ? '系统字段' : '自定义字段'}</Tag>
       )
     },
     {
       title: '默认值',
       dataIndex: 'defaultValue',
-      key: 'defaultValue',
+      key: 'defaultValue'
     },
     {
       title: '唯一',
       dataIndex: 'isUnique',
-      key: 'isUnique',
+      key: 'isUnique'
     },
     {
       title: '必填',
       dataIndex: 'isRequired',
-      key: 'isRequired',
+      key: 'isRequired'
     },
     {
       title: '允许空值',
       dataIndex: 'allowNull',
-      key: 'allowNull',
+      key: 'allowNull'
     },
     {
       title: '长度范围',
       dataIndex: 'dataLength',
-      key: 'dataLength',
+      key: 'dataLength'
     },
     {
       title: '正则校验',
       dataIndex: 'validationRulesId',
-      key: 'validationRulesId',
+      key: 'validationRulesId'
     },
     {
       title: '操作',
@@ -121,17 +119,12 @@ const DataFields: React.FC<DataFieldsProps> = ({ entity }) => {
           <Button type="text" size="mini">
             编辑
           </Button>
-          <Button 
-            type="text" 
-            size="mini" 
-            status="danger"
-            onClick={() => handleDeleteField(record.id)}
-          >
+          <Button type="text" size="mini" status="danger" onClick={() => handleDeleteField(record.id)}>
             删除
           </Button>
         </Space>
-      ),
-    },
+      )
+    }
   ];
 
   return (
@@ -154,4 +147,4 @@ const DataFields: React.FC<DataFieldsProps> = ({ entity }) => {
   );
 };
 
-export default DataFields; 
+export default DataFields;

@@ -22,8 +22,13 @@ interface EntityFormValues {
 
 // 实体类型(1:自建表，2:复用已有表)
 const entitySources = [
+<<<<<<< HEAD:apps/app-builder/src/pages/DataFactory/Pages/Entity/CreateEntityPage.tsx
+  { label: '新建业务实体', value: 'new' },
+  { label: '使用自有数据源中的数据表', value: 'existing' }
+=======
   { label: '新建业务实体', value: 1 },
   { label: '使用自有数据源中的数据表', value: 2 },
+>>>>>>> 3aa8554542cb666fb0f8e58daedc2fbc86438f8d:apps/app-builder/src/pages/DataFactory/Pages/Entity/components/Modals/CreateEntityModal.tsx
 ];
 
 const dsOptions: { label: string; value: string }[] = [];
@@ -35,12 +40,27 @@ const CreateEntityModal: React.FC<{
   successCallback: () => void;
 }> = ({ visible, setVisible, successCallback }) => {
   const [form] = Form.useForm<EntityFormValues>();
-  const [dsResource, setDsResource] = useState<string>(
-    DS_RESOURCE_TYPE.EXTERNAL,
-  ); // 数据源来源：内部数据源、外部数据源、外部数据源中引用自有数据源已有资产
+  const [dsResource, setDsResource] = useState<string>(DS_RESOURCE_TYPE.EXTERNAL); // 数据源来源：内部数据源、外部数据源、外部数据源中引用自有数据源已有资产
   // 提交
   const handleFinish = () => {
     // TODO: 提交表单数据
+<<<<<<< HEAD:apps/app-builder/src/pages/DataFactory/Pages/Entity/CreateEntityPage.tsx
+    form.validate().then((values) => {
+      const { nodes, edges } = JSON.parse(
+        localStorage.getItem('entityFormValues') || JSON.stringify({ nodes: [], edges: [] })
+      );
+
+      nodes.push({
+        ...values,
+        id: values.code,
+        title: values.name,
+        x: nodes.length * 300,
+        y: 0,
+        fields: [{ id: 'ID', name: 'ID', type: '自增ID', isSystem: true }]
+      });
+      localStorage.setItem('entityFormValues', JSON.stringify({ nodes, edges }));
+      console.log(values);
+=======
     form.validate().then(async values => {
       // 前端数据模拟
       // const { nodes, edges } = JSON.parse(localStorage.getItem('entityFormValues') || JSON.stringify({nodes: [], edges: []}));
@@ -54,7 +74,7 @@ const CreateEntityModal: React.FC<{
       //   fields: [
       //     {id: 'ID', name: 'ID', type: '自增ID', isSystem: true},
       //   ],
-      // }); 
+      // });
       // localStorage.setItem('entityFormValues', JSON.stringify({ nodes, edges }));
       // console.log(values);
 
@@ -74,10 +94,11 @@ const CreateEntityModal: React.FC<{
       } catch (error) {
         console.log(error);
       }
-      
 
+
+>>>>>>> 3aa8554542cb666fb0f8e58daedc2fbc86438f8d:apps/app-builder/src/pages/DataFactory/Pages/Entity/components/Modals/CreateEntityModal.tsx
       form.resetFields();
-      Message.success("保存成功");
+      Message.success('保存成功');
       successCallback();
       setVisible(false);
     });
@@ -85,14 +106,14 @@ const CreateEntityModal: React.FC<{
 
   const handleSourceChange = (value: string) => {
     setDsResource(value);
-    form.setFieldValue("source", value);
-    form.setFieldValue("dsResource", "");
-    form.setFieldValue("dsTable", "");
+    form.setFieldValue('source', value);
+    form.setFieldValue('dsResource', '');
+    form.setFieldValue('dsTable', '');
   };
 
   return (
     <Modal
-      className={styles["create-entity-modal"]}
+      className={styles['create-entity-modal']}
       title="创建业务实体"
       visible={visible}
       onOk={handleFinish}
@@ -100,17 +121,12 @@ const CreateEntityModal: React.FC<{
       okText="创建"
       cancelText="取消"
     >
-      <Form
-        form={form}
-        layout="vertical"
-        onSubmit={handleFinish}
-        className={styles["entity-form"]}
-      >
+      <Form form={form} layout="vertical" onSubmit={handleFinish} className={styles['entity-form']}>
         {dsResource !== DS_RESOURCE_TYPE.INTERNAL && (
           <Form.Item
             label="业务实体来源于"
             field="source"
-            rules={[{ required: true, message: "请选择业务实体来源" }]}
+            rules={[{ required: true, message: '请选择业务实体来源' }]}
             initialValue={entitySources[0].value}
           >
             <Radio.Group onChange={handleSourceChange}>
@@ -123,28 +139,18 @@ const CreateEntityModal: React.FC<{
           </Form.Item>
         )}
 
+<<<<<<< HEAD:apps/app-builder/src/pages/DataFactory/Pages/Entity/CreateEntityPage.tsx
+        {form.getFieldValue('source') === entitySources[1].value && (
+=======
         {form.getFieldValue('source') === entitySources[1].value.toString() && (
+>>>>>>> 3aa8554542cb666fb0f8e58daedc2fbc86438f8d:apps/app-builder/src/pages/DataFactory/Pages/Entity/components/Modals/CreateEntityModal.tsx
           <>
-            <Form.Item
-              label="外部数据源"
-              field="dsResource"
-              rules={[{ required: true, message: "请选择外部数据源" }]}
-            >
-              <Select
-                placeholder="请选择自有数据源，可选已接入的外部数据源"
-                options={dsOptions}
-              />
+            <Form.Item label="外部数据源" field="dsResource" rules={[{ required: true, message: '请选择外部数据源' }]}>
+              <Select placeholder="请选择自有数据源，可选已接入的外部数据源" options={dsOptions} />
             </Form.Item>
 
-            <Form.Item
-              label="数据表"
-              field="dsTable"
-              rules={[{ required: true, message: "请选择数据表" }]}
-            >
-              <Select
-                placeholder="请选择自有数据源中的数据表"
-                options={dsTables}
-              />
+            <Form.Item label="数据表" field="dsTable" rules={[{ required: true, message: '请选择数据表' }]}>
+              <Select placeholder="请选择自有数据源中的数据表" options={dsTables} />
             </Form.Item>
           </>
         )}
@@ -153,8 +159,8 @@ const CreateEntityModal: React.FC<{
           label="业务实体编码"
           field="code"
           rules={[
-            { required: true, message: "请输入业务实体编码" },
-            { max: 40, message: "业务实体编码不能超过40个字符" },
+            { required: true, message: '请输入业务实体编码' },
+            { max: 40, message: '业务实体编码不能超过40个字符' }
           ]}
         >
           <Input
@@ -167,20 +173,15 @@ const CreateEntityModal: React.FC<{
           label="业务实体名称"
           field="name"
           rules={[
-            { required: true, message: "请输入业务实体名称" },
-            { max: 50, message: "业务实体名称不能超过50个字符" },
+            { required: true, message: '请输入业务实体名称' },
+            { max: 50, message: '业务实体名称不能超过50个字符' }
           ]}
         >
           <Input maxLength={50} placeholder="请输入实体名称，不超过50个字符" />
         </Form.Item>
 
         <Form.Item label="业务实体描述" field="description">
-          <Input.TextArea
-            placeholder="请输入描述（选填）"
-            rows={4}
-            maxLength={500}
-            showWordLimit
-          />
+          <Input.TextArea placeholder="请输入描述（选填）" rows={4} maxLength={500} showWordLimit />
         </Form.Item>
       </Form>
     </Modal>

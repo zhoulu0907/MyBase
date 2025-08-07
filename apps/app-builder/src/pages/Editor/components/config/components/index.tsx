@@ -1,9 +1,9 @@
-import { Tabs, Typography } from "@arco-design/web-react";
-import { useTranslation } from "react-i18next";
-import Advanced from "./Advanced";
-import Attributes from "./Attributes";
-import TabTitle from "./components/TabTitle";
-import styles from "./index.module.less";
+import { Tabs, Typography } from '@arco-design/web-react';
+import { useTranslation } from 'react-i18next';
+import Advanced from './Advanced';
+import Attributes from './Attributes';
+import TabTitle from './components/TabTitle';
+import styles from './index.module.less';
 
 const TabPane = Tabs.TabPane;
 
@@ -21,18 +21,12 @@ const MaterialConfiger = ({ cpID }: MaterialConfigerProps) => {
   return (
     <div className={styles.configs}>
       <Tabs defaultActiveTab="attributes" type="line" size="default">
-        <TabPane
-          key="attributes"
-          title={<TabTitle title={t("formEditor.attribute")} />}
-        >
+        <TabPane key="attributes" title={<TabTitle title={t('formEditor.attribute')} />}>
           <Typography.Paragraph>
             <Attributes cpID={cpID} />
           </Typography.Paragraph>
         </TabPane>
-        <TabPane
-          key="advanced"
-          title={<TabTitle title={t("formEditor.advanced")} />}
-        >
+        <TabPane key="advanced" title={<TabTitle title={t('formEditor.advanced')} />}>
           <Typography.Paragraph>
             <Advanced />
           </Typography.Paragraph>

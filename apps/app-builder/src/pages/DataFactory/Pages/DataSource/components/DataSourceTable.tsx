@@ -1,15 +1,8 @@
-import {
-  Button,
-  Message,
-  Modal,
-  Space,
-  Table,
-  type TableColumnProps,
-} from "@arco-design/web-react";
-import { IconPlus } from "@arco-design/web-react/icon";
-import { deleteDatasource, getDatasourcePage } from "@onebase/app";
-import { useEffect, useState } from "react";
-import styles from "../index.module.less";
+import { Button, Message, Modal, Space, Table, type TableColumnProps } from '@arco-design/web-react';
+import { IconPlus } from '@arco-design/web-react/icon';
+import { deleteDatasource, getDatasourcePage } from '@onebase/app';
+import { useEffect, useState } from 'react';
+import styles from '../index.module.less';
 
 // 数据源记录类型
 interface DatasourceRecord {
@@ -24,7 +17,7 @@ interface DatasourceRecord {
 
 const DataSourceTable = ({
   handlePageType,
-  onEdit,
+  onEdit
 }: {
   handlePageType: (tab: string) => void;
   onEdit: (id: number) => void;
@@ -37,14 +30,14 @@ const DataSourceTable = ({
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState({
     pageNo: 1,
-    pageSize: 10,
+    pageSize: 10
   });
 
   const getTableData = async () => {
     setTableLoading(true);
     const params = {
       pageNo: page.pageNo,
-      pageSize: page.pageSize,
+      pageSize: page.pageSize
       // datasourceName: '',
       // datasourceType: '',
       // code: '',
@@ -53,7 +46,7 @@ const DataSourceTable = ({
     };
     const res = await getDatasourcePage(params);
 
-    console.log("getTableData res", res);
+    console.log('getTableData res', res);
     if (res) {
       setDataSourceList(res?.list || []);
       setTotal(res?.total || 0);
@@ -81,17 +74,17 @@ const DataSourceTable = ({
     try {
       const res = await deleteDatasource(currentDeleteId);
       if (res) {
-        Message.success("删除成功");
+        Message.success('删除成功');
         setDeleteModalVisible(false);
         setCurrentDeleteId(null);
         // 重新获取数据
         await getTableData();
       } else {
-        Message.error(res.msg || "删除失败");
+        Message.error(res.msg || '删除失败');
       }
     } catch (error) {
-      Message.error("删除失败，请稍后重试");
-      console.error("删除数据源失败:", error);
+      Message.error('删除失败，请稍后重试');
+      console.error('删除数据源失败:', error);
     } finally {
       setDeleteLoading(false);
     }
@@ -104,53 +97,43 @@ const DataSourceTable = ({
 
   const columns: TableColumnProps[] = [
     {
-      title: "序号",
-      dataIndex: "id",
+      title: '序号',
+      dataIndex: 'id',
       width: 100,
-      render: (_, __, index) => index + 1,
+      render: (_, __, index) => index + 1
     },
     {
-      title: "数据源名称",
-      dataIndex: "datasourceName",
+      title: '数据源名称',
+      dataIndex: 'datasourceName'
     },
     {
-      title: "数据源编码",
-      dataIndex: "code",
+      title: '数据源编码',
+      dataIndex: 'code'
     },
     {
-      title: "数据源类型",
-      dataIndex: "datasourceType",
+      title: '数据源类型',
+      dataIndex: 'datasourceType'
     },
     {
-      title: "描述",
-      dataIndex: "description",
+      title: '描述',
+      dataIndex: 'description'
     },
     {
-      title: "操作",
-      dataIndex: "operation",
+      title: '操作',
+      dataIndex: 'operation',
       render: (_, record: DatasourceRecord) => (
         <Space>
-          <Button
-            type="text"
-            size="mini"
-            style={{ marginRight: 8 }}
-            onClick={() => gotoEdit(record.id)}
-          >
+          <Button type="text" size="mini" style={{ marginRight: 8 }} onClick={() => gotoEdit(record.id)}>
             编辑
           </Button>
-          <Button
-            type="text"
-            size="mini"
-            status="danger"
-            onClick={() => handleDelete(record.id)}
-          >
+          <Button type="text" size="mini" status="danger" onClick={() => handleDelete(record.id)}>
             删除
           </Button>
         </Space>
       ),
-      fixed: "right",
-      width: 120,
-    },
+      fixed: 'right',
+      width: 120
+    }
   ];
 
   return (
@@ -160,7 +143,7 @@ const DataSourceTable = ({
         <Button
           type="primary"
           onClick={() => {
-            handlePageType("create-ds");
+            handlePageType('create-ds');
           }}
         >
           <IconPlus />
@@ -177,10 +160,10 @@ const DataSourceTable = ({
           onChange: (current, pageSize) => {
             setPage({ pageNo: current, pageSize });
             getTableData();
-          },
+          }
         }}
         loading={tableLoading}
-        style={{ margin: "0 16px" }}
+        style={{ margin: '0 16px' }}
       />
 
       {/* 删除确认对话框 */}

@@ -10,14 +10,14 @@ interface DataRulesProps {
 }
 
 const DataRules: React.FC<DataRulesProps> = ({ entity }) => {
-  const [rules, setRules] = useState([])
+  const [rules, setRules] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const loadRules = async () => {
     try {
       setLoading(true);
-      const response = await getEntityRules({entityId: entity.id});
-      console.log('getEntityRules' ,response)
+      const response = await getEntityRules({ entityId: entity.id });
+      console.log('getEntityRules', response);
       if (response.list) {
         setRules(response.list || []);
       }
@@ -33,35 +33,33 @@ const DataRules: React.FC<DataRulesProps> = ({ entity }) => {
     {
       title: '序号',
       dataIndex: 'index',
-      key: 'index',
+      key: 'index'
     },
     {
       title: '校验类型',
       dataIndex: 'validationType',
       key: 'validationType',
-      render: (validationType: string) => (
-        <Tag color="orange">{validationType}</Tag>
-      ),
+      render: (validationType: string) => <Tag color="orange">{validationType}</Tag>
     },
     {
       title: '规则名称',
       dataIndex: 'validationName',
-      key: 'validationName',
+      key: 'validationName'
     },
     {
       title: '校验数据项',
       dataIndex: 'fieldName',
-      key: 'fieldName',
-    },    
+      key: 'fieldName'
+    },
     {
       title: '条件设置',
       dataIndex: 'validationCondition',
-      key: 'validationCondition',
+      key: 'validationCondition'
     },
     {
       title: '验证失败提示语',
       dataIndex: 'errorMessage',
-      key: 'errorMessage',
+      key: 'errorMessage'
     },
     // {
     //   title: '状态',
@@ -85,13 +83,13 @@ const DataRules: React.FC<DataRulesProps> = ({ entity }) => {
             删除
           </Button>
         </Space>
-      ),
-    },
+      )
+    }
   ];
 
   useEffect(() => {
-    loadRules()
-  }, [])
+    loadRules();
+  }, []);
 
   return (
     <div className={styles.dataRules}>
@@ -101,16 +99,9 @@ const DataRules: React.FC<DataRulesProps> = ({ entity }) => {
           添加规则
         </Button>
       </div>
-      <Table
-        columns={columns}
-        data={rules}
-        rowKey="id"
-        pagination={false}
-        className={styles.table}
-        loading={loading}
-      />
+      <Table columns={columns} data={rules} rowKey="id" pagination={false} className={styles.table} loading={loading} />
     </div>
   );
 };
 
-export default DataRules; 
+export default DataRules;

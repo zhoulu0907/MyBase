@@ -1,6 +1,6 @@
-import React, { useEffect } from "react";
-import { Drawer } from "@arco-design/web-react";
-import { type EntityNode } from "../../../../utils/interface";
+import { Drawer } from '@arco-design/web-react';
+import React, { useEffect } from 'react';
+import { type EntityNode } from '../../../../utils/interface';
 
 const DetailDrawer: React.FC<{
   selectedNode: EntityNode;
@@ -10,12 +10,7 @@ const DetailDrawer: React.FC<{
   useEffect(() => {}, []);
 
   return (
-    <Drawer
-      title={selectedNode?.title}
-      visible={visible}
-      onCancel={() => setVisible(false)}
-      width={400}
-    >
+    <Drawer title={selectedNode?.title} visible={visible} onCancel={() => setVisible(false)} width={400}>
       {selectedNode && (
         <div className="node-details">
           <div className="detail-item">

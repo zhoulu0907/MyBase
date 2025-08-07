@@ -1,16 +1,12 @@
-import { Input, Button } from "@arco-design/web-react";
-import { IconPlus } from "@arco-design/web-react/icon";
-import s from "../../index.module.less";
+import { Input, Button } from '@arco-design/web-react';
+import { IconPlus } from '@arco-design/web-react/icon';
+import s from '../../index.module.less';
 interface TableHeaderProps {
   searchValue: string;
   onSearchChange: (value: string) => void;
   onAdd: () => void;
 }
-export function TableHeader({
-  searchValue,
-  onSearchChange,
-  onAdd,
-}: TableHeaderProps) {
+export function TableHeader({ searchValue, onSearchChange, onAdd }: TableHeaderProps) {
   return (
     <div className={s.tableHeader}>
       <Button type="primary" onClick={onAdd}>

@@ -1,1 +1,1 @@
-export { FormEditor } from "./formEditor";
+export { FormEditor } from './formEditor';
