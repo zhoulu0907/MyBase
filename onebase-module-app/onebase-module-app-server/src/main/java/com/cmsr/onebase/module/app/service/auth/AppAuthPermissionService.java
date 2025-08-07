@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.app.service.auth;
 
-import com.cmsr.onebase.module.app.controller.admin.auth.vo.AppAuthRolePermissionReqVO;
+import com.cmsr.onebase.module.app.controller.admin.auth.vo.AuthRolePermissionReqVO;
 import com.cmsr.onebase.module.app.controller.admin.auth.vo.AuthRolePermissionRespVO;
 import jakarta.validation.Valid;
 
@@ -10,8 +10,8 @@ import jakarta.validation.Valid;
  */
 public interface AppAuthPermissionService {
 
-    AuthRolePermissionRespVO getRolePermission(Long applicationId, Long roleId);
+    AuthRolePermissionRespVO getRolePermission(Long roleId, Long menuId);
 
-    Boolean updateRolePermission(@Valid AppAuthRolePermissionReqVO reqVO);
+    Boolean updateRolePermission(@Valid AuthRolePermissionReqVO reqVO);
 
 }
