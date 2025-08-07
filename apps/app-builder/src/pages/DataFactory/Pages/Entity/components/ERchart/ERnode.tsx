@@ -7,7 +7,7 @@ import {
   IconCaretUp,
 } from "@arco-design/web-react/icon";
 import { Node } from "@antv/x6";
-import { type EntityNode } from "../../utils/interface";
+import { type EntityNode } from "../../../../utils/interface";
 import styles from "./ERnode.module.less";
 
 // X6 节点组件接口

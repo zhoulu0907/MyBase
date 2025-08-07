@@ -2,10 +2,10 @@ import React, { useState, useEffect, useRef } from "react";
 import { Graph } from "@antv/x6";
 // import { ReactShape } from '@antv/x6-react-shape';
 import { register } from "@antv/x6-react-shape";
-import DetailDrawer from "../Drawer/DetailDrawer";
+import DetailDrawer from "../Drawers/DetailDrawer";
 // import EditDrawer from '../Drawer/EditDrawer';
-import { type EntityNode, type EntityERProps } from "../../utils/interface";
-import styles from "./ERchart.module.less";
+import { type EntityNode, type EntityERProps } from "../../../../utils/interface";
+import styles from "./index.module.less";
 import EntityNodeComponent from "./ERnode";
 
 const LINE_HEAD_HEIGHT = 48;

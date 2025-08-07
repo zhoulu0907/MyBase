@@ -7,8 +7,9 @@ import {
   Radio,
   Modal,
 } from "@arco-design/web-react";
-import styles from "./index.module.less";
-import { DS_RESOURCE_TYPE } from "../../utils/constans";
+import styles from "./modal.module.less";
+import { DS_RESOURCE_TYPE } from "../../../../utils/constans";
+import { createEntity } from "@onebase/app"
 
 interface EntityFormValues {
   source: string;
@@ -19,18 +20,18 @@ interface EntityFormValues {
   dsTable: string;
 }
 
+// 实体类型(1:自建表，2:复用已有表)
 const entitySources = [
-  { label: "新建业务实体", value: "new" },
-  { label: "使用自有数据源中的数据表", value: "existing" },
+  { label: '新建业务实体', value: 1 },
+  { label: '使用自有数据源中的数据表', value: 2 },
 ];
 
 const dsOptions: { label: string; value: string }[] = [];
 const dsTables: { label: string; value: string }[] = [];
 
-const CreateEntityPage: React.FC<{
+const CreateEntityModal: React.FC<{
   visible: boolean;
   setVisible: (visible: boolean) => void;
-  handlePageType: (tab: string) => void;
   successCallback: () => void;
 }> = ({ visible, setVisible, successCallback }) => {
   const [form] = Form.useForm<EntityFormValues>();
@@ -40,25 +41,41 @@ const CreateEntityPage: React.FC<{
   // 提交
   const handleFinish = () => {
     // TODO: 提交表单数据
-    form.validate().then((values) => {
-      const { nodes, edges } = JSON.parse(
-        localStorage.getItem("entityFormValues") ||
-          JSON.stringify({ nodes: [], edges: [] }),
-      );
+    form.validate().then(async values => {
+      // 前端数据模拟
+      // const { nodes, edges } = JSON.parse(localStorage.getItem('entityFormValues') || JSON.stringify({nodes: [], edges: []}));
 
-      nodes.push({
-        ...values,
-        id: values.code,
-        title: values.name,
-        x: nodes.length * 300,
-        y: 0,
-        fields: [{ id: "ID", name: "ID", type: "自增ID", isSystem: true }],
-      });
-      localStorage.setItem(
-        "entityFormValues",
-        JSON.stringify({ nodes, edges }),
-      );
-      console.log(values);
+      // nodes.push({
+      //   ...values,
+      //   id: values.code,
+      //   title: values.name,
+      //   x: nodes.length * 300,
+      //   y: 0,
+      //   fields: [
+      //     {id: 'ID', name: 'ID', type: '自增ID', isSystem: true},
+      //   ],
+      // }); 
+      // localStorage.setItem('entityFormValues', JSON.stringify({ nodes, edges }));
+      // console.log(values);
+
+      const params = {
+        displayName: values.name,
+        code: values.code,
+        entityType: 1, // 实体类型 1:自建表，2:复用已有表
+        description: values.description,
+        datasourceId: '542234204218462208',
+        appId: 1
+      }
+
+      try {
+        const res = await createEntity(params);
+        // TODO 返回参数待解析
+        console.log('createEntity', res);
+      } catch (error) {
+        console.log(error);
+      }
+      
+
       form.resetFields();
       Message.success("保存成功");
       successCallback();
@@ -106,7 +123,7 @@ const CreateEntityPage: React.FC<{
           </Form.Item>
         )}
 
-        {form.getFieldValue("source") === entitySources[1].value && (
+        {form.getFieldValue('source') === entitySources[1].value.toString() && (
           <>
             <Form.Item
               label="外部数据源"
@@ -170,4 +187,4 @@ const CreateEntityPage: React.FC<{
   );
 };
 
-export default CreateEntityPage;
+export default CreateEntityModal;

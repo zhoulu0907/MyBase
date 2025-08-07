@@ -13,7 +13,7 @@ import {
   type DatasourceTestConnectionReqVO,
 } from "@onebase/app";
 import React, { useEffect, useState } from "react";
-import styles from "./index.module.less";
+import styles from "../index.module.less";
 
 const Option = Select.Option;
 
@@ -142,7 +142,7 @@ const CreateDataSource: React.FC<{ handlePageType: (tab: string) => void }> = ({
       // 构建创建数据源参数
       const createParams: DatasourceSaveReqVO = {
         datasourceName: values.datasourceName,
-        code: `ds_${Date.now()}`, // 生成唯一编码
+        code: values.code,
         datasourceType: values.datasourceType,
         config: {
           host: values.host,

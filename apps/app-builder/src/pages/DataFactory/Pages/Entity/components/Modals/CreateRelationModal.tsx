@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Form, Select, Message, Modal } from "@arco-design/web-react";
-import styles from "./index.module.less";
-import type { EntityNode, EntityField, EdgeData } from "../../utils/interface";
+import styles from "./modal.module.less";
+import type { EntityNode, EntityField, EdgeData } from "../../../../utils/interface";
 
 interface RelationFormValues {
   leftEntity: string;
