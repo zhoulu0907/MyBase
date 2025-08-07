@@ -1,21 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react';
 import { Graph } from '@antv/x6';
+import React, { useEffect, useRef, useState } from 'react';
 // import { ReactShape } from '@antv/x6-react-shape';
-<<<<<<< HEAD:apps/app-builder/src/pages/DataFactory/components/ERchart/index.tsx
 import { register } from '@antv/x6-react-shape';
-import DetailDrawer from '../Drawer/DetailDrawer';
+import DetailDrawer from '../Drawers/DetailDrawer';
 // import EditDrawer from '../Drawer/EditDrawer';
-import { type EntityNode, type EntityERProps } from '../../utils/interface';
-import styles from './ERchart.module.less';
+import { type EntityERProps, type EntityNode } from '../../../../utils/interface';
 import EntityNodeComponent from './ERnode';
-=======
-import { register } from "@antv/x6-react-shape";
-import DetailDrawer from "../Drawers/DetailDrawer";
-// import EditDrawer from '../Drawer/EditDrawer';
-import { type EntityNode, type EntityERProps } from "../../../../utils/interface";
-import styles from "./index.module.less";
-import EntityNodeComponent from "./ERnode";
->>>>>>> 3aa8554542cb666fb0f8e58daedc2fbc86438f8d:apps/app-builder/src/pages/DataFactory/Pages/Entity/components/ERchart/index.tsx
+import styles from './index.module.less';
 
 const LINE_HEAD_HEIGHT = 48;
 const LINE_HEIGHT = 34.8;

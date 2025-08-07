@@ -1,15 +1,8 @@
-import React, { useState } from "react";
-import {
-  Form,
-  Input,
-  Select,
-  Message,
-  Radio,
-  Modal,
-} from "@arco-design/web-react";
-import styles from "./modal.module.less";
-import { DS_RESOURCE_TYPE } from "../../../../utils/constans";
-import { createEntity } from "@onebase/app"
+import { Form, Input, Message, Modal, Radio, Select } from '@arco-design/web-react';
+import { createEntity } from '@onebase/app';
+import React, { useState } from 'react';
+import { DS_RESOURCE_TYPE } from '../../../../utils/constans';
+import styles from './modal.module.less';
 
 interface EntityFormValues {
   source: string;
@@ -22,13 +15,8 @@ interface EntityFormValues {
 
 // 实体类型(1:自建表，2:复用已有表)
 const entitySources = [
-<<<<<<< HEAD:apps/app-builder/src/pages/DataFactory/Pages/Entity/CreateEntityPage.tsx
-  { label: '新建业务实体', value: 'new' },
-  { label: '使用自有数据源中的数据表', value: 'existing' }
-=======
   { label: '新建业务实体', value: 1 },
-  { label: '使用自有数据源中的数据表', value: 2 },
->>>>>>> 3aa8554542cb666fb0f8e58daedc2fbc86438f8d:apps/app-builder/src/pages/DataFactory/Pages/Entity/components/Modals/CreateEntityModal.tsx
+  { label: '使用自有数据源中的数据表', value: 2 }
 ];
 
 const dsOptions: { label: string; value: string }[] = [];
@@ -44,24 +32,7 @@ const CreateEntityModal: React.FC<{
   // 提交
   const handleFinish = () => {
     // TODO: 提交表单数据
-<<<<<<< HEAD:apps/app-builder/src/pages/DataFactory/Pages/Entity/CreateEntityPage.tsx
-    form.validate().then((values) => {
-      const { nodes, edges } = JSON.parse(
-        localStorage.getItem('entityFormValues') || JSON.stringify({ nodes: [], edges: [] })
-      );
-
-      nodes.push({
-        ...values,
-        id: values.code,
-        title: values.name,
-        x: nodes.length * 300,
-        y: 0,
-        fields: [{ id: 'ID', name: 'ID', type: '自增ID', isSystem: true }]
-      });
-      localStorage.setItem('entityFormValues', JSON.stringify({ nodes, edges }));
-      console.log(values);
-=======
-    form.validate().then(async values => {
+    form.validate().then(async (values) => {
       // 前端数据模拟
       // const { nodes, edges } = JSON.parse(localStorage.getItem('entityFormValues') || JSON.stringify({nodes: [], edges: []}));
 
@@ -85,7 +56,7 @@ const CreateEntityModal: React.FC<{
         description: values.description,
         datasourceId: '542234204218462208',
         appId: 1
-      }
+      };
 
       try {
         const res = await createEntity(params);
@@ -95,8 +66,6 @@ const CreateEntityModal: React.FC<{
         console.log(error);
       }
 
-
->>>>>>> 3aa8554542cb666fb0f8e58daedc2fbc86438f8d:apps/app-builder/src/pages/DataFactory/Pages/Entity/components/Modals/CreateEntityModal.tsx
       form.resetFields();
       Message.success('保存成功');
       successCallback();
@@ -139,11 +108,7 @@ const CreateEntityModal: React.FC<{
           </Form.Item>
         )}
 
-<<<<<<< HEAD:apps/app-builder/src/pages/DataFactory/Pages/Entity/CreateEntityPage.tsx
-        {form.getFieldValue('source') === entitySources[1].value && (
-=======
         {form.getFieldValue('source') === entitySources[1].value.toString() && (
->>>>>>> 3aa8554542cb666fb0f8e58daedc2fbc86438f8d:apps/app-builder/src/pages/DataFactory/Pages/Entity/components/Modals/CreateEntityModal.tsx
           <>
             <Form.Item label="外部数据源" field="dsResource" rules={[{ required: true, message: '请选择外部数据源' }]}>
               <Select placeholder="请选择自有数据源，可选已接入的外部数据源" options={dsOptions} />
