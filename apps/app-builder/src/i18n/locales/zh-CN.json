@@ -152,7 +152,9 @@
     "appRelease": "应用发布",
     "preview": "预览",
     "commom": "常用",
+    "createPage": "新建页面",
     "createForm": "新建普通表单",
-    "createGroup": "新建分组"
+    "createGroup": "新建分组",
+    "copyPage": "复制页面"
   }
 }

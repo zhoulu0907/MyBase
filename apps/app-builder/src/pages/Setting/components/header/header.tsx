@@ -1,5 +1,6 @@
-import logoSVG from '@/assets/images/logo.svg';
+import LogoSVG from '@/assets/images/ob_logo.svg';
 import settingSVG from '@/assets/images/setting_icon.svg';
+import { UserPermissionManager } from '@/utils/permission';
 import { Avatar, Button, Dropdown, Layout, Menu } from '@arco-design/web-react';
 import { IconPoweroff, IconUser } from '@arco-design/web-react/icon';
 import { TokenManager } from '@onebase/common';
@@ -20,6 +21,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
 
   // 获取用户信息
   const tokenInfo = TokenManager.getTokenInfo();
+  const userPermissionInfo = UserPermissionManager.getUserPermissionInfo();
 
   useEffect(() => {
     console.log(tokenInfo);
@@ -51,8 +53,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     <Header className={`${styles.header} ${className || ''}`}>
       <div className={styles.headerContent}>
         <div className={styles.logo} onClick={() => navigate('/onebase/')}>
-          <img src={logoSVG} alt="Logo" className={styles.logoSvg} />
-          <h1>{t('header.title')}</h1>
+          <img src={LogoSVG} />
         </div>
 
         <div className={styles.userInfo}>
@@ -65,7 +66,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
           <Dropdown droplist={userMenu} position="bottom">
             <div className={styles.userDropdown}>
               <Avatar size={32} style={{ backgroundColor: '#4FAE7B' }}>
-                {tokenInfo?.username?.toString().charAt(0) || 'U'}
+                {userPermissionInfo?.user.nickname?.toString().charAt(0) || 'U'}
               </Avatar>
             </div>
           </Dropdown>

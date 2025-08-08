@@ -1,19 +1,19 @@
 export interface ListApplicationVersionReq {
-  applicationId: number;
+  applicationId: string;
 }
 
 export interface CreateApplicationVersionReq {
-  applicationId: number;
+  applicationId: string;
   versionName: string;
   versionNumber: string;
 }
 
 export interface RestoreApplicationVersionReq {
-  applicationId: number;
+  applicationId: string;
   versionId: number;
 }
 
 export interface DeleteApplicationVersionReq {
-  applicationId: number;
+  applicationId: string;
   versionId: number;
 }

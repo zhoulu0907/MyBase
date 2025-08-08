@@ -1,5 +1,5 @@
 import '@arco-design/web-react/dist/css/arco.css';
-import '@arco-themes/react-onebase/index.less';
+import '@arco-themes/react-cyansu-ob03/index.less';
 import { Navigate, Route, HashRouter as Router, Routes } from 'react-router-dom';
 import { EditorPage } from './pages/Editor';
 import Home from './pages/Home';

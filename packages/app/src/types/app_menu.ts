@@ -1,39 +1,75 @@
 export interface ListApplicationMenuReq {
-  applicationId: number;
+  applicationId: string;
 }
 
+export interface ApplicationMenu {
+    id: string;
+    parentId?: string;
+    menuCode: string;
+    menuSort: number;
+    menuType: string;
+    menuName: string;
+    menuIcon: string;
+    isVisible: boolean;
+    children: ApplicationMenu[];
+}
+
+export enum MenuType {
+  PAGE = 1,
+  GROUP = 2
+}
+
+export enum PageType {
+  // 普通表单
+  NORMAL = 1
+}
+
+export const RootParentPage = {
+    id: "0",
+    menuCode: "",
+    menuSort: 0,
+    menuType: "",
+    menuName: "根目录",
+    menuIcon: "",
+    isVisible: true,
+    children: [] as ApplicationMenu[]
+};
+
 export interface CreateApplicationMenuReq {
-  applicationId: number;
-  parentUuid?: string;
+  applicationId: string;
+  parentId?: string;
+  pageType?: number;
   menuName: string;
+  menuType: MenuType;
+  menuIcon: string;
 }
 
 export interface UpdateApplicationMenuNameReq {
-  id: number;
+  id: string;
   menuName: string;
 }
 
 export interface UpdateApplicationMenuOrderReq {
-  id: number;
+  id: string;
   parentUuid?: string;
   ids: number[];
 }
 
 export interface UpdateApplicationMenuVisibleReq {
-  id: number;
+  id: string;
   visible: boolean;
 }
 
 export interface CopyApplicationMenuReq {
-  id: number;
+  id: string;
   menuName: string;
   parentUuid?: string;
 }
 
 export interface DeleteApplicationMenuReq {
-  id: number;
+  id: string;
 }
 
 export interface GetApplicationMenuReq {
-  id: number;
+  id: string;
 }
