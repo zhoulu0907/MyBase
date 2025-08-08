@@ -108,60 +108,8 @@ export default function RolePage() {
     [activeRole, openRoleModal, handleDeleteRole]
   );
 
-  // TODO: Mock数据 联调后移除
-  const mockPermissions = useMemo(
-    () => [
-      {
-        id: 1,
-        name: '用户管理',
-        type: 'user:manage',
-        remark: '管理系统用户',
-        actions: [
-          { id: 1, name: '查看' },
-          { id: 2, name: '编辑' },
-          { id: 3, name: '删除' }
-        ]
-      },
-      {
-        id: 2,
-        name: '角色管理',
-        type: 'role:manage',
-        remark: '管理系统角色',
-        actions: [
-          { id: 4, name: '查看' },
-          { id: 5, name: '编辑' },
-          { id: 6, name: '删除' },
-          { id: 7, name: '分配' }
-        ]
-      },
-      {
-        id: 3,
-        name: '权限管理',
-        type: 'permission:manage',
-        remark: '管理系统权限配置',
-        actions: [
-          { id: 8, name: '查看' },
-          { id: 9, name: '编辑' }
-        ]
-      },
-      {
-        id: 4,
-        name: '系统配置',
-        type: 'system:config',
-        remark: '管理系统配置',
-        actions: [
-          { id: 10, name: '查看' },
-          { id: 11, name: '编辑' },
-          { id: 12, name: '删除' }
-        ]
-      }
-    ],
-    []
-  );
-
   return (
     <div className={styles.rolePage}>
-      角色管理
       <Layout className={styles.pageLayout}>
         <Sider width={252} className={styles.leftPanel}>
           <RoleList

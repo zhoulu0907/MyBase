@@ -2,7 +2,8 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Modal, Table, Input, Checkbox } from '@arco-design/web-react';
 import type { ColumnProps } from '@arco-design/web-react/es/Table';
 import { getAllPermissions } from '@onebase/platform-center';
-import type { Permission, PermissionAction } from '@onebase/platform-center';
+import type { Permission } from '@onebase/platform-center';
+import { listToTree } from '@/utils/tree';
 
 const Search = Input.Search;
 const CheckboxGroup = Checkbox.Group;
@@ -32,82 +33,14 @@ const PermissionConfigModal: React.FC<PermissionConfigModalProps> = ({
     current: 1,
     pageSize: 10
   });
-  const [total, setTotal] = useState(0);
-  const generateMockPermissions = useMemo(() => {
-    const permissionNames = [
-      '用户管理',
-      '角色管理',
-      '权限管理',
-      '系统配置',
-      '日志管理',
-      '数据备份',
-      '监控告警',
-      '任务调度',
-      '文件管理',
-      '消息通知',
-      'API管理',
-      '字典管理',
-      '参数配置',
-      '通知公告',
-      '操作日志',
-      '登录日志',
-      '在线用户',
-      '定时任务',
-      '代码生成',
-      '系统接口',
-      '服务监控',
-      '缓存监控',
-      '表单构建',
-      '图表设计'
-    ];
-
-    const actionNames = ['增加', '编辑', '删除', '查询', '导出', '导入', '审核', '发布'];
-
-    const permissions: Permission[] = [];
-    for (let i = 0; i < permissionNames.length; i++) {
-      const actions: PermissionAction[] = [];
-      // 每个权限有2-6个操作，使用固定值确保数据一致性
-      const actionCount = 2 + (i % 5); // 循环产生2,3,4,5,6个操作
-
-      for (let j = 0; j < actionCount; j++) {
-        actions.push({
-          id: i * 100 + j + 1,
-          name: actionNames[j % actionNames.length]
-        });
-      }
-
-      permissions.push({
-        id: i + 1,
-        name: permissionNames[i],
-        type: `permission:${i + 1}`,
-        remark: `管理系统${permissionNames[i]}`,
-        actions
-      });
-    }
-
-    return permissions;
-  }, []);
 
   // 加载权限数据
   const loadPermissions = async () => {
     setLoading(true);
     try {
-      const params = { ...pagination, name: searchValue || undefined };
-      const data = await getAllPermissions(params);
-      setTableData(data);
-    } catch (error) {
-      // TODO: API调用失败，暂时使用mock数据，联调后移除
-      let mockData = generateMockPermissions;
-      if (searchValue) {
-        const search = searchValue.toLowerCase();
-        mockData = mockData.filter(
-          (permission) =>
-            permission.name.toLowerCase().includes(search) ||
-            (permission.remark?.toLowerCase().includes(search) ?? false)
-        );
-      }
-      setTableData(mockData);
-      setTotal(mockData.length);
+      const data = await getAllPermissions(); // TODO: 待接口修改后联调
+      const tree = listToTree(data);
+      setTableData(tree as Permission[]);
     } finally {
       setLoading(false);
     }
@@ -115,7 +48,7 @@ const PermissionConfigModal: React.FC<PermissionConfigModalProps> = ({
 
   useEffect(() => {
     loadPermissions();
-  }, [visible, pagination.current, pagination.pageSize, searchValue]);
+  }, [visible, searchValue]);
 
   useEffect(() => {
     if (!visible) return;
@@ -150,7 +83,7 @@ const PermissionConfigModal: React.FC<PermissionConfigModalProps> = ({
 
     tableData.forEach((permission) => {
       const selectedActionIds = selectedActions[permission.id] || [];
-      const actionIds = permission.actions?.map((action) => action.id) || [];
+      const actionIds = permission.children?.map((action) => action.id) || [];
 
       if (actionIds.length > 0) {
         const allSelected = actionIds.every((id) => selectedActionIds.includes(id));
@@ -180,9 +113,9 @@ const PermissionConfigModal: React.FC<PermissionConfigModalProps> = ({
   // 权限全选处理
   const handleCheckAllChange = (permissionId: number, checked: boolean) => {
     const permission = tableData.find((p) => p.id === permissionId);
-    if (!permission || !permission.actions) return;
+    if (!permission || !permission.children) return;
 
-    const actionIds = permission.actions.map((action) => action.id);
+    const actionIds = permission.children.map((action) => action.id);
 
     if (checked) {
       setSelectedActions((prev) => ({
@@ -203,8 +136,8 @@ const PermissionConfigModal: React.FC<PermissionConfigModalProps> = ({
     const allActionIds: Record<number, number[]> = {};
 
     tableData.forEach((permission) => {
-      if (permission.actions) {
-        allActionIds[permission.id] = permission.actions.map((action) => action.id);
+      if (permission.children) {
+        allActionIds[permission.id] = permission.children.map((action) => action.id);
       }
     });
 
@@ -283,14 +216,14 @@ const PermissionConfigModal: React.FC<PermissionConfigModalProps> = ({
       },
       {
         title: '操作权限',
-        dataIndex: 'actions',
+        dataIndex: 'children',
         width: 350,
         render: (_, record) => (
           <div>
             <CheckboxGroup
               value={selectedActions[record.id] || []}
               onChange={(value) => handleActionChange(record.id, value as number[])}
-              options={(record.actions || []).map((action) => ({
+              options={(record.children || []).map((action) => ({
                 label: action.name,
                 value: action.id
               }))}
@@ -315,14 +248,6 @@ const PermissionConfigModal: React.FC<PermissionConfigModalProps> = ({
       handleActionChange
     ]
   );
-
-  const handlePaginationChange = (current: number, pageSize: number) => {
-    setPagination((prev) => ({
-      ...prev,
-      current,
-      pageSize
-    }));
-  };
 
   const currentPageData = useMemo(() => {
     const startIndex = (pagination.current - 1) * pagination.pageSize;
@@ -358,17 +283,12 @@ const PermissionConfigModal: React.FC<PermissionConfigModalProps> = ({
       style={{ width: 900 }}
     >
       <Table
-        rowKey="id"
+        rowKey='id'
+        childrenColumnName='actions'
         columns={columns}
         data={currentPageData}
         loading={loading}
-        pagination={{
-          ...pagination,
-          showTotal: true,
-          showJumper: true,
-          sizeCanChange: true,
-          onChange: handlePaginationChange
-        }}
+        pagination={false}
       />
     </Modal>
   );

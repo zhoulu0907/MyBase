@@ -26,75 +26,21 @@ const PermissionList: React.FC<PermissionListProps> = ({ selectedRoleId }) => {
   const [configLoading, setConfigLoading] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // 生成mock权限数据
-  const mockPermissions = useMemo(
-    () => [
-      {
-        id: 1,
-        name: '用户管理',
-        type: 'user:manage',
-        remark: '管理系统用户信息',
-        actions: [
-          { id: 1, name: '查看' },
-          { id: 2, name: '编辑' },
-          { id: 3, name: '删除' }
-        ]
-      },
-      {
-        id: 2,
-        name: '角色管理',
-        type: 'role:manage',
-        remark: '管理系统角色配置',
-        actions: [
-          { id: 4, name: '查看' },
-          { id: 5, name: '编辑' },
-          { id: 6, name: '删除' },
-          { id: 7, name: '分配' }
-        ]
-      },
-      {
-        id: 3,
-        name: '权限管理',
-        type: 'permission:manage',
-        remark: '管理系统权限配置',
-        actions: [
-          { id: 8, name: '查看' },
-          { id: 9, name: '编辑' }
-        ]
-      },
-      {
-        id: 4,
-        name: '系统配置',
-        type: 'system:config',
-        remark: '管理系统基础配置',
-        actions: [
-          { id: 10, name: '查看' },
-          { id: 11, name: '编辑' },
-          { id: 12, name: '删除' }
-        ]
-      }
-    ],
-    []
-  );
-
   // 获取已配置的权限数据
   const fetchPermissions = useCallback(async () => {
     if (selectedRoleId === undefined || selectedRoleId === null) {
-      setPermissions(mockPermissions);
+      setPermissions([]);
       return;
     }
 
     setLoading(true);
     try {
-      const response = await getConfiguredPermissions(selectedRoleId);
+      const response = await getConfiguredPermissions(selectedRoleId); // TODO: 待接口修改后联调
       setPermissions(response.data || []);
-    } catch (error) {
-      // TODO: 联调后移除mock data
-      setPermissions(mockPermissions);
     } finally {
       setLoading(false);
     }
-  }, [selectedRoleId, mockPermissions]);
+  }, [selectedRoleId]);
 
   useEffect(() => {
     fetchPermissions();

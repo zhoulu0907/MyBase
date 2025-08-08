@@ -69,8 +69,8 @@ export const configureRolePermissions = (roleId: number, permissions: Record<num
 };
 
 // 获取所有权限
-export const getAllPermissions = (params: Record<string, any> = {}): Promise<Permission[]> => {
-  return systemClient.get('/menu/simple-list', params);
+export const getAllPermissions = (): Promise<Permission[]> => {
+  return systemClient.get('/menu/simple-list');
 };
 
 // 获取角色下已配置权限
