@@ -1,4 +1,15 @@
-import { Card, Descriptions, Space, Typography, Table, Tag, type TableColumnProps, Modal, Upload, Message } from '@arco-design/web-react';
+import {
+  Card,
+  Descriptions,
+  Space,
+  Typography,
+  Table,
+  Tag,
+  type TableColumnProps,
+  Modal,
+  Upload,
+  Message
+} from '@arco-design/web-react';
 // import { IconInfoCircle } from '@arco-design/web-react/icon';
 import React, { useEffect } from 'react';
 import { useState } from 'react';
@@ -42,7 +53,6 @@ const PlatformInfo: React.FC = () => {
     } catch (error: any) {
       Message.error(error.message || t('auth.loginFailed'));
     }
-    
   };
 
   useEffect(() => {
@@ -99,12 +109,12 @@ const PlatformInfo: React.FC = () => {
           }}>{t('platformInfo.check')}</a>
           
         </div>
-      ),
-    },
+      )
+    }
   ];
 
   // 上传认证
-  const handleUploadCertification = async() => {
+  const handleUploadCertification = async () => {
     // console.log('认证已经上传了');
     try {
       const resp = await uploadPlatformLicenseApi(data);
@@ -165,11 +175,11 @@ const PlatformInfo: React.FC = () => {
         <Card title={t('platformInfo.basicInfo')} className={styles.infoCard}>
           <Descriptions
             column={2}
-            colon=':'
+            colon=":"
             data={[
               {
                 label: t('platformInfo.platformType'),
-                value: licenseInfo?.platformType,
+                value: licenseInfo?.platformType
               },
               {
                 label: t('platformInfo.authStatus'),
@@ -185,7 +195,7 @@ const PlatformInfo: React.FC = () => {
               },
               {
                 label: t('platformInfo.version'),
-                value: 'v1.0.0',
+                value: 'v1.0.0'
               },
               {
                 label: t('platformInfo.tenantCount'),
@@ -195,16 +205,14 @@ const PlatformInfo: React.FC = () => {
                     <span> / </span>
                     <span>{licenseInfo?.tenantLimit}</span>
                   </Space>
-                  ),
-              },
+                )
+              }
             ]}
           />
         </Card>
         {/* 认证记录 */}
         <div className={styles.authRecord}>
-          <Text>
-            {t('platformInfo.authRecord')}
-          </Text>
+          <Text>{t('platformInfo.authRecord')}</Text>
           <span onClick={handleUploadCertification}>
             {/* {t('platformInfo.uploadAuth')} */}
             <Upload
@@ -212,21 +220,19 @@ const PlatformInfo: React.FC = () => {
               showUploadList={false}
               action="/api/upload" // 这里需要替换为实际的上传接口地址
               headers={{
-                authorization: 'authorization-text',
+                authorization: 'authorization-text'
               }}
               onChange={(file) => {
                 console.log('File uploaded:', file);
                 console.log('File uploaded:', file.length);
-                if(file.length > 0) {
+                if (file.length > 0) {
                   // 清空file
                   file.splice(0, file.length);
                   console.log('after File uploaded:', file.length);
                 }
               }}
             >
-              <div className={styles.uploadAuthText}>
-                {t('platformInfo.uploadAuth')}
-              </div>
+              <div className={styles.uploadAuthText}>{t('platformInfo.uploadAuth')}</div>
             </Upload>
           </span>
         </div>

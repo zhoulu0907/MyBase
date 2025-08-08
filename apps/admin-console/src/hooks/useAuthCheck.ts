@@ -57,6 +57,6 @@ export const useAuthCheck = () => {
 
   return {
     isChecking,
-    isAuthenticated,
+    isAuthenticated
   };
 };

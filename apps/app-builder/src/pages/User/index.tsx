@@ -1,6 +1,5 @@
 import { Layout } from '@arco-design/web-react';
-import { getSimpleDeptList } from '@onebase/platform-center/src/services/dept';
-import type { DeptVO } from '@onebase/platform-center/src/types/dept';
+import { getDeptList } from '@onebase/platform-center';
 import { useEffect, useState } from 'react';
 import DeptTree from './components/DeptTree';
 import UserTable from './components/UserTable';
@@ -19,28 +18,14 @@ export default function UserPage() {
   const fetchDeptList = async () => {
     setDeptLoading(true);
     try {
-      const res = await getSimpleDeptList();
-      const treeData = listToTree(res);
-      setDeptTree(treeData);
-    } catch (error) {
-      console.error('获取部门列表失败:', error);
-      // TODO：接口获取失败时使用mock数据，联调后移除
-      const mockDepts: DeptVO[] = [
-        { id: 1, name: '科创中心', parentId: 0, status: 1, sort: 1, leaderUserId: 1, phone: '', email: '', createTime: '', userCount: 10, remark: '' },
-        { id: 2, name: 'AI部门', parentId: 1, status: 1, sort: 1, leaderUserId: 1, phone: '', email: '', createTime: '', userCount: 5, remark: '' },
-        { id: 3, name: '大数据部门', parentId: 1, status: 1, sort: 2, leaderUserId: 1, phone: '', email: '', createTime: '', userCount: 6, remark: '' },
-        { id: 4, name: '时空', parentId: 0, status: 1, sort: 2, leaderUserId: 1, phone: '', email: '', createTime: '', userCount: 7, remark: '' },
-        { id: 5, name: 'OB', parentId: 1, status: 1, sort: 2, leaderUserId: 1, phone: '', email: '', createTime: '', userCount: 7, remark: '' },
-        { id: 6, name: '工业', parentId: 2, status: 1, sort: 2, leaderUserId: 1, phone: '', email: '', createTime: '', userCount: 7, remark: '' },
-      ];
-      const treeData = listToTree(mockDepts);
+      const res = await getDeptList();
+      const treeData = listToTree(res, {}, true);
       setDeptTree(treeData);
     } finally {
       setDeptLoading(false);
     }
   };
 
-  // 组件加载时获取部门列表
   useEffect(() => {
     fetchDeptList();
   }, []);

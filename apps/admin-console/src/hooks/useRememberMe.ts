@@ -57,6 +57,6 @@ export const useRememberMe = () => {
     rememberMe,
     savedAccount,
     saveRememberMe,
-    clearRememberMe,
+    clearRememberMe
   };
 };

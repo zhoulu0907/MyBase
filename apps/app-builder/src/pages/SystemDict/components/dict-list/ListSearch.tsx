@@ -7,12 +7,6 @@ interface DictListSearchProps {
 
 export default function TypeListSearch({ value, onChange }: DictListSearchProps) {
   return (
-    <Input.Search
-      value={value}
-      onChange={onChange}
-      placeholder="搜索字典类型"
-      style={{ width: '100%' }}
-      allowClear
-    />
+    <Input.Search value={value} onChange={onChange} placeholder="搜索字典类型" style={{ width: '100%' }} allowClear />
   );
 }

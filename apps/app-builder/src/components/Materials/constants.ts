@@ -51,34 +51,31 @@ export const CONFIG_TYPES = {
   // 标签宽度
   LABEL_COL_SPAN: 'LabelColSpan',
   // 颜色
-  COLOR: 'Color',
-
+  COLOR: 'Color'
 } as const;
-
 
 // 状态选项常量
 export const STATUS_OPTIONS = {
-    DEFAULT: '普通',
-    READONLY: '只读',
-    HIDDEN: '隐藏',
+  DEFAULT: '普通',
+  READONLY: '只读',
+  HIDDEN: '隐藏'
 } as const;
 
 export const STATUS_VALUES = {
-    [STATUS_OPTIONS.DEFAULT]: 'default',
-    [STATUS_OPTIONS.READONLY]: 'readonly',
-    [STATUS_OPTIONS.HIDDEN]: 'hidden',
+  [STATUS_OPTIONS.DEFAULT]: 'default',
+  [STATUS_OPTIONS.READONLY]: 'readonly',
+  [STATUS_OPTIONS.HIDDEN]: 'hidden'
 } as const;
-
 
 // 宽度选项常量
 export const WIDTH_OPTIONS = {
-    QUARTER: '1/4',
-    THIRD: '1/3',
-    HALF: '1/2',
-    TWO_THIRDS: '2/3',
-    THREE_QUARTERS: '3/4',
-    FULL: 'formEditor.full',
-  } as const;
+  QUARTER: '1/4',
+  THIRD: '1/3',
+  HALF: '1/2',
+  TWO_THIRDS: '2/3',
+  THREE_QUARTERS: '3/4',
+  FULL: 'formEditor.full'
+} as const;
 
 // 宽度值映射
 export const WIDTH_VALUES = {
@@ -87,7 +84,7 @@ export const WIDTH_VALUES = {
   [WIDTH_OPTIONS.HALF]: '50%',
   [WIDTH_OPTIONS.TWO_THIRDS]: '66.66%',
   [WIDTH_OPTIONS.THREE_QUARTERS]: '75%',
-  [WIDTH_OPTIONS.FULL]: '100%',
+  [WIDTH_OPTIONS.FULL]: '100%'
 } as const;
 
 // 列数选项常量
@@ -95,14 +92,14 @@ export const COLUMN_COUNT_OPTIONS = {
   ONE: 1,
   TWO: 2,
   THREE: 3,
-  FOUR: 4,
+  FOUR: 4
 } as const;
 
 export const COLUMN_COUNT_VALUES = {
   [COLUMN_COUNT_OPTIONS.ONE]: 1,
   [COLUMN_COUNT_OPTIONS.TWO]: 2,
   [COLUMN_COUNT_OPTIONS.THREE]: 3,
-  [COLUMN_COUNT_OPTIONS.FOUR]: 4,
+  [COLUMN_COUNT_OPTIONS.FOUR]: 4
 } as const;
 
 export const PAGINATION_POSITION_OPTIONS = {
@@ -111,7 +108,7 @@ export const PAGINATION_POSITION_OPTIONS = {
   TR: '右上',
   TL: '左上',
   TOP_CENTER: '上中',
-  BOTTOM_CENTER: '下中',
+  BOTTOM_CENTER: '下中'
 } as const;
 
 export const PAGINATION_POSITION_VALUES = {
@@ -120,58 +117,57 @@ export const PAGINATION_POSITION_VALUES = {
   [PAGINATION_POSITION_OPTIONS.TR]: 'tr',
   [PAGINATION_POSITION_OPTIONS.TL]: 'tl',
   [PAGINATION_POSITION_OPTIONS.TOP_CENTER]: 'topCenter',
-  [PAGINATION_POSITION_OPTIONS.BOTTOM_CENTER]: 'bottomCenter',
+  [PAGINATION_POSITION_OPTIONS.BOTTOM_CENTER]: 'bottomCenter'
 } as const;
 
 // 内容对齐方式
 export const ALIGN_OPTIONS = {
-    LEFT: '左',
-    CENTER: '中',
-    RIGHT: '右',
+  LEFT: '左',
+  CENTER: '中',
+  RIGHT: '右'
 } as const;
 
 export const ALIGN_VALUES = {
-    [ALIGN_OPTIONS.LEFT]: 'left',
-    [ALIGN_OPTIONS.CENTER]: 'center',
-    [ALIGN_OPTIONS.RIGHT]: 'right',
+  [ALIGN_OPTIONS.LEFT]: 'left',
+  [ALIGN_OPTIONS.CENTER]: 'center',
+  [ALIGN_OPTIONS.RIGHT]: 'right'
 } as const;
 
 // 上传组件展示格式
 export const UPLOAD_OPTIONS = {
-    TEXT: '文本',
-    LIST: '列表',
-    CARD: '平铺',
+  TEXT: '文本',
+  LIST: '列表',
+  CARD: '平铺'
 } as const;
 
 export const UPLOAD_VALUES = {
-    [UPLOAD_OPTIONS.TEXT]: 'text',
-    [UPLOAD_OPTIONS.LIST]: 'picture-list',
-    [UPLOAD_OPTIONS.CARD]: 'picture-card',
+  [UPLOAD_OPTIONS.TEXT]: 'text',
+  [UPLOAD_OPTIONS.LIST]: 'picture-list',
+  [UPLOAD_OPTIONS.CARD]: 'picture-card'
 } as const;
 
 // 日期选择格式
 export const DATE_OPTIONS = {
-    ONLY_YEAR: '年',
-    ONLY_MONTH: '年月',
-    ONLY_DATE: '年月日',
-    FULL: '年月日时',
+  ONLY_YEAR: '年',
+  ONLY_MONTH: '年月',
+  ONLY_DATE: '年月日',
+  FULL: '年月日时'
 } as const;
 
 export const DATE_VALUES = {
-    [DATE_OPTIONS.ONLY_YEAR]: 'ONLY_YEAR',
-    [DATE_OPTIONS.ONLY_MONTH]: 'ONLY_MONTH',
-    [DATE_OPTIONS.ONLY_DATE]: 'ONLY_DATE',
-    [DATE_OPTIONS.FULL]: 'FULL',
+  [DATE_OPTIONS.ONLY_YEAR]: 'ONLY_YEAR',
+  [DATE_OPTIONS.ONLY_MONTH]: 'ONLY_MONTH',
+  [DATE_OPTIONS.ONLY_DATE]: 'ONLY_DATE',
+  [DATE_OPTIONS.FULL]: 'FULL'
 } as const;
-
 
 // 表单的布局
 export const LAYOUT_OPTIONS = {
-    HORIZONTAL: '水平',
-    VERTICAL: '垂直',
+  HORIZONTAL: '水平',
+  VERTICAL: '垂直'
 } as const;
 
 export const LAYOUT_VALUES = {
-    [LAYOUT_OPTIONS.HORIZONTAL]: 'horizontal',
-    [LAYOUT_OPTIONS.VERTICAL]: 'vertical',
+  [LAYOUT_OPTIONS.HORIZONTAL]: 'horizontal',
+  [LAYOUT_OPTIONS.VERTICAL]: 'vertical'
 } as const;

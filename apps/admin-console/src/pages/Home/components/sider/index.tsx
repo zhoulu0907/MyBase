@@ -1,5 +1,5 @@
 import { Button, Layout, Menu } from '@arco-design/web-react';
-import { IconDesktop, IconMenuFold, IconMenuUnfold,  IconUser } from '@arco-design/web-react/icon';
+import { IconDesktop, IconMenuFold, IconMenuUnfold, IconUser } from '@arco-design/web-react/icon';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import type { MenuItemType } from './menuData';
@@ -16,37 +16,35 @@ interface SiderProps {
   menuItems?: MenuItemType[];
 }
 
-const AppSider: React.FC<SiderProps> = ({
-  className,
-  collapsed = false,
-  onCollapse,
-  menuItems = []
-}) => {
+const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollapse, menuItems = [] }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
 
   // 默认菜单项
-  const defaultMenuItems = useMemo(() => [
-    {
+  const defaultMenuItems = useMemo(
+    () => [
+      {
         key: 'platform-info',
         title: '平台信息',
         icon: <IconDesktop />,
-        path: '/onebase/platform-info',
-    },
-    {
+        path: '/onebase/platform-info'
+      },
+      {
         key: 'tenant',
         title: '租户管理',
         icon: <IconDesktop />,
-        path: '/onebase/tenant',
-    },
-    {
+        path: '/onebase/tenant'
+      },
+      {
         key: 'administrator',
         title: '平台管理员',
         icon: <IconUser />,
-        path: '/onebase/administrator',
-    },
-  ], []);
+        path: '/onebase/administrator'
+      }
+    ],
+    []
+  );
 
   // 使用传入的菜单项或默认菜单项
   const finalMenuItems = useMemo(() => {
@@ -73,29 +71,31 @@ const AppSider: React.FC<SiderProps> = ({
   useEffect(() => {
     const keys = findSelectedKeys(finalMenuItems, location.pathname);
     setSelectedKeys(keys);
-
   }, [location.pathname, findSelectedKeys]);
 
   // 处理菜单点击
-  const handleMenuClick = useCallback((key: string) => {
-    const findPathByKey = (items: MenuItemType[], targetKey: string): string | null => {
-      for (const item of items) {
-        if (item.key === targetKey) {
-          return item.path || null;
+  const handleMenuClick = useCallback(
+    (key: string) => {
+      const findPathByKey = (items: MenuItemType[], targetKey: string): string | null => {
+        for (const item of items) {
+          if (item.key === targetKey) {
+            return item.path || null;
+          }
+          if (item.children) {
+            const path = findPathByKey(item.children, targetKey);
+            if (path) return path;
+          }
         }
-        if (item.children) {
-          const path = findPathByKey(item.children, targetKey);
-          if (path) return path;
-        }
-      }
-      return null;
-    };
+        return null;
+      };
 
-    const path = findPathByKey(finalMenuItems, key);
-    if (path) {
-      navigate(path);
-    }
-  }, [finalMenuItems, navigate]);
+      const path = findPathByKey(finalMenuItems, key);
+      if (path) {
+        navigate(path);
+      }
+    },
+    [finalMenuItems, navigate]
+  );
 
   // 处理折叠按钮点击
   const handleCollapseClick = useCallback(() => {
@@ -124,10 +124,7 @@ const AppSider: React.FC<SiderProps> = ({
       }
 
       return (
-        <MenuItem
-          key={item.key}
-          disabled={item.disabled}
-        >
+        <MenuItem key={item.key} disabled={item.disabled}>
           {item.icon}
           <span className={styles.menuTitle}>{item.title}</span>
         </MenuItem>
@@ -146,12 +143,7 @@ const AppSider: React.FC<SiderProps> = ({
     >
       <div className={styles.siderContent}>
         <div className={styles.menuContainer}>
-          <Menu
-            mode="vertical"
-            selectedKeys={selectedKeys}
-            onClickMenuItem={handleMenuClick}
-            levelIndent={29}
-          >
+          <Menu mode="vertical" selectedKeys={selectedKeys} onClickMenuItem={handleMenuClick} levelIndent={29}>
             {renderMenuItems(finalMenuItems)}
           </Menu>
         </div>

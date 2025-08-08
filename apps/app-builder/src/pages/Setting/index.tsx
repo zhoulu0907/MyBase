@@ -26,10 +26,7 @@ const SettingPage: React.FC = () => {
       <AppHeader className={styles.settingPageHeader} />
 
       <Layout className={styles.settingPageContent}>
-        <AppSider
-          collapsed={collapsed}
-          onCollapse={handleCollapse}
-        />
+        <AppSider collapsed={collapsed} onCollapse={handleCollapse} />
         <Layout className={styles.settingPageContentMain}>
           <AppBreadcrumb />
 

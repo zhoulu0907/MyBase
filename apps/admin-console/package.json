@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@arco-design/web-react": "^2.66.1",
+    "@onebase/app": "workspace:*",
     "@onebase/common": "workspace:*",
     "@onebase/platform-center": "workspace:*",
     "axios": "^1.6.0",

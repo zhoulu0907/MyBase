@@ -1,0 +1,21 @@
+.listItem {
+  max-width: 100%;
+  overflow: hidden;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 4px;
+  cursor: pointer;
+
+  .listItemTitle {
+    margin-right: 6px;
+    flex: 1;
+    width: 0;
+    overflow: hidden;
+  }
+
+  &.active {
+    color: rgb(var(--primary-6));
+    background-color: #f7f8fa;
+  }
+}

@@ -13,7 +13,6 @@ export class SystemService {
    */
   getHttpClient(): HttpClient {
     if (!this.httpClient) {
-
       this.httpClient = new HttpClient({
         baseURL: this.baseURL || getBackendURL(),
         timeout: 10000,
@@ -21,8 +20,8 @@ export class SystemService {
         headers: {
           'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': '*',
-          'Tenant-Id': '1',
-        },
+          'Tenant-Id': '1'
+        }
       });
     }
     return this.httpClient;

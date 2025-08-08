@@ -2,13 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { Avatar, Typography, Space, Divider, Empty } from '@arco-design/web-react';
 import { IconUser, IconLoading } from '@arco-design/web-react/icon';
 import styles from './index.module.less';
-import { getTenantInfo } from '@onebase/platform-center/src/services/tenant';
-import type { TenantInfo } from '@onebase/platform-center/src/types/tenant';
+import { getTenantInfo } from '@onebase/platform-center';
+import type { TenantInfo } from '@onebase/platform-center';
 
 const { Title, Text } = Typography;
-const TenantPage:React.FC = () =>{
-const [tenantInfo, setTenantInfo] = useState<TenantInfo | null>(null);
-  
+const TenantPage: React.FC = () => {
+  const [tenantInfo, setTenantInfo] = useState<TenantInfo | null>(null);
+
   useEffect(() => {
     const fetchTenantInfo = async () => {
       try {
@@ -34,13 +34,13 @@ const [tenantInfo, setTenantInfo] = useState<TenantInfo | null>(null);
         });
       }
     };
-    
+
     fetchTenantInfo();
   }, []);
 
   // 显示加载状态
   if (!tenantInfo) {
-    return <Empty className={styles.tenantPage} icon={<IconLoading />} description='加载中...'></Empty>;
+    return <Empty className={styles.tenantPage} icon={<IconLoading />} description="加载中..."></Empty>;
   }
   return (
     <div className={styles.tenantPage}>
@@ -53,7 +53,9 @@ const [tenantInfo, setTenantInfo] = useState<TenantInfo | null>(null);
           </div>
           {/* 租户信息 */}
           <div className={styles.infoSection}>
-            <Title heading={5} style={{ margin: 0 }}>{tenantInfo.name}</Title>
+            <Title heading={5} style={{ margin: 0 }}>
+              {tenantInfo.name}
+            </Title>
             <Space className={styles.infoLine}>
               <Text copyable>ID：{tenantInfo.id}</Text>
               <div className={styles.infoBlock}>创建人:{tenantInfo.creator}</div>
@@ -107,6 +109,6 @@ const [tenantInfo, setTenantInfo] = useState<TenantInfo | null>(null);
       </div>
     </div>
   );
-}
+};
 
 export default TenantPage;

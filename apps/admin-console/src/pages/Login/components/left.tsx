@@ -7,10 +7,7 @@ const Left: React.FC = () => {
   const { t } = useI18n();
 
   return (
-    <div
-      className={styles.loginPageLeft}
-      style={{ backgroundImage: `url(${loginBg})` }}
-    >
+    <div className={styles.loginPageLeft} style={{ backgroundImage: `url(${loginBg})` }}>
       <div className={styles.loginPageLeftContent}>
         <div className={styles.loginPageLeftTitle}>
           <h1>{t('auth.leftTitle1')}</h1>

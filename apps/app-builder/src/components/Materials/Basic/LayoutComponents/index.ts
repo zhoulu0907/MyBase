@@ -1,5 +1,5 @@
-import XColumnLayout from "./ColumnLayout";
+import XColumnLayout from './ColumnLayout';
 
 export default {
-    XColumnLayout,
+  XColumnLayout
 };

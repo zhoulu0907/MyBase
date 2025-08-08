@@ -56,7 +56,6 @@ const AppBreadcrumb: React.FC<BreadcrumbProps> = ({ className, items }) => {
       // 根据路径生成对应的标题
       let title = segment;
       switch (segment) {
-
         case 'platform-info':
           title = t('sider.platformInfo');
           break;

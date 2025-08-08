@@ -1,14 +1,5 @@
 import LogoSVG from '@/assets/images/logo.svg';
-import {
-    Button,
-    Checkbox,
-    Form,
-    Input,
-    Message,
-    Space,
-    Tabs,
-    Typography
-} from '@arco-design/web-react';
+import { Button, Checkbox, Form, Input, Message, Space, Tabs, Typography } from '@arco-design/web-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useI18n } from '../../../hooks/useI18n';
@@ -25,7 +16,6 @@ const Right: React.FC = () => {
   const navigate = useNavigate();
   const [form] = Form.useForm();
   const { t } = useI18n();
-
 
   // 使用记住我hook
   const { rememberMe, savedAccount, saveRememberMe } = useRememberMe();
@@ -47,7 +37,6 @@ const Right: React.FC = () => {
     saveRememberMe(account, checked);
   };
 
-
   // 表单提交处理
   const handleSubmit = async (values: LoginRequest) => {
     setLoading(true);
@@ -61,12 +50,15 @@ const Right: React.FC = () => {
       if (loginResp.accessToken) {
         Message.success(t('auth.loginSuccess'));
         // 存储 token 信息（需要导入相应的 token 管理工具）
-        TokenManager.setToken({
-          userId: loginResp.userId,
-          accessToken: loginResp.accessToken,
-          refreshToken: loginResp.refreshToken,
-          expiresTime: loginResp.expiresTime,
-        }, rememberMe);
+        TokenManager.setToken(
+          {
+            userId: loginResp.userId,
+            accessToken: loginResp.accessToken,
+            refreshToken: loginResp.refreshToken,
+            expiresTime: loginResp.expiresTime
+          },
+          rememberMe
+        );
         navigate('/onebase/platform-info');
       } else {
         Message.error(t('auth.loginFailed'));
@@ -86,20 +78,9 @@ const Right: React.FC = () => {
         <div>ONE BASE</div>
       </div>
       <div className={styles.loginFormContainer}>
-
-        <Tabs
-          activeTab={loginType}
-          onChange={(key) => setLoginType(key as 'account' | 'mobile')}
-          type="text"
-        >
+        <Tabs activeTab={loginType} onChange={(key) => setLoginType(key as 'account' | 'mobile')} type="text">
           <TabPane key="account" title={t('auth.accountLogin')}>
-            <Form
-              form={form}
-              layout="vertical"
-              onSubmit={handleSubmit}
-              autoComplete="off"
-              className={styles.loginForm}
-            >
+            <Form form={form} layout="vertical" onSubmit={handleSubmit} autoComplete="off" className={styles.loginForm}>
               <Form.Item
                 field="username"
                 initialValue=""
@@ -108,11 +89,7 @@ const Right: React.FC = () => {
                   { minLength: 3, message: '账号至少3个字符' }
                 ]}
               >
-                <Input
-                  placeholder={t('auth.userAccount')}
-                  allowClear
-                  size="large"
-                />
+                <Input placeholder={t('auth.userAccount')} allowClear size="large" />
               </Form.Item>
 
               <Form.Item
@@ -123,19 +100,12 @@ const Right: React.FC = () => {
                   { minLength: 6, message: '密码至少6个字符' }
                 ]}
               >
-                <Input.Password
-                  placeholder={t('auth.password')}
-                  allowClear
-                  size="large"
-                />
+                <Input.Password placeholder={t('auth.password')} allowClear size="large" />
               </Form.Item>
 
               <Form.Item>
                 <Space className={styles.formActions}>
-                  <Checkbox
-                    checked={rememberMe}
-                    onChange={handleRememberMeChange}
-                  >
+                  <Checkbox checked={rememberMe} onChange={handleRememberMeChange}>
                     {t('auth.rememberMe')}
                   </Checkbox>
                 </Space>
@@ -159,10 +129,14 @@ const Right: React.FC = () => {
       </div>
       <div className={styles.loginFooter}>
         <Paragraph className={styles.footerText}>
-            登录即表示同意
-            <Button type="text" size="small">《用户协议》</Button>
-            和
-            <Button type="text" size="small">《隐私政策》</Button>
+          登录即表示同意
+          <Button type="text" size="small">
+            《用户协议》
+          </Button>
+          和
+          <Button type="text" size="small">
+            《隐私政策》
+          </Button>
         </Paragraph>
       </div>
     </div>

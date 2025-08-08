@@ -32,9 +32,7 @@ const MyComponent = () => {
   return (
     <div>
       <p>当前语言: {language}</p>
-      <button onClick={() => changeLanguage('en-US')}>
-        切换到英文
-      </button>
+      <button onClick={() => changeLanguage('en-US')}>切换到英文</button>
     </div>
   );
 };

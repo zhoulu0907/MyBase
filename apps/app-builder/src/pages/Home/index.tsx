@@ -14,22 +14,17 @@ import PageManagerPage from '../PageManager';
 import { AppHeader } from './components/header';
 import styles from './index.module.less';
 
-
 const Content = Layout.Content;
 
 const Home: React.FC = () => {
   const location = useLocation();
 
-
   return (
     <Layout className={styles.homePage}>
-      { location.pathname.includes('create-app') ?  null : <AppHeader className={styles.myAppPageHeader} />}
-
+      {location.pathname.includes('create-app') ? null : <AppHeader className={styles.myAppPageHeader} />}
 
       <Layout className={styles.myAppPageContent}>
-
         <Layout>
-
           <Content className={styles.content}>
             <div className={styles.contentInner}>
               <Routes>
@@ -47,7 +42,6 @@ const Home: React.FC = () => {
                   <Route path="app-setting" element={<AppSettingPage />} />
                   <Route path="app-release" element={<AppReleasePage />} />
                 </Route>
-
               </Routes>
             </div>
           </Content>

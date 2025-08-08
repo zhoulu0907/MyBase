@@ -19,9 +19,9 @@ export default function DictionaryListProps({
   onSelect,
   searchValue,
   onSearchChange,
-  onAdd,
+  onAdd
 }: DictionaryListProps) {
-  const listTitle = `全部(${list?.length})`
+  const listTitle = `全部(${list?.length})`;
   return (
     <>
       <div className={styles.searchInput}>
@@ -35,7 +35,8 @@ export default function DictionaryListProps({
       </div>
       <ListItem title={listTitle}>
         <Button type="text" onClick={onAdd} style={{ paddingLeft: '8px', paddingRight: '8px' }}>
-          <IconPlus />新建
+          <IconPlus />
+          新建
         </Button>
       </ListItem>
       <div className={styles.dictList}>
@@ -45,8 +46,7 @@ export default function DictionaryListProps({
             title={item.name}
             active={item.id?.toString() === activeId}
             onClick={() => onSelect(item.id)}
-          >
-          </ListItem>
+          ></ListItem>
         ))}
       </div>
     </>

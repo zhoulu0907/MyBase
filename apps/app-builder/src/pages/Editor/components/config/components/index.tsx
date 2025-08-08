@@ -12,37 +12,28 @@ const TabPane = Tabs.TabPane;
  * @param props.cpID 组件唯一ID
  */
 interface MaterialConfigerProps {
-    cpID: string;
+  cpID: string;
 }
 
-
 const MaterialConfiger = ({ cpID }: MaterialConfigerProps) => {
-    const { t } = useTranslation();
+  const { t } = useTranslation();
 
-    return (
-        <div className={styles.configs}>
-            <Tabs
-                defaultActiveTab="attributes"
-                type="line"
-                size='default'
-            >
-                <TabPane key="attributes"
-                    title={<TabTitle title={t("formEditor.attribute")}/>}
-                >
-                    <Typography.Paragraph>
-                        <Attributes cpID={cpID} />
-                    </Typography.Paragraph>
-                </TabPane>
-                <TabPane key="advanced"
-                    title={<TabTitle title={t("formEditor.advanced")}/>}
-                >
-                    <Typography.Paragraph>
-                        <Advanced />
-                    </Typography.Paragraph>
-                </TabPane>
-            </Tabs>
-        </div>
-    );
+  return (
+    <div className={styles.configs}>
+      <Tabs defaultActiveTab="attributes" type="line" size="default">
+        <TabPane key="attributes" title={<TabTitle title={t('formEditor.attribute')} />}>
+          <Typography.Paragraph>
+            <Attributes cpID={cpID} />
+          </Typography.Paragraph>
+        </TabPane>
+        <TabPane key="advanced" title={<TabTitle title={t('formEditor.advanced')} />}>
+          <Typography.Paragraph>
+            <Advanced />
+          </Typography.Paragraph>
+        </TabPane>
+      </Tabs>
+    </div>
+  );
 };
 
 export default MaterialConfiger;

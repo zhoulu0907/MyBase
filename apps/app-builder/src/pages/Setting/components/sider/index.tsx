@@ -16,55 +16,53 @@ interface SiderProps {
   menuItems?: MenuItemType[];
 }
 
-const AppSider: React.FC<SiderProps> = ({
-  className,
-  collapsed = false,
-  onCollapse,
-  menuItems = []
-}) => {
+const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollapse, menuItems = [] }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
 
   // 默认菜单项
-  const defaultMenuItems = useMemo(() => [
-    {
+  const defaultMenuItems = useMemo(
+    () => [
+      {
         key: 'platform-info',
         title: '平台信息',
         icon: <IconDesktop />,
-        path: '/onebase/setting/platform-info',
-    },
-    {
-      key: 'user',
-      title: '用户管理',
-      icon: <IconUser />,
-      path: '/onebase/setting/user',
-    },
-    {
+        path: '/onebase/setting/platform-info'
+      },
+      {
+        key: 'user',
+        title: '用户管理',
+        icon: <IconUser />,
+        path: '/onebase/setting/user'
+      },
+      {
         key: 'role',
         title: '角色管理',
         icon: <IconUser />,
-        path: '/onebase/setting/role',
-    },
-    {
+        path: '/onebase/setting/role'
+      },
+      {
         key: 'organization',
         title: '组织管理',
         icon: <IconUser />,
-        path: '/onebase/setting/organization',
-    },
-    {
+        path: '/onebase/setting/organization'
+      },
+      {
         key: 'system-dict',
         title: '数据字典管理',
         icon: <IconUser />,
-        path: '/onebase/setting/system-dict',
-    },
-    {
+        path: '/onebase/setting/system-dict'
+      },
+      {
         key: '租户信息',
         title: '租户信息',
         icon: <IconUser />,
-        path: '/onebase/setting/tenant',
-    }
-  ], []);
+        path: '/onebase/setting/tenant'
+      }
+    ],
+    []
+  );
 
   // 使用传入的菜单项或默认菜单项
   const finalMenuItems = useMemo(() => {
@@ -91,29 +89,31 @@ const AppSider: React.FC<SiderProps> = ({
   useEffect(() => {
     const keys = findSelectedKeys(finalMenuItems, location.pathname);
     setSelectedKeys(keys);
-
   }, [location.pathname, findSelectedKeys]);
 
   // 处理菜单点击
-  const handleMenuClick = useCallback((key: string) => {
-    const findPathByKey = (items: MenuItemType[], targetKey: string): string | null => {
-      for (const item of items) {
-        if (item.key === targetKey) {
-          return item.path || null;
+  const handleMenuClick = useCallback(
+    (key: string) => {
+      const findPathByKey = (items: MenuItemType[], targetKey: string): string | null => {
+        for (const item of items) {
+          if (item.key === targetKey) {
+            return item.path || null;
+          }
+          if (item.children) {
+            const path = findPathByKey(item.children, targetKey);
+            if (path) return path;
+          }
         }
-        if (item.children) {
-          const path = findPathByKey(item.children, targetKey);
-          if (path) return path;
-        }
-      }
-      return null;
-    };
+        return null;
+      };
 
-    const path = findPathByKey(finalMenuItems, key);
-    if (path) {
-      navigate(path);
-    }
-  }, [finalMenuItems, navigate]);
+      const path = findPathByKey(finalMenuItems, key);
+      if (path) {
+        navigate(path);
+      }
+    },
+    [finalMenuItems, navigate]
+  );
 
   // 处理折叠按钮点击
   const handleCollapseClick = useCallback(() => {
@@ -142,10 +142,7 @@ const AppSider: React.FC<SiderProps> = ({
       }
 
       return (
-        <MenuItem
-          key={item.key}
-          disabled={item.disabled}
-        >
+        <MenuItem key={item.key} disabled={item.disabled}>
           {item.icon}
           <span className={styles.menuTitle}>{item.title}</span>
         </MenuItem>
@@ -164,12 +161,7 @@ const AppSider: React.FC<SiderProps> = ({
     >
       <div className={styles.siderContent}>
         <div className={styles.menuContainer}>
-          <Menu
-            mode="vertical"
-            selectedKeys={selectedKeys}
-            onClickMenuItem={handleMenuClick}
-            levelIndent={29}
-          >
+          <Menu mode="vertical" selectedKeys={selectedKeys} onClickMenuItem={handleMenuClick} levelIndent={29}>
             {renderMenuItems(finalMenuItems)}
           </Menu>
         </div>

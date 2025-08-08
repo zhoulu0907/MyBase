@@ -2,7 +2,12 @@ import FormComp from '@/components/Materials/Basic/FormComponents';
 import LayoutComp from '@/components/Materials/Basic/LayoutComponents';
 import ListComp from '@/components/Materials/Basic/ListComponents';
 import ShowComp from '@/components/Materials/Basic/ShowComponents';
-import { FORM_COMPONENT_TYPES, LAYOUT_COMPONENT_TYPES, LIST_COMPONENT_TYPES, SHOW_COMPONENT_TYPES } from '@/constants/componentTypes';
+import {
+  FORM_COMPONENT_TYPES,
+  LAYOUT_COMPONENT_TYPES,
+  LIST_COMPONENT_TYPES,
+  SHOW_COMPONENT_TYPES
+} from '@/constants/componentTypes';
 import React from 'react';
 import { getComponentConfig } from '../utils';
 
@@ -22,11 +27,7 @@ interface ComponentRenderProps {
  * ComponentRender 组件
  * 用于渲染传入的组件，支持适配各类组件
  */
-const ComponentRender: React.FC<ComponentRenderProps> = ({
-  cpId,
-  cpType,
-  pageComponentSchema
-}) => {
+const ComponentRender: React.FC<ComponentRenderProps> = ({ cpId, cpType, pageComponentSchema }) => {
   // 获取组件配置
   const componentConfig = getComponentConfig(pageComponentSchema, cpType);
 
@@ -105,11 +106,7 @@ const ComponentRender: React.FC<ComponentRenderProps> = ({
     }
   };
 
-  return (
-    <>
-      {renderComponent()}
-    </>
-  );
+  return <>{renderComponent()}</>;
 };
 
 export default ComponentRender;

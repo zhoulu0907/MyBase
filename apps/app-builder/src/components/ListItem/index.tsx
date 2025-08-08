@@ -1,6 +1,6 @@
 import { Typography } from '@arco-design/web-react';
 import React from 'react';
-import './index.less';
+import s from './index.module.less';
 
 export interface ListItemProps {
   title: string;
@@ -9,18 +9,10 @@ export interface ListItemProps {
   children?: React.ReactNode;
 }
 
-const ListItem: React.FC<ListItemProps> = ({
-  title,
-  active = false,
-  onClick,
-  children
-}) => {
+const ListItem: React.FC<ListItemProps> = ({ title, active = false, onClick, children }) => {
   return (
-    <div
-      className={`list-item-with-dropdown${active ? ' active' : ''}`}
-      onClick={onClick}
-    >
-      <div className="list-item-with-dropdown__title">
+    <div className={`${s.listItem} ${active ? s.active : ''}`} onClick={onClick}>
+      <div className={s.listItemTitle}>
         <Typography.Ellipsis showTooltip>{title}</Typography.Ellipsis>
       </div>
       {children}

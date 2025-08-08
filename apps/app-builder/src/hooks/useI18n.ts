@@ -21,6 +21,6 @@ export const useI18n = () => {
     getCurrentLanguage,
     isLanguage,
     language: i18n.language,
-    languages: i18n.languages,
+    languages: i18n.languages
   };
 };

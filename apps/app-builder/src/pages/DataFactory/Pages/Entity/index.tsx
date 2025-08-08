@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import CheckEntityPage from './CheckEntityPage';
-import EmptyEntityPage from './EmptyEntityPage';
+import EmptyEntityPage from './main/EmptyEntityPage';
+import CheckEntityPage from './main/EntityPage';
 
 const EntityPage: React.FC = () => {
   const [pageType, setPageType] = useState('check-entity');
@@ -9,13 +9,12 @@ const EntityPage: React.FC = () => {
     setPageType(type);
   };
 
-  useEffect(() => {
-  }, []);
+  useEffect(() => {}, []);
 
   return (
     <>
-      { pageType === 'check-entity' && <CheckEntityPage handlePageType={handlePageType} />}
-      { pageType === 'empty-entity' && <EmptyEntityPage handlePageType={handlePageType} />}
+      {pageType === 'check-entity' && <CheckEntityPage handlePageType={handlePageType} />}
+      {pageType === 'empty-entity' && <EmptyEntityPage handlePageType={handlePageType} />}
     </>
   );
 };

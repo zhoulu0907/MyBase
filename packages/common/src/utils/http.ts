@@ -29,15 +29,15 @@ export class HttpClient {
   private responseInterceptors: ResponseInterceptor[] = [];
 
   constructor(config: RequestConfig = {}) {
-    const baseURL = getConcatnatedBaseUrl(config.baseURL || 'http://127.0.0.1:9524', config.prefix)
+    const baseURL = getConcatnatedBaseUrl(config.baseURL || 'http://127.0.0.1:9524', config.prefix);
     this.instance = axios.create({
       baseURL,
       timeout: config.timeout || 10000,
       headers: {
         'Content-Type': 'application/json',
-        ...config.headers,
+        ...config.headers
       },
-      withCredentials: config.withCredentials || false,
+      withCredentials: config.withCredentials || false
     });
 
     this.setupInterceptors();
@@ -53,7 +53,7 @@ export class HttpClient {
         // 添加请求时间戳
         config.params = {
           ...config.params,
-          _t: Date.now(),
+          _t: Date.now()
         };
 
         // 自动添加 token 到请求头
@@ -94,15 +94,19 @@ export class HttpClient {
         });
 
         // 统一处理响应数据
+        // TODO(mickey): remove
         console.log(response);
 
         const { data } = response;
         if (data && typeof data === 'object') {
-
-            if (data.code !== 0) {
-                Message.error(data.msg || '请求失败');
-                return Promise.reject(new Error(data.msg || '请求失败'));
+          if (data.code !== 0) {
+            Message.error(data.msg || '请求失败');
+            if (data.code === 401) {
+              TokenManager.clearToken();
+              window.location.href = '/#/login';
             }
+            return Promise.reject(new Error(data.msg || '请求失败'));
+          }
         }
 
         return response;
@@ -178,8 +182,11 @@ export class HttpClient {
   /**
    * GET 请求
    */
-  public async get<T = any>(url: string, config?: AxiosRequestConfig): Promise<T> {
-    const response = await this.instance.get<BaseResponse<T>>(url, config);
+  public async get<T = any>(url: string, params?: any, config?: AxiosRequestConfig): Promise<T> {
+    const response = await this.instance.get<BaseResponse<T>>(url, {
+      params,
+      ...config
+    });
     return response.data.data;
   }
 
@@ -226,8 +233,8 @@ export class HttpClient {
       ...config,
       headers: {
         'Content-Type': 'multipart/form-data',
-        ...config?.headers,
-      },
+        ...config?.headers
+      }
     });
 
     return response.data.data;
@@ -239,7 +246,7 @@ export class HttpClient {
   public async download(url: string, filename?: string, config?: AxiosRequestConfig): Promise<void> {
     const response = await this.instance.get(url, {
       ...config,
-      responseType: 'blob',
+      responseType: 'blob'
     });
 
     const blob = new Blob([response.data]);

@@ -8,5 +8,5 @@ export default defineConfig({
   sourcemap: true,
   clean: true,
   external: ['axios'],
-  treeshake: true,
+  treeshake: true
 });

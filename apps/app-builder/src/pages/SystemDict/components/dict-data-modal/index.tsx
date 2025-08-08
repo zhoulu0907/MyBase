@@ -1,8 +1,7 @@
 import { Form, Input, InputNumber, Modal, Switch } from '@arco-design/web-react';
 import { type DictData } from '@onebase/platform-center';
-import { StatusEnum } from '@onebase/platform-center/src/types/common';
+import { StatusEnum } from '@onebase/platform-center';
 import { useEffect } from 'react';
-
 
 interface DictionaryItemModalProps {
   visible: boolean;
@@ -19,7 +18,7 @@ export default function DictionaryItemModal({
   initialValues,
   onOk,
   onCancel,
-  title = '新增字典项',
+  title = '新增字典项'
 }: DictionaryItemModalProps) {
   const [form] = Form.useForm<DictData>();
 
@@ -30,7 +29,7 @@ export default function DictionaryItemModal({
         dictType: initialValues?.dictType || '',
         remark: initialValues?.remark || '',
         sort: initialValues?.sort ?? 0,
-        status: initialValues?.status ?? StatusEnum.ENABLE, // 使用 StatusEnum.ENABLE 作为默认值
+        status: initialValues?.status ?? StatusEnum.ENABLE // 使用 StatusEnum.ENABLE 作为默认值
       });
     } else {
       form.resetFields();
@@ -42,7 +41,7 @@ export default function DictionaryItemModal({
       title={<div style={{ textAlign: 'left' }}>{title}</div>}
       visible={visible}
       onOk={() => {
-        form.validate().then(values => {
+        form.validate().then((values) => {
           onOk(values);
         });
       }}
@@ -52,28 +51,16 @@ export default function DictionaryItemModal({
       autoFocus={false}
     >
       <Form form={form} layout="vertical">
-        <Form.Item
-          label="字典值"
-          field="label"
-          rules={[{ required: true, message: '请输入字典值' }]}
-        >
+        <Form.Item label="字典值" field="label" rules={[{ required: true, message: '请输入字典值' }]}>
           <Input placeholder="请输入字典值" maxLength={32} allowClear />
         </Form.Item>
-        <Form.Item
-          label="字典值编码"
-          field="value"
-          rules={[{ required: true, message: '请输入字典值编码' }]}
-        >
+        <Form.Item label="字典值编码" field="value" rules={[{ required: true, message: '请输入字典值编码' }]}>
           <Input placeholder="请输入字典值编码" maxLength={32} allowClear />
         </Form.Item>
         <Form.Item label="描述" field="remark">
           <Input.TextArea placeholder="请输入描述" maxLength={200} allowClear />
         </Form.Item>
-        <Form.Item
-          label="显示顺序"
-          field="sort"
-          rules={[{ required: true, message: '请输入显示顺序' }]}
-        >
+        <Form.Item label="显示顺序" field="sort" rules={[{ required: true, message: '请输入显示顺序' }]}>
           <InputNumber min={0} style={{ width: '100%' }} />
         </Form.Item>
         <Form.Item label="是否启用" field="status" triggerPropName="checked">

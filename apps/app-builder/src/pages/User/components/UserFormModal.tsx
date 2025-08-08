@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Modal, Form, Input, Grid, Switch, Select, Message, Button, TreeSelect } from '@arco-design/web-react';
-import { createUser, updateUser } from '@onebase/platform-center/src/services/user';
-import type { UserVO } from '@onebase/platform-center/src/types/user';
+import { createUser, updateUser, getSimpleRoleList, getUser } from '@onebase/platform-center';
+import type { UserVO, SimpleRoleVO } from '@onebase/platform-center';
 
 const Row = Grid.Row;
 const Col = Grid.Col;
@@ -29,6 +29,7 @@ export default function UserFormModal({
 }: UserFormModalProps) {
   const [form] = Form.useForm();
   const [loading, setLoading] = React.useState(false);
+  const [roleList, setRoleList] = useState<SimpleRoleVO[]>([]);
 
   useEffect(() => {
     if (visible) {
@@ -39,13 +40,30 @@ export default function UserFormModal({
     }
   }, [visible, initialValues, form]);
 
+  useEffect(() => {
+    if (!visible) {
+      return;
+    }
+
+    getSimpleRoleList().then((res) => {
+      setRoleList(res);
+    });
+
+    // 在编辑模式下获取用户信息并设置角色ID为初始值
+    if (mode === 'edit' && initialValues?.id) {
+      getUser(initialValues.id).then((user) => {
+        form.setFieldsValue({ roleIds: user.roleId });
+      });
+    }
+  }, [visible, mode, initialValues, form]);
+
   const handleSubmit = async () => {
     if (isDetail) {
       // 详情模式下直接关闭
       onOk();
       return;
     }
-    
+
     try {
       const values = await form.validate();
       setLoading(true);
@@ -53,7 +71,8 @@ export default function UserFormModal({
         await createUser({ ...values, status: values.status ? 1 : 0 });
         Message.success('新建成功');
       } else {
-        await updateUser({ ...initialValues, ...values, status: values.status ? 1 : 0 });
+        // TODO 待接口修改后重新验证
+        await updateUser({ ...values, status: values.status ? 1 : 0 });
         Message.success('编辑成功');
       }
       onOk();
@@ -64,7 +83,7 @@ export default function UserFormModal({
 
   return (
     <Modal
-      title={isDetail ? '用户详情' : (mode === 'create' ? '新建用户' : '编辑用户')}
+      title={isDetail ? '用户详情' : mode === 'create' ? '新建用户' : '编辑用户'}
       visible={visible}
       onCancel={onCancel}
       onOk={handleSubmit}
@@ -72,21 +91,17 @@ export default function UserFormModal({
       unmountOnExit
       style={{ width: 700 }}
       // 详情模式下自定义footer 只有关闭按钮
-      footer={isDetail ? 
-        [
-          <Button key="close" onClick={onCancel}>
-            关闭
-          </Button>
-        ] : 
-        undefined
+      footer={
+        isDetail
+          ? [
+              <Button key="close" onClick={onCancel}>
+                关闭
+              </Button>
+            ]
+          : undefined
       }
     >
-      <Form 
-        form={form} 
-        layout="vertical" 
-        autoComplete="off"
-        disabled={isDetail}
-      >
+      <Form form={form} layout="vertical" autoComplete="off" disabled={isDetail}>
         <Row gutter={24}>
           <Col span={12}>
             <Form.Item label="姓名" field="nickname" rules={[{ required: true, message: '请输入姓名' }]}>
@@ -106,9 +121,15 @@ export default function UserFormModal({
             </Form.Item>
           </Col>
           <Col span={12}>
-            <Form.Item label="密码" field="password" rules={mode === 'create' && !isDetail ? [{ required: true, message: '请输入密码' }] : []}>
-              <Input.Password placeholder="请输入" />
+            {mode === 'create' && (
+              <Form.Item
+                label="密码"
+                field="password"
+                rules={mode === 'create' && !isDetail ? [{ required: true, message: '请输入密码' }] : []}
+              >
+                <Input.Password placeholder="请输入" />
               </Form.Item>
+            )}
           </Col>
         </Row>
         <Row gutter={24}>
@@ -124,7 +145,7 @@ export default function UserFormModal({
                 allowClear
                 treeData={deptTree}
                 loading={deptLoading}
-                disabled={deptLoading}
+                disabled={deptLoading || isDetail}
               />
             </Form.Item>
           </Col>
@@ -133,8 +154,11 @@ export default function UserFormModal({
           <Col span={12}>
             <Form.Item label="角色（选填）" field="roleIds">
               <Select placeholder="请选择" mode="multiple" allowClear>
-                <Select.Option value={1}>管理员</Select.Option>
-                <Select.Option value={2}>开发工程师</Select.Option>
+                {roleList.map((role) => (
+                  <Select.Option key={role.id} value={role.id}>
+                    {role.name}
+                  </Select.Option>
+                ))}
               </Select>
             </Form.Item>
           </Col>

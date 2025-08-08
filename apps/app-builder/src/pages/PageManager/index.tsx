@@ -1,166 +1,176 @@
+import { useAppStore } from '@/store';
+import { getAppCode } from '@/utils/app';
+import { Button, Dropdown, Input, Layout, Menu, Modal } from '@arco-design/web-react';
 import {
-    Button,
-    Dropdown,
-    Input,
-    Layout,
-    Menu,
-    Modal,
-} from "@arco-design/web-react";
-import {
-    IconFile,
-    IconFolder,
-    IconHome,
-    IconPhone, IconPlus, IconSearch, IconStorage
-} from "@arco-design/web-react/icon";
-import { useState, type FC } from 'react';
-import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
+  IconFile,
+  IconFolder,
+  IconHome,
+  IconPhone,
+  IconPlus,
+  IconSearch,
+  IconStorage
+} from '@arco-design/web-react/icon';
+import { listApplicationMenu, type ListApplicationMenuReq } from '@onebase/app';
+import { useEffect, useState, type FC } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { EDITOR_TYPES } from '../Editor/components/const';
-import styles from "./index.module.less";
+import styles from './index.module.less';
 
 const MenuItem = Menu.Item;
 const Sider = Layout.Sider;
 const Content = Layout.Content;
 
 const iconStyle = {
-    marginRight: 8,
-    fontSize: 16,
-    transform: "translateY(1px)",
+  marginRight: 8,
+  fontSize: 16,
+  transform: 'translateY(1px)'
 };
 
 const menuData = [
-    {
-        key: "0",
-        icon: <IconHome />,
-        title: "首页",
-    },
-    {
-        key: "1",
-        icon: <IconPhone />,
-        title: "联系我们",
-    },
-    {
-        key: "2",
-        icon: <IconStorage />,
-        title: "基础档案",
-    },
+  {
+    key: '0',
+    icon: <IconHome />,
+    title: '首页'
+  },
+  {
+    key: '1',
+    icon: <IconPhone />,
+    title: '联系我们'
+  },
+  {
+    key: '2',
+    icon: <IconStorage />,
+    title: '基础档案'
+  }
 ];
 
 const PageManagerPage: FC = () => {
     const { t } = useTranslation();
     const navigate = useNavigate();
 
+  const { curAppCode, setCurAppCode } = useAppStore();
 
-    const [title, setTitle] = useState("");
-    const [value, setValue] = useState("");
-    const [menuList, setMenuList] = useState<any>(menuData);
-    const [visible, setVisible] = useState(false);
-    const [activeMenu, setActiveMenu] = useState(menuData[0]);
+  const [title, setTitle] = useState('');
+  const [value, setValue] = useState('');
+  const [menuList, setMenuList] = useState<any>(menuData);
+  const [visible, setVisible] = useState(false);
+  const [activeMenu, setActiveMenu] = useState(menuData[0]);
 
-    const dropList = (
-        <Menu style={{ padding: "10px 0" }}>
-            <label style={{ marginLeft: 12, color: "#999", fontSize: 16 }}>
-                {t("createApp.commom")}
-            </label>
-            <MenuItem
-                key="1"
-                onClick={() => {
-                    setVisible(true);
-                    setTitle(t("createApp.createForm"));
-                }}
-            >
-                <IconFile style={iconStyle} />
-                {t("createApp.createForm")}
-            </MenuItem>
-            <MenuItem
-                key="2"
-                onClick={() => {
-                    setVisible(true);
-                    setTitle(t("createApp.createGroup"));
-                }}
-            >
-                <IconFolder style={iconStyle} />
-                {t("createApp.createGroup")}
-            </MenuItem>
-        </Menu>
-    );
+  useEffect(() => {
+    const appCode = getAppCode();
+    if (appCode) {
+      setCurAppCode(Number(appCode));
+    }
+  }, [location.pathname]);
 
-    const handleCreate = () => {
-        setVisible(false);
-        const newItem = {
-            key: Date.now() + "",
-            icon: <IconStorage />,
-            title: value,
-        };
-        const update = menuList.concat(newItem);
-        setMenuList(update);
-        setValue("");
+  useEffect(() => {
+    console.log('curAppCode: ', curAppCode);
+    if (curAppCode !== null) {
+      getMenuList();
+    }
+  }, [curAppCode]);
+
+  const getMenuList = async () => {
+    const req: ListApplicationMenuReq = {
+      applicationId: Number(curAppCode)
     };
+    const res = await listApplicationMenu(req);
+    console.log('res: ', res);
+  };
 
-    return (
-        <div className={styles.pageManagerPage}>
-            <Layout style={{ height: "100%" }}>
-                <Layout>
-                    <Sider style={{ width: 225 }}>
-                        <div className={styles.header}>
-                            <Input
-                                style={{
-                                    width: 140,
-                                    border: "1px solid #dedede",
-                                    borderRadius: 3,
-                                }}
-                                allowClear
-                                suffix={<IconSearch />}
-                                placeholder={t("common.search")}
-                            />
-                            <Dropdown
-                                droplist={dropList}
-                                trigger="click"
-                                position="bl"
-                            >
-                                <Button type="primary" icon={<IconPlus />} />
-                            </Dropdown>
-                        </div>
+  const dropList = (
+    <Menu style={{ padding: '10px 0' }}>
+      <label style={{ marginLeft: 12, color: '#999', fontSize: 16 }}>{t('createApp.commom')}</label>
+      <MenuItem
+        key="1"
+        onClick={() => {
+          setVisible(true);
+          setTitle(t('createApp.createForm'));
+        }}
+      >
+        <IconFile style={iconStyle} />
+        {t('createApp.createForm')}
+      </MenuItem>
+      <MenuItem
+        key="2"
+        onClick={() => {
+          setVisible(true);
+          setTitle(t('createApp.createGroup'));
+        }}
+      >
+        <IconFolder style={iconStyle} />
+        {t('createApp.createGroup')}
+      </MenuItem>
+    </Menu>
+  );
 
-                        <Menu style={{ width: 226, padding: 12 }} defaultSelectedKeys={['0']}>
-                            {menuList.map((menu: any) => (
-                                <MenuItem
-                                    key={menu.key}
-                                    onClick={() => setActiveMenu(menu)}
-                                >
-                                    {menu.icon}
-                                    {menu.title}
-                                </MenuItem>
-                            ))}
-                        </Menu>
-                    </Sider>
-                    <Content className={styles.content}>
-                        <div className={styles.contentHeader}>
-                            <div className={styles.contentTitle}>
-                                {activeMenu.title}
-                            </div>
-                            <Button type="primary" onClick={() => navigate(`/onebase/editor/${EDITOR_TYPES.FORM_EDITOR}`)}>编辑</Button>
-                        </div>
-                        <Content className={styles.content}>content</Content>
-                    </Content>
-                </Layout>
-            </Layout>
-            <Modal
-                title={title}
-                visible={visible}
-                onOk={handleCreate}
-                onCancel={() => setVisible(false)}
-                autoFocus={false}
-                focusLock={true}
-            >
-                <Input
-                    value={value}
-                    onChange={setValue}
-                    placeholder="请输入名称"
-                />
-            </Modal>
-        </div>
-    );
-};
+  const handleCreate = () => {
+    setVisible(false);
+    const newItem = {
+      key: Date.now() + '',
+      icon: <IconStorage />,
+      title: value
+    };
+    const update = menuList.concat(newItem);
+    setMenuList(update);
+    setValue('');
+  };
+
+  return (
+    <div className={styles.pageManagerPage}>
+      <Layout style={{ height: '100%' }}>
+        <Layout>
+          <Sider style={{ width: 225 }}>
+            <div className={styles.header}>
+              <Input
+                style={{
+                  width: 140,
+                  border: '1px solid #dedede',
+                  borderRadius: 3
+                }}
+                allowClear
+                suffix={<IconSearch />}
+                placeholder={t('common.search')}
+              />
+              <Dropdown droplist={dropList} trigger="click" position="bl">
+                <Button type="primary" icon={<IconPlus />} />
+              </Dropdown>
+            </div>
+
+            <Menu style={{ width: 226, padding: 12 }} defaultSelectedKeys={['0']}>
+              {menuList.map((menu: any) => (
+                <MenuItem key={menu.key} onClick={() => setActiveMenu(menu)}>
+                  {menu.icon}
+                  {menu.title}
+                </MenuItem>
+              ))}
+            </Menu>
+          </Sider>
+          <Content className={styles.content}>
+            <div className={styles.contentHeader}>
+              <div className={styles.contentTitle}>{activeMenu.title}</div>
+              <Button type="primary" onClick={() => navigate(`/onebase/editor/${EDITOR_TYPES.FORM_EDITOR}`)}>
+                {t('common.edit')}
+              </Button>
+            </div>
+            <Content className={styles.content}>content</Content>
+          </Content>
+        </Layout>
+      </Layout>
+
+      <Modal
+          title={title}
+          visible={visible}
+          onOk={handleCreate}
+          onCancel={() => setVisible(false)}
+          autoFocus={false}
+          focusLock={true}
+      >
+          <Input value={value} onChange={setValue} placeholder="请输入名称" />
+      </Modal>
+    </div>
+  );
+}
 
 export default PageManagerPage;

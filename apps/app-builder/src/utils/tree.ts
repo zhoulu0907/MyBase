@@ -1,5 +1,5 @@
 export interface TreeNode {
-  key?: number; // arco-design default tree props
+  key?: number | string; // arco-design default tree props
   title?: string; // arco-design default tree props
   children?: TreeNode[];
   [key: string]: any;
@@ -16,7 +16,7 @@ export const DEFAULT_OPTIONS = {
   key: 'id',
   parentKey: 'parentId',
   children: 'children',
-  label: 'name',
+  label: 'name'
 };
 
 /**
@@ -27,9 +27,9 @@ export const DEFAULT_OPTIONS = {
  * @param options.parentId - 用作父级关联的键名，默认为 'parentId'
  * @param options.children - 用作存储子节点的键名，默认为 'children'
  * @param options.label - 用作节点显示文本的键名，默认为 'name'
- * 
+ * @param isKeyTypeString arco-tree中key为string类型，此参数表示是否将key转为string类型, 默认为false，即保留原类型
  * @returns TreeNode[]
- * 
+ *
  * @example
  * const list = [
  *   { id: 1, parentId: 0, name: '节点1' },
@@ -39,30 +39,26 @@ export const DEFAULT_OPTIONS = {
  */
 export const listToTree = <T extends Record<string, any>>(
   list: T[],
-  options: Options = {}
+  options: Options = {},
+  isKeyTypeString = false
 ): TreeNode[] => {
-  const {
-    key,
-    parentKey,
-    children,
-    label
-  } = Object.assign({}, DEFAULT_OPTIONS, options);
+  const { key, parentKey, children, label } = Object.assign({}, DEFAULT_OPTIONS, options);
 
   const nodeMap = new Map<any, TreeNode>();
 
   for (const item of list) {
     nodeMap.set(item[key], {
       ...item,
-      key: item[key], 
+      key: isKeyTypeString ? String(item[key]) : item[key],
       title: item[label],
-      children: item[children] || [],
+      children: item[children] || []
     });
   }
 
   const tree: TreeNode[] = [];
-  for(const item of nodeMap.values()) {
-    const pId=item[parentKey];
-    
+  for (const item of nodeMap.values()) {
+    const pId = item[parentKey];
+
     if (nodeMap.has(pId)) {
       const parentNode = nodeMap.get(pId)!;
       parentNode.children!.push(item);
@@ -76,14 +72,14 @@ export const listToTree = <T extends Record<string, any>>(
 
 /**
  * 根据过滤函数/关键词过滤树形结构中的节点
- * 
+ *
  * @param tree - 要过滤的树形结构数据
  * @param filter - 过滤条件函数或关键词，如为函数，则接受节点作为参数，返回布尔值
  * @param options - 过滤选项配置
  * @param options.children - 指定子节点对应字段，默认为 'children'
  * @param options.label - 指定显示文本对应字段，默认为 'label'
  * @returns T[] - 满足过滤条件的树状结构数据
- * 
+ *
  * @example
  * const result = treeFilter(
  *   treeData,
@@ -96,18 +92,21 @@ export const treeFilter = <T = any>(
   filter: string | ((v: T) => boolean),
   options: Partial<Options> = {}
 ): T[] => {
-  const isFunc = typeof filter === 'function'
-  const mergedOptions = Object.assign({}, DEFAULT_OPTIONS, options)
-  const { children:children, label} = mergedOptions
+  const isFunc = typeof filter === 'function';
+  const mergedOptions = Object.assign({}, DEFAULT_OPTIONS, options);
+  const { children: children, label } = mergedOptions;
 
   function loop(data: T[]) {
     return data
       .map((node: any) => ({ ...node }))
       .filter((node) => {
-        node[children] = node[children] && loop(node[children])
-        return (isFunc ? filter(node) : node[label].toLowerCase().indexOf(filter.toLowerCase()) > -1) || (node[children] && node[children].length)
-      })
+        node[children] = node[children] && loop(node[children]);
+        return (
+          (isFunc ? filter(node) : node[label].toLowerCase().indexOf(filter.toLowerCase()) > -1) ||
+          (node[children] && node[children].length)
+        );
+      });
   }
 
-  return loop(data)
-}
+  return loop(data);
+};

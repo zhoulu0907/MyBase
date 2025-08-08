@@ -89,17 +89,20 @@ pnpm preview
 ## 功能特性
 
 ### 用户认证
+
 - 账号密码登录
 - 手机号验证码登录
 - 验证码集成 (TAC)
 - 记住登录状态
 
 ### 页面路由
+
 - `/login` - 登录页面
 - `/onebase` - 首页
 - `/*` - 404 页面
 
 ### 组件特性
+
 - 响应式设计
 - 表单验证
 - 错误处理
@@ -141,23 +144,25 @@ import styles from './index.module.less';
 
 ## 可用命令
 
-| 命令 | 描述 |
-|------|------|
-| `pnpm dev` | 启动开发服务器 |
-| `pnpm build` | 构建生产版本 |
-| `pnpm preview` | 预览构建结果 |
-| `pnpm lint` | 运行代码检查 |
-| `make dev` | 启动开发模式 |
-| `make build` | 构建项目 |
-| `make preview` | 预览构建结果 |
+| 命令           | 描述           |
+| -------------- | -------------- |
+| `pnpm dev`     | 启动开发服务器 |
+| `pnpm build`   | 构建生产版本   |
+| `pnpm preview` | 预览构建结果   |
+| `pnpm lint`    | 运行代码检查   |
+| `make dev`     | 启动开发模式   |
+| `make build`   | 构建项目       |
+| `make preview` | 预览构建结果   |
 
 ## 环境配置
 
 ### 开发环境
+
 - 开发服务器: http://localhost:5173
 - API 服务器: http://localhost:9524
 
 ### 环境变量
+
 创建 `.env` 文件配置环境变量：
 
 ```env
@@ -168,6 +173,7 @@ VITE_APP_TITLE=OneBase Admin Console
 ## 部署
 
 ### 构建部署
+
 ```bash
 pnpm build
 ```
@@ -175,6 +181,7 @@ pnpm build
 构建完成后，将 `dist/` 目录的内容部署到 Web 服务器。
 
 ### Docker 部署
+
 ```dockerfile
 FROM nginx:alpine
 COPY dist/ /usr/share/nginx/html/
@@ -189,7 +196,6 @@ CMD ["nginx", "-g", "daemon off;"]
 3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
 4. 推送到分支 (`git push origin feature/AmazingFeature`)
 5. 打开 Pull Request
-
 
 ## 作者
 

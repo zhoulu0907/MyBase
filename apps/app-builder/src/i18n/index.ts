@@ -8,11 +8,11 @@ import zhCN from './locales/zh-CN.json';
 
 const resources = {
   'zh-CN': {
-    translation: zhCN,
+    translation: zhCN
   },
   'en-US': {
-    translation: enUS,
-  },
+    translation: enUS
+  }
 };
 
 (i18n as any)
@@ -26,12 +26,12 @@ const resources = {
     // lng: 'en-US', // 设置默认语言为英文
     debug: process.env.NODE_ENV === 'development',
     interpolation: {
-      escapeValue: false,
+      escapeValue: false
     },
     detection: {
       order: ['localStorage', 'navigator', 'htmlTag'],
-      caches: ['localStorage'],
-    },
+      caches: ['localStorage']
+    }
   });
 
 export default i18n;

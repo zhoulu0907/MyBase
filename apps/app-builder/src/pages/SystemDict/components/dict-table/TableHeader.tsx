@@ -1,5 +1,5 @@
 import { Input, Button } from '@arco-design/web-react';
-import { IconPlus } from '@arco-design/web-react/icon'
+import { IconPlus } from '@arco-design/web-react/icon';
 import s from '../../index.module.less';
 interface TableHeaderProps {
   searchValue: string;
@@ -22,4 +22,4 @@ export function TableHeader({ searchValue, onSearchChange, onAdd }: TableHeaderP
       />
     </div>
   );
-} 
+}

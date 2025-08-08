@@ -23,10 +23,7 @@ const Home: React.FC = () => {
     <Layout className={styles.homePage}>
       <AppHeader className={styles.homePageHeader} />
       <Layout className={styles.homePageContent}>
-        <AppSider
-          collapsed={collapsed}
-          onCollapse={handleCollapse}
-        />
+        <AppSider collapsed={collapsed} onCollapse={handleCollapse} />
         <Layout>
           <AppBreadcrumb />
 

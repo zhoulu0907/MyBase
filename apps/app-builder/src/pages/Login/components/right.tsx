@@ -1,14 +1,5 @@
 import LogoSVG from '@/assets/images/logo.svg';
-import {
-    Button,
-    Checkbox,
-    Form,
-    Input,
-    Message,
-    Space,
-    Tabs,
-    Typography
-} from '@arco-design/web-react';
+import { Button, Checkbox, Form, Input, Message, Space, Tabs, Typography } from '@arco-design/web-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -81,14 +72,14 @@ const Right: React.FC = () => {
       // await smsService.sendSmsCode({ mobile });
 
       // 模拟发送短信验证码
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       Message.success('验证码已发送');
       setSmsCountdown(60);
 
       // 倒计时
       const timer = setInterval(() => {
-        setSmsCountdown(prev => {
+        setSmsCountdown((prev) => {
           if (prev <= 1) {
             clearInterval(timer);
             return 0;
@@ -96,7 +87,6 @@ const Right: React.FC = () => {
           return prev - 1;
         });
       }, 1000);
-
     } catch (error) {
       Message.error('发送失败，请重试');
     } finally {
@@ -104,42 +94,42 @@ const Right: React.FC = () => {
     }
   };
 
-//   TODO(mickey): 调通后解除注释
-// 账号密码登录
+  //   TODO(mickey): 调通后解除注释
+  // 账号密码登录
   const handleAccountLogin = async (values: LoginFormData) => {
     try {
-
       setLoading(true);
 
-      const loginData : LoginRequest= {
+      const loginData: LoginRequest = {
         username: values.account!,
         password: values.password!
       };
 
       const response: LoginResponse = await login(loginData);
-      console.log(response);
 
       if (response.accessToken) {
         // 使用 TokenManager 存储 token 信息
-        TokenManager.setToken({
+        TokenManager.setToken(
+          {
             userId: response.userId,
             accessToken: response.accessToken,
             refreshToken: response.refreshToken,
-            expiresTime: response.expiresTime,
-            }, rememberMe);
+            expiresTime: response.expiresTime
+          },
+          rememberMe
+        );
 
-            // 保存记住我状态和账号信息
-            saveRememberMe(values.account!, rememberMe);
+        // 保存记住我状态和账号信息
+        saveRememberMe(values.account!, rememberMe);
 
-            Message.success(t('auth.loginSuccess'));
-            // 跳转到首页
-            navigate('/onebase/my-app');
+        Message.success(t('auth.loginSuccess'));
+        // 跳转到首页
+        navigate('/onebase/my-app');
 
-            return;
-        } else {
-            Message.error(t('auth.loginFailed'));
-        }
-
+        return;
+      } else {
+        Message.error(t('auth.loginFailed'));
+      }
     } catch (error: any) {
       console.error('登录失败:', error);
       Message.error(error.message || t('auth.invalidCredentials'));
@@ -160,20 +150,9 @@ const Right: React.FC = () => {
         <div>ONE BASE</div>
       </div>
       <div className={styles.loginFormContainer}>
-
-        <Tabs
-          activeTab={loginType}
-          onChange={(key) => setLoginType(key as 'account' | 'mobile')}
-          type="text"
-        >
+        <Tabs activeTab={loginType} onChange={(key) => setLoginType(key as 'account' | 'mobile')} type="text">
           <TabPane key="account" title={t('auth.accountLogin')}>
-            <Form
-              form={form}
-              layout="vertical"
-              onSubmit={handleSubmit}
-              autoComplete="off"
-              className={styles.loginForm}
-            >
+            <Form form={form} layout="vertical" onSubmit={handleSubmit} autoComplete="off" className={styles.loginForm}>
               <Form.Item
                 field="account"
                 initialValue=""
@@ -182,11 +161,7 @@ const Right: React.FC = () => {
                   { minLength: 3, message: '账号至少3个字符' }
                 ]}
               >
-                <Input
-                  placeholder={t('auth.userAccount')}
-                  allowClear
-                  size="large"
-                />
+                <Input placeholder={t('auth.userAccount')} allowClear size="large" />
               </Form.Item>
 
               <Form.Item
@@ -197,19 +172,12 @@ const Right: React.FC = () => {
                   { minLength: 6, message: '密码至少6个字符' }
                 ]}
               >
-                <Input.Password
-                  placeholder={t('auth.password')}
-                  allowClear
-                  size="large"
-                />
+                <Input.Password placeholder={t('auth.password')} allowClear size="large" />
               </Form.Item>
 
               <Form.Item>
                 <Space className={styles.formActions}>
-                  <Checkbox
-                    checked={rememberMe}
-                    onChange={handleRememberMeChange}
-                  >
+                  <Checkbox checked={rememberMe} onChange={handleRememberMeChange}>
                     {t('auth.rememberMe')}
                   </Checkbox>
                   <Button type="text" size="small">
@@ -234,13 +202,7 @@ const Right: React.FC = () => {
           </TabPane>
 
           <TabPane key="mobile" title={t('auth.smsLogin')}>
-            <Form
-              form={form}
-              layout="vertical"
-              onSubmit={handleSubmit}
-              autoComplete="off"
-              className={styles.loginForm}
-            >
+            <Form form={form} layout="vertical" onSubmit={handleSubmit} autoComplete="off" className={styles.loginForm}>
               <Form.Item
                 field="mobile"
                 rules={[
@@ -257,12 +219,7 @@ const Right: React.FC = () => {
                   }
                 ]}
               >
-                <Input
-                  placeholder={t('auth.mobile')}
-                  allowClear
-                  size="large"
-                  maxLength={11}
-                />
+                <Input placeholder={t('auth.mobile')} allowClear size="large" maxLength={11} />
               </Form.Item>
 
               <Form.Item
@@ -273,12 +230,7 @@ const Right: React.FC = () => {
                 ]}
               >
                 <Space align="center" className={styles.smsContainer}>
-                  <Input
-                    placeholder={t('auth.smsCode')}
-                    allowClear
-                    size="large"
-                    maxLength={6}
-                  />
+                  <Input placeholder={t('auth.smsCode')} allowClear size="large" maxLength={6} />
                   <Button
                     type="secondary"
                     size="large"
@@ -307,16 +259,17 @@ const Right: React.FC = () => {
             </Form>
           </TabPane>
         </Tabs>
-
-
-
       </div>
       <div className={styles.loginFooter}>
         <Paragraph className={styles.footerText}>
-            登录即表示同意
-            <Button type="text" size="small">《用户协议》</Button>
-            和
-            <Button type="text" size="small">《隐私政策》</Button>
+          登录即表示同意
+          <Button type="text" size="small">
+            《用户协议》
+          </Button>
+          和
+          <Button type="text" size="small">
+            《隐私政策》
+          </Button>
         </Paragraph>
       </div>
     </div>

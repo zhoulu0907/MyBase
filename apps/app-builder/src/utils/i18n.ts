@@ -3,13 +3,13 @@ export const SUPPORTED_LANGUAGES = {
   'zh-CN': {
     name: '中文',
     flag: '🇨🇳',
-    direction: 'ltr',
+    direction: 'ltr'
   },
   'en-US': {
     name: 'English',
     flag: '🇺🇸',
-    direction: 'ltr',
-  },
+    direction: 'ltr'
+  }
 } as const;
 
 export type SupportedLanguage = keyof typeof SUPPORTED_LANGUAGES;
@@ -33,6 +33,6 @@ export const formatDate = (date: Date, language: string, options?: Intl.DateTime
 export const formatCurrency = (value: number, language: string, currency = 'CNY'): string => {
   return new Intl.NumberFormat(language, {
     style: 'currency',
-    currency,
+    currency
   }).format(value);
 };

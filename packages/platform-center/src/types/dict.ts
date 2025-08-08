@@ -8,14 +8,14 @@ export interface Dict {
 
 // 字典数据
 export interface DictData {
-  id?: number
-  sort: number
-  label: string
-  value: string
-  dictType?: string
-  status: number
-  remark?: string
-  createTime?: string
+  id?: number;
+  sort: number;
+  label: string;
+  value: string;
+  dictType?: string;
+  status: number;
+  remark?: string;
+  createTime?: string;
 }
 
 // 字典项（类型）

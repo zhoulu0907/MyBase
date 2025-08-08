@@ -98,8 +98,8 @@ const Administrator: React.FC = () => {
             </Tooltip>
           )}
         </Space>
-      ),
-    },
+      )
+    }
   ];
   const [dataSource, setDataSource] = useState<PlatformAdminInfo[]>([]);
 

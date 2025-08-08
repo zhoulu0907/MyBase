@@ -4,11 +4,10 @@
  */
 
 export interface TokenInfo {
-  userId: number;                  // 用户ID
-  accessToken: string;             // 访问令牌
-  refreshToken: string;            // 刷新令牌
-  expiresTime: number;             // 令牌过期时间（时间戳，毫秒）
-  expiresAt?: number;
+  userId: number; // 用户ID
+  accessToken: string; // 访问令牌
+  refreshToken: string; // 刷新令牌
+  expiresTime: number; // 令牌过期时间（时间戳，毫秒）
 }
 
 export class TokenManager {
@@ -23,23 +22,16 @@ export class TokenManager {
    */
   static setToken(tokenInfo: TokenInfo, rememberMe: boolean = false): void {
     try {
-      // 计算过期时间
-      const expiresAt = Date.now() + (tokenInfo.expiresTime * 1000);
-      const tokenData = {
-        ...tokenInfo,
-        expiresAt,
-      };
-
       // 根据记住我选项选择存储方式
       if (rememberMe) {
         // 记住我：使用 localStorage（持久化存储）
         localStorage.setItem(this.TOKEN_KEY, tokenInfo.accessToken);
-        localStorage.setItem(this.TOKEN_INFO_KEY, JSON.stringify(tokenData));
+        localStorage.setItem(this.TOKEN_INFO_KEY, JSON.stringify(tokenInfo));
         localStorage.setItem(this.REMEMBER_ME_KEY, 'true');
       } else {
         // 不记住我：使用 sessionStorage（会话存储，关闭浏览器后清除）
         sessionStorage.setItem(this.TOKEN_KEY, tokenInfo.accessToken);
-        sessionStorage.setItem(this.TOKEN_INFO_KEY, JSON.stringify(tokenData));
+        sessionStorage.setItem(this.TOKEN_INFO_KEY, JSON.stringify(tokenInfo));
         sessionStorage.setItem(this.REMEMBER_ME_KEY, 'false');
       }
     } catch (error) {
@@ -102,7 +94,7 @@ export class TokenManager {
       }
 
       // 检查是否过期
-      if (tokenInfo.expiresAt && Date.now() > tokenInfo.expiresAt) {
+      if (tokenInfo.expiresTime && Date.now() > tokenInfo.expiresTime) {
         this.clearToken();
         return false;
       }
@@ -137,8 +129,7 @@ export class TokenManager {
    */
   static getRememberMe(): boolean {
     try {
-      const remembered = sessionStorage.getItem(this.REMEMBER_ME_KEY) ||
-                       localStorage.getItem(this.REMEMBER_ME_KEY);
+      const remembered = sessionStorage.getItem(this.REMEMBER_ME_KEY) || localStorage.getItem(this.REMEMBER_ME_KEY);
       return remembered === 'true';
     } catch (error) {
       console.error('获取记住我状态失败:', error);

@@ -1,0 +1,63 @@
+@import '../../../../styles/variables.less';
+
+/* 创建业务实体页面样式 */
+.create-entity-modal {
+  width: 600px;
+  .arco-modal-header .arco-modal-title {
+    text-align: left !important;
+  }
+}
+
+/* 创建关联关系弹窗样式 */
+.create-relation-modal {
+  width: 1000px;
+  .arco-modal-header .arco-modal-title {
+    text-align: left !important;
+  }
+}
+
+/* 关联关系表单样式 */
+.relation-form {
+  .relation-form-container {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+
+    .left-entity-section,
+    .right-entity-section {
+      flex: 1;
+      min-width: 200px;
+
+      .arco-form-item {
+        margin-bottom: 16px;
+      }
+    }
+
+    .relation-type-section {
+      flex: 0 0 150px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding-top: 32px; // 调整垂直对齐
+
+      .arco-form-item {
+        margin-bottom: 0;
+        width: 100%;
+      }
+    }
+  }
+}
+
+/* 业务实体表单样式 */
+.entity-form {
+  max-width: 560px;
+  margin: 0 auto;
+  .form-item-operation {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 24px;
+    & button {
+      margin-left: 10px;
+    }
+  }
+}

@@ -23,12 +23,12 @@ export const FORM_COMPONENT_TYPES = {
   DEPT_SELECT: 'XDeptSelect',
   FILE_UPLOAD: 'XFileUpload',
   IMG_UPLOAD: 'XImgUpload',
-  AUTO_CODE: 'XAutoCode',
+  AUTO_CODE: 'XAutoCode'
 } as const;
 
 // 布局组件类型
 export const LAYOUT_COMPONENT_TYPES = {
-  COLUMN_LAYOUT: 'XColumnLayout',
+  COLUMN_LAYOUT: 'XColumnLayout'
 } as const;
 
 // 列表组件类型
@@ -38,7 +38,7 @@ export const LIST_COMPONENT_TYPES = {
   TIMELINE: 'XTimeline',
   CAROUSEL: 'XCarousel',
   LIST: 'XList',
-  COLLAPSE: 'XCollapse',
+  COLLAPSE: 'XCollapse'
 } as const;
 
 // 展示组件类型
@@ -46,7 +46,7 @@ export const SHOW_COMPONENT_TYPES = {
   INFO_NOTICE: 'XInfoNotice',
   IMAGE: 'XImage',
   TEXT: 'XText',
-  WEB_VIEW: 'XWebView',
+  WEB_VIEW: 'XWebView'
 } as const;
 
 // 所有组件类型
@@ -54,11 +54,11 @@ export const ALL_COMPONENT_TYPES = {
   ...FORM_COMPONENT_TYPES,
   ...LAYOUT_COMPONENT_TYPES,
   ...LIST_COMPONENT_TYPES,
-  ...SHOW_COMPONENT_TYPES,
+  ...SHOW_COMPONENT_TYPES
 } as const;
 
 // 组件类型值数组（用于类型检查）
 export const COMPONENT_TYPE_VALUES = Object.values(ALL_COMPONENT_TYPES);
 
 // 组件类型联合类型
-export type ComponentType = typeof ALL_COMPONENT_TYPES[keyof typeof ALL_COMPONENT_TYPES];
+export type ComponentType = (typeof ALL_COMPONENT_TYPES)[keyof typeof ALL_COMPONENT_TYPES];

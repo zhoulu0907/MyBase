@@ -36,37 +36,29 @@ export default function DictionaryTable({
     {
       title: '状态',
       dataIndex: 'status',
-      render: (val: number) => (<StatusTag status={val} />)
+      render: (val: number) => <StatusTag status={val} />
     },
     {
       title: '操作',
       dataIndex: 'id',
       render: (_: any, record: DictData) => (
         <>
-          <Button type='text' style={{ marginRight: 8 }} onClick={() => onEdit(record)}>
+          <Button type="text" style={{ marginRight: 8 }} onClick={() => onEdit(record)}>
             编辑
           </Button>
-          <Button type='text' onClick={() => onDelete(record.id!)}>删除</Button>
+          <Button type="text" onClick={() => onDelete(record.id!)}>
+            删除
+          </Button>
         </>
-      ),
-    },
+      )
+    }
   ];
 
   return (
     <>
-      <TableHeader
-        searchValue={searchValue}
-        onSearchChange={onSearchChange}
-        onAdd={onAdd}
-      />
+      <TableHeader searchValue={searchValue} onSearchChange={onSearchChange} onAdd={onAdd} />
       <div className={s.tableContainer}>
-        <Table
-          rowKey='id'
-          columns={columns}
-          data={data}
-          pagination={false}
-          scroll={{ y: 510 }}
-        />
+        <Table rowKey="id" columns={columns} data={data} pagination={false} scroll={{ y: 510 }} />
         <div className={s.paginationContainer}>
           <Pagination
             total={total}

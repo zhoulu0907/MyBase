@@ -10,11 +10,7 @@ interface TabTitleProps {
  * 支持可选图标和自定义样式
  */
 const TabTitle: React.FC<TabTitleProps> = ({ title }) => {
-  return (
-    <div className={styles.tabTitle}>
-      {title}
-    </div>
-  );
+  return <div className={styles.tabTitle}>{title}</div>;
 };
 
 export default TabTitle;

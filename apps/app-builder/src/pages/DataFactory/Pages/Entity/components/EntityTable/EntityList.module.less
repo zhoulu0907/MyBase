@@ -1,0 +1,64 @@
+@import '../../../../styles/variables.less';
+
+.entityList {
+  .flex-column();
+  height: 100%;
+
+  .header {
+    padding: @spacingMd;
+    .border-bottom-light();
+    .flex-between();
+
+    h3 {
+      margin: 0;
+      font-size: @fontSizeLg;
+      font-weight: @fontWeightSemibold;
+    }
+
+    .count {
+      color: @textColorTertiary;
+      font-size: @fontSizeSm;
+    }
+  }
+
+  .list {
+    flex: 1;
+    overflow: auto;
+
+    .listItem {
+      .list-item-style();
+
+      .itemContent {
+        .flex-center();
+        gap: @spacingSm;
+
+        .avatar {
+          background-color: @primaryColor;
+        }
+
+        .itemInfo {
+          flex: 1;
+          min-width: 0;
+
+          .entityName {
+            font-weight: @fontWeightMedium;
+            color: @textColorPrimary;
+            margin-bottom: @spacingXs;
+            .text-ellipsis();
+          }
+
+          .entityId {
+            font-size: @fontSizeSm;
+            color: @textColorTertiary;
+            margin-bottom: 2px;
+          }
+
+          .fieldCount {
+            font-size: @fontSizeSm;
+            color: @textColorSecondary;
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,71 @@
+.versionManagement {
+  background: #fff;
+  border-radius: 8px;
+  border: 1px solid #e5e6eb;
+
+  :global(.arco-card-body) {
+    padding: 24px;
+  }
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+
+  .title {
+    margin: 0;
+    color: #1d2129;
+    font-weight: 600;
+  }
+
+  .actionButton {
+    color: #86909c;
+    border-color: #e5e6eb;
+
+    &:hover {
+      color: #1d2129;
+      border-color: #c9cdd4;
+    }
+  }
+
+  .publishButton {
+    background: #00b42a;
+    border-color: #00b42a;
+
+    &:hover {
+      background: #00a426;
+      border-color: #00a426;
+    }
+  }
+}
+
+.versionTable {
+  .arco-table-th {
+    background: #f7f8fa;
+    border-bottom: 1px solid #e5e6eb;
+    color: #1d2129;
+    font-weight: 500;
+  }
+
+  .arco-table-td {
+    border-bottom: 1px solid #f2f3f5;
+  }
+
+  .arco-table-tr:hover {
+    background: #f7f8fa;
+  }
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 16px;
+
+  .arco-pagination-item-active {
+    background-color: #e8ffea !important;
+    color: #00b42a !important;
+    border-color: #00b42a !important;
+  }
+}

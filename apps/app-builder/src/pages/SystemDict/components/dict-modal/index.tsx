@@ -1,6 +1,6 @@
 import { Form, Input, Modal, Switch } from '@arco-design/web-react';
 import { type DictItem } from '@onebase/platform-center';
-import { StatusEnum } from '@onebase/platform-center/src/types/common';
+import { StatusEnum } from '@onebase/platform-center';
 import { useEffect } from 'react';
 
 export interface DictForm {
@@ -25,7 +25,7 @@ export default function DictionaryTypeModal({
   initialValues,
   onOk,
   onCancel,
-  title = '新增数据字典',
+  title = '新增数据字典'
 }: DictionaryTypeModalProps) {
   const [form] = Form.useForm<DictItem>();
 
@@ -35,7 +35,7 @@ export default function DictionaryTypeModal({
         type: initialValues?.type || '',
         name: initialValues?.name || '',
         remark: initialValues?.remark || '',
-        status: initialValues?.status ?? StatusEnum.DISABLE,
+        status: initialValues?.status ?? StatusEnum.DISABLE
       });
     } else {
       form.resetFields();
@@ -47,7 +47,7 @@ export default function DictionaryTypeModal({
       title={<div style={{ textAlign: 'left' }}>{title}</div>}
       visible={visible}
       onOk={() => {
-        form.validate().then(values => {
+        form.validate().then((values) => {
           onOk(values);
         });
       }}
@@ -57,18 +57,10 @@ export default function DictionaryTypeModal({
       autoFocus={false}
     >
       <Form form={form} layout="vertical">
-        <Form.Item
-          label="字典编码"
-          field="type"
-          rules={[{ required: true, message: '请输入字典编码' }]}
-        >
+        <Form.Item label="字典编码" field="type" rules={[{ required: true, message: '请输入字典编码' }]}>
           <Input placeholder="请输入字典编码" maxLength={32} allowClear />
         </Form.Item>
-        <Form.Item
-          label="字典名称"
-          field="name"
-          rules={[{ required: true, message: '请输入字典名称' }]}
-        >
+        <Form.Item label="字典名称" field="name" rules={[{ required: true, message: '请输入字典名称' }]}>
           <Input placeholder="请输入字典名称" maxLength={32} allowClear />
         </Form.Item>
         <Form.Item label="描述" field="remark">

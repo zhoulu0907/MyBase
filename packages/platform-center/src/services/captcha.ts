@@ -1,13 +1,6 @@
 import { HttpClient } from '@onebase/common';
-import {
-    CaptchaResponse,
-    CaptchaType,
-    VerifyCaptchaRequest,
-    VerifyCaptchaResponse
-} from '../types';
+import { CaptchaResponse, CaptchaType, VerifyCaptchaRequest, VerifyCaptchaResponse } from '../types';
 import { getBackendURL } from './base';
-
-
 
 /**
  * 验证码服务类
@@ -61,13 +54,12 @@ export class CaptchaService {
     const requestData: VerifyCaptchaRequest = {
       captcha_id: captchaId,
       captcha_value: captchaValue,
-      captcha_type: captchaType,
+      captcha_type: captchaType
     };
 
     const client = this.getHttpClient();
     return client.post<VerifyCaptchaResponse>(`/verify`, requestData);
   }
-
 }
 
 /**

@@ -22,31 +22,6 @@ const { Text } = Typography;
 const { Option } = Select;
 const { useForm } = Form;
 
-// 模拟数据
-const mockData: PlatformTenantInfo[]  = [
-  {
-    id: 1,
-    name: '默认用户',
-    contactMobile: 'ZH2025070001',
-    accountCount: 50,
-    contactName: '石头',
-    createTime: '2025-08-14 10:30',
-    status: PlatformTenantStatus['已启用'],
-    expireTime: '2025-08-14 10:30',
-    packageId:1,
-  },
-  {
-    id: 2,
-    name: '测试环境验证用户',
-    contactMobile: 'ZH2025070002',
-    accountCount: 50,
-    contactName: '石头',
-    createTime: '2025-08-14 10:30',
-    status: PlatformTenantStatus['已禁用'],
-    expireTime: '2025-08-14 10:30',
-    packageId:1,
-  }
-];
 
 // 模拟管理员数据
 const mockAdmins = Array.from({ length: 3 }, (_, i) => ({
@@ -108,7 +83,7 @@ const TenantManagement: React.FC = () => {
   // 筛选数据
   useEffect(() => {
     let result = [...data];
-    
+
     // 状态筛选
     if (searchParams.status !== 'all') {
       if (searchParams.status === 'enabled') {
@@ -117,7 +92,7 @@ const TenantManagement: React.FC = () => {
         result = result.filter(item => item.status === PlatformTenantStatus['已禁用']);
       }
     }
-    
+
     // 关键词搜索
     if (searchParams.keyword) {
       result = result.filter(item => 
@@ -177,30 +152,26 @@ const TenantManagement: React.FC = () => {
   const handleSubmit = async () => {
     try {
       const values = await form.validate();
-      
+
       // 检查分配人数
       const allocatedCount = values.allocatedCount;
       const currentUsed = currentTenant ? currentTenant.allocatedCount : 0;
       const delta = allocatedCount - currentUsed;
-      
+
       if (delta > remainingLicense) {
         Message.error(`可分配人数不足，License总人数是${totalLicense}，剩余${remainingLicense}`);
         return;
       }
-      
+
       if (currentTenant && allocatedCount < currentUsed) {
         Message.error(`用户内已使用用户数量为${currentUsed}，分配的用户数量不能低于此数量`);
         return;
       }
       
       // 如果是从禁用状态切换到启用状态
-      if (currentTenant && 
-          currentTenant.status === 'disabled' && 
-          values.status === 'enabled') {
+      if (currentTenant && currentTenant.status === 'disabled' && values.status === 'enabled') {
         // 更新数据状态
-        setData(data.map(item => 
-          item.id === Number(currentTenant.id) ? { ...item, status: 'enabled' } : item
-        ));
+        setData(data.map((item) => (item.id === Number(currentTenant.id) ? { ...item, status: 'enabled' } : item)));
         Message.success('已启用用户');
         setModalVisible(false);
         return;
@@ -208,22 +179,24 @@ const TenantManagement: React.FC = () => {
       // 这里应该是API调用
       if (currentTenant) {
         // 更新
-        setData(data.map(item => 
-          item.id === Number(currentTenant.id) ? { ...item, ...values } : item
-        ));
+        setData(data.map((item) => (item.id === Number(currentTenant.id) ? { ...item, ...values } : item)));
         // Message.success('更新成功');
       } else {
         // 新增
         const newTenant = {
           id: data.length + 1,
-          tenantCode: `ZH${new Date().getFullYear()}${(new Date().getMonth() + 1).toString().padStart(2, '0')}${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`,
+          tenantCode: `ZH${new Date().getFullYear()}${(new Date().getMonth() + 1).toString().padStart(2, '0')}${Math.floor(
+            Math.random() * 10000
+          )
+            .toString()
+            .padStart(4, '0')}`,
           ...values,
           createTime: new Date().toISOString()
         };
         setData([...data, newTenant]);
         Message.success('创建成功');
       }
-      
+
       setModalVisible(false);
     } catch (error) {
       console.error('表单验证失败:', error);
@@ -240,9 +213,7 @@ const TenantManagement: React.FC = () => {
     }
     const values = form.getFieldsValue();
     // 这里应该是API调用
-    setData(data.map(item => 
-      item.id === Number(currentTenant?.id) ? { ...item, ...values } : item
-    ));
+    setData(data.map((item) => (item.id === Number(currentTenant?.id) ? { ...item, ...values } : item)));
     Message.success('已禁用用户');
     setConfirmText(''); // 确认禁用后清空输入框
     // 根据是否是新租户决定关闭哪些弹窗
@@ -333,17 +304,13 @@ const TenantManagement: React.FC = () => {
 
           <Space size="large">
             {/* 添加激活状态 颜色为 #00b42a */}
-            
-            <Radio.Group
-              type="button"
-              value={searchParams.status}
-              onChange={handleStatusChange}
-            >
+
+            <Radio.Group type="button" value={searchParams.status} onChange={handleStatusChange}>
               <Radio value="all">全部</Radio>
               <Radio value="enabled">启用</Radio>
               <Radio value="disabled">禁用</Radio>
             </Radio.Group>
-            
+
             <Input.Search
               placeholder="搜索租户名称/编码"
               style={{ width: 300 }}
@@ -355,7 +322,7 @@ const TenantManagement: React.FC = () => {
             />
           </Space>
         </div>
-        
+
         <Table
           rowKey="id"
           border={false}
@@ -384,35 +351,25 @@ const TenantManagement: React.FC = () => {
           <Form.Item label="租户编号" field="tenantCode">
             <Input placeholder="自动生成" disabled />
           </Form.Item>
-          
-          <Form.Item 
-            label="租户名称" 
-            field="tenantName"
-            rules={[{ required: true, message: '请输入租户名称' }]}
-          >
+
+          <Form.Item label="租户名称" field="tenantName" rules={[{ required: true, message: '请输入租户名称' }]}>
             <Input placeholder="请输入租户名称" />
           </Form.Item>
-          
-          <Form.Item 
-            label="管理员" 
-            field="admin"
-            rules={[{ required: true, message: '请选择管理员' }]}
-          >
+
+          <Form.Item label="管理员" field="admin" rules={[{ required: true, message: '请选择管理员' }]}>
             <Select
               placeholder="请选择管理员"
               showSearch
-              filterOption={(input, option) => 
-                option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
-              }
+              filterOption={(input, option) => option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}
             >
-              {mockAdmins.map(admin => (
+              {mockAdmins.map((admin) => (
                 <Option key={admin.id} value={admin.name}>
                   {admin.name}
                 </Option>
               ))}
             </Select>
           </Form.Item>
-          
+
           <Form.Item
             label={`分配人员数量 (可分配人员数量：${remainingLicense})`}
             field="allocatedCount"
@@ -423,19 +380,21 @@ const TenantManagement: React.FC = () => {
           >
             <InputNumber placeholder="请输入分配人员数量" min={1} />
           </Form.Item>
-          
+
           <Form.Item label="状态" field="status">
             <Switch
               checkedText="已启用"
               uncheckedText="已禁用"
-              defaultChecked  // 默认启用状态
+              defaultChecked // 默认启用状态
               checked={form.getFieldValue('status') === 'enabled'}
               disabled={!currentTenant}
               onChange={(checked) => {
-                form.setFieldsValue({ status: checked ? 'enabled' : 'disabled' });
-                if(!checked) {
+                form.setFieldsValue({
+                  status: checked ? 'enabled' : 'disabled'
+                });
+                if (!checked) {
                   console.log('checked', checked);
-                  setConfirmDisableVisible(true)
+                  setConfirmDisableVisible(true);
                 } else if (currentTenant && currentTenant.status === 'disabled') {
                   setData(data.map(item => 
                     item.id === Number(currentTenant.id) ? { ...item, status: PlatformTenantStatus['已启用'] } : item
@@ -447,15 +406,9 @@ const TenantManagement: React.FC = () => {
           </Form.Item>
         </Form>
       </Modal>
-      
+
       {/* 确认禁用弹窗 */}
-      <Modal
-        title="确认禁用用户"
-        visible={confirmDisableVisible}
-        onOk={confirmDisable}
-        onCancel={cancelDisable}
-        
-      >
+      <Modal title="确认禁用用户" visible={confirmDisableVisible} onOk={confirmDisable} onCancel={cancelDisable}>
         <div style={{ marginBottom: 20 }}>
           <p>
             禁用租户将导致该租户下的所有数据（包括用户信息、配置记录、业务应用等）被直接禁用，正在运行的应用停止访问。
@@ -464,14 +417,8 @@ const TenantManagement: React.FC = () => {
           <p>1. 租户内的应用现在无法在访问的浏览；</p>
           <p>2. 确保此操作是您的最终决定。</p>
         </div>
-        <p style={{ marginBottom: 8 }}>
-          为防止误操作，请输入“{currentTenant?.name}”进行确认：
-        </p>
-        <Input
-          value={confirmText}
-          onChange={(value) => setConfirmText(value)}
-          placeholder="请输入要禁用的租户名称"
-        />
+        <p style={{ marginBottom: 8 }}>为防止误操作，请输入“{currentTenant?.name}”进行确认：</p>
+        <Input value={confirmText} onChange={(value) => setConfirmText(value)} placeholder="请输入要禁用的租户名称" />
       </Modal>
     </div>
   );

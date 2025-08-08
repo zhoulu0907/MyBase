@@ -1,0 +1,99 @@
+@font-face {
+  font-family: "iconfont"; /* Project id 4993387 */
+  src: url('iconfont.woff2?t=1754528409769') format('woff2'),
+       url('iconfont.woff?t=1754528409769') format('woff'),
+       url('iconfont.ttf?t=1754528409769') format('truetype');
+}
+
+.iconfont {
+  font-family: "iconfont" !important;
+  font-size: 16px;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-cart:before {
+  content: "\e6af";
+}
+
+.icon-box:before {
+  content: "\e667";
+}
+
+.icon-safe:before {
+  content: "\e769";
+}
+
+.icon-xuexiaoweishengfuzhi:before {
+  content: "\e69b";
+}
+
+.icon-tv:before {
+  content: "\e86f";
+}
+
+.icon-book:before {
+  content: "\e600";
+}
+
+.icon-plane:before {
+  content: "\e66b";
+}
+
+.icon-car:before {
+  content: "\e7d7";
+}
+
+.icon-idcard:before {
+  content: "\e7de";
+}
+
+.icon-bag:before {
+  content: "\e7d1";
+}
+
+.icon-jiangbei:before {
+  content: "\e761";
+}
+
+.icon-User:before {
+  content: "\ea94";
+}
+
+.icon-file:before {
+  content: "\e671";
+}
+
+.icon-training:before {
+  content: "\e682";
+}
+
+.icon-balance-full:before {
+  content: "\e87a";
+}
+
+.icon-award:before {
+  content: "\e6eb";
+}
+
+.icon-train:before {
+  content: "\e6ce";
+}
+
+.icon-money-bank:before {
+  content: "\e830";
+}
+
+.icon-earth:before {
+  content: "\e856";
+}
+
+.icon-building_building_building-one:before {
+  content: "\e696";
+}
+
+.icon-cake:before {
+  content: "\e8df";
+}
+

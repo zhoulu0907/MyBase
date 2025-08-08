@@ -2,11 +2,11 @@ export interface PlatformInfoReq {
   /**
    * 页码
    */
-  pageNum: number
+  pageNum: number;
   /**
    * 每页数量
    */
-  pageSize: number
+  pageSize: number;
 }
 /**
  * 认证记录

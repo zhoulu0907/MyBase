@@ -32,7 +32,7 @@ const Welcome: React.FC = () => {
             <Card
               className={styles.quickCard}
               hoverable
-              onClick={() => window.location.href = '/onebase/platform-info'}
+              onClick={() => (window.location.href = '/onebase/platform-info')}
             >
               <div className={styles.cardContent}>
                 <IconInfoCircle className={styles.cardIcon} />
