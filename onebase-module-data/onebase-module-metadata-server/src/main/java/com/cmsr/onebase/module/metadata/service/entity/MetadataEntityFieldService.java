@@ -10,6 +10,8 @@ import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldDe
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldPageReqVO;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldSaveReqVO;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.FieldTypeConfigRespVO;
+import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldBatchSaveReqVO;
+import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldBatchSaveRespVO;
 import com.cmsr.onebase.module.metadata.service.entity.vo.EntityFieldQueryVO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataEntityFieldDO;
 import jakarta.validation.Valid;
@@ -126,5 +128,11 @@ public interface MetadataEntityFieldService {
      * @param entityId 实体ID
      */
     void deleteEntityFieldsByEntityId(String entityId);
+
+    /**
+     * 批量保存（增删改）实体字段
+     * 若任一物理 DDL 失败则整体回滚
+     */
+    EntityFieldBatchSaveRespVO batchSaveEntityFields(@Valid EntityFieldBatchSaveReqVO reqVO);
 
 }
