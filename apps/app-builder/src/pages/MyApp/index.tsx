@@ -161,7 +161,7 @@ const MyAppPage: React.FC = () => {
     try {
       setDeleteLoading(true);
       const params: DeleteApplicationReq = {
-        id: deleteApp.id,
+        id: BigInt(deleteApp.id),
         name: appName
       };
       const res = await deleteApplication(params);
@@ -177,8 +177,8 @@ const MyAppPage: React.FC = () => {
   };
 
   /* 跳转到编辑页 */
-  const nagivateToAppPage = (appId: number) => {
-    setCurAppId(appId.toString());
+  const nagivateToAppPage = (appId: string) => {
+    setCurAppId(appId);
     const newWindow = window.open('', '_blank');
     if (newWindow) {
       const href = `${window.location.origin}/#/onebase/create-app/app-setting?appId=${appId}`;

@@ -1,7 +1,7 @@
 // 应用类型
 
 export interface Application {
-  id: number;
+  id: string;
   /**
    * 应用名称
    */
@@ -156,7 +156,7 @@ export interface DeleteApplicationReq {
   /**
    * 应用ID
    */
-  id: number;
+  id: bigint;
   /**
    * 应用名称
    */
