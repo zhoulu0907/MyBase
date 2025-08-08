@@ -2,6 +2,13 @@ import { create } from 'zustand';
 import type { EditConfig } from './components/Materials/types';
 
 export interface BasicEditorStore {
+  // 是否是编辑模式
+  isEditMode: boolean;
+  // 设置是否是编辑模式
+  setIsEditMode: (isEditMode: boolean) => void;
+  // 清除是否是编辑模式
+  clearIsEditMode: () => void;
+
   // 当前选中的组件ID
   curComponentID: string;
   // 设置当前选中的组件ID
@@ -103,6 +110,10 @@ const createPageEditorStore = () =>
   }));
 
 export const useBasicEditorStore = create<BasicEditorStore>((set) => ({
+  isEditMode: false,
+  setIsEditMode: (isEditMode: boolean) => set(() => ({ isEditMode })),
+  clearIsEditMode: () => set(() => ({ isEditMode: false })),
+
   curComponentID: '',
   setCurComponentID: (cp_id: string) => set(() => ({ curComponentID: cp_id })),
   clearCurComponentID: () => set(() => ({ curComponentID: '' })),

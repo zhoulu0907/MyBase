@@ -1,6 +1,6 @@
 import CreateGroupIcon from '@/assets/images/create_group.svg';
 import CreatePageIcon from '@/assets/images/create_page.svg';
-import { useAppStore } from '@/store';
+import { useAppStore, useBasicEditorStore } from '@/store';
 import {
   Button,
   Dropdown,
@@ -11,13 +11,15 @@ import {
   Message,
   Modal,
   Select,
+  Tree,
   TreeSelect
 } from '@arco-design/web-react';
-import { IconPlus, IconSearch, IconSettings } from '@arco-design/web-react/icon';
+import { IconPlus, IconSearch } from '@arco-design/web-react/icon';
 import {
   copyApplicationMenu,
   createApplicationMenu,
   deleteApplicationMenu,
+  getPageSetCode,
   listApplicationMenu,
   MenuType,
   PageType,
@@ -27,6 +29,7 @@ import {
   type CopyApplicationMenuReq,
   type CreateApplicationMenuReq,
   type DeleteApplicationMenuReq,
+  type GetPageSetCodeReq,
   type ListApplicationMenuReq,
   type UpdateApplicationMenuNameReq
 } from '@onebase/app';
@@ -34,10 +37,11 @@ import { useEffect, useState, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { EDITOR_TYPES } from '../Editor/components/const';
+import MyMenuItem from './components/MyMenuItem';
 import styles from './index.module.less';
 
+const TreeNode = Tree.Node;
 const MenuItem = Menu.Item;
-const SubMenu = Menu.SubMenu;
 const Sider = Layout.Sider;
 const Content = Layout.Content;
 
@@ -56,20 +60,6 @@ interface TreeNode {
   children?: TreeNode[];
 }
 
-/**
- * 递归转换菜单数据为树形结构
- * @param menuItems 菜单项数组
- * @returns 转换后的树形数据
- */
-const convertMenuToTreeData = (menuItems: ApplicationMenu[]): TreeNode[] => {
-  return menuItems.map((item) => ({
-    key: String(item.id),
-    value: String(item.id),
-    title: item.menuName,
-    children: item.children ? convertMenuToTreeData(item.children) : []
-  }));
-};
-
 const PageManagerPage: FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -84,6 +74,7 @@ const PageManagerPage: FC = () => {
   const pageTypeOptions = [{ label: '普通表单', value: PageType.NORMAL }];
 
   const [menuList, setMenuList] = useState<ApplicationMenu[]>([]);
+  const [treeData, setTreeData] = useState<TreeNode[]>([]);
 
   // 创建弹窗
   const [visibleCreateForm, setVisibleCreateForm] = useState('');
@@ -92,6 +83,10 @@ const PageManagerPage: FC = () => {
   const [curEditMenuName, setCurEditMenuName] = useState<string>();
   const [activeMenu, setActiveMenu] = useState<ApplicationMenu>();
   const [parentPageOptions, setParentPageOptions] = useState<ApplicationMenu[]>([RootParentPage]);
+  const initTreeItemWidth = 155;
+  const cutTreeItemWidth = 25;
+
+  const { clearIsEditMode } = useBasicEditorStore();
 
   // 重命名弹窗
   const [visibleRenameForm, setVisibleRenameForm] = useState(false);
@@ -103,6 +98,8 @@ const PageManagerPage: FC = () => {
     if (curAppId !== '') {
       getMenuList();
     }
+    console.log('clearIsEditMode');
+    clearIsEditMode();
   }, [curAppId]);
 
   /**
@@ -112,10 +109,39 @@ const PageManagerPage: FC = () => {
    * @returns 处理后的菜单项数组
    */
   const addParentIdToChildren = (menuItems: ApplicationMenu[], parentId?: string): ApplicationMenu[] => {
-    return menuItems.map((menu) => ({
-      ...menu,
-      parentId: parentId,
-      children: menu.children ? addParentIdToChildren(menu.children, menu.id) : []
+    // 只保留 menuType 为 2（分组）的菜单项
+    return menuItems
+      .filter((menu) => menu.menuType == MenuType.GROUP)
+      .map((menu) => ({
+        ...menu,
+        parentId: parentId,
+        children: menu.children ? addParentIdToChildren(menu.children, menu.id) : []
+      }));
+  };
+
+  // 将接口返回的菜单数据（res）转换为 Tree 组件可用的 treeData 格式
+  const convertMenuToTreeData = (menus: ApplicationMenu[], maxWidth: number): any[] => {
+    return menus.map((menu) => ({
+      key: menu.id,
+      title: (
+        <MyMenuItem
+          isGroup={menu.menuType == MenuType.GROUP}
+          maxWidth={maxWidth}
+          label={menu.menuName}
+          dropList={settingMenuDropList}
+          onClick={() => {
+            if (menu.menuType == MenuType.PAGE) {
+              setActiveMenu(menu);
+            }
+          }}
+          settingOnClick={() => {
+            console.log(menu.menuName);
+            setCurEditMenuID(menu.id);
+            setCurEditMenuName(menu.menuName);
+          }}
+        />
+      ),
+      children: menu.children ? convertMenuToTreeData(menu.children, maxWidth - cutTreeItemWidth) : []
     }));
   };
 
@@ -129,84 +155,11 @@ const PageManagerPage: FC = () => {
     // 为每个children元素补充parentId字段
     const processedRes = addParentIdToChildren(res, RootParentPage.id);
 
-    setMenuList(processedRes);
+    const treeData = convertMenuToTreeData(res, initTreeItemWidth);
+
+    setTreeData(treeData);
 
     setParentPageOptions([{ ...RootParentPage, children: processedRes }]);
-  };
-
-  /**
-   * 递归渲染菜单项
-   * @param menuList 菜单列表
-   * @param onMenuClick 菜单点击回调
-   * @returns 渲染的菜单项数组
-   */
-  const renderMenuItems = (mList: ApplicationMenu[], onMenuClick: (item: ApplicationMenu) => void) => {
-    return mList.map((menu: ApplicationMenu) => {
-      if (menu.children && menu.children.length > 0) {
-        return (
-          <SubMenu
-            key={menu.id}
-            onClick={(e) => {
-              e.stopPropagation();
-              onMenuClick(menu);
-            }}
-            style={{
-              width: '100%'
-            }}
-            title={
-              <div className={styles.menuItem}>
-                <div className={styles.subMenuItemName}>{menu.menuName}</div>
-                <div
-                  style={{
-                    flex: 5
-                  }}
-                ></div>
-                <div className={styles.dropdownContainer}>
-                  <Dropdown droplist={settingMenuDropList} trigger="click" position="bl">
-                    <IconSettings
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setCurEditMenuID(menu.id);
-                        setCurEditMenuName(menu.menuName);
-                      }}
-                    />
-                  </Dropdown>
-                </div>
-              </div>
-            }
-          >
-            {renderMenuItems(menu.children, onMenuClick)}
-          </SubMenu>
-        );
-      }
-      return (
-        <MenuItem
-          key={menu.id}
-          onClick={(e) => {
-            e.stopPropagation();
-            onMenuClick(menu);
-          }}
-          style={{
-            width: '200px'
-          }}
-        >
-          <div className={styles.menuItem}>
-            <div className={styles.menuItemName}>{menu.menuName}</div>
-            <div className={styles.dropdownContainer}>
-              <Dropdown droplist={settingMenuDropList} trigger="click" position="bl">
-                <IconSettings
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setCurEditMenuID(menu.id);
-                    setCurEditMenuName(menu.menuName);
-                  }}
-                />
-              </Dropdown>
-            </div>
-          </div>
-        </MenuItem>
-      );
-    });
   };
 
   const createMenuDropList = (
@@ -350,12 +303,32 @@ const PageManagerPage: FC = () => {
     getMenuList();
   };
 
+  const handleGetPageSetCode = async () => {
+    if (!activeMenu?.id) {
+      Message.error('请选择菜单');
+      return;
+    }
+
+    const req: GetPageSetCodeReq = {
+      menuId: activeMenu?.id
+    };
+    const pageSetCode = await getPageSetCode(req);
+    console.log('res: ', pageSetCode);
+
+    if (!pageSetCode) {
+      Message.error('请先创建页面集');
+      return;
+    }
+
+    navigate(`/onebase/editor/${EDITOR_TYPES.FORM_EDITOR}?pageSetCode=${pageSetCode}`);
+  };
+
   return (
     <div className={styles.pageManagerPage}>
       <Layout style={{ height: '100%' }}>
         <Layout>
           <Sider style={{ width: 225 }}>
-            <div className={styles.header}>
+            <div className={styles.siderHeader}>
               <Input
                 style={{
                   width: 140,
@@ -371,23 +344,33 @@ const PageManagerPage: FC = () => {
               </Dropdown>
             </div>
 
-            <Menu
-              mode="vertical"
-              // levelIndent={10}
-            >
-              {renderMenuItems(menuList, (menu) => {
-                setActiveMenu(menu);
-                console.log('menu: ', menu.menuName);
-              })}
-            </Menu>
+            <Tree
+              blockNode
+              draggable
+              treeData={treeData}
+              className={styles.tree}
+              showLine={false}
+              icons={{
+                switcherIcon: null,
+                dragIcon: null
+              }}
+              actionOnClick={'expand'}
+              style={{
+                width: '210px',
+                overflow: 'hidden',
+                boxSizing: 'border-box'
+              }}
+            />
           </Sider>
           <Content className={styles.content}>
-            <div className={styles.contentHeader}>
-              <div className={styles.contentTitle}>{activeMenu?.menuName}</div>
-              <Button type="primary" onClick={() => navigate(`/onebase/editor/${EDITOR_TYPES.FORM_EDITOR}`)}>
-                {t('common.edit')}
-              </Button>
-            </div>
+            {activeMenu?.id && (
+              <div className={styles.contentHeader}>
+                <div className={styles.contentTitle}>{activeMenu?.menuName}</div>
+                <Button type="primary" onClick={() => handleGetPageSetCode()}>
+                  {t('common.edit')}
+                </Button>
+              </div>
+            )}
             <Content className={styles.content}>content</Content>
           </Content>
         </Layout>
@@ -403,12 +386,13 @@ const PageManagerPage: FC = () => {
         }}
         autoFocus={false}
         focusLock={true}
+        unmountOnExit={true}
       >
         <Form
           layout="vertical"
           form={renameForm}
           initialValues={{
-            menuName: renameForm.getFieldValue('menuName')
+            menuName: curEditMenuName
           }}
         >
           <Form.Item label="页面名称" field="menuName" rules={[{ required: true, message: '请输入页面名称' }]}>
@@ -427,6 +411,7 @@ const PageManagerPage: FC = () => {
         }}
         autoFocus={false}
         focusLock={true}
+        unmountOnExit={true}
       >
         <Form
           layout="vertical"
@@ -441,7 +426,11 @@ const PageManagerPage: FC = () => {
           </Form.Item>
 
           <Form.Item label="父级页面" field="parentId">
-            <TreeSelect treeData={convertMenuToTreeData(parentPageOptions)} placeholder="请选择父级页面" allowClear />
+            <TreeSelect
+              treeData={convertMenuToTreeData(parentPageOptions, initTreeItemWidth)}
+              placeholder="请选择父级页面"
+              allowClear
+            />
           </Form.Item>
         </Form>
       </Modal>
@@ -456,6 +445,7 @@ const PageManagerPage: FC = () => {
         }}
         autoFocus={false}
         focusLock={true}
+        unmountOnExit={true}
       >
         <Form
           layout="vertical"
@@ -496,7 +486,11 @@ const PageManagerPage: FC = () => {
           {/* TODO: 添加菜单图标 */}
 
           <Form.Item label="父级页面" field="parentId" initialValue={RootParentPage.id}>
-            <TreeSelect treeData={convertMenuToTreeData(parentPageOptions)} placeholder="请选择父级页面" allowClear />
+            <TreeSelect
+              treeData={convertMenuToTreeData(parentPageOptions, initTreeItemWidth)}
+              placeholder="请选择父级页面"
+              allowClear
+            />
           </Form.Item>
 
           {/* TODO: 添加业务实体 */}
