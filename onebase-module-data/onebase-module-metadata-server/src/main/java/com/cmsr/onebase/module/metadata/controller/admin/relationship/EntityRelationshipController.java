@@ -6,6 +6,8 @@ import com.cmsr.onebase.module.metadata.controller.admin.relationship.vo.Cascade
 import com.cmsr.onebase.module.metadata.controller.admin.relationship.vo.EntityRelationshipPageReqVO;
 import com.cmsr.onebase.module.metadata.controller.admin.relationship.vo.EntityRelationshipRespVO;
 import com.cmsr.onebase.module.metadata.controller.admin.relationship.vo.EntityRelationshipSaveReqVO;
+import com.cmsr.onebase.module.metadata.controller.admin.relationship.vo.ParentChildRelationshipSaveReqVO;
+import com.cmsr.onebase.module.metadata.controller.admin.relationship.vo.ParentChildRelationshipRespVO;
 import com.cmsr.onebase.module.metadata.controller.admin.relationship.vo.RelationshipTypeRespVO;
 import com.cmsr.onebase.module.metadata.service.relationship.MetadataEntityRelationshipService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -92,5 +94,15 @@ public class EntityRelationshipController {
         List<CascadeTypeRespVO> types = entityRelationshipService.getCascadeTypes();
         return success(types);
     }
+
+    @PostMapping("/create-parent-child")
+    @Operation(summary = "创建主子关系", description = "自动创建主子关系，默认使用主表id和子表parent_id关联，一对多关系，级联新增删除查询")
+    @PreAuthorize("@ss.hasPermission('metadata:entity-relationship:create')")
+    public CommonResult<ParentChildRelationshipRespVO> createParentChildRelationship(@Valid @RequestBody ParentChildRelationshipSaveReqVO reqVO) {
+        ParentChildRelationshipRespVO result = entityRelationshipService.createParentChildRelationship(reqVO);
+        return success(result);
+    }
+
+    //todo 帮我写一个添加主子关系的接口，主子关系就是一个实体关联了另一个实体，和创建关联关系接口区别为 ：1.默认用主表的 id 和子表的parent_id 关联 2.默认级联新增，删除，查询子表数据，3 默认主子关系为 一对多，上面这三点在创建主子关系的时候，会默认执行，不需要前端传值。如果前端传子表的 id 说明选择的是已经有的表，如果前端不传 id 那就意味着要新建一个子表，这块看看能不能复用新增实体的那块逻辑，具体的字段需求可以看看我给你的图片
 
 } 
