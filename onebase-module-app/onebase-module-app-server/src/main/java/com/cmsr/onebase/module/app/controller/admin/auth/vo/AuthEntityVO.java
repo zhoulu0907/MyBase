@@ -17,6 +17,9 @@ public class AuthEntityVO {
     @Schema(description = "实体Id")
     private Long entityId;
 
+    @Schema(description = "实体名称")
+    private String entityDisplayName;
+
     @Schema(description = "是否可访问")
     private Boolean allowed;
 

@@ -29,4 +29,11 @@ public class AppAuthDataFilterRepository extends DataRepository {
         configs.order("condition_order", Order.TYPE.ASC);
         return this.findAllByConfig(AuthDataFilterDO.class, configs);
     }
+
+    public void deleteByGroupId(Long groupId) {
+        ConfigStore configs = new DefaultConfigStore();
+        configs.eq("group_id", groupId);
+        this.deleteByConfig(AuthDataFilterDO.class, configs);
+    }
+
 }

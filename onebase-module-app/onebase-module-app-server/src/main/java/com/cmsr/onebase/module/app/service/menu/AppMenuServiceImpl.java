@@ -15,6 +15,7 @@ import com.cmsr.onebase.module.app.service.appresource.PageSetService;
 import com.cmsr.onebase.module.app.util.MenuUtils;
 import jakarta.annotation.Resource;
 import lombok.Setter;
+import org.apache.commons.collections4.MapUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -80,16 +81,12 @@ public class AppMenuServiceImpl implements AppMenuService {
         // 创建菜单
         MenuDO menuDO = new MenuDO();
         menuDO.setApplicationId(createReqVO.getApplicationId());
-        if (createReqVO.getParentId() != null && createReqVO.getParentId() != MenuUtils.ROOT_MENU_ID) {
-            validateApplicationMenuExist(createReqVO.getParentId());
-            menuDO.setParentId(createReqVO.getParentId());
-        } else {
-            menuDO.setParentId(MenuUtils.ROOT_MENU_ID);
-        }
+        menuDO.setParentId(parseParentMenuId(createReqVO));
         menuDO.setMenuCode(MenuUtils.generateMenuCode());
         menuDO.setMenuType(createReqVO.getMenuType());
         menuDO.setMenuName(createReqVO.getMenuName());
         menuDO.setMenuIcon(createReqVO.getMenuIcon());
+        menuDO.setMenuSort(generateMenuSort(createReqVO.getApplicationId()));
         menuDO.setVisible(MenuVisibleEnum.YES.getValue());
         appMenuRepository.insert(menuDO);
         // 创建页面集
@@ -103,28 +100,42 @@ public class AppMenuServiceImpl implements AppMenuService {
         return menuCreateRespVO;
     }
 
+    private Integer generateMenuSort(Long applicationId) {
+        return appMenuRepository.countByApplicationId(applicationId) + 1;
+    }
+
+    private Long parseParentMenuId(MenuCreateReqVO createReqVO) {
+        if (createReqVO.getParentId() == null || createReqVO.getParentId() == MenuUtils.ROOT_MENU_ID) {
+            return MenuUtils.ROOT_MENU_ID;
+        }
+        MenuDO parentMenu = validateMenuExist(createReqVO.getParentId());
+        if (parentMenu == null) {
+            throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_MENU_NOT_EXIST);
+        }
+        if (!MenuTypeEnum.isGroup(parentMenu.getMenuType())) {
+            throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_MENU_TYPE_ERROR);
+        }
+        return createReqVO.getParentId();
+    }
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateApplicationMenuName(Long id, String menuName) {
-        MenuDO menuDO = validateApplicationMenuExist(id);
+        MenuDO menuDO = validateMenuExist(id);
         menuDO.setMenuName(menuName);
         appMenuRepository.update(menuDO);
     }
 
     @Override
     public void updateApplicationMenuOrder(MenuOrderUpdateReqVO updateReqVO) {
-        MenuDO menuDO = validateApplicationMenuExist(updateReqVO.getId());
+        MenuDO menuDO = validateMenuExist(updateReqVO.getId());
         menuDO.setParentId(updateReqVO.getId());
         appMenuRepository.update(menuDO);
         Map<Long, Integer> menuSortMap = toMenuSortMap(updateReqVO.getMenuTree());
         List<MenuDO> menuDOS = appMenuRepository.findByApplicationId(menuDO.getApplicationId());
         for (MenuDO menu : menuDOS) {
-            Integer order = menuSortMap.get(menu.getId());
-            if (order == null) {
-                menu.setMenuSort(Integer.MAX_VALUE);
-            } else {
-                menu.setMenuSort(order);
-            }
+            Integer order = MapUtils.getInteger(menuSortMap, menu.getId(), MenuUtils.MENU_SORT_MAX_VALUE);
+            menu.setMenuSort(order);
             appMenuRepository.update(menu);
         }
     }
@@ -167,7 +178,7 @@ public class AppMenuServiceImpl implements AppMenuService {
 
     @Override
     public void updateApplicationMenuVisible(Long id, Boolean visible) {
-        MenuDO menuDO = validateApplicationMenuExist(id);
+        MenuDO menuDO = validateMenuExist(id);
         menuDO.setVisible(visible);
         appMenuRepository.update(menuDO);
     }
@@ -175,7 +186,7 @@ public class AppMenuServiceImpl implements AppMenuService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void copyApplicationMenu(MenuCopyReqVO copyReqVO) {
-        MenuDO menuDO = validateApplicationMenuExist(copyReqVO.getId());
+        MenuDO menuDO = validateMenuExist(copyReqVO.getId());
         if (menuDO.getMenuType() == MenuTypeEnum.GROUP.getValue()) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_MENU_GROUP_NOT_ALLOW_COPY);
         }
@@ -194,9 +205,9 @@ public class AppMenuServiceImpl implements AppMenuService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteApplicationMenu(Long id) {
-        MenuDO menuDO = validateApplicationMenuExist(id);
+        MenuDO menuDO = validateMenuExist(id);
         if (menuDO.getMenuType() == MenuTypeEnum.GROUP.getValue()
-                && validateApplicationMenuGroupHasChildren(menuDO.getId())) {
+                && validateMenuGroupHasChildren(menuDO.getId())) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_MENU_GROUP_HAS_CHILDREN);
         }
         // 删除菜单
@@ -206,7 +217,7 @@ public class AppMenuServiceImpl implements AppMenuService {
     }
 
 
-    private MenuDO validateApplicationMenuExist(Long id) {
+    private MenuDO validateMenuExist(Long id) {
         MenuDO menuDO = appMenuRepository.findById(id);
         if (menuDO == null) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_MENU_NOT_EXIST);
@@ -214,7 +225,7 @@ public class AppMenuServiceImpl implements AppMenuService {
         return menuDO;
     }
 
-    private boolean validateApplicationMenuGroupHasChildren(Long id) {
+    private boolean validateMenuGroupHasChildren(Long id) {
         return appMenuRepository.countByParentId(id) > 0;
     }
 

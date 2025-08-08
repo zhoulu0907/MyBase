@@ -36,8 +36,8 @@ public class AuthDataFilterDO extends TenantBaseDO {
     /**
      * 字段名称
      */
-    @Column(name = "field_name", nullable = false, length = 100, comment = "字段名称")
-    private String fieldName;
+    @Column(name = "field_id", nullable = false,   comment = "字段名称")
+    private Long fieldId;
 
     /**
      * 字段值类型

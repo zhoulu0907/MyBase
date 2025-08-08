@@ -12,7 +12,7 @@ import java.util.List;
  */
 @Schema(description = "应用管理 - 应用分页 Response VO")
 @Data
-public class ApplicationPageRespVO {
+public class ApplicationRespVO {
 
     @Schema(description = "应用Id")
     private Long id;

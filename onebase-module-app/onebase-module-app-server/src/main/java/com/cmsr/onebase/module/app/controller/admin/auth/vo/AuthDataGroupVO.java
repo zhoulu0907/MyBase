@@ -31,6 +31,9 @@ public class AuthDataGroupVO {
     @Schema(description = "关联业务实体字段Id")
     private Long scopeFieldId;
 
+    @Schema(description = "关联业务实体字段名称")
+    private Long scopeFieldDisplayName;
+
     @Schema(description = "关联业务实体字段对应的权限范围")
     private String scopeLevel;
 
