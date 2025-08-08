@@ -21,7 +21,31 @@ import { formatTimestamp } from '@/utils/date';
 const { Text } = Typography;
 const { Option } = Select;
 const { useForm } = Form;
-
+// 模拟数据
+const mockData: PlatformTenantInfo[]  = [
+  {
+    id: 1,
+    name: '默认用户',
+    contactMobile: 'ZH2025070001',
+    accountCount: 50,
+    contactName: '石头',
+    createTime: '2025-08-14 10:30',
+    status: PlatformTenantStatus['已启用'],
+    expireTime: '2025-08-14 10:30',
+    packageId:1,
+  },
+  {
+    id: 2,
+    name: '测试环境验证用户',
+    contactMobile: 'ZH2025070002',
+    accountCount: 50,
+    contactName: '石头',
+    createTime: '2025-08-14 10:30',
+    status: PlatformTenantStatus['已禁用'],
+    expireTime: '2025-08-14 10:30',
+    packageId:1,
+  }
+];
 
 // 模拟管理员数据
 const mockAdmins = Array.from({ length: 3 }, (_, i) => ({
@@ -30,7 +54,7 @@ const mockAdmins = Array.from({ length: 3 }, (_, i) => ({
 }));
 
 const TenantManagement: React.FC = () => {
-  const [data, setData] = useState(mockData);
+  const [data, setData] = useState<PlatformTenantInfo[]>([]);
   const [tenantList, setTenantList] = useState<PlatformTenantInfo[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchParams, setSearchParams] = useState({
@@ -82,7 +106,7 @@ const TenantManagement: React.FC = () => {
 
   // 筛选数据
   useEffect(() => {
-    let result = [...data];
+    let result = [...tenantList];
 
     // 状态筛选
     if (searchParams.status !== 'all') {
@@ -102,7 +126,7 @@ const TenantManagement: React.FC = () => {
     }
     
     setTenantList(result);
-  }, [searchParams, data]);
+  }, [searchParams, tenantList]);
 
   // 处理状态筛选
   const handleStatusChange = (status: string) => {
@@ -171,7 +195,7 @@ const TenantManagement: React.FC = () => {
       // 如果是从禁用状态切换到启用状态
       if (currentTenant && currentTenant.status === 'disabled' && values.status === 'enabled') {
         // 更新数据状态
-        setData(data.map((item) => (item.id === Number(currentTenant.id) ? { ...item, status: 'enabled' } : item)));
+        setTenantList(tenantList.map((item) => (item.id === Number(currentTenant.id) ? { ...item, status: 'enabled' } : item)));
         Message.success('已启用用户');
         setModalVisible(false);
         return;
@@ -179,12 +203,12 @@ const TenantManagement: React.FC = () => {
       // 这里应该是API调用
       if (currentTenant) {
         // 更新
-        setData(data.map((item) => (item.id === Number(currentTenant.id) ? { ...item, ...values } : item)));
+        setTenantList(tenantList.map((item) => (item.id === Number(currentTenant.id) ? { ...item, ...values } : item)));
         // Message.success('更新成功');
       } else {
         // 新增
         const newTenant = {
-          id: data.length + 1,
+          id: tenantList.length + 1,
           tenantCode: `ZH${new Date().getFullYear()}${(new Date().getMonth() + 1).toString().padStart(2, '0')}${Math.floor(
             Math.random() * 10000
           )
@@ -193,7 +217,7 @@ const TenantManagement: React.FC = () => {
           ...values,
           createTime: new Date().toISOString()
         };
-        setData([...data, newTenant]);
+        setTenantList([...tenantList, newTenant]);
         Message.success('创建成功');
       }
 
@@ -213,7 +237,7 @@ const TenantManagement: React.FC = () => {
     }
     const values = form.getFieldsValue();
     // 这里应该是API调用
-    setData(data.map((item) => (item.id === Number(currentTenant?.id) ? { ...item, ...values } : item)));
+    setTenantList(tenantList.map((item) => (item.id === Number(currentTenant?.id) ? { ...item, ...values } : item)));
     Message.success('已禁用用户');
     setConfirmText(''); // 确认禁用后清空输入框
     // 根据是否是新租户决定关闭哪些弹窗
@@ -396,7 +420,7 @@ const TenantManagement: React.FC = () => {
                   console.log('checked', checked);
                   setConfirmDisableVisible(true);
                 } else if (currentTenant && currentTenant.status === 'disabled') {
-                  setData(data.map(item => 
+                  setTenantList(tenantList.map(item => 
                     item.id === Number(currentTenant.id) ? { ...item, status: PlatformTenantStatus['已启用'] } : item
                   ));
                   Message.success('已启用用户');

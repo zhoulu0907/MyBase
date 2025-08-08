@@ -9,19 +9,17 @@ const { useForm } = Form;
 const { Option } = Select;
 
 const Administrator: React.FC = () => {
-  // const [submitData, setSubmitData] = useState<cratePlatformAdminReq>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [createModalVisible, setCreateModalVisible] = useState(false);
-  // const [createModalLoading, setCreateModalLoading] = useState(false);
   const [passwordForm, setPasswordForm] = useState({ id: 0, username: '', newPassword: '', confirmPassword: '' });
   const [emailForm, setEmailForm] = useState({ id: 0, username: '', oldEmail: '', newEmail: '' });
   const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
-  // const [selectedRecord, setSelectedRecord] = useState(null);
   const [modalType, setModalType] = useState<'email' | 'password' | null>(null);
   const [createForm] = useForm();
-  const [searchKeyword, setSearchKeyword] = useState(''); // 添加搜索关键词状态
+  const [searchKeyword, setSearchKeyword] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-
+  const [dataSource, setDataSource] = useState<PlatformAdminInfo[]>([]);
+  const [total, setTotal] = useState(null)
   const columns = [
     // order
     { 
@@ -101,7 +99,7 @@ const Administrator: React.FC = () => {
       )
     }
   ];
-  const [dataSource, setDataSource] = useState<PlatformAdminInfo[]>([]);
+  
 
   const getPlatformAdminList = async (pageNum: number = 1, keyword: string = '') => { 
     const res = await getPlatformAdminListApi({
@@ -111,6 +109,7 @@ const Administrator: React.FC = () => {
     });
     console.log('getPlatformAdminList res', res);
     setDataSource(res.list);
+    setTotal(res.total)
   };
 
   useEffect(() => { 
@@ -169,7 +168,6 @@ const Administrator: React.FC = () => {
 
   const handleDeleteConfirm = async (record: PlatformAdminInfo) => {
     console.log('record:', record);
-    // setSelectedRecord(record);
     try {
       await deletePlatformAdminApi(record.id)
       
@@ -180,25 +178,6 @@ const Administrator: React.FC = () => {
 
     setDeleteConfirmVisible(true);
   };
-  // const handleDeleteConfirm = (record: PlatformAdminInfo) => {
-  //   Modal.confirm({
-  //     title: 'Are you sure you want to delete?',
-  //     content: '点击删除，弹出该提示框，是否确认删除管理员账号',
-  //     onOk: async () => {
-  //       try {
-  //         await deletePlatformAdminApi(record.id);
-  //         Message.success('删除成功');
-  //         getPlatformAdminList();
-  //       } catch (error) {
-  //         console.log(error);
-  //         Message.error('删除失败');
-  //       }
-  //     },
-  //     onCancel: () => {
-  //       console.log('Cancel');
-  //     },
-  //   });
-  // };
 
   const handleUpdata = async () => {
     const { id: passwordId, newPassword, confirmPassword } = passwordForm;
@@ -254,9 +233,16 @@ const Administrator: React.FC = () => {
   };
 
   // 处理分页变化
-  const handlePageChange = (pageNum: number) => {
-    setCurrentPage(pageNum);
-    getPlatformAdminList(pageNum, searchKeyword);
+  const handlePageChange = async (pageNum: number) => {
+    try {
+      console.log('pageNum', pageNum);
+      const pageResp = await getPlatformAdminList(pageNum);
+      console.log('pageResp', pageResp);
+      // setDataSource(pageResp.list)
+      setCurrentPage(pageNum);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
@@ -282,7 +268,8 @@ const Administrator: React.FC = () => {
           pagination={{
             current: currentPage,
             pageSize: 10,
-            showTotal: (total) => `共 ${total} 条`,
+            showTotal: true,
+            total: total || 10,
             onChange: handlePageChange
           }}
           rowKey="id"
