@@ -14,8 +14,11 @@ public class AuthOperationVO {
     @Schema(description = "主键Id")
     private Long id;
 
+    @Schema(description = "操作编码")
+    private String operationCode;
+
     @Schema(description = "操作名称")
-    private String operationType;
+    private String operationDisplayName;
 
     @Schema(description = "是否允许")
     private Boolean allowed;

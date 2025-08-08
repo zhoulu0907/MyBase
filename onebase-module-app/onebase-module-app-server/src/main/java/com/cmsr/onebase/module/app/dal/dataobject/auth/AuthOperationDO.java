@@ -22,8 +22,8 @@ public class AuthOperationDO extends TenantBaseDO {
     @Column(name = "menu_id", nullable = false, comment = "菜单Id")
     private Long menuId;
 
-    @Column(name = "operation_type", nullable = false, length = 64, comment = "操作名称")
-    private String operationType;
+    @Column(name = "operation_code", nullable = false, length = 64, comment = "操作编码")
+    private String operationCode;
 
     @Column(name = "is_allowed", nullable = false, comment = "是否允许")
     private Boolean allowed;

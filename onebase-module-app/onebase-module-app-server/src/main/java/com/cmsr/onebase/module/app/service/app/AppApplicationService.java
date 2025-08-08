@@ -4,7 +4,7 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.app.controller.admin.app.vo.ApplicationCreateReqVO;
 import com.cmsr.onebase.module.app.controller.admin.app.vo.ApplicationCreateRespVO;
 import com.cmsr.onebase.module.app.controller.admin.app.vo.ApplicationPageReqVO;
-import com.cmsr.onebase.module.app.controller.admin.app.vo.ApplicationPageRespVO;
+import com.cmsr.onebase.module.app.controller.admin.app.vo.ApplicationRespVO;
 
 /**
  * @Author：huangjie
@@ -12,13 +12,16 @@ import com.cmsr.onebase.module.app.controller.admin.app.vo.ApplicationPageRespVO
  */
 public interface AppApplicationService {
 
-    PageResult<ApplicationPageRespVO> getApplicationPage(ApplicationPageReqVO pageReqVO);
+    PageResult<ApplicationRespVO> getApplicationPage(ApplicationPageReqVO pageReqVO);
 
     ApplicationCreateRespVO createApplication(ApplicationCreateReqVO applicationCreateReqVO);
+
+    ApplicationRespVO getApplication(Long id);
 
     void updateApplication(ApplicationCreateReqVO applicationCreateReqVO);
 
     void updateApplicationName(Long id, String name);
 
     void deleteApplication(Long id,String name);
+
 }

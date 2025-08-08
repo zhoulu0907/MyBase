@@ -5,7 +5,7 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.app.controller.admin.app.vo.ApplicationCreateReqVO;
 import com.cmsr.onebase.module.app.controller.admin.app.vo.ApplicationCreateRespVO;
 import com.cmsr.onebase.module.app.controller.admin.app.vo.ApplicationPageReqVO;
-import com.cmsr.onebase.module.app.controller.admin.app.vo.ApplicationPageRespVO;
+import com.cmsr.onebase.module.app.controller.admin.app.vo.ApplicationRespVO;
 import com.cmsr.onebase.module.app.service.app.AppApplicationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -31,8 +31,14 @@ public class AppApplicationController {
 
     @GetMapping("/page")
     @Operation(summary = "获得应用列表")
-    public CommonResult<PageResult<ApplicationPageRespVO>> getApplicationPage(@Validated ApplicationPageReqVO pageReqVO) {
+    public CommonResult<PageResult<ApplicationRespVO>> getApplicationPage(@Validated ApplicationPageReqVO pageReqVO) {
         return CommonResult.success(appApplicationService.getApplicationPage(pageReqVO));
+    }
+
+    @GetMapping("/get")
+    @Operation(summary = "获得应用")
+    public CommonResult<ApplicationRespVO> getApplication(@RequestParam("id") Long id) {
+        return CommonResult.success(appApplicationService.getApplication(id));
     }
 
     @PostMapping("/create")
