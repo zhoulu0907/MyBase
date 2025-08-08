@@ -17,3 +17,17 @@ export type RoleForm = Partial<RoleVO>;
 export type UpdateStatusForm = Pick<RoleVO, 'id' | 'status'>;
 
 export type SimpleRoleVO = Pick<RoleVO, 'id' | 'name'> & Partial<RoleVO>;
+
+// 权限相关类型定义
+export interface PermissionAction {
+  id: number;
+  name: string;
+}
+
+export interface Permission {
+  id: number;
+  name: string;
+  type: string;
+  remark?: string;
+  actions?: PermissionAction[];
+}
