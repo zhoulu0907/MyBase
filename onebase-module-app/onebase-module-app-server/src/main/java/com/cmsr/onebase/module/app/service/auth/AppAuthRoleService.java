@@ -15,12 +15,14 @@ public interface AppAuthRoleService {
 
     List<AuthRoleListRespVO> getAuthRoleList(Long applicationId);
 
-    void createAuthRole(AuthRoleCreateReqVO reqVO);
+    void createRole(AuthRoleCreateReqVO reqVO);
 
-    void addMember(AuthRoleAddMemberReqVO reqVO);
+    void createDefaultRole(Long applicationId);
 
-    void deleteMember(AuthRoleDeleteMemberReqVO reqVO);
+    void addUser(AuthRoleAddMemberReqVO reqVO);
 
-    void deleteAuthRole(Long roleId);
+    void deleteUser(AuthRoleDeleteMemberReqVO reqVO);
+
+    void deleteRole(Long roleId);
 
 }
