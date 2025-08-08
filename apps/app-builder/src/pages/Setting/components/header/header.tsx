@@ -1,5 +1,4 @@
 import LogoSVG from '@/assets/images/ob_logo.svg';
-import settingSVG from '@/assets/images/setting_icon.svg';
 import navBackSVG from '@/assets/images/nav_back.svg';
 import defaultAvatar from '@/assets/images/default_avatar.png';
 import { UserPermissionManager } from '@/utils/permission';

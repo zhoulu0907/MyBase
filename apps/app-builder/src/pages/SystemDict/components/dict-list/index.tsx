@@ -44,7 +44,7 @@ export default function DictionaryListProps({
           <ListItem
             key={item.id}
             title={item.name}
-            active={item.id?.toString() === activeId}
+            active={item.id === activeId}
             onClick={() => onSelect(item.id)}
           ></ListItem>
         ))}
