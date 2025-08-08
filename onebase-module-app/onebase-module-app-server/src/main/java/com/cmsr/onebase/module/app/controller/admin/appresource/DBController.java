@@ -10,7 +10,7 @@ import com.cmsr.onebase.module.app.util.db.TableInitializer;
 import jakarta.annotation.Resource;
 
 @RestController
-@RequestMapping("/app_resource/db")
+@RequestMapping("/app/resource/db")
 public class DBController {
     @Resource
     private TableInitializer tableInitializer;

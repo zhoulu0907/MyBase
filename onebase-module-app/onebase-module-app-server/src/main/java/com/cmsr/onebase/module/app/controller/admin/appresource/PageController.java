@@ -15,7 +15,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 
-
 /**
  * @ClassName PageController
  * @Description TODO
@@ -24,7 +23,7 @@ import jakarta.annotation.Resource;
  */
 @Tag(name = "应用资源管理-页面管理")
 @RestController
-@RequestMapping("/app_resource/page")
+@RequestMapping("/app/resource/page")
 @Validated
 public class PageController {
 

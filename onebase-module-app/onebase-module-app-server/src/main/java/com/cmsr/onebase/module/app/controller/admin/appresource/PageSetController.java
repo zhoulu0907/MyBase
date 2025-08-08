@@ -1,9 +1,11 @@
 package com.cmsr.onebase.module.app.controller.admin.appresource;
 
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
@@ -21,12 +23,21 @@ import jakarta.annotation.Resource;
 
 @Tag(name = "应用资源管理-页面集管理")
 @RestController
-@RequestMapping("/app_resource/page_set")
+@RequestMapping("/app/resource/page_set")
 @Validated
 public class PageSetController {
 
     @Resource
     private PageSetService pageSetService;
+
+    @GetMapping("/code")
+    @Operation(summary = "获取页面集编码")
+    public CommonResult<String> getPageSetCode(@RequestParam Long menuId) {
+
+        String pageSetCode = pageSetService.getPageSetCode(menuId);
+
+        return CommonResult.success(pageSetCode);
+    }
 
     @PostMapping("/create")
     @Operation(summary = "创建页面集")
