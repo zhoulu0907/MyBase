@@ -19,10 +19,13 @@ public class MenuDO extends TenantBaseDO {
     @Column(name = "parent_id", nullable = false, length = 64, comment = "父节点Id")
     private Long parentId;
 
+    @Column(name = "entity_id", nullable = false, length = 64, comment = "实体Id")
+    private Long entityId;
+
     @Column(name = "menu_code", length = 64, comment = "菜单编码")
     private String menuCode;
 
-    @Column(name = "menu_sort", nullable = false, columnDefinition = "integer default 0", comment = "菜单排序")
+    @Column(name = "menu_sort", nullable = false, comment = "菜单排序")
     private Integer menuSort;
 
     @Column(name = "menu_type", nullable = false, comment = "菜单类型")

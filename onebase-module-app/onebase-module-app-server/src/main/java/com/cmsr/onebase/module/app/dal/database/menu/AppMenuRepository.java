@@ -39,4 +39,10 @@ public class AppMenuRepository extends DataRepository {
         deleteByConfig(MenuDO.class, configs);
     }
 
+
+    public int countByApplicationId(Long applicationId) {
+        ConfigStore configs = new DefaultConfigStore();
+        configs.eq("application_id", applicationId);
+        return (int) countByConfig(MenuDO.class, configs);
+    }
 }

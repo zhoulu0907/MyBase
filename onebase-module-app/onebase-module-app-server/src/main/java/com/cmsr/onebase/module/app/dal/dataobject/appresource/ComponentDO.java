@@ -7,7 +7,7 @@ import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-@Table(name="app_resource_component")
+@Table(name = "app_resource_component")
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class ComponentDO extends TenantBaseDO {
@@ -21,14 +21,13 @@ public class ComponentDO extends TenantBaseDO {
     /**
      * 页面ID
      */
-    @Column(name = "page_id", columnDefinition= "BIGINT NOT NULL", comment = "页面ID")
+    @Column(name = "page_id", columnDefinition = "BIGINT NOT NULL", comment = "页面ID")
     private Long pageId;
-
 
     /**
      * 是否在子表中
      */
-    @Column(name = "in_table", columnDefinition= "BOOLEAN NOT NULL", comment = "是否在子表中")
+    @Column(name = "in_table", columnDefinition = "BOOLEAN NOT NULL", comment = "是否在子表中")
     private Boolean inTable;
 
     /**
@@ -36,36 +35,6 @@ public class ComponentDO extends TenantBaseDO {
      */
     @Column(name = "component_type", columnDefinition = "VARCHAR(64) NOT NULL", comment = "组件类型")
     private String componentType;
-
-    /**
-     * 组件标题
-     */
-    @Column(name = "label", columnDefinition = "VARCHAR(255) NOT NULL", comment = "组件标题")
-    private String label;
-
-    /**
-     * 组件宽度
-     */
-    @Column(name = "width", columnDefinition = "INT NOT NULL", comment = "组件宽度")
-    private Integer width;
-
-    /**
-     * 是否隐藏
-     */
-    @Column(name = "hidden", columnDefinition = "BOOLEAN NOT NULL", comment = "是否隐藏")
-    private Boolean hidden;
-
-    /**
-     * readOnly
-     */
-    @Column(name = "read_only", columnDefinition = "BOOLEAN NOT NULL", comment = "只读绑定（如PageData.isViewMode）")
-    private Boolean readOnly;
-
-    /**
-     * 是否必填
-     */
-    @Column(name = "required", columnDefinition = "BOOLEAN NOT NULL", comment = "是否必填")
-    private Boolean required;
 
     /**
      * 配置

@@ -8,7 +8,7 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class VersionUtils {
 
-    public static final String INIT_VERSION = "0.0.1";
+    public static final String INIT_VERSION = "v0.0.1";
 
 
     /**
@@ -19,9 +19,8 @@ public class VersionUtils {
      */
     public static String increaseVersionNumber(String versionNumber) {
         if (StringUtils.isEmpty(versionNumber)) {
-            return "v1.0.0";
+            return INIT_VERSION;
         }
-
         // 去掉前缀"v"
         String versionWithoutPrefix = versionNumber.startsWith("v") ? versionNumber.substring(1) : versionNumber;
 

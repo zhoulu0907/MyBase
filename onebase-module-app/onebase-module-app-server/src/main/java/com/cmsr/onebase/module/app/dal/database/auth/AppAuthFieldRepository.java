@@ -23,12 +23,12 @@ public class AppAuthFieldRepository extends DataRepository {
         super(AuthFieldDO.class);
     }
 
-    public List<AuthFieldVO> findByQuery(AuthPermissionReqVO reqVO) {
+    public List<AuthFieldDO> findByQuery(AuthPermissionReqVO reqVO) {
         ConfigStore configs = new DefaultConfigStore();
         configs.eq("application_id", reqVO.getApplicationId());
         configs.eq("role_id", reqVO.getRoleId());
         configs.eq("menu_id", reqVO.getMenuId());
-        return this.findAllByConfig(AuthFieldVO.class, configs);
+        return this.findAllByConfig(AuthFieldDO.class, configs);
     }
 
 }

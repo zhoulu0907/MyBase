@@ -3,9 +3,13 @@ package com.cmsr.onebase.module.app.service.app;
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.module.app.controller.admin.app.vo.*;
+import com.cmsr.onebase.module.app.controller.admin.app.vo.ApplicationCreateReqVO;
+import com.cmsr.onebase.module.app.controller.admin.app.vo.ApplicationCreateRespVO;
+import com.cmsr.onebase.module.app.controller.admin.app.vo.ApplicationPageReqVO;
+import com.cmsr.onebase.module.app.controller.admin.app.vo.ApplicationRespVO;
 import com.cmsr.onebase.module.app.controller.admin.tag.vo.TagRespVO;
-import com.cmsr.onebase.module.app.dal.database.app.*;
+import com.cmsr.onebase.module.app.dal.database.app.AppApplicationRepository;
+import com.cmsr.onebase.module.app.dal.database.app.AppResourceRepository;
 import com.cmsr.onebase.module.app.dal.database.menu.AppMenuRepository;
 import com.cmsr.onebase.module.app.dal.database.tag.AppApplicationTagRepository;
 import com.cmsr.onebase.module.app.dal.database.tag.AppTagRepository;
@@ -63,12 +67,12 @@ public class AppApplicationServiceImpl implements AppApplicationService {
     private AppCommonService appCommonService;
 
     @Override
-    public PageResult<ApplicationPageRespVO> getApplicationPage(ApplicationPageReqVO pageReqVO) {
+    public PageResult<ApplicationRespVO> getApplicationPage(ApplicationPageReqVO pageReqVO) {
         PageResult<ApplicationDO> pageResult = applicationRepository.selectPage(pageReqVO);
         AppCommonService.UserHelper userHelper = appCommonService.getUserHelper(pageResult.getList());
-        List<ApplicationPageRespVO> respVOS = pageResult.getList().stream()
+        List<ApplicationRespVO> respVOS = pageResult.getList().stream()
                 .map(v -> {
-                    ApplicationPageRespVO bean = BeanUtils.toBean(v, ApplicationPageRespVO.class);
+                    ApplicationRespVO bean = BeanUtils.toBean(v, ApplicationRespVO.class);
                     bean.setAppStatusText(ApplicationStatusEnum.getText(v.getAppStatus()));
                     bean.setTags(queryAppTags(v.getId()));
                     bean.setCreateUser(userHelper.getUserName(v.getCreator()));
@@ -96,6 +100,15 @@ public class AppApplicationServiceImpl implements AppApplicationService {
         applicationDO = applicationRepository.insert(applicationDO);
         applicationTagRepository.saveApplicationTags(applicationDO.getId(), createReqVO.getTagIds());
         return BeanUtils.toBean(applicationDO, ApplicationCreateRespVO.class);
+    }
+
+    @Override
+    public ApplicationRespVO getApplication(Long id) {
+        ApplicationDO applicationDO = applicationRepository.findById(id);
+        if (applicationDO == null) {
+            throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_NOT_EXIST);
+        }
+        return BeanUtils.toBean(applicationDO, ApplicationRespVO.class);
     }
 
 

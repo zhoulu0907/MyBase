@@ -20,14 +20,17 @@ public class AuthDataFilterVO {
     @Schema(description = "条件顺序")
     private Integer conditionOrder;
 
-    @Schema(description = "字段名称")
-    private String fieldName;
+    @Schema(description = "字段Id")
+    private Long fieldId;
 
-    @Schema(description = "字段值类型")
-    private String fieldValueType;
+    @Schema(description = "字段名称")
+    private String fieldDisplayName;
 
     @Schema(description = "比较操作符号")
     private String fieldOperator;
+
+    @Schema(description = "字段值类型")
+    private String fieldValueType;
 
     @Schema(description = "字段值")
     private String fieldValue;

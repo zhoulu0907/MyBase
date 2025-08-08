@@ -10,6 +10,8 @@ public class MenuUtils {
 
     public static final Long ROOT_MENU_ID = 0L;
 
+    public static final Integer MENU_SORT_MAX_VALUE = 9999;
+
     public static String generateMenuCode() {
         return "NAV-" + UUID.randomUUID().toString().replace("-", "");
     }
