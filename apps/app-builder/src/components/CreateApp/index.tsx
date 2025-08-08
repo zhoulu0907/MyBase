@@ -1,16 +1,24 @@
 import { useState, useEffect } from 'react';
-import { Form, Input, Grid, Button, Select, Divider, Popconfirm, type FormInstance, Icon, Message } from '@arco-design/web-react';
+import {
+  Form,
+  Input,
+  Grid,
+  Button,
+  Select,
+  Divider,
+  Popconfirm,
+  Message,
+  type FormInstance
+} from '@arco-design/web-react';
 
 import { listApplicationTag, createApplicationTag, type ListTagReq, type CreateApplicationTagReq } from '@onebase/app';
 import { sample } from 'lodash-es';
-
 
 import { IconPlus } from '@arco-design/web-react/icon';
 import tickSVG from '@/assets/images/tick_icon.svg';
 import databaseSVG from '@/assets/images/database_icon.svg';
 import formSVG from '@/assets/images/form_icon.svg';
 import arrowSVG from '@/assets/images/arrow_icon.svg';
-import createAppSVG from '@/assets/images/create_app_icon.svg';
 import appIconEditSVG from '@/assets/images/app_icon_edit.svg';
 import classicModeSVG from '@/assets/images/classic_mode_icon.svg';
 import appTypeSVG from '@/assets/images/app_type_selected_icon.svg';
@@ -49,14 +57,14 @@ const BasicSetting = (props: IProps) => {
     listApplicationTag(params).then((data) => {
       setTagList(data || []);
     });
-  }
+  };
 
   useEffect(() => {
     form.setFieldsValue({
       ...form.getFieldsValue(),
       iconName,
       iconColor,
-      themeColor,
+      themeColor
     });
   }, [form, iconName, iconColor, themeColor]);
 
@@ -140,9 +148,12 @@ const BasicSetting = (props: IProps) => {
             <Input />
           </Form.Item>
           <Grid.Row justify="space-between">
-            <div className={styles.appIcon} style={{
-              background: iconColor,
-            }}>
+            <div
+              className={styles.appIcon}
+              style={{
+                background: iconColor
+              }}
+            >
               {iconName && <i className={`iconfont ${iconName}`} />}
               <Popconfirm
                 icon={null}
@@ -164,14 +175,24 @@ const BasicSetting = (props: IProps) => {
                   <>
                     <div className={styles.avatarWrapper}>
                       {appIcon.map((icon, index) => (
-                        <div className={styles.avatar} key={index} style={{ backgroundColor: icon === iconName ? iconColor : '#d9d9d9' }} onClick={() => setIconName(icon)} >
+                        <div
+                          className={styles.avatar}
+                          key={index}
+                          style={{ backgroundColor: icon === iconName ? iconColor : '#d9d9d9' }}
+                          onClick={() => setIconName(icon)}
+                        >
                           <i className={`iconfont ${icon}`} />
                         </div>
                       ))}
                     </div>
                     <div className={styles.avatarColor}>
                       {appIconColor.map((color, index) => (
-                        <div className={styles.color} key={index} style={{ backgroundColor: color, borderWidth: color === iconColor ? 1 : 0 }} onClick={() => setIconColor(color)} />
+                        <div
+                          className={styles.color}
+                          key={index}
+                          style={{ backgroundColor: color, borderWidth: color === iconColor ? 1 : 0 }}
+                          onClick={() => setIconColor(color)}
+                        />
                       ))}
                     </div>
                   </>

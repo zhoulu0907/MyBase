@@ -1,7 +1,7 @@
 // 应用类型
 
 export interface Application {
-  id: string;
+  id: number;
   /**
    * 应用名称
    */
@@ -17,7 +17,7 @@ export interface Application {
   /**
    * 图标类型
    */
-  iconType?: string | null;
+  iconName?: string | null;
   /**
    * 图标颜色
    */
@@ -111,6 +111,10 @@ export interface UpdateApplicationReq {
    * 应用名称
    */
   appName: string;
+  /**
+   * 应用编码
+   */
+  appCode: string;
   /**
    * 数据源ID
    */
