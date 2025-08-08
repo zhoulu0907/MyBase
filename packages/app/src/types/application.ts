@@ -17,7 +17,7 @@ export interface Application {
   /**
    * 图标类型
    */
-  iconType?: string | null;
+  iconName?: string | null;
   /**
    * 图标颜色
    */
@@ -112,6 +112,10 @@ export interface UpdateApplicationReq {
    */
   appName: string;
   /**
+   * 应用编码
+   */
+  appCode: string;
+  /**
    * 数据源ID
    */
   datasourceId: number;
@@ -152,7 +156,7 @@ export interface DeleteApplicationReq {
   /**
    * 应用ID
    */
-  id: number;
+  id: bigint;
   /**
    * 应用名称
    */

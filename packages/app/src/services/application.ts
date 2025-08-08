@@ -26,5 +26,6 @@ export const updateApplicationName = (params: UpdateApplicationNameReq) => {
 };
 
 export const deleteApplication = (params: DeleteApplicationReq) => {
-  return appService.post('/application/delete', params);
+  const { id, name } = params;
+  return appService.post(`/application/delete?id=${id}&name=${name}`);
 };

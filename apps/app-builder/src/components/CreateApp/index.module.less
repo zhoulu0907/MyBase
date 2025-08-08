@@ -4,9 +4,11 @@
 
   display: flex;
   justify-content: space-between;
+  column-gap: 52px;
 
   .preview {
-    width: 635px;
+    // width: 635px;
+    flex: 1;
     height: 100%;
     padding: 20px 55px;
     box-sizing: border-box;
@@ -107,8 +109,8 @@
   }
 
   .info {
-    width: 458px;
-    margin-left: 52px;
+    // width: 458px;
+    // margin-left: 52px;
     flex: 1;
 
     .title {
@@ -247,6 +249,7 @@
   .avatar {
     width: 32px;
     height: 32px;
+    color: #FFF;
     border-radius: 4px;
     background-color: #d9d9d9;
     cursor: pointer;
@@ -267,13 +270,25 @@
     border-radius: 50%;
     background-color: #4fae7b;
     cursor: pointer;
+    border: 1px solid #333;
+    border-radius: 50%;
+    box-sizing: border-box;
   }
 }
 
 .appIcon {
   width: 66px;
   height: 66px;
+  border-radius: 4px;
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  i {
+    color: #FFF;
+    font-size: 36px;
+  }
 
   img {
     position: absolute;
