@@ -1,4 +1,4 @@
-import LogoSVG from '@/assets/images/logo.svg';
+import LogoSVG from '@/assets/images/ob_logo.svg';
 import { Button, Checkbox, Form, Input, Message, Space, Tabs, Typography } from '@arco-design/web-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -147,7 +147,7 @@ const Right: React.FC = () => {
     <div className={styles.loginPageRight}>
       <div className={styles.loginPageHeader}>
         <img src={LogoSVG} alt="logo" />
-        <div>ONE BASE</div>
+        {/* <div>ONE BASE</div> */}
       </div>
       <div className={styles.loginFormContainer}>
         <Tabs activeTab={loginType} onChange={(key) => setLoginType(key as 'account' | 'mobile')} type="text">
