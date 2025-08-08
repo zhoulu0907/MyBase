@@ -25,11 +25,11 @@ public class AppAuthUserRoleRepository extends DataRepository {
         for (Long userId : reqVO.getUserIds()) {
             ConfigStore configStore = new DefaultConfigStore();
             configStore.eq("role_id", reqVO.getRoleId());
-            configStore.eq("user_id", reqVO);
+            configStore.eq("user_id", userId);
             if (this.countByConfig(AuthUserRoleDO.class, configStore) == 0) {
                 AuthUserRoleDO authUserRoleDO = new AuthUserRoleDO();
-                authUserRoleDO.setUserId(userId);
                 authUserRoleDO.setRoleId(reqVO.getRoleId());
+                authUserRoleDO.setUserId(userId);
                 this.insert(authUserRoleDO);
             }
         }
@@ -37,12 +37,10 @@ public class AppAuthUserRoleRepository extends DataRepository {
     }
 
     public void deleteUserRole(AuthRoleDeleteMemberReqVO reqVO) {
-        for (Long userId : reqVO.getUserIds()) {
-            ConfigStore configStore = new DefaultConfigStore();
-            configStore.eq("role_id", reqVO.getRoleId());
-            configStore.eq("user_id", userId);
-            this.deleteByConfig(AuthUserRoleDO.class, configStore);
-        }
+        ConfigStore configStore = new DefaultConfigStore();
+        configStore.eq("role_id", reqVO.getRoleId());
+        configStore.in("user_id", reqVO.getUserIds());
+        this.deleteByConfig(AuthUserRoleDO.class, configStore);
     }
 
     public void deleteByRoleId(Long roleId) {
