@@ -358,7 +358,11 @@ public class TenantServiceImpl implements TenantService {
 
     @Override
     public PageResult<TenantDO> getTenantPage(TenantPageReqVO pageReqVO) {
-        return dataRepository.findPageWithConditions(TenantDO.class, new DefaultConfigStore(), pageReqVO.getPageNo(), pageReqVO.getPageSize());
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        configStore.eq(TenantDO.STATUS, pageReqVO.getStatus())
+                .like(TenantDO.NAME, pageReqVO.getName())
+                .like(TenantDO.TENANT_CODE, pageReqVO.getTenantCode());
+        return dataRepository.findPageWithConditions(TenantDO.class, configStore, pageReqVO.getPageNo(), pageReqVO.getPageSize());
 //        return tenantMapper.selectPage(pageReqVO);
     }
 

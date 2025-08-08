@@ -44,7 +44,6 @@ import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
 
 /**
  * Auth Service 实现类
- *
  */
 @Service
 @Slf4j

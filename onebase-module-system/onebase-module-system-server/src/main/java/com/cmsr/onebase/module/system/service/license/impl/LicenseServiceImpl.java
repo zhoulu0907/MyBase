@@ -11,8 +11,8 @@ import org.springframework.validation.annotation.Validated;
 import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.module.system.controller.admin.license.LicensePageReqVO;
-import com.cmsr.onebase.module.system.controller.admin.license.LicenseSaveReqVO;
+import com.cmsr.onebase.module.system.controller.admin.license.vo.LicensePageReqVO;
+import com.cmsr.onebase.module.system.controller.admin.license.vo.LicenseSaveReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.license.LicenseDO;
 import com.cmsr.onebase.module.system.service.license.LicenseService;
 
@@ -128,7 +128,7 @@ public class LicenseServiceImpl implements LicenseService {
             return dataRepository.findPageWithConditions(
                     LicenseDO.class,
                     cs,
-                    reqVO.getPageNo(),
+                    reqVO.getPageNum(),
                     reqVO.getPageSize()
             );
         } catch (Exception e) {

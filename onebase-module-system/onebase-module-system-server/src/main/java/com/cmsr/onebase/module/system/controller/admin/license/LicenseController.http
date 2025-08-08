@@ -1,0 +1,13 @@
+### 获得凭证列表分页 /admin-api/system/platforminfo/simple-simple
+GET http://127.0.0.1:48080/admin-api/system/license/page?pageNum=1&pageSize=2
+Authorization: Bearer e9f2faef4dfb48169fc69e1ac7aeefdb
+
+### 登录接口
+POST http://127.0.0.1:48080/admin-api/system/auth/login
+Content-Type: application/json
+tenant-id: 1
+
+{
+  "username": "platfomAdmin123",
+  "password": "admin124"
+}

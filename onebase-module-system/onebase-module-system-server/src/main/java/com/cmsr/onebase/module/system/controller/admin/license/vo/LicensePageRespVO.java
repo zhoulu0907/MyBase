@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.system.controller.admin.license;
+package com.cmsr.onebase.module.system.controller.admin.license.vo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
@@ -35,4 +35,11 @@ public class LicensePageRespVO {
 
     @Schema(description = "创建时间")
     private LocalDateTime createTime;
+
+    @Schema(description = "租户数量限制")
+    private Integer tenantLimit;
+
+    @Schema(description = "用户数量限制")
+    private Integer userLimit;
+
 }
