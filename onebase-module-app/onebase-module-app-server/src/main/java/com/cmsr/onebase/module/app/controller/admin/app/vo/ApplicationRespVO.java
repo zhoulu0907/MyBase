@@ -23,8 +23,12 @@ public class ApplicationRespVO {
     @Schema(description = "应用编码")
     private String appCode;
 
-    @Schema(description = "应用描述")
-    private String description;
+    @Schema(description = "应用模式")
+    private String appMode;
+
+    @Schema(description = "主题色")
+    private String themeColor;
+
 
     @Schema(description = "图标名称")
     private String iconName;
@@ -32,9 +36,19 @@ public class ApplicationRespVO {
     @Schema(description = "图标颜色")
     private String iconColor;
 
+    @Schema(description = "版本号")
+    private String versionNumber;
+
+    @Schema(description = "状态")
+    private Integer appStatus;
+
     @Schema(description = "应用状态")
     private String appStatusText;
 
+    @Schema(description = "应用描述")
+    private String description;
+
+    @Schema(description = "标签")
     private List<TagRespVO> tags;
 
     @Schema(description = "创建时间")

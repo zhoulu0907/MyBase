@@ -325,8 +325,7 @@ public class DataRepository { // TODO 等改造完成，这个类泛型 <T exten
     public <T extends BaseDO> long countByConfig(Class<T> clazz, ConfigStore configs) {
         try {
             String tableName = getTableName(clazz);
-            DataSet dataSet = anylineService.querys(tableName, configs);
-            return dataSet.total();
+            return anylineService.count(tableName, configs);
         } catch (Exception e) {
             log.error("统计实体数量失败: class={}", clazz.getSimpleName(), e);
             throw new BizException(StatusCode.DB_SELECT_ERROR);
