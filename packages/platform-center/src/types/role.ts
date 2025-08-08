@@ -22,12 +22,13 @@ export type SimpleRoleVO = Pick<RoleVO, 'id' | 'name'> & Partial<RoleVO>;
 export interface PermissionAction {
   id: number;
   name: string;
+  type?: number;
 }
 
 export interface Permission {
   id: number;
   name: string;
-  type: string;
+  type?: number;
   remark?: string;
-  actions?: PermissionAction[];
+  children?: PermissionAction[];
 }

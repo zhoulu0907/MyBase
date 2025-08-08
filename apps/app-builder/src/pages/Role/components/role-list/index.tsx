@@ -50,22 +50,6 @@ export default forwardRef(function RoleList({ activeId, onSelect, onAdd }: RoleL
 
         setHasMore(newRoleList.length === 10);
         setCurrentPage(page);
-      } catch (error) {
-        // TODO 联调后移除
-        const mockRoleList = [
-          { id: 1, name: '管理员', remark: '系统管理员' },
-          { id: 2, name: '开发工程师', remark: '开发工程师' },
-          { id: 3, name: '产品经理', remark: '产品经理' },
-          { id: 4, name: 'UI设计师', remark: 'UI设计师' },
-          { id: 5, name: '测试工程师', remark: '测试工程师' }
-        ];
-
-        if (append) {
-          setRoleList((prev) => [...prev, ...mockRoleList]);
-        } else {
-          setRoleList(mockRoleList);
-        }
-        setHasMore(false);
       } finally {
         setLoading(false);
         setIsScrollLoading(false);
