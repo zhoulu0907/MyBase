@@ -1,5 +1,7 @@
 import LogoSVG from '@/assets/images/ob_logo.svg';
 import settingSVG from '@/assets/images/setting_icon.svg';
+import navBackSVG from '@/assets/images/nav_back.svg';
+import defaultAvatar from '@/assets/images/default_avatar.png';
 import { UserPermissionManager } from '@/utils/permission';
 import { Avatar, Button, Dropdown, Layout, Menu } from '@arco-design/web-react';
 import { IconPoweroff, IconUser } from '@arco-design/web-react/icon';
@@ -57,16 +59,21 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
         </div>
 
         <div className={styles.userInfo}>
-          <Button
-            shape="circle"
-            icon={<img src={settingSVG} alt="Setting" />}
-            onClick={() => navigate('/onebase/setting')}
-          />
+           <Button
+            type='secondary'
+            icon={<img src={navBackSVG} alt="MyApp"/>}
+            onClick={() => navigate('/onebase/my-app')}
+            className={styles.backBtn}
+          >我的应用</Button>
+
+          <div className={styles.username}>
+            {userPermissionInfo?.user.nickname}
+          </div>
 
           <Dropdown droplist={userMenu} position="bottom">
             <div className={styles.userDropdown}>
               <Avatar size={32} style={{ backgroundColor: '#4FAE7B' }}>
-                {userPermissionInfo?.user.nickname?.toString().charAt(0) || 'U'}
+                <img src={defaultAvatar} alt="avatar" />
               </Avatar>
             </div>
           </Dropdown>
