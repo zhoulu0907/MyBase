@@ -8,7 +8,7 @@ import styles from './tabs.module.less';
 import type { EntityNode } from '../../../../../utils/interface';
 
 interface DataFieldsProps {
-  entity: EntityNode; 
+  entity: EntityNode;
 }
 
 const DataFields: React.FC<DataFieldsProps> = ({ entity }) => {
@@ -136,21 +136,16 @@ const DataFields: React.FC<DataFieldsProps> = ({ entity }) => {
       key: 'operation',
       render: (_, record) => (
         <Space>
-          {!record.isSystemField && <Button 
-            type="text" 
-            size="mini"
-            onClick={() => handleEditField(record.id)}
-          >
-            编辑
-          </Button>}
-          {!record.isSystemField && <Button 
-            type="text" 
-            size="mini" 
-            status="danger" 
-            onClick={() => handleDeleteField(record.id)}
-          >
-            删除
-          </Button>}
+          {!record.isSystemField && (
+            <Button type="text" size="mini" onClick={() => handleEditField(record.id)}>
+              编辑
+            </Button>
+          )}
+          {!record.isSystemField && (
+            <Button type="text" size="mini" status="danger" onClick={() => handleDeleteField(record.id)}>
+              删除
+            </Button>
+          )}
         </Space>
       )
     }

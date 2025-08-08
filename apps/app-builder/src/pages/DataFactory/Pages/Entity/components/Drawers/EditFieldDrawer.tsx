@@ -1,15 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { 
-  Drawer, 
-  Form, 
-  Input, 
-  Select, 
-  Checkbox, 
-  Button, 
-  Message, 
-  Spin,
-  Space
-} from '@arco-design/web-react';
+import { Drawer, Form, Input, Select, Checkbox, Button, Message, Spin, Space } from '@arco-design/web-react';
 import { getFieldById, updateField } from '@onebase/app';
 import { ENTITY_FIELD_TYPE } from '../../../../utils/constans';
 import styles from './EditFieldDrawer.module.less';
@@ -38,12 +28,7 @@ interface EditFieldDrawerProps {
   onSuccess?: () => void;
 }
 
-const EditFieldDrawer: React.FC<EditFieldDrawerProps> = ({
-  visible,
-  setVisible,
-  fieldId,
-  onSuccess
-}) => {
+const EditFieldDrawer: React.FC<EditFieldDrawerProps> = ({ visible, setVisible, fieldId, onSuccess }) => {
   const [form] = Form.useForm();
   const [fieldDetail, setFieldDetail] = useState<FieldDetail | null>(null);
   const [loading, setLoading] = useState(false);
@@ -72,7 +57,6 @@ const EditFieldDrawer: React.FC<EditFieldDrawerProps> = ({
         setFieldDetail(response);
         form.setFieldsValue(response);
       }
-      
     } catch (error) {
       console.error('获取字段详情失败:', error);
       Message.error('获取字段详情失败');
@@ -151,9 +135,7 @@ const EditFieldDrawer: React.FC<EditFieldDrawerProps> = ({
       footer={
         <div className={styles['drawer-footer']}>
           <Space>
-            <Button onClick={() => setVisible(false)}>
-              取消
-            </Button>
+            <Button onClick={() => setVisible(false)}>取消</Button>
             <Button type="primary" loading={submitting} onClick={handleSubmit}>
               确定
             </Button>
@@ -167,110 +149,64 @@ const EditFieldDrawer: React.FC<EditFieldDrawerProps> = ({
           <p>加载中...</p>
         </div>
       ) : fieldDetail ? (
-        <Form
-          form={form}
-          layout="vertical"
-          className={styles['edit-form']}
-        >
+        <Form form={form} layout="vertical" className={styles['edit-form']}>
           {/* 基本信息 */}
           <div className={styles['section']}>
             <h3 className={styles['section-title']}>基本信息</h3>
-            
+
             <Form.Item
               label="字段编码"
               field="fieldCode"
-              rules={[
-                { required: true, message: '请输入字段编码' },
-                { validator: validateFieldCode }
-              ]}
+              rules={[{ required: true, message: '请输入字段编码' }, { validator: validateFieldCode }]}
             >
-              <Input 
-                placeholder="请输入字段编码" 
-                disabled={fieldDetail.isSystemField}
-              />
+              <Input placeholder="请输入字段编码" disabled={fieldDetail.isSystemField} />
             </Form.Item>
 
             <Form.Item
               label="字段名称"
               field="fieldName"
-              rules={[
-                { required: true, message: '请输入字段名称' },
-                { validator: validateFieldName }
-              ]}
+              rules={[{ required: true, message: '请输入字段名称' }, { validator: validateFieldName }]}
             >
               <Input placeholder="请输入字段名称" />
             </Form.Item>
 
-            <Form.Item
-              label="字段描述"
-              field="description"
-            >
-              <Input.TextArea 
-                placeholder="请输入字段描述" 
-                rows={3}
-              />
+            <Form.Item label="字段描述" field="description">
+              <Input.TextArea placeholder="请输入字段描述" rows={3} />
             </Form.Item>
 
-            <Form.Item
-              label="数据类型"
-              field="fieldType"
-              rules={[{ required: true, message: '请选择数据类型' }]}
-            >
-              <Select 
-                placeholder="请选择数据类型"
-                options={fieldTypeOptions}
-                disabled={fieldDetail.isSystemField}
-              />
+            <Form.Item label="数据类型" field="fieldType" rules={[{ required: true, message: '请选择数据类型' }]}>
+              <Select placeholder="请选择数据类型" options={fieldTypeOptions} disabled={fieldDetail.isSystemField} />
             </Form.Item>
           </div>
 
           {/* 字段属性 */}
           <div className={styles['section']}>
             <h3 className={styles['section-title']}>字段属性</h3>
-            
-            <Form.Item
-              label="默认值"
-              field="defaultValue"
-            >
+
+            <Form.Item label="默认值" field="defaultValue">
               <Input placeholder="请输入默认值" />
             </Form.Item>
 
-            <Form.Item
-              label="唯一性"
-              field="isUnique"
-              triggerPropName="checked"
-            >
+            <Form.Item label="唯一性" field="isUnique" triggerPropName="checked">
               <Checkbox>设置为唯一字段</Checkbox>
             </Form.Item>
 
-            <Form.Item
-              label="空值约束"
-              field="allowNull"
-              triggerPropName="checked"
-            >
+            <Form.Item label="空值约束" field="allowNull" triggerPropName="checked">
               <Checkbox>允许空值</Checkbox>
             </Form.Item>
 
-            <Form.Item
-              label="字段约束"
-              field="constraints"
-            >
-              <Input.TextArea 
-                placeholder="请输入字段约束" 
-                rows={2}
-              />
+            <Form.Item label="字段约束" field="constraints">
+              <Input.TextArea placeholder="请输入字段约束" rows={2} />
             </Form.Item>
           </div>
 
           {/* 字段信息 */}
           <div className={styles['section']}>
             <h3 className={styles['section-title']}>字段信息</h3>
-            
+
             <div className={styles['info-item']}>
               <span className={styles['info-label']}>字段类型：</span>
-              <span className={styles['info-value']}>
-                {fieldDetail.isSystemField ? '系统字段' : '自定义字段'}
-              </span>
+              <span className={styles['info-value']}>{fieldDetail.isSystemField ? '系统字段' : '自定义字段'}</span>
             </div>
 
             <div className={styles['info-item']}>

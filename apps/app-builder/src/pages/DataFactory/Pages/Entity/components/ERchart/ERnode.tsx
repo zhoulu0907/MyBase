@@ -97,7 +97,7 @@ const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
   };
 
   const handleFieldClick = (fieldId: string, e: React.MouseEvent) => {
-    console.log('handleFieldClick', fieldId, e)
+    console.log('handleFieldClick', fieldId, e);
     e.preventDefault();
     e.stopPropagation();
     const data = node.getData() as NodeData;
@@ -146,13 +146,15 @@ const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
             </div>
             <div className={`${styles['field-section-content']} ${nodeCollapsed.system ? styles['collapsed'] : ''}`}>
               {systemFields.map((field, index) => (
-                <div 
-                  key={index} 
+                <div
+                  key={index}
                   className={`${styles['field-item']} ${styles['system-field']} ${styles['clickable-field']}`}
                   onClick={(e) => handleFieldClick(field.fieldId, e)}
                 >
                   <span className={styles['field-name']}>{field.fieldName}</span>
-                  <span className={styles['field-type']}>{ENTITY_FIELD_TYPE[field.fieldType as keyof typeof ENTITY_FIELD_TYPE]}</span>
+                  <span className={styles['field-type']}>
+                    {ENTITY_FIELD_TYPE[field.fieldType as keyof typeof ENTITY_FIELD_TYPE]}
+                  </span>
                 </div>
               ))}
             </div>
@@ -171,8 +173,8 @@ const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
             </div>
             <div className={`${styles['field-section-content']} ${nodeCollapsed.custom ? styles['collapsed'] : ''}`}>
               {customFields.map((field, index) => (
-                <div 
-                  key={index} 
+                <div
+                  key={index}
                   className={`${styles['field-item']} ${styles['custom-field']} ${styles['clickable-field']}`}
                   onClick={(e) => handleFieldClick(field.fieldId, e)}
                 >
