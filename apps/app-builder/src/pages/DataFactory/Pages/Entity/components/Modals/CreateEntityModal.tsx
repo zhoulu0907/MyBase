@@ -1,7 +1,7 @@
 import { Form, Input, Message, Modal, Radio, Select } from '@arco-design/web-react';
 import { createEntity } from '@onebase/app';
 import React, { useState } from 'react';
-import { DS_RESOURCE_TYPE } from '../../../../utils/constans';
+import { DS_RESOURCE_TYPE, resouceId } from '../../../../utils/constans';
 import styles from './modal.module.less';
 
 interface EntityFormValues {
@@ -54,7 +54,7 @@ const CreateEntityModal: React.FC<{
         code: values.code,
         entityType: 1, // 实体类型 1:自建表，2:复用已有表
         description: values.description,
-        datasourceId: '542234204218462208',
+        datasourceId: resouceId,
         appId: 1
       };
 

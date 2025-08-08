@@ -10,16 +10,16 @@ const DetailDrawer: React.FC<{
   useEffect(() => {}, []);
 
   return (
-    <Drawer title={selectedNode?.title} visible={visible} onCancel={() => setVisible(false)} width={400}>
+    <Drawer title={selectedNode?.entityName} visible={visible} onCancel={() => setVisible(false)} width={400}>
       {selectedNode && (
         <div className="node-details">
           <div className="detail-item">
             <label>业务对象名称:</label>
-            <span>{selectedNode.title}</span>
+            <span>{selectedNode.entityName}</span>
           </div>
           <div className="detail-item">
             <label>业务对象编码:</label>
-            <span>boc_code_{selectedNode.id}</span>
+            <span>boc_code_{selectedNode.entityId}</span>
           </div>
           <div className="detail-item">
             <label>业务对象类型:</label>
@@ -34,9 +34,9 @@ const DetailDrawer: React.FC<{
             {selectedNode?.fields?.length &&
               selectedNode.fields.map((field, index) => (
                 <div key={index} className="field-item">
-                  <span className="field-name">{field.name}</span>
-                  <span className="field-type">{field.type}</span>
-                  {field.isSystem && <span className="system-tag">系统</span>}
+                  <span className="field-name">{field.fieldName}</span>
+                  <span className="field-type">{field.fieldType}</span>
+                  {field.isSystemField && <span className="system-tag">系统</span>}
                 </div>
               ))}
           </div>

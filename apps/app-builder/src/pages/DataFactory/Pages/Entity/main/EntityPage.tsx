@@ -1,14 +1,12 @@
-import { Button, Radio, Tag } from '@arco-design/web-react';
-import { IconMindMapping, IconNav, IconPlus } from '@arco-design/web-react/icon';
+import { Radio, Tag } from '@arco-design/web-react';
+import { IconMindMapping, IconNav } from '@arco-design/web-react/icon';
 import React, { useState } from 'react';
 import EntityTable from '../components/EntityTable';
-import CreateEntityModal from '../components/Modals/CreateEntityModal';
 import styles from '../index.module.less';
-import EntityERWithModeSwitch from './EntityERExample';
+import EntityERContainer from './EntityERContainer';
 
-const CheckEntityPage: React.FC<{ handlePageType: (tab: string) => void }> = ({ handlePageType }) => {
+const CheckEntityPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('ER');
-  const [createEntityModalVisible, setCreateEntityModalVisible] = useState(false);
   const [refreshEntityList, setRefreshEntityList] = useState(false);
   const [onlyUpdateNode, setOnlyUpdateNode] = useState(false);
   const dsData = {
@@ -48,26 +46,14 @@ const CheckEntityPage: React.FC<{ handlePageType: (tab: string) => void }> = ({ 
       </div>
 
       {activeTab === 'ER' && (
-        <>
-          <Button
-            type="primary"
-            className={styles['entity-page-create-button']}
-            onClick={() => {
-              setCreateEntityModalVisible(true);
-            }}
-          >
-            <IconPlus />
-            创建业务实体
-          </Button>
-          <div className={styles['entity-page-content']}>
-            <EntityERWithModeSwitch
-              refreshEntityList={refreshEntityList}
-              setRefreshEntityList={setRefreshEntityList}
-              onlyUpdateNode={onlyUpdateNode}
-              setOnlyUpdateNode={setOnlyUpdateNode}
-            />
-          </div>
-        </>
+        <div className={styles['entity-page-content']}>
+          <EntityERContainer
+            refreshEntityList={refreshEntityList}
+            setRefreshEntityList={setRefreshEntityList}
+            onlyUpdateNode={onlyUpdateNode}
+            setOnlyUpdateNode={setOnlyUpdateNode}
+          />
+        </div>
       )}
 
       {activeTab === 'table' && (
@@ -75,15 +61,6 @@ const CheckEntityPage: React.FC<{ handlePageType: (tab: string) => void }> = ({ 
           <EntityTable />
         </div>
       )}
-
-      <CreateEntityModal
-        visible={createEntityModalVisible}
-        setVisible={setCreateEntityModalVisible}
-        successCallback={() => {
-          setRefreshEntityList(true);
-          setOnlyUpdateNode(false);
-        }}
-      />
     </div>
   );
 };

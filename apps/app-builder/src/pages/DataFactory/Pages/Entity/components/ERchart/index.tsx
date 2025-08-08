@@ -22,6 +22,7 @@ const ERchart: React.FC<EntityERProps> = ({
   onNodeDelete,
   onNodeAddField,
   onNodeAddRelation,
+  onFieldClick,
   onlyUpdateNode
 }) => {
   const [selectedNode, setSelectedNode] = useState<EntityNode | null>(null);
@@ -157,10 +158,10 @@ const ERchart: React.FC<EntityERProps> = ({
         const { nodes, edges } = JSON.parse(
           localStorage.getItem('entityFormValues') || JSON.stringify({ nodes: [], edges: [] })
         );
-        const nodeData = nodes.find((n: EntityNode) => n.id === node.id);
+        const nodeData = nodes.find((n: EntityNode) => n.entityId === node.id);
         if (nodeData) {
-          nodeData.x = x;
-          nodeData.y = y;
+          nodeData.positionX = x;
+          nodeData.positionY = y;
         }
         localStorage.setItem('entityFormValues', JSON.stringify({ nodes, edges }));
       });
@@ -192,16 +193,16 @@ const ERchart: React.FC<EntityERProps> = ({
     graphRef?.current?.clearCells();
 
     // 添加节点
-    if (data.nodes) {
-      data.nodes.forEach((nodeData) => {
+    if (data?.nodes) {
+      data?.nodes?.forEach((nodeData) => {
         const portsItems = (nodeData: EntityNode) => {
           const items: object[] = [];
-          nodeData.fields.forEach((field, index) => {
-            const extraTitleHeight = field.isSystem ? LINE_TITLE_HEIGHT : LINE_TITLE_HEIGHT * 2;
+          nodeData?.fields?.forEach((field, index) => {
+            const extraTitleHeight = field.isSystemField ? LINE_TITLE_HEIGHT : LINE_TITLE_HEIGHT * 2;
             const accumulatedHeight = index >= 1 ? index * LINE_HEIGHT : 0;
 
             const leftItem = {
-              id: field.id + '_target', // 使用字段的唯一 ID 作为 port ID
+              id: field.fieldId + '_target', // 使用字段的唯一 ID 作为 port ID
               group: 'left', // 指定属于 'left' 组
               args: {
                 x: 0,
@@ -209,7 +210,7 @@ const ERchart: React.FC<EntityERProps> = ({
               }
             };
             const rightItem = {
-              id: field.id + '_source', // 使用字段的唯一 ID 作为 port ID
+              id: field.fieldId + '_source', // 使用字段的唯一 ID 作为 port ID
               group: 'right', // 指定属于 'right' 组
               args: {
                 x: NODE_WIDTH,
@@ -230,9 +231,9 @@ const ERchart: React.FC<EntityERProps> = ({
           return items;
         };
         const node = graphRef.current!.createNode({
-          id: nodeData.id,
-          x: nodeData.x,
-          y: nodeData.y,
+          id: nodeData.entityId,
+          x: nodeData.positionX,
+          y: nodeData.positionY,
           width: NODE_WIDTH,
           height: NODE_HEIGHT,
           shape: 'er-entity-node',
@@ -243,7 +244,8 @@ const ERchart: React.FC<EntityERProps> = ({
             onNodeAdd,
             onNodeDelete,
             onNodeAddField,
-            onNodeAddRelation
+            onNodeAddRelation,
+            onFieldClick
           },
           attrs: {
             body: {
@@ -254,18 +256,11 @@ const ERchart: React.FC<EntityERProps> = ({
               ry: 4
             }
           },
-          // portMarkup: [Markup.getForeignObjectMarkup()],
           // --- 动态添加 ports ---
           ports: {
             // 连接桩分组
             groups: {
               left: {
-                // markup: [
-                //   {
-                //     tagName: 'rect',
-                //     selector: 'portBody',
-                //   }
-                // ],
                 attrs: {
                   circle: {
                     // width: NODE_WIDTH,
@@ -334,15 +329,15 @@ const ERchart: React.FC<EntityERProps> = ({
     }
 
     // 添加边
-    if (data.edges) {
-      data.edges.forEach((edgeData) => {
+    if (data?.edges) {
+      data?.edges?.forEach((edgeData) => {
         // 确保 source 和 target 是对象，并包含 port
         const source = edgeData.source;
         const target = edgeData.target;
 
         const edge = graphRef.current!.createEdge({
-          source: { cell: source.cell, port: source.port + '_source' },
-          target: { cell: target.cell, port: target.port + '_target' },
+          source: { cell: source?.cell, port: source?.port + '_source' },
+          target: { cell: target?.cell, port: target?.port + '_target' },
           attrs: {
             line: {
               // 连线样式
@@ -387,14 +382,14 @@ const ERchart: React.FC<EntityERProps> = ({
     if (!isGraphInitialized.current && data?.nodes?.length === 1 && !onlyUpdateNode) {
       console.log('onlyUpdateNode.');
       // graphRef?.current?.centerPoint(data?.nodes?.[0]?.x || 0, data?.nodes?.[0]?.y - 200 || 0);
-      graphRef?.current?.centerPoint(data?.nodes?.[0]?.x || 0, data?.nodes?.[0]?.y - 200 || 0);
+      graphRef?.current?.centerPoint(data?.nodes?.[0]?.positionX || 0, data?.nodes?.[0]?.positionY - 200 || 0);
     }
 
     if (isGraphInitialized.current) {
       console.log('isFirstRender.');
       // graphRef?.current?.zoomToFit({ maxScale: 1 });
       // graphRef?.current?.centerContent();
-      graphRef?.current?.centerPoint(data?.nodes?.[0]?.x || 0, data?.nodes?.[0]?.y - 200 || 0);
+      graphRef?.current?.centerPoint(data?.nodes?.[0]?.positionX || 0, data?.nodes?.[0]?.positionY - 200 || 0);
       isGraphInitialized.current = false;
     }
   }, [data]);

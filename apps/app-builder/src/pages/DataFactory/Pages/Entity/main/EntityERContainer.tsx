@@ -1,11 +1,18 @@
 import React, { useEffect, useState } from 'react';
 // import { Button, Space } from '@arco-design/web-react';
-import { Modal } from '@arco-design/web-react';
+import { Button, Modal } from '@arco-design/web-react';
 import type { EdgeData, EntityData, EntityERProps, EntityNode } from '../../../utils/interface';
 import EditDrawer from '../components/Drawers/EditEntityDrawer';
+import FieldDetailDrawer from '../components/Drawers/FieldDetailDrawer';
 import ERchart from '../components/ERchart';
-import CreateFieldModal from '../components/Modals/CreateFieldModal';
+import CreateEntityModal from '../components/Modals/CreateEntityModal';
+// import CreateFieldModal from '../components/Modals/CreateFieldModal';
+import ConfigFieldModal from '../components/Modals/ConfigFieldModal';
 import CreateRelationModal from '../components/Modals/CreateRelationModal';
+import { getEntityGraph } from '@onebase/app';
+import { resouceId } from '../../../utils/constans';
+import { IconPlus } from '@arco-design/web-react/icon';
+import styles from '../index.module.less';
 
 // const mockData = {
 //   nodes: [
@@ -95,7 +102,7 @@ import CreateRelationModal from '../components/Modals/CreateRelationModal';
 // };
 
 // 模式切换示例
-export const EntityERWithModeSwitch: React.FC<{
+export const EntityERContainer: React.FC<{
   refreshEntityList: boolean;
   setRefreshEntityList: (refresh: boolean) => void;
   onlyUpdateNode: boolean;
@@ -109,36 +116,53 @@ export const EntityERWithModeSwitch: React.FC<{
   );
   const [editDrawerVisible, setEditDrawerVisible] = useState(false);
   const [editingNode, setEditingNode] = useState<EntityNode | null>(null);
-  const [createFieldModalVisible, setCreateFieldModalVisible] = useState(false);
+  const [createEntityModalVisible, setCreateEntityModalVisible] = useState(false);  
+  // const [createFieldModalVisible, setCreateFieldModalVisible] = useState(false);
+  const [configFieldModalVisible, setConfigFieldModalVisible] = useState(false);
   const [nodeId, setNodeId] = useState('');
+  const [nodedata, setNodedata] = useState<EntityNode | null>(null);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [createRelationModalVisible, setCreateRelationModalVisible] = useState(false);
   const [updateRelationOptions, setUpdateRelationOptions] = useState(false);
-  // const [onlyUpdateNode, setOnlyUpdateNode] = useState(false);
+  const [fieldDetailDrawerVisible, setFieldDetailDrawerVisible] = useState(false);
+  const [selectedFieldId, setSelectedFieldId] = useState<string>('');
 
-  const handleNodeEdit = (editData: EntityNode) => {
+  const loadEntityList = async () => {
+    const res = await getEntityGraph(resouceId);
+    console.log('loadEntityList', res);
+    if (res?.entities || res?.relationships) {
+      setData({
+        nodes: res?.entities || [],
+        edges: res?.relationships || []
+      });
+    }
+    // setEntityList(res);
+    
+  };
+
+  const handleNodeEdit = (editData: Partial<EntityNode>) => {
     console.log('节点编辑:', editData);
     // 这里可以更新节点数据
     const { nodes, edges } = JSON.parse(
       localStorage.getItem('entityFormValues') || JSON.stringify({ nodes: [], edges: [] })
     );
     const newNodes = nodes.map((node: EntityNode) => {
-      if (node.id === editData.id) {
+      if (node.entityId === editData.entityId) {
         return editData;
       }
       return node;
     });
     localStorage.setItem('entityFormValues', JSON.stringify({ nodes: newNodes, edges: edges }));
     setEditDrawerVisible(true);
-    setEditingNode(editData);
+    setEditingNode(editData as unknown as EntityNode);
     setRefreshEntityList(!refreshEntityList);
     setOnlyUpdateNode(true);
   };
 
-  const handleNodeAddField = (id: string) => {
-    setCreateFieldModalVisible(true);
-    setNodeId(id);
+  const handleNodeAddField = (node: EntityNode) => {
+    setConfigFieldModalVisible(true);
+    setNodedata(node as unknown as EntityNode);
   };
 
   const handleNodeAddRelation = (id: string) => {
@@ -146,6 +170,12 @@ export const EntityERWithModeSwitch: React.FC<{
     setCreateRelationModalVisible(true);
     setUpdateRelationOptions(true);
     setOnlyUpdateNode(false);
+  };
+
+  const handleFieldClick = (fieldId: string) => {
+    console.log('字段点击:', fieldId);
+    setSelectedFieldId(fieldId);
+    setFieldDetailDrawerVisible(true);
   };
 
   const handleNodeDelete = (id: string) => {
@@ -161,7 +191,7 @@ export const EntityERWithModeSwitch: React.FC<{
       localStorage.getItem('entityFormValues') || JSON.stringify({ nodes: [], edges: [] })
     );
 
-    const newNodes = nodes.filter((node: EntityNode) => node.id !== nodeId);
+    const newNodes = nodes.filter((node: EntityNode) => node.entityId !== nodeId);
     const newEdges = edges?.filter((edge: EdgeData) => edge.source.cell !== nodeId && edge.target.cell !== nodeId);
     setData({
       nodes: newNodes,
@@ -178,10 +208,17 @@ export const EntityERWithModeSwitch: React.FC<{
     setDeleteModalVisible(false);
   };
 
-  const handleSuccessCallback = () => {
+  const handleSuccessCallback = async() => {
+    await loadEntityList();
     setRefreshEntityList(true);
     setOnlyUpdateNode(true);
   };
+
+  const createEntityCallback = () => {
+    setRefreshEntityList(true);
+    setOnlyUpdateNode(false);
+
+  }
 
   useEffect(() => {
     if (refreshEntityList) {
@@ -196,6 +233,10 @@ export const EntityERWithModeSwitch: React.FC<{
     }
   }, [refreshEntityList]);
 
+  useEffect(() => {
+    loadEntityList();
+  }, []);
+
   // useEffect(() => {
   //   const storedData = localStorage.getItem('entityFormValues');
   //   if (storedData) {
@@ -205,23 +246,7 @@ export const EntityERWithModeSwitch: React.FC<{
   // }, []);
 
   return (
-    <div style={{ height: '100%' }}>
-      {/* <div style={{ marginBottom: '16px' }}>
-        <Space>
-          <Button
-            type={mode === 'view' ? 'primary' : 'default'}
-            onClick={() => setMode('view')}
-          >
-            查看模式
-          </Button>
-          <Button
-            type={mode === 'edit' ? 'primary' : 'default'}
-            onClick={() => setMode('edit')}
-          >
-            编辑模式
-          </Button>
-        </Space>
-      </div> */}
+    <div style={{ height: '100%' }} className={styles['entity-page-container']}>
 
       <ERchart
         mode="edit"
@@ -230,8 +255,21 @@ export const EntityERWithModeSwitch: React.FC<{
         onNodeAddField={handleNodeAddField}
         onNodeAddRelation={handleNodeAddRelation}
         onNodeDelete={handleNodeDelete}
+        onFieldClick={handleFieldClick}
         onlyUpdateNode={onlyUpdateNode}
       />
+      <Button
+        type="primary"
+        className={styles['entity-page-create-button']}
+        onClick={() => {
+          setCreateEntityModalVisible(true);
+        }}
+      >
+        <IconPlus />
+          创建业务实体
+        </Button>
+
+      {/* 交互弹窗、抽屉、模态框 */}
       <EditDrawer
         visible={editDrawerVisible}
         setVisible={setEditDrawerVisible}
@@ -240,10 +278,15 @@ export const EntityERWithModeSwitch: React.FC<{
         onNodeEdit={handleNodeEdit}
         successCallback={handleSuccessCallback}
       />
-      <CreateFieldModal
-        visible={createFieldModalVisible}
-        setVisible={setCreateFieldModalVisible}
-        entityId={nodeId}
+      <CreateEntityModal
+        visible={createEntityModalVisible}
+        setVisible={setCreateEntityModalVisible}
+        successCallback={createEntityCallback}
+      />
+      <ConfigFieldModal
+        visible={configFieldModalVisible}
+        setVisible={setConfigFieldModalVisible}
+        entity={nodedata as EntityNode}
         successCallback={handleSuccessCallback}
       />
       <CreateRelationModal
@@ -252,6 +295,11 @@ export const EntityERWithModeSwitch: React.FC<{
         successCallback={handleSuccessCallback}
         updateRelationOptions={updateRelationOptions}
         setUpdateRelationOptions={setUpdateRelationOptions}
+      />
+      <FieldDetailDrawer
+        visible={fieldDetailDrawerVisible}
+        setVisible={setFieldDetailDrawerVisible}
+        fieldId={selectedFieldId}
       />
       {/* 删除确认对话框 */}
       <Modal
@@ -269,4 +317,4 @@ export const EntityERWithModeSwitch: React.FC<{
   );
 };
 
-export default EntityERWithModeSwitch;
+export default EntityERContainer;

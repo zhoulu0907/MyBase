@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Table, Tag, Button, Message } from '@arco-design/web-react';
 import type { TableColumnProps } from '@arco-design/web-react';
 import type { EntityNode } from '../../../../../utils/interface';
-import { getEntityMethods } from '@onebase/app/src/services/entity';
+import { getEntityMethods } from '@onebase/app';
 import styles from './tabs.module.less';
 
 interface DataMethodsProps {
@@ -16,7 +16,7 @@ const DataMethods: React.FC<DataMethodsProps> = ({ entity }) => {
   const loadMethods = async () => {
     try {
       setLoading(true);
-      const response = await getEntityMethods({ entityId: entity.id });
+      const response = await getEntityMethods({ entityId: entity.entityId });
       console.log('getEntityMethods', response);
       if (response) {
         setMethods(response || []);

@@ -9,7 +9,7 @@ const DetailDrawer: React.FC<{
   editingNode: EntityNode;
   visible: boolean;
   setVisible: (visible: boolean) => void;
-  onNodeEdit: (data: EntityNode) => void;
+  onNodeEdit: (data: Partial<EntityNode>) => void;
   setEditingNode: (node: EntityNode | null) => void;
   successCallback?: () => void;
 }> = ({ editingNode, visible, setVisible, onNodeEdit, setEditingNode, successCallback }) => {
@@ -23,7 +23,7 @@ const DetailDrawer: React.FC<{
   }, [visible]);
 
   // 处理节点编辑
-  const handleNodeEdit = (formData: EntityNode) => {
+  const handleNodeEdit = (formData: Partial<EntityNode>) => {
     if (editingNode && onNodeEdit) {
       onNodeEdit(formData);
       setVisible(false);
