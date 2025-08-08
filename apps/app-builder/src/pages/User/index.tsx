@@ -1,7 +1,7 @@
 import { Layout } from '@arco-design/web-react';
-import { getDeptList } from '@onebase/platform-center';
+import { getDeptList, type DeptVO } from '@onebase/platform-center';
 import { useEffect, useState } from 'react';
-import DeptTree from './components/DeptTree';
+import DeptTreeCmp from './components/DeptTree';
 import UserTable from './components/UserTable';
 import styles from './index.module.less';
 import { listToTree } from '@/utils/tree';
@@ -19,6 +19,13 @@ export default function UserPage() {
     setDeptLoading(true);
     try {
       const res = await getDeptList();
+      // 计算所有用户总数:取第一层树节点的用户数之和
+      const deptMap = res.reduce((acc:Record<number, DeptVO>, cur:DeptVO) => {
+        acc[cur.id] = cur;
+        return acc;
+      }, {});
+      const userCount = res.reduce((acc:number, cur:DeptVO) => !deptMap[cur.parentId] ? acc + cur.userCount : acc, 0);
+      setTotalUserCount(userCount);
       const treeData = listToTree(res, {}, true);
       setDeptTree(treeData);
     } finally {
@@ -39,7 +46,7 @@ export default function UserPage() {
         collapsible={false}
         trigger={null}
       >
-        <DeptTree
+        <DeptTreeCmp
           selectedDeptId={selectedDeptId}
           onDeptSelect={setSelectedDeptId}
           totalUserCount={totalUserCount}
@@ -50,7 +57,6 @@ export default function UserPage() {
       <Content className={styles.rightPanel}>
         <UserTable
           selectedDeptId={selectedDeptId}
-          onTotalUserCountChange={setTotalUserCount}
           deptTree={deptTree}
           deptLoading={deptLoading}
         />

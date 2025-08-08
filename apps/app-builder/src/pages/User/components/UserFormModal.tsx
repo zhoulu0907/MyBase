@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Modal, Form, Input, Grid, Switch, Select, Message, Button, TreeSelect } from '@arco-design/web-react';
 import { createUser, updateUser, getSimpleRoleList, getUser } from '@onebase/platform-center';
 import type { UserVO, SimpleRoleVO } from '@onebase/platform-center';
+import { StatusEnum } from '@onebase/platform-center';
+import { phoneValidator, emailValidator } from '@/utils/validator';
 
 const Row = Grid.Row;
 const Col = Grid.Col;
@@ -36,6 +38,9 @@ export default function UserFormModal({
       form.resetFields();
       if (initialValues) {
         form.setFieldsValue(initialValues);
+      } else {
+        // 创建时用户状态默认为开启
+        form.setFieldValue('status', StatusEnum.ENABLE)
       }
     }
   }, [visible, initialValues, form]);
@@ -52,7 +57,7 @@ export default function UserFormModal({
     // 在编辑模式下获取用户信息并设置角色ID为初始值
     if (mode === 'edit' && initialValues?.id) {
       getUser(initialValues.id).then((user) => {
-        form.setFieldsValue({ roleIds: user.roleId });
+        form.setFieldsValue({ roleIds: user.roles.map((item:SimpleRoleVO) => item.id) });
       });
     }
   }, [visible, mode, initialValues, form]);
@@ -66,13 +71,14 @@ export default function UserFormModal({
 
     try {
       const values = await form.validate();
+      console.log('values', values);
+      const params = { ...values, status: values.status ? StatusEnum.ENABLE : StatusEnum.DISABLE }
       setLoading(true);
       if (mode === 'create') {
-        await createUser({ ...values, status: values.status ? 1 : 0 });
+        await createUser(params);
         Message.success('新建成功');
       } else {
-        // TODO 待接口修改后重新验证
-        await updateUser({ ...values, status: values.status ? 1 : 0 });
+        await updateUser({ ...params, id: initialValues?.id });
         Message.success('编辑成功');
       }
       onOk();
@@ -109,7 +115,14 @@ export default function UserFormModal({
             </Form.Item>
           </Col>
           <Col span={12}>
-            <Form.Item label="手机号" field="mobile" rules={[{ required: true, message: '请输入手机号' }]}>
+            <Form.Item 
+              label="手机号" 
+              field="mobile" 
+              rules={[
+                { required: true, message: '请输入手机号' },
+                { validator: phoneValidator }
+              ]}
+            >
               <Input placeholder="请输入" />
             </Form.Item>
           </Col>
@@ -117,7 +130,7 @@ export default function UserFormModal({
         <Row gutter={24}>
           <Col span={12}>
             <Form.Item label="账号" field="username" rules={[{ required: true, message: '请输入账号' }]}>
-              <Input placeholder="请输入" />
+              <Input placeholder="请输入" autoComplete='new-password' />
             </Form.Item>
           </Col>
           <Col span={12}>
@@ -127,14 +140,14 @@ export default function UserFormModal({
                 field="password"
                 rules={mode === 'create' && !isDetail ? [{ required: true, message: '请输入密码' }] : []}
               >
-                <Input.Password placeholder="请输入" />
+                <Input.Password placeholder="请输入" autoComplete='new-password' />
               </Form.Item>
             )}
           </Col>
         </Row>
         <Row gutter={24}>
           <Col span={12}>
-            <Form.Item label="邮箱（选填）" field="email">
+            <Form.Item label="邮箱（选填）" field="email" rules={[{ validator: emailValidator }]}>
               <Input placeholder="请输入" />
             </Form.Item>
           </Col>
@@ -165,9 +178,11 @@ export default function UserFormModal({
         </Row>
         <Row gutter={24}>
           <Col span={12}>
-            <Form.Item label=" " field="status" style={{ marginBottom: 0 }}>
-              <span style={{ marginRight: 8 }}>启用状态</span>
-              <Switch defaultChecked={initialValues?.status === 1} />
+            <span style={{ marginRight: 8 }}>启用状态</span>
+            <Form.Item label=" " field="status" style={{ marginBottom: 0 }} triggerPropName='checked'>
+              <Switch
+                defaultChecked={mode === 'create' ? true : initialValues?.status === StatusEnum.ENABLE}
+                onChange={(checked) => form.setFieldValue('status', checked ? StatusEnum.ENABLE : StatusEnum.DISABLE)}/>
             </Form.Item>
           </Col>
         </Row>
