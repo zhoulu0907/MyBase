@@ -9,6 +9,8 @@ import com.cmsr.onebase.module.app.controller.admin.appresource.vo.SavePageSetRe
 
 public interface PageSetService {
 
+    Long getPageSetID(Long menuID);
+
     String createPageSet(CreatePageSetDTO createPageSetDTO);
 
     void deletePageSet(Long menuId);

@@ -65,6 +65,12 @@ public class PageSetServiceImpl implements PageSetService {
     private AppPageRefRouterRepository appPageRefRouterDataRepository;
 
     @Override
+    public Long getPageSetID(Long menuID) {
+        PageSetDO pageSetDO = pageSetDataRepository.findPageSetByMenuId(menuID);
+        return pageSetDO.getId();
+    }
+
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public String createPageSet(CreatePageSetDTO createPageSetDTO) {
         PageSetDO pageSetDO = BeanUtils.toBean(createPageSetDTO, PageSetDO.class);
@@ -158,7 +164,8 @@ public class PageSetServiceImpl implements PageSetService {
             pageDataRepository.insert(newPageDO);
 
             // 复制页面集-页面关联表
-            PageSetPageDO newPageSetPageDO = pageSetPageDataRepository.findByPageSetCodeAndPageRef(pageSetDO.getPageSetCode(), pageDO.getPageCode());
+            PageSetPageDO newPageSetPageDO = pageSetPageDataRepository
+                    .findByPageSetCodeAndPageRef(pageSetDO.getPageSetCode(), pageDO.getPageCode());
             newPageSetPageDO.setId(null);
             newPageSetPageDO.setPageSetRef(newPageSetDO.getPageSetCode());
             newPageSetPageDO.setPageRef(newPageDO.getPageCode());
@@ -189,12 +196,13 @@ public class PageSetServiceImpl implements PageSetService {
             });
 
             // 复制RefRouter
-            appPageRefRouterDataRepository.findPageRefRouterByPageCode(pageSetPageDO.getPageRef()).forEach(pageRefRouterDO -> {
-                PageRefRouterDO newPageRefRouterDO = BeanUtils.toBean(pageRefRouterDO, PageRefRouterDO.class);
-                newPageRefRouterDO.setId(null);
-                newPageRefRouterDO.setPageRef(newPageDO.getPageCode());
-                appPageRefRouterDataRepository.insert(newPageRefRouterDO);
-            });
+            appPageRefRouterDataRepository.findPageRefRouterByPageCode(pageSetPageDO.getPageRef())
+                    .forEach(pageRefRouterDO -> {
+                        PageRefRouterDO newPageRefRouterDO = BeanUtils.toBean(pageRefRouterDO, PageRefRouterDO.class);
+                        newPageRefRouterDO.setId(null);
+                        newPageRefRouterDO.setPageRef(newPageDO.getPageCode());
+                        appPageRefRouterDataRepository.insert(newPageRefRouterDO);
+                    });
         });
 
         return newPageSetDO.getPageSetCode();
