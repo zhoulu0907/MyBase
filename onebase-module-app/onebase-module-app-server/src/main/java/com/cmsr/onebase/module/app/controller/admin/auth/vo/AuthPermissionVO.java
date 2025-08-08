@@ -13,6 +13,9 @@ import java.util.List;
 @Schema(description = "应用管理 - 角色权限 Response VO")
 public class AuthPermissionVO {
 
+    @Schema(description = "主键Id")
+    private Long id;
+
     @Schema(description = "应用Id")
     private Long applicationId;
 
@@ -22,8 +25,14 @@ public class AuthPermissionVO {
     @Schema(description = "菜单Id")
     private Long menuId;
 
-    @Schema(description = "功能权限")
-    private AuthFeatureVO authFeature;
+    @Schema(description = "页面是否可访问")
+    private Boolean pageAllowed;
+
+    @Schema(description = "所有实体可访问")
+    private Boolean allEntitiesAllowed;
+
+    @Schema(description = "所有字段可操作")
+    private Boolean allFieldsAllowed;
 
     @Schema(description = "关联的所有操作权限")
     private List<AuthOperationVO> authOperations;

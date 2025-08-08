@@ -10,8 +10,8 @@ import lombok.Data;
  * @Date：2025/8/5 15:08
  */
 @Data
-@Table(name = "app_auth_feature")
-public class AuthFeatureDO extends TenantBaseDO {
+@Table(name = "app_auth_permission")
+public class AuthPermissionDO extends TenantBaseDO {
 
     @Column(name = "application_id", nullable = false, comment = "应用Id")
     private Long applicationId;
@@ -25,7 +25,9 @@ public class AuthFeatureDO extends TenantBaseDO {
     @Column(name = "is_page_allowed", nullable = false, comment = "页面是否可访问")
     private Boolean pageAllowed;
 
-    @Column(name = "is_all_entities_allowed", nullable = false, comment = "关联的所有视图是否可访问")
+    @Column(name = "is_all_entities_allowed", nullable = false, comment = "所有实体可访问")
     private Boolean allEntitiesAllowed;
 
+    @Column(name = "is_all_fields_allowed", nullable = false,  comment = "所有字段可操作")
+    private Boolean allFieldsAllowed;
 }
