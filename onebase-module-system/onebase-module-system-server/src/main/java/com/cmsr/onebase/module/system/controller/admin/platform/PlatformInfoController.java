@@ -6,6 +6,7 @@ import com.cmsr.onebase.module.system.controller.admin.platform.vo.PlatformInfoR
 import com.cmsr.onebase.module.system.controller.admin.platform.vo.PlatformInfoRespVo;
 import com.cmsr.onebase.module.system.dal.dataobject.license.LicenseDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
+import com.cmsr.onebase.module.system.enums.license.LicenseStatusEnum;
 import com.cmsr.onebase.module.system.enums.tenant.TenantStatusEnum;
 import com.cmsr.onebase.module.system.enums.user.UserStatusEnum;
 import com.cmsr.onebase.module.system.service.license.LicenseService;
@@ -71,7 +72,7 @@ public class PlatformInfoController {
     @PreAuthorize("@ss.hasPermission('system:platform-info:get')")
     public CommonResult<PlatformInfoRespVo> getPlatformInfo() {
 
-        LicenseDO license = licenseService.getLicenseByStatus("enable");
+        LicenseDO license = licenseService.getLicenseByStatus(LicenseStatusEnum.ENABLE.getStatus());
         PlatformInfoRespVo platformInfoRespVo = BeanUtils.toBean(license, PlatformInfoRespVo.class);
         Integer tenantCount = tenantService.getTenantCountByStatus(TenantStatusEnum.NORMAL.getStatus());
         Integer userCount = adminUserService.getUserCountByStatus(UserStatusEnum.NORMAL.getStatus());

@@ -69,7 +69,7 @@ public class UserController {
         // 获取当前登录用户ID（假设项目中有相关工具类）
         Long currentUserId = SecurityFrameworkUtils.getLoginUserId();
 
-        //如果获取到当前用户ID，则复制其角色给新用户
+        //如果获取到当前管理员用户，把角色赋给当前新建用户
         if (currentUserId != null) {
             RoleDO roleDO = roleService.getRoleIdsByCode(RoleCodeEnum.SUPER_ADMIN.getCode());
             Set<Long> roleIds = new HashSet<>();
@@ -81,7 +81,7 @@ public class UserController {
     }
 
     @GetMapping("/platform-admin/page")
-    @Operation(summary = "获得平台管理员列表")
+    @Operation(summary = "获得平台管理员列表分页")
     @PreAuthorize("@ss.hasPermission('system:platform-admin:query')")
     public CommonResult<PageResult<UserRespVO>> getPlatformAdminPage(@Valid UserPageReqVO pageReqVO) {
         // 获得用户分页列表
@@ -89,28 +89,15 @@ public class UserController {
         return success(BeanUtils.toBean(pageResult, UserRespVO.class));
     }
 
-    @PostMapping("/platform-admin/update")
+    @PostMapping("/platform-admin/update-email")
     @Operation(summary = "修改平台管理员邮箱")
     @PreAuthorize("@ss.hasPermission('system:platform-admin:update')")
-    public CommonResult<Boolean> updatePlatformAdmin(@Valid @RequestBody Map map) {
-        userService.updatePlatformUserEmail((Long) map.get("id"), (String) map.get("email"));
+    public CommonResult<Boolean> updatePlatformAdmin(@Valid @RequestBody UserUpdateEmailReqVO reqVO) {
+        userService.updatePlatformUserEmail(reqVO.getId(), reqVO.getEmail());
         return success(true);
     }
 
-    @PostMapping("/platform-admin/delete")
-    @Operation(summary = "删除平台管理员")
-    @Parameter(name = "id", description = "编号", required = true, example = "1024")
-    @PreAuthorize("@ss.hasPermission('system:platform-admin:delete')")
-    public CommonResult<Boolean> deletePlatformAdmin(@RequestParam("id") Long id) {
-        AdminUserDO adminUserDO = userService.getUser(id);
-        if (UserTypeEnum.SYSTEM.equals(adminUserDO.getUserType())) {
-            throw exception(USER_PASSWORD_NOT_ALLOW_DEL);
-        }
-        userService.deleteUser(id);
-        return success(true);
-    }
-
-    @PostMapping("/update-platform/password")
+    @PostMapping("/platform-admin/update-password")
     @Operation(summary = "重置平台用户密码")
     @PreAuthorize("@ss.hasPermission('system:platform-admin:update-password')")
     public CommonResult<Boolean> updatePlatformUserPassword(@Valid @RequestBody UserUpdatePasswordReqVO reqVO) {
@@ -131,6 +118,18 @@ public class UserController {
         return success(respList);
     }
 
+    @PostMapping("/platform-admin/delete")
+    @Operation(summary = "删除平台管理员")
+    @Parameter(name = "id", description = "编号", required = true, example = "1024")
+    @PreAuthorize("@ss.hasPermission('system:platform-admin:delete')")
+    public CommonResult<Boolean> deletePlatformAdmin(@RequestParam("id") Long id) {
+        AdminUserDO adminUserDO = userService.getUser(id);
+        if (UserTypeEnum.SYSTEM.equals(adminUserDO.getUserType())) {
+            throw exception(USER_PASSWORD_NOT_ALLOW_DEL);
+        }
+        userService.deleteUser(id);
+        return success(true);
+    }
 
     // ——————————————— 以下是普通用户管理 ———————————————
     @PostMapping("/create")

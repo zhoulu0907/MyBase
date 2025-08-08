@@ -38,4 +38,10 @@ public class UserPageReqVO extends PageParam {
     @Schema(description = "角色编号", example = "1024")
     private Long roleId;
 
+    @Schema(description = "用户邮箱", example = "yudao@iocoder.cn")
+    private String email;
+    //根据用户名或邮箱模糊查询
+    @Schema(description = "模糊查询关键词", example = "admin123")
+    private String keyword;
+
 }

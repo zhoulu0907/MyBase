@@ -20,29 +20,29 @@ GET http://127.0.0.1:48080/admin-api/system/user/platform-admin/list
 Content-Type: application/json
 Authorization: Bearer 1c274ed6c3a04877814c315ea207b39c
 
-### 修改租户 /admin-api/system/tenant/create
-PUT http://127.0.0.1:48080/admin-api/system/user/platform-admin/update
+### 修改租户 /admin-api/system/user/platform-admin/update-email
+POST http://127.0.0.1:48080/admin-api/system/user/platform-admin/update-email
 Content-Type: application/json
-Authorization: Bearer 91dda3f8eb2d46a780b73c529f1c94e8
+Authorization: Bearer 9fc027e30ea244a28ccc6c0c90743783
 tenant-id: 1
 
 {
   "id": 3385319841891094528,
-  "email": "13577@qq.com"
+  "email": "13578@qq.com"
 }
 
-### 修改平台用户密码 /admin-api/system/tenant/password
-PUT http://127.0.0.1:48080/admin-api/system/user/update-platform-password
+### 修改平台管理员密码 /admin-api/system/user/platform-admin/update-password
+POST http://127.0.0.1:48080/admin-api/system/user/platform-admin/update-password
 Content-Type: application/json
-Authorization: Bearer 91dda3f8eb2d46a780b73c529f1c94e8
+Authorization: Bearer ade173b1245541f880c7812cfadadbdf
 tenant-id: 1
 
 {
-  "id": 3385319841891094528,
-  "password": "123124"
+  "id": "3385319841891094528",
+  "password": "admin124"
 }
 
-### 修改平台用户密码 /admin-api/system/tenant/delete
+### 删除平台管理员用户 /system/user/platform-admin/delete
 DELETE http://127.0.0.1:48080/admin-api/system/user/platform-admin/delete
 Content-Type: application/json
 Authorization: Bearer 91dda3f8eb2d46a780b73c529f1c94e8
@@ -52,8 +52,14 @@ tenant-id: 1
   "id": 3385344712104742912
 }
 
-### 修改平台用户密码 /admin-api/system/tenant/list
+### 平台管理员列表查询 /system/user/platform-admin/list
 GET http://127.0.0.1:48080/admin-api/system/user/platform-admin/list
 Content-Type: application/json
 Authorization: Bearer 3dac9549902340338047f498ae0b8b18
+tenant-id: 1
+
+### 平台管理员分页列表查询 /system/user/platform-admin/page
+GET http://127.0.0.1:48080/admin-api/system/user/platform-admin/page?keyword=goudan&pageNum=1&pageSize=10
+Content-Type: application/json
+Authorization: Bearer b70021cab5df45e0b86c3af58fd16acc
 tenant-id: 1

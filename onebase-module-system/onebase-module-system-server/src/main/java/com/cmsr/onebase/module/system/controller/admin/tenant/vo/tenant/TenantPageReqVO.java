@@ -17,6 +17,9 @@ import static com.cmsr.onebase.framework.common.util.date.DateUtils.FORMAT_YEAR_
 @ToString(callSuper = true)
 public class TenantPageReqVO extends PageParam {
 
+    @Schema(description = "租户编码", example = "1")
+    private String tenantCode;
+
     @Schema(description = "租户名", example = "onebase")
     private String name;
 

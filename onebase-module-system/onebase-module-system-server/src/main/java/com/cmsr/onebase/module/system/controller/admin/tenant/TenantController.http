@@ -29,7 +29,7 @@ tenant-id: 1
 }
 
 ### 更新租户 /admin-api/system/tenant/page
-GET http://127.0.0.1:48080/admin-api/system/tenant/page?pageNum=1&pageSize=10
+GET http://127.0.0.1:48080/admin-api/system/tenant/page?status=0&name=租&tenantCode=48&pageNum=1&pageSize=10
 Content-Type: application/json
-Authorization: Bearer 5175dc025cca4770ae9b826c1a723a08
+Authorization: Bearer 1d5eb408d54b4b5480c3ee999c24383b
 tenant-id: 1
