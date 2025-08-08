@@ -16,13 +16,16 @@ public class AuthFeatureDO extends TenantBaseDO {
     @Column(name = "application_id", nullable = false, comment = "应用Id")
     private Long applicationId;
 
+    @Column(name = "role_id", nullable = false, comment = "角色Id")
+    private Long roleId;
+
     @Column(name = "menu_id", nullable = false, comment = "菜单Id")
     private Long menuId;
 
     @Column(name = "is_page_allowed", nullable = false, comment = "页面是否可访问")
-    private Boolean isPageAllowed;
+    private Boolean pageAllowed;
 
     @Column(name = "is_all_entities_allowed", nullable = false, comment = "关联的所有视图是否可访问")
-    private Boolean isAllEntitiesAllowed;
+    private Boolean allEntitiesAllowed;
 
 }

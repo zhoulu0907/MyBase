@@ -16,11 +16,17 @@ public class AuthDataGroupDO extends TenantBaseDO {
     @Column(name = "application_id", nullable = false, comment = "应用Id")
     private Long applicationId;
 
+    @Column(name = "role_id", nullable = false, comment = "角色Id")
+    private Long roleId;
+
     @Column(name = "menu_id", nullable = false, comment = "菜单Id")
     private Long menuId;
 
     @Column(name = "group_name", nullable = false, length = 100, comment = "组名称")
     private String groupName;
+
+    @Column(name = "group_order", nullable = false, comment = "组排序")
+    private Integer groupOrder;
 
     @Column(name = "description", length = 256, comment = "描述")
     private String description;
@@ -35,5 +41,6 @@ public class AuthDataGroupDO extends TenantBaseDO {
     private String scopeLevel;
 
     @Column(name = "is_operable", nullable = false, comment = "是否可以操作")
-    private Boolean isOperable;
+    private Boolean operable;
+
 }
