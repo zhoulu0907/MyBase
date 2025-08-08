@@ -6,15 +6,5 @@ export { getBackendURL } from './services/base';
 // 导出验证码服务
 export { CaptchaService, captchaService, getCaptcha, verifyCaptcha } from './services/captcha';
 
-// 导出会话服务
-export * from './services/auth';
-
-export * from './services/dict';
-
-export * from './services/user';
-
-export * from './services/dept';
-
-export * from './services/role';
-
-export * from './services/tenant';
+// 导出服务
+export * from './services';
