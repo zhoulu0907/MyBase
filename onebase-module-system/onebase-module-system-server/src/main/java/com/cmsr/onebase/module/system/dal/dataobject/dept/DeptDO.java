@@ -18,26 +18,27 @@ public class DeptDO extends TenantBaseDO {
     public static final Long PARENT_ID_ROOT = 0L;
 
     // 列名常量
-    public static final String NAME             = "name";
-    public static final String PARENT_ID        = "parent_id";
-    public static final String SORT             = "sort";
-    public static final String LEADER_USER_ID   = "leader_user_id";
-    public static final String PHONE            = "phone";
-    public static final String EMAIL            = "email";
-    public static final String STATUS           = "status";
+    public static final String NAME           = "name";
+    public static final String PARENT_ID      = "parent_id";
+    public static final String SORT           = "sort";
+    public static final String LEADER_USER_ID = "leader_user_id";
+    public static final String PHONE          = "phone";
+    public static final String EMAIL          = "email";
+    public static final String STATUS         = "status";
+    public static final String REMARK         = "remark";
 
     /**
      * 部门名称
      */
     @Column(name = NAME)
-    private String name;
+    private String  name;
     /**
      * 父部门ID
-     *
+     * <p>
      * 关联 {@link #id}
      */
     @Column(name = PARENT_ID)
-    private Long parentId;
+    private Long    parentId;
     /**
      * 显示顺序
      */
@@ -45,27 +46,33 @@ public class DeptDO extends TenantBaseDO {
     private Integer sort;
     /**
      * 管理员
-     *
+     * <p>
      * 关联 {@link AdminUserDO#getId()}
      */
     @Column(name = LEADER_USER_ID)
-    private Long leaderUserId;
+    private Long    leaderUserId;
     /**
      * 联系电话
      */
     @Column(name = PHONE)
-    private String phone;
+    private String  phone;
     /**
      * 邮箱
      */
     @Column(name = EMAIL)
-    private String email;
+    private String  email;
     /**
      * 部门状态
-     *
+     * <p>
      * 枚举 {@link CommonStatusEnum}
      */
     @Column(name = STATUS)
     private Integer status;
+
+    /**
+     * 备注
+     */
+    @Column(name = REMARK)
+    private String remark;
 
 }

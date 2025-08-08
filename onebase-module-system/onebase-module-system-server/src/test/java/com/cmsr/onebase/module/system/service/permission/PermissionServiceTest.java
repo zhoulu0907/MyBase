@@ -247,7 +247,7 @@ public class PermissionServiceTest {
      * 测试assignRoleUsers方法 - 为角色分配用户
      */
     @Test
-    public void testAssignRoleUsers() {
+    public void testAddRoleUsers() {
         // 准备数据
         Set<Long> userIds = new HashSet<>();
 
@@ -261,7 +261,7 @@ public class PermissionServiceTest {
         }
 
         // 执行测试
-        long affectedRows = permissionService.assignRoleUsers(role.getId(), userIds);
+        long affectedRows = permissionService.addRoleUsers(role.getId(), userIds);
 
         // 验证结果
         assertEquals(userIds.size(), affectedRows, "影响的行数应该等于用户数量");

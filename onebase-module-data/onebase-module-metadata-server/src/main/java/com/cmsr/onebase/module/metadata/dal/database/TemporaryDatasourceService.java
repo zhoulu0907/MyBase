@@ -80,20 +80,24 @@ public class TemporaryDatasourceService {
             log.info("用户名: {}", username);
             log.info("数据库类型: {}", datasourceType);
 
-            // 创建数据源配置 - 添加必要的连接池配置
+            // 创建数据源配置 - 使用Druid连接池
             Map<String, Object> dsConfig = new HashMap<>();
             dsConfig.put("url", url);
-            dsConfig.put("username", username != null ? username : ""); // 使用username而不是user
+            dsConfig.put("username", username != null ? username : "");
             dsConfig.put("password", password != null ? password : "");
             dsConfig.put("driver", getDriverByType(datasourceType));
-            
-            // 关键配置：明确指定连接池类型
-            dsConfig.put("pool", "com.zaxxer.hikari.HikariDataSource");
-            
-            // HikariCP连接池配置
-            dsConfig.put("maximum-pool-size", 3);
-            dsConfig.put("minimum-idle", 1);
-            dsConfig.put("connection-timeout", 30000);
+            // 指定连接池类型，使用Druid
+            dsConfig.put("pool", "com.alibaba.druid.pool.DruidDataSource");
+            // 添加Druid连接池配置
+            dsConfig.put("initial-size", 1);
+            dsConfig.put("max-active", 10);
+            dsConfig.put("min-idle", 1);
+            dsConfig.put("max-wait", 30000);
+            dsConfig.put("validation-query", "SELECT 1");
+            dsConfig.put("test-on-borrow", false);
+            dsConfig.put("test-on-return", false);
+            dsConfig.put("test-while-idle", true);
+            dsConfig.put("time-between-eviction-runs-millis", 60000);
             
             log.info("临时数据源配置: {}", dsConfig);
             

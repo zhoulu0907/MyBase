@@ -70,7 +70,7 @@ public class DeptController {
         return success(respList);
     }
 
-    @GetMapping(value = {"/list-all-simple", "/simple-list"})
+    @GetMapping(value = {"/simple-list"})
     @Operation(summary = "获取部门精简信息列表", description = "只包含被开启的部门，主要用于前端的下拉选项")
     public CommonResult<List<DeptSimpleRespVO>> getSimpleDeptList() {
         List<DeptDO> list = deptService.getDeptList(
@@ -83,8 +83,8 @@ public class DeptController {
     @Parameter(name = "id", description = "编号", required = true, example = "1024")
     @PreAuthorize("@ss.hasPermission('system:dept:query')")
     public CommonResult<DeptRespVO> getDept(@RequestParam("id") Long id) {
-        DeptDO dept = deptService.getDept(id);
-        return success(BeanUtils.toBean(dept, DeptRespVO.class));
+        DeptRespVO dept = deptService.getDeptWithUserCountAndLeader(id);
+        return success(dept);
     }
 
 }

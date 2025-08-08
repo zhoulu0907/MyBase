@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.metadata.service.entity;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.BusinessEntityPageReqVO;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.BusinessEntitySaveReqVO;
+import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.ERDiagramRespVO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataBusinessEntityDO;
 import jakarta.validation.Valid;
 
@@ -73,5 +74,13 @@ public interface MetadataBusinessEntityService {
      * @return 业务实体列表
      */
     List<MetadataBusinessEntityDO> getBusinessEntityListByDatasourceId(Long datasourceId);
+
+    /**
+     * 根据数据源ID获取ER图数据
+     *
+     * @param datasourceId 数据源ID
+     * @return ER图数据
+     */
+    ERDiagramRespVO getERDiagramByDatasourceId(Long datasourceId);
 
 }

@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.system.convert.tenant;
 
 import com.cmsr.onebase.module.system.controller.admin.tenant.vo.tenant.TenantSaveReqVO;
-import com.cmsr.onebase.module.system.controller.admin.user.vo.user.UserSaveReqVO;
+import com.cmsr.onebase.module.system.controller.admin.user.vo.user.UserInsertReqVO;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
@@ -14,8 +14,8 @@ public interface TenantConvert {
 
     TenantConvert INSTANCE = Mappers.getMapper(TenantConvert.class);
 
-    default UserSaveReqVO convert02(TenantSaveReqVO bean) {
-        UserSaveReqVO reqVO = new UserSaveReqVO();
+    default UserInsertReqVO convert02(TenantSaveReqVO bean) {
+        UserInsertReqVO reqVO = new UserInsertReqVO();
         reqVO.setUsername(bean.getUsername());
         reqVO.setPassword(bean.getPassword());
         reqVO.setNickname(bean.getContactName()).setMobile(bean.getContactMobile());

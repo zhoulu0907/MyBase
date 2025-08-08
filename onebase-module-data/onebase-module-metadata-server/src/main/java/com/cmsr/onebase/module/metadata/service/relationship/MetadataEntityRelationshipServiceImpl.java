@@ -8,6 +8,7 @@ import com.cmsr.onebase.module.metadata.controller.admin.relationship.vo.EntityR
 import com.cmsr.onebase.module.metadata.controller.admin.relationship.vo.EntityRelationshipRespVO;
 import com.cmsr.onebase.module.metadata.controller.admin.relationship.vo.EntityRelationshipSaveReqVO;
 import com.cmsr.onebase.module.metadata.controller.admin.relationship.vo.RelationshipTypeRespVO;
+import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataBusinessEntityDO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.relationship.MetadataEntityRelationshipDO;
 import com.cmsr.onebase.module.metadata.enums.CascadeTypeEnum;
 import com.cmsr.onebase.module.metadata.enums.RelationshipTypeEnum;
@@ -183,6 +184,35 @@ public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRela
         respVO.setDisplayName(cascadeTypeEnum.getDisplayName());
         respVO.setDescription(cascadeTypeEnum.getDescription());
         return respVO;
+    }
+
+    @Override
+    public List<EntityRelationshipRespVO> getRelationshipsByDatasourceId(Long datasourceId) {
+        // 首先获取该数据源下的所有实体ID
+        DefaultConfigStore entityConfigStore = new DefaultConfigStore();
+        entityConfigStore.and("datasource_id", datasourceId);
+        List<MetadataBusinessEntityDO> entities = dataRepository.findAllByConfig(
+                MetadataBusinessEntityDO.class, entityConfigStore);
+
+        if (entities.isEmpty()) {
+            return List.of();
+        }
+
+        List<Long> entityIds = entities.stream()
+                .map(MetadataBusinessEntityDO::getId)
+                .toList();
+
+        // 查询涉及这些实体的所有关系 - 使用OR查询条件
+        DefaultConfigStore relationshipConfigStore = new DefaultConfigStore();
+        relationshipConfigStore.and("(source_entity_id in ? or target_entity_id in ?)", entityIds, entityIds);
+        relationshipConfigStore.order("create_time", Order.TYPE.DESC);
+
+        List<MetadataEntityRelationshipDO> relationships = dataRepository.findAllByConfig(
+                MetadataEntityRelationshipDO.class, relationshipConfigStore);
+
+        return relationships.stream()
+                .map(this::convertToRespVO)
+                .toList();
     }
 
 } 

@@ -131,7 +131,7 @@ public class AdminUserServiceTest {
         UserPageReqVO reqVO = new UserPageReqVO();
         reqVO.setPageNo(1);
         reqVO.setPageSize(10);
-        reqVO.setUsername("user");
+        reqVO.setNickname("user");
 
         // 执行测试
         PageResult<AdminUserDO> result = adminUserService.getUserPage(reqVO);
@@ -258,7 +258,7 @@ public class AdminUserServiceTest {
         UserPageReqVO reqVO = new UserPageReqVO();
         reqVO.setPageNo(1);
         reqVO.setPageSize(10);
-        reqVO.setUsername("user");
+        reqVO.setNickname("user");
         reqVO.setStatus(CommonStatusEnum.ENABLE.getStatus());
         reqVO.setDeptId(testDept1.getId());
 
