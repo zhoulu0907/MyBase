@@ -15,7 +15,9 @@ import com.cmsr.onebase.module.metadata.enums.RelationshipTypeEnum;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
+import org.anyline.entity.Compare;
 import org.anyline.entity.Order;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -202,9 +204,12 @@ public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRela
                 .map(MetadataBusinessEntityDO::getId)
                 .toList();
 
-        // 查询涉及这些实体的所有关系 - 使用OR查询条件
+        // 查询涉及这些实体的所有关系 - 使用嵌套 OR + IN，避免 Anyline 生成非法 SQL
         DefaultConfigStore relationshipConfigStore = new DefaultConfigStore();
-        relationshipConfigStore.and("(source_entity_id in ? or target_entity_id in ?)", entityIds, entityIds);
+        ConfigStore orStore = new DefaultConfigStore()
+                .or(Compare.IN, "source_entity_id", entityIds)
+                .or(Compare.IN, "target_entity_id", entityIds);
+        relationshipConfigStore.and(orStore);
         relationshipConfigStore.order("create_time", Order.TYPE.DESC);
 
         List<MetadataEntityRelationshipDO> relationships = dataRepository.findAllByConfig(

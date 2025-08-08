@@ -20,6 +20,7 @@ import com.cmsr.onebase.module.metadata.enums.BusinessEntityTypeEnum;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Order;
 import org.anyline.entity.Compare;
@@ -585,7 +586,11 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
                 .toList();
 
         DefaultConfigStore relationshipConfigStore = new DefaultConfigStore();
-        relationshipConfigStore.and("(source_entity_id in ? or target_entity_id in ?)", entityIds, entityIds);
+        // 使用嵌套 OR + IN，避免把整段表达式再次包裹 IN 导致 SQL 语法与参数不匹配
+        ConfigStore orStore = new DefaultConfigStore();
+        ((DefaultConfigStore) orStore).or(Compare.IN, "source_entity_id", entityIds)
+                .or(Compare.IN, "target_entity_id", entityIds);
+        relationshipConfigStore.and(orStore);
         relationshipConfigStore.order("create_time", Order.TYPE.DESC);
 
         List<MetadataEntityRelationshipDO> relationshipDOs = metadataRepository.findAllByConfig(
