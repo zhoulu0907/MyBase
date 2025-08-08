@@ -26,8 +26,8 @@ public class ApplicationRespVO {
     @Schema(description = "应用描述")
     private String description;
 
-    @Schema(description = "图标类型")
-    private String iconType;
+    @Schema(description = "图标名称")
+    private String iconName;
 
     @Schema(description = "图标颜色")
     private String iconColor;

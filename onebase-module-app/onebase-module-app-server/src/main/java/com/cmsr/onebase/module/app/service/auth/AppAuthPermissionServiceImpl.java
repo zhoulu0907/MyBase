@@ -43,9 +43,9 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
     @Override
     public AuthPermissionVO getPermission(AuthPermissionReqVO reqVO) {
         AuthPermissionVO authPermissionVO = new AuthPermissionVO();
-        //补充 功能权限
-        AuthFeatureDO authFeatureDO = authFeatureRepository.findByQuery(reqVO);
-        authPermissionVO.setAuthFeature(BeanUtils.toBean(authFeatureDO, AuthFeatureVO.class));
+        //补充 基本权限
+        AuthPermissionDO authPermissionDO = authFeatureRepository.findByQuery(reqVO);
+        BeanUtils.copyProperties(authPermissionDO, authPermissionVO);
         //补充 操作权限
         List<AuthOperationDO> authOperationDOS = authOperationRepository.findByQuery(reqVO);
         authPermissionVO.setAuthOperations(BeanUtils.toBean(authOperationDOS, AuthOperationVO.class));
@@ -103,27 +103,27 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
         reqVO.setRoleId(authPermissionVO.getRoleId());
         reqVO.setMenuId(authPermissionVO.getMenuId());
         //更新 功能权限
-        updateAuthFeature(reqVO, authPermissionVO.getAuthFeature());
+        updateAuthPermission(reqVO, authPermissionVO);
         updateAuthOperation(reqVO, authPermissionVO.getAuthOperations());
         updateAuthEntity(reqVO, authPermissionVO.getAuthEntities());
         updateAuthDataGroup(reqVO, authPermissionVO.getAuthDataGroups());
         updateAuthField(reqVO, authPermissionVO.getAuthFields());
     }
 
-    private void updateAuthFeature(AuthPermissionReqVO reqVO, AuthFeatureVO authFeature) {
-        AuthFeatureDO authFeatureDO = authFeatureRepository.findByQuery(reqVO);
-        if (authFeatureDO == null) {
-            authFeatureDO = new AuthFeatureDO();
-            authFeatureDO.setApplicationId(reqVO.getApplicationId());
-            authFeatureDO.setRoleId(reqVO.getRoleId());
-            authFeatureDO.setMenuId(reqVO.getMenuId());
-            authFeatureDO.setPageAllowed(authFeature.getPageAllowed());
-            authFeatureDO.setAllEntitiesAllowed(authFeature.getAllEntitiesAllowed());
-            authFeatureRepository.insert(authFeatureDO);
+    private void updateAuthPermission(AuthPermissionReqVO reqVO, AuthPermissionVO authPermissionVO) {
+        AuthPermissionDO authPermissionDO = authFeatureRepository.findByQuery(reqVO);
+        if (authPermissionDO == null) {
+            authPermissionDO = new AuthPermissionDO();
+            authPermissionDO.setApplicationId(reqVO.getApplicationId());
+            authPermissionDO.setRoleId(reqVO.getRoleId());
+            authPermissionDO.setMenuId(reqVO.getMenuId());
+            authPermissionDO.setPageAllowed(authPermissionVO.getPageAllowed());
+            authPermissionDO.setAllEntitiesAllowed(authPermissionVO.getAllEntitiesAllowed());
+            authFeatureRepository.insert(authPermissionDO);
         } else {
-            authFeatureDO.setPageAllowed(authFeature.getPageAllowed());
-            authFeatureDO.setAllEntitiesAllowed(authFeature.getAllEntitiesAllowed());
-            authFeatureRepository.update(authFeatureDO);
+            authPermissionDO.setPageAllowed(authPermissionVO.getPageAllowed());
+            authPermissionDO.setAllEntitiesAllowed(authPermissionVO.getAllEntitiesAllowed());
+            authFeatureRepository.update(authPermissionDO);
         }
     }
 
@@ -188,7 +188,6 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
             if (authDataGroupDO != null && authDataGroupVO != null) {
                 authDataGroupDO.setGroupName(authDataGroupVO.getGroupName());
                 authDataGroupDO.setDescription(authDataGroupVO.getDescription());
-                authDataGroupDO.setEntityId(authDataGroupVO.getEntityId());
                 authDataGroupDO.setScopeFieldId(authDataGroupVO.getScopeFieldId());
                 authDataGroupDO.setScopeLevel(authDataGroupVO.getScopeLevel());
                 authDataGroupDO.setOperable(authDataGroupVO.getOperable());
@@ -201,7 +200,6 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
                 authDataGroupDO.setGroupName(authDataGroupVO.getGroupName());
                 authDataGroupDO.setGroupName(authDataGroupVO.getGroupName());
                 authDataGroupDO.setDescription(authDataGroupVO.getDescription());
-                authDataGroupDO.setEntityId(authDataGroupVO.getEntityId());
                 authDataGroupDO.setScopeFieldId(authDataGroupVO.getScopeFieldId());
                 authDataGroupDO.setScopeLevel(authDataGroupVO.getScopeLevel());
                 authDataGroupDO.setOperable(authDataGroupVO.getOperable());
