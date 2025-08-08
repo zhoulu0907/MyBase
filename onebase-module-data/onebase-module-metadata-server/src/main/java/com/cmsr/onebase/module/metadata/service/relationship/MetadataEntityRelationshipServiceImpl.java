@@ -9,6 +9,7 @@ import com.cmsr.onebase.module.metadata.controller.admin.relationship.vo.EntityR
 import com.cmsr.onebase.module.metadata.controller.admin.relationship.vo.EntityRelationshipSaveReqVO;
 import com.cmsr.onebase.module.metadata.controller.admin.relationship.vo.RelationshipTypeRespVO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataBusinessEntityDO;
+import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.relationship.MetadataEntityRelationshipDO;
 import com.cmsr.onebase.module.metadata.enums.CascadeTypeEnum;
 import com.cmsr.onebase.module.metadata.enums.RelationshipTypeEnum;
@@ -89,12 +90,13 @@ public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRela
 
         EntityRelationshipRespVO result = BeanUtils.toBean(entityRelationship, EntityRelationshipRespVO.class);
         
-        // 这里可以添加关联查询，获取源实体和目标实体的名称、字段名称等
-        // 为了简化，暂时使用占位符
-        result.setSourceEntityName("源实体名称");
-        result.setTargetEntityName("目标实体名称");
-        result.setSourceFieldName("源字段名称");
-        result.setTargetFieldName("目标字段名称");
+        // 查询源实体和目标实体的名称
+        result.setSourceEntityName(getEntityNameById(entityRelationship.getSourceEntityId()));
+        result.setTargetEntityName(getEntityNameById(entityRelationship.getTargetEntityId()));
+        
+        // 查询源字段和目标字段的名称
+        result.setSourceFieldName(getFieldNameById(entityRelationship.getSourceFieldId()));
+        result.setTargetFieldName(getFieldNameById(entityRelationship.getTargetFieldId()));
         
         return result;
     }
@@ -158,11 +160,15 @@ public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRela
      */
     private EntityRelationshipRespVO convertToRespVO(MetadataEntityRelationshipDO relationshipDO) {
         EntityRelationshipRespVO result = BeanUtils.toBean(relationshipDO, EntityRelationshipRespVO.class);
-        // 这里可以添加关联查询，获取实体名称和字段名称
-        result.setSourceEntityName("源实体名称");
-        result.setTargetEntityName("目标实体名称");
-        result.setSourceFieldName("源字段名称");
-        result.setTargetFieldName("目标字段名称");
+        
+        // 查询源实体和目标实体的名称
+        result.setSourceEntityName(getEntityNameById(relationshipDO.getSourceEntityId()));
+        result.setTargetEntityName(getEntityNameById(relationshipDO.getTargetEntityId()));
+        
+        // 查询源字段和目标字段的名称
+        result.setSourceFieldName(getFieldNameById(relationshipDO.getSourceFieldId()));
+        result.setTargetFieldName(getFieldNameById(relationshipDO.getTargetFieldId()));
+        
         return result;
     }
 
@@ -218,6 +224,53 @@ public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRela
         return relationships.stream()
                 .map(this::convertToRespVO)
                 .toList();
+    }
+
+    /**
+     * 根据实体ID获取实体名称
+     *
+     * @param entityId 实体ID
+     * @return 实体名称
+     */
+    private String getEntityNameById(Long entityId) {
+        if (entityId == null) {
+            return null;
+        }
+        
+        try {
+            DefaultConfigStore configStore = new DefaultConfigStore();
+            configStore.and("id", entityId);
+            MetadataBusinessEntityDO entity = dataRepository.findOne(MetadataBusinessEntityDO.class, configStore);
+            return entity != null ? entity.getDisplayName() : null;
+        } catch (Exception e) {
+            log.warn("获取实体名称失败，实体ID: {}, 错误: {}", entityId, e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * 根据字段ID获取字段名称
+     *
+     * @param fieldId 字段ID
+     * @return 字段名称
+     */
+    private String getFieldNameById(String fieldId) {
+        if (fieldId == null) {
+            return null;
+        }
+        
+        try {
+            DefaultConfigStore configStore = new DefaultConfigStore();
+            configStore.and("id", Long.valueOf(fieldId));
+            MetadataEntityFieldDO field = dataRepository.findOne(MetadataEntityFieldDO.class, configStore);
+            return field != null ? field.getFieldName() : null;
+        } catch (NumberFormatException e) {
+            log.warn("无效的字段ID: {}", fieldId);
+            return null;
+        } catch (Exception e) {
+            log.warn("获取字段名称失败，字段ID: {}, 错误: {}", fieldId, e.getMessage());
+            return null;
+        }
     }
 
 } 
