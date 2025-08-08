@@ -3,8 +3,13 @@ package com.cmsr.onebase.module.system.controller.admin.license;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.module.system.controller.admin.license.vo.LicensePageReqVO;
+import com.cmsr.onebase.module.system.controller.admin.license.vo.LicensePageRespVO;
+import com.cmsr.onebase.module.system.controller.admin.license.vo.LicenseRespVO;
+import com.cmsr.onebase.module.system.controller.admin.license.vo.LicenseSaveReqVO;
 import com.cmsr.onebase.module.system.convert.license.LicenseConvert;
 import com.cmsr.onebase.module.system.dal.dataobject.license.LicenseDO;
+import com.cmsr.onebase.module.system.enums.license.LicenseStatusEnum;
 import com.cmsr.onebase.module.system.service.license.LicenseService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -98,7 +103,7 @@ public class LicenseController {
      * @return 分页结果
      */
     @GetMapping("/page")
-    @PreAuthorize("ss.hasAuthority('system:license:query')")
+    @PreAuthorize("@ss.hasPermission('system:platform-admin:query')")
     @Operation(summary = "分页查询License")
     public CommonResult<PageResult<LicensePageRespVO>> getLicensePage(@Valid LicensePageReqVO reqVO) {
         PageResult<LicenseDO> pageResult = licenseService.getLicensePage(reqVO);
@@ -138,11 +143,11 @@ public class LicenseController {
 
         LicenseSaveReqVO reqVo = objectMapper.readValue(file.getInputStream(), LicenseSaveReqVO.class);
 
-        LicenseDO licenseDO = licenseService.getLicenseByStatus("enable");
+        LicenseDO licenseDO = licenseService.getLicenseByStatus(LicenseStatusEnum.ENABLE.getStatus());
         // 创建更新对象，将状态设置为已失效
         LicenseSaveReqVO updateLicense = new LicenseSaveReqVO();
         updateLicense.setId(licenseDO.getId());
-        updateLicense.setStatus("disable"); // 假设LicenseStatusEnum.INVALID.getStatus()表示已失效状态
+        updateLicense.setStatus(LicenseStatusEnum.DISABLE.getStatus()); // 假设LicenseStatusEnum.INVALID.getStatus()表示已失效状态
 
         // 更新license状态
         licenseService.updateLicense(updateLicense);
@@ -158,10 +163,10 @@ public class LicenseController {
     /**
      * 导出凭证
      */
-    @GetMapping("/export/{id}")
+    @GetMapping("/export")
     @Operation(summary = "导出凭证")
     @PreAuthorize("@ss.hasPermission('system:platform-admin:query')")
-    public void exportLicense(@PathVariable Long id, HttpServletResponse response) throws IOException {
+    public void exportLicense(@RequestParam("id") Long id, HttpServletResponse response) throws IOException {
         // 从数据库中根据ID查询license
         LicenseDO license = licenseService.getLicense(id);
 

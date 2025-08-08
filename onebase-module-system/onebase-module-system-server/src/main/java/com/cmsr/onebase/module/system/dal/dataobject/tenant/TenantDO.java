@@ -34,6 +34,7 @@ public class TenantDO extends BaseDO {
     public static final String EXPIRE_TIME             = "expire_time";
     public static final String ACCOUNT_COUNT           = "account_count";
     public static final String ALLOCATE_PERSON_COUNT   = "allocate_person_count";
+    public static final String TENANT_CODE             = "tenant_code";
 
     // builder模式可正常运作
     public TenantDO setId(Long id){
@@ -104,5 +105,10 @@ public class TenantDO extends BaseDO {
      */
     @Column(name = ALLOCATE_PERSON_COUNT)
     private Integer allocatePersonCount;
+
+    /**
+     * 租户编码 - 系统
+     */
+    private String tenantCode;
 
 }

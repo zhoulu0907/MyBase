@@ -99,6 +99,13 @@ public class AdminUserServiceImpl implements AdminUserService {
                 throw exception(USER_COUNT_MAX, tenant.getAccountCount());
             }
         });
+        // 校验个别字段是否为空，设置默认值
+        if (null == createReqVO.getDeptId()) {
+            createReqVO.setDeptId(1L);
+        }
+        // if (null == createReqVO.getPostIds()) {
+        //     createReqVO.setPostIds(Collections.singleton(1L));
+        // }
         // 1.2 校验正确性
         validateUserForCreateOrUpdate(null, createReqVO.getUsername(),
                 createReqVO.getMobile(), createReqVO.getEmail(), createReqVO.getDeptId(), createReqVO.getPostIds());
@@ -277,12 +284,12 @@ public class AdminUserServiceImpl implements AdminUserService {
         AdminUserDO user = validateUserExists(id);
 
         // 2.1 删除用户
-        //userMapper.deleteById(id);
+        // userMapper.deleteById(id);
         dataRepository.deleteById(AdminUserDO.class, id);
         // 2.2 删除用户关联数据
         permissionService.processUserDeleted(id);
         // 2.2 删除用户岗位
-        //userPostMapper.deleteByUserId(id);
+        // userPostMapper.deleteByUserId(id);
         dataRepository.deleteByConfig(UserPostDO.class, new DefaultConfigStore().eq("user_id", id));
 
         // 3. 记录操作日志上下文
@@ -311,6 +318,12 @@ public class AdminUserServiceImpl implements AdminUserService {
         // 构建查询条件
         DefaultConfigStore configStore = new DefaultConfigStore();
 
+        // // 根据关键词模糊查询
+        if (StrUtil.isNotBlank(reqVO.getKeyword())) {
+            configStore.and(new DefaultConfigStore().or(Compare.LIKE, AdminUserDO.USERNAME, reqVO.getKeyword())
+                    .or(Compare.LIKE, AdminUserDO.EMAIL, reqVO.getKeyword()));
+        }
+
         // 用户名模糊查询
         if (StrUtil.isNotBlank(reqVO.getNickname())) {
             configStore.like(AdminUserDO.NICKNAME, reqVO.getNickname());
@@ -321,6 +334,10 @@ public class AdminUserServiceImpl implements AdminUserService {
             configStore.like(AdminUserDO.MOBILE, reqVO.getMobile());
         }
 
+        // 邮箱模糊查询
+        if (StrUtil.isNotBlank(reqVO.getEmail())) {
+            configStore.like(AdminUserDO.EMAIL, reqVO.getEmail());
+        }
         // 状态精确查询
         if (reqVO.getStatus() != null) {
             configStore.and(AdminUserDO.STATUS, reqVO.getStatus());
@@ -340,7 +357,7 @@ public class AdminUserServiceImpl implements AdminUserService {
         if (reqVO.getDeptId() != null) {
             Set<Long> deptIds = getDeptCondition(reqVO.getDeptId());
             if (CollUtil.isNotEmpty(deptIds)) {
-                configStore.in(AdminUserDO.DEPT_ID , deptIds);
+                configStore.in(AdminUserDO.DEPT_ID, deptIds);
             }
         }
 
@@ -356,7 +373,7 @@ public class AdminUserServiceImpl implements AdminUserService {
         }
 
         // 添加排序
-        configStore.order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
+        configStore.order(AdminUserDO.USER_TYPE, Order.TYPE.ASC).order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
 
         // 分页查询
         return dataRepository.findPageWithConditions(AdminUserDO.class, configStore,
@@ -447,19 +464,19 @@ public class AdminUserServiceImpl implements AdminUserService {
                                                       Long deptId, Set<Long> postIds) {
         // 关闭数据权限，避免因为没有数据权限，查询不到数据，进而导致唯一校验不正确
 //        return DataPermissionUtils.executeIgnore(() -> {
-            // 校验用户存在
-            AdminUserDO user = validateUserExists(id);
-            // 校验用户名唯一
-            validateUsernameUnique(id, username);
-            // 校验手机号唯一
-            validateMobileUnique(id, mobile);
-            // 校验邮箱唯一
-            validateEmailUnique(id, email);
-            // 校验部门处于开启状态
-            deptService.validateDeptList(CollectionUtils.singleton(deptId));
-            // 校验岗位处于开启状态
-            postService.validatePostList(postIds);
-            return user;
+        // 校验用户存在
+        AdminUserDO user = validateUserExists(id);
+        // 校验用户名唯一
+        validateUsernameUnique(id, username);
+        // 校验手机号唯一
+        validateMobileUnique(id, mobile);
+        // 校验邮箱唯一
+        validateEmailUnique(id, email);
+        // 校验部门处于开启状态
+        deptService.validateDeptList(CollectionUtils.singleton(deptId));
+        // 校验岗位处于开启状态
+        postService.validatePostList(postIds);
+        return user;
 //        });
 
     }
@@ -636,7 +653,7 @@ public class AdminUserServiceImpl implements AdminUserService {
 
     @Override
     public Integer getUserCountByStatus(Integer status) {
-        return (int) dataRepository.countByConfig(AdminUserDO.class,new DefaultConfigStore().eq(AdminUserDO.STATUS, status));
+        return (int) dataRepository.countByConfig(AdminUserDO.class, new DefaultConfigStore().eq(AdminUserDO.STATUS, status));
     }
 
     @Override
@@ -647,17 +664,17 @@ public class AdminUserServiceImpl implements AdminUserService {
 
         // 批量查询指定部门的所有用户（不过滤状态）
         List<AdminUserDO> users = dataRepository.findAllByConfig(AdminUserDO.class,
-            new DefaultConfigStore()
-                .in("dept_id", deptIds)
+                new DefaultConfigStore()
+                        .in("dept_id", deptIds)
         );
 
         // 按部门ID分组统计人数
         return users.stream()
-            .filter(user -> user.getDeptId() != null)
-            .collect(Collectors.groupingBy(
-                AdminUserDO::getDeptId,
-                Collectors.collectingAndThen(Collectors.counting(), Math::toIntExact)
-            ));
+                .filter(user -> user.getDeptId() != null)
+                .collect(Collectors.groupingBy(
+                        AdminUserDO::getDeptId,
+                        Collectors.collectingAndThen(Collectors.counting(), Math::toIntExact)
+                ));
     }
 
     /**

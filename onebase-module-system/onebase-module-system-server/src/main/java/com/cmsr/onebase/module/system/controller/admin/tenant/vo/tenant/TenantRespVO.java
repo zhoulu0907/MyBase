@@ -20,6 +20,10 @@ public class TenantRespVO {
     @ExcelProperty("租户编号")
     private Long id;
 
+    @Schema(description = "租户编码", example = "1")
+    @ExcelProperty("租户编码")
+    private String tenantCode;
+
     @Schema(description = "租户名", requiredMode = Schema.RequiredMode.REQUIRED, example = "onebase")
     @ExcelProperty("租户名")
     private String name;
