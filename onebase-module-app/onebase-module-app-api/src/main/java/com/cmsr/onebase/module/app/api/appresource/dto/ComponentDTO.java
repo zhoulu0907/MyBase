@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class ComponentDTO {
-     /**
+    /**
      * 组件编码
      */
     private String componentCode;
@@ -13,31 +13,6 @@ public class ComponentDTO {
      * 组件类型
      */
     private String componentType;
-
-    /**
-     * 组件标题
-     */
-    private String label;
-
-    /**
-     * 组件宽度
-     */
-    private Integer width;
-
-    /**
-     * 是否隐藏
-     */
-    private Boolean hidden;
-
-    /**
-     * readOnly
-     */
-    private String readOnly;
-
-    /**
-     * 是否必填
-     */
-    private Boolean required;
 
     /**
      * 配置
