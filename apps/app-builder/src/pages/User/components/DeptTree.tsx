@@ -15,12 +15,17 @@ type TreeDataType = {
 interface DeptTreeProps {
   selectedDeptId?: number;
   onDeptSelect: (deptId?: number) => void;
-  totalUserCount: number;
-  treeData: any[];
+  totalUserCount?: number;
+  treeData: DeptTree[];
   deptLoading?: boolean;
 }
 
-export default function DeptTree({ selectedDeptId, onDeptSelect, totalUserCount, treeData }: DeptTreeProps) {
+const DeptTreeCmp: React.FC<DeptTreeProps> = ({
+  selectedDeptId,
+  onDeptSelect,
+  totalUserCount = 0,
+  treeData
+}) => {
   const [search, setSearch] = useState('');
   const [selectedKeys, setSelectedKeys] = useState<string[]>(selectedDeptId ? [String(selectedDeptId)] : []);
 
@@ -67,3 +72,5 @@ export default function DeptTree({ selectedDeptId, onDeptSelect, totalUserCount,
     </div>
   );
 }
+
+export default DeptTreeCmp;

@@ -45,9 +45,10 @@ export const importUserTemplate = () => {
 };
 
 // 用户密码重置
-export const resetUserPassword = (id: number) => {
+export const resetUserPassword = (id: number, password?: string) => {
   const data = {
-    id
+    id,
+    ...(password && { password }) // 只有当password存在时才添加到请求数据中
   };
   return systemClient.post('/user/update-password', data);
 };

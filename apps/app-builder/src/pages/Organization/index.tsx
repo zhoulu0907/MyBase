@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Table, Button, Space, Message, Input, Modal } from '@arco-design/web-react';
-import { IconSearch } from '@arco-design/web-react/icon';
+import { IconSearch, IconPlus } from '@arco-design/web-react/icon';
 import styles from './index.module.less';
 import OrganizationModal from './components/OrganizationModal';
 import { getDeptList, createDept, updateDept, deleteDept } from '@onebase/platform-center';
@@ -22,11 +22,13 @@ const OrganizationPage: React.FC = () => {
     },
     {
       title: '部门描述',
-      dataIndex: 'description' // TODO：待接口增加字段
+      dataIndex: 'remark',
+      placeholder: '-'
     },
     {
       title: '管理员',
-      dataIndex: 'manager' // TODO：待接口增加字段
+      dataIndex: 'leaderUserName',
+      placeholder: '-'
     },
     {
       title: '用户数量',
@@ -79,12 +81,12 @@ const OrganizationPage: React.FC = () => {
   const handleModalConfirm = async (values: DeptForm) => {
     setModalLoading(true);
     try {
-      if (editRecord) {
-        await updateDept(values);
-        Message.success(`部门 "${values.name}" 编辑成功`);
+      if (editRecord?.id) {
+        await updateDept({ ...values, id: editRecord.id });
+        Message.success(`编辑成功`);
       } else {
         await createDept(values);
-        Message.success(`部门 "${values.name}" 添加成功`);
+        Message.success(`添加成功`);
       }
       handleSearch(searchValue);
       setModalVisible(false);
@@ -130,7 +132,7 @@ const OrganizationPage: React.FC = () => {
     <div className={styles.organizationPage}>
       <div className={styles.pageHeader}>
         <div className={styles.leftContent}>
-          <Button type="primary" onClick={handleAdd}>
+          <Button type="primary" onClick={handleAdd} icon={<IconPlus />}>
             添加
           </Button>
         </div>
