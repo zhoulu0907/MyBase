@@ -2,22 +2,19 @@ package com.cmsr.onebase.module.system.service.dept;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjectUtil;
-import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.system.controller.admin.dept.vo.dept.DeptListReqVO;
 import com.cmsr.onebase.module.system.controller.admin.dept.vo.dept.DeptRespVO;
 import com.cmsr.onebase.module.system.controller.admin.dept.vo.dept.DeptSaveReqVO;
+import com.cmsr.onebase.module.system.dal.database.DeptDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
+import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.dal.redis.RedisKeyConstants;
 import com.cmsr.onebase.module.system.service.user.AdminUserService;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.anyline.data.param.ConfigStore;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.Compare;
-import org.anyline.entity.Order;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
@@ -41,11 +38,8 @@ import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
 @Slf4j
 public class DeptServiceImpl implements DeptService {
 
-    //@Resource
-    //private DeptMapper deptMapper;
-
     @Resource
-    private DataRepository dataRepository;
+    private DeptDataRepository deptDataRepository;
 
     @Lazy
     @Resource
@@ -53,7 +47,7 @@ public class DeptServiceImpl implements DeptService {
 
     @Override
     @CacheEvict(cacheNames = RedisKeyConstants.DEPT_CHILDREN_ID_LIST,
-            allEntries = true) // allEntries 清空所有缓存，因为操作一个部门，涉及到多个缓存
+            allEntries = true)
     public Long createDept(DeptSaveReqVO createReqVO) {
         if (createReqVO.getParentId() == null) {
             createReqVO.setParentId(DeptDO.PARENT_ID_ROOT);
@@ -65,14 +59,14 @@ public class DeptServiceImpl implements DeptService {
 
         // 插入部门
         DeptDO dept = BeanUtils.toBean(createReqVO, DeptDO.class);
-        dataRepository.insert(dept);
+        deptDataRepository.insert(dept);
 
         return dept.getId();
     }
 
     @Override
     @CacheEvict(cacheNames = RedisKeyConstants.DEPT_CHILDREN_ID_LIST,
-            allEntries = true) // allEntries 清空所有缓存，因为操作一个部门，涉及到多个缓存
+            allEntries = true)
     public void updateDept(DeptSaveReqVO updateReqVO) {
         if (updateReqVO.getParentId() == null) {
             updateReqVO.setParentId(DeptDO.PARENT_ID_ROOT);
@@ -86,12 +80,12 @@ public class DeptServiceImpl implements DeptService {
 
         // 更新部门
         DeptDO updateObj = BeanUtils.toBean(updateReqVO, DeptDO.class);
-        dataRepository.update(updateObj);
+        deptDataRepository.update(updateObj);
     }
 
     @Override
     @CacheEvict(cacheNames = RedisKeyConstants.DEPT_CHILDREN_ID_LIST,
-            allEntries = true) // allEntries 清空所有缓存，因为操作一个部门，涉及到多个缓存
+            allEntries = true)
     public void deleteDept(Long id) {
         // 校验是否存在
         validateDeptExists(id);
@@ -100,22 +94,14 @@ public class DeptServiceImpl implements DeptService {
             throw exception(DEPT_EXITS_CHILDREN);
         }
         // 删除部门
-        dataRepository.deleteById(DeptDO.class, id);
+        deptDataRepository.deleteById(id);
     }
 
     /**
      * 获取子部门数量
      */
     private long getChildDeptCount(Long parentId) {
-        try {
-            ConfigStore configs = new DefaultConfigStore();
-            configs.and(Compare.EQUAL, "parent_id", parentId);
-    
-            return dataRepository.findAll(DeptDO.class, configs).size();
-        } catch (Exception e) {
-            log.error("获取子部门数量失败: parentId={}", parentId, e);
-            return 0;
-        }
+        return deptDataRepository.findAllByParentId(parentId).size();
     }
 
     @VisibleForTesting
@@ -123,7 +109,7 @@ public class DeptServiceImpl implements DeptService {
         if (id == null) {
             return;
         }
-        DeptDO dept = dataRepository.findById(DeptDO.class, id);
+        DeptDO dept = deptDataRepository.findById(id);
         if (dept == null) {
             throw exception(DEPT_NOT_FOUND);
         }
@@ -139,7 +125,7 @@ public class DeptServiceImpl implements DeptService {
             throw exception(DEPT_PARENT_ERROR);
         }
         // 2. 父部门不存在
-        DeptDO parentDept = dataRepository.findById(DeptDO.class, parentId);
+        DeptDO parentDept = deptDataRepository.findById(parentId);
         if (parentDept == null) {
             throw exception(DEPT_PARENT_NOT_EXITS);
         }
@@ -157,7 +143,7 @@ public class DeptServiceImpl implements DeptService {
             if (parentId == null || DeptDO.PARENT_ID_ROOT.equals(parentId)) {
                 break;
             }
-            parentDept = dataRepository.findById(DeptDO.class, parentId);
+            parentDept = deptDataRepository.findById(parentId);
             if (parentDept == null) {
                 break;
             }
@@ -166,33 +152,22 @@ public class DeptServiceImpl implements DeptService {
 
     @VisibleForTesting
     void validateDeptNameUnique(Long id, Long parentId, String name) {
-        try {
-            ConfigStore configs = new DefaultConfigStore();
-            configs.and(Compare.EQUAL, "parent_id", parentId);
-            configs.and(Compare.EQUAL, "name", name);
-            DeptDO dept = dataRepository.findOne(DeptDO.class, configs);
-            if (dept == null) {
-                return;
-            }
-            // 如果 id 为空，说明不用比较是否为相同 id 的部门
-            if (id == null) {
-                throw exception(DEPT_NAME_DUPLICATE);
-            }
-            if (ObjectUtil.notEqual(dept.getId(), id)) {
-                throw exception(DEPT_NAME_DUPLICATE);
-            }
-        } catch (Exception e) {
-            if (e instanceof com.cmsr.onebase.framework.common.exception.ServiceException) {
-                throw e;
-            }
-            log.error("验证部门名称唯一性失败: parentId={}, name={}", parentId, name, e);
+        DeptDO dept = deptDataRepository.findOneByParentIdAndName(parentId, name);
+        if (dept == null) {
+            return;
+        }
+        // 如果 id 为空，说明不用比较是否为相同 id 的部门
+        if (id == null) {
+            throw exception(DEPT_NAME_DUPLICATE);
+        }
+        if (ObjectUtil.notEqual(dept.getId(), id)) {
             throw exception(DEPT_NAME_DUPLICATE);
         }
     }
 
     @Override
     public DeptDO getDept(Long id) {
-        return dataRepository.findById(DeptDO.class, id);
+        return deptDataRepository.findById(id);
     }
 
     @Override
@@ -200,23 +175,12 @@ public class DeptServiceImpl implements DeptService {
         if (CollUtil.isEmpty(ids)) {
             return Collections.emptyList();
         }
-        return dataRepository.findAllByIds(DeptDO.class, new ArrayList<>(ids));
+        return deptDataRepository.findAllByIds(new ArrayList<>(ids));
     }
 
     @Override
     public List<DeptDO> getDeptList(DeptListReqVO reqVO) {
-            ConfigStore configs = new DefaultConfigStore();
-
-            // 构建查询条件
-            if (reqVO.getName() != null) {
-                configs.and(Compare.LIKE, "name", reqVO.getName());
-            }
-            if (reqVO.getStatus() != null) {
-                configs.and(Compare.EQUAL, "status", reqVO.getStatus());
-            }
-            configs.order("sort", Order.TYPE.ASC);
-            List<DeptDO> list = dataRepository.findAll(DeptDO.class, configs);
-            return list;
+        return deptDataRepository.findAllByNameAndStatus(reqVO.getName(), reqVO.getStatus());
     }
 
     @Override
@@ -242,26 +206,12 @@ public class DeptServiceImpl implements DeptService {
      * 根据父部门ID列表查询子部门
      */
     private List<DeptDO> getDeptListByParentIds(Collection<Long> parentIds) {
-        try {
-            ConfigStore configs = new DefaultConfigStore();
-            configs.and(Compare.IN, "parent_id", parentIds);
-            return dataRepository.findAll(DeptDO.class, configs);
-        } catch (Exception e) {
-            log.error("根据父部门ID列表查询子部门失败: parentIds={}", parentIds, e);
-            return Collections.emptyList();
-        }
+        return deptDataRepository.findAllByParentIds(parentIds);
     }
 
     @Override
     public List<DeptDO> getDeptListByLeaderUserId(Long id) {
-        try {
-            ConfigStore configs = new DefaultConfigStore();
-            configs.and(Compare.EQUAL, "leader_user_id", id);
-            return dataRepository.findAll(DeptDO.class, configs);
-        } catch (Exception e) {
-            log.error("根据管理员用户ID查询部门列表失败: id={}", id, e);
-            return Collections.emptyList();
-        }
+        return deptDataRepository.findAllByLeaderUserId(id);
     }
 
     @Override
@@ -296,19 +246,74 @@ public class DeptServiceImpl implements DeptService {
         List<DeptDO> deptList = getDeptList(reqVO);
         List<DeptRespVO> respList = BeanUtils.toBean(deptList, DeptRespVO.class);
 
-        // 2. 批量获取所有部门的人数统计
+        if (CollUtil.isEmpty(deptList)) {
+            return respList;
+        }
+
+        // 2. 提取部门ID和领导用户ID
         List<Long> deptIds = deptList.stream()
             .map(DeptDO::getId)
             .collect(Collectors.toList());
-        Map<Long, Integer> deptUserCountMap = adminUserService.getUserCountByDeptIds(deptIds);
+        List<Long> leaderUserIds = deptList.stream()
+            .map(DeptDO::getLeaderUserId)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList());
 
-        // 3. 设置每个部门的人数
+        // 1. 批量获取部门人数统计
+        Map<Long, Integer> deptUserCountMap = adminUserService.getUserCountByDeptIds(deptIds);
+        // 2. 批量获取领导用户信息
+        Map<Long, AdminUserDO> leaderUserMap = adminUserService.getUserMap(leaderUserIds);
+
+        // 4. 设置每个部门的人数和领导姓名
         respList.forEach(dept -> {
+            // 设置人数
             Integer userCount = deptUserCountMap.getOrDefault(dept.getId(), 0);
             dept.setUserCount(userCount);
+
+            // 设置领导姓名
+            if (dept.getLeaderUserId() != null) {
+                AdminUserDO leader = leaderUserMap.get(dept.getLeaderUserId());
+                if (leader != null) {
+                    dept.setLeaderUserName(leader.getNickname());
+                }
+            }
         });
 
         return respList;
+    }
+
+    @Override
+    public DeptRespVO getDeptWithUserCountAndLeader(Long id) {
+        DeptDO dept = getDept(id);
+        if (dept == null) {
+            return null;
+        }
+
+        DeptRespVO respVO = BeanUtils.toBean(dept, DeptRespVO.class);
+
+        // 准备批量查询的参数
+        List<Long> deptIds = Collections.singletonList(id);
+        List<Long> leaderUserIds = dept.getLeaderUserId() != null ?
+            Collections.singletonList(dept.getLeaderUserId()) : Collections.emptyList();
+
+        // 1. 批量获取部门人数统计
+        Map<Long, Integer> deptUserCountMap = adminUserService.getUserCountByDeptIds(deptIds);
+        // 2. 批量获取领导用户信息
+        Map<Long, AdminUserDO> leaderUserMap = adminUserService.getUserMap(leaderUserIds);
+
+        // 设置部门人数
+        Integer userCount = deptUserCountMap.getOrDefault(id, 0);
+        respVO.setUserCount(userCount);
+
+        // 设置领导姓名
+        if (dept.getLeaderUserId() != null) {
+            AdminUserDO leader = leaderUserMap.get(dept.getLeaderUserId());
+            if (leader != null) {
+                respVO.setLeaderUserName(leader.getNickname());
+            }
+        }
+
+        return respVO;
     }
 
 }

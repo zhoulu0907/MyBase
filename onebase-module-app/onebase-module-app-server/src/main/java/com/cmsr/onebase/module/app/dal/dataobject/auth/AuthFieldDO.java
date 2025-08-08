@@ -16,11 +16,14 @@ public class AuthFieldDO extends TenantBaseDO {
     @Column(name = "application_id", nullable = false, comment = "应用Id")
     private Long applicationId;
 
+    @Column(name = "role_id", nullable = false, comment = "角色Id")
+    private Long roleId;
+
     @Column(name = "menu_id", nullable = false, comment = "菜单Id")
     private Long menuId;
 
-    @Column(name = "field_name", nullable = false, length = 100, comment = "字段名称")
-    private String fieldName;
+    @Column(name = "field_id", nullable = false, comment = "字段名称")
+    private Long fieldId;
 
     @Column(name = "is_can_read", comment = "是否可阅读")
     private Boolean canRead;

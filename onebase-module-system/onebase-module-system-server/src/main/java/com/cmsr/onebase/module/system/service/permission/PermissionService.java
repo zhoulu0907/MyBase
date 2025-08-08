@@ -149,7 +149,7 @@ public interface PermissionService {
      * @param userIds 用户编号列表
      * @return 变动影响的行数
      */
-    long assignRoleUsers(Long roleId, Set<Long> userIds);
+    long addRoleUsers(Long roleId, Set<Long> userIds);
 
     /**
      * 从角色中移除用户

@@ -98,7 +98,7 @@ public interface DeptService {
     List<DeptDO> getDeptListByLeaderUserId(Long id);
 
     /**
-     * 获得所有子部门，从缓存中
+     * 获得所有子部门，从缓存���
      *
      * @param id 父部门编号
      * @return 子部门列表
@@ -115,11 +115,19 @@ public interface DeptService {
     void validateDeptList(Collection<Long> ids);
 
     /**
-     * 获取部门列表（包含人数统计）
+     * 获��部门列表（包含人数统计）
      *
      * @param reqVO 查询条件
      * @return 部门列表（包含人数）
      */
     List<DeptRespVO> getDeptListWithUserCount(DeptListReqVO reqVO);
+
+    /**
+     * 获得部门信息（包含人数和领导姓名）
+     *
+     * @param id 部门编号
+     * @return 部门信息
+     */
+    DeptRespVO getDeptWithUserCountAndLeader(Long id);
 
 }

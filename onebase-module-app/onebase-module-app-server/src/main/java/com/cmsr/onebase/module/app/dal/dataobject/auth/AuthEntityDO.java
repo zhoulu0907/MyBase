@@ -16,6 +16,9 @@ public class AuthEntityDO extends TenantBaseDO {
     @Column(name = "application_id", nullable = false, comment = "应用Id")
     private Long applicationId;
 
+    @Column(name = "role_id", nullable = false, comment = "角色Id")
+    private Long roleId;
+
     @Column(name = "menu_id", nullable = false, comment = "菜单Id")
     private Long menuId;
 
@@ -23,6 +26,6 @@ public class AuthEntityDO extends TenantBaseDO {
     private Long entityId;
 
     @Column(name = "is_allowed", nullable = false, comment = "是否可访问")
-    private Boolean isAllowed;
+    private Boolean allowed;
 
 }

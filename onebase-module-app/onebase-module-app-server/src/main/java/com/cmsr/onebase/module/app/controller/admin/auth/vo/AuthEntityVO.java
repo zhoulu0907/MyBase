@@ -11,10 +11,13 @@ import lombok.Data;
 @Schema(description = "应用管理 - 实体 Response VO")
 public class AuthEntityVO {
 
+    @Schema(description = "主键Id")
+    private Long id;
+
     @Schema(description = "实体Id")
     private Long entityId;
 
     @Schema(description = "是否可访问")
-    private Boolean isAllowed;
+    private Boolean allowed;
 
 }

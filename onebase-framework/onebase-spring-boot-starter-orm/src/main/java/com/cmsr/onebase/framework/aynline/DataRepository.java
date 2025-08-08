@@ -1,35 +1,24 @@
 package com.cmsr.onebase.framework.aynline;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
-import javax.sql.DataSource;
-
-import org.anyline.data.Run;
-import org.anyline.data.jdbc.util.DataSourceUtil;
-import org.anyline.data.param.ConfigStore;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.Compare;
-import org.anyline.entity.DataRow;
-import org.anyline.entity.DataSet;
-import org.anyline.entity.DefaultPageNavi;
-import org.anyline.entity.PageNavi;
-import org.anyline.entity.generator.PrimaryGenerator;
-import org.anyline.metadata.Constraint;
-import org.anyline.metadata.Table;
-import org.anyline.proxy.ServiceProxy;
-import org.anyline.service.AnylineService;
-import org.anyline.util.ConfigTable;
-
 import com.cmsr.onebase.framework.common.anyline.web.BizException;
 import com.cmsr.onebase.framework.common.anyline.web.StatusCode;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.data.base.BaseDO;
-
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.anyline.data.Run;
+import org.anyline.data.param.ConfigStore;
+import org.anyline.data.param.init.DefaultConfigStore;
+import org.anyline.entity.*;
+import org.anyline.entity.generator.PrimaryGenerator;
+import org.anyline.metadata.Constraint;
+import org.anyline.metadata.Table;
+import org.anyline.service.AnylineService;
+import org.anyline.util.ConfigTable;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * DataRepository - JPA风格的CRUD操作工具类
@@ -658,8 +647,6 @@ public class DataRepository { // TODO 等改造完成，这个类泛型 <T exten
             log.info(ddl.getFinalUpdate());
         }
     }
-
-
 
 
 }

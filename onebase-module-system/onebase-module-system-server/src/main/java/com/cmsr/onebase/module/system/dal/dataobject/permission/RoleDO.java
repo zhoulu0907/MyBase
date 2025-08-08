@@ -1,15 +1,14 @@
 package com.cmsr.onebase.module.system.dal.dataobject.permission;
 
-import java.util.Set;
-
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
 import com.cmsr.onebase.module.system.enums.permission.DataScopeEnum;
 import com.cmsr.onebase.module.system.enums.permission.RoleTypeEnum;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Table;
 import lombok.Data;
+
+import java.util.Set;
 
 /**
  * 角色 DO
@@ -74,7 +73,7 @@ public class RoleDO extends TenantBaseDO {
     private String remark;
 
     /**
-     * 数据范围
+     * 数据���围
      *
      * 枚举 {@link DataScopeEnum}
      */
@@ -85,7 +84,8 @@ public class RoleDO extends TenantBaseDO {
      *
      * 适用于 {@link #dataScope} 的值为 {@link DataScopeEnum#DEPT_CUSTOM} 时
      */
-    @Column(name = DATA_SCOPE_DEPT_IDS)
+    @Column(name = DATA_SCOPE_DEPT_IDS, columnDefinition="json")
+    // 添加类型转换注解，确保Set<Long>正确映射
     private Set<Long> dataScopeDeptIds;
 
 }

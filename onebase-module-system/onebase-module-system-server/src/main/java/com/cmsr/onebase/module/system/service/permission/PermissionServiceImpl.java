@@ -8,7 +8,6 @@ import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.biz.system.permission.dto.DeptDataPermissionRespDTO;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
-import com.cmsr.onebase.framework.data.base.BaseDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.MenuDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleMenuDO;
@@ -346,7 +345,7 @@ public class PermissionServiceImpl implements PermissionService {
     }
 
     @Override
-    public long assignRoleUsers(Long roleId, Set<Long> userIds) {
+    public long addRoleUsers(Long roleId, Set<Long> userIds) {
         // 参数校验
         if (CollUtil.isEmpty(userIds)) {
             return 0;

@@ -16,6 +16,9 @@ public class AuthOperationDO extends TenantBaseDO {
     @Column(name = "application_id", nullable = false, comment = "应用Id")
     private Long applicationId;
 
+    @Column(name = "role_id", nullable = false, comment = "角色Id")
+    private Long roleId;
+
     @Column(name = "menu_id", nullable = false, comment = "菜单Id")
     private Long menuId;
 
@@ -24,4 +27,5 @@ public class AuthOperationDO extends TenantBaseDO {
 
     @Column(name = "is_allowed", nullable = false, comment = "是否允许")
     private Boolean allowed;
+
 }

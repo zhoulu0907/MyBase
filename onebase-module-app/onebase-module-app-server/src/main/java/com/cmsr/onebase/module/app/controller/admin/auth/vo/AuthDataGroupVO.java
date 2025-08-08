@@ -3,6 +3,8 @@ package com.cmsr.onebase.module.app.controller.admin.auth.vo;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
+import java.util.List;
+
 /**
  * @Author：huangjie
  * @Date：2025/8/7 14:51
@@ -10,6 +12,9 @@ import lombok.Data;
 @Data
 @Schema(description = "应用管理 - 数据 Request VO")
 public class AuthDataGroupVO {
+
+    @Schema(description = "主键Id")
+    private Long id;
 
     @Schema(description = "数据权限组名称")
     private String groupName;
@@ -30,5 +35,8 @@ public class AuthDataGroupVO {
     private String scopeLevel;
 
     @Schema(description = "是否可以操作")
-    private Boolean isOperable;
+    private Boolean operable;
+
+    private List<List<AuthDataFilterVO>> dataFilters;
+
 }
