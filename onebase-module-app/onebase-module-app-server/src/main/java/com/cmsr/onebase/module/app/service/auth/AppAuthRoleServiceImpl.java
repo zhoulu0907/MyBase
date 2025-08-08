@@ -11,6 +11,7 @@ import com.cmsr.onebase.module.app.dal.database.auth.AppAuthUserRoleRepository;
 import com.cmsr.onebase.module.app.dal.dataobject.auth.AuthRoleDO;
 import com.cmsr.onebase.module.app.enums.app.AppErrorCodeConstants;
 import com.cmsr.onebase.module.app.enums.auth.AuthRoleTypeEnum;
+import com.cmsr.onebase.module.app.service.AppCommonService;
 import com.cmsr.onebase.module.app.util.AuthUtils;
 import jakarta.annotation.Resource;
 import lombok.Setter;
@@ -33,15 +34,19 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
     @Resource
     private AppAuthUserRoleRepository authUserRoleRepository;
 
+    @Resource
+    private AppCommonService appCommonService;
+
     @Override
     public List<AuthRoleListRespVO> getAuthRoleList(Long applicationId) {
+        appCommonService.validateApplicationExist(applicationId);
         List<AuthRoleDO> authRoleList = authRoleRepository.findByApplicationId(applicationId);
         return BeanUtils.toBean(authRoleList, AuthRoleListRespVO.class);
     }
 
 
     @Override
-    public void createAuthRole(AuthRoleCreateReqVO reqVO) {
+    public void createRole(AuthRoleCreateReqVO reqVO) {
         checkAuthRoleNameExists(reqVO.getApplicationId(), reqVO.getRoleName());
         AuthRoleDO authRoleDO = new AuthRoleDO();
         authRoleDO.setApplicationId(reqVO.getApplicationId());
@@ -52,20 +57,32 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
     }
 
     @Override
+    public void createDefaultRole(Long applicationId) {
+        for (AuthRoleTypeEnum roleType : List.of(AuthRoleTypeEnum.SYSTEM_ADMIN, AuthRoleTypeEnum.SYSTEM_USER)) {
+            AuthRoleDO authRoleDO = new AuthRoleDO();
+            authRoleDO.setApplicationId(applicationId);
+            authRoleDO.setRoleCode(roleType.getCode());
+            authRoleDO.setRoleName(roleType.getName());
+            authRoleDO.setRoleType(roleType.getValue());
+            authRoleRepository.insert(authRoleDO);
+        }
+    }
+
+    @Override
     @Transactional(rollbackFor = Exception.class)
-    public void addMember(AuthRoleAddMemberReqVO reqVO) {
+    public void addUser(AuthRoleAddMemberReqVO reqVO) {
         authUserRoleRepository.saveUserRole(reqVO);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void deleteMember(AuthRoleDeleteMemberReqVO reqVO) {
+    public void deleteUser(AuthRoleDeleteMemberReqVO reqVO) {
         authUserRoleRepository.deleteUserRole(reqVO);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void deleteAuthRole(Long roleId) {
+    public void deleteRole(Long roleId) {
         authUserRoleRepository.deleteByRoleId(roleId);
         authRoleRepository.deleteById(roleId);
     }

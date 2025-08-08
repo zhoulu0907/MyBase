@@ -20,9 +20,11 @@ import com.cmsr.onebase.module.app.dal.dataobject.app.ApplicationDO;
 import com.cmsr.onebase.module.app.enums.app.AppErrorCodeConstants;
 import com.cmsr.onebase.module.app.enums.app.ApplicationStatusEnum;
 import com.cmsr.onebase.module.app.service.AppCommonService;
+import com.cmsr.onebase.module.app.service.auth.AppAuthRoleService;
 import com.cmsr.onebase.module.app.util.VersionUtils;
 import jakarta.annotation.Resource;
 import lombok.Setter;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -66,6 +68,9 @@ public class AppApplicationServiceImpl implements AppApplicationService {
     @Resource
     private AppCommonService appCommonService;
 
+    @Resource
+    private AppAuthRoleService authRoleService;
+
     @Override
     public PageResult<ApplicationRespVO> getApplicationPage(ApplicationPageReqVO pageReqVO) {
         PageResult<ApplicationDO> pageResult = applicationRepository.selectPage(pageReqVO);
@@ -98,8 +103,24 @@ public class AppApplicationServiceImpl implements AppApplicationService {
         applicationDO.setVersionNumber(VersionUtils.INIT_VERSION);
         applicationDO.setAppStatus(ApplicationStatusEnum.EDITING.getValue());
         applicationDO = applicationRepository.insert(applicationDO);
-        applicationTagRepository.saveApplicationTags(applicationDO.getId(), createReqVO.getTagIds());
+        saveApplicationTags(applicationDO.getId(), createReqVO.getTagIds());
+        authRoleService.createDefaultRole(applicationDO.getId());
         return BeanUtils.toBean(applicationDO, ApplicationCreateRespVO.class);
+    }
+
+    /**
+     * 更新应用关联的标签，先删除没有的标签，再添加新的标签
+     *
+     * @param applicationId
+     * @param tagIds
+     */
+    private void saveApplicationTags(Long applicationId, List<Long> tagIds) {
+        if (CollectionUtils.isEmpty(tagIds)) {
+            applicationTagRepository.deleteByApplicationId(applicationId);
+        } else {
+            applicationTagRepository.deleteByByApplicationIdAndTagsNotIn(applicationId, tagIds);
+            applicationTagRepository.saveAll(applicationId, tagIds);
+        }
     }
 
     @Override
@@ -117,7 +138,7 @@ public class AppApplicationServiceImpl implements AppApplicationService {
         appCommonService.validateApplicationExist(createReqVO.getId());
         validApplicationCodeDuplicate(createReqVO.getAppCode(), createReqVO.getId());
         ApplicationDO updateObj = BeanUtils.toBean(createReqVO, ApplicationDO.class);
-        applicationTagRepository.saveApplicationTags(createReqVO.getId(), createReqVO.getTagIds());
+        saveApplicationTags(createReqVO.getId(), createReqVO.getTagIds());
         applicationRepository.update(updateObj);
     }
 

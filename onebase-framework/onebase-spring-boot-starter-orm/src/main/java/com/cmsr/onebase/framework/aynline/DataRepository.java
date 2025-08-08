@@ -340,10 +340,10 @@ public class DataRepository { // TODO 等改造完成，这个类泛型 <T exten
      * @param configs configs
      * @param <T>     实体类型
      */
-    public <T extends BaseDO>  long deleteByConfig(Class<T> clazz, ConfigStore configs) {
+    public <T extends BaseDO> long deleteByConfig(Class<T> clazz, ConfigStore configs) {
         try {
             DataRow row = new DataRow();
-            row.put("deleted", 1);  // 设置逻辑删除标记
+            row.put("deleted", System.currentTimeMillis());  // 设置逻辑删除标记
             long result = anylineService.update(getTableName(clazz), row, configs);
             log.info("[{}] deleteByConfig  ---> effect rows = {}", clazz, result);
             return result;
@@ -363,7 +363,7 @@ public class DataRepository { // TODO 等改造完成，这个类泛型 <T exten
     public <T extends BaseDO> long deleteByConfigReturn(Class<T> clazz, ConfigStore configs) {
         try {
             DataRow row = new DataRow();
-            row.put("deleted", 1);  // 设置逻辑删除标记
+            row.put("deleted", System.currentTimeMillis());  // 设置逻辑删除标记
             long result = anylineService.update(getTableName(clazz), row, configs);
             log.info("[{}] deleteByConfig  ---> effect rows = {}", clazz, result);
             return result;
@@ -389,7 +389,7 @@ public class DataRepository { // TODO 等改造完成，这个类泛型 <T exten
             ConfigStore configs = new DefaultConfigStore();
             configs.and(Compare.EQUAL, "id", id);
             DataRow row = new DataRow();
-            row.put("deleted", 1);  // 设置逻辑删除标记
+            row.put("deleted", System.currentTimeMillis());  // 设置逻辑删除标记
             long result = anylineService.update(getTableName(clazz), row, configs);
             log.info("[{}] deleteById  ---> effect rows = {}, id = {}", clazz, result, id);
 
@@ -444,10 +444,10 @@ public class DataRepository { // TODO 等改造完成，这个类泛型 <T exten
             ConfigStore configs = new DefaultConfigStore();
             configs.and(Compare.IN, "id", ids);
             DataRow row = new DataRow();
-            row.put("deleted", 1);  // 设置逻辑删除标记
+            row.put("deleted", System.currentTimeMillis());  // 设置逻辑删除标记
 
             long result = anylineService.update(getTableName(clazz), row, configs);
-            log.info("[{}] deleteAllById  ---> effect rows={}, ids={}", clazz, result,ids);
+            log.info("[{}] deleteAllById  ---> effect rows={}, ids={}", clazz, result, ids);
             return result;
         } catch (Exception e) {
             log.error("根据ID列表删除实体失败: class={}, ids={}", clazz.getSimpleName(), ids, e);
@@ -469,7 +469,7 @@ public class DataRepository { // TODO 等改造完成，这个类泛型 <T exten
         try {
             ConfigStore configs = new DefaultConfigStore();
             DataRow row = new DataRow();
-            row.put("deleted", 1);  // 设置逻辑删除标记
+            row.put("deleted", System.currentTimeMillis());  // 设置逻辑删除标记
 
             long result = anylineService.update(getTableName(clazz), row, configs);
             log.info("[{}] deleteAll  ---> effect rows={}", clazz, result);

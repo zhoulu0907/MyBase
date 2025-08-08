@@ -22,13 +22,10 @@ public class AuthDataGroupVO {
     @Schema(description = "数据权限组描述")
     private String description;
 
-    @Schema(description = "关联业务实体字段Id")
+    @Schema(description = "业务实体字段Id")
     private Long scopeFieldId;
 
-    @Schema(description = "关联业务实体字段名称")
-    private Long scopeFieldDisplayName;
-
-    @Schema(description = "关联业务实体字段对应的权限范围")
+    @Schema(description = "业务实体字段对应的权限范围")
     private String scopeLevel;
 
     @Schema(description = "是否可以操作")
