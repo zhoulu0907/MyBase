@@ -7,10 +7,7 @@ import com.cmsr.onebase.framework.common.pojo.PageParam;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.excel.core.util.ExcelUtils;
-import com.cmsr.onebase.module.system.controller.admin.dict.vo.data.DictDataPageReqVO;
-import com.cmsr.onebase.module.system.controller.admin.dict.vo.data.DictDataRespVO;
-import com.cmsr.onebase.module.system.controller.admin.dict.vo.data.DictDataSaveReqVO;
-import com.cmsr.onebase.module.system.controller.admin.dict.vo.data.DictDataSimpleRespVO;
+import com.cmsr.onebase.module.system.controller.admin.dict.vo.data.*;
 import com.cmsr.onebase.module.system.dal.dataobject.dict.DictDataDO;
 import com.cmsr.onebase.module.system.service.dict.DictDataService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -41,7 +38,7 @@ public class DictDataController {
     @PostMapping("/create")
     @Operation(summary = "新增字典数据")
     @PreAuthorize("@ss.hasPermission('system:dict:create')")
-    public CommonResult<Long> createDictData(@Valid @RequestBody DictDataSaveReqVO createReqVO) {
+    public CommonResult<Long> createDictData(@Valid @RequestBody DictDataInsertReqVO createReqVO) {
         Long dictDataId = dictDataService.createDictData(createReqVO);
         return success(dictDataId);
     }
@@ -49,8 +46,17 @@ public class DictDataController {
     @PostMapping("/update")
     @Operation(summary = "修改字典数据")
     @PreAuthorize("@ss.hasPermission('system:dict:update')")
-    public CommonResult<Boolean> updateDictData(@Valid @RequestBody DictDataSaveReqVO updateReqVO) {
+    public CommonResult<Boolean> updateDictData(@Valid @RequestBody DictDataUpdateReqVO updateReqVO) {
         dictDataService.updateDictData(updateReqVO);
+        return success(true);
+    }
+
+    @PostMapping("/update-status")
+    @Operation(summary = "修改字典数据状态")
+    @PreAuthorize("@ss.hasPermission('system:dict:update')")
+    public CommonResult<Boolean> updateDictDataStatus(@RequestParam("id") Long id,
+                                                      @RequestParam("status") Integer status) {
+        dictDataService.updateDictDataStatus(id, status);
         return success(true);
     }
 

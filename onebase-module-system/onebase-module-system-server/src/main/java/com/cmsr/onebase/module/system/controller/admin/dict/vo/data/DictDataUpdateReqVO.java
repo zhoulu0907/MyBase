@@ -10,17 +10,16 @@ import lombok.Data;
 
 @Schema(description = "管理后台 - 字典数据创建/修改 Request VO")
 @Data
-public class DictDataSaveReqVO {
+public class DictDataUpdateReqVO {
 
     @Schema(description = "字典数据编号", example = "1024")
+    @NotNull(message = "id不能为空")
     private Long id;
 
     @Schema(description = "显示顺序", requiredMode = Schema.RequiredMode.REQUIRED, example = "1024")
-    @NotNull(message = "显示顺序不能为空")
     private Integer sort;
 
     @Schema(description = "字典标签", requiredMode = Schema.RequiredMode.REQUIRED, example = "onebase")
-    @NotBlank(message = "字典标签不能为空")
     @Size(max = 100, message = "字典标签长度不能超过100个字符")
     private String label;
 
@@ -35,7 +34,6 @@ public class DictDataSaveReqVO {
     private String dictType;
 
     @Schema(description = "状态,见 CommonStatusEnum 枚举", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
-    @NotNull(message = "状态不能为空")
     @InEnum(value = CommonStatusEnum.class, message = "修改状态必须是 {value}")
     private Integer status;
 

@@ -65,19 +65,19 @@ public class AdminUserServiceImpl implements AdminUserService {
     static final String USER_REGISTER_ENABLED_KEY = "system.user.register-enabled";
 
     @Resource
-    private DeptService deptService;
+    private DeptService       deptService;
     @Resource
-    private PostService postService;
+    private PostService       postService;
     @Resource
     private PermissionService permissionService;
     @Resource
-    private PasswordEncoder passwordEncoder;
+    private PasswordEncoder   passwordEncoder;
     @Resource
     @Lazy // 延迟，避免循环依赖报错
-    private TenantService tenantService;
+    private TenantService     tenantService;
 
     @Resource
-    private ConfigApi configApi;
+    private ConfigApi   configApi;
     @Lazy
     @Resource
     private RoleService roleService;
@@ -178,7 +178,7 @@ public class AdminUserServiceImpl implements AdminUserService {
         // 2.2 更新岗位
         updateUserPost(updateReqVO, updateObj);
         // 2.3 更新用户角色关联
-        permissionService.assignUserRoles(updateReqVO.getId(),updateReqVO.getRoleIds());
+        permissionService.assignUserRoles(updateReqVO.getId(), updateReqVO.getRoleIds());
 
         // 3. 记录操作日志上下文
         LogRecordContext.putVariable(DiffParseFunction.OLD_OBJECT, BeanUtils.toBean(oldUser, UserInsertReqVO.class));
@@ -363,6 +363,7 @@ public class AdminUserServiceImpl implements AdminUserService {
 
         // 如果有角色编号，查询角色对应的用户编号
         Set<Long> userIds = null;
+        // 过滤拥有roleId该角色的用户
         if (reqVO.getRoleId() != null) {
             userIds = permissionService.getUserRoleIdListByRoleId(singleton(reqVO.getRoleId()));
             if (CollUtil.isEmpty(userIds)) {
@@ -370,6 +371,13 @@ public class AdminUserServiceImpl implements AdminUserService {
                 return new PageResult<>(Collections.emptyList(), 0L);
             }
             configStore.in(BaseDO.ID, userIds);
+        }
+        // 排除拥有excludRoleId角色的用户
+        if (reqVO.getExcludRoleId() != null) {
+            userIds = permissionService.getUserRoleIdListByRoleId(singleton(reqVO.getExcludRoleId()));
+            if (!CollUtil.isEmpty(userIds)) {
+                configStore.notIn(BaseDO.ID, userIds);
+            }
         }
 
         // 添加排序
