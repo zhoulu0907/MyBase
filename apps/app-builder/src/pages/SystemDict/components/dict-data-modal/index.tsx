@@ -6,7 +6,7 @@ import { useEffect } from 'react';
 interface DictionaryItemModalProps {
   visible: boolean;
   loading?: boolean;
-  initialValues?: DictData;
+  initialValues?: Partial<DictData>
   onOk: (values: DictData) => void;
   onCancel: () => void;
   title?: string;
@@ -26,6 +26,7 @@ export default function DictionaryItemModal({
     if (visible) {
       form.setFieldsValue({
         label: initialValues?.label || '',
+        value: initialValues?.value || '',
         dictType: initialValues?.dictType || '',
         remark: initialValues?.remark || '',
         sort: initialValues?.sort ?? 0,
@@ -65,9 +66,7 @@ export default function DictionaryItemModal({
         </Form.Item>
         <Form.Item label="是否启用" field="status" triggerPropName="checked">
           <Switch
-            checkedText="启用"
-            uncheckedText="停用"
-            checked={form.getFieldValue('status') === StatusEnum.ENABLE}
+            defaultChecked={form.getFieldValue('status') === StatusEnum.ENABLE}
             onChange={(checked) => form.setFieldValue('status', checked ? StatusEnum.ENABLE : StatusEnum.DISABLE)}
           />
         </Form.Item>

@@ -1,5 +1,5 @@
 import DictList from '@/pages/SystemDict/components/dict-list';
-import DictionaryTable from '@/pages/SystemDict/components/dict-table';
+import DictionaryTable from '@/pages/SystemDict/components/dict-data-table';
 import { Layout, Message, Modal, Button, Space, Empty, Divider } from '@arco-design/web-react';
 import {
   createDict,
@@ -8,7 +8,9 @@ import {
   getAllDictList,
   getDictDataListByPage,
   updateDict,
-  getDictDetail
+  getDictDetail,
+  updateDictData,
+  createDictData
 } from '@onebase/platform-center';
 import type { PageParam } from '@onebase/platform-center';
 import type { DictData, DictItem } from '@onebase/platform-center';
@@ -17,6 +19,7 @@ import DictDataModal from './components/dict-data-modal';
 import DictModal from './components/dict-modal';
 import InfoPanel from '@/components/InfoPanel';
 import styles from './index.module.less';
+import { debounce } from 'lodash-es'
 
 const Sider = Layout.Sider;
 const Header = Layout.Header;
@@ -29,86 +32,55 @@ export default function SystemDictPage() {
   const [tableData, setTableData] = useState<DictData[]>([]);
   const [_loading, setLoading] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [pageSize, _setPageSize] = useState<number>(10);
+  const [pageSize, setPageSize] = useState<number>(10);
   const [total, setTotal] = useState<number>(0);
   const [dictSearch, setDictSearch] = useState('');
   const [filteredDictList, setFilteredDictList] = useState<DictItem[]>([]);
-  const [itemSearch, setItemSearch] = useState('');
+  const [dictDataSearch, setDictDataSearch] = useState('');
   const [addDictModalVisible, setAddDictModalVisible] = useState(false);
   const [editDict, setEditDict] = useState<DictItem | null>(null);
   const [modalLoading, setModalLoading] = useState(false);
   const [dictDataModalVisible, setDictDataModalVisible] = useState(false);
-  const [itemModalLoading, _setItemModalLoading] = useState(false);
+  const [dictDataModalLoading, setDictDataModalLoading] = useState(false);
   const [editItem, setEditItem] = useState<DictData | null>(null);
 
+  const loadDictList = async () => {
+    getAllDictList()
+      .then((data) => {
+        setDictList(data);
+        if (data.length > 0) {
+          setActiveDictId(data[0].id);
+        }
+      })
+    if (dictList.length > 0) {
+      setActiveDictId(dictList[0].id);
+    }
+  };
   useEffect(() => {
-    const loadDictList = async () => {
-      // TODO: 联调后移除mock数据
-      // const data = await getAllDictList();
-      // setDictList(data);
-      // if (data.length > 0) {
-      //   setActiveDictId(data[0].id);
-      // }
-      getAllDictList()
-        .then((data) => {
-          setDictList(data);
-        })
-        .catch((err) => {
-          console.log(err);
-          setDictList([
-            {
-              id: 1,
-              name: '用户类型',
-              type: 'user_type',
-              status: 1,
-              remark: '描述'
-            },
-            { id: 2, name: '角色权限', type: 'role_permission', status: 0 },
-            {
-              id: 3,
-              name: '系统配置',
-              type: 'system_config',
-              remark: '这是一段描述',
-              status: 1
-            }
-          ]);
-        });
-      if (dictList.length > 0) {
-        setActiveDictId(dictList[0].id);
-      }
-    };
     loadDictList();
   }, []);
+  const loadTableData = async (searchKeyword?: string) => {
+    setLoading(true);
+    const params: PageParam & { dictType: string, label?: string } = {
+      dictType: dictList.find((t) => t.id === activeDictId)?.type || '',
+      pageNo: currentPage,
+      pageSize,
+      ...(searchKeyword ? { label: searchKeyword } : {})
+    };
+    const res = await getDictDataListByPage(params);
+    
+    setLoading(false);
+    getDictDataListByPage(params)
+      .then(() => {
+        setTableData(res.list);
+        setTotal(res.total);
+      }).finally(() => {
+        setLoading(false)
+      });
+  };
 
   useEffect(() => {
     if (activeDictId !== undefined) {
-      const loadTableData = async () => {
-        setLoading(true);
-        const params: PageParam & { dictType: string } = {
-          dictType: dictList.find((t) => t.id === activeDictId)?.type || '',
-          pageNo: currentPage,
-          pageSize
-        };
-        // TODO: 调接口后移除mock data
-        // const res = await getDictDataListByPage(params);
-        // setTableData(res.list);
-        // setTotal(res.total);
-        // setLoading(false);
-        getDictDataListByPage(params)
-          .then(() => {})
-          .catch(() => {
-            setTableData([
-              {
-                id: 10,
-                label: '1',
-                value: '1',
-                status: 1,
-                remark: '1',
-                sort: 1
-              }
-            ]);
-          });
-      };
       loadTableData();
     }
   }, [activeDictId, currentPage, pageSize, dictList]);
@@ -128,6 +100,30 @@ export default function SystemDictPage() {
       dictSearch ? dictList.filter((t) => t.name.includes(dictSearch) || t.type.includes(dictSearch)) : dictList
     );
   }, [dictList, dictSearch]);
+
+  const debouncedLoadTableData = debounce((keyword: string) => {
+    loadTableData(keyword);
+  }, 300);
+
+  useEffect(() => {
+    if (activeDictId !== undefined) {
+      loadTableData(dictDataSearch);
+    }
+  }, [activeDictId, currentPage, pageSize, dictList]);
+
+  useEffect(() => {
+    if (activeDictId !== undefined) {
+      debouncedLoadTableData(dictDataSearch);
+    }
+    return () => {
+      debouncedLoadTableData.cancel();
+    };
+  }, [dictDataSearch]);
+
+  const handleDictDataSearch = (value: string) => {
+    setDictDataSearch(value);
+    setCurrentPage(1);
+  };
 
   // 编辑/删除字典按钮
   const OperationButtons = (
@@ -203,6 +199,7 @@ export default function SystemDictPage() {
       }
       setAddDictModalVisible(false);
       setEditDict(null);
+      loadDictList();
     } finally {
       setModalLoading(false);
     }
@@ -212,32 +209,44 @@ export default function SystemDictPage() {
     setEditItem(tableData.find((d) => d.id === item.id) || null);
     setDictDataModalVisible(true);
   };
-  // 字典项新增/编辑提交
-  //   const handleDictDataModalOk = async (values: DictData) => {
-  //     setItemModalLoading(true);
-  //     try {
-  //       if (editItem && editItem.id) {
-  //         await updateDictData({ ...editItem, ...values });
-  //       } else {
-  //         await createDictData({ ...values });
-  //       }
-  //       // 刷新表格
-  //       if (activeDictId !== undefined) {
-  //         const params: PageParam & { dictType: string } = {
-  //           dictType: dictList.find(t => t.id === activeDictId)?.type || '',
-  //           pageNo: currentPage,
-  //           pageSize,
-  //         };
-  //         const res = await getDictDataListByPage(params);
-  //         setTableData(res.list);
-  //         setTotal(res.total);
-  //       }
-  //       setDictDataModalVisible(false);
-  //       setEditItem(null);
-  //     } finally {
-  //       setItemModalLoading(false);
-  //     }
-  //   };
+  // 字典数据新增/编辑提交
+  const handleDictDataModalOk = async (values: DictData) => {
+    setDictDataModalLoading(true);
+    try {
+      if (editItem && editItem.dictType) {
+        await updateDictData({ ...values, dictType: editItem.dictType, id: editItem.id });
+      } else if (activeDict?.type){
+        await createDictData({ dictType: activeDict.type, ...values });
+      }
+      // 刷新表格
+      if (activeDictId !== undefined) {
+        const params: PageParam & { dictType: string } = {
+          dictType: dictList.find(t => t.id === activeDictId)?.type || '',
+          pageNo: currentPage,
+          pageSize,
+        };
+        const res = await getDictDataListByPage(params);
+        setTableData(res.list);
+        setTotal(res.total);
+      }
+      setDictDataModalVisible(false);
+      setEditItem(null);
+    } finally {
+      setDictDataModalLoading(false);
+    }
+  };
+
+  const handleUpdateDictDataStatus = (id: number, status: number) => {
+    const params = {
+      id,
+      status,
+      dictType: activeDict?.type
+    }
+    updateDictData(params).then(() => { // TODO: 待接口修改后验证
+      Message.success('操作成功');
+      loadTableData();
+    });
+  };
 
   return (
     <div className={styles.systemDictPage}>
@@ -275,14 +284,16 @@ export default function SystemDictPage() {
                 pageSize={pageSize}
                 total={total}
                 onPageChange={handlePageChange}
-                searchValue={itemSearch}
-                onSearchChange={setItemSearch}
+                onPageSizeChange={setPageSize}
+                searchValue={dictDataSearch}
+                onSearchChange={handleDictDataSearch}
                 onAdd={() => {
                   setDictDataModalVisible(true);
                   setEditItem(null);
                 }}
                 onEdit={(item) => handleDictDataEdit(item)}
                 onDelete={(id) => handleDeleteDictData(id)}
+                onUpdateStatus={(id, status) => handleUpdateDictDataStatus(id, status)}
               />
             </>
           )}
@@ -310,7 +321,7 @@ export default function SystemDictPage() {
       />
       <DictDataModal
         visible={dictDataModalVisible}
-        loading={itemModalLoading}
+        loading={dictDataModalLoading}
         initialValues={
           editItem
             ? {
@@ -323,9 +334,7 @@ export default function SystemDictPage() {
               }
             : undefined
         }
-        onOk={() => {}}
-        // TODO(Fix Bug): 调通后解除注释
-        // onOk={handleDictDataModalOk}
+        onOk={handleDictDataModalOk}
         onCancel={() => {
           setDictDataModalVisible(false);
           setEditItem(null);

@@ -7,13 +7,13 @@ export interface DictForm {
   type: string;
   name: string;
   remark?: string;
-  status: number; // 修改类型为 number，使用 StatusEnum
+  status: number;
 }
 
 interface DictionaryTypeModalProps {
   visible: boolean;
   loading?: boolean;
-  initialValues?: DictItem;
+  initialValues?: Partial<DictItem>;
   onOk: (values: DictItem) => void;
   onCancel: () => void;
   title?: string;
@@ -68,8 +68,6 @@ export default function DictionaryTypeModal({
         </Form.Item>
         <Form.Item label="是否启用" field="status" triggerPropName="checked">
           <Switch
-            checkedText="启用"
-            uncheckedText="停用"
             checked={form.getFieldValue('status') === StatusEnum.ENABLE}
             onChange={(checked) => form.setFieldValue('status', checked ? StatusEnum.ENABLE : StatusEnum.DISABLE)}
           />
