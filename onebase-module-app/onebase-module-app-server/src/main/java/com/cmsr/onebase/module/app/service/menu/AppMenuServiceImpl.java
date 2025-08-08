@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.app.service.menu;
 
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.module.app.api.appresource.dto.CopyPageSetDTO;
 import com.cmsr.onebase.module.app.api.appresource.dto.CreatePageSetDTO;
 import com.cmsr.onebase.module.app.controller.admin.menu.vo.*;
 import com.cmsr.onebase.module.app.dal.database.menu.AppMenuRepository;
@@ -178,13 +179,16 @@ public class AppMenuServiceImpl implements AppMenuService {
         if (menuDO.getMenuType() == MenuTypeEnum.GROUP.getValue()) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_MENU_GROUP_NOT_ALLOW_COPY);
         }
+        // 复制菜单
         menuDO.setId(null);
         menuDO.setMenuName(copyReqVO.getMenuName());
         menuDO.setParentId(copyReqVO.getParentId());
         menuDO.setMenuCode(MenuUtils.generateMenuCode());
         appMenuRepository.insert(menuDO);
-        //TODO 菜单相关的资源都要复制
-
+        // 复制页面
+        CopyPageSetDTO copyPageSetDTO = new CopyPageSetDTO();
+        copyPageSetDTO.setMenuId(menuDO.getId());
+        pageSetService.copyPageSet(copyPageSetDTO);
     }
 
     @Override
@@ -195,8 +199,9 @@ public class AppMenuServiceImpl implements AppMenuService {
                 && validateApplicationMenuGroupHasChildren(menuDO.getId())) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_MENU_GROUP_HAS_CHILDREN);
         }
+        // 删除菜单
         appMenuRepository.deleteById(id);
-        //菜单相关资源都要删除
+        // 删除页面
         pageSetService.deletePageSet(menuDO.getId());
     }
 

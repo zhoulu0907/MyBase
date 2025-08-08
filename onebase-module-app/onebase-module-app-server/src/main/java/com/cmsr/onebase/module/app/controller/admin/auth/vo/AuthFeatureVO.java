@@ -11,6 +11,9 @@ import lombok.Data;
 @Schema(description = "应用管理 - 功能权限 Request VO")
 public class AuthFeatureVO {
 
+    @Schema(description = "主键Id")
+    private Long id;
+
     @Schema(description = "页面是否可访问")
     private Boolean pageAllowed;
 
