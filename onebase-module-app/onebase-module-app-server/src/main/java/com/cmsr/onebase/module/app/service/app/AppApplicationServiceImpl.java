@@ -96,6 +96,23 @@ public class AppApplicationServiceImpl implements AppApplicationService {
     }
 
     @Override
+    public ApplicationRespVO getApplication(Long id) {
+        ApplicationDO applicationDO = applicationRepository.findById(id);
+        if (applicationDO == null) {
+            throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_NOT_EXIST);
+        }
+        AppCommonService.UserHelper userHelper = appCommonService.getUserHelper(applicationDO);
+        ApplicationRespVO respVO = BeanUtils.toBean(applicationDO, ApplicationRespVO.class
+                , vo -> {
+                    vo.setAppStatusText(ApplicationStatusEnum.getText(vo.getAppStatus()));
+                    vo.setTags(queryAppTags(vo.getId()));
+                    vo.setCreateUser(userHelper.getUserName(applicationDO.getCreator()));
+                    vo.setUpdateUser(userHelper.getUserName(applicationDO.getUpdater()));
+                });
+        return respVO;
+    }
+
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public ApplicationCreateRespVO createApplication(ApplicationCreateReqVO createReqVO) {
         validApplicationCodeDuplicate(createReqVO.getAppCode(), null);
@@ -121,15 +138,6 @@ public class AppApplicationServiceImpl implements AppApplicationService {
             applicationTagRepository.deleteByByApplicationIdAndTagsNotIn(applicationId, tagIds);
             applicationTagRepository.saveAll(applicationId, tagIds);
         }
-    }
-
-    @Override
-    public ApplicationRespVO getApplication(Long id) {
-        ApplicationDO applicationDO = applicationRepository.findById(id);
-        if (applicationDO == null) {
-            throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_NOT_EXIST);
-        }
-        return BeanUtils.toBean(applicationDO, ApplicationRespVO.class);
     }
 
 

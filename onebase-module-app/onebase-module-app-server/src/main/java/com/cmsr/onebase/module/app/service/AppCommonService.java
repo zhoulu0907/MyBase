@@ -40,12 +40,26 @@ public class AppCommonService {
         return applicationDO;
     }
 
+    public UserHelper getUserHelper(BaseDO baseDO) {
+        Set<Long> ids = new HashSet<>();
+        ids.add(baseDO.getCreator());
+        ids.add(baseDO.getUpdater());
+        return getUserHelper(ids);
+    }
+
     public UserHelper getUserHelper(List<? extends BaseDO> baseDOS) {
         Set<Long> ids1 = baseDOS.stream().map(BaseDO::getCreator).collect(Collectors.toSet());
         Set<Long> ids2 = baseDOS.stream().map(BaseDO::getUpdater).collect(Collectors.toSet());
         Set<Long> ids = new HashSet<>();
         ids.addAll(ids1);
         ids.addAll(ids2);
+        CommonResult<List<AdminUserRespDTO>> dtos = adminUserApi.getUserList(ids);
+        Map<Long, AdminUserRespDTO> dtoMap = dtos.getData().stream().collect(Collectors.toMap(AdminUserRespDTO::getId, v -> v));
+        return new UserHelper(dtoMap);
+    }
+
+
+    public UserHelper getUserHelper(Set<Long> ids) {
         CommonResult<List<AdminUserRespDTO>> dtos = adminUserApi.getUserList(ids);
         Map<Long, AdminUserRespDTO> dtoMap = dtos.getData().stream().collect(Collectors.toMap(AdminUserRespDTO::getId, v -> v));
         return new UserHelper(dtoMap);
