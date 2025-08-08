@@ -22,6 +22,7 @@ const ERchart: React.FC<EntityERProps> = ({
   onNodeDelete,
   onNodeAddField,
   onNodeAddRelation,
+  onFieldClick,
   onlyUpdateNode
 }) => {
   const [selectedNode, setSelectedNode] = useState<EntityNode | null>(null);
@@ -243,7 +244,8 @@ const ERchart: React.FC<EntityERProps> = ({
             onNodeAdd,
             onNodeDelete,
             onNodeAddField,
-            onNodeAddRelation
+            onNodeAddRelation,
+            onFieldClick
           },
           attrs: {
             body: {
@@ -334,8 +336,8 @@ const ERchart: React.FC<EntityERProps> = ({
         const target = edgeData.target;
 
         const edge = graphRef.current!.createEdge({
-          source: { cell: source.cell, port: source.port + '_source' },
-          target: { cell: target.cell, port: target.port + '_target' },
+          source: { cell: source?.cell, port: source?.port + '_source' },
+          target: { cell: target?.cell, port: target?.port + '_target' },
           attrs: {
             line: {
               // 连线样式

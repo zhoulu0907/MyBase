@@ -15,9 +15,9 @@ const EntityDetail: React.FC<EntityDetailProps> = ({ entity }) => {
   return (
     <div className={styles.entityDetail}>
       <div className={styles.header}>
-        <h2>{entity.title}</h2>
+        <h2>{entity.entityName}</h2>
         <div className={styles.entityInfo}>
-          <span>ID: {entity.id}</span>
+          <span>ID: {entity.entityId}</span>
           <span>字段数: {entity.fields?.length || 0}</span>
         </div>
       </div>

@@ -34,10 +34,10 @@ const DetailDrawer: React.FC<{
         localStorage.getItem('entityFormValues') || JSON.stringify({ nodes: [], edges: [] })
       );
       console.log('handleNodeEdit====', nodes);
-      const nodeData = nodes.find((n: EntityNode) => n.id === editingNode.id);
+      const nodeData = nodes.find((n: EntityNode) => n.entityId === editingNode.entityId);
       console.log('handleNodeEdit====', nodeData);
       if (nodeData) {
-        nodeData.id = editingNode.id;
+        nodeData.id = editingNode.entityId;
         nodeData.code = formData.code || nodeData.code;
         nodeData.displayName = formData.name || nodeData.displayName;
         nodeData.description = formData.description || nodeData.description;

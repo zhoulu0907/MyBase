@@ -16,7 +16,7 @@ const DataMethods: React.FC<DataMethodsProps> = ({ entity }) => {
   const loadMethods = async () => {
     try {
       setLoading(true);
-      const response = await getEntityMethods({ entityId: entity.id });
+      const response = await getEntityMethods({ entityId: entity.entityId });
       console.log('getEntityMethods', response);
       if (response) {
         setMethods(response || []);

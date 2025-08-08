@@ -8,6 +8,7 @@ interface NodeEditFormProps {
   node: EntityNode;
   onSave: (data: Partial<FormValues>) => void;
   onCancel: () => void;
+  successCallback?: () => void;
 }
 
 interface FormItem {
@@ -29,21 +30,21 @@ interface FormValues {
   };
 }
 
-const NodeEditForm: React.FC<NodeEditFormProps> = ({ node, onCancel, onSave }) => {
+const NodeEditForm: React.FC<NodeEditFormProps> = ({ node, onCancel, onSave, successCallback }) => {
   const [form] = Form.useForm<FormValues>();
 
   // 初始化表单数据
   const initialValues: FormValues = {
     code: node.code || '',
-    name: node.title || '',
+    name: node.entityName || '',
     description: node.description || '',
     systemFields: {
-      creator: node.fields.find((field: EntityField) => field.id === 'creator') ? true : false,
-      updater: node.fields.find((field: EntityField) => field.id === 'updater') ? true : false,
-      createTime: node.fields.find((field: EntityField) => field.id === 'createTime') ? true : false,
-      updateTime: node.fields.find((field: EntityField) => field.id === 'updateTime') ? true : false,
-      dataOwner: node.fields.find((field: EntityField) => field.id === 'dataOwner') ? true : false,
-      dataDepartment: node.fields.find((field: EntityField) => field.id === 'dataDepartment') ? true : false
+      creator: node.fields.find((field: EntityField) => field.fieldId === 'creator') ? true : false,
+      updater: node.fields.find((field: EntityField) => field.fieldId === 'updater') ? true : false,
+      createTime: node.fields.find((field: EntityField) => field.fieldId === 'createTime') ? true : false,
+      updateTime: node.fields.find((field: EntityField) => field.fieldId === 'updateTime') ? true : false,
+      dataOwner: node.fields.find((field: EntityField) => field.fieldId === 'dataOwner') ? true : false,
+      dataDepartment: node.fields.find((field: EntityField) => field.fieldId === 'dataDepartment') ? true : false
     }
   };
 
@@ -65,13 +66,13 @@ const NodeEditForm: React.FC<NodeEditFormProps> = ({ node, onCancel, onSave }) =
 
   useEffect(() => {
     form.setFieldValue('code', node.code);
-    form.setFieldValue('name', node.title);
+    form.setFieldValue('name', node.entityName);
     form.setFieldValue('description', node.description);
     form.setFieldValue('systemFields', {
-      creator: node.fields.find((field: EntityField) => field.id === 'creator') ? true : false,
-      updater: node.fields.find((field: EntityField) => field.id === 'updater') ? true : false,
-      createTime: node.fields.find((field: EntityField) => field.id === 'createTime') ? true : false,
-      updateTime: node.fields.find((field: EntityField) => field.id === 'updateTime') ? true : false
+      creator: node.fields.find((field: EntityField) => field.fieldId === 'creator') ? true : false,
+      updater: node.fields.find((field: EntityField) => field.fieldId === 'updater') ? true : false,
+      createTime: node.fields.find((field: EntityField) => field.fieldId === 'createTime') ? true : false,
+      updateTime: node.fields.find((field: EntityField) => field.fieldId === 'updateTime') ? true : false
     } as FormValues['systemFields']);
   }, [node]);
 
@@ -130,7 +131,10 @@ const NodeEditForm: React.FC<NodeEditFormProps> = ({ node, onCancel, onSave }) =
           <Button onClick={onCancel} style={{ marginRight: 16 }}>
             取消
           </Button>
-          <Button type="primary" onClick={() => onSave(form.getFieldsValue())}>
+          <Button type="primary" onClick={() => {
+            onSave(form.getFieldsValue());
+            successCallback?.();
+          }}>
             保存
           </Button>
         </Form.Item>

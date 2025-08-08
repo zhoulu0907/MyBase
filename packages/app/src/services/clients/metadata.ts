@@ -14,8 +14,8 @@ export class MetadataService {
   getHttpClient(): HttpClient {
     if (!this.httpClient) {
       this.httpClient = new HttpClient({
-        // baseURL: this.baseURL || getBackendURL(),
-        baseURL: 'http://192.168.224.89:48080/admin-api',
+        baseURL: this.baseURL || getBackendURL(),
+        // baseURL: 'http://192.168.224.89:48080/admin-api',
         timeout: 10000,
         prefix: '/metadata',
         headers: {

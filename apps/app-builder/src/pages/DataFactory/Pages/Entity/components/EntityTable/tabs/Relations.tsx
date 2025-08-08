@@ -3,6 +3,7 @@ import { Table, Tag, Button, Space, Message } from '@arco-design/web-react';
 import type { TableColumnProps } from '@arco-design/web-react';
 import type { EntityNode } from '../../../../../utils/interface';
 import { getEntityRelations } from '@onebase/app';
+import CreateRelationModal from '../../Modals/CreateRelationModal';
 import styles from './tabs.module.less';
 
 interface RelationsProps {
@@ -20,62 +21,47 @@ interface RelationData {
 
 const Relations: React.FC<RelationsProps> = ({ entity }) => {
   const [relations, setRelations] = useState<RelationData[]>([]);
+  const [createRelationModalVisible, setCreateRelationModalVisible] = useState(false);
+  const [updateRelationOptions, setUpdateRelationOptions] = useState(false);
+
+  const handleCreate = () => {
+    setCreateRelationModalVisible(true);
+  }
+
+  const handleSuccessCallback = () => {
+    getRelation();
+  }
 
   useEffect(() => {
-    // // 从localStorage加载关联关系数据
-    // const { edges } = JSON.parse(localStorage.getItem('entityFormValues') || JSON.stringify({ edges: [] }));
-    // const { nodes } = JSON.parse(localStorage.getItem('entityFormValues') || JSON.stringify({ nodes: [] }));
-
-    // // 过滤出与当前实体相关的关联关系
-    // const entityRelations = edges.filter((edge: EdgeData) =>
-    //   edge.source.cell === entity.id || edge.target.cell === entity.id
-    // );
-
-    // const relationData = entityRelations.map((edge: EdgeData, index: number) => {
-    //   const sourceEntity = nodes.find((node: EntityNode) => node.id === edge.source.cell);
-    //   const targetEntity = nodes.find((node: EntityNode) => node.id === edge.target.cell);
-
-    //   return {
-    //     id: `relation-${index}`,
-    //     sourceEntity: sourceEntity?.title || edge.source.cell,
-    //     sourceField: edge.source.port,
-    //     targetEntity: targetEntity?.title || edge.target.cell,
-    //     targetField: edge.target.port,
-    //     relationType: '一对一', // 这里可以根据实际数据调整
-    //   };
-    // });
-
-    // setRelations(relationData);
-
     getRelation();
-  }, [entity.id]);
+  }, []);
 
   const columns: TableColumnProps[] = [
     {
       title: '源实体',
-      dataIndex: 'sourceEntity',
-      key: 'sourceEntity'
+      dataIndex: 'sourceEntityName',
+      key: 'sourceEntityName'
     },
     {
       title: '源字段',
-      dataIndex: 'sourceField',
-      key: 'sourceField'
+      dataIndex: 'sourceFieldName',
+      key: 'sourceFieldName'
     },
     {
       title: '关联类型',
-      dataIndex: 'relationType',
-      key: 'relationType',
+      dataIndex: 'relationshipType',
+      key: 'relationshipType',
       render: (type: string) => <Tag color="purple">{type}</Tag>
     },
     {
       title: '目标实体',
-      dataIndex: 'targetEntity',
-      key: 'targetEntity'
+      dataIndex: 'targetEntityName',
+      key: 'targetEntityName'
     },
     {
       title: '目标字段',
-      dataIndex: 'targetField',
-      key: 'targetField'
+      dataIndex: 'targetEntityName',
+      key: 'targetEntityName'
     },
     {
       title: '操作',
@@ -98,15 +84,15 @@ const Relations: React.FC<RelationsProps> = ({ entity }) => {
       // setLoading(true);
       // TODO 传参后续补充完整
       const params = {
-        entityId: entity.id,
+        entityId: entity.entityId,
         pageNo: 1,
         pageSize: 10,
         appId: 1
       };
       const response = await getEntityRelations(params);
       console.log('getEntityRelations', response);
-      if (response.data) {
-        setRelations(response.data);
+      if (response?.list?.length > 0) {
+        setRelations(response.list);
       }
     } catch (error) {
       console.error('加载字段列表失败:', error);
@@ -120,11 +106,25 @@ const Relations: React.FC<RelationsProps> = ({ entity }) => {
     <div className={styles.relations}>
       <div className={styles.header}>
         <h3>关联关系</h3>
-        <Button type="primary" size="small">
+        <Button type="primary" size="small" onClick={handleCreate}>
           添加关联
         </Button>
       </div>
-      <Table columns={columns} data={relations} rowKey="id" pagination={false} className={styles.table} />
+      <Table 
+        columns={columns} 
+        data={relations} 
+        rowKey="id" 
+        pagination={false} 
+        className={styles.table} 
+      />
+
+      <CreateRelationModal
+        visible={createRelationModalVisible}
+        setVisible={setCreateRelationModalVisible}
+        successCallback={handleSuccessCallback}
+        updateRelationOptions={updateRelationOptions}
+        setUpdateRelationOptions={setUpdateRelationOptions}
+      />  
     </div>
   );
 };

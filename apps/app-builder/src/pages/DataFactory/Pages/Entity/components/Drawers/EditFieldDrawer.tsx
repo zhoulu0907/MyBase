@@ -1,0 +1,296 @@
+import React, { useEffect, useState } from 'react';
+import { 
+  Drawer, 
+  Form, 
+  Input, 
+  Select, 
+  Checkbox, 
+  Button, 
+  Message, 
+  Spin,
+  Space
+} from '@arco-design/web-react';
+import { getFieldById, updateField } from '@onebase/app';
+import { ENTITY_FIELD_TYPE } from '../../../../utils/constans';
+import styles from './EditFieldDrawer.module.less';
+
+interface FieldDetail {
+  id: string;
+  fieldCode: string;
+  fieldName: string;
+  description: string;
+  fieldType: string;
+  defaultValue: string;
+  isUnique: boolean;
+  allowNull: boolean;
+  constraints: string;
+  isSystemField: boolean;
+  entityId: string;
+  entityName: string;
+  appId: string;
+  displayName: string;
+}
+
+interface EditFieldDrawerProps {
+  visible: boolean;
+  setVisible: (visible: boolean) => void;
+  fieldId: string;
+  onSuccess?: () => void;
+}
+
+const EditFieldDrawer: React.FC<EditFieldDrawerProps> = ({
+  visible,
+  setVisible,
+  fieldId,
+  onSuccess
+}) => {
+  const [form] = Form.useForm();
+  const [fieldDetail, setFieldDetail] = useState<FieldDetail | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  // 字段类型选项
+  const fieldTypeOptions = Object.entries(ENTITY_FIELD_TYPE).map(([key, value]) => ({
+    label: value as string,
+    value: key
+  }));
+
+  useEffect(() => {
+    if (visible && fieldId) {
+      fetchFieldDetail();
+    }
+  }, [visible, fieldId]);
+
+  // 获取字段详情
+  const fetchFieldDetail = async () => {
+    try {
+      setLoading(true);
+      const response = await getFieldById(fieldId);
+      console.log('getFieldById', response);
+
+      if (response) {
+        setFieldDetail(response);
+        form.setFieldsValue(response);
+      }
+      
+    } catch (error) {
+      console.error('获取字段详情失败:', error);
+      Message.error('获取字段详情失败');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 表单验证规则
+  const validateFieldCode = async (value: string | undefined, callback: (error?: React.ReactNode) => void) => {
+    if (!value) {
+      callback('请输入字段编码');
+      return;
+    }
+    if (!/^[a-zA-Z][a-zA-Z0-9_]*$/.test(value)) {
+      callback('字段编码只能包含字母、数字和下划线，且必须以字母开头');
+      return;
+    }
+    callback();
+  };
+
+  const validateFieldName = (value: string | undefined, callback: (error?: React.ReactNode) => void) => {
+    if (!value) {
+      callback('请输入字段名称');
+      return;
+    }
+    if (value.length > 50) {
+      callback('字段名称不能超过50个字符');
+      return;
+    }
+    callback();
+  };
+
+  // 提交表单
+  const handleSubmit = async () => {
+    try {
+      const values = await form.validate();
+      setSubmitting(true);
+
+      if (!fieldDetail) {
+        Message.error('字段信息不存在');
+        return;
+      }
+
+      const updateData = {
+        appId: '1',
+        id: fieldDetail.id,
+        entityId: fieldDetail.entityId,
+        fieldCode: values.fieldCode,
+        fieldName: values.fieldName,
+        description: values.description,
+        fieldType: values.fieldType,
+        isSystemField: fieldDetail.isSystemField,
+        displayName: fieldDetail.displayName
+      };
+
+      await updateField(updateData);
+      Message.success('更新字段成功');
+      setVisible(false);
+      onSuccess?.();
+    } catch (error) {
+      console.error('更新字段失败:', error);
+      Message.error('更新字段失败');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <Drawer
+      title="编辑字段"
+      visible={visible}
+      onCancel={() => setVisible(false)}
+      width={500}
+      className={styles['edit-field-drawer']}
+      footer={
+        <div className={styles['drawer-footer']}>
+          <Space>
+            <Button onClick={() => setVisible(false)}>
+              取消
+            </Button>
+            <Button type="primary" loading={submitting} onClick={handleSubmit}>
+              确定
+            </Button>
+          </Space>
+        </div>
+      }
+    >
+      {loading ? (
+        <div className={styles['loading-container']}>
+          <Spin size={40} />
+          <p>加载中...</p>
+        </div>
+      ) : fieldDetail ? (
+        <Form
+          form={form}
+          layout="vertical"
+          className={styles['edit-form']}
+        >
+          {/* 基本信息 */}
+          <div className={styles['section']}>
+            <h3 className={styles['section-title']}>基本信息</h3>
+            
+            <Form.Item
+              label="字段编码"
+              field="fieldCode"
+              rules={[
+                { required: true, message: '请输入字段编码' },
+                { validator: validateFieldCode }
+              ]}
+            >
+              <Input 
+                placeholder="请输入字段编码" 
+                disabled={fieldDetail.isSystemField}
+              />
+            </Form.Item>
+
+            <Form.Item
+              label="字段名称"
+              field="fieldName"
+              rules={[
+                { required: true, message: '请输入字段名称' },
+                { validator: validateFieldName }
+              ]}
+            >
+              <Input placeholder="请输入字段名称" />
+            </Form.Item>
+
+            <Form.Item
+              label="字段描述"
+              field="description"
+            >
+              <Input.TextArea 
+                placeholder="请输入字段描述" 
+                rows={3}
+              />
+            </Form.Item>
+
+            <Form.Item
+              label="数据类型"
+              field="fieldType"
+              rules={[{ required: true, message: '请选择数据类型' }]}
+            >
+              <Select 
+                placeholder="请选择数据类型"
+                options={fieldTypeOptions}
+                disabled={fieldDetail.isSystemField}
+              />
+            </Form.Item>
+          </div>
+
+          {/* 字段属性 */}
+          <div className={styles['section']}>
+            <h3 className={styles['section-title']}>字段属性</h3>
+            
+            <Form.Item
+              label="默认值"
+              field="defaultValue"
+            >
+              <Input placeholder="请输入默认值" />
+            </Form.Item>
+
+            <Form.Item
+              label="唯一性"
+              field="isUnique"
+              triggerPropName="checked"
+            >
+              <Checkbox>设置为唯一字段</Checkbox>
+            </Form.Item>
+
+            <Form.Item
+              label="空值约束"
+              field="allowNull"
+              triggerPropName="checked"
+            >
+              <Checkbox>允许空值</Checkbox>
+            </Form.Item>
+
+            <Form.Item
+              label="字段约束"
+              field="constraints"
+            >
+              <Input.TextArea 
+                placeholder="请输入字段约束" 
+                rows={2}
+              />
+            </Form.Item>
+          </div>
+
+          {/* 字段信息 */}
+          <div className={styles['section']}>
+            <h3 className={styles['section-title']}>字段信息</h3>
+            
+            <div className={styles['info-item']}>
+              <span className={styles['info-label']}>字段类型：</span>
+              <span className={styles['info-value']}>
+                {fieldDetail.isSystemField ? '系统字段' : '自定义字段'}
+              </span>
+            </div>
+
+            <div className={styles['info-item']}>
+              <span className={styles['info-label']}>所属实体：</span>
+              <span className={styles['info-value']}>{fieldDetail.entityName}</span>
+            </div>
+
+            <div className={styles['info-item']}>
+              <span className={styles['info-label']}>实体ID：</span>
+              <span className={styles['info-value']}>{fieldDetail.entityId}</span>
+            </div>
+          </div>
+        </Form>
+      ) : (
+        <div className={styles['empty-container']}>
+          <p>未找到字段信息</p>
+        </div>
+      )}
+    </Drawer>
+  );
+};
+
+export default EditFieldDrawer;

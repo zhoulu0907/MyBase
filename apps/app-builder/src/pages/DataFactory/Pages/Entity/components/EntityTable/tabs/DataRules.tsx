@@ -16,7 +16,7 @@ const DataRules: React.FC<DataRulesProps> = ({ entity }) => {
   const loadRules = async () => {
     try {
       setLoading(true);
-      const response = await getEntityRules({ entityId: entity.id });
+      const response = await getEntityRules({ entityId: entity.entityId });
       console.log('getEntityRules', response);
       if (response.list) {
         setRules(response.list || []);

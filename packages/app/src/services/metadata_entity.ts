@@ -28,6 +28,7 @@ export interface CreateFieldReqVO {
   description: string;
   fieldType: string;
   isSystemField?: boolean;
+  displayName: string;
 }
 
 export interface UpdateFieldReqVO extends CreateFieldReqVO {
@@ -170,7 +171,7 @@ export const createField = (data: CreateFieldReqVO) => {
  * @returns 操作结果
  */
 export const updateField = (data: UpdateFieldReqVO) => {
-  return metadataService.post('/business-entity/field/update', data);
+  return metadataService.post('/entity-field/update', data);
 };
 
 /**
@@ -179,7 +180,25 @@ export const updateField = (data: UpdateFieldReqVO) => {
  * @returns 操作结果
  */
 export const deleteField = (id: string) => {
-  return metadataService.post('/business-entity/field/delete', { params: { id } });
+  return metadataService.post('/entity-field/delete?id=' + id);
+};
+
+/**
+ * 根据ID获取字段详细信息
+ * @param id 字段ID
+ * @returns 字段详细信息
+ */
+export const getFieldById = (id: string) => {
+  return metadataService.post('/entity-field/get?id=' + id);
+};
+
+/**
+ * 批量保存实体字段（增删改）
+ * @param id 字段ID
+ * @returns 字段详细信息
+ */
+export const batchSaveFields = (data: object) => {
+  return metadataService.post('/entity-field/batch-save', data);
 };
 
 /**

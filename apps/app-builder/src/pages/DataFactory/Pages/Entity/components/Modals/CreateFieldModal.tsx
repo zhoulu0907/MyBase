@@ -1,8 +1,8 @@
 import { Form, Input, Message, Modal, Select } from '@arco-design/web-react';
 import React from 'react';
-import type { EntityField, EntityNode } from '../../../../utils/interface';
 import { createField } from '@onebase/app';
 import styles from './modal.module.less';
+import type { EntityNode } from '../../../../utils/interface';
 
 interface FieldFormValues {
   fieldCode: string;
@@ -43,9 +43,9 @@ const dataTypes = [
 const CreateFieldModal: React.FC<{
   visible: boolean;
   setVisible: (visible: boolean) => void;
-  entityId: string;
+  entity: EntityNode;
   successCallback: () => void;
-}> = ({ visible, setVisible, entityId, successCallback }) => {
+}> = ({ visible, setVisible, entity, successCallback }) => {
   const [form] = Form.useForm<FieldFormValues>();
   // 提交
   const handleFinish = () => {
@@ -70,7 +70,8 @@ const CreateFieldModal: React.FC<{
       // console.log(values);
 
       const res = await createField({
-        entityId,
+        entityId: entity.entityId,
+        displayName: entity.entityName,
         appId: '1',
         ...values,
         isSystemField: false

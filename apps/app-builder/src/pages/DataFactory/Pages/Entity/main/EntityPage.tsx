@@ -5,7 +5,7 @@ import EntityTable from '../components/EntityTable';
 import styles from '../index.module.less';
 import EntityERContainer from './EntityERContainer';
 
-const CheckEntityPage: React.FC<{ handlePageType: (tab: string) => void }> = ({ handlePageType }) => {
+const CheckEntityPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('ER');
   const [refreshEntityList, setRefreshEntityList] = useState(false);
   const [onlyUpdateNode, setOnlyUpdateNode] = useState(false);

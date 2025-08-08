@@ -1,23 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Tag, Button, Space, Message, Modal } from '@arco-design/web-react';
 import type { TableColumnProps } from '@arco-design/web-react';
-import type { EntityNode } from '../../../../../utils/interface';
 import { getEntityFields, deleteField } from '@onebase/app';
+import EditFieldDrawer from '../../Drawers/EditFieldDrawer';
+import CreateFieldModal from '../../Modals/CreateFieldModal';
 import styles from './tabs.module.less';
+import type { EntityNode } from '../../../../../utils/interface';
 
 interface DataFieldsProps {
-  entity: EntityNode;
+  entity: EntityNode; 
 }
 
 const DataFields: React.FC<DataFieldsProps> = ({ entity }) => {
   const [fields, setFields] = useState(entity.fields || []);
   const [loading, setLoading] = useState(false);
-
+  const [editDrawerVisible, setEditDrawerVisible] = useState(false);
+  const [selectedFieldId, setSelectedFieldId] = useState<string>('');
+  const [createFieldModalVisible, setCreateFieldModalVisible] = useState(false);
   // 加载字段列表
   const loadFields = async () => {
     try {
       setLoading(true);
-      const response = await getEntityFields({ entityId: entity.id });
+      const response = await getEntityFields({ entityId: entity.entityId });
       console.log('getEntityFields', response);
       if (response) {
         setFields(response);
@@ -28,6 +32,22 @@ const DataFields: React.FC<DataFieldsProps> = ({ entity }) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleAddField = () => {
+    setSelectedFieldId('');
+    setCreateFieldModalVisible(true);
+  };
+
+  // 处理编辑字段
+  const handleEditField = (fieldId: string) => {
+    setSelectedFieldId(fieldId);
+    setEditDrawerVisible(true);
+  };
+
+  // 编辑成功回调
+  const handleEditSuccess = () => {
+    loadFields(); // 重新加载字段列表
   };
 
   // 删除字段
@@ -50,13 +70,13 @@ const DataFields: React.FC<DataFieldsProps> = ({ entity }) => {
 
   useEffect(() => {
     loadFields();
-  }, [entity.id]);
+  }, []);
 
   const columns: TableColumnProps[] = [
     {
       title: '字段编码',
-      dataIndex: 'displayName',
-      key: 'displayName'
+      dataIndex: 'fieldCode',
+      key: 'fieldCode'
     },
     {
       title: '字段名称',
@@ -116,12 +136,21 @@ const DataFields: React.FC<DataFieldsProps> = ({ entity }) => {
       key: 'operation',
       render: (_, record) => (
         <Space>
-          <Button type="text" size="mini">
+          {!record.isSystemField && <Button 
+            type="text" 
+            size="mini"
+            onClick={() => handleEditField(record.id)}
+          >
             编辑
-          </Button>
-          <Button type="text" size="mini" status="danger" onClick={() => handleDeleteField(record.id)}>
+          </Button>}
+          {!record.isSystemField && <Button 
+            type="text" 
+            size="mini" 
+            status="danger" 
+            onClick={() => handleDeleteField(record.id)}
+          >
             删除
-          </Button>
+          </Button>}
         </Space>
       )
     }
@@ -131,7 +160,7 @@ const DataFields: React.FC<DataFieldsProps> = ({ entity }) => {
     <div className={styles.dataFields}>
       <div className={styles.header}>
         <h3>数据字段</h3>
-        <Button type="primary" size="small">
+        <Button type="primary" size="small" onClick={() => handleAddField()}>
           添加字段
         </Button>
       </div>
@@ -142,6 +171,18 @@ const DataFields: React.FC<DataFieldsProps> = ({ entity }) => {
         pagination={false}
         className={styles.table}
         loading={loading}
+      />
+      <EditFieldDrawer
+        visible={editDrawerVisible}
+        setVisible={setEditDrawerVisible}
+        fieldId={selectedFieldId}
+        onSuccess={handleEditSuccess}
+      />
+      <CreateFieldModal
+        visible={createFieldModalVisible}
+        setVisible={setCreateFieldModalVisible}
+        entity={entity as unknown as EntityNode}
+        successCallback={loadFields}
       />
     </div>
   );

@@ -1,6 +1,5 @@
 import { Form, Message, Modal, Select } from '@arco-design/web-react';
 import React, { useEffect, useState } from 'react';
-import type { EdgeData, EntityField, EntityNode } from '../../../../utils/interface';
 import { createRelation, getEntityList, getEntityFields } from '@onebase/app';
 import styles from './modal.module.less';
 import { resouceId } from '@/pages/DataFactory/utils/constans';
@@ -37,7 +36,7 @@ const CreateRelationModal: React.FC<{
   successCallback: () => void;
   updateRelationOptions: boolean;
   setUpdateRelationOptions: (updateRelationOptions: boolean) => void;
-}> = ({ visible, setVisible, successCallback, updateRelationOptions, setUpdateRelationOptions }) => {
+}> = ({ visible, setVisible, successCallback }) => {
   const [form] = Form.useForm<RelationFormValues>();
   const [leftEntityOptions, setLeftEntityOptions] = useState<EntityOption[]>([]);
   const [rightEntityOptions, setRightEntityOptions] = useState<EntityOption[]>([]);

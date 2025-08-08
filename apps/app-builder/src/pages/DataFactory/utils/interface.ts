@@ -15,6 +15,7 @@ export interface EntityField {
   fieldName: string;
   fieldType: string;
   isSystemField: boolean;
+  displayName: string;
 }
 
 // 节点信息
@@ -22,7 +23,7 @@ export interface EntityNodeProps {
   onNodeEdit?: (data: EntityNode) => void;
   onNodeAdd?: () => void;
   onNodeDelete?: (id: string) => void;
-  onNodeAddField?: (id: string) => void;
+  onNodeAddField?: (node: EntityNode) => void;
   onNodeAddRelation?: (id: string) => void;
   onlyUpdateNode?: boolean;
   // mode?: 'view' | 'edit';
@@ -56,7 +57,8 @@ export interface EntityERProps {
   onNodeEdit?: (data: EntityNode) => void;
   onNodeAdd?: () => void;
   onNodeDelete?: (id: string) => void;
-  onNodeAddField?: (id: string) => void;
+  onNodeAddField?: (node: EntityNode) => void;
   onNodeAddRelation?: (id: string) => void;
+  onFieldClick?: (id: string) => void;
   onlyUpdateNode?: boolean;
 }

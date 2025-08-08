@@ -38,8 +38,8 @@ const EntityList: React.FC<EntityListProps> = ({ entities, selectedEntity, onEnt
           dataSource={entities}
           render={(entity: EntityNode) => (
             <List.Item
-              key={entity.id}
-              className={`${styles.listItem} ${selectedEntity?.id === entity.id ? styles.selected : ''}`}
+              key={entity.entityId}
+              className={`${styles.listItem} ${selectedEntity?.entityId === entity.entityId ? styles.selected : ''}`}
               onClick={() => onEntitySelect(entity)}
             >
               <div className={styles.itemContent}>
@@ -47,8 +47,8 @@ const EntityList: React.FC<EntityListProps> = ({ entities, selectedEntity, onEnt
                   <IconList />
                 </Avatar>
                 <div className={styles.itemInfo}>
-                  <div className={styles.entityName}>{entity.title}</div>
-                  <div className={styles.entityId}>{entity.id}</div>
+                  <div className={styles.entityName}>{entity.entityName}</div>
+                  <div className={styles.entityId}>{entity.entityId}</div>
                   <div className={styles.fieldCount}>{entity.fields?.length || 0} 个字段</div>
                 </div>
               </div>
