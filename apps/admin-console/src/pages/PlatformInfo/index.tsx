@@ -1,27 +1,21 @@
 import {
   Card,
   Descriptions,
+  Message,
+  Modal,
   Space,
-  Typography,
   Table,
   Tag,
-  type TableColumnProps,
-  Modal,
+  Typography,
   Upload,
-  Message
+  type TableColumnProps
 } from '@arco-design/web-react';
 // import { IconInfoCircle } from '@arco-design/web-react/icon';
-import React, { useEffect } from 'react';
-import { useState } from 'react';
+import { getPlatFormInfoListApi, uploadPlatformLicenseApi, type LicenseInfo } from '@onebase/platform-center';
+
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styles from './index.module.less';
-import {
-  getPlatFormInfoListApi,
-  uploadPlatformLicenseApi,
-  type PlatformInfoReq,
-  type AuthRecord,
-  type LicenseInfo
-} from '@onebase/platform-center';
 
 const { Title, Text } = Typography;
 // 定义认证记录的数据类型

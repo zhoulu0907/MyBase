@@ -1,0 +1,156 @@
+{
+  "id": "4993387",
+  "name": "onebase",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "32471",
+      "name": "cart",
+      "font_class": "cart",
+      "unicode": "e6af",
+      "unicode_decimal": 59055
+    },
+    {
+      "icon_id": "128635",
+      "name": "box",
+      "font_class": "box",
+      "unicode": "e667",
+      "unicode_decimal": 58983
+    },
+    {
+      "icon_id": "252292",
+      "name": "safe",
+      "font_class": "safe",
+      "unicode": "e769",
+      "unicode_decimal": 59241
+    },
+    {
+      "icon_id": "766693",
+      "name": "student",
+      "font_class": "xuexiaoweishengfuzhi",
+      "unicode": "e69b",
+      "unicode_decimal": 59035
+    },
+    {
+      "icon_id": "929921",
+      "name": "tv",
+      "font_class": "tv",
+      "unicode": "e86f",
+      "unicode_decimal": 59503
+    },
+    {
+      "icon_id": "1201513",
+      "name": "book",
+      "font_class": "book",
+      "unicode": "e600",
+      "unicode_decimal": 58880
+    },
+    {
+      "icon_id": "1488733",
+      "name": "plane",
+      "font_class": "plane",
+      "unicode": "e66b",
+      "unicode_decimal": 58987
+    },
+    {
+      "icon_id": "4766886",
+      "name": "car",
+      "font_class": "car",
+      "unicode": "e7d7",
+      "unicode_decimal": 59351
+    },
+    {
+      "icon_id": "4766920",
+      "name": "id card",
+      "font_class": "idcard",
+      "unicode": "e7de",
+      "unicode_decimal": 59358
+    },
+    {
+      "icon_id": "10241976",
+      "name": "bag",
+      "font_class": "bag",
+      "unicode": "e7d1",
+      "unicode_decimal": 59345
+    },
+    {
+      "icon_id": "11520434",
+      "name": "奖杯",
+      "font_class": "jiangbei",
+      "unicode": "e761",
+      "unicode_decimal": 59233
+    },
+    {
+      "icon_id": "12004325",
+      "name": "User",
+      "font_class": "User",
+      "unicode": "ea94",
+      "unicode_decimal": 60052
+    },
+    {
+      "icon_id": "15838480",
+      "name": "file",
+      "font_class": "file",
+      "unicode": "e671",
+      "unicode_decimal": 58993
+    },
+    {
+      "icon_id": "15838550",
+      "name": "training",
+      "font_class": "training",
+      "unicode": "e682",
+      "unicode_decimal": 59010
+    },
+    {
+      "icon_id": "18165160",
+      "name": "天平,公平,天平秤",
+      "font_class": "balance-full",
+      "unicode": "e87a",
+      "unicode_decimal": 59514
+    },
+    {
+      "icon_id": "18477392",
+      "name": "award",
+      "font_class": "award",
+      "unicode": "e6eb",
+      "unicode_decimal": 59115
+    },
+    {
+      "icon_id": "21513690",
+      "name": "train",
+      "font_class": "train",
+      "unicode": "e6ce",
+      "unicode_decimal": 59086
+    },
+    {
+      "icon_id": "34452895",
+      "name": "money-bank",
+      "font_class": "money-bank",
+      "unicode": "e830",
+      "unicode_decimal": 59440
+    },
+    {
+      "icon_id": "34453213",
+      "name": "earth",
+      "font_class": "earth",
+      "unicode": "e856",
+      "unicode_decimal": 59478
+    },
+    {
+      "icon_id": "43963685",
+      "name": "building_building_building-one",
+      "font_class": "building_building_building-one",
+      "unicode": "e696",
+      "unicode_decimal": 59030
+    },
+    {
+      "icon_id": "44108249",
+      "name": "cake",
+      "font_class": "cake",
+      "unicode": "e8df",
+      "unicode_decimal": 59615
+    }
+  ]
+}

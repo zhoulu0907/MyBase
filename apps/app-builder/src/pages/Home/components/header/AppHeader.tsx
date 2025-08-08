@@ -1,4 +1,4 @@
-import logoSVG from '@/assets/images/logo.svg';
+import LogoSVG from '@/assets/images/ob_logo.svg';
 import settingSVG from '@/assets/images/setting_icon.svg';
 import { UserPermissionManager } from '@/utils/permission';
 import { Avatar, Button, Dropdown, Layout, Menu, Tabs } from '@arco-design/web-react';
@@ -78,8 +78,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     <Header className={`${styles.header} ${className || ''}`}>
       <div className={styles.headerContent}>
         <div className={styles.logo}>
-          <img src={logoSVG} alt="Logo" className={styles.logoSvg} />
-          <h1>{t('header.title')}</h1>
+          <img src={LogoSVG} />
         </div>
 
         <Tabs
@@ -105,7 +104,6 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
             }
           }}
           size="large"
-          inkBarSize={{ width: 20, height: 3 }}
         >
           <Tabs.TabPane key="my-app" title="我的应用" />
           <Tabs.TabPane key="app-center" title="应用中心" />

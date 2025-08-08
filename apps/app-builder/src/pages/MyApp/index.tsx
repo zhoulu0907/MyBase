@@ -1,15 +1,24 @@
 import appDeleteSVG from '@/assets/images/app_delete.svg';
 import appEditSVG from '@/assets/images/app_edit.svg';
-import appIconSVG from '@/assets/images/app_icon.svg';
+import CreateApp from '@/components/CreateApp';
 import { useAppStore } from '@/store';
 import { UserPermissionManager } from '@/utils/permission';
-import { Avatar, Button, Input, Modal, Pagination, Select, Spin, Tag } from '@arco-design/web-react';
+import { Avatar, Button, Form, Input, Message, Modal, Pagination, Select, Spin, Tag } from '@arco-design/web-react';
 import { IconPlusCircle, IconSearch } from '@arco-design/web-react/icon';
-import { listApplication, type Application, type ListApplicationReq } from '@onebase/app';
+import {
+  createApplication,
+  listApplication,
+  deleteApplication,
+  type Application,
+  type CreateApplicationReq,
+  type ListApplicationReq,
+  type DeleteApplicationReq
+} from '@onebase/app';
 import dayjs from 'dayjs';
-import React, { useEffect, useState } from 'react';
+import { debounce } from 'lodash-es';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+// import { useNavigate } from 'react-router-dom';
 import styles from './index.module.less';
 
 const Option = Select.Option;
@@ -49,7 +58,8 @@ const statusOptions = [
 ];
 
 const MyAppPage: React.FC = () => {
-  const navigate = useNavigate();
+  const [form] = Form.useForm();
+  // const navigate = useNavigate();
   const { t } = useTranslation();
 
   const [pageSize, setPageSize] = useState(8);
@@ -62,9 +72,14 @@ const MyAppPage: React.FC = () => {
   const [orderByTime, setOrderByTime] = useState<'create' | 'update'>('create');
   const [status, setStatus] = useState<number | string>('');
 
-  const [visible, setVisible] = useState(false);
+  const [appName, setAppName] = useState<string>('');
+  const [deleteApp, setDeleteApp] = useState<Application>();
+  const [deleteVisible, setDeleteVisible] = useState<boolean>(false);
+  const [createVisible, setCreateVisible] = useState<boolean>(false);
+  const [createLoading, setCreateLoading] = useState<boolean>(false);
+  const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
 
-  const { setCurAppCode } = useAppStore();
+  const { setCurAppId } = useAppStore();
 
   useEffect(() => {
     getApplicationList();
@@ -86,9 +101,89 @@ const MyAppPage: React.FC = () => {
     setLoading(false);
   };
 
-  const nagivateToAppPage = (appCode: Number) => {
-    setCurAppCode(appCode);
-    navigate(`/onebase/create-app/data-factory?appCode=${appCode}`);
+  const debouncedUpdate = useCallback(
+    debounce((value) => {
+      setName(value);
+    }, 500),
+    []
+  );
+
+  useEffect(() => {
+    return () => debouncedUpdate.cancel();
+  }, [debouncedUpdate]);
+
+  const handleSearchChange = (value: string) => {
+    debouncedUpdate(value);
+  };
+
+  /* 创建应用 */
+  const handleCreateApp = async () => {
+    form.validate(async (error, data) => {
+      if (error !== null) return;
+      setCreateLoading(true);
+      const { appCode, appName, iconColor, iconName, description, tagIds, themeColor } = data;
+
+      const params: CreateApplicationReq = {
+        appCode,
+        appMode: 'classic',
+        appName,
+        datasourceId: 1,
+        description,
+        iconColor,
+        iconName,
+        tagIds,
+        themeColor
+      };
+      createApplication(params)
+        .then(() => {
+          setCreateVisible(false);
+          Message.success('应用创建成功');
+          // Message.success({
+          //   content: '应用创建成功，3s后跳转...',
+          //   duration: 3000,
+          //   onClose: () => {
+          //     navigate('/onebase/create-app/data-factory');
+          //   }
+          // });
+        })
+        .finally(() => {
+          setCreateLoading(false);
+        });
+    });
+  };
+
+  /* 删除应用 */
+  const handleDeleteApp = async () => {
+    if (appName !== deleteApp?.appName) {
+      Message.warning('请输入正确的应用名称');
+      return;
+    }
+    try {
+      setDeleteLoading(true);
+      const params: DeleteApplicationReq = {
+        id: BigInt(deleteApp.id),
+        name: appName
+      };
+      const res = await deleteApplication(params);
+      if (res) {
+        Message.success('删除成功');
+        getApplicationList();
+      }
+    } finally {
+      setAppName('');
+      setDeleteLoading(false);
+      setDeleteVisible(false);
+    }
+  };
+
+  /* 跳转到编辑页 */
+  const nagivateToAppPage = (appId: string) => {
+    setCurAppId(appId);
+    const newWindow = window.open('', '_blank');
+    if (newWindow) {
+      const href = `${window.location.origin}/#/onebase/create-app/app-setting?appId=${appId}`;
+      newWindow.location.href = href;
+    }
   };
 
   return (
@@ -103,7 +198,7 @@ const MyAppPage: React.FC = () => {
           size="large"
           icon={<IconPlusCircle />}
           className={styles.createAppButton}
-          onClick={() => navigate('/onebase/create-app/data-factory')}
+          onClick={() => setCreateVisible(true)}
         >
           {t('myApp.createApp')}
         </Button>
@@ -115,7 +210,7 @@ const MyAppPage: React.FC = () => {
             allowClear
             style={{ width: 316, height: 42, borderRadius: 6 }}
             suffix={<IconSearch />}
-            onChange={(value) => setName(value)}
+            onChange={handleSearchChange}
             placeholder="请输入应用名称"
           />
 
@@ -172,13 +267,15 @@ const MyAppPage: React.FC = () => {
                 className={styles.myAppCard}
                 key={index}
                 onClick={() => {
-                  nagivateToAppPage(Number(item.appCode));
+                  nagivateToAppPage(item.id);
                 }}
               >
                 <div className={styles.myAppCardHeader}>
                   <div className={styles.myAppName}>
-                    <img className={styles.myAppIcon} src={appIconSVG} alt="应用图标" />
-                    <div className={styles.myAppTitle}>{item.appName}asddddddddddddddddddd</div>
+                    <div className={styles.myAppIcon} style={{ backgroundColor: item.iconColor }}>
+                      <i className={`iconfont ${item.iconName || 'icon-box'}`} />
+                    </div>
+                    <div className={styles.myAppTitle}>{item.appName}</div>
                   </div>
                   <Tag
                     style={{
@@ -194,7 +291,10 @@ const MyAppPage: React.FC = () => {
                   <div className={styles.myAppDesc}>{item.description}</div>
                   <div className={styles.myAppTags}>
                     {item.tags?.map((tag) => (
-                      <Tag key={tag.id} color="green">
+                      <Tag
+                        key={tag.id}
+                        style={{ color: item.iconColor, borderColor: item.iconColor, backgroundColor: '#fff' }}
+                      >
                         {tag.tagName}
                       </Tag>
                     ))}
@@ -206,7 +306,7 @@ const MyAppPage: React.FC = () => {
                     <Avatar
                       size={24}
                       style={{
-                        backgroundColor: '#4FAE7B'
+                        backgroundColor: item.iconColor || '#4FAE7B'
                       }}
                     >
                       {item.createUser?.slice(0, 1) || 'U'}
@@ -223,7 +323,7 @@ const MyAppPage: React.FC = () => {
                       className={styles.operateIcon}
                       onClick={(e) => {
                         e.stopPropagation();
-                        nagivateToAppPage(Number(item.appCode));
+                        nagivateToAppPage(item.id);
                       }}
                     />
                     <img
@@ -232,7 +332,8 @@ const MyAppPage: React.FC = () => {
                       className={styles.operateIcon}
                       onClick={(e) => {
                         e.stopPropagation();
-                        setVisible(true);
+                        setDeleteApp(item);
+                        setDeleteVisible(true);
                       }}
                     />
                   </div>
@@ -256,12 +357,15 @@ const MyAppPage: React.FC = () => {
 
       <Modal
         title="确认删除应用"
-        visible={visible}
-        onOk={() => setVisible(false)}
-        onCancel={() => setVisible(false)}
+        visible={deleteVisible}
+        onOk={handleDeleteApp}
+        onCancel={() => setDeleteVisible(false)}
         autoFocus={false}
         focusLock={true}
+        confirmLoading={false}
         okButtonProps={{
+          loading: deleteLoading,
+          disabled: appName?.trim().length === 0,
           style: {
             backgroundColor: '#FF4D4F', // 自定义背景色
             borderColor: '#FF4D4F' // 自定义边框色
@@ -277,12 +381,41 @@ const MyAppPage: React.FC = () => {
           }}
         >
           <div>
-            删除应用则页面及数据将一并删除，并且无法还原。
+            卸载应用，其流程、流程数据、表单、列表、模型、权限组等都会删除，操作需谨慎。
+            <br />
             <br />
             为防止误操作，如确定删除，请输入
             <strong>&quot;&lt;应用名称&gt;&quot;</strong>进行确认：
           </div>
-          <Input style={{ width: 476 }} allowClear placeholder="请输入要删除的应用名称" />
+          <Input
+            value={appName}
+            allowClear
+            placeholder="请输入要删除的应用名称"
+            style={{ width: 476 }}
+            onChange={setAppName}
+          />
+        </div>
+      </Modal>
+      <Modal
+        title={<div style={{ textAlign: 'left' }}>创建空白应用</div>}
+        visible={createVisible}
+        simple
+        footer={
+          <div style={{ textAlign: 'right' }}>
+            <Button type="default" onClick={() => setCreateVisible(false)} style={{ marginRight: 12 }}>
+              取消
+            </Button>
+            <Button type="primary" loading={createLoading} onClick={handleCreateApp}>
+              创建
+            </Button>
+          </div>
+        }
+        confirmLoading={true}
+        onCancel={() => setCreateVisible(false)}
+        className={styles.createAppModal}
+      >
+        <div className={styles.createAppWrapper}>
+          <CreateApp form={form} previewBgColor="#F2F3F5BF" />
         </div>
       </Modal>
     </div>

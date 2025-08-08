@@ -1,60 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Table, Button, Space, Message, Input, Modal } from '@arco-design/web-react';
-import { IconSearch } from '@arco-design/web-react/icon';
+import { IconSearch, IconPlus } from '@arco-design/web-react/icon';
 import styles from './index.module.less';
 import OrganizationModal from './components/OrganizationModal';
 import { getDeptList, createDept, updateDept, deleteDept } from '@onebase/platform-center';
 import { type DeptVO, type DeptForm } from '@onebase/platform-center';
 import { listToTree } from '@/utils/tree';
-// mockData
-const generateMockData = () => {
-  const data = [];
-  let idCounter = 1;
-
-  for (let i = 1; i <= 10; i++) {
-    const parentId = idCounter;
-    data.push({
-      id: idCounter,
-      parentId: 0, // 根节点的parentId为0
-      name: `部门${i}`,
-      parent: '根节点',
-      description: `这是部门${i}的描述信息`,
-      manager: `管理员${Math.floor(Math.random() * 100)}`,
-      userCount: Math.floor(Math.random() * 200)
-    });
-    idCounter++;
-
-    for (let j = 1; j <= 10; j++) {
-      const currentId = idCounter;
-      data.push({
-        id: idCounter,
-        parentId: parentId, // 子节点的parentId为父节点的id
-        name: `部门${i}-${j}`,
-        parent: `部门${i}`,
-        description: `这是部门${i}-${j}的描述信息`,
-        manager: `管理员${Math.floor(Math.random() * 100)}`,
-        userCount: Math.floor(Math.random() * 100)
-      });
-      idCounter++;
-
-      const grandchildCount = Math.floor(Math.random() * 10) + 1;
-      for (let k = 1; k <= grandchildCount; k++) {
-        data.push({
-          id: idCounter,
-          parentId: currentId, // 孙节点的parentId为父节点的id
-          name: `部门${i}-${j}-${k}`,
-          parent: `部门${i}-${j}`,
-          description: `这是部门${i}-${j}-${k}的描述信息`,
-          manager: `管理员${Math.floor(Math.random() * 100)}`,
-          userCount: Math.floor(Math.random() * 50)
-        });
-        idCounter++;
-      }
-    }
-  }
-
-  return data;
-};
+import { debounce } from 'lodash-es'
 const OrganizationPage: React.FC = () => {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -70,15 +22,13 @@ const OrganizationPage: React.FC = () => {
     },
     {
       title: '部门描述',
-      dataIndex: 'description'
-    },
-    {
-      title: '上级部门',
-      dataIndex: 'parent'
+      dataIndex: 'remark',
+      placeholder: '-'
     },
     {
       title: '管理员',
-      dataIndex: 'manager'
+      dataIndex: 'leaderUserName',
+      placeholder: '-'
     },
     {
       title: '用户数量',
@@ -116,6 +66,7 @@ const OrganizationPage: React.FC = () => {
       onOk: async () => {
         deleteDept(record.id).then(() => {
           Message.success('删除成功');
+          fetchDeptList(searchValue);
         });
       }
     });
@@ -130,14 +81,14 @@ const OrganizationPage: React.FC = () => {
   const handleModalConfirm = async (values: DeptForm) => {
     setModalLoading(true);
     try {
-      if (editRecord) {
-        await updateDept(values);
-        Message.success(`部门 "${values.name}" 编辑成功`);
+      if (editRecord?.id) {
+        await updateDept({ ...values, id: editRecord.id });
+        Message.success(`编辑成功`);
       } else {
         await createDept(values);
-        Message.success(`部门 "${values.name}" 添加成功`);
+        Message.success(`添加成功`);
       }
-      handleSearch();
+      handleSearch(searchValue);
       setModalVisible(false);
     } catch (error) {
       Message.error('操作失败，请重试');
@@ -153,19 +104,25 @@ const OrganizationPage: React.FC = () => {
       // 将平铺的部门列表数据转换为树形结构
       const treeData = listToTree(res);
       setData(treeData);
-    } catch (error) {
-      // TODO: 联调后移除mock data
-      const mockList = generateMockData();
-      const treeData = listToTree(mockList);
-      setData(treeData);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSearch = () => {
-    fetchDeptList(searchValue);
-  };
+  const debouncedSearch = useCallback(
+    debounce((value: string) => {
+      fetchDeptList(value);
+    }, 300),
+    [fetchDeptList]
+  );
+
+  const handleSearch = useCallback(
+    (value: string) => {
+      setSearchValue(value);
+      debouncedSearch(value);
+    },
+    [debouncedSearch]
+  );
 
   useEffect(() => {
     fetchDeptList();
@@ -175,7 +132,7 @@ const OrganizationPage: React.FC = () => {
     <div className={styles.organizationPage}>
       <div className={styles.pageHeader}>
         <div className={styles.leftContent}>
-          <Button type="primary" onClick={handleAdd}>
+          <Button type="primary" onClick={handleAdd} icon={<IconPlus />}>
             添加
           </Button>
         </div>
@@ -184,8 +141,8 @@ const OrganizationPage: React.FC = () => {
             placeholder="请输入部门名称"
             prefix={<IconSearch />}
             value={searchValue}
-            onChange={(value: string) => setSearchValue(value)}
-            onPressEnter={handleSearch}
+            onChange={handleSearch}
+            onPressEnter={(e) => handleSearch(e.target.value)}
             style={{ width: 300 }}
           />
         </div>
@@ -204,7 +161,6 @@ const OrganizationPage: React.FC = () => {
 
       <OrganizationModal
         visible={modalVisible}
-        deptTree={data}
         onCancel={() => setModalVisible(false)}
         onConfirm={handleModalConfirm}
         loading={modalLoading}

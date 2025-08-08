@@ -1,7 +1,7 @@
 import { Button, Input, Message, Modal, Pagination, Space, Table, Spin } from '@arco-design/web-react';
 import { IconSearch, IconPlus } from '@arco-design/web-react/icon';
 import { getUserPage } from '@onebase/platform-center';
-import { deleteRoleUser, addRoleUsers } from '@onebase/platform-center';
+import { removeRoleUsers, addRoleUsers } from '@onebase/platform-center';
 import { useEffect, useState, useMemo } from 'react';
 import type { UserVO } from '@onebase/platform-center';
 import type { PageParam } from '@onebase/platform-center';
@@ -143,7 +143,7 @@ export default function UserTable({ selectedRoleId = undefined }: UserListProps)
       content: `确认要将用户 ${record.nickname} 从该角色下删除吗？`,
       onOk: async () => {
         try {
-          await deleteRoleUser(selectedRoleId, record.id);
+          await removeRoleUsers(selectedRoleId, record.id);
           Message.success('用户移除成功');
           getUserList();
         } catch (error) {
