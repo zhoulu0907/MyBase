@@ -17,6 +17,9 @@ public class AuthFieldVO {
     @Schema(description = "字段Id")
     private Long fieldId;
 
+    @Schema(description = "字段名称")
+    private String fieldDisplayName;
+
     @Schema(description = "是否可阅读")
     private Boolean canRead;
 

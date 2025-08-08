@@ -41,24 +41,24 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
 
 
     @Override
-    public AuthPermissionVO getPermission(AuthPermissionReqVO reqVO) {
-        AuthPermissionVO authPermissionVO = new AuthPermissionVO();
+    public AuthPermissionDetailVO getPermission(AuthPermissionReqVO reqVO) {
+        AuthPermissionDetailVO authPermissionDetailVO = new AuthPermissionDetailVO();
         //补充 基本权限
         AuthPermissionDO authPermissionDO = authFeatureRepository.findByQuery(reqVO);
-        BeanUtils.copyProperties(authPermissionDO, authPermissionVO);
+        authPermissionDetailVO.setAuthPermission(BeanUtils.toBean(authPermissionDO, AuthPermissionVO.class));
         //补充 操作权限
         List<AuthOperationDO> authOperationDOS = authOperationRepository.findByQuery(reqVO);
-        authPermissionVO.setAuthOperations(BeanUtils.toBean(authOperationDOS, AuthOperationVO.class));
+        authPermissionDetailVO.setAuthOperations(BeanUtils.toBean(authOperationDOS, AuthOperationVO.class));
         //补充 实体权限
         List<AuthEntityDO> authEntityDOS = authEntityRepository.findByQuery(reqVO);
-        authPermissionVO.setAuthEntities(BeanUtils.toBean(authEntityDOS, AuthEntityVO.class));
+        authPermissionDetailVO.setAuthEntities(BeanUtils.toBean(authEntityDOS, AuthEntityVO.class));
         //补充 数据权限
         List<AuthDataGroupVO> authDataGroupVOS = queryAuthDataGroups(reqVO);
-        authPermissionVO.setAuthDataGroups(authDataGroupVOS);
+        authPermissionDetailVO.setAuthDataGroups(authDataGroupVOS);
         //补充 字段权限
         List<AuthFieldDO> authFieldDOS = authFieldRepository.findByQuery(reqVO);
-        authPermissionVO.setAuthFields(BeanUtils.toBean(authFieldDOS, AuthFieldVO.class));
-        return authPermissionVO;
+        authPermissionDetailVO.setAuthFields(BeanUtils.toBean(authFieldDOS, AuthFieldVO.class));
+        return authPermissionDetailVO;
     }
 
     private List<AuthDataGroupVO> queryAuthDataGroups(AuthPermissionReqVO reqVO) {
@@ -97,17 +97,17 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
     }
 
     @Override
-    public void updatePermission(AuthPermissionVO authPermissionVO) {
+    public void updatePermission(AuthPermissionDetailVO detailVO) {
         AuthPermissionReqVO reqVO = new AuthPermissionReqVO();
-        reqVO.setApplicationId(authPermissionVO.getApplicationId());
-        reqVO.setRoleId(authPermissionVO.getRoleId());
-        reqVO.setMenuId(authPermissionVO.getMenuId());
+        reqVO.setApplicationId(detailVO.getApplicationId());
+        reqVO.setRoleId(detailVO.getRoleId());
+        reqVO.setMenuId(detailVO.getMenuId());
         //更新 功能权限
-        updateAuthPermission(reqVO, authPermissionVO);
-        updateAuthOperation(reqVO, authPermissionVO.getAuthOperations());
-        updateAuthEntity(reqVO, authPermissionVO.getAuthEntities());
-        updateAuthDataGroup(reqVO, authPermissionVO.getAuthDataGroups());
-        updateAuthField(reqVO, authPermissionVO.getAuthFields());
+        updateAuthPermission(reqVO, detailVO.getAuthPermission());
+        updateAuthOperation(reqVO, detailVO.getAuthOperations());
+        updateAuthEntity(reqVO, detailVO.getAuthEntities());
+        updateAuthDataGroup(reqVO, detailVO.getAuthDataGroups());
+        updateAuthField(reqVO, detailVO.getAuthFields());
     }
 
     private void updateAuthPermission(AuthPermissionReqVO reqVO, AuthPermissionVO authPermissionVO) {
@@ -130,7 +130,7 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
     private void updateAuthOperation(AuthPermissionReqVO reqVO, List<AuthOperationVO> authOperationVOS) {
         List<AuthOperationDO> authOperationDOS = authOperationRepository.findByQuery(reqVO);
         List<Pair<AuthOperationDO, AuthOperationVO>> pairs = AuthUtils.fullOuterJoin(authOperationDOS, authOperationVOS,
-                (authOperationDO, authOperationVO) -> authOperationDO.getOperationCode().equals(authOperationVO.getOperationCode())
+                (authOperationDO, authOperationVO) -> authOperationDO.getId().equals(authOperationVO.getId())
         );
         for (Pair<AuthOperationDO, AuthOperationVO> pair : pairs) {
             AuthOperationDO authOperationDO = pair.getLeft();
@@ -155,7 +155,7 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
     private void updateAuthEntity(AuthPermissionReqVO reqVO, List<AuthEntityVO> authEntityVOS) {
         List<AuthEntityDO> authEntityDOS = authEntityRepository.findByQuery(reqVO);
         List<Pair<AuthEntityDO, AuthEntityVO>> pairs = AuthUtils.fullOuterJoin(authEntityDOS, authEntityVOS,
-                (authEntityDO, authEntityVO) -> authEntityDO.getEntityId().equals(authEntityVO.getEntityId())
+                (authEntityDO, authEntityVO) -> authEntityDO.getId().equals(authEntityVO.getId())
         );
         for (Pair<AuthEntityDO, AuthEntityVO> pair : pairs) {
             AuthEntityDO authEntityDO = pair.getLeft();

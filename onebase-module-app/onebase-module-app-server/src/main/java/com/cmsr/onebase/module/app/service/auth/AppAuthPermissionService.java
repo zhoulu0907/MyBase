@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.app.service.auth;
 
+import com.cmsr.onebase.module.app.controller.admin.auth.vo.AuthPermissionDetailVO;
 import com.cmsr.onebase.module.app.controller.admin.auth.vo.AuthPermissionReqVO;
 import com.cmsr.onebase.module.app.controller.admin.auth.vo.AuthPermissionVO;
 import jakarta.validation.Valid;
@@ -10,8 +11,8 @@ import jakarta.validation.Valid;
  */
 public interface AppAuthPermissionService {
 
-    AuthPermissionVO getPermission(AuthPermissionReqVO reqVO);
+    AuthPermissionDetailVO getPermission(AuthPermissionReqVO reqVO);
 
-    void updatePermission(@Valid AuthPermissionVO reqVO);
+    void updatePermission(@Valid AuthPermissionDetailVO detailVO);
 
 }

@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.app.controller.admin.auth;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.module.app.controller.admin.auth.vo.AuthPermissionDetailVO;
 import com.cmsr.onebase.module.app.controller.admin.auth.vo.AuthPermissionReqVO;
 import com.cmsr.onebase.module.app.controller.admin.auth.vo.AuthPermissionVO;
 import com.cmsr.onebase.module.app.service.auth.AppAuthPermissionService;
@@ -32,7 +33,7 @@ public class AppAuthPermissionController {
      */
     @GetMapping("/get")
     @Operation(summary = "获取角色-菜单的权限")
-    public CommonResult<AuthPermissionVO> getPermission(@Valid AuthPermissionReqVO reqVO) {
+    public CommonResult<AuthPermissionDetailVO> getPermission(@Valid AuthPermissionReqVO reqVO) {
         return CommonResult.success(authPermissionService.getPermission(reqVO));
     }
 
@@ -41,8 +42,8 @@ public class AppAuthPermissionController {
      */
     @GetMapping("/update")
     @Operation(summary = "更新角色-菜单的权限")
-    public CommonResult<Boolean> updatePermission(@Valid @RequestBody AuthPermissionVO reqVO) {
-        authPermissionService.updatePermission(reqVO);
+    public CommonResult<Boolean> updatePermission(@Valid @RequestBody AuthPermissionDetailVO detailVO) {
+        authPermissionService.updatePermission(detailVO);
         return CommonResult.success(true);
     }
 

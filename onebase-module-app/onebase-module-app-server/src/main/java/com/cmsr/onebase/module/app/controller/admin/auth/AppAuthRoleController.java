@@ -41,7 +41,7 @@ public class AppAuthRoleController {
     @PostMapping("/create")
     @Operation(summary = "新增角色")
     public CommonResult<Boolean> createAuthRole(@Valid @RequestBody AuthRoleCreateReqVO reqVO) {
-        authRoleService.createAuthRole(reqVO);
+        authRoleService.createRole(reqVO);
         return CommonResult.success(true);
     }
 
@@ -50,10 +50,10 @@ public class AppAuthRoleController {
      * @param reqVO
      * @return
      */
-    @PostMapping("/add-member")
+    @PostMapping("/add-user")
     @Operation(summary = "角色添加成员")
-    public CommonResult<Boolean> addMember(@Valid @RequestBody AuthRoleAddMemberReqVO reqVO) {
-        authRoleService.addMember(reqVO);
+    public CommonResult<Boolean> addUser(@Valid @RequestBody AuthRoleAddMemberReqVO reqVO) {
+        authRoleService.addUser(reqVO);
         return CommonResult.success(true);
     }
 
@@ -62,20 +62,20 @@ public class AppAuthRoleController {
      * @param reqVO
      * @return
      */
-    @PostMapping("/delete-member")
+    @PostMapping("/delete-user")
     @Operation(summary = "角色删除成员")
-    public CommonResult<Boolean> deleteMember(@Valid @RequestBody AuthRoleDeleteMemberReqVO reqVO) {
-        authRoleService.deleteMember(reqVO);
+    public CommonResult<Boolean> deleteUser(@Valid @RequestBody AuthRoleDeleteMemberReqVO reqVO) {
+        authRoleService.deleteUser(reqVO);
         return CommonResult.success(true);
     }
 
     /**
      * 删除角色
      */
-    @GetMapping("/delete")
+    @PostMapping("/delete")
     @Operation(summary = "删除角色")
-    public CommonResult<Boolean> deleteAuthRole(@RequestParam("roleId") Long roleId) {
-        authRoleService.deleteAuthRole(roleId);
+    public CommonResult<Boolean> deleteRole(@RequestParam("roleId") Long roleId) {
+        authRoleService.deleteRole(roleId);
         return CommonResult.success(true);
     }
 
