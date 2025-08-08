@@ -13,6 +13,8 @@ import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldQu
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldRespVO;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldSaveReqVO;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.FieldTypeConfigRespVO;
+import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldBatchSaveReqVO;
+import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldBatchSaveRespVO;
 import com.cmsr.onebase.module.metadata.convert.entity.EntityFieldConvert;
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.service.entity.MetadataEntityFieldService;
@@ -129,4 +131,11 @@ public class EntityFieldController {
         return success(true);
     }
 
+    @PostMapping("/batch-save")
+    @Operation(summary = "批量保存实体字段（增删改）")
+    @PreAuthorize("@ss.hasPermission('metadata:entity-field:update')")
+    public CommonResult<EntityFieldBatchSaveRespVO> batchSave(@Valid @RequestBody EntityFieldBatchSaveReqVO reqVO) {
+        EntityFieldBatchSaveRespVO resp = entityFieldService.batchSaveEntityFields(reqVO);
+        return success(resp);
+    }
 }
