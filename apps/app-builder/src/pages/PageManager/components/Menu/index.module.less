@@ -1,0 +1,154 @@
+.menuContainer {
+  position: relative;
+  height: 100%;
+  background-color: var(--color-bg-2);
+  border-right: 1px solid var(--color-border);
+  transition: width 0.2s ease-in-out;
+  overflow: hidden;
+}
+
+.menuWrapper {
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.menu {
+  border: none;
+  background: transparent;
+
+  :global(.arco-menu-item) {
+    margin: 4px 8px;
+    border-radius: 6px;
+
+    &:hover {
+      background-color: var(--color-fill-2);
+    }
+
+    &.arco-menu-selected {
+      background-color: var(--color-primary-light-1);
+      color: var(--color-primary);
+
+      &:hover {
+        background-color: var(--color-primary-light-2);
+      }
+    }
+  }
+
+  :global(.arco-menu-submenu) {
+    .arco-menu-submenu-title {
+      margin: 4px 8px;
+      border-radius: 6px;
+
+      &:hover {
+        background-color: var(--color-fill-2);
+      }
+    }
+  }
+
+  :global(.arco-menu-submenu-open) {
+    > .arco-menu-submenu-title {
+      background-color: var(--color-fill-1);
+    }
+  }
+}
+
+.menuItemTitle {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+.menuIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  margin-right: 8px;
+  flex-shrink: 0;
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.menuText {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.collapseButtonContainer {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+}
+
+.collapseButton {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: var(--color-bg-2);
+  border: 1px solid var(--color-border);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+  &:hover {
+    background-color: var(--color-fill-2);
+    border-color: var(--color-primary);
+  }
+
+  .arco-icon {
+    font-size: 14px;
+    color: var(--color-text-2);
+  }
+}
+
+// 折叠状态下的样式
+.menuContainer:global(.collapsed) {
+  .menuIcon {
+    margin-right: 0;
+  }
+
+  .menuText {
+    display: none;
+  }
+
+  :global(.arco-menu-item),
+  :global(.arco-menu-submenu-title) {
+    padding: 0;
+    justify-content: center;
+  }
+
+  :global(.arco-menu-submenu) {
+    .arco-menu-submenu-title {
+      justify-content: center;
+    }
+  }
+}
+
+// 响应式设计
+@media (max-width: 768px) {
+  .menuContainer {
+    width: 100% !important;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .menu {
+    :global(.arco-menu-item),
+    :global(.arco-menu-submenu-title) {
+      margin: 2px 4px;
+    }
+  }
+
+  .collapseButtonContainer {
+    display: none;
+  }
+}

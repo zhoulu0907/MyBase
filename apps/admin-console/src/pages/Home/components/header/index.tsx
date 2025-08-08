@@ -1,12 +1,10 @@
-import logoSVG from '@/assets/images/logo-ob.svg';
-// import notificationSVG from '@/assets/images/notification_icon.svg';
-// import searchSVG from '@/assets/images/search_icon.svg';
-// import settingSVG from '@/assets/images/setting_icon.svg';
-// import themeSVG from '@/assets/images/theme_icon.svg';
-import { Avatar, Button, Dropdown, Layout, Menu } from '@arco-design/web-react';
+import LogoSVG from '@/assets/images/ob_logo.svg';
+import { UserPermissionManager } from '@/utils/permission';
+import { Avatar, Dropdown, Layout, Menu } from '@arco-design/web-react';
 import { IconPoweroff, IconUser } from '@arco-design/web-react/icon';
 import { TokenManager } from '@onebase/common';
-import React, { useEffect } from 'react';
+import { getPermissionInfo } from '@onebase/platform-center';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import styles from './index.module.less';
@@ -21,12 +19,21 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
 
+  const [nickname, setNickname] = useState('U');
   // 获取用户信息
   const tokenInfo = TokenManager.getTokenInfo();
 
   useEffect(() => {
-    console.log(tokenInfo);
+    if (tokenInfo?.accessToken) {
+      getInfo();
+    }
   }, [tokenInfo]);
+
+  const getInfo = async () => {
+    const res = await getPermissionInfo();
+    UserPermissionManager.setUserPermissionInfo(res);
+    setNickname(res.user.nickname);
+  };
 
   // 登出处理
   const handleLogout = () => {
@@ -54,20 +61,14 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     <Header className={`${styles.header} ${className || ''}`}>
       <div className={styles.headerContent}>
         <div className={styles.logo}>
-          <img src={logoSVG} alt="Logo" className={styles.logoSvg} />
-          {/* <h1>{t('header.title')}</h1> */}
+          <img src={LogoSVG} />
         </div>
 
         <div className={styles.userInfo}>
-          {/* <Button shape='circle' icon={<img src={searchSVG} alt="Search" />} />
-          <Button shape='circle' icon={<img src={themeSVG} alt="Theme" />} />
-          <Button shape='circle' icon={<img src={notificationSVG} alt="Notification" />} />
-          <Button shape='circle' icon={<img src={settingSVG} alt="Setting" />} /> */}
-
           <Dropdown droplist={userMenu} position="bottom">
             <div className={styles.userDropdown}>
               <Avatar size={32} style={{ backgroundColor: '#00b42a' }}>
-                {tokenInfo?.username?.toString().charAt(0) || 'U'}
+                {nickname?.charAt(0) || 'U'}
               </Avatar>
             </div>
           </Dropdown>

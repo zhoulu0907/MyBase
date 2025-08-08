@@ -151,11 +151,16 @@ const PageManagerPage: FC = () => {
               onMenuClick(menu);
             }}
             style={{
-              width: '200px'
+              width: '100%'
             }}
             title={
               <div className={styles.menuItem}>
                 <div className={styles.subMenuItemName}>{menu.menuName}</div>
+                <div
+                  style={{
+                    flex: 5
+                  }}
+                ></div>
                 <div className={styles.dropdownContainer}>
                   <Dropdown droplist={settingMenuDropList} trigger="click" position="bl">
                     <IconSettings
@@ -366,7 +371,10 @@ const PageManagerPage: FC = () => {
               </Dropdown>
             </div>
 
-            <Menu mode="vertical" levelIndent={0}>
+            <Menu
+              mode="vertical"
+              // levelIndent={10}
+            >
               {renderMenuItems(menuList, (menu) => {
                 setActiveMenu(menu);
                 console.log('menu: ', menu.menuName);
