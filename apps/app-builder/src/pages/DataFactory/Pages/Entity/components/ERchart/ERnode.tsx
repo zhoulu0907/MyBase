@@ -4,7 +4,7 @@ import { IconCaretDown, IconCaretUp, IconMoreVertical, IconSync } from '@arco-de
 import React, { useState } from 'react';
 import { type EntityNode } from '../../../../utils/interface';
 import styles from './ERnode.module.less';
-
+import { ENTITY_FIELD_TYPE } from '../../../../utils/constans';
 // X6 节点组件接口
 interface X6NodeProps {
   node: Node;
@@ -13,41 +13,13 @@ interface X6NodeProps {
 // 节点数据接口
 interface NodeData {
   data: EntityNode;
-  onNodeEdit?: (data: EntityNode) => void;
+  onNodeEdit?: (data: Partial<EntityNode>) => void;
   onNodeAdd?: () => void;
   onNodeDelete?: (id: string) => void;
-  onNodeAddField?: (id: string) => void;
+  onNodeAddField?: (data: Partial<EntityNode>) => void;
   onNodeAddRelation?: (id: string) => void;
+  onFieldClick?: (fieldId: string) => void;
 }
-
-const typeMap = {
-  TEXT: '常规短文本',
-  LONG_TEXT: '长文本内容',
-  EMAIL: '邮箱地址',
-  PHONE: '电话号码',
-  URL: '网址链接',
-  ADDRESS: '详细地址',
-  NUMBER: '通用数字',
-  CURRENCY: '货币金额',
-  DATE: '日期',
-  DATETIME: '日期时间',
-  BOOLEAN: '布尔值',
-  PICKLIST: '单选列表',
-  MULTI_PICKLIST: '多选列表',
-  AUTO_CODE: '自动编码',
-  USER: '用户引用',
-  DEPARTMENT: '部门引用',
-  DATA_SELECTION: '数据选择',
-  RELATION: '关联关系',
-  STRUCTURE: '结构化对象',
-  ARRAY: '数组列表',
-  FILE: '文件',
-  IMAGE: '图片',
-  GEOGRAPHY: '地理位置',
-  PASSWORD: '密码',
-  ENCRYPTED: '加密字段',
-  AGGREGATE: '聚合统计'
-};
 
 const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
   const [nodeCollapsed, setNodeCollapsed] = useState({
@@ -62,11 +34,11 @@ const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
     return <div style={{ padding: '10px', color: 'red' }}>No data</div>;
   }
 
-  const nodeId = nodeData.id;
+  const nodeId = nodeData.entityId;
 
   // 分离系统字段和自定义字段
-  const systemFields = nodeData.fields.filter((field) => field.isSystem);
-  const customFields = nodeData.fields.filter((field) => !field.isSystem);
+  const systemFields = nodeData?.fields?.filter((field) => field.isSystemField);
+  const customFields = nodeData?.fields?.filter((field) => !field.isSystemField);
 
   // 折叠逻辑
   const handleToggleSection = (sectionType: 'system' | 'custom', e: React.MouseEvent) => {
@@ -89,7 +61,7 @@ const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
     const data = node.getData() as NodeData;
     const onNodeAddField = data?.onNodeAddField;
     if (onNodeAddField && nodeData) {
-      onNodeAddField(nodeData.id);
+      onNodeAddField(nodeData);
     }
   };
 
@@ -99,7 +71,7 @@ const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
     const data = node.getData() as NodeData;
     const onNodeAddRelation = data?.onNodeAddRelation;
     if (onNodeAddRelation && nodeData) {
-      onNodeAddRelation(nodeData.id);
+      onNodeAddRelation(nodeData.entityId);
     }
   };
 
@@ -124,12 +96,23 @@ const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
     }
   };
 
+  const handleFieldClick = (fieldId: string, e: React.MouseEvent) => {
+    console.log('handleFieldClick', fieldId, e);
+    e.preventDefault();
+    e.stopPropagation();
+    const data = node.getData() as NodeData;
+    const onFieldClick = data?.onFieldClick;
+    if (onFieldClick) {
+      onFieldClick(fieldId);
+    }
+  };
+
   return (
     <div className={styles['node-content']}>
       {/* 节点头部 */}
       <div className={styles['node-header']}>
         <IconSync className={styles['refresh-icon']} onClick={handleRefresh} />
-        <span className={styles['node-title']}>{nodeData.title || '未命名实体'}</span>
+        <span className={styles['node-title']}>{nodeData.entityName || '未命名实体'}</span>
         <Popover
           trigger="hover"
           position="rt"
@@ -152,7 +135,7 @@ const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
       {/* 节点主体 */}
       <div className={styles['node-body']}>
         {/* 渲染系统字段 */}
-        {systemFields.length > 0 && (
+        {systemFields?.length > 0 && (
           <div className={styles['field-section']}>
             <div className={styles['field-section-header']}>
               <span className={styles['section-title']}>系统字段</span>
@@ -163,9 +146,15 @@ const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
             </div>
             <div className={`${styles['field-section-content']} ${nodeCollapsed.system ? styles['collapsed'] : ''}`}>
               {systemFields.map((field, index) => (
-                <div key={index} className={`${styles['field-item']} ${styles['system-field']}`}>
-                  <span className={styles['field-name']}>{field.name}</span>
-                  <span className={styles['field-type']}>{typeMap[field.type as keyof typeof typeMap]}</span>
+                <div
+                  key={index}
+                  className={`${styles['field-item']} ${styles['system-field']} ${styles['clickable-field']}`}
+                  onClick={(e) => handleFieldClick(field.fieldId, e)}
+                >
+                  <span className={styles['field-name']}>{field.fieldName}</span>
+                  <span className={styles['field-type']}>
+                    {ENTITY_FIELD_TYPE[field.fieldType as keyof typeof ENTITY_FIELD_TYPE]}
+                  </span>
                 </div>
               ))}
             </div>
@@ -173,7 +162,7 @@ const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
         )}
 
         {/* 渲染自定义字段 */}
-        {customFields.length > 0 && (
+        {customFields?.length > 0 && (
           <div className={styles['field-section']}>
             <div className={styles['field-section-header']}>
               <span className={styles['section-title']}>自定义字段</span>
@@ -184,10 +173,14 @@ const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
             </div>
             <div className={`${styles['field-section-content']} ${nodeCollapsed.custom ? styles['collapsed'] : ''}`}>
               {customFields.map((field, index) => (
-                <div key={index} className={`${styles['field-item']} ${styles['custom-field']}`}>
-                  <span className={styles['field-name']}>{field.name}</span>
+                <div
+                  key={index}
+                  className={`${styles['field-item']} ${styles['custom-field']} ${styles['clickable-field']}`}
+                  onClick={(e) => handleFieldClick(field.fieldId, e)}
+                >
+                  <span className={styles['field-name']}>{field.fieldName}</span>
                   <span className={styles['field-type']}>
-                    {typeMap[field.type as keyof typeof typeMap] || field.type}
+                    {ENTITY_FIELD_TYPE[field.fieldType as keyof typeof ENTITY_FIELD_TYPE] || field.fieldType}
                   </span>
                 </div>
               ))}
@@ -199,7 +192,7 @@ const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
       {/* 节点底部 */}
       <div className={styles['node-footer']}>
         <Button type="text" onClick={handleAddField} className={styles['node-footer-button']}>
-          添加字段
+          字段配置
         </Button>
         <Button type="text" onClick={handleAddRelation} className={styles['node-footer-button']}>
           添加关系

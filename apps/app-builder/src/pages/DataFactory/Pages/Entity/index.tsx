@@ -13,7 +13,7 @@ const EntityPage: React.FC = () => {
 
   return (
     <>
-      {pageType === 'check-entity' && <CheckEntityPage handlePageType={handlePageType} />}
+      {pageType === 'check-entity' && <CheckEntityPage />}
       {pageType === 'empty-entity' && <EmptyEntityPage handlePageType={handlePageType} />}
     </>
   );

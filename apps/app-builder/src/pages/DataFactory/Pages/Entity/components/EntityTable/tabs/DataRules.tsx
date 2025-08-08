@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Table, Tag, Button, Space, Message } from '@arco-design/web-react';
 import type { TableColumnProps } from '@arco-design/web-react';
 import type { EntityNode } from '../../../../../utils/interface';
-import { getEntityRules } from '@onebase/app/src/services/entity';
+import { getEntityRules } from '@onebase/app';
 import styles from './tabs.module.less';
 
 interface DataRulesProps {
@@ -16,7 +16,7 @@ const DataRules: React.FC<DataRulesProps> = ({ entity }) => {
   const loadRules = async () => {
     try {
       setLoading(true);
-      const response = await getEntityRules({ entityId: entity.id });
+      const response = await getEntityRules({ entityId: entity.entityId });
       console.log('getEntityRules', response);
       if (response.list) {
         setRules(response.list || []);

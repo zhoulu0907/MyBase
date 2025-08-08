@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Layout, Message } from '@arco-design/web-react';
 import type { EntityNode } from '../../../../utils/interface';
-import { getEntityPage } from '@onebase/app/src/services/entity';
+import { getEntityPage } from '@onebase/app';
 import EntityList from './EntityList';
 import EntityDetail from './EntityDetail';
 import styles from './index.module.less';
