@@ -3,16 +3,20 @@ package com.cmsr.onebase.module.metadata.service.relationship;
 import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.BusinessEntitySaveReqVO;
 import com.cmsr.onebase.module.metadata.controller.admin.relationship.vo.CascadeTypeRespVO;
 import com.cmsr.onebase.module.metadata.controller.admin.relationship.vo.EntityRelationshipPageReqVO;
 import com.cmsr.onebase.module.metadata.controller.admin.relationship.vo.EntityRelationshipRespVO;
 import com.cmsr.onebase.module.metadata.controller.admin.relationship.vo.EntityRelationshipSaveReqVO;
+import com.cmsr.onebase.module.metadata.controller.admin.relationship.vo.ParentChildRelationshipSaveReqVO;
+import com.cmsr.onebase.module.metadata.controller.admin.relationship.vo.ParentChildRelationshipRespVO;
 import com.cmsr.onebase.module.metadata.controller.admin.relationship.vo.RelationshipTypeRespVO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataBusinessEntityDO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.relationship.MetadataEntityRelationshipDO;
 import com.cmsr.onebase.module.metadata.enums.CascadeTypeEnum;
 import com.cmsr.onebase.module.metadata.enums.RelationshipTypeEnum;
+import com.cmsr.onebase.module.metadata.service.entity.MetadataBusinessEntityService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -42,6 +46,9 @@ public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRela
 
     @Resource
     private DataRepository dataRepository;
+
+    @Resource
+    private MetadataBusinessEntityService businessEntityService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -271,6 +278,122 @@ public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRela
             log.warn("获取字段名称失败，字段ID: {}, 错误: {}", fieldId, e.getMessage());
             return null;
         }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public ParentChildRelationshipRespVO createParentChildRelationship(@Valid ParentChildRelationshipSaveReqVO createReqVO) {
+        log.info("开始创建主子关系，主表实体ID: {}, 子表实体ID: {}", createReqVO.getParentEntityId(), createReqVO.getChildEntityId());
+        
+        // 1. 获取或创建子表实体
+        Long childEntityId;
+        if (createReqVO.getChildEntityId() != null) {
+            // 选择已有的子表
+            childEntityId = Long.valueOf(createReqVO.getChildEntityId());
+            log.info("使用已有子表，实体ID: {}", childEntityId);
+        } else {
+            // 创建新的子表实体
+            childEntityId = createNewChildEntity(createReqVO);
+            log.info("创建新子表成功，实体ID: {}", childEntityId);
+        }
+
+        // 2. 获取主表的id字段和子表的parent_id字段
+        Long parentIdFieldId = getEntityIdField(Long.valueOf(createReqVO.getParentEntityId()));
+        Long childParentIdFieldId = getOrCreateParentIdField(childEntityId);
+
+        // 3. 创建主子关系
+        EntityRelationshipSaveReqVO relationshipReqVO = new EntityRelationshipSaveReqVO();
+        relationshipReqVO.setRelationName("主子关系");
+        relationshipReqVO.setSourceEntityId(createReqVO.getParentEntityId());
+        relationshipReqVO.setTargetEntityId(String.valueOf(childEntityId));
+        relationshipReqVO.setRelationshipType(RelationshipTypeEnum.ONE_TO_MANY.getRelationshipType());
+        relationshipReqVO.setSourceFieldId(String.valueOf(parentIdFieldId));
+        relationshipReqVO.setTargetFieldId(String.valueOf(childParentIdFieldId));
+        relationshipReqVO.setCascadeType(CascadeTypeEnum.ALL.getCascadeType()); // 默认级联新增、删除、查询
+        relationshipReqVO.setDescription("系统自动创建的主子关系");
+        relationshipReqVO.setAppId(createReqVO.getAppId());
+
+        Long relationshipId = createEntityRelationship(relationshipReqVO);
+        
+        // 4. 转换为响应VO
+        ParentChildRelationshipRespVO result = new ParentChildRelationshipRespVO();
+        result.setId(relationshipId);
+        result.setParentEntityId(Long.valueOf(createReqVO.getParentEntityId()));
+        result.setChildEntityId(childEntityId);
+        result.setSourceFieldId(parentIdFieldId);
+        result.setTargetFieldId(childParentIdFieldId);
+        result.setRelationshipType(RelationshipTypeEnum.ONE_TO_MANY.getRelationshipType());
+        result.setCascadeType(CascadeTypeEnum.ALL.getCascadeType());
+        result.setAppId(Long.valueOf(createReqVO.getAppId()));
+
+        // 设置实体名称
+        result.setParentEntityName(getEntityNameById(Long.valueOf(createReqVO.getParentEntityId())));
+        result.setChildEntityName(getEntityNameById(childEntityId));
+        result.setSourceFieldName("id");
+        result.setTargetFieldName("parent_id");
+
+        log.info("主子关系创建成功，关系ID: {}", relationshipId);
+        return result;
+    }
+
+    /**
+     * 创建新的子表实体
+     *
+     * @param createReqVO 创建请求VO
+     * @return 子表实体ID
+     */
+    private Long createNewChildEntity(ParentChildRelationshipSaveReqVO createReqVO) {
+        BusinessEntitySaveReqVO entityReqVO = new BusinessEntitySaveReqVO();
+        entityReqVO.setDisplayName(createReqVO.getChildTableName());
+        entityReqVO.setCode(createReqVO.getChildTableCode());
+        entityReqVO.setDescription(createReqVO.getChildTableDescription());
+        entityReqVO.setEntityType(1); // 自建表
+        entityReqVO.setDatasourceId(createReqVO.getDatasourceId());
+        entityReqVO.setAppId(createReqVO.getAppId());
+        entityReqVO.setRunMode(0); // 默认运行模式
+
+        return businessEntityService.createBusinessEntity(entityReqVO);
+    }
+
+    /**
+     * 获取实体的id字段ID
+     *
+     * @param entityId 实体ID
+     * @return id字段ID
+     */
+    private Long getEntityIdField(Long entityId) {
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        configStore.and("entity_id", entityId);
+        configStore.and("field_name", "id");
+        
+        MetadataEntityFieldDO idField = dataRepository.findOne(MetadataEntityFieldDO.class, configStore);
+        if (idField == null) {
+            throw new IllegalArgumentException("主表实体未找到id字段，实体ID: " + entityId);
+        }
+        
+        return idField.getId();
+    }
+
+    /**
+     * 获取或创建parent_id字段
+     *
+     * @param childEntityId 子表实体ID
+     * @return parent_id字段ID
+     */
+    private Long getOrCreateParentIdField(Long childEntityId) {
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        configStore.and("entity_id", childEntityId);
+        configStore.and("field_name", "parent_id");
+        
+        MetadataEntityFieldDO parentIdField = dataRepository.findOne(MetadataEntityFieldDO.class, configStore);
+        if (parentIdField != null) {
+            return parentIdField.getId();
+        }
+
+        // TODO: 如果parent_id字段不存在，需要创建该字段
+        // 这里需要调用字段创建服务来创建parent_id字段
+        // 暂时抛出异常，提示用户手动创建
+        throw new IllegalArgumentException("子表实体未找到parent_id字段，请先为子表添加parent_id字段，实体ID: " + childEntityId);
     }
 
 } 

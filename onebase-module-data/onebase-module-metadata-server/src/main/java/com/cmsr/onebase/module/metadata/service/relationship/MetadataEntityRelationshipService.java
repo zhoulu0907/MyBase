@@ -5,6 +5,8 @@ import com.cmsr.onebase.module.metadata.controller.admin.relationship.vo.Cascade
 import com.cmsr.onebase.module.metadata.controller.admin.relationship.vo.EntityRelationshipPageReqVO;
 import com.cmsr.onebase.module.metadata.controller.admin.relationship.vo.EntityRelationshipRespVO;
 import com.cmsr.onebase.module.metadata.controller.admin.relationship.vo.EntityRelationshipSaveReqVO;
+import com.cmsr.onebase.module.metadata.controller.admin.relationship.vo.ParentChildRelationshipSaveReqVO;
+import com.cmsr.onebase.module.metadata.controller.admin.relationship.vo.ParentChildRelationshipRespVO;
 import com.cmsr.onebase.module.metadata.controller.admin.relationship.vo.RelationshipTypeRespVO;
 import jakarta.validation.Valid;
 
@@ -77,5 +79,15 @@ public interface MetadataEntityRelationshipService {
      * @return 实体关系列表
      */
     List<EntityRelationshipRespVO> getRelationshipsByDatasourceId(Long datasourceId);
+
+    /**
+     * 创建主子关系
+     * 默认使用主表的id字段和子表的parent_id字段关联
+     * 默认关系类型为一对多，级联操作为新增、删除、查询
+     *
+     * @param createReqVO 创建信息
+     * @return 主子关系响应VO
+     */
+    ParentChildRelationshipRespVO createParentChildRelationship(@Valid ParentChildRelationshipSaveReqVO createReqVO);
 
 } 
