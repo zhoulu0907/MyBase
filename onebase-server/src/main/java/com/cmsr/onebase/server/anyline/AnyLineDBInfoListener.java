@@ -30,9 +30,10 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.HashSet;
 
-@Slf4j @Component() @SuppressWarnings("rawtypes") // AnyLine 框架的接口使用原始类型
+@Slf4j
+@Component()
+@SuppressWarnings("rawtypes") // AnyLine 框架的接口使用原始类型
 public class AnyLineDBInfoListener implements DMListener {
-
 
 
     // 需要忽略租户过滤的表名列表
@@ -78,8 +79,14 @@ public class AnyLineDBInfoListener implements DMListener {
      * @param columns 需要抛入的列 如果不指定  则根据实体属性解析
      * @return 如果返回false 则中断执行
      */
-    @Override public SWITCH prepareInsert(DataRuntime runtime, String random, int batch, Table dest, Object obj,
-        ConfigStore configs, List<String> columns) {
+    @Override
+    public SWITCH prepareInsert(DataRuntime runtime, String random, int batch, Table dest, Object obj,
+                                ConfigStore configs, List<String> columns) {
+        // 检查是否是非系统数据源，如果是则跳过添加条件
+        if (!isSystemDataSource(runtime)) {
+            log.info("prepareQuery--------------> 检测到非系统数据源，跳过添加租户和软删除条件，数据源: {}", getDataSourceKey(runtime));
+            return SWITCH.CONTINUE;
+        }
         // 加入租户标志
         injectTenantIdToObject(obj);
 
@@ -89,9 +96,9 @@ public class AnyLineDBInfoListener implements DMListener {
         // 加入创建时间和创建人等参数
         if (Objects.nonNull(obj) && obj instanceof BaseDO baseDO) {
             // 设置雪花ID
-            if(baseDO.getId() == null) {
+            if (baseDO.getId() == null) {
                 baseDO.setId(SnowflakeId.nextId());
-                log.info("anyline global prepareInsert ---------> snow id:{}",baseDO.getId());
+                log.info("anyline global prepareInsert ---------> snow id:{}", baseDO.getId());
             }
 
             // 创建时间为空，则以当前时间为插入时间
@@ -128,21 +135,21 @@ public class AnyLineDBInfoListener implements DMListener {
      * @param conditions 查询条件
      * @return 如果返回false 则中断执行
      */
-    @Override public SWITCH prepareQuery(DataRuntime runtime, String random, RunPrepare prepare, ConfigStore configs,
-        String... conditions) {
-
-        // 检查是否有表名，如果没有表名则跳过添加条件
-        if (prepare == null || prepare.getTableName() == null || prepare.getTableName().trim().isEmpty()) {
-            log.info("prepareQuery--------------> 没有表名，跳过添加租户和软删除条件");
-            return SWITCH.CONTINUE;
-        }
-        
+    @Override
+    public SWITCH prepareQuery(DataRuntime runtime, String random, RunPrepare prepare, ConfigStore configs,
+                               String... conditions) {
         // 检查是否是非系统数据源，如果是则跳过添加条件
         if (!isSystemDataSource(runtime)) {
             log.info("prepareQuery--------------> 检测到非系统数据源，跳过添加租户和软删除条件，数据源: {}", getDataSourceKey(runtime));
             return SWITCH.CONTINUE;
         }
-        
+        // 检查是否有表名，如果没有表名则跳过添加条件
+        if (prepare == null || prepare.getTableName() == null || prepare.getTableName().trim().isEmpty()) {
+            log.info("prepareQuery--------------> 没有表名，跳过添加租户和软删除条件");
+            return SWITCH.CONTINUE;
+        }
+
+
         // 检查是否是简单的测试查询，如果是则跳过添加条件
         if (isSimpleTestQuery(prepare)) {
             log.info("prepareQuery--------------> 检测到简单测试查询，跳过添加租户和软删除条件");
@@ -161,7 +168,7 @@ public class AnyLineDBInfoListener implements DMListener {
         }
         return SWITCH.CONTINUE;
     }
-    
+
     /**
      * 检查是否是简单的测试查询
      *
@@ -184,9 +191,9 @@ public class AnyLineDBInfoListener implements DMListener {
 
         // 检查是否是常见的测试查询
         return normalizedSql.equals("SELECT 1") ||
-               normalizedSql.equals("SELECT 1 FROM DUAL") ||
-               normalizedSql.matches("SELECT\\s+1\\s*") ||
-               normalizedSql.matches("SELECT\\s+1\\s+FROM\\s+DUAL\\s*");
+                normalizedSql.equals("SELECT 1 FROM DUAL") ||
+                normalizedSql.matches("SELECT\\s+1\\s*") ||
+                normalizedSql.matches("SELECT\\s+1\\s+FROM\\s+DUAL\\s*");
     }
 
     /**
@@ -199,15 +206,15 @@ public class AnyLineDBInfoListener implements DMListener {
         if (runtime == null) {
             return true; // 默认认为是系统数据源
         }
-        
+
         String dataSourceKey = getDataSourceKey(runtime);
-        
+
         // 系统默认数据源通常是 "default" 或为空
         // 临时数据源通常是 "temporary" 或包含临时标识
-        return dataSourceKey == null || 
-               "default".equals(dataSourceKey) || 
-               dataSourceKey.trim().isEmpty() ||
-               (!dataSourceKey.contains("temporary") && !dataSourceKey.contains("temp"));
+        return dataSourceKey == null ||
+                "default".equals(dataSourceKey) ||
+                dataSourceKey.trim().isEmpty() ||
+                (!dataSourceKey.contains("temporary") && !dataSourceKey.contains("temp"));
     }
 
     /**
@@ -220,7 +227,7 @@ public class AnyLineDBInfoListener implements DMListener {
         if (runtime == null) {
             return "default";
         }
-        
+
         try {
             // 尝试获取数据源key，这可能因AnyLine版本而有所不同
             String key = runtime.getKey();
@@ -276,10 +283,16 @@ public class AnyLineDBInfoListener implements DMListener {
      * @param configs 更新条件
      * @return 如果返回false 则中断执行
      */
-    @Override public SWITCH prepareUpdate(DataRuntime runtime, String random, int batch, Table dest, Object obj,
-        ConfigStore configs, List<String> columns) {
+    @Override
+    public SWITCH prepareUpdate(DataRuntime runtime, String random, int batch, Table dest, Object obj,
+                                ConfigStore configs, List<String> columns) {
+        // 检查是否是非系统数据源，如果是则跳过添加条件
+        if (!isSystemDataSource(runtime)) {
+            log.info("prepareQuery--------------> 检测到非系统数据源，跳过添加租户和软删除条件，数据源: {}", getDataSourceKey(runtime));
+            return SWITCH.CONTINUE;
+        }
         // 这里config可能为空，强制异常提前发现问题。
-        if(configs == null){
+        if (configs == null) {
             throw new BizException(StatusCode.UPDATE_WHERE_IS_NULL);
         }
         // 加入软删判断 (opt: 框架这里config可能为空)
@@ -292,7 +305,7 @@ public class AnyLineDBInfoListener implements DMListener {
         }
         // 加入更新时间和更新人
         if (Objects.nonNull(obj) && obj instanceof BaseDO) {
-            BaseDO baseDO = (BaseDO)obj;
+            BaseDO baseDO = (BaseDO) obj;
             baseDO.setUpdateTime(LocalDateTime.now());
             Long userId = WebFrameworkUtils.getLoginUserId();
             baseDO.setUpdater(userId);
@@ -302,11 +315,16 @@ public class AnyLineDBInfoListener implements DMListener {
 
     @Override
     public SWITCH prepareUpdate(DataRuntime runtime, String random, RunPrepare prepare, DataRow data,
-            ConfigStore configs) {
-           // 这里config可能为空，强制异常提前发现问题。
-        if(configs == null){
+                                ConfigStore configs) {
+        // 检查是否是非系统数据源，如果是则跳过添加条件
+        if (!isSystemDataSource(runtime)) {
+            log.info("prepareQuery--------------> 检测到非系统数据源，跳过添加租户和软删除条件，数据源: {}", getDataSourceKey(runtime));
+            return SWITCH.CONTINUE;
+        }
+        // 这里config可能为空，强制异常提前发现问题。
+        if (configs == null) {
             throw new BizException(StatusCode.UPDATE_WHERE_IS_NULL);
-        }     
+        }
         // 加入软删判断 (opt: 框架这里config可能为空)
         configs.and(Compare.EQUAL, BaseDO.DELETED, false);
         // 加入租户标志
@@ -323,6 +341,7 @@ public class AnyLineDBInfoListener implements DMListener {
         }
         return SWITCH.CONTINUE;
     }
+
     /**
      * 创建删除SQL前调用(根据Entity/DataRow),修改删除条件可以在这一步实现<br/>
      * 注意不是beforeDelete<br/>
@@ -331,13 +350,19 @@ public class AnyLineDBInfoListener implements DMListener {
      *
      * @param runtime 包含数据源(key)、适配器、JDBCTemplate、dao
      * @param random  用来标记同一组SQL、执行结构、参数等
-     * @param table    表
+     * @param table   表
      * @param obj     entity或DataRow
      * @param columns 删除条件的我
      * @return 如果返回false 则中断执行
      */
-    @Override public SWITCH prepareDelete(DataRuntime runtime, String random, int batch, Table table, Object obj,
-        ConfigStore configs, String... columns) {
+    @Override
+    public SWITCH prepareDelete(DataRuntime runtime, String random, int batch, Table table, Object obj,
+                                ConfigStore configs, String... columns) {
+        // 检查是否是非系统数据源，如果是则跳过添加条件
+        if (!isSystemDataSource(runtime)) {
+            log.info("prepareQuery--------------> 检测到非系统数据源，跳过添加租户和软删除条件，数据源: {}", getDataSourceKey(runtime));
+            return SWITCH.CONTINUE;
+        }
         injectTenantIdAndDeleteToQuery(table.getName(), configs);
         return SWITCH.CONTINUE;
     }
@@ -352,11 +377,16 @@ public class AnyLineDBInfoListener implements DMListener {
      * @param random  用来标记同一组SQL、执行结构、参数等
      * @param table   表
      * @param key     key
-     * @param values     obj
+     * @param values  obj
      * @return 如果返回false 则中断执行
      */
     public SWITCH prepareDelete(DataRuntime runtime, String random, int batch, Table table, ConfigStore configs,
-        String key, Object values) {
+                                String key, Object values) {
+        // 检查是否是非系统数据源，如果是则跳过添加条件
+        if (!isSystemDataSource(runtime)) {
+            log.info("prepareQuery--------------> 检测到非系统数据源，跳过添加租户和软删除条件，数据源: {}", getDataSourceKey(runtime));
+            return SWITCH.CONTINUE;
+        }
         injectTenantIdAndDeleteToQuery(table.getName(), configs);
         return SWITCH.CONTINUE;
     }
@@ -371,8 +401,14 @@ public class AnyLineDBInfoListener implements DMListener {
      * @param set     查询结果
      * @param millis  耗时(毫秒)
      */
-    @Override public SWITCH afterQuery(DataRuntime runtime, String random, Run run, boolean success, DataSet set,
-        long millis) {
+    @Override
+    public SWITCH afterQuery(DataRuntime runtime, String random, Run run, boolean success, DataSet set,
+                             long millis) {
+        // 检查是否是非系统数据源，如果是则跳过添加条件
+        if (!isSystemDataSource(runtime)) {
+            log.info("prepareQuery--------------> 检测到非系统数据源，跳过添加租户和软删除条件，数据源: {}", getDataSourceKey(runtime));
+            return SWITCH.CONTINUE;
+        }
         return SWITCH.CONTINUE;
     }
 
@@ -390,7 +426,7 @@ public class AnyLineDBInfoListener implements DMListener {
         }
     }
 
-     /**
+    /**
      * 向查询条件注入租户标志
      *
      * @param
@@ -404,8 +440,6 @@ public class AnyLineDBInfoListener implements DMListener {
         // 加入软删判断
         configs.and(Compare.EQUAL, BaseDO.DELETED, false);
     }
-
-
 
 
 }
