@@ -30,13 +30,13 @@ public class PageSetController {
     @Resource
     private PageSetService pageSetService;
 
-    @GetMapping("/pageset_id")
-    @Operation(summary = "获取页面集id")
-    public CommonResult<Long> getPageSetID(@RequestParam Long menuId) {
+    @GetMapping("/code")
+    @Operation(summary = "获取页面集编码")
+    public CommonResult<String> getPageSetCode(@RequestParam Long menuId) {
 
-        Long pageSetID = pageSetService.getPageSetID(menuId);
+        String pageSetCode = pageSetService.getPageSetCode(menuId);
 
-        return CommonResult.success(pageSetID);
+        return CommonResult.success(pageSetCode);
     }
 
     @PostMapping("/create")

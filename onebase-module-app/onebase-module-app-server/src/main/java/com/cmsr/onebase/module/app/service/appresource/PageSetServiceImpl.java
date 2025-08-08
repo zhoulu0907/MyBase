@@ -65,9 +65,9 @@ public class PageSetServiceImpl implements PageSetService {
     private AppPageRefRouterRepository appPageRefRouterDataRepository;
 
     @Override
-    public Long getPageSetID(Long menuID) {
+    public String getPageSetCode(Long menuID) {
         PageSetDO pageSetDO = pageSetDataRepository.findPageSetByMenuId(menuID);
-        return pageSetDO.getId();
+        return pageSetDO.getPageSetCode();
     }
 
     @Override
