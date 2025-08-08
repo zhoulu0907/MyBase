@@ -191,7 +191,7 @@ public class UserController {
 
     @GetMapping("/simple-list")
     @Operation(summary = "获取用户精简信息列表", description = "只包含被开启的用户，主要用于前端的下拉选项")
-    public CommonResult<List<UserSimpleRespVO>> getSimpleUserList() {
+    public CommonResult<List<UserSimpleRespVO>> getSximpleUserList() {
         List<AdminUserDO> list = userService.getUserListByStatus(CommonStatusEnum.ENABLE.getStatus());
         // 拼接数据
         Map<Long, DeptDO> deptMap = deptService.getDeptMap(
