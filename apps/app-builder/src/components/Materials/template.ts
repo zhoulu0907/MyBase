@@ -1,9 +1,52 @@
 import {
-  FORM_COMPONENT_TYPES,
-  LAYOUT_COMPONENT_TYPES,
-  LIST_COMPONENT_TYPES,
-  SHOW_COMPONENT_TYPES
+    FORM_COMPONENT_TYPES,
+    LAYOUT_COMPONENT_TYPES,
+    LIST_COMPONENT_TYPES,
+    SHOW_COMPONENT_TYPES
 } from '@/constants/componentTypes';
+
+/**
+ * 组件 type 到 displayName 的静态映射
+ * 手动维护，确保与模板配置保持一致
+ */
+export const COMPONENT_TYPE_DISPLAY_NAME_MAP: Record<string, string> = {
+  // 布局组件
+  [LAYOUT_COMPONENT_TYPES.COLUMN_LAYOUT]: '分栏布局',
+
+  // 表单组件
+  [FORM_COMPONENT_TYPES.INPUT_TEXT]: '单行文本',
+  [FORM_COMPONENT_TYPES.INPUT_TEXTAREA]: '多行文本',
+  [FORM_COMPONENT_TYPES.INPUT_EMAIL]: '邮箱输入',
+  [FORM_COMPONENT_TYPES.INPUT_PHONE]: '手机号输入',
+  [FORM_COMPONENT_TYPES.INPUT_NUMBER]: '数字输入',
+  [FORM_COMPONENT_TYPES.DATE_PICKER]: '日期选择',
+  [FORM_COMPONENT_TYPES.DATE_TIME_PICKER]: '日期时间',
+  [FORM_COMPONENT_TYPES.TIME_PICKER]: '时间选择',
+  [FORM_COMPONENT_TYPES.SWITCH]: '开关',
+  [FORM_COMPONENT_TYPES.RADIO]: '单选框',
+  [FORM_COMPONENT_TYPES.CHECKBOX]: '复选框',
+  [FORM_COMPONENT_TYPES.SELECT_ONE]: '下拉单选',
+  [FORM_COMPONENT_TYPES.SELECT_MUTIPLE]: '下拉多选',
+  [FORM_COMPONENT_TYPES.USER_SELECT]: '人员选择',
+  [FORM_COMPONENT_TYPES.DEPT_SELECT]: '部门选择',
+  [FORM_COMPONENT_TYPES.FILE_UPLOAD]: '文件上传',
+  [FORM_COMPONENT_TYPES.IMG_UPLOAD]: '图片上传',
+  [FORM_COMPONENT_TYPES.AUTO_CODE]: '唯一编码',
+
+  // 列表组件
+  [LIST_COMPONENT_TYPES.TABLE]: '表格',
+  [LIST_COMPONENT_TYPES.CALENDAR]: '日历',
+  [LIST_COMPONENT_TYPES.TIMELINE]: '时间轴',
+  [LIST_COMPONENT_TYPES.COLLAPSE]: '看板',
+  [LIST_COMPONENT_TYPES.CAROUSEL]: '图片轮播',
+  [LIST_COMPONENT_TYPES.LIST]: '画布列表',
+
+  // 展示组件
+  [SHOW_COMPONENT_TYPES.INFO_NOTICE]: '信息公告',
+  [SHOW_COMPONENT_TYPES.TEXT]: '展示文本',
+  [SHOW_COMPONENT_TYPES.IMAGE]: '展示图片',
+  [SHOW_COMPONENT_TYPES.WEB_VIEW]: '网页组件'
+};
 
 const allTemplate = {
   base: [
@@ -21,7 +64,7 @@ const allTemplate = {
           type: LAYOUT_COMPONENT_TYPES.COLUMN_LAYOUT,
           h: 48,
           w: 68,
-          displayName: '分栏布局',
+          displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[LAYOUT_COMPONENT_TYPES.COLUMN_LAYOUT],
           icon: 'col_layout_cp.svg',
           category: 'base'
         }
@@ -34,7 +77,7 @@ const allTemplate = {
           type: FORM_COMPONENT_TYPES.INPUT_TEXT,
           h: 48,
           w: 68,
-          displayName: '单行文本',
+          displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.INPUT_TEXT],
           icon: 'text_input_cp.svg',
           category: 'base'
         },
@@ -42,7 +85,7 @@ const allTemplate = {
           type: FORM_COMPONENT_TYPES.INPUT_TEXTAREA,
           h: 48,
           w: 68,
-          displayName: '多行文本',
+          displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.INPUT_TEXTAREA],
           icon: 'textarea_input_cp.svg',
           category: 'base'
         },
@@ -50,7 +93,7 @@ const allTemplate = {
           type: FORM_COMPONENT_TYPES.INPUT_EMAIL,
           h: 48,
           w: 68,
-          displayName: '邮箱输入',
+          displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.INPUT_EMAIL],
           icon: 'email_input_cp.svg',
           category: 'base'
         },
@@ -58,7 +101,7 @@ const allTemplate = {
           type: FORM_COMPONENT_TYPES.INPUT_PHONE,
           h: 48,
           w: 68,
-          displayName: '手机号输入',
+          displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.INPUT_PHONE],
           icon: 'phone_input_cp.svg',
           category: 'base'
         },
@@ -66,7 +109,7 @@ const allTemplate = {
           type: FORM_COMPONENT_TYPES.INPUT_NUMBER,
           h: 48,
           w: 68,
-          displayName: '数字输入',
+          displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.INPUT_NUMBER],
           icon: 'number_input_cp.svg',
           category: 'base'
         },
@@ -82,7 +125,7 @@ const allTemplate = {
           type: FORM_COMPONENT_TYPES.DATE_PICKER,
           h: 48,
           w: 68,
-          displayName: '日期选择',
+          displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.DATE_PICKER],
           icon: 'date_picker_cp.svg',
           category: 'base'
         },
@@ -90,7 +133,7 @@ const allTemplate = {
           type: FORM_COMPONENT_TYPES.DATE_TIME_PICKER,
           h: 48,
           w: 68,
-          displayName: '日期时间',
+          displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.DATE_TIME_PICKER],
           icon: 'time_picker_cp.svg',
           category: 'base'
         },
@@ -98,7 +141,7 @@ const allTemplate = {
           type: FORM_COMPONENT_TYPES.TIME_PICKER,
           h: 48,
           w: 68,
-          displayName: '时间选择',
+          displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.TIME_PICKER],
           icon: 'time_picker_cp.svg',
           category: 'base'
         },
@@ -106,7 +149,7 @@ const allTemplate = {
           type: FORM_COMPONENT_TYPES.SWITCH,
           h: 48,
           w: 68,
-          displayName: '开关',
+          displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.SWITCH],
           icon: 'switch_cp.svg',
           category: 'base'
         },
@@ -114,7 +157,7 @@ const allTemplate = {
           type: FORM_COMPONENT_TYPES.RADIO,
           h: 48,
           w: 68,
-          displayName: '单选框',
+          displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.RADIO],
           icon: 'radio_cp.svg',
           category: 'base'
         },
@@ -122,7 +165,7 @@ const allTemplate = {
           type: FORM_COMPONENT_TYPES.CHECKBOX,
           h: 48,
           w: 68,
-          displayName: '复选框',
+          displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.CHECKBOX],
           icon: 'checkbox_cp.svg',
           category: 'base'
         },
@@ -130,7 +173,7 @@ const allTemplate = {
           type: FORM_COMPONENT_TYPES.SELECT_ONE,
           h: 48,
           w: 68,
-          displayName: '下拉单选',
+          displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.SELECT_ONE],
           icon: 'select_one_cp.svg',
           category: 'base'
         },
@@ -138,7 +181,7 @@ const allTemplate = {
           type: FORM_COMPONENT_TYPES.SELECT_MUTIPLE,
           h: 48,
           w: 68,
-          displayName: '下拉多选',
+          displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.SELECT_MUTIPLE],
           icon: 'select_mutiple_cp.svg',
           category: 'base'
         },
@@ -146,7 +189,7 @@ const allTemplate = {
           type: FORM_COMPONENT_TYPES.USER_SELECT,
           h: 48,
           w: 68,
-          displayName: '人员选择',
+          displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.USER_SELECT],
           icon: 'user_select_cp.svg',
           category: 'base'
         },
@@ -154,7 +197,7 @@ const allTemplate = {
           type: FORM_COMPONENT_TYPES.DEPT_SELECT,
           h: 48,
           w: 68,
-          displayName: '部门选择',
+          displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.DEPT_SELECT],
           icon: 'dept_select_cp.svg',
           category: 'base'
         },
@@ -162,7 +205,7 @@ const allTemplate = {
           type: FORM_COMPONENT_TYPES.FILE_UPLOAD,
           h: 48,
           w: 68,
-          displayName: '文件上传',
+          displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.FILE_UPLOAD],
           icon: 'upload_cp.svg',
           category: 'base'
         },
@@ -170,7 +213,7 @@ const allTemplate = {
           type: FORM_COMPONENT_TYPES.IMG_UPLOAD,
           h: 48,
           w: 68,
-          displayName: '图片上传',
+          displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.IMG_UPLOAD],
           icon: 'upload_cp.svg',
           category: 'base'
         },
@@ -178,7 +221,7 @@ const allTemplate = {
           type: FORM_COMPONENT_TYPES.AUTO_CODE,
           h: 48,
           w: 68,
-          displayName: '唯一编码',
+          displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.AUTO_CODE],
           icon: 'readonly_cp.svg',
           category: 'base'
         }
@@ -191,7 +234,7 @@ const allTemplate = {
           type: LIST_COMPONENT_TYPES.TABLE,
           h: 48,
           w: 68,
-          displayName: '表格',
+          displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[LIST_COMPONENT_TYPES.TABLE],
           icon: 'table_cp.svg',
           category: 'base'
         },
@@ -199,7 +242,7 @@ const allTemplate = {
           type: LIST_COMPONENT_TYPES.CALENDAR,
           h: 48,
           w: 68,
-          displayName: '日历',
+          displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[LIST_COMPONENT_TYPES.CALENDAR],
           icon: 'calendar_cp.svg',
           category: 'base'
         },
@@ -207,7 +250,7 @@ const allTemplate = {
           type: LIST_COMPONENT_TYPES.TIMELINE,
           h: 48,
           w: 68,
-          displayName: '时间轴',
+          displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[LIST_COMPONENT_TYPES.TIMELINE],
           icon: 'timeline_cp.svg',
           category: 'base'
         },
@@ -223,7 +266,7 @@ const allTemplate = {
           type: LIST_COMPONENT_TYPES.COLLAPSE,
           h: 48,
           w: 68,
-          displayName: '看板',
+          displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[LIST_COMPONENT_TYPES.COLLAPSE],
           icon: 'kanban_cp.svg',
           category: 'base'
         },
@@ -231,7 +274,7 @@ const allTemplate = {
           type: LIST_COMPONENT_TYPES.CAROUSEL,
           h: 48,
           w: 68,
-          displayName: '图片轮播',
+          displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[LIST_COMPONENT_TYPES.CAROUSEL],
           icon: 'display_image_cp.svg',
           category: 'base'
         },
@@ -239,7 +282,7 @@ const allTemplate = {
           type: LIST_COMPONENT_TYPES.LIST,
           h: 48,
           w: 68,
-          displayName: '画布列表',
+          displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[LIST_COMPONENT_TYPES.LIST],
           icon: 'canvas_list_cp.svg',
           category: 'base'
         }
@@ -261,7 +304,7 @@ const allTemplate = {
           type: SHOW_COMPONENT_TYPES.INFO_NOTICE,
           h: 48,
           w: 68,
-          displayName: '信息公告',
+          displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[SHOW_COMPONENT_TYPES.INFO_NOTICE],
           icon: 'info_notice_cp.svg',
           category: 'base'
         },
@@ -269,7 +312,7 @@ const allTemplate = {
           type: SHOW_COMPONENT_TYPES.TEXT,
           h: 48,
           w: 68,
-          displayName: '展示文本',
+          displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[SHOW_COMPONENT_TYPES.TEXT],
           icon: 'display_text_cp.svg',
           category: 'base'
         },
@@ -277,7 +320,7 @@ const allTemplate = {
           type: SHOW_COMPONENT_TYPES.IMAGE,
           h: 48,
           w: 68,
-          displayName: '展示图片',
+          displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[SHOW_COMPONENT_TYPES.IMAGE],
           icon: 'display_image_cp.svg',
           category: 'base'
         },
@@ -285,7 +328,7 @@ const allTemplate = {
           type: SHOW_COMPONENT_TYPES.WEB_VIEW,
           h: 48,
           w: 68,
-          displayName: '网页组件',
+          displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[SHOW_COMPONENT_TYPES.WEB_VIEW],
           icon: 'web_component_cp.svg',
           category: 'base'
         }
@@ -294,24 +337,6 @@ const allTemplate = {
   ]
 };
 
-/**
- * 获取所有组件的 type 类型数组
- * @returns {string[]} 组件 type 数组
- */
-export function getAllComponentTypes(): string[] {
-  const types: string[] = [];
-  if (allTemplate && Array.isArray(allTemplate.base)) {
-    allTemplate.base.forEach((category) => {
-      if (Array.isArray(category.items)) {
-        category.items.forEach((item) => {
-          if (item && typeof item.type === 'string') {
-            types.push(item.type);
-          }
-        });
-      }
-    });
-  }
-  return types;
-}
+
 
 export default allTemplate;

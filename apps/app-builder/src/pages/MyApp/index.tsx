@@ -7,12 +7,12 @@ import { Avatar, Button, Form, Input, Message, Modal, Pagination, Select, Spin, 
 import { IconPlusCircle, IconSearch } from '@arco-design/web-react/icon';
 import {
   createApplication,
-  listApplication,
   deleteApplication,
+  listApplication,
   type Application,
   type CreateApplicationReq,
-  type ListApplicationReq,
-  type DeleteApplicationReq
+  type DeleteApplicationReq,
+  type ListApplicationReq
 } from '@onebase/app';
 import dayjs from 'dayjs';
 import { debounce } from 'lodash-es';
@@ -186,6 +186,15 @@ const MyAppPage: React.FC = () => {
     }
   };
 
+  const nagivateToDataFactory = (appId: string) => {
+    setCurAppId(appId);
+    const newWindow = window.open('', '_blank');
+    if (newWindow) {
+      const href = `${window.location.origin}/#/onebase/create-app/data-factory?appId=${appId}`;
+      newWindow.location.href = href;
+    }
+  };
+
   return (
     <div className={styles.myAppPage}>
       <div className={styles.myAppPageHeader}>
@@ -267,7 +276,7 @@ const MyAppPage: React.FC = () => {
                 className={styles.myAppCard}
                 key={index}
                 onClick={() => {
-                  nagivateToAppPage(item.id);
+                  nagivateToDataFactory(item.id);
                 }}
               >
                 <div className={styles.myAppCardHeader}>

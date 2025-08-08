@@ -7,7 +7,7 @@ export interface ApplicationMenu {
     parentId?: string;
     menuCode: string;
     menuSort: number;
-    menuType: string;
+    menuType: number;
     menuName: string;
     menuIcon: string;
     isVisible: boolean;
@@ -28,7 +28,7 @@ export const RootParentPage = {
     id: "0",
     menuCode: "",
     menuSort: 0,
-    menuType: "",
+    menuType: MenuType.GROUP,
     menuName: "根目录",
     menuIcon: "",
     isVisible: true,

@@ -1,0 +1,32 @@
+.myMenuItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  height: 25px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+
+  .menuName {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .dropdownContainer {
+    opacity: 0;
+    transition: opacity 0.1s ease;
+    cursor: pointer;
+    margin-right: 10px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+  }
+
+  &:hover {
+    .dropdownContainer {
+      opacity: 1;
+    }
+  }
+}
