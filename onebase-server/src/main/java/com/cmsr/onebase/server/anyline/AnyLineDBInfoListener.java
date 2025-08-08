@@ -136,6 +136,13 @@ public class AnyLineDBInfoListener implements DMListener {
             log.info("prepareQuery--------------> 没有表名，跳过添加租户和软删除条件");
             return SWITCH.CONTINUE;
         }
+        
+        // 检查是否是非系统数据源，如果是则跳过添加条件
+        if (!isSystemDataSource(runtime)) {
+            log.info("prepareQuery--------------> 检测到非系统数据源，跳过添加租户和软删除条件，数据源: {}", getDataSourceKey(runtime));
+            return SWITCH.CONTINUE;
+        }
+        
         // 检查是否是简单的测试查询，如果是则跳过添加条件
         if (isSimpleTestQuery(prepare)) {
             log.info("prepareQuery--------------> 检测到简单测试查询，跳过添加租户和软删除条件");
@@ -180,6 +187,48 @@ public class AnyLineDBInfoListener implements DMListener {
                normalizedSql.equals("SELECT 1 FROM DUAL") ||
                normalizedSql.matches("SELECT\\s+1\\s*") ||
                normalizedSql.matches("SELECT\\s+1\\s+FROM\\s+DUAL\\s*");
+    }
+
+    /**
+     * 检查是否是系统数据源
+     *
+     * @param runtime DataRuntime对象
+     * @return 如果是系统数据源则返回true
+     */
+    private boolean isSystemDataSource(DataRuntime runtime) {
+        if (runtime == null) {
+            return true; // 默认认为是系统数据源
+        }
+        
+        String dataSourceKey = getDataSourceKey(runtime);
+        
+        // 系统默认数据源通常是 "default" 或为空
+        // 临时数据源通常是 "temporary" 或包含临时标识
+        return dataSourceKey == null || 
+               "default".equals(dataSourceKey) || 
+               dataSourceKey.trim().isEmpty() ||
+               (!dataSourceKey.contains("temporary") && !dataSourceKey.contains("temp"));
+    }
+
+    /**
+     * 获取数据源标识
+     *
+     * @param runtime DataRuntime对象
+     * @return 数据源标识字符串
+     */
+    private String getDataSourceKey(DataRuntime runtime) {
+        if (runtime == null) {
+            return "default";
+        }
+        
+        try {
+            // 尝试获取数据源key，这可能因AnyLine版本而有所不同
+            String key = runtime.getKey();
+            return key != null ? key : "default";
+        } catch (Exception e) {
+            log.debug("获取数据源key失败: {}", e.getMessage());
+            return "default";
+        }
     }
 
     /**
