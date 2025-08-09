@@ -27,7 +27,7 @@ public class ComponentDTO {
     /**
      * 父级ID
      */
-    private Long parentId;
+    private String parentCode;
 
     /**
      * 块索引
