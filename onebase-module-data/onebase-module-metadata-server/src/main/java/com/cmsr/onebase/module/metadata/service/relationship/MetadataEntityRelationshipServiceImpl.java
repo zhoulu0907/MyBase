@@ -533,11 +533,11 @@ public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRela
                 MetadataEntityRelationshipDO.class, configStore);
 
         // 检查是否存在以该实体为目标实体的关系（即该实体作为子表）
-        configStore.clear();
-        configStore.and("target_entity_id", entityId);
+        DefaultConfigStore targetConfigStore = new DefaultConfigStore();
+        targetConfigStore.and("target_entity_id", entityId);
         
         List<MetadataEntityRelationshipDO> asTargetRelationships = dataRepository.findAllByConfig(
-                MetadataEntityRelationshipDO.class, configStore);
+                MetadataEntityRelationshipDO.class, targetConfigStore);
 
         if (!asSourceRelationships.isEmpty() && asTargetRelationships.isEmpty()) {
             return "主表";
