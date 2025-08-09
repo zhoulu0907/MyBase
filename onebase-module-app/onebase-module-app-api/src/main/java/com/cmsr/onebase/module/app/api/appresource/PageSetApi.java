@@ -18,14 +18,19 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @FeignClient(name = ApiConstants.NAME)
 @Tag(name = "RPC 服务 - 页面集合")
 
-public interface PageSetApi{
+public interface PageSetApi {
 
     String PREFIX = ApiConstants.PREFIX + "/page_set";
 
     @GetMapping(PREFIX + "/get")
     @Operation(summary = "通过 code 查询pageSet")
     @Parameter(name = "code", description = "pageset code", example = "xxx", required = true)
-    CommonResult<PageSetRespDTO> getUser(@RequestParam("code") String code);
+    CommonResult<PageSetRespDTO> getPageSet(@RequestParam("code") String code);
+
+    @GetMapping(PREFIX + "/get-appid")
+    @Operation(summary = "通过 pageSetCode 查询 appId ")
+    @Parameter(name = "code", description = "code", example = "xxx", required = true)
+    CommonResult<Long> getAppId(@RequestParam("code") String code);
 
     @PostMapping(PREFIX + "/create")
     @Operation(summary = "创建pageSet")
