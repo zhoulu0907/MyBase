@@ -4,6 +4,7 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.BusinessEntityPageReqVO;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.BusinessEntitySaveReqVO;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.ERDiagramRespVO;
+import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.SimpleEntityRespVO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataBusinessEntityDO;
 import jakarta.validation.Valid;
 
@@ -82,5 +83,14 @@ public interface MetadataBusinessEntityService {
      * @return ER图数据
      */
     ERDiagramRespVO getERDiagramByDatasourceId(Long datasourceId);
+
+    /**
+     * 根据应用ID获取实体列表（仅包含ID和名称）
+     * 首先根据appId查询datasourceId，如果有多个datasourceId就选默认第一个
+     *
+     * @param appId 应用ID
+     * @return 简单实体信息列表
+     */
+    List<SimpleEntityRespVO> getSimpleEntityListByAppId(Long appId);
 
 }

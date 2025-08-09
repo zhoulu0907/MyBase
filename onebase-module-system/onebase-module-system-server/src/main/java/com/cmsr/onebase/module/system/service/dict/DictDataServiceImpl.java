@@ -7,8 +7,9 @@ import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
+import com.cmsr.onebase.module.system.controller.admin.dict.vo.data.DictDataInsertReqVO;
 import com.cmsr.onebase.module.system.controller.admin.dict.vo.data.DictDataPageReqVO;
-import com.cmsr.onebase.module.system.controller.admin.dict.vo.data.DictDataSaveReqVO;
+import com.cmsr.onebase.module.system.controller.admin.dict.vo.data.DictDataUpdateReqVO;
 import com.cmsr.onebase.module.system.dal.database.DictDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.dict.DictDataDO;
 import com.cmsr.onebase.module.system.dal.dataobject.dict.DictTypeDO;
@@ -73,7 +74,7 @@ public class DictDataServiceImpl implements DictDataService {
     }
 
     @Override
-    public Long createDictData(DictDataSaveReqVO createReqVO) {
+    public Long createDictData(DictDataInsertReqVO createReqVO) {
         // 校验字典类型有效
         validateDictTypeExists(createReqVO.getDictType());
         // 校验字典数据的值的唯一性
@@ -86,7 +87,7 @@ public class DictDataServiceImpl implements DictDataService {
     }
 
     @Override
-    public void updateDictData(DictDataSaveReqVO updateReqVO) {
+    public void updateDictData(DictDataUpdateReqVO updateReqVO) {
         // 校验自己存在
         validateDictDataExists(updateReqVO.getId());
         // 校验字典类型有效
@@ -96,6 +97,18 @@ public class DictDataServiceImpl implements DictDataService {
 
         // 更新字典类型
         DictDataDO updateObj = BeanUtils.toBean(updateReqVO, DictDataDO.class);
+        dictDataRepository.update(updateObj);
+    }
+
+    @Override
+    public void updateDictDataStatus(Long id, Integer status) {
+        // 校验字典数据存在
+        validateDictDataExists(id);
+
+        // 更新状态
+        DictDataDO updateObj = new DictDataDO();
+        updateObj.setId(id);
+        updateObj.setStatus(status);
         dictDataRepository.update(updateObj);
     }
 

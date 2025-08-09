@@ -11,12 +11,18 @@ import com.cmsr.onebase.module.metadata.controller.admin.relationship.vo.EntityR
 import com.cmsr.onebase.module.metadata.controller.admin.relationship.vo.ParentChildRelationshipSaveReqVO;
 import com.cmsr.onebase.module.metadata.controller.admin.relationship.vo.ParentChildRelationshipRespVO;
 import com.cmsr.onebase.module.metadata.controller.admin.relationship.vo.RelationshipTypeRespVO;
+import com.cmsr.onebase.module.metadata.controller.admin.relationship.vo.EntityWithChildrenRespVO;
+import com.cmsr.onebase.module.metadata.controller.admin.relationship.vo.ChildEntityInfoRespVO;
+import com.cmsr.onebase.module.metadata.controller.admin.relationship.vo.AppEntitiesRespVO;
+import com.cmsr.onebase.module.metadata.controller.admin.relationship.vo.EntityInfoRespVO;
+import com.cmsr.onebase.module.metadata.controller.admin.relationship.vo.EntityFieldInfoRespVO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataBusinessEntityDO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.relationship.MetadataEntityRelationshipDO;
 import com.cmsr.onebase.module.metadata.enums.CascadeTypeEnum;
 import com.cmsr.onebase.module.metadata.enums.RelationshipTypeEnum;
 import com.cmsr.onebase.module.metadata.service.entity.MetadataBusinessEntityService;
+import com.cmsr.onebase.module.metadata.service.entity.MetadataEntityFieldService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -49,6 +55,9 @@ public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRela
 
     @Resource
     private MetadataBusinessEntityService businessEntityService;
+
+    @Resource
+    private MetadataEntityFieldService entityFieldService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -394,6 +403,184 @@ public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRela
         // 这里需要调用字段创建服务来创建parent_id字段
         // 暂时抛出异常，提示用户手动创建
         throw new IllegalArgumentException("子表实体未找到parent_id字段，请先为子表添加parent_id字段，实体ID: " + childEntityId);
+    }
+
+    @Override
+    public EntityWithChildrenRespVO getEntityWithChildrenById(Long entityId) {
+        // 1. 获取实体基本信息
+        MetadataBusinessEntityDO entity = businessEntityService.getBusinessEntity(entityId);
+        if (entity == null) {
+            throw new IllegalArgumentException("实体不存在，实体ID: " + entityId);
+        }
+
+        // 2. 创建响应VO
+        EntityWithChildrenRespVO result = new EntityWithChildrenRespVO();
+        result.setEntityId(entity.getId());
+        result.setEntityName(entity.getDisplayName());
+        result.setEntityCode(entity.getCode());
+
+        // 3. 查询以该实体为源实体的所有关系（即该实体作为父表的关系）
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        configStore.and("source_entity_id", entityId);
+        configStore.order("create_time", Order.TYPE.DESC);
+
+        List<MetadataEntityRelationshipDO> relationships = dataRepository.findAllByConfig(
+                MetadataEntityRelationshipDO.class, configStore);
+
+        // 4. 转换为子表信息列表
+        List<ChildEntityInfoRespVO> childEntities = relationships.stream()
+                .map(this::convertToChildEntityInfo)
+                .toList();
+
+        result.setChildEntities(childEntities);
+        
+        log.info("查询实体及其关联子表成功，实体ID: {}, 关联子表数量: {}", entityId, childEntities.size());
+        return result;
+    }
+
+    /**
+     * 转换关系DO为子表信息
+     *
+     * @param relationshipDO 关系DO
+     * @return 子表信息
+     */
+    private ChildEntityInfoRespVO convertToChildEntityInfo(MetadataEntityRelationshipDO relationshipDO) {
+        ChildEntityInfoRespVO childInfo = new ChildEntityInfoRespVO();
+        
+        childInfo.setChildEntityId(relationshipDO.getTargetEntityId());
+        childInfo.setRelationshipId(String.valueOf(relationshipDO.getId()));
+        childInfo.setRelationshipName(relationshipDO.getRelationName());
+        childInfo.setRelationshipType(relationshipDO.getRelationshipType());
+        
+        // 获取目标实体信息
+        MetadataBusinessEntityDO targetEntity = businessEntityService.getBusinessEntity(relationshipDO.getTargetEntityId());
+        if (targetEntity != null) {
+            childInfo.setChildEntityName(targetEntity.getDisplayName());
+            childInfo.setChildEntityCode(targetEntity.getCode());
+        }
+        
+        // 获取字段名称
+        childInfo.setSourceFieldName(getFieldNameById(relationshipDO.getSourceFieldId()));
+        childInfo.setTargetFieldName(getFieldNameById(relationshipDO.getTargetFieldId()));
+        
+        return childInfo;
+    }
+
+    @Override
+    public AppEntitiesRespVO getAppEntitiesWithFields(Long appId) {
+        log.info("开始查询应用实体及字段信息，应用ID: {}", appId);
+
+        // 1. 根据appId查询该应用下的所有实体
+        DefaultConfigStore entityConfigStore = new DefaultConfigStore();
+        entityConfigStore.and("app_id", appId);
+        entityConfigStore.order("create_time", Order.TYPE.ASC);
+
+        List<MetadataBusinessEntityDO> entities = dataRepository.findAllByConfig(
+                MetadataBusinessEntityDO.class, entityConfigStore);
+
+        if (entities.isEmpty()) {
+            log.info("应用下未找到任何实体，应用ID: {}", appId);
+            AppEntitiesRespVO result = new AppEntitiesRespVO();
+            result.setEntities(List.of());
+            return result;
+        }
+
+        // 2. 转换为响应VO
+        List<EntityInfoRespVO> entityInfoList = entities.stream()
+                .map(this::convertToEntityInfo)
+                .toList();
+
+        AppEntitiesRespVO result = new AppEntitiesRespVO();
+        result.setEntities(entityInfoList);
+
+        log.info("查询应用实体及字段信息完成，应用ID: {}, 实体数量: {}", appId, entityInfoList.size());
+        return result;
+    }
+
+    /**
+     * 转换实体DO为实体信息VO
+     *
+     * @param entityDO 实体DO
+     * @return 实体信息VO
+     */
+    private EntityInfoRespVO convertToEntityInfo(MetadataBusinessEntityDO entityDO) {
+        EntityInfoRespVO entityInfo = new EntityInfoRespVO();
+        entityInfo.setEntityID(String.valueOf(entityDO.getId()));
+        entityInfo.setEntityName(entityDO.getDisplayName());
+        
+        // 判断实体类型 - 查询是否存在以该实体为源实体的关系来判断是否为主表
+        entityInfo.setEntityType(determineEntityType(entityDO.getId()));
+
+        // 查询该实体的所有字段
+        List<EntityFieldInfoRespVO> fields = getEntityFields(entityDO.getId());
+        entityInfo.setFields(fields);
+
+        return entityInfo;
+    }
+
+    /**
+     * 判断实体类型（主表/子表）
+     *
+     * @param entityId 实体ID
+     * @return 实体类型
+     */
+    private String determineEntityType(Long entityId) {
+        // 检查是否存在以该实体为源实体的关系（即该实体作为主表）
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        configStore.and("source_entity_id", entityId);
+        
+        List<MetadataEntityRelationshipDO> asSourceRelationships = dataRepository.findAllByConfig(
+                MetadataEntityRelationshipDO.class, configStore);
+
+        // 检查是否存在以该实体为目标实体的关系（即该实体作为子表）
+        configStore.clear();
+        configStore.and("target_entity_id", entityId);
+        
+        List<MetadataEntityRelationshipDO> asTargetRelationships = dataRepository.findAllByConfig(
+                MetadataEntityRelationshipDO.class, configStore);
+
+        if (!asSourceRelationships.isEmpty() && asTargetRelationships.isEmpty()) {
+            return "主表";
+        } else if (asSourceRelationships.isEmpty() && !asTargetRelationships.isEmpty()) {
+            return "子表";
+        } else if (!asSourceRelationships.isEmpty() && !asTargetRelationships.isEmpty()) {
+            return "主子表";
+        } else {
+            return "独立表";
+        }
+    }
+
+    /**
+     * 获取实体的所有字段信息
+     *
+     * @param entityId 实体ID
+     * @return 字段信息列表
+     */
+    private List<EntityFieldInfoRespVO> getEntityFields(Long entityId) {
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        configStore.and("entity_id", entityId);
+        configStore.order("sort_no", Order.TYPE.ASC);
+
+        List<MetadataEntityFieldDO> fields = dataRepository.findAllByConfig(
+                MetadataEntityFieldDO.class, configStore);
+
+        return fields.stream()
+                .map(this::convertToFieldInfo)
+                .toList();
+    }
+
+    /**
+     * 转换字段DO为字段信息VO
+     *
+     * @param fieldDO 字段DO
+     * @return 字段信息VO
+     */
+    private EntityFieldInfoRespVO convertToFieldInfo(MetadataEntityFieldDO fieldDO) {
+        EntityFieldInfoRespVO fieldInfo = new EntityFieldInfoRespVO();
+        fieldInfo.setFieldID(String.valueOf(fieldDO.getId()));
+        fieldInfo.setFieldName(fieldDO.getFieldName());
+        fieldInfo.setFieldType(fieldDO.getFieldType());
+        return fieldInfo;
     }
 
 } 

@@ -1,8 +1,9 @@
 package com.cmsr.onebase.module.system.service.dict;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.module.system.controller.admin.dict.vo.data.DictDataInsertReqVO;
 import com.cmsr.onebase.module.system.controller.admin.dict.vo.data.DictDataPageReqVO;
-import com.cmsr.onebase.module.system.controller.admin.dict.vo.data.DictDataSaveReqVO;
+import com.cmsr.onebase.module.system.controller.admin.dict.vo.data.DictDataUpdateReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.dict.DictDataDO;
 import org.springframework.lang.Nullable;
 
@@ -22,14 +23,22 @@ public interface DictDataService {
      * @param createReqVO 字典数据信息
      * @return 字典数据编号
      */
-    Long createDictData(DictDataSaveReqVO createReqVO);
+    Long createDictData(DictDataInsertReqVO createReqVO);
 
     /**
      * 更新字典数据
      *
      * @param updateReqVO 字典数据信息
      */
-    void updateDictData(DictDataSaveReqVO updateReqVO);
+    void updateDictData(DictDataUpdateReqVO updateReqVO);
+
+    /**
+     * 更新字典数据状态
+     *
+     * @param id 字典数据编号
+     * @param status 状态
+     */
+    void updateDictDataStatus(Long id, Integer status);
 
     /**
      * 删除字典数据
