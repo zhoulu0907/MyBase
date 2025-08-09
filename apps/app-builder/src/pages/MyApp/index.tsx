@@ -138,6 +138,8 @@ const MyAppPage: React.FC = () => {
         .then(() => {
           setCreateVisible(false);
           Message.success('应用创建成功');
+          getApplicationList();
+
           // Message.success({
           //   content: '应用创建成功，3s后跳转...',
           //   duration: 3000,

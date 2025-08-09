@@ -1,19 +1,7 @@
 import CreateGroupIcon from '@/assets/images/create_group.svg';
 import CreatePageIcon from '@/assets/images/create_page.svg';
 import { useAppStore, useBasicEditorStore } from '@/store';
-import {
-  Button,
-  Dropdown,
-  Form,
-  Input,
-  Layout,
-  Menu,
-  Message,
-  Modal,
-  Select,
-  Tree,
-  TreeSelect
-} from '@arco-design/web-react';
+import { Button, Dropdown, Form, Input, Layout, Menu, Message, Tree } from '@arco-design/web-react';
 import { IconPlus, IconSearch } from '@arco-design/web-react/icon';
 import {
   copyApplicationMenu,
@@ -37,6 +25,9 @@ import { useEffect, useState, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { EDITOR_TYPES } from '../Editor/components/const';
+import CopyModal from './components/Modals/CopyModal';
+import CreateModal from './components/Modals/CreateModal';
+import RenameModal from './components/Modals/RenameModal';
 import MyMenuItem from './components/MyMenuItem';
 import styles from './index.module.less';
 
@@ -66,33 +57,30 @@ const PageManagerPage: FC = () => {
 
   const { curAppId } = useAppStore();
 
-  const [form] = Form.useForm();
+  const [createForm] = Form.useForm();
   const [renameForm] = Form.useForm();
   const [copyForm] = Form.useForm();
+  // 创建弹窗
+  const [visibleCreateForm, setVisibleCreateForm] = useState('');
+  // 重命名弹窗
+  const [visibleRenameForm, setVisibleRenameForm] = useState(false);
+  // 复制弹窗
+  const [visibleCopyForm, setVisibleCopyForm] = useState(false);
 
   const [title, setTitle] = useState('');
   const pageTypeOptions = [{ label: '普通表单', value: PageType.NORMAL }];
 
-  const [menuList, setMenuList] = useState<ApplicationMenu[]>([]);
   const [treeData, setTreeData] = useState<TreeNode[]>([]);
-
-  // 创建弹窗
-  const [visibleCreateForm, setVisibleCreateForm] = useState('');
 
   const [curEditMenuID, setCurEditMenuID] = useState<string>();
   const [curEditMenuName, setCurEditMenuName] = useState<string>();
   const [activeMenu, setActiveMenu] = useState<ApplicationMenu>();
   const [parentPageOptions, setParentPageOptions] = useState<ApplicationMenu[]>([RootParentPage]);
+
   const initTreeItemWidth = 155;
   const cutTreeItemWidth = 25;
 
   const { clearIsEditMode } = useBasicEditorStore();
-
-  // 重命名弹窗
-  const [visibleRenameForm, setVisibleRenameForm] = useState(false);
-
-  // 复制弹窗
-  const [visibleCopyForm, setVisibleCopyForm] = useState(false);
 
   useEffect(() => {
     if (curAppId !== '') {
@@ -109,7 +97,7 @@ const PageManagerPage: FC = () => {
    * @returns 处理后的菜单项数组
    */
   const addParentIdToChildren = (menuItems: ApplicationMenu[], parentId?: string): ApplicationMenu[] => {
-    // 只保留 menuType 为 2（分组）的菜单项
+    // 只保留 menuType 为 2（分组）的菜单项用于生成父级页面选择下拉框
     return menuItems
       .filter((menu) => menu.menuType == MenuType.GROUP)
       .map((menu) => ({
@@ -154,12 +142,10 @@ const PageManagerPage: FC = () => {
 
     // 为每个children元素补充parentId字段
     const processedRes = addParentIdToChildren(res, RootParentPage.id);
+    setParentPageOptions([{ ...RootParentPage, children: processedRes }]);
 
     const treeData = convertMenuToTreeData(res, initTreeItemWidth);
-
     setTreeData(treeData);
-
-    setParentPageOptions([{ ...RootParentPage, children: processedRes }]);
   };
 
   const createMenuDropList = (
@@ -168,7 +154,7 @@ const PageManagerPage: FC = () => {
         key="page"
         onClick={() => {
           setVisibleCreateForm('page');
-          form.resetFields();
+          createForm.resetFields();
           setTitle(t('createApp.createPage'));
         }}
       >
@@ -179,7 +165,7 @@ const PageManagerPage: FC = () => {
         key="group"
         onClick={() => {
           setVisibleCreateForm('group');
-          form.resetFields();
+          createForm.resetFields();
           setTitle(t('createApp.createGroup'));
         }}
       >
@@ -238,8 +224,8 @@ const PageManagerPage: FC = () => {
   const handleCreate = async () => {
     let req: CreateApplicationMenuReq = {
       applicationId: curAppId,
-      parentId: form.getFieldValue('parentId'),
-      menuName: form.getFieldValue('menuName'),
+      parentId: createForm.getFieldValue('parentId'),
+      menuName: createForm.getFieldValue('menuName'),
       menuType: MenuType.PAGE,
       menuIcon: 'tmp'
     };
@@ -377,125 +363,39 @@ const PageManagerPage: FC = () => {
       </Layout>
 
       {/* 重命名弹窗 */}
-      <Modal
+      <RenameModal
         title={title}
         visible={visibleRenameForm}
-        onOk={handleRename}
-        onCancel={() => {
-          setVisibleRenameForm(false);
-        }}
-        autoFocus={false}
-        focusLock={true}
-        unmountOnExit={true}
-      >
-        <Form
-          layout="vertical"
-          form={renameForm}
-          initialValues={{
-            menuName: curEditMenuName
-          }}
-        >
-          <Form.Item label="页面名称" field="menuName" rules={[{ required: true, message: '请输入页面名称' }]}>
-            <Input placeholder="请输入页面名称" allowClear />
-          </Form.Item>
-        </Form>
-      </Modal>
+        handleRename={handleRename}
+        setVisible={setVisibleRenameForm}
+        form={renameForm}
+        initValue={curEditMenuName || ''}
+      />
 
       {/* 复制弹窗 */}
-      <Modal
+      <CopyModal
         title={title}
         visible={visibleCopyForm}
-        onOk={handleCopy}
-        onCancel={() => {
-          setVisibleCopyForm(false);
-        }}
-        autoFocus={false}
-        focusLock={true}
-        unmountOnExit={true}
-      >
-        <Form
-          layout="vertical"
-          form={renameForm}
-          initialValues={{
-            menuName: activeMenu?.menuName + '_副本',
-            parentId: activeMenu?.parentId || RootParentPage.id
-          }}
-        >
-          <Form.Item label="页面名称" field="menuName" rules={[{ required: true, message: '请输入页面名称' }]}>
-            <Input placeholder="请输入页面名称" allowClear />
-          </Form.Item>
-
-          <Form.Item label="父级页面" field="parentId">
-            <TreeSelect
-              treeData={convertMenuToTreeData(parentPageOptions, initTreeItemWidth)}
-              placeholder="请选择父级页面"
-              allowClear
-            />
-          </Form.Item>
-        </Form>
-      </Modal>
+        handleCopy={handleCopy}
+        setVisible={setVisibleCopyForm}
+        form={copyForm}
+        initValue={{ menuName: activeMenu?.menuName + '_副本', parentId: activeMenu?.parentId || RootParentPage.id }}
+        treeData={convertMenuToTreeData(parentPageOptions, initTreeItemWidth)}
+      />
 
       {/* 创建弹窗 */}
-      <Modal
+      <CreateModal
         title={title}
-        visible={visibleCreateForm !== ''}
-        onOk={handleCreate}
+        handleCreate={handleCreate}
         onCancel={() => {
           setVisibleCreateForm('');
         }}
-        autoFocus={false}
-        focusLock={true}
-        unmountOnExit={true}
-      >
-        <Form
-          layout="vertical"
-          form={form}
-          initialValues={{
-            pageType: PageType.NORMAL,
-            menuName: ''
-          }}
-        >
-          <Form.Item
-            label="页面类型"
-            field="pageType"
-            hidden={visibleCreateForm === 'group'}
-            rules={[{ required: true, message: '请选择页面类型' }]}
-            initialValue={PageType.NORMAL}
-          >
-            <Select options={pageTypeOptions} placeholder="请选择页面类型" allowClear />
-          </Form.Item>
-
-          <Form.Item
-            label={visibleCreateForm === 'page' ? '页面名称' : '分组名称'}
-            field="menuName"
-            rules={[
-              { required: true, message: '请输入页面名称' },
-              { maxLength: 20, message: '页面名称不能超过20个字符' }
-            ]}
-          >
-            <Input
-              maxLength={20}
-              placeholder="请输入页面名称，不超过20个字符"
-              allowClear
-              onChange={(value) => {
-                form.setFieldValue('menuName', value);
-              }}
-            />
-          </Form.Item>
-
-          {/* TODO: 添加菜单图标 */}
-
-          <Form.Item label="父级页面" field="parentId" initialValue={RootParentPage.id}>
-            <TreeSelect
-              treeData={convertMenuToTreeData(parentPageOptions, initTreeItemWidth)}
-              placeholder="请选择父级页面"
-              allowClear
-            />
-          </Form.Item>
-
-          {/* TODO: 添加业务实体 */}
-        </Form>
-      </Modal>
+        form={createForm}
+        pageTypeOptions={pageTypeOptions}
+        visibleCreateForm={visibleCreateForm}
+        initValue={{ pageType: PageType.NORMAL, menuName: '', parentId: RootParentPage.id }}
+        treeData={convertMenuToTreeData(parentPageOptions, initTreeItemWidth)}
+      />
     </div>
   );
 };
