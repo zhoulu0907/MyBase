@@ -6,7 +6,11 @@ import com.cmsr.onebase.module.metadata.controller.admin.relationship.vo.Cascade
 import com.cmsr.onebase.module.metadata.controller.admin.relationship.vo.EntityRelationshipPageReqVO;
 import com.cmsr.onebase.module.metadata.controller.admin.relationship.vo.EntityRelationshipRespVO;
 import com.cmsr.onebase.module.metadata.controller.admin.relationship.vo.EntityRelationshipSaveReqVO;
+import com.cmsr.onebase.module.metadata.controller.admin.relationship.vo.ParentChildRelationshipSaveReqVO;
+import com.cmsr.onebase.module.metadata.controller.admin.relationship.vo.ParentChildRelationshipRespVO;
 import com.cmsr.onebase.module.metadata.controller.admin.relationship.vo.RelationshipTypeRespVO;
+import com.cmsr.onebase.module.metadata.controller.admin.relationship.vo.EntityWithChildrenRespVO;
+import com.cmsr.onebase.module.metadata.controller.admin.relationship.vo.AppEntitiesRespVO;
 import com.cmsr.onebase.module.metadata.service.relationship.MetadataEntityRelationshipService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -91,6 +95,32 @@ public class EntityRelationshipController {
     public CommonResult<List<CascadeTypeRespVO>> getCascadeTypes() {
         List<CascadeTypeRespVO> types = entityRelationshipService.getCascadeTypes();
         return success(types);
+    }
+
+    @PostMapping("/create-parent-child")
+    @Operation(summary = "创建主子关系", description = "自动创建主子关系，默认使用主表id和子表parent_id关联，一对多关系，级联新增删除查询")
+    @PreAuthorize("@ss.hasPermission('metadata:entity-relationship:create')")
+    public CommonResult<ParentChildRelationshipRespVO> createParentChildRelationship(@Valid @RequestBody ParentChildRelationshipSaveReqVO reqVO) {
+        ParentChildRelationshipRespVO result = entityRelationshipService.createParentChildRelationship(reqVO);
+        return success(result);
+    }
+
+    @PostMapping("/entity-with-children")
+    @Operation(summary = "根据实体ID查询实体名称及其关联的子表信息")
+    @Parameter(name = "entityId", description = "实体ID", required = true, example = "1001")
+    @PreAuthorize("@ss.hasPermission('metadata:entity-relationship:query')")
+    public CommonResult<EntityWithChildrenRespVO> getEntityWithChildren(@RequestParam("entityId") Long entityId) {
+        EntityWithChildrenRespVO result = entityRelationshipService.getEntityWithChildrenById(entityId);
+        return success(result);
+    }
+
+    @PostMapping("/app-entities")
+    @Operation(summary = "根据应用ID查询所有实体及字段信息")
+    @Parameter(name = "appId", description = "应用ID", required = true, example = "1001")
+    @PreAuthorize("@ss.hasPermission('metadata:entity-relationship:query')")
+    public CommonResult<AppEntitiesRespVO> getAppEntitiesWithFields(@RequestParam("appId") Long appId) {
+        AppEntitiesRespVO result = entityRelationshipService.getAppEntitiesWithFields(appId);
+        return success(result);
     }
 
 } 

@@ -1,0 +1,30 @@
+package com.cmsr.onebase.module.metadata.controller.admin.relationship.vo;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
+
+import java.util.List;
+
+/**
+ * 管理后台 - 实体及其关联子表信息 Response VO
+ *
+ * @author matianyu
+ * @date 2025-08-09
+ */
+@Schema(description = "管理后台 - 实体及其关联子表信息 Response VO")
+@Data
+public class EntityWithChildrenRespVO {
+
+    @Schema(description = "实体ID", example = "1001")
+    private Long entityId;
+
+    @Schema(description = "实体名称", example = "用户信息")
+    private String entityName;
+
+    @Schema(description = "实体编码", example = "user_info")
+    private String entityCode;
+
+    @Schema(description = "关联的子表信息列表")
+    private List<ChildEntityInfoRespVO> childEntities;
+
+}
