@@ -43,7 +43,7 @@ export const deleteRoleList = (ids: number[]) => {
 };
 
 // 移除角色下的用户
-export const removeRoleUsers = (roleId: number, userIds: number) => {
+export const removeRoleUsers = (roleId: number, userIds: number[]) => {
   return systemClient.post('/permission/delete-role-users', { roleId, userIds });
 };
 
