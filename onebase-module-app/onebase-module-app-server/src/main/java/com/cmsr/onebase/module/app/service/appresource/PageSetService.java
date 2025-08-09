@@ -11,6 +11,8 @@ public interface PageSetService {
 
     String getPageSetCode(Long menuID);
 
+    Long getAppId(String code);
+
     String createPageSet(CreatePageSetDTO createPageSetDTO);
 
     void deletePageSet(Long menuId);

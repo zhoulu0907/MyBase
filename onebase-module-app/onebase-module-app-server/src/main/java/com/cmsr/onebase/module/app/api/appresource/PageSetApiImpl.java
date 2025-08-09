@@ -19,15 +19,21 @@ import jakarta.annotation.Resource;
 
 @RestController
 @Validated
-public class PageSetApiImpl implements PageSetApi{
+public class PageSetApiImpl implements PageSetApi {
 
     @Resource
     private PageSetService pageSetService;
 
     @Override
-    public CommonResult<PageSetRespDTO> getUser(String code) {
+    public CommonResult<PageSetRespDTO> getPageSet(String code) {
         PageSetRespDTO pageSetRespDTO = pageSetService.getPageSet(code);
         return CommonResult.success(pageSetRespDTO);
+    }
+
+    @Override
+    public CommonResult<Long> getAppId(String code) {
+        Long appId = pageSetService.getAppId(code);
+        return CommonResult.success(appId);
     }
 
     @Override

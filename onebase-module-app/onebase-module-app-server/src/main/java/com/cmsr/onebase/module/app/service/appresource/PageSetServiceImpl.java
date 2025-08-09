@@ -27,6 +27,7 @@ import com.cmsr.onebase.module.app.dal.database.appresource.AppPageRepository;
 import com.cmsr.onebase.module.app.dal.database.appresource.AppPageSetLabelRepository;
 import com.cmsr.onebase.module.app.dal.database.appresource.AppPageSetPageRepository;
 import com.cmsr.onebase.module.app.dal.database.appresource.AppPageSetRepository;
+import com.cmsr.onebase.module.app.dal.database.menu.AppMenuRepository;
 import com.cmsr.onebase.module.app.dal.dataobject.appresource.ComponentDO;
 import com.cmsr.onebase.module.app.dal.dataobject.appresource.PageDO;
 import com.cmsr.onebase.module.app.dal.dataobject.appresource.PageMetadataDO;
@@ -34,6 +35,7 @@ import com.cmsr.onebase.module.app.dal.dataobject.appresource.PageRefRouterDO;
 import com.cmsr.onebase.module.app.dal.dataobject.appresource.PageSetDO;
 import com.cmsr.onebase.module.app.dal.dataobject.appresource.PageSetLabelDO;
 import com.cmsr.onebase.module.app.dal.dataobject.appresource.PageSetPageDO;
+import com.cmsr.onebase.module.app.dal.dataobject.menu.MenuDO;
 import com.cmsr.onebase.module.app.enums.appresource.AppResourceErrorCodeConstants;
 import com.cmsr.onebase.module.app.util.PageUtils;
 
@@ -64,10 +66,21 @@ public class PageSetServiceImpl implements PageSetService {
     @Resource
     private AppPageRefRouterRepository appPageRefRouterDataRepository;
 
+    @Resource
+    private AppMenuRepository appMenuRepository;
+
     @Override
     public String getPageSetCode(Long menuID) {
         PageSetDO pageSetDO = pageSetDataRepository.findPageSetByMenuId(menuID);
         return pageSetDO.getPageSetCode();
+    }
+
+    @Override
+    public Long getAppId(String code) {
+        PageSetDO pageSetDO = pageSetDataRepository.findPageSetByPageSetCode(code);
+        Long menuId = pageSetDO.getMenuId();
+        MenuDO menuDO = appMenuRepository.findById(menuId);
+        return menuDO.getApplicationId();
     }
 
     @Override
