@@ -58,6 +58,14 @@ export const updateDictData = (data: DictDataForm): Promise<void> => {
   return systemClient.post('/dict-data/update', data);
 };
 
+
+/**
+ * 更新字典数据状态
+ */
+export const updateDictDataStatus = (data: { id: number; status: number }): Promise<void> => {
+  return systemClient.post('/dict-data/update-status', data);
+};
+
 /**
  * 删除字典数据
  */

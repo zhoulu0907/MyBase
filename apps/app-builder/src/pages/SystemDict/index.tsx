@@ -10,7 +10,8 @@ import {
   updateDict,
   getDictDetail,
   updateDictData,
-  createDictData
+  createDictData,
+  updateDictDataStatus
 } from '@onebase/platform-center';
 import type { PageParam } from '@onebase/platform-center';
 import type { DictData, DictItem } from '@onebase/platform-center';
@@ -239,10 +240,9 @@ export default function SystemDictPage() {
   const handleUpdateDictDataStatus = (id: number, status: number) => {
     const params = {
       id,
-      status,
-      dictType: activeDict?.type
+      status
     }
-    updateDictData(params).then(() => { // TODO: 待接口修改后验证
+    updateDictDataStatus(params).then(() => {
       Message.success('操作成功');
       loadTableData();
     });
