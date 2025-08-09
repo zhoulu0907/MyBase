@@ -39,7 +39,8 @@ export default function EditorWorkspace() {
     setComponents,
     delComponents,
     showDeleteButton,
-    setShowDeleteButton
+    setShowDeleteButton,
+    delColComponentsMap
   } = usePageEditorStore();
 
   const [pageMode, setPageMode] = useState<string>('pc');
@@ -56,6 +57,8 @@ export default function EditorWorkspace() {
   const handleDeleteComponent = (componentId: string) => {
     // 从组件列表中移除
     delComponents(componentId);
+    delPageComponentSchemas(componentId);
+    delColComponentsMap(componentId);
 
     // 如果删除的是当前选中的组件，清除选中状态
     if (curComponentID === componentId) {

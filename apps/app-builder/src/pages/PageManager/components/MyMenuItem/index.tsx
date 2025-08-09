@@ -1,7 +1,9 @@
-import { Dropdown } from '@arco-design/web-react';
+import { Dropdown, Menu, type FormInstance } from '@arco-design/web-react';
 import { IconFolder, IconSettings } from '@arco-design/web-react/icon';
 import React from 'react';
 import styles from './index.module.less';
+
+const MenuItem = Menu.Item;
 
 /**
  * MenuItem 组件
@@ -11,16 +13,83 @@ import styles from './index.module.less';
  * @param props.onClick 点击事件处理函数
  */
 interface MenuItemProps {
+  menuID: string;
+  menuName: string;
   label: string;
   icon?: React.ReactNode;
   isGroup: boolean;
   onClick: () => void;
-  settingOnClick: () => void;
-  dropList: React.ReactNode;
+  triggerRename: () => void;
+  triggerCopy: () => void;
+  triggerHide: () => void;
+  triggerDelete: (menuID: string) => void;
   maxWidth: number;
+  renameForm: FormInstance;
 }
 
-const MyMenuItem: React.FC<MenuItemProps> = ({ label, icon, isGroup, onClick, settingOnClick, dropList, maxWidth }) => {
+const MyMenuItem: React.FC<MenuItemProps> = ({
+  menuID,
+  menuName,
+  label,
+  icon,
+  isGroup,
+  onClick,
+  triggerRename,
+  triggerCopy,
+  triggerHide,
+  triggerDelete,
+  maxWidth,
+  renameForm
+}) => {
+  const dropList = (
+    <Menu style={{ padding: '10px 5px' }}>
+      <MenuItem
+        key="rename"
+        onClick={(e) => {
+          e.stopPropagation();
+          triggerRename();
+
+          renameForm.resetFields();
+          renameForm.setFieldValue('menuName', menuName);
+        }}
+      >
+        {'重命名'}
+      </MenuItem>
+      <MenuItem
+        key="copy"
+        onClick={(e) => {
+          e.stopPropagation();
+          triggerCopy();
+          //   setVisibleCopyForm(true);
+          //   copyForm.resetFields();
+          //   setTitle(t('createApp.copyPage'));
+          //   console.log(activeMenu?.parentId || RootParentPage.id);
+        }}
+      >
+        {'复制'}
+      </MenuItem>
+      <MenuItem
+        key="hide"
+        onClick={(e) => {
+          e.stopPropagation();
+          triggerHide();
+        }}
+      >
+        {'隐藏'}
+      </MenuItem>
+      <MenuItem
+        key="delete"
+        onClick={(e) => {
+          e.stopPropagation();
+          triggerDelete(menuID);
+        }}
+        style={{ color: 'red' }}
+      >
+        {'删除'}
+      </MenuItem>
+    </Menu>
+  );
+
   return (
     <div className={styles.myMenuItem} onClick={onClick} role="menuitem" tabIndex={0}>
       {/* {icon && <span className="mr-2">{icon}</span>} */}
@@ -36,11 +105,7 @@ const MyMenuItem: React.FC<MenuItemProps> = ({ label, icon, isGroup, onClick, se
       </div>
       <div className={styles.dropdownContainer}>
         <Dropdown droplist={dropList} trigger="click" position="bl">
-          <IconSettings
-            onClick={() => {
-              settingOnClick();
-            }}
-          />
+          <IconSettings onClick={(e) => e.stopPropagation()} />
         </Dropdown>
       </div>
     </div>

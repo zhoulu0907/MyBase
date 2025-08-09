@@ -31,3 +31,7 @@ export interface CreatePageSetReq {
 export interface DeletePageSetReq {
     pageSetCode: string;
 }
+
+export interface GetAppIdByPageSetCodeReq {
+    code: string
+}

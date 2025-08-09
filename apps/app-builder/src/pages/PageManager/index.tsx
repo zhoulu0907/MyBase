@@ -72,8 +72,7 @@ const PageManagerPage: FC = () => {
 
   const [treeData, setTreeData] = useState<TreeNode[]>([]);
 
-  const [curEditMenuID, setCurEditMenuID] = useState<string>();
-  const [curEditMenuName, setCurEditMenuName] = useState<string>();
+  const [curMenu, setCurMenu] = useState<ApplicationMenu>();
   const [activeMenu, setActiveMenu] = useState<ApplicationMenu>();
   const [parentPageOptions, setParentPageOptions] = useState<ApplicationMenu[]>([RootParentPage]);
 
@@ -86,7 +85,6 @@ const PageManagerPage: FC = () => {
     if (curAppId !== '') {
       getMenuList();
     }
-    console.log('clearIsEditMode');
     clearIsEditMode();
   }, [curAppId]);
 
@@ -113,20 +111,22 @@ const PageManagerPage: FC = () => {
       key: menu.id,
       title: (
         <MyMenuItem
+          menuID={menu.id}
+          menuName={menu.menuName}
           isGroup={menu.menuType == MenuType.GROUP}
           maxWidth={maxWidth}
           label={menu.menuName}
-          dropList={settingMenuDropList}
           onClick={() => {
             if (menu.menuType == MenuType.PAGE) {
-              setActiveMenu(menu);
+              setCurMenu(menu);
             }
+            setActiveMenu(menu);
           }}
-          settingOnClick={() => {
-            console.log(menu.menuName);
-            setCurEditMenuID(menu.id);
-            setCurEditMenuName(menu.menuName);
-          }}
+          triggerRename={triggerRename}
+          triggerCopy={triggerCopy}
+          triggerHide={triggerHide}
+          triggerDelete={triggerDelete}
+          renameForm={renameForm}
         />
       ),
       children: menu.children ? convertMenuToTreeData(menu.children, maxWidth - cutTreeItemWidth) : []
@@ -175,51 +175,21 @@ const PageManagerPage: FC = () => {
     </Menu>
   );
 
-  const settingMenuDropList = (
-    <Menu style={{ padding: '10px 5px' }}>
-      <MenuItem
-        key="rename"
-        onClick={(e) => {
-          e.stopPropagation();
-          setVisibleRenameForm(true);
-          renameForm.resetFields();
-          renameForm.setFieldValue('menuName', curEditMenuName);
-        }}
-      >
-        {'重命名'}
-      </MenuItem>
-      <MenuItem
-        key="copy"
-        onClick={(e) => {
-          e.stopPropagation();
-          setVisibleCopyForm(true);
-          copyForm.resetFields();
-          setTitle(t('createApp.copyPage'));
-          console.log(activeMenu?.parentId || RootParentPage.id);
-        }}
-      >
-        {'复制'}
-      </MenuItem>
-      <MenuItem
-        key="hide"
-        onClick={(e) => {
-          e.stopPropagation();
-        }}
-      >
-        {'隐藏'}
-      </MenuItem>
-      <MenuItem
-        key="delete"
-        onClick={(e) => {
-          e.stopPropagation();
-          handleDelete(activeMenu?.id);
-        }}
-        style={{ color: 'red' }}
-      >
-        {'删除'}
-      </MenuItem>
-    </Menu>
-  );
+  const triggerRename = () => {
+    setVisibleRenameForm(true);
+  };
+
+  const triggerCopy = () => {
+    setVisibleCopyForm(true);
+    copyForm.resetFields();
+    setTitle(t('createApp.copyPage'));
+  };
+
+  const triggerHide = () => {};
+
+  const triggerDelete = (menuID: string) => {
+    handleDelete(menuID);
+  };
 
   const handleCreate = async () => {
     let req: CreateApplicationMenuReq = {
@@ -238,24 +208,26 @@ const PageManagerPage: FC = () => {
     }
 
     const res = await createApplicationMenu(req);
-    console.log('res: ', res);
-
+    if (res) {
+      Message.success('创建成功');
+    }
     setVisibleCreateForm('');
     getMenuList();
   };
 
   const handleRename = async () => {
-    if (!curEditMenuID) {
+    if (!activeMenu?.id) {
       Message.error('请选择要重命名的菜单');
       return;
     }
-    console.log('curEditMenuID: ', curEditMenuID);
     const req: UpdateApplicationMenuNameReq = {
-      id: curEditMenuID,
+      id: activeMenu?.id,
       menuName: renameForm.getFieldValue('menuName')
     };
     const res = await updateApplicationMenuName(req);
-    console.log('res: ', res);
+    if (res) {
+      Message.success('重命名成功');
+    }
     setVisibleRenameForm(false);
     getMenuList();
   };
@@ -272,11 +244,14 @@ const PageManagerPage: FC = () => {
     };
     const res = await copyApplicationMenu(req);
     console.log('res: ', res);
+    if (res) {
+      Message.success('复制成功');
+    }
     setVisibleCopyForm(false);
     getMenuList();
   };
 
-  const handleDelete = async (id: string | undefined) => {
+  const handleDelete = async (id: string) => {
     if (!id) {
       Message.error('请选择要删除的菜单');
       return;
@@ -285,21 +260,23 @@ const PageManagerPage: FC = () => {
       id: id
     };
     const res = await deleteApplicationMenu(req);
-    console.log('res: ', res);
+    if (res) {
+      Message.success('删除成功');
+      setActiveMenu(undefined);
+    }
     getMenuList();
   };
 
-  const handleGetPageSetCode = async () => {
-    if (!activeMenu?.id) {
+  const handleEditPageSet = async () => {
+    if (!curMenu?.id) {
       Message.error('请选择菜单');
       return;
     }
 
     const req: GetPageSetCodeReq = {
-      menuId: activeMenu?.id
+      menuId: curMenu?.id
     };
     const pageSetCode = await getPageSetCode(req);
-    console.log('res: ', pageSetCode);
 
     if (!pageSetCode) {
       Message.error('请先创建页面集');
@@ -349,10 +326,10 @@ const PageManagerPage: FC = () => {
             />
           </Sider>
           <Content className={styles.content}>
-            {activeMenu?.id && (
+            {curMenu?.id && (
               <div className={styles.contentHeader}>
-                <div className={styles.contentTitle}>{activeMenu?.menuName}</div>
-                <Button type="primary" onClick={() => handleGetPageSetCode()}>
+                <div className={styles.contentTitle}>{curMenu?.menuName}</div>
+                <Button type="primary" onClick={() => handleEditPageSet()}>
                   {t('common.edit')}
                 </Button>
               </div>
@@ -369,7 +346,6 @@ const PageManagerPage: FC = () => {
         handleRename={handleRename}
         setVisible={setVisibleRenameForm}
         form={renameForm}
-        initValue={curEditMenuName || ''}
       />
 
       {/* 复制弹窗 */}

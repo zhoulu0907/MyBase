@@ -20,13 +20,13 @@ export default function EditorPanel() {
   useEffect(() => {
     // 根据当前 URL 动态设置 activeTab
     const hash = window.location.hash;
-    if (hash.endsWith(EDITOR_TYPES.FORM_EDITOR)) {
+    if (hash.includes(EDITOR_TYPES.FORM_EDITOR)) {
       setActiveTab(EDITOR_TYPES.FORM_EDITOR);
-    } else if (hash.endsWith(EDITOR_TYPES.LIST_EDITOR)) {
+    } else if (hash.includes(EDITOR_TYPES.LIST_EDITOR)) {
       setActiveTab(EDITOR_TYPES.LIST_EDITOR);
-    } else if (hash.endsWith(EDITOR_TYPES.PAGE_SETTING)) {
+    } else if (hash.includes(EDITOR_TYPES.PAGE_SETTING)) {
       setActiveTab(EDITOR_TYPES.PAGE_SETTING);
-    } else if (hash.endsWith(EDITOR_TYPES.METADATA_MANAGE)) {
+    } else if (hash.includes(EDITOR_TYPES.METADATA_MANAGE)) {
       setActiveTab(EDITOR_TYPES.METADATA_MANAGE);
     }
   }, []);

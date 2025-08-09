@@ -11,4 +11,10 @@ export interface ComponentConfig {
     config: string;
     /** 编辑数据（JSON 字符串） */
     editData: string;
+    /** 父组件ID */
+    parentCode: string;
+    /** 块索引 */
+    blockIndex: number;
+    /** 容器索引 */
+    containerIndex: number;
   }

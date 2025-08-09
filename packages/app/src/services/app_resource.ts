@@ -1,4 +1,4 @@
-import { CreatePageSetReq, DeletePageSetReq, GetPageSetCodeReq, LoadPageSetReq, SavePageSetReq } from '../types';
+import { CreatePageSetReq, DeletePageSetReq, GetAppIdByPageSetCodeReq, GetPageSetCodeReq, LoadPageSetReq, SavePageSetReq } from '../types';
 import appService from './clients/app';
 
 export const getPageSetCode = (params: GetPageSetCodeReq) => {
@@ -19,4 +19,8 @@ export const createPageSet = (params: CreatePageSetReq) => {
 
 export const deletePageSet = (params: DeletePageSetReq) => {
   return appService.post('/resource/page_set/delete', params);
+};
+
+export const getAppIdByPageSetCode = (params: GetAppIdByPageSetCodeReq) => {
+  return appService.get('/resource/page_set/app_id', params);
 };

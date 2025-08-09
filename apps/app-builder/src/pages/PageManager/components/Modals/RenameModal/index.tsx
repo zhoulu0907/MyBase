@@ -12,10 +12,9 @@ interface RenameModalProps {
   setVisible: (visible: boolean) => void;
   handleRename: () => void;
   form: FormInstance;
-  initValue: string;
 }
 
-const RenameModal: React.FC<RenameModalProps> = ({ title, visible, handleRename, setVisible, form, initValue }) => {
+const RenameModal: React.FC<RenameModalProps> = ({ title, visible, handleRename, setVisible, form }) => {
   return (
     <Modal
       title={title}
@@ -32,7 +31,7 @@ const RenameModal: React.FC<RenameModalProps> = ({ title, visible, handleRename,
         layout="vertical"
         form={form}
         initialValues={{
-          menuName: initValue
+          menuName: form.getFieldValue('menuName')
         }}
       >
         <Form.Item label="页面名称" field="menuName" rules={[{ required: true, message: '请输入页面名称' }]}>

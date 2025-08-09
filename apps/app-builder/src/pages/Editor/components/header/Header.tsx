@@ -3,22 +3,15 @@ import activeFormDesignSVG from '@/assets/images/form_design_active_icon.svg';
 import defaultFormDesignSVG from '@/assets/images/form_design_default_icon.svg';
 import activeListDesignSVG from '@/assets/images/list_design_active_icon.svg';
 import defaultListDesignSVG from '@/assets/images/list_design_default_icon.svg';
-import { COMPONENT_TYPE_DISPLAY_NAME_MAP } from '@/components/Materials/template';
 import { usePageEditorStore } from '@/hooks/useStore';
 import { useAppStore, useBasicEditorStore, useFromEditorStore, useListEditorStore } from '@/store';
 import { Button, Message, Tabs } from '@arco-design/web-react';
 import { IconArrowLeft } from '@arco-design/web-react/icon';
-import {
-  loadPageSet,
-  savePageSet,
-  type ComponentConfig,
-  type LoadPageSetReq,
-  type PageSet,
-  type SavePageSetReq
-} from '@onebase/app';
+import { getAppIdByPageSetCode } from '@onebase/app';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { EDITOR_TYPES } from '../const';
+import { startLoadPageSet, startSavePageSet, type SavePageSetParams } from '../utils';
 import styles from './index.module.less';
 
 const tabData = [
@@ -52,8 +45,22 @@ const tabData = [
 
 export default function EditorHeader() {
   const { clearCurComponentID } = usePageEditorStore();
-  const { components: fromComponents, pageComponentSchemas: fromPageComponentSchemas } = useFromEditorStore();
-  const { components: listComponents, pageComponentSchemas: listPageComponentSchemas } = useListEditorStore();
+  const {
+    components: fromComponents,
+    pageComponentSchemas: fromPageComponentSchemas,
+    colComponentsMap: fromColComponentsMap,
+    clearColComponentsMap: clearFromColComponentsMap,
+    clearComponents: clearFromComponents,
+    clearPageComponentSchemas: clearFromPageComponentSchemas
+  } = useFromEditorStore();
+  const {
+    components: listComponents,
+    pageComponentSchemas: listPageComponentSchemas,
+    colComponentsMap: listColComponentsMap,
+    clearColComponentsMap: clearListColComponentsMap,
+    clearComponents: clearListComponents,
+    clearPageComponentSchemas: clearListPageComponentSchemas
+  } = useListEditorStore();
 
   const { curAppId } = useAppStore();
 
@@ -61,10 +68,16 @@ export default function EditorHeader() {
   const [activeTab, setActiveTab] = useState('');
   const [pageSetCode, setPageSetCode] = useState('');
 
-  const { setComponents: setFromComponents, setPageComponentSchemas: setFromPageComponentSchemas } =
-    useFromEditorStore();
-  const { setComponents: setListComponents, setPageComponentSchemas: setListPageComponentSchemas } =
-    useListEditorStore();
+  const {
+    setComponents: setFromComponents,
+    setPageComponentSchemas: setFromPageComponentSchemas,
+    setColComponentsMap: setFromColComponentsMap
+  } = useFromEditorStore();
+  const {
+    setComponents: setListComponents,
+    setPageComponentSchemas: setListPageComponentSchemas,
+    setColComponentsMap: setListColComponentsMap
+  } = useListEditorStore();
   const { isEditMode, setIsEditMode } = useBasicEditorStore();
 
   useEffect(() => {
@@ -72,10 +85,8 @@ export default function EditorHeader() {
     const hash = window.location.hash;
     if (hash.includes(EDITOR_TYPES.FORM_EDITOR)) {
       setActiveTab(EDITOR_TYPES.FORM_EDITOR);
-      console.log('FormEditor isEditMode: ', isEditMode);
     } else if (hash.includes(EDITOR_TYPES.LIST_EDITOR)) {
       setActiveTab(EDITOR_TYPES.LIST_EDITOR);
-      console.log('ListEditor isEditMode: ', isEditMode);
     } else if (hash.includes(EDITOR_TYPES.PAGE_SETTING)) {
       setActiveTab(EDITOR_TYPES.PAGE_SETTING);
     } else if (hash.includes(EDITOR_TYPES.METADATA_MANAGE)) {
@@ -97,116 +108,65 @@ export default function EditorHeader() {
 
   useEffect(() => {
     if (!isEditMode && pageSetCode != '') {
-      console.log(pageSetCode);
       loadPageSetInfo(pageSetCode);
       setIsEditMode(true);
     }
   }, [pageSetCode]);
 
   const loadPageSetInfo = async (pgsetCode: string) => {
-    // 获取页面配置
-    console.log(pgsetCode);
-
-    const loadPageSetReq: LoadPageSetReq = {
-      pageSetCode: pgsetCode
-    };
-    const pageSet = await loadPageSet(loadPageSetReq);
-    console.log('res: ', pageSet);
-    pageSet.pages.forEach((page: PageSet) => {
-      let newComponents: any[] = [];
-      let newPageComponentSchemas = new Map<string, any>();
-      page.components.forEach((component: ComponentConfig) => {
-        newComponents.push({
-          id: component.componentCode,
-          chosen: false,
-          selected: false,
-          type: component.componentType,
-          displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[component.componentType] || ''
-        });
-        newPageComponentSchemas.set(component.componentCode, {
-          config: JSON.parse(component.config),
-          editData: JSON.parse(component.editData)
-        });
-      });
-
-      if (page.pageType === 'form') {
-        setFromComponents(newComponents);
-        newPageComponentSchemas.forEach((config, componentId) => {
-          setFromPageComponentSchemas(componentId, config);
-        });
-      } else if (page.pageType === 'list') {
-        setListComponents(newComponents);
-        newPageComponentSchemas.forEach((config, componentId) => {
-          setListPageComponentSchemas(componentId, config);
-        });
-      }
+    startLoadPageSet({
+      pageSetCode: pgsetCode,
+      setFromComponents: setFromComponents,
+      setFromPageComponentSchemas: setFromPageComponentSchemas,
+      setListComponents: setListComponents,
+      setListPageComponentSchemas: setListPageComponentSchemas,
+      setFromColComponentsMap: setFromColComponentsMap,
+      setListColComponentsMap: setListColComponentsMap
     });
   };
 
-  const handleSaveApp = async () => {
+  const handleSavePageSet = async () => {
     console.log(`save appid: ${curAppId}, pageSetCode: ${pageSetCode}`);
 
-    console.log(fromComponents);
-    console.log(fromPageComponentSchemas);
-
-    console.log(listComponents);
-    console.log(listPageComponentSchemas);
-
-    const loadPageSetReq: LoadPageSetReq = {
-      pageSetCode: pageSetCode
-    };
-    const loadPagesetResp = await loadPageSet(loadPageSetReq);
-    console.log('res: ', loadPagesetResp);
-
-    loadPagesetResp.pages.forEach((_page: PageSet, index: number) => {
-      if (_page.pageType === 'form') {
-        loadPagesetResp.pages[index].components = fromComponents.map((component) => {
-          return {
-            componentCode: component.id,
-            componentType: component.type,
-            config: JSON.stringify(fromPageComponentSchemas.get(component.id)?.config),
-            editData: JSON.stringify(fromPageComponentSchemas.get(component.id)?.editData)
-          };
-        });
-      } else if (_page.pageType === 'list') {
-        loadPagesetResp.pages[index].components = listComponents.map((component) => {
-          return {
-            componentCode: component.id,
-            componentType: component.type,
-            config: JSON.stringify(listPageComponentSchemas.get(component.id)?.config),
-            editData: JSON.stringify(listPageComponentSchemas.get(component.id)?.editData)
-          };
-        });
-      }
-    });
-
-    console.log(loadPagesetResp);
-
-    const savePageSetReq: SavePageSetReq = {
+    const savePageSetParams: SavePageSetParams = {
       pageSetCode: pageSetCode,
-      pageSetName: '123',
-      pages: loadPagesetResp.pages
+      fromComponents: fromComponents,
+      listComponents: listComponents,
+      fromPageComponentSchemas: fromPageComponentSchemas,
+      listPageComponentSchemas: listPageComponentSchemas,
+      fromColComponentsMap: fromColComponentsMap,
+      listColComponentsMap: listColComponentsMap
     };
-    const res = await savePageSet(savePageSetReq);
-    console.log('res: ', res);
-    if (res) {
-      Message.success('保存成功');
+
+    startSavePageSet(savePageSetParams);
+  };
+
+  const clearAllData = () => {
+    clearFromColComponentsMap();
+    clearListColComponentsMap();
+    clearFromComponents();
+    clearListComponents();
+    clearFromPageComponentSchemas();
+    clearListPageComponentSchemas();
+  };
+
+  const backToPageManager = async () => {
+    const appId = await getAppIdByPageSetCode({ code: pageSetCode });
+    if (!appId) {
+      Message.error('获取应用ID失败');
+      return;
     }
+
+    clearAllData();
+
+    navigate(`/onebase/create-app/page-manager?appId=${appId}`);
   };
 
   return (
     <div className={styles.editorHeader}>
       {/* 左侧 */}
       <div className={styles.left}>
-        <Button
-          shape="circle"
-          type="default"
-          size="small"
-          onClick={() => {
-            navigate(`/onebase/create-app/page-manager?appId=${curAppId}`);
-          }}
-          icon={<IconArrowLeft />}
-        />
+        <Button shape="circle" type="default" size="small" onClick={backToPageManager} icon={<IconArrowLeft />} />
 
         <img src={AppIcon} style={{ width: 28, height: 28 }} />
 
@@ -268,7 +228,7 @@ export default function EditorHeader() {
         <Button
           type="primary"
           onClick={() => {
-            handleSaveApp();
+            handleSavePageSet();
           }}
         >
           保存
