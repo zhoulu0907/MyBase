@@ -1,7 +1,7 @@
-import { Input, Modal, Table, Spin, Checkbox, Message, Pagination } from '@arco-design/web-react';
+import { Input, Modal, Table, Spin, Checkbox, Pagination } from '@arco-design/web-react';
 import { IconSearch } from '@arco-design/web-react/icon';
 import { useEffect, useState, useMemo, useCallback } from 'react';
-import { debounce } from 'lodash-es';
+import { debounce, union, difference } from 'lodash-es';
 import type { UserVO } from '@onebase/platform-center';
 import { getUserPage } from '@onebase/platform-center';
 import type { PageParam } from '@onebase/platform-center';
@@ -13,6 +13,7 @@ interface UserSelectModalProps {
   onCancel: () => void;
   onOk: (selectedUserIds: number[]) => void;
   currentRoleUsers: UserRecord[];
+  selectedRoleId?: number;
 }
 
 const UserSelectModal: React.FC<UserSelectModalProps> = ({
@@ -20,6 +21,7 @@ const UserSelectModal: React.FC<UserSelectModalProps> = ({
   onCancel,
   onOk,
   currentRoleUsers,
+  selectedRoleId
 }) => {
   const [userList, setUserList] = useState<UserRecord[]>([]);
   const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);
@@ -35,7 +37,8 @@ const UserSelectModal: React.FC<UserSelectModalProps> = ({
     try {
       const params: PageParam = {
         pageNo: page,
-        pageSize
+        pageSize,
+        excludRoleId: selectedRoleId // 仅筛选不属于当前角色的用户
       };
       
       if (keyword) {
@@ -82,30 +85,25 @@ const UserSelectModal: React.FC<UserSelectModalProps> = ({
   }, [debounceSearch]);
 
   // 处理用户选择
-  const handleUserSelect = useCallback((userId: number, checked: boolean) => {
-    // 如果用户已经在当前角色中，禁止取消选择
-    const isCurrentRoleUser = currentRoleUsers.some((user) => user.id === userId);
-    if (isCurrentRoleUser && !checked) {
-      Message.warning('已选择的用户不能取消选择');
-      return;
-    }
-
+  const handleUserSelect = (userId: number, checked: boolean) => {
     if (checked) {
       setSelectedUserIds((prev) => [...prev, userId]);
     } else {
       setSelectedUserIds((prev) => prev.filter((id) => id !== userId));
     }
-  }, [currentRoleUsers]);
+  };
 
   // 处理全选
   const handleSelectAll = useCallback((checked: boolean) => {
+    const currentPageIds = userList.map((user) => user.id);
     if (checked) {
-      const allUserIds = userList.map((user) => user.id);
-      setSelectedUserIds(allUserIds);
+      // 全选则取当前页与已选的并集
+      const unionedIds = union(selectedUserIds, currentPageIds);
+      setSelectedUserIds(unionedIds);
     } else {
-      // 只保留当前角色中的用户
-      const currentRoleUserIds = currentRoleUsers.map((user) => user.id);
-      setSelectedUserIds(currentRoleUserIds);
+      // 取消全选从已选中去掉当前页数据
+      const diffedIds = difference(selectedUserIds, currentPageIds);
+      setSelectedUserIds(diffedIds);
     }
   }, [userList, currentRoleUsers]);
 
@@ -134,12 +132,10 @@ const UserSelectModal: React.FC<UserSelectModalProps> = ({
         dataIndex: 'select',
         width: 50,
         render: (_: any, record: UserRecord) => {
-          const isCurrentRoleUser = currentRoleUsers.some((user) => user.id === record.id);
           return (
             <Checkbox
               checked={selectedUserIds.includes(record.id)}
               onChange={(checked) => handleUserSelect(record.id, checked)}
-              disabled={isCurrentRoleUser}
             />
           );
         }
@@ -153,7 +149,7 @@ const UserSelectModal: React.FC<UserSelectModalProps> = ({
       { title: '邮箱', dataIndex: 'email', width: 160, placeholder: '-', ellipsis: true },
       { title: '部门', dataIndex: 'deptName', placeholder: '-' }
     ],
-    [selectedUserIds, userList, currentPageSelectedUserIds, handleUserSelect, handleSelectAll, currentRoleUsers]
+    [selectedUserIds, userList, currentPageSelectedUserIds, handleUserSelect, handleSelectAll]
   );
 
   return (
