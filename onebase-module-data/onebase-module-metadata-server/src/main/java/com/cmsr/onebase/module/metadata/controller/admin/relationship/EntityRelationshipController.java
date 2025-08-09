@@ -9,6 +9,8 @@ import com.cmsr.onebase.module.metadata.controller.admin.relationship.vo.EntityR
 import com.cmsr.onebase.module.metadata.controller.admin.relationship.vo.ParentChildRelationshipSaveReqVO;
 import com.cmsr.onebase.module.metadata.controller.admin.relationship.vo.ParentChildRelationshipRespVO;
 import com.cmsr.onebase.module.metadata.controller.admin.relationship.vo.RelationshipTypeRespVO;
+import com.cmsr.onebase.module.metadata.controller.admin.relationship.vo.EntityWithChildrenRespVO;
+import com.cmsr.onebase.module.metadata.controller.admin.relationship.vo.AppEntitiesRespVO;
 import com.cmsr.onebase.module.metadata.service.relationship.MetadataEntityRelationshipService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -103,5 +105,22 @@ public class EntityRelationshipController {
         return success(result);
     }
 
+    @PostMapping("/entity-with-children")
+    @Operation(summary = "根据实体ID查询实体名称及其关联的子表信息")
+    @Parameter(name = "entityId", description = "实体ID", required = true, example = "1001")
+    @PreAuthorize("@ss.hasPermission('metadata:entity-relationship:query')")
+    public CommonResult<EntityWithChildrenRespVO> getEntityWithChildren(@RequestParam("entityId") Long entityId) {
+        EntityWithChildrenRespVO result = entityRelationshipService.getEntityWithChildrenById(entityId);
+        return success(result);
+    }
+
+    @PostMapping("/app-entities")
+    @Operation(summary = "根据应用ID查询所有实体及字段信息")
+    @Parameter(name = "appId", description = "应用ID", required = true, example = "1001")
+    @PreAuthorize("@ss.hasPermission('metadata:entity-relationship:query')")
+    public CommonResult<AppEntitiesRespVO> getAppEntitiesWithFields(@RequestParam("appId") Long appId) {
+        AppEntitiesRespVO result = entityRelationshipService.getAppEntitiesWithFields(appId);
+        return success(result);
+    }
 
 } 
