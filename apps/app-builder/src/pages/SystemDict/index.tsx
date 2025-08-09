@@ -242,7 +242,7 @@ export default function SystemDictPage() {
       id,
       status
     }
-    updateDictDataStatus(params).then(() => { // TODO: 待接口修改后验证
+    updateDictDataStatus(params).then(() => {
       Message.success('操作成功');
       loadTableData();
     });
