@@ -54,9 +54,8 @@ public class DictDataController {
     @PostMapping("/update-status")
     @Operation(summary = "修改字典数据状态")
     @PreAuthorize("@ss.hasPermission('system:dict:update')")
-    public CommonResult<Boolean> updateDictDataStatus(@RequestParam("id") Long id,
-                                                      @RequestParam("status") Integer status) {
-        dictDataService.updateDictDataStatus(id, status);
+    public CommonResult<Boolean> updateDictDataStatus(@Valid @RequestBody  DictDataUpdateStatusVO updateStatusVO) {
+        dictDataService.updateDictDataStatus(updateStatusVO.getId(), updateStatusVO.getStatus());
         return success(true);
     }
 
