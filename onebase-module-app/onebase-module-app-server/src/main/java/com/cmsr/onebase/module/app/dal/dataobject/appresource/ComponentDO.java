@@ -48,4 +48,13 @@ public class ComponentDO extends TenantBaseDO {
     @Column(name = "edit_data", columnDefinition = "TEXT NOT NULL", comment = "编辑数据")
     private String editData;
 
+    @Column(name = "parent_id", columnDefinition = "BIGINT NOT NULL DEFAULT 0", comment = "父ID")
+    private Long parentId;
+
+    @Column(name = "block_index", columnDefinition = "INT8 NOT NULL DEFAULT 0", comment = "块索引")
+    private Integer blockIndex;
+
+    @Column(name = "container_index", columnDefinition = "INT8 NOT NULL DEFAULT 0", comment = "容器索引")
+    private Integer containerIndex;
+
 }
