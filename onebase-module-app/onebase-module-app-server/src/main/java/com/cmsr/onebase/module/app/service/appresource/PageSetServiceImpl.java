@@ -228,7 +228,6 @@ public class PageSetServiceImpl implements PageSetService {
             page.getComponents().forEach(component -> {
                 ComponentDO componentDO = BeanUtils.toBean(component, ComponentDO.class);
                 componentDO.setInTable(false);
-
                 componentDO.setPageId(pageDO.getId());
                 componentDataRepository.insert(componentDO);
             });

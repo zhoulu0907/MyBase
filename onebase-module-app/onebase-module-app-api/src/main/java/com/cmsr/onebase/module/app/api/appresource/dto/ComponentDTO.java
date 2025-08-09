@@ -23,4 +23,19 @@ public class ComponentDTO {
      * 编辑数据
      */
     private String editData;
+
+    /**
+     * 父级ID
+     */
+    private Long parentId;
+
+    /**
+     * 块索引
+     */
+    private Integer blockIndex;
+
+    /**
+     * 容器索引
+     */
+    private Integer containerIndex;
 }
