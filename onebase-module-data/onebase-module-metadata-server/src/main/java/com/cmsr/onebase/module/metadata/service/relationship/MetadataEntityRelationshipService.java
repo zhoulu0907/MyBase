@@ -8,6 +8,8 @@ import com.cmsr.onebase.module.metadata.controller.admin.relationship.vo.EntityR
 import com.cmsr.onebase.module.metadata.controller.admin.relationship.vo.ParentChildRelationshipSaveReqVO;
 import com.cmsr.onebase.module.metadata.controller.admin.relationship.vo.ParentChildRelationshipRespVO;
 import com.cmsr.onebase.module.metadata.controller.admin.relationship.vo.RelationshipTypeRespVO;
+import com.cmsr.onebase.module.metadata.controller.admin.relationship.vo.EntityWithChildrenRespVO;
+import com.cmsr.onebase.module.metadata.controller.admin.relationship.vo.AppEntitiesRespVO;
 import jakarta.validation.Valid;
 
 import java.util.List;
@@ -89,5 +91,23 @@ public interface MetadataEntityRelationshipService {
      * @return 主子关系响应VO
      */
     ParentChildRelationshipRespVO createParentChildRelationship(@Valid ParentChildRelationshipSaveReqVO createReqVO);
+
+    /**
+     * 根据实体ID查询实体名称及其关联的子表信息
+     *
+     * @param entityId 实体ID
+     * @return 实体及其关联子表信息
+     */
+    EntityWithChildrenRespVO getEntityWithChildrenById(Long entityId);
+
+    /**
+     * 根据应用ID查询所有实体及字段信息
+     * 首先根据appId查询datasourceId，如果有多个datasource，默认用第一个
+     * 然后再查询相关的实体表和实体字段表
+     *
+     * @param appId 应用ID
+     * @return 应用实体和字段信息
+     */
+    AppEntitiesRespVO getAppEntitiesWithFields(Long appId);
 
 } 
