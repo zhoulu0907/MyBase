@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Table, Button, Space, Message, Input, Modal } from '@arco-design/web-react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { Table, Space, Message, Input, Modal } from '@arco-design/web-react';
 import { IconSearch, IconPlus } from '@arco-design/web-react/icon';
 import styles from './index.module.less';
 import OrganizationModal from './components/OrganizationModal';
@@ -7,6 +7,11 @@ import { getDeptList, createDept, updateDept, deleteDept } from '@onebase/platfo
 import { type DeptVO, type DeptForm } from '@onebase/platform-center';
 import { listToTree } from '@/utils/tree';
 import { debounce } from 'lodash-es'
+import { type PermissionKey } from '@/constants/permission';
+import { hasPermission, hasAnyPermission } from '@/utils/permission';
+import { PermissionButton as Button } from '@/components/PermissionControl';
+import PlaceholderPanel from '@/components/PlaceholderPanel';
+
 const OrganizationPage: React.FC = () => {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -14,6 +19,13 @@ const OrganizationPage: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [modalLoading, setModalLoading] = useState(false);
   const [editRecord, setEditRecord] = useState<any>(null);
+
+  const ACTION_PERMS: Record<string, PermissionKey> = {
+    QUERY: 'SYSTEM:DEPT:QUERY',
+    CREATE: 'SYSTEM:DEPT:CREATE',
+    DELETE: 'SYSTEM:DEPT:DELETE',
+    EDIT: 'SYSTEM:DEPT:EDIT',
+  };
 
   const columns = [
     {
@@ -41,16 +53,22 @@ const OrganizationPage: React.FC = () => {
       width: 150,
       render: (_: any, record: any) => (
         <Space size="mini">
-          <Button type="text" onClick={() => handleEdit(record)}>
+          <Button permission={ACTION_PERMS.EDIT} type="text" onClick={() => handleEdit(record)}>
             编辑
           </Button>
-          <Button type="text" onClick={() => handleDelete(record)}>
+          <Button permission={ACTION_PERMS.DELETE} type="text" onClick={() => handleDelete(record)}>
             删除
           </Button>
         </Space>
       )
     }
   ];
+
+  const filteredColumns = useMemo(() => {
+    const allowOps = hasAnyPermission([ACTION_PERMS.EDIT, ACTION_PERMS.DELETE]);
+    if (allowOps) return columns;
+    return columns.filter((column) => column.dataIndex !== 'operations');
+  }, [columns])
 
   const handleEdit = (record: any) => {
     setEditRecord(record);
@@ -132,7 +150,7 @@ const OrganizationPage: React.FC = () => {
     <div className={styles.organizationPage}>
       <div className={styles.pageHeader}>
         <div className={styles.leftContent}>
-          <Button type="primary" onClick={handleAdd} icon={<IconPlus />}>
+          <Button permission={ACTION_PERMS.CREATE} type="primary" onClick={handleAdd} icon={<IconPlus />}>
             添加
           </Button>
         </div>
@@ -147,17 +165,18 @@ const OrganizationPage: React.FC = () => {
           />
         </div>
       </div>
-
-      <Table
-        loading={loading}
-        columns={columns}
-        data={data}
-        rowKey="id"
-        childrenColumnName="children"
-        pagination={false}
-        virtualized={true}
-        scroll={{ y: 600 }}
-      />
+      <PlaceholderPanel hasPermission={hasPermission(ACTION_PERMS.QUERY)}>
+        <Table
+          loading={loading}
+          columns={filteredColumns}
+          data={data}
+          rowKey="id"
+          childrenColumnName="children"
+          pagination={false}
+          virtualized={true}
+          scroll={{ y: 600 }}
+        />
+      </PlaceholderPanel>
 
       <OrganizationModal
         visible={modalVisible}
