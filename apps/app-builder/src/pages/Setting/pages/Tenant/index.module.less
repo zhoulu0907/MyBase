@@ -1,90 +1,91 @@
 .tenantPage {
   height: 100%;
   min-height: 500px;
-  padding: 32px;
   box-sizing: border-box;
   overflow-y: auto;
   display: flex;
   justify-content: center;
-  background-color: #fff;
 
   .tenantPageMain {
-    margin-top: 64px;
-    width: 50%;
-    min-width: 640px;
+    width: 100%;
     display: flex;
     flex-direction: column;
 
-    .basicInfoWrapper {
+    .infoCard {
       margin-bottom: 16px;
-      display: flex;
-      .infoSection {
-        margin-left: 16px;
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-around;
+      padding: 24px 32px;
+      border-radius: 4px;
+      background: #FFF;
 
-        .infoLine {
+      &.infoCardPrimary {
+        display: flex;
+        justify-content: space-between;
+        & > .infoCardPrimaryLeft {
           display: flex;
           align-items: center;
-          gap: 8px;
-        }
-        .infoBlock {
-          padding: 4px 6px;
-          background-color: #f2f3f5;
-          color: var(--color-text-3);
-          font-size: 12px;
+          gap: 40px;
         }
       }
     }
-  }
 
-  .statsSection {
-    margin-bottom: 24px;
-    min-width: 180px;
-    display: flex;
-    gap: 20px;
-    .statCard {
-      background: #f7f8fa;
-      border-radius: 8px;
-      border: 1px solid #e5e6eb;
-      padding: 16px 24px;
-      min-width: 120px;
-      text-align: center;
-
-      .statLabel {
-        color: #86909c;
-        font-size: 14px;
-        margin-bottom: 4px;
-      }
-
-      .statValue {
-        color: #1d2129;
-        font-size: 22px;
-        font-weight: 600;
-      }
-    }
-  }
-
-  .section {
-    margin-bottom: 12px;
-
-    .sectionTitle {
-      font-size: 16px;
-      font-weight: 500;
-      margin-bottom: 16px;
-    }
-
-    .sectionBody {
+    .section {
       display: flex;
       flex-direction: column;
+      justify-content: flex-start;
+      align-items: flex-start;
       gap: 8px;
+
+      .sectionTitle {
+        font-size: 16px;
+        font-weight: 500;
+        margin-bottom: 16px;
+      }
+
+      .sectionBody {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .descriptionItem {
+        display: flex;
+        align-items: center;
+        .secretText {
+          display: 'inline-block';
+          color: var(--color-text-1);
+        }
+        .secretIcon {
+          margin-left: 8px;
+          cursor: 'pointer';
+          color: var(--color-text-1);        
+        }
+      }
     }
 
-    .descriptionItem {
+    .statsSection {
+      min-width: 180px;
       display: flex;
-      align-items: center;
+      gap: 20px;
+      .statCard {
+        background: #f7f8fa;
+        border-radius: 8px;
+        border: 1px solid #e5e6eb;
+        padding: 16px 24px;
+        min-width: 120px;
+        text-align: center;
+
+        .statLabel {
+          color: #86909c;
+          font-size: 14px;
+          margin-bottom: 4px;
+        }
+
+        .statValue {
+          color: #1d2129;
+          font-size: 22px;
+          font-weight: 600;
+        }
+      }
     }
   }
 }
