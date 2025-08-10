@@ -165,7 +165,7 @@ export default function EditorHeader() {
   };
 
   const toPreview = () => {
-    navigate(`/onebase/app/preview?pageSetCode=${pageSetCode}&pageType=${activeTab}`);
+    navigate(`/onebase/preview-app/preview?pageSetCode=${pageSetCode}&pageType=${activeTab}`);
   };
 
   return (
