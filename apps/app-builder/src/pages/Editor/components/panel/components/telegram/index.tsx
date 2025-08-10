@@ -1,3 +1,4 @@
+import { useI18n } from '@/hooks/useI18n';
 import React from 'react';
 import styles from './index.module.less';
 
