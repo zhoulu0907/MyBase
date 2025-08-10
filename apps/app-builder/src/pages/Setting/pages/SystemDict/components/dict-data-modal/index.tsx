@@ -1,6 +1,6 @@
 import { Form, Input, InputNumber, Modal, Switch } from '@arco-design/web-react';
 import { StatusEnum, type DictData } from '@onebase/platform-center';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 interface DictionaryItemModalProps {
   visible: boolean;
@@ -20,6 +20,7 @@ export default function DictionaryItemModal({
   title = '新增字典项'
 }: DictionaryItemModalProps) {
   const [form] = Form.useForm<DictData>();
+  const [statusCheckedValue, setStatusCheckedValue] = useState(false);
 
   useEffect(() => {
     if (visible) {
@@ -28,9 +29,10 @@ export default function DictionaryItemModal({
         value: initialValues?.value || '',
         dictType: initialValues?.dictType || '',
         remark: initialValues?.remark || '',
-        sort: initialValues?.sort ?? 0,
-        status: initialValues?.status ?? StatusEnum.ENABLE // 使用 StatusEnum.ENABLE 作为默认值
+        sort: initialValues?.sort ?? 0
       });
+      const isChecked = !initialValues || initialValues.status === StatusEnum.ENABLE ? true : false;
+      setStatusCheckedValue(isChecked);
     } else {
       form.resetFields();
     }
@@ -42,7 +44,8 @@ export default function DictionaryItemModal({
       visible={visible}
       onOk={() => {
         form.validate().then((values) => {
-          onOk(values);
+          const params = { ...values, status: statusCheckedValue ? StatusEnum.ENABLE : StatusEnum.DISABLE };
+          onOk(params);
         });
       }}
       onCancel={onCancel}
@@ -63,11 +66,8 @@ export default function DictionaryItemModal({
         <Form.Item label="显示顺序" field="sort" rules={[{ required: true, message: '请输入显示顺序' }]}>
           <InputNumber min={0} style={{ width: '100%' }} />
         </Form.Item>
-        <Form.Item label="是否启用" field="status" triggerPropName="checked">
-          <Switch
-            defaultChecked={form.getFieldValue('status') === StatusEnum.ENABLE}
-            onChange={(checked) => form.setFieldValue('status', checked ? StatusEnum.ENABLE : StatusEnum.DISABLE)}
-          />
+        <Form.Item label="是否启用">
+          <Switch checked={statusCheckedValue} onChange={setStatusCheckedValue} />
         </Form.Item>
       </Form>
     </Modal>

@@ -1,4 +1,6 @@
 import InfoPanel from '@/components/InfoPanel';
+import DictionaryTable from '@/pages/Setting/pages/SystemDict/components/dict-data-table';
+import DictList from '@/pages/Setting/pages/SystemDict/components/dict-list';
 import { Button, Divider, Empty, Layout, Message, Modal, Space } from '@arco-design/web-react';
 import type { DictData, DictItem, PageParam } from '@onebase/platform-center';
 import {
@@ -10,13 +12,12 @@ import {
   getDictDataListByPage,
   getDictDetail,
   updateDict,
-  updateDictData
+  updateDictData,
+  updateDictDataStatus
 } from '@onebase/platform-center';
 import { debounce } from 'lodash-es';
 import { useEffect, useState } from 'react';
 import DictDataModal from './components/dict-data-modal';
-import DictionaryTable from './components/dict-data-table';
-import DictList from './components/dict-list';
 import DictModal from './components/dict-modal';
 import styles from './index.module.less';
 
@@ -238,11 +239,9 @@ export default function SystemDictPage() {
   const handleUpdateDictDataStatus = (id: number, status: number) => {
     const params = {
       id,
-      status,
-      dictType: activeDict?.type
+      status
     };
-    updateDictData(params).then(() => {
-      // TODO: 待接口修改后验证
+    updateDictDataStatus(params).then(() => {
       Message.success('操作成功');
       loadTableData();
     });

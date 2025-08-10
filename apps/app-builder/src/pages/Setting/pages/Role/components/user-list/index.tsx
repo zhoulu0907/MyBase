@@ -110,7 +110,7 @@ const UserList: React.FC<UserListProps> = ({ selectedRoleId = undefined }: UserL
       content: `确认要将用户 ${record.nickname} 从该角色下删除吗？`,
       onOk: async () => {
         try {
-          await removeRoleUsers(selectedRoleId, record.id);
+          await removeRoleUsers(selectedRoleId, [record.id]);
           Message.success('用户移除成功');
           getUserList(searchValue);
         } catch (error) {
@@ -202,6 +202,7 @@ const UserList: React.FC<UserListProps> = ({ selectedRoleId = undefined }: UserL
           }}
           onOk={handleUserSelectOk}
           currentRoleUsers={data}
+          selectedRoleId={selectedRoleId}
         />
       )}
     </div>

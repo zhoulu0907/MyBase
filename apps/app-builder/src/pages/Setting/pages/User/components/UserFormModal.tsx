@@ -31,15 +31,18 @@ export default function UserFormModal({
   const [form] = Form.useForm();
   const [loading, setLoading] = React.useState(false);
   const [roleList, setRoleList] = useState<SimpleRoleVO[]>([]);
+  const [statusCheckedValue, setStatusCheckedValue] = useState(false);
 
   useEffect(() => {
     if (visible) {
       form.resetFields();
       if (initialValues) {
         form.setFieldsValue(initialValues);
+        setStatusCheckedValue(initialValues.status === StatusEnum.ENABLE ? true : false);
       } else {
         // 创建时用户状态默认为开启
         form.setFieldValue('status', StatusEnum.ENABLE);
+        setStatusCheckedValue(true);
       }
     }
   }, [visible, initialValues, form]);
@@ -70,8 +73,7 @@ export default function UserFormModal({
 
     try {
       const values = await form.validate();
-      console.log('values', values);
-      const params = { ...values, status: values.status ? StatusEnum.ENABLE : StatusEnum.DISABLE };
+      const params = { ...values, status: statusCheckedValue ? StatusEnum.ENABLE : StatusEnum.DISABLE };
       setLoading(true);
       if (mode === 'create') {
         await createUser(params);
@@ -175,11 +177,8 @@ export default function UserFormModal({
         <Row gutter={24}>
           <Col span={12}>
             <span style={{ marginRight: 8 }}>启用状态</span>
-            <Form.Item label=" " field="status" style={{ marginBottom: 0 }} triggerPropName="checked">
-              <Switch
-                defaultChecked={mode === 'create' ? true : initialValues?.status === StatusEnum.ENABLE}
-                onChange={(checked) => form.setFieldValue('status', checked ? StatusEnum.ENABLE : StatusEnum.DISABLE)}
-              />
+            <Form.Item label=" " style={{ marginBottom: 0 }} triggerPropName="checked">
+              <Switch checked={statusCheckedValue} onChange={setStatusCheckedValue} />
             </Form.Item>
           </Col>
         </Row>
