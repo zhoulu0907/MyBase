@@ -7,7 +7,7 @@ import {
     type UpdateApplicationMenuOrderReq,
     type UpdateApplicationMenuVisibleReq
 } from '../types/app_menu';
-import appService from './clients/app';
+import { appService } from './clients';
 
 export const listApplicationMenu = (params: ListApplicationMenuReq) => {
   return appService.get('/menu/list', params);

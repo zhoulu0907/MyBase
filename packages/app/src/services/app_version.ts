@@ -1,10 +1,10 @@
 import {
-  type CreateApplicationVersionReq,
-  type DeleteApplicationVersionReq,
-  type ListApplicationVersionReq,
-  type RestoreApplicationVersionReq
+    type CreateApplicationVersionReq,
+    type DeleteApplicationVersionReq,
+    type ListApplicationVersionReq,
+    type RestoreApplicationVersionReq
 } from '../types/app_version';
-import appService from './clients/app';
+import { appService } from './clients';
 
 export const listApplicationVersion = (params: ListApplicationVersionReq) => {
   return appService.get('/version/list', params);

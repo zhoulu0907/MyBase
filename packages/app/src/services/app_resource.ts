@@ -1,5 +1,5 @@
 import { CreatePageSetReq, DeletePageSetReq, GetAppIdByPageSetCodeReq, GetPageSetCodeReq, LoadPageSetReq, SavePageSetReq } from '../types';
-import appService from './clients/app';
+import { appService } from './clients';
 
 export const getPageSetCode = (params: GetPageSetCodeReq) => {
   return appService.get('/resource/page_set/code', params);

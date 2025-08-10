@@ -1,13 +1,13 @@
 // 应用服务
 
 import {
-  type CreateApplicationReq,
-  type DeleteApplicationReq,
-  type ListApplicationReq,
-  type UpdateApplicationNameReq,
-  type UpdateApplicationReq
+    type CreateApplicationReq,
+    type DeleteApplicationReq,
+    type ListApplicationReq,
+    type UpdateApplicationNameReq,
+    type UpdateApplicationReq
 } from '../types/application';
-import appService from './clients/app';
+import { appService } from './clients';
 
 export const listApplication = (params: ListApplicationReq) => {
   return appService.get('/application/page', params);
