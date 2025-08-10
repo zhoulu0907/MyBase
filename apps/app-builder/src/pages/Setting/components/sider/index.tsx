@@ -1,19 +1,18 @@
 import { Button, Layout, Menu } from '@arco-design/web-react';
 import {
   IconDesktop,
+  IconFile,
+  IconIdcard,
+  IconList,
   IconMenuFold,
   IconMenuUnfold,
   IconUser,
-  IconUserAdd,
-  IconFile,
-  IconList,
-  IconIdcard
+  IconUserAdd
 } from '@arco-design/web-react/icon';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import type { MenuItemType } from './menuData';
 import styles from './sider.module.less';
-import { hasMenu } from '@/utils/permission';
 
 const { Sider } = Layout;
 const MenuItem = Menu.Item;
@@ -30,7 +29,7 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
   const navigate = useNavigate();
   const location = useLocation();
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
-  const iconStyle = { fontSize: '18px' }
+  const iconStyle = { fontSize: '18px' };
   // 默认菜单项
   const defaultMenuItems = useMemo(
     () => [

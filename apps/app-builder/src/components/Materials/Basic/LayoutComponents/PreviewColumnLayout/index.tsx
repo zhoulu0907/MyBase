@@ -17,9 +17,7 @@ const XPreviewColumnLayout = (props: XColumnLayoutConfig) => {
     clearCurComponentID,
     setCurComponentSchema,
     pageComponentSchemas,
-    setPageComponentSchemas,
     delPageComponentSchemas,
-    showDeleteButton,
     setShowDeleteButton,
     colComponentsMap,
     setColComponentsMap
@@ -39,19 +37,6 @@ const XPreviewColumnLayout = (props: XColumnLayoutConfig) => {
       );
     }
   }, [colCount, id, colComponentsMap.colComponents, setColComponentsMap]);
-
-  const handleDeleteComponent = (componentId: string) => {
-    // 从组件列表中移除
-    // 遍历二维数组的每一列，过滤掉 id 匹配的组件
-    const updatedColumns = colComponents.map((col) => col.filter((cp) => cp.id !== componentId));
-    setColComponentsMap(id, updatedColumns);
-
-    // 如果删除的是当前选中的组件，清除选中状态
-    if (curComponentID === componentId) {
-      delPageComponentSchemas(componentId);
-      clearCurComponentID();
-    }
-  };
 
   return (
     <Layout className={styles.XPreviewColumnLayout}>

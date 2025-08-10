@@ -22,7 +22,7 @@ const MaterialContainer: React.FC<MaterialContainerProps> = ({ activeTab }) => {
   const [baseItems, setBaseItems] = useState<{ key: CategoryKey; items: any[] }[]>([]);
 
   // 按 category 分类，分成 3 个 items
-  const baseNavigateItems = allTemplate.base.find((cat) => cat.category === 'navigate')?.items || [];
+  //   const baseNavigateItems = allTemplate.base.find((cat) => cat.category === 'navigate')?.items || [];
   const baseLayoutItems = allTemplate.base.find((cat) => cat.category === 'layout')?.items || [];
   const baseFormItems = allTemplate.base.find((cat) => cat.category === 'form')?.items || [];
   const baseListItems = allTemplate.base.find((cat) => cat.category === 'list')?.items || [];
