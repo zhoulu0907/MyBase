@@ -3,6 +3,7 @@ import activeFormDesignSVG from '@/assets/images/form_design_active_icon.svg';
 import defaultFormDesignSVG from '@/assets/images/form_design_default_icon.svg';
 import activeListDesignSVG from '@/assets/images/list_design_active_icon.svg';
 import defaultListDesignSVG from '@/assets/images/list_design_default_icon.svg';
+import { useI18n } from '@/hooks/useI18n';
 import { usePageEditorStore } from '@/hooks/useStore';
 import { useAppStore, useBasicEditorStore, useFromEditorStore, useListEditorStore } from '@/store';
 import { Button, Message, Tabs } from '@arco-design/web-react';
@@ -44,6 +45,7 @@ const tabData = [
 ];
 
 export default function EditorHeader() {
+  const { t } = useI18n();
   const { clearCurComponentID } = usePageEditorStore();
   const {
     components: fromComponents,
@@ -223,7 +225,7 @@ export default function EditorHeader() {
             /* 预览逻辑 */
           }}
         >
-          预览
+          {t('editor.preview')}
         </Button>
         <Button
           type="primary"

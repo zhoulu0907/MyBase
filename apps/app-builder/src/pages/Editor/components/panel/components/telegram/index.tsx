@@ -1,11 +1,10 @@
 import React from 'react';
-import { useTranslation } from 'react-i18next';
 import styles from './index.module.less';
 
 interface TelegramContainerProps {}
 
 const TelegramContainer: React.FC<TelegramContainerProps> = ({}) => {
-  const { t } = useTranslation();
+  const { t } = useI18n();
 
   return (
     <div>

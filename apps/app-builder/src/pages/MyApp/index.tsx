@@ -17,8 +17,8 @@ import {
 import dayjs from 'dayjs';
 import { debounce } from 'lodash-es';
 import React, { useCallback, useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 // import { useNavigate } from 'react-router-dom';
+import { useI18n } from '@/hooks/useI18n';
 import styles from './index.module.less';
 
 const Option = Select.Option;
@@ -60,7 +60,7 @@ const statusOptions = [
 const MyAppPage: React.FC = () => {
   const [form] = Form.useForm();
   // const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t } = useI18n();
 
   const [pageSize, setPageSize] = useState(8);
   const [pageNo, setPageNo] = useState(1);

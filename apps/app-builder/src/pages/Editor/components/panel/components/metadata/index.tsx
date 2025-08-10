@@ -1,9 +1,9 @@
 import FieldCard from '@/components/FieldCard';
 import { FORM_COMPONENT_TYPES } from '@/constants/componentTypes';
+import { useI18n } from '@/hooks/useI18n';
 import { Button, Collapse } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
 import React, { useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { ReactSortable } from 'react-sortablejs';
 import { COMPONENT_GROUP_NAME } from '../../../const';
 import styles from './index.module.less';
@@ -13,7 +13,7 @@ const CollapseItem = Collapse.Item;
 interface MetadataContainerProps {}
 
 const MetadataContainer: React.FC<MetadataContainerProps> = ({}) => {
-  const { t } = useTranslation();
+  const { t } = useI18n();
 
   const [fieldItems, setFieldItems] = useState<{ id: string; displayName: string; type: string }[]>([
     {

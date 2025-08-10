@@ -1,7 +1,7 @@
+import { useI18n } from '@/hooks/useI18n';
 import { Breadcrumb } from '@arco-design/web-react';
 import { IconHome } from '@arco-design/web-react/icon';
 import React, { useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styles from './index.module.less';
 
@@ -17,7 +17,7 @@ interface BreadcrumbProps {
 }
 
 const AppBreadcrumb: React.FC<BreadcrumbProps> = ({ className, items }) => {
-  const { t } = useTranslation();
+  const { t } = useI18n();
   const location = useLocation();
   const navigate = useNavigate();
 

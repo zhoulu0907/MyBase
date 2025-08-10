@@ -1,5 +1,6 @@
 import CreateGroupIcon from '@/assets/images/create_group.svg';
 import CreatePageIcon from '@/assets/images/create_page.svg';
+import { useI18n } from '@/hooks/useI18n';
 import { useAppStore, useBasicEditorStore } from '@/store';
 import { Button, Dropdown, Form, Input, Layout, Menu, Message, Tree } from '@arco-design/web-react';
 import { IconPlus, IconSearch } from '@arco-design/web-react/icon';
@@ -22,7 +23,6 @@ import {
   type UpdateApplicationMenuNameReq
 } from '@onebase/app';
 import { useEffect, useState, type FC } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { EDITOR_TYPES } from '../Editor/components/const';
 import CopyModal from './components/Modals/CopyModal';
@@ -52,7 +52,7 @@ interface TreeNode {
 }
 
 const PageManagerPage: FC = () => {
-  const { t } = useTranslation();
+  const { t } = useI18n();
   const navigate = useNavigate();
 
   const { curAppId } = useAppStore();

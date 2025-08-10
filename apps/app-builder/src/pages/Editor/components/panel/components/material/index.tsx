@@ -1,8 +1,8 @@
 import MaterialCard from '@/components/MaterialCard';
 import allTemplate from '@/components/Materials/template';
+import { useI18n } from '@/hooks/useI18n';
 import { Collapse, Tabs } from '@arco-design/web-react';
 import React, { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { ReactSortable } from 'react-sortablejs';
 import { COMPONENT_GROUP_NAME, EDITOR_TYPES, type EditorType } from '../../../const';
 import styles from './index.module.less';
@@ -16,7 +16,7 @@ interface MaterialContainerProps {
 }
 
 const MaterialContainer: React.FC<MaterialContainerProps> = ({ activeTab }) => {
-  const { t } = useTranslation();
+  const { t } = useI18n();
   const [activeComponentTab, setActiveComponentTab] = useState('base-component');
 
   const [baseItems, setBaseItems] = useState<{ key: CategoryKey; items: any[] }[]>([]);
