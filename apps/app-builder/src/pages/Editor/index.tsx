@@ -1,10 +1,10 @@
 import React from 'react';
 import { Route, Routes } from 'react-router-dom';
-import { FormEditor } from '../FromEditor';
-import { ListEditor } from '../ListEditor';
 import { EDITOR_TYPES } from './components/const';
 import EditorHeader from './components/header/Header';
 import styles from './index.module.less';
+import { FormEditor } from './pages/FromEditor';
+import { ListEditor } from './pages/ListEditor';
 
 const EditorPage: React.FC = () => {
   return (

@@ -73,7 +73,7 @@ export async function startSavePageSet(params: SavePageSetParams) {
         fromColComponentsMap.colComponents.forEach((cols: any[][], parentCode: string) => {
             console.log(parentCode, ": cols: ", cols);
 
-            cols.forEach((col: any[], index: number) => {
+            cols && cols &&cols.forEach((col: any[], index: number) => {
                 col.forEach((component: any, colIndex: number) => {
                     colComponents.push({
                         componentCode: component.id,
@@ -107,7 +107,7 @@ export async function startSavePageSet(params: SavePageSetParams) {
         const colComponents: any[] = [];
         listColComponentsMap.colComponents.forEach((cols: any[][], parentCode: string) => {
             console.log(parentCode, ": cols: ", cols);
-            cols.forEach((col: any[], index: number) => {
+            cols && cols.forEach((col: any[], index: number) => {
                 col.forEach((component: any, colIndex: number) => {
                     colComponents.push({
                         componentCode: component.id,

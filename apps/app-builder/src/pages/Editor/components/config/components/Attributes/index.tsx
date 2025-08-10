@@ -1,5 +1,6 @@
 import type { TXInputTextEditData } from '@/components/Materials/Basic/FormComponents/InputText/schema';
 import { CONFIG_TYPES } from '@/components/Materials/constants';
+import { useI18n } from '@/hooks/useI18n';
 import { usePageEditorStore } from '@/hooks/useStore';
 import {
   Button,
@@ -15,7 +16,6 @@ import {
 } from '@arco-design/web-react';
 import { IconDelete, IconDragDotVertical } from '@arco-design/web-react/icon';
 import { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { ReactSortable } from 'react-sortablejs';
 import styles from './index.module.less';
 
@@ -30,7 +30,7 @@ interface ConfigsProps {
 }
 
 const Attributes = ({ cpID }: ConfigsProps) => {
-  const { t } = useTranslation();
+  const { t } = useI18n();
 
   const { curComponentSchema, setCurComponentSchema, setPageComponentSchemas } = usePageEditorStore();
 

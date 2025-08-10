@@ -1,13 +1,13 @@
+import { useI18n } from '@/hooks/useI18n';
 import { Card, Space, Typography } from '@arco-design/web-react';
 import { IconHome, IconInfoCircle } from '@arco-design/web-react/icon';
 import React from 'react';
-import { useTranslation } from 'react-i18next';
 import styles from './index.module.less';
 
 const { Title, Text } = Typography;
 
 const Welcome: React.FC = () => {
-  const { t } = useTranslation();
+  const { t } = useI18n();
 
   return (
     <div className={styles.welcome}>

@@ -1,11 +1,11 @@
 import LogoSVG from '@/assets/images/ob_logo.svg';
+import { useI18n } from '@/hooks/useI18n';
 import { UserPermissionManager } from '@/utils/permission';
 import { Avatar, Dropdown, Layout, Menu } from '@arco-design/web-react';
 import { IconPoweroff, IconUser } from '@arco-design/web-react/icon';
 import { TokenManager } from '@onebase/common';
 import { getPermissionInfo } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import styles from './index.module.less';
 
@@ -17,7 +17,7 @@ interface HeaderProps {
 
 const AppHeader: React.FC<HeaderProps> = ({ className }) => {
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t } = useI18n();
 
   const [nickname, setNickname] = useState('U');
   // 获取用户信息

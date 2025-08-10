@@ -1,5 +1,5 @@
+import { useI18n } from '@/hooks/useI18n';
 import { Tabs, Typography } from '@arco-design/web-react';
-import { useTranslation } from 'react-i18next';
 import Advanced from './Advanced';
 import Attributes from './Attributes';
 import TabTitle from './components/TabTitle';
@@ -16,7 +16,7 @@ interface MaterialConfigerProps {
 }
 
 const MaterialConfiger = ({ cpID }: MaterialConfigerProps) => {
-  const { t } = useTranslation();
+  const { t } = useI18n();
 
   return (
     <div className={styles.configs}>
