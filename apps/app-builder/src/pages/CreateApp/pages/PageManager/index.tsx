@@ -1,7 +1,8 @@
 import CreateGroupIcon from '@/assets/images/create_group.svg';
 import CreatePageIcon from '@/assets/images/create_page.svg';
 import { useI18n } from '@/hooks/useI18n';
-import { EDITOR_TYPES } from '@/pages/Editor/components/const';
+
+import { EDITOR_TYPES } from '@/pages/Editor/utils/const';
 import { useAppStore, useBasicEditorStore } from '@/store';
 import { Button, Dropdown, Form, Input, Layout, Menu, Message, Tree } from '@arco-design/web-react';
 import { IconPlus, IconSearch } from '@arco-design/web-react/icon';

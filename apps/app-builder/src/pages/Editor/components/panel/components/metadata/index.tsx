@@ -1,11 +1,11 @@
 import FieldCard from '@/components/FieldCard';
 import { FORM_COMPONENT_TYPES } from '@/constants/componentTypes';
 import { useI18n } from '@/hooks/useI18n';
+import { COMPONENT_GROUP_NAME } from '@/pages/Editor/utils/const';
 import { Button, Collapse } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
 import React, { useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
-import { COMPONENT_GROUP_NAME } from '../../../const';
 import styles from './index.module.less';
 
 const CollapseItem = Collapse.Item;
@@ -80,7 +80,7 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({}) => {
 
   return (
     <div>
-      <div className={styles.rightHeader}>{t('formEditor.metadata')}</div>
+      <div className={styles.rightHeader}>{t('editor.metadata')}</div>
 
       <div className={styles.rightBody}>
         <div className={styles.entityHeader}>业务实体</div>

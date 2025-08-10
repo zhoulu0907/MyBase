@@ -11,8 +11,8 @@ import { IconArrowLeft } from '@arco-design/web-react/icon';
 import { getAppIdByPageSetCode } from '@onebase/app';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { EDITOR_TYPES } from '../const';
-import { startLoadPageSet, startSavePageSet, type SavePageSetParams } from '../utils';
+import { startLoadPageSet, startSavePageSet, type SavePageSetParams } from '../../utils/app_resource';
+import { EDITOR_TYPES } from '../../utils/const';
 import styles from './index.module.less';
 
 const tabData = [
@@ -164,6 +164,10 @@ export default function EditorHeader() {
     navigate(`/onebase/create-app/page-manager?appId=${appId}`);
   };
 
+  const toPreview = () => {
+    navigate(`/onebase/app/preview?pageSetCode=${pageSetCode}&pageType=${activeTab}`);
+  };
+
   return (
     <div className={styles.editorHeader}>
       {/* 左侧 */}
@@ -220,13 +224,7 @@ export default function EditorHeader() {
 
       <div className={styles.right}>
         <div className={styles.editorStatus}>已保存，未发布</div>
-        <Button
-          onClick={() => {
-            /* 预览逻辑 */
-          }}
-        >
-          {t('editor.preview')}
-        </Button>
+        <Button onClick={toPreview}>{t('editor.preview')}</Button>
         <Button
           type="primary"
           onClick={() => {

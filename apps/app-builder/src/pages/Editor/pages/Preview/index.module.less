@@ -1,0 +1,58 @@
+@workspace-padding: 24px;
+
+.previewPage {
+  width: 100vw;
+  height: 100%;
+
+  display: block;
+  padding: @workspace-padding;
+  box-sizing: border-box;
+  background-color: #ffffff;
+  position: relative;
+
+  overflow-y: auto;
+
+  /* 自定义滚动条样式 */
+  &::-webkit-scrollbar {
+    width: 5px;
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #e0e0e0;
+    border-radius: 0px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}
+
+.workspaceContent {
+  background-color: #fff;
+
+  min-width: 348px;
+  min-height: calc(100vh - var(--editor-header-height) - @workspace-padding * 2);
+  width: 100%;
+  padding: 16px;
+  box-sizing: border-box;
+  border-radius: 4px;
+
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-content: flex-start;
+}
+
+// 组件样式
+.componentItem {
+  cursor: move;
+  padding: 6px;
+  box-sizing: border-box;
+  border: 1px dashed transparent;
+  border-radius: 4px;
+  transition: border-color 0.2s ease;
+  position: relative;
+
+  &:hover {
+    border-color: #4fae7b;
+  }
+}

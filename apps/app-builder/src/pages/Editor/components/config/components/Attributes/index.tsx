@@ -171,7 +171,7 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                     >
                       {item.range.map((item: any) => (
                         <Radio key={item.key} value={item.value} className={styles.widthRadio}>
-                          {item.text && item.text.startsWith('formEditor.') ? t(item.text) : item.text}
+                          {item.text && item.text.startsWith('editor.') ? t(item.text) : item.text}
                         </Radio>
                       ))}
                     </Radio.Group>

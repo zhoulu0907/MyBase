@@ -120,7 +120,7 @@
   "myApp": {
     "createApp": "创建应用"
   },
-  "formEditor": {
+  "editor": {
     "material": "组件",
     "metadata": "元数据项",
     "telegram": "页面分享",

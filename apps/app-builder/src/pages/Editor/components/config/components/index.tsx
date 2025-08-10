@@ -21,12 +21,12 @@ const MaterialConfiger = ({ cpID }: MaterialConfigerProps) => {
   return (
     <div className={styles.configs}>
       <Tabs defaultActiveTab="attributes" type="line" size="default">
-        <TabPane key="attributes" title={<TabTitle title={t('formEditor.attribute')} />}>
+        <TabPane key="attributes" title={<TabTitle title={t('editor.attribute')} />}>
           <Typography.Paragraph>
             <Attributes cpID={cpID} />
           </Typography.Paragraph>
         </TabPane>
-        <TabPane key="advanced" title={<TabTitle title={t('formEditor.advanced')} />}>
+        <TabPane key="advanced" title={<TabTitle title={t('editor.advanced')} />}>
           <Typography.Paragraph>
             <Advanced />
           </Typography.Paragraph>
