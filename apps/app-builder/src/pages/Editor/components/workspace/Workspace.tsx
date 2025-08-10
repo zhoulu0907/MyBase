@@ -122,6 +122,16 @@ export default function EditorWorkspace() {
 
             console.log(`拖入组件 ${cpID} ${itemType}`);
 
+            if (cpID) {
+              const cpSchema = pageComponentSchemas.get(cpID);
+              if (cpSchema && cpSchema.config && cpSchema.editData) {
+                setCurComponentID(cpID!);
+                setCurComponentSchema(cpSchema);
+                setShowDeleteButton(false);
+                return;
+              }
+            }
+
             const schema = getComponentSchema(itemType as any);
             // console.log("schema", schema)
             schema.config.cpName = itemDisplayName;
