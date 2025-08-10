@@ -2,9 +2,9 @@ import React, { useEffect, useState } from 'react';
 // import { useNavigate } from 'react-router-dom';
 import { Layout, Menu, Tooltip } from '@arco-design/web-react';
 import { IconCommon, IconShareAlt } from '@arco-design/web-react/icon';
-import DataSourcePage from './Pages/DataSource';
-import EntityPage from './Pages/Entity';
 import styles from './index.module.less';
+import DataSourcePage from './pages/DataSource';
+import EntityPage from './pages/Entity';
 
 const DataFactoryPage: React.FC = () => {
   // const navigate = useNavigate();
