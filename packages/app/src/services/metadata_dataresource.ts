@@ -1,13 +1,13 @@
 // 数据源服务
 
 import type {
-  DatasourceSaveReqVO,
-  DatasourceTestConnectionReqVO,
-  GetColumnsParams,
-  GetDatasourcePageParams,
-  GetTablesParams
+    DatasourceSaveReqVO,
+    DatasourceTestConnectionReqVO,
+    GetColumnsParams,
+    GetDatasourcePageParams,
+    GetTablesParams
 } from '../types/dataresource';
-import metadataService from './clients/metadata';
+import { metadataService } from './clients';
 
 /**
  * 获取所有支持的数据源类型

@@ -124,6 +124,7 @@ export default function EditorWorkspace() {
 
             if (cpID) {
               const cpSchema = pageComponentSchemas.get(cpID);
+              // 如果组件已经存在，则不进行创建
               if (cpSchema && cpSchema.config && cpSchema.editData) {
                 setCurComponentID(cpID!);
                 setCurComponentSchema(cpSchema);

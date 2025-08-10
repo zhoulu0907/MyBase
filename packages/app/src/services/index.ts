@@ -2,7 +2,6 @@ export * from './app_menu';
 export * from './app_resource';
 export * from './app_version';
 export * from './application';
-export * from './base';
 export * from './metadata_dataresource';
 export * from './metadata_entity';
 export * from './tag';

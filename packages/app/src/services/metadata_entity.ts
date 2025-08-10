@@ -1,5 +1,5 @@
 // 实体管理服务
-import metadataService from './clients/metadata';
+import { metadataService } from './clients';
 
 // 实体相关接口类型定义
 export interface CreateEntityReqVO {
