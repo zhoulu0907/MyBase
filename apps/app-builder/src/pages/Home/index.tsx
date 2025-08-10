@@ -22,7 +22,7 @@ const Home: React.FC = () => {
 
   return (
     <Layout className={styles.homePage}>
-      {location.pathname.includes('create-app') || location.pathname.includes('app') ? null : (
+      {location.pathname.includes('create-app') || location.pathname.includes('preview-app') ? null : (
         <AppHeader className={styles.myAppPageHeader} />
       )}
 
@@ -46,7 +46,7 @@ const Home: React.FC = () => {
                   <Route path="app-release" element={<AppReleasePage />} />
                 </Route>
 
-                <Route path="app">
+                <Route path="preview-app">
                   <Route path="preview" element={<Preview />} />
                 </Route>
               </Routes>
