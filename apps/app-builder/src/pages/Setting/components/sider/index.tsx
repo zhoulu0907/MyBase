@@ -1,5 +1,14 @@
 import { Button, Layout, Menu } from '@arco-design/web-react';
-import { IconDesktop, IconMenuFold, IconMenuUnfold, IconUser } from '@arco-design/web-react/icon';
+import {
+  IconDesktop,
+  IconMenuFold,
+  IconMenuUnfold,
+  IconUser,
+  IconUserAdd,
+  IconFile,
+  IconList,
+  IconIdcard
+} from '@arco-design/web-react/icon';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import type { MenuItemType } from './menuData';
@@ -21,49 +30,49 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
   const navigate = useNavigate();
   const location = useLocation();
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
-
+  const iconStyle = { fontSize: '18px' }
   // 默认菜单项
   const defaultMenuItems = useMemo(
     () => [
       {
         key: 'platform-info',
         title: '平台信息',
-        icon: <IconDesktop />,
+        icon: <IconDesktop style={iconStyle} />,
         path: '/onebase/setting/platform-info',
         permissionKey: 'SYSTEM:PLATFORM_INFO'
       },
       {
         key: 'user',
         title: '用户管理',
-        icon: <IconUser />,
+        icon: <IconUserAdd style={iconStyle} />,
         path: '/onebase/setting/user',
         permissionKey: 'SYSTEM:USER'
       },
       {
         key: 'role',
         title: '角色管理',
-        icon: <IconUser />,
+        icon: <IconUser style={iconStyle} />,
         path: '/onebase/setting/role',
         permissionKey: 'SYSTEM:ROLE'
       },
       {
         key: 'organization',
         title: '组织管理',
-        icon: <IconUser />,
+        icon: <IconList style={iconStyle} />,
         path: '/onebase/setting/organization',
         permissionKey: 'SYSTEM:DEPT'
       },
       {
         key: 'system-dict',
         title: '数据字典管理',
-        icon: <IconUser />,
+        icon: <IconFile style={iconStyle} />,
         path: '/onebase/setting/system-dict',
         permissionKey: 'SYSTEM:DICT'
       },
       {
         key: '租户信息',
         title: '租户信息',
-        icon: <IconUser />,
+        icon: <IconIdcard style={iconStyle} />,
         path: '/onebase/setting/tenant',
         permissionKey: 'SYSTEM:TENANT'
       }
@@ -157,7 +166,7 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
         }
 
         return (
-          <MenuItem key={item.key} disabled={item.disabled}>
+          <MenuItem key={item.key} disabled={item.disabled} style={{ display: 'flex', alignItems: 'center' }}>
             {item.icon}
             <span className={styles.menuTitle}>{item.title}</span>
           </MenuItem>
