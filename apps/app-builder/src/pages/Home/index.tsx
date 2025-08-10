@@ -1,18 +1,18 @@
 import { Layout } from '@arco-design/web-react';
 import React from 'react';
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
-import AppCenterPage from '../AppCenter';
-import AppReleasePage from '../AppRelease';
-import AppSettingPage from '../AppSetting';
 import CreateAppPage from '../CreateApp';
-import DataFactoryPage from '../DataFactory';
-import HelpCenterPage from '../HelpCenter';
-import IntegratedManagementPage from '../IntegratedManagement';
-import MallCenterPage from '../MallCenter';
-import MyAppPage from '../MyApp';
-import PageManagerPage from '../PageManager';
+import AppReleasePage from '../CreateApp/pages/AppRelease';
+import AppSettingPage from '../CreateApp/pages/AppSetting';
+import DataFactoryPage from '../CreateApp/pages/DataFactory';
+import IntegratedManagementPage from '../CreateApp/pages/IntegratedManagement';
+import PageManagerPage from '../CreateApp/pages/PageManager';
 import { AppHeader } from './components/header';
 import styles from './index.module.less';
+import AppCenterPage from './pages/AppCenter';
+import HelpCenterPage from './pages/HelpCenter';
+import MallCenterPage from './pages/MallCenter';
+import MyAppPage from './pages/MyApp';
 
 const Content = Layout.Content;
 
