@@ -8,7 +8,7 @@ const TelegramContainer: React.FC<TelegramContainerProps> = ({}) => {
 
   return (
     <div>
-      <div className={styles.rightHeader}>{t('formEditor.telegram')}</div>
+      <div className={styles.rightHeader}>{t('editor.telegram')}</div>
 
       <div className={styles.rightBody}></div>
     </div>

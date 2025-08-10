@@ -7,6 +7,7 @@ import AppSettingPage from '../CreateApp/pages/AppSetting';
 import DataFactoryPage from '../CreateApp/pages/DataFactory';
 import IntegratedManagementPage from '../CreateApp/pages/IntegratedManagement';
 import PageManagerPage from '../CreateApp/pages/PageManager';
+import Preview from '../Editor/pages/Preview';
 import { AppHeader } from './components/header';
 import styles from './index.module.less';
 import AppCenterPage from './pages/AppCenter';
@@ -21,7 +22,9 @@ const Home: React.FC = () => {
 
   return (
     <Layout className={styles.homePage}>
-      {location.pathname.includes('create-app') ? null : <AppHeader className={styles.myAppPageHeader} />}
+      {location.pathname.includes('create-app') || location.pathname.includes('app') ? null : (
+        <AppHeader className={styles.myAppPageHeader} />
+      )}
 
       <Layout className={styles.myAppPageContent}>
         <Layout>
@@ -41,6 +44,10 @@ const Home: React.FC = () => {
                   <Route path="data-factory" element={<DataFactoryPage />} />
                   <Route path="app-setting" element={<AppSettingPage />} />
                   <Route path="app-release" element={<AppReleasePage />} />
+                </Route>
+
+                <Route path="app">
+                  <Route path="preview" element={<Preview />} />
                 </Route>
               </Routes>
             </div>

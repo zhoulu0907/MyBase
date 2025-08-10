@@ -1,8 +1,8 @@
+import type { EditorType } from '@/pages/Editor/utils/const';
+import { EDITOR_TYPES } from '@/pages/Editor/utils/const';
 import { Button, Tabs } from '@arco-design/web-react';
 import { IconBranch, IconLayout, IconLeft, IconRight, IconSend } from '@arco-design/web-react/icon';
 import { useEffect, useState } from 'react';
-import type { EditorType } from '../const';
-import { EDITOR_TYPES } from '../const';
 import MaterialContainer from './components/material';
 import MetadataContainer from './components/metadata';
 import TelegramContainer from './components/telegram';

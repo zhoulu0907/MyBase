@@ -120,7 +120,7 @@
   "myApp": {
     "createApp": "Create App"
   },
-  "formEditor": {
+  "editor": {
     "material": "Material",
     "metadata": "Metadata",
     "telegram": "Page Share",

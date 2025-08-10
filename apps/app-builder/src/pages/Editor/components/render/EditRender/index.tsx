@@ -9,7 +9,7 @@ import {
   SHOW_COMPONENT_TYPES
 } from '@/constants/componentTypes';
 import React from 'react';
-import { getComponentConfig } from '../utils';
+import { getComponentConfig } from '../../../utils/app_resource';
 
 /**
  * 组件渲染的通用属性
@@ -27,7 +27,7 @@ interface ComponentRenderProps {
  * ComponentRender 组件
  * 用于渲染传入的组件，支持适配各类组件
  */
-const ComponentRender: React.FC<ComponentRenderProps> = ({ cpId, cpType, pageComponentSchema }) => {
+const ComponentEditRender: React.FC<ComponentRenderProps> = ({ cpId, cpType, pageComponentSchema }) => {
   // 获取组件配置
   const componentConfig = getComponentConfig(pageComponentSchema, cpType);
 
@@ -109,4 +109,4 @@ const ComponentRender: React.FC<ComponentRenderProps> = ({ cpId, cpType, pageCom
   return <>{renderComponent()}</>;
 };
 
-export default ComponentRender;
+export default ComponentEditRender;
