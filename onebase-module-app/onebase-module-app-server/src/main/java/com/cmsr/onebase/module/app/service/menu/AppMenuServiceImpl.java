@@ -191,6 +191,7 @@ public class AppMenuServiceImpl implements AppMenuService {
         if (menuDO.getMenuType() == MenuTypeEnum.GROUP.getValue()) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_MENU_GROUP_NOT_ALLOW_COPY);
         }
+        Long sourceMenuId = menuDO.getId();
         // 复制菜单
         menuDO.setId(null);
         menuDO.setMenuName(copyReqVO.getMenuName());
@@ -199,7 +200,7 @@ public class AppMenuServiceImpl implements AppMenuService {
         appMenuRepository.insert(menuDO);
         // 复制页面
         CopyPageSetDTO copyPageSetDTO = new CopyPageSetDTO();
-        copyPageSetDTO.setMenuId(menuDO.getId());
+        copyPageSetDTO.setMenuId(sourceMenuId);
         pageSetService.copyPageSet(copyPageSetDTO);
     }
 
