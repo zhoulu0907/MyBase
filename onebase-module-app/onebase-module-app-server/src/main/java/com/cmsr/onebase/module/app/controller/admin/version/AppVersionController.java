@@ -2,8 +2,10 @@ package com.cmsr.onebase.module.app.controller.admin.version;
 
 import java.util.List;
 
+import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.module.app.controller.admin.version.vo.VersionPageReqVo;
+import com.cmsr.onebase.module.app.controller.admin.version.vo.VersionPageRespVO;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.module.app.controller.admin.version.vo.VersionCreateReqVO;
-import com.cmsr.onebase.module.app.controller.admin.version.vo.VersionListRespVO;
 import com.cmsr.onebase.module.app.service.version.AppVersionService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -33,11 +34,11 @@ public class AppVersionController {
     @Resource
     private AppVersionService appVersionService;
 
-    @GetMapping("/list")
+    @PostMapping("/page")
     @Operation(summary = "应用版本列表")
-    public CommonResult<List<VersionListRespVO>> listApplicationVersion(
-            @RequestParam("applicationId") Long applicationId) {
-        return CommonResult.success(appVersionService.listApplicationVersion(applicationId));
+    public CommonResult<PageResult<VersionPageRespVO>> pageApplicationVersion(
+            @RequestBody VersionPageReqVo reqVo) {
+        return CommonResult.success(appVersionService.getApplicationVersionPage(reqVo));
     }
 
     @PostMapping("/create")

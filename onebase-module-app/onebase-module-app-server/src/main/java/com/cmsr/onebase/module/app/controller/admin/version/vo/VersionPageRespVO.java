@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
  */
 @Schema(description = "应用管理 - 版本列表 Response VO")
 @Data
-public class VersionListRespVO {
+public class VersionPageRespVO {
 
     @Schema(description = "版本 ID")
     private Long id;
