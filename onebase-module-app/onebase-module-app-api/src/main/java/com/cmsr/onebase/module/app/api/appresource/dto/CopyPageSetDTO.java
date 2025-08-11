@@ -12,4 +12,8 @@ public class CopyPageSetDTO {
     @NotNull(message = "菜单ID不能为空")
     private Long menuId;
 
+    @Schema(description = "复制后的新菜单ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
+    @NotNull(message = "复制后的新菜单ID不能为空")
+    private Long newMenuId;
+
 }
