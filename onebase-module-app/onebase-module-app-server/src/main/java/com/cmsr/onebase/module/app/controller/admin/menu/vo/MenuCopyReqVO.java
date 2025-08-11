@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.app.controller.admin.menu.vo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 /**
@@ -11,9 +12,14 @@ import lombok.Data;
 @Data
 public class MenuCopyReqVO {
 
+    @Schema(description = "菜单ID")
+    @NotNull(message = "菜单ID不能为空")
     private Long id;
 
+    @Schema(description = "菜单名称")
+    @NotNull(message = "菜单名称不能为空")
     private String menuName;
 
+    @Schema(description = "父菜单ID")
     private Long parentId;
 }
