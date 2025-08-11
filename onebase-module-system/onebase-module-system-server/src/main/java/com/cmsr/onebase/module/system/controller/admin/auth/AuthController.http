@@ -1,7 +1,7 @@
 ### 默认环境变量配置（直接使用local环境配置）
 @baseUrl = http://localhost:48080/admin-api
 @adminTenantId = 1
-@token = test1
+@token = 77b45e88d41e4776a1cf13367c4eac71
 @tag = Yunai.local
 
 ### 环境配置说明
@@ -42,7 +42,7 @@ tag: {{tag}}
 }
 
 ### 请求 /get-permission-info 接口 => 成功
-GET {{baseUrl}}/system/auth/get-permission-info
+GET {{baseUrl}}/system/auth/get-permission-info?code=tenant
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 

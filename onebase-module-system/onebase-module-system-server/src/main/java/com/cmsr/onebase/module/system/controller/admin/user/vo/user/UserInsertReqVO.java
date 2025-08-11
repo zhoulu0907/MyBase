@@ -64,9 +64,9 @@ public class UserInsertReqVO {
     @DiffLogField(name = "用户头像")
     private String avatar;
 
-    // @Schema(description = "用户类型", example = "1")
-    // @DiffLogField(name = "用户类型")
-    // private Integer userType;
+    @Schema(description = "用户类型", example = "2")
+    @DiffLogField(name = "用户类型")
+    private Integer userType;
 
     @Schema(description = "角色Ids", example = "[1,2]")
     private Set<Long> roleIds;

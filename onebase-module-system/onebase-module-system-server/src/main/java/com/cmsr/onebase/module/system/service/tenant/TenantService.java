@@ -143,4 +143,11 @@ public interface TenantService {
      */
     void validTenant(Long id);
 
+    /**
+     * 获取可分配租户数量
+     *
+     * @return 租户数量
+     */
+    Long getAccountCount();
+
 }

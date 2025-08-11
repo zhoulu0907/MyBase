@@ -21,9 +21,6 @@ public class TenantUpdateReqVO {
     @Schema(description = "租户名", requiredMode = Schema.RequiredMode.REQUIRED, example = "onebase")
     private String name;
 
-    @Schema(description = "分配人员数量", requiredMode = Schema.RequiredMode.REQUIRED, example = "100")
-    private Integer allocatePersonCount;
-
     @Schema(description = "联系人", requiredMode = Schema.RequiredMode.REQUIRED, example = "onebase")
     private String contactName;
 

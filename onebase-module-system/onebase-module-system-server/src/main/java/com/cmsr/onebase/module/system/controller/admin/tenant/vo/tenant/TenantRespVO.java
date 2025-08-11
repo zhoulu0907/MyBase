@@ -60,10 +60,6 @@ public class TenantRespVO {
     @ExcelProperty("创建时间")
     private LocalDateTime createTime;
 
-    @Schema(description = "已分配人员数量", requiredMode = Schema.RequiredMode.REQUIRED, example = "100")
-    @NotNull(message = "已分配人员数量")
-    private Integer allocatePersonCount;
-
     @Schema(description = "key", example = "ket")
     private String tenantKey;
 

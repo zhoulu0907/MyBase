@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
  */
 @Data
 public class LicensePageRespVO {
+
     @Schema(description = "主键ID", example = "1")
     private Long id;
 

@@ -23,6 +23,7 @@ import com.cmsr.onebase.module.system.dal.dataobject.dept.UserPostDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.UserRoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
+import com.cmsr.onebase.module.system.enums.permission.AdminTypeEnum;
 import com.cmsr.onebase.module.system.enums.permission.RoleTypeEnum;
 import com.cmsr.onebase.module.system.service.dept.DeptService;
 import com.cmsr.onebase.module.system.service.dept.PostService;
@@ -99,13 +100,6 @@ public class AdminUserServiceImpl implements AdminUserService {
                 throw exception(USER_COUNT_MAX, tenant.getAccountCount());
             }
         });
-        // 校验个别字段是否为空，设置默认值
-        if (null == createReqVO.getDeptId()) {
-            createReqVO.setDeptId(1L);
-        }
-        // if (null == createReqVO.getPostIds()) {
-        //     createReqVO.setPostIds(Collections.singleton(1L));
-        // }
         // 1.2 校验正确性
         validateUserForCreateOrUpdate(null, createReqVO.getUsername(),
                 createReqVO.getMobile(), createReqVO.getEmail(), createReqVO.getDeptId(), createReqVO.getPostIds());
@@ -116,6 +110,9 @@ public class AdminUserServiceImpl implements AdminUserService {
         AdminUserDO user = BeanUtils.toBean(createReqVO, AdminUserDO.class);
         user.setStatus(CommonStatusEnum.ENABLE.getStatus()); // 默认开启
         user.setPassword(encodePassword(createReqVO.getPassword())); // 加密密码
+        if (user.getUserType() == null) {
+            user.setUserType(AdminTypeEnum.CUSTOM.getType());
+        }
         dataRepository.insert(user);
 
         // 2.2 插入关联岗位
@@ -683,6 +680,56 @@ public class AdminUserServiceImpl implements AdminUserService {
                         AdminUserDO::getDeptId,
                         Collectors.collectingAndThen(Collectors.counting(), Math::toIntExact)
                 ));
+    }
+
+    @Override
+    public Map<Long, Integer> getUserCountByDeptIdsIncludeChildren(Collection<Long> deptIds) {
+        if (CollUtil.isEmpty(deptIds)) {
+            return Collections.emptyMap();
+        }
+
+        // 1. 获取所有部门ID及其子部门ID
+        Set<Long> allDeptIds = new HashSet<>();
+        for (Long deptId : deptIds) {
+            // 添加当前部门ID
+            allDeptIds.add(deptId);
+            // 添加所有子部门ID
+            Set<Long> childDeptIds = deptService.getChildDeptIdListFromCache(deptId);
+            allDeptIds.addAll(childDeptIds);
+        }
+
+        // 2. 批量查询所有相关部门的用户
+        List<AdminUserDO> allUsers = dataRepository.findAllByConfig(AdminUserDO.class,
+                new DefaultConfigStore()
+                        .in("dept_id", allDeptIds)
+        );
+
+        // 3. 按部门ID分组统计直属人数
+        Map<Long, Integer> directUserCountMap = allUsers.stream()
+                .filter(user -> user.getDeptId() != null)
+                .collect(Collectors.groupingBy(
+                        AdminUserDO::getDeptId,
+                        Collectors.collectingAndThen(Collectors.counting(), Math::toIntExact)
+                ));
+
+        // 4. 为每个请求的部门计算总人数（包含子部门）
+        Map<Long, Integer> result = new HashMap<>();
+        for (Long deptId : deptIds) {
+            int totalCount = 0;
+
+            // 统计当前部门的直属人数
+            totalCount += directUserCountMap.getOrDefault(deptId, 0);
+
+            // 统计所有子部门的人数
+            Set<Long> childDeptIds = deptService.getChildDeptIdListFromCache(deptId);
+            for (Long childDeptId : childDeptIds) {
+                totalCount += directUserCountMap.getOrDefault(childDeptId, 0);
+            }
+
+            result.put(deptId, totalCount);
+        }
+
+        return result;
     }
 
     /**
