@@ -91,7 +91,7 @@ public class TenantDataRepository extends DataRepositoryNew<TenantDO> {
      */
     public PageResult<TenantDO> findPage(TenantPageReqVO pageReqVO) {
         DefaultConfigStore configStore = new DefaultConfigStore();
-
+        
         if (pageReqVO.getName() != null) {
             configStore.and(Compare.LIKE, TenantDO.NAME, pageReqVO.getName());
         }
@@ -108,7 +108,7 @@ public class TenantDataRepository extends DataRepositoryNew<TenantDO> {
             configStore.and(Compare.GREAT_EQUAL, "create_time", pageReqVO.getCreateTime()[0])
                        .and(Compare.LESS_EQUAL, "create_time", pageReqVO.getCreateTime()[1]);
         }
-
+        
         return findPageWithConditions(configStore, pageReqVO.getPageNo(), pageReqVO.getPageSize());
     }
 }
