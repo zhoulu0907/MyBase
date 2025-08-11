@@ -1,9 +1,10 @@
+import AvatarSVG from '@/assets/images/avatar.svg';
 import helpSVG from '@/assets/images/help_icon.svg';
 import { useI18n } from '@/hooks/useI18n';
 import { useAppStore } from '@/store';
 import { UserPermissionManager } from '@/utils/permission';
-import { Avatar, Button, Dropdown, Layout, Menu, Tabs } from '@arco-design/web-react';
-import { IconMenu, IconPoweroff, IconUser } from '@arco-design/web-react/icon';
+import { Button, Dropdown, Layout, Menu, Tabs } from '@arco-design/web-react';
+import { IconMenu, IconUser } from '@arco-design/web-react/icon';
 import { TokenManager } from '@onebase/common';
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -55,13 +56,23 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
 
   // 用户菜单
   const userMenu = (
+    // <Menu>
+    //   <Menu.Item key="profile">
+    //     <IconUser />
+    //     {t('header.profile')}
+    //   </Menu.Item>
+    //   <Menu.Item key="logout" onClick={handleLogout}>
+    //     <IconPoweroff />
+    //     {t('header.logout')}
+    //   </Menu.Item>
+    // </Menu>
     <Menu>
       <Menu.Item key="profile">
-        <IconUser />
-        {t('header.profile')}
+        <div className={styles.userMenuInfo}>
+          <div>{UserPermissionManager.getUserPermissionInfo()?.user.email}</div>
+        </div>
       </Menu.Item>
-      <Menu.Item key="logout" onClick={handleLogout}>
-        <IconPoweroff />
+      <Menu.Item key="logout" onClick={handleLogout} style={{ color: '#FF0000' }}>
         {t('header.logout')}
       </Menu.Item>
     </Menu>
@@ -132,11 +143,11 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
 
           <Button type="outline" /* onClick={() => navigate('/onebase/setting')} */>{t('createApp.preview')}</Button>
 
+          {UserPermissionManager.getUserPermissionInfo()?.user?.nickname || '未登录'}
+
           <Dropdown droplist={userMenu} position="bottom">
             <div className={styles.userDropdown}>
-              <Avatar size={32} style={{ backgroundColor: '#4FAE7B' }}>
-                {UserPermissionManager.getUserPermissionInfo()?.user.nickname?.slice(0, 1) || 'U'}
-              </Avatar>
+              <img src={AvatarSVG} />
             </div>
           </Dropdown>
         </div>
