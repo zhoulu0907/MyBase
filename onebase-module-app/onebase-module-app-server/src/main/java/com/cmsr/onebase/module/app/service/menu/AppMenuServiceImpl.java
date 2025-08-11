@@ -11,7 +11,6 @@ import com.cmsr.onebase.module.app.enums.app.AppErrorCodeConstants;
 import com.cmsr.onebase.module.app.enums.menu.MenuTypeEnum;
 import com.cmsr.onebase.module.app.enums.menu.MenuVisibleEnum;
 import com.cmsr.onebase.module.app.service.AppCommonService;
-import com.cmsr.onebase.module.app.service.app.AppApplicationService;
 import com.cmsr.onebase.module.app.service.appresource.PageSetService;
 import com.cmsr.onebase.module.app.util.MenuUtils;
 import jakarta.annotation.Resource;
@@ -186,7 +185,7 @@ public class AppMenuServiceImpl implements AppMenuService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void copyApplicationMenu(MenuCopyReqVO copyReqVO) {
+    public MenuCreateRespVO copyApplicationMenu(MenuCopyReqVO copyReqVO) {
         MenuDO menuDO = appCommonService.validateMenuExist(copyReqVO.getId());
         if (menuDO.getMenuType() == MenuTypeEnum.GROUP.getValue()) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_MENU_GROUP_NOT_ALLOW_COPY);
@@ -195,13 +194,21 @@ public class AppMenuServiceImpl implements AppMenuService {
         // 复制菜单
         menuDO.setId(null);
         menuDO.setMenuName(copyReqVO.getMenuName());
-        menuDO.setParentId(copyReqVO.getParentId());
+        if (copyReqVO.getParentId() == null) {
+            menuDO.setParentId(MenuUtils.ROOT_MENU_ID);
+        } else {
+            menuDO.setParentId(copyReqVO.getParentId());
+        }
         menuDO.setMenuCode(MenuUtils.generateMenuCode());
         appMenuRepository.insert(menuDO);
         // 复制页面
         CopyPageSetDTO copyPageSetDTO = new CopyPageSetDTO();
         copyPageSetDTO.setMenuId(sourceMenuId);
+        copyPageSetDTO.setNewMenuId(menuDO.getId());
         pageSetService.copyPageSet(copyPageSetDTO);
+        //
+        MenuCreateRespVO menuCreateRespVO = BeanUtils.toBean(menuDO, MenuCreateRespVO.class);
+        return menuCreateRespVO;
     }
 
     @Override
