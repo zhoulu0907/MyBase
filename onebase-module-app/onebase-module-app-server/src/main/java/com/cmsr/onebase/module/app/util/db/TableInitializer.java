@@ -1,8 +1,11 @@
 package com.cmsr.onebase.module.app.util.db;
 
+import com.cmsr.onebase.module.app.dal.dataobject.version.VersionResourceDO;
 import org.springframework.stereotype.Component;
 
 import com.cmsr.onebase.framework.aynline.DataRepository;
+import com.cmsr.onebase.module.app.dal.dataobject.app.ApplicationDO;
+import com.cmsr.onebase.module.app.dal.dataobject.app.ApplicationTagDO;
 import com.cmsr.onebase.module.app.dal.dataobject.appresource.ComponentDO;
 import com.cmsr.onebase.module.app.dal.dataobject.appresource.PageDO;
 import com.cmsr.onebase.module.app.dal.dataobject.appresource.PageMetadataDO;
@@ -10,6 +13,7 @@ import com.cmsr.onebase.module.app.dal.dataobject.appresource.PageRefRouterDO;
 import com.cmsr.onebase.module.app.dal.dataobject.appresource.PageSetDO;
 import com.cmsr.onebase.module.app.dal.dataobject.appresource.PageSetLabelDO;
 import com.cmsr.onebase.module.app.dal.dataobject.appresource.PageSetPageDO;
+import com.cmsr.onebase.module.app.dal.dataobject.version.VersionDO;
 
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -30,7 +34,7 @@ public class TableInitializer {
     /**
      * 初始化所有数据库表结构
      *
-     * @param reset 是否重置表结构
+     * @param reset   是否重置表结构
      * @param execute 是否执行创建操作
      * @throws Exception 创建表时可能抛出的异常
      */
@@ -38,6 +42,11 @@ public class TableInitializer {
         log.info("开始初始化数据库表结构，reset: {}, execute: {}", reset, execute);
 
         try {
+            dataRepository.createTable(ApplicationDO.class, reset, execute);
+            dataRepository.createTable(ApplicationTagDO.class, reset, execute);
+            dataRepository.createTable(VersionDO.class, reset, execute);
+            dataRepository.createTable(VersionResourceDO.class, reset, execute);
+
             dataRepository.createTable(ComponentDO.class, reset, execute);
             dataRepository.createTable(PageDO.class, reset, execute);
             dataRepository.createTable(PageMetadataDO.class, reset, execute);

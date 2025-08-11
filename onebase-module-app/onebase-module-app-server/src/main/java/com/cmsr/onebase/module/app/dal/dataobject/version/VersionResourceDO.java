@@ -13,18 +13,18 @@ import lombok.Data;
 @Table(name = "app_version_resource")
 public class VersionResourceDO extends TenantBaseDO {
 
-    @Column(name = "application_id", nullable = false, comment = "应用ID")
+    @Column(name = "application_id", nullable = false, columnDefinition = "BIGINT NOT NULL", comment = "应用ID")
     private Long applicationId;
 
-    @Column(name = "version_id", nullable = false, comment = "版本ID")
+    @Column(name = "version_id", nullable = false, columnDefinition = "BIGINT NOT NULL", comment = "版本ID")
     private Long versionId;
 
-    @Column(name = "protocol_type", nullable = false, length = 64, comment = "协议类型")
+    @Column(name = "protocol_type", nullable = false, length = 64, columnDefinition = "VARCHAR(64) NOT NULL", comment = "协议类型")
     private String protocolType;
 
-    @Column(name = "res_key", nullable = false, length = 64, comment = "资源key")
+    @Column(name = "res_key", nullable = false, length = 64, columnDefinition = "VARCHAR(64) NOT NULL", comment = "资源key")
     private String resKey;
 
-    @Column(name = "res_data", nullable = false, columnDefinition = "text", comment = "资源数据")
+    @Column(name = "res_data", nullable = false, columnDefinition = "TEXT NOT NULL", comment = "资源数据")
     private String resData;
 }
