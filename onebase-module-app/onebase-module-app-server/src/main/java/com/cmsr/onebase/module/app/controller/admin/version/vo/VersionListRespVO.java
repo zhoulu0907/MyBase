@@ -25,10 +25,19 @@ public class VersionListRespVO {
     @Schema(description = "版本号")
     private String versionNumber;
 
-    @Schema(description = "创建时间")
-    private LocalDateTime createTime;
+    @Schema(description = "版本描述")
+    private String versionDescription;
 
-    @Schema(description = "创建人")
-    private String creatorName;
+    @Schema(description = "操作类型")
+    private Integer operationType;
+
+    @Schema(description = "环境")
+    private String environment;
+
+    @Schema(description = "更新时间")
+    private LocalDateTime updateTime;
+
+    @Schema(description = "更新人")
+    private String updaterName;
 
 }

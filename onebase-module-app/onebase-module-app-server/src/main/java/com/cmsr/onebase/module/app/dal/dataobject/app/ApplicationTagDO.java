@@ -13,10 +13,10 @@ import lombok.Data;
 @Table(name = "app_application_tag")
 public class ApplicationTagDO extends TenantBaseDO {
 
-    @Column(name = "application_id", nullable = false, comment = "应用ID")
+    @Column(name = "application_id", columnDefinition = "BIGINT NOT NULL", nullable = false, comment = "应用ID")
     private Long applicationId;
 
-    @Column(name = "tag_id", nullable = false, comment = "标签ID")
+    @Column(name = "tag_id", columnDefinition = "BIGINT NOT NULL", nullable = false, comment = "标签ID")
     private Long tagId;
 
 
