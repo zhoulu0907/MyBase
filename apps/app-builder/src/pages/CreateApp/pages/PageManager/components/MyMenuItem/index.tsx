@@ -1,5 +1,6 @@
 import { Dropdown, Menu, type FormInstance } from '@arco-design/web-react';
 import { IconFolder, IconSettings } from '@arco-design/web-react/icon';
+import { RootParentPage } from '@onebase/app';
 import React from 'react';
 import styles from './index.module.less';
 
@@ -25,6 +26,7 @@ interface MenuItemProps {
   triggerDelete: (menuID: string) => void;
   maxWidth: number;
   renameForm: FormInstance;
+  copyForm: FormInstance;
 }
 
 const MyMenuItem: React.FC<MenuItemProps> = ({
@@ -39,7 +41,8 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
   triggerHide,
   triggerDelete,
   maxWidth,
-  renameForm
+  renameForm,
+  copyForm
 }) => {
   const dropList = (
     <Menu style={{ padding: '10px 5px' }}>
@@ -51,23 +54,25 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
 
           renameForm.resetFields();
           renameForm.setFieldValue('menuName', menuName);
+          renameForm.setFieldValue('menuID', menuID);
         }}
       >
         {'重命名'}
       </MenuItem>
-      <MenuItem
-        key="copy"
-        onClick={(e) => {
-          e.stopPropagation();
-          triggerCopy();
-          //   setVisibleCopyForm(true);
-          //   copyForm.resetFields();
-          //   setTitle(t('createApp.copyPage'));
-          //   console.log(activeMenu?.parentId || RootParentPage.id);
-        }}
-      >
-        {'复制'}
-      </MenuItem>
+      {!isGroup && (
+        <MenuItem
+          key="copy"
+          onClick={(e) => {
+            e.stopPropagation();
+            triggerCopy();
+            copyForm.setFieldValue('menuName', menuName + '_副本');
+            copyForm.setFieldValue('parentId', RootParentPage.id);
+            copyForm.setFieldValue('menuID', menuID);
+          }}
+        >
+          {'复制'}
+        </MenuItem>
+      )}
       <MenuItem
         key="hide"
         onClick={(e) => {

@@ -31,7 +31,8 @@ const RenameModal: React.FC<RenameModalProps> = ({ title, visible, handleRename,
         layout="vertical"
         form={form}
         initialValues={{
-          menuName: form.getFieldValue('menuName')
+          menuName: form.getFieldValue('menuName'),
+          menuID: form.getFieldValue('menuID')
         }}
       >
         <Form.Item label="页面名称" field="menuName" rules={[{ required: true, message: '请输入页面名称' }]}>
