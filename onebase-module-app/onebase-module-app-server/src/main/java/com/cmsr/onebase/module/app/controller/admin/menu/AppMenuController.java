@@ -63,9 +63,8 @@ public class AppMenuController {
 
     @PostMapping("/copy")
     @Operation(summary = "复制应用菜单")
-    public CommonResult<Boolean> copyApplicationMenu(@RequestBody MenuCopyReqVO copyReqVO) {
-        appMenuService.copyApplicationMenu(copyReqVO);
-        return CommonResult.success(true);
+    public CommonResult<MenuCreateRespVO> copyApplicationMenu(@RequestBody MenuCopyReqVO copyReqVO) {
+        return CommonResult.success(appMenuService.copyApplicationMenu(copyReqVO));
     }
 
     @PostMapping("/delete")
