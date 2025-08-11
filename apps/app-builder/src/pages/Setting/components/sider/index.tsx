@@ -7,7 +7,7 @@ import {
   IconMenuFold,
   IconMenuUnfold,
   IconUser,
-  IconUserAdd
+  IconUserGroup
 } from '@arco-design/web-react/icon';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -43,7 +43,7 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
       {
         key: 'user',
         title: '用户管理',
-        icon: <IconUserAdd style={iconStyle} />,
+        icon: <IconUserGroup style={iconStyle} />,
         path: '/onebase/setting/user',
         permissionKey: 'SYSTEM:USER'
       },
@@ -165,7 +165,7 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
         }
 
         return (
-          <MenuItem key={item.key} disabled={item.disabled} style={{ display: 'flex', alignItems: 'center' }}>
+          <MenuItem key={item.key} disabled={item.disabled}>
             {item.icon}
             <span className={styles.menuTitle}>{item.title}</span>
           </MenuItem>
@@ -185,7 +185,7 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
     >
       <div className={styles.siderContent}>
         <div className={styles.menuContainer}>
-          <Menu mode="vertical" selectedKeys={selectedKeys} onClickMenuItem={handleMenuClick} levelIndent={29}>
+          <Menu mode="vertical" selectedKeys={selectedKeys} onClickMenuItem={handleMenuClick} levelIndent={29} className={styles.siderMenu}>
             {renderMenuItems(finalMenuItems)}
           </Menu>
         </div>
