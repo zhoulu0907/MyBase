@@ -23,6 +23,7 @@ import com.cmsr.onebase.module.system.dal.dataobject.dept.UserPostDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.UserRoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
+import com.cmsr.onebase.module.system.enums.permission.AdminTypeEnum;
 import com.cmsr.onebase.module.system.enums.permission.RoleTypeEnum;
 import com.cmsr.onebase.module.system.service.dept.DeptService;
 import com.cmsr.onebase.module.system.service.dept.PostService;
@@ -99,13 +100,6 @@ public class AdminUserServiceImpl implements AdminUserService {
                 throw exception(USER_COUNT_MAX, tenant.getAccountCount());
             }
         });
-        // 校验个别字段是否为空，设置默认值
-        if (null == createReqVO.getDeptId()) {
-            createReqVO.setDeptId(1L);
-        }
-        // if (null == createReqVO.getPostIds()) {
-        //     createReqVO.setPostIds(Collections.singleton(1L));
-        // }
         // 1.2 校验正确性
         validateUserForCreateOrUpdate(null, createReqVO.getUsername(),
                 createReqVO.getMobile(), createReqVO.getEmail(), createReqVO.getDeptId(), createReqVO.getPostIds());
@@ -116,6 +110,9 @@ public class AdminUserServiceImpl implements AdminUserService {
         AdminUserDO user = BeanUtils.toBean(createReqVO, AdminUserDO.class);
         user.setStatus(CommonStatusEnum.ENABLE.getStatus()); // 默认开启
         user.setPassword(encodePassword(createReqVO.getPassword())); // 加密密码
+        if (user.getUserType() == null) {
+            user.setUserType(AdminTypeEnum.CUSTOM.getType());
+        }
         dataRepository.insert(user);
 
         // 2.2 插入关联岗位

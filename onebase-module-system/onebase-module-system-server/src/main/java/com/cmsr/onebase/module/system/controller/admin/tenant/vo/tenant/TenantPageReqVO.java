@@ -36,4 +36,7 @@ public class TenantPageReqVO extends PageParam {
     @Schema(description = "创建时间")
     private LocalDateTime[] createTime;
 
+    @Schema(description = "关键词，模糊搜索使用")
+    private String keyword;
+
 }

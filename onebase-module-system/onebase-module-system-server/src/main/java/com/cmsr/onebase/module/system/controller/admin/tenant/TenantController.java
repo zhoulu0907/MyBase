@@ -105,6 +105,14 @@ public class TenantController {
         return success(BeanUtils.toBean(tenant, TenantRespVO.class));
     }
 
+    @GetMapping("/get-allocatable-count")
+    @Operation(summary = "获得租户可分配数量")
+    @PreAuthorize("@ss.hasPermission('system:tenant:query')")
+    public CommonResult<Long> getAllocatableCount() {
+        Long accountCount = tenantService.getAccountCount();
+        return success(accountCount);
+    }
+
     @GetMapping("/page")
     @Operation(summary = "获得租户分页")
     @PreAuthorize("@ss.hasPermission('system:tenant:query')")
@@ -126,3 +134,4 @@ public class TenantController {
     }
 
 }
+

@@ -5,14 +5,14 @@ Authorization: Bearer eb33f553e1194b52935de6fcc6a3f4f5
 ### 创建用户 /admin-api/system/user/platform-admin/create
 POST http://127.0.0.1:48080/admin-api/system/user/platform-admin/create
 Content-Type: application/json
-Authorization: Bearer 49f113f25a9f45f99053feb37f56c5d4
+Authorization: Bearer 0a5c369129e14e8285fd119bb2e1c7ac
 tenant-id: 1
 
 {
-  "username": "adminzhou1",
+  "username": "adminguan2",
   "password": "admin123",
-  "mobile": "15601691324",
-  "email": "13524@qq.com",
+  "mobile": "15601691628",
+  "email": "16528@qq.com",
   "userType": "2"
 }
 ### 根据状态查询用户信息列表 /admin-api/system/user/platform-admin/list
@@ -59,7 +59,7 @@ Authorization: Bearer 3dac9549902340338047f498ae0b8b18
 tenant-id: 1
 
 ### 平台管理员分页列表查询 /system/user/platform-admin/page
-GET http://127.0.0.1:48080/admin-api/system/user/platform-admin/page?keyword=goudan&pageNum=1&pageSize=10
+GET http://127.0.0.1:48080/admin-api/system/user/platform-admin/page?keyword=admin&pageNo=1&pageSize=100
 Content-Type: application/json
-Authorization: Bearer b70021cab5df45e0b86c3af58fd16acc
+Authorization: Bearer 3e71f55ccc754ad99af737a899c1c9bd
 tenant-id: 1

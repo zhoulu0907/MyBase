@@ -18,8 +18,8 @@ public class TenantInsertReqVO {
     @NotNull(message = "租户名不能为空")
     private String name;
 
-    @Schema(description = "分配人员数量", requiredMode = Schema.RequiredMode.REQUIRED, example = "100")
-    private Integer allocatePersonCount;
+    @Schema(description = "租户编码")
+    private String tenantCode;
 
     @Schema(description = "联系人", requiredMode = Schema.RequiredMode.REQUIRED, example = "onebase")
     private String contactName;
