@@ -11,6 +11,7 @@ import com.cmsr.onebase.module.system.dal.dataobject.permission.MenuDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.enums.permission.MenuTypeEnum;
+import org.apache.commons.lang3.StringUtils;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 import org.slf4j.LoggerFactory;
@@ -28,14 +29,14 @@ public interface AuthConvert {
 
     AuthLoginRespVO convert(OAuth2AccessTokenDO bean);
 
-    default AuthPermissionInfoRespVO convert(AdminUserDO user, List<RoleDO> roleList, List<MenuDO> menuList) {
+    default AuthPermissionInfoRespVO convert(AdminUserDO user, List<RoleDO> roleList, List<MenuDO> menuList, String expectCode) {
         return AuthPermissionInfoRespVO.builder()
                 .user(BeanUtils.toBean(user, AuthPermissionInfoRespVO.UserVO.class))
                 .roles(convertSet(roleList, RoleDO::getCode))
                 // 权限标识信息
                 .permissions(convertSet(menuList, MenuDO::getPermission))
                 // 菜单树
-                .menus(buildMenuTree(menuList))
+                .menus(buildMenuTree(menuList, expectCode))
                 .build();
     }
 
@@ -47,7 +48,7 @@ public interface AuthConvert {
      * @param menuList 菜单列表
      * @return 菜单树
      */
-    default List<AuthPermissionInfoRespVO.MenuVO> buildMenuTree(List<MenuDO> menuList) {
+    default List<AuthPermissionInfoRespVO.MenuVO> buildMenuTree(List<MenuDO> menuList, String expectCode) {
         if (CollUtil.isEmpty(menuList)) {
             return Collections.emptyList();
         }
@@ -76,7 +77,12 @@ public interface AuthConvert {
             parentNode.getChildren().add(childNode);
         });
         // 获得到所有的根节点
-        return filterList(treeNodeMap.values(), node -> ID_ROOT.equals(node.getParentId()));
+        if (StringUtils.isBlank(expectCode)) {
+            return filterList(treeNodeMap.values(), node -> ID_ROOT.equals(node.getParentId()));
+        } else {
+            // 如果指定期望的顶级菜单和权限点
+            return filterList(treeNodeMap.values(), node -> ID_ROOT.equals(node.getParentId()) && expectCode.equals(node.getPermission()));
+        }
     }
 
     SocialUserBindReqDTO convert(Long userId, Integer userType, AuthSocialLoginReqVO reqVO);

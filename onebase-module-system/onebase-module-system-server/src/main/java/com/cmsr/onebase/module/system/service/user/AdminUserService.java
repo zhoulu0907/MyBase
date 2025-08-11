@@ -246,6 +246,14 @@ public interface AdminUserService {
     Map<Long, Integer> getUserCountByDeptIds(Collection<Long> deptIds);
 
     /**
+     * 批量获取部门人数统计（包含下级部门）
+     *
+     * @param deptIds 部门编号集合
+     * @return 部门ID与人数的映射关系（包含该部门及其所有下级部门的人数）
+     */
+    Map<Long, Integer> getUserCountByDeptIdsIncludeChildren(Collection<Long> deptIds);
+
+    /**
      * 获取用户详情，包含角色信息
      *
      * @param id 用户ID

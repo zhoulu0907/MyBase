@@ -356,6 +356,39 @@ public class PermissionServiceImpl implements PermissionService {
         return userRoleDataRepository.deleteByRoleIdAndUserIds(roleId, userIds);
     }
 
+    @Override
+    public long addRoleMenus(Long roleId, Set<Long> menuIds) {
+        // 参数校验
+        if (CollUtil.isEmpty(menuIds)) {
+            return 0;
+        }
+
+        // 批量插入新的角色菜单关系
+        List<RoleMenuDO> roleMenuList = menuIds.stream()
+                .map(menuId -> {
+                    RoleMenuDO roleMenu = new RoleMenuDO();
+                    roleMenu.setRoleId(roleId);
+                    roleMenu.setMenuId(menuId);
+                    return roleMenu;
+                })
+                .collect(Collectors.toList());
+
+        List<RoleMenuDO> insertedList = roleMenuDataRepository.insertBatch(roleMenuList);
+        return CollUtil.isEmpty(insertedList) ? 0 : insertedList.size();
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public long deleteRoleMenus(Long roleId, Set<Long> menuIds) {
+        // 参数校验
+        if (CollUtil.isEmpty(menuIds)) {
+            return 0;
+        }
+
+        // 删除指定角色下的指定菜单关系
+        return roleMenuDataRepository.deleteByRoleIdAndMenuIds(roleId, menuIds);
+    }
+
     /**
      * 获得自身的代理对象，解决 AOP 生效问题
      *
@@ -366,4 +399,3 @@ public class PermissionServiceImpl implements PermissionService {
     }
 
 }
-
