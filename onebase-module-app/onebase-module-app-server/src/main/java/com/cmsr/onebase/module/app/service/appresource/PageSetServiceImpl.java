@@ -162,6 +162,7 @@ public class PageSetServiceImpl implements PageSetService {
         PageSetDO newPageSetDO = BeanUtils.toBean(pageSetDO, PageSetDO.class);
         newPageSetDO.setId(null);
         newPageSetDO.setPageSetCode(UUID.randomUUID().toString());
+        newPageSetDO.setMenuId(copyPageSetDTO.getNewMenuId());
         pageSetDataRepository.insert(newPageSetDO);
 
         // 复制页面其余内容
