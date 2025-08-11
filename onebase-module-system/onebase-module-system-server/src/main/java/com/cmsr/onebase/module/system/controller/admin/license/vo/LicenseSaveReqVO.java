@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
  */
 @Data
 public class LicenseSaveReqVO {
+
     @Schema(description = "主键ID", example = "1")
     private Long id;
 
@@ -44,4 +45,5 @@ public class LicenseSaveReqVO {
 
     @Schema(description = "License文件内容")
     private String licenseFile;
+
 }

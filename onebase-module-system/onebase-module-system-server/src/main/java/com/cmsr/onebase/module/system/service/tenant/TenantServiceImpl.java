@@ -24,6 +24,8 @@ import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
 import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantPackageDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
+import com.cmsr.onebase.module.system.enums.license.LicenseStatusEnum;
+import com.cmsr.onebase.module.system.enums.permission.PackageTypeEnum;
 import com.cmsr.onebase.module.system.enums.permission.RoleCodeEnum;
 import com.cmsr.onebase.module.system.enums.permission.RoleTypeEnum;
 import com.cmsr.onebase.module.system.enums.tenant.TenantStatusEnum;
@@ -38,6 +40,7 @@ import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.init.DefaultConfigStore;
+import org.anyline.entity.Compare;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -103,6 +106,23 @@ public class TenantServiceImpl implements TenantService {
     }
 
     @Override
+    public Long getAccountCount() {
+        LicenseDO license = licenseService.getLicenseByStatus(LicenseStatusEnum.ENABLE.getStatus());
+        Integer tenantCount = getTenantCountByStatus(TenantStatusEnum.NORMAL.getStatus());
+        if (license != null) {
+            // 获取license总人数限制
+            Integer licenseTotalCount = license.getTenantLimit();
+            // 如果license总人数限制小于已分配人员数量，则返回0
+            if (licenseTotalCount < tenantCount) {
+                return 0L;
+            }
+            // 返回剩余可分配人员数量
+            return (long) (licenseTotalCount - tenantCount);
+        }
+        return 0L;
+    }
+
+    @Override
     public Long createTenant(TenantInsertReqVO createReqVO) {
         // 校验租户名称是否重复
         validTenantNameDuplicate(createReqVO.getName(), null);
@@ -111,8 +131,7 @@ public class TenantServiceImpl implements TenantService {
             validTenantWebsiteDuplicate(createReqVO.getWebsite(), null);
         }
         if (createReqVO.getPackageId() == null) {
-            // todo 不可硬编码
-            createReqVO.setPackageId(112L);
+            createReqVO.setPackageId(Long.valueOf(PackageTypeEnum.SIMPLE.getPackageId()));
         }
         TenantPackageDO tenantPackage = tenantPackageService.validTenantPackage(createReqVO.getPackageId());
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -120,12 +139,8 @@ public class TenantServiceImpl implements TenantService {
         if (createReqVO.getExpireTime() == null) {
             createReqVO.setExpireTime(expireTime);
         }
-        if (createReqVO.getAccountCount() == null) {
-            createReqVO.setAccountCount(100);
-        }
 
-        // todo 状态统一用枚举0/1，如TenantStatusEnum.NORMAL
-        LicenseDO license = licenseService.getLicenseByStatus("enable");
+        LicenseDO license = licenseService.getLicenseByStatus(LicenseStatusEnum.ENABLE.getStatus());
         // 检查分配人员数量是否超过license限制
         if (license != null) {
             // 获取license总人数限制
@@ -133,28 +148,26 @@ public class TenantServiceImpl implements TenantService {
             // 获取已分配人员数量
             Integer allocatedCount = getTenantCountByStatus(TenantStatusEnum.NORMAL.getStatus());
             // 如果传入的分配人员数量加上已分配数量超过license限制，则报错
-            if (createReqVO.getAccountCount()!= null &&
+            if (createReqVO.getAccountCount() != null &&
                     (allocatedCount + createReqVO.getAccountCount()) > licenseTotalCount) {
                 Integer remainingCount = licenseTotalCount - allocatedCount;
                 throw exception(LICENSE_USER_COUNT_NOT_ENOUGH,
                         licenseTotalCount,
                         remainingCount);
             }
-            createReqVO.setAllocatePersonCount(allocatedCount);
         }
-        
+
         // 创建租户
         TenantDO tenant = BeanUtils.toBean(createReqVO, TenantDO.class);
-//        tenantMapper.insert(tenant);
         tenant = dataRepository.insert(tenant);
         // 校验联系人用户名是否已存在
-        if (StringUtils.isNotEmpty(createReqVO.getContactName())) {
-            TenantUtils.execute(tenant.getId(), () -> {
-                if (userService.getUserByUsername(createReqVO.getContactName()) != null) {
-                    throw exception(USER_USERNAME_EXISTS, createReqVO.getContactName());
-                }
-            });
-        }
+        // if (StringUtils.isNotEmpty(createReqVO.getContactName())) {
+        //     TenantUtils.execute(tenant.getId(), () -> {
+        //         if (userService.getUserByUsername(createReqVO.getContactName()) != null) {
+        //             throw exception(USER_USERNAME_EXISTS, createReqVO.getContactName());
+        //         }
+        //     });
+        // }
         // 创建租户的管理员1
         TenantDO finalTenant = tenant;
         TenantUtils.execute(tenant.getId(), () -> {
@@ -167,7 +180,6 @@ public class TenantServiceImpl implements TenantService {
             }
             Long userId = createUser(roleId, createReqVO);
             // 修改租户的管理员
-//            tenantMapper.updateById(new TenantDO().setId(tenant.getId()).setContactUserId(userId));
             TenantDO tenantDO = new TenantDO().setContactUserId(userId);
             tenantDO.setId(finalTenant.getId());
             dataRepository.update(tenantDO);
@@ -201,26 +213,26 @@ public class TenantServiceImpl implements TenantService {
         // 校验租户名称是否重复
         validTenantNameDuplicate(updateReqVO.getName(), updateReqVO.getId());
         // 校验租户域名是否重复
-        if (StringUtils.isNotBlank(updateReqVO.getWebsite() )) {
+        if (StringUtils.isNotBlank(updateReqVO.getWebsite())) {
             validTenantWebsiteDuplicate(updateReqVO.getWebsite(), updateReqVO.getId());
         }
         // 校验套餐被禁用
-        TenantPackageDO tenantPackage = tenantPackageService.validTenantPackage(updateReqVO.getPackageId());
-        //根据管理员名称和tenant_id去查询，当前修改的管理员名称是否存在
-        AdminUserDO user = userService.getUserByTenantIDAndUserName(updateReqVO.getContactName(), updateReqVO.getId());
-        TenantUtils.execute(tenant.getId(), () -> {
-            if (user != null) {
-                throw exception(USER_USERNAME_EXISTS);
-            }
-        });
-//        // 如果联系人不为空，根据tenant_id和username去查询，判断是否为空，不为空则异常，租户管理员名称已存在
-//        if (StringUtils.isNotEmpty(updateReqVO.getContactName())) {
-//                if (userService.getUserByUsername(updateReqVO.getContactName()) != null) {
-//                    throw exception(USER_USERNAME_EXISTS);
-//                }
-//        }
+        Long packageId = updateReqVO.getPackageId();
+        if (packageId == null) {
+            packageId = tenant.getPackageId();
+        }
+        TenantPackageDO tenantPackage = tenantPackageService.validTenantPackage(packageId);
+        // 根据管理员名称和tenant_id去查询，当前修改的管理员名称是否存在
+        if (StringUtils.isNotEmpty(updateReqVO.getContactName())) {
+            AdminUserDO user = userService.getUserByTenantIDAndUserName(updateReqVO.getContactName(), updateReqVO.getId());
+            TenantUtils.execute(tenant.getId(), () -> {
+                if (user != null) {
+                    throw exception(USER_USERNAME_EXISTS);
+                }
+            });
+        }
 
-        LicenseDO license = licenseService.getLicenseByStatus("enable");
+        LicenseDO license = licenseService.getLicenseByStatus(LicenseStatusEnum.ENABLE.getStatus());
         // 检查分配人员数量是否超过license限制
         if (license != null) {
             // 获取license总人数限制
@@ -229,37 +241,42 @@ public class TenantServiceImpl implements TenantService {
             Integer allocatedCount = getTenantCountByStatus(TenantStatusEnum.NORMAL.getStatus());
 
             // 如果传入的分配人员数量加上已分配数量超过license限制，则报错
-            if (updateReqVO.getAllocatePersonCount()!= null &&
-                    (allocatedCount + updateReqVO.getAllocatePersonCount()) > licenseTotalCount) {
+            if (updateReqVO.getAccountCount() != null &&
+                    (allocatedCount + updateReqVO.getAccountCount()) > licenseTotalCount) {
 
                 Integer remainingCount = licenseTotalCount - allocatedCount;
                 throw exception(LICENSE_USER_COUNT_NOT_ENOUGH,
                         licenseTotalCount,
                         remainingCount);
             }
-            if (updateReqVO.getAllocatePersonCount() < allocatedCount) {
+            if (updateReqVO.getAccountCount() < allocatedCount) {
                 throw exception(LENANT_ALLOCATE_PERSON_COUNT_LESS_THEN_ALLOCATED,
                         allocatedCount);
             }
-
         }
 
         // 更新租户
         TenantDO updateObj = BeanUtils.toBean(updateReqVO, TenantDO.class);
-        // tenantMapper.updateById(updateObj);
         dataRepository.update(updateObj);
         TenantUtils.execute(updateObj.getId(), () -> {
-            // 创建角色
-            Long roleId = createRole(tenantPackage);
+
+            RoleDO roleDO = roleService.getRoleIdsByCode(RoleCodeEnum.TENANT_ADMIN.getCode());
+            Long roleId;
+            if (roleDO == null) {
+                // 创建角色
+                roleId  = createRole(tenantPackage);
+            } else {
+               roleId = roleDO.getId();
+            }
             // 创建用户，并分配角色
             TenantInsertReqVO reqVO = new TenantInsertReqVO();
+            reqVO.setContactName(updateReqVO.getContactName());
             reqVO.setUsername(updateReqVO.getContactName());
             if (StringUtils.isEmpty(updateReqVO.getPassword())) {
                 reqVO.setPassword("admin123");
             }
             Long userId = createUser(roleId, reqVO);
             // 修改租户的管理员
-//            tenantMapper.updateById(new TenantDO().setId(tenant.getId()).setContactUserId(userId));
             TenantDO tenantDO = new TenantDO().setContactUserId(userId);
             tenantDO.setId(updateObj.getId());
             dataRepository.update(tenantDO);
@@ -273,7 +290,7 @@ public class TenantServiceImpl implements TenantService {
 
     private void validTenantNameDuplicate(String name, Long id) {
 //        TenantDO tenant = tenantMapper.selectByName(name);
-        if(StringUtils.isBlank(name)){
+        if (StringUtils.isBlank(name)) {
             return;
         }
         TenantDO tenant = dataRepository.findOne(TenantDO.class, new DefaultConfigStore().eq("name", name));
@@ -294,7 +311,6 @@ public class TenantServiceImpl implements TenantService {
         if (StrUtil.isEmpty(website)) {
             return;
         }
-//        TenantDO tenant = tenantMapper.selectByWebsite(website);
         TenantDO tenant = dataRepository.findOne(TenantDO.class, new DefaultConfigStore().eq("website", website));
 
         if (tenant == null) {
@@ -338,12 +354,10 @@ public class TenantServiceImpl implements TenantService {
         // 校验存在
         validateUpdateTenant(id);
         // 删除
-//        tenantMapper.deleteById(id);
         dataRepository.deleteById(TenantDO.class, id);
     }
 
     private TenantDO validateUpdateTenant(Long id) {
-//        TenantDO tenant = tenantMapper.selectById(id);
         TenantDO tenant = dataRepository.findById(TenantDO.class, id);
 
         if (tenant == null) {
@@ -358,29 +372,39 @@ public class TenantServiceImpl implements TenantService {
 
     @Override
     public TenantDO getTenant(Long id) {
-//        return tenantMapper.selectById(id);
         return dataRepository.findById(TenantDO.class, id);
     }
 
+
     @Override
-    public PageResult<TenantDO> getTenantPage(TenantPageReqVO pageReqVO) {
+    public PageResult<TenantDO> getTenantPage(TenantPageReqVO reqVO) {
+
+        Integer status = reqVO.getStatus();
+
+        if (status != null && status == 2) {
+            status = null;
+        }
+
         DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.eq(TenantDO.STATUS, pageReqVO.getStatus())
-                .like(TenantDO.NAME, pageReqVO.getName())
-                .like(TenantDO.TENANT_CODE, pageReqVO.getTenantCode());
-        return dataRepository.findPageWithConditions(TenantDO.class, configStore, pageReqVO.getPageNo(), pageReqVO.getPageSize());
-//        return tenantMapper.selectPage(pageReqVO);
+        // 按照关键词模糊
+        if (StringUtils.isNotBlank(reqVO.getKeyword())) {
+            configStore.and(new DefaultConfigStore().or(Compare.LIKE, TenantDO.NAME, reqVO.getKeyword())
+                    .or(Compare.LIKE, TenantDO.TENANT_CODE, reqVO.getKeyword()));
+        }
+        // 按照状态查询
+        if (status != null) {
+            configStore.eq(TenantDO.STATUS, status);
+        }
+        return dataRepository.findPageWithConditions(TenantDO.class, configStore, reqVO.getPageNo(), reqVO.getPageSize());
     }
 
     @Override
     public TenantDO getTenantByName(String name) {
         return dataRepository.findOne(TenantDO.class, new DefaultConfigStore().eq("name", name));
-//        return tenantMapper.selectByName(name);
     }
 
     @Override
     public TenantDO getTenantByWebsite(String website) {
-//        return tenantMapper.selectByWebsite(website);
         return dataRepository.findOne(TenantDO.class, new DefaultConfigStore().eq("website", website));
 
     }
@@ -388,7 +412,6 @@ public class TenantServiceImpl implements TenantService {
     @Override
     public Long getTenantCountByPackageId(Long packageId) {
         return dataRepository.countByConfig(TenantDO.class, new DefaultConfigStore().eq("package_id", packageId));
-//        return tenantMapper.selectCountByPackageId(packageId);
     }
 
     @Override
@@ -399,13 +422,11 @@ public class TenantServiceImpl implements TenantService {
     @Override
     public List<TenantDO> getTenantListByPackageId(Long packageId) {
         return dataRepository.findAllByConfig(TenantDO.class, new DefaultConfigStore().eq("package_id", packageId));
-//        return tenantMapper.selectListByPackageId(packageId);
     }
 
     @Override
     public List<TenantDO> getTenantListByStatus(Integer status) {
         return dataRepository.findAllByConfig(TenantDO.class, new DefaultConfigStore().eq("status", status));
-//        return tenantMapper.selectListByStatus(status);
     }
 
     @Override

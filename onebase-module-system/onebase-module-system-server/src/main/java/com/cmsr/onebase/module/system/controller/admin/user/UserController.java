@@ -15,8 +15,8 @@ import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.enums.common.SexEnum;
+import com.cmsr.onebase.module.system.enums.permission.AdminTypeEnum;
 import com.cmsr.onebase.module.system.enums.permission.RoleCodeEnum;
-import com.cmsr.onebase.module.system.enums.permission.UserTypeEnum;
 import com.cmsr.onebase.module.system.service.dept.DeptService;
 import com.cmsr.onebase.module.system.service.permission.PermissionService;
 import com.cmsr.onebase.module.system.service.permission.RoleService;
@@ -124,7 +124,7 @@ public class UserController {
     @PreAuthorize("@ss.hasPermission('system:platform-admin:delete')")
     public CommonResult<Boolean> deletePlatformAdmin(@RequestParam("id") Long id) {
         AdminUserDO adminUserDO = userService.getUser(id);
-        if (UserTypeEnum.SYSTEM.equals(adminUserDO.getUserType())) {
+        if (AdminTypeEnum.SYSTEM.equals(adminUserDO.getUserType())) {
             throw exception(USER_PASSWORD_NOT_ALLOW_DEL);
         }
         userService.deleteUser(id);

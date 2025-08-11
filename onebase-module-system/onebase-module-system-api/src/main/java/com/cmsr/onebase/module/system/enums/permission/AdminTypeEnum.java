@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public enum UserTypeEnum {
+public enum AdminTypeEnum {
     /**
      * 内置角色
      */
