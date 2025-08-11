@@ -96,14 +96,14 @@ public class PageSetServiceImpl implements PageSetService {
         String formRouterPath = formPageCode + "/form";
         String formPageType = "form";
         PageDO formPageDO = PageUtils.initPage(formPageCode, formPageName, formRouterPath, formPageType);
-        pageSetDataRepository.insert(formPageDO);
+        pageDataRepository.insert(formPageDO);
 
         String listPageCode = UUID.randomUUID().toString();
         String listPageName = pageSetDO.getPageSetName() + "_列表";
         String listRouterPath = listPageCode + "/list";
         String listPageType = "list";
         PageDO listPageDO = PageUtils.initPage(listPageCode, listPageName, listRouterPath, listPageType);
-        pageSetDataRepository.insert(listPageDO);
+        pageDataRepository.insert(listPageDO);
 
         PageSetPageDO formPageSetPageDO = new PageSetPageDO();
         formPageSetPageDO.setPageSetRef(pageSetDO.getPageSetCode());

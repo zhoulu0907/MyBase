@@ -40,7 +40,7 @@ public class PageRefRouterServiceImpl implements PageRefRouterService {
     @Override
     public Boolean updatePageRefRouter(PageRefRouterRespDTO pageRefRouterRespDTO) {
         PageRefRouterDO pageRefRouterDO = BeanUtils.toBean(pageRefRouterRespDTO, PageRefRouterDO.class);
-        pageRefRouterDO = appPageRefRouterDataRepository.update(pageRefRouterDO);
+        appPageRefRouterDataRepository.update(pageRefRouterDO);
         return true;
     }
 

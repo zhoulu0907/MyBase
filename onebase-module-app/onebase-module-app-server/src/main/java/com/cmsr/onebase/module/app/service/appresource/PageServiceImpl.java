@@ -57,12 +57,12 @@ public class PageServiceImpl implements PageService {
         // 删除页面集关联的页面
         ConfigStore configs = new DefaultConfigStore();
         configs.and(Compare.EQUAL, "page_ref", code);
-        pageDataRepository.deleteByConfig(PageSetPageDO.class, configs);
+        pageDataRepository.deleteByConfig(configs);
 
         // 删除页面
         configs = new DefaultConfigStore();
         configs.and(Compare.EQUAL, "page_code", code);
-        pageDataRepository.deleteByConfig(PageDO.class, configs);
+        pageDataRepository.deleteByConfig(configs);
 
         pageDataRepository.deletePageByCode(code);
         pageSetPageDataRepository.deleteByPageCode(code);
