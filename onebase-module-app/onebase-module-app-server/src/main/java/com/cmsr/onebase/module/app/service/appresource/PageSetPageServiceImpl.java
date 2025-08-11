@@ -45,7 +45,7 @@ public class PageSetPageServiceImpl implements PageSetPageService {
     @Override
     public Boolean updatePageSetPage(PageSetPageRespDTO pageSetPageRespDTO) {
         PageSetPageDO pageSetPageDO = BeanUtils.toBean(pageSetPageRespDTO, PageSetPageDO.class);
-        pageSetPageDO = pageSetPageDataRepository.update(pageSetPageDO);
+        pageSetPageDataRepository.update(pageSetPageDO);
         return true;
     }
 
