@@ -6,9 +6,13 @@ import lombok.Data;
 
 import java.util.List;
 
+/**
+ * @Author：huangjie
+ * @Date：2025/8/7 12:05
+ */
 @Data
-@Schema(description = "应用管理 - 角色添加成员 Request VO")
-public class AuthRoleAddMemberReqVO {
+@Schema(description = "应用管理 - 角色删除成员 Request VO")
+public class AuthRoleDeleteUserReqVO {
 
     @Schema(description = "角色ID")
     @NotNull(message = "角色ID不能为空")
@@ -17,5 +21,6 @@ public class AuthRoleAddMemberReqVO {
     @Schema(description = "用户ID列表")
     @NotNull(message = "用户ID列表不能为空")
     private List<Long> userIds;
+
 
 }

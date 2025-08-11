@@ -2,17 +2,13 @@ package com.cmsr.onebase.module.app.service.auth;
 
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.module.app.controller.admin.auth.vo.AuthRoleAddMemberReqVO;
-import com.cmsr.onebase.module.app.controller.admin.auth.vo.AuthRoleCreateReqVO;
-import com.cmsr.onebase.module.app.controller.admin.auth.vo.AuthRoleDeleteMemberReqVO;
-import com.cmsr.onebase.module.app.controller.admin.auth.vo.AuthRoleListRespVO;
+import com.cmsr.onebase.module.app.controller.admin.auth.vo.*;
 import com.cmsr.onebase.module.app.dal.database.auth.AppAuthRoleRepository;
-import com.cmsr.onebase.module.app.dal.database.auth.AppAuthUserRoleRepository;
+import com.cmsr.onebase.module.app.dal.database.auth.AppAuthRoleUserRepository;
 import com.cmsr.onebase.module.app.dal.dataobject.auth.AuthRoleDO;
 import com.cmsr.onebase.module.app.enums.app.AppErrorCodeConstants;
 import com.cmsr.onebase.module.app.enums.auth.AuthRoleTypeEnum;
 import com.cmsr.onebase.module.app.service.AppCommonService;
-import com.cmsr.onebase.module.app.service.app.AppApplicationService;
 import com.cmsr.onebase.module.app.util.AuthUtils;
 import jakarta.annotation.Resource;
 import lombok.Setter;
@@ -33,13 +29,13 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
     private AppAuthRoleRepository authRoleRepository;
 
     @Resource
-    private AppAuthUserRoleRepository authUserRoleRepository;
+    private AppAuthRoleUserRepository appAuthRoleUserRepository;
 
     @Resource
     private AppCommonService appCommonService;
 
     @Override
-    public List<AuthRoleListRespVO> getAuthRoleList(Long applicationId) {
+    public List<AuthRoleListRespVO> getRoleList(Long applicationId) {
         appCommonService.validateApplicationExist(applicationId);
         List<AuthRoleDO> authRoleList = authRoleRepository.findByApplicationId(applicationId);
         return BeanUtils.toBean(authRoleList, AuthRoleListRespVO.class);
@@ -47,7 +43,8 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
 
 
     @Override
-    public void createRole(AuthRoleCreateReqVO reqVO) {
+    public AuthRoleCreateRespVO createRole(AuthRoleCreateReqVO reqVO) {
+        appCommonService.validateApplicationExist(reqVO.getApplicationId());
         checkAuthRoleNameExists(reqVO.getApplicationId(), reqVO.getRoleName());
         AuthRoleDO authRoleDO = new AuthRoleDO();
         authRoleDO.setApplicationId(reqVO.getApplicationId());
@@ -55,10 +52,12 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
         authRoleDO.setRoleName(reqVO.getRoleName());
         authRoleDO.setRoleCode(AuthUtils.createRoleCode());
         authRoleRepository.insert(authRoleDO);
+        return BeanUtils.toBean(authRoleDO, AuthRoleCreateRespVO.class);
     }
 
     @Override
     public void createDefaultRole(Long applicationId) {
+        appCommonService.validateApplicationExist(applicationId);
         for (AuthRoleTypeEnum roleType : List.of(AuthRoleTypeEnum.SYSTEM_ADMIN, AuthRoleTypeEnum.SYSTEM_USER)) {
             AuthRoleDO authRoleDO = new AuthRoleDO();
             authRoleDO.setApplicationId(applicationId);
@@ -71,20 +70,22 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void addUser(AuthRoleAddMemberReqVO reqVO) {
-        authUserRoleRepository.saveUserRole(reqVO);
+    public void addRoleUser(AuthRoleAddUserReqVO reqVO) {
+        appCommonService.validateRoleExist(reqVO.getRoleId());
+        appAuthRoleUserRepository.addRoleUser(reqVO);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void deleteUser(AuthRoleDeleteMemberReqVO reqVO) {
-        authUserRoleRepository.deleteUserRole(reqVO);
+    public void deleteRoleUser(AuthRoleDeleteUserReqVO reqVO) {
+        appCommonService.validateRoleExist(reqVO.getRoleId());
+        appAuthRoleUserRepository.deleteRoleUser(reqVO);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteRole(Long roleId) {
-        authUserRoleRepository.deleteByRoleId(roleId);
+        appAuthRoleUserRepository.deleteByRoleId(roleId);
         authRoleRepository.deleteById(roleId);
     }
 
@@ -94,5 +95,6 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_AUTH_ROLE_NAME_EXISTS);
         }
     }
+
 
 }
