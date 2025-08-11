@@ -98,6 +98,7 @@ const BasicSetting = (props: IProps) => {
 
   /* 新增标签 */
   const handleCreateTagChange = async (val: Options[]) => {
+    if (val.length === 0) return;
     const curValue = val[val.length - 1]; // 最后一次更新的数据
     await createApplicationTag({
       tagName: curValue.value
@@ -106,14 +107,14 @@ const BasicSetting = (props: IProps) => {
     const res = await listAppTagReq();
     let currentTag = form.getFieldValue('tagIds'); // 需要修改的数据
     const getCurTagId = res.find((v: ListTagReq) => v.tagName === curValue.value)?.id; // 接口返回的最新数据
-
-    currentTag = currentTag.map((t: Options) => {
-      if (t.label === curValue.value) {
+    currentTag = currentTag.map((tag: Options) => {
+      if (tag.label === curValue.value) {
         return {
-          label: t.label,
+          label: tag.label,
           value: getCurTagId
         };
       }
+      return tag;
     });
     form.setFieldValue('tagIds', currentTag);
   };
