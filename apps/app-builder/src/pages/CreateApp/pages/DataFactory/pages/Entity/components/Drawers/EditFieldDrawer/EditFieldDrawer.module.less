@@ -1,0 +1,157 @@
+@import '../../../../../styles/variables.less';
+
+.edit-field-drawer {
+  .arco-drawer-header {
+    border-bottom: 1px solid #e5e5e5;
+    padding: 16px 24px;
+
+    .arco-drawer-title {
+      font-size: 16px;
+      font-weight: 500;
+      color: #1d2129;
+    }
+  }
+
+  .arco-drawer-body {
+    padding: 24px;
+  }
+}
+
+.edit-form {
+  .section {
+    margin-bottom: 32px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  .section-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: #1d2129;
+    margin: 0 0 16px 0;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #f2f3f5;
+
+    &::before {
+      content: '';
+      display: inline-block;
+      width: 4px;
+      height: 14px;
+      background: #1890ff;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+  }
+
+  .arco-form-item {
+    margin-bottom: 16px;
+
+    .arco-form-item-label {
+      font-weight: 500;
+      color: #4e5969;
+    }
+
+    .arco-form-item-control {
+      .arco-input,
+      .arco-textarea,
+      .arco-select {
+        border-radius: 4px;
+      }
+
+      .arco-checkbox {
+        .arco-checkbox-label {
+          color: #4e5969;
+        }
+      }
+    }
+  }
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+
+  .info-label {
+    font-weight: 500;
+    color: #4e5969;
+    width: 80px;
+    flex-shrink: 0;
+  }
+
+  .info-value {
+    color: #1d2129;
+    flex: 1;
+  }
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+
+  p {
+    margin-top: 16px;
+    color: #86909c;
+    font-size: 14px;
+  }
+}
+
+.empty-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+
+  p {
+    color: #86909c;
+    font-size: 14px;
+  }
+}
+
+.drawer-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 16px 24px;
+  border-top: 1px solid #e5e5e5;
+  background-color: #fafafa;
+
+  .arco-space {
+    .arco-btn {
+      min-width: 80px;
+    }
+  }
+}
+
+// 表单验证样式
+.arco-form-item-error {
+  .arco-input,
+  .arco-textarea,
+  .arco-select {
+    border-color: #f53f3f;
+
+    &:focus {
+      border-color: #f53f3f;
+      box-shadow: 0 0 0 2px rgba(245, 63, 63, 0.1);
+    }
+  }
+}
+
+.arco-form-item-error-tip {
+  color: #f53f3f;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+// 禁用状态样式
+.arco-input[disabled],
+.arco-textarea[disabled],
+.arco-select[disabled] {
+  background-color: #f5f5f5;
+  color: #8c8c8c;
+  cursor: not-allowed;
+}

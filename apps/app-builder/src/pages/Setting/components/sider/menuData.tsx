@@ -10,6 +10,7 @@ export interface MenuItemType {
   path?: string;
   children?: MenuItemType[];
   disabled?: boolean;
+  permissionKey?: string;
 }
 
 // 示例：自定义菜单数据

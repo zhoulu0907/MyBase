@@ -1,22 +1,15 @@
 import { getComponentSchema } from '@/components/Materials/schema';
 import { ALL_COMPONENT_TYPES } from '@/constants/componentTypes';
 import { usePageEditorStore } from '@/hooks/useStore';
-import { COMPONENT_GROUP_NAME } from '@/pages/Editor/components/const';
-import ComponentRender from '@/pages/Editor/components/render';
-import { getComponentConfig, getComponentWidth } from '@/pages/Editor/components/utils';
+import EditRender from '@/pages/Editor/components/render/EditRender';
+import { getComponentConfig, getComponentWidth } from '@/pages/Editor/utils/app_resource';
+import { COMPONENT_GROUP_NAME, type GridItem } from '@/pages/Editor/utils/const';
 import { Layout } from '@arco-design/web-react';
 import { IconDelete } from '@arco-design/web-react/icon';
 import { useEffect } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import styles from './index.module.less';
 import { type XColumnLayoutConfig } from './schema';
-
-// TODO(mickey): 抽出来
-interface GridItem {
-  id: string;
-  type: string;
-  displayName: string;
-}
 
 const XColumnLayout = (props: XColumnLayoutConfig) => {
   const { colCount, id } = props;
@@ -37,7 +30,7 @@ const XColumnLayout = (props: XColumnLayoutConfig) => {
 
   // 从 store 中获取当前组件的列数据，如果不存在则初始化为空数组
   const colComponents = colComponentsMap.colComponents.get(id) || Array.from({ length: colCount }, () => []);
-  console.log('colComponents', colComponents);
+  //   console.log('colComponents', colComponents);
 
   // 如果列数变了，就重新初始化列
   useEffect(() => {
@@ -146,7 +139,8 @@ const XColumnLayout = (props: XColumnLayoutConfig) => {
                   data-cp-id={cp.id}
                   className={styles.componentItem}
                   style={{
-                    width: getComponentWidth(pageComponentSchemas.get(cp.id), cp.type)
+                    width: getComponentWidth(pageComponentSchemas.get(cp.id), cp.type),
+                    borderColor: curComponentID === cp.id ? '#4FAE7B' : 'transparent'
                   }}
                   onClick={(e: React.MouseEvent<HTMLDivElement>) => {
                     e.stopPropagation();
@@ -158,11 +152,7 @@ const XColumnLayout = (props: XColumnLayoutConfig) => {
                     setShowDeleteButton(true);
                   }}
                 >
-                  <ComponentRender
-                    cpId={cp.id}
-                    cpType={cp.type}
-                    pageComponentSchema={pageComponentSchemas.get(cp.id)}
-                  />
+                  <EditRender cpId={cp.id} cpType={cp.type} pageComponentSchema={pageComponentSchemas.get(cp.id)} />
 
                   {/* 删除按钮 */}
                   {curComponentID === cp.id && showDeleteButton && (

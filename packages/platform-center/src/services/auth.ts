@@ -1,11 +1,10 @@
 import { LoginRequest } from '../types';
-
-import systemClient from './clients/system';
+import { systemService } from './clients';
 
 export const login = (req: LoginRequest) => {
-  return systemClient.post('/auth/login', req);
+  return systemService.post('/auth/login', req);
 };
 
 export const getPermissionInfo = () => {
-  return systemClient.get('/auth/get-permission-info');
+  return systemService.get('/auth/get-permission-info');
 };

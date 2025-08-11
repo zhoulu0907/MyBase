@@ -5,9 +5,9 @@ import { ReactSortable } from 'react-sortablejs';
 import { getComponentSchema } from '@/components/Materials/schema';
 import { ALL_COMPONENT_TYPES } from '@/constants/componentTypes';
 import { usePageEditorStore } from '@/hooks/useStore';
-import ComponentRender from '@/pages/Editor/components/render';
-import { COMPONENT_GROUP_NAME } from '../const';
-import { getComponentWidth } from '../utils';
+import EditRender from '@/pages/Editor/components/render/EditRender';
+import { getComponentWidth } from '../../utils/app_resource';
+import { COMPONENT_GROUP_NAME, type GridItem } from '../../utils/const';
 
 import EmptyIcon from '@/assets/images/empty.svg';
 import MobileIcon from '@/assets/images/mobile_icon.svg';
@@ -17,12 +17,6 @@ import PCActiveIcon from '@/assets/images/pc_icon_active.svg';
 
 import 'react-grid-layout/css/styles.css';
 import styles from './index.module.less';
-
-interface GridItem {
-  id: string;
-  type: string;
-  displayName: string;
-}
 
 export default function EditorWorkspace() {
   const [showEmpty, setShowEmpty] = useState(true);
@@ -39,7 +33,8 @@ export default function EditorWorkspace() {
     setComponents,
     delComponents,
     showDeleteButton,
-    setShowDeleteButton
+    setShowDeleteButton,
+    delColComponentsMap
   } = usePageEditorStore();
 
   const [pageMode, setPageMode] = useState<string>('pc');
@@ -56,6 +51,8 @@ export default function EditorWorkspace() {
   const handleDeleteComponent = (componentId: string) => {
     // 从组件列表中移除
     delComponents(componentId);
+    delPageComponentSchemas(componentId);
+    delColComponentsMap(componentId);
 
     // 如果删除的是当前选中的组件，清除选中状态
     if (curComponentID === componentId) {
@@ -125,6 +122,17 @@ export default function EditorWorkspace() {
 
             console.log(`拖入组件 ${cpID} ${itemType}`);
 
+            if (cpID) {
+              const cpSchema = pageComponentSchemas.get(cpID);
+              // 如果组件已经存在，则不进行创建
+              if (cpSchema && cpSchema.config && cpSchema.editData) {
+                setCurComponentID(cpID!);
+                setCurComponentSchema(cpSchema);
+                setShowDeleteButton(false);
+                return;
+              }
+            }
+
             const schema = getComponentSchema(itemType as any);
             // console.log("schema", schema)
             schema.config.cpName = itemDisplayName;
@@ -182,7 +190,7 @@ export default function EditorWorkspace() {
                 setShowDeleteButton(true);
               }}
             >
-              <ComponentRender cpId={cp.id} cpType={cp.type} pageComponentSchema={pageComponentSchemas.get(cp.id)} />
+              <EditRender cpId={cp.id} cpType={cp.type} pageComponentSchema={pageComponentSchemas.get(cp.id)} />
 
               {/* 删除按钮 */}
               {/* TODO(mickey): 组件继续封装，和layout中的共用一套 */}

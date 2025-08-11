@@ -1,8 +1,8 @@
 @import '../../../Editor/variables.module.less';
 
 // 定义表单编辑器工作区头部高度变量
-@form-editor-workspace-header-height: 40px;
-@form-editor-workspace-padding: 24px;
+@workspace-header-height: 40px;
+@workspace-padding: 24px;
 
 .formEditorWorkspace {
   flex: 1 1 0%;
@@ -14,7 +14,7 @@
   flex-direction: column;
 
   .workspaceHeader {
-    height: @form-editor-workspace-header-height;
+    height: @workspace-header-height;
     background-color: white;
     display: flex;
     flex-direction: row;
@@ -32,7 +32,7 @@
   .workspaceBody {
     height: 100%;
     display: block;
-    padding: @form-editor-workspace-padding;
+    padding: @workspace-padding;
     box-sizing: border-box;
     background-color: #dee4ed;
     position: relative;
@@ -57,9 +57,7 @@
       background-color: #fff;
 
       min-width: 348px;
-      min-height: calc(
-        100vh - var(--editor-header-height) - @form-editor-workspace-header-height - @form-editor-workspace-padding * 2
-      );
+      min-height: calc(100vh - var(--editor-header-height) - @workspace-header-height - @workspace-padding * 2);
       width: 100%;
       padding: 16px;
       box-sizing: border-box;

@@ -94,9 +94,6 @@ export class HttpClient {
         });
 
         // 统一处理响应数据
-        // TODO(mickey): remove
-        console.log(response);
-
         const { data } = response;
         if (data && typeof data === 'object') {
           if (data.code !== 0) {

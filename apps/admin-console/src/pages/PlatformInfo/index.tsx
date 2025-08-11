@@ -1,3 +1,5 @@
+import { useI18n } from '@/hooks/useI18n';
+import { formatTimestamp } from '@/utils/date';
 import {
   Card,
   Descriptions,
@@ -10,40 +12,41 @@ import {
   Upload,
   type TableColumnProps
 } from '@arco-design/web-react';
-// import { IconInfoCircle } from '@arco-design/web-react/icon';
-
+import {
+  getPlatFormInfoListApi,
+  getPlatformInfoApi,
+  uploadPlatformLicenseApi,
+  type LicenseInfo
+} from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import styles from './index.module.less';
-import { getPlatFormInfoListApi, getPlatformInfoApi, uploadPlatformLicenseApi,  type LicenseInfo } from '@onebase/platform-center'
-import { formatTimestamp } from '@/utils/date';
 
 const { Title, Text } = Typography;
 
 const PlatformInfo: React.FC = () => {
-  const { t } = useTranslation();
+  const { t } = useI18n();
   const [visible, setVisible] = useState(false);
   const [licenseInfoList, setLicenseInfoList] = useState<LicenseInfo[]>([]);
   const [licenseInfo, setLicenseInfo] = useState<LicenseInfo | null>(null);
-  
+
   const getPlatformInfo = async () => {
     const res = await getPlatformInfoApi();
     console.log('platformInfo res:', res);
-    if(res.id) {
-      setLicenseInfo(res)
+    if (res.id) {
+      setLicenseInfo(res);
     }
   };
 
   const getPlatformInfoList = async () => {
     console.log('获取认证记录:');
     try {
-      const res = await getPlatFormInfoListApi({ pageNum: 1, pageSize: 10 })
+      const res = await getPlatFormInfoListApi({ pageNum: 1, pageSize: 10 });
       console.log('infoList res:', res);
       if (res && Array.isArray(res.list)) {
         setLicenseInfoList(res.list);
         setPagination((prevPagination) => ({
           ...prevPagination,
-          total: res.total,
+          total: res.total
         }));
       } else {
         console.warn('Invalid response format:', res);
@@ -58,14 +61,14 @@ const PlatformInfo: React.FC = () => {
   useEffect(() => {
     getPlatformInfoList();
     getPlatformInfo();
-  }, [])
+  }, []);
 
   // 认证记录table结构
   const columns: TableColumnProps[] = [
     {
       title: '公司名称',
       dataIndex: 'enterpriseName',
-      key: 'enterpriseName',
+      key: 'enterpriseName'
     },
     {
       title: '认证内容',
@@ -76,25 +79,19 @@ const PlatformInfo: React.FC = () => {
         <div>
           租户数量：{record.tenantLimit}，用户数量：{record.userLimit}
         </div>
-      ),
+      )
     },
     {
       title: '当前状态',
       dataIndex: 'status',
       key: 'status',
-      render: (text) => (
-        <Tag color={text === 'enable' ? 'green' : 'red'}>
-          {text === 'enable' ? '已启用' : '已失效'}
-        </Tag>
-      )
+      render: (text) => <Tag color={text === 'enable' ? 'green' : 'red'}>{text === 'enable' ? '已启用' : '已失效'}</Tag>
     },
     {
       title: '到期时间',
       dataIndex: 'expireTime',
       key: 'expireTime',
-      render: (text) => (
-        <div>{formatTimestamp(text)}</div>
-      )
+      render: (text) => <div>{formatTimestamp(text)}</div>
     },
     {
       title: '操作',
@@ -102,12 +99,17 @@ const PlatformInfo: React.FC = () => {
       key: 'operation',
       render: (_, record) => (
         <div className={styles.operation}>
-          <a href="#" className={styles.btn} onClick={(e) => {
-            e.preventDefault();
-            setLicenseInfo(record);
-            setVisible(true);
-          }}>{t('platformInfo.check')}</a>
-          
+          <a
+            href="#"
+            className={styles.btn}
+            onClick={(e) => {
+              e.preventDefault();
+              setLicenseInfo(record);
+              setVisible(true);
+            }}
+          >
+            {t('platformInfo.check')}
+          </a>
         </div>
       )
     }
@@ -122,7 +124,7 @@ const PlatformInfo: React.FC = () => {
     } catch (error: any) {
       Message.error(error.message || '认证上传失败');
     }
-  }
+  };
   const [data, setData] = useState(licenseInfoList);
   // 分页器
   const [pagination, setPagination] = useState({
@@ -131,7 +133,7 @@ const PlatformInfo: React.FC = () => {
     total: 0,
     pageSize: 10,
     pageNum: 1,
-    pageSizeChangeResetCurrent: true,
+    pageSizeChangeResetCurrent: true
   });
   const [loading, setLoading] = useState(false);
 
@@ -139,7 +141,7 @@ const PlatformInfo: React.FC = () => {
     setLoading(true);
     console.log('pagination: ', pagination);
     setLoading(false);
-  }
+  };
 
   return (
     <div className={styles.platformInfo}>
@@ -161,13 +163,13 @@ const PlatformInfo: React.FC = () => {
             <div className={styles.superAdmin}>
               <Text type="secondary">
                 {t('platformInfo.superAdmin')}：
-                <span className={styles.superAdminText}>
-                  {licenseInfo?.adminUser || 'admin'}
-                </span>
+                <span className={styles.superAdminText}>{licenseInfo?.adminUser || 'admin'}</span>
               </Text>
             </div>
             <div className={styles.createdAt}>
-              <Text type="secondary">{t('platformInfo.createdAt')}：{formatTimestamp(licenseInfo?.createTime)}</Text>
+              <Text type="secondary">
+                {t('platformInfo.createdAt')}：{formatTimestamp(licenseInfo?.createTime)}
+              </Text>
             </div>
           </div>
         </div>
@@ -187,11 +189,11 @@ const PlatformInfo: React.FC = () => {
                   <span className={styles.statusRunning}>
                     {licenseInfo?.status ? t('platformInfo.enable') : t('platformInfo.disable')}
                   </span>
-                ),
+                )
               },
               {
                 label: t('platformInfo.expireTime'),
-                value: formatTimestamp(licenseInfo?.expireTime),
+                value: formatTimestamp(licenseInfo?.expireTime)
               },
               {
                 label: t('platformInfo.version'),
@@ -262,7 +264,7 @@ const PlatformInfo: React.FC = () => {
             data={[
               {
                 label: t('platformInfo.enterpriseName'),
-                value: licenseInfo.enterpriseName,
+                value: licenseInfo.enterpriseName
               },
               {
                 label: t('platformInfo.certificationContent'),
@@ -270,7 +272,7 @@ const PlatformInfo: React.FC = () => {
                   <div>
                     租户数量：{licenseInfo.tenantLimit}，用户数量：{licenseInfo.userLimit}
                   </div>
-                ),
+                )
               },
               {
                 label: t('platformInfo.status'),
@@ -278,12 +280,12 @@ const PlatformInfo: React.FC = () => {
                   <Tag color={licenseInfo?.status === 'enable' ? 'green' : 'red'}>
                     {licenseInfo?.status === 'enable' ? '已启用' : '已失效'}
                   </Tag>
-                ),
+                )
               },
               {
                 label: t('platformInfo.expireTime'),
-                value: formatTimestamp(licenseInfo.expireTime),
-              },
+                value: formatTimestamp(licenseInfo.expireTime)
+              }
             ]}
             labelStyle={{ fontWeight: 'bold', width: '100px' }}
           />

@@ -1,13 +1,12 @@
-import LogoSVG from '@/assets/images/ob_logo.svg';
-import settingSVG from '@/assets/images/setting_icon.svg';
-import navBackSVG from '@/assets/images/nav_back.svg';
 import defaultAvatar from '@/assets/images/default_avatar.png';
+import navBackSVG from '@/assets/images/nav_back.svg';
+import LogoSVG from '@/assets/images/ob_logo.svg';
+import { useI18n } from '@/hooks/useI18n';
 import { UserPermissionManager } from '@/utils/permission';
 import { Avatar, Button, Dropdown, Layout, Menu } from '@arco-design/web-react';
 import { IconPoweroff, IconUser } from '@arco-design/web-react/icon';
 import { TokenManager } from '@onebase/common';
 import React, { useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import styles from './header.module.less';
 
@@ -19,7 +18,7 @@ interface HeaderProps {
 
 const AppHeader: React.FC<HeaderProps> = ({ className }) => {
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t } = useI18n();
 
   // 获取用户信息
   const tokenInfo = TokenManager.getTokenInfo();
@@ -59,16 +58,16 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
         </div>
 
         <div className={styles.userInfo}>
-           <Button
-            type='secondary'
-            icon={<img src={navBackSVG} alt="MyApp"/>}
+          <Button
+            type="secondary"
+            icon={<img src={navBackSVG} alt="MyApp" />}
             onClick={() => navigate('/onebase/my-app')}
             className={styles.backBtn}
-          >我的应用</Button>
+          >
+            我的应用
+          </Button>
 
-          <div className={styles.username}>
-            {userPermissionInfo?.user.nickname}
-          </div>
+          <div className={styles.username}>{userPermissionInfo?.user.nickname}</div>
 
           <Dropdown droplist={userMenu} position="bottom">
             <div className={styles.userDropdown}>

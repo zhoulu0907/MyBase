@@ -28,7 +28,8 @@ export const FORM_COMPONENT_TYPES = {
 
 // 布局组件类型
 export const LAYOUT_COMPONENT_TYPES = {
-  COLUMN_LAYOUT: 'XColumnLayout'
+  COLUMN_LAYOUT: 'XColumnLayout',
+  PREVIEW_COLUMN_LAYOUT: 'XPreviewColumnLayout'
 } as const;
 
 // 列表组件类型

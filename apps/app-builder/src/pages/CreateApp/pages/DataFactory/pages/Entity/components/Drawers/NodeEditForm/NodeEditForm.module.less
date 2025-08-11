@@ -1,0 +1,36 @@
+// 表单样式变量
+@import '../../../../../styles/variables.less';
+
+.node-edit-form {
+  h3 {
+    font-size: @fontSizeLg;
+    font-weight: @fontWeightNormal;
+    color: @textColorPrimary;
+  }
+
+  h4 {
+    margin: @spacingSm -@spacingMd !important;
+    padding: @spacingSm @spacingMd !important;
+    margin-bottom: @formItemMarginBottom;
+    font-weight: @fontWeightNormal;
+    color: @textColorPrimary;
+    background-color: @backgroundColorLighter;
+  }
+
+  .form-section {
+    .form-section-style();
+  }
+
+  .form-actions {
+    .form-actions-style();
+  }
+
+  .switch-item {
+    .flex-between();
+
+    span {
+      font-size: @fontSizeBase;
+      color: @textColorSecondary;
+    }
+  }
+}

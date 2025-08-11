@@ -1,9 +1,9 @@
-import { IconArrowDown, IconArrowLeft, IconArrowRight, IconArrowUp, IconCheckCircle, IconClockCircle, IconCloseCircle, IconInfoCircle, IconDownload, IconEye, IconLaunch, IconEdit, IconDelete, IconApps, IconBug, IconCalendar, IconCompass, IconEmail, IconFile, IconList, IconImage, IconLayout, IconLoading, IconLocation, IconNotification, IconMoon, IconPhone, IconPrinter, IconPushpin, IconRobot, IconStorage, IconSubscribeAdd, IconSubscribed, IconSun, IconTag, IconTrophy, IconUnlock, IconWifi, IconUser } from '@arco-design/web-react/icon';
+import { IconApps, IconArrowDown, IconArrowLeft, IconArrowRight, IconArrowUp, IconBug, IconCalendar, IconCheckCircle, IconClockCircle, IconCloseCircle, IconCompass, IconDelete, IconDownload, IconEdit, IconEmail, IconEye, IconFile, IconImage, IconInfoCircle, IconLaunch, IconLayout, IconList, IconLoading, IconLocation, IconMoon, IconNotification, IconPhone, IconPrinter, IconPushpin, IconRobot, IconStorage, IconSubscribeAdd, IconSubscribed, IconSun, IconTag, IconTrophy, IconUnlock, IconUser, IconWifi } from '@arco-design/web-react/icon';
 
 export interface MenuItem {
   name: string;
   type: string;
-  icon: React.ComponentType; // 或 ReactNode 若你存的是 JSX 元素
+  icon: React.ComponentType<{ className?: string }>; // 允许传递 className 属性
 }
 
 // 菜单图标类型
