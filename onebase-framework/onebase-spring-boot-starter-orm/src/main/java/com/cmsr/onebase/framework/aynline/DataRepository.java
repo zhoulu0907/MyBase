@@ -581,12 +581,19 @@ public class DataRepository { // TODO 等改造完成，这个类泛型 <T exten
     public <T extends BaseDO> com.cmsr.onebase.framework.common.pojo.PageResult<T> findPageWithConditions(
             Class<T> clazz, ConfigStore configs, int pageIndex, int pageSize) {
         try {
+            log.info("DataRepository分页查询开始: class={}, pageIndex={}, pageSize={}", 
+                    clazz.getSimpleName(), pageIndex, pageSize);
 
             PageNavi page = new DefaultPageNavi(pageIndex, pageSize);
             configs.setPageNavi(page);
+            
+            log.info("DataRepository创建PageNavi: pageIndex={}, pageSize={}", pageIndex, pageSize);
 
             String tableName = getTableName(clazz);
             DataSet dataSet = anylineService.querys(tableName, configs);
+            
+            log.info("DataRepository查询结果: tableName={}, 总记录数={}, 当前页记录数={}", 
+                    tableName, dataSet.total(), dataSet.size());
 
             return new com.cmsr.onebase.framework.common.pojo.PageResult<>(
                     dataSet.entitys(clazz).stream().toList(),

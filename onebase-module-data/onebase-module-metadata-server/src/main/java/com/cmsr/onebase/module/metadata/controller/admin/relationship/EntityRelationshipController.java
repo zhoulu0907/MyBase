@@ -17,6 +17,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -35,6 +36,7 @@ import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 @RestController
 @RequestMapping("/metadata/entity-relationship")
 @Validated
+@Slf4j
 public class EntityRelationshipController {
 
     @Resource
@@ -52,7 +54,11 @@ public class EntityRelationshipController {
     @PostMapping("/page")
     @Operation(summary = "查询实体关系列表")
     @PreAuthorize("@ss.hasPermission('metadata:entity-relationship:query')")
-    public CommonResult<PageResult<EntityRelationshipRespVO>> getEntityRelationshipPage(@Valid EntityRelationshipPageReqVO pageReqVO) {
+    public CommonResult<PageResult<EntityRelationshipRespVO>> getEntityRelationshipPage(@Valid @RequestBody EntityRelationshipPageReqVO pageReqVO) {
+        log.info("控制器接收到的分页请求参数: entityId={}, appId={}, pageNo={}, pageSize={}", 
+                pageReqVO.getEntityId(), pageReqVO.getAppId(), pageReqVO.getPageNo(), pageReqVO.getPageSize());
+        log.info("控制器参数详细信息: pageReqVO={}", pageReqVO);
+        
         PageResult<EntityRelationshipRespVO> result = entityRelationshipService.getEntityRelationshipPage(pageReqVO);
         return success(result);
     }
