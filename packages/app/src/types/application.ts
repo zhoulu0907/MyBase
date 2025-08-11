@@ -34,6 +34,10 @@ export interface Application {
     tagName: string;
   }[];
   /**
+   * 主题色
+   */
+  themeColor?: string;
+  /**
    * 创建时间
    */
   createTime?: string;
@@ -102,7 +106,7 @@ export interface UpdateApplicationReq {
   /**
    * 应用ID
    */
-  id: number;
+  id: number | string;
   /**
    * 应用模式
    */
@@ -145,7 +149,7 @@ export interface UpdateApplicationNameReq {
   /**
    * 应用ID
    */
-  id: number;
+  id: number | string;
   /**
    * 应用名称
    */
@@ -156,9 +160,17 @@ export interface DeleteApplicationReq {
   /**
    * 应用ID
    */
-  id: bigint;
+  id: number | string;
   /**
    * 应用名称
    */
   name: string;
+}
+
+
+export interface GetApplicationReq {
+  /**
+   * 应用ID
+   */
+  id: number | string,
 }
