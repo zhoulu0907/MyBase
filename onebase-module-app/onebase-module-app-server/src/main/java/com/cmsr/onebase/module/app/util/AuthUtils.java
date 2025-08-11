@@ -23,7 +23,7 @@ public class AuthUtils {
     }
 
     /**
-     * 实现两个List的full outer join，比较使用compare函数，返回结果为List<Pair<T, T>>
+     * 实现两个List的full outer join，比较使用compare函数，返回结果为List<Pair<T, U>>
      *
      * @param list1
      * @param list2
@@ -70,4 +70,38 @@ public class AuthUtils {
         return result;
     }
 
+    /**
+     * 实现两个List的left outer join，比较使用compare函数，返回结果为List<Pair<T, U>>
+     * 保留list1中元素的顺序
+     *
+     * @param list1   左侧列表
+     * @param list2   右侧列表
+     * @param compare 比较函数，用于判断两个元素是否匹配
+     * @param <T>     左侧列表元素类型
+     * @param <U>     右侧列表元素类型
+     * @return 匹配结果列表，包含左侧所有元素，未匹配的右侧元素为null
+     */
+    public static <T, U> List<Pair<T, U>> leftOuterJoin(List<T> list1, List<U> list2, BiFunction<T, U, Boolean> compare) {
+        if (list1 == null) list1 = new ArrayList<>();
+        if (list2 == null) list2 = new ArrayList<>();
+
+        List<Pair<T, U>> result = new ArrayList<>();
+
+        // 遍历list1中的每个元素
+        for (T item1 : list1) {
+            Pair<T, U> pair = Pair.of(item1, null); // 默认右侧为null
+
+            // 在list2中查找匹配的元素
+            for (U item2 : list2) {
+                if (compare.apply(item1, item2)) {
+                    pair = Pair.of(item1, item2); // 找到匹配项
+                    break;
+                }
+            }
+
+            result.add(pair);
+        }
+
+        return result;
+    }
 }

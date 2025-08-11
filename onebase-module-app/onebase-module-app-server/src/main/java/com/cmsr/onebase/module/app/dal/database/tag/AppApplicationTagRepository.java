@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.app.dal.database.tag;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
+import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
 import com.cmsr.onebase.module.app.dal.dataobject.app.ApplicationTagDO;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
@@ -13,7 +13,7 @@ import java.util.List;
  * @Date：2025/8/6 14:15
  */
 @Repository
-public class AppApplicationTagRepository extends DataRepository {
+public class AppApplicationTagRepository extends DataRepositoryNew<ApplicationTagDO> {
 
     public AppApplicationTagRepository() {
         super(ApplicationTagDO.class);
@@ -22,7 +22,7 @@ public class AppApplicationTagRepository extends DataRepository {
     public List<Long> findTagIdsByApplicationId(Long applicationId) {
         ConfigStore configStore = new DefaultConfigStore();
         configStore.eq("application_id", applicationId);
-        return findAll(ApplicationTagDO.class, configStore).stream()
+        return findAllByConfig(configStore).stream()
                 .map(ApplicationTagDO::getTagId)
                 .toList();
     }
@@ -31,14 +31,14 @@ public class AppApplicationTagRepository extends DataRepository {
     public void deleteByApplicationId(Long applicationId) {
         ConfigStore configStore = new DefaultConfigStore();
         configStore.eq("application_id", applicationId);
-        this.deleteByConfig(ApplicationTagDO.class, configStore);
+        this.deleteByConfig(configStore);
     }
 
     public void deleteByByApplicationIdAndTagsNotIn(Long applicationId, List<Long> tagIds) {
         ConfigStore configStore = new DefaultConfigStore();
         configStore.eq("application_id", applicationId);
         configStore.notIn("tag_id", tagIds);
-        deleteByConfig(ApplicationTagDO.class, configStore);
+        deleteByConfig(configStore);
     }
 
     public void saveAll(Long applicationId, List<Long> tagIds) {
@@ -46,7 +46,7 @@ public class AppApplicationTagRepository extends DataRepository {
             ConfigStore existConfig = new DefaultConfigStore();
             existConfig.eq("application_id", applicationId);
             existConfig.eq("tag_id", tagId);
-            long count = this.countByConfig(ApplicationTagDO.class, existConfig);
+            long count = this.countByConfig(existConfig);
             if (count == 0) {
                 ApplicationTagDO applicationTagDO = new ApplicationTagDO();
                 applicationTagDO.setApplicationId(applicationId);

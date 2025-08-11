@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.app.dal.database.auth;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
+import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
 import com.cmsr.onebase.module.app.dal.dataobject.auth.AuthDataFilterDO;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
@@ -16,7 +16,7 @@ import java.util.List;
  * @date 2025-07-25
  */
 @Repository
-public class AppAuthDataFilterRepository extends DataRepository {
+public class AppAuthDataFilterRepository extends DataRepositoryNew<AuthDataFilterDO> {
 
     public AppAuthDataFilterRepository() {
         super(AuthDataFilterDO.class);
@@ -27,13 +27,13 @@ public class AppAuthDataFilterRepository extends DataRepository {
         configs.eq("group_id", groupId);
         configs.order("condition_group", Order.TYPE.ASC);
         configs.order("condition_order", Order.TYPE.ASC);
-        return this.findAllByConfig(AuthDataFilterDO.class, configs);
+        return this.findAllByConfig(configs);
     }
 
     public void deleteByGroupId(Long groupId) {
         ConfigStore configs = new DefaultConfigStore();
         configs.eq("group_id", groupId);
-        this.deleteByConfig(AuthDataFilterDO.class, configs);
+        this.deleteByConfig(configs);
     }
 
 }

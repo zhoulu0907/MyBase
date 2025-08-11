@@ -40,4 +40,11 @@ public class AppTagController {
         return success(true);
     }
 
+    @PostMapping("/delete")
+    @Operation(summary = "删除应用标签")
+    public CommonResult<Boolean> deleteTag(@RequestParam(name = "tagId") Long tagId) {
+        appTagService.deleteTag(tagId);
+        return success(true);
+    }
+
 }

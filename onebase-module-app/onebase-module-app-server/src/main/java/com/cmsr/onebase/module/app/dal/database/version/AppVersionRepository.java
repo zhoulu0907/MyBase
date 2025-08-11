@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.app.dal.database.version;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
+import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
 import com.cmsr.onebase.framework.data.base.BaseDO;
 import com.cmsr.onebase.module.app.dal.dataobject.version.VersionDO;
 import org.anyline.data.param.ConfigStore;
@@ -15,7 +15,7 @@ import java.util.List;
  * @Date：2025/8/6 14:42
  */
 @Repository
-public class AppVersionRepository extends DataRepository {
+public class AppVersionRepository extends DataRepositoryNew<VersionDO> {
 
     public AppVersionRepository() {
         super(VersionDO.class);
@@ -24,13 +24,13 @@ public class AppVersionRepository extends DataRepository {
     public void deleteByApplicationId(Long applicationId) {
         ConfigStore configs = new DefaultConfigStore();
         configs.eq("application_id", applicationId);
-        deleteByConfig(VersionDO.class, configs);
+        deleteByConfig(configs);
     }
 
     public List<VersionDO> findByApplicationId(Long applicationId) {
         ConfigStore configs = new DefaultConfigStore();
         configs.eq("application_id", applicationId);
         configs.order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
-        return findAll(VersionDO.class, configs);
+        return findAllByConfig(configs);
     }
 }

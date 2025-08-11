@@ -12,6 +12,7 @@ import com.cmsr.onebase.module.app.dal.dataobject.auth.AuthRoleDO;
 import com.cmsr.onebase.module.app.enums.app.AppErrorCodeConstants;
 import com.cmsr.onebase.module.app.enums.auth.AuthRoleTypeEnum;
 import com.cmsr.onebase.module.app.service.AppCommonService;
+import com.cmsr.onebase.module.app.service.app.AppApplicationService;
 import com.cmsr.onebase.module.app.util.AuthUtils;
 import jakarta.annotation.Resource;
 import lombok.Setter;

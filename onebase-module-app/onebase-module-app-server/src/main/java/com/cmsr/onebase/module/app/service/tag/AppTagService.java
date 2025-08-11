@@ -13,4 +13,6 @@ public interface AppTagService {
     List<TagRespVO> listTags(String tagName);
 
     void createTag(String tagName);
+
+    void deleteTag(Long tagId);
 }
