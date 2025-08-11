@@ -71,7 +71,7 @@ public class MailTemplateController {
         return success(BeanUtils.toBean(pageResult, MailTemplateRespVO.class));
     }
 
-    @GetMapping({"/list-all-simple", "simple-list"})
+    @GetMapping({ "simple-list"})
     @Operation(summary = "获得邮件模版精简列表")
     public CommonResult<List<MailTemplateSimpleRespVO>> getSimpleTemplateList() {
         List<MailTemplateDO> list = mailTempleService.getMailTemplateList();

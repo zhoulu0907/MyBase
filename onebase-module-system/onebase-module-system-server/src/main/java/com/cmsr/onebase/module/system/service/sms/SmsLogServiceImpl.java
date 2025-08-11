@@ -1,23 +1,19 @@
 package com.cmsr.onebase.module.system.service.sms;
 
-import java.time.LocalDateTime;
-import java.util.Map;
-import java.util.Objects;
-
-import org.anyline.data.param.ConfigStore;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.springframework.stereotype.Service;
-
-import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.system.controller.admin.sms.vo.log.SmsLogPageReqVO;
+import com.cmsr.onebase.module.system.dal.database.SmsLogDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.sms.SmsLogDO;
 import com.cmsr.onebase.module.system.dal.dataobject.sms.SmsTemplateDO;
 import com.cmsr.onebase.module.system.enums.sms.SmsReceiveStatusEnum;
 import com.cmsr.onebase.module.system.enums.sms.SmsSendStatusEnum;
-
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * 短信日志 Service 实现类
@@ -29,7 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 public class SmsLogServiceImpl implements SmsLogService {
 
     @Resource
-    private DataRepository dataRepository;
+    private SmsLogDataRepository smsLogDataRepository;
 
     @Override
     public Long createSmsLog(String mobile, Long userId, Integer userType, Boolean isSend,
@@ -51,8 +47,7 @@ public class SmsLogServiceImpl implements SmsLogService {
 
         // 插入数据库
         SmsLogDO logDO = logBuilder.build();
-        dataRepository.insert(logDO);
-		//smsLogMapper.insert(logDO);
+        smsLogDataRepository.insert(logDO);
         return logDO.getId();
     }
 
@@ -66,8 +61,7 @@ public class SmsLogServiceImpl implements SmsLogService {
             .apiSendCode(apiSendCode).apiSendMsg(apiSendMsg)
             .apiRequestId(apiRequestId).apiSerialNo(apiSerialNo).build();
         smsLogDO.setId(id);
-        dataRepository.update(smsLogDO);
-        //smsLogMapper.updateById(smsLogDO);
+        smsLogDataRepository.update(smsLogDO);
     }
 
     @Override
@@ -78,14 +72,12 @@ public class SmsLogServiceImpl implements SmsLogService {
         SmsLogDO smsLogDO = SmsLogDO.builder().receiveStatus(receiveStatus.getStatus()).receiveTime(receiveTime)
             .apiReceiveCode(apiReceiveCode).apiReceiveMsg(apiReceiveMsg).build();
         smsLogDO.setId(id);
-        dataRepository.update(smsLogDO);
-        //smsLogMapper.updateById(smsLogDO);
+        smsLogDataRepository.update(smsLogDO);
     }
 
     @Override
     public PageResult<SmsLogDO> getSmsLogPage(SmsLogPageReqVO pageReqVO) {
-        ConfigStore configStore = new DefaultConfigStore();
-        return dataRepository.findPageWithConditions(SmsLogDO.class, configStore, pageReqVO.getPageNo(), pageReqVO.getPageSize());
+        return smsLogDataRepository.findPage(pageReqVO);
     }
 
 }

@@ -1,38 +1,22 @@
 package com.cmsr.onebase.module.system.service.social;
 
-import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static com.cmsr.onebase.framework.common.util.collection.MapUtils.findAndThen;
-import static com.cmsr.onebase.framework.common.util.date.LocalDateTimeUtils.UTC_MS_WITH_XXX_OFFSET_FORMATTER;
-import static com.cmsr.onebase.framework.common.util.json.JsonUtils.toJsonString;
-import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.SOCIAL_CLIENT_NOT_EXISTS;
-import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.SOCIAL_CLIENT_UNIQUE;
-import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.SOCIAL_CLIENT_WEIXIN_MINI_APP_ORDER_NOTIFY_CONFIRM_RECEIVE_ERROR;
-import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.SOCIAL_CLIENT_WEIXIN_MINI_APP_ORDER_UPLOAD_SHIPPING_INFO_ERROR;
-import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.SOCIAL_CLIENT_WEIXIN_MINI_APP_PHONE_CODE_ERROR;
-import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.SOCIAL_CLIENT_WEIXIN_MINI_APP_QRCODE_ERROR;
-import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.SOCIAL_CLIENT_WEIXIN_MINI_APP_SUBSCRIBE_MESSAGE_ERROR;
-import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.SOCIAL_CLIENT_WEIXIN_MINI_APP_SUBSCRIBE_TEMPLATE_ERROR;
-import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.SOCIAL_USER_AUTH_FAILURE;
-import static java.util.Collections.singletonList;
-
-import java.time.Duration;
-import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
-import org.anyline.data.param.ConfigStore;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.Compare;
-import org.anyline.entity.Order;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.stereotype.Service;
-
+import cn.binarywang.wx.miniapp.api.WxMaService;
+import cn.binarywang.wx.miniapp.api.WxMaSubscribeService;
+import cn.binarywang.wx.miniapp.api.impl.WxMaServiceImpl;
+import cn.binarywang.wx.miniapp.bean.WxMaPhoneNumberInfo;
+import cn.binarywang.wx.miniapp.bean.WxMaSubscribeMessage;
+import cn.binarywang.wx.miniapp.bean.shop.request.shipping.*;
+import cn.binarywang.wx.miniapp.bean.shop.response.WxMaOrderShippingInfoBaseResponse;
+import cn.binarywang.wx.miniapp.config.impl.WxMaRedisBetterConfigImpl;
+import cn.binarywang.wx.miniapp.constant.WxMaConstants;
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.date.LocalDateTimeUtil;
+import cn.hutool.core.lang.Assert;
+import cn.hutool.core.util.DesensitizedUtil;
+import cn.hutool.core.util.ObjUtil;
+import cn.hutool.core.util.ReflectUtil;
 import com.binarywang.spring.starter.wxjava.miniapp.properties.WxMaProperties;
 import com.binarywang.spring.starter.wxjava.mp.properties.WxMpProperties;
-import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
@@ -45,6 +29,7 @@ import com.cmsr.onebase.module.system.api.social.dto.SocialWxaOrderUploadShippin
 import com.cmsr.onebase.module.system.api.social.dto.SocialWxaSubscribeMessageSendReqDTO;
 import com.cmsr.onebase.module.system.controller.admin.socail.vo.client.SocialClientPageReqVO;
 import com.cmsr.onebase.module.system.controller.admin.socail.vo.client.SocialClientSaveReqVO;
+import com.cmsr.onebase.module.system.dal.database.SocialClientDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.social.SocialClientDO;
 import com.cmsr.onebase.module.system.dal.redis.RedisKeyConstants;
 import com.cmsr.onebase.module.system.enums.social.SocialTypeEnum;
@@ -52,28 +37,6 @@ import com.cmsr.onebase.module.system.framework.justauth.core.AuthRequestFactory
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-
-import cn.binarywang.wx.miniapp.api.WxMaService;
-import cn.binarywang.wx.miniapp.api.WxMaSubscribeService;
-import cn.binarywang.wx.miniapp.api.impl.WxMaServiceImpl;
-import cn.binarywang.wx.miniapp.bean.WxMaPhoneNumberInfo;
-import cn.binarywang.wx.miniapp.bean.WxMaSubscribeMessage;
-import cn.binarywang.wx.miniapp.bean.shop.request.shipping.ContactBean;
-import cn.binarywang.wx.miniapp.bean.shop.request.shipping.OrderKeyBean;
-import cn.binarywang.wx.miniapp.bean.shop.request.shipping.PayerBean;
-import cn.binarywang.wx.miniapp.bean.shop.request.shipping.ShippingListBean;
-import cn.binarywang.wx.miniapp.bean.shop.request.shipping.WxMaOrderShippingInfoNotifyConfirmRequest;
-import cn.binarywang.wx.miniapp.bean.shop.request.shipping.WxMaOrderShippingInfoUploadRequest;
-import cn.binarywang.wx.miniapp.bean.shop.response.WxMaOrderShippingInfoBaseResponse;
-import cn.binarywang.wx.miniapp.config.impl.WxMaRedisBetterConfigImpl;
-import cn.binarywang.wx.miniapp.constant.WxMaConstants;
-import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.date.LocalDateTimeUtil;
-import cn.hutool.core.lang.Assert;
-import cn.hutool.core.util.DesensitizedUtil;
-import cn.hutool.core.util.ObjUtil;
-import cn.hutool.core.util.ReflectUtil;
 import jakarta.annotation.Resource;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -90,6 +53,23 @@ import me.zhyd.oauth.model.AuthResponse;
 import me.zhyd.oauth.model.AuthUser;
 import me.zhyd.oauth.request.AuthRequest;
 import me.zhyd.oauth.utils.AuthStateUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.stereotype.Service;
+
+import java.time.Duration;
+import java.time.ZonedDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
+import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static com.cmsr.onebase.framework.common.util.collection.MapUtils.findAndThen;
+import static com.cmsr.onebase.framework.common.util.date.LocalDateTimeUtils.UTC_MS_WITH_XXX_OFFSET_FORMATTER;
+import static com.cmsr.onebase.framework.common.util.json.JsonUtils.toJsonString;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
+import static java.util.Collections.singletonList;
 
 /**
  * 社交应用 Service 实现类
@@ -133,7 +113,7 @@ public class SocialClientServiceImpl implements SocialClientService {
     @Resource
     private WxMaProperties wxMaProperties;
     @Resource
-    private DataRepository dataRepository;
+    private SocialClientDataRepository socialClientDataRepository;
 
       /**
      * 缓存 WxMpService 对象
@@ -208,16 +188,12 @@ public class SocialClientServiceImpl implements SocialClientService {
         AuthRequest request = authRequestFactory.get(SocialTypeEnum.valueOfType(socialType).getSource());
         Assert.notNull(request, String.format("社交平台(%d) 不存在", socialType));
         // 2. 查询 DB 的配置项，如果存在则进行覆盖
-        ConfigStore cs = new DefaultConfigStore()
-                .and(Compare.EQUAL, "social_type", socialType)
-                .and(Compare.EQUAL, "user_type", userType);
-        SocialClientDO client = dataRepository.findOne(SocialClientDO.class, cs);
-        //SocialClientDO client = socialClientMapper.selectBySocialTypeAndUserType(socialType, userType);
+        SocialClientDO client = socialClientDataRepository.findBySocialTypeAndUserType(socialType, userType);
         if (client != null && Objects.equals(client.getStatus(), CommonStatusEnum.ENABLE.getStatus())) {
             // 2.1 构造新的 AuthConfig 对象
             AuthConfig authConfig = (AuthConfig) ReflectUtil.getFieldValue(request, "config");
             AuthConfig newAuthConfig = ReflectUtil.newInstance(authConfig.getClass());
-            BeanUtil.copyProperties(authConfig, newAuthConfig);
+            BeanUtils.copyProperties(authConfig, newAuthConfig);
             // 2.2 修改对应的 clientId + clientSecret 密钥
             newAuthConfig.setClientId(client.getClientId());
             newAuthConfig.setClientSecret(client.getClientSecret());
@@ -248,12 +224,8 @@ public class SocialClientServiceImpl implements SocialClientService {
     @VisibleForTesting
     WxMpService getWxMpService(Integer userType) {
         // 第一步，查询 DB 的配置项，获得对应的 WxMpService 对象
-        ConfigStore cs = new DefaultConfigStore()
-                .and(Compare.EQUAL, "social_type", SocialTypeEnum.WECHAT_MP.getType())
-                .and(Compare.EQUAL, "user_type", userType);
-        SocialClientDO client = dataRepository.findOne(SocialClientDO.class, cs);
-        //SocialClientDO client = socialClientMapper.selectBySocialTypeAndUserType(
-        //        SocialTypeEnum.WECHAT_MP.getType(), userType);
+        SocialClientDO client = socialClientDataRepository.findBySocialTypeAndUserType(
+                SocialTypeEnum.WECHAT_MP.getType(), userType);
         if (client != null && Objects.equals(client.getStatus(), CommonStatusEnum.ENABLE.getStatus())) {
             return wxMpServiceCache.getUnchecked(client.getClientId() + ":" + client.getClientSecret());
         }
@@ -429,12 +401,8 @@ public class SocialClientServiceImpl implements SocialClientService {
     @VisibleForTesting
     WxMaService getWxMaService(Integer userType) {
         // 第一步，查询 DB 的配置项，获得对应的 WxMaService 对象
-        ConfigStore cs = new DefaultConfigStore()
-                .and(Compare.EQUAL, "social_type", SocialTypeEnum.WECHAT_MP.getType())
-                .and(Compare.EQUAL, "user_type", userType);
-        SocialClientDO client = dataRepository.findOne(SocialClientDO.class, cs);
-        //SocialClientDO client = socialClientMapper.selectBySocialTypeAndUserType(
-        //        SocialTypeEnum.WECHAT_MINI_PROGRAM.getType(), userType);
+        SocialClientDO client = socialClientDataRepository.findBySocialTypeAndUserType(
+                SocialTypeEnum.WECHAT_MINI_PROGRAM.getType(), userType);
         if (client != null && Objects.equals(client.getStatus(), CommonStatusEnum.ENABLE.getStatus())) {
             return wxMaServiceCache.getUnchecked(client.getClientId() + ":" + client.getClientSecret());
         }
@@ -472,8 +440,7 @@ public class SocialClientServiceImpl implements SocialClientService {
 
         // 插入
         SocialClientDO client = BeanUtils.toBean(createReqVO, SocialClientDO.class);
-        dataRepository.insert(client);
-		//socialClientMapper.insert(client);
+        socialClientDataRepository.insert(client);
         return client.getId();
     }
 
@@ -486,8 +453,7 @@ public class SocialClientServiceImpl implements SocialClientService {
 
         // 更新
         SocialClientDO updateObj = BeanUtils.toBean(updateReqVO, SocialClientDO.class);
-        dataRepository.update(updateObj);
-		//socialClientMapper.updateById(updateObj);
+        socialClientDataRepository.update(updateObj);
     }
 
     @Override
@@ -495,18 +461,13 @@ public class SocialClientServiceImpl implements SocialClientService {
         // 校验存在
         validateSocialClientExists(id);
         // 删除
-        dataRepository.findById(SocialClientDO.class,id);
-		//socialClientMapper.deleteById(id);
+        socialClientDataRepository.deleteById(id);
     }
 
     private void validateSocialClientExists(Long id) {
-        if (dataRepository.findById(SocialClientDO.class,id) == null) {
+        if (socialClientDataRepository.findById(id) == null) {
             throw exception(SOCIAL_CLIENT_NOT_EXISTS);
         }
-		//if (socialClientMapper.selectById(id) == null) {
-          //  throw exception(SOCIAL_CLIENT_NOT_EXISTS);
-        //}
-		
     }
 
     /**
@@ -519,12 +480,7 @@ public class SocialClientServiceImpl implements SocialClientService {
      * @param socialType 社交类型
      */
     private void validateSocialClientUnique(Long id, Integer userType, Integer socialType) {
-        ConfigStore cs = new DefaultConfigStore()
-                .and(Compare.EQUAL, "social_type", socialType)
-                .and(Compare.EQUAL, "user_type", userType);
-        SocialClientDO client = dataRepository.findOne(SocialClientDO.class, cs);
-        //SocialClientDO client = socialClientMapper.selectBySocialTypeAndUserType(
-        //        socialType, userType);
+        SocialClientDO client = socialClientDataRepository.findBySocialTypeAndUserType(socialType, userType);
         if (client == null) {
             return;
         }
@@ -536,16 +492,12 @@ public class SocialClientServiceImpl implements SocialClientService {
 
     @Override
     public SocialClientDO getSocialClient(Long id) {
-        return dataRepository.findById(SocialClientDO.class,id);
-        //return socialClientMapper.selectById(id);
+        return socialClientDataRepository.findById(id);
     }
 
     @Override
     public PageResult<SocialClientDO> getSocialClientPage(SocialClientPageReqVO pageReqVO) {
-        return dataRepository.findPageWithConditions(SocialClientDO.class, new DefaultConfigStore()
-                .and(Compare.EQUAL, "social_type", pageReqVO.getSocialType())
-                .and(Compare.EQUAL, "user_type", pageReqVO.getUserType())
-                .order("id", Order.TYPE.DESC), pageReqVO.getPageNo(), pageReqVO.getPageSize());
+        return socialClientDataRepository.findPage(pageReqVO);
     }
 
 }

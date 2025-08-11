@@ -1,15 +1,15 @@
 package com.cmsr.onebase.module.system.dal.dataobject.oauth2;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Table;
 import lombok.Data;
+import lombok.experimental.Accessors;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 
 /**
  * OAuth2 访问令牌 DO
@@ -20,6 +20,7 @@ import lombok.Data;
  */
 @Table(name = "system_oauth2_access_token")
 @Data
+@Accessors(chain = true)
 public class OAuth2AccessTokenDO extends TenantBaseDO {
 
     public static final String ACCESS_TOKEN  = "access_token";

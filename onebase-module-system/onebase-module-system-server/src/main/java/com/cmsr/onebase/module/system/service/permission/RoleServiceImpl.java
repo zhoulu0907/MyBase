@@ -10,7 +10,8 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.system.controller.admin.permission.vo.role.RolePageReqVO;
-import com.cmsr.onebase.module.system.controller.admin.permission.vo.role.RoleSaveReqVO;
+import com.cmsr.onebase.module.system.controller.admin.permission.vo.role.RoleInsertReqVO;
+import com.cmsr.onebase.module.system.controller.admin.permission.vo.role.RoleUpdateReqVO;
 import com.cmsr.onebase.module.system.dal.database.RoleDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
 import com.cmsr.onebase.module.system.dal.redis.RedisKeyConstants;
@@ -22,6 +23,7 @@ import com.mzt.logapi.context.LogRecordContext;
 import com.mzt.logapi.service.impl.DiffParseFunction;
 import com.mzt.logapi.starter.annotation.LogRecord;
 import jakarta.annotation.Resource;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -56,15 +58,19 @@ public class RoleServiceImpl implements RoleService {
     @Transactional(rollbackFor = Exception.class)
     @LogRecord(type = SYSTEM_ROLE_TYPE, subType = SYSTEM_ROLE_CREATE_SUB_TYPE, bizNo = "{{#role.id}}",
             success = SYSTEM_ROLE_CREATE_SUCCESS)
-    public Long createRole(RoleSaveReqVO createReqVO, Integer type) {
+    public Long createRole(RoleInsertReqVO createReqVO, Integer type) {
+        // 0. 生成Code
+        if (!StringUtils.hasText(createReqVO.getCode())) {
+            createReqVO.setCode("role_" + System.currentTimeMillis());
+        }
         // 1. 校验角色
         validateRoleDuplicate(createReqVO.getName(), createReqVO.getCode(), null);
 
         // 2. 插入到数据库
-        RoleDO role = BeanUtils.toBean(createReqVO, RoleDO.class)
-                .setType(ObjectUtil.defaultIfNull(type, RoleTypeEnum.CUSTOM.getType()))
-                .setStatus(ObjUtil.defaultIfNull(createReqVO.getStatus(), CommonStatusEnum.ENABLE.getStatus()))
-                .setDataScope(DataScopeEnum.ALL.getScope()); // 默认可查看所有数据。
+        RoleDO role = BeanUtils.toBean(createReqVO, RoleDO.class);
+        role.setType(ObjectUtil.defaultIfNull(type, RoleTypeEnum.CUSTOM.getType()));
+        role.setStatus(ObjUtil.defaultIfNull(createReqVO.getStatus(), CommonStatusEnum.ENABLE.getStatus()));
+        role.setDataScope(DataScopeEnum.ALL.getScope()); // 默认可查看所有数据。
         roleDataRepository.insert(role);
 
         // 3. 记录操作日志上下文
@@ -76,7 +82,7 @@ public class RoleServiceImpl implements RoleService {
     @CacheEvict(value = RedisKeyConstants.ROLE, key = "#updateReqVO.id")
     @LogRecord(type = SYSTEM_ROLE_TYPE, subType = SYSTEM_ROLE_UPDATE_SUB_TYPE, bizNo = "{{#updateReqVO.id}}",
             success = SYSTEM_ROLE_UPDATE_SUCCESS)
-    public void updateRole(RoleSaveReqVO updateReqVO) {
+    public void updateRole(@Valid RoleUpdateReqVO updateReqVO) {
         // 1.1 校验是否可以更新
         RoleDO role = validateRoleForUpdate(updateReqVO.getId());
         // 1.2 校验角色的唯一字段是否重复
@@ -87,7 +93,7 @@ public class RoleServiceImpl implements RoleService {
         roleDataRepository.update(updateObj);
 
         // 3. 记录操作日志上下文
-        LogRecordContext.putVariable(DiffParseFunction.OLD_OBJECT, BeanUtils.toBean(role, RoleSaveReqVO.class));
+        LogRecordContext.putVariable(DiffParseFunction.OLD_OBJECT, BeanUtils.toBean(role, RoleInsertReqVO.class));
         LogRecordContext.putVariable("role", role);
     }
 
@@ -125,13 +131,13 @@ public class RoleServiceImpl implements RoleService {
 
     /**
      * 校验角色的唯一字段是否重复
-     *
+     * <p>
      * 1. 是否存在相同名字的角色
      * 2. 是否存在相同编码的角色
      *
      * @param name 角色名字
      * @param code 角色额编码
-     * @param id 角色编号
+     * @param id   角色编号
      */
     @VisibleForTesting
     void validateRoleDuplicate(String name, String code, Long id) {
@@ -140,6 +146,9 @@ public class RoleServiceImpl implements RoleService {
             throw exception(ROLE_ADMIN_CODE_ERROR, code);
         }
         // 1. 该 name 名字被其它角色所使用
+        if (!StringUtils.hasText(name)) {
+            return;
+        }
         RoleDO role = roleDataRepository.findOneByName(name);
         if (role != null && !role.getId().equals(id)) {
             throw exception(ROLE_NAME_DUPLICATE, name);

@@ -13,9 +13,10 @@ import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.tenant.config.TenantProperties;
 import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
-import com.cmsr.onebase.module.system.controller.admin.permission.vo.role.RoleSaveReqVO;
+import com.cmsr.onebase.module.system.controller.admin.permission.vo.role.RoleInsertReqVO;
 import com.cmsr.onebase.module.system.controller.admin.tenant.vo.tenant.TenantPageReqVO;
-import com.cmsr.onebase.module.system.controller.admin.tenant.vo.tenant.TenantSaveReqVO;
+import com.cmsr.onebase.module.system.controller.admin.tenant.vo.tenant.TenantInsertReqVO;
+import com.cmsr.onebase.module.system.controller.admin.tenant.vo.tenant.TenantUpdateReqVO;
 import com.cmsr.onebase.module.system.convert.tenant.TenantConvert;
 import com.cmsr.onebase.module.system.dal.dataobject.license.LicenseDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.MenuDO;
@@ -34,6 +35,7 @@ import com.cmsr.onebase.module.system.service.tenant.handler.TenantInfoHandler;
 import com.cmsr.onebase.module.system.service.tenant.handler.TenantMenuHandler;
 import com.cmsr.onebase.module.system.service.user.AdminUserService;
 import jakarta.annotation.Resource;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.apache.commons.lang3.StringUtils;
@@ -101,7 +103,7 @@ public class TenantServiceImpl implements TenantService {
     }
 
     @Override
-    public Long createTenant(TenantSaveReqVO createReqVO) {
+    public Long createTenant(TenantInsertReqVO createReqVO) {
         // 校验租户名称是否重复
         validTenantNameDuplicate(createReqVO.getName(), null);
         // 校验租户域名是否重复
@@ -109,6 +111,7 @@ public class TenantServiceImpl implements TenantService {
             validTenantWebsiteDuplicate(createReqVO.getWebsite(), null);
         }
         if (createReqVO.getPackageId() == null) {
+            // todo 不可硬编码
             createReqVO.setPackageId(112L);
         }
         TenantPackageDO tenantPackage = tenantPackageService.validTenantPackage(createReqVO.getPackageId());
@@ -121,6 +124,7 @@ public class TenantServiceImpl implements TenantService {
             createReqVO.setAccountCount(100);
         }
 
+        // todo 状态统一用枚举0/1，如TenantStatusEnum.NORMAL
         LicenseDO license = licenseService.getLicenseByStatus("enable");
         // 检查分配人员数量是否超过license限制
         if (license != null) {
@@ -139,19 +143,18 @@ public class TenantServiceImpl implements TenantService {
             createReqVO.setAllocatePersonCount(allocatedCount);
         }
         
+        // 创建租户
+        TenantDO tenant = BeanUtils.toBean(createReqVO, TenantDO.class);
+//        tenantMapper.insert(tenant);
+        tenant = dataRepository.insert(tenant);
         // 校验联系人用户名是否已存在
         if (StringUtils.isNotEmpty(createReqVO.getContactName())) {
-            TenantUtils.execute(createReqVO.getId(), () -> {
+            TenantUtils.execute(tenant.getId(), () -> {
                 if (userService.getUserByUsername(createReqVO.getContactName()) != null) {
                     throw exception(USER_USERNAME_EXISTS, createReqVO.getContactName());
                 }
             });
         }
-        
-        // 创建租户
-        TenantDO tenant = BeanUtils.toBean(createReqVO, TenantDO.class);
-//        tenantMapper.insert(tenant);
-        tenant = dataRepository.insert(tenant);
         // 创建租户的管理员1
         TenantDO finalTenant = tenant;
         TenantUtils.execute(tenant.getId(), () -> {
@@ -172,7 +175,7 @@ public class TenantServiceImpl implements TenantService {
         return tenant.getId();
     }
 
-    private Long createUser(Long roleId, TenantSaveReqVO createReqVO) {
+    private Long createUser(Long roleId, TenantInsertReqVO createReqVO) {
         // 创建用户
         Long userId = userService.createUser(TenantConvert.INSTANCE.convert02(createReqVO));
         // 分配角色
@@ -182,7 +185,7 @@ public class TenantServiceImpl implements TenantService {
 
     private Long createRole(TenantPackageDO tenantPackage) {
         // 创建角色
-        RoleSaveReqVO reqVO = new RoleSaveReqVO();
+        RoleInsertReqVO reqVO = new RoleInsertReqVO();
         reqVO.setName(RoleCodeEnum.TENANT_ADMIN.getName()).setCode(RoleCodeEnum.TENANT_ADMIN.getCode())
                 .setSort(0).setRemark("系统自动生成");
         Long roleId = roleService.createRole(reqVO, RoleTypeEnum.SYSTEM.getType());
@@ -192,13 +195,13 @@ public class TenantServiceImpl implements TenantService {
     }
 
     @Override
-    public void updateTenant(TenantSaveReqVO updateReqVO) {
+    public void updateTenant(@Valid TenantUpdateReqVO updateReqVO) {
         // 校验存在
         TenantDO tenant = validateUpdateTenant(updateReqVO.getId());
         // 校验租户名称是否重复
         validTenantNameDuplicate(updateReqVO.getName(), updateReqVO.getId());
         // 校验租户域名是否重复
-        if (updateReqVO.getWebsite() != null) {
+        if (StringUtils.isNotBlank(updateReqVO.getWebsite() )) {
             validTenantWebsiteDuplicate(updateReqVO.getWebsite(), updateReqVO.getId());
         }
         // 校验套餐被禁用
@@ -249,7 +252,7 @@ public class TenantServiceImpl implements TenantService {
             // 创建角色
             Long roleId = createRole(tenantPackage);
             // 创建用户，并分配角色
-            TenantSaveReqVO reqVO = new TenantSaveReqVO();
+            TenantInsertReqVO reqVO = new TenantInsertReqVO();
             reqVO.setUsername(updateReqVO.getContactName());
             if (StringUtils.isEmpty(updateReqVO.getPassword())) {
                 reqVO.setPassword("admin123");
@@ -270,6 +273,9 @@ public class TenantServiceImpl implements TenantService {
 
     private void validTenantNameDuplicate(String name, Long id) {
 //        TenantDO tenant = tenantMapper.selectByName(name);
+        if(StringUtils.isBlank(name)){
+            return;
+        }
         TenantDO tenant = dataRepository.findOne(TenantDO.class, new DefaultConfigStore().eq("name", name));
 
         if (tenant == null) {

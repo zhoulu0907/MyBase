@@ -8,15 +8,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.anyline.data.param.ConfigStore;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.Compare;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.util.date.DateUtils;
+import com.cmsr.onebase.module.system.dal.database.OAuth2ApproveDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2ApproveDO;
 import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2ClientDO;
 import com.google.common.annotations.VisibleForTesting;
@@ -42,7 +39,7 @@ public class OAuth2ApproveServiceImpl implements OAuth2ApproveService {
     private OAuth2ClientService oauth2ClientService;
 
     @Resource
-    private DataRepository dataRepository;
+    private OAuth2ApproveDataRepository oauth2ApproveDataRepository;
 
     @Override
     @Transactional
@@ -88,16 +85,8 @@ public class OAuth2ApproveServiceImpl implements OAuth2ApproveService {
 
     @Override
     public List<OAuth2ApproveDO> getApproveList(Long userId, Integer userType, String clientId) {
-
-
-        ConfigStore configStore = new DefaultConfigStore()
-                .and(Compare.EQUAL, "user_id", userId)
-                .and(Compare.EQUAL, "user_type", userType)
-                .and(Compare.EQUAL, "client_id", clientId);
-        List<OAuth2ApproveDO> approveDOs = dataRepository.findAll(OAuth2ApproveDO.class, configStore);
-
-        //List<OAuth2ApproveDO> approveDOs = oauth2ApproveMapper.selectListByUserIdAndUserTypeAndClientId(
-        //        userId, userType, clientId);
+        List<OAuth2ApproveDO> approveDOs = oauth2ApproveDataRepository.findListByUserIdAndUserTypeAndClientId(
+                userId, userType, clientId);
         approveDOs.removeIf(o -> DateUtils.isExpired(o.getExpiresTime()));
         return approveDOs;
     }
@@ -110,16 +99,10 @@ public class OAuth2ApproveServiceImpl implements OAuth2ApproveService {
                 .setClientId(clientId).setScope(scope).setApproved(approved).setExpiresTime(expireTime);
 
         try {
-            dataRepository.update(approveDO);
+            oauth2ApproveDataRepository.update(approveDO);
         } catch (Exception e) {
-            dataRepository.insert(approveDO);
+            oauth2ApproveDataRepository.insert(approveDO);
         }
-
-		//if (oauth2ApproveMapper.update(approveDO) == 1) {
-          //  return;
-        //}
-        // 失败，则说明不存在，进行更新
-        //oauth2ApproveMapper.insert(approveDO);
     }
 
 }

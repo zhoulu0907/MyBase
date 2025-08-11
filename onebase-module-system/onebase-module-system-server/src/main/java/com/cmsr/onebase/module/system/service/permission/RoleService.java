@@ -2,7 +2,8 @@ package com.cmsr.onebase.module.system.service.permission;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.system.controller.admin.permission.vo.role.RolePageReqVO;
-import com.cmsr.onebase.module.system.controller.admin.permission.vo.role.RoleSaveReqVO;
+import com.cmsr.onebase.module.system.controller.admin.permission.vo.role.RoleInsertReqVO;
+import com.cmsr.onebase.module.system.controller.admin.permission.vo.role.RoleUpdateReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
 
 import jakarta.validation.Valid;
@@ -23,14 +24,14 @@ public interface RoleService {
      * @param type 角色类型
      * @return 角色编号
      */
-    Long createRole(@Valid RoleSaveReqVO createReqVO, Integer type);
+    Long createRole(@Valid RoleInsertReqVO createReqVO, Integer type);
 
     /**
      * 更新角色
      *
      * @param updateReqVO 更新角色信息
      */
-    void updateRole(@Valid RoleSaveReqVO updateReqVO);
+    void updateRole(@Valid RoleUpdateReqVO updateReqVO);
 
     /**
      * 删除角色

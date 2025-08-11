@@ -115,7 +115,7 @@ public class LicenseController {
      *
      * @return License列表
      */
-    @GetMapping("/list-all-simple")
+    @GetMapping("/simple-list")
     @PreAuthorize("ss.hasAuthority('system:license:query')")
     @Operation(summary = "获取全部License（精简信息）")
     public List<LicensePageRespVO> getSimpleLicenseList() {

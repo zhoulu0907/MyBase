@@ -30,11 +30,14 @@ public class TenantDO extends BaseDO {
     public static final String CONTACT_MOBILE          = "contact_mobile";
     public static final String STATUS                  = "status";
     public static final String WEBSITE                 = "website";
+    public static final String WEBSITE_H5              = "website_h5";
     public static final String PACKAGE_ID              = "package_id";
     public static final String EXPIRE_TIME             = "expire_time";
     public static final String ACCOUNT_COUNT           = "account_count";
     public static final String ALLOCATE_PERSON_COUNT   = "allocate_person_count";
     public static final String TENANT_CODE             = "tenant_code";
+    public static final String TENANT_KEY              = "tenant_key";
+    public static final String TENANT_SECRET           = "tenant_secret";
 
     // builder模式可正常运作
     public TenantDO setId(Long id){
@@ -82,6 +85,11 @@ public class TenantDO extends BaseDO {
     @Column(name = WEBSITE)
     private String website;
     /**
+     * 绑定域名
+     */
+    @Column(name = WEBSITE_H5)
+    private String websiteH5;
+    /**
      * 租户套餐编号
      *
      * 关联 {@link TenantPackageDO#getId()}
@@ -109,6 +117,19 @@ public class TenantDO extends BaseDO {
     /**
      * 租户编码 - 系统
      */
+    @Column(name = TENANT_CODE)
     private String tenantCode;
 
+
+    /**
+     * key
+     */
+    @Column(name = TENANT_KEY)
+    private String tenantkey;
+
+    /**
+     * secret
+     */
+    @Column(name = TENANT_SECRET)
+    private String tenantSecret;
 }

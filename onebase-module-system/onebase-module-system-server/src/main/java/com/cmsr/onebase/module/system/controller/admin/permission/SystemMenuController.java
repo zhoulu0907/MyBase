@@ -12,12 +12,12 @@ import com.cmsr.onebase.module.system.service.permission.MenuService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.Resource;
+import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.annotation.Resource;
-import jakarta.validation.Valid;
 import java.util.Comparator;
 import java.util.List;
 
@@ -66,12 +66,12 @@ public class SystemMenuController {
         return success(BeanUtils.toBean(list, SystemMenuRespVO.class));
     }
 
-    @GetMapping({"/list-all-simple", "simple-list"})
+    @GetMapping({ "simple-list"})
     @Operation(summary = "获取菜单精简信息列表",
             description = "只包含被开启的菜单，用于【角色分配菜单】功能的选项。在多租户的场景下，会只返回租户所在套餐有的菜单")
-    public CommonResult<List<SystemMenuSimpleRespVO>> getSimpleMenuList() {
-        List<MenuDO> list = menuService.getMenuListByTenant(
-                new SystemMenuListReqVO().setStatus(CommonStatusEnum.ENABLE.getStatus()));
+    public CommonResult<List<SystemMenuSimpleRespVO>> getSimpleMenuList(SystemMenuListReqVO reqVO) {
+        reqVO.setStatus(CommonStatusEnum.ENABLE.getStatus());
+        List<MenuDO> list = menuService.getMenuListByTenant(reqVO);
         list = menuService.filterDisableMenus(list);
         list.sort(Comparator.comparing(MenuDO::getSort));
         return success(BeanUtils.toBean(list, SystemMenuSimpleRespVO.class));

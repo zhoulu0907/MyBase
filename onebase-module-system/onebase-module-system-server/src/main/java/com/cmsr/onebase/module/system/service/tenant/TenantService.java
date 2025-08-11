@@ -3,9 +3,9 @@ package com.cmsr.onebase.module.system.service.tenant;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
 import com.cmsr.onebase.module.system.controller.admin.tenant.vo.tenant.TenantPageReqVO;
-import com.cmsr.onebase.module.system.controller.admin.tenant.vo.tenant.TenantSaveReqVO;
+import com.cmsr.onebase.module.system.controller.admin.tenant.vo.tenant.TenantInsertReqVO;
+import com.cmsr.onebase.module.system.controller.admin.tenant.vo.tenant.TenantUpdateReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
-import com.cmsr.onebase.module.system.enums.tenant.TenantStatusEnum;
 import com.cmsr.onebase.module.system.service.tenant.handler.TenantInfoHandler;
 import com.cmsr.onebase.module.system.service.tenant.handler.TenantMenuHandler;
 
@@ -25,14 +25,14 @@ public interface TenantService {
      * @param createReqVO 创建信息
      * @return 编号
      */
-    Long createTenant(@Valid TenantSaveReqVO createReqVO);
+    Long createTenant(@Valid TenantInsertReqVO createReqVO);
 
     /**
      * 更新租户
      *
      * @param updateReqVO 更新信息
      */
-    void updateTenant(@Valid TenantSaveReqVO updateReqVO);
+    void updateTenant(@Valid TenantUpdateReqVO updateReqVO);
 
     /**
      * 更新租户的角色菜单

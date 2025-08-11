@@ -40,14 +40,14 @@ public class SystemRoleController {
     @PostMapping("/create")
     @Operation(summary = "创建角色")
     @PreAuthorize("@ss.hasPermission('system:role:create')")
-    public CommonResult<Long> createRole(@Valid @RequestBody RoleSaveReqVO createReqVO) {
+    public CommonResult<Long> createRole(@Valid @RequestBody RoleInsertReqVO createReqVO) {
         return success(roleService.createRole(createReqVO, null));
     }
 
     @PostMapping("/update")
     @Operation(summary = "修改角色")
     @PreAuthorize("@ss.hasPermission('system:role:update')")
-    public CommonResult<Boolean> updateRole(@Valid @RequestBody RoleSaveReqVO updateReqVO) {
+    public CommonResult<Boolean> updateRole(@Valid @RequestBody RoleUpdateReqVO updateReqVO) {
         roleService.updateRole(updateReqVO);
         return success(true);
     }

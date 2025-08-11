@@ -1,24 +1,18 @@
 package com.cmsr.onebase.module.system.controller.admin.tenant.vo.tenant;
 
-import cn.hutool.core.util.ObjectUtil;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Data;
-import org.hibernate.validator.constraints.Length;
-
-import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import lombok.Data;
+import org.hibernate.validator.constraints.Length;
+
 import java.time.LocalDateTime;
 
 @Schema(description = "管理后台 - 租户创建/修改 Request VO")
 @Data
-public class TenantSaveReqVO {
-
-    @Schema(description = "租户编号", example = "1024")
-    private Long id;
+public class TenantInsertReqVO {
 
     @Schema(description = "租户名", requiredMode = Schema.RequiredMode.REQUIRED, example = "onebase")
     @NotNull(message = "租户名不能为空")
@@ -28,14 +22,12 @@ public class TenantSaveReqVO {
     private Integer allocatePersonCount;
 
     @Schema(description = "联系人", requiredMode = Schema.RequiredMode.REQUIRED, example = "onebase")
-    @NotNull(message = "联系人不能为空")
     private String contactName;
 
     @Schema(description = "联系手机", example = "15601691300")
     private String contactMobile;
 
     @Schema(description = "租户状态", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
-    @NotNull(message = "租户状态")
     private Integer status;
 
     @Schema(description = "绑定域名", example = "http://cmsr.com")
