@@ -73,9 +73,6 @@ public class AdminAuthServiceImpl implements AdminAuthService {
     @Setter // 为了单测：开启或者关闭验证码
     private Boolean captchaEnable;
 
-    @Resource
-    private DataRepository dataRepository;
-
     @Override
     public AdminUserDO authenticate(String username, String password) {
         final LoginLogTypeEnum logTypeEnum = LoginLogTypeEnum.LOGIN_USERNAME;

@@ -43,8 +43,8 @@ public class DataRepositoryNew<T extends BaseDO> {
 
     private Class<T> defaultClazz = null;
 
-    public DataRepositoryNew() {
-    }
+    // public DataRepositoryNew() {
+    // }
 
     public DataRepositoryNew(Class<T> defaultClazz) {
         this.defaultClazz = defaultClazz;
