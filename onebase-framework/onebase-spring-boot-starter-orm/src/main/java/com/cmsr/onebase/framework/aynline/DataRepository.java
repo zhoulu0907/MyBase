@@ -17,6 +17,7 @@ import org.anyline.service.AnylineService;
 import org.anyline.util.ConfigTable;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -277,6 +278,9 @@ public class DataRepository { // TODO 等改造完成，这个类泛型 <T exten
      */
     @Deprecated
     public <T extends BaseDO> List<T> findAllByIds(Class<T> clazz, Collection<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return Collections.emptyList();
+        }
         try {
             ConfigStore configs = new DefaultConfigStore();
             configs.and(Compare.IN, "id", ids);
