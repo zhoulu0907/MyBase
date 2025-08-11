@@ -1,5 +1,5 @@
 import appDeleteSVG from '@/assets/images/app_delete.svg';
-import appEditSVG from '@/assets/images/app_edit.svg';
+import appEditSVG from '@/assets/images/app_edit_black.svg';
 import CreateApp from '@/components/CreateApp';
 import { useAppStore } from '@/store';
 import { UserPermissionManager } from '@/utils/permission';
