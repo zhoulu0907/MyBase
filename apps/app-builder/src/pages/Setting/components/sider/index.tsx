@@ -165,14 +165,19 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
         }
 
         return (
-          <MenuItem key={item.key} disabled={item.disabled}>
+          <MenuItem
+            key={item.key}
+            disabled={item.disabled}
+            className={styles.siderMenuItem}
+            style={collapsed ? { padding: '0 10px' } : { display: 'flex', alignItems: 'center' }}
+          >
             {item.icon}
             <span className={styles.menuTitle}>{item.title}</span>
           </MenuItem>
         );
       })
       .filter(Boolean);
-  }, []);
+  }, [collapsed]);
 
   return (
     <Sider
