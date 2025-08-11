@@ -106,7 +106,7 @@ export interface UpdateApplicationReq {
   /**
    * 应用ID
    */
-  id: number | string;
+  id: string;
   /**
    * 应用模式
    */
@@ -149,7 +149,7 @@ export interface UpdateApplicationNameReq {
   /**
    * 应用ID
    */
-  id: number | string;
+  id: string;
   /**
    * 应用名称
    */
@@ -160,7 +160,7 @@ export interface DeleteApplicationReq {
   /**
    * 应用ID
    */
-  id: number | string;
+  id: string;
   /**
    * 应用名称
    */
@@ -172,5 +172,5 @@ export interface GetApplicationReq {
   /**
    * 应用ID
    */
-  id: number | string,
+  id: string,
 }
