@@ -4,6 +4,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
+import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.module.app.controller.admin.app.vo.ApplicationRespVO;
+import com.cmsr.onebase.module.app.controller.admin.version.vo.VersionPageReqVo;
+import com.cmsr.onebase.module.app.controller.admin.version.vo.VersionPageRespVO;
+import com.cmsr.onebase.module.app.enums.app.ApplicationStatusEnum;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -11,7 +16,6 @@ import org.springframework.validation.annotation.Validated;
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.app.controller.admin.version.vo.VersionCreateReqVO;
-import com.cmsr.onebase.module.app.controller.admin.version.vo.VersionListRespVO;
 import com.cmsr.onebase.module.app.dal.database.app.AppApplicationRepository;
 import com.cmsr.onebase.module.app.dal.database.app.AppResourceRepository;
 import com.cmsr.onebase.module.app.dal.database.menu.AppMenuRepository;
@@ -66,14 +70,17 @@ public class AppVersionServiceImpl implements AppVersionService {
     private AppApplicationService appApplicationService;
 
     @Override
-    public List<VersionListRespVO> listApplicationVersion(Long applicationId) {
-        List<VersionDO> dos = versionRepository.findByApplicationId(applicationId);
-        AppCommonService.UserHelper userHelper = appCommonService.getUserHelper(dos);
-        return dos.stream().map(v -> {
-            VersionListRespVO vo = BeanUtils.toBean(v, VersionListRespVO.class);
-            vo.setUpdaterName(userHelper.getUserName(v.getUpdater()));
-            return vo;
-        }).toList();
+    public PageResult<VersionPageRespVO> getApplicationVersionPage(VersionPageReqVo listReqVo) {
+        PageResult<VersionDO> pageResult = versionRepository.selectPage(listReqVo);
+        AppCommonService.UserHelper userHelper = appCommonService.getUserHelper(pageResult.getList());
+        List<VersionPageRespVO> respVOS = pageResult.getList().stream()
+                .map(v -> {
+                    VersionPageRespVO bean = BeanUtils.toBean(v, VersionPageRespVO.class);
+                    bean.setUpdaterName(userHelper.getUserName(v.getUpdater()));
+                    return bean;
+                })
+                .toList();
+        return new PageResult<>(respVOS, pageResult.getTotal());
     }
 
     @Transactional

@@ -1,9 +1,9 @@
 package com.cmsr.onebase.module.app.service.version;
 
-import java.util.List;
-
+import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.app.controller.admin.version.vo.VersionCreateReqVO;
-import com.cmsr.onebase.module.app.controller.admin.version.vo.VersionListRespVO;
+import com.cmsr.onebase.module.app.controller.admin.version.vo.VersionPageReqVo;
+import com.cmsr.onebase.module.app.controller.admin.version.vo.VersionPageRespVO;
 
 /**
  * @Author：huangjie
@@ -11,7 +11,7 @@ import com.cmsr.onebase.module.app.controller.admin.version.vo.VersionListRespVO
  */
 public interface AppVersionService {
 
-    List<VersionListRespVO> listApplicationVersion(Long applicationId);
+    PageResult<VersionPageRespVO> getApplicationVersionPage(VersionPageReqVo listReqVo);
 
     void createApplicationVersion(VersionCreateReqVO createReqVO);
 
