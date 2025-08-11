@@ -31,7 +31,7 @@ public class MailLogDataRepository extends DataRepositoryNew<MailLogDO> {
      */
     public PageResult<MailLogDO> findPage(MailLogPageReqVO pageVO) {
         DefaultConfigStore configStore = new DefaultConfigStore();
-
+        
         if (null != pageVO.getUserId()) {
             configStore.and(Compare.EQUAL, MailLogDO.USER_ID, pageVO.getUserId());
         }

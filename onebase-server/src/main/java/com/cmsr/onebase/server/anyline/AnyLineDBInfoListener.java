@@ -157,7 +157,7 @@ public class AnyLineDBInfoListener implements DMListener {
         }
 
         // 加入软删判断
-        configs.and(Compare.EQUAL, BaseDO.DELETED, false);
+        configs.and(Compare.EQUAL, BaseDO.DELETED, 0);
 
         // 只有在不忽略租户的情况下才添加租户条件
         // 检查当前查询的表是否需要忽略租户过滤
@@ -296,7 +296,7 @@ public class AnyLineDBInfoListener implements DMListener {
             throw new BizException(StatusCode.UPDATE_WHERE_IS_NULL);
         }
         // 加入软删判断 (opt: 框架这里config可能为空)
-        configs.and(Compare.EQUAL, BaseDO.DELETED, false);
+        configs.and(Compare.EQUAL, BaseDO.DELETED, 0);
         // 加入租户标志
         boolean shouldIgnore = isTableTenantIgnored2(dest.getName());
         log.info("prepareUpdate obj--------------> isTableTenantIgnored: {}", shouldIgnore);
@@ -321,12 +321,12 @@ public class AnyLineDBInfoListener implements DMListener {
             log.info("prepareQuery--------------> 检测到非系统数据源，跳过添加租户和软删除条件，数据源: {}", getDataSourceKey(runtime));
             return SWITCH.CONTINUE;
         }
-        // 这里config可能为空，强制异常提前发现问题。
+        // 这里config可能为空，强制异常提前发现问题。(opt: 框架这里config可能为空)
         if (configs == null) {
             throw new BizException(StatusCode.UPDATE_WHERE_IS_NULL);
         }
-        // 加入软删判断 (opt: 框架这里config可能为空)
-        configs.and(Compare.EQUAL, BaseDO.DELETED, false);
+        // 加入软删判断
+        configs.and(Compare.EQUAL, BaseDO.DELETED, 0);
         // 加入租户标志
         boolean shouldIgnore = isTableTenantIgnored2(prepare.getTableName());
         log.info("prepareUpdate row--------------> isTableTenantIgnored: {}", shouldIgnore);
@@ -438,7 +438,7 @@ public class AnyLineDBInfoListener implements DMListener {
             configs.and(Compare.EQUAL, "tenant_id", TenantContextHolder.getRequiredTenantId());
         }
         // 加入软删判断
-        configs.and(Compare.EQUAL, BaseDO.DELETED, false);
+        configs.and(Compare.EQUAL, BaseDO.DELETED, 0);
     }
 
 

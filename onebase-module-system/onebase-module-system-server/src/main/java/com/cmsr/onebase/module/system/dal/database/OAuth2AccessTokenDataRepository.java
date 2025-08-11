@@ -42,7 +42,7 @@ public class OAuth2AccessTokenDataRepository extends DataRepositoryNew<OAuth2Acc
 
     public PageResult<OAuth2AccessTokenDO> findPage(OAuth2AccessTokenPageReqVO reqVO) {
         DefaultConfigStore configStore = new DefaultConfigStore();
-
+        
         if (reqVO.getUserId() != null) {
             configStore.and(Compare.EQUAL, "user_id", reqVO.getUserId());
         }

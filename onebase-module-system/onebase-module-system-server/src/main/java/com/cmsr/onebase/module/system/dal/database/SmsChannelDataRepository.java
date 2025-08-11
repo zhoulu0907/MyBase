@@ -51,14 +51,14 @@ public class SmsChannelDataRepository extends DataRepositoryNew<SmsChannelDO> {
      */
     public PageResult<SmsChannelDO> findPage(SmsChannelPageReqVO pageReqVO) {
         DefaultConfigStore configStore = new DefaultConfigStore();
-
+        
         if (pageReqVO.getStatus() != null) {
             configStore.and(Compare.EQUAL, "status", pageReqVO.getStatus());
         }
         if (pageReqVO.getSignature() != null) {
             configStore.and(Compare.LIKE, "signature", pageReqVO.getSignature());
         }
-
+        
         return findPageWithConditions(configStore, pageReqVO.getPageNo(), pageReqVO.getPageSize());
     }
 }
