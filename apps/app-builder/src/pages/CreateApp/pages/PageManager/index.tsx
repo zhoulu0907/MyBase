@@ -1,7 +1,6 @@
 import CreateGroupIcon from '@/assets/images/create_group.svg';
 import CreatePageIcon from '@/assets/images/create_page.svg';
 import { useI18n } from '@/hooks/useI18n';
-
 import { EDITOR_TYPES } from '@/pages/Editor/utils/const';
 import { useAppStore, useBasicEditorStore } from '@/store';
 import { Button, Dropdown, Form, Input, Layout, Menu, Message, Tree } from '@arco-design/web-react';
@@ -30,6 +29,7 @@ import CopyModal from './components/Modals/CopyModal';
 import CreateModal from './components/Modals/CreateModal';
 import RenameModal from './components/Modals/RenameModal';
 import MyMenuItem from './components/MyMenuItem';
+import PageManagerPreview from './components/Preview';
 import styles from './index.module.less';
 
 const TreeNode = Tree.Node;
@@ -294,11 +294,12 @@ const PageManagerPage: FC = () => {
     <div className={styles.pageManagerPage}>
       <Layout style={{ height: '100%' }}>
         <Layout>
-          <Sider style={{ width: 225 }}>
+          {/* <Sider style={{ width: 225 }}> */}
+          <Sider className={styles.sider}>
             <div className={styles.siderHeader}>
               <Input
                 style={{
-                  width: 140,
+                  width: 120,
                   border: '1px solid #dedede',
                   borderRadius: 3
                 }}
@@ -323,7 +324,7 @@ const PageManagerPage: FC = () => {
               }}
               actionOnClick={'expand'}
               style={{
-                width: '210px',
+                width: '200px',
                 overflow: 'hidden',
                 boxSizing: 'border-box'
               }}
@@ -338,7 +339,9 @@ const PageManagerPage: FC = () => {
                 </Button>
               </div>
             )}
-            <Content className={styles.content}>content</Content>
+            <div className={styles.contentBody}>
+              <PageManagerPreview menuID={curMenu?.id || ''} />
+            </div>
           </Content>
         </Layout>
       </Layout>
