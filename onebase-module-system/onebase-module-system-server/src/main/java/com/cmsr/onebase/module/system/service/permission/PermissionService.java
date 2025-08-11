@@ -160,4 +160,22 @@ public interface PermissionService {
      */
     long deleteRoleUsers(Long roleId, Set<Long> userIds);
 
+    /**
+     * 为角色分配菜单
+     *
+     * @param roleId 角色编号
+     * @param menuIds 菜单编号列表
+     * @return 变动影响的行数
+     */
+    long addRoleMenus(Long roleId, Set<Long> menuIds);
+
+    /**
+     * 从角色中移除菜单
+     *
+     * @param roleId 角色编号
+     * @param menuIds 菜单编号列表
+     * @return 删除的行数
+     */
+    long deleteRoleMenus(Long roleId, Set<Long> menuIds);
+
 }

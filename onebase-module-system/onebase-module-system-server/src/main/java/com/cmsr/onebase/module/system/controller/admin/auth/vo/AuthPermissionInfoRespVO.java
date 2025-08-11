@@ -62,8 +62,11 @@ public class AuthPermissionInfoRespVO {
     @Builder
     public static class MenuVO {
 
-        @Schema(description = "菜单名称", requiredMode = Schema.RequiredMode.REQUIRED, example = "onebase")
+        @Schema(description = "菜单id", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
         private Long id;
+
+        @Schema(description = "权限Code", requiredMode = Schema.RequiredMode.REQUIRED, example = "app:app:create")
+        private String permission;
 
         @Schema(description = "父菜单 ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "1024")
         private Long parentId;
