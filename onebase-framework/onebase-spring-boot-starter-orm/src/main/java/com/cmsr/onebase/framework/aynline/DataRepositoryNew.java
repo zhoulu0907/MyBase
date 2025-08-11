@@ -14,6 +14,7 @@ import org.anyline.service.AnylineService;
 import org.anyline.util.ConfigTable;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -321,6 +322,9 @@ public class DataRepositoryNew<T extends BaseDO> {
      * @throws BizException 查询失败时抛出
      */
     public List<T> findAllByIds(Collection<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return Collections.emptyList();
+        }
         try {
             ConfigStore configs = new DefaultConfigStore();
             configs.in(BaseDO.ID, ids);
