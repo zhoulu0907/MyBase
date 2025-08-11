@@ -1,35 +1,29 @@
 package com.cmsr.onebase.module.system.service.notify;
 
-import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.NOTIFY_TEMPLATE_CODE_DUPLICATE;
-import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.NOTIFY_TEMPLATE_NOT_EXISTS;
-
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Pattern;
-
-import org.anyline.data.param.ConfigStore;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.Compare;
-import org.apache.commons.lang3.StringUtils;
+import cn.hutool.core.util.ReUtil;
+import cn.hutool.core.util.StrUtil;
+import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.module.system.controller.admin.notify.vo.template.NotifyTemplatePageReqVO;
+import com.cmsr.onebase.module.system.controller.admin.notify.vo.template.NotifyTemplateSaveReqVO;
+import com.cmsr.onebase.module.system.dal.database.NotifyTemplateDataRepository;
+import com.cmsr.onebase.module.system.dal.dataobject.notify.NotifyTemplateDO;
+import com.cmsr.onebase.module.system.dal.redis.RedisKeyConstants;
+import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
-import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.module.system.controller.admin.notify.vo.template.NotifyTemplatePageReqVO;
-import com.cmsr.onebase.module.system.controller.admin.notify.vo.template.NotifyTemplateSaveReqVO;
-import com.cmsr.onebase.module.system.dal.dataobject.notify.NotifyTemplateDO;
-import com.cmsr.onebase.module.system.dal.redis.RedisKeyConstants;
-import com.google.common.annotations.VisibleForTesting;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
 
-import cn.hutool.core.util.ReUtil;
-import cn.hutool.core.util.StrUtil;
-import jakarta.annotation.Resource;
-import lombok.extern.slf4j.Slf4j;
+import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.NOTIFY_TEMPLATE_CODE_DUPLICATE;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.NOTIFY_TEMPLATE_NOT_EXISTS;
 
 /**
  * 站内信模版 Service 实现类
@@ -47,7 +41,7 @@ public class NotifyTemplateServiceImpl implements NotifyTemplateService {
     private static final Pattern PATTERN_PARAMS = Pattern.compile("\\{(.*?)}");
 
     @Resource
-    private DataRepository dataRepository;
+    private NotifyTemplateDataRepository notifyTemplateDataRepository;
 
     @Override
     public Long createNotifyTemplate(NotifyTemplateSaveReqVO createReqVO) {
@@ -58,8 +52,7 @@ public class NotifyTemplateServiceImpl implements NotifyTemplateService {
         NotifyTemplateDO notifyTemplate = BeanUtils.toBean(createReqVO, NotifyTemplateDO.class);
         List<String> strings = parseTemplateContentParams(notifyTemplate.getContent());
         notifyTemplate.setParams(strings);
-        dataRepository.insert(notifyTemplate);
-		//notifyTemplateMapper.insert(notifyTemplate);
+        notifyTemplateDataRepository.insert(notifyTemplate);
         return notifyTemplate.getId();
     }
 
@@ -75,8 +68,7 @@ public class NotifyTemplateServiceImpl implements NotifyTemplateService {
         // 更新
         NotifyTemplateDO updateObj = BeanUtils.toBean(updateReqVO, NotifyTemplateDO.class);
         updateObj.setParams(parseTemplateContentParams(updateObj.getContent()));
-        dataRepository.update(updateObj);
-		//notifyTemplateMapper.updateById(updateObj);
+        notifyTemplateDataRepository.update(updateObj);
     }
 
     @VisibleForTesting
@@ -91,71 +83,35 @@ public class NotifyTemplateServiceImpl implements NotifyTemplateService {
         // 校验存在
         validateNotifyTemplateExists(id);
         // 删除
-        dataRepository.deleteById(NotifyTemplateDO.class,id);
-		//notifyTemplateMapper.deleteById(id);
+        notifyTemplateDataRepository.deleteById(id);
     }
 
     private void validateNotifyTemplateExists(Long id) {
-        if (dataRepository.findById(NotifyTemplateDO.class,id) == null) {
+        if (notifyTemplateDataRepository.findById(id) == null) {
             throw exception(NOTIFY_TEMPLATE_NOT_EXISTS);
         }
-		//if (notifyTemplateMapper.selectById(id) == null) {
-          //  throw exception(NOTIFY_TEMPLATE_NOT_EXISTS);
-        //}
     }
 
     @Override
     public NotifyTemplateDO getNotifyTemplate(Long id) {
-        return dataRepository.findById(NotifyTemplateDO.class,id);
-		//return notifyTemplateMapper.selectById(id);
+        return notifyTemplateDataRepository.findById(id);
     }
 
     @Override
     @Cacheable(cacheNames = RedisKeyConstants.NOTIFY_TEMPLATE, key = "#code",
             unless = "#result == null")
     public NotifyTemplateDO getNotifyTemplateByCodeFromCache(String code) {
-
-        ConfigStore configStore = new DefaultConfigStore()
-                .and(Compare.EQUAL, "code", code);
-
-        return dataRepository.findOne(NotifyTemplateDO.class, configStore);
-
-        //return notifyTemplateMapper.selectByCode(code);
-
+        return notifyTemplateDataRepository.findOneByCode(code);
     }
 
     @Override
     public PageResult<NotifyTemplateDO> getNotifyTemplatePage(NotifyTemplatePageReqVO pageReqVO) {
-
-        ConfigStore configStore = new DefaultConfigStore();
-
-        if (StringUtils.isNotBlank(pageReqVO.getCode())) {
-            configStore.and(Compare.EQUAL, "code", pageReqVO.getCode());
-        }
-        if (StringUtils.isNotBlank(pageReqVO.getName())) {
-            configStore.and(Compare.EQUAL, "name", pageReqVO.getName());
-        }
-        if (null != pageReqVO.getStatus()) {
-            configStore.and(Compare.EQUAL, "status", pageReqVO.getStatus());
-        }
-        if (null != pageReqVO.getCreateTime()) {
-            configStore.and(Compare.EQUAL, "create_time", pageReqVO.getCreateTime());
-        }
-
-        return dataRepository.findPageWithConditions(NotifyTemplateDO.class,configStore, pageReqVO.getPageNo(), pageReqVO.getPageSize());
-
-        //return notifyTemplateMapper.selectPage(pageReqVO);
+        return notifyTemplateDataRepository.findPage(pageReqVO);
     }
 
     @VisibleForTesting
     void validateNotifyTemplateCodeDuplicate(Long id, String code) {
-
-        ConfigStore configStore = new DefaultConfigStore()
-                .and(Compare.EQUAL, "code", code);
-
-        NotifyTemplateDO template = dataRepository.findOne(NotifyTemplateDO.class, configStore);
-
-        //NotifyTemplateDO template = notifyTemplateMapper.selectByCode(code);
+        NotifyTemplateDO template = notifyTemplateDataRepository.findOneByCode(code);
         if (template == null) {
             return;
         }

@@ -2,11 +2,12 @@ package com.cmsr.onebase.module.system.service.social;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
-import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.system.api.social.dto.SocialUserBindReqDTO;
 import com.cmsr.onebase.module.system.api.social.dto.SocialUserRespDTO;
 import com.cmsr.onebase.module.system.controller.admin.socail.vo.user.SocialUserPageReqVO;
+import com.cmsr.onebase.module.system.dal.database.SocialUserBindDataRepository;
+import com.cmsr.onebase.module.system.dal.database.SocialUserDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.social.SocialUserBindDO;
 import com.cmsr.onebase.module.system.dal.dataobject.social.SocialUserDO;
 import com.cmsr.onebase.module.system.enums.ErrorCodeConstants;
@@ -33,7 +34,10 @@ import static com.cmsr.onebase.framework.common.util.json.JsonUtils.toJsonString
 public class SocialUserServiceImpl implements SocialUserService {
 
     @Resource
-    private DataRepository dataRepository;
+    private SocialUserDataRepository socialUserDataRepository;
+
+    @Resource
+    private SocialUserBindDataRepository socialUserBindDataRepository;
 
     @Resource
     private SocialClientService socialClientService;
@@ -41,15 +45,11 @@ public class SocialUserServiceImpl implements SocialUserService {
     @Override
     public List<SocialUserDO> getSocialUserList(Long userId, Integer userType) {
         // 获得绑定
-        List<SocialUserBindDO> socialUserBinds = dataRepository.findAllByConfig(
-                SocialUserBindDO.class,
-                new DefaultConfigStore().and("user_id", userId).and("user_type", userType));
+        List<SocialUserBindDO> socialUserBinds = socialUserBindDataRepository.findListByUserIdAndUserType(userId, userType);
         if (CollUtil.isEmpty(socialUserBinds)) {
             return Collections.emptyList();
         }
-        return dataRepository.findAllByIds(
-                SocialUserDO.class,
-                convertSet(socialUserBinds, SocialUserBindDO::getSocialUserId));
+        return socialUserDataRepository.findAllByIds(convertSet(socialUserBinds, SocialUserBindDO::getSocialUserId));
     }
 
     @Override
@@ -61,53 +61,36 @@ public class SocialUserServiceImpl implements SocialUserService {
         Assert.notNull(socialUser, "社交用户不能为空");
 
         // 解绑旧关系
-        dataRepository.deleteByConfig(
-                SocialUserBindDO.class,
-                new DefaultConfigStore().and("user_type", reqDTO.getUserType())
-                                        .and("social_user_id", socialUser.getId()));
-        dataRepository.deleteByConfig(
-                SocialUserBindDO.class,
-                new DefaultConfigStore().and("user_type", reqDTO.getUserType())
-                                        .and("user_id", reqDTO.getUserId())
-                                        .and("social_type", socialUser.getType()));
+        socialUserBindDataRepository.deleteByUserTypeAndSocialUserId(reqDTO.getUserType(), socialUser.getId());
+        socialUserBindDataRepository.deleteByUserTypeAndUserIdAndSocialType(reqDTO.getUserType(), reqDTO.getUserId(), socialUser.getType());
 
         // 插入新绑定
         SocialUserBindDO bind = SocialUserBindDO.builder()
             .userId(reqDTO.getUserId()).userType(reqDTO.getUserType())
             .socialUserId(socialUser.getId()).socialType(socialUser.getType())
             .build();
-        dataRepository.insert(bind);
+        socialUserBindDataRepository.insert(bind);
         return socialUser.getOpenid();
     }
 
     @Override
     public void unbindSocialUser(Long userId, Integer userType, Integer socialType, String openid) {
         // 获得 openid 对应的 SocialUserDO 社交用户
-        SocialUserDO socialUser = dataRepository.findOne(
-                SocialUserDO.class,
-                new DefaultConfigStore().and("type", socialType).and("openid", openid));
+        SocialUserDO socialUser = socialUserDataRepository.findByTypeAndOpenid(socialType, openid);
         if (socialUser == null) {
             throw exception(ErrorCodeConstants.SOCIAL_USER_NOT_FOUND);
         }
-        dataRepository.deleteByConfig(
-                SocialUserBindDO.class,
-                new DefaultConfigStore().and("user_type", userType)
-                                        .and("user_id", userId)
-                                        .and("social_type", socialUser.getType()));
+        socialUserBindDataRepository.deleteByUserTypeAndUserIdAndSocialType(userType, userId, socialUser.getType());
     }
 
     @Override
     public SocialUserRespDTO getSocialUserByUserId(Integer userType, Long userId, Integer socialType) {
         // 获得绑定用户
-        SocialUserBindDO bind = dataRepository.findOne(
-                SocialUserBindDO.class,
-                new DefaultConfigStore().and("user_id", userId)
-                                        .and("user_type", userType)
-                                        .and("social_type", socialType));
+        SocialUserBindDO bind = socialUserBindDataRepository.findByUserIdAndUserTypeAndSocialType(userId, userType, socialType);
         if (bind == null) {
             return null;
         }
-        SocialUserDO user = dataRepository.findById(SocialUserDO.class, bind.getSocialUserId());
+        SocialUserDO user = socialUserDataRepository.findById(bind.getSocialUserId());
         Assert.notNull(user, "社交用户不能为空");
         return new SocialUserRespDTO(user.getOpenid(), user.getNickname(), user.getAvatar(), bind.getUserId());
     }
@@ -118,9 +101,7 @@ public class SocialUserServiceImpl implements SocialUserService {
         SocialUserDO socialUser = authSocialUser(socialType, userType, code, state);
         Assert.notNull(socialUser, "社交用户不能为空");
 
-        SocialUserBindDO bind = dataRepository.findOne(
-                SocialUserBindDO.class,
-                new DefaultConfigStore().and("user_type", userType)
+        SocialUserBindDO bind = socialUserBindDataRepository.findOne(new DefaultConfigStore().and("user_type", userType)
                                         .and("social_user_id", socialUser.getId()));
         return new SocialUserRespDTO(
                 socialUser.getOpenid(), socialUser.getNickname(), socialUser.getAvatar(),
@@ -139,11 +120,8 @@ public class SocialUserServiceImpl implements SocialUserService {
      */
     @NotNull
     public SocialUserDO authSocialUser(Integer socialType, Integer userType, String code, String state) {
-        // 先查 DBˇ
-        SocialUserDO socialUser = dataRepository.findOne(
-                SocialUserDO.class,
-                new DefaultConfigStore().and("type", socialType)
-                                        .and("code", code).and("state", state));
+        // 先查 DB
+        SocialUserDO socialUser = socialUserDataRepository.findByTypeAndCodeAndState(socialType, code, state);
         if (socialUser != null) {
             return socialUser;
         }
@@ -153,10 +131,7 @@ public class SocialUserServiceImpl implements SocialUserService {
         Assert.notNull(authUser, "三方用户不能为空");
 
         // DB 再查
-        socialUser = dataRepository.findOne(
-                SocialUserDO.class,
-                new DefaultConfigStore().and("type", socialType)
-                                        .and("openid", authUser.getUuid()));
+        socialUser = socialUserDataRepository.findByTypeAndOpenid(socialType, authUser.getUuid());
         if (socialUser == null) {
             socialUser = new SocialUserDO();
         }
@@ -169,9 +144,9 @@ public class SocialUserServiceImpl implements SocialUserService {
                   .setRawUserInfo(toJsonString(authUser.getRawUserInfo()));
 
         if (socialUser.getId() == null) {
-            dataRepository.insert(socialUser);
+            socialUserDataRepository.insert(socialUser);
         } else {
-            dataRepository.update(socialUser);
+            socialUserDataRepository.update(socialUser);
         }
         return socialUser;
     }
@@ -180,33 +155,12 @@ public class SocialUserServiceImpl implements SocialUserService {
 
     @Override
     public SocialUserDO getSocialUser(Long id) {
-        return dataRepository.findById(SocialUserDO.class, id);
+        return socialUserDataRepository.findById(id);
     }
 
     @Override
     public PageResult<SocialUserDO> getSocialUserPage(SocialUserPageReqVO pageReqVO) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        
-        // 添加查询条件
-        if (pageReqVO.getType() != null) {
-            configStore.and("type", pageReqVO.getType());
-        }
-        if (pageReqVO.getNickname() != null) {
-            configStore.and("nickname", "%" + pageReqVO.getNickname() + "%", "LIKE");
-        }
-        if (pageReqVO.getOpenid() != null) {
-            configStore.and("openid", pageReqVO.getOpenid());
-        }
-        if (pageReqVO.getCreateTime() != null && pageReqVO.getCreateTime().length == 2) {
-            configStore.and("create_time", pageReqVO.getCreateTime()[0], ">=")
-                       .and("create_time", pageReqVO.getCreateTime()[1], "<=");
-        }
-        
-        return dataRepository.findPageWithConditions(
-                SocialUserDO.class,
-                configStore,
-                pageReqVO.getPageNo(),
-                pageReqVO.getPageSize());
+        return socialUserDataRepository.findPage(pageReqVO);
     }
 
 }

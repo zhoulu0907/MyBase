@@ -30,10 +30,10 @@ public class RoleDO extends TenantBaseDO {
     public static final String DATA_SCOPE_DEPT_IDS = "data_scope_dept_ids";
 
     // builder模式可正常运作
-    public RoleDO setId(Long id){
-        super.setId(id);
-        return this;
-    }
+    // public RoleDO setId(Long id){
+    //     super.setId(id);
+    //     return this;
+    // }
 
     /**
      * 角色名称

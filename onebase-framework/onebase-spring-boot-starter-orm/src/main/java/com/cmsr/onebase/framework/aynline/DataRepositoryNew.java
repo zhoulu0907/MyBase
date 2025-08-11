@@ -177,6 +177,9 @@ public class DataRepositoryNew<T extends BaseDO> {
      */
     public T findById(Long id) {
         try {
+            if (id == null) {
+                return null;
+            }
             ConfigStore configs = new DefaultConfigStore();
             configs.and(Compare.EQUAL, BaseDO.ID, id);
             String tableName = getTableName(defaultClazz);
@@ -218,8 +221,7 @@ public class DataRepositoryNew<T extends BaseDO> {
         try {
             ConfigStore configs = new DefaultConfigStore();
             String tableName = getTableName(defaultClazz);
-            DataSet dataSet = anylineService.querys(tableName, configs);
-            return dataSet.total();
+            return anylineService.count(tableName, configs);
         } catch (Exception e) {
             log.error("count error. ---> class={}", defaultClazz.getSimpleName(), e);
             throw new BizException(StatusCode.DB_SELECT_ERROR);
@@ -236,8 +238,7 @@ public class DataRepositoryNew<T extends BaseDO> {
     public long countByConfig(ConfigStore configs) {
         try {
             String tableName = getTableName(defaultClazz);
-            DataSet dataSet = anylineService.querys(tableName, configs);
-            return dataSet.total();
+            return anylineService.count(tableName, configs);
         } catch (Exception e) {
             log.error("countByConfig error. ---> class={}", defaultClazz.getSimpleName(), e);
             throw new BizException(StatusCode.DB_SELECT_ERROR);
@@ -273,6 +274,7 @@ public class DataRepositoryNew<T extends BaseDO> {
             throw new BizException(StatusCode.DB_SELECT_ERROR);
         }
     }
+
     /**
      * 查找所有实体
      *

@@ -41,8 +41,11 @@ public class TenantRespVO {
     @DictFormat(DictTypeConstants.COMMON_STATUS)
     private Integer status;
 
-    @Schema(description = "绑定域名", example = "http://cmsr.com")
+    @Schema(description = "域名", example = "http://cmsr.com")
     private String website;
+
+    @Schema(description = "域名H5", example = "http://h5.cmsr.com")
+    private String websiteH5;
 
     @Schema(description = "租户套餐编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "1024")
     private Long packageId;
@@ -60,5 +63,11 @@ public class TenantRespVO {
     @Schema(description = "已分配人员数量", requiredMode = Schema.RequiredMode.REQUIRED, example = "100")
     @NotNull(message = "已分配人员数量")
     private Integer allocatePersonCount;
+
+    @Schema(description = "key", example = "ket")
+    private String tenantKey;
+
+    @Schema(description = "secret", example = "secret")
+    private String tenantSecret;
 
 }

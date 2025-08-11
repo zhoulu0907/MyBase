@@ -1,34 +1,25 @@
 package com.cmsr.onebase.module.system.service.sms;
 
-import static cn.hutool.core.util.RandomUtil.randomInt;
-import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static com.cmsr.onebase.framework.common.util.date.DateUtils.isToday;
-import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.SMS_CODE_EXCEED_SEND_MAXIMUM_QUANTITY_PER_DAY;
-import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.SMS_CODE_EXPIRED;
-import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.SMS_CODE_NOT_FOUND;
-import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.SMS_CODE_SEND_TOO_FAST;
-import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.SMS_CODE_USED;
-
-import java.time.LocalDateTime;
-
-import org.anyline.data.param.ConfigStore;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.Compare;
-import org.springframework.stereotype.Service;
-import org.springframework.validation.annotation.Validated;
-
-import com.cmsr.onebase.framework.aynline.DataRepository;
-import com.cmsr.onebase.module.system.api.sms.dto.code.SmsCodeSendReqDTO;
-import com.cmsr.onebase.module.system.api.sms.dto.code.SmsCodeUseReqDTO;
-import com.cmsr.onebase.module.system.api.sms.dto.code.SmsCodeValidateReqDTO;
-import com.cmsr.onebase.module.system.dal.dataobject.sms.SmsCodeDO;
-import com.cmsr.onebase.module.system.enums.sms.SmsSceneEnum;
-import com.cmsr.onebase.module.system.framework.sms.config.SmsCodeProperties;
-
 import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.map.MapUtil;
+import com.cmsr.onebase.module.system.api.sms.dto.code.SmsCodeSendReqDTO;
+import com.cmsr.onebase.module.system.api.sms.dto.code.SmsCodeUseReqDTO;
+import com.cmsr.onebase.module.system.api.sms.dto.code.SmsCodeValidateReqDTO;
+import com.cmsr.onebase.module.system.dal.database.SmsCodeDataRepository;
+import com.cmsr.onebase.module.system.dal.dataobject.sms.SmsCodeDO;
+import com.cmsr.onebase.module.system.enums.sms.SmsSceneEnum;
+import com.cmsr.onebase.module.system.framework.sms.config.SmsCodeProperties;
 import jakarta.annotation.Resource;
+import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
+
+import java.time.LocalDateTime;
+
+import static cn.hutool.core.util.RandomUtil.randomInt;
+import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static com.cmsr.onebase.framework.common.util.date.DateUtils.isToday;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
 
 /**
  * 短信验证码 Service 实现类
@@ -45,7 +36,7 @@ public class SmsCodeServiceImpl implements SmsCodeService {
     private SmsSendService smsSendService;
 
     @Resource
-    private DataRepository dataRepository;
+    private SmsCodeDataRepository smsCodeDataRepository;
 
     @Override
     public void sendSmsCode(SmsCodeSendReqDTO reqDTO) {
@@ -60,10 +51,7 @@ public class SmsCodeServiceImpl implements SmsCodeService {
 
     private String createSmsCode(String mobile, Integer scene, String ip) {
         // 校验是否可以发送验证码，不用筛选场景
-        ConfigStore cs = new DefaultConfigStore()
-                .and(Compare.EQUAL, "mobile", mobile);
-        SmsCodeDO lastSmsCode = dataRepository.findOne(SmsCodeDO.class, cs);
-        //SmsCodeDO lastSmsCode = smsCodeMapper.selectLastByMobile(mobile, null, null);
+        SmsCodeDO lastSmsCode = smsCodeDataRepository.findLastByMobile(mobile);
         if (lastSmsCode != null) {
             if (LocalDateTimeUtil.between(lastSmsCode.getCreateTime(), LocalDateTime.now()).toMillis()
                     < smsCodeProperties.getSendFrequency().toMillis()) { // 发送过于频繁
@@ -83,8 +71,7 @@ public class SmsCodeServiceImpl implements SmsCodeService {
         SmsCodeDO newSmsCode = SmsCodeDO.builder().mobile(mobile).code(code).scene(scene)
                 .todayIndex(lastSmsCode != null && isToday(lastSmsCode.getCreateTime()) ? lastSmsCode.getTodayIndex() + 1 : 1)
                 .createIp(ip).used(false).build();
-        dataRepository.insert(newSmsCode);
-		//smsCodeMapper.insert(newSmsCode);
+        smsCodeDataRepository.insert(newSmsCode);
         return code;
     }
 
@@ -95,8 +82,7 @@ public class SmsCodeServiceImpl implements SmsCodeService {
         // 使用验证码
         SmsCodeDO smsCodeDO = SmsCodeDO.builder().used(true).usedTime(LocalDateTime.now()).usedIp(reqDTO.getUsedIp()).build();
         smsCodeDO.setId(lastSmsCode.getId());
-        dataRepository.update(smsCodeDO);
-        //smsCodeMapper.updateById(smsCodeDO);
+        smsCodeDataRepository.update(smsCodeDO);
     }
 
     @Override
@@ -106,12 +92,7 @@ public class SmsCodeServiceImpl implements SmsCodeService {
 
     private SmsCodeDO validateSmsCode0(String mobile, String code, Integer scene) {
         // 校验验证码
-        ConfigStore cs = new DefaultConfigStore()
-                .and(Compare.EQUAL, "mobile", mobile)
-                .and(Compare.EQUAL, "code", code)
-                .and(Compare.EQUAL, "scene", scene);
-        SmsCodeDO lastSmsCode = dataRepository.findOne(SmsCodeDO.class, cs);
-        //SmsCodeDO lastSmsCode = smsCodeMapper.selectLastByMobile(mobile, code, scene);
+        SmsCodeDO lastSmsCode = smsCodeDataRepository.findLastByMobileAndCodeAndScene(mobile, code, scene);
         // 若验证码不存在，抛出异常
         if (lastSmsCode == null) {
             throw exception(SMS_CODE_NOT_FOUND);

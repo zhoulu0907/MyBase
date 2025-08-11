@@ -5,7 +5,8 @@ import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.exception.ServiceException;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.system.controller.admin.permission.vo.role.RolePageReqVO;
-import com.cmsr.onebase.module.system.controller.admin.permission.vo.role.RoleSaveReqVO;
+import com.cmsr.onebase.module.system.controller.admin.permission.vo.role.RoleInsertReqVO;
+import com.cmsr.onebase.module.system.controller.admin.permission.vo.role.RoleUpdateReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleMenuDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.UserRoleDO;
@@ -80,7 +81,7 @@ public class RoleServiceTest {
     @Test
     public void testCreateRole_Success() {
         // 准备数据
-        RoleSaveReqVO createReqVO = new RoleSaveReqVO();
+        RoleInsertReqVO createReqVO = new RoleInsertReqVO();
         createReqVO.setName("测试角色");
         createReqVO.setCode("TEST_ROLE");
         createReqVO.setSort(1);
@@ -111,7 +112,7 @@ public class RoleServiceTest {
         createTestRole(null, "重复角色", "DUPLICATE_ROLE", CommonStatusEnum.ENABLE.getStatus());
 
         // 准备创建重复名称的角色
-        RoleSaveReqVO createReqVO = new RoleSaveReqVO();
+        RoleInsertReqVO createReqVO = new RoleInsertReqVO();
         createReqVO.setName("重复角色");
         createReqVO.setCode("ANOTHER_ROLE");
 
@@ -131,7 +132,7 @@ public class RoleServiceTest {
         createTestRole(null, "角色1", "DUPLICATE_CODE", CommonStatusEnum.ENABLE.getStatus());
 
         // 准备创建重复编码的角色
-        RoleSaveReqVO createReqVO = new RoleSaveReqVO();
+        RoleInsertReqVO createReqVO = new RoleInsertReqVO();
         createReqVO.setName("角色2");
         createReqVO.setCode("DUPLICATE_CODE");
 
@@ -148,7 +149,7 @@ public class RoleServiceTest {
     @Test
     public void testCreateRole_SuperAdminCode() {
         // 准备数据
-        RoleSaveReqVO createReqVO = new RoleSaveReqVO();
+        RoleInsertReqVO createReqVO = new RoleInsertReqVO();
         createReqVO.setName("超级管理员");
         createReqVO.setCode(RoleCodeEnum.SUPER_ADMIN.getCode());
 
@@ -168,7 +169,7 @@ public class RoleServiceTest {
         RoleDO role = createTestRole(null, "原始角色", "ORIGINAL_ROLE", CommonStatusEnum.ENABLE.getStatus());
 
         // 准备更新数据
-        RoleSaveReqVO updateReqVO = new RoleSaveReqVO();
+        RoleUpdateReqVO updateReqVO = new RoleUpdateReqVO();
         updateReqVO.setId(role.getId());
         updateReqVO.setName("更新后角色");
         updateReqVO.setCode("UPDATED_ROLE");
@@ -193,7 +194,7 @@ public class RoleServiceTest {
     @Test
     public void testUpdateRole_NotExists() {
         // 准备数据
-        RoleSaveReqVO updateReqVO = new RoleSaveReqVO();
+        RoleUpdateReqVO updateReqVO = new RoleUpdateReqVO();
         updateReqVO.setId(999L);
         updateReqVO.setName("不存在的角色");
         updateReqVO.setCode("NOT_EXISTS");
@@ -216,7 +217,7 @@ public class RoleServiceTest {
         dataRepository.update(role);
 
         // 准备更新数据
-        RoleSaveReqVO updateReqVO = new RoleSaveReqVO();
+        RoleUpdateReqVO updateReqVO = new RoleUpdateReqVO();
         updateReqVO.setId(role.getId());
         updateReqVO.setName("尝试更新系统角色");
         updateReqVO.setCode("TRY_UPDATE_SYSTEM");

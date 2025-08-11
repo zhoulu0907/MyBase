@@ -1,24 +1,18 @@
 package com.cmsr.onebase.module.system.service.license.impl;
 
-import java.util.List;
-
-import org.anyline.data.param.ConfigStore;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.Compare;
-import org.springframework.stereotype.Service;
-import org.springframework.validation.annotation.Validated;
-
-import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.system.controller.admin.license.vo.LicensePageReqVO;
 import com.cmsr.onebase.module.system.controller.admin.license.vo.LicenseSaveReqVO;
+import com.cmsr.onebase.module.system.dal.database.LicenseDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.license.LicenseDO;
 import com.cmsr.onebase.module.system.service.license.LicenseService;
-
-import cn.hutool.core.util.StrUtil;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
+
+import java.util.List;
 
 /**
  * License 服务实现类
@@ -34,7 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 public class LicenseServiceImpl implements LicenseService {
 
     @Resource
-    private DataRepository dataRepository;
+    private LicenseDataRepository licenseDataRepository;
 
     /**
      * 创建License
@@ -45,7 +39,7 @@ public class LicenseServiceImpl implements LicenseService {
     @Override
     public Long createLicense(LicenseSaveReqVO reqVO) {
         LicenseDO license = BeanUtils.toBean(reqVO, LicenseDO.class);
-        dataRepository.insert(license);
+        licenseDataRepository.insert(license);
         return license.getId();
     }
 
@@ -57,7 +51,7 @@ public class LicenseServiceImpl implements LicenseService {
     @Override
     public void updateLicense(LicenseSaveReqVO reqVO) {
         LicenseDO license = BeanUtils.toBean(reqVO, LicenseDO.class);
-        dataRepository.update(license);
+        licenseDataRepository.update(license);
     }
 
     /**
@@ -67,7 +61,7 @@ public class LicenseServiceImpl implements LicenseService {
      */
     @Override
     public void deleteLicense(Long id) {
-        dataRepository.deleteById(LicenseDO.class, id);
+        licenseDataRepository.deleteById(id);
     }
 
     /**
@@ -78,18 +72,18 @@ public class LicenseServiceImpl implements LicenseService {
      */
     @Override
     public LicenseDO getLicense(Long id) {
-        return dataRepository.findById(LicenseDO.class, id);
+        return licenseDataRepository.findById(id);
     }
 
     /**
      * 根据状态获取License
      *
-     * @param status License主键ID
+     * @param status License状态
      * @return License
      */
     @Override
     public LicenseDO getLicenseByStatus(String status) {
-        return dataRepository.findOne(LicenseDO.class, new DefaultConfigStore().and(Compare.EQUAL,"status",status));
+        return licenseDataRepository.findOneByStatus(status);
     }
 
     /**
@@ -101,36 +95,7 @@ public class LicenseServiceImpl implements LicenseService {
     @Override
     public PageResult<LicenseDO> getLicensePage(LicensePageReqVO reqVO) {
         try {
-            ConfigStore cs = new DefaultConfigStore();
-
-            // 按LicensePageReqVO实际参数动态构建查询条件
-            if (StrUtil.isNotBlank(reqVO.getEnterpriseName())) {
-                cs.and(Compare.LIKE, "enterprise_name", reqVO.getEnterpriseName());
-            }
-            if (StrUtil.isNotBlank(reqVO.getEnterpriseCode())) {
-                cs.and(Compare.EQUAL, "enterprise_code", reqVO.getEnterpriseCode());
-            }
-            if (StrUtil.isNotBlank(reqVO.getPlatformType())) {
-                cs.and(Compare.EQUAL, "platform_type", reqVO.getPlatformType());
-            }
-            if (StrUtil.isNotBlank(reqVO.getStatus())) {
-                cs.and(Compare.EQUAL, "status", reqVO.getStatus());
-            }
-            if (reqVO.getExpireTimeFrom() != null) {
-                cs.and(Compare.GREAT_EQUAL, "expire_time", reqVO.getExpireTimeFrom());
-            }
-            if (reqVO.getExpireTimeTo() != null) {
-                cs.and(Compare.LESS_EQUAL, "expire_time", reqVO.getExpireTimeTo());
-            }
-
-            cs.order("status","desc");
-
-            return dataRepository.findPageWithConditions(
-                    LicenseDO.class,
-                    cs,
-                    reqVO.getPageNum(),
-                    reqVO.getPageSize()
-            );
+            return licenseDataRepository.findPage(reqVO);
         } catch (Exception e) {
             log.error("分页查询License失败", e);
             throw new RuntimeException("分页查询License失败", e);
@@ -144,6 +109,6 @@ public class LicenseServiceImpl implements LicenseService {
      */
     @Override
     public List<LicenseDO> getSimpleLicenseList() {
-        return dataRepository.findAll(LicenseDO.class, new DefaultConfigStore());
+        return licenseDataRepository.findSimpleList();
     }
 }

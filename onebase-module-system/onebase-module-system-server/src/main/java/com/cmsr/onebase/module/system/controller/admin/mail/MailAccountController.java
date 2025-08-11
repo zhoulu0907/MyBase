@@ -71,7 +71,7 @@ public class MailAccountController {
         return success(BeanUtils.toBean(pageResult, MailAccountRespVO.class));
     }
 
-    @GetMapping({"/list-all-simple", "simple-list"})
+    @GetMapping({"simple-list"})
     @Operation(summary = "获得邮箱账号精简列表")
     public CommonResult<List<MailAccountSimpleRespVO>> getSimpleMailAccountList() {
         List<MailAccountDO> list = mailAccountService.getMailAccountList();

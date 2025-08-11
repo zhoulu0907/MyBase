@@ -1,42 +1,29 @@
 package com.cmsr.onebase.module.system.service.oauth2;
 
-import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.OAUTH2_CLIENT_AUTHORIZED_GRANT_TYPE_NOT_EXISTS;
-import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.OAUTH2_CLIENT_CLIENT_SECRET_ERROR;
-import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.OAUTH2_CLIENT_DISABLE;
-import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.OAUTH2_CLIENT_EXISTS;
-import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.OAUTH2_CLIENT_NOT_EXISTS;
-import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.OAUTH2_CLIENT_REDIRECT_URI_NOT_MATCH;
-import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.OAUTH2_CLIENT_SCOPE_OVER;
-
-import java.util.Collection;
-
-import org.anyline.data.param.ConfigStore;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.Compare;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.stereotype.Service;
-import org.springframework.validation.annotation.Validated;
-
-import com.cmsr.onebase.framework.aynline.DataRepository;
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.common.util.string.StrUtils;
 import com.cmsr.onebase.module.system.controller.admin.oauth2.vo.client.OAuth2ClientPageReqVO;
 import com.cmsr.onebase.module.system.controller.admin.oauth2.vo.client.OAuth2ClientSaveReqVO;
+import com.cmsr.onebase.module.system.dal.database.OAuth2ClientDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2ClientDO;
 import com.cmsr.onebase.module.system.dal.redis.RedisKeyConstants;
 import com.google.common.annotations.VisibleForTesting;
-
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.core.util.StrUtil;
-import cn.hutool.extra.spring.SpringUtil;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
+
+import java.util.Collection;
+
+import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
 
 /**
  * OAuth2.0 Client Service 实现类
@@ -47,15 +34,14 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class OAuth2ClientServiceImpl implements OAuth2ClientService {
     @Resource
-    private DataRepository dataRepository;
+    private OAuth2ClientDataRepository oauth2ClientDataRepository;
 
     @Override
     public Long createOAuth2Client(OAuth2ClientSaveReqVO createReqVO) {
         validateClientIdExists(null, createReqVO.getClientId());
         // 插入
         OAuth2ClientDO client = BeanUtils.toBean(createReqVO, OAuth2ClientDO.class);
-        dataRepository.insert(client);
-		//oauth2ClientMapper.insert(client);
+        oauth2ClientDataRepository.insert(client);
         return client.getId();
     }
 
@@ -70,8 +56,7 @@ public class OAuth2ClientServiceImpl implements OAuth2ClientService {
 
         // 更新
         OAuth2ClientDO updateObj = BeanUtils.toBean(updateReqVO, OAuth2ClientDO.class);
-        dataRepository.update(updateObj);
-		//oauth2ClientMapper.updateById(updateObj);
+        oauth2ClientDataRepository.update(updateObj);
     }
 
     @Override
@@ -81,81 +66,37 @@ public class OAuth2ClientServiceImpl implements OAuth2ClientService {
         // 校验存在
         validateOAuth2ClientExists(id);
         // 删除
-        dataRepository.deleteById(OAuth2ClientDO.class,id);
-		//oauth2ClientMapper.deleteById(id);
-    }
-
-    private void validateOAuth2ClientExists(Long id) {
-        if (dataRepository.findById(OAuth2ClientDO.class,id) == null) {
-            throw exception(OAUTH2_CLIENT_NOT_EXISTS);
-        }
-		//if (oauth2ClientMapper.selectById(id) == null) {
-          //  throw exception(OAUTH2_CLIENT_NOT_EXISTS);
-        //}
-    }
-
-    @VisibleForTesting
-    void validateClientIdExists(Long id, String clientId) {
-        ConfigStore configStore = new DefaultConfigStore()
-                .and(Compare.EQUAL, "client_id", clientId);
-        OAuth2ClientDO client = dataRepository.findOne(OAuth2ClientDO.class,configStore);
-		//OAuth2ClientDO client = oauth2ClientMapper.selectByClientId(clientId);
-        if (client == null) {
-            return;
-        }
-        // 如果 id 为空，说明不用比较是否为相同 id 的客户端
-        if (id == null) {
-            throw exception(OAUTH2_CLIENT_EXISTS);
-        }
-        if (!client.getId().equals(id)) {
-            throw exception(OAUTH2_CLIENT_EXISTS);
-        }
+        oauth2ClientDataRepository.deleteById(id);
     }
 
     @Override
     public OAuth2ClientDO getOAuth2Client(Long id) {
-        return dataRepository.findById(OAuth2ClientDO.class,id);
-		//return oauth2ClientMapper.selectById(id);
+        return oauth2ClientDataRepository.findById(id);
     }
 
     @Override
     @Cacheable(cacheNames = RedisKeyConstants.OAUTH_CLIENT, key = "#clientId",
             unless = "#result == null")
     public OAuth2ClientDO getOAuth2ClientFromCache(String clientId) {
-
-        ConfigStore configStore = new DefaultConfigStore()
-                .and(Compare.EQUAL, "client_id", clientId);
-        return dataRepository.findOne(OAuth2ClientDO.class,configStore);
-
-        //return oauth2ClientMapper.selectByClientId(clientId);
+        return oauth2ClientDataRepository.findOneByClientId(clientId);
     }
 
     @Override
     public PageResult<OAuth2ClientDO> getOAuth2ClientPage(OAuth2ClientPageReqVO pageReqVO) {
-
-        ConfigStore configStore = new DefaultConfigStore();
-
-        if (StringUtils.isNotBlank(pageReqVO.getName())) {
-            configStore.and(Compare.LIKE, "name", pageReqVO.getName());
-        }
-        if (null != pageReqVO.getStatus()) {
-            configStore.and(Compare.EQUAL, "status", pageReqVO.getStatus());
-        }
-
-        return dataRepository.findPageWithConditions(OAuth2ClientDO.class,configStore, pageReqVO.getPageNo(), pageReqVO.getPageSize());
-
-        //return oauth2ClientMapper.selectPage(pageReqVO);
+        return oauth2ClientDataRepository.findPage(pageReqVO);
     }
 
+    // ========== 客户端检查相关 ==========
+
     @Override
-    public OAuth2ClientDO validOAuthClientFromCache(String clientId, String clientSecret, String authorizedGrantType,
-                                                    Collection<String> scopes, String redirectUri) {
+    public OAuth2ClientDO validOAuthClientFromCache(String clientId, String clientSecret,
+                                                     String authorizedGrantType, Collection<String> scopes, String redirectUri) {
         // 校验客户端存在、且开启
-        OAuth2ClientDO client = getSelf().getOAuth2ClientFromCache(clientId);
+        OAuth2ClientDO client = this.getOAuth2ClientFromCache(clientId);
         if (client == null) {
             throw exception(OAUTH2_CLIENT_NOT_EXISTS);
         }
-        if (CommonStatusEnum.isDisable(client.getStatus())) {
+        if (ObjectUtil.notEqual(client.getStatus(), CommonStatusEnum.ENABLE.getStatus())) {
             throw exception(OAUTH2_CLIENT_DISABLE);
         }
 
@@ -178,13 +119,31 @@ public class OAuth2ClientServiceImpl implements OAuth2ClientService {
         return client;
     }
 
-    /**
-     * 获得自身的代理对象，解决 AOP 生效问题
-     *
-     * @return 自己
-     */
-    private OAuth2ClientServiceImpl getSelf() {
-        return SpringUtil.getBean(getClass());
+    @Override
+    public OAuth2ClientDO validOAuthClientFromCache(String clientId) {
+        return validOAuthClientFromCache(clientId, null, null, null, null);
+    }
+
+    @VisibleForTesting
+    void validateClientIdExists(Long id, String clientId) {
+        OAuth2ClientDO client = oauth2ClientDataRepository.findOneByClientId(clientId);
+        if (client == null) {
+            return;
+        }
+        // 如果 id 为空，说明不用比较是否为相同 id 的客户端
+        if (id == null) {
+            throw exception(OAUTH2_CLIENT_EXISTS);
+        }
+        if (!client.getId().equals(id)) {
+            throw exception(OAUTH2_CLIENT_EXISTS);
+        }
+    }
+
+    @VisibleForTesting
+    void validateOAuth2ClientExists(Long id) {
+        if (oauth2ClientDataRepository.findById(id) == null) {
+            throw exception(OAUTH2_CLIENT_NOT_EXISTS);
+        }
     }
 
 }
