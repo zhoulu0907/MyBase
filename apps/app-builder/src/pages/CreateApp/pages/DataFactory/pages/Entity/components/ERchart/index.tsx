@@ -22,6 +22,7 @@ const ERchart: React.FC<EntityERProps> = ({
   onNodeDelete,
   onNodeAddField,
   onNodeAddRelation,
+  onNodeAddMasterDetail,
   onFieldClick,
   onlyUpdateNode
 }) => {
@@ -172,8 +173,8 @@ const ERchart: React.FC<EntityERProps> = ({
     initGraph();
 
     return () => {
-      if (graphRef.current) {
-        graphRef.current.dispose();
+      if (graphRef?.current) {
+        // graphRef.current?.dispose();
         graphRef.current = null;
         isGraphInitialized.current = false;
       }
@@ -245,6 +246,7 @@ const ERchart: React.FC<EntityERProps> = ({
             onNodeDelete,
             onNodeAddField,
             onNodeAddRelation,
+            onNodeAddMasterDetail,
             onFieldClick
           },
           attrs: {

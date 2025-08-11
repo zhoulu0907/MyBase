@@ -1,5 +1,5 @@
 import type { EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
-import { Button, Drawer, Message } from '@arco-design/web-react';
+import { Button, Drawer, Message, Tabs } from '@arco-design/web-react';
 import { IconCaretRight } from '@arco-design/web-react/icon';
 import React, { useEffect, useState } from 'react';
 import NodeEditForm from '../NodeEditForm';
@@ -14,6 +14,7 @@ const DetailDrawer: React.FC<{
   successCallback?: () => void;
 }> = ({ editingNode, visible, setVisible, onNodeEdit, setEditingNode, successCallback }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [activeTab, setActiveTab] = useState('entity');
 
   useEffect(() => {
     // 当抽屉关闭时，重置收起状态
@@ -46,6 +47,40 @@ const DetailDrawer: React.FC<{
     setIsCollapsed(false);
   };
 
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'entity':
+        return (
+          <NodeEditForm
+            node={editingNode}
+            onSave={handleNodeEdit}
+            onCancel={handleClose}
+            successCallback={successCallback || (() => {})}
+          />
+        );
+      case 'relation':
+        return (
+          <div className={styles['tab-content']}>
+            <h3>关联关系</h3>
+          </div>
+        );
+      case 'rule':
+        return (
+          <div className={styles['tab-content']}>
+            <h3>数据规则</h3>
+          </div>
+        );
+      case 'method':
+        return (
+          <div className={styles['tab-content']}>
+            <h3>数据方法</h3>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
   return (
     <>
       {/* 抽屉把手按钮 - 只在抽屉可见时显示 */}
@@ -62,25 +97,32 @@ const DetailDrawer: React.FC<{
         // </Tooltip>
       )}
 
+      {/* 左侧Tab导航 */}
+      {!isCollapsed && (
+        <div className={styles['tab-sidebar']}>
+          <Tabs activeTab={activeTab} onChange={setActiveTab} direction="vertical" className={styles['vertical-tabs']}>
+            <Tabs.TabPane key="entity" title="业务实体" />
+            <Tabs.TabPane key="relation" title="关联关系" />
+            <Tabs.TabPane key="rule" title="数据规则" />
+            <Tabs.TabPane key="method" title="数据方法" />
+          </Tabs>
+        </div>
+      )}
+
       <Drawer
         title={null}
         visible={visible && !isCollapsed}
         onCancel={handleClose}
         width={500}
-        style={{
-          transition: 'transform 0.3s ease'
-        }}
         mask={false}
         placement="right"
         className={styles['edit-entity-drawer']}
       >
         {editingNode && (
-          <NodeEditForm
-            node={editingNode}
-            onSave={handleNodeEdit}
-            onCancel={handleClose}
-            successCallback={successCallback || (() => {})}
-          />
+          <div className={styles['drawer-container']}>
+            {/* 右侧内容区域 */}
+            {renderTabContent()}
+          </div>
         )}
       </Drawer>
     </>

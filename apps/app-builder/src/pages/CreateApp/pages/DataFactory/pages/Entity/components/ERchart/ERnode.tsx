@@ -18,6 +18,7 @@ interface NodeData {
   onNodeDelete?: (id: string) => void;
   onNodeAddField?: (data: Partial<EntityNode>) => void;
   onNodeAddRelation?: (id: string) => void;
+  onNodeAddMasterDetail?: (id: string) => void;
   onFieldClick?: (fieldId: string) => void;
 }
 
@@ -72,6 +73,16 @@ const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
     const onNodeAddRelation = data?.onNodeAddRelation;
     if (onNodeAddRelation && nodeData) {
       onNodeAddRelation(nodeData.entityId);
+    }
+  };
+
+  const handleAddMasterDetail = (e: Event) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const data = node.getData() as NodeData;
+    const onNodeAddMasterDetail = data?.onNodeAddMasterDetail;
+    if (onNodeAddMasterDetail && nodeData) {
+      onNodeAddMasterDetail(nodeData.entityId);
     }
   };
 
@@ -194,9 +205,24 @@ const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
         <Button type="text" onClick={handleAddField} className={styles['node-footer-button']}>
           字段配置
         </Button>
-        <Button type="text" onClick={handleAddRelation} className={styles['node-footer-button']}>
-          添加关系
-        </Button>
+        <Popover
+          trigger="hover"
+          position="rt"
+          content={
+            <Space direction="vertical">
+              <Button type="text" onClick={handleAddMasterDetail}>
+                添加主子关系
+              </Button>
+              <Button type="text" onClick={handleAddRelation}>
+                添加关联关系
+              </Button>
+            </Space>
+          }
+        >
+          <Button type="text" className={styles['node-footer-button']}>
+            添加关系
+          </Button>
+        </Popover>
       </div>
     </div>
   );

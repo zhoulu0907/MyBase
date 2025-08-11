@@ -1,0 +1,68 @@
+.edit-drawer {
+  :global(.arco-drawer-body) {
+    padding: 0;
+  }
+}
+
+.drawer-container {
+  display: flex;
+  height: 100%;
+}
+
+.tab-sidebar {
+  width: 200px;
+  border-right: 1px solid #e5e6eb;
+  background-color: #f7f8fa;
+  
+  .arco-tabs {
+    height: 100%;
+    
+    .arco-tabs-nav {
+      background-color: transparent;
+      border-right: none;
+      
+      .arco-tabs-tab {
+        padding: 16px 20px;
+        margin: 0;
+        border-radius: 0;
+        border-right: none;
+        border-bottom: 1px solid #e5e6eb;
+        
+        &:hover {
+          background-color: #e8f3ff;
+        }
+        
+        &.arco-tabs-tab-active {
+          background-color: #e8f3ff;
+          color: #165dff;
+          border-right: 2px solid #165dff;
+        }
+      }
+    }
+    
+    .arco-tabs-content {
+      display: none;
+    }
+  }
+}
+
+.content-area {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+}
+
+.tab-content {
+  h3 {
+    margin: 0 0 16px 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #1d2129;
+  }
+  
+  p {
+    margin: 0;
+    color: #86909c;
+    font-size: 14px;
+  }
+} 

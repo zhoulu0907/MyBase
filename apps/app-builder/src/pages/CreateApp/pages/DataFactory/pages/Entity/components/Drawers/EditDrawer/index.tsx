@@ -1,7 +1,8 @@
 import type { EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
-import { Drawer, Message } from '@arco-design/web-react';
-import React, { useEffect } from 'react';
+import { Drawer, Message, Tabs } from '@arco-design/web-react';
+import React, { useEffect, useState } from 'react';
 import NodeEditForm from '../NodeEditForm';
+import styles from './index.module.less';
 
 interface FormValues {
   code: string;
@@ -24,7 +25,13 @@ const EditDrawer: React.FC<{
   onNodeEdit: (data: EntityNode) => void;
   setEditingNode: (node: EntityNode | null) => void;
 }> = ({ editingNode, visible, setVisible, onNodeEdit, setEditingNode }) => {
-  useEffect(() => {}, []);
+  const [activeTab, setActiveTab] = useState('entity');
+
+  useEffect(() => {
+    if (visible) {
+      setActiveTab('entity');
+    }
+  }, [visible]);
 
   // 处理节点编辑
   const handleNodeEdit = (formData: Partial<FormValues>) => {
@@ -64,14 +71,74 @@ const EditDrawer: React.FC<{
     }
   };
 
+  // 渲染不同tab的内容
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'entity':
+        return (
+          <NodeEditForm
+            node={editingNode}
+            onSave={(data: Partial<FormValues>) => handleNodeEdit(data)}
+            onCancel={() => setVisible(false)}
+          />
+        );
+      case 'relation':
+        return (
+          <div className={styles['tab-content']}>
+            <h3>关联关系</h3>
+            <p>这里显示关联关系配置内容</p>
+            {/* TODO: 添加关联关系配置组件 */}
+          </div>
+        );
+      case 'rule':
+        return (
+          <div className={styles['tab-content']}>
+            <h3>数据规则</h3>
+            <p>这里显示数据规则配置内容</p>
+            {/* TODO: 添加数据规则配置组件 */}
+          </div>
+        );
+      case 'method':
+        return (
+          <div className={styles['tab-content']}>
+            <h3>数据方法</h3>
+            <p>这里显示数据方法配置内容</p>
+            {/* TODO: 添加数据方法配置组件 */}
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
   return (
-    <Drawer title="编辑节点" visible={visible} onCancel={() => setVisible(false)} width={500}>
+    <Drawer
+      title="编辑节点"
+      visible={visible}
+      onCancel={() => setVisible(false)}
+      width={800}
+      className={styles['edit-drawer']}
+    >
       {editingNode && (
-        <NodeEditForm
-          node={editingNode}
-          onSave={(data: Partial<FormValues>) => handleNodeEdit(data)}
-          onCancel={() => setVisible(false)}
-        />
+        <div className={styles['drawer-container']}>
+          {/* 左侧Tab导航 */}
+          <div className={styles['tab-sidebar']}>
+            <Tabs
+              activeTab={activeTab}
+              onChange={setActiveTab}
+              direction="vertical"
+              className={styles['vertical-tabs']}
+            >
+              <Tabs.TabPane key="entity" title="业务实体" />
+              <Tabs.TabPane key="relation" title="关联关系" />
+              <Tabs.TabPane key="rule" title="数据规则" />
+              <Tabs.TabPane key="method" title="数据方法" />
+            </Tabs>
+          </div>
+          
+          {/* 右侧内容区域 */}
+          <div className={styles['content-area']}>{renderTabContent()}</div>
+        </div>
       )}
     </Drawer>
   );
