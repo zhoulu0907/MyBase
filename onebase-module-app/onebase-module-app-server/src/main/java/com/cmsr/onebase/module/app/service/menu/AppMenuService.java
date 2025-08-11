@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.app.service.menu;
 
 import com.cmsr.onebase.module.app.controller.admin.menu.vo.*;
+import com.cmsr.onebase.module.app.dal.dataobject.menu.MenuDO;
 
 import java.util.List;
 
@@ -23,5 +24,4 @@ public interface AppMenuService {
     void updateApplicationMenuVisible(Long id, Boolean visible);
 
     void copyApplicationMenu(MenuCopyReqVO copyReqVO);
-
 }

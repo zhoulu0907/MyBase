@@ -10,10 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @Author：huangjie
@@ -40,7 +37,7 @@ public class AppAuthPermissionController {
     /**
      * 更新角色-菜单的权限
      */
-    @GetMapping("/update")
+    @PostMapping("/update")
     @Operation(summary = "更新角色-菜单的权限")
     public CommonResult<Boolean> updatePermission(@Valid @RequestBody AuthPermissionDetailVO detailVO) {
         authPermissionService.updatePermission(detailVO);

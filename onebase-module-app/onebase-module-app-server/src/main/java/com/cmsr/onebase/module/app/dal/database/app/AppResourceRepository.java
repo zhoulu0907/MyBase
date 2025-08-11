@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.app.dal.database.app;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
+import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
 import com.cmsr.onebase.module.app.dal.dataobject.app.ResourceDO;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
@@ -13,7 +13,7 @@ import java.util.List;
  * @Date：2025/8/6 14:40
  */
 @Repository
-public class AppResourceRepository extends DataRepository {
+public class AppResourceRepository extends DataRepositoryNew<ResourceDO> {
 
     public AppResourceRepository() {
         super(ResourceDO.class);
@@ -22,13 +22,13 @@ public class AppResourceRepository extends DataRepository {
     public void deleteByApplicationId(Long applicationId) {
         ConfigStore configs = new DefaultConfigStore();
         configs.eq("application_id", applicationId);
-        deleteByConfig(ResourceDO.class, configs);
+        deleteByConfig(configs);
     }
 
     public List<ResourceDO> findByApplicationId(Long applicationId) {
         ConfigStore configs = new DefaultConfigStore();
         configs.eq("application_id", applicationId);
-        return findAll(ResourceDO.class, configs);
+        return findAllByConfig(configs);
     }
 
 }

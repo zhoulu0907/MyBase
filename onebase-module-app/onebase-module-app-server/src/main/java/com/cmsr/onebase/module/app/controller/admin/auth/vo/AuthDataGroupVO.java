@@ -19,6 +19,9 @@ public class AuthDataGroupVO {
     @Schema(description = "数据权限组名称")
     private String groupName;
 
+    @Schema(description = "数据权限组排序")
+    private Integer groupOrder;
+
     @Schema(description = "数据权限组描述")
     private String description;
 

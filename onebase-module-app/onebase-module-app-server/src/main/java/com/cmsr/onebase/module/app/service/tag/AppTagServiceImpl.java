@@ -45,5 +45,9 @@ public class AppTagServiceImpl implements AppTagService {
         tagRepository.insert(tagDO);
     }
 
+    @Override
+    public void deleteTag(Long tagId) {
+        tagRepository.deleteById(tagId);
+    }
 
 }
