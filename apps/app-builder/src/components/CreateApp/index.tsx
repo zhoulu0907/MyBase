@@ -11,7 +11,13 @@ import {
   type FormInstance
 } from '@arco-design/web-react';
 
-import { listApplicationTag, createApplicationTag, type ListTagReq, type CreateApplicationTagReq } from '@onebase/app';
+import {
+  listApplicationTag,
+  createApplicationTag,
+  type Application,
+  type ListTagReq,
+  type CreateApplicationTagReq
+} from '@onebase/app';
 import { sample } from 'lodash-es';
 
 import { IconPlus } from '@arco-design/web-react/icon';
@@ -23,40 +29,63 @@ import appIconEditSVG from '@/assets/images/app_icon_edit.svg';
 import classicModeSVG from '@/assets/images/classic_mode_icon.svg';
 import appTypeSVG from '@/assets/images/app_type_selected_icon.svg';
 import themeSelectedSVG from '@/assets/images/theme_selected_icon.svg';
-import { appThemeColor, appIcon, appIconColor } from './const';
+import { appThemeColor, appIcon, appIconColor, type Options } from './const';
 import styles from './index.module.less';
 
 const Option = Select.Option;
 
+type AppStatus = 'create' | 'update';
 interface IProps {
   form: FormInstance;
+  readonly data?: Application;
+  readonly status: AppStatus;
   readonly previewBgColor: string;
 }
 
 // 创建/修改应用
 const BasicSetting = (props: IProps) => {
-  const { previewBgColor, form } = props;
+  const { previewBgColor, form, data, status } = props;
 
   const [tagValue, setTagValue] = useState<string>(''); // 新增标签值
   const [tagList, setTagList] = useState<ListTagReq[]>([]); // 标签列表
-
-  const [iconName, setIconName] = useState<string>(sample(appIcon)!);
-  const [iconColor, setIconColor] = useState<string>(sample(appIconColor)!);
-
-  const [themeColor, setThemeColor] = useState<string>('#4FAE7B'); // 应用主题色
+  const [iconName, setIconName] = useState<Application['iconName']>();
+  const [iconColor, setIconColor] = useState<Application['iconColor']>();
+  const [themeColor, setThemeColor] = useState<Application['themeColor']>('#4FAE7B'); // 应用主题色
 
   useEffect(() => {
     listAppTagReq();
+    form.resetFields();
   }, []);
 
+  useEffect(() => {
+    if (status === 'create') {
+      setIconName(sample(appIcon)!);
+      setIconColor(sample(appIconColor)!);
+    } else {
+      if (data && Object.values(data).length) {
+        form.setFieldsValue({
+          ...data,
+          tagIds: data.tags?.map((v) => {
+            return {
+              label: v.tagName,
+              value: v.id
+            } as Options;
+          })
+        });
+        setThemeColor(data.themeColor);
+        setIconName(data.iconName);
+        setIconColor(data.iconColor);
+      }
+    }
+  }, [data, status]);
+
+  // 查询标签
   const listAppTagReq = async () => {
     const params: ListTagReq = {
       tagName: ''
     };
-    // 查询标签
-    listApplicationTag(params).then((data) => {
-      setTagList(data || []);
-    });
+    const res = await listApplicationTag(params);
+    setTagList(res || []);
   };
 
   useEffect(() => {
@@ -227,6 +256,7 @@ const BasicSetting = (props: IProps) => {
                 render: (invisibleNumber) => `+${invisibleNumber} more`
               }}
               allowClear
+              labelInValue={true}
               dropdownRender={(menu) => (
                 <div>
                   {menu}

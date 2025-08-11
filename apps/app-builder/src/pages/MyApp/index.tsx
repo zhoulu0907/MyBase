@@ -19,6 +19,7 @@ import { debounce } from 'lodash-es';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 // import { useNavigate } from 'react-router-dom';
+import { type Options } from '@/components/CreateApp/const';
 import styles from './index.module.less';
 
 const Option = Select.Option;
@@ -56,6 +57,8 @@ const statusOptions = [
     value: 1
   }
 ];
+
+const defaultTheme = '#4FAE7B';
 
 const MyAppPage: React.FC = () => {
   const [form] = Form.useForm();
@@ -131,13 +134,14 @@ const MyAppPage: React.FC = () => {
         description,
         iconColor,
         iconName,
-        tagIds,
+        tagIds: tagIds?.map((t: Options) => t.value),
         themeColor
       };
-      createApplication(params)
+      await createApplication(params)
         .then(() => {
           setCreateVisible(false);
           Message.success('应用创建成功');
+          form.resetFields();
           // Message.success({
           //   content: '应用创建成功，3s后跳转...',
           //   duration: 3000,
@@ -149,6 +153,8 @@ const MyAppPage: React.FC = () => {
         .finally(() => {
           setCreateLoading(false);
         });
+      setPageNo(1);
+      await getApplicationList();
     });
   };
 
@@ -161,7 +167,7 @@ const MyAppPage: React.FC = () => {
     try {
       setDeleteLoading(true);
       const params: DeleteApplicationReq = {
-        id: BigInt(deleteApp.id),
+        id: deleteApp?.id,
         name: appName
       };
       const res = await deleteApplication(params);
@@ -293,7 +299,11 @@ const MyAppPage: React.FC = () => {
                     {item.tags?.map((tag) => (
                       <Tag
                         key={tag.id}
-                        style={{ color: item.iconColor, borderColor: item.iconColor, backgroundColor: '#fff' }}
+                        style={{
+                          color: item.themeColor || defaultTheme,
+                          borderColor: item.themeColor || defaultTheme,
+                          backgroundColor: '#fff'
+                        }}
                       >
                         {tag.tagName}
                       </Tag>
@@ -306,7 +316,7 @@ const MyAppPage: React.FC = () => {
                     <Avatar
                       size={24}
                       style={{
-                        backgroundColor: item.iconColor || '#4FAE7B'
+                        backgroundColor: item.themeColor || defaultTheme
                       }}
                     >
                       {item.createUser?.slice(0, 1) || 'U'}
@@ -400,6 +410,7 @@ const MyAppPage: React.FC = () => {
         title={<div style={{ textAlign: 'left' }}>创建空白应用</div>}
         visible={createVisible}
         simple
+        unmountOnExit
         footer={
           <div style={{ textAlign: 'right' }}>
             <Button type="default" onClick={() => setCreateVisible(false)} style={{ marginRight: 12 }}>
@@ -415,7 +426,7 @@ const MyAppPage: React.FC = () => {
         className={styles.createAppModal}
       >
         <div className={styles.createAppWrapper}>
-          <CreateApp form={form} previewBgColor="#F2F3F5BF" />
+          <CreateApp form={form} status="create" previewBgColor="#F2F3F5BF" />
         </div>
       </Modal>
     </div>
