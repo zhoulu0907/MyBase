@@ -175,7 +175,30 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.and("is_enabled", CommonStatusEnum.ENABLE.getStatus()); // 只获取启用的系统字段（0-启用，1-禁用）
         configStore.order("id", Order.TYPE.ASC);
-        return metadataSystemFieldsRepository.getSystemFields();
+        // 直接使用配置的查询条件，不再调用仓储类的方法（避免重复条件）
+        List<MetadataSystemFieldsDO> systemFields = metadataSystemFieldsRepository.findAllByConfig(configStore);
+        
+        log.info("获取系统字段结果: 总数={}, is_enabled条件={}", 
+                systemFields.size(), CommonStatusEnum.ENABLE.getStatus());
+        
+        // 如果启用的系统字段为空，尝试获取所有系统字段（忽略启用状态）
+        if (systemFields.isEmpty()) {
+            log.warn("未找到启用的系统字段，尝试获取所有系统字段");
+            DefaultConfigStore allConfigStore = new DefaultConfigStore();
+            allConfigStore.order("id", Order.TYPE.ASC);
+            systemFields = metadataSystemFieldsRepository.findAllByConfig(allConfigStore);
+            log.info("获取所有系统字段结果: 总数={}", systemFields.size());
+            
+            // 打印前几个字段的详细信息用于调试
+            for (int i = 0; i < Math.min(3, systemFields.size()); i++) {
+                MetadataSystemFieldsDO field = systemFields.get(i);
+                log.info("系统字段[{}]: 名称={}, 类型={}, 启用状态={}, 雪花ID={}", 
+                        i, field.getFieldName(), field.getFieldType(), 
+                        field.getIsEnabled(), field.getIsSnowflakeId());
+            }
+        }
+        
+        return systemFields;
     }
 
     /**
