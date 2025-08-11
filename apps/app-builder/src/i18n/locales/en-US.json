@@ -17,6 +17,7 @@
   "header": {
     "title": "ONE BASE",
     "profile": "Profile",
+    "tenantManagement": "Tenant Management",
     "logout": "Logout",
     "user": "User",
     "theme": "Theme",
