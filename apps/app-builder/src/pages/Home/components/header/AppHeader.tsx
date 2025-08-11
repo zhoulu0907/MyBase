@@ -123,9 +123,6 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
 
           <Dropdown droplist={userMenu} position="bl">
             <div className={styles.userDropdown}>
-              {/* <Avatar size={32} style={{ backgroundColor: '#4FAE7B' }}>
-                {nickname?.charAt(0) || 'U'}
-              </Avatar> */}
               <img src={avatarSVG} />
             </div>
           </Dropdown>

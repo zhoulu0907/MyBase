@@ -74,7 +74,7 @@ const PageManagerPage: FC = () => {
   const [treeData, setTreeData] = useState<TreeNode[]>([]);
 
   const [curMenu, setCurMenu] = useState<ApplicationMenu>();
-  const [activeMenu, setActiveMenu] = useState<ApplicationMenu>();
+  const [_activeMenu, setActiveMenu] = useState<ApplicationMenu>();
   const [parentPageOptions, setParentPageOptions] = useState<ApplicationMenu[]>([RootParentPage]);
 
   const initTreeItemWidth = 155;
@@ -128,6 +128,7 @@ const PageManagerPage: FC = () => {
           triggerHide={triggerHide}
           triggerDelete={triggerDelete}
           renameForm={renameForm}
+          copyForm={copyForm}
         />
       ),
       children: menu.children ? convertMenuToTreeData(menu.children, maxWidth - cutTreeItemWidth) : []
@@ -217,12 +218,12 @@ const PageManagerPage: FC = () => {
   };
 
   const handleRename = async () => {
-    if (!activeMenu?.id) {
+    if (!renameForm.getFieldValue('menuID')) {
       Message.error('请选择要重命名的菜单');
       return;
     }
     const req: UpdateApplicationMenuNameReq = {
-      id: activeMenu?.id,
+      id: renameForm.getFieldValue('menuID'),
       menuName: renameForm.getFieldValue('menuName')
     };
     const res = await updateApplicationMenuName(req);
@@ -234,15 +235,17 @@ const PageManagerPage: FC = () => {
   };
 
   const handleCopy = async () => {
-    if (!activeMenu?.id) {
+    if (!copyForm.getFieldValue('menuID')) {
       Message.error('请选择要复制的菜单');
       return;
     }
+
     const req: CopyApplicationMenuReq = {
-      id: activeMenu?.id,
+      id: copyForm.getFieldValue('menuID'),
       menuName: copyForm.getFieldValue('menuName'),
-      parentUuid: copyForm.getFieldValue('parentId')
+      parentId: copyForm.getFieldValue('parentId')
     };
+
     const res = await copyApplicationMenu(req);
     console.log('res: ', res);
     if (res) {
@@ -356,7 +359,6 @@ const PageManagerPage: FC = () => {
         handleCopy={handleCopy}
         setVisible={setVisibleCopyForm}
         form={copyForm}
-        initValue={{ menuName: activeMenu?.menuName + '_副本', parentId: activeMenu?.parentId || RootParentPage.id }}
         treeData={convertMenuToTreeData(parentPageOptions, initTreeItemWidth)}
       />
 
