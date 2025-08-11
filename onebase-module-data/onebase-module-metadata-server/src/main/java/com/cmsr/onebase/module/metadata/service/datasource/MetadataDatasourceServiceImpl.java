@@ -15,7 +15,7 @@ import com.cmsr.onebase.module.metadata.dal.dataobject.datasource.MetadataDataso
 import com.cmsr.onebase.module.metadata.config.MetadataConfig;
 import com.cmsr.onebase.module.metadata.convert.datasource.DatasourceConvert;
 import com.cmsr.onebase.module.metadata.enums.DatasourceTypeEnum;
-import com.cmsr.onebase.module.metadata.dal.database.MetadataRepository;
+import com.cmsr.onebase.module.metadata.dal.database.MetadataDatasourceRepository;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -54,7 +54,7 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
     @Resource
     private DatasourceConvert datasourceConvert;
     @Resource
-    private MetadataRepository metadataRepository;
+    private MetadataDatasourceRepository metadataDatasourceRepository;
     @Resource
     private TemporaryDatasourceService temporaryDatasourceService;
 
@@ -189,7 +189,7 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
         // 插入数据源
         MetadataDatasourceDO datasource = datasourceConvert.convert(createReqVO);
         datasource.setAppId(Long.valueOf(createReqVO.getAppId()));
-        metadataRepository.insert(datasource);
+        metadataDatasourceRepository.insert(datasource);
 
         return datasource.getId();
     }
@@ -239,7 +239,7 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
         // 手动设置ID，确保更新操作正常进行
         updateObj.setId(Long.valueOf(updateReqVO.getId()));
         updateObj.setAppId(Long.valueOf(updateReqVO.getAppId()));
-        metadataRepository.update(updateObj);
+        metadataDatasourceRepository.update(updateObj);
     }
 
     @Override
@@ -249,11 +249,11 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
         validateDatasourceExists(id);
 
         // 删除数据源
-        metadataRepository.deleteById(MetadataDatasourceDO.class, id);
+        metadataDatasourceRepository.deleteById(id);
     }
 
     private void validateDatasourceExists(Long id) {
-        if (metadataRepository.findById(MetadataDatasourceDO.class, id) == null) {
+        if (metadataDatasourceRepository.findById(id) == null) {
             throw exception(DATASOURCE_NOT_EXISTS);
         }
     }
@@ -266,7 +266,7 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
             configStore.and(Compare.NOT_EQUAL, "id", id);
         }
 
-        long count = metadataRepository.countByConfig(MetadataDatasourceDO.class, configStore);
+        long count = metadataDatasourceRepository.countByConfig(configStore);
         if (count > 0) {
             throw exception(DATASOURCE_CODE_DUPLICATE);
         }
@@ -274,7 +274,7 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
 
     @Override
     public MetadataDatasourceDO getDatasource(Long id) {
-        return metadataRepository.findById(MetadataDatasourceDO.class, id);
+        return metadataDatasourceRepository.findById(id);
     }
 
     @Override
@@ -302,21 +302,21 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
         }
 
         // 分页查询
-        return metadataRepository.findPageWithConditions(MetadataDatasourceDO.class, configStore, pageReqVO.getPageNo(), pageReqVO.getPageSize());
+        return metadataDatasourceRepository.findPageWithConditions(configStore, pageReqVO.getPageNo(), pageReqVO.getPageSize());
     }
 
     @Override
     public List<MetadataDatasourceDO> getDatasourceList() {
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.order("create_time", Order.TYPE.DESC);
-        return metadataRepository.findAllByConfig(MetadataDatasourceDO.class, configStore);
+        return metadataDatasourceRepository.findAllByConfig(configStore);
     }
 
     @Override
     public MetadataDatasourceDO getDatasourceByCode(String code) {
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.and("code", code);
-        return metadataRepository.findOne(MetadataDatasourceDO.class, configStore);
+        return metadataDatasourceRepository.findOne(configStore);
     }
 
     /**
