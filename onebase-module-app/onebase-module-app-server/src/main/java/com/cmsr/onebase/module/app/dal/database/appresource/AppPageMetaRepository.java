@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.app.dal.database.appresource;
 
 import java.util.List;
 
+import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.springframework.stereotype.Repository;
@@ -14,7 +15,7 @@ import com.cmsr.onebase.module.app.dal.dataobject.appresource.PageMetadataDO;
  * @Date：2025/8/6 9:31
  */
 @Repository
-public class AppPageMetaRepository extends DataRepository {
+public class AppPageMetaRepository extends DataRepositoryNew<PageMetadataDO> {
 
     public AppPageMetaRepository() {
         super(PageMetadataDO.class);
@@ -23,7 +24,7 @@ public class AppPageMetaRepository extends DataRepository {
     public List<PageMetadataDO> findByPageID(Long pageID) {
         ConfigStore configs = new DefaultConfigStore();
         configs.eq("page_id", pageID);
-        return findAll(PageMetadataDO.class, configs);
+        return findAllByConfig(configs);
     }
 
 }
