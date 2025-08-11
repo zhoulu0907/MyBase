@@ -168,7 +168,6 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
           <MenuItem
             key={item.key}
             disabled={item.disabled}
-            className={styles.siderMenuItem}
             style={collapsed ? { padding: '0 10px' } : { display: 'flex', alignItems: 'center' }}
           >
             {item.icon}
@@ -190,7 +189,7 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
     >
       <div className={styles.siderContent}>
         <div className={styles.menuContainer}>
-          <Menu mode="vertical" selectedKeys={selectedKeys} onClickMenuItem={handleMenuClick} levelIndent={29} className={styles.siderMenu}>
+          <Menu mode="vertical" selectedKeys={selectedKeys} onClickMenuItem={handleMenuClick} levelIndent={29}>
             {renderMenuItems(finalMenuItems)}
           </Menu>
         </div>
