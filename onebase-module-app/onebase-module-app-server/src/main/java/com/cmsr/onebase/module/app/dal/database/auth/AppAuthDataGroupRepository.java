@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.app.dal.database.auth;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
+import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
 import com.cmsr.onebase.module.app.controller.admin.auth.vo.AuthPermissionReqVO;
 import com.cmsr.onebase.module.app.dal.dataobject.auth.AuthDataGroupDO;
 import org.anyline.data.param.ConfigStore;
@@ -17,7 +17,7 @@ import java.util.List;
  * @date 2025-08-05
  */
 @Repository
-public class AppAuthDataGroupRepository extends DataRepository {
+public class AppAuthDataGroupRepository extends DataRepositoryNew<AuthDataGroupDO> {
 
     public AppAuthDataGroupRepository() {
         super(AuthDataGroupDO.class);
@@ -29,6 +29,7 @@ public class AppAuthDataGroupRepository extends DataRepository {
         configs.eq("role_id", reqVO.getRoleId());
         configs.eq("menu_id", reqVO.getMenuId());
         configs.order("group_order", Order.TYPE.ASC);
-        return this.findAllByConfig(AuthDataGroupDO.class, configs);
+        return this.findAllByConfig(configs);
     }
+
 }

@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.app.dal.database.version;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
+import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
 import com.cmsr.onebase.module.app.dal.dataobject.version.VersionMenuDO;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
@@ -13,7 +13,7 @@ import java.util.List;
  * @Date：2025/8/6 14:43
  */
 @Repository
-public class AppVersionMenuRepository extends DataRepository {
+public class AppVersionMenuRepository extends DataRepositoryNew<VersionMenuDO> {
 
     public AppVersionMenuRepository() {
         super(VersionMenuDO.class);
@@ -22,19 +22,19 @@ public class AppVersionMenuRepository extends DataRepository {
     public void deleteByApplicationId(Long applicationId) {
         ConfigStore configs = new DefaultConfigStore();
         configs.eq("application_id", applicationId);
-        deleteByConfig(VersionMenuDO.class, configs);
+        deleteByConfig(configs);
     }
 
     public List<VersionMenuDO> findByApplicationIdAndVersionId(Long applicationId, Long versionId) {
         ConfigStore configs = new DefaultConfigStore();
         configs.eq("application_id", applicationId);
         configs.eq("version_id", versionId);
-        return findAll(VersionMenuDO.class, configs);
+        return findAllByConfig(configs);
     }
 
     public void deleteByVersionId(Long versionId) {
         ConfigStore configs = new DefaultConfigStore();
         configs.eq("version_id", versionId);
-        deleteByConfig(VersionMenuDO.class, configs);
+        deleteByConfig(configs);
     }
 }

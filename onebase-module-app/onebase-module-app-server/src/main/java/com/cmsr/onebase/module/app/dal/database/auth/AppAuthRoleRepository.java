@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.app.dal.database.auth;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
+import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
 import com.cmsr.onebase.module.app.dal.dataobject.auth.AuthRoleDO;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
@@ -16,7 +16,7 @@ import java.util.List;
  * @date 2025-08-05
  */
 @Repository
-public class AppAuthRoleRepository extends DataRepository {
+public class AppAuthRoleRepository extends DataRepositoryNew<AuthRoleDO> {
 
     public AppAuthRoleRepository() {
         super(AuthRoleDO.class);
@@ -27,10 +27,13 @@ public class AppAuthRoleRepository extends DataRepository {
         configs.eq("application_id", applicationId);
         configs.order("role_type", Order.TYPE.ASC);
         configs.order("role_name", Order.TYPE.ASC);
-        return findAllByConfig(AuthRoleDO.class, configs);
+        return findAllByConfig(configs);
     }
 
     public AuthRoleDO findByApplicationIdAndRoleName(Long applicationId, String roleName) {
-        return null;
+        ConfigStore configs = new DefaultConfigStore();
+        configs.eq("application_id", applicationId);
+        configs.eq("role_name", roleName);
+        return findOne(configs);
     }
 }

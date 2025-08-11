@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.app.dal.database.auth;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
+import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
 import com.cmsr.onebase.module.app.controller.admin.auth.vo.AuthRoleAddMemberReqVO;
 import com.cmsr.onebase.module.app.controller.admin.auth.vo.AuthRoleDeleteMemberReqVO;
 import com.cmsr.onebase.module.app.dal.dataobject.auth.AuthUserRoleDO;
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Repository;
  * @date 2025-08-05
  */
 @Repository
-public class AppAuthUserRoleRepository extends DataRepository {
+public class AppAuthUserRoleRepository extends DataRepositoryNew<AuthUserRoleDO> {
 
     public AppAuthUserRoleRepository() {
         super(AuthUserRoleDO.class);
@@ -26,7 +26,7 @@ public class AppAuthUserRoleRepository extends DataRepository {
             ConfigStore configStore = new DefaultConfigStore();
             configStore.eq("role_id", reqVO.getRoleId());
             configStore.eq("user_id", userId);
-            if (this.countByConfig(AuthUserRoleDO.class, configStore) == 0) {
+            if (this.countByConfig(configStore) == 0) {
                 AuthUserRoleDO authUserRoleDO = new AuthUserRoleDO();
                 authUserRoleDO.setRoleId(reqVO.getRoleId());
                 authUserRoleDO.setUserId(userId);
@@ -40,13 +40,13 @@ public class AppAuthUserRoleRepository extends DataRepository {
         ConfigStore configStore = new DefaultConfigStore();
         configStore.eq("role_id", reqVO.getRoleId());
         configStore.in("user_id", reqVO.getUserIds());
-        this.deleteByConfig(AuthUserRoleDO.class, configStore);
+        this.deleteByConfig(configStore);
     }
 
     public void deleteByRoleId(Long roleId) {
         ConfigStore configStore = new DefaultConfigStore();
         configStore.eq("role_id", roleId);
-        this.deleteByConfig(AuthUserRoleDO.class, configStore);
+        this.deleteByConfig(configStore);
     }
 
 }

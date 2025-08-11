@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.app.dal.database.app;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
+import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.data.base.BaseDO;
 import com.cmsr.onebase.module.app.controller.admin.app.vo.ApplicationPageReqVO;
@@ -17,7 +17,7 @@ import org.springframework.stereotype.Repository;
  * @Date：2025/8/6 14:08
  */
 @Repository
-public class AppApplicationRepository extends DataRepository {
+public class AppApplicationRepository extends DataRepositoryNew<ApplicationDO> {
 
     public AppApplicationRepository() {
         super(ApplicationDO.class);
@@ -37,19 +37,19 @@ public class AppApplicationRepository extends DataRepository {
         if (StringUtils.equalsIgnoreCase(pageReqVO.getOrderByTime(), "update")) {
             configs.order(BaseDO.UPDATE_TIME, Order.TYPE.DESC);
         }
-        return findPageWithConditions(ApplicationDO.class, configs, pageReqVO.getPageNo(), pageReqVO.getPageSize());
+        return findPageWithConditions(configs, pageReqVO.getPageNo(), pageReqVO.getPageSize());
     }
 
     public ApplicationDO findOneByAppCode(String appCode) {
         ConfigStore configs = new DefaultConfigStore();
         configs.eq("app_code", appCode);
-        return findOne(ApplicationDO.class, configs);
+        return findOne(configs);
     }
 
     public ApplicationDO findByAppCodeAndIdNot(String appCode, Long id) {
         ConfigStore configs = new DefaultConfigStore();
         configs.eq("app_code", appCode);
         configs.ne("id", id);
-        return findOne(ApplicationDO.class, configs);
+        return findOne(configs);
     }
 }

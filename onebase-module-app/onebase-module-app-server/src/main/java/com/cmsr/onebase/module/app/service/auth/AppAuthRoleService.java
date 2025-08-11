@@ -4,6 +4,7 @@ import com.cmsr.onebase.module.app.controller.admin.auth.vo.AuthRoleAddMemberReq
 import com.cmsr.onebase.module.app.controller.admin.auth.vo.AuthRoleCreateReqVO;
 import com.cmsr.onebase.module.app.controller.admin.auth.vo.AuthRoleDeleteMemberReqVO;
 import com.cmsr.onebase.module.app.controller.admin.auth.vo.AuthRoleListRespVO;
+import com.cmsr.onebase.module.app.dal.dataobject.auth.AuthRoleDO;
 
 import java.util.List;
 

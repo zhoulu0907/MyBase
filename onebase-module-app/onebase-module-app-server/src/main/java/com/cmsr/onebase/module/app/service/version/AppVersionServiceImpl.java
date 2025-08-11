@@ -4,18 +4,21 @@ import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.app.controller.admin.version.vo.VersionCreateReqVO;
 import com.cmsr.onebase.module.app.controller.admin.version.vo.VersionListRespVO;
-import com.cmsr.onebase.module.app.dal.database.app.*;
+import com.cmsr.onebase.module.app.dal.database.app.AppApplicationRepository;
+import com.cmsr.onebase.module.app.dal.database.app.AppResourceRepository;
 import com.cmsr.onebase.module.app.dal.database.menu.AppMenuRepository;
 import com.cmsr.onebase.module.app.dal.database.version.AppVersionMenuRepository;
 import com.cmsr.onebase.module.app.dal.database.version.AppVersionRepository;
 import com.cmsr.onebase.module.app.dal.database.version.AppVersionResourceRepository;
-import com.cmsr.onebase.module.app.dal.dataobject.app.*;
+import com.cmsr.onebase.module.app.dal.dataobject.app.ApplicationDO;
+import com.cmsr.onebase.module.app.dal.dataobject.app.ResourceDO;
 import com.cmsr.onebase.module.app.dal.dataobject.menu.MenuDO;
 import com.cmsr.onebase.module.app.dal.dataobject.version.VersionDO;
 import com.cmsr.onebase.module.app.dal.dataobject.version.VersionMenuDO;
 import com.cmsr.onebase.module.app.dal.dataobject.version.VersionResourceDO;
 import com.cmsr.onebase.module.app.enums.app.AppErrorCodeConstants;
 import com.cmsr.onebase.module.app.service.AppCommonService;
+import com.cmsr.onebase.module.app.service.app.AppApplicationService;
 import com.cmsr.onebase.module.app.util.VersionUtils;
 import jakarta.annotation.Resource;
 import lombok.Setter;
@@ -54,6 +57,9 @@ public class AppVersionServiceImpl implements AppVersionService {
 
     @Resource
     private AppCommonService appCommonService;
+
+    @Resource
+    private AppApplicationService appApplicationService;
 
     @Override
     public List<VersionListRespVO> listApplicationVersion(Long applicationId) {
@@ -119,7 +125,7 @@ public class AppVersionServiceImpl implements AppVersionService {
 
     @Override
     public void deleteApplicationVersion(Long versionId) {
-        versionRepository.deleteById(VersionDO.class, versionId);
+        versionRepository.deleteById(versionId);
         versionMenuRepository.deleteByVersionId(versionId);
         versionResourceRepository.deleteByVersionId(versionId);
     }
