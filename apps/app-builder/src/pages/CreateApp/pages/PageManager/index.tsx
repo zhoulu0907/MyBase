@@ -209,12 +209,22 @@ const PageManagerPage: FC = () => {
       req.menuType = MenuType.GROUP;
     }
 
-    const res = await createApplicationMenu(req);
-    if (res) {
+    const menuResp = await createApplicationMenu(req);
+
+    console.log('res: ', menuResp);
+    if (menuResp) {
       Message.success('创建成功');
     }
     setVisibleCreateForm('');
     getMenuList();
+
+    const pageSetCode = await getPageSetCode({
+      menuId: menuResp.id
+    });
+
+    if (pageSetCode) {
+      navigate(`/onebase/editor/${EDITOR_TYPES.FORM_EDITOR}?pageSetCode=${pageSetCode}`);
+    }
   };
 
   const handleRename = async () => {

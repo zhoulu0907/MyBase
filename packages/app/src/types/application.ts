@@ -63,6 +63,18 @@ export interface ListApplicationReq {
   status?: number | null;
 }
 
+/**
+ * 应用状态常量
+ * 0: 开发中
+ * 1: 已发布
+ * 2: 已发布编辑中
+ */
+export const AppStatus = {
+  DEVELOPING: 0,      // 开发中
+  PUBLISHED: 1,       // 已发布
+  EDITING_AFTER_PUBLISH: 2, // 已发布编辑中
+} as const;
+
 export interface CreateApplicationReq {
   /**
    * 应用编码

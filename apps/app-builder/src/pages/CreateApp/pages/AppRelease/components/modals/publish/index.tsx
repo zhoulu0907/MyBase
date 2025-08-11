@@ -1,14 +1,15 @@
-import { Button, Form, Grid, Input, Modal, Tag, Typography } from '@arco-design/web-react';
+import { Form, Grid, Input, Modal, Tag } from '@arco-design/web-react';
+import { createApplicationVersion, OperationType, type CreateApplicationVersionReq } from '@onebase/app';
 import React, { useState } from 'react';
-import styles from './PublishVersionModal.module.less';
+import styles from './index.module.less';
 
 const TextArea = Input.TextArea;
 
 interface PublishVersionModalProps {
+  applicationId: string;
   visible: boolean;
   onCancel: () => void;
   onOk: (values: PublishVersionFormData) => void;
-  loading?: boolean;
 }
 
 interface PublishVersionFormData {
@@ -18,11 +19,13 @@ interface PublishVersionFormData {
   environment: string;
 }
 
-const PublishVersionModal: React.FC<PublishVersionModalProps> = ({ visible, onCancel, onOk, loading = false }) => {
+const PublishVersionModal: React.FC<PublishVersionModalProps> = ({ applicationId, visible, onCancel, onOk }) => {
+  const [loading, setLoading] = useState(false);
+
   const [form] = Form.useForm();
   const [formData] = useState<PublishVersionFormData>({
     versionName: '',
-    versionNumber: 'V 1.0.0',
+    versionNumber: '',
     description: '',
     environment: '正式环境'
   });
@@ -30,9 +33,24 @@ const PublishVersionModal: React.FC<PublishVersionModalProps> = ({ visible, onCa
   const handleOk = async () => {
     try {
       const values = await form.validate();
+      setLoading(true);
+
+      const req: CreateApplicationVersionReq = {
+        applicationId: applicationId,
+        versionName: values.versionName,
+        versionNumber: values.versionNumber,
+        versionDescription: values.description,
+        environment: '正式环境',
+        operationType: OperationType.PUBLISH
+      };
+      const res = await createApplicationVersion(req);
+      console.log(res);
+
+      setLoading(false);
       onOk(values);
     } catch (error) {
       console.error('表单验证失败:', error);
+      setLoading(false);
     }
   };
 
@@ -70,12 +88,12 @@ const PublishVersionModal: React.FC<PublishVersionModalProps> = ({ visible, onCa
         </Form.Item>
 
         <Form.Item label="发布环境" field="environment" rules={[{ required: true, message: '请选择发布环境' }]}>
-          <Tag color="green" className={styles.environmentTag}>
+          <Tag color="green" bordered className={styles.environmentTag}>
             正式环境
           </Tag>
         </Form.Item>
 
-        <Form.Item label="版本比对" field="versionComparison" rules={[{ required: true, message: '请查看版本比对' }]}>
+        {/* <Form.Item label="版本比对" field="versionComparison" rules={[{ required: true, message: '请查看版本比对' }]}>
           <div className={styles.versionComparison}>
             <Typography.Text>与上一发布版本进行比对,变更清单如下:</Typography.Text>
             <div className={styles.comparisonList}>
@@ -86,7 +104,7 @@ const PublishVersionModal: React.FC<PublishVersionModalProps> = ({ visible, onCa
               查看详情
             </Button>
           </div>
-        </Form.Item>
+        </Form.Item> */}
       </Form>
     </Modal>
   );
