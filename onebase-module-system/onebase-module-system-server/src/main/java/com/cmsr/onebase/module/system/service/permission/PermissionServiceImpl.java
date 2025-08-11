@@ -205,7 +205,7 @@ public class PermissionServiceImpl implements PermissionService {
         // 获得角色拥有角色编号
         Set<Long> dbRoleIds = convertSet(userRoleDataRepository.findListByUserId(userId), UserRoleDO::getRoleId);
         // 计算新增和删除的角色编号
-        Set<Long> roleIdList = CollUtild.emptyIfNull(roleIds);
+        Set<Long> roleIdList = CollUtil.emptyIfNull(roleIds);
         Collection<Long> createRoleIds = CollUtil.subtract(roleIdList, dbRoleIds);
         Collection<Long> deleteRoleIds = CollUtil.subtract(dbRoleIds, roleIdList);
         // 执行新增和删除。对于已经授权的角色，不用做任何处理
