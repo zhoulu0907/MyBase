@@ -8,6 +8,7 @@ import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.ERDiagramResp
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EREntityVO;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.ERFieldVO;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.ERRelationshipVO;
+import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.SimpleEntityRespVO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataBusinessEntityDO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataSystemFieldsDO;
@@ -679,6 +680,45 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.and("id", datasourceId);
         return metadataRepository.findOne(MetadataDatasourceDO.class, configStore);
+    }
+
+    @Override
+    public List<SimpleEntityRespVO> getSimpleEntityListByAppId(Long appId) {
+        log.info("开始查询应用实体列表，应用ID: {}", appId);
+
+        // 1. 根据appId查询该应用下的所有实体
+        DefaultConfigStore entityConfigStore = new DefaultConfigStore();
+        entityConfigStore.and("app_id", appId);
+        entityConfigStore.order("create_time", Order.TYPE.ASC);
+
+        List<MetadataBusinessEntityDO> entities = metadataRepository.findAllByConfig(
+                MetadataBusinessEntityDO.class, entityConfigStore);
+
+        if (entities.isEmpty()) {
+            log.info("应用下未找到任何实体，应用ID: {}", appId);
+            return List.of();
+        }
+
+        // 2. 转换为简单实体信息VO
+        List<SimpleEntityRespVO> result = entities.stream()
+                .map(this::convertToSimpleEntity)
+                .toList();
+
+        log.info("查询应用实体列表完成，应用ID: {}, 实体数量: {}", appId, result.size());
+        return result;
+    }
+
+    /**
+     * 转换实体DO为简单实体信息VO
+     *
+     * @param entityDO 实体DO
+     * @return 简单实体信息VO
+     */
+    private SimpleEntityRespVO convertToSimpleEntity(MetadataBusinessEntityDO entityDO) {
+        SimpleEntityRespVO simpleEntity = new SimpleEntityRespVO();
+        simpleEntity.setEntityId(entityDO.getId());
+        simpleEntity.setEntityName(entityDO.getDisplayName());
+        return simpleEntity;
     }
 
 }

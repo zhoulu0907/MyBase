@@ -39,6 +39,13 @@ public class PageSetController {
         return CommonResult.success(pageSetCode);
     }
 
+    @GetMapping("/app_id")
+    @Operation(summary = "获取页面集应用ID")
+    public CommonResult<Long> getAppId(@RequestParam String code) {
+        Long appId = pageSetService.getAppId(code);
+        return CommonResult.success(appId);
+    }
+
     @PostMapping("/create")
     @Operation(summary = "创建页面集")
     public CommonResult<String> createPageSet(@RequestBody CreatePageSetDTO createPageSetDTO) {

@@ -39,7 +39,7 @@ public class PageMetadataServiceImpl implements PageMetadataService {
     @Override
     public Boolean updatePageMetadata(UpdatePageMetadataDTO updatePageMetadataDTO) {
         PageMetadataDO pageMetadataDO = BeanUtils.toBean(updatePageMetadataDTO, PageMetadataDO.class);
-        pageMetadataDO = appPageMetaDataRepository.update(pageMetadataDO);
+        appPageMetaDataRepository.update(pageMetadataDO);
         return true;
     }
 }

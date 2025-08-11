@@ -14,6 +14,7 @@ import org.anyline.service.AnylineService;
 import org.anyline.util.ConfigTable;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,7 +25,7 @@ import java.util.Optional;
  * 支持实体类的增删改查操作，包含分页、排序、条件查询等功能
  *
  * @author matianyu
- * @date 2025-01-27
+ * @date 2025-08-07
  */
 @Slf4j
 public class DataRepositoryNew<T extends BaseDO> {
@@ -43,8 +44,8 @@ public class DataRepositoryNew<T extends BaseDO> {
 
     private Class<T> defaultClazz = null;
 
-    public DataRepositoryNew() {
-    }
+    // public DataRepositoryNew() {
+    // }
 
     public DataRepositoryNew(Class<T> defaultClazz) {
         this.defaultClazz = defaultClazz;
@@ -118,7 +119,7 @@ public class DataRepositoryNew<T extends BaseDO> {
             ConfigStore configs = new DefaultConfigStore();
             configs.eq(BaseDO.ID, entity.getId());
             Long result = anylineService.update(entity, configs);
-            log.info("[{}] update  ---> effect rows = {}", entity.getClass().getSimpleName(), result);
+            log.info("update  ---> class={}, effect rows = {}", entity.getClass().getSimpleName(), result);
             return result;
         } catch (Exception e) {
             log.error("update error, class={}, entity={}", defaultClazz, entity, e);
@@ -158,7 +159,7 @@ public class DataRepositoryNew<T extends BaseDO> {
         }
         try {
             long result = anylineService.update(1000, getTableName(entity.getClass()), entity, configs, (List<String>) null);
-            log.info("[{}] updateByConfig  ---> effect rows = {}", entity.getClass().getSimpleName(), result);
+            log.info("updateByConfig  ---> class={}, effect rows = {}", entity.getClass().getSimpleName(), result);
             return result;
         } catch (Exception e) {
             log.error("updateByConfig error, class={}, entity={}, config={}", defaultClazz, entity, configs, e);
@@ -269,7 +270,7 @@ public class DataRepositoryNew<T extends BaseDO> {
                     dataSet.total()
             );
         } catch (Exception e) {
-            log.error("分页查询失败: class={}, pageIndex={}, pageSize={}",
+            log.error("findAll error, class={}, pageIndex={}, pageSize={}",
                     defaultClazz.getSimpleName(), pageIndex, pageSize, e);
             throw new BizException(StatusCode.DB_SELECT_ERROR);
         }
@@ -308,7 +309,7 @@ public class DataRepositoryNew<T extends BaseDO> {
             DataSet dataSet = anylineService.querys(tableName, configs);
             return dataSet.entity(defaultClazz);
         } catch (Exception e) {
-            log.error("findAllByConfig: class={}, configs={}", defaultClazz.getSimpleName(), configs, e);
+            log.error("findAllByConfig error, class={}, configs={}", defaultClazz.getSimpleName(), configs, e);
             throw new BizException(StatusCode.DB_SELECT_ERROR);
         }
     }
@@ -321,7 +322,14 @@ public class DataRepositoryNew<T extends BaseDO> {
      * @throws BizException 查询失败时抛出
      */
     public List<T> findAllByIds(Collection<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return Collections.emptyList();
+        }
         try {
+            if (ids == null || ids.isEmpty()) {
+                return Collections.emptyList();
+            }
+
             ConfigStore configs = new DefaultConfigStore();
             configs.in(BaseDO.ID, ids);
 
@@ -329,7 +337,7 @@ public class DataRepositoryNew<T extends BaseDO> {
             DataSet dataSet = anylineService.querys(tableName, configs);
             return dataSet.entity(defaultClazz);
         } catch (Exception e) {
-            log.error("findAllByIds error. ---> class={}, ids={}", defaultClazz.getSimpleName(), ids, e);
+            log.error("findAllByIds error, ---> class={}, ids={}", defaultClazz.getSimpleName(), ids, e);
             throw new BizException(StatusCode.DB_SELECT_ERROR);
         }
     }
@@ -346,7 +354,7 @@ public class DataRepositoryNew<T extends BaseDO> {
             String tableName = getTableName(defaultClazz);
             return anylineService.select(tableName, defaultClazz, configs);
         } catch (Exception e) {
-            log.error("条件查询单个实体失败: class={}", defaultClazz.getSimpleName(), e);
+            log.error("findOne error, class={}", defaultClazz.getSimpleName(), e);
             throw new BizException(StatusCode.DB_SELECT_ERROR);
         }
     }
@@ -385,7 +393,7 @@ public class DataRepositoryNew<T extends BaseDO> {
                     dataSet.total()
             );
         } catch (Exception e) {
-            log.error("条件分页查询失败: class={}, pageIndex={}, pageSize={}",
+            log.error("findPageWithConditions error, class={}, pageIndex={}, pageSize={}",
                     defaultClazz.getSimpleName(), pageIndex, pageSize, e);
             throw new BizException(StatusCode.DB_SELECT_ERROR);
         }
@@ -404,12 +412,12 @@ public class DataRepositoryNew<T extends BaseDO> {
     public long deleteByConfig(ConfigStore configs) {
         try {
             DataRow row = new DataRow();
-            row.put(BaseDO.DELETED, 1);  // 设置逻辑删除标记
+            row.put(BaseDO.DELETED, System.currentTimeMillis());  // 设置逻辑删除标记
             long result = anylineService.update(getTableName(defaultClazz), row, configs);
             log.info("deleteByConfig  ---> class={}, effect rows = {}", defaultClazz, result);
             return result;
         } catch (Exception e) {
-            log.error("deleteByConfig error. ---> class={}, configs={}", defaultClazz.getSimpleName(), configs, e);
+            log.error("deleteByConfig error, ---> class={}, configs={}", defaultClazz.getSimpleName(), configs, e);
             throw new BizException(StatusCode.DB_DELETE_ERROR);
         }
     }
@@ -423,15 +431,18 @@ public class DataRepositoryNew<T extends BaseDO> {
      */
     public long deleteById(Long id) {
         try {
+            if(id == null || id == 0){
+                return 0;
+            }
             ConfigStore configs = new DefaultConfigStore();
             configs.and(Compare.EQUAL, BaseDO.ID, id);
             DataRow row = new DataRow();
-            row.put(BaseDO.DELETED, 1);  // 设置逻辑删除标记
+            row.put(BaseDO.DELETED, System.currentTimeMillis());  // 设置逻辑删除标记
             long result = anylineService.update(getTableName(defaultClazz), row, configs);
-            log.info("[{}] deleteById  ---> effect rows = {}, id = {}", defaultClazz, result, id);
+            log.info("deleteById  ---> class={}, effect rows = {}, id = {}", defaultClazz, result, id);
             return result;
         } catch (Exception e) {
-            log.error("根据ID删除实体失败: class={}, id={}", defaultClazz.getSimpleName(), id, e);
+            log.error("deleteById error, class={}, id={}", defaultClazz.getSimpleName(), id, e);
             throw new BizException(StatusCode.DB_DELETE_ERROR);
         }
     }
@@ -470,15 +481,18 @@ public class DataRepositoryNew<T extends BaseDO> {
     @Deprecated
     public long deleteAllById(Collection<Long> ids) {
         try {
+            if (ids == null || ids.isEmpty()) {
+                return 0;
+            }
             ConfigStore configs = new DefaultConfigStore();
             configs.and(Compare.IN, BaseDO.ID, ids);
             DataRow row = new DataRow();
-            row.put(BaseDO.DELETED, 1);  // 设置逻辑删除标记
+            row.put(BaseDO.DELETED, System.currentTimeMillis());  // 设置逻辑删除标记
             long result = anylineService.update(getTableName(defaultClazz), row, configs);
-            log.info("[{}] deleteAllById  ---> effect rows={}, ids={}", defaultClazz, result, ids);
+            log.info("deleteAllById  ---> class={}, effect rows={}, ids={}", defaultClazz, result, ids);
             return result;
         } catch (Exception e) {
-            log.error("根据ID列表删除实体失败: class={}, ids={}", defaultClazz.getSimpleName(), ids, e);
+            log.error("deleteAllById error, class={}, ids={}", defaultClazz.getSimpleName(), ids, e);
             throw new BizException(StatusCode.DB_DELETE_ERROR);
         }
     }
@@ -492,12 +506,12 @@ public class DataRepositoryNew<T extends BaseDO> {
         try {
             ConfigStore configs = new DefaultConfigStore();
             DataRow row = new DataRow();
-            row.put(BaseDO.DELETED, 1);  // 设置逻辑删除标记
+            row.put(BaseDO.DELETED, System.currentTimeMillis());  // 设置逻辑删除标记
             long result = anylineService.update(getTableName(defaultClazz), row, configs);
-            log.info("[{}] deleteAll  ---> effect rows={}", defaultClazz, result);
+            log.info("deleteAll  ---> class={}, effect rows={}", defaultClazz, result);
 
         } catch (Exception e) {
-            log.error("删除所有实体失败: class={}", defaultClazz.getSimpleName(), e);
+            log.error("deleteAll error, class={}", defaultClazz.getSimpleName(), e);
             throw new BizException(StatusCode.DB_DELETE_ERROR);
         }
     }

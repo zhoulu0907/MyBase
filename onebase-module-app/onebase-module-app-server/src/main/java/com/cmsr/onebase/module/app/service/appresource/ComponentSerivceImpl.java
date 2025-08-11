@@ -18,7 +18,7 @@ public class ComponentSerivceImpl implements ComponentSerivce {
 
     @Override
     public ComponentRespDTO getComponent(Long id) {
-        ComponentDO componentDO = appComponentDataRepository.findById(ComponentDO.class, id);
+        ComponentDO componentDO = appComponentDataRepository.findById(id);
         return BeanUtils.toBean(componentDO, ComponentRespDTO.class);
     }
 
@@ -31,14 +31,14 @@ public class ComponentSerivceImpl implements ComponentSerivce {
 
     @Override
     public Boolean deleteComponent(Long id) {
-        appComponentDataRepository.deleteById(ComponentDO.class, id);
+        appComponentDataRepository.deleteById(id);
         return true;
     }
 
     @Override
     public Boolean updateComponent(ComponentRespDTO componentRespDTO) {
         ComponentDO componentDO = BeanUtils.toBean(componentRespDTO, ComponentDO.class);
-        componentDO = appComponentDataRepository.update(componentDO);
+        appComponentDataRepository.update(componentDO);
         return true;
     }
 }

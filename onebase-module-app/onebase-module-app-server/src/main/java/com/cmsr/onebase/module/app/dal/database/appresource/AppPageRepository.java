@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.app.dal.database.appresource;
 
 import java.util.List;
 
+import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.springframework.stereotype.Repository;
@@ -14,7 +15,7 @@ import com.cmsr.onebase.module.app.dal.dataobject.appresource.PageDO;
  * @Date：2025/8/6 9:31
  */
 @Repository
-public class AppPageRepository extends DataRepository {
+public class AppPageRepository extends DataRepositoryNew<PageDO> {
 
     public AppPageRepository() {
         super(PageDO.class);
@@ -23,13 +24,13 @@ public class AppPageRepository extends DataRepository {
     public PageDO selectPageByCode(String pageCode) {
         ConfigStore configs = new DefaultConfigStore();
         configs.eq("page_code", pageCode);
-        return findOne(PageDO.class, configs);
+        return findOne(configs);
     }
 
     public void updatePageName(String pageCode, String pageName) {
         ConfigStore configs = new DefaultConfigStore();
         configs.eq( "page_code", pageCode);
-        PageDO pageDO = findOne(PageDO.class, configs);
+        PageDO pageDO = findOne(configs);
         pageDO.setPageName(pageName);
         update(pageDO);
 
@@ -40,13 +41,13 @@ public class AppPageRepository extends DataRepository {
     public void deletePageByCode(String pageCode) {
          ConfigStore configs = new DefaultConfigStore();
          configs.eq("page_code", pageCode);
-         deleteByConfig(PageDO.class, configs);
+         deleteByConfig(configs);
     }
 
     public void deletePageByCodes(List<String>  pageCodes) {
         ConfigStore configs = new DefaultConfigStore();
         configs.in("page_code", pageCodes);
-        deleteByConfig(PageDO.class, configs);
+        deleteByConfig(configs);
    }
 
 }

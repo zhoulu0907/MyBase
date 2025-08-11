@@ -31,14 +31,14 @@ public class MailAccountDataRepository extends DataRepositoryNew<MailAccountDO> 
      */
     public PageResult<MailAccountDO> findPage(MailAccountPageReqVO pageReqVO) {
         DefaultConfigStore configStore = new DefaultConfigStore();
-
+        
         if (StringUtils.isNotBlank(pageReqVO.getMail())) {
             configStore.and(Compare.EQUAL, "mail", pageReqVO.getMail());
         }
         if (StringUtils.isNotBlank(pageReqVO.getUsername())) {
             configStore.and(Compare.EQUAL, "username", pageReqVO.getUsername());
         }
-
+        
         return findPageWithConditions(configStore, pageReqVO.getPageNo(), pageReqVO.getPageSize());
     }
 }

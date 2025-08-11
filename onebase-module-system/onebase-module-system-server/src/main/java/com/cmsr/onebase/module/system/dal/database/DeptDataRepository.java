@@ -20,7 +20,7 @@ import java.util.List;
 @Repository
 public class DeptDataRepository extends DataRepositoryNew<DeptDO> {
     /**
-     * 构造方法，���定默认实体类
+     * 构造方法，指定默认实体类
      */
     public DeptDataRepository() {
         super(DeptDO.class);
