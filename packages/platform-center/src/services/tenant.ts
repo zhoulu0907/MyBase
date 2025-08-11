@@ -1,7 +1,7 @@
-import systemClient from './clients/system';
 import type { TenantInfo } from '../types/tenant';
+import { systemService } from './clients';
 
 // 按id查询租户信息
 export const getTenantInfo = (): Promise<TenantInfo> => {
-  return systemClient.get('/tenant/get');
+  return systemService.get('/tenant/get');
 };

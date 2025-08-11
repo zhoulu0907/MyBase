@@ -1,12 +1,11 @@
+import avatarSVG from '@/assets/images/avatar.svg';
 import LogoSVG from '@/assets/images/ob_logo.svg';
-import settingSVG from '@/assets/images/setting_icon.svg';
+import { useI18n } from '@/hooks/useI18n';
 import { UserPermissionManager } from '@/utils/permission';
-import { Avatar, Button, Dropdown, Layout, Menu, Tabs } from '@arco-design/web-react';
-import { IconPoweroff, IconUser } from '@arco-design/web-react/icon';
+import { Dropdown, Layout, Menu, Tabs } from '@arco-design/web-react';
 import { TokenManager } from '@onebase/common';
 import { getPermissionInfo } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styles from './header.module.less';
 
@@ -19,7 +18,7 @@ interface HeaderProps {
 const AppHeader: React.FC<HeaderProps> = ({ className }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { t } = useTranslation();
+  const { t } = useI18n();
 
   const [nickname, setNickname] = useState('U');
 
@@ -64,11 +63,19 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
   const userMenu = (
     <Menu>
       <Menu.Item key="profile">
-        <IconUser />
-        {t('header.profile')}
+        <div className={styles.userMenuInfo}>
+          <div>{UserPermissionManager.getUserPermissionInfo()?.user.email}</div>
+        </div>
       </Menu.Item>
-      <Menu.Item key="logout" onClick={handleLogout}>
-        <IconPoweroff />
+      <Menu.Item
+        key="setting"
+        onClick={() => {
+          navigate('/onebase/setting');
+        }}
+      >
+        {t('header.tenantManagement')}
+      </Menu.Item>
+      <Menu.Item key="logout" onClick={handleLogout} style={{ color: '#FF0000' }}>
         {t('header.logout')}
       </Menu.Item>
     </Menu>
@@ -106,23 +113,20 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
           size="large"
         >
           <Tabs.TabPane key="my-app" title="我的应用" />
-          <Tabs.TabPane key="app-center" title="应用中心" />
+          {/* <Tabs.TabPane key="app-center" title="应用中心" />
           <Tabs.TabPane key="mall-center" title="商超中心" />
-          <Tabs.TabPane key="help-center" title="帮助中心" />
+          <Tabs.TabPane key="help-center" title="帮助中心" /> */}
         </Tabs>
 
         <div className={styles.userInfo}>
-          <Button
-            shape="circle"
-            icon={<img src={settingSVG} alt="Setting" />}
-            onClick={() => navigate('/onebase/setting')}
-          />
+          {UserPermissionManager.getUserPermissionInfo()?.user?.nickname || '未登录'}
 
-          <Dropdown droplist={userMenu} position="bottom">
+          <Dropdown droplist={userMenu} position="bl">
             <div className={styles.userDropdown}>
-              <Avatar size={32} style={{ backgroundColor: '#4FAE7B' }}>
+              {/* <Avatar size={32} style={{ backgroundColor: '#4FAE7B' }}>
                 {nickname?.charAt(0) || 'U'}
-              </Avatar>
+              </Avatar> */}
+              <img src={avatarSVG} />
             </div>
           </Dropdown>
         </div>

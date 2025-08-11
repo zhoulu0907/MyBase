@@ -17,6 +17,7 @@
   "header": {
     "title": "ONE BASE",
     "profile": "Profile",
+    "tenantManagement": "Tenant Management",
     "logout": "Logout",
     "user": "User",
     "theme": "Theme",
@@ -120,18 +121,19 @@
   "myApp": {
     "createApp": "Create App"
   },
-  "formEditor": {
+  "editor": {
     "material": "Material",
     "metadata": "Metadata",
     "telegram": "Page Share",
     "baseComponent": "Base",
+    "preview": "Preview",
     "templateComponent": "Template",
     "customComponent": "Custom",
     "navigate": "Navigate",
     "layout": "Layout",
     "form": "Form",
     "list": "List",
-    "show": "展示组件",
+    "show": "Show",
     "empty": "No components",
     "attribute": "Attribute",
     "data": "Data",

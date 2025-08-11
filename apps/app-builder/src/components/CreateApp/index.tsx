@@ -1,35 +1,35 @@
-import { useState, useEffect } from 'react';
 import {
-  Form,
-  Input,
-  Grid,
   Button,
-  Select,
   Divider,
-  Popconfirm,
+  Form,
+  Grid,
+  Input,
   Message,
+  Popconfirm,
+  Select,
   type FormInstance
 } from '@arco-design/web-react';
+import { useEffect, useState } from 'react';
 
 import {
-  listApplicationTag,
   createApplicationTag,
-  type Application,
+  listApplicationTag,
+  type CreateApplicationTagReq,
   type ListTagReq,
-  type CreateApplicationTagReq
+  type Application
 } from '@onebase/app';
 import { sample } from 'lodash-es';
 
-import { IconPlus } from '@arco-design/web-react/icon';
-import tickSVG from '@/assets/images/tick_icon.svg';
+import appIconEditSVG from '@/assets/images/app_icon_edit.svg';
+import appTypeSVG from '@/assets/images/app_type_selected_icon.svg';
+import arrowSVG from '@/assets/images/arrow_icon.svg';
+import classicModeSVG from '@/assets/images/classic_mode_icon.svg';
 import databaseSVG from '@/assets/images/database_icon.svg';
 import formSVG from '@/assets/images/form_icon.svg';
-import arrowSVG from '@/assets/images/arrow_icon.svg';
-import appIconEditSVG from '@/assets/images/app_icon_edit.svg';
-import classicModeSVG from '@/assets/images/classic_mode_icon.svg';
-import appTypeSVG from '@/assets/images/app_type_selected_icon.svg';
 import themeSelectedSVG from '@/assets/images/theme_selected_icon.svg';
-import { appThemeColor, appIcon, appIconColor, type Options } from './const';
+import tickSVG from '@/assets/images/tick_icon.svg';
+import { IconPlus } from '@arco-design/web-react/icon';
+import { appIcon, appIconColor, appThemeColor, type Options } from './const';
 import styles from './index.module.less';
 
 const Option = Select.Option;

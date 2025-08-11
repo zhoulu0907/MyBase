@@ -1,8 +1,8 @@
+import type { EditorType } from '@/pages/Editor/utils/const';
+import { EDITOR_TYPES } from '@/pages/Editor/utils/const';
 import { Button, Tabs } from '@arco-design/web-react';
 import { IconBranch, IconLayout, IconLeft, IconRight, IconSend } from '@arco-design/web-react/icon';
 import { useEffect, useState } from 'react';
-import type { EditorType } from '../const';
-import { EDITOR_TYPES } from '../const';
 import MaterialContainer from './components/material';
 import MetadataContainer from './components/metadata';
 import TelegramContainer from './components/telegram';
@@ -20,13 +20,13 @@ export default function EditorPanel() {
   useEffect(() => {
     // 根据当前 URL 动态设置 activeTab
     const hash = window.location.hash;
-    if (hash.endsWith(EDITOR_TYPES.FORM_EDITOR)) {
+    if (hash.includes(EDITOR_TYPES.FORM_EDITOR)) {
       setActiveTab(EDITOR_TYPES.FORM_EDITOR);
-    } else if (hash.endsWith(EDITOR_TYPES.LIST_EDITOR)) {
+    } else if (hash.includes(EDITOR_TYPES.LIST_EDITOR)) {
       setActiveTab(EDITOR_TYPES.LIST_EDITOR);
-    } else if (hash.endsWith(EDITOR_TYPES.PAGE_SETTING)) {
+    } else if (hash.includes(EDITOR_TYPES.PAGE_SETTING)) {
       setActiveTab(EDITOR_TYPES.PAGE_SETTING);
-    } else if (hash.endsWith(EDITOR_TYPES.METADATA_MANAGE)) {
+    } else if (hash.includes(EDITOR_TYPES.METADATA_MANAGE)) {
       setActiveTab(EDITOR_TYPES.METADATA_MANAGE);
     }
   }, []);

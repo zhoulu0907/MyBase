@@ -10,37 +10,40 @@ import {
   Typography,
   Radio,
   Form,
-  Card,
   InputNumber,
   Switch
 } from '@arco-design/web-react';
 import { IconSearch } from '@arco-design/web-react/icon';
-import type { Tenant, TenantRecord } from '@/types/tenant';
-// import ConfirmDisableModal from './ConfirmDisableModal';
+import styles from './index.module.less'
+import { getPlatformTenantListApi, addPlatformTenantApi, updatePlatformTenantApi, getPlatformTenantAdminListApi, type PlatformTenantInfo, PlatformTenantStatus } from "@onebase/platform-center";
+import { formatTimestamp } from '@/utils/date';
 
 const { Text } = Typography;
 const { Option } = Select;
 const { useForm } = Form;
-
 // 模拟数据
-const mockData = [
+const mockData: PlatformTenantInfo[]  = [
   {
     id: 1,
-    tenantName: '默认用户',
-    tenantCode: 'ZH2025070001',
-    allocatedCount: 50,
-    admin: '石头',
+    name: '默认用户',
+    contactMobile: 'ZH2025070001',
+    accountCount: 50,
+    contactName: '石头',
     createTime: '2025-08-14 10:30',
-    status: 'enabled'
+    status: PlatformTenantStatus['已启用'],
+    expireTime: '2025-08-14 10:30',
+    packageId:1,
   },
   {
     id: 2,
-    tenantName: '测试环境验证用户',
-    tenantCode: 'ZH2025070002',
-    allocatedCount: 50,
-    admin: '石头',
+    name: '测试环境验证用户',
+    contactMobile: 'ZH2025070002',
+    accountCount: 50,
+    contactName: '石头',
     createTime: '2025-08-14 10:30',
-    status: 'disabled'
+    status: PlatformTenantStatus['已禁用'],
+    expireTime: '2025-08-14 10:30',
+    packageId:1,
   }
 ];
 
@@ -51,8 +54,8 @@ const mockAdmins = Array.from({ length: 3 }, (_, i) => ({
 }));
 
 const TenantManagement: React.FC = () => {
-  const [data, setData] = useState(mockData);
-  const [filteredData, setFilteredData] = useState(mockData);
+  const [data, setData] = useState<PlatformTenantInfo[]>([]);
+  const [tenantList, setTenantList] = useState<PlatformTenantInfo[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchParams, setSearchParams] = useState({
     status: 'all',
@@ -61,12 +64,29 @@ const TenantManagement: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [confirmDisableVisible, setConfirmDisableVisible] = useState(false);
   const [isNewTenant, setIsNewTenant] = useState(false);
-  const [currentTenant, setCurrentTenant] = useState<Tenant | null>(null);
+  const [currentTenant, setCurrentTenant] = useState<PlatformTenantInfo | null>(null);
   const [form] = useForm();
   const [totalLicense, setTotalLicense] = useState(100); // 总License数
   const [usedLicense, setUsedLicense] = useState(50); // 已用License数
   const [confirmText, setConfirmText] = useState('');
 
+  // 获取租户列表
+  const getPlatformTenantList = async () => {
+    try {
+      const resp = await getPlatformTenantListApi({ pageNum: 1, pageSize: 10 });
+      const adminListResp = await getPlatformTenantAdminListApi()
+      console.log('getPlatformTenantList resp.list:', resp.list);
+      setTenantList(resp.list)
+      console.log('adminListResp:', adminListResp);
+    } catch (error: any) {
+      console.error(error);
+      Message.error(error.message || '获取租户列表失败');
+    }
+  };
+
+  useEffect(() => {
+    getPlatformTenantList();
+  }, []);
   // 计算剩余License
   const remainingLicense = totalLicense - usedLicense;
 
@@ -86,22 +106,27 @@ const TenantManagement: React.FC = () => {
 
   // 筛选数据
   useEffect(() => {
-    let result = [...data];
+    let result = [...tenantList];
 
     // 状态筛选
     if (searchParams.status !== 'all') {
-      result = result.filter((item) => item.status === searchParams.status);
+      if (searchParams.status === 'enabled') {
+        result = result.filter(item => item.status === PlatformTenantStatus['已启用']);
+      } else if (searchParams.status === 'disabled') {
+        result = result.filter(item => item.status === PlatformTenantStatus['已禁用']);
+      }
     }
 
     // 关键词搜索
     if (searchParams.keyword) {
-      result = result.filter(
-        (item) => item.tenantName.includes(searchParams.keyword) || item.tenantCode.includes(searchParams.keyword)
+      result = result.filter(item => 
+        item.name.includes(searchParams.keyword) || 
+        item.name.includes(searchParams.keyword)
       );
     }
-
-    setFilteredData(result);
-  }, [searchParams, data]);
+    
+    setTenantList(result);
+  }, [searchParams, tenantList]);
 
   // 处理状态筛选
   const handleStatusChange = (status: string) => {
@@ -127,21 +152,21 @@ const TenantManagement: React.FC = () => {
     setIsNewTenant(true);
   };
 
-  // 打开编辑弹窗
-  const handleEdit = (record: TenantRecord) => {
-    const tenant: Tenant = {
+   // 打开编辑弹窗
+  const handleEdit = (record: PlatformTenantInfo) => {
+    const tenant: PlatformTenantInfo = {
       id: record.id.toString(),
-      name: record.tenantName,
-      code: record.tenantCode,
-      allocatedCount: record.allocatedCount,
-      admin: record.admin,
+      name: record.name,
+      contactMobile: record.contactMobile,
+      accountCount: record.accountCount,
+      contactName: record.contactName,
       createTime: record.createTime,
       status: record.status
     };
     setCurrentTenant(tenant);
     form.setFieldsValue({
       ...record,
-      status: record.status === 'enabled' ? 'enabled' : 'disabled'
+      status: record.status === PlatformTenantStatus['已启用'] ? 'enabled' : 'disabled'
     });
     setModalVisible(true);
     setIsNewTenant(false);
@@ -166,18 +191,11 @@ const TenantManagement: React.FC = () => {
         Message.error(`用户内已使用用户数量为${currentUsed}，分配的用户数量不能低于此数量`);
         return;
       }
-
-      // // 检查状态变更 (启用 -> 禁用)
-      // if (currentTenant &&
-      //     currentTenant.status === 'enabled' &&
-      //     values.status === 'disabled') {
-      //   setConfirmDisableVisible(true);
-      //   return;
-      // }
+      
       // 如果是从禁用状态切换到启用状态
       if (currentTenant && currentTenant.status === 'disabled' && values.status === 'enabled') {
         // 更新数据状态
-        setData(data.map((item) => (item.id === Number(currentTenant.id) ? { ...item, status: 'enabled' } : item)));
+        setTenantList(tenantList.map((item) => (item.id === Number(currentTenant.id) ? { ...item, status: 'enabled' } : item)));
         Message.success('已启用用户');
         setModalVisible(false);
         return;
@@ -185,12 +203,12 @@ const TenantManagement: React.FC = () => {
       // 这里应该是API调用
       if (currentTenant) {
         // 更新
-        setData(data.map((item) => (item.id === Number(currentTenant.id) ? { ...item, ...values } : item)));
+        setTenantList(tenantList.map((item) => (item.id === Number(currentTenant.id) ? { ...item, ...values } : item)));
         // Message.success('更新成功');
       } else {
         // 新增
         const newTenant = {
-          id: data.length + 1,
+          id: tenantList.length + 1,
           tenantCode: `ZH${new Date().getFullYear()}${(new Date().getMonth() + 1).toString().padStart(2, '0')}${Math.floor(
             Math.random() * 10000
           )
@@ -199,7 +217,7 @@ const TenantManagement: React.FC = () => {
           ...values,
           createTime: new Date().toISOString()
         };
-        setData([...data, newTenant]);
+        setTenantList([...tenantList, newTenant]);
         Message.success('创建成功');
       }
 
@@ -219,7 +237,7 @@ const TenantManagement: React.FC = () => {
     }
     const values = form.getFieldsValue();
     // 这里应该是API调用
-    setData(data.map((item) => (item.id === Number(currentTenant?.id) ? { ...item, ...values } : item)));
+    setTenantList(tenantList.map((item) => (item.id === Number(currentTenant?.id) ? { ...item, ...values } : item)));
     Message.success('已禁用用户');
     setConfirmText(''); // 确认禁用后清空输入框
     // 根据是否是新租户决定关闭哪些弹窗
@@ -241,34 +259,45 @@ const TenantManagement: React.FC = () => {
   };
   // 表格列定义
   const columns = [
-    {
+    { 
       title: '序号',
-      dataIndex: 'id',
-      width: 80
+      dataIndex: 'order',
+      key: 'order',
+      render: (text: any, record: any, index: number) => index + 1,
+      width: '5%',
+      fixed: 'left',
     },
+    // {
+    //   title: '序号',
+    //   dataIndex: 'id',
+    //   width: 80
+    // },
     {
       title: '用户名称',
-      dataIndex: 'tenantName',
-      sorter: (a: TenantRecord, b: TenantRecord) => a.tenantName.localeCompare(b.tenantName)
+      dataIndex: 'name',
+      sorter: (a: PlatformTenantInfo, b: PlatformTenantInfo) => a.name.localeCompare(b.name)
     },
     {
       title: '用户编码',
-      dataIndex: 'tenantCode',
-      sorter: (a: TenantRecord, b: TenantRecord) => a.tenantCode.localeCompare(b.tenantCode)
+      dataIndex: 'contactMobile',
+      sorter: (a: PlatformTenantInfo, b: PlatformTenantInfo) => a.contactMobile.localeCompare(b.contactMobile)
     },
     {
       title: '分配的人员数量',
-      dataIndex: 'allocatedCount',
-      sorter: (a: TenantRecord, b: TenantRecord) => a.allocatedCount - b.allocatedCount
+      dataIndex: 'accountCount',
+      sorter: (a: PlatformTenantInfo, b: PlatformTenantInfo) => a.accountCount - b.accountCount
     },
     {
       title: '管理员',
-      dataIndex: 'admin'
+      dataIndex: 'contactName'
     },
     {
       title: '创建时间',
       dataIndex: 'createTime',
-      sorter: (a: TenantRecord, b: TenantRecord) => new Date(a.createTime).getTime() - new Date(b.createTime).getTime()
+      sorter: (a: PlatformTenantInfo, b: PlatformTenantInfo) => new Date(a.createTime).getTime() - new Date(b.createTime).getTime(),
+      render: (text) => (
+        <div>{formatTimestamp(text)}</div>
+      )
     },
     {
       title: '状态',
@@ -281,7 +310,7 @@ const TenantManagement: React.FC = () => {
     },
     {
       title: '操作',
-      render: (_: TenantRecord, record: TenantRecord) => (
+      render: (_: PlatformTenantInfo, record: PlatformTenantInfo) => (
         <Button type="text" onClick={() => handleEdit(record)}>
           修改
         </Button>
@@ -290,18 +319,11 @@ const TenantManagement: React.FC = () => {
   ];
 
   return (
-    <div className="tenant-management">
-      <Card bordered={false}>
-        <div
-          className="toolbar"
-          style={{
-            marginBottom: 20,
-            display: 'flex',
-            justifyContent: 'space-between'
-          }}
-        >
-          <Button type="primary" status="success" onClick={handleCreate}>
-            新建
+    <div className={styles.tenant}>
+      {/* <Card bordered={false}> */}
+        <div className={styles.toolbar}>
+          <Button type="primary" status='success' onClick={handleCreate}>
+            + 新建
           </Button>
 
           <Space size="large">
@@ -318,8 +340,8 @@ const TenantManagement: React.FC = () => {
               style={{ width: 300 }}
               allowClear
               value={searchParams.keyword}
-              onChange={(value) => handleSearch(value)}
-              searchButton
+              onChange={value => handleSearch(value)}
+              // searchButton
               suffix={<IconSearch />}
             />
           </Space>
@@ -327,17 +349,18 @@ const TenantManagement: React.FC = () => {
 
         <Table
           rowKey="id"
+          border={false}
           columns={columns}
-          data={filteredData}
+          data={tenantList}
           loading={loading}
-          rowClassName={(record) => (record.status === 'enabled' ? 'enabled-row' : '')}
+          rowClassName={(record) => record.status === PlatformTenantStatus['已启用'] ? 'enabled-row' : ''}
           pagination={{
             pageSize: 10,
             showTotal: (total) => `共 ${total} 条`
           }}
         />
-      </Card>
-
+      {/* </Card> */}
+      
       {/* 新建/修改弹窗 */}
       <Modal
         title={currentTenant ? '修改用户' : '新建用户'}
@@ -397,9 +420,9 @@ const TenantManagement: React.FC = () => {
                   console.log('checked', checked);
                   setConfirmDisableVisible(true);
                 } else if (currentTenant && currentTenant.status === 'disabled') {
-                  setData(
-                    data.map((item) => (item.id === Number(currentTenant.id) ? { ...item, status: 'enabled' } : item))
-                  );
+                  setTenantList(tenantList.map(item => 
+                    item.id === Number(currentTenant.id) ? { ...item, status: PlatformTenantStatus['已启用'] } : item
+                  ));
                   Message.success('已启用用户');
                 }
               }}

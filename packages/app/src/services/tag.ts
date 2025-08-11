@@ -1,5 +1,5 @@
 import { type CreateApplicationTagReq, type ListTagReq } from '../types/tag';
-import appService from './clients/app';
+import { appService } from './clients';
 
 export const listApplicationTag = (params: ListTagReq) => {
   return appService.get('/tag/list', params);

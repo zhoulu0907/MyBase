@@ -8,7 +8,7 @@ import {
   type UpdateApplicationReq,
   type GetApplicationReq
 } from '../types/application';
-import appService from './clients/app';
+import { appService } from './clients';
 
 export const listApplication = (params: ListApplicationReq) => {
   return appService.get('/application/page', params);

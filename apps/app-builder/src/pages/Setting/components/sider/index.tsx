@@ -1,5 +1,14 @@
 import { Button, Layout, Menu } from '@arco-design/web-react';
-import { IconDesktop, IconMenuFold, IconMenuUnfold, IconUser } from '@arco-design/web-react/icon';
+import {
+  IconDesktop,
+  IconFile,
+  IconIdcard,
+  IconList,
+  IconMenuFold,
+  IconMenuUnfold,
+  IconUser,
+  IconUserAdd
+} from '@arco-design/web-react/icon';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import type { MenuItemType } from './menuData';
@@ -20,45 +29,51 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
   const navigate = useNavigate();
   const location = useLocation();
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
-
+  const iconStyle = { fontSize: '18px' };
   // 默认菜单项
   const defaultMenuItems = useMemo(
     () => [
       {
         key: 'platform-info',
         title: '平台信息',
-        icon: <IconDesktop />,
-        path: '/onebase/setting/platform-info'
+        icon: <IconDesktop style={iconStyle} />,
+        path: '/onebase/setting/platform-info',
+        permissionKey: 'SYSTEM:PLATFORM_INFO'
       },
       {
         key: 'user',
         title: '用户管理',
-        icon: <IconUser />,
-        path: '/onebase/setting/user'
+        icon: <IconUserAdd style={iconStyle} />,
+        path: '/onebase/setting/user',
+        permissionKey: 'SYSTEM:USER'
       },
       {
         key: 'role',
         title: '角色管理',
-        icon: <IconUser />,
-        path: '/onebase/setting/role'
+        icon: <IconUser style={iconStyle} />,
+        path: '/onebase/setting/role',
+        permissionKey: 'SYSTEM:ROLE'
       },
       {
         key: 'organization',
         title: '组织管理',
-        icon: <IconUser />,
-        path: '/onebase/setting/organization'
+        icon: <IconList style={iconStyle} />,
+        path: '/onebase/setting/organization',
+        permissionKey: 'SYSTEM:DEPT'
       },
       {
         key: 'system-dict',
         title: '数据字典管理',
-        icon: <IconUser />,
-        path: '/onebase/setting/system-dict'
+        icon: <IconFile style={iconStyle} />,
+        path: '/onebase/setting/system-dict',
+        permissionKey: 'SYSTEM:DICT'
       },
       {
         key: '租户信息',
         title: '租户信息',
-        icon: <IconUser />,
-        path: '/onebase/setting/tenant'
+        icon: <IconIdcard style={iconStyle} />,
+        path: '/onebase/setting/tenant',
+        permissionKey: 'SYSTEM:TENANT'
       }
     ],
     []
@@ -124,30 +139,39 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
 
   // 递归渲染菜单项
   const renderMenuItems = React.useCallback((items: MenuItemType[]): React.ReactNode => {
-    return items.map((item) => {
-      if (item.children && item.children.length > 0) {
-        return (
-          <SubMenu
-            key={item.key}
-            title={
-              <span>
-                {item.icon}
-                <span className={styles.menuTitle}>{item.title}</span>
-              </span>
-            }
-          >
-            {renderMenuItems(item.children)}
-          </SubMenu>
-        );
-      }
+    return items
+      .map((item) => {
+        // TODO 后端返回数据暂未更新，暂不开启权限控制
+        // const permissionKey = item.permissionKey;
+        // if (permissionKey && !hasMenu(permissionKey as any)) return null;
 
-      return (
-        <MenuItem key={item.key} disabled={item.disabled}>
-          {item.icon}
-          <span className={styles.menuTitle}>{item.title}</span>
-        </MenuItem>
-      );
-    });
+        if (item.children && item.children.length > 0) {
+          const childrenNodes = renderMenuItems(item.children) as React.ReactNode[];
+          const hasChildren = Array.isArray(childrenNodes) && childrenNodes.filter(Boolean).length > 0;
+          if (!hasChildren && !item.path) return null;
+          return (
+            <SubMenu
+              key={item.key}
+              title={
+                <span>
+                  {item.icon}
+                  <span className={styles.menuTitle}>{item.title}</span>
+                </span>
+              }
+            >
+              {childrenNodes}
+            </SubMenu>
+          );
+        }
+
+        return (
+          <MenuItem key={item.key} disabled={item.disabled} style={{ display: 'flex', alignItems: 'center' }}>
+            {item.icon}
+            <span className={styles.menuTitle}>{item.title}</span>
+          </MenuItem>
+        );
+      })
+      .filter(Boolean);
   }, []);
 
   return (

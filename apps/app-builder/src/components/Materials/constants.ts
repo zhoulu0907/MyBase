@@ -74,7 +74,7 @@ export const WIDTH_OPTIONS = {
   HALF: '1/2',
   TWO_THIRDS: '2/3',
   THREE_QUARTERS: '3/4',
-  FULL: 'formEditor.full'
+  FULL: 'editor.full'
 } as const;
 
 // 宽度值映射

@@ -1,6 +1,3 @@
 // 导出类型定义
-export * from './types';
-
-export { getBackendURL } from './services/base';
-
 export * from './services';
+export * from './types';

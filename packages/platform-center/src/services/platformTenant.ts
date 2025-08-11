@@ -1,13 +1,13 @@
-import systemClient from './clients/system';
+import { systemService } from './clients';
 
 // 获取平台租户列表信息
-export const getPlatformTenantListApi = (params: any) => systemClient.get('/system/tenant/page', { params });
+export const getPlatformTenantListApi = (params: any) => systemService.get('/tenant/page', { params });
 
 // 添加平台租户
-export const addPlatformTenantApi = (data: any) => systemClient.post('/system/tenant', data);
+export const addPlatformTenantApi = (data: any) => systemService.post('/tenant/create', data);
 
 // 修改平台租户
-export const updatePlatformTenantApi = (data: any) => systemClient.put('/system/tenant', data);
+export const updatePlatformTenantApi = (data: any) => systemService.post('/tenant/update', data);
 
-// 根据状态筛选平台租户 全部/启用/禁止
-export const getPlatformTenantListByStatusApi = (params: any) => systemClient.get('/system/tenant/status', { params });
+// 获取租户管理员列表
+export const getPlatformTenantAdminListApi = () => systemService.get('/user/platform-admin/list');

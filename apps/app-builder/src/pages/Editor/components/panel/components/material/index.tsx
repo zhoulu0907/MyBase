@@ -1,10 +1,10 @@
 import MaterialCard from '@/components/MaterialCard';
 import allTemplate from '@/components/Materials/template';
+import { useI18n } from '@/hooks/useI18n';
+import { COMPONENT_GROUP_NAME, EDITOR_TYPES, type EditorType } from '@/pages/Editor/utils/const';
 import { Collapse, Tabs } from '@arco-design/web-react';
 import React, { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { ReactSortable } from 'react-sortablejs';
-import { COMPONENT_GROUP_NAME, EDITOR_TYPES, type EditorType } from '../../../const';
 import styles from './index.module.less';
 
 // 定义类型
@@ -16,13 +16,13 @@ interface MaterialContainerProps {
 }
 
 const MaterialContainer: React.FC<MaterialContainerProps> = ({ activeTab }) => {
-  const { t } = useTranslation();
+  const { t } = useI18n();
   const [activeComponentTab, setActiveComponentTab] = useState('base-component');
 
   const [baseItems, setBaseItems] = useState<{ key: CategoryKey; items: any[] }[]>([]);
 
   // 按 category 分类，分成 3 个 items
-  const baseNavigateItems = allTemplate.base.find((cat) => cat.category === 'navigate')?.items || [];
+  //   const baseNavigateItems = allTemplate.base.find((cat) => cat.category === 'navigate')?.items || [];
   const baseLayoutItems = allTemplate.base.find((cat) => cat.category === 'layout')?.items || [];
   const baseFormItems = allTemplate.base.find((cat) => cat.category === 'form')?.items || [];
   const baseListItems = allTemplate.base.find((cat) => cat.category === 'list')?.items || [];
@@ -30,11 +30,11 @@ const MaterialContainer: React.FC<MaterialContainerProps> = ({ activeTab }) => {
 
   // category 对应的国际化 key
   const categoryI18nMap: Record<CategoryKey, string> = {
-    navigate: t('formEditor.navigate', '导航'),
-    layout: t('formEditor.layout', '布局'),
-    form: t('formEditor.form', '表单组件'),
-    list: t('formEditor.list', '列表组件'),
-    show: t('formEditor.show', '展示组件')
+    navigate: t('editor.navigate', '导航'),
+    layout: t('editor.layout', '布局'),
+    form: t('editor.form', '表单组件'),
+    list: t('editor.list', '列表组件'),
+    show: t('editor.show', '展示组件')
   };
 
   const baseCategories: { key: CategoryKey; items: any[] }[] = [
@@ -64,7 +64,7 @@ const MaterialContainer: React.FC<MaterialContainerProps> = ({ activeTab }) => {
 
   return (
     <div>
-      <div className={styles.rightHeader}>{t('formEditor.material')}</div>
+      <div className={styles.rightHeader}>{t('editor.material')}</div>
 
       <div className={styles.rightBody}>
         <div className={styles.componentTabs}>
@@ -78,15 +78,15 @@ const MaterialContainer: React.FC<MaterialContainerProps> = ({ activeTab }) => {
           >
             <Tabs.TabPane
               key="base-component"
-              title={<div className={styles.componentTabTitle}>{t('formEditor.baseComponent')}</div>}
+              title={<div className={styles.componentTabTitle}>{t('editor.baseComponent')}</div>}
             />
             <Tabs.TabPane
               key="template-component"
-              title={<div className={styles.componentTabTitle}>{t('formEditor.templateComponent')}</div>}
+              title={<div className={styles.componentTabTitle}>{t('editor.templateComponent')}</div>}
             />
             <Tabs.TabPane
               key="custom-component"
-              title={<div className={styles.componentTabTitle}>{t('formEditor.customComponent')}</div>}
+              title={<div className={styles.componentTabTitle}>{t('editor.customComponent')}</div>}
             />
           </Tabs>
         </div>
@@ -111,7 +111,7 @@ const MaterialContainer: React.FC<MaterialContainerProps> = ({ activeTab }) => {
                   >
                     <div>
                       {cat.items.length === 0 ? (
-                        <div className={styles.emptyTip}>{t('formEditor.empty')}</div>
+                        <div className={styles.emptyTip}>{t('editor.empty')}</div>
                       ) : (
                         <ReactSortable
                           list={baseItems.find((c) => c.key === cat.key)?.items || []}

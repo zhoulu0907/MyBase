@@ -17,6 +17,7 @@
   "header": {
     "title": "ONE BASE",
     "profile": "个人资料",
+    "tenantManagement": "租户管理",
     "logout": "退出登录",
     "user": "用户",
     "theme": "主题",
@@ -120,11 +121,12 @@
   "myApp": {
     "createApp": "创建应用"
   },
-  "formEditor": {
+  "editor": {
     "material": "组件",
     "metadata": "元数据项",
     "telegram": "页面分享",
     "baseComponent": "基础",
+    "preview": "预览",
     "templateComponent": "模板",
     "customComponent": "自定义",
     "navigate": "导航",
