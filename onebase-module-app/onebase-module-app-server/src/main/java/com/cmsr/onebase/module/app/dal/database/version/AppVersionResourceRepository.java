@@ -25,11 +25,14 @@ public class AppVersionResourceRepository extends DataRepositoryNew<VersionResou
         deleteByConfig(configs);
     }
 
-    public List<VersionResourceDO> findByApplicationIdAndVersionId(Long applicationId, Long versionId) {
+
+
+    public VersionResourceDO findByApplicationIdAndVersionIdAndResType(Long applicationId, Long versionId, String resType) {
         ConfigStore configs = new DefaultConfigStore();
         configs.eq("application_id", applicationId);
         configs.eq("version_id", versionId);
-        return findAllByConfig(configs);
+        configs.eq("res_type", resType);
+        return findOne(configs);
     }
 
     public void deleteByVersionId(Long versionId) {
@@ -37,4 +40,7 @@ public class AppVersionResourceRepository extends DataRepositoryNew<VersionResou
         configs.eq("version_id", versionId);
         deleteByConfig(configs);
     }
+
+
+
 }

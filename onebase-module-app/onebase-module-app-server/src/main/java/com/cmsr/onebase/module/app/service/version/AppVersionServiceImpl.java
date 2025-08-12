@@ -1,44 +1,39 @@
 package com.cmsr.onebase.module.app.service.version;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
-
+import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.app.controller.admin.app.vo.ApplicationRespVO;
+import com.cmsr.onebase.framework.common.util.json.JsonUtils;
+import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.framework.data.base.BaseDO;
+import com.cmsr.onebase.module.app.controller.admin.version.vo.VersionCreateReqVO;
 import com.cmsr.onebase.module.app.controller.admin.version.vo.VersionPageReqVo;
 import com.cmsr.onebase.module.app.controller.admin.version.vo.VersionPageRespVO;
-import com.cmsr.onebase.module.app.enums.app.ApplicationStatusEnum;
+import com.cmsr.onebase.module.app.dal.database.app.AppApplicationRepository;
+import com.cmsr.onebase.module.app.dal.database.menu.AppMenuRepository;
+import com.cmsr.onebase.module.app.dal.database.version.AppVersionRepository;
+import com.cmsr.onebase.module.app.dal.database.version.AppVersionResourceRepository;
+import com.cmsr.onebase.module.app.dal.dataobject.app.ApplicationDO;
+import com.cmsr.onebase.module.app.dal.dataobject.menu.MenuDO;
+import com.cmsr.onebase.module.app.dal.dataobject.version.VersionDO;
+import com.cmsr.onebase.module.app.dal.dataobject.version.VersionResourceDO;
+import com.cmsr.onebase.module.app.enums.app.AppErrorCodeConstants;
+import com.cmsr.onebase.module.app.enums.version.ResTypeEnum;
+import com.cmsr.onebase.module.app.service.AppCommonService;
+import com.cmsr.onebase.module.app.service.app.AppApplicationService;
+import com.cmsr.onebase.module.app.util.VersionUtils;
+import jakarta.annotation.Resource;
+import lombok.Setter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
-import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
-import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.module.app.controller.admin.version.vo.VersionCreateReqVO;
-import com.cmsr.onebase.module.app.dal.database.app.AppApplicationRepository;
-import com.cmsr.onebase.module.app.dal.database.app.AppResourceRepository;
-import com.cmsr.onebase.module.app.dal.database.menu.AppMenuRepository;
-import com.cmsr.onebase.module.app.dal.database.version.AppVersionMenuRepository;
-import com.cmsr.onebase.module.app.dal.database.version.AppVersionRepository;
-import com.cmsr.onebase.module.app.dal.database.version.AppVersionResourceRepository;
-import com.cmsr.onebase.module.app.dal.dataobject.app.ApplicationDO;
-import com.cmsr.onebase.module.app.dal.dataobject.app.ResourceDO;
-import com.cmsr.onebase.module.app.dal.dataobject.menu.MenuDO;
-import com.cmsr.onebase.module.app.dal.dataobject.version.VersionDO;
-import com.cmsr.onebase.module.app.dal.dataobject.version.VersionMenuDO;
-import com.cmsr.onebase.module.app.dal.dataobject.version.VersionResourceDO;
-import com.cmsr.onebase.module.app.enums.app.AppErrorCodeConstants;
-import com.cmsr.onebase.module.app.service.AppCommonService;
-import com.cmsr.onebase.module.app.service.app.AppApplicationService;
-import com.cmsr.onebase.module.app.util.VersionUtils;
-
-import jakarta.annotation.Resource;
-import lombok.Setter;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 
 /**
  * @Author：huangjie
- *                  @Date：2025/7/24 11:04
+ * @Date：2025/7/24 11:04
  */
 @Setter
 @Service
@@ -49,9 +44,6 @@ public class AppVersionServiceImpl implements AppVersionService {
     private AppVersionRepository versionRepository;
 
     @Resource
-    private AppVersionMenuRepository versionMenuRepository;
-
-    @Resource
     private AppVersionResourceRepository versionResourceRepository;
 
     @Resource
@@ -59,9 +51,6 @@ public class AppVersionServiceImpl implements AppVersionService {
 
     @Resource
     private AppMenuRepository menuRepository;
-
-    @Resource
-    private AppResourceRepository resourceRepository;
 
     @Resource
     private AppCommonService appCommonService;
@@ -89,40 +78,30 @@ public class AppVersionServiceImpl implements AppVersionService {
         ApplicationDO applicationDO = appCommonService.validateApplicationExist(createReqVO.getApplicationId());
         // 先备份老的相关数据
         // 创建新版本
-        final VersionDO applicationVersionDO = new VersionDO();
-        applicationVersionDO.setApplicationId(applicationDO.getId());
-        applicationVersionDO.setVersionName(createReqVO.getVersionName());
-        applicationVersionDO.setVersionNumber(createReqVO.getVersionNumber());
-        applicationVersionDO.setVersionDescription(createReqVO.getVersionDescription());
-        applicationVersionDO.setVersionURL(UUID.randomUUID().toString().replace("-", ""));
-        applicationVersionDO.setOperationType(createReqVO.getOperationType());
-        applicationVersionDO.setEnvironment(createReqVO.getEnvironment());
-        versionRepository.insert(applicationVersionDO);
+        final VersionDO versionDO = new VersionDO();
+        versionDO.setApplicationId(applicationDO.getId());
+        versionDO.setVersionName(createReqVO.getVersionName());
+        versionDO.setVersionNumber(createReqVO.getVersionNumber());
+        versionDO.setVersionDescription(createReqVO.getVersionDescription());
+        versionDO.setVersionURL(UUID.randomUUID().toString().replace("-", ""));
+        versionDO.setOperationType(createReqVO.getOperationType());
+        versionDO.setEnvironment(createReqVO.getEnvironment());
+        versionRepository.insert(versionDO);
+        // 备份 Menu
+        backupMenu(applicationDO.getId(), versionDO.getId());
+        // 备份 pageset
 
-        if (Objects.equals(applicationVersionDO.getOperationType(), VersionUtils.OPERATION_TYPE_PUBLISH)){
-            // 更新版本到主表
-            appApplicationService.updateApplicationVersion(applicationDO.getId(),
-                    applicationVersionDO.getVersionNumber(),
-                    applicationVersionDO.getVersionURL()
-            );
-        }
 
-        // TODO(huangjie)待完善 ：）
+    }
 
-        // 备份菜单
-        List<MenuDO> menuDOS = menuRepository.findByApplicationId(applicationDO.getId());
-        List<VersionMenuDO> versionMenuDOS = BeanUtils.toBean(menuDOS, VersionMenuDO.class,
-                versionMenuDO -> versionMenuDO.setVersionId(applicationVersionDO.getId()));
-        versionMenuRepository.insertBatch(versionMenuDOS);
-        // 备份资源
-        List<ResourceDO> resourceDOS = resourceRepository.findByApplicationId(applicationDO.getId());
-        List<VersionResourceDO> versionResourceDOS = BeanUtils.toBean(resourceDOS, VersionResourceDO.class,
-                versionResourceDO -> versionResourceDO.setVersionId(applicationVersionDO.getId()));
-        versionResourceRepository.insertBatch(versionResourceDOS);
-        // 主表版本升级
-        String newVersionNumber = VersionUtils.increaseVersionNumber(createReqVO.getVersionNumber());
-        applicationDO.setVersionNumber(newVersionNumber);
-        applicationRepository.update(applicationDO);
+    private void backupMenu(Long applicationId, Long versionId) {
+        List<MenuDO> menuDOS = menuRepository.findByApplicationId(applicationId);
+        VersionResourceDO versionResourceDO = new VersionResourceDO();
+        versionResourceDO.setApplicationId(applicationId);
+        versionResourceDO.setVersionId(versionId);
+        versionResourceDO.setResType(ResTypeEnum.MENU.getValue());
+        versionResourceDO.setResData(JsonUtils.toJsonString(menuDOS));
+        versionResourceRepository.insert(versionResourceDO);
     }
 
     @Transactional
@@ -136,30 +115,38 @@ public class AppVersionServiceImpl implements AppVersionService {
         applicationDO.setVersionURL(applicationVersionDO.getVersionURL());
         applicationDO.setVersionNumber(applicationVersionDO.getVersionNumber());
         applicationRepository.update(applicationDO);
+        // 恢复菜单
+        restoreMenu(applicationId, versionId);
+    }
 
-        // TODO(huangjie)待完善 ：）
-
+    private void restoreMenu(Long applicationId, Long versionId) {
         // 删除相关数据
         menuRepository.deleteByApplicationId(applicationId);
-        resourceRepository.deleteByApplicationId(applicationId);
         // 恢复菜单
-        List<VersionMenuDO> versionMenuDOS = versionMenuRepository.findByApplicationIdAndVersionId(applicationId,
-                versionId);
-        List<MenuDO> menuDOS = BeanUtils.toBean(versionMenuDOS, MenuDO.class,
-                menuDO -> menuDO.setId(null));
+        VersionResourceDO resourceDOS = versionResourceRepository
+                .findByApplicationIdAndVersionIdAndResType(applicationId, versionId, ResTypeEnum.MENU.getValue());
+        List<MenuDO> menuDOS = JsonUtils.parseArray(resourceDOS.getResData(), MenuDO.class);
+        prepareForBackup(menuDOS);
         menuRepository.insertBatch(menuDOS);
-        // 恢复资源
-        List<VersionResourceDO> versionResourceDOS = versionResourceRepository
-                .findByApplicationIdAndVersionId(applicationId, versionId);
-        List<ResourceDO> resourceDOS = BeanUtils.toBean(versionResourceDOS, ResourceDO.class,
-                resourceDO -> resourceDO.setId(null));
-        resourceRepository.insertBatch(resourceDOS);
+    }
+
+    private void prepareForBackup(List<? extends BaseDO> list) {
+        list.forEach(v -> {
+            //TODO clean方法待完善
+            v.clean();
+            v.setId(null);
+            v.setUpdater(null);
+            v.setUpdateTime(null);
+            v.setCreator(null);
+            v.setCreateTime(null);
+            v.setDeleted(null);
+            v.setLockVersion(null);
+        });
     }
 
     @Override
     public void deleteApplicationVersion(Long versionId) {
         versionRepository.deleteById(versionId);
-        versionMenuRepository.deleteByVersionId(versionId);
         versionResourceRepository.deleteByVersionId(versionId);
     }
 

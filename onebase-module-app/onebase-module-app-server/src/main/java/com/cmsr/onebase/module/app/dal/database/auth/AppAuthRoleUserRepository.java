@@ -1,9 +1,9 @@
 package com.cmsr.onebase.module.app.dal.database.auth;
 
 import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
-import com.cmsr.onebase.module.app.controller.admin.auth.vo.AuthRoleAddMemberReqVO;
-import com.cmsr.onebase.module.app.controller.admin.auth.vo.AuthRoleDeleteMemberReqVO;
-import com.cmsr.onebase.module.app.dal.dataobject.auth.AuthUserRoleDO;
+import com.cmsr.onebase.module.app.controller.admin.auth.vo.AuthRoleAddUserReqVO;
+import com.cmsr.onebase.module.app.controller.admin.auth.vo.AuthRoleDeleteUserReqVO;
+import com.cmsr.onebase.module.app.dal.dataobject.auth.AuthRoleUserDO;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.springframework.stereotype.Repository;
@@ -15,28 +15,28 @@ import org.springframework.stereotype.Repository;
  * @date 2025-08-05
  */
 @Repository
-public class AppAuthUserRoleRepository extends DataRepositoryNew<AuthUserRoleDO> {
+public class AppAuthRoleUserRepository extends DataRepositoryNew<AuthRoleUserDO> {
 
-    public AppAuthUserRoleRepository() {
-        super(AuthUserRoleDO.class);
+    public AppAuthRoleUserRepository() {
+        super(AuthRoleUserDO.class);
     }
 
-    public void saveUserRole(AuthRoleAddMemberReqVO reqVO) {
+    public void addRoleUser(AuthRoleAddUserReqVO reqVO) {
         for (Long userId : reqVO.getUserIds()) {
             ConfigStore configStore = new DefaultConfigStore();
             configStore.eq("role_id", reqVO.getRoleId());
             configStore.eq("user_id", userId);
             if (this.countByConfig(configStore) == 0) {
-                AuthUserRoleDO authUserRoleDO = new AuthUserRoleDO();
-                authUserRoleDO.setRoleId(reqVO.getRoleId());
-                authUserRoleDO.setUserId(userId);
-                this.insert(authUserRoleDO);
+                AuthRoleUserDO authRoleUserDO = new AuthRoleUserDO();
+                authRoleUserDO.setRoleId(reqVO.getRoleId());
+                authRoleUserDO.setUserId(userId);
+                this.insert(authRoleUserDO);
             }
         }
 
     }
 
-    public void deleteUserRole(AuthRoleDeleteMemberReqVO reqVO) {
+    public void deleteRoleUser(AuthRoleDeleteUserReqVO reqVO) {
         ConfigStore configStore = new DefaultConfigStore();
         configStore.eq("role_id", reqVO.getRoleId());
         configStore.in("user_id", reqVO.getUserIds());

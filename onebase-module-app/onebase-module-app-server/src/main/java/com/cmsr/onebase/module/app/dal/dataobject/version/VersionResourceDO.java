@@ -19,11 +19,8 @@ public class VersionResourceDO extends TenantBaseDO {
     @Column(name = "version_id", nullable = false, columnDefinition = "BIGINT NOT NULL", comment = "版本ID")
     private Long versionId;
 
-    @Column(name = "protocol_type", nullable = false, length = 64, columnDefinition = "VARCHAR(64) NOT NULL", comment = "协议类型")
-    private String protocolType;
-
-    @Column(name = "res_key", nullable = false, length = 64, columnDefinition = "VARCHAR(64) NOT NULL", comment = "资源key")
-    private String resKey;
+    @Column(name = "res_type", nullable = false, length = 64, columnDefinition = "VARCHAR(64) NOT NULL", comment = "协议类型")
+    private String resType;
 
     @Column(name = "res_data", nullable = false, columnDefinition = "TEXT NOT NULL", comment = "资源数据")
     private String resData;

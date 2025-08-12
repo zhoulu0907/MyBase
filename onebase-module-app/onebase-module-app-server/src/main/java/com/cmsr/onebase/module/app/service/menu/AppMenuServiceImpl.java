@@ -16,6 +16,7 @@ import com.cmsr.onebase.module.app.util.MenuUtils;
 import jakarta.annotation.Resource;
 import lombok.Setter;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -47,7 +48,7 @@ public class AppMenuServiceImpl implements AppMenuService {
         List<MenuListRespVO> menuListRespList = new ArrayList<>();
         // 把第一层的菜单添加到列表中
         List<MenuListRespVO> levelOneMenus = menuDOS.stream()
-                .filter(v -> Objects.isNull(v.getParentCode()))
+                .filter(v -> MenuUtils.ROOT_MENU_CODE.equalsIgnoreCase(v.getParentCode()))
                 .map(v -> BeanUtils.toBean(v, MenuListRespVO.class))
                 .toList();
         menuListRespList.addAll(levelOneMenus);
@@ -81,7 +82,7 @@ public class AppMenuServiceImpl implements AppMenuService {
         // 创建菜单
         MenuDO menuDO = new MenuDO();
         menuDO.setApplicationId(createReqVO.getApplicationId());
-        menuDO.setParentCode(parseParentMenuCode(createReqVO));
+        menuDO.setParentCode(validateParentMenuCode(createReqVO.getParentCode()));
         menuDO.setMenuCode(MenuUtils.generateMenuCode());
         menuDO.setMenuType(createReqVO.getMenuType());
         menuDO.setMenuName(createReqVO.getMenuName());
@@ -89,7 +90,6 @@ public class AppMenuServiceImpl implements AppMenuService {
         menuDO.setMenuSort(generateMenuSort(createReqVO.getApplicationId()));
         menuDO.setVisible(MenuVisibleEnum.YES.getValue());
         appMenuRepository.insert(menuDO);
-
         // 创建页面集
         CreatePageSetDTO createPageSetDTO = new CreatePageSetDTO();
         createPageSetDTO.setMenuCode(menuDO.getMenuCode());
@@ -105,18 +105,18 @@ public class AppMenuServiceImpl implements AppMenuService {
         return appMenuRepository.countByApplicationId(applicationId) + 1;
     }
 
-    private String parseParentMenuCode(MenuCreateReqVO createReqVO) {
-        if (createReqVO.getParentCode() == null || createReqVO.getParentCode() == "") {
-            return null;
+    private String validateParentMenuCode(String parentCode) {
+        if (StringUtils.isBlank(parentCode)) {
+            return MenuUtils.ROOT_MENU_CODE;
         }
-        MenuDO parentMenu = appCommonService.validateMenuExist(createReqVO.getParentCode());
+        MenuDO parentMenu = appCommonService.validateMenuExist(parentCode);
         if (parentMenu == null) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_MENU_NOT_EXIST);
         }
-        if (!MenuTypeEnum.isGroup(parentMenu.getMenuType())) {
+        if (MenuTypeEnum.isPage(parentMenu.getMenuType())) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_MENU_TYPE_ERROR);
         }
-        return createReqVO.getParentCode();
+        return parentCode;
     }
 
     @Override
@@ -165,11 +165,9 @@ public class AppMenuServiceImpl implements AppMenuService {
         if (menus == null || menus.isEmpty()) {
             return;
         }
-
         for (MenuOrderUpdateReqVO.MenuOrderNode menu : menus) {
             // 按照深度优先遍历的顺序分配序号
             menuSortMap.put(menu.getId(), sortOrder.getAndIncrement());
-
             // 递归处理子菜单
             if (menu.getChildren() != null && !menu.getChildren().isEmpty()) {
                 recursiveBuildMenuSortMap(menu.getChildren(), menuSortMap, sortOrder);
@@ -195,11 +193,7 @@ public class AppMenuServiceImpl implements AppMenuService {
         // 复制菜单
         menuDO.setId(null);
         menuDO.setMenuName(copyReqVO.getMenuName());
-        if (copyReqVO.getParentCode() == null || copyReqVO.getParentCode() == "") {
-            menuDO.setParentCode(null);
-        } else {
-            menuDO.setParentCode(copyReqVO.getParentCode());
-        }
+        menuDO.setParentCode(validateParentMenuCode(copyReqVO.getParentCode()));
         menuDO.setMenuCode(MenuUtils.generateMenuCode());
         appMenuRepository.insert(menuDO);
         // 复制页面

@@ -52,6 +52,10 @@ public enum MenuTypeEnum {
         throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_MENU_TYPE_ERROR);
     }
 
+    public static boolean isPage(Integer menuType) {
+        return PAGE.getValue().equals(menuType);
+    }
+
     public static boolean isGroup(Integer menuType) {
         return GROUP.getValue().equals(menuType);
     }
