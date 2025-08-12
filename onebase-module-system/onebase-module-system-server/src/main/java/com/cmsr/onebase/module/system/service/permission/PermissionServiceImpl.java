@@ -7,6 +7,8 @@ import cn.hutool.extra.spring.SpringUtil;
 import com.cmsr.onebase.framework.common.biz.system.permission.dto.DeptDataPermissionRespDTO;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
+import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.module.system.controller.admin.permission.vo.permission.PermissionMenuRespVO;
 import com.cmsr.onebase.module.system.dal.database.RoleMenuDataRepository;
 import com.cmsr.onebase.module.system.dal.database.UserRoleDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.MenuDO;
@@ -325,7 +327,6 @@ public class PermissionServiceImpl implements PermissionService {
 
     @Override
     public long addRoleUsers(Long roleId, Set<Long> userIds) {
-        // 参数校验
         if (CollUtil.isEmpty(userIds)) {
             return 0;
         }
@@ -340,7 +341,7 @@ public class PermissionServiceImpl implements PermissionService {
                 })
                 .collect(Collectors.toList());
 
-        List<UserRoleDO> insertedList = userRoleDataRepository.insertBatch(userRoleList);
+        List<UserRoleDO> insertedList = userRoleDataRepository.upsertBatch(userRoleList);
         return CollUtil.isEmpty(insertedList) ? 0 : insertedList.size();
     }
 
@@ -358,7 +359,6 @@ public class PermissionServiceImpl implements PermissionService {
 
     @Override
     public long addRoleMenus(Long roleId, Set<Long> menuIds) {
-        // 参数校验
         if (CollUtil.isEmpty(menuIds)) {
             return 0;
         }
@@ -373,7 +373,7 @@ public class PermissionServiceImpl implements PermissionService {
                 })
                 .collect(Collectors.toList());
 
-        List<RoleMenuDO> insertedList = roleMenuDataRepository.insertBatch(roleMenuList);
+        List<RoleMenuDO> insertedList = roleMenuDataRepository.upsertBatch(roleMenuList);
         return CollUtil.isEmpty(insertedList) ? 0 : insertedList.size();
     }
 
@@ -398,4 +398,20 @@ public class PermissionServiceImpl implements PermissionService {
         return SpringUtil.getBean(getClass());
     }
 
+    /**
+     * 根据菜单ID集合获取菜单详细信息列表
+     *
+     * @param menuIds 菜单ID集合
+     * @return 菜单详细信息列表
+     */
+    @Override
+    public List<PermissionMenuRespVO> getMenuDetailListByIds(Set<Long> menuIds) {
+        if (CollUtil.isEmpty(menuIds)) {
+            return Collections.emptyList();
+        }
+        // 查询菜单实体
+        List<MenuDO> menuDOList = menuService.getMenuList(menuIds);
+        // 转换为VO
+        return BeanUtils.toBean(menuDOList, PermissionMenuRespVO.class);
+    }
 }
