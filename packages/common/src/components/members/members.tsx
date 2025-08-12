@@ -1,6 +1,6 @@
+import { Button, Input, List, Modal, Space, Tree } from '@arco-design/web-react';
+import { IconBranch, IconClose, IconUser } from '@arco-design/web-react/icon';
 import { useState } from 'react';
-import { Button, Modal, Input, Tree, Space, List } from '@arco-design/web-react';
-import { IconUser, IconClose, IconBranch } from '@arco-design/web-react/icon';
 
 interface IProps {
   visible: boolean;
@@ -113,23 +113,27 @@ const SelectContactModal = () => {
   };
 
   return (
-    <div style={{
-      height: 500,
-      border: '1px solid #e5e6eb',
-      borderRadius: 4,
-      boxSizing: 'border-box',
-      padding: 12,
-      display: 'flex',
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      position: 'relative',
-    }}>
-      <div style={{
-        flex: 1.1,
+    <div
+      style={{
+        height: 500,
+        border: '1px solid #e5e6eb',
+        borderRadius: 4,
+        boxSizing: 'border-box',
+        padding: 12,
         display: 'flex',
-        flexDirection: 'column',
-        marginRight: 24,
-      }}>
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        position: 'relative'
+      }}
+    >
+      <div
+        style={{
+          flex: 1.1,
+          display: 'flex',
+          flexDirection: 'column',
+          marginRight: 24
+        }}
+      >
         <Input placeholder="搜索用户、群组、部门或用户组" />
 
         <Tree
@@ -138,20 +142,22 @@ const SelectContactModal = () => {
           selectable
           selectedKeys={[]}
           onSelect={handleTreeSelect}
-          icon={(node: any) => node.icon}
+          icons={(node: any) => node.icon}
           style={{
             height: '100%',
             overflowY: 'auto',
-            marginTop: 15,
+            marginTop: 15
           }}
         />
       </div>
 
-      <div style={{
-        display: 'flex',
-        flexDirection: 'column',
-        flex: 0.9,
-      }}>
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          flex: 0.9
+        }}
+      >
         已选择：{selectedKeys.length}个<br />
         <br />
         <List
