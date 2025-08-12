@@ -44,6 +44,7 @@ export interface EdgeData {
   source: { cell: string; port: string }; // 源节点ID
   target: { cell: string; port: string }; // 目标节点ID
   label?: string; // 关系标签
+  relationshipId?: string;
 }
 
 // 全部节点数据
@@ -64,6 +65,7 @@ export interface EntityERProps {
   onNodeAddMasterDetail?: (id: string) => void;
   onNodeAddRule?: (id: string) => void;
   onFieldClick?: (id: string) => void;
+  onEdgeEdit?: (data: EdgeData) => void;
   onlyUpdateNode?: boolean;
   updateEntityPosition?: (data: EntityNode, x: number, y: number) => void;
 }

@@ -59,7 +59,6 @@ const EditFieldDrawer: React.FC<EditFieldDrawerProps> = ({ visible, setVisible, 
       }
     } catch (error) {
       console.error('获取字段详情失败:', error);
-      Message.error('获取字段详情失败');
     } finally {
       setLoading(false);
     }
@@ -127,7 +126,7 @@ const EditFieldDrawer: React.FC<EditFieldDrawerProps> = ({ visible, setVisible, 
 
   return (
     <Drawer
-      title="编辑字段"
+      title="数据字段配置"
       visible={visible}
       onCancel={() => setVisible(false)}
       width={500}
@@ -152,14 +151,14 @@ const EditFieldDrawer: React.FC<EditFieldDrawerProps> = ({ visible, setVisible, 
         <Form form={form} layout="vertical" className={styles['edit-form']}>
           {/* 基本信息 */}
           <div className={styles['section']}>
-            <h3 className={styles['section-title']}>基本信息</h3>
+            <h3 className={styles['section-title']}>基本设置</h3>
 
             <Form.Item
               label="字段编码"
               field="fieldCode"
               rules={[{ required: true, message: '请输入字段编码' }, { validator: validateFieldCode }]}
             >
-              <Input placeholder="请输入字段编码" disabled={fieldDetail.isSystemField} />
+              <Input placeholder="请输入字段编码" disabled={fieldDetail.isSystemField} readOnly />
             </Form.Item>
 
             <Form.Item

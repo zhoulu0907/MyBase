@@ -24,6 +24,7 @@ const ERchart: React.FC<EntityERProps> = ({
   onNodeAddRelation,
   onNodeAddMasterDetail,
   onFieldClick,
+  onEdgeEdit,
   updateEntityPosition,
   onlyUpdateNode
 }) => {
@@ -163,6 +164,7 @@ const ERchart: React.FC<EntityERProps> = ({
 
       graphRef.current.on('edge:click', ({ e, x, y, edge, view }) => {
         console.log('edge:click', e, x, y, edge, view);
+        onEdgeEdit?.(edge.data);
       });
 
       isGraphInitialized.current = true; // 标记已初始化
@@ -355,6 +357,7 @@ const ERchart: React.FC<EntityERProps> = ({
           //   { x: 200, y: 200 },
           //   { x: 380, y: 120 },
           // ],
+          data: edgeData,
           labels: edgeData.label
             ? [
                 {

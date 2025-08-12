@@ -3,6 +3,7 @@ import { Button, Drawer, Form, Message, Select, Space, Spin } from '@arco-design
 import { getEntityFields, getEntityList, updateRelation } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
+import type { EdgeData } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
 
 interface EntityOption {
   label: string;
@@ -25,7 +26,7 @@ interface RelationFormValues {
 interface EditRelationDrawerProps {
   visible: boolean;
   setVisible: (visible: boolean) => void;
-  relationData?: any; // 关联关系数据
+  relationData?: EdgeData; // 关联关系数据
   onSuccess?: () => void;
 }
 
@@ -57,19 +58,19 @@ const EditRelationDrawer: React.FC<EditRelationDrawerProps> = ({ visible, setVis
   useEffect(() => {
     if (visible && relationData) {
       form.setFieldsValue({
-        sourceEntityId: relationData.sourceEntityId,
-        sourceFieldId: relationData.sourceFieldId,
-        relationshipType: relationData.relationshipType,
-        targetEntityId: relationData.targetEntityId,
-        targetFieldId: relationData.targetFieldId
+        sourceEntityId: relationData.source.cell,
+        sourceFieldId: relationData.source.port,
+        relationshipType: relationData.label,
+        targetEntityId: relationData.target.cell,
+        targetFieldId: relationData.target.port
       });
 
       // 加载对应的字段选项
-      if (relationData.sourceEntityId) {
-        loadFields(relationData.sourceEntityId, 'left');
+      if (relationData.source.cell) {
+        loadFields(relationData.source.cell, 'left');
       }
-      if (relationData.targetEntityId) {
-        loadFields(relationData.targetEntityId, 'right');
+      if (relationData.target.cell) {
+        loadFields(relationData.target.cell, 'right');
       }
     }
   }, [visible, relationData]);
@@ -137,7 +138,7 @@ const EditRelationDrawer: React.FC<EditRelationDrawerProps> = ({ visible, setVis
       setSubmitting(true);
 
       const updateData = {
-        id: relationData?.id,
+        id: relationData?.relationshipId,
         ...values,
         appId: '1'
       };
