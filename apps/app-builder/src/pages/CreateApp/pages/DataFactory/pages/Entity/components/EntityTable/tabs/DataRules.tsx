@@ -1,25 +1,36 @@
-import type { EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
+import type { EntityListItem } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
 import type { TableColumnProps } from '@arco-design/web-react';
 import { Button, Message, Space, Table, Tag } from '@arco-design/web-react';
 import { getEntityRules } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
+import { CreateRuleModal } from '../../Modals';
 import styles from './tabs.module.less';
 
 interface DataRulesProps {
-  entity: EntityNode;
+  entity: EntityListItem;
+  activeTab: string;
 }
 
-const DataRules: React.FC<DataRulesProps> = ({ entity }) => {
+const DataRules: React.FC<DataRulesProps> = ({ entity, activeTab }) => {
   const [rules, setRules] = useState([]);
   const [loading, setLoading] = useState(false);
-
+  const [page, setPage] = useState({ pageNo: 1, pageSize: 10 });
+  const [total, setTotal] = useState(0);
+  const [createRuleModalVisible, setCreateRuleModalVisible] = useState(false);
   const loadRules = async () => {
     try {
       setLoading(true);
-      const response = await getEntityRules({ entityId: entity.entityId });
+      const params = {
+        entityId: entity.id,
+        pageNo: page.pageNo,
+        pageSize: page.pageSize,
+        appId: '1'
+      };
+      const response = await getEntityRules(params);
       console.log('getEntityRules', response);
-      if (response.list) {
+      if (response?.list) {
         setRules(response.list || []);
+        setTotal(response.total || 0);
       }
     } catch (error) {
       console.error('加载字段列表失败:', error);
@@ -33,7 +44,8 @@ const DataRules: React.FC<DataRulesProps> = ({ entity }) => {
     {
       title: '序号',
       dataIndex: 'index',
-      key: 'index'
+      key: 'index',
+      render: (text: string, record: any, index: number) => index + 1 + (page.pageNo - 1) * page.pageSize
     },
     {
       title: '校验类型',
@@ -88,18 +100,38 @@ const DataRules: React.FC<DataRulesProps> = ({ entity }) => {
   ];
 
   useEffect(() => {
-    loadRules();
-  }, []);
+    if (activeTab === 'rules') {
+      loadRules();
+    }
+  }, [entity, activeTab, page]);
 
   return (
     <div className={styles.dataRules}>
       <div className={styles.header}>
-        <h3>数据规则</h3>
-        <Button type="primary" size="small">
+        <Button type="primary" size="small" onClick={() => setCreateRuleModalVisible(true)}>
           添加规则
         </Button>
       </div>
-      <Table columns={columns} data={rules} rowKey="id" pagination={false} className={styles.table} loading={loading} />
+      <Table
+        columns={columns}
+        data={rules}
+        rowKey="id"
+        pagination={{
+          pageSize: page.pageSize,
+          current: page.pageNo,
+          total: total,
+          onChange: (pageNo, pageSize) => {
+            setPage({ pageNo, pageSize });
+          }
+        }}
+        loading={loading}
+      />
+      <CreateRuleModal
+        visible={createRuleModalVisible}
+        setVisible={setCreateRuleModalVisible}
+        successCallback={loadRules}
+        entity={entity}
+      />
     </div>
   );
 };

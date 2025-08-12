@@ -23,10 +23,10 @@ interface FormValues {
   systemFields: {
     creator: boolean;
     updater: boolean;
-    createTime: boolean;
-    updateTime: boolean;
-    dataOwner: boolean;
-    dataDepartment: boolean;
+    created_time: boolean;
+    updated_time: boolean;
+    owner_id: boolean;
+    owner_dept: boolean;
   };
 }
 
@@ -39,41 +39,51 @@ const NodeEditForm: React.FC<NodeEditFormProps> = ({ node, onCancel, onSave, suc
     name: node.entityName || '',
     description: node.description || '',
     systemFields: {
-      creator: node.fields.find((field: EntityField) => field.fieldId === 'creator') ? true : false,
-      updater: node.fields.find((field: EntityField) => field.fieldId === 'updater') ? true : false,
-      createTime: node.fields.find((field: EntityField) => field.fieldId === 'createTime') ? true : false,
-      updateTime: node.fields.find((field: EntityField) => field.fieldId === 'updateTime') ? true : false,
-      dataOwner: node.fields.find((field: EntityField) => field.fieldId === 'dataOwner') ? true : false,
-      dataDepartment: node.fields.find((field: EntityField) => field.fieldId === 'dataDepartment') ? true : false
+      creator: node?.fields.find((field: EntityField) => field.isSystemField && field.fieldName === 'creator')
+        ? true
+        : false,
+      updater: node?.fields.find((field: EntityField) => field.isSystemField && field.fieldName === 'updater')
+        ? true
+        : false,
+      created_time: node?.fields.find((field: EntityField) => field.isSystemField && field.fieldName === 'created_time')
+        ? true
+        : false,
+      updated_time: node?.fields.find((field: EntityField) => field.isSystemField && field.fieldName === 'updated_time')
+        ? true
+        : false,
+      owner_id: node?.fields.find((field: EntityField) => field.isSystemField && field.fieldName === 'owner_id')
+        ? true
+        : false,
+      owner_dept: node?.fields.find((field: EntityField) => field.isSystemField && field.fieldName === 'owner_dept')
+        ? true
+        : false
     }
   };
 
   const formItems = [
     { field: 'systemFields.creator', label: '记录创建人' },
     { field: 'systemFields.updater', label: '记录更新人' },
-    { field: 'systemFields.createTime', label: '记录创建时间' },
-    { field: 'systemFields.updateTime', label: '记录更新时间' },
-    { field: 'systemFields.dataOwner', label: '记录数据拥有者' },
-    { field: 'systemFields.dataDepartment', label: '记录数据拥有部门' }
+    { field: 'systemFields.created_time', label: '记录创建时间' },
+    { field: 'systemFields.updated_time', label: '记录更新时间' },
+    { field: 'systemFields.owner_id', label: '记录数据拥有者' },
+    { field: 'systemFields.owner_dept', label: '记录数据拥有部门' }
   ];
 
   const handleSwitchChange = (value: boolean, item: FormItem) => {
+    console.log('handleSwitchChange item', value, item);
     // form.setFieldValue(item.field as keyof FormValues, value);
     form.setFieldValue('systemFields', {
       [item.field]: value
     } as FormValues['systemFields']);
   };
 
+  const handleDelete = () => {
+    console.log('handleDelete data', node.entityId);
+  };
+
   useEffect(() => {
-    form.setFieldValue('code', node.code);
-    form.setFieldValue('name', node.entityName);
-    form.setFieldValue('description', node.description);
-    form.setFieldValue('systemFields', {
-      creator: node.fields.find((field: EntityField) => field.fieldId === 'creator') ? true : false,
-      updater: node.fields.find((field: EntityField) => field.fieldId === 'updater') ? true : false,
-      createTime: node.fields.find((field: EntityField) => field.fieldId === 'createTime') ? true : false,
-      updateTime: node.fields.find((field: EntityField) => field.fieldId === 'updateTime') ? true : false
-    } as FormValues['systemFields']);
+    console.log('useEffect initialValues', initialValues);
+    form.setFieldsValue(initialValues);
   }, [node]);
 
   return (
@@ -93,7 +103,7 @@ const NodeEditForm: React.FC<NodeEditFormProps> = ({ node, onCancel, onSave, suc
               { max: 40, message: '业务实体编码不能超过40个字符' }
             ]}
           >
-            <Input placeholder="请输入业务实体编码" maxLength={40} />
+            <Input placeholder="请输入业务实体编码" maxLength={40} readOnly />
           </Form.Item>
 
           <Form.Item
@@ -121,14 +131,21 @@ const NodeEditForm: React.FC<NodeEditFormProps> = ({ node, onCancel, onSave, suc
               <Form.Item field={item.field} key={item.field}>
                 <div className={styles['switch-item']}>
                   <span>{item.label}</span>
-                  <Switch onChange={(value: boolean) => handleSwitchChange(value, item)} />
+                  <Switch
+                    onChange={(value: boolean) => handleSwitchChange(value, item)}
+                    checked={form.getFieldValue(item.field as keyof FormValues) as unknown as boolean}
+                  />
                 </div>
               </Form.Item>
             ))}
         </div>
 
         <Form.Item className={styles['form-actions']}>
-          <Button onClick={onCancel} style={{ marginRight: 16 }}>
+          {/* 更换为删除按钮 */}
+          <Button type="text" status="danger" onClick={() => handleDelete()}>
+            删除
+          </Button>
+          {/* <Button onClick={onCancel} style={{ marginRight: 16 }}>
             取消
           </Button>
           <Button
@@ -139,7 +156,7 @@ const NodeEditForm: React.FC<NodeEditFormProps> = ({ node, onCancel, onSave, suc
             }}
           >
             保存
-          </Button>
+          </Button> */}
         </Form.Item>
       </Form>
     </div>

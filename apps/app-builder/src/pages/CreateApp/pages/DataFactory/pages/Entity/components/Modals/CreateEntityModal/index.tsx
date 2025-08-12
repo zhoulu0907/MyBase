@@ -25,7 +25,8 @@ const CreateEntityModal: React.FC<{
   visible: boolean;
   setVisible: (visible: boolean) => void;
   successCallback: () => void;
-}> = ({ visible, setVisible, successCallback }) => {
+  entityListLength: number;
+}> = ({ visible, setVisible, successCallback, entityListLength }) => {
   const [form] = Form.useForm<EntityFormValues>();
   const [dsResource, setDsResource] = useState<string>(DS_RESOURCE_TYPE.EXTERNAL); // 数据源来源：内部数据源、外部数据源、外部数据源中引用自有数据源已有资产
   // 提交
@@ -54,7 +55,11 @@ const CreateEntityModal: React.FC<{
         entityType: 1, // 实体类型 1:自建表，2:复用已有表
         description: values.description,
         datasourceId: resouceId,
-        appId: 1
+        appId: '1',
+        displayConfig: JSON.stringify({
+          x: entityListLength * 300,
+          y: 0
+        })
       };
 
       try {
