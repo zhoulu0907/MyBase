@@ -16,7 +16,7 @@ import java.util.List;
 public class EREntityVO {
 
     @Schema(description = "实体ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "1024")
-    private Long entityId;
+    private String entityId;
 
     @Schema(description = "实体名称", requiredMode = Schema.RequiredMode.REQUIRED, example = "用户表")
     private String entityName;

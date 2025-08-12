@@ -551,7 +551,7 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
      */
     private EREntityVO convertToEREntity(MetadataBusinessEntityDO entity) {
         EREntityVO erEntity = new EREntityVO();
-        erEntity.setEntityId(entity.getId());
+        erEntity.setEntityId(entity.getId().toString());
         erEntity.setEntityName(entity.getDisplayName());
         erEntity.setTableName(entity.getTableName());
         erEntity.setDescription(entity.getDescription());
@@ -669,13 +669,14 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
         }
 
         ERRelationshipVO relationship = new ERRelationshipVO();
-        relationship.setSourceEntityId(relationshipDO.getSourceEntityId());
+        relationship.setRelationshipId(relationshipDO.getId().toString());
+        relationship.setSourceEntityId(relationshipDO.getSourceEntityId().toString());
         relationship.setSourceEntityName(sourceEntity.getDisplayName());
-        relationship.setSourceFieldId(Long.valueOf(relationshipDO.getSourceFieldId()));
+        relationship.setSourceFieldId(relationshipDO.getSourceFieldId().toString());
         relationship.setSourceFieldName(getFieldNameById(relationshipDO.getSourceFieldId()));
-        relationship.setTargetEntityId(relationshipDO.getTargetEntityId());
+        relationship.setTargetEntityId(relationshipDO.getTargetEntityId().toString());
         relationship.setTargetEntityName(targetEntity.getDisplayName());
-        relationship.setTargetFieldId(Long.valueOf(relationshipDO.getTargetFieldId()));
+        relationship.setTargetFieldId(relationshipDO.getTargetFieldId().toString());
         relationship.setTargetFieldName(getFieldNameById(relationshipDO.getTargetFieldId()));
         relationship.setRelationshipType(relationshipDO.getRelationshipType());
         relationship.setRelationshipName(relationshipDO.getRelationName());
