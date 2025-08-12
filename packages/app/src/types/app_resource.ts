@@ -1,7 +1,7 @@
 import { ComponentConfig } from "./app_component";
 
 export interface GetPageSetCodeReq {
-  menuId: string;
+  menuCode: string;
 }
 
 export interface PageSet {
