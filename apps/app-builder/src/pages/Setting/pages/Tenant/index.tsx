@@ -1,50 +1,87 @@
-import { Avatar, Divider, Empty, Typography } from '@arco-design/web-react';
-import { IconLoading, IconEye, IconEyeInvisible } from '@arco-design/web-react/icon';
+import { Avatar, Divider, Spin, Typography, Message } from '@arco-design/web-react';
+import { IconEye, IconEyeInvisible } from '@arco-design/web-react/icon';
 import type { TenantInfo } from '@onebase/platform-center';
-import { getTenantInfo } from '@onebase/platform-center';
+import { getTenantInfo, updatePlatformTenantApi } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
+import dayjs from 'dayjs';
 import styles from './index.module.less';
 
 const { Title, Text } = Typography;
 const TenantPage: React.FC = () => {
   const [tenantInfo, setTenantInfo] = useState<TenantInfo | null>(null);
+  const [loading, setLoading] = useState(true);
   const [secretVisible, setSecretVisible] = useState(false);
 
-  useEffect(() => {
-    const fetchTenantInfo = async () => {
-      try {
-        const res = await getTenantInfo();
-        setTenantInfo(res);
-      } catch (error) {
-        // TODO： 联调后移除mock数据
-        setTenantInfo({
-          id: 1,
-          name: '租户名',
-          creator: 'admin',
-          contactName: '张三',
-          contactMobile: '13800138000',
-          status: 1,
-          domain: 'example.com',
-          password: 'password',
-          accountCount: 100,
-          createTime: '2024-06-01 12:12:12',
-          expireTime: '2024-06-30',
-          appCount: 10,
-          workbenchUrl: 'http://workbench.example.com',
-          mobileUrl: 'http://mobile.example.com'
-        });
-      }
-    };
+  const fetchTenantInfo = async () => {
+    try {
+      setLoading(true);
+      const res = await getTenantInfo('1'); // TODO：租户id暂时固定，后续从用户信息中获取
+      setTenantInfo(res);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchTenantInfo();
   }, []);
 
+  const handleNameChange = async (newName: string) => {
+    if (!tenantInfo) return;
+    
+    if (!newName.trim()) {
+      Message.error('租户名称不能为空');
+      return;
+    }
+
+    try {
+      await updatePlatformTenantApi({
+        id: tenantInfo.id,
+        name: newName
+      });
+      
+      setTenantInfo({
+        ...tenantInfo,
+        name: newName
+      });
+      
+      Message.success('租户名称更新成功');
+    } catch (error) {
+      Message.error('租户名称更新失败');
+    }
+  };
+
   const secretIconStyle = { cursor: 'pointer', marginLeft: '8px', color: 'rgb(78, 89, 105)' };
 
-  // 显示加载状态
-  if (!tenantInfo) {
-    return <Empty className={styles.tenantPage} icon={<IconLoading />} description="加载中..."></Empty>;
+  const gotoLink = (link: string | null) => {
+    if (!link) {
+      return;
+    }
+    () => window.open(link, '_blank')
   }
+
+  // 显示加载状态
+  if (loading) {
+    return (
+      <div className={styles.tenantPage}>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '300px' }}>
+          <Spin tip="加载中..." />
+        </div>
+      </div>
+    );
+  }
+
+  // 数据加载完成后但没有租户信息
+  if (!tenantInfo) {
+    return (
+      <div className={styles.tenantPage}>
+        <div style={{ textAlign: 'center', padding: '40px' }}>
+          <p>无法加载租户信息</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={styles.tenantPage}>
       <div className={styles.tenantPageMain}>
@@ -52,12 +89,17 @@ const TenantPage: React.FC = () => {
           <div className={styles.infoCardPrimaryLeft}>
             <div className={styles.avatarSection}>
               <Avatar size={56} style={{ backgroundColor: '#009E9E', borderRadius: '8px' }}>
-                <span>{tenantInfo.creator?.slice(0,2)}</span>
+                <span>{tenantInfo.name?.slice(0,2)}</span>
               </Avatar>
             </div>
             {/* 名称 & ID */}
             <div className={styles.section}>
-              <Title heading={5} style={{ margin: 0 }}>
+              <Title
+                heading={5}
+                style={{ margin: 0 }}
+                editable={{
+                  onChange: handleNameChange,
+                }}>
                 {tenantInfo.name}
               </Title>
               <Text copyable>ID：{tenantInfo.id}</Text>
@@ -66,11 +108,11 @@ const TenantPage: React.FC = () => {
               <div className={styles.sectionBody}>
                 <div className={styles.descriptionItem}>
                   <Text type="secondary">创建人：</Text>
-                  <Text>{tenantInfo.creator}</Text>
+                  <Text>{tenantInfo.contactName}</Text>
                 </div>
                 <div className={styles.descriptionItem}>
                   <Text type="secondary">创建时间：</Text>
-                  <Text>{tenantInfo.createTime}</Text>
+                  <Text>{dayjs(tenantInfo.createTime).format('YYYY-MM-DD HH:mm:ss')}</Text>
                 </div>
               </div>
             </div>
@@ -98,10 +140,10 @@ const TenantPage: React.FC = () => {
                 <Text 
                   type="primary" 
                   copyable 
-                  onClick={() => window.open(tenantInfo.workbenchUrl, '_blank')}
+                  onClick={() => { gotoLink(tenantInfo.website) }}
                   style={{ cursor: 'pointer' }}
                 >
-                  {tenantInfo.workbenchUrl}
+                  {tenantInfo.website || '-'}
                 </Text>
               </div>
               <div className={styles.descriptionItem}>
@@ -109,10 +151,10 @@ const TenantPage: React.FC = () => {
                 <Text 
                   type="primary" 
                   copyable 
-                  onClick={() => window.open(tenantInfo.mobileUrl, '_blank')}
+                  onClick={() => { gotoLink(tenantInfo.websiteH5) }}
                   style={{ cursor: 'pointer' }}
                 >
-                  {tenantInfo.mobileUrl}
+                  {tenantInfo.websiteH5 || '-'}
                 </Text>
               </div>
             </div>
@@ -125,12 +167,12 @@ const TenantPage: React.FC = () => {
             <div className={styles.sectionBody}>
               <div className={styles.descriptionItem}>
                 <Text type="secondary">tenantKey：</Text>
-                <Text copyable>{tenantInfo.workbenchUrl}</Text>
+                <Text copyable>{tenantInfo.tenantKey || '-'}</Text>
               </div>
               <div className={styles.descriptionItem}>
                 <Text type="secondary">tenantSecret：</Text>
-                <span className={styles.secretText}>
-                  {secretVisible ? tenantInfo.mobileUrl : '•'.repeat(tenantInfo.mobileUrl?.length || 8)}
+                <span className={styles.secretText || '-'}>
+                  {secretVisible ? tenantInfo.tenantSecret || '-': '•'.repeat(tenantInfo.tenantSecret?.length || 8)}
                 </span>
                 <span onClick={() => setSecretVisible(!secretVisible)}>
                   {secretVisible ? <IconEye style={secretIconStyle} /> : <IconEyeInvisible style={secretIconStyle} />}

@@ -11,10 +11,16 @@ import {
 } from '@arco-design/web-react';
 import { useEffect, useState } from 'react';
 
-import { createApplicationTag, listApplicationTag, type CreateApplicationTagReq, type ListTagReq } from '@onebase/app';
+import {
+  createApplicationTag,
+  listApplicationTag,
+  type CreateApplicationTagReq,
+  type ListTagReq,
+  type Application
+} from '@onebase/app';
 import { sample } from 'lodash-es';
 
-import appIconEditSVG from '@/assets/images/app_icon_edit.svg';
+import appIconEditSVG from '@/assets/images/app_edit_white.svg';
 import appTypeSVG from '@/assets/images/app_type_selected_icon.svg';
 import arrowSVG from '@/assets/images/arrow_icon.svg';
 import classicModeSVG from '@/assets/images/classic_mode_icon.svg';
@@ -22,41 +28,63 @@ import databaseSVG from '@/assets/images/database_icon.svg';
 import formSVG from '@/assets/images/form_icon.svg';
 import themeSelectedSVG from '@/assets/images/theme_selected_icon.svg';
 import tickSVG from '@/assets/images/tick_icon.svg';
-import { IconPlus } from '@arco-design/web-react/icon';
-import { appIcon, appIconColor, appThemeColor } from './const';
+import { appIcon, appIconColor, appThemeColor, type Options } from './const';
 import styles from './index.module.less';
 
 const Option = Select.Option;
 
+type AppStatus = 'create' | 'update';
 interface IProps {
   form: FormInstance;
+  readonly data?: Application;
+  readonly status: AppStatus;
   readonly previewBgColor: string;
 }
 
 // 创建/修改应用
 const BasicSetting = (props: IProps) => {
-  const { previewBgColor, form } = props;
+  const { previewBgColor, form, data, status } = props;
 
-  const [tagValue, setTagValue] = useState<string>(''); // 新增标签值
   const [tagList, setTagList] = useState<ListTagReq[]>([]); // 标签列表
-
-  const [iconName, setIconName] = useState<string>(sample(appIcon)!);
-  const [iconColor, setIconColor] = useState<string>(sample(appIconColor)!);
-
-  const [themeColor, setThemeColor] = useState<string>('#4FAE7B'); // 应用主题色
+  const [iconName, setIconName] = useState<Application['iconName']>();
+  const [iconColor, setIconColor] = useState<Application['iconColor']>();
+  const [themeColor, setThemeColor] = useState<Application['themeColor']>('#4FAE7B'); // 应用主题色
 
   useEffect(() => {
     listAppTagReq();
+    form.resetFields();
   }, []);
 
+  useEffect(() => {
+    if (status === 'create') {
+      setIconName(sample(appIcon)!);
+      setIconColor(sample(appIconColor)!);
+    } else {
+      if (data && Object.values(data).length) {
+        form.setFieldsValue({
+          ...data,
+          tagIds: data.tags?.map((v) => {
+            return {
+              label: v.tagName,
+              value: v.id
+            } as Options;
+          })
+        });
+        setThemeColor(data.themeColor);
+        setIconName(data.iconName);
+        setIconColor(data.iconColor);
+      }
+    }
+  }, [data, status]);
+
+  // 查询标签
   const listAppTagReq = async () => {
     const params: ListTagReq = {
       tagName: ''
     };
-    // 查询标签
-    listApplicationTag(params).then((data: any[]) => {
-      setTagList(data || []);
-    });
+    const res = await listApplicationTag(params);
+    setTagList(res || []);
+    return res;
   };
 
   useEffect(() => {
@@ -69,20 +97,26 @@ const BasicSetting = (props: IProps) => {
   }, [form, iconName, iconColor, themeColor]);
 
   /* 新增标签 */
-  const handleAddTag = async () => {
-    if (tagValue === '') {
-      Message.warning('请输入标签内容');
-      return;
-    }
-    if (tagList.findIndex((t) => t.tagName === tagValue) !== -1) {
-      Message.warning('标签已存在');
-      return;
-    }
-    setTagValue('');
+  const handleCreateTagChange = async (val: Options[]) => {
+    if (val.length === 0) return;
+    const curValue = val[val.length - 1]; // 最后一次更新的数据
     await createApplicationTag({
-      tagName: tagValue
+      tagName: curValue.value
     } as CreateApplicationTagReq);
-    await listAppTagReq();
+
+    const res = await listAppTagReq();
+    let currentTag = form.getFieldValue('tagIds'); // 需要修改的数据
+    const getCurTagId = res.find((v: ListTagReq) => v.tagName === curValue.value)?.id; // 接口返回的最新数据
+    currentTag = currentTag.map((tag: Options) => {
+      if (tag.label === curValue.value) {
+        return {
+          label: tag.label,
+          value: getCurTagId
+        };
+      }
+      return tag;
+    });
+    form.setFieldValue('tagIds', currentTag);
   };
 
   return (
@@ -130,9 +164,8 @@ const BasicSetting = (props: IProps) => {
         </div>
         <div className={styles.row}>
           <div className={styles.subtitle}>预览图</div>
-          <div className={styles.previewImg}></div>
+          <div className={styles.previewImg} />
         </div>
-        <div className={styles.row}></div>
       </div>
 
       {/* 基础信息 */}
@@ -227,32 +260,9 @@ const BasicSetting = (props: IProps) => {
                 render: (invisibleNumber) => `+${invisibleNumber} more`
               }}
               allowClear
-              dropdownRender={(menu) => (
-                <div>
-                  {menu}
-                  <Divider style={{ margin: 0 }} />
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      padding: '10px 12px'
-                    }}
-                  >
-                    <Input
-                      size="small"
-                      style={{ marginRight: 18 }}
-                      value={tagValue}
-                      maxLength={20}
-                      onChange={(value) => setTagValue(value)}
-                    />
-                    <Button style={{ fontSize: 14, padding: '0 6px' }} type="text" size="mini" onClick={handleAddTag}>
-                      <IconPlus />
-                      新增标签
-                    </Button>
-                  </div>
-                </div>
-              )}
-              dropdownMenuStyle={{ maxHeight: 300 }}
+              allowCreate
+              labelInValue={true}
+              onChange={handleCreateTagChange}
             >
               {tagList.map((tag) => (
                 <Option key={tag.id} value={tag.id!}>

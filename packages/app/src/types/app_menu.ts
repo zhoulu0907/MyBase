@@ -51,7 +51,7 @@ export interface UpdateApplicationMenuNameReq {
 
 export interface UpdateApplicationMenuOrderReq {
   id: string;
-  parentUuid?: string;
+  parentId?: string;
   ids: number[];
 }
 
@@ -63,7 +63,7 @@ export interface UpdateApplicationMenuVisibleReq {
 export interface CopyApplicationMenuReq {
   id: string;
   menuName: string;
-  parentUuid?: string;
+  parentId?: string;
 }
 
 export interface DeleteApplicationMenuReq {

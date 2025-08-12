@@ -177,7 +177,7 @@ export default function EditorWorkspace() {
               className={styles.componentItem}
               style={{
                 width: getComponentWidth(pageComponentSchemas.get(cp.id), cp.type),
-                borderColor: curComponentID === cp.id ? '#4FAE7B' : 'transparent'
+                borderColor: curComponentID === cp.id ? '#4FAE7B' : ''
               }}
               onClick={(e: React.MouseEvent<HTMLDivElement>) => {
                 e.stopPropagation();
