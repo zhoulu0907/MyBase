@@ -186,10 +186,10 @@ public class PageSetServiceImpl implements PageSetService {
             pageSetPageDataRepository.insert(newPageSetPageDO);
 
             // 复制组件
-            componentDataRepository.findByPageID(pageDO.getId()).forEach(componentDO -> {
+            componentDataRepository.findByPageCode(pageDO.getPageCode()).forEach(componentDO -> {
                 ComponentDO newComponentDO = BeanUtils.toBean(componentDO, ComponentDO.class);
                 newComponentDO.setId(null);
-                newComponentDO.setPageId(newPageDO.getId());
+                newComponentDO.setPageCode(newPageDO.getPageCode());
                 componentDataRepository.insert(newComponentDO);
             });
 
@@ -197,7 +197,7 @@ public class PageSetServiceImpl implements PageSetService {
             pageMetaDataRepository.findByPageID(pageDO.getId()).forEach(pageMetadataDO -> {
                 PageMetadataDO newPageMetadataDO = BeanUtils.toBean(pageMetadataDO, PageMetadataDO.class);
                 newPageMetadataDO.setId(null);
-                newPageMetadataDO.setPageId(newPageDO.getId());
+                newPageMetadataDO.setPageCode(newPageDO.getPageCode());
                 pageMetaDataRepository.insert(newPageMetadataDO);
             });
 
@@ -214,7 +214,7 @@ public class PageSetServiceImpl implements PageSetService {
                     .forEach(pageRefRouterDO -> {
                         PageRefRouterDO newPageRefRouterDO = BeanUtils.toBean(pageRefRouterDO, PageRefRouterDO.class);
                         newPageRefRouterDO.setId(null);
-                        newPageRefRouterDO.setPageRef(newPageDO.getPageCode());
+                        newPageRefRouterDO.setPageCode(newPageDO.getPageCode());
                         appPageRefRouterDataRepository.insert(newPageRefRouterDO);
                     });
         });
@@ -236,13 +236,13 @@ public class PageSetServiceImpl implements PageSetService {
             pageDataRepository.update(pageDO);
 
             // 删除已有的component
-            componentDataRepository.deleteComponentByPageId(pageDO.getId());
+            componentDataRepository.deleteComponentByPageCode(pageDO.getPageCode());
 
             // 插入新的component
             page.getComponents().forEach(component -> {
                 ComponentDO componentDO = BeanUtils.toBean(component, ComponentDO.class);
                 componentDO.setInTable(false);
-                componentDO.setPageId(pageDO.getId());
+                componentDO.setPageCode(pageDO.getPageCode());
                 componentDataRepository.insert(componentDO);
             });
         });
@@ -283,7 +283,7 @@ public class PageSetServiceImpl implements PageSetService {
 
         // 读取每个页面的组件和配置
         pageDOs.forEach(pageDO -> {
-            List<ComponentDO> componentDOs = componentDataRepository.findByPageID(pageDO.getId());
+            List<ComponentDO> componentDOs = componentDataRepository.findByPageCode(pageDO.getPageCode());
 
             PageDTO pageDTO = BeanUtils.toBean(pageDO, PageDTO.class);
             pageDTO.setComponents(componentDOs.stream()
