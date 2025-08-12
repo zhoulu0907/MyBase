@@ -8,6 +8,9 @@ import lombok.Data;
 @Schema(description = "应用管理 - 角色创建 Request VO")
 public class AuthRoleCreateRespVO {
 
+    @Schema(description = "角色ID", required = true)
+    private Long id;
+
     @Schema(description = "应用ID", required = true)
     private Long applicationId;
 

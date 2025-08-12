@@ -32,9 +32,20 @@ public class AppVersionResourceRepository extends DataRepositoryNew<VersionResou
         return findAllByConfig(configs);
     }
 
+    public VersionResourceDO findByApplicationIdAndVersionIdAndProtocolType(Long applicationId, Long versionId, String protocolType) {
+        ConfigStore configs = new DefaultConfigStore();
+        configs.eq("application_id", applicationId);
+        configs.eq("version_id", versionId);
+        configs.eq("protocol_type", protocolType);
+        return findOne(configs);
+    }
+
     public void deleteByVersionId(Long versionId) {
         ConfigStore configs = new DefaultConfigStore();
         configs.eq("version_id", versionId);
         deleteByConfig(configs);
     }
+
+
+
 }
