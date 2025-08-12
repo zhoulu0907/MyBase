@@ -19,4 +19,10 @@ public class SystemMenuSimpleRespVO {
     @Schema(description = "类型，参见 MenuTypeEnum 枚举类", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
     private Integer type;
 
+    @Schema(description = "权限标识code", example = "system:menu:add")
+    private String permission;
+
+    @Schema(description = "状态,见 CommonStatusEnum 枚举", example = "1")
+    private Integer status;
+
 }
