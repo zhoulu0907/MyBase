@@ -4,32 +4,38 @@ Authorization: Bearer eb33f553e1194b52935de6fcc6a3f4f5
 ### 创建租户 /admin-api/system/tenant/create
 POST http://127.0.0.1:48080/admin-api/system/tenant/create
 Content-Type: application/json
-Authorization: Bearer d6c2b8f9cc18459aa544a52cdfb5b1b0
+Authorization: Bearer fe416b951aa24e21ac721bc65794ca6b
 tenant-id: 1
 
 {
-  "name": "租户6",
-  "accountCount": "50",
-  "contactName": "test",
+  "name": "租户19",
+  "accountCount": "10",
+  "contactName": "test19",
   "status": 0
 }
 
 ### 更新租户 /admin-api/system/tenant/update
-PUT http://127.0.0.1:48080/admin-api/system/tenant/update
+POST http://127.0.0.1:48080/admin-api/system/tenant/update
 Content-Type: application/json
-Authorization: Bearer 58d972a2df1a40828d28e1e5cd19ab07
+Authorization: Bearer fe416b951aa24e21ac721bc65794ca6b
 tenant-id: 1
 
 {
-  "id": "3385601779470176256",
-  "name": "租户6",
-  "accountCount": "30",
+  "id": "544449082769412096",
+  "name": "租户15",
+  "accountCount": "20",
   "contactName": "test1",
   "status": 0
 }
 
 ### 更新租户 /admin-api/system/tenant/page
-GET http://127.0.0.1:48080/admin-api/system/tenant/page?status=0&name=租&tenantCode=48&pageNum=1&pageSize=10
+GET http://127.0.0.1:48080/admin-api/system/tenant/page?status=2&pageNum=1&pageSize=10
 Content-Type: application/json
-Authorization: Bearer 1d5eb408d54b4b5480c3ee999c24383b
+Authorization: Bearer 3e71f55ccc754ad99af737a899c1c9bd
+tenant-id: 1
+
+### 获得租户可分配数量 /admin-api/system/tenant/get-allocatable-count
+GET http://127.0.0.1:48080/admin-api/system/tenant/get-allocatable-count
+Content-Type: application/json
+Authorization: Bearer 2a22af2af4544f2b86409c9ee243901a
 tenant-id: 1

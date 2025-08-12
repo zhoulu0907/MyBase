@@ -54,7 +54,7 @@ public class DictDataController {
     @PostMapping("/update-status")
     @Operation(summary = "修改字典数据状态")
     @PreAuthorize("@ss.hasPermission('system:dict:update')")
-    public CommonResult<Boolean> updateDictDataStatus(@Valid @RequestBody  DictDataUpdateStatusVO updateStatusVO) {
+    public CommonResult<Boolean> updateDictDataStatus(@Valid @RequestBody DictDataUpdateStatusVO updateStatusVO) {
         dictDataService.updateDictDataStatus(updateStatusVO.getId(), updateStatusVO.getStatus());
         return success(true);
     }
@@ -72,8 +72,15 @@ public class DictDataController {
     @Operation(summary = "获得全部字典数据列表", description = "一般用于管理后台缓存字典数据在本地")
     // 无需添加权限认证，因为前端全局都需要
     public CommonResult<List<DictDataSimpleRespVO>> getSimpleDictDataList() {
-        List<DictDataDO> list = dictDataService.getDictDataList(
-                CommonStatusEnum.ENABLE.getStatus(), null);
+        List<DictDataDO> list = dictDataService.getDictDataList(CommonStatusEnum.ENABLE.getStatus(), null);
+        return success(BeanUtils.toBean(list, DictDataSimpleRespVO.class));
+    }
+
+    @GetMapping("/simple-list-by-type")
+    @Operation(summary = "根据dict type获得字典数据列表", description = "一般用于前段获取")
+    // 无需添加权限认证，因为前端全局都需要
+    public CommonResult<List<DictDataSimpleRespVO>> getSimpleDictDataListByType(@RequestParam("dictType") String dictType) {
+        List<DictDataDO> list = dictDataService.getDictDataList(CommonStatusEnum.ENABLE.getStatus(), dictType);
         return success(BeanUtils.toBean(list, DictDataSimpleRespVO.class));
     }
 

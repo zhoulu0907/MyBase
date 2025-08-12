@@ -259,14 +259,14 @@ public class DeptServiceImpl implements DeptService {
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
 
-        // 1. 批量获取部门人数统计
-        Map<Long, Integer> deptUserCountMap = adminUserService.getUserCountByDeptIds(deptIds);
+        // 1. 批量获取部门人数统计（包含下级部门）
+        Map<Long, Integer> deptUserCountMap = adminUserService.getUserCountByDeptIdsIncludeChildren(deptIds);
         // 2. 批量获取领导用户信息
         Map<Long, AdminUserDO> leaderUserMap = adminUserService.getUserMap(leaderUserIds);
 
         // 4. 设置每个部门的人数和领导姓名
         respList.forEach(dept -> {
-            // 设置人数
+            // 设置人数（包含下级部门）
             Integer userCount = deptUserCountMap.getOrDefault(dept.getId(), 0);
             dept.setUserCount(userCount);
 
@@ -296,12 +296,12 @@ public class DeptServiceImpl implements DeptService {
         List<Long> leaderUserIds = dept.getLeaderUserId() != null ?
             Collections.singletonList(dept.getLeaderUserId()) : Collections.emptyList();
 
-        // 1. 批量获取部门人数统计
-        Map<Long, Integer> deptUserCountMap = adminUserService.getUserCountByDeptIds(deptIds);
+        // 1. 批量获取部门人数统计（包含下级部门）
+        Map<Long, Integer> deptUserCountMap = adminUserService.getUserCountByDeptIdsIncludeChildren(deptIds);
         // 2. 批量获取领导用户信息
         Map<Long, AdminUserDO> leaderUserMap = adminUserService.getUserMap(leaderUserIds);
 
-        // 设置部门人数
+        // 设置部门人数（包含下级部门）
         Integer userCount = deptUserCountMap.getOrDefault(id, 0);
         respVO.setUserCount(userCount);
 

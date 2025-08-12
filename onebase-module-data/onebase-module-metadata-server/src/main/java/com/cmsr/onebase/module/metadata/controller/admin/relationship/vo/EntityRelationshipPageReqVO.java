@@ -19,6 +19,9 @@ public class EntityRelationshipPageReqVO extends PageParam {
     @Schema(description = "应用ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "12345")
     private String appId;
 
+    @Schema(description = "实体ID（查询与该实体相关的所有关系，无论作为源实体还是目标实体）", example = "544472937227489280")
+    private String entityId;
+
     @Schema(description = "源实体ID", example = "2001")
     private String sourceEntityId;
 

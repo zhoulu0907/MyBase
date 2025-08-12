@@ -63,7 +63,7 @@ public class LicenseDataRepository extends DataRepositoryNew<LicenseDO> {
 
         configStore.order(LicenseDO.STATUS, "desc");
 
-        return findPageWithConditions(configStore, reqVO.getPageNum(), reqVO.getPageSize());
+        return findPageWithConditions(configStore, reqVO.getPageNo(), reqVO.getPageSize());
     }
 
     /**

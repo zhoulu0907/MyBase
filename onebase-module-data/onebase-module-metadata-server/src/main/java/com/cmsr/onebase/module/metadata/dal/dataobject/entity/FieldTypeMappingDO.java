@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.metadata.dal.dataobject.entity;
 
+import com.cmsr.onebase.framework.data.base.BaseDO;
 import jakarta.persistence.Table;
 import lombok.*;
 
@@ -11,14 +12,10 @@ import lombok.*;
  */
 @Table(name = "metadata_field_type_mapping")
 @Data
+@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class FieldTypeMappingDO{
-
-    /**
-     * id
-     */
-    private Long id;
+public class FieldTypeMappingDO extends BaseDO {
 
     /**
      * 业务字段类型

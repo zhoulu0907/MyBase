@@ -47,7 +47,7 @@ public class ValidationRuleController {
     @PostMapping("/page")
     @Operation(summary = "分页查询校验规则列表")
     @PreAuthorize("@ss.hasPermission('metadata:validation-rule:query')")
-    public CommonResult<PageResult<ValidationRuleRespVO>> getValidationRulePage(@Valid ValidationRulePageReqVO pageReqVO) {
+    public CommonResult<PageResult<ValidationRuleRespVO>> getValidationRulePage(@Valid @RequestBody ValidationRulePageReqVO pageReqVO) {
         PageResult<ValidationRuleRespVO> result = validationRuleService.getValidationRulePage(pageReqVO);
         return success(result);
     }

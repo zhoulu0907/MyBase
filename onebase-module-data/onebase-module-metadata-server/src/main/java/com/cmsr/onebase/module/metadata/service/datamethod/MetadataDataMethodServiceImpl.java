@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.metadata.service.datamethod;
 
 import cn.hutool.core.util.IdUtil;
+import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.module.metadata.controller.admin.datamethod.vo.*;
@@ -9,7 +10,10 @@ import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataBusinessEn
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.datasource.MetadataDatasourceDO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.method.MetadataDataSystemMethodDO;
-import com.cmsr.onebase.module.metadata.dal.database.MetadataRepository;
+import com.cmsr.onebase.module.metadata.dal.database.MetadataBusinessEntityRepository;
+import com.cmsr.onebase.module.metadata.dal.database.MetadataDataSystemMethodRepository;
+import com.cmsr.onebase.module.metadata.dal.database.MetadataDatasourceRepository;
+import com.cmsr.onebase.module.metadata.dal.database.MetadataEntityFieldRepository;
 import com.cmsr.onebase.module.metadata.dal.database.TemporaryDatasourceService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -42,7 +46,16 @@ import static com.cmsr.onebase.module.metadata.enums.ErrorCodeConstants.*;
 public class MetadataDataMethodServiceImpl implements MetadataDataMethodService {
 
     @Resource
-    private MetadataRepository metadataRepository;
+    private MetadataBusinessEntityRepository metadataBusinessEntityRepository;
+
+    @Resource
+    private MetadataDataSystemMethodRepository metadataDataSystemMethodRepository;
+
+    @Resource
+    private MetadataDatasourceRepository metadataDatasourceRepository;
+
+    @Resource
+    private MetadataEntityFieldRepository metadataEntityFieldRepository;
 
     @Resource
     private AnylineService<?> anylineService;
@@ -53,14 +66,14 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
     @Override
     public List<DataMethodRespVO> getDataMethodList(DataMethodQueryVO queryVO) {
         // 校验实体存在
-        MetadataBusinessEntityDO entity = metadataRepository.findById(MetadataBusinessEntityDO.class, Long.valueOf(queryVO.getEntityId()));
+        MetadataBusinessEntityDO entity = metadataBusinessEntityRepository.findById(Long.valueOf(queryVO.getEntityId()));
         if (entity == null) {
             throw exception(BUSINESS_ENTITY_NOT_EXISTS);
         }
 
         // 构建查询条件
         DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and("is_enabled", true);
+        configStore.and("is_enabled", CommonStatusEnum.ENABLE.getStatus()); // 只获取启用的数据方法（0-启用，1-禁用）
         configStore.and("deleted", 0);
 
         // 根据条件过滤
@@ -76,7 +89,7 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
         configStore.order("method_code", Order.TYPE.ASC);
 
         // 从数据库查询数据方法
-        List<MetadataDataSystemMethodDO> methodDOList = metadataRepository.findAllByConfig(MetadataDataSystemMethodDO.class, configStore);
+        List<MetadataDataSystemMethodDO> methodDOList = metadataDataSystemMethodRepository.getEnabledDataMethodList();
 
         // 转换为响应VO
         List<DataMethodRespVO> methods = new ArrayList<>();
@@ -102,7 +115,7 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
     @Override
     public DataMethodDetailRespVO getDataMethodDetail(Long entityId, String methodCode) {
         // 校验实体存在
-        MetadataBusinessEntityDO entity = metadataRepository.findById(MetadataBusinessEntityDO.class, entityId);
+        MetadataBusinessEntityDO entity = metadataBusinessEntityRepository.findById(entityId);
         if (entity == null) {
             throw exception(BUSINESS_ENTITY_NOT_EXISTS);
         }
@@ -110,10 +123,10 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
         // 根据方法代码查询数据方法
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.and("method_code", methodCode);
-        configStore.and("is_enabled", true);
+        configStore.and("is_enabled", CommonStatusEnum.ENABLE.getStatus()); // 只获取启用的数据方法（0-启用，1-禁用）
         configStore.and("deleted", 0);
 
-        MetadataDataSystemMethodDO methodDO = metadataRepository.findOne(MetadataDataSystemMethodDO.class, configStore);
+        MetadataDataSystemMethodDO methodDO = metadataDataSystemMethodRepository.getDataMethodByCode(methodCode);
         if (methodDO == null) {
             throw exception(DATA_METHOD_NOT_EXISTS);
         }
@@ -283,7 +296,7 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
 
         // 3. 使用Anyline执行分页查询
         // 获取临时数据源服务
-        MetadataDatasourceDO datasource = metadataRepository.findById(MetadataDatasourceDO.class, entity.getDatasourceId());
+        MetadataDatasourceDO datasource = metadataDatasourceRepository.findById(entity.getDatasourceId());
         if (datasource == null) {
             throw exception(DATASOURCE_NOT_EXISTS);
         }
@@ -406,7 +419,7 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
      * 校验实体存在
      */
     private MetadataBusinessEntityDO validateEntityExists(Long entityId) {
-        MetadataBusinessEntityDO entity = metadataRepository.findById(MetadataBusinessEntityDO.class, entityId);
+        MetadataBusinessEntityDO entity = metadataBusinessEntityRepository.findById(entityId);
         if (entity == null) {
             throw exception(BUSINESS_ENTITY_NOT_EXISTS);
         }
@@ -420,7 +433,7 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.and("entity_id", entityId);
         configStore.and("deleted", 0);
-        List<MetadataEntityFieldDO> fields = metadataRepository.findAllByConfig(MetadataEntityFieldDO.class, configStore);
+        List<MetadataEntityFieldDO> fields = metadataEntityFieldRepository.getEntityFieldListByEntityId(entityId);
         if (fields == null || fields.isEmpty()) {
             throw exception(ENTITY_FIELD_NOT_EXISTS);
         }
@@ -432,7 +445,7 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
      */
     private void switchToDataSource(Long datasourceId) {
         if (datasourceId != null) {
-            MetadataDatasourceDO datasource = metadataRepository.findById(MetadataDatasourceDO.class, datasourceId);
+            MetadataDatasourceDO datasource = metadataDatasourceRepository.findById(datasourceId);
             if (datasource != null) {
                 try {
                     // 使用临时数据源服务创建新的AnylineService实例

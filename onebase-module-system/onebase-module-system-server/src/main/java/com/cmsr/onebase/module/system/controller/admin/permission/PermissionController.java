@@ -7,6 +7,8 @@ import com.cmsr.onebase.module.system.controller.admin.permission.vo.permission.
 import com.cmsr.onebase.module.system.controller.admin.permission.vo.permission.PermissionAssignUserRoleReqVO;
 import com.cmsr.onebase.module.system.controller.admin.permission.vo.permission.PermissionAssignRoleUsersReqVO;
 import com.cmsr.onebase.module.system.controller.admin.permission.vo.permission.PermissionDeleteRoleUsersReqVO;
+import com.cmsr.onebase.module.system.controller.admin.permission.vo.permission.PermissionAssignRoleMenusReqVO;
+import com.cmsr.onebase.module.system.controller.admin.permission.vo.permission.PermissionDeleteRoleMenusReqVO;
 import com.cmsr.onebase.module.system.service.permission.PermissionService;
 import com.cmsr.onebase.module.system.service.tenant.TenantService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -36,7 +38,7 @@ public class PermissionController {
     @Resource
     private TenantService tenantService;
 
-    @Operation(summary = "获得角色拥有的菜单编号")
+    @Operation(summary = "获得角色拥有的权限编号")
     @Parameter(name = "roleId", description = "角色编号", required = true)
     @GetMapping("/list-role-menus")
     @PreAuthorize("@ss.hasPermission('system:permission:assign-role-menu')")
@@ -45,7 +47,7 @@ public class PermissionController {
     }
 
     @PostMapping("/assign-role-menu")
-    @Operation(summary = "赋予角色菜单")
+    @Operation(summary = "赋予角色权限")
     @PreAuthorize("@ss.hasPermission('system:permission:assign-role-menu')")
     public CommonResult<Boolean> assignRoleMenu(@Validated @RequestBody PermissionAssignRoleMenuReqVO reqVO) {
         // 开启多租户的情况下，需要过滤掉未开通的菜单
@@ -81,18 +83,38 @@ public class PermissionController {
     }
 
     @Operation(summary = "为角色分配用户")
-    @PostMapping("/assign-role-users")
-    @PreAuthorize("@ss.hasPermission('system:permission:assign-role-user')")
-    public CommonResult<Boolean> assignRoleUsers(@Validated @RequestBody PermissionAssignRoleUsersReqVO reqVO) {
+    @PostMapping("/add-role-users")
+    @PreAuthorize("@ss.hasPermission('system:permission:add-role-user')")
+    public CommonResult<Boolean> addRoleUsers(@Validated @RequestBody PermissionAssignRoleUsersReqVO reqVO) {
         permissionService.addRoleUsers(reqVO.getRoleId(), reqVO.getUserIds());
         return success(true);
     }
 
     @Operation(summary = "从角色中移除用户")
     @PostMapping("/delete-role-users")
-    @PreAuthorize("@ss.hasPermission('system:permission:assign-role-user')")
+    @PreAuthorize("@ss.hasPermission('system:permission:delete-role-user')")
     public CommonResult<Boolean> deleteRoleUsers(@Validated @RequestBody PermissionDeleteRoleUsersReqVO reqVO) {
         permissionService.deleteRoleUsers(reqVO.getRoleId(), reqVO.getUserIds());
+        return success(true);
+    }
+
+    @Operation(summary = "为角色分配菜单&权限")
+    @PostMapping("/add-role-menus")
+    @PreAuthorize("@ss.hasPermission('system:permission:add-role-menu')")
+    public CommonResult<Boolean> addRoleMenus(@Validated @RequestBody PermissionAssignRoleMenusReqVO reqVO) {
+        // 开启多租户的情况下，需要过滤掉未开通的菜单
+        tenantService.handleTenantMenu(menuIds -> reqVO.getMenuIds().removeIf(menuId -> !CollUtil.contains(menuIds, menuId)));
+
+        // 执行菜单的分配
+        permissionService.addRoleMenus(reqVO.getRoleId(), reqVO.getMenuIds());
+        return success(true);
+    }
+
+    @Operation(summary = "从角色中移除菜单&权限")
+    @PostMapping("/delete-role-menus")
+    @PreAuthorize("@ss.hasPermission('system:permission:delete-role-menu')")
+    public CommonResult<Boolean> deleteRoleMenus(@Validated @RequestBody PermissionDeleteRoleMenusReqVO reqVO) {
+        permissionService.deleteRoleMenus(reqVO.getRoleId(), reqVO.getMenuIds());
         return success(true);
     }
 

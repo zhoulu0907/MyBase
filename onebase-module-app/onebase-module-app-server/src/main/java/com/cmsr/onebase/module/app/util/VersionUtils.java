@@ -10,6 +10,9 @@ public class VersionUtils {
 
     public static final String INIT_VERSION = "v0.0.1";
 
+    public static final Integer OPERATION_TYPE_PUBLISH = 1;
+    public static final Integer OPERATION_TYPE_SAVE = 2;
+
 
     /**
      * 递增版本号，比如 v1.0.0 -> v1.0.1 、 v1.0.1 -> v1.0.2

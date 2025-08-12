@@ -103,7 +103,7 @@ public class AuthController {
 
     @GetMapping("/get-permission-info")
     @Operation(summary = "获取登录用户的权限信息")
-    public CommonResult<AuthPermissionInfoRespVO> getPermissionInfo() {
+    public CommonResult<AuthPermissionInfoRespVO> getPermissionInfo(@RequestParam(value = "code", required = false) String code) {
         // 1.1 获得用户信息
         AdminUserDO user = userService.getUser(getLoginUserId());
         if (user == null) {
@@ -113,7 +113,7 @@ public class AuthController {
         // 1.2 获得角色列表
         Set<Long> roleIds = permissionService.getUserRoleIdListByUserId(getLoginUserId());
         if (CollUtil.isEmpty(roleIds)) {
-            return success(AuthConvert.INSTANCE.convert(user, Collections.emptyList(), Collections.emptyList()));
+            return success(AuthConvert.INSTANCE.convert(user, Collections.emptyList(), Collections.emptyList(), code));
         }
         List<RoleDO> roles = roleService.getRoleList(roleIds);
         roles.removeIf(role -> !CommonStatusEnum.ENABLE.getStatus().equals(role.getStatus())); // 移除禁用的角色
@@ -124,7 +124,7 @@ public class AuthController {
         menuList = menuService.filterDisableMenus(menuList);
 
         // 2. 拼接结果返回
-        return success(AuthConvert.INSTANCE.convert(user, roles, menuList));
+        return success(AuthConvert.INSTANCE.convert(user, roles, menuList, code));
     }
 
     @PostMapping("/register")

@@ -34,7 +34,6 @@ public class TenantDO extends BaseDO {
     public static final String PACKAGE_ID              = "package_id";
     public static final String EXPIRE_TIME             = "expire_time";
     public static final String ACCOUNT_COUNT           = "account_count";
-    public static final String ALLOCATE_PERSON_COUNT   = "allocate_person_count";
     public static final String TENANT_CODE             = "tenant_code";
     public static final String TENANT_KEY              = "tenant_key";
     public static final String TENANT_SECRET           = "tenant_secret";
@@ -107,12 +106,6 @@ public class TenantDO extends BaseDO {
      */
     @Column(name = ACCOUNT_COUNT)
     private Integer accountCount;
-
-    /**
-     * 分配人员数量
-     */
-    @Column(name = ALLOCATE_PERSON_COUNT)
-    private Integer allocatePersonCount;
 
     /**
      * 租户编码 - 系统

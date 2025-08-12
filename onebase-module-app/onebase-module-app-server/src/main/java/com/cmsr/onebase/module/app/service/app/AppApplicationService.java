@@ -23,6 +23,8 @@ public interface AppApplicationService {
 
     void updateApplicationName(Long id, String name);
 
+    void updateApplicationVersion(Long id, String versionNumber, String versionUrl);
+
     void deleteApplication(Long id,String name);
 
  }

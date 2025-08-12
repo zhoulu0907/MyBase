@@ -161,6 +161,18 @@ public class AppApplicationServiceImpl implements AppApplicationService {
     }
 
     @Override
+    public void updateApplicationVersion(Long id, String versionNumber, String versionUrl) {
+        ApplicationDO applicationDO = applicationRepository.findById(id);
+        if (applicationDO == null) {
+            throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_NOT_EXIST);
+        }
+
+        applicationDO.setVersionNumber(versionNumber);
+        applicationDO.setVersionURL(versionUrl);
+        applicationRepository.update(applicationDO);
+    }
+
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteApplication(Long id, String name) {
         ApplicationDO applicationDO = appCommonService.validateApplicationExist(id);

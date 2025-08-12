@@ -1,9 +1,21 @@
 package com.cmsr.onebase.module.app.service.version;
 
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
+
+import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.module.app.controller.admin.app.vo.ApplicationRespVO;
+import com.cmsr.onebase.module.app.controller.admin.version.vo.VersionPageReqVo;
+import com.cmsr.onebase.module.app.controller.admin.version.vo.VersionPageRespVO;
+import com.cmsr.onebase.module.app.enums.app.ApplicationStatusEnum;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
+
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.app.controller.admin.version.vo.VersionCreateReqVO;
-import com.cmsr.onebase.module.app.controller.admin.version.vo.VersionListRespVO;
 import com.cmsr.onebase.module.app.dal.database.app.AppApplicationRepository;
 import com.cmsr.onebase.module.app.dal.database.app.AppResourceRepository;
 import com.cmsr.onebase.module.app.dal.database.menu.AppMenuRepository;
@@ -20,17 +32,13 @@ import com.cmsr.onebase.module.app.enums.app.AppErrorCodeConstants;
 import com.cmsr.onebase.module.app.service.AppCommonService;
 import com.cmsr.onebase.module.app.service.app.AppApplicationService;
 import com.cmsr.onebase.module.app.util.VersionUtils;
+
 import jakarta.annotation.Resource;
 import lombok.Setter;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.annotation.Validated;
-
-import java.util.List;
 
 /**
  * @Author：huangjie
- * @Date：2025/7/24 11:04
+ *                  @Date：2025/7/24 11:04
  */
 @Setter
 @Service
@@ -62,40 +70,56 @@ public class AppVersionServiceImpl implements AppVersionService {
     private AppApplicationService appApplicationService;
 
     @Override
-    public List<VersionListRespVO> listApplicationVersion(Long applicationId) {
-        List<VersionDO> dos = versionRepository.findByApplicationId(applicationId);
-        AppCommonService.UserHelper userHelper = appCommonService.getUserHelper(dos);
-        return dos.stream().map(v -> {
-            VersionListRespVO vo = BeanUtils.toBean(v, VersionListRespVO.class);
-            vo.setCreatorName(userHelper.getUserName(v.getCreator()));
-            return vo;
-        }).toList();
+    public PageResult<VersionPageRespVO> getApplicationVersionPage(VersionPageReqVo listReqVo) {
+        PageResult<VersionDO> pageResult = versionRepository.selectPage(listReqVo);
+        AppCommonService.UserHelper userHelper = appCommonService.getUserHelper(pageResult.getList());
+        List<VersionPageRespVO> respVOS = pageResult.getList().stream()
+                .map(v -> {
+                    VersionPageRespVO bean = BeanUtils.toBean(v, VersionPageRespVO.class);
+                    bean.setUpdaterName(userHelper.getUserName(v.getUpdater()));
+                    return bean;
+                })
+                .toList();
+        return new PageResult<>(respVOS, pageResult.getTotal());
     }
 
     @Transactional
     @Override
     public void createApplicationVersion(VersionCreateReqVO createReqVO) {
         ApplicationDO applicationDO = appCommonService.validateApplicationExist(createReqVO.getApplicationId());
-        //先备份老的相关数据
-        //创建新版本
+        // 先备份老的相关数据
+        // 创建新版本
         final VersionDO applicationVersionDO = new VersionDO();
         applicationVersionDO.setApplicationId(applicationDO.getId());
         applicationVersionDO.setVersionName(createReqVO.getVersionName());
         applicationVersionDO.setVersionNumber(createReqVO.getVersionNumber());
+        applicationVersionDO.setVersionDescription(createReqVO.getVersionDescription());
+        applicationVersionDO.setVersionURL(UUID.randomUUID().toString().replace("-", ""));
+        applicationVersionDO.setOperationType(createReqVO.getOperationType());
+        applicationVersionDO.setEnvironment(createReqVO.getEnvironment());
         versionRepository.insert(applicationVersionDO);
-        //备份菜单
+
+        if (Objects.equals(applicationVersionDO.getOperationType(), VersionUtils.OPERATION_TYPE_PUBLISH)){
+            // 更新版本到主表
+            appApplicationService.updateApplicationVersion(applicationDO.getId(),
+                    applicationVersionDO.getVersionNumber(),
+                    applicationVersionDO.getVersionURL()
+            );
+        }
+
+        // TODO(huangjie)待完善 ：）
+
+        // 备份菜单
         List<MenuDO> menuDOS = menuRepository.findByApplicationId(applicationDO.getId());
         List<VersionMenuDO> versionMenuDOS = BeanUtils.toBean(menuDOS, VersionMenuDO.class,
-                versionMenuDO -> versionMenuDO.setVersionId(applicationVersionDO.getId())
-        );
+                versionMenuDO -> versionMenuDO.setVersionId(applicationVersionDO.getId()));
         versionMenuRepository.insertBatch(versionMenuDOS);
-        //备份资源
+        // 备份资源
         List<ResourceDO> resourceDOS = resourceRepository.findByApplicationId(applicationDO.getId());
         List<VersionResourceDO> versionResourceDOS = BeanUtils.toBean(resourceDOS, VersionResourceDO.class,
-                versionResourceDO -> versionResourceDO.setVersionId(applicationVersionDO.getId())
-        );
+                versionResourceDO -> versionResourceDO.setVersionId(applicationVersionDO.getId()));
         versionResourceRepository.insertBatch(versionResourceDOS);
-        //主表版本升级
+        // 主表版本升级
         String newVersionNumber = VersionUtils.increaseVersionNumber(createReqVO.getVersionNumber());
         applicationDO.setVersionNumber(newVersionNumber);
         applicationRepository.update(applicationDO);
@@ -106,20 +130,29 @@ public class AppVersionServiceImpl implements AppVersionService {
     public void restoreApplicationVersion(Long versionId) {
         VersionDO applicationVersionDO = validateApplicationVersionExist(versionId);
         Long applicationId = applicationVersionDO.getApplicationId();
-        //删除相关数据
+
+        // 更新到主表
+        ApplicationDO applicationDO = applicationRepository.findById(applicationId);
+        applicationDO.setVersionURL(applicationVersionDO.getVersionURL());
+        applicationDO.setVersionNumber(applicationVersionDO.getVersionNumber());
+        applicationRepository.update(applicationDO);
+
+        // TODO(huangjie)待完善 ：）
+
+        // 删除相关数据
         menuRepository.deleteByApplicationId(applicationId);
         resourceRepository.deleteByApplicationId(applicationId);
-        //恢复菜单
-        List<VersionMenuDO> versionMenuDOS = versionMenuRepository.findByApplicationIdAndVersionId(applicationId, versionId);
+        // 恢复菜单
+        List<VersionMenuDO> versionMenuDOS = versionMenuRepository.findByApplicationIdAndVersionId(applicationId,
+                versionId);
         List<MenuDO> menuDOS = BeanUtils.toBean(versionMenuDOS, MenuDO.class,
-                menuDO -> menuDO.setId(null)
-        );
+                menuDO -> menuDO.setId(null));
         menuRepository.insertBatch(menuDOS);
-        //恢复资源
-        List<VersionResourceDO> versionResourceDOS = versionResourceRepository.findByApplicationIdAndVersionId(applicationId, versionId);
+        // 恢复资源
+        List<VersionResourceDO> versionResourceDOS = versionResourceRepository
+                .findByApplicationIdAndVersionId(applicationId, versionId);
         List<ResourceDO> resourceDOS = BeanUtils.toBean(versionResourceDOS, ResourceDO.class,
-                resourceDO -> resourceDO.setId(null)
-        );
+                resourceDO -> resourceDO.setId(null));
         resourceRepository.insertBatch(resourceDOS);
     }
 
