@@ -15,19 +15,18 @@ import {
 } from '@arco-design/web-react';
 import { IconSearch } from '@arco-design/web-react/icon';
 import styles from './index.module.less'
-import { getPlatformTenantListApi, getPlatformInfoApi, addPlatformTenantApi, updatePlatformTenantApi, getCreateTenantCountApi, getPlatformTenantAdminListApi, type PlatformTenantInfo, PlatformTenantStatus, type CreateTenantParams } from "@onebase/platform-center";
-import { formatTimestamp } from '@/utils/date';
+import { getPlatformTenantListApi, getPlatformInfoApi, addPlatformTenantApi, updatePlatformTenantApi, getCreateTenantCountApi, getPlatformTenantAdminListApi, PlatformTenantStatus, ADMIN_ROOT_ID, type PlatformTenantInfo, type CreateTenantParams } from "@onebase/platform-center";
+import { formatTimestamp, generateTimestampString } from '@/utils/date';
 
 const { Text } = Typography;
 const { Option } = Select;
 const { useForm } = Form;
 
 const TenantManagement: React.FC = () => {
-  const [data, setData] = useState<PlatformTenantInfo[]>([]);
   const [tenantList, setTenantList] = useState<PlatformTenantInfo[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchParams, setSearchParams] = useState({
-    status: 2,
+    status: PlatformTenantStatus.all,
     keyword: ''
   });
   const [modalVisible, setModalVisible] = useState(false);
@@ -41,6 +40,7 @@ const TenantManagement: React.FC = () => {
   const [confirmText, setConfirmText] = useState('');
   const [total, setTotal] = useState(undefined) 
   const [currentPage, setCurrentPage] = useState(1);
+  const [adminInfoList, setAdminInfoList] = useState([])
 
 
   // 获取租户列表
@@ -75,11 +75,11 @@ const TenantManagement: React.FC = () => {
     let result = [...tenantList];
 
     // 状态筛选
-    if (searchParams.status !== 2) {
-      if (searchParams.status === 0) {
-        result = result.filter(item => item.status === PlatformTenantStatus['已启用']);
-      } else if (searchParams.status === 1) {
-        result = result.filter(item => item.status === PlatformTenantStatus['已禁用']);
+    if (searchParams.status !== PlatformTenantStatus.all) {
+      if (searchParams.status === PlatformTenantStatus.enabled) {
+        result = result.filter(item => item.status === PlatformTenantStatus.enabled);
+      } else if (searchParams.status === PlatformTenantStatus.disabled) {
+        result = result.filter(item => item.status === PlatformTenantStatus.disabled);
       }
     }
 
@@ -128,7 +128,10 @@ const handleSearch = async (keyword: string) => {
   const getLicenseLimit = async () => {
     try {
       const licenseResp = await getPlatformInfoApi();
-      setTenantLimit(licenseResp.tenantLimit)
+      if(licenseResp) {
+        console.log('license总数 licenseResp:', licenseResp);
+        setTenantLimit(licenseResp.tenantLimit)
+      }
     } catch (error) {
       console.error('Error fetching getLicenseLimit:', error);
       
@@ -138,8 +141,11 @@ const handleSearch = async (keyword: string) => {
   // 获取可分配数量
   const getAllocatable = async () => {
     try {
-      const res = await getCreateTenantCountApi();
-      setAllocatableLicense(res);
+      const resp = await getCreateTenantCountApi();
+      if(resp) {
+        console.log('可分配数量 resp:', resp);
+        setAllocatableLicense(resp);
+      }
     } catch (error) {
       console.error('Error fetching allocatable:', error);
       
@@ -153,8 +159,8 @@ const handleSearch = async (keyword: string) => {
       console.log('管理员列表 adminListResp:', adminListResp);
       // setAdminList(adminListResp)
       // 将id为1的管理员 筛选出来并排到第一个
-      const adminListWithId1 = adminListResp.filter(item => item.id === 1)
-      setAdminList(adminListWithId1.concat(adminListResp.filter(item => item.id !== 1)))
+      const adminListWithId1 = adminListResp.filter(item => item.id === ADMIN_ROOT_ID)
+      setAdminList(adminListWithId1.concat(adminListResp.filter(item => item.id !== ADMIN_ROOT_ID)))
       // console.log('adminList:', adminList);
     } catch (error) {
       console.error('Error fetching adminList:', error);
@@ -165,7 +171,7 @@ const handleSearch = async (keyword: string) => {
     setCurrentTenant(null);
     form.resetFields();
     form.setFieldsValue({
-      status: 0,
+      status: PlatformTenantStatus.enabled,
       admin: adminList.length > 0 ? adminList[0].username : undefined
     });
     setModalVisible(true);
@@ -174,8 +180,7 @@ const handleSearch = async (keyword: string) => {
 
    // 生成租户编码
   const generateTenantCode = () => {
-    const now = new Date();
-    const timestamp = `${now.getFullYear()}${(now.getMonth() + 1).toString().padStart(2, '0')}${now.getDate().toString().padStart(2, '0')}${now.getHours().toString().padStart(2, '0')}${now.getMinutes().toString().padStart(2, '0')}${now.getSeconds().toString().padStart(2, '0')}`;
+    const timestamp = generateTimestampString();
     return `tenant_${timestamp}`;
   };
 
@@ -194,7 +199,7 @@ const handleSearch = async (keyword: string) => {
     setCurrentTenant(tenant);
     form.setFieldsValue({
       ...record,
-      status: record.status === PlatformTenantStatus['已启用'] ? 0 : 1
+      status: record.status === PlatformTenantStatus.enabled ? PlatformTenantStatus.enabled : PlatformTenantStatus.disabled,
     });
     setModalVisible(true);
     setIsNewTenant(false);
@@ -312,7 +317,7 @@ const handleSearch = async (keyword: string) => {
   const cancelDisable = () => {
     setConfirmDisableVisible(false);
     // 同时Switch状态变为已启用
-    // form.setFieldsValue({ status: 0 });
+    form.setFieldsValue({ status: PlatformTenantStatus.enabled });
   };
 
   // 表格列定义
@@ -399,9 +404,9 @@ const handleSearch = async (keyword: string) => {
             {/* 添加激活状态 颜色为 #00b42a */}
 
             <Radio.Group type="button" value={searchParams.status} onChange={handleStatusChange}>
-              <Radio value={2}>全部</Radio>
-              <Radio value={0}>启用</Radio>
-              <Radio value={1}>禁用</Radio>
+              <Radio value={PlatformTenantStatus.all}>全部</Radio>
+              <Radio value={PlatformTenantStatus.enabled}>启用</Radio>
+              <Radio value={PlatformTenantStatus.disabled}>禁用</Radio>
             </Radio.Group>
 
             <Input.Search
@@ -422,7 +427,7 @@ const handleSearch = async (keyword: string) => {
           columns={columns}
           data={tenantList}
           loading={loading}
-          rowClassName={(record) => record.status === PlatformTenantStatus['已启用'] ? 'enabled-row' : ''}
+          rowClassName={(record) => record.status === PlatformTenantStatus.enabled ? 'enabled-row' : ''}
           pagination={{
             current: currentPage,
             pageSize: 10,
@@ -487,18 +492,18 @@ const handleSearch = async (keyword: string) => {
               checkedText="已启用"
               uncheckedText="已禁用"
               defaultChecked // 默认启用状态
-              checked={form.getFieldValue('status') === 0}
+              checked={form.getFieldValue('status') === PlatformTenantStatus.enabled}
               disabled={!currentTenant}
               onChange={(checked) => {
                 form.setFieldsValue({
-                  status: checked ? 0 : 1
+                  status: checked ? PlatformTenantStatus.enabled : PlatformTenantStatus.disabled
                 });
                 if (!checked) {
                   // console.log('checked', checked);
                   setConfirmDisableVisible(true);
-                } else if (currentTenant && currentTenant.status === 1) {
+                } else if (currentTenant && currentTenant.status === PlatformTenantStatus.disabled) {
                   setTenantList(tenantList.map(item => 
-                    item.id === Number(currentTenant.id) ? { ...item, status: PlatformTenantStatus['已启用'] } : item
+                    item.id === Number(currentTenant.id) ? { ...item, status: PlatformTenantStatus.enabled } : item
                   ));
                   // Message.success('已启用租户');
                 }
