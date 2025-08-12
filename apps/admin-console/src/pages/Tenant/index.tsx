@@ -40,7 +40,7 @@ const TenantManagement: React.FC = () => {
   const [confirmText, setConfirmText] = useState('');
   const [total, setTotal] = useState(undefined) 
   const [currentPage, setCurrentPage] = useState(1);
-  const [adminInfoList, setAdminInfoList] = useState([])
+  // const [adminInfoList, setAdminInfoList] = useState([])
 
 
   // 获取租户列表
@@ -224,61 +224,62 @@ const handleSearch = async (keyword: string) => {
         return;
       }
       
-      // 如果是从禁用状态切换到启用状态
       if (currentTenant) {
-         // 构建更新参数
-        const updateParams: CreateTenantParams = {
-          id: currentTenant.id, // 确保包含租户ID
-          name: values.tenantName,
-          tenantCode: values.tenantCode,
-          contactName: values.admin,
-          status: values.status,
-          accountCount: values.allocatedCount
-        };
-
-        try {
-          // 调用 updatePlatformTenantApi
-          await updatePlatformTenantApi(updateParams);
-
-          // 更新本地状态
-          setTenantList(tenantList.map((item) => (item.id === Number(currentTenant.id) ? { ...item, ...values } : item)));
-          Message.success('更新成功');
-        } catch (error: any) {
-          Message.error(error.message || '更新失败');
-        }
-      }
-      // 这里应该是API调用
-      if (currentTenant) {
-        // 更新
-        setTenantList(tenantList.map((item) => (item.id === Number(currentTenant.id) ? { ...item, ...values } : item)));
-        // Message.success('更新成功');
+        // 更新租户
+        await updateTenant(values);
       } else {
-        try {
-          const newTenantData: CreateTenantParams = {
-            name: values.tenantName,
-            tenantCode: generateTenantCode(),
-            contactName: values.admin,
-            status: values.status,
-            accountCount: values.allocatedCount
-          };
-          
-          await addPlatformTenantApi(newTenantData);
-          
-          const newTenant = {
-            id: tenantList.length + 1,
-            tenantCode: newTenantData.tenantCode,
-            ...values,
-            createTime: new Date().toISOString()
-          };
-          setTenantList([...tenantList, newTenant]);
-          Message.success('创建成功');
-        } catch (error: any) {
-          Message.error(error.message || '创建失败');
-        }
+        // 创建租户
+        await createTenant(values);
       }
+      
       setModalVisible(false);
     } catch (error) {
       console.error('表单验证失败:', error);
+    }
+  };
+
+  /**
+   * 更新租户信息
+   */
+  const updateTenant = async (values: any) => {
+    try {
+      // 构建更新参数
+      const updateParams: CreateTenantParams = {
+        id: currentTenant.id, // 确保包含租户ID
+        name: values.tenantName,
+        tenantCode: values.tenantCode,
+        contactName: values.admin,
+        status: values.status,
+        accountCount: values.allocatedCount
+      };
+      // 调用 updatePlatformTenantApi
+      await updatePlatformTenantApi(updateParams);
+      getPlatformTenantList();
+      Message.success('更新成功');
+    } catch (error: any) {
+      Message.error(error.message || '更新失败');
+    }
+  };
+
+  /**
+   * 创建新租户
+   */
+  const createTenant = async (values: any) => {
+    try {
+      const newTenantData: CreateTenantParams = {
+        name: values.tenantName,
+        tenantCode: generateTenantCode(),
+        contactName: values.admin,
+        status: values.status,
+        accountCount: values.allocatedCount
+      };
+      
+      await addPlatformTenantApi(newTenantData);
+      
+      getPlatformTenantList();
+      Message.success('创建成功');
+    } catch (error: any) {
+      Message.error(error.message || '创建失败');
     }
   };
 
