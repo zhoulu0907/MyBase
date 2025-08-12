@@ -88,9 +88,9 @@ const VersionManagement: React.FC = () => {
     console.log('启用版本:', record);
   };
 
-  const handleCompareVersion = (record: VersionRecord) => {
-    console.log('版本比对:', record);
-  };
+  // const handleCompareVersion = (record: VersionRecord) => {
+  //   console.log('版本比对:', record);
+  // };
 
   const handleAccessVersion = (record: VersionRecord) => {
     console.log('访问版本:', record);
@@ -149,24 +149,29 @@ const VersionManagement: React.FC = () => {
       title: '版本名称',
       dataIndex: 'versionName',
       key: 'versionName',
+      align: 'center',
       width: 200
     },
     {
       title: '版本号',
       dataIndex: 'versionNumber',
       key: 'versionNumber',
+      align: 'center',
       width: 120
     },
     {
       title: '版本描述',
       dataIndex: 'description',
       key: 'description',
-      width: 200
+      align: 'center',
+      width: 200,
+      ellipsis: true
     },
     {
       title: '发布环境',
       dataIndex: 'environment',
       key: 'environment',
+      align: 'center',
       width: 120,
       render: (value: string) => value || '-'
     },
@@ -174,23 +179,27 @@ const VersionManagement: React.FC = () => {
       title: '操作类型',
       dataIndex: 'operationType',
       key: 'operationType',
+      align: 'center',
       width: 120
     },
     {
       title: '操作人',
       dataIndex: 'operator',
       key: 'operator',
+      align: 'center',
       width: 120
     },
     {
       title: '操作时间',
       dataIndex: 'operationTime',
       key: 'operationTime',
+      align: 'center',
       width: 180
     },
     {
       title: '操作',
       key: 'actions',
+      align: 'center',
       width: 200,
       render: (_: unknown, record: VersionRecord) => (
         <Space>
@@ -203,9 +212,9 @@ const VersionManagement: React.FC = () => {
           <Button type="text" size="small" onClick={() => handleEditVersion(record)}>
             编辑
           </Button>
-          <Button type="text" size="small" onClick={() => handleCompareVersion(record)}>
+          {/* <Button type="text" size="small" onClick={() => handleCompareVersion(record)}>
             版本比对
-          </Button>
+          </Button> */}
         </Space>
       )
     }
