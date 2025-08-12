@@ -1,67 +1,72 @@
-import type { EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
-import { Avatar, Button, List, Spin } from '@arco-design/web-react';
-import { IconList } from '@arco-design/web-react/icon';
-import React, { useState } from 'react';
-import CreateEntityPage from '../Modals/CreateEntityModal';
+import { Button, List, Popover, Space, Spin } from '@arco-design/web-react';
+import { IconMoreVertical, IconPlus } from '@arco-design/web-react/icon';
+import React from 'react';
 import styles from './EntityList.module.less';
+import type { EntityListItem } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
 
 interface EntityListProps {
-  entities: EntityNode[];
-  selectedEntity: EntityNode | null;
-  onEntitySelect: (entity: EntityNode) => void;
+  entities: EntityListItem[];
+  selectedEntity: EntityListItem | null;
+  onEntitySelect: (entity: EntityListItem) => void;
   loading?: boolean;
+  handleDelete: (entity: EntityListItem) => void;
+  handleOpenAddModal: () => void;
 }
 
-const EntityList: React.FC<EntityListProps> = ({ entities, selectedEntity, onEntitySelect, loading = false }) => {
-  const [createEntityModalVisible, setCreateEntityModalVisible] = useState(false);
-
-  const handleOpenAddModal = () => {
-    setCreateEntityModalVisible(true);
-  };
-
-  const successCallback = () => {
-    // setCreateEntityModalVisible(false);
+const EntityList: React.FC<EntityListProps> = ({
+  entities,
+  selectedEntity,
+  onEntitySelect,
+  loading = false,
+  handleDelete,
+  handleOpenAddModal
+}) => {
+  const handleEdit = (entity: EntityListItem) => {
+    console.log(entity);
   };
 
   return (
     <div className={styles.entityList}>
       <div className={styles.header}>
-        <h3>实体列表</h3>
-        <span className={styles.count}>{entities.length} 个实体</span>
+        <h3>业务实体</h3>
         <Button type="primary" onClick={handleOpenAddModal}>
-          创建实体
+          <IconPlus />
         </Button>
       </div>
       <Spin loading={loading}>
         <List
           className={styles.list}
           dataSource={entities}
-          render={(entity: EntityNode) => (
+          render={(entity) => (
             <List.Item
-              key={entity.entityId}
-              className={`${styles.listItem} ${selectedEntity?.entityId === entity.entityId ? styles.selected : ''}`}
+              key={entity.id}
+              className={`${styles.listItem} ${selectedEntity?.id === entity.id ? styles.selected : ''}`}
               onClick={() => onEntitySelect(entity)}
             >
               <div className={styles.itemContent}>
-                <Avatar className={styles.avatar}>
-                  <IconList />
-                </Avatar>
-                <div className={styles.itemInfo}>
-                  <div className={styles.entityName}>{entity.entityName}</div>
-                  <div className={styles.entityId}>{entity.entityId}</div>
-                  <div className={styles.fieldCount}>{entity.fields?.length || 0} 个字段</div>
-                </div>
+                <div className={styles.entityName}>{entity.displayName}</div>
+                <Popover
+                  trigger="hover"
+                  position="right"
+                  className={styles['more-icon-popover']}
+                  content={
+                    <Space direction="vertical">
+                      <Button type="text" onClick={() => handleEdit(entity)}>
+                        编辑
+                      </Button>
+                      <Button type="text" onClick={() => handleDelete(entity)}>
+                        删除
+                      </Button>
+                    </Space>
+                  }
+                >
+                  <IconMoreVertical />
+                </Popover>
               </div>
             </List.Item>
           )}
         />
       </Spin>
-
-      <CreateEntityPage
-        visible={createEntityModalVisible}
-        setVisible={setCreateEntityModalVisible}
-        successCallback={successCallback}
-      />
     </div>
   );
 };

@@ -45,32 +45,6 @@ const CreateRelationModal: React.FC<{
 
   // 初始化实体选项
   useEffect(() => {
-    // if (updateRelationOptions) {
-    //   // 从localStorage获取实体数据
-    //   const { nodes } = JSON.parse(
-    //     localStorage.getItem('entityFormValues') || JSON.stringify({ nodes: [], edges: [] })
-    //   );
-    //   const entityOptions = nodes?.length
-    //     ? nodes.map((node: EntityNode) => ({
-    //         label: node.title, // 使用title作为label
-    //         value: node.id
-    //       }))
-    //     : [];
-    //   const fieldOptions = nodes?.fields?.length
-    //     ? nodes.fields.map((field: EntityField) => ({
-    //         label: field.name,
-    //         value: field.id
-    //       }))
-    //     : [];
-    //   setLeftFieldOptions(fieldOptions);
-    //   setRightFieldOptions(fieldOptions);
-
-    //   setLeftEntityOptions(entityOptions);
-    //   setRightEntityOptions(entityOptions);
-    // }
-
-    // setUpdateRelationOptions(false);
-
     loadEntities();
   }, []);
 

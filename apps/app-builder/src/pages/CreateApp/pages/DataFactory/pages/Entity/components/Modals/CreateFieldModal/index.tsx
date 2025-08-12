@@ -50,24 +50,6 @@ const CreateFieldModal: React.FC<{
   const handleFinish = () => {
     // TODO: 提交表单数据
     form.validate().then(async (values) => {
-      // const { nodes, edges } = JSON.parse(
-      //   localStorage.getItem('FieldFormValues') || JSON.stringify({ nodes: [], edges: [] })
-      // );
-      // const entity = nodes.find((node: Entity  Node) => node.id === entityId);
-      // if (entity) {
-      //   if (entity.fields.find((field: EntityField) => field.id === values.fieldCode)) {
-      //     Message.error('字段编码已存在');
-      //     return;
-      //   }
-      //   entity.fields.push({
-      //     ...values,
-      //     isSystem: false
-      //   });
-      // }
-
-      // localStorage.setItem('FieldFormValues', JSON.stringify({ nodes, edges }));
-      // console.log(values);
-
       const res = await createField({
         entityId: entity.entityId,
         displayName: entity.entityName,
