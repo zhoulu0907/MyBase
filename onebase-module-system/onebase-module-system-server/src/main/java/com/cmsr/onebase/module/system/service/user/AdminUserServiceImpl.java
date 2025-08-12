@@ -396,8 +396,13 @@ public class AdminUserServiceImpl implements AdminUserService {
         if (CollUtil.isEmpty(deptIds)) {
             return Collections.emptyList();
         }
-//        return userMapper.selectListByDeptIds(deptIds);
-        return dataRepository.findAllByConfig(AdminUserDO.class, new DefaultConfigStore().in("dept_id", deptIds));
+        return dataRepository.findAllByConfig(AdminUserDO.class, new DefaultConfigStore().in(AdminUserDO.DEPT_ID, deptIds));
+    }
+
+
+    @Override
+    public List<AdminUserDO> getUserListNoDept() {
+        return dataRepository.findAllByConfig(AdminUserDO.class, new DefaultConfigStore().isNull(AdminUserDO.DEPT_ID));
     }
 
     @Override
@@ -446,8 +451,7 @@ public class AdminUserServiceImpl implements AdminUserService {
 
     @Override
     public List<AdminUserDO> getUserListByNickname(String nickname) {
-        return dataRepository.findAllByConfig(AdminUserDO.class, new DefaultConfigStore().eq("nickname", nickname));
-//        return userMapper.selectListByNickname(nickname);
+        return dataRepository.findAllByConfig(AdminUserDO.class, new DefaultConfigStore().like(AdminUserDO.NICKNAME, nickname));
     }
 
     /**

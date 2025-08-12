@@ -1,6 +1,5 @@
 package com.cmsr.onebase.module.system.controller.admin.permission;
 
-import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.system.controller.admin.permission.vo.menu.SystemMenuListReqVO;
@@ -67,10 +66,9 @@ public class SystemMenuController {
     }
 
     @GetMapping({ "simple-list"})
-    @Operation(summary = "获取权限精简列表",
+    @Operation(summary = "获取权限（开启状态）精简列表",
             description = "只包含被开启的菜单，用于【角色分配菜单】功能的选项。在多租户的场景下，会只返回租户所在套餐有的菜单")
     public CommonResult<List<SystemMenuSimpleRespVO>> getSimpleMenuList(SystemMenuListReqVO reqVO) {
-        reqVO.setStatus(CommonStatusEnum.ENABLE.getStatus());
         List<MenuDO> list = menuService.getMenuListByTenant(reqVO);
         list = menuService.filterDisableMenus(list);
         list.sort(Comparator.comparing(MenuDO::getSort));

@@ -3,6 +3,8 @@ package com.cmsr.onebase.module.system.controller.admin.dept;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.module.system.controller.admin.dept.vo.dept.DeptAndUsersReqVO;
+import com.cmsr.onebase.module.system.controller.admin.dept.vo.dept.DeptAndUsersRespVO;
 import com.cmsr.onebase.module.system.controller.admin.dept.vo.dept.DeptListReqVO;
 import com.cmsr.onebase.module.system.controller.admin.dept.vo.dept.DeptRespVO;
 import com.cmsr.onebase.module.system.controller.admin.dept.vo.dept.DeptSaveReqVO;
@@ -85,6 +87,14 @@ public class DeptController {
     public CommonResult<DeptRespVO> getDept(@RequestParam("id") Long id) {
         DeptRespVO dept = deptService.getDeptWithUserCountAndLeader(id);
         return success(dept);
+    }
+
+    @GetMapping("/get-dept-users")
+    @Operation(summary = "指定/搜索获取部门和用户信息")
+    @PreAuthorize("@ss.hasPermission('system:dept:query')")
+    public CommonResult<DeptAndUsersRespVO> getDeptAndUsers(@Valid DeptAndUsersReqVO reqVO) {
+        DeptAndUsersRespVO result = deptService.getDeptAndUsers(reqVO);
+        return success(result);
     }
 
 }
