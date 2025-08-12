@@ -22,4 +22,10 @@ public class AppPageSetLabelRepository extends DataRepositoryNew<PageSetLabelDO>
         return findAllByConfig(configs);
     }
 
+    public List<PageSetLabelDO> findByPageSetCodes(List<String> pageSetCodes) {
+        ConfigStore configs = new DefaultConfigStore();
+        configs.in("pageset_code", pageSetCodes);
+        return findAllByConfig(configs);
+    }
+
 }

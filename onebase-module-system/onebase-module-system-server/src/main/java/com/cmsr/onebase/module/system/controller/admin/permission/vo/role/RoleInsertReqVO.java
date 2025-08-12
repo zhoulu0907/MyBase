@@ -18,7 +18,6 @@ public class RoleInsertReqVO {
     @DiffLogField(name = "角色名称")
     private String name;
 
-    @NotBlank(message = "角色标志不能为空")
     @Size(max = 100, message = "角色标志长度不能超过 100 个字符")
     @Schema(description = "角色标志", requiredMode = Schema.RequiredMode.REQUIRED, example = "ADMIN")
     @DiffLogField(name = "角色标志")

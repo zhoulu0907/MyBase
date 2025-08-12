@@ -19,10 +19,10 @@ public class ComponentDO extends TenantBaseDO {
     private String componentCode;
 
     /**
-     * 页面ID
+     * 页面编码
      */
-    @Column(name = "page_id", columnDefinition = "BIGINT NOT NULL", comment = "页面ID")
-    private Long pageId;
+    @Column(name = "page_code", columnDefinition = "VARCHAR(255) NOT NULL", comment = "页面编码")
+    private String pageCode;
 
     /**
      * 是否在子表中

@@ -102,6 +102,42 @@ public class DataRepositoryNew<T extends BaseDO> {
     // ---------------------------- update 方法 ----------------------------
 
     /**
+     * 保存实体
+     *
+     * @param entity 要保存的实体
+     * @return 保存后的实体
+     * @throws BizException 插入失败时抛出
+     */
+    public T upsert(T entity) {
+        try {
+            long result = anylineService.upsert(entity);
+            log.info("upsert  ---> class={}, effect rows = {}", entity.getClass().getSimpleName(), result);
+        } catch (Exception e) {
+            log.error("update error, class={}, entity={}", defaultClazz, entity, e);
+            throw new BizException(StatusCode.DB_UPDATE_ERROR);
+        }
+        return entity;
+    }
+
+    /**
+     * 批量保存实体
+     *
+     * @param entities 实体列表
+     * @return 保存后的实体列表
+     * @throws BizException 插入失败时抛出
+     */
+    public List<T> upsertBatch(List<T> entities) {
+        if (entities == null || entities.isEmpty()) {
+            return Collections.emptyList();
+        }
+        for (T entity : entities) {
+            upsert(entity);
+        }
+        return entities;
+    }
+    // ---------------------------- update 方法 ----------------------------
+
+    /**
      * 安全更新，不抛出异常的场景（推荐使用 update）
      * 1. 批量更新操作：部分记录更新失败不影响整体流程
      * 2. 可选更新操作：如用户偏好设置、缓存更新等
@@ -431,7 +467,7 @@ public class DataRepositoryNew<T extends BaseDO> {
      */
     public long deleteById(Long id) {
         try {
-            if(id == null || id == 0){
+            if (id == null || id == 0) {
                 return 0;
             }
             ConfigStore configs = new DefaultConfigStore();
