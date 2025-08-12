@@ -23,6 +23,7 @@ export interface PermissionAction {
   id: string;
   name: string;
   type?: number;
+  permission?: string;
 }
 
 export interface Permission {
@@ -31,5 +32,6 @@ export interface Permission {
   type?: number;
   remark?: string;
   parentId: number | string;
+  permission?: string;
   children?: PermissionAction[];
 }

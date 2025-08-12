@@ -1,7 +1,7 @@
 import InfoPanel from '@/components/InfoPanel';
 import DictionaryTable from '@/pages/Setting/pages/SystemDict/components/dict-data-table';
 import DictList from '@/pages/Setting/pages/SystemDict/components/dict-list';
-import { Button, Divider, Empty, Layout, Message, Modal, Space } from '@arco-design/web-react';
+import { Divider, Empty, Layout, Message, Modal, Space } from '@arco-design/web-react';
 import type { DictData, DictItem, PageParam } from '@onebase/platform-center';
 import {
   createDict,
@@ -20,6 +20,10 @@ import { useEffect, useState } from 'react';
 import DictDataModal from './components/dict-data-modal';
 import DictModal from './components/dict-modal';
 import styles from './index.module.less';
+import PlaceholderPanel from '@/components/PlaceholderPanel';
+import { hasPermission } from '@/utils/permission';
+import { TENANT_DICT_PERMISSION as ACTIONS } from '@/constants/permission';
+import { PermissionButton as Button } from '@/components/PermissionControl';
 
 const Sider = Layout.Sider;
 const Header = Layout.Header;
@@ -129,6 +133,7 @@ export default function SystemDictPage() {
   const OperationButtons = (
     <Space size="small">
       <Button
+        permission={ACTIONS.UPDATE}
         type="secondary"
         onClick={() => {
           setAddDictModalVisible(true);
@@ -138,6 +143,7 @@ export default function SystemDictPage() {
         编辑
       </Button>
       <Button
+        permission={ACTIONS.DELETE}
         type="secondary"
         onClick={() => {
           handleDeleteDict(activeDict?.id!);

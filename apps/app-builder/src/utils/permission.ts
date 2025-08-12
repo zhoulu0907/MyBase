@@ -1,8 +1,5 @@
 import type { MenuInfo, UserInfo } from '@onebase/platform-center';
 import {
-  MODULE_MAP,
-  MENU_MAP,
-  ACTION_MAP,
   ALL_PERMISSION_CODE,
   type PermissionKey,
   type MenuKey
@@ -42,79 +39,48 @@ export class UserPermissionManager {
   }
 
   /**
-   * 将前端定义的权限标识转换为后端接口返回的权限标识
-   * @param permission 如 'SYSTEM:USER:CREATE' 的键值(constants/permission中查询常量键名）
-   * @returns 将permission自动映射为后端权限code: 'system:user:create'
-   */
-  static getPermissionCode = (permission: PermissionKey | MenuKey | string): string => {
-    if (!permission) {
-      return '';
-    }
-    
-    const parts = permission.split(':');
-    if (parts.length === 1) {
-      return permission;
-    }
-    
-    const [moduleName, menuName, actionName] = parts.slice(0, 3);
-    
-    const moduleCode = MODULE_MAP[moduleName as keyof typeof MODULE_MAP];
-    const menuCode = MENU_MAP[menuName as keyof typeof MENU_MAP];
-    const actionCode = actionName ? ACTION_MAP[actionName as keyof typeof ACTION_MAP] : undefined;
-    
-    if (!moduleCode || !menuCode || (actionName && !actionCode)) {
-      return permission;
-    }
-    
-    return actionName ? `${moduleCode}:${menuCode}:${actionCode}` : `${moduleCode}:${menuCode}`;
-  };
-
-  /**
    * 是否具有指定权限
-   * @param permission 如 'SYSTEM:USER:CREATE' 的键值(constants/permission中查询常量键名）
+   * @param permission 后端定义的权限code (可从constants/permission中引入）
    * @returns 是否具有指定权限
    */
-  static hasPermission(permission: PermissionKey): boolean {
-    const permissionCode = this.getPermissionCode(permission);
+  static hasPermission(permission: string): boolean {
     const userPermissionInfo = this.getUserPermissionInfo();
     if (!userPermissionInfo || !userPermissionInfo.permissions) return false;
 
     // 拥有所有权限
     if (userPermissionInfo.permissionMap?.[ALL_PERMISSION_CODE]) return true;
 
-    return !!userPermissionInfo.permissionMap?.[permissionCode];
+    return !!userPermissionInfo.permissionMap?.[permission];
   }
 
   /**
    * 是否具有多个指定权限中的任意一个
-   * @param permission 如 'SYSTEM:USER:CREATE' 的键值
+   * @param permission 权限code, 如'systme:user:create'
    * @returns 是否具有多个指定权限中的任意一个
    */
-  static hasAnyPermission(permissions: PermissionKey[]): boolean {
+  static hasAnyPermission(permissions: string[]): boolean {
     return permissions.some((permission) => this.hasPermission(permission));
   }
 
   /**
    * 是否具有所有指定权限
-   * @param permission 如 'SYSTEM:USER:CREATE' 的键值
+   * @param permission 权限code, 如'systme:user:create'
    * @returns 是否具有所有指定权限
    */
-  static hasAllPermissions(permissions: PermissionKey[]): boolean {
+  static hasAllPermissions(permissions: string[]): boolean {
     return permissions.every((permission) => this.hasPermission(permission));
   }
 
   /**
    * 是否具有指定菜单
-   * @param permission 如 'SYSTEM:USER' 的键值(constants/permission中查询常量键名）
+   * @param permission 如 'system:user'
    * @returns 是否具有指定菜单
    */
   static hasMenu(menu: MenuKey): boolean {
     // TODO: 目前只解析到第二层
-    const [moduleName, menuName] = menu?.split(':') as [keyof typeof MODULE_MAP, keyof typeof MENU_MAP];
-    const moduleCode = MODULE_MAP[moduleName];
-    const menuCode = MENU_MAP[menuName];
+    const [moduleCode, menuCode] = menu?.split(':');
     const userPermissionInfo = this.getUserPermissionInfo();
-    const moduleItem = userPermissionInfo?.menus.find((item) => item.path === `/${moduleCode}`);
+    const moduleItem = userPermissionInfo?.menus.find((item) => item.permission === `${moduleCode}`);
     return moduleItem?.children?.some((item) => item.path === menuCode) || false;
   }
 }

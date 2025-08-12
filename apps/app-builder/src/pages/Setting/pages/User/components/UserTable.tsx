@@ -1,5 +1,5 @@
 import StatusTag, { getStatusLabel } from '@/components/StatusTag';
-import { Button, Dropdown, Input, Menu, Message, Modal, Pagination, Space, Table } from '@arco-design/web-react';
+import { Dropdown, Input, Menu, Message, Modal, Pagination, Space, Table } from '@arco-design/web-react';
 import { IconMoreVertical, IconPlus, IconSearch } from '@arco-design/web-react/icon';
 import type { PageParam, UserVO } from '@onebase/platform-center';
 import { deleteUser, getUserPage, resetUserPassword, StatusEnum, updateUserStatus } from '@onebase/platform-center';
@@ -8,6 +8,10 @@ import { useCallback, useEffect, useState } from 'react';
 import s from '../index.module.less';
 import PasswordModal from './PasswordModal';
 import UserFormModal from './UserFormModal';
+import PlaceholderPanel from '@/components/PlaceholderPanel';
+import { PermissionButton as Button } from '@/components/PermissionControl';
+import { hasPermission, hasAllPermissions } from '@/utils/permission';
+import { TENANT_USER_PERMISSION as ACTIONS } from '@/constants/permission';
 
 interface UserTableProps {
   selectedDeptId?: number;
@@ -184,30 +188,42 @@ export default function UserTable({ selectedDeptId = undefined, deptTree, deptLo
         width: 180,
         render: (_: any, record: any) => (
           <Space>
-            <Button type="text" onClick={() => handleEdit(record)}>
+            <Button permission={ACTIONS.UPDATE} type="text" onClick={() => handleEdit(record)}>
               编辑
             </Button>
-            <Button type="text" onClick={() => handleResetPassword(record)}>
+            <Button permission={ACTIONS.RESET} type="text" onClick={() => handleResetPassword(record)}>
               重置密码
             </Button>
-            <Dropdown
-              droplist={
-                <Menu>
-                  <Menu.Item key="disable" onClick={() => handleStatusUpdate(record)}>
+            {hasAllPermissions([ACTIONS.DELETE, ACTIONS.STATUS]) ?
+              (<Dropdown
+                droplist={
+                  <Menu>
+                    <Menu.Item key="disable" onClick={() => handleStatusUpdate(record)}>
+                      {getStatusLabel(record.status === StatusEnum.DISABLE ? StatusEnum.ENABLE : StatusEnum.DISABLE)}
+                    </Menu.Item>
+                    <Menu.Item key="del" onClick={() => handleDelete(record)}>
+                      删除
+                    </Menu.Item>
+                  </Menu>
+                }
+                position="br"
+                trigger="click"
+              >
+                <a style={{ cursor: 'pointer' }}>
+                  <IconMoreVertical />
+                </a>
+              </Dropdown>) :
+              (
+                <>
+                  <Button permission={ACTIONS.UPDATE} type="text" onClick={() => handleStatusUpdate(record)}>
                     {getStatusLabel(record.status === StatusEnum.DISABLE ? StatusEnum.ENABLE : StatusEnum.DISABLE)}
-                  </Menu.Item>
-                  <Menu.Item key="del" onClick={() => handleDelete(record)}>
+                  </Button>
+                  <Button permission={ACTIONS.RESET} type="text" onClick={() => handleDelete(record)}>
                     删除
-                  </Menu.Item>
-                </Menu>
-              }
-              position="br"
-              trigger="click"
-            >
-              <a style={{ cursor: 'pointer' }}>
-                <IconMoreVertical />
-              </a>
-            </Dropdown>
+                  </Button>
+                </>
+              )
+            }
           </Space>
         )
       }
@@ -219,7 +235,7 @@ export default function UserTable({ selectedDeptId = undefined, deptTree, deptLo
       {/* 操作区 */}
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: 16 }}>
         <Space>
-          <Button type="primary" icon={<IconPlus />} onClick={handleCreate}>
+          <Button permission={ACTIONS.CREATE} type="primary" icon={<IconPlus />} onClick={handleCreate}>
             新建
           </Button>
         </Space>
@@ -235,36 +251,38 @@ export default function UserTable({ selectedDeptId = undefined, deptTree, deptLo
         />
       </div>
       {/* 表格 */}
-      <Table
-        rowKey="id"
-        hover
-        columns={getColumns(handleEdit)}
-        data={data}
-        pagination={false}
-        scroll={{ y: 510 }}
-        border={false}
-      />
-      {/* 页码 */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'flex-end',
-          marginTop: 12
-        }}
-      >
-        <Pagination
-          size="small"
-          current={page}
-          pageSize={pageSize}
-          total={total}
-          onChange={setPage}
-          onPageSizeChange={setPageSize}
-          showTotal
-          showJumper
-          sizeOptions={[10, 20, 50]}
+      <PlaceholderPanel hasPermission={hasPermission(ACTIONS.QUERY)}>
+        <Table
+          rowKey="id"
+          hover
+          columns={getColumns(handleEdit)}
+          data={data}
+          pagination={false}
+          scroll={{ y: 510 }}
+          border={false}
         />
-      </div>
+        {/* 页码 */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'flex-end',
+            marginTop: 12
+          }}
+        >
+          <Pagination
+            size="small"
+            current={page}
+            pageSize={pageSize}
+            total={total}
+            onChange={setPage}
+            onPageSizeChange={setPageSize}
+            showTotal
+            showJumper
+            sizeOptions={[10, 20, 50]}
+          />
+        </div>
+      </PlaceholderPanel>
       <UserFormModal
         visible={userModalVisible}
         initialValues={editingUser}

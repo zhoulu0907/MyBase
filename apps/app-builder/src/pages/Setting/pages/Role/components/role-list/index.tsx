@@ -1,10 +1,12 @@
 import ListItem from '@/components/ListItem';
-import { Button, Input, Spin } from '@arco-design/web-react';
+import { Input, Spin } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
 import type { PageParam } from '@onebase/platform-center';
 import { getRolePage, type RoleVO } from '@onebase/platform-center';
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import s from '../../index.module.less';
+import { TENANT_ROLE_PERMISSION as ACTIONS } from '@/constants/permission';
+import { PermissionButton as Button } from '@/components/PermissionControl';
 
 interface RoleListProps {
   activeId: number | undefined;
@@ -159,7 +161,7 @@ export default forwardRef(function RoleList({ activeId, onSelect, onAdd }: RoleL
         />
       </div>
       <ListItem title={listTitle}>
-        <Button type="text" onClick={onAdd} style={{ paddingLeft: '8px', paddingRight: '8px' }}>
+        <Button permission={ACTIONS.CREATE} type="text" onClick={onAdd} style={{ paddingLeft: '8px', paddingRight: '8px' }}>
           <IconPlus />
           新建
         </Button>

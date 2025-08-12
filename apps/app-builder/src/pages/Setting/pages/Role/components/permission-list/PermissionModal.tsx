@@ -14,7 +14,7 @@ interface PermissionConfigModalProps {
   onCancel: () => void;
   onConfirm: (values: any) => void;
   confirmLoading?: boolean;
-  configuredPermissions?: Record<string, string[]>;
+  configuredPermissions: Permission[];
 }
 
 const PermissionConfigModal: React.FC<PermissionConfigModalProps> = ({
@@ -22,7 +22,7 @@ const PermissionConfigModal: React.FC<PermissionConfigModalProps> = ({
   onCancel,
   onConfirm,
   confirmLoading = false,
-  configuredPermissions = {}
+  configuredPermissions = []
 }) => {
   const [searchValue, setSearchValue] = useState('');
   const [selectedActions, setSelectedActions] = useState<Record<string, string[]>>({}); // 所选中的操作权限
@@ -68,10 +68,16 @@ const PermissionConfigModal: React.FC<PermissionConfigModalProps> = ({
 
   useEffect(() => {
     // 初始化选中状态
-    if (configuredPermissions && Object.keys(configuredPermissions).length > 0) {
-      setSelectedActions(configuredPermissions);
+    if (configuredPermissions?.length) {
+      const initSelectedActions = configuredPermissions.reduce((acc, cur) => {
+        if (cur.children?.length) {
+          acc[cur.id] = cur.children.map(action => action.id);
+        }
+        return acc;
+      }, {} as Record<string, string[]>);
+      setSelectedActions(initSelectedActions);
     }
-  }, [visible, configuredPermissions, tableData, selectedActions, filteredPermissions]);
+  }, [visible, configuredPermissions, tableData, filteredPermissions]);
 
   useEffect(() => {
     // 计算每个权限的选中状态

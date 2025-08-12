@@ -137,11 +137,11 @@ const PermissionList: React.FC<PermissionListProps> = ({ selectedRoleId }) => {
 
       <Table {...tableConfig} />
 
-      { configModalVisible && <PermissionConfigModal
+      {configModalVisible && <PermissionConfigModal
         visible={configModalVisible}
         onCancel={() => setConfigModalVisible(false)}
         onConfirm={handleConfigConfirm}
-        configuredPermissions={{} as Record<string, string[]>}
+        configuredPermissions={permissions}
         confirmLoading={configLoading}
       />}
     </>

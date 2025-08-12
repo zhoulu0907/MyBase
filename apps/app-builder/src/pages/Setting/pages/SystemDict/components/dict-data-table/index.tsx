@@ -1,7 +1,11 @@
 import StatusTag, { getStatusLabel } from '@/components/StatusTag';
-import { Button, Input, Pagination, Popconfirm, Table } from '@arco-design/web-react';
+import { Input, Pagination, Popconfirm, Table } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
 import { type DictData, StatusEnum } from '@onebase/platform-center';
+import PlaceholderPanel from '@/components/PlaceholderPanel';
+import { hasPermission } from '@/utils/permission';
+import { TENANT_DICT_PERMISSION as ACTIONS } from '@/constants/permission';
+import { PermissionButton as Button } from '@/components/PermissionControl';
 import s from '../../index.module.less';
 
 interface DictionaryTableProps {
@@ -58,10 +62,10 @@ export default function DictionaryTable({
       dataIndex: 'id',
       render: (_: any, record: DictData) => (
         <>
-          <Button type="text" style={{ marginRight: 8 }} onClick={() => onEdit(record)}>
+          <Button permission={ACTIONS.UPDATE} type="text" style={{ marginRight: 8 }} onClick={() => onEdit(record)}>
             编辑
           </Button>
-          <Button type="text" onClick={() => onDelete(record.id!)}>
+          <Button permission={ACTIONS.DELETE} type="text" onClick={() => onDelete(record.id!)}>
             删除
           </Button>
           <Popconfirm
@@ -71,7 +75,7 @@ export default function DictionaryTable({
               handleStatusUpdate(record);
             }}
           >
-            <Button type="text">
+            <Button permission={ACTIONS.STATUS} type="text">
               {getStatusLabel(record.status === StatusEnum.DISABLE ? StatusEnum.ENABLE : StatusEnum.DISABLE)}
             </Button>
           </Popconfirm>
@@ -83,7 +87,7 @@ export default function DictionaryTable({
   return (
     <>
       <div className={s.tableHeader}>
-        <Button type="primary" onClick={onAdd}>
+        <Button permission={ACTIONS.CREATE} type="primary" onClick={onAdd}>
           <IconPlus />
           添加
         </Button>

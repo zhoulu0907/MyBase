@@ -57,5 +57,6 @@ export interface MenuInfo {
   visible: boolean;
   keepAlive: boolean;
   alwaysShow: boolean;
+  permission?: string;
   children: MenuInfo[] | null;
 }

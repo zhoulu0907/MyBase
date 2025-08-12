@@ -1,8 +1,12 @@
 import ListItem from '@/components/ListItem';
-import { Button, Input } from '@arco-design/web-react';
+import { Input } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
 import { type DictItem } from '@onebase/platform-center';
 import styles from '../../index.module.less';
+import PlaceholderPanel from '@/components/PlaceholderPanel';
+import { hasPermission } from '@/utils/permission';
+import { TENANT_DICT_PERMISSION as ACTIONS } from '@/constants/permission';
+import { PermissionButton as Button } from '@/components/PermissionControl';
 
 interface DictionaryListProps {
   list: DictItem[];
@@ -34,12 +38,17 @@ export default function DictionaryListProps({
         />
       </div>
       <ListItem title={listTitle}>
-        <Button type="text" onClick={onAdd} style={{ paddingLeft: '8px', paddingRight: '8px' }}>
+        <Button
+          permission={ACTIONS.CREATE}
+          type="text"
+          onClick={onAdd}
+          style={{ paddingLeft: '8px', paddingRight: '8px' }}
+        >
           <IconPlus />
           新建
         </Button>
       </ListItem>
-      <div className={styles.dictList}>
+      <PlaceholderPanel className={styles.dictList} hasPermission={hasPermission(ACTIONS.QUERY)}>
         {list?.map((item) => (
           <ListItem
             key={item.id}
@@ -48,7 +57,7 @@ export default function DictionaryListProps({
             onClick={() => onSelect(item.id)}
           ></ListItem>
         ))}
-      </div>
+      </PlaceholderPanel>
     </>
   );
 }
