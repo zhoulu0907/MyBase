@@ -35,7 +35,7 @@ export default forwardRef(function RoleList({ activeId, onSelect, onAdd }: RoleL
       try {
         const params: PageParam = {
           pageNo: page,
-          pageSize: 10
+          pageSize: 100
         };
         if (searchValue) params.name = searchValue;
 
@@ -64,13 +64,31 @@ export default forwardRef(function RoleList({ activeId, onSelect, onAdd }: RoleL
     loadRoleList(1, false);
   }, [loadRoleList]);
 
+  // 刷新角色
+  const refreshRoleById = useCallback(
+    (roleId: number, values: Partial<RoleVO>) => {
+      const roleIndex = roleList.findIndex((role) => role.id === roleId);
+      if (roleIndex !== -1) {
+        // 更新角色列表中的角色信息
+        const updatedRoleList = [...roleList];
+        updatedRoleList[roleIndex] = {
+          ...updatedRoleList[roleIndex],
+          ...values
+        };
+        setRoleList(updatedRoleList);
+      }
+    },
+    [roleList]
+  );
+
   // 暴露给父组件的方法
   useImperativeHandle(
     ref,
     () => ({
-      refresh
+      refresh,
+      refreshRoleById
     }),
-    [refresh]
+    [refresh, refreshRoleById]
   );
 
   // 滚动加载

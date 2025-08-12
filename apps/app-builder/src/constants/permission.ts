@@ -7,6 +7,13 @@
  * 本文件用于建立与后端权限标识对应的常量键名映射
  */
 
+export enum PERMISSION_TYPES {
+  MODULE = 1,
+  MENU = 2,
+  ACTION = 3
+}
+
+
 /** 模块 */
 export const SYSTEM = 'system'; // 租户管理
 export const APP = 'app'; // 应用管理 TODO：待确定

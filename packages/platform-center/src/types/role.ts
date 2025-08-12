@@ -20,15 +20,16 @@ export type SimpleRoleVO = Pick<RoleVO, 'id' | 'name'> & Partial<RoleVO>;
 
 // 权限相关类型定义
 export interface PermissionAction {
-  id: number;
+  id: string;
   name: string;
   type?: number;
 }
 
 export interface Permission {
-  id: number;
+  id: string;
   name: string;
   type?: number;
   remark?: string;
+  parentId: number | string;
   children?: PermissionAction[];
 }

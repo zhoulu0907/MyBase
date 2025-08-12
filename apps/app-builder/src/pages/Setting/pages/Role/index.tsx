@@ -52,23 +52,32 @@ export default function RolePage() {
   );
 
   // 保存角色
-  const handleSaveRole = useCallback(async (values: any) => {
+  const handleSaveRole = useCallback(async (values: Partial<RoleVO>) => {
     setModalLoading(true);
     try {
       if (editRole?.id) {
-        await updateRole(values);
+        await updateRole({
+          ...values,
+          id: editRole.id
+        });
+        setActiveRole(prev => ({
+          ...prev,
+          ...values
+        }));
+        roleListRef.current?.refreshRoleById?.(editRole.id, values);
       } else {
         await createRole(values);
+        roleListRef.current?.refresh?.();
       }
       Message.success('保存成功');
       setRoleModalVisible(false);
-      roleListRef.current?.refresh?.();
+      
     } catch (error) {
       Message.error('保存失败');
     } finally {
       setModalLoading(false);
     }
-  }, []);
+  }, [editRole?.id]);
 
   const openRoleModal = useCallback((role: Partial<RoleVO> | null) => {
     setEditRole(role);
