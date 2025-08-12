@@ -70,16 +70,16 @@ public class PageSetServiceImpl implements PageSetService {
     private AppMenuRepository appMenuRepository;
 
     @Override
-    public String getPageSetCode(Long menuID) {
-        PageSetDO pageSetDO = pageSetDataRepository.findPageSetByMenuId(menuID);
+    public String getPageSetCode(String menuCode) {
+        PageSetDO pageSetDO = pageSetDataRepository.findPageSetByMenuCode(menuCode);
         return pageSetDO.getPageSetCode();
     }
 
     @Override
     public Long getAppId(String code) {
         PageSetDO pageSetDO = pageSetDataRepository.findPageSetByPageSetCode(code);
-        Long menuId = pageSetDO.getMenuId();
-        MenuDO menuDO = appMenuRepository.findById(menuId);
+        String menuCode = pageSetDO.getMenuCode();
+        MenuDO menuDO = appMenuRepository.findByMenuCode(menuCode);
         return menuDO.getApplicationId();
     }
 
@@ -126,10 +126,10 @@ public class PageSetServiceImpl implements PageSetService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void deletePageSet(Long menuId) {
+    public void deletePageSet(String menuCode) {
 
         // 找到页面集
-        PageSetDO pageSetDO = pageSetDataRepository.findPageSetByMenuId(menuId);
+        PageSetDO pageSetDO = pageSetDataRepository.findPageSetByMenuCode(menuCode);
 
         // 删除页面集关联的页面
         List<PageSetPageDO> pageSetPageDOs = pageSetPageDataRepository.findByPageSetCode(pageSetDO.getPageSetCode());
@@ -145,7 +145,7 @@ public class PageSetServiceImpl implements PageSetService {
         pageDataRepository.deletePageByCodes(pageRefs);
 
         // 删除页面集
-        pageSetDataRepository.deletePageSetByMenuId(menuId);
+        pageSetDataRepository.deletePageSetByMenuCode(menuCode);
 
         return;
     }
@@ -153,7 +153,7 @@ public class PageSetServiceImpl implements PageSetService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public String copyPageSet(CopyPageSetDTO copyPageSetDTO) {
-        PageSetDO pageSetDO = pageSetDataRepository.findPageSetByMenuId(copyPageSetDTO.getMenuId());
+        PageSetDO pageSetDO = pageSetDataRepository.findPageSetByMenuCode(copyPageSetDTO.getMenuCode());
         if (pageSetDO == null) {
             throw ServiceExceptionUtil.exception(AppResourceErrorCodeConstants.PAGE_SET_NOT_EXIST);
         }
@@ -162,7 +162,7 @@ public class PageSetServiceImpl implements PageSetService {
         PageSetDO newPageSetDO = BeanUtils.toBean(pageSetDO, PageSetDO.class);
         newPageSetDO.setId(null);
         newPageSetDO.setPageSetCode(UUID.randomUUID().toString());
-        newPageSetDO.setMenuId(copyPageSetDTO.getNewMenuId());
+        newPageSetDO.setMenuCode(copyPageSetDTO.getNewMenuCode());
         pageSetDataRepository.insert(newPageSetDO);
 
         // 复制页面其余内容

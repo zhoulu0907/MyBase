@@ -38,7 +38,7 @@ public interface PageSetApi {
 
     @PostMapping(PREFIX + "/delete")
     @Operation(summary = "删除pageSet")
-    @Parameter(name = "code", description = "pageSet code", required = true)
-    CommonResult<Boolean> deletePageSet(@RequestParam("menuId") Long menuId);
+    @Parameter(name = "code", description = "menu code", required = true)
+    CommonResult<Boolean> deletePageSet(@RequestParam("menuCode") String menucode);
 
 }
