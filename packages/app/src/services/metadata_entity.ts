@@ -305,7 +305,7 @@ export const getEntityMethods = (params: object) => {
  * @returns 数据详情
  */
 export const getMethodDataById = (params: object) => {
-  return metadataService.post('/data-method/data', params);
+  return metadataService.post('/data-method/detail', params);
 };
 
 /**

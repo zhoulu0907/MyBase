@@ -77,20 +77,20 @@ export const EntityERContainer: React.FC<{
   const handleNodeEdit = (editData: Partial<EntityNode>) => {
     console.log('节点编辑:', editData);
     // 这里可以更新节点数据
-    const { nodes, edges } = JSON.parse(
-      localStorage.getItem('entityFormValues') || JSON.stringify({ nodes: [], edges: [] })
-    );
-    const newNodes = nodes.map((node: EntityNode) => {
-      if (node.entityId === editData.entityId) {
-        return editData;
-      }
-      return node;
-    });
-    localStorage.setItem('entityFormValues', JSON.stringify({ nodes: newNodes, edges: edges }));
+    // const { nodes, edges } = JSON.parse(
+    //   localStorage.getItem('entityFormValues') || JSON.stringify({ nodes: [], edges: [] })
+    // );
+    // const newNodes = nodes.map((node: EntityNode) => {
+    //   if (node.entityId === editData.entityId) {
+    //     return editData;
+    //   }
+    //   return node;
+    // });
+    // localStorage.setItem('entityFormValues', JSON.stringify({ nodes: newNodes, edges: edges }));
     setEditDrawerVisible(true);
     setEditingNode(editData as unknown as EntityNode);
-    setRefreshEntityList(!refreshEntityList);
-    setOnlyUpdateNode(true);
+    // setRefreshEntityList(!refreshEntityList);
+    // setOnlyUpdateNode(true);
   };
 
   const handleNodeAddField = (node: EntityNode) => {

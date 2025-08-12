@@ -2,7 +2,7 @@ import { ENTITY_FIELD_TYPE } from '@/pages/CreateApp/pages/DataFactory/utils/con
 import type { EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
 import { Node } from '@antv/x6';
 import { Button, Popover, Space } from '@arco-design/web-react';
-import { IconCaretDown, IconCaretUp, IconMoreVertical, IconSync } from '@arco-design/web-react/icon';
+import { IconCaretDown, IconCaretUp, IconSync } from '@arco-design/web-react/icon';
 import React, { useState } from 'react';
 import styles from './ERnode.module.less';
 // X6 节点组件接口
@@ -35,7 +35,7 @@ const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
     return <div style={{ padding: '10px', color: 'red' }}>No data</div>;
   }
 
-  const nodeId = nodeData.entityId;
+  // const nodeId = nodeData.entityId;
 
   // 分离系统字段和自定义字段
   const systemFields = nodeData?.fields?.filter((field) => field.isSystemField);
@@ -86,26 +86,27 @@ const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
     }
   };
 
-  const handleEdit = (e: Event) => {
-    e.stopPropagation(); // 阻止事件冒泡
-    // 从 node 的 data 中获取回调函数
-    const data = node.getData() as NodeData;
-    const onNodeEdit = data?.onNodeEdit;
-    if (onNodeEdit && nodeData) {
-      onNodeEdit(nodeData);
-    }
-  };
+  // const handleEdit = (e: Event) => {
+  //   console.log('handleEdit', e, nodeData);
+  //   e.stopPropagation(); // 阻止事件冒泡
+  //   // 从 node 的 data 中获取回调函数
+  //   const data = node.getData() as NodeData;
+  //   const onNodeEdit = data?.onNodeEdit;
+  //   if (onNodeEdit && nodeData) {
+  //     onNodeEdit(nodeData);
+  //   }
+  // };
 
-  const handleDelete = (e: Event) => {
-    e.preventDefault();
-    e.stopPropagation();
-    // 从 node 的 data 中获取回调函数
-    const data = node.getData() as NodeData;
-    const onNodeDelete = data?.onNodeDelete;
-    if (onNodeDelete) {
-      onNodeDelete(nodeId);
-    }
-  };
+  // const handleDelete = (e: Event) => {
+  //   e.preventDefault();
+  //   e.stopPropagation();
+  //   // 从 node 的 data 中获取回调函数
+  //   const data = node.getData() as NodeData;
+  //   const onNodeDelete = data?.onNodeDelete;
+  //   if (onNodeDelete) {
+  //     onNodeDelete(nodeId);
+  //   }
+  // };
 
   const handleFieldClick = (fieldId: string, e: React.MouseEvent) => {
     console.log('handleFieldClick', fieldId, e);
@@ -124,7 +125,8 @@ const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
       <div className={styles['node-header']}>
         <IconSync className={styles['refresh-icon']} onClick={handleRefresh} />
         <span className={styles['node-title']}>{nodeData.entityName || '未命名实体'}</span>
-        <Popover
+        {/* 改为点击节点打开编辑弹窗 */}
+        {/* <Popover
           trigger="hover"
           position="rt"
           className={styles['more-icon-popover']}
@@ -140,7 +142,7 @@ const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
           }
         >
           <IconMoreVertical className={styles['more-icon']} />
-        </Popover>
+        </Popover> */}
       </div>
 
       {/* 节点主体 */}

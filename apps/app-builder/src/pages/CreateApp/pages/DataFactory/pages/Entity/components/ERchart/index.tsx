@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { register } from '@antv/x6-react-shape';
 import DetailDrawer from '../Drawers/DetailDrawer';
 // import EditDrawer from '../Drawer/EditDrawer';
-import { type EntityERProps, type EntityNode } from '../../../../utils/interface';
+import { type EntityNode, type EntityERProps } from '../../../../utils/interface';
 import EntityNodeComponent from './ERnode';
 import styles from './index.module.less';
 
@@ -127,10 +127,11 @@ const ERchart: React.FC<EntityERProps> = ({
 
       // 事件监听
       graphRef.current.on('node:click', ({ node }) => {
-        const nodeData = node.getData() as EntityNode;
+        const nodeData = node.getData() as EntityERProps;
         if (nodeData) {
-          setSelectedNode(nodeData);
-          // setDrawerVisible(true);
+          setSelectedNode(nodeData.data as unknown as EntityNode);
+          console.log('node:click', nodeData);
+          onNodeEdit?.(nodeData.data as unknown as EntityNode);
         }
       });
 

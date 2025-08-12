@@ -2,10 +2,13 @@ import type { EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/inter
 import { Button, Drawer, Message, Tabs } from '@arco-design/web-react';
 import { IconCaretRight } from '@arco-design/web-react/icon';
 import React, { useEffect, useState } from 'react';
-import NodeEditForm from '../NodeEditForm';
-import styles from './EditEntityDrawer.module.less';
+import NodeEditForm from './tabs/NodeEditForm';
+import DataRules from './tabs/DataRules';
+import DataMethods from './tabs/DataMethods';
+import Relations from './tabs/Relations';
+import styles from './index.module.less';
 
-const DetailDrawer: React.FC<{
+const EditEntityDrawer: React.FC<{
   editingNode: EntityNode;
   visible: boolean;
   setVisible: (visible: boolean) => void;
@@ -59,23 +62,11 @@ const DetailDrawer: React.FC<{
           />
         );
       case 'relation':
-        return (
-          <div className={styles['tab-content']}>
-            <h3>关联关系</h3>
-          </div>
-        );
+        return <Relations node={editingNode} />;
       case 'rule':
-        return (
-          <div className={styles['tab-content']}>
-            <h3>数据规则</h3>
-          </div>
-        );
+        return <DataRules node={editingNode} />;
       case 'method':
-        return (
-          <div className={styles['tab-content']}>
-            <h3>数据方法</h3>
-          </div>
-        );
+        return <DataMethods node={editingNode} />;
       default:
         return null;
     }
@@ -98,7 +89,7 @@ const DetailDrawer: React.FC<{
       )}
 
       {/* 左侧Tab导航 */}
-      {!isCollapsed && (
+      {!isCollapsed && visible && (
         <div className={styles['tab-sidebar']}>
           <Tabs activeTab={activeTab} onChange={setActiveTab} direction="vertical" className={styles['vertical-tabs']}>
             <Tabs.TabPane key="entity" title="业务实体" />
@@ -117,6 +108,7 @@ const DetailDrawer: React.FC<{
         mask={false}
         placement="right"
         className={styles['edit-entity-drawer']}
+        footer={null}
       >
         {editingNode && (
           <div className={styles['drawer-container']}>
@@ -129,4 +121,4 @@ const DetailDrawer: React.FC<{
   );
 };
 
-export default DetailDrawer;
+export default EditEntityDrawer;

@@ -15,7 +15,7 @@ const DataMethods: React.FC<DataMethodsProps> = ({ entity, activeTab }) => {
   const [methods, setMethods] = useState([]);
   const [loading, setLoading] = useState(false);
   const [checkMethodModalVisible, setCheckMethodModalVisible] = useState(false);
-  const [checkMethodMethodId, setCheckMethodMethodId] = useState('');
+  const [checkMethodMethodCode, setcheckMethodMethodCode] = useState('');
   const loadMethods = async () => {
     try {
       setLoading(true);
@@ -34,8 +34,8 @@ const DataMethods: React.FC<DataMethodsProps> = ({ entity, activeTab }) => {
     }
   };
 
-  const handleMethodClick = (methodName: string, methodId: string) => {
-    setCheckMethodMethodId(methodId);
+  const handleMethodClick = (methodName: string, methodCode: string) => {
+    setcheckMethodMethodCode(methodCode);
     setCheckMethodModalVisible(true);
   };
 
@@ -51,7 +51,7 @@ const DataMethods: React.FC<DataMethodsProps> = ({ entity, activeTab }) => {
       dataIndex: 'methodName',
       key: 'methodName',
       render: (methodName: string, record: { id: string }) => (
-        <Link onClick={() => handleMethodClick(methodName, record.id)}>{methodName}</Link>
+        <Link onClick={() => handleMethodClick(methodName, record.methodCode)}>{methodName}</Link>
       )
     },
     {
@@ -113,7 +113,7 @@ const DataMethods: React.FC<DataMethodsProps> = ({ entity, activeTab }) => {
         visible={checkMethodModalVisible}
         setVisible={setCheckMethodModalVisible}
         entity={entity}
-        methodId={checkMethodMethodId}
+        methodCode={checkMethodMethodCode}
       />
     </div>
   );
