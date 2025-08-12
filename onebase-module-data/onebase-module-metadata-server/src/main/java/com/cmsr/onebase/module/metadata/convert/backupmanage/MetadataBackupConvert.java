@@ -16,7 +16,7 @@ import com.cmsr.onebase.module.metadata.dal.dataobject.datasource.MetadataDataso
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataBusinessEntityDO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.relationship.MetadataEntityRelationshipDO;
-import com.cmsr.onebase.module.metadata.dal.dataobject.validation.MetadataValidationRuleDO;
+import com.cmsr.onebase.module.metadata.dal.dataobject.validation.MetadataValidationRuleDefinitionDO;
 
 import java.util.List;
 
@@ -120,20 +120,20 @@ public class MetadataBackupConvert {
         return BeanUtils.toBean(list, MetadataEntityRelationshipDO.class);
     }
 
-    public MetadataValidationRuleDTO convert(MetadataValidationRuleDO rule) {
+    public MetadataValidationRuleDTO convert(MetadataValidationRuleDefinitionDO rule) {
         return BeanUtils.toBean(rule, MetadataValidationRuleDTO.class);
     }
 
-    public List<MetadataValidationRuleDTO> convertRuleList(List<MetadataValidationRuleDO> list) {
+    public List<MetadataValidationRuleDTO> convertRuleList(List<MetadataValidationRuleDefinitionDO> list) {
         return BeanUtils.toBean(list, MetadataValidationRuleDTO.class);
     }
 
-    public MetadataValidationRuleDO convert(MetadataValidationRuleDTO dto) {
-        return BeanUtils.toBean(dto, MetadataValidationRuleDO.class);
+    public MetadataValidationRuleDefinitionDO convert(MetadataValidationRuleDTO dto) {
+        return BeanUtils.toBean(dto, MetadataValidationRuleDefinitionDO.class);
     }
 
-    public List<MetadataValidationRuleDO> convertRuleDOList(List<MetadataValidationRuleDTO> list) {
-        return BeanUtils.toBean(list, MetadataValidationRuleDO.class);
+    public List<MetadataValidationRuleDefinitionDO> convertRuleDOList(List<MetadataValidationRuleDTO> list) {
+        return BeanUtils.toBean(list, MetadataValidationRuleDefinitionDO.class);
     }
 
 }

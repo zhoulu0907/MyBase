@@ -11,7 +11,7 @@ import com.cmsr.onebase.module.metadata.dal.dataobject.datasource.MetadataDataso
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataBusinessEntityDO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.relationship.MetadataEntityRelationshipDO;
-import com.cmsr.onebase.module.metadata.dal.dataobject.validation.MetadataValidationRuleDO;
+import com.cmsr.onebase.module.metadata.dal.dataobject.validation.MetadataValidationRuleDefinitionDO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.init.DefaultConfigStore;
@@ -96,7 +96,7 @@ public class MetadataBackupServiceImpl implements MetadataBackupService {
         DefaultConfigStore validationCondition = new DefaultConfigStore();
         validationCondition.and("app_id", appId);
         validationCondition.and("deleted", 0L);
-        List<MetadataValidationRuleDO> validationRuleList = validationRuleRepository.findAllByConfig(validationCondition);
+        List<MetadataValidationRuleDefinitionDO> validationRuleList = validationRuleRepository.findAllByConfig(validationCondition);
         backupRespVO.setValidationRuleList(validationRuleList);
         log.info("备份校验规则数量: {}", validationRuleList.size());
 
@@ -148,8 +148,8 @@ public class MetadataBackupServiceImpl implements MetadataBackupService {
         DefaultConfigStore validationCondition = new DefaultConfigStore();
         validationCondition.and("app_id", appId);
         validationCondition.and("deleted", 0L);
-        List<MetadataValidationRuleDO> existingValidationRules = validationRuleRepository.findAllByConfig(validationCondition);
-        for (MetadataValidationRuleDO rule : existingValidationRules) {
+        List<MetadataValidationRuleDefinitionDO> existingValidationRules = validationRuleRepository.findAllByConfig(validationCondition);
+        for (MetadataValidationRuleDefinitionDO rule : existingValidationRules) {
             rule.setDeleted(1L);
             validationRuleRepository.update(rule);
         }
@@ -283,9 +283,9 @@ public class MetadataBackupServiceImpl implements MetadataBackupService {
      * @param validationRuleList 校验规则列表
      * @param targetAppId        目标应用ID
      */
-    private void restoreValidationRules(List<MetadataValidationRuleDO> validationRuleList, Long targetAppId) {
+    private void restoreValidationRules(List<MetadataValidationRuleDefinitionDO> validationRuleList, Long targetAppId) {
         log.info("开始恢复校验规则，数量: {}", validationRuleList.size());
-        for (MetadataValidationRuleDO rule : validationRuleList) {
+        for (MetadataValidationRuleDefinitionDO rule : validationRuleList) {
             // 重置ID，让数据库自动生成新ID
             rule.setId(null);
             rule.setAppId(targetAppId);

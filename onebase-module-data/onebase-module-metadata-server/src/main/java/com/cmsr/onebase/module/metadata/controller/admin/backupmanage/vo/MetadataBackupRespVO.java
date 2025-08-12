@@ -4,7 +4,7 @@ import com.cmsr.onebase.module.metadata.dal.dataobject.datasource.MetadataDataso
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataBusinessEntityDO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.relationship.MetadataEntityRelationshipDO;
-import com.cmsr.onebase.module.metadata.dal.dataobject.validation.MetadataValidationRuleDO;
+import com.cmsr.onebase.module.metadata.dal.dataobject.validation.MetadataValidationRuleDefinitionDO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -40,6 +40,6 @@ public class MetadataBackupRespVO {
     private List<MetadataEntityRelationshipDO> entityRelationshipList;
 
     @Schema(description = "校验规则列表")
-    private List<MetadataValidationRuleDO> validationRuleList;
+    private List<MetadataValidationRuleDefinitionDO> validationRuleList;
 
 }

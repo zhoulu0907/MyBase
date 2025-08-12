@@ -4,7 +4,7 @@ import com.cmsr.onebase.module.metadata.dal.dataobject.datasource.MetadataDataso
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataBusinessEntityDO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.relationship.MetadataEntityRelationshipDO;
-import com.cmsr.onebase.module.metadata.dal.dataobject.validation.MetadataValidationRuleDO;
+import com.cmsr.onebase.module.metadata.dal.dataobject.validation.MetadataValidationRuleDefinitionDO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -43,6 +43,6 @@ public class MetadataRestoreReqVO {
 
     @Schema(description = "校验规则列表", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "校验规则列表不能为空")
-    private List<MetadataValidationRuleDO> validationRuleList;
+    private List<MetadataValidationRuleDefinitionDO> validationRuleList;
 
 }
