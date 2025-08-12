@@ -19,7 +19,7 @@ import { ReactSortable } from 'react-sortablejs';
 import styles from '../modal.module.less';
 
 interface FieldFormValues {
-  id: string;
+  id?: string;
   fieldCode: string;
   fieldName: string;
   description: string;
@@ -75,7 +75,6 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
 
   const addField = () => {
     const newField: FieldFormValues = {
-      id: `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`, // 生成临时唯一ID
       fieldCode: '',
       fieldName: '',
       description: '',
