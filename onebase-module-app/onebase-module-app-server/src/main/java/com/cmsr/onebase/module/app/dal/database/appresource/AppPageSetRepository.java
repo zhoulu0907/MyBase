@@ -8,8 +8,11 @@ import org.springframework.stereotype.Repository;
 import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.module.app.dal.dataobject.appresource.PageSetDO;
 
+import java.util.List;
+
 @Repository
 public class AppPageSetRepository extends DataRepositoryNew<PageSetDO> {
+
     public AppPageSetRepository() {
         super(PageSetDO.class);
     }
@@ -32,6 +35,10 @@ public class AppPageSetRepository extends DataRepositoryNew<PageSetDO> {
         deleteByConfig(configs);
     }
 
-
+    public List<PageSetDO> findByMenuCodes(List<String> menuCodes){
+        ConfigStore configs = new DefaultConfigStore();
+        configs.in("menu_code", menuCodes);
+        return findAllByConfig(configs);
+    }
 
 }
