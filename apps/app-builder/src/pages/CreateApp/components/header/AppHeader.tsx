@@ -59,8 +59,8 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     const appResp = await getApplication(appReq);
     console.log(appResp);
     if (appResp) {
-      if (appResp.icon) {
-        setAppIcon(appResp.icon);
+      if (appResp.iconName) {
+        setAppIcon(appResp.iconName);
       }
       if (appResp.iconColor) {
         setIconColor(appResp.iconColor);
