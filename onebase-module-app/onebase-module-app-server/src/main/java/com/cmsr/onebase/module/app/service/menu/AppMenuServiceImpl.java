@@ -90,7 +90,6 @@ public class AppMenuServiceImpl implements AppMenuService {
         menuDO.setVisible(MenuVisibleEnum.YES.getValue());
         appMenuRepository.insert(menuDO);
 
-        System.out.println("menuDO = " + menuDO.getMenuCode());
         // 创建页面集
         CreatePageSetDTO createPageSetDTO = new CreatePageSetDTO();
         createPageSetDTO.setMenuCode(menuDO.getMenuCode());
@@ -107,7 +106,6 @@ public class AppMenuServiceImpl implements AppMenuService {
     }
 
     private String parseParentMenuCode(MenuCreateReqVO createReqVO) {
-        System.out.println("createReqVO.getParentCode() = " + createReqVO.getParentCode());
         if (createReqVO.getParentCode() == null || createReqVO.getParentCode() == "") {
             return null;
         }
