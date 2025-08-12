@@ -38,7 +38,7 @@ const TenantManagement: React.FC = () => {
   const [tenantLimit, setTenantLimit] = useState<number>(10000);
   const [adminList, setAdminList] = useState<{id: string, username: string}[]>([])
   const [confirmText, setConfirmText] = useState('');
-  const [total, setTotal] = useState(undefined) 
+  const [total, setTotal] = useState(0) 
   const [currentPage, setCurrentPage] = useState(1);
   // const [adminInfoList, setAdminInfoList] = useState([])
 
@@ -49,7 +49,7 @@ const TenantManagement: React.FC = () => {
     try {
       console.log("getPlatformTenantList searchParams.status: ", searchParams.status);
       const resp = await getPlatformTenantListApi({
-        pageNo: 1,
+        pageNo: currentPage,
         pageSize: 10,
         status: searchParams.status, // 添加状态筛选参数
         keyword: searchParams.keyword // 添加关键词搜索参数
@@ -70,46 +70,22 @@ const TenantManagement: React.FC = () => {
     getTenantData()
   }, []);
 
-  // 筛选数据
   useEffect(() => {
-    let result = [...tenantList];
+    getPlatformTenantList();
+  }, [searchParams, currentPage]);
 
-    // 状态筛选
-    if (searchParams.status !== PlatformTenantStatus.all) {
-      if (searchParams.status === PlatformTenantStatus.enabled) {
-        result = result.filter(item => item.status === PlatformTenantStatus.enabled);
-      } else if (searchParams.status === PlatformTenantStatus.disabled) {
-        result = result.filter(item => item.status === PlatformTenantStatus.disabled);
-      }
-    }
-
-    // 关键词搜索
-    if (searchParams.keyword) {
-      result = result.filter(item => 
-        item.name.includes(searchParams.keyword) || 
-        item.name.includes(searchParams.keyword)
-      );
-    }
-    
-    setTenantList(result);
-  }, [searchParams, tenantList]);
-
-    useEffect(() => {
-      getPlatformTenantList();
-    }, [searchParams]);
   // 处理状态筛选
   const handleStatusChange = (status: number) => {
     console.log('启用状态 before: ', searchParams.status);
     console.log('启用状态 new: ', status);
     setSearchParams({ ...searchParams, status });
-    console.log('启用状态 after: ', searchParams.status);
-    getPlatformTenantList(); // 状态改变时重新获取数据
+    setCurrentPage(1); // 重置到第一页
   };
 
 // 处理搜索
 const handleSearch = async (keyword: string) => {
   setSearchParams({ ...searchParams, keyword });
-  getPlatformTenantList(); // 搜索时重新获取数据
+  setCurrentPage(1); // 重置到第一页
 };
 
   // 重置搜索
@@ -198,7 +174,10 @@ const handleSearch = async (keyword: string) => {
     };
     setCurrentTenant(tenant);
     form.setFieldsValue({
-      ...record,
+      tenantName: record.name,
+      tenantCode: record.tenantCode,
+      admin: record.contactName,
+      allocatedCount: record.accountCount,
       status: record.status === PlatformTenantStatus.enabled ? PlatformTenantStatus.enabled : PlatformTenantStatus.disabled,
     });
     setModalVisible(true);
@@ -364,9 +343,9 @@ const handleSearch = async (keyword: string) => {
     {
       title: '状态',
       dataIndex: 'status',
-      render: (status: string) => (
-        <Text style={{ color: !status ? '#00b42a' : '' }}>
-          {!status ? '已启用' : '已禁用'}
+      render: (status: number) => (
+        <Text style={{ color: status === PlatformTenantStatus.enabled ? '#00b42a' : '' }}>
+          {status === PlatformTenantStatus.enabled ? '已启用' : '已禁用'}
         </Text>
       )
     },
@@ -383,10 +362,6 @@ const handleSearch = async (keyword: string) => {
   // 处理分页变化
   const handlePageChange = async (pageNo: number) => {
     try {
-      console.log('pageNo', pageNo);
-      const pageResp = await getPlatformTenantList();
-      console.log('pageResp', pageResp);
-
       setCurrentPage(pageNo);
     } catch (error) {
       console.error(error);
