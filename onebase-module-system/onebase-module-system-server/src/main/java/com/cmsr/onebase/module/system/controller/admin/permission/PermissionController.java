@@ -2,24 +2,19 @@ package com.cmsr.onebase.module.system.controller.admin.permission;
 
 import cn.hutool.core.collection.CollUtil;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
-import com.cmsr.onebase.module.system.controller.admin.permission.vo.permission.PermissionAssignRoleDataScopeReqVO;
-import com.cmsr.onebase.module.system.controller.admin.permission.vo.permission.PermissionAssignRoleMenuReqVO;
-import com.cmsr.onebase.module.system.controller.admin.permission.vo.permission.PermissionAssignUserRoleReqVO;
-import com.cmsr.onebase.module.system.controller.admin.permission.vo.permission.PermissionAssignRoleUsersReqVO;
-import com.cmsr.onebase.module.system.controller.admin.permission.vo.permission.PermissionDeleteRoleUsersReqVO;
-import com.cmsr.onebase.module.system.controller.admin.permission.vo.permission.PermissionAssignRoleMenusReqVO;
-import com.cmsr.onebase.module.system.controller.admin.permission.vo.permission.PermissionDeleteRoleMenusReqVO;
+import com.cmsr.onebase.module.system.controller.admin.permission.vo.permission.*;
 import com.cmsr.onebase.module.system.service.permission.PermissionService;
 import com.cmsr.onebase.module.system.service.tenant.TenantService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.Resource;
+import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.annotation.Resource;
-import jakarta.validation.Valid;
+import java.util.List;
 import java.util.Set;
 
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
@@ -38,12 +33,22 @@ public class PermissionController {
     @Resource
     private TenantService tenantService;
 
-    @Operation(summary = "获得角色拥有的权限编号")
+    /**
+     * 获得角色拥有的菜单详细信息列表
+     *
+     * @param roleId 角色编号
+     * @return 菜单详细信息列表
+     */
+    @Operation(summary = "获得角色拥有的菜单详细信息列表")
     @Parameter(name = "roleId", description = "角色编号", required = true)
     @GetMapping("/list-role-menus")
     @PreAuthorize("@ss.hasPermission('system:permission:assign-role-menu')")
-    public CommonResult<Set<Long>> getRoleMenuList(Long roleId) {
-        return success(permissionService.getRoleMenuListByRoleId(roleId));
+    public CommonResult<List<PermissionMenuRespVO>> getRoleMenuList(@RequestParam("roleId") Long roleId) {
+        // 获取菜单ID集合
+        Set<Long> menuIds = permissionService.getRoleMenuListByRoleId(roleId);
+        // 查询菜单详细信息
+        List<PermissionMenuRespVO> menuList = permissionService.getMenuDetailListByIds(menuIds);
+        return success(menuList);
     }
 
     @PostMapping("/assign-role-menu")

@@ -77,13 +77,13 @@ public class MenuDataRepository extends DataRepositoryNew<MenuDO> {
         DefaultConfigStore configStore = new DefaultConfigStore();
 
         if (StringUtils.isNotBlank(reqVO.getName())) {
-            configStore.like("name", reqVO.getName());
+            configStore.like(MenuDO.NAME, reqVO.getName());
         }
         if (StringUtils.isNotBlank(reqVO.getCode())) {
-            configStore.like("permission", reqVO.getCode());
+            configStore.startWith(MenuDO.PERMISSION, reqVO.getCode());
         }
         if (reqVO.getStatus() != null) {
-            configStore.eq("status", reqVO.getStatus());
+            configStore.eq(MenuDO.STATUS, reqVO.getStatus());
         }
 
         return findAllByConfig(configStore);

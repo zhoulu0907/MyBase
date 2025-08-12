@@ -30,7 +30,7 @@ public class TenantInsertReqVO {
     @Schema(description = "租户状态", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
     private Integer status;
 
-    @Schema(description = "绑定域名", example = "http://cmsr.com")
+    @Schema(description = "绑定域名", example = "/onebase")
     private String website;
 
     @Schema(description = "租户套餐编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "1024")

@@ -1,8 +1,10 @@
 package com.cmsr.onebase.module.system.service.permission;
 
 import com.cmsr.onebase.framework.common.biz.system.permission.dto.DeptDataPermissionRespDTO;
+import com.cmsr.onebase.module.system.controller.admin.permission.vo.permission.PermissionMenuRespVO;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 import static java.util.Collections.singleton;
@@ -81,6 +83,14 @@ public interface PermissionService {
      * @return 角色编号数组
      */
     Set<Long> getMenuRoleIdListByMenuIdFromCache(Long menuId);
+
+    /**
+     * 根据菜单ID集合获取菜单详细信息列表
+     *
+     * @param menuIds 菜单ID集合
+     * @return 菜单详细信息列表
+     */
+    List<PermissionMenuRespVO> getMenuDetailListByIds(Set<Long> menuIds);
 
     // ========== 用户-角色的相关方法  ==========
 
