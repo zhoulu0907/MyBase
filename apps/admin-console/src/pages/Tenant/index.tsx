@@ -21,37 +21,6 @@ import { formatTimestamp } from '@/utils/date';
 const { Text } = Typography;
 const { Option } = Select;
 const { useForm } = Form;
-// // 模拟数据
-// const mockData: PlatformTenantInfo[]  = [
-//   {
-//     id: 1,
-//     name: '默认租户',
-//     contactMobile: 'ZH2025070001',
-//     accountCount: 50,
-//     contactName: '石头',
-//     createTime: '2025-08-14 10:30',
-//     status: PlatformTenantStatus['已启用'],
-//     expireTime: '2025-08-14 10:30',
-//     packageId:1,
-//   },
-//   {
-//     id: 2,
-//     name: '测试环境验证租户',
-//     contactMobile: 'ZH2025070002',
-//     accountCount: 50,
-//     contactName: '石头',
-//     createTime: '2025-08-14 10:30',
-//     status: PlatformTenantStatus['已禁用'],
-//     expireTime: '2025-08-14 10:30',
-//     packageId:1,
-//   }
-// ];
-
-// // 模拟管理员数据
-// const mockAdmins = Array.from({ length: 3 }, (_, i) => ({
-//   id: i + 1,
-//   name: `管理员${i + 1}`
-// }));
 
 const TenantManagement: React.FC = () => {
   const [data, setData] = useState<PlatformTenantInfo[]>([]);
@@ -252,12 +221,6 @@ const handleSearch = async (keyword: string) => {
       
       // 如果是从禁用状态切换到启用状态
       if (currentTenant) {
-        //  && currentTenant.status === 0 && values.status === 1
-        // 更新数据状态
-        // setTenantList(tenantList.map((item) => (item.id === Number(currentTenant.id) ? { ...item, status: 0 } : item)));
-        // Message.success('已启用租户');
-        // setModalVisible(false);
-        // return;
          // 构建更新参数
         const updateParams: CreateTenantParams = {
           id: currentTenant.id, // 确保包含租户ID
