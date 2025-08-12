@@ -15,50 +15,50 @@ import {
 } from '@arco-design/web-react';
 import { IconSearch } from '@arco-design/web-react/icon';
 import styles from './index.module.less'
-import { getPlatformTenantListApi, addPlatformTenantApi, updatePlatformTenantApi, getPlatformTenantAdminListApi, type PlatformTenantInfo, PlatformTenantStatus } from "@onebase/platform-center";
+import { getPlatformTenantListApi, getPlatformInfoApi, addPlatformTenantApi, updatePlatformTenantApi, getCreateTenantCountApi, getPlatformTenantAdminListApi, type PlatformTenantInfo, PlatformTenantStatus, type CreateTenantParams } from "@onebase/platform-center";
 import { formatTimestamp } from '@/utils/date';
 
 const { Text } = Typography;
 const { Option } = Select;
 const { useForm } = Form;
-// 模拟数据
-const mockData: PlatformTenantInfo[]  = [
-  {
-    id: 1,
-    name: '默认用户',
-    contactMobile: 'ZH2025070001',
-    accountCount: 50,
-    contactName: '石头',
-    createTime: '2025-08-14 10:30',
-    status: PlatformTenantStatus['已启用'],
-    expireTime: '2025-08-14 10:30',
-    packageId:1,
-  },
-  {
-    id: 2,
-    name: '测试环境验证用户',
-    contactMobile: 'ZH2025070002',
-    accountCount: 50,
-    contactName: '石头',
-    createTime: '2025-08-14 10:30',
-    status: PlatformTenantStatus['已禁用'],
-    expireTime: '2025-08-14 10:30',
-    packageId:1,
-  }
-];
+// // 模拟数据
+// const mockData: PlatformTenantInfo[]  = [
+//   {
+//     id: 1,
+//     name: '默认租户',
+//     contactMobile: 'ZH2025070001',
+//     accountCount: 50,
+//     contactName: '石头',
+//     createTime: '2025-08-14 10:30',
+//     status: PlatformTenantStatus['已启用'],
+//     expireTime: '2025-08-14 10:30',
+//     packageId:1,
+//   },
+//   {
+//     id: 2,
+//     name: '测试环境验证租户',
+//     contactMobile: 'ZH2025070002',
+//     accountCount: 50,
+//     contactName: '石头',
+//     createTime: '2025-08-14 10:30',
+//     status: PlatformTenantStatus['已禁用'],
+//     expireTime: '2025-08-14 10:30',
+//     packageId:1,
+//   }
+// ];
 
-// 模拟管理员数据
-const mockAdmins = Array.from({ length: 3 }, (_, i) => ({
-  id: i + 1,
-  name: `管理员${i + 1}`
-}));
+// // 模拟管理员数据
+// const mockAdmins = Array.from({ length: 3 }, (_, i) => ({
+//   id: i + 1,
+//   name: `管理员${i + 1}`
+// }));
 
 const TenantManagement: React.FC = () => {
   const [data, setData] = useState<PlatformTenantInfo[]>([]);
   const [tenantList, setTenantList] = useState<PlatformTenantInfo[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchParams, setSearchParams] = useState({
-    status: 'all',
+    status: 2,
     keyword: ''
   });
   const [modalVisible, setModalVisible] = useState(false);
@@ -66,42 +66,39 @@ const TenantManagement: React.FC = () => {
   const [isNewTenant, setIsNewTenant] = useState(false);
   const [currentTenant, setCurrentTenant] = useState<PlatformTenantInfo | null>(null);
   const [form] = useForm();
-  const [totalLicense, setTotalLicense] = useState(100); // 总License数
-  const [usedLicense, setUsedLicense] = useState(50); // 已用License数
+  const [allocatableLicense, setAllocatableLicense] = useState<number>(10000);
+  const [tenantLimit, setTenantLimit] = useState<number>(10000);
+  const [adminList, setAdminList] = useState<{id: string, username: string}[]>([])
   const [confirmText, setConfirmText] = useState('');
+  const [total, setTotal] = useState(undefined) 
+  const [currentPage, setCurrentPage] = useState(1);
+
 
   // 获取租户列表
   const getPlatformTenantList = async () => {
+    setLoading(true);
     try {
-      const resp = await getPlatformTenantListApi({ pageNum: 1, pageSize: 10 });
-      const adminListResp = await getPlatformTenantAdminListApi()
-      console.log('getPlatformTenantList resp.list:', resp.list);
-      setTenantList(resp.list)
-      console.log('adminListResp:', adminListResp);
+      console.log("getPlatformTenantList searchParams.status: ", searchParams.status);
+      const resp = await getPlatformTenantListApi({
+        pageNo: 1,
+        pageSize: 10,
+        status: searchParams.status, // 添加状态筛选参数
+        keyword: searchParams.keyword // 添加关键词搜索参数
+      });
+      setTenantList(resp.list);
+      setTotal(resp.total)
+      console.log(' 租户列表 resp.list: ', resp.list);
     } catch (error: any) {
       console.error(error);
       Message.error(error.message || '获取租户列表失败');
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
     getPlatformTenantList();
-  }, []);
-  // 计算剩余License
-  const remainingLicense = totalLicense - usedLicense;
-
-  // 加载数据
-  const loadData = async () => {
-    setLoading(true);
-    // 这里应该是API调用
-    setTimeout(() => {
-      setLoading(false);
-    }, 500);
-  };
-
-  // 初始化加载
-  useEffect(() => {
-    loadData();
+    getTenantData()
   }, []);
 
   // 筛选数据
@@ -109,10 +106,10 @@ const TenantManagement: React.FC = () => {
     let result = [...tenantList];
 
     // 状态筛选
-    if (searchParams.status !== 'all') {
-      if (searchParams.status === 'enabled') {
+    if (searchParams.status !== 2) {
+      if (searchParams.status === 0) {
         result = result.filter(item => item.status === PlatformTenantStatus['已启用']);
-      } else if (searchParams.status === 'disabled') {
+      } else if (searchParams.status === 1) {
         result = result.filter(item => item.status === PlatformTenantStatus['已禁用']);
       }
     }
@@ -128,28 +125,89 @@ const TenantManagement: React.FC = () => {
     setTenantList(result);
   }, [searchParams, tenantList]);
 
+    useEffect(() => {
+      getPlatformTenantList();
+    }, [searchParams]);
   // 处理状态筛选
-  const handleStatusChange = (status: string) => {
+  const handleStatusChange = (status: number) => {
+    console.log('启用状态 before: ', searchParams.status);
+    console.log('启用状态 new: ', status);
     setSearchParams({ ...searchParams, status });
+    console.log('启用状态 after: ', searchParams.status);
+    getPlatformTenantList(); // 状态改变时重新获取数据
   };
 
-  // 处理搜索
-  const handleSearch = (keyword: string) => {
-    setSearchParams({ ...searchParams, keyword });
-  };
+// 处理搜索
+const handleSearch = async (keyword: string) => {
+  setSearchParams({ ...searchParams, keyword });
+  getPlatformTenantList(); // 搜索时重新获取数据
+};
 
   // 重置搜索
   // const handleReset = () => {
   //   setSearchParams({ status: 'all', keyword: '' });
   // };
 
+  // 获取Tenant参数
+  const getTenantData = () => {
+    getLicenseLimit()
+    getAllocatable()
+    getPlatformAdminList()
+  }
+
+  // 获取license总数
+  const getLicenseLimit = async () => {
+    try {
+      const licenseResp = await getPlatformInfoApi();
+      setTenantLimit(licenseResp.tenantLimit)
+    } catch (error) {
+      console.error('Error fetching getLicenseLimit:', error);
+      
+    }
+  }
+
+  // 获取可分配数量
+  const getAllocatable = async () => {
+    try {
+      const res = await getCreateTenantCountApi();
+      setAllocatableLicense(res);
+    } catch (error) {
+      console.error('Error fetching allocatable:', error);
+      
+    }
+  }
+
+  // 获取管理员列表
+  const getPlatformAdminList = async () => { 
+    try {
+      const adminListResp = await getPlatformTenantAdminListApi()
+      console.log('管理员列表 adminListResp:', adminListResp);
+      // setAdminList(adminListResp)
+      // 将id为1的管理员 筛选出来并排到第一个
+      const adminListWithId1 = adminListResp.filter(item => item.id === 1)
+      setAdminList(adminListWithId1.concat(adminListResp.filter(item => item.id !== 1)))
+      // console.log('adminList:', adminList);
+    } catch (error) {
+      console.error('Error fetching adminList:', error);
+    }
+  }
   // 打开新建弹窗
   const handleCreate = () => {
     setCurrentTenant(null);
     form.resetFields();
-    form.setFieldsValue({ status: 'enabled' });
+    form.setFieldsValue({
+      status: 0,
+      admin: adminList.length > 0 ? adminList[0].username : undefined
+    });
     setModalVisible(true);
     setIsNewTenant(true);
+  };
+
+   // 生成租户编码
+  const generateTenantCode = () => {
+    const now = new Date();
+    const timestamp = `${now.getFullYear()}${(now.getMonth() + 1).toString().padStart(2, '0')}${now.getDate().toString().padStart(2, '0')}${now.getHours().toString().padStart(2, '0')}${now.getMinutes().toString().padStart(2, '0')}${now.getSeconds().toString().padStart(2, '0')}`;
+    return `tenant_${timestamp}`;
   };
 
    // 打开编辑弹窗
@@ -161,12 +219,13 @@ const TenantManagement: React.FC = () => {
       accountCount: record.accountCount,
       contactName: record.contactName,
       createTime: record.createTime,
-      status: record.status
+      status: record.status,
+      tenantCode: record.tenantCode,
     };
     setCurrentTenant(tenant);
     form.setFieldsValue({
       ...record,
-      status: record.status === PlatformTenantStatus['已启用'] ? 'enabled' : 'disabled'
+      status: record.status === PlatformTenantStatus['已启用'] ? 0 : 1
     });
     setModalVisible(true);
     setIsNewTenant(false);
@@ -179,26 +238,46 @@ const TenantManagement: React.FC = () => {
 
       // 检查分配人数
       const allocatedCount = values.allocatedCount;
-      const currentUsed = currentTenant ? currentTenant.allocatedCount : 0;
-      const delta = allocatedCount - currentUsed;
+      const currentUsed = allocatableLicense - tenantLimit;
 
-      if (delta > remainingLicense) {
-        Message.error(`可分配人数不足，License总人数是${totalLicense}，剩余${remainingLicense}`);
+      if (allocatedCount > allocatableLicense) {
+        Message.error(`可分配人数不足，License总人数是${tenantLimit}，剩余${allocatableLicense}`);
         return;
       }
 
       if (currentTenant && allocatedCount < currentUsed) {
-        Message.error(`用户内已使用用户数量为${currentUsed}，分配的用户数量不能低于此数量`);
+        Message.error(`租户内已使用租户数量为${currentUsed}，分配的租户数量不能低于此数量`);
         return;
       }
       
       // 如果是从禁用状态切换到启用状态
-      if (currentTenant && currentTenant.status === 'disabled' && values.status === 'enabled') {
+      if (currentTenant) {
+        //  && currentTenant.status === 0 && values.status === 1
         // 更新数据状态
-        setTenantList(tenantList.map((item) => (item.id === Number(currentTenant.id) ? { ...item, status: 'enabled' } : item)));
-        Message.success('已启用用户');
-        setModalVisible(false);
-        return;
+        // setTenantList(tenantList.map((item) => (item.id === Number(currentTenant.id) ? { ...item, status: 0 } : item)));
+        // Message.success('已启用租户');
+        // setModalVisible(false);
+        // return;
+         // 构建更新参数
+        const updateParams: CreateTenantParams = {
+          id: currentTenant.id, // 确保包含租户ID
+          name: values.tenantName,
+          tenantCode: values.tenantCode,
+          contactName: values.admin,
+          status: values.status,
+          accountCount: values.allocatedCount
+        };
+
+        try {
+          // 调用 updatePlatformTenantApi
+          await updatePlatformTenantApi(updateParams);
+
+          // 更新本地状态
+          setTenantList(tenantList.map((item) => (item.id === Number(currentTenant.id) ? { ...item, ...values } : item)));
+          Message.success('更新成功');
+        } catch (error: any) {
+          Message.error(error.message || '更新失败');
+        }
       }
       // 这里应该是API调用
       if (currentTenant) {
@@ -206,21 +285,29 @@ const TenantManagement: React.FC = () => {
         setTenantList(tenantList.map((item) => (item.id === Number(currentTenant.id) ? { ...item, ...values } : item)));
         // Message.success('更新成功');
       } else {
-        // 新增
-        const newTenant = {
-          id: tenantList.length + 1,
-          tenantCode: `ZH${new Date().getFullYear()}${(new Date().getMonth() + 1).toString().padStart(2, '0')}${Math.floor(
-            Math.random() * 10000
-          )
-            .toString()
-            .padStart(4, '0')}`,
-          ...values,
-          createTime: new Date().toISOString()
-        };
-        setTenantList([...tenantList, newTenant]);
-        Message.success('创建成功');
+        try {
+          const newTenantData: CreateTenantParams = {
+            name: values.tenantName,
+            tenantCode: generateTenantCode(),
+            contactName: values.admin,
+            status: values.status,
+            accountCount: values.allocatedCount
+          };
+          
+          await addPlatformTenantApi(newTenantData);
+          
+          const newTenant = {
+            id: tenantList.length + 1,
+            tenantCode: newTenantData.tenantCode,
+            ...values,
+            createTime: new Date().toISOString()
+          };
+          setTenantList([...tenantList, newTenant]);
+          Message.success('创建成功');
+        } catch (error: any) {
+          Message.error(error.message || '创建失败');
+        }
       }
-
       setModalVisible(false);
     } catch (error) {
       console.error('表单验证失败:', error);
@@ -232,13 +319,20 @@ const TenantManagement: React.FC = () => {
   const confirmDisable = () => {
     // 添加名称验证逻辑
     if (confirmText !== currentTenant?.name) {
-      Message.error(`用户名不正确`);
+      Message.error(`租户名不正确`);
       return;
     }
-    const values = form.getFieldsValue();
-    // 这里应该是API调用
-    setTenantList(tenantList.map((item) => (item.id === Number(currentTenant?.id) ? { ...item, ...values } : item)));
-    Message.success('已禁用用户');
+    // const values = form.getFieldsValue();
+    // // 这里应该是API调用
+    
+    // updatePlatformTenantApi({
+    //   id: currentTenant?.id,
+    //   status: PlatformTenantStatus.Disable,
+
+    // }).then(() => { 
+    // });
+    // setTenantList(tenantList.map((item) => (item.id === Number(currentTenant?.id) ? { ...item, ...values } : item)));
+    // Message.success('已禁用租户');
     setConfirmText(''); // 确认禁用后清空输入框
     // 根据是否是新租户决定关闭哪些弹窗
     if (isNewTenant) {
@@ -255,8 +349,9 @@ const TenantManagement: React.FC = () => {
   const cancelDisable = () => {
     setConfirmDisableVisible(false);
     // 同时Switch状态变为已启用
-    form.setFieldsValue({ status: 'enabled' });
+    // form.setFieldsValue({ status: 0 });
   };
+
   // 表格列定义
   const columns = [
     { 
@@ -265,22 +360,20 @@ const TenantManagement: React.FC = () => {
       key: 'order',
       render: (text: any, record: any, index: number) => index + 1,
       width: '5%',
-      fixed: 'left',
     },
-    // {
-    //   title: '序号',
-    //   dataIndex: 'id',
-    //   width: 80
-    // },
     {
-      title: '用户名称',
+      title: '租户名称',
       dataIndex: 'name',
       sorter: (a: PlatformTenantInfo, b: PlatformTenantInfo) => a.name.localeCompare(b.name)
     },
     {
-      title: '用户编码',
-      dataIndex: 'contactMobile',
-      sorter: (a: PlatformTenantInfo, b: PlatformTenantInfo) => a.contactMobile.localeCompare(b.contactMobile)
+      title: '租户编码',
+      dataIndex: 'tenantCode',
+      sorter: (a: PlatformTenantInfo, b: PlatformTenantInfo) => {
+      const timestampA = parseInt(a.tenantCode.replace('tenant_', ''), 10);
+      const timestampB = parseInt(b.tenantCode.replace('tenant_', ''), 10);
+      return timestampA - timestampB;
+    }
     },
     {
       title: '分配的人员数量',
@@ -303,8 +396,8 @@ const TenantManagement: React.FC = () => {
       title: '状态',
       dataIndex: 'status',
       render: (status: string) => (
-        <Text style={{ color: status === 'enabled' ? '#00b42a' : '' }}>
-          {status === 'enabled' ? '已启用' : '已禁用'}
+        <Text style={{ color: !status ? '#00b42a' : '' }}>
+          {!status ? '已启用' : '已禁用'}
         </Text>
       )
     },
@@ -318,6 +411,19 @@ const TenantManagement: React.FC = () => {
     }
   ];
 
+  // 处理分页变化
+  const handlePageChange = async (pageNo: number) => {
+    try {
+      console.log('pageNo', pageNo);
+      const pageResp = await getPlatformTenantList();
+      console.log('pageResp', pageResp);
+
+      setCurrentPage(pageNo);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <div className={styles.tenant}>
       {/* <Card bordered={false}> */}
@@ -330,9 +436,9 @@ const TenantManagement: React.FC = () => {
             {/* 添加激活状态 颜色为 #00b42a */}
 
             <Radio.Group type="button" value={searchParams.status} onChange={handleStatusChange}>
-              <Radio value="all">全部</Radio>
-              <Radio value="enabled">启用</Radio>
-              <Radio value="disabled">禁用</Radio>
+              <Radio value={2}>全部</Radio>
+              <Radio value={0}>启用</Radio>
+              <Radio value={1}>禁用</Radio>
             </Radio.Group>
 
             <Input.Search
@@ -355,15 +461,19 @@ const TenantManagement: React.FC = () => {
           loading={loading}
           rowClassName={(record) => record.status === PlatformTenantStatus['已启用'] ? 'enabled-row' : ''}
           pagination={{
+            current: currentPage,
             pageSize: 10,
-            showTotal: (total) => `共 ${total} 条`
+            showTotal: true,
+            total: total,
+            onChange: handlePageChange
+            // (total) => `共 ${total} 条`
           }}
         />
       {/* </Card> */}
       
       {/* 新建/修改弹窗 */}
       <Modal
-        title={currentTenant ? '修改用户' : '新建用户'}
+        title={currentTenant ? '修改租户' : '新建租户'}
         visible={modalVisible}
         onOk={handleSubmit}
         onCancel={() => setModalVisible(false)}
@@ -373,7 +483,11 @@ const TenantManagement: React.FC = () => {
       >
         <Form form={form} layout="vertical">
           <Form.Item label="租户编号" field="tenantCode">
-            <Input placeholder="自动生成" disabled />
+            <Input
+              placeholder={generateTenantCode()}
+              disabled
+              value={currentTenant ? currentTenant.tenantCode : generateTenantCode()}
+            />
           </Form.Item>
 
           <Form.Item label="租户名称" field="tenantName" rules={[{ required: true, message: '请输入租户名称' }]}>
@@ -386,16 +500,16 @@ const TenantManagement: React.FC = () => {
               showSearch
               filterOption={(input, option) => option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}
             >
-              {mockAdmins.map((admin) => (
-                <Option key={admin.id} value={admin.name}>
-                  {admin.name}
+              {adminList.map((admin) => (
+                <Option key={admin.id} value={admin.username}>
+                  {admin.username}
                 </Option>
               ))}
             </Select>
           </Form.Item>
 
           <Form.Item
-            label={`分配人员数量 (可分配人员数量：${remainingLicense})`}
+            label={`分配人员数量 (可分配人员数量：${allocatableLicense})`}
             field="allocatedCount"
             rules={[
               { required: true, message: '请输入分配人员数量' },
@@ -410,20 +524,20 @@ const TenantManagement: React.FC = () => {
               checkedText="已启用"
               uncheckedText="已禁用"
               defaultChecked // 默认启用状态
-              checked={form.getFieldValue('status') === 'enabled'}
+              checked={form.getFieldValue('status') === 0}
               disabled={!currentTenant}
               onChange={(checked) => {
                 form.setFieldsValue({
-                  status: checked ? 'enabled' : 'disabled'
+                  status: checked ? 0 : 1
                 });
                 if (!checked) {
-                  console.log('checked', checked);
+                  // console.log('checked', checked);
                   setConfirmDisableVisible(true);
-                } else if (currentTenant && currentTenant.status === 'disabled') {
+                } else if (currentTenant && currentTenant.status === 1) {
                   setTenantList(tenantList.map(item => 
                     item.id === Number(currentTenant.id) ? { ...item, status: PlatformTenantStatus['已启用'] } : item
                   ));
-                  Message.success('已启用用户');
+                  // Message.success('已启用租户');
                 }
               }}
             />
@@ -432,10 +546,10 @@ const TenantManagement: React.FC = () => {
       </Modal>
 
       {/* 确认禁用弹窗 */}
-      <Modal title="确认禁用用户" visible={confirmDisableVisible} onOk={confirmDisable} onCancel={cancelDisable}>
+      <Modal title="确认禁用租户" visible={confirmDisableVisible} onOk={confirmDisable} onCancel={cancelDisable}>
         <div style={{ marginBottom: 20 }}>
           <p>
-            禁用租户将导致该租户下的所有数据（包括用户信息、配置记录、业务应用等）被直接禁用，正在运行的应用停止访问。
+            禁用租户将导致该租户下的所有数据（包括租户信息、配置记录、业务应用等）被直接禁用，正在运行的应用停止访问。
           </p>
           <p>请确认您已完成以下事项：</p>
           <p>1. 租户内的应用现在无法在访问的浏览；</p>

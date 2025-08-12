@@ -55,3 +55,26 @@ export interface PlatformTenantInfo {
    */
   website?: string,
 }
+
+export interface CreateTenantParams {
+  /**
+   * 租户名称
+   */
+  name: string;
+  /**
+   * 租户编码
+   */
+  tenantCode: string;
+  /**
+   * 管理员名称
+   */
+  contactName: string;
+  /**
+   * 租户状态
+   */
+  status: 0 | 1;
+  /**
+   * 分配数量
+   */
+  accountCount: number;
+}
