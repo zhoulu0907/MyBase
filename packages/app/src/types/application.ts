@@ -34,6 +34,10 @@ export interface Application {
     tagName: string;
   }[];
   /**
+   * 主题色
+   */
+  themeColor?: string;
+  /**
    * 创建时间
    */
   createTime?: string;
@@ -58,6 +62,18 @@ export interface ListApplicationReq {
   orderByTime?: 'create' | 'update';
   status?: number | null;
 }
+
+/**
+ * 应用状态常量
+ * 0: 开发中
+ * 1: 已发布
+ * 2: 已发布编辑中
+ */
+export const AppStatus = {
+  DEVELOPING: 0,      // 开发中
+  PUBLISHED: 1,       // 已发布
+  EDITING_AFTER_PUBLISH: 2, // 已发布编辑中
+} as const;
 
 export interface CreateApplicationReq {
   /**
@@ -102,7 +118,7 @@ export interface UpdateApplicationReq {
   /**
    * 应用ID
    */
-  id: number;
+  id: string;
   /**
    * 应用模式
    */
@@ -145,7 +161,7 @@ export interface UpdateApplicationNameReq {
   /**
    * 应用ID
    */
-  id: number;
+  id: string;
   /**
    * 应用名称
    */
@@ -156,9 +172,17 @@ export interface DeleteApplicationReq {
   /**
    * 应用ID
    */
-  id: bigint;
+  id: string;
   /**
    * 应用名称
    */
   name: string;
+}
+
+
+export interface GetApplicationReq {
+  /**
+   * 应用ID
+   */
+  id: string,
 }

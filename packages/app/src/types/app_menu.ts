@@ -4,7 +4,7 @@ export interface ListApplicationMenuReq {
 
 export interface ApplicationMenu {
     id: string;
-    parentId?: string;
+    parentCode?: string;
     menuCode: string;
     menuSort: number;
     menuType: number;
@@ -25,8 +25,9 @@ export enum PageType {
 }
 
 export const RootParentPage = {
-    id: "0",
-    menuCode: "",
+    id: "",
+    menuCode: "root",
+    parentCode: "",
     menuSort: 0,
     menuType: MenuType.GROUP,
     menuName: "根目录",
@@ -37,7 +38,7 @@ export const RootParentPage = {
 
 export interface CreateApplicationMenuReq {
   applicationId: string;
-  parentId?: string;
+  parentCode?: string;
   pageType?: number;
   menuName: string;
   menuType: MenuType;
@@ -51,7 +52,7 @@ export interface UpdateApplicationMenuNameReq {
 
 export interface UpdateApplicationMenuOrderReq {
   id: string;
-  parentUuid?: string;
+  parentCode?: string;
   ids: number[];
 }
 
@@ -63,7 +64,7 @@ export interface UpdateApplicationMenuVisibleReq {
 export interface CopyApplicationMenuReq {
   id: string;
   menuName: string;
-  parentUuid?: string;
+  parentCode?: string;
 }
 
 export interface DeleteApplicationMenuReq {

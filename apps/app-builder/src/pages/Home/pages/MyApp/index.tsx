@@ -1,5 +1,5 @@
 import appDeleteSVG from '@/assets/images/app_delete.svg';
-import appEditSVG from '@/assets/images/app_edit.svg';
+import appEditSVG from '@/assets/images/app_edit_black.svg';
 import CreateApp from '@/components/CreateApp';
 import { useAppStore } from '@/store';
 import { UserPermissionManager } from '@/utils/permission';
@@ -18,6 +18,7 @@ import dayjs from 'dayjs';
 import { debounce } from 'lodash-es';
 import React, { useCallback, useEffect, useState } from 'react';
 // import { useNavigate } from 'react-router-dom';
+import { type Options } from '@/components/CreateApp/const';
 import { useI18n } from '@/hooks/useI18n';
 import styles from './index.module.less';
 
@@ -56,6 +57,8 @@ const statusOptions = [
     value: 1
   }
 ];
+
+const defaultTheme = '#4FAE7B';
 
 const MyAppPage: React.FC = () => {
   const [form] = Form.useForm();
@@ -131,13 +134,14 @@ const MyAppPage: React.FC = () => {
         description,
         iconColor,
         iconName,
-        tagIds,
+        tagIds: tagIds?.map((t: Options) => t.value),
         themeColor
       };
-      createApplication(params)
+      await createApplication(params)
         .then(() => {
           setCreateVisible(false);
           Message.success('应用创建成功');
+          form.resetFields();
           getApplicationList();
 
           // Message.success({
@@ -151,6 +155,8 @@ const MyAppPage: React.FC = () => {
         .finally(() => {
           setCreateLoading(false);
         });
+      setPageNo(1);
+      await getApplicationList();
     });
   };
 
@@ -163,7 +169,7 @@ const MyAppPage: React.FC = () => {
     try {
       setDeleteLoading(true);
       const params: DeleteApplicationReq = {
-        id: BigInt(deleteApp.id),
+        id: deleteApp?.id,
         name: appName
       };
       const res = await deleteApplication(params);
@@ -183,7 +189,10 @@ const MyAppPage: React.FC = () => {
     setCurAppId(appId);
     const newWindow = window.open('', '_blank');
     if (newWindow) {
-      const href = `${window.location.origin}/#/onebase/create-app/app-setting?appId=${appId}`;
+      const baseUrl = window.location.href.replace(/my-app.*$/, '');
+      const href = `${baseUrl}create-app/app-setting?appId=${appId}`;
+      newWindow.location.href = href;
+
       newWindow.location.href = href;
     }
   };
@@ -192,7 +201,8 @@ const MyAppPage: React.FC = () => {
     setCurAppId(appId);
     const newWindow = window.open('', '_blank');
     if (newWindow) {
-      const href = `${window.location.origin}/#/onebase/create-app/data-factory?appId=${appId}`;
+      const baseUrl = window.location.href.replace(/my-app.*$/, '');
+      const href = `${baseUrl}create-app/data-factory?appId=${appId}`;
       newWindow.location.href = href;
     }
   };
@@ -304,7 +314,11 @@ const MyAppPage: React.FC = () => {
                     {item.tags?.map((tag) => (
                       <Tag
                         key={tag.id}
-                        style={{ color: item.iconColor, borderColor: item.iconColor, backgroundColor: '#fff' }}
+                        style={{
+                          color: item.themeColor || defaultTheme,
+                          borderColor: item.themeColor || defaultTheme,
+                          backgroundColor: '#fff'
+                        }}
                       >
                         {tag.tagName}
                       </Tag>
@@ -317,7 +331,7 @@ const MyAppPage: React.FC = () => {
                     <Avatar
                       size={24}
                       style={{
-                        backgroundColor: item.iconColor || '#4FAE7B'
+                        backgroundColor: item.themeColor || defaultTheme
                       }}
                     >
                       {item.createUser?.slice(0, 1) || 'U'}
@@ -411,6 +425,7 @@ const MyAppPage: React.FC = () => {
         title={<div style={{ textAlign: 'left' }}>创建空白应用</div>}
         visible={createVisible}
         simple
+        unmountOnExit
         footer={
           <div style={{ textAlign: 'right' }}>
             <Button type="default" onClick={() => setCreateVisible(false)} style={{ marginRight: 12 }}>
@@ -426,7 +441,7 @@ const MyAppPage: React.FC = () => {
         className={styles.createAppModal}
       >
         <div className={styles.createAppWrapper}>
-          <CreateApp form={form} previewBgColor="#F2F3F5BF" />
+          <CreateApp form={form} status="create" previewBgColor="#F2F3F5BF" />
         </div>
       </Modal>
     </div>

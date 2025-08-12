@@ -1,5 +1,7 @@
 import { Form, Input, Modal, Select, TreeSelect, type FormInstance } from '@arco-design/web-react';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import MenuModal from '../MenuModal';
+import iconEditSVG from '@/assets/images/app_edit_black.svg';
 
 interface CreateModalProps {
   title: string;
@@ -8,7 +10,7 @@ interface CreateModalProps {
   form: FormInstance;
   pageTypeOptions: { label: string; value: any }[];
   visibleCreateForm: string;
-  initValue: { pageType: number; menuName: string; parentId: string };
+  initValue: { pageType: number; menuName: string; parentCode: string };
   treeData: any[];
 }
 
@@ -22,6 +24,17 @@ const CreateModal: React.FC<CreateModalProps> = ({
   initValue,
   treeData
 }) => {
+  const [visibleMenuIcon, setVisibleMenuIcon] = useState<boolean>(false);
+  const [menuIcon, setMenuIcon] = useState<string>();
+
+  useEffect(() => {
+    if (menuIcon) {
+      form.setFieldValue('menuIcon', menuIcon);
+    } else {
+      form.setFieldValue('menuIcon', visibleCreateForm === 'page' ? 'icon-13' : 'icon-folder');
+    }
+  }, [menuIcon, visibleCreateForm]);
+
   return (
     <Modal
       title={title}
@@ -38,7 +51,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
         initialValues={{
           pageType: initValue.pageType,
           menuName: initValue.menuName,
-          parentId: initValue.parentId
+          parentCode: initValue.parentCode
         }}
       >
         <Form.Item
@@ -68,14 +81,48 @@ const CreateModal: React.FC<CreateModalProps> = ({
           />
         </Form.Item>
 
-        {/* TODO: 添加菜单图标 */}
-
+        <Form.Item label={'菜单图标'} field="menuIcon" rules={[{ required: true, message: '请选择菜单图标' }]}>
+          <div style={{ display: 'flex', alignItems: 'flex-end' }}>
+            <div
+              style={{
+                width: 32,
+                height: 32,
+                marginRight: 4,
+                borderRadius: 2,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: '#F2F3F5'
+              }}
+            >
+              {menuIcon ? (
+                <i className={`iconfont ${menuIcon}`} style={{ fontSize: 16 }} />
+              ) : (
+                <i
+                  className={`iconfont ${visibleCreateForm === 'page' ? 'icon-13' : 'icon-folder'}`}
+                  style={{ fontSize: 16 }}
+                />
+              )}
+            </div>
+            <img
+              src={iconEditSVG}
+              alt="选择菜单图标"
+              style={{ cursor: 'pointer' }}
+              onClick={() => setVisibleMenuIcon(true)}
+            />
+          </div>
+        </Form.Item>
         <Form.Item label="父级页面" field="parentId">
           <TreeSelect treeData={treeData} placeholder="请选择父级页面" allowClear />
         </Form.Item>
 
         {/* TODO: 添加业务实体 */}
       </Form>
+      <MenuModal
+        visible={visibleMenuIcon}
+        handleSelect={(val) => setMenuIcon(val)}
+        onCancel={() => setVisibleMenuIcon(false)}
+      />
     </Modal>
   );
 };

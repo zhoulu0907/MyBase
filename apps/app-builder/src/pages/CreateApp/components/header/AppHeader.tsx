@@ -1,9 +1,11 @@
+import AvatarSVG from '@/assets/images/avatar.svg';
 import helpSVG from '@/assets/images/help_icon.svg';
 import { useI18n } from '@/hooks/useI18n';
 import { useAppStore } from '@/store';
 import { UserPermissionManager } from '@/utils/permission';
-import { Avatar, Button, Dropdown, Layout, Menu, Tabs } from '@arco-design/web-react';
-import { IconMenu, IconPoweroff, IconUser } from '@arco-design/web-react/icon';
+import { Button, Dropdown, Layout, Menu, Tabs } from '@arco-design/web-react';
+import { IconMenu } from '@arco-design/web-react/icon';
+import { getApplication, type GetApplicationReq } from '@onebase/app';
 import { TokenManager } from '@onebase/common';
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -32,6 +34,10 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     return 'page-manager';
   };
   const [activeTab, setActiveTab] = useState(() => getTabKeyFromPath(location.pathname));
+  const [appName, setAppName] = useState('未命名应用');
+  const [appIcon, setAppIcon] = useState('');
+  const [iconColor, setIconColor] = useState('');
+  const [appStatus, setAppStatus] = useState('');
 
   useEffect(() => {
     setActiveTab(getTabKeyFromPath(location.pathname));
@@ -42,8 +48,31 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     const appId = searchParams.get('appId');
     if (appId) {
       setCurAppId(appId);
+      handleGetApplication(appId);
     }
   }, []);
+
+  const handleGetApplication = async (appId: string) => {
+    const appReq: GetApplicationReq = {
+      id: appId
+    };
+    const appResp = await getApplication(appReq);
+    console.log(appResp);
+    if (appResp) {
+      if (appResp.iconName) {
+        setAppIcon(appResp.iconName);
+      }
+      if (appResp.iconColor) {
+        setIconColor(appResp.iconColor);
+      }
+      if (appResp.appName) {
+        setAppName(appResp.appName);
+      }
+      if (appResp.appStatusText) {
+        setAppStatus(appResp.appStatusText);
+      }
+    }
+  };
 
   // 登出处理
   const handleLogout = () => {
@@ -55,13 +84,23 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
 
   // 用户菜单
   const userMenu = (
+    // <Menu>
+    //   <Menu.Item key="profile">
+    //     <IconUser />
+    //     {t('header.profile')}
+    //   </Menu.Item>
+    //   <Menu.Item key="logout" onClick={handleLogout}>
+    //     <IconPoweroff />
+    //     {t('header.logout')}
+    //   </Menu.Item>
+    // </Menu>
     <Menu>
       <Menu.Item key="profile">
-        <IconUser />
-        {t('header.profile')}
+        <div className={styles.userMenuInfo}>
+          <div>{UserPermissionManager.getUserPermissionInfo()?.user.email}</div>
+        </div>
       </Menu.Item>
-      <Menu.Item key="logout" onClick={handleLogout}>
-        <IconPoweroff />
+      <Menu.Item key="logout" onClick={handleLogout} style={{ color: '#FF0000' }}>
         {t('header.logout')}
       </Menu.Item>
     </Menu>
@@ -80,10 +119,12 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
             className={styles.menuIcon}
           />
 
-          <Button iconOnly shape="square" icon={<IconUser />} style={{ backgroundColor: '#E0A951' }} />
-          <div className={styles.appName}>未命名应用</div>
+          <div className={styles.myAppIcon} style={{ backgroundColor: iconColor }}>
+            <i className={`iconfont ${appIcon || 'icon-box'}`} />
+          </div>
+          <div className={styles.appName}>{appName}</div>
           <Button type="text" style={{ background: '#eaf0fd' }}>
-            {t('header.developing')}
+            {appStatus}
           </Button>
         </div>
 
@@ -132,11 +173,11 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
 
           <Button type="outline" /* onClick={() => navigate('/onebase/setting')} */>{t('createApp.preview')}</Button>
 
+          {UserPermissionManager.getUserPermissionInfo()?.user?.nickname || '未登录'}
+
           <Dropdown droplist={userMenu} position="bottom">
             <div className={styles.userDropdown}>
-              <Avatar size={32} style={{ backgroundColor: '#4FAE7B' }}>
-                {UserPermissionManager.getUserPermissionInfo()?.user.nickname?.slice(0, 1) || 'U'}
-              </Avatar>
+              <img src={AvatarSVG} />
             </div>
           </Dropdown>
         </div>

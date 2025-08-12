@@ -12,11 +12,10 @@ interface CopyModalProps {
   setVisible: (visible: boolean) => void;
   handleCopy: () => void;
   form: FormInstance;
-  initValue: { menuName: string; parentId: string };
   treeData: any[];
 }
 
-const CopyModal: React.FC<CopyModalProps> = ({ title, visible, handleCopy, setVisible, form, initValue, treeData }) => {
+const CopyModal: React.FC<CopyModalProps> = ({ title, visible, handleCopy, setVisible, form, treeData }) => {
   return (
     <Modal
       title={title}
@@ -33,15 +32,16 @@ const CopyModal: React.FC<CopyModalProps> = ({ title, visible, handleCopy, setVi
         layout="vertical"
         form={form}
         initialValues={{
-          menuName: initValue.menuName,
-          parentId: initValue.parentId
+          menuName: form.getFieldValue('menuName'),
+          menuID: form.getFieldValue('menuID'),
+          parentCode: form.getFieldValue('parentCode')
         }}
       >
         <Form.Item label="页面名称" field="menuName" rules={[{ required: true, message: '请输入页面名称' }]}>
           <Input placeholder="请输入页面名称" allowClear />
         </Form.Item>
 
-        <Form.Item label="父级页面" field="parentId">
+        <Form.Item label="父级页面" field="parentCode">
           <TreeSelect treeData={treeData} placeholder="请选择父级页面" allowClear />
         </Form.Item>
       </Form>

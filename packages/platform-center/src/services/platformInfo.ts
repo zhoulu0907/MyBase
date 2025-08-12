@@ -5,7 +5,7 @@ import { systemService } from './clients';
 export const getPlatformInfoApi = () => systemService.get('/platforminfo/get-platform-info')
 
 // 获取平台信息 platforminfoList
-export const getPlatFormInfoListApi = (params: PlatformInfoReq) => systemService.get(`/license/page?pageNum=${params.pageNum}&pageSize=${params.pageSize}`)
+export const getPlatFormInfoListApi = (params: PlatformInfoReq) => systemService.get(`/license/page?pageNo=${params.pageNo}&pageSize=${params.pageSize}`)
 
 // 上传平台 License /platforminfo/upload
 export const uploadPlatformLicenseApi = (data: any) => systemService.post('/platforminfo/upload', data);

@@ -1,20 +1,22 @@
+import { Button, Card, Pagination, Space, Table, Typography } from '@arco-design/web-react';
+import { IconArrowLeft, IconArrowUp, IconSave } from '@arco-design/web-react/icon';
 import React, { useState } from 'react';
-import { Card, Table, Button, Space, Typography, Pagination } from '@arco-design/web-react';
-import { IconArrowLeft, IconSave, IconArrowUp } from '@arco-design/web-react/icon';
-import styles from './VersionManagement.module.less';
-import PublishVersionModal from './modals/PublishVersionModal';
-import SaveVersionModal from './modals/SaveVersionModal';
-import EditVersionModal from './modals/EditVersionModal';
+import EditVersionModal from '../modals/EditVersionModal';
+import SaveVersionModal from '../modals/SaveVersionModal';
 
-interface VersionRecord {
-  id: string;
-  versionName: string;
-  versionNumber: string;
-  description: string;
-  environment: string;
-  operationType: string;
-  operator: string;
-  operationTime: string;
+import { OperationType } from '@onebase/app';
+import dayjs from 'dayjs';
+import type { VersionRecord } from '../..';
+import styles from './index.module.less';
+
+interface VersionManagementProps {
+  applicationId: string;
+  list: VersionRecord[];
+  total: number;
+  pageSize: number;
+  setPageSize: (pageSize: number) => void;
+  currentPage: number;
+  setCurrentPage: (currentPage: number) => void;
 }
 
 interface EditModalData {
@@ -30,50 +32,20 @@ interface formData {
   environment: string;
 }
 
-const VersionManagement: React.FC = () => {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-
+const VersionManagement: React.FC<VersionManagementProps> = ({
+  list,
+  total,
+  pageSize,
+  setPageSize,
+  currentPage,
+  setCurrentPage
+}) => {
   // 弹窗状态
   const [publishModalVisible, setPublishModalVisible] = useState(false);
   const [saveModalVisible, setSaveModalVisible] = useState(false);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [editModalData, setEditModalData] = useState<EditModalData | null>(null);
   const [modalLoading, setModalLoading] = useState(false);
-
-  // 模拟数据
-  const mockData: VersionRecord[] = [
-    {
-      id: '1',
-      versionName: 'OB3.0_V2.0.7',
-      versionNumber: 'V2.0.7',
-      description: '这是一段版本描述',
-      environment: '正式环境',
-      operationType: '发布版本',
-      operator: '巫炘',
-      operationTime: '2025-07-24 10:08:49'
-    },
-    {
-      id: '2',
-      versionName: 'OB3.0_V2.0.6',
-      versionNumber: 'V2.0.6',
-      description: '这是一段版本描述',
-      environment: '',
-      operationType: '保存版本',
-      operator: '某管理员',
-      operationTime: '2025-07-23 20:56:39'
-    },
-    {
-      id: '3',
-      versionName: '回退至OB3.0_V2版本',
-      versionNumber: 'V2.0.4',
-      description: '这是一段版本描述',
-      environment: '',
-      operationType: '保存版本',
-      operator: '某管理员',
-      operationTime: '2025-07-22 15:30:12'
-    }
-  ];
 
   // 弹窗处理函数
   const handlePublishVersion = () => {
@@ -88,9 +60,9 @@ const VersionManagement: React.FC = () => {
     console.log('启用版本:', record);
   };
 
-  const handleCompareVersion = (record: VersionRecord) => {
-    console.log('版本比对:', record);
-  };
+  // const handleCompareVersion = (record: VersionRecord) => {
+  //   console.log('版本比对:', record);
+  // };
 
   const handleAccessVersion = (record: VersionRecord) => {
     console.log('访问版本:', record);
@@ -103,19 +75,6 @@ const VersionManagement: React.FC = () => {
       description: record.description
     });
     setEditModalVisible(true);
-  };
-
-  const handlePublishModalOk = async (values: formData) => {
-    setModalLoading(true);
-    try {
-      console.log('发布版本:', values);
-      // TODO: 调用发布版本API
-      setPublishModalVisible(false);
-    } catch (error) {
-      console.error('发布版本失败:', error);
-    } finally {
-      setModalLoading(false);
-    }
   };
 
   const handleSaveModalOk = async (values: Partial<formData>) => {
@@ -149,24 +108,29 @@ const VersionManagement: React.FC = () => {
       title: '版本名称',
       dataIndex: 'versionName',
       key: 'versionName',
+      align: 'center',
       width: 200
     },
     {
       title: '版本号',
       dataIndex: 'versionNumber',
       key: 'versionNumber',
+      align: 'center',
       width: 120
     },
     {
       title: '版本描述',
-      dataIndex: 'description',
-      key: 'description',
-      width: 200
+      dataIndex: 'versionDescription',
+      key: 'versionDescription',
+      align: 'center',
+      width: 200,
+      ellipsis: true
     },
     {
       title: '发布环境',
       dataIndex: 'environment',
       key: 'environment',
+      align: 'center',
       width: 120,
       render: (value: string) => value || '-'
     },
@@ -174,23 +138,33 @@ const VersionManagement: React.FC = () => {
       title: '操作类型',
       dataIndex: 'operationType',
       key: 'operationType',
-      width: 120
+      align: 'center',
+      width: 120,
+      render: (value: number) => {
+        return value === OperationType.PUBLISH ? '发布版本' : '保存版本';
+      }
     },
     {
       title: '操作人',
-      dataIndex: 'operator',
-      key: 'operator',
+      dataIndex: 'updaterName',
+      key: 'updaterName',
+      align: 'center',
       width: 120
     },
     {
       title: '操作时间',
-      dataIndex: 'operationTime',
-      key: 'operationTime',
-      width: 180
+      dataIndex: 'updateTime',
+      key: 'updateTime',
+      align: 'center',
+      width: 180,
+      render: (value: string) => {
+        return value ? dayjs(value).format('YYYY-MM-DD HH:mm:ss') : '-';
+      }
     },
     {
       title: '操作',
       key: 'actions',
+      align: 'center',
       width: 200,
       render: (_: unknown, record: VersionRecord) => (
         <Space>
@@ -203,9 +177,9 @@ const VersionManagement: React.FC = () => {
           <Button type="text" size="small" onClick={() => handleEditVersion(record)}>
             编辑
           </Button>
-          <Button type="text" size="small" onClick={() => handleCompareVersion(record)}>
+          {/* <Button type="text" size="small" onClick={() => handleCompareVersion(record)}>
             版本比对
-          </Button>
+          </Button> */}
         </Space>
       )
     }
@@ -230,11 +204,11 @@ const VersionManagement: React.FC = () => {
         </Space>
       </div>
 
-      <Table columns={columns} data={mockData} rowKey="id" pagination={false} className={styles.versionTable} />
+      <Table columns={columns} data={list} rowKey="id" pagination={false} className={styles.versionTable} />
 
       <div className={styles.pagination}>
         <Pagination
-          total={20}
+          total={total}
           current={currentPage}
           pageSize={pageSize}
           onChange={setCurrentPage}
@@ -246,12 +220,6 @@ const VersionManagement: React.FC = () => {
       </div>
 
       {/* 弹窗组件 */}
-      <PublishVersionModal
-        visible={publishModalVisible}
-        onCancel={() => setPublishModalVisible(false)}
-        onOk={handlePublishModalOk}
-        loading={modalLoading}
-      />
 
       <SaveVersionModal
         visible={saveModalVisible}

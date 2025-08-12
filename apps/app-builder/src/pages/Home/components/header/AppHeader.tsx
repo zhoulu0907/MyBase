@@ -1,4 +1,4 @@
-import avatarSVG from '@/assets/images/avatar.svg';
+import AvatarSVG from '@/assets/images/avatar.svg';
 import LogoSVG from '@/assets/images/ob_logo.svg';
 import { useI18n } from '@/hooks/useI18n';
 import { UserPermissionManager } from '@/utils/permission';
@@ -112,7 +112,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
           }}
           size="large"
         >
-          <Tabs.TabPane key="my-app" title="我的应用" />
+          {/* <Tabs.TabPane key="my-app" title="我的应用" /> */}
           {/* <Tabs.TabPane key="app-center" title="应用中心" />
           <Tabs.TabPane key="mall-center" title="商超中心" />
           <Tabs.TabPane key="help-center" title="帮助中心" /> */}
@@ -123,10 +123,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
 
           <Dropdown droplist={userMenu} position="bl">
             <div className={styles.userDropdown}>
-              {/* <Avatar size={32} style={{ backgroundColor: '#4FAE7B' }}>
-                {nickname?.charAt(0) || 'U'}
-              </Avatar> */}
-              <img src={avatarSVG} />
+              <img src={AvatarSVG} />
             </div>
           </Dropdown>
         </div>
