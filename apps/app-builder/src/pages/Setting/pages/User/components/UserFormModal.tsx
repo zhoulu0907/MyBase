@@ -58,8 +58,8 @@ export default function UserFormModal({
 
     // 在编辑模式下获取用户信息并设置角色ID为初始值
     if (mode === 'edit' && initialValues?.id) {
-      getUser(initialValues.id).then((user) => {
-        form.setFieldsValue({ roleIds: user.roles.map((item: SimpleRoleVO) => item.id) });
+      getUser(initialValues.id).then((user: UserVO) => {
+        form.setFieldsValue({ roleIds: user.roles?.map((item: SimpleRoleVO) => item.id) });
       });
     }
   }, [visible, mode, initialValues, form]);

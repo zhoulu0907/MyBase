@@ -20,8 +20,6 @@ import { useEffect, useState } from 'react';
 import DictDataModal from './components/dict-data-modal';
 import DictModal from './components/dict-modal';
 import styles from './index.module.less';
-import PlaceholderPanel from '@/components/PlaceholderPanel';
-import { hasPermission } from '@/utils/permission';
 import { TENANT_DICT_PERMISSION as ACTIONS } from '@/constants/permission';
 import { PermissionButton as Button } from '@/components/PermissionControl';
 

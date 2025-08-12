@@ -1,8 +1,6 @@
 import type { MenuInfo, UserInfo } from '@onebase/platform-center';
 import {
   ALL_PERMISSION_CODE,
-  type PermissionKey,
-  type MenuKey
 } from '../constants/permission';
 
 export interface UserPermissionInfo {
@@ -76,7 +74,7 @@ export class UserPermissionManager {
    * @param permission 如 'system:user'
    * @returns 是否具有指定菜单
    */
-  static hasMenu(menu: MenuKey): boolean {
+  static hasMenu(menu: string): boolean {
     // TODO: 目前只解析到第二层
     const [moduleCode, menuCode] = menu?.split(':');
     const userPermissionInfo = this.getUserPermissionInfo();
@@ -85,15 +83,15 @@ export class UserPermissionManager {
   }
 }
 
-export const hasPermission = (permission: PermissionKey): boolean => {
+export const hasPermission = (permission: string): boolean => {
   return UserPermissionManager.hasPermission(permission);
 }
-export const hasAnyPermission = (permissions: PermissionKey[]): boolean => {
+export const hasAnyPermission = (permissions: string[]): boolean => {
   return UserPermissionManager.hasAnyPermission(permissions);
 }
-export const hasAllPermissions = (permissions: PermissionKey[]): boolean => {
+export const hasAllPermissions = (permissions: string[]): boolean => {
   return UserPermissionManager.hasAllPermissions(permissions);
 }
-export const hasMenu = (menu: MenuKey): boolean => {
+export const hasMenu = (menu: string): boolean => {
   return UserPermissionManager.hasMenu(menu);
 }

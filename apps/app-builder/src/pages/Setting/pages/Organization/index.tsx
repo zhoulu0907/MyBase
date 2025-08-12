@@ -45,7 +45,7 @@ const OrganizationPage: React.FC = () => {
       width: 150,
       render: (_: any, record: any) => (
         <Space size="mini">
-          <Button permission={ACTIONS.EDIT} type="text" onClick={() => handleEdit(record)}>
+          <Button permission={ACTIONS.UPDATE} type="text" onClick={() => handleEdit(record)}>
             编辑
           </Button>
           <Button permission={ACTIONS.DELETE} type="text" onClick={() => handleDelete(record)}>
@@ -57,7 +57,7 @@ const OrganizationPage: React.FC = () => {
   ];
 
   const filteredColumns = useMemo(() => {
-    const allowOps = hasAnyPermission([ACTIONS.EDIT, ACTIONS.DELETE]);
+    const allowOps = hasAnyPermission([ACTIONS.UPDATE, ACTIONS.DELETE]);
     if (allowOps) return columns;
     return columns.filter((column) => column.dataIndex !== 'operations');
   }, [columns]);

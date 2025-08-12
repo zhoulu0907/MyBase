@@ -2,8 +2,6 @@ import StatusTag, { getStatusLabel } from '@/components/StatusTag';
 import { Input, Pagination, Popconfirm, Table } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
 import { type DictData, StatusEnum } from '@onebase/platform-center';
-import PlaceholderPanel from '@/components/PlaceholderPanel';
-import { hasPermission } from '@/utils/permission';
 import { TENANT_DICT_PERMISSION as ACTIONS } from '@/constants/permission';
 import { PermissionButton as Button } from '@/components/PermissionControl';
 import s from '../../index.module.less';
