@@ -14,9 +14,9 @@ public class AppPageSetRepository extends DataRepositoryNew<PageSetDO> {
         super(PageSetDO.class);
     }
 
-    public PageSetDO findPageSetByMenuId(Long menuId) {
+    public PageSetDO findPageSetByMenuCode(String menuCode) {
         ConfigStore configs = new DefaultConfigStore();
-        configs.eq("menu_id", menuId);
+        configs.eq("menu_code", menuCode);
         return findOne(configs);
     }
 
@@ -26,9 +26,9 @@ public class AppPageSetRepository extends DataRepositoryNew<PageSetDO> {
         return findOne(configs);
     }
 
-    public void deletePageSetByMenuId(Long menuId) {
+    public void deletePageSetByMenuCode(String menuCode) {
         ConfigStore configs = new DefaultConfigStore();
-        configs.eq("menu_id", menuId);
+        configs.eq("menu_code", menuCode);
         deleteByConfig(configs);
     }
 

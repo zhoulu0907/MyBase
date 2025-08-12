@@ -9,13 +9,13 @@ import com.cmsr.onebase.module.app.controller.admin.appresource.vo.SavePageSetRe
 
 public interface PageSetService {
 
-    String getPageSetCode(Long menuID);
+    String getPageSetCode(String menuCode);
 
     Long getAppId(String code);
 
     String createPageSet(CreatePageSetDTO createPageSetDTO);
 
-    void deletePageSet(Long menuId);
+    void deletePageSet(String menuCode);
 
     String copyPageSet(CopyPageSetDTO copyPageSetDTO);
 
