@@ -19,6 +19,7 @@ import com.cmsr.onebase.module.app.enums.app.AppErrorCodeConstants;
 import com.cmsr.onebase.module.app.enums.app.ApplicationStatusEnum;
 import com.cmsr.onebase.module.app.service.AppCommonService;
 import com.cmsr.onebase.module.app.service.auth.AppAuthRoleService;
+import com.cmsr.onebase.module.app.util.AppUtils;
 import com.cmsr.onebase.module.app.util.VersionUtils;
 import jakarta.annotation.Resource;
 import lombok.Setter;
@@ -111,6 +112,10 @@ public class AppApplicationServiceImpl implements AppApplicationService {
         ApplicationDO applicationDO = BeanUtils.toBean(createReqVO, ApplicationDO.class);
         applicationDO.setVersionNumber(VersionUtils.INIT_VERSION);
         applicationDO.setAppStatus(ApplicationStatusEnum.EDITING.getValue());
+        applicationDO.setAppCode(AppUtils.createAppCode());
+        if (StringUtils.isBlank(applicationDO.getAppDomain())) {
+            applicationDO.setAppDomain(applicationDO.getAppCode());
+        }
         applicationDO = applicationRepository.insert(applicationDO);
         saveApplicationTags(applicationDO.getId(), createReqVO.getTagIds());
         authRoleService.createDefaultRole(applicationDO.getId());
@@ -173,7 +178,7 @@ public class AppApplicationServiceImpl implements AppApplicationService {
         }
         //TODO 删除应用下的全部资源
         applicationRepository.deleteById(id);
-        menuRepository.deleteByApplicationId(id);
+        menuRepository.deleteByApplicationCode(applicationDO.getAppCode());
         versionRepository.deleteByApplicationId(id);
         versionResourceRepository.deleteByApplicationId(id);
     }

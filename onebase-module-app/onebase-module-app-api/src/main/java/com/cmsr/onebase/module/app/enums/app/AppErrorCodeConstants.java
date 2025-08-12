@@ -29,4 +29,6 @@ public interface AppErrorCodeConstants {
     ErrorCode APP_AUTH_ROLE_NAME_EXISTS = new ErrorCode(10010, "角色名称已存在");
 
     ErrorCode APP_AUTH_ROLE_NOT_EXISTS = new ErrorCode(10011, "角色不存在");
+
+    ErrorCode APP_AUTH_ROLE_NOT_ALLOW_DELETE = new ErrorCode(10012, "角色不允许删除");
 }

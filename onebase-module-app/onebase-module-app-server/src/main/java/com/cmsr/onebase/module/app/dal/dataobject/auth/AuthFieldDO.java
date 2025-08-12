@@ -13,17 +13,17 @@ import lombok.Data;
 @Table(name = "app_auth_field")
 public class AuthFieldDO extends TenantBaseDO {
 
-    @Column(name = "application_id", nullable = false, comment = "应用Id")
-    private Long applicationId;
+    @Column(name = "application_code", nullable = false, comment = "应用Code")
+    private String applicationCode;
 
-    @Column(name = "role_id", nullable = false, comment = "角色Id")
-    private Long roleId;
+    @Column(name = "role_code", nullable = false, comment = "角色code")
+    private String roleCode;
 
-    @Column(name = "menu_id", nullable = false, comment = "菜单Id")
-    private Long menuId;
+    @Column(name = "menu_code", nullable = false, comment = "菜单code")
+    private String menuCode;
 
-    @Column(name = "field_id", nullable = false, comment = "字段名称")
-    private Long fieldId;
+    @Column(name = "field_code", nullable = false, comment = "字段code")
+    private String fieldCode;
 
     @Column(name = "is_can_read", comment = "是否可阅读")
     private Boolean canRead;

@@ -16,12 +16,20 @@ public class AuthPermissionDetailVO {
     @Schema(description = "应用Id")
     private Long applicationId;
 
+    @Schema(description = "应用Code")
+    private String applicationCode;
+
     @Schema(description = "角色Id")
     private Long roleId;
+
+    @Schema(description = "角色Code")
+    private String roleCode;
 
     @Schema(description = "菜单Id")
     private Long menuId;
 
+    @Schema(description = "菜单Code")
+    private String menuCode;
 
     @Schema(description = "应用权限")
     private AuthPermissionVO authPermission;

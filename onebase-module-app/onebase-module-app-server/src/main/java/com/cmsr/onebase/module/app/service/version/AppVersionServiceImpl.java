@@ -101,9 +101,10 @@ public class AppVersionServiceImpl implements AppVersionService {
         versionDO.setEnvironment(createReqVO.getEnvironment());
         versionRepository.insert(versionDO);
         Long applicationId = applicationDO.getId();
+        String applicationCode = applicationDO.getAppCode();
         Long versionId = versionDO.getId();
         // 备份 Menu
-        List<String> menuCodes = backupMenu(applicationId, versionId);
+        List<String> menuCodes = backupMenu(applicationId, applicationCode, versionId);
         // 备份 pageset
         List<String> pageSetCodes = backupPageSet(applicationId, versionId, menuCodes);
         // 备份 pageset label
@@ -116,8 +117,8 @@ public class AppVersionServiceImpl implements AppVersionService {
     }
 
 
-    private List<String> backupMenu(Long applicationId, Long versionId) {
-        List<MenuDO> menuDOS = menuRepository.findByApplicationId(applicationId);
+    private List<String> backupMenu(Long applicationId, String applicationCode, Long versionId) {
+        List<MenuDO> menuDOS = menuRepository.findByApplicationCode(applicationCode);
         VersionResourceDO versionResourceDO = new VersionResourceDO();
         versionResourceDO.setApplicationId(applicationId);
         versionResourceDO.setVersionId(versionId);
@@ -160,7 +161,7 @@ public class AppVersionServiceImpl implements AppVersionService {
         return pageSetPageDOS.stream().map(v -> v.getPageRef()).toList();
     }
 
-    private  List<String> backupPage(Long applicationId, Long versionId, List<String> pageCodes) {
+    private List<String> backupPage(Long applicationId, Long versionId, List<String> pageCodes) {
         List<PageDO> pageDOS = pageRepository.findByPageCodes(pageCodes);
         VersionResourceDO versionResourceDO = new VersionResourceDO();
         versionResourceDO.setApplicationId(applicationId);
@@ -183,12 +184,12 @@ public class AppVersionServiceImpl implements AppVersionService {
         applicationDO.setVersionNumber(applicationVersionDO.getVersionNumber());
         applicationRepository.update(applicationDO);
         // 恢复菜单
-        restoreMenu(applicationId, versionId);
+        restoreMenu(applicationDO.getId(), applicationDO.getAppCode(), versionId);
     }
 
-    private void restoreMenu(Long applicationId, Long versionId) {
+    private void restoreMenu(Long applicationId, String applicationCode, Long versionId) {
         // 删除相关数据
-        menuRepository.deleteByApplicationId(applicationId);
+        menuRepository.deleteByApplicationCode(applicationCode);
         // 恢复菜单
         VersionResourceDO resourceDOS = versionResourceRepository
                 .findByApplicationIdAndVersionIdAndResType(applicationId, versionId, ResTypeEnum.MENU.getValue());

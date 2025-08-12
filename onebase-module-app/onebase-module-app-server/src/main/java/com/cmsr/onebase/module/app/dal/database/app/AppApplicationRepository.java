@@ -52,4 +52,5 @@ public class AppApplicationRepository extends DataRepositoryNew<ApplicationDO> {
         configs.ne("id", id);
         return findOne(configs);
     }
+
 }

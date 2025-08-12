@@ -20,6 +20,9 @@ public class ApplicationRespVO {
     @Schema(description = "应用名称")
     private String appName;
 
+    @Schema(description = "应用域编码")
+    private String appDomain;
+
     @Schema(description = "应用编码")
     private String appCode;
 
@@ -28,7 +31,6 @@ public class ApplicationRespVO {
 
     @Schema(description = "主题色")
     private String themeColor;
-
 
     @Schema(description = "图标名称")
     private String iconName;

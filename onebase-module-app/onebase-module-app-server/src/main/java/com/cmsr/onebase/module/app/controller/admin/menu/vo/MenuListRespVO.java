@@ -19,8 +19,8 @@ public class MenuListRespVO {
     @Schema(description = "父节点编码")
     private String parentCode;
 
-    @Schema(description = "实体Id")
-    private Long entityId;
+    @Schema(description = "实体Code")
+    private Long entityCode;
 
     @Schema(description = "菜单编码")
     private String menuCode;

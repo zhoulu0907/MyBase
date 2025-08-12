@@ -6,6 +6,7 @@ import com.cmsr.onebase.module.app.api.appresource.dto.CopyPageSetDTO;
 import com.cmsr.onebase.module.app.api.appresource.dto.CreatePageSetDTO;
 import com.cmsr.onebase.module.app.controller.admin.menu.vo.*;
 import com.cmsr.onebase.module.app.dal.database.menu.AppMenuRepository;
+import com.cmsr.onebase.module.app.dal.dataobject.app.ApplicationDO;
 import com.cmsr.onebase.module.app.dal.dataobject.menu.MenuDO;
 import com.cmsr.onebase.module.app.enums.app.AppErrorCodeConstants;
 import com.cmsr.onebase.module.app.enums.menu.MenuTypeEnum;
@@ -44,7 +45,8 @@ public class AppMenuServiceImpl implements AppMenuService {
 
     @Override
     public List<MenuListRespVO> listApplicationMenu(Long applicationId) {
-        List<MenuDO> menuDOS = appMenuRepository.findByApplicationId(applicationId);
+        ApplicationDO applicationDO = appCommonService.validateApplicationExist(applicationId);
+        List<MenuDO> menuDOS = appMenuRepository.findByApplicationCode(applicationDO.getAppCode());
         List<MenuListRespVO> menuListRespList = new ArrayList<>();
         // 把第一层的菜单添加到列表中
         List<MenuListRespVO> levelOneMenus = menuDOS.stream()
@@ -78,16 +80,16 @@ public class AppMenuServiceImpl implements AppMenuService {
     public MenuCreateRespVO createApplicationMenu(MenuCreateReqVO createReqVO) {
         // 菜单类型校验
         MenuTypeEnum.validate(createReqVO.getMenuType());
-        appCommonService.validateApplicationExist(createReqVO.getApplicationId());
+        ApplicationDO applicationDO = appCommonService.validateApplicationExist(createReqVO.getApplicationId());
         // 创建菜单
         MenuDO menuDO = new MenuDO();
-        menuDO.setApplicationId(createReqVO.getApplicationId());
+        menuDO.setApplicationCode(applicationDO.getAppCode());
         menuDO.setParentCode(validateParentMenuCode(createReqVO.getParentCode()));
         menuDO.setMenuCode(MenuUtils.generateMenuCode());
         menuDO.setMenuType(createReqVO.getMenuType());
         menuDO.setMenuName(createReqVO.getMenuName());
         menuDO.setMenuIcon(createReqVO.getMenuIcon());
-        menuDO.setMenuSort(generateMenuSort(createReqVO.getApplicationId()));
+        menuDO.setMenuSort(generateMenuSort(applicationDO.getAppCode()));
         menuDO.setVisible(MenuVisibleEnum.YES.getValue());
         appMenuRepository.insert(menuDO);
         // 创建页面集
@@ -101,8 +103,8 @@ public class AppMenuServiceImpl implements AppMenuService {
         return menuCreateRespVO;
     }
 
-    private Integer generateMenuSort(Long applicationId) {
-        return appMenuRepository.countByApplicationId(applicationId) + 1;
+    private Integer generateMenuSort(String applicationCode) {
+        return appMenuRepository.countByApplicationCode(applicationCode) + 1;
     }
 
     private String validateParentMenuCode(String parentCode) {
@@ -133,7 +135,7 @@ public class AppMenuServiceImpl implements AppMenuService {
         menuDO.setParentCode(updateReqVO.getParentCode());
         appMenuRepository.update(menuDO);
         Map<Long, Integer> menuSortMap = toMenuSortMap(updateReqVO.getMenuTree());
-        List<MenuDO> menuDOS = appMenuRepository.findByApplicationId(menuDO.getApplicationId());
+        List<MenuDO> menuDOS = appMenuRepository.findByApplicationCode(menuDO.getApplicationCode());
         for (MenuDO menu : menuDOS) {
             Integer order = MapUtils.getInteger(menuSortMap, menu.getId(), MenuUtils.MENU_SORT_MAX_VALUE);
             menu.setMenuSort(order);

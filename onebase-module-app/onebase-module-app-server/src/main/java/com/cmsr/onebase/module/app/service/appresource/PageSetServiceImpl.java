@@ -1,45 +1,29 @@
 package com.cmsr.onebase.module.app.service.appresource;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
+import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
+import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.module.app.api.appresource.dto.*;
+import com.cmsr.onebase.module.app.controller.admin.appresource.vo.LoadPageSetReqVO;
+import com.cmsr.onebase.module.app.controller.admin.appresource.vo.LoadPageSetRespVO;
+import com.cmsr.onebase.module.app.controller.admin.appresource.vo.SavePageSetReqVO;
+import com.cmsr.onebase.module.app.dal.database.app.AppApplicationRepository;
+import com.cmsr.onebase.module.app.dal.database.appresource.*;
+import com.cmsr.onebase.module.app.dal.database.menu.AppMenuRepository;
+import com.cmsr.onebase.module.app.dal.dataobject.app.ApplicationDO;
+import com.cmsr.onebase.module.app.dal.dataobject.appresource.*;
+import com.cmsr.onebase.module.app.dal.dataobject.menu.MenuDO;
+import com.cmsr.onebase.module.app.enums.appresource.AppResourceErrorCodeConstants;
+import com.cmsr.onebase.module.app.util.PageUtils;
+import jakarta.annotation.Resource;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
-import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
-import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.module.app.api.appresource.dto.ComponentDTO;
-import com.cmsr.onebase.module.app.api.appresource.dto.CopyPageSetDTO;
-import com.cmsr.onebase.module.app.api.appresource.dto.CreatePageSetDTO;
-import com.cmsr.onebase.module.app.api.appresource.dto.PageDTO;
-import com.cmsr.onebase.module.app.api.appresource.dto.PageSetRespDTO;
-import com.cmsr.onebase.module.app.controller.admin.appresource.vo.LoadPageSetReqVO;
-import com.cmsr.onebase.module.app.controller.admin.appresource.vo.LoadPageSetRespVO;
-import com.cmsr.onebase.module.app.controller.admin.appresource.vo.SavePageSetReqVO;
-import com.cmsr.onebase.module.app.dal.database.appresource.AppComponentRepository;
-import com.cmsr.onebase.module.app.dal.database.appresource.AppPageMetaRepository;
-import com.cmsr.onebase.module.app.dal.database.appresource.AppPageRefRouterRepository;
-import com.cmsr.onebase.module.app.dal.database.appresource.AppPageRepository;
-import com.cmsr.onebase.module.app.dal.database.appresource.AppPageSetLabelRepository;
-import com.cmsr.onebase.module.app.dal.database.appresource.AppPageSetPageRepository;
-import com.cmsr.onebase.module.app.dal.database.appresource.AppPageSetRepository;
-import com.cmsr.onebase.module.app.dal.database.menu.AppMenuRepository;
-import com.cmsr.onebase.module.app.dal.dataobject.appresource.ComponentDO;
-import com.cmsr.onebase.module.app.dal.dataobject.appresource.PageDO;
-import com.cmsr.onebase.module.app.dal.dataobject.appresource.PageMetadataDO;
-import com.cmsr.onebase.module.app.dal.dataobject.appresource.PageRefRouterDO;
-import com.cmsr.onebase.module.app.dal.dataobject.appresource.PageSetDO;
-import com.cmsr.onebase.module.app.dal.dataobject.appresource.PageSetLabelDO;
-import com.cmsr.onebase.module.app.dal.dataobject.appresource.PageSetPageDO;
-import com.cmsr.onebase.module.app.dal.dataobject.menu.MenuDO;
-import com.cmsr.onebase.module.app.enums.appresource.AppResourceErrorCodeConstants;
-import com.cmsr.onebase.module.app.util.PageUtils;
-
-import jakarta.annotation.Resource;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @Service
 @Validated
@@ -69,6 +53,8 @@ public class PageSetServiceImpl implements PageSetService {
     @Resource
     private AppMenuRepository appMenuRepository;
 
+    private AppApplicationRepository appApplicationRepository;
+
     @Override
     public String getPageSetCode(String menuCode) {
         PageSetDO pageSetDO = pageSetDataRepository.findPageSetByMenuCode(menuCode);
@@ -80,7 +66,8 @@ public class PageSetServiceImpl implements PageSetService {
         PageSetDO pageSetDO = pageSetDataRepository.findPageSetByPageSetCode(code);
         String menuCode = pageSetDO.getMenuCode();
         MenuDO menuDO = appMenuRepository.findByMenuCode(menuCode);
-        return menuDO.getApplicationId();
+        ApplicationDO applicationDO = appApplicationRepository.findOneByAppCode(menuDO.getApplicationCode());
+        return applicationDO.getId();
     }
 
     @Override

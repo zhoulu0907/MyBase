@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.app.dal.database.auth;
 
 import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
+import com.cmsr.onebase.module.app.controller.admin.auth.vo.AuthPermissionDTO;
 import com.cmsr.onebase.module.app.controller.admin.auth.vo.AuthPermissionReqVO;
 import com.cmsr.onebase.module.app.dal.dataobject.auth.AuthPermissionDO;
 import org.anyline.data.param.ConfigStore;
@@ -14,17 +15,17 @@ import org.springframework.stereotype.Repository;
  * @date 2025-08-05
  */
 @Repository
-public class AppAuthFeatureRepository extends DataRepositoryNew<AuthPermissionDO> {
+public class AppAuthPermissionRepository extends DataRepositoryNew<AuthPermissionDO> {
 
-    public AppAuthFeatureRepository() {
+    public AppAuthPermissionRepository() {
         super(AuthPermissionDO.class);
     }
 
-    public AuthPermissionDO findByQuery(AuthPermissionReqVO reqVO) {
+    public AuthPermissionDO findByQuery(AuthPermissionDTO dto) {
         ConfigStore configs = new DefaultConfigStore();
-        configs.eq("application_id", reqVO.getApplicationId());
-        configs.eq("role_id", reqVO.getRoleId());
-        configs.eq("menu_id", reqVO.getMenuId());
+        configs.eq("application_code", dto.getApplicationCode());
+        configs.eq("role_code", dto.getRoleCode());
+        configs.eq("menu_code", dto.getMenuCode());
         return this.findOne(configs);
     }
 }

@@ -22,8 +22,10 @@ public class ApplicationCreateReqVO {
     @NotBlank(message = "应用名称不能为空")
     private String appName;
 
+    @Schema(description = "应用域编码")
+    private String appDomain;
+
     @Schema(description = "应用编码")
-    @NotBlank(message = "应用编码不能为空")
     private String appCode;
 
     @Schema(description = "应用模式")
