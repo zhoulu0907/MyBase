@@ -29,12 +29,18 @@ public class EREntityVO {
 
     @Schema(description = "实体类型", requiredMode = Schema.RequiredMode.REQUIRED, example = "TABLE")
     private String entityType;
+    
+    @Schema(description = "实体编码", example = " code_001")
+    private String code;
 
-    @Schema(description = "实体坐标X", example = "100")
+    @Schema(description = "前端展示配置", example = "code_001")
+    private String displayConfig;
+
+/*     @Schema(description = "实体坐标X", example = "100")
     private Integer positionX;
 
     @Schema(description = "实体坐标Y", example = "200")
-    private Integer positionY;
+    private Integer positionY; */
 
     @Schema(description = "字段列表", requiredMode = Schema.RequiredMode.REQUIRED)
     private List<ERFieldVO> fields;

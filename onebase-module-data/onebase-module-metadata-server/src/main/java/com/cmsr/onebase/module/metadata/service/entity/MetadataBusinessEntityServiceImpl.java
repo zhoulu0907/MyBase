@@ -558,8 +558,8 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
         erEntity.setEntityType(entity.getEntityType().toString());
         
         // 设置默认坐标（前端可以根据需要调整）
-        erEntity.setPositionX(100);
-        erEntity.setPositionY(100);
+        erEntity.setDisplayConfig(entity.getDisplayConfig() != null ? entity.getDisplayConfig() : "{}");
+        erEntity.setCode(entity.getCode());
 
         // 获取字段信息
         List<ERFieldVO> fields = getEntityFields(entity.getId());
