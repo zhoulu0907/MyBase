@@ -7,10 +7,10 @@ import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
 
 interface PreviewProps {
-  menuID: string;
+  menuCode: string;
 }
 
-const PageManagerPreview: React.FC<PreviewProps> = ({ menuID }) => {
+const PageManagerPreview: React.FC<PreviewProps> = ({ menuCode }) => {
   const {
     setComponents: setListComponents,
     setPageComponentSchemas: setListPageComponentSchemas,
@@ -30,11 +30,11 @@ const PageManagerPreview: React.FC<PreviewProps> = ({ menuID }) => {
   const [pageSetCode, setPageSetCode] = useState('');
 
   useEffect(() => {
-    console.log('menuID', menuID);
-    if (menuID) {
-      handleGetPageSetCode(menuID);
+    console.log('menuCode', menuCode);
+    if (menuCode) {
+      handleGetPageSetCode(menuCode);
     }
-  }, [menuID]);
+  }, [menuCode]);
 
   useEffect(() => {
     console.log('pageSetCode', pageSetCode);
@@ -43,9 +43,9 @@ const PageManagerPreview: React.FC<PreviewProps> = ({ menuID }) => {
     }
   }, [pageSetCode]);
 
-  const handleGetPageSetCode = async (menuId: string) => {
+  const handleGetPageSetCode = async (menuCode: string) => {
     const req: GetPageSetCodeReq = {
-      menuId: menuId
+      menuCode: menuCode
     };
     const res = await getPageSetCode(req);
     console.log('res', res);

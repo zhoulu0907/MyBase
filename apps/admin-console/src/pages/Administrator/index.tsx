@@ -101,9 +101,10 @@ const Administrator: React.FC = () => {
   ];
   
 
-  const getPlatformAdminList = async (pageNum: number = 1, keyword: string = '') => { 
+  const getPlatformAdminList = async (pageNo: number = 1, keyword: string = '') => {
+    console.log('keyword', keyword);
     const res = await getPlatformAdminListApi({
-      pageNum: pageNum,
+      pageNo: pageNo,
       pageSize: 10,
       keyword: keyword // 添加搜索关键词参数
     });
@@ -233,13 +234,13 @@ const Administrator: React.FC = () => {
   };
 
   // 处理分页变化
-  const handlePageChange = async (pageNum: number) => {
+  const handlePageChange = async (pageNo: number) => {
     try {
-      console.log('pageNum', pageNum);
-      const pageResp = await getPlatformAdminList(pageNum);
+      console.log('pageNo', pageNo);
+      const pageResp = await getPlatformAdminList(pageNo);
       console.log('pageResp', pageResp);
       // setDataSource(pageResp.list)
-      setCurrentPage(pageNum);
+      setCurrentPage(pageNo);
     } catch (error) {
       console.error(error);
     }

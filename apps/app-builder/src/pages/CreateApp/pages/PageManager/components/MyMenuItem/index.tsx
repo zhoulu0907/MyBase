@@ -14,7 +14,9 @@ const MenuItem = Menu.Item;
  * @param props.onClick 点击事件处理函数
  */
 interface MenuItemProps {
+  showOption: boolean;
   menuID: string;
+  menuCode: string;
   menuName: string;
   label: string;
   menuIcon: string;
@@ -30,7 +32,9 @@ interface MenuItemProps {
 }
 
 const MyMenuItem: React.FC<MenuItemProps> = ({
+  showOption,
   menuID,
+  menuCode,
   menuName,
   label,
   menuIcon,
@@ -66,7 +70,7 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
             e.stopPropagation();
             triggerCopy();
             copyForm.setFieldValue('menuName', menuName + '_副本');
-            copyForm.setFieldValue('parentId', RootParentPage.id);
+            copyForm.setFieldValue('parentCode', RootParentPage.menuCode);
             copyForm.setFieldValue('menuID', menuID);
           }}
         >
@@ -106,11 +110,13 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
         <i className={`iconfont ${menuIcon}`} style={{ marginRight: '10px' }} />
         {label}
       </div>
-      <div className={styles.dropdownContainer}>
-        <Dropdown droplist={dropList} trigger="click" position="bl">
-          <IconSettings onClick={(e) => e.stopPropagation()} />
-        </Dropdown>
-      </div>
+      {showOption && (
+        <div className={styles.dropdownContainer}>
+          <Dropdown droplist={dropList} trigger="click" position="bl">
+            <IconSettings onClick={(e) => e.stopPropagation()} />
+          </Dropdown>
+        </div>
+      )}
     </div>
   );
 };

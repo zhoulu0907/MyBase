@@ -40,7 +40,7 @@ const PlatformInfo: React.FC = () => {
   const getPlatformInfoList = async () => {
     console.log('获取认证记录:');
     try {
-      const res = await getPlatFormInfoListApi({ pageNum: 1, pageSize: 10 });
+      const res = await getPlatFormInfoListApi({ pageNo: 1, pageSize: 10 });
       console.log('infoList res:', res);
       if (res && Array.isArray(res.list)) {
         setLicenseInfoList(res.list);
@@ -132,12 +132,12 @@ const PlatformInfo: React.FC = () => {
     showTotal: true,
     total: 0,
     pageSize: 10,
-    pageNum: 1,
+    pageNo: 1,
     pageSizeChangeResetCurrent: true
   });
   const [loading, setLoading] = useState(false);
 
-  const onChangeTable = (pagination: { pageNum?: number; pageSize?: number }) => {
+  const onChangeTable = (pagination: { pageNo?: number; pageSize?: number }) => {
     setLoading(true);
     console.log('pagination: ', pagination);
     setLoading(false);

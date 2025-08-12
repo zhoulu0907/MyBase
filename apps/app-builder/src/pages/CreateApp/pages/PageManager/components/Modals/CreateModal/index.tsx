@@ -10,7 +10,7 @@ interface CreateModalProps {
   form: FormInstance;
   pageTypeOptions: { label: string; value: any }[];
   visibleCreateForm: string;
-  initValue: { pageType: number; menuName: string; parentId: string };
+  initValue: { pageType: number; menuName: string; parentCode: string };
   treeData: any[];
 }
 
@@ -51,7 +51,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
         initialValues={{
           pageType: initValue.pageType,
           menuName: initValue.menuName,
-          parentId: initValue.parentId
+          parentCode: initValue.parentCode
         }}
       >
         <Form.Item

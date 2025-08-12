@@ -2,7 +2,7 @@ export interface PlatformInfoReq {
   /**
    * 页码
    */
-  pageNum: number;
+  pageNo: number;
   /**
    * 每页数量
    */

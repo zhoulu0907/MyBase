@@ -2,7 +2,7 @@ import { cratePlatformAdminReq } from '../types';
 import { systemService } from './clients';
 
 // 获取平台管理员列表信息
-export const getPlatformAdminListApi = (params: any) => systemService.get('/user/platform-admin/page', { params })
+export const getPlatformAdminListApi = (params: any) => systemService.get(`/user/platform-admin/page?pageNo=${params.pageNo}&pageSize=${params.pageSize}&keyword=${params.keyword}`)
 
 // 新增平台管理员
 export const createPlatformAdminApi = (data: cratePlatformAdminReq) => systemService.post('/user/platform-admin/create', data)
