@@ -5,6 +5,7 @@ import { useAppStore } from '@/store';
 import { UserPermissionManager } from '@/utils/permission';
 import { Button, Dropdown, Layout, Menu, Tabs } from '@arco-design/web-react';
 import { IconMenu, IconUser } from '@arco-design/web-react/icon';
+import { getApplication, type GetApplicationReq } from '@onebase/app';
 import { TokenManager } from '@onebase/common';
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -43,8 +44,17 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     const appId = searchParams.get('appId');
     if (appId) {
       setCurAppId(appId);
+      handleGetApplication(appId);
     }
   }, []);
+
+  const handleGetApplication = async (appId: string) => {
+    const appReq: GetApplicationReq = {
+      id: appId
+    };
+    const appResp = await getApplication(appReq);
+    console.log(appResp);
+  };
 
   // 登出处理
   const handleLogout = () => {
