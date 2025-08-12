@@ -1,4 +1,5 @@
 import { useFromEditorStore, useListEditorStore } from '@/store';
+import { Button, Form } from '@arco-design/web-react';
 import React, { useEffect, useState } from 'react';
 import PreviewRender from '../../components/render/PreviewRender';
 import { getComponentWidth, startLoadPageSet } from '../../utils/app_resource';
@@ -26,6 +27,7 @@ const Preview: React.FC<PreviewProps> = ({}) => {
 
   const [pageSetCode, setPageSetCode] = useState('');
   const [pageType, setPageType] = useState('');
+  const [form] = Form.useForm();
 
   useEffect(() => {
     const hash = window.location.hash;
@@ -60,32 +62,74 @@ const Preview: React.FC<PreviewProps> = ({}) => {
     });
   };
 
+  const submitForm = () => {
+    console.log('提交');
+    console.log(form.getFields());
+  };
+
+  const cancelSubmitForm = () => {
+    console.log('取消提交');
+    form.resetFields();
+
+    // navigator()
+  };
+
   return (
     <div className={styles.previewPage}>
-      <div className={styles.workspaceContent}>
-        {(pageType === EDITOR_TYPES.FORM_EDITOR ? formComponents : listComponents).map((cp: GridItem) => (
-          <div
-            key={cp.id}
-            className={styles.componentItem}
-            style={{
-              width: getComponentWidth(listPageComponentSchemas.get(cp.id), cp.type)
-            }}
-            onClick={(e: React.MouseEvent<HTMLDivElement>) => {
-              e.stopPropagation();
-              console.log('点击组件: ', cp.id);
-            }}
-          >
-            <PreviewRender
-              cpId={cp.id}
-              cpType={cp.type}
-              pageComponentSchema={
-                pageType === EDITOR_TYPES.FORM_EDITOR
-                  ? formPageComponentSchemas.get(cp.id)
-                  : listPageComponentSchemas.get(cp.id)
-              }
-            />
-          </div>
-        ))}
+      <div className={styles.content}>
+        {pageType === EDITOR_TYPES.LIST_EDITOR &&
+          listComponents.map((cp: GridItem) => (
+            <div
+              key={cp.id}
+              className={styles.componentItem}
+              style={{
+                width: getComponentWidth(listPageComponentSchemas.get(cp.id), cp.type)
+              }}
+              onClick={(e: React.MouseEvent<HTMLDivElement>) => {
+                e.stopPropagation();
+                console.log('点击组件: ', cp.id);
+              }}
+            >
+              <PreviewRender cpId={cp.id} cpType={cp.type} pageComponentSchema={listPageComponentSchemas.get(cp.id)} />
+            </div>
+          ))}
+
+        {pageType === EDITOR_TYPES.FORM_EDITOR && (
+          <>
+            <Form layout="inline" form={form}>
+              {formComponents.map((cp: GridItem) => (
+                <div
+                  key={cp.id}
+                  className={styles.componentItem}
+                  style={{
+                    width: getComponentWidth(listPageComponentSchemas.get(cp.id), cp.type)
+                  }}
+                  onClick={(e: React.MouseEvent<HTMLDivElement>) => {
+                    e.stopPropagation();
+                    console.log('点击组件: ', cp.id);
+                  }}
+                >
+                  <PreviewRender
+                    cpId={cp.id}
+                    cpType={cp.type}
+                    pageComponentSchema={formPageComponentSchemas.get(cp.id)}
+                  />
+                </div>
+              ))}
+
+              <div className={styles.footer}>
+                <Button type="primary" onClick={submitForm}>
+                  {' '}
+                  提交{' '}
+                </Button>
+                <Button type="default" onClick={cancelSubmitForm}>
+                  {' '}
+                  取消{' '}
+                </Button>
+              </div>
+            </Form>
+          </>
+        )}
       </div>
     </div>
   );

@@ -1,31 +1,31 @@
 import {
-  ALIGN_OPTIONS,
-  ALIGN_VALUES,
-  CONFIG_TYPES,
-  DATE_OPTIONS,
-  DATE_VALUES,
-  LAYOUT_OPTIONS,
-  LAYOUT_VALUES,
-  PAGINATION_POSITION_OPTIONS,
-  PAGINATION_POSITION_VALUES,
-  STATUS_OPTIONS,
-  STATUS_VALUES,
-  UPLOAD_OPTIONS,
-  UPLOAD_VALUES,
-  WIDTH_OPTIONS,
-  WIDTH_VALUES
+    ALIGN_OPTIONS,
+    ALIGN_VALUES,
+    CONFIG_TYPES,
+    DATE_OPTIONS,
+    DATE_VALUES,
+    LAYOUT_OPTIONS,
+    LAYOUT_VALUES,
+    PAGINATION_POSITION_OPTIONS,
+    PAGINATION_POSITION_VALUES,
+    STATUS_OPTIONS,
+    STATUS_VALUES,
+    UPLOAD_OPTIONS,
+    UPLOAD_VALUES,
+    WIDTH_OPTIONS,
+    WIDTH_VALUES
 } from './constants';
 import type {
-  IAlignConfigType,
-  IDateTypeConfigType,
-  IDynamicSelectConfigType,
-  ILabelColSpanConfigType,
-  ILayoutConfigType,
-  ISelectConfigType,
-  IStatusConfigType,
-  ITextConfigType,
-  IWidthConfigType,
-  TTextDefaultType
+    IAlignConfigType,
+    IDateTypeConfigType,
+    ILabelColSpanConfigType,
+    ILayoutConfigType,
+    ISelectConfigType,
+    IStatusConfigType,
+    ITableDataConfigType,
+    ITextConfigType,
+    IWidthConfigType,
+    TTextDefaultType
 } from './types';
 
 export interface ICommonBaseType {
@@ -247,16 +247,16 @@ export const pagePositionConfig: ISelectConfigType<TPagePositionSelectKeyType> =
   ]
 };
 
-export const metaDataConfig: IDynamicSelectConfigType = {
+export const metaDataConfig: ITableDataConfigType = {
   key: 'metaData',
   name: '数据',
-  type: CONFIG_TYPES.DYNAMIC_SELECT_INPUT
+  type: CONFIG_TYPES.TABLE_DATA
 };
 
-export const keyDataConfig: IDynamicSelectConfigType = {
+export const keyDataConfig: ITableDataConfigType = {
   key: 'keyData',
   name: '主键',
-  type: CONFIG_TYPES.DYNAMIC_SELECT_INPUT
+  type: CONFIG_TYPES.TABLE_DATA
 };
 
 export const baseDefault = {

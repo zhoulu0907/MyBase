@@ -189,10 +189,8 @@ const MyAppPage: React.FC = () => {
     setCurAppId(appId);
     const newWindow = window.open('', '_blank');
     if (newWindow) {
-      const baseUrl = window.location.href.replace(/my-app.*$/, '');
+      const baseUrl = getBaseUrl();
       const href = `${baseUrl}create-app/app-setting?appId=${appId}`;
-      newWindow.location.href = href;
-
       newWindow.location.href = href;
     }
   };
@@ -201,10 +199,15 @@ const MyAppPage: React.FC = () => {
     setCurAppId(appId);
     const newWindow = window.open('', '_blank');
     if (newWindow) {
-      const baseUrl = window.location.href.replace(/my-app.*$/, '');
+      const baseUrl = getBaseUrl();
       const href = `${baseUrl}create-app/data-factory?appId=${appId}`;
       newWindow.location.href = href;
     }
+  };
+
+  const getBaseUrl = () => {
+    const baseUrl = window.location.href.replace(/my-app.*$/, '');
+    return baseUrl;
   };
 
   return (

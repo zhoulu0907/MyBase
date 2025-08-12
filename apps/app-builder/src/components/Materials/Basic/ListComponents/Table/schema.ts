@@ -1,40 +1,37 @@
 import {
-  baseConfig,
-  baseDefault,
-  keyDataConfig,
-  metaDataConfig,
-  statusConfig,
-  widthConfig,
-  type ICommonBaseType,
-  type TPagePositionSelectKeyType,
-  type TStatusSelectKeyType,
-  type TWidthSelectKeyType
+    baseConfig,
+    baseDefault,
+    metaDataConfig,
+    statusConfig,
+    widthConfig,
+    type ICommonBaseType,
+    type TPagePositionSelectKeyType,
+    type TStatusSelectKeyType,
+    type TWidthSelectKeyType
 } from '@/components/Materials/common';
 import {
-  CONFIG_TYPES,
-  PAGINATION_POSITION_OPTIONS,
-  PAGINATION_POSITION_VALUES,
-  STATUS_OPTIONS,
-  STATUS_VALUES,
-  WIDTH_OPTIONS,
-  WIDTH_VALUES
+    CONFIG_TYPES,
+    PAGINATION_POSITION_OPTIONS,
+    PAGINATION_POSITION_VALUES,
+    STATUS_OPTIONS,
+    STATUS_VALUES,
+    WIDTH_OPTIONS,
+    WIDTH_VALUES
 } from '@/components/Materials/constants';
 import type {
-  IBooleanConfigType,
-  IDynamicSelectConfigType,
-  ILabelConfigType,
-  ISearchItemListConfigType,
-  IStatusConfigType,
-  ITableColumnConfigType,
-  ITablePagePositionConfigType,
-  ITablePageSizeConfigType,
-  ITextConfigType,
-  IWidthConfigType,
-  TBooleanDefaultType,
-  TNumberDefaultType,
-  TRadioDefaultType,
-  TSelectDefaultType,
-  TTextDefaultType
+    IBooleanConfigType,
+    ILabelConfigType,
+    IStatusConfigType,
+    ITableDataConfigType,
+    ITablePagePositionConfigType,
+    ITablePageSizeConfigType,
+    ITextConfigType,
+    IWidthConfigType,
+    TBooleanDefaultType,
+    TNumberDefaultType,
+    TRadioDefaultType,
+    TSelectDefaultType,
+    TTextDefaultType
 } from '@/components/Materials/types';
 
 export interface XTableSchema {
@@ -47,12 +44,10 @@ export type TXTableEditData = Array<
   | ILabelConfigType
   | IWidthConfigType<TWidthSelectKeyType>
   | IStatusConfigType<TStatusSelectKeyType>
-  | ITableColumnConfigType
   | IBooleanConfigType
   | ITablePagePositionConfigType<TPagePositionSelectKeyType>
   | ITablePageSizeConfigType
-  | IDynamicSelectConfigType
-  | ISearchItemListConfigType
+  | ITableDataConfigType
 >;
 
 export interface XTableConfig extends ICommonBaseType {
@@ -141,6 +136,7 @@ export interface XTableConfig extends ICommonBaseType {
    * 隐藏时是否提交数据，开启后隐藏状态仍会保存值
    */
   saveWithHidden?: TBooleanDefaultType;
+
 }
 
 const pagePositionConfig: ITablePagePositionConfigType<TPagePositionSelectKeyType> = {
@@ -190,24 +186,24 @@ const XTable: XTableSchema = {
       type: CONFIG_TYPES.LABEL_INPUT
     },
     metaDataConfig,
-    keyDataConfig,
-    {
-      key: 'columns',
-      name: '表头配置',
-      type: CONFIG_TYPES.TABLE_COLUMN_LIST
-    },
-    {
-      key: 'searchItems',
-      name: '搜索项',
-      type: CONFIG_TYPES.SEARCH_ITEM_LIST
-    },
+    // keyDataConfig,
+    // {
+    //   key: 'columns',
+    //   name: '表头配置',
+    //   type: CONFIG_TYPES.TABLE_COLUMN_LIST
+    // },
+    // {
+    //   key: 'searchItems',
+    //   name: '搜索项',
+    //   type: CONFIG_TYPES.SEARCH_ITEM_LIST
+    // },
+
     pagePositionConfig,
     {
       key: 'pageSize',
       name: '分页数量',
       type: CONFIG_TYPES.TABLE_PAGE_SIZE
     },
-
     {
       key: 'border',
       name: '显示边框',
@@ -350,19 +346,7 @@ const XTable: XTableSchema = {
       // {
       //     label: '姓名',
       //     value: 'name',
-      // },
-      // {
-      //     label: '邮箱',
-      //     value: 'email',
-      // },
-      // {
-      //     label: '性别',
-      //     value: 'gender',
-      // },
-      // {
-      //     label: '工资',
-      //     value: 'salary',
-      // },
+      // }
     ]
   }
 };

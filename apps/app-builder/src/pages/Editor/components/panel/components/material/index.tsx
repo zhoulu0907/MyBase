@@ -139,7 +139,6 @@ const MaterialContainer: React.FC<MaterialContainerProps> = ({ activeTab }) => {
                                 id: `${item.type}-${Date.now()}`
                               }))
                             }));
-                            console.log(newBaseItems);
                             setBaseItems(newBaseItems);
                           }}
                         >

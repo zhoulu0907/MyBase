@@ -364,3 +364,7 @@ export const getEntityStats = () => {
 export const getEntityGraph = (datasourceId: string) => {
   return metadataService.post('/business-entity/er-diagram?datasourceId=' + datasourceId);
 };
+
+export const getEntityListByApp = (appId: string) => {
+  return metadataService.post(`/business-entity/list-by-app?appId=${appId}`);
+};

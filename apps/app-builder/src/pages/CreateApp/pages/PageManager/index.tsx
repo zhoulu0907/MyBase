@@ -261,8 +261,11 @@ const PageManagerPage: FC = () => {
     const req: CopyApplicationMenuReq = {
       id: copyForm.getFieldValue('menuID'),
       menuName: copyForm.getFieldValue('menuName'),
-      parentCode: copyForm.getFieldValue('parentCode')
+      parentCode:
+        copyForm.getFieldValue('parentCode') === RootParentPage.menuCode ? '' : copyForm.getFieldValue('parentCode')
     };
+
+    console.log('req: ', req);
 
     const res = await copyApplicationMenu(req);
     console.log('res: ', res);

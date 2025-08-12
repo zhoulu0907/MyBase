@@ -2,21 +2,9 @@ import type { TXInputTextEditData } from '@/components/Materials/Basic/FormCompo
 import { CONFIG_TYPES } from '@/components/Materials/constants';
 import { useI18n } from '@/hooks/useI18n';
 import { usePageEditorStore } from '@/hooks/useStore';
-import {
-  Button,
-  Checkbox,
-  ColorPicker,
-  Form,
-  Input,
-  InputNumber,
-  Message,
-  Radio,
-  Select,
-  Switch
-} from '@arco-design/web-react';
-import { IconDelete, IconDragDotVertical } from '@arco-design/web-react/icon';
+import { ColorPicker, Form, Input, InputNumber, Radio, Switch } from '@arco-design/web-react';
 import { useEffect, useState } from 'react';
-import { ReactSortable } from 'react-sortablejs';
+import DynamicTableConfig from './components/DynamicTableConfig';
 import styles from './index.module.less';
 
 const FormItem = Form.Item;
@@ -103,7 +91,7 @@ const Attributes = ({ cpID }: ConfigsProps) => {
           </FormItem>
 
           {editData.map((item: any, index: number) => {
-            if (item.type !== CONFIG_TYPES.SWITCH_INPUT && item.type !== CONFIG_TYPES.DYNAMIC_SELECT_INPUT) {
+            if (item.type !== CONFIG_TYPES.SWITCH_INPUT && item.type !== CONFIG_TYPES.TABLE_DATA) {
               return (
                 <FormItem label={item.name} key={index} className={styles.formItem}>
                   {(item.type === CONFIG_TYPES.TEXT_INPUT ||
@@ -251,7 +239,7 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                       }}
                     />
                   )}
-                  {item.type === CONFIG_TYPES.TABLE_COLUMN_LIST && (
+                  {/* {item.type === CONFIG_TYPES.TABLE_COLUMN_LIST && (
                     <Form.List initialValue={configs[item.key] || []} field={item.key}>
                       {(_fields, { add, remove }) => (
                         <div className={styles.tableColumnList}>
@@ -483,28 +471,14 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                         </div>
                       )}
                     </Form.List>
-                  )}
+                  )} */}
                 </FormItem>
               );
             }
 
-            if (item.type === CONFIG_TYPES.DYNAMIC_SELECT_INPUT) {
+            if (item.type === CONFIG_TYPES.TABLE_DATA) {
               return (
-                <FormItem
-                  layout="horizontal"
-                  labelAlign="left"
-                  label={item.name}
-                  key={index}
-                  className={styles.formItem}
-                >
-                  <Select
-                    placeholder={`请选择${item.name}`}
-                    value={configs[item.key]}
-                    onChange={(value) => {
-                      handlePropsChange(item.key, value);
-                    }}
-                  />
-                </FormItem>
+                <DynamicTableConfig key={index} handlePropsChange={handlePropsChange} item={item} configs={configs} />
               );
             }
             if (item.type === CONFIG_TYPES.SWITCH_INPUT) {

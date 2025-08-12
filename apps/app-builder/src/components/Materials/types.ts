@@ -65,11 +65,18 @@ export interface IDynamicSelectConfigType {
   type: typeof CONFIG_TYPES.DYNAMIC_SELECT_INPUT;
 }
 
-export interface ISearchItemListConfigType {
-  key: string;
-  name: string;
-  type: typeof CONFIG_TYPES.SEARCH_ITEM_LIST;
+export interface ITableDataConfigType {
+    key: string;
+    name: string;
+    type:  typeof CONFIG_TYPES.TABLE_DATA;
 }
+
+// TODO(mickey): remove
+// export interface ISearchItemListConfigType {
+//   key: string;
+//   name: string;
+//   type: typeof CONFIG_TYPES.SEARCH_ITEM_LIST;
+// }
 
 export interface IBooleanConfigType {
   key: string;
@@ -176,11 +183,12 @@ export interface IColumnCountConfigType<KeyType> {
   }>;
 }
 
-export interface ITableColumnConfigType {
-  key: string;
-  name: string;
-  type: typeof CONFIG_TYPES.TABLE_COLUMN_LIST;
-}
+// TODO(mickey): remove
+// export interface ITableColumnConfigType {
+//   key: string;
+//   name: string;
+//   type: typeof CONFIG_TYPES.TABLE_COLUMN_LIST;
+// }
 
 // 状态配置
 export interface ITablePagePositionConfigType<KeyType> {

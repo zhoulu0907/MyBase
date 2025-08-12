@@ -8,7 +8,6 @@ export const CONFIG_TYPES = {
   NUMBER_INPUT: 'NumberInput',
   SWITCH_INPUT: 'SwitchInput',
 
-  SEARCH_ITEM_LIST: 'SearchItemList',
 
   // 组件标题输入
   LABEL_INPUT: 'LabelInput',
@@ -32,8 +31,11 @@ export const CONFIG_TYPES = {
   COLUMN_COUNT_RADIO: 'ColumnCountRadio',
   // 表格分页位置选择
   TABLE_PAGE_POSITION_RADIO: 'TablePagePositionRadio',
-  // 表格列配置
-  TABLE_COLUMN_LIST: 'TableColumnList',
+  // 表格数据配置
+  TABLE_DATA: 'TableData',
+//   // 表格列配置
+//   TABLE_COLUMN_LIST: 'TableColumnList',
+// SEARCH_ITEM_LIST: 'SearchItemList',
   // 表格分页数量
   TABLE_PAGE_SIZE: 'TablePageSize',
   // 图片、附件上传大小限制
@@ -51,7 +53,7 @@ export const CONFIG_TYPES = {
   // 标签宽度
   LABEL_COL_SPAN: 'LabelColSpan',
   // 颜色
-  COLOR: 'Color'
+  COLOR: 'Color',
 } as const;
 
 // 状态选项常量
