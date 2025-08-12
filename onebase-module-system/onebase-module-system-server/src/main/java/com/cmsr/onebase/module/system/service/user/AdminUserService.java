@@ -149,6 +149,8 @@ public interface AdminUserService {
      */
     List<AdminUserDO> getUserListByDeptIds(Collection<Long> deptIds);
 
+    List<AdminUserDO> getUserListNoDept();
+
     /**
      * 获得指定岗位的用户数组
      *
