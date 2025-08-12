@@ -43,8 +43,8 @@ public class PageSetApiImpl implements PageSetApi {
     }
 
     @Override
-    public CommonResult<Boolean> deletePageSet(Long menuId) {
-        pageSetService.deletePageSet(menuId);
+    public CommonResult<Boolean> deletePageSet(String menuCode) {
+        pageSetService.deletePageSet(menuCode);
         return CommonResult.success(true);
     }
 }

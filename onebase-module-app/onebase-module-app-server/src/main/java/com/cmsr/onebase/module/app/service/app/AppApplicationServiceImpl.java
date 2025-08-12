@@ -9,11 +9,9 @@ import com.cmsr.onebase.module.app.controller.admin.app.vo.ApplicationPageReqVO;
 import com.cmsr.onebase.module.app.controller.admin.app.vo.ApplicationRespVO;
 import com.cmsr.onebase.module.app.controller.admin.tag.vo.TagRespVO;
 import com.cmsr.onebase.module.app.dal.database.app.AppApplicationRepository;
-import com.cmsr.onebase.module.app.dal.database.app.AppResourceRepository;
 import com.cmsr.onebase.module.app.dal.database.menu.AppMenuRepository;
 import com.cmsr.onebase.module.app.dal.database.tag.AppApplicationTagRepository;
 import com.cmsr.onebase.module.app.dal.database.tag.AppTagRepository;
-import com.cmsr.onebase.module.app.dal.database.version.AppVersionMenuRepository;
 import com.cmsr.onebase.module.app.dal.database.version.AppVersionRepository;
 import com.cmsr.onebase.module.app.dal.database.version.AppVersionResourceRepository;
 import com.cmsr.onebase.module.app.dal.dataobject.app.ApplicationDO;
@@ -54,13 +52,7 @@ public class AppApplicationServiceImpl implements AppApplicationService {
     private AppMenuRepository menuRepository;
 
     @Resource
-    private AppResourceRepository resourceRepository;
-
-    @Resource
     private AppVersionRepository versionRepository;
-
-    @Resource
-    private AppVersionMenuRepository versionMenuRepository;
 
     @Resource
     private AppVersionResourceRepository versionResourceRepository;
@@ -182,9 +174,7 @@ public class AppApplicationServiceImpl implements AppApplicationService {
         //TODO 删除应用下的全部资源
         applicationRepository.deleteById(id);
         menuRepository.deleteByApplicationId(id);
-        resourceRepository.deleteByApplicationId(id);
         versionRepository.deleteByApplicationId(id);
-        versionMenuRepository.deleteByApplicationId(id);
         versionResourceRepository.deleteByApplicationId(id);
     }
 

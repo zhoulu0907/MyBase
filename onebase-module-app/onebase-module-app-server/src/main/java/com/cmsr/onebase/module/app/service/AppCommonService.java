@@ -66,6 +66,14 @@ public class AppCommonService {
         return menuDO;
     }
 
+    public MenuDO validateMenuExist(String menuCode) {
+        MenuDO menuDO = menuRepository.findByMenuCode(menuCode);
+        if (menuDO == null) {
+            throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_MENU_NOT_EXIST);
+        }
+        return menuDO;
+    }
+
     public UserHelper getUserHelper(BaseDO baseDO) {
         Set<Long> ids = new HashSet<>();
         ids.add(baseDO.getCreator());

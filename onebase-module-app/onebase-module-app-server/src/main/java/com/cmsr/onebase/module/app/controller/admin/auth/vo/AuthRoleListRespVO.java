@@ -17,6 +17,9 @@ public class AuthRoleListRespVO {
     @Schema(description = "角色名称")
     private String roleName;
 
+    @Schema(description = "角色编码")
+    private String roleCode;
+
     @Schema(description = "角色类型")
     private Integer roleType;
 
