@@ -16,15 +16,15 @@ public class AppComponentRepository extends DataRepositoryNew<ComponentDO> {
         super(ComponentDO.class);
     }
 
-    public void deleteComponentByPageId(Long pageId) {
+    public void deleteComponentByPageCode(String pageCode) {
         ConfigStore configs = new DefaultConfigStore();
-        configs.eq("page_id", pageId);
+        configs.eq("page_code", pageCode);
         deleteByConfig(configs);
     }
 
-    public List<ComponentDO> findByPageID(Long pageID){
+    public List<ComponentDO> findByPageCode(String pageCode){
         ConfigStore cfg = new DefaultConfigStore();
-        cfg.eq("page_id", pageID);
+        cfg.eq("page_code", pageCode);
         return findAllByConfig(cfg);
     }
 }

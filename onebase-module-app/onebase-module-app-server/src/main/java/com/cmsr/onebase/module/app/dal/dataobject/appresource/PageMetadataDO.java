@@ -18,9 +18,15 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 public class PageMetadataDO extends TenantBaseDO {
 
-    @Column(name = "page_id", columnDefinition= "BIGINT NOT NULL", comment = "页面ID")
-    private Long pageId;
+    /**
+     * 页面编码
+     */
+    @Column(name = "page_code", columnDefinition = "VARCHAR(255) NOT NULL", comment = "页面编码")
+    private String pageCode;
 
+    /**
+     * 页面元数据
+     */
     @Column(name = "metadata", columnDefinition= "VARCHAR(255) NOT NULL", comment = "页面元数据")
     private String metadata;
 
