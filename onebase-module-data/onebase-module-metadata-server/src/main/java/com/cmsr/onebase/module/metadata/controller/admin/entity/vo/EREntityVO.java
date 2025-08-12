@@ -44,4 +44,7 @@ public class EREntityVO {
 
     @Schema(description = "字段列表", requiredMode = Schema.RequiredMode.REQUIRED)
     private List<ERFieldVO> fields;
+
+    @Schema(description = "关系类型", example = "主表:PARENT，子表:CHILD")
+    private String relationType;
 }

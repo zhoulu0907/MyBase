@@ -23,6 +23,9 @@ public class EntityWithChildrenRespVO {
 
     @Schema(description = "实体编码", example = "user_info")
     private String entityCode;
+    
+    @Schema(description = "父表字段信息列表")
+    private List<EntityFieldInfoRespVO> parentFields;
 
     @Schema(description = "关联的子表信息列表")
     private List<ChildEntityInfoRespVO> childEntities;

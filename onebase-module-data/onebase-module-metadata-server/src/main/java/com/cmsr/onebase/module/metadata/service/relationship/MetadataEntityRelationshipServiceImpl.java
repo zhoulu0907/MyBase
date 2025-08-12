@@ -447,10 +447,6 @@ public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRela
             return parentIdField.getId();
         }
 
-        // TODO: 如果parent_id字段不存在，需要创建该字段
-        // 这里需要调用字段创建服务来创建parent_id字段
-        // 暂时抛出异常，提示用户手动创建
-        // todo 不需要用户手动创建，需要我们自动为用户创建
         throw new IllegalArgumentException("子表实体未找到parent_id字段，请先为子表添加parent_id字段，实体ID: " + childEntityId);
     }
 
@@ -476,14 +472,19 @@ public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRela
         List<MetadataEntityRelationshipDO> relationships = dataRepository.findAllByConfig(
                 MetadataEntityRelationshipDO.class, configStore);
 
-        // 4. 转换为子表信息列表
+        // 4. 填充父表字段信息
+        List<EntityFieldInfoRespVO> parentFields = getEntityFields(entityId);
+        result.setParentFields(parentFields);
+
+        // 5. 转换为子表信息列表
         List<ChildEntityInfoRespVO> childEntities = relationships.stream()
                 .map(this::convertToChildEntityInfo)
                 .toList();
 
         result.setChildEntities(childEntities);
         
-        log.info("查询实体及其关联子表成功，实体ID: {}, 关联子表数量: {}", entityId, childEntities.size());
+        log.info("查询实体及其关联子表成功，实体ID: {}, 关联子表数量: {}, 父表字段数量: {}", 
+                entityId, childEntities.size(), parentFields.size());
         return result;
     }
 
@@ -511,6 +512,10 @@ public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRela
         // 获取字段名称
         childInfo.setSourceFieldName(getFieldNameById(relationshipDO.getSourceFieldId()));
         childInfo.setTargetFieldName(getFieldNameById(relationshipDO.getTargetFieldId()));
+        
+        // 填充子表字段信息
+        List<EntityFieldInfoRespVO> childFields = getEntityFields(relationshipDO.getTargetEntityId());
+        childInfo.setChildFields(childFields);
         
         return childInfo;
     }
