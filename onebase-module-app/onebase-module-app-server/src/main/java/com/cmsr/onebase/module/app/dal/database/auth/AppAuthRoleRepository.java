@@ -36,4 +36,16 @@ public class AppAuthRoleRepository extends DataRepositoryNew<AuthRoleDO> {
         configs.eq("role_name", roleName);
         return findOne(configs);
     }
+
+    public void deleteByRoleCode(String roleCode) {
+        ConfigStore configs = new DefaultConfigStore();
+        configs.eq("role_code", roleCode);
+        deleteByConfig(configs);
+    }
+
+    public AuthRoleDO findByRoleCode(String roleCode) {
+        ConfigStore configs = new DefaultConfigStore();
+        configs.eq("role_code", roleCode);
+        return findOne(configs);
+    }
 }

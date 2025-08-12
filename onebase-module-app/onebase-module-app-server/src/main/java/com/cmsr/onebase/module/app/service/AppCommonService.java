@@ -50,8 +50,8 @@ public class AppCommonService {
         return applicationDO;
     }
 
-    public AuthRoleDO validateRoleExist(Long roleId) {
-        AuthRoleDO authRoleDO = authRoleRepository.findById(roleId);
+    public AuthRoleDO validateRoleExist(Long id) {
+        AuthRoleDO authRoleDO = authRoleRepository.findById(id);
         if (authRoleDO == null) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_AUTH_ROLE_NOT_EXISTS);
         }

@@ -13,14 +13,14 @@ import lombok.Data;
 @Table(name = "app_auth_operation")
 public class AuthOperationDO extends TenantBaseDO {
 
-    @Column(name = "application_id", nullable = false, comment = "应用Id")
-    private Long applicationId;
+    @Column(name = "application_code", nullable = false, comment = "应用code")
+    private String applicationCode;
 
-    @Column(name = "role_id", nullable = false, comment = "角色Id")
-    private Long roleId;
+    @Column(name = "role_code", nullable = false, comment = "角色code")
+    private String roleCode;
 
-    @Column(name = "menu_id", nullable = false, comment = "菜单Id")
-    private Long menuId;
+    @Column(name = "menu_code", nullable = false, comment = "菜单code")
+    private String menuCode;
 
     @Column(name = "operation_code", nullable = false, length = 64, comment = "操作编码")
     private String operationCode;

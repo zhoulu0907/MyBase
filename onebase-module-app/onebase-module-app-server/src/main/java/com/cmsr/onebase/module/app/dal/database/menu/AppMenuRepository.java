@@ -20,9 +20,9 @@ public class AppMenuRepository extends DataRepositoryNew<MenuDO> {
         super(MenuDO.class);
     }
 
-    public List<MenuDO> findByApplicationId(Long applicationId) {
+    public List<MenuDO> findByApplicationCode(String applicationCode) {
         ConfigStore configs = new DefaultConfigStore();
-        configs.eq("application_id", applicationId);
+        configs.eq("application_code", applicationCode);
         configs.order("menu_sort", Order.TYPE.ASC);
         return findAllByConfig(configs);
     }
@@ -39,16 +39,16 @@ public class AppMenuRepository extends DataRepositoryNew<MenuDO> {
         return countByConfig(configs);
     }
 
-    public void deleteByApplicationId(Long applicationId) {
+    public void deleteByApplicationCode(String applicationCode) {
         ConfigStore configs = new DefaultConfigStore();
-        configs.eq("application_id", applicationId);
+        configs.eq("application_code", applicationCode);
         deleteByConfig(configs);
     }
 
 
-    public int countByApplicationId(Long applicationId) {
+    public int countByApplicationCode(String applicationCode) {
         ConfigStore configs = new DefaultConfigStore();
-        configs.eq("application_id", applicationId);
+        configs.eq("application_code", applicationCode);
         return (int) countByConfig(configs);
     }
 }

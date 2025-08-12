@@ -14,8 +14,8 @@ public class AuthFieldVO {
     @Schema(description = "主键Id")
     private Long id;
 
-    @Schema(description = "字段Id")
-    private Long fieldId;
+    @Schema(description = "字段code")
+    private String fieldCode;
 
     @Schema(description = "字段名称")
     private String fieldDisplayName;

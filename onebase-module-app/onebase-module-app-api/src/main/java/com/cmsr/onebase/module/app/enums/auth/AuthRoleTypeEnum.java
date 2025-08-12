@@ -11,34 +11,29 @@ public enum AuthRoleTypeEnum {
     /**
      * 系统管理员角色
      */
-    SYSTEM_ADMIN(1, "ROLE_SYSTEM_ADMIN", "管理员"),
+    SYSTEM_ADMIN(1, "管理员"),
 
     /**
      * 系统普通用户角色
      */
-    SYSTEM_USER(2, "ROLE_SYSTEM_USER", "普通用户"),
+    SYSTEM_USER(2, "普通用户"),
 
     /**
      * 用户自定义角色
      */
-    CUSTOM_ROLE(3, null, "自定义角色");
+    CUSTOM_ROLE(3, "自定义角色");
 
     private final Integer value;
-    private final String code;
+
     private final String name;
 
-    AuthRoleTypeEnum(Integer value, String code, String name) {
+    AuthRoleTypeEnum(Integer value, String name) {
         this.value = value;
-        this.code = code;
         this.name = name;
     }
 
     public Integer getValue() {
         return value;
-    }
-
-    public String getCode() {
-        return code;
     }
 
     public String getName() {
@@ -52,7 +47,7 @@ public enum AuthRoleTypeEnum {
      * @param value 角色类型值
      * @return true-允许添加和删除，false-不允许添加和删除
      */
-    public static boolean canAddOrDelete(Integer value) {
-        return CUSTOM_ROLE.getValue().equals(value);
+    public static boolean isSystemRoleType(Integer value) {
+        return SYSTEM_ADMIN.getValue().equals(value) || SYSTEM_USER.getValue().equals(value);
     }
 }

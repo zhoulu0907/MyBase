@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.app.dal.database.auth;
 
 import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
-import com.cmsr.onebase.module.app.controller.admin.auth.vo.AuthPermissionReqVO;
+import com.cmsr.onebase.module.app.controller.admin.auth.vo.AuthPermissionDTO;
 import com.cmsr.onebase.module.app.dal.dataobject.auth.AuthDataGroupDO;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
@@ -23,11 +23,11 @@ public class AppAuthDataGroupRepository extends DataRepositoryNew<AuthDataGroupD
         super(AuthDataGroupDO.class);
     }
 
-    public List<AuthDataGroupDO> findByQuery(AuthPermissionReqVO reqVO) {
+    public List<AuthDataGroupDO> findByQuery(AuthPermissionDTO dto) {
         ConfigStore configs = new DefaultConfigStore();
-        configs.eq("application_id", reqVO.getApplicationId());
-        configs.eq("role_id", reqVO.getRoleId());
-        configs.eq("menu_id", reqVO.getMenuId());
+        configs.eq("application_code", dto.getApplicationCode());
+        configs.eq("role_code", dto.getRoleCode());
+        configs.eq("menu_code", dto.getMenuCode());
         configs.order("group_order", Order.TYPE.ASC);
         return this.findAllByConfig(configs);
     }

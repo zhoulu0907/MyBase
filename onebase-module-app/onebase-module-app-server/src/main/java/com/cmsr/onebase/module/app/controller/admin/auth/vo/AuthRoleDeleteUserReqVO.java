@@ -14,12 +14,15 @@ import java.util.List;
 @Schema(description = "应用管理 - 角色删除成员 Request VO")
 public class AuthRoleDeleteUserReqVO {
 
-    @Schema(description = "角色ID")
-    @NotNull(message = "角色ID不能为空")
+    @Schema(description = "角色id")
+    @NotNull(message = "角色id不能为空")
     private Long roleId;
 
-    @Schema(description = "用户ID列表")
-    @NotNull(message = "用户ID列表不能为空")
+    @Schema(description = "角色编码")
+    private String roleCode;
+
+    @Schema(description = "用户id列表")
+    @NotNull(message = "用户id列表不能为空")
     private List<Long> userIds;
 
 
