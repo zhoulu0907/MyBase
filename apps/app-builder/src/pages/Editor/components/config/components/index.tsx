@@ -1,5 +1,5 @@
 import { useI18n } from '@/hooks/useI18n';
-import { Tabs, Typography } from '@arco-design/web-react';
+import { Tabs } from '@arco-design/web-react';
 import Advanced from './Advanced';
 import Attributes from './Attributes';
 import TabTitle from './components/TabTitle';
@@ -22,14 +22,10 @@ const MaterialConfiger = ({ cpID }: MaterialConfigerProps) => {
     <div className={styles.configs}>
       <Tabs defaultActiveTab="attributes" type="line" size="default">
         <TabPane key="attributes" title={<TabTitle title={t('editor.attribute')} />}>
-          <Typography.Paragraph>
-            <Attributes cpID={cpID} />
-          </Typography.Paragraph>
+          <Attributes cpID={cpID} />
         </TabPane>
         <TabPane key="advanced" title={<TabTitle title={t('editor.advanced')} />}>
-          <Typography.Paragraph>
-            <Advanced />
-          </Typography.Paragraph>
+          <Advanced />
         </TabPane>
       </Tabs>
     </div>

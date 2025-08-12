@@ -1,7 +1,6 @@
 import CreateGroupIcon from '@/assets/images/create_group.svg';
 import CreatePageIcon from '@/assets/images/create_page.svg';
 import { useI18n } from '@/hooks/useI18n';
-
 import { EDITOR_TYPES } from '@/pages/Editor/utils/const';
 import { useAppStore, useBasicEditorStore } from '@/store';
 import { Button, Dropdown, Form, Input, Layout, Menu, Message, Tree } from '@arco-design/web-react';
@@ -30,6 +29,7 @@ import CopyModal from './components/Modals/CopyModal';
 import CreateModal from './components/Modals/CreateModal';
 import RenameModal from './components/Modals/RenameModal';
 import MyMenuItem from './components/MyMenuItem';
+import PageManagerPreview from './components/Preview';
 import styles from './index.module.less';
 
 const TreeNode = Tree.Node;
@@ -74,7 +74,7 @@ const PageManagerPage: FC = () => {
   const [treeData, setTreeData] = useState<TreeNode[]>([]);
 
   const [curMenu, setCurMenu] = useState<ApplicationMenu>();
-  const [activeMenu, setActiveMenu] = useState<ApplicationMenu>();
+  const [_activeMenu, setActiveMenu] = useState<ApplicationMenu>();
   const [parentPageOptions, setParentPageOptions] = useState<ApplicationMenu[]>([RootParentPage]);
 
   const initTreeItemWidth = 155;
@@ -128,6 +128,7 @@ const PageManagerPage: FC = () => {
           triggerHide={triggerHide}
           triggerDelete={triggerDelete}
           renameForm={renameForm}
+          copyForm={copyForm}
         />
       ),
       children: menu.children ? convertMenuToTreeData(menu.children, maxWidth - cutTreeItemWidth) : []
@@ -208,21 +209,31 @@ const PageManagerPage: FC = () => {
       req.menuType = MenuType.GROUP;
     }
 
-    const res = await createApplicationMenu(req);
-    if (res) {
+    const menuResp = await createApplicationMenu(req);
+
+    console.log('res: ', menuResp);
+    if (menuResp) {
       Message.success('创建成功');
     }
     setVisibleCreateForm('');
     getMenuList();
+
+    const pageSetCode = await getPageSetCode({
+      menuId: menuResp.id
+    });
+
+    if (pageSetCode) {
+      navigate(`/onebase/editor/${EDITOR_TYPES.FORM_EDITOR}?pageSetCode=${pageSetCode}`);
+    }
   };
 
   const handleRename = async () => {
-    if (!activeMenu?.id) {
+    if (!renameForm.getFieldValue('menuID')) {
       Message.error('请选择要重命名的菜单');
       return;
     }
     const req: UpdateApplicationMenuNameReq = {
-      id: activeMenu?.id,
+      id: renameForm.getFieldValue('menuID'),
       menuName: renameForm.getFieldValue('menuName')
     };
     const res = await updateApplicationMenuName(req);
@@ -234,15 +245,17 @@ const PageManagerPage: FC = () => {
   };
 
   const handleCopy = async () => {
-    if (!activeMenu?.id) {
+    if (!copyForm.getFieldValue('menuID')) {
       Message.error('请选择要复制的菜单');
       return;
     }
+
     const req: CopyApplicationMenuReq = {
-      id: activeMenu?.id,
+      id: copyForm.getFieldValue('menuID'),
       menuName: copyForm.getFieldValue('menuName'),
-      parentUuid: copyForm.getFieldValue('parentId')
+      parentId: copyForm.getFieldValue('parentId')
     };
+
     const res = await copyApplicationMenu(req);
     console.log('res: ', res);
     if (res) {
@@ -291,11 +304,12 @@ const PageManagerPage: FC = () => {
     <div className={styles.pageManagerPage}>
       <Layout style={{ height: '100%' }}>
         <Layout>
-          <Sider style={{ width: 225 }}>
+          {/* <Sider style={{ width: 225 }}> */}
+          <Sider className={styles.sider}>
             <div className={styles.siderHeader}>
               <Input
                 style={{
-                  width: 140,
+                  width: 120,
                   border: '1px solid #dedede',
                   borderRadius: 3
                 }}
@@ -320,7 +334,7 @@ const PageManagerPage: FC = () => {
               }}
               actionOnClick={'expand'}
               style={{
-                width: '210px',
+                width: '200px',
                 overflow: 'hidden',
                 boxSizing: 'border-box'
               }}
@@ -335,7 +349,9 @@ const PageManagerPage: FC = () => {
                 </Button>
               </div>
             )}
-            <Content className={styles.content}>content</Content>
+            <div className={styles.contentBody}>
+              <PageManagerPreview menuID={curMenu?.id || ''} />
+            </div>
           </Content>
         </Layout>
       </Layout>
@@ -356,7 +372,6 @@ const PageManagerPage: FC = () => {
         handleCopy={handleCopy}
         setVisible={setVisibleCopyForm}
         form={copyForm}
-        initValue={{ menuName: activeMenu?.menuName + '_副本', parentId: activeMenu?.parentId || RootParentPage.id }}
         treeData={convertMenuToTreeData(parentPageOptions, initTreeItemWidth)}
       />
 

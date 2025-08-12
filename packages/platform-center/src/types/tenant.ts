@@ -4,13 +4,15 @@ export interface TenantInfo {
   contactName: string;
   contactMobile: string;
   status: number;
-  domain: string;
   creator: string;
   password: string;
   expireTime: string;
   accountCount: number;
   appCount: number;
   createTime: string;
-  workbenchUrl: string;
-  mobileUrl: string;
+  tenantCode: string;
+  tenantKey: string;
+  tenantSecret: string;
+  website: string;
+  websiteH5: string;
 }
