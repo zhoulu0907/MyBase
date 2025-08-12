@@ -55,10 +55,10 @@ public class EntityRelationshipController {
     @Operation(summary = "查询实体关系列表")
     @PreAuthorize("@ss.hasPermission('metadata:entity-relationship:query')")
     public CommonResult<PageResult<EntityRelationshipRespVO>> getEntityRelationshipPage(@Valid @RequestBody EntityRelationshipPageReqVO pageReqVO) {
-        log.info("控制器接收到的分页请求参数: entityId={}, appId={}, pageNo={}, pageSize={}", 
+        log.info("控制器接收到的分页请求参数: entityId={}, appId={}, pageNo={}, pageSize={}",
                 pageReqVO.getEntityId(), pageReqVO.getAppId(), pageReqVO.getPageNo(), pageReqVO.getPageSize());
         log.info("控制器参数详细信息: pageReqVO={}", pageReqVO);
-        
+
         PageResult<EntityRelationshipRespVO> result = entityRelationshipService.getEntityRelationshipPage(pageReqVO);
         return success(result);
     }
@@ -114,7 +114,7 @@ public class EntityRelationshipController {
     @PostMapping("/entity-with-children")
     @Operation(summary = "根据实体ID查询实体名称及其关联的子表信息")
     @Parameter(name = "entityId", description = "实体ID", required = true, example = "1001")
-    @PreAuthorize("@ss.hasPermission('metadata:entity-relationship:query')")
+    //@PreAuthorize("@ss.hasPermission('metadata:entity-relationship:query')")
     public CommonResult<EntityWithChildrenRespVO> getEntityWithChildren(@RequestParam("entityId") Long entityId) {
         EntityWithChildrenRespVO result = entityRelationshipService.getEntityWithChildrenById(entityId);
         return success(result);
@@ -123,10 +123,10 @@ public class EntityRelationshipController {
     @PostMapping("/app-entities")
     @Operation(summary = "根据应用ID查询所有实体及字段信息")
     @Parameter(name = "appId", description = "应用ID", required = true, example = "1001")
-    @PreAuthorize("@ss.hasPermission('metadata:entity-relationship:query')")
+    //@PreAuthorize("@ss.hasPermission('metadata:entity-relationship:query')")
     public CommonResult<AppEntitiesRespVO> getAppEntitiesWithFields(@RequestParam("appId") Long appId) {
         AppEntitiesRespVO result = entityRelationshipService.getAppEntitiesWithFields(appId);
         return success(result);
     }
 
-} 
+}

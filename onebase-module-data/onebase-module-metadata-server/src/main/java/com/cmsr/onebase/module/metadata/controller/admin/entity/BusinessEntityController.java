@@ -84,7 +84,7 @@ public class BusinessEntityController {
     @PostMapping("/list-by-datasource")
     @Operation(summary = "根据数据源获得业务实体列表")
     @Parameter(name = "datasourceId", description = "数据源ID", required = true, example = "1024")
-    @PreAuthorize("@ss.hasPermission('metadata:business-entity:query')")
+    //@PreAuthorize("@ss.hasPermission('metadata:business-entity:query')")
     public CommonResult<List<BusinessEntityRespVO>> getBusinessEntityListByDatasourceId(@RequestParam("datasourceId") Long datasourceId) {
         List<MetadataBusinessEntityDO> list = businessEntityService.getBusinessEntityListByDatasourceId(datasourceId);
         return success(BusinessEntityConvert.INSTANCE.convertList(list));
@@ -102,7 +102,7 @@ public class BusinessEntityController {
     @PostMapping("/list-by-app")
     @Operation(summary = "根据应用ID获取实体列表", description = "返回实体ID和名称，用于下拉选择等场景")
     @Parameter(name = "appId", description = "应用ID", required = true, example = "1024")
-    @PreAuthorize("@ss.hasPermission('metadata:business-entity:query')")
+    //@PreAuthorize("@ss.hasPermission('metadata:business-entity:query')")
     public CommonResult<List<SimpleEntityRespVO>> getSimpleEntityListByAppId(@RequestParam("appId") Long appId) {
         List<SimpleEntityRespVO> result = businessEntityService.getSimpleEntityListByAppId(appId);
         return success(result);
