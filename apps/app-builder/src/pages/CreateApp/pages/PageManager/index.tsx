@@ -197,39 +197,42 @@ const PageManagerPage: FC = () => {
   };
 
   const handleCreate = async () => {
-    let req: CreateApplicationMenuReq = {
-      applicationId: curAppId,
-      parentCode:
-        createForm.getFieldValue('parentCode') === RootParentPage.menuCode
-          ? ''
-          : createForm.getFieldValue('parentCode'),
-      menuName: createForm.getFieldValue('menuName'),
-      menuType: MenuType.PAGE,
-      menuIcon: createForm.getFieldValue('menuIcon')
-    };
+    createForm.validate(async (error) => {
+      if (error !== null) return;
+      let req: CreateApplicationMenuReq = {
+        applicationId: curAppId,
+        parentCode:
+          createForm.getFieldValue('parentCode') === RootParentPage.menuCode
+            ? ''
+            : createForm.getFieldValue('parentCode'),
+        menuName: createForm.getFieldValue('menuName'),
+        menuType: MenuType.PAGE,
+        menuIcon: createForm.getFieldValue('menuIcon')
+      };
 
-    if (visibleCreateForm === 'page') {
-      req.menuType = MenuType.PAGE;
-    }
-    if (visibleCreateForm === 'group') {
-      req.menuType = MenuType.GROUP;
-    }
+      if (visibleCreateForm === 'page') {
+        req.menuType = MenuType.PAGE;
+      }
+      if (visibleCreateForm === 'group') {
+        req.menuType = MenuType.GROUP;
+      }
 
-    const menuResp = await createApplicationMenu(req);
+      const menuResp = await createApplicationMenu(req);
 
-    if (menuResp) {
-      Message.success('创建成功');
-    }
-    setVisibleCreateForm('');
-    getMenuList();
+      if (menuResp) {
+        Message.success('创建成功');
+      }
+      setVisibleCreateForm('');
+      getMenuList();
 
-    const pageSetCode = await getPageSetCode({
-      menuCode: menuResp.menuCode
+      const pageSetCode = await getPageSetCode({
+        menuCode: menuResp.menuCode
+      });
+
+      if (pageSetCode && menuResp.menuType === MenuType.PAGE) {
+        navigate(`/onebase/editor/${EDITOR_TYPES.FORM_EDITOR}?pageSetCode=${pageSetCode}`);
+      }
     });
-
-    if (pageSetCode && menuResp.menuType === MenuType.PAGE) {
-      navigate(`/onebase/editor/${EDITOR_TYPES.FORM_EDITOR}?pageSetCode=${pageSetCode}`);
-    }
   };
 
   const handleRename = async () => {
