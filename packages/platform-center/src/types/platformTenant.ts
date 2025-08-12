@@ -2,12 +2,20 @@ export enum PlatformTenantStatus {
   /**
    * 已启用
    */
-  '已启用',
+  enabled = 0,
   /**
    * 已禁用
    */
-  '已禁用',
+  disabled = 1,
+  /**
+   * 全部
+   */
+  all = 2,
+
 }
+
+// 管理员根用户ID
+export const ADMIN_ROOT_ID = 1;
 
 /**
  * 平台租户信息
@@ -54,4 +62,27 @@ export interface PlatformTenantInfo {
    * 网站
    */
   website?: string,
+}
+
+export interface CreateTenantParams {
+  /**
+   * 租户名称
+   */
+  name: string;
+  /**
+   * 租户编码
+   */
+  tenantCode: string;
+  /**
+   * 管理员名称
+   */
+  contactName: string;
+  /**
+   * 租户状态
+   */
+  status: 0 | 1;
+  /**
+   * 分配数量
+   */
+  accountCount: number;
 }
