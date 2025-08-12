@@ -1,18 +1,90 @@
 import { useState } from 'react';
-import { Button, Modal, Input, Tree, Space, List } from '@arco-design/web-react';
-import { IconUser, IconClose, IconBranch } from '@arco-design/web-react/icon';
+import { Button, Modal, Input, Space, List, Breadcrumb, Avatar, Typography } from '@arco-design/web-react';
+import { IconRight, IconDelete } from '@arco-design/web-react/icon';
+
+const treeDataMock = [
+  {
+    key: 'tenant',
+    title: '这是一个租户',
+    children: [
+      {
+        key: 'dept1',
+        title: '这是一个一级部门',
+        children: [
+          { key: 'wuxian', title: '巫炫', type: 'user' },
+          { key: 'zhangsan', title: '张三', type: 'user' },
+        ]
+      },
+      {
+        key: 'dept2',
+        title: '这是一个一级部门',
+        children: [
+          { key: 'lisi', title: '李四', type: 'user' },
+          { key: 'wangwu', title: '王五', type: 'user' }
+        ]
+      },
+      {
+        key: 'dept3',
+        title: '这是一个一级部门',
+        children: [
+          { key: 'zhaoliu', title: '赵六', type: 'user' }
+        ]
+      },
+      { key: 'zhangsan', title: '张三', type: 'user' },
+    ]
+  },
+];
 
 interface IProps {
+  title: string;
+  width: number;
   visible: boolean;
+  treeData: any[];
   cancel: () => void;
+  onConfirm: () => void;
 }
+
 // 添加成员
 const AddMembers = (props: IProps) => {
-  const { visible, cancel } = props;
+  const { title = '选择成员', width = 800, visible, treeData = treeDataMock, cancel } = props;
+
+  const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
+  const [selectedMembers, setSelectedMembers] = useState<any[]>([]);
+  const [path, setPath] = useState<any[]>([treeData[0]]); // 当前路径（面包屑）
+
+  // 获取当前层级数据
+  const currentNode = path[path.length - 1];
+  const currentChildren = currentNode.children || [];
+
+  const onCheck = (checkedKeys: any, info: any) => {
+    const checkedUsers = info.checkedNodes
+      .filter((node: any) => node.type === 'user')
+      .map((node: any) => ({
+        key: node.key,
+        name: node.title
+      }));
+
+    setSelectedKeys(checkedKeys);
+    setSelectedMembers(checkedUsers);
+  };
+
+  const removeMember = (key: string) => {
+    const newKeys = selectedKeys.filter(k => k !== key);
+    setSelectedKeys(newKeys);
+    setSelectedMembers(selectedMembers.filter(m => m.key !== key));
+  };
+
+  const goToChild = (node: any) => {
+    setPath([...path, node]);
+  };
+
+  const goToBreadcrumb = (index: number) => {
+    setPath(path.slice(0, index + 1));
+  };
 
   return (
     <Modal
-      title={<div style={{ textAlign: 'left' }}>选择成员</div>}
+      title={<div style={{ textAlign: 'left' }}>{title}</div>}
       onOk={cancel}
       onCancel={cancel}
       visible={visible}
@@ -20,7 +92,7 @@ const AddMembers = (props: IProps) => {
       focusLock={true}
       simple
       closable={true}
-      style={{ width: 716 }}
+      style={{ width }}
       maskClosable={true}
       footer={
         <div style={{ textAlign: 'right' }}>
@@ -33,155 +105,125 @@ const AddMembers = (props: IProps) => {
         </div>
       }
     >
-      <SelectContactModal />
+      <div style={{
+        height: 500,
+        border: '1px solid #e5e6eb',
+        borderRadius: 4,
+        boxSizing: 'border-box',
+        padding: 12,
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        position: 'relative',
+      }}>
+        <div style={{
+          flex: 1.1,
+          display: 'flex',
+          flexDirection: 'column',
+          marginRight: 24,
+        }}>
+          <Space direction='vertical'>
+            <Input.Search placeholder="搜索用户或部门" />
+
+            <Breadcrumb separator={<IconRight />}>
+              {path.map((node, index) => (
+                <Breadcrumb.Item key={node.key} onClick={() => goToBreadcrumb(index)}>
+                  <Typography.Text style={{ cursor: 'pointer' }}>
+                    {node.title}
+                  </Typography.Text>
+                </Breadcrumb.Item>
+              ))}
+            </Breadcrumb>
+          </Space>
+
+          <div>
+            {currentChildren.map((item: any) =>
+              item.type === 'user' ? (
+                <div key={item.key} style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8 }}>
+                  <input
+                    type="checkbox"
+                    checked={selectedKeys.includes(item.key)}
+                    onChange={(e) => {
+                      const checked = e.target.checked;
+                      if (checked) {
+                        setSelectedKeys([...selectedKeys, item.key]);
+                        setSelectedMembers([...selectedMembers, { key: item.key, name: item.title }]);
+                      } else {
+                        removeMember(item.key);
+                      }
+                    }}
+                    style={{cursor: 'pointer'}}
+                  />
+                  <Avatar size={24} style={{ backgroundColor: 'rgb(var(--primary-6))' }}>
+                    {item.title[0]}
+                  </Avatar>
+                  <span>{item.title}</span>
+                </div>
+              ) : (
+                <div
+                  key={item.key}
+                  style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <Avatar size={24} style={{ backgroundColor: 'rgb(var(--primary-6))' }}>部</Avatar>
+                    <span>{item.title}</span>
+                  </div>
+                  <Button type="text" onClick={() => goToChild(item)}>下级</Button>
+                </div>
+              )
+            )}
+          </div>
+        </div>
+
+        {/* 右侧 */}
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          flex: 0.9,
+        }}>
+          <div style={{ width: '300px', paddingLeft: '16px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+              <span>已选择: {selectedMembers.length} 个</span>
+              <Button
+                type="text"
+                size="mini"
+                onClick={() => {
+                  setSelectedKeys([]);
+                  setSelectedMembers([]);
+                }}
+              >
+                清空
+              </Button>
+            </div>
+            <List
+              bordered={false}
+              dataSource={selectedMembers}
+              render={(item) => (
+                <List.Item
+                  key={item.key}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <Avatar size={24} style={{ backgroundColor: 'rgb(var(--primary-6))' }}>
+                        {item.name[0]}
+                      </Avatar>
+                      <span>{item.name}</span>
+                    </div>
+
+                    <Button
+                      type="text"
+                      icon={<IconDelete />}
+                      onClick={() => removeMember(item.key)}
+                    />
+                  </div>
+                </List.Item>
+              )}
+            />
+          </div>
+        </div>
+      </div>
     </Modal>
-  );
-};
-
-// 树形数据
-const treeData = [
-  {
-    key: '1',
-    title: '帮助中心测试',
-    icon: <IconBranch />,
-    children: [{ key: '2', title: '总裁办', icon: <IconBranch /> }]
-  },
-  {
-    key: '3',
-    title: '产品中心',
-    icon: <IconBranch />,
-    children: [
-      {
-        key: '4',
-        title: '产品1部',
-        icon: <IconBranch />,
-        children: [
-          { key: '5', title: '陈奕迅', icon: <IconUser /> },
-          { key: '6', title: '刘德华', icon: <IconUser /> },
-          { key: '7', title: '刘德华', icon: <IconUser /> },
-          { key: '8', title: '刘德华', icon: <IconUser /> },
-          { key: '9', title: '刘德华', icon: <IconUser /> },
-          { key: '10', title: '刘德华', icon: <IconUser /> },
-          { key: '11', title: '刘德华', icon: <IconUser /> },
-          { key: '12', title: '刘德华', icon: <IconUser /> },
-          { key: '13', title: '刘德华', icon: <IconUser /> },
-          { key: '14', title: '刘德华', icon: <IconUser /> },
-          { key: '15', title: '刘德华', icon: <IconUser /> },
-          { key: '16', title: '刘德华', icon: <IconUser /> },
-          { key: '17', title: '刘德华', icon: <IconUser /> },
-          { key: '18', title: '刘德华', icon: <IconUser /> }
-        ]
-      }
-    ]
-  },
-  { key: '19', title: '研发中心', icon: <IconBranch /> },
-  { key: '20', title: '销售部', icon: <IconBranch /> }
-];
-
-// key 到 title 的映射（右侧显示用）
-const keyTitleMap = {};
-// @ts-ignore
-function buildKeyTitleMap(nodes) {
-  // @ts-ignore
-  nodes.forEach((node) => {
-    // @ts-ignore
-    keyTitleMap[node.key] = node.title;
-    if (node.children) buildKeyTitleMap(node.children);
-  });
-}
-
-buildKeyTitleMap(treeData);
-
-const SelectContactModal = () => {
-  const [_activeTab, setActiveTab] = useState('0');
-  const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
-
-  // 树节点点击事件
-  // @ts-ignore
-  const handleTreeSelect = (selectedKeysArr, { selected, node }) => {
-    const key = node.key;
-    // 只有叶子节点才可添加 node.props.isLeaf
-    if (selected && !selectedKeys.includes(key)) {
-      setSelectedKeys([...selectedKeys, key]);
-    }
-  };
-
-  // 右侧移除
-  // @ts-ignore
-  const handleRemove = (key) => {
-    setSelectedKeys(selectedKeys.filter((k) => k !== key));
-  };
-
-  return (
-    <div style={{
-      height: 500,
-      border: '1px solid #e5e6eb',
-      borderRadius: 4,
-      boxSizing: 'border-box',
-      padding: 12,
-      display: 'flex',
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      position: 'relative',
-    }}>
-      <div style={{
-        flex: 1.1,
-        display: 'flex',
-        flexDirection: 'column',
-        marginRight: 24,
-      }}>
-        <Input placeholder="搜索用户、群组、部门或用户组" />
-
-        <Tree
-          treeData={treeData}
-          blockNode
-          selectable
-          selectedKeys={[]}
-          onSelect={handleTreeSelect}
-          icon={(node: any) => node.icon}
-          style={{
-            height: '100%',
-            overflowY: 'auto',
-            marginTop: 15,
-          }}
-        />
-      </div>
-
-      <div style={{
-        display: 'flex',
-        flexDirection: 'column',
-        flex: 0.9,
-      }}>
-        已选择：{selectedKeys.length}个<br />
-        <br />
-        <List
-          bordered={false}
-          dataSource={selectedKeys}
-          style={{}}
-          wrapperStyle={{
-            // height: '100%',
-            overflow: 'auto',
-            flex: 1
-          }}
-          render={(key) => (
-            <Space
-              key={key}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                marginBottom: 12,
-                paddingRight: 24
-              }}
-            >
-              {/* @ts-ignore */}
-              {keyTitleMap[key]}
-              <Button type="text" size="mini" shape="circle" icon={<IconClose />} onClick={() => handleRemove(key)} />
-            </Space>
-          )}
-        />
-      </div>
-    </div>
   );
 };
 

@@ -3,7 +3,7 @@ import { Button, Menu } from '@arco-design/web-react';
 import { IconPlus, IconUser, IconPlusCircle } from '@arco-design/web-react/icon';
 import Admin from '../Admin';
 import User from '../User';
-import AddMembers from '@/components/AddMembers';
+import { AddMembers } from '@onebase/common/src/components';
 import styles from './index.module.less';
 
 const MenuItem = Menu.Item;

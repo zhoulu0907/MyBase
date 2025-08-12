@@ -1,5 +1,5 @@
 import { Dropdown, Menu, type FormInstance } from '@arco-design/web-react';
-import { IconFolder, IconSettings } from '@arco-design/web-react/icon';
+import { IconSettings } from '@arco-design/web-react/icon';
 import { RootParentPage } from '@onebase/app';
 import React from 'react';
 import styles from './index.module.less';
@@ -17,7 +17,7 @@ interface MenuItemProps {
   menuID: string;
   menuName: string;
   label: string;
-  icon?: React.ReactNode;
+  menuIcon: string;
   isGroup: boolean;
   onClick: () => void;
   triggerRename: () => void;
@@ -33,7 +33,7 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
   menuID,
   menuName,
   label,
-  icon,
+  menuIcon,
   isGroup,
   onClick,
   triggerRename,
@@ -97,15 +97,13 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
 
   return (
     <div className={styles.myMenuItem} onClick={onClick} role="menuitem" tabIndex={0}>
-      {/* {icon && <span className="mr-2">{icon}</span>} */}
       <div
         className={styles.menuName}
         style={{
           maxWidth: maxWidth + 'px'
         }}
       >
-        {isGroup ? <IconFolder style={{ marginRight: '10px' }} /> : null}
-
+        <i className={`iconfont ${menuIcon}`} style={{ marginRight: '10px' }} />
         {label}
       </div>
       <div className={styles.dropdownContainer}>

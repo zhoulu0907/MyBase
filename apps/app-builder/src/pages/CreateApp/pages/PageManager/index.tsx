@@ -114,6 +114,7 @@ const PageManagerPage: FC = () => {
         <MyMenuItem
           menuID={menu.id}
           menuName={menu.menuName}
+          menuIcon={menu.menuIcon}
           isGroup={menu.menuType == MenuType.GROUP}
           maxWidth={maxWidth}
           label={menu.menuName}
@@ -199,7 +200,7 @@ const PageManagerPage: FC = () => {
       parentId: createForm.getFieldValue('parentId'),
       menuName: createForm.getFieldValue('menuName'),
       menuType: MenuType.PAGE,
-      menuIcon: 'tmp'
+      menuIcon: createForm.getFieldValue('menuIcon')
     };
 
     if (visibleCreateForm === 'page') {

@@ -1,229 +1,202 @@
-import { IconApps, IconArrowDown, IconArrowLeft, IconArrowRight, IconArrowUp, IconBug, IconCalendar, IconCheckCircle, IconClockCircle, IconCloseCircle, IconCompass, IconDelete, IconDownload, IconEdit, IconEmail, IconEye, IconFile, IconImage, IconInfoCircle, IconLaunch, IconLayout, IconList, IconLoading, IconLocation, IconMoon, IconNotification, IconPhone, IconPrinter, IconPushpin, IconRobot, IconStorage, IconSubscribeAdd, IconSubscribed, IconSun, IconTag, IconTrophy, IconUnlock, IconUser, IconWifi } from '@arco-design/web-react/icon';
-
 export interface MenuItem {
   name: string;
   type: string;
-  icon: React.ComponentType<{ className?: string }>; // 允许传递 className 属性
+  icon: string;
 }
 
 // 菜单图标类型
 export const menuIconType = [
   {
     name: '全部',
-    key: 'all',
+    key: 'all'
   },
   {
     name: '基础',
-    key: 'base',
+    key: 'base'
   },
   {
     name: '方向',
-    key: 'direct',
+    key: 'direct'
   },
   {
     name: '操作',
-    key: 'operate',
+    key: 'operate'
   },
   {
     name: '提示',
-    key: 'tips',
-  },
+    key: 'tips'
+  }
 ];
 
 export const menuIconList: MenuItem[] = [
   {
     name: '向下',
-    icon: IconArrowDown,
-    type: 'direct',
+    icon: 'icon-direction-down',
+    type: 'direct'
   },
   {
     name: '向左',
-    icon: IconArrowLeft,
-    type: 'direct',
+    icon: 'icon-direction-left',
+    type: 'direct'
   },
   {
     name: '向右',
-    icon: IconArrowRight,
-    type: 'direct',
+    icon: 'icon-direction-right',
+    type: 'direct'
   },
   {
     name: '向上',
-    icon: IconArrowUp,
-    type: 'direct',
+    icon: 'icon-direction-up',
+    type: 'direct'
   },
   {
-    name: '对号（圆形）',
-    icon: IconCheckCircle,
-    type: 'tips',
+    name: '铃铛',
+    icon: 'icon-tips',
+    type: 'tips'
   },
   {
-    name: '时间',
-    icon: IconClockCircle,
-    type: 'tips',
-  },
-  {
-    name: '关闭',
-    icon: IconCloseCircle,
-    type: 'tips',
-  },
-  {
-    name: '信息',
-    icon: IconInfoCircle,
-    type: 'tips',
-  },
-  {
-    name: '下载',
-    icon: IconDownload,
-    type: 'operate',
+    name: '播放',
+    icon: 'icon-play',
+    type: 'operate'
   },
   {
     name: '查看',
-    icon: IconEye,
-    type: 'operate',
+    icon: 'icon-see',
+    type: 'operate'
   },
   {
-    name: '目录',
-    icon: IconList,
-    type: 'operate',
+    name: '隐藏',
+    icon: 'icon-unsee',
+    type: 'operate'
   },
   {
-    name: '分享',
-    icon: IconLaunch,
-    type: 'operate',
+    name: '踩',
+    icon: 'icon-cai-l',
+    type: 'operate'
   },
   {
-    name: '编辑',
-    icon: IconEdit,
-    type: 'operate',
+    name: '收藏',
+    icon: 'icon-shoucang',
+    type: 'operate'
   },
   {
-    name: '删除',
-    icon: IconDelete,
-    type: 'operate',
+    name: '点赞',
+    icon: 'icon-zan',
+    type: 'operate'
   },
   {
-    name: '应用',
-    icon: IconApps,
-    type: 'base',
+    name: '回收站',
+    icon: 'icon-icon_huishouzhan',
+    type: 'operate'
   },
   {
-    name: '缺陷',
-    icon: IconBug,
-    type: 'base',
+    name: '更多',
+    icon: 'icon-More',
+    type: 'operate'
   },
   {
-    name: '日历',
-    icon: IconCalendar,
-    type: 'base',
+    name: '更多2',
+    icon: 'icon-more',
+    type: 'operate'
   },
   {
-    name: '指南针',
-    icon: IconCompass,
-    type: 'base',
+    name: '下载',
+    icon: 'icon-direction-down-circle',
+    type: 'operate'
+  },
+  {
+    name: '手机',
+    icon: 'icon-phone',
+    type: 'base'
+  },
+  {
+    name: '表情',
+    icon: 'icon-face',
+    type: 'base'
+  },
+  {
+    name: '用户',
+    icon: 'icon-user',
+    type: 'base'
+  },
+  {
+    name: '分类',
+    icon: 'icon-fen_lei2',
+    type: 'base'
   },
   {
     name: '邮箱',
-    icon: IconEmail,
-    type: 'base',
+    icon: 'icon-email',
+    type: 'base'
   },
   {
-    name: '文件',
-    icon: IconFile,
-    type: 'base',
+    name: '按钮区',
+    icon: 'icon-menu',
+    type: 'base'
   },
   {
-    name: '人员',
-    icon: IconUser,
-    type: 'base',
+    name: '设置',
+    icon: 'icon-setting',
+    type: 'base'
   },
   {
-    name: 'Wifi',
-    icon: IconWifi,
-    type: 'base',
+    name: '书',
+    icon: 'icon-book',
+    type: 'base'
   },
   {
-    name: '解锁',
-    icon: IconUnlock,
-    type: 'base',
+    name: '动态标签',
+    icon: 'icon-tagso',
+    type: 'base'
   },
   {
-    name: '奖杯',
-    icon: IconTrophy,
-    type: 'base',
+    name: '日历',
+    icon: 'icon-rili',
+    type: 'base'
   },
   {
     name: '标签',
-    icon: IconTag,
-    type: 'base',
+    icon: 'icon-tag',
+    type: 'base'
   },
   {
-    name: '太阳',
-    icon: IconSun,
-    type: 'base',
+    name: '对话',
+    icon: 'icon-message',
+    type: 'base'
   },
   {
-    name: '订阅',
-    icon: IconSubscribed,
-    type: 'base',
+    name: '摄影',
+    icon: 'icon-Movies',
+    type: 'base'
   },
   {
-    name: '添加订阅',
-    icon: IconSubscribeAdd,
-    type: 'base',
+    name: '话筒',
+    icon: 'icon-huatong',
+    type: 'base'
   },
   {
-    name: '存储',
-    icon: IconStorage,
-    type: 'base',
+    name: '监控1',
+    icon: 'icon-jiankong',
+    type: 'base'
   },
   {
-    name: '机器人',
-    icon: IconRobot,
-    type: 'base',
+    name: '列表',
+    icon: 'icon-list',
+    type: 'base'
   },
   {
-    name: '图钉',
-    icon: IconPushpin,
-    type: 'base',
+    name: '链接',
+    icon: 'icon-URLguanli',
+    type: 'base'
   },
   {
     name: '打印机',
-    icon: IconPrinter,
-    type: 'base',
+    icon: 'icon-dayinji',
+    type: 'base'
   },
   {
-    name: '电话',
-    icon: IconPhone,
-    type: 'base',
-  },
-  {
-    name: '月亮',
-    icon: IconMoon,
-    type: 'base',
-  },
-  {
-    name: '通知',
-    icon: IconNotification,
-    type: 'base',
-  },
-  {
-    name: '位置',
-    icon: IconLocation,
-    type: 'base',
-  },
-  {
-    name: '加载中',
-    icon: IconLoading,
-    type: 'base',
-  },
-  {
-    name: '布局',
-    icon: IconLayout,
-    type: 'base',
-  },
-  {
-    name: '图片',
-    icon: IconImage,
-    type: 'base',
-  },
+    name: '监控2',
+    icon: 'icon-mti-jiankong',
+    type: 'base'
+  }
 ];
