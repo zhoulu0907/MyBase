@@ -17,7 +17,7 @@ import com.cmsr.onebase.module.app.dal.dataobject.menu.MenuDO;
 import com.cmsr.onebase.module.app.dal.dataobject.version.VersionDO;
 import com.cmsr.onebase.module.app.dal.dataobject.version.VersionResourceDO;
 import com.cmsr.onebase.module.app.enums.app.AppErrorCodeConstants;
-import com.cmsr.onebase.module.app.enums.protocol.ProtocolType;
+import com.cmsr.onebase.module.app.enums.version.ResTypeEnum;
 import com.cmsr.onebase.module.app.service.AppCommonService;
 import com.cmsr.onebase.module.app.service.app.AppApplicationService;
 import com.cmsr.onebase.module.app.util.VersionUtils;
@@ -87,17 +87,9 @@ public class AppVersionServiceImpl implements AppVersionService {
         versionDO.setOperationType(createReqVO.getOperationType());
         versionDO.setEnvironment(createReqVO.getEnvironment());
         versionRepository.insert(versionDO);
-
-        if (Objects.equals(versionDO.getOperationType(), VersionUtils.OPERATION_TYPE_PUBLISH)) {
-            // 更新版本到主表
-            appApplicationService.updateApplicationVersion(applicationDO.getId(),
-                    versionDO.getVersionNumber(),
-                    versionDO.getVersionURL()
-            );
-        }
         // 备份 Menu
         backupMenu(applicationDO.getId(), versionDO.getId());
-        // 备份 component
+        // 备份 pageset
 
 
     }
@@ -107,7 +99,7 @@ public class AppVersionServiceImpl implements AppVersionService {
         VersionResourceDO versionResourceDO = new VersionResourceDO();
         versionResourceDO.setApplicationId(applicationId);
         versionResourceDO.setVersionId(versionId);
-        versionResourceDO.setProtocolType(ProtocolType.APP_MENU.getValue());
+        versionResourceDO.setResType(ResTypeEnum.MENU.getValue());
         versionResourceDO.setResData(JsonUtils.toJsonString(menuDOS));
         versionResourceRepository.insert(versionResourceDO);
     }
@@ -132,7 +124,7 @@ public class AppVersionServiceImpl implements AppVersionService {
         menuRepository.deleteByApplicationId(applicationId);
         // 恢复菜单
         VersionResourceDO resourceDOS = versionResourceRepository
-                .findByApplicationIdAndVersionIdAndProtocolType(applicationId, versionId, ProtocolType.APP_MENU.getValue());
+                .findByApplicationIdAndVersionIdAndResType(applicationId, versionId, ResTypeEnum.MENU.getValue());
         List<MenuDO> menuDOS = JsonUtils.parseArray(resourceDOS.getResData(), MenuDO.class);
         prepareForBackup(menuDOS);
         menuRepository.insertBatch(menuDOS);

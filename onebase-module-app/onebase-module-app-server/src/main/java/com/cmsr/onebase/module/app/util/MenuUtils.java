@@ -8,6 +8,8 @@ import java.util.UUID;
  */
 public class MenuUtils {
 
+    public static final String ROOT_MENU_CODE = "NAV-ROOT";
+
     public static final Integer MENU_SORT_MAX_VALUE = 9999;
 
     public static String generateMenuCode() {
