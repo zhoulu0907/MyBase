@@ -53,6 +53,7 @@ public class PageSetServiceImpl implements PageSetService {
     @Resource
     private AppMenuRepository appMenuRepository;
 
+    @Resource
     private AppApplicationRepository appApplicationRepository;
 
     @Override
