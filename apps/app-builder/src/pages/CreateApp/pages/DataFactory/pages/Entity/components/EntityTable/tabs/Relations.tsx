@@ -4,6 +4,7 @@ import { Button, Message, Space, Table, Tag } from '@arco-design/web-react';
 import { getEntityRelations } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
 import CreateRelationModal from '../../Modals/CreateRelationModal';
+import EditRelationDrawer from '../../Drawers/EditRelationDrawer';
 import styles from './tabs.module.less';
 
 interface RelationsProps {
@@ -13,16 +14,22 @@ interface RelationsProps {
 
 interface RelationData {
   id: string;
-  sourceEntity: string;
-  sourceField: string;
-  targetEntity: string;
-  targetField: string;
-  relationType: string;
+  sourceEntityName: string;
+  sourceEntityId: string;
+  sourceFieldName: string;
+  sourceFieldId: string;
+  targetEntityName: string;
+  targetEntityId: string;
+  targetFieldName: string;
+  targetFieldId: string;
+  relationshipType: string;
 }
 
 const Relations: React.FC<RelationsProps> = ({ entity, activeTab }) => {
   const [relations, setRelations] = useState<RelationData[]>([]);
   const [createRelationModalVisible, setCreateRelationModalVisible] = useState(false);
+  const [editRelationDrawerVisible, setEditRelationDrawerVisible] = useState(false);
+  const [selectedRelation, setSelectedRelation] = useState<RelationData | null>(null);
   const [updateRelationOptions, setUpdateRelationOptions] = useState(false);
   const [page, setPage] = useState({ pageNo: 1, pageSize: 10 });
   const [total, setTotal] = useState(0);
@@ -33,6 +40,11 @@ const Relations: React.FC<RelationsProps> = ({ entity, activeTab }) => {
 
   const handleSuccessCallback = () => {
     getRelation();
+  };
+
+  const handleEditRelation = (record: RelationData) => {
+    setSelectedRelation(record);
+    setEditRelationDrawerVisible(true);
   };
 
   useEffect(() => {
@@ -77,9 +89,9 @@ const Relations: React.FC<RelationsProps> = ({ entity, activeTab }) => {
     {
       title: '操作',
       key: 'operation',
-      render: () => (
+      render: (_, record: RelationData) => (
         <Space>
-          <Button type="text" size="mini">
+          <Button type="text" size="mini" onClick={() => handleEditRelation(record)}>
             编辑
           </Button>
           <Button type="text" size="mini" status="danger">
@@ -141,6 +153,13 @@ const Relations: React.FC<RelationsProps> = ({ entity, activeTab }) => {
         successCallback={handleSuccessCallback}
         updateRelationOptions={updateRelationOptions}
         setUpdateRelationOptions={setUpdateRelationOptions}
+      />
+
+      <EditRelationDrawer
+        visible={editRelationDrawerVisible}
+        setVisible={setEditRelationDrawerVisible}
+        relationData={selectedRelation}
+        onSuccess={handleSuccessCallback}
       />
     </div>
   );

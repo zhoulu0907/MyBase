@@ -65,6 +65,7 @@ export interface EntityERProps {
   onNodeAddRule?: (id: string) => void;
   onFieldClick?: (id: string) => void;
   onlyUpdateNode?: boolean;
+  updateEntityPosition?: (data: EntityNode, x: number, y: number) => void;
 }
 
 // 实体列表

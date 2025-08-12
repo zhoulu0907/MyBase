@@ -24,6 +24,7 @@ const ERchart: React.FC<EntityERProps> = ({
   onNodeAddRelation,
   onNodeAddMasterDetail,
   onFieldClick,
+  updateEntityPosition,
   onlyUpdateNode
 }) => {
   const [selectedNode, setSelectedNode] = useState<EntityNode | null>(null);
@@ -126,14 +127,14 @@ const ERchart: React.FC<EntityERProps> = ({
       }
 
       // 事件监听
-      graphRef.current.on('node:click', ({ node }) => {
-        const nodeData = node.getData() as EntityERProps;
-        if (nodeData) {
-          setSelectedNode(nodeData.data as unknown as EntityNode);
-          console.log('node:click', nodeData);
-          onNodeEdit?.(nodeData.data as unknown as EntityNode);
-        }
-      });
+      // graphRef.current.on('node:click', ({ node }) => {
+      //   const nodeData = node.getData() as EntityERProps;
+      //   if (nodeData) {
+      //     setSelectedNode(nodeData.data as unknown as EntityNode);
+      //     console.log('node:click', nodeData);
+      //     onNodeEdit?.(nodeData.data as unknown as EntityNode);
+      //   }
+      // });
 
       graphRef.current.on('node:mouseenter', ({ node }) => {
         if (mode === 'edit') {
@@ -157,15 +158,11 @@ const ERchart: React.FC<EntityERProps> = ({
 
       graphRef.current.on('node:moved', ({ e, x, y, node, view }) => {
         console.log('node:moved', e, x, y, node, view);
-        const { nodes, edges } = JSON.parse(
-          localStorage.getItem('entityFormValues') || JSON.stringify({ nodes: [], edges: [] })
-        );
-        const nodeData = nodes.find((n: EntityNode) => n.entityId === node.id);
-        if (nodeData) {
-          nodeData.positionX = x;
-          nodeData.positionY = y;
-        }
-        localStorage.setItem('entityFormValues', JSON.stringify({ nodes, edges }));
+        updateEntityPosition?.(node.getData().data, x, y);
+      });
+
+      graphRef.current.on('edge:click', ({ e, x, y, edge, view }) => {
+        console.log('edge:click', e, x, y, edge, view);
       });
 
       isGraphInitialized.current = true; // 标记已初始化

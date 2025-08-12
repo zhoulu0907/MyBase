@@ -14,7 +14,7 @@ import CreateEntityModal from '../components/Modals/CreateEntityModal';
 // import CreateFieldModal from '../components/Modals/CreateFieldModal';
 import { resouceId } from '@/pages/CreateApp/pages/DataFactory/utils/const';
 import { IconPlus } from '@arco-design/web-react/icon';
-import { getEntityGraph, deleteEntity } from '@onebase/app';
+import { getEntityGraph, deleteEntity, updateEntity } from '@onebase/app';
 import {
   ConfigFieldModal,
   CreateRelationModal,
@@ -56,11 +56,11 @@ export const EntityERContainer: React.FC<{
       setData({
         nodes:
           res?.entities.map((item) => {
-            const pos = JSON.parse(item.displayConfig || '{}');
+            const pos = JSON.parse(item?.displayConfig || '{}');
             return {
               ...item,
-              x: pos.x || 0,
-              y: pos.y || 0
+              positionX: pos?.x || 0,
+              positionY: pos?.y || 0
             };
           }) || [],
         edges: res?.relationships.map((item) => {
@@ -76,21 +76,8 @@ export const EntityERContainer: React.FC<{
 
   const handleNodeEdit = (editData: Partial<EntityNode>) => {
     console.log('节点编辑:', editData);
-    // 这里可以更新节点数据
-    // const { nodes, edges } = JSON.parse(
-    //   localStorage.getItem('entityFormValues') || JSON.stringify({ nodes: [], edges: [] })
-    // );
-    // const newNodes = nodes.map((node: EntityNode) => {
-    //   if (node.entityId === editData.entityId) {
-    //     return editData;
-    //   }
-    //   return node;
-    // });
-    // localStorage.setItem('entityFormValues', JSON.stringify({ nodes: newNodes, edges: edges }));
     setEditDrawerVisible(true);
     setEditingNode(editData as unknown as EntityNode);
-    // setRefreshEntityList(!refreshEntityList);
-    // setOnlyUpdateNode(true);
   };
 
   const handleNodeAddField = (node: EntityNode) => {
@@ -123,6 +110,24 @@ export const EntityERContainer: React.FC<{
     setNodeId(id);
   };
 
+  const handleUpdateEntityPosition = async (data: EntityNode, x: number, y: number) => {
+    console.log('更新节点位置:', data, x, y);
+
+    const params = {
+      id: data.entityId,
+      displayName: data.entityName,
+      displayConfig: JSON.stringify({ x, y }),
+      code: data.code,
+      datasourceId: resouceId,
+      appId: '1'
+    };
+    const res = await updateEntity(params);
+    console.log('updateEntity', res);
+    if (res) {
+      console.log('实体位置成功');
+    }
+  };
+
   const confirmDelete = async () => {
     setDeleteLoading(true);
     const res = await deleteEntity(nodeId);
@@ -150,13 +155,7 @@ export const EntityERContainer: React.FC<{
 
   useEffect(() => {
     if (refreshEntityList) {
-      const { nodes, edges } = JSON.parse(
-        localStorage.getItem('entityFormValues') || JSON.stringify({ nodes: [], edges: [] })
-      );
-      setData({
-        nodes: nodes,
-        edges: edges
-      });
+      loadEntityList();
       setRefreshEntityList(false);
     }
   }, [refreshEntityList]);
@@ -185,6 +184,7 @@ export const EntityERContainer: React.FC<{
         onNodeDelete={handleNodeDelete}
         onFieldClick={handleFieldClick}
         onlyUpdateNode={onlyUpdateNode}
+        updateEntityPosition={handleUpdateEntityPosition}
       />
       <Button
         type="primary"

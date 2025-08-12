@@ -119,8 +119,19 @@ const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
     }
   };
 
+  const handleNodeClick = (e: React.MouseEvent) => {
+    console.log('handleNodeClick', e);
+    e.preventDefault();
+    e.stopPropagation();
+    const data = node.getData() as NodeData;
+    const onNodeEdit = data?.onNodeEdit;
+    if (onNodeEdit && nodeData) {
+      onNodeEdit(nodeData);
+    }
+  };
+
   return (
-    <div className={styles['node-content']}>
+    <div className={styles['node-content']} onClick={handleNodeClick}>
       {/* 节点头部 */}
       <div className={styles['node-header']}>
         <IconSync className={styles['refresh-icon']} onClick={handleRefresh} />

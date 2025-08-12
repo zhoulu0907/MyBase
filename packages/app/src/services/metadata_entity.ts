@@ -242,7 +242,7 @@ export const createRelation = (data: CreateRelationReqVO) => {
  * @returns 操作结果
  */
 export const updateRelation = (data: UpdateRelationReqVO) => {
-  return metadataService.post('/business-entity/relation/update', data);
+  return metadataService.post('/entity-relationship/update', data);
 };
 
 /**
