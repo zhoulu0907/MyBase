@@ -4,7 +4,7 @@ import { useI18n } from '@/hooks/useI18n';
 import { useAppStore } from '@/store';
 import { UserPermissionManager } from '@/utils/permission';
 import { Button, Dropdown, Layout, Menu, Tabs } from '@arco-design/web-react';
-import { IconMenu, IconUser } from '@arco-design/web-react/icon';
+import { IconMenu } from '@arco-design/web-react/icon';
 import { getApplication, type GetApplicationReq } from '@onebase/app';
 import { TokenManager } from '@onebase/common';
 import React, { useEffect, useState } from 'react';
@@ -34,6 +34,10 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     return 'page-manager';
   };
   const [activeTab, setActiveTab] = useState(() => getTabKeyFromPath(location.pathname));
+  const [appName, setAppName] = useState('未命名应用');
+  const [appIcon, setAppIcon] = useState('');
+  const [iconColor, setIconColor] = useState('');
+  const [appStatus, setAppStatus] = useState('');
 
   useEffect(() => {
     setActiveTab(getTabKeyFromPath(location.pathname));
@@ -54,6 +58,20 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     };
     const appResp = await getApplication(appReq);
     console.log(appResp);
+    if (appResp) {
+      if (appResp.icon) {
+        setAppIcon(appResp.icon);
+      }
+      if (appResp.iconColor) {
+        setIconColor(appResp.iconColor);
+      }
+      if (appResp.appName) {
+        setAppName(appResp.appName);
+      }
+      if (appResp.appStatusText) {
+        setAppStatus(appResp.appStatusText);
+      }
+    }
   };
 
   // 登出处理
@@ -101,10 +119,12 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
             className={styles.menuIcon}
           />
 
-          <Button iconOnly shape="square" icon={<IconUser />} style={{ backgroundColor: '#E0A951' }} />
-          <div className={styles.appName}>未命名应用</div>
+          <div className={styles.myAppIcon} style={{ backgroundColor: iconColor }}>
+            <i className={`iconfont ${appIcon || 'icon-box'}`} />
+          </div>
+          <div className={styles.appName}>{appName}</div>
           <Button type="text" style={{ background: '#eaf0fd' }}>
-            {t('header.developing')}
+            {appStatus}
           </Button>
         </div>
 
