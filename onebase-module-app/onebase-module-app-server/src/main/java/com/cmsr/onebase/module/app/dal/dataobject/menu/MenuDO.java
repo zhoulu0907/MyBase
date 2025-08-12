@@ -16,8 +16,8 @@ public class MenuDO extends TenantBaseDO {
     @Column(name = "application_id", nullable = false, comment = "应用Id")
     private Long applicationId;
 
-    @Column(name = "parent_id", nullable = false, length = 64, comment = "父节点Id")
-    private Long parentId;
+    @Column(name = "parent_code", length = 64, comment = "父节点编码")
+    private String parentCode;
 
     @Column(name = "entity_id", nullable = false, length = 64, comment = "实体Id")
     private Long entityId;

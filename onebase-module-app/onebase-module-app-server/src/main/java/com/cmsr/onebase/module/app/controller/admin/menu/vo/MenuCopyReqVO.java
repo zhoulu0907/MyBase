@@ -20,6 +20,6 @@ public class MenuCopyReqVO {
     @NotNull(message = "菜单名称不能为空")
     private String menuName;
 
-    @Schema(description = "父菜单ID")
-    private Long parentId;
+    @Schema(description = "父菜单编码")
+    private String parentCode;
 }

@@ -18,8 +18,8 @@ public class MenuCreateRespVO {
     @Schema(description = "应用ID")
     private Long applicationId;
 
-    @Schema(description = "父菜单ID")
-    private Long parentId;
+    @Schema(description = "父菜单编码")
+    private String parentCode;
 
     @Schema(description = "实体ID")
     private Long entityId;

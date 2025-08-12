@@ -32,9 +32,9 @@ public class PageSetController {
 
     @GetMapping("/code")
     @Operation(summary = "获取页面集编码")
-    public CommonResult<String> getPageSetCode(@RequestParam Long menuId) {
+    public CommonResult<String> getPageSetCode(@RequestParam String menuCode) {
 
-        String pageSetCode = pageSetService.getPageSetCode(menuId);
+        String pageSetCode = pageSetService.getPageSetCode(menuCode);
 
         return CommonResult.success(pageSetCode);
     }
@@ -67,7 +67,7 @@ public class PageSetController {
     @PostMapping("/delete")
     @Operation(summary = "删除页面集")
     public CommonResult<Boolean> deletePageSet(@RequestBody DeletePageSetReqVO deletePageSetReqVO) {
-        pageSetService.deletePageSet(deletePageSetReqVO.getMenuId());
+        pageSetService.deletePageSet(deletePageSetReqVO.getMenuCode());
         return CommonResult.success(true);
     }
 
