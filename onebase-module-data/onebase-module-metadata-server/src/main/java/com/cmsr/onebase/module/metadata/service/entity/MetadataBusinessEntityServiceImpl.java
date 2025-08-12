@@ -36,7 +36,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.StringJoiner;
+import java.util.stream.Collectors;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.module.metadata.enums.ErrorCodeConstants.BUSINESS_ENTITY_NOT_EXISTS;
@@ -509,7 +511,8 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.and("datasource_id", datasourceId);
         configStore.order("create_time", Order.TYPE.DESC);
-        return metadataBusinessEntityRepository.findAllByConfig(configStore);
+        List<MetadataBusinessEntityDO> a = metadataBusinessEntityRepository.findAllByConfig(configStore);
+        return a;
     }
 
     @Override
@@ -538,8 +541,25 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
 
         // 5. 构建关联关系（基于外键关系）
         List<ERRelationshipVO> relationships = buildRelationships(entities);
+
         result.setRelationships(relationships);
 
+        //设主子关系
+        Set<String> sourceIds = relationships.stream()
+                .map(ERRelationshipVO::getSourceEntityId)
+                .collect(Collectors.toSet());
+        Set<String> targetIds = relationships.stream()
+                .map(ERRelationshipVO::getTargetEntityId)
+                .collect(Collectors.toSet());
+        
+        for (EREntityVO entity : erEntities) {      
+            if (sourceIds.contains(entity.getEntityId())) {
+                entity.setRelationType("PARENT");
+            }
+            if (targetIds.contains(entity.getEntityId())) {
+                entity.setRelationType("CHILD");
+            }
+        }
         return result;
     }
 

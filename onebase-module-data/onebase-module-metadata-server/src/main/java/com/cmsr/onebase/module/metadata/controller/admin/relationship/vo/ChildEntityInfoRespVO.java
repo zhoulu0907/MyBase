@@ -1,5 +1,7 @@
 package com.cmsr.onebase.module.metadata.controller.admin.relationship.vo;
 
+import java.util.List;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -36,4 +38,7 @@ public class ChildEntityInfoRespVO {
 
     @Schema(description = "目标字段名称", example = "user_id")
     private String targetFieldName;
+    
+    @Schema(description = "子表字段信息列表")
+    private List<EntityFieldInfoRespVO> childFields;
 }

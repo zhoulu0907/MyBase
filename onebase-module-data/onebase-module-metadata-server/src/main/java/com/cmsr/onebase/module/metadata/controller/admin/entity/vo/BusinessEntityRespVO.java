@@ -36,5 +36,8 @@ public class BusinessEntityRespVO {
 
     @Schema(description = "前端显示配置json", example = "{\"showFields\":[\"name\",\"code\"]}")
     private String displayConfig;
+    
+    @Schema(description = "关系类型", example = "主表:PARENT，子表:CHILD")
+    private String relationType;
 
 }

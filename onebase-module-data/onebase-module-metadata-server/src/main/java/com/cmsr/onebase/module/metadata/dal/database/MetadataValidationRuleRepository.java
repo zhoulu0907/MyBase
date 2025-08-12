@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.metadata.dal.database;
 
 import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
-import com.cmsr.onebase.module.metadata.dal.dataobject.validation.MetadataValidationRuleDO;
+import com.cmsr.onebase.module.metadata.dal.dataobject.validation.MetadataValidationRuleDefinitionDO;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.springframework.stereotype.Repository;
@@ -18,13 +18,13 @@ import java.util.List;
  */
 @Repository
 @Slf4j
-public class MetadataValidationRuleRepository extends DataRepositoryNew<MetadataValidationRuleDO> {
+public class MetadataValidationRuleRepository extends DataRepositoryNew<MetadataValidationRuleDefinitionDO> {
 
     /**
      * 构造方法，指定默认实体类
      */
     public MetadataValidationRuleRepository() {
-        super(MetadataValidationRuleDO.class);
+        super(MetadataValidationRuleDefinitionDO.class);
     }
 
     /**
@@ -33,7 +33,7 @@ public class MetadataValidationRuleRepository extends DataRepositoryNew<Metadata
      * @param fieldId 字段ID
      * @return 验证规则列表
      */
-    public List<MetadataValidationRuleDO> getValidationRulesByFieldId(Long fieldId) {
+    public List<MetadataValidationRuleDefinitionDO> getValidationRulesByFieldId(Long fieldId) {
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.and("field_id", fieldId);
         configStore.order("create_time", org.anyline.entity.Order.TYPE.DESC);
@@ -46,7 +46,7 @@ public class MetadataValidationRuleRepository extends DataRepositoryNew<Metadata
      * @param ruleType 规则类型
      * @return 验证规则列表
      */
-    public List<MetadataValidationRuleDO> getValidationRulesByType(String ruleType) {
+    public List<MetadataValidationRuleDefinitionDO> getValidationRulesByType(String ruleType) {
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.and("rule_type", ruleType);
         configStore.order("create_time", org.anyline.entity.Order.TYPE.DESC);
@@ -60,7 +60,7 @@ public class MetadataValidationRuleRepository extends DataRepositoryNew<Metadata
      * @param ruleType 规则类型
      * @return 验证规则对象
      */
-    public MetadataValidationRuleDO getValidationRuleByFieldAndType(Long fieldId, String ruleType) {
+    public MetadataValidationRuleDefinitionDO getValidationRuleByFieldAndType(Long fieldId, String ruleType) {
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.and("field_id", fieldId);
         configStore.and("rule_type", ruleType);
@@ -72,7 +72,7 @@ public class MetadataValidationRuleRepository extends DataRepositoryNew<Metadata
      *
      * @return 验证规则列表
      */
-    public List<MetadataValidationRuleDO> getAllValidationRules() {
+    public List<MetadataValidationRuleDefinitionDO> getAllValidationRules() {
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.order("create_time", org.anyline.entity.Order.TYPE.DESC);
         return findAllByConfig(configStore);
