@@ -1,4 +1,3 @@
-import AppIcon from '@/assets/images/app_icon.svg';
 import activeFormDesignSVG from '@/assets/images/form_design_active_icon.svg';
 import defaultFormDesignSVG from '@/assets/images/form_design_default_icon.svg';
 import activeListDesignSVG from '@/assets/images/list_design_active_icon.svg';
@@ -8,7 +7,7 @@ import { usePageEditorStore } from '@/hooks/useStore';
 import { useAppStore, useBasicEditorStore, useFromEditorStore, useListEditorStore } from '@/store';
 import { Button, Message, Tabs } from '@arco-design/web-react';
 import { IconArrowLeft } from '@arco-design/web-react/icon';
-import { getAppIdByPageSetCode } from '@onebase/app';
+import { getAppIdByPageSetCode, getApplication, type GetApplicationReq } from '@onebase/app';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { startLoadPageSet, startSavePageSet, type SavePageSetParams } from '../../utils/app_resource';
@@ -64,11 +63,16 @@ export default function EditorHeader() {
     clearPageComponentSchemas: clearListPageComponentSchemas
   } = useListEditorStore();
 
-  const { curAppId } = useAppStore();
+  const { curAppId, setCurAppId } = useAppStore();
 
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('');
   const [pageSetCode, setPageSetCode] = useState('');
+
+  const [appName, setAppName] = useState('未命名应用');
+  const [appIcon, setAppIcon] = useState('');
+  const [iconColor, setIconColor] = useState('');
+  const [appStatus, setAppStatus] = useState('');
 
   const {
     setComponents: setFromComponents,
@@ -112,6 +116,7 @@ export default function EditorHeader() {
     if (!isEditMode && pageSetCode != '') {
       loadPageSetInfo(pageSetCode);
       setIsEditMode(true);
+      handleGetAppInfo(pageSetCode);
     }
   }, [pageSetCode]);
 
@@ -125,6 +130,33 @@ export default function EditorHeader() {
       setFromColComponentsMap: setFromColComponentsMap,
       setListColComponentsMap: setListColComponentsMap
     });
+  };
+
+  const handleGetAppInfo = async (pgCode: string) => {
+    const appId = await getAppIdByPageSetCode({ code: pgCode });
+    setCurAppId(appId);
+
+    const appReq: GetApplicationReq = {
+      id: appId
+    };
+
+    const appResp = await getApplication(appReq);
+    console.log(appResp);
+    console.log(appResp);
+    if (appResp) {
+      if (appResp.icon) {
+        setAppIcon(appResp.icon);
+      }
+      if (appResp.iconColor) {
+        setIconColor(appResp.iconColor);
+      }
+      if (appResp.appName) {
+        setAppName(appResp.appName);
+      }
+      if (appResp.appStatusText) {
+        setAppStatus(appResp.appStatusText);
+      }
+    }
   };
 
   const handleSavePageSet = async () => {
@@ -174,11 +206,13 @@ export default function EditorHeader() {
       <div className={styles.left}>
         <Button shape="circle" type="default" size="small" onClick={backToPageManager} icon={<IconArrowLeft />} />
 
-        <img src={AppIcon} style={{ width: 28, height: 28 }} />
+        <div className={styles.myAppIcon} style={{ backgroundColor: iconColor }}>
+          <i className={`iconfont ${appIcon || 'icon-box'}`} />
+        </div>
 
-        <span>新应用</span>
+        <span>{appName}</span>
         <span>&gt;</span>
-        <span>页面一</span>
+        <span>{activeTab === EDITOR_TYPES.FORM_EDITOR ? '表单页' : '列表页'}</span>
       </div>
 
       {/* 中间 */}

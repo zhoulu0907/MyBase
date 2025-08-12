@@ -119,7 +119,6 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
             className={styles.menuIcon}
           />
 
-          {/* <Button iconOnly shape="square" icon={<IconUser />} style={{ backgroundColor: '#E0A951' }} /> */}
           <div className={styles.myAppIcon} style={{ backgroundColor: iconColor }}>
             <i className={`iconfont ${appIcon || 'icon-box'}`} />
           </div>
