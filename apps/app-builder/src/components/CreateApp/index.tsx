@@ -120,7 +120,7 @@ const BasicSetting = (props: IProps) => {
   };
 
   return (
-    <div className={styles.basicSetting}>
+    <div className={styles.createApp}>
       <div className={styles.preview} style={{ backgroundColor: previewBgColor }}>
         <div className={styles.row}>
           <div className={styles.title}>经典模式</div>
