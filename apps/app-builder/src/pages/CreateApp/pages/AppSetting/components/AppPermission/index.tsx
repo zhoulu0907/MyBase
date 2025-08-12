@@ -1,9 +1,9 @@
-import { useState, type FC } from 'react';
 import { Button, Menu } from '@arco-design/web-react';
-import { IconPlus, IconUser, IconPlusCircle } from '@arco-design/web-react/icon';
+import { IconPlus, IconPlusCircle, IconUser } from '@arco-design/web-react/icon';
+import { AddMembers } from '@onebase/common';
+import { useState, type FC } from 'react';
 import Admin from '../Admin';
 import User from '../User';
-import { AddMembers } from '@onebase/common/src/components';
 import styles from './index.module.less';
 
 const MenuItem = Menu.Item;
