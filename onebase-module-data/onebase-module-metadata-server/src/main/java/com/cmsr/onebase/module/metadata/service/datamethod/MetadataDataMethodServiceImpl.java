@@ -101,7 +101,7 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
             method.setUrl(methodDO.getMethodUrl());
             method.setHttpMethod(methodDO.getRequestMethod());
             method.setDescription(methodDO.getMethodDescription());
-
+            method.setId(methodDO.getId().toString());
             // 设置输入输出参数（这里可以根据需要进一步扩展）
             method.setInputParameters(new ArrayList<>());
             method.setOutputParameters(new DataMethodOutputParameterVO());

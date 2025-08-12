@@ -15,6 +15,9 @@ import java.util.List;
 @Data
 public class DataMethodRespVO {
 
+    @Schema(description = "方法id", example = "19000")
+    private String id;
+
     @Schema(description = "方法名称", example = "新增单条数据")
     private String methodName;
 
