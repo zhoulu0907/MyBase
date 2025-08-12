@@ -14,28 +14,28 @@ import lombok.Data;
 public class ERRelationshipVO {
 
     @Schema(description = "关联关系ID", example = "1024")
-    private Long relationshipId;
+    private String relationshipId;
 
     @Schema(description = "源实体ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "1001")
-    private Long sourceEntityId;
+    private String sourceEntityId;
 
     @Schema(description = "源实体名称", requiredMode = Schema.RequiredMode.REQUIRED, example = "用户表")
     private String sourceEntityName;
 
     @Schema(description = "源字段ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "2001")
-    private Long sourceFieldId;
+    private String sourceFieldId;
 
     @Schema(description = "源字段名称", requiredMode = Schema.RequiredMode.REQUIRED, example = "user_id")
     private String sourceFieldName;
 
     @Schema(description = "目标实体ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "1002")
-    private Long targetEntityId;
+    private String targetEntityId;
 
     @Schema(description = "目标实体名称", requiredMode = Schema.RequiredMode.REQUIRED, example = "角色表")
     private String targetEntityName;
 
     @Schema(description = "目标字段ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "2002")
-    private Long targetFieldId;
+    private String targetFieldId;
 
     @Schema(description = "目标字段名称", requiredMode = Schema.RequiredMode.REQUIRED, example = "role_id")
     private String targetFieldName;

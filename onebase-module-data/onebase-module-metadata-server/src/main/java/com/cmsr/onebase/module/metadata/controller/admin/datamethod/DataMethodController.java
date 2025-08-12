@@ -52,7 +52,7 @@ public class DataMethodController {
 
     @PostMapping("/insert")
     @Operation(summary = "新增单条数据")
-    @PreAuthorize("@ss.hasPermission('metadata:data:create')")
+    //@PreAuthorize("@ss.hasPermission('metadata:data:create')")
     public CommonResult<DynamicDataRespVO> createData(@Valid @RequestBody DynamicDataCreateReqVO reqVO) {
         DynamicDataRespVO result = dataMethodService.createData(reqVO);
         return success(result);
@@ -60,7 +60,7 @@ public class DataMethodController {
 
     @PostMapping("/update")
     @Operation(summary = "更新单条数据")
-    @PreAuthorize("@ss.hasPermission('metadata:data:update')")
+    //@PreAuthorize("@ss.hasPermission('metadata:data:update')")
     public CommonResult<DynamicDataRespVO> updateData(@Valid @RequestBody DynamicDataUpdateReqVO reqVO) {
         DynamicDataRespVO result = dataMethodService.updateData(reqVO);
         return success(result);
@@ -68,7 +68,7 @@ public class DataMethodController {
 
     @PostMapping("/delete")
     @Operation(summary = "删除单条数据")
-    @PreAuthorize("@ss.hasPermission('metadata:data:delete')")
+    //@PreAuthorize("@ss.hasPermission('metadata:data:delete')")
     public CommonResult<Boolean> deleteData(@Valid @RequestBody DynamicDataDeleteReqVO reqVO) {
         Boolean result = dataMethodService.deleteData(reqVO);
         return success(result);
@@ -76,7 +76,7 @@ public class DataMethodController {
 
     @PostMapping("/data")
     @Operation(summary = "根据ID查询数据详情")
-    @PreAuthorize("@ss.hasPermission('metadata:data:query')")
+    //@PreAuthorize("@ss.hasPermission('metadata:data:query')")
     public CommonResult<DynamicDataRespVO> getData(@Valid @RequestBody DynamicDataGetReqVO reqVO) {
         DynamicDataRespVO result = dataMethodService.getData(reqVO);
         return success(result);
@@ -84,7 +84,7 @@ public class DataMethodController {
 
     @PostMapping("/data/page")
     @Operation(summary = "分页查询数据列表")
-    @PreAuthorize("@ss.hasPermission('metadata:data:query')")
+    //@PreAuthorize("@ss.hasPermission('metadata:data:query')")
     public CommonResult<PageResult<DynamicDataRespVO>> getDataPage(@Valid @RequestBody DynamicDataPageReqVO reqVO) {
         PageResult<DynamicDataRespVO> result = dataMethodService.getDataPage(reqVO);
         return success(result);
