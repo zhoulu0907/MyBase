@@ -25,6 +25,7 @@ import com.cmsr.onebase.module.system.enums.sms.SmsSceneEnum;
 import com.cmsr.onebase.module.system.service.logger.LoginLogService;
 import com.cmsr.onebase.module.system.service.member.MemberService;
 import com.cmsr.onebase.module.system.service.oauth2.OAuth2TokenService;
+import com.cmsr.onebase.module.system.service.permission.PermissionService;
 import com.cmsr.onebase.module.system.service.social.SocialUserService;
 import com.cmsr.onebase.module.system.service.tenant.TenantService;
 import com.cmsr.onebase.module.system.service.user.AdminUserService;
@@ -74,7 +75,9 @@ public class AdminAuthServiceImpl implements AdminAuthService {
     @Setter // 为了单测：开启或者关闭验证码
     private Boolean       captchaEnable;
     @Resource
-    private TenantService tenantService;
+    private TenantService     tenantService;
+    @Resource
+    private PermissionService permissionService;
 
     @Override
     public AdminUserDO authenticate(String username, String password) {
@@ -95,6 +98,25 @@ public class AdminAuthServiceImpl implements AdminAuthService {
             throw exception(AUTH_LOGIN_USER_DISABLED);
         }
         return user;
+    }
+
+
+    @Override
+    public AuthLoginRespVO adminLogin(UserLoginReqVO reqVO) {
+        // 1. 校验验证码
+        validateCaptcha(reqVO);
+
+        // 2. 使用账号密码，进行登录
+        AdminUserDO user = authenticate(reqVO.getUsername(), reqVO.getPassword());
+
+        // 3. 校验是否是平台管理员
+        boolean isAdmin = permissionService.isPlatformSuperAdmin(user.getId());
+        if(!isAdmin){
+            throw exception(AUTH_LOGIN_USER_NOT_ADMIN_ERROR);
+        }
+
+        // 4. 创建 Token 令牌，记录登录日志
+        return createTokenAfterLoginSuccess(user.getId(), reqVO.getUsername(), LoginLogTypeEnum.LOGIN_USERNAME);
     }
 
     @Override
@@ -186,7 +208,7 @@ public class AdminAuthServiceImpl implements AdminAuthService {
     }
 
     @VisibleForTesting
-    void validateCaptcha(AuthLoginReqVO reqVO) {
+    void validateCaptcha(UserLoginReqVO reqVO) {
         ResponseModel response = doValidateCaptcha(reqVO);
         // 校验验证码
         if (!response.isSuccess()) {
