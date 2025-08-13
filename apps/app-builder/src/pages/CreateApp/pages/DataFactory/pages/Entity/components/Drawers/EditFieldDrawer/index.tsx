@@ -14,7 +14,7 @@ interface FieldDetail {
   isUnique: boolean;
   allowNull: boolean;
   constraints: string;
-  isSystemField: boolean;
+  isSystemField: number;
   entityId: string;
   entityName: string;
   appId: string;
@@ -158,7 +158,7 @@ const EditFieldDrawer: React.FC<EditFieldDrawerProps> = ({ visible, setVisible, 
               field="fieldCode"
               rules={[{ required: true, message: '请输入字段编码' }, { validator: validateFieldCode }]}
             >
-              <Input placeholder="请输入字段编码" disabled={fieldDetail.isSystemField} readOnly />
+              <Input placeholder="请输入字段编码" disabled={fieldDetail.isSystemField === 0} readOnly />
             </Form.Item>
 
             <Form.Item
@@ -174,7 +174,11 @@ const EditFieldDrawer: React.FC<EditFieldDrawerProps> = ({ visible, setVisible, 
             </Form.Item>
 
             <Form.Item label="数据类型" field="fieldType" rules={[{ required: true, message: '请选择数据类型' }]}>
-              <Select placeholder="请选择数据类型" options={fieldTypeOptions} disabled={fieldDetail.isSystemField} />
+              <Select
+                placeholder="请选择数据类型"
+                options={fieldTypeOptions}
+                disabled={fieldDetail.isSystemField === 0}
+              />
             </Form.Item>
           </div>
 
@@ -205,7 +209,9 @@ const EditFieldDrawer: React.FC<EditFieldDrawerProps> = ({ visible, setVisible, 
 
             <div className={styles['info-item']}>
               <span className={styles['info-label']}>字段类型：</span>
-              <span className={styles['info-value']}>{fieldDetail.isSystemField ? '系统字段' : '自定义字段'}</span>
+              <span className={styles['info-value']}>
+                {fieldDetail.isSystemField === 0 ? '系统字段' : '自定义字段'}
+              </span>
             </div>
 
             <div className={styles['info-item']}>

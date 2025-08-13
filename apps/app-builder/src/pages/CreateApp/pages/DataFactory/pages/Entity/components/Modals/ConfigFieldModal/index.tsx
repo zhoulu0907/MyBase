@@ -28,7 +28,7 @@ interface FieldFormValues {
   isUnique: boolean;
   allowNull: boolean;
   constraints: string;
-  isSystemField: boolean;
+  isSystemField: number;
   sortOrder?: number;
   isDeleted?: boolean;
 }
@@ -83,7 +83,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
       isUnique: false,
       allowNull: true,
       constraints: '',
-      isSystemField: false,
+      isSystemField: 1,
       sortOrder: fields.length
     };
     setFields([...fields, newField]);
@@ -91,7 +91,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
 
   const deleteField = (index: number) => {
     const field = fields[index];
-    if (field.isSystemField) {
+    if (field.isSystemField === 0) {
       Message.error('系统字段不能删除');
       return;
     }
@@ -127,7 +127,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
       setLoading(true);
 
       // 过滤自定义字段（排除系统字段和已删除字段）
-      const customFields = fields.filter((field) => !field.isSystemField && !field.isDeleted);
+      const customFields = fields.filter((field) => field.isSystemField === 1 && !field.isDeleted);
 
       // 表单校验
       for (const field of customFields) {
@@ -146,7 +146,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
       }
 
       // 准备所有字段数据（包括标记为删除的）
-      const allFields = fields.filter((field) => !field.isSystemField);
+      const allFields = fields.filter((field) => field.isSystemField === 1);
       const fieldDataList = allFields.map((field) => {
         const fieldData = {
           appId: '1',
@@ -155,7 +155,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
           fieldName: field.fieldName,
           description: field.description,
           fieldType: field.fieldType,
-          isSystemField: false,
+          isSystemField: 1,
           displayName: entity.entityName,
           isDeleted: field.isDeleted || false
         };
@@ -218,14 +218,14 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
       dataIndex: 'sortOrder',
       width: 60,
       render: (value: number, record: FieldFormValues) =>
-        !record.isSystemField && value ? <IconDragDotVertical className={styles['drag-handle']} /> : null
+        record.isSystemField === 1 && value ? <IconDragDotVertical className={styles['drag-handle']} /> : null
     },
     {
       title: '字段编码',
       dataIndex: 'fieldCode',
       width: 120,
       render: (value: string, record: FieldFormValues) =>
-        record.isSystemField ? (
+        record.isSystemField === 0 ? (
           <span className={styles['system-field']}>{value}</span>
         ) : (
           <Input
@@ -240,7 +240,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
       dataIndex: 'fieldName',
       width: 120,
       render: (value: string, record: FieldFormValues) =>
-        record.isSystemField ? (
+        record.isSystemField === 0 ? (
           <span className={styles['system-field']}>{value}</span>
         ) : (
           <Input
@@ -260,10 +260,10 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
             value={value}
             options={fieldTypeOptions}
             onChange={(val) => updateField(getFieldIndex(record.id), { fieldType: val })}
-            disabled={record.isSystemField}
+            disabled={record.isSystemField === 0}
             style={{ width: 100 }}
           />
-          {!record.isSystemField && FIELD_TYPES_NEED_CONFIG.includes(value) && (
+          {record.isSystemField === 1 && FIELD_TYPES_NEED_CONFIG.includes(value) && (
             <Popover
               content={renderFieldConfig(value)}
               trigger="click"
@@ -289,7 +289,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
       width: 250,
       ellipsis: true,
       render: (value: string, record: FieldFormValues) =>
-        record.isSystemField ? (
+        record.isSystemField === 0 ? (
           <span className={styles['system-field']}>{value}</span>
         ) : (
           <Input
@@ -304,14 +304,16 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
       dataIndex: 'isSystemField',
       width: 110,
       ellipsis: true,
-      render: (value: boolean) => <span className={styles['system-field']}>{value ? '系统字段' : '自定义字段'}</span>
+      render: (value: number) => (
+        <span className={styles['system-field']}>{value === 0 ? '系统字段' : '自定义字段'}</span>
+      )
     },
     {
       title: '默认值',
       dataIndex: 'defaultValue',
       width: 120,
       render: (value: string, record: FieldFormValues) =>
-        record.isSystemField ? (
+        record.isSystemField === 0 ? (
           <span className={styles['system-field']}>-</span>
         ) : (
           <Input
@@ -326,7 +328,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
       dataIndex: 'isUnique',
       width: 60,
       render: (value: boolean, record: FieldFormValues) =>
-        record.isSystemField ? (
+        record.isSystemField === 0 ? (
           <span className={styles['system-field']}>-</span>
         ) : (
           <Checkbox
@@ -340,7 +342,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
       dataIndex: 'allowNull',
       width: 100,
       render: (value: boolean, record: FieldFormValues) =>
-        record.isSystemField ? (
+        record.isSystemField === 0 ? (
           <span className={styles['system-field']}>-</span>
         ) : (
           <Checkbox
@@ -354,7 +356,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
       dataIndex: 'constraints',
       // width: 120,
       render: (value: string, record: FieldFormValues) =>
-        record.isSystemField ? (
+        record.isSystemField === 0 ? (
           <span className={styles['system-field']}>{value || '-'}</span>
         ) : (
           <Input
@@ -371,7 +373,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
       render: (value: unknown, record: FieldFormValues) => {
         const fieldIndex = fields.findIndex((f) => f.id === record.id);
         return (
-          !record.isSystemField && (
+          record.isSystemField === 1 && (
             <Button type="text" status="danger" size="mini" onClick={() => deleteField(fieldIndex)}>
               删除
             </Button>
@@ -406,7 +408,9 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
             columns={columns}
             pagination={false}
             className={styles['field-table']}
-            rowClassName={(record) => (record.isSystemField ? styles['system-field-row'] : styles['custom-field-row'])}
+            rowClassName={(record) =>
+              record.isSystemField === 0 ? styles['system-field-row'] : styles['custom-field-row']
+            }
           />
         </ReactSortable>
 

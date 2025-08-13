@@ -199,7 +199,7 @@ const ERchart: React.FC<EntityERProps> = ({
         const portsItems = (nodeData: EntityNode) => {
           const items: object[] = [];
           nodeData?.fields?.forEach((field, index) => {
-            const extraTitleHeight = field.isSystemField ? LINE_TITLE_HEIGHT : LINE_TITLE_HEIGHT * 2;
+            const extraTitleHeight = field.isSystemField === 0 ? LINE_TITLE_HEIGHT : LINE_TITLE_HEIGHT * 2;
             const accumulatedHeight = index >= 1 ? index * LINE_HEIGHT : 0;
 
             const leftItem = {
