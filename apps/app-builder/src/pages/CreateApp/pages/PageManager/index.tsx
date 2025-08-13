@@ -1,5 +1,6 @@
 import CreateGroupIcon from '@/assets/images/addfolder.svg';
 import CreatePageIcon from '@/assets/images/addpage.svg';
+import PageManagerGuide from '@/assets/images/page_manaager_guide.svg';
 import { useI18n } from '@/hooks/useI18n';
 import { EDITOR_TYPES } from '@/pages/Editor/utils/const';
 import PreviewContainer from '@/pages/Runtime/components/preview';
@@ -77,6 +78,7 @@ const PageManagerPage: FC = () => {
   const [visibleCopyForm, setVisibleCopyForm] = useState(false);
 
   const [title, setTitle] = useState('');
+  const [showGuide, setShowGuide] = useState<boolean>(false);
   const pageTypeOptions = [{ label: '普通表单', value: PageType.NORMAL }];
 
   const [treeData, setTreeData] = useState<TreeNode[]>([]);
@@ -93,7 +95,10 @@ const PageManagerPage: FC = () => {
 
   useEffect(() => {
     if (curAppId !== '') {
-      getMenuList();
+      getMenuList().then((res) => {
+        const firstPageMenu = res.find((menu: ApplicationMenu) => menu.menuType == MenuType.PAGE);
+        setCurMenu(firstPageMenu);
+      });
     }
     clearIsEditMode();
   }, [curAppId]);
@@ -146,6 +151,9 @@ const PageManagerPage: FC = () => {
     if (res && res.length > 0) {
       setCurMenu(res[0]);
     }
+
+    setShowGuide(res.length === 0);
+    return res;
   };
 
   const getEntityList = async () => {
@@ -217,7 +225,7 @@ const PageManagerPage: FC = () => {
         menuName: createForm.getFieldValue('menuName'),
         menuType: MenuType.PAGE,
         menuIcon: createForm.getFieldValue('menuIcon'),
-        entityCode: createForm.getFieldValue('entityCode')
+        entityCode: visibleCreateForm === 'page' ? createForm.getFieldValue('entityCode') : ''
       };
 
       if (visibleCreateForm === 'page') {
@@ -322,6 +330,19 @@ const PageManagerPage: FC = () => {
 
   return (
     <div className={styles.pageManagerPage}>
+      {showGuide && (
+        <div className={styles.guide}>
+          <div className={styles.guideImg} style={{ background: `url(${PageManagerGuide})no-repeat center / cover` }}>
+            <div
+              className={styles.guideButton}
+              onClick={() => {
+                setVisibleCreateForm('page');
+                setShowGuide(false);
+              }}
+            />
+          </div>
+        </div>
+      )}
       <Layout style={{ height: '100%' }}>
         <Layout>
           {/* <Sider style={{ width: 225 }}> */}
