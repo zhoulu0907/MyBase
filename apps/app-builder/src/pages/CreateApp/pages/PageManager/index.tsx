@@ -3,6 +3,7 @@ import CreatePageIcon from '@/assets/images/addpage.svg';
 import { useI18n } from '@/hooks/useI18n';
 import { EDITOR_TYPES } from '@/pages/Editor/utils/const';
 import { useAppStore, useBasicEditorStore } from '@/store';
+import { addParentCodeToChildren } from '@/utils/menu';
 import { Button, Dropdown, Form, Input, Layout, Menu, Message, Tree } from '@arco-design/web-react';
 import { IconPlus, IconSearch } from '@arco-design/web-react/icon';
 import {
@@ -31,7 +32,6 @@ import CopyModal from './components/Modals/CopyModal';
 import CreateModal from './components/Modals/CreateModal';
 import RenameModal from './components/Modals/RenameModal';
 import MyMenuItem from './components/MyMenuItem';
-import PageManagerPreview from './components/Preview';
 import styles from './index.module.less';
 
 const TreeNode = Tree.Node;
@@ -97,23 +97,6 @@ const PageManagerPage: FC = () => {
     clearIsEditMode();
   }, [curAppId]);
 
-  /**
-   * 递归为菜单项补充parentCode字段
-   * @param menuItems 菜单项数组
-   * @param parentCode 父级Code
-   * @returns 处理后的菜单项数组
-   */
-  const addParentCodeToChildren = (menuItems: ApplicationMenu[], parentCode?: string): ApplicationMenu[] => {
-    // 只保留 menuType 为 2（分组）的菜单项用于生成父级页面选择下拉框
-    return menuItems
-      .filter((menu) => menu.menuType == MenuType.GROUP)
-      .map((menu) => ({
-        ...menu,
-        parentCode: parentCode,
-        children: menu.children ? addParentCodeToChildren(menu.children, menu.menuCode) : []
-      }));
-  };
-
   // 将接口返回的菜单数据（res）转换为 Tree 组件可用的 treeData 格式
   const convertMenuToTreeData = (menus: ApplicationMenu[], maxWidth: number, showOption: boolean = false): any[] => {
     return menus.map((menu) => ({
@@ -161,8 +144,11 @@ const PageManagerPage: FC = () => {
   };
 
   const getEntityList = async () => {
+    // TODO(mickey): 等xiaoyi完成后 写活
     const appId: string = '1';
+    // const appId: string = curAppId;
     const res: MetadataEntityPair[] = await getEntityListByApp(appId);
+    console.log(res);
     const entityOptions = res.map((entity) => ({
       label: entity.entityName,
       value: entity.entityId
@@ -379,7 +365,8 @@ const PageManagerPage: FC = () => {
               </div>
             )}
             <div className={styles.contentBody}>
-              <PageManagerPreview menuCode={curMenu?.menuCode || ''} />
+              {/* TODO */}
+              {/* <PageManagerPreview menuCode={curMenu?.menuCode || ''} /> */}
             </div>
           </Content>
         </Layout>

@@ -1,5 +1,4 @@
 import AvatarSVG from '@/assets/images/avatar.svg';
-import helpSVG from '@/assets/images/help_icon.svg';
 import { useI18n } from '@/hooks/useI18n';
 import { useAppStore } from '@/store';
 import { UserPermissionManager } from '@/utils/permission';
@@ -105,6 +104,15 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     </Menu>
   );
 
+  const toRuntime = () => {
+    const newWindow = window.open('', '_blank');
+    if (newWindow) {
+      const baseUrl = window.location.href.replace(/create-app.*$/, '');
+      const href = `${baseUrl}runtime?appId=${curAppId}`;
+      newWindow.location.href = href;
+    }
+  };
+
   return (
     <Header className={`${styles.header} ${className || ''}`}>
       <div className={styles.headerContent}>
@@ -163,14 +171,9 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
         </Tabs>
 
         <div className={styles.userInfo}>
-          <Button
-            type="text"
-            shape="circle"
-            icon={<img src={helpSVG} alt="Help" style={{ width: 30 }} />}
-            // onClick={() => navigate('/onebase/setting')}
-          />
-
-          <Button type="outline" /* onClick={() => navigate('/onebase/setting')} */>{t('createApp.preview')}</Button>
+          <Button type="outline" onClick={toRuntime}>
+            运行
+          </Button>
 
           {UserPermissionManager.getUserPermissionInfo()?.user?.nickname || '未登录'}
 

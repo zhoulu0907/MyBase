@@ -124,8 +124,6 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({}) => {
               console.log('cpType', cpType);
               e.item.id = `${cpType}-${Date.now()}`;
 
-              console.log(fieldItems);
-
               const newFieldItems = fieldItems.map((c, idx) => ({
                 ...c,
                 id: `${c.type}-${idx}-${Date.now()}`
