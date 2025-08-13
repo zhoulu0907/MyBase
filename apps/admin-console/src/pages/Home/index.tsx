@@ -13,7 +13,7 @@ import styles from './index.module.less';
 const Content = Layout.Content;
 
 const Home: React.FC = () => {
-  const [collapsed, setCollapsed] = useState(true);
+  const [collapsed, setCollapsed] = useState(false);
 
   const handleCollapse = (collapsed: boolean) => {
     setCollapsed(collapsed);
