@@ -13,6 +13,8 @@ public interface PageSetService {
 
     Long getAppId(String code);
 
+    String getMainMetadata(String code);
+
     String createPageSet(CreatePageSetDTO createPageSetDTO);
 
     void deletePageSet(String menuCode);

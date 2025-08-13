@@ -72,6 +72,12 @@ public class PageSetServiceImpl implements PageSetService {
     }
 
     @Override
+    public String getMainMetadata(String code) {
+        PageSetDO pageSetDO = pageSetDataRepository.findPageSetByPageSetCode(code);
+        return pageSetDO.getMainMetadata();
+    }
+
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public String createPageSet(CreatePageSetDTO createPageSetDTO) {
         PageSetDO pageSetDO = BeanUtils.toBean(createPageSetDTO, PageSetDO.class);

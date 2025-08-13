@@ -32,6 +32,11 @@ public interface PageSetApi {
     @Parameter(name = "code", description = "code", example = "xxx", required = true)
     CommonResult<Long> getAppId(@RequestParam("code") String code);
 
+    @GetMapping(PREFIX + "/get-main_metadata")
+    @Operation(summary = "通过 pageSetCode 查询 main_metadata ")
+    @Parameter(name = "code", description = "code", example = "xxx", required = true)
+    CommonResult<String> getMainMetadata(@RequestParam("code") String code);
+
     @PostMapping(PREFIX + "/create")
     @Operation(summary = "创建pageSet")
     CommonResult<String> createPageSet(@RequestBody CreatePageSetDTO createPageSetDTO);
