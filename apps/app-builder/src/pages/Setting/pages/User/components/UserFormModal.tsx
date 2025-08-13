@@ -3,6 +3,8 @@ import { Button, Form, Grid, Input, Message, Modal, Select, Switch, TreeSelect }
 import type { SimpleRoleVO, UserVO } from '@onebase/platform-center';
 import { createUser, getSimpleRoleList, getUser, StatusEnum, updateUser } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
+import { hasPermission } from '@/utils/permission';
+import { TENANT_ROLE_QUERY, TENANT_DEPT_QUERY } from '@/constants/permission';
 
 const Row = Grid.Row;
 const Col = Grid.Col;
@@ -32,6 +34,8 @@ export default function UserFormModal({
   const [loading, setLoading] = React.useState(false);
   const [roleList, setRoleList] = useState<SimpleRoleVO[]>([]);
   const [statusCheckedValue, setStatusCheckedValue] = useState(false);
+  const [hasRoleQueryPermission, setHasRoleQueryPermission] = useState(true);
+  const [hasDeptQueryPermission, setHasDeptQueryPermission] = useState(true);
 
   useEffect(() => {
     if (visible) {
@@ -51,10 +55,19 @@ export default function UserFormModal({
     if (!visible) {
       return;
     }
-
-    getSimpleRoleList().then((res) => {
-      setRoleList(res);
-    });
+    
+    // 检查是否有角色/部门查询权限
+    const rolePermission = hasPermission(TENANT_ROLE_QUERY);
+    setHasRoleQueryPermission(rolePermission);
+    const deptPermission = hasPermission(TENANT_DEPT_QUERY);
+    setHasDeptQueryPermission(deptPermission);
+    
+    // 只有在有权限的情况下才调用角色查询接口
+    if (rolePermission) {
+      getSimpleRoleList().then((res) => {
+        setRoleList(res);
+      });
+    }
 
     // 在编辑模式下获取用户信息并设置角色ID为初始值
     if (mode === 'edit' && initialValues?.id) {
@@ -145,26 +158,31 @@ export default function UserFormModal({
         </Row>
         <Row gutter={24}>
           <Col span={12}>
-            <Form.Item label="邮箱（选填）" field="email" rules={[{ validator: emailValidator }]}>
+            <Form.Item label="邮箱" field="email" rules={[{ validator: emailValidator }]}>
               <Input placeholder="请输入" />
             </Form.Item>
           </Col>
           <Col span={12}>
-            <Form.Item label="部门（选填）" field="deptId">
+            <Form.Item label="部门" field="deptId">
               <TreeSelect
-                placeholder="请选择"
+                placeholder={hasDeptQueryPermission ? "请选择" : "无权限"}
                 allowClear
                 treeData={deptTree}
                 loading={deptLoading}
-                disabled={deptLoading || isDetail}
+                disabled={deptLoading || isDetail || !hasDeptQueryPermission}
               />
             </Form.Item>
           </Col>
         </Row>
         <Row gutter={24}>
           <Col span={12}>
-            <Form.Item label="角色（选填）" field="roleIds">
-              <Select placeholder="请选择" mode="multiple" allowClear>
+            <Form.Item label="角色" field="roleIds">
+              <Select 
+                placeholder={hasRoleQueryPermission ? "请选择" : "无权限"} 
+                mode="multiple" 
+                allowClear
+                disabled={!hasRoleQueryPermission}
+              >
                 {roleList.map((role) => (
                   <Select.Option key={role.id} value={role.id}>
                     {role.name}

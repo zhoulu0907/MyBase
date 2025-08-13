@@ -76,10 +76,10 @@ export class UserPermissionManager {
    */
   static hasMenu(menu: string): boolean {
     // TODO: 目前只解析到第二层
-    const [moduleCode, menuCode] = menu?.split(':');
+    const [moduleCode] = menu?.split(':');
     const userPermissionInfo = this.getUserPermissionInfo();
     const moduleItem = userPermissionInfo?.menus.find((item) => item.permission === `${moduleCode}`);
-    return moduleItem?.children?.some((item) => item.path === menuCode) || false;
+    return moduleItem?.children?.some((item) => item.permission === menu) || false;
   }
 }
 

@@ -3,6 +3,9 @@ import { Form, Input, Modal, Select, TreeSelect } from '@arco-design/web-react';
 import type { DeptForm, UserVO } from '@onebase/platform-center';
 import { getSimpleDeptList, getSimpleUserList } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
+import { hasPermission } from '@/utils/permission';
+import { TENANT_USER_QUERY } from '@/constants/permission';
+
 const FormItem = Form.Item;
 
 interface DepartmentModalProps {
@@ -20,6 +23,7 @@ const DepartmentModal: React.FC<DepartmentModalProps> = (props) => {
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [userList, setUserList] = useState<SimpleUserVO[]>([]);
   const [deptTree, setDeptTree] = useState<any[]>([]);
+  const [hasUserQueryPermission, setHasUserQueryPermission] = useState(true);
 
   useEffect(() => {
     if (visible) {
@@ -27,8 +31,15 @@ const DepartmentModal: React.FC<DepartmentModalProps> = (props) => {
       if (initialValues) {
         form.setFieldsValue({ ...initialValues });
       }
+      
+      // 检查是否有用户查询权限
+      const userPermission = hasPermission(TENANT_USER_QUERY);
+      setHasUserQueryPermission(userPermission);
+      
       // 获取用户列表和部门树
-      fetchUserList();
+      if (userPermission) {
+        fetchUserList();
+      }
       fetchDeptTree();
     }
   }, [visible, initialValues, form]);
@@ -87,9 +98,10 @@ const DepartmentModal: React.FC<DepartmentModalProps> = (props) => {
         </FormItem>
         <FormItem label="管理员" field="leaderUserId" rules={[{ required: true, message: '请选择管理员' }]}>
           <Select
-            placeholder="请选择管理员"
+            placeholder={hasUserQueryPermission ? "请选择管理员" : "无权限"}
             allowClear
             showSearch
+            disabled={!hasUserQueryPermission}
             filterOption={(input: string, option: any) =>
               option?.children?.toString().toLowerCase().indexOf(input.toLowerCase()) >= 0
             }

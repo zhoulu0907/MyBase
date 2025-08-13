@@ -236,12 +236,14 @@ const PermissionConfigModal: React.FC<PermissionConfigModalProps> = ({
   );
 
   const handleConfirm = useCallback(async () => {
-    // 将选中的权限数据处理成扁平化数组传给接口
+    // 将选中的权限数据处理成扁平化数组并加上第一层父节点id传给接口
     const data = Object.keys(selectedActions).reduce((res: string[], key) => {
       res.push(key);
       res = res.concat(selectedActions[key]);
+      const node = tableData.find((item) => item.id === key);
+      node && res.push(node?.parentId);
       return res;
-    }, [])
+    }, []);
     onConfirm(data);
   }, [
     selectedActions
