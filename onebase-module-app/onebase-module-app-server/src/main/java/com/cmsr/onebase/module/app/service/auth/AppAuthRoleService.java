@@ -16,6 +16,8 @@ public interface AppAuthRoleService {
 
     void createDefaultRole(Long applicationId);
 
+    void renameRole(Long roleId, String name);
+
     void addRoleUser(AuthRoleAddUserReqVO reqVO);
 
     void deleteRoleUser(AuthRoleDeleteUserReqVO reqVO);

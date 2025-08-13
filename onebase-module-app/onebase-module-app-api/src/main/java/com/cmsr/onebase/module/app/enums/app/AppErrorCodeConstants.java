@@ -22,7 +22,7 @@ public interface AppErrorCodeConstants {
 
     ErrorCode APP_TAG_EXIST = new ErrorCode(10007, "标签已存在");
 
-    ErrorCode APP_CODE_DUPLICATE = new ErrorCode(10008, "应用编码重复");
+    ErrorCode APP_KEY_DUPLICATE = new ErrorCode(10008, "应用KEY重复");
 
     ErrorCode APP_MENU_TYPE_ERROR = new ErrorCode(10009, "菜单类型错误");
 
@@ -31,4 +31,5 @@ public interface AppErrorCodeConstants {
     ErrorCode APP_AUTH_ROLE_NOT_EXISTS = new ErrorCode(10011, "角色不存在");
 
     ErrorCode APP_AUTH_ROLE_NOT_ALLOW_DELETE = new ErrorCode(10012, "角色不允许删除");
+    ErrorCode APP_AUTH_ROLE_NOT_ALLOW_RENAME = new ErrorCode(10013, "角色不允许重命名");
 }
