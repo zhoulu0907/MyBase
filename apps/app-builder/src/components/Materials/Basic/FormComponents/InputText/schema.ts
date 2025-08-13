@@ -85,7 +85,7 @@ export interface XInputTextConfig extends ICommonBaseType {
   /**
    * 数据字段
    */
-  dataField: TTextDefaultType;
+  dataField: TTextDefaultType[];
 
   /**
    * 占位符
@@ -174,7 +174,7 @@ const XInputText: XInputTextSchema = {
       name: '描述信息',
       type: CONFIG_TYPES.DESCRIPTION_INPUT
     },
-    dataFieldConfig,
+    ...dataFieldConfig,
     {
       key: 'tooltip',
       name: '提示文字',
@@ -209,7 +209,7 @@ const XInputText: XInputTextSchema = {
   config: {
     ...baseDefault,
     label: '单行文本',
-    dataField: '',
+    dataField: [],
     placeholder: '请输入文字',
     description: '',
     tooltip: '',

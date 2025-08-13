@@ -57,7 +57,6 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
       id: appId
     };
     const appResp = await getApplication(appReq);
-    console.log(appResp);
     if (appResp) {
       if (appResp.iconName) {
         setAppIcon(appResp.iconName);

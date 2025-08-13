@@ -11,16 +11,18 @@ export interface DynamicTableConfigProps {
   handlePropsChange: (key: string, value: string | number | boolean | any[]) => void;
   item: any;
   configs: any;
+  id: string;
 }
 
 /**
  * 动态下拉选择组件
  * @param props 组件属性
  */
-const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({ handlePropsChange, item, configs }) => {
+const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({ handlePropsChange, item, configs, id }) => {
   const [entityList, setEntityList] = useState<MetadataEntityPair[]>([]);
   const [entityId, setEntityId] = useState<string>('');
   const [fieldList, setFieldList] = useState<MetadataEntityField[]>([]);
+
   const columnsKey = 'columns';
   const searchItemsKey = 'searchItems';
 
@@ -31,34 +33,38 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({ handlePropsChan
   const [enableAddSearchItem, setEnableAddSearchItem] = useState<boolean>(false);
 
   useEffect(() => {
-    console.log(item);
+    console.log(id, item);
+
+    if (configs[item.key]) {
+      setEntityId(configs[item.key]);
+    }
+
     getEntityList();
   }, []);
 
   useEffect(() => {
     if (entityId) {
       getFieldList();
-      setSearchItemsConfig([]);
-      handlePropsChange(searchItemsKey, []);
+      //   handlePropsChange(searchItemsKey, []);
     }
   }, [entityId]);
 
   useEffect(() => {
-    setEnableAddColumn(
-      fieldList
-        .filter((item: MetadataEntityField) => !item.isSystemField)
-        .filter((item: MetadataEntityField) => !columnsConfig.some((col: any) => col.dataIndex === item.fieldName))
-        .length > 0
-    );
+    const res =
+      fieldList.filter(
+        (item: MetadataEntityField) => !columnsConfig.some((col: any) => col.dataIndex == item.fieldName)
+      ).length > 0;
+
+    setEnableAddColumn(res);
   }, [fieldList, columnsConfig]);
 
   useEffect(() => {
-    setEnableAddSearchItem(
-      fieldList
-        .filter((item: MetadataEntityField) => !item.isSystemField)
-        .filter((item: MetadataEntityField) => !searchItemsConfig.some((col: any) => col.value === item.fieldName))
-        .length > 0
-    );
+    const res =
+      fieldList.filter(
+        (item: MetadataEntityField) => !searchItemsConfig.some((col: any) => col.value == item.fieldName)
+      ).length > 0;
+
+    setEnableAddSearchItem(res);
   }, [fieldList, searchItemsConfig]);
 
   const getEntityList = async () => {
@@ -70,12 +76,15 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({ handlePropsChan
 
   const getFieldList = async () => {
     const res = await getEntityFields({ entityId });
-    console.log('res: ', res);
-    setFieldList(res);
+    console.log('fieldList res: ', res);
 
-    const newColumns = res
-      .filter((item: MetadataEntityField) => !item.isSystemField)
-      .map((item: MetadataEntityField) => ({ title: item.displayName, dataIndex: item.fieldName }));
+    const newFieldList = res.filter((item: MetadataEntityField) => item.isSystemField);
+    setFieldList(newFieldList);
+
+    const newColumns = newFieldList.map((item: MetadataEntityField) => ({
+      title: item.displayName,
+      dataIndex: item.fieldName
+    }));
 
     console.log('newColumns: ', newColumns);
     setColumnsConfig(newColumns);
@@ -103,7 +112,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({ handlePropsChan
 
       {/* 表头配置 */}
       <FormItem layout="vertical" labelAlign="left" label={'表头配置'} className={styles.formItem}>
-        <Form.List initialValue={configs[columnsKey]} field={columnsKey}>
+        <Form.List initialValue={configs[columnsKey]} field={`${id}-${columnsKey}`}>
           {(_fields, { add, remove }) => (
             <div className={styles.tableColumnList}>
               <ReactSortable
@@ -227,7 +236,6 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({ handlePropsChan
                 droplist={
                   <Menu>
                     {fieldList
-                      .filter((item: MetadataEntityField) => !item.isSystemField)
                       .filter(
                         (item: MetadataEntityField) =>
                           !columnsConfig.some((col: any) => col.dataIndex === item.fieldName)
@@ -258,7 +266,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({ handlePropsChan
 
       {/* 搜索项 */}
       <FormItem layout="vertical" labelAlign="left" label={'搜索项'} className={styles.formItem}>
-        <Form.List initialValue={configs[searchItemsKey]} field={searchItemsKey}>
+        <Form.List initialValue={configs[searchItemsKey]} field={`${id}-${searchItemsKey}`}>
           {(_fields, { add, remove }) => (
             <div className={styles.tableColumnList}>
               <ReactSortable
@@ -291,7 +299,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({ handlePropsChan
                   }
                 }}
               >
-                {searchItemsConfig.map((_col: any, idx: number) => (
+                {configs[searchItemsKey].map((_col: any, idx: number) => (
                   <div key={idx} className={styles.tableColumnItem}>
                     <IconDragDotVertical
                       // 支持拖拽的图标，别误删了：）
@@ -303,7 +311,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({ handlePropsChan
                     />
                     <Select
                       size="small"
-                      value={searchItemsConfig[idx].label}
+                      value={configs[searchItemsKey][idx].label}
                       onChange={(e, option: any) => {
                         const newList = [...searchItemsConfig];
                         newList[idx] = {
@@ -311,7 +319,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({ handlePropsChan
                           label: option.children,
                           value: e
                         };
-
+                        setSearchItemsConfig(newList);
                         handlePropsChange(searchItemsKey, newList);
 
                         console.log(e);
@@ -319,7 +327,6 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({ handlePropsChan
                         console.log(searchItemsConfig);
                       }}
                       className={styles.tableColumnItemInput}
-                      placeholder={`请输入第${idx + 1}项`}
                       options={configs['columns']
                         .filter(
                           (col: any) =>
@@ -339,6 +346,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({ handlePropsChan
                       className={styles.tableColumnItemButton}
                       onClick={() => {
                         const newList = [...searchItemsConfig];
+
                         newList.splice(idx, 1);
 
                         remove(idx);
@@ -356,7 +364,6 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({ handlePropsChan
                 droplist={
                   <Menu>
                     {fieldList
-                      .filter((item: MetadataEntityField) => !item.isSystemField)
                       .filter(
                         (item: MetadataEntityField) =>
                           !searchItemsConfig.some((col: any) => col.value === item.fieldName)

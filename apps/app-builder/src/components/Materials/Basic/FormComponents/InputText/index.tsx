@@ -22,7 +22,7 @@ const XInputText = memo((props: XInputTextConfig) => {
   return (
     <Form.Item
       label={label}
-      field={dataField}
+      field={dataField.length > 0 ? dataField[dataField.length - 1] : ''}
       layout={layout}
       labelCol={{
         span: labelColSpan

@@ -4,10 +4,10 @@ import activeListDesignSVG from '@/assets/images/list_design_active_icon.svg';
 import defaultListDesignSVG from '@/assets/images/list_design_default_icon.svg';
 import { useI18n } from '@/hooks/useI18n';
 import { usePageEditorStore } from '@/hooks/useStore';
-import { useAppStore, useBasicEditorStore, useFromEditorStore, useListEditorStore } from '@/store';
+import { useAppDataStore, useAppStore, useBasicEditorStore, useFromEditorStore, useListEditorStore } from '@/store';
 import { Button, Message, Tabs } from '@arco-design/web-react';
 import { IconArrowLeft } from '@arco-design/web-react/icon';
-import { getAppIdByPageSetCode, getApplication, type GetApplicationReq } from '@onebase/app';
+import { getAppEntities, getAppIdByPageSetCode, getApplication, type GetApplicationReq } from '@onebase/app';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { startLoadPageSet, startSavePageSet, type SavePageSetParams } from '../../utils/app_resource';
@@ -62,6 +62,8 @@ export default function EditorHeader() {
     clearComponents: clearListComponents,
     clearPageComponentSchemas: clearListPageComponentSchemas
   } = useListEditorStore();
+
+  const { setAppEntities } = useAppDataStore();
 
   const { curAppId, setCurAppId } = useAppStore();
 
@@ -141,8 +143,6 @@ export default function EditorHeader() {
     };
 
     const appResp = await getApplication(appReq);
-    console.log(appResp);
-    console.log(appResp);
     if (appResp) {
       if (appResp.icon) {
         setAppIcon(appResp.icon);
@@ -157,6 +157,11 @@ export default function EditorHeader() {
         setAppStatus(appResp.appStatusText);
       }
     }
+
+    // TODO(mickey): 等xiaoyi完成后 写活
+    const appEntities = await getAppEntities('1');
+    console.log(appEntities);
+    setAppEntities(appEntities);
   };
 
   const handleSavePageSet = async () => {

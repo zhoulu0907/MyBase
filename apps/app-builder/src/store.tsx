@@ -1,3 +1,4 @@
+import type { AppEntities } from '@onebase/app';
 import { create } from 'zustand';
 import type { EditConfig } from './components/Materials/types';
 
@@ -142,4 +143,23 @@ export const useAppStore = create<appStore>((set) => ({
   curAppId: '',
   setCurAppId: (appId: string) => set(() => ({ curAppId: appId })),
   clearCurAppId: () => set(() => ({ curAppId: '' }))
+}));
+
+export interface appDataStore {
+  appEntities: AppEntities;
+  setAppEntities: (appEntities: AppEntities) => void;
+  clearAppEntities: () => void;
+}
+
+export const useAppDataStore = create<appDataStore>((set) => ({
+  appEntities: {
+    entities: []
+  },
+  setAppEntities: (appEntities: AppEntities) => set(() => ({ appEntities })),
+  clearAppEntities: () =>
+    set(() => ({
+      appEntities: {
+        entities: []
+      }
+    }))
 }));
