@@ -31,17 +31,17 @@ public class ERFieldVO {
     @Schema(description = "字段描述", example = "用户登录名")
     private String description;
 
-    @Schema(description = "是否必填", requiredMode = Schema.RequiredMode.REQUIRED, example = "true")
-    private Boolean isRequired;
+    @Schema(description = "是否必填：0-是，1-不是", requiredMode = Schema.RequiredMode.REQUIRED, example = "0")
+    private Integer isRequired;
 
-    @Schema(description = "是否唯一", requiredMode = Schema.RequiredMode.REQUIRED, example = "true")
-    private Boolean isUnique;
+    @Schema(description = "是否唯一：0-是，1-不是", requiredMode = Schema.RequiredMode.REQUIRED, example = "0")
+    private Integer isUnique;
 
-    @Schema(description = "是否主键", requiredMode = Schema.RequiredMode.REQUIRED, example = "false")
-    private Boolean isPrimaryKey;
+    @Schema(description = "是否主键：0-是，1-不是", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
+    private Integer isPrimaryKey;
 
-    @Schema(description = "是否系统字段", requiredMode = Schema.RequiredMode.REQUIRED, example = "false")
-    private Boolean isSystemField;
+    @Schema(description = "是否系统字段：0-是，1-不是", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
+    private Integer isSystemField;
 
     @Schema(description = "默认值", example = "admin")
     private String defaultValue;

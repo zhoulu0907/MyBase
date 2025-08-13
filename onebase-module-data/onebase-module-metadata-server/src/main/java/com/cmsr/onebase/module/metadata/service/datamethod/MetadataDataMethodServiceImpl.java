@@ -468,13 +468,13 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
      */
     private void validateDataForCreate(Map<String, Object> data, List<MetadataEntityFieldDO> fields) {
         for (MetadataEntityFieldDO field : fields) {
-            // 跳过系统字段和主键字段
-            if (field.getIsSystemField() || field.getIsPrimaryKey()) {
+            // 跳过系统字段和主键字段：0-是系统字段/主键
+            if (field.getIsSystemField() == 0 || field.getIsPrimaryKey() == 0) {
                 continue;
             }
 
-            // 校验必填字段
-            if (field.getIsRequired() && (data.get(field.getFieldName()) == null ||
+            // 校验必填字段：0-是必填
+            if (field.getIsRequired() == 0 && (data.get(field.getFieldName()) == null ||
                     String.valueOf(data.get(field.getFieldName())).trim().isEmpty())) {
                 throw exception(FIELD_REQUIRED, field.getDisplayName());
             }
@@ -497,8 +497,8 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
                 throw exception(FIELD_NOT_EXISTS, fieldName);
             }
 
-            // 不允许更新主键字段
-            if (field.getIsPrimaryKey()) {
+            // 不允许更新主键字段：0-是主键
+            if (field.getIsPrimaryKey() == 0) {
                 throw exception(PRIMARY_KEY_UPDATE_NOT_ALLOWED);
             }
         }
@@ -516,8 +516,8 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
         for (MetadataEntityFieldDO field : fields) {
             String fieldName = field.getFieldName();
             
-            // 处理主键字段
-            if (field.getIsPrimaryKey()) {
+            // 处理主键字段：0-是主键
+            if (field.getIsPrimaryKey() == 0) {
                 if (!processedData.containsKey(fieldName)) {
                     // 生成雪花ID作为主键
                     processedData.put(fieldName, IdUtil.getSnowflakeNextId());
@@ -525,8 +525,8 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
                 continue;
             }
 
-            // 处理系统字段
-            if (field.getIsSystemField()) {
+            // 处理系统字段：0-是系统字段
+            if (field.getIsSystemField() == 0) {
                 switch (fieldName.toLowerCase()) {
                     case "created_time":
                     case "createtime":
@@ -581,7 +581,7 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
                     .findFirst()
                     .orElse(null);
 
-            if (field != null && !field.getIsPrimaryKey() && !field.getIsSystemField()) {
+            if (field != null && !Boolean.TRUE.equals(field.getIsPrimaryKey() == 0) && !Boolean.TRUE.equals(field.getIsSystemField() == 0)) {
                 processedData.put(fieldName, entry.getValue());
             }
         }
@@ -650,7 +650,7 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
      */
     private String getPrimaryKeyFieldName(List<MetadataEntityFieldDO> fields) {
         return fields.stream()
-                .filter(MetadataEntityFieldDO::getIsPrimaryKey)
+                .filter(field -> Boolean.TRUE.equals(field.getIsPrimaryKey() == 0))
                 .map(MetadataEntityFieldDO::getFieldName)
                 .findFirst()
                 .orElse("id");

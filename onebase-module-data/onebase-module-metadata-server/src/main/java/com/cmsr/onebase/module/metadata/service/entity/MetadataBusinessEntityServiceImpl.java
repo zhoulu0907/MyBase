@@ -222,11 +222,11 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
                     .decimalPlaces(getDefaultDecimalPlaces(systemField.getFieldType())) // 根据字段类型设置默认小数位
                     .defaultValue(systemField.getDefaultValue())
                     .description(systemField.getDescription())
-                    .isSystemField(true) // 标记为系统字段
-                    .isPrimaryKey(systemField.getIsSnowflakeId() == 1) // 雪花ID字段设为主键
-                    .isRequired(systemField.getIsRequired() == 1)
-                    .isUnique(systemField.getIsSnowflakeId() == 1) // 主键字段唯一
-                    .allowNull(systemField.getIsRequired() != 1) // 必填字段不允许为空
+                    .isSystemField(0) // 标记为系统字段：0-是
+                    .isPrimaryKey(systemField.getIsSnowflakeId() == 1 ? 0 : 1) // 雪花ID字段设为主键：0-是，1-不是
+                    .isRequired(systemField.getIsRequired() == 1 ? 0 : 1) // 0-是，1-不是
+                    .isUnique(systemField.getIsSnowflakeId() == 1 ? 0 : 1) // 主键字段唯一：0-是，1-不是
+                    .allowNull(systemField.getIsRequired() != 1 ? 0 : 1) // 必填字段不允许为空：0-是，1-不是
                     .sortOrder(sortOrder++)
                     .validationRules(null) // 系统字段暂不设置校验规则
                     .runMode(0) // 默认编辑态
@@ -339,8 +339,8 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
             String columnType = mapFieldType(field.getFieldType());
             columnDef.append(columnType);
 
-            // 是否必填
-            if (field.getIsRequired() == 1) {
+            // 是否必填：0-是，1-不是
+            if (field.getIsRequired() == 0) {
                 columnDef.append(" NOT NULL");
             }
 

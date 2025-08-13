@@ -112,13 +112,13 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
             entityField.setFieldType(fieldItem.getFieldType());
             entityField.setDataLength(fieldItem.getDataLength());
             entityField.setDescription(fieldItem.getDescription());
-            entityField.setIsRequired(fieldItem.getIsRequired() != null ? fieldItem.getIsRequired() : false);
-            entityField.setIsUnique(fieldItem.getIsUnique() != null ? fieldItem.getIsUnique() : false);
-            entityField.setAllowNull(fieldItem.getAllowNull() != null ? fieldItem.getAllowNull() : true);
+            entityField.setIsRequired(fieldItem.getIsRequired() != null ? fieldItem.getIsRequired() : 1); // 默认1-不是必填
+            entityField.setIsUnique(fieldItem.getIsUnique() != null ? fieldItem.getIsUnique() : 1); // 默认1-不是唯一
+            entityField.setAllowNull(fieldItem.getAllowNull() != null ? fieldItem.getAllowNull() : 0); // 默认0-是允许空值
             entityField.setDefaultValue(fieldItem.getDefaultValue());
             entityField.setSortOrder(fieldItem.getSortOrder() != null ? fieldItem.getSortOrder() : 0);
-            entityField.setIsSystemField(false);
-            entityField.setIsPrimaryKey(false);
+            entityField.setIsSystemField(1); // 1-不是系统字段
+            entityField.setIsPrimaryKey(1); // 1-不是主键
             entityField.setAppId(Long.valueOf(reqVO.getAppId()));
 
             metadataEntityFieldRepository.insert(entityField);
@@ -344,9 +344,9 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
                 if (item.getDecimalPlaces() != null) upd.setDecimalPlaces(item.getDecimalPlaces());
                 if (item.getDefaultValue() != null) upd.setDefaultValue(item.getDefaultValue());
                 if (item.getDescription() != null) upd.setDescription(item.getDescription());
-                if (item.getIsRequired() != null) upd.setIsRequired(item.getIsRequired());
-                if (item.getIsUnique() != null) upd.setIsUnique(item.getIsUnique());
-                if (item.getAllowNull() != null) upd.setAllowNull(item.getAllowNull());
+                if (item.getIsRequired() != null) upd.setIsRequired(item.getIsRequired() ? 0 : 1);
+                if (item.getIsUnique() != null) upd.setIsUnique(item.getIsUnique() ? 0 : 1);
+                if (item.getAllowNull() != null) upd.setAllowNull(item.getAllowNull() ? 0 : 1);
                 if (item.getSortOrder() != null) upd.setSortOrder(item.getSortOrder());
                 if (item.getFieldCode() != null) upd.setFieldCode(item.getFieldCode());
 
@@ -380,14 +380,14 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
                 toCreate.setDecimalPlaces(item.getDecimalPlaces());
                 toCreate.setDefaultValue(item.getDefaultValue());
                 toCreate.setDescription(item.getDescription());
-                toCreate.setIsRequired(item.getIsRequired());
-                toCreate.setIsUnique(item.getIsUnique());
-                toCreate.setAllowNull(item.getAllowNull());
+                toCreate.setIsRequired(item.getIsRequired() != null ? (item.getIsRequired() ? 0 : 1) : null);
+                toCreate.setIsUnique(item.getIsUnique() != null ? (item.getIsUnique() ? 0 : 1) : null);
+                toCreate.setAllowNull(item.getAllowNull() != null ? (item.getAllowNull() ? 0 : 1) : null);
                 toCreate.setSortOrder(item.getSortOrder());
                 toCreate.setFieldCode(item.getFieldCode() != null && !item.getFieldCode().trim().isEmpty()
                         ? item.getFieldCode() : generateFieldCode(item.getFieldName()));
-                toCreate.setIsSystemField(false);
-                toCreate.setIsPrimaryKey(false);
+                toCreate.setIsSystemField(0); // 0表示是系统字段
+                toCreate.setIsPrimaryKey(1); // 1表示不是主键
 
                 metadataEntityFieldRepository.insert(toCreate);
 
@@ -436,7 +436,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
         MetadataEntityFieldDO entityField = BeanUtils.toBean(createReqVO, MetadataEntityFieldDO.class);
         entityField.setEntityId(Long.valueOf(createReqVO.getEntityId()));
         entityField.setAppId(Long.valueOf(createReqVO.getAppId()));
-        entityField.setIsSystemField(false); // 手动创建的字段不是系统字段
+        entityField.setIsSystemField(1); // 手动创建的字段不是系统字段：1-不是
         entityField.setRunMode(0); // 默认编辑态
         entityField.setStatus(0); // 默认开启
         // 如果没有提供fieldCode，则根据fieldName生成
@@ -818,7 +818,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
         ddl.append(columnType);
 
         // 是否必填
-        if (field.getIsRequired() != null && field.getIsRequired()) {
+        if (field.getIsRequired() != null && Boolean.TRUE.equals(field.getIsRequired() == 0)) {
             ddl.append(" NOT NULL");
         }
 
@@ -851,7 +851,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
 
         // 修改是否允许为空
         if (field.getIsRequired() != null) {
-            if (field.getIsRequired()) {
+            if (Boolean.TRUE.equals(field.getIsRequired() == 0)) {
                 ddl.append("ALTER TABLE \"").append(tableName).append("\" ALTER COLUMN \"")
                    .append(field.getFieldName()).append("\" SET NOT NULL;\n");
             } else {
