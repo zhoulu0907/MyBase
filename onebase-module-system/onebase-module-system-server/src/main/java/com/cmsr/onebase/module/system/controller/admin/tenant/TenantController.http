@@ -39,3 +39,9 @@ GET http://127.0.0.1:48080/admin-api/system/tenant/get-allocatable-count
 Content-Type: application/json
 Authorization: Bearer 2a22af2af4544f2b86409c9ee243901a
 tenant-id: 1
+
+### 更新租户 /admin-api/system/tenant/page
+GET http://127.0.0.1:48080/admin-api/system/tenant/get-by-website?website=tenant_20250811184245
+Content-Type: application/json
+Authorization: Bearer 3e71f55ccc754ad99af737a899c1c9bd
+tenant-id: 1

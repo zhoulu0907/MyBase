@@ -1,7 +1,9 @@
 package com.cmsr.onebase.module.system.convert.tenant;
 
 import com.cmsr.onebase.module.system.controller.admin.tenant.vo.tenant.TenantInsertReqVO;
+import com.cmsr.onebase.module.system.controller.admin.tenant.vo.tenant.TenantSimpleRespVO;
 import com.cmsr.onebase.module.system.controller.admin.user.vo.user.UserInsertReqVO;
+import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
@@ -22,4 +24,5 @@ public interface TenantConvert {
         return reqVO;
     }
 
+    TenantSimpleRespVO convertToSimpleRespVO(TenantDO tenant);
 }
