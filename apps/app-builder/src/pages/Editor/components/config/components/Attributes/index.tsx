@@ -255,7 +255,13 @@ const Attributes = ({ cpID }: ConfigsProps) => {
 
             if (item.type === CONFIG_TYPES.TABLE_DATA) {
               return (
-                <DynamicTableConfig key={index} handlePropsChange={handlePropsChange} item={item} configs={configs} />
+                <DynamicTableConfig
+                  key={index}
+                  id={cpID}
+                  handlePropsChange={handlePropsChange}
+                  item={item}
+                  configs={configs}
+                />
               );
             }
             if (item.type === CONFIG_TYPES.SWITCH_INPUT) {
