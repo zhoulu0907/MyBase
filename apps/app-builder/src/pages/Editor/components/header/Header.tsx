@@ -2,16 +2,25 @@ import activeFormDesignSVG from '@/assets/images/form_design_active_icon.svg';
 import defaultFormDesignSVG from '@/assets/images/form_design_default_icon.svg';
 import activeListDesignSVG from '@/assets/images/list_design_active_icon.svg';
 import defaultListDesignSVG from '@/assets/images/list_design_default_icon.svg';
+import previewSVG from '@/assets/images/preview_icon.svg';
 import { useI18n } from '@/hooks/useI18n';
 import { usePageEditorStore } from '@/hooks/useStore';
 import { useAppDataStore, useAppStore, useBasicEditorStore, useFromEditorStore, useListEditorStore } from '@/store';
 import { Button, Message, Tabs } from '@arco-design/web-react';
 import { IconArrowLeft } from '@arco-design/web-react/icon';
-import { getAppIdByPageSetCode, getApplication, getEntityWithChildren, type GetApplicationReq } from '@onebase/app';
+import {
+  AppStatus,
+  getAppIdByPageSetCode,
+  getApplication,
+  getEntityFieldsWithChildren,
+  getPageSetMetaData,
+  type GetApplicationReq
+} from '@onebase/app';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { startLoadPageSet, startSavePageSet, type SavePageSetParams } from '../../utils/app_resource';
 import { EDITOR_TYPES } from '../../utils/const';
+import PartPreview from '../partPreview';
 import styles from './index.module.less';
 
 const tabData = [
@@ -74,7 +83,9 @@ export default function EditorHeader() {
   const [appName, setAppName] = useState('未命名应用');
   const [appIcon, setAppIcon] = useState('');
   const [iconColor, setIconColor] = useState('');
-  const [appStatus, setAppStatus] = useState('');
+  const [appStatus, setAppStatus] = useState(0);
+
+  const [partPreviewVisible, setPartPreviewVisible] = useState(false);
 
   const {
     setComponents: setFromComponents,
@@ -119,6 +130,7 @@ export default function EditorHeader() {
       loadPageSetInfo(pageSetCode);
       setIsEditMode(true);
       handleGetAppInfo(pageSetCode);
+      getMainMetaData(pageSetCode);
     }
   }, [pageSetCode]);
 
@@ -154,12 +166,17 @@ export default function EditorHeader() {
         setAppName(appResp.appName);
       }
       if (appResp.appStatusText) {
-        setAppStatus(appResp.appStatusText);
+        setAppStatus(appResp.appStatus);
       }
     }
+    console.log('appResp: ', appResp);
+  };
 
-    // TODO(mickey): 等xiaoyi完成后 写活
-    const entityWithChildren = await getEntityWithChildren('542683577733746688');
+  const getMainMetaData = async (pageSetCode: string) => {
+    const mainMetaData = await getPageSetMetaData({ code: pageSetCode });
+    console.log('mainMetaData: ', mainMetaData);
+
+    const entityWithChildren = await getEntityFieldsWithChildren(mainMetaData);
     console.log(entityWithChildren);
 
     if (entityWithChildren) {
@@ -210,7 +227,7 @@ export default function EditorHeader() {
   };
 
   const toPreview = () => {
-    navigate(`/onebase/preview-app/preview?pageSetCode=${pageSetCode}&pageType=${activeTab}`);
+    setPartPreviewVisible(true);
   };
 
   return (
@@ -270,8 +287,16 @@ export default function EditorHeader() {
       </div>
 
       <div className={styles.right}>
-        <div className={styles.editorStatus}>已保存，未发布</div>
-        <Button onClick={toPreview}>{t('editor.preview')}</Button>
+        {appStatus === AppStatus.DEVELOPING && <div className={styles.editorStatusDeveloping}>开发中</div>}
+        {appStatus === AppStatus.PUBLISHED && <div className={styles.editorStatusPublished}>已发布</div>}
+        {appStatus === AppStatus.EDITING_AFTER_PUBLISH && (
+          <div className={styles.editorStatusEditAfterPublished}>已发布</div>
+        )}
+
+        <Button onClick={toPreview} className={styles.previewButton}>
+          <img src={previewSVG} />
+          {t('editor.preview')}
+        </Button>
         <Button
           type="primary"
           onClick={() => {
@@ -280,6 +305,12 @@ export default function EditorHeader() {
         >
           保存
         </Button>
+
+        <PartPreview
+          pageType={activeTab}
+          visible={partPreviewVisible}
+          setVisible={() => setPartPreviewVisible(false)}
+        />
       </div>
     </div>
   );

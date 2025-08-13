@@ -130,7 +130,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
       {/* 表头配置 */}
       <FormItem layout="vertical" labelAlign="left" label={'表头配置'} className={styles.formItem}>
         <Form.List initialValue={configs[columnsKey]} field={`${id}-${columnsKey}`}>
-          {(_fields, { add, remove }) => (
+          {(_fields, { remove }) => (
             <div className={styles.tableColumnList}>
               <ReactSortable
                 list={configs[columnsKey]}

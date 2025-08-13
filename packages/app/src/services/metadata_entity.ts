@@ -284,8 +284,3 @@ export const getEntityListByApp = (appId: string) => {
 export const getAppEntities = (appId: string) => {
   return metadataService.post(`/entity-relationship/app-entities?appId=${appId}`);
 };
-
-
-export const getEntityWithChildren = (entityID: string) => {
-    return metadataService.post(`/entity-relationship/entity-with-children?entityId=${entityID}`);
-}

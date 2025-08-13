@@ -21,13 +21,23 @@ interface ComponentRenderProps {
   cpType: string;
   /** 组件schema映射 */
   pageComponentSchema: any;
+
+  runtime: boolean;
+
+  toCreatePage?: Function;
 }
 
 /**
  * ComponentRender 组件
  * 用于渲染传入的组件，支持适配各类组件
  */
-const ComponentEditRender: React.FC<ComponentRenderProps> = ({ cpId, cpType, pageComponentSchema }) => {
+const ComponentEditRender: React.FC<ComponentRenderProps> = ({
+  cpId,
+  cpType,
+  pageComponentSchema,
+  runtime,
+  toCreatePage
+}) => {
   // 获取组件配置
   const componentConfig = getComponentConfig(pageComponentSchema, cpType);
 
@@ -79,7 +89,9 @@ const ComponentEditRender: React.FC<ComponentRenderProps> = ({ cpId, cpType, pag
 
       //  列表组件
       case LIST_COMPONENT_TYPES.TABLE:
-        return <ListComp.XTable cpName={cpId} id={cpId} {...componentConfig} edit={false} />;
+        return (
+          <ListComp.XTable cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} toCreatePage={toCreatePage} />
+        );
       case LIST_COMPONENT_TYPES.CALENDAR:
         return <ListComp.XCalendar cpName={cpId} id={cpId} {...componentConfig} />;
       case LIST_COMPONENT_TYPES.TIMELINE:
