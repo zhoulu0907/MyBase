@@ -143,7 +143,6 @@ const XTable = memo((props: XTableConfig & { runtime?: boolean; toCreatePage?: F
       return;
     }
 
-    console.log(id);
     // const hash = window.location.hash;
     // const queryIndex = hash.indexOf('?');
     // if (queryIndex !== -1) {

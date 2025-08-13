@@ -84,6 +84,12 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuCode, runtime }) => {
   }, [menuCode]);
 
   useEffect(() => {
+    if (editTargetId && mainMetaData) {
+      handleGetData(mainMetaData, editTargetId);
+    }
+  }, [editTargetId, mainMetaData]);
+
+  useEffect(() => {
     // console.log('pageSetCode', pageSetCode);
     if (pageSetCode) {
       loadPageSetInfo(pageSetCode);
@@ -163,12 +169,11 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuCode, runtime }) => {
   };
 
   const toCreatePage = (id: string) => {
-    console.log('id: ', id);
     setPageType(EDITOR_TYPES.FORM_EDITOR);
 
     if (id) {
+      console.log('edit row id: ', id);
       setEditTargetId(id);
-      handleGetData(mainMetaData, id);
     }
   };
 

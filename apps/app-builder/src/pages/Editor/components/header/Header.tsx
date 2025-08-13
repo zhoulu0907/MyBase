@@ -9,6 +9,7 @@ import { useAppDataStore, useAppStore, useBasicEditorStore, useFromEditorStore, 
 import { Button, Message, Tabs } from '@arco-design/web-react';
 import { IconArrowLeft } from '@arco-design/web-react/icon';
 import {
+  AppStatus,
   getAppIdByPageSetCode,
   getApplication,
   getEntityFieldsWithChildren,
@@ -82,7 +83,7 @@ export default function EditorHeader() {
   const [appName, setAppName] = useState('未命名应用');
   const [appIcon, setAppIcon] = useState('');
   const [iconColor, setIconColor] = useState('');
-  const [appStatus, setAppStatus] = useState('');
+  const [appStatus, setAppStatus] = useState(0);
 
   const [partPreviewVisible, setPartPreviewVisible] = useState(false);
 
@@ -165,7 +166,7 @@ export default function EditorHeader() {
         setAppName(appResp.appName);
       }
       if (appResp.appStatusText) {
-        setAppStatus(appResp.appStatusText);
+        setAppStatus(appResp.appStatus);
       }
     }
     console.log('appResp: ', appResp);
@@ -227,7 +228,6 @@ export default function EditorHeader() {
 
   const toPreview = () => {
     setPartPreviewVisible(true);
-    // navigate(`/onebase/preview-app/preview?pageSetCode=${pageSetCode}&pageType=${activeTab}`);
   };
 
   return (
@@ -287,7 +287,12 @@ export default function EditorHeader() {
       </div>
 
       <div className={styles.right}>
-        <div className={styles.editorStatus}>已保存，未发布</div>
+        {appStatus === AppStatus.DEVELOPING && <div className={styles.editorStatusDeveloping}>开发中</div>}
+        {appStatus === AppStatus.PUBLISHED && <div className={styles.editorStatusPublished}>已发布</div>}
+        {appStatus === AppStatus.EDITING_AFTER_PUBLISH && (
+          <div className={styles.editorStatusEditAfterPublished}>已发布</div>
+        )}
+
         <Button onClick={toPreview} className={styles.previewButton}>
           <img src={previewSVG} />
           {t('editor.preview')}

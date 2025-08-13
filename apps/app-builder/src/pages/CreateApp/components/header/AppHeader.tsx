@@ -4,7 +4,7 @@ import { useAppStore } from '@/store';
 import { UserPermissionManager } from '@/utils/permission';
 import { Button, Dropdown, Layout, Menu, Tabs } from '@arco-design/web-react';
 import { IconMenu } from '@arco-design/web-react/icon';
-import { getApplication, type GetApplicationReq } from '@onebase/app';
+import { AppStatus, getApplication, type GetApplicationReq } from '@onebase/app';
 import { TokenManager } from '@onebase/common';
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -36,7 +36,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
   const [appName, setAppName] = useState('未命名应用');
   const [appIcon, setAppIcon] = useState('');
   const [iconColor, setIconColor] = useState('');
-  const [appStatus, setAppStatus] = useState('');
+  const [appStatus, setAppStatus] = useState(0);
 
   useEffect(() => {
     setActiveTab(getTabKeyFromPath(location.pathname));
@@ -66,8 +66,8 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
       if (appResp.appName) {
         setAppName(appResp.appName);
       }
-      if (appResp.appStatusText) {
-        setAppStatus(appResp.appStatusText);
+      if (appResp.appStatus) {
+        setAppStatus(appResp.appStatus);
       }
     }
   };
@@ -130,9 +130,13 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
             <i className={`iconfont ${appIcon || 'icon-box'}`} />
           </div>
           <div className={styles.appName}>{appName}</div>
-          <Button type="text" style={{ background: '#eaf0fd' }}>
-            {appStatus}
-          </Button>
+
+          {appStatus == AppStatus.DEVELOPING && <div className={styles.appStatusDeveloping}>开发中</div>}
+
+          {appStatus == AppStatus.PUBLISHED && <div className={styles.appStatusPublished}>已发布</div>}
+          {appStatus == AppStatus.EDITING_AFTER_PUBLISH && (
+            <div className={styles.appStatusEditAfterPublished}>已发布</div>
+          )}
         </div>
 
         <Tabs
@@ -171,8 +175,8 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
         </Tabs>
 
         <div className={styles.userInfo}>
-          <Button type="outline" onClick={toRuntime}>
-            运行
+          <Button type="outline" size="small" onClick={toRuntime}>
+            预览
           </Button>
 
           {UserPermissionManager.getUserPermissionInfo()?.user?.nickname || '未登录'}

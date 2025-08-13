@@ -2,6 +2,7 @@ import CreateGroupIcon from '@/assets/images/addfolder.svg';
 import CreatePageIcon from '@/assets/images/addpage.svg';
 import { useI18n } from '@/hooks/useI18n';
 import { EDITOR_TYPES } from '@/pages/Editor/utils/const';
+import PreviewContainer from '@/pages/Runtime/components/preview';
 import { useAppStore, useBasicEditorStore } from '@/store';
 import { addParentCodeToChildren } from '@/utils/menu';
 import { Button, Dropdown, Form, Input, Layout, Menu, Message, Tree } from '@arco-design/web-react';
@@ -141,6 +142,10 @@ const PageManagerPage: FC = () => {
 
     const treeData = convertMenuToTreeData(res, initTreeItemWidth, true);
     setTreeData(treeData);
+
+    if (res && res.length > 0) {
+      setCurMenu(res[0]);
+    }
   };
 
   const getEntityList = async () => {
@@ -365,8 +370,7 @@ const PageManagerPage: FC = () => {
               </div>
             )}
             <div className={styles.contentBody}>
-              {/* TODO */}
-              {/* <PageManagerPreview menuCode={curMenu?.menuCode || ''} /> */}
+              <PreviewContainer menuCode={curMenu?.menuCode || ''} runtime={false} />
             </div>
           </Content>
         </Layout>
