@@ -59,6 +59,16 @@ public class PermissionServiceImpl implements PermissionService {
     private RoleMenuDataRepository roleMenuDataRepository;
 
     @Override
+    public boolean isPlatformSuperAdmin(Long userId) {
+        // 获得当前登录的角色。如果为空，说明没有权限
+        List<RoleDO> roles = getEnableUserRoleListByUserIdFromCache(userId);
+        if (CollUtil.isEmpty(roles)) {
+            return false;
+        }
+        return roleService.hasAnySuperAdmin(convertSet(roles, RoleDO::getId));
+    }
+
+    @Override
     public boolean hasAnyPermissions(Long userId, String... permissions) {
         // 如果为空，说明已经有权限
         if (ArrayUtil.isEmpty(permissions)) {
