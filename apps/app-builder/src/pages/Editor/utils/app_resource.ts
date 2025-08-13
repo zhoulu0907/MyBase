@@ -38,15 +38,15 @@ export interface SavePageSetParams {
 export async function startSavePageSet(params: SavePageSetParams) {
     const { fromComponents, fromPageComponentSchemas, listComponents, listPageComponentSchemas,
         fromColComponentsMap, listColComponentsMap, pageSetCode } = params;
-    console.log(fromComponents);
-    console.log(fromPageComponentSchemas);
+    // console.log(fromComponents);
+    // console.log(fromPageComponentSchemas);
 
-    console.log(fromColComponentsMap);
+    // console.log(fromColComponentsMap);
 
-    console.log(listComponents);
-    console.log(listPageComponentSchemas);
+    // console.log(listComponents);
+    // console.log(listPageComponentSchemas);
 
-    console.log(listColComponentsMap);
+    // console.log(listColComponentsMap);
 
     const loadPageSetReq: LoadPageSetReq = {
       pageSetCode: pageSetCode
@@ -135,7 +135,6 @@ export async function startSavePageSet(params: SavePageSetParams) {
     };
     const res = await savePageSet(savePageSetReq);
 
-    console.log('res: ', res);
     if (res) {
       Message.success('保存成功');
     }

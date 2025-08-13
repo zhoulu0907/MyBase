@@ -120,6 +120,10 @@ export default function EditorWorkspace() {
             const itemType = e.item.getAttribute('data-cp-type');
             const itemDisplayName = e.item.getAttribute('data-cp-displayname');
 
+            const fieldID = e.item.getAttribute('data-field-id');
+            const entityID = e.item.getAttribute('data-entity-id');
+            const dataLabel = e.item.getAttribute('data-label');
+
             console.log(`拖入组件 ${cpID} ${itemType}`);
 
             if (cpID) {
@@ -137,6 +141,14 @@ export default function EditorWorkspace() {
             // console.log("schema", schema)
             schema.config.cpName = itemDisplayName;
             schema.config.id = cpID;
+
+            if (entityID && fieldID) {
+              console.log('dataField:    ', entityID, fieldID);
+              schema.config.dataField = [entityID, fieldID];
+            }
+            if (dataLabel) {
+              schema.config.label = dataLabel;
+            }
 
             const props = {
               id: cpID,

@@ -7,11 +7,21 @@ interface FieldCardProps {
   displayName: string;
   type: string;
   id: string;
+  fieldID: string;
+  entityID: string;
 }
 
-const FieldCard: React.FC<FieldCardProps> = ({ displayName, type, id }) => {
+const FieldCard: React.FC<FieldCardProps> = ({ displayName, type, id, fieldID, entityID }) => {
   return (
-    <div className={styles.fieldCard} data-cp-type={type} data-cp-displayname={displayName} data-cp-id={id}>
+    <div
+      className={styles.fieldCard}
+      data-cp-type={type}
+      data-cp-displayname={displayName}
+      data-cp-id={id}
+      data-field-id={fieldID}
+      data-entity-id={entityID}
+      data-label={displayName}
+    >
       <Button
         key={id}
         id={id || `${type}-${Date.now()}`}

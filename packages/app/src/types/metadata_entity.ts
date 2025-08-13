@@ -46,6 +46,13 @@ export interface AppEntityField {
     displayName: string; // 显示名称
 }
 
+export interface EntityWithChildren {
+    entityId: string;
+    entityName: string;
+    entityCode: string;
+    parentFields: AppEntityField[];
+    childEntities: AppEntity[];
+}
 
 // 实体相关接口类型定义
 export interface CreateEntityReqVO {

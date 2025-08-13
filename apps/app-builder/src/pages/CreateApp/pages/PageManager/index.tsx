@@ -9,12 +9,12 @@ import {
   copyApplicationMenu,
   createApplicationMenu,
   deleteApplicationMenu,
+  getEntityListByApp,
   getPageSetCode,
   listApplicationMenu,
   MenuType,
   PageType,
   RootParentPage,
-  getEntityListByApp,
   updateApplicationMenuName,
   type ApplicationMenu,
   type CopyApplicationMenuReq,
@@ -22,8 +22,8 @@ import {
   type DeleteApplicationMenuReq,
   type GetPageSetCodeReq,
   type ListApplicationMenuReq,
-  type UpdateApplicationMenuNameReq,
-  type MetadataEntityPair
+  type MetadataEntityPair,
+  type UpdateApplicationMenuNameReq
 } from '@onebase/app';
 import { useEffect, useState, type FC } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -151,7 +151,6 @@ const PageManagerPage: FC = () => {
       applicationId: curAppId
     };
     const res = await listApplicationMenu(req);
-    console.log('res: ', res);
 
     // 为每个children元素补充parentCode字段
     const processedRes = addParentCodeToChildren(res, RootParentPage.menuCode);
@@ -288,7 +287,6 @@ const PageManagerPage: FC = () => {
     console.log('req: ', req);
 
     const res = await copyApplicationMenu(req);
-    console.log('res: ', res);
     if (res) {
       Message.success('复制成功');
     }
