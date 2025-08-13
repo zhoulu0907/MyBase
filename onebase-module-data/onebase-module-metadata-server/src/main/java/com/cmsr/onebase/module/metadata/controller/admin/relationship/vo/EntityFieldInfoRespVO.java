@@ -21,4 +21,11 @@ public class EntityFieldInfoRespVO {
 
     @Schema(description = "字段类型", example = "VARCHAR")
     private String fieldType;
+
+    @Schema(description = "是否系统字段：0-是，1-不是", example = "1")
+    private Integer isSystemField;
+
+
+    @Schema(description = "显示名称", example = "用户名")
+    private String displayName;
 }

@@ -634,6 +634,8 @@ public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRela
         fieldInfo.setFieldID(String.valueOf(fieldDO.getId()));
         fieldInfo.setFieldName(fieldDO.getFieldName());
         fieldInfo.setFieldType(fieldDO.getFieldType());
+        fieldInfo.setIsSystemField(fieldDO.getIsSystemField());
+        fieldInfo.setDisplayName(fieldDO.getDisplayName());
         return fieldInfo;
     }
 

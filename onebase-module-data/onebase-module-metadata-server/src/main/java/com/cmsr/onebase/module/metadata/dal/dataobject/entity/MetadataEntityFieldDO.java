@@ -61,29 +61,29 @@ public class MetadataEntityFieldDO extends TenantBaseDO {
     private String description;
 
     /**
-     * 是否系统字段
+     * 是否系统字段：0-是，1-不是
      */
-    private Boolean isSystemField;
+    private Integer isSystemField;
 
     /**
-     * 是否主键
+     * 是否主键：0-是，1-不是
      */
-    private Boolean isPrimaryKey;
+    private Integer isPrimaryKey;
 
     /**
-     * 是否必填
+     * 是否必填：0-是，1-不是
      */
-    private Boolean isRequired;
+    private Integer isRequired;
 
     /**
-     * 是否唯一
+     * 是否唯一：0-是，1-不是
      */
-    private Boolean isUnique;
+    private Integer isUnique;
 
     /**
-     * 是否允许空值
+     * 是否允许空值：0-是，1-不是
      */
-    private Boolean allowNull;
+    private Integer allowNull;
 
     /**
      * 排序

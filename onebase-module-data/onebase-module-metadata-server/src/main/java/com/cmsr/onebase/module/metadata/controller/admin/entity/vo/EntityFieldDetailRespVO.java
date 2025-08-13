@@ -46,20 +46,20 @@ public class EntityFieldDetailRespVO {
     @Schema(description = "描述", example = "系统登录用户名")
     private String description;
 
-    @Schema(description = "是否必填", example = "true")
-    private Boolean isRequired;
+    @Schema(description = "是否必填：0-是，1-不是", example = "0")
+    private Integer isRequired;
 
-    @Schema(description = "是否唯一", example = "true")
-    private Boolean isUnique;
+    @Schema(description = "是否唯一：0-是，1-不是", example = "0")
+    private Integer isUnique;
 
-    @Schema(description = "允许空值", example = "false")
-    private Boolean allowNull;
+    @Schema(description = "允许空值：0-是，1-不是", example = "1")
+    private Integer allowNull;
 
-    @Schema(description = "是否系统字段", example = "false")
-    private Boolean isSystemField;
+    @Schema(description = "是否系统字段：0-是，1-不是", example = "1")
+    private Integer isSystemField;
 
-    @Schema(description = "是否主键", example = "false")
-    private Boolean isPrimaryKey;
+    @Schema(description = "是否主键：0-是，1-不是", example = "1")
+    private Integer isPrimaryKey;
 
     @Schema(description = "排序顺序", example = "10")
     private Integer sortOrder;
