@@ -42,4 +42,20 @@ public class MetadataValidationRuleGroupDO extends TenantBaseDO {
      */
     private String rgStatus;
 
+    /**
+     * 校验方式，如：满足条件时，不允许提交表单，并弹窗提示
+     */
+    private String valMethod;
+
+    /**
+     * 弹窗提示内容
+     */
+    private String popPrompt;
+
+
+    /**
+     * 弹窗类型，如：短提示弹窗，长提示弹窗等
+     */
+    private String popType;
+
 }

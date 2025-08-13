@@ -43,10 +43,10 @@ public class ValidationRuleDefinitionVO {
     private String fieldCode;
 
     @Schema(description = "条件值引用（单值条件或范围表达式的第一个）", example = "100000")
-    private Long fieldValue;
+    private String fieldValue;
 
     @Schema(description = "条件值引用2（单值条件或范围表达式的第二个）", example = "200000")
-    private Long fieldValue2;
+    private String fieldValue2;
 
     @Schema(description = "状态：ACTIVE/INACTIVE", example = "ACTIVE")
     private String status;
