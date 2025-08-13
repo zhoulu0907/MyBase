@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import javax.sql.DataSource;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 临时数据源服务类
@@ -27,6 +28,11 @@ public class TemporaryDatasourceService {
 
     @Resource
     private DatasourceConvert datasourceConvert;
+    
+    /**
+     * 用于缓存已创建的临时服务，避免重复创建
+     */
+    private final Map<String, AnylineService<?>> serviceCache = new ConcurrentHashMap<>();
 
     /**
      * 根据数据源DO对象创建临时的AnylineService用于数据库操作
@@ -45,11 +51,21 @@ public class TemporaryDatasourceService {
 
     /**
      * 根据数据源配置参数创建临时 AnylineService 服务
-     *
+     * 
      * @param datasourceConfig 数据源配置参数
      * @return AnylineService 实例
      */
-    public AnylineService<?> createTemporaryService(Map<String, Object> datasourceConfig) {
+    public synchronized AnylineService<?> createTemporaryService(Map<String, Object> datasourceConfig) {
+        // 生成数据源的唯一标识，用于缓存
+        String cacheKey = generateCacheKey(datasourceConfig);
+        
+        // 先从缓存中获取
+        AnylineService<?> cachedService = serviceCache.get(cacheKey);
+        if (cachedService != null) {
+            log.debug("从缓存中获取临时数据源服务: {}", cacheKey);
+            return cachedService;
+        }
+        
         try {
             String url = (String) datasourceConfig.get("url");
             String username = (String) datasourceConfig.get("username");
@@ -101,9 +117,12 @@ public class TemporaryDatasourceService {
             
             log.info("临时数据源配置: {}", dsConfig);
             
-            // 先使用配置创建数据源，然后创建临时服务
+            // 创建数据源和临时服务
             DataSource dataSource = DataSourceUtil.build(dsConfig);
             AnylineService<?> service = ServiceProxy.temporary(dataSource);
+            
+            // 缓存创建的服务
+            serviceCache.put(cacheKey, service);
             
             log.info("临时服务创建成功，Service实例: {}", service.getClass().getName());
             log.info("=== 创建临时数据源调试信息结束 ===");
@@ -113,6 +132,38 @@ public class TemporaryDatasourceService {
             log.error("创建数据库连接失败: {}", e.getMessage(), e);
             throw new RuntimeException("创建数据库连接失败: " + e.getMessage(), e);
         }
+    }
+    
+    /**
+     * 生成数据源配置的唯一缓存键
+     * 
+     * @param datasourceConfig 数据源配置
+     * @return 缓存键
+     */
+    private String generateCacheKey(Map<String, Object> datasourceConfig) {
+        String url = (String) datasourceConfig.get("url");
+        String username = (String) datasourceConfig.get("username");
+        String datasourceType = (String) datasourceConfig.get("datasourceType");
+        
+        if (url == null) {
+            String host = (String) datasourceConfig.get("host");
+            Object portObj = datasourceConfig.get("port");
+            String database = (String) datasourceConfig.get("database");
+            if (host != null) {
+                int port = getDefaultPort(datasourceType);
+                if (portObj instanceof Integer) {
+                    port = (Integer) portObj;
+                } else if (portObj instanceof String) {
+                    port = Integer.parseInt((String) portObj);
+                }
+                url = buildJdbcUrl(datasourceType, host, port, database);
+            }
+        }
+        
+        return String.format("temp_datasource_%s_%s_%s", 
+            datasourceType != null ? datasourceType : "unknown",
+            url != null ? url.hashCode() : "nourl", 
+            username != null ? username.hashCode() : "nouser");
     }
 
     /**
