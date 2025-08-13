@@ -288,7 +288,7 @@ public class MetadataBackupServiceImpl implements MetadataBackupService {
         for (MetadataValidationRuleDefinitionDO rule : validationRuleList) {
             // 重置ID，让数据库自动生成新ID
             rule.setId(null);
-            rule.setAppId(targetAppId);
+            // 注意：校验规则定义表没有app_id字段，所以不需要设置
             rule.setDeleted(0L);
             rule.setCreateTime(LocalDateTime.now());
             rule.setUpdateTime(LocalDateTime.now());

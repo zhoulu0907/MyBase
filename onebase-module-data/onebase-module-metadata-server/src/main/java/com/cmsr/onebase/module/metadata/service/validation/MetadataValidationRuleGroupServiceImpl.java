@@ -60,8 +60,8 @@ public class MetadataValidationRuleGroupServiceImpl implements MetadataValidatio
         Long groupId = ruleGroup.getId();
 
         // 处理规则定义
-        if (!CollectionUtils.isEmpty(createReqVO.getRuleDefinitions())) {
-            saveRuleDefinitions(groupId, createReqVO.getRuleDefinitions());
+        if (!CollectionUtils.isEmpty(createReqVO.getValueRules())) {
+            saveValueRules(groupId, createReqVO.getValueRules());
         }
 
         return groupId;
@@ -84,8 +84,8 @@ public class MetadataValidationRuleGroupServiceImpl implements MetadataValidatio
         Long groupId = updateReqVO.getId();
         validationRuleDefinitionRepository.deleteByGroupId(groupId);
         
-        if (!CollectionUtils.isEmpty(updateReqVO.getRuleDefinitions())) {
-            saveRuleDefinitions(groupId, updateReqVO.getRuleDefinitions());
+        if (!CollectionUtils.isEmpty(updateReqVO.getValueRules())) {
+            saveValueRules(groupId, updateReqVO.getValueRules());
         }
     }
 
@@ -140,103 +140,128 @@ public class MetadataValidationRuleGroupServiceImpl implements MetadataValidatio
     }
 
     /**
-     * 保存规则定义（递归处理树形结构）
+     * 保存规则定义（处理二维数组结构）
      *
      * @param groupId 规则组ID
-     * @param ruleDefinitions 规则定义列表
+     * @param valueRules 规则定义二维数组，外层数组元素间为OR关系，内层数组元素间为AND关系
      */
-    private void saveRuleDefinitions(Long groupId, List<ValidationRuleDefinitionVO> ruleDefinitions) {
-        if (CollectionUtils.isEmpty(ruleDefinitions)) {
+    private void saveValueRules(Long groupId, List<List<ValidationRuleDefinitionVO>> valueRules) {
+        if (CollectionUtils.isEmpty(valueRules)) {
             return;
         }
 
-        for (ValidationRuleDefinitionVO ruleVO : ruleDefinitions) {
-            // 转换并保存当前规则
-            MetadataValidationRuleDefinitionDO ruleDO = ValidationRuleGroupConvert.INSTANCE.convertToRuleDefinitionDO(ruleVO);
-            ruleDO.setGroupId(groupId);
-            
-            // 设置默认状态
-            if (!StringUtils.hasText(ruleDO.getStatus())) {
-                ruleDO.setStatus("ACTIVE");
-            }
-            
-            validationRuleDefinitionRepository.upsert(ruleDO);
-            Long currentRuleId = ruleDO.getId();
+        // 创建主OR规则节点
+        MetadataValidationRuleDefinitionDO mainOrRule = new MetadataValidationRuleDefinitionDO();
+        mainOrRule.setGroupId(groupId);
+        mainOrRule.setLogicType("LOGIC");
+        mainOrRule.setLogicOperator("OR");
+        mainOrRule.setStatus("ACTIVE");
+        validationRuleDefinitionRepository.upsert(mainOrRule);
+        Long mainOrRuleId = mainOrRule.getId();
 
-            // 递归处理子规则
-            if (!CollectionUtils.isEmpty(ruleVO.getChildren())) {
-                saveChildRuleDefinitions(groupId, currentRuleId, ruleVO.getChildren());
+        // 处理每个OR分组（内层数组）
+        for (List<ValidationRuleDefinitionVO> andGroup : valueRules) {
+            if (CollectionUtils.isEmpty(andGroup)) {
+                continue;
+            }
+
+            if (andGroup.size() == 1) {
+                // 只有一个条件，直接添加到主OR节点下
+                ValidationRuleDefinitionVO singleRule = andGroup.get(0);
+                MetadataValidationRuleDefinitionDO ruleDO = ValidationRuleGroupConvert.INSTANCE.convertToRuleDefinitionDO(singleRule);
+                ruleDO.setGroupId(groupId);
+                ruleDO.setParentRuleId(mainOrRuleId);
+                if (!StringUtils.hasText(ruleDO.getStatus())) {
+                    ruleDO.setStatus("ACTIVE");
+                }
+                validationRuleDefinitionRepository.upsert(ruleDO);
+            } else {
+                // 多个条件，创建AND分组节点
+                MetadataValidationRuleDefinitionDO andGroupRule = new MetadataValidationRuleDefinitionDO();
+                andGroupRule.setGroupId(groupId);
+                andGroupRule.setParentRuleId(mainOrRuleId);
+                andGroupRule.setLogicType("LOGIC");
+                andGroupRule.setLogicOperator("AND");
+                andGroupRule.setStatus("ACTIVE");
+                validationRuleDefinitionRepository.upsert(andGroupRule);
+                Long andGroupRuleId = andGroupRule.getId();
+
+                // 添加AND分组内的所有条件
+                for (ValidationRuleDefinitionVO conditionRule : andGroup) {
+                    MetadataValidationRuleDefinitionDO ruleDO = ValidationRuleGroupConvert.INSTANCE.convertToRuleDefinitionDO(conditionRule);
+                    ruleDO.setGroupId(groupId);
+                    ruleDO.setParentRuleId(andGroupRuleId);
+                    if (!StringUtils.hasText(ruleDO.getStatus())) {
+                        ruleDO.setStatus("ACTIVE");
+                    }
+                    validationRuleDefinitionRepository.upsert(ruleDO);
+                }
             }
         }
     }
 
     /**
-     * 递归保存子规则定义
+     * 构建规则定义的二维数组结构
      *
      * @param groupId 规则组ID
-     * @param parentRuleId 父规则ID
-     * @param childRules 子规则列表
+     * @return 二维数组结构的规则定义列表，外层数组元素间为OR关系，内层数组元素间为AND关系
      */
-    private void saveChildRuleDefinitions(Long groupId, Long parentRuleId, List<ValidationRuleDefinitionVO> childRules) {
-        for (ValidationRuleDefinitionVO childRule : childRules) {
-            MetadataValidationRuleDefinitionDO childRuleDO = ValidationRuleGroupConvert.INSTANCE.convertToRuleDefinitionDO(childRule);
-            childRuleDO.setGroupId(groupId);
-            childRuleDO.setParentRuleId(parentRuleId);
-            
-            // 设置默认状态
-            if (!StringUtils.hasText(childRuleDO.getStatus())) {
-                childRuleDO.setStatus("ACTIVE");
-            }
-            
-            validationRuleDefinitionRepository.upsert(childRuleDO);
-            Long currentChildRuleId = childRuleDO.getId();
-
-            // 递归处理孙子规则
-            if (!CollectionUtils.isEmpty(childRule.getChildren())) {
-                saveChildRuleDefinitions(groupId, currentChildRuleId, childRule.getChildren());
-            }
-        }
-    }
-
-    /**
-     * 构建规则定义的树形结构
-     *
-     * @param groupId 规则组ID
-     * @return 树形结构的规则定义列表
-     */
-    public List<ValidationRuleDefinitionVO> buildRuleDefinitionTree(Long groupId) {
+    public List<List<ValidationRuleDefinitionVO>> buildValueRulesStructure(Long groupId) {
         // 获取该规则组下的所有规则定义
         List<MetadataValidationRuleDefinitionDO> allRules = validationRuleDefinitionRepository.selectByGroupId(groupId);
         if (CollectionUtils.isEmpty(allRules)) {
             return new ArrayList<>();
         }
 
-        // 转换为VO
+        // 转换为VO并建立映射关系
         List<ValidationRuleDefinitionVO> allRuleVOs = ValidationRuleGroupConvert.INSTANCE.convertRuleDefinitionList(allRules);
-
-        // 构建ID到VO的映射
         Map<Long, ValidationRuleDefinitionVO> ruleMap = new HashMap<>();
         for (ValidationRuleDefinitionVO ruleVO : allRuleVOs) {
-            ruleVO.setChildren(new ArrayList<>());
             ruleMap.put(ruleVO.getId(), ruleVO);
         }
 
-        // 构建树形结构
-        List<ValidationRuleDefinitionVO> rootRules = new ArrayList<>();
+        // 找到主OR节点（顶级LOGIC节点且logicOperator为OR）
+        ValidationRuleDefinitionVO mainOrRule = null;
         for (ValidationRuleDefinitionVO ruleVO : allRuleVOs) {
-            if (ruleVO.getParentRuleId() == null) {
-                // 顶级规则
-                rootRules.add(ruleVO);
-            } else {
-                // 子规则，添加到父规则的children中
-                ValidationRuleDefinitionVO parentRule = ruleMap.get(ruleVO.getParentRuleId());
-                if (parentRule != null) {
-                    parentRule.getChildren().add(ruleVO);
+            if (ruleVO.getParentRuleId() == null && "LOGIC".equals(ruleVO.getLogicType()) && "OR".equals(ruleVO.getLogicOperator())) {
+                mainOrRule = ruleVO;
+                break;
+            }
+        }
+
+        if (mainOrRule == null) {
+            return new ArrayList<>();
+        }
+
+        // 构建二维数组结构
+        List<List<ValidationRuleDefinitionVO>> valueRules = new ArrayList<>();
+        
+        // 获取主OR节点的所有子规则
+        for (ValidationRuleDefinitionVO ruleVO : allRuleVOs) {
+            if (mainOrRule.getId().equals(ruleVO.getParentRuleId())) {
+                if ("CONDITION".equals(ruleVO.getLogicType())) {
+                    // 直接是条件规则，单独成组
+                    List<ValidationRuleDefinitionVO> singleGroup = new ArrayList<>();
+                    singleGroup.add(ruleVO);
+                    valueRules.add(singleGroup);
+                } else if ("LOGIC".equals(ruleVO.getLogicType()) && "AND".equals(ruleVO.getLogicOperator())) {
+                    // AND分组，获取其所有子条件
+                    List<ValidationRuleDefinitionVO> andGroup = new ArrayList<>();
+                    for (ValidationRuleDefinitionVO conditionVO : allRuleVOs) {
+                        if (ruleVO.getId().equals(conditionVO.getParentRuleId()) && "CONDITION".equals(conditionVO.getLogicType())) {
+                            andGroup.add(conditionVO);
+                        }
+                    }
+                    if (!andGroup.isEmpty()) {
+                        valueRules.add(andGroup);
+                    }
                 }
             }
         }
 
-        return rootRules;
+        return valueRules;
     }
+
+
 
 }

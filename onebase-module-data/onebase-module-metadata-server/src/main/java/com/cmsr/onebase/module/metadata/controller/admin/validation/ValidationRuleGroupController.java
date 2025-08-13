@@ -66,8 +66,8 @@ public class ValidationRuleGroupController {
         MetadataValidationRuleGroupDO ruleGroup = validationRuleGroupService.getValidationRuleGroup(id);
         ValidationRuleGroupRespVO respVO = ValidationRuleGroupConvert.INSTANCE.convert(ruleGroup);
         
-        // 获取规则定义的树形结构
-        respVO.setRuleDefinitions(validationRuleGroupService.buildRuleDefinitionTree(id));
+        // 获取规则定义的二维数组结构
+        respVO.setValueRules(validationRuleGroupService.buildValueRulesStructure(id));
         
         return success(respVO);
     }

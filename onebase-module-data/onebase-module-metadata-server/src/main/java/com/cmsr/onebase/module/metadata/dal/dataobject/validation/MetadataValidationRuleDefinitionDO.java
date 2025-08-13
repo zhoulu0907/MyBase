@@ -32,10 +32,7 @@ public class MetadataValidationRuleDefinitionDO extends TenantBaseDO {
      */
     private Long groupId;
 
-    /**
-     * 应用ID
-     */
-    private Long appId;
+
 
     /**
      * 父规则ID，用于层级关系；顶级规则为NULL

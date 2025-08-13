@@ -28,13 +28,22 @@ public class ValidationRuleGroupRespVO {
     @Schema(description = "规则组状态", example = "ACTIVE")
     private String rgStatus;
 
+    @Schema(description = "校验方式", example = "POP")
+    private String valMethod;
+
+    @Schema(description = "弹窗提示内容", example = "不满足条件，无法提交")
+    private String popPrompt;
+
+    @Schema(description = "弹窗类型", example = "SHORT")
+    private String popType;
+
     @Schema(description = "创建时间")
     private LocalDateTime createTime;
 
     @Schema(description = "更新时间")
     private LocalDateTime updateTime;
 
-    @Schema(description = "规则定义列表")
-    private List<ValidationRuleDefinitionVO> ruleDefinitions;
+    @Schema(description = "规则定义二维数组，外层数组元素间为OR关系，内层数组元素间为AND关系")
+    private List<List<ValidationRuleDefinitionVO>> valueRules;
 
 }

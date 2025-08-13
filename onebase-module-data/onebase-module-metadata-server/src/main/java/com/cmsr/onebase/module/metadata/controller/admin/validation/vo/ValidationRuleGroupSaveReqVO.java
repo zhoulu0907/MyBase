@@ -18,7 +18,7 @@ import java.util.List;
 @Data
 public class ValidationRuleGroupSaveReqVO {
 
-    @Schema(description = "规则组编号", example = "1024")
+    @Schema(description = "规则组编号（新增时不传，修改时必传）", example = "1024")
     private Long id;
 
     @Schema(description = "规则组名称", requiredMode = Schema.RequiredMode.REQUIRED, example = "客户信用评级规则")
@@ -33,8 +33,17 @@ public class ValidationRuleGroupSaveReqVO {
     @Schema(description = "规则组状态", example = "ACTIVE")
     private String rgStatus;
 
-    @Schema(description = "规则定义列表")
+    @Schema(description = "校验方式", example = "POP")
+    private String valMethod;
+
+    @Schema(description = "弹窗提示内容", example = "不满足条件，无法提交")
+    private String popPrompt;
+
+    @Schema(description = "弹窗类型", example = "SHORT")
+    private String popType;
+
+    @Schema(description = "规则定义二维数组，外层数组元素间为OR关系，内层数组元素间为AND关系")
     @Valid
-    private List<ValidationRuleDefinitionVO> ruleDefinitions;
+    private List<List<ValidationRuleDefinitionVO>> valueRules;
 
 }

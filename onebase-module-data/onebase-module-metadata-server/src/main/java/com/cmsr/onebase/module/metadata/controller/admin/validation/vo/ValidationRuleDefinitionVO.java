@@ -3,8 +3,6 @@ package com.cmsr.onebase.module.metadata.controller.admin.validation.vo;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
-import java.util.List;
-
 /**
  * 校验规则定义 VO
  *
@@ -43,15 +41,12 @@ public class ValidationRuleDefinitionVO {
     private String fieldCode;
 
     @Schema(description = "条件值引用（单值条件或范围表达式的第一个）", example = "100000")
-    private Long fieldValue;
+    private String fieldValue;
 
     @Schema(description = "条件值引用2（单值条件或范围表达式的第二个）", example = "200000")
-    private Long fieldValue2;
+    private String fieldValue2;
 
     @Schema(description = "状态：ACTIVE/INACTIVE", example = "ACTIVE")
     private String status;
-
-    @Schema(description = "子规则列表")
-    private List<ValidationRuleDefinitionVO> children;
 
 }
