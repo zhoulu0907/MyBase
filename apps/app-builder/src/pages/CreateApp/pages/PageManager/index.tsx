@@ -1,5 +1,5 @@
-import CreateGroupIcon from '@/assets/images/create_group.svg';
-import CreatePageIcon from '@/assets/images/create_page.svg';
+import CreateGroupIcon from '@/assets/images/addfolder.svg';
+import CreatePageIcon from '@/assets/images/addpage.svg';
 import { useI18n } from '@/hooks/useI18n';
 import { EDITOR_TYPES } from '@/pages/Editor/utils/const';
 import { useAppStore, useBasicEditorStore } from '@/store';
@@ -261,8 +261,11 @@ const PageManagerPage: FC = () => {
     const req: CopyApplicationMenuReq = {
       id: copyForm.getFieldValue('menuID'),
       menuName: copyForm.getFieldValue('menuName'),
-      parentCode: copyForm.getFieldValue('parentCode')
+      parentCode:
+        copyForm.getFieldValue('parentCode') === RootParentPage.menuCode ? '' : copyForm.getFieldValue('parentCode')
     };
+
+    console.log('req: ', req);
 
     const res = await copyApplicationMenu(req);
     console.log('res: ', res);
