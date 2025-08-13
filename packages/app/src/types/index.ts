@@ -5,5 +5,6 @@ export * from './app_version';
 export * from './application';
 export * from './common';
 export * from './dataresource';
+export * from './metadata_entity';
 export * from './tag';
 export * from './role';

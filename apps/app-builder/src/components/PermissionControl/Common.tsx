@@ -1,11 +1,10 @@
 import React from 'react';
 import { UserPermissionManager } from '@/utils/permission';
-import { type PermissionKey } from '@/constants/permission'
 
 export interface PermissionControlProps {
-  permission?: PermissionKey; // 单个指定权限名称
-  anyPermissions?: PermissionKey[]; // 多个指定权限具有其中任意一个
-  allPermissions?: PermissionKey[]; // 多个指定权限具有所有权限
+  permission?: string; // 单个指定权限名称
+  anyPermissions?: string[]; // 多个指定权限具有其中任意一个
+  allPermissions?: string[]; // 多个指定权限具有所有权限
   fallback?: React.ReactNode; // 无权限时显示的内容
   children: React.ReactNode;
 }

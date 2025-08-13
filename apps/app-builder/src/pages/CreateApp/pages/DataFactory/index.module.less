@@ -1,10 +1,13 @@
 .data-factory-page {
-  height: calc(100vh - 60px);
+  height: calc(100vh - 64px);
   .menu {
     height: 100%;
     width: 100%;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
     border-right: 1px solid #e5e6eb;
+    :global(.arco-menu-item) {
+      padding: 0 8px !important;
+    }
   }
   .sider {
     height: 100%;

@@ -14,7 +14,7 @@ export interface EntityField {
   code: string;
   fieldName: string;
   fieldType: string;
-  isSystemField: boolean;
+  isSystemField: number; // 0: 开启 1: 关闭
   displayName: string;
 }
 
@@ -25,6 +25,8 @@ export interface EntityNodeProps {
   onNodeDelete?: (id: string) => void;
   onNodeAddField?: (node: EntityNode) => void;
   onNodeAddRelation?: (id: string) => void;
+  onNodeAddMasterDetail?: (id: string) => void;
+  onNodeAddRule?: (id: string) => void;
   onlyUpdateNode?: boolean;
   // mode?: 'view' | 'edit';
   nodeData: EntityNode;
@@ -42,6 +44,7 @@ export interface EdgeData {
   source: { cell: string; port: string }; // 源节点ID
   target: { cell: string; port: string }; // 目标节点ID
   label?: string; // 关系标签
+  relationshipId?: string;
 }
 
 // 全部节点数据
@@ -59,6 +62,57 @@ export interface EntityERProps {
   onNodeDelete?: (id: string) => void;
   onNodeAddField?: (node: EntityNode) => void;
   onNodeAddRelation?: (id: string) => void;
+  onNodeAddMasterDetail?: (id: string) => void;
+  onNodeAddRule?: (id: string) => void;
   onFieldClick?: (id: string) => void;
+  onEdgeEdit?: (data: EdgeData) => void;
   onlyUpdateNode?: boolean;
+  updateEntityPosition?: (data: EntityNode, x: number, y: number) => void;
+}
+
+// 实体列表
+// 实体详情
+export interface Entity {
+  id: string;
+  displayName: string;
+  code: string;
+  fields: EntityField[];
+  relations: EntityRelation[];
+  rules: EntityRule[];
+  methods: EntityMethod[];
+}
+
+// 实体列表
+export interface EntityListItem {
+  id: string;
+  displayName: string;
+  code: string;
+}
+
+// 实体关系
+export interface EntityRelation {
+  id: string;
+  displayName: string;
+  code: string;
+}
+
+// 实体规则
+export interface EntityRule {
+  id: string;
+  displayName: string;
+  code: string;
+}
+
+// 实体方法
+export interface EntityMethod {
+  id: string;
+  displayName: string;
+  code: string;
+}
+
+// 实体字段
+export interface EntityField {
+  id: string;
+  displayName: string;
+  code: string;
 }

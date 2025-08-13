@@ -1,6 +1,5 @@
 import { Button, Layout, Menu } from '@arco-design/web-react';
 import {
-  IconDesktop,
   IconFile,
   IconIdcard,
   IconList,
@@ -13,6 +12,8 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import type { MenuItemType } from './menuData';
 import styles from './sider.module.less';
+import { hasMenu } from '@/utils/permission';
+import { TENANT_MENUS } from '@/constants/permission'
 
 const { Sider } = Layout;
 const MenuItem = Menu.Item;
@@ -34,46 +35,39 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
   const defaultMenuItems = useMemo(
     () => [
       {
-        key: 'platform-info',
-        title: '平台信息',
-        icon: <IconDesktop style={iconStyle} />,
-        path: '/onebase/setting/platform-info',
-        permissionKey: 'SYSTEM:PLATFORM_INFO'
-      },
-      {
         key: 'user',
         title: '用户管理',
         icon: <IconUserGroup style={iconStyle} />,
         path: '/onebase/setting/user',
-        permissionKey: 'SYSTEM:USER'
+        permissionKey: TENANT_MENUS.USER
       },
       {
         key: 'role',
         title: '角色管理',
         icon: <IconUser style={iconStyle} />,
         path: '/onebase/setting/role',
-        permissionKey: 'SYSTEM:ROLE'
+        permissionKey: TENANT_MENUS.ROLE
       },
       {
         key: 'organization',
         title: '组织管理',
         icon: <IconList style={iconStyle} />,
         path: '/onebase/setting/organization',
-        permissionKey: 'SYSTEM:DEPT'
+        permissionKey: TENANT_MENUS.DEPT
       },
       {
         key: 'system-dict',
         title: '数据字典管理',
         icon: <IconFile style={iconStyle} />,
         path: '/onebase/setting/system-dict',
-        permissionKey: 'SYSTEM:DICT'
+        permissionKey: TENANT_MENUS.DICT
       },
       {
         key: '租户信息',
         title: '租户信息',
         icon: <IconIdcard style={iconStyle} />,
         path: '/onebase/setting/tenant',
-        permissionKey: 'SYSTEM:TENANT'
+        permissionKey: TENANT_MENUS.INFO
       }
     ],
     []
@@ -142,8 +136,8 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
     return items
       .map((item) => {
         // TODO 后端返回数据暂未更新，暂不开启权限控制
-        // const permissionKey = item.permissionKey;
-        // if (permissionKey && !hasMenu(permissionKey as any)) return null;
+        const permissionKey = item.permissionKey;
+        if (permissionKey && !hasMenu(permissionKey as any)) return null;
 
         if (item.children && item.children.length > 0) {
           const childrenNodes = renderMenuItems(item.children) as React.ReactNode[];

@@ -1,22 +1,12 @@
-import {
-  Button,
-  Divider,
-  Form,
-  Grid,
-  Input,
-  Message,
-  Popconfirm,
-  Select,
-  type FormInstance
-} from '@arco-design/web-react';
+import { Form, Grid, Input, Popconfirm, Select, type FormInstance } from '@arco-design/web-react';
 import { useEffect, useState } from 'react';
 
 import {
   createApplicationTag,
   listApplicationTag,
+  type Application,
   type CreateApplicationTagReq,
-  type ListTagReq,
-  type Application
+  type ListTagReq
 } from '@onebase/app';
 import { sample } from 'lodash-es';
 

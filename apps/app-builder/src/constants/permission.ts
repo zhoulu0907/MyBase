@@ -7,63 +7,96 @@
  * 本文件用于建立与后端权限标识对应的常量键名映射
  */
 
-/** 模块 */
-export const SYSTEM = 'system'; // 租户管理
-export const APP = 'app'; // 应用管理 TODO：待确定
-
-export const MODULE_MAP = {
-  SYSTEM,
-  APP
-} as const;
+export enum PERMISSION_TYPES {
+  MODULE = 1,
+  MENU = 2,
+  ACTION = 3
+}
 
 /** 菜单-租户管理 */
-export const USER = 'user'; // 用户管理
-export const ROLE = 'role'; // 角色管理
-export const DEPT = 'dept'; // 组织管理
-export const DICT = 'dict'; // 字典管理
-export const TENANT = 'tenant'; // 租户信息
+export const TENANT_MENUS = {
+  USER: 'tenant:user',
+  ROLE: 'tenant:role',
+  DEPT: 'tenant:dept',
+  DICT: 'tenant:dict',
+  INFO: 'tenant:info',
+}
 
-/** 菜单-应用管理 */
-// TODO: 待确定
-export const MY_APP = ''; // 我的应用
-export const APP_CENTER = ''; // 应用中心
-export const APP_MALL = ''; // 商超中心
-export const APP_HELPER = ''; // 帮助中心
+/** 租户管理-用户管理 */
+export const TENANT_USER_QUERY = 'tenant:user:query'; // 查询用户
+export const TENANT_USER_CREATE = 'tenant:user:create'; // 增加用户
+export const TENANT_USER_UPDATE = 'tenant:user:update'; // 修改用户
+export const TENANT_USER_DELETE = 'tenant:user:delete'; // 删除用户
+export const TENANT_USER_STATUS = 'tenant:user:enable'; // 启用/禁用用户
+export const TENANT_USER_RESET = 'tenant:user:reset'; // 重置密码
+export const TENANT_USER_PERMISSION = {
+  QUERY: TENANT_USER_QUERY,
+  CREATE: TENANT_USER_CREATE,
+  UPDATE: TENANT_USER_UPDATE,
+  DELETE: TENANT_USER_DELETE,
+  RESET: TENANT_USER_RESET,
+  STATUS: TENANT_USER_STATUS
+}
 
-export const MENU_MAP = {
-  USER,
-  ROLE,
-  DEPT,
-  DICT,
-  TENANT,
-  MY_APP,
-  APP_CENTER,
-  APP_MALL,
-  APP_HELPER
-} as const;
+/** 租户管理-角色管理 */ 
+export const TENANT_ROLE_QUERY = 'tenant:role:query'; // 查询角色
+export const TENANT_ROLE_CREATE = 'tenant:role:create'; // 新增角色
+export const TENANT_ROLE_UPDATE = 'tenant:role:update'; // 修改角色
+export const TENANT_ROLE_DELETE = 'tenant:role:delete'; // 删除角色
+export const TENANT_ROLE_ASSIGN_USER = 'tenant:role:user'; // 分配用户
+export const TENANT_ROLE_ASSIGN_PERMISSION = 'tenant:role:permission'; // 分配角色权限
+export const TENANT_ROLE_PERMISSION = {
+  QUERY: TENANT_ROLE_QUERY,
+  CREATE: TENANT_ROLE_CREATE,
+  UPDATE: TENANT_ROLE_UPDATE,
+  DELETE: TENANT_ROLE_DELETE,
+  USER: TENANT_ROLE_ASSIGN_USER,
+  PERMISSION: TENANT_ROLE_ASSIGN_PERMISSION
+}
 
-/** 操作 */
-export const CREATE = 'create'; // 新增
-export const DELETE = 'delete'; // 删除
-export const EDIT = 'update'; // 修改
-export const QUERY = 'query'; // 查询
-export const IMPORT = 'import'; // 导入
-export const EXPORT = 'export'; // 导出
+/** 租户管理-组织管理 */
+export const TENANT_DEPT_QUERY = 'tenant:dept:query';
+export const TENANT_DEPT_CREATE = 'tenant:dept:create';
+export const TENANT_DEPT_UPDATE = 'tenant:dept:update';
+export const TENANT_DEPT_DELETE = 'tenant:dept:delete';
+export const TENANT_DEPT_PERMISSION = {
+  QUERY: TENANT_DEPT_QUERY,
+  CREATE: TENANT_DEPT_CREATE,
+  UPDATE: TENANT_DEPT_UPDATE,
+  DELETE: TENANT_DEPT_DELETE
+}
 
-export const ACTION_MAP = {
-  CREATE,
-  DELETE,
-  EDIT,
-  QUERY,
-  IMPORT,
-  EXPORT
-} as const;
+/** 租户管理-数据字典管理 */
+export const TENANT_DICT_QUERY = 'tenant:dict:query';
+export const TENANT_DICT_CREATE = 'tenant:dict:create';
+export const TENANT_DICT_UPDATE = 'tenant:dict:update';
+export const TENANT_DICT_DELETE = 'tenant:dict:delete';
+export const TENANT_DICT_STATUS = 'tenant:dict:enable';
+export const TENANT_DICT_PERMISSION = {
+  QUERY: TENANT_DICT_QUERY,
+  CREATE: TENANT_DICT_CREATE,
+  UPDATE: TENANT_DICT_UPDATE,
+  DELETE: TENANT_DICT_DELETE,
+  STATUS: TENANT_DICT_STATUS,
+}
+
+/** 租户管理-租户信息 */
+export const TENANT_INFO_QUERY = 'tenant:info:query';
+export const TENANT_INFO_UPDATE = 'tenant:info:update';
+export const TENANT_INFO_PERMISSION = {
+  QUERY: TENANT_INFO_QUERY,
+  UPDATE: TENANT_INFO_UPDATE,
+}
+/** 应用管理-我的应用管理 */
+export const APP_MYAPP_QUERY = 'app:app:query';
+export const APP_MYAPP_CREATE = 'app:app:create';
+export const APP_MYAPP_DELETE = 'app:app:delete';
+export const APP_MYAPP_UPDATE = 'app:app:update';
+export const APP_MYAPP_PERMISSION = {
+  QUERY: APP_MYAPP_QUERY,
+  CREATE: APP_MYAPP_CREATE,
+  DELETE: APP_MYAPP_DELETE,
+  UPDATE: APP_MYAPP_UPDATE,
+}
 
 export const ALL_PERMISSION_CODE = '*:*:*';
-
-export type ModuleName = keyof typeof MODULE_MAP;
-export type MenuName = keyof typeof MENU_MAP;
-export type ActionName = keyof typeof ACTION_MAP;
-
-export type PermissionKey = `${ModuleName}:${MenuName}:${ActionName}`;
-export type MenuKey = `${ModuleName}:${MenuName}`;

@@ -1,0 +1,72 @@
+@import '../../../../../styles/variables.less';
+
+.edit-relation-drawer {
+  :global(.arco-drawer-content) {
+    padding: 0 !important;
+  }
+
+  .content {
+    padding: 16px 0;
+    height: calc(100% - 32px);
+    overflow-y: auto;
+
+    .section {
+      margin-bottom: 24px;
+
+      h4 {
+        margin: 0 0 16px 0;
+        padding: 8px 16px;
+        background-color: #F7F8FA;
+      }
+
+      .form {
+        padding: 0 16px;
+        box-sizing: border-box;
+        :global(.arco-form-item) {
+          margin-bottom: 16px;
+
+          &:last-child {
+            margin-bottom: 0;
+          }
+
+          .arco-form-item-label {
+            font-size: 13px;
+            color: var(--color-text-1);
+            font-weight: 500;
+
+            &::before {
+              content: '*';
+              color: #f53f3f;
+              margin-right: 4px;
+            }
+          }
+
+          .arco-select {
+            width: 100%;
+          }
+        }
+      }
+    }
+  }
+
+  .loading {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+    span {
+      margin-top: 8px;
+      font-size: 14px;
+      color: var(--color-text-3);
+    }
+  }
+} 

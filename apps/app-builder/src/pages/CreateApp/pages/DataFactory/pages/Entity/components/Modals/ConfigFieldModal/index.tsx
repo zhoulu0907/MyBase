@@ -19,7 +19,7 @@ import { ReactSortable } from 'react-sortablejs';
 import styles from '../modal.module.less';
 
 interface FieldFormValues {
-  id: string;
+  id?: string;
   fieldCode: string;
   fieldName: string;
   description: string;
@@ -28,14 +28,15 @@ interface FieldFormValues {
   isUnique: boolean;
   allowNull: boolean;
   constraints: string;
-  isSystemField: boolean;
+  isSystemField: number;
   sortOrder?: number;
+  isDeleted?: boolean;
 }
 
 interface ConfigFieldModalProps {
   visible: boolean;
   setVisible: (visible: boolean) => void;
-  entity: EntityNode;
+  entity: Partial<EntityNode>;
   successCallback: () => void;
   initialFields?: FieldFormValues[];
 }
@@ -74,7 +75,6 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
 
   const addField = () => {
     const newField: FieldFormValues = {
-      id: `field-${Date.now()}`,
       fieldCode: '',
       fieldName: '',
       description: '',
@@ -83,7 +83,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
       isUnique: false,
       allowNull: true,
       constraints: '',
-      isSystemField: false,
+      isSystemField: 1,
       sortOrder: fields.length
     };
     setFields([...fields, newField]);
@@ -91,38 +91,63 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
 
   const deleteField = (index: number) => {
     const field = fields[index];
-    if (field.isSystemField) {
+    if (field.isSystemField === 0) {
       Message.error('系统字段不能删除');
       return;
     }
-    setFields(fields.filter((_, i) => i !== index));
+    setFields(fields.map((f, i) => (i === index ? { ...f, isDeleted: true } : f)));
   };
 
-  const updateField = (fieldId: string, updatedField: Partial<FieldFormValues>) => {
-    setFields((prevFields) =>
-      prevFields.map((field) => (field.id === fieldId ? { ...field, ...updatedField } : field))
-    );
+  const updateField = (index: number, updatedField: Partial<FieldFormValues>) => {
+    setFields((prevFields) => prevFields.map((field, i) => (i === index ? { ...field, ...updatedField } : field)));
+  };
+
+  // 获取字段在数组中的索引
+  const getFieldIndex = (fieldId: string) => {
+    return fields.findIndex((field) => field.id === fieldId);
   };
 
   const handleSort = (newFields: FieldFormValues[]) => {
-    setFields(newFields.map((field, index) => ({ ...field, sortOrder: index })));
+    // 获取所有字段（包括已删除的）
+    const allFields = [...fields];
+    // 更新可见字段的排序
+    const visibleFields = newFields.map((field, index) => ({ ...field, sortOrder: index }));
+
+    // 更新所有字段的排序
+    setFields(
+      allFields.map((field) => {
+        const visibleField = visibleFields.find((vf) => vf.id === field.id);
+        return visibleField ? { ...field, sortOrder: visibleField.sortOrder } : field;
+      })
+    );
   };
 
   const handleFinish = async () => {
     try {
       setLoading(true);
 
-      // 验证必填字段
-      const customFields = fields.filter((field) => !field.isSystemField);
+      // 过滤自定义字段（排除系统字段和已删除字段）
+      const customFields = fields.filter((field) => field.isSystemField === 1 && !field.isDeleted);
+
+      // 表单校验
       for (const field of customFields) {
-        if (!field.fieldCode || !field.fieldName) {
-          Message.error('请填写字段编码和字段名称');
+        if (!field.fieldCode || !field.fieldCode.trim()) {
+          Message.error('字段编码不能为空');
+          return;
+        }
+        if (!field.fieldName || !field.fieldName.trim()) {
+          Message.error('字段名称不能为空');
+          return;
+        }
+        if (!field.fieldType) {
+          Message.error('数据类型不能为空');
           return;
         }
       }
 
-      // 批量保存字段
-      const promises = customFields.map((field) => {
+      // 准备所有字段数据（包括标记为删除的）
+      const allFields = fields.filter((field) => field.isSystemField === 1);
+      const fieldDataList = allFields.map((field) => {
         const fieldData = {
           appId: '1',
           entityId: entity.entityId,
@@ -130,14 +155,21 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
           fieldName: field.fieldName,
           description: field.description,
           fieldType: field.fieldType,
-          isSystemField: false,
-          displayName: ''
+          isSystemField: 1,
+          displayName: entity.entityName,
+          isDeleted: field.isDeleted || false
         };
 
-        return batchSaveFields(fieldData);
+        return field.id ? { ...fieldData, id: field.id } : fieldData;
       });
 
-      await Promise.all(promises);
+      const params = {
+        appId: '1',
+        entityId: entity.entityId,
+        items: fieldDataList
+      };
+
+      await batchSaveFields(params);
       Message.success('保存成功');
       setVisible(false);
       successCallback();
@@ -182,24 +214,24 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
 
   const columns = [
     {
-      title: '排序',
+      title: '',
       dataIndex: 'sortOrder',
       width: 60,
       render: (value: number, record: FieldFormValues) =>
-        !record.isSystemField && value ? <IconDragDotVertical className={styles['drag-handle']} /> : null
+        record.isSystemField === 1 && value ? <IconDragDotVertical className={styles['drag-handle']} /> : null
     },
     {
       title: '字段编码',
       dataIndex: 'fieldCode',
       width: 120,
       render: (value: string, record: FieldFormValues) =>
-        record.isSystemField ? (
+        record.isSystemField === 0 ? (
           <span className={styles['system-field']}>{value}</span>
         ) : (
           <Input
             value={value}
             placeholder="请输入字段编码"
-            onChange={(val) => updateField(record.id, { fieldCode: val })}
+            onChange={(val) => updateField(getFieldIndex(record.id), { fieldCode: val })}
           />
         )
     },
@@ -208,13 +240,13 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
       dataIndex: 'fieldName',
       width: 120,
       render: (value: string, record: FieldFormValues) =>
-        record.isSystemField ? (
+        record.isSystemField === 0 ? (
           <span className={styles['system-field']}>{value}</span>
         ) : (
           <Input
             value={value}
             placeholder="请输入字段名称"
-            onChange={(val) => updateField(record.id, { fieldName: val })}
+            onChange={(val) => updateField(getFieldIndex(record.id), { fieldName: val })}
           />
         )
     },
@@ -227,11 +259,11 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
           <Select
             value={value}
             options={fieldTypeOptions}
-            onChange={(val) => updateField(record.id, { fieldType: val })}
-            disabled={record.isSystemField}
+            onChange={(val) => updateField(getFieldIndex(record.id), { fieldType: val })}
+            disabled={record.isSystemField === 0}
             style={{ width: 100 }}
           />
-          {!record.isSystemField && FIELD_TYPES_NEED_CONFIG.includes(value) && (
+          {record.isSystemField === 1 && FIELD_TYPES_NEED_CONFIG.includes(value) && (
             <Popover
               content={renderFieldConfig(value)}
               trigger="click"
@@ -257,28 +289,37 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
       width: 250,
       ellipsis: true,
       render: (value: string, record: FieldFormValues) =>
-        record.isSystemField ? (
+        record.isSystemField === 0 ? (
           <span className={styles['system-field']}>{value}</span>
         ) : (
           <Input
             value={value}
             placeholder="请输入字段描述"
-            onChange={(val) => updateField(record.id, { description: val })}
+            onChange={(val) => updateField(getFieldIndex(record.id), { description: val })}
           />
         )
+    },
+    {
+      title: '字段类型',
+      dataIndex: 'isSystemField',
+      width: 110,
+      ellipsis: true,
+      render: (value: number) => (
+        <span className={styles['system-field']}>{value === 0 ? '系统字段' : '自定义字段'}</span>
+      )
     },
     {
       title: '默认值',
       dataIndex: 'defaultValue',
       width: 120,
       render: (value: string, record: FieldFormValues) =>
-        record.isSystemField ? (
+        record.isSystemField === 0 ? (
           <span className={styles['system-field']}>-</span>
         ) : (
           <Input
             value={value}
             placeholder="请输入默认值"
-            onChange={(val) => updateField(record.id, { defaultValue: val })}
+            onChange={(val) => updateField(getFieldIndex(record.id), { defaultValue: val })}
           />
         )
     },
@@ -287,21 +328,27 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
       dataIndex: 'isUnique',
       width: 60,
       render: (value: boolean, record: FieldFormValues) =>
-        record.isSystemField ? (
+        record.isSystemField === 0 ? (
           <span className={styles['system-field']}>-</span>
         ) : (
-          <Checkbox checked={value} onChange={(checked) => updateField(record.id, { isUnique: checked })} />
+          <Checkbox
+            checked={value}
+            onChange={(checked) => updateField(getFieldIndex(record.id), { isUnique: checked })}
+          />
         )
     },
     {
       title: '允许空值',
       dataIndex: 'allowNull',
-      width: 80,
+      width: 100,
       render: (value: boolean, record: FieldFormValues) =>
-        record.isSystemField ? (
+        record.isSystemField === 0 ? (
           <span className={styles['system-field']}>-</span>
         ) : (
-          <Checkbox checked={value} onChange={(checked) => updateField(record.id, { allowNull: checked })} />
+          <Checkbox
+            checked={value}
+            onChange={(checked) => updateField(getFieldIndex(record.id), { allowNull: checked })}
+          />
         )
     },
     {
@@ -309,13 +356,13 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
       dataIndex: 'constraints',
       // width: 120,
       render: (value: string, record: FieldFormValues) =>
-        record.isSystemField ? (
+        record.isSystemField === 0 ? (
           <span className={styles['system-field']}>{value || '-'}</span>
         ) : (
           <Input
             value={value}
             placeholder="请输入字段约束"
-            onChange={(val) => updateField(record.id, { constraints: val })}
+            onChange={(val) => updateField(getFieldIndex(record.id), { constraints: val })}
           />
         )
     },
@@ -326,8 +373,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
       render: (value: unknown, record: FieldFormValues) => {
         const fieldIndex = fields.findIndex((f) => f.id === record.id);
         return (
-          !record.isSystemField &&
-          value && (
+          record.isSystemField === 1 && (
             <Button type="text" status="danger" size="mini" onClick={() => deleteField(fieldIndex)}>
               删除
             </Button>
@@ -351,18 +397,20 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
     >
       <div className={styles['field-config-container']}>
         <ReactSortable
-          list={fields}
+          list={fields.filter((field) => !field.isDeleted)}
           setList={handleSort}
           animation={200}
           handle={`.${styles['drag-handle']}`}
           filter={`.${styles['system-field']}`}
         >
           <Table
-            data={fields}
+            data={fields.filter((field) => !field.isDeleted)}
             columns={columns}
             pagination={false}
             className={styles['field-table']}
-            rowClassName={(record) => (record.isSystemField ? styles['system-field-row'] : styles['custom-field-row'])}
+            rowClassName={(record) =>
+              record.isSystemField === 0 ? styles['system-field-row'] : styles['custom-field-row']
+            }
           />
         </ReactSortable>
 

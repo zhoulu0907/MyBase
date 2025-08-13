@@ -1,34 +1,45 @@
-import type { EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
+import { convertEntityListItemToConfigField } from '@/pages/CreateApp/pages/DataFactory/utils/entityConverter';
+import type { EntityListItem } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
 import type { TableColumnProps } from '@arco-design/web-react';
 import { Button, Message, Modal, Space, Table, Tag } from '@arco-design/web-react';
-import { deleteField, getEntityFields } from '@onebase/app';
+import { deleteField, getEntityFieldsPage } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
 import EditFieldDrawer from '../../Drawers/EditFieldDrawer';
-import CreateFieldModal from '../../Modals/CreateFieldModal';
+import ConfigFieldModal from '../../Modals/ConfigFieldModal';
 import styles from './tabs.module.less';
 
 interface DataFieldsProps {
-  entity: EntityNode;
+  entity: EntityListItem;
+  activeTab: string;
 }
 
-const DataFields: React.FC<DataFieldsProps> = ({ entity }) => {
-  const [fields, setFields] = useState(entity.fields || []);
+const DataFields: React.FC<DataFieldsProps> = ({ entity, activeTab }) => {
+  const [fields, setFields] = useState([]);
   const [loading, setLoading] = useState(false);
   const [editDrawerVisible, setEditDrawerVisible] = useState(false);
   const [selectedFieldId, setSelectedFieldId] = useState<string>('');
-  const [createFieldModalVisible, setCreateFieldModalVisible] = useState(false);
+  const [configFieldModalVisible, setConfigFieldModalVisible] = useState(false);
+  const [page, setPage] = useState({ pageNo: 1, pageSize: 10 });
+  const [total, setTotal] = useState(0);
+
   // 加载字段列表
   const loadFields = async () => {
     try {
       setLoading(true);
-      const response = await getEntityFields({ entityId: entity.entityId });
+      const params = {
+        entityId: entity.id,
+        pageNo: page.pageNo,
+        pageSize: page.pageSize,
+        appId: '1'
+      };
+      const response = await getEntityFieldsPage(params);
       console.log('getEntityFields', response);
-      if (response) {
-        setFields(response);
+      if (response?.list) {
+        setFields(response.list || []);
+        setTotal(response.total || 0);
       }
     } catch (error) {
       console.error('加载字段列表失败:', error);
-      Message.error('加载字段列表失败');
     } finally {
       setLoading(false);
     }
@@ -36,7 +47,7 @@ const DataFields: React.FC<DataFieldsProps> = ({ entity }) => {
 
   const handleAddField = () => {
     setSelectedFieldId('');
-    setCreateFieldModalVisible(true);
+    setConfigFieldModalVisible(true);
   };
 
   // 处理编辑字段
@@ -69,19 +80,23 @@ const DataFields: React.FC<DataFieldsProps> = ({ entity }) => {
   };
 
   useEffect(() => {
-    loadFields();
-  }, []);
+    if (activeTab === 'fields') {
+      loadFields();
+    }
+  }, [entity, activeTab, page]);
 
   const columns: TableColumnProps[] = [
     {
       title: '字段编码',
       dataIndex: 'fieldCode',
-      key: 'fieldCode'
+      key: 'fieldCode',
+      width: 150
     },
     {
       title: '字段名称',
       dataIndex: 'fieldName',
-      key: 'fieldName'
+      key: 'fieldName',
+      width: 150
     },
     {
       title: '字段描述',
@@ -91,14 +106,15 @@ const DataFields: React.FC<DataFieldsProps> = ({ entity }) => {
     {
       title: '数据类型',
       dataIndex: 'fieldType',
-      key: 'fieldType'
+      key: 'fieldType',
+      width: 100
     },
     {
       title: '字段类型',
       dataIndex: 'isSystemField',
       key: 'isSystemField',
-      render: (isSystemField: boolean) => (
-        <Tag color={isSystemField ? 'red' : 'green'}>{isSystemField ? '系统字段' : '自定义字段'}</Tag>
+      render: (isSystemField: number) => (
+        <Tag color={isSystemField === 0 ? 'red' : 'green'}>{isSystemField === 0 ? '系统字段' : '自定义字段'}</Tag>
       )
     },
     {
@@ -109,39 +125,47 @@ const DataFields: React.FC<DataFieldsProps> = ({ entity }) => {
     {
       title: '唯一',
       dataIndex: 'isUnique',
-      key: 'isUnique'
+      key: 'isUnique',
+      width: 70,
+      render: (isUnique: boolean) => (isUnique ? '是' : '否')
     },
     {
       title: '必填',
       dataIndex: 'isRequired',
-      key: 'isRequired'
+      key: 'isRequired',
+      width: 70,
+      render: (isRequired: boolean) => (isRequired ? '是' : '否')
     },
     {
       title: '允许空值',
       dataIndex: 'allowNull',
-      key: 'allowNull'
+      key: 'allowNull',
+      width: 90,
+      render: (allowNull: boolean) => (allowNull ? '是' : '否')
     },
     {
       title: '长度范围',
       dataIndex: 'dataLength',
-      key: 'dataLength'
+      key: 'dataLength',
+      width: 90
     },
     {
       title: '正则校验',
       dataIndex: 'validationRulesId',
-      key: 'validationRulesId'
+      key: 'validationRulesId',
+      width: 90
     },
     {
       title: '操作',
       key: 'operation',
       render: (_, record) => (
         <Space>
-          {!record.isSystemField && (
+          {record.isSystemField === 1 && (
             <Button type="text" size="mini" onClick={() => handleEditField(record.id)}>
               编辑
             </Button>
           )}
-          {!record.isSystemField && (
+          {record.isSystemField === 1 && (
             <Button type="text" size="mini" status="danger" onClick={() => handleDeleteField(record.id)}>
               删除
             </Button>
@@ -154,16 +178,23 @@ const DataFields: React.FC<DataFieldsProps> = ({ entity }) => {
   return (
     <div className={styles.dataFields}>
       <div className={styles.header}>
-        <h3>数据字段</h3>
+        {/* <h3>数据字段</h3> */}
         <Button type="primary" size="small" onClick={() => handleAddField()}>
-          添加字段
+          字段配置
         </Button>
       </div>
       <Table
         columns={columns}
         data={fields}
         rowKey="id"
-        pagination={false}
+        pagination={{
+          pageSize: page.pageSize,
+          current: page.pageNo,
+          total: total,
+          onChange: (pageNo, pageSize) => {
+            setPage({ pageNo, pageSize });
+          }
+        }}
         className={styles.table}
         loading={loading}
       />
@@ -173,10 +204,10 @@ const DataFields: React.FC<DataFieldsProps> = ({ entity }) => {
         fieldId={selectedFieldId}
         onSuccess={handleEditSuccess}
       />
-      <CreateFieldModal
-        visible={createFieldModalVisible}
-        setVisible={setCreateFieldModalVisible}
-        entity={entity as unknown as EntityNode}
+      <ConfigFieldModal
+        visible={configFieldModalVisible}
+        setVisible={setConfigFieldModalVisible}
+        entity={convertEntityListItemToConfigField(entity)}
         successCallback={loadFields}
       />
     </div>

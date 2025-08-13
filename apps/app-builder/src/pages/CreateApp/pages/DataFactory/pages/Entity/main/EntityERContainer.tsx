@@ -1,112 +1,28 @@
 import React, { useEffect, useState } from 'react';
-// import { Button, Space } from '@arco-design/web-react';
 import type {
   EdgeData,
   EntityData,
   EntityERProps,
   EntityNode
 } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
-import { Button, Modal } from '@arco-design/web-react';
-import EditDrawer from '../components/Drawers/EditEntityDrawer';
-import FieldDetailDrawer from '../components/Drawers/FieldDetailDrawer';
+import { Button, Message } from '@arco-design/web-react';
+import EditEntityDrawer from '../components/Drawers/EditEntityDrawer';
+import EditFieldDrawer from '../components/Drawers/EditFieldDrawer';
+import EditRelationDrawer from '../components/Drawers/EditRelationDrawer';
+// import FieldDetailDrawer from '../components/Drawers/FieldDetailDrawer';
 import ERchart from '../components/ERchart';
 import CreateEntityModal from '../components/Modals/CreateEntityModal';
 // import CreateFieldModal from '../components/Modals/CreateFieldModal';
 import { resouceId } from '@/pages/CreateApp/pages/DataFactory/utils/const';
 import { IconPlus } from '@arco-design/web-react/icon';
-import { getEntityGraph } from '@onebase/app';
-import ConfigFieldModal from '../components/Modals/ConfigFieldModal';
-import CreateRelationModal from '../components/Modals/CreateRelationModal';
+import { getEntityGraph, deleteEntity, updateEntity } from '@onebase/app';
+import {
+  ConfigFieldModal,
+  CreateRelationModal,
+  CreateMasterDetailModal,
+  DeleteConfirmModal
+} from '../components/Modals';
 import styles from '../index.module.less';
-
-// const mockData = {
-//   nodes: [
-//     {
-//       id: 'sub-table',
-//       title: '子表',
-//       x: 100,
-//       y: 100,
-//       fields: [
-//         { id: 'sub-table-field-3', name: '日期时间', type: '日期时间', isSystem: true },
-//         { id: 'sub-table-field-4', name: '选择', type: '选择', isSystem: true },
-//       ],
-//     },
-//     {
-//       id: 'user-system',
-//       title: '用户系统对象',
-//       x: 400,
-//       y: -100,
-//       fields: [
-//         { id: 'user-system-field-2', name: '用户口', type: '文本', isSystem: true },
-//         { id: 'user-system-field-3', name: '姓名', type: '文本', isSystem: true },
-//         { id: 'user-system-field-4', name: '头像', type: '文本', isSystem: false },
-//         { id: 'user-system-field-5', name: '手机号', type: '文本', isSystem: false },
-//         { id: 'user-system-field-6', name: '邮箱', type: '文本', isSystem: false },
-//         { id: 'user-system-field-7', name: '工号', type: '文本', isSystem: false },
-//         { id: 'user-system-field-8', name: '上级', type: '人员单选', isSystem: false },
-//         { id: 'user-system-field-9', name: '类型', type: '单选', isSystem: false },
-//         { id: 'user-system-field-10', name: '账号状态', type: '单选', isSystem: false },
-//       ],
-//     },
-//     {
-//       id: 'test-frontend',
-//       title: '测试前台',
-//       x: 800,
-//       y: 0,
-//       fields: [
-//         // 系统字段 (13个)
-//         { name: 'id', type: '文本', isSystem: true, id: 'id' },
-//         { name: 'created_at', type: '文本', isSystem: true, id: 'created_at' },
-//         { name: 'updated_at', type: '文本', isSystem: true, id: 'updated_at' },
-//         { name: 'created_by', type: '文本', isSystem: true, id: 'created_by' },
-//         { name: 'updated_by', type: '文本', isSystem: true, id: 'updated_by' },
-//         { name: 'deleted_at', type: '文本', isSystem: true, id: 'deleted_at' },
-//         { name: 'deleted_by', type: '文本', isSystem: true, id: 'deleted_by' },
-//         { name: 'version', type: '文本', isSystem: true, id: 'version' },
-//         { name: 'status', type: '文本', isSystem: true, id: 'status' },
-//         { name: 'tenant_id', type: '文本', isSystem: true, id: 'tenant_id' },
-//         { name: 'org_id', type: '文本', isSystem: true, id: 'org_id' },
-//         { name: 'owner_id', type: '文本', isSystem: true, id: 'owner_id' },
-//         { name: 'owner_type', type: '文本', isSystem: true, id: 'owner_type' },
-//         // 自定义字段 (5个)
-//         { name: '单行输入', type: '文本', isSystem: false, id: 'single-input' },
-//         { name: '子表', type: '主子关系', isSystem: false, id: 'sub-table' },
-//         { name: '数据选择', type: '数据多选', isSystem: false, id: 'data-select' },
-//       ],
-//     },
-//     {
-//       id: 'department',
-//       title: '部门',
-//       x: 1200,
-//       y: 100,
-//       fields: [
-//         { name: '部门ID', type: '文本', isSystem: true, id: 'department-id' },
-//         { name: '部门编号', type: '文本', isSystem: true, id: 'department-code' },
-//         { name: '部门名称', type: '文本', isSystem: false, id: 'department-name' },
-//         { name: '部门主管', type: '人员单选', isSystem: false, id: 'department-manager' },
-//         { name: '部门状态', type: '单选', isSystem: false, id: 'department-status' },
-//         { name: '结构ID', type: '文本', isSystem: false, id: 'structure-id' },
-//         { name: '结构名称', type: '文本', isSystem: false, id: 'structure-name' },
-//         { name: '部门层级', type: '数字', isSystem: false, id: 'department-level' },
-//         { name: '同级部门排序', type: '数字', isSystem: false, id: 'department-sort' },
-//       ],
-//     },
-//   ],
-//   edges: [
-//     {
-//       source: { cell: 'sub-table', port: 'sub-table-field-3' }, // 从子表的自定义字段
-//       target: { cell: 'user-system', port: 'user-system-field-5' }, // 到测试前台的子表字段
-//       // label: '主子关系',
-//     },
-//     {
-//       source: { cell: 'test-frontend', port: 'test-frontend-field-5' }, // 从测试前台的数据选择字段
-//       target: { cell: 'department', port: 'department-field-3' }, // 到部门的部门名称字段
-//       // label: '数据关联',
-//     },
-//   ],
-// };
-
-// 模式切换示例
 export const EntityERContainer: React.FC<{
   refreshEntityList: boolean;
   setRefreshEntityList: (refresh: boolean) => void;
@@ -129,42 +45,47 @@ export const EntityERContainer: React.FC<{
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [createRelationModalVisible, setCreateRelationModalVisible] = useState(false);
+  const [createMasterDetailModalVisible, setCreateMasterDetailModalVisible] = useState(false);
   const [updateRelationOptions, setUpdateRelationOptions] = useState(false);
-  const [fieldDetailDrawerVisible, setFieldDetailDrawerVisible] = useState(false);
+  const [editFieldDrawerVisible, setEditFieldDrawerVisible] = useState(false);
   const [selectedFieldId, setSelectedFieldId] = useState<string>('');
-
+  const [editRelationDrawerVisible, setEditRelationDrawerVisible] = useState(false);
+  const [relationData, setRelationData] = useState<EdgeData | null>(null);
   const loadEntityList = async () => {
     const res = await getEntityGraph(resouceId);
     console.log('loadEntityList', res);
     if (res?.entities || res?.relationships) {
       setData({
-        nodes: res?.entities || [],
-        edges: res?.relationships || []
+        nodes:
+          res?.entities.map((item) => {
+            const pos = JSON.parse(item?.displayConfig || '{}');
+            return {
+              ...item,
+              positionX: pos?.x || 0,
+              positionY: pos?.y || 0
+            };
+          }) || [],
+        edges: res?.relationships.map((item) => {
+          return {
+            source: { cell: item.sourceEntityId, port: item.sourceFieldId },
+            target: { cell: item.targetEntityId, port: item.targetFieldId },
+            label: item.relationshipName,
+            relationshipId: item.relationshipId
+          };
+        })
       });
     }
-    // setEntityList(res);
   };
 
   const handleNodeEdit = (editData: Partial<EntityNode>) => {
     console.log('节点编辑:', editData);
-    // 这里可以更新节点数据
-    const { nodes, edges } = JSON.parse(
-      localStorage.getItem('entityFormValues') || JSON.stringify({ nodes: [], edges: [] })
-    );
-    const newNodes = nodes.map((node: EntityNode) => {
-      if (node.entityId === editData.entityId) {
-        return editData;
-      }
-      return node;
-    });
-    localStorage.setItem('entityFormValues', JSON.stringify({ nodes: newNodes, edges: edges }));
     setEditDrawerVisible(true);
+    setEditFieldDrawerVisible(false);
     setEditingNode(editData as unknown as EntityNode);
-    setRefreshEntityList(!refreshEntityList);
-    setOnlyUpdateNode(true);
   };
 
   const handleNodeAddField = (node: EntityNode) => {
+    console.log('添加字段', node);
     setConfigFieldModalVisible(true);
     setNodedata(node as unknown as EntityNode);
   };
@@ -176,10 +97,17 @@ export const EntityERContainer: React.FC<{
     setOnlyUpdateNode(false);
   };
 
+  const handleNodeAddMasterDetail = (id: string) => {
+    console.log('添加主子关系:', id);
+    setCreateMasterDetailModalVisible(true);
+    setOnlyUpdateNode(false);
+  };
+
   const handleFieldClick = (fieldId: string) => {
     console.log('字段点击:', fieldId);
     setSelectedFieldId(fieldId);
-    setFieldDetailDrawerVisible(true);
+    setEditDrawerVisible(false);
+    setEditFieldDrawerVisible(true);
   };
 
   const handleNodeDelete = (id: string) => {
@@ -188,28 +116,36 @@ export const EntityERContainer: React.FC<{
     setNodeId(id);
   };
 
-  const confirmDelete = () => {
-    setDeleteLoading(true);
-    console.log('删除节点:', nodeId);
-    const { nodes, edges } = JSON.parse(
-      localStorage.getItem('entityFormValues') || JSON.stringify({ nodes: [], edges: [] })
-    );
+  const handleUpdateEntityPosition = async (data: EntityNode, x: number, y: number) => {
+    console.log('更新节点位置:', data, x, y);
 
-    const newNodes = nodes.filter((node: EntityNode) => node.entityId !== nodeId);
-    const newEdges = edges?.filter((edge: EdgeData) => edge.source.cell !== nodeId && edge.target.cell !== nodeId);
-    setData({
-      nodes: newNodes,
-      edges: newEdges
-    });
-    localStorage.setItem('entityFormValues', JSON.stringify({ nodes: newNodes, edges: newEdges }));
+    const params = {
+      id: data.entityId,
+      displayName: data.entityName,
+      displayConfig: JSON.stringify({ x, y }),
+      code: data.code,
+      datasourceId: resouceId,
+      appId: '1'
+    };
+    const res = await updateEntity(params);
+    console.log('updateEntity', res);
+    if (res) {
+      console.log('实体位置成功');
+    }
+  };
+
+  const confirmDelete = async () => {
+    setDeleteLoading(true);
+    const res = await deleteEntity(nodeId);
+    console.log('deleteEntity', res);
+    if (res) {
+      Message.success('删除成功');
+      loadEntityList();
+    }
     setDeleteModalVisible(false);
     setDeleteLoading(false);
     setRefreshEntityList(true);
     setOnlyUpdateNode(true);
-  };
-
-  const cancelDelete = () => {
-    setDeleteModalVisible(false);
   };
 
   const handleSuccessCallback = async () => {
@@ -223,15 +159,15 @@ export const EntityERContainer: React.FC<{
     setOnlyUpdateNode(false);
   };
 
+  const handleEdgeEdit = (data: EdgeData) => {
+    console.log('handleEdgeEdit', data);
+    setEditRelationDrawerVisible(true);
+    setRelationData(data);
+  };
+
   useEffect(() => {
     if (refreshEntityList) {
-      const { nodes, edges } = JSON.parse(
-        localStorage.getItem('entityFormValues') || JSON.stringify({ nodes: [], edges: [] })
-      );
-      setData({
-        nodes: nodes,
-        edges: edges
-      });
+      loadEntityList();
       setRefreshEntityList(false);
     }
   }, [refreshEntityList]);
@@ -256,9 +192,12 @@ export const EntityERContainer: React.FC<{
         onNodeEdit={handleNodeEdit}
         onNodeAddField={handleNodeAddField}
         onNodeAddRelation={handleNodeAddRelation}
+        onNodeAddMasterDetail={handleNodeAddMasterDetail}
         onNodeDelete={handleNodeDelete}
         onFieldClick={handleFieldClick}
         onlyUpdateNode={onlyUpdateNode}
+        updateEntityPosition={handleUpdateEntityPosition}
+        onEdgeEdit={handleEdgeEdit}
       />
       <Button
         type="primary"
@@ -272,7 +211,7 @@ export const EntityERContainer: React.FC<{
       </Button>
 
       {/* 交互弹窗、抽屉、模态框 */}
-      <EditDrawer
+      <EditEntityDrawer
         visible={editDrawerVisible}
         setVisible={setEditDrawerVisible}
         editingNode={editingNode as EntityNode}
@@ -284,6 +223,7 @@ export const EntityERContainer: React.FC<{
         visible={createEntityModalVisible}
         setVisible={setCreateEntityModalVisible}
         successCallback={createEntityCallback}
+        entityListLength={data.nodes.length}
       />
       <ConfigFieldModal
         visible={configFieldModalVisible}
@@ -298,23 +238,34 @@ export const EntityERContainer: React.FC<{
         updateRelationOptions={updateRelationOptions}
         setUpdateRelationOptions={setUpdateRelationOptions}
       />
-      <FieldDetailDrawer
-        visible={fieldDetailDrawerVisible}
-        setVisible={setFieldDetailDrawerVisible}
-        fieldId={selectedFieldId}
+      <CreateMasterDetailModal
+        visible={createMasterDetailModalVisible}
+        setVisible={setCreateMasterDetailModalVisible}
+        entity={nodedata as EntityNode}
+        successCallback={handleSuccessCallback}
       />
-      {/* 删除确认对话框 */}
-      <Modal
-        title="确认删除"
+      <EditRelationDrawer
+        visible={editRelationDrawerVisible}
+        setVisible={setEditRelationDrawerVisible}
+        relationData={relationData}
+        onSuccess={handleSuccessCallback}
+      />
+      <EditFieldDrawer
+        visible={editFieldDrawerVisible}
+        setVisible={setEditFieldDrawerVisible}
+        fieldId={selectedFieldId}
+        onSuccess={handleSuccessCallback}
+      />
+      <DeleteConfirmModal
         visible={deleteModalVisible}
-        onOk={confirmDelete}
-        onCancel={cancelDelete}
+        onVisibleChange={setDeleteModalVisible}
+        onConfirm={confirmDelete}
         confirmLoading={deleteLoading}
+        title="确认删除"
+        content="确定要删除这个业务实体吗？删除后无法恢复。"
         okText="确认删除"
         cancelText="取消"
-      >
-        <p>确定要删除这个业务实体吗？删除后无法恢复。</p>
-      </Modal>
+      />
     </div>
   );
 };
