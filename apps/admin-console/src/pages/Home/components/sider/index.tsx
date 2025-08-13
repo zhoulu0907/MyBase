@@ -1,5 +1,5 @@
 import { Button, Layout, Menu } from '@arco-design/web-react';
-import { IconDesktop, IconMenuFold, IconMenuUnfold, IconUser } from '@arco-design/web-react/icon';
+import { IconDesktop, IconFile, IconMenuFold, IconMenuUnfold, IconUser } from '@arco-design/web-react/icon';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import type { MenuItemType } from './menuData';
@@ -33,7 +33,7 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
       {
         key: 'tenant',
         title: '租户管理',
-        icon: <IconDesktop />,
+        icon: <IconFile />,
         path: '/onebase/tenant'
       },
       {

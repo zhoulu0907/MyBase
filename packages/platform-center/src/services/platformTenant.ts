@@ -4,6 +4,12 @@ import { PlatformTenantInfo, CreateTenantParams } from '../types/platformTenant'
 // 可分配数量接口 /admin-api/system/tenant/get-allocatable-count
 export const getCreateTenantCountApi = () => systemService.get('/tenant/get-allocatable-count');
 
+// 获取其他租户分配数量
+export const getOtherTenantCountApi = (id: string) => systemService.get('/tenant/get-exist-user-count');
+
+// 获取租户用户数量
+export const getTenantUserCountApi = (id: string) => systemService.get('/tenant/get-user-count', { id });
+
 // 获取平台租户列表信息
 export const getPlatformTenantListApi = (params: {
   pageNo: number,
