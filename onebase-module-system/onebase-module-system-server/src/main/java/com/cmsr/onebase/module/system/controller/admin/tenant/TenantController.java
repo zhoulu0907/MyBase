@@ -113,6 +113,14 @@ public class TenantController {
         return success(accountCount);
     }
 
+    @GetMapping("/get-exist-user-count")
+    @Operation(summary = "获得其他已有的用户数量和")
+    @PreAuthorize("@ss.hasPermission('system:tenant:query')")
+    public CommonResult<Long> getOtherTenantUserCount(@RequestParam Long id) {
+        Long accountCount = tenantService.getOtherTenantUserCount(id);
+        return success(accountCount);
+    }
+
     @GetMapping("/page")
     @Operation(summary = "获得租户分页")
     @PreAuthorize("@ss.hasPermission('system:tenant:query')")

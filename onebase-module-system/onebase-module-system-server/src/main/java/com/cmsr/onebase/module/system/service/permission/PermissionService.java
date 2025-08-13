@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.system.service.permission;
 
 import com.cmsr.onebase.framework.common.biz.system.permission.dto.DeptDataPermissionRespDTO;
+import com.cmsr.onebase.module.system.dal.dataobject.permission.UserRoleDO;
 
 import java.util.Collection;
 import java.util.Set;
@@ -159,5 +160,7 @@ public interface PermissionService {
      * @return 删除的行数
      */
     long deleteRoleUsers(Long roleId, Set<Long> userIds);
+
+    UserRoleDO getUserRoleByUserAndRoleId(Long userId, Long roleId);
 
 }

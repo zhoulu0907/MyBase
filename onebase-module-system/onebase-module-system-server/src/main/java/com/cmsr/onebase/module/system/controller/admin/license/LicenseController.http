@@ -8,6 +8,10 @@ Content-Type: application/json
 tenant-id: 1
 
 {
-  "username": "platfomAdmin123",
-  "password": "admin124"
+  "username": "admin",
+  "password": "admin123"
 }
+
+### 导出凭证
+GET http://127.0.0.1:48080/admin-api/system/license/export?id=1
+Authorization: Bearer e2c473e36664444f8e56abd1a8570ab9

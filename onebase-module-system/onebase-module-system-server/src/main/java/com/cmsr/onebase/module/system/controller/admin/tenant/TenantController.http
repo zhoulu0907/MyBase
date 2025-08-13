@@ -37,5 +37,11 @@ tenant-id: 1
 ### 获得租户可分配数量 /admin-api/system/tenant/get-allocatable-count
 GET http://127.0.0.1:48080/admin-api/system/tenant/get-allocatable-count
 Content-Type: application/json
-Authorization: Bearer 2a22af2af4544f2b86409c9ee243901a
+Authorization: Bearer e2c473e36664444f8e56abd1a8570ab9
+tenant-id: 1
+
+### 获得租户其他已有的用户数量 /admin-api/system/tenant/get-allocatable-count
+GET http://127.0.0.1:48080/admin-api/system/tenant/get-exist-user-count?id=1
+Content-Type: application/json
+Authorization: Bearer e2c473e36664444f8e56abd1a8570ab9
 tenant-id: 1
