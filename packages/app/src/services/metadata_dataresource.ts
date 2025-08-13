@@ -86,8 +86,8 @@ export const getDatasourcePage = (params: GetDatasourcePageParams) => {
  * 获得数据源列表
  * @returns 数据源列表
  */
-export const getDatasourceList = () => {
-  return metadataService.post('/datasource/list');
+export const getDatasourceList = (params: {appId:string}) => {
+  return metadataService.post('/datasource/list', params);
 };
 
 /**

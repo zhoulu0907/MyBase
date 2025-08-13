@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Radio, Tag } from '@arco-design/web-react';
 import { IconMindMapping, IconNav } from '@arco-design/web-react/icon';
-import { getDatasourcePage } from '@onebase/app';
+import { getDatasourceList } from '@onebase/app';
 import { useAppStore } from '@/store';
 import { useResourceStore } from '@/store_resource';
 import EntityTable from '../components/EntityTable';
@@ -28,19 +28,22 @@ export const CheckEntityPage: React.FC = () => {
   const { setCurDataSourceId } = useResourceStore();
 
   const getAppResources = async () => {
-    const params = {
-      pageNo: 1,
-      pageSize: 10,
-      appId: curAppId
-    };
-    const res = await getDatasourcePage(params);
-    console.log('getAppResources res', res);
-    if (res?.list?.length > 0) {
-      const dataSource = res?.list[0];
-      setDsData(dataSource);
-      // 将数据源ID存储到store中
-      setCurDataSourceId(dataSource.id.toString());
-      console.log('数据源ID已存储到store:', dataSource.id);
+    try {
+      const params = {
+        appId: curAppId
+      };
+      const res = await getDatasourceList(params);
+      if (res?.length > 0) {
+        const dataSource = res?.[0];
+        setDsData(dataSource);
+        // 将数据源ID存储到store中
+        setCurDataSourceId(dataSource.id.toString());
+        console.log('数据源ID已存储到store:', dataSource.id);
+      } else {
+        console.warn('getAppResources - 未获取到数据源列表');
+      }
+    } catch (error) {
+      console.error('getAppResources - API调用失败:', error);
     }
   };
 

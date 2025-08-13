@@ -35,6 +35,12 @@ const CreateEntityModal: React.FC<{
   const [dsResource, setDsResource] = useState<string>(DS_RESOURCE_TYPE.EXTERNAL); // 数据源来源：内部数据源、外部数据源、外部数据源中引用自有数据源已有资产
   // 提交
   const handleFinish = () => {
+    // 检查数据源ID是否存在
+    if (!curDataSourceId) {
+      Message.error('数据源ID未获取到，请刷新页面重试');
+      return;
+    }
+
     // TODO: 提交表单数据
     form.validate().then(async (values) => {
       // 前端数据模拟
