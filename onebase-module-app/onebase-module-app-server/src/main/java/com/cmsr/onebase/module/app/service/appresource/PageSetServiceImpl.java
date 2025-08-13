@@ -241,7 +241,6 @@ public class PageSetServiceImpl implements PageSetService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public LoadPageSetRespVO loadPageSet(LoadPageSetReqVO loadPageSetReqVO) {
-        ConfigStore configs = new DefaultConfigStore();
         PageSetDO pageSetDO = pageSetDataRepository.findPageSetByPageSetCode(loadPageSetReqVO.getPageSetCode());
 
         if (pageSetDO == null) {
@@ -281,6 +280,7 @@ public class PageSetServiceImpl implements PageSetService {
         });
 
         loadPageSetRespVO.setPages(pageDTOs);
+        loadPageSetRespVO.setMainMetadata(pageSetDO.getMainMetadata());
 
         return loadPageSetRespVO;
     }
