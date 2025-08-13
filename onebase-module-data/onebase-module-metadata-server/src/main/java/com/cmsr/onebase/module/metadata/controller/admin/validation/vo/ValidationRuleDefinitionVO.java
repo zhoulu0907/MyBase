@@ -3,8 +3,6 @@ package com.cmsr.onebase.module.metadata.controller.admin.validation.vo;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
-import java.util.List;
-
 /**
  * 校验规则定义 VO
  *
@@ -50,8 +48,5 @@ public class ValidationRuleDefinitionVO {
 
     @Schema(description = "状态：ACTIVE/INACTIVE", example = "ACTIVE")
     private String status;
-
-    @Schema(description = "子规则列表")
-    private List<ValidationRuleDefinitionVO> children;
 
 }

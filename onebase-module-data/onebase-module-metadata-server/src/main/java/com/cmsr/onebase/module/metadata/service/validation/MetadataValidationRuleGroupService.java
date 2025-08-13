@@ -56,14 +56,6 @@ public interface MetadataValidationRuleGroupService {
     PageResult<MetadataValidationRuleGroupDO> getValidationRuleGroupPage(ValidationRuleGroupPageReqVO pageReqVO);
 
     /**
-     * 构建规则定义的树形结构
-     *
-     * @param groupId 规则组ID
-     * @return 树形结构的规则定义列表
-     */
-    List<ValidationRuleDefinitionVO> buildRuleDefinitionTree(Long groupId);
-
-    /**
      * 构建规则定义的二维数组结构
      *
      * @param groupId 规则组ID

@@ -262,45 +262,6 @@ public class MetadataValidationRuleGroupServiceImpl implements MetadataValidatio
         return valueRules;
     }
 
-    /**
-     * 构建规则定义的树形结构
-     *
-     * @param groupId 规则组ID
-     * @return 树形结构的规则定义列表
-     */
-    public List<ValidationRuleDefinitionVO> buildRuleDefinitionTree(Long groupId) {
-        // 获取该规则组下的所有规则定义
-        List<MetadataValidationRuleDefinitionDO> allRules = validationRuleDefinitionRepository.selectByGroupId(groupId);
-        if (CollectionUtils.isEmpty(allRules)) {
-            return new ArrayList<>();
-        }
 
-        // 转换为VO
-        List<ValidationRuleDefinitionVO> allRuleVOs = ValidationRuleGroupConvert.INSTANCE.convertRuleDefinitionList(allRules);
-
-        // 构建ID到VO的映射
-        Map<Long, ValidationRuleDefinitionVO> ruleMap = new HashMap<>();
-        for (ValidationRuleDefinitionVO ruleVO : allRuleVOs) {
-            ruleVO.setChildren(new ArrayList<>());
-            ruleMap.put(ruleVO.getId(), ruleVO);
-        }
-
-        // 构建树形结构
-        List<ValidationRuleDefinitionVO> rootRules = new ArrayList<>();
-        for (ValidationRuleDefinitionVO ruleVO : allRuleVOs) {
-            if (ruleVO.getParentRuleId() == null) {
-                // 顶级规则
-                rootRules.add(ruleVO);
-            } else {
-                // 子规则，添加到父规则的children中
-                ValidationRuleDefinitionVO parentRule = ruleMap.get(ruleVO.getParentRuleId());
-                if (parentRule != null) {
-                    parentRule.getChildren().add(ruleVO);
-                }
-            }
-        }
-
-        return rootRules;
-    }
 
 }
