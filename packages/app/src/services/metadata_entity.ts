@@ -1,79 +1,17 @@
 // 实体管理服务
+import {
+    CreateEntityReqVO,
+    CreateFieldReqVO,
+    CreateMasterChildReqVO,
+    CreateRelationReqVO,
+    CreateRuleReqVO,
+    GetEntityPageParams,
+    UpdateEntityReqVO,
+    UpdateFieldReqVO,
+    UpdateRelationReqVO,
+    UpdateRuleReqVO
+} from '../types';
 import { metadataService } from './clients';
-
-// 实体相关接口类型定义
-export interface CreateEntityReqVO {
-  code: string;
-  displayName: string;
-  description: string;
-}
-
-export interface UpdateEntityReqVO extends CreateEntityReqVO {
-  id: string;
-}
-
-export interface GetEntityPageParams {
-  pageNo: number;
-  pageSize: number;
-  datasourceId: string;
-  code?: string;
-  title?: string;
-}
-
-export interface CreateFieldReqVO {
-  appId: string;
-  entityId: string;
-  fieldCode: string;
-  fieldName: string;
-  description: string;
-  fieldType: string;
-  isSystemField?: number;
-  displayName: string;
-}
-
-export interface UpdateFieldReqVO extends CreateFieldReqVO {
-  id: string;
-}
-
-export interface CreateMasterChildReqVO {
-  parentEntityId: string;
-  parentFieldId: string;
-  childEntityId: string;
-  childFieldId: string;
-  childTableCode: string;
-  childTableName: string;
-  childTableDescription: string;
-  appId: string;
-  datasourceId: string;
-}
-
-export interface CreateRelationReqVO {
-  sourceEntityId: string;
-  sourceFieldId: string;
-  targetEntityId: string;
-  targetFieldId: string;
-  relationshipType?: string;
-  relationName?: string;
-}
-
-export interface UpdateRelationReqVO extends CreateRelationReqVO {
-  id: string;
-}
-
-// 数据规则相关接口
-export interface CreateRuleReqVO {
-  entityId: string;
-  name: string;
-  description?: string;
-  ruleType: string;
-  ruleContent: string;
-  isEnabled?: boolean;
-}
-
-export interface UpdateRuleReqVO extends CreateRuleReqVO {
-  id: string;
-}
-
 
 /**
  * 获取实体分页列表
@@ -255,12 +193,21 @@ export const deleteRelation = (id: string) => {
 };
 
 /**
- * 获取实体数据规则
+ * 根据实体ID查询实体名称及其关联的子表信息
+ * @param entityId 实体ID
+ * @returns 实体名称及其关联的子表信息
+ */
+export const getEntityFieldsWithChildren = (entityId: string) => {
+  return metadataService.post('/entity-relationship/entity-with-children?entityId=' + entityId);
+};
+
+/**
+ * 获取实体数据规则分页
  * @param entityId 实体ID
  * @returns 数据规则列表
  */
 export const getEntityRules = (params: object) => {
-  return metadataService.post('/validation-rule/page', params);
+  return metadataService.post('/validation-rule-group/page', params);
 };
 
 /**
@@ -269,7 +216,7 @@ export const getEntityRules = (params: object) => {
  * @returns 规则ID
  */
 export const createRule = (data: CreateRuleReqVO) => {
-  return metadataService.post('/business-entity/rule/create', data);
+  return metadataService.post('/validation-rule-group/create', data);
 };
 
 /**
@@ -278,7 +225,7 @@ export const createRule = (data: CreateRuleReqVO) => {
  * @returns 操作结果
  */
 export const updateRule = (data: UpdateRuleReqVO) => {
-  return metadataService.post('/business-entity/rule/update', data);
+  return metadataService.post('/validation-rule-group/update', data);
 };
 
 /**
@@ -287,7 +234,7 @@ export const updateRule = (data: UpdateRuleReqVO) => {
  * @returns 操作结果
  */
 export const deleteRule = (id: string) => {
-  return metadataService.post('/business-entity/rule/delete', { params: { id } });
+  return metadataService.post('/validation-rule-group/delete?id=' + id);
 };
 
 /**
@@ -306,45 +253,6 @@ export const getEntityMethods = (params: object) => {
  */
 export const getMethodDataById = (params: object) => {
   return metadataService.post('/data-method/detail', params);
-};
-
-/**
- * 导出实体数据
- * @param entityId 实体ID
- * @returns 导出文件
- */
-export const exportEntity = (entityId: string) => {
-  return metadataService.post('/business-entity/export', {
-    params: { entityId },
-    responseType: 'blob'
-  });
-};
-
-/**
- * 导入实体数据
- * @param file 导入文件
- * @returns 操作结果
- */
-export const importEntity = (file: File) => {
-  const formData = new FormData();
-  formData.append('file', file);
-  return metadataService.post('/entity/import', formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data'
-    }
-  });
-};
-
-/**
- * 验证实体编码是否唯一
- * @param code 实体编码
- * @param excludeId 排除的实体ID（用于编辑时验证）
- * @returns 是否唯一
- */
-export const validateEntityCode = (code: string, excludeId?: string) => {
-  return metadataService.post('/entity/validate-code', {
-    params: { code, excludeId }
-  });
 };
 
 /**
@@ -376,3 +284,8 @@ export const getEntityListByApp = (appId: string) => {
 export const getAppEntities = (appId: string) => {
   return metadataService.post(`/entity-relationship/app-entities?appId=${appId}`);
 };
+
+
+export const getEntityWithChildren = (entityID: string) => {
+    return metadataService.post(`/entity-relationship/entity-with-children?entityId=${entityID}`);
+}

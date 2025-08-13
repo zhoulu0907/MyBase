@@ -7,7 +7,7 @@ import { usePageEditorStore } from '@/hooks/useStore';
 import { useAppDataStore, useAppStore, useBasicEditorStore, useFromEditorStore, useListEditorStore } from '@/store';
 import { Button, Message, Tabs } from '@arco-design/web-react';
 import { IconArrowLeft } from '@arco-design/web-react/icon';
-import { getAppEntities, getAppIdByPageSetCode, getApplication, type GetApplicationReq } from '@onebase/app';
+import { getAppIdByPageSetCode, getApplication, getEntityWithChildren, type GetApplicationReq } from '@onebase/app';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { startLoadPageSet, startSavePageSet, type SavePageSetParams } from '../../utils/app_resource';
@@ -63,7 +63,7 @@ export default function EditorHeader() {
     clearPageComponentSchemas: clearListPageComponentSchemas
   } = useListEditorStore();
 
-  const { setAppEntities } = useAppDataStore();
+  const { setMainEntity } = useAppDataStore();
 
   const { curAppId, setCurAppId } = useAppStore();
 
@@ -159,9 +159,17 @@ export default function EditorHeader() {
     }
 
     // TODO(mickey): 等xiaoyi完成后 写活
-    const appEntities = await getAppEntities('1');
-    console.log(appEntities);
-    setAppEntities(appEntities);
+    const entityWithChildren = await getEntityWithChildren('542683577733746688');
+    console.log(entityWithChildren);
+
+    if (entityWithChildren) {
+      setMainEntity({
+        entityID: entityWithChildren.entityId,
+        entityName: entityWithChildren.entityName,
+        entityType: entityWithChildren.entityType,
+        fields: entityWithChildren.parentFields
+      });
+    }
   };
 
   const handleSavePageSet = async () => {

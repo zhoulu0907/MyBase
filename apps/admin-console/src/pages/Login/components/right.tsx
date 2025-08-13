@@ -5,8 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useI18n } from '../../../hooks/useI18n';
 import { useRememberMe } from '../../../hooks/useRememberMe';
 import styles from '../index.module.less';
-// import type { LoginRequest } from '@/types/login';
-import { login, type LoginRequest } from '@onebase/platform-center';
+import { adminLogin, type LoginRequest } from '@onebase/platform-center';
 import { TokenManager } from '@onebase/common';
 
 const { Paragraph } = Typography;
@@ -44,7 +43,7 @@ const Right: React.FC = () => {
     console.log('values:', values);
 
     try {
-      const loginResp = await login(values);
+      const loginResp = await adminLogin(values);
       console.log('loginRes:', loginResp);
       // 显示成功消息并跳转
       if (loginResp.accessToken) {
@@ -97,7 +96,7 @@ const Right: React.FC = () => {
                 initialValue=""
                 rules={[
                   { required: true, message: '请输入密码' },
-                  { minLength: 6, message: '密码至少6个字符' }
+                  { minLength: 4, message: '密码至少4个字符' }
                 ]}
               >
                 <Input.Password placeholder={t('auth.password')} allowClear size="large" />

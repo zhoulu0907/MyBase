@@ -13,6 +13,7 @@ import {
   Tooltip
 } from '@arco-design/web-react';
 import { IconDragDotVertical, IconPlus, IconSettings } from '@arco-design/web-react/icon';
+import { useAppStore } from '@/store';
 import { batchSaveFields, getEntityFields } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
@@ -54,7 +55,13 @@ const fieldTypeOptions = Object.entries(ENTITY_FIELD_TYPE).map(([key, value]) =>
   value: key
 }));
 
+// 自定义表格行组件，支持拖拽
+const SortableTableRow = (props) => {
+  const { record, children, ...restProps } = props;
+  return <tr {...restProps}>{children}</tr>;
+};
 const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible, entity, successCallback }) => {
+  const { curAppId } = useAppStore();
   const [fields, setFields] = useState<FieldFormValues[]>([]);
   const [loading, setLoading] = useState(false);
   const [configPopoverVisible, setConfigPopoverVisible] = useState<string | null>(null);
@@ -72,6 +79,9 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
       });
     }
   }, [visible]);
+
+  // 过滤掉已删除的字段
+  const activeFields = fields.filter((field) => !field.isDeleted);
 
   const addField = () => {
     const newField: FieldFormValues = {
@@ -108,6 +118,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
   };
 
   const handleSort = (newFields: FieldFormValues[]) => {
+    console.log('handleSort', newFields);
     // 获取所有字段（包括已删除的）
     const allFields = [...fields];
     // 更新可见字段的排序
@@ -149,7 +160,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
       const allFields = fields.filter((field) => field.isSystemField === 1);
       const fieldDataList = allFields.map((field) => {
         const fieldData = {
-          appId: '1',
+          appId: curAppId,
           entityId: entity.entityId,
           fieldCode: field.fieldCode,
           fieldName: field.fieldName,
@@ -164,7 +175,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
       });
 
       const params = {
-        appId: '1',
+        appId: curAppId,
         entityId: entity.entityId,
         items: fieldDataList
       };
@@ -216,9 +227,14 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
     {
       title: '',
       dataIndex: 'sortOrder',
-      width: 60,
-      render: (value: number, record: FieldFormValues) =>
-        record.isSystemField === 1 && value ? <IconDragDotVertical className={styles['drag-handle']} /> : null
+      width: 40,
+      render: (value: number, record: FieldFormValues) => {
+        // 系统字段不能拖拽
+        if (record.isSystemField === 0) {
+          return null;
+        }
+        return <IconDragDotVertical className={styles['drag-handle']} />;
+      }
     },
     {
       title: '字段编码',
@@ -397,20 +413,27 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
     >
       <div className={styles['field-config-container']}>
         <ReactSortable
-          list={fields.filter((field) => !field.isDeleted)}
+          list={activeFields}
           setList={handleSort}
           animation={200}
           handle={`.${styles['drag-handle']}`}
           filter={`.${styles['system-field']}`}
+          tag="tbody" // 指定包装元素为tbody
         >
           <Table
-            data={fields.filter((field) => !field.isDeleted)}
+            data={activeFields}
             columns={columns}
             pagination={false}
             className={styles['field-table']}
             rowClassName={(record) =>
               record.isSystemField === 0 ? styles['system-field-row'] : styles['custom-field-row']
             }
+            rowKey="id"
+            components={{
+              body: {
+                row: SortableTableRow
+              }
+            }}
           />
         </ReactSortable>
 

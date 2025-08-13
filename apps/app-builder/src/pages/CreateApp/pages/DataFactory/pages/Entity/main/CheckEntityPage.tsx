@@ -1,29 +1,66 @@
+import React, { useState, useEffect } from 'react';
 import { Radio, Tag } from '@arco-design/web-react';
 import { IconMindMapping, IconNav } from '@arco-design/web-react/icon';
-import React, { useState } from 'react';
+import { getDatasourceList } from '@onebase/app';
+import { useAppStore } from '@/store';
+import { useResourceStore } from '@/store_resource';
 import EntityTable from '../components/EntityTable';
-import styles from '../index.module.less';
 import { EntityERContainer } from './EntityERContainer';
+import styles from '../index.module.less';
 
+interface DatasourceRecord {
+  id: number;
+  datasourceName: string;
+  code: string;
+  datasourceType: string;
+  description: string;
+  runMode: number;
+  appId: string;
+  creator: string;
+  createTime: string;
+}
 export const CheckEntityPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('ER');
   const [refreshEntityList, setRefreshEntityList] = useState(false);
   const [onlyUpdateNode, setOnlyUpdateNode] = useState(false);
-  const dsData = {
-    name: '数据源',
-    code: 'ds_1',
-    creator: 'admin',
-    createTime: '2025-01-01'
+  const [dsData, setDsData] = useState<DatasourceRecord | null>(null);
+  const { curAppId } = useAppStore();
+  const { setCurDataSourceId } = useResourceStore();
+
+  const getAppResources = async () => {
+    try {
+      const params = {
+        appId: curAppId
+      };
+      const res = await getDatasourceList(params);
+      if (res?.length > 0) {
+        const dataSource = res?.[0];
+        setDsData(dataSource);
+        // 将数据源ID存储到store中
+        setCurDataSourceId(dataSource.id.toString());
+        console.log('数据源ID已存储到store:', dataSource.id);
+      } else {
+        console.warn('getAppResources - 未获取到数据源列表');
+      }
+    } catch (error) {
+      console.error('getAppResources - API调用失败:', error);
+    }
   };
+
+  useEffect(() => {
+    if (curAppId) {
+      getAppResources();
+    }
+  }, [curAppId]);
 
   return (
     <div className={styles['entity-page']}>
       <div className={styles['entity-page-header']}>
         <div className={styles['entity-page-header-left']}>
           <span className={styles['entity-page-header-left-name']}>数据源名称</span>
-          <Tag className={styles['entity-page-header-left-tag']}>数据源编码：{dsData.code}</Tag>
-          <Tag className={styles['entity-page-header-left-tag']}>创建人：{dsData.creator}</Tag>
-          <Tag className={styles['entity-page-header-left-tag']}>创建时间：{dsData.createTime}</Tag>
+          <Tag className={styles['entity-page-header-left-tag']}>数据源编码：{dsData?.code}</Tag>
+          <Tag className={styles['entity-page-header-left-tag']}>创建人：{dsData?.creator}</Tag>
+          <Tag className={styles['entity-page-header-left-tag']}>创建时间：{dsData?.createTime}</Tag>
         </div>
 
         <div className={styles['entity-page-header-right']}>

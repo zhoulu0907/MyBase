@@ -1,5 +1,7 @@
-import { DS_RESOURCE_TYPE, resouceId } from '@/pages/CreateApp/pages/DataFactory/utils/const';
+import { DS_RESOURCE_TYPE } from '@/pages/CreateApp/pages/DataFactory/utils/const';
 import { Form, Input, Message, Modal, Radio, Select } from '@arco-design/web-react';
+import { useAppStore } from '@/store';
+import { useResourceStore } from '@/store_resource';
 import { createEntity } from '@onebase/app';
 import React, { useState } from 'react';
 import styles from '../modal.module.less';
@@ -27,10 +29,18 @@ const CreateEntityModal: React.FC<{
   successCallback: () => void;
   entityListLength: number;
 }> = ({ visible, setVisible, successCallback, entityListLength }) => {
+  const { curDataSourceId } = useResourceStore();
+  const { curAppId } = useAppStore();
   const [form] = Form.useForm<EntityFormValues>();
   const [dsResource, setDsResource] = useState<string>(DS_RESOURCE_TYPE.EXTERNAL); // 数据源来源：内部数据源、外部数据源、外部数据源中引用自有数据源已有资产
   // 提交
   const handleFinish = () => {
+    // 检查数据源ID是否存在
+    if (!curDataSourceId) {
+      Message.error('数据源ID未获取到，请刷新页面重试');
+      return;
+    }
+
     // TODO: 提交表单数据
     form.validate().then(async (values) => {
       // 前端数据模拟
@@ -54,8 +64,8 @@ const CreateEntityModal: React.FC<{
         code: values.code,
         entityType: 1, // 实体类型 1:自建表，2:复用已有表
         description: values.description,
-        datasourceId: resouceId,
-        appId: '1',
+        datasourceId: curDataSourceId,
+        appId: curAppId,
         displayConfig: JSON.stringify({
           x: entityListLength * 300,
           y: 0

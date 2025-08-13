@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Layout, Message } from '@arco-design/web-react';
 import { getEntityList, deleteEntity } from '@onebase/app';
+import { useResourceStore } from '@/store_resource';
 import type { EntityListItem, EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
 import EntityList from './EntityList';
 import EntityDetail from './EntityDetail';
@@ -10,6 +11,7 @@ import DeleteConfirmModal from '../Modals/DeleteConfirmModal';
 const { Sider, Content } = Layout;
 
 const EntityTable: React.FC = () => {
+  const { curDataSourceId } = useResourceStore();
   const [selectedEntity, setSelectedEntity] = useState<EntityListItem | null>(null);
   const [entities, setEntities] = useState<EntityListItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -20,8 +22,7 @@ const EntityTable: React.FC = () => {
   const loadEntities = async () => {
     try {
       setLoading(true);
-      // TODO id暂时写死
-      const response = await getEntityList('542234204218462208');
+      const response = await getEntityList(curDataSourceId);
       if (response) {
         setEntities(response);
         // 如果有实体数据，默认选择第一个
@@ -77,8 +78,10 @@ const EntityTable: React.FC = () => {
   // };
 
   useEffect(() => {
-    loadEntities();
-  }, []);
+    if (curDataSourceId) {
+      loadEntities();
+    }
+  }, [curDataSourceId]);
 
   const handleEntitySelect = async (entity: EntityListItem) => {
     setSelectedEntity(entity);
