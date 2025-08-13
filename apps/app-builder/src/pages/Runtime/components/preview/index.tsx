@@ -170,6 +170,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuCode, runtime }) => {
 
   const toCreatePage = (id: string) => {
     setPageType(EDITOR_TYPES.FORM_EDITOR);
+    form.resetFields();
 
     if (id) {
       console.log('edit row id: ', id);
