@@ -27,7 +27,7 @@
 @operationButtonMargin: 8px;
 
 // 颜色变量
-@primaryColor: #1890ff;
+@primaryColor: #4fae7b;
 @successColor: #52c41a;
 @warningColor: #faad14;
 @errorColor: #f5222d;
@@ -100,6 +100,12 @@
   flex-direction: column;
 }
 
+.flex-end() {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
 // 文本省略 mixin
 .text-ellipsis() {
   overflow: hidden;
@@ -123,21 +129,15 @@
   box-shadow: @boxShadowCard;
 }
 
-// 头部样式 mixin
-.header-style() {
-  padding: @spacingMd @spacingLg;
-  .border-bottom-light();
-  background: @white;
-  .flex-between();
-}
-
 // 表格容器样式 mixin
 .table-container-style() {
   .flex-column();
-  height: 100%;
+  height: calc(100vh - 220px);
 
   .header {
-    .header-style();
+    padding: 0 0 @spacingMd @spacingLg;
+    background: @white;
+    .flex-end();
 
     h3 {
       margin: 0;
@@ -149,23 +149,9 @@
   .table {
     flex: 1;
     overflow: auto;
-  }
-}
-
-// 列表项样式 mixin
-.list-item-style() {
-  cursor: pointer;
-  padding: @spacingSm @spacingMd;
-  .border-bottom-light();
-  transition: @transitionBase;
-
-  &:hover {
-    background-color: @backgroundColorLight;
-  }
-
-  &.selected {
-    background-color: @primaryColorLight;
-    border-right: 2px solid @primaryColor;
+    :deep(.arco-table-container) {
+      max-height: calc(100vh - 300px) !important;
+    }
   }
 }
 
@@ -198,9 +184,9 @@
 
 .form-actions-style() {
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
   gap: @spacingMd;
-  margin-top: @spacingLg;
-  padding-top: @spacingMd;
+  // margin-top: @spacingLg;
+  // padding-top: @spacingMd;
   border-top: 1px solid @borderColorLighter;
 }

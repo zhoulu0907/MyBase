@@ -4,8 +4,11 @@ import { getDeptList, type DeptVO } from '@onebase/platform-center';
 import { useEffect, useState } from 'react';
 import DeptTreeCmp from './components/DeptTree';
 import UserTable from './components/UserTable';
+import PlaceholderPanel from '@/components/PlaceholderPanel';
+import { hasPermission } from '@/utils/permission';
+import { TENANT_USER_QUERY, TENANT_DEPT_QUERY } from '@/constants/permission';
 import styles from './index.module.less';
-
+TENANT_USER_QUERY
 const { Sider, Content } = Layout;
 
 export default function UserPage() {
@@ -49,16 +52,20 @@ export default function UserPage() {
         collapsible={false}
         trigger={null}
       >
-        <DeptTreeCmp
-          selectedDeptId={selectedDeptId}
-          onDeptSelect={setSelectedDeptId}
-          totalUserCount={totalUserCount}
-          treeData={deptTree}
-          deptLoading={deptLoading}
-        />
+        <PlaceholderPanel hasPermission={hasPermission(TENANT_DEPT_QUERY)}>
+          <DeptTreeCmp
+            selectedDeptId={selectedDeptId}
+            onDeptSelect={setSelectedDeptId}
+            totalUserCount={totalUserCount}
+            treeData={deptTree}
+            deptLoading={deptLoading}
+          />
+        </PlaceholderPanel>
       </Sider>
       <Content className={styles.rightPanel}>
-        <UserTable selectedDeptId={selectedDeptId} deptTree={deptTree} deptLoading={deptLoading} />
+        <PlaceholderPanel hasPermission={hasPermission(TENANT_USER_QUERY)}>
+          <UserTable selectedDeptId={selectedDeptId} deptTree={deptTree} deptLoading={deptLoading} />
+        </PlaceholderPanel>
       </Content>
     </Layout>
   );

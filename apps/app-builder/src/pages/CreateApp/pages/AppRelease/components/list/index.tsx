@@ -60,9 +60,9 @@ const VersionManagement: React.FC<VersionManagementProps> = ({
     console.log('启用版本:', record);
   };
 
-  const handleCompareVersion = (record: VersionRecord) => {
-    console.log('版本比对:', record);
-  };
+  // const handleCompareVersion = (record: VersionRecord) => {
+  //   console.log('版本比对:', record);
+  // };
 
   const handleAccessVersion = (record: VersionRecord) => {
     console.log('访问版本:', record);
@@ -108,24 +108,29 @@ const VersionManagement: React.FC<VersionManagementProps> = ({
       title: '版本名称',
       dataIndex: 'versionName',
       key: 'versionName',
+      align: 'center',
       width: 200
     },
     {
       title: '版本号',
       dataIndex: 'versionNumber',
       key: 'versionNumber',
+      align: 'center',
       width: 120
     },
     {
       title: '版本描述',
       dataIndex: 'versionDescription',
       key: 'versionDescription',
-      width: 200
+      align: 'center',
+      width: 200,
+      ellipsis: true
     },
     {
       title: '发布环境',
       dataIndex: 'environment',
       key: 'environment',
+      align: 'center',
       width: 120,
       render: (value: string) => value || '-'
     },
@@ -133,6 +138,7 @@ const VersionManagement: React.FC<VersionManagementProps> = ({
       title: '操作类型',
       dataIndex: 'operationType',
       key: 'operationType',
+      align: 'center',
       width: 120,
       render: (value: number) => {
         return value === OperationType.PUBLISH ? '发布版本' : '保存版本';
@@ -142,12 +148,14 @@ const VersionManagement: React.FC<VersionManagementProps> = ({
       title: '操作人',
       dataIndex: 'updaterName',
       key: 'updaterName',
+      align: 'center',
       width: 120
     },
     {
       title: '操作时间',
       dataIndex: 'updateTime',
       key: 'updateTime',
+      align: 'center',
       width: 180,
       render: (value: string) => {
         return value ? dayjs(value).format('YYYY-MM-DD HH:mm:ss') : '-';
@@ -156,6 +164,7 @@ const VersionManagement: React.FC<VersionManagementProps> = ({
     {
       title: '操作',
       key: 'actions',
+      align: 'center',
       width: 200,
       render: (_: unknown, record: VersionRecord) => (
         <Space>
@@ -168,9 +177,9 @@ const VersionManagement: React.FC<VersionManagementProps> = ({
           <Button type="text" size="small" onClick={() => handleEditVersion(record)}>
             编辑
           </Button>
-          <Button type="text" size="small" onClick={() => handleCompareVersion(record)}>
+          {/* <Button type="text" size="small" onClick={() => handleCompareVersion(record)}>
             版本比对
-          </Button>
+          </Button> */}
         </Space>
       )
     }

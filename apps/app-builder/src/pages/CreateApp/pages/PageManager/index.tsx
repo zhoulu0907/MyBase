@@ -1,5 +1,5 @@
-import CreateGroupIcon from '@/assets/images/create_group.svg';
-import CreatePageIcon from '@/assets/images/create_page.svg';
+import CreateGroupIcon from '@/assets/images/addfolder.svg';
+import CreatePageIcon from '@/assets/images/addpage.svg';
 import { useI18n } from '@/hooks/useI18n';
 import { EDITOR_TYPES } from '@/pages/Editor/utils/const';
 import { useAppStore, useBasicEditorStore } from '@/store';
@@ -90,30 +90,33 @@ const PageManagerPage: FC = () => {
   }, [curAppId]);
 
   /**
-   * 递归为菜单项补充parentId字段
+   * 递归为菜单项补充parentCode字段
    * @param menuItems 菜单项数组
-   * @param parentId 父级ID
+   * @param parentCode 父级Code
    * @returns 处理后的菜单项数组
    */
-  const addParentIdToChildren = (menuItems: ApplicationMenu[], parentId?: string): ApplicationMenu[] => {
+  const addParentCodeToChildren = (menuItems: ApplicationMenu[], parentCode?: string): ApplicationMenu[] => {
     // 只保留 menuType 为 2（分组）的菜单项用于生成父级页面选择下拉框
     return menuItems
       .filter((menu) => menu.menuType == MenuType.GROUP)
       .map((menu) => ({
         ...menu,
-        parentId: parentId,
-        children: menu.children ? addParentIdToChildren(menu.children, menu.id) : []
+        parentCode: parentCode,
+        children: menu.children ? addParentCodeToChildren(menu.children, menu.menuCode) : []
       }));
   };
 
   // 将接口返回的菜单数据（res）转换为 Tree 组件可用的 treeData 格式
-  const convertMenuToTreeData = (menus: ApplicationMenu[], maxWidth: number): any[] => {
+  const convertMenuToTreeData = (menus: ApplicationMenu[], maxWidth: number, showOption: boolean = false): any[] => {
     return menus.map((menu) => ({
-      key: menu.id,
+      key: menu.menuCode,
       title: (
         <MyMenuItem
+          showOption={showOption}
           menuID={menu.id}
+          menuCode={menu.menuCode}
           menuName={menu.menuName}
+          menuIcon={menu.menuIcon}
           isGroup={menu.menuType == MenuType.GROUP}
           maxWidth={maxWidth}
           label={menu.menuName}
@@ -142,11 +145,11 @@ const PageManagerPage: FC = () => {
     const res = await listApplicationMenu(req);
     console.log('res: ', res);
 
-    // 为每个children元素补充parentId字段
-    const processedRes = addParentIdToChildren(res, RootParentPage.id);
+    // 为每个children元素补充parentCode字段
+    const processedRes = addParentCodeToChildren(res, RootParentPage.menuCode);
     setParentPageOptions([{ ...RootParentPage, children: processedRes }]);
 
-    const treeData = convertMenuToTreeData(res, initTreeItemWidth);
+    const treeData = convertMenuToTreeData(res, initTreeItemWidth, true);
     setTreeData(treeData);
   };
 
@@ -194,37 +197,42 @@ const PageManagerPage: FC = () => {
   };
 
   const handleCreate = async () => {
-    let req: CreateApplicationMenuReq = {
-      applicationId: curAppId,
-      parentId: createForm.getFieldValue('parentId'),
-      menuName: createForm.getFieldValue('menuName'),
-      menuType: MenuType.PAGE,
-      menuIcon: 'tmp'
-    };
+    createForm.validate(async (error) => {
+      if (error !== null) return;
+      let req: CreateApplicationMenuReq = {
+        applicationId: curAppId,
+        parentCode:
+          createForm.getFieldValue('parentCode') === RootParentPage.menuCode
+            ? ''
+            : createForm.getFieldValue('parentCode'),
+        menuName: createForm.getFieldValue('menuName'),
+        menuType: MenuType.PAGE,
+        menuIcon: createForm.getFieldValue('menuIcon')
+      };
 
-    if (visibleCreateForm === 'page') {
-      req.menuType = MenuType.PAGE;
-    }
-    if (visibleCreateForm === 'group') {
-      req.menuType = MenuType.GROUP;
-    }
+      if (visibleCreateForm === 'page') {
+        req.menuType = MenuType.PAGE;
+      }
+      if (visibleCreateForm === 'group') {
+        req.menuType = MenuType.GROUP;
+      }
 
-    const menuResp = await createApplicationMenu(req);
+      const menuResp = await createApplicationMenu(req);
 
-    console.log('res: ', menuResp);
-    if (menuResp) {
-      Message.success('创建成功');
-    }
-    setVisibleCreateForm('');
-    getMenuList();
+      if (menuResp) {
+        Message.success('创建成功');
+      }
+      setVisibleCreateForm('');
+      getMenuList();
 
-    const pageSetCode = await getPageSetCode({
-      menuId: menuResp.id
+      const pageSetCode = await getPageSetCode({
+        menuCode: menuResp.menuCode
+      });
+
+      if (pageSetCode && menuResp.menuType === MenuType.PAGE) {
+        navigate(`/onebase/editor/${EDITOR_TYPES.FORM_EDITOR}?pageSetCode=${pageSetCode}`);
+      }
     });
-
-    if (pageSetCode) {
-      navigate(`/onebase/editor/${EDITOR_TYPES.FORM_EDITOR}?pageSetCode=${pageSetCode}`);
-    }
   };
 
   const handleRename = async () => {
@@ -253,8 +261,11 @@ const PageManagerPage: FC = () => {
     const req: CopyApplicationMenuReq = {
       id: copyForm.getFieldValue('menuID'),
       menuName: copyForm.getFieldValue('menuName'),
-      parentId: copyForm.getFieldValue('parentId')
+      parentCode:
+        copyForm.getFieldValue('parentCode') === RootParentPage.menuCode ? '' : copyForm.getFieldValue('parentCode')
     };
+
+    console.log('req: ', req);
 
     const res = await copyApplicationMenu(req);
     console.log('res: ', res);
@@ -288,7 +299,7 @@ const PageManagerPage: FC = () => {
     }
 
     const req: GetPageSetCodeReq = {
-      menuId: curMenu?.id
+      menuCode: curMenu?.menuCode
     };
     const pageSetCode = await getPageSetCode(req);
 
@@ -350,7 +361,7 @@ const PageManagerPage: FC = () => {
               </div>
             )}
             <div className={styles.contentBody}>
-              <PageManagerPreview menuID={curMenu?.id || ''} />
+              <PageManagerPreview menuCode={curMenu?.menuCode || ''} />
             </div>
           </Content>
         </Layout>
@@ -385,7 +396,7 @@ const PageManagerPage: FC = () => {
         form={createForm}
         pageTypeOptions={pageTypeOptions}
         visibleCreateForm={visibleCreateForm}
-        initValue={{ pageType: PageType.NORMAL, menuName: '', parentId: RootParentPage.id }}
+        initValue={{ pageType: PageType.NORMAL, menuName: '', parentCode: RootParentPage.menuCode }}
         treeData={convertMenuToTreeData(parentPageOptions, initTreeItemWidth)}
       />
     </div>

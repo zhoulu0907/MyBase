@@ -1,5 +1,5 @@
 import { Dropdown, Menu, type FormInstance } from '@arco-design/web-react';
-import { IconFolder, IconSettings } from '@arco-design/web-react/icon';
+import { IconSettings } from '@arco-design/web-react/icon';
 import { RootParentPage } from '@onebase/app';
 import React from 'react';
 import styles from './index.module.less';
@@ -14,10 +14,12 @@ const MenuItem = Menu.Item;
  * @param props.onClick 点击事件处理函数
  */
 interface MenuItemProps {
+  showOption: boolean;
   menuID: string;
+  menuCode: string;
   menuName: string;
   label: string;
-  icon?: React.ReactNode;
+  menuIcon: string;
   isGroup: boolean;
   onClick: () => void;
   triggerRename: () => void;
@@ -30,10 +32,12 @@ interface MenuItemProps {
 }
 
 const MyMenuItem: React.FC<MenuItemProps> = ({
+  showOption,
   menuID,
+  menuCode,
   menuName,
   label,
-  icon,
+  menuIcon,
   isGroup,
   onClick,
   triggerRename,
@@ -66,7 +70,7 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
             e.stopPropagation();
             triggerCopy();
             copyForm.setFieldValue('menuName', menuName + '_副本');
-            copyForm.setFieldValue('parentId', RootParentPage.id);
+            copyForm.setFieldValue('parentCode', RootParentPage.menuCode);
             copyForm.setFieldValue('menuID', menuID);
           }}
         >
@@ -97,22 +101,22 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
 
   return (
     <div className={styles.myMenuItem} onClick={onClick} role="menuitem" tabIndex={0}>
-      {/* {icon && <span className="mr-2">{icon}</span>} */}
       <div
         className={styles.menuName}
         style={{
           maxWidth: maxWidth + 'px'
         }}
       >
-        {isGroup ? <IconFolder style={{ marginRight: '10px' }} /> : null}
-
+        <i className={`iconfont ${menuIcon}`} style={{ marginRight: '10px' }} />
         {label}
       </div>
-      <div className={styles.dropdownContainer}>
-        <Dropdown droplist={dropList} trigger="click" position="bl">
-          <IconSettings onClick={(e) => e.stopPropagation()} />
-        </Dropdown>
-      </div>
+      {showOption && (
+        <div className={styles.dropdownContainer}>
+          <Dropdown droplist={dropList} trigger="click" position="bl">
+            <IconSettings onClick={(e) => e.stopPropagation()} />
+          </Dropdown>
+        </div>
+      )}
     </div>
   );
 };

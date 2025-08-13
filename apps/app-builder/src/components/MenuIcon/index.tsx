@@ -6,8 +6,13 @@ import styles from './index.module.less';
 
 const InputSearch = Input.Search;
 
+interface IProps {
+  onSelected: (val: string) => void;
+}
+
 // 菜单图标
-const MenuIcon = () => {
+const MenuIcon = (props: IProps) => {
+  const { onSelected } = props;
   const [data, setData] = useState<MenuItem[]>([]);
   const [activeMenu, setActiveMenu] = useState<string>('all');
   const [activeIcon, setActiveIcon] = useState<string>();
@@ -50,9 +55,12 @@ const MenuIcon = () => {
             <div
               className={`${styles.iconItem} ${activeIcon === item.name ? styles.activeIcon : ''}`}
               key={index}
-              onClick={() => setActiveIcon(item.name)}
+              onClick={() => {
+                onSelected(item.icon);
+                setActiveIcon(item.name);
+              }}
             >
-              <item.icon className={styles.icon} />
+              <i className={`iconfont ${item.icon} ${styles.icon}`} />
               <div className={styles.name}>{item.name}</div>
             </div>
           ))}

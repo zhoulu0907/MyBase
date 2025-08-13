@@ -35,6 +35,18 @@ export interface UpdateFieldReqVO extends CreateFieldReqVO {
   id: string;
 }
 
+export interface CreateMasterChildReqVO {
+  parentEntityId: string;
+  parentFieldId: string;
+  childEntityId: string;
+  childFieldId: string;
+  childTableCode: string;
+  childTableName: string;
+  childTableDescription: string;
+  appId: string;
+  datasourceId: string;
+}
+
 export interface CreateRelationReqVO {
   sourceEntityId: string;
   sourceFieldId: string;
@@ -62,19 +74,6 @@ export interface UpdateRuleReqVO extends CreateRuleReqVO {
   id: string;
 }
 
-// 数据方法相关接口
-export interface CreateMethodReqVO {
-  entityId: string;
-  name: string;
-  description?: string;
-  methodType: string;
-  methodContent: string;
-  isEnabled?: boolean;
-}
-
-export interface UpdateMethodReqVO extends CreateMethodReqVO {
-  id: string;
-}
 
 /**
  * 获取实体分页列表
@@ -86,7 +85,7 @@ export const getEntityPage = (params: GetEntityPageParams) => {
 };
 
 /**
- * 获取实体列表
+ * 根据数据源获得业务实体列表
  * @returns 实体列表
  */
 export const getEntityList = (datasourceId: string) => {
@@ -135,7 +134,7 @@ export const updateEntity = (data: UpdateEntityReqVO) => {
  * @returns 操作结果
  */
 export const deleteEntity = (id: string) => {
-  return metadataService.post('/business-entity/delete', { params: { id } });
+  return metadataService.post('/business-entity/delete?id=' + id);
 };
 
 /**
@@ -154,6 +153,15 @@ export const batchDeleteEntities = (ids: string[]) => {
  */
 export const getEntityFields = (params: object) => {
   return metadataService.post('/entity-field/list', params);
+};
+
+/**
+ * 分页查询指定实体的字段列表
+ * @param entityId 实体ID
+ * @returns 字段列表
+ */
+export const getEntityFieldsPage = (params: object) => {
+  return metadataService.post('/entity-field/page', params);
 };
 
 /**
@@ -211,6 +219,15 @@ export const getEntityRelations = (params: object) => {
 };
 
 /**
+ * 创建主子关系
+ * @param data 关联关系信息
+ * @returns 关联关系ID
+ */
+export const createMasterChild = (data: CreateMasterChildReqVO) => {
+  return metadataService.post('/entity-relationship/create-parent-child', data);
+};
+
+/**
  * 创建关联关系
  * @param data 关联关系信息
  * @returns 关联关系ID
@@ -225,7 +242,7 @@ export const createRelation = (data: CreateRelationReqVO) => {
  * @returns 操作结果
  */
 export const updateRelation = (data: UpdateRelationReqVO) => {
-  return metadataService.post('/business-entity/relation/update', data);
+  return metadataService.post('/entity-relationship/update', data);
 };
 
 /**
@@ -283,30 +300,12 @@ export const getEntityMethods = (params: object) => {
 };
 
 /**
- * 创建数据方法
- * @param data 数据方法信息
- * @returns 方法ID
- */
-export const createMethod = (data: CreateMethodReqVO) => {
-  return metadataService.post('/business-entity/method/create', data);
-};
-
-/**
- * 更新数据方法
- * @param data 数据方法信息
- * @returns 操作结果
- */
-export const updateMethod = (data: UpdateMethodReqVO) => {
-  return metadataService.post('/business-entity/method/update', data);
-};
-
-/**
- * 删除数据方法
+ * 根据ID查询数据详情
  * @param id 方法ID
- * @returns 操作结果
+ * @returns 数据详情
  */
-export const deleteMethod = (id: string) => {
-  return metadataService.post('/business-entity/method/delete', { params: { id } });
+export const getMethodDataById = (params: object) => {
+  return metadataService.post('/data-method/detail', params);
 };
 
 /**
@@ -363,4 +362,8 @@ export const getEntityStats = () => {
  */
 export const getEntityGraph = (datasourceId: string) => {
   return metadataService.post('/business-entity/er-diagram?datasourceId=' + datasourceId);
+};
+
+export const getEntityListByApp = (appId: string) => {
+  return metadataService.post(`/business-entity/list-by-app?appId=${appId}`);
 };

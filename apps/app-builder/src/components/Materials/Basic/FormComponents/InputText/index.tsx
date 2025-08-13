@@ -6,6 +6,7 @@ import { type XInputTextConfig } from './schema';
 const XInputText = memo((props: XInputTextConfig) => {
   const {
     label,
+    dataField,
     placeholder,
     tooltip,
     status,
@@ -21,6 +22,7 @@ const XInputText = memo((props: XInputTextConfig) => {
   return (
     <Form.Item
       label={label}
+      field={dataField}
       layout={layout}
       labelCol={{
         span: labelColSpan

@@ -31,6 +31,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
 
   const getInfo = async () => {
     const res = await getPermissionInfo();
+    console.log(res);
     UserPermissionManager.setUserPermissionInfo(res);
     setNickname(res.user.nickname);
   };

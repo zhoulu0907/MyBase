@@ -14,49 +14,36 @@
       font-size: @fontSizeLg;
       font-weight: @fontWeightSemibold;
     }
-
-    .count {
-      color: @textColorTertiary;
-      font-size: @fontSizeSm;
-    }
   }
 
   .list {
     flex: 1;
     overflow: auto;
+    border: none !important;
 
     .listItem {
-      .list-item-style();
+      cursor: pointer;
+      padding: @spacingSm @spacingMd;
+      // .border-bottom-light();
+      transition: @transitionBase;
+    
+      &:hover, &.selected {
+        background-color: @backgroundColorLight;
+        color: @primaryColor;
+        // border-right: 2px solid @primaryColor !important;
+      }
 
       .itemContent {
-        .flex-center();
+        .flex-between();
         gap: @spacingSm;
 
-        .avatar {
-          background-color: @primaryColor;
+        .entityName {
+          .text-ellipsis();
         }
 
-        .itemInfo {
-          flex: 1;
-          min-width: 0;
-
-          .entityName {
-            font-weight: @fontWeightMedium;
-            color: @textColorPrimary;
-            margin-bottom: @spacingXs;
-            .text-ellipsis();
-          }
-
-          .entityId {
-            font-size: @fontSizeSm;
-            color: @textColorTertiary;
-            margin-bottom: 2px;
-          }
-
-          .fieldCount {
-            font-size: @fontSizeSm;
-            color: @textColorSecondary;
-          }
+        .fieldCount {
+          font-size: @fontSizeSm;
+          color: @textColorSecondary;
         }
       }
     }

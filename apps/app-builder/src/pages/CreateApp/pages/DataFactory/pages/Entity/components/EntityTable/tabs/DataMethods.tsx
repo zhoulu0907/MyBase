@@ -1,44 +1,58 @@
-import type { EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
+import type { EntityListItem } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
 import type { TableColumnProps } from '@arco-design/web-react';
-import { Button, Message, Table, Tag } from '@arco-design/web-react';
+import { Link, Table, Tag } from '@arco-design/web-react';
 import { getEntityMethods } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
 import styles from './tabs.module.less';
+import CheckMethodModal from '../../Modals/CheckMethodModal';
 
 interface DataMethodsProps {
-  entity: EntityNode;
+  entity: EntityListItem;
+  activeTab: string;
 }
 
-const DataMethods: React.FC<DataMethodsProps> = ({ entity }) => {
+const DataMethods: React.FC<DataMethodsProps> = ({ entity, activeTab }) => {
   const [methods, setMethods] = useState([]);
   const [loading, setLoading] = useState(false);
-
+  const [checkMethodModalVisible, setCheckMethodModalVisible] = useState(false);
+  const [checkMethodMethodCode, setcheckMethodMethodCode] = useState('');
   const loadMethods = async () => {
     try {
       setLoading(true);
-      const response = await getEntityMethods({ entityId: entity.entityId });
+      const params = {
+        entityId: entity.id
+      };
+      const response = await getEntityMethods(params);
       console.log('getEntityMethods', response);
       if (response) {
         setMethods(response || []);
       }
     } catch (error) {
       console.error('加载字段列表失败:', error);
-      Message.error('加载字段列表失败');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleMethodClick = (methodName: string, methodCode: string) => {
+    setcheckMethodMethodCode(methodCode);
+    setCheckMethodModalVisible(true);
   };
 
   const columns: TableColumnProps[] = [
     {
       title: '序号',
       dataIndex: 'index',
-      key: 'index'
+      key: 'index',
+      render: (text: string, record: { id: string }, index: number) => index + 1
     },
     {
       title: '方法名称',
       dataIndex: 'methodName',
-      key: 'methodName'
+      key: 'methodName',
+      render: (methodName: string, record: { id: string }) => (
+        <Link onClick={() => handleMethodClick(methodName, record.methodCode)}>{methodName}</Link>
+      )
     },
     {
       title: '方法编码',
@@ -74,17 +88,19 @@ const DataMethods: React.FC<DataMethodsProps> = ({ entity }) => {
   ];
 
   useEffect(() => {
-    loadMethods();
-  }, []);
+    if (activeTab === 'methods') {
+      loadMethods();
+    }
+  }, [entity, activeTab]);
 
   return (
     <div className={styles.dataMethods}>
-      <div className={styles.header}>
-        <h3>数据方法</h3>
+      {/* 后续迭代补充 */}
+      {/* <div className={styles.header}>
         <Button type="primary" size="small">
           添加方法
         </Button>
-      </div>
+      </div> */}
       <Table
         columns={columns}
         data={methods}
@@ -92,6 +108,12 @@ const DataMethods: React.FC<DataMethodsProps> = ({ entity }) => {
         pagination={false}
         className={styles.table}
         loading={loading}
+      />
+      <CheckMethodModal
+        visible={checkMethodModalVisible}
+        setVisible={setCheckMethodModalVisible}
+        entity={entity}
+        methodCode={checkMethodMethodCode}
       />
     </div>
   );
