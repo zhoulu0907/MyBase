@@ -7,6 +7,7 @@ import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRe
 import s from '../../index.module.less';
 import { TENANT_ROLE_PERMISSION as ACTIONS } from '@/constants/permission';
 import { PermissionButton as Button } from '@/components/PermissionControl';
+import PlaceholderPanel from '@/components/PlaceholderPanel';
 
 interface RoleListProps {
   activeId: number | undefined;
@@ -166,20 +167,20 @@ export default forwardRef(function RoleList({ activeId, onSelect, onAdd }: RoleL
           新建
         </Button>
       </ListItem>
-      <div
-        ref={scrollContainerRef}
-        className={s.roleList}
-        style={{
-          height: 'calc(100% - 110px)',
-          overflowY: 'auto',
-          position: 'relative'
-        }}
-      >
-        {loading ? (
-          <div style={{ textAlign: 'center', padding: '20px' }}>
-            <Spin size={20} />
-          </div>
-        ) : (
+      <PlaceholderPanel
+        hasPermission={true}
+        isLoading={loading}
+        isEmpty={roleList.length === 0}
+      > 
+        <div
+          ref={scrollContainerRef}
+          className={s.roleList}
+          style={{
+            height: 'calc(100% - 110px)',
+            overflowY: 'auto',
+            position: 'relative'
+          }}
+        >
           <>
             {roleListItems}
             {isScrollLoading && (
@@ -188,8 +189,8 @@ export default forwardRef(function RoleList({ activeId, onSelect, onAdd }: RoleL
               </div>
             )}
           </>
-        )}
-      </div>
+        </div>
+      </PlaceholderPanel>
     </>
   );
 });

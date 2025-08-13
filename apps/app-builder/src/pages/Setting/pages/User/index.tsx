@@ -8,7 +8,6 @@ import PlaceholderPanel from '@/components/PlaceholderPanel';
 import { hasPermission } from '@/utils/permission';
 import { TENANT_USER_QUERY, TENANT_DEPT_QUERY } from '@/constants/permission';
 import styles from './index.module.less';
-TENANT_USER_QUERY
 const { Sider, Content } = Layout;
 
 export default function UserPage() {

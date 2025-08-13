@@ -13,16 +13,14 @@ export enum PERMISSION_TYPES {
   ACTION = 3
 }
 
-/** 模块 */
-export const SYSTEM = 'system'; // 租户管理
-export const APP = 'app'; // 应用管理 TODO：待确定
-
 /** 菜单-租户管理 */
-export const USER = 'user'; // 用户管理
-export const ROLE = 'role'; // 角色管理
-export const DEPT = 'dept'; // 组织管理
-export const DICT = 'dict'; // 字典管理
-export const TENANT = 'tenant'; // 租户信息
+export const TENANT_MENUS = {
+  USER: 'tenant:user',
+  ROLE: 'tenant:role',
+  DEPT: 'tenant:dept',
+  DICT: 'tenant:dict',
+  INFO: 'tenant:info',
+}
 
 /** 租户管理-用户管理 */
 export const TENANT_USER_QUERY = 'tenant:user:query'; // 查询用户
