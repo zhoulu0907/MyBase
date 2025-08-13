@@ -3,6 +3,7 @@
 import {
   type ListRoleReq,
   type CreateRoleReq,
+  type RenameRoleReq,
   type RoleAddUserReq,
   type RoleDeleteUserReq,
   type DeleteRoleReq,
@@ -17,6 +18,12 @@ export const listRole = (params: ListRoleReq) => {
 // 新增角色
 export const createRole = (params: CreateRoleReq) => {
   return appService.post('/auth-role/create', params);
+};
+
+// 角色重命名
+export const renameRole = (params: RenameRoleReq) => {
+  const { id, name } = params;
+  return appService.post(`/auth-role/rename?id=${id}&name=${name}`);
 };
 
 // 角色添加成员
