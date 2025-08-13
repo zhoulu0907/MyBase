@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Radio, Tag } from '@arco-design/web-react';
 import { IconMindMapping, IconNav } from '@arco-design/web-react/icon';
-import { getDatasourcePage } from '@onebase/app';
+import { getDatasourceList } from '@onebase/app';
 import { useAppStore } from '@/store';
 import { useResourceStore } from '@/store_resource';
 import EntityTable from '../components/EntityTable';
@@ -29,14 +29,12 @@ export const CheckEntityPage: React.FC = () => {
 
   const getAppResources = async () => {
     const params = {
-      pageNo: 1,
-      pageSize: 10,
       appId: curAppId
     };
-    const res = await getDatasourcePage(params);
+    const res = await getDatasourceList(params);
     console.log('getAppResources res', res);
-    if (res?.list?.length > 0) {
-      const dataSource = res?.list[0];
+    if (res?.length > 0) {
+      const dataSource = res?.[0];
       setDsData(dataSource);
       // 将数据源ID存储到store中
       setCurDataSourceId(dataSource.id.toString());
