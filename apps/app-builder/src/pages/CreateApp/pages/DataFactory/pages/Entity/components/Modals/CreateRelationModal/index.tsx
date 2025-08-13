@@ -1,6 +1,6 @@
-import { resouceId } from '@/pages/CreateApp/pages/DataFactory/utils/const';
 import { Form, Message, Modal, Select } from '@arco-design/web-react';
 import { useAppStore } from '@/store';
+import { useResourceStore } from '@/store_resource';
 import { createRelation, getEntityFields, getEntityList } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
 import styles from '../modal.module.less';
@@ -39,6 +39,7 @@ const CreateRelationModal: React.FC<{
   setUpdateRelationOptions: (updateRelationOptions: boolean) => void;
 }> = ({ visible, setVisible, successCallback }) => {
   const { curAppId } = useAppStore();
+  const { curDataSourceId } = useResourceStore();
   const [form] = Form.useForm<RelationFormValues>();
   const [leftEntityOptions, setLeftEntityOptions] = useState<EntityOption[]>([]);
   const [rightEntityOptions, setRightEntityOptions] = useState<EntityOption[]>([]);
@@ -51,7 +52,7 @@ const CreateRelationModal: React.FC<{
   }, []);
 
   const loadEntities = async () => {
-    const res = await getEntityList(resouceId);
+    const res = await getEntityList(curDataSourceId);
     if (res.length > 0) {
       const entityOptions = res.map((entity: any) => ({
         label: entity.displayName,

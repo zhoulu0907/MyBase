@@ -1,9 +1,10 @@
-import { resouceId } from '@/pages/CreateApp/pages/DataFactory/utils/const';
+
 import type { EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
 import { Form, Grid, Input, Message, Modal, Radio, Select } from '@arco-design/web-react';
 import { getEntityList, getEntityFields, createMasterChild } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
 import { useAppStore } from '@/store';
+import { useResourceStore } from '@/store_resource';
 import styles from '../modal.module.less';
 
 interface MasterDetailFormValues {
@@ -34,6 +35,7 @@ const CreateMasterDetailModal: React.FC<{
   successCallback: () => void;
 }> = ({ visible, setVisible, successCallback }) => {
   const { curAppId } = useAppStore();
+  const { curDataSourceId } = useResourceStore();
   const [form] = Form.useForm<MasterDetailFormValues>();
   const [loading, setLoading] = useState(false);
   const [entityOptions, setEntityOptions] = useState<EntityOption[]>([]);
@@ -49,7 +51,7 @@ const CreateMasterDetailModal: React.FC<{
 
   const loadEntities = async () => {
     try {
-      const res = await getEntityList(resouceId);
+      const res = await getEntityList(curDataSourceId);
       if (res.length > 0) {
         const entityOptions = res.map((entityItem: { displayName: string; id: string }) => ({
           label: entityItem.displayName,
@@ -113,7 +115,7 @@ const CreateMasterDetailModal: React.FC<{
           parentEntityId: values.parentEntityId,
           parentFieldId: values.parentFieldId,
           appId: curAppId,
-          datasourceId: resouceId
+          datasourceId: curDataSourceId
         };
 
         if (values.childTableType === 'existing') {

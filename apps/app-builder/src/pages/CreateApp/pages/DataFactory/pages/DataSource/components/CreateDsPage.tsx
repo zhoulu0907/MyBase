@@ -7,6 +7,7 @@ import {
 } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
 import styles from '../index.module.less';
+import { useAppStore } from '@/store';
 
 const Option = Select.Option;
 
@@ -25,6 +26,7 @@ interface DataSourceFormValues {
 const dbTypes = [{ label: 'PostgreSQL', value: 'PostgreSQL', urlPrefix: 'jdbc:postgresql://' }];
 
 const CreateDataSource: React.FC<{ handlePageType: (tab: string) => void }> = ({ handlePageType }) => {
+  const { curAppId } = useAppStore();
   const [form] = Form.useForm<DataSourceFormValues>();
   const [testing, setTesting] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -132,7 +134,7 @@ const CreateDataSource: React.FC<{ handlePageType: (tab: string) => void }> = ({
           url: values.url || `jdbc:mysql://${values.host}:${values.port}/${values.database}`
         },
         description: `${values.datasourceType} 数据源`,
-        appId: 1 // 根据实际情况设置
+        appId: curAppId
       };
 
       const res = await createDatasource(createParams);

@@ -7,6 +7,7 @@ import {
 } from '@onebase/app';
 import React, { useEffect, useMemo, useState } from 'react';
 import styles from '../index.module.less';
+import { useAppStore } from '@/store';
 
 const Option = Select.Option;
 
@@ -31,6 +32,7 @@ interface EditDsDrawerProps {
 const dbTypes = [{ label: 'MySQL', value: 'MySQL', urlPrefix: 'jdbc:mysql://' }];
 
 const EditDsDrawer: React.FC<EditDsDrawerProps> = ({ visible, onClose, dataSource, onSuccess }) => {
+  const { curAppId } = useAppStore();
   const [form] = Form.useForm<DataSourceFormValues>();
   const [testing, setTesting] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -129,7 +131,7 @@ const EditDsDrawer: React.FC<EditDsDrawerProps> = ({ visible, onClose, dataSourc
         },
         // description: dataSource.description,
         // runMode: dataSource.runMode,
-        appId: dataSource.appId
+        appId: curAppId
         // lockVersion: dataSource.lockVersion,
       };
 

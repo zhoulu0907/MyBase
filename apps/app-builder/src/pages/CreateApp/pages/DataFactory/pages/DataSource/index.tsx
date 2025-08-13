@@ -28,9 +28,7 @@ const DataSourcePage: React.FC = () => {
   };
 
   const handleEditSuccess = () => {
-    // 编辑成功后刷新数据
     setPageType('check-ds');
-    // getTableData();
   };
 
   const renderContent = () => {
