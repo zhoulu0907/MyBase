@@ -31,4 +31,6 @@ public class MenuCreateReqVO {
     @NotBlank(message = "菜单图标不能为空")
     private String menuIcon;
 
+    @Schema(description = "实体编码")
+    private String entityCode;
 }

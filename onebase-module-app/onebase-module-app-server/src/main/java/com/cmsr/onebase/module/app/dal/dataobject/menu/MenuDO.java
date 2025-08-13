@@ -20,7 +20,7 @@ public class MenuDO extends TenantBaseDO {
     private String parentCode;
 
     @Column(name = "entity_code", nullable = false, length = 64, comment = "实体code")
-    private Long entityCode;
+    private String entityCode;
 
     @Column(name = "menu_code", length = 64, comment = "菜单编码")
     private String menuCode;

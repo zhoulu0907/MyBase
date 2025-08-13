@@ -19,6 +19,7 @@ public class ApplicationCreateReqVO {
     private Long id;
 
     @Schema(description = "应用Key")
+    @NotBlank(message = "应用Key不能为空")
     private String appKey;
 
     @Schema(description = "应用名称")

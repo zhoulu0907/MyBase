@@ -10,5 +10,7 @@ import lombok.Data;
 public class LoadPageSetRespVO {
     private String pageSetCode;
 
+    private String mainMetadata;
+
     private List<PageDTO> pages;
 }

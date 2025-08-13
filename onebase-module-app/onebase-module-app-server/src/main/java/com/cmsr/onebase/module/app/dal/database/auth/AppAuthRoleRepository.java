@@ -22,18 +22,26 @@ public class AppAuthRoleRepository extends DataRepositoryNew<AuthRoleDO> {
         super(AuthRoleDO.class);
     }
 
-    public List<AuthRoleDO> findByApplicationId(Long applicationId) {
+    public List<AuthRoleDO> findByApplicationCode(String applicationCode) {
         ConfigStore configs = new DefaultConfigStore();
-        configs.eq("application_id", applicationId);
+        configs.eq("application_code", applicationCode);
         configs.order("role_type", Order.TYPE.ASC);
         configs.order("role_name", Order.TYPE.ASC);
         return findAllByConfig(configs);
     }
 
-    public AuthRoleDO findByApplicationIdAndRoleName(Long applicationId, String roleName) {
+    public AuthRoleDO findByAppCodeAndRoleName(String applicationCode, String roleName) {
         ConfigStore configs = new DefaultConfigStore();
-        configs.eq("application_id", applicationId);
+        configs.eq("application_code", applicationCode);
         configs.eq("role_name", roleName);
+        return findOne(configs);
+    }
+
+    public AuthRoleDO findByAppCodeAndRoleNameAndRoleIdNot(String applicationCode, String roleName, Long roleId) {
+        ConfigStore configs = new DefaultConfigStore();
+        configs.eq("application_code", applicationCode);
+        configs.eq("role_name", roleName);
+        configs.ne("id", roleId);
         return findOne(configs);
     }
 
@@ -48,4 +56,6 @@ public class AppAuthRoleRepository extends DataRepositoryNew<AuthRoleDO> {
         configs.eq("role_code", roleCode);
         return findOne(configs);
     }
+
+
 }

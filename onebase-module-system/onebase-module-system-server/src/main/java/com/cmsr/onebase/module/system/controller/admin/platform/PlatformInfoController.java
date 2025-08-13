@@ -1,30 +1,45 @@
 package com.cmsr.onebase.module.system.controller.admin.platform;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.module.system.controller.admin.platform.vo.PlatformInfoReqVo;
+import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
 import com.cmsr.onebase.module.system.controller.admin.platform.vo.PlatformInfoRespVo;
+import com.cmsr.onebase.module.system.controller.admin.user.vo.user.*;
 import com.cmsr.onebase.module.system.dal.dataobject.license.LicenseDO;
+import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.enums.license.LicenseStatusEnum;
+import com.cmsr.onebase.module.system.enums.permission.AdminTypeEnum;
+import com.cmsr.onebase.module.system.enums.permission.RoleCodeEnum;
 import com.cmsr.onebase.module.system.enums.tenant.TenantStatusEnum;
 import com.cmsr.onebase.module.system.enums.user.UserStatusEnum;
 import com.cmsr.onebase.module.system.service.license.LicenseService;
+import com.cmsr.onebase.module.system.service.permission.PermissionService;
+import com.cmsr.onebase.module.system.service.permission.RoleService;
 import com.cmsr.onebase.module.system.service.tenant.TenantService;
 import com.cmsr.onebase.module.system.service.user.AdminUserService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
+import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.USER_PASSWORD_NOT_ALLOW_DEL;
 
 /**
  * 平台信息管理控制器
  */
 @RestController
-@RequestMapping("/system/platforminfo")
+@RequestMapping("/system/platform")
 @Tag(name = "平台信息管理")
 public class PlatformInfoController {
 
@@ -35,34 +50,13 @@ public class PlatformInfoController {
     private TenantService tenantService;
 
     @Resource
-    private AdminUserService adminUserService;
-
-    /**
-     * 创建平台信息
-     */
-    @PostMapping("/create")
-    public Object createPlatformInfo(@RequestBody PlatformInfoReqVo reqVo) {
-        // TODO: 实现创建平台信息逻辑
-        return null;
-    }
-
-    /**
-     * 更新平台信息
-     */
-    @PostMapping("/update")
-    public Object updatePlatformInfo(@RequestBody PlatformInfoReqVo reqVo) {
-        // TODO: 实现更新平台信息逻辑
-        return null;
-    }
-
-    /**
-     * 删除平台信息
-     */
-    @PostMapping("/delete")
-    public Object deletePlatformInfo(@RequestParam Long id) {
-        // TODO: 实现删除平台信息逻辑
-        return null;
-    }
+    private AdminUserService  adminUserService;
+    @Resource
+    private PermissionService permissionService;
+    @Resource
+    private RoleService       roleService;
+    @Resource
+    private AdminUserService  userService;
 
     /**
      * 根据状态查询出enable的license记录
@@ -85,5 +79,79 @@ public class PlatformInfoController {
         return success(platformInfoRespVo);
 
     }
+
+
+    @PostMapping("/admin/create")
+    @Operation(summary = "新增平台管理员用户")
+    @PreAuthorize("@ss.hasPermission('system:platform-admin:create')")
+    public CommonResult<Long> createPlatformAdmin(@Valid @RequestBody UserInsertReqVO reqVO) {
+
+        reqVO.setNickname(RoleCodeEnum.SUPER_ADMIN.getName());
+        Long id = userService.createUser(reqVO);
+        // 获取当前登录用户ID（假设项目中有相关工具类）
+        Long currentUserId = SecurityFrameworkUtils.getLoginUserId();
+
+        // 如果获取到当前管理员用户，把角色赋给当前新建用户
+        if (currentUserId != null) {
+            RoleDO roleDO = roleService.getRoleIdsByCode(RoleCodeEnum.SUPER_ADMIN.getCode());
+            Set<Long> roleIds = new HashSet<>();
+            roleIds.add(roleDO.getId());
+            permissionService.assignUserRoles(id, roleIds);
+        }
+
+        return success(id);
+    }
+
+    @GetMapping("/admin/page")
+    @Operation(summary = "获得平台管理员列表分页")
+    @PreAuthorize("@ss.hasPermission('system:platform-admin:query')")
+    public CommonResult<PageResult<UserRespVO>> getPlatformAdminPage(@Valid UserPageReqVO pageReqVO) {
+        // 获得用户分页列表
+        PageResult<AdminUserDO> pageResult = userService.getUserPage(pageReqVO);
+        return success(BeanUtils.toBean(pageResult, UserRespVO.class));
+    }
+
+    @PostMapping("/admin/update-email")
+    @Operation(summary = "修改平台管理员邮箱")
+    @PreAuthorize("@ss.hasPermission('system:platform-admin:update')")
+    public CommonResult<Boolean> updatePlatformAdmin(@Valid @RequestBody UserUpdateEmailReqVO reqVO) {
+        userService.updatePlatformUserEmail(reqVO.getId(), reqVO.getEmail());
+        return success(true);
+    }
+
+    @PostMapping("/admin/update-password")
+    @Operation(summary = "重置平台用户密码")
+    @PreAuthorize("@ss.hasPermission('system:platform-admin:update-password')")
+    public CommonResult<Boolean> updatePlatformUserPassword(@Valid @RequestBody UserUpdatePasswordReqVO reqVO) {
+        userService.updateUserPassword(reqVO.getId(), reqVO.getPassword());
+        return success(true);
+    }
+
+    @GetMapping("/admin/list")
+    @Operation(summary = "获得所有平台管理员列表")
+    @PreAuthorize("@ss.hasPermission('system:platform-admin:query')")
+    public CommonResult<List<UserRespVO>> getPlatformAdminList() {
+
+        // 获取所有平台管理员用户
+        List<AdminUserDO> userList = userService.getUserListByStatus(0);
+        // 转换为响应对象
+        List<UserRespVO> respList = BeanUtils.toBean(userList, UserRespVO.class);
+
+        return success(respList);
+    }
+
+    @PostMapping("/admin/delete")
+    @Operation(summary = "删除平台管理员")
+    @Parameter(name = "id", description = "编号", required = true, example = "1024")
+    @PreAuthorize("@ss.hasPermission('system:platform-admin:delete')")
+    public CommonResult<Boolean> deletePlatformAdmin(@RequestParam("id") Long id) {
+        AdminUserDO adminUserDO = userService.getUser(id);
+        if (AdminTypeEnum.SYSTEM.equals(adminUserDO.getUserType())) {
+            throw exception(USER_PASSWORD_NOT_ALLOW_DEL);
+        }
+        userService.deleteUser(id);
+        return success(true);
+    }
+
 
 }

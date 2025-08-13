@@ -57,6 +57,7 @@ public class PageDO extends TenantBaseDO {
     @Column(name = "background_color", columnDefinition= "VARCHAR(255) NOT NULL", comment = "页面背景色")
     private String backgroundColor;
 
+    // TODO(mickey): remove
     /**
      * 页面主元数据
      */

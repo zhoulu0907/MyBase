@@ -45,6 +45,17 @@ public class AppAuthRoleController {
     }
 
     /**
+     * 重命名角色
+     */
+    @PostMapping("/rename")
+    @Operation(summary = "重命名角色")
+    public CommonResult<Boolean> renameRole(@RequestParam("id") Long roleId,
+                                            @RequestParam("name") String name) {
+        authRoleService.renameRole(roleId, name);
+        return CommonResult.success(true);
+    }
+
+    /**
      * 角色添加成员
      * @param reqVO
      * @return
@@ -67,6 +78,8 @@ public class AppAuthRoleController {
         authRoleService.deleteRoleUser(reqVO);
         return CommonResult.success(true);
     }
+
+
 
     /**
      * 删除角色

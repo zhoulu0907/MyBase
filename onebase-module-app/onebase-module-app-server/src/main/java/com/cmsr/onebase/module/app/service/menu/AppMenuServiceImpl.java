@@ -91,12 +91,14 @@ public class AppMenuServiceImpl implements AppMenuService {
         menuDO.setMenuIcon(createReqVO.getMenuIcon());
         menuDO.setMenuSort(generateMenuSort(applicationDO.getAppCode()));
         menuDO.setVisible(MenuVisibleEnum.YES.getValue());
+        menuDO.setEntityCode(createReqVO.getEntityCode());
         appMenuRepository.insert(menuDO);
         // 创建页面集
         CreatePageSetDTO createPageSetDTO = new CreatePageSetDTO();
         createPageSetDTO.setMenuCode(menuDO.getMenuCode());
         createPageSetDTO.setPageSetName(menuDO.getMenuName());
         createPageSetDTO.setDisplayName(menuDO.getMenuName());
+        createPageSetDTO.setMainMetadata(createReqVO.getEntityCode());
         pageSetService.createPageSet(createPageSetDTO);
         // 返回结果
         MenuCreateRespVO menuCreateRespVO = BeanUtils.toBean(menuDO, MenuCreateRespVO.class);
