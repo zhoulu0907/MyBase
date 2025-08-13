@@ -1,3 +1,4 @@
+import { SimpleRoleVO } from './role';
 export interface UserVO {
   id: number;
   username: string;
@@ -14,4 +15,5 @@ export interface UserVO {
   remark: string;
   loginDate: Date;
   createTime: Date;
+  roles?: SimpleRoleVO[];
 }
