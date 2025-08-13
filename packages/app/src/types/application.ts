@@ -27,6 +27,10 @@ export interface Application {
    */
   appStatusText?: string;
   /**
+   * 应用状态, 对应AppStatus
+   */
+  appStatus?: 0 | 1 | 2;
+  /**
    * 标签列表
    */
   tags?: {
@@ -112,10 +116,6 @@ export interface CreateApplicationReq {
    * 主题色
    */
   themeColor?: string;
-  /**
-   * 应用状态, 对应AppStatus
-   */
-  appStatus: 0 | 1 | 2;
 }
 
 export interface UpdateApplicationReq {

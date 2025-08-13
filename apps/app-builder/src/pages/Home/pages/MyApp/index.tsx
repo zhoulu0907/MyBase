@@ -3,19 +3,7 @@ import appEditSVG from '@/assets/images/app_edit_black.svg';
 import CreateApp from '@/components/CreateApp';
 import { useAppStore } from '@/store';
 import { UserPermissionManager } from '@/utils/permission';
-import {
-  Avatar,
-  Button,
-  Form,
-  Input,
-  Message,
-  Modal,
-  Pagination,
-  Select,
-  Spin,
-  Tag,
-  Divider
-} from '@arco-design/web-react';
+import { Avatar, Form, Input, Message, Modal, Pagination, Select, Spin, Tag, Divider } from '@arco-design/web-react';
 import { IconPlus, IconSearch, IconCheckCircle } from '@arco-design/web-react/icon';
 import {
   createApplication,
@@ -29,6 +17,9 @@ import {
 import dayjs from 'dayjs';
 import { debounce } from 'lodash-es';
 import React, { useCallback, useEffect, useState } from 'react';
+import { PermissionButton as Button } from '@/components/PermissionControl';
+import { hasPermission } from '@/utils/permission';
+import { TENANT_DEPT_PERMISSION as ACTIONS } from '@/constants/permission';
 import { type Options } from '@/components/CreateApp/const';
 import { useI18n } from '@/hooks/useI18n';
 import styles from './index.module.less';
@@ -234,6 +225,7 @@ const MyAppPage: React.FC = () => {
           ，您好！
         </div>
         <Button
+          permission={ACTIONS.CREATE}
           type="default"
           size="large"
           icon={<IconPlus />}
@@ -245,166 +237,172 @@ const MyAppPage: React.FC = () => {
         </Button>
       </div>
 
-      <div className={styles.myAppContainer}>
-        <div className={styles.myAppFilter}>
-          <Input
-            className={styles.myAppInput}
-            allowClear
-            suffix={<IconSearch />}
-            onChange={handleSearchChange}
-            placeholder="搜索"
-          />
+      <div className={styles.myAppContainerWrapper}>
+        <div className={styles.myAppContainer}>
+          <div className={styles.myAppFilter}>
+            <Input
+              className={styles.myAppInput}
+              allowClear
+              suffix={<IconSearch />}
+              onChange={handleSearchChange}
+              placeholder="搜索"
+            />
 
-          {/* 筛选下拉框 */}
-          <div>
-            <Select
-              placeholder="全部应用"
-              bordered={false}
-              style={{ width: 100 }}
-              value={ownerTag}
-              onChange={(value) => setOwnerTag(value)}
-            >
-              {appOptions.map((option, index) => (
-                <Option key={index} disabled={index === 3} value={option.value}>
-                  {option.label}
-                </Option>
-              ))}
-            </Select>
-            <Divider type="vertical" />
-            <Select
-              placeholder="按创建时间排序"
-              bordered={false}
-              style={{ width: 138 }}
-              onChange={(value) => setOrderByTime(value)}
-              value={orderByTime}
-            >
-              {createTimeOptions.map((option, index) => (
-                <Option key={index} disabled={index === 3} value={option.value}>
-                  {option.label}
-                </Option>
-              ))}
-            </Select>
-            <Divider type="vertical" />
-            <Select
-              placeholder="全部状态"
-              bordered={false}
-              style={{ width: 100 }}
-              onChange={(value) => setStatus(value)}
-              value={status}
-            >
-              {statusOptions.map((option, index) => (
-                <Option key={index} value={option.value}>
-                  {option.label}
-                </Option>
-              ))}
-            </Select>
-          </div>
-        </div>
-
-        {/* 我的应用列表 */}
-
-        <Spin loading={loading} size={40} style={{ width: '100%', height: '100%' }} tip="加载中...">
-          <div className={styles.myAppList}>
-            {dataList.map((item, index) => (
-              <div
-                className={styles.myAppCard}
-                key={index}
-                onClick={() => {
-                  nagivateToDataFactory(item.id);
-                }}
+            {/* 筛选下拉框 */}
+            <div>
+              <Select
+                placeholder="全部应用"
+                bordered={false}
+                style={{ width: 100 }}
+                value={ownerTag}
+                onChange={(value) => setOwnerTag(value)}
               >
-                <div className={styles.myAppCardTop}>
-                  <div className={styles.myAppCardHeader}>
-                    <div className={styles.myAppName}>
-                      <div className={styles.myAppIcon} style={{ backgroundColor: item.iconColor }}>
-                        <i className={`iconfont ${item.iconName || 'icon-box'}`} />
-                      </div>
-                      <div className={styles.myAppCardInfo}>
-                        <div className={styles.myAppTitle}>{item.appName}</div>
-                        <div className={styles.myAppTime}>{dayjs(item.updateTime).format('YYYY-MM-DD HH:mm:ss')}</div>
-                      </div>
-                    </div>
-                    <Tag
-                      color={TagColor[item.appStatus]}
-                      icon={<IconCheckCircle style={{ color: TagColor[item.appStatus] }} />}
-                      style={{
-                        fontSize: 14,
-                        fontWeight: 400
-                      }}
-                    >
-                      {item.appStatusText}
-                    </Tag>
-                  </div>
-
-                  <div className={styles.myAppCardBody}>
-                    <div className={styles.myAppDesc}>{item.description}</div>
-                    <div className={styles.myAppTags}>
-                      {item.tags?.map((tag) => (
-                        <Tag
-                          key={tag.id}
-                          style={{
-                            color: item.themeColor || defaultTheme,
-                            borderColor: item.themeColor || defaultTheme,
-                            backgroundColor: '#fff'
-                          }}
-                        >
-                          {tag.tagName}
-                        </Tag>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-                <Divider style={{ margin: '12px 0' }} />
-                <div className={styles.myAppCardFooter}>
-                  <div className={styles.myAppCreator}>
-                    <Avatar
-                      size={24}
-                      style={{
-                        backgroundColor: item.themeColor || defaultTheme
-                      }}
-                    >
-                      {item.createUser?.slice(0, 1) || 'U'}
-                    </Avatar>
-                    <div className={styles.myAppCreatorName}>{item.createUser}</div>
-                  </div>
-
-                  <div className={styles.myAppOperate}>
-                    <img
-                      src={appEditSVG}
-                      alt="菜单"
-                      className={styles.operateIcon}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        nagivateToAppPage(item.id);
-                      }}
-                    />
-                    <img
-                      src={appDeleteSVG}
-                      alt="删除"
-                      className={styles.operateIcon}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setDeleteApp(item);
-                        setDeleteVisible(true);
-                      }}
-                    />
-                  </div>
-                </div>
-              </div>
-            ))}
+                {appOptions.map((option, index) => (
+                  <Option key={index} disabled={index === 3} value={option.value}>
+                    {option.label}
+                  </Option>
+                ))}
+              </Select>
+              <Divider type="vertical" />
+              <Select
+                placeholder="按创建时间排序"
+                bordered={false}
+                style={{ width: 138 }}
+                onChange={(value) => setOrderByTime(value)}
+                value={orderByTime}
+              >
+                {createTimeOptions.map((option, index) => (
+                  <Option key={index} disabled={index === 3} value={option.value}>
+                    {option.label}
+                  </Option>
+                ))}
+              </Select>
+              <Divider type="vertical" />
+              <Select
+                placeholder="全部状态"
+                bordered={false}
+                style={{ width: 100 }}
+                onChange={(value) => setStatus(value)}
+                value={status}
+              >
+                {statusOptions.map((option, index) => (
+                  <Option key={index} value={option.value}>
+                    {option.label}
+                  </Option>
+                ))}
+              </Select>
+            </div>
           </div>
-        </Spin>
 
-        <Pagination
-          className={styles.myAppPagination}
-          total={total}
-          current={pageNo}
-          pageSize={pageSize}
-          onChange={(pNo, pSize) => {
-            setPageNo(pNo);
-            setPageSize(pSize);
-          }}
-        />
+          {/* 我的应用列表 */}
+
+          <Spin loading={loading} size={40} style={{ width: '100%', height: '100%' }} tip="加载中...">
+            <div className={styles.myAppList}>
+              {dataList.map((item, index) => (
+                <div
+                  className={styles.myAppCard}
+                  key={index}
+                  onClick={() => {
+                    nagivateToDataFactory(item.id);
+                  }}
+                >
+                  <div className={styles.myAppCardTop}>
+                    <div className={styles.myAppCardHeader}>
+                      <div className={styles.myAppName}>
+                        <div className={styles.myAppIcon} style={{ backgroundColor: item.iconColor }}>
+                          <i className={`iconfont ${item.iconName || 'icon-box'}`} />
+                        </div>
+                        <div className={styles.myAppCardInfo}>
+                          <div className={styles.myAppTitle}>{item.appName}</div>
+                          <div className={styles.myAppTime}>{dayjs(item.updateTime).format('YYYY-MM-DD HH:mm:ss')}</div>
+                        </div>
+                      </div>
+                      <Tag
+                        color={TagColor[item.appStatus]}
+                        icon={<IconCheckCircle style={{ color: TagColor[item.appStatus] }} />}
+                        style={{
+                          fontSize: 14,
+                          fontWeight: 400
+                        }}
+                      >
+                        {item.appStatusText}
+                      </Tag>
+                    </div>
+
+                    <div className={styles.myAppCardBody}>
+                      <div className={styles.myAppDesc}>{item.description}</div>
+                      <div className={styles.myAppTags}>
+                        {item.tags?.map((tag) => (
+                          <Tag
+                            key={tag.id}
+                            style={{
+                              color: item.themeColor || defaultTheme,
+                              borderColor: item.themeColor || defaultTheme,
+                              backgroundColor: '#fff'
+                            }}
+                          >
+                            {tag.tagName}
+                          </Tag>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  <Divider style={{ margin: '12px 0' }} />
+                  <div className={styles.myAppCardFooter}>
+                    <div className={styles.myAppCreator}>
+                      <Avatar
+                        size={24}
+                        style={{
+                          backgroundColor: item.themeColor || defaultTheme
+                        }}
+                      >
+                        {item.createUser?.slice(0, 1) || 'U'}
+                      </Avatar>
+                      <div className={styles.myAppCreatorName}>{item.createUser}</div>
+                    </div>
+
+                    <div className={styles.myAppOperate}>
+                      {hasPermission(ACTIONS.UPDATE) && (
+                        <img
+                          src={appEditSVG}
+                          alt="编辑"
+                          className={styles.operateIcon}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            nagivateToAppPage(item.id);
+                          }}
+                        />
+                      )}
+                      {hasPermission(ACTIONS.DELETE) && (
+                        <img
+                          src={appDeleteSVG}
+                          alt="删除"
+                          className={styles.operateIcon}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDeleteApp(item);
+                            setDeleteVisible(true);
+                          }}
+                        />
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Spin>
+
+          <Pagination
+            className={styles.myAppPagination}
+            total={total}
+            current={pageNo}
+            pageSize={pageSize}
+            onChange={(pNo, pSize) => {
+              setPageNo(pNo);
+              setPageSize(pSize);
+            }}
+          />
+        </div>
       </div>
 
       <Modal
