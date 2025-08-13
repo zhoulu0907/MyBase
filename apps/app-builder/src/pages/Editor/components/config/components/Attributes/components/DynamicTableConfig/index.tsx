@@ -11,16 +11,18 @@ export interface DynamicTableConfigProps {
   handlePropsChange: (key: string, value: string | number | boolean | any[]) => void;
   item: any;
   configs: any;
+  id: string;
 }
 
 /**
  * 动态下拉选择组件
  * @param props 组件属性
  */
-const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({ handlePropsChange, item, configs }) => {
+const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({ handlePropsChange, item, configs, id }) => {
   const [entityList, setEntityList] = useState<MetadataEntityPair[]>([]);
   const [entityId, setEntityId] = useState<string>('');
   const [fieldList, setFieldList] = useState<MetadataEntityField[]>([]);
+
   const columnsKey = 'columns';
   const searchItemsKey = 'searchItems';
 
@@ -31,17 +33,19 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({ handlePropsChan
   const [enableAddSearchItem, setEnableAddSearchItem] = useState<boolean>(false);
 
   useEffect(() => {
-    console.log(item);
-    getEntityList();
+    console.log(id, item);
+
     if (configs[item.key]) {
       setEntityId(configs[item.key]);
     }
+
+    getEntityList();
   }, []);
 
   useEffect(() => {
     if (entityId) {
       getFieldList();
-      handlePropsChange(searchItemsKey, []);
+      //   handlePropsChange(searchItemsKey, []);
     }
   }, [entityId]);
 
@@ -108,7 +112,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({ handlePropsChan
 
       {/* 表头配置 */}
       <FormItem layout="vertical" labelAlign="left" label={'表头配置'} className={styles.formItem}>
-        <Form.List initialValue={configs[columnsKey]} field={columnsKey}>
+        <Form.List initialValue={configs[columnsKey]} field={`${id}-${columnsKey}`}>
           {(_fields, { add, remove }) => (
             <div className={styles.tableColumnList}>
               <ReactSortable
@@ -262,7 +266,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({ handlePropsChan
 
       {/* 搜索项 */}
       <FormItem layout="vertical" labelAlign="left" label={'搜索项'} className={styles.formItem}>
-        <Form.List initialValue={configs[searchItemsKey]} field={searchItemsKey}>
+        <Form.List initialValue={configs[searchItemsKey]} field={`${id}-${searchItemsKey}`}>
           {(_fields, { add, remove }) => (
             <div className={styles.tableColumnList}>
               <ReactSortable
@@ -295,7 +299,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({ handlePropsChan
                   }
                 }}
               >
-                {searchItemsConfig.map((_col: any, idx: number) => (
+                {configs[searchItemsKey].map((_col: any, idx: number) => (
                   <div key={idx} className={styles.tableColumnItem}>
                     <IconDragDotVertical
                       // 支持拖拽的图标，别误删了：）
@@ -307,7 +311,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({ handlePropsChan
                     />
                     <Select
                       size="small"
-                      value={searchItemsConfig[idx].label}
+                      value={configs[searchItemsKey][idx].label}
                       onChange={(e, option: any) => {
                         const newList = [...searchItemsConfig];
                         newList[idx] = {
@@ -342,6 +346,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({ handlePropsChan
                       className={styles.tableColumnItemButton}
                       onClick={() => {
                         const newList = [...searchItemsConfig];
+
                         newList.splice(idx, 1);
 
                         remove(idx);

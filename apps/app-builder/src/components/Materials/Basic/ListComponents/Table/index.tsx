@@ -4,23 +4,12 @@ import { IconDelete, IconEdit } from '@arco-design/web-react/icon';
 import { memo, useEffect, useState } from 'react';
 
 import { EDITOR_TYPES } from '@/pages/Editor/utils/const';
+import { dataMethodDelete, dataMethodPage, type DeleteMethodParam, type PageMethodParam } from '@onebase/app';
 import { useNavigate } from 'react-router-dom';
 import styles from './index.module.less';
 import type { XTableConfig } from './schema';
 
-const opearate: any = {
-  title: '操作',
-  dataIndex: 'op',
-  fixed: null,
-  width: '110px',
-  render: () => (
-    <>
-      <Button type="text" style={{ marginRight: 5 }} icon={<IconEdit />} />
-      <Button status="danger" type="text" icon={<IconDelete />} />
-    </>
-  )
-};
-const XTable = memo((props: XTableConfig) => {
+const XTable = memo((props: XTableConfig, edit: boolean = false) => {
   const navigate = useNavigate();
 
   const {
@@ -43,6 +32,35 @@ const XTable = memo((props: XTableConfig) => {
 
   const [finalColumns, setFinalColumns] = useState<any[]>();
 
+  const [tableData, setTableData] = useState<any[]>([]);
+
+  const opearate: any = {
+    title: '操作',
+    dataIndex: 'op',
+    fixed: null,
+    width: '110px',
+    render: (_: any, record: any) => (
+      <>
+        <Button
+          type="text"
+          style={{ marginRight: 5 }}
+          icon={<IconEdit />}
+          onClick={() => {
+            handleEdit(record.id);
+          }}
+        />
+        <Button
+          status="danger"
+          type="text"
+          icon={<IconDelete />}
+          onClick={() => {
+            handleDelete(record.id);
+          }}
+        />
+      </>
+    )
+  };
+
   useEffect(() => {
     if (Object.keys(columns as any).length) {
       columns?.map((v) => {
@@ -61,6 +79,11 @@ const XTable = memo((props: XTableConfig) => {
     }
   }, [showOpearate, columns, fixedOpearate]);
 
+  useEffect(() => {
+    console.log(finalColumns);
+    handlePage();
+  }, [finalColumns]);
+
   const handleCreate = () => {
     const hash = window.location.hash;
     const queryIndex = hash.indexOf('?');
@@ -69,6 +92,50 @@ const XTable = memo((props: XTableConfig) => {
       const params = new URLSearchParams(queryString);
       const pageSetCode = params.get('pageSetCode') || '';
       navigate(`/onebase/preview-app/preview?pageSetCode=${pageSetCode}&pageType=${EDITOR_TYPES.FORM_EDITOR}`);
+    }
+  };
+
+  const handlePage = async () => {
+    const req: PageMethodParam = {
+      entityId: '542683577733746688',
+      pageNo: 1,
+      pageSize: 10
+    };
+    const res = await dataMethodPage(req);
+    console.log(res);
+
+    const { list, total } = res;
+
+    const newTableData = (list || []).map((item: any) => {
+      return {
+        ...item.data,
+        key: item.data.id
+      };
+    });
+
+    console.log(newTableData);
+    setTableData(newTableData);
+  };
+
+  const handleDelete = async (id: string) => {
+    console.log(id);
+    const req: DeleteMethodParam = {
+      entityId: '542683577733746688',
+      id: id
+    };
+    const res = await dataMethodDelete(req);
+    console.log(res);
+  };
+
+  const handleEdit = (id: string) => {
+    console.log(id);
+    const hash = window.location.hash;
+    const queryIndex = hash.indexOf('?');
+    if (queryIndex !== -1) {
+      const queryString = hash.substring(queryIndex + 1);
+      const params = new URLSearchParams(queryString);
+      const pageSetCode = params.get('pageSetCode') || '';
+      navigate(`/onebase/preview-app/preview?pageSetCode=${pageSetCode}&pageType=${EDITOR_TYPES.FORM_EDITOR}&id=${id}`);
     }
   };
 
@@ -144,7 +211,7 @@ const XTable = memo((props: XTableConfig) => {
             stripe={stripe}
             hover={hover}
             columns={finalColumns}
-            data={defaultValue}
+            data={tableData}
             pagePosition={pagePosition}
             pagination={{
               pageSize,

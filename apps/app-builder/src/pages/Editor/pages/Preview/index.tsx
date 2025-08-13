@@ -1,5 +1,14 @@
 import { useFromEditorStore, useListEditorStore } from '@/store';
-import { Button, Form } from '@arco-design/web-react';
+import { Button, Form, Message } from '@arco-design/web-react';
+import {
+  dataMethodData,
+  dataMethodInsert,
+  getAppEntities,
+  getAppIdByPageSetCode,
+  type AppEntities,
+  type DataMethodParam,
+  type InsertMethodParams
+} from '@onebase/app';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PreviewRender from '../../components/render/PreviewRender';
@@ -11,6 +20,10 @@ interface PreviewProps {}
 
 const Preview: React.FC<PreviewProps> = ({}) => {
   const navigate = useNavigate();
+  const [appEntities, setAppEntities] = useState<AppEntities>();
+
+  const [appId, setAppId] = useState('');
+  const [editTargetId, setEditTargetId] = useState('');
 
   const {
     setComponents: setFromComponents,
@@ -40,18 +53,53 @@ const Preview: React.FC<PreviewProps> = ({}) => {
       const params = new URLSearchParams(queryString);
       const pSetCode = params.get('pageSetCode') || '';
       const pType = params.get('pageType') || '';
+      const id = params.get('id') || '';
 
       setPageSetCode(pSetCode);
       setPageType(pType);
+      setEditTargetId(id);
     }
   }, [window.location.hash]);
 
   useEffect(() => {
-    console.log('pageSetCode', pageSetCode);
     if (pageSetCode) {
+      console.log('pageSetCode: ', pageSetCode);
       loadPageSetInfo(pageSetCode);
+      getAppID(pageSetCode);
     }
   }, [pageSetCode]);
+
+  useEffect(() => {
+    if (editTargetId) {
+      console.log(editTargetId);
+      handleGetData('542683577733746688', editTargetId);
+    }
+  }, [editTargetId]);
+
+  useEffect(() => {
+    if (appId) {
+      // TODO(mickey): 需要根据 appId 获取 appEntities
+      handleGetAppEntities('1');
+    }
+  }, [appId]);
+
+  const handleGetAppEntities = async (appId: string) => {
+    const res = await getAppEntities(appId);
+    if (res) {
+      setAppEntities(res);
+    }
+    return res;
+  };
+
+  const handleGetData = async (entityId: string, id: string) => {
+    const req: DataMethodParam = {
+      entityId: entityId,
+      id: id
+    };
+    const res = await dataMethodData(req);
+    console.log(res);
+    return res;
+  };
 
   const loadPageSetInfo = async (pgsetCode: string) => {
     startLoadPageSet({
@@ -65,9 +113,45 @@ const Preview: React.FC<PreviewProps> = ({}) => {
     });
   };
 
-  const submitForm = () => {
+  const getAppID = async (pageSetCode: string) => {
+    const res = await getAppIdByPageSetCode({ code: pageSetCode });
+    if (res) {
+      setAppId(res);
+    }
+    return res;
+  };
+
+  const submitForm = async () => {
     console.log('提交');
-    console.log(form.getFields());
+    const fields = form.getFieldsValue();
+
+    const formData = {} as any;
+    Object.entries(fields).forEach(([key, value]) => {
+      let fieldInfo = null;
+      for (const entity of appEntities?.entities || []) {
+        const field = (entity.fields || []).find((f: any) => f.fieldID == key);
+        if (field) {
+          fieldInfo = field;
+          break;
+        }
+      }
+      if (fieldInfo) {
+        formData[fieldInfo.fieldName] = value;
+      }
+    });
+    console.log(formData);
+
+    const req: InsertMethodParams = {
+      entityId: appEntities?.entities[0].entityID || '',
+      data: formData
+    };
+
+    const res = await dataMethodInsert(req);
+    console.log(res);
+    if (res) {
+      Message.success('插入成功');
+      navigate(`/onebase/preview-app/preview?pageSetCode=${pageSetCode}&pageType=${EDITOR_TYPES.LIST_EDITOR}`);
+    }
   };
 
   const cancelSubmitForm = () => {

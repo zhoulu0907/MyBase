@@ -250,7 +250,7 @@ export const pagePositionConfig: ISelectConfigType<TPagePositionSelectKeyType> =
 
 export const dataFieldConfig: IDataFieldConfigType[] = [
     {
-        key: 'dataFieldID',
+        key: 'dataField',
         name: '数据字段',
         type: CONFIG_TYPES.FIELD_DATA
     },
