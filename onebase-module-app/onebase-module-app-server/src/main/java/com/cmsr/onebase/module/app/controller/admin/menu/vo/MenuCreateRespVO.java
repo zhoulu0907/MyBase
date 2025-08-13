@@ -12,23 +12,37 @@ import lombok.Data;
 @Data
 public class MenuCreateRespVO {
 
-    @Schema(description = "应用ID")
-    @NotBlank(message = "应用ID不能为空")
-    private Long applicationId;
+    @Schema(description = "菜单ID")
+    private Long id;
+
+    @Schema(description = "应用Code")
+    private String applicationCode;
+
+    @Schema(description = "父菜单编码")
+    private String parentCode;
+
+    @Schema(description = "实体Code")
+    private String entityCode;
+
+    @Schema(description = "菜单编码")
+    private String menuCode;
+
+    @Schema(description = "菜单排序")
+    private Integer menuSort;
 
     @Schema(description = "菜单类型")
-    @NotBlank(message = "菜单类型不能为空")
     private Integer menuType;
 
-    @Schema(description = "父菜单ID")
-    private Long parentId;
-
     @Schema(description = "菜单名称")
-    @NotBlank(message = "菜单名称不能为空")
     private String menuName;
 
     @Schema(description = "菜单图标")
-    @NotBlank(message = "菜单图标不能为空")
     private String menuIcon;
+
+    @Schema(description = "菜单动作")
+    private String actionTarget;
+
+    @Schema(description = "是否可见")
+    private Boolean visible;
 
 }

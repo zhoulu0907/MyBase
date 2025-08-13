@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.metadata.service.entity;
 
+import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.BusinessEntityPageReqVO;
@@ -15,7 +16,11 @@ import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataSystemFiel
 import com.cmsr.onebase.module.metadata.dal.dataobject.datasource.MetadataDatasourceDO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.relationship.MetadataEntityRelationshipDO;
 import com.cmsr.onebase.module.metadata.convert.datasource.DatasourceConvert;
-import com.cmsr.onebase.module.metadata.dal.database.MetadataRepository;
+import com.cmsr.onebase.module.metadata.dal.database.MetadataBusinessEntityRepository;
+import com.cmsr.onebase.module.metadata.dal.database.MetadataDatasourceRepository;
+import com.cmsr.onebase.module.metadata.dal.database.MetadataSystemFieldsRepository;
+import com.cmsr.onebase.module.metadata.dal.database.MetadataEntityFieldRepository;
+import com.cmsr.onebase.module.metadata.dal.database.MetadataEntityRelationshipRepository;
 import com.cmsr.onebase.module.metadata.dal.database.TemporaryDatasourceService;
 import com.cmsr.onebase.module.metadata.enums.BusinessEntityTypeEnum;
 import jakarta.annotation.Resource;
@@ -31,7 +36,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.StringJoiner;
+import java.util.stream.Collectors;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.module.metadata.enums.ErrorCodeConstants.BUSINESS_ENTITY_NOT_EXISTS;
@@ -47,7 +54,15 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
     @Resource
     private DatasourceConvert datasourceConvert;
     @Resource
-    private MetadataRepository metadataRepository;
+    private MetadataBusinessEntityRepository metadataBusinessEntityRepository;
+    @Resource
+    private MetadataDatasourceRepository metadataDatasourceRepository;
+    @Resource
+    private MetadataSystemFieldsRepository metadataSystemFieldsRepository;
+    @Resource
+    private MetadataEntityFieldRepository metadataEntityFieldRepository;
+    @Resource
+    private MetadataEntityRelationshipRepository metadataEntityRelationshipRepository;
     @Resource
     private TemporaryDatasourceService temporaryDatasourceService;
 
@@ -67,7 +82,7 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
         // 根据实体类型处理表名
         handleTableNameByEntityType(businessEntity, createReqVO);
 
-        metadataRepository.insert(businessEntity);
+        metadataBusinessEntityRepository.insert(businessEntity);
 
         // 根据实体类型决定是否创建物理表
         if (BusinessEntityTypeEnum.needCreatePhysicalTable(createReqVO.getEntityType())) {
@@ -152,7 +167,7 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
 
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.and("id", Long.valueOf(datasourceId));
-        return metadataRepository.findOne(MetadataDatasourceDO.class, configStore);
+        return metadataDatasourceRepository.findOne(configStore);
     }
 
     /**
@@ -160,9 +175,32 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
      */
     private List<MetadataSystemFieldsDO> getSystemFields() {
         DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and("is_enabled", 1); // 只获取启用的系统字段
+        configStore.and("is_enabled", CommonStatusEnum.ENABLE.getStatus()); // 只获取启用的系统字段（0-启用，1-禁用）
         configStore.order("id", Order.TYPE.ASC);
-        return metadataRepository.findAllByConfig(MetadataSystemFieldsDO.class, configStore);
+        // 直接使用配置的查询条件，不再调用仓储类的方法（避免重复条件）
+        List<MetadataSystemFieldsDO> systemFields = metadataSystemFieldsRepository.findAllByConfig(configStore);
+        
+        log.info("获取系统字段结果: 总数={}, is_enabled条件={}", 
+                systemFields.size(), CommonStatusEnum.ENABLE.getStatus());
+        
+        // 如果启用的系统字段为空，尝试获取所有系统字段（忽略启用状态）
+        if (systemFields.isEmpty()) {
+            log.warn("未找到启用的系统字段，尝试获取所有系统字段");
+            DefaultConfigStore allConfigStore = new DefaultConfigStore();
+            allConfigStore.order("id", Order.TYPE.ASC);
+            systemFields = metadataSystemFieldsRepository.findAllByConfig(allConfigStore);
+            log.info("获取所有系统字段结果: 总数={}", systemFields.size());
+            
+            // 打印前几个字段的详细信息用于调试
+            for (int i = 0; i < Math.min(3, systemFields.size()); i++) {
+                MetadataSystemFieldsDO field = systemFields.get(i);
+                log.info("系统字段[{}]: 名称={}, 类型={}, 启用状态={}, 雪花ID={}", 
+                        i, field.getFieldName(), field.getFieldType(), 
+                        field.getIsEnabled(), field.getIsSnowflakeId());
+            }
+        }
+        
+        return systemFields;
     }
 
     /**
@@ -184,11 +222,11 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
                     .decimalPlaces(getDefaultDecimalPlaces(systemField.getFieldType())) // 根据字段类型设置默认小数位
                     .defaultValue(systemField.getDefaultValue())
                     .description(systemField.getDescription())
-                    .isSystemField(true) // 标记为系统字段
-                    .isPrimaryKey(systemField.getIsSnowflakeId() == 1) // 雪花ID字段设为主键
-                    .isRequired(systemField.getIsRequired() == 1)
-                    .isUnique(systemField.getIsSnowflakeId() == 1) // 主键字段唯一
-                    .allowNull(systemField.getIsRequired() != 1) // 必填字段不允许为空
+                    .isSystemField(0) // 标记为系统字段：0-是
+                    .isPrimaryKey(systemField.getIsSnowflakeId() == 1 ? 0 : 1) // 雪花ID字段设为主键：0-是，1-不是
+                    .isRequired(systemField.getIsRequired() == 1 ? 0 : 1) // 0-是，1-不是
+                    .isUnique(systemField.getIsSnowflakeId() == 1 ? 0 : 1) // 主键字段唯一：0-是，1-不是
+                    .allowNull(systemField.getIsRequired() != 1 ? 0 : 1) // 必填字段不允许为空：0-是，1-不是
                     .sortOrder(sortOrder++)
                     .validationRules(null) // 系统字段暂不设置校验规则
                     .runMode(0) // 默认编辑态
@@ -197,7 +235,7 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
                     .fieldCode(generateFieldCode(systemField.getFieldName())) // 生成字段编码
                     .build();
 
-            metadataRepository.insert(entityField);
+            metadataEntityFieldRepository.insert(entityField);
         }
 
         log.info("成功保存 {} 个系统字段到实体字段表", systemFields.size());
@@ -301,8 +339,8 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
             String columnType = mapFieldType(field.getFieldType());
             columnDef.append(columnType);
 
-            // 是否必填
-            if (field.getIsRequired() == 1) {
+            // 是否必填：0-是，1-不是
+            if (field.getIsRequired() == 0) {
                 columnDef.append(" NOT NULL");
             }
 
@@ -376,7 +414,7 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
         // 根据实体类型处理表名
         handleTableNameByEntityType(updateObj, updateReqVO);
 
-        metadataRepository.update(updateObj);
+        metadataBusinessEntityRepository.update(updateObj);
     }
 
     @Override
@@ -388,13 +426,13 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
         // 删除业务实体
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.in("id", id);
-        metadataRepository.deleteByConfig(MetadataBusinessEntityDO.class, configStore);
+        metadataBusinessEntityRepository.deleteByConfig(configStore);
     }
 
     private void validateBusinessEntityExists(Long id) {
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.in("id", id);
-        if (metadataRepository.findOne(MetadataBusinessEntityDO.class, configStore) == null) {
+        if (metadataBusinessEntityRepository.findOne(configStore) == null) {
             throw exception(BUSINESS_ENTITY_NOT_EXISTS);
         }
     }
@@ -407,7 +445,7 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
             configStore.and(Compare.NOT_EQUAL, "id", id);
         }
 
-        long count = metadataRepository.countByConfig(MetadataBusinessEntityDO.class, configStore);
+        long count = metadataBusinessEntityRepository.countByConfig(configStore);
         if (count > 0) {
             throw exception(BUSINESS_ENTITY_CODE_DUPLICATE);
         }
@@ -417,7 +455,7 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
     public MetadataBusinessEntityDO getBusinessEntity(Long id) {
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.in("id", id);
-        return metadataRepository.findOne(MetadataBusinessEntityDO.class, configStore);
+        return metadataBusinessEntityRepository.findOne(configStore);
     }
 
     @Override
@@ -450,7 +488,7 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
         // 分页查询
         configStore.order("create_time", Order.TYPE.DESC);
 
-        return metadataRepository.findPageWithConditions(MetadataBusinessEntityDO.class, configStore,
+        return metadataBusinessEntityRepository.findPageWithConditions(configStore,
             pageReqVO.getPageNo(), pageReqVO.getPageSize());
     }
 
@@ -458,14 +496,14 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
     public List<MetadataBusinessEntityDO> getBusinessEntityList() {
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.order("create_time", Order.TYPE.DESC);
-        return metadataRepository.findAllByConfig(MetadataBusinessEntityDO.class, configStore);
+        return metadataBusinessEntityRepository.findAllByConfig(configStore);
     }
 
     @Override
     public MetadataBusinessEntityDO getBusinessEntityByCode(String code) {
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.and("code", code);
-        return metadataRepository.findOne(MetadataBusinessEntityDO.class, configStore);
+        return metadataBusinessEntityRepository.findOne(configStore);
     }
 
     @Override
@@ -473,7 +511,8 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.and("datasource_id", datasourceId);
         configStore.order("create_time", Order.TYPE.DESC);
-        return metadataRepository.findAllByConfig(MetadataBusinessEntityDO.class, configStore);
+        List<MetadataBusinessEntityDO> a = metadataBusinessEntityRepository.findAllByConfig(configStore);
+        return a;
     }
 
     @Override
@@ -502,8 +541,25 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
 
         // 5. 构建关联关系（基于外键关系）
         List<ERRelationshipVO> relationships = buildRelationships(entities);
+
         result.setRelationships(relationships);
 
+        //设主子关系
+        Set<String> sourceIds = relationships.stream()
+                .map(ERRelationshipVO::getSourceEntityId)
+                .collect(Collectors.toSet());
+        Set<String> targetIds = relationships.stream()
+                .map(ERRelationshipVO::getTargetEntityId)
+                .collect(Collectors.toSet());
+        
+        for (EREntityVO entity : erEntities) {      
+            if (sourceIds.contains(entity.getEntityId())) {
+                entity.setRelationType("PARENT");
+            }
+            if (targetIds.contains(entity.getEntityId())) {
+                entity.setRelationType("CHILD");
+            }
+        }
         return result;
     }
 
@@ -515,15 +571,15 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
      */
     private EREntityVO convertToEREntity(MetadataBusinessEntityDO entity) {
         EREntityVO erEntity = new EREntityVO();
-        erEntity.setEntityId(entity.getId());
+        erEntity.setEntityId(entity.getId().toString());
         erEntity.setEntityName(entity.getDisplayName());
         erEntity.setTableName(entity.getTableName());
         erEntity.setDescription(entity.getDescription());
         erEntity.setEntityType(entity.getEntityType().toString());
         
         // 设置默认坐标（前端可以根据需要调整）
-        erEntity.setPositionX(100);
-        erEntity.setPositionY(100);
+        erEntity.setDisplayConfig(entity.getDisplayConfig() != null ? entity.getDisplayConfig() : "{}");
+        erEntity.setCode(entity.getCode());
 
         // 获取字段信息
         List<ERFieldVO> fields = getEntityFields(entity.getId());
@@ -544,7 +600,7 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
         configStore.order("sort_order", Order.TYPE.ASC);
         configStore.order("create_time", Order.TYPE.ASC);
 
-        List<MetadataEntityFieldDO> fieldList = metadataRepository.findAllByConfig(MetadataEntityFieldDO.class, configStore);
+        List<MetadataEntityFieldDO> fieldList = metadataEntityFieldRepository.getEntityFieldListByEntityId(entityId);
         List<ERFieldVO> erFields = new ArrayList<>();
 
         for (MetadataEntityFieldDO field : fieldList) {
@@ -594,8 +650,8 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
         relationshipConfigStore.and(orStore);
         relationshipConfigStore.order("create_time", Order.TYPE.DESC);
 
-        List<MetadataEntityRelationshipDO> relationshipDOs = metadataRepository.findAllByConfig(
-                MetadataEntityRelationshipDO.class, relationshipConfigStore);
+        List<MetadataEntityRelationshipDO> relationshipDOs = metadataEntityRelationshipRepository.findAllByConfig(
+                relationshipConfigStore);
 
         // 转换为ER关系VO
         for (MetadataEntityRelationshipDO relationshipDO : relationshipDOs) {
@@ -633,13 +689,14 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
         }
 
         ERRelationshipVO relationship = new ERRelationshipVO();
-        relationship.setSourceEntityId(relationshipDO.getSourceEntityId());
+        relationship.setRelationshipId(relationshipDO.getId().toString());
+        relationship.setSourceEntityId(relationshipDO.getSourceEntityId().toString());
         relationship.setSourceEntityName(sourceEntity.getDisplayName());
-        relationship.setSourceFieldId(Long.valueOf(relationshipDO.getSourceFieldId()));
+        relationship.setSourceFieldId(relationshipDO.getSourceFieldId().toString());
         relationship.setSourceFieldName(getFieldNameById(relationshipDO.getSourceFieldId()));
-        relationship.setTargetEntityId(relationshipDO.getTargetEntityId());
+        relationship.setTargetEntityId(relationshipDO.getTargetEntityId().toString());
         relationship.setTargetEntityName(targetEntity.getDisplayName());
-        relationship.setTargetFieldId(Long.valueOf(relationshipDO.getTargetFieldId()));
+        relationship.setTargetFieldId(relationshipDO.getTargetFieldId().toString());
         relationship.setTargetFieldName(getFieldNameById(relationshipDO.getTargetFieldId()));
         relationship.setRelationshipType(relationshipDO.getRelationshipType());
         relationship.setRelationshipName(relationshipDO.getRelationName());
@@ -662,7 +719,7 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
         try {
             DefaultConfigStore configStore = new DefaultConfigStore();
             configStore.and("id", Long.valueOf(fieldId));
-            MetadataEntityFieldDO field = metadataRepository.findOne(MetadataEntityFieldDO.class, configStore);
+            MetadataEntityFieldDO field = metadataEntityFieldRepository.findById(Long.valueOf(fieldId));
             return field != null ? field.getFieldName() : null;
         } catch (NumberFormatException e) {
             log.warn("无效的字段ID: {}", fieldId);
@@ -679,7 +736,7 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
     private MetadataDatasourceDO getDatasourceById(Long datasourceId) {
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.and("id", datasourceId);
-        return metadataRepository.findOne(MetadataDatasourceDO.class, configStore);
+        return metadataDatasourceRepository.findOne(configStore);
     }
 
     @Override
@@ -691,8 +748,8 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
         entityConfigStore.and("app_id", appId);
         entityConfigStore.order("create_time", Order.TYPE.ASC);
 
-        List<MetadataBusinessEntityDO> entities = metadataRepository.findAllByConfig(
-                MetadataBusinessEntityDO.class, entityConfigStore);
+        List<MetadataBusinessEntityDO> entities = metadataBusinessEntityRepository.findAllByConfig(
+                entityConfigStore);
 
         if (entities.isEmpty()) {
             log.info("应用下未找到任何实体，应用ID: {}", appId);

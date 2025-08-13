@@ -9,11 +9,9 @@ import com.cmsr.onebase.module.app.controller.admin.app.vo.ApplicationPageReqVO;
 import com.cmsr.onebase.module.app.controller.admin.app.vo.ApplicationRespVO;
 import com.cmsr.onebase.module.app.controller.admin.tag.vo.TagRespVO;
 import com.cmsr.onebase.module.app.dal.database.app.AppApplicationRepository;
-import com.cmsr.onebase.module.app.dal.database.app.AppResourceRepository;
 import com.cmsr.onebase.module.app.dal.database.menu.AppMenuRepository;
 import com.cmsr.onebase.module.app.dal.database.tag.AppApplicationTagRepository;
 import com.cmsr.onebase.module.app.dal.database.tag.AppTagRepository;
-import com.cmsr.onebase.module.app.dal.database.version.AppVersionMenuRepository;
 import com.cmsr.onebase.module.app.dal.database.version.AppVersionRepository;
 import com.cmsr.onebase.module.app.dal.database.version.AppVersionResourceRepository;
 import com.cmsr.onebase.module.app.dal.dataobject.app.ApplicationDO;
@@ -21,6 +19,7 @@ import com.cmsr.onebase.module.app.enums.app.AppErrorCodeConstants;
 import com.cmsr.onebase.module.app.enums.app.ApplicationStatusEnum;
 import com.cmsr.onebase.module.app.service.AppCommonService;
 import com.cmsr.onebase.module.app.service.auth.AppAuthRoleService;
+import com.cmsr.onebase.module.app.util.AppUtils;
 import com.cmsr.onebase.module.app.util.VersionUtils;
 import jakarta.annotation.Resource;
 import lombok.Setter;
@@ -54,13 +53,7 @@ public class AppApplicationServiceImpl implements AppApplicationService {
     private AppMenuRepository menuRepository;
 
     @Resource
-    private AppResourceRepository resourceRepository;
-
-    @Resource
     private AppVersionRepository versionRepository;
-
-    @Resource
-    private AppVersionMenuRepository versionMenuRepository;
 
     @Resource
     private AppVersionResourceRepository versionResourceRepository;
@@ -115,10 +108,15 @@ public class AppApplicationServiceImpl implements AppApplicationService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public ApplicationCreateRespVO createApplication(ApplicationCreateReqVO createReqVO) {
-        validApplicationCodeDuplicate(createReqVO.getAppCode(), null);
+        validApplicationKeyDuplicate(createReqVO.getAppKey(), null);
         ApplicationDO applicationDO = BeanUtils.toBean(createReqVO, ApplicationDO.class);
+        applicationDO.setId(null);
         applicationDO.setVersionNumber(VersionUtils.INIT_VERSION);
         applicationDO.setAppStatus(ApplicationStatusEnum.EDITING.getValue());
+        applicationDO.setAppCode(AppUtils.createAppCode());
+        if (StringUtils.isBlank(applicationDO.getAppKey())) {
+            applicationDO.setAppKey(applicationDO.getAppCode());
+        }
         applicationDO = applicationRepository.insert(applicationDO);
         saveApplicationTags(applicationDO.getId(), createReqVO.getTagIds());
         authRoleService.createDefaultRole(applicationDO.getId());
@@ -144,7 +142,7 @@ public class AppApplicationServiceImpl implements AppApplicationService {
     @Override
     public void updateApplication(ApplicationCreateReqVO createReqVO) {
         appCommonService.validateApplicationExist(createReqVO.getId());
-        validApplicationCodeDuplicate(createReqVO.getAppCode(), createReqVO.getId());
+        validApplicationKeyDuplicate(createReqVO.getAppKey(), createReqVO.getId());
         ApplicationDO updateObj = BeanUtils.toBean(createReqVO, ApplicationDO.class);
         saveApplicationTags(createReqVO.getId(), createReqVO.getTagIds());
         applicationRepository.update(updateObj);
@@ -161,6 +159,18 @@ public class AppApplicationServiceImpl implements AppApplicationService {
     }
 
     @Override
+    public void updateApplicationVersion(Long id, String versionNumber, String versionUrl) {
+        ApplicationDO applicationDO = applicationRepository.findById(id);
+        if (applicationDO == null) {
+            throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_NOT_EXIST);
+        }
+
+        applicationDO.setVersionNumber(versionNumber);
+        applicationDO.setVersionURL(versionUrl);
+        applicationRepository.update(applicationDO);
+    }
+
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteApplication(Long id, String name) {
         ApplicationDO applicationDO = appCommonService.validateApplicationExist(id);
@@ -169,10 +179,8 @@ public class AppApplicationServiceImpl implements AppApplicationService {
         }
         //TODO 删除应用下的全部资源
         applicationRepository.deleteById(id);
-        menuRepository.deleteByApplicationId(id);
-        resourceRepository.deleteByApplicationId(id);
+        menuRepository.deleteByApplicationCode(applicationDO.getAppCode());
         versionRepository.deleteByApplicationId(id);
-        versionMenuRepository.deleteByApplicationId(id);
         versionResourceRepository.deleteByApplicationId(id);
     }
 
@@ -180,14 +188,14 @@ public class AppApplicationServiceImpl implements AppApplicationService {
     /**
      * 检查 ApplicationDO 表 code 码是否重复，重复跑出异常
      */
-    private void validApplicationCodeDuplicate(String code, Long id) {
+    private void validApplicationKeyDuplicate(String key, Long id) {
         if (id == null) {
-            if (applicationRepository.findOneByAppCode(code) != null) {
-                throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_CODE_DUPLICATE);
+            if (applicationRepository.findOneByKey(key) != null) {
+                throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_KEY_DUPLICATE);
             }
         } else {
-            if (applicationRepository.findByAppCodeAndIdNot(code, id) != null) {
-                throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_CODE_DUPLICATE);
+            if (applicationRepository.findByKeyAndIdNot(key, id) != null) {
+                throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_KEY_DUPLICATE);
             }
         }
     }

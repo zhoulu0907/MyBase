@@ -27,8 +27,8 @@ public class EntityFieldUpdateItemVO {
     @Size(max = 200, message = "描述长度不能超过200个字符")
     private String description;
 
-    @Schema(description = "是否必填", example = "true")
-    private Boolean isRequired;
+    @Schema(description = "是否必填：0-是，1-不是", example = "0")
+    private Integer isRequired;
 
     @Schema(description = "数据长度", example = "60")
     private Integer dataLength;

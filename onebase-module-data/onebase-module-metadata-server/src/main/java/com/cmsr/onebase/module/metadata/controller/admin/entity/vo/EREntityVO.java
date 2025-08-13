@@ -16,7 +16,7 @@ import java.util.List;
 public class EREntityVO {
 
     @Schema(description = "实体ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "1024")
-    private Long entityId;
+    private String entityId;
 
     @Schema(description = "实体名称", requiredMode = Schema.RequiredMode.REQUIRED, example = "用户表")
     private String entityName;
@@ -29,13 +29,22 @@ public class EREntityVO {
 
     @Schema(description = "实体类型", requiredMode = Schema.RequiredMode.REQUIRED, example = "TABLE")
     private String entityType;
+    
+    @Schema(description = "实体编码", example = " code_001")
+    private String code;
 
-    @Schema(description = "实体坐标X", example = "100")
+    @Schema(description = "前端展示配置", example = "code_001")
+    private String displayConfig;
+
+/*     @Schema(description = "实体坐标X", example = "100")
     private Integer positionX;
 
     @Schema(description = "实体坐标Y", example = "200")
-    private Integer positionY;
+    private Integer positionY; */
 
     @Schema(description = "字段列表", requiredMode = Schema.RequiredMode.REQUIRED)
     private List<ERFieldVO> fields;
+
+    @Schema(description = "关系类型", example = "主表:PARENT，子表:CHILD")
+    private String relationType;
 }

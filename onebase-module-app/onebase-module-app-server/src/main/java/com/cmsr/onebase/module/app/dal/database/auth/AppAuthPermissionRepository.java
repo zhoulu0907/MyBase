@@ -1,0 +1,31 @@
+package com.cmsr.onebase.module.app.dal.database.auth;
+
+import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
+import com.cmsr.onebase.module.app.controller.admin.auth.vo.AuthPermissionDTO;
+import com.cmsr.onebase.module.app.controller.admin.auth.vo.AuthPermissionReqVO;
+import com.cmsr.onebase.module.app.dal.dataobject.auth.AuthPermissionDO;
+import org.anyline.data.param.ConfigStore;
+import org.anyline.data.param.init.DefaultConfigStore;
+import org.springframework.stereotype.Repository;
+
+/**
+ * 应用权限功能数据访问层
+ *
+ * @author lingma
+ * @date 2025-08-05
+ */
+@Repository
+public class AppAuthPermissionRepository extends DataRepositoryNew<AuthPermissionDO> {
+
+    public AppAuthPermissionRepository() {
+        super(AuthPermissionDO.class);
+    }
+
+    public AuthPermissionDO findByQuery(AuthPermissionDTO dto) {
+        ConfigStore configs = new DefaultConfigStore();
+        configs.eq("application_code", dto.getApplicationCode());
+        configs.eq("role_code", dto.getRoleCode());
+        configs.eq("menu_code", dto.getMenuCode());
+        return this.findOne(configs);
+    }
+}

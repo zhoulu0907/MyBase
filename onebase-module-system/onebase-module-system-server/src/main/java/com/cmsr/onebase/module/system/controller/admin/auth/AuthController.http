@@ -1,7 +1,7 @@
 ### 默认环境变量配置（直接使用local环境配置）
 @baseUrl = http://localhost:48080/admin-api
 @adminTenantId = 1
-@token = test1
+@token = 9ce4e541423b47fd9429049715ae8c8d
 @tag = Yunai.local
 
 ### 环境配置说明
@@ -17,21 +17,12 @@ tag: {{tag}}
 
 {
   "username": "admin",
-  "password": "admin123",
-  "uuid": "3acd87a09a4f48fb9118333780e94883",
-  "code": "1024"
+  "password": "admin123"
 }
 
-> {%
-    // 自动保存登录获得的token
-    if (response.status === 200 && response.body.data && response.body.data.accessToken) {
-        client.global.set("token", response.body.data.accessToken);
-        client.log("Token saved: " + response.body.data.accessToken);
-    }
-%}
 
-### 请求 /login 接口 => 成功（无验证码)
-POST {{baseUrl}}/system/auth/login
+### 请求 /admin-login 接口 => 成功
+POST {{baseUrl}}/system/auth/admin-login
 Content-Type: application/json
 tenant-id: {{adminTenantId}}
 tag: {{tag}}
@@ -41,8 +32,20 @@ tag: {{tag}}
   "password": "admin123"
 }
 
+
+### 请求 /admin-login 接口 => 失败
+POST {{baseUrl}}/system/auth/admin-login
+Content-Type: application/json
+tenant-id: {{adminTenantId}}
+tag: {{tag}}
+
+{
+  "username": "test",
+  "password": "test"
+}
+
 ### 请求 /get-permission-info 接口 => 成功
-GET {{baseUrl}}/system/auth/get-permission-info
+GET {{baseUrl}}/system/auth/get-permission-info?code=tenant
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 

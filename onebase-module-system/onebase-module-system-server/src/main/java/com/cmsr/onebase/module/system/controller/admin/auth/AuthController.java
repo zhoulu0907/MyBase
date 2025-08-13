@@ -7,14 +7,7 @@ import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.security.config.SecurityProperties;
 import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
-import com.cmsr.onebase.module.system.controller.admin.auth.vo.AuthLoginReqVO;
-import com.cmsr.onebase.module.system.controller.admin.auth.vo.AuthLoginRespVO;
-import com.cmsr.onebase.module.system.controller.admin.auth.vo.AuthPermissionInfoRespVO;
-import com.cmsr.onebase.module.system.controller.admin.auth.vo.AuthRegisterReqVO;
-import com.cmsr.onebase.module.system.controller.admin.auth.vo.AuthResetPasswordReqVO;
-import com.cmsr.onebase.module.system.controller.admin.auth.vo.AuthSmsLoginReqVO;
-import com.cmsr.onebase.module.system.controller.admin.auth.vo.AuthSmsSendReqVO;
-import com.cmsr.onebase.module.system.controller.admin.auth.vo.AuthSocialLoginReqVO;
+import com.cmsr.onebase.module.system.controller.admin.auth.vo.*;
 import com.cmsr.onebase.module.system.convert.auth.AuthConvert;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.MenuDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
@@ -36,12 +29,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
 import java.util.List;
@@ -74,6 +62,13 @@ public class AuthController {
     @Resource
     private SecurityProperties securityProperties;
 
+    @PostMapping("/admin-login")
+    @PermitAll
+    @Operation(summary = "使用账号密码登录")
+    public CommonResult<AuthLoginRespVO> adminLogin(@RequestBody @Valid UserLoginReqVO reqVO) {
+        return success(authService.adminLogin(reqVO));
+    }
+
     @PostMapping("/login")
     @PermitAll
     @Operation(summary = "使用账号密码登录")
@@ -103,17 +98,16 @@ public class AuthController {
 
     @GetMapping("/get-permission-info")
     @Operation(summary = "获取登录用户的权限信息")
-    public CommonResult<AuthPermissionInfoRespVO> getPermissionInfo() {
+    public CommonResult<AuthPermissionInfoRespVO> getPermissionInfo(@RequestParam(value = "code", required = false) String code) {
         // 1.1 获得用户信息
         AdminUserDO user = userService.getUser(getLoginUserId());
         if (user == null) {
             return success(null);
         }
-
         // 1.2 获得角色列表
         Set<Long> roleIds = permissionService.getUserRoleIdListByUserId(getLoginUserId());
         if (CollUtil.isEmpty(roleIds)) {
-            return success(AuthConvert.INSTANCE.convert(user, Collections.emptyList(), Collections.emptyList()));
+            return success(AuthConvert.INSTANCE.convert(user, Collections.emptyList(), Collections.emptyList(), code));
         }
         List<RoleDO> roles = roleService.getRoleList(roleIds);
         roles.removeIf(role -> !CommonStatusEnum.ENABLE.getStatus().equals(role.getStatus())); // 移除禁用的角色
@@ -124,7 +118,7 @@ public class AuthController {
         menuList = menuService.filterDisableMenus(menuList);
 
         // 2. 拼接结果返回
-        return success(AuthConvert.INSTANCE.convert(user, roles, menuList));
+        return success(AuthConvert.INSTANCE.convert(user, roles, menuList, code));
     }
 
     @PostMapping("/register")

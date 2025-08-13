@@ -8,10 +8,8 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.excel.core.util.ExcelUtils;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
-import com.cmsr.onebase.module.system.controller.admin.tenant.vo.tenant.TenantPageReqVO;
-import com.cmsr.onebase.module.system.controller.admin.tenant.vo.tenant.TenantRespVO;
-import com.cmsr.onebase.module.system.controller.admin.tenant.vo.tenant.TenantInsertReqVO;
-import com.cmsr.onebase.module.system.controller.admin.tenant.vo.tenant.TenantUpdateReqVO;
+import com.cmsr.onebase.module.system.controller.admin.tenant.vo.tenant.*;
+import com.cmsr.onebase.module.system.convert.tenant.TenantConvert;
 import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
 import com.cmsr.onebase.module.system.service.tenant.TenantService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -63,13 +61,13 @@ public class TenantController {
     @PermitAll
     @TenantIgnore
     @Operation(summary = "使用域名，获得租户信息", description = "登录界面，根据用户的域名，获得租户信息")
-    @Parameter(name = "website", description = "域名", required = true, example = "www.abc.cn")
-    public CommonResult<TenantRespVO> getTenantByWebsite(@RequestParam("website") String website) {
+    @Parameter(name = "website", description = "域名", required = true, example = "onebase")
+    public CommonResult<TenantSimpleRespVO> getTenantByWebsite(@RequestParam("website") String website) {
         TenantDO tenant = tenantService.getTenantByWebsite(website);
         if (tenant == null || CommonStatusEnum.isDisable(tenant.getStatus())) {
             return success(null);
         }
-        return success(new TenantRespVO().setId(tenant.getId()).setName(tenant.getName()));
+        return success(TenantConvert.INSTANCE.convertToSimpleRespVO(tenant));
     }
 
     @PostMapping("/create")

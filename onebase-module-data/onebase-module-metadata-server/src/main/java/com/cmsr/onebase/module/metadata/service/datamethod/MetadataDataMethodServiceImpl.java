@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.metadata.service.datamethod;
 
 import cn.hutool.core.util.IdUtil;
+import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.module.metadata.controller.admin.datamethod.vo.*;
@@ -9,7 +10,10 @@ import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataBusinessEn
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.datasource.MetadataDatasourceDO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.method.MetadataDataSystemMethodDO;
-import com.cmsr.onebase.module.metadata.dal.database.MetadataRepository;
+import com.cmsr.onebase.module.metadata.dal.database.MetadataBusinessEntityRepository;
+import com.cmsr.onebase.module.metadata.dal.database.MetadataDataSystemMethodRepository;
+import com.cmsr.onebase.module.metadata.dal.database.MetadataDatasourceRepository;
+import com.cmsr.onebase.module.metadata.dal.database.MetadataEntityFieldRepository;
 import com.cmsr.onebase.module.metadata.dal.database.TemporaryDatasourceService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -42,7 +46,16 @@ import static com.cmsr.onebase.module.metadata.enums.ErrorCodeConstants.*;
 public class MetadataDataMethodServiceImpl implements MetadataDataMethodService {
 
     @Resource
-    private MetadataRepository metadataRepository;
+    private MetadataBusinessEntityRepository metadataBusinessEntityRepository;
+
+    @Resource
+    private MetadataDataSystemMethodRepository metadataDataSystemMethodRepository;
+
+    @Resource
+    private MetadataDatasourceRepository metadataDatasourceRepository;
+
+    @Resource
+    private MetadataEntityFieldRepository metadataEntityFieldRepository;
 
     @Resource
     private AnylineService<?> anylineService;
@@ -53,14 +66,14 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
     @Override
     public List<DataMethodRespVO> getDataMethodList(DataMethodQueryVO queryVO) {
         // 校验实体存在
-        MetadataBusinessEntityDO entity = metadataRepository.findById(MetadataBusinessEntityDO.class, Long.valueOf(queryVO.getEntityId()));
+        MetadataBusinessEntityDO entity = metadataBusinessEntityRepository.findById(Long.valueOf(queryVO.getEntityId()));
         if (entity == null) {
             throw exception(BUSINESS_ENTITY_NOT_EXISTS);
         }
 
         // 构建查询条件
         DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and("is_enabled", true);
+        configStore.and("is_enabled", CommonStatusEnum.ENABLE.getStatus()); // 只获取启用的数据方法（0-启用，1-禁用）
         configStore.and("deleted", 0);
 
         // 根据条件过滤
@@ -76,7 +89,7 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
         configStore.order("method_code", Order.TYPE.ASC);
 
         // 从数据库查询数据方法
-        List<MetadataDataSystemMethodDO> methodDOList = metadataRepository.findAllByConfig(MetadataDataSystemMethodDO.class, configStore);
+        List<MetadataDataSystemMethodDO> methodDOList = metadataDataSystemMethodRepository.getEnabledDataMethodList();
 
         // 转换为响应VO
         List<DataMethodRespVO> methods = new ArrayList<>();
@@ -88,7 +101,7 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
             method.setUrl(methodDO.getMethodUrl());
             method.setHttpMethod(methodDO.getRequestMethod());
             method.setDescription(methodDO.getMethodDescription());
-
+            method.setId(methodDO.getId().toString());
             // 设置输入输出参数（这里可以根据需要进一步扩展）
             method.setInputParameters(new ArrayList<>());
             method.setOutputParameters(new DataMethodOutputParameterVO());
@@ -102,7 +115,7 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
     @Override
     public DataMethodDetailRespVO getDataMethodDetail(Long entityId, String methodCode) {
         // 校验实体存在
-        MetadataBusinessEntityDO entity = metadataRepository.findById(MetadataBusinessEntityDO.class, entityId);
+        MetadataBusinessEntityDO entity = metadataBusinessEntityRepository.findById(entityId);
         if (entity == null) {
             throw exception(BUSINESS_ENTITY_NOT_EXISTS);
         }
@@ -110,10 +123,10 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
         // 根据方法代码查询数据方法
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.and("method_code", methodCode);
-        configStore.and("is_enabled", true);
+        configStore.and("is_enabled", CommonStatusEnum.ENABLE.getStatus()); // 只获取启用的数据方法（0-启用，1-禁用）
         configStore.and("deleted", 0);
 
-        MetadataDataSystemMethodDO methodDO = metadataRepository.findOne(MetadataDataSystemMethodDO.class, configStore);
+        MetadataDataSystemMethodDO methodDO = metadataDataSystemMethodRepository.getDataMethodByCode(methodCode);
         if (methodDO == null) {
             throw exception(DATA_METHOD_NOT_EXISTS);
         }
@@ -152,20 +165,25 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
         // 4. 处理数据并设置默认值
         Map<String, Object> processedData = processDataForCreate(reqVO.getData(), fields);
 
-        // 5. 使用Anyline执行插入操作
-        // 切换到指定数据源
-        switchToDataSource(entity.getDatasourceId());
+        // 5. 获取临时数据源服务
+        MetadataDatasourceDO datasource = metadataDatasourceRepository.findById(entity.getDatasourceId());
+        if (datasource == null) {
+            throw exception(DATASOURCE_NOT_EXISTS);
+        }
+        
+        AnylineService<?> temporaryService = temporaryDatasourceService.createTemporaryService(datasource);
+        log.info("成功切换到数据源：{}", datasource.getCode());
 
-        // 执行插入
+        // 6. 动态业务表忽略租户条件 - 使用TenantUtils.executeIgnore包装操作
+        return TenantUtils.executeIgnore(() -> {
+
+        // 7. 执行插入
         DataRow dataRow = new DataRow(processedData);
-        Object insertResult = anylineService.insert(entity.getTableName(), dataRow);
+        Object insertResult = temporaryService.insert(entity.getTableName(), dataRow);
         log.info("创建数据成功，实体ID: {}, 表名: {}, 插入结果: {}", reqVO.getEntityId(), entity.getTableName(), insertResult);
 
-        // 6. 查询插入后的完整数据 
-        Object primaryKeyValue;
-        
-        // 优先使用插入操作返回的ID，通常这是影响的行数，我们需要使用实际的主键值
-        primaryKeyValue = getPrimaryKeyValue(processedData, fields);
+        // 8. 查询插入后的完整数据 
+        Object primaryKeyValue = getPrimaryKeyValue(processedData, fields);
         log.info("从处理数据中获取主键值: {}, 插入结果: {}", primaryKeyValue, insertResult);
         
         // 确保主键值不为null
@@ -175,10 +193,12 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
             return buildDynamicDataRespVO(entity, processedData);
         }
 
-        Map<String, Object> resultData = queryDataById(entity.getTableName(), primaryKeyValue, fields);
+        Map<String, Object> resultData = queryDataByIdWithService(temporaryService, entity.getTableName(), primaryKeyValue, fields);
 
-        // 7. 构建响应
+        // 9. 构建响应
         return buildDynamicDataRespVO(entity, resultData);
+        
+        }); // TenantUtils.executeIgnore 闭合
     }
 
     @Override
@@ -189,36 +209,46 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
         // 2. 获取实体字段信息
         List<MetadataEntityFieldDO> fields = getEntityFields(Long.valueOf(reqVO.getEntityId()));
 
-        // 3. 校验数据存在
-        validateDataExists(entity.getTableName(), reqVO.getId(), fields);
+        // 3. 获取临时数据源服务
+        MetadataDatasourceDO datasource = metadataDatasourceRepository.findById(entity.getDatasourceId());
+        if (datasource == null) {
+            throw exception(DATASOURCE_NOT_EXISTS);
+        }
+        
+        AnylineService<?> temporaryService = temporaryDatasourceService.createTemporaryService(datasource);
+        log.info("成功切换到数据源：{}", datasource.getCode());
 
-        // 4. 校验更新数据
+        // 4. 动态业务表忽略租户条件 - 使用TenantUtils.executeIgnore包装操作
+        return TenantUtils.executeIgnore(() -> {
+
+        // 5. 校验数据存在
+        validateDataExistsWithService(temporaryService, entity.getTableName(), reqVO.getId(), fields);
+
+        // 6. 校验更新数据
         validateDataForUpdate(reqVO.getData(), fields);
 
-        // 5. 处理更新数据
+        // 7. 处理更新数据
         Map<String, Object> processedData = processDataForUpdate(reqVO.getData(), fields);
 
-        // 6. 使用Anyline执行更新操作
-        // 切换到指定数据源
-        switchToDataSource(entity.getDatasourceId());
-
-        // 获取主键字段名
+        // 8. 获取主键字段名
         String primaryKeyField = getPrimaryKeyFieldName(fields);
 
-        // 构建更新条件
+        // 9. 构建更新条件
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.and(primaryKeyField, reqVO.getId());
 
-        // 执行更新
+        // 10. 执行更新
         DataRow dataRow = new DataRow(processedData);
-        long updateCount = anylineService.update(entity.getTableName(), dataRow, configStore);
+        long updateCount = temporaryService.update(entity.getTableName(), dataRow, configStore);
         log.info("更新数据成功，实体ID: {}, 表名: {}, 更新记录数: {}", reqVO.getEntityId(), entity.getTableName(), updateCount);
 
-        // 7. 查询更新后的完整数据
-        Map<String, Object> resultData = queryDataById(entity.getTableName(), reqVO.getId(), fields);
+        // 11. 查询更新后的完整数据
+        Map<String, Object> resultData = queryDataByIdWithService(temporaryService, entity.getTableName(), reqVO.getId(), fields);
 
-        // 8. 构建响应
+        // 12. 构建响应
         return buildDynamicDataRespVO(entity, resultData);
+        
+        }); // TenantUtils.executeIgnore 闭合
     }
 
     @Override
@@ -229,25 +259,56 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
         // 2. 获取实体字段信息
         List<MetadataEntityFieldDO> fields = getEntityFields(Long.valueOf(reqVO.getEntityId()));
 
-        // 3. 校验数据存在
-        validateDataExists(entity.getTableName(), reqVO.getId(), fields);
+        // 3. 获取临时数据源服务
+        MetadataDatasourceDO datasource = metadataDatasourceRepository.findById(entity.getDatasourceId());
+        if (datasource == null) {
+            throw exception(DATASOURCE_NOT_EXISTS);
+        }
+        
+        AnylineService<?> temporaryService = temporaryDatasourceService.createTemporaryService(datasource);
+        log.info("成功切换到数据源：{}", datasource.getCode());
 
-        // 4. 使用Anyline执行删除操作
-        // 切换到指定数据源
-        switchToDataSource(entity.getDatasourceId());
+        // 4. 检查表中是否有软删除字段
+        boolean hasDeletedField = fields.stream()
+                .anyMatch(field -> "deleted".equalsIgnoreCase(field.getFieldName()));
 
-        // 获取主键字段名
-        String primaryKeyField = getPrimaryKeyFieldName(fields);
+        // 5. 动态业务表忽略租户条件 - 使用TenantUtils.executeIgnore包装操作
+        try {
+            return TenantUtils.executeIgnore(() -> {
 
-        // 构建删除条件
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and(primaryKeyField, reqVO.getId());
+            // 6. 校验数据存在
+            validateDataExistsWithService(temporaryService, entity.getTableName(), reqVO.getId(), fields);
 
-        // 执行删除
-        long deleteCount = anylineService.delete(entity.getTableName(), configStore);
-        log.info("删除数据成功，实体ID: {}, 表名: {}, 删除记录数: {}", reqVO.getEntityId(), entity.getTableName(), deleteCount);
+            // 7. 获取主键字段名
+            String primaryKeyField = getPrimaryKeyFieldName(fields);
 
-        return deleteCount > 0;
+            // 8. 构建删除条件
+            DefaultConfigStore configStore = new DefaultConfigStore();
+            configStore.and(primaryKeyField, reqVO.getId());
+
+            long deleteCount;
+            if (hasDeletedField) {
+                // 软删除：更新deleted字段为删除时间戳
+                DataRow updateData = new DataRow();
+                updateData.put("deleted", String.valueOf(System.currentTimeMillis()));
+                deleteCount = temporaryService.update(entity.getTableName(), updateData, configStore);
+                log.info("软删除数据成功，实体ID: {}, 表名: {}, 删除记录数: {}", reqVO.getEntityId(), entity.getTableName(), deleteCount);
+            } else {
+                // 物理删除：直接删除记录
+                deleteCount = temporaryService.delete(entity.getTableName(), configStore);
+                log.info("物理删除数据成功，实体ID: {}, 表名: {}, 删除记录数: {}", reqVO.getEntityId(), entity.getTableName(), deleteCount);
+            }
+
+            return deleteCount > 0;
+            
+            }); // TenantUtils.executeIgnore 闭合
+        } catch (RuntimeException e) {
+            // 检查是否是ServiceException被包装的情况
+            if (e.getCause() instanceof com.cmsr.onebase.framework.common.exception.ServiceException) {
+                throw (com.cmsr.onebase.framework.common.exception.ServiceException) e.getCause();
+            }
+            throw e;
+        }
     }
 
     @Override
@@ -258,19 +319,29 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
         // 2. 获取实体字段信息
         List<MetadataEntityFieldDO> fields = getEntityFields(Long.valueOf(reqVO.getEntityId()));
 
-        // 3. 使用Anyline查询数据
-        // 切换到指定数据源
-        switchToDataSource(entity.getDatasourceId());
+        // 3. 获取临时数据源服务
+        MetadataDatasourceDO datasource = metadataDatasourceRepository.findById(entity.getDatasourceId());
+        if (datasource == null) {
+            throw exception(DATASOURCE_NOT_EXISTS);
+        }
+        
+        AnylineService<?> temporaryService = temporaryDatasourceService.createTemporaryService(datasource);
+        log.info("成功切换到数据源：{}", datasource.getCode());
 
-        // 查询数据
-        Map<String, Object> resultData = queryDataById(entity.getTableName(), reqVO.getId(), fields);
+        // 4. 动态业务表忽略租户条件 - 使用TenantUtils.executeIgnore包装查询
+        return TenantUtils.executeIgnore(() -> {
+
+        // 5. 查询数据
+        Map<String, Object> resultData = queryDataByIdWithService(temporaryService, entity.getTableName(), reqVO.getId(), fields);
 
         if (resultData == null || resultData.isEmpty()) {
             throw exception(DATA_NOT_EXISTS);
         }
 
-        // 4. 构建响应
+        // 6. 构建响应
         return buildDynamicDataRespVO(entity, resultData);
+        
+        }); // TenantUtils.executeIgnore 闭合
     }
 
     @Override
@@ -283,7 +354,7 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
 
         // 3. 使用Anyline执行分页查询
         // 获取临时数据源服务
-        MetadataDatasourceDO datasource = metadataRepository.findById(MetadataDatasourceDO.class, entity.getDatasourceId());
+        MetadataDatasourceDO datasource = metadataDatasourceRepository.findById(entity.getDatasourceId());
         if (datasource == null) {
             throw exception(DATASOURCE_NOT_EXISTS);
         }
@@ -378,11 +449,39 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
         log.info("使用ConfigStore查询表: {}", entity.getTableName());
         log.info("ConfigStore配置: {}", configs.toString());
 
-        // 使用临时服务执行查询
-        DataSet dataSet = temporaryService.querys(entity.getTableName(), configs);
+        // 先获取总记录数（创建不包含分页限制的配置）
+        ConfigStore countConfigs = new DefaultConfigStore();
+        
+        // 为count查询复制相同的查询条件
+        if (reqVO.getFilters() != null && !reqVO.getFilters().isEmpty()) {
+            Set<String> existingFieldNames = fields.stream()
+                    .map(MetadataEntityFieldDO::getFieldName)
+                    .collect(Collectors.toSet());
+            
+            for (Map.Entry<String, Object> entry : reqVO.getFilters().entrySet()) {
+                String fieldName = entry.getKey();
+                Object fieldValue = entry.getValue();
+                
+                if ("deleted".equalsIgnoreCase(fieldName) || "tenant_id".equalsIgnoreCase(fieldName)) {
+                    continue;
+                }
+                
+                if (fieldValue != null && existingFieldNames.contains(fieldName)) {
+                    countConfigs.and(Compare.EQUAL, fieldName, fieldValue);
+                }
+            }
+        }
+        
+        // 添加软删除条件
+        if (hasDeletedField) {
+            countConfigs.and(Compare.EQUAL, "deleted", "0");
+        }
+        
+        long total = temporaryService.count(entity.getTableName(), countConfigs);
+        log.info("查询总记录数: {}", total);
 
-        // 获取总记录数和当前页数据
-        long total = dataSet.total();  // ConfigStore分页后会自动设置总数
+        // 使用临时服务执行分页查询
+        DataSet dataSet = temporaryService.querys(entity.getTableName(), configs);
         
         // 转换结果
         List<DynamicDataRespVO> list = new ArrayList<>();
@@ -406,7 +505,7 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
      * 校验实体存在
      */
     private MetadataBusinessEntityDO validateEntityExists(Long entityId) {
-        MetadataBusinessEntityDO entity = metadataRepository.findById(MetadataBusinessEntityDO.class, entityId);
+        MetadataBusinessEntityDO entity = metadataBusinessEntityRepository.findById(entityId);
         if (entity == null) {
             throw exception(BUSINESS_ENTITY_NOT_EXISTS);
         }
@@ -420,7 +519,7 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.and("entity_id", entityId);
         configStore.and("deleted", 0);
-        List<MetadataEntityFieldDO> fields = metadataRepository.findAllByConfig(MetadataEntityFieldDO.class, configStore);
+        List<MetadataEntityFieldDO> fields = metadataEntityFieldRepository.getEntityFieldListByEntityId(entityId);
         if (fields == null || fields.isEmpty()) {
             throw exception(ENTITY_FIELD_NOT_EXISTS);
         }
@@ -428,40 +527,17 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
     }
 
     /**
-     * 切换到指定数据源
-     */
-    private void switchToDataSource(Long datasourceId) {
-        if (datasourceId != null) {
-            MetadataDatasourceDO datasource = metadataRepository.findById(MetadataDatasourceDO.class, datasourceId);
-            if (datasource != null) {
-                try {
-                    // 使用临时数据源服务创建新的AnylineService实例
-                    AnylineService<?> temporaryService = temporaryDatasourceService.createTemporaryService(datasource);
-                    
-                    // 替换当前的anylineService实例
-                    this.anylineService = temporaryService;
-                    
-                    log.info("成功切换到数据源：{}", datasource.getCode());
-                } catch (Exception e) {
-                    log.error("切换数据源失败，使用默认数据源：{}", e.getMessage(), e);
-                    throw new RuntimeException("切换数据源失败: " + e.getMessage(), e);
-                }
-            }
-        }
-    }
-
-    /**
      * 校验创建数据的完整性
      */
     private void validateDataForCreate(Map<String, Object> data, List<MetadataEntityFieldDO> fields) {
         for (MetadataEntityFieldDO field : fields) {
-            // 跳过系统字段和主键字段
-            if (field.getIsSystemField() || field.getIsPrimaryKey()) {
+            // 跳过系统字段和主键字段：0-是系统字段/主键
+            if (field.getIsSystemField() == 0 || field.getIsPrimaryKey() == 0) {
                 continue;
             }
 
-            // 校验必填字段
-            if (field.getIsRequired() && (data.get(field.getFieldName()) == null ||
+            // 校验必填字段：0-是必填
+            if (field.getIsRequired() == 0 && (data.get(field.getFieldName()) == null ||
                     String.valueOf(data.get(field.getFieldName())).trim().isEmpty())) {
                 throw exception(FIELD_REQUIRED, field.getDisplayName());
             }
@@ -484,8 +560,8 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
                 throw exception(FIELD_NOT_EXISTS, fieldName);
             }
 
-            // 不允许更新主键字段
-            if (field.getIsPrimaryKey()) {
+            // 不允许更新主键字段：0-是主键
+            if (field.getIsPrimaryKey() == 0) {
                 throw exception(PRIMARY_KEY_UPDATE_NOT_ALLOWED);
             }
         }
@@ -503,8 +579,8 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
         for (MetadataEntityFieldDO field : fields) {
             String fieldName = field.getFieldName();
             
-            // 处理主键字段
-            if (field.getIsPrimaryKey()) {
+            // 处理主键字段：0-是主键
+            if (field.getIsPrimaryKey() == 0) {
                 if (!processedData.containsKey(fieldName)) {
                     // 生成雪花ID作为主键
                     processedData.put(fieldName, IdUtil.getSnowflakeNextId());
@@ -512,8 +588,8 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
                 continue;
             }
 
-            // 处理系统字段
-            if (field.getIsSystemField()) {
+            // 处理系统字段：0-是系统字段
+            if (field.getIsSystemField() == 0) {
                 switch (fieldName.toLowerCase()) {
                     case "created_time":
                     case "createtime":
@@ -568,7 +644,7 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
                     .findFirst()
                     .orElse(null);
 
-            if (field != null && !field.getIsPrimaryKey() && !field.getIsSystemField()) {
+            if (field != null && !Boolean.TRUE.equals(field.getIsPrimaryKey() == 0) && !Boolean.TRUE.equals(field.getIsSystemField() == 0)) {
                 processedData.put(fieldName, entry.getValue());
             }
         }
@@ -577,67 +653,11 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
     }
 
     /**
-     * 校验数据是否存在
-     */
-    private void validateDataExists(String tableName, Object id, List<MetadataEntityFieldDO> fields) {
-        Map<String, Object> existingData = queryDataById(tableName, id, fields);
-        if (existingData == null || existingData.isEmpty()) {
-            throw exception(DATA_NOT_EXISTS);
-        }
-    }
-
-    /**
-     * 根据ID查询数据
-     */
-    private Map<String, Object> queryDataById(String tableName, Object id, List<MetadataEntityFieldDO> fields) {
-        String primaryKeyField = getPrimaryKeyFieldName(fields);
-
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and(primaryKeyField, id);
-        
-        // 检查表中是否有 tenant_id 字段，如果没有则添加 deleted 条件
-        boolean hasTenantIdField = fields.stream()
-                .anyMatch(field -> "tenant_id".equalsIgnoreCase(field.getFieldName()));
-        
-        boolean hasDeletedField = fields.stream()
-                .anyMatch(field -> "deleted".equalsIgnoreCase(field.getFieldName()));
-        
-        if (hasDeletedField) {
-            configStore.and("deleted", 0);
-        }
-        
-        // 如果没有 tenant_id 字段，需要禁用租户自动条件
-        if (!hasTenantIdField) {
-            // 使用原始SQL方式查询，避免框架自动添加租户条件
-            String sql = "SELECT * FROM " + tableName + " WHERE " + primaryKeyField + " = ? ";
-            if (hasDeletedField) {
-                // 修复：将deleted字段的值作为字符串传递，以匹配数据库中的character varying类型
-                sql += "AND deleted = '0'";
-            }
-            
-            DataSet dataSet = anylineService.querys(sql, id);
-            if (dataSet == null || dataSet.size() == 0) {
-                return null;
-            }
-            DataRow dataRow = dataSet.getRow(0);
-            return convertDataRowToMap(dataRow, fields);
-        } else {
-            // 有 tenant_id 字段，使用正常查询
-            DataSet dataSet = anylineService.querys(tableName, configStore);
-            if (dataSet == null || dataSet.size() == 0) {
-                return null;
-            }
-            DataRow dataRow = dataSet.getRow(0);
-            return convertDataRowToMap(dataRow, fields);
-        }
-    }
-
-    /**
      * 获取主键字段名
      */
     private String getPrimaryKeyFieldName(List<MetadataEntityFieldDO> fields) {
         return fields.stream()
-                .filter(MetadataEntityFieldDO::getIsPrimaryKey)
+                .filter(field -> Boolean.TRUE.equals(field.getIsPrimaryKey() == 0))
                 .map(MetadataEntityFieldDO::getFieldName)
                 .findFirst()
                 .orElse("id");
@@ -682,6 +702,42 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
         respVO.setEntityName(entity.getDisplayName());
         respVO.setData(data);
         return respVO;
+    }
+
+    /**
+     * 使用指定的AnylineService根据ID查询数据
+     */
+    private Map<String, Object> queryDataByIdWithService(AnylineService<?> service, String tableName, Object id, List<MetadataEntityFieldDO> fields) {
+        String primaryKeyField = getPrimaryKeyFieldName(fields);
+
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        configStore.and(primaryKeyField, id);
+        
+        // 检查表中是否有软删除字段
+        boolean hasDeletedField = fields.stream()
+                .anyMatch(field -> "deleted".equalsIgnoreCase(field.getFieldName()));
+        
+        if (hasDeletedField) {
+            configStore.and("deleted", "0");
+        }
+        
+        DataSet dataSet = service.querys(tableName, configStore);
+        if (dataSet == null || dataSet.size() == 0) {
+            return null;
+        }
+        
+        DataRow dataRow = dataSet.getRow(0);
+        return convertDataRowToMap(dataRow, fields);
+    }
+
+    /**
+     * 使用指定的AnylineService校验数据是否存在
+     */
+    private void validateDataExistsWithService(AnylineService<?> service, String tableName, Object id, List<MetadataEntityFieldDO> fields) {
+        Map<String, Object> existingData = queryDataByIdWithService(service, tableName, id, fields);
+        if (existingData == null || existingData.isEmpty()) {
+            throw exception(DATA_NOT_EXISTS);
+        }
     }
 
 }

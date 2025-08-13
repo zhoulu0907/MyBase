@@ -50,4 +50,10 @@ public class AppPageRepository extends DataRepositoryNew<PageDO> {
         deleteByConfig(configs);
    }
 
+    public List<PageDO> findByPageCodes(List<String> pageCodes) {
+        ConfigStore configs = new DefaultConfigStore();
+        configs.in("page_code", pageCodes);
+        return findAllByConfig(configs);
+    }
+
 }

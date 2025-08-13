@@ -51,7 +51,7 @@ public class MetadataSystemFieldsDO extends BaseDO {
     private String description;
 
     /**
-     * 是否启用(0:否,1:是)
+     * 是否启用(0:是,1:否)
      */
     private Integer isEnabled;
 

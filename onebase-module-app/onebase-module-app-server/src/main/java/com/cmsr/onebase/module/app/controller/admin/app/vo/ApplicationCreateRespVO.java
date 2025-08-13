@@ -18,8 +18,10 @@ public class ApplicationCreateRespVO {
     @Schema(description = "应用ID")
     private Long id;
 
+    @Schema(description = "应用key")
+    private String appKey;
+
     @Schema(description = "应用名称")
-    @NotBlank(message = "应用名称不能为空")
     private String appName;
 
     @Schema(description = "应用编码")

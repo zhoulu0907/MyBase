@@ -30,6 +30,10 @@ public interface ErrorCodeConstants {
     // ========== 校验规则管理 1-001-004-000 ==========
     ErrorCode VALIDATION_RULE_NOT_EXISTS = new ErrorCode(1_001_004_001, "校验规则不存在");
     ErrorCode VALIDATION_RULE_CODE_DUPLICATE = new ErrorCode(1_001_004_002, "校验规则编码重复");
+    
+    // ========== 校验规则分组管理 1-001-007-000 ==========
+    ErrorCode VALIDATION_RULE_GROUP_NOT_EXISTS = new ErrorCode(1_001_007_001, "校验规则分组不存在");
+    ErrorCode VALIDATION_RULE_GROUP_NAME_DUPLICATE = new ErrorCode(1_001_007_002, "校验规则分组名称重复");
 
     // ========== 动态数据操作 1-001-005-000 ==========
     ErrorCode DATA_CREATE_FAILED = new ErrorCode(1_001_005_001, "数据创建失败：{}");

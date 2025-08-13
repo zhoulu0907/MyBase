@@ -2,11 +2,15 @@ package com.cmsr.onebase.module.system.service.dept;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.module.system.controller.admin.dept.vo.dept.DeptAndUsersReqVO;
+import com.cmsr.onebase.module.system.controller.admin.dept.vo.dept.DeptAndUsersRespVO;
 import com.cmsr.onebase.module.system.controller.admin.dept.vo.dept.DeptListReqVO;
 import com.cmsr.onebase.module.system.controller.admin.dept.vo.dept.DeptRespVO;
 import com.cmsr.onebase.module.system.controller.admin.dept.vo.dept.DeptSaveReqVO;
+import com.cmsr.onebase.module.system.controller.admin.user.vo.user.UserSimpleRespVO;
 import com.cmsr.onebase.module.system.dal.database.DeptDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
@@ -252,21 +256,21 @@ public class DeptServiceImpl implements DeptService {
 
         // 2. 提取部门ID和领导用户ID
         List<Long> deptIds = deptList.stream()
-            .map(DeptDO::getId)
-            .collect(Collectors.toList());
+                .map(DeptDO::getId)
+                .collect(Collectors.toList());
         List<Long> leaderUserIds = deptList.stream()
-            .map(DeptDO::getLeaderUserId)
-            .filter(Objects::nonNull)
-            .collect(Collectors.toList());
+                .map(DeptDO::getLeaderUserId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
 
-        // 1. 批量获取部门人数统计
-        Map<Long, Integer> deptUserCountMap = adminUserService.getUserCountByDeptIds(deptIds);
+        // 1. 批量获取部门人数统计（包含下级部门）
+        Map<Long, Integer> deptUserCountMap = adminUserService.getUserCountByDeptIdsIncludeChildren(deptIds);
         // 2. 批量获取领导用户信息
         Map<Long, AdminUserDO> leaderUserMap = adminUserService.getUserMap(leaderUserIds);
 
         // 4. 设置每个部门的人数和领导姓名
         respList.forEach(dept -> {
-            // 设置人数
+            // 设置人数（包含下级部门）
             Integer userCount = deptUserCountMap.getOrDefault(dept.getId(), 0);
             dept.setUserCount(userCount);
 
@@ -294,14 +298,14 @@ public class DeptServiceImpl implements DeptService {
         // 准备批量查询的参数
         List<Long> deptIds = Collections.singletonList(id);
         List<Long> leaderUserIds = dept.getLeaderUserId() != null ?
-            Collections.singletonList(dept.getLeaderUserId()) : Collections.emptyList();
+                Collections.singletonList(dept.getLeaderUserId()) : Collections.emptyList();
 
-        // 1. 批量获取部门人数统计
-        Map<Long, Integer> deptUserCountMap = adminUserService.getUserCountByDeptIds(deptIds);
+        // 1. 批量获取部门人数统计（包含下级部门）
+        Map<Long, Integer> deptUserCountMap = adminUserService.getUserCountByDeptIdsIncludeChildren(deptIds);
         // 2. 批量获取领导用户信息
         Map<Long, AdminUserDO> leaderUserMap = adminUserService.getUserMap(leaderUserIds);
 
-        // 设置部门人数
+        // 设置部门人数（包含下级部门）
         Integer userCount = deptUserCountMap.getOrDefault(id, 0);
         respVO.setUserCount(userCount);
 
@@ -311,6 +315,56 @@ public class DeptServiceImpl implements DeptService {
             if (leader != null) {
                 respVO.setLeaderUserName(leader.getNickname());
             }
+        }
+
+        return respVO;
+    }
+
+    @Override
+    public DeptAndUsersRespVO getDeptAndUsers(DeptAndUsersReqVO reqVO) {
+        DeptAndUsersRespVO respVO = new DeptAndUsersRespVO();
+
+        // 判断是否有搜索关键词
+        boolean hasKeywords = StrUtil.isNotBlank(reqVO.getKeywords());
+        boolean hasDeptId = reqVO.getDeptId() != null && reqVO.getDeptId() > 0;
+
+        if (hasKeywords) {
+            // 场景3和4：有搜索关键词时，优先按搜索词处理
+            respVO.setDeptInfo(null);
+
+            // 按部门名称模糊搜索部门
+            List<DeptDO> matchedDepts = deptDataRepository.findAllByNameAndStatus(reqVO.getKeywords(), null);
+            respVO.setDeptList(BeanUtils.toBean(matchedDepts, DeptRespVO.class));
+
+            // 按用户昵称模糊搜索用户
+            List<AdminUserDO> matchedUsers = adminUserService.getUserListByNickname(reqVO.getKeywords());
+            respVO.setUserList(BeanUtils.toBean(matchedUsers, UserSimpleRespVO.class));
+
+        } else if (hasDeptId) {
+            // 场景2：有部门ID，无搜索词
+            // 获取当前部门信息
+            DeptDO deptInfo = getDept(reqVO.getDeptId());
+            respVO.setDeptInfo(BeanUtils.toBean(deptInfo, DeptRespVO.class));
+
+            // 获取直属子部门
+            List<DeptDO> childDepts = deptDataRepository.findAllByParentId(reqVO.getDeptId());
+            respVO.setDeptList(BeanUtils.toBean(childDepts, DeptRespVO.class));
+
+            // 获取直属用户
+            List<AdminUserDO> directUsers = adminUserService.getUserListByDeptIds(Collections.singletonList(reqVO.getDeptId()));
+            respVO.setUserList(BeanUtils.toBean(directUsers, UserSimpleRespVO.class));
+
+        } else {
+            // 场景1：部门ID和搜索词都为空
+            respVO.setDeptInfo(null);
+
+            // 获取所有一级部门（parentId = 0）
+            List<DeptDO> rootDepts = deptDataRepository.findAllByParentId(DeptDO.PARENT_ID_ROOT);
+            respVO.setDeptList(BeanUtils.toBean(rootDepts, DeptRespVO.class));
+
+            // 获取所有没有部门的用户（dept_id = null）
+            List<AdminUserDO> usersWithoutDept = adminUserService.getUserListNoDept();
+            respVO.setUserList(BeanUtils.toBean(usersWithoutDept, UserSimpleRespVO.class));
         }
 
         return respVO;

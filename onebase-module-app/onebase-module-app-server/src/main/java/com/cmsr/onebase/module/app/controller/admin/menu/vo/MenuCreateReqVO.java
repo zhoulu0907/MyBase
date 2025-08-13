@@ -20,8 +20,8 @@ public class MenuCreateReqVO {
     @NotBlank(message = "菜单类型不能为空")
     private Integer menuType;
 
-    @Schema(description = "父菜单ID")
-    private Long parentId;
+    @Schema(description = "父菜单编码")
+    private String parentCode;
 
     @Schema(description = "菜单名称")
     @NotBlank(message = "菜单名称不能为空")
@@ -31,4 +31,6 @@ public class MenuCreateReqVO {
     @NotBlank(message = "菜单图标不能为空")
     private String menuIcon;
 
+    @Schema(description = "实体编码")
+    private String entityCode;
 }

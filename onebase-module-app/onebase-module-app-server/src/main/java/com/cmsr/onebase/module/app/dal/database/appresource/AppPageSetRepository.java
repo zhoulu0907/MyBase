@@ -8,15 +8,18 @@ import org.springframework.stereotype.Repository;
 import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.module.app.dal.dataobject.appresource.PageSetDO;
 
+import java.util.List;
+
 @Repository
 public class AppPageSetRepository extends DataRepositoryNew<PageSetDO> {
+
     public AppPageSetRepository() {
         super(PageSetDO.class);
     }
 
-    public PageSetDO findPageSetByMenuId(Long menuId) {
+    public PageSetDO findPageSetByMenuCode(String menuCode) {
         ConfigStore configs = new DefaultConfigStore();
-        configs.eq("menu_id", menuId);
+        configs.eq("menu_code", menuCode);
         return findOne(configs);
     }
 
@@ -26,12 +29,16 @@ public class AppPageSetRepository extends DataRepositoryNew<PageSetDO> {
         return findOne(configs);
     }
 
-    public void deletePageSetByMenuId(Long menuId) {
+    public void deletePageSetByMenuCode(String menuCode) {
         ConfigStore configs = new DefaultConfigStore();
-        configs.eq("menu_id", menuId);
+        configs.eq("menu_code", menuCode);
         deleteByConfig(configs);
     }
 
-
+    public List<PageSetDO> findByMenuCodes(List<String> menuCodes){
+        ConfigStore configs = new DefaultConfigStore();
+        configs.in("menu_code", menuCodes);
+        return findAllByConfig(configs);
+    }
 
 }

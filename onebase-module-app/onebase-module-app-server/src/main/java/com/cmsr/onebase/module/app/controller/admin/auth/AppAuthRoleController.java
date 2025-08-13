@@ -30,9 +30,9 @@ public class AppAuthRoleController {
      */
     @GetMapping("/list")
     @Operation(summary = "获取角色列表")
-    public CommonResult<List<AuthRoleListRespVO>> getAuthRoleList(
+    public CommonResult<List<AuthRoleListRespVO>> getRoleList(
             @RequestParam(value = "applicationId") Long applicationId) {
-        return CommonResult.success(authRoleService.getAuthRoleList(applicationId));
+        return CommonResult.success(authRoleService.getRoleList(applicationId));
     }
 
     /**
@@ -40,8 +40,18 @@ public class AppAuthRoleController {
      */
     @PostMapping("/create")
     @Operation(summary = "新增角色")
-    public CommonResult<Boolean> createAuthRole(@Valid @RequestBody AuthRoleCreateReqVO reqVO) {
-        authRoleService.createRole(reqVO);
+    public CommonResult<AuthRoleCreateRespVO> createRole(@Valid @RequestBody AuthRoleCreateReqVO reqVO) {
+        return CommonResult.success(authRoleService.createRole(reqVO));
+    }
+
+    /**
+     * 重命名角色
+     */
+    @PostMapping("/rename")
+    @Operation(summary = "重命名角色")
+    public CommonResult<Boolean> renameRole(@RequestParam("id") Long roleId,
+                                            @RequestParam("name") String name) {
+        authRoleService.renameRole(roleId, name);
         return CommonResult.success(true);
     }
 
@@ -52,8 +62,8 @@ public class AppAuthRoleController {
      */
     @PostMapping("/add-user")
     @Operation(summary = "角色添加成员")
-    public CommonResult<Boolean> addUser(@Valid @RequestBody AuthRoleAddMemberReqVO reqVO) {
-        authRoleService.addUser(reqVO);
+    public CommonResult<Boolean> addRoleUser(@Valid @RequestBody AuthRoleAddUserReqVO reqVO) {
+        authRoleService.addRoleUser(reqVO);
         return CommonResult.success(true);
     }
 
@@ -64,10 +74,12 @@ public class AppAuthRoleController {
      */
     @PostMapping("/delete-user")
     @Operation(summary = "角色删除成员")
-    public CommonResult<Boolean> deleteUser(@Valid @RequestBody AuthRoleDeleteMemberReqVO reqVO) {
-        authRoleService.deleteUser(reqVO);
+    public CommonResult<Boolean> deleteRoleUser(@Valid @RequestBody AuthRoleDeleteUserReqVO reqVO) {
+        authRoleService.deleteRoleUser(reqVO);
         return CommonResult.success(true);
     }
+
+
 
     /**
      * 删除角色

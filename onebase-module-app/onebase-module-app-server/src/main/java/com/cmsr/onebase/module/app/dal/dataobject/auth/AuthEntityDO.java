@@ -13,17 +13,17 @@ import lombok.Data;
 @Table(name = "app_auth_entity")
 public class AuthEntityDO extends TenantBaseDO {
 
-    @Column(name = "application_id", nullable = false, comment = "应用Id")
-    private Long applicationId;
+    @Column(name = "application_code", nullable = false, comment = "应用code")
+    private String applicationCode;
 
-    @Column(name = "role_id", nullable = false, comment = "角色Id")
-    private Long roleId;
+    @Column(name = "role_code", nullable = false, comment = "角色code")
+    private String roleCode;
 
-    @Column(name = "menu_id", nullable = false, comment = "菜单Id")
-    private Long menuId;
+    @Column(name = "menu_code", nullable = false, comment = "菜单code")
+    private String menuCode;
 
-    @Column(name = "entity_id", nullable = false, comment = "实体Id")
-    private Long entityId;
+    @Column(name = "entity_code", nullable = false, comment = "实体code")
+    private String entityCode;
 
     @Column(name = "is_allowed", nullable = false, comment = "是否可访问")
     private Boolean allowed;

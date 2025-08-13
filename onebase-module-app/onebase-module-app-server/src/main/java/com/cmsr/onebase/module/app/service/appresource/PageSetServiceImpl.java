@@ -1,45 +1,29 @@
 package com.cmsr.onebase.module.app.service.appresource;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
+import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
+import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.module.app.api.appresource.dto.*;
+import com.cmsr.onebase.module.app.controller.admin.appresource.vo.LoadPageSetReqVO;
+import com.cmsr.onebase.module.app.controller.admin.appresource.vo.LoadPageSetRespVO;
+import com.cmsr.onebase.module.app.controller.admin.appresource.vo.SavePageSetReqVO;
+import com.cmsr.onebase.module.app.dal.database.app.AppApplicationRepository;
+import com.cmsr.onebase.module.app.dal.database.appresource.*;
+import com.cmsr.onebase.module.app.dal.database.menu.AppMenuRepository;
+import com.cmsr.onebase.module.app.dal.dataobject.app.ApplicationDO;
+import com.cmsr.onebase.module.app.dal.dataobject.appresource.*;
+import com.cmsr.onebase.module.app.dal.dataobject.menu.MenuDO;
+import com.cmsr.onebase.module.app.enums.appresource.AppResourceErrorCodeConstants;
+import com.cmsr.onebase.module.app.util.PageUtils;
+import jakarta.annotation.Resource;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
-import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
-import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.module.app.api.appresource.dto.ComponentDTO;
-import com.cmsr.onebase.module.app.api.appresource.dto.CopyPageSetDTO;
-import com.cmsr.onebase.module.app.api.appresource.dto.CreatePageSetDTO;
-import com.cmsr.onebase.module.app.api.appresource.dto.PageDTO;
-import com.cmsr.onebase.module.app.api.appresource.dto.PageSetRespDTO;
-import com.cmsr.onebase.module.app.controller.admin.appresource.vo.LoadPageSetReqVO;
-import com.cmsr.onebase.module.app.controller.admin.appresource.vo.LoadPageSetRespVO;
-import com.cmsr.onebase.module.app.controller.admin.appresource.vo.SavePageSetReqVO;
-import com.cmsr.onebase.module.app.dal.database.appresource.AppComponentRepository;
-import com.cmsr.onebase.module.app.dal.database.appresource.AppPageMetaRepository;
-import com.cmsr.onebase.module.app.dal.database.appresource.AppPageRefRouterRepository;
-import com.cmsr.onebase.module.app.dal.database.appresource.AppPageRepository;
-import com.cmsr.onebase.module.app.dal.database.appresource.AppPageSetLabelRepository;
-import com.cmsr.onebase.module.app.dal.database.appresource.AppPageSetPageRepository;
-import com.cmsr.onebase.module.app.dal.database.appresource.AppPageSetRepository;
-import com.cmsr.onebase.module.app.dal.database.menu.AppMenuRepository;
-import com.cmsr.onebase.module.app.dal.dataobject.appresource.ComponentDO;
-import com.cmsr.onebase.module.app.dal.dataobject.appresource.PageDO;
-import com.cmsr.onebase.module.app.dal.dataobject.appresource.PageMetadataDO;
-import com.cmsr.onebase.module.app.dal.dataobject.appresource.PageRefRouterDO;
-import com.cmsr.onebase.module.app.dal.dataobject.appresource.PageSetDO;
-import com.cmsr.onebase.module.app.dal.dataobject.appresource.PageSetLabelDO;
-import com.cmsr.onebase.module.app.dal.dataobject.appresource.PageSetPageDO;
-import com.cmsr.onebase.module.app.dal.dataobject.menu.MenuDO;
-import com.cmsr.onebase.module.app.enums.appresource.AppResourceErrorCodeConstants;
-import com.cmsr.onebase.module.app.util.PageUtils;
-
-import jakarta.annotation.Resource;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @Service
 @Validated
@@ -69,18 +53,22 @@ public class PageSetServiceImpl implements PageSetService {
     @Resource
     private AppMenuRepository appMenuRepository;
 
+    @Resource
+    private AppApplicationRepository appApplicationRepository;
+
     @Override
-    public String getPageSetCode(Long menuID) {
-        PageSetDO pageSetDO = pageSetDataRepository.findPageSetByMenuId(menuID);
+    public String getPageSetCode(String menuCode) {
+        PageSetDO pageSetDO = pageSetDataRepository.findPageSetByMenuCode(menuCode);
         return pageSetDO.getPageSetCode();
     }
 
     @Override
     public Long getAppId(String code) {
         PageSetDO pageSetDO = pageSetDataRepository.findPageSetByPageSetCode(code);
-        Long menuId = pageSetDO.getMenuId();
-        MenuDO menuDO = appMenuRepository.findById(menuId);
-        return menuDO.getApplicationId();
+        String menuCode = pageSetDO.getMenuCode();
+        MenuDO menuDO = appMenuRepository.findByMenuCode(menuCode);
+        ApplicationDO applicationDO = appApplicationRepository.findOneByAppCode(menuDO.getApplicationCode());
+        return applicationDO.getId();
     }
 
     @Override
@@ -126,10 +114,10 @@ public class PageSetServiceImpl implements PageSetService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void deletePageSet(Long menuId) {
+    public void deletePageSet(String menuCode) {
 
         // 找到页面集
-        PageSetDO pageSetDO = pageSetDataRepository.findPageSetByMenuId(menuId);
+        PageSetDO pageSetDO = pageSetDataRepository.findPageSetByMenuCode(menuCode);
 
         // 删除页面集关联的页面
         List<PageSetPageDO> pageSetPageDOs = pageSetPageDataRepository.findByPageSetCode(pageSetDO.getPageSetCode());
@@ -145,7 +133,7 @@ public class PageSetServiceImpl implements PageSetService {
         pageDataRepository.deletePageByCodes(pageRefs);
 
         // 删除页面集
-        pageSetDataRepository.deletePageSetByMenuId(menuId);
+        pageSetDataRepository.deletePageSetByMenuCode(menuCode);
 
         return;
     }
@@ -153,7 +141,7 @@ public class PageSetServiceImpl implements PageSetService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public String copyPageSet(CopyPageSetDTO copyPageSetDTO) {
-        PageSetDO pageSetDO = pageSetDataRepository.findPageSetByMenuId(copyPageSetDTO.getMenuId());
+        PageSetDO pageSetDO = pageSetDataRepository.findPageSetByMenuCode(copyPageSetDTO.getMenuCode());
         if (pageSetDO == null) {
             throw ServiceExceptionUtil.exception(AppResourceErrorCodeConstants.PAGE_SET_NOT_EXIST);
         }
@@ -162,6 +150,7 @@ public class PageSetServiceImpl implements PageSetService {
         PageSetDO newPageSetDO = BeanUtils.toBean(pageSetDO, PageSetDO.class);
         newPageSetDO.setId(null);
         newPageSetDO.setPageSetCode(UUID.randomUUID().toString());
+        newPageSetDO.setMenuCode(copyPageSetDTO.getNewMenuCode());
         pageSetDataRepository.insert(newPageSetDO);
 
         // 复制页面其余内容
@@ -185,10 +174,10 @@ public class PageSetServiceImpl implements PageSetService {
             pageSetPageDataRepository.insert(newPageSetPageDO);
 
             // 复制组件
-            componentDataRepository.findByPageID(pageDO.getId()).forEach(componentDO -> {
+            componentDataRepository.findByPageCode(pageDO.getPageCode()).forEach(componentDO -> {
                 ComponentDO newComponentDO = BeanUtils.toBean(componentDO, ComponentDO.class);
                 newComponentDO.setId(null);
-                newComponentDO.setPageId(newPageDO.getId());
+                newComponentDO.setPageCode(newPageDO.getPageCode());
                 componentDataRepository.insert(newComponentDO);
             });
 
@@ -196,7 +185,7 @@ public class PageSetServiceImpl implements PageSetService {
             pageMetaDataRepository.findByPageID(pageDO.getId()).forEach(pageMetadataDO -> {
                 PageMetadataDO newPageMetadataDO = BeanUtils.toBean(pageMetadataDO, PageMetadataDO.class);
                 newPageMetadataDO.setId(null);
-                newPageMetadataDO.setPageId(newPageDO.getId());
+                newPageMetadataDO.setPageCode(newPageDO.getPageCode());
                 pageMetaDataRepository.insert(newPageMetadataDO);
             });
 
@@ -213,7 +202,7 @@ public class PageSetServiceImpl implements PageSetService {
                     .forEach(pageRefRouterDO -> {
                         PageRefRouterDO newPageRefRouterDO = BeanUtils.toBean(pageRefRouterDO, PageRefRouterDO.class);
                         newPageRefRouterDO.setId(null);
-                        newPageRefRouterDO.setPageRef(newPageDO.getPageCode());
+                        newPageRefRouterDO.setPageCode(newPageDO.getPageCode());
                         appPageRefRouterDataRepository.insert(newPageRefRouterDO);
                     });
         });
@@ -235,13 +224,13 @@ public class PageSetServiceImpl implements PageSetService {
             pageDataRepository.update(pageDO);
 
             // 删除已有的component
-            componentDataRepository.deleteComponentByPageId(pageDO.getId());
+            componentDataRepository.deleteComponentByPageCode(pageDO.getPageCode());
 
             // 插入新的component
             page.getComponents().forEach(component -> {
                 ComponentDO componentDO = BeanUtils.toBean(component, ComponentDO.class);
                 componentDO.setInTable(false);
-                componentDO.setPageId(pageDO.getId());
+                componentDO.setPageCode(pageDO.getPageCode());
                 componentDataRepository.insert(componentDO);
             });
         });
@@ -252,7 +241,6 @@ public class PageSetServiceImpl implements PageSetService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public LoadPageSetRespVO loadPageSet(LoadPageSetReqVO loadPageSetReqVO) {
-        ConfigStore configs = new DefaultConfigStore();
         PageSetDO pageSetDO = pageSetDataRepository.findPageSetByPageSetCode(loadPageSetReqVO.getPageSetCode());
 
         if (pageSetDO == null) {
@@ -282,7 +270,7 @@ public class PageSetServiceImpl implements PageSetService {
 
         // 读取每个页面的组件和配置
         pageDOs.forEach(pageDO -> {
-            List<ComponentDO> componentDOs = componentDataRepository.findByPageID(pageDO.getId());
+            List<ComponentDO> componentDOs = componentDataRepository.findByPageCode(pageDO.getPageCode());
 
             PageDTO pageDTO = BeanUtils.toBean(pageDO, PageDTO.class);
             pageDTO.setComponents(componentDOs.stream()
@@ -292,6 +280,7 @@ public class PageSetServiceImpl implements PageSetService {
         });
 
         loadPageSetRespVO.setPages(pageDTOs);
+        loadPageSetRespVO.setMainMetadata(pageSetDO.getMainMetadata());
 
         return loadPageSetRespVO;
     }

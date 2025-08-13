@@ -22,6 +22,5 @@ public interface AppMenuService {
 
     void updateApplicationMenuVisible(Long id, Boolean visible);
 
-    void copyApplicationMenu(MenuCopyReqVO copyReqVO);
-
+    MenuCreateRespVO copyApplicationMenu(MenuCopyReqVO copyReqVO);
 }

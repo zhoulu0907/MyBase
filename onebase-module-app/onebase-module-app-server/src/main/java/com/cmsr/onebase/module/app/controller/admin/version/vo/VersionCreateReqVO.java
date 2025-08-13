@@ -5,7 +5,7 @@ import lombok.Data;
 
 /**
  * @Author：huangjie
- * @Date：2025/7/22 16:48
+ *                  @Date：2025/7/22 16:48
  */
 @Schema(description = "应用管理 - 版本创建 Request VO")
 @Data
@@ -19,4 +19,13 @@ public class VersionCreateReqVO {
 
     @Schema(description = "版本号")
     private String versionNumber;
+
+    @Schema(description = "版本描述")
+    private String versionDescription;
+
+    @Schema(description = "环境")
+    private String environment;
+
+    @Schema(description = "操作类型")
+    private Integer operationType;
 }

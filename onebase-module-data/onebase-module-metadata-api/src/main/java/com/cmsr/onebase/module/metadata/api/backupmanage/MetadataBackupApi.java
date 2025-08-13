@@ -1,0 +1,34 @@
+package com.cmsr.onebase.module.metadata.api.backupmanage;
+
+import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.module.metadata.api.backupmanage.dto.MetadataBackupReqDTO;
+import com.cmsr.onebase.module.metadata.api.backupmanage.dto.MetadataBackupRespDTO;
+import com.cmsr.onebase.module.metadata.api.backupmanage.dto.MetadataRestoreReqDTO;
+import com.cmsr.onebase.module.metadata.enums.ApiConstants;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+
+/**
+ * RPC 服务 - 元数据备份恢复
+ *
+ * @author matianyu
+ * @date 2025-08-12
+ */
+@FeignClient(name = ApiConstants.NAME)
+@Tag(name = "RPC 服务 - 元数据备份恢复")
+public interface MetadataBackupApi {
+
+    String PREFIX = ApiConstants.PREFIX + "/backup";
+
+    @PostMapping(PREFIX + "/backup")
+    @Operation(summary = "备份元数据", description = "根据应用ID备份所有相关的元数据信息")
+    CommonResult<MetadataBackupRespDTO> backupMetadata(@RequestBody MetadataBackupReqDTO backupReqDTO);
+
+    @PostMapping(PREFIX + "/restore")
+    @Operation(summary = "恢复元数据", description = "将备份的元数据恢复到指定应用中")
+    CommonResult<Boolean> restoreMetadata(@RequestBody MetadataRestoreReqDTO restoreReqDTO);
+
+}

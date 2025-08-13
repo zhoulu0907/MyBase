@@ -4,7 +4,11 @@ import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.data.base.BaseDO;
 import com.cmsr.onebase.module.app.dal.database.app.AppApplicationRepository;
+import com.cmsr.onebase.module.app.dal.database.auth.AppAuthRoleRepository;
+import com.cmsr.onebase.module.app.dal.database.menu.AppMenuRepository;
 import com.cmsr.onebase.module.app.dal.dataobject.app.ApplicationDO;
+import com.cmsr.onebase.module.app.dal.dataobject.auth.AuthRoleDO;
+import com.cmsr.onebase.module.app.dal.dataobject.menu.MenuDO;
 import com.cmsr.onebase.module.app.enums.app.AppErrorCodeConstants;
 import com.cmsr.onebase.module.system.api.user.AdminUserApi;
 import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
@@ -30,6 +34,12 @@ public class AppCommonService {
     private AppApplicationRepository applicationRepository;
 
     @Resource
+    private AppAuthRoleRepository authRoleRepository;
+
+    @Resource
+    private AppMenuRepository menuRepository;
+
+    @Resource
     private AdminUserApi adminUserApi;
 
     public ApplicationDO validateApplicationExist(Long id) {
@@ -38,6 +48,30 @@ public class AppCommonService {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_NOT_EXIST);
         }
         return applicationDO;
+    }
+
+    public AuthRoleDO validateRoleExist(Long id) {
+        AuthRoleDO authRoleDO = authRoleRepository.findById(id);
+        if (authRoleDO == null) {
+            throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_AUTH_ROLE_NOT_EXISTS);
+        }
+        return authRoleDO;
+    }
+
+    public MenuDO validateMenuExist(Long id) {
+        MenuDO menuDO = menuRepository.findById(id);
+        if (menuDO == null) {
+            throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_MENU_NOT_EXIST);
+        }
+        return menuDO;
+    }
+
+    public MenuDO validateMenuExist(String menuCode) {
+        MenuDO menuDO = menuRepository.findByMenuCode(menuCode);
+        if (menuDO == null) {
+            throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_MENU_NOT_EXIST);
+        }
+        return menuDO;
     }
 
     public UserHelper getUserHelper(BaseDO baseDO) {

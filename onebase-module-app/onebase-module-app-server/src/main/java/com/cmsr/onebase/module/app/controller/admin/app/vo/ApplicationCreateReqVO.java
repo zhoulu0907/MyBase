@@ -18,12 +18,15 @@ public class ApplicationCreateReqVO {
     @Schema(description = "应用ID")
     private Long id;
 
+    @Schema(description = "应用Key")
+    @NotBlank(message = "应用Key不能为空")
+    private String appKey;
+
     @Schema(description = "应用名称")
     @NotBlank(message = "应用名称不能为空")
     private String appName;
 
     @Schema(description = "应用编码")
-    @NotBlank(message = "应用编码不能为空")
     private String appCode;
 
     @Schema(description = "应用模式")

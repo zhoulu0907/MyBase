@@ -19,8 +19,8 @@ public class EntityFieldQueryReqVO {
     @NotNull(message = "实体ID不能为空")
     private String entityId;
 
-    @Schema(description = "是否系统字段", example = "false")
-    private Boolean isSystemField;
+    @Schema(description = "是否系统字段：0-是，1-不是", example = "1")
+    private Integer isSystemField;
 
     @Schema(description = "搜索关键词", example = "name")
     private String keyword;

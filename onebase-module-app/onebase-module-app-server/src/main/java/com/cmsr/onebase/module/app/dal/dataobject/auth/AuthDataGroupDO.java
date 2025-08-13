@@ -13,14 +13,17 @@ import lombok.Data;
 @Table(name = "app_auth_data_group")
 public class AuthDataGroupDO extends TenantBaseDO {
 
-    @Column(name = "application_id", nullable = false, comment = "应用Id")
-    private Long applicationId;
+    @Column(name = "application_code", nullable = false, comment = "应用code")
+    private String applicationCode;
 
-    @Column(name = "role_id", nullable = false, comment = "角色Id")
-    private Long roleId;
+    @Column(name = "role_code", nullable = false, comment = "角色code")
+    private String roleCode;
 
-    @Column(name = "menu_id", nullable = false, comment = "菜单Id")
-    private Long menuId;
+    @Column(name = "menu_id", nullable = false, comment = "菜单code")
+    private String menuCode;
+
+    @Column(name = "group_code", nullable = false, comment = "数据权限组code")
+    private String groupCode;
 
     @Column(name = "group_name", nullable = false, length = 100, comment = "组名称")
     private String groupName;
@@ -31,8 +34,8 @@ public class AuthDataGroupDO extends TenantBaseDO {
     @Column(name = "description", length = 256, comment = "描述")
     private String description;
 
-    @Column(name = "scope_field_id", nullable = false, comment = "关联业务实体字段Id")
-    private Long scopeFieldId;
+    @Column(name = "scope_field_code", nullable = false, comment = "关联业务实体字段code")
+    private String scopeFieldCode;
 
     @Column(name = "scope_level", nullable = false, length = 32, comment = "关联业务实体字段对应的权限范围")
     private String scopeLevel;

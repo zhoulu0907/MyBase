@@ -1,0 +1,22 @@
+package com.cmsr.onebase.module.app.dal.dataobject.auth;
+
+import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
+import jakarta.persistence.Column;
+import jakarta.persistence.Table;
+import lombok.Data;
+
+/**
+ * @Author：huangjie
+ * @Date：2025/8/5 15:11
+ */
+@Data
+@Table(name = "app_auth_role_user")
+public class AuthRoleUserDO extends TenantBaseDO {
+    
+    @Column(name = "role_code", nullable = false, comment = "角色code")
+    private String roleCode;
+
+    @Column(name = "user_id", nullable = false, comment = "用户Id")
+    private Long userId;
+
+}

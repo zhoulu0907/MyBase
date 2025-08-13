@@ -5,6 +5,7 @@ import com.cmsr.onebase.module.app.controller.admin.app.vo.ApplicationCreateReqV
 import com.cmsr.onebase.module.app.controller.admin.app.vo.ApplicationCreateRespVO;
 import com.cmsr.onebase.module.app.controller.admin.app.vo.ApplicationPageReqVO;
 import com.cmsr.onebase.module.app.controller.admin.app.vo.ApplicationRespVO;
+import com.cmsr.onebase.module.app.dal.dataobject.app.ApplicationDO;
 
 /**
  * @Author：huangjie
@@ -22,6 +23,8 @@ public interface AppApplicationService {
 
     void updateApplicationName(Long id, String name);
 
+    void updateApplicationVersion(Long id, String versionNumber, String versionUrl);
+
     void deleteApplication(Long id,String name);
 
-}
+ }

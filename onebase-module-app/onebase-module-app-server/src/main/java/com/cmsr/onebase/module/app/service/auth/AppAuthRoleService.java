@@ -1,9 +1,6 @@
 package com.cmsr.onebase.module.app.service.auth;
 
-import com.cmsr.onebase.module.app.controller.admin.auth.vo.AuthRoleAddMemberReqVO;
-import com.cmsr.onebase.module.app.controller.admin.auth.vo.AuthRoleCreateReqVO;
-import com.cmsr.onebase.module.app.controller.admin.auth.vo.AuthRoleDeleteMemberReqVO;
-import com.cmsr.onebase.module.app.controller.admin.auth.vo.AuthRoleListRespVO;
+import com.cmsr.onebase.module.app.controller.admin.auth.vo.*;
 
 import java.util.List;
 
@@ -13,15 +10,17 @@ import java.util.List;
  */
 public interface AppAuthRoleService {
 
-    List<AuthRoleListRespVO> getAuthRoleList(Long applicationId);
+    List<AuthRoleListRespVO> getRoleList(Long applicationId);
 
-    void createRole(AuthRoleCreateReqVO reqVO);
+    AuthRoleCreateRespVO createRole(AuthRoleCreateReqVO reqVO);
 
     void createDefaultRole(Long applicationId);
 
-    void addUser(AuthRoleAddMemberReqVO reqVO);
+    void renameRole(Long roleId, String name);
 
-    void deleteUser(AuthRoleDeleteMemberReqVO reqVO);
+    void addRoleUser(AuthRoleAddUserReqVO reqVO);
+
+    void deleteRoleUser(AuthRoleDeleteUserReqVO reqVO);
 
     void deleteRole(Long roleId);
 

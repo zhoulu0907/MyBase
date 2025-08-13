@@ -125,21 +125,69 @@ public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRela
         if (pageReqVO.getAppId() != null) {
             configStore.and("app_id", pageReqVO.getAppId());
         }
-        if (pageReqVO.getSourceEntityId() != null) {
-            configStore.and("source_entity_id", pageReqVO.getSourceEntityId());
+        
+        // 添加调试日志，查看 entityId 的值
+        log.info("接收到的请求参数: entityId={}, appId={}, pageNo={}, pageSize={}", 
+                pageReqVO.getEntityId(), pageReqVO.getAppId(), pageReqVO.getPageNo(), pageReqVO.getPageSize());
+        log.info("entityId为空检查: entityId==null:{}, StringUtils.hasText:{}",
+                pageReqVO.getEntityId() == null, StringUtils.hasText(pageReqVO.getEntityId()));
+        
+        // 优先处理 entityId 参数 - 查询与该实体相关的所有关系（无论作为源实体还是目标实体）
+        if (StringUtils.hasText(pageReqVO.getEntityId())) {
+            Long entityIdLong = Long.valueOf(pageReqVO.getEntityId());
+            log.info("解析实体ID: 字符串={}, Long={}", pageReqVO.getEntityId(), entityIdLong);
+            
+            // 先检查该实体是否存在任何关联关系
+            DefaultConfigStore checkConfigStore = new DefaultConfigStore();
+            if (pageReqVO.getAppId() != null) {
+                checkConfigStore.and("app_id", pageReqVO.getAppId());
+            }
+            // 使用正确的嵌套OR语法
+            checkConfigStore.and(new DefaultConfigStore()
+                    .or("source_entity_id", entityIdLong)
+                    .or("target_entity_id", entityIdLong));
+            
+            // 查询是否存在相关记录
+            List<MetadataEntityRelationshipDO> existingRelations = dataRepository.findAllByConfig(
+                    MetadataEntityRelationshipDO.class, checkConfigStore);
+            
+            if (existingRelations.isEmpty()) {
+                // 如果找不到任何相关记录，直接返回空结果
+                log.info("未找到实体相关关系，实体ID: {}，返回空结果", pageReqVO.getEntityId());
+                return new PageResult<>(List.of(), 0L);
+            }
+            
+            // 使用嵌套 OR 条件：(source_entity_id = entityId OR target_entity_id = entityId)
+            configStore.and(new DefaultConfigStore()
+                    .or("source_entity_id", entityIdLong)
+                    .or("target_entity_id", entityIdLong));
+            
+            log.info("查询实体相关关系，实体ID: {}，找到 {} 条相关记录", pageReqVO.getEntityId(), existingRelations.size());
+        } else {
+            // 如果没有传入 entityId，则使用精确的源实体ID和目标实体ID查询
+            if (pageReqVO.getSourceEntityId() != null) {
+                configStore.and("source_entity_id", Long.valueOf(pageReqVO.getSourceEntityId()));
+            }
+            if (pageReqVO.getTargetEntityId() != null) {
+                configStore.and("target_entity_id", Long.valueOf(pageReqVO.getTargetEntityId()));
+            }
         }
-        if (pageReqVO.getTargetEntityId() != null) {
-            configStore.and("target_entity_id", pageReqVO.getTargetEntityId());
-        }
+        
         if (StringUtils.hasText(pageReqVO.getRelationshipType())) {
             configStore.and("relationship_type", pageReqVO.getRelationshipType());
         }
         
         configStore.order("create_time", Order.TYPE.DESC);
         
+        // 添加分页参数调试日志
+        log.info("分页查询参数: pageNo={}, pageSize={}", pageReqVO.getPageNo(), pageReqVO.getPageSize());
+        
         // 分页查询
         PageResult<MetadataEntityRelationshipDO> pageResult = dataRepository.findPageWithConditions(
             MetadataEntityRelationshipDO.class, configStore, pageReqVO.getPageNo(), pageReqVO.getPageSize());
+        
+        log.info("分页查询结果: 当前页记录数={}, 总记录数={}", 
+                pageResult.getList().size(), pageResult.getTotal());
         
         // 转换为响应VO
         return new PageResult<>(
@@ -399,9 +447,6 @@ public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRela
             return parentIdField.getId();
         }
 
-        // TODO: 如果parent_id字段不存在，需要创建该字段
-        // 这里需要调用字段创建服务来创建parent_id字段
-        // 暂时抛出异常，提示用户手动创建
         throw new IllegalArgumentException("子表实体未找到parent_id字段，请先为子表添加parent_id字段，实体ID: " + childEntityId);
     }
 
@@ -427,14 +472,19 @@ public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRela
         List<MetadataEntityRelationshipDO> relationships = dataRepository.findAllByConfig(
                 MetadataEntityRelationshipDO.class, configStore);
 
-        // 4. 转换为子表信息列表
+        // 4. 填充父表字段信息
+        List<EntityFieldInfoRespVO> parentFields = getEntityFields(entityId);
+        result.setParentFields(parentFields);
+
+        // 5. 转换为子表信息列表
         List<ChildEntityInfoRespVO> childEntities = relationships.stream()
                 .map(this::convertToChildEntityInfo)
                 .toList();
 
         result.setChildEntities(childEntities);
         
-        log.info("查询实体及其关联子表成功，实体ID: {}, 关联子表数量: {}", entityId, childEntities.size());
+        log.info("查询实体及其关联子表成功，实体ID: {}, 关联子表数量: {}, 父表字段数量: {}", 
+                entityId, childEntities.size(), parentFields.size());
         return result;
     }
 
@@ -462,6 +512,10 @@ public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRela
         // 获取字段名称
         childInfo.setSourceFieldName(getFieldNameById(relationshipDO.getSourceFieldId()));
         childInfo.setTargetFieldName(getFieldNameById(relationshipDO.getTargetFieldId()));
+        
+        // 填充子表字段信息
+        List<EntityFieldInfoRespVO> childFields = getEntityFields(relationshipDO.getTargetEntityId());
+        childInfo.setChildFields(childFields);
         
         return childInfo;
     }
@@ -580,6 +634,8 @@ public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRela
         fieldInfo.setFieldID(String.valueOf(fieldDO.getId()));
         fieldInfo.setFieldName(fieldDO.getFieldName());
         fieldInfo.setFieldType(fieldDO.getFieldType());
+        fieldInfo.setIsSystemField(fieldDO.getIsSystemField());
+        fieldInfo.setDisplayName(fieldDO.getDisplayName());
         return fieldInfo;
     }
 

@@ -12,8 +12,11 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 public class PageRefRouterDO extends TenantBaseDO {
 
-    @Column(name = "page_ref", columnDefinition= "VARCHAR(255) NOT NULL", comment = "页面编码")
-    private String pageRef;
+    /**
+     * 页面编码
+     */
+    @Column(name = "page_code", columnDefinition = "VARCHAR(255) NOT NULL", comment = "页面编码")
+    private String pageCode;
 
     @Column(name = "router_name", columnDefinition= "VARCHAR(255) NOT NULL", comment = "路由名称")
     private String routerName;

@@ -45,3 +45,9 @@ GET http://127.0.0.1:48080/admin-api/system/tenant/get-exist-user-count?id=1
 Content-Type: application/json
 Authorization: Bearer e2c473e36664444f8e56abd1a8570ab9
 tenant-id: 1
+
+### 更新租户 /admin-api/system/tenant/page
+GET http://127.0.0.1:48080/admin-api/system/tenant/get-by-website?website=tenant_20250811184245
+Content-Type: application/json
+Authorization: Bearer 3e71f55ccc754ad99af737a899c1c9bd
+tenant-id: 1

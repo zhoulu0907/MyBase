@@ -396,8 +396,13 @@ public class AdminUserServiceImpl implements AdminUserService {
         if (CollUtil.isEmpty(deptIds)) {
             return Collections.emptyList();
         }
-//        return userMapper.selectListByDeptIds(deptIds);
-        return dataRepository.findAllByConfig(AdminUserDO.class, new DefaultConfigStore().in("dept_id", deptIds));
+        return dataRepository.findAllByConfig(AdminUserDO.class, new DefaultConfigStore().in(AdminUserDO.DEPT_ID, deptIds));
+    }
+
+
+    @Override
+    public List<AdminUserDO> getUserListNoDept() {
+        return dataRepository.findAllByConfig(AdminUserDO.class, new DefaultConfigStore().isNull(AdminUserDO.DEPT_ID));
     }
 
     @Override
@@ -446,8 +451,7 @@ public class AdminUserServiceImpl implements AdminUserService {
 
     @Override
     public List<AdminUserDO> getUserListByNickname(String nickname) {
-        return dataRepository.findAllByConfig(AdminUserDO.class, new DefaultConfigStore().eq("nickname", nickname));
-//        return userMapper.selectListByNickname(nickname);
+        return dataRepository.findAllByConfig(AdminUserDO.class, new DefaultConfigStore().like(AdminUserDO.NICKNAME, nickname));
     }
 
     /**
@@ -680,6 +684,56 @@ public class AdminUserServiceImpl implements AdminUserService {
                         AdminUserDO::getDeptId,
                         Collectors.collectingAndThen(Collectors.counting(), Math::toIntExact)
                 ));
+    }
+
+    @Override
+    public Map<Long, Integer> getUserCountByDeptIdsIncludeChildren(Collection<Long> deptIds) {
+        if (CollUtil.isEmpty(deptIds)) {
+            return Collections.emptyMap();
+        }
+
+        // 1. 获取所有部门ID及其子部门ID
+        Set<Long> allDeptIds = new HashSet<>();
+        for (Long deptId : deptIds) {
+            // 添加当前部门ID
+            allDeptIds.add(deptId);
+            // 添加所有子部门ID
+            Set<Long> childDeptIds = deptService.getChildDeptIdListFromCache(deptId);
+            allDeptIds.addAll(childDeptIds);
+        }
+
+        // 2. 批量查询所有相关部门的用户
+        List<AdminUserDO> allUsers = dataRepository.findAllByConfig(AdminUserDO.class,
+                new DefaultConfigStore()
+                        .in("dept_id", allDeptIds)
+        );
+
+        // 3. 按部门ID分组统计直属人数
+        Map<Long, Integer> directUserCountMap = allUsers.stream()
+                .filter(user -> user.getDeptId() != null)
+                .collect(Collectors.groupingBy(
+                        AdminUserDO::getDeptId,
+                        Collectors.collectingAndThen(Collectors.counting(), Math::toIntExact)
+                ));
+
+        // 4. 为每个请求的部门计算总人数（包含子部门）
+        Map<Long, Integer> result = new HashMap<>();
+        for (Long deptId : deptIds) {
+            int totalCount = 0;
+
+            // 统计当前部门的直属人数
+            totalCount += directUserCountMap.getOrDefault(deptId, 0);
+
+            // 统计所有子部门的人数
+            Set<Long> childDeptIds = deptService.getChildDeptIdListFromCache(deptId);
+            for (Long childDeptId : childDeptIds) {
+                totalCount += directUserCountMap.getOrDefault(childDeptId, 0);
+            }
+
+            result.put(deptId, totalCount);
+        }
+
+        return result;
     }
 
     /**
