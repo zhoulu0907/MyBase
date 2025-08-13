@@ -53,3 +53,82 @@ export interface EntityWithChildren {
     parentFields: AppEntityField[];
     childEntities: AppEntity[];
 }
+
+// 实体相关接口类型定义
+export interface CreateEntityReqVO {
+  code: string;
+  displayName: string;
+  description: string;
+}
+
+export interface UpdateEntityReqVO extends CreateEntityReqVO {
+  id: string;
+}
+
+export interface GetEntityPageParams {
+  pageNo: number;
+  pageSize: number;
+  datasourceId: string;
+  code?: string;
+  title?: string;
+}
+
+export interface CreateFieldReqVO {
+  appId: string;
+  entityId: string;
+  fieldCode: string;
+  fieldName: string;
+  description: string;
+  fieldType: string;
+  isSystemField?: number;
+  displayName: string;
+}
+
+export interface UpdateFieldReqVO extends CreateFieldReqVO {
+  id: string;
+}
+
+export interface CreateMasterChildReqVO {
+  parentEntityId: string;
+  parentFieldId: string;
+  childEntityId: string;
+  childFieldId: string;
+  childTableCode: string;
+  childTableName: string;
+  childTableDescription: string;
+  appId: string;
+  datasourceId: string;
+}
+
+export interface CreateRelationReqVO {
+  sourceEntityId: string;
+  sourceFieldId: string;
+  targetEntityId: string;
+  targetFieldId: string;
+  relationshipType?: string;
+  relationName?: string;
+}
+
+export interface UpdateRelationReqVO extends CreateRelationReqVO {
+  id: string;
+}
+
+// 数据规则相关接口
+export interface CreateRuleReqVO {
+  entityId: string;
+  rgName: string;
+  rgDesc?: string;
+  ruleType: string;
+  ruleContent: string;
+  isEnabled?: boolean;
+  valueRules?: Array<{
+    fieldId: string;
+    operator: string;
+    valueType: string;
+    value: string;
+  }>;
+}
+
+export interface UpdateRuleReqVO extends CreateRuleReqVO {
+  id: string;
+}

@@ -95,5 +95,5 @@ export interface UpdateTenantParams extends CreateTenantParams {
   /**
    * 租户ID
    */
-  id: string | number;
+  id: string;
 }

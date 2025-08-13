@@ -56,6 +56,38 @@ const Attributes = ({ cpID }: ConfigsProps) => {
     setPageComponentSchemas(cpID, newCurComponentSchema);
   };
 
+  const handleMultiPropsChange = (updates: { key: string; value: string | number | boolean | any[] }[]) => {
+    console.log(`更新了属性: ${updates}`);
+
+    // 将 updates 数组中的每个 key-value 展开到 config 中
+    const updatesObj = updates.reduce(
+      (acc, cur) => {
+        acc[cur.key] = cur.value;
+        return acc;
+      },
+      {} as Record<string, any>
+    );
+
+    console.log(updatesObj);
+
+    const newCurComponentSchema = {
+      id: cpID,
+      type: curComponentSchema.type,
+      editData: curComponentSchema.editData,
+      config: {
+        ...curComponentSchema.config,
+        ...updatesObj
+      },
+      layout: curComponentSchema.layout
+    };
+
+    console.log(curComponentSchema.config);
+    console.log(newCurComponentSchema.config);
+
+    setCurComponentSchema(newCurComponentSchema);
+    setPageComponentSchemas(cpID, newCurComponentSchema);
+  };
+
   const handleLayoutChange = (key: string, value: string) => {
     console.log(`更新了布局属性: ${key} 值为: ${value}`);
 
@@ -258,6 +290,7 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                 <DynamicTableConfig
                   key={index}
                   id={cpID}
+                  handleMultiPropsChange={handleMultiPropsChange}
                   handlePropsChange={handlePropsChange}
                   item={item}
                   configs={configs}

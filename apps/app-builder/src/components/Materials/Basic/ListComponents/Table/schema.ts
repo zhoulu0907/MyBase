@@ -137,6 +137,7 @@ export interface XTableConfig extends ICommonBaseType {
    */
   saveWithHidden?: TBooleanDefaultType;
 
+  metaData: TTextDefaultType;
 }
 
 const pagePositionConfig: ITablePagePositionConfigType<TPagePositionSelectKeyType> = {
@@ -187,16 +188,6 @@ const XTable: XTableSchema = {
     },
     tableMetaDataConfig,
     // keyDataConfig,
-    // {
-    //   key: 'columns',
-    //   name: '表头配置',
-    //   type: CONFIG_TYPES.TABLE_COLUMN_LIST
-    // },
-    // {
-    //   key: 'searchItems',
-    //   name: '搜索项',
-    //   type: CONFIG_TYPES.SEARCH_ITEM_LIST
-    // },
 
     pagePositionConfig,
     {
@@ -268,6 +259,7 @@ const XTable: XTableSchema = {
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     pagePosition: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.BR],
     pageSize: 5,
+    metaData: '',
     defaultValue: [
     //   {
     //     key: '1',

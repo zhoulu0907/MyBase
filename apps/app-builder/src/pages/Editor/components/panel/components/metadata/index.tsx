@@ -17,17 +17,21 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({}) => {
   const { t } = useI18n();
   const { mainEntity } = useAppDataStore();
 
-  const [fieldItems, setFieldItems] = useState<{ id: string; displayName: string; type: string }[]>([]);
+  const [fieldItems, setFieldItems] = useState<
+    { id: string; displayName: string; type: string; fieldID: string; entityID: string }[]
+  >([]);
 
   useEffect(() => {
     if (mainEntity.fields.length > 0) {
       setFieldItems(
         mainEntity.fields
           .filter((field: AppEntityField) => field.isSystemField === 1)
-          .map((field: AppEntityField) => ({
-            id: field.fieldID,
+          .map((field: AppEntityField, index: number) => ({
+            id: `${FORM_COMPONENT_TYPES.INPUT_TEXT}-${index}-${Date.now()}`,
             displayName: field.displayName,
-            type: FORM_COMPONENT_TYPES.INPUT_TEXT
+            type: FORM_COMPONENT_TYPES.INPUT_TEXT,
+            fieldID: field.fieldID,
+            entityID: mainEntity.entityID
           }))
       );
     }
@@ -137,6 +141,8 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({}) => {
                 id={item.id || `${item.type}-${Date.now()}`}
                 displayName={item.displayName}
                 type={item.type}
+                fieldID={item.fieldID}
+                entityID={item.entityID}
               />
             ))}
           </ReactSortable>

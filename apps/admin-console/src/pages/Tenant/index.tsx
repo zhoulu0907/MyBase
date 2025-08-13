@@ -24,6 +24,7 @@ import {
   getPlatformTenantAdminListApi,
   PlatformTenantStatus,
   ADMIN_ROOT_ID,
+  getOtherTenantCountApi,
   getTenantUserCountApi,
   type PlatformTenantInfo,
   type CreateTenantParams,
@@ -48,9 +49,10 @@ const TenantManagement: React.FC = () => {
   const [isNewTenant, setIsNewTenant] = useState(false);
   const [currentTenant, setCurrentTenant] = useState<PlatformTenantInfo | null>(null);
   const [originalAdmin, setOriginalAdmin] = useState<string>('');
-  const [allocatableLicense, setAllocatableLicense] = useState<number>(10000);
-  const [tenantLimit, setTenantLimit] = useState<number>(10000);
-  const [tenantUserCount, setTenantUserCount] = useState<number>(0);
+  const [allocatableLicense, setAllocatableLicense] = useState<number>(10000); // 可分配许可证数量
+  const [tenantLimit, setTenantLimit] = useState<number>(10000); // 租户数量限制
+  const [otherTenantCount, setOtherTenantCount] = useState<number>(0); // 其他租户分配数
+  const [tenantUserCount, setTenantUserCount] = useState<number>(0); // 租户下用户数
   const [adminList, setAdminList] = useState<{id: string, username: string}[]>([])
   const [confirmText, setConfirmText] = useState('');
   const [total, setTotal] = useState(0) 
@@ -82,7 +84,7 @@ const TenantManagement: React.FC = () => {
 
   useEffect(() => {
     getPlatformTenantList();
-    getTenantData()
+    // getTenantData()
   }, []);
 
   useEffect(() => {
@@ -116,7 +118,8 @@ const handleSearch = async (keyword: string) => {
       const licenseResp = await getPlatformInfoApi();
       if(licenseResp) {
         console.log('license总数 licenseResp:', licenseResp);
-        setTenantLimit(licenseResp.tenantLimit)
+        console.log('license下用户总数 licenseResp:', licenseResp.userLimit);
+        setTenantLimit(licenseResp.userLimit)
       }
     } catch (error) {
       console.error('Error fetching getLicenseLimit:', error);
@@ -136,10 +139,22 @@ const handleSearch = async (keyword: string) => {
     }
   }
 
-  // 获取用户数量
-  const getTenantUserCount = async () => { 
+  // 获取其他租户数量
+  const getOtherTenantCount = async (id: string) => { 
     try {
-      const resp = await getTenantUserCountApi();
+      const resp = await getOtherTenantCountApi(id);
+      if(resp) {
+        console.log('其他租户数量 resp:', resp);
+        setOtherTenantCount(resp);
+      }
+    } catch (error) {
+      console.error('Error fetching otherTenantCount:', error);
+    }
+  }
+  // 获取用户数量
+  const getTenantUserCount = async (id: string) => {
+    try {
+      const resp = await getTenantUserCountApi(id);
       if(resp) {
         console.log('用户数量 resp:', resp);
         setTenantUserCount(resp);
@@ -171,6 +186,7 @@ const handleSearch = async (keyword: string) => {
       status: PlatformTenantStatus.enabled,
       admin: adminList.length > 0 ? adminList[0].username : undefined
     });
+    getTenantData()
     setModalVisible(true);
     setIsNewTenant(true);
   };
@@ -183,6 +199,10 @@ const handleSearch = async (keyword: string) => {
 
    // 打开编辑弹窗
   const handleEdit = (record: PlatformTenantInfo) => {
+      console.log('允许可分配数:', allocatableLicense, "/tenant/get-allocatable-count");
+      console.log('租户数量限制:', tenantLimit, "/platform/get-platform-info");
+      console.log('其他租户分配数:', otherTenantCount);
+      console.log('租户下用户数:', tenantUserCount);
     const tenant: PlatformTenantInfo = {
       id: record.id.toString(),
       name: record.name,
@@ -204,6 +224,10 @@ const handleSearch = async (keyword: string) => {
       status: record.status === PlatformTenantStatus.enabled ? PlatformTenantStatus.enabled : PlatformTenantStatus.disabled,
       website: record.website,
     });
+    getTenantData();
+    getTenantUserCount(record.id.toString());
+    getOtherTenantCount(record.id.toString());
+
     setModalVisible(true);
     setIsNewTenant(false);
   };
@@ -216,15 +240,16 @@ const handleSearch = async (keyword: string) => {
 
       // 检查分配人数
       const allocatedCount = values.allocatedCount;
-      const currentUsed = allocatableLicense - tenantLimit;
+      // 允许分配的人数
+      const allowCount = tenantLimit - otherTenantCount;
 
-      if (allocatedCount > allocatableLicense) {
-        Message.error(`可分配人数不足，License总人数是${tenantLimit}，剩余${allocatableLicense}`);
+      if (allocatedCount > allowCount) {
+        Message.error(`可分配人数不足，License总人数是${tenantLimit}，剩余${allowCount}`);
         return;
       }
 
-      if (currentTenant && allocatedCount < currentUsed) {
-        Message.error(`租户内已使用租户数量为${currentUsed}，分配的租户数量不能低于此数量`);
+      if (allocatedCount && allocatedCount < tenantUserCount) {
+        Message.error(`租户内已使用租户数量为${tenantUserCount}，分配的租户数量不能低于此数量`);
         return;
       }
       
@@ -515,7 +540,7 @@ const handleSearch = async (keyword: string) => {
           </Form.Item>
 
           <Form.Item
-            label={`分配人员数量 (可分配人员数量：${allocatableLicense})`}
+            label={`分配人员数量 (可分配人员数量：${tenantLimit - otherTenantCount})`}
             field="allocatedCount"
             rules={[
               { required: true, message: '请输入分配人员数量' },

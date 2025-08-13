@@ -9,13 +9,15 @@ import { useNavigate } from 'react-router-dom';
 import styles from './index.module.less';
 import type { XTableConfig } from './schema';
 
-const XTable = memo((props: XTableConfig, edit: boolean = false) => {
+const XTable = memo((props: XTableConfig & { edit?: boolean }) => {
+  const { edit = true } = props;
   const navigate = useNavigate();
 
   const {
     label,
     status,
     defaultValue,
+    metaData,
     searchItems,
     columns,
     hover,
@@ -81,10 +83,15 @@ const XTable = memo((props: XTableConfig, edit: boolean = false) => {
 
   useEffect(() => {
     console.log(finalColumns);
-    handlePage();
+    if (finalColumns) {
+      handlePage();
+    }
   }, [finalColumns]);
 
   const handleCreate = () => {
+    if (edit) {
+      return;
+    }
     const hash = window.location.hash;
     const queryIndex = hash.indexOf('?');
     if (queryIndex !== -1) {
@@ -96,8 +103,11 @@ const XTable = memo((props: XTableConfig, edit: boolean = false) => {
   };
 
   const handlePage = async () => {
+    if (edit) {
+      return;
+    }
     const req: PageMethodParam = {
-      entityId: '542683577733746688',
+      entityId: metaData,
       pageNo: 1,
       pageSize: 10
     };
@@ -118,16 +128,24 @@ const XTable = memo((props: XTableConfig, edit: boolean = false) => {
   };
 
   const handleDelete = async (id: string) => {
+    if (edit) {
+      return;
+    }
     console.log(id);
     const req: DeleteMethodParam = {
-      entityId: '542683577733746688',
+      entityId: metaData,
       id: id
     };
     const res = await dataMethodDelete(req);
     console.log(res);
+
+    handlePage();
   };
 
   const handleEdit = (id: string) => {
+    if (edit) {
+      return;
+    }
     console.log(id);
     const hash = window.location.hash;
     const queryIndex = hash.indexOf('?');

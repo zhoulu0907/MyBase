@@ -1,6 +1,6 @@
 import { useAppDataStore } from '@/store';
 import { Cascader, Form } from '@arco-design/web-react';
-import { type AppEntity, type AppEntityField } from '@onebase/app';
+import type { AppEntityField } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
 import styles from '../../index.module.less';
 
@@ -13,30 +13,31 @@ export interface DynamicFieldConfigProps {
 }
 
 const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({ handlePropsChange, item, configs }) => {
-  const { appEntities } = useAppDataStore();
+  const { mainEntity } = useAppDataStore();
 
   const [entityTree, setEntityTree] = useState<any[]>([]);
 
   useEffect(() => {
     initTreeData();
-  }, [appEntities]);
+  }, [mainEntity]);
 
   const initTreeData = async () => {
-    console.log(appEntities);
+    console.log(mainEntity);
 
-    const newEntityTree = (appEntities.entities || []).map((entity: AppEntity) => ({
-      value: entity.entityID,
-      label: entity.entityName,
-      children: (entity.fields || [])
-        //   TODO(mickey): 改
-        .filter((field: AppEntityField) => field.isSystemField == 1)
-        .map((field: AppEntityField) => ({
-          value: field.fieldID,
-          label: field.displayName
-        }))
-    }));
+    const newEntityTree = mainEntity.fields
+      .filter((field: AppEntityField) => field.isSystemField == 1)
+      .map((field: AppEntityField) => ({
+        value: field.fieldID,
+        label: field.displayName
+      }));
 
-    setEntityTree(newEntityTree);
+    setEntityTree([
+      {
+        value: mainEntity.entityID,
+        label: mainEntity.entityName,
+        children: newEntityTree
+      }
+    ]);
   };
 
   return (

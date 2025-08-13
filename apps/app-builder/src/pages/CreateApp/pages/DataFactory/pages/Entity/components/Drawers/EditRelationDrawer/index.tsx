@@ -1,10 +1,10 @@
-import { resouceId } from '@/pages/CreateApp/pages/DataFactory/utils/const';
 import { Button, Drawer, Form, Message, Select, Space, Spin } from '@arco-design/web-react';
 import { getEntityFields, getEntityList, updateRelation } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
 import type { EdgeData } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
-
+import { useAppStore } from '@/store';
+import { useResourceStore } from '@/store_resource';
 interface EntityOption {
   label: string;
   value: string;
@@ -39,6 +39,8 @@ const relationTypes = [
 ];
 
 const EditRelationDrawer: React.FC<EditRelationDrawerProps> = ({ visible, setVisible, relationData, onSuccess }) => {
+  const { curAppId } = useAppStore();
+  const { curDataSourceId } = useResourceStore();
   const [form] = Form.useForm<RelationFormValues>();
   const [leftEntityOptions, setLeftEntityOptions] = useState<EntityOption[]>([]);
   const [rightEntityOptions, setRightEntityOptions] = useState<EntityOption[]>([]);
@@ -49,10 +51,11 @@ const EditRelationDrawer: React.FC<EditRelationDrawerProps> = ({ visible, setVis
 
   // 初始化实体选项
   useEffect(() => {
-    if (visible) {
+    console.log('curDataSourceId=====', curDataSourceId);
+    if (visible && curDataSourceId) {
       loadEntities();
     }
-  }, [visible]);
+  }, [visible, curDataSourceId]);
 
   // 当关联关系数据变化时，设置表单值
   useEffect(() => {
@@ -77,7 +80,7 @@ const EditRelationDrawer: React.FC<EditRelationDrawerProps> = ({ visible, setVis
 
   const loadEntities = async () => {
     try {
-      const res = await getEntityList(resouceId);
+      const res = await getEntityList(curDataSourceId);
       if (res.length > 0) {
         const entityOptions = res.map((entity: any) => ({
           label: entity.displayName,
@@ -140,7 +143,7 @@ const EditRelationDrawer: React.FC<EditRelationDrawerProps> = ({ visible, setVis
       const updateData = {
         id: relationData?.relationshipId,
         ...values,
-        appId: '1'
+        appId: curAppId
       };
 
       await updateRelation(updateData);

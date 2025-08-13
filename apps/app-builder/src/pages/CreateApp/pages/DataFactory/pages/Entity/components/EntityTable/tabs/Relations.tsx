@@ -6,6 +6,7 @@ import React, { useEffect, useState } from 'react';
 import CreateRelationModal from '../../Modals/CreateRelationModal';
 import EditRelationDrawer from '../../Drawers/EditRelationDrawer';
 import styles from './tabs.module.less';
+import { useAppStore } from '@/store';
 
 interface RelationsProps {
   entity: EntityListItem;
@@ -26,6 +27,7 @@ interface RelationData {
 }
 
 const Relations: React.FC<RelationsProps> = ({ entity, activeTab }) => {
+  const { curAppId } = useAppStore();
   const [relations, setRelations] = useState<RelationData[]>([]);
   const [createRelationModalVisible, setCreateRelationModalVisible] = useState(false);
   const [editRelationDrawerVisible, setEditRelationDrawerVisible] = useState(false);
@@ -109,7 +111,7 @@ const Relations: React.FC<RelationsProps> = ({ entity, activeTab }) => {
         entityId: entity.id,
         pageNo: page.pageNo,
         pageSize: page.pageSize,
-        appId: '1'
+        appId: curAppId
       };
       const response = await getEntityRelations(params);
       console.log('getEntityRelations', response);

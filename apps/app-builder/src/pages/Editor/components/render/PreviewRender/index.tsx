@@ -79,7 +79,7 @@ const ComponentEditRender: React.FC<ComponentRenderProps> = ({ cpId, cpType, pag
 
       //  列表组件
       case LIST_COMPONENT_TYPES.TABLE:
-        return <ListComp.XTable cpName={cpId} id={cpId} {...componentConfig} />;
+        return <ListComp.XTable cpName={cpId} id={cpId} {...componentConfig} edit={false} />;
       case LIST_COMPONENT_TYPES.CALENDAR:
         return <ListComp.XCalendar cpName={cpId} id={cpId} {...componentConfig} />;
       case LIST_COMPONENT_TYPES.TIMELINE:

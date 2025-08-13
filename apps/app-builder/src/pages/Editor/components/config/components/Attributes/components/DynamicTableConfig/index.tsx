@@ -8,6 +8,7 @@ import styles from '../../index.module.less';
 const FormItem = Form.Item;
 
 export interface DynamicTableConfigProps {
+  handleMultiPropsChange: (updates: { key: string; value: string | number | boolean | any[] }[]) => void;
   handlePropsChange: (key: string, value: string | number | boolean | any[]) => void;
   item: any;
   configs: any;
@@ -18,7 +19,13 @@ export interface DynamicTableConfigProps {
  * 动态下拉选择组件
  * @param props 组件属性
  */
-const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({ handlePropsChange, item, configs, id }) => {
+const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
+  handleMultiPropsChange,
+  handlePropsChange,
+  item,
+  configs,
+  id
+}) => {
   const [entityList, setEntityList] = useState<MetadataEntityPair[]>([]);
   const [entityId, setEntityId] = useState<string>('');
   const [fieldList, setFieldList] = useState<MetadataEntityField[]>([]);
@@ -45,7 +52,6 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({ handlePropsChan
   useEffect(() => {
     if (entityId) {
       getFieldList();
-      //   handlePropsChange(searchItemsKey, []);
     }
   }, [entityId]);
 
@@ -68,8 +74,8 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({ handlePropsChan
   }, [fieldList, searchItemsConfig]);
 
   const getEntityList = async () => {
+    // TODO(mickey): 获取当前应用的实体列表
     const res = await getEntityListByApp('1');
-    console.log('res: ', res);
 
     setEntityList(res);
   };
@@ -99,7 +105,12 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({ handlePropsChan
           value={configs[item.key]}
           onChange={(value) => {
             setEntityId(value);
-            handlePropsChange(item.key, value);
+
+            setSearchItemsConfig([]);
+            handleMultiPropsChange([
+              { key: item.key, value: value },
+              { key: searchItemsKey, value: [] }
+            ]);
           }}
         >
           {entityList.map((item) => (

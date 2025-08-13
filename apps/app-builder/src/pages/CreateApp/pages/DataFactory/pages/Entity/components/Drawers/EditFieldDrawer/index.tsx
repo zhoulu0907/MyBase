@@ -2,6 +2,7 @@ import { ENTITY_FIELD_TYPE } from '@/pages/CreateApp/pages/DataFactory/utils/con
 import { Button, Checkbox, Drawer, Form, Input, Message, Select, Space, Spin } from '@arco-design/web-react';
 import { getFieldById, updateField } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
+import { useAppStore } from '@/store';
 import styles from './EditFieldDrawer.module.less';
 
 interface FieldDetail {
@@ -29,6 +30,7 @@ interface EditFieldDrawerProps {
 }
 
 const EditFieldDrawer: React.FC<EditFieldDrawerProps> = ({ visible, setVisible, fieldId, onSuccess }) => {
+  const { curAppId } = useAppStore();
   const [form] = Form.useForm();
   const [fieldDetail, setFieldDetail] = useState<FieldDetail | null>(null);
   const [loading, setLoading] = useState(false);
@@ -101,7 +103,7 @@ const EditFieldDrawer: React.FC<EditFieldDrawerProps> = ({ visible, setVisible, 
       }
 
       const updateData = {
-        appId: '1',
+        appId: curAppId,
         id: fieldDetail.id,
         entityId: fieldDetail.entityId,
         fieldCode: values.fieldCode,

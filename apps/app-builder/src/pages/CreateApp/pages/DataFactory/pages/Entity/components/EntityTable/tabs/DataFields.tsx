@@ -4,6 +4,7 @@ import type { TableColumnProps } from '@arco-design/web-react';
 import { Button, Message, Modal, Space, Table, Tag } from '@arco-design/web-react';
 import { deleteField, getEntityFieldsPage } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
+import { useAppStore } from '@/store';
 import EditFieldDrawer from '../../Drawers/EditFieldDrawer';
 import ConfigFieldModal from '../../Modals/ConfigFieldModal';
 import styles from './tabs.module.less';
@@ -14,6 +15,7 @@ interface DataFieldsProps {
 }
 
 const DataFields: React.FC<DataFieldsProps> = ({ entity, activeTab }) => {
+  const { curAppId } = useAppStore();
   const [fields, setFields] = useState([]);
   const [loading, setLoading] = useState(false);
   const [editDrawerVisible, setEditDrawerVisible] = useState(false);
@@ -30,7 +32,7 @@ const DataFields: React.FC<DataFieldsProps> = ({ entity, activeTab }) => {
         entityId: entity.id,
         pageNo: page.pageNo,
         pageSize: page.pageSize,
-        appId: '1'
+        appId: curAppId
       };
       const response = await getEntityFieldsPage(params);
       console.log('getEntityFields', response);
