@@ -1,6 +1,7 @@
+import { useAppDataStore } from '@/store';
 import { Button, Checkbox, Dropdown, Form, Input, InputNumber, Menu, Message, Select } from '@arco-design/web-react';
 import { IconDelete, IconDragDotVertical } from '@arco-design/web-react/icon';
-import { getEntityFields, getEntityListByApp, type MetadataEntityField, type MetadataEntityPair } from '@onebase/app';
+import { getEntityFields, type MetadataEntityField, type MetadataEntityPair } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import styles from '../../index.module.less';
@@ -26,6 +27,8 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
   configs,
   id
 }) => {
+  const { mainEntity } = useAppDataStore();
+
   const [entityList, setEntityList] = useState<MetadataEntityPair[]>([]);
   const [entityId, setEntityId] = useState<string>('');
   const [fieldList, setFieldList] = useState<MetadataEntityField[]>([]);
@@ -45,8 +48,6 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
     if (configs[item.key]) {
       setEntityId(configs[item.key]);
     }
-
-    getEntityList();
   }, []);
 
   useEffect(() => {
@@ -54,6 +55,18 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
       getFieldList();
     }
   }, [entityId]);
+
+  useEffect(() => {
+    console.log(mainEntity);
+    if (mainEntity) {
+      setEntityList([
+        {
+          entityId: mainEntity.entityID,
+          entityName: mainEntity.entityName
+        }
+      ]);
+    }
+  }, [mainEntity]);
 
   useEffect(() => {
     const res =
@@ -72,13 +85,6 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
 
     setEnableAddSearchItem(res);
   }, [fieldList, searchItemsConfig]);
-
-  const getEntityList = async () => {
-    // TODO(mickey): 获取当前应用的实体列表
-    const res = await getEntityListByApp('1');
-
-    setEntityList(res);
-  };
 
   const getFieldList = async () => {
     const res = await getEntityFields({ entityId });
@@ -99,7 +105,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
 
   return (
     <>
-      <FormItem layout="horizontal" labelAlign="left" label={item.name} className={styles.formItem}>
+      <FormItem layout="vertical" labelAlign="left" label={item.name} className={styles.formItem}>
         <Select
           placeholder={`请选择${item.name}`}
           value={configs[item.key]}
@@ -332,10 +338,6 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
                         };
                         setSearchItemsConfig(newList);
                         handlePropsChange(searchItemsKey, newList);
-
-                        console.log(e);
-                        console.log(option.children);
-                        console.log(searchItemsConfig);
                       }}
                       className={styles.tableColumnItemInput}
                       options={configs['columns']
