@@ -2,6 +2,7 @@ import { Graph } from '@antv/x6';
 import React, { useEffect, useRef, useState } from 'react';
 // import { ReactShape } from '@antv/x6-react-shape';
 import { register } from '@antv/x6-react-shape';
+import { Button, InputNumber } from '@arco-design/web-react';
 import DetailDrawer from '../Drawers/DetailDrawer';
 // import EditDrawer from '../Drawer/EditDrawer';
 import { type EntityNode, type EntityERProps } from '../../../../utils/interface';
@@ -35,6 +36,7 @@ const ERchart: React.FC<EntityERProps> = ({
   const graphRef = useRef<Graph | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const isGraphInitialized = useRef(false); // 标记是否已初始化
+  const [zoom, setZoom] = useState(100);
 
   useEffect(() => {
     // 注册 React 形状节点
@@ -114,13 +116,16 @@ const ERchart: React.FC<EntityERProps> = ({
             edgeLabelMovable: mode === 'edit'
           },
           panning: true, // 支持拖拽平移
-          mousewheel: true // 支持鼠标滚轮缩放
-          // zooming: true, // 支持缩放
-          // zoomingOptions: {
-          //   min: 0.5,
-          //   max: 2,
-          //   step: 0.1,
-          // },
+          // 支持鼠标滚轮缩放
+          mousewheel: {
+            enabled: true,
+            modifiers: ['ctrl'] // 修饰键：按 Ctrl 键+鼠标滚轮实现缩放
+          },
+          // 缩放级别
+          scaling: {
+            min: 0.6,
+            max: 1.5
+          }
         });
       } catch (error) {
         console.error('Failed to create graph:', error);
@@ -397,9 +402,40 @@ const ERchart: React.FC<EntityERProps> = ({
     }
   }, [data]);
 
+  // 重置缩放
+  const resetZoom = () => {
+    setZoom(100);
+    graphRef?.current?.zoomTo(1);
+  };
+
+  // 改变缩放
+  const changeZoom = (value: number) => {
+    setZoom(value);
+    graphRef?.current?.zoomTo(value / 100);
+  };
+
   return (
     <div className={styles['entity-er-container']}>
       <div ref={containerRef} className={styles['graph-container']} />
+
+      {/* 工具栏 */}
+      <div className={styles['toolbar']}>
+        <InputNumber
+          mode="button"
+          size="mini"
+          suffix="%"
+          max={150}
+          min={60}
+          step={5}
+          defaultValue={100}
+          className={styles['zoom-input']}
+          value={zoom}
+          onChange={(value) => changeZoom(value)}
+        />
+        <Button type="outline" size="mini" onClick={() => resetZoom()}>
+          重置
+        </Button>
+      </div>
 
       {/* 节点详情抽屉 */}
       <DetailDrawer selectedNode={selectedNode as EntityNode} visible={drawerVisible} setVisible={setDrawerVisible} />
