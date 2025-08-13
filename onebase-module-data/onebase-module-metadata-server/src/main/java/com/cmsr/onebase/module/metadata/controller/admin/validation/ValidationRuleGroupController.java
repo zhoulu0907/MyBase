@@ -41,7 +41,7 @@ public class ValidationRuleGroupController {
         return success(validationRuleGroupService.createValidationRuleGroup(createReqVO));
     }
 
-    @PutMapping("/update")
+    @PostMapping("/update")
     @Operation(summary = "更新校验规则分组")
     @PreAuthorize("@ss.hasPermission('metadata:validation-rule-group:update')")
     public CommonResult<Boolean> updateValidationRuleGroup(@Valid @RequestBody ValidationRuleGroupSaveReqVO updateReqVO) {
@@ -49,7 +49,7 @@ public class ValidationRuleGroupController {
         return success(true);
     }
 
-    @DeleteMapping("/delete")
+    @PostMapping("/delete")
     @Operation(summary = "删除校验规则分组")
     @Parameter(name = "id", description = "编号", required = true)
     @PreAuthorize("@ss.hasPermission('metadata:validation-rule-group:delete')")
@@ -58,7 +58,7 @@ public class ValidationRuleGroupController {
         return success(true);
     }
 
-    @GetMapping("/get")
+    @PostMapping("/get")
     @Operation(summary = "获得校验规则分组")
     @Parameter(name = "id", description = "编号", required = true, example = "1024")
     @PreAuthorize("@ss.hasPermission('metadata:validation-rule-group:query')")
@@ -72,10 +72,10 @@ public class ValidationRuleGroupController {
         return success(respVO);
     }
 
-    @GetMapping("/page")
+    @PostMapping("/page")
     @Operation(summary = "获得校验规则分组分页")
     @PreAuthorize("@ss.hasPermission('metadata:validation-rule-group:query')")
-    public CommonResult<PageResult<ValidationRuleGroupRespVO>> getValidationRuleGroupPage(@Valid ValidationRuleGroupPageReqVO pageReqVO) {
+    public CommonResult<PageResult<ValidationRuleGroupRespVO>> getValidationRuleGroupPage(@Valid @RequestBody ValidationRuleGroupPageReqVO pageReqVO) {
         PageResult<MetadataValidationRuleGroupDO> pageResult = validationRuleGroupService.getValidationRuleGroupPage(pageReqVO);
         return success(ValidationRuleGroupConvert.INSTANCE.convertPage(pageResult));
     }
