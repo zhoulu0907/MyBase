@@ -391,11 +391,39 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
         log.info("使用ConfigStore查询表: {}", entity.getTableName());
         log.info("ConfigStore配置: {}", configs.toString());
 
-        // 使用临时服务执行查询
-        DataSet dataSet = temporaryService.querys(entity.getTableName(), configs);
+        // 先获取总记录数（创建不包含分页限制的配置）
+        ConfigStore countConfigs = new DefaultConfigStore();
+        
+        // 为count查询复制相同的查询条件
+        if (reqVO.getFilters() != null && !reqVO.getFilters().isEmpty()) {
+            Set<String> existingFieldNames = fields.stream()
+                    .map(MetadataEntityFieldDO::getFieldName)
+                    .collect(Collectors.toSet());
+            
+            for (Map.Entry<String, Object> entry : reqVO.getFilters().entrySet()) {
+                String fieldName = entry.getKey();
+                Object fieldValue = entry.getValue();
+                
+                if ("deleted".equalsIgnoreCase(fieldName) || "tenant_id".equalsIgnoreCase(fieldName)) {
+                    continue;
+                }
+                
+                if (fieldValue != null && existingFieldNames.contains(fieldName)) {
+                    countConfigs.and(Compare.EQUAL, fieldName, fieldValue);
+                }
+            }
+        }
+        
+        // 添加软删除条件
+        if (hasDeletedField) {
+            countConfigs.and(Compare.EQUAL, "deleted", "0");
+        }
+        
+        long total = temporaryService.count(entity.getTableName(), countConfigs);
+        log.info("查询总记录数: {}", total);
 
-        // 获取总记录数和当前页数据
-        long total = dataSet.total();  // ConfigStore分页后会自动设置总数
+        // 使用临时服务执行分页查询
+        DataSet dataSet = temporaryService.querys(entity.getTableName(), configs);
         
         // 转换结果
         List<DynamicDataRespVO> list = new ArrayList<>();
