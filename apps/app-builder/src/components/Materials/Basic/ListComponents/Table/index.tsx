@@ -1,8 +1,10 @@
 import { STATUS_OPTIONS, STATUS_VALUES } from '@/components/Materials/constants';
 import { Button, Form, Input, Table } from '@arco-design/web-react';
-import { IconDelete, IconDown, IconEdit } from '@arco-design/web-react/icon';
+import { IconDelete, IconEdit } from '@arco-design/web-react/icon';
 import { memo, useEffect, useState } from 'react';
 
+import { EDITOR_TYPES } from '@/pages/Editor/utils/const';
+import { useNavigate } from 'react-router-dom';
 import styles from './index.module.less';
 import type { XTableConfig } from './schema';
 
@@ -19,6 +21,8 @@ const opearate: any = {
   )
 };
 const XTable = memo((props: XTableConfig) => {
+  const navigate = useNavigate();
+
   const {
     label,
     status,
@@ -57,6 +61,17 @@ const XTable = memo((props: XTableConfig) => {
     }
   }, [showOpearate, columns, fixedOpearate]);
 
+  const handleCreate = () => {
+    const hash = window.location.hash;
+    const queryIndex = hash.indexOf('?');
+    if (queryIndex !== -1) {
+      const queryString = hash.substring(queryIndex + 1);
+      const params = new URLSearchParams(queryString);
+      const pageSetCode = params.get('pageSetCode') || '';
+      navigate(`/onebase/preview-app/preview?pageSetCode=${pageSetCode}&pageType=${EDITOR_TYPES.FORM_EDITOR}`);
+    }
+  };
+
   return (
     <div
       style={{
@@ -72,8 +87,7 @@ const XTable = memo((props: XTableConfig) => {
               label={
                 <div
                   style={{
-                    width: '50px',
-                    textAlign: 'left',
+                    textAlign: 'right',
                     whiteSpace: 'nowrap',
                     overflow: 'hidden',
                     textOverflow: 'ellipsis'
@@ -83,7 +97,8 @@ const XTable = memo((props: XTableConfig) => {
                 </div>
               }
               style={{
-                width: '200px',
+                minWidth: '280px',
+                maxWidth: '400px',
                 marginBottom: 0
               }}
               layout={'horizontal'}
@@ -96,7 +111,10 @@ const XTable = memo((props: XTableConfig) => {
         <div className={styles.tableHeaderButton}>
           <Button type="primary">查询</Button>
           <Button type="primary">重置</Button>
-          <Button
+          <Button type="primary" onClick={handleCreate}>
+            新增
+          </Button>
+          {/* <Button
             type="outline"
             style={{
               border: 'none'
@@ -104,7 +122,7 @@ const XTable = memo((props: XTableConfig) => {
           >
             <IconDown />
             <span>展开</span>
-          </Button>
+          </Button> */}
         </div>
       </div>
       <div>

@@ -1,8 +1,8 @@
 import {
     baseConfig,
     baseDefault,
-    metaDataConfig,
     statusConfig,
+    tableMetaDataConfig,
     widthConfig,
     type ICommonBaseType,
     type TPagePositionSelectKeyType,
@@ -185,7 +185,7 @@ const XTable: XTableSchema = {
       name: '标题',
       type: CONFIG_TYPES.LABEL_INPUT
     },
-    metaDataConfig,
+    tableMetaDataConfig,
     // keyDataConfig,
     // {
     //   key: 'columns',
@@ -269,78 +269,78 @@ const XTable: XTableSchema = {
     pagePosition: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.BR],
     pageSize: 5,
     defaultValue: [
-      {
-        key: '1',
-        name: 'Jane Doe',
-        salary: 23000,
-        address: '32 Park Road, London',
-        email: 'jane.doe@example.com',
-        gender: 'male'
-      },
-      {
-        key: '2',
-        name: 'Alisa Ross',
-        salary: 25000,
-        address: '35 Park Road, London',
-        email: 'alisa.ross@example.com',
-        gender: 'male'
-      },
-      {
-        key: '3',
-        name: 'Kevin Sandra',
-        salary: 22000,
-        address: '31 Park Road, London',
-        email: 'kevin.sandra@example.com',
-        gender: 'male'
-      },
-      {
-        key: '4',
-        name: 'Kevin Sandra',
-        salary: 22000,
-        address: '31 Park Road, London',
-        email: 'kevin.sandra@example.com',
-        gender: 'male'
-      },
-      {
-        key: '5',
-        name: 'Kevin Sandra',
-        salary: 22000,
-        address: '31 Park Road, London',
-        email: 'kevin.sandra@example.com',
-        gender: 'male'
-      },
-      {
-        key: '6',
-        name: 'Kevin Sandra',
-        salary: 22000,
-        address: '31 Park Road, London',
-        email: 'kevin.sandra@example.com',
-        gender: 'male'
-      }
+    //   {
+    //     key: '1',
+    //     name: 'Jane Doe',
+    //     salary: 23000,
+    //     address: '32 Park Road, London',
+    //     email: 'jane.doe@example.com',
+    //     gender: 'male'
+    //   },
+    //   {
+    //     key: '2',
+    //     name: 'Alisa Ross',
+    //     salary: 25000,
+    //     address: '35 Park Road, London',
+    //     email: 'alisa.ross@example.com',
+    //     gender: 'male'
+    //   },
+    //   {
+    //     key: '3',
+    //     name: 'Kevin Sandra',
+    //     salary: 22000,
+    //     address: '31 Park Road, London',
+    //     email: 'kevin.sandra@example.com',
+    //     gender: 'male'
+    //   },
+    //   {
+    //     key: '4',
+    //     name: 'Kevin Sandra',
+    //     salary: 22000,
+    //     address: '31 Park Road, London',
+    //     email: 'kevin.sandra@example.com',
+    //     gender: 'male'
+    //   },
+    //   {
+    //     key: '5',
+    //     name: 'Kevin Sandra',
+    //     salary: 22000,
+    //     address: '31 Park Road, London',
+    //     email: 'kevin.sandra@example.com',
+    //     gender: 'male'
+    //   },
+    //   {
+    //     key: '6',
+    //     name: 'Kevin Sandra',
+    //     salary: 22000,
+    //     address: '31 Park Road, London',
+    //     email: 'kevin.sandra@example.com',
+    //     gender: 'male'
+    //   }
     ],
     columns: [
-      {
-        title: '姓名',
-        dataIndex: 'name',
-        fixed: 'left',
-        width: 140
-      },
-      {
-        title: '工资',
-        dataIndex: 'salary'
-      },
-      {
-        title: '地址',
-        dataIndex: 'address'
-      },
-      {
-        title: '邮箱',
-        dataIndex: 'email'
-      },
-      {
-        title: '性别',
-        dataIndex: 'gender'
-      }
+    //   {
+    //     title: '姓名',
+    //     dataIndex: 'name',
+    //     fixed: 'left',
+    //     width: 140
+    //   },
+    //   {
+    //     title: '工资',
+    //     dataIndex: 'salary'
+    //   },
+    //   {
+    //     title: '地址',
+    //     dataIndex: 'address'
+    //   },
+    //   {
+    //     title: '邮箱',
+    //     dataIndex: 'email'
+    //   },
+    //   {
+    //     title: '性别',
+    //     dataIndex: 'gender'
+    //   }
     ],
     searchItems: [
       // {

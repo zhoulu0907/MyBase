@@ -17,6 +17,7 @@ import {
 } from './constants';
 import type {
     IAlignConfigType,
+    IDataFieldConfigType,
     IDateTypeConfigType,
     ILabelColSpanConfigType,
     ILayoutConfigType,
@@ -247,7 +248,13 @@ export const pagePositionConfig: ISelectConfigType<TPagePositionSelectKeyType> =
   ]
 };
 
-export const metaDataConfig: ITableDataConfigType = {
+export const dataFieldConfig: IDataFieldConfigType = {
+  key: 'dataField',
+  name: '数据字段',
+  type: CONFIG_TYPES.FIELD_DATA
+};
+
+export const tableMetaDataConfig: ITableDataConfigType = {
   key: 'metaData',
   name: '数据',
   type: CONFIG_TYPES.TABLE_DATA

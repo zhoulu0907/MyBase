@@ -1,6 +1,6 @@
-import { Button, Checkbox, Form, Input, InputNumber, Message, Select } from '@arco-design/web-react';
+import { Button, Checkbox, Dropdown, Form, Input, InputNumber, Menu, Message, Select } from '@arco-design/web-react';
 import { IconDelete, IconDragDotVertical } from '@arco-design/web-react/icon';
-import { getEntityListByApp, type MetadataEntityPair } from '@onebase/app';
+import { getEntityFields, getEntityListByApp, type MetadataEntityField, type MetadataEntityPair } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import styles from '../../index.module.less';
@@ -19,22 +19,67 @@ export interface DynamicTableConfigProps {
  */
 const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({ handlePropsChange, item, configs }) => {
   const [entityList, setEntityList] = useState<MetadataEntityPair[]>([]);
+  const [entityId, setEntityId] = useState<string>('');
+  const [fieldList, setFieldList] = useState<MetadataEntityField[]>([]);
   const columnsKey = 'columns';
   const searchItemsKey = 'searchItems';
 
-  const columnsConfig = configs[columnsKey] || [];
-  const searchItemsConfig = configs[searchItemsKey] || [];
+  const [columnsConfig, setColumnsConfig] = useState<any[]>(configs[columnsKey] || []);
+  const [searchItemsConfig, setSearchItemsConfig] = useState<any[]>(configs[searchItemsKey] || []);
+
+  const [enableAddColumn, setEnableAddColumn] = useState<boolean>(false);
+  const [enableAddSearchItem, setEnableAddSearchItem] = useState<boolean>(false);
 
   useEffect(() => {
     console.log(item);
     getEntityList();
   }, []);
 
+  useEffect(() => {
+    if (entityId) {
+      getFieldList();
+      setSearchItemsConfig([]);
+      handlePropsChange(searchItemsKey, []);
+    }
+  }, [entityId]);
+
+  useEffect(() => {
+    setEnableAddColumn(
+      fieldList
+        .filter((item: MetadataEntityField) => !item.isSystemField)
+        .filter((item: MetadataEntityField) => !columnsConfig.some((col: any) => col.dataIndex === item.fieldName))
+        .length > 0
+    );
+  }, [fieldList, columnsConfig]);
+
+  useEffect(() => {
+    setEnableAddSearchItem(
+      fieldList
+        .filter((item: MetadataEntityField) => !item.isSystemField)
+        .filter((item: MetadataEntityField) => !searchItemsConfig.some((col: any) => col.value === item.fieldName))
+        .length > 0
+    );
+  }, [fieldList, searchItemsConfig]);
+
   const getEntityList = async () => {
     const res = await getEntityListByApp('1');
     console.log('res: ', res);
 
     setEntityList(res);
+  };
+
+  const getFieldList = async () => {
+    const res = await getEntityFields({ entityId });
+    console.log('res: ', res);
+    setFieldList(res);
+
+    const newColumns = res
+      .filter((item: MetadataEntityField) => !item.isSystemField)
+      .map((item: MetadataEntityField) => ({ title: item.displayName, dataIndex: item.fieldName }));
+
+    console.log('newColumns: ', newColumns);
+    setColumnsConfig(newColumns);
+    handlePropsChange(columnsKey, newColumns);
   };
 
   return (
@@ -44,6 +89,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({ handlePropsChan
           placeholder={`请选择${item.name}`}
           value={configs[item.key]}
           onChange={(value) => {
+            setEntityId(value);
             handlePropsChange(item.key, value);
           }}
         >
@@ -57,7 +103,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({ handlePropsChan
 
       {/* 表头配置 */}
       <FormItem layout="vertical" labelAlign="left" label={'表头配置'} className={styles.formItem}>
-        <Form.List initialValue={configs[columnsKey] || []} field={columnsKey}>
+        <Form.List initialValue={configs[columnsKey]} field={columnsKey}>
           {(_fields, { add, remove }) => (
             <div className={styles.tableColumnList}>
               <ReactSortable
@@ -72,6 +118,9 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({ handlePropsChan
                 className={styles.componentCollapseContent}
                 forceFallback={true}
                 animation={150}
+                onAdd={(e) => {
+                  console.log('onAdd: ', e);
+                }}
                 onSort={(e) => {
                   console.log(e);
                   const newList = [...columnsConfig];
@@ -107,9 +156,10 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({ handlePropsChan
                         const newList = [...columnsConfig];
                         newList[idx] = {
                           ...newList[idx],
-                          title: e,
-                          dataIndex: e
+                          title: e
+                          //   dataIndex: e
                         };
+                        setColumnsConfig(newList);
                         handlePropsChange(columnsKey, newList);
                       }}
                       className={styles.tableColumnItemInput}
@@ -128,6 +178,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({ handlePropsChan
                           ...newList[idx],
                           width: e
                         };
+                        setColumnsConfig(newList);
                         handlePropsChange(columnsKey, newList);
                       }}
                       // TODO(mickey): 国际化
@@ -146,6 +197,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({ handlePropsChan
                           ...newList[idx],
                           fixed: e ? 'left' : false
                         };
+                        setColumnsConfig(newList);
                         handlePropsChange(columnsKey, newList);
                       }}
                     >
@@ -160,23 +212,45 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({ handlePropsChan
                       onClick={() => {
                         const newList = [...columnsConfig];
                         newList.splice(idx, 1);
-                        handlePropsChange(item.key, newList);
+                        setColumnsConfig(newList);
+                        handlePropsChange(columnsKey, newList);
                         remove(idx);
                       }}
                     ></Button>
                   </div>
                 ))}
               </ReactSortable>
-              <Button
-                type="outline"
-                onClick={() => {
-                  const newList = [...columnsConfig, { title: '', dataIndex: '' }];
-                  add({ title: '', dataIndex: '' });
-                  handlePropsChange(columnsKey, newList);
-                }}
+
+              <Dropdown
+                position={'tl'}
+                trigger="click"
+                droplist={
+                  <Menu>
+                    {fieldList
+                      .filter((item: MetadataEntityField) => !item.isSystemField)
+                      .filter(
+                        (item: MetadataEntityField) =>
+                          !columnsConfig.some((col: any) => col.dataIndex === item.fieldName)
+                      )
+                      .map((item: MetadataEntityField) => (
+                        <Menu.Item
+                          key={item.fieldName}
+                          onClick={() => {
+                            const newList = [...columnsConfig, { title: item.displayName, dataIndex: item.fieldName }];
+                            setColumnsConfig(newList);
+                            handlePropsChange(columnsKey, newList);
+                          }}
+                        >
+                          {item.displayName}
+                        </Menu.Item>
+                      ))}
+                  </Menu>
+                }
               >
-                新增列
-              </Button>
+                <Button type={enableAddColumn ? 'outline' : 'secondary'} disabled={!enableAddColumn}>
+                  新增列
+                </Button>
+              </Dropdown>
             </div>
           )}
         </Form.List>
@@ -184,12 +258,12 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({ handlePropsChan
 
       {/* 搜索项 */}
       <FormItem layout="vertical" labelAlign="left" label={'搜索项'} className={styles.formItem}>
-        <Form.List initialValue={configs[searchItemsKey]} field={item.key}>
+        <Form.List initialValue={configs[searchItemsKey]} field={searchItemsKey}>
           {(_fields, { add, remove }) => (
             <div className={styles.tableColumnList}>
               <ReactSortable
                 list={searchItemsConfig}
-                setList={() => {}}
+                setList={setSearchItemsConfig}
                 group={{
                   name: 'table-col-item'
                 }}
@@ -213,11 +287,11 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({ handlePropsChan
                     // 插入到新位置
                     movedList.splice(newIndex, 0, movedItem);
                     // 更新属性
-                    handlePropsChange(item.key, movedList);
+                    handlePropsChange(searchItemsKey, movedList);
                   }
                 }}
               >
-                {configs[searchItemsKey].map((_col: any, idx: number) => (
+                {searchItemsConfig.map((_col: any, idx: number) => (
                   <div key={idx} className={styles.tableColumnItem}>
                     <IconDragDotVertical
                       // 支持拖拽的图标，别误删了：）
@@ -229,9 +303,9 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({ handlePropsChan
                     />
                     <Select
                       size="small"
-                      value={configs[searchItemsKey][idx].label}
+                      value={searchItemsConfig[idx].label}
                       onChange={(e, option: any) => {
-                        const newList = [...configs[searchItemsKey]];
+                        const newList = [...searchItemsConfig];
                         newList[idx] = {
                           ...newList[idx],
                           label: option.children,
@@ -242,7 +316,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({ handlePropsChan
 
                         console.log(e);
                         console.log(option.children);
-                        console.log(configs[searchItemsKey]);
+                        console.log(searchItemsConfig);
                       }}
                       className={styles.tableColumnItemInput}
                       placeholder={`请输入第${idx + 1}项`}
@@ -266,23 +340,48 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({ handlePropsChan
                       onClick={() => {
                         const newList = [...searchItemsConfig];
                         newList.splice(idx, 1);
-                        handlePropsChange(searchItemsKey, newList);
+
                         remove(idx);
+                        setSearchItemsConfig(newList);
+                        handlePropsChange(searchItemsKey, newList);
                       }}
                     ></Button>
                   </div>
                 ))}
               </ReactSortable>
-              <Button
-                type="outline"
-                onClick={() => {
-                  const newList = [...searchItemsConfig, { label: '', value: '' }];
-                  add({ label: '', value: '' });
-                  handlePropsChange(searchItemsKey, newList);
-                }}
+
+              <Dropdown
+                position={'tl'}
+                trigger="click"
+                droplist={
+                  <Menu>
+                    {fieldList
+                      .filter((item: MetadataEntityField) => !item.isSystemField)
+                      .filter(
+                        (item: MetadataEntityField) =>
+                          !searchItemsConfig.some((col: any) => col.value === item.fieldName)
+                      )
+                      .map((item: MetadataEntityField) => (
+                        <Menu.Item
+                          key={item.fieldName}
+                          onClick={() => {
+                            const newList = [...searchItemsConfig, { label: item.displayName, value: item.fieldName }];
+                            console.log('newList: ', newList);
+                            add({ label: item.displayName, value: item.fieldName });
+                            setSearchItemsConfig(newList);
+                            handlePropsChange(searchItemsKey, newList);
+                          }}
+                        >
+                          {item.displayName}
+                        </Menu.Item>
+                      ))}
+                  </Menu>
+                }
               >
-                新增搜索项
-              </Button>
+                <Button type={enableAddSearchItem ? 'outline' : 'secondary'} disabled={!enableAddSearchItem}>
+                  新增搜索项
+                </Button>
+              </Dropdown>
             </div>
           )}
         </Form.List>

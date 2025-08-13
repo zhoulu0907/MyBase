@@ -4,6 +4,7 @@ import { useI18n } from '@/hooks/useI18n';
 import { usePageEditorStore } from '@/hooks/useStore';
 import { ColorPicker, Form, Input, InputNumber, Radio, Switch } from '@arco-design/web-react';
 import { useEffect, useState } from 'react';
+import DynamicFieldConfig from './components/DynamicFieldConfig';
 import DynamicTableConfig from './components/DynamicTableConfig';
 import styles from './index.module.less';
 
@@ -91,7 +92,11 @@ const Attributes = ({ cpID }: ConfigsProps) => {
           </FormItem>
 
           {editData.map((item: any, index: number) => {
-            if (item.type !== CONFIG_TYPES.SWITCH_INPUT && item.type !== CONFIG_TYPES.TABLE_DATA) {
+            if (
+              item.type !== CONFIG_TYPES.SWITCH_INPUT &&
+              item.type !== CONFIG_TYPES.TABLE_DATA &&
+              item.type !== CONFIG_TYPES.FIELD_DATA
+            ) {
               return (
                 <FormItem label={item.name} key={index} className={styles.formItem}>
                   {(item.type === CONFIG_TYPES.TEXT_INPUT ||
@@ -239,240 +244,12 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                       }}
                     />
                   )}
-                  {/* {item.type === CONFIG_TYPES.TABLE_COLUMN_LIST && (
-                    <Form.List initialValue={configs[item.key] || []} field={item.key}>
-                      {(_fields, { add, remove }) => (
-                        <div className={styles.tableColumnList}>
-                          <ReactSortable
-                            list={configs[item.key]}
-                            setList={() => {}}
-                            group={{
-                              name: 'table-col-item'
-                            }}
-                            swap
-                            sort={true}
-                            handle=".table-col-item-handle"
-                            className={styles.componentCollapseContent}
-                            forceFallback={true}
-                            animation={150}
-                            onSort={(e) => {
-                              console.log(e);
-                              const newList = [...(configs[item.key] || [])];
-                              // 根据 onSort 事件中的 oldIndex 和 newIndex 交换数组元素
-                              const { oldIndex, newIndex } = e;
-                              console.log(oldIndex, newIndex);
-                              if (oldIndex !== undefined && newIndex !== undefined && oldIndex !== newIndex) {
-                                // 复制一份新数组
-                                const movedList = [...newList];
-                                // 取出被移动的元素
-                                const [movedItem] = movedList.splice(oldIndex, 1);
-                                // 插入到新位置
-                                movedList.splice(newIndex, 0, movedItem);
-                                // 更新属性
-                                handlePropsChange(item.key, movedList);
-                              }
-                            }}
-                          >
-                            {configs[item.key].map((_col: any, idx: number) => (
-                              <div key={idx} className={styles.tableColumnItem}>
-                                <IconDragDotVertical
-                                  // 支持拖拽的图标，别误删了：）
-                                  className="table-col-item-handle"
-                                  style={{
-                                    cursor: 'move',
-                                    color: '#555'
-                                  }}
-                                />
-                                <Input
-                                  size="small"
-                                  value={configs[item.key][idx].title}
-                                  onChange={(e) => {
-                                    const newList = [...(configs[item.key] || [])];
-                                    newList[idx] = {
-                                      ...newList[idx],
-                                      title: e,
-                                      dataIndex: e
-                                    };
-
-                                    handlePropsChange(item.key, newList);
-                                  }}
-                                  className={styles.tableColumnItemInput}
-                                  // TODO(mickey): 国际化
-                                  placeholder={`请输入第${idx + 1}项`}
-                                />
-                                <InputNumber
-                                  size="small"
-                                  max={500}
-                                  min={50}
-                                  value={configs[item.key][idx].width}
-                                  className={styles.tableColumnItemInput}
-                                  onChange={(e) => {
-                                    const newList = [...(configs[item.key] || [])];
-                                    newList[idx] = {
-                                      ...newList[idx],
-                                      width: e
-                                    };
-
-                                    handlePropsChange(item.key, newList);
-                                  }}
-                                  // TODO(mickey): 国际化
-                                  placeholder="宽度"
-                                />
-                                <Checkbox
-                                  checked={configs[item.key][idx].fixed || false}
-                                  onChange={(e) => {
-                                    const newList = [...(configs[item.key] || [])];
-                                    if (newList[idx].width === undefined) {
-                                      // TODO(mickey): 国际化
-                                      Message.error('请先设置宽度');
-                                      return;
-                                    }
-                                    newList[idx] = {
-                                      ...newList[idx],
-                                      fixed: e ? 'left' : false
-                                    };
-                                    handlePropsChange(item.key, newList);
-                                  }}
-                                >
-                                  固定
-                                </Checkbox>
-                                <Button
-                                  icon={<IconDelete />}
-                                  shape="circle"
-                                  size="mini"
-                                  status="danger"
-                                  className={styles.tableColumnItemButton}
-                                  onClick={() => {
-                                    const newList = [...(configs[item.key] || [])];
-                                    newList.splice(idx, 1);
-                                    handlePropsChange(item.key, newList);
-                                    remove(idx);
-                                  }}
-                                ></Button>
-                              </div>
-                            ))}
-                          </ReactSortable>
-                          <Button
-                            type="outline"
-                            onClick={() => {
-                              const newList = [...(configs[item.key] || []), { title: '', dataIndex: '' }];
-                              add({ title: '', dataIndex: '' });
-                              handlePropsChange(item.key, newList);
-                            }}
-                          >
-                            新增列
-                          </Button>
-                        </div>
-                      )}
-                    </Form.List>
-                  )}
-                  {item.type === CONFIG_TYPES.SEARCH_ITEM_LIST && (
-                    <Form.List initialValue={configs[item.key] || []} field={item.key}>
-                      {(_fields, { add, remove }) => (
-                        <div className={styles.tableColumnList}>
-                          <ReactSortable
-                            list={configs[item.key]}
-                            setList={() => {}}
-                            group={{
-                              name: 'table-col-item'
-                            }}
-                            swap
-                            sort={true}
-                            handle=".table-col-item-handle"
-                            className={styles.componentCollapseContent}
-                            forceFallback={true}
-                            animation={150}
-                            onSort={(e) => {
-                              console.log(e);
-                              const newList = [...(configs[item.key] || [])];
-                              // 根据 onSort 事件中的 oldIndex 和 newIndex 交换数组元素
-                              const { oldIndex, newIndex } = e;
-                              console.log(oldIndex, newIndex);
-                              if (oldIndex !== undefined && newIndex !== undefined && oldIndex !== newIndex) {
-                                // 复制一份新数组
-                                const movedList = [...newList];
-                                // 取出被移动的元素
-                                const [movedItem] = movedList.splice(oldIndex, 1);
-                                // 插入到新位置
-                                movedList.splice(newIndex, 0, movedItem);
-                                // 更新属性
-                                handlePropsChange(item.key, movedList);
-                              }
-                            }}
-                          >
-                            {configs[item.key].map((_col: any, idx: number) => (
-                              <div key={idx} className={styles.tableColumnItem}>
-                                <IconDragDotVertical
-                                  // 支持拖拽的图标，别误删了：）
-                                  className="table-col-item-handle"
-                                  style={{
-                                    cursor: 'move',
-                                    color: '#555'
-                                  }}
-                                />
-                                <Select
-                                  size="small"
-                                  value={configs[item.key][idx].label}
-                                  onChange={(e, option: any) => {
-                                    const newList = [...(configs[item.key] || [])];
-                                    newList[idx] = {
-                                      ...newList[idx],
-                                      label: option.children,
-                                      value: e
-                                    };
-
-                                    handlePropsChange(item.key, newList);
-
-                                    console.log(e);
-                                    console.log(option.children);
-                                    console.log(configs[item.key]);
-                                  }}
-                                  className={styles.tableColumnItemInput}
-                                  placeholder={`请输入第${idx + 1}项`}
-                                  options={configs['columns']
-                                    .filter(
-                                      (col: any) =>
-                                        // 过滤掉已在 configs[item.key] 中被选中的 dataIndex
-                                        !(configs[item.key] || []).some(
-                                          (selected: any) => selected.value === col.dataIndex
-                                        )
-                                    )
-                                    .map((item: any) => ({
-                                      label: item.title,
-                                      value: item.dataIndex
-                                    }))}
-                                />
-                                <Button
-                                  icon={<IconDelete />}
-                                  shape="circle"
-                                  size="mini"
-                                  status="danger"
-                                  className={styles.tableColumnItemButton}
-                                  onClick={() => {
-                                    const newList = [...(configs[item.key] || [])];
-                                    newList.splice(idx, 1);
-                                    handlePropsChange(item.key, newList);
-                                    remove(idx);
-                                  }}
-                                ></Button>
-                              </div>
-                            ))}
-                          </ReactSortable>
-                          <Button
-                            type="outline"
-                            onClick={() => {
-                              const newList = [...(configs[item.key] || []), { label: '', value: '' }];
-                              add({ label: '', value: '' });
-                              handlePropsChange(item.key, newList);
-                            }}
-                          >
-                            新增搜索项
-                          </Button>
-                        </div>
-                      )}
-                    </Form.List>
-                  )} */}
                 </FormItem>
+              );
+            }
+            if (item.type === CONFIG_TYPES.FIELD_DATA) {
+              return (
+                <DynamicFieldConfig key={index} handlePropsChange={handlePropsChange} item={item} configs={configs} />
               );
             }
 

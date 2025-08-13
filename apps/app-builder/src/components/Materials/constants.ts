@@ -31,11 +31,10 @@ export const CONFIG_TYPES = {
   COLUMN_COUNT_RADIO: 'ColumnCountRadio',
   // 表格分页位置选择
   TABLE_PAGE_POSITION_RADIO: 'TablePagePositionRadio',
+  // 字段数据配置
+  FIELD_DATA: 'FieldData',
   // 表格数据配置
   TABLE_DATA: 'TableData',
-//   // 表格列配置
-//   TABLE_COLUMN_LIST: 'TableColumnList',
-// SEARCH_ITEM_LIST: 'SearchItemList',
   // 表格分页数量
   TABLE_PAGE_SIZE: 'TablePageSize',
   // 图片、附件上传大小限制

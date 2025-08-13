@@ -1,6 +1,7 @@
 import { useFromEditorStore, useListEditorStore } from '@/store';
 import { Button, Form } from '@arco-design/web-react';
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import PreviewRender from '../../components/render/PreviewRender';
 import { getComponentWidth, startLoadPageSet } from '../../utils/app_resource';
 import { EDITOR_TYPES, type GridItem } from '../../utils/const';
@@ -9,6 +10,8 @@ import styles from './index.module.less';
 interface PreviewProps {}
 
 const Preview: React.FC<PreviewProps> = ({}) => {
+  const navigate = useNavigate();
+
   const {
     setComponents: setFromComponents,
     setPageComponentSchemas: setFromPageComponentSchemas,
@@ -41,7 +44,7 @@ const Preview: React.FC<PreviewProps> = ({}) => {
       setPageSetCode(pSetCode);
       setPageType(pType);
     }
-  }, []);
+  }, [window.location.hash]);
 
   useEffect(() => {
     console.log('pageSetCode', pageSetCode);
@@ -71,7 +74,7 @@ const Preview: React.FC<PreviewProps> = ({}) => {
     console.log('取消提交');
     form.resetFields();
 
-    // navigator()
+    navigate(`/onebase/preview-app/preview?pageSetCode=${pageSetCode}&pageType=${EDITOR_TYPES.LIST_EDITOR}`);
   };
 
   return (
@@ -119,12 +122,10 @@ const Preview: React.FC<PreviewProps> = ({}) => {
 
               <div className={styles.footer}>
                 <Button type="primary" onClick={submitForm}>
-                  {' '}
-                  提交{' '}
+                  提交
                 </Button>
                 <Button type="default" onClick={cancelSubmitForm}>
-                  {' '}
-                  取消{' '}
+                  取消
                 </Button>
               </div>
             </Form>

@@ -65,6 +65,12 @@ export interface IDynamicSelectConfigType {
   type: typeof CONFIG_TYPES.DYNAMIC_SELECT_INPUT;
 }
 
+export interface IDataFieldConfigType {
+    key: string;
+    name: string;
+    type:  typeof CONFIG_TYPES.FIELD_DATA;
+}
+
 export interface ITableDataConfigType {
     key: string;
     name: string;
