@@ -98,6 +98,7 @@ public class AppMenuServiceImpl implements AppMenuService {
         createPageSetDTO.setMenuCode(menuDO.getMenuCode());
         createPageSetDTO.setPageSetName(menuDO.getMenuName());
         createPageSetDTO.setDisplayName(menuDO.getMenuName());
+        createPageSetDTO.setMainMetadata(createReqVO.getEntityCode());
         pageSetService.createPageSet(createPageSetDTO);
         // 返回结果
         MenuCreateRespVO menuCreateRespVO = BeanUtils.toBean(menuDO, MenuCreateRespVO.class);
