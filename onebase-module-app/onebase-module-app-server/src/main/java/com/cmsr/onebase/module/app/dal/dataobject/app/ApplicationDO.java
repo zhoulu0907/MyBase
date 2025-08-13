@@ -13,14 +13,14 @@ import lombok.Data;
 @Table(name = "app_application")
 public class ApplicationDO extends TenantBaseDO {
 
+    @Column(name = "app_key", columnDefinition = "VARCHAR(256)", length = 256, comment = "应用key")
+    private String appKey;
+
     @Column(name = "app_name", columnDefinition = "VARCHAR(128) NOT NULL", nullable = false, length = 128, comment = "应用名称")
     private String appName;
 
     @Column(name = "app_code", columnDefinition = "VARCHAR(64) NOT NULL", nullable = false, length = 256, comment = "应用编码")
     private String appCode;
-
-    @Column(name = "app_domain", columnDefinition = "VARCHAR(256)", length = 256, comment = "应用域code")
-    private String appDomain;
 
     @Column(name = "app_mode", columnDefinition = "VARCHAR(32)", length = 32, comment = "应用模式")
     private String appMode;

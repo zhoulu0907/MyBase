@@ -17,11 +17,11 @@ public class ApplicationRespVO {
     @Schema(description = "应用Id")
     private Long id;
 
+    @Schema(description = "应用Key")
+    private String appKey;
+
     @Schema(description = "应用名称")
     private String appName;
-
-    @Schema(description = "应用域编码")
-    private String appDomain;
 
     @Schema(description = "应用编码")
     private String appCode;

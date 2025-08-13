@@ -46,9 +46,22 @@ public class AppApplicationRepository extends DataRepositoryNew<ApplicationDO> {
         return findOne(configs);
     }
 
+    public ApplicationDO findOneByKey(String key) {
+        ConfigStore configs = new DefaultConfigStore();
+        configs.eq("app_key", key);
+        return findOne(configs);
+    }
+
     public ApplicationDO findByAppCodeAndIdNot(String appCode, Long id) {
         ConfigStore configs = new DefaultConfigStore();
         configs.eq("app_code", appCode);
+        configs.ne("id", id);
+        return findOne(configs);
+    }
+
+    public ApplicationDO findByKeyAndIdNot(String key, Long id) {
+        ConfigStore configs = new DefaultConfigStore();
+        configs.eq("app_key", key);
         configs.ne("id", id);
         return findOne(configs);
     }
