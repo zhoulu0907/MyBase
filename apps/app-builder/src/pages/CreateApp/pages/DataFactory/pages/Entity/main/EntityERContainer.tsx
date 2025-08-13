@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-// import { Button, Space } from '@arco-design/web-react';
 import type {
   EdgeData,
   EntityData,
@@ -7,8 +6,10 @@ import type {
   EntityNode
 } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
 import { Button, Message } from '@arco-design/web-react';
-import EditDrawer from '../components/Drawers/EditEntityDrawer';
-import FieldDetailDrawer from '../components/Drawers/FieldDetailDrawer';
+import EditEntityDrawer from '../components/Drawers/EditEntityDrawer';
+import EditFieldDrawer from '../components/Drawers/EditFieldDrawer';
+import EditRelationDrawer from '../components/Drawers/EditRelationDrawer';
+// import FieldDetailDrawer from '../components/Drawers/FieldDetailDrawer';
 import ERchart from '../components/ERchart';
 import CreateEntityModal from '../components/Modals/CreateEntityModal';
 // import CreateFieldModal from '../components/Modals/CreateFieldModal';
@@ -46,9 +47,10 @@ export const EntityERContainer: React.FC<{
   const [createRelationModalVisible, setCreateRelationModalVisible] = useState(false);
   const [createMasterDetailModalVisible, setCreateMasterDetailModalVisible] = useState(false);
   const [updateRelationOptions, setUpdateRelationOptions] = useState(false);
-  const [fieldDetailDrawerVisible, setFieldDetailDrawerVisible] = useState(false);
+  const [editFieldDrawerVisible, setEditFieldDrawerVisible] = useState(false);
   const [selectedFieldId, setSelectedFieldId] = useState<string>('');
-
+  const [editRelationDrawerVisible, setEditRelationDrawerVisible] = useState(false);
+  const [relationData, setRelationData] = useState<EdgeData | null>(null);
   const loadEntityList = async () => {
     const res = await getEntityGraph(resouceId);
     console.log('loadEntityList', res);
@@ -67,7 +69,8 @@ export const EntityERContainer: React.FC<{
           return {
             source: { cell: item.sourceEntityId, port: item.sourceFieldId },
             target: { cell: item.targetEntityId, port: item.targetFieldId },
-            label: item.relationshipName
+            label: item.relationshipName,
+            relationshipId: item.relationshipId
           };
         })
       });
@@ -77,10 +80,12 @@ export const EntityERContainer: React.FC<{
   const handleNodeEdit = (editData: Partial<EntityNode>) => {
     console.log('节点编辑:', editData);
     setEditDrawerVisible(true);
+    setEditFieldDrawerVisible(false);
     setEditingNode(editData as unknown as EntityNode);
   };
 
   const handleNodeAddField = (node: EntityNode) => {
+    console.log('添加字段', node);
     setConfigFieldModalVisible(true);
     setNodedata(node as unknown as EntityNode);
   };
@@ -101,7 +106,8 @@ export const EntityERContainer: React.FC<{
   const handleFieldClick = (fieldId: string) => {
     console.log('字段点击:', fieldId);
     setSelectedFieldId(fieldId);
-    setFieldDetailDrawerVisible(true);
+    setEditDrawerVisible(false);
+    setEditFieldDrawerVisible(true);
   };
 
   const handleNodeDelete = (id: string) => {
@@ -153,6 +159,12 @@ export const EntityERContainer: React.FC<{
     setOnlyUpdateNode(false);
   };
 
+  const handleEdgeEdit = (data: EdgeData) => {
+    console.log('handleEdgeEdit', data);
+    setEditRelationDrawerVisible(true);
+    setRelationData(data);
+  };
+
   useEffect(() => {
     if (refreshEntityList) {
       loadEntityList();
@@ -185,6 +197,7 @@ export const EntityERContainer: React.FC<{
         onFieldClick={handleFieldClick}
         onlyUpdateNode={onlyUpdateNode}
         updateEntityPosition={handleUpdateEntityPosition}
+        onEdgeEdit={handleEdgeEdit}
       />
       <Button
         type="primary"
@@ -198,7 +211,7 @@ export const EntityERContainer: React.FC<{
       </Button>
 
       {/* 交互弹窗、抽屉、模态框 */}
-      <EditDrawer
+      <EditEntityDrawer
         visible={editDrawerVisible}
         setVisible={setEditDrawerVisible}
         editingNode={editingNode as EntityNode}
@@ -231,10 +244,17 @@ export const EntityERContainer: React.FC<{
         entity={nodedata as EntityNode}
         successCallback={handleSuccessCallback}
       />
-      <FieldDetailDrawer
-        visible={fieldDetailDrawerVisible}
-        setVisible={setFieldDetailDrawerVisible}
+      <EditRelationDrawer
+        visible={editRelationDrawerVisible}
+        setVisible={setEditRelationDrawerVisible}
+        relationData={relationData}
+        onSuccess={handleSuccessCallback}
+      />
+      <EditFieldDrawer
+        visible={editFieldDrawerVisible}
+        setVisible={setEditFieldDrawerVisible}
         fieldId={selectedFieldId}
+        onSuccess={handleSuccessCallback}
       />
       <DeleteConfirmModal
         visible={deleteModalVisible}

@@ -27,7 +27,7 @@ export interface CreateFieldReqVO {
   fieldName: string;
   description: string;
   fieldType: string;
-  isSystemField?: boolean;
+  isSystemField?: number;
   displayName: string;
 }
 

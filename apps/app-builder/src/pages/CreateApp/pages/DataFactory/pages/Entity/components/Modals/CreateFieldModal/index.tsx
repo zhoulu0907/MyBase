@@ -55,7 +55,7 @@ const CreateFieldModal: React.FC<{
         displayName: entity.entityName,
         appId: '1',
         ...values,
-        isSystemField: false
+        isSystemField: 1
       });
 
       console.log('createField', res);

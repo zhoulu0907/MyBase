@@ -14,7 +14,7 @@ export interface MetadataEntityField {
     decimalPlaces?: number;
     defaultValue: any;
     description: string;
-    isSystemField: boolean;
+    isSystemField: number;
     isPrimaryKey: boolean;
     isRequired: boolean;
     isUnique: boolean;
