@@ -227,7 +227,7 @@ const PageManagerPage: FC = () => {
         menuName: createForm.getFieldValue('menuName'),
         menuType: MenuType.PAGE,
         menuIcon: createForm.getFieldValue('menuIcon'),
-        entityCode: createForm.getFieldValue('entityCode')
+        entityCode: visibleCreateForm === 'page' ? createForm.getFieldValue('entityCode') : ''
       };
 
       if (visibleCreateForm === 'page') {

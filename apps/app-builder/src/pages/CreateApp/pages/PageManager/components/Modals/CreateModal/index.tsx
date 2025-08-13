@@ -118,14 +118,11 @@ const CreateModal: React.FC<CreateModalProps> = ({
           <TreeSelect treeData={treeData} placeholder="请选择父级页面" allowClear />
         </Form.Item>
 
-        <Form.Item
-          label="业务实体"
-          field="entityCode"
-          hidden={visibleCreateForm === 'group'}
-          rules={[{ required: true, message: '请选择业务实体' }]}
-        >
-          <Select options={entityListOptions} placeholder="请选择业务实体" allowClear />
-        </Form.Item>
+        {visibleCreateForm === 'page' && (
+          <Form.Item label="业务实体" field="entityCode" rules={[{ required: true, message: '请选择业务实体' }]}>
+            <Select options={entityListOptions} placeholder="请选择业务实体" allowClear />
+          </Form.Item>
+        )}
       </Form>
       <MenuModal
         visible={visibleMenuIcon}
