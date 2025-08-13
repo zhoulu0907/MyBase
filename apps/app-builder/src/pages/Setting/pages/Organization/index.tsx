@@ -1,7 +1,3 @@
-import { PermissionButton as Button } from '@/components/PermissionControl';
-import PlaceholderPanel from '@/components/PlaceholderPanel';
-import { type PermissionKey } from '@/constants/permission';
-import { hasAnyPermission, hasPermission } from '@/utils/permission';
 import { listToTree } from '@/utils/tree';
 import { Input, Message, Modal, Space, Table } from '@arco-design/web-react';
 import { IconPlus, IconSearch } from '@arco-design/web-react/icon';
@@ -9,6 +5,10 @@ import { createDept, deleteDept, getDeptList, updateDept, type DeptForm, type De
 import { debounce } from 'lodash-es';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import OrganizationModal from './components/OrganizationModal';
+import PlaceholderPanel from '@/components/PlaceholderPanel';
+import { PermissionButton as Button } from '@/components/PermissionControl';
+import { hasAnyPermission, hasPermission } from '@/utils/permission';
+import { TENANT_DEPT_PERMISSION as ACTIONS } from '@/constants/permission';
 import styles from './index.module.less';
 
 const OrganizationPage: React.FC = () => {
@@ -18,13 +18,6 @@ const OrganizationPage: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [modalLoading, setModalLoading] = useState(false);
   const [editRecord, setEditRecord] = useState<any>(null);
-
-  const ACTION_PERMS: Record<string, PermissionKey> = {
-    QUERY: 'SYSTEM:DEPT:QUERY',
-    CREATE: 'SYSTEM:DEPT:CREATE',
-    DELETE: 'SYSTEM:DEPT:DELETE',
-    EDIT: 'SYSTEM:DEPT:EDIT'
-  };
 
   const columns = [
     {
@@ -52,10 +45,10 @@ const OrganizationPage: React.FC = () => {
       width: 150,
       render: (_: any, record: any) => (
         <Space size="mini">
-          <Button permission={ACTION_PERMS.EDIT} type="text" onClick={() => handleEdit(record)}>
+          <Button permission={ACTIONS.UPDATE} type="text" onClick={() => handleEdit(record)}>
             编辑
           </Button>
-          <Button permission={ACTION_PERMS.DELETE} type="text" onClick={() => handleDelete(record)}>
+          <Button permission={ACTIONS.DELETE} type="text" onClick={() => handleDelete(record)}>
             删除
           </Button>
         </Space>
@@ -64,7 +57,7 @@ const OrganizationPage: React.FC = () => {
   ];
 
   const filteredColumns = useMemo(() => {
-    const allowOps = hasAnyPermission([ACTION_PERMS.EDIT, ACTION_PERMS.DELETE]);
+    const allowOps = hasAnyPermission([ACTIONS.UPDATE, ACTIONS.DELETE]);
     if (allowOps) return columns;
     return columns.filter((column) => column.dataIndex !== 'operations');
   }, [columns]);
@@ -149,7 +142,7 @@ const OrganizationPage: React.FC = () => {
     <div className={styles.organizationPage}>
       <div className={styles.pageHeader}>
         <div className={styles.leftContent}>
-          <Button permission={ACTION_PERMS.CREATE} type="primary" onClick={handleAdd} icon={<IconPlus />}>
+          <Button permission={ACTIONS.CREATE} type="primary" onClick={handleAdd} icon={<IconPlus />}>
             添加
           </Button>
         </div>
@@ -164,7 +157,7 @@ const OrganizationPage: React.FC = () => {
           />
         </div>
       </div>
-      <PlaceholderPanel hasPermission={hasPermission(ACTION_PERMS.QUERY)}>
+      <PlaceholderPanel hasPermission={hasPermission(ACTIONS.QUERY)}>
         <Table
           loading={loading}
           columns={filteredColumns}

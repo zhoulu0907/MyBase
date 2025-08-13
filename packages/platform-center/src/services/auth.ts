@@ -8,3 +8,7 @@ export const login = (req: LoginRequest) => {
 export const getPermissionInfo = () => {
   return systemService.get('/auth/get-permission-info');
 };
+
+export const logout = () => {
+  return systemService.post('/auth/logout');
+};

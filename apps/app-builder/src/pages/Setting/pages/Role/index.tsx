@@ -1,5 +1,5 @@
 import InfoPanel from '@/components/InfoPanel';
-import { Button, Divider, Empty, Layout, Message, Space, Tabs } from '@arco-design/web-react';
+import { Divider, Empty, Layout, Message, Space, Tabs } from '@arco-design/web-react';
 import { createRole, deleteRole, updateRole } from '@onebase/platform-center/src/services/role';
 import type { RoleVO } from '@onebase/platform-center/src/types/role';
 import { useCallback, useMemo, useRef, useState } from 'react';
@@ -8,6 +8,10 @@ import RoleList from './components/role-list';
 import RoleModal from './components/role-modal';
 import UserList from './components/user-list';
 import styles from './index.module.less';
+import { TENANT_ROLE_PERMISSION as ACTIONS } from '@/constants/permission';
+import PlaceholderPanel from '@/components/PlaceholderPanel';
+import { PermissionButton as Button } from '@/components/PermissionControl';
+import { hasPermission } from '@/utils/permission';
 
 const Sider = Layout.Sider;
 const Header = Layout.Header;
@@ -52,23 +56,32 @@ export default function RolePage() {
   );
 
   // 保存角色
-  const handleSaveRole = useCallback(async (values: any) => {
+  const handleSaveRole = useCallback(async (values: Partial<RoleVO>) => {
     setModalLoading(true);
     try {
       if (editRole?.id) {
-        await updateRole(values);
+        await updateRole({
+          ...values,
+          id: editRole.id
+        });
+        setActiveRole(prev => ({
+          ...prev,
+          ...values
+        }));
+        roleListRef.current?.refreshRoleById?.(editRole.id, values);
       } else {
         await createRole(values);
+        roleListRef.current?.refresh?.();
       }
       Message.success('保存成功');
       setRoleModalVisible(false);
-      roleListRef.current?.refresh?.();
+      
     } catch (error) {
       Message.error('保存失败');
     } finally {
       setModalLoading(false);
     }
-  }, []);
+  }, [editRole?.id]);
 
   const openRoleModal = useCallback((role: Partial<RoleVO> | null) => {
     setEditRole(role);
@@ -88,11 +101,12 @@ export default function RolePage() {
   const OperationButtons = useMemo(
     () => (
       <Space size="small">
-        <Button type="secondary" onClick={() => openRoleModal(activeRole || null)}>
+        <Button permission={ACTIONS.UPDATE} type="secondary" onClick={() => openRoleModal(activeRole || null)}>
           编辑
         </Button>
         <Button
           type="secondary"
+          permission={ACTIONS.DELETE}
           onClick={() => {
             if (activeRole?.id) {
               handleDeleteRole(activeRole.id).then(() => {
@@ -136,10 +150,14 @@ export default function RolePage() {
               <Content>
                 <Tabs activeTab={activeTab} onChange={handleTabChange}>
                   <TabPane key="user" title="角色用户">
-                    <UserList selectedRoleId={activeRoleId} />
+                    <PlaceholderPanel hasPermission={hasPermission(ACTIONS.USER)}>
+                      <UserList selectedRoleId={activeRoleId} />
+                    </PlaceholderPanel>
                   </TabPane>
                   <TabPane key="permission" title="关联权限">
-                    <PermissionList selectedRoleId={activeRoleId} />
+                    <PlaceholderPanel hasPermission={hasPermission(ACTIONS.PERMISSION)}>
+                      <PermissionList selectedRoleId={activeRoleId} />
+                    </PlaceholderPanel>
                   </TabPane>
                 </Tabs>
               </Content>

@@ -49,31 +49,31 @@ export const removeRoleUsers = (roleId: number, userIds: number[]) => {
 
 // 为角色下增加用户
 export const addRoleUsers = (roleId: number, userIds: number[]) => {
-  return systemService.post('/permission/assign-role-users', { roleId, userIds });
+  return systemService.post('/permission/add-role-users', { roleId, userIds });
 };
 
 // 移除某角色下的权限
-export const removeRolePermission = (roleId: number, permissionId: number) => {
-  return systemService.post('/role/remove-permission', {
+export const removeRolePermission = (roleId: number, menuIds: string[]) => {
+  return systemService.post('/permission/delete-role-menus', {
     roleId,
-    permissionId
+    menuIds
   });
 };
 
 // 为某角色配置权限
-export const configureRolePermissions = (roleId: number, permissions: Record<number, number[]>) => {
+export const configureRolePermissions = (roleId: number, menuIds: string[]) => {
   return systemService.post('/permission/assign-role-menu', {
     roleId,
-    permissions
+    menuIds
   });
 };
 
 // 获取所有权限
-export const getAllPermissions = (): Promise<Permission[]> => {
-  return systemService.get('/menu/simple-list');
+export const getAllPermissions = (code?: string): Promise<Permission[]> => {
+  return systemService.get('/menu/simple-list', { code });
 };
 
 // 获取角色下已配置权限
-export const getConfiguredPermissions = (roleId: number): Promise<any> => {
+export const getConfiguredPermissions = (roleId: number): Promise<Permission[]> => {
   return systemService.get('/permission/list-role-menus', { roleId });
 };

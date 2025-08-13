@@ -37,9 +37,9 @@ const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
 
   // const nodeId = nodeData.entityId;
 
-  // 分离系统字段和自定义字段
-  const systemFields = nodeData?.fields?.filter((field) => field.isSystemField);
-  const customFields = nodeData?.fields?.filter((field) => !field.isSystemField);
+  // 分离系统字段和自定义字段 0: 开启 1: 关闭
+  const systemFields = nodeData?.fields?.filter((field) => field.isSystemField === 0);
+  const customFields = nodeData?.fields?.filter((field) => field.isSystemField === 1);
 
   // 折叠逻辑
   const handleToggleSection = (sectionType: 'system' | 'custom', e: React.MouseEvent) => {

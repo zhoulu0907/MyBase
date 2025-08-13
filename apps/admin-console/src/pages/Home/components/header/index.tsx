@@ -1,10 +1,10 @@
 import LogoSVG from '@/assets/images/ob_logo.svg';
 import { useI18n } from '@/hooks/useI18n';
 import { UserPermissionManager } from '@/utils/permission';
-import { Avatar, Dropdown, Layout, Menu } from '@arco-design/web-react';
+import { Avatar, Dropdown, Layout, Menu, Message } from '@arco-design/web-react';
 import { IconPoweroff, IconUser } from '@arco-design/web-react/icon';
 import { TokenManager } from '@onebase/common';
-import { getPermissionInfo } from '@onebase/platform-center';
+import { getPermissionInfo, logout } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './index.module.less';
@@ -37,11 +37,18 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
   };
 
   // 登出处理
-  const handleLogout = () => {
-    // 清除 token
-    TokenManager.clearToken();
-    // 跳转到登录页
-    navigate('/login');
+  const handleLogout = async() => {
+    try {
+      await logout()
+      // 清除 token
+      TokenManager.clearToken();
+      // 跳转到登录页
+      navigate('/login');
+      
+    } catch (error) {
+      console.error('登出失败: ', error);
+      Message.error('登出失败');
+    }
   };
 
   // 用户菜单

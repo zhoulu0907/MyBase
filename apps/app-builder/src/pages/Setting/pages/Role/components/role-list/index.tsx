@@ -1,10 +1,13 @@
 import ListItem from '@/components/ListItem';
-import { Button, Input, Spin } from '@arco-design/web-react';
+import { Input, Spin } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
 import type { PageParam } from '@onebase/platform-center';
 import { getRolePage, type RoleVO } from '@onebase/platform-center';
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import s from '../../index.module.less';
+import { TENANT_ROLE_PERMISSION as ACTIONS } from '@/constants/permission';
+import { PermissionButton as Button } from '@/components/PermissionControl';
+import PlaceholderPanel from '@/components/PlaceholderPanel';
 
 interface RoleListProps {
   activeId: number | undefined;
@@ -35,7 +38,7 @@ export default forwardRef(function RoleList({ activeId, onSelect, onAdd }: RoleL
       try {
         const params: PageParam = {
           pageNo: page,
-          pageSize: 10
+          pageSize: 100
         };
         if (searchValue) params.name = searchValue;
 
@@ -64,13 +67,31 @@ export default forwardRef(function RoleList({ activeId, onSelect, onAdd }: RoleL
     loadRoleList(1, false);
   }, [loadRoleList]);
 
+  // 刷新角色
+  const refreshRoleById = useCallback(
+    (roleId: number, values: Partial<RoleVO>) => {
+      const roleIndex = roleList.findIndex((role) => role.id === roleId);
+      if (roleIndex !== -1) {
+        // 更新角色列表中的角色信息
+        const updatedRoleList = [...roleList];
+        updatedRoleList[roleIndex] = {
+          ...updatedRoleList[roleIndex],
+          ...values
+        };
+        setRoleList(updatedRoleList);
+      }
+    },
+    [roleList]
+  );
+
   // 暴露给父组件的方法
   useImperativeHandle(
     ref,
     () => ({
-      refresh
+      refresh,
+      refreshRoleById
     }),
-    [refresh]
+    [refresh, refreshRoleById]
   );
 
   // 滚动加载
@@ -141,25 +162,25 @@ export default forwardRef(function RoleList({ activeId, onSelect, onAdd }: RoleL
         />
       </div>
       <ListItem title={listTitle}>
-        <Button type="text" onClick={onAdd} style={{ paddingLeft: '8px', paddingRight: '8px' }}>
+        <Button permission={ACTIONS.CREATE} type="text" onClick={onAdd} style={{ paddingLeft: '8px', paddingRight: '8px' }}>
           <IconPlus />
           新建
         </Button>
       </ListItem>
-      <div
-        ref={scrollContainerRef}
-        className={s.roleList}
-        style={{
-          height: 'calc(100% - 110px)',
-          overflowY: 'auto',
-          position: 'relative'
-        }}
-      >
-        {loading ? (
-          <div style={{ textAlign: 'center', padding: '20px' }}>
-            <Spin size={20} />
-          </div>
-        ) : (
+      <PlaceholderPanel
+        hasPermission={true}
+        isLoading={loading}
+        isEmpty={roleList.length === 0}
+      > 
+        <div
+          ref={scrollContainerRef}
+          className={s.roleList}
+          style={{
+            height: 'calc(100% - 110px)',
+            overflowY: 'auto',
+            position: 'relative'
+          }}
+        >
           <>
             {roleListItems}
             {isScrollLoading && (
@@ -168,8 +189,8 @@ export default forwardRef(function RoleList({ activeId, onSelect, onAdd }: RoleL
               </div>
             )}
           </>
-        )}
-      </div>
+        </div>
+      </PlaceholderPanel>
     </>
   );
 });
