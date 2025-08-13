@@ -14,6 +14,7 @@ import {
   MenuType,
   PageType,
   RootParentPage,
+  getEntityListByApp,
   updateApplicationMenuName,
   type ApplicationMenu,
   type CopyApplicationMenuReq,
@@ -21,7 +22,8 @@ import {
   type DeleteApplicationMenuReq,
   type GetPageSetCodeReq,
   type ListApplicationMenuReq,
-  type UpdateApplicationMenuNameReq
+  type UpdateApplicationMenuNameReq,
+  type MetadataEntityPair
 } from '@onebase/app';
 import { useEffect, useState, type FC } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -52,6 +54,11 @@ interface TreeNode {
   children?: TreeNode[];
 }
 
+interface Options {
+  label: string;
+  value: string;
+}
+
 const PageManagerPage: FC = () => {
   const { t } = useI18n();
   const navigate = useNavigate();
@@ -72,6 +79,7 @@ const PageManagerPage: FC = () => {
   const pageTypeOptions = [{ label: '普通表单', value: PageType.NORMAL }];
 
   const [treeData, setTreeData] = useState<TreeNode[]>([]);
+  const [entityListOptions, setEntityListOptions] = useState<Options[]>([]);
 
   const [curMenu, setCurMenu] = useState<ApplicationMenu>();
   const [_activeMenu, setActiveMenu] = useState<ApplicationMenu>();
@@ -153,11 +161,22 @@ const PageManagerPage: FC = () => {
     setTreeData(treeData);
   };
 
+  const getEntityList = async () => {
+    const appId: string = '1';
+    const res: MetadataEntityPair[] = await getEntityListByApp(appId);
+    const entityOptions = res.map((entity) => ({
+      label: entity.entityName,
+      value: entity.entityId
+    }));
+    setEntityListOptions(entityOptions);
+  };
+
   const createMenuDropList = (
     <Menu style={{ padding: '10px 5px' }}>
       <MenuItem
         key="page"
         onClick={() => {
+          getEntityList();
           setVisibleCreateForm('page');
           createForm.resetFields();
           setTitle(t('createApp.createPage'));
@@ -207,7 +226,8 @@ const PageManagerPage: FC = () => {
             : createForm.getFieldValue('parentCode'),
         menuName: createForm.getFieldValue('menuName'),
         menuType: MenuType.PAGE,
-        menuIcon: createForm.getFieldValue('menuIcon')
+        menuIcon: createForm.getFieldValue('menuIcon'),
+        entityCode: createForm.getFieldValue('entityCode')
       };
 
       if (visibleCreateForm === 'page') {
@@ -394,6 +414,7 @@ const PageManagerPage: FC = () => {
           setVisibleCreateForm('');
         }}
         form={createForm}
+        entityListOptions={entityListOptions}
         pageTypeOptions={pageTypeOptions}
         visibleCreateForm={visibleCreateForm}
         initValue={{ pageType: PageType.NORMAL, menuName: '', parentCode: RootParentPage.menuCode }}

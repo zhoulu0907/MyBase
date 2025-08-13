@@ -64,10 +64,10 @@ const AppSettingPage: FC = () => {
     form.validate(async (error, data) => {
       if (error !== null) return;
       setSaveLoading(true);
-      const { appCode, appName, iconColor, iconName, description, tagIds, themeColor } = data;
+      const { appKey, appName, iconColor, iconName, description, tagIds, themeColor } = data;
       const params: UpdateApplicationReq = {
         id: appId,
-        appCode,
+        appKey,
         appMode: 'classic',
         appName,
         datasourceId: 1,
