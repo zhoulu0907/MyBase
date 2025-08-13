@@ -6,4 +6,5 @@ export * from './application';
 export * from './common';
 export * from './dataresource';
 export * from './metadata_entity';
+export * from './metadata_method';
 export * from './tag';

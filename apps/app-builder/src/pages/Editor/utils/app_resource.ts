@@ -43,10 +43,10 @@ export async function startSavePageSet(params: SavePageSetParams) {
 
     console.log(fromColComponentsMap);
 
-    // console.log(listComponents);
-    // console.log(listPageComponentSchemas);
+    console.log(listComponents);
+    console.log(listPageComponentSchemas);
 
-    // console.log(listColComponentsMap);
+    console.log(listColComponentsMap);
 
     const loadPageSetReq: LoadPageSetReq = {
       pageSetCode: pageSetCode
