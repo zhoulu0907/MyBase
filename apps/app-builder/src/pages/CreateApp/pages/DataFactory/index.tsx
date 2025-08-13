@@ -2,35 +2,48 @@ import React, { useEffect, useState } from 'react';
 // import { useNavigate } from 'react-router-dom';
 import { Layout, Menu, Tooltip } from '@arco-design/web-react';
 import { IconCommon, IconShareAlt } from '@arco-design/web-react/icon';
+import { useAppStore } from '@/store';
 import styles from './index.module.less';
 import DataSourcePage from './pages/DataSource';
 import EntityPage from './pages/Entity';
 
 const DataFactoryPage: React.FC = () => {
-  // const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('check-entity');
-  // const urlParams = new URLSearchParams(window.location.search);
-
-  // const updateUrl = (tab: string) => {
-  //   if (tab) {
-  //     urlParams.set('fac-tab', tab);
-  //     setActiveTab(tab);
-  //   }
-  //   navigate(`${window.location.pathname}?${urlParams.toString()}`);
-  // };
+  const { setCurAppId, curAppId } = useAppStore();
 
   const handleMenuClick = (key: string) => {
     setActiveTab(key);
-    // updateUrl(key);
   };
 
   useEffect(() => {
-    // if (urlParams.get('fac-tab')) {
-    //   setActiveTab(urlParams.get('fac-tab') as string);
-    // } else {
-    //   updateUrl('data-source');
-    // }
+    const urlParams = window.location.hash?.split('?')[1];
+    const appIdFromUrl = urlParams?.split('appId=')[1]?.split('&')[0];
+
+    if (appIdFromUrl) {
+      setCurAppId(appIdFromUrl);
+      console.log('从URL参数获取到appId:', appIdFromUrl);
+    } else {
+      console.warn('URL参数中未找到appId');
+    }
   }, []);
+
+  // 如果appId未设置，可以显示加载状态或错误提示
+  if (!curAppId) {
+    return (
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100vh',
+          fontSize: '16px',
+          color: '#666'
+        }}
+      >
+        正在加载应用信息...
+      </div>
+    );
+  }
 
   return (
     <Layout className={styles['data-factory-page']}>

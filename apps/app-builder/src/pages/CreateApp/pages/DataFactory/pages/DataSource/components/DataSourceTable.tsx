@@ -3,6 +3,7 @@ import { IconPlus } from '@arco-design/web-react/icon';
 import { deleteDatasource, getDatasourcePage } from '@onebase/app';
 import { useEffect, useState } from 'react';
 import styles from '../index.module.less';
+import { useAppStore } from '@/store';
 
 // 数据源记录类型
 interface DatasourceRecord {
@@ -12,7 +13,7 @@ interface DatasourceRecord {
   datasourceType: string;
   description: string;
   runMode: number;
-  appId: number;
+  appId: string;
 }
 
 const DataSourceTable = ({
@@ -22,6 +23,7 @@ const DataSourceTable = ({
   handlePageType: (tab: string) => void;
   onEdit: (id: number) => void;
 }) => {
+  const { curAppId } = useAppStore();
   const [dataSourceList, setDataSourceList] = useState<DatasourceRecord[]>([]);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -37,19 +39,21 @@ const DataSourceTable = ({
     setTableLoading(true);
     const params = {
       pageNo: page.pageNo,
-      pageSize: page.pageSize
+      pageSize: page.pageSize,
       // datasourceName: '',
       // datasourceType: '',
       // code: '',
       // runMode: 0,
-      // appId: '',
+      appId: curAppId
     };
     const res = await getDatasourcePage(params);
 
     console.log('getTableData res', res);
-    if (res) {
+    if (res?.list?.length > 0) {
       setDataSourceList(res?.list || []);
       setTotal(res?.total || 0);
+    } else {
+      handlePageType('empty-ds');
     }
     setTableLoading(false);
   };

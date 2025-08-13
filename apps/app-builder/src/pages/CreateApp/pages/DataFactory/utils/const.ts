@@ -10,9 +10,6 @@ export const DS_RESOURCE_TYPE_LABEL = {
   [DS_RESOURCE_TYPE.EXTERNAL_WITH_INTERNAL]: '外部数据源中引用自有数据源已有资产'
 };
 
-// TODO(xiaoyi): 需要从后端动态获取
-export const resouceId = '542234204218462208';
-
 export const ENTITY_FIELD_TYPE = {
   TEXT: '常规文本',
   LONG_TEXT: '长文本内容',

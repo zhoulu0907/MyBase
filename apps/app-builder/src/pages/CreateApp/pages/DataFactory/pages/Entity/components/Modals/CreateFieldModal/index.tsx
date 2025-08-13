@@ -1,5 +1,6 @@
 import type { EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
 import { Form, Input, Message, Modal, Select } from '@arco-design/web-react';
+import { useAppStore } from '@/store';
 import { createField } from '@onebase/app';
 import React from 'react';
 import styles from '../modal.module.less';
@@ -45,6 +46,7 @@ const CreateFieldModal: React.FC<{
   entity: EntityNode;
   successCallback: () => void;
 }> = ({ visible, setVisible, entity, successCallback }) => {
+  const { curAppId } = useAppStore();
   const [form] = Form.useForm<FieldFormValues>();
   // 提交
   const handleFinish = () => {
@@ -53,7 +55,7 @@ const CreateFieldModal: React.FC<{
       const res = await createField({
         entityId: entity.entityId,
         displayName: entity.entityName,
-        appId: '1',
+        appId: curAppId,
         ...values,
         isSystemField: 1
       });

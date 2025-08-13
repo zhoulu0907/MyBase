@@ -6,6 +6,8 @@ import type {
   EntityNode
 } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
 import { Button, Message } from '@arco-design/web-react';
+import { useAppStore } from '@/store';
+import { useResourceStore } from '@/store_resource';
 import EditEntityDrawer from '../components/Drawers/EditEntityDrawer';
 import EditFieldDrawer from '../components/Drawers/EditFieldDrawer';
 import EditRelationDrawer from '../components/Drawers/EditRelationDrawer';
@@ -13,7 +15,7 @@ import EditRelationDrawer from '../components/Drawers/EditRelationDrawer';
 import ERchart from '../components/ERchart';
 import CreateEntityModal from '../components/Modals/CreateEntityModal';
 // import CreateFieldModal from '../components/Modals/CreateFieldModal';
-import { resouceId } from '@/pages/CreateApp/pages/DataFactory/utils/const';
+
 import { IconPlus } from '@arco-design/web-react/icon';
 import { getEntityGraph, deleteEntity, updateEntity } from '@onebase/app';
 import {
@@ -29,6 +31,8 @@ export const EntityERContainer: React.FC<{
   onlyUpdateNode: boolean;
   setOnlyUpdateNode: (onlyUpdateNode: boolean) => void;
 }> = ({ refreshEntityList, setRefreshEntityList, onlyUpdateNode, setOnlyUpdateNode }) => {
+  const { curAppId } = useAppStore();
+  const { curDataSourceId } = useResourceStore();
   // const [mode, setMode] = useState<'view' | 'edit'>('view');
   const [data, setData] = useState<EntityERProps['data']>(
     JSON.parse(
@@ -52,7 +56,7 @@ export const EntityERContainer: React.FC<{
   const [editRelationDrawerVisible, setEditRelationDrawerVisible] = useState(false);
   const [relationData, setRelationData] = useState<EdgeData | null>(null);
   const loadEntityList = async () => {
-    const res = await getEntityGraph(resouceId);
+    const res = await getEntityGraph(curDataSourceId);
     console.log('loadEntityList', res);
     if (res?.entities || res?.relationships) {
       setData({
@@ -124,8 +128,8 @@ export const EntityERContainer: React.FC<{
       displayName: data.entityName,
       displayConfig: JSON.stringify({ x, y }),
       code: data.code,
-      datasourceId: resouceId,
-      appId: '1'
+      datasourceId: curDataSourceId,
+      appId: curAppId
     };
     const res = await updateEntity(params);
     console.log('updateEntity', res);
@@ -173,8 +177,10 @@ export const EntityERContainer: React.FC<{
   }, [refreshEntityList]);
 
   useEffect(() => {
-    loadEntityList();
-  }, []);
+    if (curDataSourceId) {
+      loadEntityList();
+    }
+  }, [curDataSourceId]);
 
   // useEffect(() => {
   //   const storedData = localStorage.getItem('entityFormValues');

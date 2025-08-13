@@ -4,6 +4,7 @@ import { Button, Message, Space, Table, Tag } from '@arco-design/web-react';
 import { getEntityRules } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
 import { CreateRuleModal } from '../../Modals';
+import { useAppStore } from '@/store';
 import styles from './tabs.module.less';
 
 interface DataRulesProps {
@@ -12,6 +13,7 @@ interface DataRulesProps {
 }
 
 const DataRules: React.FC<DataRulesProps> = ({ entity, activeTab }) => {
+  const { curAppId } = useAppStore();
   const [rules, setRules] = useState([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState({ pageNo: 1, pageSize: 10 });
@@ -24,7 +26,7 @@ const DataRules: React.FC<DataRulesProps> = ({ entity, activeTab }) => {
         entityId: entity.id,
         pageNo: page.pageNo,
         pageSize: page.pageSize,
-        appId: '1'
+        appId: curAppId
       };
       const response = await getEntityRules(params);
       console.log('getEntityRules', response);
