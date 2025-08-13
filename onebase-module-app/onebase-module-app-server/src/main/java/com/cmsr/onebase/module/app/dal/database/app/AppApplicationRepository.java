@@ -66,4 +66,10 @@ public class AppApplicationRepository extends DataRepositoryNew<ApplicationDO> {
         return findOne(configs);
     }
 
+    public Long countByTenantId(Long tenantId) {
+        ConfigStore configs = new DefaultConfigStore();
+        configs.eq("tenant_id", tenantId);
+        return countByConfig(configs);
+    }
+
 }

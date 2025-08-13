@@ -91,6 +91,7 @@ public class AppMenuServiceImpl implements AppMenuService {
         menuDO.setMenuIcon(createReqVO.getMenuIcon());
         menuDO.setMenuSort(generateMenuSort(applicationDO.getAppCode()));
         menuDO.setVisible(MenuVisibleEnum.YES.getValue());
+        menuDO.setEntityCode(createReqVO.getEntityCode());
         appMenuRepository.insert(menuDO);
         // 创建页面集
         CreatePageSetDTO createPageSetDTO = new CreatePageSetDTO();
