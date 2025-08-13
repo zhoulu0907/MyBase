@@ -5,10 +5,10 @@ import { PlatformTenantInfo, CreateTenantParams } from '../types/platformTenant'
 export const getCreateTenantCountApi = () => systemService.get('/tenant/get-allocatable-count');
 
 // 获取其他租户分配数量
-export const getOtherTenantCountApi = (id: string) => systemService.get('/tenant/get-exist-user-count');
+export const getOtherTenantCountApi = (id: string) => systemService.get('/tenant/get-exist-user-count', { id });
 
 // 获取租户用户数量
-export const getTenantUserCountApi = (id: string) => systemService.get('/tenant/get-user-count', { id });
+export const getTenantUserCountApi = (id: string) => systemService.get('/tenant/get-tenant-exist-user-count', { id });
 
 // 获取平台租户列表信息
 export const getPlatformTenantListApi = (params: {
@@ -39,4 +39,4 @@ export const addPlatformTenantApi = (data: CreateTenantParams) => systemService.
 export const updatePlatformTenantApi = (data: any) => systemService.post('/tenant/update', data);
 
 // 获取租户管理员列表
-export const getPlatformTenantAdminListApi = () => systemService.get('/user/platform-admin/list');
+export const getPlatformTenantAdminListApi = () => systemService.get('/platform/admin/list');
