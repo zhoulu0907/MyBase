@@ -45,3 +45,11 @@ export interface AppEntityField {
     isSystemField: number; // 是否是系统字段
     displayName: string; // 显示名称
 }
+
+export interface EntityWithChildren {
+    entityId: string;
+    entityName: string;
+    entityCode: string;
+    parentFields: AppEntityField[];
+    childEntities: AppEntity[];
+}

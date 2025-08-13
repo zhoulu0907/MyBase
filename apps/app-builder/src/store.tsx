@@ -1,4 +1,4 @@
-import type { AppEntities } from '@onebase/app';
+import type { AppEntities, AppEntity } from '@onebase/app';
 import { create } from 'zustand';
 import type { EditConfig } from './components/Materials/types';
 
@@ -146,9 +146,13 @@ export const useAppStore = create<appStore>((set) => ({
 }));
 
 export interface appDataStore {
+  mainEntity: AppEntity;
   appEntities: AppEntities;
   setAppEntities: (appEntities: AppEntities) => void;
   clearAppEntities: () => void;
+
+  setMainEntity: (mainEntity: AppEntity) => void;
+  clearMainEntity: () => void;
 }
 
 export const useAppDataStore = create<appDataStore>((set) => ({
@@ -161,5 +165,14 @@ export const useAppDataStore = create<appDataStore>((set) => ({
       appEntities: {
         entities: []
       }
-    }))
+    })),
+
+  mainEntity: {
+    entityID: '',
+    entityName: '',
+    entityType: '',
+    fields: []
+  },
+  setMainEntity: (mainEntity: AppEntity) => set(() => ({ mainEntity })),
+  clearMainEntity: () => set(() => ({ mainEntity: { entityID: '', entityName: '', entityType: '', fields: [] } }))
 }));
