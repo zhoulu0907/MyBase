@@ -15,7 +15,7 @@ import {
 } from '@arco-design/web-react';
 import { IconSearch } from '@arco-design/web-react/icon';
 import styles from './index.module.less'
-import { getPlatformTenantListApi, getPlatformInfoApi, addPlatformTenantApi, updatePlatformTenantApi, getCreateTenantCountApi, getPlatformTenantAdminListApi, PlatformTenantStatus, ADMIN_ROOT_ID, type PlatformTenantInfo, type CreateTenantParams } from "@onebase/platform-center";
+import { getPlatformTenantListApi, getPlatformInfoApi, addPlatformTenantApi, updatePlatformTenantApi, getCreateTenantCountApi, getPlatformTenantAdminListApi, PlatformTenantStatus, ADMIN_ROOT_ID, type PlatformTenantInfo, type CreateTenantParams, type UpdateTenantParams } from "@onebase/platform-center";
 import { formatTimestamp, generateTimestampString } from '@/utils/date';
 
 const { Text } = Typography;
@@ -31,17 +31,19 @@ const TenantManagement: React.FC = () => {
   });
   const [modalVisible, setModalVisible] = useState(false);
   const [confirmDisableVisible, setConfirmDisableVisible] = useState(false);
+  const [modalLoading, setModalLoading] = useState(false);
   const [isNewTenant, setIsNewTenant] = useState(false);
   const [currentTenant, setCurrentTenant] = useState<PlatformTenantInfo | null>(null);
-  const [form] = useForm();
+  const [originalAdmin, setOriginalAdmin] = useState<string>('');
   const [allocatableLicense, setAllocatableLicense] = useState<number>(10000);
   const [tenantLimit, setTenantLimit] = useState<number>(10000);
+  const [userCount, setUserCount] = useState(1);
   const [adminList, setAdminList] = useState<{id: string, username: string}[]>([])
   const [confirmText, setConfirmText] = useState('');
   const [total, setTotal] = useState(0) 
   const [currentPage, setCurrentPage] = useState(1);
-  // const [adminInfoList, setAdminInfoList] = useState([])
-
+  
+  const [form] = useForm();
 
   // 获取租户列表
   const getPlatformTenantList = async () => {
@@ -135,8 +137,8 @@ const handleSearch = async (keyword: string) => {
       console.log('管理员列表 adminListResp:', adminListResp);
       // setAdminList(adminListResp)
       // 将id为1的管理员 筛选出来并排到第一个
-      const adminListWithId1 = adminListResp.filter(item => item.id === ADMIN_ROOT_ID)
-      setAdminList(adminListWithId1.concat(adminListResp.filter(item => item.id !== ADMIN_ROOT_ID)))
+      const adminListWithId1 = adminListResp.filter((item: {id: string, username: string}) => item.id === ADMIN_ROOT_ID)
+      setAdminList(adminListWithId1.concat(adminListResp.filter((item: {id: string, username: string}) => item.id !== ADMIN_ROOT_ID)))
       // console.log('adminList:', adminList);
     } catch (error) {
       console.error('Error fetching adminList:', error);
@@ -173,6 +175,7 @@ const handleSearch = async (keyword: string) => {
       tenantCode: record.tenantCode,
     };
     setCurrentTenant(tenant);
+    setOriginalAdmin(record.contactName);
     form.setFieldsValue({
       tenantName: record.name,
       tenantCode: record.tenantCode,
@@ -187,6 +190,7 @@ const handleSearch = async (keyword: string) => {
   // 提交表单
   const handleSubmit = async () => {
     try {
+      setModalLoading(true);
       const values = await form.validate();
 
       // 检查分配人数
@@ -209,11 +213,10 @@ const handleSearch = async (keyword: string) => {
       } else {
         // 创建租户
         await createTenant(values);
-      }
-      
-      setModalVisible(false);
+      }      
     } catch (error) {
       console.error('表单验证失败:', error);
+      setModalLoading(false);
     }
   };
 
@@ -222,21 +225,30 @@ const handleSearch = async (keyword: string) => {
    */
   const updateTenant = async (values: any) => {
     try {
+      // 检查管理员是否发生变化
+      const newAdmin = values.admin || '';
+      
       // 构建更新参数
-      const updateParams: CreateTenantParams = {
-        id: currentTenant.id, // 确保包含租户ID
+      const updateParams: UpdateTenantParams = {
+        id: currentTenant?.id,
         name: values.tenantName,
         tenantCode: values.tenantCode,
-        contactName: values.admin,
+        // 只有管理员发生变化时才传递管理员信息，否则传递空字符串
+        contactName: originalAdmin !== newAdmin ? newAdmin : '',
         status: values.status,
         accountCount: values.allocatedCount
       };
+      
       // 调用 updatePlatformTenantApi
       await updatePlatformTenantApi(updateParams);
       getPlatformTenantList();
       Message.success('更新成功');
+      setModalVisible(false);
     } catch (error: any) {
-      Message.error(error.message || '更新失败');
+      console.error('更新租户信息失败:', error);
+      Message.error('更新租户信息失败');
+    } finally {
+      setModalLoading(false); // 重置加载状态
     }
   };
 
@@ -252,13 +264,16 @@ const handleSearch = async (keyword: string) => {
         status: values.status,
         accountCount: values.allocatedCount
       };
-      
       await addPlatformTenantApi(newTenantData);
-      
       getPlatformTenantList();
-      Message.success('创建成功');
+      Message.success('创建租户成功');
+      setModalVisible(false);
+
     } catch (error: any) {
-      Message.error(error.message || '创建失败');
+      console.error('创建租户失败:', error);
+      Message.error('创建租户失败');
+    } finally {
+      setModalLoading(false); // 重置加载状态
     }
   };
 
@@ -270,18 +285,7 @@ const handleSearch = async (keyword: string) => {
       Message.error(`租户名不正确`);
       return;
     }
-    // const values = form.getFieldsValue();
-    // // 这里应该是API调用
-    
-    // updatePlatformTenantApi({
-    //   id: currentTenant?.id,
-    //   status: PlatformTenantStatus.Disable,
-
-    // }).then(() => { 
-    // });
-    // setTenantList(tenantList.map((item) => (item.id === Number(currentTenant?.id) ? { ...item, ...values } : item)));
-    // Message.success('已禁用租户');
-    setConfirmText(''); // 确认禁用后清空输入框
+    setConfirmText('');
     // 根据是否是新租户决定关闭哪些弹窗
     if (isNewTenant) {
       // 新建时只关闭确认弹窗
@@ -336,7 +340,7 @@ const handleSearch = async (keyword: string) => {
       title: '创建时间',
       dataIndex: 'createTime',
       sorter: (a: PlatformTenantInfo, b: PlatformTenantInfo) => new Date(a.createTime).getTime() - new Date(b.createTime).getTime(),
-      render: (text) => (
+      render: (text: string) => (
         <div>{formatTimestamp(text)}</div>
       )
     },
@@ -345,7 +349,7 @@ const handleSearch = async (keyword: string) => {
       dataIndex: 'status',
       render: (status: number) => (
         <Text style={{ color: status === PlatformTenantStatus.enabled ? '#00b42a' : '' }}>
-          {status === PlatformTenantStatus.enabled ? '已启用' : '已禁用'}
+          {status === PlatformTenantStatus.enabled ? '启用' : '禁用'}
         </Text>
       )
     },
@@ -370,50 +374,44 @@ const handleSearch = async (keyword: string) => {
 
   return (
     <div className={styles.tenant}>
-      {/* <Card bordered={false}> */}
-        <div className={styles.toolbar}>
-          <Button type="primary" status='success' onClick={handleCreate}>
-            + 新建
-          </Button>
-
-          <Space size="large">
-            {/* 添加激活状态 颜色为 #00b42a */}
-
-            <Radio.Group type="button" value={searchParams.status} onChange={handleStatusChange}>
-              <Radio value={PlatformTenantStatus.all}>全部</Radio>
-              <Radio value={PlatformTenantStatus.enabled}>启用</Radio>
-              <Radio value={PlatformTenantStatus.disabled}>禁用</Radio>
-            </Radio.Group>
-
-            <Input.Search
-              placeholder="搜索租户名称/编码"
-              style={{ width: 300 }}
-              allowClear
-              value={searchParams.keyword}
-              onChange={value => handleSearch(value)}
-              // searchButton
-              suffix={<IconSearch />}
-            />
-          </Space>
-        </div>
-
-        <Table
-          rowKey="id"
-          border={false}
-          columns={columns}
-          data={tenantList}
-          loading={loading}
-          rowClassName={(record) => record.status === PlatformTenantStatus.enabled ? 'enabled-row' : ''}
-          pagination={{
-            current: currentPage,
-            pageSize: 10,
-            showTotal: true,
-            total: total,
-            onChange: handlePageChange
-            // (total) => `共 ${total} 条`
-          }}
-        />
-      {/* </Card> */}
+      {/* 新建搜索条件栏 */}
+      <div className={styles.toolbar}>
+        <Button type="primary" status='success' onClick={handleCreate}>
+          + 新建
+        </Button>
+        <Space size="large">
+          <Radio.Group type="button" value={searchParams.status} onChange={handleStatusChange}>
+            <Radio value={PlatformTenantStatus.all}>全部</Radio>
+            <Radio value={PlatformTenantStatus.enabled}>启用</Radio>
+            <Radio value={PlatformTenantStatus.disabled}>禁用</Radio>
+          </Radio.Group>
+          <Input.Search
+            placeholder="搜索租户名称/编码"
+            style={{ width: 300 }}
+            allowClear
+            value={searchParams.keyword}
+            onChange={value => handleSearch(value)}
+            // searchButton
+            suffix={<IconSearch />}
+          />
+        </Space>
+      </div>
+      {/* 租户表格 */}
+      <Table
+        rowKey="id"
+        border={false}
+        columns={columns}
+        data={tenantList}
+        loading={loading}
+        rowClassName={(record) => record.status === PlatformTenantStatus.enabled ? 'enabled-row' : ''}
+        pagination={{
+          current: currentPage,
+          pageSize: 10,
+          showTotal: true,
+          total: total,
+          onChange: handlePageChange
+        }}
+      />
       
       {/* 新建/修改弹窗 */}
       <Modal
@@ -424,6 +422,7 @@ const handleSearch = async (keyword: string) => {
         autoFocus={false}
         focusLock={true}
         style={{ width: 600 }}
+        confirmLoading={modalLoading}
       >
         <Form form={form} layout="vertical">
           <Form.Item label="租户编号" field="tenantCode">
@@ -433,7 +432,6 @@ const handleSearch = async (keyword: string) => {
               value={currentTenant ? currentTenant.tenantCode : generateTenantCode()}
             />
           </Form.Item>
-
           <Form.Item label="租户名称" field="tenantName" rules={[{ required: true, message: '请输入租户名称' }]}>
             <Input placeholder="请输入租户名称" />
           </Form.Item>
@@ -465,8 +463,8 @@ const handleSearch = async (keyword: string) => {
 
           <Form.Item label="状态" field="status">
             <Switch
-              checkedText="已启用"
-              uncheckedText="已禁用"
+              checkedText="启用"
+              uncheckedText="禁用"
               defaultChecked // 默认启用状态
               checked={form.getFieldValue('status') === PlatformTenantStatus.enabled}
               disabled={!currentTenant}
