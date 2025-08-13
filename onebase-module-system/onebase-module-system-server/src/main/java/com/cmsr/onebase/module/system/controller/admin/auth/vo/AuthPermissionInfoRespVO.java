@@ -19,8 +19,8 @@ public class AuthPermissionInfoRespVO {
     @Schema(description = "用户信息", requiredMode = Schema.RequiredMode.REQUIRED)
     private UserVO user;
 
-    @Schema(description = "角色标识数组", requiredMode = Schema.RequiredMode.REQUIRED)
-    private Set<String> roles;
+    @Schema(description = "角色ID数组", requiredMode = Schema.RequiredMode.REQUIRED)
+    private Set<Long> roles;
 
     @Schema(description = "操作权限数组", requiredMode = Schema.RequiredMode.REQUIRED)
     private Set<String> permissions;

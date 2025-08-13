@@ -9,6 +9,7 @@ import com.cmsr.onebase.module.system.controller.admin.auth.vo.*;
 import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2AccessTokenDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.MenuDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
+import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.enums.permission.MenuTypeEnum;
 import org.apache.commons.lang3.StringUtils;
@@ -32,7 +33,7 @@ public interface AuthConvert {
     default AuthPermissionInfoRespVO convert(AdminUserDO user, List<RoleDO> roleList, List<MenuDO> menuList, String expectCode) {
         return AuthPermissionInfoRespVO.builder()
                 .user(BeanUtils.toBean(user, AuthPermissionInfoRespVO.UserVO.class))
-                .roles(convertSet(roleList, RoleDO::getCode))
+                .roles(convertSet(roleList, RoleDO::getId))
                 // 权限标识信息
                 .permissions(convertSet(menuList, MenuDO::getPermission))
                 // 菜单树
@@ -91,4 +92,10 @@ public interface AuthConvert {
 
     SmsCodeUseReqDTO convert(AuthSmsLoginReqVO reqVO, Integer scene, String usedIp);
 
+    default AuthLoginRespVO convert(OAuth2AccessTokenDO accessTokenDO, TenantDO tennantDO){
+        AuthLoginRespVO respVO = AuthConvert.INSTANCE.convert(accessTokenDO);
+        respVO.setTenantId(tennantDO.getId());
+        respVO.setTenantWebsite(tennantDO.getWebsite());
+        return respVO;
+    }
 }
