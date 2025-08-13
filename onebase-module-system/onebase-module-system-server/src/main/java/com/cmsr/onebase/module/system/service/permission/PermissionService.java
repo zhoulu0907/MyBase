@@ -16,7 +16,13 @@ import static java.util.Collections.singleton;
  *
  */
 public interface PermissionService {
-
+    /**
+     * 判断用户是否是平台管理员
+     *
+     * @param id 用户编号
+     * @return 是否是平台管理员
+     */
+    boolean isPlatformSuperAdmin(Long id);
     /**
      * 判断是否有权限，任一一个即可
      *
@@ -187,5 +193,4 @@ public interface PermissionService {
      * @return 删除的行数
      */
     long deleteRoleMenus(Long roleId, Set<Long> menuIds);
-
 }
