@@ -1,7 +1,7 @@
 ### 默认环境变量配置（直接使用local环境配置）
 @baseUrl = http://localhost:48080/admin-api
 @adminTenantId = 1
-@token = 77b45e88d41e4776a1cf13367c4eac71
+@token = 9ce4e541423b47fd9429049715ae8c8d
 @tag = Yunai.local
 
 ### 环境配置说明
@@ -16,11 +16,17 @@ tenant-id: {{adminTenantId}}
 tag: {{tag}}
 
 {
-  "username": "admin",
+  "username": "testpermission",
   "password": "admin123",
   "uuid": "3acd87a09a4f48fb9118333780e94883",
   "code": "1024"
 }
+#{
+#  "username": "admin",
+#  "password": "admin123",
+#  "uuid": "3acd87a09a4f48fb9118333780e94883",
+#  "code": "1024"
+#}
 
 > {%
     // 自动保存登录获得的token

@@ -4,7 +4,6 @@ import cn.hutool.core.util.ObjectUtil;
 import com.anji.captcha.model.common.ResponseModel;
 import com.anji.captcha.model.vo.CaptchaVO;
 import com.anji.captcha.service.CaptchaService;
-import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.common.util.monitor.TracerUtils;
@@ -17,6 +16,7 @@ import com.cmsr.onebase.module.system.api.social.dto.SocialUserRespDTO;
 import com.cmsr.onebase.module.system.controller.admin.auth.vo.*;
 import com.cmsr.onebase.module.system.convert.auth.AuthConvert;
 import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2AccessTokenDO;
+import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.enums.logger.LoginLogTypeEnum;
 import com.cmsr.onebase.module.system.enums.logger.LoginResultEnum;
@@ -26,6 +26,7 @@ import com.cmsr.onebase.module.system.service.logger.LoginLogService;
 import com.cmsr.onebase.module.system.service.member.MemberService;
 import com.cmsr.onebase.module.system.service.oauth2.OAuth2TokenService;
 import com.cmsr.onebase.module.system.service.social.SocialUserService;
+import com.cmsr.onebase.module.system.service.tenant.TenantService;
 import com.cmsr.onebase.module.system.service.user.AdminUserService;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Resource;
@@ -50,28 +51,30 @@ import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
 public class AdminAuthServiceImpl implements AdminAuthService {
 
     @Resource
-    private AdminUserService userService;
+    private AdminUserService   userService;
     @Resource
-    private LoginLogService loginLogService;
+    private LoginLogService    loginLogService;
     @Resource
     private OAuth2TokenService oauth2TokenService;
     @Resource
-    private SocialUserService socialUserService;
+    private SocialUserService  socialUserService;
     @Resource
-    private MemberService memberService;
+    private MemberService      memberService;
     @Resource
-    private Validator validator;
+    private Validator          validator;
     @Resource
-    private CaptchaService captchaService;
+    private CaptchaService     captchaService;
     @Resource
-    private SmsCodeApi smsCodeApi;
+    private SmsCodeApi         smsCodeApi;
 
     /**
      * 验证码的开关，默认为 true
      */
     @Value("${yudao.captcha.enable:true}")
     @Setter // 为了单测：开启或者关闭验证码
-    private Boolean captchaEnable;
+    private Boolean       captchaEnable;
+    @Resource
+    private TenantService tenantService;
 
     @Override
     public AdminUserDO authenticate(String username, String password) {
@@ -210,8 +213,10 @@ public class AdminAuthServiceImpl implements AdminAuthService {
         // 创建访问令牌
         OAuth2AccessTokenDO accessTokenDO = oauth2TokenService.createAccessToken(userId, getUserType().getValue(),
                 OAuth2ClientConstants.CLIENT_ID_DEFAULT, null);
+
+        TenantDO tennantDO = tenantService.getTenant(accessTokenDO.getTenantId());
         // 构建返回结果
-        return AuthConvert.INSTANCE.convert(accessTokenDO);
+        return AuthConvert.INSTANCE.convert(accessTokenDO, tennantDO);
     }
 
     @Override
