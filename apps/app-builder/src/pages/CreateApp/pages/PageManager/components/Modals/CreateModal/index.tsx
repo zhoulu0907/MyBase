@@ -1,7 +1,7 @@
+import iconEditSVG from '@/assets/images/app_edit_black.svg';
 import { Form, Input, Modal, Select, TreeSelect, type FormInstance } from '@arco-design/web-react';
 import React, { useEffect, useState } from 'react';
 import MenuModal from '../MenuModal';
-import iconEditSVG from '@/assets/images/app_edit_black.svg';
 
 interface CreateModalProps {
   title: string;
@@ -112,7 +112,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
             />
           </div>
         </Form.Item>
-        <Form.Item label="父级页面" field="parentId">
+        <Form.Item label="父级页面" field="parentCode">
           <TreeSelect treeData={treeData} placeholder="请选择父级页面" allowClear />
         </Form.Item>
 

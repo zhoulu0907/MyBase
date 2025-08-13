@@ -2,19 +2,9 @@ import { Button, Message, Modal, Table } from '@arco-design/web-react';
 import { configureRolePermissions, getConfiguredPermissions, removeRolePermission } from '@onebase/platform-center';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import PermissionConfigModal from './PermissionModal';
-
-interface Permission {
-  id: number;
-  name: string;
-  type: string;
-  remark?: string;
-  actions?: PermissionAction[];
-}
-
-interface PermissionAction {
-  id: number;
-  name: string;
-}
+import type { Permission } from '@onebase/platform-center';
+import { listToTree } from '@/utils/tree';
+import { PERMISSION_TYPES } from '@/constants/permission';
 
 interface PermissionListProps {
   selectedRoleId?: number;
@@ -35,8 +25,9 @@ const PermissionList: React.FC<PermissionListProps> = ({ selectedRoleId }) => {
 
     setLoading(true);
     try {
-      const response = await getConfiguredPermissions(selectedRoleId); // TODO: 待接口修改后联调
-      setPermissions(response.data || []);
+      const response = await getConfiguredPermissions(selectedRoleId) || []
+      const filteredData = response.filter(item => item.type !== PERMISSION_TYPES.MODULE);
+      setPermissions(listToTree(filteredData) as Permission[]);
     } finally {
       setLoading(false);
     }
@@ -48,14 +39,15 @@ const PermissionList: React.FC<PermissionListProps> = ({ selectedRoleId }) => {
 
   // 处理移除权限
   const handleRemove = useCallback(
-    (id: number) => {
+    (id: string) => {
       Modal.confirm({
         title: '确认移除',
         content: `确定要移除权限 "${permissions.find((p) => p.id === id)?.name}" 吗？`,
         okText: '确认',
         cancelText: '取消',
         onOk: () => {
-          removeRolePermission(selectedRoleId!, id).then(() => {
+          removeRolePermission(selectedRoleId!, [id]).then(() => {
+            fetchPermissions();
             Message.success('操作成功');
           });
         }
@@ -74,7 +66,7 @@ const PermissionList: React.FC<PermissionListProps> = ({ selectedRoleId }) => {
   }, [selectedRoleId]);
 
   // 权限配置
-  const handleConfigConfirm = async (permissions: Record<number, number[]>) => {
+  const handleConfigConfirm = async (permissions: string[]) => {
     if (!selectedRoleId) {
       Message.error('角色ID不存在');
       return;
@@ -101,14 +93,10 @@ const PermissionList: React.FC<PermissionListProps> = ({ selectedRoleId }) => {
         width: 200
       },
       {
-        title: '描述',
-        dataIndex: 'remark'
-      },
-      {
         title: '操作权限',
         dataIndex: 'actions',
         render: (_: any, record: Permission) => {
-          return record.actions?.map((item) => item.name).join('，') || '-';
+          return record.children?.map((item) => item.name).join('，') || '-';
         }
       },
       {
@@ -133,7 +121,8 @@ const PermissionList: React.FC<PermissionListProps> = ({ selectedRoleId }) => {
       pagination: false,
       scroll: { y: 400 },
       border: false,
-      loading
+      loading,
+      childrenColumnName: 'actions'
     }),
     [columns, permissions, loading]
   );
@@ -148,13 +137,13 @@ const PermissionList: React.FC<PermissionListProps> = ({ selectedRoleId }) => {
 
       <Table {...tableConfig} />
 
-      <PermissionConfigModal
+      {configModalVisible && <PermissionConfigModal
         visible={configModalVisible}
         onCancel={() => setConfigModalVisible(false)}
         onConfirm={handleConfigConfirm}
-        configuredPermissions={{} as Record<number, number[]>}
+        configuredPermissions={permissions}
         confirmLoading={configLoading}
-      />
+      />}
     </>
   );
 };

@@ -59,7 +59,7 @@ const Administrator: React.FC = () => {
       dataIndex: 'createTime',
       key: 'createTime',
       width: 180,
-      render: (text) => (
+      render: (text: string) => (
         <div>{formatTimestamp(text)}</div>
       )
     },
@@ -67,7 +67,7 @@ const Administrator: React.FC = () => {
       title: '操作',
       key: 'action',
       width: 150,
-      render: (_, record: PlatformAdminInfo) => (
+      render: (_: any, record: PlatformAdminInfo) => (
         <Space>
           <Button type="text" onClick={() => handleEditEmail(record)}>
             修改邮箱

@@ -1,22 +1,12 @@
-import {
-  Button,
-  Divider,
-  Form,
-  Grid,
-  Input,
-  Message,
-  Popconfirm,
-  Select,
-  type FormInstance
-} from '@arco-design/web-react';
+import { Form, Grid, Input, Popconfirm, Select, type FormInstance } from '@arco-design/web-react';
 import { useEffect, useState } from 'react';
 
 import {
   createApplicationTag,
   listApplicationTag,
+  type Application,
   type CreateApplicationTagReq,
-  type ListTagReq,
-  type Application
+  type ListTagReq
 } from '@onebase/app';
 import { sample } from 'lodash-es';
 
@@ -236,7 +226,7 @@ const BasicSetting = (props: IProps) => {
             </div>
 
             <Form.Item
-              field="appCode"
+              field="appKey"
               label="应用编码"
               rules={[{ required: true, message: '请填写应用编码', maxLength: 20 }]}
               style={{ paddingLeft: 32, flex: 1 }}

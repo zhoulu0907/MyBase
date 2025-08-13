@@ -11,15 +11,17 @@ interface PlaceholderPanelProps {
   isLoading?: boolean;
   isEmpty?: boolean;
   children?: React.ReactNode;
+  className?: string;
 }
 const PlaceholderPanel: React.FC<PlaceholderPanelProps> = ({
   isLoading,
   isEmpty,
   hasPermission,
-  children
+  children,
+  className
 }) => {
   return (
-    <div className="placeholder-panel">
+    <div className={`${className} placeholder-panel`}>
       {!hasPermission ? (
         <Empty description="无权限" />
       ) : isLoading ? (

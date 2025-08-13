@@ -38,7 +38,7 @@ const AppBreadcrumb: React.FC<BreadcrumbProps> = ({ className, items }) => {
       {
         key: 'onebase',
         title: '',
-        path: '/onebase'
+        path: '/onebase/platform-info'
       }
     ];
 

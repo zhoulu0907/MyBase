@@ -86,3 +86,10 @@ export interface CreateTenantParams {
    */
   accountCount: number;
 }
+
+export interface UpdateTenantParams extends CreateTenantParams {
+  /**
+   * 租户ID
+   */
+  id: string | number;
+}
