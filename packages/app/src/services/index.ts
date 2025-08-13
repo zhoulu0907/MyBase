@@ -5,3 +5,4 @@ export * from './application';
 export * from './metadata_dataresource';
 export * from './metadata_entity';
 export * from './tag';
+export * from './role';

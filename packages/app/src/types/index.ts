@@ -6,3 +6,4 @@ export * from './application';
 export * from './common';
 export * from './dataresource';
 export * from './tag';
+export * from './role';

@@ -9,7 +9,7 @@ export interface Application {
   /**
    * 应用编码
    */
-  appCode: string;
+  appKey: string;
   /**
    * 应用描述
    */
@@ -79,7 +79,7 @@ export interface CreateApplicationReq {
   /**
    * 应用编码
    */
-  appCode: string;
+  appKey: string;
   /**
    * 应用模式
    */
@@ -112,6 +112,10 @@ export interface CreateApplicationReq {
    * 主题色
    */
   themeColor?: string;
+  /**
+   * 应用状态, 对应AppStatus
+   */
+  appStatus: 0 | 1 | 2;
 }
 
 export interface UpdateApplicationReq {
@@ -130,7 +134,7 @@ export interface UpdateApplicationReq {
   /**
    * 应用编码
    */
-  appCode: string;
+  appKey: string;
   /**
    * 数据源ID
    */

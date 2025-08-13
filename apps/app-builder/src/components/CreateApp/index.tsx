@@ -100,6 +100,7 @@ const BasicSetting = (props: IProps) => {
   const handleCreateTagChange = async (val: Options[]) => {
     if (val.length === 0) return;
     const curValue = val[val.length - 1]; // 最后一次更新的数据
+    if (tagList.some((tag) => tag.tagName === curValue.value)) return;
     await createApplicationTag({
       tagName: curValue.value
     } as CreateApplicationTagReq);
@@ -156,8 +157,8 @@ const BasicSetting = (props: IProps) => {
             <div className={styles.modeConfig}>
               <img src={formSVG} alt="Mode Icon" />
               <div className={styles.modeConfigRight}>
-                <div className={styles.modeConfigTitle}>元数据管理</div>
-                <div className={styles.modeConfigDesc}>创建应用后首先需定义元数据，确保您的应用具有清晰的数据结构</div>
+                <div className={styles.modeConfigTitle}>表单搭建</div>
+                <div className={styles.modeConfigDesc}>通过直观的拖拽式界面，快速创建复杂的业务表单</div>
               </div>
             </div>
           </div>
@@ -236,12 +237,15 @@ const BasicSetting = (props: IProps) => {
             </div>
 
             <Form.Item
-              field="appCode"
+              field="appKey"
               label="应用编码"
-              rules={[{ required: true, message: '请填写应用编码', maxLength: 20 }]}
+              rules={[
+                { required: true, message: '请填写应用编码' },
+                { maxLength: 40, message: '长度超过限制' }
+              ]}
               style={{ paddingLeft: 32, flex: 1 }}
             >
-              <Input placeholder="字母、数字、下划线组合，字母开头，不超过20字符" />
+              <Input placeholder="字母、数字、下划线组合，字母开头，不超过40字符" />
             </Form.Item>
           </Grid.Row>
           <Form.Item
