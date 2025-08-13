@@ -108,13 +108,14 @@ public class AppApplicationServiceImpl implements AppApplicationService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public ApplicationCreateRespVO createApplication(ApplicationCreateReqVO createReqVO) {
-        validApplicationCodeDuplicate(createReqVO.getAppCode(), null);
+        validApplicationKeyDuplicate(createReqVO.getAppKey(), null);
         ApplicationDO applicationDO = BeanUtils.toBean(createReqVO, ApplicationDO.class);
+        applicationDO.setId(null);
         applicationDO.setVersionNumber(VersionUtils.INIT_VERSION);
         applicationDO.setAppStatus(ApplicationStatusEnum.EDITING.getValue());
         applicationDO.setAppCode(AppUtils.createAppCode());
-        if (StringUtils.isBlank(applicationDO.getAppDomain())) {
-            applicationDO.setAppDomain(applicationDO.getAppCode());
+        if (StringUtils.isBlank(applicationDO.getAppKey())) {
+            applicationDO.setAppKey(applicationDO.getAppCode());
         }
         applicationDO = applicationRepository.insert(applicationDO);
         saveApplicationTags(applicationDO.getId(), createReqVO.getTagIds());
@@ -141,7 +142,7 @@ public class AppApplicationServiceImpl implements AppApplicationService {
     @Override
     public void updateApplication(ApplicationCreateReqVO createReqVO) {
         appCommonService.validateApplicationExist(createReqVO.getId());
-        validApplicationCodeDuplicate(createReqVO.getAppCode(), createReqVO.getId());
+        validApplicationKeyDuplicate(createReqVO.getAppKey(), createReqVO.getId());
         ApplicationDO updateObj = BeanUtils.toBean(createReqVO, ApplicationDO.class);
         saveApplicationTags(createReqVO.getId(), createReqVO.getTagIds());
         applicationRepository.update(updateObj);
@@ -187,13 +188,13 @@ public class AppApplicationServiceImpl implements AppApplicationService {
     /**
      * 检查 ApplicationDO 表 code 码是否重复，重复跑出异常
      */
-    private void validApplicationCodeDuplicate(String code, Long id) {
+    private void validApplicationKeyDuplicate(String key, Long id) {
         if (id == null) {
-            if (applicationRepository.findOneByAppCode(code) != null) {
+            if (applicationRepository.findOneByKey(key) != null) {
                 throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_CODE_DUPLICATE);
             }
         } else {
-            if (applicationRepository.findByAppCodeAndIdNot(code, id) != null) {
+            if (applicationRepository.findByKeyAndIdNot(key, id) != null) {
                 throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_CODE_DUPLICATE);
             }
         }

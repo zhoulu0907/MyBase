@@ -57,10 +57,6 @@ public class AppApplicationController {
 
     @PostMapping("/update-name")
     @Operation(summary = "更新应用名称")
-    @Parameters({
-            @Parameter(name = "id", description = "应用id", required = true),
-            @Parameter(name = "name", description = "应用名称", required = true)
-    })
     public CommonResult<Boolean> updateApplicationName(@RequestParam("id") Long id,
                                                        @RequestParam("name") String name) {
         appApplicationService.updateApplicationName(id, name);
@@ -70,10 +66,6 @@ public class AppApplicationController {
 
     @PostMapping("/delete")
     @Operation(summary = "删除应用")
-    @Parameters({
-            @Parameter(name = "id", description = "应用id", required = true),
-            @Parameter(name = "name", description = "应用名称", required = true)
-    })
     public CommonResult<Boolean> deleteApplication(@RequestParam("id") Long id,
                                                    @RequestParam("name") String name) {
         appApplicationService.deleteApplication(id, name);
