@@ -62,7 +62,7 @@ const MyAppPage: React.FC = () => {
 
   useEffect(() => {
     pageSize && getApplicationList();
-  }, [pageNo, pageSize]);
+  }, [pageNo, pageSize, name, orderByTime, status]);
 
   const getApplicationList = async () => {
     setLoading(true);
