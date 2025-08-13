@@ -85,3 +85,7 @@ sessionStore
 /元数据管理接口单元测试报告.md
 /datasource_api_test_improved.sh
 /datasource_api_test.sh
+/test_concurrent.py
+/test_concurrent.sh
+/test_concurrent_bg.sh
+/test_stress.sh

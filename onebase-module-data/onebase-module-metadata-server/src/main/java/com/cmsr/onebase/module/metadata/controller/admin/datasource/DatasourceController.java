@@ -110,8 +110,16 @@ public class DatasourceController {
     @PostMapping("/list")
     @Operation(summary = "获得数据源列表")
     @PreAuthorize("@ss.hasPermission('metadata:datasource:query')")
-    public CommonResult<List<DatasourceRespVO>> getDatasourceList() {
-        List<MetadataDatasourceDO> list = datasourceService.getDatasourceList();
+    public CommonResult<List<DatasourceRespVO>> getDatasourceList(@Valid DatasourceListReqVO reqVO) {
+        List<MetadataDatasourceDO> list;
+        
+        // 根据是否传入appId来决定查询方式
+        if (reqVO.getAppId() != null && !reqVO.getAppId().trim().isEmpty()) {
+            list = datasourceService.getDatasourceListByAppId(Long.valueOf(reqVO.getAppId()));
+        } else {
+            list = datasourceService.getDatasourceList();
+        }
+        
         return success(datasourceConvert.convertList(list));
     }
 
