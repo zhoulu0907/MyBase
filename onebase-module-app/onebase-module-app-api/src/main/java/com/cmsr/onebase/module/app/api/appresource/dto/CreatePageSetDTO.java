@@ -22,4 +22,7 @@ public class CreatePageSetDTO {
 
     @Schema(description = "页面集描述", requiredMode = Schema.RequiredMode.NOT_REQUIRED, example = "这是首页的页面集")
     private String description;
+
+    @Schema(description = "页面集主元数据", requiredMode = Schema.RequiredMode.REQUIRED, example = "xxx")
+    private String mainMetadata;
 }

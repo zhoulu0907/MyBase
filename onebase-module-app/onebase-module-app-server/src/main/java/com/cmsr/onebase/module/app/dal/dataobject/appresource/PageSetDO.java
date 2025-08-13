@@ -18,6 +18,9 @@ public class PageSetDO extends TenantBaseDO {
     @Column(name = "menu_code", columnDefinition= "VARCHAR(255) NOT NULL", comment = "菜单编码")
     private String menuCode;
 
+    @Column(name = "main_metadata", columnDefinition= "VARCHAR(255) NOT NULL", comment = "页面主元数据")
+    private String mainMetadata;
+
     @Column(name = "pageset_name", columnDefinition= "VARCHAR(255) NOT NULL", comment = "页面集名称")
     private String pageSetName;
 
