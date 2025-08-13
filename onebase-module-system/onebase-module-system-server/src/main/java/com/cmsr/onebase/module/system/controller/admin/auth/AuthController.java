@@ -109,7 +109,6 @@ public class AuthController {
         if (user == null) {
             return success(null);
         }
-
         // 1.2 获得角色列表
         Set<Long> roleIds = permissionService.getUserRoleIdListByUserId(getLoginUserId());
         if (CollUtil.isEmpty(roleIds)) {
