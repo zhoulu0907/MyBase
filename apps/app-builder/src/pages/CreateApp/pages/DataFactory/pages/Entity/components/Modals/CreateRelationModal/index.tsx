@@ -52,14 +52,16 @@ const CreateRelationModal: React.FC<{
   }, []);
 
   const loadEntities = async () => {
-    const res = await getEntityList(curDataSourceId);
-    if (res.length > 0) {
-      const entityOptions = res.map((entity: any) => ({
-        label: entity.displayName,
-        value: entity.id
-      }));
-      setLeftEntityOptions(entityOptions);
-      setRightEntityOptions(entityOptions);
+    if (curDataSourceId) {
+      const res = await getEntityList(curDataSourceId);
+      if (res.length > 0) {
+        const entityOptions = res.map((entity: any) => ({
+          label: entity.displayName,
+          value: entity.id
+        }));
+        setLeftEntityOptions(entityOptions);
+        setRightEntityOptions(entityOptions);
+      }
     }
   };
 

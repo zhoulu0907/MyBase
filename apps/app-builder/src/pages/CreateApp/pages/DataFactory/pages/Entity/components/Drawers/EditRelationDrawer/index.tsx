@@ -1,4 +1,3 @@
-
 import { Button, Drawer, Form, Message, Select, Space, Spin } from '@arco-design/web-react';
 import { getEntityFields, getEntityList, updateRelation } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
@@ -52,10 +51,11 @@ const EditRelationDrawer: React.FC<EditRelationDrawerProps> = ({ visible, setVis
 
   // 初始化实体选项
   useEffect(() => {
-    if (visible) {
+    console.log('curDataSourceId=====', curDataSourceId);
+    if (visible && curDataSourceId) {
       loadEntities();
     }
-  }, [visible]);
+  }, [visible, curDataSourceId]);
 
   // 当关联关系数据变化时，设置表单值
   useEffect(() => {
