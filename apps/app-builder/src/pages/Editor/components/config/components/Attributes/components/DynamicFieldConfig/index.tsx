@@ -1,5 +1,6 @@
-import { Form, TreeSelect } from '@arco-design/web-react';
-import { getEntityFields, getEntityListByApp, type MetadataEntityField, type MetadataEntityPair } from '@onebase/app';
+import { useAppDataStore } from '@/store';
+import { Cascader, Form } from '@arco-design/web-react';
+import { type AppEntity, type AppEntityField } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
 import styles from '../../index.module.less';
 
@@ -12,66 +13,43 @@ export interface DynamicFieldConfigProps {
 }
 
 const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({ handlePropsChange, item, configs }) => {
-  const [entityList, setEntityList] = useState<MetadataEntityPair[]>([]);
-  const [fieldList, setFieldList] = useState<MetadataEntityField[]>([]);
+  const { appEntities } = useAppDataStore();
 
-  const [entityTree, setEntityTree] = useState([]);
+  const [entityTree, setEntityTree] = useState<any[]>([]);
 
   useEffect(() => {
-    console.log(item);
     initTreeData();
-  }, []);
-
-  const getEntityList = async () => {
-    const res = await getEntityListByApp('1');
-    console.log('res: ', res);
-
-    setEntityList(res);
-    return res;
-  };
-
-  const getFieldList = async (entityId: string) => {
-    const res = await getEntityFields({ entityId });
-    console.log('res: ', res);
-    setFieldList(res);
-
-    return res;
-  };
+  }, [appEntities]);
 
   const initTreeData = async () => {
-    const entityList = await getEntityList();
+    console.log(appEntities);
 
-    console.log(entityList);
-
-    const newEntityTree = (entityList || []).map((entity: MetadataEntityPair) => ({
-      key: entity.entityId,
-      value: entity.entityId,
-      title: entity.entityName
+    const newEntityTree = (appEntities.entities || []).map((entity: AppEntity) => ({
+      value: entity.entityID,
+      label: entity.entityName,
+      children: (entity.fields || [])
+        .filter((field: AppEntityField) => field.isSystemField)
+        .map((field: AppEntityField) => ({
+          value: field.fieldID,
+          label: field.displayName
+        }))
     }));
 
     setEntityTree(newEntityTree);
   };
 
-  const loadFields = async (node: any, dataRef: any) => {
-    console.log(node, dataRef);
-    const fieldList = await getFieldList(dataRef.key);
-    dataRef.children = fieldList
-      .filter((field: MetadataEntityField) => !field.isSystemField)
-      .map((field: MetadataEntityField) => ({
-        key: field.id,
-        value: field.fieldName,
-        title: field.displayName,
-        isLeaf: true
-      }));
-    setEntityTree([...entityTree]);
-  };
-
   return (
     <FormItem layout="vertical" labelAlign="left" label={'数据字段配置'} className={styles.formItem}>
-      <TreeSelect
-        treeData={entityTree}
-        loadMore={loadFields}
+      <Cascader
         value={configs[item.key]}
+        placeholder="请选择数据字段"
+        showEmptyChildren
+        animation={false}
+        unmountOnExit={false}
+        style={{
+          width: '100%'
+        }}
+        options={entityTree}
         onChange={(value) => {
           console.log(value);
           handlePropsChange(item.key, value);

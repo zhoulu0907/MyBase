@@ -367,3 +367,12 @@ export const getEntityGraph = (datasourceId: string) => {
 export const getEntityListByApp = (appId: string) => {
   return metadataService.post(`/business-entity/list-by-app?appId=${appId}`);
 };
+
+/**
+ * 根据应用ID查询所有实体及字段信息
+ * @param appId 应用ID
+ * @returns 实体及字段信息
+ */
+export const getAppEntities = (appId: string) => {
+  return metadataService.post(`/entity-relationship/app-entities?appId=${appId}`);
+};
