@@ -35,24 +35,11 @@ export interface AuthRecord {
  * 平台信息
  */
 export interface LicenseInfo {
-    id: number;
-    /**
-     * 创建时间
-     */
-    createTime: string;
-    /**
-     * 创建人
-     */
-    creator: number;
-    /**
-     * 管理员账号
-     */
-    adminUser: string;
     /**
      * 企业名称
      */
     enterpriseName: string;
-    /**
+     /**
      * 公司编码
      */
     enterpriseCode: string;
@@ -65,13 +52,22 @@ export interface LicenseInfo {
      */
     platformType: string;
     /**
-     * 实际租户数
+     * 过期时间
      */
-    actualTenantCount: number;
+    expireTime: string;
+
     /**
-     * 实际用户数
+     * 创建人
      */
-    actualUserCount: number;
+    creator: number;
+    /**
+     * 管理员账号
+     */
+    adminUser: string;
+    /**
+     * 状态
+     */
+    status: 'enable' | 'disable';
     /**
      * 租户数量限制
      */
@@ -80,16 +76,8 @@ export interface LicenseInfo {
      * 用户数量限制
      */
     userLimit: number;
-    /**
-     * 过期时间
-     */
-    expireTime: string;
-    /**
-     * 状态
-     */
-    status: 'enable' | 'disable';
-    /**
-     * 是否是试用
-     */
-    isTrial: boolean;
+}
+
+export interface LicenseInfoList extends LicenseInfo { 
+  id: string
 }

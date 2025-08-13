@@ -43,6 +43,7 @@ export interface CreateApplicationMenuReq {
   menuName: string;
   menuType: MenuType;
   menuIcon: string;
+  entityCode?: string;
 }
 
 export interface UpdateApplicationMenuNameReq {

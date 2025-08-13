@@ -8,3 +8,4 @@ export * from './dataresource';
 export * from './metadata_entity';
 export * from './metadata_method';
 export * from './tag';
+export * from './role';

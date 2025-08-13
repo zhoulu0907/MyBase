@@ -39,7 +39,7 @@ interface IProps {
   title: string;
   width: number;
   visible: boolean;
-  treeData: any[];
+  treeData?: any[];
   cancel: () => void;
   onConfirm: () => void;
 }
