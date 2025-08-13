@@ -2,16 +2,6 @@
 GET http://127.0.0.1:48080/admin-api/system/license/page?pageNum=1&pageSize=2
 Authorization: Bearer e9f2faef4dfb48169fc69e1ac7aeefdb
 
-### 登录接口
-POST http://127.0.0.1:48080/admin-api/system/auth/login
-Content-Type: application/json
-tenant-id: 1
-
-{
-  "username": "admin",
-  "password": "admin123"
-}
-
 ### 导出凭证
 GET http://127.0.0.1:48080/admin-api/system/license/export?id=1
-Authorization: Bearer e2c473e36664444f8e56abd1a8570ab9
+Authorization: Bearer 93dfb697bec943d6a18d4e73baed2681

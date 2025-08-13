@@ -300,11 +300,6 @@ public class AdminUserServiceImpl implements AdminUserService {
     }
 
     @Override
-    public AdminUserDO getUserByTenantIDAndUserName(String username, Long tenantId) {
-        return dataRepository.findOne(AdminUserDO.class, new DefaultConfigStore().eq("username", username).eq("tenant_id", tenantId));
-    }
-
-    @Override
     public AdminUserDO getUserByMobile(String mobile) {
         return dataRepository.findOne(AdminUserDO.class, new DefaultConfigStore().eq("mobile", mobile));
         // return userMapper.selectByMobile(mobile);

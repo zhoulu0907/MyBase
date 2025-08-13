@@ -69,4 +69,12 @@ public interface LicenseService {
      * @return License列表
      */
     List<LicenseDO> getSimpleLicenseList();
+
+    /**
+     * 获取启用状态License
+     *
+     * @return License列表
+     */
+    List<LicenseDO> getEnableLicenseList();
+
 }

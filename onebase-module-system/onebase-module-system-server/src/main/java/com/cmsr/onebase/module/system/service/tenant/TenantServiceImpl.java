@@ -30,6 +30,7 @@ import com.cmsr.onebase.module.system.enums.permission.PackageTypeEnum;
 import com.cmsr.onebase.module.system.enums.permission.RoleCodeEnum;
 import com.cmsr.onebase.module.system.enums.permission.RoleTypeEnum;
 import com.cmsr.onebase.module.system.enums.tenant.TenantStatusEnum;
+import com.cmsr.onebase.module.system.enums.user.UserPasswordEnum;
 import com.cmsr.onebase.module.system.enums.user.UserStatusEnum;
 import com.cmsr.onebase.module.system.service.license.LicenseService;
 import com.cmsr.onebase.module.system.service.permission.MenuService;
@@ -114,7 +115,7 @@ public class TenantServiceImpl implements TenantService {
         Integer userCount = userService.getUserCountByStatus(UserStatusEnum.NORMAL.getStatus());
         if (license != null) {
             // 获取license总人数限制
-            Integer licenseTotalCount = license.getTenantLimit();
+            Integer licenseTotalCount = license.getUserLimit();
             // 如果license总人数限制小于已分配人员数量，则返回0
             if (licenseTotalCount < userCount) {
                 return 0L;
@@ -141,6 +142,14 @@ public class TenantServiceImpl implements TenantService {
     }
 
     @Override
+    public Long getTenantExistUserCount(Long tenantId) {
+        // 查询当前租户下已分配的用户数量
+        return TenantUtils.execute(tenantId, () -> {
+            return Long.valueOf(userService.getUserCountByStatus(UserStatusEnum.NORMAL.getStatus()));
+        });
+    }
+
+    @Override
     public Long createTenant(TenantInsertReqVO createReqVO) {
         // 校验租户名称是否重复
         validTenantNameDuplicate(createReqVO.getName(), null);
@@ -162,15 +171,15 @@ public class TenantServiceImpl implements TenantService {
         // 检查分配人员数量是否超过license限制
         if (license != null) {
             // 获取license总人数限制
-            Integer licenseTotalCount = license.getUserLimit();
+            Integer userLimit = license.getUserLimit();
             // 获取现有租户已分配的用户数量
-            Long userCount = getOtherTenantUserCount(null);
+            Long otherUserCount = getOtherTenantUserCount(null);
             // 如果传入的分配人员数量加上已分配数量超过license限制，则报错
             if (createReqVO.getAccountCount() != null &&
-                    (userCount + createReqVO.getAccountCount()) > licenseTotalCount) {
-                Integer remainingCount = (int) (licenseTotalCount - userCount);
+                    (otherUserCount + createReqVO.getAccountCount()) > userLimit) {
+                Integer remainingCount = (int) (userLimit - otherUserCount);
                 throw exception(LICENSE_USER_COUNT_NOT_ENOUGH,
-                        licenseTotalCount,
+                        userLimit,
                         remainingCount);
             }
         }
@@ -194,12 +203,11 @@ public class TenantServiceImpl implements TenantService {
             // 创建用户，并分配角色
             createReqVO.setUsername(createReqVO.getContactName());
             if (StringUtils.isEmpty(createReqVO.getPassword())) {
-                createReqVO.setPassword("admin123");
+                createReqVO.setPassword(UserPasswordEnum.PASSWORD_ENUM.getPassword());
             }
             Long userId = createUser(roleId, createReqVO);
             // 修改租户的管理员
             TenantDO tenantDO = new TenantDO().setContactUserId(userId);
-            tenantDO.setAccountCount(createReqVO.getAccountCount() - 1);
             tenantDO.setId(finalTenant.getId());
             dataRepository.update(tenantDO);
         });
@@ -241,30 +249,21 @@ public class TenantServiceImpl implements TenantService {
             packageId = tenant.getPackageId();
         }
         TenantPackageDO tenantPackage = tenantPackageService.validTenantPackage(packageId);
-        // 根据管理员名称和tenant_id去查询，当前修改的管理员名称是否存在
-        if (StringUtils.isNotEmpty(updateReqVO.getContactName())) {
-            AdminUserDO user = userService.getUserByTenantIDAndUserName(updateReqVO.getContactName(), updateReqVO.getId());
-            TenantUtils.execute(tenant.getId(), () -> {
-                if (user != null) {
-                    throw exception(USER_USERNAME_EXISTS);
-                }
-            });
-        }
 
         LicenseDO license = licenseService.getLicenseByStatus(LicenseStatusEnum.ENABLE.getStatus());
         // 检查分配人员数量是否超过license限制
         if (license != null) {
             // 获取license总人数限制
-            Integer licenseTotalCount = license.getUserLimit();
+            Integer userLimit = license.getUserLimit();
             // 获取除当前租户外的其他租户已分配人员数量，判断上限
-            Long userCount = getOtherTenantUserCount(updateReqVO.getId());
+            Long otherUserCount = getOtherTenantUserCount(updateReqVO.getId());
             // 如果传入的分配人员数量加上已分配数量超过license限制，则报错
             if (updateReqVO.getAccountCount() != null &&
-                    (userCount + updateReqVO.getAccountCount()) > licenseTotalCount) {
+                    (otherUserCount + updateReqVO.getAccountCount()) > userLimit) {
 
-                Integer remainingCount = (int) (licenseTotalCount - userCount);
+                Integer remainingCount = (int) (userLimit - otherUserCount);
                 throw exception(LICENSE_USER_COUNT_NOT_ENOUGH,
-                        licenseTotalCount,
+                        userLimit,
                         remainingCount);
             }
             TenantUtils.execute(tenant.getId(), () -> {
@@ -275,16 +274,22 @@ public class TenantServiceImpl implements TenantService {
                             count);
                 }
             });
-
         }
-
+        // 根据管理员名称和tenant_id去查询，当前修改的管理员名称是否存在
+        if (StringUtils.isNotEmpty(updateReqVO.getContactName())) {
+            TenantUtils.execute(tenant.getId(), () -> {
+                AdminUserDO user = userService.getUserByUsername(updateReqVO.getContactName());
+                if (user != null) {
+                    throw exception(USER_USERNAME_EXISTS);
+                }
+            });
+        }
         // 更新租户
         TenantDO updateObj = BeanUtils.toBean(updateReqVO, TenantDO.class);
-        dataRepository.update(updateObj);
+
         if (StringUtils.isNotBlank(updateReqVO.getContactName()) &&
                 !updateReqVO.getContactName().equals(tenant.getContactName())) {
             TenantUtils.execute(updateObj.getId(), () -> {
-
 
                 RoleDO roleDO = roleService.getRoleIdsByCode(RoleCodeEnum.TENANT_ADMIN.getCode());
                 Long roleId;
@@ -294,28 +299,34 @@ public class TenantServiceImpl implements TenantService {
                 } else {
                     roleId = roleDO.getId();
                 }
+
                 // 移除旧用户角色
                 UserRoleDO userRoleDO = permissionService.getUserRoleByUserAndRoleId(tenant.getContactUserId(), roleId);
                 if (userRoleDO != null) {
                     permissionService.deleteRoleUsers(roleId, singleton(userRoleDO.getUserId()));
                 }
-                // 创建用户，并分配角色
-                TenantInsertReqVO reqVO = new TenantInsertReqVO();
-                reqVO.setContactName(updateReqVO.getContactName());
-                reqVO.setUsername(updateReqVO.getContactName());
-                if (StringUtils.isEmpty(updateReqVO.getPassword())) {
-                    reqVO.setPassword("admin123");
-                }
-                Long userId = createUser(roleId, reqVO);
-                // 修改租户的管理员
-                // 当前租户实际可分配数量
-                Integer actualCount = userService.getUserCountByStatus(UserStatusEnum.NORMAL.getStatus());
-                TenantDO tenantDO = new TenantDO().setContactUserId(userId);
-                tenantDO.setId(updateObj.getId());
-                tenantDO.setAccountCount(updateObj.getAccountCount() - actualCount);
-                dataRepository.update(tenantDO);
 
+                AdminUserDO user = userService.getUserByUsername(updateReqVO.getContactName());
+                Long userId;
+                if (user != null) {
+                    userId = user.getId();
+                    // 新管理员分配角色
+                    permissionService.assignUserRoles(userId, singleton(roleId));
+                }else{
+                    // 创建用户，并分配角色
+                    TenantInsertReqVO reqVO = new TenantInsertReqVO();
+                    reqVO.setContactName(updateReqVO.getContactName());
+                    reqVO.setUsername(updateReqVO.getContactName());
+                    if (StringUtils.isEmpty(updateReqVO.getPassword())) {
+                        reqVO.setPassword(UserPasswordEnum.PASSWORD_ENUM.getPassword());
+                    }
+                    userId = createUser(roleId, reqVO);
+                }
+
+                // 修改租户的管理员
+                updateObj.setContactUserId(userId);
             });
+            dataRepository.update(updateObj);
             // 如果套餐发生变化，则修改其角色的权限
             if (ObjectUtil.notEqual(tenant.getPackageId(), updateReqVO.getPackageId())) {
                 updateTenantRoleMenu(tenant.getId(), tenantPackage.getMenuIds());

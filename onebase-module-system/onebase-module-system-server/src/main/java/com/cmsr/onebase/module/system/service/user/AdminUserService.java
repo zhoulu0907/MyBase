@@ -109,15 +109,6 @@ public interface AdminUserService {
     AdminUserDO getUserByUsername(String username);
 
     /**
-     * 通过租户id和用户名
-     * @param tenantId 租户id
-     * @param username 用户名
-     * @return 用户对象信息
-     */
-    AdminUserDO getUserByTenantIDAndUserName(String username,Long tenantId);
-
-
-    /**
      * 通过手机号获取用户
      *
      * @param mobile 手机号

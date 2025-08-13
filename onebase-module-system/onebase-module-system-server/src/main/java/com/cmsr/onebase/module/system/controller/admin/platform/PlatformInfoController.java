@@ -50,13 +50,13 @@ public class PlatformInfoController {
     private TenantService tenantService;
 
     @Resource
-    private AdminUserService  adminUserService;
+    private AdminUserService adminUserService;
     @Resource
     private PermissionService permissionService;
     @Resource
-    private RoleService       roleService;
+    private RoleService roleService;
     @Resource
-    private AdminUserService  userService;
+    private AdminUserService userService;
 
     /**
      * 根据状态查询出enable的license记录

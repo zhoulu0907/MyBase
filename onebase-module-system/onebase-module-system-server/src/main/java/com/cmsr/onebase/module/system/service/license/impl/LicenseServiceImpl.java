@@ -6,9 +6,11 @@ import com.cmsr.onebase.module.system.controller.admin.license.vo.LicensePageReq
 import com.cmsr.onebase.module.system.controller.admin.license.vo.LicenseSaveReqVO;
 import com.cmsr.onebase.module.system.dal.database.LicenseDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.license.LicenseDO;
+import com.cmsr.onebase.module.system.enums.license.LicenseStatusEnum;
 import com.cmsr.onebase.module.system.service.license.LicenseService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.anyline.data.param.init.DefaultConfigStore;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
@@ -16,7 +18,7 @@ import java.util.List;
 
 /**
  * License 服务实现类
- *
+ * <p>
  * 提供License的增删改查等核心服务能力。
  *
  * @author matianyu
@@ -110,5 +112,11 @@ public class LicenseServiceImpl implements LicenseService {
     @Override
     public List<LicenseDO> getSimpleLicenseList() {
         return licenseDataRepository.findSimpleList();
+    }
+
+    @Override
+    public List<LicenseDO> getEnableLicenseList() {
+        return licenseDataRepository.findAllByConfig(new DefaultConfigStore()
+                .eq(LicenseDO.STATUS, LicenseStatusEnum.ENABLE.getStatus()));
     }
 }

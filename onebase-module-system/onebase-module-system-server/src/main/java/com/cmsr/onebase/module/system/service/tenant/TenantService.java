@@ -156,4 +156,11 @@ public interface TenantService {
      */
     Long getOtherTenantUserCount(Long tenantId);
 
+    /**
+     * 获取当前租户已存在的用户数量
+     *
+     * @return 获取当前租户已存在的用户数量
+     */
+    Long getTenantExistUserCount(Long tenantId);
+
 }

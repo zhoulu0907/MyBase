@@ -172,4 +172,9 @@ public interface ErrorCodeConstants {
     // ========== 站内信发送 1-002-028-000 ==========
     ErrorCode NOTIFY_SEND_TEMPLATE_PARAM_MISS = new ErrorCode(1_002_028_000, "模板参数({})缺失");
 
+    // ========== 平台管理凭证 1-002-029-000 ==========
+    ErrorCode LICENSE_NOT_EXISTS = new ErrorCode(1_002_029_000, "未找到ID为({})的凭证");
+    ErrorCode LICENSE_IMPORT_ERROR = new ErrorCode(1_002_030_000, "凭证导入失败");
+    ErrorCode LICENSE_DECRYPT_ERROR = new ErrorCode(1_002_031_000, "解密失败，文件可能已损坏或不是有效的加密文件");
+
 }

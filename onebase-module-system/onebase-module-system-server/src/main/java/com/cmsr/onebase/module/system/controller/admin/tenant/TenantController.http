@@ -17,12 +17,12 @@ tenant-id: 1
 ### 更新租户 /admin-api/system/tenant/update
 POST http://127.0.0.1:48080/admin-api/system/tenant/update
 Content-Type: application/json
-Authorization: Bearer fe416b951aa24e21ac721bc65794ca6b
+Authorization: Bearer 81ba5c8bdab54021bf2a187273a59eef
 tenant-id: 1
 
 {
-  "id": "544449082769412096",
-  "name": "租户15",
+  "id": "544759610783961088",
+  "name": "测试8",
   "accountCount": "20",
   "contactName": "test1",
   "status": 0
@@ -40,10 +40,16 @@ Content-Type: application/json
 Authorization: Bearer e2c473e36664444f8e56abd1a8570ab9
 tenant-id: 1
 
-### 获得租户其他已有的用户数量 /admin-api/system/tenant/get-allocatable-count
-GET http://127.0.0.1:48080/admin-api/system/tenant/get-exist-user-count?id=1
+### 获得租户其他已有的用户数量 /admin-api/system/tenant/get-exist-user-count
+GET http://127.0.0.1:48080/admin-api/system/tenant/get-exist-user-count?id=544719549828829184
 Content-Type: application/json
-Authorization: Bearer e2c473e36664444f8e56abd1a8570ab9
+Authorization: Bearer 5657d1818df9432a99eb550c570a9705
+tenant-id: 1
+
+### 获得租户其他已有的用户数量 /admin-api/system/tenant/get-tenant-exist-user-count
+GET http://127.0.0.1:48080/admin-api/system/tenant/get-tenant-exist-user-count?id=544719549828829184
+Content-Type: application/json
+Authorization: Bearer 5657d1818df9432a99eb550c570a9705
 tenant-id: 1
 
 ### 更新租户 /admin-api/system/tenant/page
