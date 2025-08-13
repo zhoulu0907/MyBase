@@ -3,6 +3,7 @@ import type { EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/inter
 import { Form, Grid, Input, Message, Modal, Radio, Select } from '@arco-design/web-react';
 import { getEntityList, getEntityFields, createMasterChild } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
+import { useAppStore } from '@/store';
 import styles from '../modal.module.less';
 
 interface MasterDetailFormValues {
@@ -32,6 +33,7 @@ const CreateMasterDetailModal: React.FC<{
   entity: EntityNode;
   successCallback: () => void;
 }> = ({ visible, setVisible, successCallback }) => {
+  const { curAppId } = useAppStore();
   const [form] = Form.useForm<MasterDetailFormValues>();
   const [loading, setLoading] = useState(false);
   const [entityOptions, setEntityOptions] = useState<EntityOption[]>([]);
@@ -110,7 +112,7 @@ const CreateMasterDetailModal: React.FC<{
         const requestData = {
           parentEntityId: values.parentEntityId,
           parentFieldId: values.parentFieldId,
-          appId: resouceId,
+          appId: curAppId,
           datasourceId: resouceId
         };
 

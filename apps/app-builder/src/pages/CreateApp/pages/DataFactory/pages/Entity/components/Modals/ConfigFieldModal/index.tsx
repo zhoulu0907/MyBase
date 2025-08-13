@@ -13,6 +13,7 @@ import {
   Tooltip
 } from '@arco-design/web-react';
 import { IconDragDotVertical, IconPlus, IconSettings } from '@arco-design/web-react/icon';
+import { useAppStore } from '@/store';
 import { batchSaveFields, getEntityFields } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
@@ -60,6 +61,7 @@ const SortableTableRow = (props) => {
   return <tr {...restProps}>{children}</tr>;
 };
 const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible, entity, successCallback }) => {
+  const { curAppId } = useAppStore();
   const [fields, setFields] = useState<FieldFormValues[]>([]);
   const [loading, setLoading] = useState(false);
   const [configPopoverVisible, setConfigPopoverVisible] = useState<string | null>(null);
@@ -158,7 +160,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
       const allFields = fields.filter((field) => field.isSystemField === 1);
       const fieldDataList = allFields.map((field) => {
         const fieldData = {
-          appId: '1',
+          appId: curAppId,
           entityId: entity.entityId,
           fieldCode: field.fieldCode,
           fieldName: field.fieldName,
@@ -173,7 +175,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
       });
 
       const params = {
-        appId: '1',
+        appId: curAppId,
         entityId: entity.entityId,
         items: fieldDataList
       };

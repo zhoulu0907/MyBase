@@ -1,5 +1,6 @@
 import { resouceId } from '@/pages/CreateApp/pages/DataFactory/utils/const';
 import { Form, Message, Modal, Select } from '@arco-design/web-react';
+import { useAppStore } from '@/store';
 import { createRelation, getEntityFields, getEntityList } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
 import styles from '../modal.module.less';
@@ -37,6 +38,7 @@ const CreateRelationModal: React.FC<{
   updateRelationOptions: boolean;
   setUpdateRelationOptions: (updateRelationOptions: boolean) => void;
 }> = ({ visible, setVisible, successCallback }) => {
+  const { curAppId } = useAppStore();
   const [form] = Form.useForm<RelationFormValues>();
   const [leftEntityOptions, setLeftEntityOptions] = useState<EntityOption[]>([]);
   const [rightEntityOptions, setRightEntityOptions] = useState<EntityOption[]>([]);
@@ -104,7 +106,7 @@ const CreateRelationModal: React.FC<{
       const params = {
         ...values,
         relationName: '1',
-        appId: '1'
+        appId: curAppId
       };
 
       const res = await createRelation(params);

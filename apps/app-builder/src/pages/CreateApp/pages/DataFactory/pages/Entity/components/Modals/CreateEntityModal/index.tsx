@@ -1,5 +1,6 @@
 import { DS_RESOURCE_TYPE, resouceId } from '@/pages/CreateApp/pages/DataFactory/utils/const';
 import { Form, Input, Message, Modal, Radio, Select } from '@arco-design/web-react';
+import { useAppStore } from '@/store';
 import { createEntity } from '@onebase/app';
 import React, { useState } from 'react';
 import styles from '../modal.module.less';
@@ -27,6 +28,7 @@ const CreateEntityModal: React.FC<{
   successCallback: () => void;
   entityListLength: number;
 }> = ({ visible, setVisible, successCallback, entityListLength }) => {
+  const { curAppId } = useAppStore();
   const [form] = Form.useForm<EntityFormValues>();
   const [dsResource, setDsResource] = useState<string>(DS_RESOURCE_TYPE.EXTERNAL); // 数据源来源：内部数据源、外部数据源、外部数据源中引用自有数据源已有资产
   // 提交
@@ -55,7 +57,7 @@ const CreateEntityModal: React.FC<{
         entityType: 1, // 实体类型 1:自建表，2:复用已有表
         description: values.description,
         datasourceId: resouceId,
-        appId: '1',
+        appId: curAppId,
         displayConfig: JSON.stringify({
           x: entityListLength * 300,
           y: 0

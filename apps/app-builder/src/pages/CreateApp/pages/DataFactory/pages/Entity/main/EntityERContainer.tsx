@@ -6,6 +6,7 @@ import type {
   EntityNode
 } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
 import { Button, Message } from '@arco-design/web-react';
+import { useAppStore } from '@/store';
 import EditEntityDrawer from '../components/Drawers/EditEntityDrawer';
 import EditFieldDrawer from '../components/Drawers/EditFieldDrawer';
 import EditRelationDrawer from '../components/Drawers/EditRelationDrawer';
@@ -29,6 +30,7 @@ export const EntityERContainer: React.FC<{
   onlyUpdateNode: boolean;
   setOnlyUpdateNode: (onlyUpdateNode: boolean) => void;
 }> = ({ refreshEntityList, setRefreshEntityList, onlyUpdateNode, setOnlyUpdateNode }) => {
+  const { curAppId } = useAppStore();
   // const [mode, setMode] = useState<'view' | 'edit'>('view');
   const [data, setData] = useState<EntityERProps['data']>(
     JSON.parse(
@@ -125,7 +127,7 @@ export const EntityERContainer: React.FC<{
       displayConfig: JSON.stringify({ x, y }),
       code: data.code,
       datasourceId: resouceId,
-      appId: '1'
+      appId: curAppId
     };
     const res = await updateEntity(params);
     console.log('updateEntity', res);

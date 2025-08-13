@@ -4,6 +4,7 @@ import { IconDelete, IconPlus } from '@arco-design/web-react/icon';
 import React, { useState } from 'react';
 import { getEntityFieldsWithChildren } from '@onebase/app';
 import styles from '../modal.module.less';
+import { useAppStore } from '@/store';
 
 interface ConditionRow {
   field: string;
@@ -35,6 +36,7 @@ interface CreateRuleModalProps {
 }
 
 const CreateRuleModal: React.FC<CreateRuleModalProps> = ({ visible, setVisible, successCallback, entity }) => {
+  const { curAppId } = useAppStore();
   const [form] = Form.useForm<RuleFormValues>();
   const [loading, setLoading] = useState(false);
   const [leftFieldOptions, setLeftFieldOptions] = useState<any[]>([]);
@@ -175,7 +177,7 @@ const CreateRuleModal: React.FC<CreateRuleModalProps> = ({ visible, setVisible, 
       // const res = await createRule({
       //   ...values,
       //   entityId: entity.entityId,
-      //   appId: '1'
+      //   appId: curAppId
       // });
 
       Message.success('创建规则成功');

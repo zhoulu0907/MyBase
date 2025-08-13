@@ -4,6 +4,7 @@ import { getEntityFields, getEntityList, updateRelation } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
 import type { EdgeData } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
+import { useAppStore } from '@/store';
 
 interface EntityOption {
   label: string;
@@ -39,6 +40,7 @@ const relationTypes = [
 ];
 
 const EditRelationDrawer: React.FC<EditRelationDrawerProps> = ({ visible, setVisible, relationData, onSuccess }) => {
+  const { curAppId } = useAppStore();
   const [form] = Form.useForm<RelationFormValues>();
   const [leftEntityOptions, setLeftEntityOptions] = useState<EntityOption[]>([]);
   const [rightEntityOptions, setRightEntityOptions] = useState<EntityOption[]>([]);
@@ -140,7 +142,7 @@ const EditRelationDrawer: React.FC<EditRelationDrawerProps> = ({ visible, setVis
       const updateData = {
         id: relationData?.relationshipId,
         ...values,
-        appId: '1'
+        appId: curAppId
       };
 
       await updateRelation(updateData);
