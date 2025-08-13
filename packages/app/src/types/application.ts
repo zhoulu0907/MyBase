@@ -29,7 +29,7 @@ export interface Application {
   /**
    * 应用状态, 对应AppStatus
    */
-  appStatus?: 0 | 1 | 2;
+  appStatus: 0 | 1 | 2;
   /**
    * 标签列表
    */

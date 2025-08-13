@@ -16,63 +16,22 @@ import {
 } from '@onebase/app';
 import dayjs from 'dayjs';
 import { debounce } from 'lodash-es';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, useRef } from 'react';
 import { PermissionButton as Button } from '@/components/PermissionControl';
 import { hasPermission } from '@/utils/permission';
 import { TENANT_DEPT_PERMISSION as ACTIONS } from '@/constants/permission';
 import { type Options } from '@/components/CreateApp/const';
 import { useI18n } from '@/hooks/useI18n';
+import { appOptions, createTimeOptions, statusOptions, TagColor, defaultTheme, calculateMaxItems } from './const';
 import styles from './index.module.less';
 
 const Option = Select.Option;
-const appOptions = [
-  {
-    label: '全部应用',
-    value: 0
-  },
-  {
-    label: '我创建的',
-    value: 1
-  }
-];
-const createTimeOptions = [
-  {
-    label: '按创建时间排序',
-    value: 'create'
-  },
-  {
-    label: '按更新时间排序',
-    value: 'update'
-  }
-];
-const statusOptions = [
-  {
-    label: '全部状态',
-    value: ''
-  },
-  {
-    label: '开发中',
-    value: 0
-  },
-  {
-    label: '已发布',
-    value: 1
-  }
-];
-
-enum TagColor {
-  'arcoblue',
-  'red',
-  'orangered'
-}
-
-const defaultTheme = '#4FAE7B';
 
 const MyAppPage: React.FC = () => {
   const [form] = Form.useForm();
   const { t } = useI18n();
 
-  const [pageSize, setPageSize] = useState(8);
+  const [pageSize, setPageSize] = useState<number>();
   const [pageNo, setPageNo] = useState(1);
   const [dataList, setDataList] = useState<Application[]>([]);
   const [total, setTotal] = useState(0);
@@ -91,15 +50,25 @@ const MyAppPage: React.FC = () => {
 
   const { setCurAppId } = useAppStore();
 
+  const appContainerRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
-    getApplicationList();
-  }, [pageNo, pageSize, name, orderByTime, status]);
+    if (!appContainerRef.current) return;
+    const containerWidth = appContainerRef.current?.offsetWidth;
+    const containerHeight = appContainerRef.current?.offsetHeight;
+    const maxAppInfo = calculateMaxItems(containerWidth, containerHeight);
+    setPageSize(maxAppInfo.total);
+  }, [appContainerRef.current]);
+
+  useEffect(() => {
+    pageSize && getApplicationList();
+  }, [pageNo, pageSize]);
 
   const getApplicationList = async () => {
     setLoading(true);
     const req: ListApplicationReq = {
       pageNo,
-      pageSize,
+      pageSize: pageSize || 8,
       name,
       ownerTag: ownerTag === 1 ? true : false,
       orderByTime,
@@ -237,172 +206,170 @@ const MyAppPage: React.FC = () => {
         </Button>
       </div>
 
-      <div className={styles.myAppContainerWrapper}>
-        <div className={styles.myAppContainer}>
-          <div className={styles.myAppFilter}>
-            <Input
-              className={styles.myAppInput}
-              allowClear
-              suffix={<IconSearch />}
-              onChange={handleSearchChange}
-              placeholder="搜索"
-            />
+      <div className={styles.myAppContainer}>
+        <div className={styles.myAppFilter}>
+          <Input
+            className={styles.myAppInput}
+            allowClear
+            suffix={<IconSearch />}
+            onChange={handleSearchChange}
+            placeholder="搜索"
+          />
 
-            {/* 筛选下拉框 */}
-            <div>
-              <Select
-                placeholder="全部应用"
-                bordered={false}
-                style={{ width: 100 }}
-                value={ownerTag}
-                onChange={(value) => setOwnerTag(value)}
-              >
-                {appOptions.map((option, index) => (
-                  <Option key={index} disabled={index === 3} value={option.value}>
-                    {option.label}
-                  </Option>
-                ))}
-              </Select>
-              <Divider type="vertical" />
-              <Select
-                placeholder="按创建时间排序"
-                bordered={false}
-                style={{ width: 138 }}
-                onChange={(value) => setOrderByTime(value)}
-                value={orderByTime}
-              >
-                {createTimeOptions.map((option, index) => (
-                  <Option key={index} disabled={index === 3} value={option.value}>
-                    {option.label}
-                  </Option>
-                ))}
-              </Select>
-              <Divider type="vertical" />
-              <Select
-                placeholder="全部状态"
-                bordered={false}
-                style={{ width: 100 }}
-                onChange={(value) => setStatus(value)}
-                value={status}
-              >
-                {statusOptions.map((option, index) => (
-                  <Option key={index} value={option.value}>
-                    {option.label}
-                  </Option>
-                ))}
-              </Select>
-            </div>
+          {/* 筛选下拉框 */}
+          <div>
+            <Select
+              placeholder="全部应用"
+              bordered={false}
+              style={{ width: 100 }}
+              value={ownerTag}
+              onChange={(value) => setOwnerTag(value)}
+            >
+              {appOptions.map((option, index) => (
+                <Option key={index} disabled={index === 3} value={option.value}>
+                  {option.label}
+                </Option>
+              ))}
+            </Select>
+            <Divider type="vertical" />
+            <Select
+              placeholder="按创建时间排序"
+              bordered={false}
+              style={{ width: 138 }}
+              onChange={(value) => setOrderByTime(value)}
+              value={orderByTime}
+            >
+              {createTimeOptions.map((option, index) => (
+                <Option key={index} disabled={index === 3} value={option.value}>
+                  {option.label}
+                </Option>
+              ))}
+            </Select>
+            <Divider type="vertical" />
+            <Select
+              placeholder="全部状态"
+              bordered={false}
+              style={{ width: 100 }}
+              onChange={(value) => setStatus(value)}
+              value={status}
+            >
+              {statusOptions.map((option, index) => (
+                <Option key={index} value={option.value}>
+                  {option.label}
+                </Option>
+              ))}
+            </Select>
           </div>
+        </div>
 
-          {/* 我的应用列表 */}
+        {/* 我的应用列表 */}
 
-          <Spin loading={loading} size={40} style={{ width: '100%', height: '100%' }} tip="加载中...">
-            <div className={styles.myAppList}>
-              {dataList.map((item, index) => (
-                <div
-                  className={styles.myAppCard}
-                  key={index}
-                  onClick={() => {
-                    nagivateToDataFactory(item.id);
-                  }}
-                >
-                  <div className={styles.myAppCardTop}>
-                    <div className={styles.myAppCardHeader}>
-                      <div className={styles.myAppName}>
-                        <div className={styles.myAppIcon} style={{ backgroundColor: item.iconColor }}>
-                          <i className={`iconfont ${item.iconName || 'icon-box'}`} />
-                        </div>
-                        <div className={styles.myAppCardInfo}>
-                          <div className={styles.myAppTitle}>{item.appName}</div>
-                          <div className={styles.myAppTime}>{dayjs(item.updateTime).format('YYYY-MM-DD HH:mm:ss')}</div>
-                        </div>
+        <Spin loading={loading} size={40} style={{ width: '100%', height: '100%' }} tip="加载中...">
+          <div className={styles.myAppList} ref={appContainerRef}>
+            {dataList.map((item, index) => (
+              <div
+                className={styles.myAppCard}
+                key={index}
+                onClick={() => {
+                  nagivateToDataFactory(item.id);
+                }}
+              >
+                <div className={styles.myAppCardTop}>
+                  <div className={styles.myAppCardHeader}>
+                    <div className={styles.myAppName}>
+                      <div className={styles.myAppIcon} style={{ backgroundColor: item.iconColor }}>
+                        <i className={`iconfont ${item.iconName || 'icon-box'}`} />
                       </div>
-                      <Tag
-                        color={TagColor[item.appStatus]}
-                        icon={<IconCheckCircle style={{ color: TagColor[item.appStatus] }} />}
-                        style={{
-                          fontSize: 14,
-                          fontWeight: 400
-                        }}
-                      >
-                        {item.appStatusText}
-                      </Tag>
-                    </div>
-
-                    <div className={styles.myAppCardBody}>
-                      <div className={styles.myAppDesc}>{item.description}</div>
-                      <div className={styles.myAppTags}>
-                        {item.tags?.map((tag) => (
-                          <Tag
-                            key={tag.id}
-                            style={{
-                              color: item.themeColor || defaultTheme,
-                              borderColor: item.themeColor || defaultTheme,
-                              backgroundColor: '#fff'
-                            }}
-                          >
-                            {tag.tagName}
-                          </Tag>
-                        ))}
+                      <div className={styles.myAppCardInfo}>
+                        <div className={styles.myAppTitle}>{item.appName}</div>
+                        <div className={styles.myAppTime}>{dayjs(item.updateTime).format('YYYY-MM-DD HH:mm:ss')}</div>
                       </div>
                     </div>
+                    <Tag
+                      color={TagColor[item.appStatus]}
+                      icon={<IconCheckCircle style={{ color: TagColor[item.appStatus] }} />}
+                      style={{
+                        fontSize: 14,
+                        fontWeight: 400
+                      }}
+                    >
+                      {item.appStatusText}
+                    </Tag>
                   </div>
-                  <Divider style={{ margin: '12px 0' }} />
-                  <div className={styles.myAppCardFooter}>
-                    <div className={styles.myAppCreator}>
-                      <Avatar
-                        size={24}
-                        style={{
-                          backgroundColor: item.themeColor || defaultTheme
-                        }}
-                      >
-                        {item.createUser?.slice(0, 1) || 'U'}
-                      </Avatar>
-                      <div className={styles.myAppCreatorName}>{item.createUser}</div>
-                    </div>
 
-                    <div className={styles.myAppOperate}>
-                      {hasPermission(ACTIONS.UPDATE) && (
-                        <img
-                          src={appEditSVG}
-                          alt="编辑"
-                          className={styles.operateIcon}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            nagivateToAppPage(item.id);
+                  <div className={styles.myAppCardBody}>
+                    <div className={styles.myAppDesc}>{item.description}</div>
+                    <div className={styles.myAppTags}>
+                      {item.tags?.map((tag: { id: string; tagName: string }) => (
+                        <Tag
+                          key={tag.id}
+                          style={{
+                            color: item.themeColor || defaultTheme,
+                            borderColor: item.themeColor || defaultTheme,
+                            backgroundColor: '#fff'
                           }}
-                        />
-                      )}
-                      {hasPermission(ACTIONS.DELETE) && (
-                        <img
-                          src={appDeleteSVG}
-                          alt="删除"
-                          className={styles.operateIcon}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setDeleteApp(item);
-                            setDeleteVisible(true);
-                          }}
-                        />
-                      )}
+                        >
+                          {tag.tagName}
+                        </Tag>
+                      ))}
                     </div>
                   </div>
                 </div>
-              ))}
-            </div>
-          </Spin>
+                <Divider style={{ margin: '12px 0' }} />
+                <div className={styles.myAppCardFooter}>
+                  <div className={styles.myAppCreator}>
+                    <Avatar
+                      size={24}
+                      style={{
+                        backgroundColor: item.themeColor || defaultTheme
+                      }}
+                    >
+                      {item.createUser?.slice(0, 1) || 'U'}
+                    </Avatar>
+                    <div className={styles.myAppCreatorName}>{item.createUser}</div>
+                  </div>
 
-          <Pagination
-            className={styles.myAppPagination}
-            total={total}
-            current={pageNo}
-            pageSize={pageSize}
-            onChange={(pNo, pSize) => {
-              setPageNo(pNo);
-              setPageSize(pSize);
-            }}
-          />
-        </div>
+                  <div className={styles.myAppOperate}>
+                    {hasPermission(ACTIONS.UPDATE) && (
+                      <img
+                        src={appEditSVG}
+                        alt="编辑"
+                        className={styles.operateIcon}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          nagivateToAppPage(item.id);
+                        }}
+                      />
+                    )}
+                    {hasPermission(ACTIONS.DELETE) && (
+                      <img
+                        src={appDeleteSVG}
+                        alt="删除"
+                        className={styles.operateIcon}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDeleteApp(item);
+                          setDeleteVisible(true);
+                        }}
+                      />
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Spin>
+
+        <Pagination
+          className={styles.myAppPagination}
+          total={total}
+          current={pageNo}
+          pageSize={pageSize}
+          onChange={(pNo, pSize) => {
+            setPageNo(pNo);
+            setPageSize(pSize);
+          }}
+        />
       </div>
 
       <Modal
