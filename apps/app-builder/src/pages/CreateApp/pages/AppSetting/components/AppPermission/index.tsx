@@ -8,10 +8,12 @@ import {
   createRole,
   deleteRole,
   RoleType,
+  renameRole,
   type Role,
   type ListRoleReq,
   type CreateRoleReq,
-  type DeleteRoleReq
+  type DeleteRoleReq,
+  type RenameRoleReq
 } from '@onebase/app';
 import RoleInfo from '../Role';
 import InputRoleName from './inputRoleName';
@@ -74,7 +76,6 @@ const AppPermission: FC = () => {
         roleName
       };
       const res = await createRole(params);
-      console.log('回车新建自定义角色 res', res);
       setAddRole(false);
       setActiveTab(res.id);
       Message.success('角色创建成功');
@@ -85,16 +86,15 @@ const AppPermission: FC = () => {
   /* 角色重命名 */
   const handleRenameRole = async (roleName: string) => {
     try {
-      // todo
-      const params: CreateRoleReq = {
-        applicationId: appId,
-        roleName
+      const params: RenameRoleReq = {
+        id: updateRoleId,
+        name: roleName
       };
-      const res = await createRole(params);
-      console.log('回车新建自定义角色 res', res);
+      const res = await renameRole(params);
       setAddRole(false);
       setActiveTab(res.id);
-      Message.success('角色创建成功');
+      setUpdateRoleId('');
+      Message.success('角色重命名成功');
       await getRoleList();
     } catch (error) {}
   };
