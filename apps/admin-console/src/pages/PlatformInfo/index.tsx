@@ -1,11 +1,13 @@
 import { useI18n } from '@/hooks/useI18n';
 import { formatTimestamp } from '@/utils/date';
 import {
+  Button,
   Card,
   Descriptions,
   Message,
   Modal,
   Space,
+  Spin,
   Table,
   Tag,
   Typography,
@@ -13,22 +15,25 @@ import {
   type TableColumnProps
 } from '@arco-design/web-react';
 import {
+  downloadPlatformLicenseApi,
   getPlatFormInfoListApi,
   getPlatformInfoApi,
   uploadPlatformLicenseApi,
-  type LicenseInfo
+  type LicenseInfo,
+  type LicenseInfoList
 } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
+import { downloadFile } from '@/utils/download';
 
 const { Title, Text } = Typography;
 
 const PlatformInfo: React.FC = () => {
   const { t } = useI18n();
   const [visible, setVisible] = useState(false);
-  const [licenseInfoList, setLicenseInfoList] = useState<LicenseInfo[]>([]);
+  const [licenseInfoList, setLicenseInfoList] = useState<LicenseInfoList[]>([]);
   const [licenseInfo, setLicenseInfo] = useState<LicenseInfo | null>(null);
-
+  const [pageLoading, setPageLoading] = useState<boolean>(true);
   const getPlatformInfo = async () => {
     const res = await getPlatformInfoApi();
     console.log('platformInfo res:', res);
@@ -59,8 +64,15 @@ const PlatformInfo: React.FC = () => {
   };
 
   useEffect(() => {
-    getPlatformInfoList();
-    getPlatformInfo();
+    const fetchData = async () => {
+      setPageLoading(true);
+      try {
+        await Promise.all([getPlatformInfoList(), getPlatformInfo()]);
+      } finally {
+        setPageLoading(false);
+      }
+    };
+    fetchData();
   }, []);
 
   // 认证记录table结构
@@ -115,17 +127,47 @@ const PlatformInfo: React.FC = () => {
     }
   ];
 
-  // 上传认证
-  const handleUploadCertification = async () => {
-    // console.log('认证已经上传了');
-    try {
-      const resp = await uploadPlatformLicenseApi(data);
-      console.log('uploadPlatformLicense-res: ', resp);
-    } catch (error: any) {
-      Message.error(error.message || '认证上传失败');
+  // 处理文件上传变化
+  const handleFileUploadChange = async (fileList: any[]) => {
+    console.log('File uploaded:', fileList);
+    if (fileList.length > 0) {
+      const latestFile = fileList[fileList.length - 1];
+      // 确保originFile存在再进行上传操作
+      if (latestFile && latestFile.originFile) {
+        const formData = new FormData();
+        formData.append('file', latestFile.originFile);
+        
+        setLoading(true);
+        try {
+          await uploadPlatformLicenseApi(formData);
+          Message.success(t('platformInfo.uploadSuccess'));
+          // 重新获取列表数据
+          await Promise.all([getPlatformInfoList(), getPlatformInfo()]);
+        } catch (error: any) {
+          Message.error("上传license失败")
+          console.error('上传license失败', error);
+        } finally {
+          setLoading(false);
+        }
+      }
+      console.log('File uploaded:', fileList.length);
     }
   };
-  const [data, setData] = useState(licenseInfoList);
+
+  // 下载认证
+  const downloadLicense = async () => {
+    try {
+      const response = await downloadPlatformLicenseApi(1);
+      console.log('downloadLicense', response);
+        const blob = new Blob([response]);
+        downloadFile(blob, 'license.lic.sm4');
+    } catch (error) {
+      console.error('下载失败:', error);
+    }
+    
+  };
+
+  // const [data, setData] = useState(licenseInfoList);
   // 分页器
   const [pagination, setPagination] = useState({
     // sizeCanChange: true,
@@ -145,112 +187,105 @@ const PlatformInfo: React.FC = () => {
 
   return (
     <div className={styles.platformInfo}>
-      <Space direction="vertical" size="large" style={{ width: '100%' }}>
-        {/* 页面标题 */}
-        <div className={styles.pageHeader}>
-          <div className={styles.pageHeaderLeft}>
-            <Title heading={4} className={styles.pageHeaderTitle}>
-              {licenseInfo?.enterpriseName || '公司名称'}
-            </Title>
-            <div className={styles.companyId}>
-              <Text type="secondary">{licenseInfo?.enterpriseCode || '公司编码'}</Text>
+      <Spin loading={pageLoading} style={{ width: '100%' }}>
+        <Space direction="vertical" size="large" style={{ width: '100%' }}>
+          {/* 页面标题 */}
+          <div className={styles.pageHeader}>
+            <div className={styles.pageHeaderLeft}>
+              <Title heading={4} className={styles.pageHeaderTitle}>
+                {licenseInfo?.enterpriseName || '公司名称'}
+              </Title>
+              <div className={styles.companyId}>
+                <Text type="secondary">{licenseInfo?.enterpriseCode || '公司编码'}</Text>
+              </div>
+              <div className="address">
+                <Text type="secondary">{licenseInfo?.enterpriseAddress || '公司地址'}</Text>
+              </div>
             </div>
-            <div className="address">
-              <Text type="secondary">{licenseInfo?.enterpriseAddress || '公司地址'}</Text>
+            <div className={styles.pageHeaderRight}>
+              <div className={styles.superAdmin}>
+                <Text type="secondary">
+                  {t('platformInfo.superAdmin')}：
+                  <span className={styles.superAdminText}>{licenseInfo?.adminUser || '--'}</span>
+                </Text>
+              </div>
+              <div className={styles.createdAt}>
+                <Text type="secondary">
+                  {t('platformInfo.createdAt')}：{formatTimestamp(licenseInfo?.createTime)  || '--'}
+                </Text>
+              </div>
             </div>
           </div>
-          <div className={styles.pageHeaderRight}>
-            <div className={styles.superAdmin}>
-              <Text type="secondary">
-                {t('platformInfo.superAdmin')}：
-                <span className={styles.superAdminText}>{licenseInfo?.adminUser || 'admin'}</span>
-              </Text>
-            </div>
-            <div className={styles.createdAt}>
-              <Text type="secondary">
-                {t('platformInfo.createdAt')}：{formatTimestamp(licenseInfo?.createTime)}
-              </Text>
-            </div>
-          </div>
-        </div>
-        {/* 平台基本信息 */}
-        <Card title={t('platformInfo.basicInfo')} className={styles.infoCard}>
-          <Descriptions
-            column={2}
-            colon=":"
-            data={[
-              {
-                label: t('platformInfo.platformType'),
-                value: licenseInfo?.platformType
-              },
-              {
-                label: t('platformInfo.authStatus'),
-                value: (
-                  <span className={styles.statusRunning}>
-                    {licenseInfo?.status ? t('platformInfo.enable') : t('platformInfo.disable')}
-                  </span>
-                )
-              },
-              {
-                label: t('platformInfo.expireTime'),
-                value: formatTimestamp(licenseInfo?.expireTime)
-              },
-              {
-                label: t('platformInfo.version'),
-                value: 'v1.0.0'
-              },
-              {
-                label: t('platformInfo.tenantCount'),
-                value: (
-                  <Space>
-                    <span>{licenseInfo?.actualTenantCount}</span>
-                    <span> / </span>
-                    <span>{licenseInfo?.tenantLimit}</span>
-                  </Space>
-                )
-              }
-            ]}
-          />
-        </Card>
-        {/* 认证记录 */}
-        <div className={styles.authRecord}>
-          <Text>{t('platformInfo.authRecord')}</Text>
-          <span onClick={handleUploadCertification}>
-            {/* {t('platformInfo.uploadAuth')} */}
-            <Upload
-              className={styles.uploadAuth}
-              showUploadList={false}
-              action="/api/upload" // 这里需要替换为实际的上传接口地址
-              headers={{
-                authorization: 'authorization-text'
-              }}
-              onChange={(file) => {
-                console.log('File uploaded:', file);
-                console.log('File uploaded:', file.length);
-                if (file.length > 0) {
-                  // 清空file
-                  file.splice(0, file.length);
-                  console.log('after File uploaded:', file.length);
+          {/* 平台基本信息 */}
+          <Card title={t('platformInfo.basicInfo')} className={styles.infoCard}>
+            <Descriptions
+              column={2}
+              colon=":"
+              data={[
+                {
+                  label: t('platformInfo.platformType'),
+                  value: licenseInfo?.platformType || '--'
+                },
+                {
+                  label: t('platformInfo.authStatus'),
+                  value: (
+                    <span className={styles.statusRunning}>
+                      {licenseInfo?.status ? t('platformInfo.enable') : t('platformInfo.disable')}
+                    </span>
+                  )
+                },
+                {
+                  label: t('platformInfo.expireTime'),
+                  value: formatTimestamp(licenseInfo?.expireTime)
+                },
+                {
+                  label: t('platformInfo.version'),
+                  value: 'v1.0.0'
+                },
+                {
+                  label: t('platformInfo.tenantCount'),
+                  value: (
+                    <Space>
+                      <span>{licenseInfo?.actualTenantCount || '--'}</span>
+                      <span> / </span>
+                      <span>{licenseInfo?.tenantLimit || '--'}</span>
+                    </Space>
+                  )
                 }
-              }}
-            >
-              <div className={styles.uploadAuthText}>{t('platformInfo.uploadAuth')}</div>
-            </Upload>
-          </span>
-        </div>
-        <Table
-          loading={loading}
-          columns={columns}
-          data={licenseInfoList}
-          pagination={{
-            ...pagination,
-            className: styles.tablePagination
-          }}
-          onChange={onChangeTable}
-          rowKey={(record) => record.id}
-          border={false}
-        />
-      </Space>
+              ]}
+            />
+          </Card>
+          {/* 认证记录 */}
+          <div className={styles.authRecord}>
+            <Text>{t('platformInfo.authRecord')}</Text>
+            <span>
+              <Button type="primary" onClick={downloadLicense} loading={loading}>{t('platformInfo.downloadAuth')}</Button>
+              <Upload
+                className={styles.uploadAuth}
+                showUploadList={false}
+                headers={{
+                  authorization: 'authorization-text'
+                }}
+                onChange={handleFileUploadChange}
+              >
+                <div className={styles.uploadAuthText}>{t('platformInfo.uploadAuth')}</div>
+              </Upload>
+            </span>
+          </div>
+          <Table
+            loading={loading}
+            columns={columns}
+            data={licenseInfoList}
+            pagination={{
+              ...pagination,
+              className: styles.tablePagination
+            }}
+            onChange={onChangeTable}
+            rowKey={(record) => record.id}
+            border={false}
+          />
+        </Space>
+      </Spin>
       <Modal
         title={t('platformInfo.licenseDetail')}
         visible={visible}

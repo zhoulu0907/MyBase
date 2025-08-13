@@ -15,7 +15,7 @@ export enum PlatformTenantStatus {
 }
 
 // 管理员根用户ID
-export const ADMIN_ROOT_ID = 1;
+export const ADMIN_ROOT_ID = '1';
 
 /**
  * 平台租户信息
@@ -85,6 +85,10 @@ export interface CreateTenantParams {
    * 分配数量
    */
   accountCount: number;
+  /**
+   * 访问地址
+   */
+  website: string;
 }
 
 export interface UpdateTenantParams extends CreateTenantParams {

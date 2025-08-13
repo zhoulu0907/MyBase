@@ -15,7 +15,20 @@ import {
 } from '@arco-design/web-react';
 import { IconSearch } from '@arco-design/web-react/icon';
 import styles from './index.module.less'
-import { getPlatformTenantListApi, getPlatformInfoApi, addPlatformTenantApi, updatePlatformTenantApi, getCreateTenantCountApi, getPlatformTenantAdminListApi, PlatformTenantStatus, ADMIN_ROOT_ID, type PlatformTenantInfo, type CreateTenantParams, type UpdateTenantParams } from "@onebase/platform-center";
+import {
+  getPlatformTenantListApi,
+  getPlatformInfoApi,
+  addPlatformTenantApi,
+  updatePlatformTenantApi,
+  getCreateTenantCountApi,
+  getPlatformTenantAdminListApi,
+  PlatformTenantStatus,
+  ADMIN_ROOT_ID,
+  getTenantUserCountApi,
+  type PlatformTenantInfo,
+  type CreateTenantParams,
+  type UpdateTenantParams
+} from "@onebase/platform-center";
 import { formatTimestamp, generateTimestampString } from '@/utils/date';
 
 const { Text } = Typography;
@@ -37,7 +50,7 @@ const TenantManagement: React.FC = () => {
   const [originalAdmin, setOriginalAdmin] = useState<string>('');
   const [allocatableLicense, setAllocatableLicense] = useState<number>(10000);
   const [tenantLimit, setTenantLimit] = useState<number>(10000);
-  const [userCount, setUserCount] = useState(1);
+  const [tenantUserCount, setTenantUserCount] = useState<number>(0);
   const [adminList, setAdminList] = useState<{id: string, username: string}[]>([])
   const [confirmText, setConfirmText] = useState('');
   const [total, setTotal] = useState(0) 
@@ -90,16 +103,11 @@ const handleSearch = async (keyword: string) => {
   setCurrentPage(1); // 重置到第一页
 };
 
-  // 重置搜索
-  // const handleReset = () => {
-  //   setSearchParams({ status: 'all', keyword: '' });
-  // };
-
   // 获取Tenant参数
   const getTenantData = () => {
-    getLicenseLimit()
-    getAllocatable()
     getPlatformAdminList()
+    getAllocatable()
+    getLicenseLimit()
   }
 
   // 获取license总数
@@ -112,7 +120,6 @@ const handleSearch = async (keyword: string) => {
       }
     } catch (error) {
       console.error('Error fetching getLicenseLimit:', error);
-      
     }
   }
 
@@ -126,7 +133,19 @@ const handleSearch = async (keyword: string) => {
       }
     } catch (error) {
       console.error('Error fetching allocatable:', error);
-      
+    }
+  }
+
+  // 获取用户数量
+  const getTenantUserCount = async () => { 
+    try {
+      const resp = await getTenantUserCountApi();
+      if(resp) {
+        console.log('用户数量 resp:', resp);
+        setTenantUserCount(resp);
+      }
+    } catch (error) {
+      console.error('Error fetching tenantUserCount:', error);
     }
   }
 
@@ -176,12 +195,14 @@ const handleSearch = async (keyword: string) => {
     };
     setCurrentTenant(tenant);
     setOriginalAdmin(record.contactName);
+    
     form.setFieldsValue({
       tenantName: record.name,
       tenantCode: record.tenantCode,
       admin: record.contactName,
       allocatedCount: record.accountCount,
       status: record.status === PlatformTenantStatus.enabled ? PlatformTenantStatus.enabled : PlatformTenantStatus.disabled,
+      website: record.website,
     });
     setModalVisible(true);
     setIsNewTenant(false);
@@ -236,7 +257,8 @@ const handleSearch = async (keyword: string) => {
         // 只有管理员发生变化时才传递管理员信息，否则传递空字符串
         contactName: originalAdmin !== newAdmin ? newAdmin : '',
         status: values.status,
-        accountCount: values.allocatedCount
+        accountCount: values.allocatedCount,
+        website: values.website,
       };
       
       // 调用 updatePlatformTenantApi
@@ -262,7 +284,8 @@ const handleSearch = async (keyword: string) => {
         tenantCode: generateTenantCode(),
         contactName: values.admin,
         status: values.status,
-        accountCount: values.allocatedCount
+        accountCount: values.allocatedCount,
+        website: values.website,
       };
       await addPlatformTenantApi(newTenantData);
       getPlatformTenantList();
@@ -337,6 +360,21 @@ const handleSearch = async (keyword: string) => {
       dataIndex: 'contactName'
     },
     {
+      title: '访问地址',
+      dataIndex: 'website',
+      render: (text: string) => {
+        // 获取当前环境的域名前缀
+        const domainPrefix = getDomainPrefix();
+        const fullUrl = `${domainPrefix}/${text}`;
+        
+        return (
+          <Text>
+            {fullUrl}
+          </Text>
+        );
+      }
+    },
+    {
       title: '创建时间',
       dataIndex: 'createTime',
       sorter: (a: PlatformTenantInfo, b: PlatformTenantInfo) => new Date(a.createTime).getTime() - new Date(b.createTime).getTime(),
@@ -371,12 +409,38 @@ const handleSearch = async (keyword: string) => {
       console.error(error);
     }
   };
+  
+  // 获取当前环境的域名前缀
+  const getDomainPrefix = () => {
+    // 检查全局配置
+    if (typeof window !== 'undefined' && window.global_config?.BASE_URL) {
+      try {
+        const url = new URL(window.global_config.BASE_URL);
+        return `${url.protocol}//${url.host}`;
+      } catch (e) {
+        console.error('解析BASE_URL失败:', e);
+      }
+    }
+    
+    // 检查环境变量
+    if (import.meta.env.VITE_API_BASE_URL) {
+      try {
+        const url = new URL(import.meta.env.VITE_API_BASE_URL);
+        return `${url.protocol}//${url.host}`;
+      } catch (e) {
+        console.error('解析VITE_API_BASE_URL失败:', e);
+      }
+    }
+    
+    // 返回默认值
+    return 'http://localhost:9524';
+  };
 
   return (
     <div className={styles.tenant}>
       {/* 新建搜索条件栏 */}
       <div className={styles.toolbar}>
-        <Button type="primary" status='success' onClick={handleCreate}>
+        <Button type="primary" onClick={handleCreate}>
           + 新建
         </Button>
         <Space size="large">
@@ -459,6 +523,16 @@ const handleSearch = async (keyword: string) => {
             ]}
           >
             <InputNumber placeholder="请输入分配人员数量" min={1} />
+          </Form.Item>
+          
+          {/* 访问地址 */}
+          <Form.Item 
+            label="访问地址" 
+            field="website"
+            rules={[{ required: true, message: '请输入访问地址' }]}
+            validateTrigger={['onBlur']}
+          >
+            <Input addBefore={getDomainPrefix()} placeholder="请输入访问地址" />
           </Form.Item>
 
           <Form.Item label="状态" field="status">
