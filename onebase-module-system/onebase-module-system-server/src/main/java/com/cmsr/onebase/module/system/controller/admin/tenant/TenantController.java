@@ -107,8 +107,24 @@ public class TenantController {
     @Operation(summary = "获得租户可分配数量")
     @PreAuthorize("@ss.hasPermission('system:tenant:query')")
     public CommonResult<Long> getAllocatableCount() {
-        Long accountCount = tenantService.getAccountCount();
+        Long accountCount = tenantService.getAvailableAccountCount();
         return success(accountCount);
+    }
+
+    @GetMapping("/get-exist-user-count")
+    @Operation(summary = "获得其他已有的用户数量和")
+    @PreAuthorize("@ss.hasPermission('system:tenant:query')")
+    public CommonResult<Long> getOtherTenantUserCount(@RequestParam Long id) {
+        Long accountCount = tenantService.getOtherTenantUserLimitCount(id);
+        return success(accountCount);
+    }
+
+    @GetMapping("/get-tenant-exist-user-count")
+    @Operation(summary = "获得当前已有的用户数量和")
+    @PreAuthorize("@ss.hasPermission('system:tenant:query')")
+    public CommonResult<Long> getTenantExistUserCount(@RequestParam Long id) {
+        Long userCount = tenantService.getTenantExistUserCount(id);
+        return success(userCount);
     }
 
     @GetMapping("/page")

@@ -20,6 +20,7 @@
         <spring.boot.version>3.4.5</spring.boot.version>
         <spring.cloud.version>2024.0.1</spring.cloud.version>
         <spring.cloud.alibaba.version>2023.0.3.2</spring.cloud.alibaba.version>
+        <bouncycastle.version>1.72</bouncycastle.version>
         <!-- Web 相关 -->
         <springdoc.version>2.8.3</springdoc.version>
         <knife4j.version>4.6.0</knife4j.version>
@@ -137,7 +138,11 @@
                 <version>${revision}</version>
             </dependency>
 
-
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcprov-jdk15on</artifactId>
+                <version>${bouncycastle.version}</version>
+            </dependency>
 
             <!-- Spring 核心 -->
             <dependency>

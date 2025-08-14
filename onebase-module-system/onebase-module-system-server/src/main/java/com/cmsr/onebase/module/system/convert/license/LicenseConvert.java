@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.system.convert.license;
 
+import com.cmsr.onebase.module.system.controller.admin.license.vo.LicenseExportRespVO;
 import com.cmsr.onebase.module.system.controller.admin.license.vo.LicenseSaveReqVO;
 import com.cmsr.onebase.module.system.controller.admin.license.vo.LicenseRespVO;
 import com.cmsr.onebase.module.system.controller.admin.license.vo.LicensePageRespVO;
@@ -35,6 +36,14 @@ public interface LicenseConvert {
      * @return LicenseRespVO
      */
     LicenseRespVO convert(LicenseDO bean);
+
+    /**
+     * LicenseDO 转 LicenseExportRespVO
+     *
+     * @param bean LicenseDO
+     * @return LicenseExportRespVO
+     */
+    LicenseExportRespVO convertToExportVO(LicenseDO bean);
 
     /**
      * LicenseDO 列表转 LicensePageRespVO 列表

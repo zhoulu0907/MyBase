@@ -50,13 +50,13 @@ public class PlatformInfoController {
     private TenantService tenantService;
 
     @Resource
-    private AdminUserService  adminUserService;
+    private AdminUserService adminUserService;
     @Resource
     private PermissionService permissionService;
     @Resource
-    private RoleService       roleService;
+    private RoleService roleService;
     @Resource
-    private AdminUserService  userService;
+    private AdminUserService userService;
 
     /**
      * 根据状态查询出enable的license记录
@@ -146,7 +146,7 @@ public class PlatformInfoController {
     @PreAuthorize("@ss.hasPermission('system:platform-admin:delete')")
     public CommonResult<Boolean> deletePlatformAdmin(@RequestParam("id") Long id) {
         AdminUserDO adminUserDO = userService.getUser(id);
-        if (AdminTypeEnum.SYSTEM.equals(adminUserDO.getUserType())) {
+        if (AdminTypeEnum.SYSTEM.getType().equals(adminUserDO.getAdminType())) {
             throw exception(USER_PASSWORD_NOT_ALLOW_DEL);
         }
         userService.deleteUser(id);

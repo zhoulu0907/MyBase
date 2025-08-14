@@ -111,6 +111,12 @@
             <artifactId>onebase-spring-boot-starter-excel</artifactId>
         </dependency>
 
+        <!-- BouncyCastle 加密库 -->
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk15on</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-mail</artifactId>

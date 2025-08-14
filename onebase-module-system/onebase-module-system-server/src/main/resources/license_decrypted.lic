@@ -2,9 +2,11 @@
   "enterpriseName": "中移（上海） 产业研究院",
   "enterpriseCode": "F200090910000",
   "enterpriseAddress": "上海市浦东金桥开发区",
+  "createTime": "2022-09-29 12:34:09",
+  "superAdmin": "OneBase01",
   "platformType": "私有化部署",
+  "authStatus": "已认证",
   "expireTime": "2025-10-22 14:53:12",
-  "status": "enable",
-  "tenantLimit":"3",
-  "userLimit": "4",
+  "systemVersion": "v1.0.0",
+  "tenantCount": "2"
 }

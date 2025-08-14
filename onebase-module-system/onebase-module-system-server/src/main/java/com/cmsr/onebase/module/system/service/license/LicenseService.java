@@ -4,6 +4,8 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.system.controller.admin.license.vo.LicensePageReqVO;
 import com.cmsr.onebase.module.system.controller.admin.license.vo.LicenseSaveReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.license.LicenseDO;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -69,4 +71,27 @@ public interface LicenseService {
      * @return License列表
      */
     List<LicenseDO> getSimpleLicenseList();
+
+    /**
+     * 获取启用状态License
+     *
+     * @return License列表
+     */
+    List<LicenseDO> getEnableLicenseList();
+
+    /**
+     * 导入License
+     *
+     * @param file License文件
+     * @return 导入数量
+     */
+    Long importLicense(MultipartFile file);
+
+    /**
+     * 导出License
+     *
+     * @param id License主键ID
+     * @param response HttpServletResponse
+     */
+    void exportLicense(Long id, HttpServletResponse response);
 }
