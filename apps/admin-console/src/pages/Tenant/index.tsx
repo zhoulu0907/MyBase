@@ -391,9 +391,9 @@ const TenantManagement: React.FC = () => {
           <Space className={styles.urlWrapper}>
             {/* http://s25029301301.dev.internal.virtueit.net:81/v0/obappbuilder/#/XXX */}
             <Tooltip position='tl' content={fullUrl}>
-              <Text className={styles.fullUrl} onClick={() => handleClick(displayUrl)}>
+              <Text className={styles.fullUrl} onClick={() => handleClick(fullUrl)}>
                 {/* http://s25029301301.dev.internal.virtueit.net:81/v0/obappbuilder/#/XXX */}
-                {fullUrl}
+                {displayUrl}
               </Text>
             </Tooltip>
             <IconCopy className={styles.copyIcon} onClick={(e) => {
