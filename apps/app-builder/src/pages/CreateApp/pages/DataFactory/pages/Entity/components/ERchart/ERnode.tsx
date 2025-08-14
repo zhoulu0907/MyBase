@@ -204,7 +204,7 @@ const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
                   className={`${styles['field-item']} ${styles['custom-field']} ${styles['clickable-field']}`}
                   onClick={(e) => handleFieldClick(field.fieldId, e)}
                 >
-                  <span className={styles['field-name']}>{field.fieldName}</span>
+                  <span className={styles['field-name']}>{field.displayName}</span>
                   <span className={styles['field-type']}>
                     {ENTITY_FIELD_TYPE[field.fieldType as keyof typeof ENTITY_FIELD_TYPE] || field.fieldType}
                   </span>
