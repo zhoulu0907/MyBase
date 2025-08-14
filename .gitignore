@@ -94,3 +94,5 @@ sessionStore
 /动态数据源连接失败重试限制优化.md
 /实体字段批量保存isSystemField字段更新问题修复.md
 /test_validation_modifications.md
+/MetadataEntityFieldServiceImpl高并发优化说明.md
+/table_name_enhancement_summary.md
