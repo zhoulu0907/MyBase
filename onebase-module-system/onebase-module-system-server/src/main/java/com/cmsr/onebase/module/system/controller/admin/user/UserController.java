@@ -103,13 +103,25 @@ public class UserController {
                 pageResult.getTotal()));
     }
 
+    @GetMapping("/simple-page")
+    @Operation(summary = "获得简要用户分页列表(启用状态)", description = "只包含开启的用户，主要用于前端的下拉选项")
+    @PreAuthorize("@ss.hasPermission('system:user:query')")
+    public CommonResult<PageResult<UserSimpleRespVO>> getUserSimplePage(@Valid UserSimplePageReqVO pageReqVO) {
+        // 获得用户分页列表
+        PageResult<AdminUserDO> pageResult = userService.getSimpleEnableUserPage(pageReqVO);
+        if (CollUtil.isEmpty(pageResult.getList())) {
+            return success(new PageResult<>(pageResult.getTotal()));
+        }
+        return success(new PageResult<>(UserConvert.INSTANCE.convertList(pageResult.getList()), pageResult.getTotal()));
+    }
+
+
     @GetMapping("/simple-list")
-    @Operation(summary = "获取用户精简信息列表", description = "只包含被开启的用户，主要用于前端的下拉选项")
-    public CommonResult<List<UserSimpleRespVO>> getSximpleUserList() {
+    @Operation(summary = "获取用户精简信息列表", description = "只包含开启的用户，主要用于前端的下拉选项")
+    public CommonResult<List<UserDeptSimpleRespVO>> getSimpleUserList() {
         List<AdminUserDO> list = userService.getUserListByStatus(CommonStatusEnum.ENABLE.getStatus());
         // 拼接数据
-        Map<Long, DeptDO> deptMap = deptService.getDeptMap(
-                convertList(list, AdminUserDO::getDeptId));
+        Map<Long, DeptDO> deptMap = deptService.getDeptMap(convertList(list, AdminUserDO::getDeptId));
         return success(UserConvert.INSTANCE.convertSimpleList(list, deptMap));
     }
 
