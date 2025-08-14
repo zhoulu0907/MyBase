@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.metadata.controller.admin.entity.vo;
 
+import com.cmsr.onebase.framework.common.validation.ValidTableName;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -18,8 +19,7 @@ public class BusinessEntitySaveReqVO {
     @Size(max = 64, message = "实体名称长度不能超过64个字符")
     private String displayName;
 
-    @Schema(description = "实体编码", requiredMode = Schema.RequiredMode.REQUIRED, example = "user_entity")
-    @NotBlank(message = "实体编码不能为空")
+    @Schema(description = "实体编码", example = "user_entity")
     @Size(max = 32, message = "实体编码长度不能超过32个字符")
     private String code;
 
@@ -34,7 +34,8 @@ public class BusinessEntitySaveReqVO {
     @NotNull(message = "数据源ID不能为空")
     private String datasourceId;
 
-    @Schema(description = "对应数据表名", example = "sys_user")
+    @Schema(description = "对应数据表名", requiredMode = Schema.RequiredMode.REQUIRED, example = "sys_user")
+    @ValidTableName
     @Size(max = 128, message = "数据表名长度不能超过128个字符")
     private String tableName;
 
