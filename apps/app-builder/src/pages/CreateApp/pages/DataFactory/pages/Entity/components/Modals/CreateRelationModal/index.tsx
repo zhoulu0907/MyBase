@@ -81,7 +81,7 @@ const CreateRelationModal: React.FC<{
     console.log('getEntityFields', res);
     if (res.length > 0) {
       const fieldOptions = res.map((field: any) => ({
-        label: field.fieldName,
+        label: field.displayName,
         value: field.id
       }));
       type === 'left' ? setLeftFieldOptions(fieldOptions) : setRightFieldOptions(fieldOptions);

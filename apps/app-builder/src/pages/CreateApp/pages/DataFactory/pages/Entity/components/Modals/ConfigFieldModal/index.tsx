@@ -26,8 +26,8 @@ interface FieldFormValues {
   description: string;
   fieldType: string;
   defaultValue: string;
-  isUnique: boolean;
-  allowNull: boolean;
+  isUnique: number;
+  allowNull: number;
   constraints: string;
   isSystemField: number;
   sortOrder?: number;
@@ -92,8 +92,8 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
       description: '',
       fieldType: 'TEXT',
       defaultValue: '',
-      isUnique: false,
-      allowNull: true,
+      isUnique: 1,
+      allowNull: 1,
       constraints: '',
       isSystemField: 1,
       sortOrder: activeFields.length
@@ -168,12 +168,8 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
         const fieldData = {
           appId: curAppId,
           entityId: entity.entityId,
-          fieldCode: field.fieldCode,
-          fieldName: field.fieldName,
-          description: field.description,
-          fieldType: field.fieldType,
+          ...field,
           isSystemField: 1,
-          displayName: field.displayName,
           isDeleted: field.isDeleted || false
         };
 
@@ -192,7 +188,6 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
       successCallback();
     } catch (error) {
       console.error('保存字段失败:', error);
-      Message.error('保存失败');
     } finally {
       setLoading(false);
     }
@@ -349,13 +344,13 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
       title: '唯一',
       dataIndex: 'isUnique',
       width: 60,
-      render: (value: boolean, record: FieldFormValues, index: number) =>
+      render: (value: number, record: FieldFormValues, index: number) =>
         record.isSystemField === 0 ? (
           <span className={styles['system-field']}>-</span>
         ) : (
           <Checkbox
-            checked={value}
-            onChange={(checked) => updateField(getFieldIndex(record.id, index), { isUnique: checked })}
+            checked={value === 0}
+            onChange={(checked) => updateField(getFieldIndex(record.id, index), { isUnique: checked ? 0 : 1 })}
           />
         )
     },
@@ -363,13 +358,13 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
       title: '允许空值',
       dataIndex: 'allowNull',
       width: 100,
-      render: (value: boolean, record: FieldFormValues, index: number) =>
+      render: (value: number, record: FieldFormValues, index: number) =>
         record.isSystemField === 0 ? (
           <span className={styles['system-field']}>-</span>
         ) : (
           <Checkbox
-            checked={value}
-            onChange={(checked) => updateField(getFieldIndex(record.id, index), { allowNull: checked })}
+            checked={value === 0}
+            onChange={(checked) => updateField(getFieldIndex(record.id, index), { allowNull: checked ? 0 : 1 })}
           />
         )
     },

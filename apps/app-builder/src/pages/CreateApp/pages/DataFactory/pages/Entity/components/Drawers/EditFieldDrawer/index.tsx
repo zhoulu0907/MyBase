@@ -91,6 +91,18 @@ const EditFieldDrawer: React.FC<EditFieldDrawerProps> = ({ visible, setVisible, 
     callback();
   };
 
+  const validateDisplayName = (value: string | undefined, callback: (error?: React.ReactNode) => void) => {
+    if (!value) {
+      callback('请输入展示名称');
+      return;
+    }
+    callback();
+    if (value.length > 50) {
+      callback('展示名称不能超过50个字符');
+      return;
+    }
+  };
+
   // 提交表单
   const handleSubmit = async () => {
     try {
@@ -156,19 +168,19 @@ const EditFieldDrawer: React.FC<EditFieldDrawerProps> = ({ visible, setVisible, 
             <h3 className={styles['section-title']}>基本设置</h3>
 
             <Form.Item
-              label="字段编码"
-              field="fieldCode"
-              rules={[{ required: true, message: '请输入字段编码' }, { validator: validateFieldCode }]}
-            >
-              <Input placeholder="请输入字段编码" disabled={fieldDetail.isSystemField === 0} readOnly />
-            </Form.Item>
-
-            <Form.Item
               label="字段名称"
               field="fieldName"
               rules={[{ required: true, message: '请输入字段名称' }, { validator: validateFieldName }]}
             >
               <Input placeholder="请输入字段名称" />
+            </Form.Item>
+
+            <Form.Item
+              label="展示名称"
+              field="displayName"
+              rules={[{ required: true, message: '请输入展示名称' }, { validator: validateDisplayName }]}
+            >
+              <Input placeholder="请输入展示名称" />
             </Form.Item>
 
             <Form.Item label="字段描述" field="description">

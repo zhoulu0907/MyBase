@@ -76,7 +76,7 @@ export interface GetEntityPageParams {
 export interface CreateFieldReqVO {
   appId: string;
   entityId: string;
-  fieldCode: string;
+  fieldCode?: string;
   fieldName: string;
   description: string;
   fieldType: string;
