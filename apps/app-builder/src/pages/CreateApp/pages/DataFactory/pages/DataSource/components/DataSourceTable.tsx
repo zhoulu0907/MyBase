@@ -1,5 +1,5 @@
 import { Button, Message, Modal, Space, Table, type TableColumnProps } from '@arco-design/web-react';
-import { IconPlus } from '@arco-design/web-react/icon';
+// import { IconPlus } from '@arco-design/web-react/icon';
 import { deleteDatasource, getDatasource, getDatasourcePage, type DatasourceSaveReqVO } from '@onebase/app';
 import { useEffect, useState } from 'react';
 import { useAppStore } from '@/store';
@@ -31,7 +31,7 @@ const DataSourceTable = ({ handlePageType }: { handlePageType: (tab: string) => 
     pageNo: 1,
     pageSize: 10
   });
-  
+
   const getTableData = async () => {
     setTableLoading(true);
     const params = {
@@ -156,7 +156,8 @@ const DataSourceTable = ({ handlePageType }: { handlePageType: (tab: string) => 
     <div>
       <div className={styles.operationHeader}>
         <div className={styles.operationHeaderLeft}>数据源管理</div>
-        <Button
+        {/* 本期隐藏，后续开放 */}
+        {/* <Button
           type="primary"
           onClick={() => {
             handlePageType('create-ds');
@@ -164,7 +165,7 @@ const DataSourceTable = ({ handlePageType }: { handlePageType: (tab: string) => 
         >
           <IconPlus />
           创建数据源
-        </Button>
+        </Button> */}
       </div>
       <Table
         columns={columns}
