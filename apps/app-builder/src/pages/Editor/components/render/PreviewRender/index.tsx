@@ -82,6 +82,8 @@ const ComponentEditRender: React.FC<ComponentRenderProps> = ({
         return <FormComp.XImgUpload cpName={cpId} id={cpId} {...componentConfig} />;
       case FORM_COMPONENT_TYPES.AUTO_CODE:
         return <FormComp.XAutoCode cpName={cpId} id={cpId} {...componentConfig} />;
+      case FORM_COMPONENT_TYPES.RELATED_FORM:
+        return <FormComp.XRelatedForm cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
 
       //  布局组件
       case LAYOUT_COMPONENT_TYPES.COLUMN_LAYOUT:

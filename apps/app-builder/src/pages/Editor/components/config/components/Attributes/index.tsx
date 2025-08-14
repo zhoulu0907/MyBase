@@ -5,6 +5,7 @@ import { usePageEditorStore } from '@/hooks/useStore';
 import { ColorPicker, Form, Input, InputNumber, Radio, Switch } from '@arco-design/web-react';
 import { useEffect, useState } from 'react';
 import DynamicFieldConfig from './components/DynamicFieldConfig';
+import DynamicRelatedFormConfig from './components/DynamicRelatedFormConfig';
 import DynamicTableConfig from './components/DynamicTableConfig';
 import styles from './index.module.less';
 
@@ -125,7 +126,8 @@ const Attributes = ({ cpID }: ConfigsProps) => {
             if (
               item.type !== CONFIG_TYPES.SWITCH_INPUT &&
               item.type !== CONFIG_TYPES.TABLE_DATA &&
-              item.type !== CONFIG_TYPES.FIELD_DATA
+              item.type !== CONFIG_TYPES.FIELD_DATA &&
+              item.type !== CONFIG_TYPES.RELATED_FORM_DATA
             ) {
               return (
                 <FormItem label={item.name} key={index} className={styles.formItem}>
@@ -277,6 +279,18 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                 </FormItem>
               );
             }
+
+            if (item.type === CONFIG_TYPES.RELATED_FORM_DATA) {
+              return (
+                <DynamicRelatedFormConfig
+                  key={index}
+                  handlePropsChange={handlePropsChange}
+                  item={item}
+                  configs={configs}
+                />
+              );
+            }
+
             if (item.type === CONFIG_TYPES.FIELD_DATA) {
               return (
                 <DynamicFieldConfig key={index} handlePropsChange={handlePropsChange} item={item} configs={configs} />
