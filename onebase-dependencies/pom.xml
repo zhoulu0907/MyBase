@@ -138,11 +138,11 @@
                 <version>${revision}</version>
             </dependency>
 
-            <dependency>
-                <groupId>org.bouncycastle</groupId>
-                <artifactId>bcprov-jdk15on</artifactId>
-                <version>${bouncycastle.version}</version>
-            </dependency>
+<!--            <dependency>-->
+<!--                <groupId>org.bouncycastle</groupId>-->
+<!--                <artifactId>bcprov-jdk15on</artifactId>-->
+<!--                <version>${bouncycastle.version}</version>-->
+<!--            </dependency>-->
 
             <!-- Spring 核心 -->
             <dependency>
