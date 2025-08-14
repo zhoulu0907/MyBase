@@ -1,5 +1,5 @@
 // 实体管理服务
-import { DataMethodParam, DeleteMethodParam, InsertMethodParams, PageMethodParam } from '../types';
+import { DataMethodParam, DeleteMethodParam, InsertMethodParams, PageMethodParam, UpdateMethodParams } from '../types';
 import { metadataService } from './clients';
 
 
@@ -17,4 +17,8 @@ export const dataMethodDelete = (params: DeleteMethodParam) => {
 
 export const dataMethodData = (params: DataMethodParam) => {
     return metadataService.post(`/data-method/data`, params);
+};
+
+export const dataMethodUpdate = (params: UpdateMethodParams) => {
+    return metadataService.post(`/data-method/update`, params);
 };

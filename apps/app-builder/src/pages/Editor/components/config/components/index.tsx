@@ -22,7 +22,9 @@ const MaterialConfiger = ({ cpID }: MaterialConfigerProps) => {
     <div className={styles.configs}>
       <Tabs defaultActiveTab="attributes" type="line" size="default">
         <TabPane key="attributes" title={<TabTitle title={t('editor.attribute')} />}>
-          <Attributes cpID={cpID} />
+          <div style={{ width: '270px', height: '100%' }}>
+            <Attributes cpID={cpID} />
+          </div>
         </TabPane>
         <TabPane key="advanced" title={<TabTitle title={t('editor.advanced')} />}>
           <Advanced />

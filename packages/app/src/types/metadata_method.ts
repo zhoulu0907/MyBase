@@ -3,6 +3,12 @@ export interface InsertMethodParams {
     data: object;
 }
 
+export interface UpdateMethodParams {
+    entityId: string;
+    id: string;
+    data: object;
+}
+
 export interface PageMethodParam {
     entityId: string;
     pageNo: number;

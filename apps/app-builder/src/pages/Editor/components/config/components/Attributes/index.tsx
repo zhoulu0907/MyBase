@@ -68,8 +68,6 @@ const Attributes = ({ cpID }: ConfigsProps) => {
       {} as Record<string, any>
     );
 
-    console.log(updatesObj);
-
     const newCurComponentSchema = {
       id: cpID,
       type: curComponentSchema.type,
@@ -81,8 +79,8 @@ const Attributes = ({ cpID }: ConfigsProps) => {
       layout: curComponentSchema.layout
     };
 
-    console.log(curComponentSchema.config);
-    console.log(newCurComponentSchema.config);
+    // console.log(curComponentSchema.config);
+    // console.log(newCurComponentSchema.config);
 
     setCurComponentSchema(newCurComponentSchema);
     setPageComponentSchemas(cpID, newCurComponentSchema);

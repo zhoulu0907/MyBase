@@ -1,5 +1,6 @@
 import { ENTITY_FIELD_TYPE } from '@/pages/CreateApp/pages/DataFactory/utils/const';
 import type { EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
+import { useAppStore } from '@/store/store_app';
 import {
   Button,
   Checkbox,
@@ -13,7 +14,6 @@ import {
   Tooltip
 } from '@arco-design/web-react';
 import { IconDragDotVertical, IconPlus, IconSettings } from '@arco-design/web-react/icon';
-import { useAppStore } from '@/store';
 import { batchSaveFields, getEntityFields } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';

@@ -1,12 +1,12 @@
 import type { EntityListItem } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
+import { useAppStore } from '@/store/store_app';
 import type { TableColumnProps } from '@arco-design/web-react';
-import { Button, Message, Space, Table, Tag } from '@arco-design/web-react';
+import { Button, Space, Table, Tag } from '@arco-design/web-react';
 import { getEntityRelations } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
-import CreateRelationModal from '../../Modals/CreateRelationModal';
 import EditRelationDrawer from '../../Drawers/EditRelationDrawer';
+import CreateRelationModal from '../../Modals/CreateRelationModal';
 import styles from './tabs.module.less';
-import { useAppStore } from '@/store';
 
 interface RelationsProps {
   entity: EntityListItem;
