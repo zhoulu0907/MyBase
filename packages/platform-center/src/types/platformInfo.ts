@@ -55,7 +55,10 @@ export interface LicenseInfo {
      * 过期时间
      */
     expireTime: string;
-
+    /**
+     * 实际租户数量
+     */
+    actualTenantCount: number;
     /**
      * 创建人
      */
