@@ -211,7 +211,7 @@ const XImgUpload: XInputImgUploadSchema = {
     listType: UPLOAD_VALUES[UPLOAD_OPTIONS.CARD],
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
     saveWithHidden: false,
-    labelColSpan: 5
+    labelColSpan: 100
   }
 };
 

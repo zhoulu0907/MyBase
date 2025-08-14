@@ -188,7 +188,7 @@ const XAutoCode: XInputAutoCodeSchema = {
     saveWithHidden: false,
     color: '',
     bgColor: '',
-    labelColSpan: 5
+    labelColSpan: 100
   }
 };
 
