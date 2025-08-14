@@ -7,6 +7,7 @@ import { Collapse } from '@arco-design/web-react';
 import type { AppEntityField } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
+import { COMPONENT_MAP } from './component_map';
 import styles from './index.module.less';
 
 const CollapseItem = Collapse.Item;
@@ -26,13 +27,20 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({}) => {
       console.log(mainEntity.fields);
       const newFieldItems = mainEntity.fields
         .filter((field: AppEntityField) => field.isSystemField === 1)
-        .map((field: AppEntityField, index: number) => ({
-          id: `${FORM_COMPONENT_TYPES.INPUT_TEXT}-${index}-${Date.now()}`,
-          displayName: field.fieldName,
-          type: FORM_COMPONENT_TYPES.INPUT_TEXT,
-          fieldID: field.fieldID,
-          entityID: mainEntity.entityID
-        }));
+        .map((field: AppEntityField, index: number) => {
+          let cpType = COMPONENT_MAP[field.fieldType];
+          if (!cpType) {
+            cpType = FORM_COMPONENT_TYPES.INPUT_TEXT;
+          }
+          return {
+            id: `${cpType}-${index}-${Date.now()}`,
+            displayName: field.fieldName,
+            type: cpType,
+            fieldID: field.fieldID,
+            entityID: mainEntity.entityID
+          };
+        })
+        .filter((item) => item !== null);
 
       console.log(newFieldItems);
       setFieldItems(newFieldItems);
