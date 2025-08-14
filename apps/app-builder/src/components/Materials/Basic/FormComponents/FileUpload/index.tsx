@@ -25,9 +25,9 @@ const XFileUpload = memo((props: XInputFileUploadConfig) => {
       tooltip={tooltip}
       rules={[{ required }]}
       labelCol={{
-        span: labelColSpan
+        style: { width: labelColSpan, flex: 'unset' }
       }}
-      wrapperCol={{ span: 24 - labelColSpan }}
+      wrapperCol={{ style: { flex: 1 } }}
       style={{
         opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,
         pointerEvents: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset',

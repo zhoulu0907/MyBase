@@ -42,9 +42,9 @@ const XUserSelect = memo((props: XInputUserSelectConfig) => {
       layout={layout}
       tooltip={tooltip}
       labelCol={{
-        span: labelColSpan
+        style: { width: labelColSpan, flex: 'unset' }
       }}
-      wrapperCol={{ span: 24 - labelColSpan }}
+      wrapperCol={{ style: { flex: 1 } }}
       rules={[{ required }]}
       style={{
         opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,
