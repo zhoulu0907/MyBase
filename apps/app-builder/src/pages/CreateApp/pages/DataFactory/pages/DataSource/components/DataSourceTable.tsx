@@ -1,9 +1,10 @@
 import { Button, Message, Modal, Space, Table, type TableColumnProps } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
-import { deleteDatasource, getDatasourcePage } from '@onebase/app';
+import { deleteDatasource, getDatasource, getDatasourcePage, type DatasourceSaveReqVO } from '@onebase/app';
 import { useEffect, useState } from 'react';
-import styles from '../index.module.less';
 import { useAppStore } from '@/store';
+import EditDsDrawer from './EditDsDrawer';
+import styles from '../index.module.less';
 
 // 数据源记录类型
 interface DatasourceRecord {
@@ -16,25 +17,21 @@ interface DatasourceRecord {
   appId: string;
 }
 
-const DataSourceTable = ({
-  handlePageType,
-  onEdit
-}: {
-  handlePageType: (tab: string) => void;
-  onEdit: (id: number) => void;
-}) => {
+const DataSourceTable = ({ handlePageType }: { handlePageType: (tab: string) => void }) => {
   const { curAppId } = useAppStore();
   const [dataSourceList, setDataSourceList] = useState<DatasourceRecord[]>([]);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [currentDeleteId, setCurrentDeleteId] = useState<number | null>(null);
+  const [editDrawerVisible, setEditDrawerVisible] = useState(false);
+  const [currentDataSource, setCurrentDataSource] = useState<DatasourceSaveReqVO>();
   const [tableLoading, setTableLoading] = useState(false);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState({
     pageNo: 1,
     pageSize: 10
   });
-
+  
   const getTableData = async () => {
     setTableLoading(true);
     const params = {
@@ -62,8 +59,23 @@ const DataSourceTable = ({
     getTableData();
   }, []);
 
-  const gotoEdit = (id: number) => {
-    onEdit(id);
+  const gotoEdit = async (id: number) => {
+    console.log('handleEdit id', id);
+    try {
+      const res = await getDatasource(id);
+      console.log('handleEdit res', res);
+      if (res) {
+        setCurrentDataSource(res);
+        setEditDrawerVisible(true);
+      }
+    } catch (error) {
+      console.error('获取数据源详情失败:', error);
+    }
+  };
+
+  const handleEditSuccess = () => {
+    setEditDrawerVisible(false);
+    getTableData();
   };
 
   const handleDelete = (id: number) => {
@@ -182,6 +194,13 @@ const DataSourceTable = ({
       >
         <p>确定要删除这个数据源吗？删除后无法恢复。</p>
       </Modal>
+
+      <EditDsDrawer
+        visible={editDrawerVisible}
+        onClose={() => setEditDrawerVisible(false)}
+        dataSource={currentDataSource}
+        onSuccess={handleEditSuccess}
+      />
     </div>
   );
 };

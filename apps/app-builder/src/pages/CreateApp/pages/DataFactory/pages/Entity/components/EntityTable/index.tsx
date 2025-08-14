@@ -115,6 +115,7 @@ const EntityTable: React.FC = () => {
         visible={createEntityModalVisible}
         setVisible={setCreateEntityModalVisible}
         successCallback={successCallback}
+        entityListLength={entities.length}
       />
       <DeleteConfirmModal
         visible={deleteModalVisible}
