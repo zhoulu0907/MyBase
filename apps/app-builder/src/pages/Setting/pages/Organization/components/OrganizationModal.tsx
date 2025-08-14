@@ -108,7 +108,7 @@ const DepartmentModal: React.FC<DepartmentModalProps> = (props) => {
             showSearch
             disabled={!hasUserQueryPermission}
             filterOption={(input: string, option: any) =>
-              option?.children?.toString().toLowerCase().indexOf(input.toLowerCase()) >= 0
+              option.props?.children?.toString().toLowerCase().indexOf(input.toLowerCase()) >= 0
             }
           >
             {userList.map((user) => (
