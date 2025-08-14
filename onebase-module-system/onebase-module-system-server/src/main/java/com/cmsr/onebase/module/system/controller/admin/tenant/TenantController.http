@@ -1,11 +1,17 @@
+### 环境配置说明
+# 使用全局环境配置文件 http-client.env.json
+# 请在IntelliJ IDEA中选择对应环境: local/dev/test/gateway
+# 确保先在AuthController.http中登录获取token
+
 ### 获取租户编号 /admin-api/system/get-id-by-name
-GET http://127.0.0.1:48080/admin-api/system/tenant/simple-list
-Authorization: Bearer eb33f553e1194b52935de6fcc6a3f4f5
+GET {{baseUrl}}/system/tenant/simple-list
+Authorization: Bearer {{token}}
+
 ### 创建租户 /admin-api/system/tenant/create
-POST http://127.0.0.1:48080/admin-api/system/tenant/create
+POST {{baseUrl}}/system/tenant/create
 Content-Type: application/json
-Authorization: Bearer fe416b951aa24e21ac721bc65794ca6b
-tenant-id: 1
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
 
 {
   "name": "租户19",
@@ -15,10 +21,10 @@ tenant-id: 1
 }
 
 ### 更新租户 /admin-api/system/tenant/update
-POST http://127.0.0.1:48080/admin-api/system/tenant/update
+POST {{baseUrl}}/system/tenant/update
 Content-Type: application/json
-Authorization: Bearer fe416b951aa24e21ac721bc65794ca6b
-tenant-id: 1
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
 
 {
   "id": "544449082769412096",
@@ -28,20 +34,26 @@ tenant-id: 1
   "status": 0
 }
 
-### 更新租户 /admin-api/system/tenant/page
-GET http://127.0.0.1:48080/admin-api/system/tenant/page?status=2&pageNum=1&pageSize=10
+### 获取租户分页 /admin-api/system/tenant/page
+GET {{baseUrl}}/system/tenant/page?status=2&pageNum=1&pageSize=10
 Content-Type: application/json
-Authorization: Bearer 3e71f55ccc754ad99af737a899c1c9bd
-tenant-id: 1
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
 
 ### 获得租户可分配数量 /admin-api/system/tenant/get-allocatable-count
-GET http://127.0.0.1:48080/admin-api/system/tenant/get-allocatable-count
+GET {{baseUrl}}/system/tenant/get-allocatable-count
 Content-Type: application/json
-Authorization: Bearer 2a22af2af4544f2b86409c9ee243901a
-tenant-id: 1
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
 
-### 更新租户 /admin-api/system/tenant/page
-GET http://127.0.0.1:48080/admin-api/system/tenant/get-by-website?website=tenant_20250811184245
+### 根据网站获取租户 /admin-api/system/tenant/get-by-website
+GET {{baseUrl}}/system/tenant/get-by-website?website=tenant_20250811184245
 Content-Type: application/json
-Authorization: Bearer 3e71f55ccc754ad99af737a899c1c9bd
-tenant-id: 1
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+### 获得租户详情 /admin-api/system/tenant/get
+GET {{baseUrl}}/system/tenant/get
+Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
