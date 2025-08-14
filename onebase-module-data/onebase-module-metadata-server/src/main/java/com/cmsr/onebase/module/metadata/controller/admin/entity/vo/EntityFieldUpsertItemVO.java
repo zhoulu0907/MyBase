@@ -57,4 +57,7 @@ public class EntityFieldUpsertItemVO {
     @Schema(description = "字段编码", example = "USER_NAME")
     @Size(max = 60, message = "字段编码长度不能超过60个字符")
     private String fieldCode;
+
+    @Schema(description = "是否系统字段", example = "0")
+    private Integer isSystemField;
 }
