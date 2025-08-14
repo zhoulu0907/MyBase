@@ -28,7 +28,7 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({ handlePropsChan
       .filter((field: AppEntityField) => field.isSystemField == 1)
       .map((field: AppEntityField) => ({
         value: field.fieldID,
-        label: field.displayName
+        label: field.fieldName
       }));
 
     setEntityTree([

@@ -23,17 +23,18 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({}) => {
 
   useEffect(() => {
     if (mainEntity.fields.length > 0) {
-      setFieldItems(
-        mainEntity.fields
-          .filter((field: AppEntityField) => field.isSystemField === 1)
-          .map((field: AppEntityField, index: number) => ({
-            id: `${FORM_COMPONENT_TYPES.INPUT_TEXT}-${index}-${Date.now()}`,
-            displayName: field.displayName,
-            type: FORM_COMPONENT_TYPES.INPUT_TEXT,
-            fieldID: field.fieldID,
-            entityID: mainEntity.entityID
-          }))
-      );
+      const newFieldItems = mainEntity.fields
+        .filter((field: AppEntityField) => field.isSystemField === 1)
+        .map((field: AppEntityField, index: number) => ({
+          id: `${FORM_COMPONENT_TYPES.INPUT_TEXT}-${index}-${Date.now()}`,
+          displayName: field.fieldName,
+          type: FORM_COMPONENT_TYPES.INPUT_TEXT,
+          fieldID: field.fieldID,
+          entityID: mainEntity.entityID
+        }));
+
+      console.log(newFieldItems);
+      setFieldItems(newFieldItems);
     }
   }, [mainEntity]);
 
