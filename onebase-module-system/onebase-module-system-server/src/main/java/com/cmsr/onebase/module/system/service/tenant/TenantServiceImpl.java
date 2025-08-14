@@ -11,6 +11,7 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import com.cmsr.onebase.framework.common.util.date.DateUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.framework.data.base.BaseDO;
 import com.cmsr.onebase.framework.tenant.config.TenantProperties;
 import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
@@ -20,6 +21,7 @@ import com.cmsr.onebase.module.system.controller.admin.tenant.vo.tenant.TenantIn
 import com.cmsr.onebase.module.system.controller.admin.tenant.vo.tenant.TenantPageReqVO;
 import com.cmsr.onebase.module.system.controller.admin.tenant.vo.tenant.TenantRespVO;
 import com.cmsr.onebase.module.system.controller.admin.tenant.vo.tenant.TenantUpdateReqVO;
+import com.cmsr.onebase.module.system.controller.admin.user.vo.user.UserUpdateReqVO;
 import com.cmsr.onebase.module.system.convert.tenant.TenantConvert;
 import com.cmsr.onebase.module.system.dal.dataobject.license.LicenseDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.MenuDO;
@@ -29,6 +31,7 @@ import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
 import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantPackageDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.enums.license.LicenseStatusEnum;
+import com.cmsr.onebase.module.system.enums.permission.AdminTypeEnum;
 import com.cmsr.onebase.module.system.enums.permission.PackageTypeEnum;
 import com.cmsr.onebase.module.system.enums.permission.RoleCodeEnum;
 import com.cmsr.onebase.module.system.enums.permission.RoleTypeEnum;
@@ -48,6 +51,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Compare;
+import org.anyline.entity.Order;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -192,14 +196,7 @@ public class TenantServiceImpl implements TenantService {
         // 创建租户
         TenantDO tenant = BeanUtils.toBean(createReqVO, TenantDO.class);
         tenant = dataRepository.insert(tenant);
-        // 校验联系人用户名是否已存在
-        // if (StringUtils.isNotEmpty(createReqVO.getContactName())) {
-        //     TenantUtils.execute(tenant.getId(), () -> {
-        //         if (userService.getUserByUsername(createReqVO.getContactName()) != null) {
-        //             throw exception(USER_USERNAME_EXISTS, createReqVO.getContactName());
-        //         }
-        //     });
-        // }
+
         // 创建租户的管理员1
         TenantDO finalTenant = tenant;
         TenantUtils.execute(tenant.getId(), () -> {
@@ -207,6 +204,7 @@ public class TenantServiceImpl implements TenantService {
             Long roleId = createRole(tenantPackage);
             // 创建用户，并分配角色
             createReqVO.setUsername(createReqVO.getContactName());
+            createReqVO.setAdminType(AdminTypeEnum.SYSTEM.getType());
             if (StringUtils.isEmpty(createReqVO.getPassword())) {
                 createReqVO.setPassword(UserPasswordEnum.PASSWORD_ENUM.getPassword());
             }
@@ -310,7 +308,7 @@ public class TenantServiceImpl implements TenantService {
                 if (userRoleDO != null) {
                     permissionService.deleteRoleUsers(roleId, singleton(userRoleDO.getUserId()));
                 }
-
+                userService.updateAdminType(tenant.getContactUserId(), AdminTypeEnum.CUSTOM.getType());
                 AdminUserDO user = userService.getUserByUsername(updateReqVO.getContactName());
                 Long userId;
                 if (user != null) {
@@ -322,6 +320,7 @@ public class TenantServiceImpl implements TenantService {
                     TenantInsertReqVO reqVO = new TenantInsertReqVO();
                     reqVO.setContactName(updateReqVO.getContactName());
                     reqVO.setUsername(updateReqVO.getContactName());
+                    reqVO.setAdminType(AdminTypeEnum.SYSTEM.getType());
                     if (StringUtils.isEmpty(updateReqVO.getPassword())) {
                         reqVO.setPassword(UserPasswordEnum.PASSWORD_ENUM.getPassword());
                     }
@@ -458,6 +457,7 @@ public class TenantServiceImpl implements TenantService {
         if (status != null) {
             configStore.eq(TenantDO.STATUS, status);
         }
+        configStore.order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
         return dataRepository.findPageWithConditions(TenantDO.class, configStore, reqVO.getPageNo(), reqVO.getPageSize());
     }
 
@@ -489,7 +489,8 @@ public class TenantServiceImpl implements TenantService {
 
     @Override
     public List<TenantDO> getTenantListByStatus(Integer status) {
-        return dataRepository.findAllByConfig(TenantDO.class, new DefaultConfigStore().eq("status", status));
+        return dataRepository.findAllByConfig(TenantDO.class, new DefaultConfigStore().eq("status", status)
+                .order(TenantDO.CREATE_TIME, Order.TYPE.DESC));
     }
 
     @Override

@@ -68,6 +68,10 @@ public class UserInsertReqVO {
     @DiffLogField(name = "用户类型")
     private Integer userType;
 
+    @Schema(description = "管理员类型", example = "2")
+    @DiffLogField(name = "管理员类型")
+    private Integer adminType;
+
     @Schema(description = "角色Ids", example = "[1,2]")
     private Set<Long> roleIds;
 

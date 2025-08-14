@@ -46,6 +46,15 @@ public interface AdminUserService {
     void updateUser(@Valid UserUpdateReqVO updateReqVO);
 
     /**
+     * 修改用户管理员状态
+     *
+     * @param adminType 修改管理员状态
+     * @param id    用户编号
+     */
+    void updateAdminType(Long id,  Integer adminType);
+
+
+    /**
      * 修改用户
      *
      * @param email 修改平台管理员邮箱

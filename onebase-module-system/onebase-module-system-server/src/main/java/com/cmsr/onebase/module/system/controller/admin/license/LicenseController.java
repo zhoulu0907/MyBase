@@ -29,6 +29,7 @@ import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -216,23 +217,29 @@ public class LicenseController {
             });
             objectMapper.registerModule(simpleModule);
 
+            // 先将旧License置为失效
+            // 如果是新创建的license，将其他所有已认证的license更新为已失效状态
+            List<LicenseDO> licenses = licenseService.getEnableLicenseList();
+            if (CollectionUtils.isEmpty(licenses)) {
+                log.error("error -------------> 没有启用的License！！");
+            }
+            if (licenses.size() > 1) {
+                log.error("error -------------> 存在多个启用的License！！！");
+            }
+            for (LicenseDO license : licenses) {
+                LicenseSaveReqVO updateReqVO = new LicenseSaveReqVO();
+                updateReqVO.setId(license.getId());
+                updateReqVO.setStatus(LicenseStatusEnum.DISABLE.getStatus());
+                licenseService.updateLicense(updateReqVO);
+                log.info("disable license ----> {}", license.getId());
+            }
+            // 在插入新的 License
             LicenseSaveReqVO licenseSaveReqVO = objectMapper.readValue(decrypted, LicenseSaveReqVO.class);
             licenseSaveReqVO.setLicenseFile("测试用例");
             // 创建License时，将状态设置为ENABLE
             licenseSaveReqVO.setStatus(LicenseStatusEnum.ENABLE.getStatus());
             Long licenseId = licenseService.createLicense(licenseSaveReqVO);
-
-            // 如果是新创建的license，将其他所有已认证的license更新为已失效状态
-            List<LicenseDO> licenses = licenseService.getEnableLicenseList();
-            for (LicenseDO license : licenses) {
-                // 将除了当前创建的license之外的所有enable状态的license更新为disable状态
-                if (!license.getId().equals(licenseId)) {
-                    LicenseSaveReqVO updateReqVO = new LicenseSaveReqVO();
-                    updateReqVO.setId(license.getId());
-                    updateReqVO.setStatus(LicenseStatusEnum.DISABLE.getStatus());
-                    licenseService.updateLicense(updateReqVO);
-                }
-            }
+            log.info("insert and enable new license ------> {}", licenseId);
             return CommonResult.success(licenseId);
         } catch (Exception e) {
             log.error("解析License文件内容失败", e);
