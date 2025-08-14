@@ -15,6 +15,8 @@ import com.cmsr.onebase.module.metadata.dal.database.MetadataDataSystemMethodRep
 import com.cmsr.onebase.module.metadata.dal.database.MetadataDatasourceRepository;
 import com.cmsr.onebase.module.metadata.dal.database.MetadataEntityFieldRepository;
 import com.cmsr.onebase.module.metadata.dal.database.TemporaryDatasourceService;
+import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
+import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.entity.DataRow;
@@ -611,6 +613,51 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
                     case "tenantid":
                         // 这里可以从当前上下文获取租户ID，暂时设置为1
                         processedData.put(fieldName, 1L);
+                        break;
+                    case "owner_id":
+                    case "ownerid":
+                        // 设置为当前登录用户ID
+                        Long currentUserId = WebFrameworkUtils.getLoginUserId();
+                        if (currentUserId != null) {
+                            processedData.put(fieldName, currentUserId);
+                        } else {
+                            log.warn("无法获取当前用户ID，owner_id字段将使用默认值");
+                            if (StringUtils.hasText(field.getDefaultValue())) {
+                                processedData.put(fieldName, field.getDefaultValue());
+                            }
+                        }
+                        break;
+                    case "owner_dept":
+                    case "ownerdept":
+                        // 设置为当前登录用户的部门ID
+                        Long currentUserDeptId = SecurityFrameworkUtils.getLoginUserDeptId();
+                        if (currentUserDeptId != null) {
+                            processedData.put(fieldName, currentUserDeptId);
+                        } else {
+                            log.warn("无法获取当前用户部门ID，owner_dept字段将使用默认值1");
+                            // 如果获取不到就先写死为1
+                            processedData.put(fieldName, 1L);
+                        }
+                        break;
+                    case "creator":
+                        // 设置为当前登录用户ID
+                        Long creatorUserId = WebFrameworkUtils.getLoginUserId();
+                        if (creatorUserId != null) {
+                            processedData.put(fieldName, creatorUserId);
+                        } else {
+                            log.warn("无法获取当前用户ID，creator字段将使用默认值1");
+                            processedData.put(fieldName, 1L);
+                        }
+                        break;
+                    case "updater":
+                        // 设置为当前登录用户ID
+                        Long updaterUserId = WebFrameworkUtils.getLoginUserId();
+                        if (updaterUserId != null) {
+                            processedData.put(fieldName, updaterUserId);
+                        } else {
+                            log.warn("无法获取当前用户ID，updater字段将使用默认值1");
+                            processedData.put(fieldName, 1L);
+                        }
                         break;
                     default:
                         // 其他系统字段按默认值处理
