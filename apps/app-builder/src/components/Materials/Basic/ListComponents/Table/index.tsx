@@ -103,18 +103,26 @@ const XTable = memo((props: XTableConfig & { runtime?: boolean; toCreatePage?: F
       pageSize: pageSize || 10
     };
     const res = await dataMethodPage(req);
-    // console.log(res);
 
     const { list, total } = res;
 
     const newTableData = (list || []).map((item: any) => {
+      //   console.log(item);
+      const newItem = item.data;
+      if (newItem.end_date) {
+        newItem.end_date = new Date(newItem.end_date).toLocaleDateString();
+      }
+      if (newItem.start_date) {
+        newItem.start_date = new Date(newItem.start_date).toLocaleDateString();
+      }
+
       return {
-        ...item.data,
+        ...newItem,
         key: item.data.id
       };
     });
 
-    // console.log(newTableData);
+    console.log(newTableData);
     setTableData(newTableData);
     setTableTotal(total);
   };
