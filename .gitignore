@@ -89,3 +89,6 @@ sessionStore
 /test_concurrent.sh
 /test_concurrent_bg.sh
 /test_stress.sh
+/onebase-module-data/数据源appId查询问题修复.md
+/死锁优化建议.md
+/动态数据源连接失败重试限制优化.md

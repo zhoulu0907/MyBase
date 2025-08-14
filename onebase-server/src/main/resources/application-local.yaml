@@ -45,6 +45,13 @@ spring:
         test-while-idle: true
         test-on-borrow: false
         test-on-return: false
+        # 关键配置：限制连接失败重试次数，避免无限重试死循环
+        connection-error-retry-attempts: 5 # 连接失败重试次数上限为5次
+        break-after-acquire-failure: true # 获取连接失败后中断，避免死循环
+        connect-timeout: 10000 # 连接超时时间10秒
+        socket-timeout: 30000 # Socket超时时间30秒
+        fail-fast: true # 快速失败，不无限等待
+        time-between-connect-error-millis: 1000 # 连接出错后重连时间间隔，单位：毫秒
       primary: master
       datasource:
         master:
