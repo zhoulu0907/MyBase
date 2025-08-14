@@ -16,16 +16,6 @@ interface DepartmentModalProps {
   initialValues?: DeptForm;
 }
 
-/**
- * 树形数据节点接口
- */
-interface TreeNode {
-  key: string;
-  value: string;
-  title: string;
-  children?: TreeNode[];
-}
-
 export type SimpleUserVO = Pick<UserVO, 'id' | 'username' | 'nickname'> & Partial<UserVO>;
 const DepartmentModal: React.FC<DepartmentModalProps> = (props) => {
   const { visible, onCancel, onConfirm, loading, initialValues } = props;
