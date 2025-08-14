@@ -44,8 +44,7 @@ public class ApplicationCreateReqVO {
     private String iconColor;
 
     @Schema(description = "数据源ID")
-    @NotNull(message = "数据源ID不能为空")
-    private Long datasourceId;
+    private String datasourceId;
 
     @Schema(description = "应用描述")
     private String description;

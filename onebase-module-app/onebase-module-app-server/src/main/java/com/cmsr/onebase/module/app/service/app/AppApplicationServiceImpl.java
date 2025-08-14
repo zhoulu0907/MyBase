@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.app.service.app;
 
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
+import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.app.controller.admin.app.vo.ApplicationCreateReqVO;
@@ -21,6 +22,7 @@ import com.cmsr.onebase.module.app.service.AppCommonService;
 import com.cmsr.onebase.module.app.service.auth.AppAuthRoleService;
 import com.cmsr.onebase.module.app.util.AppUtils;
 import com.cmsr.onebase.module.app.util.VersionUtils;
+import com.cmsr.onebase.module.metadata.api.datasource.MetadataDatasourceApi;
 import jakarta.annotation.Resource;
 import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
@@ -63,6 +65,9 @@ public class AppApplicationServiceImpl implements AppApplicationService {
 
     @Resource
     private AppAuthRoleService authRoleService;
+
+    @Resource
+    private MetadataDatasourceApi metadataDatasourceApi;
 
     @Override
     public PageResult<ApplicationRespVO> getApplicationPage(ApplicationPageReqVO pageReqVO) {
@@ -120,6 +125,10 @@ public class AppApplicationServiceImpl implements AppApplicationService {
         applicationDO = applicationRepository.insert(applicationDO);
         saveApplicationTags(applicationDO.getId(), createReqVO.getTagIds());
         authRoleService.createDefaultRole(applicationDO.getId());
+        CommonResult<String> defaultDatasource = metadataDatasourceApi.createDefaultDatasource(applicationDO.getId());
+        //TODO 效率低，得优化方案
+        applicationDO.setDatasourceId(defaultDatasource.getData());
+        applicationRepository.update(applicationDO);
         return BeanUtils.toBean(applicationDO, ApplicationCreateRespVO.class);
     }
 
