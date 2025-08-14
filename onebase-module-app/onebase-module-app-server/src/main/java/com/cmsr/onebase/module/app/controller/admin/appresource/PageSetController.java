@@ -46,6 +46,12 @@ public class PageSetController {
         return CommonResult.success(appId);
     }
 
+    @GetMapping("/main_metadata")
+    public CommonResult<String> getMainMetadata(@RequestParam String code) {
+        String mainMetadata = pageSetService.getMainMetadata(code);
+        return CommonResult.success(mainMetadata);
+    }
+
     @PostMapping("/create")
     @Operation(summary = "创建页面集")
     public CommonResult<String> createPageSet(@RequestBody CreatePageSetDTO createPageSetDTO) {

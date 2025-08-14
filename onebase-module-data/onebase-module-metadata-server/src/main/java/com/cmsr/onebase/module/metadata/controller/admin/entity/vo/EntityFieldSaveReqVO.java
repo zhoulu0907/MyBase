@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.metadata.controller.admin.entity.vo;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
@@ -26,6 +27,7 @@ public class EntityFieldSaveReqVO {
     @Schema(description = "字段名", requiredMode = Schema.RequiredMode.REQUIRED, example = "username")
     @NotBlank(message = "字段名不能为空")
     @Size(max = 40, message = "字段名长度不能超过40个字符")
+    @Pattern(regexp = "^[a-zA-Z_][a-zA-Z0-9_]*$", message = "字段名只能包含英文字母、数字和下划线，且必须以字母或下划线开头")
     private String fieldName;
 
     @Schema(description = "显示名称", requiredMode = Schema.RequiredMode.REQUIRED, example = "用户名")
@@ -66,8 +68,8 @@ public class EntityFieldSaveReqVO {
     @NotNull(message = "应用ID不能为空")
     private String appId;
 
-    @Schema(description = "字段编码", example = "USER_NAME")
+/*     @Schema(description = "字段编码", example = "USER_NAME")
     @Size(max = 60, message = "字段编码长度不能超过60个字符")
-    private String fieldCode;
+    private String fieldCode; */
 
 }

@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.metadata.service.entity;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldBatchCreateReqVO;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldBatchCreateRespVO;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldBatchSortReqVO;
@@ -344,11 +345,14 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
                 if (item.getDecimalPlaces() != null) upd.setDecimalPlaces(item.getDecimalPlaces());
                 if (item.getDefaultValue() != null) upd.setDefaultValue(item.getDefaultValue());
                 if (item.getDescription() != null) upd.setDescription(item.getDescription());
-                if (item.getIsRequired() != null) upd.setIsRequired(item.getIsRequired() ? 0 : 1);
-                if (item.getIsUnique() != null) upd.setIsUnique(item.getIsUnique() ? 0 : 1);
-                if (item.getAllowNull() != null) upd.setAllowNull(item.getAllowNull() ? 0 : 1);
+                if (item.getIsRequired() != null) upd.setIsRequired(item.getIsRequired());
+                if (item.getIsUnique() != null) upd.setIsUnique(item.getIsUnique());
+                if (item.getAllowNull() != null) upd.setAllowNull(item.getAllowNull());
                 if (item.getSortOrder() != null) upd.setSortOrder(item.getSortOrder());
-                if (item.getFieldCode() != null) upd.setFieldCode(item.getFieldCode());
+                // fieldCode字段已注释，不再处理
+                // if (item.getFieldCode() != null) upd.setFieldCode(item.getFieldCode());
+                // 修复：正确处理isSystemField字段的更新
+                if (item.getIsSystemField() != null) upd.setIsSystemField(item.getIsSystemField());
 
                 metadataEntityFieldRepository.update(upd);
 
@@ -366,6 +370,49 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
         // 4. 最后新增
         for (EntityFieldUpsertItemVO item : reqVO.getItems()) {
             if (!Boolean.TRUE.equals(item.getIsDeleted()) && item.getId() == null) {
+                // 智能处理：如果没有传ID，但fieldCode或fieldName已存在，则自动转换为更新操作
+                MetadataEntityFieldDO existingField = findExistingFieldByCodeOrName(reqVO.getEntityId(), item);
+                if (existingField != null) {
+                    log.info("发现已存在的字段，自动转换为更新操作: fieldName={}, existingId={}", 
+                            item.getFieldName(), existingField.getId());
+                    
+                    // 转换为更新操作
+                    item.setId(existingField.getId().toString());
+                    
+                    // 组装更新对象（只覆盖非空字段）
+                    MetadataEntityFieldDO upd = new MetadataEntityFieldDO();
+                    upd.setId(existingField.getId());
+                    upd.setEntityId(existingField.getEntityId());
+                    if (item.getFieldName() != null) upd.setFieldName(item.getFieldName());
+                    if (item.getDisplayName() != null) upd.setDisplayName(item.getDisplayName());
+                    if (item.getFieldType() != null) upd.setFieldType(item.getFieldType());
+                    if (item.getDataLength() != null) upd.setDataLength(item.getDataLength());
+                    if (item.getDecimalPlaces() != null) upd.setDecimalPlaces(item.getDecimalPlaces());
+                    if (item.getDefaultValue() != null) upd.setDefaultValue(item.getDefaultValue());
+                    if (item.getDescription() != null) upd.setDescription(item.getDescription());
+                    if (item.getIsRequired() != null) upd.setIsRequired(item.getIsRequired());
+                    if (item.getIsUnique() != null) upd.setIsUnique(item.getIsUnique());
+                    if (item.getAllowNull() != null) upd.setAllowNull(item.getAllowNull());
+                    if (item.getSortOrder() != null) upd.setSortOrder(item.getSortOrder());
+                    // fieldCode字段已注释，不再处理
+                    // if (item.getFieldCode() != null) upd.setFieldCode(item.getFieldCode());
+                    // 关键：正确处理isSystemField字段的更新
+                    if (item.getIsSystemField() != null) upd.setIsSystemField(item.getIsSystemField());
+
+                    metadataEntityFieldRepository.update(upd);
+                    
+                    // 同步物理表（需要完整字段信息）
+                    DefaultConfigStore cs2 = new DefaultConfigStore();
+                    cs2.and("id", existingField.getId());
+                    MetadataEntityFieldDO full = metadataEntityFieldRepository.findOne(cs2);
+                    if (datasource != null && businessEntity.getTableName() != null) {
+                        alterColumnInTable(datasource, businessEntity.getTableName(), full);
+                    }
+                    resp.getUpdatedIds().add(existingField.getId().toString());
+                    continue; // 跳过新增逻辑
+                }
+                
+                // 确实是新增字段的情况
                 // 名称唯一
                 validateEntityFieldNameUnique(null, reqVO.getEntityId(), item.getFieldName());
                 validateEntityAllowModifyStructure(Long.valueOf(reqVO.getEntityId()));
@@ -380,13 +427,14 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
                 toCreate.setDecimalPlaces(item.getDecimalPlaces());
                 toCreate.setDefaultValue(item.getDefaultValue());
                 toCreate.setDescription(item.getDescription());
-                toCreate.setIsRequired(item.getIsRequired() != null ? (item.getIsRequired() ? 0 : 1) : null);
-                toCreate.setIsUnique(item.getIsUnique() != null ? (item.getIsUnique() ? 0 : 1) : null);
-                toCreate.setAllowNull(item.getAllowNull() != null ? (item.getAllowNull() ? 0 : 1) : null);
+                toCreate.setIsRequired(item.getIsRequired());
+                toCreate.setIsUnique(item.getIsUnique());
+                toCreate.setAllowNull(item.getAllowNull());
                 toCreate.setSortOrder(item.getSortOrder());
-                toCreate.setFieldCode(item.getFieldCode() != null && !item.getFieldCode().trim().isEmpty()
-                        ? item.getFieldCode() : generateFieldCode(item.getFieldName()));
-                toCreate.setIsSystemField(0); // 0表示是系统字段
+                // fieldCode字段已注释，自动生成
+                toCreate.setFieldCode(generateFieldCode(item.getFieldName()));
+                // 修复：正确设置isSystemField，如果前端传入则使用传入值，否则默认为0（系统字段）
+                toCreate.setIsSystemField(item.getIsSystemField() != null ? item.getIsSystemField() : 0);
                 toCreate.setIsPrimaryKey(1); // 1表示不是主键
 
                 metadataEntityFieldRepository.insert(toCreate);
@@ -399,6 +447,34 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
         }
 
         return resp;
+    }
+
+    /**
+     * 根据字段编码或字段名查找已存在的字段
+     *
+     * @param entityId 实体ID
+     * @param item 字段信息
+     * @return 已存在的字段，如果不存在则返回null
+     */
+    private MetadataEntityFieldDO findExistingFieldByCodeOrName(String entityId, EntityFieldUpsertItemVO item) {
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        configStore.and("entity_id", Long.valueOf(entityId));
+        
+        // fieldCode字段已注释，跳过根据fieldCode查找逻辑
+        // 直接根据fieldName查找
+        
+        // 其次根据fieldName查找
+        if (item.getFieldName() != null && !item.getFieldName().trim().isEmpty()) {
+            DefaultConfigStore nameConfigStore = new DefaultConfigStore();
+            nameConfigStore.and("entity_id", Long.valueOf(entityId));
+            nameConfigStore.and("field_name", item.getFieldName());
+            MetadataEntityFieldDO existingField = metadataEntityFieldRepository.findOne(nameConfigStore);
+            if (existingField != null) {
+                return existingField;
+            }
+        }
+        
+        return null;
     }
 
     /**
@@ -703,25 +779,29 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
                 datasource.getDatasourceName(), datasource.getDatasourceType());
             log.info("数据源配置: {}", datasource.getConfig());
 
-            // 创建 AnylineService 实例
-            AnylineService<?> service = temporaryDatasourceService.createTemporaryService(datasource);
+            // 使用TenantUtils.executeIgnore包装操作，忽略租户条件
+            TenantUtils.executeIgnore(() -> {
+                // 创建 AnylineService 实例
+                AnylineService<?> service = temporaryDatasourceService.createTemporaryService(datasource);
 
-            // 验证连接的数据库
-            String currentDb = getCurrentDatabase(service);
-            log.info("当前连接的数据库: {}, 期望连接的数据库: onebase_business", currentDb);
+                // 验证连接的数据库
+                String currentDb = getCurrentDatabase(service);
+                log.info("当前连接的数据库: {}, 期望连接的数据库: onebase_business", currentDb);
 
-            // 首先检查表是否存在
-            if (!checkTableExists(service, tableName)) {
-                throw new RuntimeException("表 " + tableName + " 不存在，请先创建表");
-            }
+                // 首先检查表是否存在
+                if (!checkTableExists(service, tableName)) {
+                    throw new RuntimeException("表 " + tableName + " 不存在，请先创建表");
+                }
 
-            // 生成添加列 DDL
-            String addColumnDDL = generateAddColumnDDL(tableName, field);
+                // 生成添加列 DDL
+                String addColumnDDL = generateAddColumnDDL(tableName, field);
 
-            // 执行添加列语句
-            service.execute(addColumnDDL);
+                // 执行添加列语句
+                service.execute(addColumnDDL);
 
-            log.info("成功为表 {} 添加列: {}", tableName, field.getFieldName());
+                log.info("成功为表 {} 添加列: {}", tableName, field.getFieldName());
+                return null;
+            });
         } catch (Exception e) {
             log.error("为表 {} 添加列 {} 失败: {}", tableName, field.getFieldName(), e.getMessage(), e);
             throw new RuntimeException("添加列失败: " + e.getMessage(), e);
@@ -768,16 +848,20 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
      */
     private void alterColumnInTable(MetadataDatasourceDO datasource, String tableName, MetadataEntityFieldDO field) {
         try {
-            // 创建 AnylineService 实例
-            AnylineService<?> service = temporaryDatasourceService.createTemporaryService(datasource);
+            // 使用TenantUtils.executeIgnore包装操作，忽略租户条件
+            TenantUtils.executeIgnore(() -> {
+                // 创建 AnylineService 实例
+                AnylineService<?> service = temporaryDatasourceService.createTemporaryService(datasource);
 
-            // 生成修改列 DDL
-            String alterColumnDDL = generateAlterColumnDDL(tableName, field);
+                // 生成修改列 DDL
+                String alterColumnDDL = generateAlterColumnDDL(tableName, field);
 
-            // 执行修改列语句
-            service.execute(alterColumnDDL);
+                // 执行修改列语句
+                service.execute(alterColumnDDL);
 
-            log.info("成功修改表 {} 的列: {}", tableName, field.getFieldName());
+                log.info("成功修改表 {} 的列: {}", tableName, field.getFieldName());
+                return null;
+            });
         } catch (Exception e) {
             log.error("修改表 {} 的列 {} 失败: {}", tableName, field.getFieldName(), e.getMessage(), e);
             throw new RuntimeException("修改列失败", e);
@@ -789,16 +873,20 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
      */
     private void dropColumnFromTable(MetadataDatasourceDO datasource, String tableName, String fieldName) {
         try {
-            // 创建 AnylineService 实例
-            AnylineService<?> service = temporaryDatasourceService.createTemporaryService(datasource);
+            // 使用TenantUtils.executeIgnore包装操作，忽略租户条件
+            TenantUtils.executeIgnore(() -> {
+                // 创建 AnylineService 实例
+                AnylineService<?> service = temporaryDatasourceService.createTemporaryService(datasource);
 
-            // 生成删除列 DDL
-            String dropColumnDDL = generateDropColumnDDL(tableName, fieldName);
+                // 生成删除列 DDL
+                String dropColumnDDL = generateDropColumnDDL(tableName, fieldName);
 
-            // 执行删除列语句
-            service.execute(dropColumnDDL);
+                // 执行删除列语句
+                service.execute(dropColumnDDL);
 
-            log.info("成功从表 {} 删除列: {}", tableName, fieldName);
+                log.info("成功从表 {} 删除列: {}", tableName, fieldName);
+                return null;
+            });
         } catch (Exception e) {
             log.error("从表 {} 删除列 {} 失败: {}", tableName, fieldName, e.getMessage(), e);
             throw new RuntimeException("删除列失败", e);

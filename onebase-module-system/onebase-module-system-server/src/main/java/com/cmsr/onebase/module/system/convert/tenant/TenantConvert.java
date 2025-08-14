@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.system.convert.tenant;
 
 import com.cmsr.onebase.module.system.controller.admin.tenant.vo.tenant.TenantInsertReqVO;
+import com.cmsr.onebase.module.system.controller.admin.tenant.vo.tenant.TenantRespVO;
 import com.cmsr.onebase.module.system.controller.admin.tenant.vo.tenant.TenantSimpleRespVO;
 import com.cmsr.onebase.module.system.controller.admin.user.vo.user.UserInsertReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
@@ -25,4 +26,6 @@ public interface TenantConvert {
     }
 
     TenantSimpleRespVO convertToSimpleRespVO(TenantDO tenant);
+
+    TenantRespVO convert(TenantDO tenantDO);
 }

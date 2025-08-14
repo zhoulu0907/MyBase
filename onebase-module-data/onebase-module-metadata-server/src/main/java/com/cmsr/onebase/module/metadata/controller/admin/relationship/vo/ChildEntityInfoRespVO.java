@@ -21,8 +21,11 @@ public class ChildEntityInfoRespVO {
     @Schema(description = "子表实体名称", example = "订单信息")
     private String childEntityName;
 
-    @Schema(description = "子表实体编码", example = "order_info")
+    @Schema(description = "子表实体编码", example = "ABC")
     private String childEntityCode;
+
+    @Schema(description = "实际表名", example = "user_info")
+    private String childTableName;
 
     @Schema(description = "关系ID", example = "5001")
     private String relationshipId;

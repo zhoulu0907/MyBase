@@ -10,8 +10,12 @@ import org.anyline.service.AnylineService;
 import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.Statement;
+import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 临时数据源服务类
@@ -27,6 +31,11 @@ public class TemporaryDatasourceService {
 
     @Resource
     private DatasourceConvert datasourceConvert;
+    
+    /**
+     * 用于缓存已创建的临时服务，避免重复创建
+     */
+    private final Map<String, AnylineService<?>> serviceCache = new ConcurrentHashMap<>();
 
     /**
      * 根据数据源DO对象创建临时的AnylineService用于数据库操作
@@ -45,11 +54,21 @@ public class TemporaryDatasourceService {
 
     /**
      * 根据数据源配置参数创建临时 AnylineService 服务
-     *
+     * 
      * @param datasourceConfig 数据源配置参数
      * @return AnylineService 实例
      */
-    public AnylineService<?> createTemporaryService(Map<String, Object> datasourceConfig) {
+    public synchronized AnylineService<?> createTemporaryService(Map<String, Object> datasourceConfig) {
+        // 生成数据源的唯一标识，用于缓存
+        String cacheKey = generateCacheKey(datasourceConfig);
+        
+        // 先从缓存中获取
+        AnylineService<?> cachedService = serviceCache.get(cacheKey);
+        if (cachedService != null) {
+            log.debug("从缓存中获取临时数据源服务: {}", cacheKey);
+            return cachedService;
+        }
+        
         try {
             String url = (String) datasourceConfig.get("url");
             String username = (String) datasourceConfig.get("username");
@@ -99,20 +118,97 @@ public class TemporaryDatasourceService {
             dsConfig.put("test-while-idle", true);
             dsConfig.put("time-between-eviction-runs-millis", 60000);
             
+            // 关键配置：限制连接失败重试次数，避免无限重试死循环
+            dsConfig.put("connection-error-retry-attempts", 5); // 连接失败重试次数上限为5次
+            dsConfig.put("break-after-acquire-failure", true);  // 获取连接失败后中断，避免死循环
+            dsConfig.put("connect-timeout", 10000);             // 连接超时时间10秒
+            dsConfig.put("socket-timeout", 30000);              // Socket超时时间30秒
+            dsConfig.put("fail-fast", true);                    // 快速失败，不无限等待
+            
             log.info("临时数据源配置: {}", dsConfig);
             
-            // 先使用配置创建数据源，然后创建临时服务
-            DataSource dataSource = DataSourceUtil.build(dsConfig);
-            AnylineService<?> service = ServiceProxy.temporary(dataSource);
-            
-            log.info("临时服务创建成功，Service实例: {}", service.getClass().getName());
-            log.info("=== 创建临时数据源调试信息结束 ===");
-            
-            return service;
+            // 创建数据源和临时服务 - 增加超时控制和快速失败机制
+            DataSource dataSource = null;
+            try {
+                log.info("开始创建数据源，URL: {}", url);
+                dataSource = DataSourceUtil.build(dsConfig);
+                
+                // 立即测试连接有效性，避免延迟发现问题
+                try (Connection testConn = dataSource.getConnection()) {
+                    if (testConn == null || testConn.isClosed()) {
+                        throw new RuntimeException("创建的数据库连接无效");
+                    }
+                    // 执行简单查询验证连接
+                    try (Statement stmt = testConn.createStatement(); 
+                         ResultSet rs = stmt.executeQuery("SELECT 1")) {
+                        if (!rs.next()) {
+                            throw new RuntimeException("数据库连接测试查询失败");
+                        }
+                    }
+                    log.info("数据源连接测试成功");
+                }
+                
+                AnylineService<?> service = ServiceProxy.temporary(dataSource);
+                
+                // 缓存创建的服务
+                serviceCache.put(cacheKey, service);
+                
+                log.info("临时服务创建成功，Service实例: {}", service.getClass().getName());
+                log.info("=== 创建临时数据源调试信息结束 ===");
+                
+                return service;
+            } catch (Exception e) {
+                log.error("数据源连接创建或测试失败，URL: {}, 错误: {}", url, e.getMessage());
+                
+                // 如果是连接超时或网络不可达，快速抛出异常
+                String errorMsg = e.getMessage();
+                if (errorMsg != null) {
+                    if (errorMsg.contains("Connection refused") || 
+                        errorMsg.contains("timeout") || 
+                        errorMsg.contains("Network is unreachable") ||
+                        errorMsg.contains("No route to host") ||
+                        errorMsg.contains("connect timed out")) {
+                        throw new RuntimeException("数据源网络不可达或连接超时，请检查数据源配置: " + errorMsg, e);
+                    }
+                }
+                throw e; // 其他异常直接抛出
+            }
         } catch (Exception e) {
             log.error("创建数据库连接失败: {}", e.getMessage(), e);
             throw new RuntimeException("创建数据库连接失败: " + e.getMessage(), e);
         }
+    }
+    
+    /**
+     * 生成数据源配置的唯一缓存键
+     * 
+     * @param datasourceConfig 数据源配置
+     * @return 缓存键
+     */
+    private String generateCacheKey(Map<String, Object> datasourceConfig) {
+        String url = (String) datasourceConfig.get("url");
+        String username = (String) datasourceConfig.get("username");
+        String datasourceType = (String) datasourceConfig.get("datasourceType");
+        
+        if (url == null) {
+            String host = (String) datasourceConfig.get("host");
+            Object portObj = datasourceConfig.get("port");
+            String database = (String) datasourceConfig.get("database");
+            if (host != null) {
+                int port = getDefaultPort(datasourceType);
+                if (portObj instanceof Integer) {
+                    port = (Integer) portObj;
+                } else if (portObj instanceof String) {
+                    port = Integer.parseInt((String) portObj);
+                }
+                url = buildJdbcUrl(datasourceType, host, port, database);
+            }
+        }
+        
+        return String.format("temp_datasource_%s_%s_%s", 
+            datasourceType != null ? datasourceType : "unknown",
+            url != null ? url.hashCode() : "nourl", 
+            username != null ? username.hashCode() : "nouser");
     }
 
     /**

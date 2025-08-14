@@ -85,3 +85,12 @@ sessionStore
 /元数据管理接口单元测试报告.md
 /datasource_api_test_improved.sh
 /datasource_api_test.sh
+/test_concurrent.py
+/test_concurrent.sh
+/test_concurrent_bg.sh
+/test_stress.sh
+/onebase-module-data/数据源appId查询问题修复.md
+/死锁优化建议.md
+/动态数据源连接失败重试限制优化.md
+/实体字段批量保存isSystemField字段更新问题修复.md
+/test_validation_modifications.md

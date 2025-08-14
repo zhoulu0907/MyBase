@@ -37,6 +37,7 @@ import com.mzt.logapi.starter.annotation.LogRecord;
 import jakarta.annotation.Resource;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
+import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Compare;
 import org.anyline.entity.Order;
@@ -380,10 +381,28 @@ public class AdminUserServiceImpl implements AdminUserService {
                 reqVO.getPageNo(), reqVO.getPageSize());
     }
 
+
+    @Override
+    public PageResult<AdminUserDO> getSimpleEnableUserPage(UserSimplePageReqVO reqVO) {
+        // 构建查询条件
+        ConfigStore configStore = new DefaultConfigStore().eq(AdminUserDO.STATUS, CommonStatusEnum.ENABLE.getStatus());
+
+        // // 根据关键词模糊查询
+        if (StrUtil.isNotBlank(reqVO.getKeywords())) {
+            configStore.and(Compare.LIKE, AdminUserDO.NICKNAME, reqVO.getKeywords());
+        }
+
+        // 添加排序
+        configStore.order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
+
+        // 分页查询
+        return dataRepository.findPageWithConditions(AdminUserDO.class, configStore, reqVO.getPageNo(), reqVO.getPageSize());
+    }
+
+
     @Override
     public AdminUserDO getUser(Long id) {
         return dataRepository.findById(AdminUserDO.class, id);
-        // return userMapper.selectById(id);
     }
 
     @Override

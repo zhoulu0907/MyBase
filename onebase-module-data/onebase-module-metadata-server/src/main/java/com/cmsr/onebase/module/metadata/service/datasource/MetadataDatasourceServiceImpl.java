@@ -297,8 +297,9 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
         if (pageReqVO.getRunMode() != null) {
             configStore.and("run_mode", pageReqVO.getRunMode());
         }
-        if (pageReqVO.getAppId() != null) {
-            configStore.and("app_id", pageReqVO.getAppId());
+        // 修复appId过滤逻辑 - 只有当appId不为空且不为空字符串时才添加过滤条件
+        if (pageReqVO.getAppId() != null && !pageReqVO.getAppId().trim().isEmpty()) {
+            configStore.and("app_id", Long.valueOf(pageReqVO.getAppId()));
         }
 
         // 分页查询
@@ -310,6 +311,11 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.order("create_time", Order.TYPE.DESC);
         return metadataDatasourceRepository.findAllByConfig(configStore);
+    }
+
+    @Override
+    public List<MetadataDatasourceDO> getDatasourceListByAppId(Long appId) {
+        return metadataDatasourceRepository.getDatasourceListByAppId(appId);
     }
 
     @Override

@@ -8,6 +8,7 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.excel.core.util.ExcelUtils;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
+import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
 import com.cmsr.onebase.module.system.controller.admin.tenant.vo.tenant.*;
 import com.cmsr.onebase.module.system.convert.tenant.TenantConvert;
 import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
@@ -95,12 +96,11 @@ public class TenantController {
     }
 
     @GetMapping("/get")
-    @Operation(summary = "获得租户")
+    @Operation(summary = "获得租户(安全考虑仅获取用户所属租户)")
     @Parameter(name = "id", description = "编号", required = true, example = "1024")
     @PreAuthorize("@ss.hasPermission('system:tenant:query')")
-    public CommonResult<TenantRespVO> getTenant(@RequestParam("id") Long id) {
-        TenantDO tenant = tenantService.getTenant(id);
-        return success(BeanUtils.toBean(tenant, TenantRespVO.class));
+    public CommonResult<TenantRespVO> getTenant() {
+        return success(tenantService.getTenantWithAppCount(TenantContextHolder.getTenantId()));
     }
 
     @GetMapping("/get-allocatable-count")

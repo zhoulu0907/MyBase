@@ -102,7 +102,7 @@ public class DatasourceController {
     @PostMapping("/page")
     @Operation(summary = "获得数据源分页列表")
     @PreAuthorize("@ss.hasPermission('metadata:datasource:query')")
-    public CommonResult<PageResult<DatasourceRespVO>> getDatasourcePage(@Valid DatasourcePageReqVO pageReqVO) {
+    public CommonResult<PageResult<DatasourceRespVO>> getDatasourcePage(@Valid @RequestBody DatasourcePageReqVO pageReqVO) {
         PageResult<MetadataDatasourceDO> pageResult = datasourceService.getDatasourcePage(pageReqVO);
         return success(datasourceConvert.convertPage(pageResult));
     }
@@ -110,8 +110,22 @@ public class DatasourceController {
     @PostMapping("/list")
     @Operation(summary = "获得数据源列表")
     @PreAuthorize("@ss.hasPermission('metadata:datasource:query')")
-    public CommonResult<List<DatasourceRespVO>> getDatasourceList() {
-        List<MetadataDatasourceDO> list = datasourceService.getDatasourceList();
+    public CommonResult<List<DatasourceRespVO>> getDatasourceList(@Valid @RequestBody DatasourceListReqVO reqVO) {
+        List<MetadataDatasourceDO> list;
+        
+        // 添加调试日志
+        System.out.println("DEBUG: 接收到的请求参数 - appId: " + reqVO.getAppId());
+        
+        // 根据是否传入appId来决定查询方式
+        if (reqVO.getAppId() != null && !reqVO.getAppId().trim().isEmpty()) {
+            System.out.println("DEBUG: 使用appId查询，appId: " + reqVO.getAppId());
+            list = datasourceService.getDatasourceListByAppId(Long.valueOf(reqVO.getAppId()));
+        } else {
+            System.out.println("DEBUG: 查询所有数据源");
+            list = datasourceService.getDatasourceList();
+        }
+        
+        System.out.println("DEBUG: 查询结果数量: " + list.size());
         return success(datasourceConvert.convertList(list));
     }
 
@@ -129,14 +143,6 @@ public class DatasourceController {
     @PreAuthorize("@ss.hasPermission('metadata:datasource:test')")
     public CommonResult<DatasourceTestConnectionRespVO> testConnection(@Valid @RequestBody DatasourceTestConnectionReqVO reqVO) {
         return success(datasourceService.testConnection(reqVO));
-    }
-
-    @PostMapping("/create-default")
-    @Operation(summary = "创建默认数据源")
-    @PreAuthorize("@ss.hasPermission('metadata:datasource:create')")
-    public CommonResult<String> createDefaultDatasource(@RequestParam("appId") Long appId) {
-        Long id = datasourceService.createDefaultDatasource(appId);
-        return success(id.toString());
     }
 
 }

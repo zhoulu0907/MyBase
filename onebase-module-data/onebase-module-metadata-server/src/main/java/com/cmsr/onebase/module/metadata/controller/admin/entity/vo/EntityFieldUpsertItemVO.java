@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.metadata.controller.admin.entity.vo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
@@ -20,6 +21,7 @@ public class EntityFieldUpsertItemVO {
     // 以下字段用于新增或更新（更新时可部分提供，未提供的将沿用原值）
     @Schema(description = "字段名", example = "username")
     @Size(max = 40, message = "字段名长度不能超过40个字符")
+    @Pattern(regexp = "^[a-zA-Z_][a-zA-Z0-9_]*$", message = "字段名只能包含英文字母、数字和下划线，且必须以字母或下划线开头")
     private String fieldName;
 
     @Schema(description = "显示名称", example = "用户名")
@@ -42,19 +44,22 @@ public class EntityFieldUpsertItemVO {
     @Size(max = 200, message = "描述长度不能超过200个字符")
     private String description;
 
-    @Schema(description = "是否必填", example = "true")
-    private Boolean isRequired;
+    @Schema(description = "是否必填：0-是，1-不是", example = "1")
+    private Integer isRequired;
 
-    @Schema(description = "是否唯一", example = "true")
-    private Boolean isUnique;
+    @Schema(description = "是否唯一：0-是，1-不是", example = "1")
+    private Integer isUnique;
 
-    @Schema(description = "允许空值", example = "false")
-    private Boolean allowNull;
+    @Schema(description = "允许空值：0-是，1-不是", example = "1")
+    private Integer allowNull;
 
     @Schema(description = "排序顺序", example = "10")
     private Integer sortOrder;
 
-    @Schema(description = "字段编码", example = "USER_NAME")
+/*     @Schema(description = "字段编码", example = "USER_NAME")
     @Size(max = 60, message = "字段编码长度不能超过60个字符")
-    private String fieldCode;
+    private String fieldCode; */
+
+    @Schema(description = "是否系统字段", example = "0")
+    private Integer isSystemField;
 }

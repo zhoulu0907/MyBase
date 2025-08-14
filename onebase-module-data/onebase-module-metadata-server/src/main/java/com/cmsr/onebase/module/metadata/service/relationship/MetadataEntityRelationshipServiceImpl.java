@@ -463,6 +463,8 @@ public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRela
         result.setEntityId(entity.getId());
         result.setEntityName(entity.getDisplayName());
         result.setEntityCode(entity.getCode());
+        // 设置实际表名
+        result.setTableName(entity.getTableName());
 
         // 3. 查询以该实体为源实体的所有关系（即该实体作为父表的关系）
         DefaultConfigStore configStore = new DefaultConfigStore();
@@ -507,6 +509,8 @@ public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRela
         if (targetEntity != null) {
             childInfo.setChildEntityName(targetEntity.getDisplayName());
             childInfo.setChildEntityCode(targetEntity.getCode());
+            // 设置子表实际表名
+            childInfo.setChildTableName(targetEntity.getTableName());
         }
         
         // 获取字段名称
@@ -561,6 +565,8 @@ public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRela
         EntityInfoRespVO entityInfo = new EntityInfoRespVO();
         entityInfo.setEntityID(String.valueOf(entityDO.getId()));
         entityInfo.setEntityName(entityDO.getDisplayName());
+        // 设置实际表名
+        entityInfo.setTableName(entityDO.getTableName());
         
         // 判断实体类型 - 查询是否存在以该实体为源实体的关系来判断是否为主表
         entityInfo.setEntityType(determineEntityType(entityDO.getId()));

@@ -124,6 +124,8 @@ public interface AdminUserService {
      */
     PageResult<AdminUserDO> getUserPage(UserPageReqVO reqVO);
 
+    PageResult<AdminUserDO> getSimpleEnableUserPage(UserSimplePageReqVO reqVO);
+
     /**
      * 通过用户 ID 查询用户
      *
