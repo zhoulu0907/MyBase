@@ -16,10 +16,6 @@ export interface DynamicTableConfigProps {
   id: string;
 }
 
-/**
- * 动态下拉选择组件
- * @param props 组件属性
- */
 const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
   handleMultiPropsChange,
   handlePropsChange,

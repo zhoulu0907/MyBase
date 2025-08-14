@@ -100,6 +100,7 @@ const PageManagerPage: FC = () => {
         const firstPageMenu = res.find((menu: ApplicationMenu) => menu.menuType == MenuType.PAGE);
         setCurMenu(firstPageMenu);
       });
+      getEntityList();
     }
     clearIsEditMode();
   }, [curAppId]);
@@ -160,8 +161,8 @@ const PageManagerPage: FC = () => {
 
   const getEntityList = async () => {
     // TODO(mickey): 等xiaoyi完成后 写活
-    const appId: string = '1';
-    // const appId: string = curAppId;
+    // const appId: string = '1';
+    const appId: string = curAppId;
     const res: MetadataEntityPair[] = await getEntityListByApp(appId);
     console.log(res);
     const entityOptions = res.map((entity) => ({
@@ -334,7 +335,6 @@ const PageManagerPage: FC = () => {
     <div className={styles.pageManagerPage}>
       <Layout style={{ height: '100%' }}>
         <Layout>
-          {/* <Sider style={{ width: 225 }}> */}
           <Sider className={styles.sider}>
             <div className={styles.siderHeader}>
               <Input

@@ -100,8 +100,6 @@ const OrganizationPage: React.FC = () => {
       }
       handleSearch(searchValue);
       setModalVisible(false);
-    } catch (error) {
-      Message.error('操作失败，请重试');
     } finally {
       setModalLoading(false);
     }

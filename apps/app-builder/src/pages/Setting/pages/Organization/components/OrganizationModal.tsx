@@ -67,6 +67,10 @@ const DepartmentModal: React.FC<DepartmentModalProps> = (props) => {
     }
   };
 
+  const filterTreeNode = (inputText: string, node: any) => {
+    return node.props.title.toLowerCase().indexOf(inputText.toLowerCase()) > -1;
+  };
+
   return (
     <Modal
       title={<div style={{ textAlign: 'left' }}>{initialValues ? '编辑部门' : '新增部门'}</div>}
@@ -94,16 +98,17 @@ const DepartmentModal: React.FC<DepartmentModalProps> = (props) => {
                 height: 200
               }
             }}
+            filterTreeNode={filterTreeNode}
           />
         </FormItem>
-        <FormItem label="管理员" field="leaderUserId" rules={[{ required: true, message: '请选择管理员' }]}>
+        <FormItem label="管理员" field="leaderUserId">
           <Select
             placeholder={hasUserQueryPermission ? "请选择管理员" : "无权限"}
             allowClear
             showSearch
             disabled={!hasUserQueryPermission}
             filterOption={(input: string, option: any) =>
-              option?.children?.toString().toLowerCase().indexOf(input.toLowerCase()) >= 0
+              option.props?.children?.toString().toLowerCase().indexOf(input.toLowerCase()) >= 0
             }
           >
             {userList.map((user) => (

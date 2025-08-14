@@ -21,6 +21,7 @@ import type {
     IDateTypeConfigType,
     ILabelColSpanConfigType,
     ILayoutConfigType,
+    IRelatedFormDataConfigType,
     ISelectConfigType,
     IStatusConfigType,
     ITableDataConfigType,
@@ -253,6 +254,14 @@ export const dataFieldConfig: IDataFieldConfigType[] = [
         key: 'dataField',
         name: '数据字段',
         type: CONFIG_TYPES.FIELD_DATA
+    },
+]
+
+export const relatedFormdataFieldConfig: IRelatedFormDataConfigType[] = [
+    {
+        key: 'relatedFormDataField',
+        name: '关联表单',
+        type: CONFIG_TYPES.RELATED_FORM_DATA
     },
 ]
 
