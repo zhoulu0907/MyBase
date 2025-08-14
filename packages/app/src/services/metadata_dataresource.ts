@@ -70,7 +70,7 @@ export const deleteDatasource = (id: number) => {
  * @returns 数据源详情
  */
 export const getDatasource = (id: number) => {
-  return metadataService.post('/datasource/get', { params: { id } });
+  return metadataService.post(`/datasource/get?id=${id}`);
 };
 
 /**

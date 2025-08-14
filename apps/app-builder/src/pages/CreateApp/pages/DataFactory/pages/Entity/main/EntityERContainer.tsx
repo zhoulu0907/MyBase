@@ -5,7 +5,7 @@ import type {
   EntityNode
 } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
 import { useAppStore } from '@/store/store_app';
-import { useResourceStore } from '@/store_resource';
+import { useResourceStore } from '@/store/store_resource';
 import { Button, Message } from '@arco-design/web-react';
 import React, { useEffect, useState } from 'react';
 import EditEntityDrawer from '../components/Drawers/EditEntityDrawer';

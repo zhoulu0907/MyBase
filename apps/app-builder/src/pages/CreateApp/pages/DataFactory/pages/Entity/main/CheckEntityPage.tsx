@@ -1,5 +1,5 @@
 import { useAppStore } from '@/store/store_app';
-import { useResourceStore } from '@/store_resource';
+import { useResourceStore } from '@/store/store_resource';
 import { Radio, Tag } from '@arco-design/web-react';
 import { IconMindMapping, IconNav } from '@arco-design/web-react/icon';
 import { getDatasourceList } from '@onebase/app';

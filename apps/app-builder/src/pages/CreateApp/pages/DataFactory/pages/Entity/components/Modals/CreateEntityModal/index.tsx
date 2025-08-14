@@ -1,6 +1,6 @@
 import { DS_RESOURCE_TYPE } from '@/pages/CreateApp/pages/DataFactory/utils/const';
 import { useAppStore } from '@/store/store_app';
-import { useResourceStore } from '@/store_resource';
+import { useResourceStore } from '@/store/store_resource';
 import { Form, Input, Message, Modal, Radio, Select } from '@arco-design/web-react';
 import { createEntity } from '@onebase/app';
 import React, { useState } from 'react';
@@ -41,24 +41,7 @@ const CreateEntityModal: React.FC<{
       return;
     }
 
-    // TODO: 提交表单数据
     form.validate().then(async (values) => {
-      // 前端数据模拟
-      // const { nodes, edges } = JSON.parse(localStorage.getItem('entityFormValues') || JSON.stringify({nodes: [], edges: []}));
-
-      // nodes.push({
-      //   ...values,
-      //   id: values.code,
-      //   title: values.name,
-      //   x: nodes.length * 300,
-      //   y: 0,
-      //   fields: [
-      //     {id: 'ID', name: 'ID', type: '自增ID', isSystem: true},
-      //   ],
-      // });
-      // localStorage.setItem('entityFormValues', JSON.stringify({ nodes, edges }));
-      // console.log(values);
-
       const params = {
         displayName: values.name,
         code: values.code,
@@ -72,13 +55,8 @@ const CreateEntityModal: React.FC<{
         })
       };
 
-      try {
-        const res = await createEntity(params);
-        // TODO 返回参数待解析
-        console.log('createEntity', res);
-      } catch (error) {
-        console.log(error);
-      }
+      const res = await createEntity(params);
+      console.log('createEntity', res);
 
       form.resetFields();
       Message.success('保存成功');
