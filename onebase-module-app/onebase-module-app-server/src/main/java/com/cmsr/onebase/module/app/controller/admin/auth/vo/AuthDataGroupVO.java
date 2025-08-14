@@ -28,8 +28,8 @@ public class AuthDataGroupVO {
     @Schema(description = "数据权限组描述")
     private String description;
 
-    @Schema(description = "业务实体字段code")
-    private String scopeFieldCode;
+    @Schema(description = "业务实体字段名称")
+    private String scopeFieldName;
 
     @Schema(description = "业务实体字段对应的权限范围")
     private String scopeLevel;

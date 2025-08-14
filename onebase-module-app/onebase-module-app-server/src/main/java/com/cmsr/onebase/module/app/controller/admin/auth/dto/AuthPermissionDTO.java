@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.app.controller.admin.auth.vo;
+package com.cmsr.onebase.module.app.controller.admin.auth.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;

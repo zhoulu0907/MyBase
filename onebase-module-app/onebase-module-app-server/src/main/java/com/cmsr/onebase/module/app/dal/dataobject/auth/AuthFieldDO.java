@@ -22,8 +22,8 @@ public class AuthFieldDO extends TenantBaseDO {
     @Column(name = "menu_code", nullable = false, comment = "菜单code")
     private String menuCode;
 
-    @Column(name = "field_code", nullable = false, comment = "字段code")
-    private String fieldCode;
+    @Column(name = "field_name", nullable = false, comment = "字段名称")
+    private String fieldName;
 
     @Column(name = "is_can_read", comment = "是否可阅读")
     private Boolean canRead;

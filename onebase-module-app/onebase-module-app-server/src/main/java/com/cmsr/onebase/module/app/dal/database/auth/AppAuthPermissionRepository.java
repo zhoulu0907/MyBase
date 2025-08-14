@@ -1,8 +1,7 @@
 package com.cmsr.onebase.module.app.dal.database.auth;
 
 import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
-import com.cmsr.onebase.module.app.controller.admin.auth.vo.AuthPermissionDTO;
-import com.cmsr.onebase.module.app.controller.admin.auth.vo.AuthPermissionReqVO;
+import com.cmsr.onebase.module.app.controller.admin.auth.dto.AuthPermissionDTO;
 import com.cmsr.onebase.module.app.dal.dataobject.auth.AuthPermissionDO;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
