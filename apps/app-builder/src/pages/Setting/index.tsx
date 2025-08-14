@@ -1,10 +1,9 @@
 import { Layout } from '@arco-design/web-react';
 import React, { useState } from 'react';
-import { Route, Routes } from 'react-router-dom';
+import { Route, Routes, Navigate } from 'react-router-dom';
 import AppBreadcrumb from '../../components/Breadcrumb';
 import AppHeader from './components/header';
 import AppSider from './components/sider';
-import Welcome from './components/Welcome';
 
 import OrganizationPage from './pages/Organization';
 import RolePage from './pages/Role';
@@ -40,7 +39,7 @@ const SettingPage: React.FC = () => {
                 <Route path="organization" element={<OrganizationPage />} />
                 <Route path="system-dict" element={<SystemDictPage />} />
                 <Route path="tenant" element={<TenantPage />} />
-                <Route path="" element={<Welcome />} />
+                <Route path="" element={<Navigate to="user" replace />} />
               </Routes>
             </div>
           </Content>
