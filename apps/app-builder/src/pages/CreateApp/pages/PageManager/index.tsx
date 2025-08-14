@@ -82,7 +82,7 @@ const PageManagerPage: FC = () => {
   const [showGuide, setShowGuide] = useState<boolean>(false);
   const pageTypeOptions = [{ label: '普通表单', value: PageType.NORMAL }];
 
-  const [treeData, setTreeData] = useState<TreeNode[]>([]);
+  const [treeData, setTreeData] = useState<TreeNode[]>();
   const [entityListOptions, setEntityListOptions] = useState<Options[]>([]);
 
   const [curMenu, setCurMenu] = useState<ApplicationMenu>();
@@ -104,6 +104,10 @@ const PageManagerPage: FC = () => {
     }
     clearIsEditMode();
   }, [curAppId]);
+
+  useEffect(() => {
+    setShowGuide(treeData?.length === 0);
+  }, [treeData]);
 
   // 将接口返回的菜单数据（res）转换为 Tree 组件可用的 treeData 格式
   // TODO(mickey): showOption重构
@@ -177,7 +181,6 @@ const PageManagerPage: FC = () => {
       <MenuItem
         key="page"
         onClick={() => {
-          getEntityList();
           setVisibleCreateForm('page');
           createForm.resetFields();
           setTitle(t('createApp.createPage'));

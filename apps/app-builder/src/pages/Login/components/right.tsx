@@ -29,9 +29,9 @@ const Right: React.FC = () => {
   const [form] = Form.useForm();
   const { t } = useI18n();
 
-  const regex = /^https?:\/\/[^\/]+\/tenant\/([^\/#]+)\/?#\//;
-  const match = window.location.href.match(regex);
-  const tenantId = match ? match[1] : '1'; // 没有默认1
+  const hash = window.location.hash;
+  const match = hash.match(/\/tenant\/([^\/]+)/);
+  const tenantId = match ? match[1] : '1';
 
   // 使用记住我hook
   const { rememberMe, savedAccount, saveRememberMe } = useRememberMe();

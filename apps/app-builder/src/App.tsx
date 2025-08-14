@@ -50,6 +50,8 @@ function AppContent() {
       {/* 默认重定向到登录页 */}
       <Route path="/" element={<Navigate to="/login" replace />} />
 
+      <Route path="/tenant/*" element={<Login />} />
+
       {/* 404页面 */}
       <Route path="*" element={<NotFound />} />
     </Routes>

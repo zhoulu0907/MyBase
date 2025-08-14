@@ -290,7 +290,6 @@ const MyAppPage: React.FC = () => {
                 <div
                   className={styles.myAppCard}
                   key={index}
-                  style={{ '--hover-border-color': item.themeColor } as React.CSSProperties}
                   onClick={() => {
                     nagivateToDataFactory(item.id);
                   }}
