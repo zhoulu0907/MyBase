@@ -12,6 +12,7 @@ import { TENANT_ROLE_PERMISSION as ACTIONS } from '@/constants/permission';
 import PlaceholderPanel from '@/components/PlaceholderPanel';
 import { PermissionButton as Button } from '@/components/PermissionControl';
 import { hasPermission } from '@/utils/permission';
+import { RoleType } from '@onebase/platform-center';
 
 const Sider = Layout.Sider;
 const Header = Layout.Header;
@@ -114,6 +115,7 @@ export default function RolePage() {
               });
             }
           }}
+          disabled={activeRole?.type === RoleType.SYSTEM}
         >
           删除
         </Button>
