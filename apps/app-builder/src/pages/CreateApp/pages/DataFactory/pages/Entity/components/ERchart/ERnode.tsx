@@ -1,4 +1,4 @@
-import { ENTITY_FIELD_TYPE } from '@/pages/CreateApp/pages/DataFactory/utils/const';
+import { ENTITY_FIELD_TYPE, SYSTEM_FIELD_MAP } from '@/pages/CreateApp/pages/DataFactory/utils/const';
 import type { EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
 import { Node } from '@antv/x6';
 import { Button, Popover, Space } from '@arco-design/web-react';
@@ -175,7 +175,9 @@ const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
                   className={`${styles['field-item']} ${styles['system-field']} ${styles['clickable-field']}`}
                   onClick={(e) => handleFieldClick(field.fieldId, e)}
                 >
-                  <span className={styles['field-name']}>{field.fieldName}</span>
+                  <span className={styles['field-name']}>
+                    {SYSTEM_FIELD_MAP[field.fieldName as keyof typeof SYSTEM_FIELD_MAP] || field.fieldName}
+                  </span>
                   <span className={styles['field-type']}>
                     {ENTITY_FIELD_TYPE[field.fieldType as keyof typeof ENTITY_FIELD_TYPE]}
                   </span>
@@ -202,7 +204,7 @@ const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
                   className={`${styles['field-item']} ${styles['custom-field']} ${styles['clickable-field']}`}
                   onClick={(e) => handleFieldClick(field.fieldId, e)}
                 >
-                  <span className={styles['field-name']}>{field.fieldName}</span>
+                  <span className={styles['field-name']}>{field.displayName}</span>
                   <span className={styles['field-type']}>
                     {ENTITY_FIELD_TYPE[field.fieldType as keyof typeof ENTITY_FIELD_TYPE] || field.fieldType}
                   </span>

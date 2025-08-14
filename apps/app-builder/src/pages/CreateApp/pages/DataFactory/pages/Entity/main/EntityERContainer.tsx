@@ -7,7 +7,7 @@ import type {
 import { useAppStore } from '@/store/store_app';
 import { useResourceStore } from '@/store/store_resource';
 import { Button, Message } from '@arco-design/web-react';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import EditEntityDrawer from '../components/Drawers/EditEntityDrawer';
 import EditFieldDrawer from '../components/Drawers/EditFieldDrawer';
 import EditRelationDrawer from '../components/Drawers/EditRelationDrawer';
@@ -55,6 +55,7 @@ export const EntityERContainer: React.FC<{
   const [selectedFieldId, setSelectedFieldId] = useState<string>('');
   const [editRelationDrawerVisible, setEditRelationDrawerVisible] = useState(false);
   const [relationData, setRelationData] = useState<EdgeData | null>(null);
+  const chartRef = useRef<any>(null);
   const loadEntityList = async () => {
     const res = await getEntityGraph(curDataSourceId);
     console.log('loadEntityList', res);
@@ -169,6 +170,11 @@ export const EntityERContainer: React.FC<{
     setRelationData(data);
   };
 
+  const getGraphPositon = () => {
+    console.log('chartRef.current', chartRef.current);
+    return chartRef.current?.getGraphPositon();
+  };
+
   useEffect(() => {
     if (refreshEntityList) {
       loadEntityList();
@@ -204,6 +210,7 @@ export const EntityERContainer: React.FC<{
         onlyUpdateNode={onlyUpdateNode}
         updateEntityPosition={handleUpdateEntityPosition}
         onEdgeEdit={handleEdgeEdit}
+        ref={chartRef}
       />
       <Button
         type="primary"
@@ -229,7 +236,8 @@ export const EntityERContainer: React.FC<{
         visible={createEntityModalVisible}
         setVisible={setCreateEntityModalVisible}
         successCallback={createEntityCallback}
-        entityListLength={data.nodes.length}
+        lastEntity={data.nodes[data.nodes.length - 1]}
+        getGraphPositon={getGraphPositon}
       />
       <ConfigFieldModal
         visible={configFieldModalVisible}

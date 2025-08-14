@@ -67,3 +67,18 @@ export const ENTITY_FIELD_TYPE = {
   ENCRYPTED: '加密字段',
   AGGREGATE: '聚合统计'
 };
+
+// 系统字段对应
+export const SYSTEM_FIELD_MAP = {
+  id: '数据ID',
+  owner_id: '所属人',
+  owner_dept: '所属人部门',
+  creator: '创建人',
+  created_time: '创建时间',
+  updated_time: '更新时间',
+  updater: '更新人',
+  update_by: '更新人',
+  parent_id: '主表ID',
+  deleted: '软删除标记',
+  lock_version: '乐观锁版本'
+};
