@@ -18,7 +18,10 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({ handlePropsChan
   const [entityTree, setEntityTree] = useState<any[]>([]);
 
   useEffect(() => {
-    initTreeData();
+    if (mainEntity) {
+      console.log(mainEntity);
+      initTreeData();
+    }
   }, [mainEntity]);
 
   const initTreeData = async () => {
