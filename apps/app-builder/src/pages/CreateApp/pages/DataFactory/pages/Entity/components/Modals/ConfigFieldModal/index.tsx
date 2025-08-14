@@ -81,7 +81,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
   }, [visible]);
 
   // 过滤掉已删除的字段
-  const activeFields = fields.filter((field) => !field.isDeleted);
+  const activeFields = fields.filter((field) => !field.isDeleted && field.isSystemField === 1);
 
   const addField = () => {
     const newField: FieldFormValues = {
