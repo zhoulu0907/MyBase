@@ -719,6 +719,7 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
             erField.setIsUnique(field.getIsUnique());
             erField.setIsPrimaryKey(field.getIsPrimaryKey());
             erField.setIsSystemField(field.getIsSystemField());
+            erField.setAllowNull(field.getAllowNull());
             erField.setDefaultValue(field.getDefaultValue());
             erField.setSortOrder(field.getSortOrder());
             erFields.add(erField);
@@ -879,6 +880,8 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
         SimpleEntityRespVO simpleEntity = new SimpleEntityRespVO();
         simpleEntity.setEntityId(entityDO.getId());
         simpleEntity.setEntityName(entityDO.getDisplayName());
+        // 设置实际表名
+        simpleEntity.setTableName(entityDO.getTableName());
         return simpleEntity;
     }
 
