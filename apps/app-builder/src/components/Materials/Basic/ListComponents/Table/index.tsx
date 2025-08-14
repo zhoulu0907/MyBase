@@ -3,7 +3,15 @@ import { Button, Form, Input, Table } from '@arco-design/web-react';
 import { IconDelete, IconEdit } from '@arco-design/web-react/icon';
 import { memo, useEffect, useState } from 'react';
 
-import { dataMethodDelete, dataMethodPage, type DeleteMethodParam, type PageMethodParam } from '@onebase/app';
+import { ENTITY_FIELD_TYPE_LABEL } from '@/pages/CreateApp/pages/DataFactory/utils/const';
+import {
+  dataMethodDelete,
+  dataMethodPage,
+  getEntityFieldsWithChildren,
+  type AppEntityField,
+  type DeleteMethodParam,
+  type PageMethodParam
+} from '@onebase/app';
 import { useNavigate } from 'react-router-dom';
 import styles from './index.module.less';
 import type { XTableConfig } from './schema';
@@ -104,17 +112,29 @@ const XTable = memo((props: XTableConfig & { runtime?: boolean; toCreatePage?: F
     };
     const res = await dataMethodPage(req);
 
+    const mainMetaData = await getEntityFieldsWithChildren(metaData);
+
     const { list, total } = res;
 
     const newTableData = (list || []).map((item: any) => {
       //   console.log(item);
       const newItem = item.data;
-      if (newItem.end_date) {
-        newItem.end_date = new Date(newItem.end_date).toLocaleDateString();
-      }
-      if (newItem.start_date) {
-        newItem.start_date = new Date(newItem.start_date).toLocaleDateString();
-      }
+      Object.entries(newItem).forEach(([key, value]) => {
+        console.log(key, value);
+        // 优化：减少重复查找，提升可读性和性能
+        if (Array.isArray(mainMetaData?.parentFields)) {
+          const field = mainMetaData.parentFields.find(
+            (field: AppEntityField) => field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE_LABEL.DATE
+          );
+          if (field && newItem[key]) {
+            // 仅当字段类型为日期且有值时格式化
+            const dateValue = new Date(newItem[key]);
+            if (!isNaN(dateValue.getTime())) {
+              newItem[key] = dateValue.toLocaleDateString();
+            }
+          }
+        }
+      });
 
       return {
         ...newItem,
