@@ -123,14 +123,19 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuCode, runtime }) => {
   const submitForm = async () => {
     const fields = form.getFieldsValue();
     console.log('fields: ', fields);
+    console.log('mainMetaDataFields: ', mainMetaDataFields);
 
     const formData = {} as any;
     Object.entries(fields).forEach(([key, value]) => {
       const field = (mainMetaDataFields || []).find((f: AppEntityField) => f.fieldID == key);
       if (field) {
         formData[field.fieldName] = value;
+        // if (field.fieldType === ENTITY_FIELD_TYPE_LABEL.DATE) {
+        //   formData[field.fieldName] = Date.now();
+        // }
       }
     });
+
     console.log(formData);
 
     if (editTargetId) {

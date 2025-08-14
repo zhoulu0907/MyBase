@@ -70,6 +70,7 @@ const createPageEditorStore = () =>
     pageComponentSchemas: new Map(),
     setPageComponentSchemas: (cp_id: string, config: EditConfig) =>
       set((state) => {
+        console.log(state.pageComponentSchemas);
         const newMap = new Map(state.pageComponentSchemas);
         newMap.set(cp_id, config);
         return { pageComponentSchemas: newMap };
