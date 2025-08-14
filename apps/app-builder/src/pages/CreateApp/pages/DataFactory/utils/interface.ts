@@ -1,8 +1,9 @@
 // 业务对象节点数据
 export interface EntityNode {
   entityId: string;
-  code: string;
+  code?: string;
   entityName: string;
+  tableName: string;
   description: string;
   fields: Array<EntityField>;
   positionX: number;

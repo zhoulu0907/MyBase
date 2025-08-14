@@ -4,6 +4,7 @@ import styles from './index.module.less';
 import { IconSearch } from '@arco-design/web-react/icon';
 import { getPlatformAdminListApi, PlatformAdminUserType, createPlatformAdminApi, updatePlatformAdminPasswordApi, updatePlatformAdminMailApi, deletePlatformAdminApi, type PlatformAdminInfo, type cratePlatformAdminReq } from '@onebase/platform-center';
 import { formatTimestamp } from '@/utils/date';
+import Text from '@arco-design/web-react/es/Typography/text';
 
 const { useForm } = Form;
 const { Option } = Select;
@@ -20,6 +21,7 @@ const Administrator: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [dataSource, setDataSource] = useState<PlatformAdminInfo[]>([]);
   const [total, setTotal] = useState(null)
+  const [delVisible, setDelVisible] = useState(false);
   const columns = [
     // order
     { 
@@ -69,17 +71,18 @@ const Administrator: React.FC = () => {
       width: 150,
       render: (_: any, record: PlatformAdminInfo) => (
         <Space>
-          <Button type="text" onClick={() => handleEditEmail(record)}>
+          <Text className={styles.tableBtn} onClick={() => handleEditEmail(record)}>
             修改邮箱
-          </Button>
-          <Button type="text" onClick={() => handleEditPassword(record)}>
+          </Text>
+          <Text className={styles.tableBtn} onClick={() => handleEditPassword(record)}>
             修改密码
-          </Button>
+          </Text>
           {record.userType !== PlatformAdminUserType.系统默认账号 && (
             <Tooltip
               position="tr"
               trigger="hover"
               color="#fff"
+              popupVisible={delVisible}
               content={(
                 <div className={styles.tooltipContainer}>
                   <div className={styles.tooltipText}>Are you sure you want to delete?</div>
@@ -90,9 +93,13 @@ const Administrator: React.FC = () => {
                 </div>
               )}
             >
-              <Button key={`delete-${record.id}`} type="text">
+              <Text
+                className={styles.tableBtn}
+                key={`delete-${record.id}`}
+                // onClick={() => setDelVisible(true)}
+              >
                 删除
-              </Button>
+              </Text>
             </Tooltip>
           )}
         </Space>
@@ -171,6 +178,7 @@ const Administrator: React.FC = () => {
     console.log('record:', record);
     try {
       await deletePlatformAdminApi(record.id)
+      getPlatformAdminList()
       
     } catch (error) {
       console.log(error);

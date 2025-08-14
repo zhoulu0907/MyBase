@@ -1,5 +1,5 @@
 import ListItem from '@/components/ListItem';
-import { Input, Spin } from '@arco-design/web-react';
+import { Input, Spin, Tag } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
 import type { PageParam } from '@onebase/platform-center';
 import { getRolePage, type RoleVO } from '@onebase/platform-center';
@@ -8,7 +8,7 @@ import s from '../../index.module.less';
 import { TENANT_ROLE_PERMISSION as ACTIONS } from '@/constants/permission';
 import { PermissionButton as Button } from '@/components/PermissionControl';
 import PlaceholderPanel from '@/components/PlaceholderPanel';
-
+import { RoleType } from '@onebase/platform-center';
 interface RoleListProps {
   activeId: number | undefined;
   onSelect: (id: number | undefined, role: Partial<RoleVO> | undefined) => void;
@@ -146,7 +146,9 @@ export default forwardRef(function RoleList({ activeId, onSelect, onAdd }: RoleL
         title={item.name || ''}
         active={item.id === activeId}
         onClick={() => item.id && onSelect(item.id, item)}
-      />
+      >
+        {item.type === RoleType.SYSTEM && <Tag color='cyan' style={{ marginLeft: 8 }}>系统</Tag>}
+      </ListItem>
     ));
   }, [filteredRoleList, activeId, onSelect]);
 

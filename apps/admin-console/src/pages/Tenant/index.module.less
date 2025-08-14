@@ -10,3 +10,37 @@
   text-decoration: none;
   cursor: default;
 }
+
+.tableBtn {
+  // 文字不换行
+  white-space: nowrap;
+  margin-right: 10px;
+  color: #00b42a;
+  &:hover {
+    cursor: pointer;
+  }
+}
+
+.urlWrapper {
+  display: flex;
+  align-items: center;
+}
+.fullUrl {
+  // 添加下划线
+  text-decoration: underline;
+  // 文字不换行
+  white-space: nowrap;
+  // 移入变色
+  &:hover {
+    color: #00b42a;
+    cursor: pointer;
+  }
+}
+
+.copyIcon {
+  // margin-left: 5px;
+  &:hover {
+    color: #00b42a;
+    cursor: pointer;
+  }
+}

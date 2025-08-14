@@ -35,3 +35,8 @@ export interface Permission {
   permission?: string;
   children?: PermissionAction[];
 }
+
+export enum RoleType {
+  SYSTEM = 1, // 系统内置角色
+  CUSTOM = 2 // 自定义角色
+}

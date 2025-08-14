@@ -8,11 +8,15 @@ export const getPlatformInfoApi = () => systemService.get('/platform/get-platfor
 export const getPlatFormInfoListApi = (params: PlatformInfoReq) => systemService.get(`/license/page?pageNo=${params.pageNo}&pageSize=${params.pageSize}`)
 
 // 上传平台 License
-export const uploadPlatformLicenseApi = (data: any) => systemService.post('/license/upload', data);
+export const uploadPlatformLicenseApi = (data: any) => systemService.post('/license/import', data, {
+  headers: {
+      // 不要手动设置Content-Type，让浏览器自动设置
+      'Content-Type': 'multipart/form-data'
+    },
+});
 
 // 下载平台 license 
 export const downloadPlatformLicenseApi = (id: number = 1) => {
   return systemService.get(`/license/export?id=${id}`), {
-    responseType: 'blob'
   }
 }
