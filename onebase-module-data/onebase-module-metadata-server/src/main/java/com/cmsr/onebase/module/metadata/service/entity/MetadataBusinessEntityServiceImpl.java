@@ -1,5 +1,7 @@
 package com.cmsr.onebase.module.metadata.service.entity;
 
+import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.core.util.IdUtil;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
@@ -66,11 +68,24 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
     @Resource
     private TemporaryDatasourceService temporaryDatasourceService;
 
+    // 系统字段缓存，避免频繁查询数据库
+    private volatile List<MetadataSystemFieldsDO> systemFieldsCache = null;
+    private volatile long lastCacheTime = 0;
+    private static final long CACHE_EXPIRE_TIME = 5 * 60 * 1000; // 缓存5分钟
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long createBusinessEntity(@Valid BusinessEntitySaveReqVO createReqVO) {
-        // 校验编码唯一性
-        validateBusinessEntityCodeUnique(null, createReqVO.getCode(), Long.valueOf(createReqVO.getAppId()));
+        // 预先获取系统字段信息，避免在事务中查询
+        List<MetadataSystemFieldsDO> systemFields = null;
+        if (BusinessEntityTypeEnum.needCreatePhysicalTable(createReqVO.getEntityType())) {
+            systemFields = getSystemFieldsWithCache();
+        }
+
+        // 校验编码唯一性（只有当code不为空时才校验）
+        if (CharSequenceUtil.isNotEmpty(createReqVO.getCode())) {
+            validateBusinessEntityCodeUniqueWithLock(null, createReqVO.getCode(), Long.valueOf(createReqVO.getAppId()));
+        }
 
         // 校验实体类型
         validateEntityType(createReqVO.getEntityType());
@@ -79,14 +94,19 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
         MetadataBusinessEntityDO businessEntity = BeanUtils.toBean(createReqVO, MetadataBusinessEntityDO.class);
         businessEntity.setAppId(Long.valueOf(createReqVO.getAppId()));
 
+        // 处理code字段：如果为空或空字符串，则生成UUID
+        if (CharSequenceUtil.isEmpty(createReqVO.getCode())) {
+            businessEntity.setCode(IdUtil.simpleUUID());
+        }
+
         // 根据实体类型处理表名
         handleTableNameByEntityType(businessEntity, createReqVO);
 
         metadataBusinessEntityRepository.insert(businessEntity);
 
-        // 根据实体类型决定是否创建物理表
+        // 根据实体类型决定是否创建物理表（在新事务中执行，避免长事务）
         if (BusinessEntityTypeEnum.needCreatePhysicalTable(createReqVO.getEntityType())) {
-            createPhysicalTableForEntity(businessEntity, createReqVO);
+            createPhysicalTableForEntityAsync(businessEntity, createReqVO, systemFields);
         } else {
             BusinessEntityTypeEnum entityTypeEnum = BusinessEntityTypeEnum.getByCode(createReqVO.getEntityType());
             String typeName = entityTypeEnum != null ? entityTypeEnum.getName() : "未知类型";
@@ -108,6 +128,113 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
     }
 
     /**
+     * 带锁的编码唯一性校验，避免并发冲突
+     *
+     * @param id 实体ID（更新时传入）
+     * @param code 实体编码
+     * @param appId 应用ID
+     */
+    private void validateBusinessEntityCodeUniqueWithLock(Long id, String code, Long appId) {
+        // 使用更安全的并发校验方式
+        try {
+            DefaultConfigStore configStore = new DefaultConfigStore();
+            configStore.and("code", code);
+            configStore.and("app_id", appId);
+            configStore.and("deleted", 0);
+            if (id != null) {
+                configStore.and("id", Compare.NOT_EQUAL, id);
+            }
+            
+            // 先进行普通查询，如果存在则抛出异常
+            MetadataBusinessEntityDO existEntity = metadataBusinessEntityRepository.findOne(configStore);
+            if (existEntity != null) {
+                throw exception(BUSINESS_ENTITY_CODE_DUPLICATE);
+            }
+        } catch (Exception e) {
+            if (e.getMessage() != null && e.getMessage().contains("BUSINESS_ENTITY_CODE_DUPLICATE")) {
+                throw e; // 重新抛出业务异常
+            }
+            log.warn("编码唯一性校验异常，可能由于并发导致: {}", e.getMessage());
+            // 对于数据库异常，可能是并发导致的，让调用方重试
+            throw new RuntimeException("编码校验失败，请重试", e);
+        }
+    }
+
+    /**
+     * 获取系统字段信息（带缓存优化）
+     */
+    private List<MetadataSystemFieldsDO> getSystemFieldsWithCache() {
+        long currentTime = System.currentTimeMillis();
+        
+        // 检查缓存是否有效
+        if (systemFieldsCache != null && (currentTime - lastCacheTime) < CACHE_EXPIRE_TIME) {
+            log.debug("使用系统字段缓存，缓存大小: {}", systemFieldsCache.size());
+            return new ArrayList<>(systemFieldsCache); // 返回副本避免并发修改
+        }
+        
+        // 重新查询并更新缓存
+        synchronized (this) {
+            // 双重检查
+            if (systemFieldsCache != null && (currentTime - lastCacheTime) < CACHE_EXPIRE_TIME) {
+                return new ArrayList<>(systemFieldsCache);
+            }
+            
+            List<MetadataSystemFieldsDO> fields = getSystemFields();
+            systemFieldsCache = new ArrayList<>(fields);
+            lastCacheTime = currentTime;
+            
+            log.info("刷新系统字段缓存，字段数量: {}", fields.size());
+            return new ArrayList<>(fields);
+        }
+    }
+
+    /**
+     * 异步创建物理表，避免阻塞主事务
+     *
+     * @param businessEntity 业务实体
+     * @param createReqVO 创建请求VO
+     * @param systemFields 系统字段列表
+     */
+    private void createPhysicalTableForEntityAsync(MetadataBusinessEntityDO businessEntity, 
+                                                  BusinessEntitySaveReqVO createReqVO, 
+                                                  List<MetadataSystemFieldsDO> systemFields) {
+        // 在新事务中执行物理表创建，避免长事务导致死锁
+        try {
+            createPhysicalTableForEntityInNewTransaction(businessEntity, createReqVO, systemFields);
+        } catch (Exception e) {
+            log.error("异步创建物理表失败，实体ID: {}, 错误: {}", businessEntity.getId(), e.getMessage(), e);
+            // 这里可以考虑将失败信息记录到消息队列或错误表中，后续重试
+        }
+    }
+
+    /**
+     * 在新事务中创建物理表
+     */
+    @Transactional(rollbackFor = Exception.class, propagation = org.springframework.transaction.annotation.Propagation.REQUIRES_NEW)
+    private void createPhysicalTableForEntityInNewTransaction(MetadataBusinessEntityDO businessEntity, 
+                                                             BusinessEntitySaveReqVO createReqVO, 
+                                                             List<MetadataSystemFieldsDO> systemFields) {
+        try {
+            // 1. 通过数据源 id 获取对应的数据源信息
+            MetadataDatasourceDO datasource = getDatasourceById(createReqVO.getDatasourceId());
+            if (datasource != null) {
+                // 2. 生成 DDL 并在数据源内建物理表
+                createPhysicalTable(datasource, businessEntity.getTableName(), systemFields);
+
+                // 3. 保存实体字段信息到 metadata_entity_field 表
+                saveEntityFields(businessEntity.getId(), systemFields, Long.valueOf(createReqVO.getAppId()));
+
+                log.info("成功为业务实体 {} 创建物理表: {}", businessEntity.getDisplayName(), businessEntity.getTableName());
+            } else {
+                log.warn("未找到数据源ID为 {} 的数据源配置，跳过物理表创建", createReqVO.getDatasourceId());
+            }
+        } catch (Exception e) {
+            log.error("创建业务实体物理表失败: {}", e.getMessage(), e);
+            throw e; // 在新事务中抛出异常不会影响主事务
+        }
+    }
+
+    /**
      * 根据实体类型处理表名
      *
      * @param businessEntity 业务实体DO
@@ -124,36 +251,6 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
             if (businessEntity.getTableName() == null || businessEntity.getTableName().trim().isEmpty()) {
                 businessEntity.setTableName(createReqVO.getCode().toLowerCase());
             }
-        }
-    }
-
-    /**
-     * 为实体创建物理表
-     *
-     * @param businessEntity 业务实体
-     * @param createReqVO 创建请求VO
-     */
-    private void createPhysicalTableForEntity(MetadataBusinessEntityDO businessEntity, BusinessEntitySaveReqVO createReqVO) {
-        try {
-            // 1. 通过数据源 id 获取对应的数据源信息
-            MetadataDatasourceDO datasource = getDatasourceById(createReqVO.getDatasourceId());
-            if (datasource != null) {
-                // 2. 获取系统字段信息
-                List<MetadataSystemFieldsDO> systemFields = getSystemFields();
-
-                // 3. 生成 DDL 并在数据源内建物理表
-                createPhysicalTable(datasource, businessEntity.getTableName(), systemFields);
-
-                // 4. 保存实体字段信息到 metadata_entity_field 表
-                saveEntityFields(businessEntity.getId(), systemFields, Long.valueOf(createReqVO.getAppId()));
-
-                log.info("成功为业务实体 {} 创建物理表: {}", businessEntity.getDisplayName(), businessEntity.getTableName());
-            } else {
-                log.warn("未找到数据源ID为 {} 的数据源配置，跳过物理表创建", createReqVO.getDatasourceId());
-            }
-        } catch (Exception e) {
-            log.error("创建业务实体物理表失败: {}", e.getMessage(), e);
-            // 不抛出异常，避免影响业务实体的创建
         }
     }
 
@@ -401,8 +498,10 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
     public void updateBusinessEntity(@Valid BusinessEntitySaveReqVO updateReqVO) {
         // 校验存在
         validateBusinessEntityExists(Long.valueOf(updateReqVO.getId()));
-        // 校验编码唯一性
-        validateBusinessEntityCodeUnique(Long.valueOf(updateReqVO.getId()), updateReqVO.getCode(), Long.valueOf(updateReqVO.getAppId()));
+        // 校验编码唯一性（只有当code不为空时才校验）
+        if (CharSequenceUtil.isNotEmpty(updateReqVO.getCode())) {
+            validateBusinessEntityCodeUnique(Long.valueOf(updateReqVO.getId()), updateReqVO.getCode(), Long.valueOf(updateReqVO.getAppId()));
+        }
         // 校验实体类型
         validateEntityType(updateReqVO.getEntityType());
 
@@ -410,6 +509,11 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
         MetadataBusinessEntityDO updateObj = BeanUtils.toBean(updateReqVO, MetadataBusinessEntityDO.class);
         updateObj.setId(Long.valueOf(updateReqVO.getId()));
         updateObj.setAppId(Long.valueOf(updateReqVO.getAppId()));
+
+        // 处理code字段：如果为空或空字符串，则生成UUID
+        if (CharSequenceUtil.isEmpty(updateReqVO.getCode())) {
+            updateObj.setCode(IdUtil.simpleUUID());
+        }
 
         // 根据实体类型处理表名
         handleTableNameByEntityType(updateObj, updateReqVO);

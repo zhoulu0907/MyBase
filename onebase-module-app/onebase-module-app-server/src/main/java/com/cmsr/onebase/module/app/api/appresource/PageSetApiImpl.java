@@ -37,6 +37,12 @@ public class PageSetApiImpl implements PageSetApi {
     }
 
     @Override
+    public CommonResult<String> getMainMetadata(String code) {
+        String mainMetadata = pageSetService.getMainMetadata(code);
+        return CommonResult.success(mainMetadata);
+    }
+
+    @Override
     public CommonResult<String> createPageSet(CreatePageSetDTO createPageSetDTO) {
         String pageSetCode = pageSetService.createPageSet(createPageSetDTO);
         return CommonResult.success(pageSetCode);

@@ -268,26 +268,47 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
         AnylineService<?> temporaryService = temporaryDatasourceService.createTemporaryService(datasource);
         log.info("成功切换到数据源：{}", datasource.getCode());
 
-        // 4. 动态业务表忽略租户条件 - 使用TenantUtils.executeIgnore包装操作
-        return TenantUtils.executeIgnore(() -> {
+        // 4. 检查表中是否有软删除字段
+        boolean hasDeletedField = fields.stream()
+                .anyMatch(field -> "deleted".equalsIgnoreCase(field.getFieldName()));
 
-        // 5. 校验数据存在
-        validateDataExistsWithService(temporaryService, entity.getTableName(), reqVO.getId(), fields);
+        // 5. 动态业务表忽略租户条件 - 使用TenantUtils.executeIgnore包装操作
+        try {
+            return TenantUtils.executeIgnore(() -> {
 
-        // 6. 获取主键字段名
-        String primaryKeyField = getPrimaryKeyFieldName(fields);
+            // 6. 校验数据存在
+            validateDataExistsWithService(temporaryService, entity.getTableName(), reqVO.getId(), fields);
 
-        // 7. 构建删除条件
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and(primaryKeyField, reqVO.getId());
+            // 7. 获取主键字段名
+            String primaryKeyField = getPrimaryKeyFieldName(fields);
 
-        // 8. 执行删除
-        long deleteCount = temporaryService.delete(entity.getTableName(), configStore);
-        log.info("删除数据成功，实体ID: {}, 表名: {}, 删除记录数: {}", reqVO.getEntityId(), entity.getTableName(), deleteCount);
+            // 8. 构建删除条件
+            DefaultConfigStore configStore = new DefaultConfigStore();
+            configStore.and(primaryKeyField, reqVO.getId());
 
-        return deleteCount > 0;
-        
-        }); // TenantUtils.executeIgnore 闭合
+            long deleteCount;
+            if (hasDeletedField) {
+                // 软删除：更新deleted字段为删除时间戳
+                DataRow updateData = new DataRow();
+                updateData.put("deleted", String.valueOf(System.currentTimeMillis()));
+                deleteCount = temporaryService.update(entity.getTableName(), updateData, configStore);
+                log.info("软删除数据成功，实体ID: {}, 表名: {}, 删除记录数: {}", reqVO.getEntityId(), entity.getTableName(), deleteCount);
+            } else {
+                // 物理删除：直接删除记录
+                deleteCount = temporaryService.delete(entity.getTableName(), configStore);
+                log.info("物理删除数据成功，实体ID: {}, 表名: {}, 删除记录数: {}", reqVO.getEntityId(), entity.getTableName(), deleteCount);
+            }
+
+            return deleteCount > 0;
+            
+            }); // TenantUtils.executeIgnore 闭合
+        } catch (RuntimeException e) {
+            // 检查是否是ServiceException被包装的情况
+            if (e.getCause() instanceof com.cmsr.onebase.framework.common.exception.ServiceException) {
+                throw (com.cmsr.onebase.framework.common.exception.ServiceException) e.getCause();
+            }
+            throw e;
+        }
     }
 
     @Override

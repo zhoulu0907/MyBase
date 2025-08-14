@@ -83,10 +83,25 @@ public class MetadataDatasourceRepository extends DataRepositoryNew<MetadataData
      * @return 数据源列表
      */
     public List<MetadataDatasourceDO> getDatasourceListByAppId(Long appId) {
+        System.out.println("DEBUG: Repository - 查询appId: " + appId);
         DefaultConfigStore configStore = new DefaultConfigStore();
+        // 尝试不同的字段名写法
         configStore.and("app_id", appId);
-        configStore.order("create_time", org.anyline.entity.Order.TYPE.DESC);
-        return findAllByConfig(configStore);
+        // 可能租户字段会自动添加，先不设置排序看看
+        System.out.println("DEBUG: Repository - 查询条件: " + configStore.toString());
+        List<MetadataDatasourceDO> result = findAllByConfig(configStore);
+        System.out.println("DEBUG: Repository - 查询结果数量: " + result.size());
+        
+        // 如果还是查询所有，尝试手动过滤
+        if (result.size() > 1) {
+            System.out.println("DEBUG: Repository - 手动过滤结果");
+            result = result.stream()
+                    .filter(item -> appId.equals(item.getAppId()))
+                    .collect(java.util.stream.Collectors.toList());
+            System.out.println("DEBUG: Repository - 过滤后数量: " + result.size());
+        }
+        
+        return result;
     }
 
     /**

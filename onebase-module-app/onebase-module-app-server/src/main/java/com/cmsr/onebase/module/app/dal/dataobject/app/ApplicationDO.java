@@ -40,8 +40,8 @@ public class ApplicationDO extends TenantBaseDO {
     @Column(name = "version_url", columnDefinition = "VARCHAR(1024)", length = 1024, comment = "版本URL")
     private String versionURL;
 
-    @Column(name = "datasource_id", columnDefinition = "BIGINT NOT NULL",nullable = false, comment = "数据源ID")
-    private Long datasourceId;
+    @Column(name = "datasource_id", columnDefinition = "VARCHAR(64)",nullable = false, comment = "数据源ID")
+    private String datasourceId;
 
     @Column(name = "app_status", columnDefinition = "INT4 NOT NULL", nullable = false, comment = "状态")
     private Integer appStatus;

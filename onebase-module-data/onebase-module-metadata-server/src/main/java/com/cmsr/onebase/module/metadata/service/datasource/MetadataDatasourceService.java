@@ -89,6 +89,14 @@ public interface MetadataDatasourceService {
     List<MetadataDatasourceDO> getDatasourceList();
 
     /**
+     * 根据应用ID获得数据源列表
+     *
+     * @param appId 应用ID
+     * @return 数据源列表
+     */
+    List<MetadataDatasourceDO> getDatasourceListByAppId(Long appId);
+
+    /**
      * 根据编码获得数据源
      *
      * @param code 编码
