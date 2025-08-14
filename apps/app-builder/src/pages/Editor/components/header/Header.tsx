@@ -12,6 +12,7 @@ import { Button, Message, Tabs } from '@arco-design/web-react';
 import { IconArrowLeft } from '@arco-design/web-react/icon';
 import {
   AppStatus,
+  getAppEntities,
   getAppIdByPageSetCode,
   getApplication,
   getEntityFieldsWithChildren,
@@ -74,7 +75,7 @@ export default function EditorHeader() {
     clearPageComponentSchemas: clearListPageComponentSchemas
   } = useListEditorStore();
 
-  const { setMainEntity } = useAppEntityStore();
+  const { setMainEntity, setAppEntities } = useAppEntityStore();
 
   const { curAppId, setCurAppId } = useAppStore();
 
@@ -172,6 +173,8 @@ export default function EditorHeader() {
       }
     }
     console.log('appResp: ', appResp);
+
+    handleGetAppEntities(appId);
   };
 
   const getMainMetaData = async (pageSetCode: string) => {
@@ -189,6 +192,17 @@ export default function EditorHeader() {
         fields: entityWithChildren.parentFields
       });
     }
+  };
+
+  const handleGetAppEntities = async (appId: string) => {
+    // TODO(mickey): 等xiaoyi完成后 写活
+    // const res = await getAppEntities('1');
+    const res = await getAppEntities(appId);
+    console.log('appEntities: ', res);
+    if (res) {
+      setAppEntities(res);
+    }
+    return res;
   };
 
   const handleSavePageSet = async () => {

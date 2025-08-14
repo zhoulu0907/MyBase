@@ -23,7 +23,8 @@ export const FORM_COMPONENT_TYPES = {
   DEPT_SELECT: 'XDeptSelect',
   FILE_UPLOAD: 'XFileUpload',
   IMG_UPLOAD: 'XImgUpload',
-  AUTO_CODE: 'XAutoCode'
+  AUTO_CODE: 'XAutoCode',
+  RELATED_FORM: 'XRelatedForm'
 } as const;
 
 // 布局组件类型
