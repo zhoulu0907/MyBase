@@ -4,6 +4,7 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
 import com.cmsr.onebase.module.system.controller.admin.tenant.vo.tenant.TenantPageReqVO;
 import com.cmsr.onebase.module.system.controller.admin.tenant.vo.tenant.TenantInsertReqVO;
+import com.cmsr.onebase.module.system.controller.admin.tenant.vo.tenant.TenantRespVO;
 import com.cmsr.onebase.module.system.controller.admin.tenant.vo.tenant.TenantUpdateReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
 import com.cmsr.onebase.module.system.service.tenant.handler.TenantInfoHandler;
@@ -56,6 +57,14 @@ public interface TenantService {
      * @return 租户
      */
     TenantDO getTenant(Long id);
+
+    /**
+     * 获得租户信息（包含应用数量）
+     *
+     * @param id 编号
+     * @return 租户信息
+     */
+    TenantRespVO getTenantWithAppCount(Long id);
 
     /**
      * 获得租户分页

@@ -1,3 +1,10 @@
+### 默认环境变量配置（直接使用local环境配置）
+@baseUrl = http://localhost:48080/admin-api
+@adminTenantId = 1
+@token = 883282d354914569a3e8e0425c0595e5
+@tag = Yunai.local
+
+
 ### /role/create 成功
 POST {{baseUrl}}/system/role/create
 Authorization: Bearer {{token}}

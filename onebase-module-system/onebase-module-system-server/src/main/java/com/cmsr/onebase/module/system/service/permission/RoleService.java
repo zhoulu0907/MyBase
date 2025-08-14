@@ -95,7 +95,7 @@ public interface RoleService {
      * @param statuses 筛选的状态
      * @return 角色列表
      */
-    List<RoleDO> getRoleListByStatus(Collection<Integer> statuses);
+    List<RoleDO> getRoleListByStatus(Integer statuses);
 
     /**
      * 获得所有角色列表

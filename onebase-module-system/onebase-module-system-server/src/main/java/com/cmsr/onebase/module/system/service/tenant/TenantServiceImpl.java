@@ -6,6 +6,7 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
+import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import com.cmsr.onebase.framework.common.util.date.DateUtils;
@@ -13,9 +14,11 @@ import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.tenant.config.TenantProperties;
 import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
+import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
 import com.cmsr.onebase.module.system.controller.admin.permission.vo.role.RoleInsertReqVO;
-import com.cmsr.onebase.module.system.controller.admin.tenant.vo.tenant.TenantPageReqVO;
 import com.cmsr.onebase.module.system.controller.admin.tenant.vo.tenant.TenantInsertReqVO;
+import com.cmsr.onebase.module.system.controller.admin.tenant.vo.tenant.TenantPageReqVO;
+import com.cmsr.onebase.module.system.controller.admin.tenant.vo.tenant.TenantRespVO;
 import com.cmsr.onebase.module.system.controller.admin.tenant.vo.tenant.TenantUpdateReqVO;
 import com.cmsr.onebase.module.system.convert.tenant.TenantConvert;
 import com.cmsr.onebase.module.system.dal.dataobject.license.LicenseDO;
@@ -82,7 +85,9 @@ public class TenantServiceImpl implements TenantService {
     @Resource
     private DataRepository dataRepository;
     @Resource
-    private LicenseService licenseService;
+    private LicenseService    licenseService;
+    @Resource
+    private AppApplicationApi appApplicationApi;
 
     @Override
     public List<Long> getTenantIdList() {
@@ -374,6 +379,18 @@ public class TenantServiceImpl implements TenantService {
     public TenantDO getTenant(Long id) {
         return dataRepository.findById(TenantDO.class, id);
     }
+
+
+    @Override
+    public TenantRespVO getTenantWithAppCount(Long id) {
+        TenantDO tenantDO = getTenant(id);
+        TenantRespVO tenantRespVO = TenantConvert.INSTANCE.convert(tenantDO);
+        CommonResult<Long> appCountResult = appApplicationApi.countApplicationByTenantId(id);
+        // Long 转 Integer
+        tenantRespVO.setAppCount(appCountResult.getData() != null ? appCountResult.getData().intValue() : 0);
+        return tenantRespVO;
+    }
+
 
 
     @Override

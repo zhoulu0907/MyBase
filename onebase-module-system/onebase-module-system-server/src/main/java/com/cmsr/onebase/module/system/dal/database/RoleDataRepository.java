@@ -4,11 +4,12 @@ import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.system.controller.admin.permission.vo.role.RolePageReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
+import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Compare;
+import org.anyline.entity.Order;
 import org.springframework.stereotype.Repository;
 
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -47,11 +48,14 @@ public class RoleDataRepository extends DataRepositoryNew<RoleDO> {
     /**
      * 根据状态查询角色列表
      *
-     * @param statuses 状态列表
+     * @param status 状态列表
      * @return 角色列表
      */
-    public List<RoleDO> findListByStatus(Collection<Integer> statuses) {
-        return findAllByConfig(new DefaultConfigStore().and(Compare.IN, RoleDO.STATUS, statuses));
+    public List<RoleDO> findListByStatus(Integer status) {
+        ConfigStore configStore = new DefaultConfigStore().and(Compare.EQUAL, RoleDO.STATUS, status);
+        // 内置角色靠前，其次是sort，其次是createTime
+        configStore.order(RoleDO.TYPE, Order.TYPE.ASC).order(RoleDO.SORT, Order.TYPE.ASC).order(RoleDO.CREATE_TIME, Order.TYPE.DESC);
+        return findAllByConfig(configStore);
     }
 
     /**
@@ -75,6 +79,8 @@ public class RoleDataRepository extends DataRepositoryNew<RoleDO> {
         if (reqVO.getCreateTime() != null) {
             configStore.and(Compare.EQUAL, RoleDO.CREATE_TIME, reqVO.getCreateTime());
         }
+        // 内置角色靠前，其次是sort，其次是createTime
+        configStore.order(RoleDO.TYPE, Order.TYPE.ASC).order(RoleDO.SORT, Order.TYPE.ASC).order(RoleDO.CREATE_TIME, Order.TYPE.DESC);
 
         return findPageWithConditions(configStore, reqVO.getPageNo(), reqVO.getPageSize());
     }

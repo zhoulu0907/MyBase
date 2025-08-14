@@ -1,12 +1,11 @@
 package com.cmsr.onebase.module.system.controller.admin.tenant.vo.tenant;
 
+import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
+import com.alibaba.excel.annotation.ExcelProperty;
 import com.cmsr.onebase.framework.excel.core.annotations.DictFormat;
 import com.cmsr.onebase.framework.excel.core.convert.DictConvert;
 import com.cmsr.onebase.module.system.enums.DictTypeConstants;
-import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
-import com.alibaba.excel.annotation.ExcelProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -65,5 +64,8 @@ public class TenantRespVO {
 
     @Schema(description = "secret", example = "secret")
     private String tenantSecret;
+
+    @Schema(description = "应用数量", requiredMode = Schema.RequiredMode.REQUIRED, example = "1024")
+    private Integer appCount;
 
 }

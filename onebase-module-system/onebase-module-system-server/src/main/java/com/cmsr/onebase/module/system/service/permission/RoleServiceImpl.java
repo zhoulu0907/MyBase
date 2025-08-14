@@ -201,8 +201,8 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    public List<RoleDO> getRoleListByStatus(Collection<Integer> statuses) {
-        return roleDataRepository.findListByStatus(statuses);
+    public List<RoleDO> getRoleListByStatus(Integer status) {
+        return roleDataRepository.findListByStatus(status);
     }
 
     @Override
