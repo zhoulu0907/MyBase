@@ -4,4 +4,4 @@ Authorization: Bearer e9f2faef4dfb48169fc69e1ac7aeefdb
 
 ### 导出凭证
 GET http://127.0.0.1:48080/admin-api/system/license/export?id=1
-Authorization: Bearer 93dfb697bec943d6a18d4e73baed2681
+Authorization: Bearer a91d683f9e884de0bce970c071cf4b2b

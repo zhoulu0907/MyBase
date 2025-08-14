@@ -10,7 +10,7 @@ public enum LicenseSecretKeyEnum {
     /**
      * License 凭证解密密钥
      */
-    LICENSE_SECRET_KEY("admin123");
+    LICENSE_SECRET_KEY("1234567812345678");
 
     /**
      * License 凭证解密密钥值

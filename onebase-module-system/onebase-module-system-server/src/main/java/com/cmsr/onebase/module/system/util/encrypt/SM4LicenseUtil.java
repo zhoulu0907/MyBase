@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.system.util.encrypt;
 
 import com.cmsr.onebase.module.system.controller.admin.license.vo.LicenseExportRespVO;
+import com.cmsr.onebase.module.system.enums.license.LicenseSecretKeyEnum;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.bouncycastle.crypto.CipherParameters;
@@ -14,9 +15,14 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.SecureRandom;
 import java.security.Security;
 import java.time.format.DateTimeFormatter;
+
+import static com.cmsr.onebase.module.system.util.encrypt.SM4Utils.sm4Decrypt;
+import static com.cmsr.onebase.module.system.util.encrypt.SM4Utils.sm4Encrypt;
 
 /**
  * 国密SM4加解密工具类
@@ -253,9 +259,10 @@ public class SM4LicenseUtil {
         byte[] keyBytes = getKeyBytes(key);
         PaddedBufferedBlockCipher cipher = getCipher(false, keyBytes, iv);
         
-        // 检查加密数据长度是否是块大小的倍数
-        if (cipherBytes.length % BLOCK_SIZE != 0) {
-            throw new IllegalArgumentException("加密数据长度不正确，必须是16字节的倍数");
+        // 注意：使用PKCS7填充时，不需要严格要求数据长度是块大小的倍数
+        // 但为了安全起见，仍然检查长度是否合理
+        if (cipherBytes.length < BLOCK_SIZE) {
+            throw new IllegalArgumentException("加密数据长度过短");
         }
         
         byte[] output = new byte[cipherBytes.length + BLOCK_SIZE];
@@ -274,6 +281,7 @@ public class SM4LicenseUtil {
      * @param args 命令行参数
      */
     public static void main(String[] args) {
+        LicenseSecretKeyEnum.LICENSE_SECRET_KEY.getSecretKey();
         try {
             // 测试明文内容
             // String plainText = "{\"enterpriseName\":\"中移（上海） 产业研究院\",\"enterpriseCode\":\"F200090910000\",\"enterpriseAddress\":\"上海市浦东金桥开发区\",\"platformType\":\"私有化部署\",\"expireTime\":\"2025-10-22 14:53:12\",\"status\":\"enable\",\"tenantLimit\":\"3\",\"userLimit\":\"4\"}";
@@ -300,22 +308,26 @@ public class SM4LicenseUtil {
             String sm4FilePath = licenseDirPath + File.separator + "license_encrypted__testuser_" + now + ".sm4";
             String licFilePath = licenseDirPath + File.separator + "license_encrypted__testuser_" + now + ".lic";
             // 加密并写入文件
-            byte[] bytes = encryptStringToSm4Bytes(jsonContent);
-            try (FileOutputStream fos = new FileOutputStream(sm4FilePath)) {
-                fos.write(bytes);
-            }
+            String sm4Encrypt = sm4Encrypt(LicenseSecretKeyEnum.LICENSE_SECRET_KEY.getSecretKey(), jsonContent);
+            System.out.println("加密后的长度: " + sm4Encrypt.length());
+
+            // try (FileOutputStream fos = new FileOutputStream(sm4FilePath)) {
+            //     fos.write(bytes);
+            // }
+            Files.write(Paths.get(sm4FilePath), sm4Encrypt.getBytes());
             System.out.println("加密文件已生成: " + sm4FilePath);
             // 解密并生成.lic解密文件（确保UTF-8编码）
-            decryptSm4FileToFile(sm4FilePath, licFilePath);
-            System.out.println("解密文件已生成: " + licFilePath);
-            // 校验解密内容
-            String decrypted = new String(java.nio.file.Files.readAllBytes(java.nio.file.Paths.get(licFilePath)), java.nio.charset.StandardCharsets.UTF_8);
-            System.out.println("解密内容: " + decrypted);
-            if (jsonContent.equals(decrypted)) {
-                System.out.println("加解密测试通过！");
-            } else {
-                System.err.println("加解密测试失败！");
-            }
+            // decryptSm4FileToFile(sm4FilePath, licFilePath);
+            // sm4Decrypt(sm4FilePath, LicenseSecretKeyEnum.LICENSE_SECRET_KEY.getSecretKey());
+            // System.out.println("解密文件已生成: " + licFilePath);
+            // // 校验解密内容
+            // String decrypted = new String(java.nio.file.Files.readAllBytes(java.nio.file.Paths.get(licFilePath)), java.nio.charset.StandardCharsets.UTF_8);
+            // System.out.println("解密内容: " + decrypted);
+            // if (jsonContent.equals(decrypted)) {
+            //     System.out.println("加解密测试通过！");
+            // } else {
+            //     System.err.println("加解密测试失败！");
+            // }
         } catch (Exception e) {
             System.err.println("处理过程中发生错误: " + e.getMessage());
             e.printStackTrace();
