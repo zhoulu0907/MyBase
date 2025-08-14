@@ -4,11 +4,12 @@ import { memo } from 'react';
 import type { XInputCheckboxConfig } from './schema';
 
 const XCheckbox = memo((props: XInputCheckboxConfig) => {
-  const { label, tooltip, status, defaultValue, required, layout, labelColSpan = 0 } = props;
+  const { label, dataField, tooltip, status, defaultValue, required, layout, labelColSpan = 0 } = props;
 
   return (
     <Form.Item
       label={label}
+      field={dataField.length > 0 ? dataField[dataField.length - 1] : ''}
       layout={layout}
       tooltip={tooltip}
       labelCol={{

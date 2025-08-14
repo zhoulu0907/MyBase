@@ -1,27 +1,29 @@
 import {
-  baseConfig,
-  baseDefault,
-  statusConfig,
-  widthConfig,
-  type ICommonBaseType,
-  type TStatusSelectKeyType,
-  type TWidthSelectKeyType
+    baseConfig,
+    baseDefault,
+    dataFieldConfig,
+    statusConfig,
+    widthConfig,
+    type ICommonBaseType,
+    type TStatusSelectKeyType,
+    type TWidthSelectKeyType
 } from '@/components/Materials/common';
 import { CONFIG_TYPES, STATUS_OPTIONS, STATUS_VALUES, WIDTH_OPTIONS, WIDTH_VALUES } from '../../../constants';
 import type {
-  IDescriptionConfigType,
-  ILabelConfigType,
-  INumberConfigType,
-  IPlaceholderConfigType,
-  ISelectConfigType,
-  IStatusConfigType,
-  ITextAreaConfigType,
-  ITextConfigType,
-  ITooltipConfigType,
-  IWidthConfigType,
-  TSelectDefaultType,
-  TTextAreaDefaultType,
-  TTextDefaultType
+    IDataFieldConfigType,
+    IDescriptionConfigType,
+    ILabelConfigType,
+    INumberConfigType,
+    IPlaceholderConfigType,
+    ISelectConfigType,
+    IStatusConfigType,
+    ITextAreaConfigType,
+    ITextConfigType,
+    ITooltipConfigType,
+    IWidthConfigType,
+    TSelectDefaultType,
+    TTextAreaDefaultType,
+    TTextDefaultType
 } from '../../../types';
 
 export interface XInputReadonlyBoxSchema {
@@ -40,6 +42,7 @@ export type TXInputReadonlyBoxEditData = Array<
   | INumberConfigType
   | ISelectConfigType<TWidthSelectKeyType | TStatusSelectKeyType>
   | ITextAreaConfigType
+  | IDataFieldConfigType
 >;
 
 export interface XInputReadonlyBoxConfig extends ICommonBaseType {
@@ -47,6 +50,11 @@ export interface XInputReadonlyBoxConfig extends ICommonBaseType {
    * 输入框标题
    */
   label: TTextDefaultType;
+
+  /**
+   * 数据字段
+   */
+  dataField: TTextDefaultType[];
 
   /**
    * 占位符
@@ -98,6 +106,7 @@ const XReadonlyBox: XInputReadonlyBoxSchema = {
       name: '描述信息',
       type: CONFIG_TYPES.DESCRIPTION_INPUT
     },
+    ...dataFieldConfig,
     {
       key: 'tooltip',
       name: '提示文字',
@@ -109,6 +118,7 @@ const XReadonlyBox: XInputReadonlyBoxSchema = {
   config: {
     ...baseDefault,
     label: '',
+    dataField: [],
     placeholder: '请输入文字',
     description: '',
     tooltip: '',

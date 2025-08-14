@@ -1,47 +1,49 @@
 import {
-  baseConfig,
-  baseDefault,
-  dateTypeConfig,
-  labelColSpanConfig,
-  layoutConfig,
-  statusConfig,
-  widthConfig,
-  type ICommonBaseType,
-  type TDateTypeSelectKeyType,
-  type TLayoutSelectKeyType,
-  type TStatusSelectKeyType,
-  type TWidthSelectKeyType
+    baseConfig,
+    baseDefault,
+    dataFieldConfig,
+    dateTypeConfig,
+    labelColSpanConfig,
+    layoutConfig,
+    statusConfig,
+    widthConfig,
+    type ICommonBaseType,
+    type TDateTypeSelectKeyType,
+    type TLayoutSelectKeyType,
+    type TStatusSelectKeyType,
+    type TWidthSelectKeyType
 } from '@/components/Materials/common';
 import {
-  CONFIG_TYPES,
-  DATE_OPTIONS,
-  DATE_VALUES,
-  LAYOUT_OPTIONS,
-  LAYOUT_VALUES,
-  STATUS_OPTIONS,
-  STATUS_VALUES,
-  WIDTH_OPTIONS,
-  WIDTH_VALUES
+    CONFIG_TYPES,
+    DATE_OPTIONS,
+    DATE_VALUES,
+    LAYOUT_OPTIONS,
+    LAYOUT_VALUES,
+    STATUS_OPTIONS,
+    STATUS_VALUES,
+    WIDTH_OPTIONS,
+    WIDTH_VALUES
 } from '@/components/Materials/constants';
 import type {
-  IBooleanConfigType,
-  IDateTypeConfigType,
-  IDescriptionConfigType,
-  ILabelColSpanConfigType,
-  ILabelConfigType,
-  ILayoutConfigType,
-  INumberConfigType,
-  ISelectConfigType,
-  IStatusConfigType,
-  ITextAreaConfigType,
-  ITextConfigType,
-  ITooltipConfigType,
-  IWidthConfigType,
-  TBooleanDefaultType,
-  TSelectDefaultType,
-  TTextAreaDefaultType,
-  TTextDefaultType,
-  TNumberDefaultType
+    IBooleanConfigType,
+    IDataFieldConfigType,
+    IDateTypeConfigType,
+    IDescriptionConfigType,
+    ILabelColSpanConfigType,
+    ILabelConfigType,
+    ILayoutConfigType,
+    INumberConfigType,
+    ISelectConfigType,
+    IStatusConfigType,
+    ITextAreaConfigType,
+    ITextConfigType,
+    ITooltipConfigType,
+    IWidthConfigType,
+    TBooleanDefaultType,
+    TNumberDefaultType,
+    TSelectDefaultType,
+    TTextAreaDefaultType,
+    TTextDefaultType
 } from '@/components/Materials/types';
 
 export interface XInputDatePickerSchema {
@@ -64,6 +66,7 @@ export type TXInputDatePickerEditData = Array<
   | IStatusConfigType<TDateTypeSelectKeyType>
   | IDateTypeConfigType<TDateTypeSelectKeyType>
   | ILayoutConfigType<TLayoutSelectKeyType>
+  | IDataFieldConfigType
 >;
 
 export interface XInputDatePickerConfig extends ICommonBaseType {
@@ -71,6 +74,11 @@ export interface XInputDatePickerConfig extends ICommonBaseType {
    * 输入框标题
    */
   label: TTextDefaultType;
+
+  /**
+   * 数据字段
+   */
+  dataField: TTextDefaultType[];
 
   /**
    * 描述信息（显示在输入框下方，辅助说明）
@@ -139,6 +147,7 @@ const XDatePicker: XInputDatePickerSchema = {
       name: '描述信息',
       type: CONFIG_TYPES.DESCRIPTION_INPUT
     },
+    ...dataFieldConfig,
     {
       key: 'tooltip',
       name: '提示文字',
@@ -163,6 +172,7 @@ const XDatePicker: XInputDatePickerSchema = {
   config: {
     ...baseDefault,
     label: '日期选择',
+    dataField: [],
     description: '',
     tooltip: '',
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],

@@ -91,6 +91,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
 
     const newColumns = newFieldList.map((item: MetadataEntityField) => ({
       title: item.displayName,
+      //   TODO(tianyu): 等天宇新增接口字段，这里先写死
       dataIndex: item.fieldName
     }));
 
