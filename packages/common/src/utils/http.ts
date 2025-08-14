@@ -58,8 +58,10 @@ export class HttpClient {
 
         // 自动添加 token 到请求头
         const tokenInfo = TokenManager.getTokenInfo();
+        const tenantInfo = TokenManager.getTenantInfo();
         if (tokenInfo?.accessToken) {
           config.headers['Authorization'] = `Bearer ${tokenInfo.accessToken}`;
+          config.headers['Tenant-Id'] = tenantInfo?.tenantId;
         }
 
         // 执行自定义请求拦截器

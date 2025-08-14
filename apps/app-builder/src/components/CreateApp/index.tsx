@@ -90,7 +90,7 @@ const BasicSetting = (props: IProps) => {
   const handleCreateTagChange = async (val: Options[]) => {
     if (val.length === 0) return;
     const curValue = val[val.length - 1]; // 最后一次更新的数据
-    if (tagList.some((tag) => tag.tagName === curValue.value)) return;
+    if (tagList.some((tag) => tag.tagName === curValue.label)) return;
     await createApplicationTag({
       tagName: curValue.value
     } as CreateApplicationTagReq);

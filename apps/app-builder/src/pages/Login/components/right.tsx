@@ -29,6 +29,10 @@ const Right: React.FC = () => {
   const [form] = Form.useForm();
   const { t } = useI18n();
 
+  const regex = /^https?:\/\/[^\/]+\/tenant\/([^\/#]+)\/?#\//;
+  const match = window.location.href.match(regex);
+  const tenantId = match ? match[1] : '1'; // 没有默认1
+
   // 使用记住我hook
   const { rememberMe, savedAccount, saveRememberMe } = useRememberMe();
 
@@ -100,12 +104,16 @@ const Right: React.FC = () => {
     try {
       setLoading(true);
 
+      const headers = {
+        'Tenant-Id': tenantId
+      };
+
       const loginData: LoginRequest = {
         username: values.account!,
         password: values.password!
       };
 
-      const response: LoginResponse = await login(loginData);
+      const response: LoginResponse = await login(loginData, headers);
 
       if (response.accessToken) {
         // 使用 TokenManager 存储 token 信息
@@ -114,7 +122,9 @@ const Right: React.FC = () => {
             userId: response.userId,
             accessToken: response.accessToken,
             refreshToken: response.refreshToken,
-            expiresTime: response.expiresTime
+            expiresTime: response.expiresTime,
+            tenantId: response.tenantId,
+            tenantWebsite: response.tenantWebsite
           },
           rememberMe
         );
