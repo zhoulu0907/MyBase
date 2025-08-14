@@ -1,3 +1,4 @@
+import { useAppStore } from '@/store/store_app';
 import { Button, Form, Grid, Input, Message, Select } from '@arco-design/web-react';
 import {
   createDatasource,
@@ -7,7 +8,6 @@ import {
 } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
 import styles from '../index.module.less';
-import { useAppStore } from '@/store';
 
 const Option = Select.Option;
 

@@ -86,11 +86,7 @@ const XTable = memo((props: XTableConfig & { runtime?: boolean; toCreatePage?: F
     if (finalColumns) {
       handlePage();
     }
-  }, [finalColumns]);
-
-  useEffect(() => {
-    handlePage();
-  }, [tablePageNo]);
+  }, [finalColumns, tablePageNo]);
 
   const handleCreate = () => {
     if (!runtime) {
