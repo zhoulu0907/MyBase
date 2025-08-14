@@ -52,7 +52,7 @@ const CreateEntityModal: React.FC<{
       const params = {
         displayName: values.displayName,
         tableName: values.tableName,
-        // code: values.code,
+        code: values?.code,
         entityType: 1, // 实体类型 1:自建表，2:复用已有表
         description: values.description,
         datasourceId: curDataSourceId,
@@ -60,7 +60,7 @@ const CreateEntityModal: React.FC<{
         displayConfig: JSON.stringify({
           // x: getGraphPositon().x + 300,
           // y: getGraphPositon().y
-          x: lastEntity?.positionX,
+          x: lastEntity?.positionX + 300,
           y: lastEntity?.positionY
         })
       };

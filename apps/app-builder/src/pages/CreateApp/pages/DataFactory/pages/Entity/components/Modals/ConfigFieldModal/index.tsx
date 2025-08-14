@@ -96,9 +96,9 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
       allowNull: true,
       constraints: '',
       isSystemField: 1,
-      sortOrder: fields.length
+      sortOrder: activeFields.length
     };
-    setFields([...fields, newField]);
+    setFields([...activeFields, newField]);
   };
 
   const deleteField = (index: number) => {
