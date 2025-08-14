@@ -54,6 +54,17 @@ export interface CreateRoleReq {
   roleName: string;
 }
 
+export interface RenameRoleReq {
+  /**
+   * 角色ID
+   */
+  id: string;
+  /**
+   * 角色名称
+   */
+  name: string;
+}
+
 export interface RoleAddUserReq {
   /**
    * 角色ID

@@ -1,10 +1,11 @@
-import { useFromEditorStore, useListEditorStore } from '@/store';
+import { useFromEditorStore, useListEditorStore } from '@/store/store_editor';
 import { Button, Form, Message } from '@arco-design/web-react';
 import {
   dataMethodData,
   dataMethodInsert,
   getAppEntities,
   getAppIdByPageSetCode,
+  getPageSetMetaData,
   type AppEntities,
   type DataMethodParam,
   type InsertMethodParams
@@ -43,6 +44,7 @@ const Preview: React.FC<PreviewProps> = ({}) => {
 
   const [pageSetCode, setPageSetCode] = useState('');
   const [pageType, setPageType] = useState('');
+  const [mainMetaData, setMainMetaData] = useState<string>();
   const [form] = Form.useForm();
 
   useEffect(() => {
@@ -66,25 +68,35 @@ const Preview: React.FC<PreviewProps> = ({}) => {
       console.log('pageSetCode: ', pageSetCode);
       loadPageSetInfo(pageSetCode);
       getAppID(pageSetCode);
+      getMainMetaData(pageSetCode);
     }
   }, [pageSetCode]);
 
+  const getMainMetaData = async (pageSetCode: string) => {
+    const mainMetaData = await getPageSetMetaData({ code: pageSetCode });
+    console.log('mainMetaData: ', mainMetaData);
+    setMainMetaData(mainMetaData);
+  };
+
+  //   获取行数据
   useEffect(() => {
-    if (editTargetId) {
-      console.log(editTargetId);
-      handleGetData('542683577733746688', editTargetId);
+    if (editTargetId && mainMetaData) {
+      console.log('editTargetId: ', editTargetId, '   mainMetaData: ', mainMetaData);
+      handleGetData(mainMetaData, editTargetId);
     }
-  }, [editTargetId]);
+  }, [editTargetId, mainMetaData]);
 
   useEffect(() => {
     if (appId) {
-      // TODO(mickey): 需要根据 appId 获取 appEntities
-      handleGetAppEntities('1');
+      console.log('appId: ', appId);
+
+      handleGetAppEntities(appId);
     }
   }, [appId]);
 
   const handleGetAppEntities = async (appId: string) => {
     const res = await getAppEntities(appId);
+    console.log('appEntities: ', res);
     if (res) {
       setAppEntities(res);
     }
@@ -172,12 +184,13 @@ const Preview: React.FC<PreviewProps> = ({}) => {
               style={{
                 width: getComponentWidth(listPageComponentSchemas.get(cp.id), cp.type)
               }}
-              onClick={(e: React.MouseEvent<HTMLDivElement>) => {
-                e.stopPropagation();
-                console.log('点击组件: ', cp.id);
-              }}
             >
-              <PreviewRender cpId={cp.id} cpType={cp.type} pageComponentSchema={listPageComponentSchemas.get(cp.id)} />
+              <PreviewRender
+                cpId={cp.id}
+                cpType={cp.type}
+                pageComponentSchema={listPageComponentSchemas.get(cp.id)}
+                runtime={true}
+              />
             </div>
           ))}
 
@@ -189,17 +202,14 @@ const Preview: React.FC<PreviewProps> = ({}) => {
                   key={cp.id}
                   className={styles.componentItem}
                   style={{
-                    width: getComponentWidth(listPageComponentSchemas.get(cp.id), cp.type)
-                  }}
-                  onClick={(e: React.MouseEvent<HTMLDivElement>) => {
-                    e.stopPropagation();
-                    console.log('点击组件: ', cp.id);
+                    width: getComponentWidth(formPageComponentSchemas.get(cp.id), cp.type)
                   }}
                 >
                   <PreviewRender
                     cpId={cp.id}
                     cpType={cp.type}
                     pageComponentSchema={formPageComponentSchemas.get(cp.id)}
+                    runtime={true}
                   />
                 </div>
               ))}

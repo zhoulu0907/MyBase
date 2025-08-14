@@ -1,6 +1,6 @@
 
 import { EDITOR_TYPES } from '@/pages/Editor/utils/const';
-import { useBasicEditorStore, useFromEditorStore, useListEditorStore } from '@/store';
+import { useBasicEditorStore, useFromEditorStore, useListEditorStore } from '@/store/store_editor';
 import { useLocation } from 'react-router-dom';
 
 export function usePageEditorStore() {

@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from 'react';
 import type {
   EdgeData,
   EntityData,
   EntityERProps,
   EntityNode
 } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
+import { useAppStore } from '@/store/store_app';
+import { useResourceStore } from '@/store/store_resource';
 import { Button, Message } from '@arco-design/web-react';
-import { useAppStore } from '@/store';
-import { useResourceStore } from '@/store_resource';
+import React, { useEffect, useState } from 'react';
 import EditEntityDrawer from '../components/Drawers/EditEntityDrawer';
 import EditFieldDrawer from '../components/Drawers/EditFieldDrawer';
 import EditRelationDrawer from '../components/Drawers/EditRelationDrawer';
@@ -17,11 +17,11 @@ import CreateEntityModal from '../components/Modals/CreateEntityModal';
 // import CreateFieldModal from '../components/Modals/CreateFieldModal';
 
 import { IconPlus } from '@arco-design/web-react/icon';
-import { getEntityGraph, deleteEntity, updateEntity } from '@onebase/app';
+import { deleteEntity, getEntityGraph, updateEntity } from '@onebase/app';
 import {
   ConfigFieldModal,
-  CreateRelationModal,
   CreateMasterDetailModal,
+  CreateRelationModal,
   DeleteConfirmModal
 } from '../components/Modals';
 import styles from '../index.module.less';

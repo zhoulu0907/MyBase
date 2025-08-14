@@ -1,6 +1,5 @@
-import type { AppEntities } from '@onebase/app';
 import { create } from 'zustand';
-import type { EditConfig } from './components/Materials/types';
+import type { EditConfig } from '../components/Materials/types';
 
 export interface BasicEditorStore {
   // 是否是编辑模式
@@ -129,37 +128,3 @@ export const useBasicEditorStore = create<BasicEditorStore>((set) => ({
 // 使用工厂函数创建两个独立的 store 实例
 export const useFromEditorStore = createPageEditorStore();
 export const useListEditorStore = createPageEditorStore();
-
-export interface appStore {
-  // 当前应用的appCode
-  curAppId: string;
-  // 设置当前应用的appCode
-  setCurAppId: (appId: string) => void;
-  // 清除当前应用的appCode
-  clearCurAppId: () => void;
-}
-
-export const useAppStore = create<appStore>((set) => ({
-  curAppId: '',
-  setCurAppId: (appId: string) => set(() => ({ curAppId: appId })),
-  clearCurAppId: () => set(() => ({ curAppId: '' }))
-}));
-
-export interface appDataStore {
-  appEntities: AppEntities;
-  setAppEntities: (appEntities: AppEntities) => void;
-  clearAppEntities: () => void;
-}
-
-export const useAppDataStore = create<appDataStore>((set) => ({
-  appEntities: {
-    entities: []
-  },
-  setAppEntities: (appEntities: AppEntities) => set(() => ({ appEntities })),
-  clearAppEntities: () =>
-    set(() => ({
-      appEntities: {
-        entities: []
-      }
-    }))
-}));

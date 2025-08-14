@@ -1,8 +1,8 @@
+import { useAppStore } from '@/store/store_app';
 import { Button, Message, Modal, Space, Table, type TableColumnProps } from '@arco-design/web-react';
 // import { IconPlus } from '@arco-design/web-react/icon';
 import { deleteDatasource, getDatasource, getDatasourcePage, type DatasourceSaveReqVO } from '@onebase/app';
 import { useEffect, useState } from 'react';
-import { useAppStore } from '@/store';
 import EditDsDrawer from './EditDsDrawer';
 import styles from '../index.module.less';
 

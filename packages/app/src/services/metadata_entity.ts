@@ -1,17 +1,17 @@
 // 实体管理服务
-import { metadataService } from './clients';
 import {
-  CreateEntityReqVO,
-  UpdateEntityReqVO,
-  GetEntityPageParams,
-  CreateFieldReqVO,
-  UpdateFieldReqVO,
-  CreateMasterChildReqVO,
-  CreateRelationReqVO,
-  UpdateRelationReqVO,
-  CreateRuleReqVO,
-  UpdateRuleReqVO
+    CreateEntityReqVO,
+    CreateFieldReqVO,
+    CreateMasterChildReqVO,
+    CreateRelationReqVO,
+    CreateRuleReqVO,
+    GetEntityPageParams,
+    UpdateEntityReqVO,
+    UpdateFieldReqVO,
+    UpdateRelationReqVO,
+    UpdateRuleReqVO
 } from '../types';
+import { metadataService } from './clients';
 
 /**
  * 获取实体分页列表

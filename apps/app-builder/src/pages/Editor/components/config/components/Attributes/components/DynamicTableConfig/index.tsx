@@ -1,6 +1,7 @@
+import { useAppEntityStore } from '@/store/store_entity';
 import { Button, Checkbox, Dropdown, Form, Input, InputNumber, Menu, Message, Select } from '@arco-design/web-react';
 import { IconDelete, IconDragDotVertical } from '@arco-design/web-react/icon';
-import { getEntityFields, getEntityListByApp, type MetadataEntityField, type MetadataEntityPair } from '@onebase/app';
+import { getEntityFields, type MetadataEntityField, type MetadataEntityPair } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import styles from '../../index.module.less';
@@ -8,6 +9,7 @@ import styles from '../../index.module.less';
 const FormItem = Form.Item;
 
 export interface DynamicTableConfigProps {
+  handleMultiPropsChange: (updates: { key: string; value: string | number | boolean | any[] }[]) => void;
   handlePropsChange: (key: string, value: string | number | boolean | any[]) => void;
   item: any;
   configs: any;
@@ -18,7 +20,15 @@ export interface DynamicTableConfigProps {
  * 动态下拉选择组件
  * @param props 组件属性
  */
-const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({ handlePropsChange, item, configs, id }) => {
+const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
+  handleMultiPropsChange,
+  handlePropsChange,
+  item,
+  configs,
+  id
+}) => {
+  const { mainEntity } = useAppEntityStore();
+
   const [entityList, setEntityList] = useState<MetadataEntityPair[]>([]);
   const [entityId, setEntityId] = useState<string>('');
   const [fieldList, setFieldList] = useState<MetadataEntityField[]>([]);
@@ -38,16 +48,25 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({ handlePropsChan
     if (configs[item.key]) {
       setEntityId(configs[item.key]);
     }
-
-    getEntityList();
   }, []);
 
   useEffect(() => {
     if (entityId) {
       getFieldList();
-      //   handlePropsChange(searchItemsKey, []);
     }
   }, [entityId]);
+
+  useEffect(() => {
+    console.log(mainEntity);
+    if (mainEntity) {
+      setEntityList([
+        {
+          entityId: mainEntity.entityID,
+          entityName: mainEntity.entityName
+        }
+      ]);
+    }
+  }, [mainEntity]);
 
   useEffect(() => {
     const res =
@@ -66,13 +85,6 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({ handlePropsChan
 
     setEnableAddSearchItem(res);
   }, [fieldList, searchItemsConfig]);
-
-  const getEntityList = async () => {
-    const res = await getEntityListByApp('1');
-    console.log('res: ', res);
-
-    setEntityList(res);
-  };
 
   const getFieldList = async () => {
     const res = await getEntityFields({ entityId });
@@ -93,13 +105,18 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({ handlePropsChan
 
   return (
     <>
-      <FormItem layout="horizontal" labelAlign="left" label={item.name} className={styles.formItem}>
+      <FormItem layout="vertical" labelAlign="left" label={item.name} className={styles.formItem}>
         <Select
           placeholder={`请选择${item.name}`}
           value={configs[item.key]}
           onChange={(value) => {
             setEntityId(value);
-            handlePropsChange(item.key, value);
+
+            setSearchItemsConfig([]);
+            handleMultiPropsChange([
+              { key: item.key, value: value },
+              { key: searchItemsKey, value: [] }
+            ]);
           }}
         >
           {entityList.map((item) => (
@@ -113,7 +130,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({ handlePropsChan
       {/* 表头配置 */}
       <FormItem layout="vertical" labelAlign="left" label={'表头配置'} className={styles.formItem}>
         <Form.List initialValue={configs[columnsKey]} field={`${id}-${columnsKey}`}>
-          {(_fields, { add, remove }) => (
+          {(_fields, { remove }) => (
             <div className={styles.tableColumnList}>
               <ReactSortable
                 list={configs[columnsKey]}
@@ -321,10 +338,6 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({ handlePropsChan
                         };
                         setSearchItemsConfig(newList);
                         handlePropsChange(searchItemsKey, newList);
-
-                        console.log(e);
-                        console.log(option.children);
-                        console.log(searchItemsConfig);
                       }}
                       className={styles.tableColumnItemInput}
                       options={configs['columns']

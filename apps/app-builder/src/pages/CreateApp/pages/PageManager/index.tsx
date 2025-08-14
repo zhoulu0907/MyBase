@@ -1,20 +1,24 @@
 import CreateGroupIcon from '@/assets/images/addfolder.svg';
 import CreatePageIcon from '@/assets/images/addpage.svg';
+import PageManagerGuide from '@/assets/images/page_manaager_guide.svg';
 import { useI18n } from '@/hooks/useI18n';
 import { EDITOR_TYPES } from '@/pages/Editor/utils/const';
-import { useAppStore, useBasicEditorStore } from '@/store';
+import PreviewContainer from '@/pages/Runtime/components/preview';
+import { useAppStore } from '@/store/store_app';
+import { useBasicEditorStore } from '@/store/store_editor';
+import { addParentCodeToChildren } from '@/utils/menu';
 import { Button, Dropdown, Form, Input, Layout, Menu, Message, Tree } from '@arco-design/web-react';
 import { IconPlus, IconSearch } from '@arco-design/web-react/icon';
 import {
   copyApplicationMenu,
   createApplicationMenu,
   deleteApplicationMenu,
+  getEntityListByApp,
   getPageSetCode,
   listApplicationMenu,
   MenuType,
   PageType,
   RootParentPage,
-  getEntityListByApp,
   updateApplicationMenuName,
   type ApplicationMenu,
   type CopyApplicationMenuReq,
@@ -22,8 +26,8 @@ import {
   type DeleteApplicationMenuReq,
   type GetPageSetCodeReq,
   type ListApplicationMenuReq,
-  type UpdateApplicationMenuNameReq,
-  type MetadataEntityPair
+  type MetadataEntityPair,
+  type UpdateApplicationMenuNameReq
 } from '@onebase/app';
 import { useEffect, useState, type FC } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -31,7 +35,6 @@ import CopyModal from './components/Modals/CopyModal';
 import CreateModal from './components/Modals/CreateModal';
 import RenameModal from './components/Modals/RenameModal';
 import MyMenuItem from './components/MyMenuItem';
-import PageManagerPreview from './components/Preview';
 import styles from './index.module.less';
 
 const TreeNode = Tree.Node;
@@ -76,6 +79,7 @@ const PageManagerPage: FC = () => {
   const [visibleCopyForm, setVisibleCopyForm] = useState(false);
 
   const [title, setTitle] = useState('');
+  const [showGuide, setShowGuide] = useState<boolean>(false);
   const pageTypeOptions = [{ label: '普通表单', value: PageType.NORMAL }];
 
   const [treeData, setTreeData] = useState<TreeNode[]>([]);
@@ -92,29 +96,16 @@ const PageManagerPage: FC = () => {
 
   useEffect(() => {
     if (curAppId !== '') {
-      getMenuList();
+      getMenuList().then((res) => {
+        const firstPageMenu = res.find((menu: ApplicationMenu) => menu.menuType == MenuType.PAGE);
+        setCurMenu(firstPageMenu);
+      });
     }
     clearIsEditMode();
   }, [curAppId]);
 
-  /**
-   * 递归为菜单项补充parentCode字段
-   * @param menuItems 菜单项数组
-   * @param parentCode 父级Code
-   * @returns 处理后的菜单项数组
-   */
-  const addParentCodeToChildren = (menuItems: ApplicationMenu[], parentCode?: string): ApplicationMenu[] => {
-    // 只保留 menuType 为 2（分组）的菜单项用于生成父级页面选择下拉框
-    return menuItems
-      .filter((menu) => menu.menuType == MenuType.GROUP)
-      .map((menu) => ({
-        ...menu,
-        parentCode: parentCode,
-        children: menu.children ? addParentCodeToChildren(menu.children, menu.menuCode) : []
-      }));
-  };
-
   // 将接口返回的菜单数据（res）转换为 Tree 组件可用的 treeData 格式
+  // TODO(mickey): showOption重构
   const convertMenuToTreeData = (menus: ApplicationMenu[], maxWidth: number, showOption: boolean = false): any[] => {
     return menus.map((menu) => ({
       key: menu.menuCode,
@@ -142,7 +133,7 @@ const PageManagerPage: FC = () => {
           copyForm={copyForm}
         />
       ),
-      children: menu.children ? convertMenuToTreeData(menu.children, maxWidth - cutTreeItemWidth) : []
+      children: menu.children ? convertMenuToTreeData(menu.children, maxWidth - cutTreeItemWidth, showOption) : []
     }));
   };
 
@@ -151,7 +142,6 @@ const PageManagerPage: FC = () => {
       applicationId: curAppId
     };
     const res = await listApplicationMenu(req);
-    console.log('res: ', res);
 
     // 为每个children元素补充parentCode字段
     const processedRes = addParentCodeToChildren(res, RootParentPage.menuCode);
@@ -159,11 +149,21 @@ const PageManagerPage: FC = () => {
 
     const treeData = convertMenuToTreeData(res, initTreeItemWidth, true);
     setTreeData(treeData);
+
+    if (res && res.length > 0) {
+      setCurMenu(res[0]);
+    }
+
+    setShowGuide(res.length === 0);
+    return res;
   };
 
   const getEntityList = async () => {
+    // TODO(mickey): 等xiaoyi完成后 写活
     const appId: string = '1';
+    // const appId: string = curAppId;
     const res: MetadataEntityPair[] = await getEntityListByApp(appId);
+    console.log(res);
     const entityOptions = res.map((entity) => ({
       label: entity.entityName,
       value: entity.entityId
@@ -227,7 +227,7 @@ const PageManagerPage: FC = () => {
         menuName: createForm.getFieldValue('menuName'),
         menuType: MenuType.PAGE,
         menuIcon: createForm.getFieldValue('menuIcon'),
-        entityCode: createForm.getFieldValue('entityCode')
+        entityCode: visibleCreateForm === 'page' ? createForm.getFieldValue('entityCode') : ''
       };
 
       if (visibleCreateForm === 'page') {
@@ -288,7 +288,6 @@ const PageManagerPage: FC = () => {
     console.log('req: ', req);
 
     const res = await copyApplicationMenu(req);
-    console.log('res: ', res);
     if (res) {
       Message.success('复制成功');
     }
@@ -333,9 +332,21 @@ const PageManagerPage: FC = () => {
 
   return (
     <div className={styles.pageManagerPage}>
+      {showGuide && (
+        <div className={styles.guide}>
+          <div className={styles.guideImg} style={{ background: `url(${PageManagerGuide})no-repeat center / cover` }}>
+            <div
+              className={styles.guideButton}
+              onClick={() => {
+                setVisibleCreateForm('page');
+                setShowGuide(false);
+              }}
+            />
+          </div>
+        </div>
+      )}
       <Layout style={{ height: '100%' }}>
         <Layout>
-          {/* <Sider style={{ width: 225 }}> */}
           <Sider className={styles.sider}>
             <div className={styles.siderHeader}>
               <Input
@@ -381,7 +392,7 @@ const PageManagerPage: FC = () => {
               </div>
             )}
             <div className={styles.contentBody}>
-              <PageManagerPreview menuCode={curMenu?.menuCode || ''} />
+              <PreviewContainer menuCode={curMenu?.menuCode || ''} runtime={false} />
             </div>
           </Content>
         </Layout>

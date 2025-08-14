@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Layout, Message } from '@arco-design/web-react';
 import { getEntityList, deleteEntity } from '@onebase/app';
-import { useResourceStore } from '@/store_resource';
+import { useResourceStore } from '@/store/store_resource';
 import type { EntityListItem, EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
 import EntityList from './EntityList';
 import EntityDetail from './EntityDetail';

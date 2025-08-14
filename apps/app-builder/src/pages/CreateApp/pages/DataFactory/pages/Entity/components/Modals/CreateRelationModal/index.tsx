@@ -1,6 +1,6 @@
+import { useAppStore } from '@/store/store_app';
+import { useResourceStore } from '@/store/store_resource';
 import { Form, Message, Modal, Select } from '@arco-design/web-react';
-import { useAppStore } from '@/store';
-import { useResourceStore } from '@/store_resource';
 import { createRelation, getEntityFields, getEntityList } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
 import styles from '../modal.module.less';

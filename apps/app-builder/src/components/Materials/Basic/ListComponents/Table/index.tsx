@@ -3,19 +3,20 @@ import { Button, Form, Input, Table } from '@arco-design/web-react';
 import { IconDelete, IconEdit } from '@arco-design/web-react/icon';
 import { memo, useEffect, useState } from 'react';
 
-import { EDITOR_TYPES } from '@/pages/Editor/utils/const';
 import { dataMethodDelete, dataMethodPage, type DeleteMethodParam, type PageMethodParam } from '@onebase/app';
 import { useNavigate } from 'react-router-dom';
 import styles from './index.module.less';
 import type { XTableConfig } from './schema';
 
-const XTable = memo((props: XTableConfig, edit: boolean = false) => {
+const XTable = memo((props: XTableConfig & { runtime?: boolean; toCreatePage?: Function }) => {
+  const { runtime = true, toCreatePage } = props;
   const navigate = useNavigate();
 
   const {
     label,
     status,
     defaultValue,
+    metaData,
     searchItems,
     columns,
     hover,
@@ -33,6 +34,8 @@ const XTable = memo((props: XTableConfig, edit: boolean = false) => {
   const [finalColumns, setFinalColumns] = useState<any[]>();
 
   const [tableData, setTableData] = useState<any[]>([]);
+  const [tableTotal, setTableTotal] = useState<number>(0);
+  const [tablePageNo, setTablePageNo] = useState<number>(1);
 
   const opearate: any = {
     title: '操作',
@@ -80,29 +83,27 @@ const XTable = memo((props: XTableConfig, edit: boolean = false) => {
   }, [showOpearate, columns, fixedOpearate]);
 
   useEffect(() => {
-    console.log(finalColumns);
-    handlePage();
-  }, [finalColumns]);
+    if (finalColumns) {
+      handlePage();
+    }
+  }, [finalColumns, tablePageNo]);
 
   const handleCreate = () => {
-    const hash = window.location.hash;
-    const queryIndex = hash.indexOf('?');
-    if (queryIndex !== -1) {
-      const queryString = hash.substring(queryIndex + 1);
-      const params = new URLSearchParams(queryString);
-      const pageSetCode = params.get('pageSetCode') || '';
-      navigate(`/onebase/preview-app/preview?pageSetCode=${pageSetCode}&pageType=${EDITOR_TYPES.FORM_EDITOR}`);
+    if (!runtime) {
+      return;
     }
+
+    toCreatePage?.();
   };
 
   const handlePage = async () => {
     const req: PageMethodParam = {
-      entityId: '542683577733746688',
-      pageNo: 1,
-      pageSize: 10
+      entityId: metaData,
+      pageNo: tablePageNo,
+      pageSize: pageSize || 10
     };
     const res = await dataMethodPage(req);
-    console.log(res);
+    // console.log(res);
 
     const { list, total } = res;
 
@@ -113,30 +114,32 @@ const XTable = memo((props: XTableConfig, edit: boolean = false) => {
       };
     });
 
-    console.log(newTableData);
+    // console.log(newTableData);
     setTableData(newTableData);
+    setTableTotal(total);
   };
 
   const handleDelete = async (id: string) => {
+    if (!runtime) {
+      return;
+    }
     console.log(id);
     const req: DeleteMethodParam = {
-      entityId: '542683577733746688',
+      entityId: metaData,
       id: id
     };
     const res = await dataMethodDelete(req);
     console.log(res);
+
+    handlePage();
   };
 
   const handleEdit = (id: string) => {
-    console.log(id);
-    const hash = window.location.hash;
-    const queryIndex = hash.indexOf('?');
-    if (queryIndex !== -1) {
-      const queryString = hash.substring(queryIndex + 1);
-      const params = new URLSearchParams(queryString);
-      const pageSetCode = params.get('pageSetCode') || '';
-      navigate(`/onebase/preview-app/preview?pageSetCode=${pageSetCode}&pageType=${EDITOR_TYPES.FORM_EDITOR}&id=${id}`);
+    if (!runtime) {
+      return;
     }
+
+    toCreatePage?.(id);
   };
 
   return (
@@ -215,7 +218,12 @@ const XTable = memo((props: XTableConfig, edit: boolean = false) => {
             pagePosition={pagePosition}
             pagination={{
               pageSize,
-              showTotal
+              showTotal,
+              current: tablePageNo,
+              total: tableTotal,
+              onChange: (pageNo: number) => {
+                setTablePageNo(pageNo);
+              }
             }}
           />
         </Form.Item>

@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import { useAppStore } from '@/store/store_app';
+import { useResourceStore } from '@/store/store_resource';
 import { Radio, Tag } from '@arco-design/web-react';
 import { IconMindMapping, IconNav } from '@arco-design/web-react/icon';
 import { getDatasourceList } from '@onebase/app';
-import { useAppStore } from '@/store';
-import { useResourceStore } from '@/store_resource';
+import React, { useEffect, useState } from 'react';
 import EntityTable from '../components/EntityTable';
-import { EntityERContainer } from './EntityERContainer';
 import styles from '../index.module.less';
+import { EntityERContainer } from './EntityERContainer';
 
 interface DatasourceRecord {
   id: number;

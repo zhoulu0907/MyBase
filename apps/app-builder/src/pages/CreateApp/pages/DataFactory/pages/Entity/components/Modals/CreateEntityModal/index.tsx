@@ -1,7 +1,7 @@
 import { DS_RESOURCE_TYPE } from '@/pages/CreateApp/pages/DataFactory/utils/const';
+import { useAppStore } from '@/store/store_app';
+import { useResourceStore } from '@/store/store_resource';
 import { Form, Input, Message, Modal, Radio, Select } from '@arco-design/web-react';
-import { useAppStore } from '@/store';
-import { useResourceStore } from '@/store_resource';
 import { createEntity } from '@onebase/app';
 import React, { useState } from 'react';
 import styles from '../modal.module.less';
