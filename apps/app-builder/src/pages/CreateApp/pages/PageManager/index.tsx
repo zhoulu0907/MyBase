@@ -347,7 +347,6 @@ const PageManagerPage: FC = () => {
       )}
       <Layout style={{ height: '100%' }}>
         <Layout>
-          {/* <Sider style={{ width: 225 }}> */}
           <Sider className={styles.sider}>
             <div className={styles.siderHeader}>
               <Input
