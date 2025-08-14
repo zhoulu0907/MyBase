@@ -49,9 +49,7 @@ const TenantPage: React.FC = () => {
       });
       
       Message.success('租户名称更新成功');
-    } catch (error) {
-      Message.error('租户名称更新失败');
-    }
+    } catch (error) {}
   };
 
   const secretIconStyle = { cursor: 'pointer', marginLeft: '8px', color: 'rgb(78, 89, 105)' };

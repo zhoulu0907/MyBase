@@ -10,7 +10,6 @@ import {
   deleteDictData,
   getAllDictList,
   getDictDataListByPage,
-  getDictDetail,
   updateDict,
   updateDictData,
   updateDictDataStatus
@@ -49,13 +48,13 @@ export default function SystemDictPage() {
   const loadDictList = async () => {
     getAllDictList().then((data) => {
       setDictList(data);
-      if (data.length > 0) {
+      if (activeDictId && data.findIndex(item => item.id === activeDictId) > -1) {
+        setActiveDictId(activeDictId);
+        setActiveDict(dictList.find((t) => t.id === activeDictId));
+      } else if (data.length > 0) {
         setActiveDictId(data[0].id);
       }
     });
-    if (dictList.length > 0) {
-      setActiveDictId(dictList[0].id);
-    }
   };
   useEffect(() => {
     loadDictList();
@@ -68,11 +67,9 @@ export default function SystemDictPage() {
       pageSize,
       ...(searchKeyword ? { label: searchKeyword } : {})
     };
-    const res = await getDictDataListByPage(params);
-
     setLoading(false);
     getDictDataListByPage(params)
-      .then(() => {
+      .then((res) => {
         setTableData(res.list);
         setTotal(res.total);
       })
@@ -85,17 +82,13 @@ export default function SystemDictPage() {
     if (activeDictId !== undefined) {
       loadTableData();
     }
-  }, [activeDictId, currentPage, pageSize, dictList]);
+  }, [activeDictId, currentPage, pageSize]);
 
   useEffect(() => {
     if (!activeDictId) return;
     const activeDict = dictList.find((item) => item.id === activeDictId);
     setActiveDict(activeDict);
-    // 描述从详情接口获取
-    getDictDetail(activeDictId).then((res) => {
-      setActiveDict((prev) => ({ ...prev, ...res }));
-    });
-  }, [activeDictId]);
+  }, [activeDictId, dictList]);
 
   useEffect(() => {
     setFilteredDictList(
@@ -111,7 +104,7 @@ export default function SystemDictPage() {
     if (activeDictId !== undefined) {
       loadTableData(dictDataSearch);
     }
-  }, [activeDictId, currentPage, pageSize, dictList]);
+  }, [activeDictId, currentPage, pageSize]);
 
   useEffect(() => {
     if (activeDictId !== undefined) {
@@ -302,7 +295,7 @@ export default function SystemDictPage() {
           )}
         </Content>
       </Layout>
-      <DictModal
+      { addDictModalVisible && <DictModal
         visible={addDictModalVisible}
         loading={modalLoading}
         initialValues={
@@ -321,7 +314,7 @@ export default function SystemDictPage() {
           setEditDict(null);
         }}
         title={editDict ? '编辑数据字典' : '新建数据字典'}
-      />
+      />}
       <DictDataModal
         visible={dictDataModalVisible}
         loading={dictDataModalLoading}
