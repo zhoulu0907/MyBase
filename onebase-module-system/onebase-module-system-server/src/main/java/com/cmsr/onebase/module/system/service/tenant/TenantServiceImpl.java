@@ -21,7 +21,6 @@ import com.cmsr.onebase.module.system.controller.admin.tenant.vo.tenant.TenantIn
 import com.cmsr.onebase.module.system.controller.admin.tenant.vo.tenant.TenantPageReqVO;
 import com.cmsr.onebase.module.system.controller.admin.tenant.vo.tenant.TenantRespVO;
 import com.cmsr.onebase.module.system.controller.admin.tenant.vo.tenant.TenantUpdateReqVO;
-import com.cmsr.onebase.module.system.controller.admin.user.vo.user.UserUpdateReqVO;
 import com.cmsr.onebase.module.system.convert.tenant.TenantConvert;
 import com.cmsr.onebase.module.system.dal.dataobject.license.LicenseDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.MenuDO;
@@ -83,19 +82,19 @@ public class TenantServiceImpl implements TenantService {
     private TenantPackageService tenantPackageService;
     @Resource
     @Lazy // 延迟，避免循环依赖报错
-    private AdminUserService userService;
+    private AdminUserService     userService;
     @Resource
-    private RoleService roleService;
+    private RoleService          roleService;
     @Resource
-    private MenuService menuService;
+    private MenuService          menuService;
     @Resource
-    private PermissionService permissionService;
+    private PermissionService    permissionService;
     @Resource
-    private DataRepository dataRepository;
+    private DataRepository       dataRepository;
     @Resource
-    private LicenseService    licenseService;
+    private LicenseService       licenseService;
     @Resource
-    private AppApplicationApi appApplicationApi;
+    private AppApplicationApi    appApplicationApi;
 
     @Override
     public List<Long> getTenantIdList() {
@@ -119,28 +118,28 @@ public class TenantServiceImpl implements TenantService {
     }
 
     @Override
-    public Long getAccountCount() {
+    public Long getAvailableAccountCount() {
         LicenseDO license = licenseService.getLicenseByStatus(LicenseStatusEnum.ENABLE.getStatus());
         Integer userCount = userService.getUserCountByStatus(UserStatusEnum.NORMAL.getStatus());
         if (license != null) {
             // 获取license总人数限制
-            Integer licenseTotalCount = license.getUserLimit();
+            Integer licenseUserLimit = license.getUserLimit();
             // 如果license总人数限制小于已分配人员数量，则返回0
-            if (licenseTotalCount < userCount) {
+            if (userCount > licenseUserLimit) {
                 return 0L;
             }
             // 返回剩余可分配人员数量
-            return (long) (licenseTotalCount - userCount);
+            return (long) (licenseUserLimit - userCount);
         }
         return 0L;
     }
 
     @Override
-    public Long getOtherTenantUserCount(Long tenantId) {
+    public Long getOtherTenantUserLimitCount(Long tenantId) {
         ConfigStore configStore = new DefaultConfigStore();
         configStore.and(Compare.EQUAL, TenantDO.STATUS, TenantStatusEnum.NORMAL.getStatus());
         if (tenantId != null) {
-                configStore.and(Compare.NOT_EQUAL, TenantDO.ID, tenantId);
+            configStore.and(Compare.NOT_EQUAL, TenantDO.ID, tenantId);
         }
         List<TenantDO> tenantDOList = dataRepository.findAll(TenantDO.class, configStore);
         long sum = tenantDOList.stream()
@@ -182,7 +181,7 @@ public class TenantServiceImpl implements TenantService {
             // 获取license总人数限制
             Integer userLimit = license.getUserLimit();
             // 获取现有租户已分配的用户数量
-            Long otherUserCount = getOtherTenantUserCount(null);
+            Long otherUserCount = getOtherTenantUserLimitCount(null);
             // 如果传入的分配人员数量加上已分配数量超过license限制，则报错
             if (createReqVO.getAccountCount() != null &&
                     (otherUserCount + createReqVO.getAccountCount()) > userLimit) {
@@ -259,7 +258,7 @@ public class TenantServiceImpl implements TenantService {
             // 获取license总人数限制
             Integer userLimit = license.getUserLimit();
             // 获取除当前租户外的其他租户已分配人员数量，判断上限
-            Long otherUserCount = getOtherTenantUserCount(updateReqVO.getId());
+            Long otherUserCount = getOtherTenantUserLimitCount(updateReqVO.getId());
             // 如果传入的分配人员数量加上已分配数量超过license限制，则报错
             if (updateReqVO.getAccountCount() != null &&
                     (otherUserCount + updateReqVO.getAccountCount()) > userLimit) {
@@ -315,7 +314,7 @@ public class TenantServiceImpl implements TenantService {
                     userId = user.getId();
                     // 新管理员分配角色
                     permissionService.assignUserRoles(userId, singleton(roleId));
-                }else{
+                } else {
                     // 创建用户，并分配角色
                     TenantInsertReqVO reqVO = new TenantInsertReqVO();
                     reqVO.setContactName(updateReqVO.getContactName());
@@ -435,7 +434,6 @@ public class TenantServiceImpl implements TenantService {
         tenantRespVO.setAppCount(appCountResult.getData() != null ? appCountResult.getData().intValue() : 0);
         return tenantRespVO;
     }
-
 
 
     @Override

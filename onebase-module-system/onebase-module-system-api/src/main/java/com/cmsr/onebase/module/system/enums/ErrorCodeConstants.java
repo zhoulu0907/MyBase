@@ -174,7 +174,8 @@ public interface ErrorCodeConstants {
 
     // ========== 平台管理凭证 1-002-029-000 ==========
     ErrorCode LICENSE_NOT_EXISTS = new ErrorCode(1_002_029_000, "未找到ID为({})的凭证");
-    ErrorCode LICENSE_IMPORT_ERROR = new ErrorCode(1_002_030_000, "凭证导入失败");
-    ErrorCode LICENSE_DECRYPT_ERROR = new ErrorCode(1_002_031_000, "解密失败，文件可能已损坏或不是有效的加密文件");
+    ErrorCode LICENSE_IMPORT_ERROR = new ErrorCode(1_002_030_000, "License凭证导入失败");
+    ErrorCode LICENSE_EXPORT_ERROR = new ErrorCode(1_002_030_000, "License凭证导出失败");
+    ErrorCode LICENSE_DECRYPT_ERROR = new ErrorCode(1_002_031_000, "文件解析失败，文件可能已损坏或不是有效的凭证文件");
 
 }

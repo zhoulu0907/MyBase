@@ -4,17 +4,10 @@ import com.cmsr.onebase.module.system.controller.admin.license.vo.LicenseExportR
 import com.cmsr.onebase.module.system.enums.license.LicenseSecretKeyEnum;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import javax.crypto.Cipher;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
-import java.io.File;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.security.Security;
-import java.util.Base64;
+
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -25,6 +18,10 @@ import java.nio.file.Paths;
 import java.security.Security;
 import java.util.Base64;
 
+import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.LICENSE_DECRYPT_ERROR;
+
+@Slf4j
 public class SM4Utils {
     static {
         Security.addProvider(new BouncyCastleProvider());
@@ -32,6 +29,7 @@ public class SM4Utils {
 
     /**
      * 确保密钥为16字节长度
+     *
      * @param key 原始密钥
      * @return 16字节密钥
      */
@@ -42,12 +40,13 @@ public class SM4Utils {
         System.arraycopy(inputKeyBytes, 0, keyBytes, 0, Math.min(inputKeyBytes.length, 16));
         return keyBytes;
     }
-    
+
     /**
      * 解密SM4加密文件并保存到指定文件
+     *
      * @param encryptedFilePath 加密文件路径
-     * @param key 解密密钥
-     * @param outputFilePath 解密后内容保存路径
+     * @param key               解密密钥
+     * @param outputFilePath    解密后内容保存路径
      * @return 解密是否成功
      */
     public static boolean decryptSm4FileToFile(String encryptedFilePath, String key, String outputFilePath) {
@@ -55,21 +54,45 @@ public class SM4Utils {
             // 读取加密文件内容
             byte[] encryptedBytes = Files.readAllBytes(Paths.get(encryptedFilePath));
             String encryptedContent = new String(encryptedBytes, StandardCharsets.UTF_8);
-            
+
             // 解密内容
             String decryptedContent = sm4Decrypt(encryptedContent, key);
-            if (decryptedContent == null) {
-                System.err.println("解密失败，解密结果为null");
-                return false;
+            if (StringUtils.isBlank(decryptedContent)) {
+                log.error("解密文件错误, encryptedFilePath:{} ", encryptedFilePath);
+                throw exception(LICENSE_DECRYPT_ERROR);
             }
-            
             // 将解密后的内容写入输出文件
             Files.write(Paths.get(outputFilePath), decryptedContent.getBytes(StandardCharsets.UTF_8));
             return true;
         } catch (Exception e) {
-            System.err.println("解密文件时发生错误: " + e.getMessage());
-            e.printStackTrace();
-            return false;
+            log.error("解密文件发生错误, encryptedFilePath:{} ", encryptedFilePath, e);
+            throw exception(LICENSE_DECRYPT_ERROR);
+        }
+    }
+
+    /**
+     * 解密SM4加密文件并保存到指定文件
+     *
+     * @param encryptedFilePath 加密文件路径
+     * @param key               解密密钥
+     * @return 解密是否成功
+     */
+    public static String decryptSm4FileToString(String encryptedFilePath, String key) {
+        try {
+            // 读取加密文件内容
+            byte[] encryptedBytes = Files.readAllBytes(Paths.get(encryptedFilePath));
+            String encryptedContent = new String(encryptedBytes, StandardCharsets.UTF_8);
+
+            // 解密内容
+            String decryptedContent = sm4Decrypt(encryptedContent, key);
+            if (StringUtils.isBlank(decryptedContent)) {
+                log.error("解密文件错误, encryptedFilePath:{} ", encryptedFilePath);
+                throw exception(LICENSE_DECRYPT_ERROR);
+            }
+            return decryptedContent;
+        } catch (Exception e) {
+            log.error("解密文件发生错误, encryptedFilePath:{} ", encryptedFilePath, e);
+            throw exception(LICENSE_DECRYPT_ERROR);
         }
     }
 
@@ -78,7 +101,7 @@ public class SM4Utils {
         try {
             // 确保密钥长度为16字节(128位)
             byte[] keyBytes = getKeyBytes(key);
-            
+
             // 指定加密算法
             String algorithm = "SM4";
             // 创建密钥规范
@@ -135,12 +158,12 @@ public class SM4Utils {
             ObjectMapper objectMapper = new ObjectMapper();
             objectMapper.registerModule(new JavaTimeModule());
             String jsonContent = objectMapper.writeValueAsString(licenseExportRespVO);
-            
+
             // 使用正确的密钥进行加密
             String sm4Encrypt = sm4Encrypt(jsonContent, LicenseSecretKeyEnum.LICENSE_SECRET_KEY.getSecretKey());
             if (sm4Encrypt != null) {
                 System.out.println("加密后的长度: " + sm4Encrypt.length());
-                
+
                 // 生成加密文件路径
                 String licenseDirPath = System.getProperty("user.dir") + File.separator + "license";
                 File licenseDir = new File(licenseDirPath);
@@ -150,16 +173,16 @@ public class SM4Utils {
                 String now = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
                 String sm4FilePath = "M:\\Device\\F\\onebase-v3-be\\.idea\\httpRequests\\license.lic-5.sm4";
                 String licFilePath = licenseDirPath + File.separator + "license_encrypted__testuser_" + now + ".lic";
-                
+
                 // 写入加密数据到文件
                 Files.write(Paths.get(sm4FilePath), sm4Encrypt.getBytes());
                 System.out.println("加密文件已生成: " + sm4FilePath);
-                
+
                 // 解密文件并保存到lic文件
                 boolean decryptSuccess = decryptSm4FileToFile(sm4FilePath, LicenseSecretKeyEnum.LICENSE_SECRET_KEY.getSecretKey(), licFilePath);
                 if (decryptSuccess) {
                     System.out.println("解密文件已生成: " + licFilePath);
-                    
+
                     // 验证解密内容
                     String decrypted = new String(Files.readAllBytes(Paths.get(licFilePath)), StandardCharsets.UTF_8);
                     System.out.println("解密内容: " + decrypted);
