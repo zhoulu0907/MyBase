@@ -41,6 +41,9 @@ public class ApplicationRespVO {
     @Schema(description = "版本号")
     private String versionNumber;
 
+    @Schema(description = "数据源ID")
+    private String datasourceId;
+
     @Schema(description = "状态")
     private Integer appStatus;
 
