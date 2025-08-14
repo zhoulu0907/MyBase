@@ -389,10 +389,8 @@ const TenantManagement: React.FC = () => {
         
         return (
           <Space className={styles.urlWrapper}>
-            {/* http://s25029301301.dev.internal.virtueit.net:81/v0/obappbuilder/#/XXX */}
             <Tooltip position='tl' content={fullUrl}>
               <Text className={styles.fullUrl} onClick={() => handleClick(fullUrl)}>
-                {/* http://s25029301301.dev.internal.virtueit.net:81/v0/obappbuilder/#/XXX */}
                 {displayUrl}
               </Text>
             </Tooltip>
