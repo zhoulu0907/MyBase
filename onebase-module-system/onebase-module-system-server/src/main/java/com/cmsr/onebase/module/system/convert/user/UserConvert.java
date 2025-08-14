@@ -9,6 +9,7 @@ import com.cmsr.onebase.module.system.controller.admin.dept.vo.post.PostSimpleRe
 import com.cmsr.onebase.module.system.controller.admin.permission.vo.role.RoleSimpleRespVO;
 import com.cmsr.onebase.module.system.controller.admin.user.vo.profile.UserProfileRespVO;
 import com.cmsr.onebase.module.system.controller.admin.user.vo.user.UserRespVO;
+import com.cmsr.onebase.module.system.controller.admin.user.vo.user.UserDeptSimpleRespVO;
 import com.cmsr.onebase.module.system.controller.admin.user.vo.user.UserSimpleRespVO;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.PostDO;
@@ -39,9 +40,9 @@ public interface UserConvert {
         return userVO;
     }
 
-    default List<UserSimpleRespVO> convertSimpleList(List<AdminUserDO> list, Map<Long, DeptDO> deptMap) {
+    default List<UserDeptSimpleRespVO> convertSimpleList(List<AdminUserDO> list, Map<Long, DeptDO> deptMap) {
         return CollectionUtils.convertList(list, user -> {
-            UserSimpleRespVO userVO = BeanUtils.toBean(user, UserSimpleRespVO.class);
+            UserDeptSimpleRespVO userVO = BeanUtils.toBean(user, UserDeptSimpleRespVO.class);
             MapUtils.findAndThen(deptMap, user.getDeptId(), dept -> userVO.setDeptName(dept.getName()));
             return userVO;
         });
@@ -94,4 +95,5 @@ public interface UserConvert {
                 .collect(Collectors.toList());
     }
 
+    List<UserSimpleRespVO> convertList(List<AdminUserDO> list);
 }
