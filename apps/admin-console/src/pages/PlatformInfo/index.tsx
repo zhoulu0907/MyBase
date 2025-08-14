@@ -25,6 +25,7 @@ import {
 import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
 import { downloadFile } from '@/utils/download';
+// import { systemService } from './clients';
 
 const { Title, Text } = Typography;
 
@@ -43,10 +44,9 @@ const PlatformInfo: React.FC = () => {
   };
 
   const getPlatformInfoList = async () => {
-    console.log('获取认证记录:');
     try {
       const res = await getPlatFormInfoListApi({ pageNo: 1, pageSize: 10 });
-      console.log('infoList res:', res);
+      // console.log('infoList res:', res);
       if (res && Array.isArray(res.list)) {
         setLicenseInfoList(res.list);
         setPagination((prevPagination) => ({
@@ -127,43 +127,113 @@ const PlatformInfo: React.FC = () => {
     }
   ];
 
-  // 处理文件上传变化
   const handleFileUploadChange = async (fileList: any[]) => {
     console.log('File uploaded:', fileList);
+    
+    // 只处理最新上传的文件，不累积处理
     if (fileList.length > 0) {
       const latestFile = fileList[fileList.length - 1];
-      // 确保originFile存在再进行上传操作
-      if (latestFile && latestFile.originFile) {
+      console.log('latestFile:', latestFile);
+      
+      // 获取原始文件对象 - 关键修正
+      let file = null;
+      
+      // 尝试多种方式获取文件对象
+      if (latestFile.originFile) {
+        file = latestFile.originFile;
+      } else if (latestFile.file) {
+        file = latestFile.file;
+      } else if (latestFile instanceof File) {
+        file = latestFile;
+      } else if (latestFile.raw) {
+        file = latestFile.raw;
+      }
+      
+      console.log("获取到的文件对象:", file);
+      
+      // 验证文件对象
+      if (file && (file instanceof File || file instanceof Blob)) {
+        console.log("文件验证通过，文件信息:", {
+          name: file.name,
+          size: file.size,
+          type: file.type
+        });
+        
+        // 创建FormData并添加文件 - 确保参数名为"file"
         const formData = new FormData();
-        formData.append('file', latestFile.originFile);
+        formData.append('file', file, file.name || 'license.lic.sm4');
+        
+        console.log("FormData创建完成");
+        // 验证FormData内容
+        for (let [key, value] of formData.entries()) {
+          console.log(`FormData内容 - ${key}:`, value);
+        }
         
         setLoading(true);
+        
         try {
+          // 调用上传接口
           await uploadPlatformLicenseApi(formData);
           Message.success(t('platformInfo.uploadSuccess'));
+          
           // 重新获取列表数据
           await Promise.all([getPlatformInfoList(), getPlatformInfo()]);
         } catch (error: any) {
-          Message.error("上传license失败")
+          Message.error("上传license失败");
           console.error('上传license失败', error);
         } finally {
           setLoading(false);
         }
+      } else {
+        // 如果文件对象无效，显示错误信息
+        Message.error('文件上传失败,请检查文件是否正确选择');
+        console.error('无效的文件对象:', file);
+        console.error('latestFile的完整结构:', JSON.stringify(latestFile, null, 2));
       }
-      console.log('File uploaded:', fileList.length);
+    } else {
+      console.log('没有选择文件');
     }
   };
 
   // 下载认证
   const downloadLicense = async () => {
+    window.location.href = 'http://192.168.43.40:48080/admin-api/system/license/export?id=1'
     try {
-      const response = await downloadPlatformLicenseApi(1);
-      console.log('downloadLicense', response);
-        const blob = new Blob([response]);
+      // 获取存储在localStorage或cookie中的token
+      const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
+      
+      // 创建带有token的请求
+      const response = await fetch('http://192.168.43.40:48080/admin-api/system/license/export?id=1', {
+        method: 'GET',
+        headers: {
+          // 'Authorization': `Bearer ${token}`,
+          'Authorization': `Bearer c36a3f1f75d34109b6ebf629fb7a097d`,
+          // 或者根据您的实际情况使用其他格式，例如:
+          // 'Authorization': `Bearer ${token}`
+          // 'X-Token': token
+        }
+      });
+      console.log('fetch response:', response);
+      if (response.ok) {
+        const blob = await response.blob();
         downloadFile(blob, 'license.lic.sm4');
+      } else {
+        Message.error('下载失败');
+      }
     } catch (error) {
       console.error('下载失败:', error);
+      Message.error('下载失败');
     }
+
+    // try {
+    //   const response = await downloadPlatformLicenseApi(1);
+    //   console.log("response", response);
+    //   // console.log('downloadLicense', response);
+    //     const blob = await response.blob();
+    //     // downloadFile(blob, 'license.lic.sm4');
+    // } catch (error) {
+    //   console.error('下载失败:', error);
+    // }
     
   };
 
@@ -248,7 +318,7 @@ const PlatformInfo: React.FC = () => {
                     <Space>
                       <span>{licenseInfo?.actualTenantCount || '--'}</span>
                       <span> / </span>
-                      <span>{licenseInfo?.tenantLimit || '--'}</span>
+                      <span>{licenseInfo?.userLimit || '--'}</span>
                     </Space>
                   )
                 }
@@ -263,6 +333,7 @@ const PlatformInfo: React.FC = () => {
               <Upload
                 className={styles.uploadAuth}
                 showUploadList={false}
+                multiple={false}
                 headers={{
                   authorization: 'authorization-text'
                 }}

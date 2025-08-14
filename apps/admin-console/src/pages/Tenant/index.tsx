@@ -11,9 +11,11 @@ import {
   Radio,
   Form,
   InputNumber,
-  Switch
+  Switch,
+  Tag,
+  Tooltip
 } from '@arco-design/web-react';
-import { IconSearch } from '@arco-design/web-react/icon';
+import { IconCopy, IconSearch } from '@arco-design/web-react/icon';
 import styles from './index.module.less'
 import {
   getPlatformTenantListApi,
@@ -41,7 +43,7 @@ const TenantManagement: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [searchParams, setSearchParams] = useState({
     status: PlatformTenantStatus.all,
-    keyword: ''
+    keywords: ''
   });
   const [modalVisible, setModalVisible] = useState(false);
   const [confirmDisableVisible, setConfirmDisableVisible] = useState(false);
@@ -53,7 +55,7 @@ const TenantManagement: React.FC = () => {
   const [tenantLimit, setTenantLimit] = useState<number>(10000); // 租户数量限制
   const [otherTenantCount, setOtherTenantCount] = useState<number>(0); // 其他租户分配数
   const [tenantUserCount, setTenantUserCount] = useState<number>(0); // 租户下用户数
-  const [adminList, setAdminList] = useState<{id: string, username: string}[]>([])
+  const [adminList, setAdminList] = useState<{id: string, nickname: string, username: string}[]>([])
   const [confirmText, setConfirmText] = useState('');
   const [total, setTotal] = useState(0) 
   const [currentPage, setCurrentPage] = useState(1);
@@ -69,7 +71,7 @@ const TenantManagement: React.FC = () => {
         pageNo: currentPage,
         pageSize: 10,
         status: searchParams.status, // 添加状态筛选参数
-        keyword: searchParams.keyword // 添加关键词搜索参数
+        keywords: searchParams.keywords // 添加关键词搜索参数
       });
       setTenantList(resp.list);
       setTotal(resp.total)
@@ -99,11 +101,11 @@ const TenantManagement: React.FC = () => {
     setCurrentPage(1); // 重置到第一页
   };
 
-// 处理搜索
-const handleSearch = async (keyword: string) => {
-  setSearchParams({ ...searchParams, keyword });
-  setCurrentPage(1); // 重置到第一页
-};
+  // 处理搜索
+  const handleSearch = async (keywords: string) => {
+    setSearchParams({ ...searchParams, keywords });
+    setCurrentPage(1); // 重置到第一页
+  };
 
   // 获取Tenant参数
   const getTenantData = () => {
@@ -169,11 +171,7 @@ const handleSearch = async (keyword: string) => {
     try {
       const adminListResp = await getPlatformTenantAdminListApi()
       console.log('管理员列表 adminListResp:', adminListResp);
-      // setAdminList(adminListResp)
-      // 将id为1的管理员 筛选出来并排到第一个
-      const adminListWithId1 = adminListResp.filter((item: {id: string, username: string}) => item.id === ADMIN_ROOT_ID)
-      setAdminList(adminListWithId1.concat(adminListResp.filter((item: {id: string, username: string}) => item.id !== ADMIN_ROOT_ID)))
-      // console.log('adminList:', adminList);
+      setAdminList(adminListResp)
     } catch (error) {
       console.error('Error fetching adminList:', error);
     }
@@ -184,7 +182,7 @@ const handleSearch = async (keyword: string) => {
     form.resetFields();
     form.setFieldsValue({
       status: PlatformTenantStatus.enabled,
-      admin: adminList.length > 0 ? adminList[0].username : undefined
+      admin: adminList.length > 0 ? adminList[0].nickname : undefined
     });
     getTenantData()
     setModalVisible(true);
@@ -199,10 +197,6 @@ const handleSearch = async (keyword: string) => {
 
    // 打开编辑弹窗
   const handleEdit = (record: PlatformTenantInfo) => {
-      console.log('允许可分配数:', allocatableLicense, "/tenant/get-allocatable-count");
-      console.log('租户数量限制:', tenantLimit, "/platform/get-platform-info");
-      console.log('其他租户分配数:', otherTenantCount);
-      console.log('租户下用户数:', tenantUserCount);
     const tenant: PlatformTenantInfo = {
       id: record.id.toString(),
       name: record.name,
@@ -354,13 +348,13 @@ const handleSearch = async (keyword: string) => {
 
   // 表格列定义
   const columns = [
-    { 
-      title: '序号',
-      dataIndex: 'order',
-      key: 'order',
-      render: (text: any, record: any, index: number) => index + 1,
-      width: '5%',
-    },
+    // { 
+    //   title: '序号',
+    //   dataIndex: 'order',
+    //   key: 'order',
+    //   render: (text: any, record: any, index: number) => index + 1,
+    //   width: '5%',
+    // },
     {
       title: '租户名称',
       dataIndex: 'name',
@@ -390,12 +384,29 @@ const handleSearch = async (keyword: string) => {
       render: (text: string) => {
         // 获取当前环境的域名前缀
         const domainPrefix = getDomainPrefix();
-        const fullUrl = `${domainPrefix}/${text}`;
+        const fullUrl = `${domainPrefix}/v0/obappbuilder/#/${text}`;
+        const displayUrl = simplifyUrl(fullUrl);
         
         return (
-          <Text>
-            {fullUrl}
-          </Text>
+          <Space className={styles.urlWrapper}>
+            {/* http://s25029301301.dev.internal.virtueit.net:81/v0/obappbuilder/#/XXX */}
+            <Tooltip position='tl' content={fullUrl}>
+              <Text className={styles.fullUrl} onClick={() => handleClick(displayUrl)}>
+                {/* http://s25029301301.dev.internal.virtueit.net:81/v0/obappbuilder/#/XXX */}
+                {fullUrl}
+              </Text>
+            </Tooltip>
+            <IconCopy className={styles.copyIcon} onClick={(e) => {
+              e.stopPropagation();
+              navigator.clipboard.writeText(fullUrl).then(() => {
+                Message.success('复制成功!');
+              }).catch((error) => {
+                console.error('复制失败:', error);
+                // 提供备选方案
+                Message.error('复制失败');
+              });
+            }}/>
+          </Space>
         );
       }
     },
@@ -411,20 +422,26 @@ const handleSearch = async (keyword: string) => {
       title: '状态',
       dataIndex: 'status',
       render: (status: number) => (
-        <Text style={{ color: status === PlatformTenantStatus.enabled ? '#00b42a' : '' }}>
+        <Tag color={ status === PlatformTenantStatus.enabled ? 'green' : 'gray' }>
           {status === PlatformTenantStatus.enabled ? '启用' : '禁用'}
-        </Text>
+        </Tag>
       )
     },
     {
       title: '操作',
       render: (_: PlatformTenantInfo, record: PlatformTenantInfo) => (
-        <Button type="text" onClick={() => handleEdit(record)}>
+        <Text className={styles.tableBtn} onClick={() => handleEdit(record)}>
           修改
-        </Button>
+        </Text>
       )
     }
   ];
+
+  // 处理点击地址跳转
+  const handleClick = (text: string) => {
+    console.log('处理跳转地址:', text);
+    window.open(text);
+  };
 
   // 处理分页变化
   const handlePageChange = async (pageNo: number) => {
@@ -461,6 +478,29 @@ const handleSearch = async (keyword: string) => {
     return 'http://localhost:9524';
   };
 
+  // 简化URL显示
+  const simplifyUrl = (url: string) => {
+    try {
+      const urlObj = new URL(url);
+      const host = urlObj.host;
+      const protocol = urlObj.protocol;
+      const pathname = urlObj.pathname;
+      const hash = urlObj.hash;
+
+      // 如果主机名很短，直接返回
+      if (host.length <= 20) {
+        return url;
+      }
+
+      // 省略主机名中间部分
+      const simplifiedHost = `${host.substring(0, 16)}...`;
+      return `${protocol}//${simplifiedHost}/${pathname}/${hash}`;
+    } catch (e) {
+      // 如果URL解析失败，返回原始URL
+      return url;
+    }
+  };
+
   return (
     <div className={styles.tenant}>
       {/* 新建搜索条件栏 */}
@@ -478,7 +518,7 @@ const handleSearch = async (keyword: string) => {
             placeholder="搜索租户名称/编码"
             style={{ width: 300 }}
             allowClear
-            value={searchParams.keyword}
+            value={searchParams.keywords}
             onChange={value => handleSearch(value)}
             // searchButton
             suffix={<IconSearch />}
@@ -532,8 +572,8 @@ const handleSearch = async (keyword: string) => {
               filterOption={(input, option) => option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}
             >
               {adminList.map((admin) => (
-                <Option key={admin.id} value={admin.username}>
-                  {admin.username}
+                <Option key={admin.id} value={admin.nickname}>
+                  {admin.nickname}
                 </Option>
               ))}
             </Select>
