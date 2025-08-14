@@ -127,6 +127,7 @@ export const EntityERContainer: React.FC<{
     const params = {
       id: data.entityId,
       displayName: data.entityName,
+      tableName: data.tableName,
       displayConfig: JSON.stringify({ x, y }),
       code: data.code,
       datasourceId: curDataSourceId,

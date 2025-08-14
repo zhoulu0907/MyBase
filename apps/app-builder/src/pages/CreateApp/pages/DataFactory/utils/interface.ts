@@ -3,6 +3,7 @@ export interface EntityNode {
   entityId: string;
   code: string;
   entityName: string;
+  tableName: string;
   description: string;
   fields: Array<EntityField>;
   positionX: number;
