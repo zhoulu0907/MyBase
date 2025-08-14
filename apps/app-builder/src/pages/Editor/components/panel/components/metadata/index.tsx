@@ -2,7 +2,7 @@ import FieldCard from '@/components/FieldCard';
 import { FORM_COMPONENT_TYPES } from '@/constants/componentTypes';
 import { useI18n } from '@/hooks/useI18n';
 import { COMPONENT_GROUP_NAME } from '@/pages/Editor/utils/const';
-import { useAppDataStore } from '@/store';
+import { useAppEntityStore } from '@/store/store_entity';
 import { Collapse } from '@arco-design/web-react';
 import type { AppEntityField } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
@@ -15,7 +15,7 @@ interface MetadataContainerProps {}
 
 const MetadataContainer: React.FC<MetadataContainerProps> = ({}) => {
   const { t } = useI18n();
-  const { mainEntity } = useAppDataStore();
+  const { mainEntity } = useAppEntityStore();
 
   const [fieldItems, setFieldItems] = useState<
     { id: string; displayName: string; type: string; fieldID: string; entityID: string }[]

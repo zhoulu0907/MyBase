@@ -1,10 +1,10 @@
 import type { EntityListItem } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
+import { useAppStore } from '@/store/store_app';
 import type { TableColumnProps } from '@arco-design/web-react';
 import { Button, Message, Space, Table, Tag } from '@arco-design/web-react';
 import { getEntityRules } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
 import { CreateRuleModal } from '../../Modals';
-import { useAppStore } from '@/store';
 import styles from './tabs.module.less';
 
 interface DataRulesProps {

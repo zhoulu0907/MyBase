@@ -1,7 +1,7 @@
 import PreviewRender from '@/pages/Editor/components/render/PreviewRender';
 import { getComponentWidth, startLoadPageSet } from '@/pages/Editor/utils/app_resource';
 import { EDITOR_TYPES, type GridItem } from '@/pages/Editor/utils/const';
-import { useFromEditorStore, useListEditorStore } from '@/store';
+import { useFromEditorStore, useListEditorStore } from '@/store/store_editor';
 import { Button, Form, Message } from '@arco-design/web-react';
 import {
   dataMethodData,

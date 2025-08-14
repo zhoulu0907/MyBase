@@ -1,6 +1,6 @@
 import AvatarSVG from '@/assets/images/avatar.svg';
 import { useI18n } from '@/hooks/useI18n';
-import { useAppStore } from '@/store';
+import { useAppStore } from '@/store/store_app';
 import { UserPermissionManager } from '@/utils/permission';
 import { Button, Dropdown, Layout, Menu, Tabs } from '@arco-design/web-react';
 import { IconMenu } from '@arco-design/web-react/icon';

@@ -1,10 +1,9 @@
-
 import type { EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
-import { Form, Grid, Input, Message, Modal, Radio, Select } from '@arco-design/web-react';
-import { getEntityList, getEntityFields, createMasterChild } from '@onebase/app';
-import React, { useEffect, useState } from 'react';
-import { useAppStore } from '@/store';
+import { useAppStore } from '@/store/store_app';
 import { useResourceStore } from '@/store_resource';
+import { Form, Grid, Input, Message, Modal, Radio, Select } from '@arco-design/web-react';
+import { createMasterChild, getEntityFields, getEntityList } from '@onebase/app';
+import React, { useEffect, useState } from 'react';
 import styles from '../modal.module.less';
 
 interface MasterDetailFormValues {

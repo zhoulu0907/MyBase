@@ -1,8 +1,8 @@
 import { ENTITY_FIELD_TYPE } from '@/pages/CreateApp/pages/DataFactory/utils/const';
+import { useAppStore } from '@/store/store_app';
 import { Button, Checkbox, Drawer, Form, Input, Message, Select, Space, Spin } from '@arco-design/web-react';
 import { getFieldById, updateField } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
-import { useAppStore } from '@/store';
 import styles from './EditFieldDrawer.module.less';
 
 interface FieldDetail {

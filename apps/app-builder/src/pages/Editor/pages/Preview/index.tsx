@@ -1,4 +1,4 @@
-import { useFromEditorStore, useListEditorStore } from '@/store';
+import { useFromEditorStore, useListEditorStore } from '@/store/store_editor';
 import { Button, Form, Message } from '@arco-design/web-react';
 import {
   dataMethodData,

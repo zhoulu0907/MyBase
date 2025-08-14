@@ -143,14 +143,6 @@ const XTable = memo((props: XTableConfig & { runtime?: boolean; toCreatePage?: F
       return;
     }
 
-    // const hash = window.location.hash;
-    // const queryIndex = hash.indexOf('?');
-    // if (queryIndex !== -1) {
-    //   const queryString = hash.substring(queryIndex + 1);
-    //   const params = new URLSearchParams(queryString);
-    //   const pageSetCode = params.get('pageSetCode') || '';
-    //   navigate(`/onebase/preview-app/preview?pageSetCode=${pageSetCode}&pageType=${EDITOR_TYPES.FORM_EDITOR}&id=${id}`);
-    // }
     toCreatePage?.(id);
   };
 
