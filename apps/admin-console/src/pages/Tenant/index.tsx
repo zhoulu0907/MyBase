@@ -384,16 +384,16 @@ const TenantManagement: React.FC = () => {
       render: (text: string) => {
         // 获取当前环境的域名前缀
         const domainPrefix = getDomainPrefix();
-        const fullUrl = `${domainPrefix}/v0/obappbuilder/#/${text}`;
+        const fullUrl = `${domainPrefix}/v0/obappbuilder/#/tenant/${text}`;
         const displayUrl = simplifyUrl(fullUrl);
         
         return (
           <Space className={styles.urlWrapper}>
             {/* http://s25029301301.dev.internal.virtueit.net:81/v0/obappbuilder/#/XXX */}
             <Tooltip position='tl' content={fullUrl}>
-              <Text className={styles.fullUrl} onClick={() => handleClick(fullUrl)}>
+              <Text className={styles.fullUrl} onClick={() => handleClick(displayUrl)}>
                 {/* http://s25029301301.dev.internal.virtueit.net:81/v0/obappbuilder/#/XXX */}
-                {displayUrl}
+                {fullUrl}
               </Text>
             </Tooltip>
             <IconCopy className={styles.copyIcon} onClick={(e) => {
