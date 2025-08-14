@@ -4,7 +4,8 @@ import PageManagerGuide from '@/assets/images/page_manaager_guide.svg';
 import { useI18n } from '@/hooks/useI18n';
 import { EDITOR_TYPES } from '@/pages/Editor/utils/const';
 import PreviewContainer from '@/pages/Runtime/components/preview';
-import { useAppStore, useBasicEditorStore } from '@/store';
+import { useAppStore } from '@/store/store_app';
+import { useBasicEditorStore } from '@/store/store_editor';
 import { addParentCodeToChildren } from '@/utils/menu';
 import { Button, Dropdown, Form, Input, Layout, Menu, Message, Tree } from '@arco-design/web-react';
 import { IconPlus, IconSearch } from '@arco-design/web-react/icon';
@@ -104,6 +105,7 @@ const PageManagerPage: FC = () => {
   }, [curAppId]);
 
   // 将接口返回的菜单数据（res）转换为 Tree 组件可用的 treeData 格式
+  // TODO(mickey): showOption重构
   const convertMenuToTreeData = (menus: ApplicationMenu[], maxWidth: number, showOption: boolean = false): any[] => {
     return menus.map((menu) => ({
       key: menu.menuCode,
@@ -131,7 +133,7 @@ const PageManagerPage: FC = () => {
           copyForm={copyForm}
         />
       ),
-      children: menu.children ? convertMenuToTreeData(menu.children, maxWidth - cutTreeItemWidth) : []
+      children: menu.children ? convertMenuToTreeData(menu.children, maxWidth - cutTreeItemWidth, showOption) : []
     }));
   };
 

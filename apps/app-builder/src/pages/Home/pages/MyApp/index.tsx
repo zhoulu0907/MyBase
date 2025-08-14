@@ -1,10 +1,14 @@
 import appDeleteSVG from '@/assets/images/app_delete.svg';
 import appEditSVG from '@/assets/images/app_edit_black.svg';
 import CreateApp from '@/components/CreateApp';
-import { useAppStore } from '@/store';
-import { UserPermissionManager } from '@/utils/permission';
-import { Avatar, Form, Input, Message, Modal, Pagination, Select, Spin, Tag, Divider } from '@arco-design/web-react';
-import { IconPlus, IconSearch, IconCheckCircle } from '@arco-design/web-react/icon';
+import { type Options } from '@/components/CreateApp/const';
+import { PermissionButton as Button } from '@/components/PermissionControl';
+import { TENANT_DEPT_PERMISSION as ACTIONS } from '@/constants/permission';
+import { useI18n } from '@/hooks/useI18n';
+import { useAppStore } from '@/store/store_app';
+import { hasPermission, UserPermissionManager } from '@/utils/permission';
+import { Avatar, Divider, Form, Input, Message, Modal, Pagination, Select, Spin, Tag } from '@arco-design/web-react';
+import { IconCheckCircle, IconPlus, IconSearch } from '@arco-design/web-react/icon';
 import {
   createApplication,
   deleteApplication,
@@ -16,13 +20,8 @@ import {
 } from '@onebase/app';
 import dayjs from 'dayjs';
 import { debounce } from 'lodash-es';
-import React, { useCallback, useEffect, useState, useRef } from 'react';
-import { PermissionButton as Button } from '@/components/PermissionControl';
-import { hasPermission } from '@/utils/permission';
-import { TENANT_DEPT_PERMISSION as ACTIONS } from '@/constants/permission';
-import { type Options } from '@/components/CreateApp/const';
-import { useI18n } from '@/hooks/useI18n';
-import { appOptions, createTimeOptions, statusOptions, TagColor, defaultTheme, calculateMaxItems } from './const';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { appOptions, calculateMaxItems, createTimeOptions, defaultTheme, statusOptions, TagColor } from './const';
 import styles from './index.module.less';
 
 const Option = Select.Option;

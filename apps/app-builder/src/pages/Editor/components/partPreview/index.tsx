@@ -1,4 +1,4 @@
-import { useFromEditorStore, useListEditorStore } from '@/store';
+import { useFromEditorStore, useListEditorStore } from '@/store/store_editor';
 import { Button, Drawer, Form } from '@arco-design/web-react';
 import React from 'react';
 import { getComponentWidth } from '../../utils/app_resource';

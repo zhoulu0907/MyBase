@@ -1,6 +1,6 @@
 import type { EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
+import { useAppStore } from '@/store/store_app';
 import { Form, Input, Message, Modal, Select } from '@arco-design/web-react';
-import { useAppStore } from '@/store';
 import { createField } from '@onebase/app';
 import React from 'react';
 import styles from '../modal.module.less';

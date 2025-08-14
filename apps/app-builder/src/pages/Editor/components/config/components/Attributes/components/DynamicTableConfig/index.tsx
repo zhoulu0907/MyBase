@@ -1,4 +1,4 @@
-import { useAppDataStore } from '@/store';
+import { useAppEntityStore } from '@/store/store_entity';
 import { Button, Checkbox, Dropdown, Form, Input, InputNumber, Menu, Message, Select } from '@arco-design/web-react';
 import { IconDelete, IconDragDotVertical } from '@arco-design/web-react/icon';
 import { getEntityFields, type MetadataEntityField, type MetadataEntityPair } from '@onebase/app';
@@ -27,7 +27,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
   configs,
   id
 }) => {
-  const { mainEntity } = useAppDataStore();
+  const { mainEntity } = useAppEntityStore();
 
   const [entityList, setEntityList] = useState<MetadataEntityPair[]>([]);
   const [entityId, setEntityId] = useState<string>('');

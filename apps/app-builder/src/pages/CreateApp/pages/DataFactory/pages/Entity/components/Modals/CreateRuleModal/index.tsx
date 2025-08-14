@@ -1,10 +1,10 @@
-import type { EntityListItem, EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
-import { Button, Form, Input, Message, Modal, Radio, Select, Space } from '@arco-design/web-react';
+import type { EntityListItem } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
+import { useAppStore } from '@/store/store_app';
+import { Button, Form, Input, Message, Modal, Select, Space } from '@arco-design/web-react';
 import { IconDelete, IconPlus } from '@arco-design/web-react/icon';
-import React, { useState } from 'react';
 import { getEntityFieldsWithChildren } from '@onebase/app';
+import React, { useState } from 'react';
 import styles from '../modal.module.less';
-import { useAppStore } from '@/store';
 
 interface ConditionRow {
   field: string;

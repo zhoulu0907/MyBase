@@ -1,4 +1,4 @@
-import { useAppDataStore } from '@/store';
+import { useAppEntityStore } from '@/store/store_entity';
 import { Cascader, Form } from '@arco-design/web-react';
 import type { AppEntityField } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
@@ -13,7 +13,7 @@ export interface DynamicFieldConfigProps {
 }
 
 const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({ handlePropsChange, item, configs }) => {
-  const { mainEntity } = useAppDataStore();
+  const { mainEntity } = useAppEntityStore();
 
   const [entityTree, setEntityTree] = useState<any[]>([]);
 

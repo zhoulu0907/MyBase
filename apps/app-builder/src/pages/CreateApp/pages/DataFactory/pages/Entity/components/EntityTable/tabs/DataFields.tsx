@@ -1,10 +1,10 @@
 import { convertEntityListItemToConfigField } from '@/pages/CreateApp/pages/DataFactory/utils/entityConverter';
 import type { EntityListItem } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
+import { useAppStore } from '@/store/store_app';
 import type { TableColumnProps } from '@arco-design/web-react';
 import { Button, Message, Modal, Space, Table, Tag } from '@arco-design/web-react';
 import { deleteField, getEntityFieldsPage } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
-import { useAppStore } from '@/store';
 import EditFieldDrawer from '../../Drawers/EditFieldDrawer';
 import ConfigFieldModal from '../../Modals/ConfigFieldModal';
 import styles from './tabs.module.less';

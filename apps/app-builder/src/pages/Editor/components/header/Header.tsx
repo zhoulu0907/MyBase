@@ -5,7 +5,9 @@ import defaultListDesignSVG from '@/assets/images/list_design_default_icon.svg';
 import previewSVG from '@/assets/images/preview_icon.svg';
 import { useI18n } from '@/hooks/useI18n';
 import { usePageEditorStore } from '@/hooks/useStore';
-import { useAppDataStore, useAppStore, useBasicEditorStore, useFromEditorStore, useListEditorStore } from '@/store';
+import { useAppStore } from '@/store/store_app';
+import { useBasicEditorStore, useFromEditorStore, useListEditorStore } from '@/store/store_editor';
+import { useAppEntityStore } from '@/store/store_entity';
 import { Button, Message, Tabs } from '@arco-design/web-react';
 import { IconArrowLeft } from '@arco-design/web-react/icon';
 import {
@@ -72,7 +74,7 @@ export default function EditorHeader() {
     clearPageComponentSchemas: clearListPageComponentSchemas
   } = useListEditorStore();
 
-  const { setMainEntity } = useAppDataStore();
+  const { setMainEntity } = useAppEntityStore();
 
   const { curAppId, setCurAppId } = useAppStore();
 
