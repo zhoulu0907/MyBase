@@ -1,5 +1,7 @@
 package com.cmsr.onebase.module.metadata.service.entity;
 
+import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.core.util.IdUtil;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
@@ -80,8 +82,10 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
             systemFields = getSystemFieldsWithCache();
         }
 
-        // 校验编码唯一性（使用SELECT FOR UPDATE避免重复校验冲突）
-        validateBusinessEntityCodeUniqueWithLock(null, createReqVO.getCode(), Long.valueOf(createReqVO.getAppId()));
+        // 校验编码唯一性（只有当code不为空时才校验）
+        if (CharSequenceUtil.isNotEmpty(createReqVO.getCode())) {
+            validateBusinessEntityCodeUniqueWithLock(null, createReqVO.getCode(), Long.valueOf(createReqVO.getAppId()));
+        }
 
         // 校验实体类型
         validateEntityType(createReqVO.getEntityType());
@@ -89,6 +93,11 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
         // 插入业务实体
         MetadataBusinessEntityDO businessEntity = BeanUtils.toBean(createReqVO, MetadataBusinessEntityDO.class);
         businessEntity.setAppId(Long.valueOf(createReqVO.getAppId()));
+
+        // 处理code字段：如果为空或空字符串，则生成UUID
+        if (CharSequenceUtil.isEmpty(createReqVO.getCode())) {
+            businessEntity.setCode(IdUtil.simpleUUID());
+        }
 
         // 根据实体类型处理表名
         handleTableNameByEntityType(businessEntity, createReqVO);
@@ -489,8 +498,10 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
     public void updateBusinessEntity(@Valid BusinessEntitySaveReqVO updateReqVO) {
         // 校验存在
         validateBusinessEntityExists(Long.valueOf(updateReqVO.getId()));
-        // 校验编码唯一性
-        validateBusinessEntityCodeUnique(Long.valueOf(updateReqVO.getId()), updateReqVO.getCode(), Long.valueOf(updateReqVO.getAppId()));
+        // 校验编码唯一性（只有当code不为空时才校验）
+        if (CharSequenceUtil.isNotEmpty(updateReqVO.getCode())) {
+            validateBusinessEntityCodeUnique(Long.valueOf(updateReqVO.getId()), updateReqVO.getCode(), Long.valueOf(updateReqVO.getAppId()));
+        }
         // 校验实体类型
         validateEntityType(updateReqVO.getEntityType());
 
@@ -498,6 +509,11 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
         MetadataBusinessEntityDO updateObj = BeanUtils.toBean(updateReqVO, MetadataBusinessEntityDO.class);
         updateObj.setId(Long.valueOf(updateReqVO.getId()));
         updateObj.setAppId(Long.valueOf(updateReqVO.getAppId()));
+
+        // 处理code字段：如果为空或空字符串，则生成UUID
+        if (CharSequenceUtil.isEmpty(updateReqVO.getCode())) {
+            updateObj.setCode(IdUtil.simpleUUID());
+        }
 
         // 根据实体类型处理表名
         handleTableNameByEntityType(updateObj, updateReqVO);

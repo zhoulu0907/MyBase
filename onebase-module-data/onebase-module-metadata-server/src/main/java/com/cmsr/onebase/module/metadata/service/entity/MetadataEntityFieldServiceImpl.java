@@ -348,7 +348,8 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
                 if (item.getIsUnique() != null) upd.setIsUnique(item.getIsUnique() ? 0 : 1);
                 if (item.getAllowNull() != null) upd.setAllowNull(item.getAllowNull() ? 0 : 1);
                 if (item.getSortOrder() != null) upd.setSortOrder(item.getSortOrder());
-                if (item.getFieldCode() != null) upd.setFieldCode(item.getFieldCode());
+                // fieldCode字段已注释，不再处理
+                // if (item.getFieldCode() != null) upd.setFieldCode(item.getFieldCode());
                 // 修复：正确处理isSystemField字段的更新
                 if (item.getIsSystemField() != null) upd.setIsSystemField(item.getIsSystemField());
 
@@ -371,8 +372,8 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
                 // 智能处理：如果没有传ID，但fieldCode或fieldName已存在，则自动转换为更新操作
                 MetadataEntityFieldDO existingField = findExistingFieldByCodeOrName(reqVO.getEntityId(), item);
                 if (existingField != null) {
-                    log.info("发现已存在的字段，自动转换为更新操作: fieldCode={}, fieldName={}, existingId={}", 
-                            item.getFieldCode(), item.getFieldName(), existingField.getId());
+                    log.info("发现已存在的字段，自动转换为更新操作: fieldName={}, existingId={}", 
+                            item.getFieldName(), existingField.getId());
                     
                     // 转换为更新操作
                     item.setId(existingField.getId().toString());
@@ -392,7 +393,8 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
                     if (item.getIsUnique() != null) upd.setIsUnique(item.getIsUnique() ? 0 : 1);
                     if (item.getAllowNull() != null) upd.setAllowNull(item.getAllowNull() ? 0 : 1);
                     if (item.getSortOrder() != null) upd.setSortOrder(item.getSortOrder());
-                    if (item.getFieldCode() != null) upd.setFieldCode(item.getFieldCode());
+                    // fieldCode字段已注释，不再处理
+                    // if (item.getFieldCode() != null) upd.setFieldCode(item.getFieldCode());
                     // 关键：正确处理isSystemField字段的更新
                     if (item.getIsSystemField() != null) upd.setIsSystemField(item.getIsSystemField());
 
@@ -428,8 +430,8 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
                 toCreate.setIsUnique(item.getIsUnique() != null ? (item.getIsUnique() ? 0 : 1) : null);
                 toCreate.setAllowNull(item.getAllowNull() != null ? (item.getAllowNull() ? 0 : 1) : null);
                 toCreate.setSortOrder(item.getSortOrder());
-                toCreate.setFieldCode(item.getFieldCode() != null && !item.getFieldCode().trim().isEmpty()
-                        ? item.getFieldCode() : generateFieldCode(item.getFieldName()));
+                // fieldCode字段已注释，自动生成
+                toCreate.setFieldCode(generateFieldCode(item.getFieldName()));
                 // 修复：正确设置isSystemField，如果前端传入则使用传入值，否则默认为0（系统字段）
                 toCreate.setIsSystemField(item.getIsSystemField() != null ? item.getIsSystemField() : 0);
                 toCreate.setIsPrimaryKey(1); // 1表示不是主键
@@ -457,14 +459,8 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.and("entity_id", Long.valueOf(entityId));
         
-        // 优先根据fieldCode查找
-        if (item.getFieldCode() != null && !item.getFieldCode().trim().isEmpty()) {
-            configStore.and("field_code", item.getFieldCode());
-            MetadataEntityFieldDO existingField = metadataEntityFieldRepository.findOne(configStore);
-            if (existingField != null) {
-                return existingField;
-            }
-        }
+        // fieldCode字段已注释，跳过根据fieldCode查找逻辑
+        // 直接根据fieldName查找
         
         // 其次根据fieldName查找
         if (item.getFieldName() != null && !item.getFieldName().trim().isEmpty()) {
