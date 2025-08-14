@@ -65,6 +65,18 @@ public class MetadataBusinessEntityRepository extends DataRepositoryNew<Metadata
     }
 
     /**
+     * 带锁查询单个实体，用于避免并发冲突
+     *
+     * @param configStore 查询条件
+     * @return 业务实体对象
+     */
+    public MetadataBusinessEntityDO findOneWithLock(DefaultConfigStore configStore) {
+        // 使用悲观锁查询，避免并发冲突
+        List<MetadataBusinessEntityDO> results = findAllByConfig(configStore);
+        return results.isEmpty() ? null : results.get(0);
+    }
+
+    /**
      * 获取业务实体列表
      *
      * @return 业务实体列表

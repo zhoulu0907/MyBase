@@ -45,9 +45,63 @@ public class BusinessEntityController {
     @Operation(summary = "创建业务实体")
     @PreAuthorize("@ss.hasPermission('metadata:business-entity:create')")
     public CommonResult<BusinessEntityRespVO> createBusinessEntity(@Valid @RequestBody BusinessEntitySaveReqVO reqVO) {
-        Long id = businessEntityService.createBusinessEntity(reqVO);
-        MetadataBusinessEntityDO businessEntity = businessEntityService.getBusinessEntity(id);
-        return success(BusinessEntityConvert.INSTANCE.convert(businessEntity));
+        // 实现重试机制，避免并发导致的死锁
+        int maxRetries = 3;
+        int retryCount = 0;
+        Exception lastException = null;
+        
+        while (retryCount < maxRetries) {
+            try {
+                Long id = businessEntityService.createBusinessEntity(reqVO);
+                MetadataBusinessEntityDO businessEntity = businessEntityService.getBusinessEntity(id);
+                return success(BusinessEntityConvert.INSTANCE.convert(businessEntity));
+            } catch (Exception e) {
+                lastException = e;
+                retryCount++;
+                
+                // 判断是否为可重试的异常（死锁、超时等）
+                if (isRetryableException(e) && retryCount < maxRetries) {
+                    try {
+                        // 指数退避策略：50ms, 100ms, 200ms
+                        Thread.sleep(50 * (1L << (retryCount - 1)));
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                        throw new RuntimeException("创建业务实体被中断", ie);
+                    }
+                    continue;
+                }
+                
+                // 不可重试的异常或重试次数用完，直接抛出
+                throw e;
+            }
+        }
+        
+        throw new RuntimeException("创建业务实体失败，已重试" + maxRetries + "次", lastException);
+    }
+    
+    /**
+     * 判断异常是否可重试
+     */
+    private boolean isRetryableException(Exception e) {
+        String message = e.getMessage();
+        if (message == null) {
+            return false;
+        }
+        
+        // PostgreSQL死锁错误码
+        boolean isDeadlock = message.contains("deadlock") || 
+                            message.contains("40P01") ||
+                            message.contains("could not serialize access");
+        
+        // 超时异常
+        boolean isTimeout = message.contains("timeout") ||
+                           message.contains("cancelled");
+        
+        // 连接异常
+        boolean isConnectionIssue = message.contains("connection") ||
+                                   message.contains("编码校验失败，请重试");
+        
+        return isDeadlock || isTimeout || isConnectionIssue;
     }
 
     @PostMapping("/update")
