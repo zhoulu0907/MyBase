@@ -22,6 +22,8 @@ export interface LoginResponse {
   accessToken: string; // 访问令牌
   refreshToken: string; // 刷新令牌
   expiresTime: number; // 令牌过期时间（时间戳，毫秒）
+  tenantId: string; // 租户id
+  tenantWebsite: string; // 租户网址
 }
 
 /**
@@ -60,3 +62,8 @@ export interface MenuInfo {
   permission?: string;
   children: MenuInfo[] | null;
 }
+
+/**
+ * 登录的租户id
+ */
+export type Headers = Record<'Tenant-Id', string>;

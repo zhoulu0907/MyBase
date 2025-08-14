@@ -332,19 +332,6 @@ const PageManagerPage: FC = () => {
 
   return (
     <div className={styles.pageManagerPage}>
-      {showGuide && (
-        <div className={styles.guide}>
-          <div className={styles.guideImg} style={{ background: `url(${PageManagerGuide})no-repeat center / cover` }}>
-            <div
-              className={styles.guideButton}
-              onClick={() => {
-                setVisibleCreateForm('page');
-                setShowGuide(false);
-              }}
-            />
-          </div>
-        </div>
-      )}
       <Layout style={{ height: '100%' }}>
         <Layout>
           {/* <Sider style={{ width: 225 }}> */}
@@ -384,17 +371,36 @@ const PageManagerPage: FC = () => {
             />
           </Sider>
           <Content className={styles.content}>
-            {curMenu?.id && (
-              <div className={styles.contentHeader}>
-                <div className={styles.contentTitle}>{curMenu?.menuName}</div>
-                <Button type="primary" onClick={() => handleEditPageSet()}>
-                  {t('common.edit')}
-                </Button>
+            {showGuide ? (
+              <div className={styles.guide}>
+                <div
+                  className={styles.guideImg}
+                  style={{ background: `url(${PageManagerGuide})no-repeat center / cover` }}
+                >
+                  <div
+                    className={styles.guideButton}
+                    onClick={() => {
+                      setVisibleCreateForm('page');
+                      setShowGuide(false);
+                    }}
+                  />
+                </div>
               </div>
+            ) : (
+              <>
+                {curMenu?.id && (
+                  <div className={styles.contentHeader}>
+                    <div className={styles.contentTitle}>{curMenu?.menuName}</div>
+                    <Button type="primary" onClick={() => handleEditPageSet()}>
+                      {t('common.edit')}
+                    </Button>
+                  </div>
+                )}
+                <div className={styles.contentBody}>
+                  <PreviewContainer menuCode={curMenu?.menuCode || ''} runtime={false} />
+                </div>
+              </>
             )}
-            <div className={styles.contentBody}>
-              <PreviewContainer menuCode={curMenu?.menuCode || ''} runtime={false} />
-            </div>
           </Content>
         </Layout>
       </Layout>

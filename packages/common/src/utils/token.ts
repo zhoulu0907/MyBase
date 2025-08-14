@@ -10,17 +10,24 @@ export interface TokenInfo {
   expiresTime: number; // 令牌过期时间（时间戳，毫秒）
 }
 
+export interface TenantInfo {
+  tenantId: string; //  租户id
+  tenantWebsite: string; // 租户网址
+}
+
 export class TokenManager {
   private static readonly TOKEN_KEY = 'onebase_token';
   private static readonly TOKEN_INFO_KEY = 'onebase_token_info';
   private static readonly REMEMBER_ME_KEY = 'onebase_remember_me';
+  private static readonly TENANT_ID = 'tenant_id';
+  private static readonly TENANT_WEBSITE = 'tenant_website';
 
   /**
    * 存储 token 信息
    * @param tokenInfo token信息
    * @param rememberMe 是否记住我
    */
-  static setToken(tokenInfo: TokenInfo, rememberMe: boolean = false): void {
+  static setToken(tokenInfo: TokenInfo & TenantInfo, rememberMe: boolean = false): void {
     try {
       // 根据记住我选项选择存储方式
       if (rememberMe) {
@@ -28,11 +35,15 @@ export class TokenManager {
         localStorage.setItem(this.TOKEN_KEY, tokenInfo.accessToken);
         localStorage.setItem(this.TOKEN_INFO_KEY, JSON.stringify(tokenInfo));
         localStorage.setItem(this.REMEMBER_ME_KEY, 'true');
+        localStorage.setItem(this.TENANT_ID, tokenInfo.tenantId);
+        localStorage.setItem(this.TENANT_WEBSITE, tokenInfo.tenantWebsite);
       } else {
         // 不记住我：使用 sessionStorage（会话存储，关闭浏览器后清除）
         sessionStorage.setItem(this.TOKEN_KEY, tokenInfo.accessToken);
         sessionStorage.setItem(this.TOKEN_INFO_KEY, JSON.stringify(tokenInfo));
         sessionStorage.setItem(this.REMEMBER_ME_KEY, 'false');
+        sessionStorage.setItem(this.TENANT_ID, tokenInfo.tenantId);
+        sessionStorage.setItem(this.TENANT_WEBSITE, tokenInfo.tenantWebsite);
       }
     } catch (error) {
       console.error('存储 token 失败:', error);
@@ -169,6 +180,29 @@ export class TokenManager {
   static getAuthorizationHeader(): string {
     const token = this.getToken();
     return token ? `Bearer ${token}` : '';
+  }
+
+   /**
+   * 获取 tenant 信息
+   * @returns tenantInfo 信息或 null
+   */
+  static getTenantInfo(): TenantInfo | null {
+    try {
+      // 优先从 sessionStorage 获取，然后从 localStorage 获取
+      let tenantId = sessionStorage.getItem(this.TENANT_ID);
+      let tenantWebsite = sessionStorage.getItem(this.TENANT_WEBSITE);
+      if (!(tenantId || tenantWebsite)) {
+        tenantId = localStorage.getItem(this.TENANT_ID);
+        tenantWebsite = localStorage.getItem(this.TENANT_WEBSITE);
+      }
+
+      if (!tenantId || !tenantWebsite) return null;
+
+      return { tenantId, tenantWebsite};
+    } catch (error) {
+      console.error('获取 token 失败:', error);
+      return null;
+    }
   }
 }
 
