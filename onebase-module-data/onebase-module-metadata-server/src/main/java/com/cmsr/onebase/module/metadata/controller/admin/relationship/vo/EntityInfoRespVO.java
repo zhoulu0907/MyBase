@@ -18,11 +18,14 @@ public class EntityInfoRespVO {
     @Schema(description = "实体ID", example = "1001")
     private String entityID;
 
-    @Schema(description = "实体名称", example = "用户信息")
+    @Schema(description = "实体显示名称", example = "用户信息")
     private String entityName;
 
     @Schema(description = "实体类型", example = "主表")
     private String entityType;
+
+    @Schema(description = "实际表名", example = "user_info")
+    private String tableName;
 
     @Schema(description = "实体字段列表")
     private List<EntityFieldInfoRespVO> fields;

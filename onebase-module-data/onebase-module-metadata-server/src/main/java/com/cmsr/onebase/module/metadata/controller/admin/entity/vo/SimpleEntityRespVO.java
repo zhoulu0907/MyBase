@@ -16,6 +16,9 @@ public class SimpleEntityRespVO {
     @Schema(description = "实体ID", example = "1001")
     private Long entityId;
 
-    @Schema(description = "实体名称", example = "用户信息")
+    @Schema(description = "实体显示名称", example = "用户信息")
     private String entityName;
+
+    @Schema(description = "实际表名", example = "user_info")
+    private String tableName;
 }

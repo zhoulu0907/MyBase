@@ -43,6 +43,9 @@ public class ERFieldVO {
     @Schema(description = "是否系统字段：0-是，1-不是", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
     private Integer isSystemField;
 
+    @Schema(description = "允许空值：0-是，1-不是", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
+    private Integer allowNull;
+
     @Schema(description = "默认值", example = "admin")
     private String defaultValue;
 

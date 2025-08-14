@@ -18,12 +18,15 @@ public class EntityWithChildrenRespVO {
     @Schema(description = "实体ID", example = "1001")
     private Long entityId;
 
-    @Schema(description = "实体名称", example = "用户信息")
+    @Schema(description = "实体显示名称", example = "用户信息")
     private String entityName;
 
-    @Schema(description = "实体编码", example = "user_info")
+    @Schema(description = "实体编码", example = "ABC")
     private String entityCode;
-    
+
+    @Schema(description = "实际表名", example = "user_info")
+    private String tableName;
+
     @Schema(description = "父表字段信息列表")
     private List<EntityFieldInfoRespVO> parentFields;
 
