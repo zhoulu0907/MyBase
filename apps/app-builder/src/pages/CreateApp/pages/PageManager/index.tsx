@@ -100,6 +100,7 @@ const PageManagerPage: FC = () => {
         const firstPageMenu = res.find((menu: ApplicationMenu) => menu.menuType == MenuType.PAGE);
         setCurMenu(firstPageMenu);
       });
+      getEntityList();
     }
     clearIsEditMode();
   }, [curAppId]);
