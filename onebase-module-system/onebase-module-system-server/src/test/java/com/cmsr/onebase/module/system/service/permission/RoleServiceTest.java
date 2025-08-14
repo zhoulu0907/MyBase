@@ -359,8 +359,7 @@ public class RoleServiceTest {
         createTestRole(null, "禁用角色", "DISABLE_ROLE", CommonStatusEnum.DISABLE.getStatus());
 
         // 执行测试
-        List<RoleDO> enabledRoles = roleService.getRoleListByStatus(
-            Collections.singleton(CommonStatusEnum.ENABLE.getStatus()));
+        List<RoleDO> enabledRoles = roleService.getRoleListByStatus(CommonStatusEnum.ENABLE.getStatus());
 
         // 验证结果
         assertEquals(2, enabledRoles.size(), "应该有2个启用的角色");

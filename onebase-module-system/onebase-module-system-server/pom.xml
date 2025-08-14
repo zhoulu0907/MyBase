@@ -35,7 +35,11 @@
             <artifactId>onebase-module-infra-api</artifactId>
             <version>${revision}</version>
         </dependency>
-
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-module-app-api</artifactId>
+            <version>${revision}</version>
+        </dependency>
         <!-- 租户基础 -->
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
@@ -147,6 +151,7 @@
             <groupId>org.dromara.hutool</groupId>
             <artifactId>hutool-extra</artifactId> <!-- 邮件 -->
         </dependency>
+
 
     </dependencies>
 
