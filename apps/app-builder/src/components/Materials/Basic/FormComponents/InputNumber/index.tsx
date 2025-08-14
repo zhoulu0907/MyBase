@@ -7,6 +7,7 @@ const XInputNumber = memo((props: XInputNumberConfig) => {
   const {
     label,
     placeholder,
+    dataField,
     tooltip,
     status,
     defaultValue,
@@ -23,6 +24,7 @@ const XInputNumber = memo((props: XInputNumberConfig) => {
   return (
     <Form.Item
       label={label}
+      field={dataField.length > 0 ? dataField[dataField.length - 1] : ''}
       layout={layout}
       labelCol={{
         span: labelColSpan

@@ -23,6 +23,7 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({}) => {
 
   useEffect(() => {
     if (mainEntity.fields.length > 0) {
+      console.log(mainEntity.fields);
       const newFieldItems = mainEntity.fields
         .filter((field: AppEntityField) => field.isSystemField === 1)
         .map((field: AppEntityField, index: number) => ({

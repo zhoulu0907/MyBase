@@ -6,6 +6,7 @@ import type { XInputEmailConfig } from './schema';
 const XInputEmail = memo((props: XInputEmailConfig) => {
   const {
     label,
+    dataField,
     placeholder,
     tooltip,
     status,
@@ -35,6 +36,7 @@ const XInputEmail = memo((props: XInputEmailConfig) => {
   return (
     <Form.Item
       label={label}
+      field={dataField.length > 0 ? dataField[dataField.length - 1] : ''}
       layout={layout}
       labelCol={{
         span: labelColSpan

@@ -3,7 +3,7 @@ import { memo } from 'react';
 import type { XInputReadonlyBoxConfig } from './schema';
 
 const XReadonlyBox = memo((props: XInputReadonlyBoxConfig) => {
-  const { label, tooltip, status } = props;
+  const { label, dataField, tooltip, status } = props;
   return status === 'hidden' ? null : (
     <Tooltip content={tooltip}>
       <div>

@@ -1,43 +1,45 @@
 import {
-  baseConfig,
-  baseDefault,
-  labelColSpanConfig,
-  layoutConfig,
-  statusConfig,
-  widthConfig,
-  type ICommonBaseType,
-  type TLayoutSelectKeyType,
-  type TStatusSelectKeyType,
-  type TWidthSelectKeyType
+    baseConfig,
+    baseDefault,
+    dataFieldConfig,
+    labelColSpanConfig,
+    layoutConfig,
+    statusConfig,
+    widthConfig,
+    type ICommonBaseType,
+    type TLayoutSelectKeyType,
+    type TStatusSelectKeyType,
+    type TWidthSelectKeyType
 } from '@/components/Materials/common';
 import {
-  CONFIG_TYPES,
-  LAYOUT_OPTIONS,
-  LAYOUT_VALUES,
-  STATUS_OPTIONS,
-  STATUS_VALUES,
-  WIDTH_OPTIONS,
-  WIDTH_VALUES
+    CONFIG_TYPES,
+    LAYOUT_OPTIONS,
+    LAYOUT_VALUES,
+    STATUS_OPTIONS,
+    STATUS_VALUES,
+    WIDTH_OPTIONS,
+    WIDTH_VALUES
 } from '@/components/Materials/constants';
 import type {
-  IBooleanConfigType,
-  IDescriptionConfigType,
-  ILabelColSpanConfigType,
-  ILabelConfigType,
-  ILayoutConfigType,
-  INumberConfigType,
-  IPlaceholderConfigType,
-  ISelectConfigType,
-  IStatusConfigType,
-  ITextAreaConfigType,
-  ITextConfigType,
-  ITooltipConfigType,
-  IWidthConfigType,
-  TBooleanDefaultType,
-  TNumberDefaultType,
-  TSelectDefaultType,
-  TTextAreaDefaultType,
-  TTextDefaultType
+    IBooleanConfigType,
+    IDataFieldConfigType,
+    IDescriptionConfigType,
+    ILabelColSpanConfigType,
+    ILabelConfigType,
+    ILayoutConfigType,
+    INumberConfigType,
+    IPlaceholderConfigType,
+    ISelectConfigType,
+    IStatusConfigType,
+    ITextAreaConfigType,
+    ITextConfigType,
+    ITooltipConfigType,
+    IWidthConfigType,
+    TBooleanDefaultType,
+    TNumberDefaultType,
+    TSelectDefaultType,
+    TTextAreaDefaultType,
+    TTextDefaultType
 } from '@/components/Materials/types';
 
 export interface XInputSelectOneSchema {
@@ -59,6 +61,7 @@ export type TXInputSelectOneEditData = Array<
   | ITextAreaConfigType
   | IBooleanConfigType
   | ILayoutConfigType<TLayoutSelectKeyType>
+  | IDataFieldConfigType
 >;
 
 export interface XInputSelectOneConfig extends ICommonBaseType {
@@ -66,6 +69,11 @@ export interface XInputSelectOneConfig extends ICommonBaseType {
    * 输入框标题
    */
   label: TTextDefaultType;
+
+  /**
+   * 数据字段
+   */
+  dataField: TTextDefaultType[];
 
   /**
    * 描述信息（显示在输入框下方，辅助说明）
@@ -128,6 +136,7 @@ const XSelectOne: XInputSelectOneSchema = {
       name: '描述信息',
       type: CONFIG_TYPES.DESCRIPTION_INPUT
     },
+    ...dataFieldConfig,
     {
       key: 'tooltip',
       name: '提示文字',
@@ -151,6 +160,7 @@ const XSelectOne: XInputSelectOneSchema = {
   config: {
     ...baseDefault,
     label: '下拉单选',
+    dataField: [],
     description: '',
     tooltip: '',
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],

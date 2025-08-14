@@ -1,49 +1,51 @@
 import {
-  alignConfig,
-  baseConfig,
-  baseDefault,
-  labelColSpanConfig,
-  layoutConfig,
-  statusConfig,
-  widthConfig,
-  type ICommonBaseType,
-  type TAlignSelectKeyType,
-  type TLayoutSelectKeyType,
-  type TStatusSelectKeyType,
-  type TWidthSelectKeyType
+    alignConfig,
+    baseConfig,
+    baseDefault,
+    dataFieldConfig,
+    labelColSpanConfig,
+    layoutConfig,
+    statusConfig,
+    widthConfig,
+    type ICommonBaseType,
+    type TAlignSelectKeyType,
+    type TLayoutSelectKeyType,
+    type TStatusSelectKeyType,
+    type TWidthSelectKeyType
 } from '@/components/Materials/common';
 import {
-  ALIGN_OPTIONS,
-  ALIGN_VALUES,
-  CONFIG_TYPES,
-  LAYOUT_OPTIONS,
-  LAYOUT_VALUES,
-  STATUS_OPTIONS,
-  STATUS_VALUES,
-  WIDTH_OPTIONS,
-  WIDTH_VALUES
+    ALIGN_OPTIONS,
+    ALIGN_VALUES,
+    CONFIG_TYPES,
+    LAYOUT_OPTIONS,
+    LAYOUT_VALUES,
+    STATUS_OPTIONS,
+    STATUS_VALUES,
+    WIDTH_OPTIONS,
+    WIDTH_VALUES
 } from '@/components/Materials/constants';
 import type {
-  IAlignConfigType,
-  IBooleanConfigType,
-  IColorConfigType,
-  IDescriptionConfigType,
-  ILabelColSpanConfigType,
-  ILabelConfigType,
-  ILayoutConfigType,
-  INumberConfigType,
-  IPlaceholderConfigType,
-  ISelectConfigType,
-  IStatusConfigType,
-  ITextAreaConfigType,
-  ITextConfigType,
-  ITooltipConfigType,
-  IWidthConfigType,
-  TBooleanDefaultType,
-  TNumberDefaultType,
-  TSelectDefaultType,
-  TTextAreaDefaultType,
-  TTextDefaultType
+    IAlignConfigType,
+    IBooleanConfigType,
+    IColorConfigType,
+    IDataFieldConfigType,
+    IDescriptionConfigType,
+    ILabelColSpanConfigType,
+    ILabelConfigType,
+    ILayoutConfigType,
+    INumberConfigType,
+    IPlaceholderConfigType,
+    ISelectConfigType,
+    IStatusConfigType,
+    ITextAreaConfigType,
+    ITextConfigType,
+    ITooltipConfigType,
+    IWidthConfigType,
+    TBooleanDefaultType,
+    TNumberDefaultType,
+    TSelectDefaultType,
+    TTextAreaDefaultType,
+    TTextDefaultType
 } from '@/components/Materials/types';
 
 export interface XInputEmailSchema {
@@ -68,6 +70,7 @@ export type TXInputEmailEditData = Array<
   | ILayoutConfigType<TLayoutSelectKeyType>
   | IAlignConfigType<TAlignSelectKeyType>
   | IColorConfigType
+  | IDataFieldConfigType
 >;
 
 export interface XInputEmailConfig extends ICommonBaseType {
@@ -75,6 +78,12 @@ export interface XInputEmailConfig extends ICommonBaseType {
    * 输入框标题
    */
   label: TTextDefaultType;
+
+  /**
+   * 数据字段
+   */
+  dataField: TTextDefaultType[];
+
 
   /**
    * 占位符
@@ -163,6 +172,7 @@ const XInputEmail: XInputEmailSchema = {
       name: '描述信息',
       type: CONFIG_TYPES.DESCRIPTION_INPUT
     },
+    ...dataFieldConfig,
     {
       key: 'tooltip',
       name: '提示文字',
@@ -197,6 +207,7 @@ const XInputEmail: XInputEmailSchema = {
   config: {
     ...baseDefault,
     label: '邮箱输入',
+    dataField: [],
     placeholder: '请输入邮箱',
     description: '',
     tooltip: '',

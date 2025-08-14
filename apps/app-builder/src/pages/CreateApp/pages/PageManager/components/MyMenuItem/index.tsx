@@ -1,7 +1,9 @@
-import { Dropdown, Menu, type FormInstance } from '@arco-design/web-react';
+import { EDITOR_TYPES } from '@/pages/Editor/utils/const';
+import { Dropdown, Menu, Message, type FormInstance } from '@arco-design/web-react';
 import { IconSettings } from '@arco-design/web-react/icon';
-import { RootParentPage } from '@onebase/app';
+import { getPageSetCode, RootParentPage, type GetPageSetCodeReq } from '@onebase/app';
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import styles from './index.module.less';
 
 const MenuItem = Menu.Item;
@@ -48,8 +50,19 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
   renameForm,
   copyForm
 }) => {
+  const navigate = useNavigate();
+
   const dropList = (
     <Menu style={{ padding: '10px 5px' }}>
+      <MenuItem
+        key="edit"
+        onClick={(e) => {
+          e.stopPropagation();
+          handleEditPageSet();
+        }}
+      >
+        {'编辑'}
+      </MenuItem>
       <MenuItem
         key="rename"
         onClick={(e) => {
@@ -77,7 +90,7 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
           {'复制'}
         </MenuItem>
       )}
-      <MenuItem
+      {/* <MenuItem
         key="hide"
         onClick={(e) => {
           e.stopPropagation();
@@ -85,7 +98,7 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
         }}
       >
         {'隐藏'}
-      </MenuItem>
+      </MenuItem> */}
       <MenuItem
         key="delete"
         onClick={(e) => {
@@ -98,6 +111,20 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
       </MenuItem>
     </Menu>
   );
+
+  const handleEditPageSet = async () => {
+    const req: GetPageSetCodeReq = {
+      menuCode: menuCode
+    };
+    const pageSetCode = await getPageSetCode(req);
+
+    if (!pageSetCode) {
+      Message.error('请先创建页面集');
+      return;
+    }
+
+    navigate(`/onebase/editor/${EDITOR_TYPES.FORM_EDITOR}?pageSetCode=${pageSetCode}`);
+  };
 
   return (
     <div className={styles.myMenuItem} onClick={onClick} role="menuitem" tabIndex={0}>

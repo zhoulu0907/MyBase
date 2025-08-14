@@ -5,11 +5,12 @@ import type { XInputDatePickerConfig } from './schema';
 
 const { YearPicker, MonthPicker } = DatePicker;
 const XDatePicker = memo((props: XInputDatePickerConfig) => {
-  const { label, tooltip, status, required, dateType, layout, labelColSpan = 0 } = props;
+  const { label, dataField, tooltip, status, required, dateType, layout, labelColSpan = 0 } = props;
 
   return (
     <Form.Item
       label={label}
+      field={dataField.length > 0 ? dataField[dataField.length - 1] : ''}
       layout={layout}
       tooltip={tooltip}
       labelCol={{

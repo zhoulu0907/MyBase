@@ -28,10 +28,14 @@ const XRelatedForm = memo((props: XRelatedFormConfig & { runtime?: boolean }) =>
   const [options, setOptions] = useState<any[]>([]);
 
   useEffect(() => {
-    if (relatedFormDataField.length == 2 && appEntities.entities.length > 0) {
+    console.log('relatedFormDataField: ', relatedFormDataField);
+    console.log('appEntities: ', appEntities);
+
+    if (relatedFormDataField.length == 2 && appEntities.entities.length >= 0) {
       const relatedEntity = appEntities.entities.find((entity) => entity.entityID === relatedFormDataField[0]);
       const relatedField = relatedEntity?.fields.find((field) => field.fieldID === relatedFormDataField[1]);
 
+      console.log(relatedEntity?.entityID, relatedField);
       if (relatedEntity?.entityID && relatedField) {
         handleGetRelatedData(relatedEntity?.entityID, relatedField);
       }
@@ -42,6 +46,7 @@ const XRelatedForm = memo((props: XRelatedFormConfig & { runtime?: boolean }) =>
   }, [appEntities, relatedFormDataField]);
 
   const handleGetRelatedData = async (entityId: string, relatedField: AppEntityField) => {
+    console.log('runtime: ', runtime);
     if (!runtime) {
       return;
     }

@@ -5,11 +5,12 @@ import type { XInputRadioConfig } from './schema';
 
 const RadioGroup = Radio.Group;
 const XRadio = memo((props: XInputRadioConfig) => {
-  const { label, tooltip, status, defaultValue, required, layout, labelColSpan = 0 } = props;
+  const { label, dataField, tooltip, status, defaultValue, required, layout, labelColSpan = 0 } = props;
 
   return (
     <Form.Item
       label={label}
+      field={dataField.length > 0 ? dataField[dataField.length - 1] : ''}
       layout={layout}
       tooltip={tooltip}
       labelCol={{
