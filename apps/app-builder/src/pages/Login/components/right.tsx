@@ -123,8 +123,8 @@ const Right: React.FC = () => {
             accessToken: response.accessToken,
             refreshToken: response.refreshToken,
             expiresTime: response.expiresTime,
-            tenantId: response.tenantId,
-            tenantWebsite: response.tenantWebsite
+            tenantId: response.tenantWebsite
+            // tenantWebsite: response.tenantWebsite
           },
           rememberMe
         );
