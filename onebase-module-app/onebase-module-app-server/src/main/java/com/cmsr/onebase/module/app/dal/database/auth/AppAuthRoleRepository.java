@@ -22,38 +22,26 @@ public class AppAuthRoleRepository extends DataRepositoryNew<AuthRoleDO> {
         super(AuthRoleDO.class);
     }
 
-    public List<AuthRoleDO> findByApplicationCode(String applicationCode) {
+    public List<AuthRoleDO> findByApplicationId(Long applicationId) {
         ConfigStore configs = new DefaultConfigStore();
-        configs.eq("application_code", applicationCode);
+        configs.eq("application_id", applicationId);
         configs.order("role_type", Order.TYPE.ASC);
         configs.order("role_name", Order.TYPE.ASC);
         return findAllByConfig(configs);
     }
 
-    public AuthRoleDO findByAppCodeAndRoleName(String applicationCode, String roleName) {
+    public AuthRoleDO findByApplicationIdAndRoleName(Long applicationId, String roleName) {
         ConfigStore configs = new DefaultConfigStore();
-        configs.eq("application_code", applicationCode);
+        configs.eq("application_id", applicationId);
         configs.eq("role_name", roleName);
         return findOne(configs);
     }
 
-    public AuthRoleDO findByAppCodeAndRoleNameAndRoleIdNot(String applicationCode, String roleName, Long roleId) {
+    public AuthRoleDO findByAppCodeAndRoleNameAndRoleIdNot(Long applicationId, String roleName, Long roleId) {
         ConfigStore configs = new DefaultConfigStore();
-        configs.eq("application_code", applicationCode);
+        configs.eq("application_id", applicationId);
         configs.eq("role_name", roleName);
         configs.ne("id", roleId);
-        return findOne(configs);
-    }
-
-    public void deleteByRoleCode(String roleCode) {
-        ConfigStore configs = new DefaultConfigStore();
-        configs.eq("role_code", roleCode);
-        deleteByConfig(configs);
-    }
-
-    public AuthRoleDO findByRoleCode(String roleCode) {
-        ConfigStore configs = new DefaultConfigStore();
-        configs.eq("role_code", roleCode);
         return findOne(configs);
     }
 

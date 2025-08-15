@@ -18,8 +18,8 @@ public class AuthDataFilterDO extends TenantBaseDO {
     /**
      * 数据权限组Id
      */
-    @Column(name = "group_code", nullable = false, comment = "数据权限组code")
-    private String groupCode;
+    @Column(name = "group_id", nullable = false, comment = "数据权限组id")
+    private Long groupId;
 
     /**
      * 条件组
@@ -36,8 +36,8 @@ public class AuthDataFilterDO extends TenantBaseDO {
     /**
      * 字段名称
      */
-    @Column(name = "field_name", nullable = false,   comment = "字段名称")
-    private String fieldName;
+    @Column(name = "field_id", nullable = false,   comment = "字段id")
+    private Long fieldId;
 
     /**
      * 字段值类型

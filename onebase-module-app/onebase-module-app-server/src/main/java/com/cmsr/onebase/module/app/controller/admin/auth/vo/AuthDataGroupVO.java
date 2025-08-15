@@ -19,9 +19,6 @@ public class AuthDataGroupVO {
     @Schema(description = "数据权限组名称")
     private String groupName;
 
-    @Schema(description = "数据权限组编码")
-    private String groupCode;
-
     @Schema(description = "数据权限组排序")
     private Integer groupOrder;
 
@@ -29,7 +26,7 @@ public class AuthDataGroupVO {
     private String description;
 
     @Schema(description = "业务实体字段名称")
-    private String scopeFieldName;
+    private Long scopeFieldId;
 
     @Schema(description = "业务实体字段对应的权限范围")
     private String scopeLevel;

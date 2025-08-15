@@ -18,9 +18,6 @@ public class AuthRoleDeleteUserReqVO {
     @NotNull(message = "角色id不能为空")
     private Long roleId;
 
-    @Schema(description = "角色编码")
-    private String roleCode;
-
     @Schema(description = "用户id列表")
     @NotNull(message = "用户id列表不能为空")
     private List<Long> userIds;

@@ -13,14 +13,14 @@ import lombok.Data;
 @Table(name = "app_menu")
 public class MenuDO extends TenantBaseDO {
 
-    @Column(name = "application_code", nullable = false, comment = "应用code")
-    private String applicationCode;
+    @Column(name = "application_id", nullable = false, comment = "应用id")
+    private Long applicationId;
 
-    @Column(name = "parent_code", length = 64, comment = "父节点编码")
-    private String parentCode;
+    @Column(name = "parent_id", length = 64, comment = "父节点编码")
+    private Long parentId;
 
-    @Column(name = "entity_code", nullable = false, length = 64, comment = "实体code")
-    private String entityCode;
+    @Column(name = "entity_id", nullable = false, length = 64, comment = "实体id")
+    private Long entityId;
 
     @Column(name = "menu_code", length = 64, comment = "菜单编码")
     private String menuCode;

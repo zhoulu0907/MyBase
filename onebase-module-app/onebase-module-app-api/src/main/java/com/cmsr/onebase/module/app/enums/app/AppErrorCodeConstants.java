@@ -32,4 +32,5 @@ public interface AppErrorCodeConstants {
 
     ErrorCode APP_AUTH_ROLE_NOT_ALLOW_DELETE = new ErrorCode(10012, "角色不允许删除");
     ErrorCode APP_AUTH_ROLE_NOT_ALLOW_RENAME = new ErrorCode(10013, "角色不允许重命名");
+    ErrorCode APP_UID_GENERATE_FAILED = new ErrorCode(10014, "应用UID生成失败");
 }
