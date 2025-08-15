@@ -5,6 +5,7 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.data.base.BaseDO;
+import com.cmsr.onebase.framework.uid.UidGenerator;
 import com.cmsr.onebase.module.app.controller.admin.version.vo.VersionCreateReqVO;
 import com.cmsr.onebase.module.app.controller.admin.version.vo.VersionPageReqVo;
 import com.cmsr.onebase.module.app.controller.admin.version.vo.VersionPageRespVO;
@@ -69,7 +70,11 @@ public class AppVersionServiceImpl implements AppVersionService {
     @Resource
     private AppPageSetPageRepository pageSetPageRepository;
 
+    @Resource
     private AppPageRepository pageRepository;
+
+    @Resource
+    private UidGenerator uidGenerator;
 
     @Override
     public PageResult<VersionPageRespVO> getApplicationVersionPage(VersionPageReqVo listReqVo) {
