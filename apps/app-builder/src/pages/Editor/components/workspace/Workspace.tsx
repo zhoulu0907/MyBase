@@ -114,7 +114,7 @@ export default function EditorWorkspace() {
             // console.log("pageComponentSchemas", pageComponentSchemas);
           }}
           onAdd={(e) => {
-            console.log('onAdd', e);
+            // console.log('onAdd', e);
 
             let cpID = e.item.id || e.item.getAttribute('data-cp-id');
             const itemType = e.item.getAttribute('data-cp-type');
@@ -124,12 +124,13 @@ export default function EditorWorkspace() {
             const entityID = e.item.getAttribute('data-entity-id');
             const dataLabel = e.item.getAttribute('data-label');
 
-            console.log(`拖入组件 ${cpID} ${itemType}`);
+            console.log(`拖入组件 ${cpID},类型 ${itemType}, 名称 ${itemDisplayName} 组件名称 ${dataLabel}`);
 
             if (cpID) {
               const cpSchema = pageComponentSchemas.get(cpID);
               // 如果组件已经存在，则不进行创建
               if (cpSchema && cpSchema.config && cpSchema.editData) {
+                console.log(`组件 已存在，不进行创建`);
                 setCurComponentID(cpID!);
                 setCurComponentSchema(cpSchema);
                 setShowDeleteButton(false);
@@ -146,7 +147,9 @@ export default function EditorWorkspace() {
               console.log('dataField:    ', entityID, fieldID);
               schema.config.dataField = [entityID, fieldID];
             }
+
             if (dataLabel) {
+              console.log(schema);
               schema.config.label = dataLabel;
             }
 
@@ -160,6 +163,9 @@ export default function EditorWorkspace() {
               // 拖入布局组件，根据配置创建初始化
               console.log('拖入布局组件，根据配置创建初始化: ', cpID);
             }
+
+            console.log(cpID, props);
+            console.log(pageComponentSchemas);
 
             setPageComponentSchemas(cpID!, props);
             setCurComponentID(cpID!);

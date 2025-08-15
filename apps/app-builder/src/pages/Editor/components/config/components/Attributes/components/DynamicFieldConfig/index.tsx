@@ -25,8 +25,6 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({ handlePropsChan
   }, [mainEntity]);
 
   const initTreeData = async () => {
-    console.log(mainEntity);
-
     const newEntityTree = mainEntity.fields
       .filter((field: AppEntityField) => field.isSystemField == 1)
       .map((field: AppEntityField) => ({
