@@ -1,4 +1,4 @@
-import { useFromEditorStore, useListEditorStore } from '@/store/store_editor';
+import { useFormEditorSignal, useListEditorSignal } from '@/store/singals/page_editor';
 import { Button, Form, Message } from '@arco-design/web-react';
 import {
   dataMethodData,
@@ -27,20 +27,20 @@ const Preview: React.FC<PreviewProps> = ({}) => {
   const [editTargetId, setEditTargetId] = useState('');
 
   const {
-    setComponents: setFromComponents,
-    setPageComponentSchemas: setFromPageComponentSchemas,
-    setColComponentsMap: setFromColComponentsMap,
+    components: formComponents,
     pageComponentSchemas: formPageComponentSchemas,
-    components: formComponents
-  } = useFromEditorStore();
+    setComponents: setFormComponents,
+    setPageComponentSchemas: setFromPageComponentSchemas,
+    setLayoutSubComponents: setFromLayoutSubComponents
+  } = useFormEditorSignal;
 
   const {
+    components: listComponents,
+    pageComponentSchemas: listPageComponentSchemas,
     setComponents: setListComponents,
     setPageComponentSchemas: setListPageComponentSchemas,
-    setColComponentsMap: setListColComponentsMap,
-    pageComponentSchemas: listPageComponentSchemas,
-    components: listComponents
-  } = useListEditorStore();
+    setLayoutSubComponents: setListLayoutSubComponents
+  } = useListEditorSignal;
 
   const [pageSetCode, setPageSetCode] = useState('');
   const [pageType, setPageType] = useState('');
@@ -116,12 +116,12 @@ const Preview: React.FC<PreviewProps> = ({}) => {
   const loadPageSetInfo = async (pgsetCode: string) => {
     startLoadPageSet({
       pageSetCode: pgsetCode,
-      setFromComponents: setFromComponents,
+      setFormComponents: setFormComponents,
       setFromPageComponentSchemas: setFromPageComponentSchemas,
       setListComponents: setListComponents,
       setListPageComponentSchemas: setListPageComponentSchemas,
-      setFromColComponentsMap: setFromColComponentsMap,
-      setListColComponentsMap: setListColComponentsMap
+      setFromColComponentsMap: setFromLayoutSubComponents,
+      setListColComponentsMap: setListLayoutSubComponents
     });
   };
 
@@ -177,18 +177,18 @@ const Preview: React.FC<PreviewProps> = ({}) => {
     <div className={styles.previewPage}>
       <div className={styles.content}>
         {pageType === EDITOR_TYPES.LIST_EDITOR &&
-          listComponents.map((cp: GridItem) => (
+          listComponents.value.map((cp: GridItem) => (
             <div
               key={cp.id}
               className={styles.componentItem}
               style={{
-                width: getComponentWidth(listPageComponentSchemas.get(cp.id), cp.type)
+                width: getComponentWidth(listPageComponentSchemas.value[cp.id], cp.type)
               }}
             >
               <PreviewRender
                 cpId={cp.id}
                 cpType={cp.type}
-                pageComponentSchema={listPageComponentSchemas.get(cp.id)}
+                pageComponentSchema={listPageComponentSchemas.value[cp.id]}
                 runtime={true}
               />
             </div>
@@ -197,18 +197,18 @@ const Preview: React.FC<PreviewProps> = ({}) => {
         {pageType === EDITOR_TYPES.FORM_EDITOR && (
           <>
             <Form layout="inline" form={form}>
-              {formComponents.map((cp: GridItem) => (
+              {formComponents.value.map((cp: GridItem) => (
                 <div
                   key={cp.id}
                   className={styles.componentItem}
                   style={{
-                    width: getComponentWidth(formPageComponentSchemas.get(cp.id), cp.type)
+                    width: getComponentWidth(formPageComponentSchemas.value[cp.id], cp.type)
                   }}
                 >
                   <PreviewRender
                     cpId={cp.id}
                     cpType={cp.type}
-                    pageComponentSchema={formPageComponentSchemas.get(cp.id)}
+                    pageComponentSchema={formPageComponentSchemas.value[cp.id]}
                     runtime={true}
                   />
                 </div>

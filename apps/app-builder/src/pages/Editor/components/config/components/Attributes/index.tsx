@@ -23,7 +23,6 @@ interface ConfigsProps {
 const Attributes = ({ cpID }: ConfigsProps) => {
   const { t } = useI18n();
 
-  //   const { curComponentSchema, setCurComponentSchema, setPageComponentSchemas } = usePageEditorStore();
   useSignals();
   const { curComponentSchema, setCurComponentSchema, setPageComponentSchemas } = usePageEditorSignal();
 

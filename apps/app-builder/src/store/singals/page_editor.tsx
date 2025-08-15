@@ -6,7 +6,6 @@ export const createPageEditorSignal = (initialComponents: EditConfig[] = []) => 
   const components = signal(initialComponents);
 
   const setComponents = (newComponents: any[]) => {
-    console.log('setComponents', newComponents);
     components.value = newComponents;
   };
 
@@ -38,21 +37,21 @@ export const createPageEditorSignal = (initialComponents: EditConfig[] = []) => 
     pageComponentSchemas.value = {};
   };
 
-  //   const colComponents = signal<{ [key: string]: any[][] }>({});
+  const layoutSubComponents = signal<{ [key: string]: any[][] }>({});
 
-  //   const setColComponents = (cp_id: string, newColumns: any[][]) => {
-  //     colComponents.value = { ...colComponents.value, [cp_id]: newColumns };
-  //   };
+  const setLayoutSubComponents = (cp_id: string, newColumns: any[][]) => {
+    layoutSubComponents.value = { ...layoutSubComponents.value, [cp_id]: newColumns };
+  };
 
-  //   const delColComponents = (cp_id: string) => {
-  //     const newMap = { ...colComponents.value };
-  //     delete newMap[cp_id];
-  //     colComponents.value = newMap;
-  //   };
+  const delLayoutSubComponents = (cp_id: string) => {
+    const newLayoutSubComponents = { ...layoutSubComponents.value };
+    delete newLayoutSubComponents[cp_id];
+    layoutSubComponents.value = newLayoutSubComponents;
+  };
 
-  //   const clearColComponents = () => {
-  //     colComponents.value = {};
-  //   };
+  const clearLayoutSubComponents = () => {
+    layoutSubComponents.value = {};
+  };
 
   return {
     // 页面组件
@@ -66,17 +65,15 @@ export const createPageEditorSignal = (initialComponents: EditConfig[] = []) => 
     pageComponentSchemas,
     setPageComponentSchemas,
     delPageComponentSchemas,
-    clearPageComponentSchemas
+    clearPageComponentSchemas,
 
-    // // 列布局组件的列数据
-    // colComponents,
-    // setColComponents,
-    // delColComponents,
-    // clearColComponents
+    // 列布局组件的列数据
+    layoutSubComponents,
+    setLayoutSubComponents,
+    delLayoutSubComponents,
+    clearLayoutSubComponents
   };
 };
-
-// 创建默认的 store 实例（向后兼容）
 
 export const useFormEditorSignal = createPageEditorSignal();
 export const useListEditorSignal = createPageEditorSignal();

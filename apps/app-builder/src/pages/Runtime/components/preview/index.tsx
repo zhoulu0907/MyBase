@@ -1,7 +1,7 @@
 import PreviewRender from '@/pages/Editor/components/render/PreviewRender';
 import { getComponentWidth, startLoadPageSet } from '@/pages/Editor/utils/app_resource';
 import { EDITOR_TYPES, type GridItem } from '@/pages/Editor/utils/const';
-import { useFromEditorStore, useListEditorStore } from '@/store/store_editor';
+import { useFormEditorSignal, useListEditorSignal } from '@/store/singals/page_editor';
 import { Button, Form, Message } from '@arco-design/web-react';
 import {
   dataMethodData,
@@ -16,6 +16,7 @@ import {
   type InsertMethodParams,
   type UpdateMethodParams
 } from '@onebase/app';
+import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
 
@@ -27,21 +28,23 @@ interface PreviewProps {
 const PreviewContainer: React.FC<PreviewProps> = ({ menuCode, runtime }) => {
   const [form] = Form.useForm();
 
-  const {
-    setComponents: setListComponents,
-    setPageComponentSchemas: setListPageComponentSchemas,
-    setColComponentsMap: setListColComponentsMap,
-    pageComponentSchemas: listPageComponentSchemas,
-    components: listComponents
-  } = useListEditorStore();
+  useSignals();
 
   const {
-    setComponents: setFromComponents,
-    setPageComponentSchemas: setFromPageComponentSchemas,
-    setColComponentsMap: setFromColComponentsMap,
+    components: formComponents,
     pageComponentSchemas: formPageComponentSchemas,
-    components: formComponents
-  } = useFromEditorStore();
+    setComponents: setFormComponents,
+    setPageComponentSchemas: setFromPageComponentSchemas,
+    setLayoutSubComponents: setFromLayoutSubComponents
+  } = useFormEditorSignal;
+
+  const {
+    components: listComponents,
+    pageComponentSchemas: listPageComponentSchemas,
+    setComponents: setListComponents,
+    setPageComponentSchemas: setListPageComponentSchemas,
+    setLayoutSubComponents: setListLayoutSubComponents
+  } = useListEditorSignal;
 
   const [appId, setAppId] = useState('');
   const [pageSetCode, setPageSetCode] = useState('');
@@ -111,12 +114,12 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuCode, runtime }) => {
   const loadPageSetInfo = async (pgsetCode: string) => {
     startLoadPageSet({
       pageSetCode: pgsetCode,
-      setFromComponents: setFromComponents,
+      setFormComponents: setFormComponents,
       setFromPageComponentSchemas: setFromPageComponentSchemas,
       setListComponents: setListComponents,
       setListPageComponentSchemas: setListPageComponentSchemas,
-      setFromColComponentsMap: setFromColComponentsMap,
-      setListColComponentsMap: setListColComponentsMap
+      setFromColComponentsMap: setFromLayoutSubComponents,
+      setListColComponentsMap: setListLayoutSubComponents
     });
   };
 
@@ -220,18 +223,18 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuCode, runtime }) => {
     <div className={styles.previewPage}>
       <div className={styles.content}>
         {pageType === EDITOR_TYPES.LIST_EDITOR &&
-          listComponents.map((cp: GridItem) => (
+          listComponents.value.map((cp: GridItem) => (
             <div
               key={cp.id}
               className={styles.componentItem}
               style={{
-                width: getComponentWidth(listPageComponentSchemas.get(cp.id), cp.type)
+                width: getComponentWidth(listPageComponentSchemas.value[cp.id], cp.type)
               }}
             >
               <PreviewRender
                 cpId={cp.id}
                 cpType={cp.type}
-                pageComponentSchema={listPageComponentSchemas.get(cp.id)}
+                pageComponentSchema={listPageComponentSchemas.value[cp.id]}
                 runtime={runtime}
                 toCreatePage={toCreatePage}
               />
@@ -240,18 +243,18 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuCode, runtime }) => {
 
         {pageType == EDITOR_TYPES.FORM_EDITOR && (
           <Form layout="inline" form={form}>
-            {formComponents.map((cp: GridItem) => (
+            {formComponents.value.map((cp: GridItem) => (
               <div
                 key={cp.id}
                 className={styles.componentItem}
                 style={{
-                  width: getComponentWidth(formPageComponentSchemas.get(cp.id), cp.type)
+                  width: getComponentWidth(formPageComponentSchemas.value[cp.id], cp.type)
                 }}
               >
                 <PreviewRender
                   cpId={cp.id}
                   cpType={cp.type}
-                  pageComponentSchema={formPageComponentSchemas.get(cp.id)}
+                  pageComponentSchema={formPageComponentSchemas.value[cp.id]}
                   runtime={true}
                   toCreatePage={() => {
                     setPageType(EDITOR_TYPES.FORM_EDITOR);

@@ -1,5 +1,4 @@
 import { usePageEditorSignal } from '@/hooks/useSignal';
-import { usePageEditorStore } from '@/hooks/useStore';
 import PreviewRender from '@/pages/Editor/components/render/PreviewRender';
 import { getComponentWidth } from '@/pages/Editor/utils/app_resource';
 import { COMPONENT_GROUP_NAME, type GridItem } from '@/pages/Editor/utils/const';
@@ -13,32 +12,30 @@ import { type XColumnLayoutConfig } from './schema';
 const XPreviewColumnLayout = (props: XColumnLayoutConfig) => {
   const { colCount, id } = props;
 
-  const {
-    // setCurComponentID,
-    // setCurComponentSchema,
-    // pageComponentSchemas,
-    // setShowDeleteButton,
-    colComponentsMap,
-    setColComponentsMap
-  } = usePageEditorStore();
-
   useSignals();
-  const { setCurComponentID, setCurComponentSchema, pageComponentSchemas, setShowDeleteButton } = usePageEditorSignal();
+  const {
+    setCurComponentID,
+    setCurComponentSchema,
+    pageComponentSchemas,
+    layoutSubComponents,
+    setLayoutSubComponents,
+    setShowDeleteButton
+  } = usePageEditorSignal();
 
   // 从 store 中获取当前组件的列数据，如果不存在则初始化为空数组
-  const colComponents = colComponentsMap.colComponents.get(id) || Array.from({ length: colCount }, () => []);
+  const colComponents = layoutSubComponents[id] || Array.from({ length: colCount }, () => []);
   //   console.log('colComponents', colComponents);
 
   // 如果列数变了，就重新初始化列
   useEffect(() => {
-    const currentColumns = colComponentsMap.colComponents.get(id);
+    const currentColumns = layoutSubComponents[id];
     if (!currentColumns || currentColumns.length !== colCount) {
-      setColComponentsMap(
+      setLayoutSubComponents(
         id,
         Array.from({ length: colCount }, () => [])
       );
     }
-  }, [colCount, id, colComponentsMap.colComponents, setColComponentsMap]);
+  }, [colCount, id, colComponents]);
 
   return (
     <Layout className={styles.XPreviewColumnLayout}>
@@ -49,11 +46,15 @@ const XPreviewColumnLayout = (props: XColumnLayoutConfig) => {
             list={colComponents[index]}
             setList={(newList) => {
               // 使用函数式更新确保状态更新的原子性
-              setColComponentsMap(id, (prevColumns: any[][]) => {
-                const updatedColumns = [...(prevColumns || [])];
-                updatedColumns[index] = newList;
-                return updatedColumns;
-              });
+              //   setColComponentsMap(id, (prevColumns: any[][]) => {
+              //     const updatedColumns = [...(prevColumns || [])];
+              //     updatedColumns[index] = newList;
+              //     return updatedColumns;
+              //   });
+              //   const updatecolComponents = colComponents;
+              //   updatecolComponents[index] = newList;
+              //     setLayoutSubComponents(id, updatecolComponents);
+              colComponents[index] = newList;
             }}
             group={{
               name: COMPONENT_GROUP_NAME

@@ -5,8 +5,9 @@ import defaultListDesignSVG from '@/assets/images/list_design_default_icon.svg';
 import previewSVG from '@/assets/images/preview_icon.svg';
 import { useI18n } from '@/hooks/useI18n';
 import { usePageEditorSignal } from '@/hooks/useSignal';
+import { useBasicEditorStore } from '@/store';
+import { useFormEditorSignal, useListEditorSignal } from '@/store/singals/page_editor';
 import { useAppStore } from '@/store/store_app';
-import { useBasicEditorStore, useFromEditorStore, useListEditorStore } from '@/store/store_editor';
 import { useAppEntityStore } from '@/store/store_entity';
 import { Button, Message, Tabs } from '@arco-design/web-react';
 import { IconArrowLeft } from '@arco-design/web-react/icon';
@@ -58,26 +59,33 @@ const tabData = [
 export default function EditorHeader() {
   const { t } = useI18n();
 
-  //   const { clearCurComponentID } = usePageEditorStore();
-
   const { clearCurComponentID } = usePageEditorSignal();
 
+  const { isEditMode, setIsEditMode } = useBasicEditorStore();
+
   const {
-    components: fromComponents,
-    pageComponentSchemas: fromPageComponentSchemas,
-    colComponentsMap: fromColComponentsMap,
-    clearColComponentsMap: clearFromColComponentsMap,
-    clearComponents: clearFromComponents,
-    clearPageComponentSchemas: clearFromPageComponentSchemas
-  } = useFromEditorStore();
+    components: formComponents,
+    pageComponentSchemas: formPageComponentSchemas,
+    clearComponents: clearFormComponents,
+    clearPageComponentSchemas: clearFromPageComponentSchemas,
+    layoutSubComponents: fromLayoutSubComponents,
+    clearLayoutSubComponents: clearFromLayoutSubComponents,
+    setComponents: setFormComponents,
+    setPageComponentSchemas: setFromPageComponentSchemas,
+    setLayoutSubComponents: setFromLayoutSubComponents
+  } = useFormEditorSignal;
+
   const {
     components: listComponents,
     pageComponentSchemas: listPageComponentSchemas,
-    colComponentsMap: listColComponentsMap,
-    clearColComponentsMap: clearListColComponentsMap,
     clearComponents: clearListComponents,
-    clearPageComponentSchemas: clearListPageComponentSchemas
-  } = useListEditorStore();
+    clearPageComponentSchemas: clearListPageComponentSchemas,
+    layoutSubComponents: listLayoutSubComponents,
+    clearLayoutSubComponents: clearListLayoutSubComponents,
+    setComponents: setListComponents,
+    setPageComponentSchemas: setListPageComponentSchemas,
+    setLayoutSubComponents: setListLayoutSubComponents
+  } = useListEditorSignal;
 
   const { setMainEntity, setAppEntities } = useAppEntityStore();
 
@@ -93,18 +101,6 @@ export default function EditorHeader() {
   const [appStatus, setAppStatus] = useState(0);
 
   const [partPreviewVisible, setPartPreviewVisible] = useState(false);
-
-  const {
-    setComponents: setFromComponents,
-    setPageComponentSchemas: setFromPageComponentSchemas,
-    setColComponentsMap: setFromColComponentsMap
-  } = useFromEditorStore();
-  const {
-    setComponents: setListComponents,
-    setPageComponentSchemas: setListPageComponentSchemas,
-    setColComponentsMap: setListColComponentsMap
-  } = useListEditorStore();
-  const { isEditMode, setIsEditMode } = useBasicEditorStore();
 
   useEffect(() => {
     // 根据当前 URL 动态设置 activeTab
@@ -141,15 +137,27 @@ export default function EditorHeader() {
     }
   }, [pageSetCode]);
 
+  //   const loadPageSetInfo = async (pgsetCode: string) => {
+  //     startLoadPageSet({
+  //       pageSetCode: pgsetCode,
+  //       setFormComponents: setFormComponents,
+  //       setFromPageComponentSchemas: setFromPageComponentSchemas,
+  //       setListComponents: setListComponents,
+  //       setListPageComponentSchemas: setListPageComponentSchemas,
+  //       setFromColComponentsMap: setFromColComponentsMap,
+  //       setListColComponentsMap: setListColComponentsMap
+  //     });
+  //   };
+
   const loadPageSetInfo = async (pgsetCode: string) => {
     startLoadPageSet({
       pageSetCode: pgsetCode,
-      setFromComponents: setFromComponents,
+      setFormComponents: setFormComponents,
       setFromPageComponentSchemas: setFromPageComponentSchemas,
       setListComponents: setListComponents,
       setListPageComponentSchemas: setListPageComponentSchemas,
-      setFromColComponentsMap: setFromColComponentsMap,
-      setListColComponentsMap: setListColComponentsMap
+      setFromColComponentsMap: setFromLayoutSubComponents,
+      setListColComponentsMap: setListLayoutSubComponents
     });
   };
 
@@ -212,23 +220,42 @@ export default function EditorHeader() {
   const handleSavePageSet = async () => {
     console.log(`save appid: ${curAppId}, pageSetCode: ${pageSetCode}`);
 
+    // const savePageSetParams: SavePageSetParams = {
+    //   pageSetCode: pageSetCode,
+    //   formComponents: formComponents,
+    //   listComponents: listComponents,
+    //   formPageComponentSchemas: formPageComponentSchemas,
+    //   listPageComponentSchemas: listPageComponentSchemas,
+    //   fromColComponentsMap: fromColComponentsMap,
+    //   listColComponentsMap: listColComponentsMap
+    // };
+
     const savePageSetParams: SavePageSetParams = {
       pageSetCode: pageSetCode,
-      fromComponents: fromComponents,
-      listComponents: listComponents,
-      fromPageComponentSchemas: fromPageComponentSchemas,
-      listPageComponentSchemas: listPageComponentSchemas,
-      fromColComponentsMap: fromColComponentsMap,
-      listColComponentsMap: listColComponentsMap
+      formComponents: formComponents.value,
+      listComponents: listComponents.value,
+      formPageComponentSchemas: new Map(Object.entries(formPageComponentSchemas.value)),
+      listPageComponentSchemas: new Map(Object.entries(listPageComponentSchemas.value)),
+      fromColComponentsMap: { colComponents: new Map(Object.entries(fromLayoutSubComponents.value)) },
+      listColComponentsMap: { colComponents: new Map(Object.entries(listLayoutSubComponents.value)) }
     };
 
     startSavePageSet(savePageSetParams);
   };
 
+  //   const clearAllData = () => {
+  //     clearFromColComponentsMap();
+  //     clearListColComponentsMap();
+  //     clearFormComponents();
+  //     clearListComponents();
+  //     clearFromPageComponentSchemas();
+  //     clearListPageComponentSchemas();
+  //   };
+
   const clearAllData = () => {
-    clearFromColComponentsMap();
-    clearListColComponentsMap();
-    clearFromComponents();
+    clearFromLayoutSubComponents();
+    clearListLayoutSubComponents();
+    clearFormComponents();
     clearListComponents();
     clearFromPageComponentSchemas();
     clearListPageComponentSchemas();

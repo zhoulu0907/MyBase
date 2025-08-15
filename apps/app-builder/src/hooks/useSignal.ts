@@ -49,21 +49,21 @@ export function usePageEditorSignal() {
     ? useListEditorSignal.clearPageComponentSchemas
     : useFormEditorSignal.clearPageComponentSchemas;
 
-//   const colComponentsMap = useList
-//     ? useListEditorSignal.colComponentsMap
-//     : useFormEditorSignal.colComponentsMap;
+  const layoutSubComponents = useList
+    ? useListEditorSignal.layoutSubComponents.value
+    : useFormEditorSignal.layoutSubComponents.value;
 
-//   const setColComponentsMap = useList
-//     ? useListEditorSignal.setColComponentsMap
-//     : useFormEditorSignal.setColComponentsMap;
+  const setLayoutSubComponents = useList
+    ? useListEditorSignal.setLayoutSubComponents
+    : useFormEditorSignal.setLayoutSubComponents;
 
-//   const delColComponentsMap = useList
-//     ? useListEditorSignal.delColComponentsMap
-//     : useFormEditorSignal.delColComponentsMap;
+  const delLayoutSubComponents = useList
+    ? useListEditorSignal.delLayoutSubComponents
+    : useFormEditorSignal.delLayoutSubComponents;
 
-//   const clearColComponentsMap = useList
-//     ? useListEditorSignal.clearColComponentsMap
-//     : useFormEditorSignal.clearColComponentsMap;
+  const clearLayoutSubComponents = useList
+    ? useListEditorSignal.clearLayoutSubComponents
+    : useFormEditorSignal.clearLayoutSubComponents;
 
   return {
     curComponentID,
@@ -81,9 +81,9 @@ export function usePageEditorSignal() {
     setPageComponentSchemas,
     delPageComponentSchemas,
     clearPageComponentSchemas,
-    // colComponentsMap,
-    // setColComponentsMap,
-    // delColComponentsMap,
-    // clearColComponentsMap
+    layoutSubComponents,
+    setLayoutSubComponents,
+    delLayoutSubComponents,
+    clearLayoutSubComponents
   };
 }

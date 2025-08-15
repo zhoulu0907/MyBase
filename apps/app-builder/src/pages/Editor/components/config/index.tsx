@@ -9,8 +9,6 @@ import styles from './index.module.less';
 interface EditorConfigProps {}
 
 export default function EditorConfig({}: EditorConfigProps) {
-  //   const { curComponentID } = usePageEditorStore();
-
   useSignals();
   const { curComponentID } = usePageEditorSignal();
 

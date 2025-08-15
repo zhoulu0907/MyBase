@@ -4,7 +4,6 @@ import { ReactSortable } from 'react-sortablejs';
 
 import { getComponentSchema } from '@/components/Materials/schema';
 import { ALL_COMPONENT_TYPES } from '@/constants/componentTypes';
-import { usePageEditorStore } from '@/hooks/useStore';
 import EditRender from '@/pages/Editor/components/render/EditRender';
 import { getComponentWidth } from '../../utils/app_resource';
 import { COMPONENT_GROUP_NAME, type GridItem } from '../../utils/const';
@@ -23,22 +22,6 @@ import styles from './index.module.less';
 export default function EditorWorkspace() {
   const [showEmpty, setShowEmpty] = useState(true);
 
-  const {
-    // curComponentID,
-    // setCurComponentID,
-    // clearCurComponentID,
-    // setCurComponentSchema,
-    // pageComponentSchemas,
-    // setPageComponentSchemas,
-    // delPageComponentSchemas,
-    // components,
-    // setComponents,
-    // delComponents,
-    // showDeleteButton,
-    // setShowDeleteButton,
-    delColComponentsMap
-  } = usePageEditorStore();
-
   useSignals();
 
   const {
@@ -53,7 +36,9 @@ export default function EditorWorkspace() {
     setComponents,
     delComponents,
     showDeleteButton,
-    setShowDeleteButton
+    setShowDeleteButton,
+
+    delLayoutSubComponents
   } = usePageEditorSignal();
 
   const [pageMode, setPageMode] = useState<string>('pc');
@@ -71,7 +56,7 @@ export default function EditorWorkspace() {
     // 从组件列表中移除
     delComponents(componentId);
     delPageComponentSchemas(componentId);
-    delColComponentsMap(componentId);
+    delLayoutSubComponents(componentId);
 
     // 如果删除的是当前选中的组件，清除选中状态
     if (curComponentID === componentId) {
@@ -182,9 +167,6 @@ export default function EditorWorkspace() {
               // 拖入布局组件，根据配置创建初始化
               console.log('拖入布局组件，根据配置创建初始化: ', cpID);
             }
-
-            console.log(cpID, props);
-            console.log(pageComponentSchemas);
 
             setPageComponentSchemas(cpID!, props);
             setCurComponentID(cpID!);
