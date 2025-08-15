@@ -1,5 +1,5 @@
 import { Space, Table, Button, Modal, Input, Message, Tooltip, Form, Tag, Select } from '@arco-design/web-react';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import styles from './index.module.less';
 import { IconSearch } from '@arco-design/web-react/icon';
 import { getPlatformAdminListApi, PlatformAdminUserType, createPlatformAdminApi, updatePlatformAdminPasswordApi, updatePlatformAdminMailApi, deletePlatformAdminApi, type PlatformAdminInfo, type cratePlatformAdminReq } from '@onebase/platform-center';
@@ -18,6 +18,7 @@ const Administrator: React.FC = () => {
   const [modalType, setModalType] = useState<'email' | 'password' | null>(null);
   const [createForm] = useForm();
   const [searchKeyword, setSearchKeyword] = useState('');
+  const [searchDebounceTimer, setSearchDebounceTimer] = useState<NodeJS.Timeout | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [dataSource, setDataSource] = useState<PlatformAdminInfo[]>([]);
   const [total, setTotal] = useState(null)
@@ -37,6 +38,11 @@ const Administrator: React.FC = () => {
       title: '账号',
       dataIndex: 'username',
       key: 'username',
+    },
+    {
+      title: '昵称',
+      dataIndex: 'nickname',
+      key: 'nickname',
     },
     {
       title: '邮箱',
@@ -172,6 +178,7 @@ const Administrator: React.FC = () => {
       // 构建符合 cratePlatformAdminReq 类型的提交数据
       const submitData: cratePlatformAdminReq = {
         username: values.account,
+        nickname: values.nickname,
         password: values.password,
         email: values.email,
         mobile: values.mobile,
@@ -275,12 +282,23 @@ const Administrator: React.FC = () => {
     }, 300);
   };
 
-  // 处理搜索
-  const handleSearch = (value: string) => {
+// 处理搜索（带防抖）
+  const handleSearch = useCallback((value: string) => {
     setSearchKeyword(value);
     setCurrentPage(1); // 重置到第一页
-    getPlatformAdminList(1, value);
-  };
+    
+    // 清除之前的定时器
+    if (searchDebounceTimer) {
+      clearTimeout(searchDebounceTimer);
+    }
+    
+    // 设置新的定时器
+    const timer = setTimeout(() => {
+      getPlatformAdminList(1, value);
+    }, 500); // 500ms 防抖延迟
+    
+    setSearchDebounceTimer(timer);
+  }, [searchDebounceTimer]);
 
   // 处理分页变化
   const handlePageChange = async (pageNo: number) => {
@@ -303,8 +321,7 @@ const Administrator: React.FC = () => {
             style={{ width: 300 }}
             allowClear
             value={searchKeyword}
-            onChange={(value) => setSearchKeyword(value)}
-            onSearch={handleSearch}
+            onChange={handleSearch}
             suffix={<IconSearch />}
           />
         </div>
@@ -322,17 +339,7 @@ const Administrator: React.FC = () => {
           }}
           rowKey="id"
         />
-        {/* 删除弹窗 */}
-        <Modal
-          visible={modalVisible}
-          title={modalType === 'password' ? '修改密码' : '修改邮箱'}
-          onCancel={() => setModalVisible(false)}
-          footer={[
-            <Button key="return" onClick={handleCancelUpdata}>取消</Button>,
-            <Button key="submit" type="primary" onClick={handleUpdata}>确定</Button>
-          ]}
-        ></Modal>
-        {/* 修改弹窗 */}
+        {/* 修改邮箱/密码弹窗 */}
         <Modal
           visible={modalVisible}
           title={modalType === 'password' ? '修改密码' : '修改邮箱'}
@@ -452,6 +459,16 @@ const Administrator: React.FC = () => {
               validateTrigger={['onBlur']}
             >
               <Input placeholder="请输入账号" autoComplete="off" />
+            </Form.Item>
+            <Form.Item 
+              label="昵称" 
+              field="nickname"
+              rules={[
+                { required: true, message: '请输入昵称' },
+              ]}
+              validateTrigger={['onBlur']}
+            >
+              <Input placeholder="请输入昵称" autoComplete="off" />
             </Form.Item>
             <Form.Item 
               label="手机号" 

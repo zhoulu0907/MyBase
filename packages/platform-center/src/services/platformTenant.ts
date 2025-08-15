@@ -14,15 +14,15 @@ export const getTenantUserCountApi = (id: string) => systemService.get('/tenant/
 export const getPlatformTenantListApi = (params: {
   pageNo: number,
   pageSize?: number,
-  keyword?: string,
+  keywords?: string,
   status?: number
 }) => {
-  const { pageNo, pageSize = 10, keyword, status = 2 } = params;
+  const { pageNo, pageSize = 10, keywords, status = 2 } = params;
 
   let url = `/tenant/page?pageNo=${pageNo}&pageSize=${pageSize}`;
 
-  if (keyword) {
-    url += `&keyword=${encodeURIComponent(keyword)}`;
+  if (keywords) {
+    url += `&keyword=${encodeURIComponent(keywords)}`;
   }
 
   if (status !== undefined) {
