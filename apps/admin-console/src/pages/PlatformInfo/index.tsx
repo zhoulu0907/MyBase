@@ -25,6 +25,7 @@ import {
 import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
 import { downloadFile } from '@/utils/download';
+import { TokenManager } from '@onebase/common';
 // import { systemService } from './clients';
 
 const { Title, Text } = Typography;
@@ -35,6 +36,9 @@ const PlatformInfo: React.FC = () => {
   const [licenseInfoList, setLicenseInfoList] = useState<LicenseInfoList[]>([]);
   const [licenseInfo, setLicenseInfo] = useState<LicenseInfo | null>(null);
   const [pageLoading, setPageLoading] = useState<boolean>(true);
+  const [isUploading, setIsUploading] = useState(false);
+  const [loading, setLoading] = useState(false);
+
   const getPlatformInfo = async () => {
     const res = await getPlatformInfoApi();
     console.log('platformInfo res:', res);
@@ -43,14 +47,14 @@ const PlatformInfo: React.FC = () => {
     }
   };
 
-  const getPlatformInfoList = async () => {
+   const getPlatformInfoList = async (pageNo: number = 1, pageSize: number = 10) => {
     try {
-      const res = await getPlatFormInfoListApi({ pageNo: 1, pageSize: 10 });
-      // console.log('infoList res:', res);
+      const res = await getPlatFormInfoListApi({ pageNo, pageSize });
       if (res && Array.isArray(res.list)) {
         setLicenseInfoList(res.list);
         setPagination((prevPagination) => ({
           ...prevPagination,
+          current: pageNo,
           total: res.total
         }));
       } else {
@@ -67,7 +71,10 @@ const PlatformInfo: React.FC = () => {
     const fetchData = async () => {
       setPageLoading(true);
       try {
-        await Promise.all([getPlatformInfoList(), getPlatformInfo()]);
+        await getPlatformInfoList(pagination.current, pagination.pageSize),
+        await getPlatformInfo()
+      } catch(error) {
+        console.error('上传跳转报错', error);
       } finally {
         setPageLoading(false);
       }
@@ -127,8 +134,14 @@ const PlatformInfo: React.FC = () => {
     }
   ];
 
+  // 处理文件上传变化
   const handleFileUploadChange = async (fileList: any[]) => {
     console.log('File uploaded:', fileList);
+    
+    // 防止重复上传
+    if (isUploading) {
+      return;
+    }
     
     // 只处理最新上传的文件，不累积处理
     if (fileList.length > 0) {
@@ -153,22 +166,12 @@ const PlatformInfo: React.FC = () => {
       
       // 验证文件对象
       if (file && (file instanceof File || file instanceof Blob)) {
-        console.log("文件验证通过，文件信息:", {
-          name: file.name,
-          size: file.size,
-          type: file.type
-        });
         
         // 创建FormData并添加文件 - 确保参数名为"file"
         const formData = new FormData();
         formData.append('file', file, file.name || 'license.lic.sm4');
         
-        console.log("FormData创建完成");
-        // 验证FormData内容
-        for (let [key, value] of formData.entries()) {
-          console.log(`FormData内容 - ${key}:`, value);
-        }
-        
+        setIsUploading(true);
         setLoading(true);
         
         try {
@@ -182,6 +185,7 @@ const PlatformInfo: React.FC = () => {
           Message.error("上传license失败");
           console.error('上传license失败', error);
         } finally {
+          setIsUploading(false);
           setLoading(false);
         }
       } else {
@@ -197,62 +201,67 @@ const PlatformInfo: React.FC = () => {
 
   // 下载认证
   const downloadLicense = async () => {
-    window.location.href = 'http://192.168.43.40:48080/admin-api/system/license/export?id=1'
     try {
       // 获取存储在localStorage或cookie中的token
-      const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
-      
-      // 创建带有token的请求
-      const response = await fetch('http://192.168.43.40:48080/admin-api/system/license/export?id=1', {
-        method: 'GET',
-        headers: {
-          // 'Authorization': `Bearer ${token}`,
-          'Authorization': `Bearer c36a3f1f75d34109b6ebf629fb7a097d`,
-          // 或者根据您的实际情况使用其他格式，例如:
-          // 'Authorization': `Bearer ${token}`
-          // 'X-Token': token
+      const authorizationHeader = TokenManager.getAuthorizationHeader();
+      console.log('authorizationHeader:', authorizationHeader);
+      if (typeof window !== 'undefined' && window.global_config?.BASE_URL) {
+        try {
+          const url = new URL(window.global_config.BASE_URL);
+          // 创建带有token的请求
+          const response = await fetch(`${url.href}/system/license/export?id=1`, {
+            method: 'GET',
+            headers: {
+              'Authorization': authorizationHeader,
+            }
+          });
+          console.log('fetch response:', response);
+          if (response.ok) {
+            const blob = await response.blob();
+            downloadFile(blob, 'license.lic.sm4');
+          } else {
+            Message.error('下载失败');
+          }
+        } catch (e) {
+          console.error('解析BASE_URL失败:', e);
         }
-      });
-      console.log('fetch response:', response);
-      if (response.ok) {
-        const blob = await response.blob();
-        downloadFile(blob, 'license.lic.sm4');
-      } else {
-        Message.error('下载失败');
       }
     } catch (error) {
       console.error('下载失败:', error);
       Message.error('下载失败');
-    }
-
-    // try {
-    //   const response = await downloadPlatformLicenseApi(1);
-    //   console.log("response", response);
-    //   // console.log('downloadLicense', response);
-    //     const blob = await response.blob();
-    //     // downloadFile(blob, 'license.lic.sm4');
-    // } catch (error) {
-    //   console.error('下载失败:', error);
-    // }
-    
+    }    
   };
 
-  // const [data, setData] = useState(licenseInfoList);
   // 分页器
   const [pagination, setPagination] = useState({
-    // sizeCanChange: true,
     showTotal: true,
     total: 0,
     pageSize: 10,
-    pageNo: 1,
+    current: 1,
     pageSizeChangeResetCurrent: true
   });
-  const [loading, setLoading] = useState(false);
 
-  const onChangeTable = (pagination: { pageNo?: number; pageSize?: number }) => {
+  const onChangeTable = async (paginationInfo: { current?: number; pageSize?: number }) => {
     setLoading(true);
-    console.log('pagination: ', pagination);
-    setLoading(false);
+    try {
+      const pageNo = paginationInfo.current || 1;
+      const pageSize = paginationInfo.pageSize || 10;
+      
+      // 如果页面大小改变，重置到第一页
+      const actualPageNo = pageSize !== pagination.pageSize ? 1 : pageNo;
+      
+      await getPlatformInfoList(actualPageNo, pageSize);
+      
+      setPagination(prev => ({
+        ...prev,
+        current: actualPageNo,
+        pageSize: pageSize
+      }));
+    } catch (error) {
+      console.error('分页加载失败:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -329,7 +338,7 @@ const PlatformInfo: React.FC = () => {
           <div className={styles.authRecord}>
             <Text>{t('platformInfo.authRecord')}</Text>
             <span>
-              <Button type="primary" onClick={downloadLicense} loading={loading}>{t('platformInfo.downloadAuth')}</Button>
+              <Text className={styles.downloadBtn} onClick={downloadLicense}>{t('platformInfo.downloadAuth')}</Text>
               <Upload
                 className={styles.uploadAuth}
                 showUploadList={false}
@@ -349,6 +358,8 @@ const PlatformInfo: React.FC = () => {
             data={licenseInfoList}
             pagination={{
               ...pagination,
+              // showPageSize: true,
+              // sizeCanChange: true,
               className: styles.tablePagination
             }}
             onChange={onChangeTable}

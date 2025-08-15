@@ -346,6 +346,42 @@ const TenantManagement: React.FC = () => {
     form.setFieldsValue({ status: PlatformTenantStatus.enabled });
   };
 
+  const copyToClipboard = async (text: string) => {
+    try {
+      // 首先尝试使用现代 Clipboard API
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+        Message.success('复制成功!');
+      } else {
+        // 降级到传统方法
+        fallbackCopyToClipboard(text);
+      }
+    } catch (error) {
+      console.error('复制失败:', error);
+      Message.error('复制失败');
+    }
+  };
+
+  const fallbackCopyToClipboard = (text: string) => {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.opacity = '0';
+    textArea.style.top = '0';
+    textArea.style.left = '0';
+    document.body.appendChild(textArea);
+    textArea.select();
+    try {
+      document.execCommand('copy');
+      Message.success('复制成功!');
+    } catch (err) {
+      console.error('execCommand 失败:', err);
+      Message.error('复制失败');
+    }
+    document.body.removeChild(textArea);
+  };
+
+
   // 表格列定义
   const columns = [
     // { 
@@ -384,27 +420,19 @@ const TenantManagement: React.FC = () => {
       render: (text: string) => {
         // 获取当前环境的域名前缀
         const domainPrefix = getDomainPrefix();
-        const fullUrl = `${domainPrefix}/v0/obappbuilder/#/${text}`;
+        const fullUrl = `${domainPrefix}/v0/obappbuilder/#/tenant/${text}/`;
         const displayUrl = simplifyUrl(fullUrl);
         
         return (
           <Space className={styles.urlWrapper}>
-            {/* http://s25029301301.dev.internal.virtueit.net:81/v0/obappbuilder/#/XXX */}
             <Tooltip position='tl' content={fullUrl}>
-              <Text className={styles.fullUrl} onClick={() => handleClick(displayUrl)}>
-                {/* http://s25029301301.dev.internal.virtueit.net:81/v0/obappbuilder/#/XXX */}
-                {fullUrl}
+              <Text className={styles.fullUrl} onClick={() => handleClick(fullUrl)}>
+                {displayUrl}
               </Text>
             </Tooltip>
             <IconCopy className={styles.copyIcon} onClick={(e) => {
               e.stopPropagation();
-              navigator.clipboard.writeText(fullUrl).then(() => {
-                Message.success('复制成功!');
-              }).catch((error) => {
-                console.error('复制失败:', error);
-                // 提供备选方案
-                Message.error('复制失败');
-              });
+              copyToClipboard(fullUrl);
             }}/>
           </Space>
         );
@@ -484,7 +512,7 @@ const TenantManagement: React.FC = () => {
       const urlObj = new URL(url);
       const host = urlObj.host;
       const protocol = urlObj.protocol;
-      const pathname = urlObj.pathname;
+      // const pathname = urlObj.pathname;
       const hash = urlObj.hash;
 
       // 如果主机名很短，直接返回
@@ -494,7 +522,7 @@ const TenantManagement: React.FC = () => {
 
       // 省略主机名中间部分
       const simplifiedHost = `${host.substring(0, 16)}...`;
-      return `${protocol}//${simplifiedHost}/${pathname}/${hash}`;
+      return `${protocol}//${simplifiedHost}/${hash}`;
     } catch (e) {
       // 如果URL解析失败，返回原始URL
       return url;
