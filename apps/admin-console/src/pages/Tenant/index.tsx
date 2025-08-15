@@ -346,6 +346,25 @@ const TenantManagement: React.FC = () => {
     form.setFieldsValue({ status: PlatformTenantStatus.enabled });
   };
 
+  const fallbackCopyToClipboard = (text: string) => {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.opacity = '0';
+    textArea.style.top = '0';
+    textArea.style.left = '0';
+    document.body.appendChild(textArea);
+    textArea.select();
+    try {
+      document.execCommand('copy');
+      Message.success('复制成功!');
+    } catch (err) {
+      console.error('execCommand 失败:', err);
+      Message.error('复制失败');
+    }
+    document.body.removeChild(textArea);
+  };
+
   // 表格列定义
   const columns = [
     // { 
@@ -384,7 +403,7 @@ const TenantManagement: React.FC = () => {
       render: (text: string) => {
         // 获取当前环境的域名前缀
         const domainPrefix = getDomainPrefix();
-        const fullUrl = `${domainPrefix}/v0/obappbuilder/#/tenant/${text}`;
+        const fullUrl = `${domainPrefix}/v0/obappbuilder/#/tenant/${text}/`;
         const displayUrl = simplifyUrl(fullUrl);
         
         return (
@@ -396,13 +415,19 @@ const TenantManagement: React.FC = () => {
             </Tooltip>
             <IconCopy className={styles.copyIcon} onClick={(e) => {
               e.stopPropagation();
-              navigator.clipboard.writeText(fullUrl).then(() => {
-                Message.success('复制成功!');
-              }).catch((error) => {
-                console.error('复制失败:', error);
-                // 提供备选方案
-                Message.error('复制失败');
-              });
+              const url = fullUrl;
+
+              if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(url)
+                  .then(() => {
+                    Message.success('复制成功!');
+                  })
+                  .catch(() => {
+                    fallbackCopyToClipboard(url);
+                  });
+              } else {
+                fallbackCopyToClipboard(url);
+              }
             }}/>
           </Space>
         );
@@ -482,7 +507,7 @@ const TenantManagement: React.FC = () => {
       const urlObj = new URL(url);
       const host = urlObj.host;
       const protocol = urlObj.protocol;
-      const pathname = urlObj.pathname;
+      // const pathname = urlObj.pathname;
       const hash = urlObj.hash;
 
       // 如果主机名很短，直接返回

@@ -52,9 +52,13 @@ export interface LicenseInfo {
      */
     platformType: string;
     /**
+     * 创建时间
+     */
+    createTime: number;
+    /**
      * 过期时间
      */
-    expireTime: string;
+    expireTime: number;
     /**
      * 实际租户数量
      */

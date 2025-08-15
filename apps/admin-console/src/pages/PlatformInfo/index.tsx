@@ -25,6 +25,7 @@ import {
 import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
 import { downloadFile } from '@/utils/download';
+import { TokenManager } from '@onebase/common';
 // import { systemService } from './clients';
 
 const { Title, Text } = Typography;
@@ -70,10 +71,10 @@ const PlatformInfo: React.FC = () => {
     const fetchData = async () => {
       setPageLoading(true);
       try {
-        await Promise.all([
-          getPlatformInfoList(1, pagination.pageSize), 
-          getPlatformInfo()
-        ]);
+        await getPlatformInfoList(pagination.current, pagination.pageSize),
+        await getPlatformInfo()
+      } catch(error) {
+        console.error('上传跳转报错', error);
       } finally {
         setPageLoading(false);
       }
@@ -213,15 +214,14 @@ const PlatformInfo: React.FC = () => {
   const downloadLicense = async () => {
     try {
       // 获取存储在localStorage或cookie中的token
-      const onebase_token_info = localStorage.getItem('onebase_token_info') || sessionStorage.getItem('onebase_token_info');
-      const token = JSON.parse(onebase_token_info)?.accessToken;
-      console.log('token:', token);
+      const authorizationHeader = TokenManager.getAuthorizationHeader();
+      console.log('authorizationHeader:', authorizationHeader);
       
       // 创建带有token的请求
       const response = await fetch('http://192.168.43.40:48080/admin-api/system/license/export?id=1', {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          'Authorization': authorizationHeader,
         }
       });
       console.log('fetch response:', response);
