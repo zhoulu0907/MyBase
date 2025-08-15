@@ -363,7 +363,7 @@ const PlatformInfo: React.FC = () => {
             data={licenseInfoList}
             pagination={{
               ...pagination,
-              showPageSize: true,
+              // showPageSize: true,
               // sizeCanChange: true,
               className: styles.tablePagination
             }}

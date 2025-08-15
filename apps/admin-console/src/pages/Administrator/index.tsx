@@ -82,7 +82,7 @@ const Administrator: React.FC = () => {
               position="tr"
               trigger="hover"
               color="#fff"
-              popupVisible={delVisible}
+              // popupVisible={delVisible}
               content={(
                 <div className={styles.tooltipContainer}>
                   <div className={styles.tooltipText}>Are you sure you want to delete?</div>
