@@ -24,4 +24,7 @@ public class DynamicDataRespVO {
     @Schema(description = "实体名称", example = "用户")
     private String entityName;
 
+    @Schema(description = "字段类型信息，key为字段名，value为字段类型")
+    private Map<String, String> fieldType;
+
 }

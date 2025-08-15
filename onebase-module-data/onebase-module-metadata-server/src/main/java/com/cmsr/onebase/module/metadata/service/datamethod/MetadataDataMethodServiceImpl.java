@@ -192,13 +192,13 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
         if (primaryKeyValue == null) {
             log.warn("无法获取主键值，跳过查询插入后的数据，实体ID: {}, 表名: {}", reqVO.getEntityId(), entity.getTableName());
             // 返回插入的数据
-            return buildDynamicDataRespVO(entity, processedData);
+            return buildDynamicDataRespVO(entity, processedData, fields);
         }
 
         Map<String, Object> resultData = queryDataByIdWithService(temporaryService, entity.getTableName(), primaryKeyValue, fields);
 
         // 9. 构建响应
-        return buildDynamicDataRespVO(entity, resultData);
+        return buildDynamicDataRespVO(entity, resultData, fields);
         
         }); // TenantUtils.executeIgnore 闭合
     }
@@ -248,7 +248,7 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
         Map<String, Object> resultData = queryDataByIdWithService(temporaryService, entity.getTableName(), reqVO.getId(), fields);
 
         // 12. 构建响应
-        return buildDynamicDataRespVO(entity, resultData);
+        return buildDynamicDataRespVO(entity, resultData, fields);
         
         }); // TenantUtils.executeIgnore 闭合
     }
@@ -341,7 +341,7 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
         }
 
         // 6. 构建响应
-        return buildDynamicDataRespVO(entity, resultData);
+        return buildDynamicDataRespVO(entity, resultData, fields);
         
         }); // TenantUtils.executeIgnore 闭合
     }
@@ -490,7 +490,7 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
         for (int i = 0; i < dataSet.size(); i++) {
             DataRow row = dataSet.getRow(i);
             Map<String, Object> data = convertDataRowToMap(row, fields);
-            list.add(buildDynamicDataRespVO(entity, data));
+            list.add(buildDynamicDataRespVO(entity, data, fields));
         }
         
         log.info("分页查询数据成功，实体ID: {}, 表名: {}, 页码: {}, 页大小: {}, 总记录数: {}",
@@ -748,6 +748,25 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
         respVO.setEntityId(String.valueOf(entity.getId()));
         respVO.setEntityName(entity.getDisplayName());
         respVO.setData(data);
+        return respVO;
+    }
+
+    /**
+     * 构建动态数据响应VO（包含字段类型信息）
+     */
+    private DynamicDataRespVO buildDynamicDataRespVO(MetadataBusinessEntityDO entity, Map<String, Object> data, List<MetadataEntityFieldDO> fields) {
+        DynamicDataRespVO respVO = new DynamicDataRespVO();
+        respVO.setEntityId(String.valueOf(entity.getId()));
+        respVO.setEntityName(entity.getDisplayName());
+        respVO.setData(data);
+        
+        // 构建字段类型映射
+        Map<String, String> fieldTypeMap = new HashMap<>();
+        for (MetadataEntityFieldDO field : fields) {
+            fieldTypeMap.put(field.getFieldName(), field.getFieldType());
+        }
+        respVO.setFieldType(fieldTypeMap);
+        
         return respVO;
     }
 
