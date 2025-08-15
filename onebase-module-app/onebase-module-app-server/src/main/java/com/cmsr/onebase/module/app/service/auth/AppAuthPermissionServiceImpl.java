@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.app.service.auth;
 
 import com.cmsr.onebase.framework.common.biz.system.dict.dto.DictDataRespDTO;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.module.app.controller.admin.auth.dto.AuthPermissionDTO;
 import com.cmsr.onebase.module.app.controller.admin.auth.vo.*;
 import com.cmsr.onebase.module.app.dal.database.auth.*;
 import com.cmsr.onebase.module.app.dal.dataobject.app.ApplicationDO;
@@ -9,6 +10,11 @@ import com.cmsr.onebase.module.app.dal.dataobject.auth.*;
 import com.cmsr.onebase.module.app.dal.dataobject.menu.MenuDO;
 import com.cmsr.onebase.module.app.service.AppCommonService;
 import com.cmsr.onebase.module.app.util.AuthUtils;
+import com.cmsr.onebase.module.metadata.api.entity.MetadataEntityFieldApi;
+import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldQueryReqDTO;
+import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldRespDTO;
+import com.cmsr.onebase.module.metadata.api.validation.MetadataPermitApi;
+import com.cmsr.onebase.module.metadata.api.validation.dto.PermitRefOtftRespDTO;
 import com.cmsr.onebase.module.system.api.dict.DictDataApi;
 import jakarta.annotation.Resource;
 import lombok.Setter;
@@ -50,11 +56,18 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
     @Resource
     private DictDataApi dictDataApi;
 
+    @Resource
+    private MetadataEntityFieldApi metadataEntityFieldApi;
+
+    @Resource
+    private MetadataPermitApi metadataPermitApi;
+
     @Override
-    public AuthPermissionDetailVO getPermission(AuthPermissionReqVO reqVO) {
+    public AuthDetailPermissionVO getPermission(AuthPermissionReqVO reqVO) {
         ApplicationDO applicationDO = appCommonService.validateApplicationExist(reqVO.getApplicationId());
         AuthRoleDO authRoleDO = appCommonService.validateRoleExist(reqVO.getRoleId());
         MenuDO menuDO = appCommonService.validateMenuExist(reqVO.getMenuId());
+        List<EntityFieldRespDTO> entityFieldRespDTOS = getEntityFieldRespDTOS(menuDO.getEntityCode());
         //
         AuthPermissionDTO permissionDTO = new AuthPermissionDTO();
         permissionDTO.setApplicationId(applicationDO.getId());
@@ -64,65 +77,63 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
         permissionDTO.setRoleId(authRoleDO.getId());
         permissionDTO.setRoleCode(authRoleDO.getRoleCode());
         //
-        AuthPermissionDetailVO authPermissionDetailVO = new AuthPermissionDetailVO();
-        BeanUtils.copyProperties(reqVO, authPermissionDetailVO);
-        BeanUtils.copyProperties(permissionDTO, authPermissionDetailVO);
+        AuthDetailPermissionVO authDetailPermissionVO = new AuthDetailPermissionVO();
+        BeanUtils.copyProperties(permissionDTO, authDetailPermissionVO);
         //补充 基本权限
         AuthPermissionDO authPermissionDO = authPermissionRepository.findByQuery(permissionDTO);
-        AuthPermissionVO authPermissionVO = BeanUtils.toBean(authPermissionDO, AuthPermissionVO.class);
-        authPermissionVO = formatAuthPermissionVO(authPermissionVO);
-        authPermissionDetailVO.setAuthPermission(authPermissionVO);
+        if (authPermissionDO != null) {
+            authDetailPermissionVO.setPageAllowed(authPermissionDO.getPageAllowed());
+        }
         //补充 操作权限
-        List<AuthOperationDO> authOperationDOS = authOperationRepository.findByQuery(permissionDTO);
-        List<AuthOperationVO> authOperationVOS = BeanUtils.toBean(authOperationDOS, AuthOperationVO.class);
-        authOperationVOS = formatAuthOperations(authOperationVOS);
-        authPermissionDetailVO.setAuthOperations(authOperationVOS);
+        authDetailPermissionVO.setAuthOperations(queryAuthOperations(permissionDTO));
         //补充 实体权限
-        List<AuthEntityDO> authEntityDOS = authEntityRepository.findByQuery(permissionDTO);
-        authPermissionDetailVO.setAuthEntities(BeanUtils.toBean(authEntityDOS, AuthEntityVO.class));
+        AuthDetailEntityVO authDetailEntityVO = new AuthDetailEntityVO();
+        if (authPermissionDO != null) {
+            authDetailEntityVO.setAllEntitiesAllowed(authPermissionDO.getAllEntitiesAllowed());
+        }
+        authDetailEntityVO.setAuthEntities(queryAuthEntities(permissionDTO));
+        authDetailPermissionVO.setAuthEntity(authDetailEntityVO);
         //补充 数据权限
-        List<AuthDataGroupVO> authDataGroupVOS = queryAuthDataGroups(permissionDTO);
-        authPermissionDetailVO.setAuthDataGroups(authDataGroupVOS);
+        AuthDetailDataGroupVO authDetailDataGroupVO = queryAuthDataGroups(entityFieldRespDTOS, permissionDTO);
+        authDetailPermissionVO.setAuthData(authDetailDataGroupVO);
         //补充 字段权限
-        List<AuthFieldDO> authFieldDOS = authFieldRepository.findByQuery(permissionDTO);
-        authPermissionDetailVO.setAuthFields(BeanUtils.toBean(authFieldDOS, AuthFieldVO.class));
-        return authPermissionDetailVO;
-    }
-
-    private AuthPermissionVO formatAuthPermissionVO(AuthPermissionVO authPermissionVO) {
-        if (authPermissionVO == null) {
-            authPermissionVO = new AuthPermissionVO();
-            authPermissionVO.setPageAllowed(true);
-            authPermissionVO.setAllEntitiesAllowed(true);
-            authPermissionVO.setAllFieldsAllowed(true);
+        AuthDetailFieldVO authDetailFieldVO = new AuthDetailFieldVO();
+        if (authPermissionDO != null) {
+            authDetailFieldVO.setAllFieldsAllowed(authPermissionDO.getAllFieldsAllowed());
         }
-        return authPermissionVO;
+        authDetailFieldVO.setAuthFields(queryAuthFields(entityFieldRespDTOS, permissionDTO));
+        authDetailPermissionVO.setAuthField(authDetailFieldVO);
+        return authDetailPermissionVO;
     }
 
-    private List<AuthOperationVO> formatAuthOperations(List<AuthOperationVO> authOperationVOS) {
-        List<AuthOperationVO> result = new ArrayList<>();
-        List<DictDataRespDTO> dictDatas = dictDataApi.getDictDataList("app_auth_operation")
+
+    private List<AuthOperationVO> queryAuthOperations(AuthPermissionDTO permissionDTO) {
+        List<DictDataRespDTO> dictDataList = dictDataApi.getDictDataList(AuthUtils.AUTH_OPERATION_TABLE_NAME)
                 .getData();
-        List<Pair<DictDataRespDTO, AuthOperationVO>> pairs = AuthUtils.leftOuterJoin(dictDatas, authOperationVOS, (dict, authOperationVO) ->
-                dict.getValue().equalsIgnoreCase(authOperationVO.getOperationCode()));
-        for (Pair<DictDataRespDTO, AuthOperationVO> pair : pairs) {
-            DictDataRespDTO dict = pair.getLeft();
-            AuthOperationVO authOperationVO = pair.getRight();
-            if (authOperationVO == null) {
-                authOperationVO = new AuthOperationVO();
-                authOperationVO.setOperationCode(dict.getValue());
-                authOperationVO.setOperationDisplayName(dict.getLabel());
-                authOperationVO.setAllowed(false);
-            } else {
-                authOperationVO.setOperationDisplayName(dict.getLabel());
+        List<AuthOperationDO> authOperationDOS = authOperationRepository.findByQuery(permissionDTO);
+        List<Pair<DictDataRespDTO, AuthOperationDO>> pairs = AuthUtils.leftOuterJoin(dictDataList, authOperationDOS,
+                (dict, authOperationDO) -> dict.getValue().equalsIgnoreCase(authOperationDO.getOperationCode()));
+
+        return pairs.stream().map(pair -> {
+            DictDataRespDTO dictData = pair.getLeft();
+            AuthOperationVO authOperationVO = new AuthOperationVO();
+            authOperationVO.setOperationCode(dictData.getValue());
+            authOperationVO.setDisplayName(dictData.getLabel());
+            AuthOperationDO operationDO = pair.getRight();
+            if (operationDO != null) {
+                authOperationVO.setId(operationDO.getId());
+                authOperationVO.setAllowed(operationDO.getAllowed());
             }
-            result.add(authOperationVO);
-        }
-        return result;
+            return authOperationVO;
+        }).toList();
     }
 
+    private List<AuthEntityVO> queryAuthEntities(AuthPermissionDTO permissionDTO) {
+        List<AuthEntityDO> authEntityDOS = authEntityRepository.findByQuery(permissionDTO);
+        return BeanUtils.toBean(authEntityDOS, AuthEntityVO.class);
+    }
 
-    private List<AuthDataGroupVO> queryAuthDataGroups(AuthPermissionDTO permissionDTO) {
+    private AuthDetailDataGroupVO queryAuthDataGroups(List<EntityFieldRespDTO> entityFieldRespDTOS, AuthPermissionDTO permissionDTO) {
         List<AuthDataGroupDO> authDataGroupDOS = authDataGroupRepository.findByQuery(permissionDTO);
         List<AuthDataGroupVO> authDataGroupVOS = BeanUtils.toBean(authDataGroupDOS, AuthDataGroupVO.class);
         for (AuthDataGroupVO authDataGroupVO : authDataGroupVOS) {
@@ -131,7 +142,37 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
             List<List<AuthDataFilterVO>> dataFilters = groupAndOrder(dataFilterVOS);
             authDataGroupVO.setDataFilters(dataFilters);
         }
-        return authDataGroupVOS;
+        AuthDetailDataGroupVO authDetailDataGroupVO = new AuthDetailDataGroupVO();
+        authDetailDataGroupVO.setAuthDataGroups(authDataGroupVOS);
+        List<AuthFieldInfoVO> authFieldInfoVOS = queryFieldsInfo(entityFieldRespDTOS);
+        authDetailDataGroupVO.setFieldInfo(authFieldInfoVOS);
+        return authDetailDataGroupVO;
+    }
+
+    private List<AuthFieldInfoVO> queryFieldsInfo(List<EntityFieldRespDTO> entityFieldRespDTOS) {
+        List<PermitRefOtftRespDTO> permitRefOtftRespDTOS = metadataPermitApi.getPermitRefOtftList().getData();
+
+        List<AuthFieldInfoVO> authFieldInfoVOS = entityFieldRespDTOS.stream().map(field -> {
+            AuthFieldInfoVO authFieldInfoVO = new AuthFieldInfoVO();
+            authFieldInfoVO.setFieldName(field.getFieldName());
+            authFieldInfoVO.setDisplayName(field.getDisplayName());
+            authFieldInfoVO.setFieldType(field.getFieldType());
+            authFieldInfoVO.setOperatorMap(queryAuthFieldInfoVOOperator(field.getFieldType(), permitRefOtftRespDTOS));
+            return authFieldInfoVO;
+        }).toList();
+        return authFieldInfoVOS;
+    }
+
+    private List<AuthFieldInfoVO.Operator> queryAuthFieldInfoVOOperator(String fieldTypeCode, List<PermitRefOtftRespDTO> permitRefOtftRespDTOS) {
+        return permitRefOtftRespDTOS.stream()
+                .filter(permitRefOtftRespDTO -> permitRefOtftRespDTO.getFieldTypeCode().equalsIgnoreCase(fieldTypeCode))
+                .map(permitRefOtftRespDTO -> {
+                    AuthFieldInfoVO.Operator operator = new AuthFieldInfoVO.Operator();
+                    operator.setValue(permitRefOtftRespDTO.getValidationCode());
+                    operator.setLabel(permitRefOtftRespDTO.getValidationName());
+                    return operator;
+                })
+                .toList();
     }
 
     /**
@@ -157,8 +198,36 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
                 .collect(Collectors.toList());
     }
 
+    private List<AuthFieldVO> queryAuthFields(List<EntityFieldRespDTO> entityFieldRespDTOS, AuthPermissionDTO permissionDTO) {
+        List<AuthFieldDO> authFieldDOS = authFieldRepository.findByQuery(permissionDTO);
+        List<Pair<EntityFieldRespDTO, AuthFieldDO>> pairs = AuthUtils.leftOuterJoin(entityFieldRespDTOS, authFieldDOS,
+                (entityFieldRespDTO, authFieldDO) -> entityFieldRespDTO.getFieldName().equalsIgnoreCase(authFieldDO.getFieldName()));
+        return pairs.stream().map(pair -> {
+            EntityFieldRespDTO entityField = pair.getLeft();
+            AuthFieldVO authFieldVO = new AuthFieldVO();
+            authFieldVO.setFieldName(entityField.getFieldName());
+            authFieldVO.setFieldDisplayName(entityField.getDisplayName());
+            AuthFieldDO authFieldDO = pair.getRight();
+            if (authFieldDO != null) {
+                authFieldVO.setId(authFieldDO.getId());
+                authFieldVO.setCanRead(authFieldDO.getCanRead());
+                authFieldVO.setCanEdit(authFieldDO.getCanEdit());
+                authFieldVO.setCanDownload(authFieldDO.getCanDownload());
+            }
+            return authFieldVO;
+        }).toList();
+    }
+
+    private List<EntityFieldRespDTO> getEntityFieldRespDTOS(String entityCode) {
+        EntityFieldQueryReqDTO reqDTO = new EntityFieldQueryReqDTO();
+        reqDTO.setEntityId(entityCode);
+        reqDTO.setIsSystemField(0);
+        List<EntityFieldRespDTO> entityFieldRespDTOS = metadataEntityFieldApi.getEntityFieldList(reqDTO).getData();
+        return entityFieldRespDTOS;
+    }
+
     @Override
-    public void updatePermission(AuthPermissionDetailVO detailVO) {
+    public void updatePermission(AuthDetailPermissionVO detailVO) {
         ApplicationDO applicationDO = appCommonService.validateApplicationExist(detailVO.getApplicationId());
         AuthRoleDO authRoleDO = appCommonService.validateRoleExist(detailVO.getRoleId());
         MenuDO menuDO = appCommonService.validateMenuExist(detailVO.getMenuId());
@@ -176,32 +245,32 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
         reqVO.setRoleId(detailVO.getRoleId());
         reqVO.setMenuId(detailVO.getMenuId());
         //更新 功能权限
-        updateAuthPermission(permissionDTO, detailVO.getAuthPermission());
+        updateAuthPermission(permissionDTO, detailVO);
         updateAuthOperation(permissionDTO, detailVO.getAuthOperations());
-        updateAuthEntity(permissionDTO, detailVO.getAuthEntities());
-        updateAuthDataGroup(permissionDTO, detailVO.getAuthDataGroups());
-        updateAuthField(permissionDTO, detailVO.getAuthFields());
+        updateAuthEntity(permissionDTO, detailVO.getAuthEntity());
+        updateAuthDataGroup(permissionDTO, detailVO.getAuthData().getAuthDataGroups());
+        updateAuthField(permissionDTO, detailVO.getAuthField());
     }
 
-    private void updateAuthPermission(AuthPermissionDTO permissionDTO, AuthPermissionVO authPermissionVO) {
+    private void updateAuthPermission(AuthPermissionDTO permissionDTO, AuthDetailPermissionVO detailVO) {
         AuthPermissionDO authPermissionDO = authPermissionRepository.findByQuery(permissionDTO);
         if (authPermissionDO == null) {
             authPermissionDO = new AuthPermissionDO();
-            copyFields(permissionDTO, authPermissionVO, authPermissionDO);
+            copyFields(permissionDTO, detailVO, authPermissionDO);
             authPermissionRepository.insert(authPermissionDO);
         } else {
-            copyFields(permissionDTO, authPermissionVO, authPermissionDO);
+            copyFields(permissionDTO, detailVO, authPermissionDO);
             authPermissionRepository.update(authPermissionDO);
         }
     }
 
-    private void copyFields(AuthPermissionDTO permissionDTO, AuthPermissionVO authPermissionVO, AuthPermissionDO authPermissionDO) {
+    private void copyFields(AuthPermissionDTO permissionDTO, AuthDetailPermissionVO detailVO, AuthPermissionDO authPermissionDO) {
         authPermissionDO.setApplicationCode(permissionDTO.getApplicationCode());
         authPermissionDO.setRoleCode(permissionDTO.getRoleCode());
         authPermissionDO.setMenuCode(permissionDTO.getMenuCode());
-        authPermissionDO.setPageAllowed(authPermissionVO.getPageAllowed());
-        authPermissionDO.setAllEntitiesAllowed(authPermissionVO.getAllEntitiesAllowed());
-        authPermissionDO.setAllFieldsAllowed(authPermissionVO.getAllFieldsAllowed());
+        authPermissionDO.setPageAllowed(detailVO.getPageAllowed());
+        authPermissionDO.setAllEntitiesAllowed(detailVO.getAuthEntity().getAllEntitiesAllowed());
+        authPermissionDO.setAllFieldsAllowed(detailVO.getAuthField().getAllFieldsAllowed());
     }
 
     private void updateAuthOperation(AuthPermissionDTO permissionDTO, List<AuthOperationVO> authOperationVOS) {
@@ -233,7 +302,8 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
         authOperationDO.setAllowed(authOperationVO.getAllowed());
     }
 
-    private void updateAuthEntity(AuthPermissionDTO permissionDTO, List<AuthEntityVO> authEntityVOS) {
+    private void updateAuthEntity(AuthPermissionDTO permissionDTO, AuthDetailEntityVO detailEntityVO) {
+        List<AuthEntityVO> authEntityVOS = detailEntityVO.getAuthEntities();
         List<AuthEntityDO> authEntityDOS = authEntityRepository.findByQuery(permissionDTO);
         List<Pair<AuthEntityDO, AuthEntityVO>> pairs = AuthUtils.fullOuterJoin(authEntityDOS, authEntityVOS,
                 (authEntityDO, authEntityVO) -> authEntityDO.getId().equals(authEntityVO.getId())
@@ -294,7 +364,7 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
         authDataGroupDO.setGroupName(authDataGroupVO.getGroupName());
         authDataGroupDO.setGroupOrder(authDataGroupVO.getGroupOrder());
         authDataGroupDO.setDescription(authDataGroupVO.getDescription());
-        authDataGroupDO.setScopeFieldCode(authDataGroupVO.getScopeFieldCode());
+        authDataGroupDO.setScopeFieldName(authDataGroupVO.getScopeFieldName());
         authDataGroupDO.setScopeLevel(authDataGroupVO.getScopeLevel());
         authDataGroupDO.setOperable(authDataGroupVO.getOperable());
     }
@@ -328,7 +398,7 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
         authDataFilterDO.setGroupCode(groupCode);
         authDataFilterDO.setConditionGroup(authDataFilterVO.getConditionGroup());
         authDataFilterDO.setConditionOrder(authDataFilterVO.getConditionOrder());
-        authDataFilterDO.setFieldCode(authDataFilterVO.getFieldCode());
+        authDataFilterDO.setFieldName(authDataFilterVO.getFieldName());
         authDataFilterDO.setFieldValueType(authDataFilterVO.getFieldValueType());
         authDataFilterDO.setFieldOperator(authDataFilterVO.getFieldOperator());
         authDataFilterDO.setFieldValue(authDataFilterVO.getFieldValue());
@@ -346,10 +416,11 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
         return authDataFilters.stream().flatMap(Collection::stream).toList();
     }
 
-    private void updateAuthField(AuthPermissionDTO permissionDTO, List<AuthFieldVO> authFieldVOS) {
+    private void updateAuthField(AuthPermissionDTO permissionDTO, AuthDetailFieldVO detailFieldVO) {
+        List<AuthFieldVO> authFieldVOS = detailFieldVO.getAuthFields();
         List<AuthFieldDO> authFieldDOS = authFieldRepository.findByQuery(permissionDTO);
         List<Pair<AuthFieldDO, AuthFieldVO>> pairs = AuthUtils.fullOuterJoin(authFieldDOS, authFieldVOS,
-                (authFieldDO, authFieldVO) -> authFieldDO.getFieldCode().equals(authFieldVO.getFieldCode())
+                (authFieldDO, authFieldVO) -> authFieldDO.getFieldName().equals(authFieldVO.getFieldName())
         );
         for (Pair<AuthFieldDO, AuthFieldVO> pair : pairs) {
             AuthFieldDO authFieldDO = pair.getLeft();
@@ -371,7 +442,7 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
         authFieldDO.setApplicationCode(permissionDTO.getApplicationCode());
         authFieldDO.setRoleCode(permissionDTO.getRoleCode());
         authFieldDO.setMenuCode(permissionDTO.getMenuCode());
-        authFieldDO.setFieldCode(authFieldVO.getFieldCode());
+        authFieldDO.setFieldName(authFieldVO.getFieldName());
         authFieldDO.setCanRead(authFieldVO.getCanRead());
         authFieldDO.setCanEdit(authFieldVO.getCanEdit());
         authFieldDO.setCanDownload(authFieldVO.getCanDownload());
