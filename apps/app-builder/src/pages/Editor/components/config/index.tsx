@@ -1,6 +1,7 @@
-import { usePageEditorStore } from '@/hooks/useStore';
+import { usePageEditorSignal } from '@/hooks/useSignal';
 import { Button } from '@arco-design/web-react';
 import { IconLeft, IconRight } from '@arco-design/web-react/icon';
+import { useSignals } from '@preact/signals-react/runtime';
 import { useState } from 'react';
 import MaterialConfiger from './components';
 import styles from './index.module.less';
@@ -8,7 +9,10 @@ import styles from './index.module.less';
 interface EditorConfigProps {}
 
 export default function EditorConfig({}: EditorConfigProps) {
-  const { curComponentID } = usePageEditorStore();
+  //   const { curComponentID } = usePageEditorStore();
+
+  useSignals();
+  const { curComponentID } = usePageEditorSignal();
 
   const [showDrawer, setShowDrawer] = useState(true);
 

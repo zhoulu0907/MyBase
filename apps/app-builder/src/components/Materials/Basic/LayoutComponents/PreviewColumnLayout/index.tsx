@@ -1,8 +1,10 @@
+import { usePageEditorSignal } from '@/hooks/useSignal';
 import { usePageEditorStore } from '@/hooks/useStore';
 import PreviewRender from '@/pages/Editor/components/render/PreviewRender';
 import { getComponentWidth } from '@/pages/Editor/utils/app_resource';
 import { COMPONENT_GROUP_NAME, type GridItem } from '@/pages/Editor/utils/const';
 import { Layout } from '@arco-design/web-react';
+import { useSignals } from '@preact/signals-react/runtime';
 import { useEffect } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import styles from './index.module.less';
@@ -12,16 +14,16 @@ const XPreviewColumnLayout = (props: XColumnLayoutConfig) => {
   const { colCount, id } = props;
 
   const {
-    curComponentID,
-    setCurComponentID,
-    clearCurComponentID,
-    setCurComponentSchema,
-    pageComponentSchemas,
-    delPageComponentSchemas,
-    setShowDeleteButton,
+    // setCurComponentID,
+    // setCurComponentSchema,
+    // pageComponentSchemas,
+    // setShowDeleteButton,
     colComponentsMap,
     setColComponentsMap
   } = usePageEditorStore();
+
+  useSignals();
+  const { setCurComponentID, setCurComponentSchema, pageComponentSchemas, setShowDeleteButton } = usePageEditorSignal();
 
   // 从 store 中获取当前组件的列数据，如果不存在则初始化为空数组
   const colComponents = colComponentsMap.colComponents.get(id) || Array.from({ length: colCount }, () => []);
@@ -68,19 +70,24 @@ const XPreviewColumnLayout = (props: XColumnLayoutConfig) => {
                   data-cp-id={cp.id}
                   className={styles.componentItem}
                   style={{
-                    width: getComponentWidth(pageComponentSchemas.get(cp.id), cp.type)
+                    width: getComponentWidth(pageComponentSchemas[cp.id], cp.type)
                   }}
                   onClick={(e: React.MouseEvent<HTMLDivElement>) => {
                     e.stopPropagation();
                     console.log('点击组件: ', cp.id);
                     setCurComponentID(cp.id);
 
-                    const curComponentSchema = pageComponentSchemas.get(cp.id);
+                    const curComponentSchema = pageComponentSchemas[cp.id];
                     setCurComponentSchema(curComponentSchema);
                     setShowDeleteButton(true);
                   }}
                 >
-                  <PreviewRender cpId={cp.id} cpType={cp.type} pageComponentSchema={pageComponentSchemas.get(cp.id)} />
+                  <PreviewRender
+                    cpId={cp.id}
+                    cpType={cp.type}
+                    pageComponentSchema={pageComponentSchemas[cp.id]}
+                    runtime={true}
+                  />
                 </div>
               ))}
           </ReactSortable>

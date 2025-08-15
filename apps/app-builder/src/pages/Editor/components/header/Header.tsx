@@ -4,7 +4,7 @@ import activeListDesignSVG from '@/assets/images/list_design_active_icon.svg';
 import defaultListDesignSVG from '@/assets/images/list_design_default_icon.svg';
 import previewSVG from '@/assets/images/preview_icon.svg';
 import { useI18n } from '@/hooks/useI18n';
-import { usePageEditorStore } from '@/hooks/useStore';
+import { usePageEditorSignal } from '@/hooks/useSignal';
 import { useAppStore } from '@/store/store_app';
 import { useBasicEditorStore, useFromEditorStore, useListEditorStore } from '@/store/store_editor';
 import { useAppEntityStore } from '@/store/store_entity';
@@ -57,7 +57,11 @@ const tabData = [
 
 export default function EditorHeader() {
   const { t } = useI18n();
-  const { clearCurComponentID } = usePageEditorStore();
+
+  //   const { clearCurComponentID } = usePageEditorStore();
+
+  const { clearCurComponentID } = usePageEditorSignal();
+
   const {
     components: fromComponents,
     pageComponentSchemas: fromPageComponentSchemas,

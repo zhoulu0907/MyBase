@@ -15,11 +15,31 @@ import MobileActiveIcon from '@/assets/images/mobile_icon_active.svg';
 import PCIcon from '@/assets/images/pc_icon.svg';
 import PCActiveIcon from '@/assets/images/pc_icon_active.svg';
 
+import { usePageEditorSignal } from '@/hooks/useSignal';
+import { useSignals } from '@preact/signals-react/runtime';
 import 'react-grid-layout/css/styles.css';
 import styles from './index.module.less';
 
 export default function EditorWorkspace() {
   const [showEmpty, setShowEmpty] = useState(true);
+
+  const {
+    // curComponentID,
+    // setCurComponentID,
+    // clearCurComponentID,
+    // setCurComponentSchema,
+    // pageComponentSchemas,
+    // setPageComponentSchemas,
+    // delPageComponentSchemas,
+    // components,
+    // setComponents,
+    // delComponents,
+    // showDeleteButton,
+    // setShowDeleteButton,
+    delColComponentsMap
+  } = usePageEditorStore();
+
+  useSignals();
 
   const {
     curComponentID,
@@ -33,9 +53,8 @@ export default function EditorWorkspace() {
     setComponents,
     delComponents,
     showDeleteButton,
-    setShowDeleteButton,
-    delColComponentsMap
-  } = usePageEditorStore();
+    setShowDeleteButton
+  } = usePageEditorSignal();
 
   const [pageMode, setPageMode] = useState<string>('pc');
 
@@ -127,10 +146,10 @@ export default function EditorWorkspace() {
             console.log(`拖入组件 ${cpID},类型 ${itemType}, 名称 ${itemDisplayName} 组件名称 ${dataLabel}`);
 
             if (cpID) {
-              const cpSchema = pageComponentSchemas.get(cpID);
+              const cpSchema = pageComponentSchemas[cpID];
               // 如果组件已经存在，则不进行创建
               if (cpSchema && cpSchema.config && cpSchema.editData) {
-                console.log(`组件 已存在，不进行创建`);
+                console.log(`组件 ${cpID} 已存在，不进行创建`);
                 setCurComponentID(cpID!);
                 setCurComponentSchema(cpSchema);
                 setShowDeleteButton(false);
@@ -181,7 +200,7 @@ export default function EditorWorkspace() {
             console.log('onStart', e);
             const cpID = e.item.getAttribute('data-cp-id') || '';
             setCurComponentID(cpID);
-            const curComponentSchema = pageComponentSchemas.get(cpID) || {};
+            const curComponentSchema = pageComponentSchemas[cpID] || {};
             setCurComponentSchema(curComponentSchema);
             setShowDeleteButton(true);
           }}
@@ -194,7 +213,7 @@ export default function EditorWorkspace() {
               data-cp-id={cp.id}
               className={styles.componentItem}
               style={{
-                width: getComponentWidth(pageComponentSchemas.get(cp.id), cp.type),
+                width: getComponentWidth(pageComponentSchemas[cp.id], cp.type),
                 borderColor: curComponentID === cp.id ? '#4FAE7B' : ''
               }}
               onClick={(e: React.MouseEvent<HTMLDivElement>) => {
@@ -202,13 +221,13 @@ export default function EditorWorkspace() {
                 console.log('点击组件: ', cp.id);
                 setCurComponentID(cp.id);
 
-                const curComponentSchema = pageComponentSchemas.get(cp.id);
+                const curComponentSchema = pageComponentSchemas[cp.id];
                 setCurComponentSchema(curComponentSchema);
                 console.log('当前组件的配置: ', curComponentSchema);
                 setShowDeleteButton(true);
               }}
             >
-              <EditRender cpId={cp.id} cpType={cp.type} pageComponentSchema={pageComponentSchemas.get(cp.id)} />
+              <EditRender cpId={cp.id} cpType={cp.type} pageComponentSchema={pageComponentSchemas[cp.id]} />
 
               {/* 删除按钮 */}
               {/* TODO(mickey): 组件继续封装，和layout中的共用一套 */}

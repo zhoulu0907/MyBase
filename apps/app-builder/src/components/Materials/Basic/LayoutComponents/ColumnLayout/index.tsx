@@ -1,11 +1,13 @@
 import { getComponentSchema } from '@/components/Materials/schema';
 import { ALL_COMPONENT_TYPES } from '@/constants/componentTypes';
+import { usePageEditorSignal } from '@/hooks/useSignal';
 import { usePageEditorStore } from '@/hooks/useStore';
 import EditRender from '@/pages/Editor/components/render/EditRender';
 import { getComponentConfig, getComponentWidth } from '@/pages/Editor/utils/app_resource';
 import { COMPONENT_GROUP_NAME, type GridItem } from '@/pages/Editor/utils/const';
 import { Layout } from '@arco-design/web-react';
 import { IconDelete } from '@arco-design/web-react/icon';
+import { useSignals } from '@preact/signals-react/runtime';
 import { useEffect } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import styles from './index.module.less';
@@ -15,6 +17,21 @@ const XColumnLayout = (props: XColumnLayoutConfig) => {
   const { colCount, id } = props;
 
   const {
+    // curComponentID,
+    // setCurComponentID,
+    // clearCurComponentID,
+    // setCurComponentSchema,
+    // pageComponentSchemas,
+    // setPageComponentSchemas,
+    // delPageComponentSchemas,
+    // showDeleteButton,
+    // setShowDeleteButton,
+    colComponentsMap,
+    setColComponentsMap
+  } = usePageEditorStore();
+
+  useSignals();
+  const {
     curComponentID,
     setCurComponentID,
     clearCurComponentID,
@@ -23,10 +40,8 @@ const XColumnLayout = (props: XColumnLayoutConfig) => {
     setPageComponentSchemas,
     delPageComponentSchemas,
     showDeleteButton,
-    setShowDeleteButton,
-    colComponentsMap,
-    setColComponentsMap
-  } = usePageEditorStore();
+    setShowDeleteButton
+  } = usePageEditorSignal();
 
   // 从 store 中获取当前组件的列数据，如果不存在则初始化为空数组
   const colComponents = colComponentsMap.colComponents.get(id) || Array.from({ length: colCount }, () => []);
@@ -83,7 +98,7 @@ const XColumnLayout = (props: XColumnLayoutConfig) => {
               const itemType = e.item.getAttribute('data-cp-type');
               const itemDisplayName = e.item.getAttribute('data-cp-displayname');
 
-              const schemaConfig = getComponentConfig(pageComponentSchemas.get(cpID!), itemType!);
+              const schemaConfig = getComponentConfig(pageComponentSchemas[cpID!], itemType!);
 
               const schema = getComponentSchema(itemType as any);
 
@@ -125,7 +140,7 @@ const XColumnLayout = (props: XColumnLayoutConfig) => {
               console.log('onStart', e);
               const cpID = e.item.getAttribute('data-id') || '';
               setCurComponentID(cpID);
-              const curComponentSchema = pageComponentSchemas.get(cpID) || {};
+              const curComponentSchema = pageComponentSchemas[cpID] || {};
               setCurComponentSchema(curComponentSchema);
               setShowDeleteButton(true);
             }}
@@ -139,7 +154,7 @@ const XColumnLayout = (props: XColumnLayoutConfig) => {
                   data-cp-id={cp.id}
                   className={styles.componentItem}
                   style={{
-                    width: getComponentWidth(pageComponentSchemas.get(cp.id), cp.type),
+                    width: getComponentWidth(pageComponentSchemas[cp.id], cp.type),
                     borderColor: curComponentID === cp.id ? '#4FAE7B' : 'transparent'
                   }}
                   onClick={(e: React.MouseEvent<HTMLDivElement>) => {
@@ -147,12 +162,12 @@ const XColumnLayout = (props: XColumnLayoutConfig) => {
                     console.log('点击组件: ', cp.id);
                     setCurComponentID(cp.id);
 
-                    const curComponentSchema = pageComponentSchemas.get(cp.id);
+                    const curComponentSchema = pageComponentSchemas[cp.id];
                     setCurComponentSchema(curComponentSchema);
                     setShowDeleteButton(true);
                   }}
                 >
-                  <EditRender cpId={cp.id} cpType={cp.type} pageComponentSchema={pageComponentSchemas.get(cp.id)} />
+                  <EditRender cpId={cp.id} cpType={cp.type} pageComponentSchema={pageComponentSchemas[cp.id]} />
 
                   {/* 删除按钮 */}
                   {curComponentID === cp.id && showDeleteButton && (
