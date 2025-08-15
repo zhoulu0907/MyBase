@@ -6,6 +6,7 @@ import type { XInputEmailConfig } from './schema';
 const XInputEmail = memo((props: XInputEmailConfig) => {
   const {
     label,
+    dataField,
     placeholder,
     tooltip,
     status,
@@ -35,12 +36,13 @@ const XInputEmail = memo((props: XInputEmailConfig) => {
   return (
     <Form.Item
       label={label}
+      field={dataField.length > 0 ? dataField[dataField.length - 1] : ''}
       layout={layout}
-      labelCol={{
-        span: labelColSpan
-      }}
       tooltip={tooltip}
-      wrapperCol={{ span: 24 - labelColSpan }}
+      labelCol={{
+        style: { width: labelColSpan, flex: 'unset' }
+      }}
+      wrapperCol={{ style: { flex: 1 } }}
       rules={[
         { required }
         // { type: "email", message: "请输入合法的邮件地址" },

@@ -2,6 +2,7 @@ import {
   alignConfig,
   baseConfig,
   baseDefault,
+  dataFieldConfig,
   labelColSpanConfig,
   layoutConfig,
   statusConfig,
@@ -27,6 +28,7 @@ import type {
   IAlignConfigType,
   IBooleanConfigType,
   IColorConfigType,
+  IDataFieldConfigType,
   IDescriptionConfigType,
   ILabelColSpanConfigType,
   ILabelConfigType,
@@ -68,6 +70,7 @@ export type TXInputPhoneEditData = Array<
   | ILayoutConfigType<TLayoutSelectKeyType>
   | IAlignConfigType<TAlignSelectKeyType>
   | IColorConfigType
+  | IDataFieldConfigType
 >;
 
 export interface XInputPhoneConfig extends ICommonBaseType {
@@ -75,6 +78,11 @@ export interface XInputPhoneConfig extends ICommonBaseType {
    * 输入框标题
    */
   label: TTextDefaultType;
+
+  /**
+   * 数据字段
+   */
+  dataField: TTextDefaultType[];
 
   /**
    * 占位符
@@ -163,6 +171,7 @@ const XInputPhone: XInputPhoneSchema = {
       name: '描述信息',
       type: CONFIG_TYPES.DESCRIPTION_INPUT
     },
+    ...dataFieldConfig,
     {
       key: 'tooltip',
       name: '提示文字',
@@ -197,6 +206,7 @@ const XInputPhone: XInputPhoneSchema = {
   config: {
     ...baseDefault,
     label: '手机号输入',
+    dataField: [],
     placeholder: '请输入手机号',
     description: '',
     tooltip: '',
@@ -209,7 +219,7 @@ const XInputPhone: XInputPhoneSchema = {
     saveWithHidden: false,
     color: '',
     bgColor: '',
-    labelColSpan: 5
+    labelColSpan: 100
   }
 };
 

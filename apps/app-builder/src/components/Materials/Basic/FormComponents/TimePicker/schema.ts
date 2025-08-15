@@ -158,7 +158,7 @@ const XTimePicker: XInputTimePickerSchema = {
     defaultValue: '',
     required: false,
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
-    labelColSpan: 5,
+    labelColSpan: 100,
     saveWithHidden: false
   }
 };

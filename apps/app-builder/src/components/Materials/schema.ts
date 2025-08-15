@@ -1,4 +1,5 @@
 import { ALL_COMPONENT_TYPES, type ComponentType as ComponentTypeFromConstants } from '@/constants/componentTypes';
+import { cloneDeep } from 'lodash-es';
 import BasicSchema from './Basic/schema';
 
 // 定义所有组件类型的联合类型
@@ -28,6 +29,7 @@ const componentSchemaMap: Partial<Record<ComponentType, ComponentSchema>> = {
   [ALL_COMPONENT_TYPES.FILE_UPLOAD]: BasicSchema.XFileUpload,
   [ALL_COMPONENT_TYPES.IMG_UPLOAD]: BasicSchema.XImgUpload,
   [ALL_COMPONENT_TYPES.AUTO_CODE]: BasicSchema.XAutoCode,
+  [ALL_COMPONENT_TYPES.RELATED_FORM]: BasicSchema.XRelatedForm,
 
   [ALL_COMPONENT_TYPES.COLUMN_LAYOUT]: BasicSchema.XColumnLayout,
 
@@ -56,7 +58,8 @@ export function getComponentSchema(componentType: ComponentType): ComponentSchem
     throw new Error(`未找到组件类型 "${componentType}" 的配置`);
   }
 
-  return config;
+  // 使用 lodash 的 cloneDeep 进行深度克隆，避免修改原始配置
+  return cloneDeep(config);
 }
 
 /**

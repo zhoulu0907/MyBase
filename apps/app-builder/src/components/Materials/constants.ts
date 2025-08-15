@@ -33,6 +33,8 @@ export const CONFIG_TYPES = {
   TABLE_PAGE_POSITION_RADIO: 'TablePagePositionRadio',
   // 字段数据配置
   FIELD_DATA: 'FieldData',
+  // 关联表单数据配置
+  RELATED_FORM_DATA: 'RelatedFormData',
   // 表格数据配置
   TABLE_DATA: 'TableData',
   // 表格分页数量

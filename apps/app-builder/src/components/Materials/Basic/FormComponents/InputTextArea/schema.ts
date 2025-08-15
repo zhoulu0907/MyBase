@@ -2,6 +2,7 @@ import {
   alignConfig,
   baseConfig,
   baseDefault,
+  dataFieldConfig,
   labelColSpanConfig,
   layoutConfig,
   statusConfig,
@@ -27,6 +28,7 @@ import type {
   IAlignConfigType,
   IBooleanConfigType,
   IColorConfigType,
+  IDataFieldConfigType,
   IDescriptionConfigType,
   ILabelColSpanConfigType,
   ILabelConfigType,
@@ -68,6 +70,7 @@ export type TXInputTextAreaEditData = Array<
   | ILayoutConfigType<TLayoutSelectKeyType>
   | IAlignConfigType<TAlignSelectKeyType>
   | IColorConfigType
+  | IDataFieldConfigType
 >;
 
 export interface XInputTextAreaConfig extends ICommonBaseType {
@@ -75,6 +78,11 @@ export interface XInputTextAreaConfig extends ICommonBaseType {
    * 输入框标题
    */
   label: TTextDefaultType;
+
+  /**
+   * 数据字段
+   */
+  dataField: TTextDefaultType[];
 
   /**
    * 占位符
@@ -163,6 +171,7 @@ const XInputTextArea: XInputTextAreaSchema = {
       name: '描述信息',
       type: CONFIG_TYPES.DESCRIPTION_INPUT
     },
+    ...dataFieldConfig,
     {
       key: 'tooltip',
       name: '提示文字',
@@ -197,10 +206,11 @@ const XInputTextArea: XInputTextAreaSchema = {
   config: {
     ...baseDefault,
     label: '多行文本',
+    dataField: [],
     placeholder: '请输入文字',
     description: '',
     tooltip: '',
-    labelColSpan: 5,
+    labelColSpan: 100,
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     defaultValue: '',

@@ -66,6 +66,33 @@
     background-color: #fff;
     border-radius: 24px 24px 0 0;
     margin: 0 auto;
+    position: relative;
+
+    .applicationEmpty {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: absolute;
+      top: 0;
+      left: 0;
+
+      .goCreateApplication {
+        width: 106px;
+        height: 40px;
+        cursor: pointer;
+        z-index: 1;
+        transform: translate(-201px, 168px);
+      }
+    }
+
+    .appHasDataBox {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
 
     .myAppFilter {
       height: @myAppFilterHeight;
@@ -125,7 +152,7 @@
 
       &:hover {
         box-sizing: border-box;
-        outline: 2px solid #4fae7b;
+        outline: 2px solid rgb(var(--primary-6));
         background-color: #fff;
         box-shadow: 0px 0px 8px 8px rgba(0, 0, 0, 0.05);
       }
@@ -158,7 +185,7 @@
 
             i {
               color: #fff;
-              font-size: 32px;
+              font-size: 24px;
             }
           }
 

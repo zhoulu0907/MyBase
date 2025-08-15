@@ -1,6 +1,7 @@
 import {
   baseConfig,
   baseDefault,
+  dataFieldConfig,
   labelColSpanConfig,
   layoutConfig,
   statusConfig,
@@ -21,6 +22,7 @@ import {
 } from '@/components/Materials/constants';
 import type {
   IBooleanConfigType,
+  IDataFieldConfigType,
   IDescriptionConfigType,
   ILabelColSpanConfigType,
   ILabelConfigType,
@@ -59,6 +61,7 @@ export type TXInputUserSelectEditData = Array<
   | ITextAreaConfigType
   | IBooleanConfigType
   | ILayoutConfigType<TLayoutSelectKeyType>
+  | IDataFieldConfigType
 >;
 
 export interface XInputUserSelectConfig extends ICommonBaseType {
@@ -66,6 +69,11 @@ export interface XInputUserSelectConfig extends ICommonBaseType {
    * 输入框标题
    */
   label: TTextDefaultType;
+
+  /**
+   * 数据字段
+   */
+  dataField: TTextDefaultType[];
 
   /**
    * 描述信息（显示在输入框下方，辅助说明）
@@ -128,6 +136,7 @@ const XUserSelect: XInputUserSelectSchema = {
       name: '描述信息',
       type: CONFIG_TYPES.DESCRIPTION_INPUT
     },
+    ...dataFieldConfig,
     {
       key: 'tooltip',
       name: '提示文字',
@@ -151,6 +160,7 @@ const XUserSelect: XInputUserSelectSchema = {
   config: {
     ...baseDefault,
     label: '人员选择',
+    dataField: [],
     description: '',
     tooltip: '',
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
@@ -158,7 +168,7 @@ const XUserSelect: XInputUserSelectSchema = {
     defaultValue: '',
     required: false,
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
-    labelColSpan: 5,
+    labelColSpan: 100,
     saveWithHidden: false
   }
 };

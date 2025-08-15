@@ -2,6 +2,7 @@ import {
   alignConfig,
   baseConfig,
   baseDefault,
+  dataFieldConfig,
   labelColSpanConfig,
   layoutConfig,
   statusConfig,
@@ -27,6 +28,7 @@ import type {
   IAlignConfigType,
   IBooleanConfigType,
   IColorConfigType,
+  IDataFieldConfigType,
   IDescriptionConfigType,
   ILabelColSpanConfigType,
   ILabelConfigType,
@@ -68,6 +70,7 @@ export type TXInputEmailEditData = Array<
   | ILayoutConfigType<TLayoutSelectKeyType>
   | IAlignConfigType<TAlignSelectKeyType>
   | IColorConfigType
+  | IDataFieldConfigType
 >;
 
 export interface XInputEmailConfig extends ICommonBaseType {
@@ -75,6 +78,11 @@ export interface XInputEmailConfig extends ICommonBaseType {
    * 输入框标题
    */
   label: TTextDefaultType;
+
+  /**
+   * 数据字段
+   */
+  dataField: TTextDefaultType[];
 
   /**
    * 占位符
@@ -163,6 +171,7 @@ const XInputEmail: XInputEmailSchema = {
       name: '描述信息',
       type: CONFIG_TYPES.DESCRIPTION_INPUT
     },
+    ...dataFieldConfig,
     {
       key: 'tooltip',
       name: '提示文字',
@@ -197,6 +206,7 @@ const XInputEmail: XInputEmailSchema = {
   config: {
     ...baseDefault,
     label: '邮箱输入',
+    dataField: [],
     placeholder: '请输入邮箱',
     description: '',
     tooltip: '',
@@ -209,7 +219,7 @@ const XInputEmail: XInputEmailSchema = {
     saveWithHidden: false,
     color: '',
     bgColor: '',
-    labelColSpan: 5
+    labelColSpan: 100
   }
 };
 

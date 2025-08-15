@@ -1,8 +1,8 @@
-import { LoginRequest } from '../types';
+import { LoginRequest, Headers } from '../types';
 import { systemService } from './clients';
 
-export const login = (req: LoginRequest) => {
-  return systemService.post('/auth/login', req);
+export const login = (req: LoginRequest, headers: Headers) => {
+  return systemService.post('/auth/login', req, { headers });
 };
 
 export const getPermissionInfo = () => {

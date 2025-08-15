@@ -50,8 +50,10 @@ const DataMethods: React.FC<DataMethodsProps> = ({ entity, activeTab }) => {
       title: '方法名称',
       dataIndex: 'methodName',
       key: 'methodName',
-      render: (methodName: string, record: { id: string }) => (
-        <Link onClick={() => handleMethodClick(methodName, record.methodCode)}>{methodName}</Link>
+      render: (methodName: string, record: { methodCode: string }) => (
+        <Link onClick={() => handleMethodClick(methodName, record.methodCode)} className={styles.methodName}>
+          {methodName}
+        </Link>
       )
     },
     {

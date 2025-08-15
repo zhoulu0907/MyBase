@@ -1,6 +1,6 @@
 import { listToTree } from '@/utils/tree';
 import { Input, Message, Modal, Space, Table } from '@arco-design/web-react';
-import { IconPlus, IconSearch } from '@arco-design/web-react/icon';
+import { IconPlus, IconSearch, IconCaretDown, IconCaretRight } from '@arco-design/web-react/icon';
 import { createDept, deleteDept, getDeptList, updateDept, type DeptForm, type DeptVO } from '@onebase/platform-center';
 import { debounce } from 'lodash-es';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -100,8 +100,6 @@ const OrganizationPage: React.FC = () => {
       }
       handleSearch(searchValue);
       setModalVisible(false);
-    } catch (error) {
-      Message.error('操作失败，请重试');
     } finally {
       setModalLoading(false);
     }
@@ -167,6 +165,12 @@ const OrganizationPage: React.FC = () => {
           pagination={false}
           virtualized={true}
           scroll={{ y: 600 }}
+          expandProps={{
+            expandRowByClick: true,
+            strictTreeData: true,
+            icon: ({ expanded }) => expanded ? <IconCaretDown style={{ marginRight: 8 }}/> : <IconCaretRight style={{ marginRight: 8 }} />,
+            width: 12
+          }}
         />
       </PlaceholderPanel>
 

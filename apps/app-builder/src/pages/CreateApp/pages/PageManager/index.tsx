@@ -82,7 +82,7 @@ const PageManagerPage: FC = () => {
   const [showGuide, setShowGuide] = useState<boolean>(false);
   const pageTypeOptions = [{ label: '普通表单', value: PageType.NORMAL }];
 
-  const [treeData, setTreeData] = useState<TreeNode[]>([]);
+  const [treeData, setTreeData] = useState<TreeNode[]>();
   const [entityListOptions, setEntityListOptions] = useState<Options[]>([]);
 
   const [curMenu, setCurMenu] = useState<ApplicationMenu>();
@@ -100,9 +100,14 @@ const PageManagerPage: FC = () => {
         const firstPageMenu = res.find((menu: ApplicationMenu) => menu.menuType == MenuType.PAGE);
         setCurMenu(firstPageMenu);
       });
+      getEntityList();
     }
     clearIsEditMode();
   }, [curAppId]);
+
+  useEffect(() => {
+    setShowGuide(treeData?.length === 0);
+  }, [treeData]);
 
   // 将接口返回的菜单数据（res）转换为 Tree 组件可用的 treeData 格式
   // TODO(mickey): showOption重构
@@ -160,8 +165,8 @@ const PageManagerPage: FC = () => {
 
   const getEntityList = async () => {
     // TODO(mickey): 等xiaoyi完成后 写活
-    const appId: string = '1';
-    // const appId: string = curAppId;
+    // const appId: string = '1';
+    const appId: string = curAppId;
     const res: MetadataEntityPair[] = await getEntityListByApp(appId);
     console.log(res);
     const entityOptions = res.map((entity) => ({
@@ -176,7 +181,6 @@ const PageManagerPage: FC = () => {
       <MenuItem
         key="page"
         onClick={() => {
-          getEntityList();
           setVisibleCreateForm('page');
           createForm.resetFields();
           setTitle(t('createApp.createPage'));
@@ -332,22 +336,8 @@ const PageManagerPage: FC = () => {
 
   return (
     <div className={styles.pageManagerPage}>
-      {showGuide && (
-        <div className={styles.guide}>
-          <div className={styles.guideImg} style={{ background: `url(${PageManagerGuide})no-repeat center / cover` }}>
-            <div
-              className={styles.guideButton}
-              onClick={() => {
-                setVisibleCreateForm('page');
-                setShowGuide(false);
-              }}
-            />
-          </div>
-        </div>
-      )}
       <Layout style={{ height: '100%' }}>
         <Layout>
-          {/* <Sider style={{ width: 225 }}> */}
           <Sider className={styles.sider}>
             <div className={styles.siderHeader}>
               <Input
@@ -384,17 +374,36 @@ const PageManagerPage: FC = () => {
             />
           </Sider>
           <Content className={styles.content}>
-            {curMenu?.id && (
-              <div className={styles.contentHeader}>
-                <div className={styles.contentTitle}>{curMenu?.menuName}</div>
-                <Button type="primary" onClick={() => handleEditPageSet()}>
-                  {t('common.edit')}
-                </Button>
+            {showGuide ? (
+              <div className={styles.guide}>
+                <div
+                  className={styles.guideImg}
+                  style={{ background: `url(${PageManagerGuide})no-repeat center / cover` }}
+                >
+                  <div
+                    className={styles.guideButton}
+                    onClick={() => {
+                      setVisibleCreateForm('page');
+                      setShowGuide(false);
+                    }}
+                  />
+                </div>
               </div>
+            ) : (
+              <>
+                {curMenu?.id && (
+                  <div className={styles.contentHeader}>
+                    <div className={styles.contentTitle}>{curMenu?.menuName}</div>
+                    <Button type="primary" onClick={() => handleEditPageSet()}>
+                      {t('common.edit')}
+                    </Button>
+                  </div>
+                )}
+                <div className={styles.contentBody}>
+                  <PreviewContainer menuCode={curMenu?.menuCode || ''} runtime={false} />
+                </div>
+              </>
             )}
-            <div className={styles.contentBody}>
-              <PreviewContainer menuCode={curMenu?.menuCode || ''} runtime={false} />
-            </div>
           </Content>
         </Layout>
       </Layout>

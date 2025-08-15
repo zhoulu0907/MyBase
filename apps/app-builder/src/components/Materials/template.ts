@@ -32,6 +32,7 @@ export const COMPONENT_TYPE_DISPLAY_NAME_MAP: Record<string, string> = {
   [FORM_COMPONENT_TYPES.FILE_UPLOAD]: '文件上传',
   [FORM_COMPONENT_TYPES.IMG_UPLOAD]: '图片上传',
   [FORM_COMPONENT_TYPES.AUTO_CODE]: '唯一编码',
+  [FORM_COMPONENT_TYPES.RELATED_FORM]: '关联表单',
 
   // 列表组件
   [LIST_COMPONENT_TYPES.TABLE]: '表格',
@@ -222,6 +223,14 @@ const allTemplate = {
           h: 48,
           w: 68,
           displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.AUTO_CODE],
+          icon: 'readonly_cp.svg',
+          category: 'base'
+        },
+        {
+          type: FORM_COMPONENT_TYPES.RELATED_FORM,
+          h: 48,
+          w: 68,
+          displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.RELATED_FORM],
           icon: 'readonly_cp.svg',
           category: 'base'
         }

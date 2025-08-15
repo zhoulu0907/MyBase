@@ -71,6 +71,12 @@ export interface IDataFieldConfigType {
     type:  typeof CONFIG_TYPES.FIELD_DATA;
 }
 
+export interface IRelatedFormDataConfigType {
+    key: string;
+    name: string;
+    type:  typeof CONFIG_TYPES.RELATED_FORM_DATA;
+}
+
 export interface ITableDataConfigType {
     key: string;
     name: string;

@@ -1,5 +1,5 @@
 import StatusTag, { getStatusLabel } from '@/components/StatusTag';
-import { Dropdown, Input, Menu, Message, Modal, Pagination, Space, Table } from '@arco-design/web-react';
+import { Dropdown, Input, Menu, Message, Modal, Pagination, Space, Table, Tag } from '@arco-design/web-react';
 import { IconMoreVertical, IconPlus, IconSearch } from '@arco-design/web-react/icon';
 import type { PageParam, UserVO } from '@onebase/platform-center';
 import { deleteUser, getUserPage, resetUserPassword, StatusEnum, updateUserStatus } from '@onebase/platform-center';
@@ -12,6 +12,7 @@ import PlaceholderPanel from '@/components/PlaceholderPanel';
 import { PermissionButton as Button } from '@/components/PermissionControl';
 import { hasPermission, hasAllPermissions } from '@/utils/permission';
 import { TENANT_USER_PERMISSION as ACTIONS } from '@/constants/permission';
+import { UserType } from '@onebase/platform-center';
 
 interface UserTableProps {
   selectedDeptId?: number;
@@ -141,6 +142,10 @@ export default function UserTable({ selectedDeptId = undefined, deptTree, deptLo
     setDetailModalVisible(true);
   };
 
+  const isSystemUser = (record: UserRecord) => {
+    return record.adminType === UserType.SYSTEM;
+  };
+
   const getColumns = (handleEdit: (record: UserRecord) => void) => {
     return [
       {
@@ -149,9 +154,14 @@ export default function UserTable({ selectedDeptId = undefined, deptTree, deptLo
         width: 120,
         ellipsis: true,
         render: (_: any, record: UserRecord) => (
-          <span className={s.tableColumnUsername} onClick={() => handleViewDetail(record)}>
-            {record.nickname}
-          </span>
+          <>
+            <span className={s.tableColumnUsername} onClick={() => handleViewDetail(record)}>
+              {record.nickname}
+            </span>
+            {isSystemUser(record) && <Tag color='cyan' style={{ marginLeft: '8px' }}>
+              系统
+            </Tag>}
+          </>
         )
       },
       { title: '手机号', dataIndex: 'mobile', width: 140 },
@@ -201,7 +211,7 @@ export default function UserTable({ selectedDeptId = undefined, deptTree, deptLo
                     <Menu.Item key="disable" onClick={() => handleStatusUpdate(record)}>
                       {getStatusLabel(record.status === StatusEnum.DISABLE ? StatusEnum.ENABLE : StatusEnum.DISABLE)}
                     </Menu.Item>
-                    <Menu.Item key="del" onClick={() => handleDelete(record)}>
+                    <Menu.Item key="del" disabled={isSystemUser(record)} onClick={() => handleDelete(record)}>
                       删除
                     </Menu.Item>
                   </Menu>
@@ -218,7 +228,12 @@ export default function UserTable({ selectedDeptId = undefined, deptTree, deptLo
                   <Button permission={ACTIONS.UPDATE} type="text" onClick={() => handleStatusUpdate(record)}>
                     {getStatusLabel(record.status === StatusEnum.DISABLE ? StatusEnum.ENABLE : StatusEnum.DISABLE)}
                   </Button>
-                  <Button permission={ACTIONS.RESET} type="text" onClick={() => handleDelete(record)}>
+                  <Button
+                    permission={ACTIONS.RESET}
+                    type="text"
+                    disabled={isSystemUser(record)}
+                    onClick={() => handleDelete(record)}
+                  >
                     删除
                   </Button>
                 </>

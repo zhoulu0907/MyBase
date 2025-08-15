@@ -7,17 +7,18 @@ const Option = Select.Option;
 const options = ['Beijing', 'Shanghai', 'Guangzhou', 'Disabled'];
 
 const XSelectOne = memo((props: XInputSelectOneConfig) => {
-  const { label, tooltip, status, required, layout, labelColSpan = 0 } = props;
+  const { label, dataField, tooltip, status, required, layout, labelColSpan = 0 } = props;
 
   return (
     <Form.Item
       label={label}
+      field={dataField.length > 0 ? dataField[dataField.length - 1] : ''}
       layout={layout}
       tooltip={tooltip}
       labelCol={{
-        span: labelColSpan
+        style: { width: labelColSpan, flex: 'unset' }
       }}
-      wrapperCol={{ span: 24 - labelColSpan }}
+      wrapperCol={{ style: { flex: 1 } }}
       rules={[{ required }]}
       style={{
         opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,

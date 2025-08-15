@@ -6,6 +6,7 @@ import type { XInputPhoneConfig } from './schema';
 const XInputPhone = memo((props: XInputPhoneConfig) => {
   const {
     label,
+    dataField,
     placeholder,
     tooltip,
     status,
@@ -35,12 +36,13 @@ const XInputPhone = memo((props: XInputPhoneConfig) => {
   return (
     <Form.Item
       label={label}
+      field={dataField.length > 0 ? dataField[dataField.length - 1] : ''}
       layout={layout}
-      labelCol={{
-        span: labelColSpan
-      }}
       tooltip={tooltip}
-      wrapperCol={{ span: 24 - labelColSpan }}
+      labelCol={{
+        style: { width: labelColSpan, flex: 'unset' }
+      }}
+      wrapperCol={{ style: { flex: 1 } }}
       rules={[{ required }]}
       style={{
         opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,

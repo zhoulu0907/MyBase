@@ -64,7 +64,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     <Menu>
       <Menu.Item key="profile">
         <div className={styles.userMenuInfo}>
-          <div>{UserPermissionManager.getUserPermissionInfo()?.user.email}</div>
+          <div>{UserPermissionManager.getUserPermissionInfo()?.user.username}</div>
         </div>
       </Menu.Item>
       <Menu.Item

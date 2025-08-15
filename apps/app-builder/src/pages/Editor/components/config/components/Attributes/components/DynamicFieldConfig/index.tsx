@@ -18,17 +18,18 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({ handlePropsChan
   const [entityTree, setEntityTree] = useState<any[]>([]);
 
   useEffect(() => {
-    initTreeData();
+    if (mainEntity) {
+      console.log(mainEntity);
+      initTreeData();
+    }
   }, [mainEntity]);
 
   const initTreeData = async () => {
-    console.log(mainEntity);
-
     const newEntityTree = mainEntity.fields
       .filter((field: AppEntityField) => field.isSystemField == 1)
       .map((field: AppEntityField) => ({
         value: field.fieldID,
-        label: field.displayName
+        label: field.fieldName
       }));
 
     setEntityTree([

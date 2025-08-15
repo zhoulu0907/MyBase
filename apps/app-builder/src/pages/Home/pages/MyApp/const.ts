@@ -56,3 +56,5 @@ export enum TagColor {
   'red',
   'orangered'
 }
+
+export const avatarBgColor = ['#009e9e', '#24B28F', '#1979FF', '#7E5AEA', '#EB693A', '#EBBC00'];

@@ -1,6 +1,6 @@
 import { Form, Input, Modal, Switch } from '@arco-design/web-react';
 import { StatusEnum, type DictItem } from '@onebase/platform-center';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 export interface DictForm {
   type: string;
@@ -27,17 +27,17 @@ export default function DictionaryTypeModal({
   title = '新增数据字典'
 }: DictionaryTypeModalProps) {
   const [form] = Form.useForm<DictItem>();
+  const [statusCheckedValue, setStatusCheckedValue] = useState(false);
 
   useEffect(() => {
     if (visible) {
       form.setFieldsValue({
         type: initialValues?.type || '',
         name: initialValues?.name || '',
-        remark: initialValues?.remark || '',
-        status: initialValues?.status ?? StatusEnum.DISABLE
+        remark: initialValues?.remark || ''
       });
-    } else {
-      form.resetFields();
+      const isChecked = !initialValues || initialValues.status === StatusEnum.ENABLE ? true : false;
+      setStatusCheckedValue(isChecked);
     }
   }, [visible, initialValues, form]);
 
@@ -47,7 +47,8 @@ export default function DictionaryTypeModal({
       visible={visible}
       onOk={() => {
         form.validate().then((values) => {
-          onOk(values);
+          const params = { ...values, status: statusCheckedValue ? StatusEnum.ENABLE : StatusEnum.DISABLE };
+          onOk(params);
         });
       }}
       onCancel={onCancel}
@@ -65,11 +66,8 @@ export default function DictionaryTypeModal({
         <Form.Item label="描述" field="remark">
           <Input.TextArea placeholder="请输入描述" maxLength={100} allowClear />
         </Form.Item>
-        <Form.Item label="是否启用" field="status" triggerPropName="checked">
-          <Switch
-            checked={form.getFieldValue('status') === StatusEnum.ENABLE}
-            onChange={(checked) => form.setFieldValue('status', checked ? StatusEnum.ENABLE : StatusEnum.DISABLE)}
-          />
+        <Form.Item label="是否启用">
+          <Switch checked={statusCheckedValue} onChange={setStatusCheckedValue} />
         </Form.Item>
       </Form>
     </Modal>

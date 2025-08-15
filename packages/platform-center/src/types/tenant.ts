@@ -16,3 +16,8 @@ export interface TenantInfo {
   website: string;
   websiteH5: string;
 }
+
+export interface updateTenantParams {
+  id: number;
+  name: string;
+}

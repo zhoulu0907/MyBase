@@ -1,14 +1,17 @@
 import { DS_RESOURCE_TYPE } from '@/pages/CreateApp/pages/DataFactory/utils/const';
 import { useAppStore } from '@/store/store_app';
-import { useResourceStore } from '@/store_resource';
+import { useResourceStore } from '@/store/store_resource';
 import { Form, Input, Message, Modal, Radio, Select } from '@arco-design/web-react';
 import { createEntity } from '@onebase/app';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import styles from '../modal.module.less';
+import type { EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
+
 interface EntityFormValues {
   source: string;
   code: string;
-  name: string;
+  tableName: string;
+  displayName: string;
   description: string;
   dsResource: string;
   dsTable: string;
@@ -27,12 +30,14 @@ const CreateEntityModal: React.FC<{
   visible: boolean;
   setVisible: (visible: boolean) => void;
   successCallback: () => void;
-  entityListLength: number;
-}> = ({ visible, setVisible, successCallback, entityListLength }) => {
+  lastEntity: EntityNode;
+  getGraphPositon: () => { x: number; y: number };
+}> = ({ visible, setVisible, successCallback, getGraphPositon, lastEntity }) => {
   const { curDataSourceId } = useResourceStore();
   const { curAppId } = useAppStore();
   const [form] = Form.useForm<EntityFormValues>();
   const [dsResource, setDsResource] = useState<string>(DS_RESOURCE_TYPE.EXTERNAL); // 数据源来源：内部数据源、外部数据源、外部数据源中引用自有数据源已有资产
+
   // 提交
   const handleFinish = () => {
     // 检查数据源ID是否存在
@@ -41,44 +46,27 @@ const CreateEntityModal: React.FC<{
       return;
     }
 
-    // TODO: 提交表单数据
+    console.log('lastentity', lastEntity);
+
     form.validate().then(async (values) => {
-      // 前端数据模拟
-      // const { nodes, edges } = JSON.parse(localStorage.getItem('entityFormValues') || JSON.stringify({nodes: [], edges: []}));
-
-      // nodes.push({
-      //   ...values,
-      //   id: values.code,
-      //   title: values.name,
-      //   x: nodes.length * 300,
-      //   y: 0,
-      //   fields: [
-      //     {id: 'ID', name: 'ID', type: '自增ID', isSystem: true},
-      //   ],
-      // });
-      // localStorage.setItem('entityFormValues', JSON.stringify({ nodes, edges }));
-      // console.log(values);
-
       const params = {
-        displayName: values.name,
-        code: values.code,
+        displayName: values.displayName,
+        tableName: values.tableName,
+        code: values?.code,
         entityType: 1, // 实体类型 1:自建表，2:复用已有表
         description: values.description,
         datasourceId: curDataSourceId,
         appId: curAppId,
         displayConfig: JSON.stringify({
-          x: entityListLength * 300,
-          y: 0
+          // x: getGraphPositon().x + 300,
+          // y: getGraphPositon().y
+          x: lastEntity?.positionX + 300,
+          y: lastEntity?.positionY
         })
       };
 
-      try {
-        const res = await createEntity(params);
-        // TODO 返回参数待解析
-        console.log('createEntity', res);
-      } catch (error) {
-        console.log(error);
-      }
+      const res = await createEntity(params);
+      console.log('createEntity', res);
 
       form.resetFields();
       Message.success('保存成功');
@@ -135,28 +123,28 @@ const CreateEntityModal: React.FC<{
         )}
 
         <Form.Item
-          label="业务实体编码"
-          field="code"
+          label="业务实体名称"
+          field="tableName"
           rules={[
-            { required: true, message: '请输入业务实体编码' },
-            { max: 40, message: '业务实体编码不能超过40个字符' }
+            { required: true, message: '请输入业务实体名称' },
+            { max: 40, message: '业务实体名称不能超过40个字符' }
           ]}
         >
           <Input
             maxLength={40}
-            placeholder="请输入业务实体编码，由字母、数字、下划线组合，须以字母开头，不超过40个字符"
+            placeholder="请输入业务实体名称，由字母、数字、下划线组合，须以字母开头，不超过40个字符"
           />
         </Form.Item>
 
         <Form.Item
-          label="业务实体名称"
-          field="name"
+          label="业务展示名称"
+          field="displayName"
           rules={[
-            { required: true, message: '请输入业务实体名称' },
-            { max: 50, message: '业务实体名称不能超过50个字符' }
+            { required: true, message: '请输入业务展示名称' },
+            { max: 50, message: '业务展示名称不能超过50个字符' }
           ]}
         >
-          <Input maxLength={50} placeholder="请输入实体名称，不超过50个字符" />
+          <Input maxLength={50} placeholder="请输入业务展示名称，不超过50个字符" />
         </Form.Item>
 
         <Form.Item label="业务实体描述" field="description">

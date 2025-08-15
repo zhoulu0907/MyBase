@@ -1,6 +1,7 @@
 import {
   baseConfig,
   baseDefault,
+  dataFieldConfig,
   dateTypeConfig,
   labelColSpanConfig,
   layoutConfig,
@@ -25,6 +26,7 @@ import {
 } from '@/components/Materials/constants';
 import type {
   IBooleanConfigType,
+  IDataFieldConfigType,
   IDateTypeConfigType,
   IDescriptionConfigType,
   ILabelColSpanConfigType,
@@ -38,10 +40,10 @@ import type {
   ITooltipConfigType,
   IWidthConfigType,
   TBooleanDefaultType,
+  TNumberDefaultType,
   TSelectDefaultType,
   TTextAreaDefaultType,
-  TTextDefaultType,
-  TNumberDefaultType
+  TTextDefaultType
 } from '@/components/Materials/types';
 
 export interface XInputDatePickerSchema {
@@ -64,6 +66,7 @@ export type TXInputDatePickerEditData = Array<
   | IStatusConfigType<TDateTypeSelectKeyType>
   | IDateTypeConfigType<TDateTypeSelectKeyType>
   | ILayoutConfigType<TLayoutSelectKeyType>
+  | IDataFieldConfigType
 >;
 
 export interface XInputDatePickerConfig extends ICommonBaseType {
@@ -71,6 +74,11 @@ export interface XInputDatePickerConfig extends ICommonBaseType {
    * 输入框标题
    */
   label: TTextDefaultType;
+
+  /**
+   * 数据字段
+   */
+  dataField: TTextDefaultType[];
 
   /**
    * 描述信息（显示在输入框下方，辅助说明）
@@ -139,6 +147,7 @@ const XDatePicker: XInputDatePickerSchema = {
       name: '描述信息',
       type: CONFIG_TYPES.DESCRIPTION_INPUT
     },
+    ...dataFieldConfig,
     {
       key: 'tooltip',
       name: '提示文字',
@@ -163,6 +172,7 @@ const XDatePicker: XInputDatePickerSchema = {
   config: {
     ...baseDefault,
     label: '日期选择',
+    dataField: [],
     description: '',
     tooltip: '',
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
@@ -172,7 +182,7 @@ const XDatePicker: XInputDatePickerSchema = {
     dateType: DATE_VALUES[DATE_OPTIONS.ONLY_DATE],
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
     saveWithHidden: false,
-    labelColSpan: 5
+    labelColSpan: 100
   }
 };
 

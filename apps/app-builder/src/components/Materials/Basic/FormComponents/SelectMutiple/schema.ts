@@ -159,7 +159,7 @@ const XSelectMutiple: XInputSelectMutipleSchema = {
     required: false,
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
     saveWithHidden: false,
-    labelColSpan: 5
+    labelColSpan: 100
   }
 };
 

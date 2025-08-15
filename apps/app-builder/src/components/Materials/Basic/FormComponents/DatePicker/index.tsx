@@ -5,17 +5,38 @@ import type { XInputDatePickerConfig } from './schema';
 
 const { YearPicker, MonthPicker } = DatePicker;
 const XDatePicker = memo((props: XInputDatePickerConfig) => {
-  const { label, tooltip, status, required, dateType, layout, labelColSpan = 0 } = props;
+  const { label, dataField, tooltip, status, required, dateType, layout, labelColSpan = 0 } = props;
+
+  // 确保 dateType 有默认值，避免 Form.Item 中没有元素
+  const currentDateType = dateType || DATE_VALUES[DATE_OPTIONS.ONLY_DATE];
+
+  // 根据日期类型渲染对应的日期选择器
+  const renderDatePicker = () => {
+    switch (currentDateType) {
+      case DATE_VALUES[DATE_OPTIONS.ONLY_YEAR]:
+        return <YearPicker style={{ width: '100%' }} />;
+      case DATE_VALUES[DATE_OPTIONS.ONLY_MONTH]:
+        return <MonthPicker style={{ width: '100%' }} />;
+      case DATE_VALUES[DATE_OPTIONS.ONLY_DATE]:
+        return <DatePicker style={{ width: '100%' }} />;
+      case DATE_VALUES[DATE_OPTIONS.FULL]:
+        return <DatePicker showTime style={{ width: '100%' }} />;
+      default:
+        // 默认显示日期选择器
+        return <DatePicker style={{ width: '100%' }} />;
+    }
+  };
 
   return (
     <Form.Item
       label={label}
+      field={dataField.length > 0 ? dataField[dataField.length - 1] : ''}
       layout={layout}
       tooltip={tooltip}
       labelCol={{
-        span: labelColSpan
+        style: { width: labelColSpan, flex: 'unset' }
       }}
-      wrapperCol={{ span: 24 - labelColSpan }}
+      wrapperCol={{ style: { flex: 1 } }}
       rules={[{ required }]}
       style={{
         opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,
@@ -23,10 +44,7 @@ const XDatePicker = memo((props: XInputDatePickerConfig) => {
         margin: '0px'
       }}
     >
-      {dateType === DATE_VALUES[DATE_OPTIONS.ONLY_YEAR] && <YearPicker style={{ width: '100%' }} />}
-      {dateType === DATE_VALUES[DATE_OPTIONS.ONLY_MONTH] && <MonthPicker style={{ width: '100%' }} />}
-      {dateType === DATE_VALUES[DATE_OPTIONS.ONLY_DATE] && <DatePicker style={{ width: '100%' }} />}
-      {dateType === DATE_VALUES[DATE_OPTIONS.FULL] && <DatePicker showTime style={{ width: '100%' }} />}
+      {renderDatePicker()}
     </Form.Item>
   );
 });

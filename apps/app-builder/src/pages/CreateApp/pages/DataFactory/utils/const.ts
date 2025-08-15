@@ -10,6 +10,35 @@ export const DS_RESOURCE_TYPE_LABEL = {
   [DS_RESOURCE_TYPE.EXTERNAL_WITH_INTERNAL]: '外部数据源中引用自有数据源已有资产'
 };
 
+export const ENTITY_FIELD_TYPE_LABEL = {
+  TEXT: 'TEXT',
+  LONG_TEXT: 'LONG_TEXT',
+  EMAIL: 'EMAIL',
+  PHONE: 'PHONE',
+  URL: 'URL',
+  ADDRESS: 'ADDRESS',
+  NUMBER: 'NUMBER',
+  CURRENCY: 'CURRENCY',
+  DATE: 'DATE',
+  DATETIME: 'DATETIME',
+  BOOLEAN: 'BOOLEAN',
+  PICKLIST: 'PICKLIST',
+  MULTI_PICKLIST: 'MULTI_PICKLIST',
+  AUTO_CODE: 'AUTO_CODE',
+  USER: 'USER',
+  DEPARTMENT: 'DEPARTMENT',
+  DATA_SELECTION: 'DATA_SELECTION',
+  // RELATION: 'RELATION',
+  STRUCTURE: 'STRUCTURE',
+  ARRAY: 'ARRAY',
+  FILE: 'FILE',
+  IMAGE: 'IMAGE',
+  GEOGRAPHY: 'GEOGRAPHY',
+  PASSWORD: 'PASSWORD',
+  ENCRYPTED: 'ENCRYPTED',
+  AGGREGATE: 'AGGREGATE'
+}
+
 export const ENTITY_FIELD_TYPE = {
   TEXT: '常规文本',
   LONG_TEXT: '长文本内容',
@@ -37,4 +66,19 @@ export const ENTITY_FIELD_TYPE = {
   PASSWORD: '密码',
   ENCRYPTED: '加密字段',
   AGGREGATE: '聚合统计'
+};
+
+// 系统字段对应
+export const SYSTEM_FIELD_MAP = {
+  id: '数据ID',
+  owner_id: '所属人',
+  owner_dept: '所属人部门',
+  creator: '创建人',
+  created_time: '创建时间',
+  updated_time: '更新时间',
+  updater: '更新人',
+  update_by: '更新人',
+  parent_id: '主表ID',
+  deleted: '软删除标记',
+  lock_version: '乐观锁版本'
 };

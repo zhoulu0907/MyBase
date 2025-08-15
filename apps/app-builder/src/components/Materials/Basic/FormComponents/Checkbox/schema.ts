@@ -1,6 +1,7 @@
 import {
   baseConfig,
   baseDefault,
+  dataFieldConfig,
   labelColSpanConfig,
   layoutConfig,
   statusConfig,
@@ -21,6 +22,7 @@ import {
 } from '@/components/Materials/constants';
 import type {
   IBooleanConfigType,
+  IDataFieldConfigType,
   IDescriptionConfigType,
   ILabelColSpanConfigType,
   ILabelConfigType,
@@ -57,6 +59,7 @@ export type TXInputCheckboxEditData = Array<
   | ITextAreaConfigType
   | IBooleanConfigType
   | ILayoutConfigType<TLayoutSelectKeyType>
+  | IDataFieldConfigType
 >;
 
 export interface XInputCheckboxConfig extends ICommonBaseType {
@@ -64,6 +67,11 @@ export interface XInputCheckboxConfig extends ICommonBaseType {
    * 输入框标题
    */
   label: TTextDefaultType;
+
+  /**
+   * 数据字段
+   */
+  dataField: TTextDefaultType[];
 
   /**
    * 描述信息（显示在输入框下方，辅助说明）
@@ -126,6 +134,7 @@ const XCheckbox: XInputCheckboxSchema = {
       name: '描述信息',
       type: CONFIG_TYPES.DESCRIPTION_INPUT
     },
+    ...dataFieldConfig,
     {
       key: 'tooltip',
       name: '提示文字',
@@ -149,6 +158,7 @@ const XCheckbox: XInputCheckboxSchema = {
   config: {
     ...baseDefault,
     label: '复选框',
+    dataField: [],
     description: '',
     tooltip: '',
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
@@ -157,7 +167,7 @@ const XCheckbox: XInputCheckboxSchema = {
     required: false,
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
     saveWithHidden: false,
-    labelColSpan: 5
+    labelColSpan: 100
   }
 };
 
