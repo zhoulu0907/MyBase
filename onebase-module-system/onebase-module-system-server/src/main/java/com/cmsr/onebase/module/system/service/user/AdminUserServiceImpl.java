@@ -24,6 +24,7 @@ import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.UserRoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.enums.permission.AdminTypeEnum;
+import com.cmsr.onebase.module.system.enums.permission.RoleCodeEnum;
 import com.cmsr.onebase.module.system.enums.permission.RoleTypeEnum;
 import com.cmsr.onebase.module.system.service.dept.DeptService;
 import com.cmsr.onebase.module.system.service.dept.PostService;
@@ -131,6 +132,38 @@ public class AdminUserServiceImpl implements AdminUserService {
         LogRecordContext.putVariable("user", user);
         return user.getId();
     }
+
+    @Transactional(rollbackFor = Exception.class)
+    @LogRecord(type = SYSTEM_USER_TYPE, subType = SYSTEM_USER_CREATE_SUB_TYPE, bizNo = "{{#user.id}}",
+            success = SYSTEM_USER_CREATE_SUCCESS)
+    @Override
+    public Long createPlatformUser(UserInsertReqVO createReqVO) {
+        // 设置平台管理员默认名称
+        createReqVO.setNickname(RoleCodeEnum.SUPER_ADMIN.getName());
+        //  校验正确性
+        validateUserForCreateOrUpdate(null, createReqVO.getUsername(),
+                createReqVO.getMobile(), createReqVO.getEmail(), createReqVO.getDeptId(), createReqVO.getPostIds());
+        // 插入用户
+        AdminUserDO user = BeanUtils.toBean(createReqVO, AdminUserDO.class);
+        user.setStatus(CommonStatusEnum.ENABLE.getStatus()); // 默认开启
+        user.setPassword(encodePassword(createReqVO.getPassword())); // 加密密码
+        if (user.getAdminType() == null) {
+            user.setAdminType(AdminTypeEnum.CUSTOM.getType());
+        }
+        dataRepository.insert(user);
+
+        // 赋予平台管理员角色
+        RoleDO roleDO = roleService.getRoleIdsByCode(RoleCodeEnum.SUPER_ADMIN.getCode());
+        Set<Long> roleIds = new HashSet<>();
+        roleIds.add(roleDO.getId());
+        permissionService.assignUserRoles(user.getId(), roleIds);
+
+
+        // 3. 记录操作日志上下文
+        LogRecordContext.putVariable("user", user);
+        return user.getId();
+    }
+
 
     @Override
     public Long registerUser(AuthRegisterReqVO registerReqVO) {

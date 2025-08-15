@@ -3,15 +3,12 @@ package com.cmsr.onebase.module.system.controller.admin.platform;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
 import com.cmsr.onebase.module.system.controller.admin.platform.vo.PlatformInfoRespVo;
 import com.cmsr.onebase.module.system.controller.admin.user.vo.user.*;
 import com.cmsr.onebase.module.system.dal.dataobject.license.LicenseDO;
-import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.enums.license.LicenseStatusEnum;
 import com.cmsr.onebase.module.system.enums.permission.AdminTypeEnum;
-import com.cmsr.onebase.module.system.enums.permission.RoleCodeEnum;
 import com.cmsr.onebase.module.system.enums.tenant.TenantStatusEnum;
 import com.cmsr.onebase.module.system.enums.user.UserStatusEnum;
 import com.cmsr.onebase.module.system.service.license.LicenseService;
@@ -27,9 +24,7 @@ import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
@@ -50,13 +45,13 @@ public class PlatformInfoController {
     private TenantService tenantService;
 
     @Resource
-    private AdminUserService adminUserService;
+    private AdminUserService  adminUserService;
     @Resource
     private PermissionService permissionService;
     @Resource
-    private RoleService roleService;
+    private RoleService       roleService;
     @Resource
-    private AdminUserService userService;
+    private AdminUserService  userService;
 
     /**
      * 根据状态查询出enable的license记录
@@ -85,21 +80,8 @@ public class PlatformInfoController {
     @Operation(summary = "新增平台管理员用户")
     @PreAuthorize("@ss.hasPermission('system:platform-admin:create')")
     public CommonResult<Long> createPlatformAdmin(@Valid @RequestBody UserInsertReqVO reqVO) {
-
-        reqVO.setNickname(RoleCodeEnum.SUPER_ADMIN.getName());
-        Long id = userService.createUser(reqVO);
-        // 获取当前登录用户ID（假设项目中有相关工具类）
-        Long currentUserId = SecurityFrameworkUtils.getLoginUserId();
-
-        // 如果获取到当前管理员用户，把角色赋给当前新建用户
-        if (currentUserId != null) {
-            RoleDO roleDO = roleService.getRoleIdsByCode(RoleCodeEnum.SUPER_ADMIN.getCode());
-            Set<Long> roleIds = new HashSet<>();
-            roleIds.add(roleDO.getId());
-            permissionService.assignUserRoles(id, roleIds);
-        }
-
-        return success(id);
+        Long userId = userService.createPlatformUser(reqVO);
+        return success(userId);
     }
 
     @GetMapping("/admin/page")

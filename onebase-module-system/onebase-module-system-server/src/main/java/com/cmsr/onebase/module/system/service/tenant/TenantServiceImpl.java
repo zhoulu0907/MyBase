@@ -34,6 +34,7 @@ import com.cmsr.onebase.module.system.enums.permission.AdminTypeEnum;
 import com.cmsr.onebase.module.system.enums.permission.PackageTypeEnum;
 import com.cmsr.onebase.module.system.enums.permission.RoleCodeEnum;
 import com.cmsr.onebase.module.system.enums.permission.RoleTypeEnum;
+import com.cmsr.onebase.module.system.enums.tenant.TenantCodeEnum;
 import com.cmsr.onebase.module.system.enums.tenant.TenantStatusEnum;
 import com.cmsr.onebase.module.system.enums.user.UserPasswordEnum;
 import com.cmsr.onebase.module.system.enums.user.UserStatusEnum;
@@ -138,6 +139,8 @@ public class TenantServiceImpl implements TenantService {
     public Long getOtherTenantUserLimitCount(Long tenantId) {
         ConfigStore configStore = new DefaultConfigStore();
         configStore.and(Compare.EQUAL, TenantDO.STATUS, TenantStatusEnum.NORMAL.getStatus());
+        // 排除平台租户
+        configStore.and(Compare.NOT_EQUAL, TenantDO.TENANT_CODE, TenantCodeEnum.PLATFORM_TENANT.getCode());
         if (tenantId != null) {
             configStore.and(Compare.NOT_EQUAL, TenantDO.ID, tenantId);
         }
@@ -178,17 +181,23 @@ public class TenantServiceImpl implements TenantService {
         LicenseDO license = licenseService.getLicenseByStatus(LicenseStatusEnum.ENABLE.getStatus());
         // 检查分配人员数量是否超过license限制
         if (license != null) {
+            // 获取license总租户数限制
+            Integer totalTenantLimit = license.getTenantLimit();
+            // 获取现有租户数量
+            Long existTenantCount = getExistTenantCount();
+            if (existTenantCount >= totalTenantLimit) {
+                throw exception(LICENSE_TENANT_COUNT_NOT_ENOUGH);
+            }
+
             // 获取license总人数限制
-            Integer userLimit = license.getUserLimit();
+            Integer totalUserLimit = license.getUserLimit();
+
             // 获取现有租户已分配的用户数量
             Long otherUserCount = getOtherTenantUserLimitCount(null);
             // 如果传入的分配人员数量加上已分配数量超过license限制，则报错
-            if (createReqVO.getAccountCount() != null &&
-                    (otherUserCount + createReqVO.getAccountCount()) > userLimit) {
-                Integer remainingCount = (int) (userLimit - otherUserCount);
-                throw exception(LICENSE_USER_COUNT_NOT_ENOUGH,
-                        userLimit,
-                        remainingCount);
+            if (otherUserCount + createReqVO.getAccountCount() > totalUserLimit) {
+                Integer remainingCount = (int) (totalUserLimit - otherUserCount);
+                throw exception(LICENSE_USER_COUNT_NOT_ENOUGH, totalUserLimit, remainingCount);
             }
         }
 
@@ -214,6 +223,14 @@ public class TenantServiceImpl implements TenantService {
             dataRepository.update(tenantDO);
         });
         return tenant.getId();
+    }
+
+    private Long getExistTenantCount() {
+        // 排除平台租户
+        Long existTenantCount = dataRepository.countByConfig(TenantDO.class,
+                new DefaultConfigStore().eq(TenantDO.STATUS, TenantStatusEnum.NORMAL.getStatus())
+                        .and(Compare.NOT_EQUAL, TenantDO.TENANT_CODE, TenantCodeEnum.PLATFORM_TENANT.getCode()));
+        return existTenantCount;
     }
 
     private Long createUser(Long roleId, TenantInsertReqVO createReqVO) {
@@ -413,7 +430,7 @@ public class TenantServiceImpl implements TenantService {
             throw exception(TENANT_NOT_EXISTS);
         }
         // 内置租户，不允许删除
-        if (isSystemTenant(tenant)) {
+        if (isPlatformTenant(tenant)) {
             throw exception(TENANT_CAN_NOT_UPDATE_SYSTEM);
         }
         return tenant;
@@ -455,6 +472,9 @@ public class TenantServiceImpl implements TenantService {
         if (status != null) {
             configStore.eq(TenantDO.STATUS, status);
         }
+        // 排除平台租户
+        configStore.and(Compare.NOT_EQUAL, TenantDO.TENANT_CODE, TenantCodeEnum.PLATFORM_TENANT.getCode());
+
         configStore.order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
         return dataRepository.findPageWithConditions(TenantDO.class, configStore, reqVO.getPageNo(), reqVO.getPageSize());
     }
@@ -512,7 +532,7 @@ public class TenantServiceImpl implements TenantService {
         // 获得租户，然后获得菜单
         TenantDO tenant = getTenant(TenantContextHolder.getRequiredTenantId());
         Set<Long> menuIds;
-        if (isSystemTenant(tenant)) { // 系统租户，菜单是全量的
+        if (isPlatformTenant(tenant)) { // 系统租户，菜单是全量的
             menuIds = CollectionUtils.convertSet(menuService.getMenuList(), MenuDO::getId);
         } else {
             menuIds = tenantPackageService.getTenantPackage(tenant.getPackageId()).getMenuIds();
@@ -521,8 +541,8 @@ public class TenantServiceImpl implements TenantService {
         handler.handle(menuIds);
     }
 
-    private static boolean isSystemTenant(TenantDO tenant) {
-        return Objects.equals(tenant.getPackageId(), TenantDO.PACKAGE_ID_SYSTEM);
+    private static boolean isPlatformTenant(TenantDO tenant) {
+        return Objects.equals(tenant.getTenantCode(), TenantCodeEnum.PLATFORM_TENANT.getCode());
     }
 
     private boolean isTenantDisable() {

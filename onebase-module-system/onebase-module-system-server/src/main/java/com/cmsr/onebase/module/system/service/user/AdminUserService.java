@@ -31,6 +31,14 @@ public interface AdminUserService {
     Long createUser(@Valid UserInsertReqVO createReqVO);
 
     /**
+     * 创建平台用户
+     *
+     * @param createReqVO 用户信息
+     * @return 用户编号
+     */
+    Long createPlatformUser(UserInsertReqVO createReqVO);
+
+    /**
      * 注册用户
      *
      * @param registerReqVO 用户信息

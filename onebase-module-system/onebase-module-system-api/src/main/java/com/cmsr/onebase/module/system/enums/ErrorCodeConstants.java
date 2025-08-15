@@ -49,6 +49,7 @@ public interface ErrorCodeConstants {
     ErrorCode USER_REGISTER_DISABLED = new ErrorCode(1_002_003_011, "注册功能已关闭");
     ErrorCode USER_PASSWORD_NOT_ALLOW_DEL = new ErrorCode(1_002_003_012, "内置用户不允许删除，只允许修改密码");
     ErrorCode LICENSE_USER_COUNT_NOT_ENOUGH = new ErrorCode(1_002_003_013, "可分配人员数量不足，license总人数是({}), 剩余({})");
+    ErrorCode LICENSE_TENANT_COUNT_NOT_ENOUGH = new ErrorCode(1_002_003_014, "租户数量已达上限");
     ErrorCode LENANT_ALLOCATE_PERSON_COUNT_LESS_THEN_ALLOCATED = new ErrorCode(1_002_003_014, "租户内已使用用户数量为({})，分配的用户数量不能低于此数量");
 
     // ========== 部门模块 1-002-004-000 ==========
