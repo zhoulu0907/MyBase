@@ -1,37 +1,39 @@
 import {
-    baseConfig,
-    baseDefault,
-    statusConfig,
-    tableMetaDataConfig,
-    widthConfig,
-    type ICommonBaseType,
-    type TPagePositionSelectKeyType,
-    type TStatusSelectKeyType,
-    type TWidthSelectKeyType
+  baseConfig,
+  baseDefault,
+  statusConfig,
+  tableMetaDataConfig,
+  widthConfig,
+  labelColSpanConfig,
+  type ICommonBaseType,
+  type TPagePositionSelectKeyType,
+  type TStatusSelectKeyType,
+  type TWidthSelectKeyType
 } from '@/components/Materials/common';
 import {
-    CONFIG_TYPES,
-    PAGINATION_POSITION_OPTIONS,
-    PAGINATION_POSITION_VALUES,
-    STATUS_OPTIONS,
-    STATUS_VALUES,
-    WIDTH_OPTIONS,
-    WIDTH_VALUES
+  CONFIG_TYPES,
+  PAGINATION_POSITION_OPTIONS,
+  PAGINATION_POSITION_VALUES,
+  STATUS_OPTIONS,
+  STATUS_VALUES,
+  WIDTH_OPTIONS,
+  WIDTH_VALUES
 } from '@/components/Materials/constants';
 import type {
-    IBooleanConfigType,
-    ILabelConfigType,
-    IStatusConfigType,
-    ITableDataConfigType,
-    ITablePagePositionConfigType,
-    ITablePageSizeConfigType,
-    ITextConfigType,
-    IWidthConfigType,
-    TBooleanDefaultType,
-    TNumberDefaultType,
-    TRadioDefaultType,
-    TSelectDefaultType,
-    TTextDefaultType
+  IBooleanConfigType,
+  ILabelConfigType,
+  IStatusConfigType,
+  ITableDataConfigType,
+  ITablePagePositionConfigType,
+  ITablePageSizeConfigType,
+  ITextConfigType,
+  IWidthConfigType,
+  TBooleanDefaultType,
+  TNumberDefaultType,
+  TRadioDefaultType,
+  TSelectDefaultType,
+  TTextDefaultType,
+  ILabelColSpanConfigType
 } from '@/components/Materials/types';
 
 export interface XTableSchema {
@@ -48,6 +50,7 @@ export type TXTableEditData = Array<
   | ITablePagePositionConfigType<TPagePositionSelectKeyType>
   | ITablePageSizeConfigType
   | ITableDataConfigType
+  | ILabelColSpanConfigType
 >;
 
 export interface XTableConfig extends ICommonBaseType {
@@ -136,7 +139,10 @@ export interface XTableConfig extends ICommonBaseType {
    * 隐藏时是否提交数据，开启后隐藏状态仍会保存值
    */
   saveWithHidden?: TBooleanDefaultType;
-
+  /**
+   * 表头搜索项标签宽度
+   */
+  labelColSpan?: TNumberDefaultType;
   metaData: TTextDefaultType;
 }
 
@@ -188,7 +194,7 @@ const XTable: XTableSchema = {
     },
     tableMetaDataConfig,
     // keyDataConfig,
-
+    labelColSpanConfig,
     pagePositionConfig,
     {
       key: 'pageSize',
@@ -260,79 +266,80 @@ const XTable: XTableSchema = {
     pagePosition: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.BR],
     pageSize: 5,
     metaData: '',
+    labelColSpan: 100,
     defaultValue: [
-    //   {
-    //     key: '1',
-    //     name: 'Jane Doe',
-    //     salary: 23000,
-    //     address: '32 Park Road, London',
-    //     email: 'jane.doe@example.com',
-    //     gender: 'male'
-    //   },
-    //   {
-    //     key: '2',
-    //     name: 'Alisa Ross',
-    //     salary: 25000,
-    //     address: '35 Park Road, London',
-    //     email: 'alisa.ross@example.com',
-    //     gender: 'male'
-    //   },
-    //   {
-    //     key: '3',
-    //     name: 'Kevin Sandra',
-    //     salary: 22000,
-    //     address: '31 Park Road, London',
-    //     email: 'kevin.sandra@example.com',
-    //     gender: 'male'
-    //   },
-    //   {
-    //     key: '4',
-    //     name: 'Kevin Sandra',
-    //     salary: 22000,
-    //     address: '31 Park Road, London',
-    //     email: 'kevin.sandra@example.com',
-    //     gender: 'male'
-    //   },
-    //   {
-    //     key: '5',
-    //     name: 'Kevin Sandra',
-    //     salary: 22000,
-    //     address: '31 Park Road, London',
-    //     email: 'kevin.sandra@example.com',
-    //     gender: 'male'
-    //   },
-    //   {
-    //     key: '6',
-    //     name: 'Kevin Sandra',
-    //     salary: 22000,
-    //     address: '31 Park Road, London',
-    //     email: 'kevin.sandra@example.com',
-    //     gender: 'male'
-    //   }
+      //   {
+      //     key: '1',
+      //     name: 'Jane Doe',
+      //     salary: 23000,
+      //     address: '32 Park Road, London',
+      //     email: 'jane.doe@example.com',
+      //     gender: 'male'
+      //   },
+      //   {
+      //     key: '2',
+      //     name: 'Alisa Ross',
+      //     salary: 25000,
+      //     address: '35 Park Road, London',
+      //     email: 'alisa.ross@example.com',
+      //     gender: 'male'
+      //   },
+      //   {
+      //     key: '3',
+      //     name: 'Kevin Sandra',
+      //     salary: 22000,
+      //     address: '31 Park Road, London',
+      //     email: 'kevin.sandra@example.com',
+      //     gender: 'male'
+      //   },
+      //   {
+      //     key: '4',
+      //     name: 'Kevin Sandra',
+      //     salary: 22000,
+      //     address: '31 Park Road, London',
+      //     email: 'kevin.sandra@example.com',
+      //     gender: 'male'
+      //   },
+      //   {
+      //     key: '5',
+      //     name: 'Kevin Sandra',
+      //     salary: 22000,
+      //     address: '31 Park Road, London',
+      //     email: 'kevin.sandra@example.com',
+      //     gender: 'male'
+      //   },
+      //   {
+      //     key: '6',
+      //     name: 'Kevin Sandra',
+      //     salary: 22000,
+      //     address: '31 Park Road, London',
+      //     email: 'kevin.sandra@example.com',
+      //     gender: 'male'
+      //   }
     ],
     columns: [
-    //   {
-    //     title: '姓名',
-    //     dataIndex: 'name',
-    //     fixed: 'left',
-    //     width: 140
-    //   },
-    //   {
-    //     title: '工资',
-    //     dataIndex: 'salary'
-    //   },
-    //   {
-    //     title: '地址',
-    //     dataIndex: 'address'
-    //   },
-    //   {
-    //     title: '邮箱',
-    //     dataIndex: 'email'
-    //   },
-    //   {
-    //     title: '性别',
-    //     dataIndex: 'gender'
-    //   }
+      //   {
+      //     title: '姓名',
+      //     dataIndex: 'name',
+      //     fixed: 'left',
+      //     width: 140
+      //   },
+      //   {
+      //     title: '工资',
+      //     dataIndex: 'salary'
+      //   },
+      //   {
+      //     title: '地址',
+      //     dataIndex: 'address'
+      //   },
+      //   {
+      //     title: '邮箱',
+      //     dataIndex: 'email'
+      //   },
+      //   {
+      //     title: '性别',
+      //     dataIndex: 'gender'
+      //   }
     ],
     searchItems: [
       // {

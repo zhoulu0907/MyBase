@@ -384,7 +384,6 @@ const PageManagerPage: FC = () => {
                     className={styles.guideButton}
                     onClick={() => {
                       setVisibleCreateForm('page');
-                      setShowGuide(false);
                     }}
                   />
                 </div>

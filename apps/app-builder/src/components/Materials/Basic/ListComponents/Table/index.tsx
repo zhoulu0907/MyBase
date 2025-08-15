@@ -36,7 +36,8 @@ const XTable = memo((props: XTableConfig & { runtime?: boolean; toCreatePage?: F
     pageSize,
     showTotal,
     showOpearate,
-    fixedOpearate
+    fixedOpearate,
+    labelColSpan
   } = props;
 
   const [finalColumns, setFinalColumns] = useState<any[]>();
@@ -200,6 +201,10 @@ const XTable = memo((props: XTableConfig & { runtime?: boolean; toCreatePage?: F
                 marginBottom: 0
               }}
               layout={'horizontal'}
+              labelCol={{
+                style: { width: labelColSpan, flex: 'unset' }
+              }}
+              wrapperCol={{ style: { flex: 1 } }}
             >
               <Input placeholder={`请输入${item.label}`} />
             </Form.Item>

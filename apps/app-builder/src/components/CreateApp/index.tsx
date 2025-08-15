@@ -236,7 +236,11 @@ const BasicSetting = (props: IProps) => {
               label="应用编码"
               rules={[
                 { required: true, message: '请填写应用编码' },
-                { maxLength: 40, message: '长度超过限制' }
+                { maxLength: 40, message: '长度超过限制' },
+                {
+                  match: /^[A-Za-z][A-Za-z0-9_]*$/,
+                  message: '应用编码不符合填写要求'
+                }
               ]}
               style={{ paddingLeft: 32, flex: 1 }}
             >
@@ -246,11 +250,14 @@ const BasicSetting = (props: IProps) => {
           <Form.Item
             field="appName"
             label="应用名称"
-            rules={[{ required: true, message: '请填写应用名称', maxLength: 50 }]}
+            rules={[
+              { required: true, message: '请填写应用名称' },
+              { maxLength: 50, message: '请填写应用名称' }
+            ]}
           >
             <Input placeholder="请输入应用名称，例如“工时管理系统”" />
           </Form.Item>
-          <Form.Item field="tagIds" label="应用标签" rules={[{ required: false, maxLength: 3 }]}>
+          <Form.Item field="tagIds" label="应用标签" rules={[{ message: '每个应用的标签数量不超过3个', maxLength: 3 }]}>
             <Select
               mode="multiple"
               placeholder="请选择应用标签"
@@ -274,7 +281,7 @@ const BasicSetting = (props: IProps) => {
               options={tagList.map((option: ListTagReq) => ({ label: option.tagName, value: option.id }) as Options)}
             />
           </Form.Item>
-          <Form.Item field="description" label="应用描述" rules={[{ required: false, maxLength: 100 }]}>
+          <Form.Item field="description" label="应用描述" rules={[{ maxLength: 100, message: '应用描述超出限制' }]}>
             <Input.TextArea placeholder="请输入应用描述" />
           </Form.Item>
 
