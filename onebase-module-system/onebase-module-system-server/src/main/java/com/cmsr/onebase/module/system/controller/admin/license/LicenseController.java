@@ -9,34 +9,29 @@ import com.cmsr.onebase.module.system.controller.admin.license.vo.LicenseRespVO;
 import com.cmsr.onebase.module.system.controller.admin.license.vo.LicenseSaveReqVO;
 import com.cmsr.onebase.module.system.convert.license.LicenseConvert;
 import com.cmsr.onebase.module.system.dal.dataobject.license.LicenseDO;
-import com.cmsr.onebase.module.system.enums.license.LicenseStatusEnum;
 import com.cmsr.onebase.module.system.service.license.LicenseService;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.List;
-
-import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 
 /**
  * License 管理接口
- *
+ * <p>
  * 提供License的增删改查等接口。
  *
  * @author matianyu
  * @date 2025-07-25
  */
+@Slf4j
 @RestController
 @RequestMapping("/system/license")
 @Tag(name = "License管理")
@@ -124,64 +119,23 @@ public class LicenseController {
     }
 
 
-    @PostMapping("/upload")
-    @Operation(summary = "上传凭证")
-    @Parameters({
-            @Parameter(name = "file", description = "json 文件", required = true),
-            @Parameter(name = "updateSupport", description = "是否支持更新，默认为 false", example = "true")
-    })
+    @PostMapping("/import")
+    @Operation(summary = "导入凭证")
+    @Parameter(name = "file", description = "加密的license.lic.sm4文件", required = true)
     @PreAuthorize("@ss.hasPermission('system:platform-admin:query')")
-    public CommonResult<Long> importLicense(@RequestParam("file") MultipartFile file,
-                                            @RequestParam(value = "updateSupport", required = false, defaultValue = "false") Boolean updateSupport) throws Exception {
-        // 检查文件是否为空
-        if (file.isEmpty()) {
-            throw new RuntimeException("上传文件不能为空");
-        }
-        // 解析JSON文件为LicenseSaveReqVO对象
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-
-        LicenseSaveReqVO reqVo = objectMapper.readValue(file.getInputStream(), LicenseSaveReqVO.class);
-
-        LicenseDO licenseDO = licenseService.getLicenseByStatus(LicenseStatusEnum.ENABLE.getStatus());
-        // 创建更新对象，将状态设置为已失效
-        LicenseSaveReqVO updateLicense = new LicenseSaveReqVO();
-        updateLicense.setId(licenseDO.getId());
-        updateLicense.setStatus(LicenseStatusEnum.DISABLE.getStatus()); // 假设LicenseStatusEnum.INVALID.getStatus()表示已失效状态
-
-        // 更新license状态
-        licenseService.updateLicense(updateLicense);
-//        licenseService.ge
-
-        // 调用licenseService方法保存数据
-        Long license = licenseService.createLicense(reqVo);
-
-        return success(license);
-
+    public CommonResult<Long> importLicense(@RequestParam("file") MultipartFile file){
+        Long licenseId = licenseService.importLicense(file);
+        return CommonResult.success(licenseId);
     }
 
     /**
      * 导出凭证
      */
     @GetMapping("/export")
-    @Operation(summary = "导出凭证")
+    @Operation(summary = "导出加密凭证")
     @PreAuthorize("@ss.hasPermission('system:platform-admin:query')")
-    public void exportLicense(@RequestParam("id") Long id, HttpServletResponse response) throws IOException {
-        // 从数据库中根据ID查询license
-        LicenseDO license = licenseService.getLicense(id);
-
-        if (license == null) {
-            throw new RuntimeException("未找到ID为 " + id + " 的凭证");
-        }
-
-        // 设置响应头
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-        response.setHeader("Content-Disposition", "attachment; filename=\"license_" + id + ".json\"");
-
-        // 将对象写入响应输出流
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-        objectMapper.writeValue(response.getOutputStream(), license);
+    public void exportLicense(@RequestParam("id") Long id, HttpServletResponse response) {
+        licenseService.exportLicense(id, response);
     }
+
 }

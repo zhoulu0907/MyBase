@@ -24,6 +24,7 @@ import com.google.common.base.Suppliers;
 import com.google.common.collect.Sets;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.anyline.data.param.init.DefaultConfigStore;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
@@ -365,6 +366,12 @@ public class PermissionServiceImpl implements PermissionService {
 
         // 删除指定角色下的指定用户关系
         return userRoleDataRepository.deleteByRoleIdAndUserIds(roleId, userIds);
+    }
+
+    @Override
+    public UserRoleDO getUserRoleByUserAndRoleId(Long userId, Long roleId) {
+        return userRoleDataRepository.findOne(new DefaultConfigStore()
+                .eq(UserRoleDO.USER_ID, userId).eq(UserRoleDO.ROLE_ID, roleId));
     }
 
     @Override

@@ -5,6 +5,7 @@ import com.cmsr.onebase.framework.excel.core.convert.DictConvert;
 import com.cmsr.onebase.module.system.enums.DictTypeConstants;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
+import com.mzt.logapi.starter.annotation.DiffLogField;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -75,6 +76,9 @@ public class UserRespVO{
 
     @Schema(description = "用户类型", example = "1")
     private Integer userType;
+
+    @Schema(description = "管理员类型", example = "2")
+    private Integer adminType;
 
     /**
      * 用户角色列表

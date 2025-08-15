@@ -27,8 +27,8 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
 {
-  "id": "544449082769412096",
-  "name": "租户15",
+  "id": "544759610783961088",
+  "name": "测试8",
   "accountCount": "20",
   "contactName": "test1",
   "status": 0

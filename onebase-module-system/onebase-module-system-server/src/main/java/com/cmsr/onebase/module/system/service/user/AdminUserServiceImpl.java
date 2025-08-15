@@ -111,8 +111,8 @@ public class AdminUserServiceImpl implements AdminUserService {
         AdminUserDO user = BeanUtils.toBean(createReqVO, AdminUserDO.class);
         user.setStatus(CommonStatusEnum.ENABLE.getStatus()); // 默认开启
         user.setPassword(encodePassword(createReqVO.getPassword())); // 加密密码
-        if (user.getUserType() == null) {
-            user.setUserType(AdminTypeEnum.CUSTOM.getType());
+        if (user.getAdminType() == null) {
+            user.setAdminType(AdminTypeEnum.CUSTOM.getType());
         }
         dataRepository.insert(user);
 
@@ -184,11 +184,22 @@ public class AdminUserServiceImpl implements AdminUserService {
     }
 
     @Override
+    public void updateAdminType(Long id, Integer adminType) {
+        // 校验正确性
+        validateUserExists(id);
+//        validateEmailUnique(id, email);
+        // 2.1 更新用户管理员状态
+        dataRepository.update(new AdminUserDO().setId(id).setAdminType(adminType).setUpdateTime(LocalDateTime.now()));
+    }
+
+
+    @Override
     public void updatePlatformUserEmail(Long id, String email) {
         // 校验正确性
         validateUserExists(id);
 //        validateEmailUnique(id, email);
         // 2.1 更新用户
+
         dataRepository.update(new AdminUserDO().setId(id).setEmail(email).setUpdateTime(LocalDateTime.now()));
     }
 
@@ -301,11 +312,6 @@ public class AdminUserServiceImpl implements AdminUserService {
     }
 
     @Override
-    public AdminUserDO getUserByTenantIDAndUserName(String username, Long tenantId) {
-        return dataRepository.findOne(AdminUserDO.class, new DefaultConfigStore().eq("username", username).eq("tenant_id", tenantId));
-    }
-
-    @Override
     public AdminUserDO getUserByMobile(String mobile) {
         return dataRepository.findOne(AdminUserDO.class, new DefaultConfigStore().eq("mobile", mobile));
         // return userMapper.selectByMobile(mobile);
@@ -379,7 +385,7 @@ public class AdminUserServiceImpl implements AdminUserService {
         }
 
         // 添加排序
-        configStore.order(AdminUserDO.USER_TYPE, Order.TYPE.ASC).order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
+        configStore.order(AdminUserDO.ADMIN_TYPE, Order.TYPE.ASC).order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
 
         // 分页查询
         return dataRepository.findPageWithConditions(AdminUserDO.class, configStore,
@@ -662,7 +668,8 @@ public class AdminUserServiceImpl implements AdminUserService {
     @Override
     public List<AdminUserDO> getUserListByStatus(Integer status) {
 //        return userMapper.selectListByStatus(status);
-        return dataRepository.findAllByConfig(AdminUserDO.class, new DefaultConfigStore().eq("status", status));
+        return dataRepository.findAllByConfig(AdminUserDO.class, new DefaultConfigStore().eq("status", status)
+                .order(AdminUserDO.ADMIN_TYPE, Order.TYPE.ASC).order(BaseDO.CREATE_TIME, Order.TYPE.DESC));
     }
 
     @Override

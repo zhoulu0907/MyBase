@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.system.controller.admin.tenant.vo.tenant;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.mzt.logapi.starter.annotation.DiffLogField;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -45,6 +46,11 @@ public class TenantInsertReqVO {
     @Schema(description = "账号数量", requiredMode = Schema.RequiredMode.REQUIRED, example = "1024")
     @NotNull(message = "账号数量不能为空")
     private Integer accountCount;
+
+
+
+    @Schema(description = "管理员类型", example = "1")
+    private Integer adminType;
 
     // ========== 仅【创建】时，需要传递的字段 ==========
 

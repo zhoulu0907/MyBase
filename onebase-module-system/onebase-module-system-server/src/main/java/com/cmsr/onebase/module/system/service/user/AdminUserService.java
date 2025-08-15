@@ -46,6 +46,15 @@ public interface AdminUserService {
     void updateUser(@Valid UserUpdateReqVO updateReqVO);
 
     /**
+     * 修改用户管理员状态
+     *
+     * @param adminType 修改管理员状态
+     * @param id    用户编号
+     */
+    void updateAdminType(Long id,  Integer adminType);
+
+
+    /**
      * 修改用户
      *
      * @param email 修改平台管理员邮箱
@@ -107,15 +116,6 @@ public interface AdminUserService {
      * @return 用户对象信息
      */
     AdminUserDO getUserByUsername(String username);
-
-    /**
-     * 通过租户id和用户名
-     * @param tenantId 租户id
-     * @param username 用户名
-     * @return 用户对象信息
-     */
-    AdminUserDO getUserByTenantIDAndUserName(String username,Long tenantId);
-
 
     /**
      * 通过手机号获取用户
