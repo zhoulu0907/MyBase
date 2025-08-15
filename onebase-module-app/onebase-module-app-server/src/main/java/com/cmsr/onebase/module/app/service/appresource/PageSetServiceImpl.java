@@ -67,8 +67,7 @@ public class PageSetServiceImpl implements PageSetService {
         PageSetDO pageSetDO = pageSetDataRepository.findPageSetByPageSetCode(code);
         String menuCode = pageSetDO.getMenuCode();
         MenuDO menuDO = appMenuRepository.findByMenuCode(menuCode);
-        ApplicationDO applicationDO = appApplicationRepository.findOneByAppCode(menuDO.getApplicationCode());
-        return applicationDO.getId();
+        return menuDO.getApplicationId();
     }
 
     @Override

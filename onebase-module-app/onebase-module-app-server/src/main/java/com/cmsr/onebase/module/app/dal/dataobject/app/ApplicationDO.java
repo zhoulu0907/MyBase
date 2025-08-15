@@ -13,13 +13,13 @@ import lombok.Data;
 @Table(name = "app_application")
 public class ApplicationDO extends TenantBaseDO {
 
-    @Column(name = "app_key", columnDefinition = "VARCHAR(256)", length = 256, comment = "应用key")
-    private String appKey;
+    @Column(name = "app_uid", columnDefinition = "VARCHAR(16)", length = 256, comment = "应用uid(自动生成短码)")
+    private String appUid;
 
     @Column(name = "app_name", columnDefinition = "VARCHAR(128) NOT NULL", nullable = false, length = 128, comment = "应用名称")
     private String appName;
 
-    @Column(name = "app_code", columnDefinition = "VARCHAR(64) NOT NULL", nullable = false, length = 256, comment = "应用编码")
+    @Column(name = "app_code", columnDefinition = "VARCHAR(16) NOT NULL", nullable = false, length = 256, comment = "应用编码")
     private String appCode;
 
     @Column(name = "app_mode", columnDefinition = "VARCHAR(32)", length = 32, comment = "应用模式")
@@ -31,17 +31,14 @@ public class ApplicationDO extends TenantBaseDO {
     @Column(name = "icon_name", columnDefinition = "VARCHAR(256)", length = 256, comment = "图标名称")
     private String iconName;
 
-    @Column(name = "icon_color", columnDefinition = "VARCHAR(32)", length = 32, comment = "图标颜色")
+    @Column(name = "icon_color", columnDefinition = "VARCHAR(64)", length = 32, comment = "图标颜色")
     private String iconColor;
 
     @Column(name = "version_number", columnDefinition = "VARCHAR(64)", length = 64, comment = "版本号")
     private String versionNumber;
 
     @Column(name = "version_url", columnDefinition = "VARCHAR(1024)", length = 1024, comment = "版本URL")
-    private String versionURL;
-
-    @Column(name = "datasource_id", columnDefinition = "VARCHAR(64)",nullable = false, comment = "数据源ID")
-    private String datasourceId;
+    private String versionUrl;
 
     @Column(name = "app_status", columnDefinition = "INT4 NOT NULL", nullable = false, comment = "状态")
     private Integer appStatus;

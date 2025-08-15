@@ -1,10 +1,8 @@
 package com.cmsr.onebase.module.app.service.app;
 
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
-import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.framework.uid.UidGenerator;
 import com.cmsr.onebase.module.app.controller.admin.app.vo.ApplicationCreateReqVO;
 import com.cmsr.onebase.module.app.controller.admin.app.vo.ApplicationCreateRespVO;
 import com.cmsr.onebase.module.app.controller.admin.app.vo.ApplicationPageReqVO;
@@ -114,22 +112,17 @@ public class AppApplicationServiceImpl implements AppApplicationService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public ApplicationCreateRespVO createApplication(ApplicationCreateReqVO createReqVO) {
-        validApplicationKeyDuplicate(createReqVO.getAppKey(), null);
+        validApplicationCodeDuplicate(createReqVO.getAppCode(), null);
         ApplicationDO applicationDO = BeanUtils.toBean(createReqVO, ApplicationDO.class);
         applicationDO.setId(null);
+        applicationDO.setAppUid(findAndCreateAppUid());
         applicationDO.setVersionNumber(VersionUtils.INIT_VERSION);
         applicationDO.setAppStatus(ApplicationStatusEnum.EDITING.getValue());
         applicationDO.setAppCode(AppUtils.createAppCode());
-        if (StringUtils.isBlank(applicationDO.getAppKey())) {
-            applicationDO.setAppKey(applicationDO.getAppCode());
-        }
         applicationDO = applicationRepository.insert(applicationDO);
         saveApplicationTags(applicationDO.getId(), createReqVO.getTagIds());
         authRoleService.createDefaultRole(applicationDO.getId());
-        CommonResult<String> defaultDatasource = metadataDatasourceApi.createDefaultDatasource(applicationDO.getId());
-        //TODO 效率低，得优化方案
-        applicationDO.setDatasourceId(defaultDatasource.getData());
-        applicationRepository.update(applicationDO);
+        metadataDatasourceApi.createDefaultDatasource(applicationDO.getId());
         return BeanUtils.toBean(applicationDO, ApplicationCreateRespVO.class);
     }
 
@@ -152,7 +145,7 @@ public class AppApplicationServiceImpl implements AppApplicationService {
     @Override
     public void updateApplication(ApplicationCreateReqVO createReqVO) {
         appCommonService.validateApplicationExist(createReqVO.getId());
-        validApplicationKeyDuplicate(createReqVO.getAppKey(), createReqVO.getId());
+        validApplicationCodeDuplicate(createReqVO.getAppCode(), createReqVO.getId());
         ApplicationDO updateObj = BeanUtils.toBean(createReqVO, ApplicationDO.class);
         saveApplicationTags(createReqVO.getId(), createReqVO.getTagIds());
         applicationRepository.update(updateObj);
@@ -174,9 +167,8 @@ public class AppApplicationServiceImpl implements AppApplicationService {
         if (applicationDO == null) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_NOT_EXIST);
         }
-
         applicationDO.setVersionNumber(versionNumber);
-        applicationDO.setVersionURL(versionUrl);
+        applicationDO.setVersionUrl(versionUrl);
         applicationRepository.update(applicationDO);
     }
 
@@ -189,7 +181,7 @@ public class AppApplicationServiceImpl implements AppApplicationService {
         }
         //TODO 删除应用下的全部资源
         applicationRepository.deleteById(id);
-        menuRepository.deleteByApplicationCode(applicationDO.getAppCode());
+        menuRepository.deleteByApplicationId(id);
         versionRepository.deleteByApplicationId(id);
         versionResourceRepository.deleteByApplicationId(id);
     }
@@ -198,16 +190,31 @@ public class AppApplicationServiceImpl implements AppApplicationService {
     /**
      * 检查 ApplicationDO 表 code 码是否重复，重复跑出异常
      */
-    private void validApplicationKeyDuplicate(String key, Long id) {
+    private void validApplicationCodeDuplicate(String code, Long id) {
         if (id == null) {
-            if (applicationRepository.findOneByKey(key) != null) {
+            if (applicationRepository.findOneByAppCode(code) != null) {
                 throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_KEY_DUPLICATE);
             }
         } else {
-            if (applicationRepository.findByKeyAndIdNot(key, id) != null) {
+            if (applicationRepository.findByAppCodeAndIdNot(code, id) != null) {
                 throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_KEY_DUPLICATE);
             }
         }
+    }
+
+    /**
+     * 随机生成一个appUid，然后去数据库里面查询是否唯一，如果不唯一，则重新生成一个，尝试10次
+     *
+     * @return 唯一的appUid
+     */
+    private String findAndCreateAppUid() {
+        for (int i = 0; i < 10; i++) {
+            String appUid = AppUtils.createAppUid();
+            if (applicationRepository.findOneByUid(appUid) == null) {
+                return appUid;
+            }
+        }
+        throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_UID_GENERATE_FAILED);
     }
 
 }

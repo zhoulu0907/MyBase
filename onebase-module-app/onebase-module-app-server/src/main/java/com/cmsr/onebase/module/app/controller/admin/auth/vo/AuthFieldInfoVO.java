@@ -13,11 +13,11 @@ import java.util.List;
 @Schema(description = "应用管理 - 字段信息 Response VO")
 public class AuthFieldInfoVO {
 
-    @Schema(description = "字段code")
-    private String fieldName;
+    @Schema(description = "字段Id")
+    private Long fieldId;
 
     @Schema(description = "字段名称")
-    private String displayName;
+    private String fieldDisplayName;
 
     @Schema(description = "字段类型")
     private String fieldType;

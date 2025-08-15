@@ -17,7 +17,6 @@ import com.cmsr.onebase.module.app.util.MenuUtils;
 import jakarta.annotation.Resource;
 import lombok.Setter;
 import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -46,11 +45,11 @@ public class AppMenuServiceImpl implements AppMenuService {
     @Override
     public List<MenuListRespVO> listApplicationMenu(Long applicationId) {
         ApplicationDO applicationDO = appCommonService.validateApplicationExist(applicationId);
-        List<MenuDO> menuDOS = appMenuRepository.findByApplicationCode(applicationDO.getAppCode());
+        List<MenuDO> menuDOS = appMenuRepository.findByApplicationId(applicationDO.getId());
         List<MenuListRespVO> menuListRespList = new ArrayList<>();
         // 把第一层的菜单添加到列表中
         List<MenuListRespVO> levelOneMenus = menuDOS.stream()
-                .filter(v -> MenuUtils.ROOT_MENU_CODE.equalsIgnoreCase(v.getParentCode()))
+                .filter(v -> MenuUtils.ROOT_MENU_ID.equals(v.getId()))
                 .map(v -> BeanUtils.toBean(v, MenuListRespVO.class))
                 .toList();
         menuListRespList.addAll(levelOneMenus);
@@ -65,7 +64,7 @@ public class AppMenuServiceImpl implements AppMenuService {
     private List<MenuListRespVO> recursiveGetChildren(MenuListRespVO parent, List<MenuDO> menuDOS) {
         List<MenuListRespVO> children = new ArrayList<>();
         for (MenuDO menuDO : menuDOS) {
-            if (Objects.equals(menuDO.getParentCode(), parent.getMenuCode())) {
+            if (Objects.equals(menuDO.getParentId(), parent.getId())) {
                 // 只有父菜单的uuid等于当前菜单的父菜单的uuid时，才添加子菜单，继续递归
                 MenuListRespVO child = BeanUtils.toBean(menuDO, MenuListRespVO.class);
                 child.setChildren(recursiveGetChildren(child, menuDOS));
@@ -83,44 +82,43 @@ public class AppMenuServiceImpl implements AppMenuService {
         ApplicationDO applicationDO = appCommonService.validateApplicationExist(createReqVO.getApplicationId());
         // 创建菜单
         MenuDO menuDO = new MenuDO();
-        menuDO.setApplicationCode(applicationDO.getAppCode());
-        menuDO.setParentCode(validateParentMenuCode(createReqVO.getParentCode()));
+        menuDO.setParentId(validateParentMenuId(createReqVO.getParentId()));
         menuDO.setMenuCode(MenuUtils.generateMenuCode());
         menuDO.setMenuType(createReqVO.getMenuType());
         menuDO.setMenuName(createReqVO.getMenuName());
         menuDO.setMenuIcon(createReqVO.getMenuIcon());
-        menuDO.setMenuSort(generateMenuSort(applicationDO.getAppCode()));
+        menuDO.setMenuSort(generateMenuSort(applicationDO.getId()));
         menuDO.setVisible(MenuVisibleEnum.YES.getValue());
-        menuDO.setEntityCode(createReqVO.getEntityCode());
+        menuDO.setEntityId(createReqVO.getEntityId());
         appMenuRepository.insert(menuDO);
         // 创建页面集
         CreatePageSetDTO createPageSetDTO = new CreatePageSetDTO();
         createPageSetDTO.setMenuCode(menuDO.getMenuCode());
         createPageSetDTO.setPageSetName(menuDO.getMenuName());
         createPageSetDTO.setDisplayName(menuDO.getMenuName());
-        createPageSetDTO.setMainMetadata(createReqVO.getEntityCode());
+        createPageSetDTO.setMainMetadata(String.valueOf(createReqVO.getEntityId()));
         pageSetService.createPageSet(createPageSetDTO);
         // 返回结果
         MenuCreateRespVO menuCreateRespVO = BeanUtils.toBean(menuDO, MenuCreateRespVO.class);
         return menuCreateRespVO;
     }
 
-    private Integer generateMenuSort(String applicationCode) {
-        return appMenuRepository.countByApplicationCode(applicationCode) + 1;
+    private Integer generateMenuSort(Long applicationId) {
+        return appMenuRepository.countByApplicationId(applicationId) + 1;
     }
 
-    private String validateParentMenuCode(String parentCode) {
-        if (StringUtils.isBlank(parentCode)) {
-            return MenuUtils.ROOT_MENU_CODE;
+    private Long validateParentMenuId(Long parentId) {
+        if (parentId == null) {
+            return MenuUtils.ROOT_MENU_ID;
         }
-        MenuDO parentMenu = appCommonService.validateMenuExist(parentCode);
+        MenuDO parentMenu = appCommonService.validateMenuExist(parentId);
         if (parentMenu == null) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_MENU_NOT_EXIST);
         }
         if (MenuTypeEnum.isPage(parentMenu.getMenuType())) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_MENU_TYPE_ERROR);
         }
-        return parentCode;
+        return parentId;
     }
 
     @Override
@@ -134,10 +132,10 @@ public class AppMenuServiceImpl implements AppMenuService {
     @Override
     public void updateApplicationMenuOrder(MenuOrderUpdateReqVO updateReqVO) {
         MenuDO menuDO = appCommonService.validateMenuExist(updateReqVO.getId());
-        menuDO.setParentCode(updateReqVO.getParentCode());
+        menuDO.setParentId(updateReqVO.getParentId());
         appMenuRepository.update(menuDO);
         Map<Long, Integer> menuSortMap = toMenuSortMap(updateReqVO.getMenuTree());
-        List<MenuDO> menuDOS = appMenuRepository.findByApplicationCode(menuDO.getApplicationCode());
+        List<MenuDO> menuDOS = appMenuRepository.findByApplicationId(menuDO.getApplicationId());
         for (MenuDO menu : menuDOS) {
             Integer order = MapUtils.getInteger(menuSortMap, menu.getId(), MenuUtils.MENU_SORT_MAX_VALUE);
             menu.setMenuSort(order);
@@ -197,7 +195,7 @@ public class AppMenuServiceImpl implements AppMenuService {
         // 复制菜单
         menuDO.setId(null);
         menuDO.setMenuName(copyReqVO.getMenuName());
-        menuDO.setParentCode(validateParentMenuCode(copyReqVO.getParentCode()));
+        menuDO.setParentId(validateParentMenuId(copyReqVO.getParentId()));
         menuDO.setMenuCode(MenuUtils.generateMenuCode());
         appMenuRepository.insert(menuDO);
         // 复制页面

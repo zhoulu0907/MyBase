@@ -14,8 +14,8 @@ public class AuthEntityVO {
     @Schema(description = "主键Id")
     private Long id;
 
-    @Schema(description = "实体code")
-    private String entityCode;
+    @Schema(description = "实体id")
+    private Long entityId;
 
     @Schema(description = "实体名称")
     private String entityDisplayName;

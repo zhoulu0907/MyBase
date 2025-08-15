@@ -1,12 +1,12 @@
 package com.cmsr.onebase.module.app.dal.database.auth;
 
 import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
-import com.cmsr.onebase.module.app.controller.admin.auth.vo.AuthRoleAddUserReqVO;
-import com.cmsr.onebase.module.app.controller.admin.auth.vo.AuthRoleDeleteUserReqVO;
 import com.cmsr.onebase.module.app.dal.dataobject.auth.AuthRoleUserDO;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 /**
  * 应用权限用户角色数据访问层
@@ -21,14 +21,14 @@ public class AppAuthRoleUserRepository extends DataRepositoryNew<AuthRoleUserDO>
         super(AuthRoleUserDO.class);
     }
 
-    public void addRoleUser(AuthRoleAddUserReqVO reqVO) {
-        for (Long userId : reqVO.getUserIds()) {
+    public void addRoleUser(Long roleId, List<Long> userIds) {
+        for (Long userId : userIds) {
             ConfigStore configStore = new DefaultConfigStore();
-            configStore.eq("role_code", reqVO.getRoleCode());
+            configStore.eq("role_id", roleId);
             configStore.eq("user_id", userId);
             if (this.countByConfig(configStore) == 0) {
                 AuthRoleUserDO authRoleUserDO = new AuthRoleUserDO();
-                authRoleUserDO.setRoleCode(reqVO.getRoleCode());
+                authRoleUserDO.setRoleId(roleId);
                 authRoleUserDO.setUserId(userId);
                 this.insert(authRoleUserDO);
             }
@@ -36,16 +36,16 @@ public class AppAuthRoleUserRepository extends DataRepositoryNew<AuthRoleUserDO>
 
     }
 
-    public void deleteRoleUser(AuthRoleDeleteUserReqVO reqVO) {
+    public void deleteRoleUser(Long roleId, List<Long> userIds) {
         ConfigStore configStore = new DefaultConfigStore();
-        configStore.eq("role_code", reqVO.getRoleCode());
-        configStore.in("user_id", reqVO.getUserIds());
+        configStore.eq("role_id", roleId);
+        configStore.in("user_id", userIds);
         this.deleteByConfig(configStore);
     }
 
-    public void deleteByRoleCode(String roleCode) {
+    public void deleteByRoleId(Long roleId) {
         ConfigStore configStore = new DefaultConfigStore();
-        configStore.eq("role_code", roleCode);
+        configStore.eq("role_id", roleId);
         this.deleteByConfig(configStore);
     }
 

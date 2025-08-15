@@ -106,10 +106,9 @@ public class AppVersionServiceImpl implements AppVersionService {
         versionDO.setEnvironment(createReqVO.getEnvironment());
         versionRepository.insert(versionDO);
         Long applicationId = applicationDO.getId();
-        String applicationCode = applicationDO.getAppCode();
         Long versionId = versionDO.getId();
         // 备份 Menu
-        List<String> menuCodes = backupMenu(applicationId, applicationCode, versionId);
+        List<String> menuCodes = backupMenu(applicationId,  versionId);
         // 备份 pageset
         List<String> pageSetCodes = backupPageSet(applicationId, versionId, menuCodes);
         // 备份 pageset label
@@ -122,8 +121,8 @@ public class AppVersionServiceImpl implements AppVersionService {
     }
 
 
-    private List<String> backupMenu(Long applicationId, String applicationCode, Long versionId) {
-        List<MenuDO> menuDOS = menuRepository.findByApplicationCode(applicationCode);
+    private List<String> backupMenu(Long applicationId,   Long versionId) {
+        List<MenuDO> menuDOS = menuRepository.findByApplicationId(applicationId);
         VersionResourceDO versionResourceDO = new VersionResourceDO();
         versionResourceDO.setApplicationId(applicationId);
         versionResourceDO.setVersionId(versionId);
@@ -182,19 +181,17 @@ public class AppVersionServiceImpl implements AppVersionService {
     public void restoreApplicationVersion(Long versionId) {
         VersionDO applicationVersionDO = validateApplicationVersionExist(versionId);
         Long applicationId = applicationVersionDO.getApplicationId();
-
         // 更新到主表
         ApplicationDO applicationDO = applicationRepository.findById(applicationId);
-        applicationDO.setVersionURL(applicationVersionDO.getVersionURL());
         applicationDO.setVersionNumber(applicationVersionDO.getVersionNumber());
         applicationRepository.update(applicationDO);
         // 恢复菜单
-        restoreMenu(applicationDO.getId(), applicationDO.getAppCode(), versionId);
+        restoreMenu(applicationDO.getId(),   versionId);
     }
 
-    private void restoreMenu(Long applicationId, String applicationCode, Long versionId) {
+    private void restoreMenu(Long applicationId , Long versionId) {
         // 删除相关数据
-        menuRepository.deleteByApplicationCode(applicationCode);
+        menuRepository.deleteByApplicationId(applicationId);
         // 恢复菜单
         VersionResourceDO resourceDOS = versionResourceRepository
                 .findByApplicationIdAndVersionIdAndResType(applicationId, versionId, ResTypeEnum.MENU.getValue());
