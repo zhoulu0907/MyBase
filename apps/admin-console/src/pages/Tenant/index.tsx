@@ -232,18 +232,29 @@ const TenantManagement: React.FC = () => {
       setModalLoading(true);
       const values = await form.validate();
 
-      // 检查分配人数
+      // 检查分配人数（仅在创建租户或更新租户且状态为启用时检查）
       const allocatedCount = values.allocatedCount;
-      // 允许分配的人数
-      const allowCount = tenantLimit - otherTenantCount;
+      const isStatusChangeToDisabled = currentTenant && 
+        form.getFieldValue('status') === PlatformTenantStatus.disabled && 
+        currentTenant.status === PlatformTenantStatus.enabled;
+      
+      // 只有在不是从启用改为禁用的情况下才检查人数限制
+      if (!isStatusChangeToDisabled) {
+        // 允许分配的人数
+        let allowCount = tenantLimit - otherTenantCount;
+        if (allowCount <= 0) {
+          allowCount = 0;
+        }
 
-      if (allocatedCount > allowCount) {
-        Message.error(`可分配人数不足，License总人数是${tenantLimit}，剩余${allowCount}`);
-        return;
+        if (allocatedCount > allowCount) {
+          Message.error(`可分配人数不足，License总人数是${tenantLimit}，剩余${allowCount}`);
+          setModalLoading(false); // 重置加载状态
+          return;
+        }
       }
-
       if (allocatedCount && allocatedCount < tenantUserCount) {
         Message.error(`租户内已使用租户数量为${tenantUserCount}，分配的租户数量不能低于此数量`);
+        setModalLoading(false); // 重置加载状态
         return;
       }
       
@@ -256,7 +267,7 @@ const TenantManagement: React.FC = () => {
       }      
     } catch (error) {
       console.error('表单验证失败:', error);
-      setModalLoading(false);
+      setModalLoading(false); // 重置加载状态
     }
   };
 
@@ -608,7 +619,7 @@ const TenantManagement: React.FC = () => {
           </Form.Item>
 
           <Form.Item
-            label={`分配人员数量 (可分配人员数量：${tenantLimit - otherTenantCount})`}
+            label={`分配人员数量 (可分配人员数量：${Math.max(0, tenantLimit - otherTenantCount)})`}
             field="allocatedCount"
             rules={[
               { required: true, message: '请输入分配人员数量' },

@@ -22,6 +22,7 @@ const Administrator: React.FC = () => {
   const [dataSource, setDataSource] = useState<PlatformAdminInfo[]>([]);
   const [total, setTotal] = useState(null)
   const [delVisible, setDelVisible] = useState(false);
+  const [currentUser, setCurrentUser] = useState<PlatformAdminInfo | null>(null);
   const columns = [
     // order
     { 
@@ -78,17 +79,42 @@ const Administrator: React.FC = () => {
             修改密码
           </Text>
           {record.userType !== PlatformAdminUserType.系统默认账号 && (
-            <Tooltip
+             <Tooltip
               position="tr"
-              trigger="hover"
+              trigger="click"
               color="#fff"
-              // popupVisible={delVisible}
+              popupVisible={delVisible && currentUser?.id === record.id}
+              onVisibleChange={(visible) => {
+                if (visible) {
+                  setCurrentUser(record);
+                } else {
+                  setCurrentUser(null);
+                }
+                setDelVisible(visible);
+              }}
               content={(
                 <div className={styles.tooltipContainer}>
                   <div className={styles.tooltipText}>Are you sure you want to delete?</div>
                   <Space className={styles.tooltipButton}>
-                    <Button type="text" onClick={() => console.log('Cancel')}>取消</Button>
-                    <Button type="primary" onClick={() => handleDeleteConfirm(record)}>确定</Button>
+                    <Button 
+                      type="text" 
+                      onClick={() => {
+                        setDelVisible(false);
+                        setCurrentUser(null);
+                      }}
+                    >
+                      取消
+                    </Button>
+                    <Button 
+                      type="primary" 
+                      onClick={() => {
+                        handleDeleteConfirm(record);
+                        setDelVisible(false);
+                        setCurrentUser(null);
+                      }}
+                    >
+                      确定
+                    </Button>
                   </Space>
                 </div>
               )}
@@ -96,7 +122,6 @@ const Administrator: React.FC = () => {
               <Text
                 className={styles.tableBtn}
                 key={`delete-${record.id}`}
-                // onClick={() => setDelVisible(true)}
               >
                 删除
               </Text>
@@ -108,7 +133,7 @@ const Administrator: React.FC = () => {
   ];
   
 
-  const getPlatformAdminList = async (pageNo: number = 1, keyword: string = '') => {
+  const getPlatformAdminList = async (pageNo: number = 1, keyword: string = searchKeyword) => {
     console.log('keyword', keyword);
     const res = await getPlatformAdminListApi({
       pageNo: pageNo,
@@ -117,7 +142,14 @@ const Administrator: React.FC = () => {
     });
     console.log('getPlatformAdminList res', res);
     setDataSource(res.list);
-    setTotal(res.total)
+    setTotal(res.total);
+    
+    // 如果删除后当前页没有数据且不是第一页，则自动跳转到上一页
+    if (res.list.length === 0 && pageNo > 1) {
+      const prevPage = pageNo - 1;
+      setCurrentPage(prevPage);
+      return getPlatformAdminList(prevPage, keyword);
+    }
   };
 
   useEffect(() => { 
@@ -135,7 +167,6 @@ const Administrator: React.FC = () => {
 
   const handleCreateAdmin = async () => {
     try {
-      // setCreateModalLoading(true);
       const values = await createForm.validate();
 
       // 构建符合 cratePlatformAdminReq 类型的提交数据
@@ -158,7 +189,6 @@ const Administrator: React.FC = () => {
       console.error('表单验证失败或创建失败:', error);
       Message.error('创建管理员失败');
     } finally {
-      // setCreateModalLoading(false);
     }
   };
 
@@ -177,11 +207,22 @@ const Administrator: React.FC = () => {
   const handleDeleteConfirm = async (record: PlatformAdminInfo) => {
     console.log('record:', record);
     try {
-      await deletePlatformAdminApi(record.id)
-      getPlatformAdminList()
+      await deletePlatformAdminApi(record.id);
+      Message.success('删除成功');
       
+      // 重新获取列表数据
+      // 如果当前页只有一条数据，删除后需要回到上一页
+      if (dataSource.length === 1 && currentPage > 1) {
+        // 如果当前页只有一条数据且不是第一页，返回上一页
+        getPlatformAdminList(currentPage - 1, searchKeyword);
+        setCurrentPage(currentPage - 1);
+      } else {
+        // 否则刷新当前页
+        getPlatformAdminList(currentPage, searchKeyword);
+      }
     } catch (error) {
       console.log(error);
+      Message.error('删除失败');
     }
     console.log('delete record', record);
 
@@ -245,9 +286,7 @@ const Administrator: React.FC = () => {
   const handlePageChange = async (pageNo: number) => {
     try {
       console.log('pageNo', pageNo);
-      const pageResp = await getPlatformAdminList(pageNo);
-      console.log('pageResp', pageResp);
-      // setDataSource(pageResp.list)
+      await getPlatformAdminList(pageNo, searchKeyword);
       setCurrentPage(pageNo);
     } catch (error) {
       console.error(error);
