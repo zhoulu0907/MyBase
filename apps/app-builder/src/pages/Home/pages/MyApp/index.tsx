@@ -22,6 +22,7 @@ import {
 import dayjs from 'dayjs';
 import { debounce, sample } from 'lodash-es';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   appOptions,
   calculateMaxItems,
@@ -38,6 +39,7 @@ const Option = Select.Option;
 const MyAppPage: React.FC = () => {
   const [form] = Form.useForm();
   const { t } = useI18n();
+  const navigate = useNavigate();
 
   const [pageSize, setPageSize] = useState<number>();
   const [pageNo, setPageNo] = useState(1);
@@ -122,25 +124,15 @@ const MyAppPage: React.FC = () => {
         themeColor
       };
       await createApplication(params)
-        .then(() => {
+        .then((res: Application) => {
           setCreateVisible(false);
           Message.success('应用创建成功');
           form.resetFields();
-          getApplicationList();
-
-          // Message.success({
-          //   content: '应用创建成功，3s后跳转...',
-          //   duration: 3000,
-          //   onClose: () => {
-          //     navigate('/onebase/create-app/data-factory');
-          //   }
-          // });
+          navigate(`/onebase/create-app/data-factory?appId=${res.id}`);
         })
         .finally(() => {
           setCreateLoading(false);
         });
-      setPageNo(1);
-      await getApplicationList();
     });
   };
 
