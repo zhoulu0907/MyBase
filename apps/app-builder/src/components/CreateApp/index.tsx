@@ -18,10 +18,9 @@ import databaseSVG from '@/assets/images/database_icon.svg';
 import formSVG from '@/assets/images/form_icon.svg';
 import themeSelectedSVG from '@/assets/images/theme_selected_icon.svg';
 import tickSVG from '@/assets/images/tick_icon.svg';
+import previewSVG from '@/assets/images/app_preview.svg';
 import { appIcon, appIconColor, appThemeColor, type Options } from './const';
 import styles from './index.module.less';
-
-const Option = Select.Option;
 
 type AppStatus = 'create' | 'update';
 interface IProps {
@@ -86,28 +85,34 @@ const BasicSetting = (props: IProps) => {
     });
   }, [form, iconName, iconColor, themeColor]);
 
+  const optionMap = tagList.reduce((map: Record<string, ListTagReq>, item) => {
+    map[item.tagName] = item;
+    return map;
+  }, {});
+
   /* 新增标签 */
   const handleCreateTagChange = async (val: Options[]) => {
-    if (val.length === 0) return;
-    const curValue = val[val.length - 1]; // 最后一次更新的数据
-    if (tagList.some((tag) => tag.tagName === curValue.label)) return;
-    await createApplicationTag({
-      tagName: curValue.value
-    } as CreateApplicationTagReq);
+    const normalized = await Promise.all(
+      val.map(async ({ label, value }) => {
+        // 判断是否存在于已有 options
+        const exist = optionMap[label];
 
-    const res = await listAppTagReq();
-    let currentTag = form.getFieldValue('tagIds'); // 需要修改的数据
-    const getCurTagId = res.find((v: ListTagReq) => v.tagName === curValue.value)?.id; // 接口返回的最新数据
-    currentTag = currentTag.map((tag: Options) => {
-      if (tag.label === curValue.value) {
-        return {
-          label: tag.label,
-          value: getCurTagId
-        };
-      }
-      return tag;
-    });
-    form.setFieldValue('tagIds', currentTag);
+        if (exist) {
+          // 使用已有标签的正确 id（value）
+          return { label: exist.tagName, value: exist.id };
+        } else {
+          // 新标签情况
+          await createApplicationTag({
+            tagName: value
+          } as CreateApplicationTagReq);
+          const res = await listAppTagReq();
+          const getCurTag = res.find((v: ListTagReq) => v.tagName === value); // 接口返回的最新数据
+
+          return { label: getCurTag.tagName, value: getCurTag.id };
+        }
+      })
+    );
+    form.setFieldsValue({ tagIds: normalized });
   };
 
   return (
@@ -155,7 +160,7 @@ const BasicSetting = (props: IProps) => {
         </div>
         <div className={styles.row}>
           <div className={styles.subtitle}>预览图</div>
-          <div className={styles.previewImg} />
+          <img className={styles.previewImg} src={previewSVG} alt="preview image" />
         </div>
       </div>
 
@@ -254,16 +259,20 @@ const BasicSetting = (props: IProps) => {
                 render: (invisibleNumber) => `+${invisibleNumber} more`
               }}
               allowClear
-              allowCreate
-              labelInValue={true}
+              allowCreate={{
+                formatter: (inputValue) => {
+                  const getTags = form.getFieldValue('tagIds');
+                  const hasTag = getTags?.some((v: Options) => v.label === inputValue);
+                  if (hasTag) {
+                    return false;
+                  }
+                  return { label: inputValue, value: inputValue };
+                }
+              }}
+              labelInValue
               onChange={handleCreateTagChange}
-            >
-              {tagList.map((tag) => (
-                <Option key={tag.id} value={tag.id!}>
-                  {tag.tagName}
-                </Option>
-              ))}
-            </Select>
+              options={tagList.map((option: ListTagReq) => ({ label: option.tagName, value: option.id }) as Options)}
+            />
           </Form.Item>
           <Form.Item field="description" label="应用描述" rules={[{ required: false, maxLength: 100 }]}>
             <Input.TextArea placeholder="请输入应用描述" />
