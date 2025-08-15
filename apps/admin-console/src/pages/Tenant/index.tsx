@@ -346,6 +346,22 @@ const TenantManagement: React.FC = () => {
     form.setFieldsValue({ status: PlatformTenantStatus.enabled });
   };
 
+  const copyToClipboard = async (text: string) => {
+    try {
+      // 首先尝试使用现代 Clipboard API
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+        Message.success('复制成功!');
+      } else {
+        // 降级到传统方法
+        fallbackCopyToClipboard(text);
+      }
+    } catch (error) {
+      console.error('复制失败:', error);
+      Message.error('复制失败');
+    }
+  };
+
   const fallbackCopyToClipboard = (text: string) => {
     const textArea = document.createElement('textarea');
     textArea.value = text;
@@ -364,6 +380,7 @@ const TenantManagement: React.FC = () => {
     }
     document.body.removeChild(textArea);
   };
+
 
   // 表格列定义
   const columns = [
@@ -415,19 +432,7 @@ const TenantManagement: React.FC = () => {
             </Tooltip>
             <IconCopy className={styles.copyIcon} onClick={(e) => {
               e.stopPropagation();
-              const url = fullUrl;
-
-              if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(url)
-                  .then(() => {
-                    Message.success('复制成功!');
-                  })
-                  .catch(() => {
-                    fallbackCopyToClipboard(url);
-                  });
-              } else {
-                fallbackCopyToClipboard(url);
-              }
+              copyToClipboard(fullUrl);
             }}/>
           </Space>
         );
