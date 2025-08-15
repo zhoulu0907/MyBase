@@ -60,8 +60,16 @@ const TenantPage: React.FC = () => {
     if (!link) {
       return;
     }
-    () => window.open(link, '_blank')
+    window.open(link, '_blank');
   }
+
+  // 生成完整访问地址的函数
+  const generateFullUrl = (path: string | null | undefined) => {
+    if (!path) return '';
+    const origin = window.location.origin;
+    const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+    return `${origin}/#/tenant${normalizedPath}`;
+  };
 
   // 显示加载状态
   if (loading) {
@@ -84,6 +92,10 @@ const TenantPage: React.FC = () => {
       </div>
     );
   }
+
+  // 生成完整的工作台和移动端链接
+  const fullWebsite = generateFullUrl(tenantInfo.website);
+  const fullWebsiteH5 = generateFullUrl(tenantInfo.websiteH5);
 
   return (
     <PlaceholderPanel hasPermission={hasPermission(ACTIONS.QUERY)} isLoading={loading}>
@@ -141,22 +153,22 @@ const TenantPage: React.FC = () => {
                   <Text type="secondary">工作台：</Text>
                   <Text 
                     type="primary" 
-                    copyable 
-                    onClick={() => { gotoLink(tenantInfo.website) }}
+                    copyable={{ text: fullWebsite || '-' }}
+                    onClick={() => { gotoLink(fullWebsite) }}
                     style={{ cursor: 'pointer' }}
                   >
-                    {tenantInfo.website || '-'}
+                    {fullWebsite || '-'}
                   </Text>
                 </div>
                 <div className={styles.descriptionItem}>
                   <Text type="secondary">移动端：</Text>
                   <Text 
                     type="primary" 
-                    copyable 
-                    onClick={() => { gotoLink(tenantInfo.websiteH5) }}
+                    copyable={{ text: fullWebsiteH5 || '-' }}
+                    onClick={() => { gotoLink(fullWebsiteH5) }}
                     style={{ cursor: 'pointer' }}
                   >
-                    {tenantInfo.websiteH5 || '-'}
+                    {fullWebsiteH5 || '-'}
                   </Text>
                 </div>
               </div>
