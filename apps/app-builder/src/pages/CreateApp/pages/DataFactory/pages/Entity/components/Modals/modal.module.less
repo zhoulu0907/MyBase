@@ -71,7 +71,7 @@
 
 /* 字段配置弹窗内容 */
 .field-config-popover {
-  padding: 16px;
+  padding: 0 !important;
   min-width: 300px;
 
   h4 {
@@ -85,6 +85,97 @@
     margin: 0;
     color: #666;
     font-size: 12px;
+  }
+}
+
+/* 字段类型配置组件样式 */
+.field-type-config {
+  width: 318px;
+  .field-type-config-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 16px;
+    margin-top: 16px;
+  }
+  .option-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+    gap: 8px;
+
+    .option-input {
+      width: 278px !important;
+      // flex: 1;
+    }
+
+    .delete-btn {
+      color: #ff4d4f;
+      
+      &:hover {
+        background-color: #fff2f0;
+      }
+    }
+  }
+
+  .add-option-btn {
+    width: 110px;
+    margin-top: 8px;
+    border-style: dashed;
+    border-color: #d9d9d9;
+    color: #666;
+
+    &:hover {
+      border-color: @primaryColor;
+      color: @primaryColor;
+    }
+  }
+
+  .rule-items {
+    padding: 12px;
+    border-radius: 6px;
+    background-color: #fafafa;
+
+    .rule-content {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      .drag-handle {
+        cursor: move;
+        color: #999;
+      }
+      .drag-handle:hover {
+        color: #666;
+      }
+
+      .rule-label {
+        min-width: 80px;
+        font-size: 14px;
+        color: #333;
+      }
+
+      .rule-input {
+        // flex: 1;
+        width: 142px;
+      }
+
+      .rule-action-btn {
+        color: #ff4d4f;
+        
+        &:hover {
+          background-color: #fff2f0;
+        }
+      }
+    }
+  }
+
+  .add-rule-dropdown {
+    width: 100%;
+    margin-top: 16px;
+
+    .add-rule-btn {
+      .add-option-btn;
+    }
   }
 }
 

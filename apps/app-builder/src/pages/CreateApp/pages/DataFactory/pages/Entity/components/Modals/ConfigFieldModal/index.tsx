@@ -13,11 +13,12 @@ import {
   Table,
   Tooltip
 } from '@arco-design/web-react';
-import { IconDragDotVertical, IconPlus, IconSettings } from '@arco-design/web-react/icon';
+import { IconDragDotVertical, IconPlus, IconSelectAll, IconSettings } from '@arco-design/web-react/icon';
 import { batchSaveFields, getEntityFields } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import styles from '../modal.module.less';
+import { PicklistConfig, MultiPicklistConfig, AutoCodeConfig, type AutoCodeRule } from './FieldTypeConfig';
 
 interface FieldFormValues {
   id?: string;
@@ -33,6 +34,11 @@ interface FieldFormValues {
   sortOrder?: number;
   isDeleted?: boolean;
   displayName?: string;
+  // 字段配置数据
+  fieldConfig?: {
+    options?: string[]; // 单选/多选列表的选项
+    autoCodeRules?: AutoCodeRule[]; // 自动编号规则
+  };
 }
 
 interface ConfigFieldModalProps {
@@ -44,11 +50,7 @@ interface ConfigFieldModalProps {
 }
 
 // 需要额外配置的字段类型
-const FIELD_TYPES_NEED_CONFIG = [
-  ENTITY_FIELD_TYPE.PICKLIST,
-  ENTITY_FIELD_TYPE.MULTI_PICKLIST,
-  ENTITY_FIELD_TYPE.AUTO_CODE
-];
+const FIELD_TYPES_NEED_CONFIG = ['PICKLIST', 'MULTI_PICKLIST', 'AUTO_CODE'];
 
 // 字段类型选项
 const fieldTypeOptions = Object.entries(ENTITY_FIELD_TYPE).map(([key, value]) => ({
@@ -61,6 +63,7 @@ const SortableTableRow = (props) => {
   const { record, children, ...restProps } = props;
   return <tr {...restProps}>{children}</tr>;
 };
+
 const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible, entity, successCallback }) => {
   const { curAppId } = useAppStore();
   const [fields, setFields] = useState<FieldFormValues[]>([]);
@@ -193,35 +196,75 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
     }
   };
 
-  const renderFieldConfig = (fieldType: string) => {
+  // 处理配置确认
+  const handleConfigConfirm = (fieldType: string, fieldId: string, configData: any) => {
+    const fieldIndex = fields.findIndex((field) => field.id === fieldId);
+    if (fieldIndex === -1) return;
+
+    let fieldConfig = {};
     switch (fieldType) {
-      case ENTITY_FIELD_TYPE.PICKLIST:
-        return (
-          <div className={styles['field-config-popover']}>
-            <h4>单选列表配置</h4>
-            <p>请配置选项列表...</p>
-            {/* 这里可以添加具体的配置表单 */}
-          </div>
-        );
-      case ENTITY_FIELD_TYPE.MULTI_PICKLIST:
-        return (
-          <div className={styles['field-config-popover']}>
-            <h4>多选列表配置</h4>
-            <p>请配置选项列表...</p>
-            {/* 这里可以添加具体的配置表单 */}
-          </div>
-        );
-      case ENTITY_FIELD_TYPE.AUTO_CODE:
-        return (
-          <div className={styles['field-config-popover']}>
-            <h4>自动编码配置</h4>
-            <p>请配置编码规则...</p>
-            {/* 这里可以添加具体的配置表单 */}
-          </div>
-        );
-      default:
-        return null;
+      case 'PICKLIST':
+      case 'MULTI_PICKLIST':
+        fieldConfig = { options: configData };
+        break;
+      case 'AUTO_CODE':
+        fieldConfig = { autoCodeRules: configData };
+        break;
     }
+
+    updateField(fieldIndex, { fieldConfig });
+    // 配置完成后关闭 popover
+    setConfigPopoverVisible(null);
+  };
+
+  const renderFieldConfig = (fieldType: string, fieldId: string) => {
+    const field = fields.find((f) => f.id === fieldId);
+    const hasConfig = field?.fieldConfig;
+
+    return (
+      <div className={styles['field-config-popover']} style={{ width: '400px', padding: '16px' }}>
+        <div style={{ marginBottom: '16px' }}>
+          {hasConfig ? (
+            <div>
+              <p style={{ color: '#52c41a', marginBottom: 8 }}>✓ 已配置</p>
+              {fieldType === 'AUTO_CODE' && field.fieldConfig?.autoCodeRules && (
+                <p style={{ fontSize: '12px', color: '#666' }}>规则数量: {field.fieldConfig.autoCodeRules.length}</p>
+              )}
+              {(fieldType === 'PICKLIST' || fieldType === 'MULTI_PICKLIST') && field.fieldConfig?.options && (
+                <p style={{ fontSize: '12px', color: '#666' }}>选项数量: {field.fieldConfig.options.length}</p>
+              )}
+            </div>
+          ) : (
+            <p style={{ color: '#ff4d4f' }}>⚠ 未配置</p>
+          )}
+        </div>
+
+        {/* 直接在 Popover 中渲染配置组件 */}
+        {fieldType === 'PICKLIST' && (
+          <PicklistConfig
+            onConfirm={(options) => handleConfigConfirm('PICKLIST', fieldId, options)}
+            initialOptions={field?.fieldConfig?.options}
+            onCancel={() => setConfigPopoverVisible(null)}
+          />
+        )}
+
+        {fieldType === 'MULTI_PICKLIST' && (
+          <MultiPicklistConfig
+            onConfirm={(options) => handleConfigConfirm('MULTI_PICKLIST', fieldId, options)}
+            initialOptions={field?.fieldConfig?.options}
+            onCancel={() => setConfigPopoverVisible(null)}
+          />
+        )}
+
+        {fieldType === 'AUTO_CODE' && (
+          <AutoCodeConfig
+            onConfirm={(rules) => handleConfigConfirm('AUTO_CODE', fieldId, rules)}
+            initialRules={field?.fieldConfig?.autoCodeRules}
+            onCancel={() => setConfigPopoverVisible(null)}
+          />
+        )}
+      </div>
+    );
   };
 
   const columns = [
@@ -282,7 +325,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
           />
           {record.isSystemField === 1 && FIELD_TYPES_NEED_CONFIG.includes(value) && (
             <Popover
-              content={renderFieldConfig(value)}
+              content={renderFieldConfig(value, record.id)}
               trigger="click"
               popupVisible={configPopoverVisible === record.id}
               onVisibleChange={(visible) => setConfigPopoverVisible(visible ? record.id : null)}
@@ -376,11 +419,16 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
         record.isSystemField === 0 ? (
           <span className={styles['system-field']}>{value || '-'}</span>
         ) : (
-          <Input
-            value={value}
-            placeholder="请输入字段约束"
-            onChange={(val) => updateField(getFieldIndex(record.id, index), { constraints: val })}
-          />
+          <Popover
+            content={renderFieldConfig('CONSTRAINTS', record.id)}
+            trigger="click"
+            popupVisible={configPopoverVisible === record.id}
+            onVisibleChange={(visible) => setConfigPopoverVisible(visible ? record.id : null)}
+          >
+            <Button size="mini" icon={<IconSelectAll />} onClick={() => setConfigPopoverVisible(record.id)}>
+              配置字段约束
+            </Button>
+          </Popover>
         )
     },
     {

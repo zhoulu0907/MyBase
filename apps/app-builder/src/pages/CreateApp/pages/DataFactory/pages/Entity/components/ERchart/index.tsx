@@ -189,11 +189,12 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
           onEdgeEdit?.(edge.data);
         });
 
-        graphRef.current.on('translate', ({ tx, ty }) => {
-          console.log('translate', tx, ty);
-          const center = graphRef.current?.getContentArea()?.center;
-          console.log('center', center);
-        });
+        // 监听画布平移
+        // graphRef.current.on('translate', ({ tx, ty }) => {
+        //   console.log('translate', tx, ty);
+        //   const center = graphRef.current?.getContentArea()?.center;
+        //   console.log('center', center);
+        // });
 
         isGraphInitialized.current = true; // 标记已初始化
       };
