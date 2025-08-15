@@ -25,7 +25,7 @@ public class UidAutoConfiguration {
         return workerIdAssigner;
     }
 
-    @Bean
+    @Bean("uidGenerator")
     public UidGenerator uidGenerator(DisposableWorkerIdAssigner workerIdAssigner) throws Exception {
         CachedUidGenerator uidGenerator = new CachedUidGenerator();
         uidGenerator.setEpochStr("2025-08-15");
