@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Table,
   Button,
@@ -41,10 +41,10 @@ const { useForm } = Form;
 const TenantManagement: React.FC = () => {
   const [tenantList, setTenantList] = useState<PlatformTenantInfo[]>([]);
   const [loading, setLoading] = useState(false);
-  const [searchParams, setSearchParams] = useState({
-    status: PlatformTenantStatus.all,
-    keywords: ''
-  });
+  const [statusFilter, setStatusFilter] = useState(PlatformTenantStatus.all); // 状态筛选
+  const [keywordSearch, setKeywordSearch] = useState(''); // 关键字搜索
+  const [searchInputValue, setSearchInputValue] = useState(''); // 输入框显示的值
+  const [searchDebounceTimer, setSearchDebounceTimer] = useState<NodeJS.Timeout | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [confirmDisableVisible, setConfirmDisableVisible] = useState(false);
   const [modalLoading, setModalLoading] = useState(false);
@@ -66,12 +66,12 @@ const TenantManagement: React.FC = () => {
   const getPlatformTenantList = async () => {
     setLoading(true);
     try {
-      console.log("getPlatformTenantList searchParams.status: ", searchParams.status);
+      // console.log("getPlatformTenantList searchParams.status: ", searchParams.status);
       const resp = await getPlatformTenantListApi({
         pageNo: currentPage,
         pageSize: 10,
-        status: searchParams.status, // 添加状态筛选参数
-        keywords: searchParams.keywords // 添加关键词搜索参数
+        status: statusFilter, // 添加状态筛选参数
+        keywords: keywordSearch // 添加关键词搜索参数
       });
       setTenantList(resp.list);
       setTotal(resp.total)
@@ -90,21 +90,44 @@ const TenantManagement: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    setSearchInputValue(keywordSearch);
+  }, [keywordSearch]);
+
+  useEffect(() => {
     getPlatformTenantList();
-  }, [searchParams, currentPage]);
+  }, [statusFilter, keywordSearch, currentPage]);
 
   // 处理状态筛选
   const handleStatusChange = (status: number) => {
-    console.log('启用状态 before: ', searchParams.status);
+    console.log('启用状态 before: ', statusFilter);
     console.log('启用状态 new: ', status);
-    setSearchParams({ ...searchParams, status });
+    setStatusFilter(status);
     setCurrentPage(1); // 重置到第一页
   };
 
   // 处理搜索
-  const handleSearch = async (keywords: string) => {
-    setSearchParams({ ...searchParams, keywords });
-    setCurrentPage(1); // 重置到第一页
+  // const handleSearch = (keywords: string) => {
+  //   // 实际触发搜索
+  //   setSearchParams({ ...searchParams, keywords });
+  //   setCurrentPage(1); // 重置到第一页
+  // };
+   // 处理搜索输入变化（即时更新输入框）
+  const handleSearchInputChange = (value: string) => {
+    setSearchInputValue(value);
+    
+    // 清除之前的定时器
+    if (searchDebounceTimer) {
+      clearTimeout(searchDebounceTimer);
+    }
+    
+    // 设置新的定时器
+    const timer = setTimeout(() => {
+      // 这里不需要再设置状态，因为 setKeywordSearch 已经在上面执行了
+      setKeywordSearch(value);
+      setCurrentPage(1); // 重置到第一页
+    }, 500); // 500ms 防抖延迟
+    
+    setSearchDebounceTimer(timer);
   };
 
   // 获取Tenant参数
@@ -202,18 +225,18 @@ const TenantManagement: React.FC = () => {
       name: record.name,
       contactMobile: record.contactMobile,
       accountCount: record.accountCount,
-      contactName: record.contactName,
+      nickName: record.nickName,
       createTime: record.createTime,
       status: record.status,
       tenantCode: record.tenantCode,
     };
     setCurrentTenant(tenant);
-    setOriginalAdmin(record.contactName);
+    setOriginalAdmin(record.nickName);
     
     form.setFieldsValue({
       tenantName: record.name,
       tenantCode: record.tenantCode,
-      admin: record.contactName,
+      admin: record.nickName,
       allocatedCount: record.accountCount,
       status: record.status === PlatformTenantStatus.enabled ? PlatformTenantStatus.enabled : PlatformTenantStatus.disabled,
       website: record.website,
@@ -232,18 +255,29 @@ const TenantManagement: React.FC = () => {
       setModalLoading(true);
       const values = await form.validate();
 
-      // 检查分配人数
+      // 检查分配人数（仅在创建租户或更新租户且状态为启用时检查）
       const allocatedCount = values.allocatedCount;
-      // 允许分配的人数
-      const allowCount = tenantLimit - otherTenantCount;
+      const isStatusChangeToDisabled = currentTenant && 
+        form.getFieldValue('status') === PlatformTenantStatus.disabled && 
+        currentTenant.status === PlatformTenantStatus.enabled;
+      
+      // 只有在不是从启用改为禁用的情况下才检查人数限制
+      if (!isStatusChangeToDisabled) {
+        // 允许分配的人数
+        let allowCount = tenantLimit - otherTenantCount;
+        if (allowCount <= 0) {
+          allowCount = 0;
+        }
 
-      if (allocatedCount > allowCount) {
-        Message.error(`可分配人数不足，License总人数是${tenantLimit}，剩余${allowCount}`);
-        return;
+        if (allocatedCount > allowCount) {
+          Message.error(`可分配人数不足，License总人数是${tenantLimit}，剩余${allowCount}`);
+          setModalLoading(false); // 重置加载状态
+          return;
+        }
       }
-
       if (allocatedCount && allocatedCount < tenantUserCount) {
         Message.error(`租户内已使用租户数量为${tenantUserCount}，分配的租户数量不能低于此数量`);
+        setModalLoading(false); // 重置加载状态
         return;
       }
       
@@ -256,7 +290,7 @@ const TenantManagement: React.FC = () => {
       }      
     } catch (error) {
       console.error('表单验证失败:', error);
-      setModalLoading(false);
+      setModalLoading(false); // 重置加载状态
     }
   };
 
@@ -274,7 +308,7 @@ const TenantManagement: React.FC = () => {
         name: values.tenantName,
         tenantCode: values.tenantCode,
         // 只有管理员发生变化时才传递管理员信息，否则传递空字符串
-        contactName: originalAdmin !== newAdmin ? newAdmin : '',
+        nickName: originalAdmin !== newAdmin ? newAdmin : '',
         status: values.status,
         accountCount: values.allocatedCount,
         website: values.website,
@@ -301,7 +335,7 @@ const TenantManagement: React.FC = () => {
       const newTenantData: CreateTenantParams = {
         name: values.tenantName,
         tenantCode: generateTenantCode(),
-        contactName: values.admin,
+        nickName: values.admin,
         status: values.status,
         accountCount: values.allocatedCount,
         website: values.website,
@@ -412,7 +446,7 @@ const TenantManagement: React.FC = () => {
     },
     {
       title: '管理员',
-      dataIndex: 'contactName'
+      dataIndex: 'nickName'
     },
     {
       title: '访问地址',
@@ -537,7 +571,7 @@ const TenantManagement: React.FC = () => {
           + 新建
         </Button>
         <Space size="large">
-          <Radio.Group type="button" value={searchParams.status} onChange={handleStatusChange}>
+          <Radio.Group type="button" value={statusFilter} onChange={handleStatusChange}>
             <Radio value={PlatformTenantStatus.all}>全部</Radio>
             <Radio value={PlatformTenantStatus.enabled}>启用</Radio>
             <Radio value={PlatformTenantStatus.disabled}>禁用</Radio>
@@ -546,8 +580,8 @@ const TenantManagement: React.FC = () => {
             placeholder="搜索租户名称/编码"
             style={{ width: 300 }}
             allowClear
-            value={searchParams.keywords}
-            onChange={value => handleSearch(value)}
+            value={searchInputValue}
+            onChange={value => handleSearchInputChange(value)}
             // searchButton
             suffix={<IconSearch />}
           />
@@ -608,7 +642,7 @@ const TenantManagement: React.FC = () => {
           </Form.Item>
 
           <Form.Item
-            label={`分配人员数量 (可分配人员数量：${tenantLimit - otherTenantCount})`}
+            label={`分配人员数量 (可分配人员数量：${Math.max(0, tenantLimit - otherTenantCount)})`}
             field="allocatedCount"
             rules={[
               { required: true, message: '请输入分配人员数量' },

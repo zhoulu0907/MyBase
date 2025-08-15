@@ -8,6 +8,7 @@ export enum PlatformAdminUserType {
  */
 export interface cratePlatformAdminReq {
   username: string;
+  nickname: string;
   password: string;
   mobile: string;
   email: string;
@@ -17,7 +18,7 @@ export interface cratePlatformAdminReq {
  * 平台管理员信息
  */
 export interface PlatformAdminInfo {
-  id: string | number;
+  id: string;
   avatar: string;
   /**
    * 创建时间

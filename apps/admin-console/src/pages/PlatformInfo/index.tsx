@@ -35,6 +35,7 @@ const PlatformInfo: React.FC = () => {
   const [visible, setVisible] = useState(false);
   const [licenseInfoList, setLicenseInfoList] = useState<LicenseInfoList[]>([]);
   const [licenseInfo, setLicenseInfo] = useState<LicenseInfo | null>(null);
+  const [selectedLicenseInfo, setSelectedLicenseInfo] = useState<LicenseInfo | null>(null);
   const [pageLoading, setPageLoading] = useState<boolean>(true);
   const [isUploading, setIsUploading] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -123,7 +124,7 @@ const PlatformInfo: React.FC = () => {
             className={styles.btn}
             onClick={(e) => {
               e.preventDefault();
-              setLicenseInfo(record);
+              setSelectedLicenseInfo(record);
               setVisible(true);
             }}
           >
@@ -375,33 +376,33 @@ const PlatformInfo: React.FC = () => {
         footer={null}
         className={styles.licenseModal}
       >
-        {licenseInfo && (
+        {selectedLicenseInfo && (
           <Descriptions
             column={1}
             data={[
               {
                 label: t('platformInfo.enterpriseName'),
-                value: licenseInfo.enterpriseName
+                value: selectedLicenseInfo.enterpriseName
               },
               {
                 label: t('platformInfo.certificationContent'),
                 value: (
                   <div>
-                    租户数量：{licenseInfo.tenantLimit}，用户数量：{licenseInfo.userLimit}
+                    租户数量：{selectedLicenseInfo.tenantLimit}，用户数量：{selectedLicenseInfo.userLimit}
                   </div>
                 )
               },
               {
                 label: t('platformInfo.status'),
                 value: (
-                  <Tag color={licenseInfo?.status === 'enable' ? 'green' : 'red'}>
-                    {licenseInfo?.status === 'enable' ? '已启用' : '已失效'}
+                  <Tag color={selectedLicenseInfo?.status === 'enable' ? 'green' : 'red'}>
+                    {selectedLicenseInfo?.status === 'enable' ? '已启用' : '已失效'}
                   </Tag>
                 )
               },
               {
                 label: t('platformInfo.expireTime'),
-                value: formatTimestamp(licenseInfo.expireTime)
+                value: formatTimestamp(selectedLicenseInfo.expireTime)
               }
             ]}
             labelStyle={{ fontWeight: 'bold', width: '100px' }}
