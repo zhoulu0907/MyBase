@@ -166,21 +166,10 @@ const PlatformInfo: React.FC = () => {
       
       // 验证文件对象
       if (file && (file instanceof File || file instanceof Blob)) {
-        console.log("文件验证通过，文件信息:", {
-          name: file.name,
-          size: file.size,
-          type: file.type
-        });
         
         // 创建FormData并添加文件 - 确保参数名为"file"
         const formData = new FormData();
         formData.append('file', file, file.name || 'license.lic.sm4');
-        
-        console.log("FormData创建完成");
-        // 验证FormData内容
-        for (let [key, value] of formData.entries()) {
-          console.log(`FormData内容 - ${key}:`, value);
-        }
         
         setIsUploading(true);
         setLoading(true);
@@ -216,20 +205,26 @@ const PlatformInfo: React.FC = () => {
       // 获取存储在localStorage或cookie中的token
       const authorizationHeader = TokenManager.getAuthorizationHeader();
       console.log('authorizationHeader:', authorizationHeader);
-      
-      // 创建带有token的请求
-      const response = await fetch('http://192.168.43.40:48080/admin-api/system/license/export?id=1', {
-        method: 'GET',
-        headers: {
-          'Authorization': authorizationHeader,
+      if (typeof window !== 'undefined' && window.global_config?.BASE_URL) {
+        try {
+          const url = new URL(window.global_config.BASE_URL);
+          // 创建带有token的请求
+          const response = await fetch(`${url.href}/system/license/export?id=1`, {
+            method: 'GET',
+            headers: {
+              'Authorization': authorizationHeader,
+            }
+          });
+          console.log('fetch response:', response);
+          if (response.ok) {
+            const blob = await response.blob();
+            downloadFile(blob, 'license.lic.sm4');
+          } else {
+            Message.error('下载失败');
+          }
+        } catch (e) {
+          console.error('解析BASE_URL失败:', e);
         }
-      });
-      console.log('fetch response:', response);
-      if (response.ok) {
-        const blob = await response.blob();
-        downloadFile(blob, 'license.lic.sm4');
-      } else {
-        Message.error('下载失败');
       }
     } catch (error) {
       console.error('下载失败:', error);
