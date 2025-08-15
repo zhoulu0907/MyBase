@@ -7,11 +7,11 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum AdminTypeEnum {
     /**
-     * 内置角色
+     * 内置用户
      */
     SYSTEM(1),
     /**
-     * 自定义角色
+     * 自定义用户
      */
     CUSTOM(2);
 
