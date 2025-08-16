@@ -5,7 +5,7 @@ import lombok.Data;
 @Data
 public class UpdatePageNameDTO {
 
-    private String pageCode;
+    private Long pageId;
 
     private String pageName;
 }

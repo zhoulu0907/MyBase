@@ -13,21 +13,23 @@ import lombok.EqualsAndHashCode;
  * @Author mickey
  * @Date 2025/7/30 14:51
  */
-@Table(name="app_resource_page_metadata")
+// @Table(name = "app_resource_page_metadata")
+@Table(name = "tmp0815_app_resource_page_metadata")
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class PageMetadataDO extends TenantBaseDO {
+    public static final String PAGE_ID = "page_id";
 
     /**
      * 页面编码
      */
-    @Column(name = "page_code", columnDefinition = "VARCHAR(255) NOT NULL", comment = "页面编码")
-    private String pageCode;
+    @Column(name = "page_id", columnDefinition = "BIGINT NOT NULL", nullable = false, comment = "页面ID")
+    private Long pageId;
 
     /**
      * 页面元数据
      */
-    @Column(name = "metadata", columnDefinition= "VARCHAR(255) NOT NULL", comment = "页面元数据")
+    @Column(name = "metadata", columnDefinition = "VARCHAR(255) NOT NULL", comment = "页面元数据")
     private String metadata;
 
 }

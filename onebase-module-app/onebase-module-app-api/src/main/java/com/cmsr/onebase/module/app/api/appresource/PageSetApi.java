@@ -23,19 +23,19 @@ public interface PageSetApi {
     String PREFIX = ApiConstants.PREFIX + "/page_set";
 
     @GetMapping(PREFIX + "/get")
-    @Operation(summary = "通过 code 查询pageSet")
-    @Parameter(name = "code", description = "pageset code", example = "xxx", required = true)
-    CommonResult<PageSetRespDTO> getPageSet(@RequestParam("code") String code);
+    @Operation(summary = "通过 id 查询pageSet")
+    @Parameter(name = "id", description = "pageset id", example = "xxx", required = true)
+    CommonResult<PageSetRespDTO> getPageSet(@RequestParam("id") Long id);
 
     @GetMapping(PREFIX + "/get-appid")
     @Operation(summary = "通过 pageSetCode 查询 appId ")
-    @Parameter(name = "code", description = "code", example = "xxx", required = true)
-    CommonResult<Long> getAppId(@RequestParam("code") String code);
+    @Parameter(name = "id", description = "id", example = "xxx", required = true)
+    CommonResult<Long> getAppId(@RequestParam("id") Long id);
 
     @GetMapping(PREFIX + "/get-main_metadata")
     @Operation(summary = "通过 pageSetCode 查询 main_metadata ")
-    @Parameter(name = "code", description = "code", example = "xxx", required = true)
-    CommonResult<String> getMainMetadata(@RequestParam("code") String code);
+    @Parameter(name = "id", description = "id", example = "xxx", required = true)
+    CommonResult<String> getMainMetadata(@RequestParam("id") Long id);
 
     @PostMapping(PREFIX + "/create")
     @Operation(summary = "创建pageSet")
@@ -43,7 +43,7 @@ public interface PageSetApi {
 
     @PostMapping(PREFIX + "/delete")
     @Operation(summary = "删除pageSet")
-    @Parameter(name = "code", description = "menu code", required = true)
-    CommonResult<Boolean> deletePageSet(@RequestParam("menuCode") String menucode);
+    @Parameter(name = "id", description = "menu id", required = true)
+    CommonResult<Boolean> deletePageSet(@RequestParam("id") Long id);
 
 }

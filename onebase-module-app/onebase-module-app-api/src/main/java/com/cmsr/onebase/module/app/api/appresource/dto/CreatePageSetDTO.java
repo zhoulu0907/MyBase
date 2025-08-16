@@ -16,9 +16,9 @@ public class CreatePageSetDTO {
     @NotNull(message = "页面集显示名称不能为空")
     private String displayName;
 
-    @Schema(description = "菜单编码", requiredMode = Schema.RequiredMode.REQUIRED, example = "xxxxx")
-    @NotNull(message = "菜单编码不能为空")
-    private String menuCode;
+    @Schema(description = "菜单id", requiredMode = Schema.RequiredMode.REQUIRED, example = "xxxxx")
+    @NotNull(message = "菜单id不能为空")
+    private Long menuId;
 
     @Schema(description = "页面集描述", requiredMode = Schema.RequiredMode.NOT_REQUIRED, example = "这是首页的页面集")
     private String description;

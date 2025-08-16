@@ -8,18 +8,20 @@ import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-@Table(name="app_resource_pageset_label")
+// @Table(name = "app_resource_pageset_label")
+@Table(name = "tmp0815_app_resource_pageset_label")
 @Data
 @Entity
 @EqualsAndHashCode(callSuper = true)
 public class PageSetLabelDO extends TenantBaseDO {
+    public static final String PAGE_SET_ID = "pageset_id";
 
-    @Column(name = "pageset_code", columnDefinition= "VARCHAR(255) NOT NULL", comment = "页面集编码")
-    private String pagesetCode;
+    @Column(name = "pageset_id", columnDefinition = "BIGINT NOT NULL", nullable = false, comment = "页面集ID")
+    private Long pageSetId;
 
-    @Column(name = "label_name", columnDefinition= "VARCHAR(255) NOT NULL", comment = "标签名称")
+    @Column(name = "label_name", columnDefinition = "VARCHAR(255) NOT NULL", comment = "标签名称")
     private String labelName;
 
-    @Column(name = "label_value", columnDefinition= "VARCHAR(255) NOT NULL", comment = "标签值")
+    @Column(name = "label_value", columnDefinition = "VARCHAR(255) NOT NULL", comment = "标签值")
     private String labelValue;
 }

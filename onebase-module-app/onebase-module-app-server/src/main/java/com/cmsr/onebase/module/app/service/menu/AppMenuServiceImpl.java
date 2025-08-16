@@ -1,10 +1,27 @@
 package com.cmsr.onebase.module.app.service.menu;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import com.esotericsoftware.minlog.Log;
+import org.apache.commons.collections4.MapUtils;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
+
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.app.api.appresource.dto.CopyPageSetDTO;
 import com.cmsr.onebase.module.app.api.appresource.dto.CreatePageSetDTO;
-import com.cmsr.onebase.module.app.controller.admin.menu.vo.*;
+import com.cmsr.onebase.module.app.controller.admin.menu.vo.MenuCopyReqVO;
+import com.cmsr.onebase.module.app.controller.admin.menu.vo.MenuCreateReqVO;
+import com.cmsr.onebase.module.app.controller.admin.menu.vo.MenuCreateRespVO;
+import com.cmsr.onebase.module.app.controller.admin.menu.vo.MenuListRespVO;
+import com.cmsr.onebase.module.app.controller.admin.menu.vo.MenuOrderUpdateReqVO;
 import com.cmsr.onebase.module.app.dal.database.menu.AppMenuRepository;
 import com.cmsr.onebase.module.app.dal.dataobject.app.ApplicationDO;
 import com.cmsr.onebase.module.app.dal.dataobject.menu.MenuDO;
@@ -14,19 +31,13 @@ import com.cmsr.onebase.module.app.enums.menu.MenuVisibleEnum;
 import com.cmsr.onebase.module.app.service.AppCommonService;
 import com.cmsr.onebase.module.app.service.appresource.PageSetService;
 import com.cmsr.onebase.module.app.util.MenuUtils;
+
 import jakarta.annotation.Resource;
 import lombok.Setter;
-import org.apache.commons.collections4.MapUtils;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.annotation.Validated;
-
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @Author：huangjie
- * @Date：2025/7/23 13:40
+ *                  @Date：2025/7/23 13:40
  */
 @Setter
 @Service
@@ -49,11 +60,11 @@ public class AppMenuServiceImpl implements AppMenuService {
         List<MenuListRespVO> menuListRespList = new ArrayList<>();
         // 把第一层的菜单添加到列表中
         List<MenuListRespVO> levelOneMenus = menuDOS.stream()
-                .filter(v -> MenuUtils.ROOT_MENU_ID.equals(v.getId()))
+                .filter(v -> MenuUtils.ROOT_MENU_ID.equals(v.getParentId()))
                 .map(v -> BeanUtils.toBean(v, MenuListRespVO.class))
                 .toList();
         menuListRespList.addAll(levelOneMenus);
-        //递归实现每个菜单的子菜单
+        // 递归实现每个菜单的子菜单
         for (MenuListRespVO respVO : menuListRespList) {
             List<MenuListRespVO> children = recursiveGetChildren(respVO, menuDOS);
             respVO.setChildren(children);
@@ -82,6 +93,7 @@ public class AppMenuServiceImpl implements AppMenuService {
         ApplicationDO applicationDO = appCommonService.validateApplicationExist(createReqVO.getApplicationId());
         // 创建菜单
         MenuDO menuDO = new MenuDO();
+        menuDO.setApplicationId(createReqVO.getApplicationId());
         menuDO.setParentId(validateParentMenuId(createReqVO.getParentId()));
         menuDO.setMenuCode(MenuUtils.generateMenuCode());
         menuDO.setMenuType(createReqVO.getMenuType());
@@ -93,7 +105,7 @@ public class AppMenuServiceImpl implements AppMenuService {
         appMenuRepository.insert(menuDO);
         // 创建页面集
         CreatePageSetDTO createPageSetDTO = new CreatePageSetDTO();
-        createPageSetDTO.setMenuCode(menuDO.getMenuCode());
+        createPageSetDTO.setMenuId(menuDO.getId());
         createPageSetDTO.setPageSetName(menuDO.getMenuName());
         createPageSetDTO.setDisplayName(menuDO.getMenuName());
         createPageSetDTO.setMainMetadata(String.valueOf(createReqVO.getEntityId()));
@@ -163,7 +175,8 @@ public class AppMenuServiceImpl implements AppMenuService {
      * @param menuSortMap 菜单排序映射结果
      * @param sortOrder   当前排序序号
      */
-    private void recursiveBuildMenuSortMap(List<MenuOrderUpdateReqVO.MenuOrderNode> menus, Map<Long, Integer> menuSortMap, AtomicInteger sortOrder) {
+    private void recursiveBuildMenuSortMap(List<MenuOrderUpdateReqVO.MenuOrderNode> menus,
+            Map<Long, Integer> menuSortMap, AtomicInteger sortOrder) {
         if (menus == null || menus.isEmpty()) {
             return;
         }
@@ -191,7 +204,7 @@ public class AppMenuServiceImpl implements AppMenuService {
         if (menuDO.getMenuType() == MenuTypeEnum.GROUP.getValue()) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_MENU_GROUP_NOT_ALLOW_COPY);
         }
-        String sourceMenuCode = menuDO.getMenuCode();
+        Long sourceMenuId = menuDO.getId();
         // 复制菜单
         menuDO.setId(null);
         menuDO.setMenuName(copyReqVO.getMenuName());
@@ -200,8 +213,8 @@ public class AppMenuServiceImpl implements AppMenuService {
         appMenuRepository.insert(menuDO);
         // 复制页面
         CopyPageSetDTO copyPageSetDTO = new CopyPageSetDTO();
-        copyPageSetDTO.setMenuCode(sourceMenuCode);
-        copyPageSetDTO.setNewMenuCode(menuDO.getMenuCode());
+        copyPageSetDTO.setMenuId(sourceMenuId);
+        copyPageSetDTO.setNewMenuId(menuDO.getId());
         pageSetService.copyPageSet(copyPageSetDTO);
         //
         MenuCreateRespVO menuCreateRespVO = BeanUtils.toBean(menuDO, MenuCreateRespVO.class);
@@ -219,7 +232,7 @@ public class AppMenuServiceImpl implements AppMenuService {
         // 删除菜单
         appMenuRepository.deleteById(id);
         // 删除页面
-        pageSetService.deletePageSet(menuDO.getMenuCode());
+        pageSetService.deletePageSet(menuDO.getId());
     }
 
     private boolean validateMenuGroupHasChildren(Long id) {

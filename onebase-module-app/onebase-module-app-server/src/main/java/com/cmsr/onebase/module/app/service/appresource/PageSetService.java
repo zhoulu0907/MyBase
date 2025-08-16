@@ -9,15 +9,15 @@ import com.cmsr.onebase.module.app.controller.admin.appresource.vo.SavePageSetRe
 
 public interface PageSetService {
 
-    String getPageSetCode(String menuCode);
+    Long getPageSetId(Long menuId);
 
-    Long getAppId(String code);
+    Long getAppId(Long pageSetId);
 
-    String getMainMetadata(String code);
+    String getMainMetadata(Long pageSetId);
 
     String createPageSet(CreatePageSetDTO createPageSetDTO);
 
-    void deletePageSet(String menuCode);
+    void deletePageSet(Long menuId);
 
     String copyPageSet(CopyPageSetDTO copyPageSetDTO);
 
@@ -25,5 +25,5 @@ public interface PageSetService {
 
     LoadPageSetRespVO loadPageSet(LoadPageSetReqVO loadPageSetReqVO);
 
-    PageSetRespDTO getPageSet(String code);
+    PageSetRespDTO getPageSet(Long pageSetId);
 }

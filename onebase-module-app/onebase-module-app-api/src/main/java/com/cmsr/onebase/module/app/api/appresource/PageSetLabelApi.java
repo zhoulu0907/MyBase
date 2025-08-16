@@ -18,7 +18,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
-
 @FeignClient(name = ApiConstants.NAME)
 @Tag(name = "RPC 服务 - 页面集合标签")
 public interface PageSetLabelApi {
@@ -27,8 +26,8 @@ public interface PageSetLabelApi {
 
     @GetMapping(PREFIX + "/get")
     @Operation(summary = "通过 pagesetCode 查询页面集标签")
-    @Parameter(name = "pagesetCode", description = "页面集编码", example = "home_set", required = true)
-    CommonResult<List<PageSetLabelRespDTO>> getLabelsByPageSetCode(@RequestParam("pagesetCode") String pagesetCode);
+    @Parameter(name = "id", description = "页面集id", example = "home_set", required = true)
+    CommonResult<List<PageSetLabelRespDTO>> getLabelsByPageSetId(@RequestParam("id") Long id);
 
     @PostMapping(PREFIX + "/create")
     @Operation(summary = "创建页面集标签")
