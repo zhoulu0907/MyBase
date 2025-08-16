@@ -3,7 +3,6 @@ package com.cmsr.onebase.module.app.service.auth;
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.app.controller.admin.auth.vo.*;
-import com.cmsr.onebase.module.app.dal.database.app.AppApplicationRepository;
 import com.cmsr.onebase.module.app.dal.database.auth.AppAuthRoleRepository;
 import com.cmsr.onebase.module.app.dal.database.auth.AppAuthRoleUserRepository;
 import com.cmsr.onebase.module.app.dal.dataobject.auth.AuthRoleDO;
@@ -31,9 +30,6 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
 
     @Resource
     private AppAuthRoleUserRepository appAuthRoleUserRepository;
-
-    @Resource
-    private AppApplicationRepository applicationRepository;
 
     @Resource
     private AppCommonService appCommonService;
@@ -104,6 +100,7 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
         }
         appAuthRoleUserRepository.deleteById(roleId);
         authRoleRepository.deleteById(roleId);
+
     }
 
     private void checkRoleNameExists(Long applicationId, String roleName) {
@@ -114,7 +111,7 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
     }
 
     private void checkRoleNameExists(Long applicationId, String roleName, Long roleId) {
-        AuthRoleDO authRoleDO = authRoleRepository.findByAppCodeAndRoleNameAndRoleIdNot(applicationId, roleName, roleId);
+        AuthRoleDO authRoleDO = authRoleRepository.findByApplicationIdAndRoleNameAndIdNot(applicationId, roleName, roleId);
         if (authRoleDO != null) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_AUTH_ROLE_NAME_EXISTS);
         }
