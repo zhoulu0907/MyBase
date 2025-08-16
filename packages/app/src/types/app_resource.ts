@@ -1,24 +1,24 @@
 import { ComponentConfig } from "./app_component";
 
-export interface GetPageSetCodeReq {
-  menuCode: string;
+export interface GetPageSetIdReq {
+    menuId: string;
 }
 
 export interface PageSet {
-    pageCode: string;
+    id: string;
     pageName: string;
     pageType: string;
     components: ComponentConfig[];
 }
 
 export interface SavePageSetReq {
-    pageSetCode: string;
+    id: string;
     pageSetName: string;
     pages: PageSet[];
 }
 
 export interface LoadPageSetReq {
-    pageSetCode: string;
+    id: string;
 }
 
 export interface CreatePageSetReq {
@@ -29,14 +29,14 @@ export interface CreatePageSetReq {
 }
 
 export interface DeletePageSetReq {
-    pageSetCode: string;
+    menuId: string;
 }
 
-export interface GetAppIdByPageSetCodeReq {
-    code: string
+export interface GetAppIdByPageSetIdReq {
+    pageSetId: string
 }
 
 
 export interface GetPageSetMainMetaDataReq {
-    code: string;
+    pageSetId: string;
 }

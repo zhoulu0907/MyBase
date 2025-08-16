@@ -22,7 +22,7 @@ export function getComponentConfig(schema: any, itemType: string): any {
 }
 
 export interface SavePageSetParams {
-    pageSetCode: string;
+    pageSetId: string;
     formComponents: any[];
     listComponents: any[];
     formPageComponentSchemas: Map<string, EditConfig>;
@@ -37,19 +37,11 @@ export interface SavePageSetParams {
 
 export async function startSavePageSet(params: SavePageSetParams) {
     const { formComponents, formPageComponentSchemas, listComponents, listPageComponentSchemas,
-        fromColComponentsMap, listColComponentsMap, pageSetCode } = params;
-    // console.log(formComponents);
-    // console.log(formPageComponentSchemas);
+        fromColComponentsMap, listColComponentsMap, pageSetId } = params;
 
-    // console.log(fromColComponentsMap);
-
-    // console.log(listComponents);
-    // console.log(listPageComponentSchemas);
-
-    // console.log(listColComponentsMap);
 
     const loadPageSetReq: LoadPageSetReq = {
-      pageSetCode: pageSetCode
+      id: pageSetId
     };
     const loadPagesetResp = await loadPageSet(loadPageSetReq);
     console.log('res: ', loadPagesetResp);
@@ -65,7 +57,7 @@ export async function startSavePageSet(params: SavePageSetParams) {
             parentCode: "",
             blockIndex: 0,
             containerIndex: 0,
-          };
+          } as ComponentConfig;
         });
 
         const colComponents: any[] = [];
@@ -83,7 +75,7 @@ export async function startSavePageSet(params: SavePageSetParams) {
                         parentCode: parentCode,
                         blockIndex: index,
                         containerIndex: colIndex,
-                    });
+                    } as ComponentConfig);
                 });
             });
         });
@@ -101,7 +93,7 @@ export async function startSavePageSet(params: SavePageSetParams) {
             parentCode: "",
             blockIndex: 0,
             containerIndex: 0,
-          };
+          } as ComponentConfig;
         });
 
         const colComponents: any[] = [];
@@ -117,7 +109,7 @@ export async function startSavePageSet(params: SavePageSetParams) {
                         parentCode: parentCode,
                         blockIndex: index,
                         containerIndex: colIndex,
-                    });
+                    } as ComponentConfig);
                 });
             });
         });
@@ -129,7 +121,7 @@ export async function startSavePageSet(params: SavePageSetParams) {
     console.log(loadPagesetResp);
 
     const savePageSetReq: SavePageSetReq = {
-      pageSetCode: pageSetCode,
+      id: pageSetId,
       pageSetName: '',
       pages: loadPagesetResp.pages
     };
@@ -143,7 +135,7 @@ export async function startSavePageSet(params: SavePageSetParams) {
 }
 
 export interface LoadPageSetParams {
-    pageSetCode: string;
+    pageSetId: string;
     setFormComponents: Function;
     setFromPageComponentSchemas: Function;
     setListComponents: Function;
@@ -153,10 +145,10 @@ export interface LoadPageSetParams {
 }
 
 export async function startLoadPageSet(params: LoadPageSetParams) {
-    const { pageSetCode, setFormComponents, setFromPageComponentSchemas, setListComponents, setListPageComponentSchemas ,setFromColComponentsMap, setListColComponentsMap} = params;
+    const { pageSetId, setFormComponents, setFromPageComponentSchemas, setListComponents, setListPageComponentSchemas ,setFromColComponentsMap, setListColComponentsMap} = params;
 
     const loadPageSetReq: LoadPageSetReq = {
-      pageSetCode: pageSetCode
+      id: pageSetId
     };
     const pageSet = await loadPageSet(loadPageSetReq);
     console.log('res: ', pageSet);

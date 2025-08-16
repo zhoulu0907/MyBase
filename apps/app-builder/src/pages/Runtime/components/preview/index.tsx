@@ -8,11 +8,11 @@ import {
   dataMethodInsert,
   dataMethodUpdate,
   getEntityFieldsWithChildren,
-  getPageSetCode,
+  getPageSetId,
   getPageSetMetaData,
   type AppEntityField,
   type DataMethodParam,
-  type GetPageSetCodeReq,
+  type GetPageSetIdReq,
   type InsertMethodParams,
   type UpdateMethodParams
 } from '@onebase/app';
@@ -21,11 +21,11 @@ import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
 
 interface PreviewProps {
-  menuCode: string;
+  menuId: string;
   runtime: boolean;
 }
 
-const PreviewContainer: React.FC<PreviewProps> = ({ menuCode, runtime }) => {
+const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
   const [form] = Form.useForm();
 
   useSignals();
@@ -47,7 +47,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuCode, runtime }) => {
   } = useListEditorSignal;
 
   const [appId, setAppId] = useState('');
-  const [pageSetCode, setPageSetCode] = useState('');
+  const [pageSetId, setPageSetId] = useState('');
   const [pageType, setPageType] = useState('');
   const [mainMetaData, setMainMetaData] = useState<string>('');
   const [mainMetaDataFields, setMainMetaDataFields] = useState<AppEntityField[]>([]);
@@ -68,8 +68,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuCode, runtime }) => {
     }
   }, [window.location.hash]);
 
-  const getMainMetaData = async (pageSetCode: string) => {
-    const mainMetaData = await getPageSetMetaData({ code: pageSetCode });
+  const getMainMetaData = async (pageSetId: string) => {
+    const mainMetaData = await getPageSetMetaData({ pageSetId: pageSetId });
     console.log('mainMetaData: ', mainMetaData);
     setMainMetaData(mainMetaData);
 
@@ -80,11 +80,10 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuCode, runtime }) => {
   };
 
   useEffect(() => {
-    // console.log('menuCode', menuCode);
-    if (menuCode) {
-      handleGetPageSetCode(menuCode);
+    if (menuId) {
+      handleGetPageSetId(menuId);
     }
-  }, [menuCode]);
+  }, [menuId]);
 
   useEffect(() => {
     if (editTargetId && mainMetaData) {
@@ -93,27 +92,26 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuCode, runtime }) => {
   }, [editTargetId, mainMetaData]);
 
   useEffect(() => {
-    // console.log('pageSetCode', pageSetCode);
-    if (pageSetCode) {
-      loadPageSetInfo(pageSetCode);
-      getMainMetaData(pageSetCode);
+    if (pageSetId) {
+      loadPageSetInfo(pageSetId);
+      getMainMetaData(pageSetId);
     }
     // 优先切换到列表页
     setPageType(EDITOR_TYPES.LIST_EDITOR);
-  }, [pageSetCode]);
+  }, [pageSetId]);
 
-  const handleGetPageSetCode = async (menuCode: string) => {
-    const req: GetPageSetCodeReq = {
-      menuCode: menuCode
+  const handleGetPageSetId = async (menuId: string) => {
+    const req: GetPageSetIdReq = {
+      menuId: menuId
     };
-    const res = await getPageSetCode(req);
+    const res = await getPageSetId(req);
     console.log('res', res);
-    setPageSetCode(res);
+    setPageSetId(res);
   };
 
-  const loadPageSetInfo = async (pgsetCode: string) => {
+  const loadPageSetInfo = async (pageSetId: string) => {
     startLoadPageSet({
-      pageSetCode: pgsetCode,
+      pageSetId: pageSetId,
       setFormComponents: setFormComponents,
       setFromPageComponentSchemas: setFromPageComponentSchemas,
       setListComponents: setListComponents,

@@ -24,12 +24,12 @@ import { debounce, sample } from 'lodash-es';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   appOptions,
+  avatarBgColor,
   calculateMaxItems,
   createTimeOptions,
   defaultTheme,
   statusOptions,
-  TagColor,
-  avatarBgColor
+  TagColor
 } from './const';
 import styles from './index.module.less';
 
@@ -108,10 +108,10 @@ const MyAppPage: React.FC = () => {
     form.validate(async (error, data) => {
       if (error !== null) return;
       setCreateLoading(true);
-      const { appKey, appName, iconColor, iconName, description, tagIds, themeColor } = data;
+      const { appCode, appName, iconColor, iconName, description, tagIds, themeColor } = data;
 
       const params: CreateApplicationReq = {
-        appKey,
+        appCode,
         appMode: 'classic',
         appName,
         datasourceId: 1,

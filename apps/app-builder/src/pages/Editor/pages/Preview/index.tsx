@@ -4,7 +4,7 @@ import {
   dataMethodData,
   dataMethodInsert,
   getAppEntities,
-  getAppIdByPageSetCode,
+  getAppIdByPageSetId,
   getPageSetMetaData,
   type AppEntities,
   type DataMethodParam,
@@ -42,7 +42,7 @@ const Preview: React.FC<PreviewProps> = ({}) => {
     setLayoutSubComponents: setListLayoutSubComponents
   } = useListEditorSignal;
 
-  const [pageSetCode, setPageSetCode] = useState('');
+  const [pageSetId, setPageSetId] = useState('');
   const [pageType, setPageType] = useState('');
   const [mainMetaData, setMainMetaData] = useState<string>();
   const [form] = Form.useForm();
@@ -53,27 +53,26 @@ const Preview: React.FC<PreviewProps> = ({}) => {
     if (queryIndex !== -1) {
       const queryString = hash.substring(queryIndex + 1);
       const params = new URLSearchParams(queryString);
-      const pSetCode = params.get('pageSetCode') || '';
+      const pSetId = params.get('pageSetId') || '';
       const pType = params.get('pageType') || '';
       const id = params.get('id') || '';
 
-      setPageSetCode(pSetCode);
+      setPageSetId(pSetId);
       setPageType(pType);
       setEditTargetId(id);
     }
   }, [window.location.hash]);
 
   useEffect(() => {
-    if (pageSetCode) {
-      console.log('pageSetCode: ', pageSetCode);
-      loadPageSetInfo(pageSetCode);
-      getAppID(pageSetCode);
-      getMainMetaData(pageSetCode);
+    if (pageSetId) {
+      loadPageSetInfo(pageSetId);
+      getAppID(pageSetId);
+      getMainMetaData(pageSetId);
     }
-  }, [pageSetCode]);
+  }, [pageSetId]);
 
-  const getMainMetaData = async (pageSetCode: string) => {
-    const mainMetaData = await getPageSetMetaData({ code: pageSetCode });
+  const getMainMetaData = async (pageSetId: string) => {
+    const mainMetaData = await getPageSetMetaData({ pageSetId: pageSetId });
     console.log('mainMetaData: ', mainMetaData);
     setMainMetaData(mainMetaData);
   };
@@ -113,9 +112,9 @@ const Preview: React.FC<PreviewProps> = ({}) => {
     return res;
   };
 
-  const loadPageSetInfo = async (pgsetCode: string) => {
+  const loadPageSetInfo = async (pageSetId: string) => {
     startLoadPageSet({
-      pageSetCode: pgsetCode,
+      pageSetId: pageSetId,
       setFormComponents: setFormComponents,
       setFromPageComponentSchemas: setFromPageComponentSchemas,
       setListComponents: setListComponents,
@@ -125,8 +124,8 @@ const Preview: React.FC<PreviewProps> = ({}) => {
     });
   };
 
-  const getAppID = async (pageSetCode: string) => {
-    const res = await getAppIdByPageSetCode({ code: pageSetCode });
+  const getAppID = async (pageSetId: string) => {
+    const res = await getAppIdByPageSetId({ pageSetId: pageSetId });
     if (res) {
       setAppId(res);
     }
@@ -162,15 +161,14 @@ const Preview: React.FC<PreviewProps> = ({}) => {
     console.log(res);
     if (res) {
       Message.success('插入成功');
-      navigate(`/onebase/preview-app/preview?pageSetCode=${pageSetCode}&pageType=${EDITOR_TYPES.LIST_EDITOR}`);
+      navigate(`/onebase/preview-app/preview?pageSetId=${pageSetId}&pageType=${EDITOR_TYPES.LIST_EDITOR}`);
     }
   };
 
   const cancelSubmitForm = () => {
     console.log('取消提交');
     form.resetFields();
-
-    navigate(`/onebase/preview-app/preview?pageSetCode=${pageSetCode}&pageType=${EDITOR_TYPES.LIST_EDITOR}`);
+    navigate(`/onebase/preview-app/preview?pageSetId=${pageSetId}&pageType=${EDITOR_TYPES.LIST_EDITOR}`);
   };
 
   return (

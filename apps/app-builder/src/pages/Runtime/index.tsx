@@ -129,7 +129,7 @@ const Runtime: React.FC<RuntimeProps> = ({}) => {
               </div>
             )}
             <div className={styles.contentBody}>
-              <PreviewContainer menuCode={curMenu?.menuCode || ''} runtime={true} />
+              <PreviewContainer menuId={curMenu?.id || ''} runtime={true} />
             </div>
           </Content>
         </Layout>

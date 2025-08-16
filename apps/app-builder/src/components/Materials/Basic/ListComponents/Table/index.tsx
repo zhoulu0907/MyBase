@@ -195,7 +195,7 @@ const XTable = memo((props: XTableConfig & { runtime?: boolean; toCreatePage?: F
                 </div>
               }
               style={{
-                minWidth: '280px',
+                minWidth: '350px',
                 maxWidth: '400px',
                 marginBottom: 0
               }}

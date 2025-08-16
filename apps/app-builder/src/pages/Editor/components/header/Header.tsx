@@ -14,7 +14,7 @@ import { IconArrowLeft } from '@arco-design/web-react/icon';
 import {
   AppStatus,
   getAppEntities,
-  getAppIdByPageSetCode,
+  getAppIdByPageSetId,
   getApplication,
   getEntityFieldsWithChildren,
   getPageSetMetaData,
@@ -93,7 +93,7 @@ export default function EditorHeader() {
 
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('');
-  const [pageSetCode, setPageSetCode] = useState('');
+  const [pageSetId, setPageSetId] = useState('');
 
   const [appName, setAppName] = useState('未命名应用');
   const [appIcon, setAppIcon] = useState('');
@@ -122,36 +122,24 @@ export default function EditorHeader() {
     if (queryIndex !== -1) {
       const queryString = hash.substring(queryIndex + 1);
       const params = new URLSearchParams(queryString);
-      const pSetCode = params.get('pageSetCode') || '';
+      const pSetId = params.get('pageSetId') || '';
 
-      setPageSetCode(pSetCode);
+      setPageSetId(pSetId);
     }
   }, []);
 
   useEffect(() => {
-    if (!isEditMode && pageSetCode != '') {
-      loadPageSetInfo(pageSetCode);
+    if (!isEditMode && pageSetId != '') {
+      loadPageSetInfo(pageSetId);
       setIsEditMode(true);
-      handleGetAppInfo(pageSetCode);
-      getMainMetaData(pageSetCode);
+      handleGetAppInfo(pageSetId);
+      getMainMetaData(pageSetId);
     }
-  }, [pageSetCode]);
+  }, [pageSetId]);
 
-  //   const loadPageSetInfo = async (pgsetCode: string) => {
-  //     startLoadPageSet({
-  //       pageSetCode: pgsetCode,
-  //       setFormComponents: setFormComponents,
-  //       setFromPageComponentSchemas: setFromPageComponentSchemas,
-  //       setListComponents: setListComponents,
-  //       setListPageComponentSchemas: setListPageComponentSchemas,
-  //       setFromColComponentsMap: setFromColComponentsMap,
-  //       setListColComponentsMap: setListColComponentsMap
-  //     });
-  //   };
-
-  const loadPageSetInfo = async (pgsetCode: string) => {
+  const loadPageSetInfo = async (pagesetId: string) => {
     startLoadPageSet({
-      pageSetCode: pgsetCode,
+      pageSetId: pagesetId,
       setFormComponents: setFormComponents,
       setFromPageComponentSchemas: setFromPageComponentSchemas,
       setListComponents: setListComponents,
@@ -161,8 +149,8 @@ export default function EditorHeader() {
     });
   };
 
-  const handleGetAppInfo = async (pgCode: string) => {
-    const appId = await getAppIdByPageSetCode({ code: pgCode });
+  const handleGetAppInfo = async (pdId: string) => {
+    const appId = await getAppIdByPageSetId({ pageSetId: pdId });
     setCurAppId(appId);
 
     const appReq: GetApplicationReq = {
@@ -189,8 +177,8 @@ export default function EditorHeader() {
     handleGetAppEntities(appId);
   };
 
-  const getMainMetaData = async (pageSetCode: string) => {
-    const mainMetaData = await getPageSetMetaData({ code: pageSetCode });
+  const getMainMetaData = async (pageSetId: string) => {
+    const mainMetaData = await getPageSetMetaData({ pageSetId: pageSetId });
     console.log('mainMetaData: ', mainMetaData);
 
     const entityWithChildren = await getEntityFieldsWithChildren(mainMetaData);
@@ -218,20 +206,10 @@ export default function EditorHeader() {
   };
 
   const handleSavePageSet = async () => {
-    console.log(`save appid: ${curAppId}, pageSetCode: ${pageSetCode}`);
-
-    // const savePageSetParams: SavePageSetParams = {
-    //   pageSetCode: pageSetCode,
-    //   formComponents: formComponents,
-    //   listComponents: listComponents,
-    //   formPageComponentSchemas: formPageComponentSchemas,
-    //   listPageComponentSchemas: listPageComponentSchemas,
-    //   fromColComponentsMap: fromColComponentsMap,
-    //   listColComponentsMap: listColComponentsMap
-    // };
+    console.log(`save appid: ${curAppId}, pageSetId: ${pageSetId}`);
 
     const savePageSetParams: SavePageSetParams = {
-      pageSetCode: pageSetCode,
+      pageSetId: pageSetId,
       formComponents: formComponents.value,
       listComponents: listComponents.value,
       formPageComponentSchemas: new Map(Object.entries(formPageComponentSchemas.value)),
@@ -243,15 +221,6 @@ export default function EditorHeader() {
     startSavePageSet(savePageSetParams);
   };
 
-  //   const clearAllData = () => {
-  //     clearFromColComponentsMap();
-  //     clearListColComponentsMap();
-  //     clearFormComponents();
-  //     clearListComponents();
-  //     clearFromPageComponentSchemas();
-  //     clearListPageComponentSchemas();
-  //   };
-
   const clearAllData = () => {
     clearFromLayoutSubComponents();
     clearListLayoutSubComponents();
@@ -262,7 +231,7 @@ export default function EditorHeader() {
   };
 
   const backToPageManager = async () => {
-    const appId = await getAppIdByPageSetCode({ code: pageSetCode });
+    const appId = await getAppIdByPageSetId({ pageSetId: pageSetId });
     if (!appId) {
       Message.error('获取应用ID失败');
       return;
@@ -302,16 +271,16 @@ export default function EditorHeader() {
             clearCurComponentID();
             switch (key) {
               case EDITOR_TYPES.FORM_EDITOR:
-                navigate(`/onebase/editor/${EDITOR_TYPES.FORM_EDITOR}?pageSetCode=${pageSetCode}`);
+                navigate(`/onebase/editor/${EDITOR_TYPES.FORM_EDITOR}?pageSetId=${pageSetId}`);
                 break;
               case EDITOR_TYPES.LIST_EDITOR:
-                navigate(`/onebase/editor/${EDITOR_TYPES.LIST_EDITOR}?pageSetCode=${pageSetCode}`);
+                navigate(`/onebase/editor/${EDITOR_TYPES.LIST_EDITOR}?pageSetId=${pageSetId}`);
                 break;
               case EDITOR_TYPES.PAGE_SETTING:
-                navigate(`/onebase/editor/${EDITOR_TYPES.PAGE_SETTING}?pageSetCode=${pageSetCode}`);
+                navigate(`/onebase/editor/${EDITOR_TYPES.PAGE_SETTING}?pageSetId=${pageSetId}`);
                 break;
               case EDITOR_TYPES.METADATA_MANAGE:
-                navigate(`/onebase/editor/${EDITOR_TYPES.METADATA_MANAGE}?pageSetCode=${pageSetCode}`);
+                navigate(`/onebase/editor/${EDITOR_TYPES.METADATA_MANAGE}?pageSetId=${pageSetId}`);
                 break;
               default:
                 break;
