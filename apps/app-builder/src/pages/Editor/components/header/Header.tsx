@@ -21,6 +21,7 @@ import {
   getPageSetMetaData,
   type GetApplicationReq
 } from '@onebase/app';
+import { cloneDeep } from 'lodash-es';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { startLoadPageSet, startSavePageSet, type SavePageSetParams } from '../../utils/app_resource';
@@ -203,16 +204,22 @@ export default function EditorHeader() {
 
   const handleSavePageSet = async () => {
     console.log(`save appid: ${curAppId}, pageSetId: ${pageSetId}`);
+    console.log('formComponents: ', formComponents.value);
+    console.log('listComponents: ', listComponents.value);
+    console.log('formPageComponentSchemas: ', formPageComponentSchemas.value);
+    console.log('listPageComponentSchemas: ', listPageComponentSchemas.value);
 
     const savePageSetParams: SavePageSetParams = {
       pageSetId: pageSetId,
       formComponents: formComponents.value,
       listComponents: listComponents.value,
-      formPageComponentSchemas: new Map(Object.entries(formPageComponentSchemas.value)),
-      listPageComponentSchemas: new Map(Object.entries(listPageComponentSchemas.value)),
-      fromColComponentsMap: { colComponents: new Map(Object.entries(fromLayoutSubComponents.value)) },
-      listColComponentsMap: { colComponents: new Map(Object.entries(listLayoutSubComponents.value)) }
+      formPageComponentSchemas: new Map(Object.entries(cloneDeep(formPageComponentSchemas.value))),
+      listPageComponentSchemas: new Map(Object.entries(cloneDeep(listPageComponentSchemas.value))),
+      fromColComponentsMap: { colComponents: new Map(Object.entries(cloneDeep(fromLayoutSubComponents.value))) },
+      listColComponentsMap: { colComponents: new Map(Object.entries(cloneDeep(listLayoutSubComponents.value))) }
     };
+
+    console.log('savePageSetParams: ', savePageSetParams);
 
     startSavePageSet(savePageSetParams);
   };

@@ -124,9 +124,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
       const field = (mainMetaDataFields || []).find((f: AppEntityField) => f.fieldID == key);
       if (field) {
         formData[field.fieldName] = value;
-        // if (field.fieldType === ENTITY_FIELD_TYPE_LABEL.DATE) {
-        //   formData[field.fieldName] = Date.now();
-        // }
       }
     });
 

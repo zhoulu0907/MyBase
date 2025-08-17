@@ -53,7 +53,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
   }, [entityId]);
 
   useEffect(() => {
-    console.log(mainEntity);
+    // console.log(mainEntity);
     if (mainEntity) {
       setEntityList([
         {

@@ -19,7 +19,7 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({ handlePropsChan
 
   useEffect(() => {
     if (mainEntity) {
-      console.log(mainEntity);
+      //   console.log(mainEntity);
       initTreeData();
     }
   }, [mainEntity]);

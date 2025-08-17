@@ -311,7 +311,9 @@ const PageManagerPage: FC = () => {
     if (res) {
       Message.success('删除成功');
       setActiveMenu(undefined);
+      setCurMenu(undefined);
     }
+
     getMenuList();
   };
 
@@ -392,16 +394,18 @@ const PageManagerPage: FC = () => {
             ) : (
               <>
                 {curMenu?.id && (
-                  <div className={styles.contentHeader}>
-                    <div className={styles.contentTitle}>{curMenu?.menuName}</div>
-                    <Button type="primary" onClick={() => handleEditPageSet()}>
-                      {t('common.edit')}
-                    </Button>
-                  </div>
+                  <>
+                    <div className={styles.contentHeader}>
+                      <div className={styles.contentTitle}>{curMenu?.menuName}</div>
+                      <Button type="primary" onClick={() => handleEditPageSet()}>
+                        {t('common.edit')}
+                      </Button>
+                    </div>
+                    <div className={styles.contentBody}>
+                      <PreviewContainer menuId={curMenu?.id} runtime={false} />
+                    </div>
+                  </>
                 )}
-                <div className={styles.contentBody}>
-                  <PreviewContainer menuId={curMenu?.id || ''} runtime={false} />
-                </div>
               </>
             )}
           </Content>

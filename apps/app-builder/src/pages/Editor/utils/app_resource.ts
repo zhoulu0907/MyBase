@@ -39,6 +39,11 @@ export async function startSavePageSet(params: SavePageSetParams) {
     const { formComponents, formPageComponentSchemas, listComponents, listPageComponentSchemas,
         fromColComponentsMap, listColComponentsMap, pageSetId } = params;
 
+    console.log('formComponents: ', formComponents);
+    console.log('formPageComponentSchemas: ', formPageComponentSchemas);
+    console.log('listComponents: ', listComponents);
+    console.log('listPageComponentSchemas: ', listPageComponentSchemas);
+
 
     const loadPageSetReq: LoadPageSetReq = {
       id: pageSetId
@@ -48,7 +53,11 @@ export async function startSavePageSet(params: SavePageSetParams) {
 
     loadPagesetResp.pages.forEach((_page: PageSet, index: number) => {
       if (_page.pageType === 'form') {
+        // console.log('formComponentsSchemas: ', formPageComponentSchemas);
+
         loadPagesetResp.pages[index].components = formComponents.map((component) => {
+            console.log('component: ', component);
+            console.log('formPageComponentSchemas: ', formPageComponentSchemas);
           return {
             componentCode: component.id,
             componentType: component.type,
@@ -59,6 +68,7 @@ export async function startSavePageSet(params: SavePageSetParams) {
             containerIndex: 0,
           } as ComponentConfig;
         });
+        // console.log('loadPagesetResp.pages[index].components: ', loadPagesetResp.pages[index].components);
 
         const colComponents: any[] = [];
         console.log(fromColComponentsMap.colComponents);
@@ -84,6 +94,7 @@ export async function startSavePageSet(params: SavePageSetParams) {
 
 
       } else if (_page.pageType === 'list') {
+        console.log('listComponents: ', listComponents);
         loadPagesetResp.pages[index].components = listComponents.map((component) => {
           return {
             componentCode: component.id,

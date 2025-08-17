@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 
 import { getComponentSchema } from '@/components/Materials/schema';
-import { ALL_COMPONENT_TYPES } from '@/constants/componentTypes';
 import EditRender from '@/pages/Editor/components/render/EditRender';
 import { getComponentWidth } from '../../utils/app_resource';
 import { COMPONENT_GROUP_NAME, type GridItem } from '../../utils/const';
@@ -113,9 +112,8 @@ export default function EditorWorkspace() {
           id="workspace-content"
           list={components}
           setList={(newList) => {
-            // console.debug("setList", newList);
+            console.log('newList', newList);
             setComponents(newList);
-            // console.log("pageComponentSchemas", pageComponentSchemas);
           }}
           onAdd={(e) => {
             // console.log('onAdd', e);
@@ -143,7 +141,8 @@ export default function EditorWorkspace() {
             }
 
             const schema = getComponentSchema(itemType as any);
-            // console.log("schema", schema)
+            console.log('schema', schema);
+
             schema.config.cpName = itemDisplayName;
             schema.config.id = cpID;
 
@@ -163,11 +162,6 @@ export default function EditorWorkspace() {
               ...schema
             };
 
-            if (itemType === ALL_COMPONENT_TYPES.COLUMN_LAYOUT) {
-              // 拖入布局组件，根据配置创建初始化
-              console.log('拖入布局组件，根据配置创建初始化: ', cpID);
-            }
-
             setPageComponentSchemas(cpID!, props);
             setCurComponentID(cpID!);
 
@@ -179,7 +173,7 @@ export default function EditorWorkspace() {
           forceFallback={true}
           className={styles.workspaceContent}
           onStart={(e) => {
-            console.log('onStart', e);
+            // console.log('onStart', e);
             const cpID = e.item.getAttribute('data-cp-id') || '';
             setCurComponentID(cpID);
             const curComponentSchema = pageComponentSchemas[cpID] || {};
@@ -201,10 +195,14 @@ export default function EditorWorkspace() {
               onClick={(e: React.MouseEvent<HTMLDivElement>) => {
                 e.stopPropagation();
                 console.log('点击组件: ', cp.id);
+
                 setCurComponentID(cp.id);
 
                 const curComponentSchema = pageComponentSchemas[cp.id];
                 setCurComponentSchema(curComponentSchema);
+
+                console.log('pageComponentSchemas: ', pageComponentSchemas);
+                console.log('当前组件的ID: ', cp.id);
                 console.log('当前组件的配置: ', curComponentSchema);
                 setShowDeleteButton(true);
               }}
