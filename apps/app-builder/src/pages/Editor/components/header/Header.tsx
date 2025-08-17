@@ -135,15 +135,7 @@ export default function EditorHeader() {
   }, [pageSetId]);
 
   const loadPageSetInfo = async (pagesetId: string) => {
-    startLoadPageSet({
-      pageSetId: pagesetId,
-      setFormComponents: setFormComponents,
-      setFromPageComponentSchemas: setFromPageComponentSchemas,
-      setListComponents: setListComponents,
-      setListPageComponentSchemas: setListPageComponentSchemas,
-      setFromColComponentsMap: setFromLayoutSubComponents,
-      setListColComponentsMap: setListLayoutSubComponents
-    });
+    startLoadPageSet({ pageSetId: pagesetId });
   };
 
   const handleGetAppInfo = async (pdId: string) => {
@@ -204,10 +196,6 @@ export default function EditorHeader() {
 
   const handleSavePageSet = async () => {
     console.log(`save appid: ${curAppId}, pageSetId: ${pageSetId}`);
-    console.log('formComponents: ', formComponents.value);
-    console.log('listComponents: ', listComponents.value);
-    console.log('formPageComponentSchemas: ', formPageComponentSchemas.value);
-    console.log('listPageComponentSchemas: ', listPageComponentSchemas.value);
 
     const savePageSetParams: SavePageSetParams = {
       pageSetId: pageSetId,
@@ -218,8 +206,6 @@ export default function EditorHeader() {
       fromColComponentsMap: { colComponents: new Map(Object.entries(cloneDeep(fromLayoutSubComponents.value))) },
       listColComponentsMap: { colComponents: new Map(Object.entries(cloneDeep(listLayoutSubComponents.value))) }
     };
-
-    console.log('savePageSetParams: ', savePageSetParams);
 
     startSavePageSet(savePageSetParams);
   };

@@ -31,21 +31,9 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
   useSignals();
 
-  const {
-    components: formComponents,
-    pageComponentSchemas: formPageComponentSchemas,
-    setComponents: setFormComponents,
-    setPageComponentSchemas: setFromPageComponentSchemas,
-    setLayoutSubComponents: setFromLayoutSubComponents
-  } = useFormEditorSignal;
+  const { components: formComponents, pageComponentSchemas: formPageComponentSchemas } = useFormEditorSignal;
 
-  const {
-    components: listComponents,
-    pageComponentSchemas: listPageComponentSchemas,
-    setComponents: setListComponents,
-    setPageComponentSchemas: setListPageComponentSchemas,
-    setLayoutSubComponents: setListLayoutSubComponents
-  } = useListEditorSignal;
+  const { components: listComponents, pageComponentSchemas: listPageComponentSchemas } = useListEditorSignal;
 
   const [appId, setAppId] = useState('');
   const [pageSetId, setPageSetId] = useState('');
@@ -94,24 +82,14 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
   }, [pageSetId]);
 
   const handleGetPageSetId = async (menuId: string) => {
-    const req: GetPageSetIdReq = {
-      menuId: menuId
-    };
+    const req: GetPageSetIdReq = { menuId: menuId };
     const res = await getPageSetId(req);
     console.log('res', res);
     setPageSetId(res);
   };
 
   const loadPageSetInfo = async (pageSetId: string) => {
-    startLoadPageSet({
-      pageSetId: pageSetId,
-      setFormComponents: setFormComponents,
-      setFromPageComponentSchemas: setFromPageComponentSchemas,
-      setListComponents: setListComponents,
-      setListPageComponentSchemas: setListPageComponentSchemas,
-      setFromColComponentsMap: setFromLayoutSubComponents,
-      setListColComponentsMap: setListLayoutSubComponents
-    });
+    startLoadPageSet({ pageSetId: pageSetId });
   };
 
   const submitForm = async () => {

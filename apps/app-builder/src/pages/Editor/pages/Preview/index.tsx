@@ -27,21 +27,8 @@ const Preview: React.FC<PreviewProps> = ({}) => {
   const [appId, setAppId] = useState('');
   const [editTargetId, setEditTargetId] = useState('');
 
-  const {
-    components: formComponents,
-    pageComponentSchemas: formPageComponentSchemas,
-    setComponents: setFormComponents,
-    setPageComponentSchemas: setFromPageComponentSchemas,
-    setLayoutSubComponents: setFromLayoutSubComponents
-  } = useFormEditorSignal;
-
-  const {
-    components: listComponents,
-    pageComponentSchemas: listPageComponentSchemas,
-    setComponents: setListComponents,
-    setPageComponentSchemas: setListPageComponentSchemas,
-    setLayoutSubComponents: setListLayoutSubComponents
-  } = useListEditorSignal;
+  const { components: formComponents, pageComponentSchemas: formPageComponentSchemas } = useFormEditorSignal;
+  const { components: listComponents, pageComponentSchemas: listPageComponentSchemas } = useListEditorSignal;
 
   const [pageSetId, setPageSetId] = useState('');
   const [pageType, setPageType] = useState('');
@@ -115,15 +102,7 @@ const Preview: React.FC<PreviewProps> = ({}) => {
   };
 
   const loadPageSetInfo = async (pageSetId: string) => {
-    startLoadPageSet({
-      pageSetId: pageSetId,
-      setFormComponents: setFormComponents,
-      setFromPageComponentSchemas: setFromPageComponentSchemas,
-      setListComponents: setListComponents,
-      setListPageComponentSchemas: setListPageComponentSchemas,
-      setFromColComponentsMap: setFromLayoutSubComponents,
-      setListColComponentsMap: setListLayoutSubComponents
-    });
+    startLoadPageSet({ pageSetId: pageSetId });
   };
 
   const getAppID = async (pageSetId: string) => {

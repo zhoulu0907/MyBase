@@ -2,6 +2,7 @@ import { getComponentSchema } from '@/components/Materials/schema';
 import { COMPONENT_TYPE_DISPLAY_NAME_MAP } from '@/components/Materials/template';
 import type { EditConfig } from '@/components/Materials/types';
 import { LAYOUT_COMPONENT_TYPES } from '@/constants/componentTypes';
+import { useFormEditorSignal, useListEditorSignal } from '@/store/singals/page_editor';
 import { Message } from '@arco-design/web-react';
 import { loadPageSet, savePageSet, type ComponentConfig, type LoadPageSetReq, type PageSet, type SavePageSetReq } from '@onebase/app';
 
@@ -147,16 +148,22 @@ export async function startSavePageSet(params: SavePageSetParams) {
 
 export interface LoadPageSetParams {
     pageSetId: string;
-    setFormComponents: Function;
-    setFromPageComponentSchemas: Function;
-    setListComponents: Function;
-    setListPageComponentSchemas: Function;
-    setFromColComponentsMap: Function;
-    setListColComponentsMap: Function;
 }
 
 export async function startLoadPageSet(params: LoadPageSetParams) {
-    const { pageSetId, setFormComponents, setFromPageComponentSchemas, setListComponents, setListPageComponentSchemas ,setFromColComponentsMap, setListColComponentsMap} = params;
+    const { pageSetId } = params;
+
+    const {
+        setComponents: setFormComponents,
+        setPageComponentSchemas: setFromPageComponentSchemas,
+        setLayoutSubComponents: setFromLayoutSubComponents
+    } = useFormEditorSignal;
+
+    const {
+        setComponents: setListComponents,
+        setPageComponentSchemas: setListPageComponentSchemas,
+        setLayoutSubComponents: setListLayoutSubComponents
+    } = useListEditorSignal;
 
     const loadPageSetReq: LoadPageSetReq = {
       id: pageSetId
@@ -218,9 +225,9 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
                 };
             }
             if (page.pageType === 'form') {
-                setFromColComponentsMap(component.parentCode, colComponents as any[][]);
+                setFromLayoutSubComponents(component.parentCode, colComponents as any[][]);
             } else if (page.pageType === 'list') {
-                setListColComponentsMap(component.parentCode, colComponents as any[][]);
+                setListLayoutSubComponents(component.parentCode, colComponents as any[][]);
             }
 
             newPageComponentSchemas.set(component.componentCode, {
