@@ -1,4 +1,5 @@
 import { useFormEditorSignal, useListEditorSignal } from '@/store/singals/page_editor';
+import { getHashQueryParam } from '@/utils/router';
 import { Button, Form, Message } from '@arco-design/web-react';
 import {
   dataMethodData,
@@ -48,18 +49,19 @@ const Preview: React.FC<PreviewProps> = ({}) => {
   const [form] = Form.useForm();
 
   useEffect(() => {
-    const hash = window.location.hash;
-    const queryIndex = hash.indexOf('?');
-    if (queryIndex !== -1) {
-      const queryString = hash.substring(queryIndex + 1);
-      const params = new URLSearchParams(queryString);
-      const pSetId = params.get('pageSetId') || '';
-      const pType = params.get('pageType') || '';
-      const id = params.get('id') || '';
+    const pageSetId = getHashQueryParam('pageSetId');
+    if (pageSetId) {
+      setPageSetId(pageSetId);
+    }
 
-      setPageSetId(pSetId);
-      setPageType(pType);
-      setEditTargetId(id);
+    const pageType = getHashQueryParam('pageType');
+    if (pageType) {
+      setPageType(pageType);
+    }
+
+    const editTargetId = getHashQueryParam('id');
+    if (editTargetId) {
+      setEditTargetId(editTargetId);
     }
   }, [window.location.hash]);
 

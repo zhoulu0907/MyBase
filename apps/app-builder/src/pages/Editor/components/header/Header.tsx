@@ -9,6 +9,7 @@ import { useBasicEditorStore } from '@/store';
 import { useFormEditorSignal, useListEditorSignal } from '@/store/singals/page_editor';
 import { useAppStore } from '@/store/store_app';
 import { useAppEntityStore } from '@/store/store_entity';
+import { getHashQueryParam } from '@/utils/router';
 import { Button, Message, Tabs } from '@arco-design/web-react';
 import { IconArrowLeft } from '@arco-design/web-react/icon';
 import {
@@ -117,14 +118,9 @@ export default function EditorHeader() {
   }, []);
 
   useEffect(() => {
-    const hash = window.location.hash;
-    const queryIndex = hash.indexOf('?');
-    if (queryIndex !== -1) {
-      const queryString = hash.substring(queryIndex + 1);
-      const params = new URLSearchParams(queryString);
-      const pSetId = params.get('pageSetId') || '';
-
-      setPageSetId(pSetId);
+    const pageSetId = getHashQueryParam('pageSetId');
+    if (pageSetId) {
+      setPageSetId(pageSetId);
     }
   }, []);
 

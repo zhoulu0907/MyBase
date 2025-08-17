@@ -2,6 +2,7 @@ import PreviewRender from '@/pages/Editor/components/render/PreviewRender';
 import { getComponentWidth, startLoadPageSet } from '@/pages/Editor/utils/app_resource';
 import { EDITOR_TYPES, type GridItem } from '@/pages/Editor/utils/const';
 import { useFormEditorSignal, useListEditorSignal } from '@/store/singals/page_editor';
+import { getHashQueryParam } from '@/utils/router';
 import { Button, Form, Message } from '@arco-design/web-react';
 import {
   dataMethodData,
@@ -54,17 +55,9 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
   const [editTargetId, setEditTargetId] = useState('');
 
   useEffect(() => {
-    // console.log('window.location.hash: ', window.location.hash);
-    const hash = window.location.hash;
-    const queryIndex = hash.indexOf('?');
-    if (queryIndex !== -1) {
-      const queryString = hash.substring(queryIndex + 1);
-      const params = new URLSearchParams(queryString);
-      const appId = params.get('appId');
-
-      if (appId) {
-        setAppId(appId);
-      }
+    const appId = getHashQueryParam('appId');
+    if (appId) {
+      setAppId(appId);
     }
   }, [window.location.hash]);
 

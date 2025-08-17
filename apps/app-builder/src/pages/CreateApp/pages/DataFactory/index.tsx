@@ -17,6 +17,7 @@ const DataFactoryPage: React.FC = () => {
 
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
+    // TODO(xiaoyi): use getHashQueryParam
     const appId = searchParams.get('appId');
 
     if (appId) {
