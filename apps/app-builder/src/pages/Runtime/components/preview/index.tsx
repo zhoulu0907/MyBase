@@ -1,72 +1,56 @@
 import PreviewRender from '@/pages/Editor/components/render/PreviewRender';
 import { getComponentWidth, startLoadPageSet } from '@/pages/Editor/utils/app_resource';
 import { EDITOR_TYPES, type GridItem } from '@/pages/Editor/utils/const';
-import { useFromEditorStore, useListEditorStore } from '@/store/store_editor';
+import { useFormEditorSignal, useListEditorSignal } from '@/store/singals/page_editor';
+import { getHashQueryParam } from '@/utils/router';
 import { Button, Form, Message } from '@arco-design/web-react';
 import {
   dataMethodData,
   dataMethodInsert,
   dataMethodUpdate,
   getEntityFieldsWithChildren,
-  getPageSetCode,
+  getPageSetId,
   getPageSetMetaData,
   type AppEntityField,
   type DataMethodParam,
-  type GetPageSetCodeReq,
+  type GetPageSetIdReq,
   type InsertMethodParams,
   type UpdateMethodParams
 } from '@onebase/app';
+import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
 
 interface PreviewProps {
-  menuCode: string;
+  menuId: string;
   runtime: boolean;
 }
 
-const PreviewContainer: React.FC<PreviewProps> = ({ menuCode, runtime }) => {
+const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
   const [form] = Form.useForm();
 
-  const {
-    setComponents: setListComponents,
-    setPageComponentSchemas: setListPageComponentSchemas,
-    setColComponentsMap: setListColComponentsMap,
-    pageComponentSchemas: listPageComponentSchemas,
-    components: listComponents
-  } = useListEditorStore();
+  useSignals();
 
-  const {
-    setComponents: setFromComponents,
-    setPageComponentSchemas: setFromPageComponentSchemas,
-    setColComponentsMap: setFromColComponentsMap,
-    pageComponentSchemas: formPageComponentSchemas,
-    components: formComponents
-  } = useFromEditorStore();
+  const { components: formComponents, pageComponentSchemas: formPageComponentSchemas } = useFormEditorSignal;
+
+  const { components: listComponents, pageComponentSchemas: listPageComponentSchemas } = useListEditorSignal;
 
   const [appId, setAppId] = useState('');
-  const [pageSetCode, setPageSetCode] = useState('');
+  const [pageSetId, setPageSetId] = useState('');
   const [pageType, setPageType] = useState('');
   const [mainMetaData, setMainMetaData] = useState<string>('');
   const [mainMetaDataFields, setMainMetaDataFields] = useState<AppEntityField[]>([]);
   const [editTargetId, setEditTargetId] = useState('');
 
   useEffect(() => {
-    // console.log('window.location.hash: ', window.location.hash);
-    const hash = window.location.hash;
-    const queryIndex = hash.indexOf('?');
-    if (queryIndex !== -1) {
-      const queryString = hash.substring(queryIndex + 1);
-      const params = new URLSearchParams(queryString);
-      const appId = params.get('appId');
-
-      if (appId) {
-        setAppId(appId);
-      }
+    const appId = getHashQueryParam('appId');
+    if (appId) {
+      setAppId(appId);
     }
   }, [window.location.hash]);
 
-  const getMainMetaData = async (pageSetCode: string) => {
-    const mainMetaData = await getPageSetMetaData({ code: pageSetCode });
+  const getMainMetaData = async (pageSetId: string) => {
+    const mainMetaData = await getPageSetMetaData({ pageSetId: pageSetId });
     console.log('mainMetaData: ', mainMetaData);
     setMainMetaData(mainMetaData);
 
@@ -77,11 +61,10 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuCode, runtime }) => {
   };
 
   useEffect(() => {
-    // console.log('menuCode', menuCode);
-    if (menuCode) {
-      handleGetPageSetCode(menuCode);
+    if (menuId) {
+      handleGetPageSetId(menuId);
     }
-  }, [menuCode]);
+  }, [menuId]);
 
   useEffect(() => {
     if (editTargetId && mainMetaData) {
@@ -90,34 +73,23 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuCode, runtime }) => {
   }, [editTargetId, mainMetaData]);
 
   useEffect(() => {
-    // console.log('pageSetCode', pageSetCode);
-    if (pageSetCode) {
-      loadPageSetInfo(pageSetCode);
-      getMainMetaData(pageSetCode);
+    if (pageSetId) {
+      loadPageSetInfo(pageSetId);
+      getMainMetaData(pageSetId);
     }
     // 优先切换到列表页
     setPageType(EDITOR_TYPES.LIST_EDITOR);
-  }, [pageSetCode]);
+  }, [pageSetId]);
 
-  const handleGetPageSetCode = async (menuCode: string) => {
-    const req: GetPageSetCodeReq = {
-      menuCode: menuCode
-    };
-    const res = await getPageSetCode(req);
+  const handleGetPageSetId = async (menuId: string) => {
+    const req: GetPageSetIdReq = { menuId: menuId };
+    const res = await getPageSetId(req);
     console.log('res', res);
-    setPageSetCode(res);
+    setPageSetId(res);
   };
 
-  const loadPageSetInfo = async (pgsetCode: string) => {
-    startLoadPageSet({
-      pageSetCode: pgsetCode,
-      setFromComponents: setFromComponents,
-      setFromPageComponentSchemas: setFromPageComponentSchemas,
-      setListComponents: setListComponents,
-      setListPageComponentSchemas: setListPageComponentSchemas,
-      setFromColComponentsMap: setFromColComponentsMap,
-      setListColComponentsMap: setListColComponentsMap
-    });
+  const loadPageSetInfo = async (pageSetId: string) => {
+    startLoadPageSet({ pageSetId: pageSetId });
   };
 
   const submitForm = async () => {
@@ -130,9 +102,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuCode, runtime }) => {
       const field = (mainMetaDataFields || []).find((f: AppEntityField) => f.fieldID == key);
       if (field) {
         formData[field.fieldName] = value;
-        // if (field.fieldType === ENTITY_FIELD_TYPE_LABEL.DATE) {
-        //   formData[field.fieldName] = Date.now();
-        // }
       }
     });
 
@@ -220,18 +189,18 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuCode, runtime }) => {
     <div className={styles.previewPage}>
       <div className={styles.content}>
         {pageType === EDITOR_TYPES.LIST_EDITOR &&
-          listComponents.map((cp: GridItem) => (
+          listComponents.value.map((cp: GridItem) => (
             <div
               key={cp.id}
               className={styles.componentItem}
               style={{
-                width: getComponentWidth(listPageComponentSchemas.get(cp.id), cp.type)
+                width: getComponentWidth(listPageComponentSchemas.value[cp.id], cp.type)
               }}
             >
               <PreviewRender
                 cpId={cp.id}
                 cpType={cp.type}
-                pageComponentSchema={listPageComponentSchemas.get(cp.id)}
+                pageComponentSchema={listPageComponentSchemas.value[cp.id]}
                 runtime={runtime}
                 toCreatePage={toCreatePage}
               />
@@ -240,18 +209,18 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuCode, runtime }) => {
 
         {pageType == EDITOR_TYPES.FORM_EDITOR && (
           <Form layout="inline" form={form}>
-            {formComponents.map((cp: GridItem) => (
+            {formComponents.value.map((cp: GridItem) => (
               <div
                 key={cp.id}
                 className={styles.componentItem}
                 style={{
-                  width: getComponentWidth(formPageComponentSchemas.get(cp.id), cp.type)
+                  width: getComponentWidth(formPageComponentSchemas.value[cp.id], cp.type)
                 }}
               >
                 <PreviewRender
                   cpId={cp.id}
                   cpType={cp.type}
-                  pageComponentSchema={formPageComponentSchemas.get(cp.id)}
+                  pageComponentSchema={formPageComponentSchemas.value[cp.id]}
                   runtime={true}
                   toCreatePage={() => {
                     setPageType(EDITOR_TYPES.FORM_EDITOR);

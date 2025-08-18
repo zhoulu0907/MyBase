@@ -33,6 +33,7 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({}) => {
             cpType = FORM_COMPONENT_TYPES.INPUT_TEXT;
           }
           return {
+            // TODO(mickey): 使用uuid作为id
             id: `${cpType}-${index}-${Date.now()}`,
             displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[cpType] || '',
             label: field.fieldName,
@@ -146,7 +147,7 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({}) => {
             {fieldItems.map((item) => (
               <FieldCard
                 key={item.id}
-                id={item.id || `${item.type}-${Date.now()}`}
+                id={item.id}
                 displayName={item.displayName}
                 label={item.label}
                 type={item.type}

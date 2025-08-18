@@ -28,12 +28,12 @@ import appEditSVG from '@/assets/images/app_edit_black.svg';
 import emptyApplicationSVG from '@/assets/images/empty_application.svg';
 import {
   appOptions,
+  avatarBgColor,
   calculateMaxItems,
   createTimeOptions,
   defaultTheme,
   statusOptions,
-  TagColor,
-  avatarBgColor
+  TagColor
 } from './const';
 import styles from './index.module.less';
 
@@ -139,10 +139,10 @@ const MyAppPage: React.FC = () => {
     form.validate(async (error, data) => {
       if (error !== null) return;
       setCreateLoading(true);
-      const { appKey, appName, iconColor, iconName, description, tagIds, themeColor } = data;
+      const { appCode, appName, iconColor, iconName, description, tagIds, themeColor } = data;
 
       const params: CreateApplicationReq = {
-        appKey,
+        appCode,
         appMode: 'classic',
         appName,
         datasourceId: createDatasourceRef.current?.getDatasourceId() || '1',

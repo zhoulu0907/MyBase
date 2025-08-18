@@ -1,6 +1,6 @@
 import type { MenuInfo, UserInfo } from '@onebase/platform-center';
 import {
-  ALL_PERMISSION_CODE,
+    ALL_PERMISSION_CODE,
 } from '../constants/permission';
 
 export interface UserPermissionInfo {
@@ -16,7 +16,7 @@ export class UserPermissionManager {
 
   static setUserPermissionInfo(userPermissionInfo: UserPermissionInfo): void {
     // permissions存为map，提高查询效率
-    userPermissionInfo.permissionMap = Array.isArray(userPermissionInfo.permissions) ? 
+    userPermissionInfo.permissionMap = Array.isArray(userPermissionInfo.permissions) ?
       userPermissionInfo.permissions.reduce((acc: Record<string, boolean>, cur:string) => {
         acc[cur] = true;
         return acc;

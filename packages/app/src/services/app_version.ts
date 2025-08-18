@@ -7,7 +7,7 @@ import {
 import { appService } from './clients';
 
 export const pageApplicationVersion = (params: PageApplicationVersionReq) => {
-  return appService.post('/version/page', params);
+  return appService.get('/version/page', params);
 };
 
 export const createApplicationVersion = (params: CreateApplicationVersionReq) => {

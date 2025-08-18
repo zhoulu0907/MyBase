@@ -11,7 +11,7 @@ interface CreateModalProps {
   form: FormInstance;
   pageTypeOptions: { label: string; value: any }[];
   visibleCreateForm: string;
-  initValue: { pageType: number; menuName: string; parentCode: string };
+  initValue: { pageType: number; menuName: string; parentId: string };
   treeData: any[];
   entityListOptions: { label: string; value: any }[];
 }
@@ -57,7 +57,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
           initialValues={{
             pageType: initValue.pageType,
             menuName: initValue.menuName,
-            parentCode: initValue.parentCode
+            parentId: initValue.parentId
           }}
           style={{
             transform: visibleMenuIcon ? 'translateX(-100%)' : ''
@@ -121,12 +121,12 @@ const CreateModal: React.FC<CreateModalProps> = ({
               />
             </div>
           </Form.Item>
-          <Form.Item label="父级页面" field="parentCode">
+          <Form.Item label="父级页面" field="parentId">
             <TreeSelect treeData={treeData} placeholder="请选择父级页面" allowClear />
           </Form.Item>
 
           {visibleCreateForm === 'page' && (
-            <Form.Item label="业务实体" field="entityCode" rules={[{ required: true, message: '请选择业务实体' }]}>
+            <Form.Item label="业务实体" field="entityId" rules={[{ required: true, message: '请选择业务实体' }]}>
               <Select options={entityListOptions} placeholder="请选择业务实体" allowClear />
             </Form.Item>
           )}

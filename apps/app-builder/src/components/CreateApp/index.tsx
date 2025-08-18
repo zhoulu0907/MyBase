@@ -249,7 +249,7 @@ const BasicSetting = (props: IProps) => {
             </div>
 
             <Form.Item
-              field="appKey"
+              field="appCode"
               label="应用编码"
               rules={[
                 { required: true, message: '请填写应用编码' },

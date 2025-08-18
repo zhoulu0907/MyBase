@@ -83,7 +83,7 @@ export interface CreateApplicationReq {
   /**
    * 应用编码
    */
-  appKey: string;
+  appCode: string;
   /**
    * 应用模式
    */
