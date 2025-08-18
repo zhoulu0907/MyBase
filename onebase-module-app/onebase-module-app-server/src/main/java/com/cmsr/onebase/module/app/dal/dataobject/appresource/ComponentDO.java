@@ -50,7 +50,7 @@ public class ComponentDO extends TenantBaseDO {
     @Column(name = "edit_data", columnDefinition = "TEXT NOT NULL", comment = "编辑数据")
     private String editData;
 
-    @Column(name = "parent_code", columnDefinition = "VARCHAR(255) NOT NULL", comment = "父组件编码")
+    @Column(name = "parent_code", columnDefinition = "VARCHAR(255)", comment = "父组件编码")
     private String parentCode;
 
     /**
