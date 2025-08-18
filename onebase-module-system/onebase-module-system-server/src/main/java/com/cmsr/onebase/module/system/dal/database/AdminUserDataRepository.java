@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.system.dal.database;
 
-import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
+import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.data.base.BaseDO;
@@ -26,7 +26,7 @@ import java.util.List;
  * @date 2025-08-18
  */
 @Repository
-public class AdminUserDataRepository extends DataRepositoryNew<AdminUserDO> {
+public class AdminUserDataRepository extends DataRepository<AdminUserDO> {
 
     /**
      * 构造方法，指定默认实体类

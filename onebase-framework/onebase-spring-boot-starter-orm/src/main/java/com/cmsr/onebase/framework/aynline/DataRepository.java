@@ -27,7 +27,7 @@ import java.util.Optional;
  * @date 2025-08-07
  */
 @Slf4j
-public class DataRepositoryNew<T extends BaseDO> {
+public class DataRepository<T extends BaseDO> {
 
     static {
         // ConfigTable.GENERATOR.set(PrimaryGenerator.GENERATOR.SNOWFLAKE);
@@ -45,7 +45,7 @@ public class DataRepositoryNew<T extends BaseDO> {
 
     public static boolean isDebug = false;
 
-    public DataRepositoryNew(Class<T> defaultClazz) {
+    public DataRepository(Class<T> defaultClazz) {
         this.defaultClazz = defaultClazz;
     }
 

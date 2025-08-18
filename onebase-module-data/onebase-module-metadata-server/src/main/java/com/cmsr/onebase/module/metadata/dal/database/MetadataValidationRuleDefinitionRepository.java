@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.metadata.dal.database;
 
-import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
+import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.module.metadata.dal.dataobject.validation.MetadataValidationRuleDefinitionDO;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.ConfigStore;
@@ -20,7 +20,7 @@ import java.util.List;
  */
 @Repository
 @Slf4j
-public class MetadataValidationRuleDefinitionRepository extends DataRepositoryNew<MetadataValidationRuleDefinitionDO> {
+public class MetadataValidationRuleDefinitionRepository extends DataRepository<MetadataValidationRuleDefinitionDO> {
 
     /**
      * 构造方法，指定默认实体类

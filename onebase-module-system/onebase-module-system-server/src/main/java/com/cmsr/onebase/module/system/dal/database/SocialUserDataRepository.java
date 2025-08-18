@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.system.dal.database;
 
-import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
+import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.system.controller.admin.socail.vo.user.SocialUserPageReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.social.SocialUserDO;
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Repository;
  * @date 2025-08-11
  */
 @Repository
-public class SocialUserDataRepository extends DataRepositoryNew<SocialUserDO> {
+public class SocialUserDataRepository extends DataRepository<SocialUserDO> {
 
     public SocialUserDataRepository() {
         super(SocialUserDO.class);

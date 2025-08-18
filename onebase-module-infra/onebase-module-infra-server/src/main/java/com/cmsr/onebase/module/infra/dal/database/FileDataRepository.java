@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.infra.dal.database;
 
-import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
+import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.infra.controller.admin.file.vo.file.FilePageReqVO;
 import com.cmsr.onebase.module.infra.dal.dataobject.file.FileDO;
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Repository;
  * @date 2025-08-18
  */
 @Repository
-public class FileDataRepository extends DataRepositoryNew<FileDO> {
+public class FileDataRepository extends DataRepository<FileDO> {
 
     /**
      * 构造方法，指定默认实体类

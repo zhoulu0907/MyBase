@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.system.dal.database;
 
-import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
+import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.system.controller.admin.mail.vo.account.MailAccountPageReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.mail.MailAccountDO;
@@ -17,7 +17,7 @@ import org.apache.commons.lang3.StringUtils;
  * @date 2025-08-11
  */
 @Repository
-public class MailAccountDataRepository extends DataRepositoryNew<MailAccountDO> {
+public class MailAccountDataRepository extends DataRepository<MailAccountDO> {
 
     public MailAccountDataRepository() {
         super(MailAccountDO.class);

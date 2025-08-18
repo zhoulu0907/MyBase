@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.app.dal.database.version;
 
-import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
+import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.data.base.BaseDO;
 import com.cmsr.onebase.module.app.controller.admin.version.vo.VersionPageReqVo;
@@ -17,7 +17,7 @@ import java.util.List;
  * @Date：2025/8/6 14:42
  */
 @Repository
-public class AppVersionRepository extends DataRepositoryNew<VersionDO> {
+public class AppVersionRepository extends DataRepository<VersionDO> {
 
     public AppVersionRepository() {
         super(VersionDO.class);

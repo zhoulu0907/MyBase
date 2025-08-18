@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.infra.dal.database;
 
-import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
+import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.infra.controller.admin.logger.vo.apiaccesslog.ApiAccessLogPageReqVO;
 import com.cmsr.onebase.module.infra.dal.dataobject.logger.ApiAccessLogDO;
@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
  * @date 2025-08-18
  */
 @Repository
-public class ApiAccessLogDataRepository extends DataRepositoryNew<ApiAccessLogDO> {
+public class ApiAccessLogDataRepository extends DataRepository<ApiAccessLogDO> {
 
     /**
      * 构造方法，指定默认实体类

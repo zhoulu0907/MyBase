@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.system.dal.database;
 
-import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
+import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.UserRoleDO;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.springframework.stereotype.Repository;
@@ -18,7 +18,7 @@ import java.util.Set;
  * @date 2025-08-18
  */
 @Repository
-public class UserRoleDataRepository extends DataRepositoryNew<UserRoleDO> {
+public class UserRoleDataRepository extends DataRepository<UserRoleDO> {
 
     /**
      * 构造方法，指定默认实体类

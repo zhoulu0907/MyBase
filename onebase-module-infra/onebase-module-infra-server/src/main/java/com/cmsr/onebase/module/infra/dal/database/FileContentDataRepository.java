@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.infra.dal.database;
 
 import cn.hutool.core.collection.CollUtil;
-import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
+import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.module.infra.dal.dataobject.file.FileContentDO;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.springframework.stereotype.Repository;
@@ -18,7 +18,7 @@ import java.util.List;
  * @date 2025-08-18
  */
 @Repository
-public class FileContentDataRepository extends DataRepositoryNew<FileContentDO> {
+public class FileContentDataRepository extends DataRepository<FileContentDO> {
 
     /**
      * 构造方法，指定默认实体类

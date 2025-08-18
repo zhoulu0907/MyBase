@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.system.dal.database;
 
-import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
+import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2RefreshTokenDO;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Compare;
@@ -13,7 +13,7 @@ import org.springframework.stereotype.Repository;
  * @date 2025-08-11
  */
 @Repository
-public class OAuth2RefreshTokenDataRepository extends DataRepositoryNew<OAuth2RefreshTokenDO> {
+public class OAuth2RefreshTokenDataRepository extends DataRepository<OAuth2RefreshTokenDO> {
 
     public OAuth2RefreshTokenDataRepository() {
         super(OAuth2RefreshTokenDO.class);

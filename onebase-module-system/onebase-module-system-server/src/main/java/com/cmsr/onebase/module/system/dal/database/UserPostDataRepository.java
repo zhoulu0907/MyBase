@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.system.dal.database;
 
-import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
+import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.UserPostDO;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.springframework.stereotype.Repository;
@@ -17,7 +17,7 @@ import java.util.List;
  * @date 2025-08-18
  */
 @Repository
-public class UserPostDataRepository extends DataRepositoryNew<UserPostDO> {
+public class UserPostDataRepository extends DataRepository<UserPostDO> {
 
     /**
      * 构造方法，指定默认实体类
