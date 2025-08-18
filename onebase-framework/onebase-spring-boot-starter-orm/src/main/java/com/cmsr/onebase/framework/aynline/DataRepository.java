@@ -6,13 +6,9 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.data.base.BaseDO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.anyline.data.Run;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.*;
-import org.anyline.entity.generator.PrimaryGenerator;
-import org.anyline.metadata.Constraint;
-import org.anyline.metadata.Table;
 import org.anyline.service.AnylineService;
 import org.anyline.util.ConfigTable;
 
@@ -22,34 +18,34 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * DataRepository - JPA风格的CRUD操作工具类
+ * AnyLine DataRepository - 基于AnyLine框架的JPA风格的CRUD操作工具类
  * <p>
  * 提供标准的CRUD操作接口，遵循Spring Data JPA的设计模式
  * 支持实体类的增删改查操作，包含分页、排序、条件查询等功能
  *
- * @author mickey
+ * @author matianyu
+ * @date 2025-08-07
  */
 @Slf4j
-public class DataRepository { // TODO 等改造完成，这个类泛型 <T extends BaseDO>
+public class DataRepository<T extends BaseDO> {
+
     static {
-        ConfigTable.GENERATOR.set(PrimaryGenerator.GENERATOR.SNOWFLAKE);
+        // ConfigTable.GENERATOR.set(PrimaryGenerator.GENERATOR.SNOWFLAKE);
         ConfigTable.IS_AUTO_CHECK_METADATA = true;
         ConfigTable.IS_INSERT_NULL_COLUMN = false;
         ConfigTable.IS_INSERT_NULL_FIELD = false;
         ConfigTable.IS_INSERT_EMPTY_FIELD = true;
         ConfigTable.IS_INSERT_EMPTY_COLUMN = true;
-        // ConfigTable.IS_ENABLE_SQL_DATATYPE_CONVERT = true;
     }
 
     @Resource
     private AnylineService<?> anylineService;
 
-    private Class<?> defaultClazz = null;
+    private Class<T> defaultClazz = null;
 
-    public DataRepository() {
-    }
+    public static boolean isDebug = false;
 
-    public DataRepository(Class<?> defaultClazz) {
+    public DataRepository(Class<T> defaultClazz) {
         this.defaultClazz = defaultClazz;
     }
 
@@ -59,187 +55,283 @@ public class DataRepository { // TODO 等改造完成，这个类泛型 <T exten
      * @param clazz 实体类
      * @return 表名
      */
-    private String getTableName(Class<?> clazz) {
+    private String getTableName(Class<? extends BaseDO> clazz) {
         jakarta.persistence.Table annotation = clazz.getAnnotation(jakarta.persistence.Table.class);
         return annotation != null ? annotation.name() : clazz.getSimpleName().toLowerCase();
     }
+
+    // ---------------------------- insert 方法 ----------------------------
 
     /**
      * 保存实体（插入）
      *
      * @param entity 要保存的实体
-     * @param <T>    实体类型
      * @return 保存后的实体
+     * @throws BizException 插入失败时抛出
      */
-    public <T extends BaseDO> T insert(T entity) {
+    public T insert(T entity) {
         try {
-            Long result = anylineService.insert(entity);
+            long result = anylineService.insert(entity);
             if (result == 0) {
                 throw new BizException(StatusCode.DB_INSERT_ERROR);
             }
-            return entity;
         } catch (Exception e) {
-            log.error("保存实体失败: {}", entity.getClass().getSimpleName(), e);
-            throw e;
+            log.error("update error, class={}, entity={}", defaultClazz, entity, e);
+            throw new BizException(StatusCode.DB_UPDATE_ERROR);
         }
+        return entity;
     }
 
     /**
      * 批量插入实体
      *
      * @param entities 实体列表
-     * @param <T>      实体类型
      * @return 保存后的实体列表
+     * @throws BizException 插入失败时抛出
      */
-    public <T extends BaseDO> List<T> insertBatch(List<T> entities) {
-        try {
-            for (T entity : entities) {
-                insert(entity);
-            }
-            return entities;
-        } catch (Exception e) {
-            log.error("批量保存实体失败", e);
-            throw new BizException(StatusCode.DB_INSERT_ERROR);
+    public List<T> insertBatch(List<T> entities) {
+        for (T entity : entities) {
+            insert(entity);
         }
+        return entities;
+    }
+
+
+    // ---------------------------- update 方法 ----------------------------
+
+    /**
+     * 保存实体
+     *
+     * @param entity 要保存的实体
+     * @return 保存后的实体
+     * @throws BizException 插入失败时抛出
+     */
+    public T upsert(T entity) {
+        try {
+            long result = anylineService.upsert(entity);
+            //log.info("upsert  ---> class={}, effect rows = {}", entity.getClass().getSimpleName(), result);
+        } catch (Exception e) {
+            log.error("update error, class={}, entity={}", defaultClazz, entity, e);
+            throw new BizException(StatusCode.DB_UPDATE_ERROR);
+        }
+        return entity;
     }
 
     /**
-     * 更新
+     * 批量保存实体
+     *
+     * @param entities 实体列表
+     * @return 保存后的实体列表
+     * @throws BizException 插入失败时抛出
+     */
+    public List<T> upsertBatch(List<T> entities) {
+        if (entities == null || entities.isEmpty()) {
+            return Collections.emptyList();
+        }
+        for (T entity : entities) {
+            upsert(entity);
+        }
+        return entities;
+    }
+    // ---------------------------- update 方法 ----------------------------
+
+    /**
+     * 安全更新，不抛出异常的场景（推荐使用 update）
+     * 1. 批量更新操作：部分记录更新失败不影响整体流程
+     * 2. 可选更新操作：如用户偏好设置、缓存更新等
+     * 3. 幂等性操作：重复执行不会产生副作用的操作
      *
      * @param entity 要保存的实体
-     * @param <T>    实体类型
-     * @return 保存后的实体
+     * @return 影响行数
+     * @throws BizException 当实体ID为空或更新失败时抛出
      */
-    public <T extends BaseDO> T update(T entity) {
-        if (entity.getId() == null || entity.getId() == 0) {
+    public long update(T entity) {
+        if (entity == null || entity.getId() == null || entity.getId() == 0) {
             throw new BizException(StatusCode.DB_ID_NULL);
         }
         try {
-            // 更新
             ConfigStore configs = new DefaultConfigStore();
-            configs.and(Compare.EQUAL, "id", entity.getId());
+            configs.eq(BaseDO.ID, entity.getId());
             Long result = anylineService.update(entity, configs);
-            log.info("[{}] update  ---> effect rows = {}", entity.getClass().getSimpleName(), result);
-
-            if (result == 0) {
-                throw new BizException(StatusCode.DB_UPDATE_ERROR);
+            if (isDebug) {
+                log.info("update  ---> class={}, effect rows = {}", entity.getClass().getSimpleName(), result);
             }
-            return entity;
-        } catch (Exception e) {
-            log.error("保存实体失败: {}", entity.getClass().getSimpleName(), e);
-            throw new BizException(StatusCode.DB_UPDATE_ERROR);
-        }
-    }
-
-
-    /**
-     * 更新
-     *
-     * @param clazz
-     * @param configs
-     * @return 更新数量
-     */
-    public <T> long updateByConfig(Class<T> clazz, ConfigStore configs) {
-        if (clazz == null) {
-            throw new BizException(StatusCode.DB_UPDATE_ERROR);
-        }
-        try {
-            // 更新
-            long result = anylineService.update(clazz, configs);
-            log.info("[{}] updateByConfig  ---> effect rows = {}", clazz.getSimpleName(), result);
             return result;
         } catch (Exception e) {
-            log.error("保存实体失败: {}", clazz.getSimpleName(), e);
+            log.error("update error, class={}, entity={}", defaultClazz, entity, e);
             throw new BizException(StatusCode.DB_UPDATE_ERROR);
         }
     }
 
     /**
-     * 根据ID查找实体
+     * 严格更新，严格模式，如果更新失败则抛出异常(推荐使用 updateStrict）
+     * 1. 关键业务操作：如订单状态更新、支付状态变更等
+     * 2. 并发控制场景：需要确保数据一致性的操作
+     * 3. 审计要求严格：需要确保每次更新都有明确结果
      *
-     * @param id
-     * @return
+     * @param entity 要保存的实体
+     * @return 影响行数
+     * @throws BizException 更新失败时抛出
      */
-    public <T extends BaseDO> T findById(Long id) {
-        return findById((Class<T>) defaultClazz, id);
+    public long updateStrict(T entity) {
+        long result = update(entity);
+        if (result == 0) {
+            throw new BizException(StatusCode.DB_UPDATE_ERROR);
+        }
+        return result;
     }
+
+    /**
+     * 条件更新，安全更新
+     *
+     * @param entity  要更新的实体
+     * @param configs 更新条件
+     * @return 更新数量
+     * @throws BizException 当实体ID为空或更新失败时抛出
+     */
+    public long updateByConfig(T entity, ConfigStore configs) {
+        if (entity == null || entity.getId() == null || entity.getId() == 0) {
+            throw new BizException(StatusCode.DB_ID_NULL);
+        }
+        try {
+            long result = anylineService.update(1000, getTableName(entity.getClass()), entity, configs, (List<String>) null);
+            if (isDebug) {
+                log.info("updateByConfig  ---> class={}, effect rows = {}", entity.getClass().getSimpleName(), result);
+                }
+            return result;
+        } catch (Exception e) {
+            log.error("updateByConfig error, class={}, entity={}, config={}", defaultClazz, entity, configs, e);
+            throw new BizException(StatusCode.DB_UPDATE_ERROR);
+        }
+    }
+
+    // ---------------------------- query/find 方法 ----------------------------
 
     /**
      * 根据ID查找实体
      *
-     * @param clazz 实体类
-     * @param id    实体ID
-     * @param <T>   实体类型
-     * @return 实体对象，如果不存在返回null
+     * @param id 实体ID
+     * @return 实体
+     * @throws BizException 查询失败时抛出
      */
-    @Deprecated
-    public <T extends BaseDO> T findById(Class<T> clazz, Long id) {
+    public T findById(Long id) {
         try {
+            if (id == null) {
+                return null;
+            }
             ConfigStore configs = new DefaultConfigStore();
-            configs.and(Compare.EQUAL, "id", id);
-            String tableName = getTableName(clazz);
-            return anylineService.select(tableName, clazz, configs);
+            configs.and(Compare.EQUAL, BaseDO.ID, id);
+            String tableName = getTableName(defaultClazz);
+            return anylineService.select(tableName, defaultClazz, configs);
         } catch (Exception e) {
-            log.error("根据ID查找实体失败: class={}, id={}", clazz.getSimpleName(), id, e);
+            log.error("findById error, class={}, id={}", defaultClazz, id, e);
             throw new BizException(StatusCode.DB_SELECT_ERROR);
         }
-    }
-
-    public <T extends BaseDO> Optional<T> findByIdOptional(Long id) {
-        return findByIdOptional((Class<T>) defaultClazz, id);
     }
 
     /**
      * 根据ID查找实体（返回Optional）
      *
-     * @param clazz 实体类
-     * @param id    实体ID
-     * @param <T>   实体类型
+     * @param id 实体ID
      * @return Optional包装的实体对象
      */
-    @Deprecated
-    public <T extends BaseDO> Optional<T> findByIdOptional(Class<T> clazz, Long id) {
-        T entity = findById(clazz, id);
-        return Optional.ofNullable(entity);
-    }
-
-    public boolean existsById(Long id) {
-        return existsById((Class<? extends BaseDO>) defaultClazz, id);
+    public Optional<T> findByIdOptional(Long id) {
+        return Optional.ofNullable(findById(id));
     }
 
     /**
      * 检查实体是否存在
      *
-     * @param clazz 实体类
-     * @param id    实体ID
-     * @param <T>   实体类型
+     * @param id 实体ID
      * @return 是否存在
      */
-    @Deprecated
-    public <T extends BaseDO> boolean existsById(Class<T> clazz, Long id) {
-        return findById(clazz, id) != null;
+    public boolean existsById(Long id) {
+        return findById(id) != null;
     }
 
-    public <T extends BaseDO> List<T> findAll() {
-        return findAll((Class<T>) defaultClazz);
+    /**
+     * 统计实体数量
+     *
+     * @return 实体数量
+     * @throws BizException 查询失败时抛出
+     */
+    @Deprecated
+    public long count() {
+        try {
+            ConfigStore configs = new DefaultConfigStore();
+            String tableName = getTableName(defaultClazz);
+            return anylineService.count(tableName, configs);
+        } catch (Exception e) {
+            log.error("count error. ---> class={}", defaultClazz.getSimpleName(), e);
+            throw new BizException(StatusCode.DB_SELECT_ERROR);
+        }
+    }
+
+    /**
+     * 统计实体数量
+     *
+     * @param configs 查询条件
+     * @return 实体数量
+     * @throws BizException 查询失败时抛出
+     */
+    public long countByConfig(ConfigStore configs) {
+        try {
+            String tableName = getTableName(defaultClazz);
+            return anylineService.count(tableName, configs);
+        } catch (Exception e) {
+            log.error("countByConfig error. ---> class={}", defaultClazz.getSimpleName(), e);
+            throw new BizException(StatusCode.DB_SELECT_ERROR);
+        }
+    }
+
+    /**
+     * 分页查询
+     *
+     * @param pageIndex 页码（从1开始）
+     * @param pageSize  页大小
+     * @return 分页结果
+     * @throws BizException 查询失败时抛出
+     */
+    @Deprecated
+    public PageResult<T> findAll(int pageIndex, int pageSize) {
+        try {
+            ConfigStore configs = new DefaultConfigStore();
+
+            PageNavi page = new DefaultPageNavi(pageIndex, pageSize);
+            configs.setPageNavi(page);
+
+            String tableName = getTableName(defaultClazz);
+            DataSet dataSet = anylineService.querys(tableName, configs);
+
+            return new PageResult<>(
+                    dataSet.entitys(defaultClazz).stream().toList(),
+                    dataSet.total()
+            );
+        } catch (Exception e) {
+            log.error("findAll error, class={}, pageIndex={}, pageSize={}",
+                    defaultClazz.getSimpleName(), pageIndex, pageSize, e);
+            throw new BizException(StatusCode.DB_SELECT_ERROR);
+        }
     }
 
     /**
      * 查找所有实体
      *
-     * @param clazz 实体类
-     * @param <T>   实体类型
      * @return 实体列表
+     * @throws BizException 查询失败时抛出
      */
     @Deprecated
-    public <T extends BaseDO> List<T> findAll(Class<T> clazz) {
+    public List<T> findAll() {
         try {
             ConfigStore configs = new DefaultConfigStore();
-            String tableName = getTableName(clazz);
+            String tableName = getTableName(defaultClazz);
             DataSet dataSet = anylineService.querys(tableName, configs);
-            return dataSet.entity(clazz);
+            if (isDebug) {
+                log.info("findAll --->  dataSet.size = {}", dataSet.size());
+            }
+            return dataSet.entity(defaultClazz);
         } catch (Exception e) {
-            log.error("查找所有实体失败: class={}", clazz.getSimpleName(), e);
+            log.error("findAll error, class={}", defaultClazz, e);
             throw new BizException(StatusCode.DB_SELECT_ERROR);
         }
     }
@@ -247,111 +339,124 @@ public class DataRepository { // TODO 等改造完成，这个类泛型 <T exten
     /**
      * 自定义查找实体列表
      *
-     * @param clazz   实体类
-     * @param configs configs
-     * @param <T>     实体类型
+     * @param configs 查询条件
      * @return 实体列表
+     * @throws BizException 查询失败时抛出
      */
-    public <T> List<T> findAllByConfig(Class<T> clazz, ConfigStore configs) {
+    public List<T> findAllByConfig(ConfigStore configs) {
         try {
-            String tableName = getTableName(clazz);
+            String tableName = getTableName(defaultClazz);
             DataSet dataSet = anylineService.querys(tableName, configs);
-            return dataSet.entity(clazz);
+            return dataSet.entity(defaultClazz);
         } catch (Exception e) {
-            log.error("根据ID列表查找实体失败: class={}, configs={}", clazz.getSimpleName(), configs, e);
+            log.error("findAllByConfig error, class={}, configs={}", defaultClazz.getSimpleName(), configs, e);
             throw new BizException(StatusCode.DB_SELECT_ERROR);
         }
-    }
-
-
-    public <T extends BaseDO> List<T> findAllByIds(Collection<Long> ids) {
-        return findAllByIds((Class<T>) defaultClazz, ids);
     }
 
     /**
      * 根据ID列表查找实体
      *
-     * @param clazz 实体类
-     * @param ids   ID列表
-     * @param <T>   实体类型
+     * @param ids ID列表
      * @return 实体列表
+     * @throws BizException 查询失败时抛出
      */
-    @Deprecated
-    public <T extends BaseDO> List<T> findAllByIds(Class<T> clazz, Collection<Long> ids) {
+    public List<T> findAllByIds(Collection<Long> ids) {
         if (ids == null || ids.isEmpty()) {
             return Collections.emptyList();
         }
         try {
+
             ConfigStore configs = new DefaultConfigStore();
-            configs.and(Compare.IN, "id", ids);
+            configs.in(BaseDO.ID, ids);
 
-            String tableName = getTableName(clazz);
+            String tableName = getTableName(defaultClazz);
             DataSet dataSet = anylineService.querys(tableName, configs);
-            return dataSet.entity(clazz);
+            return dataSet.entity(defaultClazz);
         } catch (Exception e) {
-            log.error("根据ID列表查找实体失败: class={}, ids={}", clazz.getSimpleName(), ids, e);
+            log.error("findAllByIds error, ---> class={}, ids={}", defaultClazz.getSimpleName(), ids, e);
             throw new BizException(StatusCode.DB_SELECT_ERROR);
         }
     }
 
-    public long count() {
-        return count((Class<? extends BaseDO>) defaultClazz);
+    /**
+     * 条件查询单个实体
+     *
+     * @param configs 查询条件
+     * @return 实体对象，如果不存在返回null
+     * @throws BizException 查询失败时抛出
+     */
+    public T findOne(ConfigStore configs) {
+        try {
+            String tableName = getTableName(defaultClazz);
+            return anylineService.select(tableName, defaultClazz, configs);
+        } catch (Exception e) {
+            log.error("findOne error, class={}", defaultClazz.getSimpleName(), e);
+            throw new BizException(StatusCode.DB_SELECT_ERROR);
+        }
     }
 
     /**
-     * 统计实体数量
+     * 条件查询单个实体（返回Optional）
      *
-     * @param clazz 实体类
-     * @param <T>   实体类型
-     * @return 实体数量
+     * @param configs 查询条件
+     * @return Optional包装的实体对象
      */
-    @Deprecated
-    public <T extends BaseDO> long count(Class<T> clazz) {
-        try {
-            ConfigStore configs = new DefaultConfigStore();
+    public Optional<T> findOneOptional(ConfigStore configs) {
+        T entity = findOne(configs);
+        return Optional.ofNullable(entity);
+    }
 
-            String tableName = getTableName(clazz);
+    /**
+     * 条件分页查询
+     *
+     * @param configs   查询条件
+     * @param pageIndex 页码（从1开始）
+     * @param pageSize  页大小
+     * @return 分页结果
+     * @throws BizException 查询失败时抛出
+     */
+    public PageResult<T> findPageWithConditions(ConfigStore configs, int pageIndex, int pageSize) {
+        try {
+
+            PageNavi page = new DefaultPageNavi(pageIndex, pageSize);
+            configs.setPageNavi(page);
+
+            String tableName = getTableName(defaultClazz);
             DataSet dataSet = anylineService.querys(tableName, configs);
-            return dataSet.total();
+
+            return new PageResult<>(
+                    dataSet.entitys(defaultClazz).stream().toList(),
+                    dataSet.total()
+            );
         } catch (Exception e) {
-            log.error("统计实体数量失败: class={}", clazz.getSimpleName(), e);
+            log.error("findPageWithConditions error, class={}, pageIndex={}, pageSize={}",
+                    defaultClazz.getSimpleName(), pageIndex, pageSize, e);
             throw new BizException(StatusCode.DB_SELECT_ERROR);
         }
     }
 
-    /**
-     * 统计实体数量
-     *
-     * @param clazz 实体类
-     * @param <T>   实体类型
-     * @return 实体数量
-     */
-    public <T extends BaseDO> long countByConfig(Class<T> clazz, ConfigStore configs) {
-        try {
-            String tableName = getTableName(clazz);
-            return anylineService.count(tableName, configs);
-        } catch (Exception e) {
-            log.error("统计实体数量失败: class={}", clazz.getSimpleName(), e);
-            throw new BizException(StatusCode.DB_SELECT_ERROR);
-        }
-    }
+
+    // ---------------------------- delete 方法 ----------------------------
 
     /**
-     * 根据ID删除实体（软删除）
+     * 根据条件删除实体（软删除）
      *
-     * @param clazz   实体类
-     * @param configs configs
-     * @param <T>     实体类型
+     * @param configs 删除条件
+     * @return 删除的记录数
+     * @throws BizException 删除失败时抛出
      */
-    public <T extends BaseDO> long deleteByConfig(Class<T> clazz, ConfigStore configs) {
+    public long deleteByConfig(ConfigStore configs) {
         try {
             DataRow row = new DataRow();
-            row.put("deleted", System.currentTimeMillis());  // 设置逻辑删除标记
-            long result = anylineService.update(getTableName(clazz), row, configs);
-            log.info("[{}] deleteByConfig  ---> effect rows = {}", clazz, result);
+            row.put(BaseDO.DELETED, System.currentTimeMillis());  // 设置逻辑删除标记
+            long result = anylineService.update(getTableName(defaultClazz), row, configs);
+            if (isDebug) {
+                log.info("deleteByConfig  ---> class={}, effect rows = {}", defaultClazz, result);
+            }
             return result;
         } catch (Exception e) {
-            log.error("根据ID删除实体失败: class={}, configs={}", clazz.getSimpleName(), configs, e);
+            log.error("deleteByConfig error, ---> class={}, configs={}", defaultClazz.getSimpleName(), configs, e);
             throw new BizException(StatusCode.DB_DELETE_ERROR);
         }
     }
@@ -359,46 +464,26 @@ public class DataRepository { // TODO 等改造完成，这个类泛型 <T exten
     /**
      * 根据ID删除实体（软删除）
      *
-     * @param clazz   实体类
-     * @param configs configs
-     * @param <T>     实体类型
+     * @param id 实体ID
+     * @return 删除的记录数
+     * @throws BizException 删除失败时抛出
      */
-    public <T extends BaseDO> long deleteByConfigReturn(Class<T> clazz, ConfigStore configs) {
+    public long deleteById(Long id) {
         try {
-            DataRow row = new DataRow();
-            row.put("deleted", System.currentTimeMillis());  // 设置逻辑删除标记
-            long result = anylineService.update(getTableName(clazz), row, configs);
-            log.info("[{}] deleteByConfig  ---> effect rows = {}", clazz, result);
-            return result;
-        } catch (Exception e) {
-            log.error("根据ID删除实体失败: class={}, configs={}", clazz.getSimpleName(), configs, e);
-            throw new BizException(StatusCode.DB_DELETE_ERROR);
-        }
-    }
-
-    public <T extends BaseDO> void deleteById(Long id) {
-        deleteById((Class<? extends BaseDO>) defaultClazz, id);
-    }
-
-    /**
-     * 根据ID删除实体（软删除）
-     *
-     * @param clazz 实体类
-     * @param id    实体ID
-     * @param <T>   实体类型
-     */
-    public <T extends BaseDO> long deleteById(Class<T> clazz, Long id) {
-        try {
+            if (id == null || id == 0) {
+                return 0;
+            }
             ConfigStore configs = new DefaultConfigStore();
-            configs.and(Compare.EQUAL, "id", id);
+            configs.and(Compare.EQUAL, BaseDO.ID, id);
             DataRow row = new DataRow();
-            row.put("deleted", System.currentTimeMillis());  // 设置逻辑删除标记
-            long result = anylineService.update(getTableName(clazz), row, configs);
-            log.info("[{}] deleteById  ---> effect rows = {}, id = {}", clazz, result, id);
-
+            row.put(BaseDO.DELETED, System.currentTimeMillis());  // 设置逻辑删除标记
+            long result = anylineService.update(getTableName(defaultClazz), row, configs);
+            if (isDebug) {
+                log.info("deleteById  ---> class={}, effect rows = {}, id = {}", defaultClazz, result, id);
+            }
             return result;
         } catch (Exception e) {
-            log.error("根据ID删除实体失败: class={}, id={}", clazz.getSimpleName(), id, e);
+            log.error("deleteById error, class={}, id={}", defaultClazz.getSimpleName(), id, e);
             throw new BizException(StatusCode.DB_DELETE_ERROR);
         }
     }
@@ -407,13 +492,11 @@ public class DataRepository { // TODO 等改造完成，这个类泛型 <T exten
      * 删除实体（软删除）
      *
      * @param entity 要删除的实体
-     * @param <T>    实体类型
+     * @return 删除的记录数
      */
-    public <T extends BaseDO> long delete(T entity) {
-        if (entity != null && entity.getId() != null) {
-            @SuppressWarnings("unchecked")
-            Class<T> entityClass = (Class<T>) entity.getClass();
-            return deleteById(entityClass, entity.getId());
+    public long delete(T entity) {
+        if (entity != null && entity.getId() != null && entity.getId() != 0) {
+            return deleteById(entity.getId());
         }
         return 0;
     }
@@ -422,241 +505,59 @@ public class DataRepository { // TODO 等改造完成，这个类泛型 <T exten
      * 批量删除实体（软删除）
      *
      * @param entities 实体列表
-     * @param <T>      实体类型
      */
-    public <T extends BaseDO> void deleteAll(List<T> entities) {
+    public void deleteAll(List<T> entities) {
         for (T entity : entities) {
             delete(entity);
         }
     }
 
-    public void deleteAllById(Collection<Long> ids) {
-        deleteAllById((Class<? extends BaseDO>) defaultClazz, ids);
-    }
-
     /**
      * 根据ID列表删除实体（软删除）
      *
-     * @param clazz 实体类
-     * @param ids   ID列表
-     * @param <T>   实体类型
+     * @param ids ID列表
+     * @return 删除的记录数
+     * @throws BizException 删除失败时抛出
      */
     @Deprecated
-    public <T extends BaseDO> long deleteAllById(Class<T> clazz, Collection<Long> ids) {
+    public long deleteAllById(Collection<Long> ids) {
         try {
+            if (ids == null || ids.isEmpty()) {
+                return 0;
+            }
             ConfigStore configs = new DefaultConfigStore();
-            configs.and(Compare.IN, "id", ids);
+            configs.and(Compare.IN, BaseDO.ID, ids);
             DataRow row = new DataRow();
-            row.put("deleted", System.currentTimeMillis());  // 设置逻辑删除标记
-
-            long result = anylineService.update(getTableName(clazz), row, configs);
-            log.info("[{}] deleteAllById  ---> effect rows={}, ids={}", clazz, result, ids);
+            row.put(BaseDO.DELETED, System.currentTimeMillis());  // 设置逻辑删除标记
+            long result = anylineService.update(getTableName(defaultClazz), row, configs);
+            if (isDebug) {
+                log.info("deleteAllById  ---> class={}, effect rows={}, ids={}", defaultClazz, result, ids);
+            }
             return result;
         } catch (Exception e) {
-            log.error("根据ID列表删除实体失败: class={}, ids={}", clazz.getSimpleName(), ids, e);
+            log.error("deleteAllById error, class={}, ids={}", defaultClazz.getSimpleName(), ids, e);
             throw new BizException(StatusCode.DB_DELETE_ERROR);
         }
-    }
-
-    public void deleteAll() {
-        deleteAll((Class<? extends BaseDO>) defaultClazz);
     }
 
     /**
      * 删除所有实体（软删除）
      *
-     * @param clazz 实体类
-     * @param <T>   实体类型
+     * @throws BizException 删除失败时抛出
      */
-    public <T extends BaseDO> void deleteAll(Class<T> clazz) {
+    public void deleteAll() {
         try {
             ConfigStore configs = new DefaultConfigStore();
             DataRow row = new DataRow();
-            row.put("deleted", System.currentTimeMillis());  // 设置逻辑删除标记
-
-            long result = anylineService.update(getTableName(clazz), row, configs);
-            log.info("[{}] deleteAll  ---> effect rows={}", clazz, result);
-
+            row.put(BaseDO.DELETED, System.currentTimeMillis());  // 设置逻辑删除标记
+            long result = anylineService.update(getTableName(defaultClazz), row, configs);
+            if (isDebug) {
+                log.info("deleteAll  ---> class={}, effect rows={}", defaultClazz, result);
+            }
         } catch (Exception e) {
-            log.error("删除所有实体失败: class={}", clazz.getSimpleName(), e);
+            log.error("deleteAll error, class={}", defaultClazz.getSimpleName(), e);
             throw new BizException(StatusCode.DB_DELETE_ERROR);
         }
     }
-
-    public <T extends BaseDO> PageResult<T> findAll(int pageIndex, int pageSize) {
-        return findAll((Class<T>) defaultClazz, pageIndex, pageSize);
-    }
-
-    /**
-     * 分页查询
-     *
-     * @param clazz     实体类
-     * @param pageIndex 页码（从1开始）
-     * @param pageSize  页大小
-     * @param <T>       实体类型
-     * @return 分页结果
-     */
-    @Deprecated
-    public <T extends BaseDO> PageResult<T> findAll(Class<T> clazz, int pageIndex, int pageSize) {
-        try {
-            ConfigStore configs = new DefaultConfigStore();
-
-            PageNavi page = new DefaultPageNavi(pageIndex, pageSize);
-            configs.setPageNavi(page);
-
-            String tableName = getTableName(clazz);
-            DataSet dataSet = anylineService.querys(tableName, configs);
-
-            return new PageResult<>(
-                    dataSet.entitys(clazz).stream().toList(),
-                    dataSet.total()
-            );
-        } catch (Exception e) {
-            log.error("分页查询失败: class={}, pageIndex={}, pageSize={}",
-                    clazz.getSimpleName(), pageIndex, pageSize, e);
-            throw new BizException(StatusCode.DB_SELECT_ERROR);
-        }
-    }
-
-    /**
-     * 条件查询
-     *
-     * @param clazz   实体类
-     * @param configs 查询条件
-     * @param <T>     实体类型
-     * @return 实体列表
-     */
-    public <T extends BaseDO> List<T> findAll(Class<T> clazz, ConfigStore configs) {
-        try {
-            String tableName = getTableName(clazz);
-            DataSet dataSet = anylineService.querys(tableName, configs);
-            return dataSet.entity(clazz);
-        } catch (Exception e) {
-            log.error("条件查询失败: class={}", clazz.getSimpleName(), e);
-            throw new BizException(StatusCode.DB_SELECT_ERROR);
-        }
-    }
-
-    /**
-     * 条件查询单个实体
-     *
-     * @param clazz   实体类
-     * @param configs 查询条件
-     * @param <T>     实体类型
-     * @return 实体对象，如果不存在返回null
-     */
-    public <T extends BaseDO> T findOne(Class<T> clazz, ConfigStore configs) {
-        try {
-            String tableName = getTableName(clazz);
-            return anylineService.select(tableName, clazz, configs);
-        } catch (Exception e) {
-            log.error("条件查询单个实体失败: class={}", clazz.getSimpleName(), e);
-            throw new BizException(StatusCode.DB_SELECT_ERROR);
-        }
-    }
-
-    /**
-     * 条件查询单个实体（返回Optional）
-     *
-     * @param clazz   实体类
-     * @param configs 查询条件
-     * @param <T>     实体类型
-     * @return Optional包装的实体对象
-     */
-    public <T extends BaseDO> Optional<T> findOneOptional(Class<T> clazz, ConfigStore configs) {
-        T entity = findOne(clazz, configs);
-        return Optional.ofNullable(entity);
-    }
-
-    /**
-     * 条件分页查询
-     *
-     * @param clazz     实体类
-     * @param configs   查询条件
-     * @param pageIndex 页码（从1开始）
-     * @param pageSize  页大小
-     * @param <T>       实体类型
-     * @return 分页结果
-     */
-    public <T extends BaseDO> com.cmsr.onebase.framework.common.pojo.PageResult<T> findPageWithConditions(
-            Class<T> clazz, ConfigStore configs, int pageIndex, int pageSize) {
-        try {
-            log.info("DataRepository分页查询开始: class={}, pageIndex={}, pageSize={}", 
-                    clazz.getSimpleName(), pageIndex, pageSize);
-
-            PageNavi page = new DefaultPageNavi(pageIndex, pageSize);
-            configs.setPageNavi(page);
-            
-            log.info("DataRepository创建PageNavi: pageIndex={}, pageSize={}", pageIndex, pageSize);
-
-            String tableName = getTableName(clazz);
-            DataSet dataSet = anylineService.querys(tableName, configs);
-            
-            log.info("DataRepository查询结果: tableName={}, 总记录数={}, 当前页记录数={}", 
-                    tableName, dataSet.total(), dataSet.size());
-
-            return new com.cmsr.onebase.framework.common.pojo.PageResult<>(
-                    dataSet.entitys(clazz).stream().toList(),
-                    dataSet.total()
-            );
-        } catch (Exception e) {
-            log.error("条件分页查询失败: class={}, pageIndex={}, pageSize={}",
-                    clazz.getSimpleName(), pageIndex, pageSize, e);
-            throw new BizException(StatusCode.DB_SELECT_ERROR);
-        }
-    }
-
-    /**
-     * 创建表
-     *
-     * @param clazz   实体类
-     * @param reset   是否删除已存在的表
-     * @param execute 是否执行DDL
-     * @throws Exception 异常
-     */
-    public void createTable(Class<?> clazz, boolean reset, boolean execute) throws Exception {
-        if (anylineService == null) {
-            throw new Exception("[DataRepository.createTable] AnylineService is null.");
-        }
-
-        log.info("CreateTable: {}", clazz);
-        Table<?> table = Table.from(clazz);
-
-        if (anylineService.metadata().exists(table) && reset) {
-            log.info("DropTable: {}", clazz);
-            anylineService.ddl().drop(table);
-        }
-
-        table.execute(execute);
-        anylineService.ddl().create(table);
-
-        // 处理唯一约束
-        if (clazz.isAnnotationPresent(jakarta.persistence.Table.class)) {
-            jakarta.persistence.Table tableAnnotation =
-                    (jakarta.persistence.Table) clazz.getAnnotation(jakarta.persistence.Table.class);
-            jakarta.persistence.UniqueConstraint[] uniqueConstraints = tableAnnotation.uniqueConstraints();
-
-            for (jakarta.persistence.UniqueConstraint constraint : uniqueConstraints) {
-                log.info("表名: {} 约束名称: {} 约束列名 {}",
-                        table.getName(), constraint.name(), constraint.columnNames());
-
-                Constraint<?> uk = new Constraint<>(table, constraint.name())
-                        .setType(Constraint.TYPE.UNIQUE);
-
-                for (String column : constraint.columnNames()) {
-                    log.info(column);
-                    uk.addColumn(column);
-                }
-
-                anylineService.ddl().add(uk);
-            }
-        }
-
-        List<Run> ddls = (List<Run>) table.runs();
-        for (Run ddl : ddls) {
-            log.info(ddl.getFinalUpdate());
-        }
-    }
-
 
 }

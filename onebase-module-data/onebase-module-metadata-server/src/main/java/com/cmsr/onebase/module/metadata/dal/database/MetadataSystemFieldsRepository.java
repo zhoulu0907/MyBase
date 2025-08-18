@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.metadata.dal.database;
 
-import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
+import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataSystemFieldsDO;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +19,7 @@ import java.util.List;
  */
 @Repository
 @Slf4j
-public class MetadataSystemFieldsRepository extends DataRepositoryNew<MetadataSystemFieldsDO> {
+public class MetadataSystemFieldsRepository extends DataRepository<MetadataSystemFieldsDO> {
 
     /**
      * 构造方法，指定默认实体类

@@ -13,7 +13,7 @@ import java.util.Set;
 /**
  * 角色 DO
  *
- * @author ruoyi
+ * @author ma
  */
 @Data
 @Table(name = "system_role")

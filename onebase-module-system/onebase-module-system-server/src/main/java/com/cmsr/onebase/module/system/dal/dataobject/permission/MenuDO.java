@@ -12,7 +12,7 @@ import lombok.Data;
 /**
  * 菜单 DO
  *
- * @author ruoyi
+ * @author ma
  */
 @Data
 @TenantIgnore

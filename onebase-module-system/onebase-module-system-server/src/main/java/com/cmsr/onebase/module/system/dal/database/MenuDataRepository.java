@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.system.dal.database;
 
-import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
+import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.module.system.controller.admin.permission.vo.menu.SystemMenuListReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.MenuDO;
 import org.anyline.data.param.init.DefaultConfigStore;
@@ -17,7 +17,7 @@ import java.util.List;
  * @date 2025-08-11
  */
 @Repository
-public class MenuDataRepository extends DataRepositoryNew<MenuDO> {
+public class MenuDataRepository extends DataRepository<MenuDO> {
 
     public MenuDataRepository() {
         super(MenuDO.class);

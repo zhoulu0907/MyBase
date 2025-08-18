@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.app.dal.database.auth;
 
-import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
+import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.module.app.dal.dataobject.auth.AuthDataFilterDO;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
@@ -16,7 +16,7 @@ import java.util.List;
  * @date 2025-07-25
  */
 @Repository
-public class AppAuthDataFilterRepository extends DataRepositoryNew<AuthDataFilterDO> {
+public class AppAuthDataFilterRepository extends DataRepository<AuthDataFilterDO> {
 
     public AppAuthDataFilterRepository() {
         super(AuthDataFilterDO.class);

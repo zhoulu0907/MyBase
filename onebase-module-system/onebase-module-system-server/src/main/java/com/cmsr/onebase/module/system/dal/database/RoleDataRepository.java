@@ -1,7 +1,8 @@
 package com.cmsr.onebase.module.system.dal.database;
 
-import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
+import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.data.base.BaseDO;
 import com.cmsr.onebase.module.system.controller.admin.permission.vo.role.RolePageReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
 import org.anyline.data.param.ConfigStore;
@@ -10,23 +11,29 @@ import org.anyline.entity.Compare;
 import org.anyline.entity.Order;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
  * 角色数据访问层
  *
+ * 负责角色相关的数据操作，继承DataRepositoryNew，提供标准CRUD能力。
+ *
  * @author matianyu
- * @date 2025-01-27
+ * @date 2025-08-18
  */
 @Repository
-public class RoleDataRepository extends DataRepositoryNew<RoleDO> {
+public class RoleDataRepository extends DataRepository<RoleDO> {
 
+    /**
+     * 构造方法，指定默认实体类
+     */
     public RoleDataRepository() {
         super(RoleDO.class);
     }
 
     /**
-     * 根据角色名称查找角色
+     * 根据角色名称查询角色
      *
      * @param name 角色名称
      * @return 角色对象
@@ -36,7 +43,7 @@ public class RoleDataRepository extends DataRepositoryNew<RoleDO> {
     }
 
     /**
-     * 根据角色编码查找角色
+     * 根据角色编码查询角色
      *
      * @param code 角色编码
      * @return 角色对象
@@ -48,7 +55,7 @@ public class RoleDataRepository extends DataRepositoryNew<RoleDO> {
     /**
      * 根据状态查询角色列表
      *
-     * @param status 状态列表
+     * @param status 状态
      * @return 角色列表
      */
     public List<RoleDO> findListByStatus(Integer status) {
@@ -59,29 +66,64 @@ public class RoleDataRepository extends DataRepositoryNew<RoleDO> {
     }
 
     /**
+     * 查询所有角色列表
+     *
+     * @return 角色列表
+     */
+    public List<RoleDO> findAllRoles() {
+        return findAllByConfig(new DefaultConfigStore());
+    }
+
+    /**
      * 分页查询角色
      *
-     * @param reqVO 查询条件
+     * @param pageReqVO 分页查询条件
      * @return 分页结果
      */
-    public PageResult<RoleDO> findPage(RolePageReqVO reqVO) {
+    public PageResult<RoleDO> findPage(RolePageReqVO pageReqVO) {
         DefaultConfigStore configStore = new DefaultConfigStore();
 
-        if (reqVO.getName() != null) {
-            configStore.and(Compare.LIKE, RoleDO.NAME, reqVO.getName());
+        // 按名称模糊查询
+        if (pageReqVO.getName() != null && !pageReqVO.getName().trim().isEmpty()) {
+            configStore.like(RoleDO.NAME, pageReqVO.getName());
         }
-        if (reqVO.getCode() != null) {
-            configStore.and(Compare.LIKE, RoleDO.CODE, reqVO.getCode());
-        }
-        if (reqVO.getStatus() != null) {
-            configStore.and(Compare.EQUAL, RoleDO.STATUS, reqVO.getStatus());
-        }
-        if (reqVO.getCreateTime() != null) {
-            configStore.and(Compare.EQUAL, RoleDO.CREATE_TIME, reqVO.getCreateTime());
-        }
-        // 内置角色靠前，其次是sort，其次是createTime
-        configStore.order(RoleDO.TYPE, Order.TYPE.ASC).order(RoleDO.SORT, Order.TYPE.ASC).order(RoleDO.CREATE_TIME, Order.TYPE.DESC);
 
-        return findPageWithConditions(configStore, reqVO.getPageNo(), reqVO.getPageSize());
+        // 按编码模糊查询
+        if (pageReqVO.getCode() != null && !pageReqVO.getCode().trim().isEmpty()) {
+            configStore.like(RoleDO.CODE, pageReqVO.getCode());
+        }
+
+        // 按状态查询
+        if (pageReqVO.getStatus() != null) {
+            configStore.eq(RoleDO.STATUS, pageReqVO.getStatus());
+        }
+
+        // 按创建时间范围查询
+        if (pageReqVO.getCreateTime() != null && pageReqVO.getCreateTime().length == 2) {
+            if (pageReqVO.getCreateTime()[0] != null) {
+                configStore.ge(BaseDO.CREATE_TIME, pageReqVO.getCreateTime()[0]);
+            }
+            if (pageReqVO.getCreateTime()[1] != null) {
+                configStore.le(BaseDO.CREATE_TIME, pageReqVO.getCreateTime()[1]);
+            }
+        }
+
+        // 排序
+        configStore.order(RoleDO.SORT, Order.TYPE.ASC)
+                .order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
+
+        return findPageWithConditions(configStore, pageReqVO.getPageNo(), pageReqVO.getPageSize());
+    }
+
+    /**
+     * 根据角色编码列表查询角色
+     *
+     * @param codes 角色编码列表
+     * @return 角色列表
+     */
+    public List<RoleDO> findAllByCodes(Collection<String> codes) {
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        configStore.in(RoleDO.CODE, codes);
+        return findAllByConfig(configStore);
     }
 }

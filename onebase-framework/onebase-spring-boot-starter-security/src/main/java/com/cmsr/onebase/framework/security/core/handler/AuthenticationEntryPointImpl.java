@@ -19,7 +19,7 @@ import static com.cmsr.onebase.framework.common.exception.enums.GlobalErrorCodeC
  *
  * 补充：Spring Security 通过 {@link ExceptionTranslationFilter#sendStartAuthentication(HttpServletRequest, HttpServletResponse, FilterChain, AuthenticationException)} 方法，调用当前类
  *
- * @author ruoyi
+ * @author ma
  */
 @Slf4j
 @SuppressWarnings("JavadocReference") // 忽略文档引用报错

@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.system.dal.database;
 
-import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
+import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.social.SocialUserBindDO;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Compare;
@@ -15,7 +15,7 @@ import java.util.List;
  * @date 2025-08-11
  */
 @Repository
-public class SocialUserBindDataRepository extends DataRepositoryNew<SocialUserBindDO> {
+public class SocialUserBindDataRepository extends DataRepository<SocialUserBindDO> {
 
     public SocialUserBindDataRepository() {
         super(SocialUserBindDO.class);

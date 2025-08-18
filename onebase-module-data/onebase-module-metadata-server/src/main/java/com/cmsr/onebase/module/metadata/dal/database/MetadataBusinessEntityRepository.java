@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.metadata.dal.database;
 
-import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
+import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataBusinessEntityDO;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +20,7 @@ import java.util.List;
  */
 @Repository
 @Slf4j
-public class MetadataBusinessEntityRepository extends DataRepositoryNew<MetadataBusinessEntityDO> {
+public class MetadataBusinessEntityRepository extends DataRepository<MetadataBusinessEntityDO> {
 
     /**
      * 构造方法，指定默认实体类

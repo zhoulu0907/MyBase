@@ -49,9 +49,9 @@ public class AnylineAutoConfiguration {
     /**
      * 初始化DataRepository
      */
-    @Bean("dataRepository")
-    public DataRepository createDataRepository() {
-        return new DataRepository();
+    @Bean("dataDDLRepository")
+    public DataDDLRepository createDataDDLRepository() {
+        return new DataDDLRepository();
     }
 
     @Bean("convertInteger2Boolean")

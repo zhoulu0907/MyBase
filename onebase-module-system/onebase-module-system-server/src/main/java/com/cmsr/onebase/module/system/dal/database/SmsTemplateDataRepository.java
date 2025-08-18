@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.system.dal.database;
 
-import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
+import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.system.controller.admin.sms.vo.template.SmsTemplatePageReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.sms.SmsTemplateDO;
@@ -18,7 +18,7 @@ import java.util.List;
  * @date 2025-08-11
  */
 @Repository
-public class SmsTemplateDataRepository extends DataRepositoryNew<SmsTemplateDO> {
+public class SmsTemplateDataRepository extends DataRepository<SmsTemplateDO> {
 
     public SmsTemplateDataRepository() {
         super(SmsTemplateDO.class);

@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.metadata.dal.database;
 
-import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
+import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.module.metadata.dal.dataobject.datasource.MetadataDatasourceDO;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.init.DefaultConfigStore;
@@ -18,7 +18,7 @@ import java.util.List;
  */
 @Repository
 @Slf4j
-public class MetadataDatasourceRepository extends DataRepositoryNew<MetadataDatasourceDO> {
+public class MetadataDatasourceRepository extends DataRepository<MetadataDatasourceDO> {
 
     /**
      * 构造方法，指定默认实体类
