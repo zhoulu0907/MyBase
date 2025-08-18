@@ -219,7 +219,7 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
     private List<EntityFieldRespDTO> getEntityFieldRespDTOS(Long entityId) {
         EntityFieldQueryReqDTO reqDTO = new EntityFieldQueryReqDTO();
         reqDTO.setEntityId(entityId.toString()); //TODO 强转
-        reqDTO.setIsSystemField(0);
+        reqDTO.setIsSystemField(1);
         List<EntityFieldRespDTO> entityFieldRespDTOS = metadataEntityFieldApi.getEntityFieldList(reqDTO).getData();
         return entityFieldRespDTOS;
     }

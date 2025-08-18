@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 /**
  * 字典类型表
  *
- * @author ruoyi
+ * @author ma
  */
 @Data
 @ToString(callSuper = true)

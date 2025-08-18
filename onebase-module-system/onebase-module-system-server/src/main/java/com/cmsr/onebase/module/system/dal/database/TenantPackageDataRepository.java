@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.system.dal.database;
 
-import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
+import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.system.controller.admin.tenant.vo.packages.TenantPackagePageReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantPackageDO;
@@ -17,7 +17,7 @@ import java.util.List;
  * @date 2025-08-11
  */
 @Repository
-public class TenantPackageDataRepository extends DataRepositoryNew<TenantPackageDO> {
+public class TenantPackageDataRepository extends DataRepository<TenantPackageDO> {
 
     public TenantPackageDataRepository() {
         super(TenantPackageDO.class);

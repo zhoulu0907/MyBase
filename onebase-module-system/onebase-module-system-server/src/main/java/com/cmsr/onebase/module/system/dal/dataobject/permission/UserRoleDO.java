@@ -9,7 +9,7 @@ import lombok.Data;
 /**
  * 用户和角色关联
  *
- * @author ruoyi
+ * @author ma
  */
 @Data
 @Table(name = "system_user_role")

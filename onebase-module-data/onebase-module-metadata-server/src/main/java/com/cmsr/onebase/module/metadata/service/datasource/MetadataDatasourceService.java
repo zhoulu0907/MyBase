@@ -97,6 +97,14 @@ public interface MetadataDatasourceService {
     List<MetadataDatasourceDO> getDatasourceListByAppId(Long appId);
 
     /**
+     * 根据条件查询数据源列表
+     *
+     * @param configStore 查询条件
+     * @return 数据源列表
+     */
+    List<MetadataDatasourceDO> findAllByConfig(org.anyline.data.param.init.DefaultConfigStore configStore);
+
+    /**
      * 根据编码获得数据源
      *
      * @param code 编码

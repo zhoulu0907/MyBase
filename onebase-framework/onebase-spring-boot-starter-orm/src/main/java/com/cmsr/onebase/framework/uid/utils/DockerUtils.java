@@ -21,33 +21,39 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Docker环境工具类，用于检测应用是否运行在Docker环境中，并获取Docker的主机和端口信息
- * 
+ *
  * @author yutianbao
  */
 public class DockerUtils {
-    
+
     private static final Logger LOGGER = LoggerFactory.getLogger(DockerUtils.class);
-    
-    /** Environment param keys */
+
+    /**
+     * Environment param keys
+     */
     private static final String ENV_KEY_HOST = "JPAAS_HOST";
     private static final String ENV_KEY_PORT = "JPAAS_HTTP_PORT";
     private static final String ENV_KEY_PORT_ORIGINAL = "JPAAS_HOST_PORT_8080";
-    
+
     // 常见的Docker环境变量
     private static final String ENV_KEY_DOCKER = "DOCKER";
     private static final String ENV_KEY_KUBERNETES_SERVICE_HOST = "KUBERNETES_SERVICE_HOST";
 
-    /** Docker host & port */
+    /**
+     * Docker host & port
+     */
     private static String DOCKER_HOST = "";
     private static String DOCKER_PORT = "";
 
-    /** Whether is docker */
-    private static boolean IS_DOCKER;
+    /**
+     * Whether is docker
+     */
+    private static boolean IS_DOCKER = false;
 
     static {
         retrieveFromEnv();
     }
-    
+
     /**
      * 私有构造函数，防止实例化
      */
@@ -57,7 +63,7 @@ public class DockerUtils {
 
     /**
      * 获取Docker主机地址
-     * 
+     *
      * @return Docker主机地址，如果不在Docker环境中则返回空字符串
      */
     public static String getDockerHost() {
@@ -66,7 +72,7 @@ public class DockerUtils {
 
     /**
      * 获取Docker端口
-     * 
+     *
      * @return Docker端口，如果不在Docker环境中则返回空字符串
      */
     public static String getDockerPort() {
@@ -75,7 +81,7 @@ public class DockerUtils {
 
     /**
      * 判断当前应用是否运行在Docker环境中
-     * 
+     *
      * @return true表示在Docker环境中运行，false表示不在Docker环境中运行
      */
     public static boolean isDocker() {
@@ -108,20 +114,19 @@ public class DockerUtils {
             // 如果主机和端口都没找到，检查其他常见的Docker环境变量
             String dockerEnv = System.getenv(ENV_KEY_DOCKER);
             String k8sHost = System.getenv(ENV_KEY_KUBERNETES_SERVICE_HOST);
-            
+
             if (StringUtils.isNotBlank(dockerEnv) || StringUtils.isNotBlank(k8sHost)) {
-                IS_DOCKER = true;
-                // 如果确认是Docker环境但缺少主机或端口，记录警告日志
-                if (!hasEnvHost || !hasEnvPort) {
-                    LOGGER.warn("Running in Docker environment but missing complete host/port information. host:{}, port:{}", 
-                            DOCKER_HOST, DOCKER_PORT);
+                if (StringUtils.isNotBlank(k8sHost)) {
+                    DOCKER_HOST = k8sHost;
+                } else if (StringUtils.isNotBlank(dockerEnv)) {
+                    DOCKER_HOST = "localhost"; // 设置默认主机
                 }
+                DOCKER_PORT = "0"; // 设置默认端口
+                IS_DOCKER = true;
                 return;
             }
-
             // 如果以上环境变量都没找到，则认为不是在Docker环境中
             IS_DOCKER = false;
-            
         } catch (Exception e) {
             // 捕获可能的异常，避免影响应用启动
             LOGGER.error("Error while detecting Docker environment", e);

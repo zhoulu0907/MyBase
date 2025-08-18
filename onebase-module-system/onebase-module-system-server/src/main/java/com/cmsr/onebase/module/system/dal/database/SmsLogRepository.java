@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.system.dal.database;
 
-import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
+import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.system.controller.admin.sms.vo.log.SmsLogPageReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.sms.SmsLogDO;
@@ -17,7 +17,7 @@ import org.springframework.stereotype.Repository;
  * @date 2025-08-07
  */
 @Repository
-public class SmsLogRepository extends DataRepositoryNew<SmsLogDO> {
+public class SmsLogRepository extends DataRepository<SmsLogDO> {
     /**
      * 构造方法，指定默认实体类
      */

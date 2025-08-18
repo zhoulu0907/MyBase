@@ -197,11 +197,11 @@ public class AppApplicationServiceImpl implements AppApplicationService {
     private void validApplicationCodeDuplicate(String code, Long id) {
         if (id == null) {
             if (applicationRepository.findOneByAppCode(code) != null) {
-                throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_KEY_DUPLICATE);
+                throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_CODE_DUPLICATE);
             }
         } else {
             if (applicationRepository.findByAppCodeAndIdNot(code, id) != null) {
-                throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_KEY_DUPLICATE);
+                throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_CODE_DUPLICATE);
             }
         }
     }

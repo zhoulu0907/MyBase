@@ -1,15 +1,14 @@
 package com.cmsr.onebase.module.infra.service.config;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.infra.controller.admin.config.vo.ConfigPageReqVO;
 import com.cmsr.onebase.module.infra.controller.admin.config.vo.ConfigSaveReqVO;
 import com.cmsr.onebase.module.infra.convert.config.ConfigConvert;
 import com.cmsr.onebase.module.infra.dal.dataobject.config.ConfigDO;
+import com.cmsr.onebase.module.infra.dal.database.ConfigDataRepository;
 import com.cmsr.onebase.module.infra.enums.config.ConfigTypeEnum;
 import com.google.common.annotations.VisibleForTesting;
 import lombok.extern.slf4j.Slf4j;
-import org.anyline.data.param.init.DefaultConfigStore;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
@@ -27,7 +26,7 @@ import static com.cmsr.onebase.module.infra.enums.ErrorCodeConstants.*;
 public class ConfigServiceImpl implements ConfigService {
 
     @Resource
-    private DataRepository dataRepository;
+    private ConfigDataRepository configDataRepository;
 
     @Override
     public Long createConfig(ConfigSaveReqVO createReqVO) {
@@ -37,7 +36,7 @@ public class ConfigServiceImpl implements ConfigService {
         // 插入参数配置
         ConfigDO config = ConfigConvert.INSTANCE.convert(createReqVO);
         config.setType(ConfigTypeEnum.CUSTOM.getType());
-        dataRepository.insert(config);
+        configDataRepository.insert(config);
         return config.getId();
     }
 
@@ -50,7 +49,7 @@ public class ConfigServiceImpl implements ConfigService {
 
         // 更新参数配置
         ConfigDO updateObj = ConfigConvert.INSTANCE.convert(updateReqVO);
-        dataRepository.update(updateObj);
+        configDataRepository.update(updateObj);
     }
 
     @Override
@@ -62,30 +61,22 @@ public class ConfigServiceImpl implements ConfigService {
             throw exception(CONFIG_CAN_NOT_DELETE_SYSTEM_TYPE);
         }
         // 删除
-        dataRepository.deleteById(ConfigDO.class, id);
+        configDataRepository.deleteById(id);
     }
 
     @Override
     public ConfigDO getConfig(Long id) {
-        return dataRepository.findById(ConfigDO.class, id);
+        return configDataRepository.findById(id);
     }
 
     @Override
     public ConfigDO getConfigByKey(String key) {
-        return dataRepository.findOne(ConfigDO.class, new DefaultConfigStore().eq(ConfigDO.CONFIG_KEY, key));
+        return configDataRepository.findByKey(key);
     }
 
     @Override
     public PageResult<ConfigDO> getConfigPage(ConfigPageReqVO pageReqVO) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.like(ConfigDO.NAME, pageReqVO.getName())
-                .like(ConfigDO.CONFIG_KEY, pageReqVO.getKey())
-                .eq(ConfigDO.TYPE, pageReqVO.getType());
-        if (pageReqVO.getCreateTime() != null && pageReqVO.getCreateTime().length == 2) {
-            configStore.ge(ConfigDO.CREATE_TIME, pageReqVO.getCreateTime()[0]);
-            configStore.le(ConfigDO.CREATE_TIME, pageReqVO.getCreateTime()[1]);
-        }
-        return dataRepository.findPageWithConditions(ConfigDO.class, configStore, pageReqVO.getPageNo(), pageReqVO.getPageSize());
+        return configDataRepository.findPage(pageReqVO);
     }
 
     @VisibleForTesting
@@ -93,7 +84,7 @@ public class ConfigServiceImpl implements ConfigService {
         if (id == null) {
             return null;
         }
-        ConfigDO config = dataRepository.findById(ConfigDO.class, id);
+        ConfigDO config = configDataRepository.findById(id);
         if (config == null) {
             throw exception(CONFIG_NOT_EXISTS);
         }
@@ -102,7 +93,7 @@ public class ConfigServiceImpl implements ConfigService {
 
     @VisibleForTesting
     public void validateConfigKeyUnique(Long id, String key) {
-        ConfigDO config = dataRepository.findOne(ConfigDO.class, new DefaultConfigStore().eq(ConfigDO.CONFIG_KEY, key));
+        ConfigDO config = configDataRepository.findByKey(key);
         if (config == null) {
             return;
         }

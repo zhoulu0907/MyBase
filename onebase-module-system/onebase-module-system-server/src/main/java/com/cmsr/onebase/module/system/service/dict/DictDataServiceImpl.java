@@ -30,7 +30,7 @@ import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
 /**
  * 字典数据 Service 实现类
  *
- * @author ruoyi
+ * @author ma
  */
 @Service
 @Slf4j

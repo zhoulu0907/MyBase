@@ -15,6 +15,16 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MetadataSystemFieldsDO extends BaseDO {
+
+    // 列名常量
+    public static final String FIELD_NAME       = "field_name";
+    public static final String FIELD_TYPE       = "field_type";
+    public static final String IS_SNOWFLAKE_ID  = "is_snowflake_id";
+    public static final String IS_REQUIRED      = "is_required";
+    public static final String DEFAULT_VALUE    = "default_value";
+    public static final String DESCRIPTION      = "description";
+    public static final String IS_ENABLED      = "is_enabled";
+
     /**
      * id
      */

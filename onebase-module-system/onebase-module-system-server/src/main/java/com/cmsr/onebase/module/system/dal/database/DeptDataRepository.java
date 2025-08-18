@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.system.dal.database;
 
-import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
+import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Compare;
@@ -18,7 +18,7 @@ import java.util.List;
  * @date 2025-08-07
  */
 @Repository
-public class DeptDataRepository extends DataRepositoryNew<DeptDO> {
+public class DeptDataRepository extends DataRepository<DeptDO> {
     /**
      * 构造方法，指定默认实体类
      */

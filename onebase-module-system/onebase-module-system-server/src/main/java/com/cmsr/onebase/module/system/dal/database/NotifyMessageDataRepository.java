@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.system.dal.database;
 
-import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
+import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.system.controller.admin.notify.vo.message.NotifyMessageMyPageReqVO;
 import com.cmsr.onebase.module.system.controller.admin.notify.vo.message.NotifyMessagePageReqVO;
@@ -21,7 +21,7 @@ import java.util.List;
  * @date 2025-08-11
  */
 @Repository
-public class NotifyMessageDataRepository extends DataRepositoryNew<NotifyMessageDO> {
+public class NotifyMessageDataRepository extends DataRepository<NotifyMessageDO> {
 
     public NotifyMessageDataRepository() {
         super(NotifyMessageDO.class);

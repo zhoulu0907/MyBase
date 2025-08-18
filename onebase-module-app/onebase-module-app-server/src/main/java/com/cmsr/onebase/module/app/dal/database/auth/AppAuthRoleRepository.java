@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.app.dal.database.auth;
 
-import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
+import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.module.app.dal.dataobject.auth.AuthRoleDO;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
@@ -16,7 +16,7 @@ import java.util.List;
  * @date 2025-08-05
  */
 @Repository
-public class AppAuthRoleRepository extends DataRepositoryNew<AuthRoleDO> {
+public class AppAuthRoleRepository extends DataRepository<AuthRoleDO> {
 
     public AppAuthRoleRepository() {
         super(AuthRoleDO.class);

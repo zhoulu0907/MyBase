@@ -101,7 +101,7 @@ public class UserDO extends TenantBaseDO {
 - Repository类每个方法都要满足JPA命名规范。
 
 ```java
-import com.cmsr.onebase.framework.aynline.DataRepository;
+import com.cmsr.onebase.framework.aynline.DataDDLRepository;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.springframework.stereotype.Repository;

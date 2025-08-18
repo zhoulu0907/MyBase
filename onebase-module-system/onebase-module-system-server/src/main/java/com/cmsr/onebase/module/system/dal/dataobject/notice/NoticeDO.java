@@ -10,7 +10,7 @@ import lombok.Data;
 /**
  * 通知公告表
  *
- * @author ruoyi
+ * @author ma
  */
 @Table(name = "system_notice")
 @Data

@@ -29,6 +29,11 @@ import lombok.NoArgsConstructor;
 @Table(name = "metadata_permit_ref_otft")
 public class MetadataPermitRefOtftDO extends BaseDO {
 
+    // 列名常量
+    public static final String FIELD_TYPE_ID      = "field_type_id";
+    public static final String VALIDATION_TYPE_ID = "validation_type_id";
+    public static final String SORT_ORDER         = "sort_order";
+
     public MetadataPermitRefOtftDO setId(Long id) {
         super.setId(id);
         return this;

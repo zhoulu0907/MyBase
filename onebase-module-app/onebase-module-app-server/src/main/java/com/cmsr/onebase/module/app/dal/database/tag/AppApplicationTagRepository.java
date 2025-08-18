@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.app.dal.database.tag;
 
-import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
+import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.module.app.dal.dataobject.app.ApplicationTagDO;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
@@ -13,7 +13,7 @@ import java.util.List;
  * @Date：2025/8/6 14:15
  */
 @Repository
-public class AppApplicationTagRepository extends DataRepositoryNew<ApplicationTagDO> {
+public class AppApplicationTagRepository extends DataRepository<ApplicationTagDO> {
 
     public AppApplicationTagRepository() {
         super(ApplicationTagDO.class);

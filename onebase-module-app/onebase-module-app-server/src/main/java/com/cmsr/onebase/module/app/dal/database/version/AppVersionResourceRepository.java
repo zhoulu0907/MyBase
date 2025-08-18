@@ -1,19 +1,17 @@
 package com.cmsr.onebase.module.app.dal.database.version;
 
-import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
+import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.module.app.dal.dataobject.version.VersionResourceDO;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.springframework.stereotype.Repository;
-
-import java.util.List;
 
 /**
  * @Author：huangjie
  * @Date：2025/8/6 14:44
  */
 @Repository
-public class AppVersionResourceRepository extends DataRepositoryNew<VersionResourceDO> {
+public class AppVersionResourceRepository extends DataRepository<VersionResourceDO> {
 
     public AppVersionResourceRepository() {
         super(VersionResourceDO.class);

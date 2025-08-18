@@ -2,8 +2,13 @@ package com.cmsr.onebase.module.metadata.service.backupmanage;
 
 import com.cmsr.onebase.module.metadata.controller.admin.backupmanage.vo.MetadataBackupRespVO;
 import com.cmsr.onebase.module.metadata.controller.admin.backupmanage.vo.MetadataRestoreReqVO;
-import com.cmsr.onebase.module.metadata.dal.database.MetadataBusinessEntityRepository;
+import com.cmsr.onebase.module.metadata.service.entity.MetadataBusinessEntityService;
+import com.cmsr.onebase.module.metadata.service.datasource.MetadataDatasourceService;
+import com.cmsr.onebase.module.metadata.service.entity.MetadataEntityFieldService;
+import com.cmsr.onebase.module.metadata.service.relationship.MetadataEntityRelationshipService;
+import com.cmsr.onebase.module.metadata.service.validation.MetadataValidationRuleService;
 import com.cmsr.onebase.module.metadata.dal.database.MetadataDatasourceRepository;
+import com.cmsr.onebase.module.metadata.dal.database.MetadataBusinessEntityRepository;
 import com.cmsr.onebase.module.metadata.dal.database.MetadataEntityFieldRepository;
 import com.cmsr.onebase.module.metadata.dal.database.MetadataEntityRelationshipRepository;
 import com.cmsr.onebase.module.metadata.dal.database.MetadataValidationRuleRepository;
@@ -31,6 +36,22 @@ import java.util.List;
 @Slf4j
 public class MetadataBackupServiceImpl implements MetadataBackupService {
 
+    @Resource
+    private MetadataDatasourceService datasourceService;
+
+    @Resource
+    private MetadataBusinessEntityService businessEntityService;
+
+    @Resource
+    private MetadataEntityFieldService entityFieldService;
+
+    @Resource
+    private MetadataEntityRelationshipService entityRelationshipService;
+
+    @Resource
+    private MetadataValidationRuleService validationRuleService;
+
+    // 备份恢复功能需要直接操作数据库，所以注入Repository
     @Resource
     private MetadataDatasourceRepository datasourceRepository;
 
@@ -64,7 +85,7 @@ public class MetadataBackupServiceImpl implements MetadataBackupService {
         DefaultConfigStore datasourceCondition = new DefaultConfigStore();
         datasourceCondition.and("app_id", appId);
         datasourceCondition.and("deleted", 0L);
-        List<MetadataDatasourceDO> datasourceList = datasourceRepository.findAllByConfig(datasourceCondition);
+        List<MetadataDatasourceDO> datasourceList = datasourceService.findAllByConfig(datasourceCondition);
         backupRespVO.setDatasourceList(datasourceList);
         log.info("备份数据源数量: {}", datasourceList.size());
 
@@ -72,7 +93,7 @@ public class MetadataBackupServiceImpl implements MetadataBackupService {
         DefaultConfigStore entityCondition = new DefaultConfigStore();
         entityCondition.and("app_id", appId);
         entityCondition.and("deleted", 0L);
-        List<MetadataBusinessEntityDO> businessEntityList = businessEntityRepository.findAllByConfig(entityCondition);
+        List<MetadataBusinessEntityDO> businessEntityList = businessEntityService.findAllByConfig(entityCondition);
         backupRespVO.setBusinessEntityList(businessEntityList);
         log.info("备份业务实体数量: {}", businessEntityList.size());
 
@@ -80,7 +101,7 @@ public class MetadataBackupServiceImpl implements MetadataBackupService {
         DefaultConfigStore fieldCondition = new DefaultConfigStore();
         fieldCondition.and("app_id", appId);
         fieldCondition.and("deleted", 0L);
-        List<MetadataEntityFieldDO> entityFieldList = entityFieldRepository.findAllByConfig(fieldCondition);
+        List<MetadataEntityFieldDO> entityFieldList = entityFieldService.findAllByConfig(fieldCondition);
         backupRespVO.setEntityFieldList(entityFieldList);
         log.info("备份实体字段数量: {}", entityFieldList.size());
 
@@ -88,7 +109,7 @@ public class MetadataBackupServiceImpl implements MetadataBackupService {
         DefaultConfigStore relationshipCondition = new DefaultConfigStore();
         relationshipCondition.and("app_id", appId);
         relationshipCondition.and("deleted", 0L);
-        List<MetadataEntityRelationshipDO> entityRelationshipList = entityRelationshipRepository.findAllByConfig(relationshipCondition);
+        List<MetadataEntityRelationshipDO> entityRelationshipList = entityRelationshipService.findAllByConfig(relationshipCondition);
         backupRespVO.setEntityRelationshipList(entityRelationshipList);
         log.info("备份实体关系数量: {}", entityRelationshipList.size());
 
@@ -96,7 +117,7 @@ public class MetadataBackupServiceImpl implements MetadataBackupService {
         DefaultConfigStore validationCondition = new DefaultConfigStore();
         validationCondition.and("app_id", appId);
         validationCondition.and("deleted", 0L);
-        List<MetadataValidationRuleDefinitionDO> validationRuleList = validationRuleRepository.findAllByConfig(validationCondition);
+        List<MetadataValidationRuleDefinitionDO> validationRuleList = validationRuleService.findAllByConfig(validationCondition);
         backupRespVO.setValidationRuleList(validationRuleList);
         log.info("备份校验规则数量: {}", validationRuleList.size());
 

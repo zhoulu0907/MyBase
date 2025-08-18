@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.app.dal.database.auth;
 
-import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
+import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.module.app.controller.admin.auth.dto.AuthPermissionDTO;
 import com.cmsr.onebase.module.app.dal.dataobject.auth.AuthPermissionDO;
 import org.anyline.data.param.ConfigStore;
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Repository;
  * @date 2025-08-05
  */
 @Repository
-public class AppAuthPermissionRepository extends DataRepositoryNew<AuthPermissionDO> {
+public class AppAuthPermissionRepository extends DataRepository<AuthPermissionDO> {
 
     public AppAuthPermissionRepository() {
         super(AuthPermissionDO.class);

@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.system.dal.database;
 
-import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
+import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleMenuDO;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Compare;
@@ -16,7 +16,7 @@ import java.util.List;
  * @date 2025-01-27
  */
 @Repository
-public class RoleMenuDataRepository extends DataRepositoryNew<RoleMenuDO> {
+public class RoleMenuDataRepository extends DataRepository<RoleMenuDO> {
 
     public RoleMenuDataRepository() {
         super(RoleMenuDO.class);

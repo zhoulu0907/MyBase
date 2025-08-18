@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.system.dal.database;
 
-import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
+import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.sms.SmsCodeDO;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Compare;
@@ -13,7 +13,7 @@ import org.springframework.stereotype.Repository;
  * @date 2025-08-11
  */
 @Repository
-public class SmsCodeDataRepository extends DataRepositoryNew<SmsCodeDO> {
+public class SmsCodeDataRepository extends DataRepository<SmsCodeDO> {
 
     public SmsCodeDataRepository() {
         super(SmsCodeDO.class);

@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.metadata.dal.database;
 
-import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
+import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.metadata.controller.admin.validation.vo.ValidationRuleGroupPageReqVO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.validation.MetadataValidationRuleGroupDO;
@@ -21,7 +21,7 @@ import org.springframework.util.StringUtils;
  */
 @Repository
 @Slf4j
-public class MetadataValidationRuleGroupRepository extends DataRepositoryNew<MetadataValidationRuleGroupDO> {
+public class MetadataValidationRuleGroupRepository extends DataRepository<MetadataValidationRuleGroupDO> {
 
     /**
      * 构造方法，指定默认实体类

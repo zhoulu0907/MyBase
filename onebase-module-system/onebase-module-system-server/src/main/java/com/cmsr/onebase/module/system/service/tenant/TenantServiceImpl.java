@@ -10,7 +10,6 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import com.cmsr.onebase.framework.common.util.date.DateUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.framework.data.base.BaseDO;
 import com.cmsr.onebase.framework.tenant.config.TenantProperties;
 import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
@@ -21,7 +20,10 @@ import com.cmsr.onebase.module.system.controller.admin.tenant.vo.tenant.TenantPa
 import com.cmsr.onebase.module.system.controller.admin.tenant.vo.tenant.TenantRespVO;
 import com.cmsr.onebase.module.system.controller.admin.tenant.vo.tenant.TenantUpdateReqVO;
 import com.cmsr.onebase.module.system.convert.tenant.TenantConvert;
+import com.cmsr.onebase.module.system.dal.database.AdminUserDataRepository;
+import com.cmsr.onebase.module.system.dal.database.RoleDataRepository;
 import com.cmsr.onebase.module.system.dal.database.TenantDataRepository;
+import com.cmsr.onebase.module.system.dal.database.UserRoleDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.license.LicenseDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.MenuDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
@@ -48,10 +50,6 @@ import com.cmsr.onebase.module.system.service.user.AdminUserService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.anyline.data.param.ConfigStore;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.Compare;
-import org.anyline.entity.Order;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -91,15 +89,24 @@ public class TenantServiceImpl implements TenantService {
     @Resource
     private PermissionService    permissionService;
     @Resource
-    private TenantDataRepository tenantDataRepository;
-    @Resource
     private LicenseService       licenseService;
     @Resource
     private AppApplicationApi    appApplicationApi;
 
+    @Resource
+    private TenantDataRepository tenantDataRepository;
+
+    @Resource
+    private AdminUserDataRepository adminUserDataRepository;
+
+    @Resource
+    private UserRoleDataRepository userRoleDataRepository;
+
+    @Resource
+    private RoleDataRepository roleDataRepository;
+
     @Override
     public List<Long> getTenantIdList() {
-//        List<TenantDO> tenants = tenantMapper.selectList();
         List<TenantDO> tenants = tenantDataRepository.findAll();
         return CollectionUtils.convertList(tenants, TenantDO::getId);
     }
@@ -137,14 +144,8 @@ public class TenantServiceImpl implements TenantService {
 
     @Override
     public Long getOtherTenantUserLimitCount(Long tenantId) {
-        ConfigStore configStore = new DefaultConfigStore();
-        configStore.and(Compare.EQUAL, TenantDO.STATUS, TenantStatusEnum.NORMAL.getStatus());
-        // 排除平台租户
-        configStore.and(Compare.NOT_EQUAL, TenantDO.TENANT_CODE, TenantCodeEnum.PLATFORM_TENANT.getCode());
-        if (tenantId != null) {
-            configStore.and(Compare.NOT_EQUAL, TenantDO.ID, tenantId);
-        }
-        List<TenantDO> tenantDOList = tenantDataRepository.findAllByConfig(configStore);
+        List<TenantDO> tenantDOList = tenantDataRepository.findAllByStatusExcludePlatform(
+                TenantStatusEnum.NORMAL.getStatus(), tenantId);
         long sum = tenantDOList.stream()
                 .filter(tenantDO -> tenantDO.getAccountCount() != null)
                 .mapToLong(TenantDO::getAccountCount)
@@ -227,9 +228,8 @@ public class TenantServiceImpl implements TenantService {
 
     private Long getExistTenantCount() {
         // 排除平台租户
-        Long existTenantCount = tenantDataRepository.countByConfig(
-                new DefaultConfigStore().eq(TenantDO.STATUS, TenantStatusEnum.NORMAL.getStatus())
-                        .and(Compare.NOT_EQUAL, TenantDO.TENANT_CODE, TenantCodeEnum.PLATFORM_TENANT.getCode()));
+        Long existTenantCount = tenantDataRepository.countByStatusExcludePlatform(
+                TenantStatusEnum.NORMAL.getStatus(), null);
         return existTenantCount;
     }
 
@@ -359,7 +359,7 @@ public class TenantServiceImpl implements TenantService {
         if (StringUtils.isBlank(name)) {
             return;
         }
-        TenantDO tenant = tenantDataRepository.findOne(new DefaultConfigStore().eq("name", name));
+        TenantDO tenant = tenantDataRepository.findByName(name);
 
         if (tenant == null) {
             return;
@@ -377,7 +377,7 @@ public class TenantServiceImpl implements TenantService {
         if (StrUtil.isEmpty(website)) {
             return;
         }
-        TenantDO tenant = tenantDataRepository.findOne(new DefaultConfigStore().eq("website", website));
+        TenantDO tenant = tenantDataRepository.findByWebsite(website);
 
         if (tenant == null) {
             return;
@@ -455,60 +455,37 @@ public class TenantServiceImpl implements TenantService {
 
     @Override
     public PageResult<TenantDO> getTenantPage(TenantPageReqVO reqVO) {
-
-        Integer status = reqVO.getStatus();
-
-        if (status != null && status == 2) {
-            status = null;
-        }
-
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        // 按照关键词模糊
-        if (StringUtils.isNotBlank(reqVO.getKeyword())) {
-            configStore.and(new DefaultConfigStore().or(Compare.LIKE, TenantDO.NAME, reqVO.getKeyword())
-                    .or(Compare.LIKE, TenantDO.TENANT_CODE, reqVO.getKeyword()));
-        }
-        // 按照状态查询
-        if (status != null) {
-            configStore.eq(TenantDO.STATUS, status);
-        }
-        // 排除平台租户
-        configStore.and(Compare.NOT_EQUAL, TenantDO.TENANT_CODE, TenantCodeEnum.PLATFORM_TENANT.getCode());
-
-        configStore.order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
-        return tenantDataRepository.findPageWithConditions(configStore, reqVO.getPageNo(), reqVO.getPageSize());
+        return tenantDataRepository.findPage(reqVO);
     }
 
     @Override
     public TenantDO getTenantByName(String name) {
-        return tenantDataRepository.findOne(new DefaultConfigStore().eq("name", name));
+        return tenantDataRepository.findByName(name);
     }
 
     @Override
     public TenantDO getTenantByWebsite(String website) {
-        return tenantDataRepository.findOne(new DefaultConfigStore().eq("website", website));
-
+        return tenantDataRepository.findByWebsite(website);
     }
 
     @Override
     public Long getTenantCountByPackageId(Long packageId) {
-        return tenantDataRepository.countByConfig(new DefaultConfigStore().eq("package_id", packageId));
+        return tenantDataRepository.countByPackageId(packageId);
     }
 
     @Override
     public Integer getTenantCountByStatus(Integer status) {
-        return (int) tenantDataRepository.countByConfig(new DefaultConfigStore().eq(TenantDO.STATUS, status));
+        return (int) tenantDataRepository.countByStatus(status);
     }
 
     @Override
     public List<TenantDO> getTenantListByPackageId(Long packageId) {
-        return tenantDataRepository.findAllByConfig(new DefaultConfigStore().eq("package_id", packageId));
+        return tenantDataRepository.findAllByPackageId(packageId);
     }
 
     @Override
     public List<TenantDO> getTenantListByStatus(Integer status) {
-        return tenantDataRepository.findAllByConfig(new DefaultConfigStore().eq("status", status)
-                .order(TenantDO.CREATE_TIME, Order.TYPE.DESC));
+        return tenantDataRepository.findAllByStatus(status);
     }
 
     @Override

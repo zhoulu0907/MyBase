@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.metadata.dal.database;
 
-import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
+import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataSystemFieldsDO;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +19,7 @@ import java.util.List;
  */
 @Repository
 @Slf4j
-public class MetadataSystemFieldsRepository extends DataRepositoryNew<MetadataSystemFieldsDO> {
+public class MetadataSystemFieldsRepository extends DataRepository<MetadataSystemFieldsDO> {
 
     /**
      * 构造方法，指定默认实体类
@@ -36,7 +36,7 @@ public class MetadataSystemFieldsRepository extends DataRepositoryNew<MetadataSy
     public List<MetadataSystemFieldsDO> getSystemFields() {
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.and("is_system_field", true);
-        configStore.and("is_enabled", CommonStatusEnum.ENABLE.getStatus());
+        configStore.and(MetadataSystemFieldsDO.IS_ENABLED, CommonStatusEnum.ENABLE.getStatus());
         return findAllByConfig(configStore);
     }
 
@@ -60,7 +60,7 @@ public class MetadataSystemFieldsRepository extends DataRepositoryNew<MetadataSy
      */
     public MetadataSystemFieldsDO getSystemFieldByName(String fieldName) {
         DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and("field_name", fieldName);
+        configStore.and(MetadataSystemFieldsDO.FIELD_NAME, fieldName);
         configStore.and("is_system_field", true);
         return findOne(configStore);
     }

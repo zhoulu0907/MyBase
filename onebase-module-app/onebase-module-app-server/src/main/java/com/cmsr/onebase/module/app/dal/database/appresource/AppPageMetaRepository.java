@@ -6,7 +6,7 @@ import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.springframework.stereotype.Repository;
 
-import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
+import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.module.app.dal.dataobject.appresource.PageMetadataDO;
 
 /**
@@ -14,7 +14,7 @@ import com.cmsr.onebase.module.app.dal.dataobject.appresource.PageMetadataDO;
  *                     @Date：2025/8/6 9:31
  */
 @Repository
-public class AppPageMetaRepository extends DataRepositoryNew<PageMetadataDO> {
+public class AppPageMetaRepository extends DataRepository<PageMetadataDO> {
 
     public AppPageMetaRepository() {
         super(PageMetadataDO.class);
