@@ -59,6 +59,7 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
         appCommonService.validateApplicationExist(applicationId);
         for (AuthRoleTypeEnum roleType : List.of(AuthRoleTypeEnum.SYSTEM_ADMIN, AuthRoleTypeEnum.SYSTEM_USER)) {
             AuthRoleDO authRoleDO = new AuthRoleDO();
+            authRoleDO.setApplicationId(applicationId);
             authRoleDO.setRoleCode(roleType.getCode());
             authRoleDO.setRoleName(roleType.getName());
             authRoleDO.setRoleType(roleType.getValue());
