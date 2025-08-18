@@ -8,7 +8,6 @@ import com.cmsr.onebase.module.system.controller.admin.user.vo.profile.UserProfi
 import com.cmsr.onebase.module.system.controller.admin.user.vo.profile.UserProfileUpdateReqVO;
 import com.cmsr.onebase.module.system.controller.admin.user.vo.user.*;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
-import com.cmsr.onebase.module.system.enums.permission.RoleTypeEnum;
 import jakarta.validation.Valid;
 
 import java.util.Collection;
@@ -232,14 +231,6 @@ public interface AdminUserService {
      * @return 是否匹配
      */
     boolean isPasswordMatch(String rawPassword, String encodedPassword);
-
-    /**
-     * 查询所有管理员用户
-     *
-     * @param roleCodeEnum 枚举
-     * @return 列表
-     */
-    List<AdminUserDO> getUserListByRoleCode(RoleTypeEnum roleCodeEnum);
 
     /**
      * 获得指定状态的租户数量

@@ -6,8 +6,6 @@ import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-
 /**
  * @Author：huangjie
  * @Date：2025/8/6 14:44

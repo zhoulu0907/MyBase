@@ -1,6 +1,5 @@
 package com.cmsr.onebase.module.system.service.dept;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.exception.ServiceException;
 import com.cmsr.onebase.module.system.controller.admin.dept.vo.dept.DeptListReqVO;
@@ -8,6 +7,8 @@ import com.cmsr.onebase.module.system.controller.admin.dept.vo.dept.DeptRespVO;
 import com.cmsr.onebase.module.system.controller.admin.dept.vo.dept.DeptSaveReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
+import com.cmsr.onebase.module.system.dal.database.AdminUserDataRepository;
+import com.cmsr.onebase.module.system.dal.database.DeptDataRepository;
 import com.cmsr.onebase.module.system.enums.user.UserStatusEnum;
 import jakarta.annotation.Resource;
 import org.anyline.data.param.init.DefaultConfigStore;
@@ -56,7 +57,10 @@ public class DeptServiceTest {
     private DeptService deptService;
 
     @Resource
-    private DataRepository dataRepository;
+    private DeptDataRepository deptDataRepository;
+
+    @Resource
+    private AdminUserDataRepository adminUserDataRepository;
 
     /**
      * 每个测试后清理数据
@@ -64,8 +68,8 @@ public class DeptServiceTest {
     @AfterEach
     public void tearDown() {
         // 清理测试数据
-        dataRepository.deleteByConfig(AdminUserDO.class, new DefaultConfigStore());
-        dataRepository.deleteByConfig(DeptDO.class, new DefaultConfigStore());
+        adminUserDataRepository.deleteByConfig(new DefaultConfigStore());
+        deptDataRepository.deleteByConfig(new DefaultConfigStore());
     }
 
     /**
@@ -157,7 +161,7 @@ public class DeptServiceTest {
 
         DeptDO disabledDept = createTestDept("禁用部门");
         disabledDept.setStatus(CommonStatusEnum.DISABLE.getStatus());
-        dataRepository.update(disabledDept);
+        deptDataRepository.update(disabledDept);
 
         // 为两个部门都分配用户
         createTestUser("user1", enabledDept.getId());
@@ -209,7 +213,7 @@ public class DeptServiceTest {
         // 创建禁用状态的用户
         AdminUserDO disabledUser = createTestUser("disabled1", dept.getId());
         disabledUser.setStatus(UserStatusEnum.DISABLE.getStatus());
-        dataRepository.update(disabledUser);
+        adminUserDataRepository.update(disabledUser);
 
         // 执行测试
         DeptListReqVO reqVO = new DeptListReqVO();
@@ -392,7 +396,7 @@ public class DeptServiceTest {
         DeptDO parentDept = createTestDept("父部门");
         DeptDO childDept = createTestDept("子部门");
         childDept.setParentId(parentDept.getId());
-        dataRepository.update(childDept);
+        deptDataRepository.update(childDept);
 
         // 尝试删除有子部门的父部门
         ServiceException exception = assertThrows(ServiceException.class, () -> {
@@ -477,7 +481,7 @@ public class DeptServiceTest {
 
         DeptDO disabledDept = createTestDept("禁用部门");
         disabledDept.setStatus(CommonStatusEnum.DISABLE.getStatus());
-        dataRepository.update(disabledDept);
+        deptDataRepository.update(disabledDept);
 
         // 测试按状态查询
         DeptListReqVO reqVO = new DeptListReqVO();
@@ -502,15 +506,15 @@ public class DeptServiceTest {
 
         DeptDO childDept1 = createTestDept("子部门1");
         childDept1.setParentId(rootDept.getId());
-        dataRepository.update(childDept1);
+        deptDataRepository.update(childDept1);
 
         DeptDO childDept2 = createTestDept("子部门2");
         childDept2.setParentId(rootDept.getId());
-        dataRepository.update(childDept2);
+        deptDataRepository.update(childDept2);
 
         DeptDO grandChildDept = createTestDept("孙部门");
         grandChildDept.setParentId(childDept1.getId());
-        dataRepository.update(grandChildDept);
+        deptDataRepository.update(grandChildDept);
 
         // 执行测试
         List<DeptDO> result = deptService.getChildDeptList(rootDept.getId());
@@ -535,11 +539,11 @@ public class DeptServiceTest {
 
         DeptDO dept1 = createTestDept("部门1");
         dept1.setLeaderUserId(leader.getId());
-        dataRepository.update(dept1);
+        deptDataRepository.update(dept1);
 
         DeptDO dept2 = createTestDept("部门2");
         dept2.setLeaderUserId(leader.getId());
-        dataRepository.update(dept2);
+        deptDataRepository.update(dept2);
 
         DeptDO dept3 = createTestDept("部门3"); // 不设置管理员
 
@@ -566,11 +570,11 @@ public class DeptServiceTest {
 
         DeptDO childDept1 = createTestDept("子部门1");
         childDept1.setParentId(parentDept.getId());
-        dataRepository.update(childDept1);
+        deptDataRepository.update(childDept1);
 
         DeptDO childDept2 = createTestDept("子部门2");
         childDept2.setParentId(parentDept.getId());
-        dataRepository.update(childDept2);
+        deptDataRepository.update(childDept2);
 
         // 执行测试
         Set<Long> result = deptService.getChildDeptIdListFromCache(parentDept.getId());
@@ -620,7 +624,7 @@ public class DeptServiceTest {
         // 准备数据 - 创建禁用状态的部门
         DeptDO disabledDept = createTestDept("禁用部门");
         disabledDept.setStatus(CommonStatusEnum.DISABLE.getStatus());
-        dataRepository.update(disabledDept);
+        deptDataRepository.update(disabledDept);
 
         // 执行测试并验证异常
         ServiceException exception = assertThrows(ServiceException.class, () -> {
@@ -655,7 +659,7 @@ public class DeptServiceTest {
         dept.setSort(1);
         dept.setStatus(CommonStatusEnum.ENABLE.getStatus());
         dept.setTenantId(0L);
-        return dataRepository.insert(dept);
+        return deptDataRepository.insert(dept);
     }
 
     /**
@@ -675,7 +679,7 @@ public class DeptServiceTest {
         user.setMobile("138888888" + (username.hashCode() % 90 + 10)); // 生成不同的手机号
         user.setDeptId(deptId);
         user.setTenantId(0L);
-        return dataRepository.insert(user);
+        return adminUserDataRepository.insert(user);
     }
 }
 

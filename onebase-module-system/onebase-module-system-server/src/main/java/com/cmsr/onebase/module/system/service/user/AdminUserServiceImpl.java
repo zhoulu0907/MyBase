@@ -4,28 +4,27 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
-import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.exception.ServiceException;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.common.util.validation.ValidationUtils;
-import com.cmsr.onebase.framework.data.base.BaseDO;
 import com.cmsr.onebase.module.infra.api.config.ConfigApi;
 import com.cmsr.onebase.module.system.controller.admin.auth.vo.AuthRegisterReqVO;
 import com.cmsr.onebase.module.system.controller.admin.user.vo.profile.UserProfileUpdatePasswordReqVO;
 import com.cmsr.onebase.module.system.controller.admin.user.vo.profile.UserProfileUpdateReqVO;
 import com.cmsr.onebase.module.system.controller.admin.user.vo.user.*;
 import com.cmsr.onebase.module.system.convert.user.UserConvert;
+import com.cmsr.onebase.module.system.dal.database.AdminUserDataRepository;
+import com.cmsr.onebase.module.system.dal.database.UserPostDataRepository;
+import com.cmsr.onebase.module.system.dal.database.UserRoleDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.UserPostDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
-import com.cmsr.onebase.module.system.dal.dataobject.permission.UserRoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.enums.permission.AdminTypeEnum;
 import com.cmsr.onebase.module.system.enums.permission.RoleCodeEnum;
-import com.cmsr.onebase.module.system.enums.permission.RoleTypeEnum;
 import com.cmsr.onebase.module.system.service.dept.DeptService;
 import com.cmsr.onebase.module.system.service.dept.PostService;
 import com.cmsr.onebase.module.system.service.permission.PermissionService;
@@ -38,10 +37,7 @@ import com.mzt.logapi.starter.annotation.LogRecord;
 import jakarta.annotation.Resource;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
-import org.anyline.data.param.ConfigStore;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.Compare;
-import org.anyline.entity.Order;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -86,7 +82,12 @@ public class AdminUserServiceImpl implements AdminUserService {
     private RoleService roleService;
 
     @Resource
-    private DataRepository dataRepository;
+    private AdminUserDataRepository adminUserDataRepository;
+
+    @Resource
+    private UserPostDataRepository userPostDataRepository;
+    @Autowired
+    private UserRoleDataRepository userRoleDataRepository;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -95,8 +96,7 @@ public class AdminUserServiceImpl implements AdminUserService {
     public Long createUser(UserInsertReqVO createReqVO) {
         // 1.1 校验账户配合
         tenantService.handleTenantInfo(tenant -> {
-//            long count = userMapper.selectCount();
-            long count = dataRepository.count(AdminUserDO.class);
+            long count = adminUserDataRepository.count();
             log.info(" count user four tenant, count={}", count);
             if (count >= tenant.getAccountCount()) {
                 throw exception(USER_COUNT_MAX, tenant.getAccountCount());
@@ -115,11 +115,11 @@ public class AdminUserServiceImpl implements AdminUserService {
         if (user.getAdminType() == null) {
             user.setAdminType(AdminTypeEnum.CUSTOM.getType());
         }
-        dataRepository.insert(user);
+        adminUserDataRepository.insert(user);
 
         // 2.2 插入关联岗位
         if (CollectionUtil.isNotEmpty(user.getPostIds())) {
-            dataRepository.insertBatch(convertList(user.getPostIds(),
+            userPostDataRepository.insertBatch(convertList(user.getPostIds(),
                     postId -> new UserPostDO().setUserId(user.getId()).setPostId(postId)));
         }
 
@@ -150,7 +150,7 @@ public class AdminUserServiceImpl implements AdminUserService {
         if (user.getAdminType() == null) {
             user.setAdminType(AdminTypeEnum.CUSTOM.getType());
         }
-        dataRepository.insert(user);
+        adminUserDataRepository.insert(user);
 
         // 赋予平台管理员角色
         RoleDO roleDO = roleService.getRoleIdsByCode(RoleCodeEnum.SUPER_ADMIN.getCode());
@@ -173,8 +173,7 @@ public class AdminUserServiceImpl implements AdminUserService {
         }
         // 1.2 校验账户配合
         tenantService.handleTenantInfo(tenant -> {
-//            long count = userMapper.selectCount();
-            long count = dataRepository.count(AdminUserDO.class);
+            long count = adminUserDataRepository.count();
             if (count >= tenant.getAccountCount()) {
                 throw exception(USER_COUNT_MAX, tenant.getAccountCount());
             }
@@ -186,8 +185,7 @@ public class AdminUserServiceImpl implements AdminUserService {
         AdminUserDO user = BeanUtils.toBean(registerReqVO, AdminUserDO.class);
         user.setStatus(CommonStatusEnum.ENABLE.getStatus()); // 默认开启
         user.setPassword(encodePassword(registerReqVO.getPassword())); //
-//        userMapper.insert(user);
-        dataRepository.insert(user);
+        adminUserDataRepository.insert(user);
         return user.getId();
     }
 
@@ -204,8 +202,7 @@ public class AdminUserServiceImpl implements AdminUserService {
 
         // 2.1 更新用户
         AdminUserDO updateObj = BeanUtils.toBean(updateReqVO, AdminUserDO.class);
-//        userMapper.updateById(updateObj);
-        dataRepository.update(updateObj);
+        adminUserDataRepository.update(updateObj);
         // 2.2 更新岗位
         updateUserPost(updateReqVO, updateObj);
         // 2.3 更新用户角色关联
@@ -220,48 +217,39 @@ public class AdminUserServiceImpl implements AdminUserService {
     public void updateAdminType(Long id, Integer adminType) {
         // 校验正确性
         validateUserExists(id);
-//        validateEmailUnique(id, email);
         // 2.1 更新用户管理员状态
-        dataRepository.update(new AdminUserDO().setId(id).setAdminType(adminType).setUpdateTime(LocalDateTime.now()));
+        adminUserDataRepository.update(new AdminUserDO().setId(id).setAdminType(adminType));
     }
-
 
     @Override
     public void updatePlatformUserEmail(Long id, String email) {
         // 校验正确性
         validateUserExists(id);
-//        validateEmailUnique(id, email);
         // 2.1 更新用户
-
-        dataRepository.update(new AdminUserDO().setId(id).setEmail(email).setUpdateTime(LocalDateTime.now()));
+        adminUserDataRepository.update(new AdminUserDO().setId(id).setEmail(email));
     }
 
     private void updateUserPost(UserUpdateReqVO reqVO, AdminUserDO updateObj) {
         Long userId = reqVO.getId();
 
-//        Set<Long> dbPostIds = convertSet(userPostMapper.selectListByUserId(userId), UserPostDO::getPostId);
-        Set<Long> dbPostIds = convertSet(dataRepository.findAllByConfig(UserPostDO.class, new DefaultConfigStore().and("user_id", userId)), UserPostDO::getPostId);
+        Set<Long> dbPostIds = convertSet(userPostDataRepository.findAllByUserId(userId), UserPostDO::getPostId);
         // 计算新增和删除的岗位编号
         Set<Long> postIds = CollUtil.emptyIfNull(updateObj.getPostIds());
         Collection<Long> createPostIds = CollUtil.subtract(postIds, dbPostIds);
         Collection<Long> deletePostIds = CollUtil.subtract(dbPostIds, postIds);
         // 执行新增和删除。对于已经授权的岗位，不用做任何处理
         if (!CollectionUtil.isEmpty(createPostIds)) {
-//            userPostMapper.insertBatch(convertList(createPostIds,
-//                    postId -> new UserPostDO().setUserId(userId).setPostId(postId)));
-            dataRepository.insertBatch(convertList(createPostIds,
+            userPostDataRepository.insertBatch(convertList(createPostIds,
                     postId -> new UserPostDO().setUserId(userId).setPostId(postId)));
         }
         if (!CollectionUtil.isEmpty(deletePostIds)) {
-//            userPostMapper.deleteByUserIdAndPostId(userId, deletePostIds);
-            dataRepository.deleteByConfig(UserPostDO.class, new DefaultConfigStore().eq("user_id", userId).in("post_id", deletePostIds));
+            userPostDataRepository.deleteByUserIdAndPostIds(userId, deletePostIds);
         }
     }
 
     @Override
     public void updateUserLogin(Long id, String loginIp) {
-//        userMapper.updateById(new AdminUserDO().setId(id).setLoginIp(loginIp).setLoginDate(LocalDateTime.now()));
-        dataRepository.update(new AdminUserDO().setId(id).setLoginIp(loginIp).setLoginDate(LocalDateTime.now()));
+        adminUserDataRepository.update(new AdminUserDO().setId(id).setLoginIp(loginIp).setLoginDate(LocalDateTime.now()));
     }
 
     @Override
@@ -271,8 +259,7 @@ public class AdminUserServiceImpl implements AdminUserService {
         validateEmailUnique(id, reqVO.getEmail());
         validateMobileUnique(id, reqVO.getMobile());
         // 执行更新
-//        userMapper.updateById(BeanUtils.toBean(reqVO, AdminUserDO.class).setId(id));
-        dataRepository.update(BeanUtils.toBean(reqVO, AdminUserDO.class).setId(id));
+        adminUserDataRepository.update(BeanUtils.toBean(reqVO, AdminUserDO.class).setId(id));
     }
 
     @Override
@@ -282,8 +269,7 @@ public class AdminUserServiceImpl implements AdminUserService {
         // 执行更新
         AdminUserDO updateObj = new AdminUserDO().setId(id);
         updateObj.setPassword(encodePassword(reqVO.getNewPassword())); // 加密密码
-        dataRepository.update(updateObj);
-//        userMapper.updateById(updateObj);
+        adminUserDataRepository.update(updateObj);
     }
 
     @Override
@@ -297,8 +283,7 @@ public class AdminUserServiceImpl implements AdminUserService {
         AdminUserDO updateObj = new AdminUserDO();
         updateObj.setId(id);
         updateObj.setPassword(encodePassword(password)); // 加密密码
-        dataRepository.update(updateObj);
-//        userMapper.updateById(updateObj);
+        adminUserDataRepository.update(updateObj);
 
         // 3. 记录操作日志上下文
         LogRecordContext.putVariable("user", user);
@@ -313,8 +298,7 @@ public class AdminUserServiceImpl implements AdminUserService {
         AdminUserDO updateObj = new AdminUserDO();
         updateObj.setId(id);
         updateObj.setStatus(status);
-//        userMapper.updateById(updateObj);
-        dataRepository.update(updateObj);
+        adminUserDataRepository.update(updateObj);
     }
 
     @Override
@@ -326,13 +310,11 @@ public class AdminUserServiceImpl implements AdminUserService {
         AdminUserDO user = validateUserExists(id);
 
         // 2.1 删除用户
-        // userMapper.deleteById(id);
-        dataRepository.deleteById(AdminUserDO.class, id);
+        adminUserDataRepository.deleteById(id);
         // 2.2 删除用户关联数据
         permissionService.processUserDeleted(id);
         // 2.2 删除用户岗位
-        // userPostMapper.deleteByUserId(id);
-        dataRepository.deleteByConfig(UserPostDO.class, new DefaultConfigStore().eq("user_id", id));
+        userPostDataRepository.deleteByUserId(id);
 
         // 3. 记录操作日志上下文
         LogRecordContext.putVariable("user", user);
@@ -340,127 +322,56 @@ public class AdminUserServiceImpl implements AdminUserService {
 
     @Override
     public AdminUserDO getUserByUsername(String username) {
-        return dataRepository.findOne(AdminUserDO.class, new DefaultConfigStore().eq("username", username));
-        // return userMapper.selectByUsername(username);
+        return adminUserDataRepository.findByUsername(username);
     }
 
     @Override
     public AdminUserDO getUserByMobile(String mobile) {
-        return dataRepository.findOne(AdminUserDO.class, new DefaultConfigStore().eq("mobile", mobile));
-        // return userMapper.selectByMobile(mobile);
+        return adminUserDataRepository.findByMobile(mobile);
     }
 
     @Override
     public PageResult<AdminUserDO> getUserPage(UserPageReqVO reqVO) {
-        // 构建查询条件
-        DefaultConfigStore configStore = new DefaultConfigStore();
-
-        // // 根据关键词模糊查询
-        if (StrUtil.isNotBlank(reqVO.getKeyword())) {
-            configStore.and(new DefaultConfigStore().or(Compare.LIKE, AdminUserDO.USERNAME, reqVO.getKeyword())
-                    .or(Compare.LIKE, AdminUserDO.EMAIL, reqVO.getKeyword()));
-        }
-
-        // 用户名模糊查询
-        if (StrUtil.isNotBlank(reqVO.getNickname())) {
-            configStore.like(AdminUserDO.NICKNAME, reqVO.getNickname());
-        }
-
-        // 手机号模糊查询
-        if (StrUtil.isNotBlank(reqVO.getMobile())) {
-            configStore.like(AdminUserDO.MOBILE, reqVO.getMobile());
-        }
-
-        // 邮箱模糊查询
-        if (StrUtil.isNotBlank(reqVO.getEmail())) {
-            configStore.like(AdminUserDO.EMAIL, reqVO.getEmail());
-        }
-        // 状态精确查询
-        if (reqVO.getStatus() != null) {
-            configStore.and(AdminUserDO.STATUS, reqVO.getStatus());
-        }
-
-        // 创建时间范围查询
-        if (reqVO.getCreateTime() != null && reqVO.getCreateTime().length == 2) {
-            if (reqVO.getCreateTime()[0] != null) {
-                configStore.ge(BaseDO.CREATE_TIME, reqVO.getCreateTime()[0]);
-            }
-            if (reqVO.getCreateTime()[1] != null) {
-                configStore.le(BaseDO.CREATE_TIME, reqVO.getCreateTime()[1]);
-            }
-        }
-
-        // 部门ID条件 - 包括子部门
-        if (reqVO.getDeptId() != null) {
-            Set<Long> deptIds = getDeptCondition(reqVO.getDeptId());
-            if (CollUtil.isNotEmpty(deptIds)) {
-                configStore.in(AdminUserDO.DEPT_ID, deptIds);
-            }
-        }
+        // 获得部门条件：查询指定部门的子部门编号们，包括自身
+        Collection<Long> deptIds = getDeptCondition(reqVO.getDeptId());
 
         // 如果有角色编号，查询角色对应的用户编号
-        Set<Long> userIds = null;
+        Collection<Long> includeRoleUserIds = null, excludeRoleUserIds = null;
         // 过滤拥有roleId该角色的用户
         if (reqVO.getRoleId() != null) {
-            userIds = permissionService.getUserRoleIdListByRoleId(singleton(reqVO.getRoleId()));
-            if (CollUtil.isEmpty(userIds)) {
+            includeRoleUserIds = permissionService.getUserRoleIdListByRoleId(singleton(reqVO.getRoleId()));
+            if (CollUtil.isEmpty(includeRoleUserIds)) {
                 // 如果角色下没有用户，直接返回空结果
                 return new PageResult<>(Collections.emptyList(), 0L);
             }
-            configStore.in(BaseDO.ID, userIds);
         }
         // 排除拥有excludRoleId角色的用户
         if (reqVO.getExcludRoleId() != null) {
-            userIds = permissionService.getUserRoleIdListByRoleId(singleton(reqVO.getExcludRoleId()));
-            if (!CollUtil.isEmpty(userIds)) {
-                configStore.notIn(BaseDO.ID, userIds);
-            }
+            excludeRoleUserIds = permissionService.getUserRoleIdListByRoleId(singleton(reqVO.getExcludRoleId()));
         }
 
-        // 添加排序
-        configStore.order(AdminUserDO.ADMIN_TYPE, Order.TYPE.ASC).order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
-
         // 分页查询
-        return dataRepository.findPageWithConditions(AdminUserDO.class, configStore,
-                reqVO.getPageNo(), reqVO.getPageSize());
+        return adminUserDataRepository.findPage(reqVO, deptIds, includeRoleUserIds, excludeRoleUserIds);
     }
-
 
     @Override
     public PageResult<AdminUserDO> getSimpleEnableUserPage(UserSimplePageReqVO reqVO) {
-        // 构建查询条件
-        ConfigStore configStore = new DefaultConfigStore().eq(AdminUserDO.STATUS, CommonStatusEnum.ENABLE.getStatus());
-
-        // // 根据关键词模糊查询
-        if (StrUtil.isNotBlank(reqVO.getKeywords())) {
-            configStore.and(Compare.LIKE, AdminUserDO.NICKNAME, reqVO.getKeywords());
-        }
-
-        // 添加排序
-        configStore.order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
-
-        // 分页查询
-        return dataRepository.findPageWithConditions(AdminUserDO.class, configStore, reqVO.getPageNo(), reqVO.getPageSize());
+        return adminUserDataRepository.findSimpleEnablePage(reqVO);
     }
-
 
     @Override
     public AdminUserDO getUser(Long id) {
-        return dataRepository.findById(AdminUserDO.class, id);
+        return adminUserDataRepository.findById(id);
     }
 
     @Override
     public List<AdminUserDO> getUserListByDeptIds(Collection<Long> deptIds) {
-        if (CollUtil.isEmpty(deptIds)) {
-            return Collections.emptyList();
-        }
-        return dataRepository.findAllByConfig(AdminUserDO.class, new DefaultConfigStore().in(AdminUserDO.DEPT_ID, deptIds));
+        return adminUserDataRepository.findAllByDeptIds(deptIds);
     }
-
 
     @Override
     public List<AdminUserDO> getUserListNoDept() {
-        return dataRepository.findAllByConfig(AdminUserDO.class, new DefaultConfigStore().isNull(AdminUserDO.DEPT_ID));
+        return adminUserDataRepository.findAllNoDept();
     }
 
     @Override
@@ -468,13 +379,11 @@ public class AdminUserServiceImpl implements AdminUserService {
         if (CollUtil.isEmpty(postIds)) {
             return Collections.emptyList();
         }
-//        Set<Long> userIds = convertSet(userPostMapper.selectListByPostIds(postIds), UserPostDO::getUserId);
-        List<Long> userIds = convertList(dataRepository.findAllByConfig(UserPostDO.class, new DefaultConfigStore().in("post_id", postIds)), UserPostDO::getUserId);
+        List<Long> userIds = convertList(userPostDataRepository.findAllByPostIds(postIds), UserPostDO::getUserId);
         if (CollUtil.isEmpty(userIds)) {
             return Collections.emptyList();
         }
-//        return userMapper.selectBatchIds(userIds);
-        return dataRepository.findAllByIds(AdminUserDO.class, userIds);
+        return adminUserDataRepository.findAllByIds(userIds);
     }
 
     @Override
@@ -482,8 +391,7 @@ public class AdminUserServiceImpl implements AdminUserService {
         if (CollUtil.isEmpty(ids)) {
             return Collections.emptyList();
         }
-        return dataRepository.findAllByIds(AdminUserDO.class, ids);
-        // return userMapper.selectBatchIds(ids);
+        return adminUserDataRepository.findAllByIds(ids);
     }
 
     @Override
@@ -492,8 +400,7 @@ public class AdminUserServiceImpl implements AdminUserService {
             return;
         }
         // 获得岗位信息
-//        List<AdminUserDO> users = userMapper.selectBatchIds(ids);
-        List<AdminUserDO> users = dataRepository.findAllByIds(AdminUserDO.class, ids);
+        List<AdminUserDO> users = adminUserDataRepository.findAllByIds(ids);
         Map<Long, AdminUserDO> userMap = CollectionUtils.convertMap(users, AdminUserDO::getId);
         // 校验
         ids.forEach(id -> {
@@ -509,7 +416,7 @@ public class AdminUserServiceImpl implements AdminUserService {
 
     @Override
     public List<AdminUserDO> getUserListByNickname(String nickname) {
-        return dataRepository.findAllByConfig(AdminUserDO.class, new DefaultConfigStore().like(AdminUserDO.NICKNAME, nickname));
+        return adminUserDataRepository.findAllByNicknameLike(nickname);
     }
 
     /**
@@ -529,8 +436,6 @@ public class AdminUserServiceImpl implements AdminUserService {
 
     private AdminUserDO validateUserForCreateOrUpdate(Long id, String username, String mobile, String email,
                                                       Long deptId, Set<Long> postIds) {
-        // 关闭数据权限，避免因为没有数据权限，查询不到数据，进而导致唯一校验不正确
-//        return DataPermissionUtils.executeIgnore(() -> {
         // 校验用户存在
         AdminUserDO user = validateUserExists(id);
         // 校验用户名唯一
@@ -544,8 +449,6 @@ public class AdminUserServiceImpl implements AdminUserService {
         // 校验岗位处于开启状态
         postService.validatePostList(postIds);
         return user;
-//        });
-
     }
 
     @VisibleForTesting
@@ -553,8 +456,7 @@ public class AdminUserServiceImpl implements AdminUserService {
         if (id == null) {
             return null;
         }
-//        AdminUserDO user = userMapper.selectById(id);
-        AdminUserDO user = dataRepository.findById(AdminUserDO.class, id);
+        AdminUserDO user = adminUserDataRepository.findById(id);
         log.info("find user id is {}, user:{}", id, user);
         if (user == null) {
             throw exception(USER_NOT_EXISTS);
@@ -567,8 +469,7 @@ public class AdminUserServiceImpl implements AdminUserService {
         if (StrUtil.isBlank(username)) {
             return;
         }
-//        AdminUserDO user = userMapper.selectByUsername(username);
-        AdminUserDO user = dataRepository.findOne(AdminUserDO.class, new DefaultConfigStore().columns("id").and("username", username));
+        AdminUserDO user = adminUserDataRepository.findByUsername(username);
         log.info("find user id is {}, user:{}", id, user);
         if (user == null) {
             return;
@@ -587,8 +488,7 @@ public class AdminUserServiceImpl implements AdminUserService {
         if (StrUtil.isBlank(email)) {
             return;
         }
-//        AdminUserDO user = userMapper.selectByEmail(email);
-        AdminUserDO user = dataRepository.findOne(AdminUserDO.class, new DefaultConfigStore().columns("id").and("email", email));
+        AdminUserDO user = adminUserDataRepository.findByEmail(email);
 
         if (user == null) {
             return;
@@ -607,8 +507,7 @@ public class AdminUserServiceImpl implements AdminUserService {
         if (StrUtil.isBlank(mobile)) {
             return;
         }
-//        AdminUserDO user = userMapper.selectByMobile(mobile);
-        AdminUserDO user = dataRepository.findOne(AdminUserDO.class, new DefaultConfigStore().columns("id").and("mobile", mobile));
+        AdminUserDO user = adminUserDataRepository.findByMobile(mobile);
 
         if (user == null) {
             return;
@@ -630,8 +529,7 @@ public class AdminUserServiceImpl implements AdminUserService {
      */
     @VisibleForTesting
     void validateOldPassword(Long id, String oldPassword) {
-//        AdminUserDO user = userMapper.selectById(id);
-        AdminUserDO user = dataRepository.findById(AdminUserDO.class, id);
+        AdminUserDO user = adminUserDataRepository.findById(id);
         if (user == null) {
             throw exception(USER_NOT_EXISTS);
         }
@@ -674,12 +572,9 @@ public class AdminUserServiceImpl implements AdminUserService {
             }
 
             // 2.2.1 判断如果不存在，在进行插入
-            // AdminUserDO existUser = userMapper.selectByUsername(importUser.getUsername());
-            AdminUserDO existUser = dataRepository.findOne(AdminUserDO.class, new DefaultConfigStore().eq(AdminUserDO.USERNAME, importUser.getUsername()));
+            AdminUserDO existUser = adminUserDataRepository.findByUsername(importUser.getUsername());
             if (existUser == null) {
-//                userMapper.insert(BeanUtils.toBean(importUser, AdminUserDO.class)
-//                        .setPassword(encodePassword(initPassword)).setPostIds(new ArrayList<>())); // 设置默认密码及空岗位编号数组
-                dataRepository.insert(BeanUtils.toBean(importUser, AdminUserDO.class)
+                adminUserDataRepository.insert(BeanUtils.toBean(importUser, AdminUserDO.class)
                         .setPassword(encodePassword(initPassword)).setPostIds(new HashSet<>()));
                 respVO.getCreateUsernames().add(importUser.getUsername());
                 return;
@@ -691,8 +586,7 @@ public class AdminUserServiceImpl implements AdminUserService {
             }
             AdminUserDO updateUser = BeanUtils.toBean(importUser, AdminUserDO.class);
             updateUser.setId(existUser.getId());
-//            userMapper.updateById(updateUser);
-            dataRepository.update(updateUser);
+            adminUserDataRepository.update(updateUser);
             respVO.getUpdateUsernames().add(importUser.getUsername());
         });
         return respVO;
@@ -700,9 +594,7 @@ public class AdminUserServiceImpl implements AdminUserService {
 
     @Override
     public List<AdminUserDO> getUserListByStatus(Integer status) {
-//        return userMapper.selectListByStatus(status);
-        return dataRepository.findAllByConfig(AdminUserDO.class, new DefaultConfigStore().eq("status", status)
-                .order(AdminUserDO.ADMIN_TYPE, Order.TYPE.ASC).order(BaseDO.CREATE_TIME, Order.TYPE.DESC));
+        return adminUserDataRepository.findAllByStatus(status);
     }
 
     @Override
@@ -711,17 +603,8 @@ public class AdminUserServiceImpl implements AdminUserService {
     }
 
     @Override
-    public List<AdminUserDO> getUserListByRoleCode(RoleTypeEnum roleCodeEnum) {
-
-        List<UserRoleDO> userRoleDOS = dataRepository.findAll(UserRoleDO.class, new DefaultConfigStore().and(Compare.EQUAL, "id", roleCodeEnum.getType().longValue()));
-        Set<Long> userIds = userRoleDOS.stream().map(UserRoleDO::getUserId).collect(Collectors.toSet());
-        List<AdminUserDO> allByIds = dataRepository.findAllByIds(AdminUserDO.class, userIds);
-        return allByIds;
-    }
-
-    @Override
     public Integer getUserCountByStatus(Integer status) {
-        return (int) dataRepository.countByConfig(AdminUserDO.class, new DefaultConfigStore().eq(AdminUserDO.STATUS, status));
+        return (int) adminUserDataRepository.countByStatus(status);
     }
 
     @Override
@@ -731,10 +614,7 @@ public class AdminUserServiceImpl implements AdminUserService {
         }
 
         // 批量查询指定部门的所有用户（不过滤状态）
-        List<AdminUserDO> users = dataRepository.findAllByConfig(AdminUserDO.class,
-                new DefaultConfigStore()
-                        .in("dept_id", deptIds)
-        );
+        List<AdminUserDO> users = adminUserDataRepository.findAllByDeptIds(deptIds);
 
         // 按部门ID分组统计人数
         return users.stream()
@@ -762,10 +642,7 @@ public class AdminUserServiceImpl implements AdminUserService {
         }
 
         // 2. 批量查询所有相关部门的用户
-        List<AdminUserDO> allUsers = dataRepository.findAllByConfig(AdminUserDO.class,
-                new DefaultConfigStore()
-                        .in("dept_id", allDeptIds)
-        );
+        List<AdminUserDO> allUsers = adminUserDataRepository.findAllByDeptIds(allDeptIds);
 
         // 3. 按部门ID分组统计直属人数
         Map<Long, Integer> directUserCountMap = allUsers.stream()

@@ -12,7 +12,7 @@ import lombok.Data;
 /**
  * 字典数据表
  *
- * @author ruoyi
+ * @author ma
  */
 @Table(name="system_dict_data")
 @Data

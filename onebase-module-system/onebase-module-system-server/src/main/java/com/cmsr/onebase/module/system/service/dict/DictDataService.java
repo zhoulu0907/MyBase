@@ -13,7 +13,7 @@ import java.util.List;
 /**
  * 字典数据 Service 接口
  *
- * @author ruoyi
+ * @author ma
  */
 public interface DictDataService {
 

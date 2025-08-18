@@ -2,13 +2,13 @@ package com.cmsr.onebase.module.infra.service.file;
 
 import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.util.IdUtil;
-import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.common.util.validation.ValidationUtils;
 import com.cmsr.onebase.module.infra.controller.admin.file.vo.config.FileConfigPageReqVO;
 import com.cmsr.onebase.module.infra.controller.admin.file.vo.config.FileConfigSaveReqVO;
 import com.cmsr.onebase.module.infra.convert.file.FileConfigConvert;
+import com.cmsr.onebase.module.infra.dal.database.FileConfigDataRepository;
 import com.cmsr.onebase.module.infra.dal.dataobject.file.FileConfigDO;
 import com.cmsr.onebase.module.infra.framework.file.core.client.FileClient;
 import com.cmsr.onebase.module.infra.framework.file.core.client.FileClientConfig;
@@ -20,7 +20,6 @@ import jakarta.annotation.Resource;
 import jakarta.validation.Validator;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.anyline.data.param.init.DefaultConfigStore;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -48,7 +47,7 @@ public class FileConfigServiceImpl implements FileConfigService {
     private FileClientFactory fileClientFactory;
 
     @Resource
-    private DataRepository dataRepository;
+    private FileConfigDataRepository fileConfigDataRepository;
 
     @Resource
     private Validator validator;
@@ -62,8 +61,8 @@ public class FileConfigServiceImpl implements FileConfigService {
                 @Override
                 public FileClient load(Long id) {
                     FileConfigDO config = Objects.equals(CACHE_MASTER_ID, id) ?
-                            dataRepository.findOne(FileConfigDO.class, new DefaultConfigStore().eq(FileConfigDO.COLUMN_MASTER, true))
-                            : dataRepository.findOne(FileConfigDO.class, new DefaultConfigStore().eq(FileConfigDO.ID, id));
+                            fileConfigDataRepository.findByMaster(true)
+                            : fileConfigDataRepository.findById(id);
                     if (config != null) {
                         fileClientFactory.createOrUpdateFileClient(config.getId(), config.getStorage(), config.getConfig());
                     }
@@ -76,7 +75,7 @@ public class FileConfigServiceImpl implements FileConfigService {
         FileConfigDO fileConfig = FileConfigConvert.INSTANCE.convert(createReqVO)
                 .setConfig(parseClientConfig(createReqVO.getStorage(), createReqVO.getConfig()))
                 .setMaster(false); // 默认非 master
-        dataRepository.insert(fileConfig);
+        fileConfigDataRepository.insert(fileConfig);
         return fileConfig.getId();
     }
 
@@ -87,7 +86,7 @@ public class FileConfigServiceImpl implements FileConfigService {
         // 更新
         FileConfigDO updateObj = FileConfigConvert.INSTANCE.convert(updateReqVO)
                 .setConfig(parseClientConfig(config.getStorage(), updateReqVO.getConfig()));
-        dataRepository.update(updateObj);
+        fileConfigDataRepository.update(updateObj);
 
         // 清空缓存
         clearCache(config.getId(), null);
@@ -99,9 +98,9 @@ public class FileConfigServiceImpl implements FileConfigService {
         // 校验存在
         validateFileConfigExists(id);
         // 更新其它为非 master
-        dataRepository.update(new FileConfigDO().setMaster(false));
+        fileConfigDataRepository.updateAllToNotMaster();
         // 更新
-        dataRepository.update(new FileConfigDO().setId(id).setMaster(true));
+        fileConfigDataRepository.updateToMaster(id);
 
         // 清空缓存
         clearCache(null, true);
@@ -126,7 +125,7 @@ public class FileConfigServiceImpl implements FileConfigService {
             throw exception(FILE_CONFIG_DELETE_FAIL_MASTER);
         }
         // 删除
-        dataRepository.deleteById(FileConfigDO.class, id);
+        fileConfigDataRepository.deleteById(id);
 
         // 清空缓存
         clearCache(id, null);
@@ -148,7 +147,7 @@ public class FileConfigServiceImpl implements FileConfigService {
     }
 
     private FileConfigDO validateFileConfigExists(Long id) {
-        FileConfigDO config = dataRepository.findById(FileConfigDO.class, id);
+        FileConfigDO config = fileConfigDataRepository.findById(id);
         if (config == null) {
             throw exception(FILE_CONFIG_NOT_EXISTS);
         }
@@ -157,24 +156,12 @@ public class FileConfigServiceImpl implements FileConfigService {
 
     @Override
     public FileConfigDO getFileConfig(Long id) {
-        return dataRepository.findById(FileConfigDO.class, id);
+        return fileConfigDataRepository.findById(id);
     }
 
     @Override
     public PageResult<FileConfigDO> getFileConfigPage(FileConfigPageReqVO pageReqVO) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.eq(FileConfigDO.COLUMN_NAME, pageReqVO.getName())
-                .eq(FileConfigDO.COLUMN_STORAGE, pageReqVO.getStorage());
-        if (pageReqVO.getCreateTime() != null && pageReqVO.getCreateTime().length == 2) {
-            configStore.ge(FileConfigDO.CREATE_TIME, pageReqVO.getCreateTime()[0]);
-            configStore.le(FileConfigDO.CREATE_TIME, pageReqVO.getCreateTime()[1]);
-        }
-        return dataRepository.findPageWithConditions(
-                FileConfigDO.class,
-                configStore,
-                pageReqVO.getPageNo(),
-                pageReqVO.getPageSize()
-        );
+        return fileConfigDataRepository.findPage(pageReqVO);
     }
 
     @Override
