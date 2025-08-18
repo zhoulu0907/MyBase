@@ -95,7 +95,7 @@ export interface CreateApplicationReq {
   /**
    * 数据源ID
    */
-  datasourceId: number;
+  datasourceId: string;
   /**
    * 应用描述
    */
@@ -138,7 +138,7 @@ export interface UpdateApplicationReq {
   /**
    * 数据源ID
    */
-  datasourceId: number;
+  datasourceId: string;
   /**
    * 应用描述
    */
