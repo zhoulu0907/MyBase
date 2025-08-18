@@ -15,6 +15,8 @@
  */
 package com.cmsr.onebase.framework.uid.utils;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -80,7 +82,11 @@ public abstract class NetUtils {
      * @return the string local address
      */
     public static String getLocalAddress() {
-        return localAddress.getHostAddress();
+        return StringUtils.substring(localAddress.getHostAddress(), 0, 39);
+    }
+
+    public static String getLocalHostName() {
+        return StringUtils.substring(localAddress.getHostName(), 0, 16);
     }
 
 }
