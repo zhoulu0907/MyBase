@@ -17,8 +17,9 @@ export interface DatasourceSaveReqVO {
   config: DatasourceConfig;
   description?: string;
   runMode?: number;
-  appId: string;
+  appId?: string;
   lockVersion?: number;
+  datasourceOrigin?: number;
 }
 
 // 数据源测试连接请求

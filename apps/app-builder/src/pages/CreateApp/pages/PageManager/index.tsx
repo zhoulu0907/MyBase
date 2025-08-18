@@ -89,17 +89,24 @@ const PageManagerPage: FC = () => {
   const [_activeMenu, setActiveMenu] = useState<ApplicationMenu>();
   const [parentPageOptions, setParentPageOptions] = useState<ApplicationMenu[]>([RootParentPage]);
 
+  const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
+
   const initTreeItemWidth = 155;
   const cutTreeItemWidth = 25;
 
   const { clearIsEditMode } = useBasicEditorStore();
 
+  const findFirstPage: any = (nodes: ApplicationMenu[]) =>
+    nodes.reduce((found, node) => {
+      if (found) return found;
+      if (Number(node.menuType) === MenuType.PAGE) return node;
+      setExpandedKeys((prev) => [...prev, node.menuCode]);
+      return node.children ? findFirstPage(node.children) : undefined;
+    }, undefined);
+
   useEffect(() => {
     if (curAppId !== '') {
-      getMenuList().then((res) => {
-        const firstPageMenu = res.find((menu: ApplicationMenu) => menu.menuType == MenuType.PAGE);
-        setCurMenu(firstPageMenu);
-      });
+      getMenuList();
       getEntityList();
     }
     clearIsEditMode();
@@ -163,7 +170,6 @@ const PageManagerPage: FC = () => {
     }
 
     setShowGuide(res.length === 0);
-    return res;
   };
 
   const getEntityList = async () => {
@@ -289,7 +295,7 @@ const PageManagerPage: FC = () => {
       parentId: copyForm.getFieldValue('parentId') === RootParentPage.id ? '' : copyForm.getFieldValue('parentId')
     };
 
-    console.log('req: ', req);
+    // console.log('req: ', req);
 
     const res = await copyApplicationMenu(req);
     if (res) {
@@ -360,6 +366,7 @@ const PageManagerPage: FC = () => {
             <Tree
               blockNode
               draggable
+              selectedKeys={[curMenu?.menuCode!]}
               treeData={treeData}
               className={styles.tree}
               showLine={false}
@@ -367,11 +374,14 @@ const PageManagerPage: FC = () => {
                 switcherIcon: null,
                 dragIcon: null
               }}
+              expandedKeys={expandedKeys}
+              onExpand={setExpandedKeys}
               actionOnClick={'expand'}
               style={{
                 width: '200px',
                 overflow: 'hidden',
-                boxSizing: 'border-box'
+                boxSizing: 'border-box',
+                paddingRight: 12
               }}
             />
           </Sider>
