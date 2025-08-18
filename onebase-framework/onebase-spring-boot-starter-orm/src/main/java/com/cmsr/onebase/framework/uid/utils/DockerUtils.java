@@ -31,13 +31,8 @@ public class DockerUtils {
     /**
      * Environment param keys
      */
-    private static final String ENV_KEY_HOST = "JPAAS_HOST";
-    private static final String ENV_KEY_PORT = "JPAAS_HTTP_PORT";
-    private static final String ENV_KEY_PORT_ORIGINAL = "JPAAS_HOST_PORT_8080";
-
-    // 常见的Docker环境变量
-    private static final String ENV_KEY_DOCKER = "DOCKER";
-    private static final String ENV_KEY_KUBERNETES_SERVICE_HOST = "KUBERNETES_SERVICE_HOST";
+    private static final String ENV_KEY_HOST = "KUBERNETES_SERVICE_HOST";
+    private static final String ENV_KEY_PORT = "KUBERNETES_SERVICE_PORT";
 
     /**
      * Docker host & port
@@ -97,36 +92,17 @@ public class DockerUtils {
             DOCKER_HOST = System.getenv(ENV_KEY_HOST);
             DOCKER_PORT = System.getenv(ENV_KEY_PORT);
 
-            // 如果从'JPAAS_HTTP_PORT'没有找到，则尝试从'JPAAS_HOST_PORT_8080'获取
-            if (StringUtils.isBlank(DOCKER_PORT)) {
-                DOCKER_PORT = System.getenv(ENV_KEY_PORT_ORIGINAL);
-            }
-
             boolean hasEnvHost = StringUtils.isNotBlank(DOCKER_HOST);
             boolean hasEnvPort = StringUtils.isNotBlank(DOCKER_PORT);
 
             // 如果能同时找到主机和端口，则认为是在Docker环境中
             if (hasEnvHost && hasEnvPort) {
                 IS_DOCKER = true;
-                return;
+            } else if (!hasEnvHost && !hasEnvPort) {
+                IS_DOCKER = false;
+            } else {
+                LOGGER.error("Missing host or port from env for Docker. host:{}, port:{}", DOCKER_HOST, DOCKER_PORT);
             }
-
-            // 如果主机和端口都没找到，检查其他常见的Docker环境变量
-            String dockerEnv = System.getenv(ENV_KEY_DOCKER);
-            String k8sHost = System.getenv(ENV_KEY_KUBERNETES_SERVICE_HOST);
-
-            if (StringUtils.isNotBlank(dockerEnv) || StringUtils.isNotBlank(k8sHost)) {
-                if (StringUtils.isNotBlank(k8sHost)) {
-                    DOCKER_HOST = k8sHost;
-                } else if (StringUtils.isNotBlank(dockerEnv)) {
-                    DOCKER_HOST = "localhost"; // 设置默认主机
-                }
-                DOCKER_PORT = "0"; // 设置默认端口
-                IS_DOCKER = true;
-                return;
-            }
-            // 如果以上环境变量都没找到，则认为不是在Docker环境中
-            IS_DOCKER = false;
         } catch (Exception e) {
             // 捕获可能的异常，避免影响应用启动
             LOGGER.error("Error while detecting Docker environment", e);
