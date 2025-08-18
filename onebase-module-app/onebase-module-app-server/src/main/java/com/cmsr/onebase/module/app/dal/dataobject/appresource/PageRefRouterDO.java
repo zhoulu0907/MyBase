@@ -7,21 +7,20 @@ import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-@Table(name="app_resource_page_ref_router")
+// @Table(name = "app_resource_page_ref_router")
+@Table(name = "tmp0815_app_resource_page_ref_router")
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class PageRefRouterDO extends TenantBaseDO {
+    public static final String PAGE_ID = "page_id";
 
-    /**
-     * 页面编码
-     */
-    @Column(name = "page_code", columnDefinition = "VARCHAR(255) NOT NULL", comment = "页面编码")
-    private String pageCode;
+    @Column(name = "page_id", columnDefinition = "BIGINT NOT NULL", nullable = false, comment = "页面ID")
+    private Long pageId;
 
-    @Column(name = "router_name", columnDefinition= "VARCHAR(255) NOT NULL", comment = "路由名称")
+    @Column(name = "router_name", columnDefinition = "VARCHAR(255) NOT NULL", comment = "路由名称")
     private String routerName;
 
-    @Column(name = "router_type", columnDefinition= "VARCHAR(255) NOT NULL", comment = "路由类型")
+    @Column(name = "router_type", columnDefinition = "VARCHAR(255) NOT NULL", comment = "路由类型")
     private String routerType;
 
 }

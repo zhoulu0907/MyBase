@@ -8,7 +8,7 @@ import lombok.Data;
 
 @Data
 public class LoadPageSetRespVO {
-    private String pageSetCode;
+    private Long id;
 
     private String mainMetadata;
 

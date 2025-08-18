@@ -1,6 +1,5 @@
 package com.cmsr.onebase.module.app.util.db;
 
-import com.cmsr.onebase.module.app.dal.dataobject.version.VersionResourceDO;
 import org.springframework.stereotype.Component;
 
 import com.cmsr.onebase.framework.aynline.DataRepository;
@@ -13,7 +12,11 @@ import com.cmsr.onebase.module.app.dal.dataobject.appresource.PageRefRouterDO;
 import com.cmsr.onebase.module.app.dal.dataobject.appresource.PageSetDO;
 import com.cmsr.onebase.module.app.dal.dataobject.appresource.PageSetLabelDO;
 import com.cmsr.onebase.module.app.dal.dataobject.appresource.PageSetPageDO;
+import com.cmsr.onebase.module.app.dal.dataobject.auth.AuthRoleDO;
+import com.cmsr.onebase.module.app.dal.dataobject.menu.MenuDO;
+import com.cmsr.onebase.module.app.dal.dataobject.tag.TagDO;
 import com.cmsr.onebase.module.app.dal.dataobject.version.VersionDO;
+import com.cmsr.onebase.module.app.dal.dataobject.version.VersionResourceDO;
 
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -42,8 +45,14 @@ public class TableInitializer {
         log.info("开始初始化数据库表结构，reset: {}, execute: {}", reset, execute);
 
         try {
+
             dataRepository.createTable(ApplicationDO.class, reset, execute);
             dataRepository.createTable(ApplicationTagDO.class, reset, execute);
+            dataRepository.createTable(MenuDO.class, reset, execute);
+            dataRepository.createTable(TagDO.class, reset, execute);
+            dataRepository.createTable(ApplicationTagDO.class, reset, execute);
+            dataRepository.createTable(AuthRoleDO.class, reset, execute);
+
             dataRepository.createTable(VersionDO.class, reset, execute);
             dataRepository.createTable(VersionResourceDO.class, reset, execute);
 

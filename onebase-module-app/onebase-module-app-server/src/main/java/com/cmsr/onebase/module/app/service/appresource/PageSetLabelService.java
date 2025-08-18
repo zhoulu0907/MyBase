@@ -11,7 +11,7 @@ import com.cmsr.onebase.module.app.api.appresource.dto.PageSetLabelUpdateDTO;
 @Service
 public interface PageSetLabelService {
 
-    List<PageSetLabelRespDTO> getLabelsByPageSetCode(String pagesetCode);
+    List<PageSetLabelRespDTO> getLabelsByPageSetId(Long pageSetId);
 
     Long createPageSetLabel(PageSetLabelCreateDTO createDTO);
 

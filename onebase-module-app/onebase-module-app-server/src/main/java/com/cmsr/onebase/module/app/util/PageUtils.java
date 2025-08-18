@@ -4,9 +4,9 @@ import com.cmsr.onebase.module.app.dal.dataobject.appresource.PageDO;
 
 public class PageUtils {
 
-    public static PageDO initPage(String pageCode, String pageName, String routerPath, String pageType) {
+    public static PageDO initPage(Long pageSetId, String pageName, String routerPath, String pageType) {
         PageDO pageDO = new PageDO();
-        pageDO.setPageCode(pageCode);
+        pageDO.setPageSetId(pageSetId);
         pageDO.setPageName(pageName);
         pageDO.setTitle(pageName);
         pageDO.setLayout("horizontal");
