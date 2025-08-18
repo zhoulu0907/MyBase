@@ -4,7 +4,6 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
-import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
@@ -22,6 +21,7 @@ import com.cmsr.onebase.module.system.controller.admin.tenant.vo.tenant.TenantPa
 import com.cmsr.onebase.module.system.controller.admin.tenant.vo.tenant.TenantRespVO;
 import com.cmsr.onebase.module.system.controller.admin.tenant.vo.tenant.TenantUpdateReqVO;
 import com.cmsr.onebase.module.system.convert.tenant.TenantConvert;
+import com.cmsr.onebase.module.system.dal.database.TenantDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.license.LicenseDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.MenuDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
@@ -91,7 +91,7 @@ public class TenantServiceImpl implements TenantService {
     @Resource
     private PermissionService    permissionService;
     @Resource
-    private DataRepository       dataRepository;
+    private TenantDataRepository tenantDataRepository;
     @Resource
     private LicenseService       licenseService;
     @Resource
@@ -100,7 +100,7 @@ public class TenantServiceImpl implements TenantService {
     @Override
     public List<Long> getTenantIdList() {
 //        List<TenantDO> tenants = tenantMapper.selectList();
-        List<TenantDO> tenants = dataRepository.findAll(TenantDO.class);
+        List<TenantDO> tenants = tenantDataRepository.findAll();
         return CollectionUtils.convertList(tenants, TenantDO::getId);
     }
 
@@ -144,7 +144,7 @@ public class TenantServiceImpl implements TenantService {
         if (tenantId != null) {
             configStore.and(Compare.NOT_EQUAL, TenantDO.ID, tenantId);
         }
-        List<TenantDO> tenantDOList = dataRepository.findAll(TenantDO.class, configStore);
+        List<TenantDO> tenantDOList = tenantDataRepository.findAllByConfig(configStore);
         long sum = tenantDOList.stream()
                 .filter(tenantDO -> tenantDO.getAccountCount() != null)
                 .mapToLong(TenantDO::getAccountCount)
@@ -203,7 +203,7 @@ public class TenantServiceImpl implements TenantService {
 
         // 创建租户
         TenantDO tenant = BeanUtils.toBean(createReqVO, TenantDO.class);
-        tenant = dataRepository.insert(tenant);
+        tenant = tenantDataRepository.insert(tenant);
 
         // 创建租户的管理员1
         TenantDO finalTenant = tenant;
@@ -220,14 +220,14 @@ public class TenantServiceImpl implements TenantService {
             // 修改租户的管理员
             TenantDO tenantDO = new TenantDO().setContactUserId(userId);
             tenantDO.setId(finalTenant.getId());
-            dataRepository.update(tenantDO);
+            tenantDataRepository.update(tenantDO);
         });
         return tenant.getId();
     }
 
     private Long getExistTenantCount() {
         // 排除平台租户
-        Long existTenantCount = dataRepository.countByConfig(TenantDO.class,
+        Long existTenantCount = tenantDataRepository.countByConfig(
                 new DefaultConfigStore().eq(TenantDO.STATUS, TenantStatusEnum.NORMAL.getStatus())
                         .and(Compare.NOT_EQUAL, TenantDO.TENANT_CODE, TenantCodeEnum.PLATFORM_TENANT.getCode()));
         return existTenantCount;
@@ -346,7 +346,7 @@ public class TenantServiceImpl implements TenantService {
                 // 修改租户的管理员
                 updateObj.setContactUserId(userId);
             });
-            dataRepository.update(updateObj);
+            tenantDataRepository.update(updateObj);
             // 如果套餐发生变化，则修改其角色的权限
             if (ObjectUtil.notEqual(tenant.getPackageId(), updateReqVO.getPackageId())) {
                 updateTenantRoleMenu(tenant.getId(), tenantPackage.getMenuIds());
@@ -359,7 +359,7 @@ public class TenantServiceImpl implements TenantService {
         if (StringUtils.isBlank(name)) {
             return;
         }
-        TenantDO tenant = dataRepository.findOne(TenantDO.class, new DefaultConfigStore().eq("name", name));
+        TenantDO tenant = tenantDataRepository.findOne(new DefaultConfigStore().eq("name", name));
 
         if (tenant == null) {
             return;
@@ -377,7 +377,7 @@ public class TenantServiceImpl implements TenantService {
         if (StrUtil.isEmpty(website)) {
             return;
         }
-        TenantDO tenant = dataRepository.findOne(TenantDO.class, new DefaultConfigStore().eq("website", website));
+        TenantDO tenant = tenantDataRepository.findOne(new DefaultConfigStore().eq("website", website));
 
         if (tenant == null) {
             return;
@@ -420,11 +420,11 @@ public class TenantServiceImpl implements TenantService {
         // 校验存在
         validateUpdateTenant(id);
         // 删除
-        dataRepository.deleteById(TenantDO.class, id);
+        tenantDataRepository.deleteById(id);
     }
 
     private TenantDO validateUpdateTenant(Long id) {
-        TenantDO tenant = dataRepository.findById(TenantDO.class, id);
+        TenantDO tenant = tenantDataRepository.findById(id);
 
         if (tenant == null) {
             throw exception(TENANT_NOT_EXISTS);
@@ -438,7 +438,7 @@ public class TenantServiceImpl implements TenantService {
 
     @Override
     public TenantDO getTenant(Long id) {
-        return dataRepository.findById(TenantDO.class, id);
+        return tenantDataRepository.findById(id);
     }
 
 
@@ -476,38 +476,38 @@ public class TenantServiceImpl implements TenantService {
         configStore.and(Compare.NOT_EQUAL, TenantDO.TENANT_CODE, TenantCodeEnum.PLATFORM_TENANT.getCode());
 
         configStore.order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
-        return dataRepository.findPageWithConditions(TenantDO.class, configStore, reqVO.getPageNo(), reqVO.getPageSize());
+        return tenantDataRepository.findPageWithConditions(configStore, reqVO.getPageNo(), reqVO.getPageSize());
     }
 
     @Override
     public TenantDO getTenantByName(String name) {
-        return dataRepository.findOne(TenantDO.class, new DefaultConfigStore().eq("name", name));
+        return tenantDataRepository.findOne(new DefaultConfigStore().eq("name", name));
     }
 
     @Override
     public TenantDO getTenantByWebsite(String website) {
-        return dataRepository.findOne(TenantDO.class, new DefaultConfigStore().eq("website", website));
+        return tenantDataRepository.findOne(new DefaultConfigStore().eq("website", website));
 
     }
 
     @Override
     public Long getTenantCountByPackageId(Long packageId) {
-        return dataRepository.countByConfig(TenantDO.class, new DefaultConfigStore().eq("package_id", packageId));
+        return tenantDataRepository.countByConfig(new DefaultConfigStore().eq("package_id", packageId));
     }
 
     @Override
     public Integer getTenantCountByStatus(Integer status) {
-        return (int) dataRepository.countByConfig(TenantDO.class, new DefaultConfigStore().eq(TenantDO.STATUS, status));
+        return (int) tenantDataRepository.countByConfig(new DefaultConfigStore().eq(TenantDO.STATUS, status));
     }
 
     @Override
     public List<TenantDO> getTenantListByPackageId(Long packageId) {
-        return dataRepository.findAllByConfig(TenantDO.class, new DefaultConfigStore().eq("package_id", packageId));
+        return tenantDataRepository.findAllByConfig(new DefaultConfigStore().eq("package_id", packageId));
     }
 
     @Override
     public List<TenantDO> getTenantListByStatus(Integer status) {
-        return dataRepository.findAllByConfig(TenantDO.class, new DefaultConfigStore().eq("status", status)
+        return tenantDataRepository.findAllByConfig(new DefaultConfigStore().eq("status", status)
                 .order(TenantDO.CREATE_TIME, Order.TYPE.DESC));
     }
 
