@@ -3,8 +3,6 @@ import { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 
 import { getComponentSchema } from '@/components/Materials/schema';
-import { ALL_COMPONENT_TYPES } from '@/constants/componentTypes';
-import { usePageEditorStore } from '@/hooks/useStore';
 import EditRender from '@/pages/Editor/components/render/EditRender';
 import { getComponentWidth } from '../../utils/app_resource';
 import { COMPONENT_GROUP_NAME, type GridItem } from '../../utils/const';
@@ -15,11 +13,15 @@ import MobileActiveIcon from '@/assets/images/mobile_icon_active.svg';
 import PCIcon from '@/assets/images/pc_icon.svg';
 import PCActiveIcon from '@/assets/images/pc_icon_active.svg';
 
+import { usePageEditorSignal } from '@/hooks/useSignal';
+import { useSignals } from '@preact/signals-react/runtime';
 import 'react-grid-layout/css/styles.css';
 import styles from './index.module.less';
 
 export default function EditorWorkspace() {
   const [showEmpty, setShowEmpty] = useState(true);
+
+  useSignals();
 
   const {
     curComponentID,
@@ -34,8 +36,9 @@ export default function EditorWorkspace() {
     delComponents,
     showDeleteButton,
     setShowDeleteButton,
-    delColComponentsMap
-  } = usePageEditorStore();
+
+    delLayoutSubComponents
+  } = usePageEditorSignal();
 
   const [pageMode, setPageMode] = useState<string>('pc');
 
@@ -52,7 +55,7 @@ export default function EditorWorkspace() {
     // 从组件列表中移除
     delComponents(componentId);
     delPageComponentSchemas(componentId);
-    delColComponentsMap(componentId);
+    delLayoutSubComponents(componentId);
 
     // 如果删除的是当前选中的组件，清除选中状态
     if (curComponentID === componentId) {
@@ -109,9 +112,8 @@ export default function EditorWorkspace() {
           id="workspace-content"
           list={components}
           setList={(newList) => {
-            // console.debug("setList", newList);
+            console.log('newList', newList);
             setComponents(newList);
-            // console.log("pageComponentSchemas", pageComponentSchemas);
           }}
           onAdd={(e) => {
             // console.log('onAdd', e);
@@ -127,10 +129,10 @@ export default function EditorWorkspace() {
             console.log(`拖入组件 ${cpID},类型 ${itemType}, 名称 ${itemDisplayName} 组件名称 ${dataLabel}`);
 
             if (cpID) {
-              const cpSchema = pageComponentSchemas.get(cpID);
+              const cpSchema = pageComponentSchemas[cpID];
               // 如果组件已经存在，则不进行创建
               if (cpSchema && cpSchema.config && cpSchema.editData) {
-                console.log(`组件 已存在，不进行创建`);
+                console.log(`组件 ${cpID} 已存在，不进行创建`);
                 setCurComponentID(cpID!);
                 setCurComponentSchema(cpSchema);
                 setShowDeleteButton(false);
@@ -139,7 +141,8 @@ export default function EditorWorkspace() {
             }
 
             const schema = getComponentSchema(itemType as any);
-            // console.log("schema", schema)
+            console.log('schema', schema);
+
             schema.config.cpName = itemDisplayName;
             schema.config.id = cpID;
 
@@ -159,14 +162,6 @@ export default function EditorWorkspace() {
               ...schema
             };
 
-            if (itemType === ALL_COMPONENT_TYPES.COLUMN_LAYOUT) {
-              // 拖入布局组件，根据配置创建初始化
-              console.log('拖入布局组件，根据配置创建初始化: ', cpID);
-            }
-
-            console.log(cpID, props);
-            console.log(pageComponentSchemas);
-
             setPageComponentSchemas(cpID!, props);
             setCurComponentID(cpID!);
 
@@ -178,10 +173,10 @@ export default function EditorWorkspace() {
           forceFallback={true}
           className={styles.workspaceContent}
           onStart={(e) => {
-            console.log('onStart', e);
+            // console.log('onStart', e);
             const cpID = e.item.getAttribute('data-cp-id') || '';
             setCurComponentID(cpID);
-            const curComponentSchema = pageComponentSchemas.get(cpID) || {};
+            const curComponentSchema = pageComponentSchemas[cpID] || {};
             setCurComponentSchema(curComponentSchema);
             setShowDeleteButton(true);
           }}
@@ -194,21 +189,25 @@ export default function EditorWorkspace() {
               data-cp-id={cp.id}
               className={styles.componentItem}
               style={{
-                width: getComponentWidth(pageComponentSchemas.get(cp.id), cp.type),
+                width: getComponentWidth(pageComponentSchemas[cp.id], cp.type),
                 borderColor: curComponentID === cp.id ? '#4FAE7B' : ''
               }}
               onClick={(e: React.MouseEvent<HTMLDivElement>) => {
                 e.stopPropagation();
                 console.log('点击组件: ', cp.id);
+
                 setCurComponentID(cp.id);
 
-                const curComponentSchema = pageComponentSchemas.get(cp.id);
+                const curComponentSchema = pageComponentSchemas[cp.id];
                 setCurComponentSchema(curComponentSchema);
+
+                console.log('pageComponentSchemas: ', pageComponentSchemas);
+                console.log('当前组件的ID: ', cp.id);
                 console.log('当前组件的配置: ', curComponentSchema);
                 setShowDeleteButton(true);
               }}
             >
-              <EditRender cpId={cp.id} cpType={cp.type} pageComponentSchema={pageComponentSchemas.get(cp.id)} />
+              <EditRender cpId={cp.id} cpType={cp.type} pageComponentSchema={pageComponentSchemas[cp.id]} />
 
               {/* 删除按钮 */}
               {/* TODO(mickey): 组件继续封装，和layout中的共用一套 */}

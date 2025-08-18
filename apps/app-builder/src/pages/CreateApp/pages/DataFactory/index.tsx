@@ -16,12 +16,13 @@ const DataFactoryPage: React.FC = () => {
   };
 
   useEffect(() => {
-    const urlParams = window.location.hash?.split('?')[1];
-    const appIdFromUrl = urlParams?.split('appId=')[1]?.split('&')[0];
+    const searchParams = new URLSearchParams(location.search);
+    // TODO(xiaoyi): use getHashQueryParam
+    const appId = searchParams.get('appId');
 
-    if (appIdFromUrl) {
-      setCurAppId(appIdFromUrl);
-      console.log('从URL参数获取到appId:', appIdFromUrl);
+    if (appId) {
+      setCurAppId(appId);
+      console.log('从URL参数获取到appId:', searchParams);
     } else {
       console.warn('URL参数中未找到appId');
     }

@@ -55,6 +55,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
   const handleLogout = () => {
     // 清除 token
     TokenManager.clearToken();
+    UserPermissionManager.clearUserPermissionInfo();
     // 跳转到登录页
     navigate('/login');
   };

@@ -1,4 +1,4 @@
-import { useFromEditorStore, useListEditorStore } from '@/store/store_editor';
+import { useFormEditorSignal, useListEditorSignal } from '@/store/singals/page_editor';
 import { Button, Drawer, Form } from '@arco-design/web-react';
 import React from 'react';
 import { getComponentWidth } from '../../utils/app_resource';
@@ -17,9 +17,8 @@ interface PartPreviewProps {
  * 用于预览页面组件的展示
  */
 const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType }) => {
-  const { pageComponentSchemas: formPageComponentSchemas, components: formComponents } = useFromEditorStore();
-
-  const { pageComponentSchemas: listPageComponentSchemas, components: listComponents } = useListEditorStore();
+  const { components: formComponents, pageComponentSchemas: formPageComponentSchemas } = useFormEditorSignal;
+  const { components: listComponents, pageComponentSchemas: listPageComponentSchemas } = useListEditorSignal;
 
   return (
     <Drawer
@@ -35,18 +34,18 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
       <div className={styles.previewPage}>
         <div className={styles.content}>
           {pageType == EDITOR_TYPES.LIST_EDITOR &&
-            listComponents.map((cp: GridItem) => (
+            listComponents.value.map((cp: GridItem) => (
               <div
                 key={cp.id}
                 className={styles.componentItem}
                 style={{
-                  width: getComponentWidth(listPageComponentSchemas.get(cp.id), cp.type)
+                  width: getComponentWidth(listPageComponentSchemas.value[cp.id], cp.type)
                 }}
               >
                 <PreviewRender
                   cpId={cp.id}
                   cpType={cp.type}
-                  pageComponentSchema={listPageComponentSchemas.get(cp.id)}
+                  pageComponentSchema={listPageComponentSchemas.value[cp.id]}
                   runtime={false}
                 />
               </div>
@@ -54,18 +53,18 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
 
           {pageType == EDITOR_TYPES.FORM_EDITOR && (
             <Form layout="inline">
-              {formComponents.map((cp: GridItem) => (
+              {formComponents.value.map((cp: GridItem) => (
                 <div
                   key={cp.id}
                   className={styles.componentItem}
                   style={{
-                    width: getComponentWidth(formPageComponentSchemas.get(cp.id), cp.type)
+                    width: getComponentWidth(formPageComponentSchemas.value[cp.id], cp.type)
                   }}
                 >
                   <PreviewRender
                     cpId={cp.id}
                     cpType={cp.type}
-                    pageComponentSchema={formPageComponentSchemas.get(cp.id)}
+                    pageComponentSchema={formPageComponentSchemas.value[cp.id]}
                     runtime={false}
                   />
                 </div>
