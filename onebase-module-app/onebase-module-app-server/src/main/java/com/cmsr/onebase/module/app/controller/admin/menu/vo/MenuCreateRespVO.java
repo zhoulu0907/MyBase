@@ -15,14 +15,14 @@ public class MenuCreateRespVO {
     @Schema(description = "菜单ID")
     private Long id;
 
-    @Schema(description = "应用Code")
-    private String applicationCode;
+    @Schema(description = "应用id")
+    private Long applicationId;
 
-    @Schema(description = "父菜单编码")
-    private String parentCode;
+    @Schema(description = "父菜单id")
+    private Long parentId;
 
     @Schema(description = "实体Code")
-    private String entityCode;
+    private Long entityId;
 
     @Schema(description = "菜单编码")
     private String menuCode;

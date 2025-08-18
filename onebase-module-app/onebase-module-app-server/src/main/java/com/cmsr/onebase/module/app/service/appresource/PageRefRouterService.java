@@ -18,6 +18,6 @@ public interface PageRefRouterService {
 
     Boolean updatePageRefRouter(PageRefRouterRespDTO pageRefRouterRespDTO);
 
-    List<PageRefRouterRespDTO> getPageRefRouterList(String pageCode);
+    List<PageRefRouterRespDTO> getPageRefRouterList(Long pageId);
 
 }

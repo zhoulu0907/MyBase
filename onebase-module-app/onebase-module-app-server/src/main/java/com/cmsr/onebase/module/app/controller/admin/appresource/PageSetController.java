@@ -30,25 +30,25 @@ public class PageSetController {
     @Resource
     private PageSetService pageSetService;
 
-    @GetMapping("/code")
-    @Operation(summary = "获取页面集编码")
-    public CommonResult<String> getPageSetCode(@RequestParam String menuCode) {
+    @GetMapping("/id")
+    @Operation(summary = "获取页面集id")
+    public CommonResult<Long> getPageSetCode(@RequestParam Long menuId) {
 
-        String pageSetCode = pageSetService.getPageSetCode(menuCode);
+        Long pageSetId = pageSetService.getPageSetId(menuId);
 
-        return CommonResult.success(pageSetCode);
+        return CommonResult.success(pageSetId);
     }
 
     @GetMapping("/app_id")
     @Operation(summary = "获取页面集应用ID")
-    public CommonResult<Long> getAppId(@RequestParam String code) {
-        Long appId = pageSetService.getAppId(code);
+    public CommonResult<Long> getAppId(@RequestParam Long pageSetId) {
+        Long appId = pageSetService.getAppId(pageSetId);
         return CommonResult.success(appId);
     }
 
     @GetMapping("/main_metadata")
-    public CommonResult<String> getMainMetadata(@RequestParam String code) {
-        String mainMetadata = pageSetService.getMainMetadata(code);
+    public CommonResult<String> getMainMetadata(@RequestParam Long pageSetId) {
+        String mainMetadata = pageSetService.getMainMetadata(pageSetId);
         return CommonResult.success(mainMetadata);
     }
 
@@ -73,7 +73,7 @@ public class PageSetController {
     @PostMapping("/delete")
     @Operation(summary = "删除页面集")
     public CommonResult<Boolean> deletePageSet(@RequestBody DeletePageSetReqVO deletePageSetReqVO) {
-        pageSetService.deletePageSet(deletePageSetReqVO.getMenuCode());
+        pageSetService.deletePageSet(deletePageSetReqVO.getMenuId());
         return CommonResult.success(true);
     }
 

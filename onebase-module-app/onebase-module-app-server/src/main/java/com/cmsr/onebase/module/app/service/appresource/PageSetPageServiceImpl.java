@@ -52,7 +52,7 @@ public class PageSetPageServiceImpl implements PageSetPageService {
     @Override
     public List<PageSetPageRespDTO> getPageSetPageList(Long pageSetId) {
         PageSetDO pageSetDO = pageSetDataRepository.findById(pageSetId);
-        List<PageSetPageDO> pageSetPageDOList = pageSetPageDataRepository.findByPageSetCode(pageSetDO.getPageSetCode());
+        List<PageSetPageDO> pageSetPageDOList = pageSetPageDataRepository.findByPageSetId(pageSetDO.getId());
         return BeanUtils.toBean(pageSetPageDOList, PageSetPageRespDTO.class);
     }
 }

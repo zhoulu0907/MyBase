@@ -25,7 +25,7 @@ public class ComponentDTO {
     private String editData;
 
     /**
-     * 父级ID
+     * 父组件编码
      */
     private String parentCode;
 

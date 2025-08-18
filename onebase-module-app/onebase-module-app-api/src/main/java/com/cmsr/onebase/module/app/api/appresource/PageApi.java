@@ -21,9 +21,9 @@ public interface PageApi {
     String PREFIX = ApiConstants.PREFIX + "/page";
 
     @GetMapping(PREFIX + "/get")
-    @Operation(summary = "通过 code 查询page")
-    @Parameter(name = "code", description = "page code", example = "xxx", required = true)
-    CommonResult<PageRespDTO> getUser(@RequestParam("code") String code);
+    @Operation(summary = "通过 id 查询page")
+    @Parameter(name = "id", description = "page id", example = "xxx", required = true)
+    CommonResult<PageRespDTO> getPage(@RequestParam("id") Long id);
 
     @PostMapping(PREFIX + "/create")
     @Operation(summary = "创建page")
@@ -31,6 +31,6 @@ public interface PageApi {
 
     @PostMapping(PREFIX + "/delete")
     @Operation(summary = "删除page")
-    @Parameter(name = "code", description = "page code", required = true)
-    CommonResult<Boolean> deletePage(@RequestParam("code") String code);
+    @Parameter(name = "id", description = "page id", required = true)
+    CommonResult<Boolean> deletePage(@RequestParam("id") Long id);
 }

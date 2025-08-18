@@ -46,9 +46,9 @@ public class AppApplicationRepository extends DataRepositoryNew<ApplicationDO> {
         return findOne(configs);
     }
 
-    public ApplicationDO findOneByKey(String key) {
+    public ApplicationDO findOneByUid(String uid) {
         ConfigStore configs = new DefaultConfigStore();
-        configs.eq("app_key", key);
+        configs.eq("app_uid", uid);
         return findOne(configs);
     }
 
@@ -59,9 +59,9 @@ public class AppApplicationRepository extends DataRepositoryNew<ApplicationDO> {
         return findOne(configs);
     }
 
-    public ApplicationDO findByKeyAndIdNot(String key, Long id) {
+    public ApplicationDO findByUidAndIdNot(String uid, Long id) {
         ConfigStore configs = new DefaultConfigStore();
-        configs.eq("app_key", key);
+        configs.eq("app_uid", uid);
         configs.ne("id", id);
         return findOne(configs);
     }

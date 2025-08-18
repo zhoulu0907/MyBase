@@ -9,7 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.*;
-import org.anyline.entity.generator.PrimaryGenerator;
 import org.anyline.service.AnylineService;
 import org.anyline.util.ConfigTable;
 
@@ -31,7 +30,7 @@ import java.util.Optional;
 public class DataRepositoryNew<T extends BaseDO> {
 
     static {
-        ConfigTable.GENERATOR.set(PrimaryGenerator.GENERATOR.SNOWFLAKE);
+        // ConfigTable.GENERATOR.set(PrimaryGenerator.GENERATOR.SNOWFLAKE);
         ConfigTable.IS_AUTO_CHECK_METADATA = true;
         ConfigTable.IS_INSERT_NULL_COLUMN = false;
         ConfigTable.IS_INSERT_NULL_FIELD = false;

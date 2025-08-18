@@ -25,20 +25,20 @@ public class PageSetApiImpl implements PageSetApi {
     private PageSetService pageSetService;
 
     @Override
-    public CommonResult<PageSetRespDTO> getPageSet(String code) {
-        PageSetRespDTO pageSetRespDTO = pageSetService.getPageSet(code);
+    public CommonResult<PageSetRespDTO> getPageSet(Long id) {
+        PageSetRespDTO pageSetRespDTO = pageSetService.getPageSet(id);
         return CommonResult.success(pageSetRespDTO);
     }
 
     @Override
-    public CommonResult<Long> getAppId(String code) {
-        Long appId = pageSetService.getAppId(code);
+    public CommonResult<Long> getAppId(Long id) {
+        Long appId = pageSetService.getAppId(id);
         return CommonResult.success(appId);
     }
 
     @Override
-    public CommonResult<String> getMainMetadata(String code) {
-        String mainMetadata = pageSetService.getMainMetadata(code);
+    public CommonResult<String> getMainMetadata(Long id) {
+        String mainMetadata = pageSetService.getMainMetadata(id);
         return CommonResult.success(mainMetadata);
     }
 
@@ -49,8 +49,8 @@ public class PageSetApiImpl implements PageSetApi {
     }
 
     @Override
-    public CommonResult<Boolean> deletePageSet(String menuCode) {
-        pageSetService.deletePageSet(menuCode);
+    public CommonResult<Boolean> deletePageSet(Long menuId) {
+        pageSetService.deletePageSet(menuId);
         return CommonResult.success(true);
     }
 }
