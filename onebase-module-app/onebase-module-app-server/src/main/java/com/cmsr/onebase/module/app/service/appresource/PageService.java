@@ -9,11 +9,11 @@ import com.cmsr.onebase.module.app.api.appresource.dto.UpdatePageNameDTO;
 @Service
 public interface PageService {
 
-    PageRespDTO getPage(String pageCode);
+    PageRespDTO getPage(Long pageId);
 
     Long createPage(CreatePageDTO createPageDTO);
 
     Boolean updatePageName(UpdatePageNameDTO updatePageNameVO);
 
-    Boolean deletePage(String code);
+    Boolean deletePage(Long pageId);
 }

@@ -1,13 +1,14 @@
 package com.cmsr.onebase.module.app.dal.dataobject.auth;
 
 import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Table;
 import lombok.Data;
 
 /**
  * @Author：huangjie
- * @Date：2025/8/5 15:10
+ *                  @Date：2025/8/5 15:10
  */
 @Data
 @Table(name = "app_auth_role")

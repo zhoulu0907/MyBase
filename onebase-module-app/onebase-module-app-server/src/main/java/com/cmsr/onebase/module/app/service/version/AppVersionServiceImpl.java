@@ -1,5 +1,12 @@
 package com.cmsr.onebase.module.app.service.version;
 
+import java.util.List;
+import java.util.UUID;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
+
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
@@ -28,18 +35,13 @@ import com.cmsr.onebase.module.app.dal.dataobject.version.VersionResourceDO;
 import com.cmsr.onebase.module.app.enums.app.AppErrorCodeConstants;
 import com.cmsr.onebase.module.app.enums.version.ResTypeEnum;
 import com.cmsr.onebase.module.app.service.AppCommonService;
+
 import jakarta.annotation.Resource;
 import lombok.Setter;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.annotation.Validated;
-
-import java.util.List;
-import java.util.UUID;
 
 /**
  * @Author：huangjie
- * @Date：2025/7/24 11:04
+ *                  @Date：2025/7/24 11:04
  */
 @Setter
 @Service
@@ -108,20 +110,19 @@ public class AppVersionServiceImpl implements AppVersionService {
         Long applicationId = applicationDO.getId();
         Long versionId = versionDO.getId();
         // 备份 Menu
-        List<String> menuCodes = backupMenu(applicationId,  versionId);
+        List<Long> menuIds = backupMenu(applicationId, versionId);
         // 备份 pageset
-        List<String> pageSetCodes = backupPageSet(applicationId, versionId, menuCodes);
+        List<Long> pageSetCodes = backupPageSet(applicationId, versionId, menuIds);
         // 备份 pageset label
         backupPageSetLabel(applicationId, versionId, pageSetCodes);
         // 备份 PageSet Page
-        List<String> pageCodes = backupPageSetPage(applicationId, versionId, pageSetCodes);
+        List<Long> pageCodes = backupPageSetPage(applicationId, versionId, pageSetCodes);
         // 备份 page
         backupPage(applicationId, versionId, pageCodes);
         // 备份 page ref router
     }
 
-
-    private List<String> backupMenu(Long applicationId,   Long versionId) {
+    private List<Long> backupMenu(Long applicationId, Long versionId) {
         List<MenuDO> menuDOS = menuRepository.findByApplicationId(applicationId);
         VersionResourceDO versionResourceDO = new VersionResourceDO();
         versionResourceDO.setApplicationId(applicationId);
@@ -129,22 +130,22 @@ public class AppVersionServiceImpl implements AppVersionService {
         versionResourceDO.setResType(ResTypeEnum.MENU.getValue());
         versionResourceDO.setResData(JsonUtils.toJsonString(menuDOS));
         versionResourceRepository.insert(versionResourceDO);
-        return menuDOS.stream().map(menuDO -> menuDO.getMenuCode()).toList();
+        return menuDOS.stream().map(menuDO -> menuDO.getId()).toList();
     }
 
-    private List<String> backupPageSet(Long applicationId, Long versionId, List<String> menuCodes) {
-        List<PageSetDO> pageSetDOS = pageSetRepository.findByMenuCodes(menuCodes);
+    private List<Long> backupPageSet(Long applicationId, Long versionId, List<Long> menuIds) {
+        List<PageSetDO> pageSetDOS = pageSetRepository.findByMenuIds(menuIds);
         VersionResourceDO versionResourceDO = new VersionResourceDO();
         versionResourceDO.setApplicationId(applicationId);
         versionResourceDO.setVersionId(versionId);
         versionResourceDO.setResType(ResTypeEnum.PAGE_SET.getValue());
         versionResourceDO.setResData(JsonUtils.toJsonString(pageSetDOS));
         versionResourceRepository.insert(versionResourceDO);
-        return pageSetDOS.stream().map(v -> v.getPageSetCode()).toList();
+        return pageSetDOS.stream().map(v -> v.getId()).toList();
     }
 
-    private void backupPageSetLabel(Long applicationId, Long versionId, List<String> pageSetCodes) {
-        List<PageSetLabelDO> pageSetLabelDOS = pageSetLabelRepository.findByPageSetCodes(pageSetCodes);
+    private void backupPageSetLabel(Long applicationId, Long versionId, List<Long> pageSetIds) {
+        List<PageSetLabelDO> pageSetLabelDOS = pageSetLabelRepository.findByPageSetIds(pageSetIds);
         VersionResourceDO versionResourceDO = new VersionResourceDO();
         versionResourceDO.setApplicationId(applicationId);
         versionResourceDO.setVersionId(versionId);
@@ -153,27 +154,26 @@ public class AppVersionServiceImpl implements AppVersionService {
         versionResourceRepository.insert(versionResourceDO);
     }
 
-
-    private List<String> backupPageSetPage(Long applicationId, Long versionId, List<String> pageSetCodes) {
-        List<PageSetPageDO> pageSetPageDOS = pageSetPageRepository.findByPageSetCodes(pageSetCodes);
+    private List<Long> backupPageSetPage(Long applicationId, Long versionId, List<Long> pageSetIds) {
+        List<PageSetPageDO> pageSetPageDOs = pageSetPageRepository.findByPageSetIds(pageSetIds);
         VersionResourceDO versionResourceDO = new VersionResourceDO();
         versionResourceDO.setApplicationId(applicationId);
         versionResourceDO.setVersionId(versionId);
         versionResourceDO.setResType(ResTypeEnum.PAGE_SET_PAGE.getValue());
-        versionResourceDO.setResData(JsonUtils.toJsonString(pageSetPageDOS));
+        versionResourceDO.setResData(JsonUtils.toJsonString(pageSetPageDOs));
         versionResourceRepository.insert(versionResourceDO);
-        return pageSetPageDOS.stream().map(v -> v.getPageRef()).toList();
+        return pageSetPageDOs.stream().map(v -> v.getId()).toList();
     }
 
-    private List<String> backupPage(Long applicationId, Long versionId, List<String> pageCodes) {
-        List<PageDO> pageDOS = pageRepository.findByPageCodes(pageCodes);
+    private List<Long> backupPage(Long applicationId, Long versionId, List<Long> pageIds) {
+        List<PageDO> pageDOs = pageRepository.findByPageIds(pageIds);
         VersionResourceDO versionResourceDO = new VersionResourceDO();
         versionResourceDO.setApplicationId(applicationId);
         versionResourceDO.setVersionId(versionId);
         versionResourceDO.setResType(ResTypeEnum.PAGE.name());
-        versionResourceDO.setResData(JsonUtils.toJsonString(pageDOS));
+        versionResourceDO.setResData(JsonUtils.toJsonString(pageDOs));
         versionResourceRepository.insert(versionResourceDO);
-        return pageDOS.stream().map(v -> v.getPageCode()).toList();
+        return pageDOs.stream().map(v -> v.getId()).toList();
     }
 
     @Transactional
@@ -186,10 +186,10 @@ public class AppVersionServiceImpl implements AppVersionService {
         applicationDO.setVersionNumber(applicationVersionDO.getVersionNumber());
         applicationRepository.update(applicationDO);
         // 恢复菜单
-        restoreMenu(applicationDO.getId(),   versionId);
+        restoreMenu(applicationDO.getId(), versionId);
     }
 
-    private void restoreMenu(Long applicationId , Long versionId) {
+    private void restoreMenu(Long applicationId, Long versionId) {
         // 删除相关数据
         menuRepository.deleteByApplicationId(applicationId);
         // 恢复菜单
@@ -202,7 +202,7 @@ public class AppVersionServiceImpl implements AppVersionService {
 
     private void prepareForBackup(List<? extends BaseDO> list) {
         list.forEach(v -> {
-            //TODO clean方法待完善
+            // TODO clean方法待完善
             v.clean();
             v.setId(null);
             v.setUpdater(null);

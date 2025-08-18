@@ -5,7 +5,6 @@ import com.cmsr.onebase.framework.uid.worker.DisposableWorkerIdAssigner;
 import com.cmsr.onebase.framework.uid.worker.dao.WorkerNodeDAO;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.core.env.Environment;
 
 import javax.sql.DataSource;
 
@@ -17,11 +16,10 @@ import javax.sql.DataSource;
 public class UidAutoConfiguration {
 
     @Bean
-    public DisposableWorkerIdAssigner disposableWorkerIdAssigner(Environment environment, DataSource dataSource) {
+    public DisposableWorkerIdAssigner disposableWorkerIdAssigner(DataSource dataSource) {
         DisposableWorkerIdAssigner workerIdAssigner = new DisposableWorkerIdAssigner();
         WorkerNodeDAO workerNodeDAO = new WorkerNodeDAO(dataSource);
         workerIdAssigner.setWorkerNodeDAO(workerNodeDAO);
-        workerIdAssigner.setEnvironment(environment);
         return workerIdAssigner;
     }
 

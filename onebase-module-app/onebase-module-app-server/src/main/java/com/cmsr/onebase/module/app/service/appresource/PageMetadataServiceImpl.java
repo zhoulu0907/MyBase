@@ -3,9 +3,7 @@ package com.cmsr.onebase.module.app.service.appresource;
 import org.springframework.stereotype.Service;
 
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.module.app.api.appresource.dto.CreatePageMetadataDTO;
 import com.cmsr.onebase.module.app.api.appresource.dto.PageMetadataRespDTO;
-import com.cmsr.onebase.module.app.api.appresource.dto.UpdatePageMetadataDTO;
 import com.cmsr.onebase.module.app.dal.database.appresource.AppPageMetaRepository;
 import com.cmsr.onebase.module.app.dal.dataobject.appresource.PageMetadataDO;
 
@@ -24,22 +22,9 @@ public class PageMetadataServiceImpl implements PageMetadataService {
     }
 
     @Override
-    public Long createPageMetadata(CreatePageMetadataDTO createPageMetadataDTO) {
-        PageMetadataDO pageMetadataDO = BeanUtils.toBean(createPageMetadataDTO, PageMetadataDO.class);
-        pageMetadataDO = appPageMetaDataRepository.insert(pageMetadataDO);
-        return pageMetadataDO.getId();
-    }
-
-    @Override
     public Boolean deletePageMetadata(Long id) {
         appPageMetaDataRepository.deleteById(id);
         return true;
     }
 
-    @Override
-    public Boolean updatePageMetadata(UpdatePageMetadataDTO updatePageMetadataDTO) {
-        PageMetadataDO pageMetadataDO = BeanUtils.toBean(updatePageMetadataDTO, PageMetadataDO.class);
-        appPageMetaDataRepository.update(pageMetadataDO);
-        return true;
-    }
 }

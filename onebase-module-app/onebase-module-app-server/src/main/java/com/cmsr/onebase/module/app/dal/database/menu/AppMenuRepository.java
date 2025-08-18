@@ -46,10 +46,4 @@ public class AppMenuRepository extends DataRepositoryNew<MenuDO> {
         return (int) countByConfig(configs);
     }
 
-    //TODO 待删除
-    public MenuDO findByMenuCode(String menuCode) {
-        ConfigStore configs = new DefaultConfigStore();
-        configs.eq("menu_code", menuCode);
-        return findOne(configs);
-    }
 }

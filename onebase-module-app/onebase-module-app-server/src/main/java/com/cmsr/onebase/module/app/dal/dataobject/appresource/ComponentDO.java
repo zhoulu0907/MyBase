@@ -12,6 +12,8 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 public class ComponentDO extends TenantBaseDO {
 
+    public static final String PAGE_ID = "page_id";
+
     /**
      * 组件编码
      */
@@ -21,8 +23,8 @@ public class ComponentDO extends TenantBaseDO {
     /**
      * 页面编码
      */
-    @Column(name = "page_code", columnDefinition = "VARCHAR(255) NOT NULL", comment = "页面编码")
-    private String pageCode;
+    @Column(name = "page_id", columnDefinition = "BIGINT NOT NULL", nullable = false, comment = "页面ID")
+    private Long pageId;
 
     /**
      * 是否在子表中
@@ -48,10 +50,7 @@ public class ComponentDO extends TenantBaseDO {
     @Column(name = "edit_data", columnDefinition = "TEXT NOT NULL", comment = "编辑数据")
     private String editData;
 
-    /**
-     * 父ID
-     */
-    @Column(name = "parent_code", columnDefinition = "VARCHAR(255)", comment = "父ID")
+    @Column(name = "parent_code", columnDefinition = "VARCHAR(255) NOT NULL", comment = "父组件编码")
     private String parentCode;
 
     /**

@@ -28,8 +28,8 @@ public class PageSetLabelApiImpl implements PageSetLabelApi {
     private PageSetLabelService pageSetLabelService;
 
     @Override
-    public CommonResult<List<PageSetLabelRespDTO>> getLabelsByPageSetCode(String pagesetCode) {
-        List<PageSetLabelRespDTO> pageSetLabelRespDTOs = pageSetLabelService.getLabelsByPageSetCode(pagesetCode);
+    public CommonResult<List<PageSetLabelRespDTO>> getLabelsByPageSetId(Long id) {
+        List<PageSetLabelRespDTO> pageSetLabelRespDTOs = pageSetLabelService.getLabelsByPageSetId(id);
         return CommonResult.success(pageSetLabelRespDTOs);
     }
 

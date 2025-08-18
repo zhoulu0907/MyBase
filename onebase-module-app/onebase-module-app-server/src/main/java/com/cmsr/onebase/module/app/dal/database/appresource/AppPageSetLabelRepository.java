@@ -2,12 +2,11 @@ package com.cmsr.onebase.module.app.dal.database.appresource;
 
 import java.util.List;
 
-import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.springframework.stereotype.Repository;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
+import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
 import com.cmsr.onebase.module.app.dal.dataobject.appresource.PageSetLabelDO;
 
 @Repository
@@ -16,15 +15,15 @@ public class AppPageSetLabelRepository extends DataRepositoryNew<PageSetLabelDO>
         super(PageSetLabelDO.class);
     }
 
-    public List<PageSetLabelDO> findByPageSetCode(String pageSetCode) {
+    public List<PageSetLabelDO> findByPageSetId(Long pageSetId) {
         ConfigStore configs = new DefaultConfigStore();
-        configs.eq("pageset_code", pageSetCode);
+        configs.eq(PageSetLabelDO.PAGE_SET_ID, pageSetId);
         return findAllByConfig(configs);
     }
 
-    public List<PageSetLabelDO> findByPageSetCodes(List<String> pageSetCodes) {
+    public List<PageSetLabelDO> findByPageSetIds(List<Long> pageSetIds) {
         ConfigStore configs = new DefaultConfigStore();
-        configs.in("pageset_code", pageSetCodes);
+        configs.in(PageSetLabelDO.PAGE_SET_ID, pageSetIds);
         return findAllByConfig(configs);
     }
 

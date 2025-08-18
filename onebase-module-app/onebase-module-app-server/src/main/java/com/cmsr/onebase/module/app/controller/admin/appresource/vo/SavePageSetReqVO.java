@@ -11,9 +11,9 @@ import lombok.Data;
 @Data
 public class SavePageSetReqVO {
 
-    @Schema(description = "页面集编码", requiredMode = Schema.RequiredMode.REQUIRED, example = "xxx")
-    @NotNull(message = "页面集编码不能为空")
-    private String pageSetCode;
+    @Schema(description = "页面集id", requiredMode = Schema.RequiredMode.REQUIRED, example = "xxx")
+    @NotNull(message = "页面集id不能为空")
+    private Long id;
 
     @Schema(description = "页面集名称", requiredMode = Schema.RequiredMode.REQUIRED, example = "xxx")
     @NotNull(message = "页面集名称不能为空")

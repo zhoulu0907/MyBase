@@ -118,7 +118,11 @@ public class AppApplicationServiceImpl implements AppApplicationService {
         applicationDO.setAppUid(findAndCreateAppUid());
         applicationDO.setVersionNumber(VersionUtils.INIT_VERSION);
         applicationDO.setAppStatus(ApplicationStatusEnum.EDITING.getValue());
-        applicationDO.setAppCode(AppUtils.createAppCode());
+        if (StringUtils.isNoneBlank(createReqVO.getAppCode())) {
+            applicationDO.setAppCode(createReqVO.getAppCode());
+        } else {
+            applicationDO.setAppCode(AppUtils.createAppCode());
+        }
         applicationDO = applicationRepository.insert(applicationDO);
         saveApplicationTags(applicationDO.getId(), createReqVO.getTagIds());
         authRoleService.createDefaultRole(applicationDO.getId());

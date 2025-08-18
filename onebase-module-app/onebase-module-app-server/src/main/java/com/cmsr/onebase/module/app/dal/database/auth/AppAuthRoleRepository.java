@@ -37,7 +37,7 @@ public class AppAuthRoleRepository extends DataRepositoryNew<AuthRoleDO> {
         return findOne(configs);
     }
 
-    public AuthRoleDO findByAppCodeAndRoleNameAndRoleIdNot(Long applicationId, String roleName, Long roleId) {
+    public AuthRoleDO findByApplicationIdAndRoleNameAndIdNot(Long applicationId, String roleName, Long roleId) {
         ConfigStore configs = new DefaultConfigStore();
         configs.eq("application_id", applicationId);
         configs.eq("role_name", roleName);

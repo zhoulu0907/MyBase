@@ -13,94 +13,93 @@ import lombok.EqualsAndHashCode;
  * @Author mickey
  * @Date 2025/7/30 14:51
  */
-@Table(name="app_resource_page")
+@Table(name = "app_resource_page")
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class PageDO extends TenantBaseDO {
+    public static final String PAGE_SET_ID = "pageset_id";
 
-    @Column(name = "page_code", columnDefinition= "VARCHAR(255) NOT NULL", comment = "页面编码")
-    private String pageCode;
+    @Column(name = "pageset_id", columnDefinition = "BIGINT NOT NULL", nullable = false, comment = "页面集ID")
+    private Long pageSetId;
 
-    @Column(name = "page_name", columnDefinition= "VARCHAR(255) NOT NULL", comment = "页面名称")
+    @Column(name = "page_name", columnDefinition = "VARCHAR(255) NOT NULL", comment = "页面名称")
     private String pageName;
 
-    @Column(name = "page_type", columnDefinition= "VARCHAR(64) NOT NULL", comment = "页面类型 list edit detail")
+    @Column(name = "page_type", columnDefinition = "VARCHAR(64) NOT NULL", comment = "页面类型 list edit detail")
     private String pageType;
 
     /**
      * 页面标题
      */
-    @Column(name = "title", columnDefinition= "VARCHAR(255) NOT NULL", comment = "页面标题")
+    @Column(name = "title", columnDefinition = "VARCHAR(255) NOT NULL", comment = "页面标题")
     private String title;
 
     /**
      * 页面布局方式，vertical（垂直布局）、horizontal（水平布局）
      */
-    @Column(name = "layout", columnDefinition= "VARCHAR(255) NOT NULL", comment = "页面布局方式")
+    @Column(name = "layout", columnDefinition = "VARCHAR(255) NOT NULL", comment = "页面布局方式")
     private String layout;
 
     /**
      * 页面宽度，auto 或固定宽度
      */
-    @Column(name = "width", columnDefinition= "VARCHAR(255) NOT NULL", comment = "页面宽度")
+    @Column(name = "width", columnDefinition = "VARCHAR(255) NOT NULL", comment = "页面宽度")
     private String width;
 
     /**
      * 页面外边距，默认 0
      */
-    @Column(name = "margin", columnDefinition= "VARCHAR(255) NOT NULL", comment = "页面外边距")
+    @Column(name = "margin", columnDefinition = "VARCHAR(255) NOT NULL", comment = "页面外边距")
     private String margin;
 
     /**
      * 页面背景色，默认 #fff
      */
-    @Column(name = "background_color", columnDefinition= "VARCHAR(255) NOT NULL", comment = "页面背景色")
+    @Column(name = "background_color", columnDefinition = "VARCHAR(255) NOT NULL", comment = "页面背景色")
     private String backgroundColor;
 
     // TODO(mickey): remove
     /**
      * 页面主元数据
      */
-    @Column(name = "main_metadata", columnDefinition= "VARCHAR(255) NOT NULL", comment = "页面主元数据")
+    @Column(name = "main_metadata", columnDefinition = "VARCHAR(255) NOT NULL", comment = "页面主元数据")
     private String mainMetadata;
 
     /**
      * 是否启用 BPM
      * 例如: true 表示启用 BPM
      */
-    @Column(name = "bpm_enabled", columnDefinition= "BOOLEAN NOT NULL", comment = "是否启用 BPM")
+    @Column(name = "bpm_enabled", columnDefinition = "BOOLEAN NOT NULL", comment = "是否启用 BPM")
     private Boolean bpmEnabled;
 
     /**
      * 路由路径
      * 例如: /user/profile
      */
-    @Column(name = "router_path", columnDefinition= "VARCHAR(255) NOT NULL", comment = "路由路径")
+    @Column(name = "router_path", columnDefinition = "VARCHAR(255) NOT NULL", comment = "路由路径")
     private String routerPath;
 
     /**
      * 路由名称
      * 例如: user-profile
      */
-    @Column(name = "router_name", columnDefinition= "VARCHAR(255) NOT NULL", comment = "路由名称")
+    @Column(name = "router_name", columnDefinition = "VARCHAR(255) NOT NULL", comment = "路由名称")
     private String routerName;
 
     /**
      * 路由元数据-是否需要认证
      * 例如: true 表示需要登录
      */
-    @Column(name = "router_meta_auth_required", columnDefinition= "BOOLEAN NOT NULL", comment = "路由元数据-是否需要认证")
+    @Column(name = "router_meta_auth_required", columnDefinition = "BOOLEAN NOT NULL", comment = "路由元数据-是否需要认证")
     private Boolean routerMetaAuthRequired;
 
     /**
      * 路由元数据-页面标题
      * 例如: 用户资料 - 个人中心
      */
-    @Column(name = "router_meta_title", columnDefinition= "VARCHAR(255) NOT NULL", comment = "路由元数据-页面标题")
+    @Column(name = "router_meta_title", columnDefinition = "VARCHAR(255) NOT NULL", comment = "路由元数据-页面标题")
     private String routerMetaTitle;
 
-
     // TODO(mickey): 补充 Method字段
-
 
 }

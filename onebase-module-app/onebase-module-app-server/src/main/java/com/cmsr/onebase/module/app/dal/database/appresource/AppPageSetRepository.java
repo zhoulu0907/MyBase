@@ -1,14 +1,13 @@
 package com.cmsr.onebase.module.app.dal.database.appresource;
 
-import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
+import java.util.List;
+
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.springframework.stereotype.Repository;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
+import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
 import com.cmsr.onebase.module.app.dal.dataobject.appresource.PageSetDO;
-
-import java.util.List;
 
 @Repository
 public class AppPageSetRepository extends DataRepositoryNew<PageSetDO> {
@@ -17,27 +16,27 @@ public class AppPageSetRepository extends DataRepositoryNew<PageSetDO> {
         super(PageSetDO.class);
     }
 
-    public PageSetDO findPageSetByMenuCode(String menuCode) {
+    public PageSetDO findPageSetByMenuId(Long menuId) {
         ConfigStore configs = new DefaultConfigStore();
-        configs.eq("menu_code", menuCode);
+        configs.eq(PageSetDO.MENU_ID, menuId);
         return findOne(configs);
     }
 
-    public PageSetDO findPageSetByPageSetCode(String pageSetCode) {
+    public List<PageSetDO> findByMenuIds(List<Long> menuIds) {
         ConfigStore configs = new DefaultConfigStore();
-        configs.eq("pageset_code", pageSetCode);
-        return findOne(configs);
+        configs.in(PageSetDO.MENU_ID, menuIds);
+        return findAllByConfig(configs);
     }
 
-    public void deletePageSetByMenuCode(String menuCode) {
+    public void deletePageSetByMenuId(Long menuId) {
         ConfigStore configs = new DefaultConfigStore();
-        configs.eq("menu_code", menuCode);
+        configs.eq(PageSetDO.MENU_ID, menuId);
         deleteByConfig(configs);
     }
 
-    public List<PageSetDO> findByMenuCodes(List<String> menuCodes){
+    public List<PageSetDO> findByMenuId(List<Long> menuIds) {
         ConfigStore configs = new DefaultConfigStore();
-        configs.in("menu_code", menuCodes);
+        configs.in(PageSetDO.MENU_ID, menuIds);
         return findAllByConfig(configs);
     }
 

@@ -20,8 +20,8 @@ public class PageSetLabelServiceImpl implements PageSetLabelService {
     private AppPageSetLabelRepository appPageSetLabelDataRepository;
 
     @Override
-    public List<PageSetLabelRespDTO> getLabelsByPageSetCode(String pagesetCode) {
-        List<PageSetLabelDO> pageSetLabelDOs = appPageSetLabelDataRepository.findByPageSetCode(pagesetCode);
+    public List<PageSetLabelRespDTO> getLabelsByPageSetId(Long pageSetId) {
+        List<PageSetLabelDO> pageSetLabelDOs = appPageSetLabelDataRepository.findByPageSetId(pageSetId);
         return BeanUtils.toBean(pageSetLabelDOs, PageSetLabelRespDTO.class);
     }
 

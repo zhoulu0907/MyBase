@@ -2,12 +2,11 @@ package com.cmsr.onebase.module.app.dal.database.appresource;
 
 import java.util.List;
 
-import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.springframework.stereotype.Repository;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
+import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
 import com.cmsr.onebase.module.app.dal.dataobject.appresource.PageSetPageDO;
 
 @Repository
@@ -16,30 +15,38 @@ public class AppPageSetPageRepository extends DataRepositoryNew<PageSetPageDO> {
         super(PageSetPageDO.class);
     }
 
-    public void deleteByPageCode(String pageCode) {
+    public void deleteByPageId(Long pageId) {
         ConfigStore configs = new DefaultConfigStore();
-        configs.eq("page_ref", pageCode);
+        configs.eq(PageSetPageDO.PAGE_ID, pageId);
         deleteByConfig(configs);
 
         return;
     }
 
-    public List<PageSetPageDO> findByPageSetCode(String pageSetCode) {
+    public void deleteByPageSetId(Long pageSetId) {
         ConfigStore configs = new DefaultConfigStore();
-        configs.eq("pageset_ref", pageSetCode);
+        configs.eq(PageSetPageDO.PAGE_SET_ID, pageSetId);
+        deleteByConfig(configs);
+
+        return;
+    }
+
+    public List<PageSetPageDO> findByPageSetId(Long pageSetId) {
+        ConfigStore configs = new DefaultConfigStore();
+        configs.eq(PageSetPageDO.PAGE_SET_ID, pageSetId);
         return findAllByConfig(configs);
     }
 
-    public PageSetPageDO findByPageSetCodeAndPageRef(String pageSetCode, String pageRef) {
+    public PageSetPageDO findByPageSetIdAndPageId(Long pageSetId, Long pageId) {
         ConfigStore configs = new DefaultConfigStore();
-        configs.eq("pageset_ref", pageSetCode);
-        configs.eq("page_ref", pageRef);
+        configs.eq(PageSetPageDO.PAGE_SET_ID, pageSetId);
+        configs.eq(PageSetPageDO.PAGE_ID, pageId);
         return findOne(configs);
     }
 
-    public List<PageSetPageDO> findByPageSetCodes(List<String> pageSetCodes) {
+    public List<PageSetPageDO> findByPageSetIds(List<Long> pageSetIds) {
         ConfigStore configs = new DefaultConfigStore();
-        configs.in("pageset_ref", pageSetCodes);
+        configs.in(PageSetPageDO.PAGE_SET_ID, pageSetIds);
         return findAllByConfig(configs);
     }
 
