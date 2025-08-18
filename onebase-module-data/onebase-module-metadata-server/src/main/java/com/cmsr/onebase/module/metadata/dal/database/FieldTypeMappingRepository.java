@@ -36,7 +36,7 @@ public class FieldTypeMappingRepository extends DataRepositoryNew<FieldTypeMappi
      */
     public List<FieldTypeMappingDO> getFieldTypeMappingsByDatabaseType(String databaseType) {
         ConfigStore configStore = new DefaultConfigStore();
-        configStore.eq("database_type", databaseType);
+        configStore.eq(FieldTypeMappingDO.DATABASE_TYPE, databaseType);
         configStore.order("create_time", org.anyline.entity.Order.TYPE.DESC);
         return findAllByConfig(configStore);
     }
@@ -49,7 +49,7 @@ public class FieldTypeMappingRepository extends DataRepositoryNew<FieldTypeMappi
      */
     public List<FieldTypeMappingDO> getFieldTypeMappingsByJavaType(String javaType) {
         ConfigStore configStore = new DefaultConfigStore();
-        configStore.eq("java_type", javaType);
+        configStore.eq(FieldTypeMappingDO.BUSINESS_FIELD_TYPE, javaType);
         configStore.order("create_time", org.anyline.entity.Order.TYPE.DESC);
         return findAllByConfig(configStore);
     }
@@ -63,8 +63,8 @@ public class FieldTypeMappingRepository extends DataRepositoryNew<FieldTypeMappi
      */
     public FieldTypeMappingDO getFieldTypeMappingByDbType(String databaseType, String dbFieldType) {
         ConfigStore configStore = new DefaultConfigStore();
-        configStore.eq("database_type", databaseType);
-        configStore.eq("db_field_type", dbFieldType);
+        configStore.eq(FieldTypeMappingDO.DATABASE_TYPE, databaseType);
+        configStore.eq(FieldTypeMappingDO.DATABASE_FIELD, dbFieldType);
         return findOne(configStore);
     }
 
@@ -75,7 +75,7 @@ public class FieldTypeMappingRepository extends DataRepositoryNew<FieldTypeMappi
      */
     public List<FieldTypeMappingDO> getAllFieldTypeMappings() {
         ConfigStore configStore = new DefaultConfigStore();
-        configStore.order("database_type", org.anyline.entity.Order.TYPE.ASC);
+        configStore.order(FieldTypeMappingDO.DATABASE_TYPE, org.anyline.entity.Order.TYPE.ASC);
         configStore.order("create_time", org.anyline.entity.Order.TYPE.DESC);
         return findAllByConfig(configStore);
     }

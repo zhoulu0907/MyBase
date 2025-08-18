@@ -10,6 +10,7 @@ import com.cmsr.onebase.module.metadata.controller.admin.relationship.vo.ParentC
 import com.cmsr.onebase.module.metadata.controller.admin.relationship.vo.RelationshipTypeRespVO;
 import com.cmsr.onebase.module.metadata.controller.admin.relationship.vo.EntityWithChildrenRespVO;
 import com.cmsr.onebase.module.metadata.controller.admin.relationship.vo.AppEntitiesRespVO;
+import com.cmsr.onebase.module.metadata.dal.dataobject.relationship.MetadataEntityRelationshipDO;
 import jakarta.validation.Valid;
 
 import java.util.List;
@@ -110,4 +111,11 @@ public interface MetadataEntityRelationshipService {
      */
     AppEntitiesRespVO getAppEntitiesWithFields(Long appId);
 
-} 
+    /**
+     * 根据条件查询实体关系列表
+     *
+     * @param configStore 查询条件
+     * @return 实体关系列表
+     */
+    List<MetadataEntityRelationshipDO> findAllByConfig(org.anyline.data.param.init.DefaultConfigStore configStore);
+}

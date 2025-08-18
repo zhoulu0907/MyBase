@@ -22,6 +22,14 @@ import lombok.NoArgsConstructor;
 @Table(name = "metadata_validation_type")
 public class MetadataValidationTypeDO extends BaseDO {
 
+    // 列名常量
+    public static final String VALIDATION_CODE = "validation_code";
+    public static final String VALIDATION_NAME = "validation_name";
+    public static final String VALIDATION_DESC = "validation_desc";
+    public static final String SORT_ORDER      = "sort_order";
+    public static final String STATUS          = "status";
+    public static final String TYPE            = "type";
+
     public MetadataValidationTypeDO setId(Long id) {
         super.setId(id);
         return this;

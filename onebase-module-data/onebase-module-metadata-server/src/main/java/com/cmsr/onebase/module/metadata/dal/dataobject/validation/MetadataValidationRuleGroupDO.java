@@ -22,6 +22,14 @@ import lombok.NoArgsConstructor;
 @Table(name = "metadata_validation_rule_group")
 public class MetadataValidationRuleGroupDO extends TenantBaseDO {
 
+    // 列名常量
+    public static final String RG_NAME     = "rg_name";
+    public static final String RG_DESC     = "rg_desc";
+    public static final String RG_STATUS   = "rg_status";
+    public static final String VAL_METHOD  = "val_method";
+    public static final String POP_PROMPT  = "pop_prompt";
+    public static final String POP_TYPE    = "pop_type";
+
     public MetadataValidationRuleGroupDO setId(Long id) {
         super.setId(id);
         return this;

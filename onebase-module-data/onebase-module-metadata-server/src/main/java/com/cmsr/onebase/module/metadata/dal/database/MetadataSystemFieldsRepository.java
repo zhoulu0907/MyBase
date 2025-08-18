@@ -36,7 +36,7 @@ public class MetadataSystemFieldsRepository extends DataRepositoryNew<MetadataSy
     public List<MetadataSystemFieldsDO> getSystemFields() {
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.and("is_system_field", true);
-        configStore.and("is_enabled", CommonStatusEnum.ENABLE.getStatus());
+        configStore.and(MetadataSystemFieldsDO.IS_ENABLED, CommonStatusEnum.ENABLE.getStatus());
         return findAllByConfig(configStore);
     }
 
@@ -60,7 +60,7 @@ public class MetadataSystemFieldsRepository extends DataRepositoryNew<MetadataSy
      */
     public MetadataSystemFieldsDO getSystemFieldByName(String fieldName) {
         DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and("field_name", fieldName);
+        configStore.and(MetadataSystemFieldsDO.FIELD_NAME, fieldName);
         configStore.and("is_system_field", true);
         return findOne(configStore);
     }

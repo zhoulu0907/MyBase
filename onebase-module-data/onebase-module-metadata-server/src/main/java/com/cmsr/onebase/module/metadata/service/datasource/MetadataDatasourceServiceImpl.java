@@ -325,6 +325,11 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
         return metadataDatasourceRepository.findOne(configStore);
     }
 
+    @Override
+    public List<MetadataDatasourceDO> findAllByConfig(DefaultConfigStore configStore) {
+        return metadataDatasourceRepository.findAllByConfig(configStore);
+    }
+
     /**
      * 测试数据源连接
      *

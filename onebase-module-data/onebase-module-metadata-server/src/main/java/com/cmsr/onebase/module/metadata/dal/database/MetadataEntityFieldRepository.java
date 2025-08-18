@@ -35,7 +35,7 @@ public class MetadataEntityFieldRepository extends DataRepositoryNew<MetadataEnt
      */
     public List<MetadataEntityFieldDO> getEntityFieldList() {
         DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.order("sort_order", Order.TYPE.ASC);
+        configStore.order(MetadataEntityFieldDO.SORT_ORDER, Order.TYPE.ASC);
         configStore.order("create_time", Order.TYPE.DESC);
         return findAllByConfig(configStore);
     }
@@ -48,8 +48,8 @@ public class MetadataEntityFieldRepository extends DataRepositoryNew<MetadataEnt
      */
     public List<MetadataEntityFieldDO> getEntityFieldListByEntityId(Long entityId) {
         DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and("entity_id", entityId);
-        configStore.order("sort_order", Order.TYPE.ASC);
+        configStore.and(MetadataEntityFieldDO.ENTITY_ID, entityId);
+        configStore.order(MetadataEntityFieldDO.SORT_ORDER, Order.TYPE.ASC);
         configStore.order("create_time", Order.TYPE.DESC);
         return findAllByConfig(configStore);
     }
@@ -74,8 +74,8 @@ public class MetadataEntityFieldRepository extends DataRepositoryNew<MetadataEnt
      */
     public MetadataEntityFieldDO getEntityFieldByName(Long entityId, String fieldName) {
         DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and("entity_id", entityId);
-        configStore.and("field_name", fieldName);
+        configStore.and(MetadataEntityFieldDO.ENTITY_ID, entityId);
+        configStore.and(MetadataEntityFieldDO.FIELD_NAME, fieldName);
         return findOne(configStore);
     }
 
@@ -87,9 +87,9 @@ public class MetadataEntityFieldRepository extends DataRepositoryNew<MetadataEnt
      */
     public List<MetadataEntityFieldDO> getActiveEntityFieldsByEntityId(Long entityId) {
         DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and("entity_id", entityId);
+        configStore.and(MetadataEntityFieldDO.ENTITY_ID, entityId);
         configStore.and("deleted", 0);
-        configStore.order("sort_order", Order.TYPE.ASC);
+        configStore.order(MetadataEntityFieldDO.SORT_ORDER, Order.TYPE.ASC);
         configStore.order("create_time", Order.TYPE.DESC);
         return findAllByConfig(configStore);
     }
@@ -102,8 +102,8 @@ public class MetadataEntityFieldRepository extends DataRepositoryNew<MetadataEnt
      */
     public MetadataEntityFieldDO getIdFieldByEntityId(Long entityId) {
         DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and("entity_id", entityId);
-        configStore.and("field_name", "id");
+        configStore.and(MetadataEntityFieldDO.ENTITY_ID, entityId);
+        configStore.and(MetadataEntityFieldDO.FIELD_NAME, "id");
         return findOne(configStore);
     }
 }
