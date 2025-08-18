@@ -7,8 +7,7 @@ import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-// @Table(name = "app_resource_component")
-@Table(name = "tmp0815_app_resource_component")
+@Table(name = "app_resource_component")
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class ComponentDO extends TenantBaseDO {

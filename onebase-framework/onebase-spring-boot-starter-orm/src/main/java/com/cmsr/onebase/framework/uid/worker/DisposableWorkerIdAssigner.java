@@ -21,7 +21,6 @@ import com.cmsr.onebase.framework.uid.worker.dao.WorkerNodeDAO;
 import com.cmsr.onebase.framework.uid.worker.entity.WorkerNodeEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.env.Environment;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -36,14 +35,8 @@ public class DisposableWorkerIdAssigner implements WorkerIdAssigner {
 
     private WorkerNodeDAO workerNodeDAO;
 
-    private Environment environment;
-
     public void setWorkerNodeDAO(WorkerNodeDAO workerNodeDAO) {
         this.workerNodeDAO = workerNodeDAO;
-    }
-
-    public void setEnvironment(Environment environment) {
-        this.environment = environment;
     }
 
     /**
@@ -77,7 +70,7 @@ public class DisposableWorkerIdAssigner implements WorkerIdAssigner {
         } else {
             workerNodeEntity.setNodeType(WorkerNodeType.ACTUAL.value());
             workerNodeEntity.setWorkerHost(NetUtils.getLocalAddress());
-            workerNodeEntity.setWorkerPort(environment.getProperty("server.port", String.valueOf(System.currentTimeMillis())));
+            workerNodeEntity.setWorkerPort("0");
         }
         return workerNodeEntity;
     }

@@ -11,8 +11,7 @@ import lombok.Data;
  *                  @Date：2025/7/22 17:50
  */
 @Data
-// @Table(name = "app_tag")
-@Table(name = "tmp0815_app_tag")
+@Table(name = "app_tag")
 public class TagDO extends TenantBaseDO {
 
     @Column(name = "tag_name", nullable = false, length = 128, comment = "标签名称")

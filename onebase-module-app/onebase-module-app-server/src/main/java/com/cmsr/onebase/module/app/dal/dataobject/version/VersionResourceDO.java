@@ -11,8 +11,7 @@ import lombok.Data;
  *                  @Date：2025/7/23 16:54
  */
 @Data
-// @Table(name = "app_version_resource")
-@Table(name = "tmp0815_app_version_resource")
+@Table(name = "app_version_resource")
 public class VersionResourceDO extends TenantBaseDO {
 
     @Column(name = "application_id", nullable = false, columnDefinition = "BIGINT NOT NULL", comment = "应用ID")

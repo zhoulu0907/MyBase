@@ -7,8 +7,7 @@ import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-// @Table(name = "app_resource_pageset")
-@Table(name = "tmp0815_app_resource_pageset")
+@Table(name = "app_resource_pageset")
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class PageSetDO extends TenantBaseDO {

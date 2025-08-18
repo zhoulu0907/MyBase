@@ -18,11 +18,12 @@ package com.cmsr.onebase.framework.uid.utils;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.Enumeration;
 
 /**
  * NetUtils
- * 
+ *
  * @author yutianbao
  */
 public abstract class NetUtils {
@@ -37,6 +38,8 @@ public abstract class NetUtils {
             localAddress = getLocalInetAddress();
         } catch (SocketException e) {
             throw new RuntimeException("fail to get local ip.");
+        } catch (UnknownHostException e) {
+            throw new RuntimeException("fail to get local ip.");
         }
     }
 
@@ -46,7 +49,7 @@ public abstract class NetUtils {
      * @return the local address
      * @throws SocketException the socket exception
      */
-    public static InetAddress getLocalInetAddress() throws SocketException {
+    public static InetAddress getLocalInetAddress() throws SocketException, UnknownHostException {
         // enumerates all network interfaces
         Enumeration<NetworkInterface> enu = NetworkInterface.getNetworkInterfaces();
 
@@ -68,13 +71,12 @@ public abstract class NetUtils {
                 return address;
             }
         }
-
-        throw new RuntimeException("No validated local address!");
+        return InetAddress.getLocalHost();
     }
 
     /**
      * Retrieve local address
-     * 
+     *
      * @return the string local address
      */
     public static String getLocalAddress() {

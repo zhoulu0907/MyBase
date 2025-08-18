@@ -11,8 +11,7 @@ import lombok.Data;
  *                  @Date：2025/7/22 17:54
  */
 @Data
-// @Table(name = "app_version")
-@Table(name = "tmp0815_app_version")
+@Table(name = "app_version")
 public class VersionDO extends TenantBaseDO {
 
     @Column(name = "application_id", nullable = false, columnDefinition = "BIGINT NOT NULL", comment = "应用ID")

@@ -2,7 +2,7 @@
 
 -- Drop table
 
--- DROP TABLE public.app_application;
+DROP TABLE public.app_application;
 
 CREATE TABLE public.app_application (
 	id int8 NOT NULL, -- 主键ID
@@ -41,7 +41,6 @@ COMMENT ON COLUMN public.app_application.theme_color IS '主题颜色';
 COMMENT ON COLUMN public.app_application.icon_name IS '应用图标';
 COMMENT ON COLUMN public.app_application.icon_color IS '图标颜色';
 COMMENT ON COLUMN public.app_application.version_number IS '当前版本';
-COMMENT ON COLUMN public.app_application.datasource_id IS '数据源ID';
 COMMENT ON COLUMN public.app_application.app_status IS '状态（编辑、发布）';
 COMMENT ON COLUMN public.app_application.description IS '描述';
 
@@ -50,7 +49,7 @@ COMMENT ON COLUMN public.app_application.description IS '描述';
 
 -- Drop table
 
--- DROP TABLE public.app_application_tag;
+DROP TABLE public.app_application_tag;
 
 CREATE TABLE public.app_application_tag (
 	id int8 NOT NULL, -- 主键Id
@@ -79,7 +78,7 @@ COMMENT ON COLUMN public.app_application_tag.tag_id IS '标签Id';
 
 -- Drop table
 
--- DROP TABLE public.app_auth_data_filter;
+DROP TABLE public.app_auth_data_filter;
 
 CREATE TABLE public.app_auth_data_filter (
 	id int8 NOT NULL, -- 主键Id
@@ -117,7 +116,7 @@ COMMENT ON COLUMN public.app_auth_data_filter.field_value IS '字段值';
 
 -- Drop table
 
--- DROP TABLE public.app_auth_data_group;
+DROP TABLE public.app_auth_data_group;
 
 CREATE TABLE public.app_auth_data_group (
 	id int8 NOT NULL, -- 主键Id
@@ -158,7 +157,7 @@ COMMENT ON COLUMN public.app_auth_data_group.is_operable IS '是否可以操作'
 
 -- Drop table
 
--- DROP TABLE public.app_auth_entity;
+DROP TABLE public.app_auth_entity;
 
 CREATE TABLE public.app_auth_entity (
 	id int8 NOT NULL, -- 主键Id
@@ -193,7 +192,7 @@ COMMENT ON COLUMN public.app_auth_entity.is_allowed IS '是否可访问';
 
 -- Drop table
 
--- DROP TABLE public.app_auth_field;
+DROP TABLE public.app_auth_field;
 
 CREATE TABLE public.app_auth_field (
 	id int8 NOT NULL, -- 主键Id
@@ -232,7 +231,7 @@ COMMENT ON COLUMN public.app_auth_field.is_can_download IS '是否可下载';
 
 -- Drop table
 
--- DROP TABLE public.app_auth_operation;
+DROP TABLE public.app_auth_operation;
 
 CREATE TABLE public.app_auth_operation (
 	id int8 NOT NULL, -- 主键Id
@@ -267,7 +266,7 @@ COMMENT ON COLUMN public.app_auth_operation.is_allowed IS '是否允许';
 
 -- Drop table
 
--- DROP TABLE public.app_auth_permission;
+DROP TABLE public.app_auth_permission;
 
 CREATE TABLE public.app_auth_permission (
 	id int8 NOT NULL, -- 主键Id
@@ -304,7 +303,7 @@ COMMENT ON COLUMN public.app_auth_permission.is_all_fields_allowed IS '所有字
 
 -- Drop table
 
--- DROP TABLE public.app_auth_role;
+DROP TABLE public.app_auth_role;
 
 CREATE TABLE public.app_auth_role (
 	id int8 NOT NULL, -- 主键Id
@@ -339,7 +338,7 @@ COMMENT ON COLUMN public.app_auth_role.description IS '描述';
 
 -- Drop table
 
--- DROP TABLE public.app_auth_role_user;
+DROP TABLE public.app_auth_role_user;
 
 CREATE TABLE public.app_auth_role_user (
 	id int8 NOT NULL, -- 主键Id
@@ -368,7 +367,7 @@ COMMENT ON COLUMN public.app_auth_role_user.user_id IS '用户Id';
 
 -- Drop table
 
--- DROP TABLE public.app_menu;
+DROP TABLE public.app_menu;
 
 CREATE TABLE public.app_menu (
 	id int8 NOT NULL, -- 主键Id

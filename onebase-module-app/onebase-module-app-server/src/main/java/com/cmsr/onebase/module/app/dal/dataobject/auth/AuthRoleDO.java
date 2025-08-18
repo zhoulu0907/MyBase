@@ -11,8 +11,7 @@ import lombok.Data;
  *                  @Date：2025/8/5 15:10
  */
 @Data
-// @Table(name = "app_auth_role")
-@Table(name = "tmp0815_app_auth_role")
+@Table(name = "app_auth_role")
 public class AuthRoleDO extends TenantBaseDO {
 
     @Column(name = "application_id", nullable = false, comment = "应用id")

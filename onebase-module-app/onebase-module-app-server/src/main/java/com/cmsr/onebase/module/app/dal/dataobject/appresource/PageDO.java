@@ -13,8 +13,7 @@ import lombok.EqualsAndHashCode;
  * @Author mickey
  * @Date 2025/7/30 14:51
  */
-// @Table(name = "app_resource_page")
-@Table(name = "tmp0815_app_resource_page")
+@Table(name = "app_resource_page")
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class PageDO extends TenantBaseDO {

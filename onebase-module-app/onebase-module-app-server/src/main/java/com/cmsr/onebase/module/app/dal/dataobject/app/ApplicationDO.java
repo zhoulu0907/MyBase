@@ -11,8 +11,7 @@ import lombok.Data;
  *                  @Date：2025/7/22 17:50
  */
 @Data
-// @Table(name = "app_application")
-@Table(name = "tmp0815_app_application")
+@Table(name = "app_application")
 public class ApplicationDO extends TenantBaseDO {
 
     @Column(name = "app_uid", columnDefinition = "VARCHAR(16)", length = 256, comment = "应用uid(自动生成短码)")

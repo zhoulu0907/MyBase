@@ -7,8 +7,7 @@ import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-// @Table(name = "app_resource_page_ref_router")
-@Table(name = "tmp0815_app_resource_page_ref_router")
+@Table(name = "app_resource_page_ref_router")
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class PageRefRouterDO extends TenantBaseDO {
