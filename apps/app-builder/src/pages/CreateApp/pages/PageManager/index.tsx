@@ -170,7 +170,6 @@ const PageManagerPage: FC = () => {
     }
 
     setShowGuide(res.length === 0);
-    setCurMenu(findFirstPage(res));
   };
 
   const getEntityList = async () => {

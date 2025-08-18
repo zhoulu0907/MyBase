@@ -9,7 +9,7 @@ export interface Application {
   /**
    * 应用编码
    */
-  appKey: string;
+  appCode: string;
   /**
    * 应用描述
    */
@@ -134,7 +134,7 @@ export interface UpdateApplicationReq {
   /**
    * 应用编码
    */
-  appKey: string;
+  appCode: string;
   /**
    * 数据源ID
    */
