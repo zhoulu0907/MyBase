@@ -13,9 +13,7 @@ const MaterialCard: React.FC<MaterialCardProps> = ({ displayName, icon, type, id
   return (
     <div className={styles.materialCard} data-cp-type={type} data-cp-displayname={displayName} data-cp-id={id}>
       <div className={styles.icon}>{ICON_Map[icon]}</div>
-      <div className={styles.text}>
-        {displayName}-{id}
-      </div>
+      <div className={styles.text}>{displayName}</div>
     </div>
   );
 };
