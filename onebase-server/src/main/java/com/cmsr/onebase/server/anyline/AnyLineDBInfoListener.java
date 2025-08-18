@@ -2,13 +2,13 @@ package com.cmsr.onebase.server.anyline;
 
 import com.cmsr.onebase.framework.common.anyline.web.BizException;
 import com.cmsr.onebase.framework.common.anyline.web.StatusCode;
-import com.cmsr.onebase.framework.common.util.snowflake.SnowflakeId;
 import com.cmsr.onebase.framework.data.base.BaseDO;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
 import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
+import com.cmsr.onebase.framework.uid.UidGenerator;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
-
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.listener.DMListener;
 import org.anyline.data.param.ConfigStore;
@@ -20,15 +20,13 @@ import org.anyline.entity.DataRow;
 import org.anyline.entity.DataSet;
 import org.anyline.metadata.ACTION.SWITCH;
 import org.anyline.metadata.Table;
-
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
-
 import java.util.Objects;
 import java.util.Set;
-import java.util.HashSet;
 
 @Slf4j
 @Component()
@@ -38,6 +36,8 @@ public class AnyLineDBInfoListener implements DMListener {
 
     // 需要忽略租户过滤的表名列表
     private static final Set<String> TENANT_IGNORE_TABLES = new HashSet<>();
+    @Resource
+    private UidGenerator uidGenerator;
 
     static {
         // 添加不需要租户过滤的表
@@ -100,7 +100,7 @@ public class AnyLineDBInfoListener implements DMListener {
         if (Objects.nonNull(obj) && obj instanceof BaseDO baseDO) {
             // 设置雪花ID
             if (baseDO.getId() == null) {
-                baseDO.setId(SnowflakeId.nextId());
+                baseDO.setId(uidGenerator.getUID());
                 log.info("anyline global prepareInsert ---------> snow id:{}", baseDO.getId());
             }
 

@@ -1,9 +1,9 @@
 package com.cmsr.onebase.module.app.controller.admin.menu.vo;
 
-import java.util.List;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+
+import java.util.List;
 
 /**
  * @Author：huangjie
@@ -15,11 +15,8 @@ public class MenuOrderUpdateReqVO {
 
     private Long id;
 
-    @Schema(description = "菜单编码")
-    private String menuCode;
-
-    @Schema(description = "父菜单编码")
-    private String parentCode;
+    @Schema(description = "父菜单id")
+    private Long parentId;
 
     @Schema(description = "菜单顺序树结构")
     private List<MenuOrderNode> menuTree;
@@ -28,9 +25,6 @@ public class MenuOrderUpdateReqVO {
     public static class MenuOrderNode {
 
         private Long id;
-
-        @Schema(description = "菜单编码")
-        private String menuCode;
 
         private List<MenuOrderNode> children;
     }

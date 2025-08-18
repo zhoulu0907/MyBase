@@ -1,8 +1,5 @@
 package com.cmsr.onebase.module.app.service.appresource;
 
-import org.anyline.data.param.ConfigStore;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.Compare;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,7 +11,6 @@ import com.cmsr.onebase.module.app.api.appresource.dto.UpdatePageNameDTO;
 import com.cmsr.onebase.module.app.dal.database.appresource.AppPageRepository;
 import com.cmsr.onebase.module.app.dal.database.appresource.AppPageSetPageRepository;
 import com.cmsr.onebase.module.app.dal.dataobject.appresource.PageDO;
-import com.cmsr.onebase.module.app.dal.dataobject.appresource.PageSetPageDO;
 import com.cmsr.onebase.module.app.enums.appresource.AppResourceErrorCodeConstants;
 
 import jakarta.annotation.Resource;
@@ -29,8 +25,8 @@ public class PageServiceImpl implements PageService {
     private AppPageSetPageRepository pageSetPageDataRepository;
 
     @Override
-    public PageRespDTO getPage(String pageCode) {
-        PageDO pageDO = pageDataRepository.selectPageByCode(pageCode);
+    public PageRespDTO getPage(Long pageId) {
+        PageDO pageDO = pageDataRepository.findById(pageId);
         if (pageDO == null) {
             throw ServiceExceptionUtil.exception(AppResourceErrorCodeConstants.PAGE_NOT_EXIST);
         }
@@ -47,25 +43,18 @@ public class PageServiceImpl implements PageService {
 
     @Override
     public Boolean updatePageName(UpdatePageNameDTO updatePageNameDTO) {
-        pageDataRepository.updatePageName(updatePageNameDTO.getPageCode(), updatePageNameDTO.getPageName());
+        pageDataRepository.updatePageName(updatePageNameDTO.getPageId(), updatePageNameDTO.getPageName());
         return true;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Boolean deletePage(String code) {
+    public Boolean deletePage(Long pageId) {
         // 删除页面集关联的页面
-        ConfigStore configs = new DefaultConfigStore();
-        configs.and(Compare.EQUAL, "page_ref", code);
-        pageDataRepository.deleteByConfig(configs);
-
+        pageSetPageDataRepository.deleteByPageId(pageId);
         // 删除页面
-        configs = new DefaultConfigStore();
-        configs.and(Compare.EQUAL, "page_code", code);
-        pageDataRepository.deleteByConfig(configs);
+        pageDataRepository.deleteById(pageId);
 
-        pageDataRepository.deletePageByCode(code);
-        pageSetPageDataRepository.deleteByPageCode(code);
         return true;
     }
 }

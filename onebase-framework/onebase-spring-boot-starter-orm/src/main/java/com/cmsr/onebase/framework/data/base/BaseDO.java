@@ -28,7 +28,7 @@ public class BaseDO implements Serializable {
      * 设置为注入雪花ID
      */
     @Id
-    @GeneratedValue(generator = "SnowflakeIdGenerator")
+    // @GeneratedValue(generator = "SnowflakeIdGenerator")
     @Column(name = ID)
     private Long id;
     /**

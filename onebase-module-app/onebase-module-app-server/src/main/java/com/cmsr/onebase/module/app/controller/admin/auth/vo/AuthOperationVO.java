@@ -18,9 +18,9 @@ public class AuthOperationVO {
     private String operationCode;
 
     @Schema(description = "操作名称")
-    private String operationDisplayName;
+    private String displayName;
 
     @Schema(description = "是否允许")
-    private Boolean allowed;
+    private Boolean allowed = Boolean.TRUE;
 
 }

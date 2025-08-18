@@ -16,7 +16,7 @@ import javax.sql.DataSource;
  */
 @AutoConfiguration
 @ConfigurationProperties(prefix = "spring.datasource")
-public class AynlineAutoConfiguration {
+public class AnylineAutoConfiguration {
 //    @Value("${dynamic.datasource}")
     private String dsType;
     @Value("${spring.datasource.dynamic.datasource.master.driver-class-name}")
@@ -41,7 +41,7 @@ public class AynlineAutoConfiguration {
         try {
             tempService = ServiceProxy.temporary(ds);
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
         return tempService;
     }

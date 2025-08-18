@@ -16,8 +16,8 @@ public class PageApiImpl implements PageApi {
     private PageService pageService;
 
     @Override
-    public CommonResult<PageRespDTO> getUser(String code) {
-        PageRespDTO pageRespDTO = pageService.getPage(code);
+    public CommonResult<PageRespDTO> getPage(Long id) {
+        PageRespDTO pageRespDTO = pageService.getPage(id);
         return CommonResult.success(pageRespDTO);
     }
 
@@ -28,8 +28,8 @@ public class PageApiImpl implements PageApi {
     }
 
     @Override
-    public CommonResult<Boolean> deletePage(String code) {
-        Boolean result = pageService.deletePage(code);
+    public CommonResult<Boolean> deletePage(Long id) {
+        Boolean result = pageService.deletePage(id);
         return CommonResult.success(result);
     }
 }

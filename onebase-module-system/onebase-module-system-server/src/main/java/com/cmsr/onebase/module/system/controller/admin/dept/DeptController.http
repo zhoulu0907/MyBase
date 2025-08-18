@@ -1,7 +1,7 @@
 ### 默认环境变量配置（直接使用local环境配置）
 @baseUrl = http://localhost:48080/admin-api
 @adminTenantId = 1
-@token = 4e9079e594c7424884b780445541196d
+@token = 1e0cc373ac674583a762aeb03c4e7715
 @tag = Yunai.local
 
 ### 环境配置说明
