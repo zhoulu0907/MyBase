@@ -44,29 +44,6 @@ public class FileConfigServiceImpl implements FileConfigService {
 
     private static final Long CACHE_MASTER_ID = 0L;
 
-    /**
-     * {@link FileClient} 缓存，通过它异步刷新 fileClientFactory
-     */
-    @Getter
-    private final LoadingCache<Long, FileClient> clientCache = buildAsyncReloadingCache(Duration.ofSeconds(10L),
-            new CacheLoader<Long, FileClient>() {
-
-                @Override
-                public FileClient load(Long id) {
-
-
-                    FileConfigDO config = Objects.equals(CACHE_MASTER_ID, id) ?
-                            dataRepository.findOne(FileConfigDO.class, new DefaultConfigStore().eq(FileConfigDO.COLUMN_MASTER, true))
-                            : dataRepository.findOne(FileConfigDO.class, new DefaultConfigStore().eq(FileConfigDO.ID, id));
-                    ;
-                    if (config != null) {
-                        fileClientFactory.createOrUpdateFileClient(config.getId(), config.getStorage(), config.getConfig());
-                    }
-                    return fileClientFactory.getFileClient(null == config ? id : config.getId());
-                }
-
-            });
-
     @Resource
     private FileClientFactory fileClientFactory;
 
@@ -75,6 +52,24 @@ public class FileConfigServiceImpl implements FileConfigService {
 
     @Resource
     private Validator validator;
+
+    /**
+     * {@link FileClient} 缓存，通过它异步刷新 fileClientFactory
+     */
+    @Getter
+    private final LoadingCache<Long, FileClient> clientCache = buildAsyncReloadingCache(Duration.ofSeconds(10L),
+            new CacheLoader<>() {
+                @Override
+                public FileClient load(Long id) {
+                    FileConfigDO config = Objects.equals(CACHE_MASTER_ID, id) ?
+                            dataRepository.findOne(FileConfigDO.class, new DefaultConfigStore().eq(FileConfigDO.COLUMN_MASTER, true))
+                            : dataRepository.findOne(FileConfigDO.class, new DefaultConfigStore().eq(FileConfigDO.ID, id));
+                    if (config != null) {
+                        fileClientFactory.createOrUpdateFileClient(config.getId(), config.getStorage(), config.getConfig());
+                    }
+                    return fileClientFactory.getFileClient(null == config ? id : config.getId());
+                }
+            });
 
     @Override
     public Long createFileConfig(FileConfigSaveReqVO createReqVO) {
