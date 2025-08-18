@@ -93,4 +93,12 @@ public interface MetadataBusinessEntityService {
      */
     List<SimpleEntityRespVO> getSimpleEntityListByAppId(Long appId);
 
+    /**
+     * 根据条件查询业务实体列表
+     *
+     * @param configStore 查询条件
+     * @return 业务实体列表
+     */
+    List<MetadataBusinessEntityDO> findAllByConfig(org.anyline.data.param.init.DefaultConfigStore configStore);
+
 }

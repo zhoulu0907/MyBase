@@ -6,7 +6,6 @@ import com.cmsr.onebase.module.metadata.controller.admin.validation.vo.Validatio
 import com.cmsr.onebase.module.metadata.controller.admin.validation.vo.ValidationRuleGroupPageReqVO;
 import com.cmsr.onebase.module.metadata.controller.admin.validation.vo.ValidationRuleGroupSaveReqVO;
 import com.cmsr.onebase.module.metadata.convert.validation.ValidationRuleGroupConvert;
-import com.cmsr.onebase.module.metadata.dal.database.MetadataValidationRuleDefinitionRepository;
 import com.cmsr.onebase.module.metadata.dal.database.MetadataValidationRuleGroupRepository;
 import com.cmsr.onebase.module.metadata.dal.dataobject.validation.MetadataValidationRuleDefinitionDO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.validation.MetadataValidationRuleGroupDO;
@@ -41,7 +40,7 @@ public class MetadataValidationRuleGroupServiceImpl implements MetadataValidatio
     private MetadataValidationRuleGroupRepository validationRuleGroupRepository;
 
     @Resource
-    private MetadataValidationRuleDefinitionRepository validationRuleDefinitionRepository;
+    private MetadataValidationRuleDefinitionService validationRuleDefinitionService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -61,7 +60,7 @@ public class MetadataValidationRuleGroupServiceImpl implements MetadataValidatio
 
         // 处理规则定义
         if (!CollectionUtils.isEmpty(createReqVO.getValueRules())) {
-            saveValueRules(groupId, createReqVO.getValueRules());
+            validationRuleDefinitionService.saveValueRules(groupId, (List<Object>) (List<?>) createReqVO.getValueRules());
         }
 
         return groupId;
@@ -82,10 +81,10 @@ public class MetadataValidationRuleGroupServiceImpl implements MetadataValidatio
 
         // 处理规则定义：先删除旧的，再插入新的
         Long groupId = updateReqVO.getId();
-        validationRuleDefinitionRepository.deleteByGroupId(groupId);
+        validationRuleDefinitionService.deleteByGroupId(groupId);
         
         if (!CollectionUtils.isEmpty(updateReqVO.getValueRules())) {
-            saveValueRules(groupId, updateReqVO.getValueRules());
+            validationRuleDefinitionService.saveValueRules(groupId, (List<Object>) (List<?>) updateReqVO.getValueRules());
         }
     }
 
@@ -96,7 +95,7 @@ public class MetadataValidationRuleGroupServiceImpl implements MetadataValidatio
         validateValidationRuleGroupExists(id);
         
         // 先删除关联的规则定义
-        validationRuleDefinitionRepository.deleteByGroupId(id);
+        validationRuleDefinitionService.deleteByGroupId(id);
         
         // 删除校验规则分组
         validationRuleGroupRepository.deleteById(id);
@@ -156,7 +155,7 @@ public class MetadataValidationRuleGroupServiceImpl implements MetadataValidatio
         mainOrRule.setLogicType("LOGIC");
         mainOrRule.setLogicOperator("OR");
         mainOrRule.setStatus("ACTIVE");
-        validationRuleDefinitionRepository.upsert(mainOrRule);
+        validationRuleDefinitionService.saveRuleDefinition(mainOrRule);
         Long mainOrRuleId = mainOrRule.getId();
 
         // 处理每个OR分组（内层数组）
@@ -174,7 +173,7 @@ public class MetadataValidationRuleGroupServiceImpl implements MetadataValidatio
                 if (!StringUtils.hasText(ruleDO.getStatus())) {
                     ruleDO.setStatus("ACTIVE");
                 }
-                validationRuleDefinitionRepository.upsert(ruleDO);
+                validationRuleDefinitionService.saveRuleDefinition(ruleDO);
             } else {
                 // 多个条件，创建AND分组节点
                 MetadataValidationRuleDefinitionDO andGroupRule = new MetadataValidationRuleDefinitionDO();
@@ -183,7 +182,7 @@ public class MetadataValidationRuleGroupServiceImpl implements MetadataValidatio
                 andGroupRule.setLogicType("LOGIC");
                 andGroupRule.setLogicOperator("AND");
                 andGroupRule.setStatus("ACTIVE");
-                validationRuleDefinitionRepository.upsert(andGroupRule);
+                validationRuleDefinitionService.saveRuleDefinition(andGroupRule);
                 Long andGroupRuleId = andGroupRule.getId();
 
                 // 添加AND分组内的所有条件
@@ -194,7 +193,7 @@ public class MetadataValidationRuleGroupServiceImpl implements MetadataValidatio
                     if (!StringUtils.hasText(ruleDO.getStatus())) {
                         ruleDO.setStatus("ACTIVE");
                     }
-                    validationRuleDefinitionRepository.upsert(ruleDO);
+                    validationRuleDefinitionService.saveRuleDefinition(ruleDO);
                 }
             }
         }
@@ -208,7 +207,7 @@ public class MetadataValidationRuleGroupServiceImpl implements MetadataValidatio
      */
     public List<List<ValidationRuleDefinitionVO>> buildValueRulesStructure(Long groupId) {
         // 获取该规则组下的所有规则定义
-        List<MetadataValidationRuleDefinitionDO> allRules = validationRuleDefinitionRepository.selectByGroupId(groupId);
+        List<MetadataValidationRuleDefinitionDO> allRules = validationRuleDefinitionService.getByGroupId(groupId);
         if (CollectionUtils.isEmpty(allRules)) {
             return new ArrayList<>();
         }

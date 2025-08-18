@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.metadata.service.relationship;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
+import com.cmsr.onebase.module.metadata.dal.database.MetadataEntityRelationshipRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.BusinessEntitySaveReqVO;
@@ -51,7 +51,7 @@ import static com.cmsr.onebase.module.metadata.enums.ErrorCodeConstants.ENTITY_R
 public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRelationshipService {
 
     @Resource
-    private DataRepository dataRepository;
+    private MetadataEntityRelationshipRepository entityRelationshipRepository;
 
     @Resource
     private MetadataBusinessEntityService businessEntityService;
@@ -67,7 +67,7 @@ public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRela
         entityRelationship.setSourceEntityId(Long.valueOf(createReqVO.getSourceEntityId()));
         entityRelationship.setTargetEntityId(Long.valueOf(createReqVO.getTargetEntityId()));
         entityRelationship.setAppId(Long.valueOf(createReqVO.getAppId()));
-        dataRepository.insert(entityRelationship);
+        entityRelationshipRepository.insert(entityRelationship);
         
         return entityRelationship.getId();
     }
@@ -84,7 +84,7 @@ public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRela
         updateObj.setSourceEntityId(Long.valueOf(updateReqVO.getSourceEntityId()));
         updateObj.setTargetEntityId(Long.valueOf(updateReqVO.getTargetEntityId()));
         updateObj.setAppId(Long.valueOf(updateReqVO.getAppId()));
-        dataRepository.update(updateObj);
+        entityRelationshipRepository.update(updateObj);
     }
 
     @Override
@@ -94,12 +94,12 @@ public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRela
         validateEntityRelationshipExists(id);
         
         // 删除实体关系
-        dataRepository.deleteById(MetadataEntityRelationshipDO.class, id);
+        entityRelationshipRepository.deleteById(id);
     }
 
     @Override
     public EntityRelationshipRespVO getEntityRelationshipDetail(Long id) {
-        MetadataEntityRelationshipDO entityRelationship = dataRepository.findById(MetadataEntityRelationshipDO.class, id);
+        MetadataEntityRelationshipDO entityRelationship = entityRelationshipRepository.findById(id);
         if (entityRelationship == null) {
             throw exception(ENTITY_RELATIONSHIP_NOT_EXISTS);
         }
@@ -140,16 +140,15 @@ public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRela
             // 先检查该实体是否存在任何关联关系
             DefaultConfigStore checkConfigStore = new DefaultConfigStore();
             if (pageReqVO.getAppId() != null) {
-                checkConfigStore.and("app_id", pageReqVO.getAppId());
+                checkConfigStore.and(MetadataEntityRelationshipDO.APP_ID, pageReqVO.getAppId());
             }
             // 使用正确的嵌套OR语法
             checkConfigStore.and(new DefaultConfigStore()
-                    .or("source_entity_id", entityIdLong)
-                    .or("target_entity_id", entityIdLong));
+                    .or(MetadataEntityRelationshipDO.SOURCE_ENTITY_ID, entityIdLong)
+                    .or(MetadataEntityRelationshipDO.TARGET_ENTITY_ID, entityIdLong));
             
             // 查询是否存在相关记录
-            List<MetadataEntityRelationshipDO> existingRelations = dataRepository.findAllByConfig(
-                    MetadataEntityRelationshipDO.class, checkConfigStore);
+            List<MetadataEntityRelationshipDO> existingRelations = entityRelationshipRepository.findAllByConfig(checkConfigStore);
             
             if (existingRelations.isEmpty()) {
                 // 如果找不到任何相关记录，直接返回空结果
@@ -159,22 +158,22 @@ public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRela
             
             // 使用嵌套 OR 条件：(source_entity_id = entityId OR target_entity_id = entityId)
             configStore.and(new DefaultConfigStore()
-                    .or("source_entity_id", entityIdLong)
-                    .or("target_entity_id", entityIdLong));
+                    .or(MetadataEntityRelationshipDO.SOURCE_ENTITY_ID, entityIdLong)
+                    .or(MetadataEntityRelationshipDO.TARGET_ENTITY_ID, entityIdLong));
             
             log.info("查询实体相关关系，实体ID: {}，找到 {} 条相关记录", pageReqVO.getEntityId(), existingRelations.size());
         } else {
             // 如果没有传入 entityId，则使用精确的源实体ID和目标实体ID查询
             if (pageReqVO.getSourceEntityId() != null) {
-                configStore.and("source_entity_id", Long.valueOf(pageReqVO.getSourceEntityId()));
+                configStore.and(MetadataEntityRelationshipDO.SOURCE_ENTITY_ID, Long.valueOf(pageReqVO.getSourceEntityId()));
             }
             if (pageReqVO.getTargetEntityId() != null) {
-                configStore.and("target_entity_id", Long.valueOf(pageReqVO.getTargetEntityId()));
+                configStore.and(MetadataEntityRelationshipDO.TARGET_ENTITY_ID, Long.valueOf(pageReqVO.getTargetEntityId()));
             }
         }
         
         if (StringUtils.hasText(pageReqVO.getRelationshipType())) {
-            configStore.and("relationship_type", pageReqVO.getRelationshipType());
+            configStore.and(MetadataEntityRelationshipDO.RELATIONSHIP_TYPE, pageReqVO.getRelationshipType());
         }
         
         configStore.order("create_time", Order.TYPE.DESC);
@@ -183,8 +182,8 @@ public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRela
         log.info("分页查询参数: pageNo={}, pageSize={}", pageReqVO.getPageNo(), pageReqVO.getPageSize());
         
         // 分页查询
-        PageResult<MetadataEntityRelationshipDO> pageResult = dataRepository.findPageWithConditions(
-            MetadataEntityRelationshipDO.class, configStore, pageReqVO.getPageNo(), pageReqVO.getPageSize());
+        PageResult<MetadataEntityRelationshipDO> pageResult = entityRelationshipRepository.findPageWithConditions(
+            configStore, pageReqVO.getPageNo(), pageReqVO.getPageSize());
         
         log.info("分页查询结果: 当前页记录数={}, 总记录数={}", 
                 pageResult.getList().size(), pageResult.getTotal());
@@ -214,7 +213,7 @@ public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRela
      * 校验实体关系是否存在
      */
     private void validateEntityRelationshipExists(Long id) {
-        if (dataRepository.findById(MetadataEntityRelationshipDO.class, id) == null) {
+        if (entityRelationshipRepository.findById(id) == null) {
             throw exception(ENTITY_RELATIONSHIP_NOT_EXISTS);
         }
     }
@@ -263,8 +262,7 @@ public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRela
         // 首先获取该数据源下的所有实体ID
         DefaultConfigStore entityConfigStore = new DefaultConfigStore();
         entityConfigStore.and("datasource_id", datasourceId);
-        List<MetadataBusinessEntityDO> entities = dataRepository.findAllByConfig(
-                MetadataBusinessEntityDO.class, entityConfigStore);
+        List<MetadataBusinessEntityDO> entities = businessEntityService.findAllByConfig(entityConfigStore);
 
         if (entities.isEmpty()) {
             return List.of();
@@ -282,8 +280,7 @@ public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRela
         relationshipConfigStore.and(orStore);
         relationshipConfigStore.order("create_time", Order.TYPE.DESC);
 
-        List<MetadataEntityRelationshipDO> relationships = dataRepository.findAllByConfig(
-                MetadataEntityRelationshipDO.class, relationshipConfigStore);
+        List<MetadataEntityRelationshipDO> relationships = entityRelationshipRepository.findAllByConfig(relationshipConfigStore);
 
         return relationships.stream()
                 .map(this::convertToRespVO)
@@ -304,7 +301,7 @@ public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRela
         try {
             DefaultConfigStore configStore = new DefaultConfigStore();
             configStore.and("id", entityId);
-            MetadataBusinessEntityDO entity = dataRepository.findOne(MetadataBusinessEntityDO.class, configStore);
+            MetadataBusinessEntityDO entity = businessEntityService.getBusinessEntity(entityId);
             return entity != null ? entity.getDisplayName() : null;
         } catch (Exception e) {
             log.warn("获取实体名称失败，实体ID: {}, 错误: {}", entityId, e.getMessage());
@@ -326,7 +323,7 @@ public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRela
         try {
             DefaultConfigStore configStore = new DefaultConfigStore();
             configStore.and("id", Long.valueOf(fieldId));
-            MetadataEntityFieldDO field = dataRepository.findOne(MetadataEntityFieldDO.class, configStore);
+            MetadataEntityFieldDO field = entityFieldService.getEntityField(fieldId);
             return field != null ? field.getFieldName() : null;
         } catch (NumberFormatException e) {
             log.warn("无效的字段ID: {}", fieldId);
@@ -420,10 +417,10 @@ public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRela
      */
     private Long getEntityIdField(Long entityId) {
         DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and("entity_id", entityId);
-        configStore.and("field_name", "id");
+        configStore.and(MetadataEntityFieldDO.ENTITY_ID, entityId);
+        configStore.and(MetadataEntityFieldDO.FIELD_NAME, "id");
         
-        MetadataEntityFieldDO idField = dataRepository.findOne(MetadataEntityFieldDO.class, configStore);
+        MetadataEntityFieldDO idField = entityFieldService.getEntityField(String.valueOf(entityId));
         if (idField == null) {
             throw new IllegalArgumentException("主表实体未找到id字段，实体ID: " + entityId);
         }
@@ -439,10 +436,10 @@ public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRela
      */
     private Long getOrCreateParentIdField(Long childEntityId) {
         DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and("entity_id", childEntityId);
-        configStore.and("field_name", "parent_id");
+        configStore.and(MetadataEntityFieldDO.ENTITY_ID, childEntityId);
+        configStore.and(MetadataEntityFieldDO.FIELD_NAME, "parent_id");
         
-        MetadataEntityFieldDO parentIdField = dataRepository.findOne(MetadataEntityFieldDO.class, configStore);
+        MetadataEntityFieldDO parentIdField = entityFieldService.getEntityField(String.valueOf(childEntityId));
         if (parentIdField != null) {
             return parentIdField.getId();
         }
@@ -468,11 +465,10 @@ public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRela
 
         // 3. 查询以该实体为源实体的所有关系（即该实体作为父表的关系）
         DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and("source_entity_id", entityId);
+        configStore.and(MetadataEntityRelationshipDO.SOURCE_ENTITY_ID, entityId);
         configStore.order("create_time", Order.TYPE.DESC);
 
-        List<MetadataEntityRelationshipDO> relationships = dataRepository.findAllByConfig(
-                MetadataEntityRelationshipDO.class, configStore);
+        List<MetadataEntityRelationshipDO> relationships = entityRelationshipRepository.findAllByConfig(configStore);
 
         // 4. 填充父表字段信息
         List<EntityFieldInfoRespVO> parentFields = getEntityFields(entityId);
@@ -533,8 +529,7 @@ public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRela
         entityConfigStore.and("app_id", appId);
         entityConfigStore.order("create_time", Order.TYPE.ASC);
 
-        List<MetadataBusinessEntityDO> entities = dataRepository.findAllByConfig(
-                MetadataBusinessEntityDO.class, entityConfigStore);
+        List<MetadataBusinessEntityDO> entities = businessEntityService.findAllByConfig(entityConfigStore);
 
         if (entities.isEmpty()) {
             log.info("应用下未找到任何实体，应用ID: {}", appId);
@@ -587,17 +582,15 @@ public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRela
     private String determineEntityType(Long entityId) {
         // 检查是否存在以该实体为源实体的关系（即该实体作为主表）
         DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and("source_entity_id", entityId);
+        configStore.and(MetadataEntityRelationshipDO.SOURCE_ENTITY_ID, entityId);
         
-        List<MetadataEntityRelationshipDO> asSourceRelationships = dataRepository.findAllByConfig(
-                MetadataEntityRelationshipDO.class, configStore);
+        List<MetadataEntityRelationshipDO> asSourceRelationships = entityRelationshipRepository.findAllByConfig(configStore);
 
         // 检查是否存在以该实体为目标实体的关系（即该实体作为子表）
         DefaultConfigStore targetConfigStore = new DefaultConfigStore();
-        targetConfigStore.and("target_entity_id", entityId);
+        targetConfigStore.and(MetadataEntityRelationshipDO.TARGET_ENTITY_ID, entityId);
         
-        List<MetadataEntityRelationshipDO> asTargetRelationships = dataRepository.findAllByConfig(
-                MetadataEntityRelationshipDO.class, targetConfigStore);
+        List<MetadataEntityRelationshipDO> asTargetRelationships = entityRelationshipRepository.findAllByConfig(targetConfigStore);
 
         if (!asSourceRelationships.isEmpty() && asTargetRelationships.isEmpty()) {
             return "主表";
@@ -618,11 +611,10 @@ public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRela
      */
     private List<EntityFieldInfoRespVO> getEntityFields(Long entityId) {
         DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and("entity_id", entityId);
-        configStore.order("sort_no", Order.TYPE.ASC);
+        configStore.and(MetadataEntityFieldDO.ENTITY_ID, entityId);
+        configStore.order(MetadataEntityFieldDO.SORT_ORDER, Order.TYPE.ASC);
 
-        List<MetadataEntityFieldDO> fields = dataRepository.findAllByConfig(
-                MetadataEntityFieldDO.class, configStore);
+        List<MetadataEntityFieldDO> fields = entityFieldService.findAllByConfig(configStore);
 
         return fields.stream()
                 .map(this::convertToFieldInfo)
@@ -645,4 +637,8 @@ public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRela
         return fieldInfo;
     }
 
+    @Override
+    public List<MetadataEntityRelationshipDO> findAllByConfig(DefaultConfigStore configStore) {
+        return entityRelationshipRepository.findAllByConfig(configStore);
+    }
 } 

@@ -100,6 +100,14 @@ public interface MetadataEntityFieldService {
     MetadataEntityFieldDO getEntityField(String id);
 
     /**
+     * 创建实体字段（内部使用）
+     *
+     * @param entityField 实体字段DO
+     * @return 字段ID
+     */
+    Long createEntityFieldInternal(MetadataEntityFieldDO entityField);
+
+    /**
      * 获得实体字段分页
      *
      * @param pageReqVO 分页查询
@@ -134,5 +142,13 @@ public interface MetadataEntityFieldService {
      * 若任一物理 DDL 失败则整体回滚
      */
     EntityFieldBatchSaveRespVO batchSaveEntityFields(@Valid EntityFieldBatchSaveReqVO reqVO);
+
+    /**
+     * 根据条件查询实体字段列表
+     *
+     * @param configStore 查询条件
+     * @return 实体字段列表
+     */
+    List<MetadataEntityFieldDO> findAllByConfig(org.anyline.data.param.init.DefaultConfigStore configStore);
 
 }
