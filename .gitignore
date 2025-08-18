@@ -97,3 +97,4 @@ sessionStore
 /MetadataEntityFieldServiceImpl高并发优化说明.md
 /table_name_enhancement_summary.md
 /onebase-module-data/onebase-module-metadata-api/README.md
+/sql/postgresql/patch/2025-08-18-metadata-auto-number.sql
