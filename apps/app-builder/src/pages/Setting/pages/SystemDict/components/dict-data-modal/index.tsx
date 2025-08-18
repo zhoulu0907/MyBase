@@ -33,8 +33,6 @@ export default function DictionaryItemModal({
       });
       const isChecked = !initialValues || initialValues.status === StatusEnum.ENABLE ? true : false;
       setStatusCheckedValue(isChecked);
-    } else {
-      form.resetFields();
     }
   }, [visible, initialValues, form]);
 

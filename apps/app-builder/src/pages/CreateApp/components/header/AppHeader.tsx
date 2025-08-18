@@ -76,22 +76,13 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
   const handleLogout = () => {
     // 清除 token
     TokenManager.clearToken();
+    UserPermissionManager.clearUserPermissionInfo();
     // 跳转到登录页
     navigate('/login');
   };
 
   // 用户菜单
   const userMenu = (
-    // <Menu>
-    //   <Menu.Item key="profile">
-    //     <IconUser />
-    //     {t('header.profile')}
-    //   </Menu.Item>
-    //   <Menu.Item key="logout" onClick={handleLogout}>
-    //     <IconPoweroff />
-    //     {t('header.logout')}
-    //   </Menu.Item>
-    // </Menu>
     <Menu>
       <Menu.Item key="profile">
         <div className={styles.userMenuInfo}>

@@ -2,6 +2,7 @@ import { getComponentSchema } from '@/components/Materials/schema';
 import { COMPONENT_TYPE_DISPLAY_NAME_MAP } from '@/components/Materials/template';
 import type { EditConfig } from '@/components/Materials/types';
 import { LAYOUT_COMPONENT_TYPES } from '@/constants/componentTypes';
+import { useFormEditorSignal, useListEditorSignal } from '@/store/singals/page_editor';
 import { Message } from '@arco-design/web-react';
 import { loadPageSet, savePageSet, type ComponentConfig, type LoadPageSetReq, type PageSet, type SavePageSetReq } from '@onebase/app';
 
@@ -22,10 +23,10 @@ export function getComponentConfig(schema: any, itemType: string): any {
 }
 
 export interface SavePageSetParams {
-    pageSetCode: string;
-    fromComponents: any[];
+    pageSetId: string;
+    formComponents: any[];
     listComponents: any[];
-    fromPageComponentSchemas: Map<string, EditConfig>;
+    formPageComponentSchemas: Map<string, EditConfig>;
     listPageComponentSchemas: Map<string, EditConfig>;
     fromColComponentsMap: {
         colComponents: Map<string, any[][]>;
@@ -36,37 +37,39 @@ export interface SavePageSetParams {
 }
 
 export async function startSavePageSet(params: SavePageSetParams) {
-    const { fromComponents, fromPageComponentSchemas, listComponents, listPageComponentSchemas,
-        fromColComponentsMap, listColComponentsMap, pageSetCode } = params;
-    // console.log(fromComponents);
-    // console.log(fromPageComponentSchemas);
+    const { formComponents, formPageComponentSchemas, listComponents, listPageComponentSchemas,
+        fromColComponentsMap, listColComponentsMap, pageSetId } = params;
 
-    // console.log(fromColComponentsMap);
+    console.log('formComponents: ', formComponents);
+    console.log('formPageComponentSchemas: ', formPageComponentSchemas);
+    console.log('listComponents: ', listComponents);
+    console.log('listPageComponentSchemas: ', listPageComponentSchemas);
 
-    // console.log(listComponents);
-    // console.log(listPageComponentSchemas);
-
-    // console.log(listColComponentsMap);
 
     const loadPageSetReq: LoadPageSetReq = {
-      pageSetCode: pageSetCode
+      id: pageSetId
     };
     const loadPagesetResp = await loadPageSet(loadPageSetReq);
     console.log('res: ', loadPagesetResp);
 
     loadPagesetResp.pages.forEach((_page: PageSet, index: number) => {
       if (_page.pageType === 'form') {
-        loadPagesetResp.pages[index].components = fromComponents.map((component) => {
+        // console.log('formComponentsSchemas: ', formPageComponentSchemas);
+
+        loadPagesetResp.pages[index].components = formComponents.map((component) => {
+            console.log('component: ', component);
+            console.log('formPageComponentSchemas: ', formPageComponentSchemas);
           return {
             componentCode: component.id,
             componentType: component.type,
-            config: JSON.stringify(fromPageComponentSchemas.get(component.id)?.config),
-            editData: JSON.stringify(fromPageComponentSchemas.get(component.id)?.editData),
+            config: JSON.stringify(formPageComponentSchemas.get(component.id)?.config),
+            editData: JSON.stringify(formPageComponentSchemas.get(component.id)?.editData),
             parentCode: "",
             blockIndex: 0,
             containerIndex: 0,
-          };
+          } as ComponentConfig;
         });
+        // console.log('loadPagesetResp.pages[index].components: ', loadPagesetResp.pages[index].components);
 
         const colComponents: any[] = [];
         console.log(fromColComponentsMap.colComponents);
@@ -78,12 +81,12 @@ export async function startSavePageSet(params: SavePageSetParams) {
                     colComponents.push({
                         componentCode: component.id,
                         componentType: component.type,
-                        config: JSON.stringify(fromPageComponentSchemas.get(component.id)?.config),
-                        editData: JSON.stringify(fromPageComponentSchemas.get(component.id)?.editData),
+                        config: JSON.stringify(formPageComponentSchemas.get(component.id)?.config),
+                        editData: JSON.stringify(formPageComponentSchemas.get(component.id)?.editData),
                         parentCode: parentCode,
                         blockIndex: index,
                         containerIndex: colIndex,
-                    });
+                    } as ComponentConfig);
                 });
             });
         });
@@ -92,6 +95,7 @@ export async function startSavePageSet(params: SavePageSetParams) {
 
 
       } else if (_page.pageType === 'list') {
+        console.log('listComponents: ', listComponents);
         loadPagesetResp.pages[index].components = listComponents.map((component) => {
           return {
             componentCode: component.id,
@@ -101,7 +105,7 @@ export async function startSavePageSet(params: SavePageSetParams) {
             parentCode: "",
             blockIndex: 0,
             containerIndex: 0,
-          };
+          } as ComponentConfig;
         });
 
         const colComponents: any[] = [];
@@ -117,7 +121,7 @@ export async function startSavePageSet(params: SavePageSetParams) {
                         parentCode: parentCode,
                         blockIndex: index,
                         containerIndex: colIndex,
-                    });
+                    } as ComponentConfig);
                 });
             });
         });
@@ -129,7 +133,7 @@ export async function startSavePageSet(params: SavePageSetParams) {
     console.log(loadPagesetResp);
 
     const savePageSetReq: SavePageSetReq = {
-      pageSetCode: pageSetCode,
+      id: pageSetId,
       pageSetName: '',
       pages: loadPagesetResp.pages
     };
@@ -143,20 +147,26 @@ export async function startSavePageSet(params: SavePageSetParams) {
 }
 
 export interface LoadPageSetParams {
-    pageSetCode: string;
-    setFromComponents: Function;
-    setFromPageComponentSchemas: Function;
-    setListComponents: Function;
-    setListPageComponentSchemas: Function;
-    setFromColComponentsMap: Function;
-    setListColComponentsMap: Function;
+    pageSetId: string;
 }
 
 export async function startLoadPageSet(params: LoadPageSetParams) {
-    const { pageSetCode, setFromComponents, setFromPageComponentSchemas, setListComponents, setListPageComponentSchemas ,setFromColComponentsMap, setListColComponentsMap} = params;
+    const { pageSetId } = params;
+
+    const {
+        setComponents: setFormComponents,
+        setPageComponentSchemas: setFromPageComponentSchemas,
+        setLayoutSubComponents: setFromLayoutSubComponents
+    } = useFormEditorSignal;
+
+    const {
+        setComponents: setListComponents,
+        setPageComponentSchemas: setListPageComponentSchemas,
+        setLayoutSubComponents: setListLayoutSubComponents
+    } = useListEditorSignal;
 
     const loadPageSetReq: LoadPageSetReq = {
-      pageSetCode: pageSetCode
+      id: pageSetId
     };
     const pageSet = await loadPageSet(loadPageSetReq);
     console.log('res: ', pageSet);
@@ -215,9 +225,9 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
                 };
             }
             if (page.pageType === 'form') {
-                setFromColComponentsMap(component.parentCode, colComponents as any[][]);
+                setFromLayoutSubComponents(component.parentCode, colComponents as any[][]);
             } else if (page.pageType === 'list') {
-                setListColComponentsMap(component.parentCode, colComponents as any[][]);
+                setListLayoutSubComponents(component.parentCode, colComponents as any[][]);
             }
 
             newPageComponentSchemas.set(component.componentCode, {
@@ -232,7 +242,7 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
     //   console.log(page.pageType,": newColComponentsMap: ", newColComponentsMap);
 
       if (page.pageType === 'form') {
-        setFromComponents(newComponents);
+        setFormComponents(newComponents);
         newPageComponentSchemas.forEach((config, componentId) => {
           setFromPageComponentSchemas(componentId, config);
         });

@@ -1,11 +1,12 @@
 import { getComponentSchema } from '@/components/Materials/schema';
 import { ALL_COMPONENT_TYPES } from '@/constants/componentTypes';
-import { usePageEditorStore } from '@/hooks/useStore';
+import { usePageEditorSignal } from '@/hooks/useSignal';
 import EditRender from '@/pages/Editor/components/render/EditRender';
 import { getComponentConfig, getComponentWidth } from '@/pages/Editor/utils/app_resource';
 import { COMPONENT_GROUP_NAME, type GridItem } from '@/pages/Editor/utils/const';
 import { Layout } from '@arco-design/web-react';
 import { IconDelete } from '@arco-design/web-react/icon';
+import { useSignals } from '@preact/signals-react/runtime';
 import { useEffect } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import styles from './index.module.less';
@@ -14,6 +15,7 @@ import { type XColumnLayoutConfig } from './schema';
 const XColumnLayout = (props: XColumnLayoutConfig) => {
   const { colCount, id } = props;
 
+  useSignals();
   const {
     curComponentID,
     setCurComponentID,
@@ -24,30 +26,32 @@ const XColumnLayout = (props: XColumnLayoutConfig) => {
     delPageComponentSchemas,
     showDeleteButton,
     setShowDeleteButton,
-    colComponentsMap,
-    setColComponentsMap
-  } = usePageEditorStore();
+
+    layoutSubComponents,
+    setLayoutSubComponents
+  } = usePageEditorSignal();
 
   // 从 store 中获取当前组件的列数据，如果不存在则初始化为空数组
-  const colComponents = colComponentsMap.colComponents.get(id) || Array.from({ length: colCount }, () => []);
+  const colComponents = layoutSubComponents[id] || Array.from({ length: colCount }, () => []);
   //   console.log('colComponents', colComponents);
 
   // 如果列数变了，就重新初始化列
   useEffect(() => {
-    const currentColumns = colComponentsMap.colComponents.get(id);
+    console.log('layoutSubComponents:  ', colComponents);
+
+    const currentColumns = layoutSubComponents[id];
     if (!currentColumns || currentColumns.length !== colCount) {
-      setColComponentsMap(
-        id,
-        Array.from({ length: colCount }, () => [])
-      );
+      console.log('id', id, 'colCount', colCount);
+      const newColumns = Array.from({ length: colCount }, () => []);
+      setLayoutSubComponents(id, newColumns);
     }
-  }, [colCount, id, colComponentsMap.colComponents, setColComponentsMap]);
+  }, [colCount, id, colComponents]);
 
   const handleDeleteComponent = (componentId: string) => {
     // 从组件列表中移除
     // 遍历二维数组的每一列，过滤掉 id 匹配的组件
     const updatedColumns = colComponents.map((col) => col.filter((cp) => cp.id !== componentId));
-    setColComponentsMap(id, updatedColumns);
+    setLayoutSubComponents(id, updatedColumns);
 
     // 如果删除的是当前选中的组件，清除选中状态
     if (curComponentID === componentId) {
@@ -65,11 +69,16 @@ const XColumnLayout = (props: XColumnLayoutConfig) => {
             list={colComponents[index]}
             setList={(newList) => {
               // 使用函数式更新确保状态更新的原子性
-              setColComponentsMap(id, (prevColumns: any[][]) => {
-                const updatedColumns = [...(prevColumns || [])];
-                updatedColumns[index] = newList;
-                return updatedColumns;
-              });
+              //   setColComponentsMap(id, (prevColumns: any[][]) => {
+              //     const updatedColumns = [...(prevColumns || [])];
+              //     updatedColumns[index] = newList;
+              //     return updatedColumns;
+              //   });
+
+              //   const updatecolComponents = colComponents;
+              //   updatecolComponents[index] = newList;
+              //   setLayoutSubComponents(id, updatecolComponents);
+              colComponents[index] = newList;
             }}
             onAdd={(e) => {
               // console.log("onAdd", e);
@@ -83,7 +92,7 @@ const XColumnLayout = (props: XColumnLayoutConfig) => {
               const itemType = e.item.getAttribute('data-cp-type');
               const itemDisplayName = e.item.getAttribute('data-cp-displayname');
 
-              const schemaConfig = getComponentConfig(pageComponentSchemas.get(cpID!), itemType!);
+              const schemaConfig = getComponentConfig(pageComponentSchemas[cpID!], itemType!);
 
               const schema = getComponentSchema(itemType as any);
 
@@ -125,7 +134,7 @@ const XColumnLayout = (props: XColumnLayoutConfig) => {
               console.log('onStart', e);
               const cpID = e.item.getAttribute('data-id') || '';
               setCurComponentID(cpID);
-              const curComponentSchema = pageComponentSchemas.get(cpID) || {};
+              const curComponentSchema = pageComponentSchemas[cpID] || {};
               setCurComponentSchema(curComponentSchema);
               setShowDeleteButton(true);
             }}
@@ -139,7 +148,7 @@ const XColumnLayout = (props: XColumnLayoutConfig) => {
                   data-cp-id={cp.id}
                   className={styles.componentItem}
                   style={{
-                    width: getComponentWidth(pageComponentSchemas.get(cp.id), cp.type),
+                    width: getComponentWidth(pageComponentSchemas[cp.id], cp.type),
                     borderColor: curComponentID === cp.id ? '#4FAE7B' : 'transparent'
                   }}
                   onClick={(e: React.MouseEvent<HTMLDivElement>) => {
@@ -147,12 +156,12 @@ const XColumnLayout = (props: XColumnLayoutConfig) => {
                     console.log('点击组件: ', cp.id);
                     setCurComponentID(cp.id);
 
-                    const curComponentSchema = pageComponentSchemas.get(cp.id);
+                    const curComponentSchema = pageComponentSchemas[cp.id];
                     setCurComponentSchema(curComponentSchema);
                     setShowDeleteButton(true);
                   }}
                 >
-                  <EditRender cpId={cp.id} cpType={cp.type} pageComponentSchema={pageComponentSchemas.get(cp.id)} />
+                  <EditRender cpId={cp.id} cpType={cp.type} pageComponentSchema={pageComponentSchemas[cp.id]} />
 
                   {/* 删除按钮 */}
                   {curComponentID === cp.id && showDeleteButton && (

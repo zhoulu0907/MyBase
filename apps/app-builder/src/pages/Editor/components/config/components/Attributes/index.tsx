@@ -1,8 +1,9 @@
 import type { TXInputTextEditData } from '@/components/Materials/Basic/FormComponents/InputText/schema';
 import { CONFIG_TYPES } from '@/components/Materials/constants';
 import { useI18n } from '@/hooks/useI18n';
-import { usePageEditorStore } from '@/hooks/useStore';
+import { usePageEditorSignal } from '@/hooks/useSignal';
 import { ColorPicker, Form, Input, InputNumber, Radio, Switch } from '@arco-design/web-react';
+import { useSignals } from '@preact/signals-react/runtime';
 import { useEffect, useState } from 'react';
 import DynamicFieldConfig from './components/DynamicFieldConfig';
 import DynamicRelatedFormConfig from './components/DynamicRelatedFormConfig';
@@ -22,7 +23,8 @@ interface ConfigsProps {
 const Attributes = ({ cpID }: ConfigsProps) => {
   const { t } = useI18n();
 
-  const { curComponentSchema, setCurComponentSchema, setPageComponentSchemas } = usePageEditorStore();
+  useSignals();
+  const { curComponentSchema, setCurComponentSchema, setPageComponentSchemas } = usePageEditorSignal();
 
   const [editData, setEditData] = useState<TXInputTextEditData>([]);
   const [configs, setConfigs] = useState<any>({});

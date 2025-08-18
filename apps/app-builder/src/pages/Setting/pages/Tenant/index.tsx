@@ -1,7 +1,7 @@
 import { Avatar, Divider, Spin, Typography, Message } from '@arco-design/web-react';
 import { IconEye, IconEyeInvisible } from '@arco-design/web-react/icon';
 import type { TenantInfo } from '@onebase/platform-center';
-import { getTenantInfo, updatePlatformTenantApi } from '@onebase/platform-center';
+import { getTenantInfo, updateTenant } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
 import dayjs from 'dayjs';
 import styles from './index.module.less';
@@ -14,12 +14,14 @@ const TenantPage: React.FC = () => {
   const [tenantInfo, setTenantInfo] = useState<TenantInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [secretVisible, setSecretVisible] = useState(false);
+  const [tenantName, setTenantName] = useState('');
 
   const fetchTenantInfo = async () => {
     try {
       setLoading(true);
-      const res = await getTenantInfo('1'); // TODO：租户id暂时固定，后续从用户信息中获取
+      const res = await getTenantInfo();
       setTenantInfo(res);
+      setTenantName(res.name);
     } finally {
       setLoading(false);
     }
@@ -38,7 +40,7 @@ const TenantPage: React.FC = () => {
     }
 
     try {
-      await updatePlatformTenantApi({
+      await updateTenant({
         id: tenantInfo.id,
         name: newName
       });
@@ -49,9 +51,7 @@ const TenantPage: React.FC = () => {
       });
       
       Message.success('租户名称更新成功');
-    } catch (error) {
-      Message.error('租户名称更新失败');
-    }
+    } catch (error) {}
   };
 
   const secretIconStyle = { cursor: 'pointer', marginLeft: '8px', color: 'rgb(78, 89, 105)' };
@@ -60,8 +60,16 @@ const TenantPage: React.FC = () => {
     if (!link) {
       return;
     }
-    () => window.open(link, '_blank')
+    window.open(link, '_blank');
   }
+
+  // 生成完整访问地址的函数
+  const generateFullUrl = (path: string | null | undefined) => {
+    if (!path) return '';
+    const origin = window.location.origin;
+    const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+    return `${origin}/#/tenant${normalizedPath}`;
+  };
 
   // 显示加载状态
   if (loading) {
@@ -85,6 +93,10 @@ const TenantPage: React.FC = () => {
     );
   }
 
+  // 生成完整的工作台和移动端链接
+  const fullWebsite = generateFullUrl(tenantInfo.website);
+  const fullWebsiteH5 = generateFullUrl(tenantInfo.websiteH5);
+
   return (
     <PlaceholderPanel hasPermission={hasPermission(ACTIONS.QUERY)} isLoading={loading}>
       <div className={styles.tenantPage}>
@@ -101,8 +113,8 @@ const TenantPage: React.FC = () => {
                 <Title
                   heading={5}
                   style={{ margin: 0 }}
-                  editable={ hasPermission(ACTIONS.UPDATE) ? { onChange: handleNameChange } : false }>
-                  {tenantInfo.name}
+                  editable={ hasPermission(ACTIONS.UPDATE) ? { onChange: setTenantName,onEnd: handleNameChange } : false }>
+                  {tenantName}
                 </Title>
                 <Text copyable>ID：{tenantInfo.id}</Text>
               </div>
@@ -141,22 +153,22 @@ const TenantPage: React.FC = () => {
                   <Text type="secondary">工作台：</Text>
                   <Text 
                     type="primary" 
-                    copyable 
-                    onClick={() => { gotoLink(tenantInfo.website) }}
+                    copyable={{ text: fullWebsite || '-' }}
+                    onClick={() => { gotoLink(fullWebsite) }}
                     style={{ cursor: 'pointer' }}
                   >
-                    {tenantInfo.website || '-'}
+                    {fullWebsite || '-'}
                   </Text>
                 </div>
                 <div className={styles.descriptionItem}>
                   <Text type="secondary">移动端：</Text>
                   <Text 
                     type="primary" 
-                    copyable 
-                    onClick={() => { gotoLink(tenantInfo.websiteH5) }}
+                    copyable={{ text: fullWebsiteH5 || '-' }}
+                    onClick={() => { gotoLink(fullWebsiteH5) }}
                     style={{ cursor: 'pointer' }}
                   >
-                    {tenantInfo.websiteH5 || '-'}
+                    {fullWebsiteH5 || '-'}
                   </Text>
                 </div>
               </div>

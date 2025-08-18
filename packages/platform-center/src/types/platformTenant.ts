@@ -31,6 +31,10 @@ export interface PlatformTenantInfo {
    */
   contactName: string,
   /**
+   * 管理员昵称
+   */
+  nickName: string,
+  /**
    * 租户编码
    */
   tenantCode: string,

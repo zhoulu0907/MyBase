@@ -1,10 +1,11 @@
-import { useFromEditorStore, useListEditorStore } from '@/store/store_editor';
+import { useFormEditorSignal, useListEditorSignal } from '@/store/singals/page_editor';
+import { getHashQueryParam } from '@/utils/router';
 import { Button, Form, Message } from '@arco-design/web-react';
 import {
   dataMethodData,
   dataMethodInsert,
   getAppEntities,
-  getAppIdByPageSetCode,
+  getAppIdByPageSetId,
   getPageSetMetaData,
   type AppEntities,
   type DataMethodParam,
@@ -26,54 +27,41 @@ const Preview: React.FC<PreviewProps> = ({}) => {
   const [appId, setAppId] = useState('');
   const [editTargetId, setEditTargetId] = useState('');
 
-  const {
-    setComponents: setFromComponents,
-    setPageComponentSchemas: setFromPageComponentSchemas,
-    setColComponentsMap: setFromColComponentsMap,
-    pageComponentSchemas: formPageComponentSchemas,
-    components: formComponents
-  } = useFromEditorStore();
+  const { components: formComponents, pageComponentSchemas: formPageComponentSchemas } = useFormEditorSignal;
+  const { components: listComponents, pageComponentSchemas: listPageComponentSchemas } = useListEditorSignal;
 
-  const {
-    setComponents: setListComponents,
-    setPageComponentSchemas: setListPageComponentSchemas,
-    setColComponentsMap: setListColComponentsMap,
-    pageComponentSchemas: listPageComponentSchemas,
-    components: listComponents
-  } = useListEditorStore();
-
-  const [pageSetCode, setPageSetCode] = useState('');
+  const [pageSetId, setPageSetId] = useState('');
   const [pageType, setPageType] = useState('');
   const [mainMetaData, setMainMetaData] = useState<string>();
   const [form] = Form.useForm();
 
   useEffect(() => {
-    const hash = window.location.hash;
-    const queryIndex = hash.indexOf('?');
-    if (queryIndex !== -1) {
-      const queryString = hash.substring(queryIndex + 1);
-      const params = new URLSearchParams(queryString);
-      const pSetCode = params.get('pageSetCode') || '';
-      const pType = params.get('pageType') || '';
-      const id = params.get('id') || '';
+    const pageSetId = getHashQueryParam('pageSetId');
+    if (pageSetId) {
+      setPageSetId(pageSetId);
+    }
 
-      setPageSetCode(pSetCode);
-      setPageType(pType);
-      setEditTargetId(id);
+    const pageType = getHashQueryParam('pageType');
+    if (pageType) {
+      setPageType(pageType);
+    }
+
+    const editTargetId = getHashQueryParam('id');
+    if (editTargetId) {
+      setEditTargetId(editTargetId);
     }
   }, [window.location.hash]);
 
   useEffect(() => {
-    if (pageSetCode) {
-      console.log('pageSetCode: ', pageSetCode);
-      loadPageSetInfo(pageSetCode);
-      getAppID(pageSetCode);
-      getMainMetaData(pageSetCode);
+    if (pageSetId) {
+      loadPageSetInfo(pageSetId);
+      getAppID(pageSetId);
+      getMainMetaData(pageSetId);
     }
-  }, [pageSetCode]);
+  }, [pageSetId]);
 
-  const getMainMetaData = async (pageSetCode: string) => {
-    const mainMetaData = await getPageSetMetaData({ code: pageSetCode });
+  const getMainMetaData = async (pageSetId: string) => {
+    const mainMetaData = await getPageSetMetaData({ pageSetId: pageSetId });
     console.log('mainMetaData: ', mainMetaData);
     setMainMetaData(mainMetaData);
   };
@@ -113,20 +101,12 @@ const Preview: React.FC<PreviewProps> = ({}) => {
     return res;
   };
 
-  const loadPageSetInfo = async (pgsetCode: string) => {
-    startLoadPageSet({
-      pageSetCode: pgsetCode,
-      setFromComponents: setFromComponents,
-      setFromPageComponentSchemas: setFromPageComponentSchemas,
-      setListComponents: setListComponents,
-      setListPageComponentSchemas: setListPageComponentSchemas,
-      setFromColComponentsMap: setFromColComponentsMap,
-      setListColComponentsMap: setListColComponentsMap
-    });
+  const loadPageSetInfo = async (pageSetId: string) => {
+    startLoadPageSet({ pageSetId: pageSetId });
   };
 
-  const getAppID = async (pageSetCode: string) => {
-    const res = await getAppIdByPageSetCode({ code: pageSetCode });
+  const getAppID = async (pageSetId: string) => {
+    const res = await getAppIdByPageSetId({ pageSetId: pageSetId });
     if (res) {
       setAppId(res);
     }
@@ -162,33 +142,32 @@ const Preview: React.FC<PreviewProps> = ({}) => {
     console.log(res);
     if (res) {
       Message.success('插入成功');
-      navigate(`/onebase/preview-app/preview?pageSetCode=${pageSetCode}&pageType=${EDITOR_TYPES.LIST_EDITOR}`);
+      navigate(`/onebase/preview-app/preview?pageSetId=${pageSetId}&pageType=${EDITOR_TYPES.LIST_EDITOR}`);
     }
   };
 
   const cancelSubmitForm = () => {
     console.log('取消提交');
     form.resetFields();
-
-    navigate(`/onebase/preview-app/preview?pageSetCode=${pageSetCode}&pageType=${EDITOR_TYPES.LIST_EDITOR}`);
+    navigate(`/onebase/preview-app/preview?pageSetId=${pageSetId}&pageType=${EDITOR_TYPES.LIST_EDITOR}`);
   };
 
   return (
     <div className={styles.previewPage}>
       <div className={styles.content}>
         {pageType === EDITOR_TYPES.LIST_EDITOR &&
-          listComponents.map((cp: GridItem) => (
+          listComponents.value.map((cp: GridItem) => (
             <div
               key={cp.id}
               className={styles.componentItem}
               style={{
-                width: getComponentWidth(listPageComponentSchemas.get(cp.id), cp.type)
+                width: getComponentWidth(listPageComponentSchemas.value[cp.id], cp.type)
               }}
             >
               <PreviewRender
                 cpId={cp.id}
                 cpType={cp.type}
-                pageComponentSchema={listPageComponentSchemas.get(cp.id)}
+                pageComponentSchema={listPageComponentSchemas.value[cp.id]}
                 runtime={true}
               />
             </div>
@@ -197,18 +176,18 @@ const Preview: React.FC<PreviewProps> = ({}) => {
         {pageType === EDITOR_TYPES.FORM_EDITOR && (
           <>
             <Form layout="inline" form={form}>
-              {formComponents.map((cp: GridItem) => (
+              {formComponents.value.map((cp: GridItem) => (
                 <div
                   key={cp.id}
                   className={styles.componentItem}
                   style={{
-                    width: getComponentWidth(formPageComponentSchemas.get(cp.id), cp.type)
+                    width: getComponentWidth(formPageComponentSchemas.value[cp.id], cp.type)
                   }}
                 >
                   <PreviewRender
                     cpId={cp.id}
                     cpType={cp.type}
-                    pageComponentSchema={formPageComponentSchemas.get(cp.id)}
+                    pageComponentSchema={formPageComponentSchemas.value[cp.id]}
                     runtime={true}
                   />
                 </div>

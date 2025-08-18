@@ -9,9 +9,10 @@ interface FieldCardProps {
   id: string;
   fieldID: string;
   entityID: string;
+  label: string;
 }
 
-const FieldCard: React.FC<FieldCardProps> = ({ displayName, type, id, fieldID, entityID }) => {
+const FieldCard: React.FC<FieldCardProps> = ({ displayName, type, id, fieldID, entityID, label }) => {
   return (
     <div
       className={styles.fieldCard}
@@ -20,16 +21,10 @@ const FieldCard: React.FC<FieldCardProps> = ({ displayName, type, id, fieldID, e
       data-cp-id={id}
       data-field-id={fieldID}
       data-entity-id={entityID}
-      data-label={displayName}
+      data-label={label}
     >
-      <Button
-        key={id}
-        id={id || `${type}-${Date.now()}`}
-        type="outline"
-        icon={<IconAlignRight />}
-        className={styles.fieldItem}
-      >
-        {displayName}
+      <Button key={id} id={id} type="outline" icon={<IconAlignRight />} className={styles.fieldItem}>
+        {label}
       </Button>
     </div>
   );

@@ -16,4 +16,10 @@ export interface UserVO {
   loginDate: Date;
   createTime: Date;
   roles?: SimpleRoleVO[];
+  adminType?: UserType;
+}
+
+export enum UserType {
+  SYSTEM = 1, // 系统预置用户
+  CUSTOM = 2, // 自定义用户
 }

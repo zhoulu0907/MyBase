@@ -85,6 +85,7 @@
     "tenantCount": "租户数量",
     "authRecord": "认证记录",
     "uploadAuth": "上传认证",
+    "uploadSuccess": "上传成功",
     "downloadAuth": "下载认证",
     "serverInfo": "服务器信息",
     "systemStatus": "系统状态",

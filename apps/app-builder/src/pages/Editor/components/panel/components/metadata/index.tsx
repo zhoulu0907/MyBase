@@ -1,4 +1,5 @@
 import FieldCard from '@/components/FieldCard';
+import { COMPONENT_TYPE_DISPLAY_NAME_MAP } from '@/components/Materials/template';
 import { FORM_COMPONENT_TYPES } from '@/constants/componentTypes';
 import { useI18n } from '@/hooks/useI18n';
 import { COMPONENT_GROUP_NAME } from '@/pages/Editor/utils/const';
@@ -19,12 +20,11 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({}) => {
   const { mainEntity } = useAppEntityStore();
 
   const [fieldItems, setFieldItems] = useState<
-    { id: string; displayName: string; type: string; fieldID: string; entityID: string }[]
+    { id: string; displayName: string; label: string; type: string; fieldID: string; entityID: string }[]
   >([]);
 
   useEffect(() => {
     if (mainEntity.fields.length > 0) {
-      console.log(mainEntity.fields);
       const newFieldItems = mainEntity.fields
         .filter((field: AppEntityField) => field.isSystemField === 1)
         .map((field: AppEntityField, index: number) => {
@@ -33,8 +33,10 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({}) => {
             cpType = FORM_COMPONENT_TYPES.INPUT_TEXT;
           }
           return {
+            // TODO(mickey): 使用uuid作为id
             id: `${cpType}-${index}-${Date.now()}`,
-            displayName: field.fieldName,
+            displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[cpType] || '',
+            label: field.fieldName,
             type: cpType,
             fieldID: field.fieldID,
             entityID: mainEntity.entityID
@@ -42,7 +44,6 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({}) => {
         })
         .filter((item) => item !== null);
 
-      console.log(newFieldItems);
       setFieldItems(newFieldItems);
     }
   }, [mainEntity]);
@@ -125,9 +126,9 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({}) => {
             className={styles.fieldListContent}
             forceFallback={true}
             animation={150}
-            onClone={(e) => {
-              console.log('onClone', e);
-            }}
+            // onClone={(e) => {
+            //   console.log('onClone', e);
+            // }}
             onEnd={(e) => {
               console.log('onEnd', e);
               const cpType = e.item.getAttribute('data-cp-type');
@@ -146,8 +147,9 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({}) => {
             {fieldItems.map((item) => (
               <FieldCard
                 key={item.id}
-                id={item.id || `${item.type}-${Date.now()}`}
+                id={item.id}
                 displayName={item.displayName}
+                label={item.label}
                 type={item.type}
                 fieldID={item.fieldID}
                 entityID={item.entityID}
