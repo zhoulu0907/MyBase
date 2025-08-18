@@ -35,7 +35,7 @@ public class PageController {
     public CommonResult<Boolean> updatePageName(@RequestBody UpdatePageNameReqVO updatePageNameReqVO) {
 
         UpdatePageNameDTO updatePageDTO = new UpdatePageNameDTO();
-        updatePageDTO.setPageCode(updatePageNameReqVO.getPageCode());
+        updatePageDTO.setPageId(updatePageNameReqVO.getId());
         updatePageDTO.setPageName(updatePageNameReqVO.getPageName());
         pageService.updatePageName(updatePageDTO);
 

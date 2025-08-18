@@ -14,19 +14,19 @@ public class AuthFieldVO {
     @Schema(description = "主键Id")
     private Long id;
 
-    @Schema(description = "字段code")
-    private String fieldCode;
+    @Schema(description = "字段id")
+    private Long fieldId;
 
     @Schema(description = "字段名称")
     private String fieldDisplayName;
 
     @Schema(description = "是否可阅读")
-    private Boolean canRead;
+    private Boolean canRead = Boolean.TRUE;
 
     @Schema(description = "是否可编辑")
-    private Boolean canEdit;
+    private Boolean canEdit = Boolean.TRUE;
 
     @Schema(description = "是否可下载")
-    private Boolean canDownload;
+    private Boolean canDownload = Boolean.TRUE;
 
 }

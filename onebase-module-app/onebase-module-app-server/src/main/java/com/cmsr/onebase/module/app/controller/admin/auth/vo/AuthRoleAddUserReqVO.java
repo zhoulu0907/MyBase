@@ -14,9 +14,6 @@ public class AuthRoleAddUserReqVO {
     @NotNull(message = "角色编码不能为空")
     private Long roleId;
 
-    @Schema(description = "角色编码")
-    private String roleCode;
-
     @Schema(description = "用户ID列表")
     @NotNull(message = "用户ID列表不能为空")
     private List<Long> userIds;

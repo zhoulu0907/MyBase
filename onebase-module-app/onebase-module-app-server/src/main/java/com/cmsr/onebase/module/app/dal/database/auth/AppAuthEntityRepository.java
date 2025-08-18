@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.app.dal.database.auth;
 
 import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
-import com.cmsr.onebase.module.app.controller.admin.auth.vo.AuthPermissionDTO;
+import com.cmsr.onebase.module.app.controller.admin.auth.dto.AuthPermissionDTO;
 import com.cmsr.onebase.module.app.dal.dataobject.auth.AuthEntityDO;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
@@ -24,9 +24,9 @@ public class AppAuthEntityRepository extends DataRepositoryNew<AuthEntityDO> {
 
     public List<AuthEntityDO> findByQuery(AuthPermissionDTO dto) {
         ConfigStore configs = new DefaultConfigStore();
-        configs.eq("application_code", dto.getApplicationCode());
-        configs.eq("role_code", dto.getRoleCode());
-        configs.eq("menu_code", dto.getMenuCode());
+        configs.eq("application_id", dto.getApplicationId());
+        configs.eq("role_id", dto.getRoleId());
+        configs.eq("menu_id", dto.getMenuId());
         return this.findAllByConfig(configs);
     }
 

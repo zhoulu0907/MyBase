@@ -17,8 +17,8 @@ public class ApplicationRespVO {
     @Schema(description = "应用Id")
     private Long id;
 
-    @Schema(description = "应用Key")
-    private String appKey;
+    @Schema(description = "应用uid")
+    private String appUid;
 
     @Schema(description = "应用名称")
     private String appName;
@@ -40,9 +40,6 @@ public class ApplicationRespVO {
 
     @Schema(description = "版本号")
     private String versionNumber;
-
-    @Schema(description = "数据源ID")
-    private String datasourceId;
 
     @Schema(description = "状态")
     private Integer appStatus;

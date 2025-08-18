@@ -1,29 +1,21 @@
 package com.cmsr.onebase.module.app.controller.admin.version;
 
-import java.util.List;
-
+import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.module.app.controller.admin.version.vo.VersionCreateReqVO;
 import com.cmsr.onebase.module.app.controller.admin.version.vo.VersionPageReqVo;
 import com.cmsr.onebase.module.app.controller.admin.version.vo.VersionPageRespVO;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.cmsr.onebase.framework.common.pojo.CommonResult;
-import com.cmsr.onebase.module.app.controller.admin.version.vo.VersionCreateReqVO;
 import com.cmsr.onebase.module.app.service.version.AppVersionService;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @Author：huangjie
- *                  @Date：2025/7/22 16:32
+ * @Date：2025/7/22 16:32
  */
 @Tag(name = "应用管理-版本管理")
 @RestController
@@ -34,10 +26,9 @@ public class AppVersionController {
     @Resource
     private AppVersionService appVersionService;
 
-    @PostMapping("/page")
+    @GetMapping("/page")
     @Operation(summary = "应用版本列表")
-    public CommonResult<PageResult<VersionPageRespVO>> pageApplicationVersion(
-            @RequestBody VersionPageReqVo reqVo) {
+    public CommonResult<PageResult<VersionPageRespVO>> pageApplicationVersion(@Validated VersionPageReqVo reqVo) {
         return CommonResult.success(appVersionService.getApplicationVersionPage(reqVo));
     }
 

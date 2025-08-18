@@ -45,8 +45,8 @@ public class PageRefRouterServiceImpl implements PageRefRouterService {
     }
 
     @Override
-    public List<PageRefRouterRespDTO> getPageRefRouterList(String pageCode) {
-        List<PageRefRouterDO> pageRefRouterDOList = appPageRefRouterDataRepository.findPageRefRouterByPageCode(pageCode);
+    public List<PageRefRouterRespDTO> getPageRefRouterList(Long pageId) {
+        List<PageRefRouterDO> pageRefRouterDOList = appPageRefRouterDataRepository.findByPageId(pageId);
         return BeanUtils.toBean(pageRefRouterDOList, PageRefRouterRespDTO.class);
     }
 }

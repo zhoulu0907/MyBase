@@ -2,12 +2,11 @@ package com.cmsr.onebase.module.app.dal.database.appresource;
 
 import java.util.List;
 
-import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.springframework.stereotype.Repository;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
+import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
 import com.cmsr.onebase.module.app.dal.dataobject.appresource.ComponentDO;
 
 @Repository
@@ -16,15 +15,15 @@ public class AppComponentRepository extends DataRepositoryNew<ComponentDO> {
         super(ComponentDO.class);
     }
 
-    public void deleteComponentByPageCode(String pageCode) {
+    public void deleteComponentByPageId(Long pageId) {
         ConfigStore configs = new DefaultConfigStore();
-        configs.eq("page_code", pageCode);
+        configs.eq(ComponentDO.PAGE_ID, pageId);
         deleteByConfig(configs);
     }
 
-    public List<ComponentDO> findByPageCode(String pageCode){
-        ConfigStore cfg = new DefaultConfigStore();
-        cfg.eq("page_code", pageCode);
-        return findAllByConfig(cfg);
+    public List<ComponentDO> findByPageId(Long pageId) {
+        ConfigStore configs = new DefaultConfigStore();
+        configs.eq(ComponentDO.PAGE_ID, pageId);
+        return findAllByConfig(configs);
     }
 }

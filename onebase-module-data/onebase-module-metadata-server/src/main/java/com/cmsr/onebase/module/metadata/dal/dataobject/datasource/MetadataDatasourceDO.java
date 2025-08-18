@@ -6,6 +6,9 @@ import lombok.*;
 
 /**
  * 数据源表 DO
+ *
+ * @author bty418
+ * @date 2025-01-27
  */
 @Table(name = "metadata_datasource")
 @Data
@@ -14,6 +17,15 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MetadataDatasourceDO extends TenantBaseDO {
+
+    // 列名常量
+    public static final String DATASOURCE_NAME = "datasource_name";
+    public static final String CODE            = "code";
+    public static final String DATASOURCE_TYPE = "datasource_type";
+    public static final String CONFIG          = "config";
+    public static final String DESCRIPTION     = "description";
+    public static final String RUN_MODE        = "run_mode";
+    public static final String APP_ID          = "app_id";
 
     public MetadataDatasourceDO setId(Long id) {
         super.setId(id);

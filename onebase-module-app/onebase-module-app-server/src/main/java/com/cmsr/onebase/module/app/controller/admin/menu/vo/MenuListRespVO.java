@@ -17,10 +17,10 @@ public class MenuListRespVO {
     private Long id;
 
     @Schema(description = "父节点编码")
-    private String parentCode;
+    private Long parentId;
 
-    @Schema(description = "实体Code")
-    private Long entityCode;
+    @Schema(description = "实体Id")
+    private Long entityId;
 
     @Schema(description = "菜单编码")
     private String menuCode;
@@ -29,7 +29,7 @@ public class MenuListRespVO {
     private Integer menuSort;
 
     @Schema(description = "菜单类型")
-    private String menuType;
+    private Integer menuType;
 
     @Schema(description = "菜单名称")
     private String menuName;

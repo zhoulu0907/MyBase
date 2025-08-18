@@ -11,24 +11,27 @@ public enum AuthRoleTypeEnum {
     /**
      * 系统管理员角色
      */
-    SYSTEM_ADMIN(1, "管理员"),
+    SYSTEM_ADMIN(1, "ROLE_SYSTEM_ADMIN", "管理员"),
 
     /**
      * 系统普通用户角色
      */
-    SYSTEM_USER(2, "普通用户"),
+    SYSTEM_USER(2, "ROLE_SYSTEM_USER", "普通用户"),
 
     /**
      * 用户自定义角色
      */
-    CUSTOM_ROLE(3, "自定义角色");
+    CUSTOM_ROLE(3, null, "自定义角色");
 
     private final Integer value;
 
+    private final String code;
+
     private final String name;
 
-    AuthRoleTypeEnum(Integer value, String name) {
+    AuthRoleTypeEnum(Integer value, String code, String name) {
         this.value = value;
+        this.code = code;
         this.name = name;
     }
 
@@ -38,6 +41,10 @@ public enum AuthRoleTypeEnum {
 
     public String getName() {
         return name;
+    }
+
+    public String getCode() {
+        return code;
     }
 
     /**

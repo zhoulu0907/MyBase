@@ -22,18 +22,17 @@ public class AppAuthDataFilterRepository extends DataRepositoryNew<AuthDataFilte
         super(AuthDataFilterDO.class);
     }
 
-    public List<AuthDataFilterDO> findByGroupCode(String groupCode) {
+    public List<AuthDataFilterDO> findByGroupId(Long groupId) {
         ConfigStore configs = new DefaultConfigStore();
-        configs.eq("group_code", groupCode);
+        configs.eq("group_id", groupId);
         configs.order("condition_group", Order.TYPE.ASC);
         configs.order("condition_order", Order.TYPE.ASC);
         return this.findAllByConfig(configs);
     }
 
-    public void deleteByGroupCode(String groupCode) {
+    public void deleteByGroupId(Long groupId) {
         ConfigStore configs = new DefaultConfigStore();
-        configs.eq("group_code", groupCode);
+        configs.eq("group_id", groupId);
         this.deleteByConfig(configs);
     }
-
 }

@@ -19,10 +19,10 @@ import com.cmsr.onebase.module.metadata.dal.dataobject.datasource.MetadataDataso
 import com.cmsr.onebase.module.metadata.dal.dataobject.relationship.MetadataEntityRelationshipDO;
 import com.cmsr.onebase.module.metadata.convert.datasource.DatasourceConvert;
 import com.cmsr.onebase.module.metadata.dal.database.MetadataBusinessEntityRepository;
-import com.cmsr.onebase.module.metadata.dal.database.MetadataDatasourceRepository;
-import com.cmsr.onebase.module.metadata.dal.database.MetadataSystemFieldsRepository;
-import com.cmsr.onebase.module.metadata.dal.database.MetadataEntityFieldRepository;
-import com.cmsr.onebase.module.metadata.dal.database.MetadataEntityRelationshipRepository;
+import com.cmsr.onebase.module.metadata.service.datasource.MetadataDatasourceService;
+import com.cmsr.onebase.module.metadata.service.entity.MetadataSystemFieldsService;
+import com.cmsr.onebase.module.metadata.service.entity.MetadataEntityFieldService;
+import com.cmsr.onebase.module.metadata.service.relationship.MetadataEntityRelationshipService;
 import com.cmsr.onebase.module.metadata.dal.database.TemporaryDatasourceService;
 import com.cmsr.onebase.module.metadata.enums.BusinessEntityTypeEnum;
 import jakarta.annotation.Resource;
@@ -58,13 +58,13 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
     @Resource
     private MetadataBusinessEntityRepository metadataBusinessEntityRepository;
     @Resource
-    private MetadataDatasourceRepository metadataDatasourceRepository;
+    private MetadataDatasourceService metadataDatasourceService;
     @Resource
-    private MetadataSystemFieldsRepository metadataSystemFieldsRepository;
+    private MetadataSystemFieldsService metadataSystemFieldsService;
     @Resource
-    private MetadataEntityFieldRepository metadataEntityFieldRepository;
+    private MetadataEntityFieldService metadataEntityFieldService;
     @Resource
-    private MetadataEntityRelationshipRepository metadataEntityRelationshipRepository;
+    private MetadataEntityRelationshipService metadataEntityRelationshipService;
     @Resource
     private TemporaryDatasourceService temporaryDatasourceService;
 
@@ -216,7 +216,7 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
                                                              List<MetadataSystemFieldsDO> systemFields) {
         try {
             // 1. 通过数据源 id 获取对应的数据源信息
-            MetadataDatasourceDO datasource = getDatasourceById(createReqVO.getDatasourceId());
+            MetadataDatasourceDO datasource = metadataDatasourceService.getDatasource(Long.valueOf(createReqVO.getDatasourceId()));
             if (datasource != null) {
                 // 2. 生成 DDL 并在数据源内建物理表
                 createPhysicalTable(datasource, businessEntity.getTableName(), systemFields);
@@ -254,18 +254,7 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
         }
     }
 
-    /**
-     * 获取数据源信息
-     */
-    private MetadataDatasourceDO getDatasourceById(String datasourceId) {
-        if (datasourceId == null || datasourceId.trim().isEmpty()) {
-            return null;
-        }
 
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and("id", Long.valueOf(datasourceId));
-        return metadataDatasourceRepository.findOne(configStore);
-    }
 
     /**
      * 获取系统字段信息
@@ -275,7 +264,7 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
         configStore.and("is_enabled", CommonStatusEnum.ENABLE.getStatus()); // 只获取启用的系统字段（0-启用，1-禁用）
         configStore.order("id", Order.TYPE.ASC);
         // 直接使用配置的查询条件，不再调用仓储类的方法（避免重复条件）
-        List<MetadataSystemFieldsDO> systemFields = metadataSystemFieldsRepository.findAllByConfig(configStore);
+        List<MetadataSystemFieldsDO> systemFields = metadataSystemFieldsService.findAllByConfig(configStore);
         
         log.info("获取系统字段结果: 总数={}, is_enabled条件={}", 
                 systemFields.size(), CommonStatusEnum.ENABLE.getStatus());
@@ -285,7 +274,7 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
             log.warn("未找到启用的系统字段，尝试获取所有系统字段");
             DefaultConfigStore allConfigStore = new DefaultConfigStore();
             allConfigStore.order("id", Order.TYPE.ASC);
-            systemFields = metadataSystemFieldsRepository.findAllByConfig(allConfigStore);
+            systemFields = metadataSystemFieldsService.findAllByConfig(allConfigStore);
             log.info("获取所有系统字段结果: 总数={}", systemFields.size());
             
             // 打印前几个字段的详细信息用于调试
@@ -332,7 +321,7 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
                     .fieldCode(generateFieldCode(systemField.getFieldName())) // 生成字段编码
                     .build();
 
-            metadataEntityFieldRepository.insert(entityField);
+            metadataEntityFieldService.createEntityFieldInternal(entityField);
         }
 
         log.info("成功保存 {} 个系统字段到实体字段表", systemFields.size());
@@ -604,6 +593,11 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
     }
 
     @Override
+    public List<MetadataBusinessEntityDO> findAllByConfig(DefaultConfigStore configStore) {
+        return metadataBusinessEntityRepository.findAllByConfig(configStore);
+    }
+
+    @Override
     public MetadataBusinessEntityDO getBusinessEntityByCode(String code) {
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.and("code", code);
@@ -622,7 +616,7 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
     @Override
     public ERDiagramRespVO getERDiagramByDatasourceId(Long datasourceId) {
         // 1. 获取数据源信息
-        MetadataDatasourceDO datasource = getDatasourceById(datasourceId);
+        MetadataDatasourceDO datasource = metadataDatasourceService.getDatasource(datasourceId);
         if (datasource == null) {
             throw new IllegalArgumentException("数据源不存在，ID: " + datasourceId);
         }
@@ -700,11 +694,11 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
      */
     private List<ERFieldVO> getEntityFields(Long entityId) {
         DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and("entity_id", entityId);
-        configStore.order("sort_order", Order.TYPE.ASC);
+        configStore.and(MetadataEntityFieldDO.ENTITY_ID, entityId);
+        configStore.order(MetadataEntityFieldDO.SORT_ORDER, Order.TYPE.ASC);
         configStore.order("create_time", Order.TYPE.ASC);
 
-        List<MetadataEntityFieldDO> fieldList = metadataEntityFieldRepository.getEntityFieldListByEntityId(entityId);
+        List<MetadataEntityFieldDO> fieldList = metadataEntityFieldService.getEntityFieldListByEntityId(String.valueOf(entityId));
         List<ERFieldVO> erFields = new ArrayList<>();
 
         for (MetadataEntityFieldDO field : fieldList) {
@@ -750,12 +744,12 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
         DefaultConfigStore relationshipConfigStore = new DefaultConfigStore();
         // 使用嵌套 OR + IN，避免把整段表达式再次包裹 IN 导致 SQL 语法与参数不匹配
         ConfigStore orStore = new DefaultConfigStore();
-        ((DefaultConfigStore) orStore).or(Compare.IN, "source_entity_id", entityIds)
-                .or(Compare.IN, "target_entity_id", entityIds);
+        ((DefaultConfigStore) orStore).or(Compare.IN, MetadataEntityRelationshipDO.SOURCE_ENTITY_ID, entityIds)
+                .or(Compare.IN, MetadataEntityRelationshipDO.TARGET_ENTITY_ID, entityIds);
         relationshipConfigStore.and(orStore);
         relationshipConfigStore.order("create_time", Order.TYPE.DESC);
 
-        List<MetadataEntityRelationshipDO> relationshipDOs = metadataEntityRelationshipRepository.findAllByConfig(
+        List<MetadataEntityRelationshipDO> relationshipDOs = metadataEntityRelationshipService.findAllByConfig(
                 relationshipConfigStore);
 
         // 转换为ER关系VO
@@ -767,6 +761,26 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
         }
 
         return relationships;
+    }
+
+    /**
+     * 根据字段ID获取字段名称
+     *
+     * @param fieldId 字段ID
+     * @return 字段名称
+     */
+    private String getFieldNameById(String fieldId) {
+        if (fieldId == null) {
+            return null;
+        }
+        
+        try {
+            MetadataEntityFieldDO field = metadataEntityFieldService.getEntityField(fieldId);
+            return field != null ? field.getFieldName() : null;
+        } catch (NumberFormatException e) {
+            log.warn("无效的字段ID: {}", fieldId);
+            return null;
+        }
     }
 
     /**
@@ -810,39 +824,7 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
         return relationship;
     }
 
-    /**
-     * 根据字段ID获取字段名称
-     *
-     * @param fieldId 字段ID
-     * @return 字段名称
-     */
-    private String getFieldNameById(String fieldId) {
-        if (fieldId == null) {
-            return null;
-        }
-        
-        try {
-            DefaultConfigStore configStore = new DefaultConfigStore();
-            configStore.and("id", Long.valueOf(fieldId));
-            MetadataEntityFieldDO field = metadataEntityFieldRepository.findById(Long.valueOf(fieldId));
-            return field != null ? field.getFieldName() : null;
-        } catch (NumberFormatException e) {
-            log.warn("无效的字段ID: {}", fieldId);
-            return null;
-        }
-    }
 
-    /**
-     * 根据ID获取数据源信息
-     *
-     * @param datasourceId 数据源ID
-     * @return 数据源DO
-     */
-    private MetadataDatasourceDO getDatasourceById(Long datasourceId) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and("id", datasourceId);
-        return metadataDatasourceRepository.findOne(configStore);
-    }
 
     @Override
     public List<SimpleEntityRespVO> getSimpleEntityListByAppId(Long appId) {

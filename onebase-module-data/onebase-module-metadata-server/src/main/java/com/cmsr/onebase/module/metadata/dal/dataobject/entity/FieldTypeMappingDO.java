@@ -17,6 +17,15 @@ import lombok.*;
 @AllArgsConstructor
 public class FieldTypeMappingDO extends BaseDO {
 
+    // 列名常量
+    public static final String BUSINESS_FIELD_TYPE    = "business_field_type";
+    public static final String BUSINESS_MEANING       = "business_meaning";
+    public static final String DATABASE_TYPE          = "database_type";
+    public static final String DATABASE_FIELD         = "database_field";
+    public static final String IS_DEFAULT             = "is_default";
+    public static final String DEFAULT_LENGTH         = "default_length";
+    public static final String DEFAULT_DECIMAL_PLACES = "default_decimal_places";
+
     /**
      * 业务字段类型
      */
