@@ -1,15 +1,15 @@
 ### 获得凭证列表分页 /admin-api/system/platforminfo/simple-simple
-GET http://127.0.0.1:48080/admin-api/system/license/page?pageNum=1&pageSize=2
+GET {{baseUrl}}/system/license/page?pageNum=1&pageSize=2
 Authorization: Bearer e9f2faef4dfb48169fc69e1ac7aeefdb
 
 ### 导出凭证
-GET http://127.0.0.1:48080/admin-api/system/license/export?id=545790779306676224
+GET {{baseUrl}}/system/license/export?id=545790779306676224
 Content-Type: application/json
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
 ### 上传凭证
-POST http://127.0.0.1:48080/admin-api/system/license/import
+POST {{baseUrl}}/system/license/import
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: multipart/form-data; boundary=WebAppBoundary
@@ -18,5 +18,5 @@ Content-Type: multipart/form-data; boundary=WebAppBoundary
 Content-Disposition: form-data; name="file"; filename="license.lic.sm4"
 Content-Type: application/octet-stream
 
-< ./license.lic.sm4
+< ./license.lic-1.sm4
 --WebAppBoundary--
