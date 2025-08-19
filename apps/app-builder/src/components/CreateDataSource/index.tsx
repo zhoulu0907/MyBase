@@ -24,20 +24,18 @@ interface DataSourceFormValues {
 
 const dbTypes = [{ label: 'PostgreSQL', value: 'PostgreSQL', urlPrefix: 'jdbc:postgresql://' }];
 
-type CreateType = 'app' | 'datasource';
-
 export type DataSourceHandle = {
   handleCreateDatasource: () => void;
   getDatasourceId: () => string;
 };
 
 interface IProps {
-  createType: CreateType;
+  style?: React.CSSProperties;
 }
 
 // 创建外部数据源
 const CreateDataSource = forwardRef<DataSourceHandle, IProps>((props, ref) => {
-  const { createType } = props;
+  const { style } = props;
 
   const [form] = Form.useForm<DataSourceFormValues>();
   const [testing, setTesting] = useState<boolean>(false);
@@ -78,7 +76,7 @@ const CreateDataSource = forwardRef<DataSourceHandle, IProps>((props, ref) => {
     code: [
       { required: true, message: '请输入数据源编码' },
       {
-        match: /^(?=.*[A-Za-z])(?=.*\d)(?=.*_)[A-Za-z][A-Za-z0-9_]*$/,
+        match: /^[A-Za-z][A-Za-z0-9_]*$/,
         message: '数据源编码不符合填写要求'
       }
     ],
@@ -149,7 +147,7 @@ const CreateDataSource = forwardRef<DataSourceHandle, IProps>((props, ref) => {
             url: values.url || `jdbc:mysql://${values.host}:${values.port}/${values.database}`
           },
           description: `${values.datasourceType} 数据源`,
-          // appId: curAppId,
+          appId: '', // todo
           datasourceOrigin: 2 // 外部数据源
         };
 
@@ -176,7 +174,7 @@ const CreateDataSource = forwardRef<DataSourceHandle, IProps>((props, ref) => {
   };
 
   return (
-    <div className={`${styles.createDatasource} ${createType === 'datasource' ? styles.showCreateApp : ''}`}>
+    <div className={styles.createDatasource} style={style}>
       <Form form={form} layout="vertical" onValuesChange={handleFormChange} className={styles.dataSourceForm}>
         <Form.Item label="数据源编码" field="code" rules={rules.code}>
           <Input

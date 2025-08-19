@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { debounce, sample } from 'lodash-es';
 import dayjs from 'dayjs';
@@ -127,6 +127,10 @@ const MyAppPage: React.FC = () => {
   const handleSearchChange = (value: string) => {
     debouncedUpdate(value);
   };
+
+  const randomColors: string[] = useMemo(() => {
+    return Array.from({ length: pageSize || 8 }, () => sample(avatarBgColor) || avatarBgColor[0]);
+  }, [pageSize]);
 
   /* 创建应用 */
   const handleCreateApp = async () => {
@@ -367,7 +371,7 @@ const MyAppPage: React.FC = () => {
                       <Avatar
                         size={24}
                         style={{
-                          backgroundColor: sample(avatarBgColor)
+                          backgroundColor: randomColors[index]
                         }}
                       >
                         {item.createUser?.slice(0, 1) || 'U'}
@@ -495,12 +499,22 @@ const MyAppPage: React.FC = () => {
             form={form}
             status="create"
             previewBgColor="#F2F3F5BF"
-            createType={createType}
-            position="absolute"
             dataSourceCreated={!!createDatasourceRef.current?.getDatasourceId()}
             onCreateDatasource={() => setCreateType('datasource')}
+            style={{
+              position: 'absolute',
+              transform: createType === 'app' ? 'translateX(0)' : 'translateX(-100%)'
+            }}
           />
-          <CreateDataSource ref={createDatasourceRef} createType={createType} />
+          <CreateDataSource
+            ref={createDatasourceRef}
+            style={{
+              position: 'absolute',
+              padding: '0 200px',
+              boxSizing: 'border-box',
+              transform: createType === 'datasource' ? 'translateX(0)' : 'translateX(100%)'
+            }}
+          />
         </div>
       </Modal>
     </div>

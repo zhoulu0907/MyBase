@@ -23,30 +23,19 @@ import { appIcon, appIconColor, appThemeColor, type Options } from './const';
 import styles from './index.module.less';
 
 type AppStatus = 'create' | 'update';
-type CreateType = 'app' | 'datasource';
 interface IProps {
   form: FormInstance;
   readonly data?: Application;
   readonly status: AppStatus;
   readonly previewBgColor: string;
-  readonly createType?: CreateType;
-  readonly position?: 'relative' | 'absolute';
+  readonly style?: React.CSSProperties;
   readonly dataSourceCreated?: boolean;
   onCreateDatasource?: () => void;
 }
 
 // 创建/修改应用
-const BasicSetting = (props: IProps) => {
-  const {
-    previewBgColor,
-    form,
-    data,
-    status,
-    createType,
-    position = 'relative',
-    dataSourceCreated,
-    onCreateDatasource
-  } = props;
+const CreateApp = (props: IProps) => {
+  const { previewBgColor, form, data, status, style, dataSourceCreated, onCreateDatasource } = props;
 
   const [tagList, setTagList] = useState<ListTagReq[]>([]); // 标签列表
   const [iconName, setIconName] = useState<Application['iconName']>();
@@ -130,10 +119,7 @@ const BasicSetting = (props: IProps) => {
   };
 
   return (
-    <div
-      className={`${styles.createApp} ${createType === 'datasource' ? styles.showCreateApp : ''}`}
-      style={{ position }}
-    >
+    <div className={styles.createApp} style={style}>
       <div className={styles.preview} style={{ backgroundColor: previewBgColor }}>
         <div className={styles.row}>
           <div className={styles.title}>经典模式</div>
@@ -255,7 +241,7 @@ const BasicSetting = (props: IProps) => {
                 { required: true, message: '请填写应用编码' },
                 { maxLength: 40, message: '长度超过限制' },
                 {
-                  match: /^(?=.*[A-Za-z])(?=.*\d)(?=.*_)[A-Za-z][A-Za-z0-9_]*$/,
+                  match: /^[A-Za-z][A-Za-z0-9_]*$/,
                   message: '应用编码不符合填写要求'
                 }
               ]}
@@ -353,4 +339,4 @@ const BasicSetting = (props: IProps) => {
   );
 };
 
-export default BasicSetting;
+export default CreateApp;
