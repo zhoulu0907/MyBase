@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.system.controller.admin.captcha;
 
 import cn.hutool.core.util.StrUtil;
+import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.anji.captcha.model.common.ResponseModel;
@@ -16,6 +17,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
+
 @Tag(name = "管理后台 - 验证码")
 @RestController("adminCaptchaController")
 @RequestMapping("/system/captcha")
@@ -28,19 +31,19 @@ public class CaptchaController {
     @Operation(summary = "获得验证码")
     @PermitAll
     @TenantIgnore
-    public ResponseModel get(@RequestBody CaptchaVO data, HttpServletRequest request) {
+    public CommonResult<ResponseModel> get(@RequestBody CaptchaVO data, HttpServletRequest request) {
         assert request.getRemoteHost() != null;
         data.setBrowserInfo(getRemoteId(request));
-        return captchaService.get(data);
+        return success(captchaService.get(data));
     }
 
     @PostMapping("/check")
     @Operation(summary = "校验验证码")
     @PermitAll
     @TenantIgnore
-    public ResponseModel check(@RequestBody CaptchaVO data, HttpServletRequest request) {
+    public CommonResult<ResponseModel> check(@RequestBody CaptchaVO data, HttpServletRequest request) {
         data.setBrowserInfo(getRemoteId(request));
-        return captchaService.check(data);
+        return success(captchaService.check(data));
     }
 
     public static String getRemoteId(HttpServletRequest request) {
