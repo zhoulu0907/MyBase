@@ -105,7 +105,7 @@ public class AuthController {
             return success(null);
         }
         // 1.2 获得角色列表
-        Set<Long> roleIds = permissionService.getUserRoleIdListByUserId(getLoginUserId());
+        Set<Long> roleIds = permissionService.getRoleIdsListByUserId(getLoginUserId());
         if (CollUtil.isEmpty(roleIds)) {
             return success(AuthConvert.INSTANCE.convert(user, Collections.emptyList(), Collections.emptyList(), code));
         }

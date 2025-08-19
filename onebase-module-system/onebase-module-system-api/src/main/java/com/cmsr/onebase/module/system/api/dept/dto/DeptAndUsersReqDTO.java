@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.system.controller.admin.dept.vo.dept;
+package com.cmsr.onebase.module.system.api.dept.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
@@ -13,7 +13,7 @@ import java.util.Collection;
  */
 @Schema(description = "管理后台 - 部门和用户查询 Request VO")
 @Data
-public class DeptAndUsersReqVO {
+public class DeptAndUsersReqDTO {
 
     @Schema(description = "部门ID", example = "1024")
     private Long deptId;

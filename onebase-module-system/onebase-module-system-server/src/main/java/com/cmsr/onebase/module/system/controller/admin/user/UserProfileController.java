@@ -52,7 +52,7 @@ public class UserProfileController {
         // 获得用户基本信息
         AdminUserDO user = userService.getUser(getLoginUserId());
         // 获得用户角色
-        List<RoleDO> userRoles = roleService.getRoleListFromCache(permissionService.getUserRoleIdListByUserId(user.getId()));
+        List<RoleDO> userRoles = roleService.getRoleListFromCache(permissionService.getRoleIdsListByUserId(user.getId()));
         // 获得部门信息
         DeptDO dept = user.getDeptId() != null ? deptService.getDept(user.getDeptId()) : null;
         // 获得岗位信息
