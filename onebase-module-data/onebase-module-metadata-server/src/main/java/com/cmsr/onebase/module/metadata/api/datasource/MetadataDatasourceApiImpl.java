@@ -33,7 +33,7 @@ public class MetadataDatasourceApiImpl implements MetadataDatasourceApi {
         String appUid = reqDTO.getAppUid();
         log.info("RPC 接口 - 创建默认数据源，应用ID: {}，appUid: {}", appId, appUid);
 
-        Long id = datasourceService.createDefaultDatasource(appId);
+        Long id = datasourceService.createDefaultDatasource(appId, appUid);
 
         log.info("RPC 接口 - 完成创建默认数据源，应用ID: {}，appUid: {}，数据源ID: {}", appId, appUid, id);
         return CommonResult.success(id.toString());

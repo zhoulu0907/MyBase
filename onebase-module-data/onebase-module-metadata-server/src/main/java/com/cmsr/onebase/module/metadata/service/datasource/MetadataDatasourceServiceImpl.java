@@ -203,7 +203,7 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Long createDefaultDatasource(Long appId) {
+    public Long createDefaultDatasource(Long appId, String appUid) {
         // 从配置类中读取默认数据源参数
 
         // 构造配置 map
@@ -224,6 +224,8 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
         reqVO.setRunMode(metadataConfig.getDefaultDatasourceRunMode());
         reqVO.setDatasourceOrigin(metadataConfig.getDefaultDatasourceDatasourceOrigin());
         reqVO.setAppId(String.valueOf(appId));
+        // 关键：传递 appUid，确保关联表插入不为 null
+        reqVO.setAppUid(appUid);
 
         // 生成唯一的数据源编码，避免重复
         String uniqueCode = metadataConfig.getDefaultDatasourceDatabase() + "_" + UUID.randomUUID().toString().replace("-", "");

@@ -347,6 +347,15 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
                 // 实体是否允许改表结构
                 validateEntityAllowModifyStructure(existing.getEntityId());
 
+                // 先删子配置（选项、约束、自动编号）
+                if (existing != null) {
+                    try {
+                        fieldOptionService.deleteByFieldId(existing.getId());
+                        fieldConstraintService.deleteByFieldId(existing.getId());
+                        autoNumberConfigService.deleteByFieldId(existing.getId());
+                    } catch (Exception ignore) {}
+                }
+
                 // 先删库记录
                 metadataEntityFieldRepository.deleteById(Long.valueOf(item.getId()));
 
@@ -404,6 +413,54 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
                     alterColumnInTable(datasource, businessEntity.getTableName(), full);
                 }
                 resp.getUpdatedIds().add(item.getId());
+
+                // 同步选项与约束（整体替换）
+                Long fieldId = origin.getId();
+                if (item.getOptions() != null) {
+                    fieldOptionService.deleteByFieldId(fieldId);
+                    for (var opt : item.getOptions()) {
+                        com.cmsr.onebase.module.metadata.dal.dataobject.field.MetadataEntityFieldOptionDO d = new com.cmsr.onebase.module.metadata.dal.dataobject.field.MetadataEntityFieldOptionDO();
+                        d.setFieldId(fieldId);
+                        d.setOptionLabel(opt.getOptionLabel());
+                        d.setOptionValue(opt.getOptionValue());
+                        d.setOptionOrder(opt.getOptionOrder());
+                        d.setIsEnabled(opt.getIsEnabled());
+                        d.setDescription(opt.getDescription());
+                        // 批量接口无 appId，沿用字段的 appId
+                        d.setAppId(full != null ? full.getAppId() : null);
+                        fieldOptionService.create(d);
+                    }
+                }
+                if (item.getConstraints() != null) {
+                    fieldConstraintService.deleteByFieldId(fieldId);
+                    var c = item.getConstraints();
+                    if (c.getMinLength() != null && c.getMaxLength() != null && c.getMinLength() > c.getMaxLength()) {
+                        throw new IllegalArgumentException("最小长度不能大于最大长度");
+                    }
+                    if (c.getMinLength() != null || c.getMaxLength() != null || c.getLengthEnabled() != null || (c.getLengthPrompt() != null && !c.getLengthPrompt().isEmpty())) {
+                        var d1 = new com.cmsr.onebase.module.metadata.dal.dataobject.field.MetadataEntityFieldConstraintDO();
+                        d1.setFieldId(fieldId);
+                        d1.setConstraintType("LENGTH_RANGE");
+                        d1.setMinLength(c.getMinLength());
+                        d1.setMaxLength(c.getMaxLength());
+                        d1.setPromptMessage(c.getLengthPrompt());
+                        d1.setIsEnabled(c.getLengthEnabled());
+                        d1.setRunMode(full != null ? full.getRunMode() : 0);
+                        d1.setAppId(full != null ? full.getAppId() : null);
+                        fieldConstraintService.upsert(d1);
+                    }
+                    if (c.getRegexPattern() != null || c.getRegexEnabled() != null || (c.getRegexPrompt() != null && !c.getRegexPrompt().isEmpty())) {
+                        var d2 = new com.cmsr.onebase.module.metadata.dal.dataobject.field.MetadataEntityFieldConstraintDO();
+                        d2.setFieldId(fieldId);
+                        d2.setConstraintType("REGEX");
+                        d2.setRegexPattern(c.getRegexPattern());
+                        d2.setPromptMessage(c.getRegexPrompt());
+                        d2.setIsEnabled(c.getRegexEnabled());
+                        d2.setRunMode(full != null ? full.getRunMode() : 0);
+                        d2.setAppId(full != null ? full.getAppId() : null);
+                        fieldConstraintService.upsert(d2);
+                    }
+                }
             }
         }
 
@@ -483,6 +540,53 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
                     addColumnToTable(datasource, businessEntity.getTableName(), toCreate);
                 }
                 resp.getCreatedIds().add(String.valueOf(toCreate.getId()));
+
+                // 同步选项与约束（整体替换）
+                Long fieldId = toCreate.getId();
+                if (item.getOptions() != null) {
+                    fieldOptionService.deleteByFieldId(fieldId);
+                    for (var opt : item.getOptions()) {
+                        com.cmsr.onebase.module.metadata.dal.dataobject.field.MetadataEntityFieldOptionDO d = new com.cmsr.onebase.module.metadata.dal.dataobject.field.MetadataEntityFieldOptionDO();
+                        d.setFieldId(fieldId);
+                        d.setOptionLabel(opt.getOptionLabel());
+                        d.setOptionValue(opt.getOptionValue());
+                        d.setOptionOrder(opt.getOptionOrder());
+                        d.setIsEnabled(opt.getIsEnabled());
+                        d.setDescription(opt.getDescription());
+                        d.setAppId(toCreate.getAppId());
+                        fieldOptionService.create(d);
+                    }
+                }
+                if (item.getConstraints() != null) {
+                    fieldConstraintService.deleteByFieldId(fieldId);
+                    var c = item.getConstraints();
+                    if (c.getMinLength() != null && c.getMaxLength() != null && c.getMinLength() > c.getMaxLength()) {
+                        throw new IllegalArgumentException("最小长度不能大于最大长度");
+                    }
+                    if (c.getMinLength() != null || c.getMaxLength() != null || c.getLengthEnabled() != null || (c.getLengthPrompt() != null && !c.getLengthPrompt().isEmpty())) {
+                        var d1 = new com.cmsr.onebase.module.metadata.dal.dataobject.field.MetadataEntityFieldConstraintDO();
+                        d1.setFieldId(fieldId);
+                        d1.setConstraintType("LENGTH_RANGE");
+                        d1.setMinLength(c.getMinLength());
+                        d1.setMaxLength(c.getMaxLength());
+                        d1.setPromptMessage(c.getLengthPrompt());
+                        d1.setIsEnabled(c.getLengthEnabled());
+                        d1.setRunMode(toCreate.getRunMode());
+                        d1.setAppId(toCreate.getAppId());
+                        fieldConstraintService.upsert(d1);
+                    }
+                    if (c.getRegexPattern() != null || c.getRegexEnabled() != null || (c.getRegexPrompt() != null && !c.getRegexPrompt().isEmpty())) {
+                        var d2 = new com.cmsr.onebase.module.metadata.dal.dataobject.field.MetadataEntityFieldConstraintDO();
+                        d2.setFieldId(fieldId);
+                        d2.setConstraintType("REGEX");
+                        d2.setRegexPattern(c.getRegexPattern());
+                        d2.setPromptMessage(c.getRegexPrompt());
+                        d2.setIsEnabled(c.getRegexEnabled());
+                        d2.setRunMode(toCreate.getRunMode());
+                        d2.setAppId(toCreate.getAppId());
+                        fieldConstraintService.upsert(d2);
+                    }
+                }
             }
         }
 
