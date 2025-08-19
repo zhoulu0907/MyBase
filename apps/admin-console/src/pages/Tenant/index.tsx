@@ -105,12 +105,6 @@ const TenantManagement: React.FC = () => {
     setCurrentPage(1); // 重置到第一页
   };
 
-  // 处理搜索
-  // const handleSearch = (keywords: string) => {
-  //   // 实际触发搜索
-  //   setSearchParams({ ...searchParams, keywords });
-  //   setCurrentPage(1); // 重置到第一页
-  // };
    // 处理搜索输入变化（即时更新输入框）
   const handleSearchInputChange = (value: string) => {
     setSearchInputValue(value);
@@ -226,6 +220,7 @@ const TenantManagement: React.FC = () => {
       contactMobile: record.contactMobile,
       accountCount: record.accountCount,
       nickName: record.nickName,
+      contactName: record.contactName,
       createTime: record.createTime,
       status: record.status,
       tenantCode: record.tenantCode,
@@ -238,6 +233,7 @@ const TenantManagement: React.FC = () => {
       tenantCode: record.tenantCode,
       admin: record.nickName,
       allocatedCount: record.accountCount,
+      nickName: record.nickName,
       status: record.status === PlatformTenantStatus.enabled ? PlatformTenantStatus.enabled : PlatformTenantStatus.disabled,
       website: record.website,
     });
@@ -298,9 +294,17 @@ const TenantManagement: React.FC = () => {
    * 更新租户信息
    */
   const updateTenant = async (values: any) => {
+    // console.log('更新租户:', values);
     try {
       // 检查管理员是否发生变化
-      const newAdmin = values.admin || '';
+      const newAdminId = values.admin; // 这里是 id
+      console.log('newAdminId:', newAdminId);
+      const originalAdminId = currentTenant?.contactName || ''; // 原始 contactName 是 username
+
+      // 根据 id 查找管理员
+      const selectedAdmin = adminList.find(admin => admin.id === newAdminId);
+      const adminUsername = selectedAdmin ? selectedAdmin.username : '';
+      const adminNickname = selectedAdmin ? selectedAdmin.nickname : '';
       
       // 构建更新参数
       const updateParams: UpdateTenantParams = {
@@ -308,12 +312,13 @@ const TenantManagement: React.FC = () => {
         name: values.tenantName,
         tenantCode: values.tenantCode,
         // 只有管理员发生变化时才传递管理员信息，否则传递空字符串
-        nickName: originalAdmin !== newAdmin ? newAdmin : '',
+        nickname: adminNickname,
+        contactName: newAdminId !== originalAdminId ? adminUsername : '',
         status: values.status,
         accountCount: values.allocatedCount,
         website: values.website,
       };
-      
+      console.log('更新租户 updateParams:', updateParams);
       // 调用 updatePlatformTenantApi
       await updatePlatformTenantApi(updateParams);
       getPlatformTenantList();
@@ -331,15 +336,24 @@ const TenantManagement: React.FC = () => {
    * 创建新租户
    */
   const createTenant = async (values: any) => {
+    console.log('创建新租户:', values);
     try {
+      // 根据 id 查找管理员
+      const selectedAdmin = adminList.find(admin => admin.id === values.admin);
+      const adminUsername = selectedAdmin ? selectedAdmin.username : '';
+      const adminNickname = selectedAdmin ? selectedAdmin.nickname : '';
+
+      // console.log('根据昵称查找管理员id:', selectedAdmin);
       const newTenantData: CreateTenantParams = {
         name: values.tenantName,
         tenantCode: generateTenantCode(),
-        nickName: values.admin,
+        contactName: adminUsername,
+        nickname: adminNickname,
         status: values.status,
         accountCount: values.allocatedCount,
         website: values.website,
       };
+      console.log('测试nickname:', newTenantData);
       await addPlatformTenantApi(newTenantData);
       getPlatformTenantList();
       Message.success('创建租户成功');
@@ -631,10 +645,12 @@ const TenantManagement: React.FC = () => {
             <Select
               placeholder="请选择管理员"
               showSearch
-              filterOption={(input, option) => option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}
+              filterOption={(input, option) => {
+                return option?.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0;
+              }}
             >
               {adminList.map((admin) => (
-                <Option key={admin.id} value={admin.nickname}>
+                <Option key={admin.id} value={admin.id}>
                   {admin.nickname}
                 </Option>
               ))}

@@ -33,7 +33,7 @@ export interface PlatformTenantInfo {
   /**
    * 管理员昵称
    */
-  nickName: string,
+  nickName?: string,
   /**
    * 租户编码
    */
@@ -81,6 +81,10 @@ export interface CreateTenantParams {
    * 管理员名称
    */
   contactName: string;
+  /**
+   * 管理员昵称
+   */
+  nickname: string;
   /**
    * 租户状态
    */

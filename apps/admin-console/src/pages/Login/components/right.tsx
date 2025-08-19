@@ -96,7 +96,7 @@ const Right: React.FC = () => {
                 initialValue=""
                 rules={[
                   { required: true, message: '请输入密码' },
-                  { minLength: 4, message: '密码至少4个字符' }
+                  { minLength: 6, message: '密码至少6个字符' }
                 ]}
               >
                 <Input.Password placeholder={t('auth.password')} allowClear size="large" />
