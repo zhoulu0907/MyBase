@@ -2,7 +2,7 @@ import { EDITOR_TYPES } from '@/pages/Editor/utils/const';
 import { Dropdown, Menu, Message, type FormInstance } from '@arco-design/web-react';
 import { IconSettings } from '@arco-design/web-react/icon';
 import { getPageSetId, RootParentPage, type GetPageSetIdReq } from '@onebase/app';
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './index.module.less';
 
@@ -24,6 +24,7 @@ interface MenuItemProps {
   menuIcon: string;
   isGroup: boolean;
   onClick: () => void;
+  triggerCreate: (formType: string) => void;
   triggerRename: () => void;
   triggerCopy: () => void;
   triggerHide: () => void;
@@ -31,6 +32,7 @@ interface MenuItemProps {
   maxWidth: number;
   renameForm: FormInstance;
   copyForm: FormInstance;
+  createForm: FormInstance;
 }
 
 const MyMenuItem: React.FC<MenuItemProps> = ({
@@ -42,15 +44,19 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
   menuIcon,
   isGroup,
   onClick,
+  triggerCreate,
   triggerRename,
   triggerCopy,
   triggerHide,
   triggerDelete,
   maxWidth,
   renameForm,
-  copyForm
+  copyForm,
+  createForm
 }) => {
   const navigate = useNavigate();
+
+  const [popupVisible, setPopupVisible] = useState(false);
 
   const dropList = (
     <Menu style={{ padding: '10px 5px' }}>
@@ -90,6 +96,34 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
           {'复制'}
         </MenuItem>
       )}
+      {isGroup && (
+        <MenuItem
+          key="createPage"
+          onClick={(e) => {
+            e.stopPropagation();
+            triggerCreate('page');
+
+            createForm.setFieldValue('parentId', menuID);
+          }}
+        >
+          {'新建页面'}
+        </MenuItem>
+      )}
+
+      {isGroup && (
+        <MenuItem
+          key="createGroup"
+          onClick={(e) => {
+            e.stopPropagation();
+            triggerCreate('group');
+
+            createForm.setFieldValue('parentId', menuID);
+          }}
+        >
+          {'新建分组'}
+        </MenuItem>
+      )}
+
       {/* <MenuItem
         key="hide"
         onClick={(e) => {
@@ -127,7 +161,17 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
   };
 
   return (
-    <div className={styles.myMenuItem} onClick={onClick} role="menuitem" tabIndex={0}>
+    <div
+      className={styles.myMenuItem}
+      onContextMenu={(e) => {
+        // 支持右键弹出菜单
+        setPopupVisible(true);
+        e.preventDefault();
+      }}
+      onClick={onClick}
+      role="menuitem"
+      tabIndex={0}
+    >
       <div
         className={styles.menuName}
         style={{
@@ -139,7 +183,15 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
       </div>
       {showOption && (
         <div className={styles.dropdownContainer}>
-          <Dropdown droplist={dropList} trigger="click" position="bl">
+          <Dropdown
+            popupVisible={popupVisible}
+            onVisibleChange={(visible) => {
+              setPopupVisible(visible);
+            }}
+            droplist={dropList}
+            trigger="click"
+            position="bl"
+          >
             <IconSettings onClick={(e) => e.stopPropagation()} />
           </Dropdown>
         </div>

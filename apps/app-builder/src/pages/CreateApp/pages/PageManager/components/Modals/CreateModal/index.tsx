@@ -1,7 +1,7 @@
 import iconEditSVG from '@/assets/images/app_edit_black.svg';
+import MenuComp from '@/components/MenuIcon';
 import { Form, Input, Modal, Select, TreeSelect, type FormInstance } from '@arco-design/web-react';
 import React, { useEffect, useState } from 'react';
-import MenuComp from '@/components/MenuIcon';
 import styles from './index.module.less';
 
 interface CreateModalProps {
@@ -57,7 +57,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
           initialValues={{
             pageType: initValue.pageType,
             menuName: initValue.menuName,
-            parentId: initValue.parentId
+            parentId: form.getFieldValue('parentId')
           }}
           style={{
             transform: visibleMenuIcon ? 'translateX(-100%)' : ''
