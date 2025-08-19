@@ -9,7 +9,7 @@ import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
 import com.cmsr.onebase.module.system.controller.admin.dept.vo.dept.DeptAndUsersReqVO;
 import com.cmsr.onebase.module.system.controller.admin.dept.vo.dept.DeptAndUsersRespVO;
 import com.cmsr.onebase.module.system.controller.admin.dept.vo.dept.DeptRespVO;
-import com.cmsr.onebase.module.system.controller.admin.user.vo.user.UserDeptSimpleRespVO;
+import com.cmsr.onebase.module.system.controller.admin.user.vo.user.UserSimpleRespVO;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
@@ -24,15 +24,16 @@ public interface DeptConvert {
 
     DeptRespDTO toDeptRespDTO(DeptRespVO deptInfo);
 
-    default List<AdminUserRespDTO> toAdminUserRespDTO(List<UserDeptSimpleRespVO> userList){
+    default List<AdminUserRespDTO> toAdminUserRespDTO(List<UserSimpleRespVO> userList) {
         return CollectionUtils.convertList(userList, user -> BeanUtils.toBean(user, AdminUserRespDTO.class));
 
     }
-    default List<DeptRespDTO> toDeptRespDTOList(List<DeptRespVO> deptList){
+
+    default List<DeptRespDTO> toDeptRespDTOList(List<DeptRespVO> deptList) {
         return CollectionUtils.convertList(deptList, dept -> BeanUtils.toBean(dept, DeptRespDTO.class));
     }
 
-    default DeptAndUsersRespDTO toDeptAndUsersRespDTO(DeptAndUsersRespVO result){
+    default DeptAndUsersRespDTO toDeptAndUsersRespDTO(DeptAndUsersRespVO result) {
         if (result == null) {
             return null;
         }
@@ -43,4 +44,5 @@ public interface DeptConvert {
         return dto;
     }
 
+    DeptAndUsersReqDTO toDeptAndUsersReqDTO(DeptAndUsersReqVO reqVO);
 }
