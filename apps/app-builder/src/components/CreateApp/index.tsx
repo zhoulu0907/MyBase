@@ -241,7 +241,7 @@ const CreateApp = (props: IProps) => {
                 { required: true, message: '请填写应用编码' },
                 { maxLength: 40, message: '长度超过限制' },
                 {
-                  match: /^(?=.*[A-Za-z])(?=.*\d)(?=.*_)[A-Za-z][A-Za-z0-9_]*$/,
+                  match: /^[A-Za-z][A-Za-z0-9_]*$/,
                   message: '应用编码不符合填写要求'
                 }
               ]}
