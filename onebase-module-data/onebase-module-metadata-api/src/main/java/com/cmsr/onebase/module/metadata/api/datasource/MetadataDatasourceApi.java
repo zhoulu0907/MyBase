@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.metadata.api.datasource;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.module.metadata.api.datasource.dto.DatasourceRespDTO;
 import com.cmsr.onebase.module.metadata.api.datasource.dto.DatasourceSaveReqDTO;
+import com.cmsr.onebase.module.metadata.api.datasource.dto.DatasourceCreateDefaultReqDTO;
 import com.cmsr.onebase.module.metadata.enums.ApiConstants;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -26,8 +27,7 @@ public interface MetadataDatasourceApi {
 
     @PostMapping(PREFIX + "/create-default")
     @Operation(summary = "创建默认数据源")
-    @Parameter(name = "appId", description = "应用ID", required = true, example = "1024")
-    CommonResult<String> createDefaultDatasource(@RequestParam("appId") Long appId);
+    CommonResult<String> createDefaultDatasource(@RequestBody DatasourceCreateDefaultReqDTO reqDTO);
 
     @PostMapping(PREFIX + "/create")
     @Operation(summary = "新增数据源")
