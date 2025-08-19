@@ -12,8 +12,8 @@ const { Option } = Select;
 const Administrator: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [createModalVisible, setCreateModalVisible] = useState(false);
-  const [passwordForm, setPasswordForm] = useState({ id: 0, username: '', newPassword: '', confirmPassword: '' });
-  const [emailForm, setEmailForm] = useState({ id: 0, username: '', oldEmail: '', newEmail: '' });
+  const [passwordForm, setPasswordForm] = useState({ id: '0', username: '', newPassword: '', confirmPassword: '' });
+  const [emailForm, setEmailForm] = useState({ id: '0', username: '', oldEmail: '', newEmail: '' });
   const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
   const [modalType, setModalType] = useState<'email' | 'password' | null>(null);
   const [createForm] = useForm();
@@ -57,8 +57,8 @@ const Administrator: React.FC = () => {
     },
     {
       title: '类型',
-      dataIndex: 'userType',
-      key: 'userType',
+      dataIndex: 'adminType',
+      key: 'adminType',
       render: (val: PlatformAdminUserType) => (
         <Tag color={val === PlatformAdminUserType.系统默认账号 ? 'green' : 'gray'}>{val === PlatformAdminUserType.系统默认账号 ? '系统默认账号' : '普通账号'}</Tag>
       )
@@ -84,7 +84,7 @@ const Administrator: React.FC = () => {
           <Text className={styles.tableBtn} onClick={() => handleEditPassword(record)}>
             修改密码
           </Text>
-          {record.userType !== PlatformAdminUserType.系统默认账号 && (
+          {record.adminType !== PlatformAdminUserType.系统默认账号 && (
              <Tooltip
               position="tr"
               trigger="click"
@@ -146,7 +146,7 @@ const Administrator: React.FC = () => {
       pageSize: 10,
       keyword: keyword // 添加搜索关键词参数
     });
-    console.log('getPlatformAdminList res', res);
+    // console.log('getPlatformAdminList res', res);
     setDataSource(res.list);
     setTotal(res.total);
     
@@ -164,8 +164,8 @@ const Administrator: React.FC = () => {
 
   const addAdmin = () => { 
     createForm.resetFields();
-    setPasswordForm({ id: 0, username: '', newPassword: '', confirmPassword: '' }); // 重置密码表单状态
-    setEmailForm({ id: 0, username: '', oldEmail: '', newEmail: '' }); // 重置邮箱表单状态
+    setPasswordForm({ id: '0', username: '', newPassword: '', confirmPassword: '' }); // 重置密码表单状态
+    setEmailForm({ id: '0', username: '', oldEmail: '', newEmail: '' }); // 重置邮箱表单状态
     setTimeout(() => {
       setCreateModalVisible(true);
     }, 0);
@@ -182,7 +182,7 @@ const Administrator: React.FC = () => {
         password: values.password,
         email: values.email,
         mobile: values.mobile,
-        userType: values.userType,
+        adminType: values.adminType,
       };
       console.log('createTenant', submitData);
       // 调用创建管理员的API
@@ -192,6 +192,7 @@ const Administrator: React.FC = () => {
       Message.success('创建管理员成功');
       setCreateModalVisible(false);
       getPlatformAdminList();
+      setCurrentPage(1)
     } catch (error) {
       console.error('表单验证失败或创建失败:', error);
       Message.error('创建管理员失败');
@@ -535,7 +536,7 @@ const Administrator: React.FC = () => {
             </Form.Item>
             <Form.Item 
               label="类型" 
-              field="userType"
+              field="adminType"
               initialValue={PlatformAdminUserType.普通账号}
               rules={[{ required: true, message: '请选择类型' }]}
               validateTrigger={['onBlur']}

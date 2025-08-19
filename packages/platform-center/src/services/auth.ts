@@ -16,3 +16,13 @@ export const adminLogin = (req: LoginRequest) => {
 export const logout = () => {
   return systemService.post('/auth/logout');
 };
+
+// 获取验证码 /system/captcha/get
+export const getCaptcha = () => {
+  return systemService.get('/captcha/get');
+};
+
+// 校验验证码 /system/captcha/check
+export const checkCaptcha = (token: string, code: string) => {
+  return systemService.post('/captcha/check', { token, code });
+};

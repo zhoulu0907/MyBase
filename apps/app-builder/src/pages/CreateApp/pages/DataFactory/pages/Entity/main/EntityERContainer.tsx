@@ -92,11 +92,13 @@ export const EntityERContainer: React.FC<{
   const handleNodeAddField = (node: EntityNode) => {
     console.log('添加字段', node);
     setConfigFieldModalVisible(true);
+    setEditDrawerVisible(false);
     setNodedata(node as unknown as EntityNode);
   };
 
   const handleNodeAddRelation = (id: string) => {
     console.log('添加关联:', id);
+    setEditDrawerVisible(false);
     setCreateRelationModalVisible(true);
     setUpdateRelationOptions(true);
     setOnlyUpdateNode(false);
@@ -104,6 +106,7 @@ export const EntityERContainer: React.FC<{
 
   const handleNodeAddMasterDetail = (id: string) => {
     console.log('添加主子关系:', id);
+    setEditDrawerVisible(false);
     setCreateMasterDetailModalVisible(true);
     setOnlyUpdateNode(false);
   };

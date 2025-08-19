@@ -12,7 +12,8 @@ export interface cratePlatformAdminReq {
   password: string;
   mobile: string;
   email: string;
-  userType: PlatformAdminUserType;
+  // userType: PlatformAdminUserType;
+  adminType: PlatformAdminUserType;
 }
 /**
  * 平台管理员信息
@@ -68,10 +69,11 @@ export interface PlatformAdminInfo {
    * 状态
    */
   status: number;
+  adminType: PlatformAdminUserType;
   /**
    * 用户类型
    */
-  userType: PlatformAdminUserType;
+  userType?: PlatformAdminUserType;
   /**
    * 用户名
    */

@@ -189,11 +189,12 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
           onEdgeEdit?.(edge.data);
         });
 
-        graphRef.current.on('translate', ({ tx, ty }) => {
-          console.log('translate', tx, ty);
-          const center = graphRef.current?.getContentArea()?.center;
-          console.log('center', center);
-        });
+        // 监听画布平移
+        // graphRef.current.on('translate', ({ tx, ty }) => {
+        //   console.log('translate', tx, ty);
+        //   const center = graphRef.current?.getContentArea()?.center;
+        //   console.log('center', center);
+        // });
 
         isGraphInitialized.current = true; // 标记已初始化
       };
@@ -386,22 +387,23 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
             //   { x: 380, y: 120 },
             // ],
             data: edgeData,
-            labels: edgeData.label
-              ? [
-                  {
-                    position: 0.5,
-                    attrs: {
-                      label: {
-                        text: edgeData.label,
-                        fill: '#39B85F',
-                        fontSize: 12,
-                        textAnchor: 'middle',
-                        textVerticalAnchor: 'middle'
+            labels:
+              edgeData.label === '主子关系'
+                ? [
+                    {
+                      position: 0.5,
+                      attrs: {
+                        label: {
+                          text: edgeData.label,
+                          fill: '#39B85F',
+                          fontSize: 12,
+                          textAnchor: 'middle',
+                          textVerticalAnchor: 'middle'
+                        }
                       }
                     }
-                  }
-                ]
-              : []
+                  ]
+                : []
             // 可以添加其他边的属性，如 router, connector 等来优化连线路径
             // router: 'manhattan', // 例如使用直角路由
             // connector: { name: 'rounded', args: { radius: 8 }}, // 例如使用圆角连接
