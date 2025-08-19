@@ -139,8 +139,10 @@ public class EntityFieldController {
         for (int i = 0; i < list.size(); i++) {
             MetadataEntityFieldDO f = list.get(i);
             EntityFieldRespVO v = respList.get(i);
-            // 单/多选返回选项
-            if ("SINGLE_SELECT".equalsIgnoreCase(f.getFieldType()) || "MULTI_SELECT".equalsIgnoreCase(f.getFieldType())) {
+            // 单/多选/选择列表返回选项
+            if ("SINGLE_SELECT".equalsIgnoreCase(f.getFieldType()) 
+                || "MULTI_SELECT".equalsIgnoreCase(f.getFieldType())
+                || "PICKLIST".equalsIgnoreCase(f.getFieldType())) {
                 var options = fieldOptionService.listByFieldId(f.getId());
                 if (options != null && !options.isEmpty()) {
                     java.util.List<FieldOptionRespVO> ov = new java.util.ArrayList<>();
