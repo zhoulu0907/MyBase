@@ -5,6 +5,8 @@ import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.system.api.dept.dto.DeptAndUsersReqDTO;
 import com.cmsr.onebase.module.system.api.dept.dto.DeptAndUsersRespDTO;
 import com.cmsr.onebase.module.system.api.dept.dto.DeptRespDTO;
+import com.cmsr.onebase.module.system.controller.admin.dept.vo.dept.DeptAndUsersRespVO;
+import com.cmsr.onebase.module.system.convert.dept.DeptConvert;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.module.system.service.dept.DeptService;
 import jakarta.annotation.Resource;
@@ -43,8 +45,8 @@ public class DeptApiImpl implements DeptApi {
 
     @Override
     public CommonResult<DeptAndUsersRespDTO> getDeptAndUsers(DeptAndUsersReqDTO reqVO) {
-        DeptAndUsersRespDTO result = deptService.getDeptAndUsers(reqVO);
-        return success(result);
+        DeptAndUsersRespVO result = deptService.getDeptAndUsers(DeptConvert.INSTANCE.toDeptAndUsersReqVO(reqVO));
+        return success(DeptConvert.INSTANCE.toDeptAndUsersRespDTO(result));
     }
 
     @Override

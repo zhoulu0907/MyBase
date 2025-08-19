@@ -5,10 +5,6 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.module.system.api.dept.dto.DeptAndUsersReqDTO;
-import com.cmsr.onebase.module.system.api.dept.dto.DeptAndUsersRespDTO;
-import com.cmsr.onebase.module.system.api.dept.dto.DeptRespDTO;
-import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
 import com.cmsr.onebase.module.system.controller.admin.dept.vo.dept.*;
 import com.cmsr.onebase.module.system.controller.admin.user.vo.user.UserDeptSimpleRespVO;
 import com.cmsr.onebase.module.system.dal.database.DeptDataRepository;
@@ -371,71 +367,6 @@ public class DeptServiceImpl implements DeptService {
             // 获取所有没有部门的用户（dept_id = null）
             List<AdminUserDO> usersWithoutDept = adminUserService.getUserListNoDept();
             respVO.setUserList(BeanUtils.toBean(usersWithoutDept, UserDeptSimpleRespVO.class));
-        }
-
-        // 数据处理：排除指定用户和角色用户
-        if (CollectionUtils.isNotEmpty(respVO.getUserList())) {
-            Collection<Long> excludeRoleUserIds = null;
-            // 排除拥有excludRoleId角色的用户
-            if (reqVO.getExcludeRoleIds() != null) {
-                excludeRoleUserIds = permissionService.getUserIdsListByRoleIds(reqVO.getExcludeRoleIds());
-            }
-            // 取合集，并去掉重复userID
-            Set<Long> excludeUserIds = CollUtil.unionDistinct(reqVO.getExcludeUserIds(), excludeRoleUserIds);
-            // 过滤掉排除的用户
-            respVO.setUserList(respVO.getUserList().stream()
-                    .filter(user -> !excludeUserIds.contains(user.getId()))
-                    .collect(Collectors.toList()));
-        }
-
-        return respVO;
-    }
-
-    @Override
-    public DeptAndUsersRespDTO getDeptAndUsers(DeptAndUsersReqDTO reqVO) {
-        DeptAndUsersRespDTO respVO = new DeptAndUsersRespDTO();
-
-        // 判断是否有搜索关键词
-        boolean hasKeywords = StrUtil.isNotBlank(reqVO.getKeywords());
-        boolean hasDeptId = reqVO.getDeptId() != null && reqVO.getDeptId() > 0;
-
-        if (hasKeywords) {
-            // 场景3和4：有搜索关键词时，优先按搜索词处理
-            respVO.setDeptInfo(null);
-
-            // 按部门名称模糊搜索部门
-            List<DeptDO> matchedDepts = deptDataRepository.findAllByNameAndStatus(reqVO.getKeywords(), null);
-            respVO.setDeptList(BeanUtils.toBean(matchedDepts, DeptRespDTO.class));
-
-            // 按用户昵称模糊搜索用户
-            List<AdminUserDO> matchedUsers = adminUserService.getUserListByNickname(reqVO.getKeywords());
-            respVO.setUserList(BeanUtils.toBean(matchedUsers, AdminUserRespDTO.class));
-
-        } else if (hasDeptId) {
-            // 场景2：有部门ID，无搜索词
-            // 获取当前部门信息
-            DeptDO deptInfo = getDept(reqVO.getDeptId());
-            respVO.setDeptInfo(BeanUtils.toBean(deptInfo, DeptRespDTO.class));
-
-            // 获取直属子部门
-            List<DeptDO> childDepts = deptDataRepository.findAllByParentId(reqVO.getDeptId());
-            respVO.setDeptList(BeanUtils.toBean(childDepts, DeptRespDTO.class));
-
-            // 获取直属用户
-            List<AdminUserDO> directUsers = adminUserService.getUserListByDeptIds(Collections.singletonList(reqVO.getDeptId()));
-            respVO.setUserList(BeanUtils.toBean(directUsers, AdminUserRespDTO.class));
-
-        } else {
-            // 场景1：部门ID和搜索词都为空
-            respVO.setDeptInfo(null);
-
-            // 获取所有一级部门（parentId = 0）
-            List<DeptDO> rootDepts = deptDataRepository.findAllByParentId(DeptDO.PARENT_ID_ROOT);
-            respVO.setDeptList(BeanUtils.toBean(rootDepts, DeptRespDTO.class));
-
-            // 获取所有没有部门的用户（dept_id = null）
-            List<AdminUserDO> usersWithoutDept = adminUserService.getUserListNoDept();
-            respVO.setUserList(BeanUtils.toBean(usersWithoutDept, AdminUserRespDTO.class));
         }
 
         // 数据处理：排除指定用户和角色用户
