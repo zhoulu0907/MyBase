@@ -57,7 +57,7 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
             if (user == null) {
                 AuthRoleUsersPageRespVO vo = new AuthRoleUsersPageRespVO();
                 vo.setId(userId);
-                vo.setNickname(String.valueOf(userId));
+                vo.setNickname("[" + userId + "]");
                 vo.setMobile("-");
                 return vo;
             } else {
