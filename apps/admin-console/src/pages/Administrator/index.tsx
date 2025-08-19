@@ -12,8 +12,8 @@ const { Option } = Select;
 const Administrator: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [createModalVisible, setCreateModalVisible] = useState(false);
-  const [passwordForm, setPasswordForm] = useState({ id: 0, username: '', newPassword: '', confirmPassword: '' });
-  const [emailForm, setEmailForm] = useState({ id: 0, username: '', oldEmail: '', newEmail: '' });
+  const [passwordForm, setPasswordForm] = useState({ id: '0', username: '', newPassword: '', confirmPassword: '' });
+  const [emailForm, setEmailForm] = useState({ id: '0', username: '', oldEmail: '', newEmail: '' });
   const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
   const [modalType, setModalType] = useState<'email' | 'password' | null>(null);
   const [createForm] = useForm();
@@ -164,8 +164,8 @@ const Administrator: React.FC = () => {
 
   const addAdmin = () => { 
     createForm.resetFields();
-    setPasswordForm({ id: 0, username: '', newPassword: '', confirmPassword: '' }); // 重置密码表单状态
-    setEmailForm({ id: 0, username: '', oldEmail: '', newEmail: '' }); // 重置邮箱表单状态
+    setPasswordForm({ id: '0', username: '', newPassword: '', confirmPassword: '' }); // 重置密码表单状态
+    setEmailForm({ id: '0', username: '', oldEmail: '', newEmail: '' }); // 重置邮箱表单状态
     setTimeout(() => {
       setCreateModalVisible(true);
     }, 0);

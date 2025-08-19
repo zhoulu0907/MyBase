@@ -226,7 +226,7 @@ const TenantManagement: React.FC = () => {
       tenantCode: record.tenantCode,
     };
     setCurrentTenant(tenant);
-    setOriginalAdmin(record.nickName);
+    setOriginalAdmin(record.nickName || record.contactName);
     
     form.setFieldsValue({
       tenantName: record.name,
