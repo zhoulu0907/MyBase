@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import java.util.List;
 
 /**
  * 管理后台 - 字段批量保存（增/改/删）项 VO
@@ -62,4 +63,10 @@ public class EntityFieldUpsertItemVO {
 
     @Schema(description = "是否系统字段", example = "0")
     private Integer isSystemField;
+
+    @Schema(description = "字段选项列表（当字段为单/多选时可传入，若提供则整体替换）")
+    private List<FieldOptionRespVO> options;
+
+    @Schema(description = "字段约束配置（长度/正则，若提供则整体替换）")
+    private FieldConstraintRespVO constraints;
 }
