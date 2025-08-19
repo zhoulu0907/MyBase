@@ -1,7 +1,5 @@
 package com.cmsr.onebase.module.system.api.user.dto;
 
-import java.util.Set;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -21,13 +19,16 @@ public class AdminUserRespDTO {
     @Schema(description = "部门编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
     private Long deptId;
 
-    @Schema(description = "岗位编号数组", requiredMode = Schema.RequiredMode.REQUIRED, example = "[1, 3]")
-    private Set<Long> postIds;
-
     @Schema(description = "手机号码", requiredMode = Schema.RequiredMode.REQUIRED, example = "15601691300")
     private String mobile;
 
     @Schema(description = "用户头像", requiredMode = Schema.RequiredMode.REQUIRED, example = "https://www.cmsr.com")
     private String avatar;
+
+    @Schema(description = "部门名称", example = "IT 部")
+    private String deptName;
+
+    @Schema(description = "用户邮箱", example = "a@b.cn")
+    private String email;
 
 }

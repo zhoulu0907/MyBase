@@ -339,7 +339,7 @@ public class AdminUserServiceImpl implements AdminUserService {
         Collection<Long> includeRoleUserIds = null, excludeRoleUserIds = null;
         // 过滤拥有roleId该角色的用户
         if (reqVO.getRoleId() != null) {
-            includeRoleUserIds = permissionService.getUserRoleIdListByRoleId(singleton(reqVO.getRoleId()));
+            includeRoleUserIds = permissionService.getUserIdsListByRoleIds(singleton(reqVO.getRoleId()));
             if (CollUtil.isEmpty(includeRoleUserIds)) {
                 // 如果角色下没有用户，直接返回空结果
                 return new PageResult<>(Collections.emptyList(), 0L);
@@ -347,7 +347,7 @@ public class AdminUserServiceImpl implements AdminUserService {
         }
         // 排除拥有excludRoleId角色的用户
         if (reqVO.getExcludRoleId() != null) {
-            excludeRoleUserIds = permissionService.getUserRoleIdListByRoleId(singleton(reqVO.getExcludRoleId()));
+            excludeRoleUserIds = permissionService.getUserIdsListByRoleIds(singleton(reqVO.getExcludRoleId()));
         }
 
         // 分页查询
@@ -694,7 +694,7 @@ public class AdminUserServiceImpl implements AdminUserService {
         DeptDO dept = deptService.getDept(user.getDeptId());
 
         // 获取用户角色信息
-        Set<Long> roleIds = permissionService.getUserRoleIdListByUserId(id);
+        Set<Long> roleIds = permissionService.getRoleIdsListByUserId(id);
         List<RoleDO> roles = new ArrayList<>();
         if (CollUtil.isNotEmpty(roleIds)) {
             roles = roleService.getRoleList(roleIds);

@@ -76,7 +76,7 @@ public class PermissionController {
     @GetMapping("/list-user-roles")
     @PreAuthorize("@ss.hasPermission('system:permission:assign-user-role')")
     public CommonResult<Set<Long>> listAdminRoles(@RequestParam("userId") Long userId) {
-        return success(permissionService.getUserRoleIdListByUserId(userId));
+        return success(permissionService.getRoleIdsListByUserId(userId));
     }
 
     @Operation(summary = "赋予用户角色")

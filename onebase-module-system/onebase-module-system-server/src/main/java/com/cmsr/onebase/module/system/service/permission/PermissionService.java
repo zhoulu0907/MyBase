@@ -122,7 +122,7 @@ public interface PermissionService {
      * @param roleIds 角色编号集合
      * @return 用户编号集合
      */
-    Set<Long> getUserRoleIdListByRoleId(Collection<Long> roleIds);
+    Set<Long> getUserIdsListByRoleIds(Collection<Long> roleIds);
 
     /**
      * 获得用户拥有的角色编号集合
@@ -130,7 +130,7 @@ public interface PermissionService {
      * @param userId 用户编号
      * @return 角色编号集合
      */
-    Set<Long> getUserRoleIdListByUserId(Long userId);
+    Set<Long> getRoleIdsListByUserId(Long userId);
 
     /**
      * 获得用户拥有的角色编号集合，从缓存中获取

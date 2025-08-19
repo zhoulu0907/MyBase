@@ -4,6 +4,7 @@ package com.cmsr.onebase.module.system.convert.user;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import com.cmsr.onebase.framework.common.util.collection.MapUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
 import com.cmsr.onebase.module.system.controller.admin.dept.vo.dept.DeptSimpleRespVO;
 import com.cmsr.onebase.module.system.controller.admin.dept.vo.post.PostSimpleRespVO;
 import com.cmsr.onebase.module.system.controller.admin.permission.vo.role.RoleSimpleRespVO;
@@ -96,4 +97,12 @@ public interface UserConvert {
     }
 
     List<UserSimpleRespVO> convertList(List<AdminUserDO> list);
+
+    default List<AdminUserRespDTO> convert2DTOList(List<AdminUserDO> users, Map<Long, DeptDO> deptMap){
+        return CollectionUtils.convertList(users, user -> {
+            AdminUserRespDTO userDTO = BeanUtils.toBean(user, AdminUserRespDTO.class);
+            MapUtils.findAndThen(deptMap, user.getDeptId(), dept -> userDTO.setDeptName(dept.getName()));
+            return userDTO;
+        });
+    }
 }

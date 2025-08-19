@@ -203,7 +203,7 @@ public class PermissionServiceTest {
         permissionService.assignUserRoles(user.getId(), roleIds);
 
         // 验证结果
-        Set<Long> assignedRoleIds = permissionService.getUserRoleIdListByUserId(user.getId());
+        Set<Long> assignedRoleIds = permissionService.getRoleIdsListByUserId(user.getId());
         assertEquals(roleIds.size(), assignedRoleIds.size(), "分配的角色数量应该一致");
         assertTrue(assignedRoleIds.containsAll(roleIds), "应该包含所有分配的角色");
     }
@@ -222,14 +222,14 @@ public class PermissionServiceTest {
         createRoleMenu(role.getId(), menu.getId());
 
         // 验证删除前数据存在
-        assertFalse(permissionService.getUserRoleIdListByUserId(user.getId()).isEmpty(), "删除前应该有用户角色关联");
+        assertFalse(permissionService.getRoleIdsListByUserId(user.getId()).isEmpty(), "删除前应该有用户角色关联");
         assertFalse(permissionService.getRoleMenuListByRoleId(role.getId()).isEmpty(), "删除前应该有角色菜单关联");
 
         // 执行测试
         permissionService.processRoleDeleted(role.getId());
 
         // 验证结果
-        assertTrue(permissionService.getUserRoleIdListByUserId(user.getId()).isEmpty(), "删除后应该清理用户角色关联");
+        assertTrue(permissionService.getRoleIdsListByUserId(user.getId()).isEmpty(), "删除后应该清理用户角色关联");
         assertTrue(permissionService.getRoleMenuListByRoleId(role.getId()).isEmpty(), "删除后应该清理角色菜单关联");
     }
 
@@ -276,7 +276,7 @@ public class PermissionServiceTest {
 
         // 验证结果
         assertEquals(userIds.size(), affectedRows, "影响的行数应该等于用户数量");
-        Set<Long> assignedUserIds = permissionService.getUserRoleIdListByRoleId(Collections.singleton(role.getId()));
+        Set<Long> assignedUserIds = permissionService.getUserIdsListByRoleIds(Collections.singleton(role.getId()));
         assertEquals(userIds.size(), assignedUserIds.size(), "分配的用户数量应该一致");
         assertTrue(assignedUserIds.containsAll(userIds), "应该包含所有分配的用户");
     }
@@ -301,7 +301,7 @@ public class PermissionServiceTest {
 
         // 验证删除前数据存在 - 检查每个用户的角色
         for (Long userId : userIds) {
-            Set<Long> userRoles = permissionService.getUserRoleIdListByUserId(userId);
+            Set<Long> userRoles = permissionService.getRoleIdsListByUserId(userId);
             assertTrue(userRoles.contains(role.getId()), "用户应该拥有指定角色");
         }
 
@@ -312,12 +312,12 @@ public class PermissionServiceTest {
         assertEquals(deleteUserIds.size(), deletedRows, "删除的行数应该正确");
 
         // 检查被删除的用户不再拥有该角色
-        Set<Long> user1Roles = permissionService.getUserRoleIdListByUserId(user1.getId());
+        Set<Long> user1Roles = permissionService.getRoleIdsListByUserId(user1.getId());
         System.out.println("User1 Roles: " + user1Roles);
         assertFalse(user1Roles.contains(role.getId()), "被删除的用户不应该再拥有该角色");
 
         // 检查未删除的用户仍然拥有该角色
-        Set<Long> user2Roles = permissionService.getUserRoleIdListByUserId(user2.getId());
+        Set<Long> user2Roles = permissionService.getRoleIdsListByUserId(user2.getId());
         System.out.println("User2 Roles: " + user2Roles);
         assertTrue(user2Roles.contains(role.getId()), "未删除的用户应该仍然拥有该角色");
     }

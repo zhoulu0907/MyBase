@@ -1,11 +1,7 @@
 package com.cmsr.onebase.module.system.service.dept;
 
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
-import com.cmsr.onebase.module.system.controller.admin.dept.vo.dept.DeptListReqVO;
-import com.cmsr.onebase.module.system.controller.admin.dept.vo.dept.DeptRespVO;
-import com.cmsr.onebase.module.system.controller.admin.dept.vo.dept.DeptSaveReqVO;
-import com.cmsr.onebase.module.system.controller.admin.dept.vo.dept.DeptAndUsersReqVO;
-import com.cmsr.onebase.module.system.controller.admin.dept.vo.dept.DeptAndUsersRespVO;
+import com.cmsr.onebase.module.system.controller.admin.dept.vo.dept.*;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 
 import java.util.*;
@@ -139,5 +135,4 @@ public interface DeptService {
      * @return 部门和用户信息
      */
     DeptAndUsersRespVO getDeptAndUsers(DeptAndUsersReqVO reqVO);
-
 }
