@@ -78,7 +78,7 @@ export default function RolePage() {
       setRoleModalVisible(false);
       
     } catch (error) {
-      Message.error('保存失败');
+      console.error('保存失败');
     } finally {
       setModalLoading(false);
     }

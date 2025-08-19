@@ -69,8 +69,8 @@ const CreateMasterDetailModal: React.FC<{
     try {
       const res = await getEntityFields({ entityId: value });
       if (res.length > 0) {
-        const fieldOptions = res.map((field: { fieldName: string; id: string }) => ({
-          label: field.fieldName,
+        const fieldOptions = res.map((field: { displayName: string; id: string }) => ({
+          label: field.displayName,
           value: field.id
         }));
         setFieldOptions(fieldOptions);
@@ -88,8 +88,8 @@ const CreateMasterDetailModal: React.FC<{
     try {
       const res = await getEntityFields({ entityId: value });
       if (res.length > 0) {
-        const fieldOptions = res.map((field: { fieldName: string; id: string }) => ({
-          label: field.fieldName,
+        const fieldOptions = res.map((field: { displayName: string; id: string }) => ({
+          label: field.displayName,
           value: field.id
         }));
         setChildFieldOptions(fieldOptions);

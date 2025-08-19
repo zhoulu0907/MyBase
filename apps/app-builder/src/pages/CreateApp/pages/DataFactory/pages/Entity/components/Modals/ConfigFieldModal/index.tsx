@@ -1,23 +1,15 @@
 import { ENTITY_FIELD_TYPE } from '@/pages/CreateApp/pages/DataFactory/utils/const';
 import type { EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
 import { useAppStore } from '@/store/store_app';
-import {
-  Button,
-  Checkbox,
-  Input,
-  Message,
-  Modal,
-  Popover,
-  Select,
-  Space,
-  Table,
-  Tooltip
-} from '@arco-design/web-react';
-import { IconDragDotVertical, IconPlus, IconSettings } from '@arco-design/web-react/icon';
+import { Button, Message, Modal, Table } from '@arco-design/web-react';
+import { IconPlus } from '@arco-design/web-react/icon';
 import { batchSaveFields, getEntityFields } from '@onebase/app';
-import React, { useEffect, useState } from 'react';
+import React, { forwardRef, useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import styles from '../modal.module.less';
+import { type AutoCodeRule } from './FieldTypeConfig';
+import FieldConfigPopover from './FieldConfigPopover';
+import TableColumns from './TableColumns';
 
 interface FieldFormValues {
   id?: string;
@@ -26,13 +18,30 @@ interface FieldFormValues {
   description: string;
   fieldType: string;
   defaultValue: string;
-  isUnique: boolean;
-  allowNull: boolean;
+  isUnique: number;
+  allowNull: number;
   constraints: string;
   isSystemField: number;
   sortOrder?: number;
   isDeleted?: boolean;
   displayName?: string;
+  fieldConfig?: {
+    options?: string[];
+    autoCodeRules?: AutoCodeRule[];
+    constraints?: {
+      lengthRange: {
+        enabled: boolean;
+        minLength: number;
+        maxLength: number;
+        hintMessage: string;
+      };
+      regexValidation: {
+        enabled: boolean;
+        pattern: string;
+        hintMessage: string;
+      };
+    };
+  };
 }
 
 interface ConfigFieldModalProps {
@@ -44,11 +53,7 @@ interface ConfigFieldModalProps {
 }
 
 // 需要额外配置的字段类型
-const FIELD_TYPES_NEED_CONFIG = [
-  ENTITY_FIELD_TYPE.PICKLIST,
-  ENTITY_FIELD_TYPE.MULTI_PICKLIST,
-  ENTITY_FIELD_TYPE.AUTO_CODE
-];
+const FIELD_TYPES_NEED_CONFIG = ['PICKLIST', 'MULTI_PICKLIST', 'AUTO_CODE'];
 
 // 字段类型选项
 const fieldTypeOptions = Object.entries(ENTITY_FIELD_TYPE).map(([key, value]) => ({
@@ -57,19 +62,88 @@ const fieldTypeOptions = Object.entries(ENTITY_FIELD_TYPE).map(([key, value]) =>
 }));
 
 // 自定义表格行组件，支持拖拽
-const SortableTableRow = (props) => {
-  const { record, children, ...restProps } = props;
-  return <tr {...restProps}>{children}</tr>;
-};
+// const SortableTableRow = (props: any) => {
+//   const { record, children, ...restProps } = props;
+//   return <tr {...restProps}>{children}</tr>;
+//   //   // 重点：只对当前行生效
+//   //   list={[record]} // 传入单个对象，保持唯一性
+//   //   setList={() => {}} // 不需要更新外部 state，由外层控制
+//   //   animation={200}
+//   //   handle={`.${styles['drag-handle']}`}
+//   //   filter={`.${styles['system-field']}`}
+//   //   tag="tr"
+//   //   // 确保能触发排序
+//   //   onSort={(event) => {
+//   //     // 这里才是真正的排序回调
+//   //     console.log('拖拽排序触发', event);
+//   //     handleSort([record]);
+//   //     // 你可以在这里调用父组件的排序逻辑
+//   //   }}
+//   //   // 关键：必须保证 key 和 id 一致
+//   //   key={record.id}
+//   // >
+//   //   <tr
+//   //     ref={ref}
+//   //     style={style}
+//   //     className={className}
+//   //     data-id={record.id} // 可选：用于调试
+//   //   >
+//   //     {children}
+//   //   </tr>
+//   // </ReactSortable>;
+// };
+interface Props {
+  index: number;
+  record: any;
+  style?: React.CSSProperties;
+  className?: string;
+  children: React.ReactNode;
+}
+
+export const SortableTableRow = forwardRef<HTMLTableRowElement, Props>((props, ref) => {
+  const { index, record, style, className, children } = props;
+  console.log('SortableTableRow', props);
+
+  return (
+    <ReactSortable
+      // 重点：只对当前行生效
+      list={[record]} // 传入单个对象，保持唯一性
+      setList={() => {}} // 不需要更新外部 state，由外层控制
+      animation={200}
+      handle={`.${styles['drag-handle']}`}
+      filter={`.${styles['system-field']}`}
+      tag="tr"
+      // 确保能触发排序
+      onSort={(event) => {
+        // 这里才是真正的排序回调
+        console.log('拖拽排序触发', event);
+        // 你可以在这里调用父组件的排序逻辑
+      }}
+      // 关键：必须保证 key 和 id 一致
+      key={record.id}
+    >
+      <tr
+        ref={ref}
+        style={style}
+        className={className}
+        data-id={record.id} // 可选：用于调试
+      >
+        {children}
+      </tr>
+    </ReactSortable>
+  );
+});
+
 const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible, entity, successCallback }) => {
   const { curAppId } = useAppStore();
   const [fields, setFields] = useState<FieldFormValues[]>([]);
   const [loading, setLoading] = useState(false);
   const [configPopoverVisible, setConfigPopoverVisible] = useState<string | null>(null);
+  const [constraintsPopoverVisible, setConstraintsPopoverVisible] = useState<string | null>(null);
 
   useEffect(() => {
     if (visible) {
-      getEntityFields({ entityId: entity.entityId }).then((res) => {
+      getEntityFields({ entityId: entity.entityId }).then((res: any) => {
         console.log('getEntityFields', res);
         setFields(
           res.map((field: object, index: number) => ({
@@ -86,14 +160,15 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
 
   const addField = () => {
     const newField: FieldFormValues = {
+      id: 'field-' + Date.now(),
       fieldCode: '',
       fieldName: '',
       displayName: '',
       description: '',
       fieldType: 'TEXT',
       defaultValue: '',
-      isUnique: false,
-      allowNull: true,
+      isUnique: 1,
+      allowNull: 1,
       constraints: '',
       isSystemField: 1,
       sortOrder: activeFields.length
@@ -125,12 +200,9 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
 
   const handleSort = (newFields: FieldFormValues[]) => {
     console.log('handleSort', newFields);
-    // 获取所有字段（包括已删除的）
     const allFields = [...fields];
-    // 更新可见字段的排序
     const visibleFields = newFields.map((field, index) => ({ ...field, sortOrder: index }));
 
-    // 更新所有字段的排序
     setFields(
       allFields.map((field) => {
         const visibleField = visibleFields.find((vf) => vf.id === field.id);
@@ -143,7 +215,6 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
     try {
       setLoading(true);
 
-      // 过滤自定义字段（排除系统字段和已删除字段）
       const customFields = fields.filter((field) => field.isSystemField === 1 && !field.isDeleted);
 
       // 表单校验
@@ -162,18 +233,13 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
         }
       }
 
-      // 准备所有字段数据（包括标记为删除的）
       const allFields = fields.filter((field) => field.isSystemField === 1);
       const fieldDataList = allFields.map((field) => {
         const fieldData = {
           appId: curAppId,
           entityId: entity.entityId,
-          fieldCode: field.fieldCode,
-          fieldName: field.fieldName,
-          description: field.description,
-          fieldType: field.fieldType,
+          ...field,
           isSystemField: 1,
-          displayName: field.displayName,
           isDeleted: field.isDeleted || false
         };
 
@@ -192,218 +258,75 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
       successCallback();
     } catch (error) {
       console.error('保存字段失败:', error);
-      Message.error('保存失败');
     } finally {
       setLoading(false);
     }
   };
 
-  const renderFieldConfig = (fieldType: string) => {
+  // 处理配置确认
+  const handleConfigConfirm = (fieldType: string, fieldId: string, configData: any) => {
+    const fieldIndex = fields.findIndex((field) => field.id === fieldId);
+    if (fieldIndex === -1) return;
+
+    let fieldConfig = {};
     switch (fieldType) {
-      case ENTITY_FIELD_TYPE.PICKLIST:
-        return (
-          <div className={styles['field-config-popover']}>
-            <h4>单选列表配置</h4>
-            <p>请配置选项列表...</p>
-            {/* 这里可以添加具体的配置表单 */}
-          </div>
-        );
-      case ENTITY_FIELD_TYPE.MULTI_PICKLIST:
-        return (
-          <div className={styles['field-config-popover']}>
-            <h4>多选列表配置</h4>
-            <p>请配置选项列表...</p>
-            {/* 这里可以添加具体的配置表单 */}
-          </div>
-        );
-      case ENTITY_FIELD_TYPE.AUTO_CODE:
-        return (
-          <div className={styles['field-config-popover']}>
-            <h4>自动编码配置</h4>
-            <p>请配置编码规则...</p>
-            {/* 这里可以添加具体的配置表单 */}
-          </div>
-        );
-      default:
-        return null;
+      case 'PICKLIST':
+      case 'MULTI_PICKLIST':
+        fieldConfig = { options: configData };
+        break;
+      case 'AUTO_CODE':
+        fieldConfig = { autoCodeRules: configData };
+        break;
+      case 'CONSTRAINTS':
+        fieldConfig = { constraints: configData };
+        break;
+    }
+
+    updateField(fieldIndex, { fieldConfig });
+
+    if (fieldType === 'CONSTRAINTS') {
+      setConstraintsPopoverVisible(null);
+    } else {
+      setConfigPopoverVisible(null);
     }
   };
 
-  const columns = [
-    {
-      title: '',
-      dataIndex: 'sortOrder',
-      width: 40,
-      render: (value: number, record: FieldFormValues) => {
-        // 系统字段不能拖拽
-        if (record.isSystemField === 0) {
-          return null;
-        }
-        return <IconDragDotVertical className={styles['drag-handle']} />;
-      }
-    },
-    {
-      title: '字段名称',
-      dataIndex: 'fieldName',
-      width: 120,
-      render: (value: string, record: FieldFormValues, index: number) =>
-        record.isSystemField === 0 ? (
-          <span className={styles['system-field']}>{value}</span>
-        ) : (
-          <Input
-            value={value}
-            placeholder="请输入字段名称"
-            onChange={(val) => updateField(getFieldIndex(record.id, index), { fieldName: val })}
-          />
-        )
-    },
-    {
-      title: '展示名称',
-      dataIndex: 'displayName',
-      width: 120,
-      render: (value: string, record: FieldFormValues, index: number) =>
-        record.isSystemField === 0 ? (
-          <span className={styles['system-field']}>{value}</span>
-        ) : (
-          <Input
-            value={value}
-            placeholder="请输入展示名称"
-            onChange={(val) => updateField(getFieldIndex(record.id, index), { displayName: val })}
-          />
-        )
-    },
-    {
-      title: '数据类型',
-      dataIndex: 'fieldType',
-      width: 140,
-      render: (value: string, record: FieldFormValues, index: number) => (
-        <Space>
-          <Select
-            value={value}
-            options={fieldTypeOptions}
-            onChange={(val) => updateField(getFieldIndex(record.id, index), { fieldType: val })}
-            disabled={record.isSystemField === 0}
-            style={{ width: 100 }}
-          />
-          {record.isSystemField === 1 && FIELD_TYPES_NEED_CONFIG.includes(value) && (
-            <Popover
-              content={renderFieldConfig(value)}
-              trigger="click"
-              popupVisible={configPopoverVisible === record.id}
-              onVisibleChange={(visible) => setConfigPopoverVisible(visible ? record.id : null)}
-            >
-              <Tooltip content="配置">
-                <Button
-                  type="text"
-                  size="mini"
-                  icon={<IconSettings />}
-                  onClick={() => setConfigPopoverVisible(record.id)}
-                />
-              </Tooltip>
-            </Popover>
-          )}
-        </Space>
-      )
-    },
-    {
-      title: '字段描述',
-      dataIndex: 'description',
-      width: 250,
-      ellipsis: true,
-      render: (value: string, record: FieldFormValues, index: number) =>
-        record.isSystemField === 0 ? (
-          <span className={styles['system-field']}>{value}</span>
-        ) : (
-          <Input
-            value={value}
-            placeholder="请输入字段描述"
-            onChange={(val) => updateField(getFieldIndex(record.id, index), { description: val })}
-          />
-        )
-    },
-    {
-      title: '字段类型',
-      dataIndex: 'isSystemField',
-      width: 110,
-      ellipsis: true,
-      render: (value: number) => (
-        <span className={styles['system-field']}>{value === 0 ? '系统字段' : '自定义字段'}</span>
-      )
-    },
-    {
-      title: '默认值',
-      dataIndex: 'defaultValue',
-      width: 120,
-      render: (value: string, record: FieldFormValues, index: number) =>
-        record.isSystemField === 0 ? (
-          <span className={styles['system-field']}>-</span>
-        ) : (
-          <Input
-            value={value}
-            placeholder="请输入默认值"
-            onChange={(val) => updateField(getFieldIndex(record.id, index), { defaultValue: val })}
-          />
-        )
-    },
-    {
-      title: '唯一',
-      dataIndex: 'isUnique',
-      width: 60,
-      render: (value: boolean, record: FieldFormValues, index: number) =>
-        record.isSystemField === 0 ? (
-          <span className={styles['system-field']}>-</span>
-        ) : (
-          <Checkbox
-            checked={value}
-            onChange={(checked) => updateField(getFieldIndex(record.id, index), { isUnique: checked })}
-          />
-        )
-    },
-    {
-      title: '允许空值',
-      dataIndex: 'allowNull',
-      width: 100,
-      render: (value: boolean, record: FieldFormValues, index: number) =>
-        record.isSystemField === 0 ? (
-          <span className={styles['system-field']}>-</span>
-        ) : (
-          <Checkbox
-            checked={value}
-            onChange={(checked) => updateField(getFieldIndex(record.id, index), { allowNull: checked })}
-          />
-        )
-    },
-    {
-      title: '字段约束',
-      dataIndex: 'constraints',
-      // width: 120,
-      render: (value: string, record: FieldFormValues, index: number) =>
-        record.isSystemField === 0 ? (
-          <span className={styles['system-field']}>{value || '-'}</span>
-        ) : (
-          <Input
-            value={value}
-            placeholder="请输入字段约束"
-            onChange={(val) => updateField(getFieldIndex(record.id, index), { constraints: val })}
-          />
-        )
-    },
-    {
-      title: '操作',
-      dataIndex: 'operation',
-      width: 80,
-      render: (value: unknown, record: FieldFormValues) => {
-        const fieldIndex = fields.findIndex((f) => f.id === record.id);
-        return (
-          record.isSystemField === 1 && (
-            <Button type="text" status="danger" size="mini" onClick={() => deleteField(fieldIndex)}>
-              删除
-            </Button>
-          )
-        );
-      }
+  const handleConfigCancel = (fieldType: string) => {
+    if (fieldType === 'CONSTRAINTS') {
+      setConstraintsPopoverVisible(null);
+    } else {
+      setConfigPopoverVisible(null);
     }
-  ];
+  };
+
+  // 渲染字段配置 popover 内容
+  const renderFieldConfigContent = (fieldType: string, fieldId: string) => {
+    const field = fields.find((f) => f.id === fieldId);
+    return (
+      <FieldConfigPopover
+        fieldType={fieldType}
+        fieldId={fieldId}
+        field={field}
+        onConfirm={handleConfigConfirm}
+        onCancel={handleConfigCancel}
+      />
+    );
+  };
+
+  // 使用表格列组件
+  const columns = TableColumns({
+    fieldTypeOptions,
+    FIELD_TYPES_NEED_CONFIG,
+    configPopoverVisible,
+    constraintsPopoverVisible,
+    setConfigPopoverVisible,
+    setConstraintsPopoverVisible,
+    renderFieldConfigContent,
+    updateField,
+    getFieldIndex,
+    deleteField,
+    fields
+  });
 
   return (
     <Modal
@@ -418,30 +341,30 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
       style={{ width: 1400 }}
     >
       <div className={styles['field-config-container']}>
-        <ReactSortable
+        {/* <ReactSortable
           list={activeFields}
           setList={handleSort}
           animation={200}
           handle={`.${styles['drag-handle']}`}
           filter={`.${styles['system-field']}`}
-          tag="tbody" // 指定包装元素为tbody
-        >
-          <Table
-            data={activeFields}
-            columns={columns}
-            pagination={false}
-            className={styles['field-table']}
-            rowClassName={(record) =>
-              record.isSystemField === 0 ? styles['system-field-row'] : styles['custom-field-row']
+          tag="tr"
+        > */}
+        <Table
+          data={activeFields}
+          columns={columns}
+          pagination={false}
+          className={styles['field-table']}
+          rowClassName={(record) =>
+            record.isSystemField === 0 ? styles['system-field-row'] : styles['custom-field-row']
+          }
+          rowKey="id"
+          components={{
+            body: {
+              row: SortableTableRow
             }
-            rowKey="id"
-            components={{
-              body: {
-                row: SortableTableRow
-              }
-            }}
-          />
-        </ReactSortable>
+          }}
+        />
+        {/* </ReactSortable> */}
 
         <div className={styles['add-field-section']}>
           <Button type="dashed" icon={<IconPlus />} onClick={addField} className={styles['add-field-button']}>

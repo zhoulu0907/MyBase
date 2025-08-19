@@ -89,15 +89,15 @@ const DataFields: React.FC<DataFieldsProps> = ({ entity, activeTab }) => {
 
   const columns: TableColumnProps[] = [
     {
-      title: '字段编码',
-      dataIndex: 'fieldCode',
-      key: 'fieldCode',
-      width: 150
-    },
-    {
       title: '字段名称',
       dataIndex: 'fieldName',
       key: 'fieldName',
+      width: 150
+    },
+    {
+      title: '展示名称',
+      dataIndex: 'displayName',
+      key: 'displayName',
       width: 150
     },
     {

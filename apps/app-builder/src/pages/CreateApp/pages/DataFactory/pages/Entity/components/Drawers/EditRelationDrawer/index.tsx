@@ -26,7 +26,7 @@ interface RelationFormValues {
 interface EditRelationDrawerProps {
   visible: boolean;
   setVisible: (visible: boolean) => void;
-  relationData?: EdgeData; // 关联关系数据
+  relationData?: RelationFormValues; // 关联关系数据
   onSuccess?: () => void;
 }
 
@@ -59,21 +59,22 @@ const EditRelationDrawer: React.FC<EditRelationDrawerProps> = ({ visible, setVis
 
   // 当关联关系数据变化时，设置表单值
   useEffect(() => {
+    console.log('relationData=====', relationData);
     if (visible && relationData) {
       form.setFieldsValue({
-        sourceEntityId: relationData.source.cell,
-        sourceFieldId: relationData.source.port,
-        relationshipType: relationData.label,
-        targetEntityId: relationData.target.cell,
-        targetFieldId: relationData.target.port
+        sourceEntityId: relationData.sourceEntityId,
+        sourceFieldId: relationData.sourceFieldId,
+        relationshipType: relationData.relationshipType,
+        targetEntityId: relationData.targetEntityId,
+        targetFieldId: relationData.targetFieldId
       });
 
       // 加载对应的字段选项
-      if (relationData.source.cell) {
-        loadFields(relationData.source.cell, 'left');
+      if (relationData.sourceEntityId) {
+        loadFields(relationData.sourceEntityId, 'left');
       }
-      if (relationData.target.cell) {
-        loadFields(relationData.target.cell, 'right');
+      if (relationData.targetEntityId) {
+        loadFields(relationData.targetEntityId, 'right');
       }
     }
   }, [visible, relationData]);
@@ -101,7 +102,7 @@ const EditRelationDrawer: React.FC<EditRelationDrawerProps> = ({ visible, setVis
       const res = await getEntityFields({ entityId });
       if (res.length > 0) {
         const fieldOptions = res.map((field: any) => ({
-          label: field.fieldName,
+          label: field.displayName,
           value: field.id
         }));
 
