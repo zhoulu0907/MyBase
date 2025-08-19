@@ -2,13 +2,14 @@ import CreateGroupIcon from '@/assets/images/addfolder.svg';
 import CreatePageIcon from '@/assets/images/addpage.svg';
 import PageManagerGuide from '@/assets/images/page_manaager_guide.svg';
 import { useI18n } from '@/hooks/useI18n';
+import { debounce } from 'lodash-es';
 import { EDITOR_TYPES } from '@/pages/Editor/utils/const';
 import PreviewContainer from '@/pages/Runtime/components/preview';
 import { useAppStore } from '@/store/store_app';
 import { useBasicEditorStore } from '@/store/store_editor';
 import { addParentIdToChildren } from '@/utils/menu';
 import { Button, Dropdown, Form, Input, Layout, Menu, Message, Tree } from '@arco-design/web-react';
-import { IconPlus, IconSearch } from '@arco-design/web-react/icon';
+import { IconPlus, IconSearch, IconEmpty } from '@arco-design/web-react/icon';
 import {
   copyApplicationMenu,
   createApplicationMenu,
@@ -29,7 +30,7 @@ import {
   type MetadataEntityPair,
   type UpdateApplicationMenuNameReq
 } from '@onebase/app';
-import { useEffect, useState, type FC } from 'react';
+import { useEffect, useState, useCallback, type FC } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CopyModal from './components/Modals/CopyModal';
 import CreateModal from './components/Modals/CreateModal';
@@ -90,6 +91,7 @@ const PageManagerPage: FC = () => {
   const [parentPageOptions, setParentPageOptions] = useState<ApplicationMenu[]>([RootParentPage]);
 
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
+  const [searchResult, setSearchResult] = useState<boolean>(false); // 菜单搜索结果
 
   const initTreeItemWidth = 155;
   const cutTreeItemWidth = 25;
@@ -113,8 +115,9 @@ const PageManagerPage: FC = () => {
   }, [curAppId]);
 
   useEffect(() => {
+    if (searchResult) return;
     setShowGuide(treeData?.length === 0);
-  }, [treeData]);
+  }, [treeData, searchResult]);
 
   // 将接口返回的菜单数据（res）转换为 Tree 组件可用的 treeData 格式
   // TODO(mickey): showOption重构
@@ -149,9 +152,10 @@ const PageManagerPage: FC = () => {
     }));
   };
 
-  const getMenuList = async () => {
+  const getMenuList = async (keywords?: string) => {
     const req: ListApplicationMenuReq = {
-      applicationId: curAppId
+      applicationId: curAppId,
+      name: keywords
     };
     const res = await listApplicationMenu(req);
 
@@ -167,9 +171,14 @@ const PageManagerPage: FC = () => {
 
     if (res && res.length > 0) {
       setCurMenu(res[0]);
+      setSearchResult(false);
     }
 
-    setShowGuide(res.length === 0);
+    if (keywords) {
+      setSearchResult(res.length === 0);
+    } else {
+      setShowGuide(res.length === 0);
+    }
   };
 
   const getEntityList = async () => {
@@ -342,6 +351,18 @@ const PageManagerPage: FC = () => {
     navigate(`/onebase/editor/${EDITOR_TYPES.FORM_EDITOR}?pageSetId=${pageSetId}`);
   };
 
+  // 菜单搜索
+  const debouncedSearch = useCallback(
+    debounce((value) => {
+      getMenuList(value);
+    }, 500),
+    [curAppId]
+  );
+
+  useEffect(() => {
+    return () => debouncedSearch.cancel();
+  }, [debouncedSearch]);
+
   return (
     <div className={styles.pageManagerPage}>
       <Layout style={{ height: '100%' }}>
@@ -357,6 +378,7 @@ const PageManagerPage: FC = () => {
                 allowClear
                 suffix={<IconSearch />}
                 placeholder={t('common.search')}
+                onChange={debouncedSearch}
               />
               <Dropdown droplist={createMenuDropList} trigger="click" position="bl">
                 <Button type="primary" icon={<IconPlus />} />
@@ -395,6 +417,7 @@ const PageManagerPage: FC = () => {
                   <div
                     className={styles.guideButton}
                     onClick={() => {
+                      setTitle(t('createApp.createPage'));
                       setVisibleCreateForm('page');
                     }}
                   />
@@ -402,17 +425,26 @@ const PageManagerPage: FC = () => {
               </div>
             ) : (
               <>
-                {curMenu?.id && (
+                {searchResult ? (
+                  <div className={styles.contentEmpty}>
+                    <IconEmpty fontSize={56} />
+                    暂无数据
+                  </div>
+                ) : (
                   <>
-                    <div className={styles.contentHeader}>
-                      <div className={styles.contentTitle}>{curMenu?.menuName}</div>
-                      <Button type="primary" onClick={() => handleEditPageSet()}>
-                        {t('common.edit')}
-                      </Button>
-                    </div>
-                    <div className={styles.contentBody}>
-                      <PreviewContainer menuId={curMenu?.id} runtime={false} />
-                    </div>
+                    {curMenu?.id && (
+                      <>
+                        <div className={styles.contentHeader}>
+                          <div className={styles.contentTitle}>{curMenu?.menuName}</div>
+                          <Button type="primary" onClick={() => handleEditPageSet()}>
+                            {t('common.edit')}
+                          </Button>
+                        </div>
+                        <div className={styles.contentBody}>
+                          <PreviewContainer menuId={curMenu?.id} runtime={false} />
+                        </div>
+                      </>
+                    )}
                   </>
                 )}
               </>

@@ -24,7 +24,6 @@ const Footer = Layout.Footer;
 
 const AppSettingPage: FC = () => {
   const [form] = Form.useForm();
-
   const { curAppId } = useAppStore();
 
   const [appData, setAppData] = useState<Application>();
@@ -32,8 +31,8 @@ const AppSettingPage: FC = () => {
   const [saveLoading, setSaveLoading] = useState<boolean>(false); // 保存按钮状态
 
   useEffect(() => {
-    getApplicationData();
-  }, []);
+    curAppId && getApplicationData();
+  }, [curAppId]);
 
   const getApplicationData = async () => {
     const params: GetApplicationReq = {
@@ -41,7 +40,6 @@ const AppSettingPage: FC = () => {
     };
     const res = await getApplication(params);
     setAppData(res);
-    console.log(res, 'app info');
   };
 
   const handleSave = () => {
@@ -61,26 +59,30 @@ const AppSettingPage: FC = () => {
   /* 基础设置编辑 */
   const handleSaveApp = async () => {
     form.validate(async (error, data) => {
-      if (error !== null) return;
-      setSaveLoading(true);
-      const { appCode, appName, iconColor, iconName, description, tagIds, themeColor } = data;
-      const params: UpdateApplicationReq = {
-        id: curAppId,
-        appCode,
-        appMode: 'classic',
-        appName,
-        datasourceId: 1,
-        description,
-        iconColor,
-        iconName,
-        tagIds: tagIds?.map((t: Options) => t.value),
-        themeColor
-      };
-      const res = await updateApplication(params);
-      if (res) {
-        Message.success('保存成功');
+      try {
+        if (error !== null) return;
+        setSaveLoading(true);
+        const { appCode, appName, iconColor, iconName, description, tagIds, themeColor } = data;
+        const params: UpdateApplicationReq = {
+          id: curAppId,
+          appCode,
+          appMode: 'classic',
+          appName,
+          datasourceId: '1',
+          description,
+          iconColor,
+          iconName,
+          tagIds: tagIds?.map((t: Options) => t.value),
+          themeColor
+        };
+        const res = await updateApplication(params);
+        if (res) {
+          Message.success('保存成功');
+        }
+      } catch (_error) {
+      } finally {
+        setSaveLoading(false);
       }
-      setSaveLoading(false);
     });
   };
 
