@@ -3,7 +3,6 @@ package com.cmsr.onebase.module.infra.framework.file.core.client.db;
 import com.cmsr.onebase.module.infra.dal.database.FileContentDataRepository;
 import com.cmsr.onebase.module.infra.dal.dataobject.file.FileContentDO;
 import com.cmsr.onebase.module.infra.framework.file.core.client.AbstractFileClient;
-import jakarta.annotation.Resource;
 
 /**
  * 基于 DB 存储的文件客户端的配置类
@@ -11,11 +10,11 @@ import jakarta.annotation.Resource;
  */
 public class DBFileClient extends AbstractFileClient<DBFileClientConfig> {
 
-    @Resource
-    private FileContentDataRepository fileContentDataRepository;
+    private final FileContentDataRepository fileContentDataRepository;
 
-    public DBFileClient(Long id, DBFileClientConfig config) {
+    public DBFileClient(Long id, DBFileClientConfig config, FileContentDataRepository fileContentDataRepository) {
         super(id, config);
+        this.fileContentDataRepository = fileContentDataRepository;
     }
 
     @Override

@@ -68,7 +68,6 @@ public class S3FileClientConfig implements FileClientConfig {
     /**
      * 是否启用 PathStyle 访问
      */
-    @NotNull(message = "enablePathStyleAccess 不能为空")
     private Boolean enablePathStyleAccess;
 
     @SuppressWarnings("RedundantIfStatement")

@@ -2,7 +2,11 @@ package com.cmsr.onebase.module.metadata.dal.dataobject.datasource;
 
 import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
 import jakarta.persistence.Table;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 /**
  * 数据源表 DO
@@ -13,7 +17,7 @@ import lombok.*;
 @Table(name = "metadata_datasource")
 @Data
 @EqualsAndHashCode(callSuper = true)
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 public class MetadataDatasourceDO extends TenantBaseDO {

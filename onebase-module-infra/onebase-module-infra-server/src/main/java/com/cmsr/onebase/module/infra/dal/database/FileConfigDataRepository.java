@@ -5,6 +5,8 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.infra.controller.admin.file.vo.config.FileConfigPageReqVO;
 import com.cmsr.onebase.module.infra.dal.dataobject.file.FileConfigDO;
 import org.anyline.data.param.init.DefaultConfigStore;
+import org.anyline.entity.DataRow;
+import org.anyline.entity.Order;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -52,7 +54,7 @@ public class FileConfigDataRepository extends DataRepository<FileConfigDO> {
             configStore.ge(FileConfigDO.CREATE_TIME, pageReqVO.getCreateTime()[0]);
             configStore.le(FileConfigDO.CREATE_TIME, pageReqVO.getCreateTime()[1]);
         }
-
+        configStore.order(FileConfigDO.CREATE_TIME, Order.TYPE.DESC);
         return findPageWithConditions(configStore, pageReqVO.getPageNo(), pageReqVO.getPageSize());
     }
 
@@ -60,9 +62,10 @@ public class FileConfigDataRepository extends DataRepository<FileConfigDO> {
      * 更新所有配置为非master状态
      */
     public void updateAllToNotMaster() {
-        FileConfigDO updateObj = new FileConfigDO().setMaster(false);
         // 更新所有记录
-        updateByConfig(updateObj, new DefaultConfigStore());
+        DataRow row = new DataRow();
+        row.put(FileConfigDO.COLUMN_MASTER, false);
+        updateByConfig(row, new DefaultConfigStore().isNotNull(FileConfigDO.ID));
     }
 
     /**

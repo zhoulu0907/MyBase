@@ -7,7 +7,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Column;
 import lombok.Data;
 import lombok.ToString;
-import lombok.Builder;
+import lombok.experimental.SuperBuilder;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
@@ -20,7 +20,7 @@ import java.time.LocalDateTime;
  */
 @Data
 @ToString(callSuper = true)
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 @TenantIgnore

@@ -1,18 +1,17 @@
 package com.cmsr.onebase.module.system.dal.dataobject.notify;
 
-import java.time.LocalDateTime;
-import java.util.Map;
-
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.data.base.BaseDO;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import lombok.experimental.SuperBuilder;
+
+import java.time.LocalDateTime;
+import java.util.Map;
 
 /**
  * 站内信 DO
@@ -21,7 +20,7 @@ import lombok.ToString;
  */
 @Data
 @ToString(callSuper = true)
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "system_notify_message")

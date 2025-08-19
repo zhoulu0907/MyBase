@@ -3,7 +3,7 @@ package com.cmsr.onebase.module.metadata.dal.dataobject.relationship;
 import jakarta.persistence.Table;
 import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
 import lombok.*;
-
+import lombok.experimental.SuperBuilder;
 /**
  * 实体关系表 DO
  *
@@ -13,7 +13,7 @@ import lombok.*;
 @Table(name = "metadata_entity_relationship")
 @Data
 @EqualsAndHashCode(callSuper = true)
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 public class MetadataEntityRelationshipDO extends TenantBaseDO {

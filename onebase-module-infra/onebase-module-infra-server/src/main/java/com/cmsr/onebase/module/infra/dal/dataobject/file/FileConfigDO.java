@@ -2,21 +2,22 @@ package com.cmsr.onebase.module.infra.dal.dataobject.file;
 
 import com.cmsr.onebase.framework.data.base.BaseDO;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
-import com.cmsr.onebase.module.infra.framework.file.core.client.FileClientConfig;
 import com.cmsr.onebase.module.infra.framework.file.core.enums.FileStorageEnum;
 import jakarta.persistence.Column;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
+
+import java.util.Map;
 
 /**
  * 文件配置表
  *
  */
 @Data
-@Builder
+@SuperBuilder
 @TenantIgnore
 @NoArgsConstructor
 @AllArgsConstructor
@@ -63,8 +64,8 @@ public class FileConfigDO extends BaseDO {
     /**
      * 支付渠道配置
      */
-    @Column(name = COLUMN_CONFIG)
-    private FileClientConfig config;
+    @Column(name = COLUMN_CONFIG, columnDefinition = "json")
+    private Map<String, Object> config;
 
 
 }

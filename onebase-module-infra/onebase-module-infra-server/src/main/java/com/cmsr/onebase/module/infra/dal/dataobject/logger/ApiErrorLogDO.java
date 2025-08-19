@@ -7,9 +7,9 @@ import com.cmsr.onebase.module.infra.enums.logger.ApiErrorLogProcessStatusEnum;
 import jakarta.persistence.Column;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
 
@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
  *
  */
 @Data
-@Builder
+@SuperBuilder
 @TenantIgnore
 @NoArgsConstructor
 @AllArgsConstructor

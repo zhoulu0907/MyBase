@@ -3,7 +3,7 @@ package com.cmsr.onebase.module.metadata.dal.dataobject.entity;
 import com.cmsr.onebase.framework.data.base.BaseDO;
 import jakarta.persistence.Table;
 import lombok.*;
-
+import lombok.experimental.SuperBuilder;
 /**
  * @ClassName MetadataSystemFieldsDO
  * @Description 元数据系统字段维护表 DO

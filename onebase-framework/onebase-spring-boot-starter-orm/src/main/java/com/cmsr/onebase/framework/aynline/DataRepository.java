@@ -43,7 +43,7 @@ public class DataRepository<T extends BaseDO> {
 
     private Class<T> defaultClazz = null;
 
-    public static boolean isDebug = false;
+    public static boolean isDebug = true;
 
     public DataRepository(Class<T> defaultClazz) {
         this.defaultClazz = defaultClazz;
@@ -109,7 +109,7 @@ public class DataRepository<T extends BaseDO> {
     public T upsert(T entity) {
         try {
             long result = anylineService.upsert(entity);
-            //log.info("upsert  ---> class={}, effect rows = {}", entity.getClass().getSimpleName(), result);
+            // log.info("upsert  ---> class={}, effect rows = {}", entity.getClass().getSimpleName(), result);
         } catch (Exception e) {
             log.error("update error, class={}, entity={}", defaultClazz, entity, e);
             throw new BizException(StatusCode.DB_UPDATE_ERROR);
@@ -184,23 +184,19 @@ public class DataRepository<T extends BaseDO> {
     /**
      * 条件更新，安全更新
      *
-     * @param entity  要更新的实体
      * @param configs 更新条件
      * @return 更新数量
      * @throws BizException 当实体ID为空或更新失败时抛出
      */
-    public long updateByConfig(T entity, ConfigStore configs) {
-        if (entity == null || entity.getId() == null || entity.getId() == 0) {
-            throw new BizException(StatusCode.DB_ID_NULL);
-        }
+    public long updateByConfig(DataRow dataRow, ConfigStore configs) {
         try {
-            long result = anylineService.update(1000, getTableName(entity.getClass()), entity, configs, (List<String>) null);
+            long result = anylineService.update(1000, getTableName(defaultClazz), dataRow, configs);
             if (isDebug) {
-                log.info("updateByConfig  ---> class={}, effect rows = {}", entity.getClass().getSimpleName(), result);
-                }
+                log.info("updateByConfig  ---> class={}, effect rows = {}", defaultClazz, result);
+            }
             return result;
         } catch (Exception e) {
-            log.error("updateByConfig error, class={}, entity={}, config={}", defaultClazz, entity, configs, e);
+            log.error("updateByConfig error, class={}, config={}", defaultClazz, configs, e);
             throw new BizException(StatusCode.DB_UPDATE_ERROR);
         }
     }

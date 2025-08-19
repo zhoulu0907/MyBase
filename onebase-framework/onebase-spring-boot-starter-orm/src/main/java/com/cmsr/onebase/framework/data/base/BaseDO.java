@@ -1,17 +1,23 @@
 package com.cmsr.onebase.framework.data.base;
 
-import java.io.Serializable;
-import java.time.LocalDateTime;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Id;
 import lombok.Data;
+import lombok.experimental.SuperBuilder;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+
+import java.io.Serializable;
+import java.time.LocalDateTime;
 
 /**
  * 基础实体对象
  *
  */
 @Data
+@SuperBuilder
+@NoArgsConstructor
+@AllArgsConstructor
 public class BaseDO implements Serializable {
 
     public static final String ID = "id";
@@ -27,7 +33,6 @@ public class BaseDO implements Serializable {
      * 设置为注入雪花ID
      */
     @Id
-    // @GeneratedValue(generator = "SnowflakeIdGenerator")
     @Column(name = ID, columnDefinition = "BIGINT NOT NULL PRIMARY KEY")
     private Long id;
     /**
