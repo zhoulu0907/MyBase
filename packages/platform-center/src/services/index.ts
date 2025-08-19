@@ -1,6 +1,7 @@
 export * from './auth';
 export * from './dept';
 export * from './dict';
+export * from './file';
 export * from './platformAdmin';
 export * from './platformInfo';
 export * from './platformTenant';

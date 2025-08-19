@@ -137,12 +137,14 @@ const PageManagerPage: FC = () => {
             }
             setActiveMenu(menu);
           }}
+          triggerCreate={triggerCreate}
           triggerRename={triggerRename}
           triggerCopy={triggerCopy}
           triggerHide={triggerHide}
           triggerDelete={triggerDelete}
           renameForm={renameForm}
           copyForm={copyForm}
+          createForm={createForm}
         />
       ),
       children: menu.children ? convertMenuToTreeData(menu.children, maxWidth - cutTreeItemWidth, showOption) : []
@@ -214,6 +216,18 @@ const PageManagerPage: FC = () => {
 
   const triggerRename = () => {
     setVisibleRenameForm(true);
+  };
+
+  const triggerCreate = (formType: string) => {
+    setVisibleCreateForm(formType);
+    createForm.resetFields();
+    if (formType == 'page') {
+      setTitle(t('createApp.createPage'));
+    }
+
+    if (formType == 'group') {
+      setTitle(t('createApp.createGroup'));
+    }
   };
 
   const triggerCopy = () => {
