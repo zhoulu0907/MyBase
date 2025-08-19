@@ -62,77 +62,10 @@ const fieldTypeOptions = Object.entries(ENTITY_FIELD_TYPE).map(([key, value]) =>
 }));
 
 // 自定义表格行组件，支持拖拽
-// const SortableTableRow = (props: any) => {
-//   const { record, children, ...restProps } = props;
-//   return <tr {...restProps}>{children}</tr>;
-//   //   // 重点：只对当前行生效
-//   //   list={[record]} // 传入单个对象，保持唯一性
-//   //   setList={() => {}} // 不需要更新外部 state，由外层控制
-//   //   animation={200}
-//   //   handle={`.${styles['drag-handle']}`}
-//   //   filter={`.${styles['system-field']}`}
-//   //   tag="tr"
-//   //   // 确保能触发排序
-//   //   onSort={(event) => {
-//   //     // 这里才是真正的排序回调
-//   //     console.log('拖拽排序触发', event);
-//   //     handleSort([record]);
-//   //     // 你可以在这里调用父组件的排序逻辑
-//   //   }}
-//   //   // 关键：必须保证 key 和 id 一致
-//   //   key={record.id}
-//   // >
-//   //   <tr
-//   //     ref={ref}
-//   //     style={style}
-//   //     className={className}
-//   //     data-id={record.id} // 可选：用于调试
-//   //   >
-//   //     {children}
-//   //   </tr>
-//   // </ReactSortable>;
-// };
-interface Props {
-  index: number;
-  record: any;
-  style?: React.CSSProperties;
-  className?: string;
-  children: React.ReactNode;
-}
-
-export const SortableTableRow = forwardRef<HTMLTableRowElement, Props>((props, ref) => {
-  const { index, record, style, className, children } = props;
-  console.log('SortableTableRow', props);
-
-  return (
-    <ReactSortable
-      // 重点：只对当前行生效
-      list={[record]} // 传入单个对象，保持唯一性
-      setList={() => {}} // 不需要更新外部 state，由外层控制
-      animation={200}
-      handle={`.${styles['drag-handle']}`}
-      filter={`.${styles['system-field']}`}
-      tag="tr"
-      // 确保能触发排序
-      onSort={(event) => {
-        // 这里才是真正的排序回调
-        console.log('拖拽排序触发', event);
-        // 你可以在这里调用父组件的排序逻辑
-      }}
-      // 关键：必须保证 key 和 id 一致
-      key={record.id}
-    >
-      <tr
-        ref={ref}
-        style={style}
-        className={className}
-        data-id={record.id} // 可选：用于调试
-      >
-        {children}
-      </tr>
-    </ReactSortable>
-  );
-});
+const SortableTableRow = (props: any) => {
+  const { record, children, ...restProps } = props;
+  return <tr {...restProps}>{children}</tr>;
+};
 
 const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible, entity, successCallback }) => {
   const { curAppId } = useAppStore();
@@ -160,7 +93,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
 
   const addField = () => {
     const newField: FieldFormValues = {
-      id: 'field-' + Date.now(),
+      // id: 'field-' + Date.now(),
       fieldCode: '',
       fieldName: '',
       displayName: '',
@@ -341,30 +274,30 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
       style={{ width: 1400 }}
     >
       <div className={styles['field-config-container']}>
-        {/* <ReactSortable
+        <ReactSortable
           list={activeFields}
           setList={handleSort}
           animation={200}
           handle={`.${styles['drag-handle']}`}
           filter={`.${styles['system-field']}`}
           tag="tr"
-        > */}
-        <Table
-          data={activeFields}
-          columns={columns}
-          pagination={false}
-          className={styles['field-table']}
-          rowClassName={(record) =>
-            record.isSystemField === 0 ? styles['system-field-row'] : styles['custom-field-row']
-          }
-          rowKey="id"
-          components={{
-            body: {
-              row: SortableTableRow
+        >
+          <Table
+            data={activeFields}
+            columns={columns}
+            pagination={false}
+            className={styles['field-table']}
+            rowClassName={(record) =>
+              record.isSystemField === 0 ? styles['system-field-row'] : styles['custom-field-row']
             }
-          }}
-        />
-        {/* </ReactSortable> */}
+            rowKey="id"
+            components={{
+              body: {
+                row: SortableTableRow
+              }
+            }}
+          />
+        </ReactSortable>
 
         <div className={styles['add-field-section']}>
           <Button type="dashed" icon={<IconPlus />} onClick={addField} className={styles['add-field-button']}>
