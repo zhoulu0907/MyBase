@@ -126,11 +126,11 @@ public class AppApplicationServiceImpl implements AppApplicationService {
         }
         applicationDO = applicationRepository.insert(applicationDO);
         saveApplicationTags(applicationDO.getId(), createReqVO.getTagIds());
-    authRoleService.createDefaultRole(applicationDO.getId());
-    DatasourceCreateDefaultReqDTO defaultReq = new DatasourceCreateDefaultReqDTO();
-    defaultReq.setAppId(applicationDO.getId());
-    defaultReq.setAppUid(applicationDO.getAppUid());
-    metadataDatasourceApi.createDefaultDatasource(defaultReq);
+        authRoleService.createDefaultRole(applicationDO.getId());
+        DatasourceCreateDefaultReqDTO defaultReq = new DatasourceCreateDefaultReqDTO();
+        defaultReq.setAppId(applicationDO.getId());
+        defaultReq.setAppUid(applicationDO.getAppUid());
+        metadataDatasourceApi.createDefaultDatasource(defaultReq);
         return BeanUtils.toBean(applicationDO, ApplicationCreateRespVO.class);
     }
 

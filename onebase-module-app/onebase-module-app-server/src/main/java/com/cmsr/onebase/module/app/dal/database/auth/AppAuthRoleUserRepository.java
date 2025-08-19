@@ -38,11 +38,18 @@ public class AppAuthRoleUserRepository extends DataRepository<AuthRoleUserDO> {
 
     }
 
-    public PageResult<AuthRoleUserDO> pageByRoleId(AuthRoleUsersPageReqVO reqVO) {
+    public List<AuthRoleUserDO> findByRoleId(Long roleId) {
+        ConfigStore configStore = new DefaultConfigStore();
+        configStore.eq("role_id", roleId);
+        return findAllByConfig(configStore);
+    }
+
+    public PageResult<AuthRoleUserDO> findByRoleId(AuthRoleUsersPageReqVO reqVO) {
         ConfigStore configStore = new DefaultConfigStore();
         configStore.eq("role_id", reqVO.getRoleId());
         return this.findPageWithConditions(configStore, reqVO.getPageNo(), reqVO.getPageSize());
     }
+
 
     public void deleteRoleUser(Long roleId, List<Long> userIds) {
         ConfigStore configStore = new DefaultConfigStore();
