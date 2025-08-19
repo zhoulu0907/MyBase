@@ -6,7 +6,7 @@ import { EDITOR_TYPES } from '@/pages/Editor/utils/const';
 import PreviewContainer from '@/pages/Runtime/components/preview';
 import { useAppStore } from '@/store/store_app';
 import { useBasicEditorStore } from '@/store/store_editor';
-import { addParentCodeToChildren } from '@/utils/menu';
+import { addParentIdToChildren } from '@/utils/menu';
 import { Button, Dropdown, Form, Input, Layout, Menu, Message, Tree } from '@arco-design/web-react';
 import { IconPlus, IconSearch } from '@arco-design/web-react/icon';
 import {
@@ -14,7 +14,7 @@ import {
   createApplicationMenu,
   deleteApplicationMenu,
   getEntityListByApp,
-  getPageSetCode,
+  getPageSetId,
   listApplicationMenu,
   MenuType,
   PageType,
@@ -24,7 +24,7 @@ import {
   type CopyApplicationMenuReq,
   type CreateApplicationMenuReq,
   type DeleteApplicationMenuReq,
-  type GetPageSetCodeReq,
+  type GetPageSetIdReq,
   type ListApplicationMenuReq,
   type MetadataEntityPair,
   type UpdateApplicationMenuNameReq
@@ -89,17 +89,24 @@ const PageManagerPage: FC = () => {
   const [_activeMenu, setActiveMenu] = useState<ApplicationMenu>();
   const [parentPageOptions, setParentPageOptions] = useState<ApplicationMenu[]>([RootParentPage]);
 
+  const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
+
   const initTreeItemWidth = 155;
   const cutTreeItemWidth = 25;
 
   const { clearIsEditMode } = useBasicEditorStore();
 
+  const findFirstPage: any = (nodes: ApplicationMenu[]) =>
+    nodes.reduce((found, node) => {
+      if (found) return found;
+      if (Number(node.menuType) === MenuType.PAGE) return node;
+      setExpandedKeys((prev) => [...prev, node.menuCode]);
+      return node.children ? findFirstPage(node.children) : undefined;
+    }, undefined);
+
   useEffect(() => {
     if (curAppId !== '') {
-      getMenuList().then((res) => {
-        const firstPageMenu = res.find((menu: ApplicationMenu) => menu.menuType == MenuType.PAGE);
-        setCurMenu(firstPageMenu);
-      });
+      getMenuList();
       getEntityList();
     }
     clearIsEditMode();
@@ -113,7 +120,7 @@ const PageManagerPage: FC = () => {
   // TODO(mickey): showOption重构
   const convertMenuToTreeData = (menus: ApplicationMenu[], maxWidth: number, showOption: boolean = false): any[] => {
     return menus.map((menu) => ({
-      key: menu.menuCode,
+      key: menu.id,
       title: (
         <MyMenuItem
           showOption={showOption}
@@ -148,8 +155,11 @@ const PageManagerPage: FC = () => {
     };
     const res = await listApplicationMenu(req);
 
-    // 为每个children元素补充parentCode字段
-    const processedRes = addParentCodeToChildren(res, RootParentPage.menuCode);
+    console.log('curAppId: ', curAppId);
+    console.log('res: ', res);
+
+    // 为每个children元素补充parentId字段
+    const processedRes = addParentIdToChildren(res, RootParentPage.id);
     setParentPageOptions([{ ...RootParentPage, children: processedRes }]);
 
     const treeData = convertMenuToTreeData(res, initTreeItemWidth, true);
@@ -160,7 +170,6 @@ const PageManagerPage: FC = () => {
     }
 
     setShowGuide(res.length === 0);
-    return res;
   };
 
   const getEntityList = async () => {
@@ -224,14 +233,12 @@ const PageManagerPage: FC = () => {
       if (error !== null) return;
       let req: CreateApplicationMenuReq = {
         applicationId: curAppId,
-        parentCode:
-          createForm.getFieldValue('parentCode') === RootParentPage.menuCode
-            ? ''
-            : createForm.getFieldValue('parentCode'),
+        parentId:
+          createForm.getFieldValue('parentId') === RootParentPage.id ? '' : createForm.getFieldValue('parentId'),
         menuName: createForm.getFieldValue('menuName'),
         menuType: MenuType.PAGE,
         menuIcon: createForm.getFieldValue('menuIcon'),
-        entityCode: visibleCreateForm === 'page' ? createForm.getFieldValue('entityCode') : ''
+        entityId: visibleCreateForm === 'page' ? createForm.getFieldValue('entityId') : ''
       };
 
       if (visibleCreateForm === 'page') {
@@ -249,23 +256,23 @@ const PageManagerPage: FC = () => {
       setVisibleCreateForm('');
       getMenuList();
 
-      const pageSetCode = await getPageSetCode({
-        menuCode: menuResp.menuCode
+      const pageSetId = await getPageSetId({
+        menuId: menuResp.id
       });
 
-      if (pageSetCode && menuResp.menuType === MenuType.PAGE) {
-        navigate(`/onebase/editor/${EDITOR_TYPES.FORM_EDITOR}?pageSetCode=${pageSetCode}`);
+      if (pageSetId && menuResp.menuType === MenuType.PAGE) {
+        navigate(`/onebase/editor/${EDITOR_TYPES.FORM_EDITOR}?pageSetId=${pageSetId}`);
       }
     });
   };
 
   const handleRename = async () => {
-    if (!renameForm.getFieldValue('menuID')) {
+    if (!renameForm.getFieldValue('menuId')) {
       Message.error('请选择要重命名的菜单');
       return;
     }
     const req: UpdateApplicationMenuNameReq = {
-      id: renameForm.getFieldValue('menuID'),
+      id: renameForm.getFieldValue('menuId'),
       menuName: renameForm.getFieldValue('menuName')
     };
     const res = await updateApplicationMenuName(req);
@@ -277,19 +284,18 @@ const PageManagerPage: FC = () => {
   };
 
   const handleCopy = async () => {
-    if (!copyForm.getFieldValue('menuID')) {
+    if (!copyForm.getFieldValue('menuId')) {
       Message.error('请选择要复制的菜单');
       return;
     }
 
     const req: CopyApplicationMenuReq = {
-      id: copyForm.getFieldValue('menuID'),
+      id: copyForm.getFieldValue('menuId'),
       menuName: copyForm.getFieldValue('menuName'),
-      parentCode:
-        copyForm.getFieldValue('parentCode') === RootParentPage.menuCode ? '' : copyForm.getFieldValue('parentCode')
+      parentId: copyForm.getFieldValue('parentId') === RootParentPage.id ? '' : copyForm.getFieldValue('parentId')
     };
 
-    console.log('req: ', req);
+    // console.log('req: ', req);
 
     const res = await copyApplicationMenu(req);
     if (res) {
@@ -311,7 +317,9 @@ const PageManagerPage: FC = () => {
     if (res) {
       Message.success('删除成功');
       setActiveMenu(undefined);
+      setCurMenu(undefined);
     }
+
     getMenuList();
   };
 
@@ -321,17 +329,17 @@ const PageManagerPage: FC = () => {
       return;
     }
 
-    const req: GetPageSetCodeReq = {
-      menuCode: curMenu?.menuCode
+    const req: GetPageSetIdReq = {
+      menuId: curMenu?.id
     };
-    const pageSetCode = await getPageSetCode(req);
+    const pageSetId = await getPageSetId(req);
 
-    if (!pageSetCode) {
+    if (!pageSetId) {
       Message.error('请先创建页面集');
       return;
     }
 
-    navigate(`/onebase/editor/${EDITOR_TYPES.FORM_EDITOR}?pageSetCode=${pageSetCode}`);
+    navigate(`/onebase/editor/${EDITOR_TYPES.FORM_EDITOR}?pageSetId=${pageSetId}`);
   };
 
   return (
@@ -358,6 +366,7 @@ const PageManagerPage: FC = () => {
             <Tree
               blockNode
               draggable
+              selectedKeys={[curMenu?.menuCode!]}
               treeData={treeData}
               className={styles.tree}
               showLine={false}
@@ -365,11 +374,14 @@ const PageManagerPage: FC = () => {
                 switcherIcon: null,
                 dragIcon: null
               }}
+              expandedKeys={expandedKeys}
+              onExpand={setExpandedKeys}
               actionOnClick={'expand'}
               style={{
                 width: '200px',
                 overflow: 'hidden',
-                boxSizing: 'border-box'
+                boxSizing: 'border-box',
+                paddingRight: 12
               }}
             />
           </Sider>
@@ -391,16 +403,18 @@ const PageManagerPage: FC = () => {
             ) : (
               <>
                 {curMenu?.id && (
-                  <div className={styles.contentHeader}>
-                    <div className={styles.contentTitle}>{curMenu?.menuName}</div>
-                    <Button type="primary" onClick={() => handleEditPageSet()}>
-                      {t('common.edit')}
-                    </Button>
-                  </div>
+                  <>
+                    <div className={styles.contentHeader}>
+                      <div className={styles.contentTitle}>{curMenu?.menuName}</div>
+                      <Button type="primary" onClick={() => handleEditPageSet()}>
+                        {t('common.edit')}
+                      </Button>
+                    </div>
+                    <div className={styles.contentBody}>
+                      <PreviewContainer menuId={curMenu?.id} runtime={false} />
+                    </div>
+                  </>
                 )}
-                <div className={styles.contentBody}>
-                  <PreviewContainer menuCode={curMenu?.menuCode || ''} runtime={false} />
-                </div>
               </>
             )}
           </Content>
@@ -437,7 +451,7 @@ const PageManagerPage: FC = () => {
         entityListOptions={entityListOptions}
         pageTypeOptions={pageTypeOptions}
         visibleCreateForm={visibleCreateForm}
-        initValue={{ pageType: PageType.NORMAL, menuName: '', parentCode: RootParentPage.menuCode }}
+        initValue={{ pageType: PageType.NORMAL, menuName: '', parentId: RootParentPage.id }}
         treeData={convertMenuToTreeData(parentPageOptions, initTreeItemWidth)}
       />
     </div>

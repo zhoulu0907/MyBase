@@ -12,13 +12,11 @@ import {
   type DeleteMethodParam,
   type PageMethodParam
 } from '@onebase/app';
-import { useNavigate } from 'react-router-dom';
 import styles from './index.module.less';
 import type { XTableConfig } from './schema';
 
 const XTable = memo((props: XTableConfig & { runtime?: boolean; toCreatePage?: Function }) => {
   const { runtime = true, toCreatePage } = props;
-  const navigate = useNavigate();
 
   const {
     label,
@@ -196,7 +194,7 @@ const XTable = memo((props: XTableConfig & { runtime?: boolean; toCreatePage?: F
                 </div>
               }
               style={{
-                minWidth: '280px',
+                minWidth: '350px',
                 maxWidth: '400px',
                 marginBottom: 0
               }}

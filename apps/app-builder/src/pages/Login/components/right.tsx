@@ -1,6 +1,6 @@
 import LogoSVG from '@/assets/images/ob_logo.svg';
 import { Button, Checkbox, Form, Input, Message, Space, Tabs, Typography } from '@arco-design/web-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 /**
@@ -42,11 +42,17 @@ const Right: React.FC = () => {
   const [smsCountdown, setSmsCountdown] = useState(0);
 
   // 组件初始化时设置保存的账号
-  useState(() => {
+  useEffect(() => {
     if (savedAccount) {
       form.setFieldValue('account', savedAccount);
     }
-  });
+
+    // 如果已经登录了就自动跳转到首页
+    if (TokenManager.isTokenValid()) {
+      navigate('/onebase/my-app');
+      return;
+    }
+  }, []);
 
   // 处理记住我状态变化
   const handleRememberMeChange = (checked: boolean) => {
@@ -124,7 +130,6 @@ const Right: React.FC = () => {
             refreshToken: response.refreshToken,
             expiresTime: response.expiresTime,
             tenantId: response.tenantWebsite
-            // tenantWebsite: response.tenantWebsite
           },
           rememberMe
         );

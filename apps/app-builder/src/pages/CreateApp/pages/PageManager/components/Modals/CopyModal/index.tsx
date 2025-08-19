@@ -33,15 +33,15 @@ const CopyModal: React.FC<CopyModalProps> = ({ title, visible, handleCopy, setVi
         form={form}
         initialValues={{
           menuName: form.getFieldValue('menuName'),
-          menuID: form.getFieldValue('menuID'),
-          parentCode: form.getFieldValue('parentCode')
+          menuID: form.getFieldValue('menuId'),
+          parentId: form.getFieldValue('parentId')
         }}
       >
         <Form.Item label="页面名称" field="menuName" rules={[{ required: true, message: '请输入页面名称' }]}>
           <Input placeholder="请输入页面名称" allowClear />
         </Form.Item>
 
-        <Form.Item label="父级页面" field="parentCode">
+        <Form.Item label="父级页面" field="parentId">
           <TreeSelect treeData={treeData} placeholder="请选择父级页面" allowClear />
         </Form.Item>
       </Form>

@@ -1,5 +1,5 @@
 import { Button, Input } from '@arco-design/web-react';
-import { IconSync } from '@arco-design/web-react/icon';
+import { IconSync, IconLeft } from '@arco-design/web-react/icon';
 import { useEffect, useState } from 'react';
 import { menuIconList, menuIconType, type MenuItem } from './const';
 import styles from './index.module.less';
@@ -7,12 +7,14 @@ import styles from './index.module.less';
 const InputSearch = Input.Search;
 
 interface IProps {
+  style: React.CSSProperties;
+  handleBack: () => void;
   onSelected: (val: string) => void;
 }
 
 // 菜单图标
 const MenuIcon = (props: IProps) => {
-  const { onSelected } = props;
+  const { style, onSelected, handleBack } = props;
   const [data, setData] = useState<MenuItem[]>([]);
   const [activeMenu, setActiveMenu] = useState<string>('all');
   const [activeIcon, setActiveIcon] = useState<string>();
@@ -27,7 +29,11 @@ const MenuIcon = (props: IProps) => {
   }, [activeMenu]);
 
   return (
-    <div className={styles.menuIconPage}>
+    <div className={styles.menuIconPage} style={style}>
+      <div className={styles.nav}>
+        <IconLeft className={styles.navIcon} onClick={handleBack} />
+        菜单图标选择
+      </div>
       <div className={styles.header}>
         <InputSearch className={styles.iconSearch} allowClear placeholder="请输入图标名称" />
         <Button type="default" icon={<IconSync />} />

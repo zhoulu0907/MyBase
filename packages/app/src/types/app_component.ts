@@ -11,7 +11,7 @@ export interface ComponentConfig {
     config: string;
     /** 编辑数据（JSON 字符串） */
     editData: string;
-    /** 父组件ID */
+    /** 父组件编码 */
     parentCode: string;
     /** 块索引 */
     blockIndex: number;

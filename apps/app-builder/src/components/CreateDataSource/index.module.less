@@ -1,0 +1,38 @@
+@import '../../pages/CreateApp/pages/DataFactory/styles/variables.less';
+
+.createDatasource {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  transition: transform 0.3s ease;
+  left: 0;
+  transform: translateX(100%); /* 初始放置在 container 右侧 */
+}
+
+/* 创建数据源表单样式 */
+.dataSourceForm {
+  width: 600px;
+  margin: 0 auto;
+
+  &Url {
+    display: inline-block;
+    width: calc(100% - @inputMinWidth - @formItemMarginRight);
+    margin-right: @formItemMarginRight;
+  }
+
+  &TestButton {
+    width: @inputMinWidth;
+    display: inline-block;
+    text-align: right;
+  }
+
+  &Button {
+    display: flex;
+    justify-content: flex-end;
+  }
+}
+
+.showCreateApp {
+  transform: translateX(0);
+}

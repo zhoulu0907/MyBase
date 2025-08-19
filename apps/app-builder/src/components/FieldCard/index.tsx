@@ -23,13 +23,7 @@ const FieldCard: React.FC<FieldCardProps> = ({ displayName, type, id, fieldID, e
       data-entity-id={entityID}
       data-label={label}
     >
-      <Button
-        key={id}
-        id={id || `${type}-${Date.now()}`}
-        type="outline"
-        icon={<IconAlignRight />}
-        className={styles.fieldItem}
-      >
+      <Button key={id} id={id} type="outline" icon={<IconAlignRight />} className={styles.fieldItem}>
         {label}
       </Button>
     </div>

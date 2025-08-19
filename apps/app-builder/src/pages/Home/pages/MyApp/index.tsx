@@ -1,15 +1,12 @@
-import appDeleteSVG from '@/assets/images/app_delete.svg';
-import appEditSVG from '@/assets/images/app_edit_black.svg';
-import emptyApplicationSVG from '@/assets/images/empty_application.svg';
-import CreateApp from '@/components/CreateApp';
-import { type Options } from '@/components/CreateApp/const';
-import { PermissionButton as Button } from '@/components/PermissionControl';
-import { TENANT_DEPT_PERMISSION as ACTIONS } from '@/constants/permission';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { debounce, sample } from 'lodash-es';
+import dayjs from 'dayjs';
+import { Avatar, Divider, Form, Input, Message, Modal, Pagination, Select, Spin, Tag } from '@arco-design/web-react';
+import { IconCheckCircle, IconPlus, IconSearch, IconLeft, IconEmpty } from '@arco-design/web-react/icon';
+
 import { useI18n } from '@/hooks/useI18n';
 import { useAppStore } from '@/store/store_app';
-import { hasPermission, UserPermissionManager } from '@/utils/permission';
-import { Avatar, Divider, Form, Input, Message, Modal, Pagination, Select, Spin, Tag } from '@arco-design/web-react';
-import { IconCheckCircle, IconPlus, IconSearch } from '@arco-design/web-react/icon';
 import {
   createApplication,
   deleteApplication,
@@ -19,18 +16,24 @@ import {
   type DeleteApplicationReq,
   type ListApplicationReq
 } from '@onebase/app';
-import dayjs from 'dayjs';
-import { debounce, sample } from 'lodash-es';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+
+import CreateApp from '@/components/CreateApp';
+import CreateDataSource, { type DataSourceHandle } from '@/components/CreateDataSource';
+import { type Options } from '@/components/CreateApp/const';
+import { PermissionButton as Button } from '@/components/PermissionControl';
+import { TENANT_DEPT_PERMISSION as ACTIONS } from '@/constants/permission';
+import { hasPermission, UserPermissionManager } from '@/utils/permission';
+import appDeleteSVG from '@/assets/images/app_delete.svg';
+import appEditSVG from '@/assets/images/app_edit_black.svg';
+import emptyApplicationSVG from '@/assets/images/empty_application.svg';
 import {
   appOptions,
+  avatarBgColor,
   calculateMaxItems,
   createTimeOptions,
   defaultTheme,
   statusOptions,
-  TagColor,
-  avatarBgColor
+  TagColor
 } from './const';
 import styles from './index.module.less';
 
@@ -52,14 +55,19 @@ const MyAppPage: React.FC = () => {
   const [status, setStatus] = useState<number | string>('');
 
   const [appName, setAppName] = useState<string>('');
+  const [createType, setCreateType] = useState<'app' | 'datasource'>('app');
   const [deleteApp, setDeleteApp] = useState<Application>();
   const [deleteVisible, setDeleteVisible] = useState<boolean>(false);
   const [createVisible, setCreateVisible] = useState<boolean>(false);
   const [createLoading, setCreateLoading] = useState<boolean>(false);
   const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
 
+  const [applicationEmpty, setAapplicationEmpty] = useState<boolean>(false); // 未创建应用
+  const [applicationFilterEmpty, setAapplicationFilterEmpty] = useState<boolean>(false); // 应用列表过滤后为空，此时applicationEmpty为true
+
   const { setCurAppId } = useAppStore();
 
+  const createDatasourceRef = useRef<DataSourceHandle>(null);
   const appContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -67,12 +75,27 @@ const MyAppPage: React.FC = () => {
     const containerWidth = appContainerRef.current?.offsetWidth;
     const containerHeight = appContainerRef.current?.offsetHeight;
     const maxAppInfo = calculateMaxItems(containerWidth, containerHeight);
-    setPageSize(maxAppInfo.total);
+    setPageSize(maxAppInfo.total || 8);
   }, [appContainerRef.current]);
 
   useEffect(() => {
     pageSize && getApplicationList();
   }, [pageNo, pageSize, name, orderByTime, status, ownerTag]);
+
+  useEffect(() => {
+    // 只有ownerTag和status会影响应用列表长度
+    if ((ownerTag === 0 || status === 0) && dataList?.length === 0) {
+      setAapplicationEmpty(true);
+    } else {
+      setAapplicationEmpty(false);
+    }
+    if ((ownerTag === 1 || status === 1) && dataList?.length === 0) {
+      setAapplicationEmpty(false);
+      setAapplicationFilterEmpty(true);
+    } else {
+      setAapplicationFilterEmpty(false);
+    }
+  }, [ownerTag, status, dataList]);
 
   const getApplicationList = async () => {
     setLoading(true);
@@ -107,16 +130,22 @@ const MyAppPage: React.FC = () => {
 
   /* 创建应用 */
   const handleCreateApp = async () => {
+    // 切换到创建数据源
+    if (createType === 'datasource') {
+      createDatasourceRef.current?.handleCreateDatasource?.();
+      return;
+    }
+
     form.validate(async (error, data) => {
       if (error !== null) return;
       setCreateLoading(true);
-      const { appKey, appName, iconColor, iconName, description, tagIds, themeColor } = data;
+      const { appCode, appName, iconColor, iconName, description, tagIds, themeColor } = data;
 
       const params: CreateApplicationReq = {
-        appKey,
+        appCode,
         appMode: 'classic',
         appName,
-        datasourceId: 1,
+        datasourceId: createDatasourceRef.current?.getDatasourceId() || '1',
         description,
         iconColor,
         iconName,
@@ -207,14 +236,13 @@ const MyAppPage: React.FC = () => {
       </div>
 
       <div className={styles.myAppContainer}>
-        {dataList?.length === 0 && !loading && (
-          <div className={styles.applicationEmpty}>
-            <img src={emptyApplicationSVG} alt="" />
-            <div className={styles.goCreateApplication} onClick={() => setCreateVisible(true)} />
-          </div>
-        )}
-        <div className={styles.appHasDataBox} style={{ visibility: dataList?.length === 0 ? 'hidden' : 'visible' }}>
-          <div className={styles.myAppFilter}>
+        <div className={styles.appHasDataBox}>
+          <div
+            className={styles.myAppFilter}
+            style={{
+              pointerEvents: applicationEmpty ? 'none' : 'unset'
+            }}
+          >
             <Input
               className={styles.myAppInput}
               allowClear
@@ -270,14 +298,20 @@ const MyAppPage: React.FC = () => {
           </div>
 
           {/* 我的应用列表 */}
-
-          <Spin
-            loading={loading}
-            size={40}
-            style={{ width: '100%', height: '100%', visibility: 'visible' }}
-            tip="加载中..."
-          >
+          <Spin loading={loading} size={40} style={{ width: '100%', height: '100%' }} tip="加载中...">
             <div className={styles.myAppList} ref={appContainerRef}>
+              {applicationEmpty && !loading && (
+                <div className={styles.applicationEmpty}>
+                  <img src={emptyApplicationSVG} alt="暂无应用" />
+                  <div className={styles.goCreateApplication} onClick={() => setCreateVisible(true)} />
+                </div>
+              )}
+              {applicationFilterEmpty && !loading && (
+                <div className={styles.applicationEmpty}>
+                  <IconEmpty fontSize={56} />
+                  暂无数据
+                </div>
+              )}
               {dataList?.map((item, index) => (
                 <div
                   className={styles.myAppCard}
@@ -427,7 +461,18 @@ const MyAppPage: React.FC = () => {
         </div>
       </Modal>
       <Modal
-        title={<div style={{ textAlign: 'left' }}>创建空白应用</div>}
+        title={
+          <div style={{ textAlign: 'left' }}>
+            {createType === 'app' ? (
+              '创建空白应用'
+            ) : (
+              <div>
+                <IconLeft style={{ cursor: 'pointer' }} onClick={() => setCreateType('app')} />
+                创建外部数据源
+              </div>
+            )}
+          </div>
+        }
         visible={createVisible}
         simple
         unmountOnExit
@@ -446,7 +491,16 @@ const MyAppPage: React.FC = () => {
         className={styles.createAppModal}
       >
         <div className={styles.createAppWrapper}>
-          <CreateApp form={form} status="create" previewBgColor="#F2F3F5BF" />
+          <CreateApp
+            form={form}
+            status="create"
+            previewBgColor="#F2F3F5BF"
+            createType={createType}
+            position="absolute"
+            dataSourceCreated={!!createDatasourceRef.current?.getDatasourceId()}
+            onCreateDatasource={() => setCreateType('datasource')}
+          />
+          <CreateDataSource ref={createDatasourceRef} createType={createType} />
         </div>
       </Modal>
     </div>

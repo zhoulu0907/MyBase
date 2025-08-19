@@ -12,9 +12,9 @@ import {
   type UpdateApplicationReq
 } from '@onebase/app';
 import { useEffect, useState, type FC } from 'react';
-import { useSearchParams } from 'react-router-dom';
 import AppPermission from './components/AppPermission';
 import BasicSetting from './components/BasicSetting';
+import { useAppStore } from '@/store/store_app';
 import styles from './index.module.less';
 
 const MenuItem = Menu.Item;
@@ -23,10 +23,9 @@ const Content = Layout.Content;
 const Footer = Layout.Footer;
 
 const AppSettingPage: FC = () => {
-  const [searchParams] = useSearchParams();
-  const appId = searchParams.get('appId') || '';
-
   const [form] = Form.useForm();
+
+  const { curAppId } = useAppStore();
 
   const [appData, setAppData] = useState<Application>();
   const [activeTab, setActiveTab] = useState('baseSetting');
@@ -38,7 +37,7 @@ const AppSettingPage: FC = () => {
 
   const getApplicationData = async () => {
     const params: GetApplicationReq = {
-      id: appId
+      id: curAppId
     };
     const res = await getApplication(params);
     setAppData(res);
@@ -64,10 +63,10 @@ const AppSettingPage: FC = () => {
     form.validate(async (error, data) => {
       if (error !== null) return;
       setSaveLoading(true);
-      const { appKey, appName, iconColor, iconName, description, tagIds, themeColor } = data;
+      const { appCode, appName, iconColor, iconName, description, tagIds, themeColor } = data;
       const params: UpdateApplicationReq = {
-        id: appId,
-        appKey,
+        id: curAppId,
+        appCode,
         appMode: 'classic',
         appName,
         datasourceId: 1,

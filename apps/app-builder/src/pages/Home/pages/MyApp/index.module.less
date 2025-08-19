@@ -72,6 +72,7 @@
       width: 100%;
       height: 100%;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
       position: absolute;
@@ -83,7 +84,7 @@
         height: 40px;
         cursor: pointer;
         z-index: 1;
-        transform: translate(-201px, 168px);
+        transform: translate(5px, -41px);
       }
     }
 
@@ -118,7 +119,7 @@
       overflow-y: auto;
       box-sizing: border-box;
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(332px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(332px, 1fr));
       grid-auto-rows: min-content;
       padding: 2px 2px 0;
       gap: 28px 24px;
@@ -311,5 +312,8 @@
   .createAppWrapper {
     padding: 0 25px;
     box-sizing: border-box;
+    height: 700px;
+    position: relative;
+    overflow: hidden;
   }
 }

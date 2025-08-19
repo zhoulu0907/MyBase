@@ -5,6 +5,7 @@ import { COMPONENT_GROUP_NAME, EDITOR_TYPES, type EditorType } from '@/pages/Edi
 import { Collapse, Tabs } from '@arco-design/web-react';
 import React, { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
+import { v4 as uuidv4 } from 'uuid';
 import styles from './index.module.less';
 
 // 定义类型
@@ -50,7 +51,7 @@ const MaterialContainer: React.FC<MaterialContainerProps> = ({ activeTab }) => {
     const newBaseItems = baseCategories.map((cat) => ({
       ...cat,
       items: cat.items.map((item) => {
-        const cpID = `${item.type}-${Date.now()}`;
+        const cpID = `${item.type}-${uuidv4()}`;
 
         return {
           type: item.type,
@@ -126,26 +127,32 @@ const MaterialContainer: React.FC<MaterialContainerProps> = ({ activeTab }) => {
                           forceFallback={true}
                           animation={150}
                           onClone={(e) => {
-                            // console.log("onClone", e);
+                            // console.log('onClone', e);
 
                             // 每次拖拽组件到面板时重新分配ID
                             const cpType = e.item.getAttribute('data-cp-type');
-                            e.item.id = `${cpType}-${Date.now()}`;
+                            e.item.id = `${cpType}-${uuidv4()}`;
+                            console.log('e.item.id', e.item.id);
 
-                            const newBaseItems = baseItems.map((c) => ({
-                              ...c,
-                              items: c.items.map((item) => ({
-                                ...item,
-                                id: `${item.type}-${Date.now()}`
-                              }))
-                            }));
-                            setBaseItems(newBaseItems);
+                            // 拖动前ID保持不变，在下次拖动后重新生成
+                            setBaseItems((prev) =>
+                              prev.map((c) =>
+                                c.key === cat.key
+                                  ? {
+                                      ...c,
+                                      items: c.items.map((item) =>
+                                        item.type === cpType ? { ...item, id: `${e.item.id}` } : item
+                                      )
+                                    }
+                                  : c
+                              )
+                            );
                           }}
                         >
                           {cat.items.map((item) => (
                             <MaterialCard
                               key={item.type}
-                              id={item.id || `${item.type}-${Date.now()}`}
+                              id={item.id}
                               displayName={item.displayName}
                               type={item.type}
                               icon={item.icon}

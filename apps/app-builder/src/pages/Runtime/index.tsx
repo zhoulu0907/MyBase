@@ -1,4 +1,5 @@
 import { useI18n } from '@/hooks/useI18n';
+import { getHashQueryParam } from '@/utils/router';
 import { Input, Layout, Tree } from '@arco-design/web-react';
 import { IconSearch } from '@arco-design/web-react/icon';
 import { listApplicationMenu, MenuType, type ApplicationMenu, type ListApplicationMenuReq } from '@onebase/app';
@@ -37,15 +38,9 @@ const Runtime: React.FC<RuntimeProps> = ({}) => {
   const [curMenu, setCurMenu] = useState<ApplicationMenu>();
 
   useEffect(() => {
-    const hash = window.location.hash;
-    const queryIndex = hash.indexOf('?');
-    if (queryIndex !== -1) {
-      const queryString = hash.substring(queryIndex + 1);
-      const params = new URLSearchParams(queryString);
-      const appID = params.get('appId') || '';
-      if (appID) {
-        getMenuList(appID);
-      }
+    const appId = getHashQueryParam('appId');
+    if (appId) {
+      getMenuList(appId);
     }
   }, [window.location.hash]);
 
@@ -129,7 +124,7 @@ const Runtime: React.FC<RuntimeProps> = ({}) => {
               </div>
             )}
             <div className={styles.contentBody}>
-              <PreviewContainer menuCode={curMenu?.menuCode || ''} runtime={true} />
+              <PreviewContainer menuId={curMenu?.id || ''} runtime={true} />
             </div>
           </Content>
         </Layout>

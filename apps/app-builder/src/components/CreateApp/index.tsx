@@ -23,16 +23,30 @@ import { appIcon, appIconColor, appThemeColor, type Options } from './const';
 import styles from './index.module.less';
 
 type AppStatus = 'create' | 'update';
+type CreateType = 'app' | 'datasource';
 interface IProps {
   form: FormInstance;
   readonly data?: Application;
   readonly status: AppStatus;
   readonly previewBgColor: string;
+  readonly createType?: CreateType;
+  readonly position?: 'relative' | 'absolute';
+  readonly dataSourceCreated?: boolean;
+  onCreateDatasource?: () => void;
 }
 
 // 创建/修改应用
 const BasicSetting = (props: IProps) => {
-  const { previewBgColor, form, data, status } = props;
+  const {
+    previewBgColor,
+    form,
+    data,
+    status,
+    createType,
+    position = 'relative',
+    dataSourceCreated,
+    onCreateDatasource
+  } = props;
 
   const [tagList, setTagList] = useState<ListTagReq[]>([]); // 标签列表
   const [iconName, setIconName] = useState<Application['iconName']>();
@@ -116,7 +130,10 @@ const BasicSetting = (props: IProps) => {
   };
 
   return (
-    <div className={styles.createApp}>
+    <div
+      className={`${styles.createApp} ${createType === 'datasource' ? styles.showCreateApp : ''}`}
+      style={{ position }}
+    >
       <div className={styles.preview} style={{ backgroundColor: previewBgColor }}>
         <div className={styles.row}>
           <div className={styles.title}>经典模式</div>
@@ -232,13 +249,13 @@ const BasicSetting = (props: IProps) => {
             </div>
 
             <Form.Item
-              field="appKey"
+              field="appCode"
               label="应用编码"
               rules={[
                 { required: true, message: '请填写应用编码' },
                 { maxLength: 40, message: '长度超过限制' },
                 {
-                  match: /^[A-Za-z][A-Za-z0-9_]*$/,
+                  match: /^(?=.*[A-Za-z])(?=.*\d)(?=.*_)[A-Za-z][A-Za-z0-9_]*$/,
                   message: '应用编码不符合填写要求'
                 }
               ]}
@@ -291,9 +308,9 @@ const BasicSetting = (props: IProps) => {
                 <div>应用模式</div>
                 <span>请根据业务需求选择应用的导航模块</span>
               </div>
-              <div className={styles.dataImportant}>
+              <div className={styles.dataImportant} onClick={onCreateDatasource}>
                 <img src={arrowSVG} alt="Use own data source" />
-                使用自有数据源
+                {dataSourceCreated ? '已配置自有数据源' : '使用自有数据源'}
               </div>
             </div>
             <div className={styles.appType}>

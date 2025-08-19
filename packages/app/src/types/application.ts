@@ -9,7 +9,7 @@ export interface Application {
   /**
    * 应用编码
    */
-  appKey: string;
+  appCode: string;
   /**
    * 应用描述
    */
@@ -83,7 +83,7 @@ export interface CreateApplicationReq {
   /**
    * 应用编码
    */
-  appKey: string;
+  appCode: string;
   /**
    * 应用模式
    */
@@ -95,7 +95,7 @@ export interface CreateApplicationReq {
   /**
    * 数据源ID
    */
-  datasourceId: number;
+  datasourceId: string;
   /**
    * 应用描述
    */
@@ -134,11 +134,11 @@ export interface UpdateApplicationReq {
   /**
    * 应用编码
    */
-  appKey: string;
+  appCode: string;
   /**
    * 数据源ID
    */
-  datasourceId: number;
+  datasourceId: string;
   /**
    * 应用描述
    */
