@@ -21,6 +21,10 @@ public class TenantUpdateReqVO {
     @Schema(description = "租户名", requiredMode = Schema.RequiredMode.REQUIRED, example = "onebase")
     private String name;
 
+    @Schema(description = "租户昵称", requiredMode = Schema.RequiredMode.REQUIRED, example = "onebase")
+    // @NotNull(message = "租户昵称不能为空")
+    private String nickname;
+
     @Schema(description = "联系人", requiredMode = Schema.RequiredMode.REQUIRED, example = "onebase")
     private String contactName;
 

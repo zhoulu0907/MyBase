@@ -3,5 +3,20 @@ GET http://127.0.0.1:48080/admin-api/system/license/page?pageNum=1&pageSize=2
 Authorization: Bearer e9f2faef4dfb48169fc69e1ac7aeefdb
 
 ### 导出凭证
-GET http://127.0.0.1:48080/admin-api/system/license/export?id=1
-Authorization: Bearer a91d683f9e884de0bce970c071cf4b2b
+GET http://127.0.0.1:48080/admin-api/system/license/export?id=545790779306676224
+Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+### 上传凭证
+POST http://127.0.0.1:48080/admin-api/system/license/import
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="file"; filename="license.lic.sm4"
+Content-Type: application/octet-stream
+
+< ./license.lic.sm4
+--WebAppBoundary--

@@ -177,6 +177,14 @@ public interface AdminUserService {
     List<AdminUserDO> getUserList(Collection<Long> ids);
 
     /**
+     * 不传租户tenant_id，获得用户列表，
+     *
+     * @param ids 用户编号数组
+     * @return 用户列表
+     */
+    List<AdminUserDO> getUserListByIgnoreTenantId(Collection<Long> ids);
+
+    /**
      * 校验用户们是否有效。如下情况，视为无效：
      * 1. 用户编号不存在
      * 2. 用户被禁用
@@ -222,6 +230,15 @@ public interface AdminUserService {
      * @return 用户们
      */
     List<AdminUserDO> getUserListByStatus(Integer status);
+
+    /**
+     * 获取所有平台管理员列表
+     *
+     * @param status 状态
+     * @return 用户们
+     */
+    List<AdminUserDO> getPlatformAdminListByStatus(Integer status);
+
 
     /**
      * 判断密码是否匹配

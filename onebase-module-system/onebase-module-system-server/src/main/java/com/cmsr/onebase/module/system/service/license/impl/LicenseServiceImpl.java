@@ -8,7 +8,6 @@ import com.cmsr.onebase.module.system.controller.admin.license.vo.LicensePageReq
 import com.cmsr.onebase.module.system.controller.admin.license.vo.LicenseSaveReqVO;
 import com.cmsr.onebase.module.system.dal.database.LicenseDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.license.LicenseDO;
-import com.cmsr.onebase.module.system.enums.license.LicenseSecretKeyEnum;
 import com.cmsr.onebase.module.system.enums.license.LicenseStatusEnum;
 import com.cmsr.onebase.module.system.service.license.LicenseService;
 import com.fasterxml.jackson.core.JsonParser;
@@ -50,6 +49,8 @@ import static com.cmsr.onebase.module.system.util.encrypt.SM4Utils.sm4Encrypt;
 @Validated
 @Slf4j
 public class LicenseServiceImpl implements LicenseService {
+
+    private static final String LICENSE_SECRET_KEY = "1234567812345678";
 
     @Resource
     private LicenseDataRepository licenseDataRepository;
@@ -166,7 +167,7 @@ public class LicenseServiceImpl implements LicenseService {
             file.transferTo(sm4File);
 
             // 解密文件并保存到lic文件
-            String decrypted = decryptSm4FileToString(sm4FilePath, LicenseSecretKeyEnum.LICENSE_SECRET_KEY.getSecretKey());
+            String decrypted = decryptSm4FileToString(sm4FilePath, LICENSE_SECRET_KEY);
             // 读取解密后的字符串
             // String content = FileUtils.readFileToString(licFile, StandardCharsets.UTF_8);
             log.info("License解析内容: {}", decrypted);
@@ -249,7 +250,7 @@ public class LicenseServiceImpl implements LicenseService {
             objectMapper.registerModule(new JavaTimeModule());
             String jsonContent = objectMapper.writeValueAsString(licenseExportRespVO);
             // 使用SM4加密字符串,将加密后的内容写入响应输出流
-            String sm4Encrypt = sm4Encrypt(jsonContent, LicenseSecretKeyEnum.LICENSE_SECRET_KEY.getSecretKey());
+            String sm4Encrypt = sm4Encrypt(jsonContent, LICENSE_SECRET_KEY);
             response.getOutputStream().write(sm4Encrypt.getBytes());
             response.getOutputStream().flush();
         } catch (Exception e) {

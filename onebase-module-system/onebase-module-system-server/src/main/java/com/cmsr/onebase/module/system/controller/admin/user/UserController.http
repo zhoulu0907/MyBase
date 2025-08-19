@@ -1,20 +1,13 @@
 ### 获取租户编号 /admin-api/system/get-id-by-name
-GET http://127.0.0.1:48080/admin-api/system/user/simple-list
-Authorization: Bearer eb33f553e1194b52935de6fcc6a3f4f5
+GET {{baseUrl}}/system/user/simple-list
+Authorization: Bearer {{token}}
 
-### 创建用户 /admin-api/system/user/platform-admin/create
-POST http://127.0.0.1:48080/admin-api/system/user/platform-admin/create
-Content-Type: application/json
-Authorization: Bearer 0a5c369129e14e8285fd119bb2e1c7ac
-tenant-id: 1
+### 获得用户详情 /admin-api/system/user/platform-admin/create
+GET {{baseUrl}}/system/user/get?id=117
+Authorization: Bearer {{token}}
 
-{
-  "username": "adminguan2",
-  "password": "admin123",
-  "mobile": "15601691628",
-  "email": "16528@qq.com",
-  "userType": "2"
-}
+
+
 ### 根据状态查询用户信息列表 /admin-api/system/user/platform-admin/list
 GET http://127.0.0.1:48080/admin-api/system/user/platform-admin/list
 Content-Type: application/json
