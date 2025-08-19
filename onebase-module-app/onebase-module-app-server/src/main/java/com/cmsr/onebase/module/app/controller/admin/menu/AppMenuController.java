@@ -28,8 +28,10 @@ public class AppMenuController {
 
     @GetMapping("/list")
     @Operation(summary = "应用菜单列表")
-    public CommonResult<List<MenuListRespVO>> listApplicationMenu(@RequestParam("applicationId") Long applicationId) {
-        return success(appMenuService.listApplicationMenu(applicationId));
+    public CommonResult<List<MenuListRespVO>> listApplicationMenu(
+            @RequestParam("applicationId") Long applicationId,
+            @RequestParam(name = "name", required = false) String name) {
+        return success(appMenuService.listApplicationMenu(applicationId,name));
     }
 
     @PostMapping("/create")

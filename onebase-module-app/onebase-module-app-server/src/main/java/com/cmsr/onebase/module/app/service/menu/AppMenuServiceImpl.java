@@ -1,27 +1,10 @@
 package com.cmsr.onebase.module.app.service.menu;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import com.esotericsoftware.minlog.Log;
-import org.apache.commons.collections4.MapUtils;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.annotation.Validated;
-
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.app.api.appresource.dto.CopyPageSetDTO;
 import com.cmsr.onebase.module.app.api.appresource.dto.CreatePageSetDTO;
-import com.cmsr.onebase.module.app.controller.admin.menu.vo.MenuCopyReqVO;
-import com.cmsr.onebase.module.app.controller.admin.menu.vo.MenuCreateReqVO;
-import com.cmsr.onebase.module.app.controller.admin.menu.vo.MenuCreateRespVO;
-import com.cmsr.onebase.module.app.controller.admin.menu.vo.MenuListRespVO;
-import com.cmsr.onebase.module.app.controller.admin.menu.vo.MenuOrderUpdateReqVO;
+import com.cmsr.onebase.module.app.controller.admin.menu.vo.*;
 import com.cmsr.onebase.module.app.dal.database.menu.AppMenuRepository;
 import com.cmsr.onebase.module.app.dal.dataobject.app.ApplicationDO;
 import com.cmsr.onebase.module.app.dal.dataobject.menu.MenuDO;
@@ -31,13 +14,19 @@ import com.cmsr.onebase.module.app.enums.menu.MenuVisibleEnum;
 import com.cmsr.onebase.module.app.service.AppCommonService;
 import com.cmsr.onebase.module.app.service.appresource.PageSetService;
 import com.cmsr.onebase.module.app.util.MenuUtils;
-
 import jakarta.annotation.Resource;
 import lombok.Setter;
+import org.apache.commons.collections4.MapUtils;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
+
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @Author：huangjie
- *                  @Date：2025/7/23 13:40
+ * @Date：2025/7/23 13:40
  */
 @Setter
 @Service
@@ -54,9 +43,9 @@ public class AppMenuServiceImpl implements AppMenuService {
     private PageSetService pageSetService;
 
     @Override
-    public List<MenuListRespVO> listApplicationMenu(Long applicationId) {
+    public List<MenuListRespVO> listApplicationMenu(Long applicationId, String name) {
         ApplicationDO applicationDO = appCommonService.validateApplicationExist(applicationId);
-        List<MenuDO> menuDOS = appMenuRepository.findByApplicationId(applicationDO.getId());
+        List<MenuDO> menuDOS = appMenuRepository.findByApplicationIdAndNameLike(applicationDO.getId(), name);
         List<MenuListRespVO> menuListRespList = new ArrayList<>();
         // 把第一层的菜单添加到列表中
         List<MenuListRespVO> levelOneMenus = menuDOS.stream()
@@ -176,7 +165,7 @@ public class AppMenuServiceImpl implements AppMenuService {
      * @param sortOrder   当前排序序号
      */
     private void recursiveBuildMenuSortMap(List<MenuOrderUpdateReqVO.MenuOrderNode> menus,
-            Map<Long, Integer> menuSortMap, AtomicInteger sortOrder) {
+                                           Map<Long, Integer> menuSortMap, AtomicInteger sortOrder) {
         if (menus == null || menus.isEmpty()) {
             return;
         }
