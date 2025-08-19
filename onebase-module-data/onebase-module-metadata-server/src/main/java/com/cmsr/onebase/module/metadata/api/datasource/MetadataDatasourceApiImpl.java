@@ -4,6 +4,7 @@ import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.metadata.api.datasource.dto.DatasourceRespDTO;
 import com.cmsr.onebase.module.metadata.api.datasource.dto.DatasourceSaveReqDTO;
+import com.cmsr.onebase.module.metadata.api.datasource.dto.DatasourceCreateDefaultReqDTO;
 import com.cmsr.onebase.module.metadata.controller.admin.datasource.vo.DatasourceSaveReqVO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.datasource.MetadataDatasourceDO;
 import com.cmsr.onebase.module.metadata.service.datasource.MetadataDatasourceService;
@@ -27,12 +28,14 @@ public class MetadataDatasourceApiImpl implements MetadataDatasourceApi {
     private MetadataDatasourceService datasourceService;
 
     @Override
-    public CommonResult<String> createDefaultDatasource(Long appId) {
-        log.info("RPC 接口 - 创建默认数据源，应用ID: {}", appId);
-        
+    public CommonResult<String> createDefaultDatasource(DatasourceCreateDefaultReqDTO reqDTO) {
+        Long appId = reqDTO.getAppId();
+        String appUid = reqDTO.getAppUid();
+        log.info("RPC 接口 - 创建默认数据源，应用ID: {}，appUid: {}", appId, appUid);
+
         Long id = datasourceService.createDefaultDatasource(appId);
-        
-        log.info("RPC 接口 - 完成创建默认数据源，应用ID: {}，数据源ID: {}", appId, id);
+
+        log.info("RPC 接口 - 完成创建默认数据源，应用ID: {}，appUid: {}，数据源ID: {}", appId, appUid, id);
         return CommonResult.success(id.toString());
     }
 

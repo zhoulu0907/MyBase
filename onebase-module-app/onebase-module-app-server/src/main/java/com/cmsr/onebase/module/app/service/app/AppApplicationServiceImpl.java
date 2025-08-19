@@ -22,6 +22,7 @@ import com.cmsr.onebase.module.app.service.auth.AppAuthRoleService;
 import com.cmsr.onebase.module.app.util.AppUtils;
 import com.cmsr.onebase.module.app.util.VersionUtils;
 import com.cmsr.onebase.module.metadata.api.datasource.MetadataDatasourceApi;
+import com.cmsr.onebase.module.metadata.api.datasource.dto.DatasourceCreateDefaultReqDTO;
 import jakarta.annotation.Resource;
 import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
@@ -125,8 +126,11 @@ public class AppApplicationServiceImpl implements AppApplicationService {
         }
         applicationDO = applicationRepository.insert(applicationDO);
         saveApplicationTags(applicationDO.getId(), createReqVO.getTagIds());
-        authRoleService.createDefaultRole(applicationDO.getId());
-        metadataDatasourceApi.createDefaultDatasource(applicationDO.getId());
+    authRoleService.createDefaultRole(applicationDO.getId());
+    DatasourceCreateDefaultReqDTO defaultReq = new DatasourceCreateDefaultReqDTO();
+    defaultReq.setAppId(applicationDO.getId());
+    defaultReq.setAppUid(applicationDO.getAppUid());
+    metadataDatasourceApi.createDefaultDatasource(defaultReq);
         return BeanUtils.toBean(applicationDO, ApplicationCreateRespVO.class);
     }
 
