@@ -181,7 +181,8 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
         // 选项与约束补充
         // 仅当字段类型为单/多选时返回选项
         if ("SINGLE_SELECT".equalsIgnoreCase(entityField.getFieldType())
-            || "MULTI_SELECT".equalsIgnoreCase(entityField.getFieldType())) {
+            || "MULTI_SELECT".equalsIgnoreCase(entityField.getFieldType())
+            || "PICKLIST".equalsIgnoreCase(entityField.getFieldType())) {
             result.setOptions(fieldOptionService.listByFieldId(entityField.getId()).stream().map(o -> {
                 FieldOptionRespVO v = new FieldOptionRespVO();
                 v.setId(String.valueOf(o.getId()));
