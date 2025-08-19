@@ -12,6 +12,9 @@ import com.cmsr.onebase.module.app.enums.app.AppErrorCodeConstants;
 import com.cmsr.onebase.module.app.enums.auth.AuthRoleTypeEnum;
 import com.cmsr.onebase.module.app.service.AppCommonService;
 import com.cmsr.onebase.module.app.util.AuthUtils;
+import com.cmsr.onebase.module.system.api.dept.DeptApi;
+import com.cmsr.onebase.module.system.api.dept.dto.DeptAndUsersReqDTO;
+import com.cmsr.onebase.module.system.api.dept.dto.DeptAndUsersRespDTO;
 import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
 import jakarta.annotation.Resource;
 import lombok.Setter;
@@ -39,6 +42,9 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
     @Resource
     private AppCommonService appCommonService;
 
+    @Resource
+    private DeptApi deptApi;
+
     @Override
     public List<AuthRoleListRespVO> getRoleList(Long applicationId) {
         appCommonService.validateApplicationExist(applicationId);
@@ -49,7 +55,7 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
     @Override
     public PageResult<AuthRoleUsersPageRespVO> pageRoleUsers(AuthRoleUsersPageReqVO reqVO) {
         appCommonService.validateRoleExist(reqVO.getRoleId());
-        PageResult<AuthRoleUserDO> pageResult = appAuthRoleUserRepository.pageByRoleId(reqVO);
+        PageResult<AuthRoleUserDO> pageResult = appAuthRoleUserRepository.findByRoleId(reqVO);
         Set<Long> userIds = pageResult.getList().stream().map(v -> v.getUserId()).collect(Collectors.toSet());
         AppCommonService.UserHelper userHelper = appCommonService.getUserHelper(userIds);
         List<AuthRoleUsersPageRespVO> respVOS = userIds.stream().map(userId -> {
@@ -128,6 +134,16 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
         appAuthRoleUserRepository.deleteById(roleId);
         authRoleRepository.deleteById(roleId);
 
+    }
+
+    @Override
+    public DeptAndUsersRespDTO listDeptUsers(AuthRoleDeptAndUsersReqVO reqVO) {
+        List<Long> userIds = appAuthRoleUserRepository.findByRoleId(reqVO.getRoleId()).stream().map(v -> v.getUserId()).toList();
+        DeptAndUsersReqDTO deptAndUsersReqDTO = new DeptAndUsersReqDTO();
+        deptAndUsersReqDTO.setDeptId(reqVO.getDeptId());
+        deptAndUsersReqDTO.setKeywords(reqVO.getKeywords());
+        deptAndUsersReqDTO.setExcludeUserIds(userIds);
+        return deptApi.getDeptAndUsers(deptAndUsersReqDTO).getData();
     }
 
     private void checkRoleNameExists(Long applicationId, String roleName) {
