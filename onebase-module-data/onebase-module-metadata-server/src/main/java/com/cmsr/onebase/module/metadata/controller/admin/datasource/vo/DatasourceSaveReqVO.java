@@ -44,6 +44,9 @@ public class DatasourceSaveReqVO {
     @NotNull(message = "应用ID不能为空")
     private String appId;
 
+    @Schema(description = "应用唯一UID（用于与数据源建立关联时的外部标识，可选）", example = "app_8df0f2a6")
+    private String appUid;
+
     @Schema(description = "数据源来源，0：系统默认，1：自有数据源，2：外部数据源", example = "1")
     private Integer datasourceOrigin;
 

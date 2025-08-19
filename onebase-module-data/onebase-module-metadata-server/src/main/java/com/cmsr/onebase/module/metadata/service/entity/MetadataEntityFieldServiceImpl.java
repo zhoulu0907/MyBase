@@ -3,29 +3,18 @@ package com.cmsr.onebase.module.metadata.service.entity;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
-import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldBatchCreateReqVO;
-import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldBatchCreateRespVO;
-import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldBatchSortReqVO;
-import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldBatchUpdateReqVO;
-import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldBatchUpdateRespVO;
-import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldCreateItemVO;
-import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldDetailRespVO;
-import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldPageReqVO;
-import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldSaveReqVO;
-import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldSortItemVO;
-import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldUpdateItemVO;
-import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.FieldTypeConfigRespVO;
-import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldBatchSaveReqVO;
-import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldBatchSaveRespVO;
-import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldUpsertItemVO;
+import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.*;
 import com.cmsr.onebase.module.metadata.service.entity.vo.EntityFieldQueryVO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataBusinessEntityDO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.datasource.MetadataDatasourceDO;
 import com.cmsr.onebase.module.metadata.dal.database.MetadataEntityFieldRepository;
 import com.cmsr.onebase.module.metadata.dal.database.TemporaryDatasourceService;
-import com.cmsr.onebase.module.metadata.service.entity.MetadataBusinessEntityService;
 import com.cmsr.onebase.module.metadata.service.datasource.MetadataDatasourceService;
+import com.cmsr.onebase.module.metadata.service.field.MetadataEntityFieldOptionService;
+import com.cmsr.onebase.module.metadata.service.field.MetadataEntityFieldConstraintService;
+import com.cmsr.onebase.module.metadata.service.number.AutoNumberConfigService;
+import com.cmsr.onebase.module.metadata.dal.dataobject.number.MetadataAutoNumberConfigDO;
 import com.cmsr.onebase.module.metadata.enums.FieldTypeEnum;
 import com.cmsr.onebase.module.metadata.enums.BusinessEntityTypeEnum;
 import jakarta.annotation.Resource;
@@ -60,9 +49,15 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
     @Resource
     private TemporaryDatasourceService temporaryDatasourceService;
     @Resource
-    private MetadataBusinessEntityService metadataBusinessEntityService;
+    private com.cmsr.onebase.module.metadata.service.entity.MetadataBusinessEntityService metadataBusinessEntityService;
     @Resource
     private MetadataDatasourceService metadataDatasourceService;
+    @Resource
+    private MetadataEntityFieldOptionService fieldOptionService;
+    @Resource
+    private MetadataEntityFieldConstraintService fieldConstraintService;
+    @Resource
+    private AutoNumberConfigService autoNumberConfigService;
 
     @Override
     public List<FieldTypeConfigRespVO> getFieldTypes() {
@@ -180,8 +175,53 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
         // 获取实体名称（这里简化处理，实际项目中可能需要关联查询）
         result.setEntityName("实体名称");
 
-        // 获取校验规则（这里暂时返回空列表，后续实现校验规则管理时再完善）
+        // 获取校验规则（旧）
         result.setValidationRules(new ArrayList<>());
+
+        // 选项与约束补充
+        // 仅当字段类型为单/多选时返回选项
+        if ("SINGLE_SELECT".equalsIgnoreCase(entityField.getFieldType())
+            || "MULTI_SELECT".equalsIgnoreCase(entityField.getFieldType())) {
+            result.setOptions(fieldOptionService.listByFieldId(entityField.getId()).stream().map(o -> {
+                FieldOptionRespVO v = new FieldOptionRespVO();
+                v.setId(String.valueOf(o.getId()));
+                v.setFieldId(o.getFieldId());
+                v.setOptionLabel(o.getOptionLabel());
+                v.setOptionValue(o.getOptionValue());
+                v.setOptionOrder(o.getOptionOrder());
+                v.setIsEnabled(o.getIsEnabled());
+                v.setDescription(o.getDescription());
+                return v;
+            }).toList());
+        }
+        var constraints = fieldConstraintService.listByFieldId(entityField.getId());
+        if (constraints != null && !constraints.isEmpty()) {
+            FieldConstraintRespVO cr = new FieldConstraintRespVO();
+            for (var c : constraints) {
+                if ("LENGTH_RANGE".equalsIgnoreCase(c.getConstraintType())) {
+                    cr.setLengthEnabled(c.getIsEnabled());
+                    cr.setMinLength(c.getMinLength());
+                    cr.setMaxLength(c.getMaxLength());
+                    cr.setLengthPrompt(c.getPromptMessage());
+                } else if ("REGEX".equalsIgnoreCase(c.getConstraintType())) {
+                    cr.setRegexEnabled(c.getIsEnabled());
+                    cr.setRegexPattern(c.getRegexPattern());
+                    cr.setRegexPrompt(c.getPromptMessage());
+                }
+            }
+            result.setConstraints(cr);
+        }
+
+        // 自动编号摘要
+        MetadataAutoNumberConfigDO cfg = autoNumberConfigService.getByFieldId(entityField.getId());
+        if (cfg != null) {
+            EntityFieldAutoNumberBriefRespVO brief = new EntityFieldAutoNumberBriefRespVO();
+            brief.setEnabled(cfg.getIsEnabled());
+            brief.setMode(cfg.getNumberMode());
+            brief.setDigitWidth(cfg.getDigitWidth() != null ? (int) cfg.getDigitWidth() : null);
+            brief.setResetCycle(cfg.getResetCycle());
+            result.setAutoNumber(brief);
+        }
 
         return result;
     }
@@ -373,12 +413,12 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
                 // 智能处理：如果没有传ID，但fieldCode或fieldName已存在，则自动转换为更新操作
                 MetadataEntityFieldDO existingField = findExistingFieldByCodeOrName(reqVO.getEntityId(), item);
                 if (existingField != null) {
-                    log.info("发现已存在的字段，自动转换为更新操作: fieldName={}, existingId={}", 
+                    log.info("发现已存在的字段，自动转换为更新操作: fieldName={}, existingId={}",
                             item.getFieldName(), existingField.getId());
-                    
+
                     // 转换为更新操作
                     item.setId(existingField.getId().toString());
-                    
+
                     // 组装更新对象（只覆盖非空字段）
                     MetadataEntityFieldDO upd = new MetadataEntityFieldDO();
                     upd.setId(existingField.getId());
@@ -400,7 +440,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
                     if (item.getIsSystemField() != null) upd.setIsSystemField(item.getIsSystemField());
 
                     metadataEntityFieldRepository.update(upd);
-                    
+
                     // 同步物理表（需要完整字段信息）
                     DefaultConfigStore cs2 = new DefaultConfigStore();
                     cs2.and("id", existingField.getId());
@@ -411,7 +451,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
                     resp.getUpdatedIds().add(existingField.getId().toString());
                     continue; // 跳过新增逻辑
                 }
-                
+
                 // 确实是新增字段的情况
                 // 名称唯一
                 validateEntityFieldNameUnique(null, reqVO.getEntityId(), item.getFieldName());
@@ -459,10 +499,10 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
     private MetadataEntityFieldDO findExistingFieldByCodeOrName(String entityId, EntityFieldUpsertItemVO item) {
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.and(MetadataEntityFieldDO.ENTITY_ID, Long.valueOf(entityId));
-        
+
         // fieldCode字段已注释，跳过根据fieldCode查找逻辑
         // 直接根据fieldName查找
-        
+
         // 其次根据fieldName查找
         if (item.getFieldName() != null && !item.getFieldName().trim().isEmpty()) {
             DefaultConfigStore nameConfigStore = new DefaultConfigStore();
@@ -473,7 +513,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
                 return existingField;
             }
         }
-        
+
         return null;
     }
 
@@ -598,6 +638,13 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
         if (existingField != null) {
             // 校验实体类型是否允许修改表结构
             validateEntityAllowModifyStructure(existingField.getEntityId());
+        }
+
+        // 先删除子配置（选项、约束、自动编号）
+        if (existingField != null) {
+            fieldOptionService.deleteByFieldId(existingField.getId());
+            fieldConstraintService.deleteByFieldId(existingField.getId());
+            autoNumberConfigService.deleteByFieldId(existingField.getId());
         }
 
         // 删除实体字段

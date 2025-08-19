@@ -70,7 +70,7 @@ public class DisposableWorkerIdAssigner implements WorkerIdAssigner {
         } else {
             workerNodeEntity.setNodeType(WorkerNodeType.ACTUAL.value());
             workerNodeEntity.setWorkerHost(NetUtils.getLocalAddress());
-            workerNodeEntity.setWorkerPort("0");
+            workerNodeEntity.setWorkerPort(NetUtils.getLocalHostName());
         }
         return workerNodeEntity;
     }
