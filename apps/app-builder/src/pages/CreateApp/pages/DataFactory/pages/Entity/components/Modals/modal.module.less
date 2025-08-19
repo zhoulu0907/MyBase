@@ -73,6 +73,7 @@
 .field-config-popover {
   padding: 0 !important;
   min-width: 300px;
+  width: 100%;
 
   h4 {
     margin: 0 0 12px 0;
@@ -327,5 +328,63 @@
   width: 600px;
   .arco-modal-header .arco-modal-title {
     text-align: left !important;
+  }
+}
+
+/* 字段约束配置样式 */
+.field-constraint-config {
+  width: 100%;
+  // padding: 16px;
+
+  h4 {
+    margin: 0 0 16px 0;
+    font-size: 16px;
+    font-weight: 500;
+    color: #333;
+  }
+
+  .constraint-section {
+    margin-bottom: 20px;
+    padding: 16px;
+    border: 1px solid #e5e5e5;
+    border-radius: 6px;
+    background-color: #fafafa;
+
+    .constraint-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      font-weight: 500;
+      color: #333;
+    }
+
+    .constraint-content {
+      .constraint-row {
+        display: flex;
+        align-items: center;
+        margin-bottom: 12px;
+
+        label {
+          width: 80px;
+          margin-right: 12px;
+          font-size: 14px;
+          color: #333;
+
+          &.required-label {
+            color: #ff4d4f;
+          }
+        }
+      }
+    }
+  }
+
+  .field-constraint-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid #e5e5e5;
   }
 }
