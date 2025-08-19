@@ -4,6 +4,8 @@ import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.app.controller.admin.auth.vo.*;
 import com.cmsr.onebase.module.app.service.auth.AppAuthRoleService;
+import com.cmsr.onebase.module.system.api.dept.dto.DeptAndUsersReqDTO;
+import com.cmsr.onebase.module.system.api.dept.dto.DeptAndUsersRespDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
@@ -40,6 +42,12 @@ public class AppAuthRoleController {
     @Operation(summary = "获取角色用户列表")
     public CommonResult<PageResult<AuthRoleUsersPageRespVO>> pageRoleUsers(@Validated AuthRoleUsersPageReqVO reqVO) {
         return CommonResult.success(authRoleService.pageRoleUsers(reqVO));
+    }
+
+    @GetMapping("/list-dept-users")
+    @Operation(summary = "获取部门用户列表")
+    public CommonResult<DeptAndUsersRespDTO> listDeptUsers(@Validated AuthRoleDeptAndUsersReqVO reqVO) {
+        return CommonResult.success(authRoleService.listDeptUsers(reqVO));
     }
 
     /**
