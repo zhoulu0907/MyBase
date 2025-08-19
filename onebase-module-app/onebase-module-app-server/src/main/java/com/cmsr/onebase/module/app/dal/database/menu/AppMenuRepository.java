@@ -27,6 +27,14 @@ public class AppMenuRepository extends DataRepository<MenuDO> {
         return findAllByConfig(configs);
     }
 
+    public List<MenuDO> findByApplicationIdAndNameLike(Long applicationId, String name) {
+        ConfigStore configs = new DefaultConfigStore();
+        configs.eq("application_id", applicationId);
+        configs.like("menu_name", name);
+        configs.order("menu_sort", Order.TYPE.ASC);
+        return findAllByConfig(configs);
+    }
+
     public long countByParentId(Long id) {
         ConfigStore configs = new DefaultConfigStore();
         configs.eq("parent_id", id);

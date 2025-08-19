@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.app.controller.admin.auth;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.app.controller.admin.auth.vo.*;
 import com.cmsr.onebase.module.app.service.auth.AppAuthRoleService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -35,6 +36,12 @@ public class AppAuthRoleController {
         return CommonResult.success(authRoleService.getRoleList(applicationId));
     }
 
+    @GetMapping("/page-role-users")
+    @Operation(summary = "获取角色用户列表")
+    public CommonResult<PageResult<AuthRoleUsersPageRespVO>> pageRoleUsers(@Validated AuthRoleUsersPageReqVO reqVO) {
+        return CommonResult.success(authRoleService.pageRoleUsers(reqVO));
+    }
+
     /**
      * 新增角色
      */
@@ -57,6 +64,7 @@ public class AppAuthRoleController {
 
     /**
      * 角色添加成员
+     *
      * @param reqVO
      * @return
      */
@@ -69,6 +77,7 @@ public class AppAuthRoleController {
 
     /**
      * 角色删除成员
+     *
      * @param reqVO
      * @return
      */
@@ -78,7 +87,6 @@ public class AppAuthRoleController {
         authRoleService.deleteRoleUser(reqVO);
         return CommonResult.success(true);
     }
-
 
 
     /**

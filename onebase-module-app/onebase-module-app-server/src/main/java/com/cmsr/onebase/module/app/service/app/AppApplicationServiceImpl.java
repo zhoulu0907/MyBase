@@ -77,8 +77,8 @@ public class AppApplicationServiceImpl implements AppApplicationService {
                     ApplicationRespVO bean = BeanUtils.toBean(v, ApplicationRespVO.class);
                     bean.setAppStatusText(ApplicationStatusEnum.getText(v.getAppStatus()));
                     bean.setTags(queryAppTags(v.getId()));
-                    bean.setCreateUser(userHelper.getUserName(v.getCreator()));
-                    bean.setUpdateUser(userHelper.getUserName(v.getUpdater()));
+                    bean.setCreateUser(userHelper.getUserNickname(v.getCreator()));
+                    bean.setUpdateUser(userHelper.getUserNickname(v.getUpdater()));
                     return bean;
                 })
                 .toList();
@@ -103,8 +103,8 @@ public class AppApplicationServiceImpl implements AppApplicationService {
                 , vo -> {
                     vo.setAppStatusText(ApplicationStatusEnum.getText(vo.getAppStatus()));
                     vo.setTags(queryAppTags(vo.getId()));
-                    vo.setCreateUser(userHelper.getUserName(applicationDO.getCreator()));
-                    vo.setUpdateUser(userHelper.getUserName(applicationDO.getUpdater()));
+                    vo.setCreateUser(userHelper.getUserNickname(applicationDO.getCreator()));
+                    vo.setUpdateUser(userHelper.getUserNickname(applicationDO.getUpdater()));
                 });
         return respVO;
     }

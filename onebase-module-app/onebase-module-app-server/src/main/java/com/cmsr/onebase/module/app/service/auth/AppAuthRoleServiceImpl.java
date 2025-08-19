@@ -1,21 +1,26 @@
 package com.cmsr.onebase.module.app.service.auth;
 
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
+import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.app.controller.admin.auth.vo.*;
 import com.cmsr.onebase.module.app.dal.database.auth.AppAuthRoleRepository;
 import com.cmsr.onebase.module.app.dal.database.auth.AppAuthRoleUserRepository;
 import com.cmsr.onebase.module.app.dal.dataobject.auth.AuthRoleDO;
+import com.cmsr.onebase.module.app.dal.dataobject.auth.AuthRoleUserDO;
 import com.cmsr.onebase.module.app.enums.app.AppErrorCodeConstants;
 import com.cmsr.onebase.module.app.enums.auth.AuthRoleTypeEnum;
 import com.cmsr.onebase.module.app.service.AppCommonService;
 import com.cmsr.onebase.module.app.util.AuthUtils;
+import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
 import jakarta.annotation.Resource;
 import lombok.Setter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @Author：huangjie
@@ -41,6 +46,26 @@ public class AppAuthRoleServiceImpl implements AppAuthRoleService {
         return BeanUtils.toBean(authRoleList, AuthRoleListRespVO.class);
     }
 
+    @Override
+    public PageResult<AuthRoleUsersPageRespVO> pageRoleUsers(AuthRoleUsersPageReqVO reqVO) {
+        appCommonService.validateRoleExist(reqVO.getRoleId());
+        PageResult<AuthRoleUserDO> pageResult = appAuthRoleUserRepository.pageByRoleId(reqVO);
+        Set<Long> userIds = pageResult.getList().stream().map(v -> v.getUserId()).collect(Collectors.toSet());
+        AppCommonService.UserHelper userHelper = appCommonService.getUserHelper(userIds);
+        List<AuthRoleUsersPageRespVO> respVOS = userIds.stream().map(userId -> {
+            AdminUserRespDTO user = userHelper.getUser(userId);
+            if (user == null) {
+                AuthRoleUsersPageRespVO vo = new AuthRoleUsersPageRespVO();
+                vo.setId(userId);
+                vo.setNickname("[" + userId + "]");
+                vo.setMobile("-");
+                return vo;
+            } else {
+                return BeanUtils.toBean(user, AuthRoleUsersPageRespVO.class);
+            }
+        }).toList();
+        return new PageResult(respVOS, pageResult.getTotal());
+    }
 
     @Override
     public AuthRoleCreateRespVO createRole(AuthRoleCreateReqVO reqVO) {
