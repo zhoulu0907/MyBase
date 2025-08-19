@@ -10,7 +10,7 @@ import com.cmsr.onebase.module.system.enums.sms.SmsTemplateTypeEnum;
 import jakarta.persistence.Column;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
+import lombok.experimental.SuperBuilder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
@@ -24,7 +24,7 @@ import lombok.ToString;
 @Table(name = "system_sms_template")
 @Data
 @ToString(callSuper = true)
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 @TenantIgnore

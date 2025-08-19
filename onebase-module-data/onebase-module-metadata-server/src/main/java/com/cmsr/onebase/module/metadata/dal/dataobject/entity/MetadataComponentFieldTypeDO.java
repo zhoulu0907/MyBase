@@ -1,13 +1,12 @@
 package com.cmsr.onebase.module.metadata.dal.dataobject.entity;
 
 import com.cmsr.onebase.framework.data.base.BaseDO;
-
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 /**
  * 元数据组件字段类型表 DO
@@ -17,7 +16,7 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "metadata_component_field_type")

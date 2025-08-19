@@ -2,9 +2,8 @@ package com.cmsr.onebase.module.infra.service.file;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.infra.controller.admin.file.vo.config.FileConfigPageReqVO;
+import com.cmsr.onebase.module.infra.controller.admin.file.vo.config.FileConfigRespVO;
 import com.cmsr.onebase.module.infra.controller.admin.file.vo.config.FileConfigSaveReqVO;
-import com.cmsr.onebase.module.infra.dal.dataobject.file.FileConfigDO;
-
 import com.cmsr.onebase.module.infra.framework.file.core.client.FileClient;
 import jakarta.validation.Valid;
 
@@ -49,7 +48,7 @@ public interface FileConfigService {
      * @param id 编号
      * @return 文件配置
      */
-    FileConfigDO getFileConfig(Long id);
+    FileConfigRespVO getFileConfig(Long id);
 
     /**
      * 获得文件配置分页
@@ -57,7 +56,7 @@ public interface FileConfigService {
      * @param pageReqVO 分页查询
      * @return 文件配置分页
      */
-    PageResult<FileConfigDO> getFileConfigPage(FileConfigPageReqVO pageReqVO);
+    PageResult<FileConfigRespVO> getFileConfigPage(FileConfigPageReqVO pageReqVO);
 
     /**
      * 测试文件配置是否正确，通过上传文件

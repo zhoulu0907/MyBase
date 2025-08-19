@@ -5,7 +5,7 @@ import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import jakarta.persistence.Table;
 import jakarta.persistence.Column;
 import lombok.*;
-
+import lombok.experimental.SuperBuilder;
 import java.time.LocalDateTime;
 
 /**
@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
  */
 @Table(name = "system_sms_code")
 @Data
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 @TenantIgnore

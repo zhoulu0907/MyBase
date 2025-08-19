@@ -35,7 +35,7 @@
         <taos.version>3.3.3</taos.version>
         <postgresql.version>42.7.4</postgresql.version>
         <!--<anyline.version>8.7.2-jdk17-SNAPSHOT</anyline.version>-->
-        <anyline.version>8.7.2-jdk17-20250722</anyline.version>
+        <anyline.version>8.7.2-jdk17-20250818</anyline.version>
         <jakarta.persistence-api.version>3.2.0</jakarta.persistence-api.version>
         <jakarta.validation-api.version>3.1.1</jakarta.validation-api.version>
         <!-- 消息队列 -->

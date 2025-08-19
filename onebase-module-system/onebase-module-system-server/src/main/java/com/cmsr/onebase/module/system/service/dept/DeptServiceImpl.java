@@ -6,7 +6,7 @@ import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.system.controller.admin.dept.vo.dept.*;
-import com.cmsr.onebase.module.system.controller.admin.user.vo.user.UserDeptSimpleRespVO;
+import com.cmsr.onebase.module.system.controller.admin.user.vo.user.UserSimpleRespVO;
 import com.cmsr.onebase.module.system.dal.database.DeptDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
@@ -340,7 +340,7 @@ public class DeptServiceImpl implements DeptService {
 
             // 按用户昵称模糊搜索用户
             List<AdminUserDO> matchedUsers = adminUserService.getUserListByNickname(reqVO.getKeywords());
-            respVO.setUserList(BeanUtils.toBean(matchedUsers, UserDeptSimpleRespVO.class));
+            respVO.setUserList(BeanUtils.toBean(matchedUsers, UserSimpleRespVO.class));
 
         } else if (hasDeptId) {
             // 场景2：有部门ID，无搜索词
@@ -354,7 +354,7 @@ public class DeptServiceImpl implements DeptService {
 
             // 获取直属用户
             List<AdminUserDO> directUsers = adminUserService.getUserListByDeptIds(Collections.singletonList(reqVO.getDeptId()));
-            respVO.setUserList(BeanUtils.toBean(directUsers, UserDeptSimpleRespVO.class));
+            respVO.setUserList(BeanUtils.toBean(directUsers, UserSimpleRespVO.class));
 
         } else {
             // 场景1：部门ID和搜索词都为空
@@ -366,7 +366,7 @@ public class DeptServiceImpl implements DeptService {
 
             // 获取所有没有部门的用户（dept_id = null）
             List<AdminUserDO> usersWithoutDept = adminUserService.getUserListNoDept();
-            respVO.setUserList(BeanUtils.toBean(usersWithoutDept, UserDeptSimpleRespVO.class));
+            respVO.setUserList(BeanUtils.toBean(usersWithoutDept, UserSimpleRespVO.class));
         }
 
         // 数据处理：排除指定用户和角色用户

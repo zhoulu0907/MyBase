@@ -3,7 +3,7 @@ package com.cmsr.onebase.module.system.dal.dataobject.license;
 import jakarta.persistence.Table;
 import jakarta.persistence.Column;
 import lombok.*;
-import java.time.LocalDateTime;
+import lombok.experimental.SuperBuilder;import java.time.LocalDateTime;
 import com.cmsr.onebase.framework.data.base.BaseDO;
 
 /**
@@ -11,7 +11,7 @@ import com.cmsr.onebase.framework.data.base.BaseDO;
  */
 @Table(name = "system_license")
 @Data
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 public class LicenseDO extends BaseDO{

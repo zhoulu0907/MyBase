@@ -1,8 +1,5 @@
 package com.cmsr.onebase.module.infra.framework.file.config;
 
-import com.cmsr.onebase.module.infra.framework.file.core.client.FileClientFactory;
-import com.cmsr.onebase.module.infra.framework.file.core.client.FileClientFactoryImpl;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
@@ -12,9 +9,6 @@ import org.springframework.context.annotation.Configuration;
 @Configuration(proxyBeanMethods = false)
 public class YudaoFileAutoConfiguration {
 
-    @Bean
-    public FileClientFactory fileClientFactory() {
-        return new FileClientFactoryImpl();
-    }
+    // 移除 fileClientFactory Bean 配置，改为使用 @Component 自动扫描
 
 }

@@ -11,9 +11,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class UserDeptSimpleRespVO extends UserSimpleRespVO{
 
-    @Schema(description = "部门ID", example = "我是一个用户")
-    private Long deptId;
-
     @Schema(description = "部门名称", example = "IT 部")
     private String deptName;
 
