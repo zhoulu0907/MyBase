@@ -23,8 +23,8 @@ import java.util.List;
 import java.util.Map;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static com.cmsr.onebase.module.metadata.enums.ErrorCodeConstants.VALIDATION_RULE_GROUP_NOT_EXISTS;
-import static com.cmsr.onebase.module.metadata.enums.ErrorCodeConstants.VALIDATION_RULE_GROUP_NAME_DUPLICATE;
+import com.cmsr.onebase.module.metadata.enums.ErrorCodeConstants;
+import com.cmsr.onebase.module.metadata.util.StatusEnumUtil;
 
 /**
  * 校验规则分组 Service 实现类
@@ -51,8 +51,8 @@ public class MetadataValidationRuleGroupServiceImpl implements MetadataValidatio
         // 插入校验规则分组
         MetadataValidationRuleGroupDO ruleGroup = BeanUtils.toBean(createReqVO, MetadataValidationRuleGroupDO.class);
         // 设置默认状态
-        if (!StringUtils.hasText(ruleGroup.getRgStatus())) {
-            ruleGroup.setRgStatus("ACTIVE");
+        if (ruleGroup.getRgStatus() == null) {
+            ruleGroup.setRgStatus(StatusEnumUtil.ACTIVE);
         }
         
         validationRuleGroupRepository.upsert(ruleGroup);
@@ -118,7 +118,7 @@ public class MetadataValidationRuleGroupServiceImpl implements MetadataValidatio
      */
     private void validateValidationRuleGroupExists(Long id) {
         if (validationRuleGroupRepository.findById(id) == null) {
-            throw exception(VALIDATION_RULE_GROUP_NOT_EXISTS);
+            throw exception(ErrorCodeConstants.VALIDATION_RULE_GROUP_NOT_EXISTS);
         }
     }
 
@@ -134,7 +134,7 @@ public class MetadataValidationRuleGroupServiceImpl implements MetadataValidatio
         }
         MetadataValidationRuleGroupDO ruleGroup = validationRuleGroupRepository.selectByRgName(rgName, id);
         if (ruleGroup != null) {
-            throw exception(VALIDATION_RULE_GROUP_NAME_DUPLICATE);
+            throw exception(ErrorCodeConstants.VALIDATION_RULE_GROUP_NAME_DUPLICATE);
         }
     }
 
@@ -154,7 +154,7 @@ public class MetadataValidationRuleGroupServiceImpl implements MetadataValidatio
         mainOrRule.setGroupId(groupId);
         mainOrRule.setLogicType("LOGIC");
         mainOrRule.setLogicOperator("OR");
-        mainOrRule.setStatus("ACTIVE");
+        mainOrRule.setStatus(StatusEnumUtil.ACTIVE);
         validationRuleDefinitionService.saveRuleDefinition(mainOrRule);
         Long mainOrRuleId = mainOrRule.getId();
 
@@ -170,8 +170,8 @@ public class MetadataValidationRuleGroupServiceImpl implements MetadataValidatio
                 MetadataValidationRuleDefinitionDO ruleDO = ValidationRuleGroupConvert.INSTANCE.convertToRuleDefinitionDO(singleRule);
                 ruleDO.setGroupId(groupId);
                 ruleDO.setParentRuleId(mainOrRuleId);
-                if (!StringUtils.hasText(ruleDO.getStatus())) {
-                    ruleDO.setStatus("ACTIVE");
+                if (ruleDO.getStatus() == null) {
+                    ruleDO.setStatus(StatusEnumUtil.ACTIVE);
                 }
                 validationRuleDefinitionService.saveRuleDefinition(ruleDO);
             } else {
@@ -181,7 +181,7 @@ public class MetadataValidationRuleGroupServiceImpl implements MetadataValidatio
                 andGroupRule.setParentRuleId(mainOrRuleId);
                 andGroupRule.setLogicType("LOGIC");
                 andGroupRule.setLogicOperator("AND");
-                andGroupRule.setStatus("ACTIVE");
+                andGroupRule.setStatus(StatusEnumUtil.ACTIVE);
                 validationRuleDefinitionService.saveRuleDefinition(andGroupRule);
                 Long andGroupRuleId = andGroupRule.getId();
 
@@ -190,8 +190,8 @@ public class MetadataValidationRuleGroupServiceImpl implements MetadataValidatio
                     MetadataValidationRuleDefinitionDO ruleDO = ValidationRuleGroupConvert.INSTANCE.convertToRuleDefinitionDO(conditionRule);
                     ruleDO.setGroupId(groupId);
                     ruleDO.setParentRuleId(andGroupRuleId);
-                    if (!StringUtils.hasText(ruleDO.getStatus())) {
-                        ruleDO.setStatus("ACTIVE");
+                    if (ruleDO.getStatus() == null) {
+                        ruleDO.setStatus(StatusEnumUtil.ACTIVE);
                     }
                     validationRuleDefinitionService.saveRuleDefinition(ruleDO);
                 }

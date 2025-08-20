@@ -77,7 +77,14 @@ public class ValidationRuleGroupController {
     @PreAuthorize("@ss.hasPermission('metadata:validation-rule-group:query')")
     public CommonResult<PageResult<ValidationRuleGroupRespVO>> getValidationRuleGroupPage(@Valid @RequestBody ValidationRuleGroupPageReqVO pageReqVO) {
         PageResult<MetadataValidationRuleGroupDO> pageResult = validationRuleGroupService.getValidationRuleGroupPage(pageReqVO);
-        return success(ValidationRuleGroupConvert.INSTANCE.convertPage(pageResult));
+        PageResult<ValidationRuleGroupRespVO> result = ValidationRuleGroupConvert.INSTANCE.convertPage(pageResult);
+        
+        // 为每个规则组设置valueRules
+        for (ValidationRuleGroupRespVO respVO : result.getList()) {
+            respVO.setValueRules(validationRuleGroupService.buildValueRulesStructure(respVO.getId()));
+        }
+        
+        return success(result);
     }
 
 }

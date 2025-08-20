@@ -44,6 +44,10 @@ public class MetadataAutoNumberConfigDO extends TenantBaseDO {
     private Long initialValue;
     @Column(name = RESET_CYCLE)
     private String resetCycle;
+    /**
+     * 是否启用：1-启用，0-禁用
+     * @see CommonStatusEnum
+     */
     @Column(name = IS_ENABLED)
     private Integer isEnabled;
     @Column(name = RUN_MODE)
