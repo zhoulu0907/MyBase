@@ -53,7 +53,8 @@ public class MetadataDataSystemMethodDO extends BaseDO {
     private String methodDescription;
 
     /**
-     * 是否启用：0-启用，1-禁用
+     * 是否启用：1-启用，0-禁用
+     * @see CommonStatusEnum
      */
     private Integer isEnabled;
 

@@ -38,7 +38,6 @@ import com.cmsr.onebase.module.system.enums.permission.RoleCodeEnum;
 import com.cmsr.onebase.module.system.enums.permission.RoleTypeEnum;
 import com.cmsr.onebase.module.system.enums.tenant.TenantCodeEnum;
 import com.cmsr.onebase.module.system.enums.tenant.TenantStatusEnum;
-import com.cmsr.onebase.module.system.enums.user.UserPasswordEnum;
 import com.cmsr.onebase.module.system.enums.user.UserStatusEnum;
 import com.cmsr.onebase.module.system.service.license.LicenseService;
 import com.cmsr.onebase.module.system.service.permission.MenuService;
@@ -53,13 +52,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
@@ -72,6 +71,9 @@ import static java.util.Collections.singleton;
 @Validated
 @Slf4j
 public class TenantServiceImpl implements TenantService {
+
+    // 租户管理员设置默认密码
+    private static final String TENANT_ADMIN_PASSWORD = "admin123";
 
     @SuppressWarnings("SpringJavaAutowiredFieldsWarningInspection")
     @Resource // 由于 yudao.tenant.enable 配置项，可以关闭多租户的功能，所以这里只能不强制注入
@@ -162,6 +164,7 @@ public class TenantServiceImpl implements TenantService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Long createTenant(TenantInsertReqVO createReqVO) {
         // 校验租户名称是否重复
         validTenantNameDuplicate(createReqVO.getName(), null);
@@ -215,7 +218,7 @@ public class TenantServiceImpl implements TenantService {
             createReqVO.setUsername(createReqVO.getContactName());
             createReqVO.setAdminType(AdminTypeEnum.SYSTEM.getType());
             if (StringUtils.isEmpty(createReqVO.getPassword())) {
-                createReqVO.setPassword(UserPasswordEnum.PASSWORD_ENUM.getPassword());
+                createReqVO.setPassword(TENANT_ADMIN_PASSWORD);
             }
             Long userId = createUser(roleId, createReqVO);
             // 修改租户的管理员
@@ -253,6 +256,7 @@ public class TenantServiceImpl implements TenantService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void updateTenant(@Valid TenantUpdateReqVO updateReqVO) {
         // 校验存在
         TenantDO tenant = validateUpdateTenant(updateReqVO.getId());
@@ -335,10 +339,11 @@ public class TenantServiceImpl implements TenantService {
                     // 创建用户，并分配角色
                     TenantInsertReqVO reqVO = new TenantInsertReqVO();
                     reqVO.setContactName(updateReqVO.getContactName());
+                    reqVO.setNickname(updateReqVO.getNickname());
                     reqVO.setUsername(updateReqVO.getContactName());
                     reqVO.setAdminType(AdminTypeEnum.SYSTEM.getType());
                     if (StringUtils.isEmpty(updateReqVO.getPassword())) {
-                        reqVO.setPassword(UserPasswordEnum.PASSWORD_ENUM.getPassword());
+                        reqVO.setPassword(TENANT_ADMIN_PASSWORD);
                     }
                     userId = createUser(roleId, reqVO);
                 }
@@ -454,8 +459,40 @@ public class TenantServiceImpl implements TenantService {
 
 
     @Override
-    public PageResult<TenantDO> getTenantPage(TenantPageReqVO reqVO) {
-        return tenantDataRepository.findPage(reqVO);
+    public PageResult<TenantRespVO> getTenantPage(TenantPageReqVO reqVO) {
+        PageResult<TenantDO> tenantDOPageResult = tenantDataRepository.findPage(reqVO);
+        if (CollUtil.isEmpty(tenantDOPageResult.getList())) {
+            return PageResult.empty();
+        }
+
+        // 获取联系人用户ID列表
+        Set<Long> contactUserIds = tenantDOPageResult.getList().stream()
+                .map(TenantDO::getContactUserId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
+        // 批量查询用户信息
+        Map<Long, String> userNicknameMap = new HashMap<>();
+        if (CollUtil.isNotEmpty(contactUserIds)) {
+            List<AdminUserDO> users = userService.getUserListByIgnoreTenantId(contactUserIds);
+            userNicknameMap = users.stream()
+                    .collect(Collectors.toMap(AdminUserDO::getId, AdminUserDO::getNickname));
+        }
+        // 转换为VO并设置昵称
+        Map<Long, String> finalUserNicknameMap = userNicknameMap;
+        List<TenantRespVO> tenantRespVOList = tenantDOPageResult.getList().stream()
+                .map(tenantDO -> {
+                    TenantRespVO tenantRespVO = TenantConvert.INSTANCE.convert(tenantDO);
+                    // 设置联系人昵称
+                    if (tenantDO.getContactUserId() != null) {
+                        tenantRespVO.setNickName(finalUserNicknameMap.get(tenantDO.getContactUserId()));
+                    }
+                    return tenantRespVO;
+                })
+                .collect(Collectors.toList());
+
+        return new PageResult<>(tenantRespVOList, tenantDOPageResult.getTotal());
+
     }
 
     @Override

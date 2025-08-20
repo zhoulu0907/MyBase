@@ -3,7 +3,8 @@ package com.cmsr.onebase.module.metadata.service.number;
 import com.cmsr.onebase.module.metadata.dal.dataobject.number.MetadataAutoNumberConfigDO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.number.MetadataAutoNumberResetLogDO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.number.MetadataAutoNumberStateDO;
-import com.cmsr.onebase.module.metadata.dal.database.MetadataAutoNumberConfigRepository;
+import com.cmsr.onebase.module.metadata.enums.CommonStatusEnum;
+import com.cmsr.onebase.module.metadata.enums.BooleanStatusEnum;
 import com.cmsr.onebase.module.metadata.dal.database.MetadataAutoNumberResetLogRepository;
 import com.cmsr.onebase.module.metadata.dal.database.MetadataAutoNumberStateRepository;
 import jakarta.annotation.Resource;
@@ -14,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class AutoNumberStateServiceImpl implements AutoNumberStateService {
 
     @Resource
-    private MetadataAutoNumberConfigRepository configRepository;
+    private AutoNumberConfigService configService;
     @Resource
     private MetadataAutoNumberStateRepository stateRepository;
     @Resource
@@ -23,8 +24,9 @@ public class AutoNumberStateServiceImpl implements AutoNumberStateService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public long nextNumber(Long configId, java.time.LocalDateTime now) {
-        MetadataAutoNumberConfigDO cfg = configRepository.findById(configId);
-        if (cfg == null || cfg.getIsEnabled() == null || cfg.getIsEnabled() != 0) {
+        MetadataAutoNumberConfigDO cfg = configService.getByConfigId(configId);
+        // 使用新的枚举值：1-启用，0-禁用
+        if (cfg == null || cfg.getIsEnabled() == null || !CommonStatusEnum.isEnabled(cfg.getIsEnabled())) {
             throw new IllegalStateException("自动编号未启用");
         }
         String periodKey = buildPeriodKey(cfg.getResetCycle(), now);
@@ -42,7 +44,8 @@ public class AutoNumberStateServiceImpl implements AutoNumberStateService {
         }
         long next = st.getCurrentValue() + 1;
         // 溢出控制（仅当 FIXED_DIGITS 且不继续递增时回绕）
-        if ("FIXED_DIGITS".equalsIgnoreCase(cfg.getNumberMode()) && (cfg.getOverflowContinue() != null && cfg.getOverflowContinue() == 0) && cfg.getDigitWidth() != null) {
+        // 使用新的枚举值：1-是，0-否  
+        if ("FIXED_DIGITS".equalsIgnoreCase(cfg.getNumberMode()) && (cfg.getOverflowContinue() != null && !BooleanStatusEnum.isYes(cfg.getOverflowContinue())) && cfg.getDigitWidth() != null) {
             long max = (long) Math.pow(10, cfg.getDigitWidth());
             if (next >= max) {
                 next = cfg.getInitialValue() != null ? cfg.getInitialValue() : 1L;

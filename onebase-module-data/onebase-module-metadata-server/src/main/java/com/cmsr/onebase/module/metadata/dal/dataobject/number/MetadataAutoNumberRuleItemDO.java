@@ -39,6 +39,10 @@ public class MetadataAutoNumberRuleItemDO extends TenantBaseDO {
     private String textValue;
     @Column(name = REF_FIELD_ID)
     private Long refFieldId;
+    /**
+     * 是否启用：1-启用，0-禁用
+     * @see CommonStatusEnum
+     */
     @Column(name = IS_ENABLED)
     private Integer isEnabled;
     @Column(name = APP_ID)

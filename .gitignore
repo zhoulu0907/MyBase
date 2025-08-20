@@ -98,3 +98,5 @@ sessionStore
 /table_name_enhancement_summary.md
 /onebase-module-data/onebase-module-metadata-api/README.md
 /sql/postgresql/patch/2025-08-18-metadata-auto-number.sql
+/sql/patch/update_status_fields.sql
+/sql/patch/update_status_fields_mysql.sql

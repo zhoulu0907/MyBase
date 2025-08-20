@@ -57,7 +57,8 @@ public class MetadataEntityFieldOptionDO extends TenantBaseDO {
     private Integer optionOrder;
 
     /**
-     * 是否启用：0-是，1-否
+     * 是否启用：1-启用，0-禁用
+     * @see CommonStatusEnum
      */
     @Column(name = IS_ENABLED)
     private Integer isEnabled;

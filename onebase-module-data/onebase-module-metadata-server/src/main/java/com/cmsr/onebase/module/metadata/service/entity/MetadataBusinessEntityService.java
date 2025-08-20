@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.metadata.service.entity;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.BusinessEntityPageReqVO;
+import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.BusinessEntityRespVO;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.BusinessEntitySaveReqVO;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.ERDiagramRespVO;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.SimpleEntityRespVO;
@@ -12,6 +13,9 @@ import java.util.List;
 
 /**
  * 业务实体 Service 接口
+ *
+ * @author matianyu
+ * @date 2025-08-20
  */
 public interface MetadataBusinessEntityService {
 
@@ -100,5 +104,37 @@ public interface MetadataBusinessEntityService {
      * @return 业务实体列表
      */
     List<MetadataBusinessEntityDO> findAllByConfig(org.anyline.data.param.init.DefaultConfigStore configStore);
+    
+    /**
+     * 创建业务实体并返回响应VO
+     *
+     * @param reqVO 创建请求VO
+     * @return 业务实体响应VO
+     */
+    BusinessEntityRespVO createBusinessEntityWithResponse(@Valid BusinessEntitySaveReqVO reqVO);
+    
+    /**
+     * 获取业务实体详细信息
+     *
+     * @param id 业务实体ID
+     * @return 业务实体响应VO
+     */
+    BusinessEntityRespVO getBusinessEntityDetail(Long id);
+    
+    /**
+     * 获取业务实体分页（带响应VO转换）
+     *
+     * @param pageReqVO 分页查询请求VO
+     * @return 业务实体分页响应VO
+     */
+    PageResult<BusinessEntityRespVO> getBusinessEntityPageWithResponse(BusinessEntityPageReqVO pageReqVO);
+    
+    /**
+     * 根据数据源ID获得业务实体列表（带关系类型）
+     *
+     * @param datasourceId 数据源ID
+     * @return 业务实体响应VO列表
+     */
+    List<BusinessEntityRespVO> getBusinessEntityListByDatasourceIdWithRelationType(Long datasourceId);
 
 }

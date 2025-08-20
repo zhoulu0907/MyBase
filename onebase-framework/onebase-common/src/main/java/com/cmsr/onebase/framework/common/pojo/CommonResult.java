@@ -57,6 +57,18 @@ public class CommonResult<T> implements Serializable {
         return result;
     }
 
+    /**
+     * 创建带数据体的错误返回
+     */
+    public static <T> CommonResult<T> error(Integer code, String message, T data) {
+        Assert.notEquals(GlobalErrorCodeConstants.SUCCESS.getCode(), code, "code 必须是错误的！");
+        CommonResult<T> result = new CommonResult<>();
+        result.code = code;
+        result.msg = message;
+        result.data = data;
+        return result;
+    }
+
     public static <T> CommonResult<T> error(ErrorCode errorCode, Object... params) {
         Assert.notEquals(GlobalErrorCodeConstants.SUCCESS.getCode(), errorCode.getCode(), "code 必须是错误的！");
         CommonResult<T> result = new CommonResult<>();

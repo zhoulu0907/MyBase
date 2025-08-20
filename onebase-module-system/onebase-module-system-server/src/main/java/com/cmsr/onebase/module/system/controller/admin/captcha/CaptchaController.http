@@ -1,0 +1,24 @@
+### 环境配置说明
+# 使用全局环境配置文件 http-client.env.json
+# 请在IntelliJ IDEA中选择对应环境: local/dev/test/gateway
+# 确保先在AuthController.http中登录获取token
+
+### 获得验证码 /admin-api/system/captcha/get
+POST {{baseUrl}}/system/captcha/get
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "captchaType": "blockPuzzle"
+}
+
+### 校验验证码 /admin-api/system/captcha/check
+POST {{baseUrl}}/system/captcha/check
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "captchaType": "blockPuzzle",
+  "pointJson": "{\"x\":120,\"y\":50}",
+  "token": "f845c053193f493380d3b7485d2b9e52"
+}

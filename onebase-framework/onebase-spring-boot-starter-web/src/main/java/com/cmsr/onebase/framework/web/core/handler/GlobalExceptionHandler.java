@@ -64,6 +64,8 @@ public class GlobalExceptionHandler {
 
     private final ApiErrorLogCommonApi apiErrorLogApi;
 
+    private final com.cmsr.onebase.framework.web.config.WebProperties webProperties;
+
     /**
      * 处理所有异常，主要是提供给 Filter 使用
      * 因为 Filter 不走 SpringMVC 的流程，但是我们又需要兜底处理异常，所以这里提供一个全量的异常处理过程，保持逻辑统一。
@@ -163,7 +165,9 @@ public class GlobalExceptionHandler {
     public CommonResult<?> bindExceptionHandler(BindException ex) {
         log.warn("[handleBindException]", ex);
         FieldError fieldError = ex.getFieldError();
-        assert fieldError != null; // 断言，避免告警
+        if (fieldError == null) {
+            return CommonResult.error(BAD_REQUEST.getCode(), "请求参数不正确");
+        }
         return CommonResult.error(BAD_REQUEST.getCode(), String.format("请求参数不正确:%s", fieldError.getDefaultMessage()));
     }
 
@@ -288,7 +292,20 @@ public class GlobalExceptionHandler {
         log.error("[defaultExceptionHandler]", ex);
         // 插入异常日志
         createExceptionLog(req, ex);
-        // 返回 ERROR CommonResult
+        // 返回 ERROR；在开发/测试环境返回结构化 JSON（放入 data），生产只返回简要 msg
+        if (webProperties != null && webProperties.isReturnExceptionStackTrace()) {
+            Map<String, Object> body = MapUtil.<String, Object>builder()
+                    .put("exception", ex.getClass().getName())
+                    .put("message", ExceptionUtil.getMessage(ex))
+                    .put("rootCause", ExceptionUtil.getRootCauseMessage(ex))
+                    .put("stackTrace", ExceptionUtil.stacktraceToString(ex))
+                    .put("traceId", TracerUtils.getTraceId())
+                    .put("timestamp", LocalDateTime.now().toString())
+                    .put("path", req.getRequestURI())
+                    .put("method", req.getMethod())
+                    .build();
+            return CommonResult.error(INTERNAL_SERVER_ERROR.getCode(), INTERNAL_SERVER_ERROR.getMsg(), body);
+        }
         return CommonResult.error(INTERNAL_SERVER_ERROR.getCode(), INTERNAL_SERVER_ERROR.getMsg());
     }
 

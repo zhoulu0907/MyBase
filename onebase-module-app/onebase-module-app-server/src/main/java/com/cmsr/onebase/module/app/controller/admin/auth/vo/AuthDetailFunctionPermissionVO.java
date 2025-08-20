@@ -11,7 +11,7 @@ import java.util.List;
  */
 @Data
 @Schema(description = "应用管理 - 角色权限 Response VO")
-public class AuthDetailPermissionVO {
+public class AuthDetailFunctionPermissionVO {
 
     @Schema(description = "应用Id")
     private Long applicationId;
@@ -23,18 +23,12 @@ public class AuthDetailPermissionVO {
     private Long menuId;
 
     @Schema(description = "页面是否可访问")
-    private Boolean pageAllowed = Boolean.TRUE;
+    private Integer isPageAllowed = 0;
 
     @Schema(description = "操作权限")
     private List<AuthOperationVO> authOperations;
 
     @Schema(description = "实体访问权限")
-    private AuthDetailEntityVO authEntity;
-
-    @Schema(description = "数据访问权限")
-    private AuthDetailDataGroupVO authData;
-
-    @Schema(description = "字段权限")
-    private AuthDetailFieldVO authField;
+    private AuthDetailViewVO authEntity;
 
 }

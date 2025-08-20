@@ -1,7 +1,6 @@
 package com.cmsr.onebase.module.system.util.encrypt;
 
 import com.cmsr.onebase.module.system.controller.admin.license.vo.LicenseExportRespVO;
-import com.cmsr.onebase.module.system.enums.license.LicenseSecretKeyEnum;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +25,8 @@ public class SM4Utils {
     static {
         Security.addProvider(new BouncyCastleProvider());
     }
+
+    private static final String LICENSE_SECRET_KEY = "1234567812345678";
 
     /**
      * 确保密钥为16字节长度
@@ -142,7 +143,7 @@ public class SM4Utils {
     }
 
     public static void main(String[] args) {
-        System.out.println("密钥长度: " + LicenseSecretKeyEnum.LICENSE_SECRET_KEY.getSecretKey().length());
+        System.out.println("密钥长度: " + LICENSE_SECRET_KEY.length());
         try {
             // 测试明文内容
             LicenseExportRespVO licenseExportRespVO = new LicenseExportRespVO();
@@ -160,7 +161,7 @@ public class SM4Utils {
             String jsonContent = objectMapper.writeValueAsString(licenseExportRespVO);
 
             // 使用正确的密钥进行加密
-            String sm4Encrypt = sm4Encrypt(jsonContent, LicenseSecretKeyEnum.LICENSE_SECRET_KEY.getSecretKey());
+            String sm4Encrypt = sm4Encrypt(jsonContent, LICENSE_SECRET_KEY);
             if (sm4Encrypt != null) {
                 System.out.println("加密后的长度: " + sm4Encrypt.length());
 
@@ -179,7 +180,7 @@ public class SM4Utils {
                 System.out.println("加密文件已生成: " + sm4FilePath);
 
                 // 解密文件并保存到lic文件
-                boolean decryptSuccess = decryptSm4FileToFile(sm4FilePath, LicenseSecretKeyEnum.LICENSE_SECRET_KEY.getSecretKey(), licFilePath);
+                boolean decryptSuccess = decryptSm4FileToFile(sm4FilePath, LICENSE_SECRET_KEY, licFilePath);
                 if (decryptSuccess) {
                     System.out.println("解密文件已生成: " + licFilePath);
 

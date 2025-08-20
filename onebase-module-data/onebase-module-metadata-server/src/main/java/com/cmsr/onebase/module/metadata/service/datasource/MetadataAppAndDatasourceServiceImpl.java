@@ -1,7 +1,6 @@
 package com.cmsr.onebase.module.metadata.service.datasource;
 
 import com.cmsr.onebase.module.metadata.dal.database.MetadataAppAndDatasourceRepository;
-import com.cmsr.onebase.module.metadata.dal.database.MetadataDatasourceRepository;
 import com.cmsr.onebase.module.metadata.dal.dataobject.datasource.MetadataAppAndDatasourceDO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.datasource.MetadataDatasourceDO;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +25,7 @@ public class MetadataAppAndDatasourceServiceImpl implements MetadataAppAndDataso
     private MetadataAppAndDatasourceRepository appAndDatasourceRepository;
 
     @Resource
-    private MetadataDatasourceRepository datasourceRepository;
+    private MetadataDatasourceService datasourceService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -57,7 +56,7 @@ public class MetadataAppAndDatasourceServiceImpl implements MetadataAppAndDataso
         // 根据数据源ID列表查询数据源详情
         List<MetadataDatasourceDO> datasources = new ArrayList<>();
         for (Long datasourceId : datasourceIds) {
-            MetadataDatasourceDO datasource = datasourceRepository.getDatasourceById(datasourceId);
+            MetadataDatasourceDO datasource = datasourceService.getDatasource(datasourceId);
             if (datasource != null) {
                 datasources.add(datasource);
             }
@@ -107,7 +106,7 @@ public class MetadataAppAndDatasourceServiceImpl implements MetadataAppAndDataso
         // 根据数据源ID列表查询数据源详情
         List<MetadataDatasourceDO> datasources = new ArrayList<>();
         for (Long datasourceId : datasourceIds) {
-            MetadataDatasourceDO datasource = datasourceRepository.getDatasourceById(datasourceId);
+            MetadataDatasourceDO datasource = datasourceService.getDatasource(datasourceId);
             if (datasource != null) {
                 datasources.add(datasource);
             }

@@ -56,7 +56,8 @@ public class MetadataValidationTypeDO extends BaseDO {
     private Integer sortOrder;
 
     /**
-     * 状态：0-启用，1-禁用
+     * 状态：1-启用，0-禁用
+     * @see CommonStatusEnum
      */
     private Integer status;
 

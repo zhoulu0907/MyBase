@@ -20,7 +20,7 @@ public interface AppMenuService {
 
     void updateApplicationMenuOrder(MenuOrderUpdateReqVO updateReqVO);
 
-    void updateApplicationMenuVisible(Long id, Boolean visible);
+    void updateApplicationMenuVisible(Long id, Integer visible);
 
     MenuCreateRespVO copyApplicationMenu(MenuCopyReqVO copyReqVO);
 }

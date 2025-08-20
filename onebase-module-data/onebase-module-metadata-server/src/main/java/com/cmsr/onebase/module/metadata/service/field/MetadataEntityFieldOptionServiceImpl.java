@@ -1,5 +1,8 @@
 package com.cmsr.onebase.module.metadata.service.field;
 
+import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.FieldOptionBatchSortReqVO;
+import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.FieldOptionRespVO;
+import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.FieldOptionSaveReqVO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.field.MetadataEntityFieldOptionDO;
 import com.cmsr.onebase.module.metadata.dal.database.MetadataEntityFieldOptionRepository;
 import jakarta.annotation.Resource;
@@ -7,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 字段选项 Service 实现
@@ -60,6 +64,77 @@ public class MetadataEntityFieldOptionServiceImpl implements MetadataEntityField
             upd.setOptionOrder(it.getOptionOrder());
             optionRepository.update(upd);
         }
+    }
+
+    @Override
+    public List<FieldOptionRespVO> getFieldOptionList(Long fieldId) {
+        List<MetadataEntityFieldOptionDO> list = listByFieldId(fieldId);
+        return list.stream().map(this::convertToRespVO).collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Long createFieldOption(FieldOptionSaveReqVO req) {
+        MetadataEntityFieldOptionDO option = convertToDO(req);
+        return create(option);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updateFieldOption(FieldOptionSaveReqVO req) {
+        MetadataEntityFieldOptionDO option = convertToDO(req);
+        if (req.getId() != null) {
+            option.setId(Long.valueOf(req.getId()));
+        }
+        update(option);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void batchSortFieldOptions(FieldOptionBatchSortReqVO req) {
+        List<MetadataEntityFieldOptionDO> options = req.getItems().stream().map(item -> {
+            MetadataEntityFieldOptionDO option = new MetadataEntityFieldOptionDO();
+            option.setId(item.getId());
+            option.setOptionOrder(item.getOptionOrder());
+            return option;
+        }).collect(Collectors.toList());
+        batchSort(req.getFieldId(), options);
+    }
+
+    /**
+     * 转换为响应VO
+     *
+     * @param option DO对象
+     * @return 响应VO
+     */
+    private FieldOptionRespVO convertToRespVO(MetadataEntityFieldOptionDO option) {
+        FieldOptionRespVO respVO = new FieldOptionRespVO();
+        respVO.setId(option.getId() != null ? String.valueOf(option.getId()) : null);
+        respVO.setFieldId(option.getFieldId());
+        respVO.setOptionLabel(option.getOptionLabel());
+        respVO.setOptionValue(option.getOptionValue());
+        respVO.setOptionOrder(option.getOptionOrder());
+        respVO.setIsEnabled(option.getIsEnabled());
+        respVO.setDescription(option.getDescription());
+        return respVO;
+    }
+
+    /**
+     * 转换为DO对象
+     *
+     * @param req 请求VO
+     * @return DO对象
+     */
+    private MetadataEntityFieldOptionDO convertToDO(FieldOptionSaveReqVO req) {
+        MetadataEntityFieldOptionDO option = new MetadataEntityFieldOptionDO();
+        option.setFieldId(req.getFieldId());
+        option.setOptionLabel(req.getOptionLabel());
+        option.setOptionValue(req.getOptionValue());
+        option.setOptionOrder(req.getOptionOrder());
+        option.setIsEnabled(req.getIsEnabled());
+        option.setDescription(req.getDescription());
+        option.setAppId(req.getAppId());
+        return option;
     }
 }
 
