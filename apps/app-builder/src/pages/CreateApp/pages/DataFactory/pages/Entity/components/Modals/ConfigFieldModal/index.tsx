@@ -20,27 +20,20 @@ interface FieldFormValues {
   defaultValue: string;
   isUnique: number;
   allowNull: number;
-  constraints: string;
   isSystemField: number;
   sortOrder?: number;
   isDeleted?: boolean;
   displayName?: string;
-  fieldConfig?: {
-    options?: string[];
-    autoCodeRules?: AutoCodeRule[];
-    constraints?: {
-      lengthRange: {
-        enabled: boolean;
-        minLength: number;
-        maxLength: number;
-        hintMessage: string;
-      };
-      regexValidation: {
-        enabled: boolean;
-        pattern: string;
-        hintMessage: string;
-      };
-    };
+  options?: object[];
+  autoCodeRules?: AutoCodeRule[];
+  constraints?: {
+    lengthEnabled: number;
+    minLength: number;
+    maxLength: number;
+    lengthPrompt: string;
+    regexEnabled: number;
+    regexPattern: string;
+    regexPrompt: string;
   };
 }
 
@@ -201,6 +194,8 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
     const fieldIndex = fields.findIndex((field) => field.id === fieldId);
     if (fieldIndex === -1) return;
 
+    // const isEnabled = configData.length > 0 ? 0 : 1;
+
     let fieldConfig = {};
     switch (fieldType) {
       case 'PICKLIST':
@@ -208,14 +203,15 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
         fieldConfig = { options: configData };
         break;
       case 'AUTO_CODE':
-        fieldConfig = { autoCodeRules: configData };
+        fieldConfig = { options: configData };
         break;
       case 'CONSTRAINTS':
         fieldConfig = { constraints: configData };
         break;
     }
 
-    updateField(fieldIndex, { fieldConfig });
+    updateField(fieldIndex, fieldConfig);
+    console.log('fieldConfig', fieldConfig);
 
     if (fieldType === 'CONSTRAINTS') {
       setConstraintsPopoverVisible(null);

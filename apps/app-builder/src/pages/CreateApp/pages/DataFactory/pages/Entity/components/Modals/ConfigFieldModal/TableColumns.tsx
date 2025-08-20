@@ -12,12 +12,19 @@ interface FieldFormValues {
   defaultValue: string;
   isUnique: number;
   allowNull: number;
-  constraints: string;
+  constraints?: {
+    lengthEnabled: number;
+    minLength: number;
+    maxLength: number;
+    lengthPrompt: string;
+    regexEnabled: number;
+    regexPattern: string;
+    regexPrompt: string;
+  };
   isSystemField: number;
   sortOrder?: number;
   isDeleted?: boolean;
   displayName?: string;
-  fieldConfig?: any;
 }
 
 interface TableColumnsProps {
@@ -202,9 +209,9 @@ const TableColumns = ({
     {
       title: '字段约束',
       dataIndex: 'constraints',
-      render: (value: string, record: FieldFormValues, index: number) =>
+      render: (value: any, record: FieldFormValues, index: number) =>
         record.isSystemField === 0 ? (
-          <span className={styles['system-field']}>{value || '-'}</span>
+          <span className={styles['system-field']}>-</span>
         ) : (
           <Popover
             content={renderFieldConfigContent('CONSTRAINTS', record.id)}
