@@ -165,14 +165,13 @@ const Right: React.FC = () => {
         return;
       }
       
-      // 添加验证码token到登录请求
-      const loginData: LoginRequest = {
-        ...values,
-        captchaVerification: captchaToken
-      };
-      
-      const loginResp = await adminLogin(loginData);
-      console.log('loginRes:', loginResp);
+      // // 添加验证码token到登录请求
+      // const loginData: LoginRequest = {
+      //   ...values,
+      //   captchaVerification: captchaToken
+      // };
+      console.log('loginData:', values);
+      const loginResp = await adminLogin(values);
       // 显示成功消息并跳转
       if (loginResp.accessToken) {
         Message.success(t('auth.loginSuccess'));
@@ -222,11 +221,6 @@ const Right: React.FC = () => {
       Message.error('请检查表单填写是否正确');
     }
   };
-  
-  // // 手动触发显示滑块验证码
-  // const handleShowCaptcha = () => {
-  //   sliderCaptchaRef.current?.showCaptcha();
-  // };
 
   return (
     <div className={styles.loginPageRight}>

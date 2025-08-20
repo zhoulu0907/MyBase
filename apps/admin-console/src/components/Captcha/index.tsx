@@ -125,6 +125,7 @@ const SliderCaptcha = forwardRef<SliderCaptchaRef, SliderCaptchaProps>(({ onSucc
       
       if (resp.repData?.result) {
         // Message.success('验证成功');
+        console.log('验证成功:', captchaVerification);
         onSuccess(captchaVerification);
         setTimeout(() => {
           closeCaptcha();
