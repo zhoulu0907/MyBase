@@ -2,15 +2,15 @@ export enum PlatformTenantStatus {
   /**
    * 已启用
    */
-  enabled = 0,
+  disabled = 0,
   /**
    * 已禁用
    */
-  disabled = 1,
+  enabled,
   /**
    * 全部
    */
-  all = 2,
+  all
 
 }
 
@@ -29,11 +29,11 @@ export interface PlatformTenantInfo {
   /**
    * 管理员名称
    */
-  contactName: string,
+  adminUserName: string,
   /**
    * 管理员昵称
    */
-  nickName?: string,
+  adminNickName?: string,
   /**
    * 租户编码
    */
@@ -41,7 +41,7 @@ export interface PlatformTenantInfo {
   /**
    * 管理员手机号
    */
-  contactMobile: string,
+  adminMobile: string,
   /**
    * 创建时间
    */
@@ -80,11 +80,11 @@ export interface CreateTenantParams {
   /**
    * 管理员名称
    */
-  contactName: string;
+  adminUserName: string;
   /**
    * 管理员昵称
    */
-  nickname: string;
+  adminNickName: string;
   /**
    * 租户状态
    */

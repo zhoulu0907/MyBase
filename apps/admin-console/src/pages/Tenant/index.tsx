@@ -217,23 +217,23 @@ const TenantManagement: React.FC = () => {
     const tenant: PlatformTenantInfo = {
       id: record.id.toString(),
       name: record.name,
-      contactMobile: record.contactMobile,
+      adminMobile: record.adminMobile,
       accountCount: record.accountCount,
-      nickName: record.nickName,
-      contactName: record.contactName,
+      adminNickName: record.adminNickName,
+      adminUserName: record.adminUserName,
       createTime: record.createTime,
       status: record.status,
       tenantCode: record.tenantCode,
     };
     setCurrentTenant(tenant);
-    setOriginalAdmin(record.nickName || record.contactName);
+    setOriginalAdmin(record.adminNickName || record.adminUserName);
     
     form.setFieldsValue({
       tenantName: record.name,
       tenantCode: record.tenantCode,
-      admin: record.nickName,
+      admin: record.adminNickName,
       allocatedCount: record.accountCount,
-      nickName: record.nickName,
+      nickName: record.adminNickName,
       status: record.status === PlatformTenantStatus.enabled ? PlatformTenantStatus.enabled : PlatformTenantStatus.disabled,
       website: record.website,
     });
@@ -299,7 +299,7 @@ const TenantManagement: React.FC = () => {
       // 检查管理员是否发生变化
       const newAdminId = values.admin; // 这里是 id
       console.log('newAdminId:', newAdminId);
-      const originalAdminId = currentTenant?.contactName || ''; // 原始 contactName 是 username
+      const originalAdminId = currentTenant?.adminUserName || ''; // 原始 contactName 是 username
 
       // 根据 id 查找管理员
       const selectedAdmin = adminList.find(admin => admin.id === newAdminId);
@@ -347,8 +347,8 @@ const TenantManagement: React.FC = () => {
       const newTenantData: CreateTenantParams = {
         name: values.tenantName,
         tenantCode: generateTenantCode(),
-        contactName: adminUsername,
-        nickname: adminNickname,
+        adminUserName: adminUsername,
+        adminNickName: adminNickname,
         status: values.status,
         accountCount: values.allocatedCount,
         website: values.website,
@@ -460,7 +460,7 @@ const TenantManagement: React.FC = () => {
     },
     {
       title: '管理员',
-      dataIndex: 'nickName'
+      dataIndex: 'adminNickName'
     },
     {
       title: '访问地址',
