@@ -24,7 +24,6 @@ const XPreviewColumnLayout = (props: XColumnLayoutConfig) => {
 
   // 从 store 中获取当前组件的列数据，如果不存在则初始化为空数组
   const colComponents = layoutSubComponents[id] || Array.from({ length: colCount }, () => []);
-  //   console.log('colComponents', colComponents);
 
   // 如果列数变了，就重新初始化列
   useEffect(() => {
@@ -45,15 +44,6 @@ const XPreviewColumnLayout = (props: XColumnLayoutConfig) => {
             id={`workspace-content-${id}-${index}`}
             list={colComponents[index]}
             setList={(newList) => {
-              // 使用函数式更新确保状态更新的原子性
-              //   setColComponentsMap(id, (prevColumns: any[][]) => {
-              //     const updatedColumns = [...(prevColumns || [])];
-              //     updatedColumns[index] = newList;
-              //     return updatedColumns;
-              //   });
-              //   const updatecolComponents = colComponents;
-              //   updatecolComponents[index] = newList;
-              //     setLayoutSubComponents(id, updatecolComponents);
               colComponents[index] = newList;
             }}
             group={{
