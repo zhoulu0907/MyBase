@@ -46,7 +46,7 @@ public class NotifyTemplateDataRepository extends DataRepository<NotifyTemplateD
             configStore.and(Compare.EQUAL, NotifyTemplateDO.CODE, pageReqVO.getCode());
         }
         if (StringUtils.isNotBlank(pageReqVO.getName())) {
-            configStore.and(Compare.EQUAL, "name", pageReqVO.getName());
+            configStore.and(Compare.EQUAL, NotifyTemplateDO.NAME, pageReqVO.getName());
         }
         if (null != pageReqVO.getStatus()) {
             configStore.and(Compare.EQUAL, NotifyTemplateDO.STATUS, pageReqVO.getStatus());
