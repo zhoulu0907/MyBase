@@ -9,6 +9,8 @@ import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldBa
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldDetailRespVO;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldPageReqVO;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldSaveReqVO;
+import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldRespVO;
+import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldQueryReqVO;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.FieldTypeConfigRespVO;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldBatchSaveReqVO;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldBatchSaveRespVO;
@@ -150,5 +152,39 @@ public interface MetadataEntityFieldService {
      * @return 实体字段列表
      */
     List<MetadataEntityFieldDO> findAllByConfig(org.anyline.data.param.init.DefaultConfigStore configStore);
+
+    // ==================== 新增方法：处理包含自动编号的业务逻辑 ====================
+
+    /**
+     * 创建字段（包含选项、约束、自动编号处理）
+     *
+     * @param reqVO 创建请求
+     * @return 字段响应信息
+     */
+    EntityFieldRespVO createEntityFieldWithRelated(@Valid EntityFieldSaveReqVO reqVO);
+
+    /**
+     * 更新字段（包含选项、约束、自动编号处理）
+     *
+     * @param reqVO 更新请求
+     * @return 是否成功
+     */
+    Boolean updateEntityFieldWithRelated(@Valid EntityFieldSaveReqVO reqVO);
+
+    /**
+     * 查询字段列表（包含选项、约束、自动编号信息）
+     *
+     * @param reqVO 查询请求
+     * @return 字段列表
+     */
+    List<EntityFieldRespVO> getEntityFieldListWithRelated(@Valid EntityFieldQueryReqVO reqVO);
+
+    /**
+     * 获取字段详情（包含完整的自动编号配置）
+     *
+     * @param id 字段ID
+     * @return 字段详情
+     */
+    EntityFieldDetailRespVO getEntityFieldDetailWithFullConfig(String id);
 
 }
