@@ -159,9 +159,6 @@ public class TenantDataRepository extends DataRepository<TenantDO> {
      */
     public PageResult<TenantDO> findPage(TenantPageReqVO pageReqVO) {
         Integer status = pageReqVO.getStatus();
-        if (status != null && status == 2) {
-            status = null;
-        }
 
         DefaultConfigStore configStore = new DefaultConfigStore();
 

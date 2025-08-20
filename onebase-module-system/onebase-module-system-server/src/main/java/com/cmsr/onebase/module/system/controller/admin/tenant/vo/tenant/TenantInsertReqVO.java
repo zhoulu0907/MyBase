@@ -18,18 +18,18 @@ public class TenantInsertReqVO {
     @NotNull(message = "租户名不能为空")
     private String name;
 
-    @Schema(description = "租户昵称", requiredMode = Schema.RequiredMode.REQUIRED, example = "onebase")
-    // @NotNull(message = "租户昵称不能为空")
-    private String nickname;
-
     @Schema(description = "租户编码")
     private String tenantCode;
 
+    @Schema(description = "租户昵称", requiredMode = Schema.RequiredMode.REQUIRED, example = "onebase")
+    // @NotNull(message = "租户昵称不能为空")
+    private String nickname;// todo 重命名 adminNickName（tenant表里不存储）
+
     @Schema(description = "联系人", requiredMode = Schema.RequiredMode.REQUIRED, example = "onebase")
-    private String contactName;
+    private String contactName;// todo 重命名 adminUserName （tenant表里删掉，以user表为主），真正关联id：adminUserId
 
     @Schema(description = "联系手机", example = "15601691300")
-    private String contactMobile;
+    private String contactMobile;// todo 重命名 adminMobile（tenant表里删掉，以user表为主）
 
     @Schema(description = "租户状态", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
     private Integer status;
@@ -56,7 +56,7 @@ public class TenantInsertReqVO {
     private Integer adminType;
 
     // ========== 仅【创建】时，需要传递的字段 ==========
-
+    // todo 看是否可删
     @Schema(description = "用户账号", requiredMode = Schema.RequiredMode.REQUIRED, example = "yudao")
     @Pattern(regexp = "^[a-zA-Z0-9]{4,30}$", message = "用户账号由 数字、字母 组成")
     @Size(min = 4, max = 30, message = "用户账号长度为 4-30 个字符")
