@@ -123,8 +123,9 @@ public interface MetadataDatasourceService {
      * 创建默认数据源，使用配置文件中 default.datasource 配置
      *
      * @param appId 应用ID
+     * @param appUid 应用唯一UID，用于建立应用与数据源的关联
      * @return 数据源编号
      */
-    Long createDefaultDatasource(Long appId);
+    Long createDefaultDatasource(Long appId, String appUid);
 
 }

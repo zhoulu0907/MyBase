@@ -23,7 +23,11 @@ public class LocalFileClient extends AbstractFileClient<LocalFileClientConfig> {
     public String upload(byte[] content, String path, String type) {
         // 执行写入
         String filePath = getFilePath(path);
-        FileUtil.writeBytes(content, filePath);
+        File file = new File(filePath);
+        // 确保目录存在
+        FileUtil.mkParentDirs(file);
+        // 写入文件
+        FileUtil.writeBytes(content, file);
         // 拼接返回路径
         return super.formatFileUrl(config.getDomain(), path);
     }
@@ -41,7 +45,10 @@ public class LocalFileClient extends AbstractFileClient<LocalFileClientConfig> {
     }
 
     private String getFilePath(String path) {
-        return config.getBasePath() + File.separator + path;
+        // 获取项目根目录
+        String porjectBaseDir = System.getProperty("user.dir");
+        return porjectBaseDir + File.separator + config.getBasePath() + File.separator + path;
+        // return config.getBasePath() + File.separator + path;
     }
 
 }

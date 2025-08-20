@@ -1,9 +1,3 @@
-### 默认环境变量配置（直接使用local环境配置）
-@baseUrl = http://localhost:48080/admin-api
-@adminTenantId = 1
-@token = 1e0cc373ac674583a762aeb03c4e7715
-@tag = Yunai.local
-
 ### 环境配置说明
 # 上面已设置默认的local环境变量，可直接运行
 # 如需切换环境，请在IntelliJ IDEA中选择对应环境: local/gateway
@@ -37,6 +31,6 @@ Content-Type: application/json
 }
 
 ### 请求 /get-dept-users 接口 => 成功
-GET {{baseUrl}}/system/dept/get-dept-users?deptId=0&keywords=管理
+GET {{baseUrl}}/system/dept/get-dept-users?deptId=100&keywords=
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}

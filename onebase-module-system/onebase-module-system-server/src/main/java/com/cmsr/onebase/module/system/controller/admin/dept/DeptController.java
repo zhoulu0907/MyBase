@@ -3,23 +3,18 @@ package com.cmsr.onebase.module.system.controller.admin.dept;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.module.system.controller.admin.dept.vo.dept.DeptAndUsersReqVO;
-import com.cmsr.onebase.module.system.controller.admin.dept.vo.dept.DeptAndUsersRespVO;
-import com.cmsr.onebase.module.system.controller.admin.dept.vo.dept.DeptListReqVO;
-import com.cmsr.onebase.module.system.controller.admin.dept.vo.dept.DeptRespVO;
-import com.cmsr.onebase.module.system.controller.admin.dept.vo.dept.DeptSaveReqVO;
-import com.cmsr.onebase.module.system.controller.admin.dept.vo.dept.DeptSimpleRespVO;
+import com.cmsr.onebase.module.system.controller.admin.dept.vo.dept.*;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.module.system.service.dept.DeptService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.Resource;
+import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.annotation.Resource;
-import jakarta.validation.Valid;
 import java.util.List;
 
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;

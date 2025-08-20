@@ -1,8 +1,12 @@
 package com.cmsr.onebase.module.metadata.dal.dataobject.entity;
 
-import jakarta.persistence.Table;
 import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
-import lombok.*;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 /**
  * 业务实体表 DO
@@ -13,7 +17,7 @@ import lombok.*;
 @Table(name = "metadata_business_entity")
 @Data
 @EqualsAndHashCode(callSuper = true)
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 public class MetadataBusinessEntityDO extends TenantBaseDO {

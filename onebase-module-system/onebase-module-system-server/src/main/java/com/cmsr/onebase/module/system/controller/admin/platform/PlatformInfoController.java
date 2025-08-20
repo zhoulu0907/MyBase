@@ -132,5 +132,4 @@ public class PlatformInfoController {
         return success(true);
     }
 
-
 }

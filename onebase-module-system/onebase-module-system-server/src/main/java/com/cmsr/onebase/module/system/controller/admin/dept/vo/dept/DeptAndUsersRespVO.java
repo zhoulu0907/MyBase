@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.system.controller.admin.dept.vo.dept;
 
-import com.cmsr.onebase.module.system.controller.admin.user.vo.user.UserDeptSimpleRespVO;
+import com.cmsr.onebase.module.system.controller.admin.user.vo.user.UserSimpleRespVO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -23,6 +23,6 @@ public class DeptAndUsersRespVO {
     private List<DeptRespVO> deptList;
 
     @Schema(description = "当前部门下直属用户列表")
-    private List<UserDeptSimpleRespVO> userList;
+    private List<UserSimpleRespVO> userList;
 
 }

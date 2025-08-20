@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.system.controller.admin.user.vo.user;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Builder;
+import lombok.experimental.SuperBuilder;
 import lombok.Data;
 
 import java.util.List;
@@ -9,7 +9,7 @@ import java.util.Map;
 
 @Schema(description = "管理后台 - 用户导入 Response VO")
 @Data
-@Builder
+@SuperBuilder
 public class UserImportRespVO {
 
     @Schema(description = "创建成功的用户名数组", requiredMode = Schema.RequiredMode.REQUIRED)

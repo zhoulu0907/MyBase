@@ -35,7 +35,7 @@ import com.alibaba.excel.annotation.*;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 ## 处理 Excel 导出 + Schema 注解（仅 DO 模式）

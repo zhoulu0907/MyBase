@@ -242,18 +242,18 @@ public class PermissionServiceImpl implements PermissionService {
     }
 
     @Override
-    public Set<Long> getUserRoleIdListByUserId(Long userId) {
+    public Set<Long> getRoleIdsListByUserId(Long userId) {
         return convertSet(userRoleDataRepository.findListByUserId(userId), UserRoleDO::getRoleId);
     }
 
     @Override
     @Cacheable(value = RedisKeyConstants.USER_ROLE_ID_LIST, key = "#userId")
     public Set<Long> getUserRoleIdListByUserIdFromCache(Long userId) {
-        return getUserRoleIdListByUserId(userId);
+        return getRoleIdsListByUserId(userId);
     }
 
     @Override
-    public Set<Long> getUserRoleIdListByRoleId(Collection<Long> roleIds) {
+    public Set<Long> getUserIdsListByRoleIds(Collection<Long> roleIds) {
         return convertSet(userRoleDataRepository.findListByRoleIds(roleIds), UserRoleDO::getUserId);
     }
 

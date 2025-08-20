@@ -100,12 +100,16 @@ public class AppCommonService {
             this.userMap = userMap;
         }
 
-        public String getUserName(Long userId) {
+        public String getUserNickname(Long userId) {
             AdminUserRespDTO adminUserRespDTO = userMap.get(userId);
             if (adminUserRespDTO == null) {
                 return "";
             }
             return adminUserRespDTO.getNickname();
+        }
+
+        public AdminUserRespDTO getUser(Long userId) {
+            return userMap.get(userId);
         }
     }
 }

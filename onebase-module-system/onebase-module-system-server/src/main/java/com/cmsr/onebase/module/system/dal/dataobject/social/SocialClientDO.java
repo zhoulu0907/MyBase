@@ -7,7 +7,7 @@ import com.cmsr.onebase.module.system.enums.social.SocialTypeEnum;
 import jakarta.persistence.Table;
 import jakarta.persistence.Column;
 import lombok.*;
-import me.zhyd.oauth.config.AuthConfig;
+import lombok.experimental.SuperBuilder;import me.zhyd.oauth.config.AuthConfig;
 
 /**
  * 社交客户端 DO
@@ -17,7 +17,7 @@ import me.zhyd.oauth.config.AuthConfig;
  */
 @Table(name = "system_social_client")
 @Data
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 public class SocialClientDO extends TenantBaseDO {

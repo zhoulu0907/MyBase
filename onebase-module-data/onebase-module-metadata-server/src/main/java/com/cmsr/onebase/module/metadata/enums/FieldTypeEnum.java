@@ -21,7 +21,10 @@ public enum FieldTypeEnum {
     TIME("TIME", "时间", "DATETIME", false, false, null, null),
     BOOLEAN("BOOLEAN", "布尔值", "BOOLEAN", false, false, null, null),
     JSON("JSON", "JSON对象", "TEXT", false, false, null, null),
-    ENUM("ENUM", "枚举", "TEXT", false, false, null, null);
+    ENUM("ENUM", "枚举", "TEXT", false, false, null, null),
+    PICKLIST("PICKLIST", "单选列表", "SELECT", false, false, null, null),
+    SINGLE_SELECT("SINGLE_SELECT", "单选", "SELECT", false, false, null, null),
+    MULTI_SELECT("MULTI_SELECT", "多选", "SELECT", false, false, null, null);
 
     /**
      * 字段类型编码

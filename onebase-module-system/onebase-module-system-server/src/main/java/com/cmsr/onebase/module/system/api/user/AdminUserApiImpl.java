@@ -5,6 +5,7 @@ import cn.hutool.core.util.ObjUtil;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
+import com.cmsr.onebase.module.system.convert.user.UserConvert;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.service.dept.DeptService;
@@ -13,12 +14,10 @@ import jakarta.annotation.Resource;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
+import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.convertList;
 import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.convertSet;
 
 @RestController // 提供 RESTful API 接口，给 Feign 调用
@@ -66,12 +65,10 @@ public class AdminUserApiImpl implements AdminUserApi {
 
     @Override
     public CommonResult<List<AdminUserRespDTO>> getUserList(Collection<Long> ids) {
-//        return DataPermissionUtils.executeIgnore(() -> { // 禁用数据权限。原因是，一般基于指定 id 的 API 查询，都是数据拼接为主
-//            List<AdminUserDO> users = userService.getUserList(ids);
-//            return success(BeanUtils.toBean(users, AdminUserRespDTO.class));
-//        });
         List<AdminUserDO> users = userService.getUserList(ids);
-        return success(BeanUtils.toBean(users, AdminUserRespDTO.class));
+        // 拼接数据
+        Map<Long, DeptDO> deptMap = deptService.getDeptMap(convertList(users, AdminUserDO::getDeptId));
+        return success(UserConvert.INSTANCE.convert2DTOList(users, deptMap));
     }
 
     @Override
@@ -80,11 +77,11 @@ public class AdminUserApiImpl implements AdminUserApi {
         return success(BeanUtils.toBean(users, AdminUserRespDTO.class));
     }
 
-    @Override
-    public CommonResult<List<AdminUserRespDTO>> getUserListByPostIds(Collection<Long> postIds) {
-        List<AdminUserDO> users = userService.getUserListByPostIds(postIds);
-        return success(BeanUtils.toBean(users, AdminUserRespDTO.class));
-    }
+    // @Override
+    // public CommonResult<List<AdminUserRespDTO>> getUserListByPostIds(Collection<Long> postIds) {
+    //     List<AdminUserDO> users = userService.getUserListByPostIds(postIds);
+    //     return success(BeanUtils.toBean(users, AdminUserRespDTO.class));
+    // }
 
     @Override
     public CommonResult<Boolean> validateUserList(Collection<Long> ids) {
