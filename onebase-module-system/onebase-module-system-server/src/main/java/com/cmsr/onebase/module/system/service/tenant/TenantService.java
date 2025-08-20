@@ -72,7 +72,7 @@ public interface TenantService {
      * @param pageReqVO 分页查询
      * @return 租户分页
      */
-    PageResult<TenantDO> getTenantPage(TenantPageReqVO pageReqVO);
+    PageResult<TenantRespVO> getTenantPage(TenantPageReqVO pageReqVO);
 
     /**
      * 获得名字对应的租户

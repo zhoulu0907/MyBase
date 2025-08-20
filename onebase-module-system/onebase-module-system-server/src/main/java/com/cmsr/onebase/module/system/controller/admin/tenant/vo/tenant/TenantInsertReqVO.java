@@ -1,7 +1,6 @@
 package com.cmsr.onebase.module.system.controller.admin.tenant.vo.tenant;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.mzt.logapi.starter.annotation.DiffLogField;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -18,6 +17,10 @@ public class TenantInsertReqVO {
     @Schema(description = "租户名", requiredMode = Schema.RequiredMode.REQUIRED, example = "onebase")
     @NotNull(message = "租户名不能为空")
     private String name;
+
+    @Schema(description = "租户昵称", requiredMode = Schema.RequiredMode.REQUIRED, example = "onebase")
+    // @NotNull(message = "租户昵称不能为空")
+    private String nickname;
 
     @Schema(description = "租户编码")
     private String tenantCode;
