@@ -131,7 +131,7 @@ public class TenantController {
     @Operation(summary = "获得租户分页")
     @PreAuthorize("@ss.hasPermission('system:tenant:query')")
     public CommonResult<PageResult<TenantRespVO>> getTenantPage(@Valid TenantPageReqVO pageVO) {
-        PageResult<TenantDO> pageResult = tenantService.getTenantPage(pageVO);
+        PageResult<TenantRespVO> pageResult = tenantService.getTenantPage(pageVO);
         return success(BeanUtils.toBean(pageResult, TenantRespVO.class));
     }
 
@@ -141,7 +141,7 @@ public class TenantController {
     @ApiAccessLog(operateType = EXPORT)
     public void exportTenantExcel(@Valid TenantPageReqVO exportReqVO, HttpServletResponse response) throws IOException {
         exportReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
-        List<TenantDO> list = tenantService.getTenantPage(exportReqVO).getList();
+        List<TenantRespVO> list = tenantService.getTenantPage(exportReqVO).getList();
         // 导出 Excel
         ExcelUtils.write(response, "租户.xls", "数据", TenantRespVO.class,
                 BeanUtils.toBean(list, TenantRespVO.class));

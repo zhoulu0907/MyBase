@@ -27,6 +27,14 @@ public class TenantRespVO {
     @ExcelProperty("租户名")
     private String name;
 
+    @Schema(description = "租户名", requiredMode = Schema.RequiredMode.REQUIRED, example = "onebase")
+    @ExcelProperty("租户名")
+    private Integer contactUserId;
+
+    @Schema(description = "用户昵称", requiredMode = Schema.RequiredMode.REQUIRED, example = "onebase")
+    @ExcelProperty("用户昵称")
+    private String nickName;
+
     @Schema(description = "联系人", requiredMode = Schema.RequiredMode.REQUIRED, example = "onebase")
     @ExcelProperty("联系人")
     private String contactName;

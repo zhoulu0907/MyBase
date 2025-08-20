@@ -14,9 +14,12 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
 {
-  "name": "租户19",
+  "name": "租户guan",
   "accountCount": "10",
   "contactName": "test19",
+  "contactMobile": "13800000002",
+  "nickname": "租户guan",
+  "website": "tenant_20250811184249",
   "status": 0
 }
 
@@ -53,7 +56,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
 ### 获得租户详情 /admin-api/system/tenant/get
-GET {{baseUrl}}/system/tenant/get
+GET {{baseUrl}}/system/tenant/get?id=5651146171154432
 Content-Type: application/json
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
