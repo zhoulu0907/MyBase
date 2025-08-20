@@ -8,11 +8,10 @@ export interface TokenInfo {
   accessToken: string; // 访问令牌
   refreshToken: string; // 刷新令牌
   expiresTime: number; // 令牌过期时间（时间戳，毫秒）
+  tenantId?: string; // 租户id
 }
 
-export interface TenantInfo {
-  tenantId: string; //  租户id
-}
+
 
 export class TokenManager {
   private static readonly TOKEN_KEY = 'onebase_token';
@@ -25,7 +24,7 @@ export class TokenManager {
    * @param tokenInfo token信息
    * @param rememberMe 是否记住我
    */
-  static setToken(tokenInfo: TokenInfo & TenantInfo, rememberMe: boolean = false): void {
+  static setToken(tokenInfo: TokenInfo, rememberMe: boolean = false): void {
     try {
       // 根据记住我选项选择存储方式
       if (rememberMe) {
@@ -33,13 +32,17 @@ export class TokenManager {
         localStorage.setItem(this.TOKEN_KEY, tokenInfo.accessToken);
         localStorage.setItem(this.TOKEN_INFO_KEY, JSON.stringify(tokenInfo));
         localStorage.setItem(this.REMEMBER_ME_KEY, 'true');
-        localStorage.setItem(this.TENANT_ID, tokenInfo.tenantId);
+        if (tokenInfo.tenantId) {
+          localStorage.setItem(this.TENANT_ID, tokenInfo.tenantId);
+        }
       } else {
         // 不记住我：使用 sessionStorage（会话存储，关闭浏览器后清除）
         sessionStorage.setItem(this.TOKEN_KEY, tokenInfo.accessToken);
         sessionStorage.setItem(this.TOKEN_INFO_KEY, JSON.stringify(tokenInfo));
         sessionStorage.setItem(this.REMEMBER_ME_KEY, 'false');
-        sessionStorage.setItem(this.TENANT_ID, tokenInfo.tenantId);
+        if (tokenInfo.tenantId) {
+          sessionStorage.setItem(this.TENANT_ID, tokenInfo.tenantId);
+        }
       }
     } catch (error) {
       console.error('存储 token 失败:', error);
@@ -182,7 +185,7 @@ export class TokenManager {
    * 获取 tenant 信息
    * @returns tenantInfo 信息或 null
    */
-  static getTenantInfo(): TenantInfo | null {
+  static getTenantInfo(): { tenantId: string } | null {
     try {
       // 优先从 sessionStorage 获取，然后从 localStorage 获取
       let tenantId = sessionStorage.getItem(this.TENANT_ID);
