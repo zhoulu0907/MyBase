@@ -26,6 +26,6 @@ public class AuthOperationDO extends TenantBaseDO {
     private String operationCode;
 
     @Column(name = "is_allowed", nullable = false, comment = "是否允许")
-    private Boolean allowed;
+    private Integer isAllowed;
 
 }

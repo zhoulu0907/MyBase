@@ -38,6 +38,6 @@ public class AuthDataGroupDO extends TenantBaseDO {
     private String scopeLevel;
 
     @Column(name = "is_operable", nullable = false, comment = "是否可以操作")
-    private Boolean operable;
+    private Integer isOperable;
 
 }
