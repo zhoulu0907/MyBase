@@ -1,5 +1,6 @@
 package com.cmsr.onebase.framework.common.util.object;
 
+import cn.hutool.core.bean.BeanUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import org.modelmapper.ModelMapper;
@@ -15,7 +16,7 @@ public class BeanUtils {
     private static final ModelMapper MODEL_MAPPER = new ModelMapper();
 
     public static <T> T toBean(Object source, Class<T> targetClass) {
-        return MODEL_MAPPER.map(source, targetClass);
+        return BeanUtil.toBean(source, targetClass);
     }
 
     public static <T> T toBean(Object source, Class<T> targetClass, Consumer<T> peek) {
