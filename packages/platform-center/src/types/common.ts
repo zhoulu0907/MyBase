@@ -17,6 +17,6 @@ export interface PageResult<T> {
  * 启用-1，禁用-0
  */
 export enum StatusEnum {
-  DISABLE = 1,
-  ENABLE = 0
+  DISABLE = 0,
+  ENABLE = 1
 }
