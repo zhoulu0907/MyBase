@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.metadata.service.number;
 
+import com.cmsr.onebase.module.metadata.controller.admin.number.vo.AutoNumberConfigWithRulesRespVO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.number.MetadataAutoNumberConfigDO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.number.MetadataAutoNumberRuleItemDO;
 import com.cmsr.onebase.module.metadata.dal.database.MetadataAutoNumberConfigRepository;
@@ -10,6 +11,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+/**
+ * 自动编号-配置 Service 实现
+ *
+ * @author matianyu
+ * @date 2025-08-20
+ */
 @Service
 public class AutoNumberConfigServiceImpl implements AutoNumberConfigService {
 
@@ -56,6 +63,26 @@ public class AutoNumberConfigServiceImpl implements AutoNumberConfigService {
     @Override
     public List<MetadataAutoNumberRuleItemDO> listRules(Long configId) {
         return ruleRepository.listByConfig(configId);
+    }
+
+    @Override
+    public AutoNumberConfigWithRulesRespVO getAutoNumberConfigWithRules(Long fieldId) {
+        MetadataAutoNumberConfigDO config = getByFieldId(fieldId);
+        AutoNumberConfigWithRulesRespVO response = new AutoNumberConfigWithRulesRespVO();
+        response.setConfig(config);
+        
+        if (config != null) {
+            List<MetadataAutoNumberRuleItemDO> rules = listRules(config.getId());
+            response.setRules(rules);
+        }
+        
+        return response;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Long saveAutoNumberConfig(MetadataAutoNumberConfigDO config) {
+        return upsert(config);
     }
 }
 

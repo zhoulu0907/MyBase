@@ -3,7 +3,6 @@ package com.cmsr.onebase.module.metadata.service.number;
 import com.cmsr.onebase.module.metadata.dal.dataobject.number.MetadataAutoNumberConfigDO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.number.MetadataAutoNumberResetLogDO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.number.MetadataAutoNumberStateDO;
-import com.cmsr.onebase.module.metadata.dal.database.MetadataAutoNumberConfigRepository;
 import com.cmsr.onebase.module.metadata.dal.database.MetadataAutoNumberResetLogRepository;
 import com.cmsr.onebase.module.metadata.dal.database.MetadataAutoNumberStateRepository;
 import jakarta.annotation.Resource;
@@ -14,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class AutoNumberStateServiceImpl implements AutoNumberStateService {
 
     @Resource
-    private MetadataAutoNumberConfigRepository configRepository;
+    private AutoNumberConfigService configService;
     @Resource
     private MetadataAutoNumberStateRepository stateRepository;
     @Resource
@@ -23,7 +22,7 @@ public class AutoNumberStateServiceImpl implements AutoNumberStateService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public long nextNumber(Long configId, java.time.LocalDateTime now) {
-        MetadataAutoNumberConfigDO cfg = configRepository.findById(configId);
+        MetadataAutoNumberConfigDO cfg = configService.getByConfigId(configId);
         if (cfg == null || cfg.getIsEnabled() == null || cfg.getIsEnabled() != 0) {
             throw new IllegalStateException("自动编号未启用");
         }

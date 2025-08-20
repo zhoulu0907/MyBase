@@ -16,6 +16,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.lang.NonNull;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
@@ -41,7 +42,7 @@ public class YudaoWebAutoConfiguration implements WebMvcConfigurer {
     private String applicationName;
 
     @Override
-    public void configurePathMatch(PathMatchConfigurer configurer) {
+    public void configurePathMatch(@NonNull PathMatchConfigurer configurer) {
         configurePathMatch(configurer, webProperties.getAdminApi());
         configurePathMatch(configurer, webProperties.getAppApi());
     }
@@ -60,7 +61,7 @@ public class YudaoWebAutoConfiguration implements WebMvcConfigurer {
 
     @Bean
     public GlobalExceptionHandler globalExceptionHandler(ApiErrorLogCommonApi apiErrorLogApi) {
-        return new GlobalExceptionHandler(applicationName, apiErrorLogApi);
+        return new GlobalExceptionHandler(applicationName, apiErrorLogApi, webProperties);
     }
 
     @Bean

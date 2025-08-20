@@ -52,7 +52,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
     @Resource
     private TemporaryDatasourceService temporaryDatasourceService;
     @Resource
-    private com.cmsr.onebase.module.metadata.service.entity.MetadataBusinessEntityService metadataBusinessEntityService;
+    private MetadataBusinessEntityService metadataBusinessEntityService;
     @Resource
     private MetadataDatasourceService metadataDatasourceService;
     @Resource
