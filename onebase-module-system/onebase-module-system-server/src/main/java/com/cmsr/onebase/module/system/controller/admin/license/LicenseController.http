@@ -1,7 +1,36 @@
-### 获得凭证列表分页 /admin-api/system/platforminfo/simple-simple
-GET http://127.0.0.1:48080/admin-api/system/license/page?pageNum=1&pageSize=2
-Authorization: Bearer e9f2faef4dfb48169fc69e1ac7aeefdb
+### 获得凭证详情 /system/license/get
+GET {{baseUrl}}/system/license/get?id=7038386249531392
+Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+### 获得凭证详情 /system/license/simple-list
+GET {{baseUrl}}/system/license/simple-list
+Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+### 获得凭证列表分页 /system/license/page
+GET {{baseUrl}}/system/license/page?pageNum=1&pageSize=10
+Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
 
 ### 导出凭证
-GET http://127.0.0.1:48080/admin-api/system/license/export?id=1
-Authorization: Bearer a91d683f9e884de0bce970c071cf4b2b
+GET {{baseUrl}}/system/license/export?id=545790779306676224
+Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+### 上传凭证
+POST {{baseUrl}}/system/license/import
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="file"; filename="license.lic.sm4"
+Content-Type: application/octet-stream
+
+< ./license.lic-9.sm4
+--WebAppBoundary--

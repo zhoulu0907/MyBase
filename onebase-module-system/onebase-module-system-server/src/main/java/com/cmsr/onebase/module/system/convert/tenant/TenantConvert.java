@@ -21,7 +21,7 @@ public interface TenantConvert {
         UserInsertReqVO reqVO = new UserInsertReqVO();
         reqVO.setUsername(bean.getUsername());
         reqVO.setPassword(bean.getPassword());
-        reqVO.setNickname(bean.getContactName()).setMobile(bean.getContactMobile());
+        reqVO.setNickname(bean.getNickname()).setMobile(bean.getContactMobile());
         reqVO.setAdminType(bean.getAdminType());
         return reqVO;
     }

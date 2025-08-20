@@ -10,6 +10,7 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.common.util.validation.ValidationUtils;
+import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.infra.api.config.ConfigApi;
 import com.cmsr.onebase.module.system.controller.admin.auth.vo.AuthRegisterReqVO;
 import com.cmsr.onebase.module.system.controller.admin.user.vo.profile.UserProfileUpdatePasswordReqVO;
@@ -22,6 +23,7 @@ import com.cmsr.onebase.module.system.dal.database.UserRoleDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.UserPostDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
+import com.cmsr.onebase.module.system.dal.dataobject.permission.UserRoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.enums.permission.AdminTypeEnum;
 import com.cmsr.onebase.module.system.enums.permission.RoleCodeEnum;
@@ -37,7 +39,6 @@ import com.mzt.logapi.starter.annotation.LogRecord;
 import jakarta.annotation.Resource;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -86,7 +87,8 @@ public class AdminUserServiceImpl implements AdminUserService {
 
     @Resource
     private UserPostDataRepository userPostDataRepository;
-    @Autowired
+
+    @Resource
     private UserRoleDataRepository userRoleDataRepository;
 
     @Override
@@ -394,6 +396,16 @@ public class AdminUserServiceImpl implements AdminUserService {
         return adminUserDataRepository.findAllByIds(ids);
     }
 
+
+    @Override
+    @TenantIgnore
+    public List<AdminUserDO> getUserListByIgnoreTenantId(Collection<Long> ids) {
+        if (CollUtil.isEmpty(ids)) {
+            return Collections.emptyList();
+        }
+        return adminUserDataRepository.findAllByIds(ids);
+    }
+
     @Override
     public void validateUserList(Collection<Long> ids) {
         if (CollUtil.isEmpty(ids)) {
@@ -595,6 +607,34 @@ public class AdminUserServiceImpl implements AdminUserService {
     @Override
     public List<AdminUserDO> getUserListByStatus(Integer status) {
         return adminUserDataRepository.findAllByStatus(status);
+    }
+
+    @Override
+    public List<AdminUserDO> getPlatformAdminListByStatus(Integer status) {
+        // 获取所有指定状态的用户
+        List<AdminUserDO> users = adminUserDataRepository.findAllByStatus(status);
+        if (CollUtil.isEmpty(users)) {
+            return Collections.emptyList();
+        }
+        
+        // 获取平台管理员角色
+        RoleDO platformAdminRole = roleService.getRoleIdsByCode(RoleCodeEnum.SUPER_ADMIN.getCode());
+        if (platformAdminRole == null) {
+            return Collections.emptyList();
+        }
+        
+        // 获取这些用户的角色信息
+        Set<Long> userIds = convertSet(users, AdminUserDO::getId);
+        List<UserRoleDO> userRoles = userRoleDataRepository.findListByRoleIds(platformAdminRole.getId())
+                .stream()
+                .filter(userRole -> userIds.contains(userRole.getUserId()))
+                .collect(Collectors.toList());
+        
+        // 过滤出具有平台管理员角色的用户
+        Set<Long> platformAdminUserIds = convertSet(userRoles, UserRoleDO::getUserId);
+        return users.stream()
+                .filter(user -> platformAdminUserIds.contains(user.getId()))
+                .collect(Collectors.toList());
     }
 
     @Override
