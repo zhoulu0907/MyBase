@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.app.controller.admin.auth.vo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import org.apache.commons.lang3.math.NumberUtils;
 
 /**
  * @Author：huangjie
@@ -21,12 +22,12 @@ public class AuthFieldVO {
     private String fieldDisplayName;
 
     @Schema(description = "是否可阅读")
-    private Boolean canRead = Boolean.TRUE;
+    private Integer isCanRead = NumberUtils.INTEGER_ONE;
 
     @Schema(description = "是否可编辑")
-    private Boolean canEdit = Boolean.TRUE;
+    private Integer isCanEdit = NumberUtils.INTEGER_ZERO;
 
     @Schema(description = "是否可下载")
-    private Boolean canDownload = Boolean.TRUE;
+    private Integer isCanDownload = NumberUtils.INTEGER_ZERO;
 
 }

@@ -11,10 +11,10 @@ import java.util.List;
  */
 @Data
 @Schema(description = "应用管理 - 字段权限 Response VO")
-public class AuthDetailFieldVO {
+public class AuthDetailFieldPermissionVO {
 
     @Schema(description = "所有字段可操作")
-    private Boolean allFieldsAllowed = Boolean.TRUE;
+    private Integer isAllFieldsAllowed = 0;
 
     @Schema(description = "字段权限")
     private List<AuthFieldVO> authFields;
