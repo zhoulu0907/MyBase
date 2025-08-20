@@ -80,4 +80,7 @@ public class EntityFieldSaveReqVO {
     @Schema(description = "字段约束配置（长度/正则，若提供则整体替换）")
     private FieldConstraintRespVO constraints;
 
+    @Schema(description = "自动编号配置（若提供则整体替换）")
+    private AutoNumberConfigReqVO autoNumber;
+
 }

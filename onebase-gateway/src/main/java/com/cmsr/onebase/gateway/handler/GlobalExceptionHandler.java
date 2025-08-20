@@ -1,6 +1,7 @@
 package com.cmsr.onebase.gateway.handler;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import cn.hutool.core.exceptions.ExceptionUtil;
 import com.cmsr.onebase.gateway.util.WebFrameworkUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.web.reactive.error.ErrorWebExceptionHandler;
@@ -11,7 +12,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.beans.factory.annotation.Value;
 import reactor.core.publisher.Mono;
+import org.springframework.lang.NonNull;
 
 import static com.cmsr.onebase.framework.common.exception.enums.GlobalErrorCodeConstants.INTERNAL_SERVER_ERROR;
 
@@ -26,8 +29,11 @@ import static com.cmsr.onebase.framework.common.exception.enums.GlobalErrorCodeC
 @Slf4j
 public class GlobalExceptionHandler implements ErrorWebExceptionHandler {
 
+    @Value("${yudao.web.return-exception-stack-trace:false}")
+    private boolean returnExceptionStackTrace;
+
     @Override
-    public Mono<Void> handle(ServerWebExchange exchange, Throwable ex) {
+    public @NonNull Mono<Void> handle(@NonNull ServerWebExchange exchange, @NonNull Throwable ex) {
         // 已经 commit，则直接返回异常
         ServerHttpResponse response = exchange.getResponse();
         if (response.isCommitted()) {
@@ -54,6 +60,16 @@ public class GlobalExceptionHandler implements ErrorWebExceptionHandler {
         // TODO 开发者：这里要精细化翻译，默认返回用户是看不懂的
         ServerHttpRequest request = exchange.getRequest();
         log.error("[responseStatusExceptionHandler][uri({}/{}) 发生异常]", request.getURI(), request.getMethod(), ex);
+        if (returnExceptionStackTrace) {
+            java.util.Map<String, Object> body = new java.util.HashMap<>();
+            body.put("exception", ex.getClass().getName());
+            body.put("message", ex.getReason());
+            body.put("stackTrace", ExceptionUtil.stacktraceToString(ex));
+            body.put("timestamp", java.time.LocalDateTime.now().toString());
+            body.put("path", request.getURI().getPath());
+            body.put("method", String.valueOf(request.getMethod()));
+            return CommonResult.error(ex.getStatusCode().value(), ex.getReason(), body);
+        }
         return CommonResult.error(ex.getStatusCode().value(), ex.getReason());
     }
 
@@ -67,6 +83,16 @@ public class GlobalExceptionHandler implements ErrorWebExceptionHandler {
         log.error("[defaultExceptionHandler][uri({}/{}) 发生异常]", request.getURI(), request.getMethod(), ex);
         // TODO 开发者：是否要插入异常日志呢？
         // 返回 ERROR CommonResult
+        if (returnExceptionStackTrace) {
+            java.util.Map<String, Object> body = new java.util.HashMap<>();
+            body.put("exception", ex.getClass().getName());
+            body.put("message", ex.getMessage());
+            body.put("stackTrace", ExceptionUtil.stacktraceToString(ex));
+            body.put("timestamp", java.time.LocalDateTime.now().toString());
+            body.put("path", request.getURI().getPath());
+            body.put("method", String.valueOf(request.getMethod()));
+            return CommonResult.error(INTERNAL_SERVER_ERROR.getCode(), INTERNAL_SERVER_ERROR.getMsg(), body);
+        }
         return CommonResult.error(INTERNAL_SERVER_ERROR.getCode(), INTERNAL_SERVER_ERROR.getMsg());
     }
 

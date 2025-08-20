@@ -60,7 +60,7 @@ public class MetadataValidationRuleGroupServiceImpl implements MetadataValidatio
 
         // 处理规则定义
         if (!CollectionUtils.isEmpty(createReqVO.getValueRules())) {
-            validationRuleDefinitionService.saveValueRules(groupId, (List<Object>) (List<?>) createReqVO.getValueRules());
+            saveValueRules(groupId, createReqVO.getValueRules());
         }
 
         return groupId;
@@ -84,7 +84,7 @@ public class MetadataValidationRuleGroupServiceImpl implements MetadataValidatio
         validationRuleDefinitionService.deleteByGroupId(groupId);
         
         if (!CollectionUtils.isEmpty(updateReqVO.getValueRules())) {
-            validationRuleDefinitionService.saveValueRules(groupId, (List<Object>) (List<?>) updateReqVO.getValueRules());
+            saveValueRules(groupId, updateReqVO.getValueRules());
         }
     }
 
