@@ -1,4 +1,4 @@
-import { LoginRequest, Headers } from '../types';
+import { LoginRequest, Headers, Captcha, CaptchaCheck } from '../types';
 import { systemService } from './clients';
 
 export const login = (req: LoginRequest, headers: Headers) => {
@@ -18,11 +18,11 @@ export const logout = () => {
 };
 
 // 获取验证码 /system/captcha/get
-export const getCaptcha = () => {
-  return systemService.get('/captcha/get');
+export const getCaptchaApi = (data: Captcha) => {
+  return systemService.post('/captcha/get', data);
 };
 
 // 校验验证码 /system/captcha/check
-export const checkCaptcha = (token: string, code: string) => {
-  return systemService.post('/captcha/check', { token, code });
+export const checkCaptchaApi = (data: CaptchaCheck) => {
+  return systemService.post('/captcha/check', data);
 };

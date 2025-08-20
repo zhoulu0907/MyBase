@@ -12,9 +12,9 @@ export interface LoginRequest {
    */
   password: string;
   /**
-   * 验证码 Token
+   * 验证码
    */
-  captcha_token?: string | null;
+  captchaVerification?: string | null;
 }
 
 export interface LoginResponse {
@@ -61,6 +61,23 @@ export interface MenuInfo {
   alwaysShow: boolean;
   permission?: string;
   children: MenuInfo[] | null;
+}
+
+/**
+ * 获取登录验证码的参数
+ */
+export interface Captcha {
+  captchaType: string,
+  clientUid?: string
+}
+
+/**
+ * 验证验证码的参数
+ */
+export interface CaptchaCheck {
+  captchaType: string; 
+  pointJson: string; 
+  token: string
 }
 
 /**

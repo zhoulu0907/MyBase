@@ -1,18 +1,19 @@
 import LogoSVG from '@/assets/images/logo.svg';
 import { Button, Checkbox, Form, Input, Message, Space, Tabs, Typography } from '@arco-design/web-react';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useI18n } from '../../../hooks/useI18n';
 import { useRememberMe } from '../../../hooks/useRememberMe';
 import styles from '../index.module.less';
 import { adminLogin, type LoginRequest, type LoginResponse } from '@onebase/platform-center';
 import { TokenManager } from '@onebase/common';
+import SliderCaptcha, { type SliderCaptchaRef } from '@/components/Captcha';
 
 const { Paragraph } = Typography;
 const TabPane = Tabs.TabPane;
 
 interface LoginFormData {
-  account?: string;
+  username?: string;
   password?: string;
   mobile?: string;
   smsCode?: string;
@@ -22,6 +23,7 @@ const Right: React.FC = () => {
   const navigate = useNavigate();
   const [form] = Form.useForm();
   const { t } = useI18n();
+  const sliderCaptchaRef = useRef<SliderCaptchaRef>(null);
 
   const hash = window.location.hash;
   const match = hash.match(/\/tenant\/([^\/]+)/);
@@ -34,18 +36,19 @@ const Right: React.FC = () => {
   const [loginType, setLoginType] = useState<'account' | 'mobile'>('account');
   const [loading, setLoading] = useState(false);
   const [smsCountdown, setSmsCountdown] = useState(0);
+  const [captchaToken, setCaptchaToken] = useState<string>('');
 
   // 组件初始化时设置保存的账号
   useState(() => {
     if (savedAccount) {
-      form.setFieldValue('account', savedAccount);
+      form.setFieldValue('username', savedAccount);
     }
   });
 
   // 处理记住我状态变化
   const handleRememberMeChange = (checked: boolean) => {
-    const account = form.getFieldValue('account') || '';
-    saveRememberMe(account, checked);
+    const username = form.getFieldValue('username') || '';
+    saveRememberMe(username, checked);
   };
 
   // 发送短信验证码
@@ -97,13 +100,17 @@ const Right: React.FC = () => {
     try {
       setLoading(true);
 
-      // const headers = {
-      //   'Tenant-Id': tenantId
-      // };
+      // 如果没有验证码token，则先进行验证码验证
+      if (!captchaToken) {
+        // 显示滑块验证码
+        sliderCaptchaRef.current?.showCaptcha();
+        return;
+      }
 
       const loginData: LoginRequest = {
-        username: values.account!,
-        password: values.password!
+        username: values.username!,
+        password: values.password!,
+        // captcha_token: captchaToken
       };
 
       const response: LoginResponse = await adminLogin(loginData);
@@ -123,7 +130,7 @@ const Right: React.FC = () => {
         );
 
         // 保存记住我状态和账号信息
-        saveRememberMe(values.account!, rememberMe);
+        saveRememberMe(values.username!, rememberMe);
 
         Message.success(t('auth.loginSuccess'));
         // 跳转到首页
@@ -145,11 +152,26 @@ const Right: React.FC = () => {
   const handleSubmit = async (values: LoginRequest) => {
     setLoading(true);
 
-    console.log('values:', values);
-
+    console.log('handleSubmit values:', values);
+    
     try {
+      const captchaVerification = values.captchaVerification || captchaToken;
+      console.log('!captchaToken', captchaToken);
+      // 如果没有验证码token，则先进行验证码验证
+      if (!captchaVerification) {
+        console.log('false');
+        // 显示滑块验证码
+        sliderCaptchaRef.current?.showCaptcha();
+        return;
+      }
+      
+      // // 添加验证码token到登录请求
+      // const loginData: LoginRequest = {
+      //   ...values,
+      //   captchaVerification: captchaToken
+      // };
+      console.log('loginData:', values);
       const loginResp = await adminLogin(values);
-      console.log('loginRes:', loginResp);
       // 显示成功消息并跳转
       if (loginResp.accessToken) {
         Message.success(t('auth.loginSuccess'));
@@ -172,6 +194,31 @@ const Right: React.FC = () => {
       Message.error(error.message || t('auth.loginFailed'));
     } finally {
       setLoading(false);
+    }
+  };
+
+  // 验证码验证成功回调
+  const handleCaptchaSuccess = async (token: string) => {
+    console.log('handleCaptchaSuccess', token);
+    setCaptchaToken(token);
+    // 验证码通过后重新提交表单
+    // form.submit();
+    const values = await form.getFieldsValue();
+    console.log('values:', values);
+    handleSubmit({username: values.username, password: values.password, captchaVerification: token});
+  };
+
+   // 登录按钮点击事件 - 先验证滑块验证码
+  const handleLoginClick = async () => {
+    try {
+      // 先验证表单
+      await form.validate();
+      
+      // 显示滑块验证码
+      sliderCaptchaRef.current?.showCaptcha();
+    } catch (error) {
+      console.error('表单验证失败:', error);
+      Message.error('请检查表单填写是否正确');
     }
   };
 
@@ -206,7 +253,7 @@ const Right: React.FC = () => {
               >
                 <Input.Password placeholder={t('auth.password')} allowClear size="large" />
               </Form.Item>
-
+              
               <Form.Item>
                 <Space className={styles.formActions}>
                   <Checkbox checked={rememberMe} onChange={handleRememberMeChange}>
@@ -218,7 +265,7 @@ const Right: React.FC = () => {
               <Form.Item>
                 <Button
                   type="primary"
-                  htmlType="submit"
+                  onClick={handleLoginClick}
                   long
                   loading={loading}
                   size="large"
@@ -289,6 +336,14 @@ const Right: React.FC = () => {
           </TabPane>
         </Tabs>
       </div>
+
+      {/* 滑块验证码组件 */}
+      <SliderCaptcha 
+        ref={sliderCaptchaRef}
+        onSuccess={handleCaptchaSuccess}
+        onError={() => setLoading(false)}
+      />
+      
       <div className={styles.loginFooter}>
         <Paragraph className={styles.footerText}>
           登录即表示同意
