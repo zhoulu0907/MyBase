@@ -10,7 +10,9 @@
   },
   "dependencies": {
     "@arco-design/web-react": "^2.66.1",
+    "@types/crypto-js": "^4.2.2",
     "axios": "^1.10.0",
+    "crypto-js": "^4.2.0",
     "less-loader": "^12.3.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"

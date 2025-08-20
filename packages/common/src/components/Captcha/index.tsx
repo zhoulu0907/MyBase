@@ -1,11 +1,13 @@
-import React, { useState, useEffect, useRef, useImperativeHandle, forwardRef } from 'react';
-import { Modal, Message } from '@arco-design/web-react';
-import { getCaptchaApi, checkCaptchaApi, type Captcha, type CaptchaCheck } from '@onebase/platform-center';
+import { Message, Modal } from '@arco-design/web-react';
 import CryptoJS from 'crypto-js';
+import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import { Captcha, CaptchaCheck } from './types';
 
 interface SliderCaptchaProps {
   onSuccess: (token: string) => void;
   onError?: (error: any) => void;
+  getCaptchaApi: Function;
+  checkCaptchaApi: Function;
 }
 
 export interface SliderCaptchaRef {
@@ -13,7 +15,7 @@ export interface SliderCaptchaRef {
   closeCaptcha: () => void;
 }
 
-const SliderCaptcha = forwardRef<SliderCaptchaRef, SliderCaptchaProps>(({ onSuccess, onError }, ref) => {
+const SliderCaptcha = forwardRef<SliderCaptchaRef, SliderCaptchaProps>(({ onSuccess, onError, getCaptchaApi, checkCaptchaApi }, ref) => {
   const [visible, setVisible] = useState(false);
   const [captchaData, setCaptchaData] = useState<any>(null);
   const [loading, setLoading] = useState(false);
@@ -49,16 +51,16 @@ const SliderCaptcha = forwardRef<SliderCaptchaRef, SliderCaptchaProps>(({ onSucc
         captchaType: 'blockPuzzle',
         clientUid: ''
       };
-      
+
       console.log('请求参数:', params);
-      
+
       const resp = await getCaptchaApi(params);
-      
+
       console.log('响应数据:', resp);
-      
+
       if(resp.repCode === '0000' && resp.repData) {
         const captcha = resp.repData;
-        
+
         // 设置背景图和滑块图
         setBgImage(`data:image/png;base64,${captcha.originalImageBase64}`);
         setSliderImage(`data:image/png;base64,${captcha.jigsawImageBase64}`);
@@ -75,14 +77,14 @@ const SliderCaptcha = forwardRef<SliderCaptchaRef, SliderCaptchaProps>(({ onSucc
       }
     } catch (error) {
       console.error('获取验证码失败:', error);
-      
+
       // 显示更具体的错误信息
       if (error instanceof Error) {
         Message.error(error.message);
       } else {
         Message.error('获取验证码失败，请检查网络连接');
       }
-      
+
       onError && onError(error);
     } finally {
       setLoading(false);
@@ -107,11 +109,11 @@ const SliderCaptcha = forwardRef<SliderCaptchaRef, SliderCaptchaProps>(({ onSucc
     if (!captchaData?.token) {
       return;
     }
-    
+
     try {
       const captchaVerification = captchaData.secretKey ? aesEncrypt(captchaData.token + '---' + pointJson, captchaData.secretKey) : captchaData.token + '---' + pointJson
       // 使用secretKey进行AES加密
-      const encryptedPointJson = captchaData.secretKey 
+      const encryptedPointJson = captchaData.secretKey
         ? aesEncrypt(pointJson, captchaData.secretKey)
         : pointJson; // 如果没有secretKey，则不加密
 
@@ -120,9 +122,9 @@ const SliderCaptcha = forwardRef<SliderCaptchaRef, SliderCaptchaProps>(({ onSucc
         pointJson: encryptedPointJson,
         token: captchaData.token
       };
-      
+
       const resp: any = await checkCaptchaApi(params);
-      
+
       if (resp.repData?.result) {
         // Message.success('验证成功');
         console.log('验证成功:', captchaVerification);
@@ -153,7 +155,7 @@ const SliderCaptcha = forwardRef<SliderCaptchaRef, SliderCaptchaProps>(({ onSucc
   // 处理拖拽移动
   const handleDragMove = (e: React.MouseEvent | MouseEvent) => {
     if (!dragging || !trackRef.current) return;
-    
+
     const trackRect = trackRef.current.getBoundingClientRect();
     const offsetX = Math.max(0, Math.min(e.clientX - trackRect.left, trackRect.width));
     setDragOffset(offsetX);
@@ -164,14 +166,14 @@ const SliderCaptcha = forwardRef<SliderCaptchaRef, SliderCaptchaProps>(({ onSucc
     if (!dragging) {
       return;
     }
-    
+
     setDragging(false);
-    
+
     if (trackRef.current && captchaData) {
       const trackRect = trackRef.current.getBoundingClientRect();
       const percentage = dragOffset / trackRect.width;
       const moveLeft = Math.round(percentage * trackRect.width);
-      
+
       // 构造pointJson参数
       const pointJson = JSON.stringify({
         x: moveLeft,
@@ -179,7 +181,7 @@ const SliderCaptcha = forwardRef<SliderCaptchaRef, SliderCaptchaProps>(({ onSucc
         width: 100,
         height: 100
       });
-      
+
       verifyCaptcha(pointJson);
     }
   };
@@ -188,12 +190,12 @@ const SliderCaptcha = forwardRef<SliderCaptchaRef, SliderCaptchaProps>(({ onSucc
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => handleDragMove(e);
     const handleMouseUp = () => handleDragEnd();
-    
+
     if (dragging) {
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
     }
-    
+
     return () => {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
@@ -217,7 +219,7 @@ const SliderCaptcha = forwardRef<SliderCaptchaRef, SliderCaptchaProps>(({ onSucc
   return (
     <>
       {visible && (
-        <div 
+        <div
           style={{
             position: 'fixed',
             top: 0,
@@ -229,7 +231,7 @@ const SliderCaptcha = forwardRef<SliderCaptchaRef, SliderCaptchaProps>(({ onSucc
           }}
         />
       )}
-      
+
       <Modal
         title="安全验证"
         visible={visible}
@@ -247,13 +249,13 @@ const SliderCaptcha = forwardRef<SliderCaptchaRef, SliderCaptchaProps>(({ onSucc
               <div className="captcha-image-container" style={{ position: 'relative', marginBottom: '20px', width: setSize.imgWidth,
               height: setSize.imgHeight }}>
                 {/* 背景图片 */}
-                <img 
-                  src={bgImage} 
-                  alt="captcha background" 
-                  className="captcha-bg-image" 
+                <img
+                  src={bgImage}
+                  alt="captcha background"
+                  className="captcha-bg-image"
                   style={{
-                    width: '100%', 
-                    height: '100%', 
+                    width: '100%',
+                    height: '100%',
                     display: 'block',
                     borderRadius: '4px',
                     boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)',
@@ -261,11 +263,11 @@ const SliderCaptcha = forwardRef<SliderCaptchaRef, SliderCaptchaProps>(({ onSucc
                   }}
                 />
                 {/* 拖动的滑块图片 */}
-                <img 
-                  src={sliderImage} 
-                  alt="captcha slider" 
-                  style={{ 
-                    position: 'absolute', 
+                <img
+                  src={sliderImage}
+                  alt="captcha slider"
+                  style={{
+                    position: 'absolute',
                     top: getSliderTopPosition(),
                     left: `${dragOffset}px`,
                     width: Math.floor((parseInt(setSize.imgWidth) * 47) / 310) + 'px',
@@ -278,9 +280,9 @@ const SliderCaptcha = forwardRef<SliderCaptchaRef, SliderCaptchaProps>(({ onSucc
                   }}
                 />
               </div>
-              
+
               <div className="slider-track-container">
-                <div 
+                <div
                   ref={trackRef}
                   className="slider-track"
                   style={{
@@ -294,10 +296,10 @@ const SliderCaptcha = forwardRef<SliderCaptchaRef, SliderCaptchaProps>(({ onSucc
                     boxShadow: '0 0 5px rgba(0, 0, 0, 0.1)'
                   }}
                 >
-                  <div 
+                  <div
                     ref={sliderRef}
                     className={`slider-button ${dragging ? 'dragging' : ''}`}
-                    style={{ 
+                    style={{
                       position: 'absolute',
                       left: `${dragOffset}px`,
                       top: '0',
@@ -319,9 +321,9 @@ const SliderCaptcha = forwardRef<SliderCaptchaRef, SliderCaptchaProps>(({ onSucc
                   >
                     <div className="slider-button-inner" style={{ color: '#999' }}>→</div>
                   </div>
-                  <div 
-                    className="slider-track-text" 
-                    style={{ 
+                  <div
+                    className="slider-track-text"
+                    style={{
                       position: 'absolute',
                       top: '0',
                       left: '0',
@@ -352,4 +354,4 @@ const SliderCaptcha = forwardRef<SliderCaptchaRef, SliderCaptchaProps>(({ onSucc
 
 SliderCaptcha.displayName = 'SliderCaptcha';
 
-export default SliderCaptcha;
+export { SliderCaptcha };

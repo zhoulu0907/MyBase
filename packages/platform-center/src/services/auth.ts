@@ -1,4 +1,5 @@
-import { LoginRequest, Headers, Captcha, CaptchaCheck } from '../types';
+import { type Captcha, type CaptchaCheck } from '@onebase/common';
+import { Headers, LoginRequest } from '../types';
 import { systemService } from './clients';
 
 export const login = (req: LoginRequest, headers: Headers) => {

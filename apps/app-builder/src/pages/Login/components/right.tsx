@@ -1,6 +1,6 @@
 import LogoSVG from '@/assets/images/ob_logo.svg';
 import { Button, Checkbox, Form, Input, Message, Space, Tabs, Typography } from '@arco-design/web-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 /**
@@ -8,8 +8,8 @@ import { useNavigate } from 'react-router-dom';
 import { sm2 } from 'sm-crypto';
  */
 
-import { TokenManager } from '@onebase/common';
-import { login, type LoginRequest, type LoginResponse } from '@onebase/platform-center';
+import { SliderCaptcha, TokenManager, type SliderCaptchaRef } from '@onebase/common';
+import { checkCaptchaApi, getCaptchaApi, login, type LoginRequest, type LoginResponse } from '@onebase/platform-center';
 import { useI18n } from '../../../hooks/useI18n';
 import { useRememberMe } from '../../../hooks/useRememberMe';
 import styles from '../index.module.less';
@@ -17,17 +17,11 @@ import styles from '../index.module.less';
 const { Paragraph } = Typography;
 const TabPane = Tabs.TabPane;
 
-interface LoginFormData {
-  account?: string;
-  password?: string;
-  mobile?: string;
-  smsCode?: string;
-}
-
 const Right: React.FC = () => {
   const navigate = useNavigate();
   const [form] = Form.useForm();
   const { t } = useI18n();
+  const sliderCaptchaRef = useRef<SliderCaptchaRef>(null);
 
   const hash = window.location.hash;
   const match = hash.match(/\/tenant\/([^\/]+)/);
@@ -40,6 +34,7 @@ const Right: React.FC = () => {
   const [loginType, setLoginType] = useState<'account' | 'mobile'>('account');
   const [loading, setLoading] = useState(false);
   const [smsCountdown, setSmsCountdown] = useState(0);
+  const [captchaToken, setCaptchaToken] = useState<string>('');
 
   // 组件初始化时设置保存的账号
   useEffect(() => {
@@ -106,17 +101,28 @@ const Right: React.FC = () => {
 
   //   TODO(mickey): 调通后解除注释
   // 账号密码登录
-  const handleAccountLogin = async (values: LoginFormData) => {
+  const handleAccountLogin = async (values: LoginRequest) => {
+    setLoading(true);
+
     try {
-      setLoading(true);
+      const captchaVerification = values.captchaVerification || captchaToken;
+      console.log('!captchaToken', captchaToken);
+      // 如果没有验证码token，则先进行验证码验证
+      if (!captchaVerification) {
+        console.log('false');
+        // 显示滑块验证码
+        sliderCaptchaRef.current?.showCaptcha();
+        return;
+      }
 
       const headers = {
         'Tenant-Id': tenantId
       };
 
       const loginData: LoginRequest = {
-        username: values.account!,
-        password: values.password!
+        username: values.username!,
+        password: values.password!,
+        captchaVerification: captchaVerification
       };
 
       const response: LoginResponse = await login(loginData, headers);
@@ -135,7 +141,7 @@ const Right: React.FC = () => {
         );
 
         // 保存记住我状态和账号信息
-        saveRememberMe(values.account!, rememberMe);
+        saveRememberMe(values.username!, rememberMe);
 
         Message.success(t('auth.loginSuccess'));
         // 跳转到首页
@@ -154,8 +160,32 @@ const Right: React.FC = () => {
   };
 
   // 表单提交处理
-  const handleSubmit = (_values: LoginFormData) => {
+  const handleSubmit = (_values: LoginRequest) => {
     handleAccountLogin(_values);
+  };
+
+  // 验证码验证成功回调
+  const handleCaptchaSuccess = async (token: string) => {
+    setCaptchaToken(token);
+    // 验证码通过后重新提交表单
+    // form.submit();
+    const values = await form.getFieldsValue();
+    console.log('values:', values);
+    handleSubmit({ username: values.username, password: values.password, captchaVerification: token });
+  };
+
+  // 登录按钮点击事件 - 先验证滑块验证码
+  const handleLoginClick = async () => {
+    try {
+      // 先验证表单
+      await form.validate();
+
+      // 显示滑块验证码
+      sliderCaptchaRef.current?.showCaptcha();
+    } catch (error) {
+      console.error('表单验证失败:', error);
+      Message.error('请检查表单填写是否正确');
+    }
   };
 
   return (
@@ -169,7 +199,7 @@ const Right: React.FC = () => {
           <TabPane key="account" title={t('auth.accountLogin')}>
             <Form form={form} layout="vertical" onSubmit={handleSubmit} autoComplete="off" className={styles.loginForm}>
               <Form.Item
-                field="account"
+                field="username"
                 initialValue=""
                 rules={[
                   { required: true, message: '请输入账号' },
@@ -262,7 +292,7 @@ const Right: React.FC = () => {
               <Form.Item>
                 <Button
                   type="primary"
-                  htmlType="submit"
+                  onClick={handleLoginClick}
                   long
                   loading={loading}
                   size="large"
@@ -275,6 +305,16 @@ const Right: React.FC = () => {
           </TabPane>
         </Tabs>
       </div>
+
+      {/* 滑块验证码组件 */}
+      <SliderCaptcha
+        ref={sliderCaptchaRef}
+        getCaptchaApi={getCaptchaApi}
+        checkCaptchaApi={checkCaptchaApi}
+        onSuccess={handleCaptchaSuccess}
+        onError={() => setLoading(false)}
+      />
+
       <div className={styles.loginFooter}>
         <Paragraph className={styles.footerText}>
           登录即表示同意

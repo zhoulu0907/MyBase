@@ -1,13 +1,13 @@
 import LogoSVG from '@/assets/images/logo.svg';
 import { Button, Checkbox, Form, Input, Message, Space, Tabs, Typography } from '@arco-design/web-react';
-import { useState, useRef } from 'react';
+import { SliderCaptcha, TokenManager, type SliderCaptchaRef } from '@onebase/common';
+import { adminLogin, checkCaptchaApi, getCaptchaApi, type LoginRequest } from '@onebase/platform-center';
+import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useI18n } from '../../../hooks/useI18n';
 import { useRememberMe } from '../../../hooks/useRememberMe';
 import styles from '../index.module.less';
-import { adminLogin, type LoginRequest, type LoginResponse } from '@onebase/platform-center';
-import { TokenManager } from '@onebase/common';
-import SliderCaptcha, { type SliderCaptchaRef } from '@/components/Captcha';
+
 
 const { Paragraph } = Typography;
 const TabPane = Tabs.TabPane;
@@ -95,65 +95,10 @@ const Right: React.FC = () => {
     }
   };
 
-  // 账号密码登录
-  const handleAccountLogin = async (values: LoginFormData) => {
-    try {
-      setLoading(true);
-
-      // 如果没有验证码token，则先进行验证码验证
-      if (!captchaToken) {
-        // 显示滑块验证码
-        sliderCaptchaRef.current?.showCaptcha();
-        return;
-      }
-
-      const loginData: LoginRequest = {
-        username: values.username!,
-        password: values.password!,
-        // captcha_token: captchaToken
-      };
-
-      const response: LoginResponse = await adminLogin(loginData);
-
-      if (response.accessToken) {
-        // 使用 TokenManager 存储 token 信息
-        TokenManager.setToken(
-          {
-            userId: response.userId,
-            accessToken: response.accessToken,
-            refreshToken: response.refreshToken,
-            expiresTime: response.expiresTime,
-            tenantId: response.tenantWebsite
-            // tenantWebsite: response.tenantWebsite
-          },
-          rememberMe
-        );
-
-        // 保存记住我状态和账号信息
-        saveRememberMe(values.username!, rememberMe);
-
-        Message.success(t('auth.loginSuccess'));
-        // 跳转到首页
-        navigate('/onebase/my-app');
-
-        return;
-      } else {
-        Message.error(t('auth.loginFailed'));
-      }
-    } catch (error: any) {
-      console.error('登录失败:', error);
-      Message.error(error.message || t('auth.invalidCredentials'));
-    } finally {
-      setLoading(false);
-    }
-  };
-
   // 表单提交处理
   const handleSubmit = async (values: LoginRequest) => {
     setLoading(true);
 
-    console.log('handleSubmit values:', values);
-    
     try {
       const captchaVerification = values.captchaVerification || captchaToken;
       console.log('!captchaToken', captchaToken);
@@ -164,7 +109,7 @@ const Right: React.FC = () => {
         sliderCaptchaRef.current?.showCaptcha();
         return;
       }
-      
+
       // // 添加验证码token到登录请求
       // const loginData: LoginRequest = {
       //   ...values,
@@ -181,7 +126,7 @@ const Right: React.FC = () => {
             userId: loginResp.userId,
             accessToken: loginResp.accessToken,
             refreshToken: loginResp.refreshToken,
-            expiresTime: loginResp.expiresTime
+            expiresTime: loginResp.expiresTime,
           },
           rememberMe
         );
@@ -199,7 +144,6 @@ const Right: React.FC = () => {
 
   // 验证码验证成功回调
   const handleCaptchaSuccess = async (token: string) => {
-    console.log('handleCaptchaSuccess', token);
     setCaptchaToken(token);
     // 验证码通过后重新提交表单
     // form.submit();
@@ -213,7 +157,7 @@ const Right: React.FC = () => {
     try {
       // 先验证表单
       await form.validate();
-      
+
       // 显示滑块验证码
       sliderCaptchaRef.current?.showCaptcha();
     } catch (error) {
@@ -253,7 +197,7 @@ const Right: React.FC = () => {
               >
                 <Input.Password placeholder={t('auth.password')} allowClear size="large" />
               </Form.Item>
-              
+
               <Form.Item>
                 <Space className={styles.formActions}>
                   <Checkbox checked={rememberMe} onChange={handleRememberMeChange}>
@@ -338,12 +282,14 @@ const Right: React.FC = () => {
       </div>
 
       {/* 滑块验证码组件 */}
-      <SliderCaptcha 
+      <SliderCaptcha
         ref={sliderCaptchaRef}
+        getCaptchaApi={getCaptchaApi}
+        checkCaptchaApi={checkCaptchaApi}
         onSuccess={handleCaptchaSuccess}
         onError={() => setLoading(false)}
       />
-      
+
       <div className={styles.loginFooter}>
         <Paragraph className={styles.footerText}>
           登录即表示同意
