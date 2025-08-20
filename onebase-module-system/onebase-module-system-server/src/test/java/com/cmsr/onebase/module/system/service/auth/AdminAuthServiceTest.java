@@ -2,7 +2,6 @@ package com.cmsr.onebase.module.system.service.auth;
 
 import com.anji.captcha.model.common.ResponseModel;
 import com.anji.captcha.service.CaptchaService;
-import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.common.exception.ServiceException;
@@ -14,6 +13,7 @@ import com.cmsr.onebase.module.system.api.social.dto.SocialUserRespDTO;
 import com.cmsr.onebase.module.system.controller.admin.auth.vo.*;
 import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2AccessTokenDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
+import com.cmsr.onebase.module.system.dal.database.AdminUserDataRepository;
 import com.cmsr.onebase.module.system.enums.social.SocialTypeEnum;
 import com.cmsr.onebase.module.system.service.logger.LoginLogService;
 import com.cmsr.onebase.module.system.service.member.MemberService;
@@ -70,7 +70,7 @@ public class AdminAuthServiceTest {
     private AdminAuthService adminAuthService;
 
     @Resource
-    private DataRepository dataRepository;
+    private AdminUserDataRepository adminUserDataRepository;
 
     @Mock
     private AdminUserService userService;
@@ -120,7 +120,7 @@ public class AdminAuthServiceTest {
      */
     @AfterEach
     public void tearDown() {
-        dataRepository.deleteByConfig(AdminUserDO.class, new DefaultConfigStore());
+        adminUserDataRepository.deleteByConfig(new DefaultConfigStore());
     }
 
     /**

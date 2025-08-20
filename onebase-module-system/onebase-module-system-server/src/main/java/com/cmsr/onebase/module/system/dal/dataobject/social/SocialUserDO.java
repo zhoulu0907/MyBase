@@ -5,7 +5,7 @@ import com.cmsr.onebase.module.system.enums.social.SocialTypeEnum;
 import jakarta.persistence.Column;
 import jakarta.persistence.Table;
 import lombok.*;
-
+import lombok.experimental.SuperBuilder;
 /**
  * 社交（三方）用户
  *
@@ -13,7 +13,7 @@ import lombok.*;
  */
 @Table(name = "system_social_user")
 @Data
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 public class SocialUserDO extends BaseDO {

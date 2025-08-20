@@ -3,7 +3,7 @@ package com.cmsr.onebase.module.system.dal.dataobject.license;
 import jakarta.persistence.Table;
 import jakarta.persistence.Column;
 import lombok.*;
-import java.time.LocalDateTime;
+import lombok.experimental.SuperBuilder;import java.time.LocalDateTime;
 import com.cmsr.onebase.framework.data.base.BaseDO;
 
 /**
@@ -11,7 +11,7 @@ import com.cmsr.onebase.framework.data.base.BaseDO;
  */
 @Table(name = "system_license")
 @Data
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 public class LicenseDO extends BaseDO{
@@ -26,10 +26,8 @@ public class LicenseDO extends BaseDO{
     public static final String STATUS             = "status";
     public static final String IS_TRIAL           = "is_trial";
     public static final String LICENSE_FILE       = "license_file";
+    public static final String CREATE_TIME        = "create_time";
 
-    /** 主键 */
-    @Column
-    private Long id;
     /** 企业名称 */
     @Column(name = ENTERPRISE_NAME)
     private String enterpriseName;
@@ -61,6 +59,7 @@ public class LicenseDO extends BaseDO{
     @Column(name = LICENSE_FILE)
     private String licenseFile;
     /** 创建时间 */
+    @Column(name = CREATE_TIME)
     private LocalDateTime createTime;
 
 }

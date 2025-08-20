@@ -3,7 +3,7 @@ package com.cmsr.onebase.module.metadata.dal.dataobject.validation;
 import com.cmsr.onebase.framework.data.base.BaseDO;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
+import lombok.experimental.SuperBuilder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -16,11 +16,19 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "metadata_validation_type")
 public class MetadataValidationTypeDO extends BaseDO {
+
+    // 列名常量
+    public static final String VALIDATION_CODE = "validation_code";
+    public static final String VALIDATION_NAME = "validation_name";
+    public static final String VALIDATION_DESC = "validation_desc";
+    public static final String SORT_ORDER      = "sort_order";
+    public static final String STATUS          = "status";
+    public static final String TYPE            = "type";
 
     public MetadataValidationTypeDO setId(Long id) {
         super.setId(id);

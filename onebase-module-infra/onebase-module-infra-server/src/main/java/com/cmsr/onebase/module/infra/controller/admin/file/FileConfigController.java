@@ -2,21 +2,18 @@ package com.cmsr.onebase.module.infra.controller.admin.file;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.infra.controller.admin.file.vo.config.FileConfigPageReqVO;
 import com.cmsr.onebase.module.infra.controller.admin.file.vo.config.FileConfigRespVO;
 import com.cmsr.onebase.module.infra.controller.admin.file.vo.config.FileConfigSaveReqVO;
-import com.cmsr.onebase.module.infra.dal.dataobject.file.FileConfigDO;
 import com.cmsr.onebase.module.infra.service.file.FileConfigService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.Resource;
+import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import jakarta.annotation.Resource;
-import jakarta.validation.Valid;
 
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 
@@ -66,16 +63,14 @@ public class FileConfigController {
     @Parameter(name = "id", description = "编号", required = true, example = "1024")
     @PreAuthorize("@ss.hasPermission('infra:file-config:query')")
     public CommonResult<FileConfigRespVO> getFileConfig(@RequestParam("id") Long id) {
-        FileConfigDO config = fileConfigService.getFileConfig(id);
-        return success(BeanUtils.toBean(config, FileConfigRespVO.class));
+        return success(fileConfigService.getFileConfig(id));
     }
 
     @GetMapping("/page")
     @Operation(summary = "获得文件配置分页")
     @PreAuthorize("@ss.hasPermission('infra:file-config:query')")
     public CommonResult<PageResult<FileConfigRespVO>> getFileConfigPage(@Valid FileConfigPageReqVO pageVO) {
-        PageResult<FileConfigDO> pageResult = fileConfigService.getFileConfigPage(pageVO);
-        return success(BeanUtils.toBean(pageResult, FileConfigRespVO.class));
+        return success(fileConfigService.getFileConfigPage(pageVO));
     }
 
     @GetMapping("/test")

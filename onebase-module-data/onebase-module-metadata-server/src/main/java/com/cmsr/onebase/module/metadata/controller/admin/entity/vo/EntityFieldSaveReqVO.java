@@ -7,6 +7,8 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
+import java.util.List;
+
 /**
  * 管理后台 - 实体字段保存 Request VO
  *
@@ -71,5 +73,14 @@ public class EntityFieldSaveReqVO {
 /*     @Schema(description = "字段编码", example = "USER_NAME")
     @Size(max = 60, message = "字段编码长度不能超过60个字符")
     private String fieldCode; */
+
+    @Schema(description = "字段选项列表（当字段为单/多选时可传入，若提供则整体替换）")
+    private List<FieldOptionRespVO> options;
+
+    @Schema(description = "字段约束配置（长度/正则，若提供则整体替换）")
+    private FieldConstraintRespVO constraints;
+
+    @Schema(description = "自动编号配置（若提供则整体替换）")
+    private AutoNumberConfigReqVO autoNumber;
 
 }

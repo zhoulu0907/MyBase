@@ -2,11 +2,14 @@ package com.cmsr.onebase.module.system.api.dept;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
+import com.cmsr.onebase.module.system.api.dept.dto.DeptAndUsersReqDTO;
+import com.cmsr.onebase.module.system.api.dept.dto.DeptAndUsersRespDTO;
 import com.cmsr.onebase.module.system.api.dept.dto.DeptRespDTO;
 import com.cmsr.onebase.module.system.enums.ApiConstants;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -14,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 @FeignClient(name = ApiConstants.NAME) // TODO 开发者：fallbackFactory =
 @Tag(name = "RPC 服务 - 部门")
@@ -36,6 +38,11 @@ public interface DeptApi {
     @Operation(summary = "校验部门是否合法")
     @Parameter(name = "ids", description = "部门编号数组", example = "1,2", required = true)
     CommonResult<Boolean> validateDeptList(@RequestParam("ids") Collection<Long> ids);
+
+
+    @GetMapping(PREFIX + "/get-dept-users")
+    @Operation(summary = "指定/搜索获取部门和用户信息")
+    CommonResult<DeptAndUsersRespDTO> getDeptAndUsers(@Valid @RequestParam DeptAndUsersReqDTO reqVO);
 
     /**
      * 获得指定编号的部门 Map

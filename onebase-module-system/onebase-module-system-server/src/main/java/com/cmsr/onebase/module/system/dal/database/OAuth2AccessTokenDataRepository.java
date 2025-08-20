@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.system.dal.database;
 
-import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
+import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.system.controller.admin.oauth2.vo.token.OAuth2AccessTokenPageReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2AccessTokenDO;
@@ -19,7 +19,7 @@ import java.util.List;
  * @date 2025-01-27
  */
 @Repository
-public class OAuth2AccessTokenDataRepository extends DataRepositoryNew<OAuth2AccessTokenDO> {
+public class OAuth2AccessTokenDataRepository extends DataRepository<OAuth2AccessTokenDO> {
 
     public OAuth2AccessTokenDataRepository() {
         super(OAuth2AccessTokenDO.class);

@@ -1,19 +1,47 @@
 package com.cmsr.onebase.module.metadata.dal.dataobject.entity;
 
-import jakarta.persistence.Table;
 import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
-import lombok.*;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 /**
  * 实体字段表 DO
+ *
+ * @author bty418
+ * @date 2025-01-27
  */
 @Table(name = "metadata_entity_field")
 @Data
 @EqualsAndHashCode(callSuper = true)
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 public class MetadataEntityFieldDO extends TenantBaseDO {
+
+    // 列名常量
+    public static final String ENTITY_ID        = "entity_id";
+    public static final String FIELD_NAME       = "field_name";
+    public static final String DISPLAY_NAME     = "display_name";
+    public static final String FIELD_TYPE       = "field_type";
+    public static final String DATA_LENGTH      = "data_length";
+    public static final String DECIMAL_PLACES   = "decimal_places";
+    public static final String DEFAULT_VALUE    = "default_value";
+    public static final String DESCRIPTION      = "description";
+    public static final String IS_SYSTEM_FIELD = "is_system_field";
+    public static final String IS_PRIMARY_KEY  = "is_primary_key";
+    public static final String IS_REQUIRED     = "is_required";
+    public static final String IS_UNIQUE       = "is_unique";
+    public static final String ALLOW_NULL      = "allow_null";
+    public static final String SORT_ORDER      = "sort_order";
+    public static final String VALIDATION_RULES = "validation_rules";
+    public static final String RUN_MODE        = "run_mode";
+    public static final String APP_ID          = "app_id";
+    public static final String STATUS          = "status";
+    public static final String FIELD_CODE      = "field_code";
 
     public MetadataEntityFieldDO setId(Long id) {
         super.setId(id);

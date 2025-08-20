@@ -4,14 +4,12 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
-import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import com.cmsr.onebase.framework.common.util.date.DateUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.framework.data.base.BaseDO;
 import com.cmsr.onebase.framework.tenant.config.TenantProperties;
 import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
@@ -22,6 +20,10 @@ import com.cmsr.onebase.module.system.controller.admin.tenant.vo.tenant.TenantPa
 import com.cmsr.onebase.module.system.controller.admin.tenant.vo.tenant.TenantRespVO;
 import com.cmsr.onebase.module.system.controller.admin.tenant.vo.tenant.TenantUpdateReqVO;
 import com.cmsr.onebase.module.system.convert.tenant.TenantConvert;
+import com.cmsr.onebase.module.system.dal.database.AdminUserDataRepository;
+import com.cmsr.onebase.module.system.dal.database.RoleDataRepository;
+import com.cmsr.onebase.module.system.dal.database.TenantDataRepository;
+import com.cmsr.onebase.module.system.dal.database.UserRoleDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.license.LicenseDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.MenuDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
@@ -36,7 +38,6 @@ import com.cmsr.onebase.module.system.enums.permission.RoleCodeEnum;
 import com.cmsr.onebase.module.system.enums.permission.RoleTypeEnum;
 import com.cmsr.onebase.module.system.enums.tenant.TenantCodeEnum;
 import com.cmsr.onebase.module.system.enums.tenant.TenantStatusEnum;
-import com.cmsr.onebase.module.system.enums.user.UserPasswordEnum;
 import com.cmsr.onebase.module.system.enums.user.UserStatusEnum;
 import com.cmsr.onebase.module.system.service.license.LicenseService;
 import com.cmsr.onebase.module.system.service.permission.MenuService;
@@ -48,20 +49,16 @@ import com.cmsr.onebase.module.system.service.user.AdminUserService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.anyline.data.param.ConfigStore;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.Compare;
-import org.anyline.entity.Order;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
@@ -74,6 +71,9 @@ import static java.util.Collections.singleton;
 @Validated
 @Slf4j
 public class TenantServiceImpl implements TenantService {
+
+    // 租户管理员设置默认密码
+    private static final String TENANT_ADMIN_PASSWORD = "admin123";
 
     @SuppressWarnings("SpringJavaAutowiredFieldsWarningInspection")
     @Resource // 由于 yudao.tenant.enable 配置项，可以关闭多租户的功能，所以这里只能不强制注入
@@ -91,16 +91,25 @@ public class TenantServiceImpl implements TenantService {
     @Resource
     private PermissionService    permissionService;
     @Resource
-    private DataRepository       dataRepository;
-    @Resource
     private LicenseService       licenseService;
     @Resource
     private AppApplicationApi    appApplicationApi;
 
+    @Resource
+    private TenantDataRepository tenantDataRepository;
+
+    @Resource
+    private AdminUserDataRepository adminUserDataRepository;
+
+    @Resource
+    private UserRoleDataRepository userRoleDataRepository;
+
+    @Resource
+    private RoleDataRepository roleDataRepository;
+
     @Override
     public List<Long> getTenantIdList() {
-//        List<TenantDO> tenants = tenantMapper.selectList();
-        List<TenantDO> tenants = dataRepository.findAll(TenantDO.class);
+        List<TenantDO> tenants = tenantDataRepository.findAll();
         return CollectionUtils.convertList(tenants, TenantDO::getId);
     }
 
@@ -137,14 +146,8 @@ public class TenantServiceImpl implements TenantService {
 
     @Override
     public Long getOtherTenantUserLimitCount(Long tenantId) {
-        ConfigStore configStore = new DefaultConfigStore();
-        configStore.and(Compare.EQUAL, TenantDO.STATUS, TenantStatusEnum.NORMAL.getStatus());
-        // 排除平台租户
-        configStore.and(Compare.NOT_EQUAL, TenantDO.TENANT_CODE, TenantCodeEnum.PLATFORM_TENANT.getCode());
-        if (tenantId != null) {
-            configStore.and(Compare.NOT_EQUAL, TenantDO.ID, tenantId);
-        }
-        List<TenantDO> tenantDOList = dataRepository.findAll(TenantDO.class, configStore);
+        List<TenantDO> tenantDOList = tenantDataRepository.findAllByStatusExcludePlatform(
+                TenantStatusEnum.NORMAL.getStatus(), tenantId);
         long sum = tenantDOList.stream()
                 .filter(tenantDO -> tenantDO.getAccountCount() != null)
                 .mapToLong(TenantDO::getAccountCount)
@@ -161,6 +164,7 @@ public class TenantServiceImpl implements TenantService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Long createTenant(TenantInsertReqVO createReqVO) {
         // 校验租户名称是否重复
         validTenantNameDuplicate(createReqVO.getName(), null);
@@ -203,7 +207,7 @@ public class TenantServiceImpl implements TenantService {
 
         // 创建租户
         TenantDO tenant = BeanUtils.toBean(createReqVO, TenantDO.class);
-        tenant = dataRepository.insert(tenant);
+        tenant = tenantDataRepository.insert(tenant);
 
         // 创建租户的管理员1
         TenantDO finalTenant = tenant;
@@ -214,22 +218,21 @@ public class TenantServiceImpl implements TenantService {
             createReqVO.setUsername(createReqVO.getContactName());
             createReqVO.setAdminType(AdminTypeEnum.SYSTEM.getType());
             if (StringUtils.isEmpty(createReqVO.getPassword())) {
-                createReqVO.setPassword(UserPasswordEnum.PASSWORD_ENUM.getPassword());
+                createReqVO.setPassword(TENANT_ADMIN_PASSWORD);
             }
             Long userId = createUser(roleId, createReqVO);
             // 修改租户的管理员
             TenantDO tenantDO = new TenantDO().setContactUserId(userId);
             tenantDO.setId(finalTenant.getId());
-            dataRepository.update(tenantDO);
+            tenantDataRepository.update(tenantDO);
         });
         return tenant.getId();
     }
 
     private Long getExistTenantCount() {
         // 排除平台租户
-        Long existTenantCount = dataRepository.countByConfig(TenantDO.class,
-                new DefaultConfigStore().eq(TenantDO.STATUS, TenantStatusEnum.NORMAL.getStatus())
-                        .and(Compare.NOT_EQUAL, TenantDO.TENANT_CODE, TenantCodeEnum.PLATFORM_TENANT.getCode()));
+        Long existTenantCount = tenantDataRepository.countByStatusExcludePlatform(
+                TenantStatusEnum.NORMAL.getStatus(), null);
         return existTenantCount;
     }
 
@@ -253,6 +256,7 @@ public class TenantServiceImpl implements TenantService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void updateTenant(@Valid TenantUpdateReqVO updateReqVO) {
         // 校验存在
         TenantDO tenant = validateUpdateTenant(updateReqVO.getId());
@@ -335,10 +339,11 @@ public class TenantServiceImpl implements TenantService {
                     // 创建用户，并分配角色
                     TenantInsertReqVO reqVO = new TenantInsertReqVO();
                     reqVO.setContactName(updateReqVO.getContactName());
+                    reqVO.setNickname(updateReqVO.getNickname());
                     reqVO.setUsername(updateReqVO.getContactName());
                     reqVO.setAdminType(AdminTypeEnum.SYSTEM.getType());
                     if (StringUtils.isEmpty(updateReqVO.getPassword())) {
-                        reqVO.setPassword(UserPasswordEnum.PASSWORD_ENUM.getPassword());
+                        reqVO.setPassword(TENANT_ADMIN_PASSWORD);
                     }
                     userId = createUser(roleId, reqVO);
                 }
@@ -346,7 +351,7 @@ public class TenantServiceImpl implements TenantService {
                 // 修改租户的管理员
                 updateObj.setContactUserId(userId);
             });
-            dataRepository.update(updateObj);
+            tenantDataRepository.update(updateObj);
             // 如果套餐发生变化，则修改其角色的权限
             if (ObjectUtil.notEqual(tenant.getPackageId(), updateReqVO.getPackageId())) {
                 updateTenantRoleMenu(tenant.getId(), tenantPackage.getMenuIds());
@@ -359,7 +364,7 @@ public class TenantServiceImpl implements TenantService {
         if (StringUtils.isBlank(name)) {
             return;
         }
-        TenantDO tenant = dataRepository.findOne(TenantDO.class, new DefaultConfigStore().eq("name", name));
+        TenantDO tenant = tenantDataRepository.findByName(name);
 
         if (tenant == null) {
             return;
@@ -377,7 +382,7 @@ public class TenantServiceImpl implements TenantService {
         if (StrUtil.isEmpty(website)) {
             return;
         }
-        TenantDO tenant = dataRepository.findOne(TenantDO.class, new DefaultConfigStore().eq("website", website));
+        TenantDO tenant = tenantDataRepository.findByWebsite(website);
 
         if (tenant == null) {
             return;
@@ -420,11 +425,11 @@ public class TenantServiceImpl implements TenantService {
         // 校验存在
         validateUpdateTenant(id);
         // 删除
-        dataRepository.deleteById(TenantDO.class, id);
+        tenantDataRepository.deleteById(id);
     }
 
     private TenantDO validateUpdateTenant(Long id) {
-        TenantDO tenant = dataRepository.findById(TenantDO.class, id);
+        TenantDO tenant = tenantDataRepository.findById(id);
 
         if (tenant == null) {
             throw exception(TENANT_NOT_EXISTS);
@@ -438,7 +443,7 @@ public class TenantServiceImpl implements TenantService {
 
     @Override
     public TenantDO getTenant(Long id) {
-        return dataRepository.findById(TenantDO.class, id);
+        return tenantDataRepository.findById(id);
     }
 
 
@@ -454,61 +459,70 @@ public class TenantServiceImpl implements TenantService {
 
 
     @Override
-    public PageResult<TenantDO> getTenantPage(TenantPageReqVO reqVO) {
-
-        Integer status = reqVO.getStatus();
-
-        if (status != null && status == 2) {
-            status = null;
+    public PageResult<TenantRespVO> getTenantPage(TenantPageReqVO reqVO) {
+        PageResult<TenantDO> tenantDOPageResult = tenantDataRepository.findPage(reqVO);
+        if (CollUtil.isEmpty(tenantDOPageResult.getList())) {
+            return PageResult.empty();
         }
 
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        // 按照关键词模糊
-        if (StringUtils.isNotBlank(reqVO.getKeyword())) {
-            configStore.and(new DefaultConfigStore().or(Compare.LIKE, TenantDO.NAME, reqVO.getKeyword())
-                    .or(Compare.LIKE, TenantDO.TENANT_CODE, reqVO.getKeyword()));
-        }
-        // 按照状态查询
-        if (status != null) {
-            configStore.eq(TenantDO.STATUS, status);
-        }
-        // 排除平台租户
-        configStore.and(Compare.NOT_EQUAL, TenantDO.TENANT_CODE, TenantCodeEnum.PLATFORM_TENANT.getCode());
+        // 获取联系人用户ID列表
+        Set<Long> contactUserIds = tenantDOPageResult.getList().stream()
+                .map(TenantDO::getContactUserId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
 
-        configStore.order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
-        return dataRepository.findPageWithConditions(TenantDO.class, configStore, reqVO.getPageNo(), reqVO.getPageSize());
+        // 批量查询用户信息
+        Map<Long, String> userNicknameMap = new HashMap<>();
+        if (CollUtil.isNotEmpty(contactUserIds)) {
+            List<AdminUserDO> users = userService.getUserListByIgnoreTenantId(contactUserIds);
+            userNicknameMap = users.stream()
+                    .collect(Collectors.toMap(AdminUserDO::getId, AdminUserDO::getNickname));
+        }
+        // 转换为VO并设置昵称
+        Map<Long, String> finalUserNicknameMap = userNicknameMap;
+        List<TenantRespVO> tenantRespVOList = tenantDOPageResult.getList().stream()
+                .map(tenantDO -> {
+                    TenantRespVO tenantRespVO = TenantConvert.INSTANCE.convert(tenantDO);
+                    // 设置联系人昵称
+                    if (tenantDO.getContactUserId() != null) {
+                        tenantRespVO.setNickName(finalUserNicknameMap.get(tenantDO.getContactUserId()));
+                    }
+                    return tenantRespVO;
+                })
+                .collect(Collectors.toList());
+
+        return new PageResult<>(tenantRespVOList, tenantDOPageResult.getTotal());
+
     }
 
     @Override
     public TenantDO getTenantByName(String name) {
-        return dataRepository.findOne(TenantDO.class, new DefaultConfigStore().eq("name", name));
+        return tenantDataRepository.findByName(name);
     }
 
     @Override
     public TenantDO getTenantByWebsite(String website) {
-        return dataRepository.findOne(TenantDO.class, new DefaultConfigStore().eq("website", website));
-
+        return tenantDataRepository.findByWebsite(website);
     }
 
     @Override
     public Long getTenantCountByPackageId(Long packageId) {
-        return dataRepository.countByConfig(TenantDO.class, new DefaultConfigStore().eq("package_id", packageId));
+        return tenantDataRepository.countByPackageId(packageId);
     }
 
     @Override
     public Integer getTenantCountByStatus(Integer status) {
-        return (int) dataRepository.countByConfig(TenantDO.class, new DefaultConfigStore().eq(TenantDO.STATUS, status));
+        return (int) tenantDataRepository.countByStatus(status);
     }
 
     @Override
     public List<TenantDO> getTenantListByPackageId(Long packageId) {
-        return dataRepository.findAllByConfig(TenantDO.class, new DefaultConfigStore().eq("package_id", packageId));
+        return tenantDataRepository.findAllByPackageId(packageId);
     }
 
     @Override
     public List<TenantDO> getTenantListByStatus(Integer status) {
-        return dataRepository.findAllByConfig(TenantDO.class, new DefaultConfigStore().eq("status", status)
-                .order(TenantDO.CREATE_TIME, Order.TYPE.DESC));
+        return tenantDataRepository.findAllByStatus(status);
     }
 
     @Override

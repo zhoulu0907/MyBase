@@ -22,14 +22,6 @@ public interface LicenseConvert {
     LicenseConvert INSTANCE = Mappers.getMapper(LicenseConvert.class);
 
     /**
-     * LicenseSaveReqVO 转 LicenseDO
-     *
-     * @param bean LicenseSaveReqVO
-     * @return LicenseDO
-     */
-    LicenseDO convert(LicenseSaveReqVO bean);
-
-    /**
      * LicenseDO 转 LicenseRespVO
      *
      * @param bean LicenseDO

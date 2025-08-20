@@ -5,7 +5,7 @@ import com.cmsr.onebase.framework.data.base.BaseDO;
 import jakarta.persistence.Column;
 import jakarta.persistence.Table;
 import lombok.*;
-
+import lombok.experimental.SuperBuilder;
 /**
  * 社交用户的绑定
  * 即 {@link SocialUserDO} 与 UserDO 的关联表
@@ -13,7 +13,7 @@ import lombok.*;
  */
 @Table(name = "system_social_user_bind")
 @Data
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 public class SocialUserBindDO extends BaseDO {

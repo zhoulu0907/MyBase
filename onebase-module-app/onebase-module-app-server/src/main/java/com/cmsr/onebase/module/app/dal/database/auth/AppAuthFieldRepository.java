@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.app.dal.database.auth;
 
-import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
+import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.module.app.controller.admin.auth.dto.AuthPermissionDTO;
 import com.cmsr.onebase.module.app.dal.dataobject.auth.AuthFieldDO;
 import org.anyline.data.param.ConfigStore;
@@ -16,7 +16,7 @@ import java.util.List;
  * @date 2025-08-05
  */
 @Repository
-public class AppAuthFieldRepository extends DataRepositoryNew<AuthFieldDO> {
+public class AppAuthFieldRepository extends DataRepository<AuthFieldDO> {
 
     public AppAuthFieldRepository() {
         super(AuthFieldDO.class);

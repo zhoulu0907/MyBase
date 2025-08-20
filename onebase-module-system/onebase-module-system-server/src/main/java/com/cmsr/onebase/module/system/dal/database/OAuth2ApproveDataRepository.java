@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.system.dal.database;
 
-import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
+import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2ApproveDO;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Compare;
@@ -15,7 +15,7 @@ import java.util.List;
  * @date 2025-08-11
  */
 @Repository
-public class OAuth2ApproveDataRepository extends DataRepositoryNew<OAuth2ApproveDO> {
+public class OAuth2ApproveDataRepository extends DataRepository<OAuth2ApproveDO> {
 
     public OAuth2ApproveDataRepository() {
         super(OAuth2ApproveDO.class);

@@ -8,7 +8,7 @@ import lombok.Data;
 /**
  * 角色和菜单关联
  *
- * @author ruoyi
+ * @author ma
  */
 @Table(name = "system_role_menu")
 @Data

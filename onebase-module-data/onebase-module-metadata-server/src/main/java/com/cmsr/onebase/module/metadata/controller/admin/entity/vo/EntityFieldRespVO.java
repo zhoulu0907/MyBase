@@ -67,4 +67,12 @@ public class EntityFieldRespVO {
     @Schema(description = "字段编码", example = "USER_NAME")
     private String fieldCode;
 
+    @Schema(description = "字段选项列表（单/多选字段专用）")
+    private java.util.List<FieldOptionRespVO> options;
+
+    @Schema(description = "字段约束配置（长度/正则）")
+    private FieldConstraintRespVO constraints;
+
+    @Schema(description = "自动编号摘要：是否启用/模式/位数/重置周期")
+    private EntityFieldAutoNumberBriefRespVO autoNumber;
 }

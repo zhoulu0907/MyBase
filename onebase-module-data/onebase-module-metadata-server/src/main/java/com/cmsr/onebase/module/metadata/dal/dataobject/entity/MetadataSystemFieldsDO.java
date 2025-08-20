@@ -3,7 +3,7 @@ package com.cmsr.onebase.module.metadata.dal.dataobject.entity;
 import com.cmsr.onebase.framework.data.base.BaseDO;
 import jakarta.persistence.Table;
 import lombok.*;
-
+import lombok.experimental.SuperBuilder;
 /**
  * @ClassName MetadataSystemFieldsDO
  * @Description 元数据系统字段维护表 DO
@@ -15,6 +15,16 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MetadataSystemFieldsDO extends BaseDO {
+
+    // 列名常量
+    public static final String FIELD_NAME       = "field_name";
+    public static final String FIELD_TYPE       = "field_type";
+    public static final String IS_SNOWFLAKE_ID  = "is_snowflake_id";
+    public static final String IS_REQUIRED      = "is_required";
+    public static final String DEFAULT_VALUE    = "default_value";
+    public static final String DESCRIPTION      = "description";
+    public static final String IS_ENABLED      = "is_enabled";
+
     /**
      * id
      */

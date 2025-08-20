@@ -3,10 +3,10 @@ package com.cmsr.onebase.module.metadata.dal.dataobject.validation;
 import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 /**
  * 规则定义表 DO
@@ -16,11 +16,24 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "metadata_validation_rule_definition")
 public class MetadataValidationRuleDefinitionDO extends TenantBaseDO {
+
+    // 列名常量
+    public static final String GROUP_ID        = "group_id";
+    public static final String PARENT_RULE_ID  = "parent_rule_id";
+    public static final String ENTITY_ID       = "entity_id";
+    public static final String FIELD_ID        = "field_id";
+    public static final String LOGIC_TYPE      = "logic_type";
+    public static final String OPERATOR        = "operator";
+    public static final String LOGIC_OPERATOR  = "logic_operator";
+    public static final String FIELD_CODE      = "field_code";
+    public static final String FIELD_VALUE     = "field_value";
+    public static final String FIELD_VALUE2    = "field_value2";
+    public static final String STATUS          = "status";
 
     public MetadataValidationRuleDefinitionDO setId(Long id) {
         super.setId(id);

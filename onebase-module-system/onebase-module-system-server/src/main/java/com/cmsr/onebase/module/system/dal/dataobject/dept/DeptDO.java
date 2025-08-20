@@ -9,7 +9,7 @@ import lombok.Data;
 /**
  * 部门表
  *
- * @author ruoyi
+ * @author ma
  */
 @Table(name = "system_dept")
 @Data
@@ -35,7 +35,6 @@ public class DeptDO extends TenantBaseDO {
     /**
      * 父部门ID
      * <p>
-     * 关联 {@link #id}
      */
     @Column(name = PARENT_ID)
     private Long    parentId;
@@ -45,9 +44,9 @@ public class DeptDO extends TenantBaseDO {
     @Column(name = SORT)
     private Integer sort;
     /**
-     * 管理员
+     * 管理员UserID
      * <p>
-     * 关联 {@link AdminUserDO#getId()}
+     * 关联
      */
     @Column(name = LEADER_USER_ID)
     private Long    leaderUserId;

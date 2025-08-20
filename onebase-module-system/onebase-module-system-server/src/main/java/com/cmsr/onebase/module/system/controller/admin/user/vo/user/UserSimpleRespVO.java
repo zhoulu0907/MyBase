@@ -16,4 +16,10 @@ public class UserSimpleRespVO {
 
     @Schema(description = "用户昵称", requiredMode = Schema.RequiredMode.REQUIRED, example = "onebase")
     private String nickname;
+
+    @Schema(description = "用户邮箱", example = "a@b.cn")
+    private String email;
+
+    @Schema(description = "部门ID", example = "我是一个用户")
+    private Long deptId;
 }

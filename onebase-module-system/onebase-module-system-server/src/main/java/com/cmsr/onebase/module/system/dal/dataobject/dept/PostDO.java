@@ -9,7 +9,7 @@ import lombok.Data;
 /**
  * 岗位表
  *
- * @author ruoyi
+ * @author ma
  */
 @Table(name = "system_post")
 @Data

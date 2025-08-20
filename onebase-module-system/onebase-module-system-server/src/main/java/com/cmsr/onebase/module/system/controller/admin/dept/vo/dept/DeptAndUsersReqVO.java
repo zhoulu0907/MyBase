@@ -3,6 +3,8 @@ package com.cmsr.onebase.module.system.controller.admin.dept.vo.dept;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
+import java.util.Collection;
+
 /**
  * 管理后台 - 部门和用户查询 Request VO
  *
@@ -19,4 +21,9 @@ public class DeptAndUsersReqVO {
     @Schema(description = "搜索关键词", example = "onebase")
     private String keywords;
 
+    @Schema(description = "排除的userIDs", example = "100")
+    private Collection<Long> excludeUserIds;
+
+    @Schema(description = "排除的roleIDs", example = "100")
+    private Collection<Long> excludeRoleIds;
 }

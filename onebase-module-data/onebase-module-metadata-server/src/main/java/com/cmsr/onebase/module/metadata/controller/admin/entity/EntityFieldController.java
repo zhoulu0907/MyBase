@@ -18,7 +18,6 @@ import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldBa
 import com.cmsr.onebase.module.metadata.convert.entity.EntityFieldConvert;
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.service.entity.MetadataEntityFieldService;
-import com.cmsr.onebase.module.metadata.service.entity.vo.EntityFieldQueryVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -66,19 +65,16 @@ public class EntityFieldController {
     @Operation(summary = "为业务实体创建新字段")
     @PreAuthorize("@ss.hasPermission('metadata:entity-field:create')")
     public CommonResult<EntityFieldRespVO> createEntityField(@Valid @RequestBody EntityFieldSaveReqVO reqVO) {
-        Long id = entityFieldService.createEntityField(reqVO);
-        MetadataEntityFieldDO entityField = entityFieldService.getEntityField(String.valueOf(id));
-        return success(EntityFieldConvert.INSTANCE.convert(entityField));
+        EntityFieldRespVO result = entityFieldService.createEntityFieldWithRelated(reqVO);
+        return success(result);
     }
 
     @PostMapping("/list")
     @Operation(summary = "查询指定实体的字段列表")
     @PreAuthorize("@ss.hasPermission('metadata:entity-field:query')")
     public CommonResult<List<EntityFieldRespVO>> getEntityFieldList(@Valid @RequestBody EntityFieldQueryReqVO reqVO) {
-        // 将Controller层的VO转换为Service层的VO
-        EntityFieldQueryVO queryVO = EntityFieldConvert.INSTANCE.convertVOToQueryVO(reqVO);
-        List<MetadataEntityFieldDO> list = entityFieldService.getEntityFieldListByConditions(queryVO);
-        return success(EntityFieldConvert.INSTANCE.convertList(list));
+        List<EntityFieldRespVO> result = entityFieldService.getEntityFieldListWithRelated(reqVO);
+        return success(result);
     }
 
     @PostMapping("/page")
@@ -94,7 +90,7 @@ public class EntityFieldController {
     @Parameter(name = "id", description = "字段ID", required = true, example = "1024")
     @PreAuthorize("@ss.hasPermission('metadata:entity-field:query')")
     public CommonResult<EntityFieldDetailRespVO> getEntityField(@RequestParam("id") String id) {
-        EntityFieldDetailRespVO entityField = entityFieldService.getEntityFieldDetail(id);
+        EntityFieldDetailRespVO entityField = entityFieldService.getEntityFieldDetailWithFullConfig(id);
         return success(entityField);
     }
 
@@ -110,8 +106,8 @@ public class EntityFieldController {
     @Operation(summary = "更新实体字段信息")
     @PreAuthorize("@ss.hasPermission('metadata:entity-field:update')")
     public CommonResult<Boolean> updateEntityField(@Valid @RequestBody EntityFieldSaveReqVO reqVO) {
-        entityFieldService.updateEntityField(reqVO);
-        return success(true);
+        Boolean result = entityFieldService.updateEntityFieldWithRelated(reqVO);
+        return success(result);
     }
 
     @PostMapping("/delete")

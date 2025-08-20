@@ -1,6 +1,8 @@
 package com.cmsr.onebase.module.app.dal.database.auth;
 
-import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
+import com.cmsr.onebase.framework.aynline.DataRepository;
+import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.module.app.controller.admin.auth.vo.AuthRoleUsersPageReqVO;
 import com.cmsr.onebase.module.app.dal.dataobject.auth.AuthRoleUserDO;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
@@ -15,7 +17,7 @@ import java.util.List;
  * @date 2025-08-05
  */
 @Repository
-public class AppAuthRoleUserRepository extends DataRepositoryNew<AuthRoleUserDO> {
+public class AppAuthRoleUserRepository extends DataRepository<AuthRoleUserDO> {
 
     public AppAuthRoleUserRepository() {
         super(AuthRoleUserDO.class);
@@ -36,6 +38,19 @@ public class AppAuthRoleUserRepository extends DataRepositoryNew<AuthRoleUserDO>
 
     }
 
+    public List<AuthRoleUserDO> findByRoleId(Long roleId) {
+        ConfigStore configStore = new DefaultConfigStore();
+        configStore.eq("role_id", roleId);
+        return findAllByConfig(configStore);
+    }
+
+    public PageResult<AuthRoleUserDO> findByRoleId(AuthRoleUsersPageReqVO reqVO) {
+        ConfigStore configStore = new DefaultConfigStore();
+        configStore.eq("role_id", reqVO.getRoleId());
+        return this.findPageWithConditions(configStore, reqVO.getPageNo(), reqVO.getPageSize());
+    }
+
+
     public void deleteRoleUser(Long roleId, List<Long> userIds) {
         ConfigStore configStore = new DefaultConfigStore();
         configStore.eq("role_id", roleId);
@@ -48,5 +63,6 @@ public class AppAuthRoleUserRepository extends DataRepositoryNew<AuthRoleUserDO>
         configStore.eq("role_id", roleId);
         this.deleteByConfig(configStore);
     }
+
 
 }

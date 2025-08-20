@@ -1,0 +1,125 @@
+package com.cmsr.onebase.module.metadata.service.datasource;
+
+import com.cmsr.onebase.module.metadata.dal.database.MetadataAppAndDatasourceRepository;
+import com.cmsr.onebase.module.metadata.dal.database.MetadataDatasourceRepository;
+import com.cmsr.onebase.module.metadata.dal.dataobject.datasource.MetadataAppAndDatasourceDO;
+import com.cmsr.onebase.module.metadata.dal.dataobject.datasource.MetadataDatasourceDO;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import jakarta.annotation.Resource;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * 应用与数据源关联Service实现类
+ *
+ * @author bty418
+ * @date 2025-01-27
+ */
+@Service
+@Slf4j
+public class MetadataAppAndDatasourceServiceImpl implements MetadataAppAndDatasourceService {
+
+    @Resource
+    private MetadataAppAndDatasourceRepository appAndDatasourceRepository;
+
+    @Resource
+    private MetadataDatasourceRepository datasourceRepository;
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Long createRelation(Long applicationId, Long datasourceId, String datasourceType, String appUid) {
+        log.info("创建应用{}与数据源{}的关联关系", applicationId, datasourceId);
+        return appAndDatasourceRepository.createRelation(applicationId, datasourceId, datasourceType, appUid);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean deleteRelation(Long applicationId, Long datasourceId) {
+        log.info("删除应用{}与数据源{}的关联关系", applicationId, datasourceId);
+        return appAndDatasourceRepository.deleteRelation(applicationId, datasourceId);
+    }
+
+    @Override
+    public List<MetadataDatasourceDO> getDatasourcesByApplicationId(Long applicationId) {
+        log.debug("查询应用{}关联的数据源", applicationId);
+        
+        // 获取关联的数据源ID列表
+        List<Long> datasourceIds = appAndDatasourceRepository.getDatasourceIdsByApplicationId(applicationId);
+        
+        if (datasourceIds.isEmpty()) {
+            log.debug("应用{}未关联任何数据源", applicationId);
+            return new ArrayList<>();
+        }
+        
+        // 根据数据源ID列表查询数据源详情
+        List<MetadataDatasourceDO> datasources = new ArrayList<>();
+        for (Long datasourceId : datasourceIds) {
+            MetadataDatasourceDO datasource = datasourceRepository.getDatasourceById(datasourceId);
+            if (datasource != null) {
+                datasources.add(datasource);
+            }
+        }
+        
+        log.debug("应用{}关联的数据源数量: {}", applicationId, datasources.size());
+        return datasources;
+    }
+
+    @Override
+    public List<Long> getApplicationIdsByDatasourceId(Long datasourceId) {
+        log.debug("查询数据源{}关联的应用", datasourceId);
+        return appAndDatasourceRepository.getApplicationIdsByDatasourceId(datasourceId);
+    }
+
+    @Override
+    public boolean isRelationExists(Long applicationId, Long datasourceId) {
+        return appAndDatasourceRepository.isRelationExists(applicationId, datasourceId);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public long deleteRelationsByApplicationId(Long applicationId) {
+        log.info("删除应用{}的所有关联关系", applicationId);
+        return appAndDatasourceRepository.deleteRelationsByApplicationId(applicationId);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public long deleteRelationsByDatasourceId(Long datasourceId) {
+        log.info("删除数据源{}的所有关联关系", datasourceId);
+        return appAndDatasourceRepository.deleteRelationsByDatasourceId(datasourceId);
+    }
+
+    @Override
+    public List<MetadataDatasourceDO> getDatasourcesByAppUid(String appUid) {
+        log.debug("查询应用UID{}关联的数据源", appUid);
+        
+        // 获取关联的数据源ID列表
+        List<Long> datasourceIds = appAndDatasourceRepository.getDatasourceIdsByAppUid(appUid);
+        
+        if (datasourceIds.isEmpty()) {
+            log.debug("应用UID{}未关联任何数据源", appUid);
+            return new ArrayList<>();
+        }
+        
+        // 根据数据源ID列表查询数据源详情
+        List<MetadataDatasourceDO> datasources = new ArrayList<>();
+        for (Long datasourceId : datasourceIds) {
+            MetadataDatasourceDO datasource = datasourceRepository.getDatasourceById(datasourceId);
+            if (datasource != null) {
+                datasources.add(datasource);
+            }
+        }
+        
+        log.debug("应用UID{}关联的数据源数量: {}", appUid, datasources.size());
+        return datasources;
+    }
+
+    @Override
+    public List<MetadataAppAndDatasourceDO> getRelationsByDatasourceType(String datasourceType) {
+        log.debug("查询数据源类型{}的关联关系", datasourceType);
+        return appAndDatasourceRepository.getRelationsByDatasourceType(datasourceType);
+    }
+}

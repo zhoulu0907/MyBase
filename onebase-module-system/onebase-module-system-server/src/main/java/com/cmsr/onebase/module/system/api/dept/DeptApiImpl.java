@@ -2,14 +2,17 @@ package com.cmsr.onebase.module.system.api.dept;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.module.system.api.dept.dto.DeptAndUsersReqDTO;
+import com.cmsr.onebase.module.system.api.dept.dto.DeptAndUsersRespDTO;
 import com.cmsr.onebase.module.system.api.dept.dto.DeptRespDTO;
+import com.cmsr.onebase.module.system.controller.admin.dept.vo.dept.DeptAndUsersRespVO;
+import com.cmsr.onebase.module.system.convert.dept.DeptConvert;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.module.system.service.dept.DeptService;
-import org.springframework.context.annotation.Bean;
+import jakarta.annotation.Resource;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RestController;
 
-import jakarta.annotation.Resource;
 import java.util.Collection;
 import java.util.List;
 
@@ -38,6 +41,12 @@ public class DeptApiImpl implements DeptApi {
     public CommonResult<Boolean> validateDeptList(Collection<Long> ids) {
         deptService.validateDeptList(ids);
         return success(true);
+    }
+
+    @Override
+    public CommonResult<DeptAndUsersRespDTO> getDeptAndUsers(DeptAndUsersReqDTO reqVO) {
+        DeptAndUsersRespVO result = deptService.getDeptAndUsers(DeptConvert.INSTANCE.toDeptAndUsersReqVO(reqVO));
+        return success(DeptConvert.INSTANCE.toDeptAndUsersRespDTO(result));
     }
 
     @Override

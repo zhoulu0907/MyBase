@@ -8,6 +8,7 @@ import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
 import jakarta.persistence.Column;
 import jakarta.persistence.Table;
 import lombok.*;
+import lombok.experimental.SuperBuilder;import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
 
@@ -16,7 +17,7 @@ import java.time.LocalDateTime;
  *
  */
 @Data
-@Builder
+@SuperBuilder
 @TenantIgnore
 @NoArgsConstructor
 @AllArgsConstructor

@@ -3,7 +3,7 @@ package com.cmsr.onebase.module.system.controller.admin.auth.vo;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
+import lombok.experimental.SuperBuilder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
@@ -12,7 +12,7 @@ import org.hibernate.validator.constraints.Length;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@SuperBuilder
 public class AuthResetPasswordReqVO {
 
     @Schema(description = "userId", requiredMode = Schema.RequiredMode.REQUIRED, example = "007")

@@ -1,22 +1,20 @@
 package com.cmsr.onebase.module.system.api.user;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
-import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
 import com.cmsr.onebase.module.system.enums.ApiConstants;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 @FeignClient(name = ApiConstants.NAME) // TODO 开发者：fallbackFactory =
 @Tag(name = "RPC 服务 - 管理员用户")
@@ -45,10 +43,10 @@ public interface AdminUserApi {
     @Parameter(name = "deptIds", description = "部门编号数组", example = "1,2", required = true)
     CommonResult<List<AdminUserRespDTO>> getUserListByDeptIds(@RequestParam("deptIds") Collection<Long> deptIds);
 
-    @GetMapping(PREFIX + "/list-by-post-id")
-    @Operation(summary = "获得指定岗位的用户数组")
-    @Parameter(name = "postIds", description = "岗位编号数组", example = "2,3", required = true)
-    CommonResult<List<AdminUserRespDTO>> getUserListByPostIds(@RequestParam("postIds") Collection<Long> postIds);
+    // @GetMapping(PREFIX + "/list-by-post-id")
+    // @Operation(summary = "获得指定岗位的用户数组")
+    // @Parameter(name = "postIds", description = "岗位编号数组", example = "2,3", required = true)
+    // CommonResult<List<AdminUserRespDTO>> getUserListByPostIds(@RequestParam("postIds") Collection<Long> postIds);
 
     /**
      * 获得用户 Map

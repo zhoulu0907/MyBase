@@ -3,10 +3,10 @@ package com.cmsr.onebase.module.metadata.dal.dataobject.validation;
 import com.cmsr.onebase.framework.data.base.BaseDO;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 /**
  * 数据权限-操作符号与字段类型的关联表 DO
@@ -23,11 +23,16 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "metadata_permit_ref_otft")
 public class MetadataPermitRefOtftDO extends BaseDO {
+
+    // 列名常量
+    public static final String FIELD_TYPE_ID      = "field_type_id";
+    public static final String VALIDATION_TYPE_ID = "validation_type_id";
+    public static final String SORT_ORDER         = "sort_order";
 
     public MetadataPermitRefOtftDO setId(Long id) {
         super.setId(id);

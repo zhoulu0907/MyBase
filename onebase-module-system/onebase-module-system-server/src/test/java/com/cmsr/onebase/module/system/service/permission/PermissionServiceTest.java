@@ -1,11 +1,14 @@
 package com.cmsr.onebase.module.system.service.permission;
 
 import cn.hutool.core.collection.CollUtil;
-import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.biz.system.permission.dto.DeptDataPermissionRespDTO;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
+import com.cmsr.onebase.module.system.dal.database.*;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
-import com.cmsr.onebase.module.system.dal.dataobject.permission.*;
+import com.cmsr.onebase.module.system.dal.dataobject.permission.MenuDO;
+import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
+import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleMenuDO;
+import com.cmsr.onebase.module.system.dal.dataobject.permission.UserRoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.enums.permission.DataScopeEnum;
 import jakarta.annotation.Resource;
@@ -33,21 +36,21 @@ import static org.junit.jupiter.api.Assertions.*;
  * @date 2025-08-06
  */
 @SpringBootTest(
-    webEnvironment = SpringBootTest.WebEnvironment.NONE,
-    classes = {com.cmsr.onebase.module.system.framework.test.BaseDbIntegrationTest.Application.class}
+        webEnvironment = SpringBootTest.WebEnvironment.NONE,
+        classes = {com.cmsr.onebase.module.system.framework.test.BaseDbIntegrationTest.Application.class}
 )
 @TestPropertySource(properties = {
-    "spring.datasource.url=jdbc:h2:mem:testdb;MODE=MYSQL;DATABASE_TO_UPPER=false",
-    "spring.datasource.driver-class-name=org.h2.Driver",
-    "spring.datasource.username=sa",
-    "spring.datasource.password=",
-    "spring.datasource.dynamic.datasource.master.url=jdbc:h2:mem:testdb;MODE=MYSQL;DATABASE_TO_UPPER=false",
-    "spring.datasource.dynamic.datasource.master.driver-class-name=org.h2.Driver",
-    "spring.datasource.dynamic.datasource.master.username=sa",
-    "spring.datasource.dynamic.datasource.master.password=",
-    "yudao.security.mock-enable=true",
-    "yudao.tenant.enable=false",
-    "yudao.captcha.enable=false"
+        "spring.datasource.url=jdbc:h2:mem:testdb;MODE=MYSQL;DATABASE_TO_UPPER=false",
+        "spring.datasource.driver-class-name=org.h2.Driver",
+        "spring.datasource.username=sa",
+        "spring.datasource.password=",
+        "spring.datasource.dynamic.datasource.master.url=jdbc:h2:mem:testdb;MODE=MYSQL;DATABASE_TO_UPPER=false",
+        "spring.datasource.dynamic.datasource.master.driver-class-name=org.h2.Driver",
+        "spring.datasource.dynamic.datasource.master.username=sa",
+        "spring.datasource.dynamic.datasource.master.password=",
+        "yudao.security.mock-enable=true",
+        "yudao.tenant.enable=false",
+        "yudao.captcha.enable=false"
 })
 @ActiveProfiles("unit-test")
 @Transactional
@@ -57,7 +60,15 @@ public class PermissionServiceTest {
     private PermissionService permissionService;
 
     @Resource
-    private DataRepository dataRepository;
+    private PermissionDataRepository permissionDataRepository;
+    @Resource
+    private UserRoleDataRepository   userRoleDataRepository;
+    @Resource
+    private RoleDataRepository       roleDataRepository;
+    @Resource
+    private DeptDataRepository deptDataRepository;
+    @Resource
+    private MenuDataRepository menuDataRepository;
 
     /**
      * 每个测试后清理数据
@@ -65,12 +76,12 @@ public class PermissionServiceTest {
     @AfterEach
     public void tearDown() {
         // 清理测试数据
-        dataRepository.deleteByConfig(UserRoleDO.class, new DefaultConfigStore());
-        dataRepository.deleteByConfig(RoleMenuDO.class, new DefaultConfigStore());
-        dataRepository.deleteByConfig(RoleDO.class, new DefaultConfigStore());
-        dataRepository.deleteByConfig(MenuDO.class, new DefaultConfigStore());
-        dataRepository.deleteByConfig(AdminUserDO.class, new DefaultConfigStore());
-        dataRepository.deleteByConfig(DeptDO.class, new DefaultConfigStore());
+        permissionDataRepository.deleteByConfig(new DefaultConfigStore());
+        permissionDataRepository.deleteByConfig(new DefaultConfigStore());
+        permissionDataRepository.deleteByConfig(new DefaultConfigStore());
+        permissionDataRepository.deleteByConfig(new DefaultConfigStore());
+        permissionDataRepository.deleteByConfig(new DefaultConfigStore());
+        permissionDataRepository.deleteByConfig(new DefaultConfigStore());
     }
 
     /**
@@ -83,16 +94,16 @@ public class PermissionServiceTest {
 
         // 创建用户
         AdminUserDO user = createTestUser(null, "testuser");
-        
+
         // 创建角色
         RoleDO role = createTestRole(null, "TEST_ROLE", CommonStatusEnum.ENABLE.getStatus());
-        
+
         // 创建菜单
         MenuDO menu = createTestMenu(null, "用户查询", permission);
-        
+
         // 创建用户角色关联
         createUserRole(user.getId(), role.getId());
-        
+
         // 创建角色菜单关联
         createRoleMenu(role.getId(), menu.getId());
 
@@ -131,10 +142,10 @@ public class PermissionServiceTest {
 
         // 创建用户
         AdminUserDO user = createTestUser(null, "testuser");
-        
+
         // 创建角色
         RoleDO role = createTestRole(null, roleCode, CommonStatusEnum.ENABLE.getStatus());
-        
+
         // 创建用户角色关联
         createUserRole(user.getId(), role.getId());
 
@@ -155,7 +166,7 @@ public class PermissionServiceTest {
 
         // 创建角色
         RoleDO role = createTestRole(null, "TEST_ROLE", CommonStatusEnum.ENABLE.getStatus());
-        
+
         // 创建菜单
         for (int i = 1; i <= 3; i++) {
             MenuDO menu = createTestMenu(null, "菜单" + i, "permission:" + i);
@@ -181,7 +192,7 @@ public class PermissionServiceTest {
 
         // 创建用户
         AdminUserDO user = createTestUser(null, "testuser");
-        
+
         // 创建角色
         for (int i = 1; i <= 2; i++) {
             RoleDO role = createTestRole(null, "ROLE_" + i, CommonStatusEnum.ENABLE.getStatus());
@@ -192,7 +203,7 @@ public class PermissionServiceTest {
         permissionService.assignUserRoles(user.getId(), roleIds);
 
         // 验证结果
-        Set<Long> assignedRoleIds = permissionService.getUserRoleIdListByUserId(user.getId());
+        Set<Long> assignedRoleIds = permissionService.getRoleIdsListByUserId(user.getId());
         assertEquals(roleIds.size(), assignedRoleIds.size(), "分配的角色数量应该一致");
         assertTrue(assignedRoleIds.containsAll(roleIds), "应该包含所有分配的角色");
     }
@@ -206,19 +217,19 @@ public class PermissionServiceTest {
         AdminUserDO user = createTestUser(null, "testuser");
         RoleDO role = createTestRole(null, "TEST_ROLE", CommonStatusEnum.ENABLE.getStatus());
         MenuDO menu = createTestMenu(null, "测试菜单", "test:permission");
-        
+
         createUserRole(user.getId(), role.getId());
         createRoleMenu(role.getId(), menu.getId());
 
         // 验证删除前数据存在
-        assertFalse(permissionService.getUserRoleIdListByUserId(user.getId()).isEmpty(), "删除前应该有用户角色关联");
+        assertFalse(permissionService.getRoleIdsListByUserId(user.getId()).isEmpty(), "删除前应该有用户角色关联");
         assertFalse(permissionService.getRoleMenuListByRoleId(role.getId()).isEmpty(), "删除前应该有角色菜单关联");
 
         // 执行测试
         permissionService.processRoleDeleted(role.getId());
 
         // 验证结果
-        assertTrue(permissionService.getUserRoleIdListByUserId(user.getId()).isEmpty(), "删除后应该清理用户角色关联");
+        assertTrue(permissionService.getRoleIdsListByUserId(user.getId()).isEmpty(), "删除后应该清理用户角色关联");
         assertTrue(permissionService.getRoleMenuListByRoleId(role.getId()).isEmpty(), "删除后应该清理角色菜单关联");
     }
 
@@ -230,7 +241,7 @@ public class PermissionServiceTest {
         // 准备数据
         RoleDO role = createTestRole(null, "TEST_ROLE", CommonStatusEnum.ENABLE.getStatus());
         MenuDO menu = createTestMenu(null, "测试菜单", "test:permission");
-        
+
         createRoleMenu(role.getId(), menu.getId());
 
         // 验证删除前数据存在
@@ -253,7 +264,7 @@ public class PermissionServiceTest {
 
         // 创建角色
         RoleDO role = createTestRole(null, "TEST_ROLE", CommonStatusEnum.ENABLE.getStatus());
-        
+
         // 创建用户
         for (int i = 1; i <= 3; i++) {
             AdminUserDO user = createTestUser(null, "user" + i);
@@ -265,7 +276,7 @@ public class PermissionServiceTest {
 
         // 验证结果
         assertEquals(userIds.size(), affectedRows, "影响的行数应该等于用户数量");
-        Set<Long> assignedUserIds = permissionService.getUserRoleIdListByRoleId(Collections.singleton(role.getId()));
+        Set<Long> assignedUserIds = permissionService.getUserIdsListByRoleIds(Collections.singleton(role.getId()));
         assertEquals(userIds.size(), assignedUserIds.size(), "分配的用户数量应该一致");
         assertTrue(assignedUserIds.containsAll(userIds), "应该包含所有分配的用户");
     }
@@ -279,7 +290,7 @@ public class PermissionServiceTest {
         RoleDO role = createTestRole(null, "TEST_ROLE", CommonStatusEnum.ENABLE.getStatus());
         AdminUserDO user1 = createTestUser(null, "user1");
         AdminUserDO user2 = createTestUser(null, "user2");
-        
+
         Set<Long> userIds = new HashSet<>(Arrays.asList(user1.getId(), user2.getId()));
         Set<Long> deleteUserIds = new HashSet<>(Arrays.asList(user1.getId()));
 
@@ -290,7 +301,7 @@ public class PermissionServiceTest {
 
         // 验证删除前数据存在 - 检查每个用户的角色
         for (Long userId : userIds) {
-            Set<Long> userRoles = permissionService.getUserRoleIdListByUserId(userId);
+            Set<Long> userRoles = permissionService.getRoleIdsListByUserId(userId);
             assertTrue(userRoles.contains(role.getId()), "用户应该拥有指定角色");
         }
 
@@ -299,14 +310,14 @@ public class PermissionServiceTest {
         System.out.println("Deleted Rows: " + deletedRows);
         // 验证结果
         assertEquals(deleteUserIds.size(), deletedRows, "删除的行数应该正确");
-        
+
         // 检查被删除的用户不再拥有该角色
-        Set<Long> user1Roles = permissionService.getUserRoleIdListByUserId(user1.getId());
+        Set<Long> user1Roles = permissionService.getRoleIdsListByUserId(user1.getId());
         System.out.println("User1 Roles: " + user1Roles);
         assertFalse(user1Roles.contains(role.getId()), "被删除的用户不应该再拥有该角色");
-        
+
         // 检查未删除的用户仍然拥有该角色
-        Set<Long> user2Roles = permissionService.getUserRoleIdListByUserId(user2.getId());
+        Set<Long> user2Roles = permissionService.getRoleIdsListByUserId(user2.getId());
         System.out.println("User2 Roles: " + user2Roles);
         assertTrue(user2Roles.contains(role.getId()), "未删除的用户应该仍然拥有该角色");
     }
@@ -318,17 +329,17 @@ public class PermissionServiceTest {
     public void testGetDeptDataPermission() {
         // 准备数据
         DeptDO dept = createTestDept(null, "测试部门");
-        
+
         // 创建用户并关联部门
         AdminUserDO user = createTestUser(null, "testuser");
         user.setDeptId(dept.getId());
-        dataRepository.update(user);
-        
+        // permissionDataRepository.update(user);
+
         // 创建角色并设置数据权限为本部门
         RoleDO role = createTestRole(null, "TEST_ROLE", CommonStatusEnum.ENABLE.getStatus());
         role.setDataScope(DataScopeEnum.DEPT_ONLY.getScope());
-        dataRepository.update(role);
-        
+        roleDataRepository.update(role);
+
         // 创建用户角色关联
         createUserRole(user.getId(), role.getId());
 
@@ -358,8 +369,8 @@ public class PermissionServiceTest {
         user.setEmail(username + "@test.com");
         user.setMobile("1388888888" + (userId != null ? userId % 10 : 0));
         user.setTenantId(0L);
-        AdminUserDO saved = dataRepository.insert(user);
-        return saved;
+        // AdminUserDO saved = permissionDataRepository.insert(user);
+        return user;
     }
 
     /**
@@ -375,7 +386,7 @@ public class PermissionServiceTest {
         role.setType(1);
         role.setDataScope(DataScopeEnum.ALL.getScope());
         role.setTenantId(0L);
-        RoleDO saved = dataRepository.insert(role);
+        RoleDO saved = roleDataRepository.insert(role);
         return saved;
     }
 
@@ -391,7 +402,7 @@ public class PermissionServiceTest {
         menu.setSort(1);
         menu.setParentId(0L);
         menu.setStatus(CommonStatusEnum.ENABLE.getStatus());
-        MenuDO saved = dataRepository.insert(menu);
+        MenuDO saved = menuDataRepository.insert(menu);
         return saved;
     }
 
@@ -406,7 +417,7 @@ public class PermissionServiceTest {
         dept.setSort(1);
         dept.setStatus(CommonStatusEnum.ENABLE.getStatus());
         dept.setTenantId(0L);
-        DeptDO saved = dataRepository.insert(dept);
+        DeptDO saved = deptDataRepository.insert(dept);
         return saved;
     }
 
@@ -418,7 +429,7 @@ public class PermissionServiceTest {
         userRole.setUserId(userId);
         userRole.setRoleId(roleId);
         userRole.setTenantId(0L);
-        dataRepository.insert(userRole);
+        userRoleDataRepository.insert(userRole);
     }
 
     /**
@@ -429,6 +440,6 @@ public class PermissionServiceTest {
         roleMenu.setRoleId(roleId);
         roleMenu.setMenuId(menuId);
         roleMenu.setTenantId(0L);
-        dataRepository.insert(roleMenu);
+        permissionDataRepository.insert(roleMenu);
     }
 }

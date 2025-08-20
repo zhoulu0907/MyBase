@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.system.dal.database;
 
-import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
+import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.system.controller.admin.notify.vo.message.NotifyMessageMyPageReqVO;
 import com.cmsr.onebase.module.system.controller.admin.notify.vo.message.NotifyMessagePageReqVO;
@@ -8,6 +8,7 @@ import com.cmsr.onebase.module.system.dal.dataobject.notify.NotifyMessageDO;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Compare;
+import org.anyline.entity.DataRow;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 
@@ -21,7 +22,7 @@ import java.util.List;
  * @date 2025-08-11
  */
 @Repository
-public class NotifyMessageDataRepository extends DataRepositoryNew<NotifyMessageDO> {
+public class NotifyMessageDataRepository extends DataRepository<NotifyMessageDO> {
 
     public NotifyMessageDataRepository() {
         super(NotifyMessageDO.class);
@@ -59,8 +60,8 @@ public class NotifyMessageDataRepository extends DataRepositoryNew<NotifyMessage
      * 分页查询我的站内信
      *
      * @param pageReqVO 分页查询参数
-     * @param userId 用户ID
-     * @param userType 用户类型
+     * @param userId    用户ID
+     * @param userType  用户类型
      * @return 分页结果
      */
     public PageResult<NotifyMessageDO> findMyPage(NotifyMessageMyPageReqVO pageReqVO, Long userId, Integer userType) {
@@ -79,9 +80,9 @@ public class NotifyMessageDataRepository extends DataRepositoryNew<NotifyMessage
     /**
      * 查询未读站内信列表
      *
-     * @param userId 用户ID
+     * @param userId   用户ID
      * @param userType 用户类型
-     * @param size 数量限制
+     * @param size     数量限制
      * @return 未读站内信列表
      */
     public List<NotifyMessageDO> findUnreadList(Long userId, Integer userType, Integer size) {
@@ -104,7 +105,7 @@ public class NotifyMessageDataRepository extends DataRepositoryNew<NotifyMessage
     /**
      * 统计未读站内信数量
      *
-     * @param userId 用户ID
+     * @param userId   用户ID
      * @param userType 用户类型
      * @return 未读站内信数量
      */
@@ -126,8 +127,8 @@ public class NotifyMessageDataRepository extends DataRepositoryNew<NotifyMessage
     /**
      * 批量更新站内信为已读
      *
-     * @param ids 站内信ID集合
-     * @param userId 用户ID
+     * @param ids      站内信ID集合
+     * @param userId   用户ID
      * @param userType 用户类型
      * @return 更新数量
      */
@@ -136,17 +137,15 @@ public class NotifyMessageDataRepository extends DataRepositoryNew<NotifyMessage
                 .and(Compare.IN, "id", ids)
                 .and(Compare.EQUAL, NotifyMessageDO.USER_ID, userId)
                 .and(Compare.EQUAL, NotifyMessageDO.USER_TYPE, userType);
-
-        NotifyMessageDO updateEntity = new NotifyMessageDO();
-        updateEntity.setReadStatus(true);
-
-        return (int) updateByConfig(updateEntity, configStore);
+        DataRow row = new DataRow();
+        row.put(NotifyMessageDO.READ_STATUS, true);
+        return (int) updateByConfig(row, configStore);
     }
 
     /**
      * 更新用户所有站内信为已读
      *
-     * @param userId 用户ID
+     * @param userId   用户ID
      * @param userType 用户类型
      * @return 更新数量
      */
@@ -155,9 +154,8 @@ public class NotifyMessageDataRepository extends DataRepositoryNew<NotifyMessage
                 .and(Compare.EQUAL, NotifyMessageDO.USER_ID, userId)
                 .and(Compare.EQUAL, NotifyMessageDO.USER_TYPE, userType);
 
-        NotifyMessageDO updateEntity = new NotifyMessageDO();
-        updateEntity.setReadStatus(true);
-
-        return (int) updateByConfig(updateEntity, configStore);
+        DataRow row = new DataRow();
+        row.put(NotifyMessageDO.READ_STATUS, true);
+        return (int) updateByConfig(row, configStore);
     }
 }

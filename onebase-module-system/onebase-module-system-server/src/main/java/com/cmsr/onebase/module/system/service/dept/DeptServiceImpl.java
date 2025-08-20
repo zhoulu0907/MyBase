@@ -5,20 +5,18 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.module.system.controller.admin.dept.vo.dept.DeptAndUsersReqVO;
-import com.cmsr.onebase.module.system.controller.admin.dept.vo.dept.DeptAndUsersRespVO;
-import com.cmsr.onebase.module.system.controller.admin.dept.vo.dept.DeptListReqVO;
-import com.cmsr.onebase.module.system.controller.admin.dept.vo.dept.DeptRespVO;
-import com.cmsr.onebase.module.system.controller.admin.dept.vo.dept.DeptSaveReqVO;
-import com.cmsr.onebase.module.system.controller.admin.user.vo.user.UserDeptSimpleRespVO;
+import com.cmsr.onebase.module.system.controller.admin.dept.vo.dept.*;
+import com.cmsr.onebase.module.system.controller.admin.user.vo.user.UserSimpleRespVO;
 import com.cmsr.onebase.module.system.dal.database.DeptDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.dal.redis.RedisKeyConstants;
+import com.cmsr.onebase.module.system.service.permission.PermissionService;
 import com.cmsr.onebase.module.system.service.user.AdminUserService;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
@@ -48,6 +46,10 @@ public class DeptServiceImpl implements DeptService {
     @Lazy
     @Resource
     private AdminUserService adminUserService;
+
+    @Lazy
+    @Resource
+    private PermissionService permissionService;
 
     @Override
     @CacheEvict(cacheNames = RedisKeyConstants.DEPT_CHILDREN_ID_LIST,
@@ -338,7 +340,7 @@ public class DeptServiceImpl implements DeptService {
 
             // 按用户昵称模糊搜索用户
             List<AdminUserDO> matchedUsers = adminUserService.getUserListByNickname(reqVO.getKeywords());
-            respVO.setUserList(BeanUtils.toBean(matchedUsers, UserDeptSimpleRespVO.class));
+            respVO.setUserList(BeanUtils.toBean(matchedUsers, UserSimpleRespVO.class));
 
         } else if (hasDeptId) {
             // 场景2：有部门ID，无搜索词
@@ -352,7 +354,7 @@ public class DeptServiceImpl implements DeptService {
 
             // 获取直属用户
             List<AdminUserDO> directUsers = adminUserService.getUserListByDeptIds(Collections.singletonList(reqVO.getDeptId()));
-            respVO.setUserList(BeanUtils.toBean(directUsers, UserDeptSimpleRespVO.class));
+            respVO.setUserList(BeanUtils.toBean(directUsers, UserSimpleRespVO.class));
 
         } else {
             // 场景1：部门ID和搜索词都为空
@@ -364,7 +366,22 @@ public class DeptServiceImpl implements DeptService {
 
             // 获取所有没有部门的用户（dept_id = null）
             List<AdminUserDO> usersWithoutDept = adminUserService.getUserListNoDept();
-            respVO.setUserList(BeanUtils.toBean(usersWithoutDept, UserDeptSimpleRespVO.class));
+            respVO.setUserList(BeanUtils.toBean(usersWithoutDept, UserSimpleRespVO.class));
+        }
+
+        // 数据处理：排除指定用户和角色用户
+        if (CollectionUtils.isNotEmpty(respVO.getUserList())) {
+            Collection<Long> excludeRoleUserIds = null;
+            // 排除拥有excludRoleId角色的用户
+            if (reqVO.getExcludeRoleIds() != null) {
+                excludeRoleUserIds = permissionService.getUserIdsListByRoleIds(reqVO.getExcludeRoleIds());
+            }
+            // 取合集，并去掉重复userID
+            Set<Long> excludeUserIds = CollUtil.unionDistinct(reqVO.getExcludeUserIds(), excludeRoleUserIds);
+            // 过滤掉排除的用户
+            respVO.setUserList(respVO.getUserList().stream()
+                    .filter(user -> !excludeUserIds.contains(user.getId()))
+                    .collect(Collectors.toList()));
         }
 
         return respVO;

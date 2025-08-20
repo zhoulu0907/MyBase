@@ -1,9 +1,11 @@
 package com.cmsr.onebase.framework.data.base;
 
 import jakarta.persistence.Column;
-import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import lombok.Data;
+import lombok.experimental.SuperBuilder;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -13,6 +15,9 @@ import java.time.LocalDateTime;
  *
  */
 @Data
+@SuperBuilder
+@NoArgsConstructor
+@AllArgsConstructor
 public class BaseDO implements Serializable {
 
     public static final String ID = "id";
@@ -28,8 +33,7 @@ public class BaseDO implements Serializable {
      * 设置为注入雪花ID
      */
     @Id
-    // @GeneratedValue(generator = "SnowflakeIdGenerator")
-    @Column(name = ID)
+    @Column(name = ID, columnDefinition = "BIGINT NOT NULL PRIMARY KEY")
     private Long id;
     /**
      * 创建时间
@@ -57,10 +61,10 @@ public class BaseDO implements Serializable {
     /**
      * 是否删除
      */
-    @Column(name = DELETED, columnDefinition= "INT8 NOT NULL DEFAULT 0", comment = "是否删除")
+    @Column(name = DELETED, columnDefinition = "INT8 NOT NULL DEFAULT 0", comment = "是否删除")
     private Long deleted;
 
-       /**
+    /**
      * 乐观锁版本号
      */
     @Column(name = LOCK_VERSION)
@@ -69,7 +73,7 @@ public class BaseDO implements Serializable {
     /**
      * 把 creator、createTime、updateTime、updater 都清空，避免前端直接传递 creator 之类的字段，直接就被更新了
      */
-    public void clean(){
+    public void clean() {
         this.creator = null;
         this.createTime = null;
         this.updater = null;

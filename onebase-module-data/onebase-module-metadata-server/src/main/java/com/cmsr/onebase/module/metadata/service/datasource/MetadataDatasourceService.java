@@ -97,6 +97,14 @@ public interface MetadataDatasourceService {
     List<MetadataDatasourceDO> getDatasourceListByAppId(Long appId);
 
     /**
+     * 根据条件查询数据源列表
+     *
+     * @param configStore 查询条件
+     * @return 数据源列表
+     */
+    List<MetadataDatasourceDO> findAllByConfig(org.anyline.data.param.init.DefaultConfigStore configStore);
+
+    /**
      * 根据编码获得数据源
      *
      * @param code 编码
@@ -115,8 +123,9 @@ public interface MetadataDatasourceService {
      * 创建默认数据源，使用配置文件中 default.datasource 配置
      *
      * @param appId 应用ID
+     * @param appUid 应用唯一UID，用于建立应用与数据源的关联
      * @return 数据源编号
      */
-    Long createDefaultDatasource(Long appId);
+    Long createDefaultDatasource(Long appId, String appUid);
 
 }

@@ -5,13 +5,13 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.digest.DigestUtil;
-import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.infra.controller.admin.file.vo.file.FileCreateReqVO;
 import com.cmsr.onebase.module.infra.controller.admin.file.vo.file.FilePageReqVO;
 import com.cmsr.onebase.module.infra.controller.admin.file.vo.file.FilePresignedUrlRespVO;
 import com.cmsr.onebase.module.infra.dal.dataobject.file.FileDO;
+import com.cmsr.onebase.module.infra.dal.database.FileDataRepository;
 import com.cmsr.onebase.module.infra.framework.file.core.client.FileClient;
 import com.cmsr.onebase.module.infra.framework.file.core.client.s3.FilePresignedUrlRespDTO;
 import com.cmsr.onebase.module.infra.framework.file.core.utils.FileTypeUtils;
@@ -50,24 +50,11 @@ public class FileServiceImpl implements FileService {
     private FileConfigService fileConfigService;
 
     @Resource
-    private DataRepository dataRepository;
+    private FileDataRepository fileDataRepository;
 
     @Override
     public PageResult<FileDO> getFilePage(FilePageReqVO pageReqVO) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.like("path", pageReqVO.getPath())
-                .like("type", pageReqVO.getType());
-
-        if (pageReqVO.getCreateTime() != null && pageReqVO.getCreateTime().length == 2) {
-            configStore.ge("create_time", pageReqVO.getCreateTime()[0]);
-            configStore.le("create_time", pageReqVO.getCreateTime()[1]);
-        }
-        return dataRepository.findPageWithConditions(
-                FileDO.class,
-                configStore,
-                pageReqVO.getPageNo(),
-                pageReqVO.getPageSize()
-        );
+        return fileDataRepository.findPage(pageReqVO);
     }
 
     @Override
@@ -97,7 +84,7 @@ public class FileServiceImpl implements FileService {
         String url = client.upload(content, path, type);
 
         // 3. 保存到数据库
-        dataRepository.insert(new FileDO().setConfigId(client.getId())
+        fileDataRepository.insert(new FileDO().setConfigId(client.getId())
                 .setName(name).setPath(path).setUrl(url)
                 .setType(type).setSize(content.length));
         return url;
@@ -151,7 +138,7 @@ public class FileServiceImpl implements FileService {
     @Override
     public Long createFile(FileCreateReqVO createReqVO) {
         FileDO file = BeanUtils.toBean(createReqVO, FileDO.class);
-        dataRepository.insert(file);
+        fileDataRepository.insert(file);
         return file.getId();
     }
 
@@ -166,11 +153,11 @@ public class FileServiceImpl implements FileService {
         client.delete(file.getPath());
 
         // 删除记录
-        dataRepository.deleteById(FileDO.class,id);
+        fileDataRepository.deleteById(id);
     }
 
     private FileDO validateFileExists(Long id) {
-        FileDO fileDO = dataRepository.findById(FileDO.class,id);
+        FileDO fileDO = fileDataRepository.findById(id);
         if (fileDO == null) {
             throw exception(FILE_NOT_EXISTS);
         }

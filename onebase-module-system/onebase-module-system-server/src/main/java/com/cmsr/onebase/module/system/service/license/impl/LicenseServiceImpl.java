@@ -6,15 +6,12 @@ import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
 import com.cmsr.onebase.module.system.controller.admin.license.vo.LicenseExportRespVO;
 import com.cmsr.onebase.module.system.controller.admin.license.vo.LicensePageReqVO;
 import com.cmsr.onebase.module.system.controller.admin.license.vo.LicenseSaveReqVO;
+import com.cmsr.onebase.module.system.convert.license.LicenseConvert;
 import com.cmsr.onebase.module.system.dal.database.LicenseDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.license.LicenseDO;
-import com.cmsr.onebase.module.system.enums.license.LicenseSecretKeyEnum;
 import com.cmsr.onebase.module.system.enums.license.LicenseStatusEnum;
 import com.cmsr.onebase.module.system.service.license.LicenseService;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.cmsr.onebase.module.system.util.jsondeserializer.JsonDeserializerUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -28,7 +25,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -50,6 +46,8 @@ import static com.cmsr.onebase.module.system.util.encrypt.SM4Utils.sm4Encrypt;
 @Validated
 @Slf4j
 public class LicenseServiceImpl implements LicenseService {
+
+    private static final String LICENSE_SECRET_KEY = "1234567812345678";
 
     @Resource
     private LicenseDataRepository licenseDataRepository;
@@ -144,8 +142,8 @@ public class LicenseServiceImpl implements LicenseService {
 
     @Override
     public Long importLicense(MultipartFile file) {
-        try {
 
+        try {
             // 获取当前登录用户名
             String username = SecurityFrameworkUtils.getLoginUserNickname();
             // 获取当前时间，格式yyyyMMddHHmmss
@@ -159,33 +157,19 @@ public class LicenseServiceImpl implements LicenseService {
             // 构造文件名
             String baseName = "license_encrypted__" + username + "_" + now;
             String sm4FilePath = licenseDirPath + File.separator + baseName + ".sm4";
-
-            File sm4File = new File(sm4FilePath);
-
             // 保存上传的文件为加密文件
-            file.transferTo(sm4File);
-
+            file.transferTo(new File(sm4FilePath));
             // 解密文件并保存到lic文件
-            String decrypted = decryptSm4FileToString(sm4FilePath, LicenseSecretKeyEnum.LICENSE_SECRET_KEY.getSecretKey());
-            // 读取解密后的字符串
-            // String content = FileUtils.readFileToString(licFile, StandardCharsets.UTF_8);
+            String decrypted = decryptSm4FileToString(sm4FilePath, LICENSE_SECRET_KEY);
             log.info("License解析内容: {}", decrypted);
-
             // 解析JSON内容
             ObjectMapper objectMapper = new ObjectMapper();
             // 注册JavaTimeModule以支持LocalDateTime反序列化
             JavaTimeModule javaTimeModule = new JavaTimeModule();
             objectMapper.registerModule(javaTimeModule);
-            // 添加自定义的LocalDateTime反序列化器
             SimpleModule simpleModule = new SimpleModule();
-            simpleModule.addDeserializer(LocalDateTime.class, new JsonDeserializer<>() {
-                @Override
-                public LocalDateTime deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JsonProcessingException {
-                    return LocalDateTime.parse(p.getText(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-                }
-            });
+            simpleModule.addDeserializer(LocalDateTime.class, JsonDeserializerUtils.getInstance());
             objectMapper.registerModule(simpleModule);
-
             // 先将旧License置为失效
             // 如果是新创建的license，将其他所有已认证的license更新为已失效状态
             List<LicenseDO> licenses = getEnableLicenseList();
@@ -225,31 +209,17 @@ public class LicenseServiceImpl implements LicenseService {
             if (license == null) {
                 throw exception(LICENSE_NOT_EXISTS, id);
             }
-            // LicenseExportRespVO licenseExportRespVO = LicenseConvert.INSTANCE.convertToExportVO(license);
-            LicenseExportRespVO licenseExportRespVO = new LicenseExportRespVO();
-            licenseExportRespVO.setEnterpriseName(license.getEnterpriseName());
-            licenseExportRespVO.setEnterpriseCode(license.getEnterpriseCode());
-            licenseExportRespVO.setEnterpriseAddress(license.getEnterpriseAddress());
-            licenseExportRespVO.setPlatformType(license.getPlatformType());
-            licenseExportRespVO.setExpireTime(license.getExpireTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-            licenseExportRespVO.setStatus(license.getStatus());
-            licenseExportRespVO.setTenantLimit(license.getTenantLimit().toString());
-            licenseExportRespVO.setUserLimit(license.getUserLimit().toString());
-
+            LicenseExportRespVO licenseExportRespVO = LicenseConvert.INSTANCE.convertToExportVO(license);
             // 设置响应头，返回加密文件
             response.setContentType("application/octet-stream");
             response.setCharacterEncoding("UTF-8");
             response.setHeader("Content-Disposition", "attachment; filename=\"license.lic.sm4\"");
-            response.setHeader("Content-Transfer-Encoding", "binary");
-            response.setHeader("Expires", "0");
-            response.setHeader("Pragma", "no-cache");
-            response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
             // 将license信息写入json字符串
             ObjectMapper objectMapper = new ObjectMapper();
             objectMapper.registerModule(new JavaTimeModule());
             String jsonContent = objectMapper.writeValueAsString(licenseExportRespVO);
             // 使用SM4加密字符串,将加密后的内容写入响应输出流
-            String sm4Encrypt = sm4Encrypt(jsonContent, LicenseSecretKeyEnum.LICENSE_SECRET_KEY.getSecretKey());
+            String sm4Encrypt = sm4Encrypt(jsonContent, LICENSE_SECRET_KEY);
             response.getOutputStream().write(sm4Encrypt.getBytes());
             response.getOutputStream().flush();
         } catch (Exception e) {

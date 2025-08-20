@@ -8,7 +8,6 @@ import com.cmsr.onebase.module.system.controller.admin.user.vo.profile.UserProfi
 import com.cmsr.onebase.module.system.controller.admin.user.vo.profile.UserProfileUpdateReqVO;
 import com.cmsr.onebase.module.system.controller.admin.user.vo.user.*;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
-import com.cmsr.onebase.module.system.enums.permission.RoleTypeEnum;
 import jakarta.validation.Valid;
 
 import java.util.Collection;
@@ -178,6 +177,14 @@ public interface AdminUserService {
     List<AdminUserDO> getUserList(Collection<Long> ids);
 
     /**
+     * 不传租户tenant_id，获得用户列表，
+     *
+     * @param ids 用户编号数组
+     * @return 用户列表
+     */
+    List<AdminUserDO> getUserListByIgnoreTenantId(Collection<Long> ids);
+
+    /**
      * 校验用户们是否有效。如下情况，视为无效：
      * 1. 用户编号不存在
      * 2. 用户被禁用
@@ -225,6 +232,15 @@ public interface AdminUserService {
     List<AdminUserDO> getUserListByStatus(Integer status);
 
     /**
+     * 获取所有平台管理员列表
+     *
+     * @param status 状态
+     * @return 用户们
+     */
+    List<AdminUserDO> getPlatformAdminListByStatus(Integer status);
+
+
+    /**
      * 判断密码是否匹配
      *
      * @param rawPassword     未加密的密码
@@ -232,14 +248,6 @@ public interface AdminUserService {
      * @return 是否匹配
      */
     boolean isPasswordMatch(String rawPassword, String encodedPassword);
-
-    /**
-     * 查询所有管理员用户
-     *
-     * @param roleCodeEnum 枚举
-     * @return 列表
-     */
-    List<AdminUserDO> getUserListByRoleCode(RoleTypeEnum roleCodeEnum);
 
     /**
      * 获得指定状态的租户数量

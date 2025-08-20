@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.system.dal.database;
 
-import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
+import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.system.controller.admin.sms.vo.channel.SmsChannelPageReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.sms.SmsChannelDO;
@@ -19,7 +19,7 @@ import java.util.List;
  * @date 2025-08-07
  */
 @Repository
-public class SmsChannelRepository extends DataRepositoryNew<SmsChannelDO> {
+public class SmsChannelRepository extends DataRepository<SmsChannelDO> {
     /**
      * 构造方法，指定默认实体类
      */

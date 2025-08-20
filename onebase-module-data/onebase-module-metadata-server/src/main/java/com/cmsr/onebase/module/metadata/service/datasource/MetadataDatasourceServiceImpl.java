@@ -16,6 +16,7 @@ import com.cmsr.onebase.module.metadata.config.MetadataConfig;
 import com.cmsr.onebase.module.metadata.convert.datasource.DatasourceConvert;
 import com.cmsr.onebase.module.metadata.enums.DatasourceTypeEnum;
 import com.cmsr.onebase.module.metadata.dal.database.MetadataDatasourceRepository;
+import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import javax.sql.DataSource;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -57,6 +59,8 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
     private MetadataDatasourceRepository metadataDatasourceRepository;
     @Resource
     private TemporaryDatasourceService temporaryDatasourceService;
+    @Resource
+    private MetadataAppAndDatasourceService appAndDatasourceService;
 
     @Override
     public List<DatasourceTypeRespVO> getDatasourceTypes() {
@@ -186,17 +190,34 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
         // 校验编码唯一性
         validateDatasourceCodeUnique(null, createReqVO.getCode(), Long.valueOf(createReqVO.getAppId()));
 
-        // 插入数据源
+        // 插入数据源（不再设置appId，使用关联表维护关系）
         MetadataDatasourceDO datasource = datasourceConvert.convert(createReqVO);
-        datasource.setAppId(Long.valueOf(createReqVO.getAppId()));
+        
+        // 设置创建人和创建时间
+        Long currentUserId = SecurityFrameworkUtils.getLoginUserId();
+        if (currentUserId != null) {
+            datasource.setCreator(currentUserId);
+            datasource.setUpdater(currentUserId);
+        }
+        LocalDateTime now = LocalDateTime.now();
+        datasource.setCreateTime(now);
+        datasource.setUpdateTime(now);
+        
         metadataDatasourceRepository.insert(datasource);
 
+        // 创建应用与数据源的关联关系
+        Long applicationId = Long.valueOf(createReqVO.getAppId());
+        appAndDatasourceService.createRelation(applicationId, datasource.getId(), 
+                datasource.getDatasourceType(), createReqVO.getAppUid());
+
+        log.info("创建数据源成功，ID: {}，应用ID: {}，创建人: {}，创建时间: {}", 
+                datasource.getId(), applicationId, currentUserId, now);
         return datasource.getId();
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Long createDefaultDatasource(Long appId) {
+    public Long createDefaultDatasource(Long appId, String appUid) {
         // 从配置类中读取默认数据源参数
 
         // 构造配置 map
@@ -217,6 +238,8 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
         reqVO.setRunMode(metadataConfig.getDefaultDatasourceRunMode());
         reqVO.setDatasourceOrigin(metadataConfig.getDefaultDatasourceDatasourceOrigin());
         reqVO.setAppId(String.valueOf(appId));
+        // 关键：传递 appUid，确保关联表插入不为 null
+        reqVO.setAppUid(appUid);
 
         // 生成唯一的数据源编码，避免重复
         String uniqueCode = metadataConfig.getDefaultDatasourceDatabase() + "_" + UUID.randomUUID().toString().replace("-", "");
@@ -234,12 +257,22 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
         // 校验编码唯一性
         validateDatasourceCodeUnique(Long.valueOf(updateReqVO.getId()), updateReqVO.getCode(), Long.valueOf(updateReqVO.getAppId()));
 
-        // 更新数据源
+        // 更新数据源（不再设置appId，因为关联关系在单独的表中维护）
         MetadataDatasourceDO updateObj = datasourceConvert.convert(updateReqVO);
         // 手动设置ID，确保更新操作正常进行
         updateObj.setId(Long.valueOf(updateReqVO.getId()));
-        updateObj.setAppId(Long.valueOf(updateReqVO.getAppId()));
+        
+        // 设置更新人和更新时间
+        Long currentUserId = SecurityFrameworkUtils.getLoginUserId();
+        if (currentUserId != null) {
+            updateObj.setUpdater(currentUserId);
+        }
+        updateObj.setUpdateTime(LocalDateTime.now());
+        
+        // 不再设置appId，因为关联关系由关联表维护
         metadataDatasourceRepository.update(updateObj);
+        
+        log.info("更新数据源成功，ID: {}，更新人: {}", updateReqVO.getId(), currentUserId);
     }
 
     @Override
@@ -248,8 +281,13 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
         // 校验存在
         validateDatasourceExists(id);
 
+        // 删除数据源关联关系
+        long deletedRelations = appAndDatasourceService.deleteRelationsByDatasourceId(id);
+        log.info("删除数据源{}相关联的关系数量: {}", id, deletedRelations);
+
         // 删除数据源
         metadataDatasourceRepository.deleteById(id);
+        log.info("删除数据源成功，ID: {}", id);
     }
 
     private void validateDatasourceExists(Long id) {
@@ -259,15 +297,15 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
     }
 
     private void validateDatasourceCodeUnique(Long id, String code, Long appId) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and("code", code);
-        configStore.and("app_id", appId);
-        if (id != null) {
-            configStore.and(Compare.NOT_EQUAL, "id", id);
-        }
-
-        long count = metadataDatasourceRepository.countByConfig(configStore);
-        if (count > 0) {
+        // 获取同一应用下的所有数据源
+        List<MetadataDatasourceDO> appDatasources = appAndDatasourceService.getDatasourcesByApplicationId(appId);
+        
+        // 检查编码是否重复
+        boolean isDuplicate = appDatasources.stream()
+                .filter(datasource -> !datasource.getId().equals(id)) // 排除自身
+                .anyMatch(datasource -> code.equals(datasource.getCode()));
+        
+        if (isDuplicate) {
             throw exception(DATASOURCE_CODE_DUPLICATE);
         }
     }
@@ -279,6 +317,57 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
 
     @Override
     public PageResult<MetadataDatasourceDO> getDatasourcePage(DatasourcePageReqVO pageReqVO) {
+        // 如果指定了应用ID，需要通过关联表查询
+        if (pageReqVO.getAppId() != null && !pageReqVO.getAppId().trim().isEmpty()) {
+            Long appId = Long.valueOf(pageReqVO.getAppId());
+            
+            // 获取应用关联的数据源列表
+            List<MetadataDatasourceDO> appDatasources = appAndDatasourceService.getDatasourcesByApplicationId(appId);
+            
+            // 基于获取的数据源进行进一步过滤
+            List<MetadataDatasourceDO> filteredDatasources = appDatasources.stream()
+                    .filter(datasource -> {
+                        // 应用各种过滤条件
+                        if (pageReqVO.getDatasourceName() != null && 
+                            !datasource.getDatasourceName().contains(pageReqVO.getDatasourceName())) {
+                            return false;
+                        }
+                        if (pageReqVO.getCode() != null && 
+                            !datasource.getCode().contains(pageReqVO.getCode())) {
+                            return false;
+                        }
+                        if (pageReqVO.getDatasourceType() != null && 
+                            !pageReqVO.getDatasourceType().equals(datasource.getDatasourceType())) {
+                            return false;
+                        }
+                        if (pageReqVO.getRunMode() != null && 
+                            !pageReqVO.getRunMode().equals(datasource.getRunMode())) {
+                            return false;
+                        }
+                        // TODO: 如果需要datasourceOrigin字段过滤，请在MetadataDatasourceDO中添加该字段
+                        // if (pageReqVO.getDatasourceOrigin() != null && 
+                        //     !pageReqVO.getDatasourceOrigin().equals(datasource.getDatasourceOrigin())) {
+                        //     return false;
+                        // }
+                        return true;
+                    })
+                    .toList();
+            
+            // 手动实现分页
+            int pageNo = pageReqVO.getPageNo();
+            int pageSize = pageReqVO.getPageSize();
+            int startIndex = (pageNo - 1) * pageSize;
+            int endIndex = Math.min(startIndex + pageSize, filteredDatasources.size());
+            
+            List<MetadataDatasourceDO> pageData = filteredDatasources.subList(
+                Math.max(0, startIndex), 
+                Math.max(0, endIndex)
+            );
+            
+            return new PageResult<>(pageData, (long) filteredDatasources.size());
+        }
+        
+        // 如果没有指定应用ID，查询所有数据源
         DefaultConfigStore configStore = new DefaultConfigStore();
 
         // 添加查询条件
@@ -297,10 +386,6 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
         if (pageReqVO.getRunMode() != null) {
             configStore.and("run_mode", pageReqVO.getRunMode());
         }
-        // 修复appId过滤逻辑 - 只有当appId不为空且不为空字符串时才添加过滤条件
-        if (pageReqVO.getAppId() != null && !pageReqVO.getAppId().trim().isEmpty()) {
-            configStore.and("app_id", Long.valueOf(pageReqVO.getAppId()));
-        }
 
         // 分页查询
         return metadataDatasourceRepository.findPageWithConditions(configStore, pageReqVO.getPageNo(), pageReqVO.getPageSize());
@@ -315,7 +400,8 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
 
     @Override
     public List<MetadataDatasourceDO> getDatasourceListByAppId(Long appId) {
-        return metadataDatasourceRepository.getDatasourceListByAppId(appId);
+        // 使用新的关联服务查询应用关联的数据源
+        return appAndDatasourceService.getDatasourcesByApplicationId(appId);
     }
 
     @Override
@@ -323,6 +409,11 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.and("code", code);
         return metadataDatasourceRepository.findOne(configStore);
+    }
+
+    @Override
+    public List<MetadataDatasourceDO> findAllByConfig(DefaultConfigStore configStore) {
+        return metadataDatasourceRepository.findAllByConfig(configStore);
     }
 
     /**

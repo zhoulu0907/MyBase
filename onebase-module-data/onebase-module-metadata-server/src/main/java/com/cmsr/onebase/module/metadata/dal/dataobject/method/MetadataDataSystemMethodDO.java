@@ -17,6 +17,16 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MetadataDataSystemMethodDO extends BaseDO {
+
+    // 列名常量
+    public static final String METHOD_CODE        = "method_code";
+    public static final String METHOD_NAME        = "method_name";
+    public static final String METHOD_TYPE        = "method_type";
+    public static final String METHOD_URL         = "method_url";
+    public static final String METHOD_DESCRIPTION = "method_description";
+    public static final String IS_ENABLED        = "is_enabled";
+    public static final String REQUEST_METHOD    = "request_method";
+
     /**
      * 方法编码
      */

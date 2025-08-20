@@ -1,16 +1,15 @@
 package com.cmsr.onebase.module.system.service.permission;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.exception.ServiceException;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.system.controller.admin.permission.vo.role.RolePageReqVO;
 import com.cmsr.onebase.module.system.controller.admin.permission.vo.role.RoleInsertReqVO;
+import com.cmsr.onebase.module.system.controller.admin.permission.vo.role.RolePageReqVO;
 import com.cmsr.onebase.module.system.controller.admin.permission.vo.role.RoleUpdateReqVO;
+import com.cmsr.onebase.module.system.dal.database.AdminUserDataRepository;
+import com.cmsr.onebase.module.system.dal.database.RoleDataRepository;
+import com.cmsr.onebase.module.system.dal.database.UserRoleDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
-import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleMenuDO;
-import com.cmsr.onebase.module.system.dal.dataobject.permission.UserRoleDO;
-import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.enums.permission.DataScopeEnum;
 import com.cmsr.onebase.module.system.enums.permission.RoleCodeEnum;
 import com.cmsr.onebase.module.system.enums.permission.RoleTypeEnum;
@@ -61,7 +60,13 @@ public class RoleServiceTest {
     private RoleService roleService;
 
     @Resource
-    private DataRepository dataRepository;
+    private RoleDataRepository roleDataRepository;
+
+    @Resource
+    private UserRoleDataRepository userRoleDataRepository;
+
+    @Resource
+    private AdminUserDataRepository adminUserDataRepository;
 
     /**
      * 每个测试后清理数据
@@ -69,10 +74,9 @@ public class RoleServiceTest {
     @AfterEach
     public void tearDown() {
         // 清理测试数据
-        dataRepository.deleteByConfig(UserRoleDO.class, new DefaultConfigStore());
-        dataRepository.deleteByConfig(RoleMenuDO.class, new DefaultConfigStore());
-        dataRepository.deleteByConfig(RoleDO.class, new DefaultConfigStore());
-        dataRepository.deleteByConfig(AdminUserDO.class, new DefaultConfigStore());
+        userRoleDataRepository.deleteByConfig(new DefaultConfigStore());
+        roleDataRepository.deleteByConfig(new DefaultConfigStore());
+        adminUserDataRepository.deleteByConfig(new DefaultConfigStore());
     }
 
     /**
@@ -214,7 +218,7 @@ public class RoleServiceTest {
         // 准备数据 - 创建系统角色
         RoleDO role = createTestRole(null, "系统角色", "SYSTEM_ROLE", CommonStatusEnum.ENABLE.getStatus());
         role.setType(RoleTypeEnum.SYSTEM.getType());
-        dataRepository.update(role);
+        roleDataRepository.update(role);
 
         // 准备更新数据
         RoleUpdateReqVO updateReqVO = new RoleUpdateReqVO();
@@ -304,7 +308,7 @@ public class RoleServiceTest {
         // 准备数据 - 创建系统角色
         RoleDO role = createTestRole(null, "系统角色", "SYSTEM_ROLE", CommonStatusEnum.ENABLE.getStatus());
         role.setType(RoleTypeEnum.SYSTEM.getType());
-        dataRepository.update(role);
+        roleDataRepository.update(role);
 
         // 执行测试并验证异常
         ServiceException exception = assertThrows(ServiceException.class,
@@ -515,7 +519,7 @@ public class RoleServiceTest {
         role.setDataScope(DataScopeEnum.ALL.getScope());
         role.setRemark("测试角色");
         role.setTenantId(0L);
-        RoleDO saved = dataRepository.insert(role);
+        RoleDO saved = roleDataRepository.insert(role);
         return saved;
     }
 }

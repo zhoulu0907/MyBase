@@ -1,6 +1,5 @@
 package com.cmsr.onebase.module.system.service.user;
 
-import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.system.controller.admin.user.vo.user.UserPageReqVO;
@@ -8,6 +7,10 @@ import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.UserRoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
+import com.cmsr.onebase.module.system.dal.database.AdminUserDataRepository;
+import com.cmsr.onebase.module.system.dal.database.DeptDataRepository;
+import com.cmsr.onebase.module.system.dal.database.RoleDataRepository;
+import com.cmsr.onebase.module.system.dal.database.UserRoleDataRepository;
 import com.cmsr.onebase.module.system.enums.permission.DataScopeEnum;
 import com.cmsr.onebase.module.system.service.permission.PermissionService;
 import jakarta.annotation.Resource;
@@ -61,7 +64,16 @@ public class AdminUserServiceTest {
     private PermissionService permissionService;
 
     @Resource
-    private DataRepository dataRepository;
+    private AdminUserDataRepository adminUserDataRepository;
+
+    @Resource
+    private DeptDataRepository deptDataRepository;
+
+    @Resource
+    private RoleDataRepository roleDataRepository;
+
+    @Resource
+    private UserRoleDataRepository userRoleDataRepository;
 
     private AdminUserDO testUser1;
     private AdminUserDO testUser2;
@@ -97,10 +109,10 @@ public class AdminUserServiceTest {
      */
     @AfterEach
     public void tearDown() {
-        dataRepository.deleteByConfig(UserRoleDO.class, new DefaultConfigStore());
-        dataRepository.deleteByConfig(AdminUserDO.class, new DefaultConfigStore());
-        dataRepository.deleteByConfig(RoleDO.class, new DefaultConfigStore());
-        dataRepository.deleteByConfig(DeptDO.class, new DefaultConfigStore());
+        userRoleDataRepository.deleteByConfig(new DefaultConfigStore());
+        adminUserDataRepository.deleteByConfig(new DefaultConfigStore());
+        roleDataRepository.deleteByConfig(new DefaultConfigStore());
+        deptDataRepository.deleteByConfig(new DefaultConfigStore());
     }
 
     /**
@@ -336,7 +348,7 @@ public class AdminUserServiceTest {
         if (createTime != null) {
             user.setCreateTime(createTime);
         }
-        return dataRepository.insert(user);
+        return adminUserDataRepository.insert(user);
     }
 
     /**
@@ -349,7 +361,7 @@ public class AdminUserServiceTest {
         dept.setSort(1);
         dept.setStatus(CommonStatusEnum.ENABLE.getStatus());
         dept.setTenantId(0L);
-        return dataRepository.insert(dept);
+        return deptDataRepository.insert(dept);
     }
 
     /**
@@ -364,7 +376,7 @@ public class AdminUserServiceTest {
         role.setType(1);
         role.setDataScope(DataScopeEnum.ALL.getScope());
         role.setTenantId(0L);
-        return dataRepository.insert(role);
+        return roleDataRepository.insert(role);
     }
 
     /**
@@ -375,7 +387,7 @@ public class AdminUserServiceTest {
         userRole.setUserId(userId);
         userRole.setRoleId(roleId);
         userRole.setTenantId(0L);
-        dataRepository.insert(userRole);
+        userRoleDataRepository.insert(userRole);
     }
 }
 

@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.system.dal.database;
 
-import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
+import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.system.controller.admin.dict.vo.type.DictTypePageReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.dict.DictTypeDO;
@@ -20,7 +20,7 @@ import java.util.List;
  * @date 2025-08-07
  */
 @Repository
-public class DictTypeRepository extends DataRepositoryNew<DictTypeDO> {
+public class DictTypeRepository extends DataRepository<DictTypeDO> {
     /**
      * 构造方法，指定默认实体类
      */

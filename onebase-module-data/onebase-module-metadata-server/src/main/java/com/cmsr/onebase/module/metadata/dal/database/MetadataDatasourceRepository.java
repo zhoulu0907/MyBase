@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.metadata.dal.database;
 
-import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
+import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.module.metadata.dal.dataobject.datasource.MetadataDatasourceDO;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.init.DefaultConfigStore;
@@ -18,7 +18,7 @@ import java.util.List;
  */
 @Repository
 @Slf4j
-public class MetadataDatasourceRepository extends DataRepositoryNew<MetadataDatasourceDO> {
+public class MetadataDatasourceRepository extends DataRepository<MetadataDatasourceDO> {
 
     /**
      * 构造方法，指定默认实体类
@@ -61,7 +61,7 @@ public class MetadataDatasourceRepository extends DataRepositoryNew<MetadataData
      */
     public MetadataDatasourceDO getDatasourceByCode(String code) {
         DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and("code", code);
+        configStore.and(MetadataDatasourceDO.CODE, code);
         return findOne(configStore);
     }
 
@@ -86,7 +86,7 @@ public class MetadataDatasourceRepository extends DataRepositoryNew<MetadataData
         System.out.println("DEBUG: Repository - 查询appId: " + appId);
         DefaultConfigStore configStore = new DefaultConfigStore();
         // 尝试不同的字段名写法
-        configStore.and("app_id", appId);
+        configStore.and(MetadataDatasourceDO.APP_ID, appId);
         // 可能租户字段会自动添加，先不设置排序看看
         System.out.println("DEBUG: Repository - 查询条件: " + configStore.toString());
         List<MetadataDatasourceDO> result = findAllByConfig(configStore);
@@ -114,8 +114,8 @@ public class MetadataDatasourceRepository extends DataRepositoryNew<MetadataData
      */
     public boolean isDatasourceCodeUnique(Long id, String code, Long appId) {
         DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and("code", code);
-        configStore.and("app_id", appId);
+        configStore.and(MetadataDatasourceDO.CODE, code);
+        configStore.and(MetadataDatasourceDO.APP_ID, appId);
         if (id != null) {
             configStore.and(org.anyline.entity.Compare.NOT_EQUAL, "id", id);
         }

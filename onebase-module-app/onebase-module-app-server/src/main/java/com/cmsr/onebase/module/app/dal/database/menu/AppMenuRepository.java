@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.app.dal.database.menu;
 
-import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
+import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.module.app.dal.dataobject.menu.MenuDO;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
@@ -14,7 +14,7 @@ import java.util.List;
  * @Date：2025/8/6 9:31
  */
 @Repository
-public class AppMenuRepository extends DataRepositoryNew<MenuDO> {
+public class AppMenuRepository extends DataRepository<MenuDO> {
 
     public AppMenuRepository() {
         super(MenuDO.class);
@@ -23,6 +23,14 @@ public class AppMenuRepository extends DataRepositoryNew<MenuDO> {
     public List<MenuDO> findByApplicationId(Long applicationId) {
         ConfigStore configs = new DefaultConfigStore();
         configs.eq("application_id", applicationId);
+        configs.order("menu_sort", Order.TYPE.ASC);
+        return findAllByConfig(configs);
+    }
+
+    public List<MenuDO> findByApplicationIdAndNameLike(Long applicationId, String name) {
+        ConfigStore configs = new DefaultConfigStore();
+        configs.eq("application_id", applicationId);
+        configs.like("menu_name", name);
         configs.order("menu_sort", Order.TYPE.ASC);
         return findAllByConfig(configs);
     }

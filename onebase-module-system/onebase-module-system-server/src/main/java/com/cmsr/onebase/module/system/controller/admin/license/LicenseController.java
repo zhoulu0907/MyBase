@@ -84,7 +84,7 @@ public class LicenseController {
      * @return License详情
      */
     @GetMapping("/get")
-    @PreAuthorize("ss.hasAuthority('system:license:query')")
+    @PreAuthorize("@ss.hasPermission('system:platform-admin:query')")
     @Operation(summary = "获取License详情")
     public LicenseRespVO getLicense(@RequestParam("id") Long id) {
         LicenseDO license = licenseService.getLicense(id);
@@ -111,7 +111,7 @@ public class LicenseController {
      * @return License列表
      */
     @GetMapping("/simple-list")
-    @PreAuthorize("ss.hasAuthority('system:license:query')")
+    @PreAuthorize("@ss.hasPermission('system:platform-admin:query')")
     @Operation(summary = "获取全部License（精简信息）")
     public List<LicensePageRespVO> getSimpleLicenseList() {
         List<LicenseDO> list = licenseService.getSimpleLicenseList();

@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.app.dal.database.app;
 
-import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
+import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.data.base.BaseDO;
 import com.cmsr.onebase.module.app.controller.admin.app.vo.ApplicationPageReqVO;
@@ -17,7 +17,7 @@ import org.springframework.stereotype.Repository;
  * @Date：2025/8/6 14:08
  */
 @Repository
-public class AppApplicationRepository extends DataRepositoryNew<ApplicationDO> {
+public class AppApplicationRepository extends DataRepository<ApplicationDO> {
 
     public AppApplicationRepository() {
         super(ApplicationDO.class);

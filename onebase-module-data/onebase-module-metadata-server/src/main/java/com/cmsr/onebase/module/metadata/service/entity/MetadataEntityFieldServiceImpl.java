@@ -3,29 +3,21 @@ package com.cmsr.onebase.module.metadata.service.entity;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
-import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldBatchCreateReqVO;
-import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldBatchCreateRespVO;
-import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldBatchSortReqVO;
-import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldBatchUpdateReqVO;
-import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldBatchUpdateRespVO;
-import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldCreateItemVO;
-import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldDetailRespVO;
-import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldPageReqVO;
-import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldSaveReqVO;
-import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldSortItemVO;
-import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldUpdateItemVO;
-import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.FieldTypeConfigRespVO;
-import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldBatchSaveReqVO;
-import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldBatchSaveRespVO;
-import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldUpsertItemVO;
+import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.*;
 import com.cmsr.onebase.module.metadata.service.entity.vo.EntityFieldQueryVO;
+import com.cmsr.onebase.module.metadata.service.number.AutoNumberRuleService;
+import com.cmsr.onebase.module.metadata.convert.entity.EntityFieldConvert;
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataBusinessEntityDO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.datasource.MetadataDatasourceDO;
 import com.cmsr.onebase.module.metadata.dal.database.MetadataEntityFieldRepository;
 import com.cmsr.onebase.module.metadata.dal.database.TemporaryDatasourceService;
-import com.cmsr.onebase.module.metadata.dal.database.MetadataBusinessEntityRepository;
-import com.cmsr.onebase.module.metadata.dal.database.MetadataDatasourceRepository;
+import com.cmsr.onebase.module.metadata.service.datasource.MetadataDatasourceService;
+import com.cmsr.onebase.module.metadata.service.field.MetadataEntityFieldOptionService;
+import com.cmsr.onebase.module.metadata.service.field.MetadataEntityFieldConstraintService;
+import com.cmsr.onebase.module.metadata.service.number.AutoNumberConfigService;
+import com.cmsr.onebase.module.metadata.dal.dataobject.number.MetadataAutoNumberConfigDO;
+import com.cmsr.onebase.module.metadata.dal.dataobject.number.MetadataAutoNumberRuleItemDO;
 import com.cmsr.onebase.module.metadata.enums.FieldTypeEnum;
 import com.cmsr.onebase.module.metadata.enums.BusinessEntityTypeEnum;
 import jakarta.annotation.Resource;
@@ -60,9 +52,17 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
     @Resource
     private TemporaryDatasourceService temporaryDatasourceService;
     @Resource
-    private MetadataBusinessEntityRepository metadataBusinessEntityRepository;
+    private com.cmsr.onebase.module.metadata.service.entity.MetadataBusinessEntityService metadataBusinessEntityService;
     @Resource
-    private MetadataDatasourceRepository metadataDatasourceRepository;
+    private MetadataDatasourceService metadataDatasourceService;
+    @Resource
+    private MetadataEntityFieldOptionService fieldOptionService;
+    @Resource
+    private MetadataEntityFieldConstraintService fieldConstraintService;
+    @Resource
+    private AutoNumberConfigService autoNumberConfigService;
+    @Resource
+    private AutoNumberRuleService autoNumberRuleService;
 
     @Override
     public List<FieldTypeConfigRespVO> getFieldTypes() {
@@ -83,7 +83,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
         MetadataBusinessEntityDO businessEntity = null;
         MetadataDatasourceDO datasource = null;
         try {
-            businessEntity = getBusinessEntityById(reqVO.getEntityId());
+            businessEntity = metadataBusinessEntityService.getBusinessEntity(Long.valueOf(reqVO.getEntityId()));
             log.info("获取到业务实体: {}, 表名: {}, 数据源ID: {}",
                 businessEntity != null ? businessEntity.getId() : "null",
                 businessEntity != null ? businessEntity.getTableName() : "null",
@@ -91,7 +91,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
 
             if (businessEntity != null && businessEntity.getTableName() != null &&
                 !businessEntity.getTableName().trim().isEmpty()) {
-                datasource = getDatasourceById(businessEntity.getDatasourceId().toString());
+                datasource = metadataDatasourceService.getDatasource(businessEntity.getDatasourceId());
                 log.info("获取到数据源: {}, 数据源名称: {}, 数据源类型: {}",
                     datasource != null ? datasource.getId() : "null",
                     datasource != null ? datasource.getDatasourceName() : "null",
@@ -148,20 +148,20 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
         DefaultConfigStore configStore = new DefaultConfigStore();
 
         if (queryVO.getEntityId() != null && !queryVO.getEntityId().trim().isEmpty()) {
-            configStore.and("entity_id", Long.valueOf(queryVO.getEntityId()));
+            configStore.and(MetadataEntityFieldDO.ENTITY_ID, Long.valueOf(queryVO.getEntityId()));
         }
         if (queryVO.getKeyword() != null && !queryVO.getKeyword().trim().isEmpty()) {
-            configStore.and(Compare.LIKE, "field_name", "%" + queryVO.getKeyword() + "%")
-                    .or(Compare.LIKE, "display_name", "%" + queryVO.getKeyword() + "%");
+            configStore.and(Compare.LIKE, MetadataEntityFieldDO.FIELD_NAME, "%" + queryVO.getKeyword() + "%")
+                    .or(Compare.LIKE, MetadataEntityFieldDO.DISPLAY_NAME, "%" + queryVO.getKeyword() + "%");
         }
         if (queryVO.getIsSystemField() != null) {
-            configStore.and("is_system_field", queryVO.getIsSystemField());
+            configStore.and(MetadataEntityFieldDO.IS_SYSTEM_FIELD, queryVO.getIsSystemField());
         }
         if (queryVO.getFieldCode() != null && !queryVO.getFieldCode().trim().isEmpty()) {
-            configStore.and(Compare.LIKE, "field_code", "%" + queryVO.getFieldCode() + "%");
+            configStore.and(Compare.LIKE, MetadataEntityFieldDO.FIELD_CODE, "%" + queryVO.getFieldCode() + "%");
         }
 
-        configStore.order("sort_order", Order.TYPE.ASC);
+        configStore.order(MetadataEntityFieldDO.SORT_ORDER, Order.TYPE.ASC);
         configStore.order("create_time", Order.TYPE.DESC);
 
         return metadataEntityFieldRepository.findAllByConfig(configStore);
@@ -180,8 +180,54 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
         // 获取实体名称（这里简化处理，实际项目中可能需要关联查询）
         result.setEntityName("实体名称");
 
-        // 获取校验规则（这里暂时返回空列表，后续实现校验规则管理时再完善）
+        // 获取校验规则（旧）
         result.setValidationRules(new ArrayList<>());
+
+        // 选项与约束补充
+        // 仅当字段类型为单/多选时返回选项
+        if ("SINGLE_SELECT".equalsIgnoreCase(entityField.getFieldType())
+            || "MULTI_SELECT".equalsIgnoreCase(entityField.getFieldType())
+            || "PICKLIST".equalsIgnoreCase(entityField.getFieldType())) {
+            result.setOptions(fieldOptionService.listByFieldId(entityField.getId()).stream().map(o -> {
+                FieldOptionRespVO v = new FieldOptionRespVO();
+                v.setId(String.valueOf(o.getId()));
+                v.setFieldId(o.getFieldId());
+                v.setOptionLabel(o.getOptionLabel());
+                v.setOptionValue(o.getOptionValue());
+                v.setOptionOrder(o.getOptionOrder());
+                v.setIsEnabled(o.getIsEnabled());
+                v.setDescription(o.getDescription());
+                return v;
+            }).toList());
+        }
+        var constraints = fieldConstraintService.listByFieldId(entityField.getId());
+        if (constraints != null && !constraints.isEmpty()) {
+            FieldConstraintRespVO cr = new FieldConstraintRespVO();
+            for (var c : constraints) {
+                if ("LENGTH_RANGE".equalsIgnoreCase(c.getConstraintType())) {
+                    cr.setLengthEnabled(c.getIsEnabled());
+                    cr.setMinLength(c.getMinLength());
+                    cr.setMaxLength(c.getMaxLength());
+                    cr.setLengthPrompt(c.getPromptMessage());
+                } else if ("REGEX".equalsIgnoreCase(c.getConstraintType())) {
+                    cr.setRegexEnabled(c.getIsEnabled());
+                    cr.setRegexPattern(c.getRegexPattern());
+                    cr.setRegexPrompt(c.getPromptMessage());
+                }
+            }
+            result.setConstraints(cr);
+        }
+
+        // 自动编号摘要
+        MetadataAutoNumberConfigDO cfg = autoNumberConfigService.getByFieldId(entityField.getId());
+        if (cfg != null) {
+            EntityFieldAutoNumberBriefRespVO brief = new EntityFieldAutoNumberBriefRespVO();
+            brief.setEnabled(cfg.getIsEnabled());
+            brief.setMode(cfg.getNumberMode());
+            brief.setDigitWidth(cfg.getDigitWidth() != null ? (int) cfg.getDigitWidth() : null);
+            brief.setResetCycle(cfg.getResetCycle());
+            result.setAutoNumber(brief);
+        }
 
         return result;
     }
@@ -204,10 +250,10 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
                 configStore.and("id", Long.valueOf(firstFieldId));
                 MetadataEntityFieldDO firstField = metadataEntityFieldRepository.findOne(configStore);
                 if (firstField != null) {
-                    businessEntity = getBusinessEntityById(firstField.getEntityId().toString());
+                    businessEntity = metadataBusinessEntityService.getBusinessEntity(firstField.getEntityId());
                     if (businessEntity != null && businessEntity.getTableName() != null &&
                         !businessEntity.getTableName().trim().isEmpty()) {
-                        datasource = getDatasourceById(businessEntity.getDatasourceId().toString());
+                        datasource = metadataDatasourceService.getDatasource(businessEntity.getDatasourceId());
                     }
                 }
             }
@@ -281,13 +327,13 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
         EntityFieldBatchSaveRespVO resp = new EntityFieldBatchSaveRespVO();
 
         // 1. 获取实体与数据源
-        MetadataBusinessEntityDO businessEntity = getBusinessEntityById(reqVO.getEntityId());
+        MetadataBusinessEntityDO businessEntity = metadataBusinessEntityService.getBusinessEntity(Long.valueOf(reqVO.getEntityId()));
         if (businessEntity == null) {
             throw new IllegalArgumentException("业务实体不存在");
         }
         MetadataDatasourceDO datasource = null;
         if (businessEntity.getTableName() != null && !businessEntity.getTableName().trim().isEmpty()) {
-            datasource = getDatasourceById(businessEntity.getDatasourceId().toString());
+            datasource = metadataDatasourceService.getDatasource(businessEntity.getDatasourceId());
         }
 
         // 2. 先删除
@@ -306,6 +352,15 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
 
                 // 实体是否允许改表结构
                 validateEntityAllowModifyStructure(existing.getEntityId());
+
+                // 先删子配置（选项、约束、自动编号）
+                if (existing != null) {
+                    try {
+                        fieldOptionService.deleteByFieldId(existing.getId());
+                        fieldConstraintService.deleteByFieldId(existing.getId());
+                        autoNumberConfigService.deleteByFieldId(existing.getId());
+                    } catch (Exception ignore) {}
+                }
 
                 // 先删库记录
                 metadataEntityFieldRepository.deleteById(Long.valueOf(item.getId()));
@@ -364,6 +419,10 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
                     alterColumnInTable(datasource, businessEntity.getTableName(), full);
                 }
                 resp.getUpdatedIds().add(item.getId());
+
+                // 同步选项、约束和自动编号（整体替换）
+                Long fieldId = origin.getId();
+                processFieldRelatedData(fieldId, full, item.getOptions(), item.getConstraints(), item.getAutoNumber());
             }
         }
 
@@ -373,12 +432,12 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
                 // 智能处理：如果没有传ID，但fieldCode或fieldName已存在，则自动转换为更新操作
                 MetadataEntityFieldDO existingField = findExistingFieldByCodeOrName(reqVO.getEntityId(), item);
                 if (existingField != null) {
-                    log.info("发现已存在的字段，自动转换为更新操作: fieldName={}, existingId={}", 
+                    log.info("发现已存在的字段，自动转换为更新操作: fieldName={}, existingId={}",
                             item.getFieldName(), existingField.getId());
-                    
+
                     // 转换为更新操作
                     item.setId(existingField.getId().toString());
-                    
+
                     // 组装更新对象（只覆盖非空字段）
                     MetadataEntityFieldDO upd = new MetadataEntityFieldDO();
                     upd.setId(existingField.getId());
@@ -400,7 +459,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
                     if (item.getIsSystemField() != null) upd.setIsSystemField(item.getIsSystemField());
 
                     metadataEntityFieldRepository.update(upd);
-                    
+
                     // 同步物理表（需要完整字段信息）
                     DefaultConfigStore cs2 = new DefaultConfigStore();
                     cs2.and("id", existingField.getId());
@@ -411,7 +470,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
                     resp.getUpdatedIds().add(existingField.getId().toString());
                     continue; // 跳过新增逻辑
                 }
-                
+
                 // 确实是新增字段的情况
                 // 名称唯一
                 validateEntityFieldNameUnique(null, reqVO.getEntityId(), item.getFieldName());
@@ -443,6 +502,10 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
                     addColumnToTable(datasource, businessEntity.getTableName(), toCreate);
                 }
                 resp.getCreatedIds().add(String.valueOf(toCreate.getId()));
+
+                // 同步选项、约束和自动编号（整体替换）
+                Long fieldId = toCreate.getId();
+                processFieldRelatedData(fieldId, toCreate, item.getOptions(), item.getConstraints(), item.getAutoNumber());
             }
         }
 
@@ -458,22 +521,22 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
      */
     private MetadataEntityFieldDO findExistingFieldByCodeOrName(String entityId, EntityFieldUpsertItemVO item) {
         DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and("entity_id", Long.valueOf(entityId));
-        
+        configStore.and(MetadataEntityFieldDO.ENTITY_ID, Long.valueOf(entityId));
+
         // fieldCode字段已注释，跳过根据fieldCode查找逻辑
         // 直接根据fieldName查找
-        
+
         // 其次根据fieldName查找
         if (item.getFieldName() != null && !item.getFieldName().trim().isEmpty()) {
             DefaultConfigStore nameConfigStore = new DefaultConfigStore();
-            nameConfigStore.and("entity_id", Long.valueOf(entityId));
-            nameConfigStore.and("field_name", item.getFieldName());
+            nameConfigStore.and(MetadataEntityFieldDO.ENTITY_ID, Long.valueOf(entityId));
+            nameConfigStore.and(MetadataEntityFieldDO.FIELD_NAME, item.getFieldName());
             MetadataEntityFieldDO existingField = metadataEntityFieldRepository.findOne(nameConfigStore);
             if (existingField != null) {
                 return existingField;
             }
         }
-        
+
         return null;
     }
 
@@ -524,10 +587,10 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
 
         // 同步到物理表 - 失败时直接抛出异常回滚事务
         try {
-            MetadataBusinessEntityDO businessEntity = getBusinessEntityById(createReqVO.getEntityId().toString());
+            MetadataBusinessEntityDO businessEntity = metadataBusinessEntityService.getBusinessEntity(Long.valueOf(createReqVO.getEntityId()));
             if (businessEntity != null && businessEntity.getTableName() != null &&
                 !businessEntity.getTableName().trim().isEmpty()) {
-                MetadataDatasourceDO datasource = getDatasourceById(businessEntity.getDatasourceId().toString());
+                MetadataDatasourceDO datasource = metadataDatasourceService.getDatasource(businessEntity.getDatasourceId());
                 if (datasource != null) {
                     addColumnToTable(datasource, businessEntity.getTableName(), entityField);
                 }
@@ -537,6 +600,12 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
             throw new RuntimeException("同步物理表失败: " + e.getMessage(), e);
         }
 
+        return entityField.getId();
+    }
+
+    @Override
+    public Long createEntityFieldInternal(MetadataEntityFieldDO entityField) {
+        metadataEntityFieldRepository.insert(entityField);
         return entityField.getId();
     }
 
@@ -563,10 +632,10 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
 
         // 同步到物理表
         try {
-            MetadataBusinessEntityDO businessEntity = getBusinessEntityById(updateReqVO.getEntityId().toString());
+            MetadataBusinessEntityDO businessEntity = metadataBusinessEntityService.getBusinessEntity(Long.valueOf(updateReqVO.getEntityId()));
             if (businessEntity != null && businessEntity.getTableName() != null &&
                 !businessEntity.getTableName().trim().isEmpty()) {
-                MetadataDatasourceDO datasource = getDatasourceById(businessEntity.getDatasourceId().toString());
+                MetadataDatasourceDO datasource = metadataDatasourceService.getDatasource(businessEntity.getDatasourceId());
                 if (datasource != null) {
                     alterColumnInTable(datasource, businessEntity.getTableName(), updateObj);
                 }
@@ -594,16 +663,23 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
             validateEntityAllowModifyStructure(existingField.getEntityId());
         }
 
+        // 先删除子配置（选项、约束、自动编号）
+        if (existingField != null) {
+            fieldOptionService.deleteByFieldId(existingField.getId());
+            fieldConstraintService.deleteByFieldId(existingField.getId());
+            autoNumberConfigService.deleteByFieldId(existingField.getId());
+        }
+
         // 删除实体字段
         metadataEntityFieldRepository.deleteById(longId);
 
         // 从物理表删除字段
         if (existingField != null) {
             try {
-                MetadataBusinessEntityDO businessEntity = getBusinessEntityById(existingField.getEntityId());
+                MetadataBusinessEntityDO businessEntity = metadataBusinessEntityService.getBusinessEntity(existingField.getEntityId());
                 if (businessEntity != null && businessEntity.getTableName() != null &&
                     !businessEntity.getTableName().trim().isEmpty()) {
-                    MetadataDatasourceDO datasource = getDatasourceById(businessEntity.getDatasourceId().toString());
+                    MetadataDatasourceDO datasource = metadataDatasourceService.getDatasource(businessEntity.getDatasourceId());
                     if (datasource != null) {
                         dropColumnFromTable(datasource, businessEntity.getTableName(), existingField.getFieldName());
                     }
@@ -625,8 +701,8 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
     private void validateEntityFieldNameUnique(String id, String entityId, String fieldName) {
         Long longEntityId = Long.valueOf(entityId);
         DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and("entity_id", longEntityId);
-        configStore.and("field_name", fieldName);
+        configStore.and(MetadataEntityFieldDO.ENTITY_ID, longEntityId);
+        configStore.and(MetadataEntityFieldDO.FIELD_NAME, fieldName);
         if (id != null) {
             Long longId = Long.valueOf(id);
             configStore.and(Compare.NOT_EQUAL, "id", longId);
@@ -650,38 +726,38 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
 
         // 添加查询条件
         if (pageReqVO.getEntityId() != null && !pageReqVO.getEntityId().trim().isEmpty()) {
-            configStore.and("entity_id", Long.valueOf(pageReqVO.getEntityId()));
+            configStore.and(MetadataEntityFieldDO.ENTITY_ID, Long.valueOf(pageReqVO.getEntityId()));
         }
         if (pageReqVO.getFieldName() != null && !pageReqVO.getFieldName().trim().isEmpty()) {
-            configStore.and(Compare.LIKE, "field_name", "%" + pageReqVO.getFieldName() + "%");
+            configStore.and(Compare.LIKE, MetadataEntityFieldDO.FIELD_NAME, "%" + pageReqVO.getFieldName() + "%");
         }
         if (pageReqVO.getDisplayName() != null && !pageReqVO.getDisplayName().trim().isEmpty()) {
-            configStore.and(Compare.LIKE, "display_name", "%" + pageReqVO.getDisplayName() + "%");
+            configStore.and(Compare.LIKE, MetadataEntityFieldDO.DISPLAY_NAME, "%" + pageReqVO.getDisplayName() + "%");
         }
         if (pageReqVO.getFieldType() != null && !pageReqVO.getFieldType().trim().isEmpty()) {
-            configStore.and("field_type", pageReqVO.getFieldType());
+            configStore.and(MetadataEntityFieldDO.FIELD_TYPE, pageReqVO.getFieldType());
         }
         if (pageReqVO.getIsSystemField() != null) {
-            configStore.and("is_system_field", pageReqVO.getIsSystemField());
+            configStore.and(MetadataEntityFieldDO.IS_SYSTEM_FIELD, pageReqVO.getIsSystemField());
         }
         if (pageReqVO.getIsPrimaryKey() != null) {
-            configStore.and("is_primary_key", pageReqVO.getIsPrimaryKey());
+            configStore.and(MetadataEntityFieldDO.IS_PRIMARY_KEY, pageReqVO.getIsPrimaryKey());
         }
         if (pageReqVO.getIsRequired() != null) {
-            configStore.and("is_required", pageReqVO.getIsRequired());
+            configStore.and(MetadataEntityFieldDO.IS_REQUIRED, pageReqVO.getIsRequired());
         }
         if (pageReqVO.getRunMode() != null) {
-            configStore.and("run_mode", pageReqVO.getRunMode());
+            configStore.and(MetadataEntityFieldDO.RUN_MODE, pageReqVO.getRunMode());
         }
         if (pageReqVO.getAppId() != null && !pageReqVO.getAppId().trim().isEmpty()) {
-            configStore.and("app_id", Long.valueOf(pageReqVO.getAppId()));
+            configStore.and(MetadataEntityFieldDO.APP_ID, Long.valueOf(pageReqVO.getAppId()));
         }
         if (pageReqVO.getFieldCode() != null && !pageReqVO.getFieldCode().trim().isEmpty()) {
-            configStore.and(Compare.LIKE, "field_code", "%" + pageReqVO.getFieldCode() + "%");
+            configStore.and(Compare.LIKE, MetadataEntityFieldDO.FIELD_CODE, "%" + pageReqVO.getFieldCode() + "%");
         }
 
         // 添加排序：按照字段排序优先，然后按创建时间倒序
-        configStore.order("sort_order", Order.TYPE.ASC);
+        configStore.order(MetadataEntityFieldDO.SORT_ORDER, Order.TYPE.ASC);
         configStore.order("create_time", Order.TYPE.DESC);
 
         // 分页查询
@@ -691,7 +767,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
     @Override
     public List<MetadataEntityFieldDO> getEntityFieldList() {
         DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.order("sort_order", Order.TYPE.ASC);
+        configStore.order(MetadataEntityFieldDO.SORT_ORDER, Order.TYPE.ASC);
         configStore.order("create_time", Order.TYPE.DESC);
         return metadataEntityFieldRepository.findAllByConfig(configStore);
     }
@@ -700,8 +776,8 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
     public List<MetadataEntityFieldDO> getEntityFieldListByEntityId(String entityId) {
         Long longEntityId = Long.valueOf(entityId);
         DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and("entity_id", longEntityId);
-        configStore.order("sort_order", Order.TYPE.ASC);
+        configStore.and(MetadataEntityFieldDO.ENTITY_ID, longEntityId);
+        configStore.order(MetadataEntityFieldDO.SORT_ORDER, Order.TYPE.ASC);
         configStore.order("create_time", Order.TYPE.DESC);
         return metadataEntityFieldRepository.findAllByConfig(configStore);
     }
@@ -711,18 +787,18 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
     public void deleteEntityFieldsByEntityId(String entityId) {
         Long longEntityId = Long.valueOf(entityId);
         DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and("entity_id", longEntityId);
+        configStore.and(MetadataEntityFieldDO.ENTITY_ID, longEntityId);
         List<MetadataEntityFieldDO> fields = metadataEntityFieldRepository.findAllByConfig(configStore);
 
         // 获取业务实体信息，用于批量删除物理表字段
         MetadataBusinessEntityDO businessEntity = null;
         MetadataDatasourceDO datasource = null;
         try {
-            businessEntity = getBusinessEntityById(entityId);
-            if (businessEntity != null && businessEntity.getTableName() != null &&
-                !businessEntity.getTableName().trim().isEmpty()) {
-                datasource = getDatasourceById(businessEntity.getDatasourceId().toString());
-            }
+            businessEntity = metadataBusinessEntityService.getBusinessEntity(Long.valueOf(entityId));
+                            if (businessEntity != null && businessEntity.getTableName() != null &&
+                    !businessEntity.getTableName().trim().isEmpty()) {
+                    datasource = metadataDatasourceService.getDatasource(businessEntity.getDatasourceId());
+                }
         } catch (Exception e) {
             log.error("获取业务实体信息失败: {}", e.getMessage(), e);
         }
@@ -743,31 +819,9 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
         }
     }
 
-    /**
-     * 获取业务实体信息
-     */
-    private MetadataBusinessEntityDO getBusinessEntityById(String entityId) {
-        if (entityId == null || entityId.trim().isEmpty()) {
-            return null;
-        }
 
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and("id", Long.valueOf(entityId));
-        return metadataBusinessEntityRepository.findOne(configStore);
-    }
 
-    /**
-     * 获取数据源信息
-     */
-    private MetadataDatasourceDO getDatasourceById(String datasourceId) {
-        if (datasourceId == null || datasourceId.trim().isEmpty()) {
-            return null;
-        }
 
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and("id", Long.valueOf(datasourceId));
-        return metadataDatasourceRepository.findOne(configStore);
-    }
 
     /**
      * 添加列到表
@@ -1021,7 +1075,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
      */
     private void validateEntityAllowModifyStructure(Long entityId) {
         // 获取业务实体信息
-        MetadataBusinessEntityDO businessEntity = getBusinessEntityById(entityId);
+        MetadataBusinessEntityDO businessEntity = metadataBusinessEntityService.getBusinessEntity(Long.valueOf(entityId));
         if (businessEntity == null) {
             throw new IllegalArgumentException("业务实体不存在");
         }
@@ -1035,15 +1089,287 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
         }
     }
 
+
+
+    @Override
+    public List<MetadataEntityFieldDO> findAllByConfig(DefaultConfigStore configStore) {
+        return metadataEntityFieldRepository.findAllByConfig(configStore);
+    }
+
+    // ==================== 新增方法实现：处理包含自动编号的业务逻辑 ====================
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public EntityFieldRespVO createEntityFieldWithRelated(@Valid EntityFieldSaveReqVO reqVO) {
+        Long id = createEntityField(reqVO);
+        MetadataEntityFieldDO entityField = getEntityField(String.valueOf(id));
+        
+        // 处理选项、约束和自动编号
+        processFieldRelatedData(id, entityField, reqVO.getOptions(), reqVO.getConstraints(), reqVO.getAutoNumber());
+        
+        return EntityFieldConvert.INSTANCE.convert(entityField);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean updateEntityFieldWithRelated(@Valid EntityFieldSaveReqVO reqVO) {
+        updateEntityField(reqVO);
+        
+        if (reqVO.getId() != null) {
+            Long fieldId = Long.valueOf(reqVO.getId());
+            MetadataEntityFieldDO entityField = getEntityField(String.valueOf(fieldId));
+            
+            // 处理选项、约束和自动编号
+            processFieldRelatedData(fieldId, entityField, reqVO.getOptions(), reqVO.getConstraints(), reqVO.getAutoNumber());
+        }
+        
+        return true;
+    }
+
+    @Override
+    public List<EntityFieldRespVO> getEntityFieldListWithRelated(@Valid EntityFieldQueryReqVO reqVO) {
+        EntityFieldQueryVO queryVO = EntityFieldConvert.INSTANCE.convertVOToQueryVO(reqVO);
+        List<MetadataEntityFieldDO> list = getEntityFieldListByConditions(queryVO);
+        List<EntityFieldRespVO> respList = EntityFieldConvert.INSTANCE.convertList(list);
+        
+        // 为每个字段补充选项、约束和自动编号信息
+        for (int i = 0; i < list.size(); i++) {
+            MetadataEntityFieldDO f = list.get(i);
+            EntityFieldRespVO v = respList.get(i);
+            populateFieldRelatedData(f, v);
+        }
+        
+        return respList;
+    }
+
+    @Override
+    public EntityFieldDetailRespVO getEntityFieldDetailWithFullConfig(String id) {
+        EntityFieldDetailRespVO result = getEntityFieldDetail(id);
+        
+        // 补充完整的自动编号配置信息
+        Long fieldId = Long.valueOf(id);
+        MetadataAutoNumberConfigDO config = autoNumberConfigService.getByFieldId(fieldId);
+        if (config != null) {
+            AutoNumberConfigRespVO autoNumberConfig = convertToAutoNumberConfigRespVO(config);
+            // 获取规则项列表
+            List<MetadataAutoNumberRuleItemDO> rules = autoNumberConfigService.listRules(config.getId());
+            List<AutoNumberRuleItemRespVO> ruleVOs = rules.stream()
+                    .map(this::convertToAutoNumberRuleItemRespVO)
+                    .toList();
+            autoNumberConfig.setRules(ruleVOs);
+            result.setAutoNumberConfig(autoNumberConfig);
+        }
+        
+        return result;
+    }
+
     /**
-     * 根据ID获取业务实体
-     *
-     * @param entityId 实体ID
-     * @return 业务实体DO
+     * 处理字段相关数据（选项、约束、自动编号）
      */
-    private MetadataBusinessEntityDO getBusinessEntityById(Long entityId) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and("id", entityId);
-        return metadataBusinessEntityRepository.findOne(configStore);
+    private void processFieldRelatedData(Long fieldId, MetadataEntityFieldDO entityField,
+                                       List<FieldOptionRespVO> options,
+                                       FieldConstraintRespVO constraints,
+                                       AutoNumberConfigReqVO autoNumber) {
+        // 处理选项
+        if (options != null) {
+            fieldOptionService.deleteByFieldId(fieldId);
+            for (var opt : options) {
+                com.cmsr.onebase.module.metadata.dal.dataobject.field.MetadataEntityFieldOptionDO d = 
+                    new com.cmsr.onebase.module.metadata.dal.dataobject.field.MetadataEntityFieldOptionDO();
+                d.setFieldId(fieldId);
+                d.setOptionLabel(opt.getOptionLabel());
+                d.setOptionValue(opt.getOptionValue());
+                d.setOptionOrder(opt.getOptionOrder());
+                d.setIsEnabled(opt.getIsEnabled());
+                d.setDescription(opt.getDescription());
+                d.setAppId(entityField != null ? entityField.getAppId() : null);
+                fieldOptionService.create(d);
+            }
+        }
+
+        // 处理约束
+        if (constraints != null) {
+            fieldConstraintService.deleteByFieldId(fieldId);
+            processFieldConstraints(fieldId, entityField, constraints);
+        }
+
+        // 处理自动编号
+        if (autoNumber != null) {
+            processAutoNumberConfig(fieldId, entityField, autoNumber);
+        }
+    }
+
+    /**
+     * 处理字段约束
+     */
+    private void processFieldConstraints(Long fieldId, MetadataEntityFieldDO entityField, FieldConstraintRespVO constraints) {
+        if (constraints.getMinLength() != null && constraints.getMaxLength() != null && 
+            constraints.getMinLength() > constraints.getMaxLength()) {
+            throw new IllegalArgumentException("最小长度不能大于最大长度");
+        }
+
+        if (constraints.getMinLength() != null || constraints.getMaxLength() != null || 
+            constraints.getLengthEnabled() != null || 
+            (constraints.getLengthPrompt() != null && !constraints.getLengthPrompt().isEmpty())) {
+            var d = new com.cmsr.onebase.module.metadata.dal.dataobject.field.MetadataEntityFieldConstraintDO();
+            d.setFieldId(fieldId);
+            d.setConstraintType("LENGTH_RANGE");
+            d.setMinLength(constraints.getMinLength());
+            d.setMaxLength(constraints.getMaxLength());
+            d.setPromptMessage(constraints.getLengthPrompt());
+            d.setIsEnabled(constraints.getLengthEnabled());
+            d.setRunMode(entityField != null ? entityField.getRunMode() : 0);
+            d.setAppId(entityField != null ? entityField.getAppId() : null);
+            fieldConstraintService.upsert(d);
+        }
+
+        if (constraints.getRegexPattern() != null || constraints.getRegexEnabled() != null || 
+            (constraints.getRegexPrompt() != null && !constraints.getRegexPrompt().isEmpty())) {
+            var d = new com.cmsr.onebase.module.metadata.dal.dataobject.field.MetadataEntityFieldConstraintDO();
+            d.setFieldId(fieldId);
+            d.setConstraintType("REGEX");
+            d.setRegexPattern(constraints.getRegexPattern());
+            d.setPromptMessage(constraints.getRegexPrompt());
+            d.setIsEnabled(constraints.getRegexEnabled());
+            d.setRunMode(entityField != null ? entityField.getRunMode() : 0);
+            d.setAppId(entityField != null ? entityField.getAppId() : null);
+            fieldConstraintService.upsert(d);
+        }
+    }
+
+    /**
+     * 处理自动编号配置
+     */
+    private void processAutoNumberConfig(Long fieldId, MetadataEntityFieldDO entityField, AutoNumberConfigReqVO autoNumber) {
+        // 先删除现有配置
+        autoNumberConfigService.deleteByFieldId(fieldId);
+        
+        if (autoNumber.getIsEnabled() != null && autoNumber.getIsEnabled() == 0) { // 0表示启用
+            // 创建自动编号配置
+            MetadataAutoNumberConfigDO config = new MetadataAutoNumberConfigDO();
+            config.setFieldId(fieldId);
+            config.setIsEnabled(autoNumber.getIsEnabled());
+            config.setNumberMode(autoNumber.getNumberMode());
+            config.setDigitWidth(autoNumber.getDigitWidth());
+            config.setOverflowContinue(autoNumber.getOverflowContinue());
+            config.setInitialValue(autoNumber.getInitialValue() != null ? autoNumber.getInitialValue() : 1L);
+            config.setResetCycle(autoNumber.getResetCycle());
+            config.setRunMode(entityField != null ? entityField.getRunMode() : 0);
+            config.setAppId(entityField != null ? entityField.getAppId() : null);
+            
+            Long configId = autoNumberConfigService.upsert(config);
+            
+            // 处理规则项
+            if (autoNumber.getRules() != null && !autoNumber.getRules().isEmpty()) {
+                for (AutoNumberRuleItemReqVO ruleReq : autoNumber.getRules()) {
+                    MetadataAutoNumberRuleItemDO rule = new MetadataAutoNumberRuleItemDO();
+                    rule.setConfigId(configId);
+                    rule.setItemType(ruleReq.getItemType());
+                    rule.setItemOrder(ruleReq.getItemOrder());
+                    rule.setFormat(ruleReq.getFormat());
+                    rule.setTextValue(ruleReq.getTextValue());
+                    rule.setRefFieldId(ruleReq.getRefFieldId());
+                    rule.setIsEnabled(ruleReq.getIsEnabled() != null ? ruleReq.getIsEnabled() : 0);
+                    rule.setAppId(entityField != null ? entityField.getAppId() : null);
+                    
+                    autoNumberRuleService.add(rule);
+                }
+            }
+        }
+    }
+
+    /**
+     * 填充字段相关数据到响应VO
+     */
+    private void populateFieldRelatedData(MetadataEntityFieldDO field, EntityFieldRespVO vo) {
+        // 填充选项信息
+        if ("SINGLE_SELECT".equalsIgnoreCase(field.getFieldType()) || 
+            "MULTI_SELECT".equalsIgnoreCase(field.getFieldType()) ||
+            "PICKLIST".equalsIgnoreCase(field.getFieldType())) {
+            var options = fieldOptionService.listByFieldId(field.getId());
+            if (options != null && !options.isEmpty()) {
+                List<FieldOptionRespVO> optionVOs = options.stream().map(o -> {
+                    FieldOptionRespVO item = new FieldOptionRespVO();
+                    item.setId(o.getId() != null ? String.valueOf(o.getId()) : null);
+                    item.setFieldId(o.getFieldId());
+                    item.setOptionLabel(o.getOptionLabel());
+                    item.setOptionValue(o.getOptionValue());
+                    item.setOptionOrder(o.getOptionOrder());
+                    item.setIsEnabled(o.getIsEnabled());
+                    item.setDescription(o.getDescription());
+                    return item;
+                }).toList();
+                vo.setOptions(optionVOs);
+            }
+        }
+
+        // 填充约束信息
+        var constraints = fieldConstraintService.listByFieldId(field.getId());
+        if (constraints != null && !constraints.isEmpty()) {
+            FieldConstraintRespVO constraintVO = new FieldConstraintRespVO();
+            for (var c : constraints) {
+                if ("LENGTH_RANGE".equalsIgnoreCase(c.getConstraintType())) {
+                    constraintVO.setLengthEnabled(c.getIsEnabled());
+                    constraintVO.setMinLength(c.getMinLength());
+                    constraintVO.setMaxLength(c.getMaxLength());
+                    constraintVO.setLengthPrompt(c.getPromptMessage());
+                } else if ("REGEX".equalsIgnoreCase(c.getConstraintType())) {
+                    constraintVO.setRegexEnabled(c.getIsEnabled());
+                    constraintVO.setRegexPattern(c.getRegexPattern());
+                    constraintVO.setRegexPrompt(c.getPromptMessage());
+                }
+            }
+            vo.setConstraints(constraintVO);
+        }
+
+        // 填充自动编号摘要信息
+        MetadataAutoNumberConfigDO config = autoNumberConfigService.getByFieldId(field.getId());
+        if (config != null) {
+            EntityFieldAutoNumberBriefRespVO brief = new EntityFieldAutoNumberBriefRespVO();
+            brief.setEnabled(config.getIsEnabled());
+            brief.setMode(config.getNumberMode());
+            brief.setDigitWidth(config.getDigitWidth() != null ? (int) config.getDigitWidth() : null);
+            brief.setResetCycle(config.getResetCycle());
+            vo.setAutoNumber(brief);
+        }
+    }
+
+    /**
+     * 转换自动编号配置DO为响应VO
+     */
+    private AutoNumberConfigRespVO convertToAutoNumberConfigRespVO(MetadataAutoNumberConfigDO config) {
+        AutoNumberConfigRespVO vo = new AutoNumberConfigRespVO();
+        vo.setId(config.getId());
+        vo.setFieldId(config.getFieldId());
+        vo.setIsEnabled(config.getIsEnabled());
+        vo.setNumberMode(config.getNumberMode());
+        vo.setDigitWidth(config.getDigitWidth());
+        vo.setOverflowContinue(config.getOverflowContinue());
+        vo.setInitialValue(config.getInitialValue());
+        vo.setResetCycle(config.getResetCycle());
+        vo.setRunMode(config.getRunMode());
+        vo.setAppId(config.getAppId());
+        vo.setCreateTime(config.getCreateTime());
+        vo.setUpdateTime(config.getUpdateTime());
+        return vo;
+    }
+
+    /**
+     * 转换自动编号规则项DO为响应VO
+     */
+    private AutoNumberRuleItemRespVO convertToAutoNumberRuleItemRespVO(MetadataAutoNumberRuleItemDO rule) {
+        AutoNumberRuleItemRespVO vo = new AutoNumberRuleItemRespVO();
+        vo.setId(rule.getId());
+        vo.setConfigId(rule.getConfigId());
+        vo.setItemType(rule.getItemType());
+        vo.setItemOrder(rule.getItemOrder());
+        vo.setFormat(rule.getFormat());
+        vo.setTextValue(rule.getTextValue());
+        vo.setRefFieldId(rule.getRefFieldId());
+        vo.setIsEnabled(rule.getIsEnabled());
+        vo.setAppId(rule.getAppId());
+        vo.setCreateTime(rule.getCreateTime());
+        vo.setUpdateTime(rule.getUpdateTime());
+        return vo;
     }
 }

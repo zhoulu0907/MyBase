@@ -10,7 +10,7 @@ import java.util.List;
  */
 public interface AppMenuService {
 
-    List<MenuListRespVO> listApplicationMenu(Long applicationId);
+    List<MenuListRespVO> listApplicationMenu(Long applicationId, String name);
 
     MenuCreateRespVO createApplicationMenu(MenuCreateReqVO createReqVO);
 

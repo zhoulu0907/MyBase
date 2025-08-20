@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.metadata.dal.database;
 
-import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
+import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataBusinessEntityDO;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +20,7 @@ import java.util.List;
  */
 @Repository
 @Slf4j
-public class MetadataBusinessEntityRepository extends DataRepositoryNew<MetadataBusinessEntityDO> {
+public class MetadataBusinessEntityRepository extends DataRepository<MetadataBusinessEntityDO> {
 
     /**
      * 构造方法，指定默认实体类
@@ -60,7 +60,7 @@ public class MetadataBusinessEntityRepository extends DataRepositoryNew<Metadata
      */
     public MetadataBusinessEntityDO getBusinessEntityByCode(String code) {
         DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and("code", code);
+        configStore.and(MetadataBusinessEntityDO.CODE, code);
         return findOne(configStore);
     }
 
@@ -95,7 +95,7 @@ public class MetadataBusinessEntityRepository extends DataRepositoryNew<Metadata
      */
     public List<MetadataBusinessEntityDO> getBusinessEntityListByDatasourceId(Long datasourceId) {
         DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and("datasource_id", datasourceId);
+        configStore.and(MetadataBusinessEntityDO.DATASOURCE_ID, datasourceId);
         configStore.order("create_time", org.anyline.entity.Order.TYPE.DESC);
         return findAllByConfig(configStore);
     }
@@ -108,7 +108,7 @@ public class MetadataBusinessEntityRepository extends DataRepositoryNew<Metadata
      */
     public List<MetadataBusinessEntityDO> getSimpleEntityListByAppId(Long appId) {
         DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and("app_id", appId);
+        configStore.and(MetadataBusinessEntityDO.APP_ID, appId);
         configStore.order("create_time", org.anyline.entity.Order.TYPE.ASC);
         return findAllByConfig(configStore);
     }
@@ -135,8 +135,8 @@ public class MetadataBusinessEntityRepository extends DataRepositoryNew<Metadata
      */
     public boolean isBusinessEntityCodeUnique(Long id, String code, Long appId) {
         DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and("code", code);
-        configStore.and("app_id", appId);
+        configStore.and(MetadataBusinessEntityDO.CODE, code);
+        configStore.and(MetadataBusinessEntityDO.APP_ID, appId);
         if (id != null) {
             configStore.and(Compare.NOT_EQUAL, "id", id);
         }

@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.infra.controller.admin.redis.vo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
+import lombok.experimental.SuperBuilder;
 import lombok.Data;
 
 import java.util.List;
@@ -10,7 +10,7 @@ import java.util.Properties;
 
 @Schema(description = "管理后台 - Redis 监控信息 Response VO")
 @Data
-@Builder
+@SuperBuilder
 @AllArgsConstructor
 public class RedisMonitorRespVO {
 
@@ -25,7 +25,7 @@ public class RedisMonitorRespVO {
 
     @Schema(description = "Redis 命令统计结果")
     @Data
-    @Builder
+    @SuperBuilder
     @AllArgsConstructor
     public static class CommandStat {
 

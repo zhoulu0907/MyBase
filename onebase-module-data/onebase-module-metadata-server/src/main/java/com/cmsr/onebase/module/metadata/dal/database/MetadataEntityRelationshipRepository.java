@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.metadata.dal.database;
 
-import com.cmsr.onebase.framework.aynline.DataRepositoryNew;
+import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.module.metadata.dal.dataobject.relationship.MetadataEntityRelationshipDO;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.init.DefaultConfigStore;
@@ -18,7 +18,7 @@ import java.util.List;
  */
 @Repository
 @Slf4j
-public class MetadataEntityRelationshipRepository extends DataRepositoryNew<MetadataEntityRelationshipDO> {
+public class MetadataEntityRelationshipRepository extends DataRepository<MetadataEntityRelationshipDO> {
 
     /**
      * 构造方法，指定默认实体类
@@ -35,7 +35,7 @@ public class MetadataEntityRelationshipRepository extends DataRepositoryNew<Meta
      */
     public List<MetadataEntityRelationshipDO> getRelationshipsByMasterEntityId(Long masterEntityId) {
         DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and("master_entity_id", masterEntityId);
+        configStore.and(MetadataEntityRelationshipDO.SOURCE_ENTITY_ID, masterEntityId);
         configStore.order("create_time", org.anyline.entity.Order.TYPE.DESC);
         return findAllByConfig(configStore);
     }
@@ -48,7 +48,7 @@ public class MetadataEntityRelationshipRepository extends DataRepositoryNew<Meta
      */
     public List<MetadataEntityRelationshipDO> getRelationshipsBySlaveEntityId(Long slaveEntityId) {
         DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and("slave_entity_id", slaveEntityId);
+        configStore.and(MetadataEntityRelationshipDO.TARGET_ENTITY_ID, slaveEntityId);
         configStore.order("create_time", org.anyline.entity.Order.TYPE.DESC);
         return findAllByConfig(configStore);
     }
@@ -61,8 +61,8 @@ public class MetadataEntityRelationshipRepository extends DataRepositoryNew<Meta
      */
     public List<MetadataEntityRelationshipDO> getRelationshipsByEntityId(Long entityId) {
         DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.or("master_entity_id", entityId);
-        configStore.or("slave_entity_id", entityId);
+        configStore.or(MetadataEntityRelationshipDO.SOURCE_ENTITY_ID, entityId);
+        configStore.or(MetadataEntityRelationshipDO.TARGET_ENTITY_ID, entityId);
         configStore.order("create_time", org.anyline.entity.Order.TYPE.DESC);
         return findAllByConfig(configStore);
     }
@@ -75,7 +75,7 @@ public class MetadataEntityRelationshipRepository extends DataRepositoryNew<Meta
      */
     public List<MetadataEntityRelationshipDO> getRelationshipsByType(String relationshipType) {
         DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and("relationship_type", relationshipType);
+        configStore.and(MetadataEntityRelationshipDO.RELATIONSHIP_TYPE, relationshipType);
         configStore.order("create_time", org.anyline.entity.Order.TYPE.DESC);
         return findAllByConfig(configStore);
     }

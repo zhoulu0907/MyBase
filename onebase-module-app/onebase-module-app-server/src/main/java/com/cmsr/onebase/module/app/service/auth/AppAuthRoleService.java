@@ -1,6 +1,8 @@
 package com.cmsr.onebase.module.app.service.auth;
 
+import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.app.controller.admin.auth.vo.*;
+import com.cmsr.onebase.module.system.api.dept.dto.DeptAndUsersRespDTO;
 
 import java.util.List;
 
@@ -11,6 +13,8 @@ import java.util.List;
 public interface AppAuthRoleService {
 
     List<AuthRoleListRespVO> getRoleList(Long applicationId);
+
+    PageResult<AuthRoleUsersPageRespVO> pageRoleUsers(AuthRoleUsersPageReqVO reqVO);
 
     AuthRoleCreateRespVO createRole(AuthRoleCreateReqVO reqVO);
 
@@ -24,4 +28,5 @@ public interface AppAuthRoleService {
 
     void deleteRole(Long roleId);
 
+    DeptAndUsersRespDTO listDeptUsers(AuthRoleDeptAndUsersReqVO reqVO);
 }
