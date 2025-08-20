@@ -41,11 +41,6 @@ const SliderCaptcha = forwardRef<SliderCaptchaRef, SliderCaptchaProps>(({ onSucc
       return encrypted.toString();
     };
 
-  // 生成客户端唯一标识
-  const generateClientUid = () => {
-    return 'client-' + Math.random().toString(36).substring(2, 15);
-  };
-
   // 获取验证码
   const fetchCaptcha = async () => {
     try {
@@ -110,16 +105,10 @@ const SliderCaptcha = forwardRef<SliderCaptchaRef, SliderCaptchaProps>(({ onSucc
   // 验证码校验
   const verifyCaptcha = async (pointJson: string) => {
     if (!captchaData?.token) {
-      console.log('captchaData或token不存在:', captchaData);
       return;
     }
     
     try {
-      console.log('captchaData.secretKey:', captchaData.secretKey);
-      console.log('captchaData.token:', captchaData.token);
-      console.log('pointJson:', pointJson);
-      console.log('JSON.stringify(pointJson):', JSON.stringify(pointJson));
-
       const captchaVerification = captchaData.secretKey ? aesEncrypt(captchaData.token + '---' + pointJson, captchaData.secretKey) : captchaData.token + '---' + pointJson
       // 使用secretKey进行AES加密
       const encryptedPointJson = captchaData.secretKey 
@@ -135,7 +124,7 @@ const SliderCaptcha = forwardRef<SliderCaptchaRef, SliderCaptchaProps>(({ onSucc
       const resp: any = await checkCaptchaApi(params);
       
       if (resp.repData?.result) {
-        Message.success('验证成功');
+        // Message.success('验证成功');
         onSuccess(captchaVerification);
         setTimeout(() => {
           closeCaptcha();
@@ -171,16 +160,13 @@ const SliderCaptcha = forwardRef<SliderCaptchaRef, SliderCaptchaProps>(({ onSucc
 
    // 处理拖拽结束
   const handleDragEnd = () => {
-    console.log('拖拽结束事件触发');
     if (!dragging) {
-      console.log('dragging状态为false，直接返回');
       return;
     }
     
     setDragging(false);
     
     if (trackRef.current && captchaData) {
-      console.log('开始验证，trackRef和captchaData都存在');
       const trackRect = trackRef.current.getBoundingClientRect();
       const percentage = dragOffset / trackRect.width;
       const moveLeft = Math.round(percentage * trackRect.width);
@@ -194,9 +180,6 @@ const SliderCaptcha = forwardRef<SliderCaptchaRef, SliderCaptchaProps>(({ onSucc
       });
       
       verifyCaptcha(pointJson);
-      console.log('trackRef.current:', trackRef.current, 'captchaData:', captchaData);
-    } else {
-      console.log('trackRef.current:', trackRef.current, 'captchaData:', captchaData);
     }
   };
 
