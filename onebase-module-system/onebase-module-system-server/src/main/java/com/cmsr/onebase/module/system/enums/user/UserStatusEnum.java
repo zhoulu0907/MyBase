@@ -16,11 +16,11 @@ public enum UserStatusEnum {
     /**
      * 正常
      */
-    NORMAL(0),
+    NORMAL(1),
     /**
      * 停用
      */
-    DISABLE(1);
+    DISABLE(0);
 
     /**
      * 状态值

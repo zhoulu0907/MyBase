@@ -43,16 +43,16 @@ public class NotifyTemplateDataRepository extends DataRepository<NotifyTemplateD
         DefaultConfigStore configStore = new DefaultConfigStore();
 
         if (StringUtils.isNotBlank(pageReqVO.getCode())) {
-            configStore.and(Compare.EQUAL, "code", pageReqVO.getCode());
+            configStore.and(Compare.EQUAL, NotifyTemplateDO.CODE, pageReqVO.getCode());
         }
         if (StringUtils.isNotBlank(pageReqVO.getName())) {
             configStore.and(Compare.EQUAL, "name", pageReqVO.getName());
         }
         if (null != pageReqVO.getStatus()) {
-            configStore.and(Compare.EQUAL, "status", pageReqVO.getStatus());
+            configStore.and(Compare.EQUAL, NotifyTemplateDO.STATUS, pageReqVO.getStatus());
         }
         if (null != pageReqVO.getCreateTime()) {
-            configStore.and(Compare.EQUAL, "create_time", pageReqVO.getCreateTime());
+            configStore.and(Compare.EQUAL, NotifyTemplateDO.CREATE_TIME, pageReqVO.getCreateTime());
         }
 
         return findPageWithConditions(configStore, pageReqVO.getPageNo(), pageReqVO.getPageSize());
