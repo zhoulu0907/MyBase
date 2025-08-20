@@ -89,27 +89,32 @@ public class MetadataEntityFieldDO extends TenantBaseDO {
     private String description;
 
     /**
-     * 是否系统字段：0-是，1-不是
+     * 是否系统字段：1-是，0-不是
+     * @see BooleanStatusEnum
      */
     private Integer isSystemField;
 
     /**
-     * 是否主键：0-是，1-不是
+     * 是否主键：1-是，0-不是
+     * @see BooleanStatusEnum
      */
     private Integer isPrimaryKey;
 
     /**
-     * 是否必填：0-是，1-不是
+     * 是否必填：1-是，0-不是
+     * @see BooleanStatusEnum
      */
     private Integer isRequired;
 
     /**
-     * 是否唯一：0-是，1-不是
+     * 是否唯一：1-是，0-不是
+     * @see BooleanStatusEnum
      */
     private Integer isUnique;
 
     /**
-     * 是否允许空值：0-是，1-不是
+     * 是否允许空值：1-是，0-不是
+     * @see BooleanStatusEnum
      */
     private Integer allowNull;
 
@@ -134,7 +139,8 @@ public class MetadataEntityFieldDO extends TenantBaseDO {
     private Long appId;
 
     /**
-     * 字段状态 0：开启，1：关闭
+     * 字段状态：1-开启，0-关闭
+     * @see CommonStatusEnum
      */
     private Integer status;
 

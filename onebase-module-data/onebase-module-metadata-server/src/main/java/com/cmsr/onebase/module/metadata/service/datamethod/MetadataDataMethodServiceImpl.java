@@ -35,6 +35,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
+import com.cmsr.onebase.module.metadata.enums.ErrorCodeConstants;
+import com.cmsr.onebase.module.metadata.enums.BooleanStatusEnum;
 import static com.cmsr.onebase.module.metadata.enums.ErrorCodeConstants.*;
 
 /**
@@ -337,7 +339,7 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
         Map<String, Object> resultData = queryDataByIdWithService(temporaryService, entity.getTableName(), reqVO.getId(), fields);
 
         if (resultData == null || resultData.isEmpty()) {
-            throw exception(DATA_NOT_EXISTS);
+            throw exception(BUSINESS_ENTITY_NOT_EXISTS);
         }
 
         // 6. 构建响应
@@ -533,14 +535,15 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
      */
     private void validateDataForCreate(Map<String, Object> data, List<MetadataEntityFieldDO> fields) {
         for (MetadataEntityFieldDO field : fields) {
-            // 跳过系统字段和主键字段：0-是系统字段/主键
-            if (field.getIsSystemField() == 0 || field.getIsPrimaryKey() == 0) {
+            // 跳过系统字段和主键字段 - 使用新的枚举值：1-是，0-否
+            if (BooleanStatusEnum.isYes(field.getIsSystemField()) || 
+                BooleanStatusEnum.isYes(field.getIsPrimaryKey())) {
                 continue;
             }
 
-            // 校验必填字段：0-是必填
-            if (field.getIsRequired() == 0 && (data.get(field.getFieldName()) == null ||
-                    String.valueOf(data.get(field.getFieldName())).trim().isEmpty())) {
+            // 校验必填字段 - 使用新的枚举值：1-是，0-否
+            if (BooleanStatusEnum.isYes(field.getIsRequired()) && 
+                (data.get(field.getFieldName()) == null || String.valueOf(data.get(field.getFieldName())).trim().isEmpty())) {
                 throw exception(FIELD_REQUIRED, field.getDisplayName());
             }
         }
@@ -559,11 +562,11 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
                     .orElse(null);
 
             if (field == null) {
-                throw exception(FIELD_NOT_EXISTS, fieldName);
+                throw exception(ENTITY_FIELD_NOT_EXISTS, fieldName);
             }
 
-            // 不允许更新主键字段：0-是主键
-            if (field.getIsPrimaryKey() == 0) {
+            // 不允许更新主键字段 - 使用新的枚举值：1-是，0-否
+            if (BooleanStatusEnum.isYes(field.getIsPrimaryKey())) {
                 throw exception(PRIMARY_KEY_UPDATE_NOT_ALLOWED);
             }
         }
@@ -581,8 +584,8 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
         for (MetadataEntityFieldDO field : fields) {
             String fieldName = field.getFieldName();
             
-            // 处理主键字段：0-是主键
-            if (field.getIsPrimaryKey() == 0) {
+            // 处理主键字段 - 使用新的枚举值：1-是，0-否
+            if (BooleanStatusEnum.isYes(field.getIsPrimaryKey())) {
                 if (!processedData.containsKey(fieldName)) {
                     // 生成雪花ID作为主键
                     processedData.put(fieldName, IdUtil.getSnowflakeNextId());
@@ -590,8 +593,8 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
                 continue;
             }
 
-            // 处理系统字段：0-是系统字段
-            if (field.getIsSystemField() == 0) {
+            // 处理系统字段 - 使用新的枚举值：1-是，0-否
+            if (BooleanStatusEnum.isYes(field.getIsSystemField())) {
                 switch (fieldName.toLowerCase()) {
                     case "created_time":
                     case "createtime":
@@ -691,7 +694,10 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
                     .findFirst()
                     .orElse(null);
 
-            if (field != null && !Boolean.TRUE.equals(field.getIsPrimaryKey() == 0) && !Boolean.TRUE.equals(field.getIsSystemField() == 0)) {
+            // 只处理非主键和非系统字段 - 使用新的枚举值：1-是，0-否
+            if (field != null && 
+                !BooleanStatusEnum.isYes(field.getIsPrimaryKey()) && 
+                !BooleanStatusEnum.isYes(field.getIsSystemField())) {
                 processedData.put(fieldName, entry.getValue());
             }
         }
@@ -704,7 +710,7 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
      */
     private String getPrimaryKeyFieldName(List<MetadataEntityFieldDO> fields) {
         return fields.stream()
-                .filter(field -> Boolean.TRUE.equals(field.getIsPrimaryKey() == 0))
+                .filter(field -> BooleanStatusEnum.isYes(field.getIsPrimaryKey()))
                 .map(MetadataEntityFieldDO::getFieldName)
                 .findFirst()
                 .orElse("id");
@@ -802,7 +808,7 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
     private void validateDataExistsWithService(AnylineService<?> service, String tableName, Object id, List<MetadataEntityFieldDO> fields) {
         Map<String, Object> existingData = queryDataByIdWithService(service, tableName, id, fields);
         if (existingData == null || existingData.isEmpty()) {
-            throw exception(DATA_NOT_EXISTS);
+            throw exception(BUSINESS_ENTITY_NOT_EXISTS);
         }
     }
 

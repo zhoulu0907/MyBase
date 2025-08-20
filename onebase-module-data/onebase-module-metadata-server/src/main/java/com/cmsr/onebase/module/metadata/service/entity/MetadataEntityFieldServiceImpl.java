@@ -6,6 +6,7 @@ import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.*;
 import com.cmsr.onebase.module.metadata.service.entity.vo.EntityFieldQueryVO;
 import com.cmsr.onebase.module.metadata.service.number.AutoNumberRuleService;
+import com.cmsr.onebase.module.metadata.util.StatusEnumUtil;
 import com.cmsr.onebase.module.metadata.convert.entity.EntityFieldConvert;
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataBusinessEntityDO;
@@ -20,6 +21,8 @@ import com.cmsr.onebase.module.metadata.dal.dataobject.number.MetadataAutoNumber
 import com.cmsr.onebase.module.metadata.dal.dataobject.number.MetadataAutoNumberRuleItemDO;
 import com.cmsr.onebase.module.metadata.enums.FieldTypeEnum;
 import com.cmsr.onebase.module.metadata.enums.BusinessEntityTypeEnum;
+import com.cmsr.onebase.module.metadata.enums.BooleanStatusEnum;
+import com.cmsr.onebase.module.metadata.enums.CommonStatusEnum;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -113,13 +116,14 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
             entityField.setFieldType(fieldItem.getFieldType());
             entityField.setDataLength(fieldItem.getDataLength());
             entityField.setDescription(fieldItem.getDescription());
-            entityField.setIsRequired(fieldItem.getIsRequired() != null ? fieldItem.getIsRequired() : 1); // 默认1-不是必填
-            entityField.setIsUnique(fieldItem.getIsUnique() != null ? fieldItem.getIsUnique() : 1); // 默认1-不是唯一
-            entityField.setAllowNull(fieldItem.getAllowNull() != null ? fieldItem.getAllowNull() : 0); // 默认0-是允许空值
+            // 使用新的枚举值：1-是，0-否
+            entityField.setIsRequired(fieldItem.getIsRequired() != null ? fieldItem.getIsRequired() : StatusEnumUtil.NO); // 默认0-不是必填
+            entityField.setIsUnique(fieldItem.getIsUnique() != null ? fieldItem.getIsUnique() : StatusEnumUtil.NO); // 默认0-不是唯一
+            entityField.setAllowNull(fieldItem.getAllowNull() != null ? fieldItem.getAllowNull() : StatusEnumUtil.YES); // 默认1-是允许空值
             entityField.setDefaultValue(fieldItem.getDefaultValue());
             entityField.setSortOrder(fieldItem.getSortOrder() != null ? fieldItem.getSortOrder() : 0);
-            entityField.setIsSystemField(1); // 1-不是系统字段
-            entityField.setIsPrimaryKey(1); // 1-不是主键
+            entityField.setIsSystemField(StatusEnumUtil.NO); // 0-不是系统字段
+            entityField.setIsPrimaryKey(StatusEnumUtil.NO); // 0-不是主键
             entityField.setAppId(Long.valueOf(reqVO.getAppId()));
 
             metadataEntityFieldRepository.insert(entityField);
@@ -492,9 +496,9 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
                 toCreate.setSortOrder(item.getSortOrder());
                 // fieldCode字段已注释，自动生成
                 toCreate.setFieldCode(generateFieldCode(item.getFieldName()));
-                // 修复：正确设置isSystemField，如果前端传入则使用传入值，否则默认为0（系统字段）
-                toCreate.setIsSystemField(item.getIsSystemField() != null ? item.getIsSystemField() : 0);
-                toCreate.setIsPrimaryKey(1); // 1表示不是主键
+                // 使用新的枚举值：1-是，0-否
+                toCreate.setIsSystemField(item.getIsSystemField() != null ? item.getIsSystemField() : StatusEnumUtil.YES); // 默认1-是系统字段
+                toCreate.setIsPrimaryKey(StatusEnumUtil.NO); // 0-不是主键
 
                 metadataEntityFieldRepository.insert(toCreate);
 
@@ -959,8 +963,8 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
         String columnType = mapFieldType(field.getFieldType(), field.getDataLength());
         ddl.append(columnType);
 
-        // 是否必填
-        if (field.getIsRequired() != null && Boolean.TRUE.equals(field.getIsRequired() == 0)) {
+        // 是否必填 - 使用新的枚举值：1-是，0-否
+        if (field.getIsRequired() != null && BooleanStatusEnum.isYes(field.getIsRequired())) {
             ddl.append(" NOT NULL");
         }
 
@@ -991,9 +995,9 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
         ddl.append("ALTER TABLE \"").append(tableName).append("\" ALTER COLUMN \"")
            .append(field.getFieldName()).append("\" TYPE ").append(columnType).append(";\n");
 
-        // 修改是否允许为空
+        // 修改是否允许为空 - 使用新的枚举值：1-是，0-否
         if (field.getIsRequired() != null) {
-            if (Boolean.TRUE.equals(field.getIsRequired() == 0)) {
+            if (BooleanStatusEnum.isYes(field.getIsRequired())) {
                 ddl.append("ALTER TABLE \"").append(tableName).append("\" ALTER COLUMN \"")
                    .append(field.getFieldName()).append("\" SET NOT NULL;\n");
             } else {
@@ -1244,7 +1248,8 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
         // 先删除现有配置
         autoNumberConfigService.deleteByFieldId(fieldId);
         
-        if (autoNumber.getIsEnabled() != null && autoNumber.getIsEnabled() == 0) { // 0表示启用
+        // 使用新的枚举值：1-启用，0-禁用
+        if (autoNumber.getIsEnabled() != null && CommonStatusEnum.isEnabled(autoNumber.getIsEnabled())) {
             // 创建自动编号配置
             MetadataAutoNumberConfigDO config = new MetadataAutoNumberConfigDO();
             config.setFieldId(fieldId);
@@ -1269,7 +1274,8 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
                     rule.setFormat(ruleReq.getFormat());
                     rule.setTextValue(ruleReq.getTextValue());
                     rule.setRefFieldId(ruleReq.getRefFieldId());
-                    rule.setIsEnabled(ruleReq.getIsEnabled() != null ? ruleReq.getIsEnabled() : 0);
+                    // 使用新的枚举值：1-启用，0-禁用
+                    rule.setIsEnabled(ruleReq.getIsEnabled() != null ? ruleReq.getIsEnabled() : StatusEnumUtil.ENABLED);
                     rule.setAppId(entityField != null ? entityField.getAppId() : null);
                     
                     autoNumberRuleService.add(rule);

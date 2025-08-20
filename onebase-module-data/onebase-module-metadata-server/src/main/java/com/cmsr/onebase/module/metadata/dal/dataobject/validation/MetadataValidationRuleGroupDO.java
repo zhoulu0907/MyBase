@@ -46,9 +46,10 @@ public class MetadataValidationRuleGroupDO extends TenantBaseDO {
     private String rgDesc;
 
     /**
-     * 状态："ACTIVE"（启用）/"INACTIVE"（禁用）
+     * 状态：1-激活，0-非激活
+     * @see com.cmsr.onebase.module.metadata.enums.ValidationStatusEnum
      */
-    private String rgStatus;
+    private Integer rgStatus;
 
     /**
      * 校验方式，如：满足条件时，不允许提交表单，并弹窗提示

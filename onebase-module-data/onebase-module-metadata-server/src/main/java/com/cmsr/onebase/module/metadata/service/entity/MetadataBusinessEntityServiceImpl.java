@@ -19,10 +19,12 @@ import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataEntityFiel
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataSystemFieldsDO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.datasource.MetadataDatasourceDO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.relationship.MetadataEntityRelationshipDO;
+import com.cmsr.onebase.module.metadata.enums.BooleanStatusEnum;
 import com.cmsr.onebase.module.metadata.convert.datasource.DatasourceConvert;
 import com.cmsr.onebase.module.metadata.dal.database.MetadataBusinessEntityRepository;
 import com.cmsr.onebase.module.metadata.service.datasource.MetadataDatasourceService;
 import com.cmsr.onebase.module.metadata.service.relationship.MetadataEntityRelationshipService;
+import com.cmsr.onebase.module.metadata.util.StatusEnumUtil;
 import com.cmsr.onebase.module.metadata.dal.database.TemporaryDatasourceService;
 import com.cmsr.onebase.module.metadata.enums.BusinessEntityTypeEnum;
 import jakarta.annotation.Resource;
@@ -308,11 +310,12 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
                     .decimalPlaces(getDefaultDecimalPlaces(systemField.getFieldType())) // 根据字段类型设置默认小数位
                     .defaultValue(systemField.getDefaultValue())
                     .description(systemField.getDescription())
-                    .isSystemField(0) // 标记为系统字段：0-是
-                    .isPrimaryKey(systemField.getIsSnowflakeId() == 1 ? 0 : 1) // 雪花ID字段设为主键：0-是，1-不是
-                    .isRequired(systemField.getIsRequired() == 1 ? 0 : 1) // 0-是，1-不是
-                    .isUnique(systemField.getIsSnowflakeId() == 1 ? 0 : 1) // 主键字段唯一：0-是，1-不是
-                    .allowNull(systemField.getIsRequired() != 1 ? 0 : 1) // 必填字段不允许为空：0-是，1-不是
+                    // 使用新的枚举值：1-是，0-否
+                    .isSystemField(StatusEnumUtil.YES) // 标记为系统字段：1-是
+                    .isPrimaryKey(BooleanStatusEnum.isYes(systemField.getIsSnowflakeId()) ? StatusEnumUtil.YES : StatusEnumUtil.NO) // 雪花ID字段设为主键：1-是，0-不是
+                    .isRequired(BooleanStatusEnum.isYes(systemField.getIsRequired()) ? StatusEnumUtil.YES : StatusEnumUtil.NO) // 1-是，0-否
+                    .isUnique(BooleanStatusEnum.isYes(systemField.getIsSnowflakeId()) ? StatusEnumUtil.YES : StatusEnumUtil.NO) // 主键字段唯一：1-是，0-否
+                    .allowNull(!BooleanStatusEnum.isYes(systemField.getIsRequired()) ? StatusEnumUtil.YES : StatusEnumUtil.NO) // 非必填字段允许为空：1-是，0-否
                     .sortOrder(sortOrder++)
                     .validationRules(null) // 系统字段暂不设置校验规则
                     .runMode(0) // 默认编辑态
@@ -425,8 +428,8 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
             String columnType = mapFieldType(field.getFieldType());
             columnDef.append(columnType);
 
-            // 是否必填：0-是，1-不是
-            if (field.getIsRequired() == 0) {
+            // 是否必填 - 使用新的枚举值：1-是，0-否
+            if (BooleanStatusEnum.isYes(field.getIsRequired())) {
                 columnDef.append(" NOT NULL");
             }
 

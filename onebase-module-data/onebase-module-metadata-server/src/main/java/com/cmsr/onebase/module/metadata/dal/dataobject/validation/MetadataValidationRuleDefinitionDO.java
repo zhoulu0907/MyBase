@@ -93,8 +93,9 @@ public class MetadataValidationRuleDefinitionDO extends TenantBaseDO {
     private Long fieldValue2;
 
     /**
-     * 状态："ACTIVE"/"INACTIVE"
+     * 状态：1-激活，0-非激活
+     * @see com.cmsr.onebase.module.metadata.enums.ValidationStatusEnum
      */
-    private String status;
+    private Integer status;
 
 }
