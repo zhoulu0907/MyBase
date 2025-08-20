@@ -1,50 +1,50 @@
 import {
-  baseConfig,
-  baseDefault,
-  labelColSpanConfig,
-  layoutConfig,
-  widthConfig,
-  listTypeConfig,
-  statusConfig,
-  type ICommonBaseType,
-  type TLayoutSelectKeyType,
-  type TStatusSelectKeyType,
-  type TUploadSelectKeyType,
-  type TWidthSelectKeyType
+    baseConfig,
+    baseDefault,
+    labelColSpanConfig,
+    layoutConfig,
+    listTypeConfig,
+    statusConfig,
+    widthConfig,
+    type ICommonBaseType,
+    type TLayoutSelectKeyType,
+    type TStatusSelectKeyType,
+    type TUploadSelectKeyType,
+    type TWidthSelectKeyType
 } from '@/components/Materials/common';
 import {
-  CONFIG_TYPES,
-  WIDTH_OPTIONS,
-  WIDTH_VALUES,
-  LAYOUT_OPTIONS,
-  LAYOUT_VALUES,
-  STATUS_OPTIONS,
-  STATUS_VALUES,
-  UPLOAD_OPTIONS,
-  UPLOAD_VALUES
+    CONFIG_TYPES,
+    LAYOUT_OPTIONS,
+    LAYOUT_VALUES,
+    STATUS_OPTIONS,
+    STATUS_VALUES,
+    UPLOAD_OPTIONS,
+    UPLOAD_VALUES,
+    WIDTH_OPTIONS,
+    WIDTH_VALUES
 } from '@/components/Materials/constants';
 import type {
-  IBooleanConfigType,
-  IDescriptionConfigType,
-  ILabelColSpanConfigType,
-  ILabelConfigType,
-  ILayoutConfigType,
-  INumberConfigType,
-  IPlaceholderConfigType,
-  ISelectConfigType,
-  IStatusConfigType,
-  ITextAreaConfigType,
-  ITextConfigType,
-  ITooltipConfigType,
-  IUploadCompressConfigType,
-  IUploadLimitConfigType,
-  IUploadSizeConfigType,
-  IWidthConfigType,
-  TBooleanDefaultType,
-  TNumberDefaultType,
-  TSelectDefaultType,
-  TTextAreaDefaultType,
-  TTextDefaultType
+    IBooleanConfigType,
+    IDataFieldConfigType,
+    IDescriptionConfigType,
+    ILabelColSpanConfigType,
+    ILabelConfigType,
+    ILayoutConfigType,
+    INumberConfigType,
+    IPlaceholderConfigType,
+    ISelectConfigType,
+    IStatusConfigType,
+    ITextAreaConfigType,
+    ITextConfigType,
+    ITooltipConfigType,
+    IUploadCompressConfigType,
+    IUploadSizeConfigType,
+    IWidthConfigType,
+    TBooleanDefaultType,
+    TNumberDefaultType,
+    TSelectDefaultType,
+    TTextAreaDefaultType,
+    TTextDefaultType
 } from '@/components/Materials/types';
 
 export interface XInputImgUploadSchema {
@@ -66,10 +66,10 @@ export type TXInputImgUploadEditData = Array<
   | ITextAreaConfigType
   | IBooleanConfigType
   | IUploadSizeConfigType
-  | IUploadLimitConfigType
   | IUploadCompressConfigType
   | IStatusConfigType<TUploadSelectKeyType>
   | ILayoutConfigType<TLayoutSelectKeyType>
+  | IDataFieldConfigType
 >;
 
 export interface XInputImgUploadConfig extends ICommonBaseType {
@@ -77,6 +77,11 @@ export interface XInputImgUploadConfig extends ICommonBaseType {
    * 输入框标题
    */
   label: TTextDefaultType;
+
+  /**
+   * 数据字段
+   */
+  dataField: TTextDefaultType[];
 
   /**
    * 描述信息（显示在输入框下方，辅助说明）
@@ -126,11 +131,6 @@ export interface XInputImgUploadConfig extends ICommonBaseType {
   uploadSize?: TNumberDefaultType;
 
   /**
-   * 上传数量限制，默认无限制
-   */
-  uploadLimit?: TNumberDefaultType;
-
-  /**
    * 图片压缩率（0-1），-1 表示不压缩
    */
   uploadCompress?: TNumberDefaultType;
@@ -173,11 +173,6 @@ const XImgUpload: XInputImgUploadSchema = {
       type: CONFIG_TYPES.UPLOAD_SIZE
     },
     {
-      key: 'uploadLimit',
-      name: '上传数量限制',
-      type: CONFIG_TYPES.UPLOAD_LIMIT
-    },
-    {
       key: 'uploadCompress',
       name: '图片压缩率',
       type: CONFIG_TYPES.UPLOAD_COMPRESS
@@ -199,6 +194,7 @@ const XImgUpload: XInputImgUploadSchema = {
   config: {
     ...baseDefault,
     label: '图片上传',
+    dataField: [],
     description: '',
     tooltip: '',
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
@@ -206,7 +202,6 @@ const XImgUpload: XInputImgUploadSchema = {
     defaultValue: '',
     required: false,
     uploadSize: 10,
-    uploadLimit: -1,
     uploadCompress: -1,
     listType: UPLOAD_VALUES[UPLOAD_OPTIONS.CARD],
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
