@@ -398,7 +398,7 @@ public class AdminUserServiceImpl implements AdminUserService {
 
 
     @Override
-    @TenantIgnore
+    @TenantIgnore // todo 确认忽略租户的方法注解
     public List<AdminUserDO> getUserListByIgnoreTenantId(Collection<Long> ids) {
         if (CollUtil.isEmpty(ids)) {
             return Collections.emptyList();
@@ -611,12 +611,6 @@ public class AdminUserServiceImpl implements AdminUserService {
 
     @Override
     public List<AdminUserDO> getPlatformAdminListByStatus(Integer status) {
-        // 获取所有指定状态的用户
-        List<AdminUserDO> users = adminUserDataRepository.findAllByStatus(status);
-        if (CollUtil.isEmpty(users)) {
-            return Collections.emptyList();
-        }
-        
         // 获取平台管理员角色
         RoleDO platformAdminRole = roleService.getRoleIdsByCode(RoleCodeEnum.SUPER_ADMIN.getCode());
         if (platformAdminRole == null) {
@@ -624,17 +618,14 @@ public class AdminUserServiceImpl implements AdminUserService {
         }
         
         // 获取这些用户的角色信息
-        Set<Long> userIds = convertSet(users, AdminUserDO::getId);
-        List<UserRoleDO> userRoles = userRoleDataRepository.findListByRoleIds(platformAdminRole.getId())
-                .stream()
-                .filter(userRole -> userIds.contains(userRole.getUserId()))
-                .collect(Collectors.toList());
+        List<UserRoleDO> userRoles = new ArrayList<>(userRoleDataRepository.findListByRoleIds(platformAdminRole.getId()));
         
         // 过滤出具有平台管理员角色的用户
         Set<Long> platformAdminUserIds = convertSet(userRoles, UserRoleDO::getUserId);
-        return users.stream()
-                .filter(user -> platformAdminUserIds.contains(user.getId()))
-                .collect(Collectors.toList());
+
+        // 获取所有指定状态的用户
+        List<AdminUserDO> users = adminUserDataRepository.findEnableUserByIds(platformAdminUserIds);
+        return users;
     }
 
     @Override
