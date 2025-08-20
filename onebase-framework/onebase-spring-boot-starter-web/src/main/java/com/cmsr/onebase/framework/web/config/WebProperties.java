@@ -24,6 +24,12 @@ public class WebProperties {
     // @NotNull(message = "Admin UI 不能为空")
     private Ui adminUi;
 
+    /**
+     * 是否在响应中返回异常堆栈。仅建议开发/测试环境打开。
+     * 配置项：yudao.web.return-exception-stack-trace
+     */
+    private boolean returnExceptionStackTrace = false;
+
     @Data
     @AllArgsConstructor
     @NoArgsConstructor

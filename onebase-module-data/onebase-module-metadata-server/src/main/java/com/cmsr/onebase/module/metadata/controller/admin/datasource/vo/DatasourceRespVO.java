@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.metadata.controller.admin.datasource.vo;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
 @Schema(description = "管理后台 - 数据源 Response VO")
@@ -35,5 +36,17 @@ public class DatasourceRespVO {
     
     @Schema(description = "数据源来源，0：系统默认，1：自有数据源，2：外部数据源", example = "1")
     private Integer datasourceOrigin;
+
+    @Schema(description = "创建人", example = "1024")
+    private Long creator;
+
+    @Schema(description = "创建时间")
+    private LocalDateTime createTime;
+
+    @Schema(description = "更新人", example = "1024")
+    private Long updater;
+
+    @Schema(description = "更新时间")
+    private LocalDateTime updateTime;
 
 }

@@ -1,23 +1,21 @@
 package com.cmsr.onebase.framework.common.util.object;
 
-import cn.hutool.core.bean.BeanUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
+import org.modelmapper.ModelMapper;
 
 import java.util.List;
 import java.util.function.Consumer;
 
 /**
  * Bean 工具类
- *
- * 1. 默认使用 {@link cn.hutool.core.bean.BeanUtil} 作为实现类，虽然不同 bean 工具的性能有差别，但是对绝大多数同学的项目，不用在意这点性能
- * 2. 针对复杂的对象转换，可以搜参考 AuthConvert 实现，通过 mapstruct + default 配合实现
- *
  */
 public class BeanUtils {
 
+    private static final ModelMapper MODEL_MAPPER = new ModelMapper();
+
     public static <T> T toBean(Object source, Class<T> targetClass) {
-        return BeanUtil.toBean(source, targetClass);
+        return MODEL_MAPPER.map(source, targetClass);
     }
 
     public static <T> T toBean(Object source, Class<T> targetClass, Consumer<T> peek) {
@@ -62,7 +60,7 @@ public class BeanUtils {
         if (source == null || target == null) {
             return;
         }
-        BeanUtil.copyProperties(source, target, false);
+        MODEL_MAPPER.map(source, target);
     }
 
 }

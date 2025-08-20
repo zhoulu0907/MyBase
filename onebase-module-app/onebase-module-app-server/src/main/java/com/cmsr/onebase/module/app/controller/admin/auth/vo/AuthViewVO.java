@@ -8,19 +8,19 @@ import lombok.Data;
  * @Date：2025/8/7 14:48
  */
 @Data
-@Schema(description = "应用管理 - 实体 Response VO")
-public class AuthEntityVO {
+@Schema(description = "应用管理 - 视图 Response VO")
+public class AuthViewVO {
 
     @Schema(description = "主键Id")
     private Long id;
 
     @Schema(description = "实体id")
-    private Long entityId;
+    private Long viewId;
 
     @Schema(description = "实体名称")
-    private String entityDisplayName;
+    private String viewDisplayName;
 
     @Schema(description = "是否可访问")
-    private Boolean allowed;
+    private Integer isAllowed;
 
 }

@@ -6,23 +6,25 @@ import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.BusinessEntityPageReqVO;
+import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.BusinessEntityRespVO;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.BusinessEntitySaveReqVO;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.ERDiagramRespVO;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EREntityVO;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.ERFieldVO;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.ERRelationshipVO;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.SimpleEntityRespVO;
+import com.cmsr.onebase.module.metadata.convert.entity.BusinessEntityConvert;
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataBusinessEntityDO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataSystemFieldsDO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.datasource.MetadataDatasourceDO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.relationship.MetadataEntityRelationshipDO;
+import com.cmsr.onebase.module.metadata.enums.BooleanStatusEnum;
 import com.cmsr.onebase.module.metadata.convert.datasource.DatasourceConvert;
 import com.cmsr.onebase.module.metadata.dal.database.MetadataBusinessEntityRepository;
 import com.cmsr.onebase.module.metadata.service.datasource.MetadataDatasourceService;
-import com.cmsr.onebase.module.metadata.service.entity.MetadataSystemFieldsService;
-import com.cmsr.onebase.module.metadata.service.entity.MetadataEntityFieldService;
 import com.cmsr.onebase.module.metadata.service.relationship.MetadataEntityRelationshipService;
+import com.cmsr.onebase.module.metadata.util.StatusEnumUtil;
 import com.cmsr.onebase.module.metadata.dal.database.TemporaryDatasourceService;
 import com.cmsr.onebase.module.metadata.enums.BusinessEntityTypeEnum;
 import jakarta.annotation.Resource;
@@ -308,11 +310,12 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
                     .decimalPlaces(getDefaultDecimalPlaces(systemField.getFieldType())) // 根据字段类型设置默认小数位
                     .defaultValue(systemField.getDefaultValue())
                     .description(systemField.getDescription())
-                    .isSystemField(0) // 标记为系统字段：0-是
-                    .isPrimaryKey(systemField.getIsSnowflakeId() == 1 ? 0 : 1) // 雪花ID字段设为主键：0-是，1-不是
-                    .isRequired(systemField.getIsRequired() == 1 ? 0 : 1) // 0-是，1-不是
-                    .isUnique(systemField.getIsSnowflakeId() == 1 ? 0 : 1) // 主键字段唯一：0-是，1-不是
-                    .allowNull(systemField.getIsRequired() != 1 ? 0 : 1) // 必填字段不允许为空：0-是，1-不是
+                    // 使用新的枚举值：1-是，0-否
+                    .isSystemField(StatusEnumUtil.YES) // 标记为系统字段：1-是
+                    .isPrimaryKey(BooleanStatusEnum.isYes(systemField.getIsSnowflakeId()) ? StatusEnumUtil.YES : StatusEnumUtil.NO) // 雪花ID字段设为主键：1-是，0-不是
+                    .isRequired(BooleanStatusEnum.isYes(systemField.getIsRequired()) ? StatusEnumUtil.YES : StatusEnumUtil.NO) // 1-是，0-否
+                    .isUnique(BooleanStatusEnum.isYes(systemField.getIsSnowflakeId()) ? StatusEnumUtil.YES : StatusEnumUtil.NO) // 主键字段唯一：1-是，0-否
+                    .allowNull(!BooleanStatusEnum.isYes(systemField.getIsRequired()) ? StatusEnumUtil.YES : StatusEnumUtil.NO) // 非必填字段允许为空：1-是，0-否
                     .sortOrder(sortOrder++)
                     .validationRules(null) // 系统字段暂不设置校验规则
                     .runMode(0) // 默认编辑态
@@ -425,8 +428,8 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
             String columnType = mapFieldType(field.getFieldType());
             columnDef.append(columnType);
 
-            // 是否必填：0-是，1-不是
-            if (field.getIsRequired() == 0) {
+            // 是否必填 - 使用新的枚举值：1-是，0-否
+            if (BooleanStatusEnum.isYes(field.getIsRequired())) {
                 columnDef.append(" NOT NULL");
             }
 
@@ -865,6 +868,65 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
         // 设置实际表名
         simpleEntity.setTableName(entityDO.getTableName());
         return simpleEntity;
+    }
+
+    @Override
+    public BusinessEntityRespVO createBusinessEntityWithResponse(@Valid BusinessEntitySaveReqVO reqVO) {
+        Long id = createBusinessEntity(reqVO);
+        MetadataBusinessEntityDO businessEntity = getBusinessEntity(id);
+        return BusinessEntityConvert.INSTANCE.convert(businessEntity);
+    }
+
+    @Override
+    public BusinessEntityRespVO getBusinessEntityDetail(Long id) {
+        MetadataBusinessEntityDO businessEntity = getBusinessEntity(id);
+        return BusinessEntityConvert.INSTANCE.convert(businessEntity);
+    }
+
+    @Override
+    public PageResult<BusinessEntityRespVO> getBusinessEntityPageWithResponse(BusinessEntityPageReqVO pageReqVO) {
+        PageResult<MetadataBusinessEntityDO> pageResult = getBusinessEntityPage(pageReqVO);
+        return BusinessEntityConvert.INSTANCE.convertPage(pageResult);
+    }
+
+    @Override
+    public List<BusinessEntityRespVO> getBusinessEntityListByDatasourceIdWithRelationType(Long datasourceId) {
+        // 1. 获取业务实体列表
+        List<MetadataBusinessEntityDO> list = getBusinessEntityListByDatasourceId(datasourceId);
+        
+        // 2. 转换为 VO
+        List<BusinessEntityRespVO> result = BusinessEntityConvert.INSTANCE.convertList(list);
+        
+        // 3. 填充 relationType 字段
+        // relationType 用于标识实体在关系中的角色：PARENT(主表/父表) 或 CHILD(子表)
+        if (!result.isEmpty()) {
+            // 复用 ER 图服务获取关系信息，保持逻辑一致性
+            ERDiagramRespVO erDiagram = getERDiagramByDatasourceId(datasourceId);
+            List<ERRelationshipVO> relationships = erDiagram.getRelationships();
+            
+            // 收集所有作为源实体(主表)和目标实体(子表)的ID
+            Set<String> sourceIds = relationships.stream()
+                    .map(ERRelationshipVO::getSourceEntityId)
+                    .collect(Collectors.toSet());
+            Set<String> targetIds = relationships.stream()
+                    .map(ERRelationshipVO::getTargetEntityId)  
+                    .collect(Collectors.toSet());
+                    
+            // 为每个实体设置关系类型
+            for (BusinessEntityRespVO entity : result) {
+                if (sourceIds.contains(entity.getId())) {
+                    entity.setRelationType("PARENT");  // 主表：其他表引用此表
+                }
+                if (targetIds.contains(entity.getId())) {
+                    entity.setRelationType("CHILD");   // 子表：引用其他表的外键
+                }
+                // 注意：一个实体可能既是某些关系的主表，又是其他关系的子表
+                // 在这种情况下，最后设置的值会覆盖前面的值
+                // 如果既不是源实体也不是目标实体，relationType 保持 null
+            }
+        }
+        
+        return result;
     }
 
 }

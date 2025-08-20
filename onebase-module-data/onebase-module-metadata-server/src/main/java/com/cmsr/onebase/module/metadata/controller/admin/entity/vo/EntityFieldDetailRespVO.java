@@ -76,6 +76,9 @@ public class EntityFieldDetailRespVO {
     @Schema(description = "自动编号摘要：是否启用/模式/位数/重置周期")
     private EntityFieldAutoNumberBriefRespVO autoNumber;
 
+    @Schema(description = "自动编号完整配置（包含规则项）")
+    private AutoNumberConfigRespVO autoNumberConfig;
+
     @Schema(description = "创建时间", example = "2025-07-28T10:30:00")
     private LocalDateTime createTime;
 

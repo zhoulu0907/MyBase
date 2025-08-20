@@ -16,6 +16,7 @@ import com.cmsr.onebase.module.metadata.config.MetadataConfig;
 import com.cmsr.onebase.module.metadata.convert.datasource.DatasourceConvert;
 import com.cmsr.onebase.module.metadata.enums.DatasourceTypeEnum;
 import com.cmsr.onebase.module.metadata.dal.database.MetadataDatasourceRepository;
+import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import javax.sql.DataSource;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -190,6 +192,17 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
 
         // 插入数据源（不再设置appId，使用关联表维护关系）
         MetadataDatasourceDO datasource = datasourceConvert.convert(createReqVO);
+        
+        // 设置创建人和创建时间
+        Long currentUserId = SecurityFrameworkUtils.getLoginUserId();
+        if (currentUserId != null) {
+            datasource.setCreator(currentUserId);
+            datasource.setUpdater(currentUserId);
+        }
+        LocalDateTime now = LocalDateTime.now();
+        datasource.setCreateTime(now);
+        datasource.setUpdateTime(now);
+        
         metadataDatasourceRepository.insert(datasource);
 
         // 创建应用与数据源的关联关系
@@ -197,7 +210,8 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
         appAndDatasourceService.createRelation(applicationId, datasource.getId(), 
                 datasource.getDatasourceType(), createReqVO.getAppUid());
 
-        log.info("创建数据源成功，ID: {}，应用ID: {}", datasource.getId(), applicationId);
+        log.info("创建数据源成功，ID: {}，应用ID: {}，创建人: {}，创建时间: {}", 
+                datasource.getId(), applicationId, currentUserId, now);
         return datasource.getId();
     }
 
@@ -247,10 +261,18 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
         MetadataDatasourceDO updateObj = datasourceConvert.convert(updateReqVO);
         // 手动设置ID，确保更新操作正常进行
         updateObj.setId(Long.valueOf(updateReqVO.getId()));
+        
+        // 设置更新人和更新时间
+        Long currentUserId = SecurityFrameworkUtils.getLoginUserId();
+        if (currentUserId != null) {
+            updateObj.setUpdater(currentUserId);
+        }
+        updateObj.setUpdateTime(LocalDateTime.now());
+        
         // 不再设置appId，因为关联关系由关联表维护
         metadataDatasourceRepository.update(updateObj);
         
-        log.info("更新数据源成功，ID: {}", updateReqVO.getId());
+        log.info("更新数据源成功，ID: {}，更新人: {}", updateReqVO.getId(), currentUserId);
     }
 
     @Override

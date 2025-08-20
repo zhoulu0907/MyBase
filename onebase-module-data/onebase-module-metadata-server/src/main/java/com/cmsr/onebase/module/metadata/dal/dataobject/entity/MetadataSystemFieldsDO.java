@@ -41,12 +41,14 @@ public class MetadataSystemFieldsDO extends BaseDO {
     private String fieldType;
 
     /**
-     * 是否为雪花ID(0:否,1:是)
+     * 是否为雪花ID：1-是，0-否
+     * @see BooleanStatusEnum
      */
     private Integer isSnowflakeId;
 
     /**
-     * 是否必填(0:否,1:是)
+     * 是否必填：1-是，0-否
+     * @see BooleanStatusEnum
      */
     private Integer isRequired;
 
@@ -61,7 +63,8 @@ public class MetadataSystemFieldsDO extends BaseDO {
     private String description;
 
     /**
-     * 是否启用(0:是,1:否)
+     * 是否启用：1-启用，0-禁用
+     * @see CommonStatusEnum
      */
     private Integer isEnabled;
 

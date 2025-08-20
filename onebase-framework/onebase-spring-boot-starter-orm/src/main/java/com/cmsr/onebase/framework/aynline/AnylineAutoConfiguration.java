@@ -53,33 +53,5 @@ public class AnylineAutoConfiguration {
     public DataDDLRepository createDataDDLRepository() {
         return new DataDDLRepository();
     }
-
-    @Bean("convertInteger2Boolean")
-    public Convert convertInteger2Boolean() {
-        Convert convert = new Convert() {
-            @Override
-            public Class getOrigin() {
-                return java.lang.Integer.class;
-            }
-
-            @Override
-            public Class getTarget() {
-                return java.lang.Boolean.class;
-            }
-
-            @Override
-            public Object exe(Object value, Object def) {
-                Integer date = (Integer) value;
-                if (date == null) {
-                    return null;
-                } else if (date.intValue() > 0) {
-                    return Boolean.TRUE;
-                } else {
-                    return Boolean.FALSE;
-                }
-            }
-        };
-        return convert;
-    }
-
+    
 }
