@@ -23,11 +23,11 @@ public class AuthPermissionDO extends TenantBaseDO {
     private Long menuId;
 
     @Column(name = "is_page_allowed", nullable = false, comment = "页面是否可访问")
-    private Boolean pageAllowed;
+    private Integer isPageAllowed;
 
-    @Column(name = "is_all_entities_allowed", nullable = false, comment = "所有实体可访问")
-    private Boolean allEntitiesAllowed;
+    @Column(name = "is_all_views_allowed", nullable = false, comment = "所有视图可访问")
+    private Integer isAllViewsAllowed;
 
-    @Column(name = "is_all_fields_allowed", nullable = false,  comment = "所有字段可操作")
-    private Boolean allFieldsAllowed;
+    @Column(name = "is_all_fields_allowed", nullable = false, comment = "所有字段可操作")
+    private Integer isAllFieldsAllowed;
 }

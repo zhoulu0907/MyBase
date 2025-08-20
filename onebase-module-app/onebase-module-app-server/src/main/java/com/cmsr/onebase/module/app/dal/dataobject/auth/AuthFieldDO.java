@@ -26,11 +26,11 @@ public class AuthFieldDO extends TenantBaseDO {
     private Long fieldId;
 
     @Column(name = "is_can_read", comment = "是否可阅读")
-    private Boolean canRead;
+    private Integer isCanRead;
 
     @Column(name = "is_can_edit", comment = "是否可编辑")
-    private Boolean canEdit;
+    private Integer isCanEdit;
 
     @Column(name = "is_can_download", comment = "是否可下载")
-    private Boolean canDownload;
+    private Integer isCanDownload;
 }

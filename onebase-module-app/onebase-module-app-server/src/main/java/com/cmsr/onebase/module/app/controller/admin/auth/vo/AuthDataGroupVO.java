@@ -32,7 +32,7 @@ public class AuthDataGroupVO {
     private String scopeLevel;
 
     @Schema(description = "是否可以操作")
-    private Boolean operable;
+    private Integer isOperable;
 
     private List<List<AuthDataFilterVO>> dataFilters;
 

@@ -31,7 +31,7 @@ public class AppMenuController {
     public CommonResult<List<MenuListRespVO>> listApplicationMenu(
             @RequestParam("applicationId") Long applicationId,
             @RequestParam(name = "name", required = false) String name) {
-        return success(appMenuService.listApplicationMenu(applicationId,name));
+        return success(appMenuService.listApplicationMenu(applicationId, name));
     }
 
     @PostMapping("/create")
@@ -58,7 +58,7 @@ public class AppMenuController {
     @PostMapping("/update-visible")
     @Operation(summary = "更新应用菜单可见性")
     public CommonResult<Boolean> updateApplicationMenuVisible(@RequestParam("id") Long id,
-                                                              @RequestParam("visible") Boolean visible) {
+                                                              @RequestParam("visible") Integer visible) {
         appMenuService.updateApplicationMenuVisible(id, visible);
         return CommonResult.success(true);
     }

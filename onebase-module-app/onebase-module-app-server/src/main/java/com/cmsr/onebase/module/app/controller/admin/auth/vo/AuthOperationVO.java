@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.app.controller.admin.auth.vo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import org.apache.commons.lang3.math.NumberUtils;
 
 /**
  * @Author：huangjie
@@ -21,6 +22,6 @@ public class AuthOperationVO {
     private String displayName;
 
     @Schema(description = "是否允许")
-    private Boolean allowed = Boolean.TRUE;
+    private Integer isAllowed = NumberUtils.INTEGER_ONE;
 
 }

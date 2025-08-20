@@ -10,13 +10,13 @@ import com.cmsr.onebase.module.app.dal.dataobject.app.ApplicationDO;
 import com.cmsr.onebase.module.app.dal.dataobject.menu.MenuDO;
 import com.cmsr.onebase.module.app.enums.app.AppErrorCodeConstants;
 import com.cmsr.onebase.module.app.enums.menu.MenuTypeEnum;
-import com.cmsr.onebase.module.app.enums.menu.MenuVisibleEnum;
 import com.cmsr.onebase.module.app.service.AppCommonService;
 import com.cmsr.onebase.module.app.service.appresource.PageSetService;
 import com.cmsr.onebase.module.app.util.MenuUtils;
 import jakarta.annotation.Resource;
 import lombok.Setter;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -89,7 +89,7 @@ public class AppMenuServiceImpl implements AppMenuService {
         menuDO.setMenuName(createReqVO.getMenuName());
         menuDO.setMenuIcon(createReqVO.getMenuIcon());
         menuDO.setMenuSort(generateMenuSort(applicationDO.getId()));
-        menuDO.setVisible(MenuVisibleEnum.YES.getValue());
+        menuDO.setIsVisible(NumberUtils.INTEGER_ONE);
         menuDO.setEntityId(createReqVO.getEntityId());
         appMenuRepository.insert(menuDO);
         // 创建页面集
@@ -180,9 +180,9 @@ public class AppMenuServiceImpl implements AppMenuService {
     }
 
     @Override
-    public void updateApplicationMenuVisible(Long id, Boolean visible) {
+    public void updateApplicationMenuVisible(Long id, Integer visible) {
         MenuDO menuDO = appCommonService.validateMenuExist(id);
-        menuDO.setVisible(visible);
+        menuDO.setIsVisible(visible);
         appMenuRepository.update(menuDO);
     }
 
