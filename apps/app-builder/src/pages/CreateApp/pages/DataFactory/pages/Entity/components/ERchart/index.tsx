@@ -6,6 +6,7 @@ import { Button, InputNumber } from '@arco-design/web-react';
 import DetailDrawer from '../Drawers/DetailDrawer';
 // import EditDrawer from '../Drawer/EditDrawer';
 import { type EntityNode, type EntityERProps } from '../../../../utils/interface';
+import { FIELD_TYPE } from '@/pages/CreateApp/pages/DataFactory/utils/const';
 import EntityNodeComponent from './ERnode';
 import styles from './index.module.less';
 
@@ -228,7 +229,7 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
           const portsItems = (nodeData: EntityNode) => {
             const items: object[] = [];
             nodeData?.fields?.forEach((field, index) => {
-              const extraTitleHeight = field.isSystemField === 1 ? LINE_TITLE_HEIGHT : LINE_TITLE_HEIGHT * 2;
+              const extraTitleHeight = field.isSystemField === FIELD_TYPE.SYSTEM ? LINE_TITLE_HEIGHT : LINE_TITLE_HEIGHT * 2;
               const accumulatedHeight = index >= 1 ? index * LINE_HEIGHT : 0;
 
               const leftItem = {

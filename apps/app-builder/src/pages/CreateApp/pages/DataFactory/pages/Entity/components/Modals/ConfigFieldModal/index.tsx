@@ -1,5 +1,6 @@
 import { ENTITY_FIELD_TYPE } from '@/pages/CreateApp/pages/DataFactory/utils/const';
 import type { EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
+import { FIELD_TYPE } from '@/pages/CreateApp/pages/DataFactory/utils/const';
 import { useAppStore } from '@/store/store_app';
 import { Button, Message, Modal, Table } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
@@ -82,7 +83,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
   }, [visible]);
 
   // 过滤掉已删除的字段和系统字段
-  const activeFields = fields.filter((field) => !field.isDeleted && field.isSystemField === 0);
+  const activeFields = fields.filter((field) => !field.isDeleted && field.isSystemField === FIELD_TYPE.CUSTOM);
 
   const addField = () => {
     const newField: FieldFormValues = {
@@ -96,7 +97,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
       isUnique: 1,
       allowNull: 1,
       constraints: '',
-      isSystemField: 0,
+      isSystemField: FIELD_TYPE.CUSTOM,
       sortOrder: activeFields.length
     };
     setFields([...activeFields, newField]);
@@ -104,7 +105,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
 
   const deleteField = (index: number) => {
     const field = fields[index];
-    if (field.isSystemField === 1) {
+    if (field.isSystemField === FIELD_TYPE.SYSTEM) {
       Message.error('系统字段不能删除');
       return;
     }
@@ -141,7 +142,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
     try {
       setLoading(true);
 
-      const customFields = fields.filter((field) => field.isSystemField === 0 && !field.isDeleted);
+      const customFields = fields.filter((field) => field.isSystemField === FIELD_TYPE.CUSTOM && !field.isDeleted);
 
       // 表单校验
       for (const field of customFields) {
@@ -159,13 +160,13 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
         }
       }
 
-      const allFields = fields.filter((field) => field.isSystemField === 0);
+      const allFields = fields.filter((field) => field.isSystemField === FIELD_TYPE.CUSTOM);
       const fieldDataList = allFields.map((field) => {
         const fieldData = {
           appId: curAppId,
           entityId: entity.entityId,
           ...field,
-          isSystemField: 0,
+          isSystemField: FIELD_TYPE.CUSTOM,
           isDeleted: field.isDeleted || false
         };
 
@@ -284,7 +285,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
             pagination={false}
             className={styles['field-table']}
             rowClassName={(record) =>
-              record.isSystemField === 1 ? styles['system-field-row'] : styles['custom-field-row']
+              record.isSystemField === FIELD_TYPE.SYSTEM ? styles['system-field-row'] : styles['custom-field-row']
             }
             rowKey="id"
             components={{

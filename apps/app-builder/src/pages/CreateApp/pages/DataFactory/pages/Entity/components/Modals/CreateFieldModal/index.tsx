@@ -1,4 +1,5 @@
 import type { EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
+import { FIELD_TYPE } from '@/pages/CreateApp/pages/DataFactory/utils/const';
 import { useAppStore } from '@/store/store_app';
 import { Form, Input, Message, Modal, Select } from '@arco-design/web-react';
 import { createField } from '@onebase/app';
@@ -57,7 +58,7 @@ const CreateFieldModal: React.FC<{
         displayName: entity.entityName,
         appId: curAppId,
         ...values,
-        isSystemField: 0
+        isSystemField: FIELD_TYPE.CUSTOM
       });
 
       console.log('createField', res);

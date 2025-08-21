@@ -1,4 +1,5 @@
 import React from 'react';
+import { FIELD_TYPE, FIELD_TYPE_LABEL } from '@/pages/CreateApp/pages/DataFactory/utils/const';
 import { Button, Checkbox, Input, Popover, Select, Space, Tooltip } from '@arco-design/web-react';
 import { IconDragDotVertical, IconSelectAll, IconSettings } from '@arco-design/web-react/icon';
 import styles from '../modal.module.less';
@@ -69,7 +70,7 @@ const TableColumns = ({
       dataIndex: 'sortOrder',
       width: 40,
       render: (value: number, record: FieldFormValues) => {
-        if (record.isSystemField === 1) {
+        if (record.isSystemField === FIELD_TYPE.SYSTEM) {
           return null;
         }
         return <IconDragDotVertical className={styles['drag-handle']} />;
@@ -80,7 +81,7 @@ const TableColumns = ({
       dataIndex: 'fieldName',
       width: 120,
       render: (value: string, record: FieldFormValues, index: number) =>
-        record.isSystemField === 1 ? (
+        record.isSystemField === FIELD_TYPE.SYSTEM ? (
           <span className={styles['system-field']}>{value}</span>
         ) : (
           <Input
@@ -95,7 +96,7 @@ const TableColumns = ({
       dataIndex: 'displayName',
       width: 120,
       render: (value: string, record: FieldFormValues, index: number) =>
-        record.isSystemField === 1 ? (
+        record.isSystemField === FIELD_TYPE.SYSTEM ? (
           <span className={styles['system-field']}>{value}</span>
         ) : (
           <Input
@@ -115,12 +116,12 @@ const TableColumns = ({
             value={value}
             options={fieldTypeOptions}
             onChange={(val) => updateField(getFieldIndex(record.id, index), { fieldType: val })}
-            disabled={record.isSystemField === 1}
+            disabled={record.isSystemField === FIELD_TYPE.SYSTEM}
             style={{ width: 100 }}
             showSearch
             filterOption={(input, option) => (option?.props?.label ?? '').includes(input)}
           />
-          {record.isSystemField === 0 && FIELD_TYPES_NEED_CONFIG.includes(value) && (
+          {record.isSystemField === FIELD_TYPE.CUSTOM && FIELD_TYPES_NEED_CONFIG.includes(value) && (
             <Popover
               content={renderFieldConfigContent(value, record.id)}
               trigger="click"
@@ -162,7 +163,7 @@ const TableColumns = ({
       width: 110,
       ellipsis: true,
       render: (value: number) => (
-        <span className={styles['system-field']}>{value === 0 ? '系统字段' : '自定义字段'}</span>
+        <span className={styles['system-field']}>{FIELD_TYPE_LABEL[value as keyof typeof FIELD_TYPE_LABEL]}</span>
       )
     },
     {
@@ -170,7 +171,7 @@ const TableColumns = ({
       dataIndex: 'defaultValue',
       width: 120,
       render: (value: string, record: FieldFormValues, index: number) =>
-        record.isSystemField === 1 ? (
+        record.isSystemField === FIELD_TYPE.SYSTEM ? (
           <span className={styles['system-field']}>-</span>
         ) : (
           <Input
@@ -185,7 +186,7 @@ const TableColumns = ({
       dataIndex: 'isUnique',
       width: 60,
       render: (value: number, record: FieldFormValues, index: number) =>
-        record.isSystemField === 1 ? (
+        record.isSystemField === FIELD_TYPE.SYSTEM ? (
           <span className={styles['system-field']}>-</span>
         ) : (
           <Checkbox
@@ -199,7 +200,7 @@ const TableColumns = ({
       dataIndex: 'allowNull',
       width: 100,
       render: (value: number, record: FieldFormValues, index: number) =>
-        record.isSystemField === 1 ? (
+        record.isSystemField === FIELD_TYPE.SYSTEM ? (
           <span className={styles['system-field']}>-</span>
         ) : (
           <Checkbox
@@ -212,7 +213,7 @@ const TableColumns = ({
       title: '字段约束',
       dataIndex: 'constraints',
       render: (value: any, record: FieldFormValues, index: number) =>
-        record.isSystemField === 1 ? (
+        record.isSystemField === FIELD_TYPE.SYSTEM ? (
           <span className={styles['system-field']}>-</span>
         ) : (
           <Popover
@@ -234,7 +235,7 @@ const TableColumns = ({
       render: (value: unknown, record: FieldFormValues) => {
         const fieldIndex = fields.findIndex((f) => f.id === record.id);
         return (
-          record.isSystemField === 0 && (
+          record.isSystemField === FIELD_TYPE.CUSTOM && (
             <Button type="text" status="danger" size="mini" onClick={() => deleteField(fieldIndex)}>
               删除
             </Button>

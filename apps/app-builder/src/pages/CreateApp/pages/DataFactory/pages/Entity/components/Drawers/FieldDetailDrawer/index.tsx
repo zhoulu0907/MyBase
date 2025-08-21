@@ -1,4 +1,5 @@
 import { ENTITY_FIELD_TYPE } from '@/pages/CreateApp/pages/DataFactory/utils/const';
+import { FIELD_TYPE, FIELD_TYPE_LABEL } from '@/pages/CreateApp/pages/DataFactory/utils/const';
 import { Descriptions, Drawer, Empty, Spin, Tag } from '@arco-design/web-react';
 import { getFieldById } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
@@ -78,10 +79,11 @@ const FieldDetailDrawer: React.FC<FieldDetailDrawerProps> = ({ visible, setVisib
   };
 
   const renderSystemFieldTag = (isSystemField: number) => {
-    if (isSystemField === 1) {
-      return <Tag color="red">系统字段</Tag>;
-    }
-    return <Tag color="green">自定义字段</Tag>;
+    return (
+      <Tag color={isSystemField === FIELD_TYPE.SYSTEM ? 'red' : 'green'}>
+        {FIELD_TYPE_LABEL[isSystemField as keyof typeof FIELD_TYPE_LABEL]}
+      </Tag>
+    );
   };
 
   const renderUniqueTag = (isUnique: boolean) => {

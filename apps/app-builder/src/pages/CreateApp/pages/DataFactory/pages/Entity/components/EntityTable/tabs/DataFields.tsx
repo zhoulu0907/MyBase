@@ -1,5 +1,6 @@
 import { convertEntityListItemToConfigField } from '@/pages/CreateApp/pages/DataFactory/utils/entityConverter';
 import type { EntityListItem } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
+import { FIELD_TYPE, FIELD_TYPE_LABEL } from '@/pages/CreateApp/pages/DataFactory/utils/const';
 import { useAppStore } from '@/store/store_app';
 import type { TableColumnProps } from '@arco-design/web-react';
 import { Button, Message, Modal, Space, Table, Tag } from '@arco-design/web-react';
@@ -116,7 +117,9 @@ const DataFields: React.FC<DataFieldsProps> = ({ entity, activeTab }) => {
       dataIndex: 'isSystemField',
       key: 'isSystemField',
       render: (isSystemField: number) => (
-        <Tag color={isSystemField === 1 ? 'red' : 'green'}>{isSystemField === 1 ? '系统字段' : '自定义字段'}</Tag>
+        <Tag color={isSystemField === FIELD_TYPE.SYSTEM ? 'red' : 'green'}>
+          {FIELD_TYPE_LABEL[isSystemField as keyof typeof FIELD_TYPE_LABEL]}
+        </Tag>
       )
     },
     {
@@ -162,12 +165,12 @@ const DataFields: React.FC<DataFieldsProps> = ({ entity, activeTab }) => {
       key: 'operation',
       render: (_, record) => (
         <Space>
-          {record.isSystemField === 0 && (
+          {record.isSystemField === FIELD_TYPE.CUSTOM && (
             <Button type="text" size="mini" onClick={() => handleEditField(record.id)}>
               编辑
             </Button>
           )}
-          {record.isSystemField === 0 && (
+          {record.isSystemField === FIELD_TYPE.CUSTOM && (
             <Button type="text" size="mini" status="danger" onClick={() => handleDeleteField(record.id)}>
               删除
             </Button>
