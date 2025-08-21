@@ -1,31 +1,24 @@
 // 表单样式变量
 @import '../../../../../../styles/variables.less';
 
-.node-edit-form {
-  h3 {
-    font-size: @fontSizeLg;
-    font-weight: @fontWeightNormal;
-    color: @textColorPrimary;
+.nodeEditForm {
+  .header {
+    .form-header-style();
   }
 
-  h4 {
-    margin: @spacingSm -@spacingMd !important;
-    padding: @spacingSm @spacingMd !important;
-    margin-bottom: @formItemMarginBottom;
-    font-weight: @fontWeightNormal;
-    color: @textColorPrimary;
-    background-color: @backgroundColorLighter;
-  }
-
-  .form-section {
+  .formSection {
     .form-section-style();
   }
 
-  .form-actions {
+  .formSectionTitle {
+    .form-section-title();
+  }
+
+  .formActions {
     .form-actions-style();
   }
 
-  .switch-item {
+  .switchItem {
     .flex-between();
 
     span {

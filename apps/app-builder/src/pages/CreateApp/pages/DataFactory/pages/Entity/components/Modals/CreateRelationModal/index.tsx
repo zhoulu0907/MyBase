@@ -1,6 +1,6 @@
 import { useAppStore } from '@/store/store_app';
 import { useResourceStore } from '@/store/store_resource';
-import { Form, Message, Modal, Select } from '@arco-design/web-react';
+import { Form, Message, Modal, Select, Grid } from '@arco-design/web-react';
 import { createRelation, getEntityFields, getEntityList } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
 import styles from '../modal.module.less';
@@ -84,31 +84,24 @@ const CreateRelationModal: React.FC<{
         label: field.displayName,
         value: field.id
       }));
-      type === 'left' ? setLeftFieldOptions(fieldOptions) : setRightFieldOptions(fieldOptions);
+      if (type === 'left') {
+        form.setFieldValue('sourceFieldId', '');
+        setLeftFieldOptions(fieldOptions);
+      } else {
+        form.setFieldValue('targetFieldId', '');
+        setRightFieldOptions(fieldOptions);
+      }
     }
-    form.setFieldValue('sourceFieldId', '');
   };
 
   // 提交
   const handleFinish = () => {
     form.validate().then(async (values) => {
-      // TODO: 提交关联关系数据
       console.log('关联关系数据:', values);
-      // const { nodes, edges } = JSON.parse(
-      //   localStorage.getItem('entityFormValues') || JSON.stringify({ nodes: [], edges: [] })
-      // );
-      // const newEdges = edges || [];
-      // const edge: EdgeData = {
-      //   source: { cell: values.sourceEntityId, port: values.sourceFieldId },
-      //   target: { cell: values.targetEntityId, port: values.targetFieldId }
-      //   // label: values.relationshipType,
-      // };
-      // newEdges.push(edge);
-      // localStorage.setItem('entityFormValues', JSON.stringify({ nodes, edges: newEdges }));
 
       const params = {
         ...values,
-        relationName: '1',
+        relationName: values.relationshipType,
         appId: curAppId
       };
 
@@ -132,25 +125,30 @@ const CreateRelationModal: React.FC<{
       okText="确认"
       cancelText="取消"
     >
-      <Form form={form} layout="vertical" onSubmit={handleFinish} className={styles['relation-form']}>
+      <Form form={form} onSubmit={handleFinish} layout="vertical" className={styles['relation-form']}>
         <div className={styles['relation-form-container']}>
-          {/* 左关联表 */}
-          <Form.Item
-            label="左关联表"
-            field="sourceEntityId"
-            required
-            rules={[{ required: true, message: '请选择左关联表' }]}
-          >
-            <Select
-              placeholder="请选择业务实体"
-              options={leftEntityOptions}
-              onChange={(values) => handleEntityChange(values, 'left')}
-            />
-          </Form.Item>
-
-          <Form.Item label="请选择字段" field="sourceFieldId" rules={[{ required: true, message: '请选择字段' }]}>
-            <Select placeholder="请选择字段" options={leftFieldOptions} />
-          </Form.Item>
+          {/* 本表 */}
+          <Grid.Row gutter={16}>
+            <Grid.Col span={12}>
+              <Form.Item
+                label="本表"
+                field="sourceEntityId"
+                required
+                rules={[{ required: true, message: '请选择本表' }]}
+              >
+                <Select
+                  placeholder="请选择业务实体"
+                  options={leftEntityOptions}
+                  onChange={(values) => handleEntityChange(values, 'left')}
+                />
+              </Form.Item>
+            </Grid.Col>
+            <Grid.Col span={12} className={styles['form-item-bottom']}>
+              <Form.Item field="sourceFieldId" rules={[{ required: true, message: '请选择字段' }]}>
+                <Select placeholder="请选择字段" options={leftFieldOptions} />
+              </Form.Item>
+            </Grid.Col>
+          </Grid.Row>
 
           {/* 关联关系类型 */}
           <Form.Item
@@ -162,23 +160,28 @@ const CreateRelationModal: React.FC<{
             <Select placeholder="请选择关联关系" options={relationTypes} />
           </Form.Item>
 
-          {/* 右关联表 */}
-          <Form.Item
-            label="右关联表"
-            field="targetEntityId"
-            required
-            rules={[{ required: true, message: '请选择右关联表' }]}
-          >
-            <Select
-              placeholder="请选择业务实体"
-              options={rightEntityOptions}
-              onChange={(values) => handleEntityChange(values, 'right')}
-            />
-          </Form.Item>
-
-          <Form.Item label="请选择字段" field="targetFieldId" rules={[{ required: true, message: '请选择字段' }]}>
-            <Select placeholder="请选择字段" options={rightFieldOptions} />
-          </Form.Item>
+          {/* 关联表 */}
+          <Grid.Row gutter={16}>
+            <Grid.Col span={12}>
+              <Form.Item
+                label="关联表"
+                field="targetEntityId"
+                required
+                rules={[{ required: true, message: '请选择关联表' }]}
+              >
+                <Select
+                  placeholder="请选择业务实体"
+                  options={rightEntityOptions}
+                  onChange={(values) => handleEntityChange(values, 'right')}
+                />
+              </Form.Item>
+            </Grid.Col>
+            <Grid.Col span={12} className={styles['form-item-bottom']}>
+              <Form.Item field="targetFieldId" rules={[{ required: true, message: '请选择字段' }]}>
+                <Select placeholder="请选择字段" options={rightFieldOptions} />
+              </Form.Item>
+            </Grid.Col>
+          </Grid.Row>
         </div>
       </Form>
     </Modal>

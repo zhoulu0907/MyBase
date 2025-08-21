@@ -100,13 +100,15 @@ const NodeEditForm: React.FC<NodeEditFormProps> = ({ node, onCancel, onSave, suc
   }, [node]);
 
   return (
-    <div className={styles['node-edit-form']}>
-      <h3>业务实体</h3>
+    <div className={styles.nodeEditForm}>
+      <div className={styles.header}>
+        <h3>业务实体</h3>
+      </div>
 
       <Form form={form} initialValues={initialValues} layout="vertical" style={{ width: '100%' }}>
         {/* 基本设置 */}
-        <div className={styles['form-section']}>
-          <h4>基本设置</h4>
+        <div className={styles.formSection}>
+          <h4 className={styles.formSectionTitle}>基本设置</h4>
 
           <Form.Item
             label="业务实体编码"
@@ -136,13 +138,13 @@ const NodeEditForm: React.FC<NodeEditFormProps> = ({ node, onCancel, onSave, suc
         </div>
 
         {/* 系统字段 */}
-        <div className={styles['form-section']}>
-          <h4>系统字段</h4>
+        <div className={styles.formSection}>
+          <h4 className={styles.formSectionTitle}>系统字段</h4>
 
           {formItems.length &&
             formItems.map((item) => (
               <Form.Item field={item.field} key={item.field}>
-                <div className={styles['switch-item']}>
+                <div className={styles.switchItem}>
                   <span>{item.label}</span>
                   <Switch
                     onChange={(value: boolean) => handleSwitchChange(value, item)}
@@ -153,7 +155,7 @@ const NodeEditForm: React.FC<NodeEditFormProps> = ({ node, onCancel, onSave, suc
             ))}
         </div>
 
-        <Form.Item className={styles['form-actions']}>
+        <Form.Item className={styles.formActions}>
           {/* 更换为删除按钮 */}
           <Button type="text" status="danger" onClick={() => handleDelete()}>
             删除
