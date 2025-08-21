@@ -29,19 +29,19 @@ public class TenantRespVO {
 
     @Schema(description = "租户名", requiredMode = Schema.RequiredMode.REQUIRED, example = "onebase")
     @ExcelProperty("租户名")
-    private Integer contactUserId;
+    private Integer adminUserId;
 
     @Schema(description = "用户昵称", requiredMode = Schema.RequiredMode.REQUIRED, example = "onebase")
     @ExcelProperty("用户昵称")
-    private String nickName;
+    private String adminNickName;
 
     @Schema(description = "联系人", requiredMode = Schema.RequiredMode.REQUIRED, example = "onebase")
     @ExcelProperty("联系人")
-    private String contactName;
+    private String adminUserName;
 
     @Schema(description = "联系手机", example = "15601691300")
     @ExcelProperty("联系手机")
-    private String contactMobile;
+    private String adminMobile;
 
     @Schema(description = "租户状态", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
     @ExcelProperty(value = "状态", converter = DictConvert.class)

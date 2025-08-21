@@ -23,13 +23,13 @@ public class TenantUpdateReqVO {
 
     @Schema(description = "租户昵称", requiredMode = Schema.RequiredMode.REQUIRED, example = "onebase")
     // @NotNull(message = "租户昵称不能为空")
-    private String nickname;
+    private String adminNickName;
 
     @Schema(description = "联系人", requiredMode = Schema.RequiredMode.REQUIRED, example = "onebase")
-    private String contactName;
+    private String adminUserName;
 
     @Schema(description = "联系手机", example = "15601691300")
-    private String contactMobile;
+    private String adminMobile;
 
     @Schema(description = "租户状态", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
     private Integer status;
@@ -52,14 +52,14 @@ public class TenantUpdateReqVO {
 
     // ========== 仅【创建】时，需要传递的字段 ==========
 
-    @Schema(description = "用户账号", requiredMode = Schema.RequiredMode.REQUIRED, example = "yudao")
-    @Pattern(regexp = "^[a-zA-Z0-9]{4,30}$", message = "用户账号由 数字、字母 组成")
-    @Size(min = 4, max = 30, message = "用户账号长度为 4-30 个字符")
-    private String username;
-
-    @Schema(description = "密码", requiredMode = Schema.RequiredMode.REQUIRED, example = "123456")
-    @Length(min = 4, max = 16, message = "密码长度为 4-16 位")
-    private String password;
+    // @Schema(description = "用户账号", requiredMode = Schema.RequiredMode.REQUIRED, example = "yudao")
+    // @Pattern(regexp = "^[a-zA-Z0-9]{4,30}$", message = "用户账号由 数字、字母 组成")
+    // @Size(min = 4, max = 30, message = "用户账号长度为 4-30 个字符")
+    // private String username;
+    //
+    // @Schema(description = "密码", requiredMode = Schema.RequiredMode.REQUIRED, example = "123456")
+    // @Length(min = 4, max = 16, message = "密码长度为 4-16 位")
+    // private String password;
 
 //    @AssertTrue(message = "用户账号、密码不能为空")
 //    @JsonIgnore
