@@ -3,6 +3,7 @@ package com.cmsr.onebase.framework.common.util.object;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.config.Configuration;
 import org.modelmapper.convention.MatchingStrategies;
 
 import java.util.List;
@@ -20,7 +21,8 @@ public class BeanUtils {
                 .setMatchingStrategy(MatchingStrategies.STRICT)
                 .setFullTypeMatchingRequired(true)
                 .setFieldMatchingEnabled(true)
-                .setAmbiguityIgnored(true);
+                .setAmbiguityIgnored(true)
+                .setFieldAccessLevel(Configuration.AccessLevel.PRIVATE);
     }
 
     public static <T> T toBean(Object source, Class<T> targetClass) {
