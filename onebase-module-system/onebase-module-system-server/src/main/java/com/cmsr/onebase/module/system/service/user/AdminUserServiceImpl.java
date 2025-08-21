@@ -101,7 +101,7 @@ public class AdminUserServiceImpl implements AdminUserService {
         // 1.1 校验账户配合
         tenantService.handleTenantInfo(tenant -> {
 
-            long count = adminUserDataRepository.countByConfig(new DefaultConfigStore().eq(AdminUserDO.STATUS, UserStatusEnum.NORMAL));
+            long count = adminUserDataRepository.countByConfig(new DefaultConfigStore().eq(AdminUserDO.STATUS, UserStatusEnum.NORMAL.getStatus()));
             log.info(" count user four tenant, count={}", count);
             if (count >= tenant.getAccountCount()) {
                 throw exception(USER_COUNT_MAX, tenant.getAccountCount());

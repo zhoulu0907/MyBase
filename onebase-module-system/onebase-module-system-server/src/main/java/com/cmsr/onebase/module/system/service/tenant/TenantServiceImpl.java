@@ -319,7 +319,7 @@ public class TenantServiceImpl implements TenantService {
         DataRow row = new DataRow();
         row.put(TenantDO.ID, updateObj.getId());
         if (updateObj.getAdminUserId() != null) {
-            row.put(TenantDO.CONTACT_USER_ID, updateObj.getAdminUserId());
+            row.put(TenantDO.ADMIN_USER_ID, updateObj.getAdminUserId());
         }
         if(StringUtils.isNotEmpty(updateObj.getName())){
             row.put(TenantDO.NAME, updateObj.getName());
@@ -373,7 +373,7 @@ public class TenantServiceImpl implements TenantService {
                 // 修改租户的管理员
                 updateObj.setAdminUserId(userId);
                 if(updateObj.getStatus() != null){
-                    row.put(TenantDO.CONTACT_USER_ID, updateObj.getAdminUserId());
+                    row.put(TenantDO.ADMIN_USER_ID, updateObj.getAdminUserId());
                 }
                 tenantDataRepository.updateByConfig(row, new DefaultConfigStore().eq(TenantDO.ID, updateObj.getId()));
             }
