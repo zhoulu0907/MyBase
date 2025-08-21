@@ -40,19 +40,19 @@ public class EntityFieldRespDTO {
     @Schema(description = "字段描述", example = "用户登录名")
     private String description;
 
-    @Schema(description = "是否系统字段：0-是，1-不是", example = "1")
+    @Schema(description = "是否系统字段：1-是，0-不是", example = "1")
     private Integer isSystemField;
 
-    @Schema(description = "是否主键：0-是，1-不是", example = "1")
+    @Schema(description = "是否主键：1-是，0-不是", example = "1")
     private Integer isPrimaryKey;
 
-    @Schema(description = "是否必填：0-是，1-不是", example = "0")
+    @Schema(description = "是否必填：1-是，0-不是", example = "0")
     private Integer isRequired;
 
-    @Schema(description = "是否唯一：0-是，1-不是", example = "0")
+    @Schema(description = "是否唯一：1-是，0-不是", example = "0")
     private Integer isUnique;
 
-    @Schema(description = "是否允许空值：0-是，1-不是", example = "1")
+    @Schema(description = "是否允许空值：1-是，0-不是", example = "1")
     private Integer allowNull;
 
     @Schema(description = "排序", example = "1")
