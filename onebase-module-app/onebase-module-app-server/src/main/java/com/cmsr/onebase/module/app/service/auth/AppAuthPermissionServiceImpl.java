@@ -16,7 +16,6 @@ import com.cmsr.onebase.module.metadata.api.validation.dto.PermitRefOtftRespDTO;
 import com.cmsr.onebase.module.system.api.dict.DictDataApi;
 import jakarta.annotation.Resource;
 import lombok.Setter;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -334,7 +333,7 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
         List<EntityFieldRespDTO> entityFieldRespDTOS = getEntityFieldRespDTOS(entityId);
         List<AuthFieldDO> authFieldDOS = authFieldRepository.findByQuery(reqVO);
         List<Pair<EntityFieldRespDTO, AuthFieldDO>> pairs = AuthUtils.leftOuterJoin(entityFieldRespDTOS, authFieldDOS,
-                (entityFieldRespDTO, authFieldDO) -> Objects.equals(NumberUtils.toLong(entityFieldRespDTO.getId()), authFieldDO.getFieldId())); //TODO 强转
+                (entityFieldRespDTO, authFieldDO) -> Objects.equals(entityFieldRespDTO.getId(), authFieldDO.getFieldId()));
         return pairs.stream().map(pair -> {
             EntityFieldRespDTO entityField = pair.getLeft();
             AuthFieldVO authFieldVO = new AuthFieldVO();
@@ -352,7 +351,7 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
 
     private List<EntityFieldRespDTO> getEntityFieldRespDTOS(Long entityId) {
         EntityFieldQueryReqDTO reqDTO = new EntityFieldQueryReqDTO();
-        reqDTO.setEntityId(entityId.toString()); //TODO 强转
+        reqDTO.setEntityId(entityId);
         reqDTO.setIsSystemField(0);
         List<EntityFieldRespDTO> entityFieldRespDTOS = metadataEntityFieldApi.getEntityFieldList(reqDTO).getData();
         return entityFieldRespDTOS;
