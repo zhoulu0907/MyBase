@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.app.dal.database.auth;
 
 import com.cmsr.onebase.framework.aynline.DataRepository;
+import com.cmsr.onebase.module.app.controller.admin.auth.vo.AuthFieldVO;
 import com.cmsr.onebase.module.app.controller.admin.auth.vo.AuthPermissionReqVO;
 import com.cmsr.onebase.module.app.dal.dataobject.auth.AuthFieldDO;
 import org.anyline.data.param.ConfigStore;
@@ -30,4 +31,12 @@ public class AppAuthFieldRepository extends DataRepository<AuthFieldDO> {
         return this.findAllByConfig(configs);
     }
 
+    public AuthFieldDO findByQuery(AuthPermissionReqVO reqVO, AuthFieldVO authField) {
+        ConfigStore configs = new DefaultConfigStore();
+        configs.eq("application_id", reqVO.getApplicationId());
+        configs.eq("role_id", reqVO.getRoleId());
+        configs.eq("menu_id", reqVO.getMenuId());
+        configs.eq("field_id", authField.getFieldId());
+        return this.findOne(configs);
+    }
 }

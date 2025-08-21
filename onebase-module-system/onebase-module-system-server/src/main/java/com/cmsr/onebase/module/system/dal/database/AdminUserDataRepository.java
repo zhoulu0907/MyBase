@@ -7,6 +7,7 @@ import com.cmsr.onebase.framework.data.base.BaseDO;
 import com.cmsr.onebase.module.system.controller.admin.user.vo.user.UserPageReqVO;
 import com.cmsr.onebase.module.system.controller.admin.user.vo.user.UserSimplePageReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
+import com.cmsr.onebase.module.system.enums.user.UserStatusEnum;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Compare;
 import org.anyline.entity.Order;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 /**
  * 管理员用户数据访问层
@@ -224,5 +226,14 @@ public class AdminUserDataRepository extends DataRepository<AdminUserDO> {
         configStore.order(AdminUserDO.ADMIN_TYPE, Order.TYPE.ASC).order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
 
         return findPageWithConditions(configStore, reqVO.getPageNo(), reqVO.getPageSize());
+    }
+
+    public List<AdminUserDO> findEnableUserByIds(Set<Long> userIds) {
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        configStore.in(AdminUserDO.ID, userIds)
+                .eq(AdminUserDO.STATUS, UserStatusEnum.NORMAL.getStatus())
+                .order(AdminUserDO.ADMIN_TYPE, Order.TYPE.ASC)
+                .order(BaseDO.CREATE_TIME, Order.TYPE.DESC);
+        return findAllByConfig(configStore);
     }
 }

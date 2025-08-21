@@ -33,10 +33,10 @@ public class NoticeDataRepository extends DataRepository<NoticeDO> {
         DefaultConfigStore configStore = new DefaultConfigStore();
 
         if (StringUtils.isNotBlank(reqVO.getTitle())) {
-            configStore.and(Compare.LIKE, "title", reqVO.getTitle());
+            configStore.and(Compare.LIKE, NoticeDO.TITLE, reqVO.getTitle());
         }
         if (null != reqVO.getStatus()) {
-            configStore.and(Compare.EQUAL, "status", reqVO.getStatus());
+            configStore.and(Compare.EQUAL, NoticeDO.STATUS, reqVO.getStatus());
         }
 
         return findPageWithConditions(configStore, reqVO.getPageNo(), reqVO.getPageSize());

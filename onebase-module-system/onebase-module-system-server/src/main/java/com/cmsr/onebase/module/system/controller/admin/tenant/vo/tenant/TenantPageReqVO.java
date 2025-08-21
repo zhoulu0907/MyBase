@@ -29,7 +29,7 @@ public class TenantPageReqVO extends PageParam {
     @Schema(description = "联系手机", example = "15601691300")
     private String contactMobile;
 
-    @Schema(description = "租户状态（0正常 1停用）", example = "1")
+    @Schema(description = "租户状态（1正常 0停用）", example = "1")
     private Integer status;
 
     @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)

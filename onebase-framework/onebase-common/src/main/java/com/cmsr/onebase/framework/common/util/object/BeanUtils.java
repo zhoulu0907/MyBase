@@ -3,6 +3,8 @@ package com.cmsr.onebase.framework.common.util.object;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.config.Configuration;
+import org.modelmapper.convention.MatchingStrategies;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -13,6 +15,15 @@ import java.util.function.Consumer;
 public class BeanUtils {
 
     private static final ModelMapper MODEL_MAPPER = new ModelMapper();
+
+    static {
+        MODEL_MAPPER.getConfiguration()
+                .setMatchingStrategy(MatchingStrategies.STRICT)
+                .setFullTypeMatchingRequired(true)
+                .setFieldMatchingEnabled(true)
+                .setAmbiguityIgnored(true)
+                .setFieldAccessLevel(Configuration.AccessLevel.PRIVATE);
+    }
 
     public static <T> T toBean(Object source, Class<T> targetClass) {
         return MODEL_MAPPER.map(source, targetClass);

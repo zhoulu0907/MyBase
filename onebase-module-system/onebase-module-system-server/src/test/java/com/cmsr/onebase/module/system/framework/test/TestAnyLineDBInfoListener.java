@@ -2,23 +2,13 @@ package com.cmsr.onebase.module.system.framework.test;
 
 import com.cmsr.onebase.framework.common.anyline.web.BizException;
 import com.cmsr.onebase.framework.common.anyline.web.StatusCode;
-import com.cmsr.onebase.framework.common.util.snowflake.SnowflakeId;
 import com.cmsr.onebase.framework.data.base.BaseDO;
-import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
 import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
+import com.cmsr.onebase.framework.uid.UidGenerator;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
-
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-
-import static org.mockito.ArgumentMatchers.refEq;
-
-import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-
 import org.anyline.data.listener.DMListener;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.prepare.RunPrepare;
@@ -30,6 +20,12 @@ import org.anyline.entity.DataSet;
 import org.anyline.metadata.ACTION.SWITCH;
 import org.anyline.metadata.Table;
 import org.springframework.stereotype.Component;
+
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * 测试环境专用的AnyLine数据库监听器
@@ -43,6 +39,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class TestAnyLineDBInfoListener implements DMListener {
 
+    @Resource
+    private UidGenerator uidGenerator;
 
     // 需要忽略租户过滤的表名列表
     private static final Set<String> TENANT_IGNORE_TABLES = new HashSet<>();
@@ -59,8 +57,9 @@ public class TestAnyLineDBInfoListener implements DMListener {
      * @param columns 需要抛入的列 如果不指定  则根据实体属性解析
      * @return 如果返回false 则中断执行
      */
-    @Override public SWITCH prepareInsert(DataRuntime runtime, String random, int batch, Table dest, Object obj,
-        ConfigStore configs, List<String> columns) {
+    @Override
+    public SWITCH prepareInsert(DataRuntime runtime, String random, int batch, Table dest, Object obj,
+                                ConfigStore configs, List<String> columns) {
         // 加入租户标志
         injectTenantIdToObject(obj);
 
@@ -70,9 +69,9 @@ public class TestAnyLineDBInfoListener implements DMListener {
         // 加入创建时间和创建人等参数
         if (Objects.nonNull(obj) && obj instanceof BaseDO baseDO) {
             // 设置雪花ID
-            if(baseDO.getId() == null) {
-                baseDO.setId(SnowflakeId.nextId());
-                log.info("anyline global prepareInsert ---------> snow id:{}",baseDO.getId());
+            if (baseDO.getId() == null) {
+                baseDO.setId(uidGenerator.getUID());
+                log.info("anyline global prepareInsert ---------> snow id:{}", baseDO.getId());
             }
 
             // 创建时间为空，则以当前时间为插入时间
@@ -109,8 +108,9 @@ public class TestAnyLineDBInfoListener implements DMListener {
      * @param conditions 查询条件
      * @return 如果返回false 则中断执行
      */
-    @Override public SWITCH prepareQuery(DataRuntime runtime, String random, RunPrepare prepare, ConfigStore configs,
-        String... conditions) {
+    @Override
+    public SWITCH prepareQuery(DataRuntime runtime, String random, RunPrepare prepare, ConfigStore configs,
+                               String... conditions) {
 
         // 检查是否是简单的测试查询，如果是则跳过添加条件
         if (isSimpleTestQuery(prepare)) {
@@ -136,7 +136,7 @@ public class TestAnyLineDBInfoListener implements DMListener {
         }
         return SWITCH.CONTINUE;
     }
-    
+
     /**
      * 检查是否是简单的测试查询
      *
@@ -147,25 +147,25 @@ public class TestAnyLineDBInfoListener implements DMListener {
         if (prepare == null) {
             return false;
         }
-        
+
         // 获取SQL文本进行判断
         String sql = prepare.getText();
         if (sql == null) {
             return false;
         }
-        
+
         // 去除空白字符并转为大写
         String normalizedSql = sql.trim().toUpperCase();
-        
+
         // 检查是否是常见的测试查询
         return normalizedSql.equals("SELECT 1") ||
-               normalizedSql.equals("SELECT 1 FROM DUAL") ||
-               normalizedSql.matches("SELECT\\s+1\\s*") ||
-               normalizedSql.matches("SELECT\\s+1\\s+FROM\\s+DUAL\\s*");
+                normalizedSql.equals("SELECT 1 FROM DUAL") ||
+                normalizedSql.matches("SELECT\\s+1\\s*") ||
+                normalizedSql.matches("SELECT\\s+1\\s+FROM\\s+DUAL\\s*");
     }
 
     /**
-     * 检查表是否需要忽略租户过滤 
+     * 检查表是否需要忽略租户过滤
      *
      * @param obj RunPrepare对象
      * @return 如果表需要忽略租户过滤则返回true
@@ -175,7 +175,7 @@ public class TestAnyLineDBInfoListener implements DMListener {
     }
 
     /**
-     * 检查表名是否需要忽略租户过滤 
+     * 检查表名是否需要忽略租户过滤
      *
      * @param prepare RunPrepare对象
      * @return 如果表名在忽略列表中则返回true
@@ -183,7 +183,7 @@ public class TestAnyLineDBInfoListener implements DMListener {
     private boolean isTableTenantIgnored2(RunPrepare prepare) {
         return true;
     }
-    
+
     /**
      * 检查表名是否需要忽略租户过滤
      *
@@ -206,10 +206,11 @@ public class TestAnyLineDBInfoListener implements DMListener {
      * @param configs 更新条件
      * @return 如果返回false 则中断执行
      */
-    @Override public SWITCH prepareUpdate(DataRuntime runtime, String random, int batch, Table dest, Object obj,
-        ConfigStore configs, List<String> columns) {
+    @Override
+    public SWITCH prepareUpdate(DataRuntime runtime, String random, int batch, Table dest, Object obj,
+                                ConfigStore configs, List<String> columns) {
         // 这里config可能为空，强制异常提前发现问题。
-        if(configs == null){
+        if (configs == null) {
             throw new BizException(StatusCode.UPDATE_WHERE_IS_NULL);
         }
         // 加入软删判断 (opt: 框架这里config可能为空)
@@ -222,7 +223,7 @@ public class TestAnyLineDBInfoListener implements DMListener {
         }
         // 加入更新时间和更新人
         if (Objects.nonNull(obj) && obj instanceof BaseDO) {
-            BaseDO baseDO = (BaseDO)obj;
+            BaseDO baseDO = (BaseDO) obj;
             baseDO.setUpdateTime(LocalDateTime.now());
             Long userId = WebFrameworkUtils.getLoginUserId();
             baseDO.setUpdater(userId);
@@ -232,11 +233,11 @@ public class TestAnyLineDBInfoListener implements DMListener {
 
     @Override
     public SWITCH prepareUpdate(DataRuntime runtime, String random, RunPrepare prepare, DataRow data,
-            ConfigStore configs) {
-           // 这里config可能为空，强制异常提前发现问题。
-        if(configs == null){
+                                ConfigStore configs) {
+        // 这里config可能为空，强制异常提前发现问题。
+        if (configs == null) {
             throw new BizException(StatusCode.UPDATE_WHERE_IS_NULL);
-        }     
+        }
         // 加入软删判断 (opt: 框架这里config可能为空)
         configs.and(Compare.EQUAL, BaseDO.DELETED, false);
         // 加入租户标志
@@ -253,6 +254,7 @@ public class TestAnyLineDBInfoListener implements DMListener {
         }
         return SWITCH.CONTINUE;
     }
+
     /**
      * 创建删除SQL前调用(根据Entity/DataRow),修改删除条件可以在这一步实现<br/>
      * 注意不是beforeDelete<br/>
@@ -261,13 +263,14 @@ public class TestAnyLineDBInfoListener implements DMListener {
      *
      * @param runtime 包含数据源(key)、适配器、JDBCTemplate、dao
      * @param random  用来标记同一组SQL、执行结构、参数等
-     * @param table    表
+     * @param table   表
      * @param obj     entity或DataRow
      * @param columns 删除条件的我
      * @return 如果返回false 则中断执行
      */
-    @Override public SWITCH prepareDelete(DataRuntime runtime, String random, int batch, Table table, Object obj,
-        ConfigStore configs, String... columns) {
+    @Override
+    public SWITCH prepareDelete(DataRuntime runtime, String random, int batch, Table table, Object obj,
+                                ConfigStore configs, String... columns) {
         injectTenantIdAndDeleteToQuery(table.getName(), configs);
         return SWITCH.CONTINUE;
     }
@@ -282,11 +285,11 @@ public class TestAnyLineDBInfoListener implements DMListener {
      * @param random  用来标记同一组SQL、执行结构、参数等
      * @param table   表
      * @param key     key
-     * @param values     obj
+     * @param values  obj
      * @return 如果返回false 则中断执行
      */
     public SWITCH prepareDelete(DataRuntime runtime, String random, int batch, Table table, ConfigStore configs,
-        String key, Object values) {
+                                String key, Object values) {
         injectTenantIdAndDeleteToQuery(table.getName(), configs);
         return SWITCH.CONTINUE;
     }
@@ -301,8 +304,9 @@ public class TestAnyLineDBInfoListener implements DMListener {
      * @param set     查询结果
      * @param millis  耗时(毫秒)
      */
-    @Override public SWITCH afterQuery(DataRuntime runtime, String random, Run run, boolean success, DataSet set,
-        long millis) {
+    @Override
+    public SWITCH afterQuery(DataRuntime runtime, String random, Run run, boolean success, DataSet set,
+                             long millis) {
         return SWITCH.CONTINUE;
     }
 
@@ -320,7 +324,7 @@ public class TestAnyLineDBInfoListener implements DMListener {
         }
     }
 
-     /**
+    /**
      * 向查询条件注入租户标志
      *
      * @param
@@ -332,7 +336,7 @@ public class TestAnyLineDBInfoListener implements DMListener {
             configs.and(Compare.EQUAL, "tenant_id", TenantContextHolder.getRequiredTenantId());
         }
         // 加入软删判断
-        configs.and(Compare.EQUAL, BaseDO.DELETED, false); 
+        configs.and(Compare.EQUAL, BaseDO.DELETED, false);
     }
 
 

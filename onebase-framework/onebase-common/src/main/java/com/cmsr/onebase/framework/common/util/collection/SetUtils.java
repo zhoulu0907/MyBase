@@ -10,6 +10,13 @@ import java.util.Set;
  */
 public class SetUtils {
 
+    /**
+     * 使用 java.util.Set#of(E...) 替代
+     * @param objs
+     * @return
+     * @param <T>
+     */
+    @Deprecated
     @SafeVarargs
     public static <T> Set<T> asSet(T... objs) {
         return CollUtil.newHashSet(objs);
