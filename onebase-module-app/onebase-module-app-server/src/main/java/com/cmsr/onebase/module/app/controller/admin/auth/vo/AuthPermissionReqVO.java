@@ -11,13 +11,13 @@ import lombok.Data;
 @Data
 public class AuthPermissionReqVO {
 
-    @Schema(description = "应用Id")
+    @Schema(description = "应用Id", required = true)
     private Long applicationId;
 
-    @Schema(description = "角色Id")
+    @Schema(description = "角色Id", required = true)
     private Long roleId;
 
-    @Schema(description = "菜单Id")
+    @Schema(description = "菜单Id", required = true)
     private Long menuId;
 
 }

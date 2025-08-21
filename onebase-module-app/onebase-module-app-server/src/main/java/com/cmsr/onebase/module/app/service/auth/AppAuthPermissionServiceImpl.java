@@ -137,30 +137,43 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void updateOperation(AuthUpdateOperationReqVO reqVO) {
-        Long operationId = reqVO.getAuthOperation().getId();
+        if (reqVO.getAuthOperation() != null) {
+            upsetAuthOperation(reqVO.getPermissionReq(), reqVO.getAuthOperation());
+        }
+        if (reqVO.getAuthOperations() != null) {
+            for (AuthOperationVO authOperationVO : reqVO.getAuthOperations()) {
+                upsetAuthOperation(reqVO.getPermissionReq(), authOperationVO);
+            }
+        }
+    }
+
+    private void upsetAuthOperation(AuthPermissionReqVO reqVO, AuthOperationVO operationVO) {
+        Long operationId = operationVO.getId();
         AuthOperationDO authOperationDO = null;
         if (operationId != null) {
             authOperationDO = authOperationRepository.findById(operationId);
         }
         if (authOperationDO == null) {
-            authOperationDO = authOperationRepository.findByQuery(reqVO.getPermissionReq(), reqVO.getAuthOperation());
+            authOperationDO = authOperationRepository.findByQuery(reqVO, operationVO);
         }
         if (authOperationDO == null) {
             authOperationDO = new AuthOperationDO();
-            authOperationDO.setApplicationId(reqVO.getPermissionReq().getApplicationId());
-            authOperationDO.setRoleId(reqVO.getPermissionReq().getRoleId());
-            authOperationDO.setMenuId(reqVO.getPermissionReq().getMenuId());
-            authOperationDO.setOperationCode(reqVO.getAuthOperation().getOperationCode());
-            authOperationDO.setIsAllowed(reqVO.getAuthOperation().getIsAllowed());
+            authOperationDO.setApplicationId(reqVO.getApplicationId());
+            authOperationDO.setRoleId(reqVO.getRoleId());
+            authOperationDO.setMenuId(reqVO.getMenuId());
+            authOperationDO.setOperationCode(operationVO.getOperationCode());
+            authOperationDO.setIsAllowed(operationVO.getIsAllowed());
             authOperationRepository.insert(authOperationDO);
         } else {
-            authOperationDO.setIsAllowed(reqVO.getAuthOperation().getIsAllowed());
+            authOperationDO.setIsAllowed(operationVO.getIsAllowed());
             authOperationRepository.update(authOperationDO);
         }
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void updateDataGroup(AuthUpdateDataGroupReqVO reqVO) {
         Long dataGroupId = reqVO.getAuthDataGroup().getId();
         if (dataGroupId == null) {

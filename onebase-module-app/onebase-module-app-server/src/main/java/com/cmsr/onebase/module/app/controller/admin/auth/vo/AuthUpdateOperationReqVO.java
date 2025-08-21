@@ -4,6 +4,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
+import java.util.List;
+
 /**
  * @Author：huangjie
  * @Date：2025/8/20 15:42
@@ -16,8 +18,9 @@ public class AuthUpdateOperationReqVO   {
     @NotNull(message = "应用管理 - 权限基础参数不能为空")
     private AuthPermissionReqVO permissionReq;
 
-    @Schema(description = "操作权限")
-    @NotNull(message = "操作权限不能为空")
+    @Schema(description = "操作权限，修改单个")
     private AuthOperationVO authOperation;
 
+    @Schema(description = "操作权限列表，修改多个")
+    private List<AuthOperationVO> authOperations;
 }
