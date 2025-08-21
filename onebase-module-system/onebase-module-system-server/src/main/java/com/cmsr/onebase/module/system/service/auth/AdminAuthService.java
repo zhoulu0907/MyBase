@@ -65,7 +65,7 @@ public interface AdminAuthService {
      * @param reqVO 登录信息
      * @return 登录结果
      */
-    AuthLoginRespVO socialLogin(@Valid AuthSocialLoginReqVO reqVO);
+    // AuthLoginRespVO socialLogin(@Valid AuthSocialLoginReqVO reqVO);
 
     /**
      * 刷新访问令牌
