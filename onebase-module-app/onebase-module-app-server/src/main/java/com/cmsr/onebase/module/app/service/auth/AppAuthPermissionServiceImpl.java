@@ -336,9 +336,11 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
                 (entityFieldRespDTO, authFieldDO) -> Objects.equals(entityFieldRespDTO.getId(), authFieldDO.getFieldId()));
         return pairs.stream().map(pair -> {
             EntityFieldRespDTO entityField = pair.getLeft();
-            AuthFieldVO authFieldVO = new AuthFieldVO();
-            authFieldVO.setFieldDisplayName(entityField.getDisplayName());
             AuthFieldDO authFieldDO = pair.getRight();
+            //
+            AuthFieldVO authFieldVO = new AuthFieldVO();
+            authFieldVO.setFieldId(entityField.getId());
+            authFieldVO.setFieldDisplayName(entityField.getDisplayName());
             if (authFieldDO != null) {
                 authFieldVO.setId(authFieldDO.getId());
                 authFieldVO.setIsCanRead(authFieldDO.getIsCanRead());
