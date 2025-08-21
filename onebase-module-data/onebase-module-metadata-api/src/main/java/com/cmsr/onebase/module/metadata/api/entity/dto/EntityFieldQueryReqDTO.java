@@ -17,9 +17,9 @@ public class EntityFieldQueryReqDTO {
 
     @Schema(description = "实体ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "1024")
     @NotNull(message = "实体ID不能为空")
-    private String entityId;
+    private Long entityId;
 
-    @Schema(description = "是否系统字段：0-是，1-不是", example = "1")
+    @Schema(description = "是否系统字段：1-是，0-不是", example = "1")
     private Integer isSystemField;
 
     @Schema(description = "搜索关键词", example = "name")

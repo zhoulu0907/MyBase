@@ -337,7 +337,7 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
         List<EntityFieldRespDTO> entityFieldRespDTOS = getEntityFieldRespDTOS(entityId);
         List<AuthFieldDO> authFieldDOS = authFieldRepository.findByQuery(reqVO);
         List<Pair<EntityFieldRespDTO, AuthFieldDO>> pairs = AuthUtils.leftOuterJoin(entityFieldRespDTOS, authFieldDOS,
-                (entityFieldRespDTO, authFieldDO) -> Objects.equals(NumberUtils.toLong(entityFieldRespDTO.getId()), authFieldDO.getFieldId())); //TODO 强转
+                (entityFieldRespDTO, authFieldDO) -> Objects.equals(entityFieldRespDTO.getId(), authFieldDO.getFieldId())); //TODO 强转
         return pairs.stream().map(pair -> {
             EntityFieldRespDTO entityField = pair.getLeft();
             AuthFieldVO authFieldVO = new AuthFieldVO();
@@ -355,7 +355,7 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
 
     private List<EntityFieldRespDTO> getEntityFieldRespDTOS(Long entityId) {
         EntityFieldQueryReqDTO reqDTO = new EntityFieldQueryReqDTO();
-        reqDTO.setEntityId(entityId.toString()); //TODO 强转
+        reqDTO.setEntityId(entityId); //TODO 强转
         reqDTO.setIsSystemField(1);
         List<EntityFieldRespDTO> entityFieldRespDTOS = metadataEntityFieldApi.getEntityFieldList(reqDTO).getData();
         return entityFieldRespDTOS;

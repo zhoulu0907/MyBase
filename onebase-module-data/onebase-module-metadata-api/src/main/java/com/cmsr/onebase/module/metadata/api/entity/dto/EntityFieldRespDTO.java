@@ -14,10 +14,10 @@ import lombok.Data;
 public class EntityFieldRespDTO {
 
     @Schema(description = "字段编号", example = "1024")
-    private String id;
+    private Long id;
 
     @Schema(description = "实体ID", example = "1")
-    private String entityId;
+    private Long entityId;
 
     @Schema(description = "字段名称", example = "user_name")
     private String fieldName;
