@@ -12,6 +12,7 @@ import lombok.experimental.SuperBuilder;
  */
 @Table(name = "metadata_field_type_mapping")
 @Data
+
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
@@ -61,4 +62,4 @@ public class FieldTypeMappingDO extends BaseDO {
      */
     private Integer defaultDecimalPlaces;
 
-} 
+}

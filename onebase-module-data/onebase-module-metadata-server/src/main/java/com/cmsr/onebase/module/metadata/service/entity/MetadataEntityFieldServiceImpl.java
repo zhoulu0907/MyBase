@@ -6,6 +6,7 @@ import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.*;
 import com.cmsr.onebase.module.metadata.service.entity.vo.EntityFieldQueryVO;
 import com.cmsr.onebase.module.metadata.service.number.AutoNumberRuleService;
+import com.cmsr.onebase.module.metadata.service.component.MetadataComponentFieldTypeService;
 import com.cmsr.onebase.module.metadata.util.StatusEnumUtil;
 import com.cmsr.onebase.module.metadata.convert.entity.EntityFieldConvert;
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataEntityFieldDO;
@@ -19,7 +20,6 @@ import com.cmsr.onebase.module.metadata.service.field.MetadataEntityFieldConstra
 import com.cmsr.onebase.module.metadata.service.number.AutoNumberConfigService;
 import com.cmsr.onebase.module.metadata.dal.dataobject.number.MetadataAutoNumberConfigDO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.number.MetadataAutoNumberRuleItemDO;
-import com.cmsr.onebase.module.metadata.enums.FieldTypeEnum;
 import com.cmsr.onebase.module.metadata.enums.BusinessEntityTypeEnum;
 import com.cmsr.onebase.module.metadata.enums.BooleanStatusEnum;
 import com.cmsr.onebase.module.metadata.enums.CommonStatusEnum;
@@ -36,7 +36,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
@@ -66,12 +65,13 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
     private AutoNumberConfigService autoNumberConfigService;
     @Resource
     private AutoNumberRuleService autoNumberRuleService;
+    @Resource
+    private MetadataComponentFieldTypeService componentFieldTypeService;
 
     @Override
     public List<FieldTypeConfigRespVO> getFieldTypes() {
-        return Arrays.stream(FieldTypeEnum.values())
-                .map(this::convertToFieldTypeConfigRespVO)
-                .toList();
+        // 从MetadataComponentFieldTypeDO中读取字段类型配置，替代原来的枚举方式
+        return componentFieldTypeService.getFieldTypeConfigs();
     }
 
     @Override
@@ -544,28 +544,6 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
         return null;
     }
 
-    /**
-     * 将字段类型枚举转换为响应VO
-     *
-     * @param fieldTypeEnum 字段类型枚举
-     * @return 字段类型配置响应VO
-     */
-    private FieldTypeConfigRespVO convertToFieldTypeConfigRespVO(FieldTypeEnum fieldTypeEnum) {
-        FieldTypeConfigRespVO respVO = new FieldTypeConfigRespVO();
-        respVO.setFieldType(fieldTypeEnum.getFieldType());
-        respVO.setDisplayName(fieldTypeEnum.getDisplayName());
-        respVO.setCategory(fieldTypeEnum.getCategory());
-        respVO.setSupportLength(fieldTypeEnum.getSupportLength());
-        respVO.setSupportDecimal(fieldTypeEnum.getSupportDecimal());
-        respVO.setDefaultLength(fieldTypeEnum.getDefaultLength());
-        respVO.setMaxLength(fieldTypeEnum.getMaxLength());
-        // 对于支持小数位的类型，设置默认小数位数
-        if (fieldTypeEnum.getSupportDecimal()) {
-            respVO.setDefaultDecimal(2);
-        }
-        return respVO;
-    }
-
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long createEntityField(@Valid EntityFieldSaveReqVO createReqVO) {
@@ -1032,30 +1010,8 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
      * 字段类型映射
      */
     private String mapFieldType(String fieldType, Integer dataLength) {
-        switch (fieldType.toUpperCase()) {
-            case "BIGINT":
-                return "BIGINT";
-            case "VARCHAR":
-                return "VARCHAR(" + (dataLength != null && dataLength > 0 ? dataLength : 255) + ")";
-            case "TEXT":
-                return "TEXT";
-            case "TIMESTAMP":
-                return "TIMESTAMP";
-            case "BOOLEAN":
-                return "BOOLEAN";
-            case "INTEGER":
-                return "INTEGER";
-            case "DECIMAL":
-                return "DECIMAL(18,2)";
-            case "DATE":
-                return "DATE";
-            case "TIME":
-                return "TIME";
-            case "JSON":
-                return "JSONB";
-            default:
-                return "VARCHAR(" + (dataLength != null && dataLength > 0 ? dataLength : 255) + ")"; // 默认类型
-        }
+        // 使用新的字段类型服务从MetadataComponentFieldTypeDO中读取映射关系
+        return componentFieldTypeService.mapFieldTypeToDatabaseType(fieldType, dataLength);
     }
 
     /**
