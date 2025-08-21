@@ -7,11 +7,6 @@ export enum PlatformTenantStatus {
    * 已禁用
    */
   enabled,
-  /**
-   * 全部
-   */
-  all
-
 }
 
 // 管理员根用户ID
@@ -21,7 +16,7 @@ export const ADMIN_ROOT_ID = '1';
  * 平台租户信息
  */
 export interface PlatformTenantInfo {
-  id: string | number,
+  id: string,
   /**
    * 租户名称
    */

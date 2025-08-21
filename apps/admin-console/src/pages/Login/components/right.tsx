@@ -101,7 +101,6 @@ const Right: React.FC = () => {
 
     try {
       const captchaVerification = values.captchaVerification || captchaToken;
-      console.log('!captchaToken', captchaToken);
       // 如果没有验证码token，则先进行验证码验证
       if (!captchaVerification) {
         console.log('false');
@@ -110,11 +109,6 @@ const Right: React.FC = () => {
         return;
       }
 
-      // // 添加验证码token到登录请求
-      // const loginData: LoginRequest = {
-      //   ...values,
-      //   captchaVerification: captchaToken
-      // };
       console.log('loginData:', values);
       const loginResp = await adminLogin(values);
       // 显示成功消息并跳转
@@ -146,9 +140,7 @@ const Right: React.FC = () => {
   const handleCaptchaSuccess = async (token: string) => {
     setCaptchaToken(token);
     // 验证码通过后重新提交表单
-    // form.submit();
     const values = await form.getFieldsValue();
-    console.log('values:', values);
     handleSubmit({username: values.username, password: values.password, captchaVerification: token});
   };
 

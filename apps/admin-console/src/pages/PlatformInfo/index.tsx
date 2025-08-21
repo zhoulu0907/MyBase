@@ -42,7 +42,7 @@ const PlatformInfo: React.FC = () => {
 
   const getPlatformInfo = async () => {
     const res = await getPlatformInfoApi();
-    console.log('platformInfo res:', res);
+    // console.log('platformInfo res:', res);
     if (res.id) {
       setLicenseInfo(res);
     }
