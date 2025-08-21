@@ -26,8 +26,8 @@ public class TenantDO extends BaseDO {
     // 字段列名常量
     public static final String NAME                    = "name";
     public static final String CONTACT_USER_ID         = "contact_user_id";
-    public static final String CONTACT_NAME            = "contact_name";
-    public static final String CONTACT_MOBILE          = "contact_mobile";
+    // public static final String CONTACT_NAME            = "contact_name";
+    // public static final String CONTACT_MOBILE          = "contact_mobile";
     public static final String STATUS                  = "status";
     public static final String WEBSITE                 = "website";
     public static final String WEBSITE_H5              = "website_h5";
@@ -60,17 +60,17 @@ public class TenantDO extends BaseDO {
      * 关联 {@link com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO#getId()}
      */
     @Column(name = CONTACT_USER_ID)
-    private Long contactUserId;
+    private Long adminUserId;
     /**
      * 联系人
      */
-    @Column(name = CONTACT_NAME)
-    private String contactName;
+    // @Column(name = CONTACT_NAME)
+    // private String adminUserName;
     /**
      * 联系手机
      */
-    @Column(name = CONTACT_MOBILE)
-    private String contactMobile;
+    // @Column(name = CONTACT_MOBILE)
+    // private String adminMobile;
     /**
      * 租户状态
      *

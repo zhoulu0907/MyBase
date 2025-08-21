@@ -30,21 +30,27 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
 {
-  "id": "544759610783961088",
-  "name": "测试8",
-  "accountCount": "20",
-  "contactName": "test1",
+  "id": "9856984310087680",
+  "name": "测试2101",
+  "accountCount": "2",
+  "adminUserName": "",
   "status": 0
 }
 
 ### 获取租户分页 /admin-api/system/tenant/page
-GET {{baseUrl}}/system/tenant/page?status=2&pageNum=1&pageSize=10
+GET {{baseUrl}}/system/tenant/page?pageNum=1&pageSize=10
 Content-Type: application/json
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
 ### 获得租户可分配数量 /admin-api/system/tenant/get-allocatable-count
 GET {{baseUrl}}/system/tenant/get-allocatable-count
+Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+### 获得租户可分配数量 /admin-api/system/tenant/get-other-exist-user-count?id=545560397835538432
+GET {{baseUrl}}/system/tenant/get-other-exist-user-count?id=545560397835538432
 Content-Type: application/json
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
