@@ -16,7 +16,6 @@ import com.cmsr.onebase.module.metadata.api.validation.dto.PermitRefOtftRespDTO;
 import com.cmsr.onebase.module.system.api.dict.DictDataApi;
 import jakarta.annotation.Resource;
 import lombok.Setter;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -69,7 +68,6 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
         appCommonService.validateMenuExist(reqVO.getMenuId());
         //
         AuthDetailFunctionPermissionVO functionPermissionVO = new AuthDetailFunctionPermissionVO();
-        BeanUtils.copyProperties(reqVO, functionPermissionVO);
         AuthPermissionDO authPermissionDO = authPermissionRepository.findByQuery(reqVO);
         // 页面权限
         if (authPermissionDO != null) {
@@ -94,7 +92,6 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
         MenuDO menuDO = appCommonService.validateMenuExist(reqVO.getMenuId());
         //
         AuthDetailDataPermissionVO dataPermissionVO = new AuthDetailDataPermissionVO();
-        BeanUtils.copyProperties(reqVO, dataPermissionVO);
         //数据权限
         List<AuthDataGroupVO> authDataGroupVOS = queryAuthDataGroups(reqVO);
         dataPermissionVO.setAuthDataGroups(authDataGroupVOS);
@@ -111,7 +108,6 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
         MenuDO menuDO = appCommonService.validateMenuExist(reqVO.getMenuId());
         //
         AuthDetailFieldPermissionVO fieldPermissionVO = new AuthDetailFieldPermissionVO();
-        BeanUtils.copyProperties(reqVO, fieldPermissionVO);
         AuthPermissionDO authPermissionDO = authPermissionRepository.findByQuery(reqVO);
         if (authPermissionDO != null) {
             fieldPermissionVO.setIsAllFieldsAllowed(authPermissionDO.getIsAllFieldsAllowed());
@@ -337,12 +333,14 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
         List<EntityFieldRespDTO> entityFieldRespDTOS = getEntityFieldRespDTOS(entityId);
         List<AuthFieldDO> authFieldDOS = authFieldRepository.findByQuery(reqVO);
         List<Pair<EntityFieldRespDTO, AuthFieldDO>> pairs = AuthUtils.leftOuterJoin(entityFieldRespDTOS, authFieldDOS,
-                (entityFieldRespDTO, authFieldDO) -> Objects.equals(entityFieldRespDTO.getId(), authFieldDO.getFieldId())); //TODO 强转
+                (entityFieldRespDTO, authFieldDO) -> Objects.equals(entityFieldRespDTO.getId(), authFieldDO.getFieldId()));
         return pairs.stream().map(pair -> {
             EntityFieldRespDTO entityField = pair.getLeft();
-            AuthFieldVO authFieldVO = new AuthFieldVO();
-            authFieldVO.setFieldDisplayName(entityField.getDisplayName());
             AuthFieldDO authFieldDO = pair.getRight();
+            //
+            AuthFieldVO authFieldVO = new AuthFieldVO();
+            authFieldVO.setFieldId(entityField.getId());
+            authFieldVO.setFieldDisplayName(entityField.getDisplayName());
             if (authFieldDO != null) {
                 authFieldVO.setId(authFieldDO.getId());
                 authFieldVO.setIsCanRead(authFieldDO.getIsCanRead());
@@ -355,8 +353,8 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
 
     private List<EntityFieldRespDTO> getEntityFieldRespDTOS(Long entityId) {
         EntityFieldQueryReqDTO reqDTO = new EntityFieldQueryReqDTO();
-        reqDTO.setEntityId(entityId); //TODO 强转
-        reqDTO.setIsSystemField(1);
+        reqDTO.setEntityId(entityId);
+        reqDTO.setIsSystemField(0);
         List<EntityFieldRespDTO> entityFieldRespDTOS = metadataEntityFieldApi.getEntityFieldList(reqDTO).getData();
         return entityFieldRespDTOS;
     }
