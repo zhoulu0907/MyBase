@@ -74,6 +74,18 @@ public class MetadataAppAndDatasourceRepository extends DataRepository<MetadataA
     }
 
     /**
+     * 根据应用ID与数据源ID获取 appUid
+     *
+     * @param applicationId 应用ID
+     * @param datasourceId 数据源ID
+     * @return appUid，未找到时返回 null
+     */
+    public String getAppUidByAppIdAndDatasourceId(Long applicationId, Long datasourceId) {
+        MetadataAppAndDatasourceDO relation = getRelation(applicationId, datasourceId);
+        return relation != null ? relation.getAppUid() : null;
+    }
+
+    /**
      * 检查应用和数据源是否已关联
      *
      * @param applicationId 应用ID

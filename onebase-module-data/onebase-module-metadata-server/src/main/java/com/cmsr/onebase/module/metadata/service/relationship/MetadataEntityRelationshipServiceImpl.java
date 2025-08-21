@@ -23,6 +23,7 @@ import com.cmsr.onebase.module.metadata.enums.CascadeTypeEnum;
 import com.cmsr.onebase.module.metadata.enums.RelationshipTypeEnum;
 import com.cmsr.onebase.module.metadata.service.entity.MetadataBusinessEntityService;
 import com.cmsr.onebase.module.metadata.service.entity.MetadataEntityFieldService;
+import com.cmsr.onebase.module.metadata.service.entity.vo.EntityFieldQueryVO;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -36,9 +37,6 @@ import org.springframework.util.StringUtils;
 
 import java.util.Arrays;
 import java.util.List;
-
-import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static com.cmsr.onebase.module.metadata.enums.ErrorCodeConstants.ENTITY_RELATIONSHIP_NOT_EXISTS;
 
 /**
  * 实体关系 Service 实现类
@@ -101,7 +99,7 @@ public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRela
     public EntityRelationshipRespVO getEntityRelationshipDetail(Long id) {
         MetadataEntityRelationshipDO entityRelationship = entityRelationshipRepository.findById(id);
         if (entityRelationship == null) {
-            throw exception(ENTITY_RELATIONSHIP_NOT_EXISTS);
+            throw new IllegalArgumentException("实体关系不存在");
         }
 
         EntityRelationshipRespVO result = BeanUtils.toBean(entityRelationship, EntityRelationshipRespVO.class);
@@ -214,7 +212,7 @@ public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRela
      */
     private void validateEntityRelationshipExists(Long id) {
         if (entityRelationshipRepository.findById(id) == null) {
-            throw exception(ENTITY_RELATIONSHIP_NOT_EXISTS);
+            throw new IllegalArgumentException("实体关系不存在");
         }
     }
 
@@ -416,11 +414,19 @@ public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRela
      * @return id字段ID
      */
     private Long getEntityIdField(Long entityId) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and(MetadataEntityFieldDO.ENTITY_ID, entityId);
-        configStore.and(MetadataEntityFieldDO.FIELD_NAME, "id");
+        // 构建查询条件，查找指定实体的id字段
+        EntityFieldQueryVO queryVO = new EntityFieldQueryVO();
+        queryVO.setEntityId(String.valueOf(entityId));
+        queryVO.setKeyword("id"); // 使用关键字搜索id字段
         
-        MetadataEntityFieldDO idField = entityFieldService.getEntityField(String.valueOf(entityId));
+        List<MetadataEntityFieldDO> fields = entityFieldService.getEntityFieldListByConditions(queryVO);
+        
+        // 查找字段名为"id"的字段
+        MetadataEntityFieldDO idField = fields.stream()
+                .filter(field -> "id".equals(field.getFieldName()))
+                .findFirst()
+                .orElse(null);
+        
         if (idField == null) {
             throw new IllegalArgumentException("主表实体未找到id字段，实体ID: " + entityId);
         }
@@ -435,11 +441,19 @@ public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRela
      * @return parent_id字段ID
      */
     private Long getOrCreateParentIdField(Long childEntityId) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and(MetadataEntityFieldDO.ENTITY_ID, childEntityId);
-        configStore.and(MetadataEntityFieldDO.FIELD_NAME, "parent_id");
+        // 构建查询条件，查找指定实体的parent_id字段
+        EntityFieldQueryVO queryVO = new EntityFieldQueryVO();
+        queryVO.setEntityId(String.valueOf(childEntityId));
+        queryVO.setKeyword("parent_id"); // 使用关键字搜索parent_id字段
         
-        MetadataEntityFieldDO parentIdField = entityFieldService.getEntityField(String.valueOf(childEntityId));
+        List<MetadataEntityFieldDO> fields = entityFieldService.getEntityFieldListByConditions(queryVO);
+        
+        // 查找字段名为"parent_id"的字段
+        MetadataEntityFieldDO parentIdField = fields.stream()
+                .filter(field -> "parent_id".equals(field.getFieldName()))
+                .findFirst()
+                .orElse(null);
+        
         if (parentIdField != null) {
             return parentIdField.getId();
         }

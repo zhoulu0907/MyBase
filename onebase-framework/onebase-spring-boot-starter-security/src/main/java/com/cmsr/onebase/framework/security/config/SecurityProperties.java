@@ -2,6 +2,7 @@ package com.cmsr.onebase.framework.security.config;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.validation.annotation.Validated;
 
 import jakarta.validation.constraints.NotEmpty;
@@ -10,6 +11,7 @@ import java.util.Collections;
 import java.util.List;
 
 @ConfigurationProperties(prefix = "yudao.security")
+@RefreshScope
 @Validated
 @Data
 public class SecurityProperties {
