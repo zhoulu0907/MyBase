@@ -37,7 +37,8 @@ const CreateRelationModal: React.FC<{
   successCallback: () => void;
   updateRelationOptions: boolean;
   setUpdateRelationOptions: (updateRelationOptions: boolean) => void;
-}> = ({ visible, setVisible, successCallback }) => {
+  entityId: string;
+}> = ({ visible, setVisible, successCallback, entityId }) => {
   const { curAppId } = useAppStore();
   const { curDataSourceId } = useResourceStore();
   const [form] = Form.useForm<RelationFormValues>();
@@ -48,20 +49,22 @@ const CreateRelationModal: React.FC<{
 
   // 初始化实体选项
   useEffect(() => {
-    loadEntities();
-  }, []);
+    if (visible && curDataSourceId) {
+      loadEntities();
+    }
+  }, [visible]);
 
   const loadEntities = async () => {
-    if (curDataSourceId) {
-      const res = await getEntityList(curDataSourceId);
-      if (res.length > 0) {
-        const entityOptions = res.map((entity: any) => ({
-          label: entity.displayName,
-          value: entity.id
-        }));
-        setLeftEntityOptions(entityOptions);
-        setRightEntityOptions(entityOptions);
-      }
+    const res = await getEntityList(curDataSourceId);
+    if (res.length > 0) {
+      const entityOptions = res.map((entity: any) => ({
+        label: entity.displayName,
+        value: entity.id
+      }));
+      setLeftEntityOptions(entityOptions);
+      setRightEntityOptions(entityOptions.filter((item: EntityOption) => item.value !== entityId));
+      form.setFieldValue('sourceEntityId', entityId);
+      handleEntityChange(entityId, 'left');
     }
   };
 
@@ -140,6 +143,7 @@ const CreateRelationModal: React.FC<{
                   placeholder="请选择业务实体"
                   options={leftEntityOptions}
                   onChange={(values) => handleEntityChange(values, 'left')}
+                  disabled
                 />
               </Form.Item>
             </Grid.Col>
