@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.app.dal.database.auth;
 
 import com.cmsr.onebase.framework.aynline.DataRepository;
+import com.cmsr.onebase.module.app.controller.admin.auth.vo.AuthOperationVO;
 import com.cmsr.onebase.module.app.controller.admin.auth.vo.AuthPermissionReqVO;
 import com.cmsr.onebase.module.app.dal.dataobject.auth.AuthOperationDO;
 import org.anyline.data.param.ConfigStore;
@@ -28,6 +29,15 @@ public class AppAuthOperationRepository extends DataRepository<AuthOperationDO> 
         configs.eq("role_id", reqVO.getRoleId());
         configs.eq("menu_id", reqVO.getMenuId());
         return this.findAllByConfig(configs);
+    }
+
+    public AuthOperationDO findByQuery(AuthPermissionReqVO reqVO, AuthOperationVO authOperation) {
+        ConfigStore configs = new DefaultConfigStore();
+        configs.eq("application_id", reqVO.getApplicationId());
+        configs.eq("role_id", reqVO.getRoleId());
+        configs.eq("menu_id", reqVO.getMenuId());
+        configs.eq("operation_code", authOperation.getOperationCode());
+        return this.findOne(configs);
     }
 
 }

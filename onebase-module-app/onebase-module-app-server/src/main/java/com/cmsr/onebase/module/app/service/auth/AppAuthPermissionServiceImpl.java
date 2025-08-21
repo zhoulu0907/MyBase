@@ -122,12 +122,12 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
 
     @Override
     public void updatePageAllowed(AuthUpdatePageAllowedReqVO reqVO) {
-        AuthPermissionDO authPermissionDO = authPermissionRepository.findByQuery(reqVO);
+        AuthPermissionDO authPermissionDO = authPermissionRepository.findByQuery(reqVO.getPermissionReq());
         if (authPermissionDO == null) {
             authPermissionDO = new AuthPermissionDO();
-            authPermissionDO.setApplicationId(reqVO.getApplicationId());
-            authPermissionDO.setRoleId(reqVO.getRoleId());
-            authPermissionDO.setMenuId(reqVO.getMenuId());
+            authPermissionDO.setApplicationId(reqVO.getPermissionReq().getApplicationId());
+            authPermissionDO.setRoleId(reqVO.getPermissionReq().getRoleId());
+            authPermissionDO.setMenuId(reqVO.getPermissionReq().getMenuId());
             authPermissionDO.setIsPageAllowed(reqVO.getIsPageAllowed());
             authPermissionRepository.insert(authPermissionDO);
         } else {
@@ -139,16 +139,22 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
     @Override
     public void updateOperation(AuthUpdateOperationReqVO reqVO) {
         Long operationId = reqVO.getAuthOperation().getId();
-        if (operationId == null) {
-            AuthOperationDO authOperationDO = new AuthOperationDO();
-            authOperationDO.setApplicationId(reqVO.getApplicationId());
-            authOperationDO.setRoleId(reqVO.getRoleId());
-            authOperationDO.setMenuId(reqVO.getMenuId());
+        AuthOperationDO authOperationDO = null;
+        if (operationId != null) {
+            authOperationDO = authOperationRepository.findById(operationId);
+        }
+        if (authOperationDO == null) {
+            authOperationDO = authOperationRepository.findByQuery(reqVO.getPermissionReq(), reqVO.getAuthOperation());
+        }
+        if (authOperationDO == null) {
+            authOperationDO = new AuthOperationDO();
+            authOperationDO.setApplicationId(reqVO.getPermissionReq().getApplicationId());
+            authOperationDO.setRoleId(reqVO.getPermissionReq().getRoleId());
+            authOperationDO.setMenuId(reqVO.getPermissionReq().getMenuId());
             authOperationDO.setOperationCode(reqVO.getAuthOperation().getOperationCode());
             authOperationDO.setIsAllowed(reqVO.getAuthOperation().getIsAllowed());
             authOperationRepository.insert(authOperationDO);
         } else {
-            AuthOperationDO authOperationDO = authOperationRepository.findById(operationId);
             authOperationDO.setIsAllowed(reqVO.getAuthOperation().getIsAllowed());
             authOperationRepository.update(authOperationDO);
         }
@@ -159,9 +165,9 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
         Long dataGroupId = reqVO.getAuthDataGroup().getId();
         if (dataGroupId == null) {
             AuthDataGroupDO authDataGroupDO = new AuthDataGroupDO();
-            authDataGroupDO.setApplicationId(reqVO.getApplicationId());
-            authDataGroupDO.setRoleId(reqVO.getRoleId());
-            authDataGroupDO.setMenuId(reqVO.getMenuId());
+            authDataGroupDO.setApplicationId(reqVO.getPermissionReq().getApplicationId());
+            authDataGroupDO.setRoleId(reqVO.getPermissionReq().getRoleId());
+            authDataGroupDO.setMenuId(reqVO.getPermissionReq().getMenuId());
             BeanUtils.copyProperties(reqVO.getAuthDataGroup(), authDataGroupDO);
             authDataGroupRepository.insert(authDataGroupDO);
             List<AuthDataFilterVO> authDataFilterVOS = formatAuthDataFilterVO(reqVO.getAuthDataGroup().getDataFilters());
@@ -186,7 +192,7 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
     @Transactional(rollbackFor = Exception.class)
     public void updateField(AuthUpdateFieldReqVO reqVO) {
         if (reqVO.getIsAllFieldsAllowed() != null) {
-            AuthPermissionDO authPermissionDO = authPermissionRepository.findByQuery(reqVO);
+            AuthPermissionDO authPermissionDO = authPermissionRepository.findByQuery(reqVO.getPermissionReq());
             authPermissionDO.setIsAllFieldsAllowed(reqVO.getIsAllFieldsAllowed());
             authPermissionRepository.update(authPermissionDO);
         }
@@ -194,18 +200,34 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
             AuthFieldVO authField = reqVO.getAuthField();
             upsetAuthField(reqVO, authField);
         }
+        if (reqVO.getAuthFields() != null) {
+            reqVO.getAuthFields().forEach(v -> upsetAuthField(reqVO, v));
+        }
     }
 
     private void upsetAuthField(AuthUpdateFieldReqVO reqVO, AuthFieldVO authField) {
-        if (authField.getId() == null) {
-            AuthFieldDO authFieldDO = BeanUtils.toBean(authField, AuthFieldDO.class);
-            authFieldDO.setApplicationId(reqVO.getApplicationId());
-            authFieldDO.setRoleId(reqVO.getRoleId());
-            authFieldDO.setMenuId(reqVO.getMenuId());
+        AuthFieldDO authFieldDO = null;
+        if (authField.getId() != null) {
+            authFieldDO = authFieldRepository.findById(authField.getId());
+        }
+        if (authFieldDO == null) {
+            authFieldDO = authFieldRepository.findByQuery(reqVO.getPermissionReq(), authField);
+        }
+        if (authFieldDO == null) {
+            authFieldDO = new AuthFieldDO();
+            authFieldDO.setApplicationId(reqVO.getPermissionReq().getApplicationId());
+            authFieldDO.setRoleId(reqVO.getPermissionReq().getRoleId());
+            authFieldDO.setMenuId(reqVO.getPermissionReq().getMenuId());
+            authFieldDO.setFieldId(authField.getFieldId());
+            authFieldDO.setIsCanRead(authField.getIsCanRead());
+            authFieldDO.setIsCanEdit(authField.getIsCanEdit());
+            authFieldDO.setIsCanDownload(authField.getIsCanDownload());
             authFieldRepository.insert(authFieldDO);
         } else {
-            AuthFieldDO authFieldDO = authFieldRepository.findById(authField.getId());
-            BeanUtils.copyProperties(authField, authFieldDO);
+            authFieldDO.setFieldId(authField.getFieldId());
+            authFieldDO.setIsCanRead(authField.getIsCanRead());
+            authFieldDO.setIsCanEdit(authField.getIsCanEdit());
+            authFieldDO.setIsCanDownload(authField.getIsCanDownload());
             authFieldRepository.update(authFieldDO);
         }
     }
