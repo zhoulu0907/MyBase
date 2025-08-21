@@ -10,7 +10,11 @@ import lombok.Data;
  */
 @Schema(description = "应用管理 - 权限 数据权限 Request VO")
 @Data
-public class AuthUpdateDataGroupReqVO extends AuthPermissionReqVO {
+public class AuthUpdateDataGroupReqVO {
+
+    @Schema(description = "应用管理 - 权限基础参数")
+    @NotNull(message = "应用管理 - 权限基础参数不能为空")
+    private AuthPermissionReqVO permissionReq;
 
     @Schema(description = "数据访问")
     @NotNull(message = "数据访问不能为空")

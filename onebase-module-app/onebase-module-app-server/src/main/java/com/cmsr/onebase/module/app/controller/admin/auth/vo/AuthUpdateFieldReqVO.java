@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.app.controller.admin.auth.vo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.util.List;
@@ -11,7 +12,11 @@ import java.util.List;
  */
 @Schema(description = "应用管理 - 权限 字段权限 Request VO")
 @Data
-public class AuthUpdateFieldReqVO extends AuthPermissionReqVO {
+public class AuthUpdateFieldReqVO   {
+
+    @Schema(description = "应用管理 - 权限基础参数")
+    @NotNull(message = "应用管理 - 权限基础参数不能为空")
+    private AuthPermissionReqVO permissionReq;
 
     @Schema(description = "所有字段可操作，当下面情况必须传值：从全部到自定义，或从自定义到全部")
     private Integer isAllFieldsAllowed;
