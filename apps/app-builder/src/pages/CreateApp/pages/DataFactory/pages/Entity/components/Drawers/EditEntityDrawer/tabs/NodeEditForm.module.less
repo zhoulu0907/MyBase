@@ -26,4 +26,38 @@
       color: @textColorSecondary;
     }
   }
+
+  .iconCheck {
+    color: @successColor;
+    margin-right: 8px;
+  }
+
+  .checkboxItem {
+    display: flex;
+    align-items: center;
+    padding: 8px 0;
+
+    .systemFieldCheckbox {
+      width: 100%;
+      
+      .arco-checkbox-label {
+        font-size: @fontSizeBase;
+        color: @textColorSecondary;
+        margin-left: 8px;
+      }
+
+      &.arco-checkbox-checked {
+        .arco-checkbox-icon {
+          color: @successColor;
+          border-color: @successColor;
+        }
+      }
+
+      &.arco-checkbox-disabled {
+        .arco-checkbox-label {
+          color: @textColorSecondary;
+        }
+      }
+    }
+  }
 }
