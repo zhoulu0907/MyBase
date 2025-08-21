@@ -1,4 +1,5 @@
 import { ENTITY_FIELD_TYPE } from '@/pages/CreateApp/pages/DataFactory/utils/const';
+import { FIELD_TYPE, FIELD_TYPE_LABEL } from '@/pages/CreateApp/pages/DataFactory/utils/const';
 import { useAppStore } from '@/store/store_app';
 import { Button, Checkbox, Drawer, Form, Input, Message, Select, Space, Spin } from '@arco-design/web-react';
 import { getFieldById, updateField } from '@onebase/app';
@@ -172,7 +173,7 @@ const EditFieldDrawer: React.FC<EditFieldDrawerProps> = ({ visible, setVisible, 
               field="fieldName"
               rules={[{ required: true, message: '请输入字段名称' }, { validator: validateFieldName }]}
             >
-              <Input placeholder="请输入字段名称" />
+              <Input placeholder="请输入字段名称" disabled />
             </Form.Item>
 
             <Form.Item
@@ -191,7 +192,7 @@ const EditFieldDrawer: React.FC<EditFieldDrawerProps> = ({ visible, setVisible, 
               <Select
                 placeholder="请选择数据类型"
                 options={fieldTypeOptions}
-                disabled={fieldDetail.isSystemField === 0}
+                disabled={fieldDetail.isSystemField === FIELD_TYPE.SYSTEM}
               />
             </Form.Item>
           </div>
@@ -224,7 +225,7 @@ const EditFieldDrawer: React.FC<EditFieldDrawerProps> = ({ visible, setVisible, 
             <div className={styles['info-item']}>
               <span className={styles['info-label']}>字段类型：</span>
               <span className={styles['info-value']}>
-                {fieldDetail.isSystemField === 0 ? '系统字段' : '自定义字段'}
+                {FIELD_TYPE_LABEL[fieldDetail.isSystemField as keyof typeof FIELD_TYPE_LABEL]}
               </span>
             </div>
 

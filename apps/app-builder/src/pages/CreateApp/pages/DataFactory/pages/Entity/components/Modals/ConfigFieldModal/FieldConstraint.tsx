@@ -4,17 +4,13 @@ import styles from '../modal.module.less';
 
 // 字段约束配置接口
 interface FieldConstraintConfig {
-  lengthRange: {
-    enabled: boolean;
-    minLength: number;
-    maxLength: number;
-    hintMessage: string;
-  };
-  regexValidation: {
-    enabled: boolean;
-    pattern: string;
-    hintMessage: string;
-  };
+  lengthEnabled: number;
+  minLength: number;
+  maxLength: number;
+  lengthPrompt: string;
+  regexEnabled: number;
+  regexPattern: string;
+  regexPrompt: string;
 }
 
 interface FieldConstraintProps {
@@ -25,39 +21,47 @@ interface FieldConstraintProps {
 
 export const FieldConstraint: React.FC<FieldConstraintProps> = ({ onConfirm, onCancel, initialConfig }) => {
   const [config, setConfig] = useState<FieldConstraintConfig>({
-    lengthRange: {
-      enabled: false,
-      minLength: 0,
-      maxLength: 8000,
-      hintMessage: ''
-    },
-    regexValidation: {
-      enabled: false,
-      pattern: '',
-      hintMessage: ''
-    },
+    lengthEnabled: 1,
+    minLength: 0,
+    maxLength: 800,
+    lengthPrompt: '',
+    regexEnabled: 1,
+    regexPattern: '',
+    regexPrompt: '',
     ...initialConfig
   });
 
   // 更新长度范围配置
-  const updateLengthRange = (field: keyof FieldConstraintConfig['lengthRange'], value: string | number | boolean) => {
-    setConfig((prev) => ({
-      ...prev,
-      lengthRange: {
-        ...prev.lengthRange,
-        [field]: value
-      }
-    }));
+  const updateLengthConfig = (
+    field: keyof Pick<FieldConstraintConfig, 'lengthEnabled' | 'minLength' | 'maxLength' | 'lengthPrompt'>,
+    value: string | number | boolean
+  ) => {
+    if (field === 'lengthEnabled') {
+      setConfig((prev) => ({
+        ...prev,
+        [field]: value ? 0 : 1
+      }));
+    } else if (field === 'minLength' || field === 'maxLength') {
+      setConfig((prev) => ({
+        ...prev,
+        [field]: typeof value === 'number' ? value : parseInt(String(value)) || 0
+      }));
+    } else if (field === 'lengthPrompt') {
+      setConfig((prev) => ({
+        ...prev,
+        [field]: String(value)
+      }));
+    }
   };
 
   // 更新正则校验配置
-  const updateRegexValidation = (field: keyof FieldConstraintConfig['regexValidation'], value: string | boolean) => {
+  const updateRegexConfig = (
+    field: keyof Pick<FieldConstraintConfig, 'regexEnabled' | 'regexPattern' | 'regexPrompt'>,
+    value: string | boolean
+  ) => {
     setConfig((prev) => ({
       ...prev,
-      regexValidation: {
-        ...prev.regexValidation,
-        [field]: value
-      }
+      [field]: field === 'regexEnabled' ? (value ? 0 : 1) : value
     }));
   };
 
@@ -75,20 +79,20 @@ export const FieldConstraint: React.FC<FieldConstraintProps> = ({ onConfirm, onC
         <div className={styles['constraint-header']}>
           <span>长度范围</span>
           <Switch
-            checked={config.lengthRange.enabled}
-            onChange={(checked) => updateLengthRange('enabled', checked)}
+            checked={config.lengthEnabled === 0}
+            onChange={(checked) => updateLengthConfig('lengthEnabled', checked)}
             size="small"
           />
         </div>
 
-        {config.lengthRange.enabled && (
+        {config.lengthEnabled === 0 && (
           <div className={styles['constraint-content']}>
             <div className={styles['constraint-row']}>
               <label className={styles['required-label']}>*最小长度</label>
               <Input
                 type="number"
-                value={config.lengthRange.minLength}
-                onChange={(value) => updateLengthRange('minLength', parseInt(value) || 0)}
+                value={config.minLength}
+                onChange={(value) => updateLengthConfig('minLength', parseInt(value) || 0)}
                 placeholder="0"
                 style={{ width: '120px' }}
               />
@@ -98,9 +102,9 @@ export const FieldConstraint: React.FC<FieldConstraintProps> = ({ onConfirm, onC
               <label className={styles['required-label']}>*最大长度</label>
               <Input
                 type="number"
-                value={config.lengthRange.maxLength}
-                onChange={(value) => updateLengthRange('maxLength', parseInt(value) || 8000)}
-                placeholder="8000"
+                value={config.maxLength}
+                onChange={(value) => updateLengthConfig('maxLength', parseInt(value) || 8000)}
+                placeholder="800"
                 style={{ width: '120px' }}
               />
             </div>
@@ -108,8 +112,8 @@ export const FieldConstraint: React.FC<FieldConstraintProps> = ({ onConfirm, onC
             <div className={styles['constraint-row']}>
               <label>提示信息</label>
               <Input
-                value={config.lengthRange.hintMessage}
-                onChange={(value) => updateLengthRange('hintMessage', value)}
+                value={config.lengthPrompt}
+                onChange={(value) => updateLengthConfig('lengthPrompt', value)}
                 placeholder="请输入提示信息"
                 style={{ width: '200px' }}
               />
@@ -123,19 +127,19 @@ export const FieldConstraint: React.FC<FieldConstraintProps> = ({ onConfirm, onC
         <div className={styles['constraint-header']}>
           <span>正则校验</span>
           <Switch
-            checked={config.regexValidation.enabled}
-            onChange={(checked) => updateRegexValidation('enabled', checked)}
+            checked={config.regexEnabled === 0}
+            onChange={(checked) => updateRegexConfig('regexEnabled', checked)}
             size="small"
           />
         </div>
 
-        {config.regexValidation.enabled && (
+        {config.regexEnabled === 0 && (
           <div className={styles['constraint-content']}>
             <div className={styles['constraint-row']}>
               <label className={styles['required-label']}>*正则校验</label>
               <Input
-                value={config.regexValidation.pattern}
-                onChange={(value) => updateRegexValidation('pattern', value)}
+                value={config.regexPattern}
+                onChange={(value) => updateRegexConfig('regexPattern', value)}
                 placeholder="请输入正则表达式"
                 style={{ width: '200px' }}
               />
@@ -144,8 +148,8 @@ export const FieldConstraint: React.FC<FieldConstraintProps> = ({ onConfirm, onC
             <div className={styles['constraint-row']}>
               <label>提示信息</label>
               <Input
-                value={config.regexValidation.hintMessage}
-                onChange={(value) => updateRegexValidation('hintMessage', value)}
+                value={config.regexPrompt}
+                onChange={(value) => updateRegexConfig('regexPrompt', value)}
                 placeholder="请输入提示信息"
                 style={{ width: '200px' }}
               />

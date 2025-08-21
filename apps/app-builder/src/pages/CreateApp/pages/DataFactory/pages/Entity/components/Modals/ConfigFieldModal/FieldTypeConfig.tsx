@@ -7,24 +7,25 @@ import styles from '../modal.module.less';
 // 选项配置组件
 interface OptionConfigProps {
   onVisibleChange?: (visible: boolean) => void;
-  onConfirm: (options: string[]) => void;
-  initialOptions?: string[];
+  onConfirm: (options: object[]) => void;
+  initialOptions?: { optionLabel: string; optionValue: string }[] | undefined;
   onCancel?: () => void; // 新增：取消回调
 }
 
-export const OptionConfig: React.FC<OptionConfigProps> = ({
-  onVisibleChange,
-  onConfirm,
-  onCancel,
-  initialOptions = []
-}) => {
-  const [options, setOptions] = useState<string[]>(
-    initialOptions.length > 0 ? initialOptions : ['选项1', '选项2', '选项3']
+const initialThreeOptions = [
+  { optionLabel: '选项1', optionValue: '选项1' },
+  { optionLabel: '选项2', optionValue: '选项2' },
+  { optionLabel: '选项3', optionValue: '选项3' }
+];
+export const OptionConfig: React.FC<OptionConfigProps> = ({ onVisibleChange, onConfirm, onCancel, initialOptions }) => {
+  const [options, setOptions] = useState(
+    initialOptions && initialOptions?.length > 0 ? initialOptions : initialThreeOptions
   );
   const [optionType, setOptionType] = useState('custom');
 
   const addOption = () => {
-    setOptions([...options, `选项${options.length + 1}`]);
+    const newopt = { optionLabel: `选项${options.length + 1}`, optionValue: `选项${options.length + 1}` };
+    setOptions([...options, newopt]);
   };
 
   const removeOption = (index: number) => {
@@ -36,7 +37,7 @@ export const OptionConfig: React.FC<OptionConfigProps> = ({
 
   const updateOption = (index: number, value: string) => {
     const newOptions = [...options];
-    newOptions[index] = value;
+    newOptions[index] = { optionLabel: value, optionValue: value };
     setOptions(newOptions);
   };
 
@@ -57,6 +58,7 @@ export const OptionConfig: React.FC<OptionConfigProps> = ({
 
   return (
     <div className={styles['field-type-config']}>
+      <h4>选项配置</h4>
       <Select value={optionType} onChange={setOptionType} style={{ width: '100%', marginBottom: 16 }}>
         <Select.Option value="custom">自定义</Select.Option>
         <Select.Option value="system">引用字典</Select.Option>
@@ -66,7 +68,7 @@ export const OptionConfig: React.FC<OptionConfigProps> = ({
         {options.map((option, index) => (
           <div key={index} className={styles['option-item']}>
             <Input
-              value={option}
+              value={option.optionLabel}
               onChange={(value) => updateOption(index, value)}
               placeholder="请输入选项内容"
               className={styles['option-input']}
@@ -129,7 +131,12 @@ const dataOptions = [
   { label: '自定义', value: '自定义' }
 ];
 
-export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({ onVisibleChange, onConfirm, onCancel, initialRules = [] }) => {
+export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({
+  onVisibleChange,
+  onConfirm,
+  onCancel,
+  initialRules = []
+}) => {
   const [rules, setRules] = useState<AutoCodeRule[]>(
     initialRules.length > 0
       ? initialRules
@@ -282,6 +289,7 @@ export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({ onVisibleChange,
 
   return (
     <div className={styles['field-type-config']}>
+      <h4>自动编号规则</h4>
       <div className={styles['rule-items']}>
         <ReactSortable list={rules} setList={setRules}>
           {rules.map((rule, index) => (

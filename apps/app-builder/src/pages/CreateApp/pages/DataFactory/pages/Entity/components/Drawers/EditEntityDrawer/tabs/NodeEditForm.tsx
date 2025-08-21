@@ -1,4 +1,5 @@
 import { type EntityField, type EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
+import { FIELD_TYPE } from '@/pages/CreateApp/pages/DataFactory/utils/const';
 import { Button, Form, Input, Switch } from '@arco-design/web-react';
 import React, { useEffect } from 'react';
 import styles from './NodeEditForm.module.less';
@@ -39,27 +40,33 @@ const NodeEditForm: React.FC<NodeEditFormProps> = ({ node, onCancel, onSave, suc
     name: node.entityName || '',
     description: node.description || '',
     systemFields: {
-      creator: node?.fields.find((field: EntityField) => field.isSystemField === 0 && field.fieldName === 'creator')
+      creator: node?.fields.find(
+        (field: EntityField) => field.isSystemField === FIELD_TYPE.SYSTEM && field.fieldName === 'creator'
+      )
         ? true
         : false,
-      updater: node?.fields.find((field: EntityField) => field.isSystemField === 0 && field.fieldName === 'updater')
+      updater: node?.fields.find(
+        (field: EntityField) => field.isSystemField === FIELD_TYPE.SYSTEM && field.fieldName === 'updater'
+      )
         ? true
         : false,
       created_time: node?.fields.find(
-        (field: EntityField) => field.isSystemField === 0 && field.fieldName === 'created_time'
+        (field: EntityField) => field.isSystemField === FIELD_TYPE.SYSTEM && field.fieldName === 'created_time'
       )
         ? true
         : false,
       updated_time: node?.fields.find(
-        (field: EntityField) => field.isSystemField === 0 && field.fieldName === 'updated_time'
+        (field: EntityField) => field.isSystemField === FIELD_TYPE.SYSTEM && field.fieldName === 'updated_time'
       )
         ? true
         : false,
-      owner_id: node?.fields.find((field: EntityField) => field.isSystemField === 0 && field.fieldName === 'owner_id')
+      owner_id: node?.fields.find(
+        (field: EntityField) => field.isSystemField === FIELD_TYPE.SYSTEM && field.fieldName === 'owner_id'
+      )
         ? true
         : false,
       owner_dept: node?.fields.find(
-        (field: EntityField) => field.isSystemField === 0 && field.fieldName === 'owner_dept'
+        (field: EntityField) => field.isSystemField === FIELD_TYPE.SYSTEM && field.fieldName === 'owner_dept'
       )
         ? true
         : false
@@ -109,7 +116,7 @@ const NodeEditForm: React.FC<NodeEditFormProps> = ({ node, onCancel, onSave, suc
               { max: 40, message: '业务实体编码不能超过40个字符' }
             ]}
           >
-            <Input placeholder="请输入业务实体编码" maxLength={40} readOnly />
+            <Input placeholder="请输入业务实体编码" maxLength={40} disabled />
           </Form.Item>
 
           <Form.Item
