@@ -81,8 +81,8 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
     }
   }, [visible]);
 
-  // 过滤掉已删除的字段
-  const activeFields = fields.filter((field) => !field.isDeleted && field.isSystemField === 1);
+  // 过滤掉已删除的字段和系统字段
+  const activeFields = fields.filter((field) => !field.isDeleted && field.isSystemField === 0);
 
   const addField = () => {
     const newField: FieldFormValues = {
@@ -96,7 +96,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
       isUnique: 1,
       allowNull: 1,
       constraints: '',
-      isSystemField: 1,
+      isSystemField: 0,
       sortOrder: activeFields.length
     };
     setFields([...activeFields, newField]);
@@ -104,7 +104,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
 
   const deleteField = (index: number) => {
     const field = fields[index];
-    if (field.isSystemField === 0) {
+    if (field.isSystemField === 1) {
       Message.error('系统字段不能删除');
       return;
     }
@@ -141,7 +141,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
     try {
       setLoading(true);
 
-      const customFields = fields.filter((field) => field.isSystemField === 1 && !field.isDeleted);
+      const customFields = fields.filter((field) => field.isSystemField === 0 && !field.isDeleted);
 
       // 表单校验
       for (const field of customFields) {
@@ -159,13 +159,13 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
         }
       }
 
-      const allFields = fields.filter((field) => field.isSystemField === 1);
+      const allFields = fields.filter((field) => field.isSystemField === 0);
       const fieldDataList = allFields.map((field) => {
         const fieldData = {
           appId: curAppId,
           entityId: entity.entityId,
           ...field,
-          isSystemField: 1,
+          isSystemField: 0,
           isDeleted: field.isDeleted || false
         };
 
@@ -284,7 +284,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
             pagination={false}
             className={styles['field-table']}
             rowClassName={(record) =>
-              record.isSystemField === 0 ? styles['system-field-row'] : styles['custom-field-row']
+              record.isSystemField === 1 ? styles['system-field-row'] : styles['custom-field-row']
             }
             rowKey="id"
             components={{

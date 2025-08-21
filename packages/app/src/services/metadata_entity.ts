@@ -202,6 +202,15 @@ export const getEntityFieldsWithChildren = (entityId: string) => {
 };
 
 /**
+ * 获得校验规则分组详情
+ * @param id 校验规则分组ID
+ * @returns 校验规则分组详情
+ */
+export const getRuleById = (id: string) => {
+  return metadataService.post('/validation-rule-group/get?id=' + id);
+};
+
+/**
  * 获取实体数据规则分页
  * @param entityId 实体ID
  * @returns 数据规则列表

@@ -36,7 +36,7 @@ const DetailDrawer: React.FC<{
                 <div key={index} className="field-item">
                   <span className="field-name">{field.fieldName}</span>
                   <span className="field-type">{field.fieldType}</span>
-                  {field.isSystemField === 0 && <span className="system-tag">系统</span>}
+                  {field.isSystemField === 1 && <span className="system-tag">系统</span>}
                 </div>
               ))}
           </div>

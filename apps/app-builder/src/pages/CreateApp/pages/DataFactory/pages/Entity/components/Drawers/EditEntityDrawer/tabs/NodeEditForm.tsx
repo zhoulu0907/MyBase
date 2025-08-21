@@ -39,27 +39,27 @@ const NodeEditForm: React.FC<NodeEditFormProps> = ({ node, onCancel, onSave, suc
     name: node.entityName || '',
     description: node.description || '',
     systemFields: {
-      creator: node?.fields.find((field: EntityField) => field.isSystemField === 0 && field.fieldName === 'creator')
+      creator: node?.fields.find((field: EntityField) => field.isSystemField === 1 && field.fieldName === 'creator')
         ? true
         : false,
-      updater: node?.fields.find((field: EntityField) => field.isSystemField === 0 && field.fieldName === 'updater')
+      updater: node?.fields.find((field: EntityField) => field.isSystemField === 1 && field.fieldName === 'updater')
         ? true
         : false,
       created_time: node?.fields.find(
-        (field: EntityField) => field.isSystemField === 0 && field.fieldName === 'created_time'
+        (field: EntityField) => field.isSystemField === 1 && field.fieldName === 'created_time'
       )
         ? true
         : false,
       updated_time: node?.fields.find(
-        (field: EntityField) => field.isSystemField === 0 && field.fieldName === 'updated_time'
+        (field: EntityField) => field.isSystemField === 1 && field.fieldName === 'updated_time'
       )
         ? true
         : false,
-      owner_id: node?.fields.find((field: EntityField) => field.isSystemField === 0 && field.fieldName === 'owner_id')
+      owner_id: node?.fields.find((field: EntityField) => field.isSystemField === 1 && field.fieldName === 'owner_id')
         ? true
         : false,
       owner_dept: node?.fields.find(
-        (field: EntityField) => field.isSystemField === 0 && field.fieldName === 'owner_dept'
+        (field: EntityField) => field.isSystemField === 1 && field.fieldName === 'owner_dept'
       )
         ? true
         : false

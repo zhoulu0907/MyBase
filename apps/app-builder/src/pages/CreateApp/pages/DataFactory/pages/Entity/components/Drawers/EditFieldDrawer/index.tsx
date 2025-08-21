@@ -191,7 +191,7 @@ const EditFieldDrawer: React.FC<EditFieldDrawerProps> = ({ visible, setVisible, 
               <Select
                 placeholder="请选择数据类型"
                 options={fieldTypeOptions}
-                disabled={fieldDetail.isSystemField === 0}
+                disabled={fieldDetail.isSystemField === 1}
               />
             </Form.Item>
           </div>
@@ -224,7 +224,7 @@ const EditFieldDrawer: React.FC<EditFieldDrawerProps> = ({ visible, setVisible, 
             <div className={styles['info-item']}>
               <span className={styles['info-label']}>字段类型：</span>
               <span className={styles['info-value']}>
-                {fieldDetail.isSystemField === 0 ? '系统字段' : '自定义字段'}
+                {fieldDetail.isSystemField === 1 ? '系统字段' : '自定义字段'}
               </span>
             </div>
 

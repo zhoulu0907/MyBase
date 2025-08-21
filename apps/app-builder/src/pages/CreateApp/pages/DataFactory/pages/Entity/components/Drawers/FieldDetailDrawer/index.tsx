@@ -78,7 +78,7 @@ const FieldDetailDrawer: React.FC<FieldDetailDrawerProps> = ({ visible, setVisib
   };
 
   const renderSystemFieldTag = (isSystemField: number) => {
-    if (isSystemField === 0) {
+    if (isSystemField === 1) {
       return <Tag color="red">系统字段</Tag>;
     }
     return <Tag color="green">自定义字段</Tag>;

@@ -116,7 +116,7 @@ const DataFields: React.FC<DataFieldsProps> = ({ entity, activeTab }) => {
       dataIndex: 'isSystemField',
       key: 'isSystemField',
       render: (isSystemField: number) => (
-        <Tag color={isSystemField === 0 ? 'red' : 'green'}>{isSystemField === 0 ? '系统字段' : '自定义字段'}</Tag>
+        <Tag color={isSystemField === 1 ? 'red' : 'green'}>{isSystemField === 1 ? '系统字段' : '自定义字段'}</Tag>
       )
     },
     {
@@ -162,12 +162,12 @@ const DataFields: React.FC<DataFieldsProps> = ({ entity, activeTab }) => {
       key: 'operation',
       render: (_, record) => (
         <Space>
-          {record.isSystemField === 1 && (
+          {record.isSystemField === 0 && (
             <Button type="text" size="mini" onClick={() => handleEditField(record.id)}>
               编辑
             </Button>
           )}
-          {record.isSystemField === 1 && (
+          {record.isSystemField === 0 && (
             <Button type="text" size="mini" status="danger" onClick={() => handleDeleteField(record.id)}>
               删除
             </Button>
