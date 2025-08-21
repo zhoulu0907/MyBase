@@ -69,7 +69,6 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
         appCommonService.validateMenuExist(reqVO.getMenuId());
         //
         AuthDetailFunctionPermissionVO functionPermissionVO = new AuthDetailFunctionPermissionVO();
-        BeanUtils.copyProperties(reqVO, functionPermissionVO);
         AuthPermissionDO authPermissionDO = authPermissionRepository.findByQuery(reqVO);
         // 页面权限
         if (authPermissionDO != null) {
@@ -94,7 +93,6 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
         MenuDO menuDO = appCommonService.validateMenuExist(reqVO.getMenuId());
         //
         AuthDetailDataPermissionVO dataPermissionVO = new AuthDetailDataPermissionVO();
-        BeanUtils.copyProperties(reqVO, dataPermissionVO);
         //数据权限
         List<AuthDataGroupVO> authDataGroupVOS = queryAuthDataGroups(reqVO);
         dataPermissionVO.setAuthDataGroups(authDataGroupVOS);
@@ -111,7 +109,6 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
         MenuDO menuDO = appCommonService.validateMenuExist(reqVO.getMenuId());
         //
         AuthDetailFieldPermissionVO fieldPermissionVO = new AuthDetailFieldPermissionVO();
-        BeanUtils.copyProperties(reqVO, fieldPermissionVO);
         AuthPermissionDO authPermissionDO = authPermissionRepository.findByQuery(reqVO);
         if (authPermissionDO != null) {
             fieldPermissionVO.setIsAllFieldsAllowed(authPermissionDO.getIsAllFieldsAllowed());
@@ -356,7 +353,7 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
     private List<EntityFieldRespDTO> getEntityFieldRespDTOS(Long entityId) {
         EntityFieldQueryReqDTO reqDTO = new EntityFieldQueryReqDTO();
         reqDTO.setEntityId(entityId.toString()); //TODO 强转
-        reqDTO.setIsSystemField(1);
+        reqDTO.setIsSystemField(0);
         List<EntityFieldRespDTO> entityFieldRespDTOS = metadataEntityFieldApi.getEntityFieldList(reqDTO).getData();
         return entityFieldRespDTOS;
     }

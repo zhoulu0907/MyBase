@@ -13,15 +13,6 @@ import java.util.List;
 @Schema(description = "应用管理 - 角色权限 Response VO")
 public class AuthDetailFunctionPermissionVO {
 
-    @Schema(description = "应用Id")
-    private Long applicationId;
-
-    @Schema(description = "角色Id")
-    private Long roleId;
-
-    @Schema(description = "菜单Id")
-    private Long menuId;
-
     @Schema(description = "页面是否可访问")
     private Integer isPageAllowed = 0;
 
