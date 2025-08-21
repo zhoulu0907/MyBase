@@ -70,4 +70,34 @@ public enum ValidationStatusEnum {
     public static boolean isInactive(Integer status) {
         return INACTIVE.getStatus().equals(status);
     }
+
+    /**
+     * 根据布尔值获取对应的状态值
+     *
+     * @param boolValue 布尔值
+     * @return 对应的状态值（true返回1，false返回0）
+     */
+    public static Integer getStatusValue(boolean boolValue) {
+        return boolValue ? ACTIVE.getStatus() : INACTIVE.getStatus();
+    }
+
+    /**
+     * 根据输入值判断是否激活，并返回对应的状态值
+     *
+     * @param value 输入值
+     * @return 对应的状态值（值激活返回1，否则返回0）
+     */
+    public static Integer toStatusValue(Integer value) {
+        return isActive(value) ? ACTIVE.getStatus() : INACTIVE.getStatus();
+    }
+
+    /**
+     * 根据输入值判断是否激活（取反），并返回对应的状态值
+     *
+     * @param value 输入值
+     * @return 对应的状态值（值非激活返回1，否则返回0）
+     */
+    public static Integer toInverseStatusValue(Integer value) {
+        return isInactive(value) ? ACTIVE.getStatus() : INACTIVE.getStatus();
+    }
 }

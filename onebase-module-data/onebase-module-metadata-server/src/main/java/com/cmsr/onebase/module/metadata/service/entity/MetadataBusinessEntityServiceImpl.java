@@ -312,10 +312,10 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
                     .description(systemField.getDescription())
                     // 使用新的枚举值：1-是，0-否
                     .isSystemField(StatusEnumUtil.YES) // 标记为系统字段：1-是
-                    .isPrimaryKey(BooleanStatusEnum.isYes(systemField.getIsSnowflakeId()) ? StatusEnumUtil.YES : StatusEnumUtil.NO) // 雪花ID字段设为主键：1-是，0-不是
-                    .isRequired(BooleanStatusEnum.isYes(systemField.getIsRequired()) ? StatusEnumUtil.YES : StatusEnumUtil.NO) // 1-是，0-否
-                    .isUnique(BooleanStatusEnum.isYes(systemField.getIsSnowflakeId()) ? StatusEnumUtil.YES : StatusEnumUtil.NO) // 主键字段唯一：1-是，0-否
-                    .allowNull(!BooleanStatusEnum.isYes(systemField.getIsRequired()) ? StatusEnumUtil.YES : StatusEnumUtil.NO) // 非必填字段允许为空：1-是，0-否
+                    .isPrimaryKey(BooleanStatusEnum.toStatusValue(systemField.getIsSnowflakeId())) // 雪花ID字段设为主键：1-是，0-不是
+                    .isRequired(BooleanStatusEnum.toStatusValue(systemField.getIsRequired())) // 1-是，0-否
+                    .isUnique(BooleanStatusEnum.toStatusValue(systemField.getIsSnowflakeId())) // 主键字段唯一：1-是，0-否
+                    .allowNull(BooleanStatusEnum.toInverseStatusValue(systemField.getIsRequired())) // 非必填字段允许为空：1-是，0-否
                     .sortOrder(sortOrder++)
                     .validationRules(null) // 系统字段暂不设置校验规则
                     .runMode(0) // 默认编辑态
@@ -439,7 +439,7 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
             }
 
             // 雪花ID字段设置为主键
-            if (field.getIsSnowflakeId() == 1) {
+            if (BooleanStatusEnum.isYes(field.getIsSnowflakeId())) {
                 primaryKeyField = field.getFieldName();
             }
 
