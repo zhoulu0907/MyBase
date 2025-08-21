@@ -27,11 +27,11 @@ public interface MetadataDatasourceApi {
 
     @PostMapping(PREFIX + "/create-default")
     @Operation(summary = "创建默认数据源")
-    CommonResult<String> createDefaultDatasource(@RequestBody DatasourceCreateDefaultReqDTO reqDTO);
+    CommonResult<Long> createDefaultDatasource(@RequestBody DatasourceCreateDefaultReqDTO reqDTO);
 
     @PostMapping(PREFIX + "/create")
     @Operation(summary = "新增数据源")
-    CommonResult<String> createDatasource(@RequestBody DatasourceSaveReqDTO reqDTO);
+    CommonResult<Long> createDatasource(@RequestBody DatasourceSaveReqDTO reqDTO);
 
     @PostMapping(PREFIX + "/update")
     @Operation(summary = "修改数据源")

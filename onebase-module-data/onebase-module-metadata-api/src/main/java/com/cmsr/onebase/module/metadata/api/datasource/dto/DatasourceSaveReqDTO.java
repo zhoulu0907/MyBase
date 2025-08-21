@@ -19,7 +19,7 @@ import java.util.Map;
 public class DatasourceSaveReqDTO {
 
     @Schema(description = "数据源编号", example = "1024")
-    private String id;
+    private Long id;
 
     @Schema(description = "数据源名称", requiredMode = Schema.RequiredMode.REQUIRED, example = "用户数据库")
     @NotBlank(message = "数据源名称不能为空")
@@ -48,7 +48,7 @@ public class DatasourceSaveReqDTO {
 
     @Schema(description = "应用ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
     @NotNull(message = "应用ID不能为空")
-    private String appId;
+    private Long appId;
 
     @Schema(description = "数据源来源，0：系统默认，1：自有数据源，2：外部数据源", example = "1")
     private Integer datasourceOrigin;
