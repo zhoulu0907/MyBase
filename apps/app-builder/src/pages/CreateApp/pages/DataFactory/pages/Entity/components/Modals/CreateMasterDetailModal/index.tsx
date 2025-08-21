@@ -1,4 +1,3 @@
-import type { EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
 import { useAppStore } from '@/store/store_app';
 import { useResourceStore } from '@/store/store_resource';
 import { Form, Grid, Input, Message, Modal, Radio, Select } from '@arco-design/web-react';
@@ -30,20 +29,20 @@ interface FieldOption {
 const CreateMasterDetailModal: React.FC<{
   visible: boolean;
   setVisible: (visible: boolean) => void;
-  entity: EntityNode;
+  entityId: string;
   successCallback: () => void;
-}> = ({ visible, setVisible, successCallback }) => {
+}> = ({ visible, setVisible, successCallback, entityId }) => {
   const { curAppId } = useAppStore();
   const { curDataSourceId } = useResourceStore();
   const [form] = Form.useForm<MasterDetailFormValues>();
   const [loading, setLoading] = useState(false);
   const [entityOptions, setEntityOptions] = useState<EntityOption[]>([]);
+  const [childEntityOptions, setChildEntityOptions] = useState<EntityOption[]>([]);
   const [fieldOptions, setFieldOptions] = useState<FieldOption[]>([]);
-  const [childFieldOptions, setChildFieldOptions] = useState<FieldOption[]>([]);
 
   // 初始化实体选项
   useEffect(() => {
-    if (visible) {
+    if (visible && curDataSourceId) {
       loadEntities();
     }
   }, [visible]);
@@ -57,10 +56,12 @@ const CreateMasterDetailModal: React.FC<{
           value: entityItem.id
         }));
         setEntityOptions(entityOptions);
+        setChildEntityOptions(entityOptions.filter((item: EntityOption) => item.value !== entityId));
+        form.setFieldValue('parentEntityId', entityId);
+        handleMasterEntityChange(entityId);
       }
     } catch (error) {
       console.error('加载实体列表失败:', error);
-      Message.error('加载实体列表失败');
     }
   };
 
@@ -79,26 +80,6 @@ const CreateMasterDetailModal: React.FC<{
       form.setFieldValue('parentFieldId', '');
     } catch (error) {
       console.error('加载字段列表失败:', error);
-      Message.error('加载字段列表失败');
-    }
-  };
-
-  // 当子表改变时，更新子表字段选项
-  const handleChildEntityChange = async (value: string) => {
-    try {
-      const res = await getEntityFields({ entityId: value });
-      if (res.length > 0) {
-        const fieldOptions = res.map((field: { displayName: string; id: string }) => ({
-          label: field.displayName,
-          value: field.id
-        }));
-        setChildFieldOptions(fieldOptions);
-      }
-      // 清空子表字段选择
-      form.setFieldValue('childFieldId', '');
-    } catch (error) {
-      console.error('加载子表字段列表失败:', error);
-      Message.error('加载子表字段列表失败');
     }
   };
 
@@ -174,7 +155,7 @@ const CreateMasterDetailModal: React.FC<{
                   placeholder="请选择业务实体"
                   options={entityOptions}
                   onChange={handleMasterEntityChange}
-                  style={{ width: '100%' }}
+                  disabled
                 />
               </Form.Item>
             </Grid.Col>
@@ -201,12 +182,7 @@ const CreateMasterDetailModal: React.FC<{
               return (
                 <>
                   <Form.Item label="子表" field="childEntityId" rules={[{ required: true, message: '请选择子表' }]}>
-                    <Select
-                      placeholder="请选择子表"
-                      options={entityOptions}
-                      style={{ width: '100%' }}
-                      onChange={handleChildEntityChange}
-                    />
+                    <Select placeholder="请选择子表" options={childEntityOptions} />
                   </Form.Item>
                 </>
               );
