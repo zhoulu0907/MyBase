@@ -117,6 +117,8 @@ const TableColumns = ({
             onChange={(val) => updateField(getFieldIndex(record.id, index), { fieldType: val })}
             disabled={record.isSystemField === 0}
             style={{ width: 100 }}
+            showSearch
+            filterOption={(input, option) => (option?.props?.label ?? '').includes(input)}
           />
           {record.isSystemField === 1 && FIELD_TYPES_NEED_CONFIG.includes(value) && (
             <Popover

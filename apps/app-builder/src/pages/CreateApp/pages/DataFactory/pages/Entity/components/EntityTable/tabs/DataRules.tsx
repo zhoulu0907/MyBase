@@ -57,8 +57,8 @@ const DataRules: React.FC<DataRulesProps> = ({ entity, activeTab }) => {
     },
     {
       title: '规则名称',
-      dataIndex: 'validationName',
-      key: 'validationName'
+      dataIndex: 'rgName',
+      key: 'rgName'
     },
     {
       title: '校验数据项',
@@ -72,8 +72,8 @@ const DataRules: React.FC<DataRulesProps> = ({ entity, activeTab }) => {
     },
     {
       title: '验证失败提示语',
-      dataIndex: 'errorMessage',
-      key: 'errorMessage'
+      dataIndex: 'popPrompt',
+      key: 'popPrompt'
     },
     // {
     //   title: '状态',

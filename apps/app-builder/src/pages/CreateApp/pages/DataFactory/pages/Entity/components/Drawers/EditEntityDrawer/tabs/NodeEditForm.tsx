@@ -109,7 +109,7 @@ const NodeEditForm: React.FC<NodeEditFormProps> = ({ node, onCancel, onSave, suc
               { max: 40, message: '业务实体编码不能超过40个字符' }
             ]}
           >
-            <Input placeholder="请输入业务实体编码" maxLength={40} readOnly />
+            <Input placeholder="请输入业务实体编码" maxLength={40} disabled />
           </Form.Item>
 
           <Form.Item

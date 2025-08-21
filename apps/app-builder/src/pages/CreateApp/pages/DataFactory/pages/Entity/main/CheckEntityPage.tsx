@@ -7,6 +7,7 @@ import React, { useEffect, useState } from 'react';
 import EntityTable from '../components/EntityTable';
 import styles from '../index.module.less';
 import { EntityERContainer } from './EntityERContainer';
+import dayjs from 'dayjs';
 
 interface DatasourceRecord {
   id: number;
@@ -60,7 +61,9 @@ export const CheckEntityPage: React.FC = () => {
           <span className={styles['entity-page-header-left-name']}>数据源名称</span>
           <Tag className={styles['entity-page-header-left-tag']}>数据源编码：{dsData?.code}</Tag>
           <Tag className={styles['entity-page-header-left-tag']}>创建人：{dsData?.creator}</Tag>
-          <Tag className={styles['entity-page-header-left-tag']}>创建时间：{dsData?.createTime}</Tag>
+          <Tag className={styles['entity-page-header-left-tag']}>
+            创建时间：{dayjs(dsData?.createTime).format('YYYY-MM-DD HH:mm:ss')}
+          </Tag>
         </div>
 
         <div className={styles['entity-page-header-right']}>

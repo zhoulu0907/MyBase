@@ -172,7 +172,7 @@ const EditFieldDrawer: React.FC<EditFieldDrawerProps> = ({ visible, setVisible, 
               field="fieldName"
               rules={[{ required: true, message: '请输入字段名称' }, { validator: validateFieldName }]}
             >
-              <Input placeholder="请输入字段名称" />
+              <Input placeholder="请输入字段名称" disabled />
             </Form.Item>
 
             <Form.Item
