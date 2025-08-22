@@ -113,20 +113,26 @@ export interface UpdateRelationReqVO extends CreateRelationReqVO {
   id: string;
 }
 
+
 // 数据规则相关接口
+export interface ConditionRow {
+  fieldId: string;
+  operator: string;
+  valueType: string;
+  fieldValue: string;
+  logicOperator: 'AND' | 'OR';
+  logicType: 'CONDITION';
+}
+
 export interface CreateRuleReqVO {
   entityId: string;
   rgName: string;
   rgDesc?: string;
-  ruleType: string;
-  ruleContent: string;
-  isEnabled?: boolean;
-  valueRules?: Array<{
-    fieldId: string;
-    operator: string;
-    valueType: string;
-    value: string;
-  }>;
+  validationType?: string;
+  formatValidationType?: string;
+  popPrompt?: string;
+  popType?: string;
+  valueRules?: ConditionRow[][];
 }
 
 export interface UpdateRuleReqVO extends CreateRuleReqVO {

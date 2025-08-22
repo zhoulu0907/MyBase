@@ -15,7 +15,7 @@ export interface EntityField {
   code: string;
   fieldName: string;
   fieldType: string;
-  isSystemField: number; // 0: 开启 1: 关闭
+  isSystemField: number; // 0: 自定义 1: 系统
   displayName: string;
 }
 

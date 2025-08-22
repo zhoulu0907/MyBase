@@ -92,6 +92,12 @@
 /* 字段类型配置组件样式 */
 .field-type-config {
   width: 318px;
+  h4 {
+    margin: 0 0 16px 0;
+    font-size: 16px;
+    font-weight: 500;
+    color: #333;
+  }
   .field-type-config-footer {
     display: flex;
     justify-content: flex-end;
@@ -278,31 +284,17 @@
 
 /* 创建关联关系弹窗样式 */
 .create-relation-modal {
-  width: 1000px;
-  .arco-modal-header .arco-modal-title {
-    text-align: left !important;
-  }
+  width: 560px;
 }
 
 /* 关联关系表单样式 */
 .relation-form {
   .relation-form-container {
-    display: flex;
-    gap: 16px;
-    align-items: flex-start;
-
-    .left-entity-section,
-    .right-entity-section {
-      flex: 1;
-      min-width: 200px;
-
-      .arco-form-item {
-        margin-bottom: 16px;
-      }
+    .form-item-bottom {
+      margin-top: 30px;
     }
 
     .relation-type-section {
-      flex: 0 0 150px;
       display: flex;
       align-items: center;
       justify-content: center;

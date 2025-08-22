@@ -1,5 +1,6 @@
 import { ENTITY_FIELD_TYPE, SYSTEM_FIELD_MAP } from '@/pages/CreateApp/pages/DataFactory/utils/const';
 import type { EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
+import { FIELD_TYPE } from '@/pages/CreateApp/pages/DataFactory/utils/const';
 import { Node } from '@antv/x6';
 import { Button, Popover, Space } from '@arco-design/web-react';
 import { IconCaretDown, IconCaretUp, IconSync } from '@arco-design/web-react/icon';
@@ -37,9 +38,9 @@ const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
 
   // const nodeId = nodeData.entityId;
 
-  // 分离系统字段和自定义字段 0: 开启 1: 关闭
-  const systemFields = nodeData?.fields?.filter((field) => field.isSystemField === 0);
-  const customFields = nodeData?.fields?.filter((field) => field.isSystemField === 1);
+  // 分离系统字段和自定义字段
+  const systemFields = nodeData?.fields?.filter((field) => field.isSystemField === FIELD_TYPE.SYSTEM);
+  const customFields = nodeData?.fields?.filter((field) => field.isSystemField === FIELD_TYPE.CUSTOM);
 
   // 折叠逻辑
   const handleToggleSection = (sectionType: 'system' | 'custom', e: React.MouseEvent) => {
