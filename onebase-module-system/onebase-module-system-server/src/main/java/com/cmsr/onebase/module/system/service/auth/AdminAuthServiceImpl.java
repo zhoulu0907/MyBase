@@ -68,7 +68,7 @@ public class AdminAuthServiceImpl implements AdminAuthService {
     /**
      * 验证码的开关，默认为 true
      */
-    @Value("${yudao.captcha.enable:true}")
+    @Value("${onebase.captcha.enable:true}")
     @Setter // 为了单测：开启或者关闭验证码
     private Boolean       captchaEnable;
     @Resource

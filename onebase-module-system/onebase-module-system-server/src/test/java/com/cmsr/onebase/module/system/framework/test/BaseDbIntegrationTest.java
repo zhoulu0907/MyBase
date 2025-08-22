@@ -1,8 +1,8 @@
 package com.cmsr.onebase.module.system.framework.test;
 
 import cn.hutool.extra.spring.SpringUtil;
-import com.cmsr.onebase.framework.redis.config.YudaoCacheAutoConfiguration;
-import com.cmsr.onebase.framework.redis.config.YudaoRedisAutoConfiguration;
+import com.cmsr.onebase.framework.redis.config.OneBaseCacheAutoConfiguration;
+import com.cmsr.onebase.framework.redis.config.OneBaseRedisAutoConfiguration;
 import com.cmsr.onebase.framework.test.config.SqlInitializationTestConfiguration;
 import org.redisson.spring.starter.RedissonAutoConfigurationV2;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -39,8 +39,8 @@ public class BaseDbIntegrationTest {
         RedisRepositoriesAutoConfiguration.class,
         RedissonAutoConfigurationV2.class,
         // 排除自定义Redis配置
-        YudaoRedisAutoConfiguration.class,
-        YudaoCacheAutoConfiguration.class,
+        OneBaseRedisAutoConfiguration.class,
+        OneBaseCacheAutoConfiguration.class,
         // 排除缓存相关配置
         CacheAutoConfiguration.class,
         // 排除Web相关配置  

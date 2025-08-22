@@ -21,7 +21,7 @@ import static com.cmsr.onebase.framework.common.exception.enums.GlobalErrorCodeC
 /**
  * Gateway 的全局异常处理器，将 Exception 翻译成 CommonResult + 对应的异常编号
  *
- * 在功能上，和 yudao-spring-boot-starter-web 的 GlobalExceptionHandler 类是一致的
+ * 在功能上，和 onebase-spring-boot-starter-web 的 GlobalExceptionHandler 类是一致的
  *
  */
 @Component
@@ -29,7 +29,7 @@ import static com.cmsr.onebase.framework.common.exception.enums.GlobalErrorCodeC
 @Slf4j
 public class GlobalExceptionHandler implements ErrorWebExceptionHandler {
 
-    @Value("${yudao.web.return-exception-stack-trace:false}")
+    @Value("${onebase.web.return-exception-stack-trace:false}")
     private boolean returnExceptionStackTrace;
 
     @Override

@@ -1,2 +1,2 @@
-com.cmsr.onebase.framework.dict.config.YudaoDictRpcAutoConfiguration
-com.cmsr.onebase.framework.dict.config.YudaoDictAutoConfiguration
+com.cmsr.onebase.framework.dict.config.OneBaseDictRpcAutoConfiguration
+com.cmsr.onebase.framework.dict.config.OneBaseDictAutoConfiguration

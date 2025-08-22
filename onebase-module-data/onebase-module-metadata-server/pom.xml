@@ -104,7 +104,7 @@
         <!-- 服务保障相关 TODO 开发者：暂时去掉 -->
         <!--        <dependency>-->
         <!--            <groupId>com.cmsr.onebase</groupId>-->
-        <!--            <artifactId>yudao-spring-boot-starter-protection</artifactId>-->
+        <!--            <artifactId>onebase-spring-boot-starter-protection</artifactId>-->
         <!--        </dependency>-->
 
         <!-- Test 测试相关 -->

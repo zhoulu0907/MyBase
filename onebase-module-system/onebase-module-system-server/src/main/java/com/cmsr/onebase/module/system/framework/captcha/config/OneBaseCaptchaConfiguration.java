@@ -17,7 +17,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
  */
 @Configuration(proxyBeanMethods = false)
 @ImportAutoConfiguration(AjCaptchaAutoConfiguration.class) // 目的：解决 aj-captcha 针对 SpringBoot 3.X 自动配置不生效的问题
-public class YudaoCaptchaConfiguration {
+public class OneBaseCaptchaConfiguration {
 
     @Bean(name = "AjCaptchaCacheService")
     @Primary

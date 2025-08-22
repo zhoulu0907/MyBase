@@ -20,7 +20,7 @@ public class PostSaveReqVO {
     @Size(max = 50, message = "岗位名称长度不能超过 50 个字符")
     private String name;
 
-    @Schema(description = "岗位编码", requiredMode = Schema.RequiredMode.REQUIRED, example = "yudao")
+    @Schema(description = "岗位编码", requiredMode = Schema.RequiredMode.REQUIRED, example = "onebase")
     @NotBlank(message = "岗位编码不能为空")
     @Size(max = 64, message = "岗位编码长度不能超过64个字符")
     private String code;

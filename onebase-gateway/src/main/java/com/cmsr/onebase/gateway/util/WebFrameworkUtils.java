@@ -19,7 +19,7 @@ import reactor.core.publisher.Mono;
 /**
  * Web 工具类
  *
- * copy from yudao-spring-boot-starter-web 的 WebFrameworkUtils 类
+ * copy from onebase-spring-boot-starter-web 的 WebFrameworkUtils 类
  *
  */
 @Slf4j

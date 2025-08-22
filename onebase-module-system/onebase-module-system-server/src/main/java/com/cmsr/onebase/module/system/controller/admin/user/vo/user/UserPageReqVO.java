@@ -19,10 +19,10 @@ import static com.cmsr.onebase.framework.common.util.date.DateUtils.FORMAT_YEAR_
 @EqualsAndHashCode(callSuper = true)
 public class UserPageReqVO extends PageParam {
 
-    @Schema(description = "用户账号，模糊匹配", example = "yudao")
+    @Schema(description = "用户账号，模糊匹配", example = "onebase")
     private String nickname;
 
-    @Schema(description = "手机号码，模糊匹配", example = "yudao")
+    @Schema(description = "手机号码，模糊匹配", example = "onebase")
     private String mobile;
 
     @Schema(description = "展示状态，参见 CommonStatusEnum 枚举类", example = "1")
@@ -41,7 +41,7 @@ public class UserPageReqVO extends PageParam {
     @Schema(description = "排除角色，不要展示有此角色的用户", example = "1024")
     private Long excludRoleId;
 
-    @Schema(description = "用户邮箱", example = "yudao@iocoder.cn")
+    @Schema(description = "用户邮箱", example = "onebase@aaa.com")
     private String email;
     //根据用户名或邮箱模糊查询
     @Schema(description = "模糊查询关键词", example = "admin123")

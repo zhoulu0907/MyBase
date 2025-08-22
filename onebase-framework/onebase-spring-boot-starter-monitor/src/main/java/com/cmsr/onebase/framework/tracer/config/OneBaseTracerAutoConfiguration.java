@@ -18,8 +18,8 @@ import org.springframework.context.annotation.Bean;
 @AutoConfiguration
 @ConditionalOnClass(value = {BizTraceAspect.class}, name = "jakarta.servlet.Filter")
 @EnableConfigurationProperties(TracerProperties.class)
-@ConditionalOnProperty(prefix = "yudao.tracer", value = "enable", matchIfMissing = true)
-public class YudaoTracerAutoConfiguration {
+@ConditionalOnProperty(prefix = "onebase.tracer", value = "enable", matchIfMissing = true)
+public class OneBaseTracerAutoConfiguration {
 
     // TODO @开发者：重要。目前 opentracing 版本存在冲突，要么保证 skywalking，要么保证阿里云短信 sdk
 //    @Bean

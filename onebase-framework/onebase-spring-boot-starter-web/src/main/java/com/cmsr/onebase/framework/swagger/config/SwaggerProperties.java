@@ -9,7 +9,7 @@ import jakarta.validation.constraints.NotEmpty;
  * Swagger 配置属性
  *
  */
-@ConfigurationProperties("yudao.swagger")
+@ConfigurationProperties("onebase.swagger")
 @Data
 public class SwaggerProperties {
 

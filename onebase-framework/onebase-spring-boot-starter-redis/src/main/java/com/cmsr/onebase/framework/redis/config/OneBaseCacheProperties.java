@@ -9,10 +9,10 @@ import org.springframework.validation.annotation.Validated;
  *
  * @author Wanwan
  */
-@ConfigurationProperties("yudao.cache")
+@ConfigurationProperties("onebase.cache")
 @Data
 @Validated
-public class YudaoCacheProperties {
+public class OneBaseCacheProperties {
 
     /**
      * {@link #redisScanBatchSize} 默认值

@@ -31,7 +31,7 @@ import jakarta.servlet.Filter;
 
 @AutoConfiguration
 @EnableConfigurationProperties(WebProperties.class)
-public class YudaoWebAutoConfiguration implements WebMvcConfigurer {
+public class OneBaseWebAutoConfiguration implements WebMvcConfigurer {
 
     @Resource
     private WebProperties webProperties;
@@ -107,7 +107,7 @@ public class YudaoWebAutoConfiguration implements WebMvcConfigurer {
      * 创建 DemoFilter Bean，演示模式
      */
     @Bean
-    @ConditionalOnProperty(value = "yudao.demo", havingValue = "true")
+    @ConditionalOnProperty(value = "onebase.demo", havingValue = "true")
     public FilterRegistrationBean<DemoFilter> demoFilter() {
         return createFilterBean(new DemoFilter(), WebFilterOrderEnum.DEMO_FILTER);
     }

@@ -104,13 +104,13 @@ xxl:
 
 --- #################### OneBase相关配置 ####################
 
-yudao:
+onebase:
   info:
     version: 1.0.0
     base-package: com.cmsr.onebase.module.infra
   web:
     admin-ui:
-      url: http://dashboard.yudao.iocoder.cn # Admin 管理后台 UI 的地址
+      url: http://dashboard.test.cn # Admin 管理后台 UI 的地址
   xss:
     enable: false
     exclude-urls: # 如下两个 url，仅仅是为了演示，去掉配置也没关系
@@ -132,7 +132,7 @@ yudao:
   swagger:
     title: 管理后台
     description: 提供管理员管理的所有功能
-    version: ${yudao.info.version}
+    version: ${onebase.info.version}
   codegen:
     base-package: com.cmsr.onebase
     db-schemas: ${spring.datasource.dynamic.datasource.master.name}

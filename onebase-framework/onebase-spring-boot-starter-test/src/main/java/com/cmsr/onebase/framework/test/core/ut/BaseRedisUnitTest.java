@@ -1,7 +1,7 @@
 package com.cmsr.onebase.framework.test.core.ut;
 
 import cn.hutool.extra.spring.SpringUtil;
-import com.cmsr.onebase.framework.redis.config.YudaoRedisAutoConfiguration;
+import com.cmsr.onebase.framework.redis.config.OneBaseRedisAutoConfiguration;
 import com.cmsr.onebase.framework.test.config.RedisTestConfiguration;
 import org.redisson.spring.starter.RedissonAutoConfiguration;
 import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
@@ -21,7 +21,7 @@ public class BaseRedisUnitTest {
             // Redis 配置类
             RedisTestConfiguration.class, // Redis 测试配置类，用于启动 RedisServer
             RedisAutoConfiguration.class, // Spring Redis 自动配置类
-            YudaoRedisAutoConfiguration.class, // 自己的 Redis 配置类
+            OneBaseRedisAutoConfiguration.class, // 自己的 Redis 配置类
             RedissonAutoConfiguration.class, // Redisson 自动配置类
 
             // 其它配置类

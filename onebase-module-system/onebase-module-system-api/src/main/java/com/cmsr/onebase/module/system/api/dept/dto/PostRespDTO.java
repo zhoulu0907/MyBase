@@ -17,7 +17,7 @@ public class PostRespDTO {
     @Schema(description = "岗位名称", requiredMode = Schema.RequiredMode.REQUIRED, example = "小土豆")
     private String name;
 
-    @Schema(description = "岗位编码", requiredMode = Schema.RequiredMode.REQUIRED, example = "yudao")
+    @Schema(description = "岗位编码", requiredMode = Schema.RequiredMode.REQUIRED, example = "onebase")
     private String code;
 
     @Schema(description = "岗位排序", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")

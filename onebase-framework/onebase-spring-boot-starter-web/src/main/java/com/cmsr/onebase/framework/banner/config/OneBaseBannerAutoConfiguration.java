@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Bean;
  *
  */
 @AutoConfiguration
-public class YudaoBannerAutoConfiguration {
+public class OneBaseBannerAutoConfiguration {
 
     @Bean
     public BannerApplicationRunner bannerApplicationRunner() {

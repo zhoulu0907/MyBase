@@ -22,7 +22,7 @@ public class UserRespVO{
     @ExcelProperty("用户编号")
     private Long id;
 
-    @Schema(description = "用户账号", requiredMode = Schema.RequiredMode.REQUIRED, example = "yudao")
+    @Schema(description = "用户账号", requiredMode = Schema.RequiredMode.REQUIRED, example = "onebase")
     @ExcelProperty("用户名称")
     private String username;
 
@@ -42,7 +42,7 @@ public class UserRespVO{
     @Schema(description = "岗位编号数组", example = "1")
     private Set<Long> postIds;
 
-    @Schema(description = "用户邮箱", example = "yudao@iocoder.cn")
+    @Schema(description = "用户邮箱", example = "onebase@aaa.com")
     @ExcelProperty("用户邮箱")
     private String email;
 
