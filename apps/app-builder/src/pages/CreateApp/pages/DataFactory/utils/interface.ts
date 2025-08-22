@@ -77,10 +77,11 @@ export interface Entity {
   id: string;
   displayName: string;
   code: string;
-  fields: EntityField[];
-  relations: EntityRelation[];
-  rules: EntityRule[];
-  methods: EntityMethod[];
+  description?: string;
+  fields?: EntityField[];
+  relations?: EntityRelation[];
+  rules?: EntityRule[];
+  methods?: EntityMethod[];
 }
 
 // 实体列表

@@ -35,8 +35,8 @@ export const getEntityList = (datasourceId: string) => {
  * @param id 实体ID
  * @returns 实体详情
  */
-export const getEntity = (id: string) => {
-  return metadataService.post('/business-entity/get', { params: { id } });
+export const getEntityById = (id: string) => {
+  return metadataService.post('/business-entity/get?id=' + id);
 };
 
 /**
@@ -148,6 +148,14 @@ export const batchSaveFields = (data: object) => {
 };
 
 /**
+ * 获取系统支持的字段类型列表
+ * @returns 字段类型列表
+ */
+export const getFieldTypes = () => {
+  return metadataService.post('/entity-field/field-types');
+};
+
+/**
  * 获取实体的关联关系列表
  * @param entityId 实体ID
  * @returns 关联关系列表
@@ -190,6 +198,16 @@ export const updateRelation = (data: UpdateRelationReqVO) => {
  */
 export const deleteRelation = (id: string) => {
   return metadataService.post('/business-entity/relation/delete', { params: { id } });
+};
+
+
+/**
+ * 根据ID获取关系详细信息
+ * @param id 关联关系ID
+ * @returns 关联关系详细信息
+ */
+export const getRelationById = (id: string) => {
+  return metadataService.post('/entity-relationship/get?id=' + id);
 };
 
 /**

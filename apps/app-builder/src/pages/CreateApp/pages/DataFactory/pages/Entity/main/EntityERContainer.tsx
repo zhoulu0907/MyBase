@@ -195,14 +195,6 @@ export const EntityERContainer: React.FC<{
     }
   }, [curDataSourceId]);
 
-  // useEffect(() => {
-  //   const storedData = localStorage.getItem('entityFormValues');
-  //   if (storedData) {
-  //     const parsedData = JSON.parse(storedData);
-  //     setData(parsedData as EntityERProps['data']);
-  //   }
-  // }, []);
-
   return (
     <div style={{ height: '100%' }} className={styles['entity-page-container']}>
       <ERchart
