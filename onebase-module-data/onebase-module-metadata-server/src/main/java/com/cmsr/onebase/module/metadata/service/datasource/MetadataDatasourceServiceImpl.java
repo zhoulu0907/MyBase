@@ -189,7 +189,7 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
     @Transactional(rollbackFor = Exception.class)
     public Long createDatasource(@Valid DatasourceSaveReqVO createReqVO) {
         // 校验编码唯一性
-        validateDatasourceCodeUnique(null, createReqVO.getCode(), Long.valueOf(createReqVO.getAppId()));
+        validateDatasourceCodeUnique(Long.valueOf(createReqVO.getId()), createReqVO.getCode(), Long.valueOf(createReqVO.getAppId()));
 
         // 插入数据源（不再设置appId，使用关联表维护关系）
         MetadataDatasourceDO datasource = datasourceConvert.convert(createReqVO);
