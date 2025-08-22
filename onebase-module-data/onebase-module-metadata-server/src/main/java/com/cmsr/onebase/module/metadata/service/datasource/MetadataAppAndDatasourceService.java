@@ -89,4 +89,32 @@ public interface MetadataAppAndDatasourceService {
      * @return 关联关系列表
      */
     List<MetadataAppAndDatasourceDO> getRelationsByDatasourceType(String datasourceType);
+
+    /**
+     * 根据应用ID与数据源ID获取应用UID
+     *
+     * @param applicationId 应用ID
+     * @param datasourceId 数据源ID
+     * @return appUid，未找到时返回 null
+     */
+    String getAppUidByAppIdAndDatasourceId(Long applicationId, Long datasourceId);
+
+    /**
+     * 根据应用ID与数据源ID获取关联关系对象
+     *
+     * @param applicationId 应用ID
+     * @param datasourceId 数据源ID
+     * @return 关联关系对象，未找到时返回 null
+     */
+    MetadataAppAndDatasourceDO getRelation(Long applicationId, Long datasourceId);
+
+    /**
+     * 更新应用与数据源关联关系中的appUid
+     *
+     * @param applicationId 应用ID
+     * @param datasourceId 数据源ID
+     * @param newAppUid 新的应用UID
+     * @return 是否更新成功
+     */
+    boolean updateRelationAppUid(Long applicationId, Long datasourceId, String newAppUid);
 }

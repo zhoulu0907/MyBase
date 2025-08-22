@@ -36,6 +36,11 @@ public class DataRepository<T extends BaseDO> {
         ConfigTable.IS_INSERT_NULL_FIELD = false;
         ConfigTable.IS_INSERT_EMPTY_FIELD = true;
         ConfigTable.IS_INSERT_EMPTY_COLUMN = true;
+
+        ConfigTable.IS_UPDATE_NULL_COLUMN = false;
+        ConfigTable.IS_UPDATE_NULL_FIELD = false;
+        ConfigTable.IS_UPDATE_EMPTY_COLUMN = true;
+        ConfigTable.IS_UPDATE_EMPTY_FIELD = true;
     }
 
     @Resource

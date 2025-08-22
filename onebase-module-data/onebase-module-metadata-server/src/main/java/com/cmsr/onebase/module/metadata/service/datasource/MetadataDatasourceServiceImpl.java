@@ -43,6 +43,7 @@ import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionU
 import static com.cmsr.onebase.module.metadata.enums.ErrorCodeConstants.DATASOURCE_NOT_EXISTS;
 import static com.cmsr.onebase.module.metadata.enums.ErrorCodeConstants.DATASOURCE_CODE_DUPLICATE;
 import org.anyline.entity.Compare;
+import com.cmsr.onebase.module.metadata.dal.dataobject.datasource.MetadataAppAndDatasourceDO;
 
 /**
  * 数据源 Service 实现类
@@ -188,7 +189,7 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
     @Transactional(rollbackFor = Exception.class)
     public Long createDatasource(@Valid DatasourceSaveReqVO createReqVO) {
         // 校验编码唯一性
-        validateDatasourceCodeUnique(null, createReqVO.getCode(), Long.valueOf(createReqVO.getAppId()));
+        validateDatasourceCodeUnique(Long.valueOf(createReqVO.getId()), createReqVO.getCode(), Long.valueOf(createReqVO.getAppId()));
 
         // 插入数据源（不再设置appId，使用关联表维护关系）
         MetadataDatasourceDO datasource = datasourceConvert.convert(createReqVO);
@@ -271,6 +272,19 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
         
         // 不再设置appId，因为关联关系由关联表维护
         metadataDatasourceRepository.update(updateObj);
+        
+        // 如果 appUid 发生变化，同步更新关联表
+        Long datasourceId = Long.valueOf(updateReqVO.getId());
+        Long applicationId = Long.valueOf(updateReqVO.getAppId());
+        String newAppUid = updateReqVO.getAppUid();
+        
+        // 获取当前关联关系
+        MetadataAppAndDatasourceDO currentRelation = appAndDatasourceService.getRelation(applicationId, datasourceId);
+        if (currentRelation != null && !newAppUid.equals(currentRelation.getAppUid())) {
+            // appUid 发生变化，更新关联表
+            log.info("数据源{}的appUid从{}更新为{}，同步更新关联表", datasourceId, currentRelation.getAppUid(), newAppUid);
+            appAndDatasourceService.updateRelationAppUid(applicationId, datasourceId, newAppUid);
+        }
         
         log.info("更新数据源成功，ID: {}，更新人: {}", updateReqVO.getId(), currentUserId);
     }

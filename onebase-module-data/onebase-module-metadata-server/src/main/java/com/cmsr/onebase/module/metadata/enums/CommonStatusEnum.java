@@ -70,4 +70,34 @@ public enum CommonStatusEnum {
     public static boolean isDisabled(Integer status) {
         return DISABLED.getStatus().equals(status);
     }
+
+    /**
+     * 根据布尔值获取对应的状态值
+     *
+     * @param boolValue 布尔值
+     * @return 对应的状态值（true返回1，false返回0）
+     */
+    public static Integer getStatusValue(boolean boolValue) {
+        return boolValue ? ENABLED.getStatus() : DISABLED.getStatus();
+    }
+
+    /**
+     * 根据输入值判断是否启用，并返回对应的状态值
+     *
+     * @param value 输入值
+     * @return 对应的状态值（值启用返回1，否则返回0）
+     */
+    public static Integer toStatusValue(Integer value) {
+        return isEnabled(value) ? ENABLED.getStatus() : DISABLED.getStatus();
+    }
+
+    /**
+     * 根据输入值判断是否启用（取反），并返回对应的状态值
+     *
+     * @param value 输入值
+     * @return 对应的状态值（值禁用返回1，否则返回0）
+     */
+    public static Integer toInverseStatusValue(Integer value) {
+        return isDisabled(value) ? ENABLED.getStatus() : DISABLED.getStatus();
+    }
 }

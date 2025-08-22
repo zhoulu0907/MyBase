@@ -23,6 +23,7 @@ import com.cmsr.onebase.module.metadata.enums.CascadeTypeEnum;
 import com.cmsr.onebase.module.metadata.enums.RelationshipTypeEnum;
 import com.cmsr.onebase.module.metadata.service.entity.MetadataBusinessEntityService;
 import com.cmsr.onebase.module.metadata.service.entity.MetadataEntityFieldService;
+import com.cmsr.onebase.module.metadata.service.entity.vo.EntityFieldQueryVO;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -36,9 +37,6 @@ import org.springframework.util.StringUtils;
 
 import java.util.Arrays;
 import java.util.List;
-
-import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static com.cmsr.onebase.module.metadata.enums.ErrorCodeConstants.ENTITY_RELATIONSHIP_NOT_EXISTS;
 
 /**
  * 实体关系 Service 实现类
@@ -99,20 +97,24 @@ public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRela
 
     @Override
     public EntityRelationshipRespVO getEntityRelationshipDetail(Long id) {
+        if (id == null) {
+            log.warn("查询实体关系详情时，ID参数为空");
+            throw new IllegalArgumentException("实体关系ID不能为空");
+        }
+        
         MetadataEntityRelationshipDO entityRelationship = entityRelationshipRepository.findById(id);
         if (entityRelationship == null) {
-            throw exception(ENTITY_RELATIONSHIP_NOT_EXISTS);
+            log.warn("未找到ID为{}的实体关系", id);
+            throw new IllegalArgumentException("实体关系不存在");
         }
 
-        EntityRelationshipRespVO result = BeanUtils.toBean(entityRelationship, EntityRelationshipRespVO.class);
+        EntityRelationshipRespVO result = convertToRespVO(entityRelationship);
         
-        // 查询源实体和目标实体的名称
-        result.setSourceEntityName(getEntityNameById(entityRelationship.getSourceEntityId()));
-        result.setTargetEntityName(getEntityNameById(entityRelationship.getTargetEntityId()));
-        
-        // 查询源字段和目标字段的名称
-        result.setSourceFieldName(getFieldNameById(entityRelationship.getSourceFieldId()));
-        result.setTargetFieldName(getFieldNameById(entityRelationship.getTargetFieldId()));
+        // 验证转换结果
+        if (result == null || result.getId() == null) {
+            log.error("转换实体关系详情失败，原始ID: {}, 转换结果: {}", id, result);
+            throw new RuntimeException("实体关系数据转换失败");
+        }
         
         return result;
     }
@@ -188,11 +190,25 @@ public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRela
         log.info("分页查询结果: 当前页记录数={}, 总记录数={}", 
                 pageResult.getList().size(), pageResult.getTotal());
         
+        // 验证查询结果
+        if (pageResult.getList() == null || pageResult.getList().isEmpty()) {
+            log.info("分页查询结果为空，返回空结果");
+            return new PageResult<>(List.of(), pageResult.getTotal());
+        }
+        
         // 转换为响应VO
-        return new PageResult<>(
-            pageResult.getList().stream().map(this::convertToRespVO).toList(),
-            pageResult.getTotal()
-        );
+        List<EntityRelationshipRespVO> respVOList = pageResult.getList().stream()
+                .map(this::convertToRespVO)
+                .filter(vo -> vo != null) // 过滤掉转换失败的VO
+                .toList();
+        
+        // 验证转换结果
+        if (respVOList.size() != pageResult.getList().size()) {
+            log.warn("数据转换过程中有记录丢失，原始记录数: {}, 转换后记录数: {}", 
+                    pageResult.getList().size(), respVOList.size());
+        }
+        
+        return new PageResult<>(respVOList, pageResult.getTotal());
     }
 
     @Override
@@ -214,7 +230,7 @@ public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRela
      */
     private void validateEntityRelationshipExists(Long id) {
         if (entityRelationshipRepository.findById(id) == null) {
-            throw exception(ENTITY_RELATIONSHIP_NOT_EXISTS);
+            throw new IllegalArgumentException("实体关系不存在");
         }
     }
 
@@ -222,7 +238,18 @@ public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRela
      * 转换为响应VO
      */
     private EntityRelationshipRespVO convertToRespVO(MetadataEntityRelationshipDO relationshipDO) {
+        if (relationshipDO == null) {
+            log.warn("转换响应VO时，输入参数 relationshipDO 为空");
+            return null;
+        }
+        
         EntityRelationshipRespVO result = BeanUtils.toBean(relationshipDO, EntityRelationshipRespVO.class);
+        
+        // 确保关键字段正确设置
+        if (result.getId() == null && relationshipDO.getId() != null) {
+            result.setId(relationshipDO.getId());
+            log.debug("手动设置响应VO的id字段: {}", relationshipDO.getId());
+        }
         
         // 查询源实体和目标实体的名称
         result.setSourceEntityName(getEntityNameById(relationshipDO.getSourceEntityId()));
@@ -231,6 +258,11 @@ public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRela
         // 查询源字段和目标字段的名称
         result.setSourceFieldName(getFieldNameById(relationshipDO.getSourceFieldId()));
         result.setTargetFieldName(getFieldNameById(relationshipDO.getTargetFieldId()));
+        
+        // 验证关键字段
+        if (result.getId() == null) {
+            log.error("转换后的响应VO中id字段为空，原始DO的id: {}", relationshipDO.getId());
+        }
         
         return result;
     }
@@ -284,6 +316,7 @@ public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRela
 
         return relationships.stream()
                 .map(this::convertToRespVO)
+                .filter(vo -> vo != null) // 过滤掉转换失败的VO
                 .toList();
     }
 
@@ -416,11 +449,19 @@ public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRela
      * @return id字段ID
      */
     private Long getEntityIdField(Long entityId) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and(MetadataEntityFieldDO.ENTITY_ID, entityId);
-        configStore.and(MetadataEntityFieldDO.FIELD_NAME, "id");
+        // 构建查询条件，查找指定实体的id字段
+        EntityFieldQueryVO queryVO = new EntityFieldQueryVO();
+        queryVO.setEntityId(String.valueOf(entityId));
+        queryVO.setKeyword("id"); // 使用关键字搜索id字段
         
-        MetadataEntityFieldDO idField = entityFieldService.getEntityField(String.valueOf(entityId));
+        List<MetadataEntityFieldDO> fields = entityFieldService.getEntityFieldListByConditions(queryVO);
+        
+        // 查找字段名为"id"的字段
+        MetadataEntityFieldDO idField = fields.stream()
+                .filter(field -> "id".equals(field.getFieldName()))
+                .findFirst()
+                .orElse(null);
+        
         if (idField == null) {
             throw new IllegalArgumentException("主表实体未找到id字段，实体ID: " + entityId);
         }
@@ -435,11 +476,19 @@ public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRela
      * @return parent_id字段ID
      */
     private Long getOrCreateParentIdField(Long childEntityId) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and(MetadataEntityFieldDO.ENTITY_ID, childEntityId);
-        configStore.and(MetadataEntityFieldDO.FIELD_NAME, "parent_id");
+        // 构建查询条件，查找指定实体的parent_id字段
+        EntityFieldQueryVO queryVO = new EntityFieldQueryVO();
+        queryVO.setEntityId(String.valueOf(childEntityId));
+        queryVO.setKeyword("parent_id"); // 使用关键字搜索parent_id字段
         
-        MetadataEntityFieldDO parentIdField = entityFieldService.getEntityField(String.valueOf(childEntityId));
+        List<MetadataEntityFieldDO> fields = entityFieldService.getEntityFieldListByConditions(queryVO);
+        
+        // 查找字段名为"parent_id"的字段
+        MetadataEntityFieldDO parentIdField = fields.stream()
+                .filter(field -> "parent_id".equals(field.getFieldName()))
+                .findFirst()
+                .orElse(null);
+        
         if (parentIdField != null) {
             return parentIdField.getId();
         }

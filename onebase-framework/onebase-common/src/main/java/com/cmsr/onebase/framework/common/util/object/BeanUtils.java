@@ -19,8 +19,6 @@ public class BeanUtils {
     static {
         MODEL_MAPPER.getConfiguration()
                 .setMatchingStrategy(MatchingStrategies.STRICT)
-                .setFullTypeMatchingRequired(true)
-                .setFieldMatchingEnabled(true)
                 .setAmbiguityIgnored(true)
                 .setFieldAccessLevel(Configuration.AccessLevel.PRIVATE);
     }

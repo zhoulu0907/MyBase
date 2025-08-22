@@ -71,6 +71,24 @@
             <scope>provided</scope> <!-- 设置为 provided，主要是 api 包使用到 -->
         </dependency>
 
+        <!-- common -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-collections4</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <scope>provided</scope> <!-- 设置为 provided，只有工具类需要使用到 -->
+        </dependency>
         <!-- 监控相关 -->
         <dependency>
             <groupId>org.apache.skywalking</groupId>
@@ -99,11 +117,7 @@
             <groupId>org.modelmapper</groupId>
             <artifactId>modelmapper</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <scope>provided</scope> <!-- 设置为 provided，只有工具类需要使用到 -->
-        </dependency>
+
 
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
@@ -138,37 +152,7 @@
             <artifactId>hutool-all</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>transmittable-thread-local</artifactId>
-        </dependency>
 
-<!--        <dependency>-->
-<!--            <groupId>com.fhs-opensource</groupId> &lt;!&ndash; VO 数据翻译 &ndash;&gt;-->
-<!--            <artifactId>easy-trans-anno</artifactId> &lt;!&ndash; 默认引入的原因，方便 xxx-module-api 包使用 &ndash;&gt;-->
-<!--        </dependency>-->
-
-        <!-- Aynline 相关 -->
-        <dependency>
-            <groupId>org.anyline</groupId>
-            <artifactId>anyline-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.anyline</groupId>
-            <artifactId>anyline-mvc</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.anyline</groupId>
-            <artifactId>anyline-environment-spring-data-jdbc</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.anyline</groupId>
-            <artifactId>anyline-data-jdbc-postgresql</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.anyline</groupId>
-            <artifactId>anyline-data-jdbc-h2</artifactId>
-        </dependency>
         <dependency>
             <groupId>jakarta.persistence</groupId>
             <artifactId>jakarta.persistence-api</artifactId>

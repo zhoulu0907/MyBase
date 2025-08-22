@@ -74,6 +74,18 @@ public class MetadataAppAndDatasourceRepository extends DataRepository<MetadataA
     }
 
     /**
+     * 根据应用ID与数据源ID获取 appUid
+     *
+     * @param applicationId 应用ID
+     * @param datasourceId 数据源ID
+     * @return appUid，未找到时返回 null
+     */
+    public String getAppUidByAppIdAndDatasourceId(Long applicationId, Long datasourceId) {
+        MetadataAppAndDatasourceDO relation = getRelation(applicationId, datasourceId);
+        return relation != null ? relation.getAppUid() : null;
+    }
+
+    /**
      * 检查应用和数据源是否已关联
      *
      * @param applicationId 应用ID
@@ -185,5 +197,30 @@ public class MetadataAppAndDatasourceRepository extends DataRepository<MetadataA
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.and(MetadataAppAndDatasourceDO.DATASOURCE_TYPE, datasourceType);
         return findAllByConfig(configStore);
+    }
+
+    /**
+     * 更新应用与数据源关联关系中的appUid
+     *
+     * @param applicationId 应用ID
+     * @param datasourceId 数据源ID
+     * @param newAppUid 新的应用UID
+     * @return 是否更新成功
+     */
+    public boolean updateRelationAppUid(Long applicationId, Long datasourceId, String newAppUid) {
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        configStore.and(MetadataAppAndDatasourceDO.APPLICATION_ID, applicationId);
+        configStore.and(MetadataAppAndDatasourceDO.DATASOURCE_ID, datasourceId);
+        
+        MetadataAppAndDatasourceDO relation = findOne(configStore);
+        if (relation == null) {
+            log.warn("未找到应用{}与数据源{}的关联关系，无法更新appUid", applicationId, datasourceId);
+            return false;
+        }
+        
+        relation.setAppUid(newAppUid);
+        update(relation);
+        log.info("成功更新应用{}与数据源{}关联关系的appUid为{}", applicationId, datasourceId, newAppUid);
+        return true;
     }
 }

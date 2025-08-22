@@ -23,6 +23,7 @@ import com.cmsr.onebase.module.metadata.enums.BooleanStatusEnum;
 import com.cmsr.onebase.module.metadata.convert.datasource.DatasourceConvert;
 import com.cmsr.onebase.module.metadata.dal.database.MetadataBusinessEntityRepository;
 import com.cmsr.onebase.module.metadata.service.datasource.MetadataDatasourceService;
+import com.cmsr.onebase.module.metadata.service.datasource.MetadataAppAndDatasourceService;
 import com.cmsr.onebase.module.metadata.service.relationship.MetadataEntityRelationshipService;
 import com.cmsr.onebase.module.metadata.util.StatusEnumUtil;
 import com.cmsr.onebase.module.metadata.dal.database.TemporaryDatasourceService;
@@ -69,6 +70,8 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
     private MetadataEntityRelationshipService metadataEntityRelationshipService;
     @Resource
     private TemporaryDatasourceService temporaryDatasourceService;
+    @Resource
+    private MetadataAppAndDatasourceService metadataAppAndDatasourceService;
 
     // 系统字段缓存，避免频繁查询数据库
     private volatile List<MetadataSystemFieldsDO> systemFieldsCache = null;
@@ -77,6 +80,7 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+
     public Long createBusinessEntity(@Valid BusinessEntitySaveReqVO createReqVO) {
         // 预先获取系统字段信息，避免在事务中查询
         List<MetadataSystemFieldsDO> systemFields = null;
@@ -101,8 +105,22 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
             businessEntity.setCode(IdUtil.simpleUUID());
         }
 
-        // 根据实体类型处理表名
+        // 根据实体类型处理表名，并加上 appUid 前缀（如有）
         handleTableNameByEntityType(businessEntity, createReqVO);
+        String appUid = metadataAppAndDatasourceService.getAppUidByAppIdAndDatasourceId(
+                Long.valueOf(createReqVO.getAppId()), Long.valueOf(createReqVO.getDatasourceId())
+        );
+        if (appUid != null && !appUid.isBlank()) {
+            String rawName = businessEntity.getTableName();
+            // 避免重复前缀：如果已经以 appUid_ 开头则不再重复
+            String prefix = appUid + "_";
+            if (rawName == null || rawName.isBlank()) {
+                rawName = CharSequenceUtil.isNotEmpty(createReqVO.getCode()) ? createReqVO.getCode().toLowerCase() : IdUtil.simpleUUID();
+            }
+            if (!rawName.startsWith(prefix)) {
+                businessEntity.setTableName(prefix + rawName);
+            }
+        }
 
         metadataBusinessEntityRepository.insert(businessEntity);
 
@@ -312,10 +330,10 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
                     .description(systemField.getDescription())
                     // 使用新的枚举值：1-是，0-否
                     .isSystemField(StatusEnumUtil.YES) // 标记为系统字段：1-是
-                    .isPrimaryKey(BooleanStatusEnum.isYes(systemField.getIsSnowflakeId()) ? StatusEnumUtil.YES : StatusEnumUtil.NO) // 雪花ID字段设为主键：1-是，0-不是
-                    .isRequired(BooleanStatusEnum.isYes(systemField.getIsRequired()) ? StatusEnumUtil.YES : StatusEnumUtil.NO) // 1-是，0-否
-                    .isUnique(BooleanStatusEnum.isYes(systemField.getIsSnowflakeId()) ? StatusEnumUtil.YES : StatusEnumUtil.NO) // 主键字段唯一：1-是，0-否
-                    .allowNull(!BooleanStatusEnum.isYes(systemField.getIsRequired()) ? StatusEnumUtil.YES : StatusEnumUtil.NO) // 非必填字段允许为空：1-是，0-否
+                    .isPrimaryKey(BooleanStatusEnum.toStatusValue(systemField.getIsSnowflakeId())) // 雪花ID字段设为主键：1-是，0-不是
+                    .isRequired(BooleanStatusEnum.toStatusValue(systemField.getIsRequired())) // 1-是，0-否
+                    .isUnique(BooleanStatusEnum.toStatusValue(systemField.getIsSnowflakeId())) // 主键字段唯一：1-是，0-否
+                    .allowNull(BooleanStatusEnum.toInverseStatusValue(systemField.getIsRequired())) // 非必填字段允许为空：1-是，0-否
                     .sortOrder(sortOrder++)
                     .validationRules(null) // 系统字段暂不设置校验规则
                     .runMode(0) // 默认编辑态
@@ -439,7 +457,7 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
             }
 
             // 雪花ID字段设置为主键
-            if (field.getIsSnowflakeId() == 1) {
+            if (BooleanStatusEnum.isYes(field.getIsSnowflakeId())) {
                 primaryKeyField = field.getFieldName();
             }
 

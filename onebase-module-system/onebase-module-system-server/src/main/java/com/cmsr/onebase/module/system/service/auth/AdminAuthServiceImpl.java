@@ -30,6 +30,7 @@ import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Resource;
 import jakarta.validation.Validator;
 import lombok.Setter;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -45,6 +46,7 @@ import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
  * Auth Service 实现类
  */
 @Service
+@RefreshScope
 @Slf4j
 public class AdminAuthServiceImpl implements AdminAuthService {
 

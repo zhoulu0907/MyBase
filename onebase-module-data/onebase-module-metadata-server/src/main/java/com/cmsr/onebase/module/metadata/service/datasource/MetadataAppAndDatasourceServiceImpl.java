@@ -121,4 +121,22 @@ public class MetadataAppAndDatasourceServiceImpl implements MetadataAppAndDataso
         log.debug("查询数据源类型{}的关联关系", datasourceType);
         return appAndDatasourceRepository.getRelationsByDatasourceType(datasourceType);
     }
+
+    @Override
+    public String getAppUidByAppIdAndDatasourceId(Long applicationId, Long datasourceId) {
+        return appAndDatasourceRepository.getAppUidByAppIdAndDatasourceId(applicationId, datasourceId);
+    }
+
+    @Override
+    public MetadataAppAndDatasourceDO getRelation(Long applicationId, Long datasourceId) {
+        log.debug("查询应用{}与数据源{}的关联关系", applicationId, datasourceId);
+        return appAndDatasourceRepository.getRelation(applicationId, datasourceId);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean updateRelationAppUid(Long applicationId, Long datasourceId, String newAppUid) {
+        log.info("更新应用{}与数据源{}关联关系的appUid为{}", applicationId, datasourceId, newAppUid);
+        return appAndDatasourceRepository.updateRelationAppUid(applicationId, datasourceId, newAppUid);
+    }
 }

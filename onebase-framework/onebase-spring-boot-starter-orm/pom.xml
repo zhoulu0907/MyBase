@@ -28,6 +28,27 @@
             <scope>provided</scope> <!-- 设置为 provided，只有 OncePerRequestFilter 使用到 -->
         </dependency>
 
+        <!-- Aynline 相关 -->
+        <dependency>
+            <groupId>org.anyline</groupId>
+            <artifactId>anyline-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.anyline</groupId>
+            <artifactId>anyline-mvc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.anyline</groupId>
+            <artifactId>anyline-environment-spring-data-jdbc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.anyline</groupId>
+            <artifactId>anyline-data-jdbc-postgresql</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.anyline</groupId>
+            <artifactId>anyline-data-jdbc-h2</artifactId>
+        </dependency>
         <!-- DB 相关 -->
         <dependency>
             <groupId>com.mysql</groupId>
@@ -79,10 +100,10 @@
                 </exclusion>
             </exclusions>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>com.fhs-opensource</groupId> &lt;!&ndash; VO 数据翻译 &ndash;&gt;-->
-<!--            <artifactId>easy-trans-spring-boot-starter</artifactId>-->
-<!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>com.fhs-opensource</groupId> &lt;!&ndash; VO 数据翻译 &ndash;&gt;-->
+        <!--            <artifactId>easy-trans-spring-boot-starter</artifactId>-->
+        <!--        </dependency>-->
     </dependencies>
 
 </project>
