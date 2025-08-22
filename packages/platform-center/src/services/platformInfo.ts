@@ -17,6 +17,5 @@ export const uploadPlatformLicenseApi = (data: any) => systemService.post('/lice
 
 // 下载平台 license 
 export const downloadPlatformLicenseApi = (id: number = 1) => {
-  return systemService.get(`/license/export?id=${id}`), {
-  }
+  return systemService.get(`/license/export?id=${id}`)
 }

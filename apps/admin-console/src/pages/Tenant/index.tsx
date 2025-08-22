@@ -41,7 +41,7 @@ const { useForm } = Form;
 const TenantManagement: React.FC = () => {
   const [tenantList, setTenantList] = useState<PlatformTenantInfo[]>([]);
   const [loading, setLoading] = useState(false);
-  const [statusFilter, setStatusFilter] = useState(PlatformTenantStatus.all); // 状态筛选
+  const [statusFilter, setStatusFilter] = useState(null); // 状态筛选
   const [keywordSearch, setKeywordSearch] = useState(''); // 关键字搜索
   const [searchInputValue, setSearchInputValue] = useState(''); // 输入框显示的值
   const [searchDebounceTimer, setSearchDebounceTimer] = useState<NodeJS.Timeout | null>(null);
@@ -66,7 +66,6 @@ const TenantManagement: React.FC = () => {
   const getPlatformTenantList = async () => {
     setLoading(true);
     try {
-      // console.log("getPlatformTenantList searchParams.status: ", searchParams.status);
       const resp = await getPlatformTenantListApi({
         pageNo: currentPage,
         pageSize: 10,
@@ -75,7 +74,6 @@ const TenantManagement: React.FC = () => {
       });
       setTenantList(resp.list);
       setTotal(resp.total)
-      console.log(' 租户列表 resp.list: ', resp.list);
     } catch (error: any) {
       console.error(error);
       Message.error(error.message || '获取租户列表失败');
@@ -136,8 +134,6 @@ const TenantManagement: React.FC = () => {
     try {
       const licenseResp = await getPlatformInfoApi();
       if(licenseResp) {
-        console.log('license总数 licenseResp:', licenseResp);
-        console.log('license下用户总数 licenseResp:', licenseResp.userLimit);
         setTenantLimit(licenseResp.userLimit)
       }
     } catch (error) {
@@ -150,7 +146,6 @@ const TenantManagement: React.FC = () => {
     try {
       const resp = await getCreateTenantCountApi();
       if(resp) {
-        console.log('可分配数量 resp:', resp);
         setAllocatableLicense(resp);
       }
     } catch (error) {
@@ -159,11 +154,10 @@ const TenantManagement: React.FC = () => {
   }
 
   // 获取其他租户数量
-  const getOtherTenantCount = async (id: string) => { 
+  const getOtherTenantCount = async (id?: string) => { 
     try {
       const resp = await getOtherTenantCountApi(id);
       if(resp) {
-        console.log('其他租户数量 resp:', resp);
         setOtherTenantCount(resp);
       }
     } catch (error) {
@@ -175,7 +169,6 @@ const TenantManagement: React.FC = () => {
     try {
       const resp = await getTenantUserCountApi(id);
       if(resp) {
-        console.log('用户数量 resp:', resp);
         setTenantUserCount(resp);
       }
     } catch (error) {
@@ -187,7 +180,6 @@ const TenantManagement: React.FC = () => {
   const getPlatformAdminList = async () => { 
     try {
       const adminListResp = await getPlatformTenantAdminListApi()
-      console.log('管理员列表 adminListResp:', adminListResp);
       setAdminList(adminListResp)
     } catch (error) {
       console.error('Error fetching adminList:', error);
@@ -199,9 +191,10 @@ const TenantManagement: React.FC = () => {
     form.resetFields();
     form.setFieldsValue({
       status: PlatformTenantStatus.enabled,
-      admin: adminList.length > 0 ? adminList[0].nickname : undefined
+      admin: undefined
     });
     getTenantData()
+    getOtherTenantCount()
     setModalVisible(true);
     setIsNewTenant(true);
   };
@@ -298,7 +291,6 @@ const TenantManagement: React.FC = () => {
     try {
       // 检查管理员是否发生变化
       const newAdminId = values.admin; // 这里是 id
-      console.log('newAdminId:', newAdminId);
       const originalAdminId = currentTenant?.adminUserName || ''; // 原始 contactName 是 username
 
       // 根据 id 查找管理员
@@ -312,13 +304,12 @@ const TenantManagement: React.FC = () => {
         name: values.tenantName,
         tenantCode: values.tenantCode,
         // 只有管理员发生变化时才传递管理员信息，否则传递空字符串
-        nickname: adminNickname,
-        contactName: newAdminId !== originalAdminId ? adminUsername : '',
+        adminNickName: adminNickname,
+        adminUserName: newAdminId !== originalAdminId ? adminUsername : '',
         status: values.status,
         accountCount: values.allocatedCount,
         website: values.website,
       };
-      console.log('更新租户 updateParams:', updateParams);
       // 调用 updatePlatformTenantApi
       await updatePlatformTenantApi(updateParams);
       getPlatformTenantList();
@@ -336,7 +327,6 @@ const TenantManagement: React.FC = () => {
    * 创建新租户
    */
   const createTenant = async (values: any) => {
-    console.log('创建新租户:', values);
     try {
       // 根据 id 查找管理员
       const selectedAdmin = adminList.find(admin => admin.id === values.admin);
@@ -353,8 +343,8 @@ const TenantManagement: React.FC = () => {
         accountCount: values.allocatedCount,
         website: values.website,
       };
-      console.log('测试nickname:', newTenantData);
       await addPlatformTenantApi(newTenantData);
+      setCurrentPage(1);
       getPlatformTenantList();
       Message.success('创建租户成功');
       setModalVisible(false);
@@ -515,7 +505,6 @@ const TenantManagement: React.FC = () => {
 
   // 处理点击地址跳转
   const handleClick = (text: string) => {
-    console.log('处理跳转地址:', text);
     window.open(text);
   };
 
@@ -586,7 +575,7 @@ const TenantManagement: React.FC = () => {
         </Button>
         <Space size="large">
           <Radio.Group type="button" value={statusFilter} onChange={handleStatusChange}>
-            <Radio value={PlatformTenantStatus.all}>全部</Radio>
+            <Radio value={null}>全部</Radio>
             <Radio value={PlatformTenantStatus.enabled}>启用</Radio>
             <Radio value={PlatformTenantStatus.disabled}>禁用</Radio>
           </Radio.Group>
