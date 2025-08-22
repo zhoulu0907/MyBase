@@ -1,3 +1,37 @@
+@import '../../components/variables.less';
+
 .integratedManagementPage {
-  /* 页面样式可根据需求自定义 */
+  width: 100vw;
+  height: calc(100vh - @header-height);
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+  background-color: rgb(214, 214, 214);
+
+  .sider {
+    width: 200px;
+    height: 100%;
+    background-color: white;
+    border-right: 1px solid #e5e5e5;
+
+    .title {
+      font-size: 13px;
+      padding-left: 18px;
+      padding-top: 16px;
+      font-weight: 500;
+      color: grey;
+    }
+
+    .menu {
+      margin-bottom: 10px;
+    }
+  }
+
+  .content {
+    flex: 1;
+    width: 100%;
+    height: 100%;
+    background-color: rgb(250, 250, 250);
+  }
 }

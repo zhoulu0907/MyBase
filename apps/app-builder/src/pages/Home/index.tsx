@@ -40,7 +40,7 @@ const Home: React.FC = () => {
                 <Route path="create-app" element={<CreateAppPage />}>
                   <Route index element={<PageManagerPage />} />
                   <Route path="page-manager" element={<PageManagerPage />} />
-                  <Route path="integrated-management" element={<IntegratedManagementPage />} />
+                  <Route path="integrated-management/*" element={<IntegratedManagementPage />} />
                   <Route path="data-factory" element={<DataFactoryPage />} />
                   <Route path="app-setting" element={<AppSettingPage />} />
                   <Route path="app-release" element={<AppReleasePage />} />
