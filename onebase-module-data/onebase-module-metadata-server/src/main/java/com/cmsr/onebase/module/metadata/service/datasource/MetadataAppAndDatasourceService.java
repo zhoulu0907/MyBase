@@ -98,4 +98,14 @@ public interface MetadataAppAndDatasourceService {
      * @return appUid，未找到时返回 null
      */
     String getAppUidByAppIdAndDatasourceId(Long applicationId, Long datasourceId);
+
+    /**
+     * 更新应用与数据源关联关系中的appUid
+     *
+     * @param applicationId 应用ID
+     * @param datasourceId 数据源ID
+     * @param newAppUid 新的应用UID
+     * @return 是否更新成功
+     */
+    boolean updateRelationAppUid(Long applicationId, Long datasourceId, String newAppUid);
 }

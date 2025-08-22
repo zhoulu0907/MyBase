@@ -198,4 +198,29 @@ public class MetadataAppAndDatasourceRepository extends DataRepository<MetadataA
         configStore.and(MetadataAppAndDatasourceDO.DATASOURCE_TYPE, datasourceType);
         return findAllByConfig(configStore);
     }
+
+    /**
+     * 更新应用与数据源关联关系中的appUid
+     *
+     * @param applicationId 应用ID
+     * @param datasourceId 数据源ID
+     * @param newAppUid 新的应用UID
+     * @return 是否更新成功
+     */
+    public boolean updateRelationAppUid(Long applicationId, Long datasourceId, String newAppUid) {
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        configStore.and(MetadataAppAndDatasourceDO.APPLICATION_ID, applicationId);
+        configStore.and(MetadataAppAndDatasourceDO.DATASOURCE_ID, datasourceId);
+        
+        MetadataAppAndDatasourceDO relation = findOne(configStore);
+        if (relation == null) {
+            log.warn("未找到应用{}与数据源{}的关联关系，无法更新appUid", applicationId, datasourceId);
+            return false;
+        }
+        
+        relation.setAppUid(newAppUid);
+        update(relation);
+        log.info("成功更新应用{}与数据源{}关联关系的appUid为{}", applicationId, datasourceId, newAppUid);
+        return true;
+    }
 }

@@ -126,4 +126,11 @@ public class MetadataAppAndDatasourceServiceImpl implements MetadataAppAndDataso
     public String getAppUidByAppIdAndDatasourceId(Long applicationId, Long datasourceId) {
         return appAndDatasourceRepository.getAppUidByAppIdAndDatasourceId(applicationId, datasourceId);
     }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean updateRelationAppUid(Long applicationId, Long datasourceId, String newAppUid) {
+        log.info("更新应用{}与数据源{}关联关系的appUid为{}", applicationId, datasourceId, newAppUid);
+        return appAndDatasourceRepository.updateRelationAppUid(applicationId, datasourceId, newAppUid);
+    }
 }
