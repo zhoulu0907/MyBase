@@ -5,7 +5,7 @@ import { PlatformTenantInfo, CreateTenantParams } from '../types/platformTenant'
 export const getCreateTenantCountApi = () => systemService.get('/tenant/get-allocatable-count');
 
 // 获取其他租户分配数量
-export const getOtherTenantCountApi = (id: string) => systemService.get('/tenant/get-exist-user-count', { id });
+export const getOtherTenantCountApi = (id?: string) => systemService.get('/tenant/get-other-exist-user-count', { id });
 
 // 获取租户用户数量
 export const getTenantUserCountApi = (id: string) => systemService.get('/tenant/get-tenant-exist-user-count', { id });
@@ -15,9 +15,9 @@ export const getPlatformTenantListApi = (params: {
   pageNo: number,
   pageSize?: number,
   keywords?: string,
-  status?: number
+  status?: number | null
 }) => {
-  const { pageNo, pageSize = 10, keywords, status = 2 } = params;
+  const { pageNo, pageSize = 10, keywords, status } = params;
 
   let url = `/tenant/page?pageNo=${pageNo}&pageSize=${pageSize}`;
 
@@ -25,7 +25,7 @@ export const getPlatformTenantListApi = (params: {
     url += `&keyword=${encodeURIComponent(keywords)}`;
   }
 
-  if (status !== undefined) {
+  if (status !== null) {
     url += `&status=${status}`;
   }
 

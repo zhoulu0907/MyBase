@@ -73,7 +73,7 @@ export interface RoleAddUserReq {
   /**
    * 用户ID列表
    */
-  userIds: number[];
+  userIds: string[];
 }
 
 export interface RoleDeleteUserReq {
@@ -84,7 +84,7 @@ export interface RoleDeleteUserReq {
   /**
    * 用户ID列表
    */
-  userIds: number[];
+  userIds: string[];
 }
 
 export interface DeleteRoleReq {
@@ -92,4 +92,34 @@ export interface DeleteRoleReq {
    * 用户ID
    */
   roleId: string,
+}
+
+export interface GerRoleUserReq {
+  /**
+   * 页码，从 1 开始
+   */
+  pageNo: number;
+  /**
+   * 每页条数，最大值为 100
+   */
+  pageSize: number;
+  /**
+   * 角色ID
+   */
+  roleId: string;
+}
+
+export interface GetDeptUserReq {
+  /**
+   * 部门ID
+   */
+  deptId?: string;
+  /**
+   * 搜索关键词
+   */
+  keywords?: string;
+  /**
+   * 角色ID
+   */
+  roleId: string;
 }

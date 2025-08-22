@@ -1,31 +1,21 @@
 import type { EntityListItem } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
 import { useAppStore } from '@/store/store_app';
-import { Button, Form, Input, Message, Modal, Select, Space } from '@arco-design/web-react';
+import { Button, Form, Input, Message, Modal, Radio, Select, Space } from '@arco-design/web-react';
 import { IconDelete, IconPlus } from '@arco-design/web-react/icon';
-import { getEntityFieldsWithChildren } from '@onebase/app';
+import { createRule, getEntityFieldsWithChildren } from '@onebase/app';
 import React, { useState } from 'react';
+import { operatorOptions, valueTypeOptions, validationTypeOptions, formatValidationTypeOptions } from './rule.ts';
 import styles from '../modal.module.less';
-
-interface ConditionRow {
-  field: string;
-  operator: string;
-  valueType: string;
-  value: string;
-}
-
-interface ConditionGroup {
-  id: string;
-  conditions: ConditionRow[];
-  logic: 'AND' | 'OR';
-}
+import type { ConditionRow } from '@onebase/app';
 
 interface RuleFormValues {
   validationType: string;
   formatValidationType?: string;
-  validationName: string;
+  rgName: string;
   validationDataItem: string;
-  conditionGroups: ConditionGroup[];
-  failureMessage: string;
+  valueRules: ConditionRow[][];
+  popPrompt: string;
+  popType: string;
 }
 
 interface CreateRuleModalProps {
@@ -42,65 +32,21 @@ const CreateRuleModal: React.FC<CreateRuleModalProps> = ({ visible, setVisible, 
   const [leftFieldOptions, setLeftFieldOptions] = useState<any[]>([]);
   const [rightFieldOptions, setRightFieldOptions] = useState<any[]>([]);
 
-  // 校验类型选项
-  const validationTypeOptions = [
-    { label: '必填校验', value: 'required' },
-    { label: '唯一校验', value: 'unique' },
-    { label: '长度校验', value: 'length' },
-    { label: '范围校验', value: 'range' },
-    { label: '格式校验', value: 'format' },
-    { label: '子表空行校验', value: 'subtable_empty' }
-  ];
-
-  // 格式校验类型选项
-  const formatValidationTypeOptions = [
-    { label: '正则校验', value: 'pattern' },
-    { label: '邮箱格式', value: 'email' },
-    { label: '电话格式', value: 'phone' },
-    { label: 'URL格式', value: 'url' },
-    { label: '日期格式', value: 'date' }
-  ];
-
-  // 操作符选项
-  const operatorOptions = [
-    { label: '等于', value: 'equals' },
-    { label: '不等于', value: 'not_equals' },
-    { label: '大于', value: 'greater_than' },
-    { label: '大于等于', value: 'greater_equal' },
-    { label: '小于', value: 'less_than' },
-    { label: '小于等于', value: 'less_equal' },
-    { label: '包含', value: 'contains' },
-    { label: '不包含', value: 'not_contains' },
-    { label: '为空', value: 'is_null' },
-    { label: '不为空', value: 'is_not_null' }
-  ];
-
-  // 值类型选项
-  const valueTypeOptions = [
-    { label: '自定义', value: 'custom' },
-    { label: '字段值', value: 'field' },
-    { label: '固定值', value: 'fixed' },
-    { label: '当前用户', value: 'current_user' },
-    { label: '当前时间', value: 'current_time' }
-  ];
-
   // 生成唯一ID
   const generateId = () => `id_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
   // 创建默认条件行
   const createDefaultConditionRow = (): ConditionRow => ({
-    field: '',
+    fieldId: '',
     operator: 'equals',
     valueType: 'custom',
-    value: ''
+    fieldValue: '',
+    logicOperator: 'AND',
+    logicType: 'CONDITION'
   });
 
   // 创建默认条件组
-  const createDefaultConditionGroup = (): ConditionGroup => ({
-    id: generateId(),
-    conditions: [createDefaultConditionRow()],
-    logic: 'AND'
-  });
+  const createDefaultConditionGroup = (): ConditionRow[] => [createDefaultConditionRow()];
 
   // 监听校验类型变化，控制格式校验类型字段的显示
   const handleValidationTypeChange = (value: string) => {
@@ -117,28 +63,28 @@ const CreateRuleModal: React.FC<CreateRuleModalProps> = ({ visible, setVisible, 
 
   // 添加AND条件（在同一组内添加行）
   const addAndCondition = (groupIndex: number) => {
-    const currentGroups = form.getFieldValue('conditionGroups') || [];
+    const currentGroups = form.getFieldValue('valueRules') || [];
     const newGroups = [...currentGroups];
-    newGroups[groupIndex].conditions.push(createDefaultConditionRow());
-    form.setFieldValue('conditionGroups', newGroups);
+    newGroups[groupIndex].push(createDefaultConditionRow());
+    form.setFieldValue('valueRules', newGroups);
   };
 
   // 添加OR条件（添加新的条件组）
   const addOrCondition = () => {
-    const currentGroups = form.getFieldValue('conditionGroups') || [];
+    const currentGroups = form.getFieldValue('valueRules') || [];
     const newGroups = [...currentGroups, createDefaultConditionGroup()];
-    form.setFieldValue('conditionGroups', newGroups);
+    form.setFieldValue('valueRules', newGroups);
   };
 
   // 删除条件行
   const removeConditionRow = (groupIndex: number, conditionIndex: number) => {
-    const currentGroups = form.getFieldValue('conditionGroups') || [];
+    const currentGroups = form.getFieldValue('valueRules') || [];
     const newGroups = [...currentGroups];
 
     // 确保至少保留一行条件
-    if (newGroups[groupIndex].conditions.length > 1) {
-      newGroups[groupIndex].conditions.splice(conditionIndex, 1);
-      form.setFieldValue('conditionGroups', newGroups);
+    if (newGroups[groupIndex].length > 1) {
+      newGroups[groupIndex].splice(conditionIndex, 1);
+      form.setFieldValue('valueRules', newGroups);
     } else {
       Message.warning('至少需要保留一个条件');
     }
@@ -146,23 +92,28 @@ const CreateRuleModal: React.FC<CreateRuleModalProps> = ({ visible, setVisible, 
 
   // 删除条件组
   const removeConditionGroup = (groupIndex: number) => {
-    const currentGroups = form.getFieldValue('conditionGroups') || [];
+    const currentGroups = form.getFieldValue('valueRules') || [];
 
     // 确保至少保留一个条件组
     if (currentGroups.length > 1) {
       const newGroups = currentGroups.filter((_, index) => index !== groupIndex);
-      form.setFieldValue('conditionGroups', newGroups);
+      form.setFieldValue('valueRules', newGroups);
     } else {
       Message.warning('至少需要保留一个条件组');
     }
   };
 
   // 更新条件行
-  const updateConditionRow = (groupIndex: number, conditionIndex: number, field: keyof ConditionRow, value: string) => {
-    const currentGroups = form.getFieldValue('conditionGroups') || [];
+  const updateConditionRow = (
+    groupIndex: number,
+    conditionIndex: number,
+    fieldId: keyof ConditionRow,
+    value: string
+  ) => {
+    const currentGroups = form.getFieldValue('valueRules') || [];
     const newGroups = [...currentGroups];
-    newGroups[groupIndex].conditions[conditionIndex][field] = value;
-    form.setFieldValue('conditionGroups', newGroups);
+    newGroups[groupIndex][conditionIndex][fieldId] = value;
+    form.setFieldValue('valueRules', newGroups);
   };
 
   // 提交表单
@@ -171,14 +122,16 @@ const CreateRuleModal: React.FC<CreateRuleModalProps> = ({ visible, setVisible, 
       const values = await form.validate();
       setLoading(true);
 
-      console.log('规则表单数据:', values);
+      console.log('规则表单数据:', values, form.getFieldsValue());
 
       // TODO: 调用创建规则的API
-      // const res = await createRule({
-      //   ...values,
-      //   entityId: entity.entityId,
-      //   appId: curAppId
-      // });
+      const res = await createRule({
+        ...values,
+        entityId: entity.id
+        // appId: curAppId
+      });
+
+      console.log('createRule', res);
 
       Message.success('创建规则成功');
       form.resetFields();
@@ -186,7 +139,6 @@ const CreateRuleModal: React.FC<CreateRuleModalProps> = ({ visible, setVisible, 
       successCallback();
     } catch (error) {
       console.error('创建规则失败:', error);
-      Message.error('创建规则失败');
     } finally {
       setLoading(false);
     }
@@ -204,31 +156,40 @@ const CreateRuleModal: React.FC<CreateRuleModalProps> = ({ visible, setVisible, 
     console.log('字段选项:', res);
     let allFields: object[] = [];
     let parentFields: object[] = [];
-    let childFields: object[] = [];
+    let allChildFields: object[] = [];
 
     if (res?.parentFields?.length > 0) {
-      parentFields = res.parentFields;
+      parentFields = res.parentFields.map((item: { displayName: string; fieldID: string }) => ({
+        label: item.displayName,
+        value: item.fieldID,
+        isParent: true // 增加主表标识
+      }));
     }
     if (res?.childEntities?.length > 0) {
-      res.childEntities.forEach((item: { childFields: object[] }) => {
+      res.childEntities.forEach((item: { childFields: { displayName: string; fieldID: string }[] }) => {
         if (item?.childFields?.length > 0) {
-          childFields = childFields.concat(item.childFields);
+          const childFields = item?.childFields?.map((item: { displayName: string; fieldID: string }) => ({
+            label: item.displayName,
+            value: item.fieldID
+          }));
+          allChildFields = allChildFields.concat(childFields);
         }
       });
     }
-    allFields = [...parentFields, ...childFields];
+    allFields = [...parentFields, ...allChildFields];
+    // console.log('allFields', allFields, parentFields, childFields);
     setLeftFieldOptions(allFields);
-    setRightFieldOptions(allFields);
+    setRightFieldOptions(allChildFields);
   };
 
   // 初始化表单数据
   React.useEffect(() => {
     if (visible) {
       // 设置默认的条件组
-      form.setFieldValue('conditionGroups', [createDefaultConditionGroup()]);
+      form.setFieldValue('valueRules', [createDefaultConditionGroup()]);
       loadFieldOptions();
     }
-  }, [visible, form]);
+  }, [visible]);
 
   return (
     <Modal
@@ -245,7 +206,7 @@ const CreateRuleModal: React.FC<CreateRuleModalProps> = ({ visible, setVisible, 
       <Form form={form} layout="vertical" className={styles['rule-form']}>
         <Form.Item
           label="规则名称"
-          field="validationName"
+          field="rgName"
           rules={[
             { required: true, message: '请输入规则名称' },
             { max: 50, message: '规则名称不能超过50个字符' }
@@ -290,28 +251,28 @@ const CreateRuleModal: React.FC<CreateRuleModalProps> = ({ visible, setVisible, 
         <Form.Item noStyle shouldUpdate>
           {(values) => {
             if (isConditionSettingVisible()) {
-              const conditionGroups = values.conditionGroups || [];
+              const valueRules = values.valueRules || [];
 
               return (
-                <Form.Item label="条件设置" field="conditionGroups">
+                <Form.Item label="条件设置" field="valueRules">
                   <div className={styles['condition-setting-container']}>
-                    {conditionGroups.map((group, groupIndex) => (
-                      <div key={group.id} className={styles['condition-group']}>
+                    {valueRules.map((group, groupIndex) => (
+                      <div key={groupIndex} className={styles['condition-group']}>
                         {groupIndex > 0 && (
-                          <div className={styles['condition-logic-divider']}>
-                            <span className={styles['logic-label']}>或者</span>
+                          <div className={styles['condition-logicOperator-divider']}>
+                            <span className={styles['logicOperator-label']}>或者</span>
                           </div>
                         )}
 
                         <div className={styles['condition-group-content']}>
-                          {group.conditions.map((condition, conditionIndex) => (
+                          {group.map((condition, conditionIndex) => (
                             <div key={conditionIndex} className={styles['condition-row']}>
                               <Space size="small" align="start">
                                 {/* 字段选择 */}
                                 <Select
                                   placeholder="请选择字段"
-                                  value={condition.field}
-                                  onChange={(value) => updateConditionRow(groupIndex, conditionIndex, 'field', value)}
+                                  value={condition.fieldId}
+                                  onChange={(value) => updateConditionRow(groupIndex, conditionIndex, 'fieldId', value)}
                                   style={{ width: 200 }}
                                   options={leftFieldOptions}
                                 />
@@ -324,6 +285,12 @@ const CreateRuleModal: React.FC<CreateRuleModalProps> = ({ visible, setVisible, 
                                     updateConditionRow(groupIndex, conditionIndex, 'operator', value)
                                   }
                                   style={{ width: 120 }}
+                                  // options={
+                                  //   fieldOperatorMapping[condition.fieldId]?.map(operator => ({
+                                  //     value: operator,
+                                  //     label: operatorOptions[operator],
+                                  //   })) || []
+                                  // }
                                   options={operatorOptions}
                                 />
 
@@ -339,12 +306,29 @@ const CreateRuleModal: React.FC<CreateRuleModalProps> = ({ visible, setVisible, 
                                 />
 
                                 {/* 值输入 */}
-                                <Input
-                                  placeholder="请输入值"
-                                  value={condition.value}
-                                  onChange={(value) => updateConditionRow(groupIndex, conditionIndex, 'value', value)}
-                                  style={{ width: 150 }}
-                                />
+                                {/* 静态值 */}
+                                {condition.valueType === 'custom' && (
+                                  <Input
+                                    placeholder="请输入值"
+                                    value={condition.fieldValue}
+                                    onChange={(value) =>
+                                      updateConditionRow(groupIndex, conditionIndex, 'fieldValue', value)
+                                    }
+                                    style={{ width: 150 }}
+                                  />
+                                )}
+                                {/* 变量 */}
+                                {condition.valueType === 'fieldId' && (
+                                  <Select
+                                    placeholder="请选择字段"
+                                    value={condition.fieldValue}
+                                    onChange={(value) =>
+                                      updateConditionRow(groupIndex, conditionIndex, 'fieldValue', value)
+                                    }
+                                    style={{ width: 150 }}
+                                    options={rightFieldOptions}
+                                  />
+                                )}
 
                                 {/* 删除按钮 */}
                                 <Button
@@ -396,14 +380,16 @@ const CreateRuleModal: React.FC<CreateRuleModalProps> = ({ visible, setVisible, 
         </Form.Item>
 
         {/* 验证失败提示语 */}
-        <Form.Item
-          label="验证失败提示语"
-          field="failureMessage"
-          rules={[
-            { required: true, message: '请输入验证失败提示语' },
-            { max: 200, message: '验证失败提示语不能超过200个字符' }
-          ]}
-        >
+        <Form.Item label="验证失败提示语" field="popType">
+          <Radio.Group
+            defaultValue={'SHORT'}
+            options={[
+              { label: '短提示框', value: 'SHORT' },
+              { label: '长提示框', value: 'LONG' }
+            ]}
+          />
+        </Form.Item>
+        <Form.Item field="popPrompt">
           <Input.TextArea placeholder="请输入验证失败提示语" rows={3} maxLength={200} showWordLimit />
         </Form.Item>
       </Form>

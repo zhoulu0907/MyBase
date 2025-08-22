@@ -1,15 +1,18 @@
+// 数据源类型
 export const DS_RESOURCE_TYPE = {
   INTERNAL: 'internal',
   EXTERNAL: 'external',
   EXTERNAL_WITH_INTERNAL: 'external_with_internal'
 };
 
+// 数据源类型标签
 export const DS_RESOURCE_TYPE_LABEL = {
   [DS_RESOURCE_TYPE.INTERNAL]: '内部数据源',
   [DS_RESOURCE_TYPE.EXTERNAL]: '外部数据源',
   [DS_RESOURCE_TYPE.EXTERNAL_WITH_INTERNAL]: '外部数据源中引用自有数据源已有资产'
 };
 
+// 实体字段类型标签
 export const ENTITY_FIELD_TYPE_LABEL = {
   TEXT: 'TEXT',
   LONG_TEXT: 'LONG_TEXT',
@@ -37,8 +40,9 @@ export const ENTITY_FIELD_TYPE_LABEL = {
   PASSWORD: 'PASSWORD',
   ENCRYPTED: 'ENCRYPTED',
   AGGREGATE: 'AGGREGATE'
-}
+};
 
+// 实体字段类型
 export const ENTITY_FIELD_TYPE = {
   TEXT: '常规文本',
   LONG_TEXT: '长文本内容',
@@ -81,4 +85,30 @@ export const SYSTEM_FIELD_MAP = {
   parent_id: '主表ID',
   deleted: '软删除标记',
   lock_version: '乐观锁版本'
+};
+
+// 字段类型常量
+export const FIELD_TYPE = {
+  /** 自定义字段 */
+  CUSTOM: 0,
+  /** 系统字段 */
+  SYSTEM: 1
+} as const;
+
+export type FieldType = (typeof FIELD_TYPE)[keyof typeof FIELD_TYPE];
+
+// 字段类型标签
+export const FIELD_TYPE_LABEL = {
+  [FIELD_TYPE.CUSTOM]: '自定义字段',
+  [FIELD_TYPE.SYSTEM]: '系统字段'
+} as const;
+
+// 检查字段是否为系统字段
+export const isSystemField = (fieldType: number): boolean => {
+  return fieldType === FIELD_TYPE.SYSTEM;
+};
+
+// 检查字段是否为自定义字段
+export const isCustomField = (fieldType: number): boolean => {
+  return fieldType === FIELD_TYPE.CUSTOM;
 };

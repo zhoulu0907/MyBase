@@ -1,4 +1,5 @@
 import { type EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
+import { FIELD_TYPE } from '@/pages/CreateApp/pages/DataFactory/utils/const';
 import { Drawer } from '@arco-design/web-react';
 import React, { useEffect } from 'react';
 
@@ -36,7 +37,7 @@ const DetailDrawer: React.FC<{
                 <div key={index} className="field-item">
                   <span className="field-name">{field.fieldName}</span>
                   <span className="field-type">{field.fieldType}</span>
-                  {field.isSystemField === 0 && <span className="system-tag">系统</span>}
+                  {field.isSystemField === FIELD_TYPE.SYSTEM && <span className="system-tag">系统</span>}
                 </div>
               ))}
           </div>

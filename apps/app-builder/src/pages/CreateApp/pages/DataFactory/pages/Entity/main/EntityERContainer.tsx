@@ -53,6 +53,7 @@ export const EntityERContainer: React.FC<{
   const [updateRelationOptions, setUpdateRelationOptions] = useState(false);
   const [editFieldDrawerVisible, setEditFieldDrawerVisible] = useState(false);
   const [selectedFieldId, setSelectedFieldId] = useState<string>('');
+  const [selectedEntityId, setSelectedEntityId] = useState<string>('');
   const [editRelationDrawerVisible, setEditRelationDrawerVisible] = useState(false);
   const [relationData, setRelationData] = useState<EdgeData | null>(null);
   const chartRef = useRef<any>(null);
@@ -98,6 +99,7 @@ export const EntityERContainer: React.FC<{
 
   const handleNodeAddRelation = (id: string) => {
     console.log('添加关联:', id);
+    setSelectedEntityId(id);
     setEditDrawerVisible(false);
     setCreateRelationModalVisible(true);
     setUpdateRelationOptions(true);
@@ -106,6 +108,7 @@ export const EntityERContainer: React.FC<{
 
   const handleNodeAddMasterDetail = (id: string) => {
     console.log('添加主子关系:', id);
+    setSelectedEntityId(id);
     setEditDrawerVisible(false);
     setCreateMasterDetailModalVisible(true);
     setOnlyUpdateNode(false);
@@ -251,6 +254,7 @@ export const EntityERContainer: React.FC<{
       />
       <CreateRelationModal
         visible={createRelationModalVisible}
+        entityId={selectedEntityId}
         setVisible={setCreateRelationModalVisible}
         successCallback={handleSuccessCallback}
         updateRelationOptions={updateRelationOptions}
@@ -259,7 +263,7 @@ export const EntityERContainer: React.FC<{
       <CreateMasterDetailModal
         visible={createMasterDetailModalVisible}
         setVisible={setCreateMasterDetailModalVisible}
-        entity={nodedata as EntityNode}
+        entityId={selectedEntityId}
         successCallback={handleSuccessCallback}
       />
       <EditRelationDrawer

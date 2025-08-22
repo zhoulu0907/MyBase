@@ -1,5 +1,6 @@
 import { ENTITY_FIELD_TYPE } from '@/pages/CreateApp/pages/DataFactory/utils/const';
 import type { EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
+import { FIELD_TYPE } from '@/pages/CreateApp/pages/DataFactory/utils/const';
 import { useAppStore } from '@/store/store_app';
 import { Button, Message, Modal, Table } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
@@ -20,27 +21,20 @@ interface FieldFormValues {
   defaultValue: string;
   isUnique: number;
   allowNull: number;
-  constraints: string;
   isSystemField: number;
   sortOrder?: number;
   isDeleted?: boolean;
   displayName?: string;
-  fieldConfig?: {
-    options?: string[];
-    autoCodeRules?: AutoCodeRule[];
-    constraints?: {
-      lengthRange: {
-        enabled: boolean;
-        minLength: number;
-        maxLength: number;
-        hintMessage: string;
-      };
-      regexValidation: {
-        enabled: boolean;
-        pattern: string;
-        hintMessage: string;
-      };
-    };
+  options?: object[];
+  autoCodeRules?: AutoCodeRule[];
+  constraints?: {
+    lengthEnabled: number;
+    minLength: number;
+    maxLength: number;
+    lengthPrompt: string;
+    regexEnabled: number;
+    regexPattern: string;
+    regexPrompt: string;
   };
 }
 
@@ -88,8 +82,8 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
     }
   }, [visible]);
 
-  // 过滤掉已删除的字段
-  const activeFields = fields.filter((field) => !field.isDeleted && field.isSystemField === 1);
+  // 过滤掉已删除的字段和系统字段
+  const activeFields = fields.filter((field) => !field.isDeleted && field.isSystemField === FIELD_TYPE.CUSTOM);
 
   const addField = () => {
     const newField: FieldFormValues = {
@@ -103,7 +97,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
       isUnique: 1,
       allowNull: 1,
       constraints: '',
-      isSystemField: 1,
+      isSystemField: FIELD_TYPE.CUSTOM,
       sortOrder: activeFields.length
     };
     setFields([...activeFields, newField]);
@@ -111,7 +105,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
 
   const deleteField = (index: number) => {
     const field = fields[index];
-    if (field.isSystemField === 0) {
+    if (field.isSystemField === FIELD_TYPE.SYSTEM) {
       Message.error('系统字段不能删除');
       return;
     }
@@ -148,7 +142,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
     try {
       setLoading(true);
 
-      const customFields = fields.filter((field) => field.isSystemField === 1 && !field.isDeleted);
+      const customFields = fields.filter((field) => field.isSystemField === FIELD_TYPE.CUSTOM && !field.isDeleted);
 
       // 表单校验
       for (const field of customFields) {
@@ -166,13 +160,13 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
         }
       }
 
-      const allFields = fields.filter((field) => field.isSystemField === 1);
+      const allFields = fields.filter((field) => field.isSystemField === FIELD_TYPE.CUSTOM);
       const fieldDataList = allFields.map((field) => {
         const fieldData = {
           appId: curAppId,
           entityId: entity.entityId,
           ...field,
-          isSystemField: 1,
+          isSystemField: FIELD_TYPE.CUSTOM,
           isDeleted: field.isDeleted || false
         };
 
@@ -201,6 +195,8 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
     const fieldIndex = fields.findIndex((field) => field.id === fieldId);
     if (fieldIndex === -1) return;
 
+    // const isEnabled = configData.length > 0 ? 0 : 1;
+
     let fieldConfig = {};
     switch (fieldType) {
       case 'PICKLIST':
@@ -208,14 +204,15 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
         fieldConfig = { options: configData };
         break;
       case 'AUTO_CODE':
-        fieldConfig = { autoCodeRules: configData };
+        fieldConfig = { options: configData };
         break;
       case 'CONSTRAINTS':
         fieldConfig = { constraints: configData };
         break;
     }
 
-    updateField(fieldIndex, { fieldConfig });
+    updateField(fieldIndex, fieldConfig);
+    console.log('fieldConfig', fieldConfig);
 
     if (fieldType === 'CONSTRAINTS') {
       setConstraintsPopoverVisible(null);
@@ -288,7 +285,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
             pagination={false}
             className={styles['field-table']}
             rowClassName={(record) =>
-              record.isSystemField === 0 ? styles['system-field-row'] : styles['custom-field-row']
+              record.isSystemField === FIELD_TYPE.SYSTEM ? styles['system-field-row'] : styles['custom-field-row']
             }
             rowKey="id"
             components={{

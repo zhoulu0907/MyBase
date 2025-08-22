@@ -1,5 +1,7 @@
 import { type EntityField, type EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
-import { Button, Form, Input, Switch } from '@arco-design/web-react';
+import { FIELD_TYPE } from '@/pages/CreateApp/pages/DataFactory/utils/const';
+import { Button, Form, Input, Grid } from '@arco-design/web-react';
+import { IconCheck } from '@arco-design/web-react/icon';
 import React, { useEffect } from 'react';
 import styles from './NodeEditForm.module.less';
 
@@ -39,34 +41,40 @@ const NodeEditForm: React.FC<NodeEditFormProps> = ({ node, onCancel, onSave, suc
     name: node.entityName || '',
     description: node.description || '',
     systemFields: {
-      creator: node?.fields.find((field: EntityField) => field.isSystemField === 0 && field.fieldName === 'creator')
+      creator: node?.fields.find(
+        (field: EntityField) => field.isSystemField === FIELD_TYPE.SYSTEM && field.fieldName === 'creator'
+      )
         ? true
         : false,
-      updater: node?.fields.find((field: EntityField) => field.isSystemField === 0 && field.fieldName === 'updater')
+      updater: node?.fields.find(
+        (field: EntityField) => field.isSystemField === FIELD_TYPE.SYSTEM && field.fieldName === 'updater'
+      )
         ? true
         : false,
       created_time: node?.fields.find(
-        (field: EntityField) => field.isSystemField === 0 && field.fieldName === 'created_time'
+        (field: EntityField) => field.isSystemField === FIELD_TYPE.SYSTEM && field.fieldName === 'created_time'
       )
         ? true
         : false,
       updated_time: node?.fields.find(
-        (field: EntityField) => field.isSystemField === 0 && field.fieldName === 'updated_time'
+        (field: EntityField) => field.isSystemField === FIELD_TYPE.SYSTEM && field.fieldName === 'updated_time'
       )
         ? true
         : false,
-      owner_id: node?.fields.find((field: EntityField) => field.isSystemField === 0 && field.fieldName === 'owner_id')
+      owner_id: node?.fields.find(
+        (field: EntityField) => field.isSystemField === FIELD_TYPE.SYSTEM && field.fieldName === 'owner_id'
+      )
         ? true
         : false,
       owner_dept: node?.fields.find(
-        (field: EntityField) => field.isSystemField === 0 && field.fieldName === 'owner_dept'
+        (field: EntityField) => field.isSystemField === FIELD_TYPE.SYSTEM && field.fieldName === 'owner_dept'
       )
         ? true
         : false
     }
   };
 
-  const formItems = [
+  const formItems: FormItem[] = [
     { field: 'systemFields.creator', label: '记录创建人' },
     { field: 'systemFields.updater', label: '记录更新人' },
     { field: 'systemFields.created_time', label: '记录创建时间' },
@@ -74,14 +82,6 @@ const NodeEditForm: React.FC<NodeEditFormProps> = ({ node, onCancel, onSave, suc
     { field: 'systemFields.owner_id', label: '记录数据拥有者' },
     { field: 'systemFields.owner_dept', label: '记录数据拥有部门' }
   ];
-
-  const handleSwitchChange = (value: boolean, item: FormItem) => {
-    console.log('handleSwitchChange item', value, item);
-    // form.setFieldValue(item.field as keyof FormValues, value);
-    form.setFieldValue('systemFields', {
-      [item.field]: value
-    } as FormValues['systemFields']);
-  };
 
   const handleDelete = () => {
     console.log('handleDelete data', node.entityId);
@@ -93,13 +93,15 @@ const NodeEditForm: React.FC<NodeEditFormProps> = ({ node, onCancel, onSave, suc
   }, [node]);
 
   return (
-    <div className={styles['node-edit-form']}>
-      <h3>业务实体</h3>
+    <div className={styles.nodeEditForm}>
+      <div className={styles.header}>
+        <h3>业务实体</h3>
+      </div>
 
       <Form form={form} initialValues={initialValues} layout="vertical" style={{ width: '100%' }}>
         {/* 基本设置 */}
-        <div className={styles['form-section']}>
-          <h4>基本设置</h4>
+        <div className={styles.formSection}>
+          <h4 className={styles.formSectionTitle}>基本设置</h4>
 
           <Form.Item
             label="业务实体编码"
@@ -109,7 +111,7 @@ const NodeEditForm: React.FC<NodeEditFormProps> = ({ node, onCancel, onSave, suc
               { max: 40, message: '业务实体编码不能超过40个字符' }
             ]}
           >
-            <Input placeholder="请输入业务实体编码" maxLength={40} readOnly />
+            <Input placeholder="请输入业务实体编码" maxLength={40} disabled />
           </Form.Item>
 
           <Form.Item
@@ -129,24 +131,33 @@ const NodeEditForm: React.FC<NodeEditFormProps> = ({ node, onCancel, onSave, suc
         </div>
 
         {/* 系统字段 */}
-        <div className={styles['form-section']}>
-          <h4>系统字段</h4>
+        <div className={styles.formSection}>
+          <h4 className={styles.formSectionTitle}>系统字段</h4>
 
-          {formItems.length &&
-            formItems.map((item) => (
-              <Form.Item field={item.field} key={item.field}>
-                <div className={styles['switch-item']}>
-                  <span>{item.label}</span>
-                  <Switch
-                    onChange={(value: boolean) => handleSwitchChange(value, item)}
-                    checked={form.getFieldValue(item.field as keyof FormValues) as unknown as boolean}
-                  />
-                </div>
-              </Form.Item>
-            ))}
+          <Grid.Row gutter={16}>
+            {formItems.length &&
+              formItems.map((item) => (
+                <Grid.Col span={12} key={item.field}>
+                  <Form.Item field={item.field} key={item.field}>
+                    <div className={styles.checkboxItem}>
+                      {/* 后续改为可编辑单选框 */}
+                      {/* <Checkbox
+                        checked={form.getFieldValue(item.field as keyof FormValues) as unknown as boolean}
+                        disabled
+                        className={styles.systemFieldCheckbox}
+                      >
+                        {item.label}
+                      </Checkbox> */}
+                      <IconCheck className={styles.iconCheck} />
+                      {item.label}
+                    </div>
+                  </Form.Item>
+                </Grid.Col>
+              ))}
+          </Grid.Row>
         </div>
 
-        <Form.Item className={styles['form-actions']}>
+        <Form.Item className={styles.formActions}>
           {/* 更换为删除按钮 */}
           <Button type="text" status="danger" onClick={() => handleDelete()}>
             删除

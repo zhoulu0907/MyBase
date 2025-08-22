@@ -12,13 +12,6 @@ import styles from '../index.module.less';
 const { Paragraph } = Typography;
 const TabPane = Tabs.TabPane;
 
-interface LoginFormData {
-  username?: string;
-  password?: string;
-  mobile?: string;
-  smsCode?: string;
-}
-
 const Right: React.FC = () => {
   const navigate = useNavigate();
   const [form] = Form.useForm();
@@ -41,6 +34,12 @@ const Right: React.FC = () => {
   useState(() => {
     if (savedAccount) {
       form.setFieldValue('username', savedAccount);
+    }
+
+    // 如果已经登录了就自动跳转到首页
+    if (TokenManager.isTokenValid()) {
+      navigate('/onebase/platform-info');
+      return;
     }
   });
 
@@ -105,8 +104,10 @@ const Right: React.FC = () => {
         sliderCaptchaRef.current?.showCaptcha();
         return;
       }
-
-      const loginResp = await adminLogin(values);
+      const headers = {
+        'Tenant-Id': tenantId
+      };
+      const loginResp = await adminLogin(values, headers);
       // 显示成功消息并跳转
       if (loginResp.accessToken) {
         Message.success(t('auth.loginSuccess'));
@@ -117,6 +118,7 @@ const Right: React.FC = () => {
             accessToken: loginResp.accessToken,
             refreshToken: loginResp.refreshToken,
             expiresTime: loginResp.expiresTime,
+            tenantId: loginResp.tenantWebsite,
           },
           rememberMe
         );
@@ -141,8 +143,8 @@ const Right: React.FC = () => {
 
   // 验证码验证成功回调
   const handleCaptchaSuccess = async (token: string) => {
+    // 验证码通过后重新提交表单
     const values = await form.getFieldsValue();
-    console.log('values:', values);
     handleSubmit({username: values.username, password: values.password, captchaVerification: token});
   };
 
