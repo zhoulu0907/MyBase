@@ -1,7 +1,7 @@
 package com.cmsr.onebase.server.anyline;
 
-import com.cmsr.onebase.framework.common.anyline.web.BizException;
-import com.cmsr.onebase.framework.common.anyline.web.StatusCode;
+import com.cmsr.onebase.framework.common.exception.DatabaseAccessErrorCodes;
+import com.cmsr.onebase.framework.common.exception.DatabaseAccessException;
 import com.cmsr.onebase.framework.data.base.BaseDO;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
@@ -294,7 +294,7 @@ public class AnyLineDBInfoListener implements DMListener {
         }
         // 这里config可能为空，强制异常提前发现问题。
         if (configs == null) {
-            throw new BizException(StatusCode.UPDATE_WHERE_IS_NULL);
+            throw new DatabaseAccessException(DatabaseAccessErrorCodes.UPDATE_WHERE_IS_NULL);
         }
         // 加入软删判断 (opt: 框架这里config可能为空)
         configs.and(Compare.EQUAL, BaseDO.DELETED, 0);
@@ -324,7 +324,7 @@ public class AnyLineDBInfoListener implements DMListener {
         }
         // 这里config可能为空，强制异常提前发现问题。(opt: 框架这里config可能为空)
         if (configs == null) {
-            throw new BizException(StatusCode.UPDATE_WHERE_IS_NULL);
+            throw new DatabaseAccessException(DatabaseAccessErrorCodes.UPDATE_WHERE_IS_NULL);
         }
         // 加入软删判断
         configs.and(Compare.EQUAL, BaseDO.DELETED, 0);

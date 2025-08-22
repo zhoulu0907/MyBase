@@ -1,7 +1,7 @@
 package com.cmsr.onebase.framework.aynline;
 
-import com.cmsr.onebase.framework.common.anyline.web.BizException;
-import com.cmsr.onebase.framework.common.anyline.web.StatusCode;
+import com.cmsr.onebase.framework.common.exception.DatabaseAccessErrorCodes;
+import com.cmsr.onebase.framework.common.exception.DatabaseAccessException;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.data.base.BaseDO;
 import jakarta.annotation.Resource;
@@ -48,8 +48,6 @@ public class DataRepository<T extends BaseDO> {
 
     private Class<T> defaultClazz = null;
 
-    public static boolean isDebug = true;
-
     public DataRepository(Class<T> defaultClazz) {
         this.defaultClazz = defaultClazz;
     }
@@ -72,17 +70,17 @@ public class DataRepository<T extends BaseDO> {
      *
      * @param entity 要保存的实体
      * @return 保存后的实体
-     * @throws BizException 插入失败时抛出
+     * @throws DatabaseAccessException 插入失败时抛出
      */
     public T insert(T entity) {
         try {
             long result = anylineService.insert(entity);
             if (result == 0) {
-                throw new BizException(StatusCode.DB_INSERT_ERROR);
+                throw new DatabaseAccessException(DatabaseAccessErrorCodes.DB_INSERT_ERROR);
             }
         } catch (Exception e) {
-            log.error("update error, class={}, entity={}", defaultClazz, entity, e);
-            throw new BizException(StatusCode.DB_UPDATE_ERROR);
+            log.error("insert error, class={}, entity={}", defaultClazz, entity, e);
+            throw new DatabaseAccessException(DatabaseAccessErrorCodes.DB_INSERT_ERROR, e);
         }
         return entity;
     }
@@ -92,9 +90,10 @@ public class DataRepository<T extends BaseDO> {
      *
      * @param entities 实体列表
      * @return 保存后的实体列表
-     * @throws BizException 插入失败时抛出
+     * @throws DatabaseAccessException 插入失败时抛出
      */
     public List<T> insertBatch(List<T> entities) {
+        //TODO 批量插入
         for (T entity : entities) {
             insert(entity);
         }
@@ -109,15 +108,15 @@ public class DataRepository<T extends BaseDO> {
      *
      * @param entity 要保存的实体
      * @return 保存后的实体
-     * @throws BizException 插入失败时抛出
+     * @throws DatabaseAccessException 插入失败时抛出
      */
     public T upsert(T entity) {
         try {
             long result = anylineService.upsert(entity);
-            // log.info("upsert  ---> class={}, effect rows = {}", entity.getClass().getSimpleName(), result);
+            log.debug("upsert  ---> class={}, effect rows = {}", entity.getClass().getSimpleName(), result);
         } catch (Exception e) {
-            log.error("update error, class={}, entity={}", defaultClazz, entity, e);
-            throw new BizException(StatusCode.DB_UPDATE_ERROR);
+            log.error("upsert error, class={}, entity={}", defaultClazz, entity, e);
+            throw new DatabaseAccessException(DatabaseAccessErrorCodes.DB_UPDATE_ERROR, e);
         }
         return entity;
     }
@@ -127,7 +126,7 @@ public class DataRepository<T extends BaseDO> {
      *
      * @param entities 实体列表
      * @return 保存后的实体列表
-     * @throws BizException 插入失败时抛出
+     * @throws DatabaseAccessException 插入失败时抛出
      */
     public List<T> upsertBatch(List<T> entities) {
         if (entities == null || entities.isEmpty()) {
@@ -148,23 +147,21 @@ public class DataRepository<T extends BaseDO> {
      *
      * @param entity 要保存的实体
      * @return 影响行数
-     * @throws BizException 当实体ID为空或更新失败时抛出
+     * @throws DatabaseAccessException 当实体ID为空或更新失败时抛出
      */
     public long update(T entity) {
         if (entity == null || entity.getId() == null || entity.getId() == 0) {
-            throw new BizException(StatusCode.DB_ID_NULL);
+            throw new DatabaseAccessException(DatabaseAccessErrorCodes.DB_ID_NULL);
         }
         try {
             ConfigStore configs = new DefaultConfigStore();
             configs.eq(BaseDO.ID, entity.getId());
             Long result = anylineService.update(entity, configs);
-            if (isDebug) {
-                log.info("update  ---> class={}, effect rows = {}", entity.getClass().getSimpleName(), result);
-            }
+            log.debug("update  ---> class={}, effect rows = {}", entity.getClass().getSimpleName(), result);
             return result;
         } catch (Exception e) {
             log.error("update error, class={}, entity={}", defaultClazz, entity, e);
-            throw new BizException(StatusCode.DB_UPDATE_ERROR);
+            throw new DatabaseAccessException(DatabaseAccessErrorCodes.DB_UPDATE_ERROR, e);
         }
     }
 
@@ -176,12 +173,12 @@ public class DataRepository<T extends BaseDO> {
      *
      * @param entity 要保存的实体
      * @return 影响行数
-     * @throws BizException 更新失败时抛出
+     * @throws DatabaseAccessException 更新失败时抛出
      */
     public long updateStrict(T entity) {
         long result = update(entity);
         if (result == 0) {
-            throw new BizException(StatusCode.DB_UPDATE_ERROR);
+            throw new DatabaseAccessException(DatabaseAccessErrorCodes.DB_UPDATE_ERROR);
         }
         return result;
     }
@@ -191,18 +188,16 @@ public class DataRepository<T extends BaseDO> {
      *
      * @param configs 更新条件
      * @return 更新数量
-     * @throws BizException 当实体ID为空或更新失败时抛出
+     * @throws DatabaseAccessException 当实体ID为空或更新失败时抛出
      */
     public long updateByConfig(DataRow dataRow, ConfigStore configs) {
         try {
             long result = anylineService.update(1000, getTableName(defaultClazz), dataRow, configs);
-            if (isDebug) {
-                log.info("updateByConfig  ---> class={}, effect rows = {}", defaultClazz, result);
-            }
+            log.debug("updateByConfig class={}, effect rows = {}", defaultClazz, result);
             return result;
         } catch (Exception e) {
-            log.error("updateByConfig error, class={}, config={}", defaultClazz, configs, e);
-            throw new BizException(StatusCode.DB_UPDATE_ERROR);
+            log.error("updateByConfig error, class={}, configs={}", defaultClazz, configs, e);
+            throw new DatabaseAccessException(DatabaseAccessErrorCodes.DB_UPDATE_ERROR, e);
         }
     }
 
@@ -213,12 +208,12 @@ public class DataRepository<T extends BaseDO> {
      *
      * @param id 实体ID
      * @return 实体
-     * @throws BizException 查询失败时抛出
+     * @throws DatabaseAccessException 查询失败时抛出
      */
     public T findById(Long id) {
         try {
             if (id == null) {
-                return null;
+                throw new DatabaseAccessException(DatabaseAccessErrorCodes.DB_ID_NULL);
             }
             ConfigStore configs = new DefaultConfigStore();
             configs.and(Compare.EQUAL, BaseDO.ID, id);
@@ -226,7 +221,7 @@ public class DataRepository<T extends BaseDO> {
             return anylineService.select(tableName, defaultClazz, configs);
         } catch (Exception e) {
             log.error("findById error, class={}, id={}", defaultClazz, id, e);
-            throw new BizException(StatusCode.DB_SELECT_ERROR);
+            throw new DatabaseAccessException(DatabaseAccessErrorCodes.DB_SELECT_ERROR, e);
         }
     }
 
@@ -247,14 +242,25 @@ public class DataRepository<T extends BaseDO> {
      * @return 是否存在
      */
     public boolean existsById(Long id) {
-        return findById(id) != null;
+        try {
+            if (id == null) {
+                throw new DatabaseAccessException(DatabaseAccessErrorCodes.DB_ID_NULL);
+            }
+            ConfigStore configs = new DefaultConfigStore();
+            configs.and(Compare.EQUAL, BaseDO.ID, id);
+            String tableName = getTableName(defaultClazz);
+            return anylineService.count(tableName, configs) > 0;
+        } catch (Exception e) {
+            log.error("existsById error, class={}, id={}", defaultClazz, id, e);
+            throw new DatabaseAccessException(DatabaseAccessErrorCodes.DB_SELECT_ERROR, e);
+        }
     }
 
     /**
      * 统计实体数量
      *
      * @return 实体数量
-     * @throws BizException 查询失败时抛出
+     * @throws DatabaseAccessException 查询失败时抛出
      */
     @Deprecated
     public long count() {
@@ -263,8 +269,8 @@ public class DataRepository<T extends BaseDO> {
             String tableName = getTableName(defaultClazz);
             return anylineService.count(tableName, configs);
         } catch (Exception e) {
-            log.error("count error. ---> class={}", defaultClazz.getSimpleName(), e);
-            throw new BizException(StatusCode.DB_SELECT_ERROR);
+            log.error("count error, class={}", defaultClazz.getSimpleName(), e);
+            throw new DatabaseAccessException(DatabaseAccessErrorCodes.DB_SELECT_ERROR, e);
         }
     }
 
@@ -273,7 +279,7 @@ public class DataRepository<T extends BaseDO> {
      *
      * @param configs 查询条件
      * @return 实体数量
-     * @throws BizException 查询失败时抛出
+     * @throws DatabaseAccessException 查询失败时抛出
      */
     public long countByConfig(ConfigStore configs) {
         try {
@@ -281,7 +287,7 @@ public class DataRepository<T extends BaseDO> {
             return anylineService.count(tableName, configs);
         } catch (Exception e) {
             log.error("countByConfig error. ---> class={}", defaultClazz.getSimpleName(), e);
-            throw new BizException(StatusCode.DB_SELECT_ERROR);
+            throw new DatabaseAccessException(DatabaseAccessErrorCodes.DB_SELECT_ERROR, e);
         }
     }
 
@@ -291,7 +297,7 @@ public class DataRepository<T extends BaseDO> {
      * @param pageIndex 页码（从1开始）
      * @param pageSize  页大小
      * @return 分页结果
-     * @throws BizException 查询失败时抛出
+     * @throws DatabaseAccessException 查询失败时抛出
      */
     @Deprecated
     public PageResult<T> findAll(int pageIndex, int pageSize) {
@@ -311,7 +317,7 @@ public class DataRepository<T extends BaseDO> {
         } catch (Exception e) {
             log.error("findAll error, class={}, pageIndex={}, pageSize={}",
                     defaultClazz.getSimpleName(), pageIndex, pageSize, e);
-            throw new BizException(StatusCode.DB_SELECT_ERROR);
+            throw new DatabaseAccessException(DatabaseAccessErrorCodes.DB_SELECT_ERROR, e);
         }
     }
 
@@ -319,7 +325,7 @@ public class DataRepository<T extends BaseDO> {
      * 查找所有实体
      *
      * @return 实体列表
-     * @throws BizException 查询失败时抛出
+     * @throws DatabaseAccessException 查询失败时抛出
      */
     @Deprecated
     public List<T> findAll() {
@@ -327,13 +333,11 @@ public class DataRepository<T extends BaseDO> {
             ConfigStore configs = new DefaultConfigStore();
             String tableName = getTableName(defaultClazz);
             DataSet dataSet = anylineService.querys(tableName, configs);
-            if (isDebug) {
-                log.info("findAll --->  dataSet.size = {}", dataSet.size());
-            }
+            log.debug("findAll --->  dataSet.size = {}", dataSet.size());
             return dataSet.entity(defaultClazz);
         } catch (Exception e) {
             log.error("findAll error, class={}", defaultClazz, e);
-            throw new BizException(StatusCode.DB_SELECT_ERROR);
+            throw new DatabaseAccessException(DatabaseAccessErrorCodes.DB_SELECT_ERROR, e);
         }
     }
 
@@ -342,7 +346,7 @@ public class DataRepository<T extends BaseDO> {
      *
      * @param configs 查询条件
      * @return 实体列表
-     * @throws BizException 查询失败时抛出
+     * @throws DatabaseAccessException 查询失败时抛出
      */
     public List<T> findAllByConfig(ConfigStore configs) {
         try {
@@ -351,7 +355,7 @@ public class DataRepository<T extends BaseDO> {
             return dataSet.entity(defaultClazz);
         } catch (Exception e) {
             log.error("findAllByConfig error, class={}, configs={}", defaultClazz.getSimpleName(), configs, e);
-            throw new BizException(StatusCode.DB_SELECT_ERROR);
+            throw new DatabaseAccessException(DatabaseAccessErrorCodes.DB_SELECT_ERROR, e);
         }
     }
 
@@ -360,23 +364,21 @@ public class DataRepository<T extends BaseDO> {
      *
      * @param ids ID列表
      * @return 实体列表
-     * @throws BizException 查询失败时抛出
+     * @throws DatabaseAccessException 查询失败时抛出
      */
     public List<T> findAllByIds(Collection<Long> ids) {
         if (ids == null || ids.isEmpty()) {
             return Collections.emptyList();
         }
         try {
-
             ConfigStore configs = new DefaultConfigStore();
             configs.in(BaseDO.ID, ids);
-
             String tableName = getTableName(defaultClazz);
             DataSet dataSet = anylineService.querys(tableName, configs);
             return dataSet.entity(defaultClazz);
         } catch (Exception e) {
-            log.error("findAllByIds error, ---> class={}, ids={}", defaultClazz.getSimpleName(), ids, e);
-            throw new BizException(StatusCode.DB_SELECT_ERROR);
+            log.error("findAllByIds error, class={}, ids={}", defaultClazz.getSimpleName(), ids, e);
+            throw new DatabaseAccessException(DatabaseAccessErrorCodes.DB_SELECT_ERROR, e);
         }
     }
 
@@ -385,7 +387,7 @@ public class DataRepository<T extends BaseDO> {
      *
      * @param configs 查询条件
      * @return 实体对象，如果不存在返回null
-     * @throws BizException 查询失败时抛出
+     * @throws DatabaseAccessException 查询失败时抛出
      */
     public T findOne(ConfigStore configs) {
         try {
@@ -393,7 +395,7 @@ public class DataRepository<T extends BaseDO> {
             return anylineService.select(tableName, defaultClazz, configs);
         } catch (Exception e) {
             log.error("findOne error, class={}", defaultClazz.getSimpleName(), e);
-            throw new BizException(StatusCode.DB_SELECT_ERROR);
+            throw new DatabaseAccessException(DatabaseAccessErrorCodes.DB_SELECT_ERROR, e);
         }
     }
 
@@ -415,11 +417,10 @@ public class DataRepository<T extends BaseDO> {
      * @param pageIndex 页码（从1开始）
      * @param pageSize  页大小
      * @return 分页结果
-     * @throws BizException 查询失败时抛出
+     * @throws DatabaseAccessException 查询失败时抛出
      */
     public PageResult<T> findPageWithConditions(ConfigStore configs, int pageIndex, int pageSize) {
         try {
-
             PageNavi page = new DefaultPageNavi(pageIndex, pageSize);
             configs.setPageNavi(page);
 
@@ -433,7 +434,7 @@ public class DataRepository<T extends BaseDO> {
         } catch (Exception e) {
             log.error("findPageWithConditions error, class={}, pageIndex={}, pageSize={}",
                     defaultClazz.getSimpleName(), pageIndex, pageSize, e);
-            throw new BizException(StatusCode.DB_SELECT_ERROR);
+            throw new DatabaseAccessException(DatabaseAccessErrorCodes.DB_SELECT_ERROR, e);
         }
     }
 
@@ -445,20 +446,18 @@ public class DataRepository<T extends BaseDO> {
      *
      * @param configs 删除条件
      * @return 删除的记录数
-     * @throws BizException 删除失败时抛出
+     * @throws DatabaseAccessException 删除失败时抛出
      */
     public long deleteByConfig(ConfigStore configs) {
         try {
             DataRow row = new DataRow();
             row.put(BaseDO.DELETED, System.currentTimeMillis());  // 设置逻辑删除标记
             long result = anylineService.update(getTableName(defaultClazz), row, configs);
-            if (isDebug) {
-                log.info("deleteByConfig  ---> class={}, effect rows = {}", defaultClazz, result);
-            }
+            log.debug("deleteByConfig  ---> class={}, effect rows = {}", defaultClazz, result);
             return result;
         } catch (Exception e) {
-            log.error("deleteByConfig error, ---> class={}, configs={}", defaultClazz.getSimpleName(), configs, e);
-            throw new BizException(StatusCode.DB_DELETE_ERROR);
+            log.error("deleteByConfig error, class={}, configs={}", defaultClazz.getSimpleName(), configs, e);
+            throw new DatabaseAccessException(DatabaseAccessErrorCodes.DB_DELETE_ERROR, e);
         }
     }
 
@@ -467,25 +466,23 @@ public class DataRepository<T extends BaseDO> {
      *
      * @param id 实体ID
      * @return 删除的记录数
-     * @throws BizException 删除失败时抛出
+     * @throws DatabaseAccessException 删除失败时抛出
      */
     public long deleteById(Long id) {
         try {
             if (id == null || id == 0) {
-                return 0;
+                throw new DatabaseAccessException(DatabaseAccessErrorCodes.DB_ID_NULL);
             }
             ConfigStore configs = new DefaultConfigStore();
             configs.and(Compare.EQUAL, BaseDO.ID, id);
             DataRow row = new DataRow();
             row.put(BaseDO.DELETED, System.currentTimeMillis());  // 设置逻辑删除标记
             long result = anylineService.update(getTableName(defaultClazz), row, configs);
-            if (isDebug) {
-                log.info("deleteById  ---> class={}, effect rows = {}, id = {}", defaultClazz, result, id);
-            }
+            log.debug("deleteById  ---> class={}, effect rows = {}, id = {}", defaultClazz, result, id);
             return result;
         } catch (Exception e) {
             log.error("deleteById error, class={}, id={}", defaultClazz.getSimpleName(), id, e);
-            throw new BizException(StatusCode.DB_DELETE_ERROR);
+            throw new DatabaseAccessException(DatabaseAccessErrorCodes.DB_DELETE_ERROR, e);
         }
     }
 
@@ -518,7 +515,7 @@ public class DataRepository<T extends BaseDO> {
      *
      * @param ids ID列表
      * @return 删除的记录数
-     * @throws BizException 删除失败时抛出
+     * @throws DatabaseAccessException 删除失败时抛出
      */
     @Deprecated
     public long deleteAllById(Collection<Long> ids) {
@@ -531,20 +528,18 @@ public class DataRepository<T extends BaseDO> {
             DataRow row = new DataRow();
             row.put(BaseDO.DELETED, System.currentTimeMillis());  // 设置逻辑删除标记
             long result = anylineService.update(getTableName(defaultClazz), row, configs);
-            if (isDebug) {
-                log.info("deleteAllById  ---> class={}, effect rows={}, ids={}", defaultClazz, result, ids);
-            }
+            log.debug("deleteAllById  ---> class={}, effect rows={}, ids={}", defaultClazz, result, ids);
             return result;
         } catch (Exception e) {
             log.error("deleteAllById error, class={}, ids={}", defaultClazz.getSimpleName(), ids, e);
-            throw new BizException(StatusCode.DB_DELETE_ERROR);
+            throw new DatabaseAccessException(DatabaseAccessErrorCodes.DB_DELETE_ERROR, e);
         }
     }
 
     /**
      * 删除所有实体（软删除）
      *
-     * @throws BizException 删除失败时抛出
+     * @throws DatabaseAccessException 删除失败时抛出
      */
     public void deleteAll() {
         try {
@@ -552,12 +547,10 @@ public class DataRepository<T extends BaseDO> {
             DataRow row = new DataRow();
             row.put(BaseDO.DELETED, System.currentTimeMillis());  // 设置逻辑删除标记
             long result = anylineService.update(getTableName(defaultClazz), row, configs);
-            if (isDebug) {
-                log.info("deleteAll  ---> class={}, effect rows={}", defaultClazz, result);
-            }
+            log.debug("deleteAll  ---> class={}, effect rows={}", defaultClazz, result);
         } catch (Exception e) {
             log.error("deleteAll error, class={}", defaultClazz.getSimpleName(), e);
-            throw new BizException(StatusCode.DB_DELETE_ERROR);
+            throw new DatabaseAccessException(DatabaseAccessErrorCodes.DB_DELETE_ERROR, e);
         }
     }
 

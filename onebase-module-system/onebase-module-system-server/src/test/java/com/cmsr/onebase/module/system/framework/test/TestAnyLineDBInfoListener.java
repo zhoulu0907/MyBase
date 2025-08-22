@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.system.framework.test;
 
-import com.cmsr.onebase.framework.common.anyline.web.BizException;
-import com.cmsr.onebase.framework.common.anyline.web.StatusCode;
+import com.cmsr.onebase.framework.common.exception.DatabaseAccessErrorCodes;
+import com.cmsr.onebase.framework.common.exception.DatabaseAccessException;
 import com.cmsr.onebase.framework.data.base.BaseDO;
 import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
 import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
@@ -211,7 +211,7 @@ public class TestAnyLineDBInfoListener implements DMListener {
                                 ConfigStore configs, List<String> columns) {
         // 这里config可能为空，强制异常提前发现问题。
         if (configs == null) {
-            throw new BizException(StatusCode.UPDATE_WHERE_IS_NULL);
+            throw new DatabaseAccessException(DatabaseAccessErrorCodes.UPDATE_WHERE_IS_NULL);
         }
         // 加入软删判断 (opt: 框架这里config可能为空)
         configs.and(Compare.EQUAL, BaseDO.DELETED, false);
@@ -236,7 +236,7 @@ public class TestAnyLineDBInfoListener implements DMListener {
                                 ConfigStore configs) {
         // 这里config可能为空，强制异常提前发现问题。
         if (configs == null) {
-            throw new BizException(StatusCode.UPDATE_WHERE_IS_NULL);
+            throw new DatabaseAccessException(DatabaseAccessErrorCodes.UPDATE_WHERE_IS_NULL);
         }
         // 加入软删判断 (opt: 框架这里config可能为空)
         configs.and(Compare.EQUAL, BaseDO.DELETED, false);
