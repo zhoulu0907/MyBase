@@ -36,7 +36,6 @@ const Right: React.FC = () => {
   const [loginType, setLoginType] = useState<'account' | 'mobile'>('account');
   const [loading, setLoading] = useState(false);
   const [smsCountdown, setSmsCountdown] = useState(0);
-  const [captchaToken, setCaptchaToken] = useState<string>('');
 
   // 组件初始化时设置保存的账号
   useState(() => {
@@ -95,27 +94,18 @@ const Right: React.FC = () => {
     }
   };
 
-  // 表单提交处理
-  const handleSubmit = async (values: LoginRequest) => {
+  const handleAccountLogin = async (values: LoginRequest) => {
     setLoading(true);
 
     try {
-      const captchaVerification = values.captchaVerification || captchaToken;
-      console.log('!captchaToken', captchaToken);
+      const captchaVerification = values.captchaVerification;
       // 如果没有验证码token，则先进行验证码验证
       if (!captchaVerification) {
-        console.log('false');
         // 显示滑块验证码
         sliderCaptchaRef.current?.showCaptcha();
         return;
       }
 
-      // // 添加验证码token到登录请求
-      // const loginData: LoginRequest = {
-      //   ...values,
-      //   captchaVerification: captchaToken
-      // };
-      console.log('loginData:', values);
       const loginResp = await adminLogin(values);
       // 显示成功消息并跳转
       if (loginResp.accessToken) {
@@ -142,11 +132,15 @@ const Right: React.FC = () => {
     }
   };
 
+  // 表单提交处理
+  const handleSubmit = async (_values: LoginRequest) => {
+    handleAccountLogin(_values);
+
+
+  };
+
   // 验证码验证成功回调
   const handleCaptchaSuccess = async (token: string) => {
-    setCaptchaToken(token);
-    // 验证码通过后重新提交表单
-    // form.submit();
     const values = await form.getFieldsValue();
     console.log('values:', values);
     handleSubmit({username: values.username, password: values.password, captchaVerification: token});
@@ -175,7 +169,7 @@ const Right: React.FC = () => {
       <div className={styles.loginFormContainer}>
         <Tabs activeTab={loginType} onChange={(key) => setLoginType(key as 'account' | 'mobile')} type="text">
           <TabPane key="account" title={t('auth.accountLogin')}>
-            <Form form={form} layout="vertical" onSubmit={handleSubmit} autoComplete="off" className={styles.loginForm}>
+            <Form form={form} layout="vertical" onSubmit={handleLoginClick} autoComplete="off" className={styles.loginForm}>
               <Form.Item
                 field="username"
                 initialValue=""
@@ -222,7 +216,7 @@ const Right: React.FC = () => {
           </TabPane>
 
           <TabPane key="mobile" title={t('auth.smsLogin')}>
-            <Form form={form} layout="vertical" onSubmit={handleSubmit} autoComplete="off" className={styles.loginForm}>
+            <Form form={form} layout="vertical" onSubmit={handleLoginClick} autoComplete="off" className={styles.loginForm}>
               <Form.Item
                 field="mobile"
                 rules={[

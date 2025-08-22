@@ -1,0 +1,20 @@
+.baseNode {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.baseNode:hover {
+  -webkit-filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.3)) drop-shadow(0 4px 14px rgba(0, 0, 0, 0.1));
+  filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.3)) drop-shadow(0 4px 14px rgba(0, 0, 0, 0.1));
+}
+
+.baseNode.activated,
+.baseNode.selected {
+  outline: 2px solid var(--light-usage-primary-color-primary, #4d53e8);
+  -webkit-filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.3)) drop-shadow(0 4px 14px rgba(0, 0, 0, 0.1));
+  filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.3)) drop-shadow(0 4px 14px rgba(0, 0, 0, 0.1));
+}

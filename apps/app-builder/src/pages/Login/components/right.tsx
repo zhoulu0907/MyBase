@@ -1,15 +1,9 @@
 import LogoSVG from '@/assets/images/ob_logo.svg';
 import { Button, Checkbox, Form, Input, Message, Space, Tabs, Typography } from '@arco-design/web-react';
-import { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-
-/**
- * // @ts-expect-error: no types for sm-crypto
-import { sm2 } from 'sm-crypto';
- */
-
 import { SliderCaptcha, TokenManager, type SliderCaptchaRef } from '@onebase/common';
 import { checkCaptchaApi, getCaptchaApi, login, type LoginRequest, type LoginResponse } from '@onebase/platform-center';
+import { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useI18n } from '../../../hooks/useI18n';
 import { useRememberMe } from '../../../hooks/useRememberMe';
 import styles from '../index.module.less';
@@ -34,7 +28,6 @@ const Right: React.FC = () => {
   const [loginType, setLoginType] = useState<'account' | 'mobile'>('account');
   const [loading, setLoading] = useState(false);
   const [smsCountdown, setSmsCountdown] = useState(0);
-  const [captchaToken, setCaptchaToken] = useState<string>('');
 
   // 组件初始化时设置保存的账号
   useEffect(() => {
@@ -99,17 +92,14 @@ const Right: React.FC = () => {
     }
   };
 
-  //   TODO(mickey): 调通后解除注释
   // 账号密码登录
   const handleAccountLogin = async (values: LoginRequest) => {
     setLoading(true);
 
     try {
-      const captchaVerification = values.captchaVerification || captchaToken;
-      console.log('!captchaToken', captchaToken);
+      const captchaVerification = values.captchaVerification;
       // 如果没有验证码token，则先进行验证码验证
       if (!captchaVerification) {
-        console.log('false');
         // 显示滑块验证码
         sliderCaptchaRef.current?.showCaptcha();
         return;
@@ -166,9 +156,6 @@ const Right: React.FC = () => {
 
   // 验证码验证成功回调
   const handleCaptchaSuccess = async (token: string) => {
-    setCaptchaToken(token);
-    // 验证码通过后重新提交表单
-    // form.submit();
     const values = await form.getFieldsValue();
     console.log('values:', values);
     handleSubmit({ username: values.username, password: values.password, captchaVerification: token });
@@ -197,7 +184,13 @@ const Right: React.FC = () => {
       <div className={styles.loginFormContainer}>
         <Tabs activeTab={loginType} onChange={(key) => setLoginType(key as 'account' | 'mobile')} type="text">
           <TabPane key="account" title={t('auth.accountLogin')}>
-            <Form form={form} layout="vertical" onSubmit={handleSubmit} autoComplete="off" className={styles.loginForm}>
+            <Form
+              form={form}
+              layout="vertical"
+              onSubmit={handleLoginClick}
+              autoComplete="off"
+              className={styles.loginForm}
+            >
               <Form.Item
                 field="username"
                 initialValue=""
@@ -247,7 +240,13 @@ const Right: React.FC = () => {
           </TabPane>
 
           <TabPane key="mobile" title={t('auth.smsLogin')}>
-            <Form form={form} layout="vertical" onSubmit={handleSubmit} autoComplete="off" className={styles.loginForm}>
+            <Form
+              form={form}
+              layout="vertical"
+              onSubmit={handleLoginClick}
+              autoComplete="off"
+              className={styles.loginForm}
+            >
               <Form.Item
                 field="mobile"
                 rules={[
@@ -292,7 +291,7 @@ const Right: React.FC = () => {
               <Form.Item>
                 <Button
                   type="primary"
-                  onClick={handleLoginClick}
+                  htmlType="submit"
                   long
                   loading={loading}
                   size="large"
