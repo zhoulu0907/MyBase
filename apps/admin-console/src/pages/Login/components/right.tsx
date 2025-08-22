@@ -43,6 +43,12 @@ const Right: React.FC = () => {
     if (savedAccount) {
       form.setFieldValue('username', savedAccount);
     }
+
+    // 如果已经登录了就自动跳转到首页
+    if (TokenManager.isTokenValid()) {
+      navigate('/onebase/platform-info');
+      return;
+    }
   });
 
   // 处理记住我状态变化
@@ -108,9 +114,12 @@ const Right: React.FC = () => {
         sliderCaptchaRef.current?.showCaptcha();
         return;
       }
-
+      const headers = {
+        'Tenant-Id': tenantId
+      };
       console.log('loginData:', values);
-      const loginResp = await adminLogin(values);
+      console.log('loginData headers:', headers);
+      const loginResp = await adminLogin(values, headers);
       // 显示成功消息并跳转
       if (loginResp.accessToken) {
         Message.success(t('auth.loginSuccess'));
@@ -121,6 +130,7 @@ const Right: React.FC = () => {
             accessToken: loginResp.accessToken,
             refreshToken: loginResp.refreshToken,
             expiresTime: loginResp.expiresTime,
+            tenantId: loginResp.tenantWebsite,
           },
           rememberMe
         );

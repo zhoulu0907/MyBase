@@ -10,8 +10,8 @@ export const getPermissionInfo = () => {
   return systemService.get('/auth/get-permission-info');
 };
 
-export const adminLogin = (req: LoginRequest) => {
-  return systemService.post('/auth/admin-login', req);
+export const adminLogin = (req: LoginRequest, headers: Headers) => {
+  return systemService.post('/auth/admin-login', req, { headers });
 };
 
 export const logout = () => {
