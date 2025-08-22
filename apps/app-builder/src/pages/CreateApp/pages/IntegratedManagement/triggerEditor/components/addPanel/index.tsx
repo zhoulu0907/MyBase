@@ -1,5 +1,6 @@
 import { WorkflowDragService, useService } from '@flowgram.ai/free-layout-editor';
 import React from 'react';
+import { WorkflowNodeType } from '../../node/constants';
 import styles from './index.module.less';
 
 /**
@@ -18,6 +19,10 @@ const NodeAddPanel: React.FC = () => {
     {
       type: 'loop',
       name: '循环节点'
+    },
+    {
+      type: WorkflowNodeType.Start,
+      name: '开始节点'
     }
   ];
 
@@ -32,9 +37,9 @@ const NodeAddPanel: React.FC = () => {
             style={{ marginBottom: 8, cursor: 'pointer' }}
             onMouseDown={(e) =>
               startDragSerivce.startDragCard(node.type, e, {
+                type: node.type,
                 data: {
-                  title: `New ${node.name}`,
-                  content: 'xxxx'
+                  title: `${node.name}`
                 }
               })
             }

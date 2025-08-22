@@ -1,46 +1,33 @@
-import {
-  DisplayOutputs,
-  JsonSchemaEditor,
-  provideJsonSchemaOutputs,
-  syncVariableTitle
-} from '@flowgram.ai/form-materials';
-import {
-  Field,
-  type FieldRenderProps,
-  type FormMeta,
-  type FormRenderProps,
-  ValidateTrigger
-} from '@flowgram.ai/free-layout-editor';
-
-// import { FormContent, FormHeader } from '../../form-components';
+import { Field, ValidateTrigger, type FormMeta, type FormRenderProps } from '@flowgram.ai/free-layout-editor';
 import { useIsSidebar } from '../../hooks';
-import { type FlowNodeJSON, type JsonSchema } from '../../typings';
+import type { FlowNodeJSON } from '../../typings';
+import styles from '../index.module.less';
 
 export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON>) => {
   const isSidebar = useIsSidebar();
+
   if (isSidebar) {
     return (
       <>
-        {/* <FormHeader />
-        <FormContent> */}
-        <Field
-          name="outputs"
-          render={({ field: { value, onChange } }: FieldRenderProps<JsonSchema>) => (
-            <>
-              <JsonSchemaEditor value={value} onChange={(value) => onChange(value as JsonSchema)} />
-            </>
-          )}
-        />
-        {/* </FormContent> */}
+        <div className={styles.startNodeContainer}>
+          <Field<string> name="title">
+            {({ field }) => <div className={styles.startNodeTitle}>{field.value}</div>}
+          </Field>
+        </div>
       </>
     );
   }
+
   return (
     <>
-      {/* <FormHeader />
-      <FormContent> */}
-      <DisplayOutputs displayFromScope />
-      {/* </FormContent> */}
+      <div
+        className={styles.startNodeContainer}
+        onClick={() => {
+          console.log(form);
+        }}
+      >
+        <Field<string> name="title">{({ field }) => <div className={styles.startNodeTitle}>{field.value}</div>}</Field>
+      </div>
     </>
   );
 };
@@ -50,9 +37,9 @@ export const formMeta: FormMeta<FlowNodeJSON> = {
   validateTrigger: ValidateTrigger.onChange,
   validate: {
     title: ({ value }: { value: string }) => (value ? undefined : 'Title is required')
-  },
-  effect: {
-    title: syncVariableTitle,
-    outputs: provideJsonSchemaOutputs
   }
+  //   effect: {
+  //     title: syncVariableTitle,
+  //     outputs: provideJsonSchemaOutputs
+  //   }
 };

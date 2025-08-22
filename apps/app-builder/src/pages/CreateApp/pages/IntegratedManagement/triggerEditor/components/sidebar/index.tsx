@@ -6,7 +6,8 @@ import {
   type FlowNodeMeta
 } from '@flowgram.ai/free-layout-editor';
 import { startTransition, useCallback, useContext, useEffect, useMemo } from 'react';
-import { IsSidebarContext, SidebarContext } from './sidebar-context';
+import { IsSidebarContext, SidebarContext } from '../../context';
+import { SidebarNodeRenderer } from './sidebar-node-renderer';
 
 export const SidebarRenderer = () => {
   const { nodeId, setNodeId } = useContext(SidebarContext);
@@ -76,8 +77,7 @@ export const SidebarRenderer = () => {
   const content =
     node && visible ? (
       <PlaygroundEntityContext.Provider key={node.id} value={node}>
-        {/* <SidebarNodeRenderer node={node} /> */}
-        12312332
+        <SidebarNodeRenderer node={node} />
       </PlaygroundEntityContext.Provider>
     ) : null;
 
@@ -87,13 +87,11 @@ export const SidebarRenderer = () => {
       visible={visible}
       onCancel={handleClose}
       closable={false}
-      width={500}
+      width={400}
       headerStyle={{
         display: 'none'
       }}
-      bodyStyle={{
-        padding: 0
-      }}
+      footer={null}
       style={{
         background: 'none',
         boxShadow: 'none'
