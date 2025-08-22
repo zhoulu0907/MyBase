@@ -1,96 +1,208 @@
-import { useState, type FC } from 'react';
+import { useEffect, useState, type FC } from 'react';
 import { Radio, Checkbox, Divider, Grid, Form } from '@arco-design/web-react';
-import { IconCalendar, IconAttachment, IconUser, IconLocation } from '@arco-design/web-react/icon';
+import {
+  getFieldPermission,
+  updateFieldPermission,
+  type AuthFieldVO,
+  type GetPermissionReq,
+  type UpdateFieldPermissionReq
+} from '@onebase/app';
+
 import styles from './index.module.less';
 
 const Row = Grid.Row;
 const Col = Grid.Col;
 const RadioGroup = Radio.Group;
 
-// 字段配置
-const fieldConfig = [
-  { key: 'activityLocation', name: '活动地点', icon: <IconAttachment /> },
-  { key: 'activityTime', name: '活动时间', icon: <IconCalendar /> },
-  { key: 'participantLimit', name: '参与人数上限', icon: <IconUser /> }
-];
-const operationConfig = [{ key: 'attachment', name: '活动方案附件', icon: <IconAttachment /> }];
+interface IProps {
+  appId: string;
+  menuId: string;
+  roleId: string;
+}
 
-// 初始表单值
-const initialValues = {
-  fieldPermissions: {
-    activityLocation: { readable: true, editable: true },
-    activityTime: { readable: false, editable: false },
-    participantLimit: { readable: true, editable: false }
-  },
-  operationPermissions: {
-    attachment: { downloadable: true }
-  }
-};
-
-// 管理员面板
-const FuncPermission: FC = () => {
+// 字段权限
+const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
   const [form] = Form.useForm();
 
-  const [_editableValue, setEditableVValue] = useState(['1', '2', '3']);
-  const [_downloadableValue, setDownloadableValue] = useState(['1', '2', '3']);
   const [checkReadableAll, setCheckReadableAll] = useState(false);
   const [checkEditableAll, setCheckEditableAll] = useState(false);
-  const [checkDownloadableAll, setCheckDownloadableAll] = useState(false);
+  // const [checkDownloadableAll, setCheckDownloadableAll] = useState(false);
 
   const [indeterminateReadable, setIndeterminateReadable] = useState(true);
   const [indeterminateEditable, setIndeterminateEditable] = useState(true);
-  const [indeterminateDownloadable, setIndeterminateDownloadable] = useState(true);
+  // const [indeterminateDownloadable, setIndeterminateDownloadable] = useState(true);
 
-  function onChangeReadableAll(checked: boolean) {
+  const [fieldPermission, setFieldPermission] = useState<AuthFieldVO[]>(); // 字段权限
+  const [isAllFieldsAllowed, setIsAllFieldsAllowed] = useState<number>();
+
+  useEffect(() => {
+    if (appId && menuId && roleId) {
+      getFieldsPermission();
+    }
+  }, [appId, menuId, roleId]);
+
+  useEffect(() => {
+    if (fieldPermission) {
+      const formattedFields = fieldPermission.reduce((acc, field) => {
+        acc[field.fieldId] = {
+          isCanRead: field.isCanRead === 1,
+          isCanEdit: field.isCanEdit === 1,
+          isCanDownload: field.isCanDownload === 1
+        };
+        return acc;
+      }, {});
+
+      form.setFieldsValue({
+        authFields: formattedFields
+      });
+      onChangeSelectAll();
+    }
+  }, [fieldPermission]);
+
+  /* 获取权限信息 */
+  const getFieldsPermission = async () => {
+    const params: GetPermissionReq = {
+      applicationId: appId,
+      menuId,
+      roleId
+    };
+    const res = await getFieldPermission(params);
+    const addDisabled = res.authFields.map((field: AuthFieldVO) => ({
+      ...field
+    }));
+    setFieldPermission(addDisabled);
+    setIsAllFieldsAllowed(res.isAllFieldsAllowed || 0);
+  };
+
+  /* 更新字段权限 */
+  const updateFieldsPermission = async (authFields: AuthFieldVO[], isAllFieldsAllowed: number) => {
+    const params: UpdateFieldPermissionReq = {
+      permissionReq: {
+        applicationId: appId,
+        menuId,
+        roleId
+      },
+      isAllFieldsAllowed,
+      authFields
+    };
+    const res = await updateFieldPermission(params);
+    console.log('更新字段权限', res);
+  };
+
+  // 可阅读全部选中
+  const onChangeReadableAll = (checked: boolean) => {
     const formData = form.getFieldsValue();
 
+    // 可编辑时，默认可阅读
     const updatedFieldPermissions = Object.fromEntries(
-      Object.entries(formData.fieldPermissions).map(([key, value]) => [key, { ...value, readable: checked }])
+      Object.entries(formData.authFields as Record<string, { isCanRead: boolean; isCanEdit: boolean }>).map(
+        ([key, value]) => [key, { ...value, isCanRead: value.isCanEdit }]
+      )
     );
 
     setCheckReadableAll(checked);
     setIndeterminateReadable(false);
-    form.setFieldValue('fieldPermissions', updatedFieldPermissions);
-  }
+    form.setFieldValue('authFields', updatedFieldPermissions);
 
-  function onChangeEditableAll(checked: boolean) {
-    if (checked) {
-      setIndeterminateEditable(false);
-      setCheckEditableAll(true);
-      setEditableVValue(['1', '2', '3', '4']);
-    } else {
-      setIndeterminateEditable(false);
-      setCheckEditableAll(false);
-      setEditableVValue([]);
-    }
-  }
+    const updateFields = fieldPermission?.map((field) => ({
+      ...field,
+      isCanRead: field.isCanEdit || +(field.isCanRead === 0)
+    }));
+    setFieldPermission(updateFields);
+    updateFieldsPermission(updateFields || [], isAllFieldsAllowed || 0);
+    console.log(fieldPermission, updateFields);
+  };
 
-  function onChangeDownloadableAll(checked: boolean) {
-    if (checked) {
-      setIndeterminateDownloadable(false);
-      setCheckDownloadableAll(true);
-      setDownloadableValue(['1', '2', '3', '4']);
-    } else {
-      setIndeterminateDownloadable(false);
-      setCheckDownloadableAll(false);
-      setDownloadableValue([]);
-    }
-  }
+  // 可编辑全部选中
+  const onChangeEditableAll = (checked: boolean) => {
+    const formData = form.getFieldsValue();
 
-  // 提交处理
-  const handleSubmit = (values) => {
-    console.log('权限配置已提交:', values);
+    const updatedFieldPermissions = Object.fromEntries(
+      Object.entries(formData.authFields as Record<string, { isCanRead: boolean; isCanEdit: boolean }>).map(
+        ([key, value]) => [key, { ...value, isCanEdit: checked, isCanRead: checked }]
+      )
+    );
+
+    setCheckEditableAll(checked);
+    setIndeterminateEditable(false);
+    form.setFieldValue('authFields', updatedFieldPermissions);
+    const updateFields = fieldPermission?.map((field) => ({
+      ...field,
+      isCanEdit: +checked,
+      isCanRead: +checked || +(field.isCanRead === 0)
+    }));
+    setFieldPermission(updateFields);
+    updateFieldsPermission(updateFields || [], isAllFieldsAllowed || 0);
+    console.log(fieldPermission, updateFields);
+  };
+
+  // 更新全部选中的值
+  const onChangeSelectAll = () => {
+    const currentValues = form.getFieldsValue().authFields;
+
+    const allCheckedRead = Object.values(currentValues).every((field: any) => field.isCanRead);
+    const allUnCheckedRead = Object.values(currentValues).every((field: any) => !field.isCanRead);
+    setCheckReadableAll(allCheckedRead);
+    setIndeterminateReadable(!allCheckedRead && !allUnCheckedRead);
+
+    const allCheckedEdit = Object.values(currentValues).every((field: any) => field.isCanEdit);
+    const allUnCheckedEdit = Object.values(currentValues).every((field: any) => !field.isCanEdit);
+    setCheckEditableAll(allCheckedEdit);
+    setIndeterminateEditable(!allCheckedEdit && !allUnCheckedEdit);
   };
 
   return (
     <div className={styles.fieldPermissions}>
-      <RadioGroup direction="vertical" name="lang" defaultValue="custom">
-        <Radio value="admin">所有字段内容可操作</Radio>
-        <Radio value="custom">自定义权限</Radio>
-      </RadioGroup>
+      <Form
+        form={form}
+        onChange={(value) => {
+          const changeField = Object.entries(value);
+          const getChangeFieldKey = changeField[0];
+          const getChangeFieldValue = Object.values(value)[0];
+          const getChangeFieldName = getChangeFieldKey[0].trim().split('.');
 
-      <Form form={form} initialValues={initialValues} onSubmit={handleSubmit} style={{ marginTop: 20 }}>
-        <Form.Item field="fieldPermissions" label="字段内容权限" layout="vertical" shouldUpdate>
+          console.log(changeField, 'changeField');
+
+          const updateField = fieldPermission?.map((field) => {
+            if (field.fieldId === getChangeFieldName[1]) {
+              return {
+                ...field,
+                isCanRead: Number(getChangeFieldValue) || field.isCanRead,
+                [getChangeFieldName[2]]: Number(getChangeFieldValue)
+              };
+            }
+            return field;
+          });
+
+          setFieldPermission(updateField);
+
+          const modifiedField = updateField?.filter((field) => field.fieldId === getChangeFieldName[1]) || [];
+          updateFieldsPermission(modifiedField, isAllFieldsAllowed || 0);
+
+          // 更新单个字段
+          form.setFieldValue(getChangeFieldKey + '', changeField[1]);
+          onChangeSelectAll();
+        }}
+      >
+        <RadioGroup
+          direction="vertical"
+          value={isAllFieldsAllowed}
+          onChange={(value) => {
+            setIsAllFieldsAllowed(value);
+            updateFieldsPermission(fieldPermission || [], value);
+          }}
+        >
+          <Radio value={1}>所有字段内容可操作</Radio>
+          <Radio value={0}>自定义权限</Radio>
+        </RadioGroup>
+
+        <Form.Item
+          field="authFields"
+          label="字段内容权限"
+          layout="vertical"
+          shouldUpdate
+          style={{ marginTop: 12, visibility: isAllFieldsAllowed === 0 ? 'visible' : 'hidden' }}
+        >
           <div className={styles.table}>
             <Row>
               <Col span={8}></Col>
@@ -114,25 +226,33 @@ const FuncPermission: FC = () => {
               </Col>
             </Row>
             <Divider />
-            {fieldConfig.map((field) => {
+            {fieldPermission?.map((field) => {
+              console.log(field);
               return (
-                <Row className={styles.rowItem} key={field.key}>
+                <Row className={styles.rowItem} key={field.fieldId}>
                   <Col span={8}>
-                    <IconLocation style={{ marginRight: 8 }} />
-                    <span>{field.name}</span>
+                    <span>{field.fieldDisplayName}</span>
                   </Col>
 
                   {/* 可阅读权限 */}
                   <Col span={4}>
-                    <Form.Item field={`fieldPermissions.${field.key}.readable`} triggerPropName="checked" noStyle>
-                      <Checkbox />
+                    <Form.Item
+                      field={`authFields.${field.fieldId}.isCanRead`}
+                      trigger="onChange"
+                      triggerPropName="checked"
+                      noStyle
+                    >
+                      <Checkbox disabled={field.isCanEdit === 1} />
                     </Form.Item>
                   </Col>
 
                   {/* 可编辑权限 */}
                   <Col span={4}>
-                    <Form.Item field={`fieldPermissions.${field.key}.editable`} triggerPropName="checked" noStyle>
-                      <Checkbox />
+                    <Form.Item field={`authFields.${field.fieldId}.isCanEdit`} triggerPropName="checked" noStyle>
+                      <Checkbox
+                        className={`${field.isCanRead === 0 ? styles.checkboxGray : ''} ${field.isCanEdit === 1 ? styles.checkboxGreen : ''}`}
+                      />
+                      {/* field.editDisabled */}
                     </Form.Item>
                   </Col>
                 </Row>
@@ -141,7 +261,7 @@ const FuncPermission: FC = () => {
           </div>
         </Form.Item>
 
-        <Form.Item field="operationPermissions" label="操作权限" layout="vertical" shouldUpdate>
+        {/* <Form.Item field="operationPermissions" label="操作权限" layout="vertical" shouldUpdate>
           <div className={styles.table}>
             <Row className={styles.tableTitle}>
               <Col span={8}></Col>
@@ -163,7 +283,6 @@ const FuncPermission: FC = () => {
                   <span>{field.name}</span>
                 </Col>
 
-                {/* 可下载权限 */}
                 <Col span={4}>
                   <Form.Item field={`operationPermissions.${field.key}.downloadable`} triggerPropName="checked" noStyle>
                     <Checkbox />
@@ -172,10 +291,10 @@ const FuncPermission: FC = () => {
               </Row>
             ))}
           </div>
-        </Form.Item>
+        </Form.Item> */}
       </Form>
     </div>
   );
 };
 
-export default FuncPermission;
+export default FieldPermission;
