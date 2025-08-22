@@ -43,8 +43,8 @@ public interface OAuth2TokenCommonApi {
     @PostMapping(PREFIX + "/refresh")
     @Operation(summary = "刷新访问令牌")
     @Parameters({
-        @Parameter(name = "refreshToken", description = "刷新令牌", required = true, example = "haha"),
-        @Parameter(name = "clientId", description = "客户端编号", required = true, example = "yudaoyuanma")
+        @Parameter(name = "refreshToken", description = "刷新令牌", required = true, example = "token"),
+        @Parameter(name = "clientId", description = "客户端编号", required = true, example = "id")
     })
     CommonResult<OAuth2AccessTokenRespDTO> refreshAccessToken(@RequestParam("refreshToken") String refreshToken,
                                                               @RequestParam("clientId") String clientId);

@@ -5,6 +5,7 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.infra.controller.admin.file.vo.file.FilePageReqVO;
 import com.cmsr.onebase.module.infra.dal.dataobject.file.FileDO;
 import org.anyline.data.param.init.DefaultConfigStore;
+import org.anyline.entity.Order;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -40,7 +41,7 @@ public class FileDataRepository extends DataRepository<FileDO> {
             configStore.ge(FileDO.CREATE_TIME, pageReqVO.getCreateTime()[0]);
             configStore.le(FileDO.CREATE_TIME, pageReqVO.getCreateTime()[1]);
         }
-
+        configStore.order(FileDO.CREATE_TIME, Order.TYPE.DESC);
         return findPageWithConditions(configStore, pageReqVO.getPageNo(), pageReqVO.getPageSize());
     }
 }
