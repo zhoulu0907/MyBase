@@ -16,19 +16,19 @@ import java.time.LocalDateTime;
 public class EntityRelationshipRespVO {
 
     @Schema(description = "关系ID", example = "5001")
-    private String id;
+    private Long id;
 
     @Schema(description = "关系名称", example = "用户订单关系")
     private String relationName;
 
     @Schema(description = "源实体ID", example = "2001")
-    private String sourceEntityId;
+    private Long sourceEntityId;
 
     @Schema(description = "源实体名称", example = "用户信息")
     private String sourceEntityName;
 
     @Schema(description = "目标实体ID", example = "2002")
-    private String targetEntityId;
+    private Long targetEntityId;
 
     @Schema(description = "目标实体名称", example = "订单信息")
     private String targetEntityName;
@@ -53,6 +53,12 @@ public class EntityRelationshipRespVO {
 
     @Schema(description = "描述信息", example = "用户与订单的一对多关系")
     private String description;
+
+    @Schema(description = "应用ID", example = "1001")
+    private Long appId;
+
+    @Schema(description = "运行模式：0 编辑态，1 运行态", example = "0")
+    private Integer runMode;
 
     @Schema(description = "创建时间", example = "2025-07-28T10:30:00")
     private LocalDateTime createTime;
