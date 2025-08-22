@@ -191,7 +191,7 @@ const TenantManagement: React.FC = () => {
     form.resetFields();
     form.setFieldsValue({
       status: PlatformTenantStatus.enabled,
-      admin: adminList.length > 0 ? adminList[0].nickname : undefined
+      admin: undefined
     });
     getTenantData()
     getOtherTenantCount()
@@ -344,6 +344,7 @@ const TenantManagement: React.FC = () => {
         website: values.website,
       };
       await addPlatformTenantApi(newTenantData);
+      setCurrentPage(1);
       getPlatformTenantList();
       Message.success('创建租户成功');
       setModalVisible(false);
