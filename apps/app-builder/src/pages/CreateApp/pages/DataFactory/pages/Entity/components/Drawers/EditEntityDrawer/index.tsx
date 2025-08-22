@@ -15,7 +15,8 @@ const EditEntityDrawer: React.FC<{
   onNodeEdit: (data: Partial<EntityNode>) => void;
   setEditingNode: (node: EntityNode | null) => void;
   successCallback?: () => void;
-}> = ({ editingNode, visible, setVisible, onNodeEdit, setEditingNode, successCallback }) => {
+  onlyShowEntity?: boolean;
+}> = ({ editingNode, visible, setVisible, onNodeEdit, setEditingNode, successCallback, onlyShowEntity = false }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [activeTab, setActiveTab] = useState('entity');
 
@@ -75,7 +76,7 @@ const EditEntityDrawer: React.FC<{
   return (
     <>
       {/* 抽屉把手按钮 - 只在抽屉可见时显示 */}
-      {visible && (
+      {visible && !onlyShowEntity && (
         // <Tooltip content={isCollapsed ? '展开抽屉' : '收起抽屉'}>
         <Button
           type="primary"
@@ -89,7 +90,7 @@ const EditEntityDrawer: React.FC<{
       )}
 
       {/* 左侧Tab导航 */}
-      {!isCollapsed && visible && (
+      {!isCollapsed && visible && !onlyShowEntity && (
         <div className={styles['tab-sidebar']}>
           <Tabs activeTab={activeTab} onChange={setActiveTab} direction="vertical" className={styles['vertical-tabs']}>
             <Tabs.TabPane key="entity" title="业务实体" />
