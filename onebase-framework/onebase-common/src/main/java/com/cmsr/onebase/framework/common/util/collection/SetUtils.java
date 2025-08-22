@@ -8,6 +8,7 @@ import java.util.Set;
  * Set 工具类
  *
  */
+@Deprecated
 public class SetUtils {
 
     /**
