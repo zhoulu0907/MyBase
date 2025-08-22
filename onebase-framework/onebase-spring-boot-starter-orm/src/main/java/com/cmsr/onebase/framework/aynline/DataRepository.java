@@ -93,9 +93,14 @@ public class DataRepository<T extends BaseDO> {
      * @throws DatabaseAccessException 插入失败时抛出
      */
     public List<T> insertBatch(List<T> entities) {
-        //TODO 批量插入
-        for (T entity : entities) {
-            insert(entity);
+        try {
+            long result = anylineService.insert(entities);
+            if (result == 0) {
+                throw new DatabaseAccessException(DatabaseAccessErrorCodes.DB_INSERT_ERROR);
+            }
+        } catch (Exception e) {
+            log.error("insert error, class={}, entity={}", defaultClazz, entities, e);
+            throw new DatabaseAccessException(DatabaseAccessErrorCodes.DB_INSERT_ERROR, e);
         }
         return entities;
     }
