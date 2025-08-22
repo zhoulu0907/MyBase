@@ -8,17 +8,13 @@ import com.cmsr.onebase.framework.common.exception.ServiceException;
 import com.cmsr.onebase.module.system.api.sms.SmsCodeApi;
 import com.cmsr.onebase.module.system.api.sms.dto.code.SmsCodeSendReqDTO;
 import com.cmsr.onebase.module.system.api.sms.dto.code.SmsCodeUseReqDTO;
-import com.cmsr.onebase.module.system.api.social.dto.SocialUserBindReqDTO;
-import com.cmsr.onebase.module.system.api.social.dto.SocialUserRespDTO;
 import com.cmsr.onebase.module.system.controller.admin.auth.vo.*;
+import com.cmsr.onebase.module.system.dal.database.AdminUserDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2AccessTokenDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
-import com.cmsr.onebase.module.system.dal.database.AdminUserDataRepository;
-import com.cmsr.onebase.module.system.enums.social.SocialTypeEnum;
 import com.cmsr.onebase.module.system.service.logger.LoginLogService;
 import com.cmsr.onebase.module.system.service.member.MemberService;
 import com.cmsr.onebase.module.system.service.oauth2.OAuth2TokenService;
-import com.cmsr.onebase.module.system.service.social.SocialUserService;
 import com.cmsr.onebase.module.system.service.user.AdminUserService;
 import jakarta.annotation.Resource;
 import org.anyline.data.param.init.DefaultConfigStore;
@@ -82,9 +78,6 @@ public class AdminAuthServiceTest {
     private OAuth2TokenService oauth2TokenService;
 
     @Mock
-    private SocialUserService socialUserService;
-
-    @Mock
     private MemberService memberService;
 
     @Mock
@@ -111,7 +104,7 @@ public class AdminAuthServiceTest {
         testToken = createTestToken();
 
         // 重置所有Mock对象
-        reset(userService, loginLogService, oauth2TokenService, socialUserService,
+        reset(userService, loginLogService, oauth2TokenService,
               memberService, captchaService, smsCodeApi);
     }
 
@@ -235,32 +228,6 @@ public class AdminAuthServiceTest {
         verify(userService).updateUserLogin(eq(testUser.getId()), anyString());
     }
 
-    /**
-     * 测试login方法 - 带社交绑定
-     */
-    @Test
-    public void testLogin_WithSocialBinding() {
-        // 准备数据
-        AuthLoginReqVO reqVO = new AuthLoginReqVO();
-        reqVO.setUsername("testuser");
-        reqVO.setPassword("123456");
-        reqVO.setSocialType(SocialTypeEnum.WECHAT_MINI_PROGRAM.getType());
-        reqVO.setSocialCode("socialCode");
-        reqVO.setSocialState("socialState");
-
-        when(userService.getUserByUsername(reqVO.getUsername())).thenReturn(testUser);
-        when(userService.isPasswordMatch(reqVO.getPassword(), testUser.getPassword())).thenReturn(true);
-        when(oauth2TokenService.createAccessToken(any(), any(), any(), any())).thenReturn(testToken);
-
-        // 执行测试
-        AuthLoginRespVO result = adminAuthService.login(reqVO);
-
-        // 验证结果
-        assertNotNull(result, "登录结果不应该为空");
-
-        // 验证社交绑定调用
-        verify(socialUserService).bindSocialUser(any(SocialUserBindReqDTO.class));
-    }
 
     /**
      * 测试sendSmsCode方法 - 正常发送
@@ -343,57 +310,6 @@ public class AdminAuthServiceTest {
             () -> adminAuthService.smsLogin(reqVO));
 
         assertEquals(USER_NOT_EXISTS.getCode(), exception.getCode(), "错误码应该一致");
-    }
-
-    /**
-     * 测试socialLogin方法 - 社交登录成功
-     */
-    @Test
-    public void testSocialLogin_Success() {
-        // 准备数据
-        AuthSocialLoginReqVO reqVO = new AuthSocialLoginReqVO();
-        reqVO.setType(SocialTypeEnum.WECHAT_MINI_PROGRAM.getType());
-        reqVO.setCode("socialCode");
-        reqVO.setState("socialState");
-
-        SocialUserRespDTO socialUser = new SocialUserRespDTO();
-        socialUser.setUserId(testUser.getId());
-
-        when(socialUserService.getSocialUserByCode(UserTypeEnum.ADMIN.getValue(),
-            reqVO.getType(), reqVO.getCode(), reqVO.getState())).thenReturn(socialUser);
-        when(userService.getUser(testUser.getId())).thenReturn(testUser);
-        when(oauth2TokenService.createAccessToken(any(), any(), any(), any())).thenReturn(testToken);
-
-        // 执行测试
-        AuthLoginRespVO result = adminAuthService.socialLogin(reqVO);
-
-        // 验证结果
-        assertNotNull(result, "登录结果不应该为空");
-        assertEquals(testToken.getAccessToken(), result.getAccessToken(), "访问令牌应该一致");
-    }
-
-    /**
-     * 测试socialLogin方法 - 社交用户未绑定
-     */
-    @Test
-    public void testSocialLogin_NotBound() {
-        // 准备数据
-        AuthSocialLoginReqVO reqVO = new AuthSocialLoginReqVO();
-        reqVO.setType(SocialTypeEnum.WECHAT_MINI_PROGRAM.getType());
-        reqVO.setCode("socialCode");
-        reqVO.setState("socialState");
-
-        SocialUserRespDTO socialUser = new SocialUserRespDTO();
-        socialUser.setUserId(null); // 未绑定
-
-        when(socialUserService.getSocialUserByCode(UserTypeEnum.ADMIN.getValue(),
-            reqVO.getType(), reqVO.getCode(), reqVO.getState())).thenReturn(socialUser);
-
-        // 执行测试并验证异常
-        ServiceException exception = assertThrows(ServiceException.class,
-            () -> adminAuthService.socialLogin(reqVO));
-
-        assertEquals(AUTH_THIRD_LOGIN_NOT_BIND.getCode(), exception.getCode(), "错误码应该一致");
     }
 
     /**
