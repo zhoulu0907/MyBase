@@ -1,6 +1,7 @@
 import { EditorRenderer, FreeLayoutEditorProvider } from '@flowgram.ai/free-layout-editor';
 import '@flowgram.ai/free-layout-editor/index.css';
 import React from 'react';
+import NodeAddPanel from './components/addPanel';
 import { SidebarRenderer } from './components/sidebar';
 import { SidebarProvider } from './components/sidebar/sidebar-provider';
 import { Tools } from './components/tools';
@@ -8,7 +9,6 @@ import { useEditorProps } from './hooks';
 import styles from './index.module.less';
 import { initialData } from './initial-data';
 import { nodeRegistries } from './node';
-import NodeAddPanel from './nodeAddPanel';
 
 /**
  * 触发器编辑器组件初始化

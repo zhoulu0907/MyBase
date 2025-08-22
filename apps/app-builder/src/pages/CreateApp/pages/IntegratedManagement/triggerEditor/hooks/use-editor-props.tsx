@@ -4,7 +4,7 @@ import { createMinimapPlugin } from '@flowgram.ai/minimap-plugin';
 import { useMemo } from 'react';
 
 import { BaseNode } from '../components/base-node'; // 节点渲染
-import { defaultFormMeta } from '../node/default-form-meta';
+import defaultFormMeta from '../node/defaultFormMeta';
 import type { FlowDocumentJSON, FlowNodeRegistry } from '../typings';
 
 export function useEditorProps(initialData: FlowDocumentJSON, nodeRegistries: FlowNodeRegistry[]): FreeLayoutProps {
@@ -47,7 +47,10 @@ export function useEditorProps(initialData: FlowDocumentJSON, nodeRegistries: Fl
           meta: {
             defaultExpanded: true
           },
-          formMeta: defaultFormMeta
+          // TODO(mickey): defaultFormMeta
+          formMeta: {
+            render: defaultFormMeta
+          }
         };
       },
       /**
