@@ -7,6 +7,8 @@ import {
   type RoleAddUserReq,
   type RoleDeleteUserReq,
   type DeleteRoleReq,
+  type GerRoleUserReq,
+  type GetDeptUserReq
 } from '../types/role';
 import { appService } from './clients';
 
@@ -39,4 +41,14 @@ export const roleDeleteUser = (params: RoleDeleteUserReq) => {
 // 删除角色
 export const deleteRole = (params: DeleteRoleReq) => {
   return appService.post(`/auth-role/delete?roleId=${params.roleId}`);
+};
+
+// 获取角色用户列表
+export const getRoleUser = (params: GerRoleUserReq) => {
+  return appService.get('/auth-role/page-role-users', params);
+};
+
+// 获取部门用户列表
+export const getDeptUser = (params: GetDeptUserReq) => {
+  return appService.get('/auth-role/list-dept-users', params);
 };

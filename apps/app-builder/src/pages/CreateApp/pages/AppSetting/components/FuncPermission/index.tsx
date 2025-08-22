@@ -1,119 +1,156 @@
-import { useState, type FC } from 'react';
-import { Radio, Checkbox, Collapse } from '@arco-design/web-react';
-import { IconInteraction, IconDashboard, IconMindMapping } from '@arco-design/web-react/icon';
+import { useState, useEffect, type FC } from 'react';
+import { Radio, Checkbox, Form } from '@arco-design/web-react';
+import {
+  getFuncPermission,
+  updatePagePermission,
+  updateOperationPermission,
+  type AuthOperationVO,
+  type GetPermissionReq,
+  type FuncPermissionResponse,
+  type UpdatePagePermissionReq,
+  type UpdateOperationPermissionReq
+} from '@onebase/app';
+import styles from './index.module.less';
 
 const RadioGroup = Radio.Group;
-const CollapseItem = Collapse.Item;
 const CheckboxGroup = Checkbox.Group;
 
-const options = [
-  {
-    label: '新增',
-    value: '1'
-  },
-  {
-    label: '导入',
-    value: '2'
-  },
-  {
-    label: '导出',
-    value: '3'
-  },
-  {
-    label: '保存',
-    value: '4'
-  },
-  {
-    label: '分享',
-    value: '5'
-  }
-];
+interface IProps {
+  appId: string;
+  menuId: string;
+  roleId: string;
+}
 
-const options2 = [
-  {
-    label: (
-      <>
-        <IconInteraction style={{ color: '#5D77EC', marginRight: 10 }} />
-        全量表
-      </>
-    ),
-    value: '1'
-  },
-  {
-    label: (
-      <>
-        <IconInteraction style={{ color: '#5D77EC', marginRight: 10 }} />
-        领导简表
-      </>
-    ),
-    value: '2'
-  },
-  {
-    label: (
-      <>
-        <IconDashboard style={{ color: '#E7924D', marginRight: 10 }} />
-        可视化看板
-      </>
-    ),
-    value: '3'
-  },
-  {
-    label: (
-      <>
-        <IconMindMapping style={{ color: '#C862A2', marginRight: 10 }} />
-        甘特图
-      </>
-    ),
-    value: '4'
-  }
-];
+// 功能权限
+const FuncPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
+  const [form] = Form.useForm();
 
-// 管理员面板
-const FuncPermission: FC = () => {
-  const [value, setValue] = useState(['1', '2', '3']);
-  const [checkAll, setCheckAll] = useState(false);
-  const [indeterminate, setIndeterminate] = useState(true);
+  const [operationOptions, setOperationOptions] = useState<any[]>();
+  const [funcPermission, setFuncPermission] = useState<FuncPermissionResponse>(); // 功能权限
 
-  function onChangeAll(checked: boolean) {
-    if (checked) {
-      setIndeterminate(false);
-      setCheckAll(true);
-      setValue(['1', '2', '3', '4']);
-    } else {
-      setIndeterminate(false);
-      setCheckAll(false);
-      setValue([]);
+  useEffect(() => {
+    if (appId && menuId && roleId) {
+      getApplicationPermission();
     }
-  }
+  }, [appId, menuId, roleId]);
 
-  function onChange(checkList: string[]) {
-    setIndeterminate(!!(checkList.length && checkList.length !== options2.length));
-    setCheckAll(!!(checkList.length === options2.length));
-    setValue(checkList);
-  }
+  useEffect(() => {
+    if (funcPermission) {
+      // 组装 options
+      const operationOptions = funcPermission.authOperations.map((item: AuthOperationVO) => ({
+        label: item.displayName,
+        value: item.operationCode
+      }));
+
+      setOperationOptions(operationOptions); // 存在 state 里
+
+      // 设置默认值
+      const defaultChecked = funcPermission.authOperations
+        .filter((item: AuthOperationVO) => item.isAllowed === 1)
+        .map((item: AuthOperationVO) => item.operationCode);
+
+      form.setFieldsValue({
+        isPageAllowed: funcPermission.isPageAllowed,
+        authOperations: defaultChecked,
+        isAllViewsAllowed: true
+        // authEntity: funcPermission.authEntity.authViews
+      });
+    }
+  }, [funcPermission]);
+
+  /* 获取权限信息 */
+  const getApplicationPermission = async () => {
+    const params: GetPermissionReq = {
+      applicationId: appId,
+      menuId,
+      roleId
+    };
+    const res = await getFuncPermission(params);
+    console.log('获取权限信息', res);
+    setFuncPermission(res);
+  };
 
   return (
-    <Collapse defaultActiveKey={['1', '2', '3']} expandIconPosition="right">
-      <CollapseItem header="页面权限" name="1">
-        <RadioGroup type="button" name="lang" defaultValue="yes">
-          <Radio value="yes">可访问</Radio>
-          <Radio value="no">无权限</Radio>
-        </RadioGroup>
-      </CollapseItem>
-
-      <CollapseItem header="操作权限" name="2">
-        <CheckboxGroup options={options} defaultValue={['1', '2', '3', '4', '5']} />
-      </CollapseItem>
-
-      <CollapseItem header="视图权限" name="3">
-        <div>
-          <Checkbox onChange={onChangeAll} checked={checkAll} indeterminate={indeterminate}>
-            {checkAll ? '取消全选' : '全选'}
-          </Checkbox>
+    <Form form={form}>
+      <div className={styles.formItem}>
+        <div className={styles.itemHeader}>
+          <div className={styles.left}>页面权限</div>
+          <div className={styles.right}>{funcPermission?.isPageAllowed ? '可访问' : '无权限'}</div>
         </div>
-        <CheckboxGroup direction="vertical" value={value} options={options2} onChange={onChange} />
-      </CollapseItem>
-    </Collapse>
+
+        <div className={styles.itemContent}>
+          <Form.Item field="isPageAllowed" noStyle>
+            <RadioGroup
+              type="button"
+              name="lang"
+              onChange={(val) => {
+                const params: UpdatePagePermissionReq = {
+                  isPageAllowed: val,
+                  permissionReq: {
+                    applicationId: appId,
+                    menuId,
+                    roleId
+                  }
+                };
+                updatePagePermission(params);
+              }}
+            >
+              <Radio value={1}>可访问</Radio>
+              <Radio value={0}>无权限</Radio>
+            </RadioGroup>
+          </Form.Item>
+        </div>
+      </div>
+
+      <div className={styles.formItem}>
+        <div className={styles.itemHeader}>
+          <div className={styles.left}>操作权限</div>
+          <div className={styles.right}>
+            {funcPermission?.authOperations.every((op: AuthOperationVO) => op.isAllowed === 1) && '全部可操作'}
+          </div>
+        </div>
+        <div className={styles.itemContent}>
+          <Form.Item field="authOperations" noStyle>
+            <CheckboxGroup
+              options={operationOptions}
+              onChange={async (values) => {
+                const updateOperations = funcPermission?.authOperations
+                  .map((op: AuthOperationVO) => {
+                    const newIsAllowed = values.includes(op.operationCode) ? 1 : 0;
+                    return newIsAllowed !== op.isAllowed ? { ...op, isAllowed: newIsAllowed } : null;
+                  })
+                  .filter(Boolean);
+                console.log(values, updateOperations);
+                const params: UpdateOperationPermissionReq = {
+                  authOperations: updateOperations,
+                  permissionReq: {
+                    applicationId: appId,
+                    menuId,
+                    roleId
+                  }
+                };
+                await updateOperationPermission(params);
+                await getApplicationPermission();
+              }}
+            />
+          </Form.Item>
+        </div>
+      </div>
+
+      {/*  暂时没有数据，后面迭代 */}
+      {/* <div>
+          <div>视图权限</div>
+          <Form.Item field="isAllViewsAllowed" noStyle>
+            <Checkbox onChange={onChangeAll}>
+              {funcPermission?.authEntity.isAllViewsAllowed ? '取消全选' : '全选'}
+            </Checkbox>
+          </Form.Item>
+
+          <Form.Item field="authEntity">
+            <CheckboxGroup direction="vertical" />
+          </Form.Item>
+        </div> */}
+    </Form>
   );
 };
 

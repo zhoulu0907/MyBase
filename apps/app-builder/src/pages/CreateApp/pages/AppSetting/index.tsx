@@ -4,6 +4,7 @@ import baseSettingSVG from '@/assets/images/base_setting.svg';
 import baseSettingActiveSVG from '@/assets/images/base_setting_active.svg';
 import { type Options } from '@/components/CreateApp/const';
 import { Button, Form, Layout, Menu, Message } from '@arco-design/web-react';
+import { IconMenuFold } from '@arco-design/web-react/icon';
 import {
   getApplication,
   updateApplication,
@@ -28,6 +29,7 @@ const AppSettingPage: FC = () => {
 
   const [appData, setAppData] = useState<Application>();
   const [activeTab, setActiveTab] = useState('baseSetting');
+  const [collapsed, setCollapsed] = useState<boolean>(false);
   const [saveLoading, setSaveLoading] = useState<boolean>(false); // 保存按钮状态
 
   useEffect(() => {
@@ -90,7 +92,12 @@ const AppSettingPage: FC = () => {
     <div className={styles.appSettingPage}>
       <Layout style={{ height: '100%' }}>
         <Layout>
-          <Sider style={{ width: 200 }}>
+          <Sider
+            collapsible
+            collapsed={collapsed}
+            trigger={<IconMenuFold fontSize={20} style={{ width: '100%', textAlign: 'right' }} />}
+            onCollapse={() => setCollapsed((prev) => !prev)}
+          >
             <Menu defaultSelectedKeys={[activeTab]} onClickMenuItem={setActiveTab}>
               <MenuItem key="baseSetting" style={{ display: 'flex' }}>
                 <img
@@ -115,11 +122,13 @@ const AppSettingPage: FC = () => {
             {activeTab === 'appPermission' && <AppPermission />}
           </Content>
         </Layout>
-        <Footer className={styles.footer}>
-          <Button type="primary" loading={saveLoading} onClick={handleSave}>
-            保存
-          </Button>
-        </Footer>
+        {activeTab === 'baseSetting' && (
+          <Footer className={styles.footer}>
+            <Button type="primary" loading={saveLoading} onClick={handleSave}>
+              保存
+            </Button>
+          </Footer>
+        )}
       </Layout>
     </div>
   );
