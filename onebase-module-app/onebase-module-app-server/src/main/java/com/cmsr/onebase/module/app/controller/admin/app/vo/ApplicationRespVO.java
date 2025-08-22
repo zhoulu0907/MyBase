@@ -4,6 +4,7 @@ import com.cmsr.onebase.module.app.controller.admin.tag.vo.TagRespVO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -54,13 +55,13 @@ public class ApplicationRespVO {
     private List<TagRespVO> tags;
 
     @Schema(description = "创建时间")
-    private String createTime;
+    private LocalDateTime createTime;
 
     @Schema(description = "创建人")
     private String createUser;
 
     @Schema(description = "更新时间")
-    private String updateTime;
+    private LocalDateTime updateTime;
 
     @Schema(description = "更新人")
     private String updateUser;
