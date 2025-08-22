@@ -22,7 +22,7 @@ public class OAuth2AccessTokenCreateReqDTO implements Serializable {
     @InEnum(value = UserTypeEnum.class, message = "用户类型必须是 {value}")
     private Integer userType;
 
-    @Schema(description = "客户端编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "yudaoyuanma")
+    @Schema(description = "客户端编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "id")
     @NotNull(message = "客户端编号不能为空")
     private String clientId;
 
