@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.app.controller.admin.app.vo;
 
+import com.cmsr.onebase.module.metadata.api.datasource.dto.DatasourceSaveReqDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
@@ -42,4 +43,8 @@ public class ApplicationCreateReqVO {
 
     @Schema(description = "标签ID")
     private List<Long> tagIds;
+
+    @Schema(description = "数据源信息")
+    private DatasourceSaveReqDTO datasourceSaveReq;
+
 }
