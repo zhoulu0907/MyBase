@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Configuration;
  *
  */
 @Configuration(proxyBeanMethods = false)
-public class YudaoFileAutoConfiguration {
+public class OneBaseFileAutoConfiguration {
 
     // 移除 fileClientFactory Bean 配置，改为使用 @Component 自动扫描
 

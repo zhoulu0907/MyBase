@@ -14,7 +14,7 @@ import org.springframework.data.redis.serializer.RedisSerializer;
  * Redis 配置类
  */
 @AutoConfiguration(before = RedissonAutoConfigurationV2.class) // 目的：使用自己定义的 RedisTemplate Bean
-public class YudaoRedisAutoConfiguration {
+public class OneBaseRedisAutoConfiguration {
 
     /**
      * 创建 RedisTemplate Bean，使用 JSON 序列化方式

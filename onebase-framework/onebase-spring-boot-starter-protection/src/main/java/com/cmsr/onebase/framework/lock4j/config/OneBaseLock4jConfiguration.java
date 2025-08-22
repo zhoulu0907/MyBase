@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Bean;
 
 @AutoConfiguration(before = LockAutoConfiguration.class)
 @ConditionalOnClass(name = "com.baomidou.lock.annotation.Lock4j")
-public class YudaoLock4jConfiguration {
+public class OneBaseLock4jConfiguration {
 
     @Bean
     public DefaultLockFailureStrategy lockFailureStrategy() {

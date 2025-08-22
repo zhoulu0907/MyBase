@@ -3,7 +3,7 @@ package com.cmsr.onebase.framework.tenant.config;
 import cn.hutool.extra.spring.SpringUtil;
 import com.cmsr.onebase.framework.common.biz.system.tenant.TenantCommonApi;
 import com.cmsr.onebase.framework.common.enums.WebFilterOrderEnum;
-import com.cmsr.onebase.framework.redis.config.YudaoCacheProperties;
+import com.cmsr.onebase.framework.redis.config.OneBaseCacheProperties;
 import com.cmsr.onebase.framework.security.core.service.SecurityFrameworkService;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnoreAspect;
@@ -45,9 +45,9 @@ import java.util.Objects;
 import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.convertList;
 
 @AutoConfiguration
-@ConditionalOnProperty(prefix = "yudao.tenant", value = "enable", matchIfMissing = true) // 允许使用 yudao.tenant.enable=false 禁用多租户
+@ConditionalOnProperty(prefix = "yudao.tenant", value = "enable", matchIfMissing = true)
 @EnableConfigurationProperties(TenantProperties.class)
-public class YudaoTenantAutoConfiguration {
+public class OneBaseTenantAutoConfiguration {
 
     @Resource
     private ApplicationContext applicationContext;
@@ -159,12 +159,12 @@ public class YudaoTenantAutoConfiguration {
     @Primary // 引入租户时，tenantRedisCacheManager 为主 Bean
     public RedisCacheManager tenantRedisCacheManager(RedisTemplate<String, Object> redisTemplate,
                                                      RedisCacheConfiguration redisCacheConfiguration,
-                                                     YudaoCacheProperties yudaoCacheProperties,
+                                                     OneBaseCacheProperties oneBaseCacheProperties,
                                                      TenantProperties tenantProperties) {
         // 创建 RedisCacheWriter 对象
         RedisConnectionFactory connectionFactory = Objects.requireNonNull(redisTemplate.getConnectionFactory());
         RedisCacheWriter cacheWriter = RedisCacheWriter.nonLockingRedisCacheWriter(connectionFactory,
-                BatchStrategies.scan(yudaoCacheProperties.getRedisScanBatchSize()));
+                BatchStrategies.scan(oneBaseCacheProperties.getRedisScanBatchSize()));
         // 创建 TenantRedisCacheManager 对象
         return new TenantRedisCacheManager(cacheWriter, redisCacheConfiguration, tenantProperties.getIgnoreCaches());
     }

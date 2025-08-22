@@ -23,7 +23,7 @@ import java.util.List;
 
 @AutoConfiguration
 @Slf4j
-public class YudaoJacksonAutoConfiguration {
+public class OneBaseJacksonAutoConfiguration {
 
     @Bean
     @SuppressWarnings("InstantiationOfUtilityClass")

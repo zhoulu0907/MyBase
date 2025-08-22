@@ -17,7 +17,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import static com.cmsr.onebase.framework.web.config.YudaoWebAutoConfiguration.createFilterBean;
+import static com.cmsr.onebase.framework.web.config.OneBaseWebAutoConfiguration.createFilterBean;
 
 @AutoConfiguration
 @EnableConfigurationProperties(XssProperties.class)

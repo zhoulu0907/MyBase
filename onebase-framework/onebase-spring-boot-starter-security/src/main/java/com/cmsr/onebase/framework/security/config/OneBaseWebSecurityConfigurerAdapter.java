@@ -45,7 +45,7 @@ import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.
 @AutoConfiguration
 @AutoConfigureOrder(-1) // 目的：先于 Spring Security 自动配置，避免一键改包后，org.* 基础包无法生效
 @EnableMethodSecurity(securedEnabled = true)
-public class YudaoWebSecurityConfigurerAdapter {
+public class OneBaseWebSecurityConfigurerAdapter {
 
     @Resource
     private WebProperties webProperties;

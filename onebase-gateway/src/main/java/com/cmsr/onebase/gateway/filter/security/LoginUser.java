@@ -9,7 +9,6 @@ import java.util.Map;
 /**
  * 登录用户信息
  *
- * copy from yudao-spring-boot-starter-security 的 LoginUser 类
  *
  */
 @Data

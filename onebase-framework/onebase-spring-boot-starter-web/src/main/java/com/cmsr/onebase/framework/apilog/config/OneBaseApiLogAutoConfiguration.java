@@ -5,7 +5,7 @@ import com.cmsr.onebase.framework.apilog.core.interceptor.ApiAccessLogIntercepto
 import com.cmsr.onebase.framework.common.biz.infra.logger.ApiAccessLogCommonApi;
 import com.cmsr.onebase.framework.common.enums.WebFilterOrderEnum;
 import com.cmsr.onebase.framework.web.config.WebProperties;
-import com.cmsr.onebase.framework.web.config.YudaoWebAutoConfiguration;
+import com.cmsr.onebase.framework.web.config.OneBaseWebAutoConfiguration;
 import jakarta.servlet.Filter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -15,8 +15,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-@AutoConfiguration(after = YudaoWebAutoConfiguration.class)
-public class YudaoApiLogAutoConfiguration implements WebMvcConfigurer {
+@AutoConfiguration(after = OneBaseWebAutoConfiguration.class)
+public class OneBaseApiLogAutoConfiguration implements WebMvcConfigurer {
 
     /**
      * 创建 ApiAccessLogFilter Bean，记录 API 请求日志

@@ -7,7 +7,6 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
 /**
  * Metrics 配置类
@@ -16,7 +15,7 @@ import org.springframework.context.annotation.Configuration;
 @AutoConfiguration
 @ConditionalOnClass({MeterRegistryCustomizer.class})
 @ConditionalOnProperty(prefix = "yudao.metrics", value = "enable", matchIfMissing = true) // 允许使用 yudao.metrics.enable=false 禁用 Metrics
-public class YudaoMetricsAutoConfiguration {
+public class OneBaseMetricsAutoConfiguration {
 
     @Bean
     public MeterRegistryCustomizer<MeterRegistry> metricsCommonTags(

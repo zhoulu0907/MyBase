@@ -10,5 +10,5 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
  */
 @AutoConfiguration
 @EnableFeignClients(clients = {OperateLogCommonApi.class}) // 主要是引入相关的 API 服务
-public class YudaoOperateLogRpcAutoConfiguration {
+public class OneBaseOperateLogRpcAutoConfiguration {
 }
