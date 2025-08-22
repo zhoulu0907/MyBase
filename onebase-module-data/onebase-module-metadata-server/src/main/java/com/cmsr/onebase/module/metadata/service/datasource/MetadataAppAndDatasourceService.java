@@ -100,6 +100,15 @@ public interface MetadataAppAndDatasourceService {
     String getAppUidByAppIdAndDatasourceId(Long applicationId, Long datasourceId);
 
     /**
+     * 根据应用ID与数据源ID获取关联关系对象
+     *
+     * @param applicationId 应用ID
+     * @param datasourceId 数据源ID
+     * @return 关联关系对象，未找到时返回 null
+     */
+    MetadataAppAndDatasourceDO getRelation(Long applicationId, Long datasourceId);
+
+    /**
      * 更新应用与数据源关联关系中的appUid
      *
      * @param applicationId 应用ID
