@@ -172,7 +172,7 @@ const PageManagerPage: FC = () => {
     setTreeData(treeData);
 
     if (res && res.length > 0) {
-      setCurMenu(res[0]);
+      setCurMenu(findFirstPage(res));
       setSearchResult(false);
     }
 
