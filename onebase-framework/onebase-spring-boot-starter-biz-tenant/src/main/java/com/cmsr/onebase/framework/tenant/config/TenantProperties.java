@@ -11,7 +11,7 @@ import java.util.Set;
  * 多租户配置
  *
  */
-@ConfigurationProperties(prefix = "yudao.tenant")
+@ConfigurationProperties(prefix = "onebase.tenant")
 @Data
 public class TenantProperties {
 

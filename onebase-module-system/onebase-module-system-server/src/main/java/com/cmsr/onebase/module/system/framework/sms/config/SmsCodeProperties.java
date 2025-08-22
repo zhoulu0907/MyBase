@@ -7,7 +7,7 @@ import org.springframework.validation.annotation.Validated;
 import jakarta.validation.constraints.NotNull;
 import java.time.Duration;
 
-@ConfigurationProperties(prefix = "yudao.sms-code")
+@ConfigurationProperties(prefix = "onebase.sms-code")
 @Validated
 @Data
 public class SmsCodeProperties {

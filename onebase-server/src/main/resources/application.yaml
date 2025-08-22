@@ -95,20 +95,20 @@ aj:
 
 --- #################### OneBase相关配置 ####################
 
-yudao:
+onebase:
   info:
     version: 1.0.0
     base-package: com.cmsr.onebase
   swagger:
     title: OneBase快速开发平台
     description: 提供管理后台、用户 App 的所有功能
-    version: ${yudao.info.version}
-    url: ${yudao.web.admin-ui.url}
+    version: ${onebase.info.version}
+    url: ${onebase.web.admin-ui.url}
     email: xingyu4j@vip.qq.com
     license: MIT
     license-url: https://gitee.com/zhijiantianya/onebase_v3/blob/master/LICENSE
   codegen:
-    base-package: ${yudao.info.base-package}
+    base-package: ${onebase.info.base-package}
     db-schemas: ${spring.datasource.dynamic.datasource.master.name}
     front-type: 20 # 前端模版的类型，参见 CodegenFrontTypeEnum 枚举类
     vo-type: 10 # VO 的类型，参见 CodegenVOTypeEnum 枚举类

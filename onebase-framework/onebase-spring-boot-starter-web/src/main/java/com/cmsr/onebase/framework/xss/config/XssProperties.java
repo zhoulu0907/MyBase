@@ -11,7 +11,7 @@ import java.util.List;
  * Xss 配置属性
  *
  */
-@ConfigurationProperties(prefix = "yudao.xss")
+@ConfigurationProperties(prefix = "onebase.xss")
 @Validated
 @Data
 public class XssProperties {

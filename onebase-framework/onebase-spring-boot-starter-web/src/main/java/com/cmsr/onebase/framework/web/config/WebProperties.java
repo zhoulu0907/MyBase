@@ -12,7 +12,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
-@ConfigurationProperties(prefix = "yudao.web")
+@ConfigurationProperties(prefix = "onebase.web")
 @RefreshScope
 @Validated
 @Data
@@ -28,7 +28,7 @@ public class WebProperties {
 
     /**
      * 是否在响应中返回异常堆栈。仅建议开发/测试环境打开。
-     * 配置项：yudao.web.return-exception-stack-trace
+     * 配置项：onebase.web.return-exception-stack-trace
      */
     private boolean returnExceptionStackTrace = false;
 

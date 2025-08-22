@@ -79,7 +79,7 @@ public class TenantServiceImpl implements TenantService {
     private static final String TENANT_ADMIN_PASSWORD = "admin123";
 
     @SuppressWarnings("SpringJavaAutowiredFieldsWarningInspection")
-    @Resource // 由于 yudao.tenant.enable 配置项，可以关闭多租户的功能，所以这里只能不强制注入
+    @Resource // 由于 onebase.tenant.enable 配置项，可以关闭多租户的功能，所以这里只能不强制注入
     private TenantProperties tenantProperties;
 
     @Resource

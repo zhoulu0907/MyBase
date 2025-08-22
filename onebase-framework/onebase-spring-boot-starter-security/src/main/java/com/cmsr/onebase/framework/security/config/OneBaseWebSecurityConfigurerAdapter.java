@@ -136,7 +136,7 @@ public class OneBaseWebSecurityConfigurerAdapter {
                     .requestMatchers(HttpMethod.DELETE, permitAllUrls.get(HttpMethod.DELETE).toArray(new String[0])).permitAll()
                     .requestMatchers(HttpMethod.HEAD, permitAllUrls.get(HttpMethod.HEAD).toArray(new String[0])).permitAll()
                     .requestMatchers(HttpMethod.PATCH, permitAllUrls.get(HttpMethod.PATCH).toArray(new String[0])).permitAll()
-                    // 1.3 基于 yudao.security.permit-all-urls 无需认证
+                    // 1.3 基于 onebase.security.permit-all-urls 无需认证
                     .requestMatchers(securityProperties.getPermitAllUrls().toArray(new String[0])).permitAll()
                 )
                 // ②：每个项目的自定义规则

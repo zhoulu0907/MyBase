@@ -89,7 +89,7 @@ public class QiniuSmsClientTest extends BaseMockitoUnitTest {
             String apiTemplateId = randomString();
             // mock 方法
             httpUtilsMockedStatic.when(() -> HttpUtils.get(anyString(), anyMap()))
-                    .thenReturn("{\"audit_status\":\"passed\",\"created_at\":1724231187,\"description\":\"\",\"disable_broadcast\":false,\"disable_broadcast_reason\":\"\",\"disable_reason\":\"\",\"disabled\":false,\"id\":\"1826184073773596672\",\"is_oversea\":false,\"name\":\"dd\",\"parameters\":[\"code\"],\"reject_reason\":\"\",\"signature_id\":\"1826099896017498112\",\"signature_text\":\"yudao\",\"template\":\"您的验证码为：${code}\",\"type\":\"verification\",\"uid\":1383022432,\"updated_at\":1724288561,\"variable_count\":0}");
+                    .thenReturn("{\"audit_status\":\"passed\",\"created_at\":1724231187,\"description\":\"\",\"disable_broadcast\":false,\"disable_broadcast_reason\":\"\",\"disable_reason\":\"\",\"disabled\":false,\"id\":\"1826184073773596672\",\"is_oversea\":false,\"name\":\"dd\",\"parameters\":[\"code\"],\"reject_reason\":\"\",\"signature_id\":\"1826099896017498112\",\"signature_text\":\"onebase\",\"template\":\"您的验证码为：${code}\",\"type\":\"verification\",\"uid\":1383022432,\"updated_at\":1724288561,\"variable_count\":0}");
             // 调用
             SmsTemplateRespDTO result = smsClient.getSmsTemplate(apiTemplateId);
             // 断言

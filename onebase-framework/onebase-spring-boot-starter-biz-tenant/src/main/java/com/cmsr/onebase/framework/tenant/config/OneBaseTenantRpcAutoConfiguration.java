@@ -8,7 +8,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
 
 @AutoConfiguration
-@ConditionalOnProperty(prefix = "yudao.tenant", value = "enable", matchIfMissing = true)
+@ConditionalOnProperty(prefix = "onebase.tenant", value = "enable", matchIfMissing = true)
 @EnableFeignClients(clients = TenantCommonApi.class) // 主要是引入相关的 API 服务
 public class OneBaseTenantRpcAutoConfiguration {
 

@@ -1,5 +1,5 @@
 OneBase
-Application Version: ${yudao.info.version}
+Application Version: ${onebase.info.version}
 Spring Boot Version: ${spring-boot.version}
 
 .__   __.   ______      .______    __    __    _______

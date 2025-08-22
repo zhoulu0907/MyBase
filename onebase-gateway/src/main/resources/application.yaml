@@ -113,6 +113,6 @@ knife4j:
 
 --- #################### OneBase相关配置 ####################
 
-yudao:
+onebase:
   info:
     version: 1.0.0

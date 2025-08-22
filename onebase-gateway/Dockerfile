@@ -3,10 +3,10 @@
 FROM eclipse-temurin:21-jre
 
 ## 创建目录，并使用它作为工作目录
-RUN mkdir -p /yudao-gateway
-WORKDIR /yudao-gateway
+RUN mkdir -p /onebase-gateway
+WORKDIR /onebase-gateway
 ## 将后端项目的 Jar 文件，复制到镜像中
-COPY ./target/yudao-gateway.jar app.jar
+COPY ./target/onebase-gateway.jar app.jar
 
 ## 设置 TZ 时区
 ## 设置 JAVA_OPTS 环境变量，可通过 docker run -e "JAVA_OPTS=" 进行覆盖

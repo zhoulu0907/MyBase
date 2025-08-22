@@ -57,7 +57,7 @@ mybatis-plus:
 --- #################### OneBase相关配置 ####################
 
 # OneBase配置项，设置当前项目所有自定义的配置
-yudao:
+onebase:
   info:
     base-package: com.cmsr.onebase.module
   security:

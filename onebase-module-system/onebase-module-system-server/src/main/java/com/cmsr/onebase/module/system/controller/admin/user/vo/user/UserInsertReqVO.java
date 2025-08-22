@@ -21,7 +21,7 @@ public class UserInsertReqVO {
     @Schema(description = "用户编号", example = "1024")
     private Long id;
 
-    @Schema(description = "用户账号", requiredMode = Schema.RequiredMode.REQUIRED, example = "yudao")
+    @Schema(description = "用户账号", requiredMode = Schema.RequiredMode.REQUIRED, example = "onebase")
     @NotBlank(message = "用户账号不能为空")
     @Pattern(regexp = "^[a-zA-Z0-9]+$", message = "用户账号由 数字、字母 组成")
     @Size(min = 4, max = 30, message = "用户账号长度为 4-30 个字符")
@@ -45,7 +45,7 @@ public class UserInsertReqVO {
     @DiffLogField(name = "岗位", function = PostParseFunction.NAME)
     private Set<Long> postIds;
 
-    @Schema(description = "用户邮箱", example = "yudao@iocoder.cn")
+    @Schema(description = "用户邮箱", example = "onebase@aaa.com")
     @Email(message = "邮箱格式不正确")
     @Size(max = 50, message = "邮箱长度不能超过 50 个字符")
     @DiffLogField(name = "用户邮箱")

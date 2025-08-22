@@ -29,7 +29,7 @@ spring:
 
 #mybatis-plus:
 #  lazy-initialization: true # 单元测试，设置 MyBatis Mapper 延迟加载，加速每个单元测试
-#  type-aliases-package: ${yudao.info.base-package}.dal.dataobject
+#  type-aliases-package: ${onebase.info.base-package}.dal.dataobject
 #  global-config:
 #    db-config:
 #      id-type: AUTO # H2 主键递增
@@ -47,6 +47,6 @@ spring:
 --- #################### OneBase相关配置 ####################
 
 # OneBase配置项，设置当前项目所有自定义的配置
-yudao:
+onebase:
   info:
     base-package: com.cmsr.onebase.module.infra

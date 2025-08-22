@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Bean;
  */
 @AutoConfiguration
 @ConditionalOnClass({MeterRegistryCustomizer.class})
-@ConditionalOnProperty(prefix = "yudao.metrics", value = "enable", matchIfMissing = true) // 允许使用 yudao.metrics.enable=false 禁用 Metrics
+@ConditionalOnProperty(prefix = "onebase.metrics", value = "enable", matchIfMissing = true) // 允许使用 onebase.metrics.enable=false 禁用 Metrics
 public class OneBaseMetricsAutoConfiguration {
 
     @Bean

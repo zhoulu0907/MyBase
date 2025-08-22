@@ -9,7 +9,7 @@ import org.springframework.validation.annotation.Validated;
  *
  * @author Wanwan
  */
-@ConfigurationProperties("yudao.cache")
+@ConfigurationProperties("onebase.cache")
 @Data
 @Validated
 public class OneBaseCacheProperties {

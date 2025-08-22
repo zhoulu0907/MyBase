@@ -45,7 +45,7 @@ import java.util.Objects;
 import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.convertList;
 
 @AutoConfiguration
-@ConditionalOnProperty(prefix = "yudao.tenant", value = "enable", matchIfMissing = true)
+@ConditionalOnProperty(prefix = "onebase.tenant", value = "enable", matchIfMissing = true)
 @EnableConfigurationProperties(TenantProperties.class)
 public class OneBaseTenantAutoConfiguration {
 

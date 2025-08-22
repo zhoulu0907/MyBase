@@ -48,9 +48,9 @@ import static org.junit.jupiter.api.Assertions.*;
         "spring.datasource.dynamic.datasource.master.driver-class-name=org.h2.Driver",
         "spring.datasource.dynamic.datasource.master.username=sa",
         "spring.datasource.dynamic.datasource.master.password=",
-        "yudao.security.mock-enable=true",
-        "yudao.tenant.enable=false",
-        "yudao.captcha.enable=false"
+        "onebase.security.mock-enable=true",
+        "onebase.tenant.enable=false",
+        "onebase.captcha.enable=false"
 })
 @ActiveProfiles("unit-test")
 @Transactional

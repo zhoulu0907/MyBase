@@ -10,7 +10,7 @@ import jakarta.validation.constraints.NotNull;
 import java.util.Collections;
 import java.util.List;
 
-@ConfigurationProperties(prefix = "yudao.security")
+@ConfigurationProperties(prefix = "onebase.security")
 @RefreshScope
 @Validated
 @Data
