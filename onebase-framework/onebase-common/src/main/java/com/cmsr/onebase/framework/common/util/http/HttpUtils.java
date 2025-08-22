@@ -1,9 +1,6 @@
 package com.cmsr.onebase.framework.common.util.http;
 
 import cn.hutool.core.codec.Base64;
-import cn.hutool.core.map.TableMap;
-import cn.hutool.core.net.url.UrlBuilder;
-import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
@@ -14,14 +11,15 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.net.URLEncoder;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 /**
+ * 迁移走！ 提供的方法没有普遍性！
+ * <p>
  * HTTP 工具类
- *
  */
+@Deprecated
 public class HttpUtils {
 
     /**
@@ -34,33 +32,36 @@ public class HttpUtils {
         return URLEncoder.encode(value, StandardCharsets.UTF_8);
     }
 
-    @SuppressWarnings("unchecked")
-    public static String replaceUrlQuery(String url, String key, String value) {
-        UrlBuilder builder = UrlBuilder.of(url, Charset.defaultCharset());
-        // 先移除
-        TableMap<CharSequence, CharSequence> query = (TableMap<CharSequence, CharSequence>)
-                ReflectUtil.getFieldValue(builder.getQuery(), "query");
-        query.remove(key);
-        // 后添加
-        builder.addQuery(key, value);
-        return builder.build();
-    }
+//    @SuppressWarnings("unchecked")
+//    public static String replaceUrlQuery(String url, String key, String value) {
+//        UrlBuilder builder = UrlBuilder.of(url, Charset.defaultCharset());
+//        // 先移除
+//        TableMap<CharSequence, CharSequence> query = (TableMap<CharSequence, CharSequence>)
+//                ReflectUtil.getFieldValue(builder.getQuery(), "query");
+//        query.remove(key);
+//        // 后添加
+//        builder.addQuery(key, value);
+//        return builder.build();
+//    }
 
-    private String append(String base, Map<String, ?> query, boolean fragment) {
-        return append(base, query, null, fragment);
-    }
+//    private String append(String base, Map<String, ?> query, boolean fragment) {
+//        return append(base, query, null, fragment);
+//    }
 
     /**
+     * 迁移走！
+     * <p>
      * 拼接 URL
-     *
+     * <p>
      * copy from Spring Security OAuth2 的 AuthorizationEndpoint 类的 append 方法
      *
-     * @param base 基础 URL
-     * @param query 查询参数
-     * @param keys query 的 key，对应的原本的 key 的映射。例如说 query 里有个 key 是 xx，实际它的 key 是 extra_xx，则通过 keys 里添加这个映射
+     * @param base     基础 URL
+     * @param query    查询参数
+     * @param keys     query 的 key，对应的原本的 key 的映射。例如说 query 里有个 key 是 xx，实际它的 key 是 extra_xx，则通过 keys 里添加这个映射
      * @param fragment URL 的 fragment，即拼接到 # 中
      * @return 拼接后的 URL
      */
+    @Deprecated
     public static String append(String base, Map<String, ?> query, Map<String, String> keys, boolean fragment) {
         UriComponentsBuilder template = UriComponentsBuilder.newInstance();
         UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(base);
@@ -112,6 +113,13 @@ public class HttpUtils {
         return builder.build().toUriString();
     }
 
+    /**
+     * 迁移走！
+     *
+     * @param request
+     * @return
+     */
+    @Deprecated
     public static String[] obtainBasicAuthorization(HttpServletRequest request) {
         String clientId;
         String clientSecret;
@@ -136,15 +144,17 @@ public class HttpUtils {
     }
 
     /**
+     * 使用 unirest 替代
      * HTTP post 请求，基于 {@link cn.hutool.http.HttpUtil} 实现
-     *
+     * <p>
      * 为什么要封装该方法，因为 HttpUtil 默认封装的方法，没有允许传递 headers 参数
      *
-     * @param url URL
-     * @param headers 请求头
+     * @param url         URL
+     * @param headers     请求头
      * @param requestBody 请求体
      * @return 请求结果
      */
+    @Deprecated
     public static String post(String url, Map<String, String> headers, String requestBody) {
         try (HttpResponse response = HttpRequest.post(url)
                 .addHeaders(headers)
@@ -155,14 +165,16 @@ public class HttpUtils {
     }
 
     /**
+     * 使用 unirest 替代
      * HTTP get 请求，基于 {@link cn.hutool.http.HttpUtil} 实现
-     *
+     * <p>
      * 为什么要封装该方法，因为 HttpUtil 默认封装的方法，没有允许传递 headers 参数
      *
-     * @param url URL
+     * @param url     URL
      * @param headers 请求头
      * @return 请求结果
      */
+    @Deprecated
     public static String get(String url, Map<String, String> headers) {
         try (HttpResponse response = HttpRequest.get(url)
                 .addHeaders(headers)
