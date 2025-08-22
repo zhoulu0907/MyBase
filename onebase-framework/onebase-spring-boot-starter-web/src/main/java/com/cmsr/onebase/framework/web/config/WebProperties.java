@@ -12,7 +12,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
-@ConfigurationProperties(prefix = "yudao.web")
+@ConfigurationProperties(prefix = "onebase.web")
 @RefreshScope
 @Validated
 @Data
@@ -28,7 +28,7 @@ public class WebProperties {
 
     /**
      * 是否在响应中返回异常堆栈。仅建议开发/测试环境打开。
-     * 配置项：yudao.web.return-exception-stack-trace
+     * 配置项：onebase.web.return-exception-stack-trace
      */
     private boolean returnExceptionStackTrace = false;
 
@@ -45,7 +45,7 @@ public class WebProperties {
          * 意义：通过该前缀，避免 Swagger、Actuator 意外通过 Nginx 暴露出来给外部，带来安全性问题
          *      这样，Nginx 只需要配置转发到 /api/* 的所有接口即可。
          *
-         * @see YudaoWebAutoConfiguration#configurePathMatch(PathMatchConfigurer)
+         * @see OneBaseWebAutoConfiguration#configurePathMatch(PathMatchConfigurer)
          */
         @NotEmpty(message = "API 前缀不能为空")
         private String prefix;

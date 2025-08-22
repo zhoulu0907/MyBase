@@ -1,2 +1,2 @@
-com.cmsr.onebase.framework.redis.config.YudaoRedisAutoConfiguration
-com.cmsr.onebase.framework.redis.config.YudaoCacheAutoConfiguration
+com.cmsr.onebase.framework.redis.config.OneBaseRedisAutoConfiguration
+com.cmsr.onebase.framework.redis.config.OneBaseCacheAutoConfiguration

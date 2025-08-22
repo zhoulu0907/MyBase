@@ -581,64 +581,64 @@ CACHE 1;
 ALTER SEQUENCE "public"."system_users_seq" OWNER TO "postgres";
 
 -- ----------------------------
--- Sequence structure for yudao_demo01_contact_seq
+-- Sequence structure for onebase_demo01_contact_seq
 -- ----------------------------
-DROP SEQUENCE IF EXISTS "public"."yudao_demo01_contact_seq";
-CREATE SEQUENCE "public"."yudao_demo01_contact_seq" 
+DROP SEQUENCE IF EXISTS "public"."onebase_demo01_contact_seq";
+CREATE SEQUENCE "public"."onebase_demo01_contact_seq"
 INCREMENT 1
 MINVALUE  1
 MAXVALUE 9223372036854775807
 START 2
 CACHE 1;
-ALTER SEQUENCE "public"."yudao_demo01_contact_seq" OWNER TO "postgres";
+ALTER SEQUENCE "public"."onebase_demo01_contact_seq" OWNER TO "postgres";
 
 -- ----------------------------
--- Sequence structure for yudao_demo02_category_seq
+-- Sequence structure for onebase_demo02_category_seq
 -- ----------------------------
-DROP SEQUENCE IF EXISTS "public"."yudao_demo02_category_seq";
-CREATE SEQUENCE "public"."yudao_demo02_category_seq" 
+DROP SEQUENCE IF EXISTS "public"."onebase_demo02_category_seq";
+CREATE SEQUENCE "public"."onebase_demo02_category_seq"
 INCREMENT 1
 MINVALUE  1
 MAXVALUE 9223372036854775807
 START 7
 CACHE 1;
-ALTER SEQUENCE "public"."yudao_demo02_category_seq" OWNER TO "postgres";
+ALTER SEQUENCE "public"."onebase_demo02_category_seq" OWNER TO "postgres";
 
 -- ----------------------------
--- Sequence structure for yudao_demo03_course_seq
+-- Sequence structure for onebase_demo03_course_seq
 -- ----------------------------
-DROP SEQUENCE IF EXISTS "public"."yudao_demo03_course_seq";
-CREATE SEQUENCE "public"."yudao_demo03_course_seq" 
+DROP SEQUENCE IF EXISTS "public"."onebase_demo03_course_seq";
+CREATE SEQUENCE "public"."onebase_demo03_course_seq"
 INCREMENT 1
 MINVALUE  1
 MAXVALUE 9223372036854775807
 START 14
 CACHE 1;
-ALTER SEQUENCE "public"."yudao_demo03_course_seq" OWNER TO "postgres";
+ALTER SEQUENCE "public"."onebase_demo03_course_seq" OWNER TO "postgres";
 
 -- ----------------------------
--- Sequence structure for yudao_demo03_grade_seq
+-- Sequence structure for onebase_demo03_grade_seq
 -- ----------------------------
-DROP SEQUENCE IF EXISTS "public"."yudao_demo03_grade_seq";
-CREATE SEQUENCE "public"."yudao_demo03_grade_seq" 
+DROP SEQUENCE IF EXISTS "public"."onebase_demo03_grade_seq";
+CREATE SEQUENCE "public"."onebase_demo03_grade_seq"
 INCREMENT 1
 MINVALUE  1
 MAXVALUE 9223372036854775807
 START 10
 CACHE 1;
-ALTER SEQUENCE "public"."yudao_demo03_grade_seq" OWNER TO "postgres";
+ALTER SEQUENCE "public"."onebase_demo03_grade_seq" OWNER TO "postgres";
 
 -- ----------------------------
--- Sequence structure for yudao_demo03_student_seq
+-- Sequence structure for onebase_demo03_student_seq
 -- ----------------------------
-DROP SEQUENCE IF EXISTS "public"."yudao_demo03_student_seq";
-CREATE SEQUENCE "public"."yudao_demo03_student_seq" 
+DROP SEQUENCE IF EXISTS "public"."onebase_demo03_student_seq";
+CREATE SEQUENCE "public"."onebase_demo03_student_seq"
 INCREMENT 1
 MINVALUE  1
 MAXVALUE 9223372036854775807
 START 10
 CACHE 1;
-ALTER SEQUENCE "public"."yudao_demo03_student_seq" OWNER TO "postgres";
+ALTER SEQUENCE "public"."onebase_demo03_student_seq" OWNER TO "postgres";
 
 -- ----------------------------
 -- Table structure for app_application
@@ -3371,10 +3371,10 @@ COMMENT ON COLUMN "public"."system_users"."user_type" IS '用户类型';
 COMMENT ON TABLE "public"."system_users" IS '用户信息表';
 
 -- ----------------------------
--- Table structure for yudao_demo01_contact
+-- Table structure for onebase_demo01_contact
 -- ----------------------------
-DROP TABLE IF EXISTS "public"."yudao_demo01_contact";
-CREATE TABLE "public"."yudao_demo01_contact" (
+DROP TABLE IF EXISTS "public"."onebase_demo01_contact";
+CREATE TABLE "public"."onebase_demo01_contact" (
   "id" int8 NOT NULL,
   "name" varchar(100) COLLATE "pg_catalog"."default" NOT NULL DEFAULT ''::character varying,
   "sex" int2 NOT NULL,
@@ -3389,26 +3389,26 @@ CREATE TABLE "public"."yudao_demo01_contact" (
   "tenant_id" int8 NOT NULL DEFAULT 0
 )
 ;
-ALTER TABLE "public"."yudao_demo01_contact" OWNER TO "postgres";
-COMMENT ON COLUMN "public"."yudao_demo01_contact"."id" IS '编号';
-COMMENT ON COLUMN "public"."yudao_demo01_contact"."name" IS '名字';
-COMMENT ON COLUMN "public"."yudao_demo01_contact"."sex" IS '性别';
-COMMENT ON COLUMN "public"."yudao_demo01_contact"."birthday" IS '出生年';
-COMMENT ON COLUMN "public"."yudao_demo01_contact"."description" IS '简介';
-COMMENT ON COLUMN "public"."yudao_demo01_contact"."avatar" IS '头像';
-COMMENT ON COLUMN "public"."yudao_demo01_contact"."creator" IS '创建者';
-COMMENT ON COLUMN "public"."yudao_demo01_contact"."create_time" IS '创建时间';
-COMMENT ON COLUMN "public"."yudao_demo01_contact"."updater" IS '更新者';
-COMMENT ON COLUMN "public"."yudao_demo01_contact"."update_time" IS '更新时间';
-COMMENT ON COLUMN "public"."yudao_demo01_contact"."deleted" IS '是否删除';
-COMMENT ON COLUMN "public"."yudao_demo01_contact"."tenant_id" IS '租户编号';
-COMMENT ON TABLE "public"."yudao_demo01_contact" IS '示例联系人表';
+ALTER TABLE "public"."onebase_demo01_contact" OWNER TO "postgres";
+COMMENT ON COLUMN "public"."onebase_demo01_contact"."id" IS '编号';
+COMMENT ON COLUMN "public"."onebase_demo01_contact"."name" IS '名字';
+COMMENT ON COLUMN "public"."onebase_demo01_contact"."sex" IS '性别';
+COMMENT ON COLUMN "public"."onebase_demo01_contact"."birthday" IS '出生年';
+COMMENT ON COLUMN "public"."onebase_demo01_contact"."description" IS '简介';
+COMMENT ON COLUMN "public"."onebase_demo01_contact"."avatar" IS '头像';
+COMMENT ON COLUMN "public"."onebase_demo01_contact"."creator" IS '创建者';
+COMMENT ON COLUMN "public"."onebase_demo01_contact"."create_time" IS '创建时间';
+COMMENT ON COLUMN "public"."onebase_demo01_contact"."updater" IS '更新者';
+COMMENT ON COLUMN "public"."onebase_demo01_contact"."update_time" IS '更新时间';
+COMMENT ON COLUMN "public"."onebase_demo01_contact"."deleted" IS '是否删除';
+COMMENT ON COLUMN "public"."onebase_demo01_contact"."tenant_id" IS '租户编号';
+COMMENT ON TABLE "public"."onebase_demo01_contact" IS '示例联系人表';
 
 -- ----------------------------
--- Table structure for yudao_demo02_category
+-- Table structure for onebase_demo02_category
 -- ----------------------------
-DROP TABLE IF EXISTS "public"."yudao_demo02_category";
-CREATE TABLE "public"."yudao_demo02_category" (
+DROP TABLE IF EXISTS "public"."onebase_demo02_category";
+CREATE TABLE "public"."onebase_demo02_category" (
   "id" int8 NOT NULL,
   "name" varchar(100) COLLATE "pg_catalog"."default" NOT NULL DEFAULT ''::character varying,
   "parent_id" int8 NOT NULL,
@@ -3420,23 +3420,23 @@ CREATE TABLE "public"."yudao_demo02_category" (
   "tenant_id" int8 NOT NULL DEFAULT 0
 )
 ;
-ALTER TABLE "public"."yudao_demo02_category" OWNER TO "postgres";
-COMMENT ON COLUMN "public"."yudao_demo02_category"."id" IS '编号';
-COMMENT ON COLUMN "public"."yudao_demo02_category"."name" IS '名字';
-COMMENT ON COLUMN "public"."yudao_demo02_category"."parent_id" IS '父级编号';
-COMMENT ON COLUMN "public"."yudao_demo02_category"."creator" IS '创建者';
-COMMENT ON COLUMN "public"."yudao_demo02_category"."create_time" IS '创建时间';
-COMMENT ON COLUMN "public"."yudao_demo02_category"."updater" IS '更新者';
-COMMENT ON COLUMN "public"."yudao_demo02_category"."update_time" IS '更新时间';
-COMMENT ON COLUMN "public"."yudao_demo02_category"."deleted" IS '是否删除';
-COMMENT ON COLUMN "public"."yudao_demo02_category"."tenant_id" IS '租户编号';
-COMMENT ON TABLE "public"."yudao_demo02_category" IS '示例分类表';
+ALTER TABLE "public"."onebase_demo02_category" OWNER TO "postgres";
+COMMENT ON COLUMN "public"."onebase_demo02_category"."id" IS '编号';
+COMMENT ON COLUMN "public"."onebase_demo02_category"."name" IS '名字';
+COMMENT ON COLUMN "public"."onebase_demo02_category"."parent_id" IS '父级编号';
+COMMENT ON COLUMN "public"."onebase_demo02_category"."creator" IS '创建者';
+COMMENT ON COLUMN "public"."onebase_demo02_category"."create_time" IS '创建时间';
+COMMENT ON COLUMN "public"."onebase_demo02_category"."updater" IS '更新者';
+COMMENT ON COLUMN "public"."onebase_demo02_category"."update_time" IS '更新时间';
+COMMENT ON COLUMN "public"."onebase_demo02_category"."deleted" IS '是否删除';
+COMMENT ON COLUMN "public"."onebase_demo02_category"."tenant_id" IS '租户编号';
+COMMENT ON TABLE "public"."onebase_demo02_category" IS '示例分类表';
 
 -- ----------------------------
--- Table structure for yudao_demo03_course
+-- Table structure for onebase_demo03_course
 -- ----------------------------
-DROP TABLE IF EXISTS "public"."yudao_demo03_course";
-CREATE TABLE "public"."yudao_demo03_course" (
+DROP TABLE IF EXISTS "public"."onebase_demo03_course";
+CREATE TABLE "public"."onebase_demo03_course" (
   "id" int8 NOT NULL,
   "student_id" int8 NOT NULL,
   "name" varchar(100) COLLATE "pg_catalog"."default" NOT NULL DEFAULT ''::character varying,
@@ -3449,24 +3449,24 @@ CREATE TABLE "public"."yudao_demo03_course" (
   "tenant_id" int8 NOT NULL DEFAULT 0
 )
 ;
-ALTER TABLE "public"."yudao_demo03_course" OWNER TO "postgres";
-COMMENT ON COLUMN "public"."yudao_demo03_course"."id" IS '编号';
-COMMENT ON COLUMN "public"."yudao_demo03_course"."student_id" IS '学生编号';
-COMMENT ON COLUMN "public"."yudao_demo03_course"."name" IS '名字';
-COMMENT ON COLUMN "public"."yudao_demo03_course"."score" IS '分数';
-COMMENT ON COLUMN "public"."yudao_demo03_course"."creator" IS '创建者';
-COMMENT ON COLUMN "public"."yudao_demo03_course"."create_time" IS '创建时间';
-COMMENT ON COLUMN "public"."yudao_demo03_course"."updater" IS '更新者';
-COMMENT ON COLUMN "public"."yudao_demo03_course"."update_time" IS '更新时间';
-COMMENT ON COLUMN "public"."yudao_demo03_course"."deleted" IS '是否删除';
-COMMENT ON COLUMN "public"."yudao_demo03_course"."tenant_id" IS '租户编号';
-COMMENT ON TABLE "public"."yudao_demo03_course" IS '学生课程表';
+ALTER TABLE "public"."onebase_demo03_course" OWNER TO "postgres";
+COMMENT ON COLUMN "public"."onebase_demo03_course"."id" IS '编号';
+COMMENT ON COLUMN "public"."onebase_demo03_course"."student_id" IS '学生编号';
+COMMENT ON COLUMN "public"."onebase_demo03_course"."name" IS '名字';
+COMMENT ON COLUMN "public"."onebase_demo03_course"."score" IS '分数';
+COMMENT ON COLUMN "public"."onebase_demo03_course"."creator" IS '创建者';
+COMMENT ON COLUMN "public"."onebase_demo03_course"."create_time" IS '创建时间';
+COMMENT ON COLUMN "public"."onebase_demo03_course"."updater" IS '更新者';
+COMMENT ON COLUMN "public"."onebase_demo03_course"."update_time" IS '更新时间';
+COMMENT ON COLUMN "public"."onebase_demo03_course"."deleted" IS '是否删除';
+COMMENT ON COLUMN "public"."onebase_demo03_course"."tenant_id" IS '租户编号';
+COMMENT ON TABLE "public"."onebase_demo03_course" IS '学生课程表';
 
 -- ----------------------------
--- Table structure for yudao_demo03_grade
+-- Table structure for onebase_demo03_grade
 -- ----------------------------
-DROP TABLE IF EXISTS "public"."yudao_demo03_grade";
-CREATE TABLE "public"."yudao_demo03_grade" (
+DROP TABLE IF EXISTS "public"."onebase_demo03_grade";
+CREATE TABLE "public"."onebase_demo03_grade" (
   "id" int8 NOT NULL,
   "student_id" int8 NOT NULL,
   "name" varchar(100) COLLATE "pg_catalog"."default" NOT NULL DEFAULT ''::character varying,
@@ -3479,24 +3479,24 @@ CREATE TABLE "public"."yudao_demo03_grade" (
   "tenant_id" int8 NOT NULL DEFAULT 0
 )
 ;
-ALTER TABLE "public"."yudao_demo03_grade" OWNER TO "postgres";
-COMMENT ON COLUMN "public"."yudao_demo03_grade"."id" IS '编号';
-COMMENT ON COLUMN "public"."yudao_demo03_grade"."student_id" IS '学生编号';
-COMMENT ON COLUMN "public"."yudao_demo03_grade"."name" IS '名字';
-COMMENT ON COLUMN "public"."yudao_demo03_grade"."teacher" IS '班主任';
-COMMENT ON COLUMN "public"."yudao_demo03_grade"."creator" IS '创建者';
-COMMENT ON COLUMN "public"."yudao_demo03_grade"."create_time" IS '创建时间';
-COMMENT ON COLUMN "public"."yudao_demo03_grade"."updater" IS '更新者';
-COMMENT ON COLUMN "public"."yudao_demo03_grade"."update_time" IS '更新时间';
-COMMENT ON COLUMN "public"."yudao_demo03_grade"."deleted" IS '是否删除';
-COMMENT ON COLUMN "public"."yudao_demo03_grade"."tenant_id" IS '租户编号';
-COMMENT ON TABLE "public"."yudao_demo03_grade" IS '学生班级表';
+ALTER TABLE "public"."onebase_demo03_grade" OWNER TO "postgres";
+COMMENT ON COLUMN "public"."onebase_demo03_grade"."id" IS '编号';
+COMMENT ON COLUMN "public"."onebase_demo03_grade"."student_id" IS '学生编号';
+COMMENT ON COLUMN "public"."onebase_demo03_grade"."name" IS '名字';
+COMMENT ON COLUMN "public"."onebase_demo03_grade"."teacher" IS '班主任';
+COMMENT ON COLUMN "public"."onebase_demo03_grade"."creator" IS '创建者';
+COMMENT ON COLUMN "public"."onebase_demo03_grade"."create_time" IS '创建时间';
+COMMENT ON COLUMN "public"."onebase_demo03_grade"."updater" IS '更新者';
+COMMENT ON COLUMN "public"."onebase_demo03_grade"."update_time" IS '更新时间';
+COMMENT ON COLUMN "public"."onebase_demo03_grade"."deleted" IS '是否删除';
+COMMENT ON COLUMN "public"."onebase_demo03_grade"."tenant_id" IS '租户编号';
+COMMENT ON TABLE "public"."onebase_demo03_grade" IS '学生班级表';
 
 -- ----------------------------
--- Table structure for yudao_demo03_student
+-- Table structure for onebase_demo03_student
 -- ----------------------------
-DROP TABLE IF EXISTS "public"."yudao_demo03_student";
-CREATE TABLE "public"."yudao_demo03_student" (
+DROP TABLE IF EXISTS "public"."onebase_demo03_student";
+CREATE TABLE "public"."onebase_demo03_student" (
   "id" int8 NOT NULL,
   "name" varchar(100) COLLATE "pg_catalog"."default" NOT NULL DEFAULT ''::character varying,
   "sex" int2 NOT NULL,
@@ -3510,19 +3510,19 @@ CREATE TABLE "public"."yudao_demo03_student" (
   "tenant_id" int8 NOT NULL DEFAULT 0
 )
 ;
-ALTER TABLE "public"."yudao_demo03_student" OWNER TO "postgres";
-COMMENT ON COLUMN "public"."yudao_demo03_student"."id" IS '编号';
-COMMENT ON COLUMN "public"."yudao_demo03_student"."name" IS '名字';
-COMMENT ON COLUMN "public"."yudao_demo03_student"."sex" IS '性别';
-COMMENT ON COLUMN "public"."yudao_demo03_student"."birthday" IS '出生日期';
-COMMENT ON COLUMN "public"."yudao_demo03_student"."description" IS '简介';
-COMMENT ON COLUMN "public"."yudao_demo03_student"."creator" IS '创建者';
-COMMENT ON COLUMN "public"."yudao_demo03_student"."create_time" IS '创建时间';
-COMMENT ON COLUMN "public"."yudao_demo03_student"."updater" IS '更新者';
-COMMENT ON COLUMN "public"."yudao_demo03_student"."update_time" IS '更新时间';
-COMMENT ON COLUMN "public"."yudao_demo03_student"."deleted" IS '是否删除';
-COMMENT ON COLUMN "public"."yudao_demo03_student"."tenant_id" IS '租户编号';
-COMMENT ON TABLE "public"."yudao_demo03_student" IS '学生表';
+ALTER TABLE "public"."onebase_demo03_student" OWNER TO "postgres";
+COMMENT ON COLUMN "public"."onebase_demo03_student"."id" IS '编号';
+COMMENT ON COLUMN "public"."onebase_demo03_student"."name" IS '名字';
+COMMENT ON COLUMN "public"."onebase_demo03_student"."sex" IS '性别';
+COMMENT ON COLUMN "public"."onebase_demo03_student"."birthday" IS '出生日期';
+COMMENT ON COLUMN "public"."onebase_demo03_student"."description" IS '简介';
+COMMENT ON COLUMN "public"."onebase_demo03_student"."creator" IS '创建者';
+COMMENT ON COLUMN "public"."onebase_demo03_student"."create_time" IS '创建时间';
+COMMENT ON COLUMN "public"."onebase_demo03_student"."updater" IS '更新者';
+COMMENT ON COLUMN "public"."onebase_demo03_student"."update_time" IS '更新时间';
+COMMENT ON COLUMN "public"."onebase_demo03_student"."deleted" IS '是否删除';
+COMMENT ON COLUMN "public"."onebase_demo03_student"."tenant_id" IS '租户编号';
+COMMENT ON TABLE "public"."onebase_demo03_student" IS '学生表';
 
 -- ----------------------------
 -- Alter sequences owned by
@@ -3770,27 +3770,27 @@ SELECT setval('"public"."system_users_seq"', 136, true);
 -- ----------------------------
 -- Alter sequences owned by
 -- ----------------------------
-SELECT setval('"public"."yudao_demo01_contact_seq"', 2, false);
+SELECT setval('"public"."onebase_demo01_contact_seq"', 2, false);
 
 -- ----------------------------
 -- Alter sequences owned by
 -- ----------------------------
-SELECT setval('"public"."yudao_demo02_category_seq"', 7, false);
+SELECT setval('"public"."onebase_demo02_category_seq"', 7, false);
 
 -- ----------------------------
 -- Alter sequences owned by
 -- ----------------------------
-SELECT setval('"public"."yudao_demo03_course_seq"', 14, false);
+SELECT setval('"public"."onebase_demo03_course_seq"', 14, false);
 
 -- ----------------------------
 -- Alter sequences owned by
 -- ----------------------------
-SELECT setval('"public"."yudao_demo03_grade_seq"', 10, false);
+SELECT setval('"public"."onebase_demo03_grade_seq"', 10, false);
 
 -- ----------------------------
 -- Alter sequences owned by
 -- ----------------------------
-SELECT setval('"public"."yudao_demo03_student_seq"', 10, false);
+SELECT setval('"public"."onebase_demo03_student_seq"', 10, false);
 
 -- ----------------------------
 -- Primary Key structure for table app_application
@@ -4295,26 +4295,26 @@ ALTER TABLE "public"."system_user_role" ADD CONSTRAINT "pk_system_user_role" PRI
 ALTER TABLE "public"."system_users" ADD CONSTRAINT "pk_system_users" PRIMARY KEY ("id");
 
 -- ----------------------------
--- Primary Key structure for table yudao_demo01_contact
+-- Primary Key structure for table onebase_demo01_contact
 -- ----------------------------
-ALTER TABLE "public"."yudao_demo01_contact" ADD CONSTRAINT "pk_yudao_demo01_contact" PRIMARY KEY ("id");
+ALTER TABLE "public"."onebase_demo01_contact" ADD CONSTRAINT "pk_onebase_demo01_contact" PRIMARY KEY ("id");
 
 -- ----------------------------
--- Primary Key structure for table yudao_demo02_category
+-- Primary Key structure for table onebase_demo02_category
 -- ----------------------------
-ALTER TABLE "public"."yudao_demo02_category" ADD CONSTRAINT "pk_yudao_demo02_category" PRIMARY KEY ("id");
+ALTER TABLE "public"."onebase_demo02_category" ADD CONSTRAINT "pk_onebase_demo02_category" PRIMARY KEY ("id");
 
 -- ----------------------------
--- Primary Key structure for table yudao_demo03_course
+-- Primary Key structure for table onebase_demo03_course
 -- ----------------------------
-ALTER TABLE "public"."yudao_demo03_course" ADD CONSTRAINT "pk_yudao_demo03_course" PRIMARY KEY ("id");
+ALTER TABLE "public"."onebase_demo03_course" ADD CONSTRAINT "pk_onebase_demo03_course" PRIMARY KEY ("id");
 
 -- ----------------------------
--- Primary Key structure for table yudao_demo03_grade
+-- Primary Key structure for table onebase_demo03_grade
 -- ----------------------------
-ALTER TABLE "public"."yudao_demo03_grade" ADD CONSTRAINT "pk_yudao_demo03_grade" PRIMARY KEY ("id");
+ALTER TABLE "public"."onebase_demo03_grade" ADD CONSTRAINT "pk_onebase_demo03_grade" PRIMARY KEY ("id");
 
 -- ----------------------------
--- Primary Key structure for table yudao_demo03_student
+-- Primary Key structure for table onebase_demo03_student
 -- ----------------------------
-ALTER TABLE "public"."yudao_demo03_student" ADD CONSTRAINT "pk_yudao_demo03_student" PRIMARY KEY ("id");
+ALTER TABLE "public"."onebase_demo03_student" ADD CONSTRAINT "pk_onebase_demo03_student" PRIMARY KEY ("id");

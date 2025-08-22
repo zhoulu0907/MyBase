@@ -8,7 +8,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  *
  * @author 麻薯
  */
-@ConfigurationProperties("yudao.tracer")
+@ConfigurationProperties("onebase.tracer")
 @Data
 public class TracerProperties {
 }

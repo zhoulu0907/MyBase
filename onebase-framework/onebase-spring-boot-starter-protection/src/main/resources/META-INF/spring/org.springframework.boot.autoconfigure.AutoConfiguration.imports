@@ -1,4 +1,4 @@
-com.cmsr.onebase.framework.idempotent.config.YudaoIdempotentConfiguration
-com.cmsr.onebase.framework.lock4j.config.YudaoLock4jConfiguration
-com.cmsr.onebase.framework.ratelimiter.config.YudaoRateLimiterConfiguration
-com.cmsr.onebase.framework.signature.config.YudaoApiSignatureAutoConfiguration
+com.cmsr.onebase.framework.idempotent.config.OneBaseIdempotentConfiguration
+com.cmsr.onebase.framework.lock4j.config.OneBaseLock4jConfiguration
+com.cmsr.onebase.framework.ratelimiter.config.OneBaseRateLimiterConfiguration
+com.cmsr.onebase.framework.signature.config.OneBaseApiSignatureAutoConfiguration

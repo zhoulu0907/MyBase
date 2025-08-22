@@ -15,10 +15,10 @@ public class FileRespVO {
     @Schema(description = "配置编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "11")
     private Long configId;
 
-    @Schema(description = "文件路径", requiredMode = Schema.RequiredMode.REQUIRED, example = "yudao.jpg")
+    @Schema(description = "文件路径", requiredMode = Schema.RequiredMode.REQUIRED, example = "onebase.jpg")
     private String path;
 
-    @Schema(description = "原文件名", requiredMode = Schema.RequiredMode.REQUIRED, example = "yudao.jpg")
+    @Schema(description = "原文件名", requiredMode = Schema.RequiredMode.REQUIRED, example = "onebase.jpg")
     private String name;
 
     @Schema(description = "文件 URL", requiredMode = Schema.RequiredMode.REQUIRED, example = "https://www.cmsr.com")

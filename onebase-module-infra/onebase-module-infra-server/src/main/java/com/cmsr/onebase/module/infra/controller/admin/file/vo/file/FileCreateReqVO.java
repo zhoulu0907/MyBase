@@ -13,11 +13,11 @@ public class FileCreateReqVO {
     private Long configId;
 
     @NotNull(message = "文件路径不能为空")
-    @Schema(description = "文件路径", requiredMode = Schema.RequiredMode.REQUIRED, example = "yudao.jpg")
+    @Schema(description = "文件路径", requiredMode = Schema.RequiredMode.REQUIRED, example = "onebase.jpg")
     private String path;
 
     @NotNull(message = "原文件名不能为空")
-    @Schema(description = "原文件名", requiredMode = Schema.RequiredMode.REQUIRED, example = "yudao.jpg")
+    @Schema(description = "原文件名", requiredMode = Schema.RequiredMode.REQUIRED, example = "onebase.jpg")
     private String name;
 
     @NotNull(message = "文件 URL不能为空")

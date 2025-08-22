@@ -7,14 +7,14 @@ import com.cmsr.onebase.framework.idempotent.core.keyresolver.IdempotentKeyResol
 import com.cmsr.onebase.framework.idempotent.core.keyresolver.impl.UserIdempotentKeyResolver;
 import com.cmsr.onebase.framework.idempotent.core.redis.IdempotentRedisDAO;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
-import com.cmsr.onebase.framework.redis.config.YudaoRedisAutoConfiguration;
+import com.cmsr.onebase.framework.redis.config.OneBaseRedisAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 import java.util.List;
 
-@AutoConfiguration(after = YudaoRedisAutoConfiguration.class)
-public class YudaoIdempotentConfiguration {
+@AutoConfiguration(after = OneBaseRedisAutoConfiguration.class)
+public class OneBaseIdempotentConfiguration {
 
     @Bean
     public IdempotentAspect idempotentAspect(List<IdempotentKeyResolver> keyResolvers, IdempotentRedisDAO idempotentRedisDAO) {

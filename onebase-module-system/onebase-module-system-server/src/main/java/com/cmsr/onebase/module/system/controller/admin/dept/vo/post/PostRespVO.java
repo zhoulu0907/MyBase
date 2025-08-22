@@ -23,7 +23,7 @@ public class PostRespVO {
     @ExcelProperty("岗位名称")
     private String name;
 
-    @Schema(description = "岗位编码", requiredMode = Schema.RequiredMode.REQUIRED, example = "yudao")
+    @Schema(description = "岗位编码", requiredMode = Schema.RequiredMode.REQUIRED, example = "onebase")
     @ExcelProperty("岗位编码")
     private String code;
 

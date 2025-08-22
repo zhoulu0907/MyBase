@@ -69,7 +69,7 @@ spring:
   # Redis 配置。Redisson 默认的配置足够使用，一般不需要进行调优
   data:
     redis:
-      host: 400-infra.server.iocoder.cn # 地址
+      host: 400-infra.server.aaa.com # 地址
       port: 6379 # 端口
       database: 1 # 数据库索引
 #      password: 123456 # 密码，建议生产环境开启
@@ -155,7 +155,7 @@ wx:
 --- #################### OneBase相关配置 ####################
 
 # OneBase配置项，设置当前项目所有自定义的配置
-yudao:
+onebase:
   demo: true # 开启演示模式
 
 justauth:

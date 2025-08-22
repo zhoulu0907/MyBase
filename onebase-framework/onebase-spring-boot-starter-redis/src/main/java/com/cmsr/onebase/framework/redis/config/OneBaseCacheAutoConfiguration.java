@@ -19,15 +19,15 @@ import org.springframework.util.StringUtils;
 
 import java.util.Objects;
 
-import static com.cmsr.onebase.framework.redis.config.YudaoRedisAutoConfiguration.buildRedisSerializer;
+import static com.cmsr.onebase.framework.redis.config.OneBaseRedisAutoConfiguration.buildRedisSerializer;
 
 /**
  * Cache 配置类，基于 Redis 实现
  */
 @AutoConfiguration
-@EnableConfigurationProperties({CacheProperties.class, YudaoCacheProperties.class})
+@EnableConfigurationProperties({CacheProperties.class, OneBaseCacheProperties.class})
 @EnableCaching
-public class YudaoCacheAutoConfiguration {
+public class OneBaseCacheAutoConfiguration {
 
     /**
      * RedisCacheConfiguration Bean
@@ -70,11 +70,11 @@ public class YudaoCacheAutoConfiguration {
     @Bean
     public RedisCacheManager redisCacheManager(RedisTemplate<String, Object> redisTemplate,
                                                RedisCacheConfiguration redisCacheConfiguration,
-                                               YudaoCacheProperties yudaoCacheProperties) {
+                                               OneBaseCacheProperties oneBaseCacheProperties) {
         // 创建 RedisCacheWriter 对象
         RedisConnectionFactory connectionFactory = Objects.requireNonNull(redisTemplate.getConnectionFactory());
         RedisCacheWriter cacheWriter = RedisCacheWriter.nonLockingRedisCacheWriter(connectionFactory,
-                BatchStrategies.scan(yudaoCacheProperties.getRedisScanBatchSize()));
+                BatchStrategies.scan(oneBaseCacheProperties.getRedisScanBatchSize()));
         // 创建 TenantRedisCacheManager 对象
         return new TimeoutRedisCacheManager(cacheWriter, redisCacheConfiguration);
     }

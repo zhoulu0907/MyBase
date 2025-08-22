@@ -47,7 +47,7 @@ public interface SocialClientApi {
     @Operation(summary = "获得微信小程序的手机信息")
     @Parameters({
             @Parameter(name = "userType", description = "用户类型", example = "1", required = true),
-            @Parameter(name = "phoneCode", description = "手机授权码", example = "yudao11", required = true)
+            @Parameter(name = "phoneCode", description = "手机授权码", example = "onebase11", required = true)
     })
     CommonResult<SocialWxPhoneNumberInfoRespDTO> getWxMaPhoneNumberInfo(@RequestParam("userType") Integer userType,
                                                                         @RequestParam("phoneCode") String phoneCode);

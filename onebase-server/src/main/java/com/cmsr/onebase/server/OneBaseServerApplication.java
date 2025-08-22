@@ -8,8 +8,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  *
  *
  */
-@SuppressWarnings("SpringComponentScan") // 忽略 IDEA 无法识别 ${yudao.info.base-package}
-@SpringBootApplication(scanBasePackages = {"${yudao.info.base-package}.server", "${yudao.info.base-package}.module"},
+@SuppressWarnings("SpringComponentScan") // 忽略 IDEA 无法识别 ${onebase.info.base-package}
+@SpringBootApplication(scanBasePackages = {"${onebase.info.base-package}.server", "${onebase.info.base-package}.module"},
         excludeName = {
         // RPC 相关
         // "org.springframework.cloud.openfeign.FeignAutoConfiguration",

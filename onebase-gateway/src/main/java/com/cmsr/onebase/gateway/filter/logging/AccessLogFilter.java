@@ -48,7 +48,7 @@ import static cn.hutool.core.date.DatePattern.NORM_DATETIME_MS_FORMATTER;
 /**
  * 网关的访问日志过滤器
  *
- * 从功能上，它类似 yudao-spring-boot-starter-web 的 ApiAccessLogFilter 过滤器
+ * 从功能上，它类似 onebase-spring-boot-starter-web 的 ApiAccessLogFilter 过滤器
  *
  * TODO 开发者：如果网关执行异常，不会记录访问日志，后续研究下 https://github.com/Silvmike/webflux-demo/blob/master/tests/src/test/java/ru/hardcoders/demo/webflux/web_handler/filters/logging
  *

@@ -10,7 +10,7 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 public class PostPageReqVO extends PageParam {
 
-    @Schema(description = "岗位编码，模糊匹配", example = "yudao")
+    @Schema(description = "岗位编码，模糊匹配", example = "onebase")
     private String code;
 
     @Schema(description = "岗位名称，模糊匹配", example = "onebase")

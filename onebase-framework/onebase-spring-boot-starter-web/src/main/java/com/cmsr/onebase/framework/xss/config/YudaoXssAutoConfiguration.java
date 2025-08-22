@@ -17,11 +17,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import static com.cmsr.onebase.framework.web.config.YudaoWebAutoConfiguration.createFilterBean;
+import static com.cmsr.onebase.framework.web.config.OneBaseWebAutoConfiguration.createFilterBean;
 
 @AutoConfiguration
 @EnableConfigurationProperties(XssProperties.class)
-@ConditionalOnProperty(prefix = "yudao.xss", name = "enable", havingValue = "true", matchIfMissing = true) // 设置为 false 时，禁用
+@ConditionalOnProperty(prefix = "onebase.xss", name = "enable", havingValue = "true", matchIfMissing = true) // 设置为 false 时，禁用
 public class YudaoXssAutoConfiguration implements WebMvcConfigurer {
 
     /**
@@ -43,7 +43,7 @@ public class YudaoXssAutoConfiguration implements WebMvcConfigurer {
     @Bean
     @ConditionalOnMissingBean(name = "xssJacksonCustomizer")
     @ConditionalOnBean(ObjectMapper.class)
-    @ConditionalOnProperty(value = "yudao.xss.enable", havingValue = "true")
+    @ConditionalOnProperty(value = "onebase.xss.enable", havingValue = "true")
     public Jackson2ObjectMapperBuilderCustomizer xssJacksonCustomizer(XssProperties properties,
                                                                       PathMatcher pathMatcher,
                                                                       XssCleaner xssCleaner) {
