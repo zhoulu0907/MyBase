@@ -16,11 +16,15 @@ interface FieldOption {
 }
 
 interface RelationFormValues {
-  sourceEntityId: string;
+  sourceEntityId?: string;
   sourceFieldId: string;
   relationshipType: string;
-  targetEntityId: string;
-  targetFieldId: string;
+  targetEntityId?: string;
+  targetFieldId?: string;
+  relationName?: string;
+  relationshipId?: string;
+  target?: { cell: string; port: string };
+  source?: { cell: string; port: string };
 }
 
 interface EditRelationDrawerProps {
@@ -62,20 +66,12 @@ const EditRelationDrawer: React.FC<EditRelationDrawerProps> = ({ visible, setVis
     console.log('relationData=====', relationData);
     if (visible && relationData) {
       form.setFieldsValue({
-        sourceEntityId: relationData.sourceEntityId,
-        sourceFieldId: relationData.sourceFieldId,
+        sourceEntityId: relationData.source?.cell || relationData.sourceEntityId,
+        sourceFieldId: relationData.source?.port || relationData.sourceFieldId,
         relationshipType: relationData.relationshipType,
-        targetEntityId: relationData.targetEntityId,
-        targetFieldId: relationData.targetFieldId
+        targetEntityId: relationData.target?.cell || relationData.targetEntityId,
+        targetFieldId: relationData.target?.port || relationData.targetFieldId
       });
-
-      // 加载对应的字段选项
-      if (relationData.sourceEntityId) {
-        loadFields(relationData.sourceEntityId, 'left');
-      }
-      if (relationData.targetEntityId) {
-        loadFields(relationData.targetEntityId, 'right');
-      }
     }
   }, [visible, relationData]);
 
@@ -88,11 +84,12 @@ const EditRelationDrawer: React.FC<EditRelationDrawerProps> = ({ visible, setVis
           value: entity.id
         }));
         setLeftEntityOptions(entityOptions);
-        setRightEntityOptions(entityOptions);
+        setRightEntityOptions(entityOptions.filter((item: EntityOption) => item.value !== relationData?.source?.cell));
+        handleEntityChange(relationData?.source?.cell || relationData?.sourceEntityId || '', 'left');
+        handleEntityChange(relationData?.target?.cell || relationData?.targetEntityId || '', 'right');
       }
     } catch (error) {
       console.error('加载实体列表失败:', error);
-      Message.error('加载实体列表失败');
     }
   };
 
@@ -114,7 +111,6 @@ const EditRelationDrawer: React.FC<EditRelationDrawerProps> = ({ visible, setVis
       }
     } catch (error) {
       console.error('加载字段列表失败:', error);
-      Message.error('加载字段列表失败');
     } finally {
       setLoading(false);
     }
@@ -184,25 +180,20 @@ const EditRelationDrawer: React.FC<EditRelationDrawerProps> = ({ visible, setVis
           <h4>基本设置</h4>
 
           <Form form={form} layout="vertical" className={styles.form}>
-            <Form.Item
-              label="左关联表"
-              field="sourceEntityId"
-              required
-              rules={[{ required: true, message: '请选择左关联表' }]}
-            >
+            <Form.Item label="主表" field="sourceEntityId" required rules={[{ required: true, message: '请选择主表' }]}>
               <Select
-                placeholder="请选择左关联表"
+                placeholder="请选择主表"
                 options={leftEntityOptions}
                 onChange={(value) => handleEntityChange(value, 'left')}
-                allowClear
+                disabled
               />
             </Form.Item>
 
             <Form.Item
-              label="左关联字段"
+              label="主表字段"
               field="sourceFieldId"
               required
-              rules={[{ required: true, message: '请选择左关联字段' }]}
+              rules={[{ required: true, message: '请选择主表字段' }]}
             >
               <Select
                 placeholder="请选择字段"
@@ -221,15 +212,15 @@ const EditRelationDrawer: React.FC<EditRelationDrawerProps> = ({ visible, setVis
               <Select placeholder="请选择关联关系" options={relationTypes} allowClear />
             </Form.Item>
 
-            {/* 右关联表 */}
+            {/* 关联表 */}
             <Form.Item
-              label="右关联表"
+              label="关联表"
               field="targetEntityId"
               required
-              rules={[{ required: true, message: '请选择右关联表' }]}
+              rules={[{ required: true, message: '请选择关联表' }]}
             >
               <Select
-                placeholder="请选择右关联表"
+                placeholder="请选择关联表"
                 options={rightEntityOptions}
                 onChange={(value) => handleEntityChange(value, 'right')}
                 allowClear
@@ -237,10 +228,10 @@ const EditRelationDrawer: React.FC<EditRelationDrawerProps> = ({ visible, setVis
             </Form.Item>
 
             <Form.Item
-              label="右关联字段"
+              label="关联字段"
               field="targetFieldId"
               required
-              rules={[{ required: true, message: '请选择右关联字段' }]}
+              rules={[{ required: true, message: '请选择关联字段' }]}
             >
               <Select
                 placeholder="请选择字段"
