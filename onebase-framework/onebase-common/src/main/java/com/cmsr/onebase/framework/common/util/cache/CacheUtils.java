@@ -11,9 +11,13 @@ import java.util.concurrent.Executors;
  * Cache 工具类
  *
  */
+@Deprecated
 public class CacheUtils {
 
     /**
+     * 废弃
+     * 这种包装没有实际意义！刷新的策略很多，需要根据不同情况调整！
+     *
      * 构建异步刷新的 LoadingCache 对象
      *
      * 注意：如果你的缓存和 ThreadLocal 有关系，要么自己处理 ThreadLocal 的传递，要么使用 {@link #buildCache(Duration, CacheLoader)} 方法
@@ -26,6 +30,7 @@ public class CacheUtils {
      * @param loader  CacheLoader 对象
      * @return LoadingCache 对象
      */
+    @Deprecated
     public static <K, V> LoadingCache<K, V> buildAsyncReloadingCache(Duration duration, CacheLoader<K, V> loader) {
         return CacheBuilder.newBuilder()
                 // 只阻塞当前数据加载线程，其他线程返回旧值
@@ -35,12 +40,16 @@ public class CacheUtils {
     }
 
     /**
+     * 废弃
+     * 这种包装没有实际意义！刷新的策略很多，需要根据不同情况调整！
+     *
      * 构建同步刷新的 LoadingCache 对象
      *
      * @param duration 过期时间
      * @param loader  CacheLoader 对象
      * @return LoadingCache 对象
      */
+    @Deprecated
     public static <K, V> LoadingCache<K, V> buildCache(Duration duration, CacheLoader<K, V> loader) {
         return CacheBuilder.newBuilder().refreshAfterWrite(duration).build(loader);
     }
