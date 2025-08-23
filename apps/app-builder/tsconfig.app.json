@@ -30,7 +30,9 @@
     "skipLibCheck": true,
     "types": ["react", "react-dom", "node"],
     "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+
+    "experimentalDecorators": true,
   },
   "include": ["src", "src/types", "src/vite-env.d.ts"]
 }
