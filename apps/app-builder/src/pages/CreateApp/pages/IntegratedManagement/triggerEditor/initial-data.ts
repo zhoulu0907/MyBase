@@ -8,7 +8,7 @@ export const initialData: FlowDocumentJSON = {
       type: 'start',
       blocks: [],
       data: {
-        title: 'Start',
+        title: '开始',
         outputs: {
           type: 'object',
           properties: {
@@ -44,7 +44,7 @@ export const initialData: FlowDocumentJSON = {
       type: 'end',
       blocks: [],
       data: {
-        title: 'End',
+        title: '结束',
         inputsValues: {
           success: { type: 'constant', content: true, schema: { type: 'boolean' } },
         },
