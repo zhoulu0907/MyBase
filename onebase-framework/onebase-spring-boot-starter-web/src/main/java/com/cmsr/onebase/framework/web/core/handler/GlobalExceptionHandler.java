@@ -282,13 +282,6 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(value = Exception.class)
     public CommonResult<?> defaultExceptionHandler(HttpServletRequest req, Throwable ex) {
-        // 情况一：处理表不存在的异常
-        CommonResult<?> tableNotExistsResult = handleTableNotExists(ex);
-        if (tableNotExistsResult != null) {
-            return tableNotExistsResult;
-        }
-
-        // 情况二：处理异常
         log.error("[defaultExceptionHandler]", ex);
         // 插入异常日志
         createExceptionLog(req, ex);
@@ -304,8 +297,9 @@ public class GlobalExceptionHandler {
                     .put("method", req.getMethod())
                     .build();
             return CommonResult.error(INTERNAL_SERVER_ERROR.getCode(), INTERNAL_SERVER_ERROR.getMsg(), body);
+        } else {
+            return CommonResult.error(INTERNAL_SERVER_ERROR.getCode(), INTERNAL_SERVER_ERROR.getMsg());
         }
-        return CommonResult.error(INTERNAL_SERVER_ERROR.getCode(), INTERNAL_SERVER_ERROR.getMsg());
     }
 
     private void createExceptionLog(HttpServletRequest req, Throwable e) {
@@ -351,25 +345,6 @@ public class GlobalExceptionHandler {
         errorLog.setExceptionTime(LocalDateTime.now());
     }
 
-    /**
-     * 处理 Table 不存在的异常情况
-     *
-     * @param ex 异常
-     * @return 如果是 Table 不存在的异常，则返回对应的 CommonResult
-     */
-    private CommonResult<?> handleTableNotExists(Throwable ex) {
-        String message = ExceptionUtils.getRootCauseMessage(ex);
-        if (!message.contains("doesn't exist")) {
-            return null;
-        }
-        // 工作流
-        if (message.contains("bpm_")) {
-            log.error("[工作流模块 onebase-module-bpm - 表结构未导入]");
-            return CommonResult.error(NOT_IMPLEMENTED.getCode(),
-                    "[工作流模块 onebase-module-bpm - 表结构未导入]");
-        }
 
-        return null;
-    }
 
 }
