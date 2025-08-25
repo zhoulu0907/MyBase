@@ -38,10 +38,9 @@ public class OneBaseRedisAutoConfiguration {
         ObjectMapper objectMapper = new ObjectMapper();
         // 解决 LocalDateTime 的序列化
         objectMapper.registerModules(new JavaTimeModule());
-        GenericJackson2JsonRedisSerializer json = GenericJackson2JsonRedisSerializer.builder()
+        return GenericJackson2JsonRedisSerializer.builder()
                 .objectMapper(objectMapper)
                 .build();
-        return json;
     }
 
 }
