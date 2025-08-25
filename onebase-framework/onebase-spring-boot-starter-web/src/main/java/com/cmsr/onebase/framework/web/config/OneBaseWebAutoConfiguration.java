@@ -107,15 +107,6 @@ public class OneBaseWebAutoConfiguration implements WebMvcConfigurer {
         return bean;
     }
 
-    /**
-     * 创建 RestTemplate 实例
-     *
-     * @param restTemplateBuilder {@link RestTemplateAutoConfiguration#restTemplateBuilder}
-     */
-    @Bean
-    @ConditionalOnMissingBean
-    public RestTemplate restTemplate(RestTemplateBuilder restTemplateBuilder) {
-        return restTemplateBuilder.build();
-    }
+
 
 }
