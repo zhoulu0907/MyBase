@@ -1,20 +1,20 @@
 package com.cmsr.onebase.module.infra.dal.dataobject.logger;
 
-import com.cmsr.onebase.framework.apilog.core.enums.OperateTypeEnum;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
 import jakarta.persistence.Column;
 import jakarta.persistence.Table;
-import lombok.*;
-import lombok.experimental.SuperBuilder;import lombok.experimental.SuperBuilder;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
 
 /**
  * API 访问日志
- *
  */
 @Data
 @SuperBuilder
@@ -56,7 +56,7 @@ public class ApiAccessLogDO extends TenantBaseDO {
 
     /**
      * 链路追踪编号
-     *
+     * <p>
      * 一般来说，通过链路追踪编号，可以将访问日志，错误日志，链路追踪日志，logger 打印日志等，结合在一起，从而进行排错。
      */
     @Column(name = COLUMN_TRACE_ID)
@@ -68,14 +68,14 @@ public class ApiAccessLogDO extends TenantBaseDO {
     private Long userId;
     /**
      * 用户类型
-     *
+     * <p>
      * 枚举 {@link UserTypeEnum}
      */
     @Column(name = COLUMN_USER_TYPE)
     private Integer userType;
     /**
      * 应用名
-     *
+     * <p>
      * 目前读取 `spring.application.name` 配置项
      */
     @Column(name = COLUMN_APPLICATION_NAME)
@@ -95,7 +95,7 @@ public class ApiAccessLogDO extends TenantBaseDO {
     private String requestUrl;
     /**
      * 请求参数
-     *
+     * <p>
      * query: Query String
      * body: Quest Body
      */
@@ -131,8 +131,7 @@ public class ApiAccessLogDO extends TenantBaseDO {
     private String operateName;
     /**
      * 操作分类
-     *
-     * 枚举 {@link OperateTypeEnum}
+     * <p>
      */
     @Column(name = COLUMN_OPERATE_TYPE)
     private Integer operateType;
@@ -155,14 +154,14 @@ public class ApiAccessLogDO extends TenantBaseDO {
 
     /**
      * 结果码
-     *
+     * <p>
      * 目前使用的 {@link CommonResult#getCode()} 属性
      */
     @Column(name = COLUMN_RESULT_CODE)
     private Integer resultCode;
     /**
      * 结果提示
-     *
+     * <p>
      * 目前使用的 {@link CommonResult#getMsg()} 属性
      */
     @Column(name = COLUMN_RESULT_MSG)
