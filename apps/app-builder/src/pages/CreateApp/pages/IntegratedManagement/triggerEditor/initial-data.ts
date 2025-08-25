@@ -1,33 +1,54 @@
-import type { FlowDocumentJSON } from './typings';
+
+import { type FlowDocumentJSON } from './typings';
 
 export const initialData: FlowDocumentJSON = {
   nodes: [
     {
       id: 'start_0',
       type: 'start',
-      meta: {
-        position: { x: 0, y: 0 },
-      },
+      blocks: [],
       data: {
         title: '开始',
+        outputs: {
+          type: 'object',
+          properties: {
+            // query: {
+            //   type: 'string',
+            //   default: 'Hello Flow.',
+            // },
+            // enable: {
+            //   type: 'boolean',
+            //   default: true,
+            // },
+            // array_obj: {
+            //   type: 'array',
+            //   items: {
+            //     type: 'object',
+            //     properties: {
+            //       int: {
+            //         type: 'number',
+            //       },
+            //       str: {
+            //         type: 'string',
+            //       },
+            //     },
+            //   },
+            // },
+          },
+        },
       },
     },
+
     {
       id: 'end_0',
       type: 'end',
-      meta: {
-        position: { x: 800, y: 0 },
-      },
+      blocks: [],
       data: {
-        title: 'End',
-        content: 'End content'
+        title: '结束',
+        inputsValues: {
+          success: { type: 'constant', content: true, schema: { type: 'boolean' } },
+        },
       },
     },
-  ],
-  edges: [
-    {
-      sourceNodeID: 'start_0',
-      targetNodeID: 'end_0',
-    }
   ],
 };

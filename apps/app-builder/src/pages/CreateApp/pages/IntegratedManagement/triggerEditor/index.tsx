@@ -1,36 +1,27 @@
-import { EditorRenderer, FreeLayoutEditorProvider } from '@flowgram.ai/free-layout-editor';
-import '@flowgram.ai/free-layout-editor/index.css';
-import React from 'react';
-import { SidebarRenderer } from './components/sidebar';
-import { SidebarProvider } from './components/sidebar/sidebar-provider';
-import { Tools } from './components/tools';
-import { useEditorProps } from './hooks';
+import { EditorRenderer, FixedLayoutEditorProvider } from '@flowgram.ai/fixed-layout-editor';
+
+import '@flowgram.ai/fixed-layout-editor/index.css';
+import { SidebarProvider, SidebarRenderer } from './components/sidebar';
+import { useEditorProps } from './hooks/use-editor-props';
 import styles from './index.module.less';
 import { initialData } from './initial-data';
-import { nodeRegistries } from './node';
-import NodeAddPanel from './nodeAddPanel';
+import { FlowNodeRegistries } from './nodes';
 
-/**
- * 触发器编辑器组件初始化
- * 该组件用于后续集成管理页面的触发器编辑功能
- */
-const TriggerEditor: React.FC = () => {
-  const editorProps = useEditorProps(initialData, nodeRegistries);
+const TriggerEditor = () => {
+  const editorProps = useEditorProps(initialData, FlowNodeRegistries);
 
   return (
     <div className={styles.triggerEditor}>
-      <FreeLayoutEditorProvider {...editorProps}>
+      <FixedLayoutEditorProvider {...editorProps}>
         <SidebarProvider>
           <div className={styles.container}>
             <div className={styles.layout}>
-              <NodeAddPanel />
               <EditorRenderer className={styles.editor} />
             </div>
-            <Tools />
             <SidebarRenderer />
           </div>
         </SidebarProvider>
-      </FreeLayoutEditorProvider>
+      </FixedLayoutEditorProvider>
     </div>
   );
 };
