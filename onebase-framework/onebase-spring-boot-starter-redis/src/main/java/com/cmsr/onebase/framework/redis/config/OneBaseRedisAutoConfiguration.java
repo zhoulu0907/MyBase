@@ -1,6 +1,5 @@
 package com.cmsr.onebase.framework.redis.config;
 
-import cn.hutool.core.util.ReflectUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.redisson.spring.starter.RedissonAutoConfigurationV2;
@@ -8,6 +7,7 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializer;
 
 /**
@@ -35,10 +35,12 @@ public class OneBaseRedisAutoConfiguration {
     }
 
     public static RedisSerializer<?> buildRedisSerializer() {
-        RedisSerializer<Object> json = RedisSerializer.json();
+        ObjectMapper objectMapper = new ObjectMapper();
         // 解决 LocalDateTime 的序列化
-        ObjectMapper objectMapper = (ObjectMapper) ReflectUtil.getFieldValue(json, "mapper");
         objectMapper.registerModules(new JavaTimeModule());
+        GenericJackson2JsonRedisSerializer json = GenericJackson2JsonRedisSerializer.builder()
+                .objectMapper(objectMapper)
+                .build();
         return json;
     }
 
