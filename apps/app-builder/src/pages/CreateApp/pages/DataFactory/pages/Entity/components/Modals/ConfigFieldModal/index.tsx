@@ -50,10 +50,7 @@ interface ConfigFieldModalProps {
 const FIELD_TYPES_NEED_CONFIG = ['PICKLIST', 'MULTI_PICKLIST', 'AUTO_CODE'];
 
 // 字段类型选项
-const fieldTypeOptions = Object.entries(ENTITY_FIELD_TYPE).map(([key, value]) => ({
-  label: value as string,
-  value: key
-}));
+const fieldTypeOptions = JSON.parse(localStorage.getItem('fieldTypes') || '[]');
 
 // 自定义表格行组件，支持拖拽
 const SortableTableRow = (props: any) => {

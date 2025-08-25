@@ -1,4 +1,4 @@
-import { type EntityField, type EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
+import { type Entity, type EntityField } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
 import { FIELD_TYPE } from '@/pages/CreateApp/pages/DataFactory/utils/const';
 import { Button, Form, Input, Grid } from '@arco-design/web-react';
 import { IconCheck } from '@arco-design/web-react/icon';
@@ -7,7 +7,7 @@ import styles from './NodeEditForm.module.less';
 
 // 节点编辑表单组件
 interface NodeEditFormProps {
-  node: EntityNode;
+  node: Entity;
   onSave: (data: Partial<FormValues>) => void;
   onCancel: () => void;
   successCallback?: () => void;
@@ -20,7 +20,7 @@ interface FormItem {
 
 interface FormValues {
   code: string;
-  name: string;
+  displayName: string;
   description: string;
   systemFields: {
     creator: boolean;
@@ -38,35 +38,35 @@ const NodeEditForm: React.FC<NodeEditFormProps> = ({ node, onCancel, onSave, suc
   // 初始化表单数据
   const initialValues: FormValues = {
     code: node.code || '',
-    name: node.entityName || '',
+    displayName: node.displayName || '',
     description: node.description || '',
     systemFields: {
-      creator: node?.fields.find(
+      creator: node?.fields?.find(
         (field: EntityField) => field.isSystemField === FIELD_TYPE.SYSTEM && field.fieldName === 'creator'
       )
         ? true
         : false,
-      updater: node?.fields.find(
+      updater: node?.fields?.find(
         (field: EntityField) => field.isSystemField === FIELD_TYPE.SYSTEM && field.fieldName === 'updater'
       )
         ? true
         : false,
-      created_time: node?.fields.find(
+      created_time: node?.fields?.find(
         (field: EntityField) => field.isSystemField === FIELD_TYPE.SYSTEM && field.fieldName === 'created_time'
       )
         ? true
         : false,
-      updated_time: node?.fields.find(
+      updated_time: node?.fields?.find(
         (field: EntityField) => field.isSystemField === FIELD_TYPE.SYSTEM && field.fieldName === 'updated_time'
       )
         ? true
         : false,
-      owner_id: node?.fields.find(
+      owner_id: node?.fields?.find(
         (field: EntityField) => field.isSystemField === FIELD_TYPE.SYSTEM && field.fieldName === 'owner_id'
       )
         ? true
         : false,
-      owner_dept: node?.fields.find(
+      owner_dept: node?.fields?.find(
         (field: EntityField) => field.isSystemField === FIELD_TYPE.SYSTEM && field.fieldName === 'owner_dept'
       )
         ? true
@@ -84,7 +84,7 @@ const NodeEditForm: React.FC<NodeEditFormProps> = ({ node, onCancel, onSave, suc
   ];
 
   const handleDelete = () => {
-    console.log('handleDelete data', node.entityId);
+    console.log('handleDelete data', node.id);
   };
 
   useEffect(() => {
@@ -116,7 +116,7 @@ const NodeEditForm: React.FC<NodeEditFormProps> = ({ node, onCancel, onSave, suc
 
           <Form.Item
             label="业务实体名称"
-            field="name"
+            field="displayName"
             rules={[
               { required: true, message: '请输入业务实体名称' },
               { max: 50, message: '业务实体名称不能超过50个字符' }
