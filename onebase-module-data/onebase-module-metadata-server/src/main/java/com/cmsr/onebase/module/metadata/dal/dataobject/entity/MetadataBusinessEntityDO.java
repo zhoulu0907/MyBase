@@ -32,6 +32,7 @@ public class MetadataBusinessEntityDO extends TenantBaseDO {
     public static final String RUN_MODE       = "run_mode";
     public static final String APP_ID         = "app_id";
     public static final String DISPLAY_CONFIG = "display_config";
+    public static final String STATUS         = "status";
 
     public MetadataBusinessEntityDO setId(Long id) {
         super.setId(id);
@@ -82,6 +83,11 @@ public class MetadataBusinessEntityDO extends TenantBaseDO {
      * 前端显示配置json
      */
     private String displayConfig;
+
+    /**
+     * 状态：0 关闭，1 开启
+     */
+    private Integer status;
 
 
 }
