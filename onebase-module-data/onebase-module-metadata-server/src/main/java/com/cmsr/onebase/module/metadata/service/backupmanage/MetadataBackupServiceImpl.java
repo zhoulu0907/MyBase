@@ -83,7 +83,7 @@ public class MetadataBackupServiceImpl implements MetadataBackupService {
 
         // 1. 备份数据源
         DefaultConfigStore datasourceCondition = new DefaultConfigStore();
-        datasourceCondition.and("app_id", appId);
+        datasourceCondition.and(MetadataDatasourceDO.APP_ID, appId);
         datasourceCondition.and("deleted", 0L);
         List<MetadataDatasourceDO> datasourceList = datasourceService.findAllByConfig(datasourceCondition);
         backupRespVO.setDatasourceList(datasourceList);
@@ -91,7 +91,7 @@ public class MetadataBackupServiceImpl implements MetadataBackupService {
 
         // 2. 备份业务实体
         DefaultConfigStore entityCondition = new DefaultConfigStore();
-        entityCondition.and("app_id", appId);
+        entityCondition.and(MetadataBusinessEntityDO.APP_ID, appId);
         entityCondition.and("deleted", 0L);
         List<MetadataBusinessEntityDO> businessEntityList = businessEntityService.findAllByConfig(entityCondition);
         backupRespVO.setBusinessEntityList(businessEntityList);
@@ -99,7 +99,7 @@ public class MetadataBackupServiceImpl implements MetadataBackupService {
 
         // 3. 备份实体字段
         DefaultConfigStore fieldCondition = new DefaultConfigStore();
-        fieldCondition.and("app_id", appId);
+        fieldCondition.and(MetadataEntityFieldDO.APP_ID, appId);
         fieldCondition.and("deleted", 0L);
         List<MetadataEntityFieldDO> entityFieldList = entityFieldService.findAllByConfig(fieldCondition);
         backupRespVO.setEntityFieldList(entityFieldList);
@@ -107,7 +107,7 @@ public class MetadataBackupServiceImpl implements MetadataBackupService {
 
         // 4. 备份实体关系
         DefaultConfigStore relationshipCondition = new DefaultConfigStore();
-        relationshipCondition.and("app_id", appId);
+        relationshipCondition.and(MetadataEntityRelationshipDO.APP_ID, appId);
         relationshipCondition.and("deleted", 0L);
         List<MetadataEntityRelationshipDO> entityRelationshipList = entityRelationshipService.findAllByConfig(relationshipCondition);
         backupRespVO.setEntityRelationshipList(entityRelationshipList);
@@ -177,7 +177,7 @@ public class MetadataBackupServiceImpl implements MetadataBackupService {
 
         // 软删除实体关系
         DefaultConfigStore relationshipCondition = new DefaultConfigStore();
-        relationshipCondition.and("app_id", appId);
+        relationshipCondition.and(MetadataEntityRelationshipDO.APP_ID, appId);
         relationshipCondition.and("deleted", 0L);
         List<MetadataEntityRelationshipDO> existingRelationships = entityRelationshipRepository.findAllByConfig(relationshipCondition);
         for (MetadataEntityRelationshipDO relationship : existingRelationships) {
@@ -187,7 +187,7 @@ public class MetadataBackupServiceImpl implements MetadataBackupService {
 
         // 软删除实体字段
         DefaultConfigStore fieldCondition = new DefaultConfigStore();
-        fieldCondition.and("app_id", appId);
+        fieldCondition.and(MetadataEntityFieldDO.APP_ID, appId);
         fieldCondition.and("deleted", 0L);
         List<MetadataEntityFieldDO> existingFields = entityFieldRepository.findAllByConfig(fieldCondition);
         for (MetadataEntityFieldDO field : existingFields) {
@@ -197,7 +197,7 @@ public class MetadataBackupServiceImpl implements MetadataBackupService {
 
         // 软删除业务实体
         DefaultConfigStore entityCondition = new DefaultConfigStore();
-        entityCondition.and("app_id", appId);
+        entityCondition.and(MetadataBusinessEntityDO.APP_ID, appId);
         entityCondition.and("deleted", 0L);
         List<MetadataBusinessEntityDO> existingEntities = businessEntityRepository.findAllByConfig(entityCondition);
         for (MetadataBusinessEntityDO entity : existingEntities) {
@@ -207,7 +207,7 @@ public class MetadataBackupServiceImpl implements MetadataBackupService {
 
         // 软删除数据源
         DefaultConfigStore datasourceCondition = new DefaultConfigStore();
-        datasourceCondition.and("app_id", appId);
+        datasourceCondition.and(MetadataDatasourceDO.APP_ID, appId);
         datasourceCondition.and("deleted", 0L);
         List<MetadataDatasourceDO> existingDatasources = datasourceRepository.findAllByConfig(datasourceCondition);
         for (MetadataDatasourceDO datasource : existingDatasources) {
