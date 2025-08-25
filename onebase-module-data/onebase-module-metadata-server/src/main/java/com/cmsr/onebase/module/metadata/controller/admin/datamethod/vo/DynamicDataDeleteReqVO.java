@@ -22,4 +22,7 @@ public class DynamicDataDeleteReqVO {
     @NotNull(message = "数据主键ID不能为空")
     private Object id;
 
+    @Schema(description = "方法编码(可选). 若提供, 将用于匹配执行计划", example = "metadata.user.delete")
+    private String methodCode;
+
 }

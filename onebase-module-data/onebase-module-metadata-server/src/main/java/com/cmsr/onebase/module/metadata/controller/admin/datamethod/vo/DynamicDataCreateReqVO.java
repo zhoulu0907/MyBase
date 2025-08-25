@@ -24,4 +24,7 @@ public class DynamicDataCreateReqVO {
     @NotNull(message = "数据内容不能为空")
     private Map<String, Object> data;
 
+    @Schema(description = "方法编码(可选). 若提供, 将用于匹配执行计划", example = "metadata.user.create")
+    private String methodCode;
+
 }

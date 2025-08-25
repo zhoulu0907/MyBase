@@ -598,6 +598,9 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
         if (pageReqVO.getAppId() != null) {
             configStore.and("app_id", pageReqVO.getAppId());
         }
+        if (pageReqVO.getStatus() != null) {
+            configStore.and("status", pageReqVO.getStatus());
+        }
 
         // 分页查询
         configStore.order("create_time", Order.TYPE.DESC);
