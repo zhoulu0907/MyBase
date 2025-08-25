@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { SidebarContext } from '../../context/sidebar-context';
+
+import { SidebarContext } from '../../context';
 
 export function SidebarProvider({ children }: { children: React.ReactNode }) {
   const [nodeId, setNodeId] = useState<string | undefined>();
