@@ -11,7 +11,7 @@ interface IProps {
 
 // 角色名称编辑
 const InputRoleName = (props: IProps) => {
-  const { defaultValue, placeholder = '未命名角色', width = 100, onPressEnter, onBlur } = props;
+  const { defaultValue, placeholder = '未命名角色', width = 194, onPressEnter, onBlur } = props;
 
   return (
     <Input

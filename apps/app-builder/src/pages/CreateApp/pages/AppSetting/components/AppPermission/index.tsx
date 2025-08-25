@@ -60,6 +60,7 @@ const AppPermission: FC = () => {
   // 回车新建自定义角色
   const handlePressEnter = async (e: any) => {
     const name = e.target.value;
+    console.log('回车创建新角色 name:', name);
     if (!name) return;
     /* 角色重命名 */
     if (updateRoleId) {
@@ -166,17 +167,21 @@ const AppPermission: FC = () => {
                 );
               })}
           </div>
-          {addRole && (
-            <MenuItem key="ipput">
-              <IconUser className={styles.iconRight4} />
-              <InputRoleName onPressEnter={handlePressEnter} onBlur={() => setAddRole(false)} />
-            </MenuItem>
-          )}
-          <MenuItem key="add" className={styles.add}>
-            <IconPlus style={{ color: 'rgb(var(--primary-6))' }} />
-            添加角色
-          </MenuItem>
         </Menu>
+        {addRole && (
+          <div style={{ padding: '0 8px' }}>
+            <InputRoleName onPressEnter={handlePressEnter} onBlur={() => setAddRole(false)} />
+          </div>
+        )}
+        <div
+          className={styles.addRoleBox}
+          onClick={() => {
+            setAddRole(true);
+          }}
+        >
+          <IconPlus className={styles.addRole} />
+          添加角色
+        </div>
       </div>
       <div className={styles.right}>
         <RoleInfo roleInfo={activeTab === adminData?.id ? adminData : notAdminData} />
