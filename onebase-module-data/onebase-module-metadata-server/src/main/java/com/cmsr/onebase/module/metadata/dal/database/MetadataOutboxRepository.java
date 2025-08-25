@@ -9,5 +9,5 @@ import com.cmsr.onebase.module.metadata.dal.dataobject.method.MetadataOutboxDO;
  * @date 2025-08-22
  */
 public interface MetadataOutboxRepository {
-    void insert(MetadataOutboxDO outbox);
+    MetadataOutboxDO insert(MetadataOutboxDO outbox);
 }

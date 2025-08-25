@@ -9,5 +9,5 @@ import com.cmsr.onebase.module.metadata.dal.dataobject.method.MetadataCompensati
  * @date 2025-08-22
  */
 public interface MetadataCompensationLogRepository {
-    void insert(MetadataCompensationLogDO compensation);
+    MetadataCompensationLogDO insert(MetadataCompensationLogDO compensation);
 }

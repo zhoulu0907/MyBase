@@ -17,6 +17,6 @@ public interface MetadataDataMethodExecutionLogRepository {
      *
      * @param logDO 日志对象
      */
-    void insert(MetadataDataMethodExecutionLogDO logDO);
+    MetadataDataMethodExecutionLogDO insert(MetadataDataMethodExecutionLogDO logDO);
 
 }
