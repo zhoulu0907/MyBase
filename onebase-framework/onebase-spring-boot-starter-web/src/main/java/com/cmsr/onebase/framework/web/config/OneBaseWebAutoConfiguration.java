@@ -4,22 +4,17 @@ import com.cmsr.onebase.framework.common.biz.infra.logger.ApiErrorLogCommonApi;
 import com.cmsr.onebase.framework.common.enums.WebFilterOrderEnum;
 import com.cmsr.onebase.framework.web.core.filter.CacheRequestBodyFilter;
 import com.cmsr.onebase.framework.web.core.handler.GlobalExceptionHandler;
-import com.cmsr.onebase.framework.web.core.handler.GlobalResponseBodyHandler;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
 import jakarta.annotation.Resource;
 import jakarta.servlet.Filter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.web.client.RestTemplateAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.lang.NonNull;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
@@ -61,10 +56,6 @@ public class OneBaseWebAutoConfiguration implements WebMvcConfigurer {
         return new GlobalExceptionHandler(applicationName, apiErrorLogApi, webProperties);
     }
 
-    @Bean
-    public GlobalResponseBodyHandler globalResponseBodyHandler() {
-        return new GlobalResponseBodyHandler();
-    }
 
     @Bean
     @SuppressWarnings("InstantiationOfUtilityClass")
@@ -106,7 +97,6 @@ public class OneBaseWebAutoConfiguration implements WebMvcConfigurer {
         bean.setOrder(order);
         return bean;
     }
-
 
 
 }
