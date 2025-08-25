@@ -39,7 +39,6 @@
         <jakarta.persistence-api.version>3.2.0</jakarta.persistence-api.version>
         <jakarta.validation-api.version>3.1.1</jakarta.validation-api.version>
         <!-- 消息队列 -->
-        <rocketmq-spring.version>2.3.2</rocketmq-spring.version>
         <!-- RPC 相关 -->
         <!-- Config 配置中心相关 -->
         <!-- Job 定时任务相关 -->
