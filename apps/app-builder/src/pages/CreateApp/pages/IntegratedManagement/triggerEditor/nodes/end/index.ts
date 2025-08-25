@@ -61,7 +61,7 @@ export const EndNodeRegistry: FlowNodeRegistry = {
       id: `end_${nanoid()}`,
       type: 'end',
       data: {
-        title: 'End',
+        title: '结束节点',
         outputs: {
           type: 'object',
           properties: {

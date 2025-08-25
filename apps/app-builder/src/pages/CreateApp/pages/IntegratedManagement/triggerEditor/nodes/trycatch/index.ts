@@ -19,7 +19,7 @@ export const TryCatchNodeRegistry: FlowNodeRegistry = {
       id: `tryCatch${nanoid(5)}`,
       type: 'tryCatch',
       data: {
-        title: 'TryCatch',
+        title: '异常处理',
       },
       blocks: [
         {
@@ -32,7 +32,7 @@ export const TryCatchNodeRegistry: FlowNodeRegistry = {
           type: 'catchBlock',
           blocks: [],
           data: {
-            title: 'Catch Block 1',
+            title: '异常捕获_1',
             inputsValues: {
               condition: '',
             },

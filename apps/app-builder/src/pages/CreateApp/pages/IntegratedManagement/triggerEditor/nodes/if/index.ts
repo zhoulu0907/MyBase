@@ -22,7 +22,7 @@ export const IFNodeRegistry: FlowNodeRegistry = {
       id: `if_${nanoid(5)}`,
       type: 'if',
       data: {
-        title: 'If',
+        title: '条件节点',
         inputsValues: {
           condition: { type: 'constant', content: true },
         },

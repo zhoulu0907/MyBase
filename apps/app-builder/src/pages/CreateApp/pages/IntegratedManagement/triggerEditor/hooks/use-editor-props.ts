@@ -196,6 +196,7 @@ export function useEditorProps(
        * Bind custom service
        */
       onBind: ({ bind }) => {
+        console.log('onBind');
         bind(CustomService).toSelf().inSingletonScope();
       },
       scroll: {

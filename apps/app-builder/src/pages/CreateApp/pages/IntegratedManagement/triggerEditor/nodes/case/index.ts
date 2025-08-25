@@ -26,7 +26,7 @@ export const CaseNodeRegistry: FlowNodeRegistry = {
       id: `Case_${nanoid(5)}`,
       type: 'case',
       data: {
-        title: `Case_${id++}`,
+        title: `分支_${id++}`,
         inputs: {
           type: 'object',
           required: ['condition'],

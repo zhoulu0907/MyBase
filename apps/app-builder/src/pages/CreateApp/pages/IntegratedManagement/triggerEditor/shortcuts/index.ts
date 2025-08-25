@@ -1,5 +1,5 @@
 
-import { Toast } from '@douyinfe/semi-ui';
+
 import {
     CommandRegistry,
     type FixedLayoutPluginContext,
@@ -11,6 +11,7 @@ import {
 } from '@flowgram.ai/fixed-layout-editor';
 import { nanoid } from 'nanoid';
 
+import { Message } from '@arco-design/web-react';
 import { FlowCommandId } from './constants';
 import { writeData } from './utils';
 
@@ -41,9 +42,7 @@ const copy: ShortcutGetter = (ctx) => {
       }));
 
       writeData(originNodes, clipboard);
-      Toast.success({
-        content: 'Copied. You can move to any [+] to paste.',
-      });
+      Message.success('已复制。你可以移动到任意 [+] 处进行粘贴。');
     },
   };
 };
@@ -67,9 +66,7 @@ const cut: ShortcutGetter = (ctx) => {
       //   ) as FlowNodeEntity[],
       // );
 
-      Toast.success({
-        content: 'Cut. You can move to any [+] to paste.',
-      });
+      Message.success('已剪切。你可以移动到任意 [+] 处进行粘贴。');
 
       commandRegistry.executeCommand(FlowCommandId.DELETE);
     },
