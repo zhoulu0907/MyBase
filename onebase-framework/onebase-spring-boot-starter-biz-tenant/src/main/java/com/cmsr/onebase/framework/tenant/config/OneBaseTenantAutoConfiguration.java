@@ -7,8 +7,6 @@ import com.cmsr.onebase.framework.redis.config.OneBaseCacheProperties;
 import com.cmsr.onebase.framework.security.core.service.SecurityFrameworkService;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnoreAspect;
-import com.cmsr.onebase.framework.tenant.core.mq.rabbitmq.TenantRabbitMQInitializer;
-import com.cmsr.onebase.framework.tenant.core.mq.rocketmq.TenantRocketMQInitializer;
 import com.cmsr.onebase.framework.tenant.core.redis.TenantRedisCacheManager;
 import com.cmsr.onebase.framework.tenant.core.security.TenantSecurityWebFilter;
 import com.cmsr.onebase.framework.tenant.core.service.TenantFrameworkService;
@@ -19,7 +17,6 @@ import com.cmsr.onebase.framework.web.config.WebProperties;
 import com.cmsr.onebase.framework.web.core.handler.GlobalExceptionHandler;
 import jakarta.annotation.Resource;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -59,7 +56,8 @@ public class OneBaseTenantAutoConfiguration {
             if (tenantApiImpl != null) {
                 tenantApi = tenantApiImpl;
             }
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
         return new TenantFrameworkServiceImpl(tenantApi);
     }
 
@@ -139,18 +137,6 @@ public class OneBaseTenantAutoConfiguration {
                 globalExceptionHandler, tenantFrameworkService));
         registrationBean.setOrder(WebFilterOrderEnum.TENANT_SECURITY_FILTER);
         return registrationBean;
-    }
-
-    @Bean
-    @ConditionalOnClass(name = "org.springframework.amqp.rabbit.core.RabbitTemplate")
-    public TenantRabbitMQInitializer tenantRabbitMQInitializer() {
-        return new TenantRabbitMQInitializer();
-    }
-
-    @Bean
-    @ConditionalOnClass(name = "org.apache.rocketmq.spring.core.RocketMQTemplate")
-    public TenantRocketMQInitializer tenantRocketMQInitializer() {
-        return new TenantRocketMQInitializer();
     }
 
     // ========== Redis ==========

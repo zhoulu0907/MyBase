@@ -1,6 +1,5 @@
 package com.cmsr.onebase.module.system.controller.admin.tenant;
 
-import com.cmsr.onebase.framework.apilog.core.annotation.ApiAccessLog;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageParam;
@@ -26,7 +25,6 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.util.List;
 
-import static com.cmsr.onebase.framework.apilog.core.enums.OperateTypeEnum.EXPORT;
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.convertList;
 
@@ -48,7 +46,7 @@ public class TenantController {
         return success(tenant != null ? tenant.getId() : null);
     }
 
-    @GetMapping({ "simple-list" })
+    @GetMapping({"simple-list"})
     @PermitAll
     @TenantIgnore
     @Operation(summary = "获取租户精简信息列表", description = "只包含被开启的租户，用于【首页】功能的选择租户选项")
@@ -138,7 +136,6 @@ public class TenantController {
     @GetMapping("/export-excel")
     @Operation(summary = "导出租户 Excel")
     @PreAuthorize("@ss.hasPermission('system:tenant:export')")
-    @ApiAccessLog(operateType = EXPORT)
     public void exportTenantExcel(@Valid TenantPageReqVO exportReqVO, HttpServletResponse response) throws IOException {
         exportReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
         List<TenantRespVO> list = tenantService.getTenantPage(exportReqVO).getList();

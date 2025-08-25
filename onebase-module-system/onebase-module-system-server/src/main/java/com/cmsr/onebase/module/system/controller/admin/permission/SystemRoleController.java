@@ -1,6 +1,5 @@
 package com.cmsr.onebase.module.system.controller.admin.permission;
 
-import com.cmsr.onebase.framework.apilog.core.annotation.ApiAccessLog;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageParam;
@@ -27,7 +26,6 @@ import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
 
-import static com.cmsr.onebase.framework.apilog.core.enums.OperateTypeEnum.EXPORT;
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 
 @Tag(name = "管理后台 - 角色")
@@ -89,7 +87,6 @@ public class SystemRoleController {
 
     @GetMapping("/export-excel")
     @Operation(summary = "导出角色 Excel")
-    @ApiAccessLog(operateType = EXPORT)
     //@PreAuthorize("@ss.hasPermission('system:role:export')")
     public void export(HttpServletResponse response, @Validated RolePageReqVO exportReqVO) throws IOException {
         exportReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);

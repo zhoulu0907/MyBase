@@ -38,8 +38,6 @@
         <anyline.version>8.7.2-jdk17-20250818</anyline.version>
         <jakarta.persistence-api.version>3.2.0</jakarta.persistence-api.version>
         <jakarta.validation-api.version>3.1.1</jakarta.validation-api.version>
-        <!-- 消息队列 -->
-        <rocketmq-spring.version>2.3.2</rocketmq-spring.version>
         <!-- RPC 相关 -->
         <!-- Config 配置中心相关 -->
         <!-- Job 定时任务相关 -->
@@ -58,14 +56,12 @@
         <flowable.version>7.0.1</flowable.version>
         <!-- 工具类相关 -->
         <anji-plus-captcha.version>1.4.0</anji-plus-captcha.version>
-        <jsoup.version>1.18.1</jsoup.version>
         <lombok.version>1.18.36</lombok.version>
         <mapstruct.version>1.6.3</mapstruct.version>
         <modelmapper.version>3.2.4</modelmapper.version>
         <hutool-5.version>5.8.35</hutool-5.version>
         <hutool-6.version>6.0.0-M19</hutool-6.version>
         <easyexcel.version>4.0.3</easyexcel.version>
-        <velocity.version>2.4.1</velocity.version>
         <guava.version>33.4.8-jre</guava.version>
         <transmittable-thread-local.version>2.14.5</transmittable-thread-local.version>
         <commons-net.version>3.11.1</commons-net.version>
@@ -73,20 +69,15 @@
         <unirest.version>4.5.0</unirest.version>
         <jsch.version>0.1.55</jsch.version>
         <tika-core.version>3.1.0</tika-core.version>
-        <ip2region.version>2.7.0</ip2region.version>
         <bizlog-sdk.version>3.0.6</bizlog-sdk.version>
         <reflections.version>0.10.2</reflections.version>
         <netty.version>4.1.116.Final</netty.version>
-        <mqtt.version>1.2.5</mqtt.version>
-        <pf4j-spring.version>0.9.0</pf4j-spring.version>
-        <vertx.version>4.5.13</vertx.version>
         <!-- 三方云服务相关 -->
         <commons-io.version>2.17.0</commons-io.version>
         <commons-compress.version>1.27.1</commons-compress.version>
         <awssdk.version>2.30.14</awssdk.version>
         <justauth.version>1.16.7</justauth.version>
         <justauth-starter.version>1.4.0</justauth-starter.version>
-        <jimureport.version>1.9.4</jimureport.version>
         <weixin-java.version>4.7.5.B</weixin-java.version>
     </properties>
 
@@ -498,12 +489,6 @@
             </dependency>
 
             <dependency>
-                <groupId>org.apache.velocity</groupId>
-                <artifactId>velocity-engine-core</artifactId>
-                <version>${velocity.version}</version>
-            </dependency>
-
-            <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
                 <version>${guava.version}</version>
@@ -530,18 +515,6 @@
                 <groupId>com.anji-plus</groupId>
                 <artifactId>captcha-spring-boot-starter</artifactId> <!-- 验证码，一般用于登录使用 -->
                 <version>${anji-plus-captcha.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.lionsoul</groupId>
-                <artifactId>ip2region</artifactId>
-                <version>${ip2region.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.jsoup</groupId>
-                <artifactId>jsoup</artifactId>
-                <version>${jsoup.version}</version>
             </dependency>
 
             <dependency>
@@ -582,61 +555,6 @@
                 <groupId>com.xkcoding.justauth</groupId>
                 <artifactId>justauth-spring-boot-starter</artifactId>
                 <version>${justauth-starter.version}</version>
-            </dependency>
-
-            <!-- 积木报表-->
-            <dependency>
-                <groupId>org.jeecgframework.jimureport</groupId>
-                <artifactId>jimureport-spring-boot3-starter-fastjson2</artifactId>
-                <version>${jimureport.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jeecgframework.jimureport</groupId>
-                <artifactId>jimubi-spring-boot3-starter</artifactId>
-                <version>${jimureport.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>com.github.jsqlparser</groupId>
-                        <artifactId>jsqlparser</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-
-            <!-- PF4J -->
-            <dependency>
-                <groupId>org.pf4j</groupId>
-                <artifactId>pf4j-spring</artifactId>
-                <version>${pf4j-spring.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>slf4j-log4j12</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-
-            <!-- Vert.x -->
-            <dependency>
-                <groupId>io.vertx</groupId>
-                <artifactId>vertx-core</artifactId>
-                <version>${vertx.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.vertx</groupId>
-                <artifactId>vertx-web</artifactId>
-                <version>${vertx.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.vertx</groupId>
-                <artifactId>vertx-mqtt</artifactId>
-                <version>${vertx.version}</version>
-            </dependency>
-
-            <!-- MQTT -->
-            <dependency>
-                <groupId>org.eclipse.paho</groupId>
-                <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
-                <version>${mqtt.version}</version>
             </dependency>
 
             <!-- anyline -->

@@ -1,6 +1,4 @@
-com.cmsr.onebase.framework.apilog.config.OneBaseApiLogAutoConfiguration
 com.cmsr.onebase.framework.jackson.config.OneBaseJacksonAutoConfiguration
 com.cmsr.onebase.framework.swagger.config.OneBaseSwaggerAutoConfiguration
 com.cmsr.onebase.framework.web.config.OneBaseWebAutoConfiguration
-com.cmsr.onebase.framework.apilog.config.OneBaseApiLogRpcAutoConfiguration
 com.cmsr.onebase.framework.banner.config.OneBaseBannerAutoConfiguration
