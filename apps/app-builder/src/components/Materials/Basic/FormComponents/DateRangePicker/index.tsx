@@ -1,10 +1,16 @@
-import { STATUS_OPTIONS, STATUS_VALUES } from '@/components/Materials/constants';
-import { DatePicker, Form } from '@arco-design/web-react';
 import { memo } from 'react';
+import dayjs from 'dayjs';
+import { DatePicker, Form } from '@arco-design/web-react';
+import { STATUS_OPTIONS, STATUS_VALUES, DATE_OPTIONS, DATE_VALUES } from '@/components/Materials/constants';
 import type { XInputDateRangePickerConfig } from './schema';
 
 const XDateRangePicker = memo((props: XInputDateRangePickerConfig) => {
-  const { label, status, tooltip, required, layout, labelColSpan = 0 } = props;
+  const { label, status, tooltip, required, layout, labelColSpan = 0, dateType, startTime, endTime } = props;
+
+  // 确保 dateType 有默认值，避免 Form.Item 中没有元素
+  const currentDateType = (dateType !== DATE_VALUES[DATE_OPTIONS.FULL] && dateType) || DATE_VALUES[DATE_OPTIONS.DATE];
+  const validStartTime = startTime && dayjs(startTime);
+  const validEndTime = endTime && dayjs(endTime);
 
   return (
     <Form.Item
@@ -22,7 +28,12 @@ const XDateRangePicker = memo((props: XInputDateRangePickerConfig) => {
         margin: '0px'
       }}
     >
-      <DatePicker.RangePicker style={{ width: '100%' }} />
+      <DatePicker.RangePicker
+        mode={currentDateType}
+        defaultValue={[validStartTime, validEndTime]}
+        showTime={dateType === DATE_VALUES[DATE_OPTIONS.FULL]}
+        style={{ width: '100%' }}
+      />
     </Form.Item>
   );
 });

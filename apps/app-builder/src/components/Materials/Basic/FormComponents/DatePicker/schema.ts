@@ -29,7 +29,6 @@ import type {
   IDataFieldConfigType,
   IDateTypeConfigType,
   IDescriptionConfigType,
-  ILabelColSpanConfigType,
   ILabelConfigType,
   ILayoutConfigType,
   INumberConfigType,
@@ -59,7 +58,6 @@ export type TXInputDatePickerEditData = Array<
   | IStatusConfigType<TStatusSelectKeyType>
   | IWidthConfigType<TWidthSelectKeyType>
   | INumberConfigType
-  | ILabelColSpanConfigType
   | ISelectConfigType<TWidthSelectKeyType | TStatusSelectKeyType>
   | ITextAreaConfigType
   | IBooleanConfigType
@@ -113,7 +111,7 @@ export interface XInputDatePickerConfig extends ICommonBaseType {
 
   /**
    * 日期类型： 年、年月、年月日、年月日时
-   * 可选值: 'ONLY_YEAR' | 'ONLY_MONTH' | 'ONLY_DATE' | 'FULL'
+   * 可选值: 'YEAR' | 'MONTH' | 'DATE' | 'FULL'
    */
   dateType: TDateTypeSelectKeyType;
 
@@ -124,7 +122,7 @@ export interface XInputDatePickerConfig extends ICommonBaseType {
   layout?: TLayoutSelectKeyType;
 
   /**
-   * 标签宽度
+   * 标题宽度
    */
   labelColSpan?: TNumberDefaultType;
 
@@ -179,7 +177,7 @@ const XDatePicker: XInputDatePickerSchema = {
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     defaultValue: '',
     required: false,
-    dateType: DATE_VALUES[DATE_OPTIONS.ONLY_DATE],
+    dateType: DATE_VALUES[DATE_OPTIONS.DATE],
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
     saveWithHidden: false,
     labelColSpan: 100

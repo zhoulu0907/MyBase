@@ -2,6 +2,8 @@ import activeFormDesignSVG from '@/assets/images/form_design_active_icon.svg';
 import defaultFormDesignSVG from '@/assets/images/form_design_default_icon.svg';
 import activeListDesignSVG from '@/assets/images/list_design_active_icon.svg';
 import defaultListDesignSVG from '@/assets/images/list_design_default_icon.svg';
+import activePageSettingSVG from '@/assets/images/page_setting_active_icon.svg';
+import defaultPageSettingSVG from '@/assets/images/page_setting_default_icon.svg';
 import previewSVG from '@/assets/images/preview_icon.svg';
 import { useI18n } from '@/hooks/useI18n';
 import { usePageEditorSignal } from '@/hooks/useSignal';
@@ -47,7 +49,9 @@ const tabData = [
   {
     key: EDITOR_TYPES.PAGE_SETTING,
     title: '页面设置',
-    alt: ''
+    alt: 'Page Setting',
+    defaultIcon: defaultPageSettingSVG,
+    activeIcon: activePageSettingSVG
   }
   // {
   //     key: EDITOR_TYPES.METADATA_MANAGE,
@@ -239,7 +243,7 @@ export default function EditorHeader() {
     <div className={styles.editorHeader}>
       {/* 左侧 */}
       <div className={styles.left}>
-        <Button shape="circle" type="default" size="small" onClick={backToPageManager} icon={<IconArrowLeft />} />
+        <Button shape="square" type="default" size="small" onClick={backToPageManager} icon={<IconArrowLeft />} />
 
         <div className={styles.myAppIcon} style={{ backgroundColor: iconColor }}>
           <i className={`iconfont ${appIcon || 'icon-box'}`} />

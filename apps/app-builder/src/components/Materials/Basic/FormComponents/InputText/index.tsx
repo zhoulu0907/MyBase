@@ -16,7 +16,8 @@ const XInputText = memo((props: XInputTextConfig) => {
     layout,
     color,
     bgColor,
-    labelColSpan = 0
+    labelColSpan = 0,
+    maxLength
   } = props;
 
   return (
@@ -38,8 +39,9 @@ const XInputText = memo((props: XInputTextConfig) => {
     >
       <Input
         readOnly={status === STATUS_VALUES[STATUS_OPTIONS.READONLY]}
-        defaultValue={defaultValue}
         placeholder={placeholder}
+        defaultValue={defaultValue}
+        maxLength={maxLength}
         style={{
           width: '100%',
           color,

@@ -30,7 +30,6 @@ import type {
   IColorConfigType,
   IDataFieldConfigType,
   IDescriptionConfigType,
-  ILabelColSpanConfigType,
   ILabelConfigType,
   ILayoutConfigType,
   INumberConfigType,
@@ -62,7 +61,6 @@ export type TXInputTextAreaEditData = Array<
   | IStatusConfigType<TStatusSelectKeyType>
   | IWidthConfigType<TWidthSelectKeyType>
   | INumberConfigType
-  | ILabelColSpanConfigType
   | ISelectConfigType<TWidthSelectKeyType | TStatusSelectKeyType>
   | ITextAreaConfigType
   | IBooleanConfigType
@@ -148,9 +146,24 @@ export interface XInputTextAreaConfig extends ICommonBaseType {
   bgColor?: TTextDefaultType;
 
   /**
-   * 标签宽度
+   * 标题宽度
    */
   labelColSpan?: TNumberDefaultType;
+
+  /**
+   * 多行文本字数上限
+   */
+  maxLength?: TNumberDefaultType;
+
+  /**
+   * 多行文本最小高度
+   */
+  minRows?: TNumberDefaultType;
+
+  /**
+   * 多行文本最大高度
+   */
+  maxRows?: TNumberDefaultType;
 }
 
 const XInputTextArea: XInputTextAreaSchema = {
@@ -176,6 +189,21 @@ const XInputTextArea: XInputTextAreaSchema = {
       key: 'tooltip',
       name: '提示文字',
       type: CONFIG_TYPES.TOOLTIP_INPUT
+    },
+    {
+      key: 'maxLength',
+      name: '多行文本字数上限',
+      type: CONFIG_TYPES.NUMBER_INPUT
+    },
+    {
+      key: 'minRows',
+      name: '多行文本最小高度',
+      type: CONFIG_TYPES.NUMBER_INPUT
+    },
+    {
+      key: 'maxRows',
+      name: '多行文本最大高度',
+      type: CONFIG_TYPES.NUMBER_INPUT
     },
     layoutConfig,
     labelColSpanConfig,
@@ -219,7 +247,10 @@ const XInputTextArea: XInputTextAreaSchema = {
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
     saveWithHidden: false,
     color: '',
-    bgColor: ''
+    bgColor: '',
+    maxLength: 200,
+    minRows: 2,
+    maxRows: 5
   }
 };
 

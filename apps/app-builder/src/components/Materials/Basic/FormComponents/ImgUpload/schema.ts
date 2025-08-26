@@ -1,50 +1,49 @@
 import {
-    baseConfig,
-    baseDefault,
-    labelColSpanConfig,
-    layoutConfig,
-    listTypeConfig,
-    statusConfig,
-    widthConfig,
-    type ICommonBaseType,
-    type TLayoutSelectKeyType,
-    type TStatusSelectKeyType,
-    type TUploadSelectKeyType,
-    type TWidthSelectKeyType
+  baseConfig,
+  baseDefault,
+  labelColSpanConfig,
+  layoutConfig,
+  listTypeConfig,
+  statusConfig,
+  widthConfig,
+  type ICommonBaseType,
+  type TLayoutSelectKeyType,
+  type TStatusSelectKeyType,
+  type TUploadSelectKeyType,
+  type TWidthSelectKeyType
 } from '@/components/Materials/common';
 import {
-    CONFIG_TYPES,
-    LAYOUT_OPTIONS,
-    LAYOUT_VALUES,
-    STATUS_OPTIONS,
-    STATUS_VALUES,
-    UPLOAD_OPTIONS,
-    UPLOAD_VALUES,
-    WIDTH_OPTIONS,
-    WIDTH_VALUES
+  CONFIG_TYPES,
+  LAYOUT_OPTIONS,
+  LAYOUT_VALUES,
+  STATUS_OPTIONS,
+  STATUS_VALUES,
+  UPLOAD_OPTIONS,
+  UPLOAD_VALUES,
+  WIDTH_OPTIONS,
+  WIDTH_VALUES
 } from '@/components/Materials/constants';
 import type {
-    IBooleanConfigType,
-    IDataFieldConfigType,
-    IDescriptionConfigType,
-    ILabelColSpanConfigType,
-    ILabelConfigType,
-    ILayoutConfigType,
-    INumberConfigType,
-    IPlaceholderConfigType,
-    ISelectConfigType,
-    IStatusConfigType,
-    ITextAreaConfigType,
-    ITextConfigType,
-    ITooltipConfigType,
-    IUploadCompressConfigType,
-    IUploadSizeConfigType,
-    IWidthConfigType,
-    TBooleanDefaultType,
-    TNumberDefaultType,
-    TSelectDefaultType,
-    TTextAreaDefaultType,
-    TTextDefaultType
+  IBooleanConfigType,
+  IDataFieldConfigType,
+  IDescriptionConfigType,
+  ILabelConfigType,
+  ILayoutConfigType,
+  INumberConfigType,
+  IPlaceholderConfigType,
+  ISelectConfigType,
+  IStatusConfigType,
+  ITextAreaConfigType,
+  ITextConfigType,
+  ITooltipConfigType,
+  IUploadCompressConfigType,
+  IUploadSizeConfigType,
+  IWidthConfigType,
+  TBooleanDefaultType,
+  TNumberDefaultType,
+  TSelectDefaultType,
+  TTextAreaDefaultType,
+  TTextDefaultType
 } from '@/components/Materials/types';
 
 export interface XInputImgUploadSchema {
@@ -61,7 +60,6 @@ export type TXInputImgUploadEditData = Array<
   | IStatusConfigType<TStatusSelectKeyType>
   | IWidthConfigType<TWidthSelectKeyType>
   | INumberConfigType
-  | ILabelColSpanConfigType
   | ISelectConfigType<TWidthSelectKeyType | TStatusSelectKeyType>
   | ITextAreaConfigType
   | IBooleanConfigType
@@ -121,7 +119,7 @@ export interface XInputImgUploadConfig extends ICommonBaseType {
   layout?: TLayoutSelectKeyType;
 
   /**
-   * 标签宽度
+   * 标题宽度
    */
   labelColSpan?: TNumberDefaultType;
 

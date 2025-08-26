@@ -1,10 +1,24 @@
-import { STATUS_OPTIONS, STATUS_VALUES } from '@/components/Materials/constants';
-import { Checkbox, Form } from '@arco-design/web-react';
 import { memo } from 'react';
+import { Checkbox, Form } from '@arco-design/web-react';
+import { STATUS_OPTIONS, STATUS_VALUES } from '@/components/Materials/constants';
 import type { XInputCheckboxConfig } from './schema';
 
+const CheckboxGroup = Checkbox.Group;
+
 const XCheckbox = memo((props: XInputCheckboxConfig) => {
-  const { label, dataField, tooltip, status, defaultValue, required, layout, labelColSpan = 0 } = props;
+  const {
+    label,
+    dataField,
+    tooltip,
+    status,
+    // defaultValue,
+    required,
+    layout,
+    labelColSpan = 0,
+    options
+    // allChecked,
+    // maxChecked = 0
+  } = props;
 
   return (
     <Form.Item
@@ -15,22 +29,23 @@ const XCheckbox = memo((props: XInputCheckboxConfig) => {
       labelCol={{
         style: { width: labelColSpan, flex: 'unset' }
       }}
+      // trigger="onChange"
+      // triggerPropName="checked"
       wrapperCol={{ style: { flex: 1 } }}
       rules={[{ required }]}
       style={{
         margin: 0,
         opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1
       }}
+      // initialValue={allChecked ? options.map((op) => op.value) : []}
     >
-      <Checkbox
-        defaultChecked={defaultValue === 'true'}
+      <CheckboxGroup
+        options={options}
         style={{
           width: '100%',
           pointerEvents: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset'
         }}
-      >
-        开启
-      </Checkbox>
+      />
     </Form.Item>
   );
 });

@@ -5,7 +5,7 @@ import type { XInputRadioConfig } from './schema';
 
 const RadioGroup = Radio.Group;
 const XRadio = memo((props: XInputRadioConfig) => {
-  const { label, dataField, tooltip, status, defaultValue, required, layout, labelColSpan = 0 } = props;
+  const { label, dataField, tooltip, status, defaultValue, required, layout, labelColSpan = 0, direction } = props;
 
   return (
     <Form.Item
@@ -24,7 +24,7 @@ const XRadio = memo((props: XInputRadioConfig) => {
         margin: '0px'
       }}
     >
-      <RadioGroup options={defaultValue} />
+      <RadioGroup direction={direction} options={defaultValue} />
     </Form.Item>
   );
 });

@@ -3,9 +3,11 @@ import {
   baseDefault,
   dataFieldConfig,
   labelColSpanConfig,
+  directionConfig,
   layoutConfig,
   statusConfig,
   widthConfig,
+  radioDataConfig,
   type ICommonBaseType,
   type TLayoutSelectKeyType,
   type TStatusSelectKeyType,
@@ -24,7 +26,6 @@ import type {
   IBooleanConfigType,
   IDataFieldConfigType,
   IDescriptionConfigType,
-  ILabelColSpanConfigType,
   ILabelConfigType,
   ILayoutConfigType,
   INumberConfigType,
@@ -39,7 +40,8 @@ import type {
   TNumberDefaultType,
   TSelectDefaultType,
   TTextAreaDefaultType,
-  TTextDefaultType
+  TTextDefaultType,
+  IRadioDataConfigType
 } from '@/components/Materials/types';
 
 export interface XInputRadioSchema {
@@ -56,12 +58,12 @@ export type TXInputRadioEditData = Array<
   | IStatusConfigType<TStatusSelectKeyType>
   | IWidthConfigType<TWidthSelectKeyType>
   | INumberConfigType
-  | ILabelColSpanConfigType
   | ISelectConfigType<TWidthSelectKeyType | TStatusSelectKeyType>
   | ITextAreaConfigType
   | IBooleanConfigType
   | ILayoutConfigType<TLayoutSelectKeyType>
   | IDataFieldConfigType
+  | IRadioDataConfigType
 >;
 
 export interface XInputRadioConfig extends ICommonBaseType {
@@ -118,9 +120,15 @@ export interface XInputRadioConfig extends ICommonBaseType {
   saveWithHidden?: TBooleanDefaultType;
 
   /**
-   * 标签宽度
+   * 标题宽度
    */
   labelColSpan?: TNumberDefaultType;
+
+  /**
+   * 单选框方向：水平（默认）、垂直
+   * 可选值: 'vertical' | 'horizontal'
+   */
+  direction?: TLayoutSelectKeyType;
 }
 
 const XRadio: XInputRadioSchema = {
@@ -142,8 +150,9 @@ const XRadio: XInputRadioSchema = {
       name: '提示文字',
       type: CONFIG_TYPES.TOOLTIP_INPUT
     },
-    layoutConfig,
     labelColSpanConfig,
+    layoutConfig,
+    directionConfig,
     {
       key: 'required',
       name: '开启必填',
@@ -154,6 +163,7 @@ const XRadio: XInputRadioSchema = {
       name: '隐藏时提交数据',
       type: CONFIG_TYPES.SWITCH_INPUT
     },
+    radioDataConfig,
     statusConfig,
     widthConfig
   ],
@@ -167,23 +177,23 @@ const XRadio: XInputRadioSchema = {
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     defaultValue: [
       {
-        label: 'A',
-        value: 'a'
+        label: '选项一',
+        value: '1'
       },
       {
-        label: 'B',
-        value: 'b'
+        label: '选项二',
+        value: '2'
       },
       {
-        label: 'C',
-        value: 'c',
-        disabled: true
+        label: '选项三',
+        value: '3'
       }
     ],
     required: false,
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
     labelColSpan: 100,
-    saveWithHidden: false
+    saveWithHidden: false,
+    direction: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL]
   }
 };
 

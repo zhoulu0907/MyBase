@@ -48,8 +48,6 @@ const AddMembers = (props: IProps) => {
     setBreadcrumbs(breadcrumbs.slice(0, index + 1));
   };
 
-  console.log(renderData?.children, 'renderData?.children')
-
   return (
     <Modal
       title={<div style={{ textAlign: 'left' }}>{title}</div>}

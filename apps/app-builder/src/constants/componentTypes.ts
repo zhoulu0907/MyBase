@@ -24,7 +24,11 @@ export const FORM_COMPONENT_TYPES = {
   FILE_UPLOAD: 'XFileUpload',
   IMG_UPLOAD: 'XImgUpload',
   AUTO_CODE: 'XAutoCode',
-  RELATED_FORM: 'XRelatedForm'
+  RELATED_FORM: 'XRelatedForm',
+  STATIC_TEXT: 'XStaticText',
+  DIVIDER: 'XDivider',
+  RICH_TEXT: 'XRichText',
+  CAROUSEL_F: 'XFCarousel'
 } as const;
 
 // 布局组件类型
