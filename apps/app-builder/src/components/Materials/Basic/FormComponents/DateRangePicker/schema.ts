@@ -5,10 +5,12 @@ import {
   layoutConfig,
   statusConfig,
   widthConfig,
+  dateTypeConfig,
   type ICommonBaseType,
   type TLayoutSelectKeyType,
   type TStatusSelectKeyType,
-  type TWidthSelectKeyType
+  type TWidthSelectKeyType,
+  type TDateTypeSelectKeyType
 } from '@/components/Materials/common';
 import {
   CONFIG_TYPES,
@@ -17,12 +19,13 @@ import {
   STATUS_OPTIONS,
   STATUS_VALUES,
   WIDTH_OPTIONS,
-  WIDTH_VALUES
+  WIDTH_VALUES,
+  DATE_OPTIONS,
+  DATE_VALUES
 } from '@/components/Materials/constants';
 import type {
   IBooleanConfigType,
   IDescriptionConfigType,
-  ILabelColSpanConfigType,
   ILabelConfigType,
   ILayoutConfigType,
   INumberConfigType,
@@ -36,7 +39,9 @@ import type {
   TSelectDefaultType,
   TTextAreaDefaultType,
   TTextDefaultType,
-  TNumberDefaultType
+  TNumberDefaultType,
+  IDateTypeConfigType,
+  IDateConfigType
 } from '@/components/Materials/types';
 
 export interface XInputDateRangePickerSchema {
@@ -52,11 +57,13 @@ export type TXInputDateRangePickerEditData = Array<
   | IStatusConfigType<TStatusSelectKeyType>
   | IWidthConfigType<TWidthSelectKeyType>
   | INumberConfigType
-  | ILabelColSpanConfigType
   | ISelectConfigType<TWidthSelectKeyType | TStatusSelectKeyType>
   | ITextAreaConfigType
   | IBooleanConfigType
   | ILayoutConfigType<TLayoutSelectKeyType>
+  | IStatusConfigType<TDateTypeSelectKeyType>
+  | IDateTypeConfigType<TDateTypeSelectKeyType>
+  | IDateConfigType
 >;
 
 export interface XInputDateRangePickerConfig extends ICommonBaseType {
@@ -103,7 +110,7 @@ export interface XInputDateRangePickerConfig extends ICommonBaseType {
   layout?: TLayoutSelectKeyType;
 
   /**
-   * 标签宽度
+   * 标题宽度
    */
   labelColSpan?: TNumberDefaultType;
 
@@ -111,6 +118,22 @@ export interface XInputDateRangePickerConfig extends ICommonBaseType {
    * 隐藏时是否提交数据，开启后隐藏状态仍会保存值
    */
   saveWithHidden?: TBooleanDefaultType;
+
+  /**
+   * 日期类型： 年、年月、年月日、年月日时
+   * 可选值: 'YEAR' | 'MONTH' | 'DATE' | 'FULL'
+   */
+  dateType: TDateTypeSelectKeyType;
+
+  /**
+   * 开始时间
+   */
+  startTime: TTextDefaultType;
+
+  /**
+   * 结束时间
+   */
+  endTime: TTextDefaultType;
 }
 
 const XDateRangePicker: XInputDateRangePickerSchema = {
@@ -144,11 +167,22 @@ const XDateRangePicker: XInputDateRangePickerSchema = {
       type: CONFIG_TYPES.SWITCH_INPUT
     },
     statusConfig,
-    widthConfig
+    widthConfig,
+    dateTypeConfig,
+    {
+      key: 'startTime',
+      name: '开始时间',
+      type: CONFIG_TYPES.DATE_INPUT
+    },
+    {
+      key: 'endTime',
+      name: '结束时间',
+      type: CONFIG_TYPES.DATE_INPUT
+    }
   ],
   config: {
     ...baseDefault,
-    label: '时间段',
+    label: '日期区间',
     description: '',
     tooltip: '',
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
@@ -157,7 +191,10 @@ const XDateRangePicker: XInputDateRangePickerSchema = {
     required: false,
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
     saveWithHidden: false,
-    labelColSpan: 100
+    labelColSpan: 100,
+    dateType: DATE_VALUES[DATE_OPTIONS.DATE],
+    startTime: '',
+    endTime: ''
   }
 };
 

@@ -1,8 +1,8 @@
 import {
-    FORM_COMPONENT_TYPES,
-    LAYOUT_COMPONENT_TYPES,
-    LIST_COMPONENT_TYPES,
-    SHOW_COMPONENT_TYPES
+  FORM_COMPONENT_TYPES,
+  LAYOUT_COMPONENT_TYPES,
+  LIST_COMPONENT_TYPES,
+  SHOW_COMPONENT_TYPES
 } from '@/constants/componentTypes';
 
 /**
@@ -20,7 +20,8 @@ export const COMPONENT_TYPE_DISPLAY_NAME_MAP: Record<string, string> = {
   [FORM_COMPONENT_TYPES.INPUT_PHONE]: '手机号输入',
   [FORM_COMPONENT_TYPES.INPUT_NUMBER]: '数字输入',
   [FORM_COMPONENT_TYPES.DATE_PICKER]: '日期选择',
-  [FORM_COMPONENT_TYPES.DATE_TIME_PICKER]: '日期时间',
+  [FORM_COMPONENT_TYPES.DATE_RANGE_PICKER]: '日期区间',
+  // [FORM_COMPONENT_TYPES.DATE_TIME_PICKER]: '日期时间',
   [FORM_COMPONENT_TYPES.TIME_PICKER]: '时间选择',
   [FORM_COMPONENT_TYPES.SWITCH]: '开关',
   [FORM_COMPONENT_TYPES.RADIO]: '单选框',
@@ -33,6 +34,10 @@ export const COMPONENT_TYPE_DISPLAY_NAME_MAP: Record<string, string> = {
   [FORM_COMPONENT_TYPES.IMG_UPLOAD]: '图片上传',
   [FORM_COMPONENT_TYPES.AUTO_CODE]: '唯一编码',
   [FORM_COMPONENT_TYPES.RELATED_FORM]: '关联表单',
+  [FORM_COMPONENT_TYPES.STATIC_TEXT]: '静态文本',
+  [FORM_COMPONENT_TYPES.DIVIDER]: '分割线',
+  [FORM_COMPONENT_TYPES.RICH_TEXT]: '富文本',
+  [FORM_COMPONENT_TYPES.CAROUSEL_F]: '轮播图',
 
   // 列表组件
   [LIST_COMPONENT_TYPES.TABLE]: '表格',
@@ -63,8 +68,8 @@ const allTemplate = {
       items: [
         {
           type: LAYOUT_COMPONENT_TYPES.COLUMN_LAYOUT,
-          h: 48,
-          w: 68,
+          h: 36,
+          w: 118,
           displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[LAYOUT_COMPONENT_TYPES.COLUMN_LAYOUT],
           icon: 'col_layout_cp.svg',
           category: 'base'
@@ -76,162 +81,186 @@ const allTemplate = {
       items: [
         {
           type: FORM_COMPONENT_TYPES.INPUT_TEXT,
-          h: 48,
-          w: 68,
+          h: 36,
+          w: 118,
           displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.INPUT_TEXT],
           icon: 'text_input_cp.svg',
           category: 'base'
         },
         {
           type: FORM_COMPONENT_TYPES.INPUT_TEXTAREA,
-          h: 48,
-          w: 68,
+          h: 36,
+          w: 118,
           displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.INPUT_TEXTAREA],
           icon: 'textarea_input_cp.svg',
           category: 'base'
         },
         {
+          type: FORM_COMPONENT_TYPES.RICH_TEXT,
+          h: 36,
+          w: 118,
+          displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.RICH_TEXT],
+          icon: 'readonly_cp.svg', // todo
+          category: 'base'
+        },
+        {
           type: FORM_COMPONENT_TYPES.INPUT_EMAIL,
-          h: 48,
-          w: 68,
+          h: 36,
+          w: 118,
           displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.INPUT_EMAIL],
           icon: 'email_input_cp.svg',
           category: 'base'
         },
         {
           type: FORM_COMPONENT_TYPES.INPUT_PHONE,
-          h: 48,
-          w: 68,
+          h: 36,
+          w: 118,
           displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.INPUT_PHONE],
           icon: 'phone_input_cp.svg',
           category: 'base'
         },
         {
           type: FORM_COMPONENT_TYPES.INPUT_NUMBER,
-          h: 48,
-          w: 68,
+          h: 36,
+          w: 118,
           displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.INPUT_NUMBER],
           icon: 'number_input_cp.svg',
           category: 'base'
         },
-        // {
-        //     type: FORM_COMPONENT_TYPES.DATE_RANGE_PICKER,
-        //     h: 48,
-        //     w: 68,
-        //     displayName: '时间段',
-        //     icon: 'date_picker_cp.svg',
-        //     category: 'base'
-        // },
         {
           type: FORM_COMPONENT_TYPES.DATE_PICKER,
-          h: 48,
-          w: 68,
+          h: 36,
+          w: 118,
           displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.DATE_PICKER],
           icon: 'date_picker_cp.svg',
           category: 'base'
         },
         {
-          type: FORM_COMPONENT_TYPES.DATE_TIME_PICKER,
-          h: 48,
-          w: 68,
-          displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.DATE_TIME_PICKER],
-          icon: 'time_picker_cp.svg',
+          type: FORM_COMPONENT_TYPES.DATE_RANGE_PICKER,
+          h: 36,
+          w: 118,
+          displayName: '日期区间',
+          icon: 'date_picker_cp.svg',
           category: 'base'
         },
+        // {
+        //   type: FORM_COMPONENT_TYPES.DATE_TIME_PICKER,
+        //   h: 36,
+        //   w: 118,
+        //   displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.DATE_TIME_PICKER],
+        //   icon: 'time_picker_cp.svg',
+        //   category: 'base'
+        // },
         {
           type: FORM_COMPONENT_TYPES.TIME_PICKER,
-          h: 48,
-          w: 68,
+          h: 36,
+          w: 118,
           displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.TIME_PICKER],
           icon: 'time_picker_cp.svg',
           category: 'base'
         },
         {
           type: FORM_COMPONENT_TYPES.SWITCH,
-          h: 48,
-          w: 68,
+          h: 36,
+          w: 118,
           displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.SWITCH],
           icon: 'switch_cp.svg',
           category: 'base'
         },
         {
           type: FORM_COMPONENT_TYPES.RADIO,
-          h: 48,
-          w: 68,
+          h: 36,
+          w: 118,
           displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.RADIO],
           icon: 'radio_cp.svg',
           category: 'base'
         },
         {
           type: FORM_COMPONENT_TYPES.CHECKBOX,
-          h: 48,
-          w: 68,
+          h: 36,
+          w: 118,
           displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.CHECKBOX],
           icon: 'checkbox_cp.svg',
           category: 'base'
         },
         {
           type: FORM_COMPONENT_TYPES.SELECT_ONE,
-          h: 48,
-          w: 68,
+          h: 36,
+          w: 118,
           displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.SELECT_ONE],
           icon: 'select_one_cp.svg',
           category: 'base'
         },
         {
           type: FORM_COMPONENT_TYPES.SELECT_MUTIPLE,
-          h: 48,
-          w: 68,
+          h: 36,
+          w: 118,
           displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.SELECT_MUTIPLE],
           icon: 'select_mutiple_cp.svg',
           category: 'base'
         },
         {
           type: FORM_COMPONENT_TYPES.USER_SELECT,
-          h: 48,
-          w: 68,
+          h: 36,
+          w: 118,
           displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.USER_SELECT],
           icon: 'user_select_cp.svg',
           category: 'base'
         },
         {
           type: FORM_COMPONENT_TYPES.DEPT_SELECT,
-          h: 48,
-          w: 68,
+          h: 36,
+          w: 118,
           displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.DEPT_SELECT],
           icon: 'dept_select_cp.svg',
           category: 'base'
         },
         {
           type: FORM_COMPONENT_TYPES.FILE_UPLOAD,
-          h: 48,
-          w: 68,
+          h: 36,
+          w: 118,
           displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.FILE_UPLOAD],
-          icon: 'upload_cp.svg',
+          icon: 'upload_file_cp.svg',
           category: 'base'
         },
         {
           type: FORM_COMPONENT_TYPES.IMG_UPLOAD,
-          h: 48,
-          w: 68,
+          h: 36,
+          w: 118,
           displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.IMG_UPLOAD],
-          icon: 'upload_cp.svg',
+          icon: 'upload_image_cp.svg',
           category: 'base'
         },
         {
           type: FORM_COMPONENT_TYPES.AUTO_CODE,
-          h: 48,
-          w: 68,
+          h: 36,
+          w: 118,
           displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.AUTO_CODE],
           icon: 'readonly_cp.svg',
           category: 'base'
         },
         {
           type: FORM_COMPONENT_TYPES.RELATED_FORM,
-          h: 48,
-          w: 68,
+          h: 36,
+          w: 118,
           displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.RELATED_FORM],
           icon: 'readonly_cp.svg',
+          category: 'base'
+        },
+        {
+          type: FORM_COMPONENT_TYPES.DIVIDER,
+          h: 36,
+          w: 118,
+          displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.DIVIDER],
+          icon: 'readonly_cp.svg', // todo
+          category: 'base'
+        },
+        {
+          type: FORM_COMPONENT_TYPES.CAROUSEL_F,
+          h: 36,
+          w: 118,
+          displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.CAROUSEL_F],
+          icon: 'readonly_cp.svg', // todo
           category: 'base'
         }
       ]
@@ -345,7 +374,5 @@ const allTemplate = {
     }
   ]
 };
-
-
 
 export default allTemplate;

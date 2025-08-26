@@ -1,24 +1,3 @@
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="16" height="16" viewBox="0 0 16 16" fill="none">
-<path    stroke="rgba(51, 150, 100, 1)" stroke-width="1.3300000429153442" stroke-linejoin="round" stroke-linecap="round" style="mix-blend-mode:normal" d="M8.00016 13.3333L2.3335 13.3333C1.78121 13.3333 1.3335 12.8856 1.3335 12.3333L1.3335 3.66663C1.3335 3.11434 1.78121 2.66663 2.3335 2.66663L13.6668 2.66663C14.2191 2.66663 14.6668 3.11434 14.6668 3.66663L14.6668 7.68623">
-</path>
-<path d="M1.3335 3.66663C1.3335 3.11434 1.78121 2.66663 2.3335 2.66663L13.6668 2.66663C14.2191 2.66663 14.6668 3.11434 14.6668 3.66663L14.6668 6.66663L1.3335 6.66663L1.3335 3.66663Z" stroke="rgba(51, 150, 100, 1)" stroke-width="1.3300000429153442"   style="mix-blend-mode:normal">
-</path>
-<path d="M3.33333 4.00004C2.96514 4.00004 2.66667 4.29852 2.66667 4.66671C2.66667 5.0349 2.96514 5.33337 3.33333 5.33337C3.70152 5.33337 4 5.0349 4 4.66671C4 4.29852 3.70152 4.00004 3.33333 4.00004Z"  style="mix-blend-mode:normal" fill="rgba(51, 150, 100, 1)" >
-</path>
-<path d="M5.33333 4.00004C4.96514 4.00004 4.66667 4.29852 4.66667 4.66671C4.66667 5.0349 4.96514 5.33337 5.33333 5.33337C5.70152 5.33337 6 5.0349 6 4.66671C6 4.29852 5.70152 4.00004 5.33333 4.00004Z"  style="mix-blend-mode:normal" fill="rgba(51, 150, 100, 1)" >
-</path>
-<path d="M13.3335 11.3334C13.3335 11.8857 12.8858 12.3334 12.3335 12.3334C11.7812 12.3334 11.3335 11.8857 11.3335 11.3334C11.3335 10.7811 11.7812 10.3334 12.3335 10.3334C12.8858 10.3334 13.3335 10.7811 13.3335 11.3334Z" stroke="rgba(51, 150, 100, 1)" stroke-width="1.3300000429153442"   style="mix-blend-mode:normal">
-</path>
-<path    stroke="rgba(51, 150, 100, 1)" stroke-width="1.3300000429153442" stroke-linejoin="round" stroke-linecap="round" style="mix-blend-mode:normal" d="M12.3335 13.6667L12.3335 12.3334">
-</path>
-<path    stroke="rgba(51, 150, 100, 1)" stroke-width="1.3300000429153442" stroke-linejoin="round" stroke-linecap="round" style="mix-blend-mode:normal" d="M12.3335 10.3333L12.3335 9">
-</path>
-<path    stroke="rgba(51, 150, 100, 1)" stroke-width="1.3300000429153442" stroke-linejoin="round" stroke-linecap="round" style="mix-blend-mode:normal" d="M10.3125 12.5L11.4672 11.8334">
-</path>
-<path    stroke="rgba(51, 150, 100, 1)" stroke-width="1.3300000429153442" stroke-linejoin="round" stroke-linecap="round" style="mix-blend-mode:normal" d="M13.1992 10.8333L14.3539 10.1666">
-</path>
-<path    stroke="rgba(51, 150, 100, 1)" stroke-width="1.3300000429153442" stroke-linejoin="round" stroke-linecap="round" style="mix-blend-mode:normal" d="M10.3125 10.1666L11.4672 10.8333">
-</path>
-<path    stroke="rgba(51, 150, 100, 1)" stroke-width="1.3300000429153442" stroke-linejoin="round" stroke-linecap="round" style="mix-blend-mode:normal" d="M13.1992 11.8334L14.3539 12.5">
-</path>
+<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M17 17.3203H3V15.6602H17V17.3203ZM17 13.6602H3V12H17V13.6602ZM17 4C17.5523 4 18 4.44772 18 5V9C18 9.55228 17.5523 10 17 10H3C2.44772 10 2 9.55228 2 9V5C2 4.44772 2.44772 4 3 4H17Z" fill="#4E5969"/>
 </svg>

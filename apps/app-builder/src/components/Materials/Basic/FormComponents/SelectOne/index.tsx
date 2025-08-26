@@ -7,7 +7,7 @@ const Option = Select.Option;
 const options = ['Beijing', 'Shanghai', 'Guangzhou', 'Disabled'];
 
 const XSelectOne = memo((props: XInputSelectOneConfig) => {
-  const { label, dataField, tooltip, status, required, layout, labelColSpan = 0 } = props;
+  const { label, dataField, tooltip, status, required, layout, labelColSpan = 0, showSearch } = props;
 
   return (
     <Form.Item
@@ -26,7 +26,7 @@ const XSelectOne = memo((props: XInputSelectOneConfig) => {
         margin: '0px'
       }}
     >
-      <Select placeholder="Select" style={{ width: '100%' }} allowClear>
+      <Select placeholder="Select" showSearch={showSearch} style={{ width: '100%' }} allowClear>
         {options.map((option, index) => (
           <Option key={option} disabled={index === 3} value={option}>
             {option}

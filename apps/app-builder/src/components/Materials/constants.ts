@@ -7,7 +7,7 @@ export const CONFIG_TYPES = {
   DYNAMIC_SELECT_INPUT: 'DynamicSelectInput',
   NUMBER_INPUT: 'NumberInput',
   SWITCH_INPUT: 'SwitchInput',
-
+  DATE_INPUT: 'DateInput',
 
   // 组件标题输入
   LABEL_INPUT: 'LabelInput',
@@ -51,10 +51,12 @@ export const CONFIG_TYPES = {
   FORM_LAYOUT: 'FormLayout',
   // 文本对齐方式
   TEXT_ALIGN: 'TextAlign',
-  // 标签宽度
+  // 标题宽度
   LABEL_COL_SPAN: 'LabelColSpan',
   // 颜色
   COLOR: 'Color',
+  // 单选框配置
+  RADIO_DATA: 'RadioData'
 } as const;
 
 // 状态选项常量
@@ -151,17 +153,17 @@ export const UPLOAD_VALUES = {
 
 // 日期选择格式
 export const DATE_OPTIONS = {
-  ONLY_YEAR: '年',
-  ONLY_MONTH: '年月',
-  ONLY_DATE: '年月日',
+  YEAR: '年',
+  MONTH: '年月',
+  DATE: '年月日',
   FULL: '年月日时'
 } as const;
 
 export const DATE_VALUES = {
-  [DATE_OPTIONS.ONLY_YEAR]: 'ONLY_YEAR',
-  [DATE_OPTIONS.ONLY_MONTH]: 'ONLY_MONTH',
-  [DATE_OPTIONS.ONLY_DATE]: 'ONLY_DATE',
-  [DATE_OPTIONS.FULL]: 'FULL'
+  [DATE_OPTIONS.YEAR]: 'year',
+  [DATE_OPTIONS.MONTH]: 'month',
+  [DATE_OPTIONS.DATE]: 'date',
+  [DATE_OPTIONS.FULL]: 'full'
 } as const;
 
 // 表单的布局

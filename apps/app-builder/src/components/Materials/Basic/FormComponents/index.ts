@@ -18,6 +18,10 @@ import XSelectOne from './SelectOne';
 import XSwitch from './Switch';
 import XTimePicker from './TimePicker';
 import XUserSelect from './UserSelect';
+import XStaticText from './StaticText';
+import XDIVIDER from './Divider';
+import XRichText from './RichText';
+import XCarousel from './Carousel';
 
 export default {
   XInputText,
@@ -39,5 +43,9 @@ export default {
   XFileUpload,
   XImgUpload,
   XAutoCode,
-  XRelatedForm
+  XRelatedForm,
+  XStaticText,
+  XDIVIDER,
+  XRichText,
+  XCarousel
 };

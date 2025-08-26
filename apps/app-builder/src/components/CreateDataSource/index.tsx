@@ -1,11 +1,6 @@
 import { useEffect, useState, forwardRef, useImperativeHandle } from 'react';
 import { Button, Form, Grid, Input, Message, Select } from '@arco-design/web-react';
-import {
-  createDatasource,
-  testDatasourceConnection,
-  type DatasourceSaveReqVO,
-  type DatasourceTestConnectionReqVO
-} from '@onebase/app';
+import { testDatasourceConnection, type DatasourceSaveReqVO, type DatasourceTestConnectionReqVO } from '@onebase/app';
 import styles from './index.module.less';
 
 const Option = Select.Option;
@@ -25,8 +20,7 @@ interface DataSourceFormValues {
 const dbTypes = [{ label: 'PostgreSQL', value: 'PostgreSQL', urlPrefix: 'jdbc:postgresql://' }];
 
 export type DataSourceHandle = {
-  handleCreateDatasource: () => void;
-  getDatasourceId: () => string;
+  handleGetDatasource: () => void;
 };
 
 interface IProps {
@@ -39,15 +33,33 @@ const CreateDataSource = forwardRef<DataSourceHandle, IProps>((props, ref) => {
 
   const [form] = Form.useForm<DataSourceFormValues>();
   const [testing, setTesting] = useState<boolean>(false);
-  const [datasourceId, setDataSourceId] = useState<string>('');
   const [formValues, setFormValues] = useState<Partial<DataSourceFormValues>>({});
 
   useImperativeHandle(ref, () => ({
-    handleCreateDatasource() {
-      handleFinish();
-    },
-    getDatasourceId() {
-      return datasourceId;
+    async handleGetDatasource() {
+      try {
+        const values = await form.validate();
+
+        const createParams: DatasourceSaveReqVO = {
+          datasourceName: values.datasourceName,
+          code: values.code,
+          datasourceType: values.datasourceType,
+          config: {
+            host: values.host,
+            port: parseInt(values.port),
+            database: values.database,
+            username: values.username,
+            password: values.password,
+            url: values.url || `jdbc:mysql://${values.host}:${values.port}/${values.database}`
+          },
+          description: `${values.datasourceType} 数据源`,
+          datasourceOrigin: 2 // 外部数据源
+        };
+
+        return createParams;
+      } catch (error) {
+        return null;
+      }
     }
   }));
 
@@ -123,53 +135,6 @@ const CreateDataSource = forwardRef<DataSourceHandle, IProps>((props, ref) => {
       }
     } finally {
       setTesting(false);
-    }
-  };
-
-  // 提交
-  const handleFinish = async () => {
-    try {
-      form.validate(async (error, values: any) => {
-        console.log(error, values);
-        if (error !== null) return;
-
-        // 构建创建数据源参数
-        const createParams: DatasourceSaveReqVO = {
-          datasourceName: values.datasourceName,
-          code: values.code,
-          datasourceType: values.datasourceType,
-          config: {
-            host: values.host,
-            port: parseInt(values.port),
-            database: values.database,
-            username: values.username,
-            password: values.password,
-            url: values.url || `jdbc:mysql://${values.host}:${values.port}/${values.database}`
-          },
-          description: `${values.datasourceType} 数据源`,
-          appId: '', // todo
-          datasourceOrigin: 2 // 外部数据源
-        };
-
-        const res = await createDatasource(createParams);
-
-        console.log('createDatasource res', res);
-
-        if (res) {
-          Message.success('数据源创建成功');
-          setDataSourceId(res);
-        } else {
-          Message.error(res.msg || '创建失败');
-        }
-      });
-    } catch (error) {
-      if (error instanceof Error) {
-        Message.error(error.message);
-      } else {
-        Message.error('创建失败，请检查表单数据');
-      }
-    } finally {
-      form.resetFields();
     }
   };
 

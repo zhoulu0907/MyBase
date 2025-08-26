@@ -18,7 +18,10 @@ const XInputTextArea = memo((props: XInputTextAreaConfig) => {
     layout,
     color,
     bgColor,
-    labelColSpan = 0
+    labelColSpan = 0,
+    maxLength,
+    minRows,
+    maxRows
   } = props;
   return (
     <Form.Item
@@ -41,6 +44,13 @@ const XInputTextArea = memo((props: XInputTextAreaConfig) => {
         readOnly={status === STATUS_VALUES[STATUS_OPTIONS.READONLY]}
         defaultValue={defaultValue}
         placeholder={placeholder}
+        maxLength={maxLength}
+        allowClear
+        autoSize={{
+          minRows,
+          maxRows
+        }}
+        showWordLimit
         style={{
           width: '100%',
           color,

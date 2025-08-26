@@ -1,33 +1,34 @@
 import {
-    ALIGN_OPTIONS,
-    ALIGN_VALUES,
-    CONFIG_TYPES,
-    DATE_OPTIONS,
-    DATE_VALUES,
-    LAYOUT_OPTIONS,
-    LAYOUT_VALUES,
-    PAGINATION_POSITION_OPTIONS,
-    PAGINATION_POSITION_VALUES,
-    STATUS_OPTIONS,
-    STATUS_VALUES,
-    UPLOAD_OPTIONS,
-    UPLOAD_VALUES,
-    WIDTH_OPTIONS,
-    WIDTH_VALUES
+  ALIGN_OPTIONS,
+  ALIGN_VALUES,
+  CONFIG_TYPES,
+  DATE_OPTIONS,
+  DATE_VALUES,
+  LAYOUT_OPTIONS,
+  LAYOUT_VALUES,
+  PAGINATION_POSITION_OPTIONS,
+  PAGINATION_POSITION_VALUES,
+  STATUS_OPTIONS,
+  STATUS_VALUES,
+  UPLOAD_OPTIONS,
+  UPLOAD_VALUES,
+  WIDTH_OPTIONS,
+  WIDTH_VALUES
 } from './constants';
 import type {
-    IAlignConfigType,
-    IDataFieldConfigType,
-    IDateTypeConfigType,
-    ILabelColSpanConfigType,
-    ILayoutConfigType,
-    IRelatedFormDataConfigType,
-    ISelectConfigType,
-    IStatusConfigType,
-    ITableDataConfigType,
-    ITextConfigType,
-    IWidthConfigType,
-    TTextDefaultType
+  IAlignConfigType,
+  IDataFieldConfigType,
+  IDateTypeConfigType,
+  ILayoutConfigType,
+  IRelatedFormDataConfigType,
+  ISelectConfigType,
+  IStatusConfigType,
+  ITableDataConfigType,
+  ITextConfigType,
+  IWidthConfigType,
+  TTextDefaultType,
+  INumberConfigType,
+  IRadioDataConfigType
 } from './types';
 
 export interface ICommonBaseType {
@@ -137,19 +138,19 @@ export const dateTypeConfig: IDateTypeConfigType<TDateTypeSelectKeyType> = {
   type: CONFIG_TYPES.DATE_TYPE,
   range: [
     {
-      key: DATE_OPTIONS.ONLY_YEAR,
-      text: DATE_OPTIONS.ONLY_YEAR,
-      value: DATE_VALUES[DATE_OPTIONS.ONLY_YEAR]
+      key: DATE_OPTIONS.YEAR,
+      text: DATE_OPTIONS.YEAR,
+      value: DATE_VALUES[DATE_OPTIONS.YEAR]
     },
     {
-      key: DATE_OPTIONS.ONLY_MONTH,
-      text: DATE_OPTIONS.ONLY_MONTH,
-      value: DATE_VALUES[DATE_OPTIONS.ONLY_MONTH]
+      key: DATE_OPTIONS.MONTH,
+      text: DATE_OPTIONS.MONTH,
+      value: DATE_VALUES[DATE_OPTIONS.MONTH]
     },
     {
-      key: DATE_OPTIONS.ONLY_DATE,
-      text: DATE_OPTIONS.ONLY_DATE,
-      value: DATE_VALUES[DATE_OPTIONS.ONLY_DATE]
+      key: DATE_OPTIONS.DATE,
+      text: DATE_OPTIONS.DATE,
+      value: DATE_VALUES[DATE_OPTIONS.DATE]
     },
     {
       key: DATE_OPTIONS.FULL,
@@ -178,11 +179,30 @@ export const layoutConfig: ILayoutConfigType<TLayoutSelectKeyType> = {
   ]
 };
 
-// 标签宽度
-export const labelColSpanConfig: ILabelColSpanConfigType = {
+export type TDirectionSelectKeyType = (typeof LAYOUT_VALUES)[keyof typeof LAYOUT_VALUES];
+export const directionConfig: ILayoutConfigType<TDirectionSelectKeyType> = {
+  key: 'direction',
+  name: '方向',
+  type: CONFIG_TYPES.FORM_LAYOUT,
+  range: [
+    {
+      key: LAYOUT_OPTIONS.HORIZONTAL,
+      text: LAYOUT_OPTIONS.HORIZONTAL,
+      value: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL]
+    },
+    {
+      key: LAYOUT_OPTIONS.VERTICAL,
+      text: LAYOUT_OPTIONS.VERTICAL,
+      value: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL]
+    }
+  ]
+};
+
+// 标题宽度
+export const labelColSpanConfig: INumberConfigType = {
   key: 'labelColSpan',
-  name: '标签宽度',
-  type: CONFIG_TYPES.LABEL_COL_SPAN
+  name: '标题宽度',
+  type: CONFIG_TYPES.NUMBER_INPUT
 };
 
 // 文件列表
@@ -250,20 +270,20 @@ export const pagePositionConfig: ISelectConfigType<TPagePositionSelectKeyType> =
 };
 
 export const dataFieldConfig: IDataFieldConfigType[] = [
-    {
-        key: 'dataField',
-        name: '数据字段',
-        type: CONFIG_TYPES.FIELD_DATA
-    },
-]
+  {
+    key: 'dataField',
+    name: '数据字段',
+    type: CONFIG_TYPES.FIELD_DATA
+  }
+];
 
 export const relatedFormdataFieldConfig: IRelatedFormDataConfigType[] = [
-    {
-        key: 'relatedFormDataField',
-        name: '关联表单',
-        type: CONFIG_TYPES.RELATED_FORM_DATA
-    },
-]
+  {
+    key: 'relatedFormDataField',
+    name: '关联表单',
+    type: CONFIG_TYPES.RELATED_FORM_DATA
+  }
+];
 
 export const tableMetaDataConfig: ITableDataConfigType = {
   key: 'metaData',
@@ -280,4 +300,10 @@ export const keyDataConfig: ITableDataConfigType = {
 export const baseDefault = {
   cpName: '',
   id: ''
+};
+
+export const radioDataConfig: IRadioDataConfigType = {
+  key: 'radioData',
+  name: '自定义选项',
+  type: CONFIG_TYPES.RADIO_DATA
 };

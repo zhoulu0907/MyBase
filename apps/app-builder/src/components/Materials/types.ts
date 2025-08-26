@@ -31,15 +31,6 @@ export interface INumberConfigType {
   step?: number;
 }
 
-// 数字输入框配置
-export interface ILabelColSpanConfigType {
-  key: string;
-  name: string;
-  type: typeof CONFIG_TYPES.LABEL_COL_SPAN;
-  range?: [number, number];
-  step?: number;
-}
-
 // 文本区域输入框配置
 export interface ITextAreaConfigType {
   key: string;
@@ -66,21 +57,27 @@ export interface IDynamicSelectConfigType {
 }
 
 export interface IDataFieldConfigType {
-    key: string;
-    name: string;
-    type:  typeof CONFIG_TYPES.FIELD_DATA;
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.FIELD_DATA;
 }
 
 export interface IRelatedFormDataConfigType {
-    key: string;
-    name: string;
-    type:  typeof CONFIG_TYPES.RELATED_FORM_DATA;
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.RELATED_FORM_DATA;
 }
 
 export interface ITableDataConfigType {
-    key: string;
-    name: string;
-    type:  typeof CONFIG_TYPES.TABLE_DATA;
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.TABLE_DATA;
+}
+
+export interface IRadioDataConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.RADIO_DATA;
 }
 
 // TODO(mickey): remove
@@ -284,4 +281,11 @@ export interface IColorConfigType {
   name: string;
   type: typeof CONFIG_TYPES.COLOR;
   placeholder?: string;
+}
+
+// 日期
+export interface IDateConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.DATE_INPUT;
 }
