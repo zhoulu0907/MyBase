@@ -1,16 +1,21 @@
 
 import { type FlowNodeRegistry } from '../typings';
-import { BreakLoopNodeRegistry } from './break-loop';
-import { CaseNodeRegistry } from './case';
-import { CaseDefaultNodeRegistry } from './case-default';
-import { CatchBlockNodeRegistry } from './catch-block';
-import { EndNodeRegistry } from './end';
-import { IFNodeRegistry } from './if';
-import { IFBlockNodeRegistry } from './if-block';
-import { LoopNodeRegistry } from './loop';
+import { BreakLoopNodeRegistry } from './control/break-loop';
+import { CaseNodeRegistry } from './control/case';
+import { CaseDefaultNodeRegistry } from './control/case-default';
+import { CatchBlockNodeRegistry } from './control/catch-block';
+import { EndNodeRegistry } from './control/end';
+import { IFNodeRegistry } from './control/if';
+import { IFBlockNodeRegistry } from './control/if-block';
+import { LoopNodeRegistry } from './control/loop';
+import { SwitchNodeRegistry } from './control/switch';
+import { TryCatchNodeRegistry } from './control/trycatch';
+import { DataAddNodeRegistry } from './data/data-add';
+import { DataCalcNodeRegistry } from './data/data-calc';
+import { DataDeleteNodeRegistry } from './data/data-delete';
+import { DataQueryNodeRegistry } from './data/data-query';
+import { DataUpdateNodeRegistry } from './data/data-update';
 import { StartNodeRegistry } from './start';
-import { SwitchNodeRegistry } from './switch';
-import { TryCatchNodeRegistry } from './trycatch';
 
 export const FlowNodeRegistries: FlowNodeRegistry[] = [
     CaseNodeRegistry,
@@ -23,5 +28,10 @@ export const FlowNodeRegistries: FlowNodeRegistry[] = [
     SwitchNodeRegistry,
     LoopNodeRegistry,
     BreakLoopNodeRegistry,
-    TryCatchNodeRegistry
+    TryCatchNodeRegistry,
+    DataAddNodeRegistry,
+    DataCalcNodeRegistry,
+    DataDeleteNodeRegistry,
+    DataQueryNodeRegistry,
+    DataUpdateNodeRegistry
 ];

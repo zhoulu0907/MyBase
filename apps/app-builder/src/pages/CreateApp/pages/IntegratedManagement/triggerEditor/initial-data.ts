@@ -8,7 +8,7 @@ export const initialData: FlowDocumentJSON = {
       type: 'start',
       blocks: [],
       data: {
-        title: '开始',
+        title: '触发节点',
         outputs: {
           type: 'object',
           properties: {
