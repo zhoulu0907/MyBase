@@ -1,7 +1,6 @@
 import { Button } from '@arco-design/web-react';
-
 import { useNavigate } from 'react-router-dom';
-import './index.less';
+import './index.css';
 
 export function NotFoundPage() {
   const navigate = useNavigate();
