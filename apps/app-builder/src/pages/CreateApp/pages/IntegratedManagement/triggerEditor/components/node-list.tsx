@@ -1,7 +1,9 @@
 import { FlowNodeEntity, FlowNodeRegistry, useClientContext } from '@flowgram.ai/fixed-layout-editor';
 import styled from 'styled-components';
 
+import { Tabs } from '@arco-design/web-react';
 import { FlowNodeRegistries } from '../nodes';
+import styles from './index.module.less';
 
 const NodeWrap = styled.div`
   width: 100%;
@@ -23,9 +25,9 @@ const NodeLabel = styled.div`
   margin-left: 10px;
 `;
 
-function Node(props: { label: string; icon: JSX.Element; onClick: () => void; disabled: boolean }) {
+function Node(props: { label: string; icon: JSX.Element; onClick: () => void }) {
   return (
-    <NodeWrap onClick={props.disabled ? undefined : props.onClick} style={props.disabled ? { opacity: 0.3 } : {}}>
+    <NodeWrap onClick={props.onClick}>
       <div style={{ fontSize: 14 }}>{props.icon}</div>
       <NodeLabel>{props.label}</NodeLabel>
     </NodeWrap>
@@ -47,16 +49,57 @@ export function NodeList(props: { onSelect: (meta: any) => void; from: FlowNodeE
     props.onSelect?.(addProps);
   };
   return (
-    <NodesWrap style={{ width: 80 * 2 + 20 }}>
-      {FlowNodeRegistries.filter((registry) => !registry.meta?.addDisable).map((registry) => (
-        <Node
-          key={registry.type}
-          disabled={!(registry.canAdd?.(context, props.from) ?? true)}
-          icon={<img style={{ width: 10, height: 10, borderRadius: 4 }} src={registry.info.icon} />}
-          label={registry.type as string}
-          onClick={() => handleClick(registry)}
-        />
-      ))}
-    </NodesWrap>
+    // <NodesWrap style={{ width: 80 * 2 + 20 }}>
+    //   {FlowNodeRegistries.filter((registry) => !registry.meta?.addDisable).map(
+    //     (registry) =>
+    //       (registry.canAdd?.(context, props.from) ?? true) && (
+    //         <Node
+    //           key={registry.type}
+    //           icon={<img style={{ width: 10, height: 10, borderRadius: 4 }} src={registry.info.icon} />}
+    //           label={registry.title as string}
+    //           onClick={() => handleClick(registry)}
+    //         />
+    //       )
+    //   )}
+    // </NodesWrap>
+    <div className={styles.nodeList} style={{ width: 450 }}>
+      <Tabs>
+        <Tabs.TabPane key="trigger" title="触发节点">
+          {FlowNodeRegistries.filter((registry) => !registry.meta?.addDisable).map(
+            (registry) =>
+              (registry.canAdd?.(context, props.from) ?? true) && (
+                <Node
+                  key={registry.type}
+                  icon={<img style={{ width: 10, height: 10, borderRadius: 4 }} src={registry.info.icon} />}
+                  label={registry.title as string}
+                  onClick={() => handleClick(registry)}
+                />
+              )
+          )}
+        </Tabs.TabPane>
+        <Tabs.TabPane key="control" title="控制节点">
+          {FlowNodeRegistries.filter((registry) => !registry.meta?.addDisable).map(
+            (registry) =>
+              (registry.canAdd?.(context, props.from) ?? true) && (
+                <Node
+                  key={registry.type}
+                  icon={<img style={{ width: 10, height: 10, borderRadius: 4 }} src={registry.info.icon} />}
+                  label={registry.title as string}
+                  onClick={() => handleClick(registry)}
+                />
+              )
+          )}
+        </Tabs.TabPane>
+        <Tabs.TabPane key="data" title="数据节点">
+          无
+        </Tabs.TabPane>
+        <Tabs.TabPane key="interaction" title="交互节点">
+          无
+        </Tabs.TabPane>
+        <Tabs.TabPane key="other" title="其他节点">
+          无
+        </Tabs.TabPane>
+      </Tabs>
+    </div>
   );
 }

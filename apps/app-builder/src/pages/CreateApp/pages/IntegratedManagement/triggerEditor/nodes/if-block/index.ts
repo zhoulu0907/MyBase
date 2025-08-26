@@ -5,6 +5,7 @@ import { formMeta } from './form-meta';
 
 export const IFBlockNodeRegistry: FlowNodeRegistry = {
   type: 'ifBlock',
+  title: '条件分支节点',
   /**
    * 分支节点需要继承自 block
    * Branch nodes need to inherit from 'block'

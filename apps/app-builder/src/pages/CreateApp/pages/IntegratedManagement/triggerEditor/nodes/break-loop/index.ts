@@ -1,7 +1,3 @@
-/**
- * Copyright (c) 2025 Bytedance Ltd. and/or its affiliates
- * SPDX-License-Identifier: MIT
- */
 
 import { nanoid } from 'nanoid';
 
@@ -14,6 +10,7 @@ import { formMeta } from './form-meta';
  */
 export const BreakLoopNodeRegistry: FlowNodeRegistry = {
   type: 'breakLoop',
+  title: '循环结束节点',
   extend: 'end',
   info: {
     icon: iconBreak,

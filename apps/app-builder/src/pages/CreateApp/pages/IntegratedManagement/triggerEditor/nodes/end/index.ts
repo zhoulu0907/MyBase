@@ -7,6 +7,7 @@ import { formMeta } from './form-meta';
 
 export const EndNodeRegistry: FlowNodeRegistry = {
   type: 'end',
+  title: '结束节点',
   meta: {
     isNodeEnd: true, // Mark as end
     selectable: false, // End node cannot select
@@ -16,7 +17,7 @@ export const EndNodeRegistry: FlowNodeRegistry = {
   info: {
     icon: iconEnd,
     description:
-      'The final node of the workflow, used to return the result information after the workflow is run.',
+      '工作流的最后一个节点，用于在工作流运行结束后返回结果信息。',
   },
   /**
    * Render node via formMeta

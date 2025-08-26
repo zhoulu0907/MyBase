@@ -9,6 +9,7 @@ import { defaultFormMeta } from '../default-form-meta';
 export const SwitchNodeRegistry: FlowNodeRegistry = {
   extend: FlowNodeSplitType.DYNAMIC_SPLIT,
   type: 'switch',
+  title: '分支节点',
   info: {
     icon: iconCondition,
     description:

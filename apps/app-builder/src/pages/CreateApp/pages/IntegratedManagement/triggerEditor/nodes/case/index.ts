@@ -7,6 +7,7 @@ import { formMeta } from './form-meta';
 let id = 2;
 export const CaseNodeRegistry: FlowNodeRegistry = {
   type: 'case',
+  title: '分支节点',
   /**
    * 分支节点需要继承自 block
    * Branch nodes need to inherit from 'block'

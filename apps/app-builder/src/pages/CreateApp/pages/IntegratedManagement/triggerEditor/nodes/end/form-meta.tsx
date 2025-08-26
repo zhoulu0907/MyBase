@@ -1,15 +1,4 @@
-/**
- * Copyright (c) 2025 Bytedance Ltd. and/or its affiliates
- * SPDX-License-Identifier: MIT
- */
-
-import { Field, type FormMeta } from '@flowgram.ai/fixed-layout-editor';
-import {
-  createInferInputsPlugin,
-  DisplayInputsValues,
-  type IFlowValue,
-  InputsValues
-} from '@flowgram.ai/form-materials';
+import { type FormMeta } from '@flowgram.ai/fixed-layout-editor';
 
 import { FormContent, FormHeader } from '../../form-components';
 import { useIsSidebar } from '../../hooks';
@@ -21,41 +10,19 @@ export const renderForm = () => {
     return (
       <>
         <FormHeader />
-        <FormContent>
-          <Field<Record<string, IFlowValue | undefined> | undefined> name="inputsValues">
-            {({ field: { value, onChange } }) => (
-              <>
-                <InputsValues value={value} onChange={(_v) => onChange(_v)} />
-              </>
-            )}
-          </Field>
-        </FormContent>
+        <FormContent></FormContent>
       </>
     );
   }
   return (
     <>
       <FormHeader />
-      <FormContent>
-        <Field<Record<string, IFlowValue | undefined> | undefined> name="inputsValues">
-          {({ field: { value } }) => (
-            <>
-              <DisplayInputsValues value={value} />
-            </>
-          )}
-        </Field>
-      </FormContent>
+      <FormContent></FormContent>
     </>
   );
 };
 
 export const formMeta: FormMeta = {
   ...defaultFormMeta,
-  render: renderForm,
-  plugins: [
-    createInferInputsPlugin({
-      sourceKey: 'inputsValues',
-      targetKey: 'inputs'
-    })
-  ]
+  render: renderForm
 };
