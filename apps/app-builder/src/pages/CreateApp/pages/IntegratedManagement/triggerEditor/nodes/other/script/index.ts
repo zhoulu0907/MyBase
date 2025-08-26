@@ -3,10 +3,10 @@ import { nanoid } from 'nanoid';
 import { type FlowNodeRegistry } from '../../../typings';
 import { formMeta } from './form-meta';
 
-export const DataDeleteNodeRegistry: FlowNodeRegistry = {
-  type: 'dataDelete',
-  title: '数据删除节点',
-  category: 'data',
+export const ScriptNodeRegistry: FlowNodeRegistry = {
+  type: 'script',
+  title: '脚本节点',
+  category: 'other',
   meta: {
     isStart: false,
     deleteDisable: false,
@@ -18,7 +18,7 @@ export const DataDeleteNodeRegistry: FlowNodeRegistry = {
   info: {
     icon: iconStart,
     description:
-    '这是数据删除节点，用于删除数据。',
+    '这是脚本节点，用于执行脚本。',
   },
   /**
    * Render node via formMeta
@@ -29,10 +29,10 @@ export const DataDeleteNodeRegistry: FlowNodeRegistry = {
   },
   onAdd(ctx, from) {
     return {
-      id: `dataDelete_${nanoid()}`,
-      type: 'dataDelete',
+      id: `script_${nanoid()}`,
+      type: 'script',
       data: {
-        title: '数据删除节点',
+        title: '脚本节点',
       },
     };
   },

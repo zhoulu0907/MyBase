@@ -15,6 +15,16 @@ import { DataCalcNodeRegistry } from './data/data-calc';
 import { DataDeleteNodeRegistry } from './data/data-delete';
 import { DataQueryNodeRegistry } from './data/data-query';
 import { DataUpdateNodeRegistry } from './data/data-update';
+import { ModalNodeRegistry } from './interaction/modal';
+import { NagivateNodeRegistry } from './interaction/nagivate';
+import { RefreshNodeRegistry } from './interaction/refresh';
+import { TooltipNodeRegistry } from './interaction/tooltip';
+import { DataMapperNodeRegistry } from './other/data-mapper';
+import { IpaasNodeRegistry } from './other/ipaas';
+import { JsonNodeRegistry } from './other/json';
+import { LogNodeRegistry } from './other/log';
+import { MessageNodeRegistry } from './other/message';
+import { ScriptNodeRegistry } from './other/script';
 import { StartNodeRegistry } from './start';
 
 export const FlowNodeRegistries: FlowNodeRegistry[] = [
@@ -29,9 +39,22 @@ export const FlowNodeRegistries: FlowNodeRegistry[] = [
     LoopNodeRegistry,
     BreakLoopNodeRegistry,
     TryCatchNodeRegistry,
+
     DataAddNodeRegistry,
     DataCalcNodeRegistry,
     DataDeleteNodeRegistry,
     DataQueryNodeRegistry,
-    DataUpdateNodeRegistry
+    DataUpdateNodeRegistry,
+
+    IpaasNodeRegistry,
+    JsonNodeRegistry,
+    LogNodeRegistry,
+    MessageNodeRegistry,
+    ScriptNodeRegistry,
+    DataMapperNodeRegistry,
+
+    ModalNodeRegistry,
+    NagivateNodeRegistry,
+    RefreshNodeRegistry,
+    TooltipNodeRegistry,
 ];

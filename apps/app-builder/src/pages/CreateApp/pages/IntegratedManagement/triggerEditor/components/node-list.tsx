@@ -18,44 +18,52 @@ export function NodeList(props: { onSelect: (meta: any) => void; from: FlowNodeE
     const addProps = registry.onAdd(context, props.from);
     props.onSelect?.(addProps);
   };
+
+  const controlNodes = FlowNodeRegistries.filter((registry) => !registry.meta?.addDisable).filter(
+    (registry) => registry.category === 'control'
+  );
+  const dataNodes = FlowNodeRegistries.filter((registry) => !registry.meta?.addDisable).filter(
+    (registry) => registry.category === 'data'
+  );
+  const interactionNodes = FlowNodeRegistries.filter((registry) => !registry.meta?.addDisable).filter(
+    (registry) => registry.category === 'interaction'
+  );
+  const otherNodes = FlowNodeRegistries.filter((registry) => !registry.meta?.addDisable).filter(
+    (registry) => registry.category === 'other'
+  );
+
+  const showNodes = (nodes: FlowNodeRegistry[]) => {
+    return (
+      <div className={styles.nodePanel}>
+        {nodes.map(
+          (registry) =>
+            (registry.canAdd?.(context, props.from) ?? true) && (
+              <Node
+                key={registry.type}
+                icon={<img style={{ width: 10, height: 10, borderRadius: 4 }} src={registry.info.icon} />}
+                label={registry.title as string}
+                onClick={() => handleClick(registry)}
+              />
+            )
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className={styles.nodeList} style={{ width: 400 }}>
       <Tabs>
         <Tabs.TabPane key="control" title="控制节点">
-          {FlowNodeRegistries.filter((registry) => !registry.meta?.addDisable)
-            .filter((registry) => registry.category === 'control')
-            .map(
-              (registry) =>
-                (registry.canAdd?.(context, props.from) ?? true) && (
-                  <Node
-                    key={registry.type}
-                    icon={<img style={{ width: 10, height: 10, borderRadius: 4 }} src={registry.info.icon} />}
-                    label={registry.title as string}
-                    onClick={() => handleClick(registry)}
-                  />
-                )
-            )}
+          {showNodes(controlNodes)}
         </Tabs.TabPane>
         <Tabs.TabPane key="data" title="数据节点">
-          {FlowNodeRegistries.filter((registry) => !registry.meta?.addDisable)
-            .filter((registry) => registry.category === 'data')
-            .map(
-              (registry) =>
-                (registry.canAdd?.(context, props.from) ?? true) && (
-                  <Node
-                    key={registry.type}
-                    icon={<img style={{ width: 10, height: 10, borderRadius: 4 }} src={registry.info.icon} />}
-                    label={registry.title as string}
-                    onClick={() => handleClick(registry)}
-                  />
-                )
-            )}
+          {showNodes(dataNodes)}
         </Tabs.TabPane>
         <Tabs.TabPane key="interaction" title="交互节点">
-          无
+          {showNodes(interactionNodes)}
         </Tabs.TabPane>
         <Tabs.TabPane key="other" title="其他节点">
-          无
+          {showNodes(otherNodes)}
         </Tabs.TabPane>
       </Tabs>
     </div>
