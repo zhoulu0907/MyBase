@@ -3,6 +3,7 @@ import { useCallback, useContext } from 'react';
 import { ConfigProvider } from '@douyinfe/semi-ui';
 import { FlowNodeEntity, useNodeRender } from '@flowgram.ai/fixed-layout-editor';
 
+import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { NodeRenderContext, SidebarContext } from '../../context';
 import { BaseNodeStyle, ErrorIcon } from './styles';
 
@@ -28,6 +29,7 @@ export const BaseNode = ({ node }: { node: FlowNodeEntity }) => {
    * Sidebar control
    */
   const sidebar = useContext(SidebarContext);
+  const { setNodeId } = triggerEditorSignal;
 
   return (
     <ConfigProvider getPopupContainer={getPopupContainer}>
@@ -44,7 +46,9 @@ export const BaseNode = ({ node }: { node: FlowNodeEntity }) => {
           if (nodeRender.dragging) {
             return;
           }
-          sidebar.setNodeId(nodeRender.node.id);
+          //   sidebar.setNodeId(nodeRender.node.id);
+          console.log('onClick', nodeRender.node.id);
+          setNodeId(nodeRender.node.id);
         }}
         style={{
           /**
