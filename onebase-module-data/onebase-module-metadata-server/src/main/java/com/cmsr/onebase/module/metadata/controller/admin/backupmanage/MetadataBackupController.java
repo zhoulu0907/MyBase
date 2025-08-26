@@ -23,10 +23,10 @@ import org.springframework.web.bind.annotation.RestController;
  * @author matianyu
  * @date 2025-08-12
  */
-@Tag(name = "管理后台 - 元数据备份恢复")
+/*@Tag(name = "管理后台 - 元数据备份恢复")
 @RestController
 @RequestMapping("/metadata/backup")
-@Validated
+@Validated*/
 @Slf4j
 public class MetadataBackupController {
 

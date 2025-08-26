@@ -14,9 +14,9 @@ import java.util.List;
 
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 
-@Tag(name = "管理后台 - 自动编号规则")
+/*@Tag(name = "管理后台 - 自动编号规则")
 @RestController
-@RequestMapping("/metadata/auto-number/rule")
+@RequestMapping("/metadata/auto-number/rule")*/
 public class AutoNumberRuleController {
 
     @Resource

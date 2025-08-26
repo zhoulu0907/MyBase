@@ -19,9 +19,9 @@ import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
  * @author matianyu
  * @date 2025-08-20
  */
-@Tag(name = "管理后台 - 实体字段约束管理")
+/*@Tag(name = "管理后台 - 实体字段约束管理")
 @RestController
-@RequestMapping("/metadata/entity-field/constraint")
+@RequestMapping("/metadata/entity-field/constraint")*/
 public class EntityFieldConstraintController {
 
     @Resource

@@ -19,9 +19,9 @@ import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
  * @author matianyu
  * @date 2025-08-20
  */
-@Tag(name = "管理后台 - 自动编号配置")
+/*@Tag(name = "管理后台 - 自动编号配置")
 @RestController
-@RequestMapping("/metadata/auto-number/config")
+@RequestMapping("/metadata/auto-number/config")*/
 public class AutoNumberConfigController {
 
     @Resource

@@ -23,10 +23,10 @@ import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
  * @author bty418
  * @date 2025-01-27
  */
-@Tag(name = "管理后台 - 应用与数据源关联管理")
+/*@Tag(name = "管理后台 - 应用与数据源关联管理")
 @RestController
 @RequestMapping("/metadata/app-datasource")
-@Validated
+@Validated*/
 public class AppDatasourceController {
 
     @Resource

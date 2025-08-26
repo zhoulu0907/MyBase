@@ -10,9 +10,9 @@ import org.springframework.web.bind.annotation.*;
 
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 
-@Tag(name = "管理后台 - 自动编号状态与重置")
+/*@Tag(name = "管理后台 - 自动编号状态与重置")
 @RestController
-@RequestMapping("/metadata/auto-number/state")
+@RequestMapping("/metadata/auto-number/state")*/
 public class AutoNumberStateController {
 
     @Resource

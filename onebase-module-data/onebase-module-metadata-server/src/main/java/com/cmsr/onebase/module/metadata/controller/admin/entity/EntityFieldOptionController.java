@@ -22,9 +22,9 @@ import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
  * @author matianyu
  * @date 2025-08-20
  */
-@Tag(name = "管理后台 - 实体字段选项管理")
+/*@Tag(name = "管理后台 - 实体字段选项管理")
 @RestController
-@RequestMapping("/metadata/entity-field/option")
+@RequestMapping("/metadata/entity-field/option")*/
 public class EntityFieldOptionController {
 
     @Resource
