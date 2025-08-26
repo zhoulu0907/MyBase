@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.metadata.service.datasource;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.metadata.controller.admin.datasource.vo.ColumnInfoRespVO;
 import com.cmsr.onebase.module.metadata.controller.admin.datasource.vo.DatasourcePageReqVO;
 import com.cmsr.onebase.module.metadata.controller.admin.datasource.vo.DatasourceSaveReqVO;
@@ -18,6 +19,23 @@ import com.cmsr.onebase.module.metadata.enums.DatasourceTypeEnum;
 import com.cmsr.onebase.module.metadata.dal.database.MetadataDatasourceRepository;
 import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
+import org.anyline.data.param.Compare;
+import org.anyline.data.param.init.DefaultConfigStore;
+import org.anyline.entity.Order;
+import org.anyline.metadata.Column;
+import org.anyline.metadata.Table;
+import org.anyline.service.AnylineService;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.jdbc.util.DataSourceUtil;
@@ -173,16 +191,16 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
      * @return 数据源类型响应VO
      */
     private DatasourceTypeRespVO convertToTypeRespVO(DatasourceTypeEnum typeEnum) {
-        DatasourceTypeRespVO respVO = new DatasourceTypeRespVO();
-        respVO.setDatasourceType(typeEnum.getCode());
-        respVO.setDisplayName(typeEnum.getDisplayName());
-        respVO.setDescription(typeEnum.getDescription());
-        respVO.setDefaultPort(typeEnum.getDefaultPort());
-        respVO.setJdbcDriverClass(typeEnum.getJdbcDriverClass());
-        respVO.setUrlTemplate(typeEnum.getUrlTemplate());
-        // 所有数据源类型都支持读写和模式发现功能
-        respVO.setSupportFeatures(Arrays.asList("READ", "WRITE", "SCHEMA_DISCOVERY"));
-        return respVO;
+        return BeanUtils.toBean(typeEnum, DatasourceTypeRespVO.class, respVO -> {
+            respVO.setDatasourceType(typeEnum.getCode());
+            respVO.setDisplayName(typeEnum.getDisplayName());
+            respVO.setDescription(typeEnum.getDescription());
+            respVO.setDefaultPort(typeEnum.getDefaultPort());
+            respVO.setJdbcDriverClass(typeEnum.getJdbcDriverClass());
+            respVO.setUrlTemplate(typeEnum.getUrlTemplate());
+            // 所有数据源类型都支持读写和模式发现功能
+            respVO.setSupportFeatures(Arrays.asList("READ", "WRITE", "SCHEMA_DISCOVERY"));
+        });
     }
 
     @Override

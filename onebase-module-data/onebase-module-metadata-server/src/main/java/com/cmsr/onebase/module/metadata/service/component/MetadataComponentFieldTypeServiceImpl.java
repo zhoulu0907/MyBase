@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.metadata.service.component;
 
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
+import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.FieldTypeConfigRespVO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataComponentFieldTypeDO;
 import jakarta.annotation.Resource;
@@ -113,41 +114,40 @@ public class MetadataComponentFieldTypeServiceImpl implements MetadataComponentF
      * @return 字段类型配置响应VO
      */
     private FieldTypeConfigRespVO convertToFieldTypeConfigRespVO(MetadataComponentFieldTypeDO fieldTypeDO) {
-        FieldTypeConfigRespVO respVO = new FieldTypeConfigRespVO();
-        respVO.setFieldType(fieldTypeDO.getFieldTypeCode());
-        respVO.setDisplayName(fieldTypeDO.getFieldTypeName());
-        respVO.setCategory(fieldTypeDO.getDataType());
+        return BeanUtils.toBean(fieldTypeDO, FieldTypeConfigRespVO.class, respVO -> {
+            respVO.setFieldType(fieldTypeDO.getFieldTypeCode());
+            respVO.setDisplayName(fieldTypeDO.getFieldTypeName());
+            respVO.setCategory(fieldTypeDO.getDataType());
 
-        // 根据字段类型设置支持的配置选项
-        String fieldTypeCode = fieldTypeDO.getFieldTypeCode();
-        if (fieldTypeCode != null) {
-            switch (fieldTypeCode.toUpperCase()) {
-                case "VARCHAR":
-                case "INTEGER":
-                case "BIGINT":
-                case "DECIMAL":
-                    respVO.setSupportLength(true);
-                    respVO.setDefaultLength(fieldTypeCode.equals("VARCHAR") ? 255 : 
-                                           fieldTypeCode.equals("INTEGER") ? 11 : 
-                                           fieldTypeCode.equals("BIGINT") ? 20 : 10);
-                    respVO.setMaxLength(fieldTypeCode.equals("VARCHAR") ? 4000 : null);
-                    break;
-                default:
-                    respVO.setSupportLength(false);
-                    respVO.setDefaultLength(null);
-                    respVO.setMaxLength(null);
-                    break;
+            // 根据字段类型设置支持的配置选项
+            String fieldTypeCode = fieldTypeDO.getFieldTypeCode();
+            if (fieldTypeCode != null) {
+                switch (fieldTypeCode.toUpperCase()) {
+                    case "VARCHAR":
+                    case "INTEGER":
+                    case "BIGINT":
+                    case "DECIMAL":
+                        respVO.setSupportLength(true);
+                        respVO.setDefaultLength(fieldTypeCode.equals("VARCHAR") ? 255 : 
+                                               fieldTypeCode.equals("INTEGER") ? 11 : 
+                                               fieldTypeCode.equals("BIGINT") ? 20 : 10);
+                        respVO.setMaxLength(fieldTypeCode.equals("VARCHAR") ? 4000 : null);
+                        break;
+                    default:
+                        respVO.setSupportLength(false);
+                        respVO.setDefaultLength(null);
+                        respVO.setMaxLength(null);
+                        break;
+                }
+
+                // 小数类型支持小数位设置
+                if ("DECIMAL".equalsIgnoreCase(fieldTypeCode)) {
+                    respVO.setSupportDecimal(true);
+                    respVO.setDefaultDecimal(2);
+                } else {
+                    respVO.setSupportDecimal(false);
+                }
             }
-
-            // 小数类型支持小数位设置
-            if ("DECIMAL".equalsIgnoreCase(fieldTypeCode)) {
-                respVO.setSupportDecimal(true);
-                respVO.setDefaultDecimal(2);
-            } else {
-                respVO.setSupportDecimal(false);
-            }
-        }
-
-        return respVO;
+        });
     }
 }

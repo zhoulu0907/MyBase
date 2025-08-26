@@ -271,22 +271,22 @@ public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRela
      * 转换关系类型枚举为响应VO
      */
     private RelationshipTypeRespVO convertToRelationshipTypeRespVO(RelationshipTypeEnum relationshipTypeEnum) {
-        RelationshipTypeRespVO respVO = new RelationshipTypeRespVO();
-        respVO.setRelationshipType(relationshipTypeEnum.getRelationshipType());
-        respVO.setDisplayName(relationshipTypeEnum.getDisplayName());
-        respVO.setDescription(relationshipTypeEnum.getDescription());
-        return respVO;
+        return BeanUtils.toBean(relationshipTypeEnum, RelationshipTypeRespVO.class, respVO -> {
+            respVO.setRelationshipType(relationshipTypeEnum.getRelationshipType());
+            respVO.setDisplayName(relationshipTypeEnum.getDisplayName());
+            respVO.setDescription(relationshipTypeEnum.getDescription());
+        });
     }
 
     /**
      * 转换级联类型枚举为响应VO
      */
     private CascadeTypeRespVO convertToCascadeTypeRespVO(CascadeTypeEnum cascadeTypeEnum) {
-        CascadeTypeRespVO respVO = new CascadeTypeRespVO();
-        respVO.setCascadeType(cascadeTypeEnum.getCascadeType());
-        respVO.setDisplayName(cascadeTypeEnum.getDisplayName());
-        respVO.setDescription(cascadeTypeEnum.getDescription());
-        return respVO;
+        return BeanUtils.toBean(cascadeTypeEnum, CascadeTypeRespVO.class, respVO -> {
+            respVO.setCascadeType(cascadeTypeEnum.getCascadeType());
+            respVO.setDisplayName(cascadeTypeEnum.getDisplayName());
+            respVO.setDescription(cascadeTypeEnum.getDescription());
+        });
     }
 
     @Override
@@ -389,16 +389,16 @@ public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRela
         Long childParentIdFieldId = getOrCreateParentIdField(childEntityId);
 
         // 3. 创建主子关系
-        EntityRelationshipSaveReqVO relationshipReqVO = new EntityRelationshipSaveReqVO();
-        relationshipReqVO.setRelationName("主子关系");
-        relationshipReqVO.setSourceEntityId(createReqVO.getParentEntityId());
-        relationshipReqVO.setTargetEntityId(String.valueOf(childEntityId));
-        relationshipReqVO.setRelationshipType(RelationshipTypeEnum.ONE_TO_MANY.getRelationshipType());
-        relationshipReqVO.setSourceFieldId(String.valueOf(parentIdFieldId));
-        relationshipReqVO.setTargetFieldId(String.valueOf(childParentIdFieldId));
-        relationshipReqVO.setCascadeType(CascadeTypeEnum.ALL.getCascadeType()); // 默认级联新增、删除、查询
-        relationshipReqVO.setDescription("系统自动创建的主子关系");
-        relationshipReqVO.setAppId(createReqVO.getAppId());
+        EntityRelationshipSaveReqVO relationshipReqVO = BeanUtils.toBean(createReqVO, EntityRelationshipSaveReqVO.class, req -> {
+            req.setRelationName("主子关系");
+            req.setSourceEntityId(createReqVO.getParentEntityId());
+            req.setTargetEntityId(String.valueOf(childEntityId));
+            req.setRelationshipType(RelationshipTypeEnum.ONE_TO_MANY.getRelationshipType());
+            req.setSourceFieldId(String.valueOf(parentIdFieldId));
+            req.setTargetFieldId(String.valueOf(childParentIdFieldId));
+            req.setCascadeType(CascadeTypeEnum.ALL.getCascadeType()); // 默认级联新增、删除、查询
+            req.setDescription("系统自动创建的主子关系");
+        });
 
         Long relationshipId = createEntityRelationship(relationshipReqVO);
         
@@ -430,14 +430,13 @@ public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRela
      * @return 子表实体ID
      */
     private Long createNewChildEntity(ParentChildRelationshipSaveReqVO createReqVO) {
-        BusinessEntitySaveReqVO entityReqVO = new BusinessEntitySaveReqVO();
-        entityReqVO.setDisplayName(createReqVO.getChildTableName());
-        entityReqVO.setCode(createReqVO.getChildTableCode());
-        entityReqVO.setDescription(createReqVO.getChildTableDescription());
-        entityReqVO.setEntityType(1); // 自建表
-        entityReqVO.setDatasourceId(createReqVO.getDatasourceId());
-        entityReqVO.setAppId(createReqVO.getAppId());
-        entityReqVO.setRunMode(0); // 默认运行模式
+        BusinessEntitySaveReqVO entityReqVO = BeanUtils.toBean(createReqVO, BusinessEntitySaveReqVO.class, req -> {
+            req.setDisplayName(createReqVO.getChildTableName());
+            req.setCode(createReqVO.getChildTableCode());
+            req.setDescription(createReqVO.getChildTableDescription());
+            req.setEntityType(1); // 自建表
+            req.setRunMode(0); // 默认运行模式
+        });
 
         return businessEntityService.createBusinessEntity(entityReqVO);
     }
@@ -505,12 +504,13 @@ public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRela
         }
 
         // 2. 创建响应VO
-        EntityWithChildrenRespVO result = new EntityWithChildrenRespVO();
-        result.setEntityId(entity.getId());
-        result.setEntityName(entity.getDisplayName());
-        result.setEntityCode(entity.getCode());
-        // 设置实际表名
-        result.setTableName(entity.getTableName());
+        EntityWithChildrenRespVO result = BeanUtils.toBean(entity, EntityWithChildrenRespVO.class, res -> {
+            res.setEntityId(entity.getId());
+            res.setEntityName(entity.getDisplayName());
+            res.setEntityCode(entity.getCode());
+            // 设置实际表名
+            res.setTableName(entity.getTableName());
+        });
 
         // 3. 查询以该实体为源实体的所有关系（即该实体作为父表的关系）
         DefaultConfigStore configStore = new DefaultConfigStore();
@@ -542,21 +542,21 @@ public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRela
      * @return 子表信息
      */
     private ChildEntityInfoRespVO convertToChildEntityInfo(MetadataEntityRelationshipDO relationshipDO) {
-        ChildEntityInfoRespVO childInfo = new ChildEntityInfoRespVO();
-        
-        childInfo.setChildEntityId(relationshipDO.getTargetEntityId());
-        childInfo.setRelationshipId(String.valueOf(relationshipDO.getId()));
-        childInfo.setRelationshipName(relationshipDO.getRelationName());
-        childInfo.setRelationshipType(relationshipDO.getRelationshipType());
-        
-        // 获取目标实体信息
-        MetadataBusinessEntityDO targetEntity = businessEntityService.getBusinessEntity(relationshipDO.getTargetEntityId());
-        if (targetEntity != null) {
-            childInfo.setChildEntityName(targetEntity.getDisplayName());
-            childInfo.setChildEntityCode(targetEntity.getCode());
-            // 设置子表实际表名
-            childInfo.setChildTableName(targetEntity.getTableName());
-        }
+        ChildEntityInfoRespVO childInfo = BeanUtils.toBean(relationshipDO, ChildEntityInfoRespVO.class, info -> {
+            info.setChildEntityId(relationshipDO.getTargetEntityId());
+            info.setRelationshipId(String.valueOf(relationshipDO.getId()));
+            info.setRelationshipName(relationshipDO.getRelationName());
+            info.setRelationshipType(relationshipDO.getRelationshipType());
+            
+            // 获取目标实体信息
+            MetadataBusinessEntityDO targetEntity = businessEntityService.getBusinessEntity(relationshipDO.getTargetEntityId());
+            if (targetEntity != null) {
+                info.setChildEntityName(targetEntity.getDisplayName());
+                info.setChildEntityCode(targetEntity.getCode());
+                // 设置子表实际表名
+                info.setChildTableName(targetEntity.getTableName());
+            }
+        });
         
         // 获取字段名称
         childInfo.setSourceFieldName(getFieldNameById(relationshipDO.getSourceFieldId()));
@@ -582,9 +582,7 @@ public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRela
 
         if (entities.isEmpty()) {
             log.info("应用下未找到任何实体，应用ID: {}", appId);
-            AppEntitiesRespVO result = new AppEntitiesRespVO();
-            result.setEntities(List.of());
-            return result;
+            return new AppEntitiesRespVO().setEntities(List.of());
         }
 
         // 2. 转换为响应VO
@@ -592,8 +590,7 @@ public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRela
                 .map(this::convertToEntityInfo)
                 .toList();
 
-        AppEntitiesRespVO result = new AppEntitiesRespVO();
-        result.setEntities(entityInfoList);
+        AppEntitiesRespVO result = new AppEntitiesRespVO().setEntities(entityInfoList);
 
         log.info("查询应用实体及字段信息完成，应用ID: {}, 实体数量: {}", appId, entityInfoList.size());
         return result;
@@ -606,20 +603,19 @@ public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRela
      * @return 实体信息VO
      */
     private EntityInfoRespVO convertToEntityInfo(MetadataBusinessEntityDO entityDO) {
-        EntityInfoRespVO entityInfo = new EntityInfoRespVO();
-        entityInfo.setEntityID(String.valueOf(entityDO.getId()));
-        entityInfo.setEntityName(entityDO.getDisplayName());
-        // 设置实际表名
-        entityInfo.setTableName(entityDO.getTableName());
-        
-        // 判断实体类型 - 查询是否存在以该实体为源实体的关系来判断是否为主表
-        entityInfo.setEntityType(determineEntityType(entityDO.getId()));
+        return BeanUtils.toBean(entityDO, EntityInfoRespVO.class, entityInfo -> {
+            entityInfo.setEntityID(String.valueOf(entityDO.getId()));
+            entityInfo.setEntityName(entityDO.getDisplayName());
+            // 设置实际表名
+            entityInfo.setTableName(entityDO.getTableName());
+            
+            // 判断实体类型 - 查询是否存在以该实体为源实体的关系来判断是否为主表
+            entityInfo.setEntityType(determineEntityType(entityDO.getId()));
 
-        // 查询该实体的所有字段
-        List<EntityFieldInfoRespVO> fields = getEntityFields(entityDO.getId());
-        entityInfo.setFields(fields);
-
-        return entityInfo;
+            // 查询该实体的所有字段
+            List<EntityFieldInfoRespVO> fields = getEntityFields(entityDO.getId());
+            entityInfo.setFields(fields);
+        });
     }
 
     /**
@@ -677,13 +673,9 @@ public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRela
      * @return 字段信息VO
      */
     private EntityFieldInfoRespVO convertToFieldInfo(MetadataEntityFieldDO fieldDO) {
-        EntityFieldInfoRespVO fieldInfo = new EntityFieldInfoRespVO();
-        fieldInfo.setFieldID(String.valueOf(fieldDO.getId()));
-        fieldInfo.setFieldName(fieldDO.getFieldName());
-        fieldInfo.setFieldType(fieldDO.getFieldType());
-        fieldInfo.setIsSystemField(fieldDO.getIsSystemField());
-        fieldInfo.setDisplayName(fieldDO.getDisplayName());
-        return fieldInfo;
+        return BeanUtils.toBean(fieldDO, EntityFieldInfoRespVO.class, fieldInfo -> {
+            fieldInfo.setFieldID(String.valueOf(fieldDO.getId()));
+        });
     }
 
     @Override

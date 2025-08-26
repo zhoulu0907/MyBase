@@ -1,36 +1,52 @@
 package com.cmsr.onebase.module.metadata.convert.datasource;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.metadata.controller.admin.datasource.vo.DatasourceRespVO;
 import com.cmsr.onebase.module.metadata.controller.admin.datasource.vo.DatasourceSaveReqVO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.datasource.MetadataDatasourceDO;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
 
-@Mapper(componentModel = "spring")
-public interface DatasourceConvert {
+/**
+ * 数据源转换器
+ *
+ * @author matianyu
+ * @date 2025-08-26
+ */
+@Component
+public class DatasourceConvert {
 
-    @Mapping(target = "config", expression = "java(stringToMap(bean.getConfig()))")
-    DatasourceRespVO convert(MetadataDatasourceDO bean);
+    public DatasourceRespVO convert(MetadataDatasourceDO bean) {
+        return BeanUtils.toBean(bean, DatasourceRespVO.class, vo -> {
+            vo.setConfig(stringToMap(bean.getConfig()));
+        });
+    }
 
-    @Mapping(target = "config", expression = "java(mapToString(reqVO.getConfig()))")
-    MetadataDatasourceDO convert(DatasourceSaveReqVO reqVO);
+    public MetadataDatasourceDO convert(DatasourceSaveReqVO reqVO) {
+        return BeanUtils.toBean(reqVO, MetadataDatasourceDO.class, entity -> {
+            entity.setConfig(mapToString(reqVO.getConfig()));
+        });
+    }
 
-    List<DatasourceRespVO> convertList(List<MetadataDatasourceDO> list);
+    public List<DatasourceRespVO> convertList(List<MetadataDatasourceDO> list) {
+        return list.stream()
+                .map(this::convert)
+                .toList();
+    }
 
-    default PageResult<DatasourceRespVO> convertPage(PageResult<MetadataDatasourceDO> page) {
+    public PageResult<DatasourceRespVO> convertPage(PageResult<MetadataDatasourceDO> page) {
         return new PageResult<>(convertList(page.getList()), page.getTotal());
     }
 
     /**
      * 将JSON字符串转换为Map
      */
-    default Map<String, Object> stringToMap(String configStr) {
+    public Map<String, Object> stringToMap(String configStr) {
         if (configStr == null || configStr.trim().isEmpty()) {
             return null;
         }
@@ -66,7 +82,7 @@ public interface DatasourceConvert {
     /**
      * 将Map转换为JSON字符串
      */
-    default String mapToString(Map<String, Object> configMap) {
+    public String mapToString(Map<String, Object> configMap) {
         if (configMap == null) {
             return null;
         }

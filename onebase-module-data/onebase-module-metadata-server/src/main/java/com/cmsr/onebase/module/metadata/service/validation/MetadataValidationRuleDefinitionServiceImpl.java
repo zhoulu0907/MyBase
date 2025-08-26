@@ -35,7 +35,7 @@ public class MetadataValidationRuleDefinitionServiceImpl implements MetadataVali
         }
 
         for (Object valueRule : valueRules) {
-            // valueRule 可能是 VO 或 Map；优先使用 MapStruct 转换，确保类型一致性
+            // valueRule 可能是 VO 或 Map；使用 BeanUtils 或 ValidationRuleGroupConvert 转换，确保类型一致性
             MetadataValidationRuleDefinitionDO ruleDefinition;
             if (valueRule instanceof com.cmsr.onebase.module.metadata.controller.admin.validation.vo.ValidationRuleDefinitionVO vo) {
                 ruleDefinition = com.cmsr.onebase.module.metadata.convert.validation.ValidationRuleGroupConvert.INSTANCE.convertToRuleDefinitionDO(vo);
