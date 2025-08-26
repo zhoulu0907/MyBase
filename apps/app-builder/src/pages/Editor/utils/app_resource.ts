@@ -1,26 +1,8 @@
-import { getComponentSchema } from '@/components/Materials/schema';
-import { COMPONENT_TYPE_DISPLAY_NAME_MAP } from '@/components/Materials/template';
-import type { EditConfig } from '@/components/Materials/types';
-import { LAYOUT_COMPONENT_TYPES } from '@/constants/componentTypes';
 import { useFormEditorSignal, useListEditorSignal } from '@/store/singals/page_editor';
 import { Message } from '@arco-design/web-react';
 import { loadPageSet, savePageSet, type ComponentConfig, type LoadPageSetReq, type PageSet, type SavePageSetReq } from '@onebase/app';
+import { COMPONENT_TYPE_DISPLAY_NAME_MAP, LAYOUT_COMPONENT_TYPES, type EditConfig } from '@onebase/ui-kit';
 
-export function getComponentWidth(schema: any, itemType: string): string {
-  if (!schema || !schema.config || !schema.config.width) {
-    schema = getComponentSchema(itemType as any);
-    // console.log("初始化 schema.config.width", schema.config.width);
-  }
-  return schema.config.width;
-}
-
-export function getComponentConfig(schema: any, itemType: string): any {
-  if (!schema || !schema.config) {
-    schema = getComponentSchema(itemType as any);
-    // console.log("初始化 schema.config 默认配置", schema.config);
-  }
-  return schema.config;
-}
 
 export interface SavePageSetParams {
     pageSetId: string;

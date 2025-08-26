@@ -1,13 +1,12 @@
-import type { EditorType } from '@/pages/Editor/utils/const';
-import { EDITOR_TYPES } from '@/pages/Editor/utils/const';
+import IconBranch from '@/assets/images/edit_branch_icon.svg';
+import IconLayout from '@/assets/images/edit_layout_icon.svg';
 import { Button, Tabs } from '@arco-design/web-react';
 import { IconLeft, IconRight, IconSend } from '@arco-design/web-react/icon';
+import { EDITOR_TYPES, type EditorType } from '@onebase/ui-kit';
 import { useEffect, useState } from 'react';
 import MaterialContainer from './components/material';
 import MetadataContainer from './components/metadata';
 import TelegramContainer from './components/telegram';
-import IconLayout from '@/assets/images/edit_layout_icon.svg';
-import IconBranch from '@/assets/images/edit_branch_icon.svg';
 import styles from './index.module.less';
 
 // 定义类型

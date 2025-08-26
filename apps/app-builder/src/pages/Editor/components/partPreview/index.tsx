@@ -1,9 +1,7 @@
 import { useFormEditorSignal, useListEditorSignal } from '@/store/singals/page_editor';
 import { Button, Drawer, Form } from '@arco-design/web-react';
+import { EDITOR_TYPES, getComponentWidth, PreviewRender, type GridItem } from '@onebase/ui-kit';
 import React from 'react';
-import { getComponentWidth } from '../../utils/app_resource';
-import { EDITOR_TYPES, type GridItem } from '../../utils/const';
-import PreviewRender from '../render/PreviewRender';
 import styles from './index.module.less';
 
 interface PartPreviewProps {

@@ -1,4 +1,5 @@
 import iconStart from '@/assets/flow/icon-start.jpg';
+import { nanoid } from 'nanoid';
 import { type FlowNodeRegistry } from '../../../typings';
 import { formMeta } from './form-meta';
 
@@ -23,4 +24,16 @@ export const DataDeleteNodeRegistry: FlowNodeRegistry = {
    * Render node via formMeta
    */
   formMeta,
+  canDelete(ctx, node) {
+    return node.parent !== ctx.document.root;
+  },
+  onAdd(ctx, from) {
+    return {
+      id: `dataDelete_${nanoid()}`,
+      type: 'dataDelete',
+      data: {
+        title: '数据删除节点',
+      },
+    };
+  },
 };

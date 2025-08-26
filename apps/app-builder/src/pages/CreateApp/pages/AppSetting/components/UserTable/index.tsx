@@ -1,19 +1,19 @@
-import { useState, useEffect, useCallback } from 'react';
-import { Button, Table, Popconfirm, type TableColumnProps, Message } from '@arco-design/web-react';
+import { Button, Message, Popconfirm, Table, type TableColumnProps } from '@arco-design/web-react';
 import { IconPlusCircle } from '@arco-design/web-react/icon';
-import { debounce } from 'lodash-es';
 import {
-  roleDeleteUser,
-  getRoleUser,
   getDeptUser,
+  getRoleUser,
   roleAddUser,
-  type GetDeptUserReq,
-  type RoleDeleteUserReq,
-  type Role,
+  roleDeleteUser,
   type GerRoleUserReq,
-  type RoleAddUserReq
+  type GetDeptUserReq,
+  type Role,
+  type RoleAddUserReq,
+  type RoleDeleteUserReq
 } from '@onebase/app';
-import { AddMembers } from '@onebase/common';
+import { debounce } from 'lodash-es';
+import { useCallback, useEffect, useState } from 'react';
+import { AddMembers } from '../members';
 import styles from './index.module.less';
 
 interface IProps {

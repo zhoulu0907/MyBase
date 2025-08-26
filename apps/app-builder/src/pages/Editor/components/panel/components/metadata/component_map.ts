@@ -1,5 +1,5 @@
-import { FORM_COMPONENT_TYPES } from "@/constants/componentTypes";
 import { ENTITY_FIELD_TYPE_LABEL } from "@/pages/CreateApp/pages/DataFactory/utils/const";
+import { FORM_COMPONENT_TYPES } from "@onebase/ui-kit";
 
 // 组件类型与组件实现的映射表
 export const COMPONENT_MAP: Record<string, string> = {
