@@ -1,12 +1,12 @@
 import { Button } from '@arco-design/web-react';
 import type { FallbackProps } from 'react-error-boundary';
-import styles from './index.module.less';
+import './index.css';
 
-export default function ErrorPage({ error }: FallbackProps) {
+export function ErrorPage({ error }: FallbackProps) {
   return (
-    <div className={styles.errorPage}>
-      <div className={styles.content}>
-        <div className={styles.contentTitle}>500</div>
+    <div className="errorPage">
+      <div className="content">
+        <div className="contentTitle">500</div>
         <p>出错啦</p>
         <pre style={{ color: 'transparent' }}>{error.message}</pre>
         <Button type="secondary" onClick={() => (window.location.href = '/onebase/my-app')}>
