@@ -698,6 +698,7 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
         erEntity.setTableName(entity.getTableName());
         erEntity.setDescription(entity.getDescription());
         erEntity.setEntityType(entity.getEntityType().toString());
+        erEntity.setStatus(entity.getStatus());
         
         // 设置默认坐标（前端可以根据需要调整）
         erEntity.setDisplayConfig(entity.getDisplayConfig() != null ? entity.getDisplayConfig() : "{}");
