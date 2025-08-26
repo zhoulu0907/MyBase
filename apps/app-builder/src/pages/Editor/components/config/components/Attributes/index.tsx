@@ -1,7 +1,6 @@
 import { useI18n } from '@/hooks/useI18n';
-import { usePageEditorSignal } from '@/hooks/useSignal';
 import { ColorPicker, DatePicker, Form, Input, InputNumber, Radio, Switch } from '@arco-design/web-react';
-import { CONFIG_TYPES } from '@onebase/ui-kit';
+import { CONFIG_TYPES, usePageEditorSignal } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import { useEffect, useState } from 'react';
 import DynamicFieldConfig from './components/DynamicFieldConfig';

@@ -2,10 +2,15 @@ import { IconDelete } from '@arco-design/web-react/icon';
 import { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 
-import EditRender from '@/pages/Editor/components/render/EditRender';
 import { getComponentSchema } from '@onebase/ui-kit';
-import { getComponentWidth } from '../../utils/app_resource';
-import { COMPONENT_GROUP_NAME, type GridItem } from '../../utils/const';
+
+import {
+  COMPONENT_GROUP_NAME,
+  EditRender,
+  getComponentWidth,
+  type GridItem,
+  usePageEditorSignal
+} from '@onebase/ui-kit';
 
 import EmptyIcon from '@/assets/images/empty.svg';
 import MobileIcon from '@/assets/images/mobile_icon.svg';
@@ -13,7 +18,6 @@ import MobileActiveIcon from '@/assets/images/mobile_icon_active.svg';
 import PCIcon from '@/assets/images/pc_icon.svg';
 import PCActiveIcon from '@/assets/images/pc_icon_active.svg';
 
-import { usePageEditorSignal } from '@/hooks/useSignal';
 import { useSignals } from '@preact/signals-react/runtime';
 import 'react-grid-layout/css/styles.css';
 import styles from './index.module.less';

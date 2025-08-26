@@ -14,7 +14,7 @@ import XInputPhone from './FormComponents/InputPhone/schema';
 import XInputText from './FormComponents/InputText/schema';
 import XInputTextArea from './FormComponents/InputTextArea/schema';
 import XRadio from './FormComponents/Radio/schema';
-// import XRelatedForm from './FormComponents/RelatedForm/schema';
+import XRelatedForm from './FormComponents/RelatedForm/schema';
 import XRichText from './FormComponents/RichText/schema';
 import XSelectMutiple from './FormComponents/SelectMutiple/schema';
 import XSelectOne from './FormComponents/SelectOne/schema';
@@ -22,7 +22,7 @@ import XStaticText from './FormComponents/StaticText/schema';
 import XSwitch from './FormComponents/Switch/schema';
 import XTimePicker from './FormComponents/TimePicker/schema';
 import XUserSelect from './FormComponents/UserSelect/schema';
-// import XColumnLayout from './LayoutComponents/ColumnLayout/schema';
+import XColumnLayout from './LayoutComponents/ColumnLayout/schema';
 import XCalendar from './ListComponents/Calendar/schema';
 import XCarousel from './ListComponents/Carousel/schema';
 import XCollapse from './ListComponents/Collapse/schema';
@@ -53,7 +53,7 @@ const baseSchema = {
   XDeptSelect,
   XFileUpload,
   XImgUpload,
-//   XRelatedForm,
+  XRelatedForm,
   XStaticText,
   XDivider,
   XRichText,
@@ -66,7 +66,7 @@ const baseSchema = {
   XCarousel,
   XCollapse,
   XList,
-//   XColumnLayout,
+  XColumnLayout,
 
   XInfoNotice,
   XImage,

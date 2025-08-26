@@ -1,4 +1,5 @@
 export { FormComp } from './FormComponents';
+export { LayoutComp } from './LayoutComponents';
 export { ListComp } from './ListComponents';
 export { NavigateComp } from './NavigateComponents';
 export { ShowComp } from './ShowComponents';

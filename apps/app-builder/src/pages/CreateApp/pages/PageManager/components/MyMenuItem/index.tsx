@@ -1,7 +1,7 @@
-import { EDITOR_TYPES } from '@/pages/Editor/utils/const';
 import { Dropdown, Menu, Message, type FormInstance } from '@arco-design/web-react';
 import { IconSettings } from '@arco-design/web-react/icon';
 import { getPageSetId, RootParentPage, type GetPageSetIdReq } from '@onebase/app';
+import { EDITOR_TYPES } from '@onebase/ui-kit';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './index.module.less';

@@ -1,9 +1,11 @@
 import XAutoCode from './AutoCode';
+import XCarousel from './Carousel';
 import XCheckbox from './Checkbox';
 import XDatePicker from './DatePicker';
 import XDateRangePicker from './DateRangePicker';
 import XDateTimePicker from './DateTimePicker';
 import XDeptSelect from './DeptSelect';
+import XDIVIDER from './Divider';
 import XFileUpload from './FileUpload';
 import XImgUpload from './ImgUpload';
 import XInputEmail from './InputEmail';
@@ -12,9 +14,7 @@ import XInputPhone from './InputPhone';
 import XInputText from './InputText';
 import XInputTextArea from './InputTextArea';
 import XRadio from './Radio';
-// import XRelatedForm from './RelatedForm';
-import XCarousel from './Carousel';
-import XDIVIDER from './Divider';
+import XRelatedForm from './RelatedForm';
 import XRichText from './RichText';
 import XSelectMutiple from './SelectMutiple';
 import XSelectOne from './SelectOne';
@@ -43,7 +43,7 @@ export const FormComp = {
   XFileUpload,
   XImgUpload,
   XAutoCode,
-//   XRelatedForm,
+  XRelatedForm,
   XStaticText,
   XDIVIDER,
   XRichText,
