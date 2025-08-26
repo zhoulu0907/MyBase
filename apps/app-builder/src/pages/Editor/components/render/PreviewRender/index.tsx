@@ -1,13 +1,6 @@
-import FormComp from '@/components/Materials/Basic/FormComponents';
-import LayoutComp from '@/components/Materials/Basic/LayoutComponents';
-import ListComp from '@/components/Materials/Basic/ListComponents';
-import ShowComp from '@/components/Materials/Basic/ShowComponents';
-import {
-  FORM_COMPONENT_TYPES,
-  LAYOUT_COMPONENT_TYPES,
-  LIST_COMPONENT_TYPES,
-  SHOW_COMPONENT_TYPES
-} from '@/constants/componentTypes';
+// import LayoutComp from '@/components/Materials/Basic/LayoutComponents';
+import { FORM_COMPONENT_TYPES, LIST_COMPONENT_TYPES, SHOW_COMPONENT_TYPES } from '@/constants/componentTypes';
+import { FormComp, ListComp, ShowComp } from '@onebase/ui-kit';
 import React from 'react';
 import { getComponentConfig } from '../../../utils/app_resource';
 
@@ -82,8 +75,9 @@ const ComponentEditRender: React.FC<ComponentRenderProps> = ({
         return <FormComp.XImgUpload cpName={cpId} id={cpId} {...componentConfig} />;
       case FORM_COMPONENT_TYPES.AUTO_CODE:
         return <FormComp.XAutoCode cpName={cpId} id={cpId} {...componentConfig} />;
-      case FORM_COMPONENT_TYPES.RELATED_FORM:
-        return <FormComp.XRelatedForm cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+      // TODO(mickey)
+      //   case FORM_COMPONENT_TYPES.RELATED_FORM:
+      //     return <FormComp.XRelatedForm cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case FORM_COMPONENT_TYPES.STATIC_TEXT:
         return <FormComp.XStaticText cpName={cpId} id={cpId} {...componentConfig} />;
       case FORM_COMPONENT_TYPES.DIVIDER:
@@ -94,8 +88,8 @@ const ComponentEditRender: React.FC<ComponentRenderProps> = ({
         return <FormComp.XCarousel cpName={cpId} id={cpId} {...componentConfig} />;
 
       //  布局组件
-      case LAYOUT_COMPONENT_TYPES.COLUMN_LAYOUT:
-        return <LayoutComp.XPreviewColumnLayout {...componentConfig} cpName={cpId} id={cpId} />;
+      //   case LAYOUT_COMPONENT_TYPES.COLUMN_LAYOUT:
+      //     return <LayoutComp.XPreviewColumnLayout {...componentConfig} cpName={cpId} id={cpId} />;
 
       //  列表组件
       case LIST_COMPONENT_TYPES.TABLE:

@@ -9,8 +9,18 @@
     "build": "tsup"
   },
   "dependencies": {
+    "@arco-design/web-react": "^2.66.1",
+    "@onebase/app": "workspace:*",
+    "@onebase/common": "workspace:*",
+    "@onebase/platform-center": "workspace:*",
+    "@platejs/basic-nodes": "^49.0.0",
+    "@types/lodash-es": "^4.17.12",
+    "dayjs": "^1.11.13",
+    "lodash-es": "^4.17.21",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "uuid": "^11.1.0",
+    "platejs": "^49.2.12"
   },
   "devDependencies": {
     "@types/react": "^18.3.1",

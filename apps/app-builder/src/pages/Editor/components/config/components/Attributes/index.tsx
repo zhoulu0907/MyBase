@@ -1,14 +1,13 @@
-import type { TXInputTextEditData } from '@/components/Materials/Basic/FormComponents/InputText/schema';
-import { CONFIG_TYPES } from '@/components/Materials/constants';
 import { useI18n } from '@/hooks/useI18n';
 import { usePageEditorSignal } from '@/hooks/useSignal';
-import { ColorPicker, Form, Input, InputNumber, Radio, Switch, DatePicker } from '@arco-design/web-react';
+import { ColorPicker, DatePicker, Form, Input, InputNumber, Radio, Switch } from '@arco-design/web-react';
+import { CONFIG_TYPES } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import { useEffect, useState } from 'react';
 import DynamicFieldConfig from './components/DynamicFieldConfig';
+import DynamicRadioConfig from './components/DynamicRadioConfig';
 import DynamicRelatedFormConfig from './components/DynamicRelatedFormConfig';
 import DynamicTableConfig from './components/DynamicTableConfig';
-import DynamicRadioConfig from './components/DynamicRadioConfig';
 import styles from './index.module.less';
 
 const FormItem = Form.Item;
@@ -27,7 +26,7 @@ const Attributes = ({ cpID }: ConfigsProps) => {
   useSignals();
   const { curComponentSchema, setCurComponentSchema, setPageComponentSchemas } = usePageEditorSignal();
 
-  const [editData, setEditData] = useState<TXInputTextEditData>([]);
+  const [editData, setEditData] = useState<any>([]);
   const [configs, setConfigs] = useState<any>({});
 
   useEffect(() => {

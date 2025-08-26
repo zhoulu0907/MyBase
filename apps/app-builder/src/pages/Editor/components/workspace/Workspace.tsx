@@ -2,8 +2,8 @@ import { IconDelete } from '@arco-design/web-react/icon';
 import { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 
-import { getComponentSchema } from '@/components/Materials/schema';
 import EditRender from '@/pages/Editor/components/render/EditRender';
+import { getComponentSchema } from '@onebase/ui-kit';
 import { getComponentWidth } from '../../utils/app_resource';
 import { COMPONENT_GROUP_NAME, type GridItem } from '../../utils/const';
 

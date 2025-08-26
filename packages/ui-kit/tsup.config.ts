@@ -7,5 +7,5 @@ export default defineConfig({
   dts: true,
   splitting: true,
   sourcemap: true,
-  clean: true
+  clean: true,
 });
