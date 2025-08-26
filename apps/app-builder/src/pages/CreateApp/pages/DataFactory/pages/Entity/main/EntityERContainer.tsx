@@ -17,7 +17,7 @@ import CreateEntityModal from '../components/Modals/CreateEntityModal';
 // import CreateFieldModal from '../components/Modals/CreateFieldModal';
 
 import { IconPlus } from '@arco-design/web-react/icon';
-import { deleteEntity, getEntityGraph, updateEntity } from '@onebase/app';
+import { deleteEntity, getEntityGraph, updateEntity, type UpdateEntityReqVO } from '@onebase/app';
 import {
   ConfigFieldModal,
   CreateMasterDetailModal,
@@ -182,6 +182,24 @@ export const EntityERContainer: React.FC<{
     return chartRef.current?.getGraphPositon();
   };
 
+  const handleStatusChange = async (data: Partial<EntityNode>) => {
+    console.log('handleStatusChange', data);
+    const params = {
+      id: data.entityId,
+      status: data.status,
+      tableName: data.tableName,
+      displayName: data.entityName,
+      datasourceId: curDataSourceId,
+      appId: curAppId
+    };
+    const res = await updateEntity(params as unknown as UpdateEntityReqVO);
+    if (res) {
+      console.log('实体状态更新成功');
+      setOnlyUpdateNode(true);
+      loadEntityList();
+    }
+  };
+
   useEffect(() => {
     if (refreshEntityList) {
       loadEntityList();
@@ -209,6 +227,7 @@ export const EntityERContainer: React.FC<{
         onlyUpdateNode={onlyUpdateNode}
         updateEntityPosition={handleUpdateEntityPosition}
         onEdgeEdit={handleEdgeEdit}
+        onStatusChange={handleStatusChange}
         ref={chartRef}
       />
       <Button

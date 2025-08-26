@@ -1,8 +1,8 @@
 import { ENTITY_FIELD_TYPE, SYSTEM_FIELD_MAP } from '@/pages/CreateApp/pages/DataFactory/utils/const';
 import type { EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
-import { FIELD_TYPE } from '@/pages/CreateApp/pages/DataFactory/utils/const';
+import { ENTITY_STATUS, FIELD_TYPE } from '@/pages/CreateApp/pages/DataFactory/utils/const';
 import { Node } from '@antv/x6';
-import { Button, Popover, Space } from '@arco-design/web-react';
+import { Button, Popover, Space, Switch } from '@arco-design/web-react';
 import { IconCaretDown, IconCaretUp, IconSync } from '@arco-design/web-react/icon';
 import React, { useState } from 'react';
 import styles from './ERnode.module.less';
@@ -21,6 +21,7 @@ interface NodeData {
   onNodeAddRelation?: (id: string) => void;
   onNodeAddMasterDetail?: (id: string) => void;
   onFieldClick?: (fieldId: string) => void;
+  onStatusChange?: (data: Partial<EntityNode>) => void;
 }
 
 const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
@@ -131,12 +132,28 @@ const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
     }
   };
 
+  const handleStatusChange = (checked: boolean, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const data = node.getData() as NodeData;
+    const onStatusChange = data?.onStatusChange;
+    if (onStatusChange && nodeData) {
+      onStatusChange({ ...nodeData, status: checked ? ENTITY_STATUS.ENABLE : ENTITY_STATUS.DISABLE });
+    }
+  };
+
   return (
     <div className={styles['node-content']} onClick={handleNodeClick}>
       {/* 节点头部 */}
       <div className={styles['node-header']}>
         <IconSync className={styles['refresh-icon']} onClick={handleRefresh} />
         <span className={styles['node-title']}>{nodeData.entityName || '未命名实体'}</span>
+        <Switch
+          checked={nodeData.status === ENTITY_STATUS.ENABLE}
+          onChange={(value, e) => handleStatusChange(value, e)}
+          checkedText="已启用"
+          uncheckedText="已禁用"
+        />
         {/* 改为点击节点打开编辑弹窗 */}
         {/* <Popover
           trigger="hover"

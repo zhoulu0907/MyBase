@@ -1,3 +1,5 @@
+import type { EntityStatus } from './const';
+
 // 业务对象节点数据
 export interface EntityNode {
   entityId: string;
@@ -8,6 +10,7 @@ export interface EntityNode {
   fields: Array<EntityField>;
   positionX: number;
   positionY: number;
+  status?: EntityStatus;
 }
 
 export interface EntityField {
@@ -69,6 +72,7 @@ export interface EntityERProps {
   onEdgeEdit?: (data: EdgeData) => void;
   onlyUpdateNode?: boolean;
   updateEntityPosition?: (data: EntityNode, x: number, y: number) => void;
+  onStatusChange?: (data: Partial<EntityNode>) => void;
 }
 
 // 实体列表

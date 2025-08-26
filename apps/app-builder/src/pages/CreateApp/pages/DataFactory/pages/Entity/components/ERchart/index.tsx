@@ -33,6 +33,7 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
       onNodeAddMasterDetail,
       onFieldClick,
       onEdgeEdit,
+      onStatusChange,
       updateEntityPosition,
       onlyUpdateNode
     },
@@ -277,7 +278,8 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
               onNodeAddField,
               onNodeAddRelation,
               onNodeAddMasterDetail,
-              onFieldClick
+              onFieldClick,
+              onStatusChange
             },
             attrs: {
               body: {
