@@ -125,7 +125,7 @@ public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRela
         
         // 添加查询条件
         if (pageReqVO.getAppId() != null) {
-            configStore.and("app_id", pageReqVO.getAppId());
+            configStore.and(MetadataEntityRelationshipDO.APP_ID, pageReqVO.getAppId());
         }
         
         // 添加调试日志，查看 entityId 的值
@@ -293,7 +293,7 @@ public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRela
     public List<EntityRelationshipRespVO> getRelationshipsByDatasourceId(Long datasourceId) {
         // 首先获取该数据源下的所有实体ID
         DefaultConfigStore entityConfigStore = new DefaultConfigStore();
-        entityConfigStore.and("datasource_id", datasourceId);
+        entityConfigStore.and(MetadataBusinessEntityDO.DATASOURCE_ID, datasourceId);
         List<MetadataBusinessEntityDO> entities = businessEntityService.findAllByConfig(entityConfigStore);
 
         if (entities.isEmpty()) {
@@ -307,8 +307,8 @@ public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRela
         // 查询涉及这些实体的所有关系 - 使用嵌套 OR + IN，避免 Anyline 生成非法 SQL
         DefaultConfigStore relationshipConfigStore = new DefaultConfigStore();
         ConfigStore orStore = new DefaultConfigStore()
-                .or(Compare.IN, "source_entity_id", entityIds)
-                .or(Compare.IN, "target_entity_id", entityIds);
+                .or(Compare.IN, MetadataEntityRelationshipDO.SOURCE_ENTITY_ID, entityIds)
+                .or(Compare.IN, MetadataEntityRelationshipDO.TARGET_ENTITY_ID, entityIds);
         relationshipConfigStore.and(orStore);
         relationshipConfigStore.order("create_time", Order.TYPE.DESC);
 
@@ -575,7 +575,7 @@ public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRela
 
         // 1. 根据appId查询该应用下的所有实体
         DefaultConfigStore entityConfigStore = new DefaultConfigStore();
-        entityConfigStore.and("app_id", appId);
+        entityConfigStore.and(MetadataBusinessEntityDO.APP_ID, appId);
         entityConfigStore.order("create_time", Order.TYPE.ASC);
 
         List<MetadataBusinessEntityDO> entities = businessEntityService.findAllByConfig(entityConfigStore);
