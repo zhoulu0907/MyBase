@@ -61,12 +61,6 @@
             <optional>true</optional>
         </dependency>
 
-        <!-- xss -->
-        <dependency>
-            <groupId>org.jsoup</groupId>
-            <artifactId>jsoup</artifactId>
-        </dependency>
-
         <!-- Test 测试相关 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

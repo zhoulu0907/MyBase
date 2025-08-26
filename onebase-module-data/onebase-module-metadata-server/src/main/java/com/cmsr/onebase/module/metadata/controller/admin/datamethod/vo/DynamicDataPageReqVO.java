@@ -32,4 +32,7 @@ public class DynamicDataPageReqVO extends PageParam {
     @Schema(description = "排序方向", example = "desc")
     private String sortDirection;
 
+    @Schema(description = "方法编码(可选). 若提供, 将用于匹配执行计划", example = "metadata.user.page")
+    private String methodCode;
+
 }

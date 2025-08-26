@@ -28,4 +28,7 @@ public class BusinessEntityPageReqVO extends PageParam {
     @Schema(description = "应用ID", example = "1")
     private String appId;
 
+    @Schema(description = "状态：0 关闭，1 开启", example = "1")
+    private Integer status;
+
 }

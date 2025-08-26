@@ -1,6 +1,5 @@
 package com.cmsr.onebase.module.infra.controller.admin.config;
 
-import com.cmsr.onebase.framework.apilog.core.annotation.ApiAccessLog;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageParam;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
@@ -25,7 +24,6 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.util.List;
 
-import static com.cmsr.onebase.framework.apilog.core.enums.OperateTypeEnum.EXPORT;
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 
@@ -95,7 +93,6 @@ public class ConfigController {
     @GetMapping("/export")
     @Operation(summary = "导出参数配置")
     @PreAuthorize("@ss.hasPermission('infra:config:export')")
-    @ApiAccessLog(operateType = EXPORT)
     public void exportConfig(ConfigPageReqVO exportReqVO,
                              HttpServletResponse response) throws IOException {
         exportReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);

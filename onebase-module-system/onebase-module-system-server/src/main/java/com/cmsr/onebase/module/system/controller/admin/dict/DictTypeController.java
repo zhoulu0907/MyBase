@@ -1,6 +1,5 @@
 package com.cmsr.onebase.module.system.controller.admin.dict;
 
-import com.cmsr.onebase.framework.apilog.core.annotation.ApiAccessLog;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageParam;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
@@ -25,7 +24,6 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.util.List;
 
-import static com.cmsr.onebase.framework.apilog.core.enums.OperateTypeEnum.EXPORT;
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 
 @Tag(name = "管理后台 - 字典类型")
@@ -90,7 +88,6 @@ public class DictTypeController {
     @Operation(summary = "导出数据类型")
     @GetMapping("/export")
     @PreAuthorize("@ss.hasPermission('system:dict:query')")
-    @ApiAccessLog(operateType = EXPORT)
     public void export(HttpServletResponse response, @Valid DictTypePageReqVO exportReqVO) throws IOException {
         exportReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
         List<DictTypeDO> list = dictTypeService.getDictTypePage(exportReqVO).getList();

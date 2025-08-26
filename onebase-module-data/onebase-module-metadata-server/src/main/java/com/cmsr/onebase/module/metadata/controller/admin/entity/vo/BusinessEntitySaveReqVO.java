@@ -53,4 +53,7 @@ public class BusinessEntitySaveReqVO {
     @Size(max = 2000, message = "前端显示配置长度不能超过2000个字符")
     private String displayConfig;
 
+    @Schema(description = "状态：0 关闭，1 开启", example = "1")
+    private Integer status;
+
 }

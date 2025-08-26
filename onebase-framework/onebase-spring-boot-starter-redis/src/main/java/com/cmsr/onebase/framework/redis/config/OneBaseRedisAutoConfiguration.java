@@ -40,6 +40,8 @@ public class OneBaseRedisAutoConfiguration {
         objectMapper.registerModules(new JavaTimeModule());
         return GenericJackson2JsonRedisSerializer.builder()
                 .objectMapper(objectMapper)
+                .registerNullValueSerializer(true)
+                .defaultTyping(true)
                 .build();
     }
 

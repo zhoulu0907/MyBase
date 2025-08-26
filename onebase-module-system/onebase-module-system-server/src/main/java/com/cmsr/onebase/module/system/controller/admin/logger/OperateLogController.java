@@ -1,6 +1,5 @@
 package com.cmsr.onebase.module.system.controller.admin.logger;
 
-import com.cmsr.onebase.framework.apilog.core.annotation.ApiAccessLog;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageParam;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
@@ -24,7 +23,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.IOException;
 import java.util.List;
 
-import static com.cmsr.onebase.framework.apilog.core.enums.OperateTypeEnum.EXPORT;
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 
 @Tag(name = "管理后台 - 操作日志")
@@ -47,7 +45,6 @@ public class OperateLogController {
     @Operation(summary = "导出操作日志")
     @GetMapping("/export")
     @PreAuthorize("@ss.hasPermission('system:operate-log:export')")
-    @ApiAccessLog(operateType = EXPORT)
     public void exportOperateLog(HttpServletResponse response, @Valid OperateLogPageReqVO exportReqVO) throws IOException {
         exportReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
         List<OperateLogDO> list = operateLogService.getOperateLogPage(exportReqVO).getList();

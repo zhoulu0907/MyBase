@@ -40,4 +40,7 @@ public class BusinessEntityRespVO {
     @Schema(description = "关系类型", example = "主表:PARENT，子表:CHILD")
     private String relationType;
 
+    @Schema(description = "状态：0 关闭，1 开启", example = "1")
+    private Integer status;
+
 }
