@@ -692,23 +692,22 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
      * @return ER实体VO
      */
     private EREntityVO convertToEREntity(MetadataBusinessEntityDO entity) {
-        EREntityVO erEntity = new EREntityVO();
-        erEntity.setEntityId(entity.getId().toString());
-        erEntity.setEntityName(entity.getDisplayName());
-        erEntity.setTableName(entity.getTableName());
-        erEntity.setDescription(entity.getDescription());
-        erEntity.setEntityType(entity.getEntityType().toString());
-        erEntity.setStatus(entity.getStatus());
-        
-        // 设置默认坐标（前端可以根据需要调整）
-        erEntity.setDisplayConfig(entity.getDisplayConfig() != null ? entity.getDisplayConfig() : "{}");
-        erEntity.setCode(entity.getCode());
+        return BeanUtils.toBean(entity, EREntityVO.class, erEntity -> {
+            erEntity.setEntityId(entity.getId().toString());
+            erEntity.setEntityName(entity.getDisplayName());
+            erEntity.setTableName(entity.getTableName());
+            erEntity.setDescription(entity.getDescription());
+            erEntity.setEntityType(entity.getEntityType().toString());
+            erEntity.setStatus(entity.getStatus());
+            
+            // 设置默认坐标（前端可以根据需要调整）
+            erEntity.setDisplayConfig(entity.getDisplayConfig() != null ? entity.getDisplayConfig() : "{}");
+            erEntity.setCode(entity.getCode());
 
-        // 获取字段信息
-        List<ERFieldVO> fields = getEntityFields(entity.getId());
-        erEntity.setFields(fields);
-
-        return erEntity;
+            // 获取字段信息
+            List<ERFieldVO> fields = getEntityFields(entity.getId());
+            erEntity.setFields(fields);
+        });
     }
 
     /**
@@ -727,20 +726,7 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
         List<ERFieldVO> erFields = new ArrayList<>();
 
         for (MetadataEntityFieldDO field : fieldList) {
-            ERFieldVO erField = new ERFieldVO();
-            erField.setFieldId(field.getId());
-            erField.setFieldName(field.getFieldName());
-            erField.setDisplayName(field.getDisplayName());
-            erField.setFieldType(field.getFieldType());
-            erField.setDataLength(field.getDataLength());
-            erField.setDescription(field.getDescription());
-            erField.setIsRequired(field.getIsRequired());
-            erField.setIsUnique(field.getIsUnique());
-            erField.setIsPrimaryKey(field.getIsPrimaryKey());
-            erField.setIsSystemField(field.getIsSystemField());
-            erField.setAllowNull(field.getAllowNull());
-            erField.setDefaultValue(field.getDefaultValue());
-            erField.setSortOrder(field.getSortOrder());
+            ERFieldVO erField = BeanUtils.toBean(field, ERFieldVO.class);
             erFields.add(erField);
         }
 
@@ -832,19 +818,17 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
             return null;
         }
 
-        ERRelationshipVO relationship = new ERRelationshipVO();
-        relationship.setRelationshipId(relationshipDO.getId().toString());
-        relationship.setSourceEntityId(relationshipDO.getSourceEntityId().toString());
-        relationship.setSourceEntityName(sourceEntity.getDisplayName());
-        relationship.setSourceFieldId(relationshipDO.getSourceFieldId().toString());
-        relationship.setSourceFieldName(getFieldNameById(relationshipDO.getSourceFieldId()));
-        relationship.setTargetEntityId(relationshipDO.getTargetEntityId().toString());
-        relationship.setTargetEntityName(targetEntity.getDisplayName());
-        relationship.setTargetFieldId(relationshipDO.getTargetFieldId().toString());
-        relationship.setTargetFieldName(getFieldNameById(relationshipDO.getTargetFieldId()));
-        relationship.setRelationshipType(relationshipDO.getRelationshipType());
-        relationship.setRelationshipName(relationshipDO.getRelationName());
-        relationship.setDescription(relationshipDO.getDescription());
+        ERRelationshipVO relationship = BeanUtils.toBean(relationshipDO, ERRelationshipVO.class, rel -> {
+            rel.setRelationshipId(relationshipDO.getId().toString());
+            rel.setSourceEntityId(relationshipDO.getSourceEntityId().toString());
+            rel.setSourceEntityName(sourceEntity.getDisplayName());
+            rel.setSourceFieldId(relationshipDO.getSourceFieldId().toString());
+            rel.setSourceFieldName(getFieldNameById(relationshipDO.getSourceFieldId()));
+            rel.setTargetEntityId(relationshipDO.getTargetEntityId().toString());
+            rel.setTargetEntityName(targetEntity.getDisplayName());
+            rel.setTargetFieldId(relationshipDO.getTargetFieldId().toString());
+            rel.setTargetFieldName(getFieldNameById(relationshipDO.getTargetFieldId()));
+        });
         
         return relationship;
     }
@@ -884,12 +868,12 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
      * @return 简单实体信息VO
      */
     private SimpleEntityRespVO convertToSimpleEntity(MetadataBusinessEntityDO entityDO) {
-        SimpleEntityRespVO simpleEntity = new SimpleEntityRespVO();
-        simpleEntity.setEntityId(entityDO.getId());
-        simpleEntity.setEntityName(entityDO.getDisplayName());
-        // 设置实际表名
-        simpleEntity.setTableName(entityDO.getTableName());
-        return simpleEntity;
+        return BeanUtils.toBean(entityDO, SimpleEntityRespVO.class, simpleEntity -> {
+            simpleEntity.setEntityId(entityDO.getId());
+            simpleEntity.setEntityName(entityDO.getDisplayName());
+            // 设置实际表名
+            simpleEntity.setTableName(entityDO.getTableName());
+        });
     }
 
     @Override

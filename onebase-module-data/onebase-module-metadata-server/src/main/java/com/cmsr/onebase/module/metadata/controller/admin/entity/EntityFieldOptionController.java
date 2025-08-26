@@ -22,49 +22,49 @@ import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
  * @author matianyu
  * @date 2025-08-20
  */
-@Tag(name = "管理后台 - 实体字段选项管理")
+/*@Tag(name = "管理后台 - 实体字段选项管理")
 @RestController
-@RequestMapping("/metadata/entity-field/option")
+@RequestMapping("/metadata/entity-field/option")*/
 public class EntityFieldOptionController {
 
     @Resource
     private MetadataEntityFieldOptionService optionService;
 
-    @PostMapping("/list")
+/*    @PostMapping("/list")
     @Operation(summary = "按字段ID获取选项列表")
-    @PreAuthorize("@ss.hasPermission('metadata:entity-field-option:query')")
+    @PreAuthorize("@ss.hasPermission('metadata:entity-field-option:query')")*/
     public CommonResult<List<FieldOptionRespVO>> list(@RequestParam("fieldId") Long fieldId) {
         List<FieldOptionRespVO> result = optionService.getFieldOptionList(fieldId);
         return success(result);
     }
 
-    @PostMapping("/create")
+/*    @PostMapping("/create")
     @Operation(summary = "创建选项")
-    @PreAuthorize("@ss.hasPermission('metadata:entity-field-option:create')")
+    @PreAuthorize("@ss.hasPermission('metadata:entity-field-option:create')")*/
     public CommonResult<Long> create(@Valid @RequestBody FieldOptionSaveReqVO req) {
         Long id = optionService.createFieldOption(req);
         return success(id);
     }
 
-    @PostMapping("/update")
+/*    @PostMapping("/update")
     @Operation(summary = "更新选项")
-    @PreAuthorize("@ss.hasPermission('metadata:entity-field-option:update')")
+    @PreAuthorize("@ss.hasPermission('metadata:entity-field-option:update')")*/
     public CommonResult<Boolean> update(@Valid @RequestBody FieldOptionSaveReqVO req) {
         optionService.updateFieldOption(req);
         return success(true);
     }
 
-    @PostMapping("/delete")
+/*    @PostMapping("/delete")
     @Operation(summary = "删除选项")
-    @PreAuthorize("@ss.hasPermission('metadata:entity-field-option:delete')")
+    @PreAuthorize("@ss.hasPermission('metadata:entity-field-option:delete')")*/
     public CommonResult<Boolean> delete(@RequestParam("id") Long id) {
         optionService.deleteById(id);
         return success(true);
     }
 
-    @PostMapping("/batch-sort")
+/*    @PostMapping("/batch-sort")
     @Operation(summary = "批量排序选项")
-    @PreAuthorize("@ss.hasPermission('metadata:entity-field-option:update')")
+    @PreAuthorize("@ss.hasPermission('metadata:entity-field-option:update')")*/
     public CommonResult<Boolean> batchSort(@Valid @RequestBody FieldOptionBatchSortReqVO req) {
         optionService.batchSortFieldOptions(req);
         return success(true);

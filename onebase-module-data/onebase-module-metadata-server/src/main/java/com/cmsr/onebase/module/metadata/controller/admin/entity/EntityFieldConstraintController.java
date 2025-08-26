@@ -19,33 +19,33 @@ import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
  * @author matianyu
  * @date 2025-08-20
  */
-@Tag(name = "管理后台 - 实体字段约束管理")
+/*@Tag(name = "管理后台 - 实体字段约束管理")
 @RestController
-@RequestMapping("/metadata/entity-field/constraint")
+@RequestMapping("/metadata/entity-field/constraint")*/
 public class EntityFieldConstraintController {
 
     @Resource
     private MetadataEntityFieldConstraintService constraintService;
 
-    @PostMapping("/get")
+/*    @PostMapping("/get")
     @Operation(summary = "按字段ID获取约束配置")
-    @PreAuthorize("@ss.hasPermission('metadata:entity-field-constraint:query')")
+    @PreAuthorize("@ss.hasPermission('metadata:entity-field-constraint:query')")*/
     public CommonResult<FieldConstraintRespVO> get(@RequestParam("fieldId") Long fieldId) {
         FieldConstraintRespVO result = constraintService.getFieldConstraintConfig(fieldId);
         return success(result);
     }
 
-    @PostMapping("/upsert")
+/*    @PostMapping("/upsert")
     @Operation(summary = "保存/更新约束配置")
-    @PreAuthorize("@ss.hasPermission('metadata:entity-field-constraint:update')")
+    @PreAuthorize("@ss.hasPermission('metadata:entity-field-constraint:update')")*/
     public CommonResult<Boolean> upsert(@Valid @RequestBody FieldConstraintSaveReqVO req) {
         constraintService.saveFieldConstraintConfig(req);
         return success(true);
     }
 
-    @PostMapping("/delete")
+/*    @PostMapping("/delete")
     @Operation(summary = "删除某类型约束")
-    @PreAuthorize("@ss.hasPermission('metadata:entity-field-constraint:delete')")
+    @PreAuthorize("@ss.hasPermission('metadata:entity-field-constraint:delete')")*/
     public CommonResult<Boolean> delete(@RequestParam("fieldId") Long fieldId,
                                         @RequestParam("constraintType") String type) {
         constraintService.delete(fieldId, type);
