@@ -14,7 +14,8 @@ import {
   type Application,
   type CreateApplicationReq,
   type DeleteApplicationReq,
-  type ListApplicationReq
+  type ListApplicationReq,
+  type DatasourceSaveReqVO
 } from '@onebase/app';
 
 import CreateApp from '@/components/CreateApp';
@@ -57,6 +58,7 @@ const MyAppPage: React.FC = () => {
   const [appName, setAppName] = useState<string>('');
   const [createType, setCreateType] = useState<'app' | 'datasource'>('app');
   const [deleteApp, setDeleteApp] = useState<Application>();
+  const [datasource, setDdtasource] = useState<DatasourceSaveReqVO>(); // 自有数据源
   const [deleteVisible, setDeleteVisible] = useState<boolean>(false);
   const [createVisible, setCreateVisible] = useState<boolean>(false);
   const [createLoading, setCreateLoading] = useState<boolean>(false);
@@ -81,6 +83,10 @@ const MyAppPage: React.FC = () => {
   useEffect(() => {
     pageSize && getApplicationList();
   }, [pageNo, pageSize, name, orderByTime, status, ownerTag]);
+
+  useEffect(() => {
+    setDdtasource(null);
+  }, []);
 
   useEffect(() => {
     // 只有ownerTag和status会影响应用列表长度
@@ -134,39 +140,39 @@ const MyAppPage: React.FC = () => {
 
   /* 创建应用 */
   const handleCreateApp = async () => {
-    // 切换到创建数据源
-    if (createType === 'datasource') {
-      createDatasourceRef.current?.handleCreateDatasource?.();
-      return;
-    }
+    try {
+      // 切换到创建数据源
+      if (createType === 'datasource') {
+        const res = await createDatasourceRef.current?.handleGetDatasource?.();
+        setDdtasource(res);
+        return;
+      }
 
-    form.validate(async (error, data) => {
-      if (error !== null) return;
+      const values = await form.validate(); // 等待校验完成并返回数据
       setCreateLoading(true);
-      const { appCode, appName, iconColor, iconName, description, tagIds, themeColor } = data;
+      const { appCode, appName, iconColor, iconName, description, tagIds, themeColor } = values;
 
       const params: CreateApplicationReq = {
         appCode,
         appMode: 'classic',
         appName,
-        datasourceId: createDatasourceRef.current?.getDatasourceId() || '1',
         description,
         iconColor,
         iconName,
         tagIds: tagIds?.map((t: Options) => t.value),
-        themeColor
+        themeColor,
+        datasourceSaveReq: datasource
       };
-      await createApplication(params)
-        .then((res: Application) => {
-          setCreateVisible(false);
-          Message.success('应用创建成功');
-          form.resetFields();
-          navigate(`/onebase/create-app/data-factory?appId=${res.id}`);
-        })
-        .finally(() => {
-          setCreateLoading(false);
-        });
-    });
+      const res = await createApplication(params);
+      setCreateVisible(false);
+      Message.success('应用创建成功');
+      form.resetFields();
+      navigate(`/onebase/create-app/data-factory?appId=${res.id}`);
+    } catch (error) {
+      return null;
+    } finally {
+      setCreateLoading(false);
+    }
   };
 
   /* 删除应用 */
@@ -486,7 +492,7 @@ const MyAppPage: React.FC = () => {
               取消
             </Button>
             <Button type="primary" loading={createLoading} onClick={handleCreateApp}>
-              创建
+              {createType === 'app' ? '创建' : '保存'}
             </Button>
           </div>
         }
@@ -499,7 +505,7 @@ const MyAppPage: React.FC = () => {
             form={form}
             status="create"
             previewBgColor="#F2F3F5BF"
-            dataSourceCreated={!!createDatasourceRef.current?.getDatasourceId()}
+            dataSourceCreated={!!datasource}
             onCreateDatasource={() => setCreateType('datasource')}
             style={{
               position: 'absolute',

@@ -33,7 +33,7 @@ import type {
   TRadioDefaultType,
   TSelectDefaultType,
   TTextDefaultType,
-  ILabelColSpanConfigType
+  INumberConfigType
 } from '@/components/Materials/types';
 
 export interface XTableSchema {
@@ -50,7 +50,7 @@ export type TXTableEditData = Array<
   | ITablePagePositionConfigType<TPagePositionSelectKeyType>
   | ITablePageSizeConfigType
   | ITableDataConfigType
-  | ILabelColSpanConfigType
+  | INumberConfigType
 >;
 
 export interface XTableConfig extends ICommonBaseType {
@@ -140,7 +140,7 @@ export interface XTableConfig extends ICommonBaseType {
    */
   saveWithHidden?: TBooleanDefaultType;
   /**
-   * 表头搜索项标签宽度
+   * 表头搜索项标题宽度
    */
   labelColSpan?: TNumberDefaultType;
   metaData: TTextDefaultType;
@@ -267,86 +267,9 @@ const XTable: XTableSchema = {
     pageSize: 5,
     metaData: '',
     labelColSpan: 100,
-    defaultValue: [
-      //   {
-      //     key: '1',
-      //     name: 'Jane Doe',
-      //     salary: 23000,
-      //     address: '32 Park Road, London',
-      //     email: 'jane.doe@example.com',
-      //     gender: 'male'
-      //   },
-      //   {
-      //     key: '2',
-      //     name: 'Alisa Ross',
-      //     salary: 25000,
-      //     address: '35 Park Road, London',
-      //     email: 'alisa.ross@example.com',
-      //     gender: 'male'
-      //   },
-      //   {
-      //     key: '3',
-      //     name: 'Kevin Sandra',
-      //     salary: 22000,
-      //     address: '31 Park Road, London',
-      //     email: 'kevin.sandra@example.com',
-      //     gender: 'male'
-      //   },
-      //   {
-      //     key: '4',
-      //     name: 'Kevin Sandra',
-      //     salary: 22000,
-      //     address: '31 Park Road, London',
-      //     email: 'kevin.sandra@example.com',
-      //     gender: 'male'
-      //   },
-      //   {
-      //     key: '5',
-      //     name: 'Kevin Sandra',
-      //     salary: 22000,
-      //     address: '31 Park Road, London',
-      //     email: 'kevin.sandra@example.com',
-      //     gender: 'male'
-      //   },
-      //   {
-      //     key: '6',
-      //     name: 'Kevin Sandra',
-      //     salary: 22000,
-      //     address: '31 Park Road, London',
-      //     email: 'kevin.sandra@example.com',
-      //     gender: 'male'
-      //   }
-    ],
-    columns: [
-      //   {
-      //     title: '姓名',
-      //     dataIndex: 'name',
-      //     fixed: 'left',
-      //     width: 140
-      //   },
-      //   {
-      //     title: '工资',
-      //     dataIndex: 'salary'
-      //   },
-      //   {
-      //     title: '地址',
-      //     dataIndex: 'address'
-      //   },
-      //   {
-      //     title: '邮箱',
-      //     dataIndex: 'email'
-      //   },
-      //   {
-      //     title: '性别',
-      //     dataIndex: 'gender'
-      //   }
-    ],
-    searchItems: [
-      // {
-      //     label: '姓名',
-      //     value: 'name',
-      // }
-    ]
+    defaultValue: [],
+    columns: [],
+    searchItems: []
   }
 };
 

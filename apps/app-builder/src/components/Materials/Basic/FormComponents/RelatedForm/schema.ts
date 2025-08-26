@@ -31,7 +31,6 @@ import type {
   IColorConfigType,
   IDataFieldConfigType,
   IDescriptionConfigType,
-  ILabelColSpanConfigType,
   ILabelConfigType,
   ILayoutConfigType,
   INumberConfigType,
@@ -68,7 +67,6 @@ export type TXRelatedFormEditData = Array<
   | IStatusConfigType<TStatusSelectKeyType>
   | IWidthConfigType<TWidthSelectKeyType>
   | INumberConfigType
-  | ILabelColSpanConfigType
   | ITextAreaConfigType
   | IBooleanConfigType
   | IStatusConfigType<TAlignSelectKeyType>
@@ -159,7 +157,7 @@ export interface XRelatedFormConfig extends ICommonBaseType {
   bgColor?: TTextDefaultType;
 
   /**
-   * 标签宽度
+   * 标题宽度
    */
   labelColSpan?: TNumberDefaultType;
 }

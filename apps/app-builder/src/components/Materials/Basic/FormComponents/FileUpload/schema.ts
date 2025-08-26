@@ -26,7 +26,6 @@ import {
 import type {
   IBooleanConfigType,
   IDescriptionConfigType,
-  ILabelColSpanConfigType,
   ILabelConfigType,
   ILayoutConfigType,
   INumberConfigType,
@@ -60,7 +59,6 @@ export type TXInputFileUploadEditData = Array<
   | IStatusConfigType<TStatusSelectKeyType>
   | IWidthConfigType<TWidthSelectKeyType>
   | INumberConfigType
-  | ILabelColSpanConfigType
   | ISelectConfigType<TWidthSelectKeyType | TStatusSelectKeyType>
   | ITextAreaConfigType
   | IUploadSizeConfigType
@@ -114,7 +112,7 @@ export interface XInputFileUploadConfig extends ICommonBaseType {
   layout?: TLayoutSelectKeyType;
 
   /**
-   * 标签宽度
+   * 标题宽度
    */
   labelColSpan?: TNumberDefaultType;
 

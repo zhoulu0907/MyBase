@@ -139,9 +139,9 @@ const RoleInfo = (props: IProps) => {
                   ) : (
                     <Spin className={styles.loading} loading={menuLoading}>
                       <Menu
+                        openKeys={[firstGroupCode]}
                         selectedKeys={[activeMenuId]}
-                        defaultOpenKeys={[firstGroupCode]}
-                        // defaultSelectedKeys={[findFirstPage(menuList)?.id]}
+                        defaultSelectedKeys={[findFirstPage(menuList)?.id]}
                         onClickMenuItem={handleSelectMenu}
                       >
                         {renderMenuItems(menuList || [])}
@@ -154,13 +154,13 @@ const RoleInfo = (props: IProps) => {
               <div className={styles.right}>
                 <Tabs defaultActiveTab="1" destroyOnHide activeTab={activeTab} onChange={setActiveTab}>
                   <TabPane key="1" title="功能权限">
-                    <FuncPermission appId={curAppId} menuId={activeMenuId} roleId={roleInfo?.id} />
+                    <FuncPermission appId={curAppId} menuId={activeMenuId} roleId={roleInfo?.id!} />
                   </TabPane>
                   <TabPane key="2" title="数据权限">
-                    <DataPermission />
+                    <DataPermission appId={curAppId} menuId={activeMenuId} roleId={roleInfo?.id!} />
                   </TabPane>
                   <TabPane key="3" title="字段权限">
-                    <FieldPermission appId={curAppId} menuId={activeMenuId} roleId={roleInfo?.id} />
+                    <FieldPermission appId={curAppId} menuId={activeMenuId} roleId={roleInfo?.id!} />
                   </TabPane>
                 </Tabs>
               </div>

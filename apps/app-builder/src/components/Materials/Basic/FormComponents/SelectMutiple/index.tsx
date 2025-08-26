@@ -7,7 +7,7 @@ const Option = Select.Option;
 const options = ['Beijing', 'Shanghai', 'Guangzhou', 'Disabled'];
 
 const XSelectMutiple = memo((props: XInputSelectMutipleConfig) => {
-  const { label, tooltip, status, required, layout, labelColSpan = 0 } = props;
+  const { label, tooltip, status, required, layout, labelColSpan = 0, showSearch } = props;
 
   return (
     <Form.Item
@@ -27,10 +27,11 @@ const XSelectMutiple = memo((props: XInputSelectMutipleConfig) => {
     >
       <Select
         mode="multiple"
-        placeholder="Select"
-        style={{ width: '100%' }}
-        defaultValue={['Beijing', 'Shenzhen']}
         allowClear
+        showSearch={showSearch}
+        placeholder="Select"
+        defaultValue={['Beijing', 'Shenzhen']}
+        style={{ width: '100%' }}
       >
         {options.map((option, index) => (
           <Option key={option} disabled={index === 3} value={option}>

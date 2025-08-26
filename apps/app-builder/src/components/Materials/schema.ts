@@ -30,6 +30,10 @@ const componentSchemaMap: Partial<Record<ComponentType, ComponentSchema>> = {
   [ALL_COMPONENT_TYPES.IMG_UPLOAD]: BasicSchema.XImgUpload,
   [ALL_COMPONENT_TYPES.AUTO_CODE]: BasicSchema.XAutoCode,
   [ALL_COMPONENT_TYPES.RELATED_FORM]: BasicSchema.XRelatedForm,
+  [ALL_COMPONENT_TYPES.STATIC_TEXT]: BasicSchema.XStaticText,
+  [ALL_COMPONENT_TYPES.DIVIDER]: BasicSchema.XDivider,
+  [ALL_COMPONENT_TYPES.RICH_TEXT]: BasicSchema.XRichText,
+  [ALL_COMPONENT_TYPES.CAROUSEL_F]: BasicSchema.XFCarousel,
 
   [ALL_COMPONENT_TYPES.COLUMN_LAYOUT]: BasicSchema.XColumnLayout,
 

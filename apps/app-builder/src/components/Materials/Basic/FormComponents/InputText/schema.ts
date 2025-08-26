@@ -30,7 +30,6 @@ import type {
   IColorConfigType,
   IDataFieldConfigType,
   IDescriptionConfigType,
-  ILabelColSpanConfigType,
   ILabelConfigType,
   ILayoutConfigType,
   INumberConfigType,
@@ -66,7 +65,6 @@ export type TXInputTextEditData = Array<
   | IStatusConfigType<TStatusSelectKeyType>
   | IWidthConfigType<TWidthSelectKeyType>
   | INumberConfigType
-  | ILabelColSpanConfigType
   | ITextAreaConfigType
   | IBooleanConfigType
   | IStatusConfigType<TAlignSelectKeyType>
@@ -151,9 +149,14 @@ export interface XInputTextConfig extends ICommonBaseType {
   bgColor?: TTextDefaultType;
 
   /**
-   * 标签宽度
+   * 标题宽度
    */
   labelColSpan?: TNumberDefaultType;
+
+  /**
+   * 文本最大长度
+   */
+  maxLength?: TNumberDefaultType;
 }
 
 const XInputText: XInputTextSchema = {
@@ -163,6 +166,11 @@ const XInputText: XInputTextSchema = {
       key: 'label',
       name: '标题',
       type: CONFIG_TYPES.LABEL_INPUT
+    },
+    {
+      key: 'defaultValue',
+      name: '默认值',
+      type: CONFIG_TYPES.TEXT_INPUT
     },
     {
       key: 'placeholder',
@@ -182,6 +190,11 @@ const XInputText: XInputTextSchema = {
     },
     layoutConfig,
     labelColSpanConfig,
+    {
+      key: 'maxLength',
+      name: '文本最大长度',
+      type: CONFIG_TYPES.NUMBER_INPUT
+    },
     {
       key: 'required',
       name: '开启必填',
@@ -222,7 +235,8 @@ const XInputText: XInputTextSchema = {
     saveWithHidden: false,
     color: '',
     bgColor: '',
-    labelColSpan: 100
+    labelColSpan: 100,
+    maxLength: 40
   }
 };
 

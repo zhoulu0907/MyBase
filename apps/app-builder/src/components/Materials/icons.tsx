@@ -25,7 +25,8 @@ import TextInputIcon from '@/assets/images/cp/text_input_cp.svg';
 import TextareaInputIcon from '@/assets/images/cp/textarea_input_cp.svg';
 import TimePickerIcon from '@/assets/images/cp/time_picker_cp.svg';
 import TimelineIcon from '@/assets/images/cp/timeline_cp.svg';
-import UploadIcon from '@/assets/images/cp/upload_cp.svg';
+import FileUploadIcon from '@/assets/images/cp/upload_file_cp.svg';
+import ImageUploadIcon from '@/assets/images/cp/upload_image_cp.svg';
 import UserSelectIcon from '@/assets/images/cp/user_select_cp.svg';
 import WebComponentIcon from '@/assets/images/cp/web_component_cp.svg';
 
@@ -44,7 +45,8 @@ export const ICON_Map: Record<string, React.ReactNode> = {
   'select_mutiple_cp.svg': <img src={SelectMutipleIcon} />,
   'user_select_cp.svg': <img src={UserSelectIcon} />,
   'dept_select_cp.svg': <img src={DeptSelectIcon} />,
-  'upload_cp.svg': <img src={UploadIcon} />,
+  'upload_file_cp.svg': <img src={FileUploadIcon} />,
+  'upload_image_cp.svg': <img src={ImageUploadIcon} />,
   'readonly_cp.svg': <img src={ReadonlyIcon} />,
   'col_layout_cp.svg': <img src={ColumnLayoutIcon} />,
   'canvas_card_cp.svg': <img src={CanvasCardIcon} />,

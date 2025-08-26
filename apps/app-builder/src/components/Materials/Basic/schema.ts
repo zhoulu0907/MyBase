@@ -18,6 +18,10 @@ import XSelectOne from './FormComponents/SelectOne/schema';
 import XSwitch from './FormComponents/Switch/schema';
 import XTimePicker from './FormComponents/TimePicker/schema';
 import XUserSelect from './FormComponents/UserSelect/schema';
+import XStaticText from './FormComponents/StaticText/schema';
+import XDivider from './FormComponents/Divider/schema';
+import XRichText from './FormComponents/RichText/schema';
+import XFCarousel from './FormComponents/Carousel/schema';
 import XColumnLayout from './LayoutComponents/ColumnLayout/schema';
 import XCalendar from './ListComponents/Calendar/schema';
 import XCarousel from './ListComponents/Carousel/schema';
@@ -50,6 +54,10 @@ const baseSchema = {
   XFileUpload,
   XImgUpload,
   XRelatedForm,
+  XStaticText,
+  XDivider,
+  XRichText,
+  XFCarousel,
 
   XTable,
   XCalendar,

@@ -22,7 +22,6 @@ import {
 import type {
   IBooleanConfigType,
   IDescriptionConfigType,
-  ILabelColSpanConfigType,
   ILabelConfigType,
   ILayoutConfigType,
   INumberConfigType,
@@ -54,7 +53,6 @@ export type TXInputTimePickerEditData = Array<
   | IStatusConfigType<TStatusSelectKeyType>
   | IWidthConfigType<TWidthSelectKeyType>
   | INumberConfigType
-  | ILabelColSpanConfigType
   | ISelectConfigType<TWidthSelectKeyType | TStatusSelectKeyType>
   | ITextAreaConfigType
   | IBooleanConfigType
@@ -105,7 +103,7 @@ export interface XInputTimePickerConfig extends ICommonBaseType {
   layout?: TLayoutSelectKeyType;
 
   /**
-   * 标签宽度
+   * 标题宽度
    */
   labelColSpan?: TNumberDefaultType;
 

@@ -24,7 +24,6 @@ import type {
   IBooleanConfigType,
   IDataFieldConfigType,
   IDescriptionConfigType,
-  ILabelColSpanConfigType,
   ILabelConfigType,
   ILayoutConfigType,
   INumberConfigType,
@@ -55,7 +54,6 @@ export type TXInputCheckboxEditData = Array<
   | IStatusConfigType<TStatusSelectKeyType>
   | IWidthConfigType<TWidthSelectKeyType>
   | INumberConfigType
-  | ILabelColSpanConfigType
   | ITextAreaConfigType
   | IBooleanConfigType
   | ILayoutConfigType<TLayoutSelectKeyType>
@@ -111,7 +109,7 @@ export interface XInputCheckboxConfig extends ICommonBaseType {
   layout?: TLayoutSelectKeyType;
 
   /**
-   * 标签宽度
+   * 标题宽度
    */
   labelColSpan?: TNumberDefaultType;
 
@@ -119,6 +117,21 @@ export interface XInputCheckboxConfig extends ICommonBaseType {
    * 隐藏时是否提交数据，开启后隐藏状态仍会保存值
    */
   saveWithHidden?: TBooleanDefaultType;
+
+  /**
+   * 可选项
+   */
+  options: { label: string; value: string }[];
+
+  /**
+   * 全选 or 反选
+   */
+  allChecked?: TBooleanDefaultType;
+
+  /**
+   * 最大选中数量
+   */
+  maxChecked?: TNumberDefaultType;
 }
 
 const XCheckbox: XInputCheckboxSchema = {
@@ -152,6 +165,16 @@ const XCheckbox: XInputCheckboxSchema = {
       name: '隐藏时提交数据',
       type: CONFIG_TYPES.SWITCH_INPUT
     },
+    {
+      key: 'allChecked',
+      name: '全选',
+      type: CONFIG_TYPES.SWITCH_INPUT
+    },
+    {
+      key: 'maxChecked',
+      name: '最大选中数量',
+      type: CONFIG_TYPES.NUMBER_INPUT
+    },
     statusConfig,
     widthConfig
   ],
@@ -167,7 +190,23 @@ const XCheckbox: XInputCheckboxSchema = {
     required: false,
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
     saveWithHidden: false,
-    labelColSpan: 100
+    labelColSpan: 100,
+    options: [
+      {
+        label: '选项一',
+        value: '1'
+      },
+      {
+        label: '选项二',
+        value: '2'
+      },
+      {
+        label: '选项三',
+        value: '3'
+      }
+    ],
+    allChecked: false,
+    maxChecked: 9
   }
 };
 

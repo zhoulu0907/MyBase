@@ -24,7 +24,6 @@ import type {
   IBooleanConfigType,
   IDataFieldConfigType,
   IDescriptionConfigType,
-  ILabelColSpanConfigType,
   ILabelConfigType,
   ILayoutConfigType,
   INumberConfigType,
@@ -56,7 +55,6 @@ export type TXInputSelectOneEditData = Array<
   | IStatusConfigType<TStatusSelectKeyType>
   | IWidthConfigType<TWidthSelectKeyType>
   | INumberConfigType
-  | ILabelColSpanConfigType
   | ISelectConfigType<TWidthSelectKeyType | TStatusSelectKeyType>
   | ITextAreaConfigType
   | IBooleanConfigType
@@ -113,7 +111,7 @@ export interface XInputSelectOneConfig extends ICommonBaseType {
   layout?: TLayoutSelectKeyType;
 
   /**
-   * 标签宽度
+   * 标题宽度
    */
   labelColSpan?: TNumberDefaultType;
 
@@ -121,6 +119,11 @@ export interface XInputSelectOneConfig extends ICommonBaseType {
    * 隐藏时是否提交数据，开启后隐藏状态仍会保存值
    */
   saveWithHidden?: TBooleanDefaultType;
+
+  /**
+   * 搜索
+   */
+  showSearch?: TBooleanDefaultType;
 }
 
 const XSelectOne: XInputSelectOneSchema = {
@@ -150,6 +153,11 @@ const XSelectOne: XInputSelectOneSchema = {
       type: CONFIG_TYPES.SWITCH_INPUT
     },
     {
+      key: 'showSearch',
+      name: '开启搜索',
+      type: CONFIG_TYPES.SWITCH_INPUT
+    },
+    {
       key: 'saveWithHidden',
       name: '隐藏时提交数据',
       type: CONFIG_TYPES.SWITCH_INPUT
@@ -169,7 +177,8 @@ const XSelectOne: XInputSelectOneSchema = {
     required: false,
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
     saveWithHidden: false,
-    labelColSpan: 100
+    labelColSpan: 100,
+    showSearch: true
   }
 };
 

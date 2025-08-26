@@ -8,16 +8,16 @@ const XDatePicker = memo((props: XInputDatePickerConfig) => {
   const { label, dataField, tooltip, status, required, dateType, layout, labelColSpan = 0 } = props;
 
   // 确保 dateType 有默认值，避免 Form.Item 中没有元素
-  const currentDateType = dateType || DATE_VALUES[DATE_OPTIONS.ONLY_DATE];
+  const currentDateType = dateType || DATE_VALUES[DATE_OPTIONS.DATE];
 
   // 根据日期类型渲染对应的日期选择器
   const renderDatePicker = () => {
     switch (currentDateType) {
-      case DATE_VALUES[DATE_OPTIONS.ONLY_YEAR]:
+      case DATE_VALUES[DATE_OPTIONS.YEAR]:
         return <YearPicker style={{ width: '100%' }} />;
-      case DATE_VALUES[DATE_OPTIONS.ONLY_MONTH]:
+      case DATE_VALUES[DATE_OPTIONS.MONTH]:
         return <MonthPicker style={{ width: '100%' }} />;
-      case DATE_VALUES[DATE_OPTIONS.ONLY_DATE]:
+      case DATE_VALUES[DATE_OPTIONS.DATE]:
         return <DatePicker style={{ width: '100%' }} />;
       case DATE_VALUES[DATE_OPTIONS.FULL]:
         return <DatePicker showTime style={{ width: '100%' }} />;
