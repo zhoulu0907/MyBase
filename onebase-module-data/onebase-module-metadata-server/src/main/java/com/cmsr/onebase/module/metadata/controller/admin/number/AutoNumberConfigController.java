@@ -27,17 +27,17 @@ public class AutoNumberConfigController {
     @Resource
     private AutoNumberConfigService configService;
 
-    @PostMapping("/get")
+/*    @PostMapping("/get")
     @Operation(summary = "按字段ID获取自动编号配置与规则")
-    @PreAuthorize("@ss.hasPermission('metadata:auto-number:query')")
+    @PreAuthorize("@ss.hasPermission('metadata:auto-number:query')")*/
     public CommonResult<AutoNumberConfigWithRulesRespVO> get(@RequestParam("fieldId") Long fieldId) {
         AutoNumberConfigWithRulesRespVO result = configService.getAutoNumberConfigWithRules(fieldId);
         return success(result);
     }
 
-    @PostMapping("/upsert")
+/*    @PostMapping("/upsert")
     @Operation(summary = "保存/更新自动编号配置")
-    @PreAuthorize("@ss.hasPermission('metadata:auto-number:update')")
+    @PreAuthorize("@ss.hasPermission('metadata:auto-number:update')")*/
     public CommonResult<Long> upsert(@Valid @RequestBody MetadataAutoNumberConfigDO req) {
         Long id = configService.saveAutoNumberConfig(req);
         return success(id);

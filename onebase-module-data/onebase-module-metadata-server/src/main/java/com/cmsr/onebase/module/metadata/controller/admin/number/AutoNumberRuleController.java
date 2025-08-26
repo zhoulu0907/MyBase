@@ -22,39 +22,39 @@ public class AutoNumberRuleController {
     @Resource
     private AutoNumberRuleService ruleService;
 
-    @PostMapping("/list")
+/*    @PostMapping("/list")
     @Operation(summary = "按配置ID获取规则项列表")
-    @PreAuthorize("@ss.hasPermission('metadata:auto-number:query')")
+    @PreAuthorize("@ss.hasPermission('metadata:auto-number:query')")*/
     public CommonResult<List<MetadataAutoNumberRuleItemDO>> list(@RequestParam("configId") Long configId) {
         return success(ruleService.listByConfig(configId));
     }
 
-    @PostMapping("/add")
+/*    @PostMapping("/add")
     @Operation(summary = "添加规则项")
-    @PreAuthorize("@ss.hasPermission('metadata:auto-number:update')")
+    @PreAuthorize("@ss.hasPermission('metadata:auto-number:update')")*/
     public CommonResult<Long> add(@Valid @RequestBody MetadataAutoNumberRuleItemDO req) {
         return success(ruleService.add(req));
     }
 
-    @PostMapping("/update")
+/*    @PostMapping("/update")
     @Operation(summary = "更新规则项")
-    @PreAuthorize("@ss.hasPermission('metadata:auto-number:update')")
+    @PreAuthorize("@ss.hasPermission('metadata:auto-number:update')")*/
     public CommonResult<Boolean> update(@Valid @RequestBody MetadataAutoNumberRuleItemDO req) {
         ruleService.update(req);
         return success(true);
     }
 
-    @PostMapping("/delete")
+/*    @PostMapping("/delete")
     @Operation(summary = "删除规则项")
-    @PreAuthorize("@ss.hasPermission('metadata:auto-number:update')")
+    @PreAuthorize("@ss.hasPermission('metadata:auto-number:update')")*/
     public CommonResult<Boolean> delete(@RequestParam("id") Long id) {
         ruleService.delete(id);
         return success(true);
     }
 
-    @PostMapping("/sort")
+/*    @PostMapping("/sort")
     @Operation(summary = "批量排序规则项")
-    @PreAuthorize("@ss.hasPermission('metadata:auto-number:update')")
+    @PreAuthorize("@ss.hasPermission('metadata:auto-number:update')")*/
     public CommonResult<Boolean> sort(@RequestParam("configId") Long configId,
                                       @RequestBody List<MetadataAutoNumberRuleItemDO> items) {
         ruleService.batchSort(configId, items);
