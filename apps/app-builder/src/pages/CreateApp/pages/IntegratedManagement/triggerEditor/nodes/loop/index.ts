@@ -6,6 +6,7 @@ import { formMeta } from './form-meta';
 
 export const LoopNodeRegistry: FlowNodeRegistry = {
   type: 'loop',
+  title: '循环节点',
   info: {
     icon: iconLoop,
     description:

@@ -1,7 +1,3 @@
-/**
- * Copyright (c) 2025 Bytedance Ltd. and/or its affiliates
- * SPDX-License-Identifier: MIT
- */
 
 import { nanoid } from 'nanoid';
 
@@ -12,6 +8,7 @@ import { formMeta } from './form-meta';
 let id = 3;
 export const CatchBlockNodeRegistry: FlowNodeRegistry = {
   type: 'catchBlock',
+  title: '异常捕获节点',
   meta: {
     copyDisable: true,
     addDisable: true,

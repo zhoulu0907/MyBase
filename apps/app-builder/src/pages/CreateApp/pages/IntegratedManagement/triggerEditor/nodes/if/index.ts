@@ -9,6 +9,7 @@ import { defaultFormMeta } from '../default-form-meta';
 export const IFNodeRegistry: FlowNodeRegistry = {
   extend: FlowNodeSplitType.STATIC_SPLIT,
   type: 'if',
+  title: '条件节点',
   info: {
     icon: iconIf,
     description: 'Only the corresponding branch will be executed if the set conditions are met.',

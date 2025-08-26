@@ -4,6 +4,7 @@ import { formMeta } from './form-meta';
 
 export const StartNodeRegistry: FlowNodeRegistry = {
   type: 'start',
+  title: '开始节点',
   meta: {
     isStart: true, // Mark as start
     deleteDisable: true, // Start node cannot delete

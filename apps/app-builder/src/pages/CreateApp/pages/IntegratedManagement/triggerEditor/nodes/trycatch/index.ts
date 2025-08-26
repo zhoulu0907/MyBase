@@ -6,6 +6,7 @@ import { formMeta } from './form-meta';
 
 export const TryCatchNodeRegistry: FlowNodeRegistry = {
   type: 'tryCatch',
+  title: '异常处理节点',
   info: {
     icon: iconTryCatch,
     description: 'try catch.',

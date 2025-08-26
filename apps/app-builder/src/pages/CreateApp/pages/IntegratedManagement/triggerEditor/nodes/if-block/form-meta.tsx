@@ -5,6 +5,7 @@ import { type FlowNodeJSON } from '../../typings';
 
 export const renderForm = (props: FormRenderProps<FlowNodeJSON['data']>) => {
   const { node } = useNodeRenderContext();
+
   return (
     <div
       style={{
