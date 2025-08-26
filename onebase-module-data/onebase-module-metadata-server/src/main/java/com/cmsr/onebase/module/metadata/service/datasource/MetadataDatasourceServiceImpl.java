@@ -386,19 +386,19 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
 
         // 添加查询条件
         if (pageReqVO.getDatasourceName() != null) {
-            configStore.and(Compare.LIKE, "datasource_name", "%" + pageReqVO.getDatasourceName() + "%");
+            configStore.and(Compare.LIKE, MetadataDatasourceDO.DATASOURCE_NAME, "%" + pageReqVO.getDatasourceName() + "%");
         }
         if (pageReqVO.getCode() != null) {
-            configStore.and(Compare.LIKE, "code", "%" + pageReqVO.getCode() + "%");
+            configStore.and(Compare.LIKE, MetadataDatasourceDO.CODE, "%" + pageReqVO.getCode() + "%");
         }
         if (pageReqVO.getDatasourceType() != null) {
-            configStore.and("datasource_type", pageReqVO.getDatasourceType());
+            configStore.and(MetadataDatasourceDO.DATASOURCE_TYPE, pageReqVO.getDatasourceType());
         }
         if (pageReqVO.getDatasourceOrigin() != null) {
-            configStore.and("datasource_origin", pageReqVO.getDatasourceOrigin());
+            configStore.and(MetadataDatasourceDO.DATASOURCE_ORIGIN, pageReqVO.getDatasourceOrigin());
         }
         if (pageReqVO.getRunMode() != null) {
-            configStore.and("run_mode", pageReqVO.getRunMode());
+            configStore.and(MetadataDatasourceDO.RUN_MODE, pageReqVO.getRunMode());
         }
 
         // 分页查询
@@ -421,7 +421,7 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
     @Override
     public MetadataDatasourceDO getDatasourceByCode(String code) {
         DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and("code", code);
+        configStore.and(MetadataDatasourceDO.CODE, code);
         return metadataDatasourceRepository.findOne(configStore);
     }
 
