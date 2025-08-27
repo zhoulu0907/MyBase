@@ -1,4 +1,3 @@
-import { useFormEditorSignal, useListEditorSignal } from '@/store/singals/page_editor';
 import { getHashQueryParam } from '@/utils/router';
 import { Button, Form, Message } from '@arco-design/web-react';
 import {
@@ -11,11 +10,17 @@ import {
   type DataMethodParam,
   type InsertMethodParams
 } from '@onebase/app';
+import {
+  EDITOR_TYPES,
+  getComponentWidth,
+  PreviewRender,
+  useFormEditorSignal,
+  useListEditorSignal,
+  type GridItem
+} from '@onebase/ui-kit';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import PreviewRender from '../../components/render/PreviewRender';
-import { getComponentWidth, startLoadPageSet } from '../../utils/app_resource';
-import { EDITOR_TYPES, type GridItem } from '../../utils/const';
+import { startLoadPageSet } from '../../utils/app_resource';
 import styles from './index.module.less';
 
 interface PreviewProps {}

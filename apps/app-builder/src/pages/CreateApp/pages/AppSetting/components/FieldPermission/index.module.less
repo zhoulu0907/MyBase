@@ -1,5 +1,5 @@
 .fieldPermissions {
-  height: 592px;
+  height: 680px;
   overflow: hidden auto;
 
   .table {
@@ -10,6 +10,26 @@
 
     .rowItem {
       padding: 10px 0;
+    }
+  }
+}
+
+.checkboxGray {
+  span {
+    div {
+      border-color: transparent;
+      background-color: rgb(var(--primary-6));
+      filter: grayscale(100%) opacity(50%);
+    }
+  }
+}
+
+.checkboxGreen {
+  span {
+    div {
+      border-color: transparent;
+      background-color: rgb(var(--primary-6));
+      filter: grayscale(0) opacity(100%);
     }
   }
 }

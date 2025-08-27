@@ -1,6 +1,6 @@
-import { usePageEditorSignal } from '@/hooks/useSignal';
 import { Button } from '@arco-design/web-react';
 import { IconLeft, IconRight } from '@arco-design/web-react/icon';
+import { usePageEditorSignal } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import { useState } from 'react';
 import MaterialConfiger from './components';

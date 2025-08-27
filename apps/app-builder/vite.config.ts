@@ -8,7 +8,16 @@ export default defineConfig({
     port: 4399
   },
   base: './',
-  plugins: [react()],
+  plugins: [react(
+    {
+        babel: {
+            plugins: [
+              ['@babel/plugin-proposal-decorators', { legacy: true }],
+              ['@babel/plugin-proposal-class-properties', { loose: true }],
+            ],
+        },
+    }
+  )],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),

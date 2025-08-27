@@ -1,11 +1,9 @@
 import FieldCard from '@/components/FieldCard';
-import { COMPONENT_TYPE_DISPLAY_NAME_MAP } from '@/components/Materials/template';
-import { FORM_COMPONENT_TYPES } from '@/constants/componentTypes';
 import { useI18n } from '@/hooks/useI18n';
-import { COMPONENT_GROUP_NAME } from '@/pages/Editor/utils/const';
 import { useAppEntityStore } from '@/store/store_entity';
 import { Collapse } from '@arco-design/web-react';
 import type { AppEntityField } from '@onebase/app';
+import { COMPONENT_GROUP_NAME, COMPONENT_TYPE_DISPLAY_NAME_MAP, FORM_COMPONENT_TYPES } from '@onebase/ui-kit';
 import React, { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import { COMPONENT_MAP } from './component_map';

@@ -140,7 +140,7 @@ const Administrator: React.FC = () => {
   
 
   const getPlatformAdminList = async (pageNo: number = 1, keyword: string = searchKeyword) => {
-    console.log('keyword', keyword);
+    // console.log('keyword', keyword);
     const res = await getPlatformAdminListApi({
       pageNo: pageNo,
       pageSize: 10,

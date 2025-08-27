@@ -2,7 +2,6 @@ import { useState, useEffect, type FC } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Menu, Popconfirm, Message } from '@arco-design/web-react';
 import { IconEdit, IconPlus, IconUser, IconClose } from '@arco-design/web-react/icon';
-import { AddMembers } from '@onebase/common';
 import {
   listRole,
   createRole,
@@ -26,19 +25,21 @@ const AppPermission: FC = () => {
   const [searchParams] = useSearchParams();
   const appId = searchParams.get('appId') || '';
 
-  const [visible, setVisible] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<string>('');
   const [roleList, setRoleList] = useState<Role[]>([]);
   const [addRole, setAddRole] = useState<boolean>(false);
   const [updateRoleId, setUpdateRoleId] = useState<string>('');
 
   const adminData: Role | undefined = roleList?.find((role) => role.roleType === RoleType.ADMIN);
-  const notAdminData: Role | undefined = roleList?.find((role) => role.roleType !== RoleType.ADMIN);
+  const notAdminData: Role | undefined = roleList?.find(
+    (role) => role.roleType !== RoleType.ADMIN && role.id === activeTab
+  );
 
   useEffect(() => {
     getRoleList();
   }, []);
 
+  // 获取角色列表
   const getRoleList = async () => {
     const params: ListRoleReq = {
       applicationId: appId
@@ -112,7 +113,6 @@ const AppPermission: FC = () => {
   };
 
   if (!adminData?.id) return null;
-  console.log('activeTab', activeTab, roleList);
 
   return (
     <div className={styles.AppPermission}>
@@ -135,7 +135,7 @@ const AppPermission: FC = () => {
                 return (
                   <MenuItem className={styles.menuItem} key={role.id}>
                     <div className={styles.custom}>
-                      <IconUser className={styles.iconRight4} />
+                      <IconUser className={styles.userIcon} />
                       {updateRoleId === role.id ? (
                         <InputRoleName
                           defaultValue={role.roleName}
@@ -160,7 +160,7 @@ const AppPermission: FC = () => {
                       content="确定要删除这个角色吗？"
                       onOk={() => handleDeleteRole(role.id)}
                     >
-                      {role.roleType === RoleType.CUSTOM && <IconClose className={styles.iconRight4} />}
+                      {role.roleType === RoleType.CUSTOM && <IconClose className={styles.deleteIcon} />}
                     </Popconfirm>
                   </MenuItem>
                 );
@@ -179,20 +179,8 @@ const AppPermission: FC = () => {
         </Menu>
       </div>
       <div className={styles.right}>
-        <RoleInfo
-          roleInfo={activeTab === adminData?.id ? adminData : notAdminData}
-          onAddMembers={() => setVisible(true)}
-        />
+        <RoleInfo roleInfo={activeTab === adminData?.id ? adminData : notAdminData} />
       </div>
-
-      <AddMembers
-        title="选择成员"
-        width={800}
-        visible={visible}
-        // treeData={[]}
-        onConfirm={() => {}}
-        cancel={() => setVisible(false)}
-      />
     </div>
   );
 };

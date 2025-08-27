@@ -2,14 +2,12 @@ import CreateGroupIcon from '@/assets/images/addfolder.svg';
 import CreatePageIcon from '@/assets/images/addpage.svg';
 import PageManagerGuide from '@/assets/images/page_manaager_guide.svg';
 import { useI18n } from '@/hooks/useI18n';
-import { debounce } from 'lodash-es';
-import { EDITOR_TYPES } from '@/pages/Editor/utils/const';
 import PreviewContainer from '@/pages/Runtime/components/preview';
 import { useAppStore } from '@/store/store_app';
 import { useBasicEditorStore } from '@/store/store_editor';
 import { addParentIdToChildren } from '@/utils/menu';
 import { Button, Dropdown, Form, Input, Layout, Menu, Message, Tree } from '@arco-design/web-react';
-import { IconPlus, IconSearch, IconEmpty } from '@arco-design/web-react/icon';
+import { IconEmpty, IconPlus, IconSearch } from '@arco-design/web-react/icon';
 import {
   copyApplicationMenu,
   createApplicationMenu,
@@ -30,7 +28,9 @@ import {
   type MetadataEntityPair,
   type UpdateApplicationMenuNameReq
 } from '@onebase/app';
-import { useEffect, useState, useCallback, type FC } from 'react';
+import { EDITOR_TYPES } from '@onebase/ui-kit';
+import { debounce } from 'lodash-es';
+import { useCallback, useEffect, useState, type FC } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CopyModal from './components/Modals/CopyModal';
 import CreateModal from './components/Modals/CreateModal';
@@ -172,7 +172,7 @@ const PageManagerPage: FC = () => {
     setTreeData(treeData);
 
     if (res && res.length > 0) {
-      setCurMenu(res[0]);
+      setCurMenu(findFirstPage(res));
       setSearchResult(false);
     }
 
