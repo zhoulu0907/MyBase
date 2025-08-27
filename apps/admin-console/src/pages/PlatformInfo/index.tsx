@@ -25,7 +25,7 @@ import {
 import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
 import { downloadFile } from '@/utils/download';
-import { TokenManager } from '@onebase/common';
+import { getBackendURL, TokenManager } from '@onebase/common';
 // import { systemService } from './clients';
 
 const { Title, Text } = Typography;
@@ -205,12 +205,10 @@ const PlatformInfo: React.FC = () => {
     try {
       // 获取存储在localStorage或cookie中的token
       const authorizationHeader = TokenManager.getAuthorizationHeader();
-      console.log('authorizationHeader:', authorizationHeader);
-      if (typeof window !== 'undefined' && window.global_config?.BASE_URL) {
         try {
-          const url = new URL(window.global_config.BASE_URL);
+          const url = getBackendURL();
           // 创建带有token的请求
-          const response = await fetch(`${url.href}/system/license/export?id=1`, {
+          const response = await fetch(`${url}/system/license/export?id=1`, {
             method: 'GET',
             headers: {
               'Authorization': authorizationHeader,
@@ -226,7 +224,6 @@ const PlatformInfo: React.FC = () => {
         } catch (e) {
           console.error('解析BASE_URL失败:', e);
         }
-      }
     } catch (error) {
       console.error('下载失败:', error);
       Message.error('下载失败');
