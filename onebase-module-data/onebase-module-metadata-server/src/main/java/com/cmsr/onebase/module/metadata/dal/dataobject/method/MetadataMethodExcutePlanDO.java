@@ -21,12 +21,19 @@ import lombok.experimental.SuperBuilder;
 @Table(name = "metadata_method_excute_plan")
 public class MetadataMethodExcutePlanDO extends BaseDO {
 
-    public static final String METHOD_CODE = "method_code";
+    public static final String METHOD_ID = "method_id";
+    /**
+     * 兼容旧代码的常量别名，后续请统一使用 METHOD_ID
+     */
+    public static final String METHOD_CODE = "method_id";
     public static final String PLAN_JSON = "plan_json";
     public static final String VERSION = "version";
     public static final String ENABLED = "enabled";
 
-    private String methodCode;
+    /**
+     * 关联系统数据方法ID（method_id）
+     */
+    private Long methodId;
 
     /**
      * 存储 QueryPlan 的 JSON（jsonb），此处使用 String 保存原始 JSON 文本。
@@ -36,6 +43,9 @@ public class MetadataMethodExcutePlanDO extends BaseDO {
 
     private String version;
 
-    private Boolean enabled;
+    /**
+     * 启用状态：0-关闭，1-开启
+     */
+    private Integer enabled;
 
 }

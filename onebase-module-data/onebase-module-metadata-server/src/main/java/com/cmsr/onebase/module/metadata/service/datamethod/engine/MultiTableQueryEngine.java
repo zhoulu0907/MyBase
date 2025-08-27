@@ -12,6 +12,7 @@ import com.cmsr.onebase.module.metadata.service.datasource.MetadataDatasourceSer
 import com.cmsr.onebase.module.metadata.service.entity.MetadataBusinessEntityService;
 import com.cmsr.onebase.module.metadata.service.entity.MetadataEntityFieldService;
 import com.cmsr.onebase.module.metadata.dal.database.TemporaryDatasourceService;
+import com.cmsr.onebase.module.metadata.service.datamethod.MetadataDataSystemMethodService;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Resource;
@@ -47,6 +48,8 @@ public class MultiTableQueryEngine {
     private final ObjectMapper mapper = new ObjectMapper();
     @Resource
     private com.cmsr.onebase.module.metadata.service.datamethod.MetadataDataMethodExecutionLogService execLogService;
+    @Resource
+    private MetadataDataSystemMethodService metadataDataSystemMethodService;
 
     public DynamicDataRespVO queryOne(String methodCode, String planJson, DynamicDataGetReqVO reqVO) {
         return TenantUtils.executeIgnore(() -> doQueryOne(methodCode, planJson, reqVO));
@@ -140,7 +143,13 @@ public class MultiTableQueryEngine {
                            long costMs, Long rows, boolean success, String error) {
     com.cmsr.onebase.module.metadata.dal.dataobject.method.MetadataDataMethodExecutionLogDO logDO =
         new com.cmsr.onebase.module.metadata.dal.dataobject.method.MetadataDataMethodExecutionLogDO();
-    logDO.setMethodCode(methodCode);
+    try {
+        com.cmsr.onebase.module.metadata.dal.dataobject.method.MetadataDataSystemMethodDO method =
+            metadataDataSystemMethodService.getDataMethodByCode(methodCode);
+        if (method != null) {
+            logDO.setMethodId(method.getId());
+        }
+    } catch (Exception ignore) {}
         // 将简要信息写入已有字段
         logDO.setRequestParams("{\"op\":\"" + op + "\",\"plan\":" + quote(planJson) + ",\"rows\":" + rows + "}");
         logDO.setDurationMs((int) Math.min(costMs, Integer.MAX_VALUE));
