@@ -1,10 +1,11 @@
 import type { EntityListItem } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
 import { useAppStore } from '@/store/store_app';
 import type { TableColumnProps } from '@arco-design/web-react';
-import { Button, Message, Space, Table, Tag } from '@arco-design/web-react';
+import { Button, Dropdown, Menu, Message, Space, Table, Tag } from '@arco-design/web-react';
 import { getEntityRules } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
-import { CreateRuleModal } from '../../Modals';
+import { CreateCustomRule, CreateOtherRule } from '../../Modals';
+import { validationTypeOptions } from '../../Modals/CreateRuleModal/rule';
 import styles from './tabs.module.less';
 
 interface DataRulesProps {
@@ -18,7 +19,9 @@ const DataRules: React.FC<DataRulesProps> = ({ entity, activeTab }) => {
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState({ pageNo: 1, pageSize: 10 });
   const [total, setTotal] = useState(0);
-  const [createRuleModalVisible, setCreateRuleModalVisible] = useState(false);
+  const [createCustomRuleModalVisible, setCreateCustomRuleModalVisible] = useState(false);
+  const [createOtherRuleModalVisible, setCreateOtherRuleModalVisible] = useState(false);
+  const [ruleType, setRuleType] = useState('');
   const loadRules = async () => {
     try {
       setLoading(true);
@@ -107,12 +110,36 @@ const DataRules: React.FC<DataRulesProps> = ({ entity, activeTab }) => {
     }
   }, [entity, activeTab, page]);
 
+  const handleClickMenu = (value: string) => {
+    setRuleType(value);
+    if (value === 'custom') {
+      // 自定义校验
+      setCreateCustomRuleModalVisible(true);
+    } else {
+      // 其他校验类型
+      setCreateOtherRuleModalVisible(true);
+    }
+  };
+
   return (
     <div className={styles.dataRules}>
       <div className={styles.header}>
-        <Button type="primary" size="small" onClick={() => setCreateRuleModalVisible(true)}>
-          添加规则
-        </Button>
+        <Dropdown
+          droplist={
+            <Menu>
+              {validationTypeOptions.map((item) => (
+                <Menu.Item key={item.value} onClick={() => handleClickMenu(item.value)}>
+                  {item.label}
+                </Menu.Item>
+              ))}
+            </Menu>
+          }
+          trigger="hover"
+        >
+          <Button type="primary" size="small">
+            添加规则
+          </Button>
+        </Dropdown>
       </div>
       <Table
         columns={columns}
@@ -128,11 +155,18 @@ const DataRules: React.FC<DataRulesProps> = ({ entity, activeTab }) => {
         }}
         loading={loading}
       />
-      <CreateRuleModal
-        visible={createRuleModalVisible}
-        setVisible={setCreateRuleModalVisible}
+      <CreateCustomRule
+        visible={createCustomRuleModalVisible}
+        setVisible={setCreateCustomRuleModalVisible}
         successCallback={loadRules}
         entity={entity}
+      />
+      <CreateOtherRule
+        visible={createOtherRuleModalVisible}
+        setVisible={setCreateOtherRuleModalVisible}
+        successCallback={loadRules}
+        entity={entity}
+        ruleType={ruleType}
       />
     </div>
   );
