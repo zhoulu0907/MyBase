@@ -18,7 +18,7 @@
 12. DTO类中不允许有业务逻辑，DTO类仅用于数据传输，DTO类中不允许有方法，除非是静态方法；
 13. 使用@Resource而不是@Autowired注入依赖，避免使用@Autowired注入Bean；
 14. 使用jakarta.validation包如@Valid、@NotEmpty、@Length等注解对入参进行校验，在VO和Controller层校验；
-15. 测试
+15. 类中不允许有静态内部类，避免使用static class；
 
 
 ## 三、生成与补写代码的规范（important! 重要！请务必要遵守！）

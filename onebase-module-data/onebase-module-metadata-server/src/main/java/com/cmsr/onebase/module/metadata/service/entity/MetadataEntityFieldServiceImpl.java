@@ -829,6 +829,12 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
                     throw new RuntimeException("表 " + tableName + " 不存在，请先创建表");
                 }
 
+                // 检查列是否已存在
+                if (checkColumnExists(service, tableName, field.getFieldName())) {
+                    log.warn("列 {} 已存在于表 {} 中，跳过添加操作", field.getFieldName(), tableName);
+                    return null;
+                }
+
                 // 生成添加列 DDL
                 String addColumnDDL = generateAddColumnDDL(tableName, field);
 
@@ -877,6 +883,33 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
             log.debug("获取当前数据库名称失败: {}", e.getMessage());
         }
         return "unknown";
+    }
+
+    /**
+     * 检查列是否存在于表中
+     *
+     * @param service AnylineService实例
+     * @param tableName 表名
+     * @param columnName 列名
+     * @return 如果列存在返回true，否则返回false
+     */
+    private boolean checkColumnExists(AnylineService<?> service, String tableName, String columnName) {
+        try {
+            log.info("检查列是否存在 - 表名: {}, 列名: {}", tableName, columnName);
+            
+            // 查询 PostgreSQL 系统表来检查列是否存在
+            String checkSql = "SELECT 1 FROM information_schema.columns " +
+                             "WHERE table_name = ? AND column_name = ? AND table_schema = 'public'";
+            
+            DataSet resultSet = service.querys(checkSql, tableName, columnName);
+            boolean exists = resultSet != null && resultSet.size() > 0;
+            
+            log.info("列 {} 在表 {} 中{}存在", columnName, tableName, exists ? "" : "不");
+            return exists;
+        } catch (Exception e) {
+            log.warn("检查列 {} 在表 {} 中是否存在时发生错误: {}", columnName, tableName, e.getMessage());
+            return false;
+        }
     }
 
     /**
