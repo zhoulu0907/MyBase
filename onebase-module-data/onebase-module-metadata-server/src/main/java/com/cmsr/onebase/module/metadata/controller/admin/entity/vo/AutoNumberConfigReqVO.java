@@ -14,8 +14,7 @@ import java.util.List;
 @Schema(description = "自动编号配置请求VO")
 @Data
 public class AutoNumberConfigReqVO {
-
-    @Schema(description = "是否启用：0-启用，1-禁用", example = "0")
+    @Schema(description = "是否启用：1-启用，0-禁用", example = "0")
     private Integer isEnabled;
 
     @Schema(description = "编号模式：NATURAL（自然递增）/FIXED_DIGITS（固定位数）", example = "FIXED_DIGITS")
@@ -24,7 +23,7 @@ public class AutoNumberConfigReqVO {
     @Schema(description = "固定位数（当模式为FIXED_DIGITS时有效）", example = "6")
     private Short digitWidth;
 
-    @Schema(description = "溢出时继续：0-是，1-否", example = "0")
+    @Schema(description = "溢出时继续：1-是，0-否", example = "0")
     private Integer overflowContinue;
 
     @Schema(description = "初始值", example = "1")

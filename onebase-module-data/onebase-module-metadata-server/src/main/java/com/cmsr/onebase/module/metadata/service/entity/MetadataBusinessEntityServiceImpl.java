@@ -726,7 +726,10 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
         List<ERFieldVO> erFields = new ArrayList<>();
 
         for (MetadataEntityFieldDO field : fieldList) {
-            ERFieldVO erField = BeanUtils.toBean(field, ERFieldVO.class);
+            ERFieldVO erField = BeanUtils.toBean(field, ERFieldVO.class, result -> {
+                // 手动设置 fieldId，因为数据库实体中是 id，而 VO 中是 fieldId
+                result.setFieldId(field.getId());
+            });
             erFields.add(erField);
         }
 

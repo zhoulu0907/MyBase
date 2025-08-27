@@ -16,13 +16,7 @@ public class FieldOptionBatchSortReqVO {
     private Long fieldId;
 
     @Schema(description = "排序项")
-    private List<SortItem> items;
-
-    @Data
-    public static class SortItem {
-        private Long id;
-        private Integer optionOrder;
-    }
+    private List<SortItemDTO> items;
 }
 
 

@@ -13,10 +13,11 @@ import com.cmsr.onebase.module.metadata.service.entity.MetadataBusinessEntitySer
 import com.cmsr.onebase.module.metadata.service.entity.MetadataEntityFieldService;
 import com.cmsr.onebase.module.metadata.dal.database.TemporaryDatasourceService;
 import com.cmsr.onebase.module.metadata.service.datamethod.MetadataDataSystemMethodService;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.cmsr.onebase.module.metadata.service.datamethod.dto.QueryPlanDTO;
+import com.cmsr.onebase.module.metadata.service.datamethod.dto.JoinTableDTO;
+import com.cmsr.onebase.module.metadata.service.datamethod.dto.JoinOnDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Resource;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
@@ -62,7 +63,7 @@ public class MultiTableQueryEngine {
     private DynamicDataRespVO doQueryOne(String methodCode, String planJson, DynamicDataGetReqVO reqVO) {
     long begin = System.currentTimeMillis();
     try {
-            QueryPlan plan = mapper.readValue(planJson, QueryPlan.class);
+            QueryPlanDTO plan = mapper.readValue(planJson, QueryPlanDTO.class);
             // 主表与字段
             MetadataBusinessEntityDO entity = metadataBusinessEntityService.getBusinessEntity(Long.valueOf(reqVO.getEntityId()));
             List<MetadataEntityFieldDO> fields = metadataEntityFieldService.getEntityFieldListByEntityId(reqVO.getEntityId());
@@ -98,7 +99,7 @@ public class MultiTableQueryEngine {
     private PageResult<DynamicDataRespVO> doQueryPage(String methodCode, String planJson, DynamicDataPageReqVO reqVO) {
     long begin = System.currentTimeMillis();
     try {
-            QueryPlan plan = mapper.readValue(planJson, QueryPlan.class);
+            QueryPlanDTO plan = mapper.readValue(planJson, QueryPlanDTO.class);
             // 主表与字段
             MetadataBusinessEntityDO entity = metadataBusinessEntityService.getBusinessEntity(Long.valueOf(reqVO.getEntityId()));
             List<MetadataEntityFieldDO> fields = metadataEntityFieldService.getEntityFieldListByEntityId(reqVO.getEntityId());
@@ -163,7 +164,7 @@ public class MultiTableQueryEngine {
         return '"' + s.replace("\\", "\\\\").replace("\"", "\\\"") + '"';
     }
 
-    private ConfigStore buildPrimaryFilter(QueryPlan plan, Map<String, Object> filters) {
+    private ConfigStore buildPrimaryFilter(QueryPlanDTO plan, Map<String, Object> filters) {
         DefaultConfigStore cs = new DefaultConfigStore();
         if (filters != null) {
             for (Map.Entry<String, Object> en : filters.entrySet()) {
@@ -178,12 +179,12 @@ public class MultiTableQueryEngine {
         return cs;
     }
 
-    private Map<String, Object> applyJoins(QueryPlan plan, Map<String, Object> main, List<Map<String, Object>> pageMains) {
+    private Map<String, Object> applyJoins(QueryPlanDTO plan, Map<String, Object> main, List<Map<String, Object>> pageMains) {
         Map<String, Object> result = new LinkedHashMap<>(main);
         if (plan.getJoins() == null || plan.getJoins().isEmpty()) {
             return result;
         }
-        for (Join j : plan.getJoins()) {
+        for (JoinTableDTO j : plan.getJoins()) {
             try {
                 AnylineService<?> svc = getServiceByCode(j.getDatasource());
                 String rightCol = rightColName(j.getOn());
@@ -250,44 +251,11 @@ public class MultiTableQueryEngine {
         return vo;
     }
 
-    private String rightColName(JoinOn on) { return on.getRight(); }
-    private String leftColName(JoinOn on) { return on.getLeft(); }
+    private String rightColName(JoinOnDTO on) { return on.getRight(); }
+    private String leftColName(JoinOnDTO on) { return on.getLeft(); }
 
     private String simpleField(String qualified) {
         int idx = qualified.lastIndexOf('.') ;
         return idx >= 0 ? qualified.substring(idx + 1) : qualified;
-    }
-
-    // --- QueryPlan DTO ---
-    @Data
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class QueryPlan {
-        private Primary primary;
-        private List<Join> joins;
-    }
-    @Data
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class Primary {
-        private String datasource;
-        private String table;
-        private String alias;
-        private String pk;
-    }
-    @Data
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class Join {
-        private String datasource;
-        private String table;
-        private String alias;
-        private String joinType; // left/inner, 当前仅支持left
-        private JoinOn on;
-        private Boolean many; // 是否一对多
-        public boolean isMany() { return Boolean.TRUE.equals(many); }
-    }
-    @Data
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class JoinOn {
-        private String left;  // e.g. u.dept_id
-        private String right; // e.g. d.id
     }
 }
