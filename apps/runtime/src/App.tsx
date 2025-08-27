@@ -3,6 +3,7 @@ import '@arco-themes/react-cyansu-ob03/index.less';
 import { NotFoundPage } from '@onebase/common';
 import { Navigate, Route, HashRouter as Router, Routes } from 'react-router-dom';
 import Login from './pages/Login';
+import Runtime from './pages/Runtime';
 // import Runtime from './pages/Runtime';
 
 function AppContent() {
@@ -10,8 +11,9 @@ function AppContent() {
     <Routes>
       {/* 登录页面不需要认证 */}
       <Route path="/login" element={<Login />} />
+      <Route path="/:appId/:tenantId/login" element={<Login />} />
 
-      {/* <Route path="/onebase/runtime/*" element={<Runtime />} /> */}
+      <Route path="/onebase/runtime/:appId/" element={<Runtime />} />
 
       {/* 默认重定向到登录页 */}
       <Route path="/" element={<Navigate to="/login" replace />} />

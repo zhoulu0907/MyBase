@@ -5,7 +5,6 @@ import { Navigate, Route, HashRouter as Router, Routes } from 'react-router-dom'
 import { EditorPage } from './pages/Editor';
 import Home from './pages/Home';
 import Login from './pages/Login';
-import Runtime from './pages/Runtime';
 import SettingPage from './pages/Setting';
 
 function AppContent() {
@@ -42,8 +41,6 @@ function AppContent() {
           // </AuthGuard>
         }
       />
-
-      <Route path="/onebase/runtime/*" element={<Runtime />} />
 
       <Route path="/onebase/editor/*" element={<EditorPage />} />
 
