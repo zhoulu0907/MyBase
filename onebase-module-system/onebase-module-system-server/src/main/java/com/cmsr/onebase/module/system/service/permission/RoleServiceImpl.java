@@ -10,9 +10,11 @@ import com.cmsr.onebase.module.system.controller.admin.permission.vo.role.RolePa
 import com.cmsr.onebase.module.system.controller.admin.permission.vo.role.RoleUpdateReqVO;
 import com.cmsr.onebase.module.system.dal.database.RoleDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
+import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
 import com.cmsr.onebase.module.system.dal.redis.RedisKeyConstants;
 import com.cmsr.onebase.module.system.enums.permission.DataScopeEnum;
 import com.cmsr.onebase.module.system.controller.admin.permission.vo.role.RolePageReqVO;
+import com.cmsr.onebase.module.system.enums.permission.PackageTypeEnum;
 import com.cmsr.onebase.module.system.enums.permission.RoleCodeEnum;
 import com.cmsr.onebase.module.system.enums.permission.RoleTypeEnum;
 import com.google.common.annotations.VisibleForTesting;

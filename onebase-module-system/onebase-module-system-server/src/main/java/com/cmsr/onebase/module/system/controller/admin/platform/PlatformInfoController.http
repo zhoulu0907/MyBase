@@ -22,12 +22,12 @@ Authorization: Bearer {{token}}
 tenant-id: 1
 
 {
-  "username": "adminguan3",
+  "username": "adminlishuhao",
   "password": "admin123",
-  "mobile": "15601691613",
-  "email": "16558@qq.com",
-  "nickName": "管理员3",
-  "userType": "2"
+  "mobile": "15601691636",
+  "email": "165592@qq.com",
+  "nickName": "管理员4",
+  "adminType": "2"
 }
 
 

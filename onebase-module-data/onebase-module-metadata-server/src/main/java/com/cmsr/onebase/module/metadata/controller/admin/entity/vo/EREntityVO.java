@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.metadata.controller.admin.entity.vo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.persistence.criteria.CriteriaBuilder.In;
 import lombok.Data;
 
 import java.util.List;
@@ -47,4 +48,8 @@ public class EREntityVO {
 
     @Schema(description = "关系类型", example = "主表:PARENT，子表:CHILD")
     private String relationType;
+
+    //todo
+    @Schema(description = "状态", example = "1")
+    private Integer status;
 }

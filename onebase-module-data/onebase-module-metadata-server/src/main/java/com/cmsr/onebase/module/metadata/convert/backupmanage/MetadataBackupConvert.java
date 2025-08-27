@@ -36,23 +36,23 @@ public class MetadataBackupConvert {
     }
 
     public MetadataBackupRespDTO convert(MetadataBackupRespVO vo) {
-        MetadataBackupRespDTO dto = BeanUtils.toBean(vo, MetadataBackupRespDTO.class);
-        dto.setDatasourceList(convertDatasourceList(vo.getDatasourceList()));
-        dto.setBusinessEntityList(convertEntityList(vo.getBusinessEntityList()));
-        dto.setEntityFieldList(convertFieldList(vo.getEntityFieldList()));
-        dto.setEntityRelationshipList(convertRelationshipList(vo.getEntityRelationshipList()));
-        dto.setValidationRuleList(convertRuleList(vo.getValidationRuleList()));
-        return dto;
+        return BeanUtils.toBean(vo, MetadataBackupRespDTO.class, dto -> {
+            dto.setDatasourceList(convertDatasourceList(vo.getDatasourceList()));
+            dto.setBusinessEntityList(convertEntityList(vo.getBusinessEntityList()));
+            dto.setEntityFieldList(convertFieldList(vo.getEntityFieldList()));
+            dto.setEntityRelationshipList(convertRelationshipList(vo.getEntityRelationshipList()));
+            dto.setValidationRuleList(convertRuleList(vo.getValidationRuleList()));
+        });
     }
 
     public MetadataRestoreReqVO convert(MetadataRestoreReqDTO dto) {
-        MetadataRestoreReqVO vo = BeanUtils.toBean(dto, MetadataRestoreReqVO.class);
-        vo.setDatasourceList(convertDatasourceDOList(dto.getDatasourceList()));
-        vo.setBusinessEntityList(convertEntityDOList(dto.getBusinessEntityList()));
-        vo.setEntityFieldList(convertFieldDOList(dto.getEntityFieldList()));
-        vo.setEntityRelationshipList(convertRelationshipDOList(dto.getEntityRelationshipList()));
-        vo.setValidationRuleList(convertRuleDOList(dto.getValidationRuleList()));
-        return vo;
+        return BeanUtils.toBean(dto, MetadataRestoreReqVO.class, vo -> {
+            vo.setDatasourceList(convertDatasourceDOList(dto.getDatasourceList()));
+            vo.setBusinessEntityList(convertEntityDOList(dto.getBusinessEntityList()));
+            vo.setEntityFieldList(convertFieldDOList(dto.getEntityFieldList()));
+            vo.setEntityRelationshipList(convertRelationshipDOList(dto.getEntityRelationshipList()));
+            vo.setValidationRuleList(convertRuleDOList(dto.getValidationRuleList()));
+        });
     }
 
     // DO 与 DTO 之间的转换

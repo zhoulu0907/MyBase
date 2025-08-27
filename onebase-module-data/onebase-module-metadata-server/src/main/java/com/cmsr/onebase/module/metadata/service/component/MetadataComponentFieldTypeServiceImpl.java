@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.metadata.service.component;
 
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
+import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.FieldTypeConfigRespVO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataComponentFieldTypeDO;
 import jakarta.annotation.Resource;
@@ -11,6 +12,7 @@ import org.anyline.entity.Order;
 import org.anyline.service.AnylineService;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,14 +31,27 @@ public class MetadataComponentFieldTypeServiceImpl implements MetadataComponentF
 
     @Override
     public List<MetadataComponentFieldTypeDO> getAllFieldTypes() {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and(MetadataComponentFieldTypeDO.STATUS, CommonStatusEnum.ENABLE.getStatus()); // 只获取启用的字段类型
-        configStore.and("deleted", 0); // 未删除的记录
-        configStore.order(MetadataComponentFieldTypeDO.SORT_ORDER, Order.TYPE.ASC);
-        configStore.order("create_time", Order.TYPE.ASC);
+        try {
+            DefaultConfigStore configStore = new DefaultConfigStore();
+            configStore.and(MetadataComponentFieldTypeDO.STATUS, CommonStatusEnum.ENABLE.getStatus()); // 只获取启用的字段类型
+            configStore.and("deleted", 0); // 未删除的记录
+            configStore.order(MetadataComponentFieldTypeDO.SORT_ORDER, Order.TYPE.ASC);
+            configStore.order("create_time", Order.TYPE.ASC);
 
-        DataSet dataSet = anylineService.querys("metadata_component_field_type", configStore);
-        return dataSet.entity(MetadataComponentFieldTypeDO.class);
+            DataSet dataSet = anylineService.querys("metadata_component_field_type", configStore);
+            List<MetadataComponentFieldTypeDO> results = dataSet.entity(MetadataComponentFieldTypeDO.class);
+            
+            // 如果数据库中没有数据，返回默认的字段类型配置
+            if (results.isEmpty()) {
+                log.warn("数据库表 metadata_component_field_type 中没有数据，返回默认字段类型配置");
+                return getDefaultFieldTypes();
+            }
+            
+            return results;
+        } catch (Exception e) {
+            log.error("查询字段类型配置失败，返回默认配置: {}", e.getMessage(), e);
+            return getDefaultFieldTypes();
+        }
     }
 
     @Override
@@ -113,41 +128,89 @@ public class MetadataComponentFieldTypeServiceImpl implements MetadataComponentF
      * @return 字段类型配置响应VO
      */
     private FieldTypeConfigRespVO convertToFieldTypeConfigRespVO(MetadataComponentFieldTypeDO fieldTypeDO) {
-        FieldTypeConfigRespVO respVO = new FieldTypeConfigRespVO();
-        respVO.setFieldType(fieldTypeDO.getFieldTypeCode());
-        respVO.setDisplayName(fieldTypeDO.getFieldTypeName());
-        respVO.setCategory(fieldTypeDO.getDataType());
+        return BeanUtils.toBean(fieldTypeDO, FieldTypeConfigRespVO.class, respVO -> {
+            respVO.setFieldType(fieldTypeDO.getFieldTypeCode());
+            respVO.setDisplayName(fieldTypeDO.getFieldTypeName());
+            respVO.setCategory(fieldTypeDO.getDataType());
 
-        // 根据字段类型设置支持的配置选项
-        String fieldTypeCode = fieldTypeDO.getFieldTypeCode();
-        if (fieldTypeCode != null) {
-            switch (fieldTypeCode.toUpperCase()) {
-                case "VARCHAR":
-                case "INTEGER":
-                case "BIGINT":
-                case "DECIMAL":
-                    respVO.setSupportLength(true);
-                    respVO.setDefaultLength(fieldTypeCode.equals("VARCHAR") ? 255 : 
-                                           fieldTypeCode.equals("INTEGER") ? 11 : 
-                                           fieldTypeCode.equals("BIGINT") ? 20 : 10);
-                    respVO.setMaxLength(fieldTypeCode.equals("VARCHAR") ? 4000 : null);
-                    break;
-                default:
-                    respVO.setSupportLength(false);
-                    respVO.setDefaultLength(null);
-                    respVO.setMaxLength(null);
-                    break;
+            // 根据字段类型设置支持的配置选项
+            String fieldTypeCode = fieldTypeDO.getFieldTypeCode();
+            if (fieldTypeCode != null) {
+                switch (fieldTypeCode.toUpperCase()) {
+                    case "VARCHAR":
+                    case "INTEGER":
+                    case "BIGINT":
+                    case "DECIMAL":
+                        respVO.setSupportLength(true);
+                        respVO.setDefaultLength(fieldTypeCode.equals("VARCHAR") ? 255 : 
+                                               fieldTypeCode.equals("INTEGER") ? 11 : 
+                                               fieldTypeCode.equals("BIGINT") ? 20 : 10);
+                        respVO.setMaxLength(fieldTypeCode.equals("VARCHAR") ? 4000 : null);
+                        break;
+                    default:
+                        respVO.setSupportLength(false);
+                        respVO.setDefaultLength(null);
+                        respVO.setMaxLength(null);
+                        break;
+                }
+
+                // 小数类型支持小数位设置
+                if ("DECIMAL".equalsIgnoreCase(fieldTypeCode)) {
+                    respVO.setSupportDecimal(true);
+                    respVO.setDefaultDecimal(2);
+                } else {
+                    respVO.setSupportDecimal(false);
+                }
             }
-
-            // 小数类型支持小数位设置
-            if ("DECIMAL".equalsIgnoreCase(fieldTypeCode)) {
-                respVO.setSupportDecimal(true);
-                respVO.setDefaultDecimal(2);
-            } else {
-                respVO.setSupportDecimal(false);
-            }
-        }
-
-        return respVO;
+        });
+    }
+    
+    /**
+     * 获取默认的字段类型配置（当数据库表不存在或没有数据时使用）
+     */
+    private List<MetadataComponentFieldTypeDO> getDefaultFieldTypes() {
+        List<MetadataComponentFieldTypeDO> defaultTypes = new ArrayList<>();
+        
+        // 文本类型
+        defaultTypes.add(createDefaultFieldType("VARCHAR", "文本", "字符串类型", "VARCHAR", 1));
+        defaultTypes.add(createDefaultFieldType("TEXT", "长文本", "文本类型", "TEXT", 2));
+        
+        // 数字类型
+        defaultTypes.add(createDefaultFieldType("INTEGER", "整数", "整数类型", "INTEGER", 3));
+        defaultTypes.add(createDefaultFieldType("BIGINT", "长整数", "长整数类型", "BIGINT", 4));
+        defaultTypes.add(createDefaultFieldType("DECIMAL", "小数", "小数类型", "DECIMAL", 5));
+        
+        // 时间类型
+        defaultTypes.add(createDefaultFieldType("DATE", "日期", "日期类型", "DATE", 6));
+        defaultTypes.add(createDefaultFieldType("DATETIME", "日期时间", "日期时间类型", "TIMESTAMP", 7));
+        defaultTypes.add(createDefaultFieldType("TIME", "时间", "时间类型", "TIME", 8));
+        
+        // 布尔类型
+        defaultTypes.add(createDefaultFieldType("BOOLEAN", "布尔", "布尔类型", "BOOLEAN", 9));
+        
+        // 选择类型
+        defaultTypes.add(createDefaultFieldType("SINGLE_SELECT", "单选", "单选类型", "VARCHAR", 10));
+        defaultTypes.add(createDefaultFieldType("MULTI_SELECT", "多选", "多选类型", "VARCHAR", 11));
+        
+        // 其他类型
+        defaultTypes.add(createDefaultFieldType("JSON", "JSON", "JSON类型", "JSON", 12));
+        defaultTypes.add(createDefaultFieldType("AUTO_NUMBER", "自动编号", "自动编号类型", "VARCHAR", 13));
+        
+        return defaultTypes;
+    }
+    
+    /**
+     * 创建默认字段类型对象
+     */
+    private MetadataComponentFieldTypeDO createDefaultFieldType(String code, String name, String desc, 
+                                                              String dataType, int sortOrder) {
+        return MetadataComponentFieldTypeDO.builder()
+                .fieldTypeCode(code)
+                .fieldTypeName(name)
+                .fieldTypeDesc(desc)
+                .dataType(dataType)
+                .sortOrder(sortOrder)
+                .status(CommonStatusEnum.ENABLE.getStatus())
+                .build();
     }
 }

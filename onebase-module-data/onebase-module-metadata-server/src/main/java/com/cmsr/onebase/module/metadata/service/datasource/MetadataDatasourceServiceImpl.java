@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.metadata.service.datasource;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.metadata.controller.admin.datasource.vo.ColumnInfoRespVO;
 import com.cmsr.onebase.module.metadata.controller.admin.datasource.vo.DatasourcePageReqVO;
 import com.cmsr.onebase.module.metadata.controller.admin.datasource.vo.DatasourceSaveReqVO;
@@ -18,25 +19,25 @@ import com.cmsr.onebase.module.metadata.enums.DatasourceTypeEnum;
 import com.cmsr.onebase.module.metadata.dal.database.MetadataDatasourceRepository;
 import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
 import jakarta.annotation.Resource;
-import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.anyline.data.jdbc.util.DataSourceUtil;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Order;
 import org.anyline.metadata.Column;
 import org.anyline.metadata.Table;
-import org.anyline.proxy.ServiceProxy;
 import org.anyline.service.AnylineService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import javax.sql.DataSource;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import jakarta.validation.Valid;
+import org.anyline.data.jdbc.util.DataSourceUtil;
+import org.anyline.proxy.ServiceProxy;
+import javax.sql.DataSource;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
@@ -73,7 +74,12 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
     @Override
     public List<TableInfoRespVO> getTablesByDatasourceId(TableQueryVO queryVO) {
         // 获取数据源信息
-        MetadataDatasourceDO datasource = getDatasource(Long.valueOf(queryVO.getDatasourceId()));
+        String datasourceIdStr = queryVO.getDatasourceId();
+        Long datasourceId = (datasourceIdStr != null && !datasourceIdStr.trim().isEmpty()) ? Long.valueOf(datasourceIdStr) : null;
+        if (datasourceId == null) {
+            throw exception(DATASOURCE_NOT_EXISTS);
+        }
+        MetadataDatasourceDO datasource = getDatasource(datasourceId);
         if (datasource == null) {
             throw exception(DATASOURCE_NOT_EXISTS);
         }
@@ -120,7 +126,12 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
     @Override
     public List<ColumnInfoRespVO> getColumnsByTableName(ColumnQueryVO queryVO) {
         // 获取数据源信息
-        MetadataDatasourceDO datasource = getDatasource(Long.valueOf(queryVO.getDatasourceId()));
+        String datasourceIdStr = queryVO.getDatasourceId();
+        Long datasourceId = (datasourceIdStr != null && !datasourceIdStr.trim().isEmpty()) ? Long.valueOf(datasourceIdStr) : null;
+        if (datasourceId == null) {
+            throw exception(DATASOURCE_NOT_EXISTS);
+        }
+        MetadataDatasourceDO datasource = getDatasource(datasourceId);
         if (datasource == null) {
             throw exception(DATASOURCE_NOT_EXISTS);
         }
@@ -173,23 +184,25 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
      * @return 数据源类型响应VO
      */
     private DatasourceTypeRespVO convertToTypeRespVO(DatasourceTypeEnum typeEnum) {
-        DatasourceTypeRespVO respVO = new DatasourceTypeRespVO();
-        respVO.setDatasourceType(typeEnum.getCode());
-        respVO.setDisplayName(typeEnum.getDisplayName());
-        respVO.setDescription(typeEnum.getDescription());
-        respVO.setDefaultPort(typeEnum.getDefaultPort());
-        respVO.setJdbcDriverClass(typeEnum.getJdbcDriverClass());
-        respVO.setUrlTemplate(typeEnum.getUrlTemplate());
-        // 所有数据源类型都支持读写和模式发现功能
-        respVO.setSupportFeatures(Arrays.asList("READ", "WRITE", "SCHEMA_DISCOVERY"));
-        return respVO;
+        return BeanUtils.toBean(typeEnum, DatasourceTypeRespVO.class, respVO -> {
+            respVO.setDatasourceType(typeEnum.getCode());
+            respVO.setDisplayName(typeEnum.getDisplayName());
+            respVO.setDescription(typeEnum.getDescription());
+            respVO.setDefaultPort(typeEnum.getDefaultPort());
+            respVO.setJdbcDriverClass(typeEnum.getJdbcDriverClass());
+            respVO.setUrlTemplate(typeEnum.getUrlTemplate());
+            // 所有数据源类型都支持读写和模式发现功能
+            respVO.setSupportFeatures(Arrays.asList("READ", "WRITE", "SCHEMA_DISCOVERY"));
+        });
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long createDatasource(@Valid DatasourceSaveReqVO createReqVO) {
-        // 校验编码唯一性
-        validateDatasourceCodeUnique(Long.valueOf(createReqVO.getId()), createReqVO.getCode(), Long.valueOf(createReqVO.getAppId()));
+        // 校验编码唯一性（创建时ID为null，所以传null；appId需要安全转换）
+        Long id = (createReqVO.getId() != null && !createReqVO.getId().trim().isEmpty()) ? Long.valueOf(createReqVO.getId()) : null;
+        Long appId = (createReqVO.getAppId() != null && !createReqVO.getAppId().trim().isEmpty()) ? Long.valueOf(createReqVO.getAppId()) : null;
+        validateDatasourceCodeUnique(id, createReqVO.getCode(), appId);
 
         // 插入数据源（不再设置appId，使用关联表维护关系）
         MetadataDatasourceDO datasource = datasourceConvert.convert(createReqVO);
@@ -206,13 +219,15 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
         
         metadataDatasourceRepository.insert(datasource);
 
-        // 创建应用与数据源的关联关系
-        Long applicationId = Long.valueOf(createReqVO.getAppId());
-        appAndDatasourceService.createRelation(applicationId, datasource.getId(), 
+        // 创建应用与数据源的关联关系（使用之前安全转换的appId）
+        if (appId == null) {
+            throw new IllegalArgumentException("应用ID不能为空");
+        }
+        appAndDatasourceService.createRelation(appId, datasource.getId(), 
                 datasource.getDatasourceType(), createReqVO.getAppUid());
 
         log.info("创建数据源成功，ID: {}，应用ID: {}，创建人: {}，创建时间: {}", 
-                datasource.getId(), applicationId, currentUserId, now);
+                datasource.getId(), appId, currentUserId, now);
         return datasource.getId();
     }
 
@@ -253,15 +268,22 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateDatasource(@Valid DatasourceSaveReqVO updateReqVO) {
+        // 安全转换ID和AppID
+        Long id = (updateReqVO.getId() != null && !updateReqVO.getId().trim().isEmpty()) ? Long.valueOf(updateReqVO.getId()) : null;
+        Long appId = (updateReqVO.getAppId() != null && !updateReqVO.getAppId().trim().isEmpty()) ? Long.valueOf(updateReqVO.getAppId()) : null;
+        
         // 校验存在
-        validateDatasourceExists(Long.valueOf(updateReqVO.getId()));
+        if (id == null) {
+            throw new IllegalArgumentException("更新数据源时ID不能为空");
+        }
+        validateDatasourceExists(id);
         // 校验编码唯一性
-        validateDatasourceCodeUnique(Long.valueOf(updateReqVO.getId()), updateReqVO.getCode(), Long.valueOf(updateReqVO.getAppId()));
+        validateDatasourceCodeUnique(id, updateReqVO.getCode(), appId);
 
         // 更新数据源（不再设置appId，因为关联关系在单独的表中维护）
         MetadataDatasourceDO updateObj = datasourceConvert.convert(updateReqVO);
-        // 手动设置ID，确保更新操作正常进行
-        updateObj.setId(Long.valueOf(updateReqVO.getId()));
+        // 手动设置ID，确保更新操作正常进行（使用之前安全转换的id）
+        updateObj.setId(id);
         
         // 设置更新人和更新时间
         Long currentUserId = SecurityFrameworkUtils.getLoginUserId();
@@ -273,17 +295,17 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
         // 不再设置appId，因为关联关系由关联表维护
         metadataDatasourceRepository.update(updateObj);
         
-        // 如果 appUid 发生变化，同步更新关联表
-        Long datasourceId = Long.valueOf(updateReqVO.getId());
-        Long applicationId = Long.valueOf(updateReqVO.getAppId());
+        // 如果 appUid 发生变化，同步更新关联表（使用之前安全转换的id和appId）
         String newAppUid = updateReqVO.getAppUid();
         
         // 获取当前关联关系
-        MetadataAppAndDatasourceDO currentRelation = appAndDatasourceService.getRelation(applicationId, datasourceId);
-        if (currentRelation != null && !newAppUid.equals(currentRelation.getAppUid())) {
-            // appUid 发生变化，更新关联表
-            log.info("数据源{}的appUid从{}更新为{}，同步更新关联表", datasourceId, currentRelation.getAppUid(), newAppUid);
-            appAndDatasourceService.updateRelationAppUid(applicationId, datasourceId, newAppUid);
+        if (appId != null) {
+            MetadataAppAndDatasourceDO currentRelation = appAndDatasourceService.getRelation(appId, id);
+            if (currentRelation != null && !newAppUid.equals(currentRelation.getAppUid())) {
+                // appUid 发生变化，更新关联表
+                log.info("数据源{}的appUid从{}更新为{}，同步更新关联表", id, currentRelation.getAppUid(), newAppUid);
+                appAndDatasourceService.updateRelationAppUid(appId, id, newAppUid);
+            }
         }
         
         log.info("更新数据源成功，ID: {}，更新人: {}", updateReqVO.getId(), currentUserId);
@@ -333,7 +355,12 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
     public PageResult<MetadataDatasourceDO> getDatasourcePage(DatasourcePageReqVO pageReqVO) {
         // 如果指定了应用ID，需要通过关联表查询
         if (pageReqVO.getAppId() != null && !pageReqVO.getAppId().trim().isEmpty()) {
-            Long appId = Long.valueOf(pageReqVO.getAppId());
+            Long appId;
+            try {
+                appId = Long.valueOf(pageReqVO.getAppId());
+            } catch (NumberFormatException e) {
+                throw new IllegalArgumentException("应用ID格式不正确: " + pageReqVO.getAppId());
+            }
             
             // 获取应用关联的数据源列表
             List<MetadataDatasourceDO> appDatasources = appAndDatasourceService.getDatasourcesByApplicationId(appId);
@@ -386,19 +413,19 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
 
         // 添加查询条件
         if (pageReqVO.getDatasourceName() != null) {
-            configStore.and(Compare.LIKE, "datasource_name", "%" + pageReqVO.getDatasourceName() + "%");
+            configStore.and(Compare.LIKE, MetadataDatasourceDO.DATASOURCE_NAME, "%" + pageReqVO.getDatasourceName() + "%");
         }
         if (pageReqVO.getCode() != null) {
-            configStore.and(Compare.LIKE, "code", "%" + pageReqVO.getCode() + "%");
+            configStore.and(Compare.LIKE, MetadataDatasourceDO.CODE, "%" + pageReqVO.getCode() + "%");
         }
         if (pageReqVO.getDatasourceType() != null) {
-            configStore.and("datasource_type", pageReqVO.getDatasourceType());
+            configStore.and(MetadataDatasourceDO.DATASOURCE_TYPE, pageReqVO.getDatasourceType());
         }
         if (pageReqVO.getDatasourceOrigin() != null) {
-            configStore.and("datasource_origin", pageReqVO.getDatasourceOrigin());
+            configStore.and(MetadataDatasourceDO.DATASOURCE_ORIGIN, pageReqVO.getDatasourceOrigin());
         }
         if (pageReqVO.getRunMode() != null) {
-            configStore.and("run_mode", pageReqVO.getRunMode());
+            configStore.and(MetadataDatasourceDO.RUN_MODE, pageReqVO.getRunMode());
         }
 
         // 分页查询
@@ -421,7 +448,7 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
     @Override
     public MetadataDatasourceDO getDatasourceByCode(String code) {
         DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and("code", code);
+        configStore.and(MetadataDatasourceDO.CODE, code);
         return metadataDatasourceRepository.findOne(configStore);
     }
 

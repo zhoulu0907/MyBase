@@ -32,7 +32,7 @@ import com.cmsr.onebase.module.app.dal.dataobject.appresource.PageSetPageDO;
 import com.cmsr.onebase.module.app.dal.dataobject.menu.MenuDO;
 import com.cmsr.onebase.module.app.dal.dataobject.version.VersionDO;
 import com.cmsr.onebase.module.app.dal.dataobject.version.VersionResourceDO;
-import com.cmsr.onebase.module.app.enums.app.AppErrorCodeConstants;
+import com.cmsr.onebase.module.app.enums.AppErrorCodeConstants;
 import com.cmsr.onebase.module.app.enums.version.ResTypeEnum;
 import com.cmsr.onebase.module.app.service.AppCommonService;
 

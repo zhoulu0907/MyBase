@@ -125,6 +125,8 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
             entityField.setIsSystemField(StatusEnumUtil.NO); // 0-不是系统字段
             entityField.setIsPrimaryKey(StatusEnumUtil.NO); // 0-不是主键
             entityField.setAppId(Long.valueOf(reqVO.getAppId()));
+            // 设置默认运行模式，防止后续约束/自动编号处理中出现空指针
+            entityField.setRunMode(0);
 
             metadataEntityFieldRepository.insert(entityField);
             fieldIds.add(entityField.getId().toString());
@@ -499,6 +501,8 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
                 // 使用新的枚举值：1-是，0-否
                 toCreate.setIsSystemField(item.getIsSystemField() != null ? item.getIsSystemField() : StatusEnumUtil.YES); // 默认1-是系统字段
                 toCreate.setIsPrimaryKey(StatusEnumUtil.NO); // 0-不是主键
+                // 设置默认运行模式，防止后续约束/自动编号处理中出现空指针
+                toCreate.setRunMode(0);
 
                 metadataEntityFieldRepository.insert(toCreate);
 
@@ -829,6 +833,12 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
                     throw new RuntimeException("表 " + tableName + " 不存在，请先创建表");
                 }
 
+                // 检查列是否已存在
+                if (checkColumnExists(service, tableName, field.getFieldName())) {
+                    log.warn("列 {} 已存在于表 {} 中，跳过添加操作", field.getFieldName(), tableName);
+                    return null;
+                }
+
                 // 生成添加列 DDL
                 String addColumnDDL = generateAddColumnDDL(tableName, field);
 
@@ -878,6 +888,58 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
         }
         return "unknown";
     }
+
+    /**
+     * 检查列是否存在于表中
+     *
+     * @param service AnylineService实例
+     * @param tableName 表名
+     * @param columnName 列名
+     * @return 如果列存在返回true，否则返回false
+     */
+    private boolean checkColumnExists(AnylineService<?> service, String tableName, String columnName) {
+        try {
+            log.info("检查列是否存在 - 表名: {}, 列名: {}", tableName, columnName);
+
+            // 使用参数化查询 + ILIKE（PostgreSQL 不区分大小写匹配），一次查询既判断存在也可拿到详情
+            String sql = "SELECT table_name, column_name, data_type FROM information_schema.columns "
+                + "WHERE table_schema = ? "
+                + "AND table_name ILIKE ? "
+                + "AND column_name ILIKE ? "
+                + "LIMIT 1";
+
+            DataSet resultSet = service.querys(sql, "public", tableName, columnName);
+            boolean exists = resultSet != null && resultSet.size() > 0;
+
+            log.info("列 {} 在表 {} 中{}存在", columnName, tableName, exists ? "" : "不");
+
+            if (exists) {
+                try {
+                    if (resultSet != null && resultSet.size() > 0) {
+                        DataRow row = resultSet.getRow(0);
+                        log.info("已存在的列详情: 表名={}, 列名={}, 数据类型={}",
+                                row.get("table_name"), row.get("column_name"), row.get("data_type"));
+                    }
+                } catch (Exception detailException) {
+                    log.debug("获取列详细信息失败: {}", detailException.getMessage());
+                }
+            }
+
+            return exists;
+        } catch (Exception e) {
+            log.warn("检查列 {} 在表 {} 中是否存在时发生错误: {}", columnName, tableName, e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * 简单转义 SQL 字面量中的单引号，防止拼接语句时语法错误。
+     * 仅用于把受信任的标识符作为字符串常量参与比较，不用于通用拼接或用户输入。
+     *
+     * @param value 待转义的值
+     * @return 转义后的值（将 ' 替换为 ''）
+     */
+    
 
     /**
      * 修改表中的列
@@ -1178,7 +1240,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
             d.setMaxLength(constraints.getMaxLength());
             d.setPromptMessage(constraints.getLengthPrompt());
             d.setIsEnabled(constraints.getLengthEnabled());
-            d.setRunMode(entityField != null ? entityField.getRunMode() : 0);
+            d.setRunMode(entityField != null && entityField.getRunMode() != null ? entityField.getRunMode() : 0);
             d.setAppId(entityField != null ? entityField.getAppId() : null);
             fieldConstraintService.upsert(d);
         }
@@ -1191,7 +1253,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
             d.setRegexPattern(constraints.getRegexPattern());
             d.setPromptMessage(constraints.getRegexPrompt());
             d.setIsEnabled(constraints.getRegexEnabled());
-            d.setRunMode(entityField != null ? entityField.getRunMode() : 0);
+            d.setRunMode(entityField != null && entityField.getRunMode() != null ? entityField.getRunMode() : 0);
             d.setAppId(entityField != null ? entityField.getAppId() : null);
             fieldConstraintService.upsert(d);
         }
@@ -1215,7 +1277,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
             config.setOverflowContinue(autoNumber.getOverflowContinue());
             config.setInitialValue(autoNumber.getInitialValue() != null ? autoNumber.getInitialValue() : 1L);
             config.setResetCycle(autoNumber.getResetCycle());
-            config.setRunMode(entityField != null ? entityField.getRunMode() : 0);
+            config.setRunMode(entityField != null && entityField.getRunMode() != null ? entityField.getRunMode() : 0);
             config.setAppId(entityField != null ? entityField.getAppId() : null);
             
             Long configId = autoNumberConfigService.upsert(config);

@@ -12,10 +12,11 @@ import com.cmsr.onebase.module.metadata.dal.database.TemporaryDatasourceService;
 import com.cmsr.onebase.module.metadata.service.datamethod.CompensationLogService;
 import com.cmsr.onebase.module.metadata.service.datamethod.OutboxService;
 import com.cmsr.onebase.module.metadata.service.datamethod.MetadataDataMethodExecutionLogService;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.cmsr.onebase.module.metadata.service.datamethod.MetadataDataSystemMethodService;
+import com.cmsr.onebase.module.metadata.service.datamethod.dto.WritePlanDTO;
+import com.cmsr.onebase.module.metadata.service.datamethod.dto.WriteChildDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Resource;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Compare;
@@ -52,6 +53,8 @@ public class MultiTableWriteEngine {
     private OutboxService outboxService;
     @Resource
     private CompensationLogService compensationLogService;
+    @Resource
+    private MetadataDataSystemMethodService metadataDataSystemMethodService;
 
     private final ObjectMapper mapper = new ObjectMapper();
 
@@ -64,12 +67,12 @@ public class MultiTableWriteEngine {
         String error = null;
         Set<String> dsSet = new LinkedHashSet<>();
         try {
-            WritePlan plan = mapper.readValue(planJson, WritePlan.class);
+            WritePlanDTO plan = mapper.readValue(planJson, WritePlanDTO.class);
             if (plan.getPrimary() != null && plan.getPrimary().getDatasource() != null) {
                 dsSet.add(plan.getPrimary().getDatasource());
             }
             if (plan.getChildren() == null || plan.getChildren().isEmpty()) return;
-            for (Child c : plan.getChildren()) {
+            for (WriteChildDTO c : plan.getChildren()) {
                 if (c.getDatasource() != null) dsSet.add(c.getDatasource());
                 Object childData = requestData.get(c.getAlias());
                 if (childData == null) continue;
@@ -102,12 +105,12 @@ public class MultiTableWriteEngine {
         String error = null;
         Set<String> dsSet = new LinkedHashSet<>();
         try {
-            WritePlan plan = mapper.readValue(planJson, WritePlan.class);
+            WritePlanDTO plan = mapper.readValue(planJson, WritePlanDTO.class);
             if (plan.getPrimary() != null && plan.getPrimary().getDatasource() != null) {
                 dsSet.add(plan.getPrimary().getDatasource());
             }
             if (plan.getChildren() == null || plan.getChildren().isEmpty()) return;
-            for (Child c : plan.getChildren()) {
+            for (WriteChildDTO c : plan.getChildren()) {
                 if (c.getDatasource() != null) dsSet.add(c.getDatasource());
                 if (!Boolean.TRUE.equals(c.getReplaceOnUpdate())) continue;
                 deleteByFkWithOutbox(methodCode, plan, c, primaryPk);
@@ -139,12 +142,12 @@ public class MultiTableWriteEngine {
         String error = null;
         Set<String> dsSet = new LinkedHashSet<>();
         try {
-            WritePlan plan = mapper.readValue(planJson, WritePlan.class);
+            WritePlanDTO plan = mapper.readValue(planJson, WritePlanDTO.class);
             if (plan.getPrimary() != null && plan.getPrimary().getDatasource() != null) {
                 dsSet.add(plan.getPrimary().getDatasource());
             }
             if (plan.getChildren() == null || plan.getChildren().isEmpty()) return;
-            for (Child c : plan.getChildren()) {
+            for (WriteChildDTO c : plan.getChildren()) {
                 if (c.getDatasource() != null) dsSet.add(c.getDatasource());
                 deleteByFkWithOutbox(methodCode, plan, c, primaryPk);
             }
@@ -158,7 +161,7 @@ public class MultiTableWriteEngine {
         }
     }
 
-    private void batchInsertWithOutbox(String methodCode, WritePlan plan, Child c, List<Map<String, Object>> list, Object primaryPk) {
+    private void batchInsertWithOutbox(String methodCode, WritePlanDTO plan, WriteChildDTO c, List<Map<String, Object>> list, Object primaryPk) {
         AnylineService<?> svc = getServiceByCode(c.getDatasource());
         for (Map<String, Object> item : list) {
             item.put(c.getFk(), primaryPk);
@@ -176,7 +179,15 @@ public class MultiTableWriteEngine {
             try {
                 MetadataOutboxDO outbox = new MetadataOutboxDO();
                 outbox.setAggregateType("DATA_METHOD");
-                outbox.setAggregateId(methodCode);
+                try {
+                    com.cmsr.onebase.module.metadata.dal.dataobject.method.MetadataDataSystemMethodDO method =
+                            metadataDataSystemMethodService.getDataMethodByCode(methodCode);
+                    if (method != null) {
+                        outbox.setAggregateId(String.valueOf(method.getId()));
+                    } else {
+                        outbox.setAggregateId(methodCode);
+                    }
+                } catch (Exception ignore) { outbox.setAggregateId(methodCode); }
                 outbox.setAction("CHILD_CREATE");
                 outbox.setPayload(toJsonSafe(Map.of(
                         "child", c.getAlias(),
@@ -211,7 +222,7 @@ public class MultiTableWriteEngine {
         }
     }
 
-    private void deleteByFkWithOutbox(String methodCode, WritePlan plan, Child c, Object primaryPk) {
+    private void deleteByFkWithOutbox(String methodCode, WritePlanDTO plan, WriteChildDTO c, Object primaryPk) {
         AnylineService<?> svc = getServiceByCode(c.getDatasource());
         DefaultConfigStore cs = new DefaultConfigStore();
         cs.and(Compare.EQUAL, c.getFk(), primaryPk);
@@ -233,7 +244,15 @@ public class MultiTableWriteEngine {
         try {
             MetadataOutboxDO outbox = new MetadataOutboxDO();
             outbox.setAggregateType("DATA_METHOD");
-            outbox.setAggregateId(methodCode);
+            try {
+                com.cmsr.onebase.module.metadata.dal.dataobject.method.MetadataDataSystemMethodDO method =
+                        metadataDataSystemMethodService.getDataMethodByCode(methodCode);
+                if (method != null) {
+                    outbox.setAggregateId(String.valueOf(method.getId()));
+                } else {
+                    outbox.setAggregateId(methodCode);
+                }
+            } catch (Exception ignore) { outbox.setAggregateId(methodCode); }
             outbox.setAction("CHILD_DELETE");
             outbox.setPayload(toJsonSafe(Map.of(
                     "child", c.getAlias(),
@@ -277,7 +296,13 @@ public class MultiTableWriteEngine {
                            long costMs, Long rows, boolean success, String error, Set<String> dataSources) {
         try {
             MetadataDataMethodExecutionLogDO logDO = new MetadataDataMethodExecutionLogDO();
-            logDO.setMethodCode(methodCode);
+            try {
+                com.cmsr.onebase.module.metadata.dal.dataobject.method.MetadataDataSystemMethodDO method =
+                        metadataDataSystemMethodService.getDataMethodByCode(methodCode);
+                if (method != null) {
+                    logDO.setMethodId(method.getId());
+                }
+            } catch (Exception ignore) {}
             logDO.setRequestParams("{\"op\":\"" + op + "\",\"plan\":" + quote(planJson) + ",\"rows\":" + rows + "}");
             logDO.setDurationMs((int) Math.min(costMs, Integer.MAX_VALUE));
             logDO.setStatus(success ? "SUCCESS" : "FAILED");
@@ -296,34 +321,5 @@ public class MultiTableWriteEngine {
     private String quote(String s) {
         if (s == null) return null;
         return '"' + s.replace("\\", "\\\\").replace("\"", "\\\"") + '"';
-    }
-
-    @Data
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class WritePlan {
-        private Primary primary;
-        private List<Child> children;
-    }
-    @Data
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class Primary {
-        private String datasource;
-        private String table;
-        private String alias;
-        private String pk;
-        private Boolean softDelete;
-        private String deletedColumn;
-    }
-    @Data
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class Child {
-        private String datasource;
-        private String table;
-        private String alias;
-        private Boolean many;
-        private String fk;
-        private Boolean replaceOnUpdate;
-        private Boolean softDelete;
-        private String deletedColumn;
     }
 }

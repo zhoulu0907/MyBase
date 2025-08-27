@@ -34,6 +34,16 @@ public class TenantPackageDataRepository extends DataRepository<TenantPackageDO>
     }
 
     /**
+     * 根据套餐编码查找租户套餐
+     *
+     * @param code 套餐编码
+     * @return 租户套餐
+     */
+    public TenantPackageDO findOneByCode(String code) {
+        return findOne(new DefaultConfigStore().and(Compare.EQUAL, TenantPackageDO.CODE, code));
+    }
+
+    /**
      * 根据状态查询租户套餐列表
      *
      * @param status 状态

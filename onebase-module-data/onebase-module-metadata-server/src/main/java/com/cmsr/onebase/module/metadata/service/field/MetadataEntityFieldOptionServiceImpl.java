@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.metadata.service.field;
 
+import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.FieldOptionBatchSortReqVO;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.FieldOptionRespVO;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.FieldOptionSaveReqVO;
@@ -83,8 +84,12 @@ public class MetadataEntityFieldOptionServiceImpl implements MetadataEntityField
     @Transactional(rollbackFor = Exception.class)
     public void updateFieldOption(FieldOptionSaveReqVO req) {
         MetadataEntityFieldOptionDO option = convertToDO(req);
-        if (req.getId() != null) {
-            option.setId(Long.valueOf(req.getId()));
+        if (req.getId() != null && !req.getId().trim().isEmpty()) {
+            try {
+                option.setId(Long.valueOf(req.getId()));
+            } catch (NumberFormatException e) {
+                throw new IllegalArgumentException("选项ID格式不正确: " + req.getId());
+            }
         }
         update(option);
     }
@@ -108,15 +113,9 @@ public class MetadataEntityFieldOptionServiceImpl implements MetadataEntityField
      * @return 响应VO
      */
     private FieldOptionRespVO convertToRespVO(MetadataEntityFieldOptionDO option) {
-        FieldOptionRespVO respVO = new FieldOptionRespVO();
-        respVO.setId(option.getId() != null ? String.valueOf(option.getId()) : null);
-        respVO.setFieldId(option.getFieldId());
-        respVO.setOptionLabel(option.getOptionLabel());
-        respVO.setOptionValue(option.getOptionValue());
-        respVO.setOptionOrder(option.getOptionOrder());
-        respVO.setIsEnabled(option.getIsEnabled());
-        respVO.setDescription(option.getDescription());
-        return respVO;
+        return BeanUtils.toBean(option, FieldOptionRespVO.class, respVO -> {
+            respVO.setId(option.getId() != null ? String.valueOf(option.getId()) : null);
+        });
     }
 
     /**
@@ -126,15 +125,7 @@ public class MetadataEntityFieldOptionServiceImpl implements MetadataEntityField
      * @return DO对象
      */
     private MetadataEntityFieldOptionDO convertToDO(FieldOptionSaveReqVO req) {
-        MetadataEntityFieldOptionDO option = new MetadataEntityFieldOptionDO();
-        option.setFieldId(req.getFieldId());
-        option.setOptionLabel(req.getOptionLabel());
-        option.setOptionValue(req.getOptionValue());
-        option.setOptionOrder(req.getOptionOrder());
-        option.setIsEnabled(req.getIsEnabled());
-        option.setDescription(req.getDescription());
-        option.setAppId(req.getAppId());
-        return option;
+        return BeanUtils.toBean(req, MetadataEntityFieldOptionDO.class);
     }
 }
 

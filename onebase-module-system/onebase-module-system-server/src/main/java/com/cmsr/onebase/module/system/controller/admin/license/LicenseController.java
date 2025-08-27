@@ -84,7 +84,7 @@ public class LicenseController {
      * @return License详情
      */
     @GetMapping("/get")
-    @PreAuthorize("@ss.hasPermission('system:platform-admin:query')")
+    @PreAuthorize("@ss.hasPermission('system:license:query')")
     @Operation(summary = "获取License详情")
     public LicenseRespVO getLicense(@RequestParam("id") Long id) {
         LicenseDO license = licenseService.getLicense(id);
@@ -98,7 +98,7 @@ public class LicenseController {
      * @return 分页结果
      */
     @GetMapping("/page")
-    @PreAuthorize("@ss.hasPermission('system:platform-admin:query')")
+    @PreAuthorize("@ss.hasPermission('system:license:query')")
     @Operation(summary = "分页查询License")
     public CommonResult<PageResult<LicensePageRespVO>> getLicensePage(@Valid LicensePageReqVO reqVO) {
         PageResult<LicenseDO> pageResult = licenseService.getLicensePage(reqVO);
@@ -111,7 +111,7 @@ public class LicenseController {
      * @return License列表
      */
     @GetMapping("/simple-list")
-    @PreAuthorize("@ss.hasPermission('system:platform-admin:query')")
+    @PreAuthorize("@ss.hasPermission('system:license:query')")
     @Operation(summary = "获取全部License（精简信息）")
     public List<LicensePageRespVO> getSimpleLicenseList() {
         List<LicenseDO> list = licenseService.getSimpleLicenseList();
@@ -122,7 +122,7 @@ public class LicenseController {
     @PostMapping("/import")
     @Operation(summary = "导入凭证")
     @Parameter(name = "file", description = "加密的license.lic.sm4文件", required = true)
-    @PreAuthorize("@ss.hasPermission('system:platform-admin:query')")
+    @PreAuthorize("@ss.hasPermission('system:license:query')")
     public CommonResult<Long> importLicense(@RequestParam("file") MultipartFile file){
         Long licenseId = licenseService.importLicense(file);
         return CommonResult.success(licenseId);
@@ -133,7 +133,7 @@ public class LicenseController {
      */
     @GetMapping("/export")
     @Operation(summary = "导出加密凭证")
-    @PreAuthorize("@ss.hasPermission('system:platform-admin:query')")
+    @PreAuthorize("@ss.hasPermission('system:license:query')")
     public void exportLicense(@RequestParam("id") Long id, HttpServletResponse response) {
         licenseService.exportLicense(id, response);
     }

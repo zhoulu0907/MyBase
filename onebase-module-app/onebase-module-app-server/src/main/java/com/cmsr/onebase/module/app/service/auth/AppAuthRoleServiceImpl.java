@@ -8,7 +8,7 @@ import com.cmsr.onebase.module.app.dal.database.auth.AppAuthRoleRepository;
 import com.cmsr.onebase.module.app.dal.database.auth.AppAuthRoleUserRepository;
 import com.cmsr.onebase.module.app.dal.dataobject.auth.AuthRoleDO;
 import com.cmsr.onebase.module.app.dal.dataobject.auth.AuthRoleUserDO;
-import com.cmsr.onebase.module.app.enums.app.AppErrorCodeConstants;
+import com.cmsr.onebase.module.app.enums.AppErrorCodeConstants;
 import com.cmsr.onebase.module.app.enums.auth.AuthRoleTypeEnum;
 import com.cmsr.onebase.module.app.service.AppCommonService;
 import com.cmsr.onebase.module.app.util.AuthUtils;

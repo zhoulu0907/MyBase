@@ -14,13 +14,13 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
 {
-  "name": "租户guan",
+  "name": "租户guan1",
   "accountCount": "10",
-  "contactName": "test19",
-  "contactMobile": "13800000002",
-  "nickname": "租户guan",
-  "website": "tenant_20250811184249",
-  "status": 0
+  "adminUserName": "test21",
+  "adminMobile": "13800000003",
+  "adminNickName": "租户guan1",
+  "website": "tenant_20250811184255",
+  "status": 1
 }
 
 ### 更新租户 /admin-api/system/tenant/update
@@ -41,7 +41,7 @@ tenant-id: {{adminTenantId}}
 GET {{baseUrl}}/system/tenant/page?pageNum=1&pageSize=10
 Content-Type: application/json
 Authorization: Bearer {{token}}
-tenant-id: {{adminTenantId}}
+tenant-id: 15772133531222016
 
 ### 获得租户可分配数量 /admin-api/system/tenant/get-allocatable-count
 GET {{baseUrl}}/system/tenant/get-allocatable-count

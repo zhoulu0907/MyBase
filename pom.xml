@@ -18,6 +18,7 @@
         <module>onebase-module-infra</module>
         <module>onebase-module-app</module>
         <module>onebase-module-data</module>
+        <module>onebase-module-flow</module>
     </modules>
 
     <name>${project.artifactId}</name>
