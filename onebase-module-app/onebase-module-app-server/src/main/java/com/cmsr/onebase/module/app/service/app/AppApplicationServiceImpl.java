@@ -15,7 +15,7 @@ import com.cmsr.onebase.module.app.dal.database.tag.AppTagRepository;
 import com.cmsr.onebase.module.app.dal.database.version.AppVersionRepository;
 import com.cmsr.onebase.module.app.dal.database.version.AppVersionResourceRepository;
 import com.cmsr.onebase.module.app.dal.dataobject.app.ApplicationDO;
-import com.cmsr.onebase.module.app.enums.app.AppErrorCodeConstants;
+import com.cmsr.onebase.module.app.enums.AppErrorCodeConstants;
 import com.cmsr.onebase.module.app.enums.app.ApplicationStatusEnum;
 import com.cmsr.onebase.module.app.service.AppCommonService;
 import com.cmsr.onebase.module.app.service.auth.AppAuthRoleService;
