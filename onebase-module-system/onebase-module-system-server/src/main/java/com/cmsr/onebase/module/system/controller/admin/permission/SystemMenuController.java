@@ -30,6 +30,7 @@ public class SystemMenuController {
 
     @Resource
     private MenuService menuService;
+    private List<MenuDO> menuList;
 
     @PostMapping("/create")
     @Operation(summary = "创建权限")
@@ -60,7 +61,7 @@ public class SystemMenuController {
     @Operation(summary = "获取菜单&权限列表", description = "用于【菜单管理】界面")
     @PreAuthorize("@ss.hasPermission('system:menu:query')")
     public CommonResult<List<SystemMenuRespVO>> getMenuList(SystemMenuListReqVO reqVO) {
-        List<MenuDO> list = menuService.getMenuList(reqVO);
+        List<MenuDO> list = menuList;
         list.sort(Comparator.comparing(MenuDO::getSort));
         return success(BeanUtils.toBean(list, SystemMenuRespVO.class));
     }

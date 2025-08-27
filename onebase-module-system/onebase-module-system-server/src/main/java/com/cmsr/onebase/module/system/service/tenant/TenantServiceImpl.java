@@ -21,10 +21,7 @@ import com.cmsr.onebase.module.system.controller.admin.tenant.vo.tenant.TenantRe
 import com.cmsr.onebase.module.system.controller.admin.tenant.vo.tenant.TenantUpdateReqVO;
 import com.cmsr.onebase.module.system.controller.admin.user.vo.user.UserInsertReqVO;
 import com.cmsr.onebase.module.system.convert.tenant.TenantConvert;
-import com.cmsr.onebase.module.system.dal.database.AdminUserDataRepository;
-import com.cmsr.onebase.module.system.dal.database.RoleDataRepository;
 import com.cmsr.onebase.module.system.dal.database.TenantDataRepository;
-import com.cmsr.onebase.module.system.dal.database.UserRoleDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.license.LicenseDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.MenuDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
@@ -101,15 +98,6 @@ public class TenantServiceImpl implements TenantService {
     @Resource
     private TenantDataRepository tenantDataRepository;
 
-    @Resource
-    private AdminUserDataRepository adminUserDataRepository;
-
-    @Resource
-    private UserRoleDataRepository userRoleDataRepository;
-
-    @Resource
-    private RoleDataRepository roleDataRepository;
-
     @Override
     public List<Long> getTenantIdList() {
         List<TenantDO> tenants = tenantDataRepository.findAll();
@@ -176,10 +164,10 @@ public class TenantServiceImpl implements TenantService {
         if (StringUtils.isNotEmpty(createReqVO.getWebsite())) {
             validTenantWebsiteDuplicate(createReqVO.getWebsite(), null);
         }
-        if (createReqVO.getPackageId() == null) {
-            createReqVO.setPackageId(Long.valueOf(PackageTypeEnum.SIMPLE.getPackageId()));
-        }
-        TenantPackageDO tenantPackage = tenantPackageService.validTenantPackage(createReqVO.getPackageId());
+        // 根据租户套餐编号获取租户套餐
+        TenantPackageDO tenantPackage = tenantPackageService.getTenantPackageByCode(PackageTypeEnum.ALL.getCode());
+        createReqVO.setPackageId(tenantPackage.getId());
+
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         LocalDateTime expireTime = LocalDateTime.parse("2099-02-19 00:00:00", formatter);
         if (createReqVO.getExpireTime() == null) {
@@ -257,7 +245,7 @@ public class TenantServiceImpl implements TenantService {
                 .setSort(0).setRemark("系统自动生成");
         Long roleId = roleService.createRole(reqVO, RoleTypeEnum.SYSTEM.getType());
         // 分配权限
-        permissionService.assignRoleMenu(roleId, tenantPackage.getMenuIds());
+        // permissionService.assignRoleMenu(roleId, tenantPackage.getMenuIds());
         return roleId;
     }
 
@@ -272,12 +260,9 @@ public class TenantServiceImpl implements TenantService {
         if (StringUtils.isNotBlank(updateReqVO.getWebsite())) {
             validTenantWebsiteDuplicate(updateReqVO.getWebsite(), updateReqVO.getId());
         }
-        // 校验套餐被禁用
-        Long packageId = updateReqVO.getPackageId();
-        if (packageId == null) {
-            packageId = tenant.getPackageId();
-        }
-        TenantPackageDO tenantPackage = tenantPackageService.validTenantPackage(packageId);
+        // 根据租户套餐编号获取租户套餐
+        TenantPackageDO tenantPackage = tenantPackageService.getTenantPackageByCode(PackageTypeEnum.ALL.getCode());
+        updateReqVO.setPackageId(tenantPackage.getId());
 
         LicenseDO license = licenseService.getLicenseByStatus(LicenseStatusEnum.ENABLE.getStatus());
         // 检查分配人员数量是否超过license限制

@@ -23,13 +23,13 @@ public class TenantInsertReqVO {
 
     @Schema(description = "租户昵称", requiredMode = Schema.RequiredMode.REQUIRED, example = "onebase")
     // @NotNull(message = "租户昵称不能为空")
-    private String adminNickName;// todo 重命名 adminNickName（tenant表里不存储）
+    private String adminNickName;
 
     @Schema(description = "联系人", requiredMode = Schema.RequiredMode.REQUIRED, example = "onebase")
-    private String adminUserName;// todo 重命名 adminUserName （tenant表里删掉，以user表为主），真正关联id：adminUserId
+    private String adminUserName;
 
     @Schema(description = "联系手机", example = "15601691300")
-    private String adminMobile;// todo 重命名 adminMobile（tenant表里删掉，以user表为主）
+    private String adminMobile;
 
     @Schema(description = "租户状态", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
     private Integer status;
@@ -37,9 +37,13 @@ public class TenantInsertReqVO {
     @Schema(description = "绑定域名", example = "/onebase")
     private String website;
 
-    @Schema(description = "租户套餐编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "1024")
+    @Schema(description = "租户套餐编号", requiredMode = Schema.RequiredMode.NOT_REQUIRED, example = "1024")
 //    @NotNull(message = "租户套餐编号不能为空")
     private Long packageId;
+
+    @Schema(description = "租户套餐编码", requiredMode = Schema.RequiredMode.NOT_REQUIRED, example = "1024")
+//    @NotNull(message = "租户套餐编号不能为空")
+    private Long packageCode;
 
     @Schema(description = "过期时间", requiredMode = Schema.RequiredMode.REQUIRED)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")

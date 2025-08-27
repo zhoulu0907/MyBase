@@ -7,26 +7,23 @@ package com.cmsr.onebase.module.system.enums.permission;
  * @date 2025-08-11
  */
 public enum PackageTypeEnum {
-    /**
-     * 普通套餐
-     */
-    NORMAL(111, "普通套餐"),
-    /**
-     * 租户简餐
-     */
-    SIMPLE(112, "租户简餐");
 
     /**
-     * 套餐ID
+     * 全功能套餐
      */
-    private final Integer packageId;
+    ALL("super_package", "全功能套餐");
+
+    /**
+     * 套餐编码
+     */
+    private final String code;
     /**
      * 套餐名称
      */
     private final String name;
 
-    PackageTypeEnum(Integer packageId, String name) {
-        this.packageId = packageId;
+    PackageTypeEnum(String code, String name) {
+        this.code = code;
         this.name = name;
     }
 
@@ -35,8 +32,8 @@ public enum PackageTypeEnum {
      *
      * @return 套餐ID
      */
-    public Integer getPackageId() {
-        return packageId;
+    public String getCode() {
+        return code;
     }
 
     /**

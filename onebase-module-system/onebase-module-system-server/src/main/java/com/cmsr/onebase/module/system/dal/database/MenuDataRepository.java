@@ -73,7 +73,8 @@ public class MenuDataRepository extends DataRepository<MenuDO> {
      * @param reqVO 查询条件
      * @return 菜单列表
      */
-    public List<MenuDO> findList(SystemMenuListReqVO reqVO) {
+    public List<MenuDO>
+    findList(SystemMenuListReqVO reqVO) {
         DefaultConfigStore configStore = new DefaultConfigStore();
 
         if (StringUtils.isNotBlank(reqVO.getName())) {

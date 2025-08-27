@@ -8,6 +8,7 @@ import com.cmsr.onebase.framework.common.biz.system.permission.dto.DeptDataPermi
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
 import com.cmsr.onebase.module.system.controller.admin.permission.vo.permission.PermissionMenuRespVO;
 import com.cmsr.onebase.module.system.dal.database.RoleMenuDataRepository;
 import com.cmsr.onebase.module.system.dal.database.UserRoleDataRepository;
@@ -15,9 +16,15 @@ import com.cmsr.onebase.module.system.dal.dataobject.permission.MenuDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleMenuDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.UserRoleDO;
+import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
+import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantPackageDO;
 import com.cmsr.onebase.module.system.dal.redis.RedisKeyConstants;
 import com.cmsr.onebase.module.system.enums.permission.DataScopeEnum;
+import com.cmsr.onebase.module.system.enums.permission.MenuConstants;
+import com.cmsr.onebase.module.system.enums.permission.PackageTypeEnum;
 import com.cmsr.onebase.module.system.service.dept.DeptService;
+import com.cmsr.onebase.module.system.service.tenant.TenantPackageService;
+import com.cmsr.onebase.module.system.service.tenant.TenantService;
 import com.cmsr.onebase.module.system.service.user.AdminUserService;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Suppliers;
@@ -53,6 +60,11 @@ public class PermissionServiceImpl implements PermissionService {
     private DeptService deptService;
     @Resource
     private AdminUserService userService;
+    @Resource
+    private TenantPackageService tenantPackageService;
+    @Resource
+    private TenantService tenantService;
+
 
     @Resource
     private UserRoleDataRepository userRoleDataRepository;
@@ -82,15 +94,53 @@ public class PermissionServiceImpl implements PermissionService {
             return false;
         }
 
-        // 情况一：遍历判断每个权限，如果有一满足，说明有权限
+        // 情况一：如果是平台管理员，赋予所有权限
+        boolean isPlatformSuperAdmin = roleService.hasAnySuperAdmin(convertSet(roles, RoleDO::getId));
+        if (isPlatformSuperAdmin) {
+            return true;
+        }
+
+        // 情况二：如果是租户管理员，赋予所有租户的权限
+        boolean isTenantAdmin = roleService.isTenantAdmin(convertSet(roles, RoleDO::getId));
+        if(isTenantAdmin){
+            // 读取 tenant package，获取租户所有的权限点 tenantAllPermissions
+            TenantDO tenant = tenantService.getTenant(TenantContextHolder.getRequiredTenantId());
+            TenantPackageDO tenantPackage = tenantPackageService.getTenantPackage(tenant.getPackageId());
+            Set<String> tenantAllPermissions = null;
+            if (PackageTypeEnum.ALL.getCode().equals(tenantPackage.getCode())) {
+                // 若是 PackageTypeEnum.ALL, tenantAllPermissions = tenant、app开头的权限
+                List<MenuDO> menuList = menuService.getMenuList();
+                // 过滤出permission字段值为app和tenant开头的菜单项
+                tenantAllPermissions = menuList.stream()
+                        .filter(menu -> menu.getPermission() != null &&
+                                (menu.getPermission().startsWith(MenuConstants.MENU_APP)
+                                        || menu.getPermission().startsWith(MenuConstants.MENU_TENANT)
+                                || menu.getPermission().startsWith(MenuConstants.MENU_SYSTEM)))
+                        .map(MenuDO::getPermission)
+                        .collect(Collectors.toSet());
+            } else {
+                // 不是All，tenantAllPermissions = package下写入的所有权限点
+                Set<Long> menuIds = tenantPackage.getMenuIds();
+                List<MenuDO> menuList = menuService.getMenuList(menuIds);
+                tenantAllPermissions = menuList.stream().map(MenuDO::getPermission).filter(Objects::nonNull)
+                        .collect(Collectors.toSet());
+            }
+            // permissions 和 tenantAllPermissions对比，命中一个即返回true
+            for (String permission : permissions) {
+                if (tenantAllPermissions.contains(permission)) {
+                    return true;
+                }
+            }
+        }
+
+        // 情况三：遍历判断每个权限，如果有一满足，说明有权限
         for (String permission : permissions) {
             if (hasAnyPermission(roles, permission)) {
                 return true;
             }
         }
 
-        // 情况二：如果是超管，也说明有权限
-        return roleService.hasAnySuperAdmin(convertSet(roles, RoleDO::getId));
+        return false;
     }
 
     /**
