@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.app.enums.menu;
 
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
-import com.cmsr.onebase.module.app.enums.app.AppErrorCodeConstants;
+import com.cmsr.onebase.module.app.enums.AppErrorCodeConstants;
 
 /**
  * @Author：huangjie

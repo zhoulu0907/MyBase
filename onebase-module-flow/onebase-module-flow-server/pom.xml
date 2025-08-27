@@ -4,39 +4,26 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>com.cmsr.onebase</groupId>
-        <artifactId>onebase-module-app</artifactId>
+        <artifactId>onebase-module-flow</artifactId>
         <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>onebase-module-app-server</artifactId>
+    <artifactId>onebase-module-flow-server</artifactId>
     <packaging>jar</packaging>
 
     <name>${project.artifactId}</name>
     <description>
-        app 模块 API，暴露给其它模块调用
+        flow 模块，自动化工作流管理
     </description>
-
+    <properties>
+        <liteflow.version>2.13.2</liteflow.version>
+        <js.version>23.0.9</js.version>
+    </properties>
     <dependencies>
-
         <!-- 依赖服务 -->
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-module-app-api</artifactId>
-            <version>${revision}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-module-system-api</artifactId>
-            <version>${revision}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-module-infra-api</artifactId>
-            <version>${revision}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-module-metadata-api</artifactId>
+            <artifactId>onebase-module-flow-api</artifactId>
             <version>${revision}</version>
         </dependency>
 
@@ -45,16 +32,13 @@
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-spring-boot-starter-biz-tenant</artifactId>
         </dependency>
-        <!-- Web 相关 -->
-        <dependency>
-            <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-spring-boot-starter-security</artifactId>
-        </dependency>
+
         <!-- DB 相关 -->
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-spring-boot-starter-orm</artifactId>
         </dependency>
+
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-spring-boot-starter-redis</artifactId>
@@ -65,13 +49,31 @@
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-spring-boot-starter-rpc</artifactId>
         </dependency>
-
-        <!-- 服务保障相关 TODO 开发者：暂时去掉 -->
-<!--        <dependency>-->
-<!--            <groupId>com.cmsr.onebase</groupId>-->
-<!--            <artifactId>onebase-spring-boot-starter-protection</artifactId>-->
-<!--        </dependency>-->
-
+        <dependency>
+            <groupId>com.yomahub</groupId>
+            <artifactId>liteflow-spring-boot-starter</artifactId>
+            <version>${liteflow.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.yomahub</groupId>
+            <artifactId>liteflow-script-groovy</artifactId>
+            <version>${liteflow.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.yomahub</groupId>
+            <artifactId>liteflow-script-javascript</artifactId>
+            <version>${liteflow.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.graalvm.js</groupId>
+            <artifactId>js</artifactId>
+            <version>${js.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.graalvm.js</groupId>
+            <artifactId>js-scriptengine</artifactId>
+            <version>${js.version}</version>
+        </dependency>
         <!-- Test 测试相关 -->
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
@@ -79,8 +81,8 @@
             <scope>test</scope>
         </dependency>
 
-    </dependencies>
 
+    </dependencies>
     <build>
         <!-- 设置构建的 jar 包名 -->
         <finalName>${project.artifactId}</finalName>
@@ -104,6 +106,5 @@
             </plugin>
         </plugins>
     </build>
-
 
 </project>

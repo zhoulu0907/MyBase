@@ -8,7 +8,7 @@ import com.cmsr.onebase.module.app.controller.admin.menu.vo.*;
 import com.cmsr.onebase.module.app.dal.database.menu.AppMenuRepository;
 import com.cmsr.onebase.module.app.dal.dataobject.app.ApplicationDO;
 import com.cmsr.onebase.module.app.dal.dataobject.menu.MenuDO;
-import com.cmsr.onebase.module.app.enums.app.AppErrorCodeConstants;
+import com.cmsr.onebase.module.app.enums.AppErrorCodeConstants;
 import com.cmsr.onebase.module.app.enums.menu.MenuTypeEnum;
 import com.cmsr.onebase.module.app.service.AppCommonService;
 import com.cmsr.onebase.module.app.service.appresource.PageSetService;

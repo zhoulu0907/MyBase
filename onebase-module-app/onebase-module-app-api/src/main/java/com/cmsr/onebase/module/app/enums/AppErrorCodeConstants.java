@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.app.enums.app;
+package com.cmsr.onebase.module.app.enums;
 
 import com.cmsr.onebase.framework.common.exception.ErrorCode;
 
