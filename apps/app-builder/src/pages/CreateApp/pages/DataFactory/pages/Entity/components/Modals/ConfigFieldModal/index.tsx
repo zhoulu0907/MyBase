@@ -93,7 +93,15 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
       defaultValue: '',
       isUnique: 1,
       allowNull: 1,
-      constraints: '',
+      constraints: {
+        lengthEnabled: 0,
+        minLength: 0,
+        maxLength: 0,
+        lengthPrompt: '',
+        regexEnabled: 0,
+        regexPattern: '',
+        regexPrompt: ''
+      },
       isSystemField: FIELD_TYPE.CUSTOM,
       sortOrder: activeFields.length
     };

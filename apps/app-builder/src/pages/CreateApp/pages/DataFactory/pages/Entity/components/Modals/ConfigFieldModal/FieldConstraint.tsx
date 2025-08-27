@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
 import { Button, Input, Switch } from '@arco-design/web-react';
 import styles from '../modal.module.less';
+import {
+  FIELD_CONSTRAINT_LENGTH_ENABLED,
+  FIELD_CONSTRAINT_REGEX_ENABLED
+} from '@/pages/CreateApp/pages/DataFactory/utils/const';
 
 // 字段约束配置接口
 interface FieldConstraintConfig {
@@ -21,11 +25,11 @@ interface FieldConstraintProps {
 
 export const FieldConstraint: React.FC<FieldConstraintProps> = ({ onConfirm, onCancel, initialConfig }) => {
   const [config, setConfig] = useState<FieldConstraintConfig>({
-    lengthEnabled: 1,
+    lengthEnabled: FIELD_CONSTRAINT_LENGTH_ENABLED.DISABLE,
     minLength: 0,
     maxLength: 800,
     lengthPrompt: '',
-    regexEnabled: 1,
+    regexEnabled: FIELD_CONSTRAINT_REGEX_ENABLED.DISABLE,
     regexPattern: '',
     regexPrompt: '',
     ...initialConfig
@@ -39,7 +43,7 @@ export const FieldConstraint: React.FC<FieldConstraintProps> = ({ onConfirm, onC
     if (field === 'lengthEnabled') {
       setConfig((prev) => ({
         ...prev,
-        [field]: value ? 0 : 1
+        [field]: value ? FIELD_CONSTRAINT_LENGTH_ENABLED.ENABLE : FIELD_CONSTRAINT_LENGTH_ENABLED.DISABLE
       }));
     } else if (field === 'minLength' || field === 'maxLength') {
       setConfig((prev) => ({
@@ -61,7 +65,12 @@ export const FieldConstraint: React.FC<FieldConstraintProps> = ({ onConfirm, onC
   ) => {
     setConfig((prev) => ({
       ...prev,
-      [field]: field === 'regexEnabled' ? (value ? 0 : 1) : value
+      [field]:
+        field === 'regexEnabled'
+          ? value
+            ? FIELD_CONSTRAINT_REGEX_ENABLED.ENABLE
+            : FIELD_CONSTRAINT_REGEX_ENABLED.DISABLE
+          : value
     }));
   };
 
@@ -79,13 +88,13 @@ export const FieldConstraint: React.FC<FieldConstraintProps> = ({ onConfirm, onC
         <div className={styles['constraint-header']}>
           <span>长度范围</span>
           <Switch
-            checked={config.lengthEnabled === 0}
+            checked={config.lengthEnabled === FIELD_CONSTRAINT_LENGTH_ENABLED.ENABLE}
             onChange={(checked) => updateLengthConfig('lengthEnabled', checked)}
             size="small"
           />
         </div>
 
-        {config.lengthEnabled === 0 && (
+        {config.lengthEnabled === FIELD_CONSTRAINT_LENGTH_ENABLED.ENABLE && (
           <div className={styles['constraint-content']}>
             <div className={styles['constraint-row']}>
               <label className={styles['required-label']}>*最小长度</label>
@@ -127,13 +136,13 @@ export const FieldConstraint: React.FC<FieldConstraintProps> = ({ onConfirm, onC
         <div className={styles['constraint-header']}>
           <span>正则校验</span>
           <Switch
-            checked={config.regexEnabled === 0}
+            checked={config.regexEnabled === FIELD_CONSTRAINT_REGEX_ENABLED.ENABLE}
             onChange={(checked) => updateRegexConfig('regexEnabled', checked)}
             size="small"
           />
         </div>
 
-        {config.regexEnabled === 0 && (
+        {config.regexEnabled === FIELD_CONSTRAINT_REGEX_ENABLED.ENABLE && (
           <div className={styles['constraint-content']}>
             <div className={styles['constraint-row']}>
               <label className={styles['required-label']}>*正则校验</label>
