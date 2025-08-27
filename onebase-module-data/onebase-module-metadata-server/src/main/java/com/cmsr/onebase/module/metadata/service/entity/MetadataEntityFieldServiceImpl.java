@@ -125,6 +125,8 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
             entityField.setIsSystemField(StatusEnumUtil.NO); // 0-不是系统字段
             entityField.setIsPrimaryKey(StatusEnumUtil.NO); // 0-不是主键
             entityField.setAppId(Long.valueOf(reqVO.getAppId()));
+            // 设置默认运行模式，防止后续约束/自动编号处理中出现空指针
+            entityField.setRunMode(0);
 
             metadataEntityFieldRepository.insert(entityField);
             fieldIds.add(entityField.getId().toString());
@@ -499,6 +501,8 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
                 // 使用新的枚举值：1-是，0-否
                 toCreate.setIsSystemField(item.getIsSystemField() != null ? item.getIsSystemField() : StatusEnumUtil.YES); // 默认1-是系统字段
                 toCreate.setIsPrimaryKey(StatusEnumUtil.NO); // 0-不是主键
+                // 设置默认运行模式，防止后续约束/自动编号处理中出现空指针
+                toCreate.setRunMode(0);
 
                 metadataEntityFieldRepository.insert(toCreate);
 
@@ -896,45 +900,31 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
     private boolean checkColumnExists(AnylineService<?> service, String tableName, String columnName) {
         try {
             log.info("检查列是否存在 - 表名: {}, 列名: {}", tableName, columnName);
-            
-        // 说明：
-        // 之前这里使用 Anyline 的占位符 ? 并通过 service.querys(sql, params...) 传参，
-        // 实际运行时 Anyline 并不会按 JDBC 方式绑定参数，导致占位符未替换，且把传入参数当做附加条件拼接成
-        // “AND user_info AND name”，从而让 SQL 失效，最终误判列不存在。
-        // 为避免该问题，这里改为安全拼接常量字符串（转义单引号）来构造查询语句。
 
-        String safeTable = escapeSqlLiteral(tableName);
-        String safeColumn = escapeSqlLiteral(columnName);
-        String checkSql = "SELECT 1 FROM information_schema.columns "
-            + "WHERE table_schema = 'public' "
-            + "AND LOWER(table_name) = LOWER('" + safeTable + "') "
-            + "AND LOWER(column_name) = LOWER('" + safeColumn + "') "
-            + "LIMIT 1";
+            // 使用参数化查询 + ILIKE（PostgreSQL 不区分大小写匹配），一次查询既判断存在也可拿到详情
+            String sql = "SELECT table_name, column_name, data_type FROM information_schema.columns "
+                + "WHERE table_schema = ? "
+                + "AND table_name ILIKE ? "
+                + "AND column_name ILIKE ? "
+                + "LIMIT 1";
 
-        DataSet resultSet = service.querys(checkSql);
+            DataSet resultSet = service.querys(sql, "public", tableName, columnName);
             boolean exists = resultSet != null && resultSet.size() > 0;
-            
+
             log.info("列 {} 在表 {} 中{}存在", columnName, tableName, exists ? "" : "不");
-            
-            // 如果列存在，记录详细信息
+
             if (exists) {
                 try {
-            String detailSql = "SELECT table_name, column_name, data_type FROM information_schema.columns "
-                + "WHERE table_schema = 'public' "
-                + "AND LOWER(table_name) = LOWER('" + safeTable + "') "
-                + "AND LOWER(column_name) = LOWER('" + safeColumn + "') "
-                + "LIMIT 1";
-            DataSet details = service.querys(detailSql);
-                    if (details != null && details.size() > 0) {
-                        DataRow row = details.getRow(0);
-                        log.info("已存在的列详情: 表名={}, 列名={}, 数据类型={}", 
+                    if (resultSet != null && resultSet.size() > 0) {
+                        DataRow row = resultSet.getRow(0);
+                        log.info("已存在的列详情: 表名={}, 列名={}, 数据类型={}",
                                 row.get("table_name"), row.get("column_name"), row.get("data_type"));
                     }
                 } catch (Exception detailException) {
                     log.debug("获取列详细信息失败: {}", detailException.getMessage());
                 }
             }
-            
+
             return exists;
         } catch (Exception e) {
             log.warn("检查列 {} 在表 {} 中是否存在时发生错误: {}", columnName, tableName, e.getMessage());
@@ -949,12 +939,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
      * @param value 待转义的值
      * @return 转义后的值（将 ' 替换为 ''）
      */
-    private String escapeSqlLiteral(String value) {
-    if (value == null) {
-        return "";
-    }
-    return value.replace("'", "''");
-    }
+    
 
     /**
      * 修改表中的列
@@ -1255,7 +1240,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
             d.setMaxLength(constraints.getMaxLength());
             d.setPromptMessage(constraints.getLengthPrompt());
             d.setIsEnabled(constraints.getLengthEnabled());
-            d.setRunMode(entityField != null ? entityField.getRunMode() : 0);
+            d.setRunMode(entityField != null && entityField.getRunMode() != null ? entityField.getRunMode() : 0);
             d.setAppId(entityField != null ? entityField.getAppId() : null);
             fieldConstraintService.upsert(d);
         }
@@ -1268,7 +1253,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
             d.setRegexPattern(constraints.getRegexPattern());
             d.setPromptMessage(constraints.getRegexPrompt());
             d.setIsEnabled(constraints.getRegexEnabled());
-            d.setRunMode(entityField != null ? entityField.getRunMode() : 0);
+            d.setRunMode(entityField != null && entityField.getRunMode() != null ? entityField.getRunMode() : 0);
             d.setAppId(entityField != null ? entityField.getAppId() : null);
             fieldConstraintService.upsert(d);
         }
@@ -1292,7 +1277,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
             config.setOverflowContinue(autoNumber.getOverflowContinue());
             config.setInitialValue(autoNumber.getInitialValue() != null ? autoNumber.getInitialValue() : 1L);
             config.setResetCycle(autoNumber.getResetCycle());
-            config.setRunMode(entityField != null ? entityField.getRunMode() : 0);
+            config.setRunMode(entityField != null && entityField.getRunMode() != null ? entityField.getRunMode() : 0);
             config.setAppId(entityField != null ? entityField.getAppId() : null);
             
             Long configId = autoNumberConfigService.upsert(config);
