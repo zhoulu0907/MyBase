@@ -8,32 +8,11 @@ export const initialData: FlowDocumentJSON = {
       type: 'start',
       blocks: [],
       data: {
-        title: '开始',
+        title: '触发节点',
         outputs: {
           type: 'object',
           properties: {
-            // query: {
-            //   type: 'string',
-            //   default: 'Hello Flow.',
-            // },
-            // enable: {
-            //   type: 'boolean',
-            //   default: true,
-            // },
-            // array_obj: {
-            //   type: 'array',
-            //   items: {
-            //     type: 'object',
-            //     properties: {
-            //       int: {
-            //         type: 'number',
-            //       },
-            //       str: {
-            //         type: 'string',
-            //       },
-            //     },
-            //   },
-            // },
+
           },
         },
       },
@@ -45,9 +24,6 @@ export const initialData: FlowDocumentJSON = {
       blocks: [],
       data: {
         title: '结束',
-        inputsValues: {
-          success: { type: 'constant', content: true, schema: { type: 'boolean' } },
-        },
       },
     },
   ],

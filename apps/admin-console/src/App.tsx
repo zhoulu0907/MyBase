@@ -1,9 +1,9 @@
 import '@arco-design/web-react/dist/css/arco.css';
 import '@arco-themes/react-cyansu-ob03/index.less';
+import { NotFoundPage } from '@onebase/common';
 import { Navigate, Route, HashRouter as Router, Routes } from 'react-router-dom';
 import Home from './pages/Home';
 import Login from './pages/Login';
-import NotFound from './pages/NotFound';
 
 function AppContent() {
   //   // 启用token自动刷新
@@ -36,7 +36,7 @@ function AppContent() {
       <Route path="/" element={<Navigate to="/login" replace />} />
 
       {/* 404页面 */}
-      <Route path="*" element={<NotFound />} />
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
 }

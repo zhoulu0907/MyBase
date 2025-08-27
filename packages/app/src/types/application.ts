@@ -93,10 +93,6 @@ export interface CreateApplicationReq {
    */
   appName: string;
   /**
-   * 数据源ID
-   */
-  datasourceId: string;
-  /**
    * 应用描述
    */
   description?: string;
@@ -116,7 +112,76 @@ export interface CreateApplicationReq {
    * 主题色
    */
   themeColor?: string;
+  /**
+   * 数据源信息
+   */
+  datasourceSaveReq?: DatasourceSaveReqDTO;
 }
+
+
+/**
+ * 数据源信息
+ *
+ * DatasourceSaveReqDTO
+ */
+export interface DatasourceSaveReqDTO {
+  /**
+   * 应用ID
+   */
+  appId: string;
+  /**
+   * 应用唯一UID（用于与数据源建立关联时的外部标识，可选）
+   */
+  appUid: string;
+  /**
+   * 数据源编码
+   */
+  code: string;
+  /**
+   * 数据源配置信息
+   */
+  config: MapObject;
+  /**
+   * 数据源名称
+   */
+  datasourceName: string;
+  /**
+   * 数据源来源，0：系统默认，1：自有数据源，2：外部数据源
+   */
+  datasourceOrigin?: number;
+  /**
+   * 数据源类型
+   */
+  datasourceType: string;
+  /**
+   * 描述
+   */
+  description?: string;
+  /**
+   * 数据源编号
+   */
+  id?: string;
+  /**
+   * 版本锁标识
+   */
+  lockVersion?: number;
+  /**
+   * 运行模式
+   */
+  runMode?: number;
+  [property: string]: any;
+}
+
+/**
+ * 数据源配置信息
+ *
+ * MapObject
+ */
+export interface MapObject {
+  key?: { [key: string]: any };
+  [property: string]: any;
+}
+
 
 export interface UpdateApplicationReq {
   /**
@@ -182,7 +247,6 @@ export interface DeleteApplicationReq {
    */
   name: string;
 }
-
 
 export interface GetApplicationReq {
   /**

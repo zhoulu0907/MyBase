@@ -8,6 +8,7 @@ import EntityDetail from './EntityDetail';
 import styles from './index.module.less';
 import CreateEntityPage from '../Modals/CreateEntityModal';
 import DeleteConfirmModal from '../Modals/DeleteConfirmModal';
+import EditEntityDrawer from '../Drawers/EditEntityDrawer';
 const { Sider, Content } = Layout;
 
 const EntityTable: React.FC = () => {
@@ -18,6 +19,8 @@ const EntityTable: React.FC = () => {
   const [createEntityModalVisible, setCreateEntityModalVisible] = useState(false);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [editNodeDrawerVisible, setEditNodeDrawerVisible] = useState(false);
+  const [editingNode, setEditingNode] = useState<EntityNode | null>(null);
   // 加载实体列表
   const loadEntities = async () => {
     try {
@@ -63,31 +66,26 @@ const EntityTable: React.FC = () => {
     setDeleteModalVisible(false);
   };
 
-  // 加载实体详情
-  // const loadEntityDetail = async (entityId: string) => {
-  //   try {
-  //     const response = await getEntity(entityId);
-  //     console.log('getEntity', response)
-  //     if (response.data) {
-  //       setSelectedEntity(response.data);
-  //     }
-  //   } catch (error) {
-  //     console.error('加载实体详情失败:', error);
-  //     Message.error('加载实体详情失败');
-  //   }
-  // };
+  const handleEntitySelect = async (entity: EntityListItem) => {
+    setSelectedEntity(entity);
+    // 可以在这里调用loadEntityDetail来获取最新的实体详情
+    // await loadEntityDetail(entity.id);
+  };
+
+  const handleClickEdit = async (entity: EntityListItem) => {
+    setEditNodeDrawerVisible(true);
+    setEditingNode(entity as unknown as EntityNode);
+  };
+
+  const onNodeEdit = (data: Partial<EntityNode>) => {
+    console.log('onNodeEdit', data);
+  };
 
   useEffect(() => {
     if (curDataSourceId) {
       loadEntities();
     }
   }, [curDataSourceId]);
-
-  const handleEntitySelect = async (entity: EntityListItem) => {
-    setSelectedEntity(entity);
-    // 可以在这里调用loadEntityDetail来获取最新的实体详情
-    // await loadEntityDetail(entity.id);
-  };
 
   return (
     <>
@@ -100,6 +98,7 @@ const EntityTable: React.FC = () => {
             loading={loading}
             handleDelete={handleDelete}
             handleOpenAddModal={handleOpenAddModal}
+            handleClickEdit={handleClickEdit}
           />
         </Sider>
         <Content className={styles.content}>
@@ -126,6 +125,15 @@ const EntityTable: React.FC = () => {
         content="确定要删除这个业务实体吗？删除后无法恢复。"
         okText="确认删除"
         cancelText="取消"
+      />
+      <EditEntityDrawer
+        visible={editNodeDrawerVisible}
+        setVisible={setEditNodeDrawerVisible}
+        editingNode={editingNode as unknown as EntityNode}
+        setEditingNode={(node: EntityNode | null) => setEditingNode(node)}
+        onNodeEdit={onNodeEdit}
+        successCallback={successCallback}
+        onlyShowEntity={true}
       />
     </>
   );

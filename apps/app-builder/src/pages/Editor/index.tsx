@@ -1,10 +1,10 @@
+import { EDITOR_TYPES } from '@onebase/ui-kit';
 import React from 'react';
 import { Route, Routes } from 'react-router-dom';
 import EditorHeader from './components/header/Header';
 import styles from './index.module.less';
 import { FormEditor } from './pages/FromEditor';
 import { ListEditor } from './pages/ListEditor';
-import { EDITOR_TYPES } from './utils/const';
 
 const EditorPage: React.FC = () => {
   return (

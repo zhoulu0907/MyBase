@@ -15,3 +15,9 @@ export const getBackendURL = (): string => {
   const baseUrl = (window as any).global_config.BASE_URL;
   return baseUrl || 'http://localhost:9524';
 };
+
+
+export const getRuntimeURL = (): string => {
+  const runtimeUrl = (window as any).global_config.RUNTIME_URL;
+  return runtimeUrl || 'http://localhost:9527';
+};

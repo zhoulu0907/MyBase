@@ -1,7 +1,8 @@
-import type { EditorType } from '@/pages/Editor/utils/const';
-import { EDITOR_TYPES } from '@/pages/Editor/utils/const';
+import IconBranch from '@/assets/images/edit_branch_icon.svg';
+import IconLayout from '@/assets/images/edit_layout_icon.svg';
 import { Button, Tabs } from '@arco-design/web-react';
-import { IconBranch, IconLayout, IconLeft, IconRight, IconSend } from '@arco-design/web-react/icon';
+import { IconLeft, IconRight, IconSend } from '@arco-design/web-react/icon';
+import { EDITOR_TYPES, type EditorType } from '@onebase/ui-kit';
 import { useEffect, useState } from 'react';
 import MaterialContainer from './components/material';
 import MetadataContainer from './components/metadata';
@@ -61,12 +62,25 @@ export default function EditorPanel() {
           size="large"
           direction="vertical"
         >
-          <Tabs.TabPane key={'material'} title={<IconLayout fontSize={20} />} />
-          <Tabs.TabPane key={'metadata'} title={<IconBranch fontSize={20} />} />
+          <Tabs.TabPane
+            key={'material'}
+            title={
+              <div className={`${styles.tabButton} ${activeLeftTabKey === 'material' ? styles.activeTab : ''}`}>
+                <img src={IconLayout} />
+              </div>
+            }
+          />
+          <Tabs.TabPane
+            key={'metadata'}
+            title={
+              <div className={`${styles.tabButton} ${activeLeftTabKey === 'metadata' ? styles.activeTab : ''}`}>
+                <img src={IconBranch} />
+              </div>
+            }
+          />
           {activeTab === EDITOR_TYPES.FORM_EDITOR && (
             <Tabs.TabPane key={'telegram'} title={<IconSend fontSize={20} />} />
           )}
-          {/* <Tabs.TabPane key={"key4"} title={<IconStorage fontSize={20}/>} /> */}
         </Tabs>
       </div>
 

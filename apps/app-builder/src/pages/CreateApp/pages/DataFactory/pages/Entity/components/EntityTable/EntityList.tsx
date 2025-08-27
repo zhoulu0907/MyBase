@@ -11,6 +11,7 @@ interface EntityListProps {
   loading?: boolean;
   handleDelete: (entity: EntityListItem) => void;
   handleOpenAddModal: () => void;
+  handleClickEdit: (entity: EntityListItem) => void;
 }
 
 const EntityList: React.FC<EntityListProps> = ({
@@ -19,12 +20,9 @@ const EntityList: React.FC<EntityListProps> = ({
   onEntitySelect,
   loading = false,
   handleDelete,
-  handleOpenAddModal
+  handleOpenAddModal,
+  handleClickEdit
 }) => {
-  const handleEdit = (entity: EntityListItem) => {
-    console.log(entity);
-  };
-
   return (
     <div className={styles.entityList}>
       <div className={styles.header}>
@@ -51,7 +49,7 @@ const EntityList: React.FC<EntityListProps> = ({
                   className={styles['more-icon-popover']}
                   content={
                     <Space direction="vertical">
-                      <Button type="text" onClick={() => handleEdit(entity)}>
+                      <Button type="text" onClick={() => handleClickEdit(entity)}>
                         编辑
                       </Button>
                       <Button type="text" onClick={() => handleDelete(entity)}>

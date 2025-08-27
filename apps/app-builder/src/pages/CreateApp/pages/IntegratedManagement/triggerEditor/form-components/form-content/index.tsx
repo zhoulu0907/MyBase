@@ -13,6 +13,7 @@ export function FormContent(props: { children?: React.ReactNode }) {
   const { node, expanded } = useNodeRenderContext();
   const isSidebar = useIsSidebar();
   const registry = node.getNodeRegistry<FlowNodeRegistry>();
+
   return (
     <FormWrapper>
       <>

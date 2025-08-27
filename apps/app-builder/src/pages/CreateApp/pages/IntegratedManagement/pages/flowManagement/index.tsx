@@ -2,6 +2,7 @@ import { Button, Form, Input, Menu, Modal, Radio } from '@arco-design/web-react'
 import { IconApps, IconList, IconPlus, IconRobot } from '@arco-design/web-react/icon';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import FlowCard from './components/card';
 import styles from './index.module.less';
 
 const RadioGroup = Radio.Group;
@@ -67,7 +68,9 @@ const FlowManagementPage: React.FC = () => {
           <div className={styles.searchContainer}>
             <Input.Search allowClear placeholder="请输入流程名称" style={{ width: 240 }} />
           </div>
-          <div className={styles.tableContainer}>TODO</div>
+          <div className={styles.tableContainer}>
+            <FlowCard />
+          </div>
         </div>
       </div>
 

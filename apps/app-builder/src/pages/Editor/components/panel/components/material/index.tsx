@@ -1,8 +1,7 @@
 import MaterialCard from '@/components/MaterialCard';
-import allTemplate from '@/components/Materials/template';
 import { useI18n } from '@/hooks/useI18n';
-import { COMPONENT_GROUP_NAME, EDITOR_TYPES, type EditorType } from '@/pages/Editor/utils/const';
 import { Collapse, Tabs } from '@arco-design/web-react';
+import { allTemplate, COMPONENT_GROUP_NAME, EDITOR_TYPES, type EditorType } from '@onebase/ui-kit';
 import React, { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import { v4 as uuidv4 } from 'uuid';

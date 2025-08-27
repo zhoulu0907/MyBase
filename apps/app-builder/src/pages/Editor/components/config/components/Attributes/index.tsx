@@ -1,11 +1,10 @@
-import type { TXInputTextEditData } from '@/components/Materials/Basic/FormComponents/InputText/schema';
-import { CONFIG_TYPES } from '@/components/Materials/constants';
 import { useI18n } from '@/hooks/useI18n';
-import { usePageEditorSignal } from '@/hooks/useSignal';
-import { ColorPicker, Form, Input, InputNumber, Radio, Switch } from '@arco-design/web-react';
+import { ColorPicker, DatePicker, Form, Input, InputNumber, Radio, Switch } from '@arco-design/web-react';
+import { CONFIG_TYPES, usePageEditorSignal } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import { useEffect, useState } from 'react';
 import DynamicFieldConfig from './components/DynamicFieldConfig';
+import DynamicRadioConfig from './components/DynamicRadioConfig';
 import DynamicRelatedFormConfig from './components/DynamicRelatedFormConfig';
 import DynamicTableConfig from './components/DynamicTableConfig';
 import styles from './index.module.less';
@@ -26,7 +25,7 @@ const Attributes = ({ cpID }: ConfigsProps) => {
   useSignals();
   const { curComponentSchema, setCurComponentSchema, setPageComponentSchemas } = usePageEditorSignal();
 
-  const [editData, setEditData] = useState<TXInputTextEditData>([]);
+  const [editData, setEditData] = useState<any>([]);
   const [configs, setConfigs] = useState<any>({});
 
   useEffect(() => {
@@ -52,8 +51,8 @@ const Attributes = ({ cpID }: ConfigsProps) => {
       layout: curComponentSchema.layout
     };
 
-    // console.log(curComponentSchema.config)
-    // console.log(newCurComponentSchema.config)
+    // console.log(curComponentSchema.config);
+    // console.log(newCurComponentSchema.config);
 
     setCurComponentSchema(newCurComponentSchema);
     setPageComponentSchemas(cpID, newCurComponentSchema);
@@ -129,7 +128,8 @@ const Attributes = ({ cpID }: ConfigsProps) => {
               item.type !== CONFIG_TYPES.SWITCH_INPUT &&
               item.type !== CONFIG_TYPES.TABLE_DATA &&
               item.type !== CONFIG_TYPES.FIELD_DATA &&
-              item.type !== CONFIG_TYPES.RELATED_FORM_DATA
+              item.type !== CONFIG_TYPES.RELATED_FORM_DATA &&
+              item.type !== CONFIG_TYPES.RADIO_DATA
             ) {
               return (
                 <FormItem label={item.name} key={index} className={styles.formItem}>
@@ -148,16 +148,7 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                       }}
                     />
                   )}
-                  {item.type === CONFIG_TYPES.NUMBER_INPUT && (
-                    <InputNumber
-                      placeholder={`请输入${item.name}`}
-                      value={configs[item.key]}
-                      onChange={(value) => {
-                        handlePropsChange(item.key, value);
-                      }}
-                    />
-                  )}
-                  {item.type === CONFIG_TYPES.LABEL_COL_SPAN && (
+                  {(item.type === CONFIG_TYPES.NUMBER_INPUT || item.type === CONFIG_TYPES.LABEL_COL_SPAN) && (
                     <InputNumber
                       placeholder={`请输入${item.name}`}
                       value={configs[item.key]}
@@ -278,6 +269,18 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                       }}
                     />
                   )}
+                  {item.type === CONFIG_TYPES.DATE_INPUT && (
+                    <DatePicker
+                      showTime={{
+                        defaultValue: '00:00:00'
+                      }}
+                      format="YYYY-MM-DD HH:mm:ss"
+                      onChange={(value) => {
+                        handlePropsChange(item.key, value);
+                      }}
+                      style={{ width: '100%' }}
+                    />
+                  )}
                 </FormItem>
               );
             }
@@ -305,6 +308,19 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                   key={index}
                   id={cpID}
                   handleMultiPropsChange={handleMultiPropsChange}
+                  handlePropsChange={handlePropsChange}
+                  item={item}
+                  configs={configs}
+                />
+              );
+            }
+
+            if (item.type === CONFIG_TYPES.RADIO_DATA) {
+              return (
+                <DynamicRadioConfig
+                  key={index}
+                  id={cpID}
+                  // handleMultiPropsChange={handleMultiPropsChange}
                   handlePropsChange={handlePropsChange}
                   item={item}
                   configs={configs}

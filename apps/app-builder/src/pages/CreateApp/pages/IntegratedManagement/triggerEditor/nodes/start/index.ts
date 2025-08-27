@@ -4,6 +4,8 @@ import { formMeta } from './form-meta';
 
 export const StartNodeRegistry: FlowNodeRegistry = {
   type: 'start',
+  title: '触发节点',
+  category: 'trigger',
   meta: {
     isStart: true, // Mark as start
     deleteDisable: true, // Start node cannot delete
@@ -15,7 +17,7 @@ export const StartNodeRegistry: FlowNodeRegistry = {
   info: {
     icon: iconStart,
     description:
-    '这是开始节点，用于设置启动工作流所需的信息。',
+    '这是触发节点，用于设置启动工作流所需的信息。',
   },
   /**
    * Render node via formMeta

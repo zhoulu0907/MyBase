@@ -1,5 +1,5 @@
 import React from 'react';
-import { ICON_Map } from '../Materials/icons';
+import { ICON_Map } from './icons';
 import styles from './index.module.less';
 
 interface MaterialCardProps {

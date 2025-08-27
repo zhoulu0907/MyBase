@@ -1,8 +1,8 @@
 import { type FlowNodeEntity, useClientContext } from '@flowgram.ai/fixed-layout-editor';
 
 import { IconPlus } from '@arco-design/web-react/icon';
-import { CaseNodeRegistry } from '../../nodes/case';
-import { CatchBlockNodeRegistry } from '../../nodes/catch-block';
+import { CaseNodeRegistry } from '../../nodes/control/case';
+import { CatchBlockNodeRegistry } from '../../nodes/control/catch-block';
 import { Container } from './styles';
 
 interface PropsType {
