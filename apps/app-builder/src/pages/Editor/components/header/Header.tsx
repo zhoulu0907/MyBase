@@ -7,7 +7,6 @@ import defaultPageSettingSVG from '@/assets/images/page_setting_default_icon.svg
 import previewSVG from '@/assets/images/preview_icon.svg';
 import { useI18n } from '@/hooks/useI18n';
 import { useBasicEditorStore } from '@/store';
-import { useFormEditorSignal, useListEditorSignal } from '@/store/singals/page_editor';
 import { useAppStore } from '@/store/store_app';
 import { useAppEntityStore } from '@/store/store_entity';
 import { getHashQueryParam } from '@/utils/router';
@@ -22,7 +21,7 @@ import {
   getPageSetMetaData,
   type GetApplicationReq
 } from '@onebase/app';
-import { EDITOR_TYPES, usePageEditorSignal } from '@onebase/ui-kit';
+import { EDITOR_TYPES, useFormEditorSignal, useListEditorSignal, usePageEditorSignal } from '@onebase/ui-kit';
 import { cloneDeep } from 'lodash-es';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';

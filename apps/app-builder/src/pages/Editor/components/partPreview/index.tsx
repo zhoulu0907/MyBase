@@ -1,6 +1,12 @@
-import { useFormEditorSignal, useListEditorSignal } from '@/store/singals/page_editor';
 import { Button, Drawer, Form } from '@arco-design/web-react';
-import { EDITOR_TYPES, getComponentWidth, PreviewRender, type GridItem } from '@onebase/ui-kit';
+import {
+  EDITOR_TYPES,
+  getComponentWidth,
+  PreviewRender,
+  useFormEditorSignal,
+  useListEditorSignal,
+  type GridItem
+} from '@onebase/ui-kit';
 import React from 'react';
 import styles from './index.module.less';
 

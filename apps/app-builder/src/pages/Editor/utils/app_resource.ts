@@ -1,7 +1,6 @@
-import { useFormEditorSignal, useListEditorSignal } from '@/store/singals/page_editor';
 import { Message } from '@arco-design/web-react';
 import { loadPageSet, savePageSet, type ComponentConfig, type LoadPageSetReq, type PageSet, type SavePageSetReq } from '@onebase/app';
-import { COMPONENT_TYPE_DISPLAY_NAME_MAP, LAYOUT_COMPONENT_TYPES, type EditConfig } from '@onebase/ui-kit';
+import { COMPONENT_TYPE_DISPLAY_NAME_MAP, LAYOUT_COMPONENT_TYPES, useFormEditorSignal, useListEditorSignal, type EditConfig } from '@onebase/ui-kit';
 
 
 export interface SavePageSetParams {
