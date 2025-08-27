@@ -66,22 +66,6 @@ export interface AuthOperationVO {
   operationCode: string;
 }
 
-export interface ViewPermissionValue {
-  id: number;
-  /**
-   * 视图Id
-   */
-  viewId: number;
-  /**
-   * 视图名称
-   */
-  viewDisplayName: string;
-  /**
-   * 是否允许权限
-   */
-  isAllowed: number;
-}
-
 /**
  * 更新数据组权限
  */

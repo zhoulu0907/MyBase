@@ -25,7 +25,7 @@ import {
 import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
 import { downloadFile } from '@/utils/download';
-import { TokenManager } from '@onebase/common';
+import { getBackendURL, TokenManager } from '@onebase/common';
 // import { systemService } from './clients';
 
 const { Title, Text } = Typography;
@@ -205,10 +205,9 @@ const PlatformInfo: React.FC = () => {
     try {
       // 获取存储在localStorage或cookie中的token
       const authorizationHeader = TokenManager.getAuthorizationHeader();
-      console.log('authorizationHeader:', authorizationHeader);
-      if (typeof window !== 'undefined' && window.global_config?.BASE_URL) {
+      if (typeof window !== 'undefined' && getBackendURL()) {
         try {
-          const url = new URL(window.global_config.BASE_URL);
+          const url = new URL(getBackendURL());
           // 创建带有token的请求
           const response = await fetch(`${url.href}/system/license/export?id=1`, {
             method: 'GET',

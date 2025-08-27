@@ -9,7 +9,7 @@ import {
   type FuncPermissionResponse,
   type UpdatePagePermissionReq,
   type UpdateOperationPermissionReq,
-  type ViewPermissionValue
+  type AuthViewVO
 } from '@onebase/app';
 import styles from './index.module.less';
 
@@ -47,7 +47,7 @@ const FuncPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
         label: item.displayName,
         value: item.operationCode
       }));
-      const viewOptions = funcPermission.authEntity.authViews.map((item: ViewPermissionValue) => ({
+      const viewOptions = funcPermission.authEntity.authViews?.map((item: AuthViewVO) => ({
         label: item.viewDisplayName,
         value: item.viewId,
         isAllowed: item.isAllowed
@@ -60,8 +60,8 @@ const FuncPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
         .filter((item: AuthOperationVO) => item.isAllowed === 1)
         .map((item: AuthOperationVO) => item.operationCode);
       const viewDefaultChecked = funcPermission.authEntity.authViews
-        .filter((item: ViewPermissionValue) => item.isAllowed === 1)
-        .map((item: ViewPermissionValue) => item.viewId);
+        ?.filter((item: AuthViewVO) => item.isAllowed === 1)
+        .map((item: AuthViewVO) => item.viewId);
       console.log('viewDefaultChecked', viewDefaultChecked);
       form.setFieldsValue({
         isPageAllowed: funcPermission.isPageAllowed,

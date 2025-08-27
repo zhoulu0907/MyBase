@@ -25,13 +25,13 @@ import {
   getCreateTenantCountApi,
   getPlatformTenantAdminListApi,
   PlatformTenantStatus,
-  ADMIN_ROOT_ID,
   getOtherTenantCountApi,
   getTenantUserCountApi,
   type PlatformTenantInfo,
   type CreateTenantParams,
   type UpdateTenantParams
 } from "@onebase/platform-center";
+import { getBackendURL } from '@onebase/common';
 import { formatTimestamp, generateTimestampString } from '@/utils/date';
 
 const { Text } = Typography;
@@ -520,9 +520,9 @@ const TenantManagement: React.FC = () => {
   // 获取当前环境的域名前缀
   const getDomainPrefix = () => {
     // 检查全局配置
-    if (typeof window !== 'undefined' && window.global_config?.BASE_URL) {
+    if (typeof window !== 'undefined' && getBackendURL()) {
       try {
-        const url = new URL(window.global_config.BASE_URL);
+        const url = new URL(getBackendURL());
         return `${url.protocol}//${url.host}`;
       } catch (e) {
         console.error('解析BASE_URL失败:', e);
