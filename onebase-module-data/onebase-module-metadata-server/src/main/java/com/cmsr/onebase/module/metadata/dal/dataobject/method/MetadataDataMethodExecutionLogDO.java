@@ -22,7 +22,7 @@ import lombok.experimental.SuperBuilder;
 @Table(name = "metadata_data_method_execution_log")
 public class MetadataDataMethodExecutionLogDO extends BaseDO {
 
-    public static final String METHOD_CODE = "method_code";
+    public static final String METHOD_ID = "method_id";
     public static final String REQUEST_PARAMS = "request_params";
     public static final String PRIMARY_KEYS = "primary_keys";
     public static final String DATA_SOURCES = "data_sources";
@@ -30,7 +30,10 @@ public class MetadataDataMethodExecutionLogDO extends BaseDO {
     public static final String STATUS = "status";
     public static final String ERROR_MSG = "error_msg";
 
-    private String methodCode;
+    /**
+     * 关联系统数据方法ID（method_id）
+     */
+    private Long methodId;
 
     @Column(name = "request_params")
     private String requestParams; // jsonb

@@ -8,7 +8,12 @@ import com.cmsr.onebase.module.metadata.dal.dataobject.method.MetadataMethodExcu
 public interface MetadataMethodExcutePlanService {
 
     /**
-     * 通过方法编码获取启用的执行计划
+     * 通过方法编码获取启用的执行计划（向后兼容）
      */
     MetadataMethodExcutePlanDO getEnabledByMethodCode(String methodCode);
+
+    /**
+     * 通过方法ID获取启用的执行计划
+     */
+    MetadataMethodExcutePlanDO getEnabledByMethodId(Long methodId);
 }

@@ -18,12 +18,12 @@ public class MetadataMethodExcutePlanRepository extends DataRepository<MetadataM
     }
 
     /**
-     * 获取启用的执行计划
+     * 获取启用的执行计划（按 method_id）
      */
-    public MetadataMethodExcutePlanDO getEnabledByMethodCode(String methodCode) {
+    public MetadataMethodExcutePlanDO getEnabledByMethodId(Long methodId) {
         ConfigStore store = new DefaultConfigStore();
-        store.and(Compare.EQUAL, MetadataMethodExcutePlanDO.METHOD_CODE, methodCode);
-        store.and(Compare.EQUAL, MetadataMethodExcutePlanDO.ENABLED, true);
+        store.and(Compare.EQUAL, MetadataMethodExcutePlanDO.METHOD_ID, methodId);
+        store.and(Compare.EQUAL, MetadataMethodExcutePlanDO.ENABLED, 1);
         return findOne(store);
     }
 }

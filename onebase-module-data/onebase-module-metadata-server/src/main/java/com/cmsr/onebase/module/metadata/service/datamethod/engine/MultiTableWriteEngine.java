@@ -12,6 +12,7 @@ import com.cmsr.onebase.module.metadata.dal.database.TemporaryDatasourceService;
 import com.cmsr.onebase.module.metadata.service.datamethod.CompensationLogService;
 import com.cmsr.onebase.module.metadata.service.datamethod.OutboxService;
 import com.cmsr.onebase.module.metadata.service.datamethod.MetadataDataMethodExecutionLogService;
+import com.cmsr.onebase.module.metadata.service.datamethod.MetadataDataSystemMethodService;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Resource;
@@ -52,6 +53,8 @@ public class MultiTableWriteEngine {
     private OutboxService outboxService;
     @Resource
     private CompensationLogService compensationLogService;
+    @Resource
+    private MetadataDataSystemMethodService metadataDataSystemMethodService;
 
     private final ObjectMapper mapper = new ObjectMapper();
 
@@ -176,7 +179,15 @@ public class MultiTableWriteEngine {
             try {
                 MetadataOutboxDO outbox = new MetadataOutboxDO();
                 outbox.setAggregateType("DATA_METHOD");
-                outbox.setAggregateId(methodCode);
+                try {
+                    com.cmsr.onebase.module.metadata.dal.dataobject.method.MetadataDataSystemMethodDO method =
+                            metadataDataSystemMethodService.getDataMethodByCode(methodCode);
+                    if (method != null) {
+                        outbox.setAggregateId(String.valueOf(method.getId()));
+                    } else {
+                        outbox.setAggregateId(methodCode);
+                    }
+                } catch (Exception ignore) { outbox.setAggregateId(methodCode); }
                 outbox.setAction("CHILD_CREATE");
                 outbox.setPayload(toJsonSafe(Map.of(
                         "child", c.getAlias(),
@@ -233,7 +244,15 @@ public class MultiTableWriteEngine {
         try {
             MetadataOutboxDO outbox = new MetadataOutboxDO();
             outbox.setAggregateType("DATA_METHOD");
-            outbox.setAggregateId(methodCode);
+            try {
+                com.cmsr.onebase.module.metadata.dal.dataobject.method.MetadataDataSystemMethodDO method =
+                        metadataDataSystemMethodService.getDataMethodByCode(methodCode);
+                if (method != null) {
+                    outbox.setAggregateId(String.valueOf(method.getId()));
+                } else {
+                    outbox.setAggregateId(methodCode);
+                }
+            } catch (Exception ignore) { outbox.setAggregateId(methodCode); }
             outbox.setAction("CHILD_DELETE");
             outbox.setPayload(toJsonSafe(Map.of(
                     "child", c.getAlias(),
@@ -277,7 +296,13 @@ public class MultiTableWriteEngine {
                            long costMs, Long rows, boolean success, String error, Set<String> dataSources) {
         try {
             MetadataDataMethodExecutionLogDO logDO = new MetadataDataMethodExecutionLogDO();
-            logDO.setMethodCode(methodCode);
+            try {
+                com.cmsr.onebase.module.metadata.dal.dataobject.method.MetadataDataSystemMethodDO method =
+                        metadataDataSystemMethodService.getDataMethodByCode(methodCode);
+                if (method != null) {
+                    logDO.setMethodId(method.getId());
+                }
+            } catch (Exception ignore) {}
             logDO.setRequestParams("{\"op\":\"" + op + "\",\"plan\":" + quote(planJson) + ",\"rows\":" + rows + "}");
             logDO.setDurationMs((int) Math.min(costMs, Integer.MAX_VALUE));
             logDO.setStatus(success ? "SUCCESS" : "FAILED");
