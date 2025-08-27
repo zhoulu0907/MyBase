@@ -1,3 +1,8 @@
+export const ENTITY_TYPE = {
+    MAIN: '主表',
+    SUB: '子表'
+}
+
 export interface MetadataEntityPair {
   entityId: string;
 
