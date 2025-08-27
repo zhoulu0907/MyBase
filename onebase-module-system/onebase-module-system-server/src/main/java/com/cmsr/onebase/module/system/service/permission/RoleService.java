@@ -129,4 +129,11 @@ public interface RoleService {
      */
     void validateRoleList(Collection<Long> ids);
 
+    /**
+     * 判断是否是租户管理员
+     *
+     * @param ids 角色编号数组
+     * @return 是否是租户管理员
+     */
+    boolean isTenantAdmin(Set<Long> ids);
 }
