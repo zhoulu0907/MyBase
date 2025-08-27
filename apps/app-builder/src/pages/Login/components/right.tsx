@@ -1,6 +1,6 @@
 import LogoSVG from '@/assets/images/ob_logo.svg';
 import { Button, Checkbox, Form, Input, Message, Space, Tabs, Typography } from '@arco-design/web-react';
-import { SliderCaptcha, TokenManager, type SliderCaptchaRef } from '@onebase/common';
+import { getHashQueryParam, SliderCaptcha, TokenManager, type SliderCaptchaRef } from '@onebase/common';
 import { checkCaptchaApi, getCaptchaApi, login, type LoginRequest, type LoginResponse } from '@onebase/platform-center';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -37,8 +37,13 @@ const Right: React.FC = () => {
 
     // 如果已经登录了就自动跳转到首页
     if (TokenManager.isTokenValid()) {
-      navigate('/onebase/my-app');
-      return;
+      const redirectURL = getHashQueryParam('redirectURL');
+      if (redirectURL) {
+        window.location.href = redirectURL;
+      } else {
+        // 跳转到首页
+        navigate('/onebase/my-app');
+      }
     }
   }, []);
 
@@ -134,8 +139,14 @@ const Right: React.FC = () => {
         saveRememberMe(values.username!, rememberMe);
 
         Message.success(t('auth.loginSuccess'));
-        // 跳转到首页
-        navigate('/onebase/my-app');
+
+        const redirectURL = getHashQueryParam('redirectURL');
+        if (redirectURL) {
+          window.location.href = redirectURL;
+        } else {
+          // 跳转到首页
+          navigate('/onebase/my-app');
+        }
 
         return;
       } else {
@@ -179,7 +190,6 @@ const Right: React.FC = () => {
     <div className={styles.loginPageRight}>
       <div className={styles.loginPageHeader}>
         <img src={LogoSVG} alt="logo" />
-        {/* <div>ONE BASE</div> */}
       </div>
       <div className={styles.loginFormContainer}>
         <Tabs activeTab={loginType} onChange={(key) => setLoginType(key as 'account' | 'mobile')} type="text">
