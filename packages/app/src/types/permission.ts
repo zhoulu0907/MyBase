@@ -66,7 +66,6 @@ export interface AuthOperationVO {
   operationCode: string;
 }
 
-
 /**
  * 更新数据组权限
  */
