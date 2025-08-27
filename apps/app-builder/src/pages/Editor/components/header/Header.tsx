@@ -9,7 +9,6 @@ import { useI18n } from '@/hooks/useI18n';
 import { useBasicEditorStore } from '@/store';
 import { useAppStore } from '@/store/store_app';
 import { useAppEntityStore } from '@/store/store_entity';
-import { getHashQueryParam } from '@/utils/router';
 import { Button, Message, Tabs } from '@arco-design/web-react';
 import { IconArrowLeft } from '@arco-design/web-react/icon';
 import {
@@ -21,6 +20,7 @@ import {
   getPageSetMetaData,
   type GetApplicationReq
 } from '@onebase/app';
+import { getHashQueryParam } from '@onebase/common';
 import {
   EDITOR_TYPES,
   startLoadPageSet,

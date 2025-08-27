@@ -78,7 +78,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     TokenManager.clearToken();
     UserPermissionManager.clearUserPermissionInfo();
     // 跳转到登录页
-    navigate('/login');
+    navigate('/login', { replace: true });
   };
 
   // 用户菜单

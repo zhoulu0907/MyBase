@@ -33,7 +33,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     // 清除 token
     TokenManager.clearToken();
     // 跳转到登录页
-    navigate('/login');
+    navigate('/login', { replace: true });
   };
 
   // 用户菜单

@@ -1,6 +1,7 @@
 import { Message } from '@arco-design/web-react';
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { BaseResponse, RequestConfig, RequestInterceptor, ResponseInterceptor } from '../types';
+import { getHashQueryParam } from './router';
 import TokenManager from './token';
 
 /**
@@ -104,8 +105,11 @@ export class HttpClient {
               TokenManager.clearToken();
 
               console.log('window.location.href', window.location.href);
-              const redirectURL = window.location.href;
+              const redirectURL = getHashQueryParam('redirectURL') || window.location.href;
             //   window.location.href = '/#/login';
+            console.log('redirectURL', redirectURL);
+            // 使用工具函数去除递归，只保留最终的跳转链接
+
             window.location.href = `/#/login?redirectURL=${redirectURL}`;
             }
             return Promise.reject(new Error(data.msg || '请求失败'));

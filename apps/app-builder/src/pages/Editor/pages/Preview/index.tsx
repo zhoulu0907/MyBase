@@ -1,4 +1,3 @@
-import { getHashQueryParam } from '@/utils/router';
 import { Button, Form, Message } from '@arco-design/web-react';
 import {
   dataMethodData,
@@ -10,6 +9,7 @@ import {
   type DataMethodParam,
   type InsertMethodParams
 } from '@onebase/app';
+import { getHashQueryParam } from '@onebase/common';
 import {
   EDITOR_TYPES,
   getComponentWidth,

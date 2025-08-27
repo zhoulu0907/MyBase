@@ -1,7 +1,6 @@
 import LogoSVG from '@/assets/images/ob_logo.svg';
-import { getHashQueryParam } from '@/utils/router';
 import { Button, Checkbox, Form, Input, Message, Space, Tabs, Typography } from '@arco-design/web-react';
-import { SliderCaptcha, TokenManager, type SliderCaptchaRef } from '@onebase/common';
+import { getHashQueryParam, SliderCaptcha, TokenManager, type SliderCaptchaRef } from '@onebase/common';
 import { checkCaptchaApi, getCaptchaApi, login, type LoginRequest, type LoginResponse } from '@onebase/platform-center';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
