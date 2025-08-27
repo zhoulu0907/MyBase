@@ -68,4 +68,13 @@ public interface TenantPackageService {
      */
     List<TenantPackageDO> getTenantPackageListByStatus(Integer status);
 
+
+    /**
+     * 获得指定编码的租户套餐
+     *
+     * @param code 编码
+     * @return 租户套餐
+     */
+    TenantPackageDO getTenantPackageByCode(String code);
+
 }

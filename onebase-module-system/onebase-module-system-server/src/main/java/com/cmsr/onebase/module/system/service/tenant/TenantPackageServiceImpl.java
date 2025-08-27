@@ -99,6 +99,11 @@ public class TenantPackageServiceImpl implements TenantPackageService {
         return tenantPackageDataRepository.findListByStatus(status);
     }
 
+    @Override
+    public TenantPackageDO getTenantPackageByCode(String code) {
+        return tenantPackageDataRepository.findOneByCode(code);
+    }
+
     @VisibleForTesting
     void validateTenantPackageNameUnique(Long id, String name) {
         TenantPackageDO tenantPackage = tenantPackageDataRepository.findOneByName(name);

@@ -2,7 +2,6 @@ package com.cmsr.onebase.module.system.service.tenant;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
-import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
@@ -21,10 +20,7 @@ import com.cmsr.onebase.module.system.controller.admin.tenant.vo.tenant.TenantRe
 import com.cmsr.onebase.module.system.controller.admin.tenant.vo.tenant.TenantUpdateReqVO;
 import com.cmsr.onebase.module.system.controller.admin.user.vo.user.UserInsertReqVO;
 import com.cmsr.onebase.module.system.convert.tenant.TenantConvert;
-import com.cmsr.onebase.module.system.dal.database.AdminUserDataRepository;
-import com.cmsr.onebase.module.system.dal.database.RoleDataRepository;
 import com.cmsr.onebase.module.system.dal.database.TenantDataRepository;
-import com.cmsr.onebase.module.system.dal.database.UserRoleDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.license.LicenseDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.MenuDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
@@ -101,15 +97,6 @@ public class TenantServiceImpl implements TenantService {
     @Resource
     private TenantDataRepository tenantDataRepository;
 
-    @Resource
-    private AdminUserDataRepository adminUserDataRepository;
-
-    @Resource
-    private UserRoleDataRepository userRoleDataRepository;
-
-    @Resource
-    private RoleDataRepository roleDataRepository;
-
     @Override
     public List<Long> getTenantIdList() {
         List<TenantDO> tenants = tenantDataRepository.findAll();
@@ -149,7 +136,7 @@ public class TenantServiceImpl implements TenantService {
 
     @Override
     public Long getOtherTenantUserLimitCount(Long tenantId) {
-        
+
         List<TenantDO> tenantDOList = tenantDataRepository.findAllByStatusExcludePlatform(
                 TenantStatusEnum.NORMAL.getStatus(), tenantId);
         long sum = tenantDOList.stream()
@@ -176,10 +163,10 @@ public class TenantServiceImpl implements TenantService {
         if (StringUtils.isNotEmpty(createReqVO.getWebsite())) {
             validTenantWebsiteDuplicate(createReqVO.getWebsite(), null);
         }
-        if (createReqVO.getPackageId() == null) {
-            createReqVO.setPackageId(Long.valueOf(PackageTypeEnum.SIMPLE.getPackageId()));
-        }
-        TenantPackageDO tenantPackage = tenantPackageService.validTenantPackage(createReqVO.getPackageId());
+        // 根据租户套餐编号获取租户套餐
+        TenantPackageDO tenantPackage = tenantPackageService.getTenantPackageByCode(PackageTypeEnum.ALL.getCode());
+        createReqVO.setPackageId(tenantPackage.getId());
+
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         LocalDateTime expireTime = LocalDateTime.parse("2099-02-19 00:00:00", formatter);
         if (createReqVO.getExpireTime() == null) {
@@ -217,7 +204,7 @@ public class TenantServiceImpl implements TenantService {
         TenantDO finalTenant = tenant;
         TenantUtils.execute(tenant.getId(), () -> {
             // 创建角色
-            Long roleId = createRole(tenantPackage);
+            Long roleId = createTenantAdminRole();
             // 创建用户，并分配角色
             Long userId = createUser(roleId, createReqVO);
             // 修改租户的管理员
@@ -250,14 +237,12 @@ public class TenantServiceImpl implements TenantService {
         return userId;
     }
 
-    private Long createRole(TenantPackageDO tenantPackage) {
+    private Long createTenantAdminRole() {
         // 创建角色
         RoleInsertReqVO reqVO = new RoleInsertReqVO();
         reqVO.setName(RoleCodeEnum.TENANT_ADMIN.getName()).setCode(RoleCodeEnum.TENANT_ADMIN.getCode())
                 .setSort(0).setRemark("系统自动生成");
         Long roleId = roleService.createRole(reqVO, RoleTypeEnum.SYSTEM.getType());
-        // 分配权限
-        permissionService.assignRoleMenu(roleId, tenantPackage.getMenuIds());
         return roleId;
     }
 
@@ -272,12 +257,6 @@ public class TenantServiceImpl implements TenantService {
         if (StringUtils.isNotBlank(updateReqVO.getWebsite())) {
             validTenantWebsiteDuplicate(updateReqVO.getWebsite(), updateReqVO.getId());
         }
-        // 校验套餐被禁用
-        Long packageId = updateReqVO.getPackageId();
-        if (packageId == null) {
-            packageId = tenant.getPackageId();
-        }
-        TenantPackageDO tenantPackage = tenantPackageService.validTenantPackage(packageId);
 
         LicenseDO license = licenseService.getLicenseByStatus(LicenseStatusEnum.ENABLE.getStatus());
         // 检查分配人员数量是否超过license限制
@@ -321,16 +300,16 @@ public class TenantServiceImpl implements TenantService {
         if (updateObj.getAdminUserId() != null) {
             row.put(TenantDO.ADMIN_USER_ID, updateObj.getAdminUserId());
         }
-        if(StringUtils.isNotEmpty(updateObj.getName())){
+        if (StringUtils.isNotEmpty(updateObj.getName())) {
             row.put(TenantDO.NAME, updateObj.getName());
         }
-        if(StringUtils.isNotEmpty(updateObj.getWebsite())){
+        if (StringUtils.isNotEmpty(updateObj.getWebsite())) {
             row.put(TenantDO.WEBSITE, updateObj.getWebsite());
         }
-        if(updateObj.getAccountCount() != null){
+        if (updateObj.getAccountCount() != null) {
             row.put(TenantDO.ACCOUNT_COUNT, updateObj.getAccountCount());
         }
-        if(updateObj.getStatus() != null){
+        if (updateObj.getStatus() != null) {
             row.put(TenantDO.STATUS, updateObj.getStatus());
         }
         tenantDataRepository.updateByConfig(row, new DefaultConfigStore().eq(TenantDO.ID, updateObj.getId()));
@@ -338,22 +317,23 @@ public class TenantServiceImpl implements TenantService {
         TenantUtils.execute(updateObj.getId(), () -> {
             AdminUserDO oldAdminUser = userService.getUser(tenant.getAdminUserId());
             if (StringUtils.isNotBlank(updateReqVO.getAdminUserName()) &&
-                !updateReqVO.getAdminUserName().equals(oldAdminUser.getUsername())) {
+                    !updateReqVO.getAdminUserName().equals(oldAdminUser.getUsername())) {
 
                 RoleDO roleDO = roleService.getRoleIdsByCode(RoleCodeEnum.TENANT_ADMIN.getCode());
                 Long roleId;
                 if (roleDO == null) {
                     // 创建角色
-                    roleId = createRole(tenantPackage);
+                    roleId = createTenantAdminRole();
                 } else {
                     roleId = roleDO.getId();
                 }
 
-                // 移除旧用户角色
+                // 移除旧用户租户管理员角色
                 UserRoleDO userRoleDO = permissionService.getUserRoleByUserAndRoleId(tenant.getAdminUserId(), roleId);
                 if (userRoleDO != null) {
                     permissionService.deleteRoleUsers(roleId, singleton(userRoleDO.getUserId()));
                 }
+                // 将旧管理员设置为普通用户,降级
                 userService.updateAdminType(tenant.getAdminUserId(), AdminTypeEnum.CUSTOM.getType());
                 AdminUserDO newAdminUser = userService.getUserByUsername(updateReqVO.getAdminUserName());
                 Long userId;
@@ -372,19 +352,12 @@ public class TenantServiceImpl implements TenantService {
 
                 // 修改租户的管理员
                 updateObj.setAdminUserId(userId);
-                if(updateObj.getStatus() != null){
+                if (updateObj.getStatus() != null) {
                     row.put(TenantDO.ADMIN_USER_ID, updateObj.getAdminUserId());
                 }
                 tenantDataRepository.updateByConfig(row, new DefaultConfigStore().eq(TenantDO.ID, updateObj.getId()));
             }
-            });
-
-        // 如果套餐发生变化，则修改其角色的权限
-        if (updateReqVO.getPackageId() != null) {
-            if (ObjectUtil.notEqual(tenant.getPackageId(), updateReqVO.getPackageId())) {
-                updateTenantRoleMenu(tenant.getId(), tenantPackage.getMenuIds());
-            }
-        }
+        });
     }
 
     private void validTenantNameDuplicate(String name, Long id) {

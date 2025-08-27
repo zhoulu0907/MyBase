@@ -34,6 +34,7 @@ public class TenantPackageDO extends BaseDO {
     public static final String STATUS   = "status";
     public static final String REMARK   = "remark";
     public static final String MENU_IDS = "menu_ids";
+    public static final String CODE = "code";
 
     /**
      * 套餐名，唯一
@@ -52,6 +53,13 @@ public class TenantPackageDO extends BaseDO {
      */
     @Column(name = REMARK)
     private String remark;
+
+    /**
+     * 租户套餐编码
+     */
+    @Column(name = CODE)
+    private String code;
+
     /**
      * 关联的菜单编号
      */

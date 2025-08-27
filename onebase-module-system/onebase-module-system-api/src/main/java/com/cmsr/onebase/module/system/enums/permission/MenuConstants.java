@@ -1,0 +1,15 @@
+package com.cmsr.onebase.module.system.enums.permission;
+
+/**
+ * API 相关的枚举
+ *
+ */
+public class MenuConstants {
+
+    public static final String MENU_APP = "app";
+    public static final String MENU_TENANT = "tenant";
+
+    @Deprecated
+    public static final String MENU_SYSTEM = "system";
+
+}
