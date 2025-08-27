@@ -1,11 +1,12 @@
 import type { EntityListItem } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
 import { useAppStore } from '@/store/store_app';
 import type { TableColumnProps } from '@arco-design/web-react';
-import { Button, Space, Table, Tag } from '@arco-design/web-react';
+import { Button, Dropdown, Menu, Space, Table, Tag } from '@arco-design/web-react';
 import { getEntityRelations } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
 import EditRelationDrawer from '../../Drawers/EditRelationDrawer';
 import CreateRelationModal from '../../Modals/CreateRelationModal';
+import CreateMasterDetailModal from '../../Modals/CreateMasterDetailModal';
 import styles from './tabs.module.less';
 
 interface RelationsProps {
@@ -30,14 +31,20 @@ const Relations: React.FC<RelationsProps> = ({ entity, activeTab }) => {
   const { curAppId } = useAppStore();
   const [relations, setRelations] = useState<RelationData[]>([]);
   const [createRelationModalVisible, setCreateRelationModalVisible] = useState(false);
+  const [createMasterDetailModalVisible, setCreateMasterDetailModalVisible] = useState(false);
   const [editRelationDrawerVisible, setEditRelationDrawerVisible] = useState(false);
   const [selectedRelation, setSelectedRelation] = useState<RelationData | null>(null);
   const [updateRelationOptions, setUpdateRelationOptions] = useState(false);
   const [page, setPage] = useState({ pageNo: 1, pageSize: 10 });
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
-  const handleCreate = () => {
-    setCreateRelationModalVisible(true);
+
+  const handleCreate = (type: 'master_child' | 'relation') => {
+    if (type === 'master_child') {
+      setCreateMasterDetailModalVisible(true);
+    } else {
+      setCreateRelationModalVisible(true);
+    }
   };
 
   const handleSuccessCallback = () => {
@@ -129,9 +136,23 @@ const Relations: React.FC<RelationsProps> = ({ entity, activeTab }) => {
   return (
     <div className={styles.relations}>
       <div className={styles.header}>
-        <Button type="primary" size="small" onClick={handleCreate}>
-          添加关联
-        </Button>
+        <Dropdown
+          droplist={
+            <Menu>
+              <Menu.Item key="1" onClick={() => handleCreate('master_child')}>
+                添加主子关系
+              </Menu.Item>
+              <Menu.Item key="2" onClick={() => handleCreate('relation')}>
+                添加关联关系
+              </Menu.Item>
+            </Menu>
+          }
+          trigger="hover"
+        >
+          <Button type="primary" size="small">
+            添加关联
+          </Button>
+        </Dropdown>
       </div>
       <Table
         columns={columns}
@@ -155,6 +176,14 @@ const Relations: React.FC<RelationsProps> = ({ entity, activeTab }) => {
         successCallback={handleSuccessCallback}
         updateRelationOptions={updateRelationOptions}
         setUpdateRelationOptions={setUpdateRelationOptions}
+        entityId={entity.id}
+      />
+
+      <CreateMasterDetailModal
+        visible={createMasterDetailModalVisible}
+        setVisible={setCreateMasterDetailModalVisible}
+        entityId={entity.id}
+        successCallback={handleSuccessCallback}
       />
 
       <EditRelationDrawer
