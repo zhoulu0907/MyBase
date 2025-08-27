@@ -84,8 +84,12 @@ public class MetadataEntityFieldOptionServiceImpl implements MetadataEntityField
     @Transactional(rollbackFor = Exception.class)
     public void updateFieldOption(FieldOptionSaveReqVO req) {
         MetadataEntityFieldOptionDO option = convertToDO(req);
-        if (req.getId() != null) {
-            option.setId(Long.valueOf(req.getId()));
+        if (req.getId() != null && !req.getId().trim().isEmpty()) {
+            try {
+                option.setId(Long.valueOf(req.getId()));
+            } catch (NumberFormatException e) {
+                throw new IllegalArgumentException("选项ID格式不正确: " + req.getId());
+            }
         }
         update(option);
     }
