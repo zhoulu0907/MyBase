@@ -897,19 +897,63 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
         try {
             log.info("检查列是否存在 - 表名: {}, 列名: {}", tableName, columnName);
             
-            // 查询 PostgreSQL 系统表来检查列是否存在
-            String checkSql = "SELECT 1 FROM information_schema.columns " +
-                             "WHERE table_name = ? AND column_name = ? AND table_schema = 'public'";
-            
-            DataSet resultSet = service.querys(checkSql, tableName, columnName);
+        // 说明：
+        // 之前这里使用 Anyline 的占位符 ? 并通过 service.querys(sql, params...) 传参，
+        // 实际运行时 Anyline 并不会按 JDBC 方式绑定参数，导致占位符未替换，且把传入参数当做附加条件拼接成
+        // “AND user_info AND name”，从而让 SQL 失效，最终误判列不存在。
+        // 为避免该问题，这里改为安全拼接常量字符串（转义单引号）来构造查询语句。
+
+        String safeTable = escapeSqlLiteral(tableName);
+        String safeColumn = escapeSqlLiteral(columnName);
+        String checkSql = "SELECT 1 FROM information_schema.columns "
+            + "WHERE table_schema = 'public' "
+            + "AND LOWER(table_name) = LOWER('" + safeTable + "') "
+            + "AND LOWER(column_name) = LOWER('" + safeColumn + "') "
+            + "LIMIT 1";
+
+        DataSet resultSet = service.querys(checkSql);
             boolean exists = resultSet != null && resultSet.size() > 0;
             
             log.info("列 {} 在表 {} 中{}存在", columnName, tableName, exists ? "" : "不");
+            
+            // 如果列存在，记录详细信息
+            if (exists) {
+                try {
+            String detailSql = "SELECT table_name, column_name, data_type FROM information_schema.columns "
+                + "WHERE table_schema = 'public' "
+                + "AND LOWER(table_name) = LOWER('" + safeTable + "') "
+                + "AND LOWER(column_name) = LOWER('" + safeColumn + "') "
+                + "LIMIT 1";
+            DataSet details = service.querys(detailSql);
+                    if (details != null && details.size() > 0) {
+                        DataRow row = details.getRow(0);
+                        log.info("已存在的列详情: 表名={}, 列名={}, 数据类型={}", 
+                                row.get("table_name"), row.get("column_name"), row.get("data_type"));
+                    }
+                } catch (Exception detailException) {
+                    log.debug("获取列详细信息失败: {}", detailException.getMessage());
+                }
+            }
+            
             return exists;
         } catch (Exception e) {
             log.warn("检查列 {} 在表 {} 中是否存在时发生错误: {}", columnName, tableName, e.getMessage());
             return false;
         }
+    }
+
+    /**
+     * 简单转义 SQL 字面量中的单引号，防止拼接语句时语法错误。
+     * 仅用于把受信任的标识符作为字符串常量参与比较，不用于通用拼接或用户输入。
+     *
+     * @param value 待转义的值
+     * @return 转义后的值（将 ' 替换为 ''）
+     */
+    private String escapeSqlLiteral(String value) {
+    if (value == null) {
+        return "";
+    }
+    return value.replace("'", "''");
     }
 
     /**

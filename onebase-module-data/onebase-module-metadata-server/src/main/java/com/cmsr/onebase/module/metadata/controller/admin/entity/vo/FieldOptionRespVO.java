@@ -18,7 +18,7 @@ public class FieldOptionRespVO {
     private String optionValue;
     @Schema(description = "排序")
     private Integer optionOrder;
-    @Schema(description = "是否启用：0-是，1-否")
+    @Schema(description = "是否启用：1-启用，0-禁用")
     private Integer isEnabled;
     @Schema(description = "描述")
     private String description;
