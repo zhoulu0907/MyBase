@@ -45,8 +45,12 @@ export interface FieldEdge {
 
 // 边的数据结构示例
 export interface EdgeData {
-  source: { cell: string; port: string }; // 源节点ID
-  target: { cell: string; port: string }; // 目标节点ID
+  // source: { cell: string; port: string }; // 源节点ID
+  // target: { cell: string; port: string }; // 目标节点ID
+  sourceEntityId: string;
+  sourceFieldId: string;
+  targetEntityId: string;
+  targetFieldId: string;
   label?: string; // 关系标签
   relationshipId?: string;
 }

@@ -1,9 +1,4 @@
-import type {
-  EdgeData,
-  EntityData,
-  EntityERProps,
-  EntityNode
-} from '@/pages/CreateApp/pages/DataFactory/utils/interface';
+import type { EdgeData, EntityERProps, EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
 import { useAppStore } from '@/store/store_app';
 import { useResourceStore } from '@/store/store_resource';
 import { Button, Message } from '@arco-design/web-react';
@@ -34,11 +29,7 @@ export const EntityERContainer: React.FC<{
   const { curAppId } = useAppStore();
   const { curDataSourceId } = useResourceStore();
   // const [mode, setMode] = useState<'view' | 'edit'>('view');
-  const [data, setData] = useState<EntityERProps['data']>(
-    JSON.parse(
-      localStorage.getItem('entityFormValues') || JSON.stringify({ nodes: [], edges: [] })
-    ) as unknown as EntityData
-  );
+  const [data, setData] = useState<EntityERProps['data']>({ nodes: [], edges: [] });
   const [editDrawerVisible, setEditDrawerVisible] = useState(false);
   const [editingNode, setEditingNode] = useState<EntityNode | null>(null);
   const [createEntityModalVisible, setCreateEntityModalVisible] = useState(false);
@@ -71,14 +62,7 @@ export const EntityERContainer: React.FC<{
               positionY: pos?.y || 0
             };
           }) || [],
-        edges: res?.relationships.map((item) => {
-          return {
-            source: { cell: item.sourceEntityId, port: item.sourceFieldId },
-            target: { cell: item.targetEntityId, port: item.targetFieldId },
-            label: item.relationshipName,
-            relationshipId: item.relationshipId
-          };
-        })
+        edges: res?.relationships || []
       });
     }
   };
