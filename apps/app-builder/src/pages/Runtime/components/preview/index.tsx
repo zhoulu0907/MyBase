@@ -1,5 +1,4 @@
 import { startLoadPageSet } from '@/pages/Editor/utils/app_resource';
-import { useFormEditorSignal, useListEditorSignal } from '@/store/singals/page_editor';
 import { getHashQueryParam } from '@/utils/router';
 import { Button, Form, Message } from '@arco-design/web-react';
 import {
@@ -15,7 +14,14 @@ import {
   type InsertMethodParams,
   type UpdateMethodParams
 } from '@onebase/app';
-import { EDITOR_TYPES, getComponentWidth, PreviewRender, type GridItem } from '@onebase/ui-kit';
+import {
+  EDITOR_TYPES,
+  getComponentWidth,
+  PreviewRender,
+  useFormEditorSignal,
+  useListEditorSignal,
+  type GridItem
+} from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
