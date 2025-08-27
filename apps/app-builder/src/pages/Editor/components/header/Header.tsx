@@ -21,11 +21,18 @@ import {
   getPageSetMetaData,
   type GetApplicationReq
 } from '@onebase/app';
-import { EDITOR_TYPES, useFormEditorSignal, useListEditorSignal, usePageEditorSignal } from '@onebase/ui-kit';
+import {
+  EDITOR_TYPES,
+  startLoadPageSet,
+  startSavePageSet,
+  useFormEditorSignal,
+  useListEditorSignal,
+  usePageEditorSignal,
+  type SavePageSetParams
+} from '@onebase/ui-kit';
 import { cloneDeep } from 'lodash-es';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { startLoadPageSet, startSavePageSet, type SavePageSetParams } from '../../utils/app_resource';
 import PartPreview from '../partPreview';
 import styles from './index.module.less';
 

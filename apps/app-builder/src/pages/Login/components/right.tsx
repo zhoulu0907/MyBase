@@ -179,7 +179,6 @@ const Right: React.FC = () => {
     <div className={styles.loginPageRight}>
       <div className={styles.loginPageHeader}>
         <img src={LogoSVG} alt="logo" />
-        {/* <div>ONE BASE</div> */}
       </div>
       <div className={styles.loginFormContainer}>
         <Tabs activeTab={loginType} onChange={(key) => setLoginType(key as 'account' | 'mobile')} type="text">

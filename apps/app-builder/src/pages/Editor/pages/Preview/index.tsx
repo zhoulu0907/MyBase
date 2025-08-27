@@ -14,13 +14,13 @@ import {
   EDITOR_TYPES,
   getComponentWidth,
   PreviewRender,
+  startLoadPageSet,
   useFormEditorSignal,
   useListEditorSignal,
   type GridItem
 } from '@onebase/ui-kit';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { startLoadPageSet } from '../../utils/app_resource';
 import styles from './index.module.less';
 
 interface PreviewProps {}

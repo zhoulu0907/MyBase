@@ -13,6 +13,7 @@ const XPreviewColumnLayout = (props: XColumnLayoutConfig) => {
   const { colCount, id } = props;
 
   useSignals();
+
   const {
     setCurComponentID,
     setCurComponentSchema,

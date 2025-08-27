@@ -1,4 +1,3 @@
-import { startLoadPageSet } from '@/pages/Editor/utils/app_resource';
 import { getHashQueryParam } from '@/utils/router';
 import { Button, Form, Message } from '@arco-design/web-react';
 import {
@@ -18,6 +17,7 @@ import {
   EDITOR_TYPES,
   getComponentWidth,
   PreviewRender,
+  startLoadPageSet,
   useFormEditorSignal,
   useListEditorSignal,
   type GridItem

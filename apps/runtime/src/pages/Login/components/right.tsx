@@ -1,9 +1,10 @@
 import LogoSVG from '@/assets/images/ob_logo.svg';
+import { getHashQueryParam } from '@/utils/router';
 import { Button, Checkbox, Form, Input, Message, Space, Tabs, Typography } from '@arco-design/web-react';
 import { SliderCaptcha, TokenManager, type SliderCaptchaRef } from '@onebase/common';
 import { checkCaptchaApi, getCaptchaApi, login, type LoginRequest, type LoginResponse } from '@onebase/platform-center';
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useI18n } from '../../../hooks/useI18n';
 import { useRememberMe } from '../../../hooks/useRememberMe';
 import styles from '../index.module.less';
@@ -17,9 +18,9 @@ const Right: React.FC = () => {
   const { t } = useI18n();
   const sliderCaptchaRef = useRef<SliderCaptchaRef>(null);
 
-  const hash = window.location.hash;
-  const match = hash.match(/\/tenant\/([^\/]+)/);
-  const tenantId = match ? match[1] : '1';
+  // 从路由中获取 appid 参数
+  const { appId } = useParams<{ appId?: string }>();
+  const { tenantId } = useParams<{ tenantId?: string }>();
 
   // 使用记住我hook
   const { rememberMe, savedAccount, saveRememberMe } = useRememberMe();
@@ -35,9 +36,15 @@ const Right: React.FC = () => {
       form.setFieldValue('account', savedAccount);
     }
 
-    // 如果已经登录了就自动跳转到首页
+    // 如果已经登录了就自动跳转到首
     if (TokenManager.isTokenValid()) {
-      navigate('/onebase/my-app');
+      const redirectURL = getHashQueryParam('redirectURL');
+      if (redirectURL) {
+        window.location.href = redirectURL;
+      } else {
+        // 跳转到首页
+        navigate(`/onebase/runtime/${appId}`);
+      }
       return;
     }
   }, []);
@@ -106,7 +113,7 @@ const Right: React.FC = () => {
       }
 
       const headers = {
-        'Tenant-Id': tenantId
+        'Tenant-Id': tenantId || '1'
       };
 
       const loginData: LoginRequest = {
@@ -134,8 +141,13 @@ const Right: React.FC = () => {
         saveRememberMe(values.username!, rememberMe);
 
         Message.success(t('auth.loginSuccess'));
-        // 跳转到首页
-        navigate('/onebase/my-app');
+        const redirectURL = getHashQueryParam('redirectURL');
+        if (redirectURL) {
+          window.location.href = redirectURL;
+        } else {
+          // 跳转到首页
+          navigate(`/onebase/runtime/${appId}`);
+        }
 
         return;
       } else {
@@ -179,7 +191,6 @@ const Right: React.FC = () => {
     <div className={styles.loginPageRight}>
       <div className={styles.loginPageHeader}>
         <img src={LogoSVG} alt="logo" />
-        {/* <div>ONE BASE</div> */}
       </div>
       <div className={styles.loginFormContainer}>
         <Tabs activeTab={loginType} onChange={(key) => setLoginType(key as 'account' | 'mobile')} type="text">
