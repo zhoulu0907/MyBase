@@ -33,6 +33,7 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
       onNodeAddMasterDetail,
       onFieldClick,
       onEdgeEdit,
+      onStatusChange,
       updateEntityPosition,
       onlyUpdateNode
     },
@@ -233,7 +234,7 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
               const accumulatedHeight = index >= 1 ? index * LINE_HEIGHT : 0;
 
               const leftItem = {
-                id: field.fieldId + '_target', // 使用字段的唯一 ID 作为 port ID
+                id: field.fieldName + '_target', // 使用字段的唯一 ID 作为 port ID
                 group: 'left', // 指定属于 'left' 组
                 args: {
                   x: 0,
@@ -241,7 +242,7 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
                 }
               };
               const rightItem = {
-                id: field.fieldId + '_source', // 使用字段的唯一 ID 作为 port ID
+                id: field.fieldName + '_source', // 使用字段的唯一 ID 作为 port ID
                 group: 'right', // 指定属于 'right' 组
                 args: {
                   x: NODE_WIDTH,
@@ -277,7 +278,8 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
               onNodeAddField,
               onNodeAddRelation,
               onNodeAddMasterDetail,
-              onFieldClick
+              onFieldClick,
+              onStatusChange
             },
             attrs: {
               body: {
