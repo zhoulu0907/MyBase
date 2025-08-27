@@ -205,11 +205,10 @@ const PlatformInfo: React.FC = () => {
     try {
       // 获取存储在localStorage或cookie中的token
       const authorizationHeader = TokenManager.getAuthorizationHeader();
-      if (typeof window !== 'undefined' && getBackendURL()) {
         try {
-          const url = new URL(getBackendURL());
+          const url = getBackendURL();
           // 创建带有token的请求
-          const response = await fetch(`${url.href}/system/license/export?id=1`, {
+          const response = await fetch(`${url}/system/license/export?id=1`, {
             method: 'GET',
             headers: {
               'Authorization': authorizationHeader,
@@ -225,7 +224,6 @@ const PlatformInfo: React.FC = () => {
         } catch (e) {
           console.error('解析BASE_URL失败:', e);
         }
-      }
     } catch (error) {
       console.error('下载失败:', error);
       Message.error('下载失败');
