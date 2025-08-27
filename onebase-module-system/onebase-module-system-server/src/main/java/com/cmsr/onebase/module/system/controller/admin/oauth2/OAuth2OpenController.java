@@ -2,7 +2,6 @@ package com.cmsr.onebase.module.system.controller.admin.oauth2;
 
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.ArrayUtil;
-import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
@@ -21,17 +20,18 @@ import com.cmsr.onebase.module.system.service.oauth2.OAuth2ClientService;
 import com.cmsr.onebase.module.system.service.oauth2.OAuth2GrantService;
 import com.cmsr.onebase.module.system.service.oauth2.OAuth2TokenService;
 import com.cmsr.onebase.module.system.util.oauth2.OAuth2Utils;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
-import io.swagger.v3.oas.annotations.Operation;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
-
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.annotation.security.PermitAll;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -219,7 +219,7 @@ public class OAuth2OpenController {
                                               @RequestParam(value = "state", required = false) String state) {
         @SuppressWarnings("unchecked")
         Map<String, Boolean> scopes = JsonUtils.parseObject(scope, Map.class);
-        scopes = ObjectUtil.defaultIfNull(scopes, Collections.emptyMap());
+        scopes = ObjectUtils.defaultIfNull(scopes, Collections.emptyMap());
         // 0. 校验用户已经登录。通过 Spring Security 实现
 
         // 1.1 校验 responseType 是否满足 code 或者 token 值
