@@ -3,7 +3,12 @@ import { useI18n } from '@/hooks/useI18n';
 import { useAppEntityStore } from '@/store/store_entity';
 import { Collapse } from '@arco-design/web-react';
 import type { AppEntityField } from '@onebase/app';
-import { COMPONENT_GROUP_NAME, COMPONENT_TYPE_DISPLAY_NAME_MAP, FORM_COMPONENT_TYPES } from '@onebase/ui-kit';
+import {
+  COMPONENT_GROUP_NAME,
+  COMPONENT_TYPE_DISPLAY_NAME_MAP,
+  FIELD_TYPE,
+  FORM_COMPONENT_TYPES
+} from '@onebase/ui-kit';
 import React, { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import { COMPONENT_MAP } from './component_map';
@@ -15,16 +20,27 @@ interface MetadataContainerProps {}
 
 const MetadataContainer: React.FC<MetadataContainerProps> = ({}) => {
   const { t } = useI18n();
-  const { mainEntity } = useAppEntityStore();
+  const { mainEntity, subEntities } = useAppEntityStore();
 
-  const [fieldItems, setFieldItems] = useState<
-    { id: string; displayName: string; label: string; type: string; fieldID: string; entityID: string }[]
-  >([]);
+  const [activeEntityID, setActiveEntityID] = useState<string>(mainEntity.entityID);
+
+  // 现在支持多个 entity，每个 entityId 对应一个字段数组
+  const [fieldItems, setFieldItems] = useState<{
+    [entityID: string]: {
+      id: string;
+      displayName: string;
+      label: string;
+      type: string;
+      fieldID: string;
+      entityID: string;
+    }[];
+  }>({});
 
   useEffect(() => {
     if (mainEntity.fields.length > 0) {
       const newFieldItems = mainEntity.fields
-        .filter((field: AppEntityField) => field.isSystemField === 1)
+        //   系统字段不展示
+        .filter((field: AppEntityField) => field.isSystemField === FIELD_TYPE.CUSTOM)
         .map((field: AppEntityField, index: number) => {
           let cpType = COMPONENT_MAP[field.fieldType];
           if (!cpType) {
@@ -42,9 +58,45 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({}) => {
         })
         .filter((item) => item !== null);
 
-      setFieldItems(newFieldItems);
+      setFieldItems((prevFieldItems) => ({
+        ...prevFieldItems,
+        [mainEntity.entityID]: newFieldItems
+      }));
     }
   }, [mainEntity]);
+
+  useEffect(() => {
+    subEntities.entities.forEach((subEntity) => {
+      const newFieldItems = subEntity.fields
+        //   系统字段不展示
+        .filter((field: AppEntityField) => field.isSystemField === FIELD_TYPE.CUSTOM)
+        .map((field: AppEntityField, index: number) => {
+          let cpType = COMPONENT_MAP[field.fieldType];
+          if (!cpType) {
+            cpType = FORM_COMPONENT_TYPES.INPUT_TEXT;
+          }
+          return {
+            // TODO(mickey): 使用uuid作为id
+            id: `${cpType}-${index}-${Date.now()}`,
+            displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[cpType] || '',
+            label: field.fieldName,
+            type: cpType,
+            fieldID: field.fieldID,
+            entityID: subEntity.entityID
+          };
+        })
+        .filter((item) => item !== null);
+
+      setFieldItems((prevFieldItems) => ({
+        ...prevFieldItems,
+        [subEntity.entityID]: newFieldItems
+      }));
+    });
+  }, [subEntities]);
+
+  useEffect(() => {
+    console.log('fieldItems', fieldItems);
+  }, [fieldItems]);
 
   return (
     <div>
@@ -54,11 +106,16 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({}) => {
         <div className={styles.entityHeader}>业务实体</div>
         <div className={styles.entityListWrapper}>
           <div className={styles.entityList}>
-            <Collapse className={styles.entityCollapse} bordered={false} defaultActiveKey={['1']}>
+            <Collapse
+              className={styles.entityCollapse}
+              bordered={false}
+              defaultActiveKey={['main']}
+              triggerRegion="icon"
+            >
               <CollapseItem
-                name="1"
+                name="main"
                 header={
-                  <div className={styles.mainEntityHeader}>
+                  <div className={styles.mainEntityHeader} onClick={() => setActiveEntityID(mainEntity.entityID)}>
                     <div className={styles.mainEntityHeaderIcon}>主</div>
                     {mainEntity.entityName || '无'}
                   </div>
@@ -74,11 +131,18 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({}) => {
                   backgroundColor: 'white'
                 }}
               >
-                {/* <div className={styles.subEntityHeader}>
-                  <div className={styles.subEntityHeaderIcon}>子</div>
-                  活动签到记录表
-                </div>
-                <div className={styles.relEntityHeader}>
+                {subEntities.entities.map((subEntity) => (
+                  <div
+                    className={styles.subEntityHeader}
+                    key={subEntity.entityID}
+                    onClick={() => setActiveEntityID(subEntity.entityID)}
+                  >
+                    <div className={styles.subEntityHeaderIcon}>子</div>
+                    {subEntity.entityName || '无'}
+                  </div>
+                ))}
+
+                {/* <div className={styles.relEntityHeader}>
                   <div className={styles.relEntityHeaderIcon}>关联</div>
                   党员信息表
                 </div> */}
@@ -113,7 +177,7 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({}) => {
 
         <div className={styles.fieldList}>
           <ReactSortable
-            list={fieldItems}
+            list={fieldItems[activeEntityID] || []}
             setList={() => {}}
             group={{
               name: COMPONENT_GROUP_NAME,
@@ -133,16 +197,16 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({}) => {
               console.log('cpType', cpType);
               e.item.id = `${cpType}-${Date.now()}`;
 
-              const newFieldItems = fieldItems.map((c, idx) => ({
+              const newFieldItems = fieldItems[activeEntityID]?.map((c, idx) => ({
                 ...c,
                 id: `${c.type}-${idx}-${Date.now()}`
               }));
 
               console.log('newFieldItems', newFieldItems);
-              setFieldItems(newFieldItems);
+              setFieldItems({ ...fieldItems, [activeEntityID]: newFieldItems });
             }}
           >
-            {fieldItems.map((item) => (
+            {fieldItems[activeEntityID]?.map((item) => (
               <FieldCard
                 key={item.id}
                 id={item.id}

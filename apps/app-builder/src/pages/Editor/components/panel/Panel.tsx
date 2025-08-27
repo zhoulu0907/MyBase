@@ -1,16 +1,15 @@
 import IconBranch from '@/assets/images/edit_branch_icon.svg';
 import IconLayout from '@/assets/images/edit_layout_icon.svg';
 import { Button, Tabs } from '@arco-design/web-react';
-import { IconLeft, IconRight, IconSend } from '@arco-design/web-react/icon';
+import { IconLeft, IconRight } from '@arco-design/web-react/icon';
 import { EDITOR_TYPES, type EditorType } from '@onebase/ui-kit';
 import { useEffect, useState } from 'react';
 import MaterialContainer from './components/material';
 import MetadataContainer from './components/metadata';
-import TelegramContainer from './components/telegram';
 import styles from './index.module.less';
 
 // 定义类型
-const PANNEL_KEYS = ['material', 'metadata', 'telegram'] as const;
+const PANNEL_KEYS = ['material', 'metadata'] as const;
 type PannelKey = (typeof PANNEL_KEYS)[number];
 
 export default function EditorPanel() {
@@ -78,9 +77,6 @@ export default function EditorPanel() {
               </div>
             }
           />
-          {activeTab === EDITOR_TYPES.FORM_EDITOR && (
-            <Tabs.TabPane key={'telegram'} title={<IconSend fontSize={20} />} />
-          )}
         </Tabs>
       </div>
 
@@ -92,7 +88,6 @@ export default function EditorPanel() {
       >
         {activeLeftTabKey === 'material' && <MaterialContainer activeTab={activeTab} />}
         {activeLeftTabKey === 'metadata' && <MetadataContainer />}
-        {activeLeftTabKey === 'telegram' && <TelegramContainer />}
       </div>
     </div>
   );

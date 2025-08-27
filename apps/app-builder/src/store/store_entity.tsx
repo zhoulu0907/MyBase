@@ -9,6 +9,10 @@ export interface appEntityStore {
 
   setMainEntity: (mainEntity: AppEntity) => void;
   clearMainEntity: () => void;
+
+  subEntities: AppEntities;
+  setSubEntities: (subEntities: AppEntities) => void;
+  clearSubEntities: () => void;
 }
 
 export const useAppEntityStore = create<appEntityStore>((set) => ({
@@ -30,5 +34,11 @@ export const useAppEntityStore = create<appEntityStore>((set) => ({
     fields: []
   },
   setMainEntity: (mainEntity: AppEntity) => set(() => ({ mainEntity })),
-  clearMainEntity: () => set(() => ({ mainEntity: { entityID: '', entityName: '', entityType: '', fields: [] } }))
+  clearMainEntity: () => set(() => ({ mainEntity: { entityID: '', entityName: '', entityType: '', fields: [] } })),
+
+  subEntities: {
+    entities: []
+  },
+  setSubEntities: (subEntities: AppEntities) => set(() => ({ subEntities })),
+  clearSubEntities: () => set(() => ({ subEntities: { entities: [] } }))
 }));
