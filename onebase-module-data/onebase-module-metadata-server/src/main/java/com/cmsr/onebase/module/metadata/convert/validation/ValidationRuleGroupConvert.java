@@ -1,59 +1,74 @@
 package com.cmsr.onebase.module.metadata.convert.validation;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.metadata.controller.admin.validation.vo.ValidationRuleDefinitionVO;
 import com.cmsr.onebase.module.metadata.controller.admin.validation.vo.ValidationRuleGroupRespVO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.validation.MetadataValidationRuleDefinitionDO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.validation.MetadataValidationRuleGroupDO;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.factory.Mappers;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
 
 /**
- * 校验规则分组 Convert
+ * 校验规则分组转换器
  *
  * @author bty418
  * @date 2025-01-25
  */
-@Mapper
-public interface ValidationRuleGroupConvert {
+public class ValidationRuleGroupConvert {
 
-    ValidationRuleGroupConvert INSTANCE = Mappers.getMapper(ValidationRuleGroupConvert.class);
+    public static final ValidationRuleGroupConvert INSTANCE = new ValidationRuleGroupConvert();
 
-    ValidationRuleGroupRespVO convert(MetadataValidationRuleGroupDO bean);
+    public ValidationRuleGroupRespVO convert(MetadataValidationRuleGroupDO bean) {
+        return BeanUtils.toBean(bean, ValidationRuleGroupRespVO.class);
+    }
 
-    List<ValidationRuleGroupRespVO> convertList(List<MetadataValidationRuleGroupDO> list);
+    public List<ValidationRuleGroupRespVO> convertList(List<MetadataValidationRuleGroupDO> list) {
+        return BeanUtils.toBean(list, ValidationRuleGroupRespVO.class);
+    }
 
-    @Mapping(target = "fieldValue", expression = "java(convertLongToString(bean.getFieldValue()))")
-    @Mapping(target = "fieldValue2", expression = "java(convertLongToString(bean.getFieldValue2()))")
-    ValidationRuleDefinitionVO convertRuleDefinition(MetadataValidationRuleDefinitionDO bean);
+    public ValidationRuleDefinitionVO convertRuleDefinition(MetadataValidationRuleDefinitionDO bean) {
+        return BeanUtils.toBean(bean, ValidationRuleDefinitionVO.class, vo -> {
+            vo.setFieldValue(convertLongToString(bean.getFieldValue()));
+            vo.setFieldValue2(convertLongToString(bean.getFieldValue2()));
+        });
+    }
 
-    List<ValidationRuleDefinitionVO> convertRuleDefinitionList(List<MetadataValidationRuleDefinitionDO> list);
+    public List<ValidationRuleDefinitionVO> convertRuleDefinitionList(List<MetadataValidationRuleDefinitionDO> list) {
+        return list.stream()
+                .map(this::convertRuleDefinition)
+                .toList();
+    }
 
-    @Mapping(target = "fieldValue", expression = "java(convertStringToLong(vo.getFieldValue()))")
-    @Mapping(target = "fieldValue2", expression = "java(convertStringToLong(vo.getFieldValue2()))")
-    MetadataValidationRuleDefinitionDO convertToRuleDefinitionDO(ValidationRuleDefinitionVO vo);
+    public MetadataValidationRuleDefinitionDO convertToRuleDefinitionDO(ValidationRuleDefinitionVO vo) {
+        return BeanUtils.toBean(vo, MetadataValidationRuleDefinitionDO.class, entity -> {
+            entity.setFieldValue(convertStringToLong(vo.getFieldValue()));
+            entity.setFieldValue2(convertStringToLong(vo.getFieldValue2()));
+        });
+    }
 
-    List<MetadataValidationRuleDefinitionDO> convertToRuleDefinitionDOList(List<ValidationRuleDefinitionVO> list);
+    public List<MetadataValidationRuleDefinitionDO> convertToRuleDefinitionDOList(List<ValidationRuleDefinitionVO> list) {
+        return list.stream()
+                .map(this::convertToRuleDefinitionDO)
+                .toList();
+    }
 
-    default PageResult<ValidationRuleGroupRespVO> convertPage(PageResult<MetadataValidationRuleGroupDO> page) {
+    public PageResult<ValidationRuleGroupRespVO> convertPage(PageResult<MetadataValidationRuleGroupDO> page) {
         return new PageResult<>(convertList(page.getList()), page.getTotal());
     }
 
     /**
      * Long转String
      */
-    default String convertLongToString(Long value) {
+    public String convertLongToString(Long value) {
         return value != null ? value.toString() : null;
     }
 
     /**
      * String转Long
      */
-    default Long convertStringToLong(String value) {
+    public Long convertStringToLong(String value) {
         if (!StringUtils.hasText(value)) {
             return null;
         }

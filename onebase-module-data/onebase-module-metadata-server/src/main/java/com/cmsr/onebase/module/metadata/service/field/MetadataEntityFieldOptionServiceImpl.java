@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.metadata.service.field;
 
+import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.FieldOptionBatchSortReqVO;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.FieldOptionRespVO;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.FieldOptionSaveReqVO;
@@ -108,15 +109,9 @@ public class MetadataEntityFieldOptionServiceImpl implements MetadataEntityField
      * @return 响应VO
      */
     private FieldOptionRespVO convertToRespVO(MetadataEntityFieldOptionDO option) {
-        FieldOptionRespVO respVO = new FieldOptionRespVO();
-        respVO.setId(option.getId() != null ? String.valueOf(option.getId()) : null);
-        respVO.setFieldId(option.getFieldId());
-        respVO.setOptionLabel(option.getOptionLabel());
-        respVO.setOptionValue(option.getOptionValue());
-        respVO.setOptionOrder(option.getOptionOrder());
-        respVO.setIsEnabled(option.getIsEnabled());
-        respVO.setDescription(option.getDescription());
-        return respVO;
+        return BeanUtils.toBean(option, FieldOptionRespVO.class, respVO -> {
+            respVO.setId(option.getId() != null ? String.valueOf(option.getId()) : null);
+        });
     }
 
     /**
@@ -126,15 +121,7 @@ public class MetadataEntityFieldOptionServiceImpl implements MetadataEntityField
      * @return DO对象
      */
     private MetadataEntityFieldOptionDO convertToDO(FieldOptionSaveReqVO req) {
-        MetadataEntityFieldOptionDO option = new MetadataEntityFieldOptionDO();
-        option.setFieldId(req.getFieldId());
-        option.setOptionLabel(req.getOptionLabel());
-        option.setOptionValue(req.getOptionValue());
-        option.setOptionOrder(req.getOptionOrder());
-        option.setIsEnabled(req.getIsEnabled());
-        option.setDescription(req.getDescription());
-        option.setAppId(req.getAppId());
-        return option;
+        return BeanUtils.toBean(req, MetadataEntityFieldOptionDO.class);
     }
 }
 

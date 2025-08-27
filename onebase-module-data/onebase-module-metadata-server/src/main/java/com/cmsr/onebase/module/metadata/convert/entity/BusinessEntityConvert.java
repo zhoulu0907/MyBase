@@ -4,21 +4,28 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.BusinessEntityRespVO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataBusinessEntityDO;
-import org.mapstruct.Mapper;
-import org.mapstruct.factory.Mappers;
 
 import java.util.List;
 
-@Mapper
-public interface BusinessEntityConvert {
+/**
+ * 业务实体转换器
+ *
+ * @author matianyu
+ * @date 2025-08-26
+ */
+public class BusinessEntityConvert {
 
-    BusinessEntityConvert INSTANCE = Mappers.getMapper(BusinessEntityConvert.class);
+    public static final BusinessEntityConvert INSTANCE = new BusinessEntityConvert();
 
-    BusinessEntityRespVO convert(MetadataBusinessEntityDO bean);
+    public BusinessEntityRespVO convert(MetadataBusinessEntityDO bean) {
+        return BeanUtils.toBean(bean, BusinessEntityRespVO.class);
+    }
 
-    List<BusinessEntityRespVO> convertList(List<MetadataBusinessEntityDO> list);
+    public List<BusinessEntityRespVO> convertList(List<MetadataBusinessEntityDO> list) {
+        return BeanUtils.toBean(list, BusinessEntityRespVO.class);
+    }
 
-    default PageResult<BusinessEntityRespVO> convertPage(PageResult<MetadataBusinessEntityDO> page) {
+    public PageResult<BusinessEntityRespVO> convertPage(PageResult<MetadataBusinessEntityDO> page) {
         return new PageResult<>(convertList(page.getList()), page.getTotal());
     }
 
