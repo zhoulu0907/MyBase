@@ -112,3 +112,11 @@ export const isSystemField = (fieldType: number): boolean => {
 export const isCustomField = (fieldType: number): boolean => {
   return fieldType === FIELD_TYPE.CUSTOM;
 };
+
+// 实体是否开启 0禁用 1开启
+export const ENTITY_STATUS = {
+  DISABLE: 0,
+  ENABLE: 1
+} as const;
+
+export type EntityStatus = (typeof ENTITY_STATUS)[keyof typeof ENTITY_STATUS];
