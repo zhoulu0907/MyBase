@@ -1,6 +1,9 @@
 package com.cmsr.onebase.module.metadata.controller.admin.validation;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.module.metadata.controller.admin.validation.vo.ValidationUniqueSaveReqVO;
+import com.cmsr.onebase.module.metadata.controller.admin.validation.vo.ValidationUniqueUpdateReqVO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.validation.MetadataValidationUniqueDO;
 import com.cmsr.onebase.module.metadata.service.validation.MetadataValidationUniqueService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -29,19 +32,19 @@ public class ValidationUniqueController {
     public CommonResult<MetadataValidationUniqueDO> getByField(@RequestParam("fieldId") Long fieldId) {
         return success(uniqueService.getByFieldId(fieldId));
     }
-
     @PostMapping("/create")
     @Operation(summary = "创建唯一性校验")
     @PreAuthorize("@ss.hasPermission('metadata:validation-unique:create')")
-    public CommonResult<Long> create(@Valid @RequestBody MetadataValidationUniqueDO req) {
-        return success(uniqueService.create(req));
+    public CommonResult<Long> create(@Valid @RequestBody ValidationUniqueSaveReqVO vo) {
+        return success(uniqueService.create(vo));
     }
 
     @PostMapping("/update")
     @Operation(summary = "更新唯一性校验")
     @PreAuthorize("@ss.hasPermission('metadata:validation-unique:update')")
-    public CommonResult<Boolean> update(@Valid @RequestBody MetadataValidationUniqueDO req) {
-        uniqueService.update(req);
+    public CommonResult<Boolean> update(@Valid @RequestBody ValidationUniqueUpdateReqVO vo) {
+        MetadataValidationUniqueDO data = BeanUtils.toBean(vo, MetadataValidationUniqueDO.class);
+        uniqueService.update(data);
         return success(true);
     }
 

@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.metadata.controller.admin.validation;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.module.metadata.controller.admin.validation.vo.ValidationChildNotEmptySaveReqVO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.validation.MetadataValidationChildNotEmptyDO;
 import com.cmsr.onebase.module.metadata.service.validation.MetadataValidationChildNotEmptyService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -33,8 +34,8 @@ public class ValidationChildNotEmptyController {
     @PostMapping("/create")
     @Operation(summary = "创建子表非空校验")
     @PreAuthorize("@ss.hasPermission('metadata:validation-child-not-empty:create')")
-    public CommonResult<Long> create(@Valid @RequestBody MetadataValidationChildNotEmptyDO req) {
-        return success(childNotEmptyService.create(req));
+    public CommonResult<Long> create(@Valid @RequestBody ValidationChildNotEmptySaveReqVO vo) {
+        return success(childNotEmptyService.create(vo));
     }
 
     @PostMapping("/update")

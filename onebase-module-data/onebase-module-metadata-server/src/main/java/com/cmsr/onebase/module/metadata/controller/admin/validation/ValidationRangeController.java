@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.metadata.controller.admin.validation;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.module.metadata.controller.admin.validation.vo.ValidationRangeSaveReqVO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.validation.MetadataValidationRangeDO;
 import com.cmsr.onebase.module.metadata.service.validation.MetadataValidationRangeService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -33,8 +34,8 @@ public class ValidationRangeController {
     @PostMapping("/create")
     @Operation(summary = "创建范围校验")
     @PreAuthorize("@ss.hasPermission('metadata:validation-range:create')")
-    public CommonResult<Long> create(@Valid @RequestBody MetadataValidationRangeDO req) {
-        return success(rangeService.create(req));
+    public CommonResult<Long> create(@Valid @RequestBody ValidationRangeSaveReqVO vo) {
+        return success(rangeService.create(vo));
     }
 
     @PostMapping("/update")

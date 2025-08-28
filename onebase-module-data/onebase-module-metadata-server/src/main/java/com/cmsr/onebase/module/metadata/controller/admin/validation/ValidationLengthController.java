@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.metadata.controller.admin.validation;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.module.metadata.controller.admin.validation.vo.ValidationLengthSaveReqVO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.validation.MetadataValidationLengthDO;
 import com.cmsr.onebase.module.metadata.service.validation.MetadataValidationLengthService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -33,8 +34,8 @@ public class ValidationLengthController {
     @PostMapping("/create")
     @Operation(summary = "创建长度校验")
     @PreAuthorize("@ss.hasPermission('metadata:validation-length:create')")
-    public CommonResult<Long> create(@Valid @RequestBody MetadataValidationLengthDO req) {
-        return success(lengthService.create(req));
+    public CommonResult<Long> create(@Valid @RequestBody ValidationLengthSaveReqVO vo) {
+        return success(lengthService.create(vo));
     }
 
     @PostMapping("/update")

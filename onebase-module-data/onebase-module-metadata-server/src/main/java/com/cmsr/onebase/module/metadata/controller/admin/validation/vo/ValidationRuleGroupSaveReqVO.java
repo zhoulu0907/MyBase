@@ -30,8 +30,8 @@ public class ValidationRuleGroupSaveReqVO {
     @Size(max = 500, message = "规则组描述长度不能超过500个字符")
     private String rgDesc;
 
-    @Schema(description = "规则组状态", example = "ACTIVE")
-    private String rgStatus;
+    @Schema(description = "规则组状态，见 ValidationStatusEnum 枚举（1-激活，0-非激活）", example = "1")
+    private Integer rgStatus;
 
     @Schema(description = "校验方式", example = "POP")
     private String valMethod;

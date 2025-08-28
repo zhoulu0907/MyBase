@@ -914,8 +914,20 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
 
             return exists;
         } catch (Exception e) {
-            log.warn("检查列 {} 在表 {} 中是否存在时发生错误: {}", columnName, tableName, e.getMessage());
-            return false;
+            log.error("检查列 {} 在表 {} 中是否存在时发生错误: {}", columnName, tableName, e.getMessage(), e);
+            // 发生异常时，使用更保守的策略：尝试直接查询表结构来确认
+            try {
+                log.info("使用备用方法检查列是否存在: {}.{}", tableName, columnName);
+                String backupSql = "SELECT column_name FROM information_schema.columns WHERE table_name = ? AND column_name = ? AND table_schema = 'public'";
+                DataSet backupResult = service.querys(backupSql, tableName, columnName);
+                boolean backupExists = backupResult != null && backupResult.size() > 0;
+                log.info("备用检查结果：列 {} 在表 {} 中{}存在", columnName, tableName, backupExists ? "" : "不");
+                return backupExists;
+            } catch (Exception backupException) {
+                log.error("备用列存在性检查也失败: {}", backupException.getMessage(), backupException);
+                // 最后的保险措施：假设列不存在，但在执行DDL时使用IF NOT EXISTS
+                return false;
+            }
         }
     }
 
@@ -983,7 +995,8 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
      */
     private String generateAddColumnDDL(String tableName, MetadataEntityFieldDO field) {
         StringBuilder ddl = new StringBuilder();
-        ddl.append("ALTER TABLE \"").append(tableName).append("\" ADD COLUMN \"")
+        // 使用 IF NOT EXISTS 语法防止重复添加列的错误
+        ddl.append("ALTER TABLE \"").append(tableName).append("\" ADD COLUMN IF NOT EXISTS \"")
            .append(field.getFieldName()).append("\" ");
 
         // 字段类型映射
@@ -1233,9 +1246,9 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
             fieldConstraintService.saveFieldConstraintConfig(req);
         }
 
-        // 正则
-        if (constraints.getRegexPattern() != null || constraints.getRegexEnabled() != null ||
-                (constraints.getRegexPrompt() != null && !constraints.getRegexPrompt().isEmpty())) {
+        // 正则 - 只有当正则表达式不为空且启用时才创建REGEX约束
+        if (constraints.getRegexPattern() != null && !constraints.getRegexPattern().trim().isEmpty() &&
+                constraints.getRegexEnabled() != null && constraints.getRegexEnabled() == 1) {
             FieldConstraintSaveReqVO req = new FieldConstraintSaveReqVO();
             req.setFieldId(fieldId);
             req.setConstraintType("REGEX");
