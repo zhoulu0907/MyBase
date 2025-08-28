@@ -1,8 +1,9 @@
 package com.cmsr.onebase.module.metadata.controller.admin.validation;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.module.metadata.controller.admin.validation.vo.ValidationLengthRespVO;
 import com.cmsr.onebase.module.metadata.controller.admin.validation.vo.ValidationLengthSaveReqVO;
-import com.cmsr.onebase.module.metadata.dal.dataobject.validation.MetadataValidationLengthDO;
+import com.cmsr.onebase.module.metadata.controller.admin.validation.vo.ValidationLengthUpdateReqVO;
 import com.cmsr.onebase.module.metadata.service.validation.MetadataValidationLengthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -27,8 +28,8 @@ public class ValidationLengthController {
     @Operation(summary = "根据字段ID获取长度校验")
     @Parameter(name = "fieldId", required = true)
     @PreAuthorize("@ss.hasPermission('metadata:validation-length:query')")
-    public CommonResult<MetadataValidationLengthDO> getByFieldId(@RequestParam("fieldId") Long fieldId) {
-        return success(lengthService.getByFieldId(fieldId));
+    public CommonResult<ValidationLengthRespVO> getByFieldId(@RequestParam("fieldId") Long fieldId) {
+        return success(lengthService.getByFieldIdWithRgName(fieldId));
     }
 
     @PostMapping("/create")
@@ -41,8 +42,8 @@ public class ValidationLengthController {
     @PostMapping("/update")
     @Operation(summary = "更新长度校验")
     @PreAuthorize("@ss.hasPermission('metadata:validation-length:update')")
-    public CommonResult<Boolean> update(@Valid @RequestBody MetadataValidationLengthDO req) {
-        lengthService.update(req);
+    public CommonResult<Boolean> update(@Valid @RequestBody ValidationLengthUpdateReqVO vo) {
+        lengthService.update(vo);
         return success(true);
     }
 

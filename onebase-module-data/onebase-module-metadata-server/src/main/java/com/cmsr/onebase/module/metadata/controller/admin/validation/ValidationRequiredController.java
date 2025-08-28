@@ -1,8 +1,9 @@
 package com.cmsr.onebase.module.metadata.controller.admin.validation;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.module.metadata.controller.admin.validation.vo.ValidationRequiredRespVO;
 import com.cmsr.onebase.module.metadata.controller.admin.validation.vo.ValidationRequiredSaveReqVO;
-import com.cmsr.onebase.module.metadata.dal.dataobject.validation.MetadataValidationRequiredDO;
+import com.cmsr.onebase.module.metadata.controller.admin.validation.vo.ValidationRequiredUpdateReqVO;
 import com.cmsr.onebase.module.metadata.service.validation.MetadataValidationRequiredService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -27,8 +28,8 @@ public class ValidationRequiredController {
     @Operation(summary = "根据字段ID获取必填校验")
     @Parameter(name = "fieldId", required = true)
     @PreAuthorize("@ss.hasPermission('metadata:validation-required:query')")
-    public CommonResult<MetadataValidationRequiredDO> getByField(@RequestParam("fieldId") Long fieldId) {
-        return success(requiredService.getByFieldId(fieldId));
+    public CommonResult<ValidationRequiredRespVO> getByField(@RequestParam("fieldId") Long fieldId) {
+        return success(requiredService.getByFieldIdWithRgName(fieldId));
     }
 
     @PostMapping("/create")
@@ -41,8 +42,8 @@ public class ValidationRequiredController {
     @PostMapping("/update")
     @Operation(summary = "更新必填校验")
     @PreAuthorize("@ss.hasPermission('metadata:validation-required:update')")
-    public CommonResult<Boolean> update(@Valid @RequestBody MetadataValidationRequiredDO req) {
-        requiredService.update(req);
+    public CommonResult<Boolean> update(@Valid @RequestBody ValidationRequiredUpdateReqVO vo) {
+        requiredService.update(vo);
         return success(true);
     }
 

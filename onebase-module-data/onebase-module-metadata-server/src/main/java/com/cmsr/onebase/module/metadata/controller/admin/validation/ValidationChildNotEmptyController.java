@@ -1,8 +1,9 @@
 package com.cmsr.onebase.module.metadata.controller.admin.validation;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.module.metadata.controller.admin.validation.vo.ValidationChildNotEmptyRespVO;
 import com.cmsr.onebase.module.metadata.controller.admin.validation.vo.ValidationChildNotEmptySaveReqVO;
-import com.cmsr.onebase.module.metadata.dal.dataobject.validation.MetadataValidationChildNotEmptyDO;
+import com.cmsr.onebase.module.metadata.controller.admin.validation.vo.ValidationChildNotEmptyUpdateReqVO;
 import com.cmsr.onebase.module.metadata.service.validation.MetadataValidationChildNotEmptyService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -27,8 +28,8 @@ public class ValidationChildNotEmptyController {
     @Operation(summary = "根据字段ID获取子表非空校验")
     @Parameter(name = "fieldId", required = true)
     @PreAuthorize("@ss.hasPermission('metadata:validation-child-not-empty:query')")
-    public CommonResult<MetadataValidationChildNotEmptyDO> getByField(@RequestParam("fieldId") Long fieldId) {
-        return success(childNotEmptyService.getByFieldId(fieldId));
+    public CommonResult<ValidationChildNotEmptyRespVO> getByField(@RequestParam("fieldId") Long fieldId) {
+        return success(childNotEmptyService.getByFieldIdWithRgName(fieldId));
     }
 
     @PostMapping("/create")
@@ -41,8 +42,8 @@ public class ValidationChildNotEmptyController {
     @PostMapping("/update")
     @Operation(summary = "更新子表非空校验")
     @PreAuthorize("@ss.hasPermission('metadata:validation-child-not-empty:update')")
-    public CommonResult<Boolean> update(@Valid @RequestBody MetadataValidationChildNotEmptyDO req) {
-        childNotEmptyService.update(req);
+    public CommonResult<Boolean> update(@Valid @RequestBody ValidationChildNotEmptyUpdateReqVO vo) {
+        childNotEmptyService.update(vo);
         return success(true);
     }
 
