@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.metadata.service.validation;
 
+import com.cmsr.onebase.module.metadata.controller.admin.validation.vo.ValidationUniqueSaveReqVO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.validation.MetadataValidationUniqueDO;
 
 /**
@@ -10,7 +11,7 @@ import com.cmsr.onebase.module.metadata.dal.dataobject.validation.MetadataValida
  */
 public interface MetadataValidationUniqueService {
     MetadataValidationUniqueDO getByFieldId(Long fieldId);
-    Long create(MetadataValidationUniqueDO data);
+    Long create(ValidationUniqueSaveReqVO vo);
     void update(MetadataValidationUniqueDO data);
     void deleteByFieldId(Long fieldId);
 }

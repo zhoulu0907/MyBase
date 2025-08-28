@@ -1,9 +1,13 @@
 package com.cmsr.onebase.module.metadata.service.validation;
 
+import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.module.metadata.controller.admin.validation.vo.ValidationRangeSaveReqVO;
+import com.cmsr.onebase.module.metadata.controller.admin.validation.vo.ValidationRuleGroupSaveReqVO;
 import com.cmsr.onebase.module.metadata.dal.database.MetadataValidationRangeRepository;
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.validation.MetadataValidationRangeDO;
 import com.cmsr.onebase.module.metadata.service.entity.MetadataEntityFieldService;
+import com.cmsr.onebase.module.metadata.util.StatusEnumUtil;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,20 +26,47 @@ public class MetadataValidationRangeServiceImpl implements MetadataValidationRan
     @Override
     public MetadataValidationRangeDO getByFieldId(Long fieldId) {
         // 当前每字段至多一条，若未来支持多条，可调整为取最新或抛错
-    return rangeRepository.findByFieldId(fieldId).stream().findFirst().orElse(null);
+        return rangeRepository.findByFieldId(fieldId).stream().findFirst().orElse(null);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Long create(MetadataValidationRangeDO data) {
-        Assert.notNull(data, "data不能为空");
-        Assert.notNull(data.getFieldId(), "fieldId不能为空");
-    MetadataEntityFieldDO field = entityFieldService.getEntityField(String.valueOf(data.getFieldId()));
+    public Long create(ValidationRangeSaveReqVO vo) {
+        Assert.notNull(vo, "vo不能为空");
+        Assert.notNull(vo.getFieldId(), "字段ID不能为空");
+        Assert.hasText(vo.getRgName(), "规则组名称不能为空");
+
+        // 获取字段信息
+        MetadataEntityFieldDO field = entityFieldService.getEntityField(String.valueOf(vo.getFieldId()));
         Assert.notNull(field, "字段不存在");
-    Long groupId = ensureFieldRuleGroup(data.getFieldId());
+
+        // 检查同一字段是否已存在范围校验规则
+        MetadataValidationRangeDO existingRule = getByFieldId(vo.getFieldId());
+        if (existingRule != null) {
+            throw new IllegalStateException("该字段已存在范围校验规则，同一字段只能有一条范围校验规则");
+        }
+
+        // 处理规则组：先查找，不存在则创建
+        Long groupId;
+        var existingGroup = ruleGroupService.getByName(vo.getRgName());
+        if (existingGroup != null) {
+            groupId = existingGroup.getId();
+        } else {
+            // 创建新的规则组
+            ValidationRuleGroupSaveReqVO groupVO = new ValidationRuleGroupSaveReqVO();
+            groupVO.setRgName(vo.getRgName());
+            groupVO.setRgDesc("自动创建的规则组：" + vo.getRgName());
+            groupVO.setRgStatus(StatusEnumUtil.ACTIVE);
+            groupId = ruleGroupService.createValidationRuleGroup(groupVO);
+        }
+
+        // 转换VO为DO并设置必要字段
+        MetadataValidationRangeDO data = BeanUtils.toBean(vo, MetadataValidationRangeDO.class);
         data.setEntityId(field.getEntityId());
         data.setAppId(field.getAppId());
         data.setGroupId(groupId);
+
+        // 保存范围校验规则
         rangeRepository.upsert(data);
         return data.getId();
     }
@@ -52,9 +83,5 @@ public class MetadataValidationRangeServiceImpl implements MetadataValidationRan
     @Transactional(rollbackFor = Exception.class)
     public void deleteByFieldId(Long fieldId) {
         rangeRepository.deleteByFieldId(fieldId);
-    }
-
-    private Long ensureFieldRuleGroup(Long fieldId) {
-        return ruleGroupService.ensureFieldRuleGroup(fieldId);
     }
 }

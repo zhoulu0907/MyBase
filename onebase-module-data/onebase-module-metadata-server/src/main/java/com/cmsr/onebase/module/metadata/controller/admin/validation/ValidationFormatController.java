@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.metadata.controller.admin.validation;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.module.metadata.controller.admin.validation.vo.ValidationFormatSaveReqVO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.validation.MetadataValidationFormatDO;
 import com.cmsr.onebase.module.metadata.service.validation.MetadataValidationFormatService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -33,8 +34,8 @@ public class ValidationFormatController {
     @PostMapping("/create")
     @Operation(summary = "创建格式校验")
     @PreAuthorize("@ss.hasPermission('metadata:validation-format:create')")
-    public CommonResult<Long> create(@Valid @RequestBody MetadataValidationFormatDO req) {
-        return success(formatService.create(req));
+    public CommonResult<Long> create(@Valid @RequestBody ValidationFormatSaveReqVO vo) {
+        return success(formatService.create(vo));
     }
 
     @PostMapping("/update")

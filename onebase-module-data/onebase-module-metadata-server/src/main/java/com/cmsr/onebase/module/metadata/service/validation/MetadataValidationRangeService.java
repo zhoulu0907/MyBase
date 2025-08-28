@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.metadata.service.validation;
 
+import com.cmsr.onebase.module.metadata.controller.admin.validation.vo.ValidationRangeSaveReqVO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.validation.MetadataValidationRangeDO;
 
 /**
@@ -10,7 +11,7 @@ import com.cmsr.onebase.module.metadata.dal.dataobject.validation.MetadataValida
  */
 public interface MetadataValidationRangeService {
     MetadataValidationRangeDO getByFieldId(Long fieldId);
-    Long create(MetadataValidationRangeDO data);
+    Long create(ValidationRangeSaveReqVO vo);
     void update(MetadataValidationRangeDO data);
     void deleteByFieldId(Long fieldId);
 }

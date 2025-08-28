@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.metadata.controller.admin.validation;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.module.metadata.controller.admin.validation.vo.ValidationRequiredSaveReqVO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.validation.MetadataValidationRequiredDO;
 import com.cmsr.onebase.module.metadata.service.validation.MetadataValidationRequiredService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -33,8 +34,8 @@ public class ValidationRequiredController {
     @PostMapping("/create")
     @Operation(summary = "创建必填校验")
     @PreAuthorize("@ss.hasPermission('metadata:validation-required:create')")
-    public CommonResult<Long> create(@Valid @RequestBody MetadataValidationRequiredDO req) {
-        return success(requiredService.create(req));
+    public CommonResult<Long> create(@Valid @RequestBody ValidationRequiredSaveReqVO vo) {
+        return success(requiredService.create(vo));
     }
 
     @PostMapping("/update")

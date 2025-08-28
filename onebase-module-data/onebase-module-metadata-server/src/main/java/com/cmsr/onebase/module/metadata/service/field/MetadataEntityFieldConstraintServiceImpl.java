@@ -1,7 +1,9 @@
 package com.cmsr.onebase.module.metadata.service.field;
 
+import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.FieldConstraintRespVO;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.FieldConstraintSaveReqVO;
+import com.cmsr.onebase.module.metadata.controller.admin.validation.vo.*;
 import com.cmsr.onebase.module.metadata.dal.dataobject.validation.MetadataValidationFormatDO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.validation.MetadataValidationLengthDO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.validation.MetadataValidationRequiredDO;
@@ -78,7 +80,10 @@ public class MetadataEntityFieldConstraintServiceImpl implements MetadataEntityF
             d.setPromptMessage(req.getPromptMessage());
             d.setRunMode(req.getRunMode());
             if (d.getId() == null) {
-                lengthService.create(d);
+                // 将DO转换为VO
+                ValidationLengthSaveReqVO lengthVO = BeanUtils.toBean(d, ValidationLengthSaveReqVO.class);
+                lengthVO.setRgName("字段约束-" + req.getFieldId()); // 设置规则组名称
+                lengthService.create(lengthVO);
             } else {
                 lengthService.update(d);
             }
@@ -95,7 +100,10 @@ public class MetadataEntityFieldConstraintServiceImpl implements MetadataEntityF
             d.setPromptMessage(req.getPromptMessage());
             d.setRunMode(req.getRunMode());
             if (d.getId() == null) {
-                formatService.create(d);
+                // 将DO转换为VO
+                ValidationFormatSaveReqVO formatVO = BeanUtils.toBean(d, ValidationFormatSaveReqVO.class);
+                formatVO.setRgName("字段约束-" + req.getFieldId()); // 设置规则组名称
+                formatService.create(formatVO);
             } else {
                 formatService.update(d);
             }
@@ -109,7 +117,10 @@ public class MetadataEntityFieldConstraintServiceImpl implements MetadataEntityF
             d.setPromptMessage(req.getPromptMessage());
             d.setRunMode(req.getRunMode());
             if (d.getId() == null) {
-                requiredService.create(d);
+                // 将DO转换为VO
+                ValidationRequiredSaveReqVO requiredVO = BeanUtils.toBean(d, ValidationRequiredSaveReqVO.class);
+                requiredVO.setRgName("字段约束-" + req.getFieldId()); // 设置规则组名称
+                requiredService.create(requiredVO);
             } else {
                 requiredService.update(d);
             }
@@ -123,7 +134,10 @@ public class MetadataEntityFieldConstraintServiceImpl implements MetadataEntityF
             d.setPromptMessage(req.getPromptMessage());
             d.setRunMode(req.getRunMode());
             if (d.getId() == null) {
-                uniqueService.create(d);
+                // 将DO转换为VO
+                ValidationUniqueSaveReqVO uniqueVO = BeanUtils.toBean(d, ValidationUniqueSaveReqVO.class);
+                uniqueVO.setRgName("字段约束-" + req.getFieldId()); // 设置规则组名称
+                uniqueService.create(uniqueVO);
             } else {
                 uniqueService.update(d);
             }

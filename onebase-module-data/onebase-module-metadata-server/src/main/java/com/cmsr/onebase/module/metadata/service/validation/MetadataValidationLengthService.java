@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.metadata.service.validation;
 
+import com.cmsr.onebase.module.metadata.controller.admin.validation.vo.ValidationLengthSaveReqVO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.validation.MetadataValidationLengthDO;
 
 /**
@@ -23,10 +24,10 @@ public interface MetadataValidationLengthService {
     /**
      * 新增长度校验配置
      *
-     * @param data 待保存数据（需要包含fieldId；groupId可为空将自动创建；entityId/appId将基于字段回填）
+     * @param vo 待保存的VO数据
      * @return 新记录ID
      */
-    Long create(MetadataValidationLengthDO data);
+    Long create(ValidationLengthSaveReqVO vo);
 
     /**
      * 修改长度校验配置

@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.metadata.service.validation;
 
+import com.cmsr.onebase.module.metadata.controller.admin.validation.vo.ValidationChildNotEmptySaveReqVO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.validation.MetadataValidationChildNotEmptyDO;
 
 /**
@@ -7,7 +8,7 @@ import com.cmsr.onebase.module.metadata.dal.dataobject.validation.MetadataValida
  */
 public interface MetadataValidationChildNotEmptyService {
     MetadataValidationChildNotEmptyDO getByFieldId(Long fieldId);
-    Long create(MetadataValidationChildNotEmptyDO data);
+    Long create(ValidationChildNotEmptySaveReqVO vo);
     void update(MetadataValidationChildNotEmptyDO data);
     void deleteByFieldId(Long fieldId);
 }
