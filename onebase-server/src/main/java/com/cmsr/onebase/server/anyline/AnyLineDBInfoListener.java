@@ -1,5 +1,6 @@
 package com.cmsr.onebase.server.anyline;
 
+import com.cmsr.onebase.framework.common.consts.DeleteConstant;
 import com.cmsr.onebase.framework.common.exception.DatabaseAccessErrorCodes;
 import com.cmsr.onebase.framework.common.exception.DatabaseAccessException;
 import com.cmsr.onebase.framework.data.base.BaseDO;
@@ -23,10 +24,7 @@ import org.anyline.metadata.Table;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 @Slf4j
 @Component()
@@ -35,9 +33,9 @@ public class AnyLineDBInfoListener implements DMListener {
 
 
     // 需要忽略租户过滤的表名列表
-    private static final Set<String> TENANT_IGNORE_TABLES = new HashSet<>();
+    private static final Set<String>  TENANT_IGNORE_TABLES = new HashSet<>();
     @Resource
-    private UidGenerator uidGenerator;
+    private              UidGenerator uidGenerator;
 
     static {
         // 添加不需要租户过滤的表
@@ -76,26 +74,73 @@ public class AnyLineDBInfoListener implements DMListener {
      * @param runtime 包含数据源(key)、适配器、JDBCTemplate、dao
      * @param random  用来标记同一组SQL、执行结构、参数等
      * @param dest    表
-     * @param obj     实体
+     * @param object  实体
      * @param columns 需要抛入的列 如果不指定  则根据实体属性解析
      * @return 如果返回false 则中断执行
      */
     @Override
-    public SWITCH prepareInsert(DataRuntime runtime, String random, int batch, Table dest, Object obj,
+    public SWITCH prepareInsert(DataRuntime runtime, String random, int batch, Table dest, Object object,
                                 ConfigStore configs, List<String> columns) {
         // 检查是否是非系统数据源，如果是则跳过添加条件
         if (!isSystemDataSource(runtime)) {
-            log.info("prepareQuery--------------> 检测到非系统数据源，跳过添加租户和软删除条件，数据源: {}", getDataSourceKey(runtime));
+            log.info("prepareInsert--------------> 检测到非系统数据源，跳过添加租户和软删除条件，数据源: {}", getDataSourceKey(runtime));
+            return SWITCH.CONTINUE;
+        }
+        // 先看插入对象是否为空
+        if (Objects.isNull(object)) {
+            log.info("prepareInsert--------------> insert null object: {}", dest.getName());
             return SWITCH.CONTINUE;
         }
         // 加入租户标志
-        injectTenantIdToObject(obj);
+        injectTenantIdToEntity(object);
 
-        // 注释：由于config字段已改为String类型使用JacksonTypeHandler处理，不再需要JSONB转换
-        // handleJsonbFields(runtime, dest, obj);
+        // 加入创建时间和创建人等基础信息
+        injectBaseInfoToEntity(object);
+        return SWITCH.CONTINUE;
+    }
 
-        // 加入创建时间和创建人等参数
-        if (Objects.nonNull(obj) && obj instanceof BaseDO baseDO) {
+    /**
+     * 向实体注入租户标志
+     *
+     * @param obj
+     */
+    private void injectTenantIdToEntity(Object obj) {
+        if (obj instanceof Collection) {
+            for (Object item : (Collection<?>) obj) {
+                injectTenantIdToSingleEntity(item);
+            }
+        } else {
+            injectTenantIdToSingleEntity(obj);
+        }
+    }
+
+    /**
+     * 向实体注入租户标志
+     *
+     * @param obj
+     */
+    private void injectTenantIdToSingleEntity(Object obj) {
+        boolean shouldIgnore = isTableTenantIgnored(obj);
+        log.info("injectTenantIdToOneEntity--------------> isTableTenantIgnored: {}", shouldIgnore);
+        if (!shouldIgnore && obj instanceof TenantBaseDO tenantBaseDO) {
+            tenantBaseDO.setTenantId(TenantContextHolder.getRequiredTenantId());
+            log.info("injectTenantIdToOneEntity--------------> class: {} , setTenantId: {}", obj.getClass().getSimpleName(), tenantBaseDO.getTenantId());
+        }
+    }
+
+
+    private void injectBaseInfoToEntity(Object object) {
+        if (object instanceof Collection) {
+            for (Object item : (Collection<?>) object) {
+                injectBaseInfoToSingleEntity(item);
+            }
+        } else {
+            injectBaseInfoToSingleEntity(object);
+        }
+    }
+
+    private void injectBaseInfoToSingleEntity(Object obj) {
+        if (obj instanceof BaseDO baseDO) {
             // 设置雪花ID
             if (baseDO.getId() == null) {
                 baseDO.setId(uidGenerator.getUID());
@@ -121,8 +166,9 @@ public class AnyLineDBInfoListener implements DMListener {
             if (Objects.nonNull(userId) && Objects.isNull(baseDO.getUpdater())) {
                 baseDO.setUpdater(userId);
             }
+            // 新增数据，删除状态为未删除。解决批量插入数据是插入deleted为null的问题
+            baseDO.setDeleted(DeleteConstant.NOT_DELETED);
         }
-        return SWITCH.CONTINUE;
     }
 
     /**
@@ -162,7 +208,7 @@ public class AnyLineDBInfoListener implements DMListener {
 
         // 只有在不忽略租户的情况下才添加租户条件
         // 检查当前查询的表是否需要忽略租户过滤
-        boolean shouldIgnore = isTableTenantIgnored2(prepare);
+        boolean shouldIgnore = isTableTenantIgnored(prepare);
         log.info("prepareQuery--------------> isTableTenantIgnored: {}", shouldIgnore);
         if (!shouldIgnore) {
             configs.and("tenant_id = " + TenantContextHolder.getRequiredTenantId());
@@ -245,7 +291,7 @@ public class AnyLineDBInfoListener implements DMListener {
      * @param obj RunPrepare对象
      * @return 如果表需要忽略租户过滤则返回true
      */
-    private boolean isTableTenantIgnored2(Object obj) {
+    private boolean isTableTenantIgnored(Object obj) {
         return obj != null && obj.getClass().isAnnotationPresent(TenantIgnore.class);
     }
 
@@ -255,8 +301,8 @@ public class AnyLineDBInfoListener implements DMListener {
      * @param prepare RunPrepare对象
      * @return 如果表名在忽略列表中则返回true
      */
-    private boolean isTableTenantIgnored2(RunPrepare prepare) {
-        return prepare != null && isTableTenantIgnored2(prepare.getTableName());
+    private boolean isTableTenantIgnored(RunPrepare prepare) {
+        return prepare != null && isTableTenantIgnored(prepare.getTableName());
     }
 
     /**
@@ -265,7 +311,7 @@ public class AnyLineDBInfoListener implements DMListener {
      * @param tableName 表名
      * @return 如果表名在忽略列表中则返回true
      */
-    private boolean isTableTenantIgnored2(String tableName) {
+    private boolean isTableTenantIgnored(String tableName) {
         if (TenantContextHolder.isIgnore()) {
             return true;
         }
@@ -289,7 +335,7 @@ public class AnyLineDBInfoListener implements DMListener {
                                 ConfigStore configs, List<String> columns) {
         // 检查是否是非系统数据源，如果是则跳过添加条件
         if (!isSystemDataSource(runtime)) {
-            log.info("prepareQuery--------------> 检测到非系统数据源，跳过添加租户和软删除条件，数据源: {}", getDataSourceKey(runtime));
+            log.info("prepareUpdate--------------> 检测到非系统数据源，跳过添加租户和软删除条件，table:{} 数据源: {}", dest.getName(), getDataSourceKey(runtime));
             return SWITCH.CONTINUE;
         }
         // 这里config可能为空，强制异常提前发现问题。
@@ -299,7 +345,7 @@ public class AnyLineDBInfoListener implements DMListener {
         // 加入软删判断 (opt: 框架这里config可能为空)
         configs.and(Compare.EQUAL, BaseDO.DELETED, 0);
         // 加入租户标志
-        boolean shouldIgnore = isTableTenantIgnored2(dest.getName());
+        boolean shouldIgnore = isTableTenantIgnored(dest.getName());
         log.info("prepareUpdate obj--------------> isTableTenantIgnored: {}", shouldIgnore);
         if (!shouldIgnore) {
             configs.and(Compare.EQUAL, TenantBaseDO.TENANT_ID, TenantContextHolder.getRequiredTenantId());
@@ -319,7 +365,7 @@ public class AnyLineDBInfoListener implements DMListener {
                                 ConfigStore configs) {
         // 检查是否是非系统数据源，如果是则跳过添加条件
         if (!isSystemDataSource(runtime)) {
-            log.info("prepareQuery--------------> 检测到非系统数据源，跳过添加租户和软删除条件，数据源: {}", getDataSourceKey(runtime));
+            log.info("prepareUpdate--------------> 检测到非系统数据源，跳过添加租户和软删除条件，数据源: {}", getDataSourceKey(runtime));
             return SWITCH.CONTINUE;
         }
         // 这里config可能为空，强制异常提前发现问题。(opt: 框架这里config可能为空)
@@ -329,7 +375,7 @@ public class AnyLineDBInfoListener implements DMListener {
         // 加入软删判断
         configs.and(Compare.EQUAL, BaseDO.DELETED, 0);
         // 加入租户标志
-        boolean shouldIgnore = isTableTenantIgnored2(prepare.getTableName());
+        boolean shouldIgnore = isTableTenantIgnored(prepare.getTableName());
         log.info("prepareUpdate row--------------> isTableTenantIgnored: {}", shouldIgnore);
         if (!shouldIgnore) {
             configs.and(Compare.EQUAL, TenantBaseDO.TENANT_ID, TenantContextHolder.getRequiredTenantId());
@@ -361,10 +407,10 @@ public class AnyLineDBInfoListener implements DMListener {
                                 ConfigStore configs, String... columns) {
         // 检查是否是非系统数据源，如果是则跳过添加条件
         if (!isSystemDataSource(runtime)) {
-            log.info("prepareQuery--------------> 检测到非系统数据源，跳过添加租户和软删除条件，数据源: {}", getDataSourceKey(runtime));
+            log.info("prepareDelete--------------> 检测到非系统数据源，跳过添加租户和软删除条件，数据源: {}", getDataSourceKey(runtime));
             return SWITCH.CONTINUE;
         }
-        injectTenantIdAndDeleteToQuery(table.getName(), configs);
+        injectTenantIdAndDeleteToConfigs(table.getName(), configs);
         return SWITCH.CONTINUE;
     }
 
@@ -385,10 +431,10 @@ public class AnyLineDBInfoListener implements DMListener {
                                 String key, Object values) {
         // 检查是否是非系统数据源，如果是则跳过添加条件
         if (!isSystemDataSource(runtime)) {
-            log.info("prepareQuery--------------> 检测到非系统数据源，跳过添加租户和软删除条件，数据源: {}", getDataSourceKey(runtime));
+            log.info("prepareDelete--------------> 检测到非系统数据源，跳过添加租户和软删除条件，数据源: {}", getDataSourceKey(runtime));
             return SWITCH.CONTINUE;
         }
-        injectTenantIdAndDeleteToQuery(table.getName(), configs);
+        injectTenantIdAndDeleteToConfigs(table.getName(), configs);
         return SWITCH.CONTINUE;
     }
 
@@ -407,24 +453,10 @@ public class AnyLineDBInfoListener implements DMListener {
                              long millis) {
         // 检查是否是非系统数据源，如果是则跳过添加条件
         if (!isSystemDataSource(runtime)) {
-            log.info("prepareQuery--------------> 检测到非系统数据源，跳过添加租户和软删除条件，数据源: {}", getDataSourceKey(runtime));
+            log.info("afterQuery--------------> 检测到非系统数据源，跳过添加租户和软删除条件，数据源: {}", getDataSourceKey(runtime));
             return SWITCH.CONTINUE;
         }
         return SWITCH.CONTINUE;
-    }
-
-    /**
-     * 向实体注入租户标志
-     *
-     * @param obj
-     */
-    private void injectTenantIdToObject(Object obj) {
-        boolean shouldIgnore = isTableTenantIgnored2(obj);
-        log.info("injectTenantIdToObject--------------> isTableTenantIgnored: {}", shouldIgnore);
-        if (!shouldIgnore && obj instanceof TenantBaseDO tenantBaseDO) {
-            tenantBaseDO.setTenantId(TenantContextHolder.getRequiredTenantId());
-            log.info("injectTenantIdToObject--------------> setTenantId: {}", tenantBaseDO.getTenantId());
-        }
     }
 
     /**
@@ -432,15 +464,14 @@ public class AnyLineDBInfoListener implements DMListener {
      *
      * @param
      */
-    private void injectTenantIdAndDeleteToQuery(String table, ConfigStore configs) {
-        boolean shouldIgnore = isTableTenantIgnored2(table);
-        log.info("[{}] injectTenantIdAndDeleteToQuery --------------> isTableTenantIgnored: {}", table, shouldIgnore);
+    private void injectTenantIdAndDeleteToConfigs(String table, ConfigStore configs) {
+        boolean shouldIgnore = isTableTenantIgnored(table);
+        log.info("[{}] injectTenantIdAndDeleteToConfigs --------------> isTableTenantIgnored: {}", table, shouldIgnore);
         if (!shouldIgnore) {
             configs.and(Compare.EQUAL, "tenant_id", TenantContextHolder.getRequiredTenantId());
         }
         // 加入软删判断
         configs.and(Compare.EQUAL, BaseDO.DELETED, 0);
     }
-
 
 }

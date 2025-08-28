@@ -1,23 +1,16 @@
 package com.cmsr.onebase.module.system.service.permission;
 
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.util.ObjUtil;
-import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.extra.spring.SpringUtil;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
+import com.cmsr.onebase.framework.common.util.collection.CollUtil;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.module.system.controller.admin.permission.vo.role.RolePageReqVO;
 import com.cmsr.onebase.module.system.controller.admin.permission.vo.role.RoleInsertReqVO;
+import com.cmsr.onebase.module.system.controller.admin.permission.vo.role.RolePageReqVO;
 import com.cmsr.onebase.module.system.controller.admin.permission.vo.role.RoleUpdateReqVO;
 import com.cmsr.onebase.module.system.dal.database.RoleDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
-import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
 import com.cmsr.onebase.module.system.dal.redis.RedisKeyConstants;
 import com.cmsr.onebase.module.system.enums.permission.DataScopeEnum;
-import com.cmsr.onebase.module.system.enums.permission.PackageTypeEnum;
 import com.cmsr.onebase.module.system.enums.permission.RoleCodeEnum;
 import com.cmsr.onebase.module.system.enums.permission.RoleTypeEnum;
 import com.google.common.annotations.VisibleForTesting;
@@ -27,8 +20,11 @@ import com.mzt.logapi.starter.annotation.LogRecord;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -36,6 +32,7 @@ import org.springframework.util.StringUtils;
 import java.util.*;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.convertList;
 import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.convertMap;
 import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
 import static com.cmsr.onebase.module.system.enums.LogRecordConstants.*;
@@ -56,6 +53,14 @@ public class RoleServiceImpl implements RoleService {
     @Resource
     private RoleDataRepository roleDataRepository;
 
+    /**
+     * 自注入 RoleService 的代理对象，确保类内调用时 AOP（如 @Cacheable）生效；
+     * 使用 @Lazy 避免启动期自引用导致的循环依赖问题。
+     */
+    @Resource
+    @Lazy
+    private RoleService roleService;
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     @LogRecord(type = SYSTEM_ROLE_TYPE, subType = SYSTEM_ROLE_CREATE_SUB_TYPE, bizNo = "{{#role.id}}",
@@ -70,8 +75,8 @@ public class RoleServiceImpl implements RoleService {
 
         // 2. 插入到数据库
         RoleDO role = BeanUtils.toBean(createReqVO, RoleDO.class);
-        role.setType(ObjectUtil.defaultIfNull(type, RoleTypeEnum.CUSTOM.getType()));
-        role.setStatus(ObjUtil.defaultIfNull(createReqVO.getStatus(), CommonStatusEnum.ENABLE.getStatus()));
+        role.setType(ObjectUtils.defaultIfNull(type, RoleTypeEnum.CUSTOM.getType()));
+        role.setStatus(ObjectUtils.defaultIfNull(createReqVO.getStatus(), CommonStatusEnum.ENABLE.getStatus()));
         role.setDataScope(DataScopeEnum.ALL.getScope()); // 默认可查看所有数据。
         roleDataRepository.insert(role);
 
@@ -214,7 +219,7 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public List<RoleDO> getRoleList(Collection<Long> ids) {
-        if (CollectionUtil.isEmpty(ids)) {
+        if (CollUtil.isEmpty(ids)) {
             return Collections.emptyList();
         }
         return roleDataRepository.findAllByIds(ids);
@@ -222,12 +227,11 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public List<RoleDO> getRoleListFromCache(Collection<Long> ids) {
-        if (CollectionUtil.isEmpty(ids)) {
+        if (CollUtil.isEmpty(ids)) {
             return Collections.emptyList();
         }
-        // 这里采用 for 循环从缓存中获取，主要考虑 Spring CacheManager 无法批量操作的问题
-        RoleServiceImpl self = getSelf();
-        return CollectionUtils.convertList(ids, self::getRoleFromCache);
+        // 通过代理对象调用，确保 @Cacheable 生效
+        return convertList(ids, roleService::getRoleFromCache);
     }
 
     @Override
@@ -237,12 +241,12 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public boolean hasAnySuperAdmin(Collection<Long> ids) {
-        if (CollectionUtil.isEmpty(ids)) {
+        if (CollectionUtils.isEmpty(ids)) {
             return false;
         }
-        RoleServiceImpl self = getSelf();
+        // 通过代理对象调用，确保 @Cacheable 生效
         return ids.stream().anyMatch(id -> {
-            RoleDO role = self.getRoleFromCache(id);
+            RoleDO role = roleService.getRoleFromCache(id);
             return role != null && RoleCodeEnum.isSuperAdmin(role.getCode());
         });
     }
@@ -269,22 +273,14 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public boolean isTenantAdmin(Set<Long> ids) {
-        if (CollectionUtil.isEmpty(ids)) {
+        if (CollUtil.isEmpty(ids)) {
             return false;
         }
-        RoleServiceImpl self = getSelf();
+        // 通过代理对象调用，确保 @Cacheable 生效
         return ids.stream().anyMatch(id -> {
-            RoleDO role = self.getRoleFromCache(id);
+            RoleDO role = roleService.getRoleFromCache(id);
             return role != null && RoleCodeEnum.TENANT_ADMIN.getCode().equals(role.getCode());
         });
     }
 
-    /**
-     * 获得自身的代理对象，解决 AOP 生效问题
-     *
-     * @return 自己
-     */
-    private RoleServiceImpl getSelf() {
-        return SpringUtil.getBean(getClass());
-    }
 }
