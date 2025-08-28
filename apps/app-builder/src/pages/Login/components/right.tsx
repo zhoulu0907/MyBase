@@ -233,7 +233,7 @@ const Right: React.FC = () => {
               </Form.Item>
 
               <Form.Item field="captchaVerification" hidden={true}>
-                <Input allowClear size="large" />
+                <Input allowClear size="large" placeholder="请输入隐藏验证码" />
               </Form.Item>
 
               <Form.Item>
