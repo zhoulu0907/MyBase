@@ -1,7 +1,8 @@
 package com.cmsr.onebase.framework.common.util.collection;
 
-import java.util.*;
+import java.util.Collection;
 
+@Deprecated
 public class CollUtil {
     /**
      * 集合是否为空
@@ -9,7 +10,10 @@ public class CollUtil {
      * @param collection 集合
      * @return 是否为空
      */
+
+    @Deprecated
     public static boolean isEmpty(Collection<?> collection) {
-        return collection == null || collection.isEmpty();
+        // 替代方法
+        return org.apache.commons.collections4.CollectionUtils.isEmpty(collection);
     }
 }
