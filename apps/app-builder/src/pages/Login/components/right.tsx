@@ -178,6 +178,15 @@ const Right: React.FC = () => {
       // 先验证表单
       await form.validate();
 
+      if (form.getFieldValue('captchaVerification')) {
+        handleAccountLogin({
+          username: form.getFieldValue('username'),
+          password: form.getFieldValue('password'),
+          captchaVerification: form.getFieldValue('captchaVerification')
+        });
+        return;
+      }
+
       // 显示滑块验证码
       sliderCaptchaRef.current?.showCaptcha();
     } catch (error) {
@@ -221,6 +230,10 @@ const Right: React.FC = () => {
                 ]}
               >
                 <Input.Password placeholder={t('auth.password')} allowClear size="large" />
+              </Form.Item>
+
+              <Form.Item field="captchaVerification" hidden={true}>
+                <Input allowClear size="large" />
               </Form.Item>
 
               <Form.Item>
