@@ -21,6 +21,11 @@
     <dependencies>
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-module-formula-server</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-module-system-server</artifactId>
             <version>${revision}</version>
         </dependency>

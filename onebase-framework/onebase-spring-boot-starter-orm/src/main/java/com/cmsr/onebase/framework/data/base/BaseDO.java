@@ -79,5 +79,4 @@ public class BaseDO implements Serializable {
         this.updater = null;
         this.updateTime = null;
     }
-
 }

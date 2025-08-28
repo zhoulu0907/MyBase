@@ -19,6 +19,7 @@
         <module>onebase-module-app</module>
         <module>onebase-module-data</module>
         <module>onebase-module-flow</module>
+        <module>onebase-module-formula</module>
     </modules>
 
     <name>${project.artifactId}</name>
