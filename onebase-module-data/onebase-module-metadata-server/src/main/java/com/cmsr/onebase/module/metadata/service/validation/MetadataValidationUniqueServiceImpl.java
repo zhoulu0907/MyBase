@@ -2,7 +2,9 @@ package com.cmsr.onebase.module.metadata.service.validation;
 
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.metadata.controller.admin.validation.vo.ValidationRuleGroupSaveReqVO;
+import com.cmsr.onebase.module.metadata.controller.admin.validation.vo.ValidationUniqueRespVO;
 import com.cmsr.onebase.module.metadata.controller.admin.validation.vo.ValidationUniqueSaveReqVO;
+import com.cmsr.onebase.module.metadata.controller.admin.validation.vo.ValidationUniqueUpdateReqVO;
 import com.cmsr.onebase.module.metadata.dal.database.MetadataValidationUniqueRepository;
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.validation.MetadataValidationUniqueDO;
@@ -29,6 +31,25 @@ public class MetadataValidationUniqueServiceImpl implements MetadataValidationUn
     @Override
     public MetadataValidationUniqueDO getByFieldId(Long fieldId) {
         return uniqueRepository.findOneByFieldId(fieldId);
+    }
+
+    @Override
+    public ValidationUniqueRespVO getByFieldIdWithRgName(Long fieldId) {
+        MetadataValidationUniqueDO uniqueDO = uniqueRepository.findOneByFieldId(fieldId);
+        if (uniqueDO == null) {
+            return null;
+        }
+        
+        // 转换DO为VO
+        ValidationUniqueRespVO respVO = BeanUtils.toBean(uniqueDO, ValidationUniqueRespVO.class);
+        
+        // 获取规则组名称
+        var ruleGroup = ruleGroupService.getValidationRuleGroup(uniqueDO.getGroupId());
+        if (ruleGroup != null) {
+            respVO.setRgName(ruleGroup.getRgName());
+        }
+        
+        return respVO;
     }
 
     @Override
@@ -75,10 +96,42 @@ public class MetadataValidationUniqueServiceImpl implements MetadataValidationUn
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void update(MetadataValidationUniqueDO data) {
-        Assert.notNull(data, "data不能为空");
-        Assert.notNull(data.getId(), "id不能为空");
-        uniqueRepository.upsert(data);
+    public void update(ValidationUniqueUpdateReqVO vo) {
+        Assert.notNull(vo, "vo不能为空");
+        Assert.notNull(vo.getId(), "id不能为空");
+        Assert.hasText(vo.getRgName(), "规则组名称不能为空");
+        
+        // 查询现有记录获取完整信息
+        MetadataValidationUniqueDO existing = uniqueRepository.findById(vo.getId());
+        Assert.notNull(existing, "记录不存在");
+        
+        // 获取字段信息
+        MetadataEntityFieldDO field = entityFieldService.getEntityField(String.valueOf(existing.getFieldId()));
+        Assert.notNull(field, "字段不存在");
+        
+        // 处理规则组：先查找，不存在则创建
+        Long groupId;
+        var existingGroup = ruleGroupService.getByName(vo.getRgName());
+        if (existingGroup != null) {
+            groupId = existingGroup.getId();
+        } else {
+            // 创建新的规则组
+            ValidationRuleGroupSaveReqVO groupVO = new ValidationRuleGroupSaveReqVO();
+            groupVO.setRgName(vo.getRgName());
+            groupVO.setRgDesc("自动创建的规则组：" + vo.getRgName());
+            groupVO.setRgStatus(StatusEnumUtil.ACTIVE);
+            groupId = ruleGroupService.createValidationRuleGroup(groupVO);
+        }
+        
+        // 将 VO 转换为 DO 并设置必要字段
+        MetadataValidationUniqueDO updateObj = BeanUtils.toBean(vo, MetadataValidationUniqueDO.class);
+        updateObj.setFieldId(existing.getFieldId());
+        updateObj.setEntityId(existing.getEntityId());
+        updateObj.setAppId(existing.getAppId());
+        updateObj.setGroupId(groupId);
+        
+        // 执行更新
+        uniqueRepository.upsert(updateObj);
     }
 
     @Override

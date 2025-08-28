@@ -1,6 +1,8 @@
 package com.cmsr.onebase.module.metadata.service.validation;
 
+import com.cmsr.onebase.module.metadata.controller.admin.validation.vo.ValidationLengthRespVO;
 import com.cmsr.onebase.module.metadata.controller.admin.validation.vo.ValidationLengthSaveReqVO;
+import com.cmsr.onebase.module.metadata.controller.admin.validation.vo.ValidationLengthUpdateReqVO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.validation.MetadataValidationLengthDO;
 
 /**
@@ -22,6 +24,14 @@ public interface MetadataValidationLengthService {
     MetadataValidationLengthDO getByFieldId(Long fieldId);
 
     /**
+     * 按字段ID查询长度校验配置（包含规则组名称）
+     *
+     * @param fieldId 字段ID
+     * @return 长度校验VO，可能为null
+     */
+    ValidationLengthRespVO getByFieldIdWithRgName(Long fieldId);
+
+    /**
      * 新增长度校验配置
      *
      * @param vo 待保存的VO数据
@@ -32,9 +42,9 @@ public interface MetadataValidationLengthService {
     /**
      * 修改长度校验配置
      *
-     * @param data 待更新数据（需要携带id）
+     * @param vo 待更新数据（需要携带id和rgName）
      */
-    void update(MetadataValidationLengthDO data);
+    void update(ValidationLengthUpdateReqVO vo);
 
     /**
      * 按字段ID删除长度校验配置

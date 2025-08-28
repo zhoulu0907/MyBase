@@ -1,7 +1,9 @@
 package com.cmsr.onebase.module.metadata.service.validation;
 
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.module.metadata.controller.admin.validation.vo.ValidationRequiredRespVO;
 import com.cmsr.onebase.module.metadata.controller.admin.validation.vo.ValidationRequiredSaveReqVO;
+import com.cmsr.onebase.module.metadata.controller.admin.validation.vo.ValidationRequiredUpdateReqVO;
 import com.cmsr.onebase.module.metadata.controller.admin.validation.vo.ValidationRuleGroupSaveReqVO;
 import com.cmsr.onebase.module.metadata.dal.database.MetadataValidationRequiredRepository;
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataEntityFieldDO;
@@ -29,6 +31,25 @@ public class MetadataValidationRequiredServiceImpl implements MetadataValidation
     @Override
     public MetadataValidationRequiredDO getByFieldId(Long fieldId) {
         return requiredRepository.findOneByFieldId(fieldId);
+    }
+
+    @Override
+    public ValidationRequiredRespVO getByFieldIdWithRgName(Long fieldId) {
+        MetadataValidationRequiredDO requiredDO = requiredRepository.findOneByFieldId(fieldId);
+        if (requiredDO == null) {
+            return null;
+        }
+        
+        // 转换DO为VO
+        ValidationRequiredRespVO respVO = BeanUtils.toBean(requiredDO, ValidationRequiredRespVO.class);
+        
+        // 获取规则组名称
+        var ruleGroup = ruleGroupService.getValidationRuleGroup(requiredDO.getGroupId());
+        if (ruleGroup != null) {
+            respVO.setRgName(ruleGroup.getRgName());
+        }
+        
+        return respVO;
     }
 
     @Override
@@ -75,10 +96,38 @@ public class MetadataValidationRequiredServiceImpl implements MetadataValidation
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void update(MetadataValidationRequiredDO data) {
-        Assert.notNull(data, "data不能为空");
-        Assert.notNull(data.getId(), "id不能为空");
-        requiredRepository.upsert(data);
+    public void update(ValidationRequiredUpdateReqVO reqVO) {
+        // 查询是否存在
+        MetadataValidationRequiredDO existingDO = requiredRepository.findById(reqVO.getId());
+        Assert.notNull(existingDO, "当前必填校验规则不存在");
+
+        // 查询字段信息
+        MetadataEntityFieldDO entityFieldDO = entityFieldService.getEntityField(String.valueOf(existingDO.getFieldId()));
+        Assert.notNull(entityFieldDO, "字段不存在");
+
+        // 处理规则组：先查找，不存在则创建
+        Long groupId;
+        var existingGroup = ruleGroupService.getByName(reqVO.getRgName());
+        if (existingGroup != null) {
+            groupId = existingGroup.getId();
+        } else {
+            // 创建新的规则组
+            ValidationRuleGroupSaveReqVO groupVO = new ValidationRuleGroupSaveReqVO();
+            groupVO.setRgName(reqVO.getRgName());
+            groupVO.setRgDesc("自动创建的规则组：" + reqVO.getRgName());
+            groupVO.setRgStatus(StatusEnumUtil.ACTIVE);
+            groupId = ruleGroupService.createValidationRuleGroup(groupVO);
+        }
+
+        // 转换为DO对象并保留必要字段
+        MetadataValidationRequiredDO updateDO = BeanUtils.toBean(reqVO, MetadataValidationRequiredDO.class);
+        updateDO.setFieldId(existingDO.getFieldId());
+        updateDO.setEntityId(existingDO.getEntityId());
+        updateDO.setAppId(existingDO.getAppId());
+        updateDO.setGroupId(groupId);
+        
+        // 执行更新
+        requiredRepository.upsert(updateDO);
     }
 
     @Override
