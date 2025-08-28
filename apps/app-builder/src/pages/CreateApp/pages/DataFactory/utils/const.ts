@@ -120,3 +120,26 @@ export const ENTITY_STATUS = {
 } as const;
 
 export type EntityStatus = (typeof ENTITY_STATUS)[keyof typeof ENTITY_STATUS];
+
+// 字段约束 长度 0禁用 1开启
+export const FIELD_CONSTRAINT_LENGTH_ENABLED = {
+  DISABLE: 0,
+  ENABLE: 1
+} as const;
+
+export type FieldConstraintLengthEnabled =
+  (typeof FIELD_CONSTRAINT_LENGTH_ENABLED)[keyof typeof FIELD_CONSTRAINT_LENGTH_ENABLED];
+
+// 字段约束 正则 0禁用 1开启
+export const FIELD_CONSTRAINT_REGEX_ENABLED = {
+  DISABLE: 0,
+  ENABLE: 1
+} as const;
+
+export type FieldConstraintRegexEnabled =
+  (typeof FIELD_CONSTRAINT_REGEX_ENABLED)[keyof typeof FIELD_CONSTRAINT_REGEX_ENABLED];
+
+export const FIELD_CONSTRAINT_LENGTH_PROMPT = {
+  DISABLE: 0,
+  ENABLE: 1
+} as const;
