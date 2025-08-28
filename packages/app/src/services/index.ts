@@ -5,6 +5,7 @@ export * from './application';
 export * from './metadata_dataresource';
 export * from './metadata_entity';
 export * from './metadata_method';
+export * from './metadata_validation';
 export * from './tag';
 export * from './role';
 export * from './permission';
