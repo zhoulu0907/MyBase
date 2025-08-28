@@ -2,7 +2,7 @@
 @baseUrl = http://localhost:48080/admin-api
 @adminTenantId = 1
 @token = 1952f31dd1564d3e9889dd789d50e27c
-@tag = Yunai.local
+@tag = OneBase.local
 
 
 ### /role/create 成功

@@ -1,6 +1,6 @@
 package com.cmsr.onebase.framework.common.util.collection;
 
-import java.util.Collection;
+import java.util.*;
 
 public class CollUtil {
     /**

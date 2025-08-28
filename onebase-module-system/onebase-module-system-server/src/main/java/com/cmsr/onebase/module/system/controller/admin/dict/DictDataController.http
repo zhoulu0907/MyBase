@@ -3,7 +3,7 @@
 @baseUrl = http://localhost:48080/admin-api
 @adminTenantId = 1
 @token = 327a71784fa14847867c95e2f5bab8cd
-@tag = Yunai.local
+@tag = OneBase.local
 
 
 ### 请求 /menu/list 接口 => 成功
