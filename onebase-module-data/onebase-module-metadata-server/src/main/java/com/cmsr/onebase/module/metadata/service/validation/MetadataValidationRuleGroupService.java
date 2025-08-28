@@ -63,4 +63,20 @@ public interface MetadataValidationRuleGroupService {
      */
     List<List<ValidationRuleDefinitionVO>> buildValueRulesStructure(Long groupId);
 
+    /**
+     * 根据名称获取规则组
+     *
+     * @param rgName 规则组名称
+     * @return 规则组DO，可能为null
+     */
+    MetadataValidationRuleGroupDO getByName(String rgName);
+
+    /**
+     * 确保存在指定字段专属规则组（RG_FIELD_{fieldId}），不存在则创建
+     *
+     * @param fieldId 字段ID
+     * @return 规则组ID
+     */
+    Long ensureFieldRuleGroup(Long fieldId);
+
 }

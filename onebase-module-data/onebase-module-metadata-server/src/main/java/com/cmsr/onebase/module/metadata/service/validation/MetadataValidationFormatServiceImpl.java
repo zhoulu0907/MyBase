@@ -1,11 +1,9 @@
 package com.cmsr.onebase.module.metadata.service.validation;
 
-import com.cmsr.onebase.module.metadata.dal.database.MetadataEntityFieldRepository;
 import com.cmsr.onebase.module.metadata.dal.database.MetadataValidationFormatRepository;
-import com.cmsr.onebase.module.metadata.dal.database.MetadataValidationRuleGroupRepository;
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.validation.MetadataValidationFormatDO;
-import com.cmsr.onebase.module.metadata.dal.dataobject.validation.MetadataValidationRuleGroupDO;
+import com.cmsr.onebase.module.metadata.service.entity.MetadataEntityFieldService;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,9 +18,9 @@ import org.springframework.util.Assert;
 @Service
 public class MetadataValidationFormatServiceImpl implements MetadataValidationFormatService {
 
-    @Resource private MetadataValidationFormatRepository formatRepository;
-    @Resource private MetadataValidationRuleGroupRepository ruleGroupRepository;
-    @Resource private MetadataEntityFieldRepository entityFieldRepository;
+    @Resource private MetadataValidationFormatRepository formatRepository; // 自身仓库
+    @Resource private MetadataValidationRuleGroupService ruleGroupService; // 其他服务
+    @Resource private MetadataEntityFieldService entityFieldService; // 其他服务
 
     @Override
     public MetadataValidationFormatDO getRegexByFieldId(Long fieldId) {
@@ -35,10 +33,10 @@ public class MetadataValidationFormatServiceImpl implements MetadataValidationFo
         Assert.notNull(data, "data不能为空");
         Assert.notNull(data.getFieldId(), "fieldId不能为空");
 
-        MetadataEntityFieldDO field = entityFieldRepository.findById(data.getFieldId());
+    MetadataEntityFieldDO field = entityFieldService.getEntityField(String.valueOf(data.getFieldId()));
         Assert.notNull(field, "字段不存在");
 
-        Long groupId = ensureFieldRuleGroup(data.getFieldId());
+    Long groupId = ensureFieldRuleGroup(data.getFieldId());
 
         data.setEntityId(field.getEntityId());
         data.setAppId(field.getAppId());
@@ -65,16 +63,6 @@ public class MetadataValidationFormatServiceImpl implements MetadataValidationFo
     }
 
     private Long ensureFieldRuleGroup(Long fieldId) {
-        String rgName = "RG_FIELD_" + fieldId;
-        MetadataValidationRuleGroupDO group = ruleGroupRepository.selectByRgName(rgName, null);
-        if (group == null) {
-            group = new MetadataValidationRuleGroupDO();
-            group.setRgName(rgName);
-            group.setRgDesc("字段" + fieldId + "的规则组");
-            group.setRgStatus(1);
-            group.setValMethod("BLOCK_AND_POP");
-            ruleGroupRepository.insert(group);
-        }
-        return group.getId();
+        return ruleGroupService.ensureFieldRuleGroup(fieldId);
     }
 }

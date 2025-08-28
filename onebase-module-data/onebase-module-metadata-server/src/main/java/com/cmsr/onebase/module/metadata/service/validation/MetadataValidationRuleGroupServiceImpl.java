@@ -111,6 +111,27 @@ public class MetadataValidationRuleGroupServiceImpl implements MetadataValidatio
         return validationRuleGroupRepository.selectPage(pageReqVO);
     }
 
+    @Override
+    public MetadataValidationRuleGroupDO getByName(String rgName) {
+        return validationRuleGroupRepository.selectByRgName(rgName, null);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Long ensureFieldRuleGroup(Long fieldId) {
+        String rgName = "RG_FIELD_" + fieldId;
+        MetadataValidationRuleGroupDO group = validationRuleGroupRepository.selectByRgName(rgName, null);
+        if (group == null) {
+            group = new MetadataValidationRuleGroupDO();
+            group.setRgName(rgName);
+            group.setRgDesc("字段" + fieldId + "的规则组");
+            group.setRgStatus(StatusEnumUtil.ACTIVE);
+            group.setValMethod("BLOCK_AND_POP");
+            validationRuleGroupRepository.insert(group);
+        }
+        return group.getId();
+    }
+
     /**
      * 校验校验规则分组是否存在
      *
