@@ -1,8 +1,9 @@
 package com.cmsr.onebase.module.metadata.controller.admin.validation;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.module.metadata.controller.admin.validation.vo.ValidationFormatRespVO;
 import com.cmsr.onebase.module.metadata.controller.admin.validation.vo.ValidationFormatSaveReqVO;
-import com.cmsr.onebase.module.metadata.dal.dataobject.validation.MetadataValidationFormatDO;
+import com.cmsr.onebase.module.metadata.controller.admin.validation.vo.ValidationFormatUpdateReqVO;
 import com.cmsr.onebase.module.metadata.service.validation.MetadataValidationFormatService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -27,8 +28,8 @@ public class ValidationFormatController {
     @Operation(summary = "根据字段ID获取正则格式校验")
     @Parameter(name = "fieldId", required = true)
     @PreAuthorize("@ss.hasPermission('metadata:validation-format:query')")
-    public CommonResult<MetadataValidationFormatDO> getRegexByField(@RequestParam("fieldId") Long fieldId) {
-        return success(formatService.getRegexByFieldId(fieldId));
+    public CommonResult<ValidationFormatRespVO> getRegexByField(@RequestParam("fieldId") Long fieldId) {
+        return success(formatService.getRegexByFieldIdWithRgName(fieldId));
     }
 
     @PostMapping("/create")
@@ -41,8 +42,8 @@ public class ValidationFormatController {
     @PostMapping("/update")
     @Operation(summary = "更新格式校验")
     @PreAuthorize("@ss.hasPermission('metadata:validation-format:update')")
-    public CommonResult<Boolean> update(@Valid @RequestBody MetadataValidationFormatDO req) {
-        formatService.update(req);
+    public CommonResult<Boolean> update(@Valid @RequestBody ValidationFormatUpdateReqVO vo) {
+        formatService.update(vo);
         return success(true);
     }
 

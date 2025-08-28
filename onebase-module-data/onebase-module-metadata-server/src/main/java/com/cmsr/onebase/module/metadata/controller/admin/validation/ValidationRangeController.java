@@ -1,8 +1,9 @@
 package com.cmsr.onebase.module.metadata.controller.admin.validation;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.module.metadata.controller.admin.validation.vo.ValidationRangeRespVO;
 import com.cmsr.onebase.module.metadata.controller.admin.validation.vo.ValidationRangeSaveReqVO;
-import com.cmsr.onebase.module.metadata.dal.dataobject.validation.MetadataValidationRangeDO;
+import com.cmsr.onebase.module.metadata.controller.admin.validation.vo.ValidationRangeUpdateReqVO;
 import com.cmsr.onebase.module.metadata.service.validation.MetadataValidationRangeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -27,8 +28,8 @@ public class ValidationRangeController {
     @Operation(summary = "根据字段ID获取范围校验")
     @Parameter(name = "fieldId", required = true)
     @PreAuthorize("@ss.hasPermission('metadata:validation-range:query')")
-    public CommonResult<MetadataValidationRangeDO> getByField(@RequestParam("fieldId") Long fieldId) {
-        return success(rangeService.getByFieldId(fieldId));
+    public CommonResult<ValidationRangeRespVO> getByField(@RequestParam("fieldId") Long fieldId) {
+        return success(rangeService.getByFieldIdWithRgName(fieldId));
     }
 
     @PostMapping("/create")
@@ -41,8 +42,8 @@ public class ValidationRangeController {
     @PostMapping("/update")
     @Operation(summary = "更新范围校验")
     @PreAuthorize("@ss.hasPermission('metadata:validation-range:update')")
-    public CommonResult<Boolean> update(@Valid @RequestBody MetadataValidationRangeDO req) {
-        rangeService.update(req);
+    public CommonResult<Boolean> update(@Valid @RequestBody ValidationRangeUpdateReqVO vo) {
+        rangeService.update(vo);
         return success(true);
     }
 

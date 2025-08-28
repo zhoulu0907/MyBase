@@ -85,7 +85,10 @@ public class MetadataEntityFieldConstraintServiceImpl implements MetadataEntityF
                 lengthVO.setRgName("字段约束-" + req.getFieldId()); // 设置规则组名称
                 lengthService.create(lengthVO);
             } else {
-                lengthService.update(d);
+                // 将DO转换为UpdateReqVO
+                ValidationLengthUpdateReqVO lengthUpdateVO = BeanUtils.toBean(d, ValidationLengthUpdateReqVO.class);
+                lengthUpdateVO.setRgName("字段约束-" + req.getFieldId()); // 设置规则组名称
+                lengthService.update(lengthUpdateVO);
             }
         } else if ("REGEX".equalsIgnoreCase(type)) {
             // upsert 正则（格式表 format_code=REGEX）
@@ -105,7 +108,10 @@ public class MetadataEntityFieldConstraintServiceImpl implements MetadataEntityF
                 formatVO.setRgName("字段约束-" + req.getFieldId()); // 设置规则组名称
                 formatService.create(formatVO);
             } else {
-                formatService.update(d);
+                // 将DO转换为UpdateReqVO
+                ValidationFormatUpdateReqVO formatUpdateVO = BeanUtils.toBean(d, ValidationFormatUpdateReqVO.class);
+                formatUpdateVO.setRgName("字段约束-" + req.getFieldId()); // 设置规则组名称
+                formatService.update(formatUpdateVO);
             }
         } else if ("REQUIRED".equalsIgnoreCase(type)) {
             // 同步必填到 required 表
@@ -122,7 +128,10 @@ public class MetadataEntityFieldConstraintServiceImpl implements MetadataEntityF
                 requiredVO.setRgName("字段约束-" + req.getFieldId()); // 设置规则组名称
                 requiredService.create(requiredVO);
             } else {
-                requiredService.update(d);
+                // 将DO转换为UpdateReqVO
+                ValidationRequiredUpdateReqVO requiredUpdateVO = BeanUtils.toBean(d, ValidationRequiredUpdateReqVO.class);
+                requiredUpdateVO.setRgName("字段约束-" + req.getFieldId()); // 设置规则组名称
+                requiredService.update(requiredUpdateVO);
             }
         } else if ("UNIQUE".equalsIgnoreCase(type)) {
             // 同步唯一性到 unique 表
@@ -139,7 +148,10 @@ public class MetadataEntityFieldConstraintServiceImpl implements MetadataEntityF
                 uniqueVO.setRgName("字段约束-" + req.getFieldId()); // 设置规则组名称
                 uniqueService.create(uniqueVO);
             } else {
-                uniqueService.update(d);
+                // 将DO转换为UpdateReqVO
+                ValidationUniqueUpdateReqVO uniqueUpdateVO = BeanUtils.toBean(d, ValidationUniqueUpdateReqVO.class);
+                uniqueUpdateVO.setRgName("字段约束-" + req.getFieldId()); // 设置规则组名称
+                uniqueService.update(uniqueUpdateVO);
             }
         }
     }

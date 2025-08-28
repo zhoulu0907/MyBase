@@ -848,8 +848,8 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
         try {
             log.info("检查表是否存在 - 表名: {}", tableName);
 
-            // 简单尝试查询表，如果表不存在会抛出异常
-            String testSql = "SELECT 1 FROM " + tableName + " LIMIT 1";
+            // 简单尝试查询表，给表名加双引号处理PostgreSQL大小写问题
+            String testSql = "SELECT 1 FROM \"" + tableName + "\" LIMIT 1";
             service.querys(testSql);
 
             log.info("表 {} 存在，当前连接的数据库: {}", tableName, getCurrentDatabase(service));

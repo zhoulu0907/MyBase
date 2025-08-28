@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.metadata.controller.admin.validation.vo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
@@ -16,6 +17,10 @@ public class ValidationUniqueUpdateReqVO {
     @Schema(description = "ID", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "ID不能为空")
     private Long id;
+
+    @Schema(description = "规则组名称", requiredMode = Schema.RequiredMode.REQUIRED, example = "用户信息校验")
+    @NotBlank(message = "规则组名称不能为空")
+    private String rgName;
 
     @Schema(description = "是否启用(0/1)")
     private Integer isEnabled;
