@@ -7,7 +7,6 @@ import styles from '../modal.module.less';
 
 interface MasterDetailFormValues {
   parentEntityId: string;
-  parentFieldId: string;
   childTableType: 'existing' | 'new';
   childEntityId?: string;
   childFieldId?: string;
@@ -38,7 +37,6 @@ const CreateMasterDetailModal: React.FC<{
   const [loading, setLoading] = useState(false);
   const [entityOptions, setEntityOptions] = useState<EntityOption[]>([]);
   const [childEntityOptions, setChildEntityOptions] = useState<EntityOption[]>([]);
-  const [fieldOptions, setFieldOptions] = useState<FieldOption[]>([]);
 
   // 初始化实体选项
   useEffect(() => {
@@ -58,28 +56,9 @@ const CreateMasterDetailModal: React.FC<{
         setEntityOptions(entityOptions);
         setChildEntityOptions(entityOptions.filter((item: EntityOption) => item.value !== entityId));
         form.setFieldValue('parentEntityId', entityId);
-        handleMasterEntityChange(entityId);
       }
     } catch (error) {
       console.error('加载实体列表失败:', error);
-    }
-  };
-
-  // 当主表改变时，更新字段选项
-  const handleMasterEntityChange = async (value: string) => {
-    try {
-      const res = await getEntityFields({ entityId: value });
-      if (res.length > 0) {
-        const fieldOptions = res.map((field: { displayName: string; id: string }) => ({
-          label: field.displayName,
-          value: field.id
-        }));
-        setFieldOptions(fieldOptions);
-      }
-      // 清空字段选择
-      form.setFieldValue('parentFieldId', '');
-    } catch (error) {
-      console.error('加载字段列表失败:', error);
     }
   };
 
@@ -93,7 +72,6 @@ const CreateMasterDetailModal: React.FC<{
         // 根据子表类型准备数据
         const requestData = {
           parentEntityId: values.parentEntityId,
-          parentFieldId: values.parentFieldId,
           appId: curAppId,
           datasourceId: curDataSourceId
         };
@@ -148,23 +126,9 @@ const CreateMasterDetailModal: React.FC<{
       <Form form={form} layout="vertical" className={styles['master-detail-form']}>
         {/* 主表选择 */}
         <Form.Item label="主表" required>
-          <Grid.Row gutter={16}>
-            <Grid.Col span={12}>
-              <Form.Item field="parentEntityId" rules={[{ required: true, message: '请选择主表' }]}>
-                <Select
-                  placeholder="请选择业务实体"
-                  options={entityOptions}
-                  onChange={handleMasterEntityChange}
-                  disabled
-                />
-              </Form.Item>
-            </Grid.Col>
-            <Grid.Col span={12}>
-              <Form.Item field="parentFieldId" rules={[{ required: true, message: '请选择主表字段' }]}>
-                <Select placeholder="请选择字段" options={fieldOptions} style={{ width: '100%' }} />
-              </Form.Item>
-            </Grid.Col>
-          </Grid.Row>
+          <Form.Item field="parentEntityId" rules={[{ required: true, message: '请选择主表' }]}>
+            <Select placeholder="请选择业务实体" options={entityOptions} disabled />
+          </Form.Item>
         </Form.Item>
 
         {/* 子表类型选择 */}

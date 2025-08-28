@@ -81,7 +81,8 @@ export const validationTypeOptions = [
   { label: '长度校验', value: 'length' },
   { label: '范围校验', value: 'range' },
   { label: '格式校验', value: 'format' },
-  { label: '子表空行校验', value: 'subtable_empty' }
+  { label: '子表空行校验', value: 'subtable_empty' },
+  { label: '自定义校验', value: 'custom' }
 ];
 
 // 格式校验类型选项

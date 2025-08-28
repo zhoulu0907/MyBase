@@ -25,7 +25,7 @@ interface CreateRuleModalProps {
   successCallback: () => void;
 }
 
-const CreateRuleModal: React.FC<CreateRuleModalProps> = ({ visible, setVisible, successCallback, entity }) => {
+const CreateCustomRule: React.FC<CreateRuleModalProps> = ({ visible, setVisible, successCallback, entity }) => {
   const { curAppId } = useAppStore();
   const [form] = Form.useForm<RuleFormValues>();
   const [loading, setLoading] = useState(false);
@@ -215,7 +215,7 @@ const CreateRuleModal: React.FC<CreateRuleModalProps> = ({ visible, setVisible, 
           <Input placeholder="请输入规则名称" maxLength={50} showWordLimit />
         </Form.Item>
 
-        <Form.Item label="校验类型" field="validationType" rules={[{ required: true, message: '请选择校验类型' }]}>
+        {/* <Form.Item label="校验类型" field="validationType" rules={[{ required: true, message: '请选择校验类型' }]}>
           <Select onChange={handleValidationTypeChange} placeholder="请选择校验类型">
             {validationTypeOptions.map((option) => (
               <Select.Option key={option.value} value={option.value}>
@@ -223,7 +223,7 @@ const CreateRuleModal: React.FC<CreateRuleModalProps> = ({ visible, setVisible, 
               </Select.Option>
             ))}
           </Select>
-        </Form.Item>
+        </Form.Item> */}
 
         {/* 格式校验类型 - 条件显示 */}
         <Form.Item noStyle shouldUpdate>
@@ -397,4 +397,4 @@ const CreateRuleModal: React.FC<CreateRuleModalProps> = ({ visible, setVisible, 
   );
 };
 
-export default CreateRuleModal;
+export default CreateCustomRule;
