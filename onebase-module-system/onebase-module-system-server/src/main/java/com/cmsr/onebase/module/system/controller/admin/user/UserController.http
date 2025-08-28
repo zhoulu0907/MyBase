@@ -35,6 +35,23 @@ tenant-id: 1
   "password": "admin124"
 }
 
+### 新增平台管理员用户 /system/user/platform-admin/create
+POST http://127.0.0.1:48080/admin-api/system/user/platform-admin/create
+Content-Type: application/json
+Authorization: Bearer 91dda3f8eb2d46a780b73c529f1c94e8
+tenant-id: 1
+
+{
+  "username": "test003",
+  "password": "admin123",
+  "mobile": "15601691636",
+  "email": "",
+  "nickName": "宇",
+  "adminType": "2"
+}
+
+
+
 ### 删除平台管理员用户 /system/user/platform-admin/delete
 DELETE http://127.0.0.1:48080/admin-api/system/user/platform-admin/delete
 Content-Type: application/json
