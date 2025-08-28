@@ -21,12 +21,12 @@ import java.util.List;
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 
 /**
- * 管理后台 - 函数 Controller
+ * 公式引擎 - 函数 Controller
  *
  * @author matianyu
  * @date 2025-08-28
  */
-@Tag(name = "管理后台 - 函数")
+@Tag(name = "公式引擎 - 函数")
 @RestController
 @RequestMapping("/formula/function")
 @Validated
