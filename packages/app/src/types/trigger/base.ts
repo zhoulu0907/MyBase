@@ -24,7 +24,6 @@ export interface Condition {
     rules?: Condition[];
 }
 
-
 export enum FieldType {
     // 值
     VALUE = 'value',
