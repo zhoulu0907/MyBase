@@ -2,105 +2,150 @@ package com.cmsr.onebase.module.metadata.service.field;
 
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.FieldConstraintRespVO;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.FieldConstraintSaveReqVO;
-import com.cmsr.onebase.module.metadata.dal.dataobject.field.MetadataEntityFieldConstraintDO;
-import com.cmsr.onebase.module.metadata.dal.database.MetadataEntityFieldConstraintRepository;
+import com.cmsr.onebase.module.metadata.dal.dataobject.validation.MetadataValidationFormatDO;
+import com.cmsr.onebase.module.metadata.dal.dataobject.validation.MetadataValidationLengthDO;
+import com.cmsr.onebase.module.metadata.dal.dataobject.validation.MetadataValidationRequiredDO;
+import com.cmsr.onebase.module.metadata.dal.dataobject.validation.MetadataValidationUniqueDO;
+import com.cmsr.onebase.module.metadata.service.validation.*;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-
 /**
- * 字段约束 Service 实现
- *
- * @author bty418
- * @date 2025-08-18
+ * 字段约束 Service 实现（基于新规则表）
  */
 @Service
 public class MetadataEntityFieldConstraintServiceImpl implements MetadataEntityFieldConstraintService {
 
-    @Resource
-    private MetadataEntityFieldConstraintRepository constraintRepository;
-
-    @Override
-    public List<MetadataEntityFieldConstraintDO> listByFieldId(Long fieldId) {
-        return constraintRepository.findByFieldId(fieldId);
-    }
-
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public void upsert(MetadataEntityFieldConstraintDO constraint) {
-        MetadataEntityFieldConstraintDO exist = constraintRepository.findOneByType(constraint.getFieldId(), constraint.getConstraintType());
-        if (exist == null) {
-            constraintRepository.insert(constraint);
-        } else {
-            constraint.setId(exist.getId());
-            constraintRepository.update(constraint);
-        }
-    }
-
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public void delete(Long fieldId, String constraintType) {
-        MetadataEntityFieldConstraintDO exist = constraintRepository.findOneByType(fieldId, constraintType);
-        if (exist != null) {
-            constraintRepository.deleteById(exist.getId());
-        }
-    }
+    @Resource private MetadataValidationLengthService lengthService;
+    @Resource private MetadataValidationFormatService formatService;
+    @Resource private MetadataValidationRequiredService requiredService;
+    @Resource private MetadataValidationUniqueService uniqueService;
+    @Resource private MetadataValidationRangeService rangeService;
+    @Resource private MetadataValidationChildNotEmptyService childNotEmptyService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteByFieldId(Long fieldId) {
-        constraintRepository.deleteByFieldId(fieldId);
+    lengthService.deleteByFieldId(fieldId);
+    formatService.deleteByFieldId(fieldId);
+    requiredService.deleteByFieldId(fieldId);
+    uniqueService.deleteByFieldId(fieldId);
+    rangeService.deleteByFieldId(fieldId);
+    childNotEmptyService.deleteByFieldId(fieldId);
     }
 
     @Override
     public FieldConstraintRespVO getFieldConstraintConfig(Long fieldId) {
-        List<MetadataEntityFieldConstraintDO> list = listByFieldId(fieldId);
         FieldConstraintRespVO resp = new FieldConstraintRespVO();
-        
-        if (list != null) {
-            list.forEach(c -> {
-                if ("LENGTH_RANGE".equalsIgnoreCase(c.getConstraintType())) {
-                    resp.setLengthEnabled(c.getIsEnabled());
-                    resp.setMinLength(c.getMinLength());
-                    resp.setMaxLength(c.getMaxLength());
-                    resp.setLengthPrompt(c.getPromptMessage());
-                } else if ("REGEX".equalsIgnoreCase(c.getConstraintType())) {
-                    resp.setRegexEnabled(c.getIsEnabled());
-                    resp.setRegexPattern(c.getRegexPattern());
-                    resp.setRegexPrompt(c.getPromptMessage());
-                }
-            });
+    // 长度
+    MetadataValidationLengthDO len = lengthService.getByFieldId(fieldId);
+        if (len != null) {
+            resp.setLengthEnabled(len.getIsEnabled());
+            resp.setMinLength(len.getMinLength());
+            resp.setMaxLength(len.getMaxLength());
+            resp.setLengthPrompt(len.getPromptMessage());
         }
-        
+        // 正则（格式表里 format_code=REGEX）
+    MetadataValidationFormatDO regex = formatService.getRegexByFieldId(fieldId);
+        if (regex != null) {
+            resp.setRegexEnabled(regex.getIsEnabled());
+            resp.setRegexPattern(regex.getRegexPattern());
+            resp.setRegexPrompt(regex.getPromptMessage());
+        }
         return resp;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void saveFieldConstraintConfig(FieldConstraintSaveReqVO req) {
-        // 校验：LENGTH_RANGE 需校验区间合理
-        if ("LENGTH_RANGE".equalsIgnoreCase(req.getConstraintType())) {
+        String type = req.getConstraintType();
+        if ("LENGTH_RANGE".equalsIgnoreCase(type)) {
             Integer min = req.getMinLength();
             Integer max = req.getMaxLength();
             if (min != null && max != null && min > max) {
                 throw new IllegalArgumentException("最小长度不能大于最大长度");
             }
+            // upsert 长度
+            MetadataValidationLengthDO exist = lengthService.getByFieldId(req.getFieldId());
+            MetadataValidationLengthDO d = new MetadataValidationLengthDO();
+            if (exist != null) { d.setId(exist.getId()); }
+            d.setFieldId(req.getFieldId());
+            d.setIsEnabled(req.getIsEnabled());
+            d.setMinLength(req.getMinLength());
+            d.setMaxLength(req.getMaxLength());
+            d.setTrimBefore(1);
+            d.setPromptMessage(req.getPromptMessage());
+            d.setRunMode(req.getRunMode());
+            if (d.getId() == null) {
+                lengthService.create(d);
+            } else {
+                lengthService.update(d);
+            }
+        } else if ("REGEX".equalsIgnoreCase(type)) {
+            // upsert 正则（格式表 format_code=REGEX）
+            MetadataValidationFormatDO exist = formatService.getRegexByFieldId(req.getFieldId());
+            MetadataValidationFormatDO d = new MetadataValidationFormatDO();
+            if (exist != null) { d.setId(exist.getId()); }
+            d.setFieldId(req.getFieldId());
+            d.setIsEnabled(req.getIsEnabled());
+            d.setFormatCode("REGEX");
+            d.setRegexPattern(req.getRegexPattern());
+            d.setFlags(null);
+            d.setPromptMessage(req.getPromptMessage());
+            d.setRunMode(req.getRunMode());
+            if (d.getId() == null) {
+                formatService.create(d);
+            } else {
+                formatService.update(d);
+            }
+        } else if ("REQUIRED".equalsIgnoreCase(type)) {
+            // 同步必填到 required 表
+            MetadataValidationRequiredDO exist = requiredService.getByFieldId(req.getFieldId());
+            MetadataValidationRequiredDO d = new MetadataValidationRequiredDO();
+            if (exist != null) { d.setId(exist.getId()); }
+            d.setFieldId(req.getFieldId());
+            d.setIsEnabled(req.getIsEnabled());
+            d.setPromptMessage(req.getPromptMessage());
+            d.setRunMode(req.getRunMode());
+            if (d.getId() == null) {
+                requiredService.create(d);
+            } else {
+                requiredService.update(d);
+            }
+        } else if ("UNIQUE".equalsIgnoreCase(type)) {
+            // 同步唯一性到 unique 表
+            MetadataValidationUniqueDO exist = uniqueService.getByFieldId(req.getFieldId());
+            MetadataValidationUniqueDO d = new MetadataValidationUniqueDO();
+            if (exist != null) { d.setId(exist.getId()); }
+            d.setFieldId(req.getFieldId());
+            d.setIsEnabled(req.getIsEnabled());
+            d.setPromptMessage(req.getPromptMessage());
+            d.setRunMode(req.getRunMode());
+            if (d.getId() == null) {
+                uniqueService.create(d);
+            } else {
+                uniqueService.update(d);
+            }
         }
-        
-        MetadataEntityFieldConstraintDO constraint = new MetadataEntityFieldConstraintDO();
-        constraint.setFieldId(req.getFieldId());
-        constraint.setConstraintType(req.getConstraintType());
-        constraint.setMinLength(req.getMinLength());
-        constraint.setMaxLength(req.getMaxLength());
-        constraint.setRegexPattern(req.getRegexPattern());
-        constraint.setPromptMessage(req.getPromptMessage());
-        constraint.setIsEnabled(req.getIsEnabled());
-        constraint.setRunMode(req.getRunMode());
-        constraint.setAppId(req.getAppId());
-        
-        upsert(constraint);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void delete(Long fieldId, String constraintType) {
+        if ("LENGTH_RANGE".equalsIgnoreCase(constraintType)) {
+            MetadataValidationLengthDO exist = lengthService.getByFieldId(fieldId);
+            if (exist != null) { lengthService.deleteByFieldId(fieldId); }
+        } else if ("REGEX".equalsIgnoreCase(constraintType)) {
+            MetadataValidationFormatDO exist = formatService.getRegexByFieldId(fieldId);
+            if (exist != null) { formatService.deleteByFieldId(fieldId); }
+        } else if ("REQUIRED".equalsIgnoreCase(constraintType)) {
+            MetadataValidationRequiredDO exist = requiredService.getByFieldId(fieldId);
+            if (exist != null) { requiredService.deleteByFieldId(fieldId); }
+        } else if ("UNIQUE".equalsIgnoreCase(constraintType)) {
+            MetadataValidationUniqueDO exist = uniqueService.getByFieldId(fieldId);
+            if (exist != null) { uniqueService.deleteByFieldId(fieldId); }
+        }
     }
 }
 
