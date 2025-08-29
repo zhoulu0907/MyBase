@@ -25,13 +25,15 @@ const InputSearch = Input.Search;
 
 interface IProps {
   roleInfo: Role | undefined;
+  memberList?: any[];
+  memberTotal?: number;
 }
 
 type ManagerType = 'permission' | 'members';
 
 // 角色面板
 const RoleInfo = (props: IProps) => {
-  const { roleInfo } = props;
+  const { roleInfo, memberList, memberTotal } = props;
   const { curAppId } = useAppStore();
 
   const [activeTab, setActiveTab] = useState('1'); // tabs
@@ -121,7 +123,7 @@ const RoleInfo = (props: IProps) => {
       </div>
 
       {managerType === 'members' ? (
-        <UserTable roleInfo={roleInfo} />
+        <UserTable roleInfo={roleInfo} memberList={memberList} memberTotal={memberTotal} />
       ) : (
         <>
           {roleInfo?.roleType !== RoleType.ADMIN && (
