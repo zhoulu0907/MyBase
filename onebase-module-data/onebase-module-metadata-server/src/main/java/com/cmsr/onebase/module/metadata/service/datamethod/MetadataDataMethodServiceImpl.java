@@ -194,7 +194,7 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
 
         // 7. 执行插入
         DataRow dataRow = new DataRow(processedData);
-        Object insertResult = temporaryService.insert(entity.getTableName(), dataRow);
+        Object insertResult = temporaryService.insert(quoteTableName(entity.getTableName()), dataRow);
         log.info("创建数据成功，实体ID: {}, 表名: {}, 插入结果: {}", reqVO.getEntityId(), entity.getTableName(), insertResult);
 
         // 8. 查询插入后的完整数据 
@@ -208,7 +208,7 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
             return buildDynamicDataRespVO(entity, processedData, fields);
         }
 
-        Map<String, Object> resultData = queryDataByIdWithService(temporaryService, entity.getTableName(), primaryKeyValue, fields);
+        Map<String, Object> resultData = queryDataByIdWithService(temporaryService, quoteTableName(entity.getTableName()), primaryKeyValue, fields);
 
         // 9. 若存在写计划，处理子表写入
         try {
@@ -249,7 +249,7 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
         return TenantUtils.executeIgnore(() -> {
 
         // 5. 校验数据存在
-        validateDataExistsWithService(temporaryService, entity.getTableName(), reqVO.getId(), fields);
+        validateDataExistsWithService(temporaryService, quoteTableName(entity.getTableName()), reqVO.getId(), fields);
 
         // 6. 校验更新数据
         validateDataForUpdate(reqVO.getData(), fields);
@@ -266,11 +266,11 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
 
         // 10. 执行更新
         DataRow dataRow = new DataRow(processedData);
-        long updateCount = temporaryService.update(entity.getTableName(), dataRow, configStore);
+        long updateCount = temporaryService.update(quoteTableName(entity.getTableName()), dataRow, configStore);
         log.info("更新数据成功，实体ID: {}, 表名: {}, 更新记录数: {}", reqVO.getEntityId(), entity.getTableName(), updateCount);
 
         // 11. 查询更新后的完整数据
-        Map<String, Object> resultData = queryDataByIdWithService(temporaryService, entity.getTableName(), reqVO.getId(), fields);
+        Map<String, Object> resultData = queryDataByIdWithService(temporaryService, quoteTableName(entity.getTableName()), reqVO.getId(), fields);
 
         // 12. 若存在写计划，处理子表替换式更新（按计划配置）
         try {
@@ -315,7 +315,7 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
             return TenantUtils.executeIgnore(() -> {
 
             // 6. 校验数据存在
-            validateDataExistsWithService(temporaryService, entity.getTableName(), reqVO.getId(), fields);
+            validateDataExistsWithService(temporaryService, quoteTableName(entity.getTableName()), reqVO.getId(), fields);
 
             // 7. 获取主键字段名
             String primaryKeyField = getPrimaryKeyFieldName(fields);
@@ -329,11 +329,11 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
                 // 软删除：更新deleted字段为删除时间戳
                 DataRow updateData = new DataRow();
                 updateData.put("deleted", String.valueOf(System.currentTimeMillis()));
-                deleteCount = temporaryService.update(entity.getTableName(), updateData, configStore);
+                deleteCount = temporaryService.update(quoteTableName(entity.getTableName()), updateData, configStore);
                 log.info("软删除数据成功，实体ID: {}, 表名: {}, 删除记录数: {}", reqVO.getEntityId(), entity.getTableName(), deleteCount);
             } else {
                 // 物理删除：直接删除记录
-                deleteCount = temporaryService.delete(entity.getTableName(), configStore);
+                deleteCount = temporaryService.delete(quoteTableName(entity.getTableName()), configStore);
                 log.info("物理删除数据成功，实体ID: {}, 表名: {}, 删除记录数: {}", reqVO.getEntityId(), entity.getTableName(), deleteCount);
             }
 
@@ -381,7 +381,7 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
         AnylineService<?> temporaryService = temporaryDatasourceService.createTemporaryService(datasource);
         log.info("成功切换到数据源：{}", datasource.getCode());
         return TenantUtils.executeIgnore(() -> {
-            Map<String, Object> resultData = queryDataByIdWithService(temporaryService, entity.getTableName(), reqVO.getId(), fields);
+            Map<String, Object> resultData = queryDataByIdWithService(temporaryService, quoteTableName(entity.getTableName()), reqVO.getId(), fields);
             if (resultData == null || resultData.isEmpty()) {
                 throw exception(BUSINESS_ENTITY_NOT_EXISTS);
             }
@@ -459,8 +459,8 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
             if (hasDeletedField) {
                 countConfigs.and(Compare.EQUAL, "deleted", "0");
             }
-            long total = temporaryService.count(entity.getTableName(), countConfigs);
-            DataSet dataSet = temporaryService.querys(entity.getTableName(), configs);
+            long total = temporaryService.count(quoteTableName(entity.getTableName()), countConfigs);
+            DataSet dataSet = temporaryService.querys(quoteTableName(entity.getTableName()), configs);
             List<DynamicDataRespVO> list = new ArrayList<>();
             for (int i = 0; i < dataSet.size(); i++) {
                 DataRow row = dataSet.getRow(i);
@@ -772,6 +772,24 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
         if (existingData == null || existingData.isEmpty()) {
             throw exception(BUSINESS_ENTITY_NOT_EXISTS);
         }
+    }
+
+    /**
+     * 为表名添加引号以支持PostgreSQL中大小写混合的表名
+     *
+     * @param tableName 原始表名
+     * @return 添加引号后的表名
+     */
+    private String quoteTableName(String tableName) {
+        if (tableName == null || tableName.trim().isEmpty()) {
+            return tableName;
+        }
+        // 如果表名已经有引号，直接返回
+        if (tableName.startsWith("\"") && tableName.endsWith("\"")) {
+            return tableName;
+        }
+        // 为表名添加双引号
+        return "\"" + tableName + "\"";
     }
 
 }

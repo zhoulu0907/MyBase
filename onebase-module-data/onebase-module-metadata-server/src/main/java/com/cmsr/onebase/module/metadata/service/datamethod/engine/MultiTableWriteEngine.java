@@ -169,7 +169,7 @@ public class MultiTableWriteEngine {
             boolean ok = true;
             String err = null;
             try {
-                svc.insert(c.getTable(), row);
+                svc.insert(quoteTableName(c.getTable()), row);
             } catch (Exception ex) {
                 ok = false;
                 err = ex.getMessage();
@@ -232,9 +232,9 @@ public class MultiTableWriteEngine {
             if (Boolean.TRUE.equals(c.getSoftDelete()) && c.getDeletedColumn() != null && !c.getDeletedColumn().isEmpty()) {
                 DataRow update = new DataRow();
                 update.put(c.getDeletedColumn(), String.valueOf(System.currentTimeMillis()));
-                svc.update(c.getTable(), update, cs);
+                svc.update(quoteTableName(c.getTable()), update, cs);
             } else {
-                svc.delete(c.getTable(), cs);
+                svc.delete(quoteTableName(c.getTable()), cs);
             }
         } catch (Exception ex) {
             ok = false;
@@ -321,5 +321,23 @@ public class MultiTableWriteEngine {
     private String quote(String s) {
         if (s == null) return null;
         return '"' + s.replace("\\", "\\\\").replace("\"", "\\\"") + '"';
+    }
+
+    /**
+     * 为表名添加引号以支持PostgreSQL中大小写混合的表名
+     *
+     * @param tableName 原始表名
+     * @return 添加引号后的表名
+     */
+    private String quoteTableName(String tableName) {
+        if (tableName == null || tableName.trim().isEmpty()) {
+            return tableName;
+        }
+        // 如果表名已经有引号，直接返回
+        if (tableName.startsWith("\"") && tableName.endsWith("\"")) {
+            return tableName;
+        }
+        // 为表名添加双引号
+        return "\"" + tableName + "\"";
     }
 }
