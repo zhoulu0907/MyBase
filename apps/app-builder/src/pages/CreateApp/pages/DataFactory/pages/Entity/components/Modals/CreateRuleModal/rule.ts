@@ -75,16 +75,6 @@ export const valueTypeOptions = [
 ];
 
 // 校验类型选项
-export const validationTypeOptions = [
-  { label: '必填校验', value: 'required' },
-  { label: '唯一校验', value: 'unique' },
-  { label: '长度校验', value: 'length' },
-  { label: '范围校验', value: 'range' },
-  { label: '格式校验', value: 'format' },
-  { label: '子表空行校验', value: 'subtable_empty' },
-  { label: '自定义校验', value: 'custom' }
-];
-
 export const validationTypeMap: Record<string, string> = {
   required: '必填校验',
   unique: '唯一校验',
@@ -94,6 +84,11 @@ export const validationTypeMap: Record<string, string> = {
   subtable_empty: '子表空行校验',
   custom: '自定义校验'
 };
+
+export const validationTypeOptions = Object.entries(validationTypeMap).map(([key, value]) => ({
+  label: value,
+  value: key
+}));
 
 // 格式校验类型选项
 export const formatValidationTypeOptions = [

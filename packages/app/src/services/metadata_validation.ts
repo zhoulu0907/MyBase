@@ -33,6 +33,14 @@ export const createRule = (data: CreateRuleReqVO) => {
 };
 
 /**
+ * 创建必填校验
+ * @param data 数据规则信息
+ */
+export const createRequiredRule = (data: object) => {
+  return metadataService.post('/validation/required/create', data);
+};
+
+/**
  * 创建唯一校验
  * @param data 数据规则信息
  */
@@ -49,11 +57,27 @@ export const createLengthRule = (data: object) => {
 };
 
 /**
- * 创建正则校验
+ * 创建格式校验
  * @param data 数据规则信息
  */
-export const createRegexRule = (data: object) => {
-  return metadataService.post('/validation/regex/create', data);
+export const createFormatRule = (data: object) => {
+  return metadataService.post('/validation/format/create', data);
+};
+
+/**
+ * 创建范围校验
+ * @param data 数据规则信息
+ */
+export const createRangeRule = (data: object) => {
+  return metadataService.post('/validation/range/create', data);
+};
+
+/**
+ * 创建子表空行校验
+ * @param data 数据规则信息
+ */
+export const createChildNotEmptyRule = (data: object) => {
+  return metadataService.post('/validation/child-not-empty/create', data);
 };
 
 /**

@@ -1,13 +1,22 @@
 import type { EntityListItem } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
 import { Form, Grid, Input, Message, Modal, Select } from '@arco-design/web-react';
-import { createUniqueRule, getEntityFieldsWithChildren } from '@onebase/app';
+import {
+  createLengthRule,
+  createRequiredRule,
+  createRangeRule,
+  createFormatRule,
+  createUniqueRule,
+  getEntityFieldsWithChildren,
+  createChildNotEmptyRule
+} from '@onebase/app';
 import React, { useState } from 'react';
 import { useAppStore } from '@/store/store_app';
-import { validationTypeMap, ruleTip } from './rule.ts';
+import { validationTypeMap, ruleTip, validationTypeOptions } from './rule.ts';
 import styles from '../modal.module.less';
 
 interface RuleFormValues {
   // validationType: string;
+  validationType: string;
   formatValidationType?: string;
   rgName: string;
   fieldId: string;
@@ -22,8 +31,6 @@ interface CreateRuleModalProps {
   successCallback: () => void;
   ruleType: string;
 }
-
-
 
 const CreateOtherRule: React.FC<CreateRuleModalProps> = ({
   visible,
@@ -52,19 +59,45 @@ const CreateOtherRule: React.FC<CreateRuleModalProps> = ({
 
       console.log('规则表单数据:', values, form.getFieldsValue());
 
-      // TODO: 调用创建规则的API
-      const res = await createUniqueRule({
+      const params = {
         ...values,
         entityId: entity.id,
         appId: curAppId
-      });
+      };
+
+      let res;
+
+      switch (ruleType) {
+        case 'required':
+          res = await createRequiredRule(params);
+          break;
+        case 'unique':
+          res = await createUniqueRule(params);
+          break;
+        case 'length':
+          res = await createLengthRule(params);
+          break;
+        case 'range':
+          res = await createRangeRule(params);
+          break;
+        case 'format':
+          res = await createFormatRule(params);
+          break;
+        case 'subtable_empty':
+          res = await createChildNotEmptyRule(params);
+          break;
+      }
 
       console.log('createRule', res);
 
-      Message.success('创建规则成功');
-      form.resetFields();
-      setVisible(false);
-      successCallback();
+      if (res) {
+        Message.success('创建规则成功');
+        form.resetFields();
+        setVisible(false);
+        successCallback();
+      } else {
+        console.error(res.msg || '创建失败');
+      }
     } catch (error) {
       console.error('创建规则失败:', error);
     } finally {
@@ -145,7 +178,7 @@ const CreateOtherRule: React.FC<CreateRuleModalProps> = ({
           <Select placeholder="请选择校验数据项" options={fieldOptions} />
         </Form.Item>
 
-        {/* <Form.Item label="校验类型" field="validationType" rules={[{ required: true, message: '请选择校验类型' }]}>
+        <Form.Item label="校验类型" field="validationType" hidden>
           <Select onChange={handleValidationTypeChange} placeholder="请选择校验类型" disabled>
             {validationTypeOptions.map((option) => (
               <Select.Option key={option.value} value={option.value}>
@@ -153,7 +186,7 @@ const CreateOtherRule: React.FC<CreateRuleModalProps> = ({
               </Select.Option>
             ))}
           </Select>
-        </Form.Item> */}
+        </Form.Item>
 
         {ruleType === 'length' && (
           <Grid.Row gutter={16}>
