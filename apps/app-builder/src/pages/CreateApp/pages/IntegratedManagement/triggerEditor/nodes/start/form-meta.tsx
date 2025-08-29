@@ -2,6 +2,7 @@ import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-e
 
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { Form, Input, Select } from '@arco-design/web-react';
+import ConditionEditor from '../../components/condition-editor';
 import { FormContent, FormHeader, FormOutputs } from '../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../hooks';
 import { type FlowNodeJSON } from '../../typings';
@@ -67,6 +68,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
               </>
             )}
           </Form>
+          <ConditionEditor onChange={() => {}} fields={[]} fieldOperatorMapping={{}} />
         </FormContent>
       ) : (
         <FormContent>
