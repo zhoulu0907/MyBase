@@ -101,3 +101,5 @@ sessionStore
 /sql/patch/update_status_fields.sql
 /sql/patch/update_status_fields_mysql.sql
 /docs/多表CRUD后续待办.md
+/sql/postgresql/patch/2025-08-27-metadata-validation-migration.sql
+/sql/postgresql/patch/2025-08-27-metadata-validation-ddl.sql

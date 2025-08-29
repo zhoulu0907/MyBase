@@ -206,21 +206,8 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
                 return v;
             }).toList());
         }
-        var constraints = fieldConstraintService.listByFieldId(entityField.getId());
-        if (constraints != null && !constraints.isEmpty()) {
-            FieldConstraintRespVO cr = new FieldConstraintRespVO();
-            for (var c : constraints) {
-                if ("LENGTH_RANGE".equalsIgnoreCase(c.getConstraintType())) {
-                    cr.setLengthEnabled(c.getIsEnabled());
-                    cr.setMinLength(c.getMinLength());
-                    cr.setMaxLength(c.getMaxLength());
-                    cr.setLengthPrompt(c.getPromptMessage());
-                } else if ("REGEX".equalsIgnoreCase(c.getConstraintType())) {
-                    cr.setRegexEnabled(c.getIsEnabled());
-                    cr.setRegexPattern(c.getRegexPattern());
-                    cr.setRegexPrompt(c.getPromptMessage());
-                }
-            }
+        FieldConstraintRespVO cr = fieldConstraintService.getFieldConstraintConfig(entityField.getId());
+        if (cr != null) {
             result.setConstraints(cr);
         }
 
@@ -861,8 +848,8 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
         try {
             log.info("检查表是否存在 - 表名: {}", tableName);
 
-            // 简单尝试查询表，如果表不存在会抛出异常
-            String testSql = "SELECT 1 FROM " + tableName + " LIMIT 1";
+            // 简单尝试查询表，给表名加双引号处理PostgreSQL大小写问题
+            String testSql = "SELECT 1 FROM \"" + tableName + "\" LIMIT 1";
             service.querys(testSql);
 
             log.info("表 {} 存在，当前连接的数据库: {}", tableName, getCurrentDatabase(service));
@@ -927,8 +914,20 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
 
             return exists;
         } catch (Exception e) {
-            log.warn("检查列 {} 在表 {} 中是否存在时发生错误: {}", columnName, tableName, e.getMessage());
-            return false;
+            log.error("检查列 {} 在表 {} 中是否存在时发生错误: {}", columnName, tableName, e.getMessage(), e);
+            // 发生异常时，使用更保守的策略：尝试直接查询表结构来确认
+            try {
+                log.info("使用备用方法检查列是否存在: {}.{}", tableName, columnName);
+                String backupSql = "SELECT column_name FROM information_schema.columns WHERE table_name = ? AND column_name = ? AND table_schema = 'public'";
+                DataSet backupResult = service.querys(backupSql, tableName, columnName);
+                boolean backupExists = backupResult != null && backupResult.size() > 0;
+                log.info("备用检查结果：列 {} 在表 {} 中{}存在", columnName, tableName, backupExists ? "" : "不");
+                return backupExists;
+            } catch (Exception backupException) {
+                log.error("备用列存在性检查也失败: {}", backupException.getMessage(), backupException);
+                // 最后的保险措施：假设列不存在，但在执行DDL时使用IF NOT EXISTS
+                return false;
+            }
         }
     }
 
@@ -996,7 +995,8 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
      */
     private String generateAddColumnDDL(String tableName, MetadataEntityFieldDO field) {
         StringBuilder ddl = new StringBuilder();
-        ddl.append("ALTER TABLE \"").append(tableName).append("\" ADD COLUMN \"")
+        // 使用 IF NOT EXISTS 语法防止重复添加列的错误
+        ddl.append("ALTER TABLE \"").append(tableName).append("\" ADD COLUMN IF NOT EXISTS \"")
            .append(field.getFieldName()).append("\" ");
 
         // 字段类型映射
@@ -1225,37 +1225,63 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
      * 处理字段约束
      */
     private void processFieldConstraints(Long fieldId, MetadataEntityFieldDO entityField, FieldConstraintRespVO constraints) {
-        if (constraints.getMinLength() != null && constraints.getMaxLength() != null && 
-            constraints.getMinLength() > constraints.getMaxLength()) {
+        if (constraints.getMinLength() != null && constraints.getMaxLength() != null &&
+                constraints.getMinLength() > constraints.getMaxLength()) {
             throw new IllegalArgumentException("最小长度不能大于最大长度");
         }
 
-        if (constraints.getMinLength() != null || constraints.getMaxLength() != null || 
-            constraints.getLengthEnabled() != null || 
-            (constraints.getLengthPrompt() != null && !constraints.getLengthPrompt().isEmpty())) {
-            var d = new com.cmsr.onebase.module.metadata.dal.dataobject.field.MetadataEntityFieldConstraintDO();
-            d.setFieldId(fieldId);
-            d.setConstraintType("LENGTH_RANGE");
-            d.setMinLength(constraints.getMinLength());
-            d.setMaxLength(constraints.getMaxLength());
-            d.setPromptMessage(constraints.getLengthPrompt());
-            d.setIsEnabled(constraints.getLengthEnabled());
-            d.setRunMode(entityField != null && entityField.getRunMode() != null ? entityField.getRunMode() : 0);
-            d.setAppId(entityField != null ? entityField.getAppId() : null);
-            fieldConstraintService.upsert(d);
+        // 长度
+        if (constraints.getMinLength() != null || constraints.getMaxLength() != null ||
+                constraints.getLengthEnabled() != null ||
+                (constraints.getLengthPrompt() != null && !constraints.getLengthPrompt().isEmpty())) {
+            FieldConstraintSaveReqVO req = new FieldConstraintSaveReqVO();
+            req.setFieldId(fieldId);
+            req.setConstraintType("LENGTH_RANGE");
+            req.setMinLength(constraints.getMinLength());
+            req.setMaxLength(constraints.getMaxLength());
+            req.setPromptMessage(constraints.getLengthPrompt());
+            req.setIsEnabled(constraints.getLengthEnabled());
+            req.setRunMode(entityField != null && entityField.getRunMode() != null ? entityField.getRunMode() : 0);
+            req.setAppId(entityField != null ? entityField.getAppId() : null);
+            fieldConstraintService.saveFieldConstraintConfig(req);
         }
 
-        if (constraints.getRegexPattern() != null || constraints.getRegexEnabled() != null || 
-            (constraints.getRegexPrompt() != null && !constraints.getRegexPrompt().isEmpty())) {
-            var d = new com.cmsr.onebase.module.metadata.dal.dataobject.field.MetadataEntityFieldConstraintDO();
-            d.setFieldId(fieldId);
-            d.setConstraintType("REGEX");
-            d.setRegexPattern(constraints.getRegexPattern());
-            d.setPromptMessage(constraints.getRegexPrompt());
-            d.setIsEnabled(constraints.getRegexEnabled());
-            d.setRunMode(entityField != null && entityField.getRunMode() != null ? entityField.getRunMode() : 0);
-            d.setAppId(entityField != null ? entityField.getAppId() : null);
-            fieldConstraintService.upsert(d);
+        // 正则 - 只有当正则表达式不为空且启用时才创建REGEX约束
+        if (constraints.getRegexPattern() != null && !constraints.getRegexPattern().trim().isEmpty() &&
+                constraints.getRegexEnabled() != null && constraints.getRegexEnabled() == 1) {
+            FieldConstraintSaveReqVO req = new FieldConstraintSaveReqVO();
+            req.setFieldId(fieldId);
+            req.setConstraintType("REGEX");
+            req.setRegexPattern(constraints.getRegexPattern());
+            req.setPromptMessage(constraints.getRegexPrompt());
+            req.setIsEnabled(constraints.getRegexEnabled());
+            req.setRunMode(entityField != null && entityField.getRunMode() != null ? entityField.getRunMode() : 0);
+            req.setAppId(entityField != null ? entityField.getAppId() : null);
+            fieldConstraintService.saveFieldConstraintConfig(req);
+        }
+
+        // 必填（与 isRequired 联动）
+        if (entityField != null && entityField.getIsRequired() != null) {
+            FieldConstraintSaveReqVO req = new FieldConstraintSaveReqVO();
+            req.setFieldId(fieldId);
+            req.setConstraintType("REQUIRED");
+            req.setIsEnabled(entityField.getIsRequired());
+            req.setPromptMessage(null);
+            req.setRunMode(entityField.getRunMode() != null ? entityField.getRunMode() : 0);
+            req.setAppId(entityField.getAppId());
+            fieldConstraintService.saveFieldConstraintConfig(req);
+        }
+
+        // 唯一（与 isUnique 联动）
+        if (entityField != null && entityField.getIsUnique() != null) {
+            FieldConstraintSaveReqVO req = new FieldConstraintSaveReqVO();
+            req.setFieldId(fieldId);
+            req.setConstraintType("UNIQUE");
+            req.setIsEnabled(entityField.getIsUnique());
+            req.setPromptMessage(null);
+            req.setRunMode(entityField.getRunMode() != null ? entityField.getRunMode() : 0);
+            req.setAppId(entityField.getAppId());
+            fieldConstraintService.saveFieldConstraintConfig(req);
         }
     }
 
@@ -1327,22 +1353,9 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
             }
         }
 
-        // 填充约束信息
-        var constraints = fieldConstraintService.listByFieldId(field.getId());
-        if (constraints != null && !constraints.isEmpty()) {
-            FieldConstraintRespVO constraintVO = new FieldConstraintRespVO();
-            for (var c : constraints) {
-                if ("LENGTH_RANGE".equalsIgnoreCase(c.getConstraintType())) {
-                    constraintVO.setLengthEnabled(c.getIsEnabled());
-                    constraintVO.setMinLength(c.getMinLength());
-                    constraintVO.setMaxLength(c.getMaxLength());
-                    constraintVO.setLengthPrompt(c.getPromptMessage());
-                } else if ("REGEX".equalsIgnoreCase(c.getConstraintType())) {
-                    constraintVO.setRegexEnabled(c.getIsEnabled());
-                    constraintVO.setRegexPattern(c.getRegexPattern());
-                    constraintVO.setRegexPrompt(c.getPromptMessage());
-                }
-            }
+        // 填充约束信息（使用新表）
+        FieldConstraintRespVO constraintVO = fieldConstraintService.getFieldConstraintConfig(field.getId());
+        if (constraintVO != null) {
             vo.setConstraints(constraintVO);
         }
 
