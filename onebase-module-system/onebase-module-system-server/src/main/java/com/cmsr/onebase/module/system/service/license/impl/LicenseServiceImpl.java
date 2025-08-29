@@ -2,7 +2,6 @@ package com.cmsr.onebase.module.system.service.license.impl;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
 import com.cmsr.onebase.module.system.controller.admin.license.vo.LicenseExportRespVO;
 import com.cmsr.onebase.module.system.controller.admin.license.vo.LicensePageReqVO;
 import com.cmsr.onebase.module.system.controller.admin.license.vo.LicenseSaveReqVO;
@@ -11,6 +10,7 @@ import com.cmsr.onebase.module.system.dal.database.LicenseDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.license.LicenseDO;
 import com.cmsr.onebase.module.system.enums.license.LicenseStatusEnum;
 import com.cmsr.onebase.module.system.service.license.LicenseService;
+import com.cmsr.onebase.module.system.util.encrypt.SM4Utils;
 import com.cmsr.onebase.module.system.util.jsondeserializer.JsonDeserializerUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -24,14 +24,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
-import static com.cmsr.onebase.module.system.util.encrypt.SM4Utils.decryptSm4FileToString;
 import static com.cmsr.onebase.module.system.util.encrypt.SM4Utils.sm4Encrypt;
 
 /**
@@ -142,26 +140,14 @@ public class LicenseServiceImpl implements LicenseService {
 
     @Override
     public Long importLicense(MultipartFile file) {
-
+        
         try {
-            // 获取当前登录用户名
-            String username = SecurityFrameworkUtils.getLoginUserNickname();
-            // 获取当前时间，格式yyyyMMddHHmmss
-            String now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
-            // 项目根目录下license目录
-            String licenseDirPath = System.getProperty("user.dir") + File.separator + "license";
-            File licenseDir = new File(licenseDirPath);
-            if (!licenseDir.exists()) {
-                licenseDir.mkdirs();
-            }
-            // 构造文件名
-            String baseName = "license_encrypted__" + username + "_" + now;
-            String sm4FilePath = licenseDirPath + File.separator + baseName + ".sm4";
-            // 保存上传的文件为加密文件
-            file.transferTo(new File(sm4FilePath));
-            // 解密文件并保存到lic文件
-            String decrypted = decryptSm4FileToString(sm4FilePath, LICENSE_SECRET_KEY);
-            log.info("License解析内容: {}", decrypted);
+            // 直接从MultipartFile获取字节数据并转换为字符串
+            byte[] encryptedBytes = file.getBytes();
+            String encryptedContent = new String(encryptedBytes, StandardCharsets.UTF_8);
+            // 解密内容
+            String decryptedContent = SM4Utils.sm4Decrypt(encryptedContent, LICENSE_SECRET_KEY);
+            log.info("License解析内容: {}", decryptedContent);
             // 解析JSON内容
             ObjectMapper objectMapper = new ObjectMapper();
             // 注册JavaTimeModule以支持LocalDateTime反序列化
@@ -187,7 +173,7 @@ public class LicenseServiceImpl implements LicenseService {
                 log.info("disable license ----> {}", license.getId());
             }
             // 在插入新的 License
-            LicenseSaveReqVO licenseSaveReqVO = objectMapper.readValue(decrypted, LicenseSaveReqVO.class);
+            LicenseSaveReqVO licenseSaveReqVO = objectMapper.readValue(decryptedContent, LicenseSaveReqVO.class);
             licenseSaveReqVO.setLicenseFile("测试用例");
             // 创建License时，将状态设置为ENABLE
             licenseSaveReqVO.setStatus(LicenseStatusEnum.ENABLE.getStatus());
