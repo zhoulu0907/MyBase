@@ -100,7 +100,7 @@ const allTemplate = {
           h: 36,
           w: 118,
           displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.RICH_TEXT],
-          icon: 'readonly_cp.svg', // todo
+          icon: 'rich_text_cp.svg',
           category: 'base'
         },
         {
@@ -244,7 +244,7 @@ const allTemplate = {
           h: 36,
           w: 118,
           displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.RELATED_FORM],
-          icon: 'readonly_cp.svg',
+          icon: 'related_form_cp.svg',
           category: 'base'
         },
         {

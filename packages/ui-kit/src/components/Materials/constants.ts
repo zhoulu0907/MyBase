@@ -56,7 +56,11 @@ export const CONFIG_TYPES = {
   // 颜色
   COLOR: 'Color',
   // 单选框配置
-  RADIO_DATA: 'RadioData'
+  RADIO_DATA: 'RadioData',
+  // 轮播图管理
+  CAROUSEL: 'Carousel',
+  // 图片填充方式
+  FILL_STYLE: 'FillStyle'
 } as const;
 
 // 状态选项常量
@@ -175,4 +179,17 @@ export const LAYOUT_OPTIONS = {
 export const LAYOUT_VALUES = {
   [LAYOUT_OPTIONS.HORIZONTAL]: 'horizontal',
   [LAYOUT_OPTIONS.VERTICAL]: 'vertical'
+} as const;
+
+// 图片填充方式
+export const FILL_OPTIONS = {
+  CONTAIN: '原图局中',
+  COVER: '局中填满',
+  FILL: '拉伸填满'
+} as const;
+
+export const FILL_VALUES = {
+  [FILL_OPTIONS.CONTAIN]: 'contain',
+  [FILL_OPTIONS.COVER]: 'cover',
+  [FILL_OPTIONS.FILL]: 'fill'
 } as const;
