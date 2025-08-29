@@ -8,8 +8,8 @@ import lombok.Data;
 
 @Data
 @Entity
-@Table(name = "flow_process_trigger_field")
-public class FlowProcessTriggerFieldDO extends TenantBaseDO {
+@Table(name = "flow_process_trigger_date_field")
+public class FlowProcessTriggerDateFieldDO extends TenantBaseDO {
 
     /**
      * 主键ID

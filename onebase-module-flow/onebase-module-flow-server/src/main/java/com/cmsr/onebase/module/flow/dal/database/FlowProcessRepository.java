@@ -6,11 +6,13 @@ import com.cmsr.onebase.module.flow.controller.admin.mgmt.vo.ListFlowProcessReqV
 import com.cmsr.onebase.module.flow.dal.dataobject.FlowProcessDO;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
+import org.springframework.stereotype.Repository;
 
 /**
  * @Author：huangjie
  * @Date：2025/8/29 14:35
  */
+@Repository
 public class FlowProcessRepository extends DataRepository<FlowProcessDO> {
 
     public FlowProcessRepository() {

@@ -4,6 +4,7 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.flow.controller.admin.mgmt.vo.CreateFlowProcessReqVO;
 import com.cmsr.onebase.module.flow.controller.admin.mgmt.vo.FlowProcessVO;
 import com.cmsr.onebase.module.flow.controller.admin.mgmt.vo.ListFlowProcessReqVO;
+import com.cmsr.onebase.module.flow.controller.admin.mgmt.vo.RenameFlowProcessReqVO;
 import com.cmsr.onebase.module.flow.controller.admin.mgmt.vo.UpdateFlowProcessReqVO;
 
 import java.util.List;
@@ -51,4 +52,22 @@ public interface FlowProcessMgmtService {
      * @param ids 流程ID列表
      */
     void batchDelete(List<Long> ids);
+
+    /**
+     * 启用流程
+     * @param id 流程ID
+     */
+    void enableFlowProcess(Long id);
+
+    /**
+     * 关闭流程
+     * @param id 流程ID
+     */
+    void disableFlowProcess(Long id);
+
+    /**
+     * 重命名流程
+     * @param reqVO 重命名参数
+     */
+    void renameFlowProcess(RenameFlowProcessReqVO reqVO);
 }
