@@ -7,10 +7,11 @@ import { IconPlus } from '@arco-design/web-react/icon';
 import { batchSaveFields, getEntityFields } from '@onebase/app';
 import React, { forwardRef, useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
-import styles from '../modal.module.less';
+import { ENTITY_FIELD_TYPE_LABEL } from '@/pages/CreateApp/pages/DataFactory/utils/const';
 import { type AutoCodeRule } from './FieldTypeConfig';
 import FieldConfigPopover from './FieldConfigPopover';
 import TableColumns from './TableColumns';
+import styles from './index.module.less';
 
 interface FieldFormValues {
   id?: string;
@@ -47,7 +48,11 @@ interface ConfigFieldModalProps {
 }
 
 // 需要额外配置的字段类型
-const FIELD_TYPES_NEED_CONFIG = ['PICKLIST', 'MULTI_PICKLIST', 'AUTO_CODE'];
+const FIELD_TYPES_NEED_CONFIG = [
+  ENTITY_FIELD_TYPE_LABEL.PICKLIST,
+  ENTITY_FIELD_TYPE_LABEL.MULTI_PICKLIST,
+  ENTITY_FIELD_TYPE_LABEL.AUTO_CODE
+];
 
 // 字段类型选项
 const fieldTypeOptions = JSON.parse(localStorage.getItem('fieldTypes') || '[]');
@@ -204,11 +209,11 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
 
     let fieldConfig = {};
     switch (fieldType) {
-      case 'PICKLIST':
-      case 'MULTI_PICKLIST':
+      case ENTITY_FIELD_TYPE_LABEL.PICKLIST:
+      case ENTITY_FIELD_TYPE_LABEL.MULTI_PICKLIST:
         fieldConfig = { options: configData };
         break;
-      case 'AUTO_CODE':
+      case ENTITY_FIELD_TYPE_LABEL.AUTO_CODE:
         fieldConfig = { options: configData };
         break;
       case 'CONSTRAINTS':

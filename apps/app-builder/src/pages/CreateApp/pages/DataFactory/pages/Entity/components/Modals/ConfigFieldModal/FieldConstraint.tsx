@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Button, Input, Switch } from '@arco-design/web-react';
-import styles from '../modal.module.less';
+import styles from './index.module.less';
 import {
   FIELD_CONSTRAINT_LENGTH_ENABLED,
   FIELD_CONSTRAINT_REGEX_ENABLED
