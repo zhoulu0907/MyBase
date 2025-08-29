@@ -491,6 +491,24 @@ public class DataRepository<T extends BaseDO> {
         }
     }
 
+    public long deleteByIds(List<Long> ids) {
+        try {
+            if (ids == null || ids.isEmpty()) {
+                return 0;
+            }
+            ConfigStore configs = new DefaultConfigStore();
+            configs.in(BaseDO.ID, ids);
+            DataRow row = new DataRow();
+            row.put(BaseDO.DELETED, System.currentTimeMillis());
+            long result = anylineService.update(getTableName(defaultClazz), row, configs);
+            log.debug("deleteByIds  ---> class={}, effect rows = {}, ids = {}", defaultClazz, result, ids);
+            return result;
+        } catch (Exception e) {
+            log.error("deleteByIds error, class={}, ids={}", defaultClazz.getSimpleName(), ids, e);
+            throw new DatabaseAccessException(DatabaseAccessErrorCodes.DB_DELETE_ERROR, e);
+        }
+    }
+
     /**
      * 删除实体（软删除）
      *
