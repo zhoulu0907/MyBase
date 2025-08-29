@@ -1,3 +1,5 @@
+import type { EntityStatus } from './const';
+
 // 业务对象节点数据
 export interface EntityNode {
   entityId: string;
@@ -8,6 +10,7 @@ export interface EntityNode {
   fields: Array<EntityField>;
   positionX: number;
   positionY: number;
+  status?: EntityStatus;
 }
 
 export interface EntityField {
@@ -42,8 +45,12 @@ export interface FieldEdge {
 
 // 边的数据结构示例
 export interface EdgeData {
-  source: { cell: string; port: string }; // 源节点ID
-  target: { cell: string; port: string }; // 目标节点ID
+  // source: { cell: string; port: string }; // 源节点ID
+  // target: { cell: string; port: string }; // 目标节点ID
+  sourceEntityId: string;
+  sourceFieldId: string;
+  targetEntityId: string;
+  targetFieldId: string;
   label?: string; // 关系标签
   relationshipId?: string;
 }
@@ -69,6 +76,7 @@ export interface EntityERProps {
   onEdgeEdit?: (data: EdgeData) => void;
   onlyUpdateNode?: boolean;
   updateEntityPosition?: (data: EntityNode, x: number, y: number) => void;
+  onStatusChange?: (data: Partial<EntityNode>) => void;
 }
 
 // 实体列表

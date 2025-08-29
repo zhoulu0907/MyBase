@@ -5,7 +5,7 @@ import { UserPermissionManager } from '@/utils/permission';
 import { Button, Dropdown, Layout, Menu, Tabs } from '@arco-design/web-react';
 import { IconMenu } from '@arco-design/web-react/icon';
 import { AppStatus, getApplication, type GetApplicationReq } from '@onebase/app';
-import { TokenManager } from '@onebase/common';
+import { getRuntimeURL, TokenManager } from '@onebase/common';
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styles from './header.module.less';
@@ -78,7 +78,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     TokenManager.clearToken();
     UserPermissionManager.clearUserPermissionInfo();
     // 跳转到登录页
-    navigate('/login');
+    navigate('/login', { replace: true });
   };
 
   // 用户菜单
@@ -98,9 +98,8 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
   const toRuntime = () => {
     const newWindow = window.open('', '_blank');
     if (newWindow) {
-      const baseUrl = window.location.href.replace(/create-app.*$/, '');
-      const href = `${baseUrl}runtime?appId=${curAppId}`;
-      newWindow.location.href = href;
+      const redirectURL = `${getRuntimeURL()}/#/onebase/runtime/${curAppId}/`;
+      newWindow.location.href = `${getRuntimeURL()}/#/login?redirectURL=${redirectURL}`;
     }
   };
 

@@ -33,6 +33,7 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
       onNodeAddMasterDetail,
       onFieldClick,
       onEdgeEdit,
+      onStatusChange,
       updateEntityPosition,
       onlyUpdateNode
     },
@@ -229,11 +230,12 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
           const portsItems = (nodeData: EntityNode) => {
             const items: object[] = [];
             nodeData?.fields?.forEach((field, index) => {
-              const extraTitleHeight = field.isSystemField === FIELD_TYPE.SYSTEM ? LINE_TITLE_HEIGHT : LINE_TITLE_HEIGHT * 2;
+              const extraTitleHeight =
+                field.isSystemField === FIELD_TYPE.SYSTEM ? LINE_TITLE_HEIGHT : LINE_TITLE_HEIGHT * 2;
               const accumulatedHeight = index >= 1 ? index * LINE_HEIGHT : 0;
 
               const leftItem = {
-                id: field.fieldId + '_target', // 使用字段的唯一 ID 作为 port ID
+                id: (field?.fieldId || field.fieldName) + '_target', // 使用字段的唯一 ID 作为 port ID
                 group: 'left', // 指定属于 'left' 组
                 args: {
                   x: 0,
@@ -241,7 +243,7 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
                 }
               };
               const rightItem = {
-                id: field.fieldId + '_source', // 使用字段的唯一 ID 作为 port ID
+                id: (field?.fieldId || field.fieldName) + '_source', // 使用字段的唯一 ID 作为 port ID
                 group: 'right', // 指定属于 'right' 组
                 args: {
                   x: NODE_WIDTH,
@@ -277,7 +279,8 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
               onNodeAddField,
               onNodeAddRelation,
               onNodeAddMasterDetail,
-              onFieldClick
+              onFieldClick,
+              onStatusChange
             },
             attrs: {
               body: {
@@ -363,13 +366,9 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
       // 添加边
       if (data?.edges) {
         data?.edges?.forEach((edgeData) => {
-          // 确保 source 和 target 是对象，并包含 port
-          const source = edgeData.source;
-          const target = edgeData.target;
-
           const edge = graphRef.current!.createEdge({
-            source: { cell: source?.cell, port: source?.port + '_source' },
-            target: { cell: target?.cell, port: target?.port + '_target' },
+            source: { cell: edgeData?.sourceEntityId, port: edgeData?.sourceFieldId + '_source' },
+            target: { cell: edgeData?.targetEntityId, port: edgeData?.targetFieldId + '_target' },
             attrs: {
               line: {
                 // 连线样式

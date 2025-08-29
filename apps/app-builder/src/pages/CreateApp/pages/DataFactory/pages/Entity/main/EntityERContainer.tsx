@@ -1,9 +1,4 @@
-import type {
-  EdgeData,
-  EntityData,
-  EntityERProps,
-  EntityNode
-} from '@/pages/CreateApp/pages/DataFactory/utils/interface';
+import type { EdgeData, EntityERProps, EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
 import { useAppStore } from '@/store/store_app';
 import { useResourceStore } from '@/store/store_resource';
 import { Button, Message } from '@arco-design/web-react';
@@ -17,7 +12,7 @@ import CreateEntityModal from '../components/Modals/CreateEntityModal';
 // import CreateFieldModal from '../components/Modals/CreateFieldModal';
 
 import { IconPlus } from '@arco-design/web-react/icon';
-import { deleteEntity, getEntityGraph, updateEntity } from '@onebase/app';
+import { deleteEntity, getEntityGraph, updateEntity, type UpdateEntityReqVO } from '@onebase/app';
 import {
   ConfigFieldModal,
   CreateMasterDetailModal,
@@ -34,11 +29,7 @@ export const EntityERContainer: React.FC<{
   const { curAppId } = useAppStore();
   const { curDataSourceId } = useResourceStore();
   // const [mode, setMode] = useState<'view' | 'edit'>('view');
-  const [data, setData] = useState<EntityERProps['data']>(
-    JSON.parse(
-      localStorage.getItem('entityFormValues') || JSON.stringify({ nodes: [], edges: [] })
-    ) as unknown as EntityData
-  );
+  const [data, setData] = useState<EntityERProps['data']>({ nodes: [], edges: [] });
   const [editDrawerVisible, setEditDrawerVisible] = useState(false);
   const [editingNode, setEditingNode] = useState<EntityNode | null>(null);
   const [createEntityModalVisible, setCreateEntityModalVisible] = useState(false);
@@ -71,14 +62,7 @@ export const EntityERContainer: React.FC<{
               positionY: pos?.y || 0
             };
           }) || [],
-        edges: res?.relationships.map((item) => {
-          return {
-            source: { cell: item.sourceEntityId, port: item.sourceFieldId },
-            target: { cell: item.targetEntityId, port: item.targetFieldId },
-            label: item.relationshipName,
-            relationshipId: item.relationshipId
-          };
-        })
+        edges: res?.relationships || []
       });
     }
   };
@@ -182,6 +166,24 @@ export const EntityERContainer: React.FC<{
     return chartRef.current?.getGraphPositon();
   };
 
+  const handleStatusChange = async (data: Partial<EntityNode>) => {
+    console.log('handleStatusChange', data);
+    const params = {
+      id: data.entityId,
+      status: data.status,
+      tableName: data.tableName,
+      displayName: data.entityName,
+      datasourceId: curDataSourceId,
+      appId: curAppId
+    };
+    const res = await updateEntity(params as unknown as UpdateEntityReqVO);
+    if (res) {
+      console.log('实体状态更新成功');
+      setOnlyUpdateNode(true);
+      loadEntityList();
+    }
+  };
+
   useEffect(() => {
     if (refreshEntityList) {
       loadEntityList();
@@ -209,6 +211,7 @@ export const EntityERContainer: React.FC<{
         onlyUpdateNode={onlyUpdateNode}
         updateEntityPosition={handleUpdateEntityPosition}
         onEdgeEdit={handleEdgeEdit}
+        onStatusChange={handleStatusChange}
         ref={chartRef}
       />
       <Button

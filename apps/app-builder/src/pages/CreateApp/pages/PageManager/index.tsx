@@ -161,9 +161,6 @@ const PageManagerPage: FC = () => {
     };
     const res = await listApplicationMenu(req);
 
-    console.log('curAppId: ', curAppId);
-    console.log('res: ', res);
-
     // 为每个children元素补充parentId字段
     const processedRes = addParentIdToChildren(res, RootParentPage.id);
     setParentPageOptions([{ ...RootParentPage, children: processedRes }]);

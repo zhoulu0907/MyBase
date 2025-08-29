@@ -1,6 +1,6 @@
 import LogoSVG from '@/assets/images/ob_logo.svg';
 import { Button, Checkbox, Form, Input, Message, Space, Tabs, Typography } from '@arco-design/web-react';
-import { SliderCaptcha, TokenManager, type SliderCaptchaRef } from '@onebase/common';
+import { getHashQueryParam, SliderCaptcha, TokenManager, type SliderCaptchaRef } from '@onebase/common';
 import { checkCaptchaApi, getCaptchaApi, login, type LoginRequest, type LoginResponse } from '@onebase/platform-center';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -37,8 +37,13 @@ const Right: React.FC = () => {
 
     // 如果已经登录了就自动跳转到首页
     if (TokenManager.isTokenValid()) {
-      navigate('/onebase/my-app');
-      return;
+      const redirectURL = getHashQueryParam('redirectURL');
+      if (redirectURL) {
+        window.location.href = redirectURL;
+      } else {
+        // 跳转到首页
+        navigate('/onebase/my-app');
+      }
     }
   }, []);
 
@@ -134,8 +139,14 @@ const Right: React.FC = () => {
         saveRememberMe(values.username!, rememberMe);
 
         Message.success(t('auth.loginSuccess'));
-        // 跳转到首页
-        navigate('/onebase/my-app');
+
+        const redirectURL = getHashQueryParam('redirectURL');
+        if (redirectURL) {
+          window.location.href = redirectURL;
+        } else {
+          // 跳转到首页
+          navigate('/onebase/my-app');
+        }
 
         return;
       } else {
@@ -167,6 +178,15 @@ const Right: React.FC = () => {
       // 先验证表单
       await form.validate();
 
+      if (form.getFieldValue('captchaVerification')) {
+        handleAccountLogin({
+          username: form.getFieldValue('username'),
+          password: form.getFieldValue('password'),
+          captchaVerification: form.getFieldValue('captchaVerification')
+        });
+        return;
+      }
+
       // 显示滑块验证码
       sliderCaptchaRef.current?.showCaptcha();
     } catch (error) {
@@ -179,7 +199,6 @@ const Right: React.FC = () => {
     <div className={styles.loginPageRight}>
       <div className={styles.loginPageHeader}>
         <img src={LogoSVG} alt="logo" />
-        {/* <div>ONE BASE</div> */}
       </div>
       <div className={styles.loginFormContainer}>
         <Tabs activeTab={loginType} onChange={(key) => setLoginType(key as 'account' | 'mobile')} type="text">
@@ -211,6 +230,10 @@ const Right: React.FC = () => {
                 ]}
               >
                 <Input.Password placeholder={t('auth.password')} allowClear size="large" />
+              </Form.Item>
+
+              <Form.Item field="captchaVerification" hidden={true}>
+                <Input allowClear size="large" placeholder="请输入隐藏验证码" />
               </Form.Item>
 
               <Form.Item>

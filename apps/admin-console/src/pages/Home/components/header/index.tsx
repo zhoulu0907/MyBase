@@ -37,14 +37,13 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
   };
 
   // 登出处理
-  const handleLogout = async() => {
+  const handleLogout = async () => {
     try {
-      await logout()
+      await logout();
       // 清除 token
       TokenManager.clearToken();
       // 跳转到登录页
-      navigate('/login');
-      
+      navigate('/login', { replace: true });
     } catch (error) {
       console.error('登出失败: ', error);
       Message.error('登出失败');

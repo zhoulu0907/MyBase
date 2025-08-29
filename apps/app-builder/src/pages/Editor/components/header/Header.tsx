@@ -9,23 +9,30 @@ import { useI18n } from '@/hooks/useI18n';
 import { useBasicEditorStore } from '@/store';
 import { useAppStore } from '@/store/store_app';
 import { useAppEntityStore } from '@/store/store_entity';
-import { getHashQueryParam } from '@/utils/router';
 import { Button, Message, Tabs } from '@arco-design/web-react';
 import { IconArrowLeft } from '@arco-design/web-react/icon';
 import {
   AppStatus,
+  ENTITY_TYPE,
   getAppEntities,
   getAppIdByPageSetId,
   getApplication,
-  getEntityFieldsWithChildren,
-  getPageSetMetaData,
+  type AppEntity,
   type GetApplicationReq
 } from '@onebase/app';
-import { EDITOR_TYPES, useFormEditorSignal, useListEditorSignal, usePageEditorSignal } from '@onebase/ui-kit';
+import { getHashQueryParam } from '@onebase/common';
+import {
+  EDITOR_TYPES,
+  startLoadPageSet,
+  startSavePageSet,
+  useFormEditorSignal,
+  useListEditorSignal,
+  usePageEditorSignal,
+  type SavePageSetParams
+} from '@onebase/ui-kit';
 import { cloneDeep } from 'lodash-es';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { startLoadPageSet, startSavePageSet, type SavePageSetParams } from '../../utils/app_resource';
 import PartPreview from '../partPreview';
 import styles from './index.module.less';
 
@@ -73,10 +80,7 @@ export default function EditorHeader() {
     clearComponents: clearFormComponents,
     clearPageComponentSchemas: clearFromPageComponentSchemas,
     layoutSubComponents: fromLayoutSubComponents,
-    clearLayoutSubComponents: clearFromLayoutSubComponents,
-    setComponents: setFormComponents,
-    setPageComponentSchemas: setFromPageComponentSchemas,
-    setLayoutSubComponents: setFromLayoutSubComponents
+    clearLayoutSubComponents: clearFromLayoutSubComponents
   } = useFormEditorSignal;
 
   const {
@@ -85,13 +89,10 @@ export default function EditorHeader() {
     clearComponents: clearListComponents,
     clearPageComponentSchemas: clearListPageComponentSchemas,
     layoutSubComponents: listLayoutSubComponents,
-    clearLayoutSubComponents: clearListLayoutSubComponents,
-    setComponents: setListComponents,
-    setPageComponentSchemas: setListPageComponentSchemas,
-    setLayoutSubComponents: setListLayoutSubComponents
+    clearLayoutSubComponents: clearListLayoutSubComponents
   } = useListEditorSignal;
 
-  const { setMainEntity, setAppEntities } = useAppEntityStore();
+  const { setMainEntity, setAppEntities, setSubEntities } = useAppEntityStore();
 
   const { curAppId, setCurAppId } = useAppStore();
 
@@ -132,7 +133,7 @@ export default function EditorHeader() {
       loadPageSetInfo(pageSetId);
       setIsEditMode(true);
       handleGetAppInfo(pageSetId);
-      getMainMetaData(pageSetId);
+      //   getMainMetaData(pageSetId);
     }
   }, [pageSetId]);
 
@@ -168,30 +169,37 @@ export default function EditorHeader() {
     handleGetAppEntities(appId);
   };
 
-  const getMainMetaData = async (pageSetId: string) => {
-    const mainMetaData = await getPageSetMetaData({ pageSetId: pageSetId });
-    console.log('mainMetaData: ', mainMetaData);
+  //   // 获取主表对应的主实体信息
+  //   const getMainMetaData = async (pageSetId: string) => {
+  //     const mainMetaData = await getPageSetMetaData({ pageSetId: pageSetId });
+  //     console.log('mainMetaData: ', mainMetaData);
 
-    const entityWithChildren = await getEntityFieldsWithChildren(mainMetaData);
-    console.log(entityWithChildren);
+  //     const entityWithChildren = await getEntityFieldsWithChildren(mainMetaData);
+  //     console.log(entityWithChildren);
 
-    if (entityWithChildren) {
-      setMainEntity({
-        entityID: entityWithChildren.entityId,
-        entityName: entityWithChildren.entityName,
-        entityType: entityWithChildren.entityType,
-        fields: entityWithChildren.parentFields
-      });
-    }
-  };
+  //     if (entityWithChildren) {
+  //       setMainEntity({
+  //         entityID: entityWithChildren.entityId,
+  //         entityName: entityWithChildren.entityName,
+  //         entityType: entityWithChildren.entityType,
+  //         fields: entityWithChildren.parentFields
+  //       });
+  //     }
+  //   };
 
   const handleGetAppEntities = async (appId: string) => {
-    // TODO(mickey): 等xiaoyi完成后 写活
-    // const res = await getAppEntities('1');
     const res = await getAppEntities(appId);
     console.log('appEntities: ', res);
     if (res) {
-      setAppEntities(res);
+      setAppEntities(res.entities);
+      const mainEntity = res.entities.filter((entity: AppEntity) => entity.entityType === ENTITY_TYPE.MAIN);
+      if (mainEntity.length > 0) {
+        setMainEntity(mainEntity[0]);
+      }
+      const subEntities = res.entities.filter((entity: AppEntity) => entity.entityType === ENTITY_TYPE.SUB);
+      if (subEntities.length > 0) {
+        setSubEntities({ entities: subEntities });
+      }
     }
     return res;
   };
