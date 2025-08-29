@@ -74,7 +74,7 @@ public class MultiTableQueryEngine {
 
             DefaultConfigStore cs = new DefaultConfigStore();
             cs.and(Compare.EQUAL, plan.getPrimary().getPk(), reqVO.getId());
-            DataSet ds = primarySvc.querys(table, cs);
+            DataSet ds = primarySvc.querys(quoteTableName(table), cs);
             if (ds.isEmpty()) {
                 return buildResp(entity, Collections.emptyMap(), fields);
             }
@@ -110,13 +110,13 @@ public class MultiTableQueryEngine {
 
             // 统计
             ConfigStore countCs = buildPrimaryFilter(plan, reqVO.getFilters());
-            long total = primarySvc.count(table, countCs);
+            long total = primarySvc.count(quoteTableName(table), countCs);
 
             // 分页
             DefaultConfigStore pageCs = (DefaultConfigStore) buildPrimaryFilter(plan, reqVO.getFilters());
             int offset = (reqVO.getPageNo() - 1) * reqVO.getPageSize();
             pageCs.scope(offset, reqVO.getPageSize());
-            DataSet pageDs = primarySvc.querys(table, pageCs);
+            DataSet pageDs = primarySvc.querys(quoteTableName(table), pageCs);
             List<Map<String, Object>> mains = new ArrayList<>();
             for (int i = 0; i < pageDs.size(); i++) {
                 mains.add(toMap(pageDs.getRow(i)));
@@ -201,7 +201,7 @@ public class MultiTableQueryEngine {
                 DefaultConfigStore cs = new DefaultConfigStore();
                 cs.in(simpleField(rightCol), keys);
                 cs.and(Compare.EQUAL, "deleted", "0");
-                DataSet ds = svc.querys(j.getTable(), cs);
+                DataSet ds = svc.querys(quoteTableName(j.getTable()), cs);
                 // 构建右值 -> 行(列表)映射
                 Map<Object, List<Map<String, Object>>> idx = new HashMap<>();
                 for (int i = 0; i < ds.size(); i++) {
@@ -257,5 +257,23 @@ public class MultiTableQueryEngine {
     private String simpleField(String qualified) {
         int idx = qualified.lastIndexOf('.') ;
         return idx >= 0 ? qualified.substring(idx + 1) : qualified;
+    }
+
+    /**
+     * 为表名添加引号以支持PostgreSQL中大小写混合的表名
+     *
+     * @param tableName 原始表名
+     * @return 添加引号后的表名
+     */
+    private String quoteTableName(String tableName) {
+        if (tableName == null || tableName.trim().isEmpty()) {
+            return tableName;
+        }
+        // 如果表名已经有引号，直接返回
+        if (tableName.startsWith("\"") && tableName.endsWith("\"")) {
+            return tableName;
+        }
+        // 为表名添加双引号
+        return "\"" + tableName + "\"";
     }
 }
