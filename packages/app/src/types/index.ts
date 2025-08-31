@@ -5,6 +5,7 @@ export * from './app_version';
 export * from './application';
 export * from './common';
 export * from './dataresource';
+export * from './flow';
 export * from './metadata_entity';
 export * from './metadata_method';
 export * from './permission';
