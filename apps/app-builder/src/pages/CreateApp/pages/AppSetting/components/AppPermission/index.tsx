@@ -8,11 +8,13 @@ import {
   deleteRole,
   RoleType,
   renameRole,
+  getRoleUser,
   type Role,
   type ListRoleReq,
   type CreateRoleReq,
   type DeleteRoleReq,
-  type RenameRoleReq
+  type RenameRoleReq,
+  type GerRoleUserReq
 } from '@onebase/app';
 import RoleInfo from '../Role';
 import InputRoleName from './inputRoleName';
@@ -29,6 +31,8 @@ const AppPermission: FC = () => {
   const [roleList, setRoleList] = useState<Role[]>([]);
   const [addRole, setAddRole] = useState<boolean>(false);
   const [updateRoleId, setUpdateRoleId] = useState<string>('');
+  const [memberList, setMemberList] = useState<any[]>([]);
+  const [memberTotal, setMemberTotal] = useState<number>(0);
 
   const adminData: Role | undefined = roleList?.find((role) => role.roleType === RoleType.ADMIN);
   const notAdminData: Role | undefined = roleList?.find(
@@ -49,12 +53,36 @@ const AppPermission: FC = () => {
     setActiveTab(res[0].id);
   };
 
+  // 获取用户角色成员
+  const getMemberList = async (roleId: string) => {
+    try {
+      const params: GerRoleUserReq = {
+        roleId,
+        // applicationId: appId,
+        pageNo: 1,
+        pageSize: 10
+      };
+      const res = await getRoleUser(params);
+      console.log('获取用户角色成员成功:', res);
+      // setMemberList(res.data || []);
+      setMemberList(res.list || []);
+      setMemberTotal(res.total);
+    } catch (error) {
+      console.error('获取用户角色成员失败:', error);
+    }
+  };
+
   const handleSelectmenu = (val: string) => {
+    // console.log('应用权限选择菜单 val:', val);
     if (val === 'add') {
       setAddRole(true);
       return;
     }
     setActiveTab(val);
+    const isAdminRole = val === adminData?.id;
+    if (isAdminRole) {
+      getMemberList(val);
+    }
   };
 
   // 回车新建自定义角色
@@ -184,7 +212,11 @@ const AppPermission: FC = () => {
         </div>
       </div>
       <div className={styles.right}>
-        <RoleInfo roleInfo={activeTab === adminData?.id ? adminData : notAdminData} />
+        <RoleInfo
+          roleInfo={activeTab === adminData?.id ? adminData : notAdminData}
+          memberList={memberList}
+          memberTotal={memberTotal}
+        />
       </div>
     </div>
   );

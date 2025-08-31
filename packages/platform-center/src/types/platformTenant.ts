@@ -81,6 +81,10 @@ export interface CreateTenantParams {
    */
   adminNickName: string;
   /**
+   * 管理员电话
+   */
+  adminMobile: string;
+  /**
    * 租户状态
    */
   status: 0 | 1;

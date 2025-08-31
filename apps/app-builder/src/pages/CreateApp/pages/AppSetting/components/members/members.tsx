@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Button, Modal, Input, Space, List, Breadcrumb, Avatar, Typography, Spin } from '@arco-design/web-react';
 import { IconRight, IconClose } from '@arco-design/web-react/icon';
 import { formatDeptAndUsers } from './const';
@@ -26,14 +26,29 @@ const AddMembers = (props: IProps) => {
   const renderData = formatDeptAndUsers(data);
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
   const [selectedMembers, setSelectedMembers] = useState<any[]>([]);
-  const [breadcrumbs, setBreadcrumbs] = useState<
-    { key?: string; title: string }[]
-  >([{ key: renderData.key || '-', title: renderData.title || "根目录" }]);
+  const [breadcrumbs, setBreadcrumbs] = useState<{ key?: string; title: string; id?: string }[]>([
+    { key: renderData.key || '-', title: renderData.title || '根目录' }
+  ]);
 
   const removeMember = (key: string) => {
-    const newKeys = selectedKeys.filter(k => k !== key);
+    const newKeys = selectedKeys.filter((k) => k !== key);
     setSelectedKeys(newKeys);
-    setSelectedMembers(selectedMembers.filter(m => m.key !== key));
+    setSelectedMembers(selectedMembers.filter((m) => m.key !== key));
+  };
+
+  // 重置状态函数
+  const resetState = useCallback(() => {
+    // 重置面包屑
+    setBreadcrumbs([{ key: renderData.key || '-', title: renderData.title || '根目录' }]);
+    // 清空已选中的用户
+    setSelectedKeys([]);
+    setSelectedMembers([]);
+  }, [renderData]);
+
+  // 点击取消时的处理函数
+  const handleCancel = () => {
+    resetState();
+    onCancel();
   };
 
   // 点击部门，进入下级
@@ -48,11 +63,17 @@ const AddMembers = (props: IProps) => {
     setBreadcrumbs(breadcrumbs.slice(0, index + 1));
   };
 
+  // 构建部门完整路径
+  const buildDepartmentPath = () => {
+    const deptNames = breadcrumbs.slice(1).map((breadcrumb) => breadcrumb.title);
+    return deptNames.length > 0 ? deptNames.join('/') : '未分配部门';
+  };
+
   return (
     <Modal
       title={<div style={{ textAlign: 'left' }}>{title}</div>}
       onOk={onCancel}
-      onCancel={onCancel}
+      onCancel={handleCancel}
       visible={visible}
       autoFocus={false}
       focusLock={true}
@@ -63,51 +84,65 @@ const AddMembers = (props: IProps) => {
       maskClosable={true}
       footer={
         <div style={{ textAlign: 'right' }}>
-          <Button type="default" onClick={onCancel} style={{ marginRight: 12 }}>
+          <Button type="default" onClick={handleCancel} style={{ marginRight: 12 }}>
             取消
           </Button>
-          <Button type="primary" disabled={selectedMembers.length === 0} onClick={() => onConfirm(selectedMembers.map(v => v.key))}>
+          <Button
+            type="primary"
+            disabled={selectedMembers.length === 0}
+            onClick={() => onConfirm(selectedMembers.map((v) => v.key))}
+          >
             确定
           </Button>
         </div>
       }
     >
-      <div style={{
-        height: 500,
-        border: '1px solid #e5e6eb',
-        borderRadius: 4,
-        boxSizing: 'border-box',
-        padding: 12,
-        display: 'flex',
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        position: 'relative',
-      }}>
-        <div style={{
-          flex: 1.1,
+      <div
+        style={{
+          height: 500,
+          border: '1px solid #e5e6eb',
+          borderRadius: 4,
+          boxSizing: 'border-box',
+          padding: 12,
           display: 'flex',
-          flexDirection: 'column',
-          marginRight: 24,
-        }}>
-          <Space direction='vertical'>
-            <Input.Search placeholder="搜索用户或部门" onChange={onSearch} />
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          position: 'relative'
+        }}
+      >
+        <div
+          style={{
+            flex: 1.1,
+            display: 'flex',
+            flexDirection: 'column',
+            marginRight: 24
+          }}
+        >
+          <Space direction="vertical">
+            <Input.Search
+              placeholder="搜索用户或部门"
+              onChange={onSearch}
+              onPressEnter={(e) => {
+                console.log('ipt关键字', e);
+                const value = e.target.value;
+                onSearch(value);
+              }}
+            />
 
             <Breadcrumb separator={<IconRight />}>
               {breadcrumbs.map((node, index) => (
                 <Breadcrumb.Item key={node.key} onClick={() => handleBreadcrumbClick(node, index)}>
-                  <Typography.Text style={{ cursor: 'pointer' }}>
-                    {node.title}
-                  </Typography.Text>
+                  <Typography.Text style={{ cursor: 'pointer' }}>{node.title}</Typography.Text>
                 </Breadcrumb.Item>
               ))}
             </Breadcrumb>
           </Space>
 
-          <div style={{overflow: 'hidden auto'}}>
-            <Spin loading={loading} block style={{height: '100%'}}>
+          <div style={{ overflow: 'hidden auto' }}>
+            <Spin loading={loading} block style={{ height: '100%' }}>
               {renderData?.children?.map((item: any) =>
                 item.type === 'user' ? (
-                  <div key={item.key} style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8 }}>
+                  <div key={`user-${item.key}`} style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8 }}>
                     <input
                       type="checkbox"
                       checked={selectedKeys.includes(item.key)}
@@ -115,12 +150,19 @@ const AddMembers = (props: IProps) => {
                         const checked = e.target.checked;
                         if (checked) {
                           setSelectedKeys([...selectedKeys, item.key]);
-                          setSelectedMembers([...selectedMembers, { key: item.key, name: item.title }]);
+                          setSelectedMembers([
+                            ...selectedMembers,
+                            {
+                              key: item.key,
+                              name: item.title,
+                              department: buildDepartmentPath() // 使用构建的完整路径
+                            }
+                          ]);
                         } else {
                           removeMember(item.key);
                         }
                       }}
-                      style={{cursor: 'pointer'}}
+                      style={{ cursor: 'pointer' }}
                     />
                     <Avatar size={24} style={{ backgroundColor: 'rgb(var(--primary-6))' }}>
                       {item.title?.slice(0, 1) || 'U'}
@@ -129,28 +171,34 @@ const AddMembers = (props: IProps) => {
                   </div>
                 ) : (
                   <div
-                    key={item.key}
+                    key={`dept-${item.key}`}
                     style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <Avatar size={24} style={{ backgroundColor: 'rgb(var(--primary-6))' }}>部</Avatar>
+                      <Avatar size={24} style={{ backgroundColor: 'rgb(var(--primary-6))' }}>
+                        部
+                      </Avatar>
                       <span>{item.title}</span>
                     </div>
-                    <Button type="text" onClick={() => handleDeptClick(item)}>下级<IconRight /></Button>
+                    <Button type="text" onClick={() => handleDeptClick(item)}>
+                      下级
+                      <IconRight />
+                    </Button>
                   </div>
                 )
               )}
             </Spin>
           </div>
-
         </div>
 
         {/* 右侧 */}
-        <div style={{
-          display: 'flex',
-          flexDirection: 'column',
-          flex: 0.9,
-        }}>
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            flex: 0.9
+          }}
+        >
           <div style={{ width: '300px', height: '100%', paddingLeft: '16px', overflow: 'hidden' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
               <span>已选择: {selectedMembers.length} 个</span>
@@ -164,7 +212,7 @@ const AddMembers = (props: IProps) => {
                 清空
               </Button>
             </div>
-            <div style={{height: 'calc(100% - 40px)', overflow: 'auto'}}>
+            <div style={{ height: 'calc(100% - 40px)', overflow: 'auto' }}>
               <List
                 split={false}
                 bordered={false}
@@ -174,24 +222,22 @@ const AddMembers = (props: IProps) => {
                     key={item.key}
                     style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 0' }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         <Avatar size={24} style={{ backgroundColor: 'rgb(var(--primary-6))' }}>
                           {item.name[0]}
                         </Avatar>
-                        <span>{item.name}</span>
+                        <div>
+                          <div>{item.name}</div>
+                          <div style={{ color: '#ccc' }}>{item.department || '未分配部门'}</div>
+                        </div>
                       </div>
 
-                      <Button
-                        type="text"
-                        icon={<IconClose />}
-                        onClick={() => removeMember(item.key)}
-                      />
+                      <Button type="text" icon={<IconClose />} onClick={() => removeMember(item.key)} />
                     </div>
                   </List.Item>
                 )}
               />
-              
             </div>
           </div>
         </div>
