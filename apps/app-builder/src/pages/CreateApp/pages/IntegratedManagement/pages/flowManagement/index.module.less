@@ -3,37 +3,27 @@
   height: 100%;
   box-sizing: border-box;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   align-items: flex-start;
   justify-content: center;
 
-  .triggerClassifyContainer {
-    width: 220px;
-    height: 100%;
+  .header {
+    width: 100%;
+    height: 64px;
     box-sizing: border-box;
-    padding-top: 26px;
-    padding-left: 16px;
-    padding-right: 16px;
-
-    .triggerClassifyContent {
-      width: 200px;
-      height: 320px;
-      background-color: white;
-      border-radius: 10px;
-      box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
-
-      .triggerClassifyHeader {
-        padding: 10px;
-        font-weight: 500;
-        font-size: 14px;
-        border-bottom: 1px solid #e5e5e5;
-      }
-    }
+    background-color: white;
+    border-radius: 4px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
   }
 
   .body {
     flex: 1;
     height: 100%;
+    width: 100%;
     padding-left: 16px;
     padding-right: 16px;
     padding-bottom: 16px;
@@ -42,17 +32,7 @@
     flex-direction: column;
     align-items: flex-start;
     justify-content: flex-start;
-
-    .header {
-      width: 100%;
-      height: 64px;
-      box-sizing: border-box;
-      border-radius: 4px;
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      justify-content: flex-end;
-    }
+    background-color: white;
 
     .content {
       width: 100%;
@@ -66,7 +46,6 @@
       .searchContainer {
         width: 100%;
         height: 50px;
-        margin-bottom: 16px;
         box-sizing: border-box;
         background-color: white;
         display: flex;
@@ -74,7 +53,7 @@
         align-items: center;
         justify-content: flex-start;
         padding: 16px;
-        box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
+        gap: 10px;
       }
 
       .tableContainer {
@@ -83,8 +62,12 @@
         padding: 16px;
         box-sizing: border-box;
         background-color: white;
-        border-radius: 4px;
-        box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: row;
+        align-items: flex-start;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+        gap: 16px;
       }
     }
   }
