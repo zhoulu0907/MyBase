@@ -270,7 +270,13 @@ const FlowManagementPage: React.FC = () => {
           <Spin loading={loading} size={40} style={{ width: '100%', height: '100%' }} tip="加载中...">
             <div className={styles.tableContainer}>
               {dataList?.map((item, index) => (
-                <FlowCard key={index} data={item} handleEdit={handleEditFlow} handleDelete={handleDeleteFlow} />
+                <FlowCard
+                  key={index}
+                  data={item}
+                  handleEdit={handleEditFlow}
+                  handleDelete={handleDeleteFlow}
+                  refreshList={getFlowMgmtList}
+                />
               ))}
             </div>
           </Spin>
