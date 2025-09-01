@@ -116,7 +116,6 @@ export default function EditorWorkspace() {
           id="workspace-content"
           list={components}
           setList={(newList) => {
-            console.log('newList', newList);
             setComponents(newList);
           }}
           onAdd={(e) => {

@@ -25,13 +25,13 @@ import {
   getCreateTenantCountApi,
   getPlatformTenantAdminListApi,
   PlatformTenantStatus,
-  ADMIN_ROOT_ID,
   getOtherTenantCountApi,
   getTenantUserCountApi,
   type PlatformTenantInfo,
   type CreateTenantParams,
   type UpdateTenantParams
 } from "@onebase/platform-center";
+import { getBackendURL } from '@onebase/common';
 import { formatTimestamp, generateTimestampString } from '@/utils/date';
 
 const { Text } = Typography;
@@ -41,7 +41,7 @@ const { useForm } = Form;
 const TenantManagement: React.FC = () => {
   const [tenantList, setTenantList] = useState<PlatformTenantInfo[]>([]);
   const [loading, setLoading] = useState(false);
-  const [statusFilter, setStatusFilter] = useState(null); // 状态筛选
+  const [statusFilter, setStatusFilter] = useState<number | null>(null); // 状态筛选
   const [keywordSearch, setKeywordSearch] = useState(''); // 关键字搜索
   const [searchInputValue, setSearchInputValue] = useState(''); // 输入框显示的值
   const [searchDebounceTimer, setSearchDebounceTimer] = useState<NodeJS.Timeout | null>(null);
@@ -55,7 +55,7 @@ const TenantManagement: React.FC = () => {
   const [tenantLimit, setTenantLimit] = useState<number>(10000); // 租户数量限制
   const [otherTenantCount, setOtherTenantCount] = useState<number>(0); // 其他租户分配数
   const [tenantUserCount, setTenantUserCount] = useState<number>(0); // 租户下用户数
-  const [adminList, setAdminList] = useState<{id: string, nickname: string, username: string}[]>([])
+  const [adminList, setAdminList] = useState<{id: string, nickname: string, username: string, mobile: string}[]>([])
   const [confirmText, setConfirmText] = useState('');
   const [total, setTotal] = useState(0) 
   const [currentPage, setCurrentPage] = useState(1);
@@ -297,6 +297,8 @@ const TenantManagement: React.FC = () => {
       const selectedAdmin = adminList.find(admin => admin.id === newAdminId);
       const adminUsername = selectedAdmin ? selectedAdmin.username : '';
       const adminNickname = selectedAdmin ? selectedAdmin.nickname : '';
+      const adminMobile = selectedAdmin ? selectedAdmin.mobile : '';
+      console.log('selectAdmin', adminMobile);
       
       // 构建更新参数
       const updateParams: UpdateTenantParams = {
@@ -304,8 +306,9 @@ const TenantManagement: React.FC = () => {
         name: values.tenantName,
         tenantCode: values.tenantCode,
         // 只有管理员发生变化时才传递管理员信息，否则传递空字符串
-        adminNickName: adminNickname,
+        adminNickName: newAdminId !== originalAdminId ? adminNickname : '',
         adminUserName: newAdminId !== originalAdminId ? adminUsername : '',
+        adminMobile: newAdminId !== originalAdminId ? adminMobile : '',
         status: values.status,
         accountCount: values.allocatedCount,
         website: values.website,
@@ -332,13 +335,14 @@ const TenantManagement: React.FC = () => {
       const selectedAdmin = adminList.find(admin => admin.id === values.admin);
       const adminUsername = selectedAdmin ? selectedAdmin.username : '';
       const adminNickname = selectedAdmin ? selectedAdmin.nickname : '';
+      const adminMobile = selectedAdmin ? selectedAdmin.mobile : '';
 
-      // console.log('根据昵称查找管理员id:', selectedAdmin);
       const newTenantData: CreateTenantParams = {
         name: values.tenantName,
         tenantCode: generateTenantCode(),
         adminUserName: adminUsername,
         adminNickName: adminNickname,
+        adminMobile: adminMobile,
         status: values.status,
         accountCount: values.allocatedCount,
         website: values.website,
@@ -520,14 +524,12 @@ const TenantManagement: React.FC = () => {
   // 获取当前环境的域名前缀
   const getDomainPrefix = () => {
     // 检查全局配置
-    if (typeof window !== 'undefined' && window.global_config?.BASE_URL) {
       try {
-        const url = new URL(window.global_config.BASE_URL);
+        const url = new URL(getBackendURL());
         return `${url.protocol}//${url.host}`;
       } catch (e) {
         console.error('解析BASE_URL失败:', e);
       }
-    }
     
     // 检查环境变量
     if (import.meta.env.VITE_API_BASE_URL) {
@@ -683,7 +685,7 @@ const TenantManagement: React.FC = () => {
                   setConfirmDisableVisible(true);
                 } else if (currentTenant && currentTenant.status === PlatformTenantStatus.disabled) {
                   setTenantList(tenantList.map(item => 
-                    item.id === Number(currentTenant.id) ? { ...item, status: PlatformTenantStatus.enabled } : item
+                    item.id === currentTenant.id ? { ...item, status: PlatformTenantStatus.enabled } : item
                   ));
                   // Message.success('已启用租户');
                 }

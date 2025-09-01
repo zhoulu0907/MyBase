@@ -18,18 +18,22 @@ import styles from './index.module.less';
 
 interface IProps {
   roleInfo: Role | undefined;
+  memberList?: [];
+  memberTotal?: number;
 }
 
 // 用户成员列表
 const UserMembers = (props: IProps) => {
-  const { roleInfo } = props;
+  const { roleInfo, memberList, memberTotal } = props;
 
+  // const [memberList, setMemberList] = useState<any[]>([]);
+  // const [memberTotal, setMemberTotal] = useState<number>(0);
   const [deptData, setDeptData] = useState<any>();
-  const [userList, setMuneList] = useState([]); // 用户列表
+  const [userList, setMuneList] = useState(memberList || []); // 用户列表
   const [pagination, setPagination] = useState({
     pageSize: 10,
     current: 1,
-    total: 0
+    total: memberTotal || 0
   });
 
   const [userLoading, setUserLoading] = useState<boolean>(false); // 用户列表加载状态
@@ -37,10 +41,10 @@ const UserMembers = (props: IProps) => {
   const [membersVisible, setMembersVisible] = useState<boolean>(false);
 
   useEffect(() => {
-    if (roleInfo?.id) {
+    if (memberList && roleInfo?.id) {
       getRoleUserList();
     }
-  }, []);
+  }, [memberList]);
 
   /* 获取角色用户列表 */
   const getRoleUserList = async (pageNo = 1, pageSize = 10) => {

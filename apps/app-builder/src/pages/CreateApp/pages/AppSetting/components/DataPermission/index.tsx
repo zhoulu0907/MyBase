@@ -6,7 +6,8 @@ import {
   updateDataGroupPermission,
   deleteDataGroup,
   type GetPermissionReq,
-  type UpdateDataGroupPermissionReq
+  type UpdateDataGroupPermissionReq,
+  getAppEntities
 } from '@onebase/app';
 import PermissionModal from './modal';
 
@@ -36,10 +37,12 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
   const [form] = Form.useForm();
   const [visible, setVisible] = useState<boolean>(false);
   const [status, setStatus] = useState<'create' | 'edit'>('create');
+  const [entity, setEntity] = useState<any[]>([]);
 
   useEffect(() => {
     if (appId && menuId && roleId) {
       getFieldsPermission();
+      getAppEntities(appId);
     }
   }, [appId, menuId, roleId]);
 
@@ -59,6 +62,11 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
     // setIsAllFieldsAllowed(res.isAllFieldsAllowed || 0);
   };
 
+  // 打开model
+  const handleModel = (status: 'create' | 'edit', id?: string) => {
+    setVisible(true);
+    setStatus(status);
+  };
   return (
     <div className={styles.dataPermission}>
       {permission.map((perm) => (
@@ -71,9 +79,9 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
             <div className={styles.right}>
               <IconEdit
                 style={{ fontSize: 20, color: '#4E5969', cursor: 'pointer' }}
+                // onClick={() => handleModel('edit', perm.id)}
                 onClick={() => {
-                  setVisible(true);
-                  setStatus('edit');
+                  handleModel('edit', perm.id);
                 }}
               />
               <Popconfirm
@@ -135,7 +143,7 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
         size="large"
         icon={<IconPlusCircle fontSize={20} />}
         style={{ display: 'flex', alignItems: 'center' }}
-        onClick={() => setVisible(true)}
+        onClick={() => handleModel('create')}
       >
         添加权限组
       </Button>
