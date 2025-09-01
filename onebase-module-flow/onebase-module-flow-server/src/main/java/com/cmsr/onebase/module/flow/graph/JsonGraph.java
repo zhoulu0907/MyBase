@@ -8,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @Author：huangjie
@@ -39,7 +40,7 @@ public class JsonGraph {
         define.append(repeatIndent(deep)).append("SER(");
         for (int i = 0; i < blocks.size(); i++) {
             String nodeCmp = nodeDefine(deep, blocks.get(i));
-            define.append(NEW_LINE).append(repeatIndent(deep)).append(INDENT).append(nodeCmp);
+            define.append(NEW_LINE).append(repeatIndent(deep + 1, nodeCmp));
             if (i != blocks.size() - 1) {
                 define.append(",");
             }
@@ -54,9 +55,9 @@ public class JsonGraph {
                 "start", "end", "dataAdd", "dataDelete", "dataUpdate")) {
             return node.toDefine();
         } else if (Objects.equals(node.getType(), "loop")) {
-            return loopNodeDefine(deep + 1, node);
+            return loopNodeDefine(deep, node);
         } else if (Objects.equals(node.getType(), "switch")) {
-            return switchNodeDefine(deep + 1, node);
+            return switchNodeDefine(deep, node);
         }
         throw new IllegalArgumentException("未知的节点类型: " + node.getType());
     }
@@ -65,7 +66,7 @@ public class JsonGraph {
         StringBuilder define = new StringBuilder();
         define.append("WHILE(").append(node.toDefine()).append(".DO(");
         define.append(NEW_LINE).append(blocksNodeDefine(deep + 1, node.getBlocks()));
-        define.append(NEW_LINE).append(repeatIndent(deep)).append(")");
+        define.append(NEW_LINE).append(")");
         return define.toString();
     }
 
@@ -77,7 +78,7 @@ public class JsonGraph {
                 define.append(NEW_LINE).append(switchCaseNodeDefine(deep + 1, caseDefaultNode)).append(",");
             }
         }
-        define.append(NEW_LINE).append(repeatIndent(deep)).append(")");
+        define.append(NEW_LINE).append(")");
         for (JsonNode caseDefaultNode : node.getBlocks()) {
             if (Objects.equals(caseDefaultNode.getType(), "caseDefault")) {
                 define.append(switchDefaultNodeDefine(deep + 1, caseDefaultNode));
@@ -106,5 +107,17 @@ public class JsonGraph {
             return "";
         }
         return StringUtils.repeat(INDENT, deep);
+    }
+
+    /**
+     * 在content的每行数据前面都加上deep个缩进
+     *
+     * @param deep
+     * @param content
+     * @return
+     */
+    private static String repeatIndent(int deep, String content) {
+        String collect = content.lines().map(line -> repeatIndent(deep) + line).collect(Collectors.joining(NEW_LINE));
+        return collect;
     }
 }
