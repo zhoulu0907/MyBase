@@ -91,7 +91,7 @@ export const SidebarRenderer = () => {
       visible={visible}
       onCancel={handleClose}
       closable={false}
-      width={400}
+      width={450}
       headerStyle={{
         display: 'none'
       }}
