@@ -1,5 +1,5 @@
-import { ENTITY_FIELD_TYPE } from '@/pages/CreateApp/pages/DataFactory/utils/const';
-import { FIELD_TYPE, FIELD_TYPE_LABEL } from '@/pages/CreateApp/pages/DataFactory/utils/const';
+import { ENTITY_FIELD_TYPE } from '@onebase/ui-kit';
+import { FIELD_TYPE, FIELD_TYPE_LABEL } from '@onebase/ui-kit';
 import { useAppStore } from '@/store/store_app';
 import { Button, Checkbox, Drawer, Form, Input, Message, Select, Space, Spin } from '@arco-design/web-react';
 import { getFieldById, updateField } from '@onebase/app';

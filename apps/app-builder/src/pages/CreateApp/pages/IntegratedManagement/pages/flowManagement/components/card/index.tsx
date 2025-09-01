@@ -1,8 +1,9 @@
 import { Button, Dropdown, Menu, Message, Switch } from '@arco-design/web-react';
 import { IconRobot } from '@arco-design/web-react/icon';
-import { disableFlowMgmt, enableFlowMgmt, ProcessDefinition, ProcessStatus, type FlowMgmt } from '@onebase/app';
+import { disableFlowMgmt, enableFlowMgmt, ProcessStatus, TriggerType, type FlowMgmt } from '@onebase/app';
 import dayjs from 'dayjs';
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import styles from './index.module.less';
 
 /**
@@ -17,17 +18,19 @@ export interface FlowCardProps {
 }
 
 const FlowCard: React.FC<FlowCardProps> = ({ data, handleEdit, handleDelete, refreshList }) => {
-  const showProcessDefinition = () => {
-    switch (data.processDefinition) {
-      case ProcessDefinition.Time:
+  const navigate = useNavigate();
+
+  const showTriggerType = () => {
+    switch (data.triggerType) {
+      case TriggerType.Time:
         return '时间触发';
-      case ProcessDefinition.FORM:
+      case TriggerType.FORM:
         return '表单触发';
-      case ProcessDefinition.DATE_FIELD:
+      case TriggerType.DATE_FIELD:
         return '日期字段触发';
-      case ProcessDefinition.ENTITY:
-        return '实体触发';
-      case ProcessDefinition.API:
+      case TriggerType.INTERACTION:
+        return '界面交互触发';
+      case TriggerType.API:
         return 'API触发';
       default:
         return '未知';
@@ -45,9 +48,17 @@ const FlowCard: React.FC<FlowCardProps> = ({ data, handleEdit, handleDelete, ref
     refreshList();
   };
 
+  const toFlowEditor = () => {
+    navigate(`/onebase/create-app/integrated-management/flow-editor?appId=${data.applicationId}&flowId=${data.id}`);
+  };
   return (
     <div className={styles.card}>
-      <div className={styles.cardHeader}>
+      <div
+        className={styles.cardHeader}
+        onClick={(e) => {
+          toFlowEditor();
+        }}
+      >
         <div className={styles.cardHeaderLeft}>
           <div className={styles.cardHeaderLeftIcon}>
             <IconRobot />
@@ -58,22 +69,25 @@ const FlowCard: React.FC<FlowCardProps> = ({ data, handleEdit, handleDelete, ref
           </div>
         </div>
         <div className={styles.cardHeaderRight}>
-          <div className={styles.cardHeaderRightTitle}>{showProcessDefinition()}</div>
+          <div className={styles.cardHeaderRightTitle}>{showTriggerType()}</div>
         </div>
       </div>
-      <div className={styles.cardBody}>
+      <div
+        className={styles.cardBody}
+        onClick={() => {
+          toFlowEditor();
+        }}
+      >
         <div className={styles.cardBodyRow}>
           <div className={styles.cardBodyRowLabel}> 创建时间</div>
           <div className={styles.cardBodyRowContent}> {dayjs(data.createTime).format('YYYY-MM-DD HH:mm:ss')}</div>
         </div>
-      </div>
-      <div className={styles.cardBody}>
+
         <div className={styles.cardBodyRow}>
           <div className={styles.cardBodyRowLabel}> 最后执行</div>
           <div className={styles.cardBodyRowContent}> xx</div>
         </div>
-      </div>
-      <div className={styles.cardBody}>
+
         <div className={styles.cardBodyRow}>
           <div className={styles.cardBodyRowLabel}> 执行次数</div>
           <div className={styles.cardBodyRowContent}> xx</div>
@@ -98,10 +112,9 @@ const FlowCard: React.FC<FlowCardProps> = ({ data, handleEdit, handleDelete, ref
             trigger="click"
             droplist={
               <Menu>
-                {' '}
                 <Menu.Item key="delete" onClick={() => handleDelete(data.id)}>
                   删除
-                </Menu.Item>{' '}
+                </Menu.Item>
               </Menu>
             }
           >

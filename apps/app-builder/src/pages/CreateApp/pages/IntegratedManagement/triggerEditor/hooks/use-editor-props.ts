@@ -1,13 +1,11 @@
-
 import { useMemo } from 'react';
 
 import {
-    ConstantKeys,
-    FixedLayoutProps,
-    type FlowDocumentJSON,
-    FlowLayoutDefault,
-    FlowRendererKey,
-    ShortcutsRegistry,
+  ConstantKeys,
+  FixedLayoutProps,
+  FlowLayoutDefault,
+  FlowRendererKey,
+  ShortcutsRegistry
 } from '@flowgram.ai/fixed-layout-editor';
 import { defaultFixedSemiMaterials } from '@flowgram.ai/fixed-semi-materials';
 import { createMinimapPlugin } from '@flowgram.ai/minimap-plugin';
@@ -25,7 +23,7 @@ import { shortcutGetter } from '../shortcuts';
 import { type FlowNodeRegistry } from '../typings';
 
 export function useEditorProps(
-  initialData: FlowDocumentJSON,
+  //   initialData: FlowDocumentJSON,
   nodeRegistries: FlowNodeRegistry[]
 ): FixedLayoutProps {
   return useMemo<FixedLayoutProps>(
@@ -43,7 +41,7 @@ export function useEditorProps(
          * Prevent Mac browser gestures from turning pages
          * 阻止 mac 浏览器手势翻页
          */
-        preventGlobalGesture: true,
+        preventGlobalGesture: true
       },
       /**
        * Whether it is read-only or not, the node cannot be dragged in read-only mode
@@ -53,7 +51,7 @@ export function useEditorProps(
        * Initial data
        * 初始化数据
        */
-      initialData,
+      //   initialData,
       /**
        * Node registries
        * 节点注册
@@ -71,8 +69,8 @@ export function useEditorProps(
              * Default expanded
              * 默认展开所有节点
              */
-            defaultExpanded: true,
-          },
+            defaultExpanded: true
+          }
         };
       },
       /**
@@ -111,14 +109,14 @@ export function useEditorProps(
         // [ConstantKeys.INLINE_BLOCKS_PADDING_BOTTOM]: 30,
         // [ConstantKeys.COLLAPSED_SPACING]: 10,
         [ConstantKeys.BASE_COLOR]: '#B8BCC1',
-        [ConstantKeys.BASE_ACTIVATED_COLOR]: '#82A7FC',
+        [ConstantKeys.BASE_ACTIVATED_COLOR]: '#82A7FC'
       },
       /**
        * SelectBox config
        */
-    //   selectBox: {
-    //     SelectorBoxPopover,
-    //   },
+      //   selectBox: {
+      //     SelectorBoxPopover,
+      //   },
 
       // Config shortcuts
       shortcuts: (registry: ShortcutsRegistry, ctx) => {
@@ -145,7 +143,7 @@ export function useEditorProps(
           //   dropData.dropNode.id,
           //   dropData.dragNodes.map(n => n.id),
           // );
-          true,
+          true
       },
       /**
        * Redo/Undo enable
@@ -157,19 +155,19 @@ export function useEditorProps(
           if (ctx.document.disposed) return;
           // Listen change to trigger auto save
           console.log('auto save: ', ctx.document.toJSON());
-        }, 100),
+        }, 100)
       },
       /**
        * Node engine enable, you can configure formMeta in the FlowNodeRegistry
        */
       nodeEngine: {
-        enable: true,
+        enable: true
       },
       /**
        * Variable engine enable
        */
       variableEngine: {
-        enable: true,
+        enable: true
       },
       /**
        * Materials, components can be customized based on the key
@@ -181,7 +179,7 @@ export function useEditorProps(
           ...defaultFixedSemiMaterials,
           [FlowRendererKey.ADDER]: NodeAdder, // Node Add Button
           [FlowRendererKey.BRANCH_ADDER]: BranchAdder, // Branch Add Button
-          [FlowRendererKey.DRAG_NODE]: DragNode, // Component in node dragging
+          [FlowRendererKey.DRAG_NODE]: DragNode // Component in node dragging
         },
         renderDefaultNode: BaseNode, // node render
         renderTexts: {
@@ -189,8 +187,8 @@ export function useEditorProps(
           'loop-traverse-text': 'Loop',
           'try-start-text': 'Try Start',
           'try-end-text': 'Try End',
-          'catch-text': 'Catch Error',
-        },
+          'catch-text': 'Catch Error'
+        }
       },
       /**
        * Bind custom service
@@ -204,7 +202,7 @@ export function useEditorProps(
          * 限制滚动，防止节点都看不到
          * Limit scrolling so that none of the nodes can see it
          */
-        enableScrollLimit: true,
+        enableScrollLimit: true
       },
       /**
        * Playground init
@@ -256,10 +254,10 @@ export function useEditorProps(
             nodeBorderRadius: 2,
             nodeBorderWidth: 0.145,
             nodeBorderColor: 'rgba(6, 7, 9, 0.10)',
-            overlayColor: 'rgba(255, 255, 255, 0)',
+            overlayColor: 'rgba(255, 255, 255, 0)'
           },
-          inactiveDebounceTime: 1,
-        }),
+          inactiveDebounceTime: 1
+        })
         // /**
         //  * Group plugin
         //  * 分组插件
@@ -281,7 +279,7 @@ export function useEditorProps(
         //  * 变量面板插件
         //  */
         // createVariablePanelPlugin({}),
-      ],
+      ]
     }),
     []
   );

@@ -19,8 +19,8 @@ import {
   deleteFlowMgmt,
   getFlowMgmt,
   listFlowMgmt,
-  ProcessDefinition,
   ProcessStatus,
+  TriggerType,
   updateFlowMgmt,
   type CreateFlowMgmtReq,
   type ListFlowMgmtReq,
@@ -28,7 +28,6 @@ import {
 } from '@onebase/app';
 import { debounce } from 'lodash-es';
 import React, { useCallback, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import FlowCard from './components/card';
 import styles from './index.module.less';
 
@@ -42,8 +41,6 @@ const Option = Select.Option;
  * 目前集成触发器编辑器作为主内容
  */
 const FlowManagementPage: React.FC = () => {
-  const navigate = useNavigate();
-
   const [createForm] = Form.useForm();
   const [createModalVisible, setCreateModalVisible] = useState(false);
   const [createLoading, setCreateLoading] = useState(false);
@@ -55,7 +52,7 @@ const FlowManagementPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [searchFlowProccessStatus, setSearchFlowProccessStatus] = useState<ProcessStatus | undefined>(undefined);
   const [searchFlowProcessName, setSearchFlowProccessName] = useState('');
-  const [searchTriggerType, setSearchTriggerType] = useState<ProcessDefinition | undefined>(undefined);
+  const [searchTriggerType, setSearchTriggerType] = useState<TriggerType | undefined>(undefined);
 
   const [pageSize, setPageSize] = useState<number>(8);
   const [pageNo, setPageNo] = useState(1);
@@ -80,7 +77,7 @@ const FlowManagementPage: React.FC = () => {
         appId: string,
         processName: string,
         processStatus: ProcessStatus | undefined,
-        triggerType: ProcessDefinition | undefined
+        triggerType: TriggerType | undefined
       ) => {
         getFlowMgmtList(appId, processName, processStatus, triggerType);
       },
@@ -94,15 +91,14 @@ const FlowManagementPage: React.FC = () => {
   }, [debouncedSearch]);
 
   const handleCreateFlow = async () => {
-    // navigate('/create-app/integrated-management/flow-management/create');
     try {
       setCreateLoading(true);
       const req: CreateFlowMgmtReq = {
         applicationId: curAppId,
         processName: createForm.getFieldValue('processName'),
-        processStatus: createForm.getFieldValue('processStatus') ? ProcessStatus.ENABLED : ProcessStatus.DISABLED,
-        processDescription: createForm.getFieldValue('processDescription'),
-        processDefinition: createForm.getFieldValue('processDefinition'),
+        // 默认禁用
+        processStatus: ProcessStatus.DISABLED,
+        processDescription: createForm.getFieldValue('processDescription') || '',
         triggerType: createForm.getFieldValue('triggerType')
       };
 
@@ -125,7 +121,6 @@ const FlowManagementPage: React.FC = () => {
     editForm.setFieldsValue({ processName: res.processName });
     editForm.setFieldsValue({ processStatus: res.processStatus == ProcessStatus.ENABLED ? true : false });
     editForm.setFieldsValue({ processDescription: res.processDescription });
-    editForm.setFieldsValue({ processDefinition: res.processDefinition });
     editForm.setFieldsValue({ triggerType: res.triggerType });
 
     setEditModalVisible(true);
@@ -139,8 +134,7 @@ const FlowManagementPage: React.FC = () => {
         applicationId: curAppId,
         processName: editForm.getFieldValue('processName'),
         processStatus: editForm.getFieldValue('processStatus') ? ProcessStatus.ENABLED : ProcessStatus.DISABLED,
-        processDescription: editForm.getFieldValue('processDescription'),
-        processDefinition: editForm.getFieldValue('processDefinition'),
+        processDescription: editForm.getFieldValue('processDescription') || '',
         triggerType: editForm.getFieldValue('triggerType')
       };
 
@@ -163,7 +157,7 @@ const FlowManagementPage: React.FC = () => {
     appId?: string,
     processName?: string,
     processStatus?: ProcessStatus,
-    triggerType?: ProcessDefinition
+    triggerType?: TriggerType
   ) => {
     setLoading(true);
     const req: ListFlowMgmtReq = {
@@ -212,16 +206,17 @@ const FlowManagementPage: React.FC = () => {
               if (key === 'all') {
                 setSearchTriggerType(undefined);
               } else {
-                setSearchTriggerType(key as ProcessDefinition);
+                setSearchTriggerType(key as TriggerType);
               }
             }}
           >
             <TabPane key="all" title="全部"></TabPane>
-            <TabPane key={ProcessDefinition.FORM} title="表单触发"></TabPane>
-            <TabPane key={ProcessDefinition.DATE_FIELD} title="日期触发"></TabPane>
-            <TabPane key={ProcessDefinition.Time} title="定时触发"></TabPane>
-            <TabPane key={ProcessDefinition.API} title="接口触发"></TabPane>
-            <TabPane key={ProcessDefinition.ENTITY} title="实体触发"></TabPane>
+            <TabPane key={TriggerType.FORM} title="表单触发"></TabPane>
+            <TabPane key={TriggerType.ENTITY} title="实体触发"></TabPane>
+            <TabPane key={TriggerType.TIME} title="时间触发"></TabPane>
+            <TabPane key={TriggerType.DATE_FIELD} title="日期字段触发"></TabPane>
+            <TabPane key={TriggerType.API} title="API触发"></TabPane>
+            <TabPane key={TriggerType.BPM} title="子流程触发"></TabPane>
           </Tabs>
         </div>
         <div className={styles.content}>
@@ -313,29 +308,19 @@ const FlowManagementPage: React.FC = () => {
             <Input />
           </FormItem>
 
-          <FormItem label="流程状态" field="processStatus">
-            <Switch />
-          </FormItem>
-
           <FormItem label="流程描述" field="processDescription">
             <Input.TextArea placeholder="请输入流程描述" maxLength={100} allowClear />
           </FormItem>
 
-          <FormItem label="流程定义" field="processDefinition">
+          <FormItem label="流程定义" field="triggerType">
             <Select>
-              <Option value={ProcessDefinition.Time}>时间触发</Option>
-              <Option value={ProcessDefinition.FORM}>表单触发</Option>
-              <Option value={ProcessDefinition.DATE_FIELD}>日期字段触发</Option>
-              <Option value={ProcessDefinition.ENTITY}>实体触发</Option>
-              <Option value={ProcessDefinition.API}>API触发</Option>
+              <Option value={TriggerType.FORM}>表单触发</Option>
+              <Option value={TriggerType.ENTITY}>实体触发</Option>
+              <Option value={TriggerType.TIME}>时间触发</Option>
+              <Option value={TriggerType.DATE_FIELD}>日期字段触发</Option>
+              <Option value={TriggerType.API}>API触发</Option>
+              <Option value={TriggerType.BPM}>子流程触发</Option>
             </Select>
-          </FormItem>
-
-          <FormItem label="触发类型" field="triggerType">
-            <RadioGroup>
-              <Radio value={'manual'}>手工触发</Radio>
-              <Radio value={'auto'}>自动触发</Radio>
-            </RadioGroup>
           </FormItem>
         </Form>
       </Modal>
@@ -370,21 +355,15 @@ const FlowManagementPage: React.FC = () => {
             <Input.TextArea placeholder="请输入流程描述" maxLength={100} allowClear />
           </FormItem>
 
-          <FormItem label="流程定义" field="processDefinition">
+          <FormItem label="流程定义" field="triggerType">
             <Select>
-              <Option value={ProcessDefinition.Time}>时间触发</Option>
-              <Option value={ProcessDefinition.FORM}>表单触发</Option>
-              <Option value={ProcessDefinition.DATE_FIELD}>日期字段触发</Option>
-              <Option value={ProcessDefinition.ENTITY}>实体触发</Option>
-              <Option value={ProcessDefinition.API}>API触发</Option>
+              <Option value={TriggerType.FORM}>表单触发</Option>
+              <Option value={TriggerType.ENTITY}>实体触发</Option>
+              <Option value={TriggerType.TIME}>时间触发</Option>
+              <Option value={TriggerType.DATE_FIELD}>日期字段触发</Option>
+              <Option value={TriggerType.API}>API触发</Option>
+              <Option value={TriggerType.BPM}>子流程触发</Option>
             </Select>
-          </FormItem>
-
-          <FormItem label="触发类型" field="triggerType">
-            <RadioGroup>
-              <Radio value={'manual'}>手工触发</Radio>
-              <Radio value={'auto'}>自动触发</Radio>
-            </RadioGroup>
           </FormItem>
         </Form>
       </Modal>
