@@ -6,6 +6,7 @@ export * from './flow';
 export * from './metadata_dataresource';
 export * from './metadata_entity';
 export * from './metadata_method';
+export * from './metadata_validation';
 export * from './permission';
 export * from './role';
 export * from './tag';

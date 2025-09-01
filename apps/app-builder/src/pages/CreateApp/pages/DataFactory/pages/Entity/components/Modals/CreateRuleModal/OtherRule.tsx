@@ -1,16 +1,26 @@
 import type { EntityListItem } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
 import { Form, Grid, Input, Message, Modal, Select } from '@arco-design/web-react';
-import { createRule, getEntityFieldsWithChildren } from '@onebase/app';
+import {
+  createLengthRule,
+  createRequiredRule,
+  createRangeRule,
+  createFormatRule,
+  createUniqueRule,
+  getEntityFieldsWithChildren,
+  createChildNotEmptyRule
+} from '@onebase/app';
 import React, { useState } from 'react';
-import { validationTypeOptions } from './rule.ts';
+import { useAppStore } from '@/store/store_app';
+import { validationTypeMap, ruleTip, validationTypeOptions } from './rule.ts';
 import styles from '../modal.module.less';
 
 interface RuleFormValues {
+  // validationType: string;
   validationType: string;
   formatValidationType?: string;
   rgName: string;
-  validationDataItem: string;
-  popPrompt: string;
+  fieldId: string;
+  promptMessage: string;
   popType: string;
 }
 
@@ -22,15 +32,6 @@ interface CreateRuleModalProps {
   ruleType: string;
 }
 
-const ruleTip: Record<string, string> = {
-  required: '请输入校验不通过后的弹窗提示语，例如“XXX必填”',
-  unique: '请输入校验不通过后的弹窗提示语，例如“XXX不可重复”',
-  length: '请输入校验不通过后的弹窗提示语，例如“XXX长度范围需在XX~XX之间”',
-  range: '请输入校验不通过后的弹窗提示语，例如“XXX范围需在XX~XX之间”',
-  format: '请输入校验不通过后的弹窗提示语，例如“请输入有效的手机号码”',
-  subtable_empty: '请输入校验不通过后的弹窗提示语，例如“子表存在空行”'
-};
-
 const CreateOtherRule: React.FC<CreateRuleModalProps> = ({
   visible,
   setVisible,
@@ -38,7 +39,7 @@ const CreateOtherRule: React.FC<CreateRuleModalProps> = ({
   entity,
   ruleType
 }) => {
-  // const { curAppId } = useAppStore();
+  const { curAppId } = useAppStore();
   const [form] = Form.useForm<RuleFormValues>();
   const [loading, setLoading] = useState(false);
   const [fieldOptions, setFieldOptions] = useState<any[]>([]);
@@ -58,19 +59,45 @@ const CreateOtherRule: React.FC<CreateRuleModalProps> = ({
 
       console.log('规则表单数据:', values, form.getFieldsValue());
 
-      // TODO: 调用创建规则的API
-      const res = await createRule({
+      const params = {
         ...values,
-        entityId: entity.id
-        // appId: curAppId
-      });
+        entityId: entity.id,
+        appId: curAppId
+      };
+
+      let res;
+
+      switch (ruleType) {
+        case 'required':
+          res = await createRequiredRule(params);
+          break;
+        case 'unique':
+          res = await createUniqueRule(params);
+          break;
+        case 'length':
+          res = await createLengthRule(params);
+          break;
+        case 'range':
+          res = await createRangeRule(params);
+          break;
+        case 'format':
+          res = await createFormatRule(params);
+          break;
+        case 'subtable_empty':
+          res = await createChildNotEmptyRule(params);
+          break;
+      }
 
       console.log('createRule', res);
 
-      Message.success('创建规则成功');
-      form.resetFields();
-      setVisible(false);
-      successCallback();
+      if (res) {
+        Message.success('创建规则成功');
+        form.resetFields();
+        setVisible(false);
+        successCallback();
+      } else {
+        console.error(res.msg || '创建失败');
+      }
     } catch (error) {
       console.error('创建规则失败:', error);
     } finally {
@@ -126,14 +153,14 @@ const CreateOtherRule: React.FC<CreateRuleModalProps> = ({
   return (
     <Modal
       className={styles['create-rule-modal']}
-      title="添加规则"
+      title={`新建数据规则-${validationTypeMap[ruleType]}`}
       visible={visible}
       onOk={handleFinish}
       onCancel={handleCancel}
       okText="创建"
       cancelText="取消"
       confirmLoading={loading}
-      style={{ width: 800 }}
+      style={{ width: 600 }}
     >
       <Form form={form} layout="vertical" className={styles['rule-form']}>
         <Form.Item
@@ -147,15 +174,11 @@ const CreateOtherRule: React.FC<CreateRuleModalProps> = ({
           <Input placeholder="请输入规则名称" maxLength={50} showWordLimit />
         </Form.Item>
 
-        <Form.Item
-          label="校验数据项"
-          field="validationDataItem"
-          rules={[{ required: true, message: '请选择校验数据项' }]}
-        >
+        <Form.Item label="校验数据项" field="fieldId" rules={[{ required: true, message: '请选择校验数据项' }]}>
           <Select placeholder="请选择校验数据项" options={fieldOptions} />
         </Form.Item>
 
-        <Form.Item label="校验类型" field="validationType" rules={[{ required: true, message: '请选择校验类型' }]}>
+        <Form.Item label="校验类型" field="validationType" hidden>
           <Select onChange={handleValidationTypeChange} placeholder="请选择校验类型" disabled>
             {validationTypeOptions.map((option) => (
               <Select.Option key={option.value} value={option.value}>
@@ -166,7 +189,7 @@ const CreateOtherRule: React.FC<CreateRuleModalProps> = ({
         </Form.Item>
 
         {ruleType === 'length' && (
-          <Grid.Row>
+          <Grid.Row gutter={16}>
             <Grid.Col span={12}>
               <Form.Item label="最小长度" field="minLength" rules={[{ required: true, message: '请输入最小长度' }]}>
                 <Input placeholder="请输入最小长度" defaultValue={0} />
@@ -181,7 +204,7 @@ const CreateOtherRule: React.FC<CreateRuleModalProps> = ({
         )}
 
         {ruleType === 'range' && (
-          <Grid.Row>
+          <Grid.Row gutter={16}>
             <Grid.Col span={10}>
               <Form.Item label="范围区间" field="range" rules={[{ required: true, message: '请输入范围区间' }]}>
                 <Input placeholder="请输入范围区间" />
@@ -207,8 +230,8 @@ const CreateOtherRule: React.FC<CreateRuleModalProps> = ({
         )}
 
         {/* 验证失败提示语 */}
-        <Form.Item field="popPrompt" label="验证失败提示语">
-          <Input.TextArea placeholder={ruleTip[ruleType]} rows={3} maxLength={200} showWordLimit />
+        <Form.Item field="promptMessage" label="验证失败提示语">
+          <Input placeholder={ruleTip[ruleType]} maxLength={40} />
         </Form.Item>
       </Form>
     </Modal>

@@ -1,4 +1,4 @@
-import { DS_RESOURCE_TYPE } from '@/pages/CreateApp/pages/DataFactory/utils/const';
+import { DS_RESOURCE_TYPE } from '@onebase/ui-kit';
 import { useAppStore } from '@/store/store_app';
 import { useResourceStore } from '@/store/store_resource';
 import { Form, Input, Message, Modal, Radio, Select } from '@arco-design/web-react';

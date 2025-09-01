@@ -1,5 +1,5 @@
 import { type EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
-import { FIELD_TYPE } from '@/pages/CreateApp/pages/DataFactory/utils/const';
+import { FIELD_TYPE } from '@onebase/ui-kit';
 import { Drawer } from '@arco-design/web-react';
 import React, { useEffect } from 'react';
 

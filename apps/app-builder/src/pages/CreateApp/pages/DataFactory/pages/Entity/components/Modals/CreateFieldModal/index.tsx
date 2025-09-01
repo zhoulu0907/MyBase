@@ -1,5 +1,5 @@
 import type { EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
-import { ENTITY_FIELD_TYPE, FIELD_TYPE } from '@/pages/CreateApp/pages/DataFactory/utils/const';
+import { ENTITY_FIELD_TYPE, FIELD_TYPE } from '@onebase/ui-kit';
 import { useAppStore } from '@/store/store_app';
 import { Form, Input, Message, Modal, Select } from '@arco-design/web-react';
 import { createField } from '@onebase/app';
