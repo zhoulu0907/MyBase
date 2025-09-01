@@ -2,7 +2,6 @@ import { useAppStore } from '@/store';
 import { Menu } from '@arco-design/web-react';
 import {
   IconBranch,
-  IconHighlight,
   IconPlayCircle,
   IconQuestionCircle,
   IconRefresh,
@@ -33,12 +32,12 @@ const IntegratedManagementPage: React.FC = () => {
           >
             <IconBranch /> 流程管理
           </MenuItem>
-          <MenuItem
+          {/* <MenuItem
             key="automation"
             onClick={() => navigate(`/onebase/create-app/integrated-management/flow-editor?appId=${curAppId}`)}
           >
             <IconHighlight /> 自动化流编辑
-          </MenuItem>
+          </MenuItem> */}
           <MenuItem key="debug">
             <IconPlayCircle /> 调试中心
           </MenuItem>
