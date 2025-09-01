@@ -193,10 +193,6 @@ export interface UpdateApplicationReq {
    */
   appCode: string;
   /**
-   * 数据源ID
-   */
-  datasourceId: string;
-  /**
    * 应用描述
    */
   description?: string;

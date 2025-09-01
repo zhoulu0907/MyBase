@@ -53,7 +53,7 @@ const CreateDataSource = forwardRef<DataSourceHandle, IProps>((props, ref) => {
             url: values.url || `jdbc:mysql://${values.host}:${values.port}/${values.database}`
           },
           description: `${values.datasourceType} 数据源`,
-          datasourceOrigin: 2 // 外部数据源
+          datasourceOrigin: 1 // 自有数据源
         };
 
         return createParams;

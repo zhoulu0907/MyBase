@@ -18,9 +18,15 @@ import MobileActiveIcon from '@/assets/images/mobile_icon_active.svg';
 import PCIcon from '@/assets/images/pc_icon.svg';
 import PCActiveIcon from '@/assets/images/pc_icon_active.svg';
 
+// import PrevIcon from '@/assets/images/prev_icon.svg';
+import PrevActiveIcon from '@/assets/images/prev_icon_active.svg';
+import NextIcon from '@/assets/images/next_icon.svg';
+// import NextActiveIcon from '@/assets/images/next_icon_active.svg';
+
 import { useSignals } from '@preact/signals-react/runtime';
 import 'react-grid-layout/css/styles.css';
 import styles from './index.module.less';
+import { Divider } from '@arco-design/web-react';
 
 export default function EditorWorkspace() {
   const [showEmpty, setShowEmpty] = useState(true);
@@ -94,32 +100,26 @@ export default function EditorWorkspace() {
   return (
     <div className={styles.formEditorWorkspace}>
       <div className={styles.workspaceHeader}>
-        {pageMode === 'pc' && (
-          <>
-            <img className={styles.pageModeIcon} src={PCActiveIcon} />
-            <img
-              className={styles.pageModeIcon}
-              style={{
-                cursor: 'pointer'
-              }}
-              src={MobileIcon}
-              onClick={() => setPageMode('mobile')}
-            />
-          </>
-        )}
-        {pageMode === 'mobile' && (
-          <>
-            <img
-              className={styles.pageModeIcon}
-              src={PCIcon}
-              style={{
-                cursor: 'pointer'
-              }}
-              onClick={() => setPageMode('pc')}
-            />
-            <img className={styles.pageModeIcon} src={MobileActiveIcon} />
-          </>
-        )}
+        {/* TODO 撤回重做 */}
+        <div className={styles.editorStepCtrl}>
+          <img className={styles.pageModeIcon} src={PrevActiveIcon} />
+          <img className={styles.pageModeIcon} src={NextIcon} />
+        </div>
+        <Divider type="vertical" />
+        <div className={styles.pageModeCtrl}>
+          {pageMode === 'pc' && (
+            <>
+              <img className={styles.pageModeIcon} src={PCActiveIcon} />
+              <img className={styles.pageModeIcon} src={MobileIcon} onClick={() => setPageMode('mobile')} />
+            </>
+          )}
+          {pageMode === 'mobile' && (
+            <>
+              <img className={styles.pageModeIcon} src={PCIcon} onClick={() => setPageMode('pc')} />
+              <img className={styles.pageModeIcon} src={MobileActiveIcon} />
+            </>
+          )}
+        </div>
       </div>
 
       <div

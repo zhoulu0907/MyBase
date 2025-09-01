@@ -96,7 +96,7 @@ const PageManagerPage: FC = () => {
   const initTreeItemWidth = 155;
   const cutTreeItemWidth = 25;
 
-  const { clearIsEditMode, setPageName } = useBasicEditorStore();
+  const { clearIsEditMode } = useBasicEditorStore();
 
   const findFirstPage: any = (nodes: ApplicationMenu[]) =>
     nodes.reduce((found, node) => {
@@ -359,7 +359,8 @@ const PageManagerPage: FC = () => {
       return;
     }
 
-    setPageName(name);
+    // 把编辑页菜单数据保存起来；
+    sessionStorage.setItem('EDITOR_PAGE_INFO', JSON.stringify({ id: curMenu?.id, name }));
     navigate(`/onebase/editor/${EDITOR_TYPES.FORM_EDITOR}?pageSetId=${pageSetId}`);
   };
 

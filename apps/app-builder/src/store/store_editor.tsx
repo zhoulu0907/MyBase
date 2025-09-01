@@ -25,17 +25,10 @@ export interface BasicEditorStore {
   showDeleteButton: boolean;
   // 设置是否显示删除按钮
   setShowDeleteButton: (show: boolean) => void;
-
-  // 当前页面名称
-  pageName: string;
-  // 设置页面名称
-  setPageName: (name: string) => void;
 }
 
 export const useBasicEditorStore = create<BasicEditorStore>((set) => ({
   isEditMode: false,
-  pageName: '',
-  setPageName: (pageName: string) => set(() => ({ pageName })),
 
   setIsEditMode: (isEditMode: boolean) => set(() => ({ isEditMode })),
   clearIsEditMode: () => set(() => ({ isEditMode: false })),
