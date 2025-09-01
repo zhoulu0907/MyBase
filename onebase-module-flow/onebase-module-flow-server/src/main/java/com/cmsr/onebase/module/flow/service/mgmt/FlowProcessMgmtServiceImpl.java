@@ -55,7 +55,17 @@ public class FlowProcessMgmtServiceImpl implements FlowProcessMgmtService {
         if (flowProcessDO == null) {
             return null;
         }
-        return convertToVO(flowProcessDO);
+        FlowProcessVO flowProcessVO = convertToVO(flowProcessDO);
+        Object triggerConfig = getTriggerConfig(flowProcessDO.getId(), flowProcessDO.getTriggerType());
+        flowProcessVO.setTriggerConfig(triggerConfig);
+        return flowProcessVO;
+    }
+
+    private Object getTriggerConfig(Long processId, String triggerType) {
+        if (FlowTriggerTypeEnum.isFormTrigger(triggerType)) {
+            return flowProcessTriggerFormRepository.findByProcessId(processId);
+        }
+        return null;
     }
 
     @Override

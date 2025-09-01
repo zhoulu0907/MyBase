@@ -37,6 +37,6 @@ public class CreateFlowProcessReqVO implements Serializable {
     @Size(max = 50, message = "触发类型长度不能超过50个字符")
     private String triggerType;
 
-    @Schema(description = "触发配置，比如表单触发传入page_id")
+    @Schema(description = "触发配置，比如表单触发传入pageId")
     private Map<String, Object> triggerConfig;
 }
