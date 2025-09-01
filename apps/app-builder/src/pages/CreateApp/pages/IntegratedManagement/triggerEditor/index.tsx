@@ -20,7 +20,6 @@ import {
 import { FlowNodeRegistries } from './nodes';
 
 const TriggerEditor = () => {
-  //   const editorProps = useEditorProps(initialData, FlowNodeRegistries);
   const editorProps = useEditorProps(FlowNodeRegistries);
   const { setNodeId, setFlowId, flowId } = triggerEditorSignal;
   const [initData, setInitData] = useState<FlowDocumentJSON>();
