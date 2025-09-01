@@ -1,5 +1,8 @@
 package com.cmsr.onebase.module.app.controller.admin.appresource;
 
+import com.cmsr.onebase.module.app.api.appresource.dto.PageDTO;
+import com.cmsr.onebase.module.app.controller.admin.appresource.vo.GetFormPageListByAppIdReqVO;
+import com.cmsr.onebase.module.app.controller.admin.appresource.vo.GetFormPageListByAppIdRespVO;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,6 +17,8 @@ import com.cmsr.onebase.module.app.service.appresource.PageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
+
+import java.util.List;
 
 /**
  * @ClassName PageController
@@ -40,5 +45,15 @@ public class PageController {
         pageService.updatePageName(updatePageDTO);
 
         return CommonResult.success(true);
+    }
+
+    @PostMapping("/form/app_id")
+    @Operation(summary = "根据app_id获取表单页面")
+    public CommonResult<GetFormPageListByAppIdRespVO> getFormPageListByAppId(@RequestBody GetFormPageListByAppIdReqVO getFormPageListByAppIdReqVO) {
+        List<PageDTO> pages = pageService.getFormPageListByAppId(getFormPageListByAppIdReqVO.getAppId());
+
+        GetFormPageListByAppIdRespVO getFormPageListByAppIdRespVO = new GetFormPageListByAppIdRespVO();
+        getFormPageListByAppIdRespVO.setPages(pages);
+        return CommonResult.success(getFormPageListByAppIdRespVO);
     }
 }
