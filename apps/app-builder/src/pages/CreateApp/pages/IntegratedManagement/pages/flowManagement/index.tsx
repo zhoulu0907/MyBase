@@ -28,6 +28,7 @@ import {
 } from '@onebase/app';
 import { debounce } from 'lodash-es';
 import React, { useCallback, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import FlowCard from './components/card';
 import styles from './index.module.less';
 
@@ -41,6 +42,8 @@ const Option = Select.Option;
  * 目前集成触发器编辑器作为主内容
  */
 const FlowManagementPage: React.FC = () => {
+  const navigate = useNavigate();
+
   const [createForm] = Form.useForm();
   const [createModalVisible, setCreateModalVisible] = useState(false);
   const [createLoading, setCreateLoading] = useState(false);
@@ -90,6 +93,10 @@ const FlowManagementPage: React.FC = () => {
     return () => debouncedSearch.cancel();
   }, [debouncedSearch]);
 
+  const toFlowEditor = (appId: string, flowId: string) => {
+    navigate(`/onebase/create-app/integrated-management/flow-editor?appId=${appId}&flowId=${flowId}`);
+  };
+
   const handleCreateFlow = async () => {
     try {
       setCreateLoading(true);
@@ -103,6 +110,9 @@ const FlowManagementPage: React.FC = () => {
       };
 
       const res = await createFlowMgmt(req);
+      console.log('创建流程成功:', res);
+
+      toFlowEditor(curAppId, res);
 
       setCreateModalVisible(false);
       getFlowMgmtList();
@@ -175,6 +185,17 @@ const FlowManagementPage: React.FC = () => {
     setLoading(false);
   };
 
+  const getTriggerTypeList = () => {
+    return [
+      { label: '界面交互触发', value: TriggerType.FORM },
+      { label: '表单(实体)触发', value: TriggerType.ENTITY },
+      { label: '时间触发', value: TriggerType.TIME },
+      { label: '日期字段触发', value: TriggerType.DATE_FIELD },
+      { label: 'API触发', value: TriggerType.API },
+      { label: '子流程触发', value: TriggerType.BPM }
+    ];
+  };
+
   return (
     <div className={styles.flowManagementPage}>
       <div className={styles.header}>
@@ -211,7 +232,7 @@ const FlowManagementPage: React.FC = () => {
             }}
           >
             <TabPane key="all" title="全部"></TabPane>
-            <TabPane key={TriggerType.FORM} title="表单触发"></TabPane>
+            <TabPane key={TriggerType.FORM} title="界面交互触发"></TabPane>
             <TabPane key={TriggerType.ENTITY} title="实体触发"></TabPane>
             <TabPane key={TriggerType.TIME} title="时间触发"></TabPane>
             <TabPane key={TriggerType.DATE_FIELD} title="日期字段触发"></TabPane>
@@ -271,6 +292,7 @@ const FlowManagementPage: React.FC = () => {
                   handleEdit={handleEditFlow}
                   handleDelete={handleDeleteFlow}
                   refreshList={getFlowMgmtList}
+                  toFlowEditor={toFlowEditor}
                 />
               ))}
             </div>
@@ -314,12 +336,11 @@ const FlowManagementPage: React.FC = () => {
 
           <FormItem label="流程定义" field="triggerType">
             <Select>
-              <Option value={TriggerType.FORM}>表单触发</Option>
-              <Option value={TriggerType.ENTITY}>实体触发</Option>
-              <Option value={TriggerType.TIME}>时间触发</Option>
-              <Option value={TriggerType.DATE_FIELD}>日期字段触发</Option>
-              <Option value={TriggerType.API}>API触发</Option>
-              <Option value={TriggerType.BPM}>子流程触发</Option>
+              {getTriggerTypeList().map((item) => (
+                <Option key={item.value} value={item.value}>
+                  {item.label}
+                </Option>
+              ))}
             </Select>
           </FormItem>
         </Form>
@@ -357,12 +378,11 @@ const FlowManagementPage: React.FC = () => {
 
           <FormItem label="流程定义" field="triggerType">
             <Select>
-              <Option value={TriggerType.FORM}>表单触发</Option>
-              <Option value={TriggerType.ENTITY}>实体触发</Option>
-              <Option value={TriggerType.TIME}>时间触发</Option>
-              <Option value={TriggerType.DATE_FIELD}>日期字段触发</Option>
-              <Option value={TriggerType.API}>API触发</Option>
-              <Option value={TriggerType.BPM}>子流程触发</Option>
+              {getTriggerTypeList().map((item) => (
+                <Option key={item.value} value={item.value}>
+                  {item.label}
+                </Option>
+              ))}
             </Select>
           </FormItem>
         </Form>

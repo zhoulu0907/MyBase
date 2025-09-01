@@ -15,23 +15,26 @@ export interface FlowCardProps {
   handleEdit: Function;
   handleDelete: Function;
   refreshList: Function;
+  toFlowEditor: Function;
 }
 
-const FlowCard: React.FC<FlowCardProps> = ({ data, handleEdit, handleDelete, refreshList }) => {
+const FlowCard: React.FC<FlowCardProps> = ({ data, handleEdit, handleDelete, refreshList, toFlowEditor }) => {
   const navigate = useNavigate();
 
   const showTriggerType = () => {
     switch (data.triggerType) {
-      case TriggerType.Time:
+      case TriggerType.TIME:
         return '时间触发';
       case TriggerType.FORM:
-        return '表单触发';
+        return '界面交互触发';
       case TriggerType.DATE_FIELD:
         return '日期字段触发';
-      case TriggerType.INTERACTION:
-        return '界面交互触发';
+      case TriggerType.ENTITY:
+        return '表单(实体)触发';
       case TriggerType.API:
         return 'API触发';
+      case TriggerType.BPM:
+        return '子流程触发';
       default:
         return '未知';
     }
@@ -48,15 +51,12 @@ const FlowCard: React.FC<FlowCardProps> = ({ data, handleEdit, handleDelete, ref
     refreshList();
   };
 
-  const toFlowEditor = () => {
-    navigate(`/onebase/create-app/integrated-management/flow-editor?appId=${data.applicationId}&flowId=${data.id}`);
-  };
   return (
     <div className={styles.card}>
       <div
         className={styles.cardHeader}
-        onClick={(e) => {
-          toFlowEditor();
+        onClick={() => {
+          toFlowEditor(data.applicationId, data.id);
         }}
       >
         <div className={styles.cardHeaderLeft}>
