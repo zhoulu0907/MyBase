@@ -72,7 +72,7 @@ export default function EditorHeader() {
 
   const { clearCurComponentID } = usePageEditorSignal();
 
-  const { isEditMode, setIsEditMode } = useBasicEditorStore();
+  const { isEditMode, pageName, setIsEditMode } = useBasicEditorStore();
 
   const {
     components: formComponents,
@@ -151,8 +151,8 @@ export default function EditorHeader() {
 
     const appResp = await getApplication(appReq);
     if (appResp) {
-      if (appResp.icon) {
-        setAppIcon(appResp.icon);
+      if (appResp.iconName) {
+        setAppIcon(appResp.iconName);
       }
       if (appResp.iconColor) {
         setIconColor(appResp.iconColor);
@@ -257,7 +257,8 @@ export default function EditorHeader() {
 
         <span>{appName}</span>
         <span>&gt;</span>
-        <span>{activeTab === EDITOR_TYPES.FORM_EDITOR ? '表单页' : '列表页'}</span>
+        <span>{pageName}</span>
+        {/* <span>{activeTab === EDITOR_TYPES.FORM_EDITOR ? '表单页' : '列表页'}</span> */}
       </div>
 
       {/* 中间 */}
@@ -302,10 +303,10 @@ export default function EditorHeader() {
       </div>
 
       <div className={styles.right}>
-        {appStatus === AppStatus.DEVELOPING && <div className={styles.editorStatusDeveloping}>开发中</div>}
-        {appStatus === AppStatus.PUBLISHED && <div className={styles.editorStatusPublished}>已发布</div>}
+        {appStatus === AppStatus.DEVELOPING && <div className={styles.editorStatusDeveloping}>未保存</div>}
+        {appStatus === AppStatus.PUBLISHED && <div className={styles.editorStatusPublished}>已保存</div>}
         {appStatus === AppStatus.EDITING_AFTER_PUBLISH && (
-          <div className={styles.editorStatusEditAfterPublished}>已发布</div>
+          <div className={styles.editorStatusEditAfterPublished}>未保存</div>
         )}
 
         <Button onClick={toPreview} className={styles.previewButton}>

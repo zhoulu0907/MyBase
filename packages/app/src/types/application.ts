@@ -126,14 +126,6 @@ export interface CreateApplicationReq {
  */
 export interface DatasourceSaveReqDTO {
   /**
-   * 应用ID
-   */
-  appId: string;
-  /**
-   * 应用唯一UID（用于与数据源建立关联时的外部标识，可选）
-   */
-  appUid: string;
-  /**
    * 数据源编码
    */
   code: string;

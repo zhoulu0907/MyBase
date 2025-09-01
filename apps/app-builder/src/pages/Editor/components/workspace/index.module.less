@@ -2,7 +2,7 @@
 
 // 定义表单编辑器工作区头部高度变量
 @workspace-header-height: 40px;
-@workspace-padding: 24px;
+@workspace-padding: 20px;
 
 .formEditorWorkspace {
   flex: 1 1 0%;
@@ -34,7 +34,7 @@
     display: block;
     padding: @workspace-padding;
     box-sizing: border-box;
-    background-color: #dee4ed;
+    background-color: #f2f3f5;
     position: relative;
 
     overflow-y: auto;
@@ -79,34 +79,54 @@
       transition: border-color 0.2s ease;
       position: relative;
 
+      & > div {
+        pointer-events: none !important;
+      }
+
+      & .operationArea {
+        pointer-events: auto !important;
+      }
+
       &:hover {
-        border-color: #4fae7b;
+        border-color: #009e9e;
       }
     }
 
-    // 删除按钮样式
-    .deleteButton {
+    .operationArea {
       position: absolute;
-      top: -8px;
-      right: -8px;
-      width: 20px;
-      height: 20px;
-      background-color: #c9c9c9;
-      border: 1px solid #fff;
-      border-radius: 4px;
+      top: -18px;
+      right: 16px;
+      width: 49px;
+      height: 24px;
+      padding: 4px;
+      border: 1px solid #e5e6eb;
+      border-radius: 8px;
+      box-sizing: border-box;
+      background-color: #fff;
+      transition: all 0.2s ease;
       display: flex;
       align-items: center;
-      justify-content: center;
-      cursor: pointer;
+      justify-content: space-evenly;
       z-index: 10;
-      transition: all 0.2s ease;
-      font-size: 12px;
-      color: #fff;
-      font-weight: bold;
 
-      &:hover {
-        background-color: #ff7875;
-        transform: scale(1.1);
+      // 删除按钮样式
+      .copyButton,
+      .deleteButton {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 16px;
+        color: #4e5969;
+        background-color: #fff;
+
+        &:hover {
+          transform: scale(1.1);
+        }
+      }
+
+      .deleteButton {
+        color: #f53f3f;
       }
     }
   }

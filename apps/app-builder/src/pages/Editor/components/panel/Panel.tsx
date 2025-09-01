@@ -1,7 +1,9 @@
 import IconBranch from '@/assets/images/edit_branch_icon.svg';
+import IconBranchActive from '@/assets/images/edit_branch_active_icon.svg';
 import IconLayout from '@/assets/images/edit_layout_icon.svg';
-import { Button, Tabs } from '@arco-design/web-react';
-import { IconLeft, IconRight } from '@arco-design/web-react/icon';
+import IconLayoutActive from '@/assets/images/edit_layout_active_icon.svg';
+import { /* Button, */ Tabs } from '@arco-design/web-react';
+// import { IconLeft, IconRight } from '@arco-design/web-react/icon';
 import { EDITOR_TYPES, type EditorType } from '@onebase/ui-kit';
 import { useEffect, useState } from 'react';
 import MaterialContainer from './components/material';
@@ -13,9 +15,10 @@ const PANNEL_KEYS = ['material', 'metadata'] as const;
 type PannelKey = (typeof PANNEL_KEYS)[number];
 
 export default function EditorPanel() {
-  const [showDrawer, setShowDrawer] = useState(true);
+  // const [showDrawer, setShowDrawer] = useState(true);
   const [activeTab, setActiveTab] = useState<EditorType>(EDITOR_TYPES.FORM_EDITOR);
   const [activeLeftTabKey, setActiveLeftTabKey] = useState<PannelKey>('material');
+  const [childCollapsed, setChildCollapsed] = useState<PannelKey | string | undefined>('material');
 
   useEffect(() => {
     // 根据当前 URL 动态设置 activeTab
@@ -35,22 +38,21 @@ export default function EditorPanel() {
     <div
       className={styles.editorPanel}
       style={{
-        width: showDrawer ? '340px' : '0px',
         transition: 'width 0.3s cubic-bezier(0.4, 0, 0.4, 1)'
       }}
     >
-      <Button
+      {/* <Button
         size="mini"
         className={styles.drawerButton}
         icon={showDrawer ? <IconLeft /> : <IconRight />}
         type="dashed"
         onClick={() => setShowDrawer(!showDrawer)}
-      />
+      /> */}
       <div
         className={styles.left}
-        style={{
-          width: showDrawer ? '48px' : '0px'
-        }}
+        // style={{
+        //   width: showDrawer ? '48px' : '0px'
+        // }}
       >
         <Tabs
           type="text"
@@ -60,20 +62,27 @@ export default function EditorPanel() {
           }}
           size="large"
           direction="vertical"
+          onClickTab={(key: string) => {
+            setChildCollapsed((prev) => (prev === key ? undefined : key));
+          }}
         >
           <Tabs.TabPane
             key={'material'}
             title={
-              <div className={`${styles.tabButton} ${activeLeftTabKey === 'material' ? styles.activeTab : ''}`}>
-                <img src={IconLayout} />
+              <div className={styles.tabButton}>
+                <img
+                  src={childCollapsed === 'material' && activeLeftTabKey === 'material' ? IconLayoutActive : IconLayout}
+                />
               </div>
             }
           />
           <Tabs.TabPane
             key={'metadata'}
             title={
-              <div className={`${styles.tabButton} ${activeLeftTabKey === 'metadata' ? styles.activeTab : ''}`}>
-                <img src={IconBranch} />
+              <div className={styles.tabButton}>
+                <img
+                  src={childCollapsed === 'metadata' && activeLeftTabKey === 'metadata' ? IconBranchActive : IconBranch}
+                />
               </div>
             }
           />
@@ -82,12 +91,20 @@ export default function EditorPanel() {
 
       <div
         className={styles.right}
-        style={{
-          width: showDrawer ? '100%' : '0px'
-        }}
+        // style={{
+        //   width: showDrawer ? '100%' : '0px'
+        // }}
       >
-        {activeLeftTabKey === 'material' && <MaterialContainer activeTab={activeTab} />}
-        {activeLeftTabKey === 'metadata' && <MetadataContainer />}
+        {activeLeftTabKey === 'material' && (
+          <MaterialContainer
+            activeTab={activeTab}
+            childCollapsed={childCollapsed}
+            setChildCollapsed={() => setChildCollapsed(undefined)}
+          />
+        )}
+        {activeLeftTabKey === 'metadata' && (
+          <MetadataContainer childCollapsed={childCollapsed} setChildCollapsed={() => setChildCollapsed(undefined)} />
+        )}
       </div>
     </div>
   );

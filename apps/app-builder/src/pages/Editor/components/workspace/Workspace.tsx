@@ -1,7 +1,7 @@
-import { IconDelete } from '@arco-design/web-react/icon';
+import { IconCopy, IconDelete } from '@arco-design/web-react/icon';
 import { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
-
+import { v4 as uuidv4 } from 'uuid';
 import { getComponentSchema } from '@onebase/ui-kit';
 
 import {
@@ -36,6 +36,7 @@ export default function EditorWorkspace() {
     setPageComponentSchemas,
     delPageComponentSchemas,
     components,
+    addComponents,
     setComponents,
     delComponents,
     showDeleteButton,
@@ -53,6 +54,28 @@ export default function EditorWorkspace() {
       setShowEmpty(false);
     }
   }, [components]);
+
+  // 复制组件
+  const handleCopyComponent = (comp: any) => {
+    addComponents(comp);
+
+    const schema = getComponentSchema(comp.type);
+    // console.log('schema', schema);
+
+    schema.config.cpName = comp.displayName;
+    schema.config.id = comp.id;
+
+    const props = {
+      id: comp.id,
+      type: comp.type,
+      ...schema
+    };
+
+    setPageComponentSchemas(comp.id, props);
+    setCurComponentID(comp.id!);
+    setCurComponentSchema(props);
+    setShowDeleteButton(false);
+  };
 
   // 删除组件
   const handleDeleteComponent = (componentId: string) => {
@@ -193,7 +216,8 @@ export default function EditorWorkspace() {
               className={styles.componentItem}
               style={{
                 width: getComponentWidth(pageComponentSchemas[cp.id], cp.type),
-                borderColor: curComponentID === cp.id ? '#4FAE7B' : ''
+                borderColor: curComponentID === cp.id ? '#009E9E' : '',
+                borderStyle: curComponentID === cp.id ? 'solid' : 'dashed'
               }}
               onClick={(e: React.MouseEvent<HTMLDivElement>) => {
                 e.stopPropagation();
@@ -212,18 +236,30 @@ export default function EditorWorkspace() {
             >
               <EditRender cpId={cp.id} cpType={cp.type} pageComponentSchema={pageComponentSchemas[cp.id]} />
 
-              {/* 删除按钮 */}
-              {/* TODO(mickey): 组件继续封装，和layout中的共用一套 */}
               {curComponentID === cp.id && showDeleteButton && (
-                <div
-                  className={styles.deleteButton}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    console.log('删除组件: ', cp.id);
-                    handleDeleteComponent(cp.id);
-                  }}
-                >
-                  <IconDelete />
+                <div className={styles.operationArea}>
+                  <div
+                    className={styles.copyButton}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      // console.log('复制组件: ', cp);
+                      handleCopyComponent({ ...cp, id: `${cp.type}-${uuidv4()}` });
+                    }}
+                  >
+                    <IconCopy />
+                  </div>
+                  {/* 删除按钮 */}
+                  {/* TODO(mickey): 组件继续封装，和layout中的共用一套 */}
+                  <div
+                    className={styles.deleteButton}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      console.log('删除组件: ', cp.id);
+                      handleDeleteComponent(cp.id);
+                    }}
+                  >
+                    <IconDelete />
+                  </div>
                 </div>
               )}
             </div>

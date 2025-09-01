@@ -96,7 +96,7 @@ const PageManagerPage: FC = () => {
   const initTreeItemWidth = 155;
   const cutTreeItemWidth = 25;
 
-  const { clearIsEditMode } = useBasicEditorStore();
+  const { clearIsEditMode, setPageName } = useBasicEditorStore();
 
   const findFirstPage: any = (nodes: ApplicationMenu[]) =>
     nodes.reduce((found, node) => {
@@ -343,7 +343,7 @@ const PageManagerPage: FC = () => {
     getMenuList();
   };
 
-  const handleEditPageSet = async () => {
+  const handleEditPageSet = async (name: string) => {
     if (!curMenu?.id) {
       Message.error('请选择菜单');
       return;
@@ -359,6 +359,7 @@ const PageManagerPage: FC = () => {
       return;
     }
 
+    setPageName(name);
     navigate(`/onebase/editor/${EDITOR_TYPES.FORM_EDITOR}?pageSetId=${pageSetId}`);
   };
 
@@ -447,7 +448,7 @@ const PageManagerPage: FC = () => {
                       <>
                         <div className={styles.contentHeader}>
                           <div className={styles.contentTitle}>{curMenu?.menuName}</div>
-                          <Button type="primary" onClick={() => handleEditPageSet()}>
+                          <Button type="primary" onClick={() => handleEditPageSet(curMenu?.menuName)}>
                             {t('common.edit')}
                           </Button>
                         </div>
