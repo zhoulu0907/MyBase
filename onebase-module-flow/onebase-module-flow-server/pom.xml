@@ -64,16 +64,16 @@
             <artifactId>liteflow-script-javascript</artifactId>
             <version>${liteflow.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.graalvm.js</groupId>
-            <artifactId>js</artifactId>
-            <version>${js.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.graalvm.js</groupId>
-            <artifactId>js-scriptengine</artifactId>
-            <version>${js.version}</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.graalvm.js</groupId>-->
+<!--            <artifactId>js</artifactId>-->
+<!--            <version>${js.version}</version>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>org.graalvm.js</groupId>-->
+<!--            <artifactId>js-scriptengine</artifactId>-->
+<!--            <version>${js.version}</version>-->
+<!--        </dependency>-->
         <!-- Test 测试相关 -->
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
