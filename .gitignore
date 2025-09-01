@@ -103,3 +103,6 @@ sessionStore
 /docs/多表CRUD后续待办.md
 /sql/postgresql/patch/2025-08-27-metadata-validation-migration.sql
 /sql/postgresql/patch/2025-08-27-metadata-validation-ddl.sql
+/sql/patch/fix_system_uid_worker_node_emergency.sql
+/docs/IDENTITY列序列冲突解决方案.md
+/docs/PostgreSQL序列冲突修复指南.md
