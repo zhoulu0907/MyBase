@@ -14,8 +14,11 @@ export const DS_RESOURCE_TYPE_LABEL = {
 
 // 实体字段类型标签
 export const ENTITY_FIELD_TYPE_LABEL = {
-  TEXT: 'TEXT',
-  LONG_TEXT: 'LONG_TEXT',
+  TEXT: 'VARCHAR',
+  LONG_TEXT: 'TEXT',
+  INTEGER: 'INTEGER',
+  BIGINT: 'BIGINT',
+  DECIMAL: 'DECIMAL',
   EMAIL: 'EMAIL',
   PHONE: 'PHONE',
   URL: 'URL',
@@ -24,10 +27,12 @@ export const ENTITY_FIELD_TYPE_LABEL = {
   CURRENCY: 'CURRENCY',
   DATE: 'DATE',
   DATETIME: 'DATETIME',
+  TIME: 'TIME',
   BOOLEAN: 'BOOLEAN',
-  PICKLIST: 'PICKLIST',
-  MULTI_PICKLIST: 'MULTI_PICKLIST',
-  AUTO_CODE: 'AUTO_CODE',
+  PICKLIST: 'SINGLE_SELECT',
+  MULTI_PICKLIST: 'MULTI_SELECT',
+  JSON: 'JSON',
+  AUTO_CODE: 'AUTO_NUMBER',
   USER: 'USER',
   DEPARTMENT: 'DEPARTMENT',
   DATA_SELECTION: 'DATA_SELECTION',
@@ -44,8 +49,11 @@ export const ENTITY_FIELD_TYPE_LABEL = {
 
 // 实体字段类型
 export const ENTITY_FIELD_TYPE = {
-  TEXT: '常规文本',
-  LONG_TEXT: '长文本内容',
+  VARCHAR: '常规文本',
+  TEXT: '长文本内容',
+  INTEGER: '整数',
+  BIGINT: '长整数',
+  DECIMAL: '小数',
   EMAIL: '邮箱地址',
   PHONE: '电话号码',
   URL: '网址链接',
@@ -54,9 +62,11 @@ export const ENTITY_FIELD_TYPE = {
   CURRENCY: '货币金额',
   DATE: '日期',
   DATETIME: '日期时间',
+  TIME: '时间',
   BOOLEAN: '布尔值',
-  PICKLIST: '单选列表',
-  MULTI_PICKLIST: '多选列表',
+  SINGLE_SELECT: '单选列表',
+  MULTI_SELECT: '多选列表',
+  JSON: 'JSON',
   AUTO_CODE: '自动编码',
   USER: '用户引用',
   DEPARTMENT: '部门引用',
@@ -112,3 +122,29 @@ export const isSystemField = (fieldType: number): boolean => {
 export const isCustomField = (fieldType: number): boolean => {
   return fieldType === FIELD_TYPE.CUSTOM;
 };
+
+// 实体是否开启 0禁用 1开启
+export const ENTITY_STATUS = {
+  DISABLE: 0,
+  ENABLE: 1
+} as const;
+
+export type EntityStatus = (typeof ENTITY_STATUS)[keyof typeof ENTITY_STATUS];
+
+// 字段约束 长度 0禁用 1开启
+export const FIELD_CONSTRAINT_LENGTH_ENABLED = {
+  DISABLE: 0,
+  ENABLE: 1
+} as const;
+
+// 字段约束 正则 0禁用 1开启
+export const FIELD_CONSTRAINT_REGEX_ENABLED = {
+  DISABLE: 0,
+  ENABLE: 1
+} as const;
+
+// 字段约束 长度 0禁用 1开启
+export const FIELD_CONSTRAINT_LENGTH_PROMPT = {
+  DISABLE: 0,
+  ENABLE: 1
+} as const;

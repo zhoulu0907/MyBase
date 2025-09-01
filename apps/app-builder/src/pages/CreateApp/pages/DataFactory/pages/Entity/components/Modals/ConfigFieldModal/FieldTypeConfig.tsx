@@ -110,6 +110,7 @@ interface AutoCodeConfigProps {
   onConfirm: (rules: AutoCodeRule[]) => void;
   initialRules?: AutoCodeRule[];
   onCancel?: () => void; // 新增：取消回调
+  fields: any[];
 }
 
 export interface AutoCodeRule {
@@ -142,7 +143,8 @@ export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({
   onVisibleChange,
   onConfirm,
   onCancel,
-  initialRules = []
+  initialRules = [],
+  fields
 }) => {
   const [rules, setRules] = useState<AutoCodeRule[]>(
     initialRules.length > 0
@@ -309,10 +311,8 @@ export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({
               placeholder="请选择字段"
               onChange={(value) => updateRule(rule.id!, { config: { ...rule.config, fieldName: value } })}
               className={styles['rule-input']}
-            >
-              <Select.Option value="field1">XX字段</Select.Option>
-              <Select.Option value="field2">YY字段</Select.Option>
-            </Select>
+              options={fields}
+            ></Select>
             <Button
               type="text"
               status="danger"

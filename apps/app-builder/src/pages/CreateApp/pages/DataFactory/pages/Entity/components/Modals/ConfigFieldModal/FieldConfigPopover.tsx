@@ -1,5 +1,5 @@
 import React from 'react';
-import { ENTITY_FIELD_TYPE_LABEL, ENTITY_FIELD_TYPE } from '@/pages/CreateApp/pages/DataFactory/utils/const';
+import { ENTITY_FIELD_TYPE_LABEL } from '@onebase/ui-kit';
 import { PicklistConfig, MultiPicklistConfig, AutoCodeConfig } from './FieldTypeConfig';
 import FieldConstraint from './FieldConstraint';
 import styles from './index.module.less';
@@ -10,10 +10,17 @@ interface FieldConfigPopoverProps {
   field: any;
   onConfirm: (fieldType: string, fieldId: string, configData: any) => void;
   onCancel: (fieldType: string) => void;
+  fields: any[];
 }
 
-const FieldConfigPopover: React.FC<FieldConfigPopoverProps> = ({ fieldType, fieldId, field, onConfirm, onCancel }) => {
-
+const FieldConfigPopover: React.FC<FieldConfigPopoverProps> = ({
+  fieldType,
+  fieldId,
+  field,
+  onConfirm,
+  onCancel,
+  fields
+}) => {
   return (
     <div className={styles['field-config-popover']}>
       {/* 根据字段类型渲染对应的配置组件 */}
@@ -38,6 +45,7 @@ const FieldConfigPopover: React.FC<FieldConfigPopoverProps> = ({ fieldType, fiel
           onConfirm={(rules) => onConfirm(ENTITY_FIELD_TYPE_LABEL.AUTO_CODE, fieldId, rules)}
           initialRules={field?.autoCodeRules}
           onCancel={() => onCancel(ENTITY_FIELD_TYPE_LABEL.AUTO_CODE)}
+          fields={fields}
         />
       )}
 

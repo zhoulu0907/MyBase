@@ -1,5 +1,5 @@
 import React from 'react';
-import { FIELD_TYPE, FIELD_TYPE_LABEL } from '@/pages/CreateApp/pages/DataFactory/utils/const';
+import { FIELD_TYPE, FIELD_TYPE_LABEL } from '@onebase/ui-kit';
 import { Button, Checkbox, Input, Popover, Select, Space, Tooltip } from '@arco-design/web-react';
 import { IconDragDotVertical, IconSelectAll, IconSettings } from '@arco-design/web-react/icon';
 import styles from './index.module.less';

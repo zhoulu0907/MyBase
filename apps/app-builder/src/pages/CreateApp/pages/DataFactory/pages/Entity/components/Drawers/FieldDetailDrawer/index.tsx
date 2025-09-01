@@ -1,5 +1,5 @@
-import { ENTITY_FIELD_TYPE } from '@/pages/CreateApp/pages/DataFactory/utils/const';
-import { FIELD_TYPE, FIELD_TYPE_LABEL } from '@/pages/CreateApp/pages/DataFactory/utils/const';
+import { ENTITY_FIELD_TYPE } from '@onebase/ui-kit';
+import { FIELD_TYPE, FIELD_TYPE_LABEL } from '@onebase/ui-kit';
 import { Descriptions, Drawer, Empty, Spin, Tag } from '@arco-design/web-react';
 import { getFieldById } from '@onebase/app';
 import React, { useEffect, useState } from 'react';

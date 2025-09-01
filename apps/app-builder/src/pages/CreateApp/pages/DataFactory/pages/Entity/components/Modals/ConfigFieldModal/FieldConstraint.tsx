@@ -4,7 +4,7 @@ import styles from './index.module.less';
 import {
   FIELD_CONSTRAINT_LENGTH_ENABLED,
   FIELD_CONSTRAINT_REGEX_ENABLED
-} from '@/pages/CreateApp/pages/DataFactory/utils/const';
+} from '@onebase/ui-kit';
 
 // 字段约束配置接口
 interface FieldConstraintConfig {

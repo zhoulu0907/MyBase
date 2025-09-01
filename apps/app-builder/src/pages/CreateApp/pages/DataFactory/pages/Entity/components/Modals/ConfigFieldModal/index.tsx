@@ -1,13 +1,12 @@
-import { ENTITY_FIELD_TYPE } from '@/pages/CreateApp/pages/DataFactory/utils/const';
 import type { EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
-import { FIELD_TYPE } from '@/pages/CreateApp/pages/DataFactory/utils/const';
+import { FIELD_TYPE } from '@onebase/ui-kit';
 import { useAppStore } from '@/store/store_app';
 import { Button, Message, Modal, Table } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
 import { batchSaveFields, getEntityFields } from '@onebase/app';
-import React, { forwardRef, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
-import { ENTITY_FIELD_TYPE_LABEL } from '@/pages/CreateApp/pages/DataFactory/utils/const';
+import { ENTITY_FIELD_TYPE_LABEL } from '@onebase/ui-kit';
 import { type AutoCodeRule } from './FieldTypeConfig';
 import FieldConfigPopover from './FieldConfigPopover';
 import TableColumns from './TableColumns';
@@ -247,6 +246,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
         fieldType={fieldType}
         fieldId={fieldId}
         field={field}
+        fields={fields}
         onConfirm={handleConfigConfirm}
         onCancel={handleConfigCancel}
       />
