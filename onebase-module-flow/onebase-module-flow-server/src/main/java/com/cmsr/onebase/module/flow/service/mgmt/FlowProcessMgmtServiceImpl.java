@@ -5,15 +5,20 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.flow.controller.admin.mgmt.vo.*;
 import com.cmsr.onebase.module.flow.dal.database.FlowProcessRepository;
+import com.cmsr.onebase.module.flow.dal.database.FlowProcessTriggerFormRepository;
 import com.cmsr.onebase.module.flow.dal.dataobject.FlowProcessDO;
+import com.cmsr.onebase.module.flow.dal.dataobject.FlowProcessTriggerFormDO;
 import com.cmsr.onebase.module.flow.enums.FlowErrorCodeConstants;
 import com.cmsr.onebase.module.flow.enums.mgmt.FlowStatusEnum;
+import com.cmsr.onebase.module.flow.enums.mgmt.FlowTriggerTypeEnum;
 import lombok.Setter;
+import org.apache.commons.collections4.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -25,6 +30,9 @@ public class FlowProcessMgmtServiceImpl implements FlowProcessMgmtService {
 
     @Autowired
     private FlowProcessRepository flowProcessRepository;
+
+    @Autowired
+    private FlowProcessTriggerFormRepository flowProcessTriggerFormRepository;
 
     @Override
     public PageResult<FlowProcessVO> pageList(PageFlowProcessReqVO reqVO) {
@@ -59,7 +67,21 @@ public class FlowProcessMgmtServiceImpl implements FlowProcessMgmtService {
         flowProcessDO.setProcessStatus(FlowStatusEnum.DISABLE.getStatus());
         // 保存到数据库
         FlowProcessDO saved = flowProcessRepository.insert(flowProcessDO);
+        saveTriggerConfig(flowProcessDO.getId(), reqVO.getTriggerType(), reqVO.getTriggerConfig());
         return saved.getId();
+    }
+
+    private void saveTriggerConfig(Long processId, String triggerType, Map<String, Object> triggerConfig) {
+        if (MapUtils.isEmpty(triggerConfig)) {
+            return;
+        }
+        if (FlowTriggerTypeEnum.isFormTrigger(triggerType)) {
+            Long pageId = MapUtils.getLong(triggerConfig, "pageId");
+            FlowProcessTriggerFormDO flowProcessTriggerFormDO = new FlowProcessTriggerFormDO();
+            flowProcessTriggerFormDO.setProcessId(processId);
+            flowProcessTriggerFormDO.setPageId(pageId);
+            flowProcessTriggerFormRepository.insert(flowProcessTriggerFormDO);
+        }
     }
 
     @Override
@@ -79,6 +101,7 @@ public class FlowProcessMgmtServiceImpl implements FlowProcessMgmtService {
         FlowProcessDO flowProcessDO = validateFlowProcessExist(reqVO.getId());
         // 更新流程定义
         flowProcessDO.setProcessDefinition(reqVO.getProcessDefinition());
+        flowProcessDO.setProcessStatus(reqVO.getProcessStatus());
         // 保存更新
         flowProcessRepository.update(flowProcessDO);
     }

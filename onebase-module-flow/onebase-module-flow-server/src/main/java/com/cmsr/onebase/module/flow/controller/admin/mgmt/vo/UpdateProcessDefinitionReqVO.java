@@ -20,4 +20,7 @@ public class UpdateProcessDefinitionReqVO {
     @NotNull(message = "流程定义不能为空")
     private String processDefinition;
 
+    @Schema(description = "流程状态：0-禁用，1-启用", required = true, example = "1")
+    @NotNull(message = "流程状态不能为空")
+    private Integer processStatus;
 }
