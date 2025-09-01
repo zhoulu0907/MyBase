@@ -1,15 +1,15 @@
 package com.cmsr.onebase.module.flow.controller.admin.mgmt.vo;
 
+import com.cmsr.onebase.framework.common.pojo.PageParam;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-import java.io.Serializable;
 
 /**
  * 流程管理 - 分页查询流程 Request VO
  */
 @Data
 @Schema(description = "流程管理 - 分页查询流程请求参数")
-public class ListFlowProcessReqVO implements Serializable {
+public class PageFlowProcessReqVO extends PageParam {
     
     private static final long serialVersionUID = 1L;
 
@@ -24,10 +24,4 @@ public class ListFlowProcessReqVO implements Serializable {
 
     @Schema(description = "触发类型", example = "manual")
     private String triggerType;
-
-    @Schema(description = "页码", required = true, example = "1")
-    private Integer pageNum;
-
-    @Schema(description = "每页数量", required = true, example = "10")
-    private Integer pageSize;
 }

@@ -26,17 +26,10 @@ public class CreateFlowProcessReqVO implements Serializable {
     @Size(min = 1, max = 100, message = "流程名称长度必须在1-100之间")
     private String processName;
 
-    @Schema(description = "流程状态：0-禁用，1-启用", required = true, example = "1")
-    @NotNull(message = "流程状态不能为空")
-    private Integer processStatus;
-
     @Schema(description = "流程描述", example = "这是一个审批流程")
     @Size(max = 500, message = "流程描述长度不能超过500个字符")
     private String processDescription;
 
-    @Schema(description = "流程定义", required = true)
-    @NotBlank(message = "流程定义不能为空")
-    private String processDefinition;
 
     @Schema(description = "触发类型", required = true, example = "manual")
     @NotBlank(message = "触发类型不能为空")
