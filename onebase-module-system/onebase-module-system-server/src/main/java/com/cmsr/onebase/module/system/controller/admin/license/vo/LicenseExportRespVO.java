@@ -3,6 +3,8 @@ package com.cmsr.onebase.module.system.controller.admin.license.vo;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 @Data
 public class LicenseExportRespVO {
 
@@ -19,7 +21,7 @@ public class LicenseExportRespVO {
     private String platformType;
 
     @Schema(description = "到期时间")
-    private String expireTime;
+    private LocalDateTime expireTime;
 
     @Schema(description = "状态")
     private String status;

@@ -15,6 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.Security;
+import java.time.LocalDateTime;
 import java.util.Base64;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
@@ -152,7 +153,7 @@ public class SM4Utils {
             licenseExportRespVO.setEnterpriseCode("F200090910001");
             licenseExportRespVO.setEnterpriseAddress("上海市浦东金桥开发区");
             licenseExportRespVO.setPlatformType("私有化部署");
-            licenseExportRespVO.setExpireTime("2025-12-01 08:01:48");
+            licenseExportRespVO.setExpireTime(LocalDateTime.parse("2025-12-01 08:01:48"));
             licenseExportRespVO.setStatus("disable");
             licenseExportRespVO.setTenantLimit("100");
             licenseExportRespVO.setUserLimit("300");

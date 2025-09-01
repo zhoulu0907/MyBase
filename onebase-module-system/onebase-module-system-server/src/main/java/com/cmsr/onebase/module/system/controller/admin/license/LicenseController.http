@@ -32,5 +32,5 @@ Content-Type: multipart/form-data; boundary=WebAppBoundary
 Content-Disposition: form-data; name="file"; filename="license.lic.sm4"
 Content-Type: application/octet-stream
 
-< ./license.lic-1.sm4
+< ./license.lic-3.sm4
 --WebAppBoundary--
