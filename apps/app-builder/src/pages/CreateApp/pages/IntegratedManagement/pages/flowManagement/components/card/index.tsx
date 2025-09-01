@@ -3,7 +3,6 @@ import { IconRobot } from '@arco-design/web-react/icon';
 import { disableFlowMgmt, enableFlowMgmt, ProcessStatus, TriggerType, type FlowMgmt } from '@onebase/app';
 import dayjs from 'dayjs';
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import styles from './index.module.less';
 
 /**
@@ -19,8 +18,6 @@ export interface FlowCardProps {
 }
 
 const FlowCard: React.FC<FlowCardProps> = ({ data, handleEdit, handleDelete, refreshList, toFlowEditor }) => {
-  const navigate = useNavigate();
-
   const showTriggerType = () => {
     switch (data.triggerType) {
       case TriggerType.TIME:
@@ -75,7 +72,7 @@ const FlowCard: React.FC<FlowCardProps> = ({ data, handleEdit, handleDelete, ref
       <div
         className={styles.cardBody}
         onClick={() => {
-          toFlowEditor();
+          toFlowEditor(data.applicationId, data.id);
         }}
       >
         <div className={styles.cardBodyRow}>
