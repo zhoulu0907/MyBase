@@ -1,11 +1,8 @@
 package com.cmsr.onebase.module.flow.service.mgmt;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.flow.controller.admin.mgmt.vo.CreateFlowProcessReqVO;
-import com.cmsr.onebase.module.flow.controller.admin.mgmt.vo.FlowProcessVO;
-import com.cmsr.onebase.module.flow.controller.admin.mgmt.vo.ListFlowProcessReqVO;
-import com.cmsr.onebase.module.flow.controller.admin.mgmt.vo.RenameFlowProcessReqVO;
-import com.cmsr.onebase.module.flow.controller.admin.mgmt.vo.UpdateFlowProcessReqVO;
+import com.cmsr.onebase.module.flow.controller.admin.mgmt.vo.*;
+import jakarta.validation.Valid;
 
 import java.util.List;
 
@@ -19,7 +16,7 @@ public interface FlowProcessMgmtService {
      * @param reqVO 查询条件
      * @return 分页结果
      */
-    PageResult<FlowProcessVO> pageList(ListFlowProcessReqVO reqVO);
+    PageResult<FlowProcessVO> pageList(PageFlowProcessReqVO reqVO);
 
     /**
      * 获取流程详情
@@ -42,16 +39,16 @@ public interface FlowProcessMgmtService {
     void update(UpdateFlowProcessReqVO reqVO);
 
     /**
-     * 删除流程
-     * @param id 流程ID
+     * 更新流程定义
+     * @param reqVO 更新参数
      */
-    void delete(Long id);
+    void updateProcessDefinition(@Valid UpdateProcessDefinitionReqVO reqVO);
 
     /**
-     * 批量删除流程
-     * @param ids 流程ID列表
+     * 重命名流程
+     * @param reqVO 重命名参数
      */
-    void batchDelete(List<Long> ids);
+    void renameFlowProcess(RenameFlowProcessReqVO reqVO);
 
     /**
      * 启用流程
@@ -65,9 +62,21 @@ public interface FlowProcessMgmtService {
      */
     void disableFlowProcess(Long id);
 
+
     /**
-     * 重命名流程
-     * @param reqVO 重命名参数
+     * 删除流程
+     * @param id 流程ID
      */
-    void renameFlowProcess(RenameFlowProcessReqVO reqVO);
+    void delete(Long id);
+
+    /**
+     * 批量删除流程
+     * @param ids 流程ID列表
+     */
+    void batchDelete(List<Long> ids);
+
+
+
+
+
 }

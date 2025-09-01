@@ -20,9 +20,6 @@ public class UpdateFlowProcessReqVO implements Serializable {
     @NotNull(message = "流程ID不能为空")
     private Long id;
 
-    @Schema(description = "应用ID", example = "1")
-    private Long applicationId;
-
     @Schema(description = "流程名称", example = "审批流程")
     @Size(min = 1, max = 100, message = "流程名称长度必须在1-100之间")
     private String processName;
@@ -34,10 +31,5 @@ public class UpdateFlowProcessReqVO implements Serializable {
     @Size(max = 500, message = "流程描述长度不能超过500个字符")
     private String processDescription;
 
-    @Schema(description = "流程定义")
-    private String processDefinition;
 
-    @Schema(description = "触发类型", example = "manual")
-    @Size(max = 50, message = "触发类型长度不能超过50个字符")
-    private String triggerType;
 }

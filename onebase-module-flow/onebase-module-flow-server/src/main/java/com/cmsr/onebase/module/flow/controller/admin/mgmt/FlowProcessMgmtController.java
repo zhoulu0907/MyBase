@@ -30,14 +30,14 @@ public class FlowProcessMgmtController {
 
     @GetMapping("/page")
     @Operation(summary = "分页查询流程列表")
-    public CommonResult<PageResult<FlowProcessVO>> pageList(ListFlowProcessReqVO reqVO) {
+    public CommonResult<PageResult<FlowProcessVO>> pageList(PageFlowProcessReqVO reqVO) {
         PageResult<FlowProcessVO> pageResult = flowProcessMgmtService.pageList(reqVO);
         return CommonResult.success(pageResult);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/get")
     @Operation(summary = "获取流程详情")
-    public CommonResult<FlowProcessVO> getDetail(@PathVariable Long id) {
+    public CommonResult<FlowProcessVO> getDetail(@RequestParam("id") Long id) {
         FlowProcessVO flowProcessVO = flowProcessMgmtService.getDetail(id);
         if (flowProcessVO == null) {
             return CommonResult.error(FlowErrorCodeConstants.FLOW_NOT_EXIST);
@@ -59,22 +59,20 @@ public class FlowProcessMgmtController {
         return CommonResult.success(true);
     }
 
-    @PostMapping("/delete")
-    @Operation(summary = "删除流程")
-    public CommonResult<Boolean> delete(@RequestParam Long id) {
-        flowProcessMgmtService.delete(id);
+    @PostMapping("/rename")
+    @Operation(summary = "重命名流程")
+    public CommonResult<Boolean> renameFlowProcess(@RequestBody @Valid RenameFlowProcessReqVO reqVO) {
+        flowProcessMgmtService.renameFlowProcess(reqVO);
         return CommonResult.success(true);
     }
 
-    @PostMapping("/batch-delete")
-    @Operation(summary = "批量删除流程")
-    public CommonResult<Boolean> batchDelete(@RequestBody List<Long> ids) {
-        if (ids == null || ids.isEmpty()) {
-            return CommonResult.success(true);
-        }
-        flowProcessMgmtService.batchDelete(ids);
+    @PostMapping("/update-definition")
+    @Operation(summary = "更新流程定义")
+    public CommonResult<Boolean> updateProcessDefinition(@RequestBody @Valid UpdateProcessDefinitionReqVO reqVO) {
+        flowProcessMgmtService.updateProcessDefinition(reqVO);
         return CommonResult.success(true);
     }
+
 
     @PostMapping("/enable")
     @Operation(summary = "启用流程")
@@ -90,10 +88,21 @@ public class FlowProcessMgmtController {
         return CommonResult.success(true);
     }
 
-    @PostMapping("/rename")
-    @Operation(summary = "重命名流程")
-    public CommonResult<Boolean> renameFlowProcess(@RequestBody @Valid RenameFlowProcessReqVO reqVO) {
-        flowProcessMgmtService.renameFlowProcess(reqVO);
+
+    @PostMapping("/delete")
+    @Operation(summary = "删除流程")
+    public CommonResult<Boolean> delete(@RequestParam Long id) {
+        flowProcessMgmtService.delete(id);
+        return CommonResult.success(true);
+    }
+
+    @PostMapping("/batch-delete")
+    @Operation(summary = "批量删除流程")
+    public CommonResult<Boolean> batchDelete(@RequestBody List<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return CommonResult.success(true);
+        }
+        flowProcessMgmtService.batchDelete(ids);
         return CommonResult.success(true);
     }
 }
