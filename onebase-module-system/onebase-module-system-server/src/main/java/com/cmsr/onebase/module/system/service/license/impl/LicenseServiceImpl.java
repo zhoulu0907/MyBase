@@ -162,7 +162,7 @@ public class LicenseServiceImpl implements LicenseService {
             }
             // 在插入新的 License
             LicenseSaveReqVO licenseSaveReqVO = JsonUtils.parseObject(decryptedContent, LicenseSaveReqVO.class);
-            licenseSaveReqVO.setLicenseFile("测试用例");
+            licenseSaveReqVO.setLicenseFile(encryptedContent);
             // 创建License时，将状态设置为ENABLE
             licenseSaveReqVO.setStatus(LicenseStatusEnum.ENABLE.getStatus());
             Long licenseId = createLicense(licenseSaveReqVO);
