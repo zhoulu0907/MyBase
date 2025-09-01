@@ -80,8 +80,12 @@
             <artifactId>onebase-spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-
-
+        <dependency>
+            <groupId>com.github.adrninistrator</groupId>
+            <artifactId>jpa-entity-generator-enhance</artifactId>
+            <version>0.0.5</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
     <build>
         <!-- 设置构建的 jar 包名 -->
