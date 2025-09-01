@@ -52,4 +52,7 @@ public class FlowProcessVO implements Serializable {
 
     @Schema(description = "更新时间")
     private LocalDateTime updateTime;
+
+    @Schema(description = "触发配置，比如表单触发pageId等")
+    private Object triggerConfig;
 }
