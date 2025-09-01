@@ -44,7 +44,9 @@ const PermissionModal = (props: IProps) => {
 
   const [value, setValue] = useState<string[]>(['1', '2']);
   const [checkAll, setCheckAll] = useState<boolean>(true);
-  const [indeterminate, setIndeterminate] = useState<boolean>(false);
+  // 业务实体
+  const [entity, setEntity] = useState<any[]>([]);
+  const [indeterminate, setIndeterminate] = useState<boolean>(false); // 操作权限
   const [conditionGroup, setConditionGroup] = useState<[IConditionData[]]>(); // 条件组
 
   function onChangeAll(checked: boolean) {

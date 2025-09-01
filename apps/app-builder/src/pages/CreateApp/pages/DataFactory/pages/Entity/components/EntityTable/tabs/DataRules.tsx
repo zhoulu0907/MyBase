@@ -5,7 +5,7 @@ import { Button, Dropdown, Menu, Message, Space, Table, Tag } from '@arco-design
 import { getEntityRules } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
 import { CreateCustomRule, CreateOtherRule } from '../../Modals';
-import { validationTypeOptions } from '../../Modals/CreateRuleModal/rule';
+import { validationTypeOptions, validationTypeMap } from '../../Modals/CreateRuleModal/rule';
 import styles from './tabs.module.less';
 
 interface DataRulesProps {
@@ -56,7 +56,7 @@ const DataRules: React.FC<DataRulesProps> = ({ entity, activeTab }) => {
       title: '校验类型',
       dataIndex: 'validationType',
       key: 'validationType',
-      render: (validationType: string) => <Tag color="orange">{validationType}</Tag>
+      render: (validationType: string) => <Tag color="orange">{validationTypeMap[validationType]}</Tag>
     },
     {
       title: '规则名称',
