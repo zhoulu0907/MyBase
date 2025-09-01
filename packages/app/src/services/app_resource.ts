@@ -1,4 +1,13 @@
-import { CreatePageSetReq, DeletePageSetReq, GetAppIdByPageSetIdReq, GetPageSetIdReq, GetPageSetMainMetaDataReq, LoadPageSetReq, SavePageSetReq } from '../types';
+import {
+  CreatePageSetReq,
+  DeletePageSetReq,
+  GetAppIdByPageSetIdReq,
+  GetPageListByAppIdReq,
+  GetPageSetIdReq,
+  GetPageSetMainMetaDataReq,
+  LoadPageSetReq,
+  SavePageSetReq
+} from '../types';
 import { appService } from './clients';
 
 export const getPageSetId = (params: GetPageSetIdReq) => {
@@ -27,4 +36,8 @@ export const getAppIdByPageSetId = (params: GetAppIdByPageSetIdReq) => {
 
 export const getPageSetMetaData = (params: GetPageSetMainMetaDataReq) => {
   return appService.get('/resource/page_set/main_metadata', params);
+};
+
+export const getPageListByAppId = (params: GetPageListByAppIdReq) => {
+  return appService.post('/resource/page/form/app_id', params);
 };

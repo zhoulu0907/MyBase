@@ -33,12 +33,17 @@ export interface ListFlowMgmtReq {
   triggerType?: string;
 }
 
+export interface TriggerConfig {
+  pageId?: string;
+}
+
 export interface CreateFlowMgmtReq {
   applicationId: string;
   processName: string;
   processStatus: ProcessStatus;
   processDescription?: string;
   triggerType: string;
+  triggerConfig?: TriggerConfig;
 }
 
 export interface UpdateFlowMgmtReq {
@@ -48,6 +53,7 @@ export interface UpdateFlowMgmtReq {
   processStatus: ProcessStatus;
   processDescription?: string;
   triggerType: TriggerType;
+  triggerConfig?: TriggerConfig;
 }
 
 export interface RenameFlowMgmtReq {

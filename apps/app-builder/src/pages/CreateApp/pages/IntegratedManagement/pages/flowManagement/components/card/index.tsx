@@ -62,7 +62,7 @@ const FlowCard: React.FC<FlowCardProps> = ({ data, handleEdit, handleDelete, ref
           </div>
           <div className={styles.cardHeaderLeftContent}>
             <div className={styles.cardHeaderLeftContentTitle}>{data.processName}</div>
-            <div className={styles.cardHeaderLeftContentDesc}>{data.id}</div>
+            <div className={styles.cardHeaderLeftContentDesc}>{data.processDescription}</div>
           </div>
         </div>
         <div className={styles.cardHeaderRight}>
