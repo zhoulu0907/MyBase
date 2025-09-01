@@ -18,7 +18,7 @@ import styles from './index.module.less';
 
 interface IProps {
   roleInfo: Role | undefined;
-  memberList?: [];
+  memberList?: any[];
   memberTotal?: number;
 }
 

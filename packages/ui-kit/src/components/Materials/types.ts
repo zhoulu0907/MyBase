@@ -289,3 +289,10 @@ export interface IDateConfigType {
   name: string;
   type: typeof CONFIG_TYPES.DATE_INPUT;
 }
+
+// 轮播图配置
+export interface ICarouselConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.CAROUSEL;
+}

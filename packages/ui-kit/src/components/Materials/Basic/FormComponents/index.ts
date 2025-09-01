@@ -15,7 +15,7 @@ import XInputText from './InputText';
 import XInputTextArea from './InputTextArea';
 import XRadio from './Radio';
 import XRelatedForm from './RelatedForm';
-import XRichText from './RichText';
+import XRichText from './RichTextEditor';
 import XSelectMutiple from './SelectMutiple';
 import XSelectOne from './SelectOne';
 import XStaticText from './StaticText';

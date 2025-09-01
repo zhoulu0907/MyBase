@@ -4,9 +4,10 @@ import { CONFIG_TYPES, usePageEditorSignal } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import { useEffect, useState } from 'react';
 import DynamicFieldConfig from './components/DynamicFieldConfig';
-import DynamicRadioConfig from './components/DynamicRadioConfig';
+import DynamicCarouselConfig from './components/DynamicCarouselConfig';
 import DynamicRelatedFormConfig from './components/DynamicRelatedFormConfig';
 import DynamicTableConfig from './components/DynamicTableConfig';
+import DynamicRadioConfig from './components/DynamicRadioConfig';
 import styles from './index.module.less';
 
 const FormItem = Form.Item;
@@ -129,7 +130,8 @@ const Attributes = ({ cpID }: ConfigsProps) => {
               item.type !== CONFIG_TYPES.TABLE_DATA &&
               item.type !== CONFIG_TYPES.FIELD_DATA &&
               item.type !== CONFIG_TYPES.RELATED_FORM_DATA &&
-              item.type !== CONFIG_TYPES.RADIO_DATA
+              item.type !== CONFIG_TYPES.RADIO_DATA &&
+              item.type !== CONFIG_TYPES.CAROUSEL
             ) {
               return (
                 <FormItem label={item.name} key={index} className={styles.formItem}>
@@ -327,6 +329,19 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                 />
               );
             }
+
+            if (item.type === CONFIG_TYPES.CAROUSEL) {
+              return (
+                <DynamicCarouselConfig
+                  key={index}
+                  id={cpID}
+                  handlePropsChange={handlePropsChange}
+                  item={item}
+                  configs={configs}
+                />
+              );
+            }
+
             if (item.type === CONFIG_TYPES.SWITCH_INPUT) {
               return (
                 <FormItem

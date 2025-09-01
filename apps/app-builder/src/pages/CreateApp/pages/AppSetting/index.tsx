@@ -64,13 +64,12 @@ const AppSettingPage: FC = () => {
       try {
         if (error !== null) return;
         setSaveLoading(true);
-        const { appCode, appName, iconColor, iconName, description, tagIds, themeColor } = data;
+        const { appCode, appName, appMode, iconColor, iconName, description, tagIds, themeColor } = data;
         const params: UpdateApplicationReq = {
           id: curAppId,
           appCode,
-          appMode: 'classic',
+          appMode,
           appName,
-          datasourceId: '1',
           description,
           iconColor,
           iconName,
@@ -118,7 +117,7 @@ const AppSettingPage: FC = () => {
             </Menu>
           </Sider>
           <Content className={styles.content}>
-            {activeTab === 'baseSetting' && <BasicSetting form={form} data={appData} />}
+            {activeTab === 'baseSetting' && <BasicSetting form={form} data={appData!} />}
             {activeTab === 'appPermission' && <AppPermission />}
           </Content>
         </Layout>

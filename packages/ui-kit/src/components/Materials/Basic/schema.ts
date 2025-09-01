@@ -15,7 +15,7 @@ import XInputText from './FormComponents/InputText/schema';
 import XInputTextArea from './FormComponents/InputTextArea/schema';
 import XRadio from './FormComponents/Radio/schema';
 import XRelatedForm from './FormComponents/RelatedForm/schema';
-import XRichText from './FormComponents/RichText/schema';
+import XRichText from './FormComponents/RichTextEditor/schema';
 import XSelectMutiple from './FormComponents/SelectMutiple/schema';
 import XSelectOne from './FormComponents/SelectOne/schema';
 import XStaticText from './FormComponents/StaticText/schema';

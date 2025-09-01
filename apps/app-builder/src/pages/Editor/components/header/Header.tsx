@@ -9,7 +9,7 @@ import { useI18n } from '@/hooks/useI18n';
 import { useBasicEditorStore } from '@/store';
 import { useAppStore } from '@/store/store_app';
 import { useAppEntityStore } from '@/store/store_entity';
-import { Button, Message, Tabs } from '@arco-design/web-react';
+import { Button, Message, Tabs, Breadcrumb, Input } from '@arco-design/web-react';
 import { IconArrowLeft } from '@arco-design/web-react/icon';
 import {
   AppStatus,
@@ -17,8 +17,10 @@ import {
   getAppEntities,
   getAppIdByPageSetId,
   getApplication,
+  updateApplicationMenuName,
   type AppEntity,
-  type GetApplicationReq
+  type GetApplicationReq,
+  type UpdateApplicationMenuNameReq
 } from '@onebase/app';
 import { getHashQueryParam } from '@onebase/common';
 import {
@@ -35,6 +37,9 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PartPreview from '../partPreview';
 import styles from './index.module.less';
+import { IconEdit } from '@douyinfe/semi-icons';
+
+const BreadcrumbItem = Breadcrumb.Item;
 
 const tabData = [
   {
@@ -105,7 +110,12 @@ export default function EditorHeader() {
   const [iconColor, setIconColor] = useState('');
   const [appStatus, setAppStatus] = useState(0);
 
+  const [pageReanme, setPageRename] = useState(false);
+
   const [partPreviewVisible, setPartPreviewVisible] = useState(false);
+
+  const sessionData = sessionStorage.getItem('EDITOR_PAGE_INFO') || '{}';
+  const pageInfo = JSON.parse(sessionData);
 
   useEffect(() => {
     // 根据当前 URL 动态设置 activeTab
@@ -151,8 +161,8 @@ export default function EditorHeader() {
 
     const appResp = await getApplication(appReq);
     if (appResp) {
-      if (appResp.icon) {
-        setAppIcon(appResp.icon);
+      if (appResp.iconName) {
+        setAppIcon(appResp.iconName);
       }
       if (appResp.iconColor) {
         setIconColor(appResp.iconColor);
@@ -245,6 +255,19 @@ export default function EditorHeader() {
     setPartPreviewVisible(true);
   };
 
+  const handleInputChange = async (e: any) => {
+    const name = e.target.value;
+    try {
+      const params: UpdateApplicationMenuNameReq = {
+        id: pageInfo?.id,
+        menuName: name
+      };
+      await updateApplicationMenuName(params);
+      setPageRename(false);
+      sessionStorage.setItem('EDITOR_PAGE_INFO', JSON.stringify({ ...pageInfo, name }));
+    } catch (error) {}
+  };
+
   return (
     <div className={styles.editorHeader}>
       {/* 左侧 */}
@@ -255,9 +278,26 @@ export default function EditorHeader() {
           <i className={`iconfont ${appIcon || 'icon-box'}`} />
         </div>
 
-        <span>{appName}</span>
-        <span>&gt;</span>
-        <span>{activeTab === EDITOR_TYPES.FORM_EDITOR ? '表单页' : '列表页'}</span>
+        <Breadcrumb>
+          <BreadcrumbItem className={styles.appName}>{appName}</BreadcrumbItem>
+          <BreadcrumbItem className={styles.pageName}>
+            {pageReanme ? (
+              <Input
+                autoFocus
+                allowClear
+                defaultValue={pageInfo?.name}
+                onPressEnter={handleInputChange}
+                onBlur={() => setPageRename(false)}
+                style={{ width: 150 }}
+              />
+            ) : (
+              <>
+                {pageInfo?.name || '未命名页面'}
+                <IconEdit onClick={() => setPageRename(true)} style={{ marginLeft: 4, cursor: 'pointer' }} />
+              </>
+            )}
+          </BreadcrumbItem>
+        </Breadcrumb>
       </div>
 
       {/* 中间 */}
@@ -302,10 +342,10 @@ export default function EditorHeader() {
       </div>
 
       <div className={styles.right}>
-        {appStatus === AppStatus.DEVELOPING && <div className={styles.editorStatusDeveloping}>开发中</div>}
-        {appStatus === AppStatus.PUBLISHED && <div className={styles.editorStatusPublished}>已发布</div>}
+        {appStatus === AppStatus.DEVELOPING && <div className={styles.editorStatusDeveloping}>未保存</div>}
+        {appStatus === AppStatus.PUBLISHED && <div className={styles.editorStatusPublished}>已保存</div>}
         {appStatus === AppStatus.EDITING_AFTER_PUBLISH && (
-          <div className={styles.editorStatusEditAfterPublished}>已发布</div>
+          <div className={styles.editorStatusEditAfterPublished}>未保存</div>
         )}
 
         <Button onClick={toPreview} className={styles.previewButton}>

@@ -28,7 +28,7 @@
     .myAppIcon {
       width: 24px;
       height: 24px;
-      border-radius: 4px;
+      border-radius: 6px;
       margin: 0 4px 0 12px;
       display: flex;
       align-items: center;
@@ -39,10 +39,30 @@
         font-size: 14px;
       }
     }
+
+    .appName {
+      color: #86909c;
+      text-align: center;
+      font-family: 'PingFang SC';
+      font-size: 14px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: 22px;
+    }
+
+    .pageName {
+      color: #1d2129;
+      text-align: center;
+      font-family: 'PingFang SC';
+      font-size: 14px;
+      font-style: normal;
+      font-weight: 600;
+      line-height: 22px;
+    }
   }
 
   .center {
-    flex: 4;
+    flex: 1;
     display: flex;
     justify-content: center;
 
@@ -80,6 +100,19 @@
       white-space: nowrap;
       margin-right: 24px;
       position: relative;
+
+      &::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: -10px;
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        background-color: #00b42a;
+        border: 1px solid #aff0b5;
+        transform: translateY(-50%);
+      }
     }
 
     .editorStatusDeveloping {
@@ -87,9 +120,8 @@
       font-weight: 400;
       letter-spacing: 0px;
       line-height: 32px;
-      color: #3491fa;
+      color: #6b7785;
       white-space: nowrap;
-      margin-right: 24px;
       position: relative;
     }
 
