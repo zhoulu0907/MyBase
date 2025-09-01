@@ -3,7 +3,6 @@ export interface FlowMgmt {
   applicationId: string;
   processName: string;
   processStatus: ProcessStatus;
-  processDefinition: string;
   processDescription: string;
   triggerType: string;
   createTime: string;
@@ -15,12 +14,13 @@ export enum ProcessStatus {
   ENABLED = 1
 }
 
-export enum ProcessDefinition {
-  Time = 'time',
+export enum TriggerType {
   FORM = 'form',
-  DATE_FIELD = 'date_field',
   ENTITY = 'entity',
-  API = 'api'
+  TIME = 'time',
+  DATE_FIELD = 'date_field',
+  API = 'api',
+  BPM = 'bpm'
 }
 
 export interface ListFlowMgmtReq {
@@ -38,7 +38,6 @@ export interface CreateFlowMgmtReq {
   processName: string;
   processStatus: ProcessStatus;
   processDescription?: string;
-  processDefinition: ProcessDefinition;
   triggerType: string;
 }
 
@@ -48,8 +47,7 @@ export interface UpdateFlowMgmtReq {
   processName: string;
   processStatus: ProcessStatus;
   processDescription?: string;
-  processDefinition: ProcessDefinition;
-  triggerType: string;
+  triggerType: TriggerType;
 }
 
 export interface RenameFlowMgmtReq {
