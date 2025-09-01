@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.Map;
 
 /**
  * 流程管理 - 创建流程 Request VO
@@ -35,4 +36,7 @@ public class CreateFlowProcessReqVO implements Serializable {
     @NotBlank(message = "触发类型不能为空")
     @Size(max = 50, message = "触发类型长度不能超过50个字符")
     private String triggerType;
+
+    @Schema(description = "触发配置，比如表单触发传入page_id")
+    private Map<String, Object> triggerConfig;
 }
