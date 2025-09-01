@@ -21,10 +21,12 @@ public class EMailJsonSerializer extends JsonSerializer<String> {
     public void serialize(String value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
         if (StringUtils.isEmpty(value)) {
             gen.writeString(value);
+            return;
         }
         int index = value.indexOf("@");
         if (index <= 1) {
             gen.writeString(value);
+            return;
         }
         String begin = value.substring(0, 1);
         String end = value.substring(index);

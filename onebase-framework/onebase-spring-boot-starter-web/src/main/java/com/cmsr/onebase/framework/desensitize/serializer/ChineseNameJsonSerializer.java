@@ -21,6 +21,7 @@ public class ChineseNameJsonSerializer extends JsonSerializer<String> {
     public void serialize(String value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
         if (StringUtils.isEmpty(value)) {
             gen.writeString(value);
+            return;
         }
         String begin = value.substring(0, 1);
         String stars = "**";
