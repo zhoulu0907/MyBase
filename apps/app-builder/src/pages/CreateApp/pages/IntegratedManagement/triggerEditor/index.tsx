@@ -38,6 +38,7 @@ const TriggerEditor = () => {
     }
   }, [flowId]);
 
+  // 载入初始化数据
   const initFlowData = async (id: string) => {
     const res = await getFlowMgmt(id);
     console.log('res: ', res);
