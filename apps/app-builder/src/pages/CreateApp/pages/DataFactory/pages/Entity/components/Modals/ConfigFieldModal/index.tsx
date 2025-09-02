@@ -11,6 +11,7 @@ import { type AutoNumberRule } from './FieldTypeConfig';
 import FieldConfigPopover from './FieldConfigPopover';
 import TableColumns from './TableColumns';
 import styles from './index.module.less';
+import { useFieldStore } from '@/store/store_field';
 
 interface FieldFormValues {
   id?: string;
@@ -53,13 +54,17 @@ const FIELD_TYPES_NEED_CONFIG = [
   ENTITY_FIELD_TYPE_LABEL.AUTO_NUMBER
 ];
 
-// 字段类型选项
-const fieldTypeOptions = JSON.parse(localStorage.getItem('fieldTypes') || '[]');
-
 // 自定义表格行组件，支持拖拽
 const SortableTableRow = (props: any) => {
   const { record, children, ...restProps } = props;
-  return <tr {...restProps}>{children}</tr>;
+
+  // 为可拖拽的行添加 data-id 属性
+  const rowProps = {
+    ...restProps,
+    'data-id': record.id
+  };
+
+  return <tr {...rowProps}>{children}</tr>;
 };
 
 const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible, entity, successCallback }) => {
@@ -68,6 +73,11 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
   const [loading, setLoading] = useState(false);
   const [configPopoverVisible, setConfigPopoverVisible] = useState<string | null>(null);
   const [constraintsPopoverVisible, setConstraintsPopoverVisible] = useState<string | null>(null);
+
+  const fieldTypeOptions = useFieldStore.getState().fieldTypes.map((item) => ({
+    label: item.displayName,
+    value: item.fieldType
+  }));
 
   useEffect(() => {
     if (visible) {
@@ -83,17 +93,18 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
     }
   }, [visible]);
 
+
   // 过滤掉已删除的字段和系统字段
   const activeFields = fields.filter((field) => !field.isDeleted && field.isSystemField === FIELD_TYPE.CUSTOM);
 
   const addField = () => {
     const newField: FieldFormValues = {
-      // id: 'field-' + Date.now(),
+      id: 'field-' + Date.now(),
       fieldCode: '',
       fieldName: '',
       displayName: '',
       description: '',
-      fieldType: 'TEXT',
+      fieldType: ENTITY_FIELD_TYPE_LABEL.TEXT,
       defaultValue: '',
       isUnique: 1,
       allowNull: 1,
@@ -179,7 +190,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
           isDeleted: field.isDeleted || false
         };
 
-        return field.id ? { ...fieldData, id: field.id } : fieldData;
+        return field.id && field.id.startsWith('field-') ? { ...fieldData, id: '' } : { ...fieldData, id: field.id };
       });
 
       const params = {
@@ -287,7 +298,6 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
           animation={200}
           handle={`.${styles['drag-handle']}`}
           filter={`.${styles['system-field']}`}
-          tag="tr"
         >
           <Table
             data={activeFields}
