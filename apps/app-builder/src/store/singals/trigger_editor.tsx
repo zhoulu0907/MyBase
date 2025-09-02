@@ -14,13 +14,29 @@ export const createTriggerEditorSignal = () => {
     nodeId.value = id;
   };
 
+  const flowId = signal<string>();
+  const setFlowId = (id: string) => {
+    flowId.value = id;
+  };
+
+  const pageId = signal<string>();
+  const setPageId = (id: string) => {
+    pageId.value = id;
+  };
+
   return {
     nodeData,
     setNodeData,
     clearNodeData,
 
     nodeId,
-    setNodeId
+    setNodeId,
+
+    flowId,
+    setFlowId,
+
+    pageId,
+    setPageId
   };
 };
 

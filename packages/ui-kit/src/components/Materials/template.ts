@@ -32,7 +32,7 @@ export const COMPONENT_TYPE_DISPLAY_NAME_MAP: Record<string, string> = {
   [FORM_COMPONENT_TYPES.DEPT_SELECT]: '部门选择',
   [FORM_COMPONENT_TYPES.FILE_UPLOAD]: '文件上传',
   [FORM_COMPONENT_TYPES.IMG_UPLOAD]: '图片上传',
-  [FORM_COMPONENT_TYPES.AUTO_CODE]: '唯一编码',
+  [FORM_COMPONENT_TYPES.AUTO_NUMBER]: '自动编码',
   [FORM_COMPONENT_TYPES.RELATED_FORM]: '关联表单',
   [FORM_COMPONENT_TYPES.STATIC_TEXT]: '静态文本',
   [FORM_COMPONENT_TYPES.DIVIDER]: '分割线',
@@ -100,7 +100,7 @@ const allTemplate = {
           h: 36,
           w: 118,
           displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.RICH_TEXT],
-          icon: 'readonly_cp.svg', // todo
+          icon: 'rich_text_cp.svg',
           category: 'base'
         },
         {
@@ -232,10 +232,10 @@ const allTemplate = {
           category: 'base'
         },
         {
-          type: FORM_COMPONENT_TYPES.AUTO_CODE,
+          type: FORM_COMPONENT_TYPES.AUTO_NUMBER,
           h: 36,
           w: 118,
-          displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.AUTO_CODE],
+          displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.AUTO_NUMBER],
           icon: 'readonly_cp.svg',
           category: 'base'
         },
@@ -244,7 +244,7 @@ const allTemplate = {
           h: 36,
           w: 118,
           displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.RELATED_FORM],
-          icon: 'readonly_cp.svg',
+          icon: 'related_form_cp.svg',
           category: 'base'
         },
         {

@@ -1,6 +1,6 @@
 import { useEffect, useState, forwardRef, useImperativeHandle } from 'react';
 import { Button, Form, Grid, Input, Message, Select } from '@arco-design/web-react';
-import { testDatasourceConnection, type DatasourceSaveReqVO, type DatasourceTestConnectionReqVO } from '@onebase/app';
+import { testDatasourceConnection, type DatasourceSaveReqDTO, type DatasourceTestConnectionReqVO } from '@onebase/app';
 import styles from './index.module.less';
 
 const Option = Select.Option;
@@ -20,7 +20,7 @@ interface DataSourceFormValues {
 const dbTypes = [{ label: 'PostgreSQL', value: 'PostgreSQL', urlPrefix: 'jdbc:postgresql://' }];
 
 export type DataSourceHandle = {
-  handleGetDatasource: () => void;
+  handleGetDatasource: () => Promise<DatasourceSaveReqDTO | undefined>;
 };
 
 interface IProps {
@@ -36,11 +36,11 @@ const CreateDataSource = forwardRef<DataSourceHandle, IProps>((props, ref) => {
   const [formValues, setFormValues] = useState<Partial<DataSourceFormValues>>({});
 
   useImperativeHandle(ref, () => ({
-    async handleGetDatasource() {
+    async handleGetDatasource(): Promise<DatasourceSaveReqDTO | undefined> {
       try {
         const values = await form.validate();
 
-        const createParams: DatasourceSaveReqVO = {
+        const createParams = {
           datasourceName: values.datasourceName,
           code: values.code,
           datasourceType: values.datasourceType,
@@ -53,12 +53,12 @@ const CreateDataSource = forwardRef<DataSourceHandle, IProps>((props, ref) => {
             url: values.url || `jdbc:mysql://${values.host}:${values.port}/${values.database}`
           },
           description: `${values.datasourceType} 数据源`,
-          datasourceOrigin: 2 // 外部数据源
+          datasourceOrigin: 1 // 自有数据源
         };
 
         return createParams;
       } catch (error) {
-        return null;
+        return undefined;
       }
     }
   }));

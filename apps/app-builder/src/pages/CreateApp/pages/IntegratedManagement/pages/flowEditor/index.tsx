@@ -1,7 +1,5 @@
 import { Button } from '@arco-design/web-react';
 import React from 'react';
-// import TriggerEditor from '../../freeTriggerEditor';
-// import TriggerEditor from '../../fixedTriggerEditor';
 import TriggerEditor from '../../triggerEditor';
 import styles from './index.module.less';
 

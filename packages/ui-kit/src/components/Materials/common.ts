@@ -13,7 +13,9 @@ import {
   UPLOAD_OPTIONS,
   UPLOAD_VALUES,
   WIDTH_OPTIONS,
-  WIDTH_VALUES
+  WIDTH_VALUES,
+  FILL_OPTIONS,
+  FILL_VALUES
 } from './constants';
 import type {
   IAlignConfigType,
@@ -28,7 +30,8 @@ import type {
   IWidthConfigType,
   TTextDefaultType,
   INumberConfigType,
-  IRadioDataConfigType
+  IRadioDataConfigType,
+  ICarouselConfigType,
 } from './types';
 
 export interface ICommonBaseType {
@@ -269,6 +272,30 @@ export const pagePositionConfig: ISelectConfigType<TPagePositionSelectKeyType> =
   ]
 };
 
+export type TFillSelectKeyType = (typeof FILL_VALUES)[keyof typeof FILL_VALUES];
+export const fillConfig: IStatusConfigType<TFillSelectKeyType> = {
+  key: 'fillStyle',
+  name: '填充方式',
+  type: CONFIG_TYPES.STATUS_RADIO,
+  range: [
+    {
+      key: FILL_OPTIONS.CONTAIN,
+      text: FILL_OPTIONS.CONTAIN,
+      value: FILL_VALUES[FILL_OPTIONS.CONTAIN]
+    },
+    {
+      key: FILL_OPTIONS.COVER,
+      text: FILL_OPTIONS.COVER,
+      value: FILL_VALUES[FILL_OPTIONS.COVER]
+    },
+    {
+      key: FILL_OPTIONS.FILL,
+      text: FILL_OPTIONS.FILL,
+      value: FILL_VALUES[FILL_OPTIONS.FILL]
+    }
+  ]
+};
+
 export const dataFieldConfig: IDataFieldConfigType[] = [
   {
     key: 'dataField',
@@ -306,4 +333,10 @@ export const radioDataConfig: IRadioDataConfigType = {
   key: 'radioData',
   name: '自定义选项',
   type: CONFIG_TYPES.RADIO_DATA
+};
+
+export const carouselConfig: ICarouselConfigType = {
+  key: 'carousel',
+  name: '图片',
+  type: CONFIG_TYPES.CAROUSEL
 };

@@ -30,6 +30,10 @@ export function usePageEditorSignal() {
     ? useListEditorSignal.delComponents
     : useFormEditorSignal.delComponents;
 
+  const addComponents = useList
+    ? useListEditorSignal.addComponents
+    : useFormEditorSignal.addComponents;
+
   const clearComponents = useList
     ? useListEditorSignal.clearComponents
     : useFormEditorSignal.clearComponents;
@@ -76,6 +80,7 @@ export function usePageEditorSignal() {
     setShowDeleteButton,
     components,
     setComponents,
+    addComponents,
     delComponents,
     clearComponents,
     pageComponentSchemas,

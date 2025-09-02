@@ -9,7 +9,7 @@ export const createPageEditorSignal = (initialComponents: EditConfig[] = []) => 
     components.value = newComponents;
   };
 
-  const addComponent = (component: any) => {
+  const addComponents = (component: any) => {
     components.value = [...components.value, component];
   };
 
@@ -57,7 +57,7 @@ export const createPageEditorSignal = (initialComponents: EditConfig[] = []) => 
     // 页面组件
     components,
     setComponents,
-    addComponent,
+    addComponents,
     delComponents,
     clearComponents,
 

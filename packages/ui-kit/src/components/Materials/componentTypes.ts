@@ -23,7 +23,7 @@ export const FORM_COMPONENT_TYPES = {
   DEPT_SELECT: 'XDeptSelect',
   FILE_UPLOAD: 'XFileUpload',
   IMG_UPLOAD: 'XImgUpload',
-  AUTO_CODE: 'XAutoCode',
+  AUTO_NUMBER: 'XAutoNumber',
   RELATED_FORM: 'XRelatedForm',
   STATIC_TEXT: 'XStaticText',
   DIVIDER: 'XDivider',

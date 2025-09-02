@@ -1,8 +1,8 @@
 import { Button, Input, Select } from '@arco-design/web-react';
 import { IconClose } from '@douyinfe/semi-icons';
-import type { Condition } from '@onebase/app';
+import type { Condition, ConfitionField } from '@onebase/app';
 import { nanoid } from 'nanoid';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import styles from './index.module.less';
 
 const Option = Select.Option;
@@ -23,9 +23,10 @@ const opCodeOptions = [
  * ConditionEditor 组件的 props 类型定义
  */
 export interface ConditionEditorProps {
+  fields: ConfitionField[];
+
   data?: Condition;
   onChange: (value: Condition) => void;
-  fields: { label: string; value: string; fieldType: string }[];
   fieldOperatorMapping: { [key: string]: string[] };
 }
 
@@ -46,15 +47,15 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({ data, onChange, field
 
   const [fieldOperator, setFieldOperator] = useState<{ [key: string]: string[] }>({});
 
-  useEffect(() => {
-    if (data) {
-      setCondition(data);
-    }
-  }, []);
+  //   useEffect(() => {
+  //     if (data) {
+  //       setCondition(data);
+  //     }
+  //   }, []);
 
-  useEffect(() => {
-    onChange(condition);
-  }, [condition]);
+  //   useEffect(() => {
+  //     onChange(condition);
+  //   }, [condition]);
 
   const addCondition = (pid: string) => {
     const newCondition = { ...condition };
@@ -179,7 +180,7 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({ data, onChange, field
           );
         })}
       </div>
-      <Button type="outline" onClick={() => addCondition('')}>
+      <Button type="outline" size="small" onClick={() => addCondition('')}>
         + 或者
       </Button>
     </div>

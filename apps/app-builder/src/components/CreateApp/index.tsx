@@ -30,12 +30,13 @@ interface IProps {
   readonly previewBgColor: string;
   readonly style?: React.CSSProperties;
   readonly dataSourceCreated?: boolean;
+  readonly isOwnDatasource?: boolean;
   onCreateDatasource?: () => void;
 }
 
 // 创建/修改应用
 const CreateApp = (props: IProps) => {
-  const { previewBgColor, form, data, status, style, dataSourceCreated, onCreateDatasource } = props;
+  const { previewBgColor, form, data, status, style, dataSourceCreated, isOwnDatasource, onCreateDatasource } = props;
 
   const [tagList, setTagList] = useState<ListTagReq[]>([]); // 标签列表
   const [iconName, setIconName] = useState<Application['iconName']>();
@@ -92,6 +93,14 @@ const CreateApp = (props: IProps) => {
     map[item.tagName] = item;
     return map;
   }, {});
+
+  const datasourceStatus = () => {
+    if (status === 'update') {
+      return isOwnDatasource ? '已使用自有数据源' : '已使用系统默认数据源';
+    } else {
+      return dataSourceCreated ? '已配置自有数据源' : '使用自有数据源';
+    }
+  };
 
   /* 新增标签 */
   const handleCreateTagChange = async (val: Options[]) => {
@@ -296,7 +305,7 @@ const CreateApp = (props: IProps) => {
               </div>
               <div className={styles.dataImportant} onClick={onCreateDatasource}>
                 <img src={arrowSVG} alt="Use own data source" />
-                {dataSourceCreated ? '已配置自有数据源' : '使用自有数据源'}
+                {datasourceStatus()}
               </div>
             </div>
             <div className={styles.appType}>
