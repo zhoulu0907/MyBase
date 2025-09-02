@@ -202,7 +202,9 @@ export default function EditorHeader() {
     console.log('appEntities: ', res);
     if (res) {
       setAppEntities(res.entities);
-      const mainEntity = res.entities.filter((entity: AppEntity) => entity.entityType === ENTITY_TYPE.MAIN);
+      const mainEntity = res.entities.filter((entity: AppEntity) => 
+        entity.entityType === ENTITY_TYPE.MAIN || entity.entityType === ENTITY_TYPE.INDEP
+      );
       if (mainEntity.length > 0) {
         setMainEntity(mainEntity[0]);
       }
