@@ -78,6 +78,10 @@ public class MetadataValidationRangeServiceImpl implements MetadataValidationRan
             groupVO.setRgName(vo.getRgName());
             groupVO.setRgDesc("自动创建的规则组：" + vo.getRgName());
             groupVO.setRgStatus(StatusEnumUtil.ACTIVE);
+            // 透传可选的组级提示配置
+            groupVO.setValMethod(vo.getValMethod());
+            groupVO.setPopPrompt(vo.getPopPrompt());
+            groupVO.setPopType(vo.getPopType());
             groupId = ruleGroupService.createValidationRuleGroup(groupVO);
         }
 
@@ -114,6 +118,10 @@ public class MetadataValidationRangeServiceImpl implements MetadataValidationRan
             groupVO.setRgName(reqVO.getRgName());
             groupVO.setRgDesc("自动创建的规则组：" + reqVO.getRgName());
             groupVO.setRgStatus(StatusEnumUtil.ACTIVE);
+            // 透传可选的组级提示配置
+            groupVO.setValMethod(reqVO.getValMethod());
+            groupVO.setPopPrompt(reqVO.getPopPrompt());
+            groupVO.setPopType(reqVO.getPopType());
             groupId = ruleGroupService.createValidationRuleGroup(groupVO);
         }
 
