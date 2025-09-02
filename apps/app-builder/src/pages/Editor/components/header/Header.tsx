@@ -9,8 +9,9 @@ import { useI18n } from '@/hooks/useI18n';
 import { useBasicEditorStore } from '@/store';
 import { useAppStore } from '@/store/store_app';
 import { useAppEntityStore } from '@/store/store_entity';
-import { Button, Message, Tabs, Breadcrumb, Input } from '@arco-design/web-react';
+import { Breadcrumb, Button, Input, Message, Tabs } from '@arco-design/web-react';
 import { IconArrowLeft } from '@arco-design/web-react/icon';
+import { IconEdit } from '@douyinfe/semi-icons';
 import {
   AppStatus,
   ENTITY_TYPE,
@@ -37,7 +38,6 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PartPreview from '../partPreview';
 import styles from './index.module.less';
-import { IconEdit } from '@douyinfe/semi-icons';
 
 const BreadcrumbItem = Breadcrumb.Item;
 
@@ -202,7 +202,9 @@ export default function EditorHeader() {
     console.log('appEntities: ', res);
     if (res) {
       setAppEntities(res.entities);
-      const mainEntity = res.entities.filter((entity: AppEntity) => entity.entityType === ENTITY_TYPE.MAIN);
+      const mainEntity = res.entities.filter(
+        (entity: AppEntity) => entity.entityType === ENTITY_TYPE.MAIN || entity.entityType === ENTITY_TYPE.INDEPENDENT
+      );
       if (mainEntity.length > 0) {
         setMainEntity(mainEntity[0]);
       }
