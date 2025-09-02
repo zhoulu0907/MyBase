@@ -58,7 +58,7 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({ childCollapsed, s
             // TODO(mickey): 使用uuid作为id
             id: `${cpType}-${index}-${Date.now()}`,
             displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[cpType] || '',
-            label: field.fieldName,
+            label: field.displayName,
             type: cpType,
             fieldID: field.fieldID,
             entityID: mainEntity.entityID
