@@ -1,6 +1,6 @@
 import { Button, Input, Select } from '@arco-design/web-react';
 import { IconClose } from '@douyinfe/semi-icons';
-import type { Condition } from '@onebase/app';
+import type { Condition, ConfitionField } from '@onebase/app';
 import { nanoid } from 'nanoid';
 import React, { useState } from 'react';
 import styles from './index.module.less';
@@ -23,11 +23,10 @@ const opCodeOptions = [
  * ConditionEditor 组件的 props 类型定义
  */
 export interface ConditionEditorProps {
-  pageId: string;
+  fields: ConfitionField[];
 
   data?: Condition;
   onChange: (value: Condition) => void;
-  fields: { label: string; value: string; fieldType: string }[];
   fieldOperatorMapping: { [key: string]: string[] };
 }
 
@@ -181,7 +180,7 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({ data, onChange, field
           );
         })}
       </div>
-      <Button type="outline" onClick={() => addCondition('')}>
+      <Button type="outline" size="small" onClick={() => addCondition('')}>
         + 或者
       </Button>
     </div>

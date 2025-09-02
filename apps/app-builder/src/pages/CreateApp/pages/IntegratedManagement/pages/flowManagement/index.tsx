@@ -145,6 +145,7 @@ const FlowManagementPage: React.FC = () => {
     form.setFieldsValue({ processStatus: res.processStatus == ProcessStatus.ENABLED ? true : false });
     form.setFieldsValue({ processDescription: res.processDescription });
     form.setFieldsValue({ triggerType: res.triggerType });
+    res.triggerConfig && res.triggerConfig.pageId && form.setFieldsValue({ pageId: res.triggerConfig.pageId });
 
     setModalVisible('update');
   };
@@ -334,7 +335,7 @@ const FlowManagementPage: React.FC = () => {
         onOk={modalVisible == 'create' ? handleCreateFlow : handleUpdateFlowMgmt}
         onCancel={() => setModalVisible('')}
         confirmLoading={formLoading}
-        okText="创建"
+        okText={modalVisible == 'create' ? '创建' : '更新'}
         cancelText="取消"
       >
         <Form layout="horizontal" form={form}>
