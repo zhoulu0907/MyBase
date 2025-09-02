@@ -21,7 +21,7 @@ import { FlowNodeRegistries } from './nodes';
 
 const TriggerEditor = () => {
   const editorProps = useEditorProps(FlowNodeRegistries);
-  const { setNodeId, setFlowId, flowId } = triggerEditorSignal;
+  const { setNodeId, setFlowId, flowId, setPageId } = triggerEditorSignal;
   const [initData, setInitData] = useState<FlowDocumentJSON>();
 
   useEffect(() => {
@@ -43,6 +43,10 @@ const TriggerEditor = () => {
     const res = await getFlowMgmt(id);
     console.log('res: ', res);
     console.log(res.triggerType);
+
+    if (res.triggerConfig && res.triggerConfig.pageId) {
+      setPageId(res.triggerConfig.pageId);
+    }
 
     switch (res.triggerType) {
       case TriggerType.FORM:

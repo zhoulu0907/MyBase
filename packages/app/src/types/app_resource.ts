@@ -39,6 +39,11 @@ export interface GetAppIdByPageSetIdReq {
 export interface GetPageSetMainMetaDataReq {
   pageSetId: string;
 }
+
 export interface GetPageListByAppIdReq {
   appId: string;
+}
+
+export interface GetComponentListByPageIdReq {
+  pageId: string;
 }

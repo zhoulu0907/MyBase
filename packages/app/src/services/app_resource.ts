@@ -2,6 +2,7 @@ import {
   CreatePageSetReq,
   DeletePageSetReq,
   GetAppIdByPageSetIdReq,
+  GetComponentListByPageIdReq,
   GetPageListByAppIdReq,
   GetPageSetIdReq,
   GetPageSetMainMetaDataReq,
@@ -40,4 +41,8 @@ export const getPageSetMetaData = (params: GetPageSetMainMetaDataReq) => {
 
 export const getPageListByAppId = (params: GetPageListByAppIdReq) => {
   return appService.post('/resource/page/form/app_id', params);
+};
+
+export const getComponentListByPageId = (params: GetComponentListByPageIdReq) => {
+  return appService.post('/resource/component/list', params);
 };

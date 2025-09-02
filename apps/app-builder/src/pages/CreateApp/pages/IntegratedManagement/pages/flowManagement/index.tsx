@@ -348,7 +348,7 @@ const FlowManagementPage: React.FC = () => {
             <Input />
           </FormItem>
 
-          <FormItem label="流程名称" field="processName">
+          <FormItem label="流程名称" field="processName" rules={[{ required: true, message: '请输入流程名称' }]}>
             <Input />
           </FormItem>
 
@@ -362,7 +362,7 @@ const FlowManagementPage: React.FC = () => {
             <Input.TextArea placeholder="请输入流程描述" maxLength={100} allowClear />
           </FormItem>
 
-          <FormItem label="流程定义" field="triggerType">
+          <FormItem label="流程定义" field="triggerType" rules={[{ required: true, message: '请选择流程定义' }]}>
             <Select>
               {getTriggerTypeList().map((item) => (
                 <Option key={item.value} value={item.value}>
@@ -372,7 +372,12 @@ const FlowManagementPage: React.FC = () => {
             </Select>
           </FormItem>
 
-          <FormItem label="表单ID" field="pageId" hidden={triggerType != TriggerType.FORM}>
+          <FormItem
+            label="表单ID"
+            field="pageId"
+            hidden={triggerType != TriggerType.FORM}
+            rules={[{ required: true, message: '请选择表单ID' }]}
+          >
             <Select>
               {pageList?.map((item) => (
                 <Option key={item.id} value={item.id}>
