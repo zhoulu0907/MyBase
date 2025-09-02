@@ -1,7 +1,7 @@
 export const ENTITY_TYPE = {
   MAIN: '主表',
   SUB: '子表',
-  INDEPENDENT: '独立表'
+  INDEP: '独立表'
 };
 
 export interface MetadataEntityPair {
@@ -42,6 +42,18 @@ export interface AppEntity {
   entityName: string; // 实体名称
   entityType: string; // 实体类型，如“主表”、“子表”、“独立表”、“主子表”
   fields: AppEntityField[];
+}
+
+export interface ChildEntity {
+  childEntityCode: string;
+  childEntityId: string;
+  childEntityName: string;
+  childFields: AppEntityField[];
+  childTableName: string;
+  relationshipId: string;
+  relationshipType: string;
+  sourceFieldName: string;
+  targetFieldName: string;
 }
 
 export interface AppEntityField {
