@@ -37,11 +37,60 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
     private final Pattern dangerousPatternRegex;
 
     /**
-     * 支持的Excel函数列表
+     * 支持的Excel函数列表 - 基于FormulaJS v4.5.3完整函数库
      */
     private static final String[] SUPPORTED_FUNCTIONS = {
-            "LEFT", "RIGHT", "MID", "LEN", "UPPER", "LOWER",
-            "SUM", "AVERAGE", "MAX", "MIN"
+            // 文本函数
+            "LEFT", "RIGHT", "MID", "LEN", "UPPER", "LOWER", "PROPER", "TRIM",
+            "CONCATENATE", "FIND", "REPLACE", "SUBSTITUTE", "SEARCH", "EXACT",
+            "CLEAN", "CODE", "CHAR", "REPT", "TEXT", "VALUE", "FIXED",
+
+            // 数学和三角函数
+            "SUM", "SUMIF", "SUMIFS", "AVERAGE", "AVERAGEIF", "AVERAGEIFS",
+            "MAX", "MIN", "COUNT", "COUNTA", "COUNTIF", "COUNTIFS", "COUNTBLANK",
+            "ROUND", "ROUNDUP", "ROUNDDOWN", "ABS", "POWER", "SQRT", "MOD",
+            "CEILING", "FLOOR", "INT", "SIGN", "TRUNC", "EVEN", "ODD",
+            "SIN", "COS", "TAN", "ASIN", "ACOS", "ATAN", "ATAN2",
+            "SINH", "COSH", "TANH", "PI", "RADIANS", "DEGREES",
+            "EXP", "LN", "LOG", "LOG10", "FACT", "COMBIN", "PERMUT",
+            "GCD", "LCM", "RAND", "RANDBETWEEN",
+
+            // 逻辑函数
+            "IF", "AND", "OR", "NOT", "IFERROR", "IFNA", "TRUE", "FALSE",
+
+            // 日期时间函数
+            "TODAY", "NOW", "DATE", "TIME", "YEAR", "MONTH", "DAY",
+            "HOUR", "MINUTE", "SECOND", "WEEKDAY", "WEEKNUM",
+            "DATEDIF", "DATEVALUE", "TIMEVALUE", "DAYS", "DAYS360",
+            "NETWORKDAYS", "WORKDAY", "EDATE", "EOMONTH",
+
+            // 查找和引用函数
+            "INDEX", "MATCH", "VLOOKUP", "HLOOKUP", "LOOKUP", "CHOOSE",
+            "INDIRECT", "OFFSET", "ROW", "ROWS", "COLUMN", "COLUMNS",
+
+            // 信息函数
+            "ISNUMBER", "ISTEXT", "ISBLANK", "ISERROR", "ISNA", "ISLOGICAL",
+            "ISEVEN", "ISODD", "TYPE", "N", "NA", "ERROR.TYPE",
+
+            // 统计函数
+            "MEDIAN", "MODE", "VAR", "VARP", "STDEV", "STDEVP",
+            "QUARTILE", "PERCENTILE", "PERCENTRANK", "RANK",
+            "LARGE", "SMALL", "FREQUENCY", "CORREL", "COVAR",
+
+            // 财务函数
+            "PV", "FV", "PMT", "RATE", "NPER", "NPV", "IRR",
+            "CUMIPMT", "CUMPRINC", "IPMT", "PPMT", "EFFECT", "NOMINAL",
+
+            // 工程函数
+            "BIN2DEC", "BIN2HEX", "BIN2OCT", "DEC2BIN", "DEC2HEX", "DEC2OCT",
+            "HEX2BIN", "HEX2DEC", "HEX2OCT", "OCT2BIN", "OCT2DEC", "OCT2HEX",
+            "BITAND", "BITOR", "BITXOR", "BITLSHIFT", "BITRSHIFT",
+
+            // 数据库函数
+            "DGET", "DMAX", "DMIN", "DSUM", "DAVERAGE", "DCOUNT", "DCOUNTA",
+
+            // 其他常用函数
+            "TRANSPOSE", "UNIQUE", "SORT", "FILTER", "SUMPRODUCT"
     };
 
     /**
@@ -102,19 +151,34 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
             if (properties.getTimeoutMs() > 0) {
                 context.enter();
                 try {
-                    // 加载Formula.js库
+                    // 1. 首先创建module和exports环境
+                    context.eval("js", "var module = { exports: {} }; var exports = module.exports;");
+
+                    // 2. 加载FormulaJS库，函数将被导出到exports对象
                     context.eval("js", formulaJsScript);
 
-                    // 注入参数
+                    // 3. 获取exports对象并将所有函数暴露到全局作用域
+                    Value bindings = context.getBindings("js");
+                    Value moduleObj = bindings.getMember("module");
+                    Value exportsObj = moduleObj.getMember("exports");
+
+                    // 4. 将exports中的所有函数暴露到���局作用域
+                    if (exportsObj != null && exportsObj.hasMembers()) {
+                        for (String memberName : exportsObj.getMemberKeys()) {
+                            Value member = exportsObj.getMember(memberName);
+                            if (member != null && member.canExecute()) {
+                                bindings.putMember(memberName, member);
+                            }
+                        }
+                    }
+
+                    // 5. 注入参数
                     injectParameters(context, parameters);
 
-                    // 包装公式执行，添加超时控制
-                    String wrappedFormula = wrapFormulaExecution(formula);
+                    // 6. 执行公式
+                    Value formulaResult = context.eval("js", formula);
 
-                    // 执行公式
-                    Value result = context.eval("js", wrappedFormula);
-
-                    return convertResult(result);
+                    return convertResult(formulaResult);
                 } finally {
                     context.leave();
                 }
@@ -158,9 +222,26 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
                     .option("engine.WarnInterpreterOnly", "false");
 
             try (Context context = contextBuilder.build()) {
+                // 使用与executeFormula相同的加载逻辑
+                context.eval("js", "var module = { exports: {} }; var exports = module.exports;");
                 context.eval("js", formulaJsScript);
-                String wrappedFormula = wrapFormulaExecution(formula);
-                context.eval("js", wrappedFormula);
+
+                // 获取exports对象并将所有函数暴露到全局作用域
+                Value bindings = context.getBindings("js");
+                Value moduleObj = bindings.getMember("module");
+                Value exportsObj = moduleObj.getMember("exports");
+
+                if (exportsObj != null && exportsObj.hasMembers()) {
+                    for (String memberName : exportsObj.getMemberKeys()) {
+                        Value member = exportsObj.getMember(memberName);
+                        if (member != null && member.canExecute()) {
+                            bindings.putMember(memberName, member);
+                        }
+                    }
+                }
+
+                // 尝试执行公式
+                context.eval("js", formula);
                 return true;
             }
         } catch (Exception e) {
@@ -200,7 +281,7 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
      * 验证公式安全性
      *
      * @param formula 公式内容
-     * @return 是否安���
+     * @return 是否安全
      */
     private boolean validateFormulaSecurity(String formula) {
         // 检查是否包含危险的函数或操作
@@ -244,12 +325,27 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
         return String.format(
             "(function() { " +
             "try { " +
+            "    // 创建module和exports对象来支持UMD模块加载" +
+            "    var module = { exports: {} }; " +
+            "    var exports = module.exports; " +
+            "    " +
+            "    // 重新执行FormulaJS库以获取exports对象" +
+            "    eval(arguments[0]); " +
+            "    " +
+            "    // 将所有函数暴露到全局作用域" +
+            "    for (var key in exports) { " +
+            "        if (typeof exports[key] === 'function') { " +
+            "            global[key] = exports[key]; " +
+            "        } " +
+            "    } " +
+            "    " +
+            "    // 执行用户公式" +
             "    var result = %s; " +
             "    return result; " +
             "} catch (error) { " +
             "    throw new Error('公式执行错误: ' + error.message); " +
             "} " +
-            "})()",
+            "})",
             formula
         );
     }
