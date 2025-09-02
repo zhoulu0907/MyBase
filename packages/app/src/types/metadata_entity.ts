@@ -1,6 +1,7 @@
 export const ENTITY_TYPE = {
     MAIN: '主表',
-    SUB: '子表'
+    SUB: '子表',
+    INDEP: '独立表'
 }
 
 export interface MetadataEntityPair {
