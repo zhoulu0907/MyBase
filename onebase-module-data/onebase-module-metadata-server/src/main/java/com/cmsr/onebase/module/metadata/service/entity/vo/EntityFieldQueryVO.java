@@ -32,6 +32,11 @@ public class EntityFieldQueryVO {
     private String fieldCode;
 
     /**
+     * 是否是人员字段：0-不是，1-是
+     */
+    private Integer isPerson;
+
+    /**
      * 构造方法
      *
      * @param entityId 实体ID
