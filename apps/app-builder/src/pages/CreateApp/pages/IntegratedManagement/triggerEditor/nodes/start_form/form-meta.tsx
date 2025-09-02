@@ -16,12 +16,8 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const { pageId } = triggerEditorSignal;
   const [conditionField, setConditionField] = useState<ConfitionField[]>([]);
 
-  const handlePropsOnChange = (key: string, value: any) => {
-    const nodeData = triggerEditorSignal.nodeData.value[node.id];
-    triggerEditorSignal.setNodeData(node.id, {
-      ...nodeData,
-      [key]: value
-    });
+  const handlePropsOnChange = (values: any) => {
+    triggerEditorSignal.setNodeData(node.id, values);
   };
 
   const [payloadForm] = Form.useForm();
@@ -60,6 +56,8 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
   const onValuesChange = (changeValue: any, values: any) => {
     console.log('onValuesChange: ', changeValue, values);
+
+    handlePropsOnChange(values);
   };
 
   return (
