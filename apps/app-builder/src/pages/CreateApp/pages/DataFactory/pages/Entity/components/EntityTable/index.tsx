@@ -9,6 +9,7 @@ import styles from './index.module.less';
 import CreateEntityPage from '../Modals/CreateEntityModal';
 import DeleteConfirmModal from '../Modals/DeleteConfirmModal';
 import EditEntityDrawer from '../Drawers/EditEntityDrawer';
+import { FormulaEditor } from '@/components/FormulaEditor';
 const { Sider, Content } = Layout;
 
 const EntityTable: React.FC = () => {
@@ -21,6 +22,8 @@ const EntityTable: React.FC = () => {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [editNodeDrawerVisible, setEditNodeDrawerVisible] = useState(false);
   const [editingNode, setEditingNode] = useState<EntityNode | null>(null);
+  const [visible, setVisible] = useState(false);
+  const [formula, setFormula] = useState('');
   // 加载实体列表
   const loadEntities = async () => {
     try {
@@ -47,7 +50,20 @@ const EntityTable: React.FC = () => {
   };
 
   const handleOpenAddModal = () => {
-    setCreateEntityModalVisible(true);
+    setVisible(true);
+    // setCreateEntityModalVisible(true);
+  };
+
+  // 关闭公式编辑器
+  const handleCloseEditor = () => {
+    setVisible(false);
+  };
+
+  // 确认公式
+  const handleConfirmFormula = (newFormula: string) => {
+    setFormula(newFormula);
+    setVisible(false);
+    console.log('公式已更新:', newFormula);
   };
 
   const successCallback = () => {
@@ -134,6 +150,13 @@ const EntityTable: React.FC = () => {
         onNodeEdit={onNodeEdit}
         successCallback={successCallback}
         onlyShowEntity={true}
+      />
+      {/* 公式编辑器弹窗 */}
+      <FormulaEditor
+        visible={visible}
+        onCancel={handleCloseEditor}
+        onConfirm={handleConfirmFormula}
+        initialFormula={formula}
       />
     </>
   );

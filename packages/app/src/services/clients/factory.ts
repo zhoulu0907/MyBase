@@ -6,3 +6,4 @@ import { createClient } from '@onebase/common';
 export const appService = createClient('/app');
 export const metadataService = createClient('/metadata');
 export const flowService = createClient('/flow');
+export const formulaService = createClient('/formula');
