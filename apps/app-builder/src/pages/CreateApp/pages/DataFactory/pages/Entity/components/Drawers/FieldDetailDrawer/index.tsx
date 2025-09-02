@@ -69,7 +69,7 @@ const FieldDetailDrawer: React.FC<FieldDetailDrawerProps> = ({ visible, setVisib
       color = 'orange';
     } else if (fieldType === 'PICKLIST' || fieldType === 'MULTI_PICKLIST') {
       color = 'purple';
-    } else if (fieldType === 'AUTO_CODE') {
+    } else if (fieldType === 'AUTO_NUMBER') {
       color = 'red';
     } else if (fieldType === 'BOOLEAN') {
       color = 'cyan';

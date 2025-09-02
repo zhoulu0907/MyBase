@@ -70,8 +70,6 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({ cpId, cpType, pageCompone
         return <FormComp.XFileUpload cpName={cpId} id={cpId} {...componentConfig} />;
       case FORM_COMPONENT_TYPES.IMG_UPLOAD:
         return <FormComp.XImgUpload cpName={cpId} id={cpId} {...componentConfig} />;
-      case FORM_COMPONENT_TYPES.AUTO_CODE:
-        return <FormComp.XAutoCode cpName={cpId} id={cpId} {...componentConfig} />;
       case FORM_COMPONENT_TYPES.AUTO_NUMBER:
         return <FormComp.XAutoNumber cpName={cpId} id={cpId} {...componentConfig} />;
       case FORM_COMPONENT_TYPES.RELATED_FORM:
