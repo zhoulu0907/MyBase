@@ -19,8 +19,11 @@ public class EntityFieldQueryReqVO {
     @NotNull(message = "实体ID不能为空")
     private String entityId;
 
-    @Schema(description = "是否系统字段：0-是，1-不是", example = "1")
+    @Schema(description = "是否系统字段：0-不是，1-是", example = "1")
     private Integer isSystemField;
+
+    @Schema(description = "是否是人员字段：0-不是，1-是；为1时仅返回 field_type=USER 的字段及 creator/updater 系统字段", example = "1")
+    private Integer isPerson;
 
     @Schema(description = "搜索关键词", example = "name")
     private String keyword;
@@ -28,4 +31,4 @@ public class EntityFieldQueryReqVO {
     @Schema(description = "字段编码", example = "USER_NAME")
     private String fieldCode;
 
-} 
+}
