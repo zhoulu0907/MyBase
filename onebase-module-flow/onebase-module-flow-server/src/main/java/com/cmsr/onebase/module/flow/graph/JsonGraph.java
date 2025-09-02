@@ -53,7 +53,7 @@ public class JsonGraph {
     private String nodeDefine(int deep, JsonNode node) {
         if (StringUtils.equalsAny(node.getType(),
                 "start", "end", "dataAdd", "dataDelete", "dataUpdate")) {
-            return node.toDefine();
+            return toDefine(node);
         } else if (Objects.equals(node.getType(), "loop")) {
             return loopNodeDefine(deep, node);
         } else if (Objects.equals(node.getType(), "switch")) {
@@ -64,7 +64,7 @@ public class JsonGraph {
 
     private String loopNodeDefine(int deep, JsonNode node) {
         StringBuilder define = new StringBuilder();
-        define.append("WHILE(").append(node.toDefine()).append(".DO(");
+        define.append("WHILE(").append(toDefine(node)).append(".DO(");
         define.append(NEW_LINE).append(blocksNodeDefine(deep + 1, node.getBlocks()));
         define.append(NEW_LINE).append(")");
         return define.toString();
@@ -72,7 +72,7 @@ public class JsonGraph {
 
     private String switchNodeDefine(int deep, JsonNode node) {
         StringBuilder define = new StringBuilder();
-        define.append("SWITCH(").append(node.toDefine()).append(".TO(");
+        define.append("SWITCH(").append(toDefine(node)).append(".TO(");
         for (JsonNode caseDefaultNode : node.getBlocks()) {
             if (Objects.equals(caseDefaultNode.getType(), "case")) {
                 define.append(NEW_LINE).append(switchCaseNodeDefine(deep + 1, caseDefaultNode)).append(",");
@@ -89,15 +89,21 @@ public class JsonGraph {
 
     private String switchCaseNodeDefine(int deep, JsonNode caseJsonNode) {
         String blocksNodeDefine = blocksNodeDefine(deep, caseJsonNode.getBlocks());
-        return String.format("%s.id(\"%s\")", blocksNodeDefine, caseJsonNode.getId());
+        return String.format("%s.tag(\"%s\")", blocksNodeDefine, caseJsonNode.getId());
     }
 
     private String switchDefaultNodeDefine(int deep, JsonNode defaultJsonNode) {
         String blocksNodeDefine = blocksNodeDefine(deep, defaultJsonNode.getBlocks());
         StringBuilder define = new StringBuilder();
         define.append(".DEFAULT(");
-        define.append(NEW_LINE).append(blocksNodeDefine).append(".id(\"").append(defaultJsonNode.getId()).append("\")");
+        define.append(NEW_LINE).append(blocksNodeDefine).append(".tag(\"").append(defaultJsonNode.getId()).append("\")");
         define.append(")");
+        return define.toString();
+    }
+
+    private String toDefine(JsonNode node) {
+        StringBuilder define = new StringBuilder();
+        define.append(node.getType()).append(".tag(\"").append(node.getId()).append("\")");
         return define.toString();
     }
 
