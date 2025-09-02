@@ -2,13 +2,13 @@ import React, { useEffect } from 'react';
 import { Modal, Radio, InputNumber, Checkbox, Select, Form, Tooltip } from '@arco-design/web-react';
 import { IconQuestionCircle } from '@arco-design/web-react/icon';
 import styles from './index.module.less';
-import type { AutoCodeRule } from './FieldTypeConfig';
+import type { AutoNumberRule } from './FieldTypeConfig';
 
 interface AutoNumberConfigModalProps {
   visible: boolean;
   onVisibleChange: (visible: boolean) => void;
-  onConfirm: (config: AutoCodeRule['config']) => void;
-  initialConfig?: AutoCodeRule['config'];
+  onConfirm: (config: AutoNumberRule['config']) => void;
+  initialConfig?: AutoNumberRule['config'];
 }
 
 const AutoNumberConfigModal: React.FC<AutoNumberConfigModalProps> = ({

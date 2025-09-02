@@ -7,7 +7,7 @@ import { batchSaveFields, getEntityFields } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import { ENTITY_FIELD_TYPE_LABEL } from '@onebase/ui-kit';
-import { type AutoCodeRule } from './FieldTypeConfig';
+import { type AutoNumberRule } from './FieldTypeConfig';
 import FieldConfigPopover from './FieldConfigPopover';
 import TableColumns from './TableColumns';
 import styles from './index.module.less';
@@ -26,7 +26,7 @@ interface FieldFormValues {
   isDeleted?: boolean;
   displayName?: string;
   options?: object[];
-  autoCodeRules?: AutoCodeRule[];
+  autoNumberRules?: AutoNumberRule[];
   constraints?: {
     lengthEnabled: number;
     minLength: number;
@@ -50,7 +50,7 @@ interface ConfigFieldModalProps {
 const FIELD_TYPES_NEED_CONFIG = [
   ENTITY_FIELD_TYPE_LABEL.PICKLIST,
   ENTITY_FIELD_TYPE_LABEL.MULTI_PICKLIST,
-  ENTITY_FIELD_TYPE_LABEL.AUTO_CODE
+  ENTITY_FIELD_TYPE_LABEL.AUTO_NUMBER
 ];
 
 // 字段类型选项
@@ -212,7 +212,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
       case ENTITY_FIELD_TYPE_LABEL.MULTI_PICKLIST:
         fieldConfig = { options: configData };
         break;
-      case ENTITY_FIELD_TYPE_LABEL.AUTO_CODE:
+      case ENTITY_FIELD_TYPE_LABEL.AUTO_NUMBER:
         fieldConfig = { options: configData };
         break;
       case 'CONSTRAINTS':

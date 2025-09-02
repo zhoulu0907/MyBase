@@ -1,4 +1,4 @@
-import XAutoCode from './FormComponents/AutoCode/schema';
+import XAutoNumber from './FormComponents/AutoNumber/schema';
 import XFCarousel from './FormComponents/Carousel/schema';
 import XCheckbox from './FormComponents/Checkbox/schema';
 import XDatePicker from './FormComponents/DatePicker/schema';
@@ -62,7 +62,7 @@ const baseSchema = {
   XTable,
   XCalendar,
   XTimeline,
-  XAutoCode,
+  XAutoNumber,
   XCarousel,
   XCollapse,
   XList,
