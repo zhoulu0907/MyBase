@@ -185,14 +185,21 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
           });
         });
 
-        graphRef.current.on('node:moved', ({ e, x, y, node, view }) => {
-          console.log('node:moved', e, x, y, node, view);
+        graphRef.current.on('node:moved', ({ e, x, y, node }) => {
+          e.preventDefault();
+          e.stopPropagation();
           updateEntityPosition?.(node.getData().data, x, y);
         });
 
         graphRef.current.on('edge:click', ({ e, x, y, edge, view }) => {
           console.log('edge:click', e, x, y, edge, view);
           onEdgeEdit?.(edge.data);
+        });
+
+        graphRef.current.on('node:click', ({ e, node }) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onNodeEdit?.(node.getData().data);
         });
 
         // 监听画布平移

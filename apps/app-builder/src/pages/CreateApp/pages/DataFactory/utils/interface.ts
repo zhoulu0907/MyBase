@@ -83,8 +83,10 @@ export interface EntityERProps {
 // 实体详情
 export interface Entity {
   id: string;
+  tableName?: string;
   displayName: string;
-  code: string;
+  entityName?: string;
+  code?: string;
   description?: string;
   fields?: EntityField[];
   relations?: EntityRelation[];
