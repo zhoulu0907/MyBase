@@ -1,6 +1,6 @@
 import { useAppEntityStore } from '@/store/store_entity';
 import { Cascader, Form } from '@arco-design/web-react';
-import type { AppEntity, AppEntityField } from '@onebase/app';
+import { FilterEntityFields, type AppEntity, type AppEntityField } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
 import styles from '../../index.module.less';
 
@@ -26,10 +26,7 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({ handlePropsChan
 
   const initTreeData = async () => {
     const mainEntityTree = mainEntity.fields
-      .filter(
-        (field: AppEntityField) =>
-          field.fieldName !== 'lock_version' && field.fieldName !== 'deleted' && field.fieldName !== 'parent_id'
-      )
+      .filter((field: AppEntityField) => !FilterEntityFields.includes(field.fieldName))
       .map((field: AppEntityField) => ({
         value: field.fieldID,
         label: field.displayName
@@ -39,10 +36,7 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({ handlePropsChan
       value: entity.entityID,
       label: entity.entityName,
       children: entity.fields
-        .filter(
-          (field: AppEntityField) =>
-            field.fieldName !== 'lock_version' && field.fieldName !== 'deleted' && field.fieldName !== 'parent_id'
-        )
+        .filter((field: AppEntityField) => !FilterEntityFields.includes(field.fieldName))
         .map((field: AppEntityField) => ({
           value: field.fieldID,
           label: field.displayName

@@ -3,7 +3,7 @@ import IconSearchForm from '@/assets/images/search_form_icon.svg';
 import FieldCard from '@/components/FieldCard';
 import { useAppEntityStore } from '@/store/store_entity';
 import { Collapse, Input, Layout } from '@arco-design/web-react';
-import type { AppEntityField } from '@onebase/app';
+import { FilterEntityFields, type AppEntityField } from '@onebase/app';
 import {
   COMPONENT_GROUP_NAME,
   COMPONENT_TYPE_DISPLAY_NAME_MAP,
@@ -47,10 +47,7 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({ childCollapsed, s
     if (mainEntity.fields.length > 0) {
       const newFieldItems = mainEntity.fields
         //   系统字段不展示
-        .filter(
-          (field: AppEntityField) =>
-            field.fieldName !== 'lock_version' && field.fieldName !== 'deleted' && field.fieldName !== 'parent_id'
-        )
+        .filter((field: AppEntityField) => !FilterEntityFields.includes(field.fieldName))
         .map((field: AppEntityField, index: number) => {
           let cpType = COMPONENT_MAP[field.fieldType];
           if (!cpType) {
@@ -80,10 +77,7 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({ childCollapsed, s
     subEntities.entities.forEach((subEntity) => {
       const newFieldItems = subEntity.fields
         //   部分系统字段不展示
-        .filter(
-          (field: AppEntityField) =>
-            field.fieldName !== 'lock_version' && field.fieldName !== 'deleted' && field.fieldName !== 'parent_id'
-        )
+        .filter((field: AppEntityField) => !FilterEntityFields.includes(field.fieldName))
         .map((field: AppEntityField, index: number) => {
           let cpType = COMPONENT_MAP[field.fieldType];
           if (!cpType) {
