@@ -1,7 +1,8 @@
-import { Form, InputNumber } from '@arco-design/web-react';
 import { memo } from 'react';
+import { Form, InputNumber } from '@arco-design/web-react';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import type { XInputNumberConfig } from './schema';
+import './index.css';
 
 const XInputNumber = memo((props: XInputNumberConfig) => {
   const {
@@ -11,19 +12,18 @@ const XInputNumber = memo((props: XInputNumberConfig) => {
     tooltip,
     status,
     defaultValue,
-    required,
+    verify,
     align,
-    min,
-    max,
     step,
     precision,
     layout,
-    labelColSpan = 0
+    labelColSpan = 0,
+    description
   } = props;
 
   return (
     <Form.Item
-      label={label}
+      label={label.display && label.text}
       field={dataField.length > 0 ? dataField[dataField.length - 1] : ''}
       layout={layout}
       tooltip={tooltip}
@@ -33,10 +33,10 @@ const XInputNumber = memo((props: XInputNumberConfig) => {
       wrapperCol={{ style: { flex: 1 } }}
       rules={[
         {
-          required,
+          required: verify.required,
           type: 'number',
-          min,
-          max
+          min: verify.min,
+          max: verify.max
         }
       ]}
       style={{
@@ -50,14 +50,15 @@ const XInputNumber = memo((props: XInputNumberConfig) => {
         defaultValue={defaultValue}
         placeholder={placeholder}
         step={step}
-        min={min}
-        max={max}
+        min={verify.min}
+        max={verify.max}
         precision={precision}
         style={{
           width: '100%',
           textAlignLast: align
         }}
       />
+      <div className='description showEllipsis'>{description}</div>
     </Form.Item>
   );
 });

@@ -4,6 +4,7 @@ import activeListDesignSVG from '@/assets/images/list_design_active_icon.svg';
 import defaultListDesignSVG from '@/assets/images/list_design_default_icon.svg';
 import activePageSettingSVG from '@/assets/images/page_setting_active_icon.svg';
 import defaultPageSettingSVG from '@/assets/images/page_setting_default_icon.svg';
+import editPageNameSVG from '@/assets/images/edit_page_name_icon.svg';
 import previewSVG from '@/assets/images/preview_icon.svg';
 import { useI18n } from '@/hooks/useI18n';
 import { useBasicEditorStore } from '@/store';
@@ -37,7 +38,6 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PartPreview from '../partPreview';
 import styles from './index.module.less';
-import { IconEdit } from '@douyinfe/semi-icons';
 
 const BreadcrumbItem = Breadcrumb.Item;
 
@@ -257,6 +257,7 @@ export default function EditorHeader() {
 
   const handleInputChange = async (e: any) => {
     const name = e.target.value;
+    if (!name) return Message.error('请输入页面名称');
     try {
       const params: UpdateApplicationMenuNameReq = {
         id: pageInfo?.id,
@@ -293,7 +294,9 @@ export default function EditorHeader() {
             ) : (
               <>
                 {pageInfo?.name || '未命名页面'}
-                <IconEdit onClick={() => setPageRename(true)} style={{ marginLeft: 4, cursor: 'pointer' }} />
+                <div className={styles.editIcon} onClick={() => setPageRename(true)}>
+                  <img src={editPageNameSVG} alt="edit page name" />
+                </div>
               </>
             )}
           </BreadcrumbItem>

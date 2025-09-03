@@ -296,3 +296,17 @@ export interface ICarouselConfigType {
   name: string;
   type: typeof CONFIG_TYPES.CAROUSEL;
 }
+
+// 安全配置
+export interface ISecurityConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.SECURITY;
+}
+
+// 校验配置
+export interface IVerifyConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.VERIFY;
+}

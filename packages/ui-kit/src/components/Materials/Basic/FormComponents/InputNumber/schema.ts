@@ -44,7 +44,9 @@ import type {
     TNumberDefaultType,
     TSelectDefaultType,
     TTextAreaDefaultType,
-    TTextDefaultType
+    TTextDefaultType,
+    ISecurityConfigType,
+    IVerifyConfigType
 } from '../../../types';
 
 export interface XInputNumberSchema {
@@ -69,13 +71,20 @@ export type TXInputNumberEditData = Array<
   | IAlignConfigType<TAlignSelectKeyType>
   | IColorConfigType
   | IDataFieldConfigType
+  | ISecurityConfigType
+  | IVerifyConfigType
 >;
 
 export interface XInputNumberConfig extends ICommonBaseType {
   /**
    * 输入框标题
+   * text：标题
+   * display：是否显示
    */
-  label: TTextDefaultType;
+  label: {
+    text: TTextDefaultType;
+    display: TBooleanDefaultType;
+  };
 
   /**
    * 数据字段
@@ -114,9 +123,15 @@ export interface XInputNumberConfig extends ICommonBaseType {
   width: TSelectDefaultType<TWidthSelectKeyType>;
 
   /**
-   * 是否必填，未填写时提交报错
+   * required：是否必填，未填写时提交报错
+   * min：最小值，默认：0
+   * max：最大值，默认：100
    */
-  required: TBooleanDefaultType;
+  verify: {
+    required: TBooleanDefaultType;
+    min: TNumberDefaultType;
+    max: TNumberDefaultType;
+  }
 
   /**
    * 表单的布局：水平、垂直（默认）
@@ -141,16 +156,6 @@ export interface XInputNumberConfig extends ICommonBaseType {
   bgColor?: TTextDefaultType;
 
   /**
-   * 最小值：默认0
-   */
-  min: TNumberDefaultType;
-
-  /**
-   * 最大值：默认100
-   */
-  max: TNumberDefaultType;
-
-  /**
    * 数字步长：默认1
    */
   step: TNumberDefaultType;
@@ -169,6 +174,16 @@ export interface XInputNumberConfig extends ICommonBaseType {
    * 标题宽度
    */
   labelColSpan?: TNumberDefaultType;
+
+  /**
+   * 安全
+   * display：开启
+   * type：掩码类型
+   */
+  security: {
+    display: TBooleanDefaultType;
+    type?: TTextDefaultType;
+  };
 }
 
 const XInputNumber: XInputNumberSchema = {
@@ -198,11 +213,6 @@ const XInputNumber: XInputNumberSchema = {
     layoutConfig,
     labelColSpanConfig,
     {
-      key: 'required',
-      name: '开启必填',
-      type: CONFIG_TYPES.SWITCH_INPUT
-    },
-    {
       key: 'saveWithHidden',
       name: '隐藏时提交数据',
       type: CONFIG_TYPES.SWITCH_INPUT
@@ -218,16 +228,6 @@ const XInputNumber: XInputNumberSchema = {
       type: CONFIG_TYPES.COLOR
     },
     {
-      key: 'min',
-      name: '最小值',
-      type: CONFIG_TYPES.NUMBER_INPUT
-    },
-    {
-      key: 'max',
-      name: '最大值',
-      type: CONFIG_TYPES.NUMBER_INPUT
-    },
-    {
       key: 'step',
       name: '数字步长',
       type: CONFIG_TYPES.NUMBER_INPUT
@@ -237,13 +237,26 @@ const XInputNumber: XInputNumberSchema = {
       name: '数字精度',
       type: CONFIG_TYPES.NUMBER_INPUT
     },
+    {
+      key: 'verify',
+      name: '校验',
+      type: CONFIG_TYPES.VERIFY
+    },
     statusConfig,
+    alignConfig,
+    {
+      key: 'security',
+      name: '安全',
+      type: CONFIG_TYPES.SECURITY
+    },
     widthConfig,
-    alignConfig
   ],
   config: {
     ...baseDefault,
-    label: '数字输入',
+    label: {
+      text: '数字录入',
+      display: true,
+    },
     dataField: [],
     placeholder: '请输入数字',
     description: '',
@@ -251,17 +264,23 @@ const XInputNumber: XInputNumberSchema = {
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     defaultValue: '',
-    required: false,
     align: ALIGN_VALUES[ALIGN_OPTIONS.LEFT],
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
-    min: 0,
-    max: 15,
     step: 1,
     precision: 2,
     saveWithHidden: false,
     color: '',
     bgColor: '',
-    labelColSpan: 100
+    labelColSpan: 100,
+    security: {
+      display: false,
+      type: ''
+    },
+    verify: {
+      required: false,
+      min: 0,
+      max: 100,
+    }
   }
 };
 

@@ -38,7 +38,8 @@ import type {
     TNumberDefaultType,
     TSelectDefaultType,
     TTextAreaDefaultType,
-    TTextDefaultType
+    TTextDefaultType,
+    IVerifyConfigType
 } from '../../../types';
 
 export interface XInputSelectOneSchema {
@@ -60,13 +61,19 @@ export type TXInputSelectOneEditData = Array<
   | IBooleanConfigType
   | ILayoutConfigType<TLayoutSelectKeyType>
   | IDataFieldConfigType
+  | IVerifyConfigType
 >;
 
 export interface XInputSelectOneConfig extends ICommonBaseType {
   /**
    * 输入框标题
+   * text：标题
+   * display：是否显示
    */
-  label: TTextDefaultType;
+  label: {
+    text: TTextDefaultType;
+    display: TBooleanDefaultType;
+  };
 
   /**
    * 数据字段
@@ -100,9 +107,13 @@ export interface XInputSelectOneConfig extends ICommonBaseType {
   width: TSelectDefaultType<TWidthSelectKeyType>;
 
   /**
-   * 是否必填，未填写时提交报错
+   * required：是否必填，未填写时提交报错
+   * noRepeat：是否允许重复值
    */
-  required: TBooleanDefaultType;
+  verify: {
+    required: TBooleanDefaultType;
+    noRepeat: TBooleanDefaultType;
+  }
 
   /**
    * 表单的布局：水平、垂直（默认）
@@ -148,11 +159,6 @@ const XSelectOne: XInputSelectOneSchema = {
     layoutConfig,
     labelColSpanConfig,
     {
-      key: 'required',
-      name: '开启必填',
-      type: CONFIG_TYPES.SWITCH_INPUT
-    },
-    {
       key: 'showSearch',
       name: '开启搜索',
       type: CONFIG_TYPES.SWITCH_INPUT
@@ -162,23 +168,34 @@ const XSelectOne: XInputSelectOneSchema = {
       name: '隐藏时提交数据',
       type: CONFIG_TYPES.SWITCH_INPUT
     },
+    {
+      key: 'verify',
+      name: '校验',
+      type: CONFIG_TYPES.VERIFY
+    },
     statusConfig,
     widthConfig
   ],
   config: {
     ...baseDefault,
-    label: '下拉单选',
+    label: {
+      text: '下拉单选',
+      display: true,
+    },
     dataField: [],
     description: '',
     tooltip: '',
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     defaultValue: '',
-    required: false,
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
     saveWithHidden: false,
     labelColSpan: 100,
-    showSearch: true
+    showSearch: true,
+    verify: {
+      required: false,
+      noRepeat: false
+    }
   }
 };
 

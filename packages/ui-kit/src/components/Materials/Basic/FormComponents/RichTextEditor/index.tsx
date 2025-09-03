@@ -1,19 +1,15 @@
 import '@wangeditor/editor/dist/css/style.css' // 引入 css
 
+import { useState, useEffect, memo } from 'react'
 import { Form } from '@arco-design/web-react';
-import { memo } from 'react';
-import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
-// import RichTextEditor from '@/components/PleteJS';
-import { useState, useEffect } from 'react'
 import { Editor, Toolbar } from '@wangeditor/editor-for-react'
 import { IDomEditor, IEditorConfig, IToolbarConfig } from '@wangeditor/editor'
-
-
-import './index.css';
+import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import type { XRichTextConfig } from './schema';
+import './index.css';
 
 const XRichText = memo((props: XRichTextConfig) => {
-  const { label, dataField, tooltip, status, defaultValue, required, layout, labelColSpan = 0 } = props;
+  const { label, dataField, tooltip, status, defaultValue, verify, layout, labelColSpan = 0, description } = props;
 
   // 编辑器内容
   const [html, setHtml] = useState<string>();
@@ -52,7 +48,7 @@ const XRichText = memo((props: XRichTextConfig) => {
 
   return (
     <Form.Item
-      label={label}
+      label={label.display && label.text}
       field={dataField.length > 0 ? dataField[dataField.length - 1] : ''}
       layout={layout}
       tooltip={tooltip}
@@ -60,7 +56,7 @@ const XRichText = memo((props: XRichTextConfig) => {
         style: { width: labelColSpan, flex: 'unset' }
       }}
       wrapperCol={{ style: { flex: 1 } }}
-      rules={[{ required }]}
+      rules={[{ required: verify.required }]}
       style={{
         margin: 0,
         opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1
@@ -83,6 +79,7 @@ const XRichText = memo((props: XRichTextConfig) => {
         />
       </div>
       {/* <div style={{ marginTop: '15px' }}>{html}</div> */}
+      <div className='description showEllipsis'>{description}</div>
     </Form.Item>
   );
 });

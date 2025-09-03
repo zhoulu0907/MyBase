@@ -8,6 +8,7 @@ export const CONFIG_TYPES = {
   NUMBER_INPUT: 'NumberInput',
   SWITCH_INPUT: 'SwitchInput',
   DATE_INPUT: 'DateInput',
+  CHECKED: 'Checked',
 
   // 组件标题输入
   LABEL_INPUT: 'LabelInput',
@@ -60,7 +61,11 @@ export const CONFIG_TYPES = {
   // 轮播图管理
   CAROUSEL: 'Carousel',
   // 图片填充方式
-  FILL_STYLE: 'FillStyle'
+  FILL_STYLE: 'FillStyle',
+  // 安全
+  SECURITY: 'Security',
+  // 校验
+  VERIFY: 'Verify'
 } as const;
 
 // 状态选项常量

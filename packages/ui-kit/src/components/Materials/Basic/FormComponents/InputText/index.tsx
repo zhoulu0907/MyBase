@@ -1,9 +1,11 @@
-import { Form, Input } from '@arco-design/web-react';
 import { memo } from 'react';
+import { Form, Input } from '@arco-design/web-react';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import { type XInputTextConfig } from './schema';
+import './index.css';
 
-const XInputText = memo((props: XInputTextConfig) => {
+const XInputText = memo((props: XInputTextConfig & { runtime?: boolean }) => {
+  const { runtime = true } = props;
   const {
     label,
     dataField,
@@ -11,18 +13,20 @@ const XInputText = memo((props: XInputTextConfig) => {
     tooltip,
     status,
     defaultValue,
-    required,
+    verify,
     align,
     layout,
     color,
     bgColor,
     labelColSpan = 0,
-    maxLength
+    maxLength,
+    description,
+    
   } = props;
 
   return (
     <Form.Item
-      label={label}
+      label={label.display && label.text}
       field={dataField.length > 0 ? dataField[dataField.length - 1] : ''}
       layout={layout}
       tooltip={tooltip}
@@ -30,7 +34,7 @@ const XInputText = memo((props: XInputTextConfig) => {
         style: { width: labelColSpan, flex: 'unset' }
       }}
       wrapperCol={{ style: { flex: 1 } }}
-      rules={[{ required }]}
+      rules={[{ required: verify.required }]}
       style={{
         opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,
         pointerEvents: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset',
@@ -39,8 +43,8 @@ const XInputText = memo((props: XInputTextConfig) => {
     >
       <Input
         readOnly={status === STATUS_VALUES[STATUS_OPTIONS.READONLY]}
-        placeholder={placeholder}
         defaultValue={defaultValue}
+        placeholder={placeholder}
         maxLength={maxLength}
         style={{
           width: '100%',
@@ -49,6 +53,7 @@ const XInputText = memo((props: XInputTextConfig) => {
           backgroundColor: bgColor
         }}
       />
+      <div className='description showEllipsis'>{description}</div>
     </Form.Item>
   );
 });

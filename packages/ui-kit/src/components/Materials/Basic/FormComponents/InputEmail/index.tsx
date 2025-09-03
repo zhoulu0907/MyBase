@@ -1,5 +1,5 @@
-import { Form, Input } from '@arco-design/web-react';
 import { memo, useEffect, useState } from 'react';
+import { Form, Input } from '@arco-design/web-react';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import type { XInputEmailConfig } from './schema';
 
@@ -11,12 +11,13 @@ const XInputEmail = memo((props: XInputEmailConfig) => {
     tooltip,
     status,
     defaultValue,
-    required,
+    verify,
     align,
     layout,
     color,
     bgColor,
-    labelColSpan = 0
+    labelColSpan = 0,
+    description
   } = props;
 
   const [value, setValue] = useState('');
@@ -35,7 +36,7 @@ const XInputEmail = memo((props: XInputEmailConfig) => {
 
   return (
     <Form.Item
-      label={label}
+      label={label.display && label.text}
       field={dataField.length > 0 ? dataField[dataField.length - 1] : ''}
       layout={layout}
       tooltip={tooltip}
@@ -44,7 +45,7 @@ const XInputEmail = memo((props: XInputEmailConfig) => {
       }}
       wrapperCol={{ style: { flex: 1 } }}
       rules={[
-        { required }
+        { required: verify.required }
         // { type: "email", message: "请输入合法的邮件地址" },
         // {
         //     validator: (value) => {
@@ -74,6 +75,7 @@ const XInputEmail = memo((props: XInputEmailConfig) => {
         placeholder={placeholder}
         onChange={setValue}
       />
+      <div className='description showEllipsis'>{description}</div>
     </Form.Item>
   );
 });

@@ -1,7 +1,8 @@
-import { Checkbox, Form } from '@arco-design/web-react';
 import { memo } from 'react';
+import { Checkbox, Form } from '@arco-design/web-react';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import type { XInputCheckboxConfig } from './schema';
+import './index.css';
 
 const CheckboxGroup = Checkbox.Group;
 
@@ -12,17 +13,17 @@ const XCheckbox = memo((props: XInputCheckboxConfig) => {
     tooltip,
     status,
     // defaultValue,
-    required,
+    verify,
     layout,
     labelColSpan = 0,
-    options
+    options,
     // allChecked,
-    // maxChecked = 0
+    description
   } = props;
 
   return (
     <Form.Item
-      label={label}
+      label={label.display && label.text}
       field={dataField.length > 0 ? dataField[dataField.length - 1] : ''}
       layout={layout}
       tooltip={tooltip}
@@ -32,7 +33,7 @@ const XCheckbox = memo((props: XInputCheckboxConfig) => {
       // trigger="onChange"
       // triggerPropName="checked"
       wrapperCol={{ style: { flex: 1 } }}
-      rules={[{ required }]}
+      rules={[{ required: verify.required }]}
       style={{
         margin: 0,
         opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1
@@ -46,6 +47,7 @@ const XCheckbox = memo((props: XInputCheckboxConfig) => {
           pointerEvents: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset'
         }}
       />
+      <div className='description showEllipsis'>{description}</div>
     </Form.Item>
   );
 });

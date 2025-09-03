@@ -37,7 +37,8 @@ import type {
     TNumberDefaultType,
     TRadioDefaultType,
     TSelectDefaultType,
-    TTextDefaultType
+    TTextDefaultType,
+    TBooleanDefaultType
 } from '../../../types';
 
 // 输入框组件的schema
@@ -66,8 +67,13 @@ export type TXInputTextEditData = Array<
 export interface XDividerConfig extends ICommonBaseType {
   /**
    * 输入框标题
+   * text：标题
+   * display：是否显示
    */
-  label: TTextDefaultType;
+  label: {
+    text: TTextDefaultType;
+    display: TBooleanDefaultType;
+  };
 
   /**
    * 提示文字（鼠标悬浮时显示）
@@ -138,13 +144,16 @@ const XInputText: XInputTextSchema = {
       name: '上下间距',
       type: CONFIG_TYPES.NUMBER_INPUT
     },
+    alignConfig,
     statusConfig,
     widthConfig,
-    alignConfig
   ],
   config: {
     ...baseDefault,
-    label: '分割线',
+    label: {
+      text: '分割线',
+      display: true,
+    },
     tooltip: '',
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],

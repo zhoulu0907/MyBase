@@ -281,6 +281,7 @@ const PageManagerPage: FC = () => {
       });
 
       if (pageSetId && menuResp.menuType === MenuType.PAGE) {
+        sessionStorage.setItem('EDITOR_PAGE_INFO', JSON.stringify({ id: curMenu?.id, name: menuResp.menuName }));
         navigate(`/onebase/editor/${EDITOR_TYPES.FORM_EDITOR}?pageSetId=${pageSetId}`);
       }
     });

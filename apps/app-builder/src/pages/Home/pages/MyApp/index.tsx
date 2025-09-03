@@ -487,12 +487,12 @@ const MyAppPage: React.FC = () => {
         simple
         unmountOnExit
         footer={
-          <div style={{ textAlign: 'right' }}>
+          <div style={{ textAlign: 'right', visibility: createType === 'app' ? 'visible' : 'hidden' }}>
             <Button type="default" onClick={() => setCreateVisible(false)} style={{ marginRight: 12 }}>
               取消
             </Button>
             <Button type="primary" loading={createLoading} onClick={handleCreateApp}>
-              {createType === 'app' ? '创建' : '保存'}
+              创建
             </Button>
           </div>
         }
