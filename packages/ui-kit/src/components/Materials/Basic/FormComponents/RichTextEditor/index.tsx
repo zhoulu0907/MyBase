@@ -8,6 +8,7 @@ import { useState, useEffect } from 'react'
 import { Editor, Toolbar } from '@wangeditor/editor-for-react'
 import { IDomEditor, IEditorConfig, IToolbarConfig } from '@wangeditor/editor'
 import { nanoid } from 'platejs';
+import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 
 import './index.css';
 import type { XRichTextConfig } from './schema';
@@ -53,7 +54,7 @@ const XRichText = memo((props: XRichTextConfig) => {
   return (
     <Form.Item
       label={label}
-      field={dataField.length > 0 ? dataField[dataField.length - 1] : `XRichText_${nanoid()}`}
+      field={dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.RICH_TEXT}_${nanoid()}`}
       layout={layout}
       tooltip={tooltip}
       labelCol={{

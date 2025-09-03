@@ -3,6 +3,7 @@ import { memo } from 'react';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import { type XStaticTextConfig } from './schema';
 import { nanoid } from 'platejs';
+import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 
 const XStaticText = memo((props: XStaticTextConfig) => {
   const {
@@ -24,7 +25,7 @@ const XStaticText = memo((props: XStaticTextConfig) => {
   return (
     <Form.Item
       label={label}
-      field={dataField.length > 0 ? dataField[dataField.length - 1] : `XStaticText_${nanoid()}`}
+      field={dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.STATIC_TEXT}_${nanoid()}`}
       layout={layout}
       tooltip={tooltip}
       labelCol={{

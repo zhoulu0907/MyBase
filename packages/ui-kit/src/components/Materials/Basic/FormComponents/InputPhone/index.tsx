@@ -3,6 +3,7 @@ import { memo, useEffect, useState } from 'react';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import type { XInputPhoneConfig } from './schema';
 import { nanoid } from 'platejs';
+import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 
 const XInputPhone = memo((props: XInputPhoneConfig) => {
   const {
@@ -37,7 +38,7 @@ const XInputPhone = memo((props: XInputPhoneConfig) => {
   return (
     <Form.Item
       label={label}
-      field={dataField.length > 0 ? dataField[dataField.length - 1] : `XInputPhone_${nanoid()}`}
+      field={dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.INPUT_PHONE}_${nanoid()}`}
       layout={layout}
       tooltip={tooltip}
       labelCol={{

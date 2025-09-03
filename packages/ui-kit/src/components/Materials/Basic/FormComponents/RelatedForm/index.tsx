@@ -5,6 +5,7 @@ import { dataMethodPage, type AppEntityField, type PageMethodParam } from '@oneb
 import { memo, useState } from 'react';
 import { type XRelatedFormConfig } from './schema';
 import { nanoid } from 'platejs';
+import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 
 const XRelatedForm = memo((props: XRelatedFormConfig & { runtime?: boolean }) => {
   const { runtime = true } = props;
@@ -77,7 +78,7 @@ const XRelatedForm = memo((props: XRelatedFormConfig & { runtime?: boolean }) =>
   return (
     <Form.Item
       label={label}
-      field={dataField.length > 0 ? dataField[dataField.length - 1] : `XRelatedForm_${nanoid()}`}
+      field={dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.RELATED_FORM}_${nanoid()}`}
       layout={layout}
       tooltip={tooltip}
       labelCol={{

@@ -3,6 +3,7 @@ import { memo } from 'react';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import type { XInputNumberConfig } from './schema';
 import { nanoid } from 'platejs';
+import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 
 const XInputNumber = memo((props: XInputNumberConfig) => {
   const {
@@ -26,7 +27,7 @@ const XInputNumber = memo((props: XInputNumberConfig) => {
   return (
     <Form.Item
       label={label}
-      field={dataField.length > 0 ? dataField[dataField.length - 1] : `XInputNumber_${nanoid()}`}
+      field={dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.INPUT_NUMBER}_${nanoid()}`}
       layout={layout}
       tooltip={tooltip}
       labelCol={{
