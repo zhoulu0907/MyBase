@@ -246,10 +246,10 @@ const PageManagerPage: FC = () => {
   };
 
   // 更新应用菜单可见性  隐藏/显示
-  const triggerHide = async(menuID: string,visible:boolean) => {
+  const triggerHide = async(menuID: string,visible:number) => {
     const req: UpdateApplicationMenuVisibleReq = {
       id: menuID,
-      visible: visible === false ? true : false,
+      visible: visible === 0 ? 1 : 0,
     };
     const res = await updateApplicationMenuVisible(req);
     if (res) {
@@ -432,6 +432,7 @@ const PageManagerPage: FC = () => {
                 boxSizing: 'border-box',
                 paddingRight: 12
               }}
+              onDrop={(dragNode:TreeNode, dropNode:TreeNode, dropPosition:number)=>{}}
             />
           </Sider>
           <Content className={styles.content}>
