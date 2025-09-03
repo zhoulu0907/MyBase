@@ -2,6 +2,7 @@ import { Form, TreeSelect } from '@arco-design/web-react';
 import { memo } from 'react';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import type { XInputUserSelectConfig } from './schema';
+import { nanoid } from 'platejs';
 
 // TODO(Mickey): 放到schema的config中
 // 示例树形结构：人员
@@ -38,7 +39,7 @@ const XUserSelect = memo((props: XInputUserSelectConfig) => {
   return (
     <Form.Item
       label={label}
-      field={dataField.length > 0 ? dataField[dataField.length - 1] : ''}
+      field={dataField.length > 0 ? dataField[dataField.length - 1] : `XUserSelect_${nanoid()}`}
       layout={layout}
       tooltip={tooltip}
       labelCol={{

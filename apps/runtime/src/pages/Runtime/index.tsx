@@ -18,6 +18,7 @@ interface TreeNode {
   key: string;
   value: string;
   title: string;
+  isVisible: number;
   children?: TreeNode[];
 }
 /**
@@ -35,6 +36,7 @@ const Runtime: React.FC = () => {
   const initTreeItemWidth = 155;
   const cutTreeItemWidth = 25;
   const [curMenu, setCurMenu] = useState<ApplicationMenu>();
+  const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
 
   useEffect(() => {
     if (appId) {
@@ -42,19 +44,68 @@ const Runtime: React.FC = () => {
     }
   }, [appId]);
 
+  // 递归处理 去除隐藏的页面
+  const dealPage = (array: ApplicationMenu[]) => {
+    let treeList: ApplicationMenu[] = [];
+    array.forEach((item: ApplicationMenu) => {
+      if (item.isVisible === 1) {
+        let childrenList: ApplicationMenu[] = [];
+        if (item.children && item.children.length > 0) {
+          childrenList = dealPage(item.children);
+        }
+        treeList.push({ ...item, children: childrenList });
+      }
+    });
+    return treeList;
+  };
+
   const getMenuList = async (appID: string) => {
     const req: ListApplicationMenuReq = {
       applicationId: appID
     };
     const res = await listApplicationMenu(req);
 
-    const treeData = convertMenuToTreeData(res, initTreeItemWidth, true);
+    // 处理数据
+    const pageList = res && res.length > 0 ? dealPage(res) : [];
+
+    const treeData = convertMenuToTreeData(pageList, initTreeItemWidth, true);
     setTreeData(treeData);
 
     // 如果菜单列表不为空，默认选中第一个菜单
-    if (res && res.length > 0) {
-      // TODO(Mickey): 处理第一个菜单为分组的情况
-      setCurMenu(res[0]);
+    if (pageList && pageList.length > 0) {
+      // 处理第一个菜单为分组的情况 分组里没有页面的情况
+      const currentMenu = dealMenu(pageList);
+      if (currentMenu) {
+        // 默认展开当前页面
+        if (currentMenu.parentId) {
+          const parentCode = dealCode(currentMenu.parentId, pageList);
+          if (parentCode) {
+            setExpandedKeys((prev) => [...prev, parentCode]);
+          }
+        }
+        setCurMenu(currentMenu);
+      }
+    }
+  };
+  // 递归处理 获取第一个页面
+  const dealMenu = (array: ApplicationMenu[]) => {
+    // menu.menuType == MenuType.PAGE
+    for (let item of array) {
+      if (item.menuType == MenuType.PAGE) {
+        return item;
+      } else if (item.children && item.children.length) {
+        return dealMenu(item.children);
+      }
+    }
+  };
+
+  const dealCode = (id: string, array: ApplicationMenu[]): any => {
+    for (let item of array) {
+      if (item.id == id) {
+        return item.menuCode;
+      } else if (item.children && item.children.length) {
+        return dealMenu(item.children);
+      }
     }
   };
 
@@ -96,11 +147,12 @@ const Runtime: React.FC = () => {
                 placeholder={t('common.search')}
               />
             </div>
-
             <Tree
               blockNode
               draggable
               treeData={treeData}
+              expandedKeys={expandedKeys}
+              onExpand={setExpandedKeys}
               className={styles.tree}
               showLine={false}
               icons={{

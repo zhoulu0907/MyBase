@@ -2,6 +2,7 @@ import { Form, Input } from '@arco-design/web-react';
 import { memo } from 'react';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import { type XInputTextConfig } from './schema';
+import { nanoid } from 'platejs';
 
 const XInputText = memo((props: XInputTextConfig) => {
   const {
@@ -23,7 +24,7 @@ const XInputText = memo((props: XInputTextConfig) => {
   return (
     <Form.Item
       label={label}
-      field={dataField.length > 0 ? dataField[dataField.length - 1] : ''}
+      field={dataField.length > 0 ? dataField[dataField.length - 1] : `XInputText_${nanoid()}`}
       layout={layout}
       tooltip={tooltip}
       labelCol={{
