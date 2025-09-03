@@ -170,7 +170,6 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
 
     navigate(`/onebase/editor/${EDITOR_TYPES.FORM_EDITOR}?pageSetId=${pageSetId}`);
   };
-  // todo 编辑态的隐藏样式
 
   return (
     <div
