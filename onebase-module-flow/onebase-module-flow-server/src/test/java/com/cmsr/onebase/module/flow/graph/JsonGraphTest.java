@@ -13,30 +13,31 @@ import java.nio.charset.StandardCharsets;
  */
 class JsonGraphTest {
 
-    @Test
-    public void testSimple() throws IOException {
-        ClassPathResource resource = new ClassPathResource("graphjson/simple.json");
+    public void testToFlowChain(String fileName) throws IOException {
+        ClassPathResource resource = new ClassPathResource("graphjson/" + fileName);
         String json = StreamUtils.copyToString(resource.getInputStream(), StandardCharsets.UTF_8);
 
         JsonGraph jsonGraph = JsonGraph.of(json);
         System.out.println(jsonGraph.toFlowChain());
+    }
+
+    @Test
+    public void testSimple() throws IOException {
+        testToFlowChain("simple.json");
     }
 
     @Test
     public void testCLoop() throws IOException {
-        ClassPathResource resource = new ClassPathResource("graphjson/loop.json");
-        String json = StreamUtils.copyToString(resource.getInputStream(), StandardCharsets.UTF_8);
-
-        JsonGraph jsonGraph = JsonGraph.of(json);
-        System.out.println(jsonGraph.toFlowChain());
+        testToFlowChain("loop.json");
     }
 
     @Test
     public void testSwitch() throws IOException {
-        ClassPathResource resource = new ClassPathResource("graphjson/switch.json");
-        String json = StreamUtils.copyToString(resource.getInputStream(), StandardCharsets.UTF_8);
+        testToFlowChain("switch.json");
+    }
 
-        JsonGraph jsonGraph = JsonGraph.of(json);
-        System.out.println(jsonGraph.toFlowChain());
+    @Test
+    public void testSwitch2() throws IOException {
+        testToFlowChain("switch2.json");
     }
 }

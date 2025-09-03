@@ -16,6 +16,7 @@ import com.cmsr.onebase.module.app.util.MenuUtils;
 import jakarta.annotation.Resource;
 import lombok.Setter;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +24,7 @@ import org.springframework.validation.annotation.Validated;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 /**
  * @Author：huangjie
@@ -45,24 +47,25 @@ public class AppMenuServiceImpl implements AppMenuService {
     @Override
     public List<MenuListRespVO> listApplicationMenu(Long applicationId, String name) {
         ApplicationDO applicationDO = appCommonService.validateApplicationExist(applicationId);
-        List<MenuDO> menuDOS = appMenuRepository.findByApplicationIdAndNameLike(applicationDO.getId(), name);
+        List<MenuDO> menuDOS = appMenuRepository.findByApplicationId(applicationDO.getId());
         List<MenuListRespVO> menuListRespList = new ArrayList<>();
         // 把第一层的菜单添加到列表中
-        List<MenuListRespVO> levelOneMenus = menuDOS.stream()
+        LinkedList<MenuListRespVO> levelOneMenus = menuDOS.stream()
                 .filter(v -> MenuUtils.ROOT_MENU_ID.equals(v.getParentId()))
                 .map(v -> BeanUtils.toBean(v, MenuListRespVO.class))
-                .toList();
+                .collect(Collectors.toCollection(LinkedList::new));
         menuListRespList.addAll(levelOneMenus);
         // 递归实现每个菜单的子菜单
         for (MenuListRespVO respVO : menuListRespList) {
-            List<MenuListRespVO> children = recursiveGetChildren(respVO, menuDOS);
+            LinkedList<MenuListRespVO> children = recursiveGetChildren(respVO, menuDOS);
             respVO.setChildren(children);
         }
-        return menuListRespList;
+        return filterMenuByName(menuListRespList, name);
     }
 
-    private List<MenuListRespVO> recursiveGetChildren(MenuListRespVO parent, List<MenuDO> menuDOS) {
-        List<MenuListRespVO> children = new ArrayList<>();
+
+    private LinkedList<MenuListRespVO> recursiveGetChildren(MenuListRespVO parent, List<MenuDO> menuDOS) {
+        LinkedList<MenuListRespVO> children = new LinkedList<>();
         for (MenuDO menuDO : menuDOS) {
             if (Objects.equals(menuDO.getParentId(), parent.getId())) {
                 // 只有父菜单的uuid等于当前菜单的父菜单的uuid时，才添加子菜单，继续递归
@@ -73,6 +76,125 @@ public class AppMenuServiceImpl implements AppMenuService {
         }
         return children.isEmpty() ? null : children;
     }
+
+
+    /**
+     * 根据名称过滤菜单
+     * menuType 1 是页面 2是目录
+     * 过滤规则为：
+     * 如果 菜单名称包含name，则此菜单及其父级目录都要展示
+     * 如果 目录名称包含name，则此目录及其子菜单都要展示
+     *
+     * @param menuListRespList
+     * @param name
+     * @return
+     */
+    private List<MenuListRespVO> filterMenuByName(List<MenuListRespVO> menuListRespList, String name) {
+        // 如果没有过滤条件，直接返回原列表
+        if (name == null || name.trim().isEmpty()) {
+            return menuListRespList;
+        }
+
+        // 第一步：根据规则设置 filter 标记
+        markMenusForFilter(menuListRespList, name);
+        reMarkMenusForFilter(menuListRespList);
+        // 第二步：移除不符合条件的菜单
+        removeUnmarkedMenus(menuListRespList);
+        return menuListRespList;
+    }
+
+    /**
+     * 根据过滤规则标记菜单
+     *
+     * @param menuList 菜单列表
+     * @param name     过滤条件
+     */
+    private void markMenusForFilter(List<MenuListRespVO> menuList, String name) {
+        for (MenuListRespVO menu : menuList) {
+            boolean currentMenuMatches = StringUtils.containsIgnoreCase(menu.getMenuName(), name);
+            if (currentMenuMatches) {
+                menu.setFilter(true);
+            }
+            if (currentMenuMatches && menu.getChildren() != null) {
+                markAllChildren(menu.getChildren());
+            }
+            // 递归处理子菜单
+            if (menu.getChildren() != null && !menu.getChildren().isEmpty()) {
+                markMenusForFilter(menu.getChildren(), name);
+            }
+        }
+    }
+
+    private void reMarkMenusForFilter(List<MenuListRespVO> menuList) {
+        for (MenuListRespVO menu : menuList) {
+            if (hasMarkedChildren(menu.getChildren())) {
+                menu.setFilter(true);
+            }
+            if (menu.getChildren() != null && !menu.getChildren().isEmpty()) {
+                reMarkMenusForFilter(menu.getChildren());
+            }
+        }
+    }
+
+    /**
+     * 标记所有子菜单
+     *
+     * @param children 子菜单列表
+     */
+    private void markAllChildren(List<MenuListRespVO> children) {
+        for (MenuListRespVO child : children) {
+            child.setFilter(true);
+            if (child.getChildren() != null) {
+                markAllChildren(child.getChildren());
+            }
+        }
+    }
+
+    /**
+     * 检查是否有子菜单被标记
+     *
+     * @param children 子菜单列表
+     * @return 是否有子菜单被标记
+     */
+    private boolean hasMarkedChildren(List<MenuListRespVO> children) {
+        if (children == null || children.isEmpty()) {
+            return false;
+        }
+        for (MenuListRespVO child : children) {
+            if (child.isFilter() || hasMarkedChildren(child.getChildren())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+    /**
+     * 移除未标记的菜单
+     *
+     * @param menuList 菜单列表
+     */
+    private void removeUnmarkedMenus(List<MenuListRespVO> menuList) {
+        // 使用迭代器安全地删除元素
+        Iterator<MenuListRespVO> iterator = menuList.iterator();
+        while (iterator.hasNext()) {
+            MenuListRespVO menu = iterator.next();
+            if (menu.isFilter()) {
+                // 递归处理子菜单
+                if (menu.getChildren() != null && !menu.getChildren().isEmpty()) {
+                    removeUnmarkedMenus(menu.getChildren());
+                    // 如果子菜单全部被删除，设置为null
+                    if (menu.getChildren().isEmpty()) {
+                        menu.setChildren(null);
+                    }
+                }
+            } else {
+                // 删除未标记的菜单
+                iterator.remove();
+            }
+        }
+    }
+
 
     @Override
     @Transactional(rollbackFor = Exception.class)

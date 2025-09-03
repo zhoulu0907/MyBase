@@ -9,7 +9,8 @@ public enum FlowTriggerTypeEnum {
     FORM("form", "表单触发"),
     DATE_FIELD("date_field", "日期字段触发"),
     ENTITY("entity", "实体触发"),
-    API("api", "API触发");
+    API("api", "API触发"),
+    BPM("bpm", "BPM触发");
 
     private final String type;
     private final String name;

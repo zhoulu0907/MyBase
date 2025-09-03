@@ -19,9 +19,5 @@ public class JsonNode {
 
     private List<JsonNode> blocks;
 
-    public String toDefine(){
-        StringBuilder define = new StringBuilder();
-        define.append(type).append(".id(\"").append(id).append("\")");
-        return define.toString();
-    }
+
 }

@@ -18,6 +18,7 @@
     <properties>
         <liteflow.version>2.13.2</liteflow.version>
         <js.version>23.0.9</js.version>
+        <dom4j.version>2.2.0</dom4j.version>
     </properties>
     <dependencies>
         <!-- 依赖服务 -->
@@ -49,6 +50,7 @@
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-spring-boot-starter-rpc</artifactId>
         </dependency>
+        <!-- liteflow -->
         <dependency>
             <groupId>com.yomahub</groupId>
             <artifactId>liteflow-spring-boot-starter</artifactId>
@@ -74,6 +76,17 @@
             <artifactId>js-scriptengine</artifactId>
             <version>${js.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.dom4j</groupId>
+            <artifactId>dom4j</artifactId>
+            <version>${dom4j.version}</version>
+        </dependency>
+        <!-- xxl job -->
+        <!--<dependency>
+            <groupId>com.konghq</groupId>
+            <artifactId>unirest-java-core</artifactId>
+            <version>${unirest.version}</version>
+        </dependency>-->
         <!-- Test 测试相关 -->
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
