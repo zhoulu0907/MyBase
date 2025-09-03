@@ -319,10 +319,13 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
     private void saveEntityFields(Long entityId, List<MetadataSystemFieldsDO> systemFields, Long appId) {
         int sortOrder = 1;
         for (MetadataSystemFieldsDO systemField : systemFields) {
-            MetadataEntityFieldDO entityField = MetadataEntityFieldDO.builder()
+        MetadataEntityFieldDO entityField = MetadataEntityFieldDO.builder()
                     .entityId(entityId)
                     .fieldName(systemField.getFieldName())
-                    .displayName(systemField.getFieldName()) // 使用字段名作为显示名称
+            // 优先使用系统字段的显示名称，为空则回退为字段名
+            .displayName(cn.hutool.core.text.CharSequenceUtil.isNotEmpty(systemField.getDisplayName())
+                ? systemField.getDisplayName()
+                : systemField.getFieldName())
                     .fieldType(systemField.getFieldType())
                     .dataLength(getDefaultDataLength(systemField.getFieldType())) // 根据字段类型设置默认长度
                     .decimalPlaces(getDefaultDecimalPlaces(systemField.getFieldType())) // 根据字段类型设置默认小数位
