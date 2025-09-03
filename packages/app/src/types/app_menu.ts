@@ -20,6 +20,11 @@ export enum MenuType {
   GROUP = 2
 }
 
+export enum VisibleType {
+  SHOW = 1,
+  HIDDEN = 0
+}
+
 export enum PageType {
   // 普通表单
   NORMAL = 1

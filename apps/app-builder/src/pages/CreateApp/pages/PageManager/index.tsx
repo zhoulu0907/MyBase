@@ -17,6 +17,7 @@ import {
   getPageSetId,
   listApplicationMenu,
   MenuType,
+  VisibleType,
   PageType,
   RootParentPage,
   updateApplicationMenuName,
@@ -246,14 +247,14 @@ const PageManagerPage: FC = () => {
   };
 
   // 更新应用菜单可见性  显示/隐藏
-  const triggerHide = async(menuID: string,isVisible:number) => {
+  const triggerHide = async (menuID: string, isVisible: number) => {
     const req: UpdateApplicationMenuVisibleReq = {
       id: menuID,
-      visible: isVisible === 0 ? 1 : 0,
+      visible: isVisible === VisibleType.HIDDEN ? VisibleType.SHOW : VisibleType.HIDDEN
     };
     const res = await updateApplicationMenuVisible(req);
     if (res) {
-      Message.success(`${!!isVisible ? '显示':'隐藏'}成功`);
+      Message.success(`${isVisible === VisibleType.HIDDEN ? '显示' : '隐藏'}成功`);
     }
     getMenuList();
   };
@@ -432,7 +433,6 @@ const PageManagerPage: FC = () => {
                 boxSizing: 'border-box',
                 paddingRight: 12
               }}
-              onDrop={(dragNode:TreeNode, dropNode:TreeNode, dropPosition:number)=>{}}
             />
           </Sider>
           <Content className={styles.content}>

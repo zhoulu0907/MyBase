@@ -1,6 +1,6 @@
 import { Dropdown, Menu, Message, type FormInstance } from '@arco-design/web-react';
 import { IconSettings } from '@arco-design/web-react/icon';
-import { getPageSetId, RootParentPage, type GetPageSetIdReq } from '@onebase/app';
+import { getPageSetId, RootParentPage, VisibleType, type GetPageSetIdReq } from '@onebase/app';
 import { EDITOR_TYPES } from '@onebase/ui-kit';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -18,7 +18,7 @@ const MenuItem = Menu.Item;
 interface MenuItemProps {
   showOption: boolean;
   menuID: string;
-  isVisible: number,
+  isVisible: number;
   menuCode: string;
   menuName: string;
   label: string;
@@ -28,7 +28,7 @@ interface MenuItemProps {
   triggerCreate: (formType: string) => void;
   triggerRename: () => void;
   triggerCopy: () => void;
-  triggerHide: (menuID: string,isVisible: number) => void;
+  triggerHide: (menuID: string, isVisible: number) => void;
   triggerDelete: (menuID: string) => void;
   maxWidth: number;
   renameForm: FormInstance;
@@ -61,7 +61,7 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
   const [popupVisible, setPopupVisible] = useState(false);
 
   const dropList = (
-    <Menu style={{ padding: '10px 5px',maxHeight: 'none' }}>
+    <Menu style={{ padding: '10px 5px', maxHeight: 'none' }}>
       <MenuItem
         key="edit"
         onClick={(e) => {
@@ -88,10 +88,10 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
         key="visible"
         onClick={(e) => {
           e.stopPropagation();
-          triggerHide(menuID,isVisible);
+          triggerHide(menuID, isVisible);
         }}
       >
-        { isVisible === 0 ? '显示':'隐藏'}
+        {isVisible === VisibleType.HIDDEN ? '显示' : '隐藏'}
       </MenuItem>
       {!isGroup && (
         <MenuItem
