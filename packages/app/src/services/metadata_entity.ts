@@ -197,7 +197,7 @@ export const updateRelation = (data: UpdateRelationReqVO) => {
  * @returns 操作结果
  */
 export const deleteRelation = (id: string) => {
-  return metadataService.post('/business-entity/relation/delete', { params: { id } });
+  return metadataService.post('/entity-relationship/delete?id=' + id);
 };
 
 
