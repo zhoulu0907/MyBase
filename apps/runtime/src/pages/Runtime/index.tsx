@@ -1,7 +1,7 @@
 import { useI18n } from '@/hooks/useI18n';
 import { Input, Layout, Tree } from '@arco-design/web-react';
 import { IconSearch } from '@arco-design/web-react/icon';
-import { listApplicationMenu, MenuType, type ApplicationMenu, type ListApplicationMenuReq } from '@onebase/app';
+import { listApplicationMenu, MenuType, VisibleType, type ApplicationMenu, type ListApplicationMenuReq } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import RuntimeMenuItem from './components/menuItem';
@@ -48,7 +48,7 @@ const Runtime: React.FC = () => {
   const dealPage = (array: ApplicationMenu[]) => {
     let treeList: ApplicationMenu[] = [];
     array.forEach((item: ApplicationMenu) => {
-      if (item.isVisible === 1) {
+      if (item.isVisible === VisibleType.SHOW) {
         let childrenList: ApplicationMenu[] = [];
         if (item.children && item.children.length > 0) {
           childrenList = dealPage(item.children);
