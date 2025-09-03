@@ -193,11 +193,11 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
         <i className={`iconfont ${menuIcon}`} style={{ marginRight: '10px' }} />
         {label}
       </div>
-      {/* {isVisible === VisibleType.HIDDEN && (
+      {isVisible === VisibleType.HIDDEN && (
         <div className={styles.eyeVisible}>
           <IconEyeInvisible />
         </div>
-      )} */}
+      )}
       {showOption && (
         <div className={styles.dropdownContainer}>
           <Dropdown
