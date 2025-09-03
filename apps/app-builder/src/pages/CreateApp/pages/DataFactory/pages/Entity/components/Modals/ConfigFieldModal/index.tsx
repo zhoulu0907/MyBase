@@ -144,10 +144,10 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
 
   // 获取字段在数组中的索引
   const getFieldIndex = (fieldId: string, index: number) => {
-    if (index) {
-      return index;
-    } else {
+    if (fieldId) {
       return fields.findIndex((field) => field.id === fieldId);
+    } else {
+      return index;
     }
   };
 
