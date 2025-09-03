@@ -1,3 +1,4 @@
+import { FIELD_TYPE } from '@/pages/CreateApp/pages/DataFactory/utils/const';
 import { useAppEntityStore } from '@/store/store_entity';
 import { Button, Checkbox, Dropdown, Form, Input, InputNumber, Menu, Message, Select } from '@arco-design/web-react';
 import { IconDelete, IconDragDotVertical } from '@arco-design/web-react/icon';
@@ -86,7 +87,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
     const res = await getEntityFields({ entityId });
     console.log('fieldList res: ', res);
 
-    const newFieldList = res.filter((item: MetadataEntityField) => item.isSystemField);
+    const newFieldList = res.filter((item: MetadataEntityField) => item.isSystemField == FIELD_TYPE.CUSTOM);
     setFieldList(newFieldList);
 
     const newColumns = newFieldList.map((item: MetadataEntityField) => ({

@@ -18,7 +18,8 @@ const XInputNumber = memo((props: XInputNumberConfig) => {
     step,
     precision,
     layout,
-    labelColSpan = 0
+    labelColSpan = 0,
+    unit
   } = props;
 
   return (
@@ -57,6 +58,7 @@ const XInputNumber = memo((props: XInputNumberConfig) => {
           width: '100%',
           textAlignLast: align
         }}
+        suffix={unit}
       />
     </Form.Item>
   );

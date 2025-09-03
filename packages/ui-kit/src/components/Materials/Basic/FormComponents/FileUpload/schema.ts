@@ -1,48 +1,49 @@
 import {
-    baseConfig,
-    baseDefault,
-    labelColSpanConfig,
-    layoutConfig,
-    listTypeConfig,
-    statusConfig,
-    widthConfig,
-    type ICommonBaseType,
-    type TLayoutSelectKeyType,
-    type TStatusSelectKeyType,
-    type TUploadSelectKeyType,
-    type TWidthSelectKeyType
+  baseConfig,
+  baseDefault,
+  labelColSpanConfig,
+  layoutConfig,
+  listTypeConfig,
+  statusConfig,
+  widthConfig,
+  type ICommonBaseType,
+  type TLayoutSelectKeyType,
+  type TStatusSelectKeyType,
+  type TUploadSelectKeyType,
+  type TWidthSelectKeyType
 } from '../../../common';
 import {
-    CONFIG_TYPES,
-    LAYOUT_OPTIONS,
-    LAYOUT_VALUES,
-    STATUS_OPTIONS,
-    STATUS_VALUES,
-    UPLOAD_OPTIONS,
-    UPLOAD_VALUES,
-    WIDTH_OPTIONS,
-    WIDTH_VALUES
+  CONFIG_TYPES,
+  LAYOUT_OPTIONS,
+  LAYOUT_VALUES,
+  STATUS_OPTIONS,
+  STATUS_VALUES,
+  UPLOAD_OPTIONS,
+  UPLOAD_VALUES,
+  WIDTH_OPTIONS,
+  WIDTH_VALUES
 } from '../../../constants';
 import type {
-    IBooleanConfigType,
-    IDescriptionConfigType,
-    ILabelConfigType,
-    ILayoutConfigType,
-    INumberConfigType,
-    IPlaceholderConfigType,
-    ISelectConfigType,
-    IStatusConfigType,
-    ITextAreaConfigType,
-    ITextConfigType,
-    ITooltipConfigType,
-    IUploadLimitConfigType,
-    IUploadSizeConfigType,
-    IWidthConfigType,
-    TBooleanDefaultType,
-    TNumberDefaultType,
-    TSelectDefaultType,
-    TTextAreaDefaultType,
-    TTextDefaultType
+  IBooleanConfigType,
+  IDescriptionConfigType,
+  ILabelConfigType,
+  ILayoutConfigType,
+  INumberConfigType,
+  IPlaceholderConfigType,
+  ISelectConfigType,
+  IStatusConfigType,
+  ISupportFileTypeConfigType,
+  ITextAreaConfigType,
+  ITextConfigType,
+  ITooltipConfigType,
+  IUploadLimitConfigType,
+  IUploadSizeConfigType,
+  IWidthConfigType,
+  TBooleanDefaultType,
+  TNumberDefaultType,
+  TSelectDefaultType,
+  TTextAreaDefaultType,
+  TTextDefaultType
 } from '../../../types';
 
 export interface XInputFileUploadSchema {
@@ -52,6 +53,7 @@ export interface XInputFileUploadSchema {
 
 export type TXInputFileUploadEditData = Array<
   | ITextConfigType
+  | ISupportFileTypeConfigType
   | ILabelConfigType
   | IPlaceholderConfigType
   | IDescriptionConfigType
@@ -122,6 +124,11 @@ export interface XInputFileUploadConfig extends ICommonBaseType {
   uploadSize?: TNumberDefaultType;
 
   /**
+   * 支持的文件类型，多个类型用逗号分隔，默认不限制
+   */
+  supportFileType?: TTextDefaultType;
+
+  /**
    * 上传数量限制，默认无限制
    */
   uploadLimit?: TNumberDefaultType;
@@ -184,6 +191,11 @@ const XFileUpload: XInputFileUploadSchema = {
       type: CONFIG_TYPES.UPLOAD_LIMIT
     },
     {
+      key: 'supportFileType',
+      name: '支持的文件类型',
+      type: CONFIG_TYPES.SUPPORT_FILE_TYPE
+    },
+    {
       key: 'showPreview',
       name: '允许预览文件',
       type: CONFIG_TYPES.SWITCH_INPUT
@@ -212,9 +224,10 @@ const XFileUpload: XInputFileUploadSchema = {
     defaultValue: '',
     required: false,
     uploadSize: 10,
-    uploadLimit: -1,
+    uploadLimit: 1,
     showPreview: false,
     showDownload: false,
+    supportFileType: '',
     listType: UPLOAD_VALUES[UPLOAD_OPTIONS.CARD],
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
     saveWithHidden: false,

@@ -3,11 +3,8 @@ import { memo } from 'react';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import type { XInputSelectOneConfig } from './schema';
 
-const Option = Select.Option;
-const options = ['Beijing', 'Shanghai', 'Guangzhou', 'Disabled'];
-
 const XSelectOne = memo((props: XInputSelectOneConfig) => {
-  const { label, dataField, tooltip, status, required, layout, labelColSpan = 0, showSearch } = props;
+  const { label, dataField, tooltip, status, required, layout, labelColSpan = 0, showSearch, defaultValue } = props;
 
   return (
     <Form.Item
@@ -26,13 +23,13 @@ const XSelectOne = memo((props: XInputSelectOneConfig) => {
         margin: '0px'
       }}
     >
-      <Select placeholder="Select" showSearch={showSearch} style={{ width: '100%' }} allowClear>
-        {options.map((option, index) => (
-          <Option key={option} disabled={index === 3} value={option}>
-            {option}
-          </Option>
-        ))}
-      </Select>
+      <Select
+        placeholder="Select"
+        showSearch={showSearch}
+        style={{ width: '100%' }}
+        allowClear
+        options={defaultValue}
+      ></Select>
     </Form.Item>
   );
 });

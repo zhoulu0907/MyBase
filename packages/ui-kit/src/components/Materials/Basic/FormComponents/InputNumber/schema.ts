@@ -1,50 +1,50 @@
 import {
-    alignConfig,
-    baseConfig,
-    baseDefault,
-    dataFieldConfig,
-    labelColSpanConfig,
-    layoutConfig,
-    statusConfig,
-    widthConfig,
-    type ICommonBaseType,
-    type TAlignSelectKeyType,
-    type TLayoutSelectKeyType,
-    type TStatusSelectKeyType,
-    type TWidthSelectKeyType
+  alignConfig,
+  baseConfig,
+  baseDefault,
+  dataFieldConfig,
+  labelColSpanConfig,
+  layoutConfig,
+  statusConfig,
+  widthConfig,
+  type ICommonBaseType,
+  type TAlignSelectKeyType,
+  type TLayoutSelectKeyType,
+  type TStatusSelectKeyType,
+  type TWidthSelectKeyType
 } from '../../../common';
 import {
-    ALIGN_OPTIONS,
-    ALIGN_VALUES,
-    CONFIG_TYPES,
-    LAYOUT_OPTIONS,
-    LAYOUT_VALUES,
-    STATUS_OPTIONS,
-    STATUS_VALUES,
-    WIDTH_OPTIONS,
-    WIDTH_VALUES
+  ALIGN_OPTIONS,
+  ALIGN_VALUES,
+  CONFIG_TYPES,
+  LAYOUT_OPTIONS,
+  LAYOUT_VALUES,
+  STATUS_OPTIONS,
+  STATUS_VALUES,
+  WIDTH_OPTIONS,
+  WIDTH_VALUES
 } from '../../../constants';
 import type {
-    IAlignConfigType,
-    IBooleanConfigType,
-    IColorConfigType,
-    IDataFieldConfigType,
-    IDescriptionConfigType,
-    ILabelConfigType,
-    ILayoutConfigType,
-    INumberConfigType,
-    IPlaceholderConfigType,
-    ISelectConfigType,
-    IStatusConfigType,
-    ITextAreaConfigType,
-    ITextConfigType,
-    ITooltipConfigType,
-    IWidthConfigType,
-    TBooleanDefaultType,
-    TNumberDefaultType,
-    TSelectDefaultType,
-    TTextAreaDefaultType,
-    TTextDefaultType
+  IAlignConfigType,
+  IBooleanConfigType,
+  IColorConfigType,
+  IDataFieldConfigType,
+  IDescriptionConfigType,
+  ILabelConfigType,
+  ILayoutConfigType,
+  INumberConfigType,
+  IPlaceholderConfigType,
+  ISelectConfigType,
+  IStatusConfigType,
+  ITextAreaConfigType,
+  ITextConfigType,
+  ITooltipConfigType,
+  IWidthConfigType,
+  TBooleanDefaultType,
+  TNumberDefaultType,
+  TSelectDefaultType,
+  TTextAreaDefaultType,
+  TTextDefaultType
 } from '../../../types';
 
 export interface XInputNumberSchema {
@@ -161,6 +161,11 @@ export interface XInputNumberConfig extends ICommonBaseType {
   precision: TNumberDefaultType;
 
   /**
+   * 单位
+   */
+  unit: TTextDefaultType;
+
+  /**
    * 隐藏时是否提交数据，开启后隐藏状态仍会保存值
    */
   saveWithHidden?: TBooleanDefaultType;
@@ -237,6 +242,11 @@ const XInputNumber: XInputNumberSchema = {
       name: '数字精度',
       type: CONFIG_TYPES.NUMBER_INPUT
     },
+    {
+      key: 'unit',
+      name: '单位',
+      type: CONFIG_TYPES.TEXT_INPUT
+    },
     statusConfig,
     widthConfig,
     alignConfig
@@ -258,6 +268,7 @@ const XInputNumber: XInputNumberSchema = {
     max: 15,
     step: 1,
     precision: 2,
+    unit: '',
     saveWithHidden: false,
     color: '',
     bgColor: '',
