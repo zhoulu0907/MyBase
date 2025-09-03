@@ -114,7 +114,7 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({ childCollapsed, s
     <div>
       <Sider collapsed={!childCollapsed} collapsible collapsedWidth={0} trigger={null} width={295}>
         <div className={styles.rightHeader}>
-          <div className={styles.title}>{t('editor.metadata')}</div>
+          <div className={styles.title}></div>
 
           <div className={styles.right}>
             <div className={styles.search} onClick={() => setShowSearchInput(true)}>
