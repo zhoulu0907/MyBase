@@ -3,6 +3,7 @@ import { memo, useEffect, useState } from 'react';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import type { XInputEmailConfig } from './schema';
 import { nanoid } from 'platejs';
+import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 
 const XInputEmail = memo((props: XInputEmailConfig) => {
   const {
@@ -37,7 +38,7 @@ const XInputEmail = memo((props: XInputEmailConfig) => {
   return (
     <Form.Item
       label={label}
-      field={dataField.length > 0 ? dataField[dataField.length - 1] : `XInputEmail_${nanoid()}`}
+      field={dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.INPUT_EMAIL}_${nanoid()}`}
       layout={layout}
       tooltip={tooltip}
       labelCol={{

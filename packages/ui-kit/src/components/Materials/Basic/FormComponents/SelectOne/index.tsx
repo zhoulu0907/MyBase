@@ -3,6 +3,7 @@ import { memo } from 'react';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import type { XInputSelectOneConfig } from './schema';
 import { nanoid } from 'platejs';
+import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 
 const XSelectOne = memo((props: XInputSelectOneConfig) => {
   const { label, dataField, tooltip, status, required, layout, labelColSpan = 0, showSearch, defaultValue } = props;
@@ -10,7 +11,7 @@ const XSelectOne = memo((props: XInputSelectOneConfig) => {
   return (
     <Form.Item
       label={label}
-      field={dataField.length > 0 ? dataField[dataField.length - 1] : `XSelectOne_${nanoid()}`}
+      field={dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.SELECT_ONE}_${nanoid()}`}
       layout={layout}
       tooltip={tooltip}
       labelCol={{
