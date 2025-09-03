@@ -245,7 +245,7 @@ const PageManagerPage: FC = () => {
     setTitle(t('createApp.copyPage'));
   };
 
-  // 更新应用菜单可见性  隐藏/显示
+  // 更新应用菜单可见性  显示/隐藏
   const triggerHide = async(menuID: string,isVisible:number) => {
     const req: UpdateApplicationMenuVisibleReq = {
       id: menuID,
