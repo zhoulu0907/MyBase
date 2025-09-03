@@ -15,7 +15,8 @@ const XFileUpload = memo((props: XInputFileUploadConfig) => {
     listType,
     required,
     layout,
-    labelColSpan = 0
+    labelColSpan = 0,
+    supportFileType
   } = props;
 
   return (
@@ -36,7 +37,7 @@ const XFileUpload = memo((props: XInputFileUploadConfig) => {
     >
       <Upload
         limit={uploadLimit === -1 ? undefined : Number(uploadLimit)}
-        accept=".doc, .docx, .xls, .pdf, .xlsx"
+        accept={supportFileType}
         listType={listType}
         action="/"
         beforeUpload={async (file) => {
