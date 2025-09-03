@@ -3,6 +3,7 @@ import { uploadFile } from '@onebase/platform-center';
 import { memo, useState } from 'react';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import type { XInputImgUploadConfig } from './schema';
+import { nanoid } from 'platejs';
 
 const XImgUpload = memo((props: XInputImgUploadConfig) => {
   const { label, dataField, status, tooltip, uploadSize = 10, listType, required, layout, labelColSpan = 0 } = props;
@@ -29,7 +30,7 @@ const XImgUpload = memo((props: XInputImgUploadConfig) => {
   return (
     <Form.Item
       label={label}
-      field={dataField.length > 0 ? dataField[dataField.length - 1] : ''}
+      field={dataField.length > 0 ? dataField[dataField.length - 1] : `XImgUpload_${nanoid()}`}
       layout={layout}
       tooltip={tooltip}
       labelCol={{

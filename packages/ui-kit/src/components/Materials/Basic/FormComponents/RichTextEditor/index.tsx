@@ -7,7 +7,7 @@ import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import { useState, useEffect } from 'react'
 import { Editor, Toolbar } from '@wangeditor/editor-for-react'
 import { IDomEditor, IEditorConfig, IToolbarConfig } from '@wangeditor/editor'
-
+import { nanoid } from 'platejs';
 
 import './index.css';
 import type { XRichTextConfig } from './schema';
@@ -53,7 +53,7 @@ const XRichText = memo((props: XRichTextConfig) => {
   return (
     <Form.Item
       label={label}
-      field={dataField.length > 0 ? dataField[dataField.length - 1] : ''}
+      field={dataField.length > 0 ? dataField[dataField.length - 1] : `XRichText_${nanoid()}`}
       layout={layout}
       tooltip={tooltip}
       labelCol={{

@@ -2,6 +2,7 @@ import { Checkbox, Form } from '@arco-design/web-react';
 import { memo } from 'react';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import type { XInputCheckboxConfig } from './schema';
+import { nanoid } from 'platejs';
 
 const CheckboxGroup = Checkbox.Group;
 
@@ -23,7 +24,7 @@ const XCheckbox = memo((props: XInputCheckboxConfig) => {
   return (
     <Form.Item
       label={label}
-      field={dataField.length > 0 ? dataField[dataField.length - 1] : ''}
+      field={dataField.length > 0 ? dataField[dataField.length - 1] : `XCheckbox_${nanoid()}`}
       layout={layout}
       tooltip={tooltip}
       labelCol={{

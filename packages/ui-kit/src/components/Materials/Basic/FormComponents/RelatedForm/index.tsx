@@ -4,6 +4,7 @@ import { Form, Select } from '@arco-design/web-react';
 import { dataMethodPage, type AppEntityField, type PageMethodParam } from '@onebase/app';
 import { memo, useState } from 'react';
 import { type XRelatedFormConfig } from './schema';
+import { nanoid } from 'platejs';
 
 const XRelatedForm = memo((props: XRelatedFormConfig & { runtime?: boolean }) => {
   const { runtime = true } = props;
@@ -76,7 +77,7 @@ const XRelatedForm = memo((props: XRelatedFormConfig & { runtime?: boolean }) =>
   return (
     <Form.Item
       label={label}
-      field={dataField.length > 0 ? dataField[dataField.length - 1] : ''}
+      field={dataField.length > 0 ? dataField[dataField.length - 1] : `XRelatedForm_${nanoid()}`}
       layout={layout}
       tooltip={tooltip}
       labelCol={{

@@ -2,6 +2,7 @@ import { DatePicker, Form } from '@arco-design/web-react';
 import { memo } from 'react';
 import { DATE_OPTIONS, DATE_VALUES, STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import type { XInputDatePickerConfig } from './schema';
+import { nanoid } from 'platejs';
 
 const { YearPicker, MonthPicker } = DatePicker;
 const XDatePicker = memo((props: XInputDatePickerConfig) => {
@@ -30,7 +31,7 @@ const XDatePicker = memo((props: XInputDatePickerConfig) => {
   return (
     <Form.Item
       label={label}
-      field={dataField.length > 0 ? dataField[dataField.length - 1] : ''}
+      field={dataField.length > 0 ? dataField[dataField.length - 1] : `XDatePicker_${nanoid()}`}
       layout={layout}
       tooltip={tooltip}
       labelCol={{
