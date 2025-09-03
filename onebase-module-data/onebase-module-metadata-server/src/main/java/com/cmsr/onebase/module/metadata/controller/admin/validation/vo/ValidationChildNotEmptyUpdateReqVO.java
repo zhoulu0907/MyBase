@@ -35,4 +35,13 @@ public class ValidationChildNotEmptyUpdateReqVO {
 
     @Schema(description = "运行模式", example = "1")
     private Integer runMode;
+
+    @Schema(description = "校验方式", example = "POP")
+    private String valMethod;
+
+    @Schema(description = "弹窗提示内容", example = "不满足条件，无法提交")
+    private String popPrompt;
+
+    @Schema(description = "弹窗类型", example = "SHORT")
+    private String popType;
 }

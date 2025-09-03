@@ -79,12 +79,15 @@ public class MetadataValidationRuleGroupServiceImpl implements MetadataValidatio
         MetadataValidationRuleGroupDO updateObj = BeanUtils.toBean(updateReqVO, MetadataValidationRuleGroupDO.class);
         validationRuleGroupRepository.upsert(updateObj);
 
-        // 处理规则定义：先删除旧的，再插入新的
-        Long groupId = updateReqVO.getId();
-        validationRuleDefinitionService.deleteByGroupId(groupId);
-        
-        if (!CollectionUtils.isEmpty(updateReqVO.getValueRules())) {
-            saveValueRules(groupId, updateReqVO.getValueRules());
+        // 处理规则定义：仅当前端传入了新的规则结构时，才删除重建；
+        // 否则保留原有规则，便于只更新valMethod/popPrompt/popType等基础信息。
+        if (updateReqVO.getValueRules() != null) {
+            Long groupId = updateReqVO.getId();
+            // 传入了空列表视为清空规则
+            validationRuleDefinitionService.deleteByGroupId(groupId);
+            if (!CollectionUtils.isEmpty(updateReqVO.getValueRules())) {
+                saveValueRules(groupId, updateReqVO.getValueRules());
+            }
         }
     }
 
@@ -126,7 +129,6 @@ public class MetadataValidationRuleGroupServiceImpl implements MetadataValidatio
             group.setRgName(rgName);
             group.setRgDesc("字段" + fieldId + "的规则组");
             group.setRgStatus(StatusEnumUtil.ACTIVE);
-            group.setValMethod("BLOCK_AND_POP");
             validationRuleGroupRepository.insert(group);
         }
         return group.getId();

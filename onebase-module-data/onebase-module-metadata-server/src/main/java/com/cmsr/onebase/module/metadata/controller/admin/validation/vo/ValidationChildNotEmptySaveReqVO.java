@@ -30,6 +30,15 @@ public class ValidationChildNotEmptySaveReqVO {
     @Schema(description = "运行模式")
     private Integer runMode;
 
+    @Schema(description = "校验方式", example = "POP")
+    private String valMethod;
+
+    @Schema(description = "弹窗提示内容", example = "不满足条件，无法提交")
+    private String popPrompt;
+
+    @Schema(description = "弹窗类型", example = "SHORT")
+    private String popType;
+
     @Schema(description = "规则组名称", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "规则组名称不能为空")
     private String rgName;
