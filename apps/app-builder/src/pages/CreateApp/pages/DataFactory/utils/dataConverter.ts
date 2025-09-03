@@ -25,14 +25,3 @@ export const convertEntityListItemToEntityNode = (entityListItem: EntityListItem
   positionX: 0,
   positionY: 0
 });
-
-/**
- * 将 EntityNode 转换为 EntityListItem 格式
- * @param entityNode EntityNode 对象
- * @returns 转换后的 EntityListItem 对象
- */
-export const convertEntityNodeToEntityListItem = (entityNode: EntityNode): EntityListItem => ({
-  id: entityNode.entityId,
-  displayName: entityNode.entityName,
-  code: entityNode.code
-}); 

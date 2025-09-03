@@ -45,6 +45,7 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
     // const [editingNode, setEditingNode] = useState<EntityNode | null>(null);
     const graphRef = useRef<Graph | null>(null);
     const containerRef = useRef<HTMLDivElement>(null);
+    const isUnmounting = useRef(false);
     const isGraphInitialized = useRef(false); // 标记是否已初始化
     const [zoom, setZoom] = useState(100);
 
@@ -68,6 +69,7 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
       });
 
       return () => {
+        isUnmounting.current = true; // 标记正在卸载
         // Cleanup registration if needed
         try {
           Graph.unregisterNode('er-entity-node');
@@ -76,11 +78,13 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
           console.log(e);
         }
       };
-    }, []); // 添加 mode 到依赖项
+    }, []);
 
     // 初始化图形
     useEffect(() => {
       console.log('Initializing graph...');
+
+      isUnmounting.current = false;
 
       const initGraph = () => {
         if (!containerRef.current) {
@@ -181,14 +185,21 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
           });
         });
 
-        graphRef.current.on('node:moved', ({ e, x, y, node, view }) => {
-          console.log('node:moved', e, x, y, node, view);
+        graphRef.current.on('node:moved', ({ e, x, y, node }) => {
+          e.preventDefault();
+          e.stopPropagation();
           updateEntityPosition?.(node.getData().data, x, y);
         });
 
         graphRef.current.on('edge:click', ({ e, x, y, edge, view }) => {
           console.log('edge:click', e, x, y, edge, view);
           onEdgeEdit?.(edge.data);
+        });
+
+        graphRef.current.on('node:click', ({ e, node }) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onNodeEdit?.(node.getData().data);
         });
 
         // 监听画布平移
@@ -204,7 +215,7 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
       initGraph();
 
       return () => {
-        if (graphRef?.current) {
+        if (graphRef?.current && !isUnmounting.current) {
           graphRef.current?.dispose();
           graphRef.current = null;
           isGraphInitialized.current = false;
@@ -311,7 +322,6 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
                       strokeWidth: 0
                     }
                   },
-                  // position: 'erPortPosition', // 使用您自定义的布局
                   position: {
                     name: 'absolute'
                     // args: { x: 0, y: 0 },
