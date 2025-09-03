@@ -24,7 +24,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
   configs,
   id
 }) => {
-  const { mainEntity, subEntities } = useAppEntityStore();
+  const { mainEntity } = useAppEntityStore();
 
   const [entityList, setEntityList] = useState<MetadataEntityPair[]>([]);
   const [entityId, setEntityId] = useState<string>('');
@@ -39,7 +39,6 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
   const [enableAddColumn, setEnableAddColumn] = useState<boolean>(false);
   const [enableAddSearchItem, setEnableAddSearchItem] = useState<boolean>(false);
 
-  // 获取当前表格关联的实体id
   useEffect(() => {
     console.log(id, item);
 
@@ -48,35 +47,24 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
     }
   }, []);
 
-  // 如果实体id变化，重新获取字段列表
   useEffect(() => {
     if (entityId) {
       getFieldList();
     }
   }, [entityId]);
 
-  // 获取实体列表
   useEffect(() => {
-    const newEntityList = [];
+    // console.log(mainEntity);
     if (mainEntity) {
-      newEntityList.push({
-        entityId: mainEntity.entityID,
-        entityName: mainEntity.entityName
-      });
+      setEntityList([
+        {
+          entityId: mainEntity.entityID,
+          entityName: mainEntity.entityName
+        }
+      ]);
     }
-    if (subEntities) {
-      newEntityList.push(
-        ...subEntities.entities.map((entity) => ({
-          entityId: entity.entityID,
-          entityName: entity.entityName
-        }))
-      );
-    }
+  }, [mainEntity]);
 
-    setEntityList(newEntityList);
-  }, [mainEntity, subEntities]);
-
-  // 设置允许的列
   useEffect(() => {
     const res =
       fieldList.filter(
@@ -86,7 +74,6 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
     setEnableAddColumn(res);
   }, [fieldList, columnsConfig]);
 
-  // 设置允许的搜索项
   useEffect(() => {
     const res =
       fieldList.filter(
@@ -96,7 +83,6 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
     setEnableAddSearchItem(res);
   }, [fieldList, searchItemsConfig]);
 
-  // 获取字段列表
   const getFieldList = async () => {
     const res = await getEntityFields({ entityId });
     console.log('fieldList res: ', res);
@@ -105,20 +91,19 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
     setFieldList(newFieldList);
 
     const newColumns = newFieldList.map((item: MetadataEntityField) => ({
-      // 保留已有的命名，如果没有则使用字段展示名称
-      title: configs[columnsKey].find((col: any) => col.dataIndex === item.fieldName)?.title || item.displayName,
+      title: item.displayName,
+      //   TODO(tianyu): 等天宇新增接口字段，这里先写死
       dataIndex: item.fieldName
     }));
 
     console.log('newColumns: ', newColumns);
-
     setColumnsConfig(newColumns);
     handlePropsChange(columnsKey, newColumns);
   };
 
   return (
     <>
-      <FormItem layout="vertical" labelAlign="left" label="数据" className={styles.formItem}>
+      <FormItem layout="vertical" labelAlign="left" label={item.name} className={styles.formItem}>
         <Select
           placeholder={`请选择${item.name}`}
           value={configs[item.key]}
@@ -126,12 +111,9 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
             setEntityId(value);
 
             setSearchItemsConfig([]);
-            // setColumnsConfig([]);
-
             handleMultiPropsChange([
               { key: item.key, value: value },
-              { key: searchItemsKey, value: [] },
-              { key: columnsKey, value: [] }
+              { key: searchItemsKey, value: [] }
             ]);
           }}
         >
