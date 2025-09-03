@@ -1,4 +1,4 @@
-import XAutoNumber from './AutoNumber';
+import XAutoCode from './AutoCode';
 import XCarousel from './Carousel';
 import XCheckbox from './Checkbox';
 import XDatePicker from './DatePicker';
@@ -42,7 +42,7 @@ export const FormComp = {
   XDeptSelect,
   XFileUpload,
   XImgUpload,
-  XAutoNumber,
+  XAutoCode,
   XRelatedForm,
   XStaticText,
   XDIVIDER,

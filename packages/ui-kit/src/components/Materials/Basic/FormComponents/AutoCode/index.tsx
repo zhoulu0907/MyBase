@@ -1,9 +1,9 @@
 import { Form, Input } from '@arco-design/web-react';
 import { memo } from 'react';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
-import { type XAutoNumberConfig } from './schema';
+import { type XautoCodeConfig } from './schema';
 
-const XAutoNumber = memo((props: XAutoNumberConfig) => {
+const XautoCode = memo((props: XautoCodeConfig) => {
   const {
     label,
     tooltip,
@@ -48,4 +48,4 @@ const XAutoNumber = memo((props: XAutoNumberConfig) => {
   );
 });
 
-export default XAutoNumber;
+export default XautoCode;

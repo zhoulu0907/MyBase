@@ -48,15 +48,15 @@ import type {
 } from '../../../types';
 
 // 输入框组件的schema
-export interface XAutoNumberSchema {
+export interface XautoCodeSchema {
   // 可配置项
-  editData: TXAutoNumberEditData;
+  editData: TXautoCodeEditData;
   // 默认配置
-  config: XAutoNumberConfig;
+  config: XautoCodeConfig;
 }
 
 // 输入框组件的可配置项
-export type TXAutoNumberEditData = Array<
+export type TXautoCodeEditData = Array<
   | ITextConfigType
   | ILabelConfigType
   | IPlaceholderConfigType
@@ -74,7 +74,7 @@ export type TXAutoNumberEditData = Array<
   | IDataFieldConfigType
 >;
 
-export interface XAutoNumberConfig extends ICommonBaseType {
+export interface XautoCodeConfig extends ICommonBaseType {
   /**
    * 输入框标题
    */
@@ -159,7 +159,7 @@ export interface XAutoNumberConfig extends ICommonBaseType {
   maxLength?: TNumberDefaultType;
 }
 
-const XAutoNumber: XAutoNumberSchema = {
+const XautoCode: XautoCodeSchema = {
   editData: [
     ...baseConfig,
     {
@@ -230,4 +230,4 @@ const XAutoNumber: XAutoNumberSchema = {
   }
 };
 
-export default XAutoNumber;
+export default XautoCode;
