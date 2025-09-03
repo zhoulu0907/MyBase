@@ -7,7 +7,7 @@ import { batchSaveFields, getEntityFields } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import { ENTITY_FIELD_TYPE_LABEL } from '@onebase/ui-kit';
-import { type AutoCodeRule } from './FieldTypeConfig';
+import type { AutoNumberRule } from './types';
 import FieldConfigPopover from './FieldConfigPopover';
 import TableColumns from './TableColumns';
 import styles from './index.module.less';
@@ -27,7 +27,7 @@ interface FieldFormValues {
   isDeleted?: boolean;
   displayName?: string;
   options?: object[];
-  autoCodeRules?: AutoCodeRule[];
+  autoNumber?: AutoNumberRule;
   constraints?: {
     lengthEnabled: number;
     minLength: number;
@@ -70,6 +70,7 @@ const SortableTableRow = (props: any) => {
 const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible, entity, successCallback }) => {
   const { curAppId } = useAppStore();
   const [fields, setFields] = useState<FieldFormValues[]>([]);
+  const [originFields, setOriginFields] = useState<FieldFormValues[]>([]);
   const [loading, setLoading] = useState(false);
   const [configPopoverVisible, setConfigPopoverVisible] = useState<string | null>(null);
   const [constraintsPopoverVisible, setConstraintsPopoverVisible] = useState<string | null>(null);
@@ -89,10 +90,10 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
             sortOrder: index
           }))
         );
+        setOriginFields(res);
       });
     }
   }, [visible]);
-
 
   // 过滤掉已删除的字段和系统字段
   const activeFields = fields.filter((field) => !field.isDeleted && field.isSystemField === FIELD_TYPE.CUSTOM);
@@ -129,7 +130,12 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
       Message.error('系统字段不能删除');
       return;
     }
-    setFields(fields.map((f, i) => (i === index ? { ...f, isDeleted: true } : f)));
+    if (field.id && field.id.startsWith('field-')) {
+      setFields(fields.filter((f, i) => i !== index));
+      return;
+    } else {
+      setFields(fields.map((f, i) => (i === index ? { ...f, isDeleted: true } : f)));
+    }
   };
 
   const updateField = (index: number, updatedField: Partial<FieldFormValues>) => {
@@ -172,6 +178,10 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
         }
         if (!field.fieldName || !field.fieldName.trim()) {
           Message.error('字段名称不能为空');
+          return;
+        }
+        if (field.fieldName && !/^[a-z][a-z0-9_]{0,39}$/.test(field.fieldName)) {
+          Message.error('请输入符合规范的字段名称');
           return;
         }
         if (!field.fieldType) {
@@ -224,7 +234,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
         fieldConfig = { options: configData };
         break;
       case ENTITY_FIELD_TYPE_LABEL.AUTO_CODE:
-        fieldConfig = { options: configData };
+        fieldConfig = { autoNumber: configData };
         break;
       case 'CONSTRAINTS':
         fieldConfig = { constraints: configData };
@@ -257,7 +267,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
         fieldType={fieldType}
         fieldId={fieldId}
         field={field}
-        fields={fields}
+        fields={originFields}
         onConfirm={handleConfigConfirm}
         onCancel={handleConfigCancel}
       />
