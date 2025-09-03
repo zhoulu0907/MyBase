@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.app.controller.admin.menu.vo;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -38,9 +39,12 @@ public class MenuListRespVO {
     private String menuIcon;
 
     @Schema(description = "菜单可见")
-    private Boolean visible;
+    private Integer isVisible;
 
     @Schema(description = "子菜单")
-    public List<MenuListRespVO> children = null;
+    public LinkedList<MenuListRespVO> children = null;
+
+    @Schema(description = "过滤标记（辅助字段，不返回给前端）", hidden = true)
+    private boolean filter = false;
 
 }

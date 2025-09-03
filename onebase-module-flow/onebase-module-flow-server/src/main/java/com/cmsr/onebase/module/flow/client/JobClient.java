@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
  * @Author：huangjie
  * @Date：2025/9/3 10:07
  */
-@Component
+//@Component
 public class JobClient {
 
     @Value("${flow.job.token}")
