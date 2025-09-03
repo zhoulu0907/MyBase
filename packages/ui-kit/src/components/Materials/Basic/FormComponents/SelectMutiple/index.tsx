@@ -3,11 +3,8 @@ import { memo } from 'react';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import type { XInputSelectMutipleConfig } from './schema';
 
-const Option = Select.Option;
-const options = ['Beijing', 'Shanghai', 'Guangzhou', 'Disabled'];
-
 const XSelectMutiple = memo((props: XInputSelectMutipleConfig) => {
-  const { label, tooltip, status, required, layout, labelColSpan = 0, showSearch } = props;
+  const { label, tooltip, status, required, layout, labelColSpan = 0, showSearch, defaultValue } = props;
 
   return (
     <Form.Item
@@ -30,15 +27,9 @@ const XSelectMutiple = memo((props: XInputSelectMutipleConfig) => {
         allowClear
         showSearch={showSearch}
         placeholder="Select"
-        defaultValue={['Beijing', 'Shenzhen']}
         style={{ width: '100%' }}
-      >
-        {options.map((option, index) => (
-          <Option key={option} disabled={index === 3} value={option}>
-            {option}
-          </Option>
-        ))}
-      </Select>
+        options={defaultValue}
+      ></Select>
     </Form.Item>
   );
 });

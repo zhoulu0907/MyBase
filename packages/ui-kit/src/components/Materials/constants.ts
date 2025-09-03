@@ -15,6 +15,8 @@ export const CONFIG_TYPES = {
   PLACEHOLDER_INPUT: 'PlaceholderInput',
   // 组件描述输入
   DESCRIPTION_INPUT: 'DescriptionInput',
+  // 组件选项输入
+  SELECT_OPTIONS_INPUT: 'OptionsInput',
   // 组件提示输入
   TOOLTIP_INPUT: 'TooltipInput',
   // 组件状态选择
@@ -43,6 +45,8 @@ export const CONFIG_TYPES = {
   UPLOAD_SIZE: 'UploadSize',
   // 图片、附件上传数量限制
   UPLOAD_LIMIT: 'UploadLimit',
+  // 图片、附件支持的文件类型
+  SUPPORT_FILE_TYPE: 'SupportFileType',
   // 图片压缩率
   UPLOAD_COMPRESS: 'UploadCompress',
   // 日期类型

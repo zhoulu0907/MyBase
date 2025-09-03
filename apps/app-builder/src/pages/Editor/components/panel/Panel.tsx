@@ -1,8 +1,8 @@
-import IconBranch from '@/assets/images/edit_branch_icon.svg';
 import IconBranchActive from '@/assets/images/edit_branch_active_icon.svg';
-import IconLayout from '@/assets/images/edit_layout_icon.svg';
+import IconBranch from '@/assets/images/edit_branch_icon.svg';
 import IconLayoutActive from '@/assets/images/edit_layout_active_icon.svg';
-import { /* Button, */ Tabs } from '@arco-design/web-react';
+import IconLayout from '@/assets/images/edit_layout_icon.svg';
+import { Tabs, Tooltip } from '@arco-design/web-react';
 // import { IconLeft, IconRight } from '@arco-design/web-react/icon';
 import { EDITOR_TYPES, type EditorType } from '@onebase/ui-kit';
 import { useEffect, useState } from 'react';
@@ -70,9 +70,13 @@ export default function EditorPanel() {
             key={'material'}
             title={
               <div className={styles.tabButton}>
-                <img
-                  src={childCollapsed === 'material' && activeLeftTabKey === 'material' ? IconLayoutActive : IconLayout}
-                />
+                <Tooltip mini content="组件库" position="right">
+                  <img
+                    src={
+                      childCollapsed === 'material' && activeLeftTabKey === 'material' ? IconLayoutActive : IconLayout
+                    }
+                  />
+                </Tooltip>
               </div>
             }
           />
@@ -80,9 +84,13 @@ export default function EditorPanel() {
             key={'metadata'}
             title={
               <div className={styles.tabButton}>
-                <img
-                  src={childCollapsed === 'metadata' && activeLeftTabKey === 'metadata' ? IconBranchActive : IconBranch}
-                />
+                <Tooltip mini content="元数据项" position="right">
+                  <img
+                    src={
+                      childCollapsed === 'metadata' && activeLeftTabKey === 'metadata' ? IconBranchActive : IconBranch
+                    }
+                  />
+                </Tooltip>
               </div>
             }
           />
