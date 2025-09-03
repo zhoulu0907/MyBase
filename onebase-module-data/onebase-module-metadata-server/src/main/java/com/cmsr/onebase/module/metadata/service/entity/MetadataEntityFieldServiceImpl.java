@@ -122,13 +122,14 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
         // 2) 一次性联表查询：字段类型 -> 校验类型列表
         String inClause = typeCodes.stream().map(code -> "'" + code.replace("'", "''") + "'")
                 .collect(Collectors.joining(","));
-        String sql = "select mcft.field_type_code, mvt.validation_code, mvt.validation_name, mvt.validation_desc, mpo.sort_order " +
-                "from metadata_permit_ref_otft mpo " +
-                "join metadata_component_field_type mcft on mpo.field_type_id = mcft.id " +
-                "join metadata_validation_type mvt on mpo.validation_type_id = mvt.id " +
-                "where mcft.status = 1 and mvt.status = 1 and mcft.deleted = 0 and mvt.deleted = 0 " +
-                "and mcft.field_type_code in (" + inClause + ") " +
-                "order by mcft.field_type_code, mpo.sort_order";
+    // 说明：不同环境对 status 语义可能不一致（0/1 含义相反），这里不做 status 过滤，仅按 deleted=0 过滤，确保有数据即可返回
+    String sql = "select mcft.field_type_code, mvt.validation_code, mvt.validation_name, mvt.validation_desc, mpo.sort_order " +
+        "from metadata_permit_ref_otft mpo " +
+        "join metadata_component_field_type mcft on mpo.field_type_id = mcft.id " +
+        "join metadata_validation_type mvt on mpo.validation_type_id = mvt.id " +
+        "where mcft.deleted = 0 and mvt.deleted = 0 and mpo.deleted = 0 " +
+        "and mcft.field_type_code in (" + inClause + ") " +
+        "order by mcft.field_type_code, mpo.sort_order";
 
         DataSet ds = anylineService.querys(sql);
         Map<String, List<EntityFieldValidationTypesRespVO.ValidationTypeItem>> typeToValidation = new HashMap<>();
