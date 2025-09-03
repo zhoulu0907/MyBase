@@ -5,9 +5,14 @@ import {
   getDataPermission,
   updateDataGroupPermission,
   deleteDataGroup,
+  // getEntityFieldsWithChildren
+  getAppEntities,
+  getEntityFields,
   type GetPermissionReq,
   type UpdateDataGroupPermissionReq,
-  getAppEntities
+  type AppEntities,
+  type AppEntity,
+  type AppEntityField
 } from '@onebase/app';
 import PermissionModal from './modal';
 
@@ -37,12 +42,12 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
   const [form] = Form.useForm();
   const [visible, setVisible] = useState<boolean>(false);
   const [status, setStatus] = useState<'create' | 'edit'>('create');
-  const [entity, setEntity] = useState<any[]>([]);
+  const [appEntities, setAppEntities] = useState<AppEntity[]>([]);
+  const [appEntityFields, setAppEntityFields] = useState<AppEntityField[]>([]);
 
   useEffect(() => {
     if (appId && menuId && roleId) {
       getFieldsPermission();
-      getAppEntities(appId);
     }
   }, [appId, menuId, roleId]);
 
@@ -63,9 +68,59 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
   };
 
   // 打开model
-  const handleModel = (status: 'create' | 'edit', id?: string) => {
+  const handleModel = async (status: 'create' | 'edit', id?: string) => {
     setVisible(true);
     setStatus(status);
+
+    GetModelInitData();
+  };
+
+  const GetModelInitData = async () => {
+    try {
+      const entitiesResq: AppEntities = await getAppEntities(appId);
+      console.log('业务实体 entitiesResq:', entitiesResq);
+      setAppEntities(entitiesResq.entities);
+    } catch (error) {
+      console.error('获取权限信息失败', error);
+    }
+  };
+
+  const changeEntity = async (params: { entityId: string }) => {
+    console.log('改变业务实体 entityId;', params.entityId);
+    getDataPermissionFields(params);
+  };
+
+  // 获取数据权限数据字典
+  const getDataPermissionFields = async (params: { entityId: string }) => {
+    try {
+      const entityFieldsResq = await getEntityFields(params);
+      console.log('根据实体ID获取数据字段权限 entityFieldsResq:', entityFieldsResq);
+      // entityFieldsResq 返回的数据 是 id 但是 appEntityField 中 是 fieldID
+      entityFieldsResq.forEach((field: any) => {
+        field.fieldID = field.id;
+      });
+      setAppEntityFields(entityFieldsResq);
+      console.log('setEntityFields', appEntityFields);
+    } catch (error) {
+      console.error('获取权限信息失败', error);
+    }
+  };
+  // 获取数据权限角色
+  const getDataPermissionRoles = async (params: { entityId: string }) => {
+    try {
+      const dataPermissionRoles = await getEntityFields(params);
+      console.log('获取数据权限角色 dataPermissionRoles:', dataPermissionRoles);
+    } catch (error) {
+      console.error('获取数据权限角色失败', error);
+    }
+  };
+  const handleModelSubmit = async (values: any) => {
+    console.log('创建数据权限 values:', values);
+    // setVisible(false);
+  };
+  const handleModelCancel = () => {
+    console.log('取消创建数据权限');
+    setVisible(false);
   };
   return (
     <div className={styles.dataPermission}>
@@ -147,7 +202,17 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
       >
         添加权限组
       </Button>
-      <PermissionModal form={form} status={status} visible={visible} onClose={() => setVisible(false)} />
+      <PermissionModal
+        // form={form}
+        status={status}
+        visible={visible}
+        // onClose={() => setVisible(false)}
+        appEntities={appEntities}
+        appEntityFields={appEntityFields}
+        changeEntity={changeEntity}
+        handleModelSubmit={handleModelSubmit}
+        handleModelCancel={handleModelCancel}
+      />
     </div>
   );
 };
