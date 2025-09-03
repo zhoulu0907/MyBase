@@ -1,50 +1,50 @@
 import {
-    alignConfig,
-    baseConfig,
-    baseDefault,
-    dataFieldConfig,
-    labelColSpanConfig,
-    layoutConfig,
-    statusConfig,
-    widthConfig,
-    type ICommonBaseType,
-    type TAlignSelectKeyType,
-    type TLayoutSelectKeyType,
-    type TStatusSelectKeyType,
-    type TWidthSelectKeyType
+  alignConfig,
+  baseConfig,
+  baseDefault,
+  dataFieldConfig,
+  labelColSpanConfig,
+  layoutConfig,
+  statusConfig,
+  widthConfig,
+  type ICommonBaseType,
+  type TAlignSelectKeyType,
+  type TLayoutSelectKeyType,
+  type TStatusSelectKeyType,
+  type TWidthSelectKeyType
 } from '../../../common';
 import {
-    ALIGN_OPTIONS,
-    ALIGN_VALUES,
-    CONFIG_TYPES,
-    LAYOUT_OPTIONS,
-    LAYOUT_VALUES,
-    STATUS_OPTIONS,
-    STATUS_VALUES,
-    WIDTH_OPTIONS,
-    WIDTH_VALUES
+  ALIGN_OPTIONS,
+  ALIGN_VALUES,
+  CONFIG_TYPES,
+  LAYOUT_OPTIONS,
+  LAYOUT_VALUES,
+  STATUS_OPTIONS,
+  STATUS_VALUES,
+  WIDTH_OPTIONS,
+  WIDTH_VALUES
 } from '../../../constants';
 import type {
-    IAlignConfigType,
-    IBooleanConfigType,
-    IColorConfigType,
-    IDataFieldConfigType,
-    IDescriptionConfigType,
-    ILabelConfigType,
-    ILayoutConfigType,
-    INumberConfigType,
-    IPlaceholderConfigType,
-    ISelectConfigType,
-    IStatusConfigType,
-    ITextAreaConfigType,
-    ITextConfigType,
-    ITooltipConfigType,
-    IWidthConfigType,
-    TBooleanDefaultType,
-    TNumberDefaultType,
-    TSelectDefaultType,
-    TTextAreaDefaultType,
-    TTextDefaultType
+  IAlignConfigType,
+  IBooleanConfigType,
+  IColorConfigType,
+  IDataFieldConfigType,
+  IDescriptionConfigType,
+  ILabelConfigType,
+  ILayoutConfigType,
+  INumberConfigType,
+  IPlaceholderConfigType,
+  ISelectConfigType,
+  IStatusConfigType,
+  ITextAreaConfigType,
+  ITextConfigType,
+  ITooltipConfigType,
+  IWidthConfigType,
+  TBooleanDefaultType,
+  TNumberDefaultType,
+  TSelectDefaultType,
+  TTextAreaDefaultType,
+  TTextDefaultType
 } from '../../../types';
 
 export interface XInputTextAreaSchema {
@@ -151,6 +151,11 @@ export interface XInputTextAreaConfig extends ICommonBaseType {
   labelColSpan?: TNumberDefaultType;
 
   /**
+   * 多行文本字数下限
+   */
+  minLength?: TNumberDefaultType;
+
+  /**
    * 多行文本字数上限
    */
   maxLength?: TNumberDefaultType;
@@ -189,6 +194,11 @@ const XInputTextArea: XInputTextAreaSchema = {
       key: 'tooltip',
       name: '提示文字',
       type: CONFIG_TYPES.TOOLTIP_INPUT
+    },
+    {
+      key: 'minLength',
+      name: '多行文本字数下限',
+      type: CONFIG_TYPES.NUMBER_INPUT
     },
     {
       key: 'maxLength',
@@ -248,6 +258,7 @@ const XInputTextArea: XInputTextAreaSchema = {
     saveWithHidden: false,
     color: '',
     bgColor: '',
+    minLength: 0,
     maxLength: 200,
     minRows: 2,
     maxRows: 5
