@@ -3,7 +3,7 @@ import { Button, Input, Select, Dropdown, Menu } from '@arco-design/web-react';
 import { IconDelete, IconDragDotVertical, IconPlus, IconEdit } from '@arco-design/web-react/icon';
 import { ReactSortable } from 'react-sortablejs';
 import styles from './index.module.less';
-import AutoNumberConfigModal from './AutoNumberConfigModal';
+import AutoCodeConfigModal from './AutoCodeConfigModal';
 
 // 选项配置组件
 interface OptionConfigProps {
@@ -105,15 +105,15 @@ export const OptionConfig: React.FC<OptionConfigProps> = ({ onVisibleChange, onC
 };
 
 // 自动编号规则配置组件
-interface AutoNumberConfigProps {
+interface AutoCodeConfigProps {
   onVisibleChange?: (visible: boolean) => void;
-  onConfirm: (rules: AutoNumberRule[]) => void;
-  initialRules?: AutoNumberRule[];
+  onConfirm: (rules: AutoCodeRule[]) => void;
+  initialRules?: AutoCodeRule[];
   onCancel?: () => void; // 新增：取消回调
   fields: any[];
 }
 
-export interface AutoNumberRule {
+export interface AutoCodeRule {
   id?: string;
   type: 'auto_number' | 'create_time' | 'fixed_char' | 'form_field';
   config: {
@@ -139,14 +139,14 @@ const dataOptions = [
   { label: '自定义', value: '自定义' }
 ];
 
-export const AutoNumberConfig: React.FC<AutoNumberConfigProps> = ({
+export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({
   onVisibleChange,
   onConfirm,
   onCancel,
   initialRules = [],
   fields
 }) => {
-  const [rules, setRules] = useState<AutoNumberRule[]>(
+  const [rules, setRules] = useState<AutoCodeRule[]>(
     initialRules.length > 0
       ? initialRules
       : [
@@ -180,21 +180,21 @@ export const AutoNumberConfig: React.FC<AutoNumberConfigProps> = ({
         ]
   );
 
-  const autoNumberConfig = rules[0].config;
+  const autoCodeConfig = rules[0].config;
 
-  const getDisplayText = (config: AutoNumberRule['config']) => {
+  const getDisplayText = (config: AutoCodeRule['config']) => {
     const numberingMethodText = config.numberMode === 'NATURAL' ? '自然数编号' : '指定位数编号';
     const digitsText = config.digitWidth ? `${config.digitWidth}位数` : '';
     const resetText = config.resetCycle === 'NONE' ? '不自动重置' : '自动重置';
     return `${numberingMethodText},${digitsText},${resetText}`;
   };
 
-  const [autoNumberModalVisible, setAutoNumberModalVisible] = useState(false);
+  const [autoCodeModalVisible, setAutoCodeModalVisible] = useState(false);
   const [editingRuleId, setEditingRuleId] = useState<string>('');
-  const [displayText, setDisplayText] = useState(getDisplayText(autoNumberConfig));
+  const [displayText, setDisplayText] = useState(getDisplayText(autoCodeConfig));
 
-  const addRule = (type: AutoNumberRule['type']) => {
-    const newRule: AutoNumberRule = {
+  const addRule = (type: AutoCodeRule['type']) => {
+    const newRule: AutoCodeRule = {
       id: Date.now().toString(),
       type,
       config: {}
@@ -204,10 +204,10 @@ export const AutoNumberConfig: React.FC<AutoNumberConfigProps> = ({
 
   const editRule = (id: string) => {
     setEditingRuleId(id);
-    setAutoNumberModalVisible(true);
+    setAutoCodeModalVisible(true);
   };
 
-  const handleAutoNumberConfigConfirm = (config: AutoNumberRule['config']) => {
+  const handleAutoCodeConfigConfirm = (config: AutoCodeRule['config']) => {
     console.log('config', config);
     updateRule(editingRuleId, { config });
     setDisplayText(getDisplayText(config));
@@ -218,7 +218,7 @@ export const AutoNumberConfig: React.FC<AutoNumberConfigProps> = ({
     setRules(rules.filter((rule) => rule.id !== id));
   };
 
-  const updateRule = (id: string, updates: Partial<AutoNumberRule>) => {
+  const updateRule = (id: string, updates: Partial<AutoCodeRule>) => {
     setRules(rules.map((rule) => (rule.id === id ? { ...rule, ...updates } : rule)));
   };
 
@@ -237,7 +237,7 @@ export const AutoNumberConfig: React.FC<AutoNumberConfigProps> = ({
     }
   };
 
-  const renderRuleConfig = (rule: AutoNumberRule) => {
+  const renderRuleConfig = (rule: AutoCodeRule) => {
     switch (rule.type) {
       case 'auto_number': {
         return (
@@ -333,7 +333,7 @@ export const AutoNumberConfig: React.FC<AutoNumberConfigProps> = ({
       <div className={styles['field-type-config']}>
         <h4>自动编号规则</h4>
         <div className={styles['rule-items']}>
-          <ReactSortable list={rules} setList={(newList) => setRules(newList as AutoNumberRule[])} animation={200}>
+          <ReactSortable list={rules} setList={(newList) => setRules(newList as AutoCodeRule[])} animation={200}>
             {rules.map((rule) => (
               <div key={rule.id}>{renderRuleConfig(rule)}</div>
             ))}
@@ -374,10 +374,10 @@ export const AutoNumberConfig: React.FC<AutoNumberConfigProps> = ({
       </div>
 
       {/* 自动编号配置弹窗 */}
-      <AutoNumberConfigModal
-        visible={autoNumberModalVisible}
-        onVisibleChange={setAutoNumberModalVisible}
-        onConfirm={handleAutoNumberConfigConfirm}
+      <AutoCodeConfigModal
+        visible={autoCodeModalVisible}
+        onVisibleChange={setAutoCodeModalVisible}
+        onConfirm={handleAutoCodeConfigConfirm}
         initialConfig={rules.find((rule) => rule.id === editingRuleId)?.config}
       />
     </>

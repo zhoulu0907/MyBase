@@ -25,7 +25,7 @@ const componentSchemaMap: Partial<Record<ComponentType, ComponentSchema>> = {
   [ALL_COMPONENT_TYPES.DEPT_SELECT]: BasicSchema.XDeptSelect,
   [ALL_COMPONENT_TYPES.FILE_UPLOAD]: BasicSchema.XFileUpload,
   [ALL_COMPONENT_TYPES.IMG_UPLOAD]: BasicSchema.XImgUpload,
-  [ALL_COMPONENT_TYPES.AUTO_NUMBER]: BasicSchema.XAutoNumber,
+  [ALL_COMPONENT_TYPES.AUTO_CODE]: BasicSchema.XAutoCode,
   [ALL_COMPONENT_TYPES.RELATED_FORM]: BasicSchema.XRelatedForm,
   [ALL_COMPONENT_TYPES.STATIC_TEXT]: BasicSchema.XStaticText,
   [ALL_COMPONENT_TYPES.DIVIDER]: BasicSchema.XDivider,
