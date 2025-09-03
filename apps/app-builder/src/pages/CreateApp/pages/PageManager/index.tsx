@@ -130,7 +130,7 @@ const PageManagerPage: FC = () => {
         <MyMenuItem
           showOption={showOption}
           menuID={menu.id}
-          visible={menu.visible}
+          isVisible={menu.isVisible}
           menuCode={menu.menuCode}
           menuName={menu.menuName}
           menuIcon={menu.menuIcon}
@@ -246,14 +246,14 @@ const PageManagerPage: FC = () => {
   };
 
   // 更新应用菜单可见性  隐藏/显示
-  const triggerHide = async(menuID: string,visible:number) => {
+  const triggerHide = async(menuID: string,isVisible:number) => {
     const req: UpdateApplicationMenuVisibleReq = {
       id: menuID,
-      visible: visible === 0 ? 1 : 0,
+      visible: isVisible === 0 ? 1 : 0,
     };
     const res = await updateApplicationMenuVisible(req);
     if (res) {
-      Message.success(`${!!visible ? '显示':'隐藏'}成功`);
+      Message.success(`${!!isVisible ? '显示':'隐藏'}成功`);
     }
     getMenuList();
   };

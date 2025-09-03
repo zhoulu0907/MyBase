@@ -18,7 +18,7 @@ const MenuItem = Menu.Item;
 interface MenuItemProps {
   showOption: boolean;
   menuID: string;
-  visible: number,
+  isVisible: number,
   menuCode: string;
   menuName: string;
   label: string;
@@ -28,7 +28,7 @@ interface MenuItemProps {
   triggerCreate: (formType: string) => void;
   triggerRename: () => void;
   triggerCopy: () => void;
-  triggerHide: (menuID: string,visible: number) => void;
+  triggerHide: (menuID: string,isVisible: number) => void;
   triggerDelete: (menuID: string) => void;
   maxWidth: number;
   renameForm: FormInstance;
@@ -40,7 +40,7 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
   showOption,
   menuID,
   menuCode,
-  visible,
+  isVisible,
   menuName,
   label,
   menuIcon,
@@ -88,10 +88,10 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
         key="visible"
         onClick={(e) => {
           e.stopPropagation();
-          triggerHide(menuID,visible);
+          triggerHide(menuID,isVisible);
         }}
       >
-        { visible === 0 ? '显示':'隐藏'}
+        { isVisible === 0 ? '显示':'隐藏'}
       </MenuItem>
       {!isGroup && (
         <MenuItem
