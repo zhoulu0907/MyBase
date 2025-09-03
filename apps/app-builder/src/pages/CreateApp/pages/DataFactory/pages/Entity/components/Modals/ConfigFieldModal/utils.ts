@@ -95,7 +95,6 @@ export const convertAutoNumberRuleToAutoCodeComp = (autoNumberRule: AutoNumberRu
       config: {}
     };
 
-    // 根据不同类型设置不同的配置
     switch (rule.itemType) {
       case 'DATE':
         autoCodeRule.config = { dateFormat: rule.format || '年月日' };
@@ -111,8 +110,6 @@ export const convertAutoNumberRuleToAutoCodeComp = (autoNumberRule: AutoNumberRu
     }
 
     rules.push(autoCodeRule);
-
-    console.log('autoCodeRule', autoCodeRule, rules);
   });
 
   return rules;

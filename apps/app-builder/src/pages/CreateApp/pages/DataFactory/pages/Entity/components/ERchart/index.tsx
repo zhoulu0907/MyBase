@@ -397,23 +397,20 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
             //   { x: 380, y: 120 },
             // ],
             data: edgeData,
-            labels:
-              edgeData.label === '主子关系'
-                ? [
-                    {
-                      position: 0.5,
-                      attrs: {
-                        label: {
-                          text: edgeData.label,
-                          fill: '#39B85F',
-                          fontSize: 12,
-                          textAnchor: 'middle',
-                          textVerticalAnchor: 'middle'
-                        }
-                      }
-                    }
-                  ]
-                : []
+            labels: [
+              {
+                position: 0.5,
+                attrs: {
+                  label: {
+                    text: edgeData.label,
+                    fill: '#39B85F',
+                    fontSize: 12,
+                    textAnchor: 'middle',
+                    textVerticalAnchor: 'middle'
+                  }
+                }
+              }
+            ]
             // 可以添加其他边的属性，如 router, connector 等来优化连线路径
             // router: 'manhattan', // 例如使用直角路由
             // connector: { name: 'rounded', args: { radius: 8 }}, // 例如使用圆角连接

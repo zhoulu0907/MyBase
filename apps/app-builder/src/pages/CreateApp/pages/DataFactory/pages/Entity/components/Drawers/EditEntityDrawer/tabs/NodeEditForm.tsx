@@ -78,44 +78,6 @@ const NodeEditForm: React.FC<NodeEditFormProps> = ({ node, onCancel, onSave, suc
       }
     };
   };
-  // const initialValues: FormValues = {
-  //   code: node.code || '',
-  //   tableName: node.tableName || '',
-  //   displayName: node.displayName || '',
-  //   description: node.description || '',
-  //   systemFields: {
-  //     creator: node?.fields?.find(
-  //       (field: EntityField) => field.isSystemField === FIELD_TYPE.SYSTEM && field.fieldName === 'creator'
-  //     )
-  //       ? true
-  //       : false,
-  //     updater: node?.fields?.find(
-  //       (field: EntityField) => field.isSystemField === FIELD_TYPE.SYSTEM && field.fieldName === 'updater'
-  //     )
-  //       ? true
-  //       : false,
-  //     created_time: node?.fields?.find(
-  //       (field: EntityField) => field.isSystemField === FIELD_TYPE.SYSTEM && field.fieldName === 'created_time'
-  //     )
-  //       ? true
-  //       : false,
-  //     updated_time: node?.fields?.find(
-  //       (field: EntityField) => field.isSystemField === FIELD_TYPE.SYSTEM && field.fieldName === 'updated_time'
-  //     )
-  //       ? true
-  //       : false,
-  //     owner_id: node?.fields?.find(
-  //       (field: EntityField) => field.isSystemField === FIELD_TYPE.SYSTEM && field.fieldName === 'owner_id'
-  //     )
-  //       ? true
-  //       : false,
-  //     owner_dept: node?.fields?.find(
-  //       (field: EntityField) => field.isSystemField === FIELD_TYPE.SYSTEM && field.fieldName === 'owner_dept'
-  //     )
-  //       ? true
-  //       : false
-  //   }
-  // };
 
   const formItems: FormItem[] = [
     { field: 'systemFields.creator', label: '记录创建人' },

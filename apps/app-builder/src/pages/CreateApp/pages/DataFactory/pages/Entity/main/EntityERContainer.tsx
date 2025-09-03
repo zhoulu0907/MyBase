@@ -20,6 +20,14 @@ import {
   DeleteConfirmModal
 } from '../components/Modals';
 import styles from '../index.module.less';
+
+const relationshipTypeMap: Record<string, string> = {
+  ONE_TO_ONE: '1:1',
+  ONE_TO_MANY: '1:N',
+  MANY_TO_ONE: 'N:1',
+  MANY_TO_MANY: 'M:N'
+};
+
 export const EntityERContainer: React.FC<{
   refreshEntityList: boolean;
   setRefreshEntityList: (refresh: boolean) => void;
@@ -62,7 +70,13 @@ export const EntityERContainer: React.FC<{
               positionY: pos?.y || 0
             };
           }) || [],
-        edges: res?.relationships || []
+        edges:
+          res?.relationships.map((item) => {
+            return {
+              ...item,
+              label: relationshipTypeMap[item?.relationshipType || '']
+            };
+          }) || []
       });
     }
   };
