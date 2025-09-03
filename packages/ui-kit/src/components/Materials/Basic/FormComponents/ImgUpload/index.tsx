@@ -1,10 +1,11 @@
 import { Form, Message, Upload } from '@arco-design/web-react';
+import { IconPlus } from '@arco-design/web-react/icon';
 import { uploadFile } from '@onebase/platform-center';
+import { nanoid } from 'platejs';
 import { memo, useState } from 'react';
+import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import type { XInputImgUploadConfig } from './schema';
-import { nanoid } from 'platejs';
-import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 
 const XImgUpload = memo((props: XInputImgUploadConfig) => {
   const { label, dataField, status, tooltip, uploadSize = 10, listType, required, layout, labelColSpan = 0 } = props;
@@ -83,7 +84,16 @@ const XImgUpload = memo((props: XInputImgUploadConfig) => {
         style={{
           width: '100%'
         }}
-      />
+      >
+        {listType == 'picture-card' && (
+          <div className="arco-upload-trigger-picture">
+            <div className="arco-upload-trigger-picture-text">
+              <IconPlus />
+              <div style={{ marginTop: 10, fontWeight: 600, fontSize: '11px' }}>点击或拖动图片到框内上传</div>
+            </div>
+          </div>
+        )}
+      </Upload>
     </Form.Item>
   );
 });

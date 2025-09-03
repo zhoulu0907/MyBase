@@ -1,4 +1,5 @@
 import { Form, Message, Upload } from '@arco-design/web-react';
+import { IconPlus } from '@arco-design/web-react/icon';
 import { memo } from 'react';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import type { XInputFileUploadConfig } from './schema';
@@ -52,7 +53,17 @@ const XFileUpload = memo((props: XInputFileUploadConfig) => {
         style={{
           width: '100%'
         }}
-      />
+      >
+        {listType == 'picture-card' && (
+          <div className="arco-upload-trigger-picture">
+            <div className="arco-upload-trigger-picture-text">
+              <IconPlus />
+              <div style={{ marginTop: 10, fontWeight: 600, fontSize: '11px' }}>点击或拖动文件到框内上传</div>
+              <div style={{ marginTop: 5, fontWeight: 600, fontSize: '11px' }}>文件大小不超过{uploadSize}MB</div>
+            </div>
+          </div>
+        )}
+      </Upload>
     </Form.Item>
   );
 });
