@@ -1,5 +1,5 @@
 import { type Entity, type EntityField } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
-import { FIELD_TYPE } from '@/pages/CreateApp/pages/DataFactory/utils/const';
+import { FIELD_TYPE } from '@onebase/ui-kit';
 import { Button, Form, Input, Grid } from '@arco-design/web-react';
 import { IconCheck } from '@arco-design/web-react/icon';
 import React, { useEffect } from 'react';

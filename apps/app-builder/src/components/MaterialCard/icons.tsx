@@ -29,6 +29,8 @@ import FileUploadIcon from '@/assets/images/cp/upload_file_cp.svg';
 import ImageUploadIcon from '@/assets/images/cp/upload_image_cp.svg';
 import UserSelectIcon from '@/assets/images/cp/user_select_cp.svg';
 import WebComponentIcon from '@/assets/images/cp/web_component_cp.svg';
+import RelatedFormIcon from '@/assets/images/cp/related_form_cp.svg';
+import RichTextIcon from '@/assets/images/cp/rich_text_cp.svg';
 
 export const ICON_Map: Record<string, React.ReactNode> = {
   'text_input_cp.svg': <img src={TextInputIcon} />,
@@ -61,5 +63,7 @@ export const ICON_Map: Record<string, React.ReactNode> = {
   'web_component_cp.svg': <img src={WebComponentIcon} />,
   'list_container_cp.svg': <img src={ListContainerIcon} />,
   'canvas_list_cp.svg': <img src={CanvasListIcon} />,
-  'calendar_cp.svg': <img src={CalendarIcon} />
+  'calendar_cp.svg': <img src={CalendarIcon} />,
+  'related_form_cp.svg': <img src={RelatedFormIcon} />,
+  'rich_text_cp.svg': <img src={RichTextIcon} />
 };

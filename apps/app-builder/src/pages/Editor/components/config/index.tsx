@@ -1,8 +1,8 @@
-import { Button } from '@arco-design/web-react';
-import { IconLeft, IconRight } from '@arco-design/web-react/icon';
-import { usePageEditorSignal } from '@onebase/ui-kit';
+// import { useState } from 'react';
+// import { Button } from '@arco-design/web-react';
+// import { IconLeft, IconRight } from '@arco-design/web-react/icon';
 import { useSignals } from '@preact/signals-react/runtime';
-import { useState } from 'react';
+import { usePageEditorSignal } from '@onebase/ui-kit';
 import MaterialConfiger from './components';
 import styles from './index.module.less';
 
@@ -12,23 +12,23 @@ export default function EditorConfig({}: EditorConfigProps) {
   useSignals();
   const { curComponentID } = usePageEditorSignal();
 
-  const [showDrawer, setShowDrawer] = useState(true);
+  // const [showDrawer, setShowDrawer] = useState(true);
 
   return (
     <div
       className={styles.editorConfig}
       style={{
-        width: showDrawer ? '310px' : '0px',
+        // width: showDrawer ? '310px' : '0px',
         transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
       }}
     >
-      <Button
+      {/* <Button
         size="mini"
         className={styles.drawerButton}
         icon={showDrawer ? <IconRight /> : <IconLeft />}
         type="default"
         onClick={() => setShowDrawer(!showDrawer)}
-      />
+      /> */}
       <MaterialConfiger cpID={curComponentID} />
     </div>
   );

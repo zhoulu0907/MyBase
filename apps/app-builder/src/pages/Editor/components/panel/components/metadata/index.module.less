@@ -1,14 +1,50 @@
 .rightHeader {
-  padding: 16px;
   height: 40px;
   width: 100%;
-  border-bottom: 0.5px solid #e8e8e8;
+  padding: 8px 12px;
   box-sizing: border-box;
-  font-size: 16px;
-  font-weight: 400;
-  color: #000000;
+  border-bottom: 0.5px solid #e8e8e8;
   display: flex;
   align-items: center;
+  justify-content: space-between;
+
+  .title {
+    font-size: 16px;
+    font-weight: 400;
+    color: #000000;
+    white-space: nowrap;
+  }
+
+  .right {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+
+    .search {
+      height: 100%;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-left: 12px;
+      padding-top: 4px;
+      padding-bottom: 4px;
+
+      img {
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+      }
+    }
+
+    .collapse {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+      margin-left: 18px;
+    }
+  }
 }
 
 .rightBody {
@@ -29,6 +65,7 @@
     font-size: 13px;
     font-weight: 500;
     color: #000000;
+    white-space: nowrap;
   }
 
   .entityListWrapper {
@@ -53,6 +90,7 @@
 
     .mainEntityHeader {
       width: 100%;
+      min-width: 250px;
       height: 40px;
       box-sizing: border-box;
       color: #4fae7b;
@@ -208,6 +246,7 @@
     font-size: 13px;
     font-weight: 500;
     color: #000000;
+    white-space: nowrap;
   }
 
   .fieldList {
@@ -226,5 +265,6 @@
     justify-content: flex-start;
     flex-wrap: wrap;
     gap: 15px;
+    box-sizing: border-box;
   }
 }

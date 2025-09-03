@@ -6,7 +6,7 @@ export const listFlowMgmt = (params: ListFlowMgmtReq) => {
 };
 
 export const getFlowMgmt = (id: string) => {
-  return flowService.get(`/mgmt/${id}`);
+  return flowService.get(`/mgmt/get?id=${id}`);
 };
 
 export const createFlowMgmt = (params: CreateFlowMgmtReq) => {

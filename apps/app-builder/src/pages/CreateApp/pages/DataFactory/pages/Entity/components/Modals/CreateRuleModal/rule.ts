@@ -75,15 +75,20 @@ export const valueTypeOptions = [
 ];
 
 // 校验类型选项
-export const validationTypeOptions = [
-  { label: '必填校验', value: 'required' },
-  { label: '唯一校验', value: 'unique' },
-  { label: '长度校验', value: 'length' },
-  { label: '范围校验', value: 'range' },
-  { label: '格式校验', value: 'format' },
-  { label: '子表空行校验', value: 'subtable_empty' },
-  { label: '自定义校验', value: 'custom' }
-];
+export const validationTypeMap: Record<string, string> = {
+  required: '必填校验',
+  unique: '唯一校验',
+  length: '长度校验',
+  range: '范围校验',
+  format: '格式校验',
+  subtable_empty: '子表空行校验',
+  custom: '自定义校验'
+};
+
+export const validationTypeOptions = Object.entries(validationTypeMap).map(([key, value]) => ({
+  label: value,
+  value: key
+}));
 
 // 格式校验类型选项
 export const formatValidationTypeOptions = [
@@ -93,3 +98,13 @@ export const formatValidationTypeOptions = [
   { label: 'URL格式', value: 'url' },
   { label: '日期格式', value: 'date' }
 ];
+
+// 提示语
+export const ruleTip: Record<string, string> = {
+  required: '请输入校验不通过后的弹窗提示语，例如“XXX必填”',
+  unique: '请输入校验不通过后的弹窗提示语，例如“XXX不可重复”',
+  length: '请输入校验不通过后的弹窗提示语，例如“XXX长度范围需在XX~XX之间”',
+  range: '请输入校验不通过后的弹窗提示语，例如“XXX范围需在XX~XX之间”',
+  format: '请输入校验不通过后的弹窗提示语，例如“请输入有效的手机号码”',
+  subtable_empty: '请输入校验不通过后的弹窗提示语，例如“子表存在空行”'
+};

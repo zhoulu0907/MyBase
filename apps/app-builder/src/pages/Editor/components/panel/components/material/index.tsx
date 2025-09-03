@@ -1,11 +1,16 @@
+import React, { useEffect, useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
+import { Collapse, Tabs, Layout, Input } from '@arco-design/web-react';
+import { ReactSortable } from 'react-sortablejs';
 import MaterialCard from '@/components/MaterialCard';
 import { useI18n } from '@/hooks/useI18n';
-import { Collapse, Tabs } from '@arco-design/web-react';
 import { allTemplate, COMPONENT_GROUP_NAME, EDITOR_TYPES, type EditorType } from '@onebase/ui-kit';
-import React, { useEffect, useState } from 'react';
-import { ReactSortable } from 'react-sortablejs';
-import { v4 as uuidv4 } from 'uuid';
+import IconCollapsed from '@/assets/images/collapsed.svg';
+import IconSearchForm from '@/assets/images/search_form_icon.svg';
 import styles from './index.module.less';
+
+const Sider = Layout.Sider;
+const InputSearch = Input.Search;
 
 // 定义类型
 const CATEGORY_KEYS = ['navigate', 'layout', 'form', 'list', 'show'] as const;
@@ -13,13 +18,16 @@ type CategoryKey = (typeof CATEGORY_KEYS)[number];
 
 interface MaterialContainerProps {
   activeTab: EditorType;
+  childCollapsed: string | undefined;
+  setChildCollapsed: () => void;
 }
 
-const MaterialContainer: React.FC<MaterialContainerProps> = ({ activeTab }) => {
+const MaterialContainer: React.FC<MaterialContainerProps> = ({ activeTab, childCollapsed, setChildCollapsed }) => {
   const { t } = useI18n();
   const [activeComponentTab, setActiveComponentTab] = useState('base-component');
 
   const [baseItems, setBaseItems] = useState<{ key: CategoryKey; items: any[] }[]>([]);
+  const [showSearchInput, setShowSearchInput] = useState<boolean>(false);
 
   // 按 category 分类，分成 3 个 items
   //   const baseNavigateItems = allTemplate.base.find((cat) => cat.category === 'navigate')?.items || [];
@@ -62,111 +70,130 @@ const MaterialContainer: React.FC<MaterialContainerProps> = ({ activeTab }) => {
     setBaseItems(newBaseItems);
   }, []);
 
+  // todo 搜索功能
+
   return (
     <div>
-      <div className={styles.rightHeader}>{t('editor.material')}</div>
+      <Sider collapsed={!childCollapsed} collapsible collapsedWidth={0} trigger={null} width={295}>
+        <div className={styles.rightHeader}>
+          <div className={styles.title}>{t('editor.material')}</div>
 
-      <div className={styles.rightBody}>
-        <div className={styles.componentTabs}>
-          <Tabs
-            type="capsule"
-            activeTab={activeComponentTab}
-            onChange={(key) => {
-              setActiveComponentTab(key);
-            }}
-            size="default"
-          >
-            <Tabs.TabPane
-              key="base-component"
-              title={<div className={styles.componentTabTitle}>{t('editor.baseComponent')}</div>}
-            />
-            <Tabs.TabPane
-              key="template-component"
-              title={<div className={styles.componentTabTitle}>{t('editor.templateComponent')}</div>}
-            />
-            <Tabs.TabPane
-              key="custom-component"
-              title={<div className={styles.componentTabTitle}>{t('editor.customComponent')}</div>}
-            />
-          </Tabs>
+          <div className={styles.right}>
+            <div className={styles.search} onClick={() => setShowSearchInput(true)}>
+              {!showSearchInput ? (
+                <img src={IconSearchForm} alt="search some component" />
+              ) : (
+                <InputSearch autoFocus onBlur={() => setShowSearchInput(false)} />
+              )}
+            </div>
+            <div className={styles.collapse} onClick={setChildCollapsed}>
+              <img src={IconCollapsed} alt="collapse" />
+            </div>
+          </div>
         </div>
-        <div className={styles.componentList}>
-          {activeComponentTab === 'base-component' && (
-            <Collapse defaultActiveKey={baseCategories.map((c) => c.key)} accordion={false} bordered={false}>
-              {baseCategories.map((cat) => {
-                if (activeTab === EDITOR_TYPES.LIST_EDITOR && cat.key === 'form') {
-                  return null;
-                }
-                if (activeTab === EDITOR_TYPES.FORM_EDITOR && (cat.key === 'list' || cat.key === 'show')) {
-                  return null;
-                }
 
-                return (
-                  <Collapse.Item
-                    header={categoryI18nMap[cat.key]}
-                    name={cat.key}
-                    key={cat.key}
-                    style={{ border: 'none' }}
-                    contentStyle={{ backgroundColor: '#fff', border: 'none' }}
-                  >
-                    <div>
-                      {cat.items.length === 0 ? (
-                        <div className={styles.emptyTip}>{t('editor.empty')}</div>
-                      ) : (
-                        <ReactSortable
-                          list={baseItems.find((c) => c.key === cat.key)?.items || []}
-                          setList={() => {}}
-                          group={{
-                            name: COMPONENT_GROUP_NAME,
-                            pull: 'clone',
-                            put: false
-                          }}
-                          sort={false}
-                          className={styles.componentCollapseContent}
-                          forceFallback={true}
-                          animation={150}
-                          onClone={(e) => {
-                            // console.log('onClone', e);
+        <div className={styles.rightBody}>
+          <div className={styles.componentTabs}>
+            <Tabs
+              type="capsule"
+              activeTab={activeComponentTab}
+              onChange={(key) => {
+                setActiveComponentTab(key);
+              }}
+              size="default"
+            >
+              <Tabs.TabPane
+                key="base-component"
+                title={<div className={styles.componentTabTitle}>{t('editor.baseComponent')}</div>}
+              />
+              <Tabs.TabPane
+                key="template-component"
+                title={<div className={styles.componentTabTitle}>{t('editor.templateComponent')}</div>}
+              />
+              <Tabs.TabPane
+                key="custom-component"
+                title={<div className={styles.componentTabTitle}>{t('editor.customComponent')}</div>}
+              />
+            </Tabs>
+          </div>
+          <div className={styles.componentList}>
+            {activeComponentTab === 'base-component' && (
+              <Collapse defaultActiveKey={baseCategories.map((c) => c.key)} accordion={false} bordered={false}>
+                {baseCategories.map((cat) => {
+                  if (activeTab === EDITOR_TYPES.LIST_EDITOR && cat.key === 'form') {
+                    return null;
+                  }
+                  if (activeTab === EDITOR_TYPES.FORM_EDITOR && (cat.key === 'list' || cat.key === 'show')) {
+                    return null;
+                  }
 
-                            // 每次拖拽组件到面板时重新分配ID
-                            const cpType = e.item.getAttribute('data-cp-type');
-                            e.item.id = `${cpType}-${uuidv4()}`;
-                            console.log('e.item.id', e.item.id);
+                  return (
+                    <Collapse.Item
+                      header={categoryI18nMap[cat.key]}
+                      name={cat.key}
+                      key={cat.key}
+                      style={{ border: 'none' }}
+                      contentStyle={{ backgroundColor: '#fff', border: 'none' }}
+                    >
+                      <div>
+                        {cat.items.length === 0 ? (
+                          <div className={styles.emptyTip}>{t('editor.empty')}</div>
+                        ) : (
+                          <ReactSortable
+                            list={baseItems.find((c) => c.key === cat.key)?.items || []}
+                            setList={() => {}}
+                            group={{
+                              name: COMPONENT_GROUP_NAME,
+                              pull: 'clone',
+                              put: false
+                            }}
+                            sort={false}
+                            className={styles.componentCollapseContent}
+                            forceFallback={true}
+                            animation={150}
+                            onClone={(e) => {
+                              // console.log('onClone', e);
 
-                            // 拖动前ID保持不变，在下次拖动后重新生成
-                            setBaseItems((prev) =>
-                              prev.map((c) =>
-                                c.key === cat.key
-                                  ? {
-                                      ...c,
-                                      items: c.items.map((item) =>
-                                        item.type === cpType ? { ...item, id: `${e.item.id}` } : item
-                                      )
-                                    }
-                                  : c
-                              )
-                            );
-                          }}
-                        >
-                          {cat.items.map((item) => (
-                            <MaterialCard
-                              key={item.type}
-                              id={item.id}
-                              displayName={item.displayName}
-                              type={item.type}
-                              icon={item.icon}
-                            />
-                          ))}
-                        </ReactSortable>
-                      )}
-                    </div>
-                  </Collapse.Item>
-                );
-              })}
-            </Collapse>
-          )}
+                              // 每次拖拽组件到面板时重新分配ID
+                              const cpType = e.item.getAttribute('data-cp-type');
+                              e.item.id = `${cpType}-${uuidv4()}`;
+                              console.log('e.item.id', e.item.id);
+
+                              // 拖动前ID保持不变，在下次拖动后重新生成
+                              setBaseItems((prev) =>
+                                prev.map((c) =>
+                                  c.key === cat.key
+                                    ? {
+                                        ...c,
+                                        items: c.items.map((item) =>
+                                          item.type === cpType ? { ...item, id: `${e.item.id}` } : item
+                                        )
+                                      }
+                                    : c
+                                )
+                              );
+                            }}
+                          >
+                            {cat.items.map((item) => (
+                              <MaterialCard
+                                key={item.type}
+                                id={item.id}
+                                displayName={item.displayName}
+                                type={item.type}
+                                icon={item.icon}
+                              />
+                            ))}
+                          </ReactSortable>
+                        )}
+                      </div>
+                    </Collapse.Item>
+                  );
+                })}
+              </Collapse>
+            )}
+          </div>
         </div>
-      </div>
+      </Sider>
     </div>
   );
 };

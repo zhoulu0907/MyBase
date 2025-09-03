@@ -1,9 +1,9 @@
 import AvatarSVG from '@/assets/images/avatar.svg';
+import AppIconSVG from '@/assets/images/app_icon.svg';
 import { useI18n } from '@/hooks/useI18n';
 import { useAppStore } from '@/store/store_app';
 import { UserPermissionManager } from '@/utils/permission';
 import { Button, Dropdown, Layout, Menu, Tabs } from '@arco-design/web-react';
-import { IconMenu } from '@arco-design/web-react/icon';
 import { AppStatus, getApplication, type GetApplicationReq } from '@onebase/app';
 import { getRuntimeURL, TokenManager } from '@onebase/common';
 import React, { useEffect, useState } from 'react';
@@ -107,14 +107,14 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     <Header className={`${styles.header} ${className || ''}`}>
       <div className={styles.headerContent}>
         <div className={styles.appInfo}>
-          <Button
-            shape="square"
-            icon={<IconMenu />}
+          <div
+            className={styles.menuIcon}
             onClick={() => {
               navigate('/onebase/my-app');
             }}
-            className={styles.menuIcon}
-          />
+          >
+            <img src={AppIconSVG} alt="application icon" />
+          </div>
 
           <div className={styles.myAppIcon} style={{ backgroundColor: iconColor }}>
             <i className={`iconfont ${appIcon || 'icon-box'}`} />

@@ -2,11 +2,11 @@
 
 .editorPanel {
   height: calc(100vh - var(--editor-header-height));
-  width: 340px;
+  // width: 340px;
   box-sizing: border-box;
   background-color: #ffffff;
   display: flex;
-  float: row;
+  // float: row;
   align-items: flex-start;
   justify-content: flex-start;
   position: relative;
@@ -54,12 +54,13 @@
       align-items: center;
       justify-content: center;
 
+      &:hover {
+        background-color: #f2f3f5;
+      }
+
       img {
         font-size: 24px;
       }
-    }
-    .activeTab {
-      background-color: #f2f3f5;
     }
   }
 

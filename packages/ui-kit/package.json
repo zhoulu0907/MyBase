@@ -17,6 +17,8 @@
     "@preact/signals-react": "^3.2.1",
     "@tailwindcss/vite": "^4.1.12",
     "@types/lodash-es": "^4.17.12",
+    "@wangeditor/editor": "^5.1.23",
+    "@wangeditor/editor-for-react": "^1.0.6",
     "dayjs": "^1.11.13",
     "lodash-es": "^4.17.21",
     "platejs": "^49.2.12",

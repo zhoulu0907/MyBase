@@ -18,13 +18,13 @@ export interface appEntityStore {
 export const useAppEntityStore = create<appEntityStore>((set) => ({
   appEntities: {
     entities: []
-  },
+  } as AppEntities,
   setAppEntities: (appEntities: AppEntities) => set(() => ({ appEntities })),
   clearAppEntities: () =>
     set(() => ({
       appEntities: {
         entities: []
-      }
+      } as AppEntities
     })),
 
   mainEntity: {
@@ -32,13 +32,13 @@ export const useAppEntityStore = create<appEntityStore>((set) => ({
     entityName: '',
     entityType: '',
     fields: []
-  },
+  } as AppEntity,
   setMainEntity: (mainEntity: AppEntity) => set(() => ({ mainEntity })),
   clearMainEntity: () => set(() => ({ mainEntity: { entityID: '', entityName: '', entityType: '', fields: [] } })),
 
   subEntities: {
     entities: []
-  },
+  } as AppEntities,
   setSubEntities: (subEntities: AppEntities) => set(() => ({ subEntities })),
   clearSubEntities: () => set(() => ({ subEntities: { entities: [] } }))
 }));

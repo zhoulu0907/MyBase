@@ -1,6 +1,6 @@
-import { ENTITY_FIELD_TYPE, SYSTEM_FIELD_MAP } from '@/pages/CreateApp/pages/DataFactory/utils/const';
+import { ENTITY_FIELD_TYPE, SYSTEM_FIELD_MAP } from '@onebase/ui-kit';
 import type { EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
-import { ENTITY_STATUS, FIELD_TYPE } from '@/pages/CreateApp/pages/DataFactory/utils/const';
+import { ENTITY_STATUS, FIELD_TYPE } from '@onebase/ui-kit';
 import { Node } from '@antv/x6';
 import { Button, Popover, Space, Switch } from '@arco-design/web-react';
 import { IconCaretDown, IconCaretUp, IconSync } from '@arco-design/web-react/icon';

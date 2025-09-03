@@ -15,7 +15,7 @@ import {
   type CreateApplicationReq,
   type DeleteApplicationReq,
   type ListApplicationReq,
-  type DatasourceSaveReqVO
+  type DatasourceSaveReqDTO
 } from '@onebase/app';
 
 import CreateApp from '@/components/CreateApp';
@@ -58,7 +58,7 @@ const MyAppPage: React.FC = () => {
   const [appName, setAppName] = useState<string>('');
   const [createType, setCreateType] = useState<'app' | 'datasource'>('app');
   const [deleteApp, setDeleteApp] = useState<Application>();
-  const [datasource, setDdtasource] = useState<DatasourceSaveReqVO>(); // 自有数据源
+  const [datasource, setDdtasource] = useState<DatasourceSaveReqDTO | undefined>(); // 自有数据源
   const [deleteVisible, setDeleteVisible] = useState<boolean>(false);
   const [createVisible, setCreateVisible] = useState<boolean>(false);
   const [createLoading, setCreateLoading] = useState<boolean>(false);
@@ -85,7 +85,7 @@ const MyAppPage: React.FC = () => {
   }, [pageNo, pageSize, name, orderByTime, status, ownerTag]);
 
   useEffect(() => {
-    setDdtasource(null);
+    setDdtasource(undefined);
   }, []);
 
   useEffect(() => {
