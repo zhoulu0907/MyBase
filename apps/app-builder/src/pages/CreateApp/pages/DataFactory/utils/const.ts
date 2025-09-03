@@ -16,6 +16,7 @@ export const DS_RESOURCE_TYPE_LABEL = {
 export const ENTITY_FIELD_TYPE_LABEL = {
   TEXT: 'TEXT',
   LONG_TEXT: 'LONG_TEXT',
+  BIGINT: 'BIGINT',
   EMAIL: 'EMAIL',
   PHONE: 'PHONE',
   URL: 'URL',
