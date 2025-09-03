@@ -133,7 +133,6 @@ const EditFieldDrawer: React.FC<EditFieldDrawerProps> = ({ visible, setVisible, 
       onSuccess?.();
     } catch (error) {
       console.error('更新字段失败:', error);
-      Message.error('更新字段失败');
     } finally {
       setSubmitting(false);
     }

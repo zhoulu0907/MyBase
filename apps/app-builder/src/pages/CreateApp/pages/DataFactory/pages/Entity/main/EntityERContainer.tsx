@@ -145,9 +145,8 @@ export const EntityERContainer: React.FC<{
   };
 
   const handleSuccessCallback = async () => {
-    await loadEntityList();
-    setRefreshEntityList(true);
     setOnlyUpdateNode(true);
+    setRefreshEntityList(true);
   };
 
   const createEntityCallback = () => {
@@ -185,6 +184,7 @@ export const EntityERContainer: React.FC<{
   };
 
   useEffect(() => {
+    console.log('refreshEntityList', refreshEntityList);
     if (refreshEntityList) {
       loadEntityList();
       setRefreshEntityList(false);

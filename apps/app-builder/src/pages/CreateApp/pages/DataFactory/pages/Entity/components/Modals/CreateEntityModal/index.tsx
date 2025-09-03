@@ -6,6 +6,7 @@ import { createEntity } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
 import styles from '../modal.module.less';
 import type { EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
+import { createEntityRules } from '@/pages/CreateApp/pages/DataFactory/utils/rules';
 
 interface EntityFormValues {
   source: string;
@@ -122,32 +123,15 @@ const CreateEntityModal: React.FC<{
           </>
         )}
 
-        <Form.Item
-          label="业务实体名称"
-          field="tableName"
-          rules={[
-            { required: true, message: '请输入业务实体名称' },
-            { max: 40, message: '业务实体名称不能超过40个字符' }
-          ]}
-        >
-          <Input
-            maxLength={40}
-            placeholder="请输入业务实体名称，由字母、数字、下划线组合，须以字母开头，不超过40个字符"
-          />
+        <Form.Item label="业务实体名称" field="tableName" rules={[...createEntityRules.tableName]}>
+          <Input maxLength={40} placeholder="由小写字母、数字、下划线组成，须以字母开头，不超过40个字符" />
         </Form.Item>
 
-        <Form.Item
-          label="业务展示名称"
-          field="displayName"
-          rules={[
-            { required: true, message: '请输入业务展示名称' },
-            { max: 50, message: '业务展示名称不能超过50个字符' }
-          ]}
-        >
+        <Form.Item label="业务展示名称" field="displayName" rules={[...createEntityRules.displayName]}>
           <Input maxLength={50} placeholder="请输入业务展示名称，不超过50个字符" />
         </Form.Item>
 
-        <Form.Item label="业务实体描述" field="description">
+        <Form.Item label="业务实体描述" field="description" rules={[...createEntityRules.description]}>
           <Input.TextArea placeholder="请输入描述（选填）" rows={4} maxLength={500} showWordLimit />
         </Form.Item>
       </Form>

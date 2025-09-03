@@ -3,6 +3,7 @@ import { FIELD_TYPE } from '@onebase/ui-kit';
 import { Button, Form, Input, Grid } from '@arco-design/web-react';
 import { IconCheck } from '@arco-design/web-react/icon';
 import React, { useEffect } from 'react';
+import { createEntityRules } from '@/pages/CreateApp/pages/DataFactory/utils/rules';
 import styles from './NodeEditForm.module.less';
 
 // 节点编辑表单组件
@@ -20,6 +21,7 @@ interface FormItem {
 
 interface FormValues {
   code: string;
+  tableName: string;
   displayName: string;
   description: string;
   systemFields: {
@@ -36,43 +38,84 @@ const NodeEditForm: React.FC<NodeEditFormProps> = ({ node, onCancel, onSave, suc
   const [form] = Form.useForm<FormValues>();
 
   // 初始化表单数据
-  const initialValues: FormValues = {
-    code: node.code || '',
-    displayName: node.displayName || '',
-    description: node.description || '',
-    systemFields: {
-      creator: node?.fields?.find(
-        (field: EntityField) => field.isSystemField === FIELD_TYPE.SYSTEM && field.fieldName === 'creator'
-      )
-        ? true
-        : false,
-      updater: node?.fields?.find(
-        (field: EntityField) => field.isSystemField === FIELD_TYPE.SYSTEM && field.fieldName === 'updater'
-      )
-        ? true
-        : false,
-      created_time: node?.fields?.find(
-        (field: EntityField) => field.isSystemField === FIELD_TYPE.SYSTEM && field.fieldName === 'created_time'
-      )
-        ? true
-        : false,
-      updated_time: node?.fields?.find(
-        (field: EntityField) => field.isSystemField === FIELD_TYPE.SYSTEM && field.fieldName === 'updated_time'
-      )
-        ? true
-        : false,
-      owner_id: node?.fields?.find(
-        (field: EntityField) => field.isSystemField === FIELD_TYPE.SYSTEM && field.fieldName === 'owner_id'
-      )
-        ? true
-        : false,
-      owner_dept: node?.fields?.find(
-        (field: EntityField) => field.isSystemField === FIELD_TYPE.SYSTEM && field.fieldName === 'owner_dept'
-      )
-        ? true
-        : false
-    }
+  const getInitialValues = (node: Entity) => {
+    return {
+      code: node.code || '',
+      tableName: node.tableName || '',
+      displayName: node.displayName || node.entityName || '',
+      description: node.description || '',
+      systemFields: {
+        creator: node?.fields?.find(
+          (field: EntityField) => field.isSystemField === FIELD_TYPE.SYSTEM && field.fieldName === 'creator'
+        )
+          ? true
+          : false,
+        updater: node?.fields?.find(
+          (field: EntityField) => field.isSystemField === FIELD_TYPE.SYSTEM && field.fieldName === 'updater'
+        )
+          ? true
+          : false,
+        created_time: node?.fields?.find(
+          (field: EntityField) => field.isSystemField === FIELD_TYPE.SYSTEM && field.fieldName === 'created_time'
+        )
+          ? true
+          : false,
+        updated_time: node?.fields?.find(
+          (field: EntityField) => field.isSystemField === FIELD_TYPE.SYSTEM && field.fieldName === 'updated_time'
+        )
+          ? true
+          : false,
+        owner_id: node?.fields?.find(
+          (field: EntityField) => field.isSystemField === FIELD_TYPE.SYSTEM && field.fieldName === 'owner_id'
+        )
+          ? true
+          : false,
+        owner_dept: node?.fields?.find(
+          (field: EntityField) => field.isSystemField === FIELD_TYPE.SYSTEM && field.fieldName === 'owner_dept'
+        )
+          ? true
+          : false
+      }
+    };
   };
+  // const initialValues: FormValues = {
+  //   code: node.code || '',
+  //   tableName: node.tableName || '',
+  //   displayName: node.displayName || '',
+  //   description: node.description || '',
+  //   systemFields: {
+  //     creator: node?.fields?.find(
+  //       (field: EntityField) => field.isSystemField === FIELD_TYPE.SYSTEM && field.fieldName === 'creator'
+  //     )
+  //       ? true
+  //       : false,
+  //     updater: node?.fields?.find(
+  //       (field: EntityField) => field.isSystemField === FIELD_TYPE.SYSTEM && field.fieldName === 'updater'
+  //     )
+  //       ? true
+  //       : false,
+  //     created_time: node?.fields?.find(
+  //       (field: EntityField) => field.isSystemField === FIELD_TYPE.SYSTEM && field.fieldName === 'created_time'
+  //     )
+  //       ? true
+  //       : false,
+  //     updated_time: node?.fields?.find(
+  //       (field: EntityField) => field.isSystemField === FIELD_TYPE.SYSTEM && field.fieldName === 'updated_time'
+  //     )
+  //       ? true
+  //       : false,
+  //     owner_id: node?.fields?.find(
+  //       (field: EntityField) => field.isSystemField === FIELD_TYPE.SYSTEM && field.fieldName === 'owner_id'
+  //     )
+  //       ? true
+  //       : false,
+  //     owner_dept: node?.fields?.find(
+  //       (field: EntityField) => field.isSystemField === FIELD_TYPE.SYSTEM && field.fieldName === 'owner_dept'
+  //     )
+  //       ? true
+  //       : false
+  //   }
+  // };
 
   const formItems: FormItem[] = [
     { field: 'systemFields.creator', label: '记录创建人' },
@@ -88,7 +131,7 @@ const NodeEditForm: React.FC<NodeEditFormProps> = ({ node, onCancel, onSave, suc
   };
 
   useEffect(() => {
-    console.log('useEffect initialValues', initialValues);
+    const initialValues = getInitialValues(node);
     form.setFieldsValue(initialValues);
   }, [node]);
 
@@ -98,34 +141,20 @@ const NodeEditForm: React.FC<NodeEditFormProps> = ({ node, onCancel, onSave, suc
         <h3>业务实体</h3>
       </div>
 
-      <Form form={form} initialValues={initialValues} layout="vertical" style={{ width: '100%' }}>
+      <Form form={form} layout="vertical" style={{ width: '100%' }}>
         {/* 基本设置 */}
         <div className={styles.formSection}>
           <h4 className={styles.formSectionTitle}>基本设置</h4>
 
-          <Form.Item
-            label="业务实体编码"
-            field="code"
-            rules={[
-              { required: true, message: '请输入业务实体编码' },
-              { max: 40, message: '业务实体编码不能超过40个字符' }
-            ]}
-          >
-            <Input placeholder="请输入业务实体编码" maxLength={40} disabled />
+          <Form.Item label="业务实体名称" field="tableName" rules={[...createEntityRules.tableName]}>
+            <Input placeholder="请输入业务实体名称" maxLength={40} disabled />
           </Form.Item>
 
-          <Form.Item
-            label="业务实体名称"
-            field="displayName"
-            rules={[
-              { required: true, message: '请输入业务实体名称' },
-              { max: 50, message: '业务实体名称不能超过50个字符' }
-            ]}
-          >
-            <Input placeholder="请输入业务实体名称" maxLength={50} />
+          <Form.Item label="业务展示名称" field="displayName" rules={[...createEntityRules.displayName]}>
+            <Input placeholder="请输入业务展示名称" maxLength={50} />
           </Form.Item>
 
-          <Form.Item label="业务实体描述" field="description">
+          <Form.Item label="业务实体描述" field="description" rules={[...createEntityRules.description]}>
             <Input.TextArea placeholder="请输入描述 (选填)" rows={4} maxLength={500} showWordLimit />
           </Form.Item>
         </div>

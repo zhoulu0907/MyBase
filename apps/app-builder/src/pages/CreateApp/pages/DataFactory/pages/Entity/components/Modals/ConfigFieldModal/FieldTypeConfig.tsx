@@ -4,6 +4,8 @@ import { IconDelete, IconDragDotVertical, IconPlus, IconEdit } from '@arco-desig
 import { ReactSortable } from 'react-sortablejs';
 import styles from './index.module.less';
 import AutoCodeConfigModal from './AutoCodeConfigModal';
+import type { AutoNumberRule, AutoCodeRule } from './types';
+import { convertAutoCodeCompoToAutoNumberRule, convertAutoNumberRuleToAutoCodeComp } from './utils';
 
 // 选项配置组件
 interface OptionConfigProps {
@@ -107,27 +109,10 @@ export const OptionConfig: React.FC<OptionConfigProps> = ({ onVisibleChange, onC
 // 自动编号规则配置组件
 interface AutoCodeConfigProps {
   onVisibleChange?: (visible: boolean) => void;
-  onConfirm: (rules: AutoCodeRule[]) => void;
-  initialRules?: AutoCodeRule[];
+  onConfirm: (config: AutoNumberRule) => void;
+  initialConfig?: AutoNumberRule;
   onCancel?: () => void; // 新增：取消回调
-  fields: any[];
-}
-
-export interface AutoCodeRule {
-  id?: string;
-  type: 'auto_number' | 'create_time' | 'fixed_char' | 'form_field';
-  config: {
-    digitWidth?: number;
-    reset?: boolean;
-    dateFormat?: string;
-    fixedText?: string;
-    fieldName?: string;
-    numberMode?: 'NATURAL' | 'FIXED_DIGITS';
-    startValue?: number;
-    continueIncrement?: boolean;
-    nextRecordStartValue?: boolean;
-    resetCycle?: string;
-  };
+  fields: Record<string, unknown>[];
 }
 
 const dataOptions = [
@@ -143,42 +128,50 @@ export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({
   onVisibleChange,
   onConfirm,
   onCancel,
-  initialRules = [],
+  initialConfig,
   fields
 }) => {
-  const [rules, setRules] = useState<AutoCodeRule[]>(
-    initialRules.length > 0
-      ? initialRules
-      : [
-          {
-            // id: '1',
-            type: 'auto_number',
-            config: {
-              numberMode: 'FIXED_DIGITS',
-              digitWidth: 4,
-              continueIncrement: true,
-              startValue: 1,
-              nextRecordStartValue: false,
-              resetCycle: 'no_reset'
-            }
-          },
-          {
-            // id: '1',
-            type: 'create_time',
-            config: { dateFormat: '年月日' }
-          },
-          {
-            // id: '1',
-            type: 'fixed_char',
-            config: { fixedText: '' }
-          },
-          {
-            // id: '1',
-            type: 'form_field',
-            config: { fieldName: 'field1' }
-          }
-        ]
-  );
+  // 初始化规则：如果传入的是 AutoNumberRule 格式，则转换为数组格式
+  const getInitialRules = (): AutoCodeRule[] => {
+    console.log('initialConfig', initialConfig);
+    if (initialConfig) {
+      // 如果传入的是 AutoNumberRule 格式，转换为数组格式
+      return convertAutoNumberRuleToAutoCodeComp(initialConfig);
+    }
+
+    // 默认规则
+    return [
+      {
+        id: 'rule-1',
+        itemType: 'SEQUENCE',
+        config: {
+          numberMode: 'FIXED_DIGITS',
+          digitWidth: 4,
+          continueIncrement: true,
+          startValue: 1,
+          nextRecordStartValue: false,
+          resetCycle: 'NONE'
+        }
+      },
+      {
+        id: 'rule-2',
+        itemType: 'DATE',
+        config: { dateFormat: '年月日' }
+      },
+      {
+        id: 'rule-3',
+        itemType: 'TEXT',
+        config: { fixedText: '' }
+      },
+      {
+        id: 'rule-4',
+        itemType: 'FIELD_REF',
+        config: { fieldName: '' }
+      }
+    ];
+  };
+
+  const [rules, setRules] = useState<AutoCodeRule[]>(getInitialRules());
 
   const autoCodeConfig = rules[0].config;
 
@@ -193,10 +186,10 @@ export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({
   const [editingRuleId, setEditingRuleId] = useState<string>('');
   const [displayText, setDisplayText] = useState(getDisplayText(autoCodeConfig));
 
-  const addRule = (type: AutoCodeRule['type']) => {
+  const addRule = (type: AutoCodeRule['itemType']) => {
     const newRule: AutoCodeRule = {
-      id: Date.now().toString(),
-      type,
+      id: 'rule-' + Date.now().toString(),
+      itemType: type,
       config: {}
     };
     setRules([...rules, newRule]);
@@ -207,9 +200,9 @@ export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({
     setAutoCodeModalVisible(true);
   };
 
-  const handleAutoCodeConfigConfirm = (config: AutoCodeRule['config']) => {
+  const handleAutoCodeConfigConfirm = (config: AutoNumberRule) => {
     console.log('config', config);
-    updateRule(editingRuleId, { config });
+    updateRule(editingRuleId, { config: config });
     setDisplayText(getDisplayText(config));
     setEditingRuleId('');
   };
@@ -223,7 +216,9 @@ export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({
   };
 
   const handleConfirm = () => {
-    onConfirm(rules);
+    // 将数组格式转换为 AutoNumberRule 对象格式
+    const autoNumberRule = convertAutoCodeCompoToAutoNumberRule(rules);
+    onConfirm(autoNumberRule);
     if (onVisibleChange) {
       onVisibleChange(false);
     }
@@ -238,8 +233,8 @@ export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({
   };
 
   const renderRuleConfig = (rule: AutoCodeRule) => {
-    switch (rule.type) {
-      case 'auto_number': {
+    switch (rule.itemType) {
+      case 'SEQUENCE': {
         return (
           <div className={styles['rule-content']}>
             <IconDragDotVertical className={styles['drag-handle']} />
@@ -254,13 +249,13 @@ export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({
         );
       }
 
-      case 'create_time':
+      case 'DATE':
         return (
           <div className={styles['rule-content']}>
             <IconDragDotVertical className={styles['drag-handle']} />
             <span className={styles['rule-label']}>创建时间:</span>
             <Select
-              value={rule.config.dateFormat || '年月日'}
+              value={(rule.config.dateFormat as string) || '年月日'}
               onChange={(value) => updateRule(rule.id!, { config: { ...rule.config, dateFormat: value } })}
               className={styles['rule-input']}
             >
@@ -280,13 +275,13 @@ export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({
           </div>
         );
 
-      case 'fixed_char':
+      case 'TEXT':
         return (
           <div className={styles['rule-content']}>
             <IconDragDotVertical className={styles['drag-handle']} />
             <span className={styles['rule-label']}>固定字符:</span>
             <Input
-              value={rule.config.fixedText || ''}
+              value={(rule.config.fixedText as string) || ''}
               placeholder="请输入内容"
               onChange={(value) => updateRule(rule.id!, { config: { ...rule.config, fixedText: value } })}
               className={styles['rule-input']}
@@ -301,17 +296,17 @@ export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({
           </div>
         );
 
-      case 'form_field':
+      case 'FIELD_REF':
         return (
           <div className={styles['rule-content']}>
             <IconDragDotVertical className={styles['drag-handle']} />
             <span className={styles['rule-label']}>表单字段:</span>
             <Select
-              value={rule.config.fieldName || ''}
+              value={(rule.config.fieldName as string) || ''}
               placeholder="请选择字段"
               onChange={(value) => updateRule(rule.id!, { config: { ...rule.config, fieldName: value } })}
               className={styles['rule-input']}
-              options={fields}
+              options={fields.map((field) => ({ label: field.displayName, value: field.fieldName }))}
             ></Select>
             <Button
               type="text"
@@ -345,13 +340,13 @@ export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({
             trigger="click"
             droplist={
               <Menu>
-                <Menu.Item key="create_time" onClick={() => addRule('create_time')}>
+                <Menu.Item key="DATE" onClick={() => addRule('DATE')}>
                   创建时间
                 </Menu.Item>
-                <Menu.Item key="fixed_char" onClick={() => addRule('fixed_char')}>
+                <Menu.Item key="TEXT" onClick={() => addRule('TEXT')}>
                   固定字符
                 </Menu.Item>
-                <Menu.Item key="form_field" onClick={() => addRule('form_field')}>
+                <Menu.Item key="FIELD_REF" onClick={() => addRule('FIELD_REF')}>
                   表单字段
                 </Menu.Item>
               </Menu>
@@ -378,7 +373,7 @@ export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({
         visible={autoCodeModalVisible}
         onVisibleChange={setAutoCodeModalVisible}
         onConfirm={handleAutoCodeConfigConfirm}
-        initialConfig={rules.find((rule) => rule.id === editingRuleId)?.config}
+        initialConfig={rules.find((rule) => rule.itemType === 'SEQUENCE')?.config}
       />
     </>
   );
