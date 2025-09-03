@@ -11,7 +11,7 @@ export interface ApplicationMenu {
     menuType: number;
     menuName: string;
     menuIcon: string;
-    isVisible: boolean;
+    visible: boolean;
     children: ApplicationMenu[];
 }
 
@@ -33,7 +33,7 @@ export const RootParentPage = {
     menuType: MenuType.GROUP,
     menuName: "根目录",
     menuIcon: "",
-    isVisible: true,
+    visible: true,
     children: [] as ApplicationMenu[]
 };
 

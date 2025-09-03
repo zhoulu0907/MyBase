@@ -18,6 +18,7 @@ const MenuItem = Menu.Item;
 interface MenuItemProps {
   showOption: boolean;
   menuID: string;
+  visible: boolean,
   menuCode: string;
   menuName: string;
   label: string;
@@ -27,7 +28,7 @@ interface MenuItemProps {
   triggerCreate: (formType: string) => void;
   triggerRename: () => void;
   triggerCopy: () => void;
-  triggerHide: () => void;
+  triggerHide: (menuID: string,visible: boolean) => void;
   triggerDelete: (menuID: string) => void;
   maxWidth: number;
   renameForm: FormInstance;
@@ -39,6 +40,7 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
   showOption,
   menuID,
   menuCode,
+  visible,
   menuName,
   label,
   menuIcon,
@@ -59,7 +61,7 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
   const [popupVisible, setPopupVisible] = useState(false);
 
   const dropList = (
-    <Menu style={{ padding: '10px 5px' }}>
+    <Menu style={{ padding: '10px 5px',maxHeight: 'none' }}>
       <MenuItem
         key="edit"
         onClick={(e) => {
@@ -81,6 +83,15 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
         }}
       >
         {'重命名'}
+      </MenuItem>
+      <MenuItem
+        key="visible"
+        onClick={(e) => {
+          e.stopPropagation();
+          triggerHide(menuID,visible);
+        }}
+      >
+        { !!visible ? '显示':'隐藏'}
       </MenuItem>
       {!isGroup && (
         <MenuItem

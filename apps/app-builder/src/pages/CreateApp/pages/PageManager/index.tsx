@@ -12,6 +12,7 @@ import {
   copyApplicationMenu,
   createApplicationMenu,
   deleteApplicationMenu,
+  updateApplicationMenuVisible,
   getEntityListByApp,
   getPageSetId,
   listApplicationMenu,
@@ -23,6 +24,7 @@ import {
   type CopyApplicationMenuReq,
   type CreateApplicationMenuReq,
   type DeleteApplicationMenuReq,
+  type UpdateApplicationMenuVisibleReq,
   type GetPageSetIdReq,
   type ListApplicationMenuReq,
   type MetadataEntityPair,
@@ -128,6 +130,7 @@ const PageManagerPage: FC = () => {
         <MyMenuItem
           showOption={showOption}
           menuID={menu.id}
+          visible={menu.visible}
           menuCode={menu.menuCode}
           menuName={menu.menuName}
           menuIcon={menu.menuIcon}
@@ -242,7 +245,18 @@ const PageManagerPage: FC = () => {
     setTitle(t('createApp.copyPage'));
   };
 
-  const triggerHide = () => {};
+  // 更新应用菜单可见性  隐藏/显示
+  const triggerHide = async(menuID: string,visible:boolean) => {
+    const req: UpdateApplicationMenuVisibleReq = {
+      id: menuID,
+      visible: visible === false ? true : false,
+    };
+    const res = await updateApplicationMenuVisible(req);
+    if (res) {
+      Message.success(`${!!visible ? '显示':'隐藏'}成功`);
+    }
+    getMenuList();
+  };
 
   const triggerDelete = (menuID: string) => {
     handleDelete(menuID);
