@@ -32,7 +32,7 @@ export const COMPONENT_TYPE_DISPLAY_NAME_MAP: Record<string, string> = {
   [FORM_COMPONENT_TYPES.DEPT_SELECT]: '部门选择',
   [FORM_COMPONENT_TYPES.FILE_UPLOAD]: '文件上传',
   [FORM_COMPONENT_TYPES.IMG_UPLOAD]: '图片上传',
-  [FORM_COMPONENT_TYPES.AUTO_NUMBER]: '自动编码',
+  [FORM_COMPONENT_TYPES.AUTO_CODE]: '自动编码',
   [FORM_COMPONENT_TYPES.RELATED_FORM]: '关联表单',
   [FORM_COMPONENT_TYPES.STATIC_TEXT]: '静态文本',
   [FORM_COMPONENT_TYPES.DIVIDER]: '分割线',
@@ -232,10 +232,10 @@ const allTemplate = {
           category: 'base'
         },
         {
-          type: FORM_COMPONENT_TYPES.AUTO_NUMBER,
+          type: FORM_COMPONENT_TYPES.AUTO_CODE,
           h: 36,
           w: 118,
-          displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.AUTO_NUMBER],
+          displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.AUTO_CODE],
           icon: 'readonly_cp.svg',
           category: 'base'
         },

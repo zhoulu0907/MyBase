@@ -18,6 +18,7 @@ import NodeAdder from '../components/node-adder';
 // import { SelectorBoxPopover } from '../components/selector-box-popover';
 // import { createClipboardPlugin, createVariablePanelPlugin } from '../plugins';
 // import { GroupBoxHeader, GroupNode } from '../plugins/group-plugin';
+import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { CustomService } from '../services';
 import { shortcutGetter } from '../shortcuts';
 import { type FlowNodeRegistry } from '../typings';
@@ -155,6 +156,7 @@ export function useEditorProps(
           if (ctx.document.disposed) return;
           // Listen change to trigger auto save
           console.log('auto save: ', ctx.document.toJSON());
+          triggerEditorSignal.setNodes(ctx.document.toJSON());
         }, 100)
       },
       /**
