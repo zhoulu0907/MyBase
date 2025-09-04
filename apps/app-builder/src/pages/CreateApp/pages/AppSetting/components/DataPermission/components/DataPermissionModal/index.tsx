@@ -286,7 +286,7 @@ const PermissionModal = (props: IProps) => {
               }}
             >
               {appEntities.map((appEntity: AppEntity) => (
-                <Option key={appEntity.entityID} value={appEntity.entityID}>
+                <Option key={appEntity.entityID} value={appEntity.entityID || ''}>
                   {appEntity.entityName}
                 </Option>
               ))}
@@ -305,7 +305,7 @@ const PermissionModal = (props: IProps) => {
                 }}
               >
                 {dataPermissionPerson.map((option) => (
-                  <Option key={option.id} value={option.fieldName}>
+                  <Option key={option.PersonId} value={option.fieldName || ''}>
                     {option.displayName}
                   </Option>
                 ))}
@@ -350,7 +350,7 @@ const PermissionModal = (props: IProps) => {
                                   onChange={(value) => getFieldCheckType(value)}
                                 >
                                   {appEntityFields.map((option) => (
-                                    <Option key={option.fieldID} value={option.fieldID}>
+                                    <Option key={option.fieldID} value={option.fieldID || ''}>
                                       {option.displayName}
                                     </Option>
                                   ))}
@@ -362,7 +362,7 @@ const PermissionModal = (props: IProps) => {
                               >
                                 <Select placeholder="比较操作" className={styles.dataFilterItem}>
                                   {filterFieldCheckType?.map((option) => (
-                                    <Option key={option.code} value={option.code}>
+                                    <Option key={option.code} value={option.code || ''}>
                                       {option.name}
                                     </Option>
                                   ))}
@@ -432,7 +432,7 @@ const PermissionModal = (props: IProps) => {
                                     }}
                                   >
                                     {appEntityFields.map((option) => (
-                                      <Option key={option.fieldID} value={option.fieldName}>
+                                      <Option key={option.fieldID} value={option.fieldName || ''}>
                                         {option.displayName}
                                       </Option>
                                     ))}
