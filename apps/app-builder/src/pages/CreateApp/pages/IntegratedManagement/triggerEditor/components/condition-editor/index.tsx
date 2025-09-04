@@ -1,6 +1,6 @@
 import { Button, Input, Select } from '@arco-design/web-react';
 import { IconClose } from '@douyinfe/semi-icons';
-import type { Condition, ConfitionField, EntityFieldValidationTypes } from '@onebase/app';
+import type { Condition, ConfitionField, EntityFieldValidationTypes, ValidationTypeItem } from '@onebase/app';
 import { nanoid } from 'nanoid';
 import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
@@ -43,7 +43,7 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({ data, onChange, field
 
   useEffect(() => {
     console.log(conditions);
-    onChange(conditions);
+    // onChange(conditions);
   }, [conditions]);
 
   const addCondition = (pid: string) => {
@@ -159,7 +159,7 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({ data, onChange, field
           }}
         >
           {(entityFieldValidationTypes.find((item) => item.fieldId === cond.fieldId)?.validationTypes || []).map(
-            (operator: Condition) => (
+            (operator: ValidationTypeItem) => (
               <Option key={operator.code} value={operator.code}>
                 {operator.name}
               </Option>

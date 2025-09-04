@@ -15,6 +15,7 @@ export const DS_RESOURCE_TYPE_LABEL = {
 // 实体字段类型标签
 export const ENTITY_FIELD_TYPE_LABEL = {
   TEXT: 'TEXT',
+  BIGINT: 'BIGINT',
   LONG_TEXT: 'LONG_TEXT',
   EMAIL: 'EMAIL',
   PHONE: 'PHONE',
@@ -41,7 +42,8 @@ export const ENTITY_FIELD_TYPE_LABEL = {
   GEOGRAPHY: 'GEOGRAPHY',
   PASSWORD: 'PASSWORD',
   ENCRYPTED: 'ENCRYPTED',
-  AGGREGATE: 'AGGREGATE'
+  AGGREGATE: 'AGGREGATE',
+  ID: 'ID'
 };
 
 // 实体字段类型
@@ -128,6 +130,9 @@ export const ENTITY_STATUS = {
 
 export type EntityStatus = (typeof ENTITY_STATUS)[keyof typeof ENTITY_STATUS];
 
+export type FieldConstraintLengthEnabled =
+  (typeof FIELD_CONSTRAINT_LENGTH_ENABLED)[keyof typeof FIELD_CONSTRAINT_LENGTH_ENABLED];
+
 // 字段约束 长度 0禁用 1开启
 export const FIELD_CONSTRAINT_LENGTH_ENABLED = {
   DISABLE: 0,
@@ -145,3 +150,6 @@ export const FIELD_CONSTRAINT_LENGTH_PROMPT = {
   DISABLE: 0,
   ENABLE: 1
 } as const;
+
+export type FieldConstraintRegexEnabled =
+  (typeof FIELD_CONSTRAINT_REGEX_ENABLED)[keyof typeof FIELD_CONSTRAINT_REGEX_ENABLED];
