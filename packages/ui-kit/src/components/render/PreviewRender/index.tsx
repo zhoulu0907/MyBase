@@ -63,7 +63,7 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({ cpId, cpType, pageCompone
       case FORM_COMPONENT_TYPES.SELECT_MUTIPLE:
         return <FormComp.XSelectMutiple cpName={cpId} id={cpId} {...componentConfig} />;
       case FORM_COMPONENT_TYPES.USER_SELECT:
-        return <FormComp.XUserSelect cpName={cpId} id={cpId} {...componentConfig} />;
+        return <FormComp.XUserSelect cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case FORM_COMPONENT_TYPES.DEPT_SELECT:
         return <FormComp.XDeptSelect cpName={cpId} id={cpId} {...componentConfig} />;
       case FORM_COMPONENT_TYPES.FILE_UPLOAD:

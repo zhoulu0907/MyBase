@@ -426,13 +426,6 @@ const TenantManagement: React.FC = () => {
 
   // 表格列定义
   const columns = [
-    // { 
-    //   title: '序号',
-    //   dataIndex: 'order',
-    //   key: 'order',
-    //   render: (text: any, record: any, index: number) => index + 1,
-    //   width: '5%',
-    // },
     {
       title: '租户名称',
       dataIndex: 'name',
@@ -459,10 +452,10 @@ const TenantManagement: React.FC = () => {
     {
       title: '访问地址',
       dataIndex: 'website',
-      render: (text: string) => {
+      render: (text: string, record: PlatformTenantInfo) => {
         // 获取当前环境的域名前缀
         const domainPrefix = getDomainPrefix();
-        const fullUrl = `${domainPrefix}/v0/obappbuilder/#/tenant/${text}/`;
+        const fullUrl = `${domainPrefix}/v0/obappbuilder/#/tenant/${record.id}/${text}/`;
         const displayUrl = simplifyUrl(fullUrl);
         
         return (

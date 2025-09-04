@@ -187,6 +187,7 @@ const UserMembers = (props: IProps) => {
         data={userList}
         loading={userLoading}
         pagination={{ ...pagination, showTotal: true, onChange: handlePageChange }}
+        rowKey="id"
       />
       <AddMembers
         visible={membersVisible}
