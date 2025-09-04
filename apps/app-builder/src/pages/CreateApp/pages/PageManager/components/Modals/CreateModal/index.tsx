@@ -1,6 +1,6 @@
 import iconEditSVG from '@/assets/images/app_edit_black.svg';
 import MenuComp from '@/components/MenuIcon';
-import { Form, Input, Modal, Select, TreeSelect, type FormInstance } from '@arco-design/web-react';
+import { Form, Input, Modal, Select, TreeSelect, Button, type FormInstance } from '@arco-design/web-react';
 import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
 
@@ -42,12 +42,20 @@ const CreateModal: React.FC<CreateModalProps> = ({
     <Modal
       title={title}
       visible={visibleCreateForm !== ''}
-      onOk={handleCreate}
-      onCancel={onCancel}
       autoFocus={false}
       focusLock={true}
       unmountOnExit={true}
       className={styles.createModal}
+      footer={
+        <div style={{ textAlign: 'right', visibility: !visibleMenuIcon ? 'visible' : 'hidden' }}>
+          <Button type="default" onClick={onCancel} style={{ marginRight: 12 }}>
+            取消
+          </Button>
+          <Button type="primary" onClick={handleCreate}>
+            创建
+          </Button>
+        </div>
+      }
     >
       <div className={styles.createContainer}>
         <Form

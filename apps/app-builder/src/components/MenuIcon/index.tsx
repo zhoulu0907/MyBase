@@ -1,4 +1,4 @@
-import { Button, Input } from '@arco-design/web-react';
+import { Button, Input, Empty } from '@arco-design/web-react';
 import { IconSync, IconLeft } from '@arco-design/web-react/icon';
 import { useEffect, useState } from 'react';
 import { menuIconList, menuIconType, type MenuItem } from './const';
@@ -18,15 +18,29 @@ const MenuIcon = (props: IProps) => {
   const [data, setData] = useState<MenuItem[]>([]);
   const [activeMenu, setActiveMenu] = useState<string>('all');
   const [activeIcon, setActiveIcon] = useState<string>();
+  const [inputValue, setInputValue] = useState<string>('');
 
   useEffect(() => {
     setData(menuIconList);
   }, []);
 
   useEffect(() => {
-    const newData = activeMenu === 'all' ? menuIconList : menuIconList.filter((v) => v.type === activeMenu);
-    setData(newData);
-  }, [activeMenu]);
+    if (inputValue) {
+      const result = menuIconList
+        .filter((item) => item.name.includes(inputValue))
+        .filter((item) => item.type === activeMenu || activeMenu === 'all');
+
+      setData(result);
+    } else {
+      const result = activeMenu === 'all' ? menuIconList : menuIconList.filter((v) => v.type === activeMenu);
+      setData(result);
+    }
+  }, [inputValue, activeMenu]);
+
+  const handleReset = () => {
+    setData(menuIconList);
+    setInputValue('');
+  };
 
   return (
     <div className={styles.menuIconPage} style={style}>
@@ -35,8 +49,14 @@ const MenuIcon = (props: IProps) => {
         菜单图标选择
       </div>
       <div className={styles.header}>
-        <InputSearch className={styles.iconSearch} allowClear placeholder="请输入图标名称" />
-        <Button type="default" icon={<IconSync />} />
+        <InputSearch
+          className={styles.iconSearch}
+          allowClear
+          value={inputValue}
+          placeholder="请输入图标名称"
+          onChange={setInputValue}
+        />
+        <Button type="default" icon={<IconSync />} onClick={handleReset} />
       </div>
 
       <div className={styles.menuContainer}>
@@ -57,19 +77,27 @@ const MenuIcon = (props: IProps) => {
         </div>
 
         <div className={styles.iconContainer}>
-          {data.map((item, index) => (
-            <div
-              className={`${styles.iconItem} ${activeIcon === item.name ? styles.activeIcon : ''}`}
-              key={index}
-              onClick={() => {
-                onSelected(item.icon);
-                setActiveIcon(item.name);
-              }}
-            >
-              <i className={`iconfont ${item.icon} ${styles.icon}`} />
-              <div className={styles.name}>{item.name}</div>
+          {data.length === 0 ? (
+            <div className={styles.empty}>
+              <Empty />
             </div>
-          ))}
+          ) : (
+            <>
+              {data.map((item, index) => (
+                <div
+                  className={`${styles.iconItem} ${activeIcon === item.name ? styles.activeIcon : ''}`}
+                  key={index}
+                  onClick={() => {
+                    onSelected(item.icon);
+                    setActiveIcon(item.name);
+                  }}
+                >
+                  <i className={`iconfont ${item.icon} ${styles.icon}`} />
+                  <div className={styles.name}>{item.name}</div>
+                </div>
+              ))}
+            </>
+          )}
         </div>
       </div>
     </div>
