@@ -1,12 +1,17 @@
 import { useEffect, useState } from 'react';
 import { Checkbox, Button, Modal, Form, Input, Select } from '@arco-design/web-react';
 import { IconPlus, IconClose } from '@arco-design/web-react/icon';
-import { type AppEntity, type AppEntityField, type AuthDataGroupVO } from '@onebase/app';
+import {
+  DataOperationEnum,
+  type AppEntity,
+  type AppEntityField,
+  type AuthDataGroupVO,
+  // type AuthDataFilterVO,
+  type AuthDataPermissionPersonVO,
+  type FilterFieldCheckType
+} from '@onebase/app';
 const Option = Select.Option;
-// const CheckboxGroup = Checkbox.Group;
 const FormItem = Form.Item;
-
-const options = ['Beijing', 'Shanghai'];
 
 // 字段比较操作符
 const fieldCompareOperators = [
@@ -47,17 +52,6 @@ const fieldValueType = [
   }
 ];
 
-// const options2 = [
-//   {
-//     label: '可查看',
-//     value: '1'
-//   },
-//   {
-//     label: '可操作',
-//     value: '2'
-//   }
-// ];
-
 const conditionData = {
   status: '',
   condition: '',
@@ -67,25 +61,6 @@ const conditionData = {
   fieldValueType: 'static',
   fieldValue: ''
 };
-
-// // 固定的“是”部分选项
-// const [secondSelectOptions, setSecondSelectOptions] = useState([
-//   { label: '本人', value: 'self' },
-//   { label: '本人及下属员工', value: 'selfAndSubordinates' },
-//   { label: '当前员工所在主部门', value: 'mainDepartment' },
-//   { label: '当前员工所在主部门及下级部门', value: 'mainDepartmentAndSubs' },
-//   { label: '指定部门', value: 'specifiedDepartment' },
-//   { label: '指定人员', value: 'specifiedPerson' },
-//   { label: '当前人员身份信息', value: 'identityInfo' },
-//   { label: '全部', value: 'all' }
-// ]);
-
-// 系统预设的“人员”字段
-// const systemPersonFields = [
-//   { label: '拥有者', value: 'owner' },
-//   { label: '创建人', value: 'creator' },
-//   { label: '更新人', value: 'updater' }
-// ];
 
 interface IConditionData {
   status: string;
@@ -101,9 +76,12 @@ interface IProps {
   // form: any;
   appEntities: AppEntity[];
   appEntityFields: AppEntityField[];
+  dataPermissionPerson: AuthDataPermissionPersonVO[];
+  filterFieldCheckType: FilterFieldCheckType[];
   status: 'edit' | 'create';
   visible: boolean;
   changeEntity: (params: { entityId: string }) => void;
+  getFieldCheckType: (fieldId: string) => void;
   handleModelSubmit: (values: AuthDataGroupVO) => void;
   handleModelCancel: () => void;
 }
@@ -115,17 +93,57 @@ const PermissionModal = (props: IProps) => {
     status,
     visible = false,
     appEntityFields,
+    dataPermissionPerson,
+    filterFieldCheckType,
     changeEntity,
+    getFieldCheckType,
     handleModelSubmit,
     handleModelCancel
   } = props;
   const [form] = Form.useForm();
 
-  const [value, setValue] = useState<string[]>(['1', '2']);
+  const [value, setValue] = useState<DataOperationEnum[]>([DataOperationEnum.examine, DataOperationEnum.operate]);
   const [checkAll, setCheckAll] = useState<boolean>(true);
   const [indeterminate, setIndeterminate] = useState<boolean>(false); // 操作权限
   const [conditionGroup, setConditionGroup] = useState<IConditionData[][]>(); // 条件组
   const [entitySelected, setEntitySelected] = useState<boolean>(false);
+  const [scopeOwner, setScopeOwner] = useState<string>('');
+  const [scopeValue, setScopeValue] = useState<string>('');
+
+  const [scopeInfo, setScopeInfo] = useState<{
+    owner: string;
+    value: string;
+  }>({
+    owner: '',
+    value: ''
+  });
+  const dataPermissionScope = [
+    { label: '本人', value: 'self' },
+    { label: '本人及下属员工', value: 'selfAndSubordinates' },
+    { label: '当前员工所在主部门', value: 'mainDepartment' },
+    { label: '当前员工所在主部门及下级部门', value: 'mainDepartmentAndSubs' },
+    { label: '指定部门', value: 'specifiedDepartment' },
+    { label: '指定人员', value: 'specifiedPerson' },
+    { label: '当前人员身份信息', value: 'identityInfo' },
+    { label: '全部', value: 'all' }
+  ];
+  // const validateScopeLevel = (rule: any, value: any, callback: any) => {
+  //   if (!value || !value.owner || !value.value) {
+  //     callback(new Error('请选择权限范围'));
+  //   } else {
+  //     callback();
+  //   }
+  // };
+
+  useEffect(() => {
+    // 当 scopeOwner 或 scopeValue 变化时，同步更新 scopeInfo
+    if (scopeOwner && scopeValue) {
+      setScopeInfo({
+        owner: scopeOwner,
+        value: scopeValue
+      });
+    }
+  }, [scopeOwner, scopeValue]);
 
   useEffect(() => {
     // 初始化时检查entity字段是否有值
@@ -133,15 +151,26 @@ const PermissionModal = (props: IProps) => {
     setEntitySelected(!!entityValue);
   }, [form]);
 
+  useEffect(() => {
+    // 当 visible 状态改变时，如果是关闭模态框，则重置表单
+    if (!visible) {
+      // 使用 setTimeout 确保在下一个事件循环中执行，避免同步卸载问题
+      const timer = setTimeout(() => {
+        form.resetFields();
+      }, 0);
+      return () => clearTimeout(timer);
+    }
+  }, [visible, form]);
+
   function onChangeAll(checked: boolean) {
     if (checked) {
       setIndeterminate(false);
       setCheckAll(true);
-      setValue(['1', '2']);
+      setValue([DataOperationEnum.examine, DataOperationEnum.operate]);
     } else {
       setIndeterminate(true);
       setCheckAll(false);
-      setValue([]);
+      setValue([DataOperationEnum.examine]);
     }
   }
 
@@ -149,11 +178,51 @@ const PermissionModal = (props: IProps) => {
     form
       .validate()
       .then((values: AuthDataGroupVO) => {
+        console.log('values: ', values);
+        // 确保 scopeLevel 被正确设置
+        // values.scopeLevel = {
+        //   owner: scopeInfo.owner,
+        //   value: scopeInfo.value
+        // };
+
+        // // 处理条件组数据
+        // if (conditionGroup && conditionGroup.length > 0) {
+        //   // 将conditionGroup转换为dataFilters格式
+        //   const dataFilters: Array<AuthDataFilterVO[]> = [];
+
+        //   conditionGroup.forEach((group, groupIndex) => {
+        //     const filterGroup: AuthDataFilterVO[] = [];
+        //     group.forEach((item, itemIndex) => {
+        //       const filter: AuthDataFilterVO = {
+        //         conditionGroup: groupIndex,
+        //         conditionOrder: itemIndex,
+        //         fieldId: item.fieldId,
+        //         fieldOperator: item.fieldOperator,
+        //         fieldValue: item.fieldValue,
+        //         fieldValueType: item.fieldValueType
+        //       };
+        //       filterGroup.push(filter);
+        //     });
+        //     if (filterGroup.length > 0) {
+        //       dataFilters.push(filterGroup);
+        //     }
+        //   });
+
+        //   values.dataFilters = dataFilters;
+        // }
+
+        // // 设置操作权限
+        // values.isOperable = value.includes('2') ? 1 : 0;
+
         // 可以在这里添加额外的处理逻辑
         handleModelSubmit(values);
       })
       .catch((error) => {
         console.error('表单验证失败:', error);
+        // 显示具体的错误信息
+        if (error.errors && error.errors.length > 0) {
+          console.log('具体错误:', error.errors[0].message);
+        }
       });
   };
 
@@ -166,11 +235,18 @@ const PermissionModal = (props: IProps) => {
         title={<div style={{ textAlign: 'left' }}>{status === 'create' ? '添加' : '编辑'}数据权限组</div>}
         visible={visible}
         onOk={handleOk}
-        onCancel={handleModelCancel}
+        onCancel={() => {
+          // 使用异步方式关闭模态框，避免同步卸载问题
+          setTimeout(() => {
+            handleModelCancel();
+          }, 0);
+        }}
         autoFocus={false}
         focusLock={true}
         okText="创建"
         style={{ width: 750 }}
+        // 添加 unmountOnExit 属性确保组件正确卸载
+        unmountOnExit={true}
       >
         <Form
           form={form}
@@ -180,6 +256,14 @@ const PermissionModal = (props: IProps) => {
             // 当entity字段值发生变化时，更新entitySelected状态
             if (Object.prototype.hasOwnProperty.call(changedValues, 'scopeFieldId')) {
               setEntitySelected(!!changedValues.scopeFieldId);
+            }
+
+            // 当权限范围字段变化时，更新对应的state
+            if (Object.prototype.hasOwnProperty.call(changedValues, 'scopeOwner')) {
+              setScopeOwner(changedValues.scopeOwner);
+            }
+            if (Object.prototype.hasOwnProperty.call(changedValues, 'scopeValue')) {
+              setScopeValue(changedValues.scopeValue);
             }
           }}
         >
@@ -205,7 +289,7 @@ const PermissionModal = (props: IProps) => {
               ))}
             </Select>
           </FormItem>
-          <FormItem field="scopeLevel" label="权限范围" rules={[{ required: true, message: '请选择权限范围' }]}>
+          <FormItem field="scopeOwner" label="权限范围" rules={[{ required: true, message: '请选择权限范围' }]}>
             <div
               style={{
                 display: 'flex',
@@ -213,24 +297,42 @@ const PermissionModal = (props: IProps) => {
                 justifyContent: 'space-between'
               }}
             >
-              <Select placeholder="拥有者" style={{ width: 150 }} disabled={!entitySelected}>
-                {options.map((option, index) => (
-                  <Option key={option} disabled={index === 3} value={option}>
-                    {option}
+              <Select
+                placeholder="选择拥有者"
+                style={{ width: 150 }}
+                disabled={!entitySelected}
+                onChange={(value) => {
+                  setScopeOwner(value);
+                  // 同时更新 scopeInfo
+                  setScopeInfo((prev) => ({ ...prev, owner: value }));
+                }}
+              >
+                {dataPermissionPerson.map((option) => (
+                  <Option key={option.id} value={option.fieldName}>
+                    {option.displayName}
                   </Option>
                 ))}
               </Select>
               是
-              <Select placeholder="本人" style={{ width: 360 }} disabled={!entitySelected}>
-                {options.map((option, index) => (
-                  <Option key={option} disabled={index === 3} value={option}>
-                    {option}
+              <Select
+                placeholder="本人"
+                style={{ width: 360 }}
+                disabled={!entitySelected}
+                onChange={(value) => {
+                  setScopeValue(value);
+                  // 同时更新 scopeInfo
+                  setScopeInfo((prev) => ({ ...prev, value }));
+                }}
+              >
+                {dataPermissionScope.map((option) => (
+                  <Option key={option.value} value={option.value}>
+                    {option.label}
                   </Option>
                 ))}
               </Select>
             </div>
           </FormItem>
-          <FormItem field="DataFilters" label="数据过滤">
+          <FormItem field="dataFilters" label="数据过滤">
             <div
               style={{
                 border: '1px solid #E5E6EB',
@@ -262,12 +364,23 @@ const PermissionModal = (props: IProps) => {
                           }}
                         >
                           {group.map((item, idx: number) => (
-                            <div key={idx} style={{ marginBottom: 8, display: 'flex', alignItems: 'center' }}>
+                            <div
+                              key={idx}
+                              style={{
+                                marginBottom: 8,
+                                display: 'flex',
+                                alignItems: 'center'
+                              }}
+                            >
                               <FormItem
                                 field={`dataFilters[${index}][${idx}].fieldId`}
-                                style={{ marginBottom: 0, width: 112 }}
+                                style={{ marginBottom: 0, width: 132 }}
                               >
-                                <Select placeholder="归档状态" style={{ width: 100, marginRight: 12, marginBottom: 8 }}>
+                                <Select
+                                  placeholder="归档状态"
+                                  style={{ width: 120, marginRight: 12, marginBottom: 8 }}
+                                  onChange={(value) => getFieldCheckType(value)}
+                                >
                                   {appEntityFields.map((option) => (
                                     <Option key={option.fieldID} value={option.fieldID}>
                                       {option.displayName}
@@ -280,9 +393,9 @@ const PermissionModal = (props: IProps) => {
                                 style={{ marginBottom: 0, width: 112 }}
                               >
                                 <Select placeholder="比较操作" style={{ width: 100, marginRight: 12, marginBottom: 8 }}>
-                                  {fieldCompareOperators.map((option) => (
-                                    <Option key={option.value} value={option.value}>
-                                      {option.label}
+                                  {filterFieldCheckType?.map((option) => (
+                                    <Option key={option.code} value={option.code}>
+                                      {option.name}
                                     </Option>
                                   ))}
                                 </Select>
@@ -296,10 +409,12 @@ const PermissionModal = (props: IProps) => {
                                   style={{ width: 100, marginRight: 12, marginBottom: 8 }}
                                   onChange={(value) => {
                                     // 更新字段值类型
-                                    const newConditionGroup = [...conditionGroup];
-                                    newConditionGroup[index][idx].fieldValueType = value;
-                                    newConditionGroup[index][idx].fieldValue = ''; // 重置值
-                                    setConditionGroup(newConditionGroup);
+                                    const newConditionGroup = [...(conditionGroup || [])];
+                                    if (newConditionGroup[index] && newConditionGroup[index][idx]) {
+                                      newConditionGroup[index][idx].fieldValueType = value;
+                                      newConditionGroup[index][idx].fieldValue = ''; // 重置值
+                                      setConditionGroup(newConditionGroup);
+                                    }
                                   }}
                                 >
                                   {fieldValueType.map((option) => (
@@ -321,6 +436,11 @@ const PermissionModal = (props: IProps) => {
                                     onChange={(value) => {
                                       // 更新静态值
                                       console.log('输入的变量值', value);
+                                      const newConditionGroup = [...(conditionGroup || [])];
+                                      if (newConditionGroup[index] && newConditionGroup[index][idx]) {
+                                        newConditionGroup[index][idx].fieldValue = value;
+                                        setConditionGroup(newConditionGroup);
+                                      }
                                     }}
                                   />
                                 </FormItem>
@@ -336,6 +456,11 @@ const PermissionModal = (props: IProps) => {
                                     onChange={(value) => {
                                       // 更新变量值
                                       console.log('现在的变量值:', value);
+                                      const newConditionGroup = [...(conditionGroup || [])];
+                                      if (newConditionGroup[index] && newConditionGroup[index][idx]) {
+                                        newConditionGroup[index][idx].fieldValue = value;
+                                        setConditionGroup(newConditionGroup);
+                                      }
                                     }}
                                   >
                                     {appEntityFields.map((option) => (
@@ -350,7 +475,7 @@ const PermissionModal = (props: IProps) => {
                                 style={{ cursor: 'pointer', fontSize: 16, paddingBottom: 8 }}
                                 onClick={() => {
                                   // 删除当前条件
-                                  const newGroup = [...conditionGroup];
+                                  const newGroup = [...(conditionGroup || [])];
                                   if (newGroup[index] && newGroup[index].length > 0) {
                                     newGroup[index].splice(idx, 1);
                                     // 如果当前组为空，则删除该组
@@ -370,8 +495,11 @@ const PermissionModal = (props: IProps) => {
                             icon={<IconPlus />}
                             style={{ marginTop: 5 }}
                             onClick={() => {
-                              const newGroup = [...conditionGroup];
-                              newGroup[index].push(conditionData);
+                              const newGroup = [...(conditionGroup || [])];
+                              if (!newGroup[index]) {
+                                newGroup[index] = [];
+                              }
+                              newGroup[index].push({ ...conditionData });
                               setConditionGroup(newGroup);
                             }}
                           >
@@ -385,7 +513,7 @@ const PermissionModal = (props: IProps) => {
                     type="outline"
                     size="small"
                     icon={<IconPlus />}
-                    onClick={() => setConditionGroup((pre) => [...(pre || []), [conditionData]])}
+                    onClick={() => setConditionGroup((pre) => [...(pre || []), [{ ...conditionData }]])}
                   >
                     或者
                   </Button>
@@ -394,7 +522,7 @@ const PermissionModal = (props: IProps) => {
                 <Button
                   type="outline"
                   icon={<IconPlus />}
-                  onClick={() => setConditionGroup((pre) => [...(pre || []), [conditionData]])}
+                  onClick={() => setConditionGroup((pre) => [...(pre || []), [{ ...conditionData }]])}
                   disabled={!entitySelected}
                 >
                   添加条件组
@@ -413,12 +541,12 @@ const PermissionModal = (props: IProps) => {
                 可查看
               </Checkbox>
               <Checkbox
-                checked={value.includes('2')}
+                checked={value.includes(DataOperationEnum.operate)}
                 onChange={(checked) => {
                   if (checked) {
-                    setValue(['1', '2']);
+                    setValue([DataOperationEnum.examine, DataOperationEnum.operate]);
                   } else {
-                    setValue(['1']);
+                    setValue([DataOperationEnum.examine]);
                   }
                   // 更新全选状态
                   setCheckAll(checked);

@@ -118,6 +118,24 @@ export interface AuthDataGroupVO {
 }
 
 /**
+ * 数据权限范围人员字段 AuthDataFilterPersonVO
+ */
+export interface AuthDataPermissionPersonVO {
+  /**
+   * 主键id
+   */
+  PersonId?: string;
+  /**
+   * 操作人员字段名称
+   */
+  fieldName?: string;
+  /**
+   * 操作人员名称
+   */
+  displayName?: string;
+}
+
+/**
  * AuthDataFilterVO
  */
 export interface AuthDataFilterVO {
@@ -150,7 +168,27 @@ export interface AuthDataFilterVO {
    */
   id?: string;
 }
-
+/**
+ * 可选校验类型列表
+ */
+export interface FilterFieldCheckType {
+  /**
+     * 校验类型编码
+     */
+    code?: string;
+    /**
+     * 校验类型描述
+     */
+    description?: string;
+    /**
+     * 校验类型名称
+     */
+    name?: string;
+    /**
+     * 排序
+     */
+    sortOrder?: number;
+}
 
 /**
  * 更新字段权限
@@ -273,4 +311,19 @@ export interface AuthViewVO {
    * 实体id
    */
   viewId?: number;
+}
+
+/**
+ * 枚举 数据操作权限
+ * @enum 
+ */
+export enum DataOperationEnum {
+  /**
+   * 查看
+   */
+  examine = 'examine',
+  /**
+   * 操作
+   */
+  operate = 'operate',
 }

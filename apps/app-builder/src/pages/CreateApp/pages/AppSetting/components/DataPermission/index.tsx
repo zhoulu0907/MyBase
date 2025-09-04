@@ -1,18 +1,21 @@
 import { useState, useEffect, type FC } from 'react';
-import { Divider, Tag, Space, Button, Form, Popconfirm } from '@arco-design/web-react';
+import { Divider, Tag, Space, Button, Popconfirm } from '@arco-design/web-react';
 import { IconEdit, IconDelete, IconPlusCircle } from '@arco-design/web-react/icon';
 import {
   getDataPermission,
-  updateDataGroupPermission,
-  deleteDataGroup,
+  // updateDataGroupPermission,
+  // deleteDataGroup,
   // getEntityFieldsWithChildren
   getAppEntities,
   getEntityFields,
+  getFieldCheckTypeApi,
   type GetPermissionReq,
-  type UpdateDataGroupPermissionReq,
+  // type UpdateDataGroupPermissionReq,
   type AppEntities,
   type AppEntity,
-  type AppEntityField
+  type AppEntityField,
+  type AuthDataPermissionPersonVO,
+  type FilterFieldCheckType
 } from '@onebase/app';
 import PermissionModal from './modal';
 
@@ -39,11 +42,13 @@ interface IProps {
 
 // 数据权限
 const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
-  const [form] = Form.useForm();
+  // const [form] = Form.useForm();
   const [visible, setVisible] = useState<boolean>(false);
   const [status, setStatus] = useState<'create' | 'edit'>('create');
   const [appEntities, setAppEntities] = useState<AppEntity[]>([]);
   const [appEntityFields, setAppEntityFields] = useState<AppEntityField[]>([]);
+  const [dataPermissionPerson, setDataPermissionPerson] = useState<AuthDataPermissionPersonVO[]>([]);
+  const [filterFieldCheckType, setFilterFieldCheckType] = useState<FilterFieldCheckType[]>([]);
 
   useEffect(() => {
     if (appId && menuId && roleId) {
@@ -88,6 +93,7 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
   const changeEntity = async (params: { entityId: string }) => {
     console.log('改变业务实体 entityId;', params.entityId);
     getDataPermissionFields(params);
+    getDataPermissionRoles(params);
   };
 
   // 获取数据权限数据字典
@@ -108,12 +114,20 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
   // 获取数据权限角色
   const getDataPermissionRoles = async (params: { entityId: string }) => {
     try {
-      const dataPermissionRoles = await getEntityFields(params);
+      const dataPermissionRoles = await getEntityFields({ entityId: params.entityId, isPerson: 1 });
       console.log('获取数据权限角色 dataPermissionRoles:', dataPermissionRoles);
+      setDataPermissionPerson((prev) => [...prev, ...dataPermissionRoles]);
     } catch (error) {
       console.error('获取数据权限角色失败', error);
     }
   };
+  // 根据选择字段获取可选校验类型
+  const getFieldCheckType = async (fieldId: string) => {
+    const fieldCheckTypeResq = await getFieldCheckTypeApi([fieldId]);
+    console.log('根据选择字段获取校验类型 fieldCheckTypeResq', fieldCheckTypeResq[0].validationTypes);
+    setFilterFieldCheckType(fieldCheckTypeResq[0].validationTypes);
+  };
+
   const handleModelSubmit = async (values: any) => {
     console.log('创建数据权限 values:', values);
     // setVisible(false);
@@ -124,8 +138,8 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
   };
   return (
     <div className={styles.dataPermission}>
-      {permission.map((perm) => (
-        <div className={styles.permItem}>
+      {permission.map((perm, index) => (
+        <div className={styles.permItem} key={index}>
           <div className={styles.top}>
             <div className={styles.left}>
               <div className={styles.title}>{perm.name}</div>
@@ -209,7 +223,10 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
         // onClose={() => setVisible(false)}
         appEntities={appEntities}
         appEntityFields={appEntityFields}
+        dataPermissionPerson={dataPermissionPerson}
+        filterFieldCheckType={filterFieldCheckType}
         changeEntity={changeEntity}
+        getFieldCheckType={getFieldCheckType}
         handleModelSubmit={handleModelSubmit}
         handleModelCancel={handleModelCancel}
       />
