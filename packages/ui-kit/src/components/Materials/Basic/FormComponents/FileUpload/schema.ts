@@ -3,7 +3,6 @@ import {
   baseDefault,
   labelColSpanConfig,
   layoutConfig,
-  listTypeConfig,
   statusConfig,
   widthConfig,
   type ICommonBaseType,
@@ -32,7 +31,7 @@ import type {
   IPlaceholderConfigType,
   ISelectConfigType,
   IStatusConfigType,
-  ISupportFileTypeConfigType,
+  // ISupportFileTypeConfigType,
   ITextAreaConfigType,
   ITextConfigType,
   ITooltipConfigType,
@@ -43,7 +42,8 @@ import type {
   TNumberDefaultType,
   TSelectDefaultType,
   TTextAreaDefaultType,
-  TTextDefaultType
+  TTextDefaultType,
+  IVerifyConfigType
 } from '../../../types';
 
 export interface XInputFileUploadSchema {
@@ -53,7 +53,7 @@ export interface XInputFileUploadSchema {
 
 export type TXInputFileUploadEditData = Array<
   | ITextConfigType
-  | ISupportFileTypeConfigType
+  // | ISupportFileTypeConfigType
   | ILabelConfigType
   | IPlaceholderConfigType
   | IDescriptionConfigType
@@ -68,13 +68,19 @@ export type TXInputFileUploadEditData = Array<
   | IBooleanConfigType
   | IStatusConfigType<TUploadSelectKeyType>
   | ILayoutConfigType<TLayoutSelectKeyType>
+  | IVerifyConfigType
 >;
 
 export interface XInputFileUploadConfig extends ICommonBaseType {
   /**
    * 输入框标题
+   * text：标题
+   * display：是否显示
    */
-  label: TTextDefaultType;
+  label: {
+    text: TTextDefaultType;
+    display: TBooleanDefaultType;
+  };
 
   /**
    * 描述信息（显示在输入框下方，辅助说明）
@@ -102,10 +108,18 @@ export interface XInputFileUploadConfig extends ICommonBaseType {
    */
   width: TSelectDefaultType<TWidthSelectKeyType>;
 
-  /**
-   * 是否必填，未填写时提交报错
+ /**
+   * required：是否必填，未填写时提交报错
+   * maxCount：最大上传数量，默认：-1 不限制
+   * maxSize：最大图片大小单位：MB，默认：10，最大100
+   * fileFormat：支持的文件类型，多个类型用逗号分隔，默认不限制
    */
-  required: TBooleanDefaultType;
+  verify: {
+    required: TBooleanDefaultType;
+    maxCount: TNumberDefaultType;
+    maxSize: TNumberDefaultType;
+    fileFormat: TTextDefaultType;
+  }
 
   /**
    * 表单的布局：水平、垂直（默认）
@@ -117,21 +131,6 @@ export interface XInputFileUploadConfig extends ICommonBaseType {
    * 标题宽度
    */
   labelColSpan?: TNumberDefaultType;
-
-  /**
-   * 单个文件大小限制（MB），最大 100, 默认10
-   */
-  uploadSize?: TNumberDefaultType;
-
-  /**
-   * 支持的文件类型，多个类型用逗号分隔，默认不限制
-   */
-  supportFileType?: TTextDefaultType;
-
-  /**
-   * 上传数量限制，默认无限制
-   */
-  uploadLimit?: TNumberDefaultType;
 
   /**
    * 是否允许预览文件
@@ -176,26 +175,6 @@ const XFileUpload: XInputFileUploadSchema = {
     layoutConfig,
     labelColSpanConfig,
     {
-      key: 'required',
-      name: '开启必填',
-      type: CONFIG_TYPES.SWITCH_INPUT
-    },
-    {
-      key: 'uploadSize',
-      name: '文件大小限制',
-      type: CONFIG_TYPES.UPLOAD_SIZE
-    },
-    {
-      key: 'uploadLimit',
-      name: '上传数量限制',
-      type: CONFIG_TYPES.UPLOAD_LIMIT
-    },
-    {
-      key: 'supportFileType',
-      name: '支持的文件类型',
-      type: CONFIG_TYPES.SUPPORT_FILE_TYPE
-    },
-    {
       key: 'showPreview',
       name: '允许预览文件',
       type: CONFIG_TYPES.SWITCH_INPUT
@@ -210,28 +189,37 @@ const XFileUpload: XInputFileUploadSchema = {
       name: '隐藏时提交数据',
       type: CONFIG_TYPES.SWITCH_INPUT
     },
+    {
+      key: 'verify',
+      name: '校验',
+      type: CONFIG_TYPES.VERIFY
+    },
     statusConfig,
     widthConfig,
-    listTypeConfig
   ],
   config: {
     ...baseDefault,
-    label: '文件上传',
+    label: {
+      text: '文件上传',
+      display: true,
+    },
     description: '',
     tooltip: '',
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     defaultValue: '',
-    required: false,
-    uploadSize: 10,
-    uploadLimit: 1,
     showPreview: false,
     showDownload: false,
-    supportFileType: '',
-    listType: UPLOAD_VALUES[UPLOAD_OPTIONS.CARD],
+    listType: UPLOAD_VALUES[UPLOAD_OPTIONS.TEXT],
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
     saveWithHidden: false,
-    labelColSpan: 100
+    labelColSpan: 100,
+    verify: {
+      required: false,
+      maxCount: -1,
+      maxSize: 10,
+      fileFormat: ''
+    }
   }
 };
 

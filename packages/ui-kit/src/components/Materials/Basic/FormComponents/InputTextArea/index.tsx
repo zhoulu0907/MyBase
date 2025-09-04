@@ -1,9 +1,10 @@
-import { Form, Input } from '@arco-design/web-react';
-import { nanoid } from 'platejs';
 import { memo } from 'react';
+import { nanoid } from 'nanoid';
+import { Form, Input } from '@arco-design/web-react';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
-import type { XInputTextAreaConfig } from './schema';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
+import type { XInputTextAreaConfig } from './schema';
+import './index.css';
 
 const TextArea = Input.TextArea;
 
@@ -15,7 +16,7 @@ const XInputTextArea = memo((props: XInputTextAreaConfig) => {
     tooltip,
     status,
     defaultValue,
-    required,
+    verify,
     align,
     layout,
     color,
@@ -24,11 +25,12 @@ const XInputTextArea = memo((props: XInputTextAreaConfig) => {
     minLength = 0,
     maxLength = 0,
     minRows,
-    maxRows
+    maxRows,
+    description
   } = props;
   return (
     <Form.Item
-      label={label}
+      label={label.display && label.text}
       field={dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.INPUT_TEXTAREA}_${nanoid()}`}
       layout={layout}
       tooltip={tooltip}
@@ -37,7 +39,7 @@ const XInputTextArea = memo((props: XInputTextAreaConfig) => {
       }}
       wrapperCol={{ style: { flex: 1 } }}
       rules={[
-        { required },
+        { required: verify?.required },
         {
           validator: (value, callback) => {
             if (minLength !== 0 && value.length < minLength) {
@@ -73,6 +75,7 @@ const XInputTextArea = memo((props: XInputTextAreaConfig) => {
           backgroundColor: bgColor
         }}
       />
+      <div className='description showEllipsis'>{description}</div>
     </Form.Item>
   );
 });

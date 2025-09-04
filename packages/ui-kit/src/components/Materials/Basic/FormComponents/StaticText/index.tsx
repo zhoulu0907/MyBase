@@ -1,9 +1,10 @@
-import { Form, Input } from '@arco-design/web-react';
 import { memo } from 'react';
+import { nanoid } from 'nanoid';
+import { Form, Input } from '@arco-design/web-react';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
-import { type XStaticTextConfig } from './schema';
-import { nanoid } from 'platejs';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
+import { type XStaticTextConfig } from './schema';
+import './index.css';
 
 const XStaticText = memo((props: XStaticTextConfig) => {
   const {
@@ -13,18 +14,18 @@ const XStaticText = memo((props: XStaticTextConfig) => {
     tooltip,
     status,
     defaultValue,
-    required,
     align,
     layout,
     color,
     bgColor,
     labelColSpan = 0,
-    maxLength
+    maxLength,
+    description
   } = props;
 
   return (
     <Form.Item
-      label={label}
+      label={label.display && label.text}
       field={dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.STATIC_TEXT}_${nanoid()}`}
       layout={layout}
       tooltip={tooltip}
@@ -32,7 +33,6 @@ const XStaticText = memo((props: XStaticTextConfig) => {
         style: { width: labelColSpan, flex: 'unset' }
       }}
       wrapperCol={{ style: { flex: 1 } }}
-      rules={[{ required }]}
       style={{
         opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,
         pointerEvents: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset',
@@ -51,6 +51,7 @@ const XStaticText = memo((props: XStaticTextConfig) => {
           backgroundColor: bgColor
         }}
       />
+      <div className='description showEllipsis'>{description}</div>
     </Form.Item>
   );
 });

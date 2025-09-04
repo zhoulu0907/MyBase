@@ -1,13 +1,14 @@
-import { DatePicker, Form } from '@arco-design/web-react';
 import { memo } from 'react';
+import { nanoid } from 'nanoid';
+import { DatePicker, Form } from '@arco-design/web-react';
 import { DATE_OPTIONS, DATE_VALUES, STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
-import type { XInputDatePickerConfig } from './schema';
-import { nanoid } from 'platejs';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
+import type { XInputDatePickerConfig } from './schema';
+import './index.css';
 
 const { YearPicker, MonthPicker } = DatePicker;
 const XDatePicker = memo((props: XInputDatePickerConfig) => {
-  const { label, dataField, tooltip, status, required, dateType, layout, labelColSpan = 0 } = props;
+  const { label, dataField, tooltip, status, verify, dateType, layout, labelColSpan = 0, description } = props;
 
   // 确保 dateType 有默认值，避免 Form.Item 中没有元素
   const currentDateType = dateType || DATE_VALUES[DATE_OPTIONS.DATE];
@@ -31,7 +32,7 @@ const XDatePicker = memo((props: XInputDatePickerConfig) => {
 
   return (
     <Form.Item
-      label={label}
+      label={label.display && label.text}
       field={dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.DATE_PICKER}_${nanoid()}`}
       layout={layout}
       tooltip={tooltip}
@@ -39,7 +40,7 @@ const XDatePicker = memo((props: XInputDatePickerConfig) => {
         style: { width: labelColSpan, flex: 'unset' }
       }}
       wrapperCol={{ style: { flex: 1 } }}
-      rules={[{ required }]}
+      rules={[{ required: verify?.required }]}
       style={{
         opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,
         pointerEvents: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset',
@@ -47,6 +48,7 @@ const XDatePicker = memo((props: XInputDatePickerConfig) => {
       }}
     >
       {renderDatePicker()}
+      <div className='description showEllipsis'>{description}</div>
     </Form.Item>
   );
 });

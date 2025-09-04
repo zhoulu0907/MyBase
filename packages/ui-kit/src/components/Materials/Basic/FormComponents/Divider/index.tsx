@@ -1,5 +1,5 @@
-import { Divider, Form } from '@arco-design/web-react';
 import { memo } from 'react';
+import { Divider, Form } from '@arco-design/web-react';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import { type XDividerConfig } from './schema';
 
@@ -8,7 +8,7 @@ const XDivider = memo((props: XDividerConfig) => {
 
   return (
     <Form.Item
-      label={label}
+      label={label.display && label.text}
       layout={layout}
       tooltip={tooltip}
       labelCol={{
