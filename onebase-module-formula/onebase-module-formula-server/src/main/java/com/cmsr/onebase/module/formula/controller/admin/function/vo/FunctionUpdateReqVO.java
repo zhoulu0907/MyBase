@@ -9,7 +9,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
-@Schema(description = "管理后台 - 函数创建/修改 Request VO")
+@Schema(description = "公式引擎 - 函数创建/修改 Request VO")
 @Data
 public class FunctionUpdateReqVO {
 
