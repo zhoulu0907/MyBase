@@ -1,8 +1,9 @@
 import { memo } from 'react';
+import { nanoid } from 'nanoid';
 import { Form, Input } from '@arco-design/web-react';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
+import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { type XStaticTextConfig } from './schema';
-import { nanoid } from 'nanoid';
 import './index.css';
 
 const XStaticText = memo((props: XStaticTextConfig) => {
@@ -25,7 +26,7 @@ const XStaticText = memo((props: XStaticTextConfig) => {
   return (
     <Form.Item
       label={label.display && label.text}
-      field={dataField.length > 0 ? dataField[dataField.length - 1] : `XStaticText_${nanoid()}`}
+      field={dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.STATIC_TEXT}_${nanoid()}`}
       layout={layout}
       tooltip={tooltip}
       labelCol={{

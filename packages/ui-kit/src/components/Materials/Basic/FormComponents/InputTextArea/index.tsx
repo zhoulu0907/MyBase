@@ -1,7 +1,8 @@
-import { Form, Input } from '@arco-design/web-react';
-import { nanoid } from 'nanoid';
 import { memo } from 'react';
+import { nanoid } from 'nanoid';
+import { Form, Input } from '@arco-design/web-react';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
+import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import type { XInputTextAreaConfig } from './schema';
 import './index.css';
 
@@ -30,7 +31,7 @@ const XInputTextArea = memo((props: XInputTextAreaConfig) => {
   return (
     <Form.Item
       label={label.display && label.text}
-      field={dataField.length > 0 ? dataField[dataField.length - 1] : `XInputTextArea_${nanoid()}`}
+      field={dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.INPUT_TEXTAREA}_${nanoid()}`}
       layout={layout}
       tooltip={tooltip}
       labelCol={{

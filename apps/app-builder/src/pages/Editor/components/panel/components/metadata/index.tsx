@@ -1,14 +1,13 @@
 import IconCollapsed from '@/assets/images/collapsed.svg';
 import IconSearchForm from '@/assets/images/search_form_icon.svg';
 import FieldCard from '@/components/FieldCard';
-import { useI18n } from '@/hooks/useI18n';
 import { useAppEntityStore } from '@/store/store_entity';
 import { Collapse, Input, Layout } from '@arco-design/web-react';
-import type { AppEntityField } from '@onebase/app';
+import { FilterEntityFields, type AppEntityField } from '@onebase/app';
 import {
   COMPONENT_GROUP_NAME,
   COMPONENT_TYPE_DISPLAY_NAME_MAP,
-  FIELD_TYPE,
+  ENTITY_COMPONENT_TYPES,
   FORM_COMPONENT_TYPES
 } from '@onebase/ui-kit';
 import React, { useEffect, useState } from 'react';
@@ -26,7 +25,6 @@ interface MetadataContainerProps {
 }
 
 const MetadataContainer: React.FC<MetadataContainerProps> = ({ childCollapsed, setChildCollapsed }) => {
-  const { t } = useI18n();
   const { mainEntity, subEntities } = useAppEntityStore();
 
   const [activeEntityID, setActiveEntityID] = useState<string>(mainEntity.entityID);
@@ -44,11 +42,12 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({ childCollapsed, s
     }[];
   }>({});
 
+  // 主表字段
   useEffect(() => {
     if (mainEntity.fields.length > 0) {
       const newFieldItems = mainEntity.fields
         //   系统字段不展示
-        .filter((field: AppEntityField) => field.isSystemField === FIELD_TYPE.CUSTOM)
+        .filter((field: AppEntityField) => !FilterEntityFields.includes(field.fieldName))
         .map((field: AppEntityField, index: number) => {
           let cpType = COMPONENT_MAP[field.fieldType];
           if (!cpType) {
@@ -73,17 +72,18 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({ childCollapsed, s
     }
   }, [mainEntity]);
 
+  // 子表字段
   useEffect(() => {
     subEntities.entities.forEach((subEntity) => {
       const newFieldItems = subEntity.fields
-        //   系统字段不展示
-        .filter((field: AppEntityField) => field.isSystemField === FIELD_TYPE.CUSTOM)
+        //   部分系统字段不展示
+        .filter((field: AppEntityField) => !FilterEntityFields.includes(field.fieldName))
         .map((field: AppEntityField, index: number) => {
           let cpType = COMPONENT_MAP[field.fieldType];
           if (!cpType) {
             cpType = FORM_COMPONENT_TYPES.INPUT_TEXT;
           }
-          console.log('field: ', field);
+          //   console.log('field: ', field);
           return {
             // TODO(mickey): 使用uuid作为id
             id: `${cpType}-${index}-${Date.now()}`,
@@ -143,10 +143,39 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({ childCollapsed, s
                 <CollapseItem
                   name="main"
                   header={
-                    <div className={styles.mainEntityHeader} onClick={() => setActiveEntityID(mainEntity.entityID)}>
-                      <div className={styles.mainEntityHeaderIcon}>主</div>
-                      {mainEntity.entityName || '无'}
-                    </div>
+                    <ReactSortable
+                      list={[
+                        {
+                          ...mainEntity,
+                          id: mainEntity.entityID,
+                          type: 'entity',
+                          displayName: 'entity'
+                        }
+                      ]}
+                      setList={() => {}}
+                      group={{
+                        name: COMPONENT_GROUP_NAME,
+                        pull: 'clone',
+                        put: false
+                      }}
+                      sort={false}
+                      className={styles.fieldListContent}
+                      forceFallback={true}
+                      animation={150}
+                      onEnd={(e) => {
+                        console.log('onEnd', e);
+                      }}
+                    >
+                      <div
+                        className={styles.mainEntityHeader}
+                        onClick={() => setActiveEntityID(mainEntity.entityID)}
+                        data-cp-type={ENTITY_COMPONENT_TYPES.MAIN_ENTITY}
+                        data-entity-id={mainEntity.entityID}
+                      >
+                        <div className={styles.mainEntityHeaderIcon}>主</div>
+                        {mainEntity.entityName || '无'}
+                      </div>
+                    </ReactSortable>
                   }
                   contentStyle={{
                     // borderLeft: '1px solid #e8e8e8',
@@ -159,16 +188,42 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({ childCollapsed, s
                     backgroundColor: 'white'
                   }}
                 >
-                  {subEntities.entities.map((subEntity) => (
-                    <div
-                      className={styles.subEntityHeader}
-                      key={subEntity.entityID}
-                      onClick={() => setActiveEntityID(subEntity.entityID)}
-                    >
-                      <div className={styles.subEntityHeaderIcon}>子</div>
-                      {subEntity.entityName || '无'}
-                    </div>
-                  ))}
+                  <ReactSortable
+                    list={[
+                      ...subEntities.entities.map((subEntity) => ({
+                        ...subEntity,
+                        id: subEntity.entityID,
+                        type: 'entity',
+                        displayName: 'entity'
+                      }))
+                    ]}
+                    setList={() => {}}
+                    group={{
+                      name: COMPONENT_GROUP_NAME,
+                      pull: 'clone',
+                      put: false
+                    }}
+                    sort={false}
+                    className={styles.fieldListContent}
+                    forceFallback={true}
+                    animation={150}
+                    onEnd={(e) => {
+                      console.log('onEnd', e);
+                    }}
+                  >
+                    {subEntities.entities.map((subEntity) => (
+                      <div
+                        className={styles.subEntityHeader}
+                        key={subEntity.entityID}
+                        onClick={() => setActiveEntityID(subEntity.entityID)}
+                        data-cp-type={ENTITY_COMPONENT_TYPES.SUB_ENTITY}
+                        data-entity-id={subEntity.entityID}
+                      >
+                        <div className={styles.subEntityHeaderIcon}>子</div>
+                        {subEntity.entityName || '无'}
+                      </div>
+                    ))}
+                  </ReactSortable>
 
                   {/* <div className={styles.relEntityHeader}>
                   <div className={styles.relEntityHeaderIcon}>关联</div>
@@ -177,15 +232,7 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({ childCollapsed, s
                 </CollapseItem>
               </Collapse>
 
-              {/* <div className={styles.importEntityHeader}>
-              <div className={styles.importEntityHeaderIcon}>引入</div>
-              党建活动年度统计
-            </div>
-            <div className={styles.importEntityHeader}>
-              <div className={styles.importEntityHeaderIcon}>引入</div>
-              党建经费使用统计
-            </div>
-
+              {/*
             <Button
               type="outline"
               size="mini"

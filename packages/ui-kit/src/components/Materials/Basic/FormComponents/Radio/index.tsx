@@ -1,7 +1,8 @@
 import { memo } from 'react';
-import { Form, Radio } from '@arco-design/web-react';
 import { nanoid } from 'nanoid';
+import { Form, Radio } from '@arco-design/web-react';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
+import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import type { XInputRadioConfig } from './schema';
 import './index.css';
 
@@ -12,7 +13,7 @@ const XRadio = memo((props: XInputRadioConfig) => {
   return (
     <Form.Item
       label={label.display && label.text}
-      field={dataField.length > 0 ? dataField[dataField.length - 1] : `XRadio_${nanoid()}`}
+      field={dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.RADIO}_${nanoid()}`}
       layout={layout}
       tooltip={tooltip}
       labelCol={{

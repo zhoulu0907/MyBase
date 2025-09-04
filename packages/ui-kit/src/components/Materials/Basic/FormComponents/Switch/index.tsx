@@ -1,8 +1,9 @@
 import { memo } from 'react';
+import { nanoid } from 'nanoid';
 import { Form, Switch } from '@arco-design/web-react';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
+import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import type { XInputSwitchConfig } from './schema';
-import { nanoid } from 'nanoid';
 import './index.css';
 
 const XSwitch = memo((props: XInputSwitchConfig) => {
@@ -11,7 +12,7 @@ const XSwitch = memo((props: XInputSwitchConfig) => {
   return (
     <Form.Item
       label={label.display && label.text}
-      field={dataField.length > 0 ? dataField[dataField.length - 1] : `XSwitch_${nanoid()}`}
+      field={dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.SWITCH}_${nanoid()}`}
       layout={layout}
       tooltip={tooltip}
       labelCol={{

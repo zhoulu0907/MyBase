@@ -1,5 +1,6 @@
 import { memo, useState } from 'react';
 import { Form, Message, Upload } from '@arco-design/web-react';
+import { IconPlus } from '@arco-design/web-react/icon';
 import { uploadFile } from '@onebase/platform-center';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import type { XInputFileUploadConfig } from './schema';
@@ -19,7 +20,7 @@ const XFileUpload = memo((props: XInputFileUploadConfig) => {
     description,
   } = props;
 
-  const [fileUrl, setFileUrl] = useState<string>('');
+  const [_fileUrl, setFileUrl] = useState<string>('');
 
   const handleUpload = async (file: File, onProgress?: (percent: number, event?: ProgressEvent) => void) => {
     const formData = new FormData();
@@ -90,7 +91,17 @@ const XFileUpload = memo((props: XInputFileUploadConfig) => {
         style={{
           width: '100%'
         }}
-      />
+      >
+        {listType == 'picture-card' && (
+          <div className="arco-upload-trigger-picture">
+            <div className="arco-upload-trigger-picture-text">
+              <IconPlus />
+              <div style={{ marginTop: 10, fontWeight: 600, fontSize: '11px' }}>点击或拖动文件到框内上传</div>
+              <div style={{ marginTop: 5, fontWeight: 600, fontSize: '11px' }}>文件大小不超过{verify.maxSize}MB</div>
+            </div>
+          </div>
+        )}
+      </Upload>
       <div className='description showEllipsis'>{description}</div>
     </Form.Item>
   );

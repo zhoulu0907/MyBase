@@ -254,7 +254,7 @@ const PageManagerPage: FC = () => {
     };
     const res = await updateApplicationMenuVisible(req);
     if (res) {
-      Message.success(`${isVisible === VisibleType.HIDDEN ? '显示' : '隐藏'}成功`);
+      Message.success(`${isVisible === VisibleType.HIDDEN ? '取消隐藏' : '隐藏'}成功`);
     }
     getMenuList();
   };

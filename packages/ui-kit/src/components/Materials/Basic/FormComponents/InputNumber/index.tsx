@@ -1,10 +1,10 @@
 import { memo } from 'react';
+import { nanoid } from 'nanoid';
 import { Form, InputNumber } from '@arco-design/web-react';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
+import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import type { XInputNumberConfig } from './schema';
-import { nanoid } from 'nanoid';
 import './index.css';
-
 
 const XInputNumber = memo((props: XInputNumberConfig) => {
   const {
@@ -27,7 +27,7 @@ const XInputNumber = memo((props: XInputNumberConfig) => {
   return (
     <Form.Item
       label={label.display && label.text}
-      field={dataField.length > 0 ? dataField[dataField.length - 1] : `XInputNumber_${nanoid()}`}
+      field={dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.INPUT_NUMBER}_${nanoid()}`}
       layout={layout}
       tooltip={tooltip}
       labelCol={{

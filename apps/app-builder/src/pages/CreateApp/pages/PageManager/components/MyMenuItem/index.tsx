@@ -1,5 +1,5 @@
+import { IconSettings, IconEyeInvisible } from '@arco-design/web-react/icon';
 import { Dropdown, Menu, Message, Tooltip, type FormInstance } from '@arco-design/web-react';
-import { IconSettings } from '@arco-design/web-react/icon';
 import { getPageSetId, RootParentPage, VisibleType, type GetPageSetIdReq } from '@onebase/app';
 import { EDITOR_TYPES } from '@onebase/ui-kit';
 import React, { useState } from 'react';
@@ -91,7 +91,7 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
           triggerHide(menuID, isVisible);
         }}
       >
-        {isVisible === VisibleType.HIDDEN ? '显示' : '隐藏'}
+        {isVisible === VisibleType.HIDDEN ? '取消隐藏' : '隐藏'}
       </MenuItem>
       {!isGroup && (
         <MenuItem
@@ -193,6 +193,11 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
           <i className={`iconfont ${menuIcon}`} style={{ marginRight: '10px' }} />
           {label}
         </div>
+        {isVisible === VisibleType.HIDDEN && (
+          <div className={styles.eyeVisible}>
+            <IconEyeInvisible />
+          </div>
+        )}
         {showOption && (
           <div className={styles.dropdownContainer}>
             <Dropdown

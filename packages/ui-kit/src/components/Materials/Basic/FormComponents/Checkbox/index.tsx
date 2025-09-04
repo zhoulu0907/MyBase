@@ -1,8 +1,9 @@
 import { memo } from 'react';
+import { nanoid } from 'nanoid';
 import { Checkbox, Form } from '@arco-design/web-react';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
+import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import type { XInputCheckboxConfig } from './schema';
-import { nanoid } from 'nanoid';
 import './index.css';
 
 const CheckboxGroup = Checkbox.Group;
@@ -25,7 +26,7 @@ const XCheckbox = memo((props: XInputCheckboxConfig) => {
   return (
     <Form.Item
       label={label.display && label.text}
-      field={dataField.length > 0 ? dataField[dataField.length - 1] : `XCheckbox_${nanoid()}`}
+      field={dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.CHECKBOX}_${nanoid()}`}
       layout={layout}
       tooltip={tooltip}
       labelCol={{

@@ -1,7 +1,9 @@
 import { memo, useState } from 'react';
-import { Form, Message, Upload } from '@arco-design/web-react';
 import { nanoid } from 'nanoid';
+import { Form, Message, Upload } from '@arco-design/web-react';
+import { IconPlus } from '@arco-design/web-react/icon';
 import { uploadFile } from '@onebase/platform-center';
+import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import type { XInputImgUploadConfig } from './schema';
 import './index.css';
@@ -31,7 +33,7 @@ const XImgUpload = memo((props: XInputImgUploadConfig) => {
   return (
     <Form.Item
       label={label.display && label.text}
-      field={dataField.length > 0 ? dataField[dataField.length - 1] : `XImgUpload_${nanoid()}`}
+      field={dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.IMG_UPLOAD}_${nanoid()}`}
       layout={layout}
       tooltip={tooltip}
       labelCol={{
@@ -83,7 +85,16 @@ const XImgUpload = memo((props: XInputImgUploadConfig) => {
         style={{
           width: '100%'
         }}
-      />
+      >
+        {listType == 'picture-card' && (
+          <div className="arco-upload-trigger-picture">
+            <div className="arco-upload-trigger-picture-text">
+              <IconPlus />
+              <div style={{ marginTop: 10, fontWeight: 600, fontSize: '11px' }}>点击或拖动图片到框内上传</div>
+            </div>
+          </div>
+        )}
+      </Upload>
       <div className='description showEllipsis'>{description}</div>
     </Form.Item>
   );

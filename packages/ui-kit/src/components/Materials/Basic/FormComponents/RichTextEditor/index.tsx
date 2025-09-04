@@ -3,10 +3,12 @@ import '@wangeditor/editor/dist/css/style.css' // 引入 css
 import { useState, useEffect, memo } from 'react'
 import { Form } from '@arco-design/web-react';
 import { Editor, Toolbar } from '@wangeditor/editor-for-react'
-import { nanoid } from 'nanoid';
 import { IDomEditor, IEditorConfig, IToolbarConfig } from '@wangeditor/editor'
+import { nanoid } from 'nanoid';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
+import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import type { XRichTextConfig } from './schema';
+
 import './index.css';
 
 const XRichText = memo((props: XRichTextConfig) => {
@@ -50,7 +52,7 @@ const XRichText = memo((props: XRichTextConfig) => {
   return (
     <Form.Item
       label={label.display && label.text}
-      field={dataField.length > 0 ? dataField[dataField.length - 1] : `XRichText_${nanoid()}`}
+      field={dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.RICH_TEXT}_${nanoid()}`}
       layout={layout}
       tooltip={tooltip}
       labelCol={{

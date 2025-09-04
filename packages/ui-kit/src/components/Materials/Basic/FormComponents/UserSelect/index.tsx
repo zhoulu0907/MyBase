@@ -1,9 +1,10 @@
-import { Form, TreeSelect } from '@arco-design/web-react';
 import { memo } from 'react';
+import { nanoid } from 'nanoid';
+import { Form, TreeSelect } from '@arco-design/web-react';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import type { XInputUserSelectConfig } from './schema';
-import { nanoid } from 'nanoid';
 import './index.css';
+import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 
 // TODO(Mickey): 放到schema的config中
 // 示例树形结构：人员
@@ -40,7 +41,7 @@ const XUserSelect = memo((props: XInputUserSelectConfig) => {
   return (
     <Form.Item
       label={label.display && label.text}
-      field={dataField.length > 0 ? dataField[dataField.length - 1] : `XUserSelect_${nanoid()}`}
+      field={dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.USER_SELECT}_${nanoid()}`}
       layout={layout}
       tooltip={tooltip}
       labelCol={{

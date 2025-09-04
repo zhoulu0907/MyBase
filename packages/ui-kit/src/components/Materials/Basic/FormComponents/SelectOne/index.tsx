@@ -2,6 +2,7 @@ import { memo } from 'react';
 import { nanoid } from 'nanoid';
 import { Form, Select } from '@arco-design/web-react';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
+import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import type { XInputSelectOneConfig } from './schema';
 import './index.css';
 
@@ -11,7 +12,7 @@ const XSelectOne = memo((props: XInputSelectOneConfig) => {
   return (
     <Form.Item
       label={label.display && label.text}
-      field={dataField.length > 0 ? dataField[dataField.length - 1] : `XSelectOne_${nanoid()}`}
+      field={dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.SELECT_ONE}_${nanoid()}`}
       layout={layout}
       tooltip={tooltip}
       labelCol={{
