@@ -2,7 +2,9 @@ import { memo } from 'react';
 import { Form, InputNumber } from '@arco-design/web-react';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import type { XInputNumberConfig } from './schema';
+import { nanoid } from 'nanoid';
 import './index.css';
+
 
 const XInputNumber = memo((props: XInputNumberConfig) => {
   const {
@@ -18,13 +20,14 @@ const XInputNumber = memo((props: XInputNumberConfig) => {
     precision,
     layout,
     labelColSpan = 0,
-    description
+    description,
+    unit
   } = props;
 
   return (
     <Form.Item
       label={label.display && label.text}
-      field={dataField.length > 0 ? dataField[dataField.length - 1] : ''}
+      field={dataField.length > 0 ? dataField[dataField.length - 1] : `XInputNumber_${nanoid()}`}
       layout={layout}
       tooltip={tooltip}
       labelCol={{
@@ -57,6 +60,7 @@ const XInputNumber = memo((props: XInputNumberConfig) => {
           width: '100%',
           textAlignLast: align
         }}
+        suffix={unit}
       />
       <div className='description showEllipsis'>{description}</div>
     </Form.Item>

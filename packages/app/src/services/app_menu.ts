@@ -30,7 +30,7 @@ export const updateApplicationMenuOrder = (params: UpdateApplicationMenuOrderReq
 };
 
 export const updateApplicationMenuVisible = (params: UpdateApplicationMenuVisibleReq) => {
-  return appService.post('/menu/update-visible', params);
+  return appService.post(`/menu/update-visible?id=${params.id}&visible=${params.visible}`,);
 };
 
 export const copyApplicationMenu = (params: CopyApplicationMenuReq) => {

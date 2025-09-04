@@ -1,4 +1,4 @@
-import { BaseNode, Condition } from "./base";
+import { BaseNode, Condition } from './base';
 
 // 触发节点
 export interface TriggerNode extends BaseNode {

@@ -1,13 +1,22 @@
 import { Form, Input } from '@arco-design/web-react';
 import { memo } from 'react';
-import { v4 as uuidv4 } from 'uuid';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
-import type { XInputAutoCodeConfig } from './schema';
+import { type XautoCodeConfig } from './schema';
 
-const XAutoCode = memo((props: XInputAutoCodeConfig) => {
-  const { label, tooltip, status, required, align, layout, color, bgColor, labelColSpan = 0 } = props;
-
-  const defaultValue = uuidv4();
+const XautoCode = memo((props: XautoCodeConfig) => {
+  const {
+    label,
+    tooltip,
+    placeholder,
+    status,
+    defaultValue,
+    required,
+    align,
+    layout,
+    color,
+    bgColor,
+    labelColSpan = 0
+  } = props;
 
   return (
     <Form.Item
@@ -27,6 +36,7 @@ const XAutoCode = memo((props: XInputAutoCodeConfig) => {
       <Input
         readOnly={true}
         defaultValue={defaultValue}
+        placeholder={placeholder}
         style={{
           width: '100%',
           color,
@@ -38,4 +48,4 @@ const XAutoCode = memo((props: XInputAutoCodeConfig) => {
   );
 });
 
-export default XAutoCode;
+export default XautoCode;

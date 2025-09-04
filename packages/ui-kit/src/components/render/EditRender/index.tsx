@@ -73,7 +73,6 @@ const ComponentEditRender: React.FC<ComponentRenderProps> = ({ cpId, cpType, pag
         return <FormComp.XImgUpload cpName={cpId} id={cpId} {...componentConfig} />;
       case FORM_COMPONENT_TYPES.AUTO_CODE:
         return <FormComp.XAutoCode cpName={cpId} id={cpId} {...componentConfig} />;
-
       case FORM_COMPONENT_TYPES.RELATED_FORM:
         return <FormComp.XRelatedForm cpName={cpId} id={cpId} {...componentConfig} runtime={false} />;
       case FORM_COMPONENT_TYPES.STATIC_TEXT:

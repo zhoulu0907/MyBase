@@ -2,6 +2,7 @@ import {
     alignConfig,
     baseConfig,
     baseDefault,
+    dataFieldConfig,
     labelColSpanConfig,
     layoutConfig,
     statusConfig,
@@ -27,12 +28,12 @@ import type {
     IAlignConfigType,
     IBooleanConfigType,
     IColorConfigType,
+    IDataFieldConfigType,
     IDescriptionConfigType,
     ILabelConfigType,
     ILayoutConfigType,
     INumberConfigType,
     IPlaceholderConfigType,
-    ISelectConfigType,
     IStatusConfigType,
     ITextAreaConfigType,
     ITextConfigType,
@@ -40,17 +41,22 @@ import type {
     IWidthConfigType,
     TBooleanDefaultType,
     TNumberDefaultType,
+    TRadioDefaultType,
     TSelectDefaultType,
     TTextAreaDefaultType,
     TTextDefaultType
 } from '../../../types';
 
-export interface XInputAutoCodeSchema {
-  editData: TXInputAutoCodeEditData;
-  config: XInputAutoCodeConfig;
+// 输入框组件的schema
+export interface XautoCodeSchema {
+  // 可配置项
+  editData: TXautoCodeEditData;
+  // 默认配置
+  config: XautoCodeConfig;
 }
 
-export type TXInputAutoCodeEditData = Array<
+// 输入框组件的可配置项
+export type TXautoCodeEditData = Array<
   | ITextConfigType
   | ILabelConfigType
   | IPlaceholderConfigType
@@ -59,21 +65,30 @@ export type TXInputAutoCodeEditData = Array<
   | IStatusConfigType<TStatusSelectKeyType>
   | IWidthConfigType<TWidthSelectKeyType>
   | INumberConfigType
-  | ISelectConfigType<TWidthSelectKeyType | TStatusSelectKeyType>
   | ITextAreaConfigType
   | IBooleanConfigType
   | IStatusConfigType<TAlignSelectKeyType>
   | ILayoutConfigType<TLayoutSelectKeyType>
   | IAlignConfigType<TAlignSelectKeyType>
   | IColorConfigType
-  | TNumberDefaultType
+  | IDataFieldConfigType
 >;
 
-export interface XInputAutoCodeConfig extends ICommonBaseType {
+export interface XautoCodeConfig extends ICommonBaseType {
   /**
    * 输入框标题
    */
   label: TTextDefaultType;
+
+  /**
+   * 数据字段
+   */
+  dataField: TTextDefaultType[];
+
+  /**
+   * 占位符
+   */
+  placeholder: TTextDefaultType;
 
   /**
    * 描述信息（显示在输入框下方，辅助说明）
@@ -89,12 +104,17 @@ export interface XInputAutoCodeConfig extends ICommonBaseType {
    * 组件状态：可用、隐藏、只读
    * 可选值: 'default' | 'hidden' | 'readonly'
    */
-  status?: TSelectDefaultType<TStatusSelectKeyType>;
+  status?: TRadioDefaultType<TStatusSelectKeyType>;
+
+  /**
+   * 默认值
+   */
+  defaultValue?: TTextDefaultType;
 
   /**
    * 字段宽度
    */
-  width: TSelectDefaultType<TWidthSelectKeyType>;
+  width: TRadioDefaultType<TWidthSelectKeyType>;
 
   /**
    * 是否必填，未填写时提交报错
@@ -108,15 +128,10 @@ export interface XInputAutoCodeConfig extends ICommonBaseType {
   layout?: TLayoutSelectKeyType;
 
   /**
-   * 标题宽度
-   */
-  labelColSpan?: TNumberDefaultType;
-
-  /**
    * 内容对齐方式：左、中、右
    * 可选值: 'left' | 'center' | 'right'
    */
-  align?: TAlignSelectKeyType;
+  align?: TSelectDefaultType<TAlignSelectKeyType>;
 
   /**
    * 隐藏时是否提交数据，开启后隐藏状态仍会保存值
@@ -132,9 +147,19 @@ export interface XInputAutoCodeConfig extends ICommonBaseType {
    * 背景颜色
    */
   bgColor?: TTextDefaultType;
+
+  /**
+   * 标题宽度
+   */
+  labelColSpan?: TNumberDefaultType;
+
+  /**
+   * 文本最大长度
+   */
+  maxLength?: TNumberDefaultType;
 }
 
-const XAutoCode: XInputAutoCodeSchema = {
+const XautoCode: XautoCodeSchema = {
   editData: [
     ...baseConfig,
     {
@@ -142,16 +167,27 @@ const XAutoCode: XInputAutoCodeSchema = {
       name: '标题',
       type: CONFIG_TYPES.LABEL_INPUT
     },
+    // {
+    //   key: 'defaultValue',
+    //   name: '默认值',
+    //   type: CONFIG_TYPES.TEXT_INPUT
+    // },
+    // {
+    //   key: 'placeholder',
+    //   name: '占位符',
+    //   type: CONFIG_TYPES.PLACEHOLDER_INPUT
+    // },
     {
       key: 'description',
       name: '描述信息',
       type: CONFIG_TYPES.DESCRIPTION_INPUT
     },
-    {
-      key: 'tooltip',
-      name: '提示文字',
-      type: CONFIG_TYPES.TOOLTIP_INPUT
-    },
+    ...dataFieldConfig,
+    // {
+    //   key: 'tooltip',
+    //   name: '提示文字',
+    //   type: CONFIG_TYPES.TOOLTIP_INPUT
+    // },
     layoutConfig,
     labelColSpanConfig,
     {
@@ -175,19 +211,23 @@ const XAutoCode: XInputAutoCodeSchema = {
   ],
   config: {
     ...baseDefault,
-    label: '唯一编码',
+    label: '自动编码',
+    dataField: [],
+    placeholder: '',
     description: '',
     tooltip: '',
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
+    defaultValue: '',
     required: false,
     align: ALIGN_VALUES[ALIGN_OPTIONS.LEFT],
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
     saveWithHidden: false,
     color: '',
     bgColor: '',
-    labelColSpan: 100
+    labelColSpan: 100,
+    maxLength: 40
   }
 };
 
-export default XAutoCode;
+export default XautoCode;

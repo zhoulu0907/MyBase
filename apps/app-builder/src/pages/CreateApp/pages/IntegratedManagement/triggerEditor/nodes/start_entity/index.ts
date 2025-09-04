@@ -4,7 +4,7 @@ import { formMeta } from './form-meta';
 
 export const StartEntityNodeRegistry: FlowNodeRegistry = {
   type: 'start_entity',
-  title: '实体触发节点',
+  title: '表单(实体)触发节点',
   category: 'trigger',
   meta: {
     isStart: true, // Mark as start
@@ -16,7 +16,7 @@ export const StartEntityNodeRegistry: FlowNodeRegistry = {
   },
   info: {
     icon: iconStart,
-    description: '这是实体触发节点，用于设置启动工作流所需的信息。'
+    description: '这是表单(实体)触发节点，用于设置启动工作流所需的信息。'
   },
   /**
    * Render node via formMeta

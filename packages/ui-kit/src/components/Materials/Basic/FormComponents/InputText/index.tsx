@@ -1,5 +1,6 @@
 import { memo } from 'react';
 import { Form, Input } from '@arco-design/web-react';
+import { nanoid } from 'nanoid';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import { type XInputTextConfig } from './schema';
 import './index.css';
@@ -27,7 +28,7 @@ const XInputText = memo((props: XInputTextConfig & { runtime?: boolean }) => {
   return (
     <Form.Item
       label={label.display && label.text}
-      field={dataField.length > 0 ? dataField[dataField.length - 1] : ''}
+      field={dataField.length > 0 ? dataField[dataField.length - 1] : `XInputText_${nanoid()}`}
       layout={layout}
       tooltip={tooltip}
       labelCol={{

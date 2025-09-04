@@ -1,7 +1,9 @@
 import { memo, useEffect, useState } from 'react';
 import { Form, Input } from '@arco-design/web-react';
+import { nanoid } from 'nanoid';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import type { XInputEmailConfig } from './schema';
+import './index.css';
 
 const XInputEmail = memo((props: XInputEmailConfig) => {
   const {
@@ -37,7 +39,7 @@ const XInputEmail = memo((props: XInputEmailConfig) => {
   return (
     <Form.Item
       label={label.display && label.text}
-      field={dataField.length > 0 ? dataField[dataField.length - 1] : ''}
+      field={dataField.length > 0 ? dataField[dataField.length - 1] : `XInputEmail_${nanoid()}`}
       layout={layout}
       tooltip={tooltip}
       labelCol={{

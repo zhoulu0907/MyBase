@@ -4,7 +4,8 @@ import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import '@flowgram.ai/fixed-layout-editor/index.css';
 import { getFlowMgmt, TriggerType } from '@onebase/app';
 import { getHashQueryParam } from '@onebase/common';
-import { useEffect, useState } from 'react';
+import { useSignals } from '@preact/signals-react/runtime';
+import { useEffect, useRef, useState } from 'react';
 import { SidebarProvider, SidebarRenderer } from './components/sidebar';
 import { Tools } from './components/tools';
 import { useEditorProps } from './hooks/use-editor-props';
@@ -20,10 +21,12 @@ import {
 import { FlowNodeRegistries } from './nodes';
 
 const TriggerEditor = () => {
-  //   const editorProps = useEditorProps(initialData, FlowNodeRegistries);
   const editorProps = useEditorProps(FlowNodeRegistries);
-  const { setNodeId, setFlowId, flowId } = triggerEditorSignal;
+  const { setNodeId, nodeId, setFlowId, flowId, setPageId, setNodeData } = triggerEditorSignal;
   const [initData, setInitData] = useState<FlowDocumentJSON>();
+  const sidebarContainerRef = useRef<HTMLDivElement>(null);
+
+  useSignals();
 
   useEffect(() => {
     const flowId = getHashQueryParam('flowId');
@@ -39,14 +42,21 @@ const TriggerEditor = () => {
     }
   }, [flowId]);
 
+  // 载入初始化数据
   const initFlowData = async (id: string) => {
     const res = await getFlowMgmt(id);
     console.log('res: ', res);
     console.log(res.triggerType);
 
+    if (res.triggerConfig && res.triggerConfig.pageId) {
+      setPageId(res.triggerConfig.pageId);
+    }
+
     switch (res.triggerType) {
       case TriggerType.FORM:
         setInitData(StartFormInitData);
+        setNodeData(StartFormInitData.nodes[0].id, StartFormInitData.nodes[0].data.initialData);
+        setNodeData(StartFormInitData.nodes[1].id, StartFormInitData.nodes[1].data.initialData);
         break;
       case TriggerType.ENTITY:
         setInitData(StartEntityInitData);
@@ -68,6 +78,9 @@ const TriggerEditor = () => {
 
   useEffect(() => {
     console.log('initData: ', initData);
+    if (initData) {
+      triggerEditorSignal.setNodes(initData.nodes);
+    }
   }, [initData]);
 
   return (
@@ -94,7 +107,15 @@ const TriggerEditor = () => {
                 <EditorRenderer className={styles.editor} />
                 <Tools />
               </div>
-              <SidebarRenderer />
+              <div
+                className={styles.sidebarContainer}
+                ref={sidebarContainerRef}
+                style={{
+                  width: nodeId.value ? '440px' : '0px'
+                }}
+              >
+                <SidebarRenderer refWrapper={sidebarContainerRef} />
+              </div>
             </div>
           </SidebarProvider>
         </FixedLayoutEditorProvider>

@@ -1,9 +1,9 @@
+import IconCollapsed from '@/assets/images/collapsed.svg';
+import IconSearchForm from '@/assets/images/search_form_icon.svg';
 import FieldCard from '@/components/FieldCard';
 import { useI18n } from '@/hooks/useI18n';
 import { useAppEntityStore } from '@/store/store_entity';
-import { Collapse, Layout, Input } from '@arco-design/web-react';
-import IconCollapsed from '@/assets/images/collapsed.svg';
-import IconSearchForm from '@/assets/images/search_form_icon.svg';
+import { Collapse, Input, Layout } from '@arco-design/web-react';
 import type { AppEntityField } from '@onebase/app';
 import {
   COMPONENT_GROUP_NAME,
@@ -58,7 +58,7 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({ childCollapsed, s
             // TODO(mickey): 使用uuid作为id
             id: `${cpType}-${index}-${Date.now()}`,
             displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[cpType] || '',
-            label: field.fieldName,
+            label: field.displayName,
             type: cpType,
             fieldID: field.fieldID,
             entityID: mainEntity.entityID
@@ -83,11 +83,13 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({ childCollapsed, s
           if (!cpType) {
             cpType = FORM_COMPONENT_TYPES.INPUT_TEXT;
           }
+          console.log('field: ', field);
           return {
             // TODO(mickey): 使用uuid作为id
             id: `${cpType}-${index}-${Date.now()}`,
             displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[cpType] || '',
-            label: field.fieldName,
+            // displayName: field.displayName,
+            label: field.displayName,
             type: cpType,
             fieldID: field.fieldID,
             entityID: subEntity.entityID
@@ -112,7 +114,7 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({ childCollapsed, s
     <div>
       <Sider collapsed={!childCollapsed} collapsible collapsedWidth={0} trigger={null} width={295}>
         <div className={styles.rightHeader}>
-          <div className={styles.title}>{t('editor.metadata')}</div>
+          <div className={styles.title}></div>
 
           <div className={styles.right}>
             <div className={styles.search} onClick={() => setShowSearchInput(true)}>

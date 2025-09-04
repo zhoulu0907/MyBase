@@ -16,11 +16,12 @@ import { CONFIG_TYPES, usePageEditorSignal } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import { useEffect, useState } from 'react';
 import { IconCopy } from '@arco-design/web-react/icon';
-import DynamicFieldConfig from './components/DynamicFieldConfig';
 import DynamicCarouselConfig from './components/DynamicCarouselConfig';
+import DynamicFieldConfig from './components/DynamicFieldConfig';
+import DynamicOptionsConfig from './components/DynamicOptionsConfig';
+import DynamicRadioConfig from './components/DynamicRadioConfig';
 import DynamicRelatedFormConfig from './components/DynamicRelatedFormConfig';
 import DynamicTableConfig from './components/DynamicTableConfig';
-import DynamicRadioConfig from './components/DynamicRadioConfig';
 import styles from './index.module.less';
 
 const Row = Grid.Row;
@@ -189,6 +190,7 @@ const Attributes = ({ cpID }: ConfigsProps) => {
               item.type !== CONFIG_TYPES.FIELD_DATA &&
               item.type !== CONFIG_TYPES.RELATED_FORM_DATA &&
               item.type !== CONFIG_TYPES.RADIO_DATA &&
+              item.type !== CONFIG_TYPES.SELECT_OPTIONS_INPUT &&
               item.type !== CONFIG_TYPES.CAROUSEL
             ) {
               return (
@@ -235,8 +237,6 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                   {(item.type === CONFIG_TYPES.TEXT_INPUT ||
                     item.type === CONFIG_TYPES.TOOLTIP_INPUT ||
                     item.type === CONFIG_TYPES.PLACEHOLDER_INPUT ||
-                    item.type === CONFIG_TYPES.UPLOAD_SIZE ||
-                    item.type === CONFIG_TYPES.UPLOAD_LIMIT ||
                     item.type === CONFIG_TYPES.UPLOAD_COMPRESS) && (
                     <Input
                       placeholder={`请输入${item.name}`}
@@ -263,6 +263,17 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                       min={0}
                       onChange={(value) => {
                         if (!value) return;
+                        handlePropsChange(item.key, value);
+                      }}
+                      suffix={item.type == CONFIG_TYPES.UPLOAD_SIZE ? 'MB' : ''}
+                    />
+                  )}
+
+                  {item.type === CONFIG_TYPES.SUPPORT_FILE_TYPE && (
+                    <Input
+                      placeholder={`请输入支持文件格式，用英文逗号分隔`}
+                      value={configs[item.key]}
+                      onChange={(value) => {
                         handlePropsChange(item.key, value);
                       }}
                     />
@@ -540,6 +551,18 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                   key={index}
                   id={cpID}
                   // handleMultiPropsChange={handleMultiPropsChange}
+                  handlePropsChange={handlePropsChange}
+                  item={item}
+                  configs={configs}
+                />
+              );
+            }
+
+            if (item.type === CONFIG_TYPES.SELECT_OPTIONS_INPUT) {
+              return (
+                <DynamicOptionsConfig
+                  key={index}
+                  id={cpID}
                   handlePropsChange={handlePropsChange}
                   item={item}
                   configs={configs}

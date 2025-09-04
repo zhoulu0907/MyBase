@@ -122,8 +122,8 @@
     "createApp": "零代码创建"
   },
   "editor": {
-    "material": "组件",
-    "metadata": "元数据项",
+    "material": "组件库",
+    "metadata": "业务实体",
     "telegram": "页面分享",
     "baseComponent": "基础",
     "preview": "预览",

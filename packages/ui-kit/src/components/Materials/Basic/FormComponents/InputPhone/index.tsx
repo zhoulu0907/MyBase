@@ -1,5 +1,6 @@
-import { Form, Input } from '@arco-design/web-react';
 import { memo, useEffect, useState } from 'react';
+import { Form, Input } from '@arco-design/web-react';
+import { nanoid } from 'nanoid';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import type { XInputPhoneConfig } from './schema';
 import '../index.css';
@@ -38,7 +39,7 @@ const XInputPhone = memo((props: XInputPhoneConfig) => {
   return (
     <Form.Item
       label={label.display && label.text}
-      field={dataField.length > 0 ? dataField[dataField.length - 1] : ''}
+      field={dataField.length > 0 ? dataField[dataField.length - 1] : `XInputPhone_${nanoid()}`}
       layout={layout}
       tooltip={tooltip}
       labelCol={{

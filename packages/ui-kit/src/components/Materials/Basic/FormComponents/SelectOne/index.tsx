@@ -1,19 +1,17 @@
-import { Form, Select } from '@arco-design/web-react';
 import { memo } from 'react';
+import { nanoid } from 'nanoid';
+import { Form, Select } from '@arco-design/web-react';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import type { XInputSelectOneConfig } from './schema';
 import './index.css';
 
-const Option = Select.Option;
-const options = ['Beijing', 'Shanghai', 'Guangzhou', 'Disabled'];
-
 const XSelectOne = memo((props: XInputSelectOneConfig) => {
-  const { label, dataField, tooltip, status, verify, layout, labelColSpan = 0, showSearch, description } = props;
+  const { label, dataField, tooltip, status, verify, layout, labelColSpan = 0, showSearch, defaultValue } = props;
 
   return (
     <Form.Item
       label={label.display && label.text}
-      field={dataField.length > 0 ? dataField[dataField.length - 1] : ''}
+      field={dataField.length > 0 ? dataField[dataField.length - 1] : `XSelectOne_${nanoid()}`}
       layout={layout}
       tooltip={tooltip}
       labelCol={{
@@ -27,14 +25,13 @@ const XSelectOne = memo((props: XInputSelectOneConfig) => {
         margin: '0px'
       }}
     >
-      <Select placeholder="Select" showSearch={showSearch} style={{ width: '100%' }} allowClear>
-        {options.map((option, index) => (
-          <Option key={option} disabled={index === 3} value={option}>
-            {option}
-          </Option>
-        ))}
-      </Select>
-      <div className='description showEllipsis'>{description}</div>
+      <Select
+        placeholder="Select"
+        showSearch={showSearch}
+        style={{ width: '100%' }}
+        allowClear
+        options={defaultValue}
+      ></Select>
     </Form.Item>
   );
 });

@@ -18,6 +18,7 @@ import {
   createFlowMgmt,
   deleteFlowMgmt,
   getFlowMgmt,
+  getPageListByAppId,
   listFlowMgmt,
   ProcessStatus,
   TriggerType,
@@ -28,6 +29,7 @@ import {
 } from '@onebase/app';
 import { debounce } from 'lodash-es';
 import React, { useCallback, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import FlowCard from './components/card';
 import styles from './index.module.less';
 
@@ -41,13 +43,13 @@ const Option = Select.Option;
  * 目前集成触发器编辑器作为主内容
  */
 const FlowManagementPage: React.FC = () => {
-  const [createForm] = Form.useForm();
-  const [createModalVisible, setCreateModalVisible] = useState(false);
-  const [createLoading, setCreateLoading] = useState(false);
+  const navigate = useNavigate();
 
-  const [editForm] = Form.useForm();
-  const [editModalVisible, setEditModalVisible] = useState(false);
-  const [editLoading, setEditLoading] = useState(false);
+  const [form] = Form.useForm();
+  const [modalVisible, setModalVisible] = useState('');
+  const [formLoading, setFormLoading] = useState(false);
+
+  const triggerType = Form.useWatch('triggerType', form);
 
   const [loading, setLoading] = useState(false);
   const [searchFlowProccessStatus, setSearchFlowProccessStatus] = useState<ProcessStatus | undefined>(undefined);
@@ -56,10 +58,15 @@ const FlowManagementPage: React.FC = () => {
 
   const [pageSize, setPageSize] = useState<number>(8);
   const [pageNo, setPageNo] = useState(1);
-  //   TODO
+
   const [dataList, setDataList] = useState<any[]>();
   const [total, setTotal] = useState(0);
   const { curAppId } = useAppStore();
+  const [pageList, setPageList] = useState<any[]>();
+
+  useEffect(() => {
+    curAppId && handlegetPageList();
+  }, [curAppId]);
 
   useEffect(() => {
     pageSize && curAppId && getFlowMgmtList();
@@ -90,61 +97,81 @@ const FlowManagementPage: React.FC = () => {
     return () => debouncedSearch.cancel();
   }, [debouncedSearch]);
 
+  const toFlowEditor = (appId: string, flowId: string) => {
+    navigate(`/onebase/create-app/integrated-management/flow-editor?appId=${appId}&flowId=${flowId}`);
+  };
+
+  const handlegetPageList = async () => {
+    const res = await getPageListByAppId({ appId: curAppId });
+    console.log('res: ', res);
+    setPageList(res.pages);
+  };
+
   const handleCreateFlow = async () => {
     try {
-      setCreateLoading(true);
+      setFormLoading(true);
       const req: CreateFlowMgmtReq = {
         applicationId: curAppId,
-        processName: createForm.getFieldValue('processName'),
+        processName: form.getFieldValue('processName'),
         // 默认禁用
         processStatus: ProcessStatus.DISABLED,
-        processDescription: createForm.getFieldValue('processDescription') || '',
-        triggerType: createForm.getFieldValue('triggerType')
+        processDescription: form.getFieldValue('processDescription') || '',
+        triggerType: form.getFieldValue('triggerType'),
+        triggerConfig: {
+          pageId: form.getFieldValue('pageId') || undefined
+        }
       };
 
       const res = await createFlowMgmt(req);
+      console.log('创建流程成功:', res);
 
-      setCreateModalVisible(false);
+      toFlowEditor(curAppId, res);
+
+      setModalVisible('');
       getFlowMgmtList();
     } catch (error) {
       console.error('创建流程失败:', error);
     } finally {
-      setCreateLoading(false);
+      setFormLoading(false);
     }
   };
 
   const handleEditFlow = async (id: string) => {
-    editForm.resetFields();
+    form.resetFields();
 
     const res = await getFlowMgmt(id);
-    editForm.setFieldsValue({ id: id });
-    editForm.setFieldsValue({ processName: res.processName });
-    editForm.setFieldsValue({ processStatus: res.processStatus == ProcessStatus.ENABLED ? true : false });
-    editForm.setFieldsValue({ processDescription: res.processDescription });
-    editForm.setFieldsValue({ triggerType: res.triggerType });
+    form.setFieldsValue({ id: id });
+    form.setFieldsValue({ processName: res.processName });
+    form.setFieldsValue({ processStatus: res.processStatus == ProcessStatus.ENABLED ? true : false });
+    form.setFieldsValue({ processDescription: res.processDescription });
+    form.setFieldsValue({ triggerType: res.triggerType });
+    res.triggerConfig && res.triggerConfig.pageId && form.setFieldsValue({ pageId: res.triggerConfig.pageId });
 
-    setEditModalVisible(true);
+    setModalVisible('update');
   };
 
   const handleUpdateFlowMgmt = async () => {
     try {
-      setEditLoading(true);
+      setFormLoading(true);
       const req: UpdateFlowMgmtReq = {
-        id: editForm.getFieldValue('id'),
+        id: form.getFieldValue('id'),
         applicationId: curAppId,
-        processName: editForm.getFieldValue('processName'),
-        processStatus: editForm.getFieldValue('processStatus') ? ProcessStatus.ENABLED : ProcessStatus.DISABLED,
-        processDescription: editForm.getFieldValue('processDescription') || '',
-        triggerType: editForm.getFieldValue('triggerType')
+        processName: form.getFieldValue('processName'),
+        processStatus: form.getFieldValue('processStatus') ? ProcessStatus.ENABLED : ProcessStatus.DISABLED,
+        processDescription: form.getFieldValue('processDescription') || '',
+        triggerType: form.getFieldValue('triggerType'),
+        triggerConfig: {
+          pageId: form.getFieldValue('pageId') || undefined
+        }
       };
 
       const res = await updateFlowMgmt(req);
-      setEditModalVisible(false);
+      setModalVisible('');
       getFlowMgmtList();
     } catch (error) {
       console.error('更新流程失败:', error);
     } finally {
-      setEditLoading(false);
+      setFormLoading(false);
     }
   };
 
@@ -175,6 +202,17 @@ const FlowManagementPage: React.FC = () => {
     setLoading(false);
   };
 
+  const getTriggerTypeList = () => {
+    return [
+      { label: '界面交互触发', value: TriggerType.FORM },
+      { label: '表单(实体)触发', value: TriggerType.ENTITY },
+      { label: '时间触发', value: TriggerType.TIME },
+      { label: '日期字段触发', value: TriggerType.DATE_FIELD },
+      { label: 'API触发', value: TriggerType.API },
+      { label: '子流程触发', value: TriggerType.BPM }
+    ];
+  };
+
   return (
     <div className={styles.flowManagementPage}>
       <div className={styles.header}>
@@ -182,8 +220,8 @@ const FlowManagementPage: React.FC = () => {
           type="primary"
           icon={<IconPlus />}
           onClick={() => {
-            createForm.resetFields();
-            setCreateModalVisible(true);
+            form.resetFields();
+            setModalVisible('create');
           }}
         >
           新建流程
@@ -211,7 +249,7 @@ const FlowManagementPage: React.FC = () => {
             }}
           >
             <TabPane key="all" title="全部"></TabPane>
-            <TabPane key={TriggerType.FORM} title="表单触发"></TabPane>
+            <TabPane key={TriggerType.FORM} title="界面交互触发"></TabPane>
             <TabPane key={TriggerType.ENTITY} title="实体触发"></TabPane>
             <TabPane key={TriggerType.TIME} title="时间触发"></TabPane>
             <TabPane key={TriggerType.DATE_FIELD} title="日期字段触发"></TabPane>
@@ -271,6 +309,7 @@ const FlowManagementPage: React.FC = () => {
                   handleEdit={handleEditFlow}
                   handleDelete={handleDeleteFlow}
                   refreshList={getFlowMgmtList}
+                  toFlowEditor={toFlowEditor}
                 />
               ))}
             </div>
@@ -292,77 +331,60 @@ const FlowManagementPage: React.FC = () => {
 
       <Modal
         title="创建流程"
-        visible={createModalVisible}
-        onOk={handleCreateFlow}
-        onCancel={() => setCreateModalVisible(false)}
-        confirmLoading={createLoading}
-        okText="创建"
+        visible={modalVisible !== ''}
+        onOk={modalVisible == 'create' ? handleCreateFlow : handleUpdateFlowMgmt}
+        onCancel={() => setModalVisible('')}
+        confirmLoading={formLoading}
+        okText={modalVisible == 'create' ? '创建' : '更新'}
         cancelText="取消"
       >
-        <Form layout="horizontal" form={createForm}>
+        <Form layout="horizontal" form={form}>
+          {modalVisible == 'update' && (
+            <FormItem field="id" hidden={true} initialValue={form.getFieldValue('id')}>
+              <Input />
+            </FormItem>
+          )}
+
           <FormItem field="applicationId" hidden={true} initialValue={curAppId}>
             <Input />
           </FormItem>
 
-          <FormItem label="流程名称" field="processName">
+          <FormItem label="流程名称" field="processName" rules={[{ required: true, message: '请输入流程名称' }]}>
             <Input />
           </FormItem>
+
+          {modalVisible == 'update' && (
+            <FormItem label="流程状态" field="processStatus" triggerPropName="checked">
+              <Switch />
+            </FormItem>
+          )}
 
           <FormItem label="流程描述" field="processDescription">
             <Input.TextArea placeholder="请输入流程描述" maxLength={100} allowClear />
           </FormItem>
 
-          <FormItem label="流程定义" field="triggerType">
+          <FormItem label="流程定义" field="triggerType" rules={[{ required: true, message: '请选择流程定义' }]}>
             <Select>
-              <Option value={TriggerType.FORM}>表单触发</Option>
-              <Option value={TriggerType.ENTITY}>实体触发</Option>
-              <Option value={TriggerType.TIME}>时间触发</Option>
-              <Option value={TriggerType.DATE_FIELD}>日期字段触发</Option>
-              <Option value={TriggerType.API}>API触发</Option>
-              <Option value={TriggerType.BPM}>子流程触发</Option>
+              {getTriggerTypeList().map((item) => (
+                <Option key={item.value} value={item.value}>
+                  {item.label}
+                </Option>
+              ))}
             </Select>
           </FormItem>
-        </Form>
-      </Modal>
 
-      <Modal
-        title="编辑流程"
-        visible={editModalVisible}
-        onOk={handleUpdateFlowMgmt}
-        onCancel={() => setEditModalVisible(false)}
-        confirmLoading={editLoading}
-        okText="更新"
-        cancelText="取消"
-      >
-        <Form layout="horizontal" form={editForm}>
-          <FormItem field="id" hidden={true} initialValue={editForm.getFieldValue('id')}>
-            <Input />
-          </FormItem>
-
-          <FormItem field="applicationId" hidden={true} initialValue={curAppId}>
-            <Input />
-          </FormItem>
-
-          <FormItem label="流程名称" field="processName">
-            <Input />
-          </FormItem>
-
-          <FormItem label="流程状态" field="processStatus" triggerPropName="checked">
-            <Switch />
-          </FormItem>
-
-          <FormItem label="流程描述" field="processDescription">
-            <Input.TextArea placeholder="请输入流程描述" maxLength={100} allowClear />
-          </FormItem>
-
-          <FormItem label="流程定义" field="triggerType">
+          <FormItem
+            label="表单ID"
+            field="pageId"
+            hidden={triggerType != TriggerType.FORM}
+            rules={[{ required: true, message: '请选择表单ID' }]}
+          >
             <Select>
-              <Option value={TriggerType.FORM}>表单触发</Option>
-              <Option value={TriggerType.ENTITY}>实体触发</Option>
-              <Option value={TriggerType.TIME}>时间触发</Option>
-              <Option value={TriggerType.DATE_FIELD}>日期字段触发</Option>
-              <Option value={TriggerType.API}>API触发</Option>
-              <Option value={TriggerType.BPM}>子流程触发</Option>
+              {pageList?.map((item) => (
+                <Option key={item.id} value={item.id}>
+                  {item.pageName}
+                </Option>
+              ))}
             </Select>
           </FormItem>
         </Form>

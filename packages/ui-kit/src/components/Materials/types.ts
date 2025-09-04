@@ -310,3 +310,18 @@ export interface IVerifyConfigType {
   name: string;
   type: typeof CONFIG_TYPES.VERIFY;
 }
+
+// 文本输入框配置
+// export interface ISupportFileTypeConfigType {
+//   key: string;
+//   name: string;
+//   type: typeof CONFIG_TYPES.SUPPORT_FILE_TYPE;
+//   placeholder?: string;
+// }
+
+export interface ISelectOptionsConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.SELECT_OPTIONS_INPUT;
+  placeholder?: string;
+}

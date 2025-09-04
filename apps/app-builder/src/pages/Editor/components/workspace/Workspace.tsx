@@ -1,8 +1,8 @@
 import { IconCopy, IconDelete } from '@arco-design/web-react/icon';
+import { getComponentSchema } from '@onebase/ui-kit';
 import { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import { v4 as uuidv4 } from 'uuid';
-import { getComponentSchema } from '@onebase/ui-kit';
 
 import {
   COMPONENT_GROUP_NAME,
@@ -19,14 +19,14 @@ import PCIcon from '@/assets/images/pc_icon.svg';
 import PCActiveIcon from '@/assets/images/pc_icon_active.svg';
 
 // import PrevIcon from '@/assets/images/prev_icon.svg';
-import PrevActiveIcon from '@/assets/images/prev_icon_active.svg';
 import NextIcon from '@/assets/images/next_icon.svg';
+import PrevActiveIcon from '@/assets/images/prev_icon_active.svg';
 // import NextActiveIcon from '@/assets/images/next_icon_active.svg';
 
+import { Divider } from '@arco-design/web-react';
 import { useSignals } from '@preact/signals-react/runtime';
 import 'react-grid-layout/css/styles.css';
 import styles from './index.module.less';
-import { Divider } from '@arco-design/web-react';
 
 export default function EditorWorkspace() {
   const [showEmpty, setShowEmpty] = useState(true);
@@ -228,9 +228,8 @@ export default function EditorWorkspace() {
                 const curComponentSchema = pageComponentSchemas[cp.id];
                 setCurComponentSchema(curComponentSchema);
 
-                console.log('pageComponentSchemas: ', pageComponentSchemas);
-                console.log('当前组件的ID: ', cp.id);
-                console.log('当前组件的配置: ', curComponentSchema);
+                // console.log('当前组件的ID: ', cp.id);
+                // console.log('当前组件的配置: ', curComponentSchema);
                 setShowDeleteButton(true);
               }}
             >

@@ -16,7 +16,7 @@ const XFileUpload = memo((props: XInputFileUploadConfig) => {
     verify,
     layout,
     labelColSpan = 0,
-    description
+    description,
   } = props;
 
   const [fileUrl, setFileUrl] = useState<string>('');

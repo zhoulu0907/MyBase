@@ -10,16 +10,18 @@ import { useI18n } from '@/hooks/useI18n';
 import { useBasicEditorStore } from '@/store';
 import { useAppStore } from '@/store/store_app';
 import { useAppEntityStore } from '@/store/store_entity';
-import { Button, Message, Tabs, Breadcrumb, Input } from '@arco-design/web-react';
+import { Breadcrumb, Button, Input, Message, Tabs } from '@arco-design/web-react';
 import { IconArrowLeft } from '@arco-design/web-react/icon';
+import { IconEdit } from '@douyinfe/semi-icons';
 import {
   AppStatus,
   ENTITY_TYPE,
-  getAppEntities,
   getAppIdByPageSetId,
   getApplication,
+  getEntityFieldsWithChildren,
+  getPageSetMetaData,
   updateApplicationMenuName,
-  type AppEntity,
+  type ChildEntity,
   type GetApplicationReq,
   type UpdateApplicationMenuNameReq
 } from '@onebase/app';
@@ -143,7 +145,7 @@ export default function EditorHeader() {
       loadPageSetInfo(pageSetId);
       setIsEditMode(true);
       handleGetAppInfo(pageSetId);
-      //   getMainMetaData(pageSetId);
+      getMainMetaData(pageSetId);
     }
   }, [pageSetId]);
 
@@ -176,43 +178,57 @@ export default function EditorHeader() {
     }
     console.log('appResp: ', appResp);
 
-    handleGetAppEntities(appId);
+    // handleGetAppEntities(appId);
   };
 
-  //   // 获取主表对应的主实体信息
-  //   const getMainMetaData = async (pageSetId: string) => {
-  //     const mainMetaData = await getPageSetMetaData({ pageSetId: pageSetId });
-  //     console.log('mainMetaData: ', mainMetaData);
+  // 获取主表对应的主实体信息
+  const getMainMetaData = async (pageSetId: string) => {
+    const mainMetaData = await getPageSetMetaData({ pageSetId: pageSetId });
+    console.log('mainMetaData: ', mainMetaData);
 
-  //     const entityWithChildren = await getEntityFieldsWithChildren(mainMetaData);
-  //     console.log(entityWithChildren);
+    const entityWithChildren = await getEntityFieldsWithChildren(mainMetaData);
 
-  //     if (entityWithChildren) {
-  //       setMainEntity({
-  //         entityID: entityWithChildren.entityId,
-  //         entityName: entityWithChildren.entityName,
-  //         entityType: entityWithChildren.entityType,
-  //         fields: entityWithChildren.parentFields
-  //       });
-  //     }
-  //   };
+    if (entityWithChildren) {
+      setMainEntity({
+        entityID: entityWithChildren.entityId,
+        entityName: entityWithChildren.entityName,
+        entityType: ENTITY_TYPE.MAIN,
+        fields: entityWithChildren.parentFields
+      });
 
-  const handleGetAppEntities = async (appId: string) => {
-    const res = await getAppEntities(appId);
-    console.log('appEntities: ', res);
-    if (res) {
-      setAppEntities(res.entities);
-      const mainEntity = res.entities.filter((entity: AppEntity) => entity.entityType === ENTITY_TYPE.MAIN);
-      if (mainEntity.length > 0) {
-        setMainEntity(mainEntity[0]);
-      }
-      const subEntities = res.entities.filter((entity: AppEntity) => entity.entityType === ENTITY_TYPE.SUB);
-      if (subEntities.length > 0) {
-        setSubEntities({ entities: subEntities });
+      if (entityWithChildren.childEntities && entityWithChildren.childEntities.length > 0) {
+        const subEntities = entityWithChildren.childEntities.map((entity: ChildEntity) => ({
+          entityID: entity.childEntityId,
+          entityName: entity.childEntityName,
+          entityType: ENTITY_TYPE.SUB,
+          fields: entity.childFields
+        }));
+
+        setSubEntities({
+          entities: subEntities
+        });
       }
     }
-    return res;
   };
+
+  //   const handleGetAppEntities = async (appId: string) => {
+  //     const res = await getAppEntities(appId);
+  //     console.log('appEntities: ', res);
+  //     if (res) {
+  //       setAppEntities(res.entities);
+  //       const mainEntity = res.entities.filter(
+  //         (entity: AppEntity) => entity.entityType === ENTITY_TYPE.MAIN || entity.entityType === ENTITY_TYPE.INDEP
+  //       );
+  //       if (mainEntity.length > 0) {
+  //         setMainEntity(mainEntity[0]);
+  //       }
+  //       const subEntities = res.entities.filter((entity: AppEntity) => entity.entityType === ENTITY_TYPE.SUB);
+  //       if (subEntities.length > 0) {
+  //         setSubEntities({ entities: subEntities });
+  //       }
+  //     }
+  //     return res;
+  //   };
 
   const handleSavePageSet = async () => {
     console.log(`save appid: ${curAppId}, pageSetId: ${pageSetId}`);

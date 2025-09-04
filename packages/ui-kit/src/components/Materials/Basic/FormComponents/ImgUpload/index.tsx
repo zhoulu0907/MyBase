@@ -1,5 +1,6 @@
 import { memo, useState } from 'react';
 import { Form, Message, Upload } from '@arco-design/web-react';
+import { nanoid } from 'nanoid';
 import { uploadFile } from '@onebase/platform-center';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import type { XInputImgUploadConfig } from './schema';
@@ -30,7 +31,7 @@ const XImgUpload = memo((props: XInputImgUploadConfig) => {
   return (
     <Form.Item
       label={label.display && label.text}
-      field={dataField.length > 0 ? dataField[dataField.length - 1] : ''}
+      field={dataField.length > 0 ? dataField[dataField.length - 1] : `XImgUpload_${nanoid()}`}
       layout={layout}
       tooltip={tooltip}
       labelCol={{

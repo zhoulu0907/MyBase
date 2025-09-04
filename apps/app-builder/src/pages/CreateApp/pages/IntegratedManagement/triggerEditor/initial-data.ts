@@ -31,7 +31,8 @@ export const EndInitData = {
   type: 'end',
   blocks: [],
   data: {
-    title: '结束'
+    title: '结束',
+    initialData: {}
   }
 };
 
@@ -42,7 +43,13 @@ export const StartFormInitData = {
       type: 'start_form',
       blocks: [],
       data: {
-        title: '表单触发节点',
+        title: '界面交互触发节点',
+        initialData: {
+          debounceTime: 100,
+          id: 'start_form_0',
+          ignoreEmptyChange: false,
+          relatedSubtableTrigger: false
+        },
         outputs: {
           type: 'object',
           properties: {}
@@ -60,7 +67,7 @@ export const StartEntityInitData = {
       type: 'start_entity',
       blocks: [],
       data: {
-        title: '实体触发节点',
+        title: '表单(实体)触发节点',
         outputs: {
           type: 'object',
           properties: {}

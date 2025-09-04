@@ -11,13 +11,18 @@ export interface ApplicationMenu {
     menuType: number;
     menuName: string;
     menuIcon: string;
-    isVisible: boolean;
+    isVisible: number;
     children: ApplicationMenu[];
 }
 
 export enum MenuType {
   PAGE = 1,
   GROUP = 2
+}
+
+export enum VisibleType {
+  SHOW = 1,
+  HIDDEN = 0
 }
 
 export enum PageType {
@@ -33,7 +38,7 @@ export const RootParentPage = {
     menuType: MenuType.GROUP,
     menuName: "根目录",
     menuIcon: "",
-    isVisible: true,
+    isVisible: 1,
     children: [] as ApplicationMenu[]
 };
 
@@ -60,7 +65,7 @@ export interface UpdateApplicationMenuOrderReq {
 
 export interface UpdateApplicationMenuVisibleReq {
   id: string;
-  visible: boolean;
+  visible: number;
 }
 
 export interface CopyApplicationMenuReq {
