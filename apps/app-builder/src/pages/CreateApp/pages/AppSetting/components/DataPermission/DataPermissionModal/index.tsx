@@ -3,6 +3,7 @@ import { Checkbox, Button, Modal, Form, Input, Select } from '@arco-design/web-r
 import { IconPlus, IconClose } from '@arco-design/web-react/icon';
 import {
   DataOperationEnum,
+  FieldValueType,
   type AppEntity,
   type AppEntityField,
   type AuthDataGroupVO,
@@ -10,6 +11,8 @@ import {
   type AuthDataPermissionPersonVO,
   type FilterFieldCheckType
 } from '@onebase/app';
+import styles from './index.module.less';
+
 const Option = Select.Option;
 const FormItem = Form.Item;
 
@@ -44,11 +47,11 @@ const fieldCompareOperators = [
 const fieldValueType = [
   {
     label: '静态值',
-    value: 'static'
+    value: FieldValueType.static
   },
   {
     label: '变量',
-    value: 'variable'
+    value: FieldValueType.variable
   }
 ];
 
@@ -58,7 +61,7 @@ const conditionData = {
   value: '',
   fieldId: 0,
   fieldOperator: 'equal',
-  fieldValueType: 'static',
+  fieldValueType: FieldValueType.static,
   fieldValue: ''
 };
 
@@ -232,7 +235,7 @@ const PermissionModal = (props: IProps) => {
     <>
       {/* 添加、编辑数据权限组 */}
       <Modal
-        title={<div style={{ textAlign: 'left' }}>{status === 'create' ? '添加' : '编辑'}数据权限组</div>}
+        title={<div className={styles.dataPermissionModalTitle}>{status === 'create' ? '添加' : '编辑'}数据权限组</div>}
         visible={visible}
         onOk={handleOk}
         onCancel={() => {
@@ -244,14 +247,14 @@ const PermissionModal = (props: IProps) => {
         autoFocus={false}
         focusLock={true}
         okText="创建"
-        style={{ width: 750 }}
+        className={styles.dataPermissionModal}
         // 添加 unmountOnExit 属性确保组件正确卸载
         unmountOnExit={true}
       >
         <Form
           form={form}
           layout="vertical"
-          style={{ padding: '0 65px', boxSizing: 'border-box' }}
+          className={styles.dataPermissionForm}
           onValuesChange={(changedValues) => {
             // 当entity字段值发生变化时，更新entitySelected状态
             if (Object.prototype.hasOwnProperty.call(changedValues, 'scopeFieldId')) {
@@ -290,16 +293,10 @@ const PermissionModal = (props: IProps) => {
             </Select>
           </FormItem>
           <FormItem field="scopeOwner" label="权限范围" rules={[{ required: true, message: '请选择权限范围' }]}>
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between'
-              }}
-            >
+            <div className={styles.dataPermissionScope}>
               <Select
                 placeholder="选择拥有者"
-                style={{ width: 150 }}
+                className={styles.scopeRoles}
                 disabled={!entitySelected}
                 onChange={(value) => {
                   setScopeOwner(value);
@@ -316,7 +313,7 @@ const PermissionModal = (props: IProps) => {
               是
               <Select
                 placeholder="本人"
-                style={{ width: 360 }}
+                className={styles.scopePerson}
                 disabled={!entitySelected}
                 onChange={(value) => {
                   setScopeValue(value);
@@ -333,52 +330,23 @@ const PermissionModal = (props: IProps) => {
             </div>
           </FormItem>
           <FormItem field="dataFilters" label="数据过滤">
-            <div
-              style={{
-                border: '1px solid #E5E6EB',
-                borderRadius: 4,
-                padding: 18,
-                boxSizing: 'border-box',
-                overflow: 'auto',
-                maxHeight: 300
-              }}
-            >
+            <div className={styles.dataPermissionFilters}>
               {conditionGroup && conditionGroup[0]?.length > 0 ? (
                 <>
                   {conditionGroup.map((group, index) => {
                     return (
                       <div key={index}>
                         {index > 0 && <p style={{ margin: '8px 0', color: '#666', fontSize: 14 }}>或者</p>}
-                        <div
-                          key={index}
-                          style={{
-                            display: 'flex',
-                            flexWrap: 'wrap',
-                            alignItems: 'center',
-                            padding: '9px 18px 9px 9px',
-                            boxSizing: 'border-box',
-                            borderRadius: 4,
-                            background: 'rgb(225 227 231)',
-                            marginBottom: 15,
-                            position: 'relative'
-                          }}
-                        >
+                        <div key={index} className={styles.dataFilter}>
                           {group.map((item, idx: number) => (
-                            <div
-                              key={idx}
-                              style={{
-                                marginBottom: 8,
-                                display: 'flex',
-                                alignItems: 'center'
-                              }}
-                            >
+                            <div key={idx} className={styles.dataFilterItem}>
                               <FormItem
                                 field={`dataFilters[${index}][${idx}].fieldId`}
-                                style={{ marginBottom: 0, width: 132 }}
+                                className={styles.dataFilterItemFieldBox}
                               >
                                 <Select
                                   placeholder="归档状态"
-                                  style={{ width: 120, marginRight: 12, marginBottom: 8 }}
+                                  className={styles.dataFilterItemField}
                                   onChange={(value) => getFieldCheckType(value)}
                                 >
                                   {appEntityFields.map((option) => (
@@ -390,9 +358,9 @@ const PermissionModal = (props: IProps) => {
                               </FormItem>
                               <FormItem
                                 field={`dataFilters[${index}][${idx}].fieldOperator`}
-                                style={{ marginBottom: 0, width: 112 }}
+                                className={styles.dataFilterItemBox}
                               >
-                                <Select placeholder="比较操作" style={{ width: 100, marginRight: 12, marginBottom: 8 }}>
+                                <Select placeholder="比较操作" className={styles.dataFilterItem}>
                                   {filterFieldCheckType?.map((option) => (
                                     <Option key={option.code} value={option.code}>
                                       {option.name}
@@ -402,11 +370,11 @@ const PermissionModal = (props: IProps) => {
                               </FormItem>
                               <FormItem
                                 field={`dataFilters[${index}][${idx}].fieldValueType`}
-                                style={{ marginBottom: 0, width: 112 }}
+                                className={styles.dataFilterItemBox}
                               >
                                 <Select
                                   placeholder="字段类型"
-                                  style={{ width: 100, marginRight: 12, marginBottom: 8 }}
+                                  className={styles.dataFilterItem}
                                   onChange={(value) => {
                                     // 更新字段值类型
                                     const newConditionGroup = [...(conditionGroup || [])];
@@ -424,14 +392,14 @@ const PermissionModal = (props: IProps) => {
                                   ))}
                                 </Select>
                               </FormItem>
-                              {item.fieldValueType === 'static' ? (
+                              {item.fieldValueType === FieldValueType.static ? (
                                 <FormItem
                                   field={`dataFilters[${index}][${idx}].fieldValue`}
-                                  style={{ marginBottom: 0, width: 152 }}
+                                  className={styles.dataFilterItemValueBox}
                                 >
                                   <Input
                                     placeholder="请输入值"
-                                    style={{ width: 140, marginRight: 12, marginBottom: 8 }}
+                                    className={styles.dataFilterItemValue}
                                     value={item.fieldValue}
                                     onChange={(value) => {
                                       // 更新静态值
@@ -447,11 +415,11 @@ const PermissionModal = (props: IProps) => {
                               ) : (
                                 <FormItem
                                   field={`dataFilters[${index}][${idx}].fieldValue`}
-                                  style={{ marginBottom: 0 }}
+                                  className={styles.dataFilterItemValueBox}
                                 >
                                   <Select
                                     placeholder="请选择变量"
-                                    style={{ width: 140, marginRight: 12, marginBottom: 8 }}
+                                    className={styles.dataFilterItemValue}
                                     // value={item.fieldValue}
                                     onChange={(value) => {
                                       // 更新变量值
@@ -472,7 +440,7 @@ const PermissionModal = (props: IProps) => {
                                 </FormItem>
                               )}
                               <IconClose
-                                style={{ cursor: 'pointer', fontSize: 16, paddingBottom: 8 }}
+                                className={styles.dataFilterItemIcon}
                                 onClick={() => {
                                   // 删除当前条件
                                   const newGroup = [...(conditionGroup || [])];
@@ -493,7 +461,7 @@ const PermissionModal = (props: IProps) => {
                             type="outline"
                             size="mini"
                             icon={<IconPlus />}
-                            style={{ marginTop: 5 }}
+                            className={styles.dataFilterAndBtn}
                             onClick={() => {
                               const newGroup = [...(conditionGroup || [])];
                               if (!newGroup[index]) {
@@ -531,12 +499,12 @@ const PermissionModal = (props: IProps) => {
             </div>
           </FormItem>
           <FormItem field="isOperable" label="操作权限">
-            <div style={{ marginBottom: 20 }}>
+            <div className={styles.dataPermissionOperableBox}>
               <Checkbox onChange={onChangeAll} checked={checkAll} indeterminate={indeterminate}>
                 操作权限
               </Checkbox>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 36 }}>
+            <div className={styles.dataPermissionOperable}>
               <Checkbox checked={true} disabled>
                 可查看
               </Checkbox>

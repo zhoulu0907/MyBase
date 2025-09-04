@@ -315,7 +315,7 @@ export interface AuthViewVO {
 
 /**
  * 枚举 数据操作权限
- * @enum 
+ * @enum
  */
 export enum DataOperationEnum {
   /**
@@ -326,4 +326,19 @@ export enum DataOperationEnum {
    * 操作
    */
   operate = 'operate',
+}
+
+/**
+ * 枚举 字段操作权限
+ * @enum 
+ */
+export enum FieldValueType {
+  /**
+   * 静态值
+   */
+  static = 'static',
+  /**
+   * 变量
+   */
+  variable = 'variable',
 }
