@@ -1,15 +1,14 @@
 // 实体管理服务
 import {
-    CreateEntityReqVO,
-    CreateFieldReqVO,
-    CreateMasterChildReqVO,
-    CreateRelationReqVO,
-    CreateRuleReqVO,
-    GetEntityPageParams,
-    UpdateEntityReqVO,
-    UpdateFieldReqVO,
-    UpdateRelationReqVO,
-    UpdateRuleReqVO
+  CreateEntityReqVO,
+  CreateFieldReqVO,
+  CreateMasterChildReqVO,
+  CreateRelationReqVO,
+  GetEntityPageParams,
+  GetFieldValidationTypesParams,
+  UpdateEntityReqVO,
+  UpdateFieldReqVO,
+  UpdateRelationReqVO
 } from '../types';
 import { metadataService } from './clients';
 
@@ -162,6 +161,10 @@ export const getFieldTypes = () => {
   return metadataService.post('/entity-field/field-types');
 };
 
+export const getFieldValidationTypes = (params: GetFieldValidationTypesParams) => {
+  return metadataService.post('/entity-field/validation-types/query', params);
+};
+
 /**
  * 获取实体的关联关系列表
  * @param entityId 实体ID
@@ -206,7 +209,6 @@ export const updateRelation = (data: UpdateRelationReqVO) => {
 export const deleteRelation = (id: string) => {
   return metadataService.post('/business-entity/relation/delete', { params: { id } });
 };
-
 
 /**
  * 根据ID获取关系详细信息

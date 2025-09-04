@@ -1,8 +1,8 @@
 import { Form, TreeSelect } from '@arco-design/web-react';
 import { memo } from 'react';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
-import type { XInputDeptSelectConfig } from './schema';
 import './index.css';
+import type { XInputDeptSelectConfig } from './schema';
 
 // TODO(Mickey): 放到schema的config中
 // 示例树形结构：部门
@@ -52,8 +52,8 @@ const XDeptSelect = memo((props: XInputDeptSelectConfig) => {
         margin: '0px'
       }}
     >
-      <TreeSelect placeholder="Select" style={{ width: '100%' }} allowClear treeData={treeData}></TreeSelect>
-      <div className='description showEllipsis'>{description}</div>
+      <TreeSelect placeholder="请选择" style={{ width: '100%' }} allowClear treeData={treeData}></TreeSelect>
+      <div className="description showEllipsis">{description}</div>
     </Form.Item>
   );
 });

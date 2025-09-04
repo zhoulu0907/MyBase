@@ -1,24 +1,24 @@
-import { memo, useEffect, useState } from 'react';
-import { nanoid } from 'nanoid';
 import { Form, Select } from '@arco-design/web-react';
-import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
-import type { XInputUserSelectConfig } from './schema';
-import './index.css';
-import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
-import { getSimpleUserList } from '@onebase/platform-center';
 import type { UserVO } from '@onebase/platform-center';
+import { getSimpleUserList } from '@onebase/platform-center';
+import { nanoid } from 'nanoid';
+import { memo, useEffect, useState } from 'react';
+import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
+import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
+import './index.css';
+import type { XInputUserSelectConfig } from './schema';
 
 const Option = Select.Option;
 
 const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean }) => {
-  const { label, dataField, tooltip, status, verify, layout, labelColSpan = 0, description, runtime} = props;
+  const { label, dataField, tooltip, status, verify, layout, labelColSpan = 0, description, runtime } = props;
   const [userData, setUserData] = useState<UserVO[]>([]);
 
   useEffect(() => {
-    if(runtime === true){
+    if (runtime === true) {
       getUserData();
     }
-  }, [])
+  }, []);
   const getUserData = async () => {
     // const param = {
     //   pageNo: 1,
@@ -26,8 +26,8 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean })
     //   keywords: ''
     // }
     const res = await getSimpleUserList();
-    setUserData(res || [])
-  }
+    setUserData(res || []);
+  };
 
   return (
     <Form.Item
@@ -47,7 +47,7 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean })
       }}
     >
       <Select
-        placeholder="Select"
+        placeholder="请选择"
         showSearch={true}
         filterOption={(inputValue, option) =>
           option.props.value.toLowerCase().indexOf(inputValue.toLowerCase()) >= 0 ||
@@ -62,7 +62,7 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean })
           </Option>
         ))}
       </Select>
-      <div className='description showEllipsis'>{description}</div>
+      <div className="description showEllipsis">{description}</div>
     </Form.Item>
   );
 });
