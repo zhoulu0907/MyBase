@@ -30,11 +30,10 @@ const MenuIcon = (props: IProps) => {
         .filter((item) => item.name.includes(inputValue))
         .filter((item) => item.type === activeMenu || activeMenu === 'all');
 
-      console.log(result, 'result', data, activeMenu);
       setData(result);
     } else {
-      const newData = activeMenu === 'all' ? menuIconList : menuIconList.filter((v) => v.type === activeMenu);
-      setData(newData);
+      const result = activeMenu === 'all' ? menuIconList : menuIconList.filter((v) => v.type === activeMenu);
+      setData(result);
     }
   }, [inputValue, activeMenu]);
 
