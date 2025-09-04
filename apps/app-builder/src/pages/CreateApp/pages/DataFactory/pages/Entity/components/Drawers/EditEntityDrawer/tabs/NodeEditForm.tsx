@@ -1,14 +1,16 @@
-import { type Entity, type EntityField } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
+import { type EntityField, type EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
 import { FIELD_TYPE } from '@onebase/ui-kit';
-import { Button, Form, Input, Grid } from '@arco-design/web-react';
+import { Button, Form, Input, Grid, Space, Message } from '@arco-design/web-react';
 import { IconCheck } from '@arco-design/web-react/icon';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { createEntityRules } from '@/pages/CreateApp/pages/DataFactory/utils/rules';
+import { deleteEntity } from '@onebase/app';
+import { DeleteConfirmModal } from '../../../Modals';
 import styles from './NodeEditForm.module.less';
 
 // 节点编辑表单组件
 interface NodeEditFormProps {
-  node: Entity;
+  node: EntityNode;
   onSave: (data: Partial<FormValues>) => void;
   onCancel: () => void;
   successCallback?: () => void;
@@ -20,6 +22,7 @@ interface FormItem {
 }
 
 interface FormValues {
+  id: string;
   code: string;
   tableName: string;
   displayName: string;
@@ -36,13 +39,17 @@ interface FormValues {
 
 const NodeEditForm: React.FC<NodeEditFormProps> = ({ node, onCancel, onSave, successCallback }) => {
   const [form] = Form.useForm<FormValues>();
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   // 初始化表单数据
-  const getInitialValues = (node: Entity) => {
+  const getInitialValues = (node: EntityNode) => {
+    console.log('getInitialValues', node);
     return {
+      id: node.entityId || '',
       code: node.code || '',
       tableName: node.tableName || '',
-      displayName: node.displayName || node.entityName || '',
+      displayName: node.entityName || '',
       description: node.description || '',
       systemFields: {
         creator: node?.fields?.find(
@@ -88,8 +95,21 @@ const NodeEditForm: React.FC<NodeEditFormProps> = ({ node, onCancel, onSave, suc
     { field: 'systemFields.owner_dept', label: '记录数据拥有部门' }
   ];
 
-  const handleDelete = () => {
-    console.log('handleDelete data', node.id);
+  const openDeleteModal = () => {
+    setDeleteModalVisible(true);
+  };
+
+  const handleDelete = async () => {
+    setDeleteLoading(true);
+    const res = await deleteEntity(node.entityId);
+
+    setDeleteLoading(false);
+    setDeleteModalVisible(false);
+    if (res) {
+      onCancel();
+      Message.success('删除成功');
+      successCallback?.();
+    }
   };
 
   useEffect(() => {
@@ -103,7 +123,7 @@ const NodeEditForm: React.FC<NodeEditFormProps> = ({ node, onCancel, onSave, suc
         <h3>业务实体</h3>
       </div>
 
-      <Form form={form} layout="vertical" style={{ width: '100%' }}>
+      <Form form={form} layout="vertical" className={styles.editForm}>
         {/* 基本设置 */}
         <div className={styles.formSection}>
           <h4 className={styles.formSectionTitle}>基本设置</h4>
@@ -147,26 +167,33 @@ const NodeEditForm: React.FC<NodeEditFormProps> = ({ node, onCancel, onSave, suc
               ))}
           </Grid.Row>
         </div>
+      </Form>
 
-        <Form.Item className={styles.formActions}>
-          {/* 更换为删除按钮 */}
-          <Button type="text" status="danger" onClick={() => handleDelete()}>
-            删除
-          </Button>
-          {/* <Button onClick={onCancel} style={{ marginRight: 16 }}>
-            取消
-          </Button>
+      <div className={styles.formActions}>
+        <Button type="text" status="danger" onClick={() => openDeleteModal()}>
+          删除
+        </Button>
+        <Space>
+          <Button onClick={onCancel}>取消</Button>
           <Button
             type="primary"
             onClick={() => {
-              onSave(form.getFieldsValue());
+              onSave({ ...form.getFieldsValue(), id: node.entityId });
               successCallback?.();
             }}
           >
             保存
-          </Button> */}
-        </Form.Item>
-      </Form>
+          </Button>
+        </Space>
+      </div>
+
+      <DeleteConfirmModal
+        content="确定要删除这个业务实体吗？删除后无法恢复。"
+        visible={deleteModalVisible}
+        onVisibleChange={setDeleteModalVisible}
+        onConfirm={handleDelete}
+        confirmLoading={deleteLoading}
+      />
     </div>
   );
 };

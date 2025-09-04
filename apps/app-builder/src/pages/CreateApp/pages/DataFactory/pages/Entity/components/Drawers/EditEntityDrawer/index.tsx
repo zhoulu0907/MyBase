@@ -32,7 +32,6 @@ const EditEntityDrawer: React.FC<{
       onNodeEdit(formData);
       setVisible(false);
       setEditingNode(null);
-      Message.success('节点信息已更新');
       if (successCallback) {
         successCallback();
       }
