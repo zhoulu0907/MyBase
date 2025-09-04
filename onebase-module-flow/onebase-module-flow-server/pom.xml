@@ -19,6 +19,7 @@
         <liteflow.version>2.13.2</liteflow.version>
         <js.version>23.0.9</js.version>
         <dom4j.version>2.2.0</dom4j.version>
+        <xxljob.version>3.1.1</xxljob.version>
     </properties>
     <dependencies>
         <!-- 依赖服务 -->
@@ -82,11 +83,20 @@
             <version>${dom4j.version}</version>
         </dependency>
         <!-- xxl job -->
-        <!--<dependency>
+        <dependency>
+            <groupId>com.xuxueli</groupId>
+            <artifactId>xxl-job-core</artifactId>
+            <version>${xxljob.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>com.konghq</groupId>
             <artifactId>unirest-java-core</artifactId>
-            <version>${unirest.version}</version>
-        </dependency>-->
+        </dependency>
+        <dependency>
+            <groupId>com.konghq</groupId>
+            <artifactId>unirest-modules-jackson</artifactId>
+        </dependency>
         <!-- Test 测试相关 -->
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
