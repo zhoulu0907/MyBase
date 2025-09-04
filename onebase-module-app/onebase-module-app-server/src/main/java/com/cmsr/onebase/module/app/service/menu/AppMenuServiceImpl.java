@@ -234,6 +234,15 @@ public class AppMenuServiceImpl implements AppMenuService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    public void updateApplicationMenu(MenuUpdateReqVO updateReqVO) {
+        MenuDO menuDO = appCommonService.validateMenuExist(updateReqVO.getId());
+        menuDO.setMenuName(updateReqVO.getMenuName());
+        menuDO.setMenuIcon(updateReqVO.getMenuIcon());
+        appMenuRepository.update(menuDO);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
     public void updateApplicationMenuName(Long id, String menuName) {
         MenuDO menuDO = appCommonService.validateMenuExist(id);
         menuDO.setMenuName(menuName);

@@ -40,6 +40,13 @@ public class AppMenuController {
         return success(appMenuService.createApplicationMenu(createReqVO));
     }
 
+    @PostMapping("/update")
+    @Operation(summary = "更新应用菜单")
+    public CommonResult<Boolean> updateApplicationMenu(@RequestBody MenuUpdateReqVO updateReqVO) {
+        appMenuService.updateApplicationMenu(updateReqVO);
+        return CommonResult.success(true);
+    }
+
     @PostMapping("/update-name")
     @Operation(summary = "更新应用菜单名称")
     public CommonResult<Boolean> updateApplicationMenuName(@RequestParam("id") Long id,
