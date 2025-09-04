@@ -1,8 +1,7 @@
-import { FIELD_TYPE } from '@/pages/CreateApp/pages/DataFactory/utils/const';
 import { useAppEntityStore } from '@/store/store_entity';
 import { Button, Checkbox, Dropdown, Form, Input, InputNumber, Menu, Message, Select } from '@arco-design/web-react';
 import { IconDelete, IconDragDotVertical } from '@arco-design/web-react/icon';
-import { getEntityFields, type MetadataEntityField, type MetadataEntityPair } from '@onebase/app';
+import { FilterEntityFields, getEntityFields, type MetadataEntityField, type MetadataEntityPair } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import styles from '../../index.module.less';
@@ -41,7 +40,9 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
 
   // 获取当前表格关联的实体id
   useEffect(() => {
-    console.log(id, item);
+    if (id != configs.id) {
+      return;
+    }
 
     if (configs[item.key]) {
       setEntityId(configs[item.key]);
@@ -101,16 +102,24 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
     const res = await getEntityFields({ entityId });
     console.log('fieldList res: ', res);
 
-    const newFieldList = res.filter((item: MetadataEntityField) => item.isSystemField == FIELD_TYPE.CUSTOM);
+    const newFieldList = res.filter((item: MetadataEntityField) => !FilterEntityFields.includes(item.fieldName));
+
     setFieldList(newFieldList);
+
+    if (configs.metaData === entityId) {
+      return;
+    }
 
     const newColumns = newFieldList.map((item: MetadataEntityField) => ({
       // 保留已有的命名，如果没有则使用字段展示名称
-      title: configs[columnsKey].find((col: any) => col.dataIndex === item.fieldName)?.title || item.displayName,
+      title:
+        configs[columnsKey].find((col: any) => col.dataIndex === item.fieldName && configs.metaData === entityId)
+          ?.title || item.displayName,
       dataIndex: item.fieldName
     }));
 
-    console.log('newColumns: ', newColumns);
+    // console.log('configs[columnsKey]: ', configs[columnsKey]);
+    // console.log('newColumns: ', newColumns);
 
     setColumnsConfig(newColumns);
     handlePropsChange(columnsKey, newColumns);
@@ -123,16 +132,15 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
           placeholder={`请选择${item.name}`}
           value={configs[item.key]}
           onChange={(value) => {
-            setEntityId(value);
-
-            setSearchItemsConfig([]);
-            // setColumnsConfig([]);
-
             handleMultiPropsChange([
               { key: item.key, value: value },
               { key: searchItemsKey, value: [] },
               { key: columnsKey, value: [] }
             ]);
+
+            setEntityId(value);
+            setSearchItemsConfig([]);
+            setColumnsConfig([]);
           }}
         >
           {entityList.map((item) => (

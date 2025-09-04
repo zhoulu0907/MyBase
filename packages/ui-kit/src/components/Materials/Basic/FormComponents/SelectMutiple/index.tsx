@@ -26,7 +26,7 @@ const XSelectMutiple = memo((props: XInputSelectMutipleConfig) => {
         mode="multiple"
         allowClear
         showSearch={showSearch}
-        placeholder="Select"
+        placeholder="请选择"
         style={{ width: '100%' }}
         options={defaultValue}
       ></Select>

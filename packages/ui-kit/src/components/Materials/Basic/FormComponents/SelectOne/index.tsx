@@ -1,9 +1,9 @@
 import { Form, Select } from '@arco-design/web-react';
+import { nanoid } from 'platejs';
 import { memo } from 'react';
+import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import type { XInputSelectOneConfig } from './schema';
-import { nanoid } from 'platejs';
-import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 
 const XSelectOne = memo((props: XInputSelectOneConfig) => {
   const { label, dataField, tooltip, status, required, layout, labelColSpan = 0, showSearch, defaultValue } = props;
@@ -26,7 +26,7 @@ const XSelectOne = memo((props: XInputSelectOneConfig) => {
       }}
     >
       <Select
-        placeholder="Select"
+        placeholder="请选择"
         showSearch={showSearch}
         style={{ width: '100%' }}
         allowClear
