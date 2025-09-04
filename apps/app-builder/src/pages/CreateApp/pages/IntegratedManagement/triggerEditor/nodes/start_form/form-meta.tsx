@@ -1,8 +1,14 @@
 import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
 
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
-import { Form, Input, InputNumber, Switch } from '@arco-design/web-react';
-import { getComponentListByPageId, type ComponentConfig, type ConfitionField } from '@onebase/app';
+import { Form, Input, Switch } from '@arco-design/web-react';
+import {
+  getComponentListByPageId,
+  getFieldValidationTypes,
+  type ComponentConfig,
+  type ConfitionField,
+  type EntityFieldValidationTypes
+} from '@onebase/app';
 import { useEffect, useState } from 'react';
 import ConditionEditor from '../../components/condition-editor';
 import { FormContent, FormHeader, FormOutputs } from '../../form-components';
@@ -14,7 +20,8 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const { node } = useNodeRenderContext();
 
   const { pageId } = triggerEditorSignal;
-  const [conditionField, setConditionField] = useState<ConfitionField[]>([]);
+  const [conditionFields, setConditionFields] = useState<ConfitionField[]>([]);
+  const [validationTypes, setValidationTypes] = useState<EntityFieldValidationTypes[]>([]);
 
   const handlePropsOnChange = (values: any) => {
     triggerEditorSignal.setNodeData(node.id, values);
@@ -32,25 +39,28 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     const res = await getComponentListByPageId({ pageId: id });
     console.log('res: ', res);
     if (res && res.list) {
-      const newConditionField: ConfitionField[] = [];
+      const newConditionFields: ConfitionField[] = [];
       const filedIds: string[] = [];
       res.list.forEach((item: ComponentConfig) => {
         const cpConfig = JSON.parse(item.config);
         if (cpConfig.dataField && cpConfig.dataField.length > 1) {
           filedIds.push(cpConfig.dataField[1]);
+
+          newConditionFields.push({
+            label: cpConfig.label.text,
+            value: cpConfig.dataField[1],
+            fieldType: item.componentType
+          });
         }
       });
 
-      // TODO(mickey): 等天宇提供接口后
-      //   res.list.forEach((item: ComponentConfig) => {
+      const newValidationTypes = await getFieldValidationTypes({ fieldIdList: filedIds });
+      console.log('validationTypes: ', newValidationTypes);
+      setValidationTypes(newValidationTypes);
 
-      //     const cpConfig = JSON.parse(item.config);
-      //     if (cpConfig.dataField && cpConfig.dataField.length > 1) {
-      //       newConditionField.push({ label: cpConfig.label, value: cpConfig.dataField[1], fieldType: cpConfig.dataField[0] });
-      //     }
-      //   });
+      console.log('newConditionFields: ', newConditionFields);
 
-      //   setConditionField(newConditionField);
+      setConditionFields(newConditionFields);
     }
   };
 
@@ -75,7 +85,14 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
               <Input disabled />
             </Form.Item>
             <Form.Item label="过滤条件" field="filterConditions" layout="vertical">
-              <ConditionEditor onChange={() => {}} fields={[]} fieldOperatorMapping={{}} />
+              {validationTypes && (
+                <ConditionEditor
+                  // TODO(mickey): 补充onChange
+                  onChange={() => {}}
+                  fields={conditionFields}
+                  entityFieldValidationTypes={validationTypes}
+                />
+              )}
             </Form.Item>
 
             <Form.Item label="忽略空值变更" field="ignoreEmptyChange" layout="vertical" triggerPropName="checked">
@@ -83,10 +100,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             </Form.Item>
             <Form.Item label="关联子表触发" field="relatedSubtableTrigger" layout="vertical" triggerPropName="checked">
               <Switch />
-            </Form.Item>
-
-            <Form.Item label="防抖时间" field="debounceTime" layout="vertical">
-              <InputNumber min={100} max={1000} />
             </Form.Item>
           </Form>
         </FormContent>

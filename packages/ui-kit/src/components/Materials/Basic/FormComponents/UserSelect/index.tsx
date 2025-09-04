@@ -1,10 +1,10 @@
-import { memo } from 'react';
-import { nanoid } from 'nanoid';
 import { Form, TreeSelect } from '@arco-design/web-react';
-import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
-import type { XInputUserSelectConfig } from './schema';
-import './index.css';
+import { nanoid } from 'nanoid';
+import { memo } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
+import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
+import './index.css';
+import type { XInputUserSelectConfig } from './schema';
 
 // TODO(Mickey): 放到schema的config中
 // 示例树形结构：人员
@@ -55,8 +55,8 @@ const XUserSelect = memo((props: XInputUserSelectConfig) => {
         margin: '0px'
       }}
     >
-      <TreeSelect placeholder="Select" style={{ width: '100%' }} allowClear treeData={treeData} />
-      <div className='description showEllipsis'>{description}</div>
+      <TreeSelect placeholder="请选择" style={{ width: '100%' }} allowClear treeData={treeData} />
+      <div className="description showEllipsis">{description}</div>
     </Form.Item>
   );
 });
