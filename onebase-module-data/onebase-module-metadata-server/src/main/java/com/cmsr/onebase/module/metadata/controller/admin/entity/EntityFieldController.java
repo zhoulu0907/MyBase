@@ -15,6 +15,8 @@ import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldSa
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.FieldTypeConfigRespVO;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldBatchSaveReqVO;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldBatchSaveRespVO;
+import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldValidationTypesReqVO;
+import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldValidationTypesRespVO;
 import com.cmsr.onebase.module.metadata.convert.entity.EntityFieldConvert;
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.service.entity.MetadataEntityFieldService;
@@ -68,7 +70,6 @@ public class EntityFieldController {
         EntityFieldRespVO result = entityFieldService.createEntityFieldWithRelated(reqVO);
         return success(result);
     }
-
     @PostMapping("/list")
     @Operation(summary = "查询指定实体的字段列表")
     @PreAuthorize("@ss.hasPermission('metadata:entity-field:query')")
@@ -133,5 +134,14 @@ public class EntityFieldController {
     public CommonResult<EntityFieldBatchSaveRespVO> batchSave(@Valid @RequestBody EntityFieldBatchSaveReqVO reqVO) {
         EntityFieldBatchSaveRespVO resp = entityFieldService.batchSaveEntityFields(reqVO);
         return success(resp);
+    }
+
+    @PostMapping("/validation-types/query")
+    @Operation(summary = "批量查询字段可选校验类型")
+    @PreAuthorize("@ss.hasPermission('metadata:entity-field:query')")
+    public CommonResult<List<EntityFieldValidationTypesRespVO>> getFieldValidationTypes(
+            @Valid @RequestBody EntityFieldValidationTypesReqVO reqVO) {
+        List<EntityFieldValidationTypesRespVO> result = entityFieldService.getFieldValidationTypes(reqVO);
+        return success(result);
     }
 }

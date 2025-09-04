@@ -4,9 +4,11 @@ import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import lombok.Data;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @Author：huangjie
@@ -27,7 +29,7 @@ public class JsonGraph {
     private List<JsonNode> nodes;
 
     public String toFlowChain() {
-        return blocksNodeDefine(1, nodes);
+        return blocksNodeDefine(0, nodes);
     }
 
     private String blocksNodeDefine(int deep, List<JsonNode> blocks) {
@@ -35,49 +37,48 @@ public class JsonGraph {
             throw new IllegalArgumentException("blocks子节点不能为空");
         }
         StringBuilder define = new StringBuilder();
-        define.append("SER(").append(NEW_LINE);
+        define.append(repeatIndent(deep)).append("SER(");
         for (int i = 0; i < blocks.size(); i++) {
             String nodeCmp = nodeDefine(deep, blocks.get(i));
-            define.append(StringUtils.repeat(INDENT, deep)).append(INDENT).append(nodeCmp);
+            define.append(NEW_LINE).append(repeatIndent(deep + 1, nodeCmp));
             if (i != blocks.size() - 1) {
-                define.append(",").append(NEW_LINE);
-            } else {
-                define.append(NEW_LINE);
+                define.append(",");
             }
         }
-        define.append(StringUtils.repeat(INDENT, deep)).append(")");
+        define.append(NEW_LINE).append(repeatIndent(deep)).append(")");
         return define.toString();
     }
+
 
     private String nodeDefine(int deep, JsonNode node) {
         if (StringUtils.equalsAny(node.getType(),
                 "start", "end", "dataAdd", "dataDelete", "dataUpdate")) {
-            return node.toDefine();
+            return toDefine(node);
         } else if (Objects.equals(node.getType(), "loop")) {
-            return loopNodeDefine(deep + 1, node);
+            return loopNodeDefine(deep, node);
         } else if (Objects.equals(node.getType(), "switch")) {
-            return switchNodeDefine(deep + 1, node);
+            return switchNodeDefine(deep, node);
         }
         throw new IllegalArgumentException("未知的节点类型: " + node.getType());
     }
 
     private String loopNodeDefine(int deep, JsonNode node) {
         StringBuilder define = new StringBuilder();
-        define.append("WHILE(").append(node.toDefine()).append(".DO(").append(NEW_LINE);
-        define.append(blocksNodeDefine(deep + 1, node.getBlocks()));
-        define.append(NEW_LINE).append(StringUtils.repeat(INDENT, deep)).append(")");
+        define.append("WHILE(").append(toDefine(node)).append(".DO(");
+        define.append(NEW_LINE).append(blocksNodeDefine(deep + 1, node.getBlocks()));
+        define.append(NEW_LINE).append(")");
         return define.toString();
     }
 
     private String switchNodeDefine(int deep, JsonNode node) {
         StringBuilder define = new StringBuilder();
-        define.append("SWITCH(").append(node.toDefine()).append(".TO(");
+        define.append("SWITCH(").append(toDefine(node)).append(".TO(");
         for (JsonNode caseDefaultNode : node.getBlocks()) {
             if (Objects.equals(caseDefaultNode.getType(), "case")) {
-                define.append(NEW_LINE).append(StringUtils.repeat(INDENT, deep + 1)).append(switchCaseNodeDefine(deep + 1, caseDefaultNode)).append(",");
+                define.append(NEW_LINE).append(switchCaseNodeDefine(deep + 1, caseDefaultNode)).append(",");
             }
         }
-        define.append(NEW_LINE).append(StringUtils.repeat(INDENT, deep)).append(")");
+        define.append(NEW_LINE).append(")");
         for (JsonNode caseDefaultNode : node.getBlocks()) {
             if (Objects.equals(caseDefaultNode.getType(), "caseDefault")) {
                 define.append(switchDefaultNodeDefine(deep + 1, caseDefaultNode));
@@ -88,16 +89,41 @@ public class JsonGraph {
 
     private String switchCaseNodeDefine(int deep, JsonNode caseJsonNode) {
         String blocksNodeDefine = blocksNodeDefine(deep, caseJsonNode.getBlocks());
-        return String.format("%s.id(\"%s\")", blocksNodeDefine, caseJsonNode.getId());
+        return String.format("%s.tag(\"%s\")", blocksNodeDefine, caseJsonNode.getId());
     }
 
     private String switchDefaultNodeDefine(int deep, JsonNode defaultJsonNode) {
         String blocksNodeDefine = blocksNodeDefine(deep, defaultJsonNode.getBlocks());
         StringBuilder define = new StringBuilder();
-        define.append(".DEFAULT(").append(blocksNodeDefine).append(NEW_LINE);
-        define.append(StringUtils.repeat(INDENT, deep)).append(")").append(".id(\"").append(defaultJsonNode.getId()).append("\"");
+        define.append(".DEFAULT(");
+        define.append(NEW_LINE).append(blocksNodeDefine).append(".tag(\"").append(defaultJsonNode.getId()).append("\")");
+        define.append(")");
         return define.toString();
     }
 
+    private String toDefine(JsonNode node) {
+        StringBuilder define = new StringBuilder();
+        define.append(node.getType()).append(".tag(\"").append(node.getId()).append("\")");
+        return define.toString();
+    }
 
+    @NotNull
+    private static String repeatIndent(int deep) {
+        if (deep <= 0) {
+            return "";
+        }
+        return StringUtils.repeat(INDENT, deep);
+    }
+
+    /**
+     * 在content的每行数据前面都加上deep个缩进
+     *
+     * @param deep
+     * @param content
+     * @return
+     */
+    private static String repeatIndent(int deep, String content) {
+        String collect = content.lines().map(line -> repeatIndent(deep) + line).collect(Collectors.joining(NEW_LINE));
+        return collect;
+    }
 }

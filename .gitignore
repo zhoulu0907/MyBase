@@ -106,3 +106,8 @@ sessionStore
 /sql/patch/fix_system_uid_worker_node_emergency.sql
 /docs/IDENTITY列序列冲突解决方案.md
 /docs/PostgreSQL序列冲突修复指南.md
+/sql/patch/fix_all_sequence_conflicts.sql
+/sql/patch/fix_uid_worker_node_sequence.sql
+/sql/patch/fix_uid_worker_node_sequence_force.sql
+/sql/patch/fix_uid_worker_node_sequence_rebuild.sql
+/sql/patch/fix_uid_worker_node_sequence_simple.sql

@@ -1,10 +1,13 @@
 package com.cmsr.onebase.module.app.service.appresource;
 
+import com.cmsr.onebase.module.app.api.appresource.dto.PageDTO;
 import org.springframework.stereotype.Service;
 
 import com.cmsr.onebase.module.app.api.appresource.dto.CreatePageDTO;
 import com.cmsr.onebase.module.app.api.appresource.dto.PageRespDTO;
 import com.cmsr.onebase.module.app.api.appresource.dto.UpdatePageNameDTO;
+
+import java.util.List;
 
 @Service
 public interface PageService {
@@ -16,4 +19,7 @@ public interface PageService {
     Boolean updatePageName(UpdatePageNameDTO updatePageNameVO);
 
     Boolean deletePage(Long pageId);
+
+    List<PageDTO> getFormPageListByAppId(Long appId);
+
 }

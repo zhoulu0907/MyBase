@@ -47,7 +47,7 @@ public class EntityFieldConvert {
     }
 
     public EntityFieldQueryVO convertVOToQueryVO(EntityFieldQueryReqVO reqVO) {
-        return BeanUtils.toBean(reqVO, EntityFieldQueryVO.class);
+    return BeanUtils.toBean(reqVO, EntityFieldQueryVO.class);
     }
 
 }

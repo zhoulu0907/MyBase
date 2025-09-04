@@ -36,7 +36,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.module.metadata.enums.ErrorCodeConstants.ENTITY_FIELD_NOT_EXISTS;
@@ -67,11 +72,87 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
     private AutoNumberRuleService autoNumberRuleService;
     @Resource
     private MetadataComponentFieldTypeService componentFieldTypeService;
+    @Resource
+    private AnylineService<?> anylineService;
 
     @Override
     public List<FieldTypeConfigRespVO> getFieldTypes() {
         // 从MetadataComponentFieldTypeDO中读取字段类型配置，替代原来的枚举方式
         return componentFieldTypeService.getFieldTypeConfigs();
+    }
+
+    @Override
+    public List<EntityFieldValidationTypesRespVO> getFieldValidationTypes(@Valid EntityFieldValidationTypesReqVO reqVO) {
+        List<String> fieldIds = reqVO.getFieldIdList();
+        if (fieldIds == null || fieldIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        // 1) 批量查询字段，获取 fieldId -> fieldType 映射
+    DefaultConfigStore cs = new DefaultConfigStore();
+    cs.and(Compare.IN, "id", fieldIds.stream()
+        .filter(s -> s != null && !s.trim().isEmpty())
+        .map(s -> Long.valueOf(s.trim()))
+        .collect(Collectors.toList()));
+        cs.and("deleted", 0);
+        List<MetadataEntityFieldDO> fields = metadataEntityFieldRepository.findAllByConfig(cs);
+        Map<String, String> fieldIdToType = fields.stream()
+                .collect(Collectors.toMap(f -> String.valueOf(f.getId()), MetadataEntityFieldDO::getFieldType));
+
+        if (fieldIdToType.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        // 提取所有用到的字段类型编码
+        Set<String> typeCodes = fieldIdToType.values().stream()
+                .filter(s -> s != null && !s.isBlank())
+                .collect(Collectors.toSet());
+
+        if (typeCodes.isEmpty()) {
+            // 没有可用类型，直接返回空列表结构
+            return fieldIdToType.entrySet().stream().map(e -> {
+                EntityFieldValidationTypesRespVO vo = new EntityFieldValidationTypesRespVO();
+                vo.setFieldId(e.getKey());
+                vo.setFieldTypeCode(e.getValue());
+                vo.setValidationTypes(new ArrayList<>());
+                return vo;
+            }).collect(Collectors.toList());
+        }
+
+        // 2) 一次性联表查询：字段类型 -> 校验类型列表
+        String inClause = typeCodes.stream().map(code -> "'" + code.replace("'", "''") + "'")
+                .collect(Collectors.joining(","));
+    // 说明：不同环境对 status 语义可能不一致（0/1 含义相反），这里不做 status 过滤，仅按 deleted=0 过滤，确保有数据即可返回
+    String sql = "select mcft.field_type_code, mvt.validation_code, mvt.validation_name, mvt.validation_desc, mpo.sort_order " +
+        "from metadata_permit_ref_otft mpo " +
+        "join metadata_component_field_type mcft on mpo.field_type_id = mcft.id " +
+        "join metadata_validation_type mvt on mpo.validation_type_id = mvt.id " +
+        "where mcft.deleted = 0 and mvt.deleted = 0 and mpo.deleted = 0 " +
+        "and mcft.field_type_code in (" + inClause + ") " +
+        "order by mcft.field_type_code, mpo.sort_order";
+
+        DataSet ds = anylineService.querys(sql);
+        Map<String, List<EntityFieldValidationTypesRespVO.ValidationTypeItem>> typeToValidation = new HashMap<>();
+        for (DataRow row : ds) {
+            String ftCode = row.getString("field_type_code");
+            EntityFieldValidationTypesRespVO.ValidationTypeItem item = new EntityFieldValidationTypesRespVO.ValidationTypeItem();
+            item.setCode(row.getString("validation_code"));
+            item.setName(row.getString("validation_name"));
+            item.setDescription(row.getString("validation_desc"));
+            item.setSortOrder(row.getInt("sort_order"));
+            typeToValidation.computeIfAbsent(ftCode, k -> new ArrayList<>()).add(item);
+        }
+
+        // 3) 按 fieldId 组装返回
+        List<EntityFieldValidationTypesRespVO> result = new ArrayList<>();
+        for (Map.Entry<String, String> e : fieldIdToType.entrySet()) {
+            EntityFieldValidationTypesRespVO vo = new EntityFieldValidationTypesRespVO();
+            vo.setFieldId(e.getKey());
+            vo.setFieldTypeCode(e.getValue());
+            vo.setValidationTypes(typeToValidation.getOrDefault(e.getValue(), new ArrayList<>()));
+            result.add(vo);
+        }
+        return result;
     }
 
     @Override
@@ -154,7 +235,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
         DefaultConfigStore configStore = new DefaultConfigStore();
 
         if (queryVO.getEntityId() != null && !queryVO.getEntityId().trim().isEmpty()) {
-            configStore.and(MetadataEntityFieldDO.ENTITY_ID, Long.valueOf(queryVO.getEntityId()));
+            configStore.and(MetadataEntityFieldDO.ENTITY_ID, Long.valueOf(queryVO.getEntityId().trim()));
         }
         if (queryVO.getKeyword() != null && !queryVO.getKeyword().trim().isEmpty()) {
             configStore.and(Compare.LIKE, MetadataEntityFieldDO.FIELD_NAME, "%" + queryVO.getKeyword() + "%")
@@ -167,9 +248,65 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
             configStore.and(Compare.LIKE, MetadataEntityFieldDO.FIELD_CODE, "%" + queryVO.getFieldCode() + "%");
         }
 
+        // isPerson=1 时，限定人员字段（USER）并补充 creator/updater 两个系统字段
+        List<MetadataEntityFieldDO> baseList;
         configStore.order(MetadataEntityFieldDO.SORT_ORDER, Order.TYPE.ASC);
         configStore.order("create_time", Order.TYPE.DESC);
 
+        if (queryVO.getIsPerson() != null && queryVO.getIsPerson() == 1) {
+            // 限定字段类型为 USER
+            DefaultConfigStore personStore = new DefaultConfigStore();
+            personStore.and(MetadataEntityFieldDO.ENTITY_ID, Long.valueOf(queryVO.getEntityId().trim()));
+            personStore.and(MetadataEntityFieldDO.FIELD_TYPE, "USER");
+            // 透传其它条件
+            if (queryVO.getKeyword() != null && !queryVO.getKeyword().trim().isEmpty()) {
+                personStore.and(Compare.LIKE, MetadataEntityFieldDO.FIELD_NAME, "%" + queryVO.getKeyword() + "%")
+                        .or(Compare.LIKE, MetadataEntityFieldDO.DISPLAY_NAME, "%" + queryVO.getKeyword() + "%");
+            }
+            if (queryVO.getFieldCode() != null && !queryVO.getFieldCode().trim().isEmpty()) {
+                personStore.and(Compare.LIKE, MetadataEntityFieldDO.FIELD_CODE, "%" + queryVO.getFieldCode() + "%");
+            }
+            personStore.order(MetadataEntityFieldDO.SORT_ORDER, Order.TYPE.ASC);
+            personStore.order("create_time", Order.TYPE.DESC);
+
+            baseList = metadataEntityFieldRepository.findAllByConfig(personStore);
+
+            // 追加 creator、updater 系统字段（若存在）并去重
+            if (queryVO.getEntityId() != null) {
+                Long eid = Long.valueOf(queryVO.getEntityId().trim());
+                LinkedHashMap<String, MetadataEntityFieldDO> map = new LinkedHashMap<>();
+                for (MetadataEntityFieldDO f : baseList) {
+                    String key = f.getId() != null ? String.valueOf(f.getId()) : f.getFieldName();
+                    map.putIfAbsent(key, f);
+                }
+
+                MetadataEntityFieldDO creator = metadataEntityFieldRepository.getEntityFieldByName(eid, "creator");
+                if (creator != null) {
+                    String key = creator.getId() != null ? String.valueOf(creator.getId()) : creator.getFieldName();
+                    map.putIfAbsent(key, creator);
+                }
+                MetadataEntityFieldDO updater = metadataEntityFieldRepository.getEntityFieldByName(eid, "updater");
+                if (updater != null) {
+                    String key = updater.getId() != null ? String.valueOf(updater.getId()) : updater.getFieldName();
+                    map.putIfAbsent(key, updater);
+                }
+
+                baseList = new java.util.ArrayList<>(map.values());
+                // 最终再按 sort_order asc, create_time desc 排序一次
+                baseList.sort((a,b) -> {
+                    int s1 = a.getSortOrder() != null ? a.getSortOrder() : 0;
+                    int s2 = b.getSortOrder() != null ? b.getSortOrder() : 0;
+                    if (s1 != s2) return Integer.compare(s1, s2);
+                    if (a.getCreateTime() == null && b.getCreateTime() == null) return 0;
+                    if (a.getCreateTime() == null) return 1;
+                    if (b.getCreateTime() == null) return -1;
+                    return b.getCreateTime().compareTo(a.getCreateTime());
+                });
+            }
+            return baseList;
+        }
+
+        // 默认逻辑
         return metadataEntityFieldRepository.findAllByConfig(configStore);
     }
 
@@ -211,16 +348,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
             result.setConstraints(cr);
         }
 
-        // 自动编号摘要
-        MetadataAutoNumberConfigDO cfg = autoNumberConfigService.getByFieldId(entityField.getId());
-        if (cfg != null) {
-            EntityFieldAutoNumberBriefRespVO brief = new EntityFieldAutoNumberBriefRespVO();
-            brief.setEnabled(cfg.getIsEnabled());
-            brief.setMode(cfg.getNumberMode());
-            brief.setDigitWidth(cfg.getDigitWidth() != null ? (int) cfg.getDigitWidth() : null);
-            brief.setResetCycle(cfg.getResetCycle());
-            result.setAutoNumber(brief);
-        }
+    // 自动编号（详情页返回在 getEntityFieldDetailWithFullConfig 中补充完整配置）
 
         return result;
     }
@@ -239,14 +367,16 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
             // 获取第一个字段的entityId来确定业务实体
             if (!reqVO.getFields().isEmpty()) {
                 String firstFieldId = reqVO.getFields().get(0).getId();
-                DefaultConfigStore configStore = new DefaultConfigStore();
-                configStore.and("id", Long.valueOf(firstFieldId));
-                MetadataEntityFieldDO firstField = metadataEntityFieldRepository.findOne(configStore);
-                if (firstField != null) {
-                    businessEntity = metadataBusinessEntityService.getBusinessEntity(firstField.getEntityId());
-                    if (businessEntity != null && businessEntity.getTableName() != null &&
-                        !businessEntity.getTableName().trim().isEmpty()) {
-                        datasource = metadataDatasourceService.getDatasource(businessEntity.getDatasourceId());
+                if (firstFieldId != null && !firstFieldId.trim().isEmpty()) {
+                    DefaultConfigStore configStore = new DefaultConfigStore();
+                    configStore.and("id", Long.valueOf(firstFieldId.trim()));
+                    MetadataEntityFieldDO firstField = metadataEntityFieldRepository.findOne(configStore);
+                    if (firstField != null) {
+                        businessEntity = metadataBusinessEntityService.getBusinessEntity(firstField.getEntityId());
+                        if (businessEntity != null && businessEntity.getTableName() != null &&
+                            !businessEntity.getTableName().trim().isEmpty()) {
+                            datasource = metadataDatasourceService.getDatasource(businessEntity.getDatasourceId());
+                        }
                     }
                 }
             }
@@ -332,7 +462,8 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
         // 2. 先删除
         for (EntityFieldUpsertItemVO item : reqVO.getItems()) {
             if (Boolean.TRUE.equals(item.getIsDeleted())) {
-                if (item.getId() == null) {
+                // 删除必须提供有效ID（非空非空白）
+                if (item.getId() == null || item.getId().trim().isEmpty()) {
                     throw new IllegalArgumentException("删除操作必须提供字段ID");
                 }
                 // 校验存在
@@ -368,7 +499,8 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
 
         // 3. 再更新
         for (EntityFieldUpsertItemVO item : reqVO.getItems()) {
-            if (!Boolean.TRUE.equals(item.getIsDeleted()) && item.getId() != null) {
+            // 更新：要求提供有效ID（非空非空白）
+            if (!Boolean.TRUE.equals(item.getIsDeleted()) && item.getId() != null && !item.getId().trim().isEmpty()) {
                 validateEntityFieldExists(item.getId());
 
                 // 拉取原字段
@@ -405,6 +537,16 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
                 metadataEntityFieldRepository.update(upd);
 
                 // 同步物理表（需要完整字段信息）
+                // 若本次更新修改了字段名，先尝试对物理列执行重命名，避免后续ALTER因新列不存在而失败
+                if (datasource != null && businessEntity.getTableName() != null && item.getFieldName() != null
+                        && !item.getFieldName().equals(origin.getFieldName())) {
+                    try {
+                        renameColumnInTable(datasource, businessEntity.getTableName(), origin.getFieldName(), item.getFieldName());
+                    } catch (Exception e) {
+                        log.warn("重命名物理列失败，将在后续逻辑中回退为新增列处理。old={}, new={}, err={}",
+                                origin.getFieldName(), item.getFieldName(), e.getMessage());
+                    }
+                }
                 DefaultConfigStore cs2 = new DefaultConfigStore();
                 cs2.and("id", origin.getId());
                 MetadataEntityFieldDO full = metadataEntityFieldRepository.findOne(cs2);
@@ -421,7 +563,8 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
 
         // 4. 最后新增
         for (EntityFieldUpsertItemVO item : reqVO.getItems()) {
-            if (!Boolean.TRUE.equals(item.getIsDeleted()) && item.getId() == null) {
+            // 新增：当未提供ID或ID为空白时进入
+            if (!Boolean.TRUE.equals(item.getIsDeleted()) && (item.getId() == null || item.getId().trim().isEmpty())) {
                 // 智能处理：如果没有传ID，但fieldCode或fieldName已存在，则自动转换为更新操作
                 MetadataEntityFieldDO existingField = findExistingFieldByCodeOrName(reqVO.getEntityId(), item);
                 if (existingField != null) {
@@ -454,6 +597,16 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
                     metadataEntityFieldRepository.update(upd);
 
                     // 同步物理表（需要完整字段信息）
+                    // 如果修改了字段名，优先执行物理列重命名
+                    if (datasource != null && businessEntity.getTableName() != null && item.getFieldName() != null
+                            && !item.getFieldName().equals(existingField.getFieldName())) {
+                        try {
+                            renameColumnInTable(datasource, businessEntity.getTableName(), existingField.getFieldName(), item.getFieldName());
+                        } catch (Exception e) {
+                            log.warn("重命名物理列失败，将在后续逻辑中回退为新增列处理。old={}, new={}, err={}",
+                                    existingField.getFieldName(), item.getFieldName(), e.getMessage());
+                        }
+                    }
                     DefaultConfigStore cs2 = new DefaultConfigStore();
                     cs2.and("id", existingField.getId());
                     MetadataEntityFieldDO full = metadataEntityFieldRepository.findOne(cs2);
@@ -516,7 +669,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
      */
     private MetadataEntityFieldDO findExistingFieldByCodeOrName(String entityId, EntityFieldUpsertItemVO item) {
         DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and(MetadataEntityFieldDO.ENTITY_ID, Long.valueOf(entityId));
+    configStore.and(MetadataEntityFieldDO.ENTITY_ID, Long.valueOf(entityId.trim()));
 
         // fieldCode字段已注释，跳过根据fieldCode查找逻辑
         // 直接根据fieldName查找
@@ -524,7 +677,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
         // 其次根据fieldName查找
         if (item.getFieldName() != null && !item.getFieldName().trim().isEmpty()) {
             DefaultConfigStore nameConfigStore = new DefaultConfigStore();
-            nameConfigStore.and(MetadataEntityFieldDO.ENTITY_ID, Long.valueOf(entityId));
+            nameConfigStore.and(MetadataEntityFieldDO.ENTITY_ID, Long.valueOf(entityId.trim()));
             nameConfigStore.and(MetadataEntityFieldDO.FIELD_NAME, item.getFieldName());
             MetadataEntityFieldDO existingField = metadataEntityFieldRepository.findOne(nameConfigStore);
             if (existingField != null) {
@@ -622,8 +775,8 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteEntityField(String id) {
-        // 校验存在
-        validateEntityFieldExists(id);
+    // 校验存在（容错空白ID）
+    validateEntityFieldExists(id);
 
         // 获取字段信息（在删除前需要获取相关信息用于删除物理表字段）
         Long longId = Long.valueOf(id);
@@ -665,7 +818,15 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
     }
 
     private void validateEntityFieldExists(String id) {
-        Long longId = Long.valueOf(id);
+        if (id == null || id.trim().isEmpty()) {
+            throw exception(ENTITY_FIELD_NOT_EXISTS);
+        }
+        Long longId;
+        try {
+            longId = Long.valueOf(id.trim());
+        } catch (NumberFormatException e) {
+            throw exception(ENTITY_FIELD_NOT_EXISTS);
+        }
         if (metadataEntityFieldRepository.findById(longId) == null) {
             throw exception(ENTITY_FIELD_NOT_EXISTS);
         }
@@ -676,8 +837,8 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.and(MetadataEntityFieldDO.ENTITY_ID, longEntityId);
         configStore.and(MetadataEntityFieldDO.FIELD_NAME, fieldName);
-        if (id != null) {
-            Long longId = Long.valueOf(id);
+        if (id != null && !id.trim().isEmpty()) {
+            Long longId = Long.valueOf(id.trim());
             configStore.and(Compare.NOT_EQUAL, "id", longId);
         }
 
@@ -689,7 +850,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
 
     @Override
     public MetadataEntityFieldDO getEntityField(String id) {
-        Long longId = Long.valueOf(id);
+    Long longId = Long.valueOf(id.trim());
         return metadataEntityFieldRepository.findById(longId);
     }
 
@@ -699,7 +860,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
 
         // 添加查询条件
         if (pageReqVO.getEntityId() != null && !pageReqVO.getEntityId().trim().isEmpty()) {
-            configStore.and(MetadataEntityFieldDO.ENTITY_ID, Long.valueOf(pageReqVO.getEntityId()));
+            configStore.and(MetadataEntityFieldDO.ENTITY_ID, Long.valueOf(pageReqVO.getEntityId().trim()));
         }
         if (pageReqVO.getFieldName() != null && !pageReqVO.getFieldName().trim().isEmpty()) {
             configStore.and(Compare.LIKE, MetadataEntityFieldDO.FIELD_NAME, "%" + pageReqVO.getFieldName() + "%");
@@ -723,7 +884,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
             configStore.and(MetadataEntityFieldDO.RUN_MODE, pageReqVO.getRunMode());
         }
         if (pageReqVO.getAppId() != null && !pageReqVO.getAppId().trim().isEmpty()) {
-            configStore.and(MetadataEntityFieldDO.APP_ID, Long.valueOf(pageReqVO.getAppId()));
+            configStore.and(MetadataEntityFieldDO.APP_ID, Long.valueOf(pageReqVO.getAppId().trim()));
         }
         if (pageReqVO.getFieldCode() != null && !pageReqVO.getFieldCode().trim().isEmpty()) {
             configStore.and(Compare.LIKE, MetadataEntityFieldDO.FIELD_CODE, "%" + pageReqVO.getFieldCode() + "%");
@@ -747,7 +908,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
 
     @Override
     public List<MetadataEntityFieldDO> getEntityFieldListByEntityId(String entityId) {
-        Long longEntityId = Long.valueOf(entityId);
+    Long longEntityId = Long.valueOf(entityId.trim());
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.and(MetadataEntityFieldDO.ENTITY_ID, longEntityId);
         configStore.order(MetadataEntityFieldDO.SORT_ORDER, Order.TYPE.ASC);
@@ -758,7 +919,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteEntityFieldsByEntityId(String entityId) {
-        Long longEntityId = Long.valueOf(entityId);
+    Long longEntityId = Long.valueOf(entityId.trim());
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.and(MetadataEntityFieldDO.ENTITY_ID, longEntityId);
         List<MetadataEntityFieldDO> fields = metadataEntityFieldRepository.findAllByConfig(configStore);
@@ -949,11 +1110,22 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
             TenantUtils.executeIgnore(() -> {
                 // 创建 AnylineService 实例
                 AnylineService<?> service = temporaryDatasourceService.createTemporaryService(datasource);
+                // 先校验表与列是否存在
+                if (!checkTableExists(service, tableName)) {
+                    throw new RuntimeException("表 " + tableName + " 不存在，请先创建表");
+                }
 
-                // 生成修改列 DDL
+                boolean exists = checkColumnExists(service, tableName, field.getFieldName());
+                if (!exists) {
+                    // 列不存在：容错处理，改为新增列，防止 ALTER 失败
+                    String addColumnDDL = generateAddColumnDDL(tableName, field);
+                    service.execute(addColumnDDL);
+                    log.info("列 {} 在表 {} 中不存在，已自动改为添加列", field.getFieldName(), tableName);
+                    return null;
+                }
+
+                // 生成并执行修改列 DDL
                 String alterColumnDDL = generateAlterColumnDDL(tableName, field);
-
-                // 执行修改列语句
                 service.execute(alterColumnDDL);
 
                 log.info("成功修改表 {} 的列: {}", tableName, field.getFieldName());
@@ -962,6 +1134,40 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
         } catch (Exception e) {
             log.error("修改表 {} 的列 {} 失败: {}", tableName, field.getFieldName(), e.getMessage(), e);
             throw new RuntimeException("修改列失败", e);
+        }
+    }
+
+    /**
+     * 重命名表中的列
+     */
+    private void renameColumnInTable(MetadataDatasourceDO datasource, String tableName, String oldName, String newName) {
+        try {
+            TenantUtils.executeIgnore(() -> {
+                AnylineService<?> service = temporaryDatasourceService.createTemporaryService(datasource);
+
+                if (!checkTableExists(service, tableName)) {
+                    throw new RuntimeException("表 " + tableName + " 不存在，请先创建表");
+                }
+
+                boolean oldExists = checkColumnExists(service, tableName, oldName);
+                boolean newExists = checkColumnExists(service, tableName, newName);
+                if (!oldExists) {
+                    log.warn("重命名列时发现旧列不存在：{}.{} -> {}.{}，跳过重命名", tableName, oldName, tableName, newName);
+                    return null;
+                }
+                if (newExists) {
+                    log.info("目标列已存在：{}.{}，跳过重命名", tableName, newName);
+                    return null;
+                }
+
+                String sql = "ALTER TABLE \"" + tableName + "\" RENAME COLUMN \"" + oldName + "\" TO \"" + newName + "\";";
+                service.execute(sql);
+                log.info("已将表 {} 的列 {} 重命名为 {}", tableName, oldName, newName);
+                return null;
+            });
+        } catch (Exception e) {
+            log.error("重命名表 {} 列 {} 到 {} 失败: {}", tableName, oldName, newName, e.getMessage(), e);
+            throw new RuntimeException("重命名列失败", e);
         }
     }
 
@@ -1359,16 +1565,19 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
             vo.setConstraints(constraintVO);
         }
 
-        // 填充自动编号摘要信息
-        MetadataAutoNumberConfigDO config = autoNumberConfigService.getByFieldId(field.getId());
-        if (config != null) {
-            EntityFieldAutoNumberBriefRespVO brief = new EntityFieldAutoNumberBriefRespVO();
-            brief.setEnabled(config.getIsEnabled());
-            brief.setMode(config.getNumberMode());
-            brief.setDigitWidth(config.getDigitWidth() != null ? (int) config.getDigitWidth() : null);
-            brief.setResetCycle(config.getResetCycle());
-            vo.setAutoNumber(brief);
-        }
+    // 填充自动编号完整配置（规则项）
+    MetadataAutoNumberConfigDO config = autoNumberConfigService.getByFieldId(field.getId());
+    if (config != null) {
+        // 完整配置
+        AutoNumberConfigRespVO full = convertToAutoNumberConfigRespVO(config);
+        // 规则项
+        List<MetadataAutoNumberRuleItemDO> rules = autoNumberConfigService.listRules(config.getId());
+        List<AutoNumberRuleItemRespVO> ruleVOs = rules.stream()
+            .map(this::convertToAutoNumberRuleItemRespVO)
+            .toList();
+        full.setRules(ruleVOs);
+        vo.setAutoNumberConfig(full);
+    }
     }
 
     /**

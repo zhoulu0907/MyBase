@@ -80,6 +80,10 @@ public class MetadataValidationFormatServiceImpl implements MetadataValidationFo
             groupVO.setRgName(vo.getRgName());
             groupVO.setRgDesc("自动创建的规则组：" + vo.getRgName());
             groupVO.setRgStatus(StatusEnumUtil.ACTIVE);
+            // 透传可选的组级提示配置
+            groupVO.setValMethod(vo.getValMethod());
+            groupVO.setPopPrompt(vo.getPopPrompt());
+            groupVO.setPopType(vo.getPopType());
             groupId = ruleGroupService.createValidationRuleGroup(groupVO);
         }
 
@@ -123,6 +127,10 @@ public class MetadataValidationFormatServiceImpl implements MetadataValidationFo
             groupVO.setRgName(vo.getRgName());
             groupVO.setRgDesc("自动创建的规则组：" + vo.getRgName());
             groupVO.setRgStatus(StatusEnumUtil.ACTIVE);
+            // 透传可选的组级提示配置
+            groupVO.setValMethod(vo.getValMethod());
+            groupVO.setPopPrompt(vo.getPopPrompt());
+            groupVO.setPopType(vo.getPopType());
             groupId = ruleGroupService.createValidationRuleGroup(groupVO);
         }
         
