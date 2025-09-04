@@ -122,13 +122,14 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
         // 2) 一次性联表查询：字段类型 -> 校验类型列表
         String inClause = typeCodes.stream().map(code -> "'" + code.replace("'", "''") + "'")
                 .collect(Collectors.joining(","));
-        String sql = "select mcft.field_type_code, mvt.validation_code, mvt.validation_name, mvt.validation_desc, mpo.sort_order " +
-                "from metadata_permit_ref_otft mpo " +
-                "join metadata_component_field_type mcft on mpo.field_type_id = mcft.id " +
-                "join metadata_validation_type mvt on mpo.validation_type_id = mvt.id " +
-                "where mcft.status = 1 and mvt.status = 1 and mcft.deleted = 0 and mvt.deleted = 0 " +
-                "and mcft.field_type_code in (" + inClause + ") " +
-                "order by mcft.field_type_code, mpo.sort_order";
+    // 说明：不同环境对 status 语义可能不一致（0/1 含义相反），这里不做 status 过滤，仅按 deleted=0 过滤，确保有数据即可返回
+    String sql = "select mcft.field_type_code, mvt.validation_code, mvt.validation_name, mvt.validation_desc, mpo.sort_order " +
+        "from metadata_permit_ref_otft mpo " +
+        "join metadata_component_field_type mcft on mpo.field_type_id = mcft.id " +
+        "join metadata_validation_type mvt on mpo.validation_type_id = mvt.id " +
+        "where mcft.deleted = 0 and mvt.deleted = 0 and mpo.deleted = 0 " +
+        "and mcft.field_type_code in (" + inClause + ") " +
+        "order by mcft.field_type_code, mpo.sort_order";
 
         DataSet ds = anylineService.querys(sql);
         Map<String, List<EntityFieldValidationTypesRespVO.ValidationTypeItem>> typeToValidation = new HashMap<>();
@@ -347,16 +348,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
             result.setConstraints(cr);
         }
 
-        // 自动编号摘要
-        MetadataAutoNumberConfigDO cfg = autoNumberConfigService.getByFieldId(entityField.getId());
-        if (cfg != null) {
-            EntityFieldAutoNumberBriefRespVO brief = new EntityFieldAutoNumberBriefRespVO();
-            brief.setEnabled(cfg.getIsEnabled());
-            brief.setMode(cfg.getNumberMode());
-            brief.setDigitWidth(cfg.getDigitWidth() != null ? (int) cfg.getDigitWidth() : null);
-            brief.setResetCycle(cfg.getResetCycle());
-            result.setAutoNumber(brief);
-        }
+    // 自动编号（详情页返回在 getEntityFieldDetailWithFullConfig 中补充完整配置）
 
         return result;
     }
@@ -545,6 +537,16 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
                 metadataEntityFieldRepository.update(upd);
 
                 // 同步物理表（需要完整字段信息）
+                // 若本次更新修改了字段名，先尝试对物理列执行重命名，避免后续ALTER因新列不存在而失败
+                if (datasource != null && businessEntity.getTableName() != null && item.getFieldName() != null
+                        && !item.getFieldName().equals(origin.getFieldName())) {
+                    try {
+                        renameColumnInTable(datasource, businessEntity.getTableName(), origin.getFieldName(), item.getFieldName());
+                    } catch (Exception e) {
+                        log.warn("重命名物理列失败，将在后续逻辑中回退为新增列处理。old={}, new={}, err={}",
+                                origin.getFieldName(), item.getFieldName(), e.getMessage());
+                    }
+                }
                 DefaultConfigStore cs2 = new DefaultConfigStore();
                 cs2.and("id", origin.getId());
                 MetadataEntityFieldDO full = metadataEntityFieldRepository.findOne(cs2);
@@ -595,6 +597,16 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
                     metadataEntityFieldRepository.update(upd);
 
                     // 同步物理表（需要完整字段信息）
+                    // 如果修改了字段名，优先执行物理列重命名
+                    if (datasource != null && businessEntity.getTableName() != null && item.getFieldName() != null
+                            && !item.getFieldName().equals(existingField.getFieldName())) {
+                        try {
+                            renameColumnInTable(datasource, businessEntity.getTableName(), existingField.getFieldName(), item.getFieldName());
+                        } catch (Exception e) {
+                            log.warn("重命名物理列失败，将在后续逻辑中回退为新增列处理。old={}, new={}, err={}",
+                                    existingField.getFieldName(), item.getFieldName(), e.getMessage());
+                        }
+                    }
                     DefaultConfigStore cs2 = new DefaultConfigStore();
                     cs2.and("id", existingField.getId());
                     MetadataEntityFieldDO full = metadataEntityFieldRepository.findOne(cs2);
@@ -1098,11 +1110,22 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
             TenantUtils.executeIgnore(() -> {
                 // 创建 AnylineService 实例
                 AnylineService<?> service = temporaryDatasourceService.createTemporaryService(datasource);
+                // 先校验表与列是否存在
+                if (!checkTableExists(service, tableName)) {
+                    throw new RuntimeException("表 " + tableName + " 不存在，请先创建表");
+                }
 
-                // 生成修改列 DDL
+                boolean exists = checkColumnExists(service, tableName, field.getFieldName());
+                if (!exists) {
+                    // 列不存在：容错处理，改为新增列，防止 ALTER 失败
+                    String addColumnDDL = generateAddColumnDDL(tableName, field);
+                    service.execute(addColumnDDL);
+                    log.info("列 {} 在表 {} 中不存在，已自动改为添加列", field.getFieldName(), tableName);
+                    return null;
+                }
+
+                // 生成并执行修改列 DDL
                 String alterColumnDDL = generateAlterColumnDDL(tableName, field);
-
-                // 执行修改列语句
                 service.execute(alterColumnDDL);
 
                 log.info("成功修改表 {} 的列: {}", tableName, field.getFieldName());
@@ -1111,6 +1134,40 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
         } catch (Exception e) {
             log.error("修改表 {} 的列 {} 失败: {}", tableName, field.getFieldName(), e.getMessage(), e);
             throw new RuntimeException("修改列失败", e);
+        }
+    }
+
+    /**
+     * 重命名表中的列
+     */
+    private void renameColumnInTable(MetadataDatasourceDO datasource, String tableName, String oldName, String newName) {
+        try {
+            TenantUtils.executeIgnore(() -> {
+                AnylineService<?> service = temporaryDatasourceService.createTemporaryService(datasource);
+
+                if (!checkTableExists(service, tableName)) {
+                    throw new RuntimeException("表 " + tableName + " 不存在，请先创建表");
+                }
+
+                boolean oldExists = checkColumnExists(service, tableName, oldName);
+                boolean newExists = checkColumnExists(service, tableName, newName);
+                if (!oldExists) {
+                    log.warn("重命名列时发现旧列不存在：{}.{} -> {}.{}，跳过重命名", tableName, oldName, tableName, newName);
+                    return null;
+                }
+                if (newExists) {
+                    log.info("目标列已存在：{}.{}，跳过重命名", tableName, newName);
+                    return null;
+                }
+
+                String sql = "ALTER TABLE \"" + tableName + "\" RENAME COLUMN \"" + oldName + "\" TO \"" + newName + "\";";
+                service.execute(sql);
+                log.info("已将表 {} 的列 {} 重命名为 {}", tableName, oldName, newName);
+                return null;
+            });
+        } catch (Exception e) {
+            log.error("重命名表 {} 列 {} 到 {} 失败: {}", tableName, oldName, newName, e.getMessage(), e);
+            throw new RuntimeException("重命名列失败", e);
         }
     }
 
@@ -1508,16 +1565,19 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
             vo.setConstraints(constraintVO);
         }
 
-        // 填充自动编号摘要信息
-        MetadataAutoNumberConfigDO config = autoNumberConfigService.getByFieldId(field.getId());
-        if (config != null) {
-            EntityFieldAutoNumberBriefRespVO brief = new EntityFieldAutoNumberBriefRespVO();
-            brief.setEnabled(config.getIsEnabled());
-            brief.setMode(config.getNumberMode());
-            brief.setDigitWidth(config.getDigitWidth() != null ? (int) config.getDigitWidth() : null);
-            brief.setResetCycle(config.getResetCycle());
-            vo.setAutoNumber(brief);
-        }
+    // 填充自动编号完整配置（规则项）
+    MetadataAutoNumberConfigDO config = autoNumberConfigService.getByFieldId(field.getId());
+    if (config != null) {
+        // 完整配置
+        AutoNumberConfigRespVO full = convertToAutoNumberConfigRespVO(config);
+        // 规则项
+        List<MetadataAutoNumberRuleItemDO> rules = autoNumberConfigService.listRules(config.getId());
+        List<AutoNumberRuleItemRespVO> ruleVOs = rules.stream()
+            .map(this::convertToAutoNumberRuleItemRespVO)
+            .toList();
+        full.setRules(ruleVOs);
+        vo.setAutoNumberConfig(full);
+    }
     }
 
     /**

@@ -1,17 +1,22 @@
 package com.cmsr.onebase.module.metadata.dal.dataobject.entity;
 
 import com.cmsr.onebase.framework.data.base.BaseDO;
+import com.cmsr.onebase.module.metadata.enums.BooleanStatusEnum;
+import com.cmsr.onebase.module.metadata.enums.CommonStatusEnum;
+
 import jakarta.persistence.Table;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 /**
- * @ClassName MetadataSystemFieldsDO
- * @Description 元数据系统字段维护表 DO
- * @Author mickey
- * @Date 2025/1/27 10:30
+ * 元数据系统字段维护表 DO
+ *
+ * @author bty418
+ * @date 2025-09-03
  */
 @Table(name = "metadata_system_fields")
 @Data
+@EqualsAndHashCode(callSuper = true)
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 public class MetadataSystemFieldsDO extends BaseDO {
@@ -24,11 +29,9 @@ public class MetadataSystemFieldsDO extends BaseDO {
     public static final String DEFAULT_VALUE    = "default_value";
     public static final String DESCRIPTION      = "description";
     public static final String IS_ENABLED      = "is_enabled";
+    public static final String DISPLAY_NAME      = "display_name";
 
-    /**
-     * id
-     */
-    private Long id;
+    // 基础字段 id、createTime、updateTime 等来自父类 BaseDO
 
     /**
      * 字段名
@@ -67,5 +70,11 @@ public class MetadataSystemFieldsDO extends BaseDO {
      * @see CommonStatusEnum
      */
     private Integer isEnabled;
+
+    // TODO: 我在数据库中新加了这个字段。在新建实体时，会默认添加系统字段，会从此表中查询系统字段的信息然后插入到 metadata_entity_field 表中，displayName 的值复用此字段；需要检查实体的新建与修改的逻辑。
+    /**
+     * 对外展示名称
+     */
+    private String displayName;
 
 } 
