@@ -24,7 +24,6 @@ import NextIcon from '@/assets/images/next_icon.svg';
 import PrevActiveIcon from '@/assets/images/prev_icon_active.svg';
 // import NextActiveIcon from '@/assets/images/next_icon_active.svg';
 
-import { useAppEntityStore } from '@/store';
 import { Divider } from '@arco-design/web-react';
 import type { AppEntityField } from '@onebase/app';
 import { useSignals } from '@preact/signals-react/runtime';
@@ -34,7 +33,6 @@ import styles from './index.module.less';
 
 export default function EditorWorkspace() {
   const [showEmpty, setShowEmpty] = useState(true);
-  const { mainEntity, subEntities } = useAppEntityStore();
 
   useSignals();
 
@@ -144,7 +142,6 @@ export default function EditorWorkspace() {
           id="workspace-content"
           list={components}
           setList={(newList) => {
-            console.log('setList', newList);
             const entityList: GridItem[] = [];
             newList.forEach((item) => {
               if (item.type == 'entity') {
@@ -156,7 +153,6 @@ export default function EditorWorkspace() {
                       field.fieldName !== 'parent_id'
                   )
                   .forEach((field: AppEntityField) => {
-                    console.log(field.fieldType, field);
                     let cpType = COMPONENT_MAP[field.fieldType];
                     let cpID = `${cpType}-${uuidv4()}`;
                     const schema = getComponentSchema(cpType as any);
@@ -184,8 +180,6 @@ export default function EditorWorkspace() {
               }
             });
             newList.push(...entityList);
-
-            console.log(newList);
 
             setComponents(newList);
           }}

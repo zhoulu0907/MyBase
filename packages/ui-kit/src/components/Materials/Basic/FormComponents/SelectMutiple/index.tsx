@@ -1,8 +1,8 @@
-import { memo } from 'react';
 import { Form, Select } from '@arco-design/web-react';
+import { memo } from 'react';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
-import type { XInputSelectMutipleConfig } from './schema';
 import './index.css';
+import type { XInputSelectMutipleConfig } from './schema';
 
 const XSelectMutiple = memo((props: XInputSelectMutipleConfig) => {
   const { label, tooltip, status, verify, layout, labelColSpan = 0, showSearch, defaultValue, description } = props;
@@ -27,11 +27,11 @@ const XSelectMutiple = memo((props: XInputSelectMutipleConfig) => {
         mode="multiple"
         allowClear
         showSearch={showSearch}
-        placeholder="Select"
+        placeholder="请选择"
         style={{ width: '100%' }}
         options={defaultValue}
       />
-      <div className='description showEllipsis'>{description}</div>
+      <div className="description showEllipsis">{description}</div>
     </Form.Item>
   );
 });

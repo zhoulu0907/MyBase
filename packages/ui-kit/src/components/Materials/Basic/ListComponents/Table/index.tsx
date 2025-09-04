@@ -141,7 +141,6 @@ const XTable = memo((props: XTableConfig & { runtime?: boolean; toCreatePage?: F
       };
     });
 
-    console.log(newTableData);
     setTableData(newTableData);
     setTableTotal(total);
   };
