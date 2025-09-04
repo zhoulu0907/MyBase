@@ -48,7 +48,7 @@ const XInputEmail = memo((props: XInputEmailConfig) => {
       }}
       wrapperCol={{ style: { flex: 1 } }}
       rules={[
-        { required: verify.required }
+        { required: verify?.required }
         // { type: "email", message: "请输入合法的邮件地址" },
         // {
         //     validator: (value) => {

@@ -35,7 +35,7 @@ const XCheckbox = memo((props: XInputCheckboxConfig) => {
       // trigger="onChange"
       // triggerPropName="checked"
       wrapperCol={{ style: { flex: 1 } }}
-      rules={[{ required: verify.required }]}
+      rules={[{ required: verify?.required }]}
       style={{
         margin: 0,
         opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1

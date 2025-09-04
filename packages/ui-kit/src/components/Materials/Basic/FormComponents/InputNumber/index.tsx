@@ -36,7 +36,7 @@ const XInputNumber = memo((props: XInputNumberConfig) => {
       wrapperCol={{ style: { flex: 1 } }}
       rules={[
         {
-          required: verify.required,
+          required: verify?.required,
           type: 'number',
           min: verify.min,
           max: verify.max

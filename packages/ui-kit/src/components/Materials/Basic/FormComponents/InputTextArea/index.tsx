@@ -39,7 +39,7 @@ const XInputTextArea = memo((props: XInputTextAreaConfig) => {
       }}
       wrapperCol={{ style: { flex: 1 } }}
       rules={[
-        { required: verify.required },
+        { required: verify?.required },
         {
           validator: (value, callback) => {
             if (minLength !== 0 && value.length < minLength) {

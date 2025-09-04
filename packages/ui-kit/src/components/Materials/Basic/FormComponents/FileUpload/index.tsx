@@ -44,7 +44,7 @@ const XFileUpload = memo((props: XInputFileUploadConfig) => {
       label={label.display && label.text}
       layout={layout}
       tooltip={tooltip}
-      rules={[{ required: verify.required }]}
+      rules={[{ required: verify?.required }]}
       labelCol={{
         style: { width: labelColSpan, flex: 'unset' }
       }}
