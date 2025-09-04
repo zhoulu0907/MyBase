@@ -10,12 +10,14 @@ import type { UserVO } from '@onebase/platform-center';
 
 const Option = Select.Option;
 
-const XUserSelect = memo((props: XInputUserSelectConfig) => {
-  const { label, dataField, tooltip, status, verify, layout, labelColSpan = 0, description } = props;
+const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean }) => {
+  const { label, dataField, tooltip, status, verify, layout, labelColSpan = 0, description, runtime} = props;
   const [userData, setUserData] = useState<UserVO[]>([]);
 
   useEffect(() => {
-    getUserData();
+    if(runtime === true){
+      getUserData();
+    }
   }, [])
   const getUserData = async () => {
     // const param = {
