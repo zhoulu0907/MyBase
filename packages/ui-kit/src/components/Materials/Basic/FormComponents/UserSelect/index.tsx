@@ -47,7 +47,7 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean })
       }}
     >
       <Select
-        placeholder="Select"
+        placeholder="请选择"
         showSearch={true}
         filterOption={(inputValue, option) =>
           option.props.value.toLowerCase().indexOf(inputValue.toLowerCase()) >= 0 ||
