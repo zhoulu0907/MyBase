@@ -9,6 +9,7 @@ import {
 } from '@onebase/app';
 
 import styles from './index.module.less';
+import { IconAttachment } from '@arco-design/web-react/icon';
 
 const Row = Grid.Row;
 const Col = Grid.Col;
@@ -26,11 +27,11 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
 
   const [checkReadableAll, setCheckReadableAll] = useState(false);
   const [checkEditableAll, setCheckEditableAll] = useState(false);
-  // const [checkDownloadableAll, setCheckDownloadableAll] = useState(false);
+  const [checkDownloadableAll, setCheckDownloadableAll] = useState(false);
 
   const [indeterminateReadable, setIndeterminateReadable] = useState(true);
   const [indeterminateEditable, setIndeterminateEditable] = useState(true);
-  // const [indeterminateDownloadable, setIndeterminateDownloadable] = useState(true);
+  const [indeterminateDownloadable, setIndeterminateDownloadable] = useState(true);
 
   const [fieldPermission, setFieldPermission] = useState<AuthFieldVO[]>(); // 字段权限
   const [isAllFieldsAllowed, setIsAllFieldsAllowed] = useState<number>();
@@ -267,7 +268,7 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
               <Col span={8}></Col>
               <Col span={4}>
                 <Checkbox
-                  onChange={onChangeDownloadableAll}
+                  // onChange={onChangeDownloadableAll}
                   checked={checkDownloadableAll}
                   indeterminate={indeterminateDownloadable}
                 >
