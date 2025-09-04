@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.flow.client.enums;
+package com.cmsr.onebase.module.flow.client.dto;
 
 /**
  * @Author：huangjie
@@ -16,4 +16,7 @@ public enum JobScheduleTypeEnum {
         this.value = value;
     }
 
+    public String getValue() {
+        return value;
+    }
 }
