@@ -19,6 +19,8 @@
 13. 使用@Resource而不是@Autowired注入依赖，避免使用@Autowired注入Bean；
 14. 使用jakarta.validation包如@Valid、@NotEmpty、@Length等注解对入参进行校验，在VO和Controller层校验；
 15. 类中不允许有静态内部类，避免使用static class；
+16. maven依赖请统一在onebase-dependencies模块中定义和引入版本，避免版本冲突；
+17. 公共基类和通用能力在onebase-framework下的onebase-common模块中实现，避免重复实现，如：通用util、公共枚举、公共常量、分页、缓存、日志、通用框架初始化等。
 
 
 ## 三、生成与补写代码的规范（important! 重要！请务必要遵守！）
