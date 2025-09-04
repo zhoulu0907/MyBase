@@ -224,15 +224,6 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                     </>
                   }
                   key={index}
-                  rules={[
-                    {
-                      required:
-                        item.type === CONFIG_TYPES.LABEL_INPUT ||
-                        item.type === CONFIG_TYPES.STATUS_RADIO ||
-                        item.type === CONFIG_TYPES.SECURITY ||
-                        item.type === CONFIG_TYPES.VERIFY
-                    }
-                  ]}
                 >
                   {(item.type === CONFIG_TYPES.TEXT_INPUT ||
                     item.type === CONFIG_TYPES.TOOLTIP_INPUT ||
@@ -269,7 +260,7 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                     />
                   )}
 
-                  {item.type === CONFIG_TYPES.SUPPORT_FILE_TYPE && (
+                  {/* {item.type === CONFIG_TYPES.SUPPORT_FILE_TYPE && (
                     <Input
                       placeholder={`请输入支持文件格式，用英文逗号分隔`}
                       value={configs[item.key]}
@@ -277,7 +268,7 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                         handlePropsChange(item.key, value);
                       }}
                     />
-                  )}
+                  )} */}
                   {item.type === CONFIG_TYPES.DESCRIPTION_INPUT && (
                     <Input.TextArea
                       placeholder={`请输入${item.name}`}

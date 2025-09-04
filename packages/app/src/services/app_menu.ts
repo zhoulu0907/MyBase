@@ -19,6 +19,10 @@ export const createApplicationMenu = (params: CreateApplicationMenuReq) => {
 
 export const updateApplicationMenuName = (params: UpdateApplicationMenuNameReq) => {
   return appService.post(`/menu/update-name?id=${params.id}&menuName=${params.menuName}`);
+}
+
+export const updateApplicationMenu = (params: UpdateApplicationMenuNameReq) => {
+  return appService.post('/menu/update', params);
 };
 
 export const deleteApplicationMenu = (params: DeleteApplicationMenuReq) => {

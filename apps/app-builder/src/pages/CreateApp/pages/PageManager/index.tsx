@@ -20,7 +20,7 @@ import {
   VisibleType,
   PageType,
   RootParentPage,
-  updateApplicationMenuName,
+  updateApplicationMenu,
   type ApplicationMenu,
   type CopyApplicationMenuReq,
   type CreateApplicationMenuReq,
@@ -296,7 +296,10 @@ const PageManagerPage: FC = () => {
       });
 
       if (pageSetId && menuResp.menuType === MenuType.PAGE) {
-        sessionStorage.setItem('EDITOR_PAGE_INFO', JSON.stringify({ id: curMenu?.id, name: menuResp.menuName }));
+        sessionStorage.setItem(
+          'EDITOR_PAGE_INFO',
+          JSON.stringify({ id: curMenu?.id, name: menuResp.menuName, icon: createForm.getFieldValue('menuIcon') })
+        );
         navigate(`/onebase/editor/${EDITOR_TYPES.FORM_EDITOR}?pageSetId=${pageSetId}`);
       }
     });
@@ -309,9 +312,10 @@ const PageManagerPage: FC = () => {
     }
     const req: UpdateApplicationMenuNameReq = {
       id: renameForm.getFieldValue('menuId'),
-      menuName: renameForm.getFieldValue('menuName')
+      menuName: renameForm.getFieldValue('menuName'),
+      menuIcon: renameForm.getFieldValue('menuIcon')
     };
-    const res = await updateApplicationMenuName(req);
+    const res = await updateApplicationMenu(req);
     if (res) {
       Message.success('重命名成功');
     }
@@ -359,7 +363,7 @@ const PageManagerPage: FC = () => {
     getMenuList();
   };
 
-  const handleEditPageSet = async (name: string) => {
+  const handleEditPageSet = async (name: string, icon: string) => {
     if (!curMenu?.id) {
       Message.error('请选择菜单');
       return;
@@ -376,7 +380,7 @@ const PageManagerPage: FC = () => {
     }
 
     // 把编辑页菜单数据保存起来；
-    sessionStorage.setItem('EDITOR_PAGE_INFO', JSON.stringify({ id: curMenu?.id, name }));
+    sessionStorage.setItem('EDITOR_PAGE_INFO', JSON.stringify({ id: curMenu?.id, name, icon }));
     navigate(`/onebase/editor/${EDITOR_TYPES.FORM_EDITOR}?pageSetId=${pageSetId}`);
   };
 
@@ -465,7 +469,10 @@ const PageManagerPage: FC = () => {
                       <>
                         <div className={styles.contentHeader}>
                           <div className={styles.contentTitle}>{curMenu?.menuName}</div>
-                          <Button type="primary" onClick={() => handleEditPageSet(curMenu?.menuName)}>
+                          <Button
+                            type="primary"
+                            onClick={() => handleEditPageSet(curMenu?.menuName, curMenu?.menuIcon)}
+                          >
                             {t('common.edit')}
                           </Button>
                         </div>
