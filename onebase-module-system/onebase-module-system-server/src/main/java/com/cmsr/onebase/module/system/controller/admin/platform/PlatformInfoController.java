@@ -45,9 +45,6 @@ public class PlatformInfoController {
     private TenantService tenantService;
 
     @Resource
-    private AdminUserService  adminUserService;
-
-    @Resource
     private AdminUserService  userService;
 
     /**
@@ -61,8 +58,8 @@ public class PlatformInfoController {
         LicenseDO license = licenseService.getLicenseByStatus(LicenseStatusEnum.ENABLE.getStatus());
         PlatformInfoRespVo platformInfoRespVo = BeanUtils.toBean(license, PlatformInfoRespVo.class);
         Integer tenantCount = tenantService.getTenantCountByStatus(TenantStatusEnum.NORMAL.getStatus());
-        Integer userCount = adminUserService.getUserCountByStatus(UserStatusEnum.NORMAL.getStatus());
-        AdminUserDO user = adminUserService.getUser(platformInfoRespVo.getCreator());
+        Integer userCount = userService.getUserCountByStatus(UserStatusEnum.NORMAL.getStatus());
+        AdminUserDO user = userService.getUser(platformInfoRespVo.getCreator());
 
         platformInfoRespVo.setAdminUser(user.getUsername());
         platformInfoRespVo.setActualTenantCount(tenantCount);

@@ -206,7 +206,7 @@ public class TenantServiceImpl implements TenantService {
             // 创建角色
             Long roleId = createTenantAdminRole();
             // 创建用户，并分配角色
-            Long userId = createUser(roleId, createReqVO);
+            Long userId = createSystemUser(roleId, createReqVO);
             // 修改租户的管理员
             TenantDO tenantDO = new TenantDO().setAdminUserId(userId);
             tenantDO.setId(finalTenant.getId());
@@ -222,7 +222,7 @@ public class TenantServiceImpl implements TenantService {
         return existTenantCount;
     }
 
-    private Long createUser(Long roleId, TenantInsertReqVO insertReqVO) {
+    private Long createSystemUser(Long roleId, TenantInsertReqVO insertReqVO) {
 
         UserInsertReqVO reqVO = new UserInsertReqVO();
         reqVO.setUsername(insertReqVO.getAdminUserName());
@@ -283,18 +283,9 @@ public class TenantServiceImpl implements TenantService {
                 }
             });
         }
-        // 根据管理员名称和tenant_id去查询，当前修改的管理员名称是否存在
-        if (StringUtils.isNotEmpty(updateReqVO.getAdminUserName())) {
-            TenantUtils.execute(tenant.getId(), () -> {
-                AdminUserDO user = userService.getUserByUsername(updateReqVO.getAdminUserName());
-                if (user != null) {
-                    throw exception(USER_USERNAME_EXISTS);
-                }
-            });
-        }
         // 先更新租户
         TenantDO updateObj = BeanUtils.toBean(updateReqVO, TenantDO.class);
-        // tenantDataRepository.update(updateObj);
+
         DataRow row = new DataRow();
         row.put(TenantDO.ID, updateObj.getId());
         if (updateObj.getAdminUserId() != null) {
@@ -313,51 +304,64 @@ public class TenantServiceImpl implements TenantService {
             row.put(TenantDO.STATUS, updateObj.getStatus());
         }
         tenantDataRepository.updateByConfig(row, new DefaultConfigStore().eq(TenantDO.ID, updateObj.getId()));
-
-        TenantUtils.execute(updateObj.getId(), () -> {
-            AdminUserDO oldAdminUser = userService.getUser(tenant.getAdminUserId());
-            if (StringUtils.isNotBlank(updateReqVO.getAdminUserName()) &&
-                    !updateReqVO.getAdminUserName().equals(oldAdminUser.getUsername())) {
-
-                RoleDO roleDO = roleService.getRoleIdsByCode(RoleCodeEnum.TENANT_ADMIN.getCode());
+        // 修改租户管理员
+        if (StringUtils.isNotBlank(updateReqVO.getAdminUserName())) {
+            TenantUtils.execute(updateObj.getId(), () -> {
                 Long roleId;
-                if (roleDO == null) {
-                    // 创建角色
-                    roleId = createTenantAdminRole();
-                } else {
-                    roleId = roleDO.getId();
-                }
+                Long userId = null;
+                // 获取旧的租户管理员
+                AdminUserDO oldAdminUser = userService.getUser(tenant.getAdminUserId());
+                // 判断管理员是否发生变更
+                if (!updateReqVO.getAdminUserName().equals(oldAdminUser.getUsername())) {
+                    // 管理员变了，把旧管理员角色移除，并降级为自定义
+                    roleId = getAdminRoleAndDeleteOldUserRole(tenant);
 
-                // 移除旧用户租户管理员角色
-                UserRoleDO userRoleDO = permissionService.getUserRoleByUserAndRoleId(tenant.getAdminUserId(), roleId);
-                if (userRoleDO != null) {
-                    permissionService.deleteRoleUsers(roleId, singleton(userRoleDO.getUserId()));
-                }
-                // 将旧管理员设置为普通用户,降级
-                userService.updateAdminType(tenant.getAdminUserId(), AdminTypeEnum.CUSTOM.getType());
-                AdminUserDO newAdminUser = userService.getUserByUsername(updateReqVO.getAdminUserName());
-                Long userId;
-                if (newAdminUser != null) {
-                    userId = newAdminUser.getId();
-                    // 新管理员分配角色
-                    permissionService.assignUserRoles(userId, singleton(roleId));
-                } else {
-                    // 创建用户，并分配角色
-                    TenantInsertReqVO reqVO = new TenantInsertReqVO();
-                    reqVO.setAdminUserName(updateReqVO.getAdminUserName());
-                    reqVO.setAdminNickName(updateReqVO.getAdminNickName());
-                    reqVO.setAdminMobile(updateReqVO.getAdminMobile());
-                    userId = createUser(roleId, reqVO);
+                    // 已存在的用户
+                    AdminUserDO newAdminUser = userService.getUserByUsername(updateReqVO.getAdminUserName());
+                    // 判断前端上送的管理员是否已存在，存在则分配角色且不是老用户
+                    if (newAdminUser == null) {
+                        // 新管理员用户不存在，创建用户，并分配角色
+                        TenantInsertReqVO reqVO = new TenantInsertReqVO();
+                        reqVO.setAdminUserName(updateReqVO.getAdminUserName());
+                        reqVO.setAdminNickName(updateReqVO.getAdminNickName());
+                        reqVO.setAdminMobile(updateReqVO.getAdminMobile());
+                        userId = createSystemUser(roleId, reqVO);
+                    } else {
+                        // 新管理员用户存在，直接分配角色
+                        permissionService.assignUserRoles(newAdminUser.getId(), singleton(roleId));
+                        userId = newAdminUser.getId();
+                        // 将新管理员设置为内置用户类型
+                        userService.updateAdminType(userId, AdminTypeEnum.SYSTEM.getType());
+                    }
                 }
 
                 // 修改租户的管理员
                 updateObj.setAdminUserId(userId);
-                if (updateObj.getStatus() != null) {
+                if (updateObj.getAdminUserId() != null) {
                     row.put(TenantDO.ADMIN_USER_ID, updateObj.getAdminUserId());
+                    tenantDataRepository.updateByConfig(row, new DefaultConfigStore().eq(TenantDO.ID, updateObj.getId()));
                 }
-                tenantDataRepository.updateByConfig(row, new DefaultConfigStore().eq(TenantDO.ID, updateObj.getId()));
-            }
-        });
+            });
+        }
+    }
+
+    private Long getAdminRoleAndDeleteOldUserRole(TenantDO tenant) {
+        RoleDO roleDO = roleService.getRoleIdsByCode(RoleCodeEnum.TENANT_ADMIN.getCode());
+        Long roleId;
+        if (roleDO == null) {
+            // 创建角色
+            roleId = createTenantAdminRole();
+        } else {
+            roleId = roleDO.getId();
+        }
+        // 移除旧用户租户管理员角色
+        UserRoleDO userRoleDO = permissionService.getUserRoleByUserAndRoleId(tenant.getAdminUserId(), roleId);
+        if (userRoleDO != null) {
+            permissionService.deleteRoleUsers(roleId, singleton(userRoleDO.getUserId()));
+        }
+        // 将旧管理员设置为普通用户,降级
+        userService.updateAdminType(tenant.getAdminUserId(), AdminTypeEnum.CUSTOM.getType());
+        return roleId;
     }
 
     private void validTenantNameDuplicate(String name, Long id) {
