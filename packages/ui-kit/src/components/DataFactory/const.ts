@@ -15,6 +15,7 @@ export const DS_RESOURCE_TYPE_LABEL = {
 // 实体字段类型标签
 export const ENTITY_FIELD_TYPE_LABEL = {
   TEXT: 'TEXT',
+  BIGINT: 'BIGINT',
   LONG_TEXT: 'LONG_TEXT',
   EMAIL: 'EMAIL',
   PHONE: 'PHONE',
