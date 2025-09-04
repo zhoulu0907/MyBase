@@ -1,12 +1,13 @@
 import type { EntityListItem } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
 import { useAppStore } from '@/store/store_app';
 import type { TableColumnProps } from '@arco-design/web-react';
-import { Button, Dropdown, Menu, Space, Table, Tag } from '@arco-design/web-react';
-import { getEntityRelations } from '@onebase/app';
+import { Button, Dropdown, Menu, Message, Space, Table, Tag } from '@arco-design/web-react';
+import { getEntityRelations, deleteRelation } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
 import EditRelationDrawer from '../../Drawers/EditRelationDrawer';
 import CreateRelationModal from '../../Modals/CreateRelationModal';
 import CreateMasterDetailModal from '../../Modals/CreateMasterDetailModal';
+import DeleteConfirmModal from '../../Modals/DeleteConfirmModal';
 import styles from './tabs.module.less';
 
 interface RelationsProps {
@@ -38,7 +39,8 @@ const Relations: React.FC<RelationsProps> = ({ entity, activeTab }) => {
   const [page, setPage] = useState({ pageNo: 1, pageSize: 10 });
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
-
+  const [deleteConfirmModalVisible, setDeleteConfirmModalVisible] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
   const handleCreate = (type: 'master_child' | 'relation') => {
     if (type === 'master_child') {
       setCreateMasterDetailModalVisible(true);
@@ -54,6 +56,23 @@ const Relations: React.FC<RelationsProps> = ({ entity, activeTab }) => {
   const handleEditRelation = (record: RelationData) => {
     setSelectedRelation(record);
     setEditRelationDrawerVisible(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    setDeleteLoading(true);
+    const res = await deleteRelation(selectedRelation?.id || '');
+    console.log('deleteRelation', res);
+    if (res) {
+      Message.success('删除成功');
+      handleSuccessCallback();
+    }
+    setDeleteLoading(false);
+    setDeleteConfirmModalVisible(false);
+  };
+
+  const handleDelete = (record: RelationData) => {
+    setSelectedRelation(record);
+    setDeleteConfirmModalVisible(true);
   };
 
   useEffect(() => {
@@ -103,7 +122,7 @@ const Relations: React.FC<RelationsProps> = ({ entity, activeTab }) => {
           <Button type="text" size="mini" onClick={() => handleEditRelation(record)}>
             编辑
           </Button>
-          <Button type="text" size="mini" status="danger">
+          <Button type="text" size="mini" status="danger" onClick={() => handleDelete(record)}>
             删除
           </Button>
         </Space>
@@ -191,6 +210,17 @@ const Relations: React.FC<RelationsProps> = ({ entity, activeTab }) => {
         setVisible={setEditRelationDrawerVisible}
         relationData={selectedRelation}
         onSuccess={handleSuccessCallback}
+      />
+
+      <DeleteConfirmModal
+        visible={deleteConfirmModalVisible}
+        onVisibleChange={setDeleteConfirmModalVisible}
+        onConfirm={handleDeleteConfirm}
+        confirmLoading={deleteLoading}
+        title="确认删除"
+        content="确定要删除这个关联关系吗？删除后无法恢复。"
+        okText="确认删除"
+        cancelText="取消"
       />
     </div>
   );
