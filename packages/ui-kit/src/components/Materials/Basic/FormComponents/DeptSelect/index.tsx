@@ -2,6 +2,7 @@ import { Form, TreeSelect } from '@arco-design/web-react';
 import { memo } from 'react';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import type { XInputDeptSelectConfig } from './schema';
+import './index.css';
 
 // TODO(Mickey): 放到schema的config中
 // 示例树形结构：部门
@@ -33,18 +34,18 @@ const treeData = [
 ];
 
 const XDeptSelect = memo((props: XInputDeptSelectConfig) => {
-  const { label, tooltip, status, required, layout, labelColSpan = 0 } = props;
+  const { label, tooltip, status, verify, layout, labelColSpan = 0, description } = props;
 
   return (
     <Form.Item
-      label={label}
+      label={label.display && label.text}
       layout={layout}
       tooltip={tooltip}
       labelCol={{
         style: { width: labelColSpan, flex: 'unset' }
       }}
       wrapperCol={{ style: { flex: 1 } }}
-      rules={[{ required }]}
+      rules={[{ required: verify?.required }]}
       style={{
         opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,
         pointerEvents: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset',
@@ -52,6 +53,7 @@ const XDeptSelect = memo((props: XInputDeptSelectConfig) => {
       }}
     >
       <TreeSelect placeholder="Select" style={{ width: '100%' }} allowClear treeData={treeData}></TreeSelect>
+      <div className='description showEllipsis'>{description}</div>
     </Form.Item>
   );
 });

@@ -1,5 +1,5 @@
-import { Dropdown, Menu, Message, type FormInstance } from '@arco-design/web-react';
 import { IconSettings, IconEyeInvisible } from '@arco-design/web-react/icon';
+import { Dropdown, Menu, Message, Tooltip, type FormInstance } from '@arco-design/web-react';
 import { getPageSetId, RootParentPage, VisibleType, type GetPageSetIdReq } from '@onebase/app';
 import { EDITOR_TYPES } from '@onebase/ui-kit';
 import React, { useState } from 'react';
@@ -172,47 +172,49 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
   };
 
   return (
-    <div
-      className={styles.myMenuItem}
-      onContextMenu={(e) => {
-        // 支持右键弹出菜单
-        setPopupVisible(true);
-        e.preventDefault();
-      }}
-      onClick={onClick}
-      role="menuitem"
-      tabIndex={0}
-    >
+    <Tooltip content={menuName} position="right">
       <div
-        className={styles.menuName}
-        style={{
-          maxWidth: maxWidth + 'px'
+        className={styles.myMenuItem}
+        onContextMenu={(e) => {
+          // 支持右键弹出菜单
+          setPopupVisible(true);
+          e.preventDefault();
         }}
+        onClick={onClick}
+        role="menuitem"
+        tabIndex={0}
       >
-        <i className={`iconfont ${menuIcon}`} style={{ marginRight: '10px' }} />
-        {label}
+        <div
+          className={styles.menuName}
+          style={{
+            maxWidth: maxWidth + 'px'
+          }}
+        >
+          <i className={`iconfont ${menuIcon}`} style={{ marginRight: '10px' }} />
+          {label}
+        </div>
+        {isVisible === VisibleType.HIDDEN && (
+          <div className={styles.eyeVisible}>
+            <IconEyeInvisible />
+          </div>
+        )}
+        {showOption && (
+          <div className={styles.dropdownContainer}>
+            <Dropdown
+              popupVisible={popupVisible}
+              onVisibleChange={(visible) => {
+                setPopupVisible(visible);
+              }}
+              droplist={dropList}
+              trigger="click"
+              position="bl"
+            >
+              <IconSettings onClick={(e) => e.stopPropagation()} />
+            </Dropdown>
+          </div>
+        )}
       </div>
-      {isVisible === VisibleType.HIDDEN && (
-        <div className={styles.eyeVisible}>
-          <IconEyeInvisible />
-        </div>
-      )}
-      {showOption && (
-        <div className={styles.dropdownContainer}>
-          <Dropdown
-            popupVisible={popupVisible}
-            onVisibleChange={(visible) => {
-              setPopupVisible(visible);
-            }}
-            droplist={dropList}
-            trigger="click"
-            position="bl"
-          >
-            <IconSettings onClick={(e) => e.stopPropagation()} />
-          </Dropdown>
-        </div>
-      )}
-    </div>
+    </Tooltip>
   );
 };
 

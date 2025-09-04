@@ -1,8 +1,10 @@
 import { useI18n } from '@/hooks/useI18n';
 import { Tabs } from '@arco-design/web-react';
+import { usePageEditorSignal } from '@onebase/ui-kit';
 import Advanced from './Advanced';
 import Attributes from './Attributes';
 import TabTitle from './components/TabTitle';
+import { ICON_Map_By_Type } from '@/components/MaterialCard/icons';
 import styles from './index.module.less';
 
 const TabPane = Tabs.TabPane;
@@ -18,18 +20,27 @@ interface MaterialConfigerProps {
 const MaterialConfiger = ({ cpID }: MaterialConfigerProps) => {
   const { t } = useI18n();
 
+  const { curComponentSchema, components } = usePageEditorSignal();
+  const curComp = components?.find((comp) => comp.id === curComponentSchema.config?.id);
+
   return (
     <div className={styles.configs}>
-      <Tabs defaultActiveTab="attributes" type="line" size="default">
-        <TabPane key="attributes" title={<TabTitle title={t('editor.attribute')} />}>
-          <div style={{ width: '270px', height: '100%' }}>
-            <Attributes cpID={cpID} />
-          </div>
-        </TabPane>
-        <TabPane key="advanced" title={<TabTitle title={t('editor.advanced')} />}>
-          <Advanced />
-        </TabPane>
-      </Tabs>
+      <div className={styles.componentName}>
+        <div className={styles.icon}>{ICON_Map_By_Type[curComp?.type]}</div>
+        {curComponentSchema.config?.cpName}
+      </div>
+      <div className={styles.componentInfo}>
+        <Tabs defaultActiveTab="attributes" type="line" size="default">
+          <TabPane key="attributes" title={<TabTitle title={t('editor.attribute')} />}>
+            <div style={{ width: '270px', height: '100%' }}>
+              <Attributes cpID={cpID} />
+            </div>
+          </TabPane>
+          <TabPane key="advanced" title={<TabTitle title={t('editor.advanced')} />}>
+            <Advanced />
+          </TabPane>
+        </Tabs>
+      </div>
     </div>
   );
 };

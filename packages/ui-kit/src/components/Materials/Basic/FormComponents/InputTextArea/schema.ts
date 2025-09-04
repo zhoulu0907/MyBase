@@ -44,7 +44,9 @@ import type {
   TNumberDefaultType,
   TSelectDefaultType,
   TTextAreaDefaultType,
-  TTextDefaultType
+  TTextDefaultType,
+  ISecurityConfigType,
+  IVerifyConfigType
 } from '../../../types';
 
 export interface XInputTextAreaSchema {
@@ -69,13 +71,20 @@ export type TXInputTextAreaEditData = Array<
   | IAlignConfigType<TAlignSelectKeyType>
   | IColorConfigType
   | IDataFieldConfigType
+  | ISecurityConfigType
+  | IVerifyConfigType
 >;
 
 export interface XInputTextAreaConfig extends ICommonBaseType {
   /**
    * 输入框标题
+   * text：标题
+   * display：是否显示
    */
-  label: TTextDefaultType;
+  label: {
+    text: TTextDefaultType;
+    display: TBooleanDefaultType;
+  };
 
   /**
    * 数据字段
@@ -114,9 +123,14 @@ export interface XInputTextAreaConfig extends ICommonBaseType {
   width: TSelectDefaultType<TWidthSelectKeyType>;
 
   /**
-   * 是否必填，未填写时提交报错
+   * 数据校验
+   * required：是否必填，未填写时提交报错
+   * noRepeat：是否不允许重复
    */
-  required: TBooleanDefaultType;
+  verify: {
+    required: TBooleanDefaultType;
+    noRepeat?: TBooleanDefaultType;
+  }
 
   /**
    * 表单的布局：水平、垂直（默认）
@@ -169,6 +183,16 @@ export interface XInputTextAreaConfig extends ICommonBaseType {
    * 多行文本最大高度
    */
   maxRows?: TNumberDefaultType;
+
+  /**
+   * 安全
+   * display：开启
+   * type：掩码类型
+   */
+  security: {
+    display?: TBooleanDefaultType;
+    type?: TTextDefaultType;
+  };
 }
 
 const XInputTextArea: XInputTextAreaSchema = {
@@ -218,11 +242,6 @@ const XInputTextArea: XInputTextAreaSchema = {
     layoutConfig,
     labelColSpanConfig,
     {
-      key: 'required',
-      name: '开启必填',
-      type: CONFIG_TYPES.SWITCH_INPUT
-    },
-    {
       key: 'saveWithHidden',
       name: '隐藏时提交数据',
       type: CONFIG_TYPES.SWITCH_INPUT
@@ -237,13 +256,26 @@ const XInputTextArea: XInputTextAreaSchema = {
       name: '背景颜色',
       type: CONFIG_TYPES.COLOR
     },
+    {
+      key: 'verify',
+      name: '校验',
+      type: CONFIG_TYPES.VERIFY
+    },
     statusConfig,
+    alignConfig,
+    {
+      key: 'security',
+      name: '安全',
+      type: CONFIG_TYPES.SECURITY
+    },
     widthConfig,
-    alignConfig
   ],
   config: {
     ...baseDefault,
-    label: '多行文本',
+    label: {
+      text: '多行文本',
+      display: true,
+    },
     dataField: [],
     placeholder: '请输入文字',
     description: '',
@@ -252,7 +284,6 @@ const XInputTextArea: XInputTextAreaSchema = {
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     defaultValue: '',
-    required: false,
     align: ALIGN_VALUES[ALIGN_OPTIONS.LEFT],
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
     saveWithHidden: false,
@@ -260,8 +291,15 @@ const XInputTextArea: XInputTextAreaSchema = {
     bgColor: '',
     minLength: 0,
     maxLength: 200,
-    minRows: 2,
-    maxRows: 5
+    minRows: 3,
+    maxRows: 5,
+    security: {
+      display: false,
+      type: ''
+    },
+    verify: {
+      required: false,
+    }
   }
 };
 

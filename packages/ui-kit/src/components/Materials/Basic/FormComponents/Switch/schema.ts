@@ -38,7 +38,9 @@ import type {
     TNumberDefaultType,
     TSelectDefaultType,
     TTextAreaDefaultType,
-    TTextDefaultType
+    TTextDefaultType,
+    ISecurityConfigType,
+    IVerifyConfigType
 } from '../../../types';
 
 export interface XInputSwitchSchema {
@@ -60,13 +62,20 @@ export type TXInputSwitchEditData = Array<
   | IBooleanConfigType
   | ILayoutConfigType<TLayoutSelectKeyType>
   | IDataFieldConfigType
+  | ISecurityConfigType
+  | IVerifyConfigType
 >;
 
 export interface XInputSwitchConfig extends ICommonBaseType {
   /**
    * 输入框标题
+   * text：标题
+   * display：是否显示
    */
-  label: TTextDefaultType;
+  label: {
+    text: TTextDefaultType;
+    display: TBooleanDefaultType;
+  };
 
   /**
    * 数据字段
@@ -100,11 +109,6 @@ export interface XInputSwitchConfig extends ICommonBaseType {
   width: TSelectDefaultType<TWidthSelectKeyType>;
 
   /**
-   * 是否必填，未填写时提交报错
-   */
-  required: TBooleanDefaultType;
-
-  /**
    * 表单的布局：水平、垂直（默认）
    * 可选值: 'vertical' | 'horizontal'
    */
@@ -119,6 +123,16 @@ export interface XInputSwitchConfig extends ICommonBaseType {
    * 隐藏时是否提交数据，开启后隐藏状态仍会保存值
    */
   saveWithHidden?: TBooleanDefaultType;
+
+  /**
+   * 安全
+   * display：开启
+   * type：掩码类型
+   */
+  security: {
+    display: TBooleanDefaultType;
+    type?: TTextDefaultType;
+  };
 }
 
 const XSwitch: XInputSwitchSchema = {
@@ -143,31 +157,37 @@ const XSwitch: XInputSwitchSchema = {
     layoutConfig,
     labelColSpanConfig,
     {
-      key: 'required',
-      name: '开启必填',
-      type: CONFIG_TYPES.SWITCH_INPUT
-    },
-    {
       key: 'saveWithHidden',
       name: '隐藏时提交数据',
       type: CONFIG_TYPES.SWITCH_INPUT
     },
     statusConfig,
+    {
+      key: 'security',
+      name: '安全',
+      type: CONFIG_TYPES.SECURITY
+    },
     widthConfig
   ],
   config: {
     ...baseDefault,
-    label: '开关',
+    label: {
+      text: '开关',
+      display: true,
+    },
     dataField: [],
     description: '',
     tooltip: '',
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     defaultValue: '',
-    required: false,
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
     labelColSpan: 100,
-    saveWithHidden: false
+    saveWithHidden: false,
+    security: {
+      display: false,
+      type: ''
+    },
   }
 };
 

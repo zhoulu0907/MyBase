@@ -297,13 +297,27 @@ export interface ICarouselConfigType {
   type: typeof CONFIG_TYPES.CAROUSEL;
 }
 
-// 文本输入框配置
-export interface ISupportFileTypeConfigType {
+// 安全配置
+export interface ISecurityConfigType {
   key: string;
   name: string;
-  type: typeof CONFIG_TYPES.SUPPORT_FILE_TYPE;
-  placeholder?: string;
+  type: typeof CONFIG_TYPES.SECURITY;
 }
+
+// 校验配置
+export interface IVerifyConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.VERIFY;
+}
+
+// 文本输入框配置
+// export interface ISupportFileTypeConfigType {
+//   key: string;
+//   name: string;
+//   type: typeof CONFIG_TYPES.SUPPORT_FILE_TYPE;
+//   placeholder?: string;
+// }
 
 export interface ISelectOptionsConfigType {
   key: string;

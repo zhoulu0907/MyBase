@@ -42,7 +42,8 @@ import type {
     TNumberDefaultType,
     TSelectDefaultType,
     TTextAreaDefaultType,
-    TTextDefaultType
+    TTextDefaultType,
+    IVerifyConfigType
 } from '../../../types';
 
 export interface XInputDatePickerSchema {
@@ -65,13 +66,19 @@ export type TXInputDatePickerEditData = Array<
   | IDateTypeConfigType<TDateTypeSelectKeyType>
   | ILayoutConfigType<TLayoutSelectKeyType>
   | IDataFieldConfigType
+  | IVerifyConfigType
 >;
 
 export interface XInputDatePickerConfig extends ICommonBaseType {
-  /**
+ /**
    * 输入框标题
+   * text：标题
+   * display：是否显示
    */
-  label: TTextDefaultType;
+  label: {
+    text: TTextDefaultType;
+    display: TBooleanDefaultType;
+  };
 
   /**
    * 数据字段
@@ -105,9 +112,11 @@ export interface XInputDatePickerConfig extends ICommonBaseType {
   width: TSelectDefaultType<TWidthSelectKeyType>;
 
   /**
-   * 是否必填，未填写时提交报错
+   * required：是否必填，未填写时提交报错
    */
-  required: TBooleanDefaultType;
+  verify: {
+    required: TBooleanDefaultType;
+  }
 
   /**
    * 日期类型： 年、年月、年月日、年月日时
@@ -154,33 +163,37 @@ const XDatePicker: XInputDatePickerSchema = {
     layoutConfig,
     labelColSpanConfig,
     {
-      key: 'required',
-      name: '开启必填',
-      type: CONFIG_TYPES.SWITCH_INPUT
-    },
-    {
       key: 'saveWithHidden',
       name: '隐藏时提交数据',
       type: CONFIG_TYPES.SWITCH_INPUT
     },
+    {
+      key: 'verify',
+      name: '校验',
+      type: CONFIG_TYPES.VERIFY
+    },
     statusConfig,
     widthConfig,
-    dateTypeConfig
   ],
   config: {
     ...baseDefault,
-    label: '日期选择',
+    label: {
+      text: '日期选择',
+      display: true,
+    },
     dataField: [],
     description: '',
     tooltip: '',
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     defaultValue: '',
-    required: false,
     dateType: DATE_VALUES[DATE_OPTIONS.DATE],
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
     saveWithHidden: false,
-    labelColSpan: 100
+    labelColSpan: 100,
+    verify: {
+      required: false,
+    }
   }
 };
 
