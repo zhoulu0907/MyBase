@@ -1,42 +1,33 @@
-import { Form, TreeSelect } from '@arco-design/web-react';
+import { Form, Select } from '@arco-design/web-react';
+import type { UserVO } from '@onebase/platform-center';
+import { getSimpleUserList } from '@onebase/platform-center';
 import { nanoid } from 'nanoid';
-import { memo } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import './index.css';
 import type { XInputUserSelectConfig } from './schema';
 
-// TODO(Mickey): 放到schema的config中
-// 示例树形结构：人员
-const treeData = [
-  {
-    key: 'node1',
-    title: 'Trunk',
-    children: [
-      {
-        key: 'node2',
-        title: 'Leaf'
-      }
-    ]
-  },
-  {
-    key: 'node3',
-    title: 'Trunk2',
-    children: [
-      {
-        key: 'node4',
-        title: 'Leaf'
-      },
-      {
-        key: 'node5',
-        title: 'Leaf'
-      }
-    ]
-  }
-];
+const Option = Select.Option;
 
-const XUserSelect = memo((props: XInputUserSelectConfig) => {
-  const { label, dataField, tooltip, status, verify, layout, labelColSpan = 0, description } = props;
+const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean }) => {
+  const { label, dataField, tooltip, status, verify, layout, labelColSpan = 0, description, runtime } = props;
+  const [userData, setUserData] = useState<UserVO[]>([]);
+
+  useEffect(() => {
+    if (runtime === true) {
+      getUserData();
+    }
+  }, []);
+  const getUserData = async () => {
+    // const param = {
+    //   pageNo: 1,
+    //   pageSize: 99999,
+    //   keywords: ''
+    // }
+    const res = await getSimpleUserList();
+    setUserData(res || []);
+  };
 
   return (
     <Form.Item
@@ -55,7 +46,22 @@ const XUserSelect = memo((props: XInputUserSelectConfig) => {
         margin: '0px'
       }}
     >
-      <TreeSelect placeholder="请选择" style={{ width: '100%' }} allowClear treeData={treeData} />
+      <Select
+        placeholder="Select"
+        showSearch={true}
+        filterOption={(inputValue, option) =>
+          option.props.value.toLowerCase().indexOf(inputValue.toLowerCase()) >= 0 ||
+          option.props.children.toLowerCase().indexOf(inputValue.toLowerCase()) >= 0
+        }
+        style={{ width: '100%' }}
+        allowClear
+      >
+        {userData.map((option) => (
+          <Option key={option.id} value={option.id}>
+            {option.nickname}
+          </Option>
+        ))}
+      </Select>
       <div className="description showEllipsis">{description}</div>
     </Form.Item>
   );

@@ -147,6 +147,13 @@ export const batchSaveFields = (data: object) => {
 };
 
 /**
+ * 批量查询字段可选校验类型
+ * @returns 
+ */
+export const getFieldCheckTypeApi = (fieldIdList: string[]) => {
+  return metadataService.post('/entity-field/validation-types/query', { fieldIdList });
+};
+/**
  * 获取系统支持的字段类型列表
  * @returns 字段类型列表
  */

@@ -55,6 +55,7 @@ export interface CreateApplicationMenuReq {
 export interface UpdateApplicationMenuNameReq {
   id: string;
   menuName: string;
+  menuIcon?: string;
 }
 
 export interface UpdateApplicationMenuOrderReq {

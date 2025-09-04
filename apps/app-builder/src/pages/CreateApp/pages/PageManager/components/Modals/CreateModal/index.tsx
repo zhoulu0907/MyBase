@@ -42,6 +42,8 @@ const CreateModal: React.FC<CreateModalProps> = ({
     <Modal
       title={title}
       visible={visibleCreateForm !== ''}
+      onOk={handleCreate}
+      onCancel={onCancel}
       autoFocus={false}
       focusLock={true}
       unmountOnExit={true}
