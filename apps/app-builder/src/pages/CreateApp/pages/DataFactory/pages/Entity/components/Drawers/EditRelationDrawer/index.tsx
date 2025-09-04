@@ -1,10 +1,10 @@
-import type { EdgeData } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
 import { useAppStore } from '@/store/store_app';
 import { useResourceStore } from '@/store/store_resource';
 import { Button, Drawer, Form, Message, Select, Space, Spin } from '@arco-design/web-react';
-import { getEntityFields, getEntityList, updateRelation } from '@onebase/app';
+import { deleteRelation, getEntityFields, getEntityList, updateRelation } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
+import { DeleteConfirmModal } from '../../Modals';
 interface EntityOption {
   label: string;
   value: string;
@@ -52,6 +52,8 @@ const EditRelationDrawer: React.FC<EditRelationDrawerProps> = ({ visible, setVis
   const [rightFieldOptions, setRightFieldOptions] = useState<FieldOption[]>([]);
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   // 初始化实体选项
   useEffect(() => {
@@ -146,6 +148,7 @@ const EditRelationDrawer: React.FC<EditRelationDrawerProps> = ({ visible, setVis
       await updateRelation(updateData);
       Message.success('关联关系更新成功');
       setVisible(false);
+      handleClose();
       onSuccess?.();
     } catch (error) {
       console.error('更新关联关系失败:', error);
@@ -159,6 +162,23 @@ const EditRelationDrawer: React.FC<EditRelationDrawerProps> = ({ visible, setVis
     setVisible(false);
   };
 
+  const openDeleteModal = () => {
+    setDeleteModalVisible(true);
+  };
+
+  const handleDelete = async () => {
+    setDeleteLoading(true);
+    const res = await deleteRelation(relationData?.relationshipId || '');
+    console.log('deleteRelation', res);
+    setDeleteLoading(false);
+    setDeleteModalVisible(false);
+    if (res) {
+      Message.success('删除成功');
+      handleClose();
+      onSuccess?.();
+    }
+  };
+
   return (
     <Drawer
       title="关联关系配置"
@@ -166,12 +186,17 @@ const EditRelationDrawer: React.FC<EditRelationDrawerProps> = ({ visible, setVis
       onCancel={handleClose}
       width={500}
       footer={
-        <Space>
-          <Button onClick={handleClose}>取消</Button>
-          <Button type="primary" loading={submitting} onClick={handleSubmit}>
-            保存
+        <div className={styles.footer}>
+          <Button type="text" status="danger" onClick={() => openDeleteModal()} style={{ float: 'left' }}>
+            删除
           </Button>
-        </Space>
+          <Space>
+            <Button onClick={handleClose}>取消</Button>
+            <Button type="primary" loading={submitting} onClick={handleSubmit}>
+              保存
+            </Button>
+          </Space>
+        </div>
       }
       className={styles['edit-relation-drawer']}
     >
@@ -250,6 +275,14 @@ const EditRelationDrawer: React.FC<EditRelationDrawerProps> = ({ visible, setVis
           <span>加载中...</span>
         </div>
       )}
+
+      <DeleteConfirmModal
+        content="确定要删除这个关联关系吗？删除后无法恢复。"
+        visible={deleteModalVisible}
+        onVisibleChange={setDeleteModalVisible}
+        onConfirm={handleDelete}
+        confirmLoading={deleteLoading}
+      />
     </Drawer>
   );
 };
