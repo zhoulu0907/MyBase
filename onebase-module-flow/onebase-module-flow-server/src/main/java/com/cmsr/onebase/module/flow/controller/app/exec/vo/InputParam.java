@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.flow.controller.admin.exec.vo;
+package com.cmsr.onebase.module.flow.controller.app.exec.vo;
 
 /**
  * @Author：huangjie

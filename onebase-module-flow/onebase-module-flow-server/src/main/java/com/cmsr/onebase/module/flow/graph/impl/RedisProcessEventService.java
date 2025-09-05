@@ -1,5 +1,8 @@
 package com.cmsr.onebase.module.flow.graph.impl;
 
+import com.cmsr.onebase.module.flow.graph.FlowProcessEventService;
+import jakarta.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
 import org.redisson.Redisson;
 import org.redisson.api.RTopic;
 import org.redisson.api.listener.MessageListener;
@@ -7,25 +10,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
-import com.cmsr.onebase.module.flow.graph.GraphEventService;
-import lombok.extern.slf4j.Slf4j;
-
-import jakarta.annotation.PostConstruct;
-
 /**
  * Redis 流程图事件服务实现
  * 通过 Redis 发布订阅机制实现分布式流程事件通知
- * 
+ *
  * @author huangjie
  */
 @Slf4j
 @Component
 @ConditionalOnProperty(
-    prefix = "onebase.flow.event", 
-    name = "type", 
-    havingValue = "redis"
+        prefix = "onebase.flow.event",
+        name = "type",
+        havingValue = "redis"
 )
-public class RedisGraphEventService extends GraphEventService {
+public class RedisProcessEventService extends FlowProcessEventService {
 
     /**
      * Redis Topic 常量定义

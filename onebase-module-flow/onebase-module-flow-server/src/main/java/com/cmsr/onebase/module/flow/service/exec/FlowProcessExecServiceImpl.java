@@ -1,18 +1,19 @@
 package com.cmsr.onebase.module.flow.service.exec;
 
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.module.flow.controller.admin.exec.vo.FormTriggerReqVO;
-import com.cmsr.onebase.module.flow.controller.admin.exec.vo.FormTriggerRespVO;
-import com.cmsr.onebase.module.flow.controller.admin.exec.vo.QueryFormTriggerRespVO;
+import com.cmsr.onebase.module.flow.controller.app.exec.vo.FormTriggerReqVO;
+import com.cmsr.onebase.module.flow.controller.app.exec.vo.FormTriggerRespVO;
+import com.cmsr.onebase.module.flow.controller.app.exec.vo.QueryFormTriggerRespVO;
 import com.cmsr.onebase.module.flow.dal.database.FlowProcessTriggerFormRepository;
 import com.cmsr.onebase.module.flow.dal.dataobject.FlowProcessTriggerFormDO;
-import com.cmsr.onebase.module.flow.graph.GraphFlowFilterExecutor;
+import com.cmsr.onebase.module.flow.flow.FlowFilterExecutor;
 import com.cmsr.onebase.module.flow.utils.FlowUtils;
 import com.yomahub.liteflow.core.FlowExecutor;
 import com.yomahub.liteflow.flow.LiteflowResponse;
 import com.yomahub.liteflow.slot.DefaultContext;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
@@ -22,7 +23,7 @@ import java.util.Map;
  * @Date：2025/9/4 17:38
  */
 @Setter
-//@Service
+@Service
 public class FlowProcessExecServiceImpl implements FlowProcessExecService {
 
     @Autowired
@@ -32,7 +33,7 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
     private FlowExecutor flowExecutor;
 
     @Autowired
-    private GraphFlowFilterExecutor graphFlowFilterExecutor;
+    private FlowFilterExecutor flowFilterExecutor;
 
     @Override
     public List<QueryFormTriggerRespVO> queryFormTrigger(Long pageId) {
@@ -46,7 +47,7 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
     public FormTriggerRespVO triggerForm(FormTriggerReqVO reqVO) {
         //TODO 输入参数要转换为实际对象
         Map<String, Object> inputMap = null;//BeanUtils.toMap(reqVO.getInputParams());
-        if (!graphFlowFilterExecutor.filter(reqVO.getProcessId(), inputMap)) {
+        if (!flowFilterExecutor.filter(reqVO.getProcessId(), inputMap)) {
             return null;
         }
         String chainId = FlowUtils.toFlowChainId(reqVO.getProcessId());

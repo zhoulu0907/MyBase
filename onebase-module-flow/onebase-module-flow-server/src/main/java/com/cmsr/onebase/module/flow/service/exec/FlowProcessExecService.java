@@ -1,8 +1,8 @@
 package com.cmsr.onebase.module.flow.service.exec;
 
-import com.cmsr.onebase.module.flow.controller.admin.exec.vo.FormTriggerReqVO;
-import com.cmsr.onebase.module.flow.controller.admin.exec.vo.FormTriggerRespVO;
-import com.cmsr.onebase.module.flow.controller.admin.exec.vo.QueryFormTriggerRespVO;
+import com.cmsr.onebase.module.flow.controller.app.exec.vo.FormTriggerReqVO;
+import com.cmsr.onebase.module.flow.controller.app.exec.vo.FormTriggerRespVO;
+import com.cmsr.onebase.module.flow.controller.app.exec.vo.QueryFormTriggerRespVO;
 
 import java.util.List;
 

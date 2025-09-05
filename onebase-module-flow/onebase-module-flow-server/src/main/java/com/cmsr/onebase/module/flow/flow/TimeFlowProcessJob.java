@@ -1,7 +1,8 @@
 package com.cmsr.onebase.module.flow.flow;
 
-import com.xxl.job.core.context.XxlJobHelper;
-import com.xxl.job.core.handler.annotation.XxlJob;
+import com.aizuda.snailjob.client.job.core.annotation.JobExecutor;
+import com.aizuda.snailjob.client.job.core.dto.JobArgs;
+import com.aizuda.snailjob.model.dto.ExecuteResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -13,9 +14,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class TimeFlowProcessJob {
 
-    @XxlJob("timeFlowProcessJob")
-    public void execute() {
-        String command = XxlJobHelper.getJobParam();
-        log.info("TimeFlowProcessJob execute, command: {}", command);
+    @JobExecutor(name = "timeFlowProcessJob")
+    public ExecuteResult jobExecute(JobArgs jobArgs) {
+        log.info("TimeFlowProcessJob execute, command: {}", jobArgs.getJobParams());
+        return ExecuteResult.success("测试成功");
     }
+
 }

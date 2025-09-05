@@ -19,7 +19,7 @@
         <liteflow.version>2.13.2</liteflow.version>
         <js.version>23.0.9</js.version>
         <dom4j.version>2.2.0</dom4j.version>
-        <xxljob.version>3.1.1</xxljob.version>
+        <snail.version>1.7.2</snail.version>
     </properties>
     <dependencies>
         <!-- 依赖服务 -->
@@ -80,20 +80,16 @@
             <artifactId>dom4j</artifactId>
             <version>${dom4j.version}</version>
         </dependency>
-        <!-- xxl flow -->
+        <!-- snail job -->
         <dependency>
-            <groupId>com.xuxueli</groupId>
-            <artifactId>xxl-job-core</artifactId>
-            <version>${xxljob.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.konghq</groupId>
-            <artifactId>unirest-java-core</artifactId>
+            <groupId>com.aizuda</groupId>
+            <artifactId>snail-job-client-starter</artifactId>
+            <version>${snail.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.konghq</groupId>
-            <artifactId>unirest-modules-jackson</artifactId>
+            <groupId>com.aizuda</groupId>
+            <artifactId>snail-job-client-job-core</artifactId>
+            <version>${snail.version}</version>
         </dependency>
         <!-- Test 测试相关 -->
         <dependency>

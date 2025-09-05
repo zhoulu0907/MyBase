@@ -1,10 +1,9 @@
-package com.cmsr.onebase.module.flow.controller.admin.exec.vo;
-
-import java.util.List;
-import java.util.Map;
+package com.cmsr.onebase.module.flow.controller.app.exec.vo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+
+import java.util.List;
 
 /**
  * @Author：huangjie
@@ -16,6 +15,8 @@ public class FormTriggerReqVO {
 
     @Schema(description = "流程定义ID")
     private Long processId;
+
+    private String executionUuid;
 
     @Schema(description = "输入参数")
     private List<InputParam> inputParams;

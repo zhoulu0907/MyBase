@@ -15,7 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 @Setter
 @Slf4j
-public abstract class GraphEventService {
+public abstract class FlowProcessEventService {
 
     @Autowired
     private FlowProcessRepository flowProcessRepository;
