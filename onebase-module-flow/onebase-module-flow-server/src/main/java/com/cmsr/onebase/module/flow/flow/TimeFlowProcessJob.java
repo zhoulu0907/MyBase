@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.flow.job;
+package com.cmsr.onebase.module.flow.flow;
 
 import com.xxl.job.core.context.XxlJobHelper;
 import com.xxl.job.core.handler.annotation.XxlJob;

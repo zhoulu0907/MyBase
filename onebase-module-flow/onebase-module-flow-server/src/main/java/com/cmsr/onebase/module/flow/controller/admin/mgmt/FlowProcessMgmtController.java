@@ -46,7 +46,7 @@ public class FlowProcessMgmtController {
     }
 
 
-    @PostMapping
+    @PostMapping("/create")
     @Operation(summary = "创建流程")
     public CommonResult<Long> create(@RequestBody @Valid CreateFlowProcessReqVO reqVO) {
         Long id = flowProcessMgmtService.create(reqVO);

@@ -1,14 +1,13 @@
-package com.cmsr.onebase.module.flow.job;
+package com.cmsr.onebase.module.flow.flow;
 
 import com.xxl.job.core.executor.impl.XxlJobSpringExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
 /**
- * xxl-job config
+ * xxl-flow config
  *
  * @author xuxueli 2017-04-28
  */
@@ -16,37 +15,37 @@ import org.springframework.context.annotation.Configuration;
 public class XxlJobConfig {
     private Logger logger = LoggerFactory.getLogger(XxlJobConfig.class);
 
-    @Value("${xxl.job.admin.addresses}")
+    @Value("${flow.job.admin.addresses}")
     private String adminAddresses;
 
-    @Value("${xxl.job.admin.accessToken}")
+    @Value("${flow.job.admin.accessToken}")
     private String accessToken;
 
-    @Value("${xxl.job.admin.timeout}")
+    @Value("${flow.job.admin.timeout}")
     private int timeout;
 
-    @Value("${xxl.job.executor.appname}")
+    @Value("${flow.job.executor.appname}")
     private String appname;
 
-    @Value("${xxl.job.executor.address:}")
+    @Value("${flow.job.executor.address:}")
     private String address;
 
-    @Value("${xxl.job.executor.ip:}")
+    @Value("${flow.job.executor.ip:}")
     private String ip;
 
-    @Value("${xxl.job.executor.port:0}")
+    @Value("${flow.job.executor.port:0}")
     private int port;
 
-    @Value("${xxl.job.executor.logpath:}")
+    @Value("${flow.job.executor.logpath:}")
     private String logPath;
 
-    @Value("${xxl.job.executor.logretentiondays:3}")
+    @Value("${flow.job.executor.logretentiondays:3}")
     private int logRetentionDays;
 
 
     @Bean
     public XxlJobSpringExecutor xxlJobExecutor() {
-        logger.info("xxl-job config: [{}] [{}]", adminAddresses, appname);
+        logger.info("xxl-flow config: [{}] [{}]", adminAddresses, appname);
         XxlJobSpringExecutor xxlJobSpringExecutor = new XxlJobSpringExecutor();
         xxlJobSpringExecutor.setAdminAddresses(adminAddresses);
         xxlJobSpringExecutor.setAppname(appname);

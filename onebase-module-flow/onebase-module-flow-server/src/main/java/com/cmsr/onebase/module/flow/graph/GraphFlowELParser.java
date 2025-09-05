@@ -2,7 +2,10 @@ package com.cmsr.onebase.module.flow.graph;
 
 import com.cmsr.onebase.module.flow.dal.database.FlowProcessRepository;
 import com.cmsr.onebase.module.flow.dal.dataobject.FlowProcessDO;
+import com.cmsr.onebase.module.flow.utils.FlowUtils;
 import com.yomahub.liteflow.parser.el.ClassXmlFlowELParser;
+
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
@@ -17,6 +20,7 @@ import java.util.List;
  * @Date：2025/9/2 10:31
  */
 @Slf4j
+@Setter
 @Component
 public class GraphFlowELParser extends ClassXmlFlowELParser {
 
@@ -36,7 +40,8 @@ public class GraphFlowELParser extends ClassXmlFlowELParser {
             try {
                 JsonGraph jsonGraph = JsonGraph.of(flowProcessDO.getProcessDefinition());
                 String flowChain = jsonGraph.toFlowChain();
-                Element element = rootElement.addElement("chain").addAttribute("name", "chain" + flowProcessDO.getId());
+                String chainId = FlowUtils.toFlowChainId(flowProcessDO.getId());
+                Element element = rootElement.addElement("chain").addAttribute("name", chainId);
                 element.addCDATA(flowChain);
             } catch (Exception e) {
                 log.error("解析流程定义失败：{}", e);

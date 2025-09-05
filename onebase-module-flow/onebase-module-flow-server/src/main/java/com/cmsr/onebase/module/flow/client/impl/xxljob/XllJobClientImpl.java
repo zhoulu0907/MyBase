@@ -26,13 +26,13 @@ public class XllJobClientImpl implements JobClient {
     private static final int SUCCESS_CODE = 200;
     private static final int LOGIN_TIMEOUT_HOURS = 1;
 
-    @Value("${flow.job.url}")
+    @Value("${flow.flow.url}")
     private String url;
 
-    @Value("${flow.job.jobGroup:1}")
+    @Value("${flow.flow.jobGroup:1}")
     private Long jobGroup;
 
-    @Value("${flow.job.password}")
+    @Value("${flow.flow.password}")
     private String password;
 
     private Cookies cookies;
