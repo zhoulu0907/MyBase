@@ -155,6 +155,7 @@ export default function EditorWorkspace() {
                   .forEach((field: AppEntityField) => {
                     let cpType = COMPONENT_MAP[field.fieldType];
                     let cpID = `${cpType}-${uuidv4()}`;
+                    console.log('cpType', cpType, field);
                     const schema = getComponentSchema(cpType as any);
 
                     schema.config.cpName = field.displayName;

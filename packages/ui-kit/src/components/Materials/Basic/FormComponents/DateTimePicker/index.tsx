@@ -1,15 +1,18 @@
-import { memo } from 'react';
+import { FORM_COMPONENT_TYPES } from '@/components/Materials/componentTypes';
 import { DatePicker, Form } from '@arco-design/web-react';
+import { nanoid } from 'nanoid';
+import { memo } from 'react';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
-import type { XInputDateTimePickerConfig } from './schema';
 import './index.css';
+import type { XInputDateTimePickerConfig } from './schema';
 
 const XDateTimePicker = memo((props: XInputDateTimePickerConfig) => {
-  const { label, tooltip, status, defaultValue, verify, layout, labelColSpan = 0, description } = props;
+  const { label, dataField, tooltip, status, defaultValue, verify, layout, labelColSpan = 0, description } = props;
 
   return (
     <Form.Item
       label={label.display && label.text}
+      field={dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.INPUT_TEXT}_${nanoid()}`}
       layout={layout}
       tooltip={tooltip}
       labelCol={{
@@ -24,7 +27,6 @@ const XDateTimePicker = memo((props: XInputDateTimePickerConfig) => {
       }}
     >
       <DatePicker showTime defaultValue={defaultValue} style={{ width: '100%' }} />
-      <div className='description showEllipsis'>{description}</div>
     </Form.Item>
   );
 });

@@ -31,7 +31,6 @@ const XSelectMutiple = memo((props: XInputSelectMutipleConfig) => {
         style={{ width: '100%' }}
         options={defaultValue}
       />
-      <div className="description showEllipsis">{description}</div>
     </Form.Item>
   );
 });

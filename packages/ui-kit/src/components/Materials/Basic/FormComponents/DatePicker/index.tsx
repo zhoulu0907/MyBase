@@ -1,10 +1,10 @@
-import { memo } from 'react';
-import { nanoid } from 'nanoid';
 import { DatePicker, Form } from '@arco-design/web-react';
-import { DATE_OPTIONS, DATE_VALUES, STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
+import { nanoid } from 'nanoid';
+import { memo } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
-import type { XInputDatePickerConfig } from './schema';
+import { DATE_OPTIONS, DATE_VALUES, STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import './index.css';
+import type { XInputDatePickerConfig } from './schema';
 
 const { YearPicker, MonthPicker } = DatePicker;
 const XDatePicker = memo((props: XInputDatePickerConfig) => {
@@ -48,7 +48,6 @@ const XDatePicker = memo((props: XInputDatePickerConfig) => {
       }}
     >
       {renderDatePicker()}
-      <div className='description showEllipsis'>{description}</div>
     </Form.Item>
   );
 });
