@@ -1,6 +1,5 @@
 package com.cmsr.onebase.module.flow.client.dto;
 
-import com.cmsr.onebase.module.flow.client.enums.JobScheduleTypeEnum;
 import lombok.Data;
 
 /**
@@ -14,8 +13,9 @@ public class JobCreateUpdateReqDTO {
 
     private JobScheduleTypeEnum scheduleType;
 
-    private String scheduleValue;
+    private String scheduleConf;
 
     private String executorParam;
+
 
 }
