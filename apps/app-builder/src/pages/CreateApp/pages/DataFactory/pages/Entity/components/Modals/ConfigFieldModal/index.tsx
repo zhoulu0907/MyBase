@@ -1,17 +1,16 @@
-import type { EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
-import { FIELD_TYPE } from '@onebase/ui-kit';
-import { useAppStore } from '@/store/store_app';
-import { Button, Message, Modal, Table } from '@arco-design/web-react';
-import { IconPlus } from '@arco-design/web-react/icon';
-import { batchSaveFields, getEntityFields } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
-import { ENTITY_FIELD_TYPE_LABEL } from '@onebase/ui-kit';
+import { Button, Message, Modal, Table } from '@arco-design/web-react';
+import { IconPlus } from '@arco-design/web-react/icon';
+import type { EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
+import { batchSaveFields, getEntityFields } from '@onebase/app';
+import { FIELD_TYPE, ENTITY_FIELD_TYPE_LABEL } from '@onebase/ui-kit';
+import { useAppStore } from '@/store/store_app';
+import { useFieldStore } from '@/store/store_field';
 import type { AutoNumberRule } from './types';
 import FieldConfigPopover from './FieldConfigPopover';
 import TableColumns from './TableColumns';
 import styles from './index.module.less';
-import { useFieldStore } from '@/store/store_field';
 
 interface FieldFormValues {
   id?: string;
