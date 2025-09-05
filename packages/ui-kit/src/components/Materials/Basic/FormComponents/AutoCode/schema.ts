@@ -211,7 +211,7 @@ const XautoCode: XautoCodeSchema = {
   ],
   config: {
     ...baseDefault,
-    label: '自动编码',
+    label: '自动编号',
     dataField: [],
     placeholder: '',
     description: '',

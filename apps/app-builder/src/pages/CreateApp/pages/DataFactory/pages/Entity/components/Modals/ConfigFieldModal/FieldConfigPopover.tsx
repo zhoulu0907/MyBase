@@ -32,11 +32,11 @@ const FieldConfigPopover: React.FC<FieldConfigPopoverProps> = ({
         />
       )}
 
-      {fieldType === ENTITY_FIELD_TYPE_LABEL.MULTI_PICKLIST && (
+      {fieldType === ENTITY_FIELD_TYPE_LABEL.MULTI_SELECT && (
         <MultiPicklistConfig
-          onConfirm={(options) => onConfirm(ENTITY_FIELD_TYPE_LABEL.MULTI_PICKLIST, fieldId, options)}
+          onConfirm={(options) => onConfirm(ENTITY_FIELD_TYPE_LABEL.MULTI_SELECT, fieldId, options)}
           initialOptions={field?.options}
-          onCancel={() => onCancel(ENTITY_FIELD_TYPE_LABEL.MULTI_PICKLIST)}
+          onCancel={() => onCancel(ENTITY_FIELD_TYPE_LABEL.MULTI_SELECT)}
         />
       )}
 

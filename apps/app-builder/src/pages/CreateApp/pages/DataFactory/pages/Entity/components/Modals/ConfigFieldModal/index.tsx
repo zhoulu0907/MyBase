@@ -50,7 +50,7 @@ interface ConfigFieldModalProps {
 // 需要额外配置的字段类型
 const FIELD_TYPES_NEED_CONFIG = [
   ENTITY_FIELD_TYPE_LABEL.PICKLIST,
-  ENTITY_FIELD_TYPE_LABEL.MULTI_PICKLIST,
+  ENTITY_FIELD_TYPE_LABEL.MULTI_SELECT,
   ENTITY_FIELD_TYPE_LABEL.AUTO_CODE
 ];
 
@@ -230,7 +230,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
     let fieldConfig = {};
     switch (fieldType) {
       case ENTITY_FIELD_TYPE_LABEL.PICKLIST:
-      case ENTITY_FIELD_TYPE_LABEL.MULTI_PICKLIST:
+      case ENTITY_FIELD_TYPE_LABEL.MULTI_SELECT:
         fieldConfig = { options: configData };
         break;
       case ENTITY_FIELD_TYPE_LABEL.AUTO_CODE:
