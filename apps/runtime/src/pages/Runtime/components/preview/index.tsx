@@ -54,6 +54,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     }
   }, [window.location.hash]);
 
+  // 获取主表字段
   const getMainMetaData = async (pageSetId: string) => {
     const mainMetaData = await getPageSetMetaData({ pageSetId: pageSetId });
     console.log('mainMetaData: ', mainMetaData);
@@ -104,13 +105,14 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
     const formData = {} as any;
     Object.entries(fields).forEach(([key, value]) => {
+      console.log('key: ', key, '   value: ', value);
       const field = (mainMetaDataFields || []).find((f: AppEntityField) => f.fieldID == key);
       if (field) {
         formData[field.fieldName] = value;
       }
     });
 
-    console.log(formData);
+    console.log('formData:   ', formData);
 
     if (editTargetId) {
       const req: UpdateMethodParams = {

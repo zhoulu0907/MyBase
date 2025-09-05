@@ -1,10 +1,10 @@
-import { memo } from 'react';
-import { nanoid } from 'nanoid';
 import { Form, Switch } from '@arco-design/web-react';
-import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
+import { nanoid } from 'nanoid';
+import { memo } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
-import type { XInputSwitchConfig } from './schema';
+import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import './index.css';
+import type { XInputSwitchConfig } from './schema';
 
 const XSwitch = memo((props: XInputSwitchConfig) => {
   const { label, dataField, tooltip, status, defaultValue, layout, labelColSpan = 0, description } = props;
@@ -25,8 +25,7 @@ const XSwitch = memo((props: XInputSwitchConfig) => {
         margin: '0px'
       }}
     >
-      <Switch defaultChecked={defaultValue === 'true'} style={{marginTop: !!description ? 4 : 0}} />
-      <div className='description showEllipsis'>{description}</div>
+      <Switch defaultChecked={defaultValue === 'true'} style={{ marginTop: !!description ? 4 : 0 }} />
     </Form.Item>
   );
 });

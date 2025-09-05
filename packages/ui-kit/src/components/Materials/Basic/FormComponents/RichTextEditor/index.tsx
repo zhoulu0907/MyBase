@@ -1,12 +1,12 @@
-import '@wangeditor/editor/dist/css/style.css' // 引入 css
+import '@wangeditor/editor/dist/css/style.css'; // 引入 css
 
-import { useState, useEffect, memo } from 'react'
 import { Form } from '@arco-design/web-react';
-import { Editor, Toolbar } from '@wangeditor/editor-for-react'
-import { IDomEditor, IEditorConfig, IToolbarConfig } from '@wangeditor/editor'
+import { IDomEditor, IEditorConfig, IToolbarConfig } from '@wangeditor/editor';
+import { Editor, Toolbar } from '@wangeditor/editor-for-react';
 import { nanoid } from 'nanoid';
-import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
+import { memo, useEffect, useState } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
+import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import type { XRichTextConfig } from './schema';
 
 import './index.css';
@@ -25,7 +25,7 @@ const XRichText = memo((props: XRichTextConfig) => {
 
   // 编辑器配置
   const editorConfig: Partial<IEditorConfig> = {
-    placeholder: '请输入内容...',
+    placeholder: '请输入内容...'
   };
 
   useEffect(() => {
@@ -46,7 +46,7 @@ const XRichText = memo((props: XRichTextConfig) => {
       if (editor === null) return;
       editor.destroy();
       setEditor(null);
-    }
+    };
   }, [editor]);
 
   return (
@@ -82,7 +82,6 @@ const XRichText = memo((props: XRichTextConfig) => {
         />
       </div>
       {/* <div style={{ marginTop: '15px' }}>{html}</div> */}
-      <div className='description showEllipsis'>{description}</div>
     </Form.Item>
   );
 });

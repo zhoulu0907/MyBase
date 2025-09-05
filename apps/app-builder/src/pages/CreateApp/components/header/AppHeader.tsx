@@ -1,5 +1,5 @@
-import AvatarSVG from '@/assets/images/avatar.svg';
 import AppIconSVG from '@/assets/images/app_icon.svg';
+import AvatarSVG from '@/assets/images/avatar.svg';
 import { useI18n } from '@/hooks/useI18n';
 import { useAppStore } from '@/store/store_app';
 import { UserPermissionManager } from '@/utils/permission';
@@ -166,7 +166,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
 
         <div className={styles.userInfo}>
           <Button type="outline" size="small" onClick={toRuntime}>
-            预览
+            访问
           </Button>
 
           {UserPermissionManager.getUserPermissionInfo()?.user?.nickname || '未登录'}

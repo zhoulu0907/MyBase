@@ -1,10 +1,10 @@
-import { memo } from 'react';
-import { nanoid } from 'nanoid';
 import { Form, Input } from '@arco-design/web-react';
-import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
+import { nanoid } from 'nanoid';
+import { memo } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
-import { type XStaticTextConfig } from './schema';
+import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import './index.css';
+import { type XStaticTextConfig } from './schema';
 
 const XStaticText = memo((props: XStaticTextConfig) => {
   const {
@@ -51,7 +51,6 @@ const XStaticText = memo((props: XStaticTextConfig) => {
           backgroundColor: bgColor
         }}
       />
-      <div className='description showEllipsis'>{description}</div>
     </Form.Item>
   );
 });
