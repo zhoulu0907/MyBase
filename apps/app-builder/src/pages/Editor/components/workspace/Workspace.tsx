@@ -2,6 +2,7 @@ import { IconCopy, IconDelete } from '@arco-design/web-react/icon';
 import { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import { v4 as uuidv4 } from 'uuid';
+import { STATUS_OPTIONS,STATUS_VALUES } from '@onebase/ui-kit';
 
 import {
   COMPONENT_GROUP_NAME,
@@ -160,7 +161,7 @@ export default function EditorWorkspace() {
                     schema.config.cpName = field.displayName;
                     schema.config.id = cpID;
                     schema.config.dataField = [item.entityID, field.fieldID];
-                    schema.config.label = field.displayName;
+                    schema.config.label.text = field.displayName;
                     const props = {
                       id: cpID,
                       type: cpType,
@@ -214,14 +215,16 @@ export default function EditorWorkspace() {
               schema.config.cpName = itemDisplayName;
               schema.config.id = cpID;
 
+              // 系统组件
               if (entityID && fieldID) {
                 console.log('dataField:    ', entityID, fieldID);
                 schema.config.dataField = [entityID, fieldID];
+                schema.config.status = STATUS_VALUES[STATUS_OPTIONS.READONLY]
               }
 
               if (dataLabel) {
                 console.log(schema);
-                schema.config.label = dataLabel;
+                schema.config.label.text = dataLabel;
               }
 
               const props = {
