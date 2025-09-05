@@ -66,7 +66,7 @@ export const ENTITY_FIELD_TYPE = {
   PICKLIST: '单选列表',
   MULTI_SELECT: '多选列表',
   JSON: 'JSON',
-  AUTO_CODE: '自动编码',
+  AUTO_CODE: '自动编号',
   USER: '用户引用',
   DEPARTMENT: '部门引用',
   DATA_SELECTION: '数据选择',
