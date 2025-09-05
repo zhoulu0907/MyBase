@@ -78,7 +78,10 @@ export interface XautoCodeConfig extends ICommonBaseType {
   /**
    * 输入框标题
    */
-  label: TTextDefaultType;
+  label: {
+    text: TTextDefaultType;
+    display: TBooleanDefaultType;
+  };
 
   /**
    * 数据字段
@@ -211,7 +214,10 @@ const XautoCode: XautoCodeSchema = {
   ],
   config: {
     ...baseDefault,
-    label: '自动编号',
+    label: {
+      text: '自动编号',
+      display: true,
+    },
     dataField: [],
     placeholder: '',
     description: '',

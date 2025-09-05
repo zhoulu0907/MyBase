@@ -20,7 +20,7 @@ const XautoCode = memo((props: XautoCodeConfig) => {
 
   return (
     <Form.Item
-      label={label}
+      label={label.display && label.text}
       layout={layout}
       rules={[{ required }]}
       tooltip={tooltip}
