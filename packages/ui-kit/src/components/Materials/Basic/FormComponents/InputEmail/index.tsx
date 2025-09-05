@@ -1,10 +1,10 @@
-import { memo, useEffect, useState } from 'react';
-import { nanoid } from 'nanoid';
 import { Form, Input } from '@arco-design/web-react';
-import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
+import { nanoid } from 'nanoid';
+import { memo, useEffect, useState } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
-import type { XInputEmailConfig } from './schema';
+import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import './index.css';
+import type { XInputEmailConfig } from './schema';
 
 const XInputEmail = memo((props: XInputEmailConfig) => {
   const {
@@ -78,7 +78,6 @@ const XInputEmail = memo((props: XInputEmailConfig) => {
         placeholder={placeholder}
         onChange={setValue}
       />
-      <div className='description showEllipsis'>{description}</div>
     </Form.Item>
   );
 });

@@ -53,7 +53,6 @@ const XDeptSelect = memo((props: XInputDeptSelectConfig) => {
       }}
     >
       <TreeSelect placeholder="请选择" style={{ width: '100%' }} allowClear treeData={treeData}></TreeSelect>
-      <div className="description showEllipsis">{description}</div>
     </Form.Item>
   );
 });

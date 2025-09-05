@@ -1,10 +1,10 @@
-import { memo, useState } from 'react';
 import { Form, Message, Upload } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
 import { uploadFile } from '@onebase/platform-center';
+import { memo, useState } from 'react';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
-import type { XInputFileUploadConfig } from './schema';
 import './index.css';
+import type { XInputFileUploadConfig } from './schema';
 
 const XFileUpload = memo((props: XInputFileUploadConfig) => {
   const {
@@ -17,7 +17,7 @@ const XFileUpload = memo((props: XInputFileUploadConfig) => {
     verify,
     layout,
     labelColSpan = 0,
-    description,
+    description
   } = props;
 
   const [_fileUrl, setFileUrl] = useState<string>('');
@@ -102,7 +102,6 @@ const XFileUpload = memo((props: XInputFileUploadConfig) => {
           </div>
         )}
       </Upload>
-      <div className='description showEllipsis'>{description}</div>
     </Form.Item>
   );
 });

@@ -1,9 +1,9 @@
-import { memo } from 'react';
-import dayjs from 'dayjs';
 import { DatePicker, Form } from '@arco-design/web-react';
+import dayjs from 'dayjs';
+import { memo } from 'react';
 import { DATE_OPTIONS, DATE_VALUES, STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
-import type { XInputDateRangePickerConfig } from './schema';
 import './index.css';
+import type { XInputDateRangePickerConfig } from './schema';
 
 const XDateRangePicker = memo((props: XInputDateRangePickerConfig) => {
   const { label, status, tooltip, verify, layout, labelColSpan = 0, dateType, startTime, endTime, description } = props;
@@ -35,7 +35,6 @@ const XDateRangePicker = memo((props: XInputDateRangePickerConfig) => {
         showTime={dateType === DATE_VALUES[DATE_OPTIONS.FULL]}
         style={{ width: '100%' }}
       />
-      <div className='description showEllipsis'>{description}</div>
     </Form.Item>
   );
 });

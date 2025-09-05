@@ -1,12 +1,12 @@
 import { Form, Select } from '@arco-design/web-react';
 import { getSimpleUserPage, type UserVO } from '@onebase/platform-center';
+import { debounce } from 'lodash-es';
 import { nanoid } from 'nanoid';
-import { memo, useEffect, useState, useCallback } from 'react';
+import { memo, useCallback, useEffect, useState } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import './index.css';
 import type { XInputUserSelectConfig } from './schema';
-import { debounce } from 'lodash-es';
 
 const Option = Select.Option;
 
@@ -23,7 +23,7 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean })
 
   useEffect(() => {
     if (runtime === true) {
-      getUserData("");
+      getUserData('');
     }
   }, []);
 
@@ -41,9 +41,9 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean })
       pageNo: 1,
       pageSize: 20,
       keywords: inputValue
-    }
+    };
     const { list, total } = await getSimpleUserPage(param);
-    setPageNo(1)
+    setPageNo(1);
     setTotal(total);
     setUserData(list || []);
     setFetching(false);
@@ -60,14 +60,14 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean })
         pageNo: pageNo + 1,
         pageSize: 20,
         keywords: keywords
-      }
+      };
       const { list, total } = await getSimpleUserPage(param);
-      setPageNo(pageNo + 1)
+      setPageNo(pageNo + 1);
       setTotal(total);
-      setUserData(prev => [...prev, ...list]);
+      setUserData((prev) => [...prev, ...list]);
       setFetching(false);
     }
-  }
+  };
 
   return (
     <Form.Item
@@ -101,7 +101,6 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean })
           </Option>
         ))}
       </Select>
-      <div className="description showEllipsis">{description}</div>
     </Form.Item>
   );
 });

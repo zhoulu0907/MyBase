@@ -1,10 +1,10 @@
-import { memo } from 'react';
 import { Form, Input } from '@arco-design/web-react';
 import { nanoid } from 'nanoid';
-import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
+import { memo } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
-import { type XInputTextConfig } from './schema';
+import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import './index.css';
+import { type XInputTextConfig } from './schema';
 
 const XInputText = memo((props: XInputTextConfig & { runtime?: boolean }) => {
   const { runtime = true } = props;
@@ -22,8 +22,7 @@ const XInputText = memo((props: XInputTextConfig & { runtime?: boolean }) => {
     bgColor,
     labelColSpan = 0,
     maxLength,
-    description,
-    
+    description
   } = props;
 
   return (
@@ -55,7 +54,6 @@ const XInputText = memo((props: XInputTextConfig & { runtime?: boolean }) => {
           backgroundColor: bgColor
         }}
       />
-      <div className='description showEllipsis'>{description}</div>
     </Form.Item>
   );
 });
