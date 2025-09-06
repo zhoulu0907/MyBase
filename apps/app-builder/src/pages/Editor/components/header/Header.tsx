@@ -258,7 +258,7 @@ export default function EditorHeader() {
       listColComponentsMap: { colComponents: new Map(Object.entries(cloneDeep(listLayoutSubComponents.value))) }
     };
 
-    startSavePageSet(savePageSetParams);
+    startSavePageSet(savePageSetParams, setAppStatus(AppStatus.PUBLISHED));
   };
 
   const clearAllData = () => {
