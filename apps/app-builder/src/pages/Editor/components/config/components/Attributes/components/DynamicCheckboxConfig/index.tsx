@@ -1,5 +1,5 @@
 // import { useAppEntityStore } from '@/store/store_entity';
-import { Button, Form, Input, Checkbox, Space } from '@arco-design/web-react';
+import { Button, Form, Input, Checkbox, Space, Message } from '@arco-design/web-react';
 import { IconDelete, IconDragDotVertical } from '@arco-design/web-react/icon';
 // import { type MetadataEntityField, type MetadataEntityPair } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
@@ -86,6 +86,10 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
                             ...newList[idx],
                             chosen: e
                           };
+                          if (newList.filter((op) => op.chosen).length > configs['verify']['maxChecked']) {
+                            Message.warning('选中数量超过最大可选数量');
+                            return false;
+                          }
                           setCheckboxConfig(newList);
                           handlePropsChange(checkboxKey, newList);
                         }}
