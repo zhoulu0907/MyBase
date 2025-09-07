@@ -1,6 +1,6 @@
-import { Form, Switch } from '@arco-design/web-react';
-import { nanoid } from 'nanoid';
 import { memo } from 'react';
+import { nanoid } from 'nanoid';
+import { Form, Switch } from '@arco-design/web-react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import type { XInputSwitchConfig } from './schema';
@@ -27,7 +27,7 @@ const XSwitch = memo((props: XInputSwitchConfig & { runtime?: boolean }) => {
         pointerEvents: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset'
       }}
     >
-      <Switch defaultChecked={defaultValue === 'true'} style={{ marginTop: !!description ? 4 : 0 }} />
+      <Switch defaultChecked={defaultValue} style={{ marginTop: !!description ? 4 : 0 }} />
     </Form.Item>
   );
 });

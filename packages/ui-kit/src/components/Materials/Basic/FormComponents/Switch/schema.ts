@@ -101,7 +101,7 @@ export interface XInputSwitchConfig extends ICommonBaseType {
   /**
    * 默认值
    */
-  defaultValue?: TTextDefaultType;
+  defaultValue?: TBooleanDefaultType;
 
   /**
    * 字段宽度
@@ -154,6 +154,11 @@ const XSwitch: XInputSwitchSchema = {
       name: '提示文字',
       type: CONFIG_TYPES.TOOLTIP_INPUT
     },
+    {
+      key: 'defaultValue',
+      name: '默认值',
+      type: CONFIG_TYPES.SWITCH_INPUT
+    },
     layoutConfig,
     labelColSpanConfig,
     {
@@ -180,7 +185,7 @@ const XSwitch: XInputSwitchSchema = {
     tooltip: '',
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
-    defaultValue: '',
+    defaultValue: false,
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
     labelColSpan: 100,
     saveWithHidden: false,

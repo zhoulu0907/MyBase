@@ -62,6 +62,8 @@ export const CONFIG_TYPES = {
   COLOR: 'Color',
   // 单选框配置
   RADIO_DATA: 'RadioData',
+  // 复选框配置
+  CHECKBOX_DATA: 'CheckboxData',
   // 轮播图管理
   CAROUSEL: 'Carousel',
   // 图片填充方式
