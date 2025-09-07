@@ -1,8 +1,8 @@
 import { Form, Select } from '@arco-design/web-react';
-import type { UserVO } from '@onebase/platform-center';
-import { getSimpleUserList } from '@onebase/platform-center';
+import { getSimpleUserPage, type UserVO } from '@onebase/platform-center';
+import { debounce } from 'lodash-es';
 import { nanoid } from 'nanoid';
-import { memo, useEffect, useState } from 'react';
+import { memo, useCallback, useEffect, useState } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import type { XInputUserSelectConfig } from './schema';
@@ -13,20 +13,60 @@ const Option = Select.Option;
 const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean }) => {
   const { label, dataField, tooltip, status, verify, layout, labelColSpan = 0, description, runtime } = props;
   const [userData, setUserData] = useState<UserVO[]>([]);
+  // 分页
+  const [pageNo, setPageNo] = useState<number>(1);
+  const [total, setTotal] = useState<number | string>(0);
+  // 搜索条件
+  const [keywords, setKeywords] = useState<string>('');
+  // 是否加载中
+  const [fetching, setFetching] = useState<boolean>(false);
 
   useEffect(() => {
     if (runtime === true) {
-      getUserData();
+      getUserData('');
     }
   }, []);
-  const getUserData = async () => {
-    // const param = {
-    //   pageNo: 1,
-    //   pageSize: 99999,
-    //   keywords: ''
-    // }
-    const res = await getSimpleUserList();
-    setUserData(res || []);
+
+  // 第一页的加载
+  const debouncedSearch = useCallback(
+    debounce((value) => {
+      getUserData(value);
+    }, 500),
+    []
+  );
+  const getUserData = async (inputValue: string) => {
+    setFetching(true);
+    setKeywords(inputValue);
+    const param = {
+      pageNo: 1,
+      pageSize: 20,
+      keywords: inputValue
+    };
+    const { list, total } = await getSimpleUserPage(param);
+    setPageNo(1);
+    setTotal(total);
+    setUserData(list || []);
+    setFetching(false);
+  };
+
+  // 滚动加载
+  const scrollHandler = async (element: HTMLDivElement) => {
+    const { scrollTop, scrollHeight, clientHeight } = element;
+    const scrollBottom = scrollHeight - (scrollTop + clientHeight);
+
+    if (scrollBottom < 10 && !fetching && Number(total) > userData.length) {
+      setFetching(true);
+      const param = {
+        pageNo: pageNo + 1,
+        pageSize: 20,
+        keywords: keywords
+      };
+      const { list, total } = await getSimpleUserPage(param);
+      setPageNo(pageNo + 1);
+      setTotal(total);
+      setUserData((prev) => [...prev, ...list]);
+      setFetching(false);
+    }
   };
 
   return (
@@ -51,10 +91,9 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean })
       <Select
         placeholder="请选择"
         showSearch={true}
-        filterOption={(inputValue, option) =>
-          option.props.value.toLowerCase().indexOf(inputValue.toLowerCase()) >= 0 ||
-          option.props.children.toLowerCase().indexOf(inputValue.toLowerCase()) >= 0
-        }
+        filterOption={false}
+        onSearch={debouncedSearch}
+        onPopupScroll={scrollHandler}
         style={{ width: '100%' }}
         allowClear
       >
@@ -64,7 +103,6 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean })
           </Option>
         ))}
       </Select>
-      <div className="description showEllipsis">{description}</div>
     </Form.Item>
   );
 });

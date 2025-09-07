@@ -1,15 +1,15 @@
-import { memo, useState } from 'react';
-import { nanoid } from 'nanoid';
 import { Form, Message, Upload } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
 import { uploadFile } from '@onebase/platform-center';
+import { nanoid } from 'nanoid';
+import { memo, useState } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import type { XInputImgUploadConfig } from './schema';
 import '../index.css';
 
 const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean }) => {
-  const { label, dataField, status, tooltip, listType, verify, layout, labelColSpan = 0, description, runtime = true } = props;
+  const { label, dataField, status, tooltip, listType, verify, layout, labelColSpan = 0, /* description, */ runtime = true } = props;
 
   const [_imgUrl, setImgUrl] = useState<string>('');
 
@@ -97,7 +97,6 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean }) =
           </div>
         )}
       </Upload>
-      <div className='description showEllipsis'>{description}</div>
     </Form.Item>
   );
 });

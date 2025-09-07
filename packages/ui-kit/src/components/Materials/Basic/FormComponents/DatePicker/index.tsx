@@ -1,14 +1,14 @@
-import { memo } from 'react';
-import { nanoid } from 'nanoid';
 import { DatePicker, Form } from '@arco-design/web-react';
-import { DATE_OPTIONS, DATE_VALUES, STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
+import { nanoid } from 'nanoid';
+import { memo } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
+import { DATE_OPTIONS, DATE_VALUES, STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import type { XInputDatePickerConfig } from './schema';
 import '../index.css';
 
 const { YearPicker, MonthPicker } = DatePicker;
 const XDatePicker = memo((props: XInputDatePickerConfig & { runtime?: boolean }) => {
-  const { label, dataField, tooltip, status, verify, dateType, layout, labelColSpan = 0, description, runtime = true } = props;
+  const { label, dataField, tooltip, status, verify, dateType, layout, labelColSpan = 0, /* description, */ runtime = true } = props;
 
   // 确保 dateType 有默认值，避免 Form.Item 中没有元素
   const currentDateType = dateType || DATE_VALUES[DATE_OPTIONS.DATE];
@@ -50,7 +50,6 @@ const XDatePicker = memo((props: XInputDatePickerConfig & { runtime?: boolean })
       }}
     >
       {renderDatePicker()}
-      <div className='description showEllipsis'>{description}</div>
     </Form.Item>
   );
 });

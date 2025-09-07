@@ -1,5 +1,5 @@
-import { memo } from 'react';
 import { Form, TimePicker } from '@arco-design/web-react';
+import { memo } from 'react';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import type { XInputTimePickerConfig } from './schema';
 import '../index.css';
@@ -26,7 +26,6 @@ const XTimePicker = memo((props: XInputTimePickerConfig & { runtime?: boolean })
       }}
     >
       <TimePicker defaultValue={defaultValue} style={{ width: '100%' }} />
-      <div className='description showEllipsis'>{description}</div>
     </Form.Item>
   );
 });

@@ -1,14 +1,27 @@
 import { memo } from 'react';
 import { nanoid } from 'nanoid';
 import { Form, Radio } from '@arco-design/web-react';
-import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
+import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import type { XInputRadioConfig } from './schema';
 import '../index.css';
 
 const RadioGroup = Radio.Group;
+
 const XRadio = memo((props: XInputRadioConfig & { runtime?: boolean }) => {
-  const { label, dataField, tooltip, status, defaultValue, verify, layout, labelColSpan = 0, direction, description, runtime = true } = props;
+  const {
+    label,
+    dataField,
+    tooltip,
+    status,
+    defaultValue,
+    verify,
+    layout,
+    labelColSpan = 0,
+    direction,
+    // description,
+    runtime = true
+  } = props;
 
   return (
     <Form.Item
@@ -30,7 +43,6 @@ const XRadio = memo((props: XInputRadioConfig & { runtime?: boolean }) => {
       }}
     >
       <RadioGroup direction={direction} options={defaultValue} defaultValue={defaultValue?.find(op => op.chosen)?.value} />
-      <div className='description showEllipsis'>{description}</div>
     </Form.Item>
   );
 });

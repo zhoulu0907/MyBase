@@ -1,9 +1,9 @@
-import { memo, useState } from 'react';
-import { nanoid } from 'nanoid';
 import { Form, Select } from '@arco-design/web-react';
+import { nanoid } from 'nanoid';
+import { memo, useState } from 'react';
 // import { useAppEntityStore } from 'src/store/store_entity';
-import { STATUS_OPTIONS, STATUS_VALUES } from 'src/components/Materials/constants';
 import { dataMethodPage, type AppEntityField, type PageMethodParam } from '@onebase/app';
+import { STATUS_OPTIONS, STATUS_VALUES } from 'src/components/Materials/constants';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { type XRelatedFormConfig } from './schema';
 import '../index.css';
@@ -80,7 +80,9 @@ const XRelatedForm = memo((props: XRelatedFormConfig & { runtime?: boolean }) =>
   return (
     <Form.Item
       label={label.display && label.text}
-      field={dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.RELATED_FORM}_${nanoid()}`}
+      field={
+        dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.RELATED_FORM}_${nanoid()}`
+      }
       layout={layout}
       tooltip={tooltip}
       labelCol={{
@@ -107,7 +109,6 @@ const XRelatedForm = memo((props: XRelatedFormConfig & { runtime?: boolean }) =>
           backgroundColor: bgColor
         }}
       />
-      <div className='description showEllipsis'>{description}</div>
     </Form.Item>
   );
 });

@@ -1,8 +1,8 @@
-import { memo } from 'react';
-import { nanoid } from 'nanoid';
 import { Form, InputNumber } from '@arco-design/web-react';
-import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
+import { nanoid } from 'nanoid';
+import { memo } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
+import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import type { XInputNumberConfig } from './schema';
 import '../index.css';
 
@@ -20,7 +20,7 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean }) =>
     precision,
     layout,
     labelColSpan = 0,
-    description,
+    // description,
     unit,
     runtime = true
   } = props;
@@ -28,7 +28,9 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean }) =>
   return (
     <Form.Item
       label={label.display && label.text}
-      field={dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.INPUT_NUMBER}_${nanoid()}`}
+      field={
+        dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.INPUT_NUMBER}_${nanoid()}`
+      }
       layout={layout}
       tooltip={tooltip}
       labelCol={{
@@ -65,7 +67,6 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean }) =>
         }}
         suffix={unit}
       />
-      <div className='description showEllipsis'>{description}</div>
     </Form.Item>
   );
 });

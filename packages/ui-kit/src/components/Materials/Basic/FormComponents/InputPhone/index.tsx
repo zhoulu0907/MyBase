@@ -1,10 +1,10 @@
-import { memo, useEffect, useState } from 'react';
 import { Form, Input } from '@arco-design/web-react';
 import { nanoid } from 'nanoid';
-import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
+import { memo, useEffect, useState } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
-import type { XInputPhoneConfig } from './schema';
+import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import '../index.css';
+import type { XInputPhoneConfig } from './schema';
 
 const XInputPhone = memo((props: XInputPhoneConfig & { runtime?: boolean }) => {
   const {
@@ -70,7 +70,6 @@ const XInputPhone = memo((props: XInputPhoneConfig & { runtime?: boolean }) => {
         placeholder={placeholder}
         onChange={setValue}
       />
-      <div className='description showEllipsis'>{description}</div>
     </Form.Item>
   );
 });

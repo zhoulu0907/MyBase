@@ -1,8 +1,8 @@
-import { memo } from 'react';
-import { nanoid } from 'nanoid';
 import { Checkbox, Form } from '@arco-design/web-react';
-import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
+import { nanoid } from 'nanoid';
+import { memo } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
+import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import type { XInputCheckboxConfig } from './schema';
 import '../index.css';
 
@@ -21,7 +21,7 @@ const XCheckbox = memo((props: XInputCheckboxConfig & { runtime?: boolean }) => 
     options,
     // allChecked,
     runtime = true,
-    description,
+    // description,
   } = props;
 
   return (
@@ -52,7 +52,6 @@ const XCheckbox = memo((props: XInputCheckboxConfig & { runtime?: boolean }) => 
           pointerEvents: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset'
         }}
       />
-      <div className='description showEllipsis'>{description}</div>
     </Form.Item>
   );
 });
