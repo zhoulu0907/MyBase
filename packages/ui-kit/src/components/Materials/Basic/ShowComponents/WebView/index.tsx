@@ -2,8 +2,8 @@ import { memo, useState } from 'react';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import { type XWebViewConfig } from './schema';
 
-const XWebView = memo((props: XWebViewConfig) => {
-  const { status, title, webViewUrl } = props;
+const XWebView = memo((props: XWebViewConfig & { runtime?: boolean }) => {
+  const { status, title, webViewUrl, runtime = true } = props;
 
   const [iframeError, setIframeError] = useState(false);
 
@@ -25,7 +25,7 @@ const XWebView = memo((props: XWebViewConfig) => {
         style={{
           width: '100%',
           height: '200px',
-          display: 'flex',
+          display: runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 'none' : 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           border: '1px solid #e0e0e0',
@@ -54,7 +54,8 @@ const XWebView = memo((props: XWebViewConfig) => {
   return (
     <div
       style={{
-        opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1
+        opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,
+        display: runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 'none' : 'unset'
       }}
     >
       {title}

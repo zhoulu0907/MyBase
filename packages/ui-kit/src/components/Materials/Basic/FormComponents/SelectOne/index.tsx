@@ -3,11 +3,11 @@ import { nanoid } from 'nanoid';
 import { memo } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
-import './index.css';
 import type { XInputSelectOneConfig } from './schema';
+import '../index.css';
 
-const XSelectOne = memo((props: XInputSelectOneConfig) => {
-  const { label, dataField, tooltip, status, verify, layout, labelColSpan = 0, showSearch, defaultValue } = props;
+const XSelectOne = memo((props: XInputSelectOneConfig & { runtime?: boolean }) => {
+  const { label, dataField, tooltip, status, verify, layout, labelColSpan = 0, showSearch, defaultValue, description, runtime = true } = props;
 
   return (
     <Form.Item
@@ -20,10 +20,12 @@ const XSelectOne = memo((props: XInputSelectOneConfig) => {
       }}
       wrapperCol={{ style: { flex: 1 } }}
       rules={[{ required: verify?.required }]}
+      hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
       style={{
+        margin: 0,
+        padding: 6,
         opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,
-        pointerEvents: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset',
-        margin: '0px'
+        pointerEvents: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset'
       }}
     >
       <Select
@@ -32,7 +34,8 @@ const XSelectOne = memo((props: XInputSelectOneConfig) => {
         style={{ width: '100%' }}
         allowClear
         options={defaultValue}
-      ></Select>
+      />
+      <div className='description showEllipsis'>{description}</div>
     </Form.Item>
   );
 });

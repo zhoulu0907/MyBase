@@ -4,9 +4,9 @@ import { Form, InputNumber } from '@arco-design/web-react';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import type { XInputNumberConfig } from './schema';
-import './index.css';
+import '../index.css';
 
-const XInputNumber = memo((props: XInputNumberConfig) => {
+const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean }) => {
   const {
     label,
     placeholder,
@@ -21,7 +21,8 @@ const XInputNumber = memo((props: XInputNumberConfig) => {
     layout,
     labelColSpan = 0,
     description,
-    unit
+    unit,
+    runtime = true
   } = props;
 
   return (
@@ -42,10 +43,12 @@ const XInputNumber = memo((props: XInputNumberConfig) => {
           max: verify.max
         }
       ]}
+      hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
       style={{
+        margin: 0,
+        padding: 6,
         opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,
-        pointerEvents: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset',
-        margin: '0px'
+        pointerEvents: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset'
       }}
     >
       <InputNumber

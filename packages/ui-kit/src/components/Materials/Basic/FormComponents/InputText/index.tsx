@@ -1,13 +1,12 @@
 import { memo } from 'react';
-import { Form, Input } from '@arco-design/web-react';
 import { nanoid } from 'nanoid';
+import { Form, Input } from '@arco-design/web-react';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { type XInputTextConfig } from './schema';
-import './index.css';
+import '../index.css';
 
 const XInputText = memo((props: XInputTextConfig & { runtime?: boolean }) => {
-  const { runtime = true } = props;
   const {
     label,
     dataField,
@@ -23,7 +22,7 @@ const XInputText = memo((props: XInputTextConfig & { runtime?: boolean }) => {
     labelColSpan = 0,
     maxLength,
     description,
-    
+    runtime = true
   } = props;
 
   return (
@@ -37,10 +36,12 @@ const XInputText = memo((props: XInputTextConfig & { runtime?: boolean }) => {
       }}
       wrapperCol={{ style: { flex: 1 } }}
       rules={[{ required: verify?.required }]}
+      hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
       style={{
+        margin: 0,
+        padding: 6,
         opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,
-        pointerEvents: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset',
-        margin: '0px'
+        pointerEvents: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset'
       }}
     >
       <Input

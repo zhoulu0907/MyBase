@@ -8,11 +8,10 @@ import { nanoid } from 'nanoid';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import type { XRichTextConfig } from './schema';
+import '../index.css';
 
-import './index.css';
-
-const XRichText = memo((props: XRichTextConfig) => {
-  const { label, dataField, tooltip, status, defaultValue, verify, layout, labelColSpan = 0, description } = props;
+const XRichText = memo((props: XRichTextConfig & { runtime?: boolean }) => {
+  const { label, dataField, tooltip, status, defaultValue, verify, layout, labelColSpan = 0, description, runtime = true } = props;
 
   // 编辑器内容
   const [html, setHtml] = useState<string>();
@@ -60,8 +59,10 @@ const XRichText = memo((props: XRichTextConfig) => {
       }}
       wrapperCol={{ style: { flex: 1 } }}
       rules={[{ required: verify?.required }]}
+      hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
       style={{
         margin: 0,
+        padding: 6,
         opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1
       }}
     >

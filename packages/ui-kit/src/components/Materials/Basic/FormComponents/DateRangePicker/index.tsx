@@ -3,10 +3,10 @@ import dayjs from 'dayjs';
 import { DatePicker, Form } from '@arco-design/web-react';
 import { DATE_OPTIONS, DATE_VALUES, STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import type { XInputDateRangePickerConfig } from './schema';
-import './index.css';
+import '../index.css';
 
-const XDateRangePicker = memo((props: XInputDateRangePickerConfig) => {
-  const { label, status, tooltip, verify, layout, labelColSpan = 0, dateType, startTime, endTime, description } = props;
+const XDateRangePicker = memo((props: XInputDateRangePickerConfig & { runtime?: boolean }) => {
+  const { label, status, tooltip, verify, layout, labelColSpan = 0, dateType, startTime, endTime, description, runtime = true } = props;
 
   // 确保 dateType 有默认值，避免 Form.Item 中没有元素
   const currentDateType = (dateType !== DATE_VALUES[DATE_OPTIONS.FULL] && dateType) || DATE_VALUES[DATE_OPTIONS.DATE];
@@ -23,10 +23,12 @@ const XDateRangePicker = memo((props: XInputDateRangePickerConfig) => {
       }}
       wrapperCol={{ style: { flex: 1 } }}
       rules={[{ required: verify?.required }]}
+      hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
       style={{
+        margin: 0,
+        padding: 6,
         opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,
-        pointerEvents: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset',
-        margin: '0px'
+        pointerEvents: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset'
       }}
     >
       <DatePicker.RangePicker

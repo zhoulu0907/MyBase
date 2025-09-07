@@ -199,6 +199,7 @@ const XInputNumber: XInputNumberSchema = {
       name: '标题',
       type: CONFIG_TYPES.LABEL_INPUT
     },
+    ...dataFieldConfig,
     {
       key: 'placeholder',
       name: '占位符',
@@ -209,7 +210,6 @@ const XInputNumber: XInputNumberSchema = {
       name: '描述信息',
       type: CONFIG_TYPES.DESCRIPTION_INPUT
     },
-    ...dataFieldConfig,
     {
       key: 'tooltip',
       name: '提示文字',
