@@ -111,3 +111,4 @@ sessionStore
 /sql/patch/fix_uid_worker_node_sequence_force.sql
 /sql/patch/fix_uid_worker_node_sequence_rebuild.sql
 /sql/patch/fix_uid_worker_node_sequence_simple.sql
+/sql/patch/update_parent_id_flags.sql
