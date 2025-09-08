@@ -3,10 +3,7 @@ package com.cmsr.onebase.module.metadata.controller.admin.validation;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.metadata.controller.admin.validation.vo.ValidationRuleGroupPageReqVO;
-import com.cmsr.onebase.module.metadata.controller.admin.validation.vo.ValidationRuleGroupRespVO;
-import com.cmsr.onebase.module.metadata.controller.admin.validation.vo.ValidationRuleGroupSaveReqVO;
-import com.cmsr.onebase.module.metadata.convert.validation.ValidationRuleGroupConvert;
-import com.cmsr.onebase.module.metadata.dal.dataobject.validation.MetadataValidationRuleGroupDO;
+import com.cmsr.onebase.module.metadata.controller.admin.validation.vo.ValidationRuleGroupSimpleRespVO;
 import com.cmsr.onebase.module.metadata.service.validation.MetadataValidationRuleGroupService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -34,57 +31,24 @@ public class ValidationRuleGroupController {
     @Resource
     private MetadataValidationRuleGroupService validationRuleGroupService;
 
-    @PostMapping("/create")
-    @Operation(summary = "创建校验规则分组")
-    @PreAuthorize("@ss.hasPermission('metadata:validation-rule-group:create')")
-    public CommonResult<Long> createValidationRuleGroup(@Valid @RequestBody ValidationRuleGroupSaveReqVO createReqVO) {
-        return success(validationRuleGroupService.createValidationRuleGroup(createReqVO));
-    }
-
-    @PostMapping("/update")
-    @Operation(summary = "更新校验规则分组")
-    @PreAuthorize("@ss.hasPermission('metadata:validation-rule-group:update')")
-    public CommonResult<Boolean> updateValidationRuleGroup(@Valid @RequestBody ValidationRuleGroupSaveReqVO updateReqVO) {
-        validationRuleGroupService.updateValidationRuleGroup(updateReqVO);
-        return success(true);
-    }
-
-    @PostMapping("/delete")
-    @Operation(summary = "删除校验规则分组")
-    @Parameter(name = "id", description = "编号", required = true)
-    @PreAuthorize("@ss.hasPermission('metadata:validation-rule-group:delete')")
-    public CommonResult<Boolean> deleteValidationRuleGroup(@RequestParam("id") Long id) {
-        validationRuleGroupService.deleteValidationRuleGroup(id);
-        return success(true);
-    }
-
-    @PostMapping("/get")
-    @Operation(summary = "获得校验规则分组")
-    @Parameter(name = "id", description = "编号", required = true, example = "1024")
-    @PreAuthorize("@ss.hasPermission('metadata:validation-rule-group:query')")
-    public CommonResult<ValidationRuleGroupRespVO> getValidationRuleGroup(@RequestParam("id") Long id) {
-        MetadataValidationRuleGroupDO ruleGroup = validationRuleGroupService.getValidationRuleGroup(id);
-        ValidationRuleGroupRespVO respVO = ValidationRuleGroupConvert.INSTANCE.convert(ruleGroup);
-        
-        // 获取规则定义的二维数组结构
-        respVO.setValueRules(validationRuleGroupService.buildValueRulesStructure(id));
-        
-        return success(respVO);
-    }
+    // 该控制器已精简为仅分页和统一操作入口，不再提供单独的新增/修改/删除/详情接口
+    // 新增/修改/删除/详情请使用各具体校验类型 Controller 或自定义验证 Controller
 
     @PostMapping("/page")
     @Operation(summary = "获得校验规则分组分页")
     @PreAuthorize("@ss.hasPermission('metadata:validation-rule-group:query')")
-    public CommonResult<PageResult<ValidationRuleGroupRespVO>> getValidationRuleGroupPage(@Valid @RequestBody ValidationRuleGroupPageReqVO pageReqVO) {
-        PageResult<MetadataValidationRuleGroupDO> pageResult = validationRuleGroupService.getValidationRuleGroupPage(pageReqVO);
-        PageResult<ValidationRuleGroupRespVO> result = ValidationRuleGroupConvert.INSTANCE.convertPage(pageResult);
-        
-        // 为每个规则组设置valueRules
-        for (ValidationRuleGroupRespVO respVO : result.getList()) {
-            respVO.setValueRules(validationRuleGroupService.buildValueRulesStructure(respVO.getId()));
-        }
-        
-        return success(result);
+    public CommonResult<PageResult<ValidationRuleGroupSimpleRespVO>> getValidationRuleGroupPage(@Valid @RequestBody ValidationRuleGroupPageReqVO pageReqVO) {
+        // TODO: 汇总七种校验类型分页（当前先复用原逻辑）后续可在Service新增聚合方法
+        return success(validationRuleGroupService.getValidationRuleGroupPageSimple(pageReqVO));
+    }
+
+    @PostMapping("/delete")
+    @Operation(summary = "统一删除规则组及其下规则（按ID）")
+    @Parameter(name = "id", description = "规则组ID", required = true)
+    @PreAuthorize("@ss.hasPermission('metadata:validation-rule-group:delete')")
+    public CommonResult<Boolean> unifiedDelete(@RequestParam("id") Long id) {
+        validationRuleGroupService.deleteValidationRuleGroup(id);
+        return success(true);
     }
 
 }

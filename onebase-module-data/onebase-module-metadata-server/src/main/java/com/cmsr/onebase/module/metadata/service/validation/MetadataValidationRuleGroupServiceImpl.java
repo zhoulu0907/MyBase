@@ -5,6 +5,7 @@ import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.metadata.controller.admin.validation.vo.ValidationRuleDefinitionVO;
 import com.cmsr.onebase.module.metadata.controller.admin.validation.vo.ValidationRuleGroupPageReqVO;
 import com.cmsr.onebase.module.metadata.controller.admin.validation.vo.ValidationRuleGroupSaveReqVO;
+import com.cmsr.onebase.module.metadata.controller.admin.validation.vo.ValidationRuleGroupSimpleRespVO;
 import com.cmsr.onebase.module.metadata.convert.validation.ValidationRuleGroupConvert;
 import com.cmsr.onebase.module.metadata.dal.database.MetadataValidationRuleGroupRepository;
 import com.cmsr.onebase.module.metadata.dal.dataobject.validation.MetadataValidationRuleDefinitionDO;
@@ -112,6 +113,21 @@ public class MetadataValidationRuleGroupServiceImpl implements MetadataValidatio
     @Override
     public PageResult<MetadataValidationRuleGroupDO> getValidationRuleGroupPage(ValidationRuleGroupPageReqVO pageReqVO) {
         return validationRuleGroupRepository.selectPage(pageReqVO);
+    }
+
+    @Override
+    public PageResult<ValidationRuleGroupSimpleRespVO> getValidationRuleGroupPageSimple(ValidationRuleGroupPageReqVO pageReqVO) {
+        PageResult<MetadataValidationRuleGroupDO> page = validationRuleGroupRepository.selectPage(pageReqVO);
+        List<ValidationRuleGroupSimpleRespVO> list = new ArrayList<>();
+        for (MetadataValidationRuleGroupDO groupDO : page.getList()) {
+            ValidationRuleGroupSimpleRespVO vo = new ValidationRuleGroupSimpleRespVO();
+            vo.setId(groupDO.getId());
+            vo.setRgName(groupDO.getRgName());
+            // 构建派生字段
+            buildDerivedFieldsForSimpleVO(vo, groupDO.getId(), groupDO.getPopPrompt());
+            list.add(vo);
+        }
+        return new PageResult<>(list, page.getTotal());
     }
 
     @Override
@@ -282,6 +298,62 @@ public class MetadataValidationRuleGroupServiceImpl implements MetadataValidatio
         }
 
         return valueRules;
+    }
+
+    /**
+     * 为精简VO构建派生字段
+     * validationType : 取第一条条件规则的 fieldCode
+     * validationItems : 每个OR分组转可读表达式(内部AND用 AND 连接)
+     * errorMessage : 复用 popPrompt
+     */
+    private void buildDerivedFieldsForSimpleVO(ValidationRuleGroupSimpleRespVO vo, Long groupId, String popPrompt) {
+        List<List<ValidationRuleDefinitionVO>> valueRules = buildValueRulesStructure(groupId);
+        vo.setErrorMessage(popPrompt);
+        if (valueRules == null || valueRules.isEmpty()) {
+            vo.setValidationItems(new ArrayList<>());
+            return;
+        }
+        // validationType
+        outer: for (List<ValidationRuleDefinitionVO> andGroup : valueRules) {
+            if (andGroup == null) continue;
+            for (ValidationRuleDefinitionVO rule : andGroup) {
+                if ("CONDITION".equalsIgnoreCase(rule.getLogicType())) {
+                    vo.setValidationType(rule.getFieldCode());
+                    break outer;
+                }
+            }
+        }
+        // items
+        List<String> items = new ArrayList<>();
+        for (List<ValidationRuleDefinitionVO> andGroup : valueRules) {
+            if (andGroup == null || andGroup.isEmpty()) continue;
+            StringBuilder sb = new StringBuilder();
+            boolean first = true;
+            for (ValidationRuleDefinitionVO rule : andGroup) {
+                if (!"CONDITION".equalsIgnoreCase(rule.getLogicType())) continue;
+                String left = rule.getFieldCode() != null ? rule.getFieldCode() : "";
+                String op = rule.getOperator() != null ? rule.getOperator() : "";
+                String v1 = rule.getFieldValue() != null ? String.valueOf(rule.getFieldValue()) : "";
+                String v2 = rule.getFieldValue2() != null ? String.valueOf(rule.getFieldValue2()) : null;
+                String expr;
+                if ("BETWEEN".equalsIgnoreCase(op) && v2 != null) {
+                    expr = left + " BETWEEN " + v1 + " AND " + v2;
+                } else if ("IN".equalsIgnoreCase(op) || "NOT IN".equalsIgnoreCase(op)) {
+                    expr = left + " " + op + " (" + v1 + ")"; // 这里假设v1包含逗号分隔值
+                } else {
+                    expr = left + " " + op + " " + v1;
+                }
+                if (!first) {
+                    sb.append(" AND ");
+                }
+                sb.append(expr.trim());
+                first = false;
+            }
+            if (sb.length() > 0) {
+                items.add(sb.toString());
+            }
+        }
+        vo.setValidationItems(items);
     }
 
 

@@ -84,6 +84,7 @@ public class MetadataValidationChildNotEmptyServiceImpl implements MetadataValid
             groupVO.setValMethod(vo.getValMethod());
             groupVO.setPopPrompt(vo.getPopPrompt());
             groupVO.setPopType(vo.getPopType());
+            groupVO.setValidationType("CHILD_NOT_EMPTY");
             groupId = ruleGroupService.createValidationRuleGroup(groupVO);
         }
 
@@ -128,6 +129,7 @@ public class MetadataValidationChildNotEmptyServiceImpl implements MetadataValid
             groupVO.setValMethod(vo.getValMethod());
             groupVO.setPopPrompt(vo.getPopPrompt());
             groupVO.setPopType(vo.getPopType());
+            groupVO.setValidationType("CHILD_NOT_EMPTY");
             groupId = ruleGroupService.createValidationRuleGroup(groupVO);
         }
         
