@@ -34,8 +34,8 @@ public class FlowProcessTriggerFormDO extends TenantBaseDO {
     /**
      * 触发事件
      */
-    @Column(name = "trigger_event", length = 64)
-    private String triggerEvent;
+    @Column(name = "trigger_events", length = 64)
+    private String triggerEvents;
     /**
      * 触发人，枚举值：creator/modifier/specific
      */
