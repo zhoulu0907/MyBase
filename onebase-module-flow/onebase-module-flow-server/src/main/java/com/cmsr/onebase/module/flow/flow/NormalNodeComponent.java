@@ -10,7 +10,7 @@ public abstract class NormalNodeComponent extends NodeComponent {
 
     public NodeActionEnum nodeAction() {
         ExecuteContext contextBean = this.getContextBean(ExecuteContext.class);
-        if (contextBean.getInterruptNodeTag().isEmpty()) {
+        if (contextBean.getPreviousNodeTag().isEmpty()) {
             return NodeActionEnum.DO_PROCESS;
         } else {
             return NodeActionEnum.DO_SKIP;

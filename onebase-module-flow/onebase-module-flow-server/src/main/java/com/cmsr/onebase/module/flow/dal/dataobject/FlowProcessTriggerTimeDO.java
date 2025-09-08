@@ -89,4 +89,10 @@ public class FlowProcessTriggerTimeDO extends TenantBaseDO {
     @Column(name = "is_concurrent_exec_allowed", length = 5)
     private Integer isConcurrentExecAllowed;
 
+    /**
+     * 任务ID
+     */
+    @Column(name = "job_id", length = 64)
+    private String jobId;
+
 }

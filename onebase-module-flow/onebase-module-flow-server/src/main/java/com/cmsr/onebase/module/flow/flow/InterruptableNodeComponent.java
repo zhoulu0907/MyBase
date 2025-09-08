@@ -10,10 +10,10 @@ public abstract class InterruptableNodeComponent extends NodeComponent {
 
     public NodeActionEnum nodeAction() {
         ExecuteContext contextBean = this.getContextBean(ExecuteContext.class);
-        if (contextBean.getInterruptNodeTag().isEmpty()) {
+        if (contextBean.getPreviousNodeTag().isEmpty()) {
             return NodeActionEnum.DO_PROCESS;
-        } else if (contextBean.getInterruptNodeTag().isPresent() &&
-                contextBean.equalsInterruptNodeTag(this.getTag())) {
+        } else if (contextBean.getPreviousNodeTag().isPresent() &&
+                contextBean.equalsPreviousNodeTag(this.getTag())) {
             return NodeActionEnum.SKIP_AND_REST;
         } else {
             return NodeActionEnum.DO_SKIP;
@@ -29,7 +29,7 @@ public abstract class InterruptableNodeComponent extends NodeComponent {
             return false;
         } else if (nodeActionEnum == NodeActionEnum.SKIP_AND_REST) {
             ExecuteContext contextBean = this.getContextBean(ExecuteContext.class);
-            contextBean.restInterruptNodeTag();
+            contextBean.restPreviousNodeTag();
             return false;
         }
         throw new IllegalStateException("nodeAction()返回值异常");

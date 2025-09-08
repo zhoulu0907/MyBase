@@ -71,10 +71,6 @@ public class FlowProcessTriggerFormDO extends TenantBaseDO {
      */
     @Column(name = "is_child_trigger_allowed", length = 5)
     private Integer isChildTriggerAllowed;
-    /**
-     * 防抖时间，单位：毫秒
-     */
-    @Column(name = "debounce_milliseconds", length = 10)
-    private Integer debounceMilliseconds;
+
 
 }

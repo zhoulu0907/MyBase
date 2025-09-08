@@ -87,9 +87,11 @@ public class FlowProcessMgmtServiceImpl implements FlowProcessMgmtService {
         }
         if (FlowTriggerTypeEnum.isFormTrigger(triggerType)) {
             Long pageId = MapUtils.getLong(triggerConfig, "pageId");
+            Long fieldId = MapUtils.getLong(triggerConfig, "fieldId");
             FlowProcessTriggerFormDO flowProcessTriggerFormDO = new FlowProcessTriggerFormDO();
             flowProcessTriggerFormDO.setProcessId(processId);
             flowProcessTriggerFormDO.setPageId(pageId);
+            flowProcessTriggerFormDO.setFieldId(fieldId);
             flowProcessTriggerFormRepository.insert(flowProcessTriggerFormDO);
         }
     }
