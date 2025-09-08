@@ -4,7 +4,7 @@ import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { Form, Input, Switch } from '@arco-design/web-react';
 import {
   getComponentListByPageId,
-  getFieldValidationTypes,
+  getFieldCheckTypeApi,
   type ComponentConfig,
   type ConfitionField,
   type EntityFieldValidationTypes
@@ -54,7 +54,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
         }
       });
 
-      const newValidationTypes = await getFieldValidationTypes({ fieldIdList: filedIds });
+      const newValidationTypes = await getFieldCheckTypeApi(filedIds);
       console.log('validationTypes: ', newValidationTypes);
       setValidationTypes(newValidationTypes);
 
