@@ -97,7 +97,7 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean })
       >
         {userData.map((option) => (
           <Option key={option.id} value={option.id}>
-            {option.nickname}
+            {`${option.nickname}（${option.username}）`}
           </Option>
         ))}
       </Select>
