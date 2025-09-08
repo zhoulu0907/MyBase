@@ -42,7 +42,6 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({ data, onChange, field
   }, []);
 
   useEffect(() => {
-    console.log('conditions: ', conditions);
     onChange(conditions);
   }, [conditions]);
 
@@ -217,7 +216,6 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({ data, onChange, field
         <IconClose
           style={{ fontSize: '13px', color: '#4E5969' }}
           onClick={() => {
-            console.log('close', cond.id);
             deleteCondition(cond.id);
           }}
         />
