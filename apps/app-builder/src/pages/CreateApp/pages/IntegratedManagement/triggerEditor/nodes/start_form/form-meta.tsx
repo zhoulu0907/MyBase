@@ -2,6 +2,7 @@ import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-e
 
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { Form, Input, Switch } from '@arco-design/web-react';
+import type { Condition } from '@onebase/app';
 import {
   getComponentListByPageId,
   getFieldCheckTypeApi,
@@ -37,7 +38,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
   const handleGetComponentList = async (id: string) => {
     const res = await getComponentListByPageId({ pageId: id });
-    console.log('res: ', res);
     if (res && res.list) {
       const newConditionFields: ConfitionField[] = [];
       const filedIds: string[] = [];
@@ -47,7 +47,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
           filedIds.push(cpConfig.dataField[1]);
 
           newConditionFields.push({
-            label: cpConfig.label.text,
+            label: cpConfig.label.text ? cpConfig.label.text : cpConfig.label,
             value: cpConfig.dataField[1],
             fieldType: item.componentType
           });
@@ -70,6 +70,10 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     handlePropsOnChange(values);
   };
 
+  const onConditionChange = (conditions: Condition[]) => {
+    // console.log(conditions);
+  };
+
   return (
     <>
       <FormHeader />
@@ -87,8 +91,8 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             <Form.Item label="过滤条件" field="filterConditions" layout="vertical">
               {validationTypes && (
                 <ConditionEditor
-                  // TODO(mickey): 补充onChange
-                  onChange={() => {}}
+                  onChange={onConditionChange}
+                  data={triggerEditorSignal.nodeData.value[node.id].filterConditions}
                   fields={conditionFields}
                   entityFieldValidationTypes={validationTypes}
                 />

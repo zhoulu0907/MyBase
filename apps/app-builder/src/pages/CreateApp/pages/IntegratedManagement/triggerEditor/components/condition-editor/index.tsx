@@ -24,8 +24,8 @@ const opCodeOptions = [
  */
 export interface ConditionEditorProps {
   fields: ConfitionField[];
-  data?: Condition;
-  onChange: (value: Condition) => void;
+  data?: Condition[];
+  onChange: (value: Condition[]) => void;
   entityFieldValidationTypes: EntityFieldValidationTypes[];
 }
 
@@ -35,15 +35,15 @@ export interface ConditionEditorProps {
 const ConditionEditor: React.FC<ConditionEditorProps> = ({ data, onChange, fields, entityFieldValidationTypes }) => {
   const [conditions, setConditions] = useState<Condition[]>([]);
 
-  //   useEffect(() => {
-  //     if (data) {
-  //       setCondition(data);
-  //     }
-  //   }, []);
+  useEffect(() => {
+    if (data) {
+      setConditions(data);
+    }
+  }, []);
 
   useEffect(() => {
-    console.log(conditions);
-    // onChange(conditions);
+    console.log('conditions: ', conditions);
+    onChange(conditions);
   }, [conditions]);
 
   const addCondition = (pid: string) => {
@@ -114,6 +114,7 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({ data, onChange, field
         <Select
           className={styles.itemSelect}
           style={{ width: '100px' }}
+          value={cond.fieldId || ''}
           onChange={(value) => {
             const newConditions = [...conditions];
 
@@ -141,6 +142,7 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({ data, onChange, field
         <Select
           className={styles.itemSelect}
           style={{ width: '90px' }}
+          value={cond.op || ''}
           onChange={(value) => {
             const newConditions = [...conditions];
 
@@ -170,6 +172,7 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({ data, onChange, field
         <Select
           className={styles.itemSelect}
           style={{ width: '90px' }}
+          value={cond.operatorType || ''}
           onChange={(value) => {
             const newConditions = [...conditions];
 
@@ -192,6 +195,7 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({ data, onChange, field
 
         <Input
           style={{ width: '100px', marginRight: '10px', backgroundColor: 'white' }}
+          value={cond.value?.[0] || ''}
           onChange={(value) => {
             const newConditions = [...conditions];
 
