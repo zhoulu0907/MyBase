@@ -22,4 +22,7 @@ public class ValidationRuleGroupPageReqVO extends PageParam {
     @Schema(description = "规则组状态", example = "ACTIVE")
     private String rgStatus;
 
+    @Schema(description = "校验类型：REQUIRED / UNIQUE / LENGTH / RANGE / FORMAT / CHILD_NOT_EMPTY / SELF_DEFINED", example = "REQUIRED")
+    private String validationType;
+
 }
