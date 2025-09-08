@@ -96,7 +96,7 @@ public class FunctionServiceImpl implements FunctionService {
     public PageResult<FunctionDO> getFunctionPage(FunctionPageReqVO reqVO) {
         DefaultConfigStore configs = new DefaultConfigStore();
 
-        // 构建��询条件
+        // 构建查询条件
         if (reqVO.getType() != null) {
             configs.and(org.anyline.entity.Compare.EQUAL, FunctionDO.FIELD_TYPE, reqVO.getType());
         }

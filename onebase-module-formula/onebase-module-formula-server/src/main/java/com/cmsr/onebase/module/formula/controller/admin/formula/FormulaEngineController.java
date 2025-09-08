@@ -47,8 +47,7 @@ public class FormulaEngineController {
 
         FormulaExecuteRespVO respVO = FormulaExecuteRespVO.success(result, executionTime);
 
-        log.info("公式执行成功，公式：{}，结果：{}，耗时：{}ms",
-                reqVO.getFormula(), result, executionTime);
+        log.info("公式执行成功，公式：{}，结果：{}，耗时：{}ms", reqVO.getFormula(), result, executionTime);
 
         return CommonResult.success(respVO);
     }
