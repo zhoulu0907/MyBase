@@ -49,41 +49,43 @@ const XRichText = memo((props: XRichTextConfig & { runtime?: boolean }) => {
   }, [editor]);
 
   return (
-    <Form.Item
-      label={label.display && label.text}
-      field={dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.RICH_TEXT}_${nanoid()}`}
-      layout={layout}
-      tooltip={tooltip}
-      labelCol={{
-        style: { width: labelColSpan, flex: 'unset' }
-      }}
-      wrapperCol={{ style: { flex: 1 } }}
-      rules={[{ required: verify?.required }]}
-      hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
-      style={{
-        margin: 0,
-        padding: 6,
-        opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1
-      }}
-    >
-      <div style={{ border: '1px solid #ccc', zIndex: 100 }}>
-        <Toolbar
-          editor={editor}
-          defaultConfig={toolbarConfig}
-          mode="default"
-          style={{ borderBottom: '1px solid #ccc' }}
-        />
-        <Editor
-          defaultConfig={editorConfig}
-          value={html}
-          onCreated={setEditor}
-          onChange={(editor) => setHtml(editor.getHtml())}
-          mode="default"
-          style={{ height: '300px', overflowY: 'hidden' }}
-        />
-      </div>
-      {/* <div style={{ marginTop: '15px' }}>{html}</div> */}
-    </Form.Item>
+    <div className='formWrapper'>
+      <Form.Item
+        label={label.display && label.text}
+        field={dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.RICH_TEXT}_${nanoid()}`}
+        layout={layout}
+        tooltip={tooltip}
+        labelCol={{
+          style: { width: labelColSpan, flex: 'unset' }
+        }}
+        wrapperCol={{ style: { flex: 1 } }}
+        rules={[{ required: verify?.required }]}
+        hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
+        style={{
+          margin: 0,
+          opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1
+        }}
+      >
+        <div style={{ border: '1px solid #ccc', zIndex: 100 }}>
+          <Toolbar
+            editor={editor}
+            defaultConfig={toolbarConfig}
+            mode="default"
+            style={{ borderBottom: '1px solid #ccc' }}
+          />
+          <Editor
+            defaultConfig={editorConfig}
+            value={html}
+            onCreated={setEditor}
+            onChange={(editor) => setHtml(editor.getHtml())}
+            mode="default"
+            style={{ height: '300px', overflowY: 'hidden' }}
+          />
+        </div>
+        {/* <div style={{ marginTop: '15px' }}>{html}</div> */}
+      </Form.Item>
+      <div className='description showEllipsis' style={{marginLeft: labelColSpan}}>{description}</div>
+    </div>
   );
 });
 
