@@ -15,11 +15,26 @@ import {
   type AppEntity,
   type AppEntityField,
   type AuthDataPermissionPersonVO,
-  type FilterFieldCheckType
+  type FilterFieldCheckType,
+  type AuthDataGroupVO
 } from '@onebase/app';
-import PermissionModal from './components/DataPermissionModal';
+import DataPermissionModal from './components/DataPermissionModal/modal';
 
 import styles from './index.module.less';
+
+const initialFormValues: AuthDataGroupVO = {
+  id: '',
+  groupName: '',
+  description: '',
+  scopeFieldId: undefined,
+  scopeLevel: {
+    personId: '',
+    scopeType: undefined,
+    assignId: ['1', '2']
+  },
+  dataFilters: [],
+  isOperable: 1
+};
 
 const permission = [
   {
@@ -43,12 +58,13 @@ interface IProps {
 // 数据权限
 const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
   // const [form] = Form.useForm();
-  const [visible, setVisible] = useState<boolean>(false);
   const [status, setStatus] = useState<'create' | 'edit'>('create');
   const [appEntities, setAppEntities] = useState<AppEntity[]>([]);
   const [appEntityFields, setAppEntityFields] = useState<AppEntityField[]>([]);
   const [dataPermissionPerson, setDataPermissionPerson] = useState<AuthDataPermissionPersonVO[]>([]);
   const [filterFieldCheckType, setFilterFieldCheckType] = useState<FilterFieldCheckType[]>([]);
+
+  const [modalVisible, setModelVisible] = useState<boolean>(false);
 
   useEffect(() => {
     if (appId && menuId && roleId) {
@@ -73,9 +89,10 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
   };
 
   // 打开model
-  const handleModel = async (status: 'create' | 'edit', id?: string) => {
-    setVisible(true);
+  const handleModal = async (status: 'create' | 'edit', id?: string) => {
+    console.log('Modal id', id);
     setStatus(status);
+    setModelVisible(true);
 
     GetModelInitData();
   };
@@ -99,7 +116,7 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
   // 获取数据权限数据字典
   const getDataPermissionFields = async (params: { entityId: string }) => {
     try {
-      const entityFieldsResq = await getEntityFields(params);
+      const entityFieldsResq = await getEntityFields({ entityId: params.entityId, isSystemField: 0 });
       console.log('根据实体ID获取数据字段权限 entityFieldsResq:', entityFieldsResq);
       // entityFieldsResq 返回的数据 是 id 但是 appEntityField 中 是 fieldID
       entityFieldsResq.forEach((field: any) => {
@@ -116,7 +133,16 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
     try {
       const dataPermissionRoles = await getEntityFields({ entityId: params.entityId, isPerson: 1 });
       console.log('获取数据权限角色 dataPermissionRoles:', dataPermissionRoles);
-      setDataPermissionPerson((prev) => [...prev, ...dataPermissionRoles]);
+      // 将获取到的数据转换为正确的格式
+      const formattedData = dataPermissionRoles.map((item: any) => ({
+        PersonId: item.id,
+        fieldName: item.fieldName,
+        displayName: item.displayName,
+        entityID: item.entityId
+      }));
+
+      // 更新状态
+      setDataPermissionPerson(formattedData);
     } catch (error) {
       console.error('获取数据权限角色失败', error);
     }
@@ -128,13 +154,12 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
     setFilterFieldCheckType(fieldCheckTypeResq[0].validationTypes);
   };
 
-  const handleModelSubmit = async (values: any) => {
-    console.log('创建数据权限 values:', values);
-    // setVisible(false);
+  const handleModalSubmit = async (values?: AuthDataGroupVO) => {
+    console.log('handleModalSubmit values:', values);
   };
-  const handleModelCancel = () => {
+  const handleModalCancel = () => {
     console.log('取消创建数据权限');
-    setVisible(false);
+    setModelVisible(false);
   };
   return (
     <div className={styles.dataPermission}>
@@ -148,9 +173,8 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
             <div className={styles.right}>
               <IconEdit
                 style={{ fontSize: 20, color: '#4E5969', cursor: 'pointer' }}
-                // onClick={() => handleModel('edit', perm.id)}
                 onClick={() => {
-                  handleModel('edit', perm.id);
+                  handleModal('edit', perm.id);
                 }}
               />
               <Popconfirm
@@ -212,23 +236,22 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
         size="large"
         icon={<IconPlusCircle fontSize={20} />}
         style={{ display: 'flex', alignItems: 'center' }}
-        onClick={() => handleModel('create')}
+        onClick={() => handleModal('create')}
       >
         添加权限组
       </Button>
-      <PermissionModal
-        // form={form}
+      <DataPermissionModal
+        initialFormValues={initialFormValues}
+        modalVisible={modalVisible}
         status={status}
-        visible={visible}
-        // onClose={() => setVisible(false)}
         appEntities={appEntities}
-        appEntityFields={appEntityFields}
         dataPermissionPerson={dataPermissionPerson}
+        appEntityFields={appEntityFields}
         filterFieldCheckType={filterFieldCheckType}
         changeEntity={changeEntity}
         getFieldCheckType={getFieldCheckType}
-        handleModelSubmit={handleModelSubmit}
-        handleModelCancel={handleModelCancel}
+        handleModalSubmit={(values: AuthDataGroupVO) => handleModalSubmit(values)}
+        handleModalCancel={() => handleModalCancel()}
       />
     </div>
   );

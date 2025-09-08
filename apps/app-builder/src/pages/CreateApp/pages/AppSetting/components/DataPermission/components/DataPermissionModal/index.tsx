@@ -9,40 +9,14 @@ import {
   type AuthDataGroupVO,
   // type AuthDataFilterVO,
   type AuthDataPermissionPersonVO,
-  type FilterFieldCheckType
+  type FilterFieldCheckType,
+  type ScopeType
 } from '@onebase/app';
 import styles from './index.module.less';
 
 const Option = Select.Option;
 const FormItem = Form.Item;
 
-// 字段比较操作符
-const fieldCompareOperators = [
-  {
-    label: '等于',
-    value: 'equal'
-  },
-  {
-    label: '不等于',
-    value: 'unequal'
-  },
-  {
-    label: '大于',
-    value: 'greaterThan'
-  },
-  {
-    label: '小于',
-    value: 'lessThan'
-  },
-  {
-    label: '不小于',
-    value: 'greaterThanOrEqual'
-  },
-  {
-    label: '不小于',
-    value: 'lessThanOrEqual'
-  }
-];
 // 字段值类型
 const fieldValueType = [
   {
@@ -60,7 +34,7 @@ const conditionData = {
   condition: '',
   value: '',
   fieldId: 0,
-  fieldOperator: 'equal',
+  fieldOperator: '',
   fieldValueType: FieldValueType.static,
   fieldValue: ''
 };
@@ -85,8 +59,8 @@ interface IProps {
   visible: boolean;
   changeEntity: (params: { entityId: string }) => void;
   getFieldCheckType: (fieldId: string) => void;
-  handleModelSubmit: (values: AuthDataGroupVO) => void;
-  handleModelCancel: () => void;
+  handleModalSubmit: (values: AuthDataGroupVO) => void;
+  handleModalCancel: () => void;
 }
 
 // 数据权限弹窗
@@ -100,8 +74,8 @@ const PermissionModal = (props: IProps) => {
     filterFieldCheckType,
     changeEntity,
     getFieldCheckType,
-    handleModelSubmit,
-    handleModelCancel
+    handleModalSubmit,
+    handleModalCancel
   } = props;
   const [form] = Form.useForm();
 
@@ -178,53 +152,37 @@ const PermissionModal = (props: IProps) => {
   }
 
   const handleOk = () => {
+    // 添加调试信息
+    console.log('当前表单值:', form.getFieldsValue());
     form
       .validate()
-      .then((values: AuthDataGroupVO) => {
-        console.log('values: ', values);
-        // 确保 scopeLevel 被正确设置
-        // values.scopeLevel = {
-        //   owner: scopeInfo.owner,
-        //   value: scopeInfo.value
+      .then((values: any) => {
+        console.log('form values:', values);
+        // // 构造要传递给父组件的数据
+        // const submitData: AuthDataGroupVO = {
+        //   groupName: values.groupName,
+        //   description: values.description,
+        //   scopeFieldId: Number(values.scopeFieldId),
+        //   dataFilters: values.dataFilters,
+        //   isOperable: value.includes(DataOperationEnum.operate) ? 1 : 0
         // };
-
-        // // 处理条件组数据
-        // if (conditionGroup && conditionGroup.length > 0) {
-        //   // 将conditionGroup转换为dataFilters格式
-        //   const dataFilters: Array<AuthDataFilterVO[]> = [];
-
-        //   conditionGroup.forEach((group, groupIndex) => {
-        //     const filterGroup: AuthDataFilterVO[] = [];
-        //     group.forEach((item, itemIndex) => {
-        //       const filter: AuthDataFilterVO = {
-        //         conditionGroup: groupIndex,
-        //         conditionOrder: itemIndex,
-        //         fieldId: item.fieldId,
-        //         fieldOperator: item.fieldOperator,
-        //         fieldValue: item.fieldValue,
-        //         fieldValueType: item.fieldValueType
-        //       };
-        //       filterGroup.push(filter);
-        //     });
-        //     if (filterGroup.length > 0) {
-        //       dataFilters.push(filterGroup);
-        //     }
-        //   });
-
-        //   values.dataFilters = dataFilters;
+        // // 处理权限范围
+        // if (scopeInfo.owner && scopeInfo.value) {
+        //   submitData.scopeLevel = {
+        //     PersonId: scopeInfo.owner,
+        //     scopeType: scopeInfo.value as ScopeType
+        //     // assignId:
+        //   };
         // }
-
-        // // 设置操作权限
-        // values.isOperable = value.includes('2') ? 1 : 0;
-
-        // 可以在这里添加额外的处理逻辑
-        handleModelSubmit(values);
+        // // 调用父组件传递的处理函数
+        // handleModalSubmit(submitData);
       })
-      .catch((error) => {
+      .catch((error: any) => {
         console.error('表单验证失败:', error);
-        // 显示具体的错误信息
-        if (error.errors && error.errors.length > 0) {
-          console.log('具体错误:', error.errors[0].message);
+        if (error.errors) {
+          error.errors.forEach((err: any) => {
+            console.error('字段:', err.field, '错误:', err.message);
+          });
         }
       });
   };
@@ -241,7 +199,7 @@ const PermissionModal = (props: IProps) => {
         onCancel={() => {
           // 使用异步方式关闭模态框，避免同步卸载问题
           setTimeout(() => {
-            handleModelCancel();
+            handleModalCancel();
           }, 0);
         }}
         autoFocus={false}
@@ -285,11 +243,13 @@ const PermissionModal = (props: IProps) => {
                 }
               }}
             >
-              {appEntities.map((appEntity: AppEntity) => (
-                <Option key={appEntity.entityID} value={appEntity.entityID || ''}>
-                  {appEntity.entityName}
-                </Option>
-              ))}
+              {appEntities
+                .filter((appEntity: AppEntity) => appEntity.entityID)
+                .map((appEntity: AppEntity) => (
+                  <Option key={appEntity.entityID} value={appEntity.entityID || ''}>
+                    {appEntity.entityName}
+                  </Option>
+                ))}
             </Select>
           </FormItem>
           <FormItem field="scopeOwner" label="权限范围" rules={[{ required: true, message: '请选择权限范围' }]}>
@@ -304,11 +264,13 @@ const PermissionModal = (props: IProps) => {
                   setScopeInfo((prev) => ({ ...prev, owner: value }));
                 }}
               >
-                {dataPermissionPerson.map((option) => (
-                  <Option key={option.PersonId} value={option.fieldName || ''}>
-                    {option.displayName}
-                  </Option>
-                ))}
+                {dataPermissionPerson
+                  .filter((option) => option.PersonId)
+                  .map((option) => (
+                    <Option key={option.PersonId} value={option.fieldName || ''}>
+                      {option.displayName}
+                    </Option>
+                  ))}
               </Select>
               是
               <Select
@@ -349,11 +311,13 @@ const PermissionModal = (props: IProps) => {
                                   className={styles.dataFilterItemField}
                                   onChange={(value) => getFieldCheckType(value)}
                                 >
-                                  {appEntityFields.map((option) => (
-                                    <Option key={option.fieldID} value={option.fieldID || ''}>
-                                      {option.displayName}
-                                    </Option>
-                                  ))}
+                                  {appEntityFields
+                                    .filter((option) => option.fieldID)
+                                    .map((option) => (
+                                      <Option key={option.fieldID} value={option.fieldID || ''}>
+                                        {option.displayName}
+                                      </Option>
+                                    ))}
                                 </Select>
                               </FormItem>
                               <FormItem
@@ -400,7 +364,7 @@ const PermissionModal = (props: IProps) => {
                                   <Input
                                     placeholder="请输入值"
                                     className={styles.dataFilterItemValue}
-                                    value={item.fieldValue}
+                                    value={item.fieldValue || ''}
                                     onChange={(value) => {
                                       // 更新静态值
                                       console.log('输入的变量值', value);
@@ -420,7 +384,7 @@ const PermissionModal = (props: IProps) => {
                                   <Select
                                     placeholder="请选择变量"
                                     className={styles.dataFilterItemValue}
-                                    // value={item.fieldValue}
+                                    value={item.fieldValue || undefined}
                                     onChange={(value) => {
                                       // 更新变量值
                                       console.log('现在的变量值:', value);
@@ -431,11 +395,13 @@ const PermissionModal = (props: IProps) => {
                                       }
                                     }}
                                   >
-                                    {appEntityFields.map((option) => (
-                                      <Option key={option.fieldID} value={option.fieldName || ''}>
-                                        {option.displayName}
-                                      </Option>
-                                    ))}
+                                    {appEntityFields
+                                      .filter((option) => option.fieldID)
+                                      .map((option) => (
+                                        <Option key={option.fieldID} value={option.fieldName || ''}>
+                                          {option.displayName}
+                                        </Option>
+                                      ))}
                                   </Select>
                                 </FormItem>
                               )}
