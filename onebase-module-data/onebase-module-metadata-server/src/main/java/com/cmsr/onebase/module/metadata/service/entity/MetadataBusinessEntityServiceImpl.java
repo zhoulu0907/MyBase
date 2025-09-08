@@ -441,51 +441,74 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
      * 生成创建表的DDL语句
      */
     private String generateCreateTableDDL(String tableName, List<MetadataSystemFieldsDO> systemFields) {
+        /**
+         * 建表规则强化说明 (2025-09-08 修订):
+         * 1. id 字段: 强制 BIGINT NOT NULL 主键（即使系统字段元数据未配置 required/snowflake 也兜底）
+         * 2. parent_id 字段: 强制允许为空，绝不作为主键，不附加 NOT NULL
+         * 3. 其它字段: 按元数据 isRequired 拼接 NOT NULL
+         * 4. 主键优先级: 如果存在 id 列 => 使用 id；否则选取第一个声明了 isSnowflakeId 的非 parent_id 字段；仍无则兜底 id(自动追加列)
+         */
         StringJoiner ddl = new StringJoiner("\n");
         ddl.add("CREATE TABLE IF NOT EXISTS \"" + tableName + "\" (");
 
         StringJoiner columns = new StringJoiner(",\n  ");
-        String primaryKeyField = null;
+        String detectedIdField = null;
+        String candidatePk = null;
+
+        // 预扫描是否已有 id 列
+        for (MetadataSystemFieldsDO f : systemFields) {
+            if ("id".equalsIgnoreCase(f.getFieldName())) {
+                detectedIdField = f.getFieldName();
+                break;
+            }
+        }
 
         for (MetadataSystemFieldsDO field : systemFields) {
+            String fieldName = field.getFieldName();
+            if (fieldName == null || fieldName.trim().isEmpty()) {
+                continue;
+            }
+            boolean isParentId = "parent_id".equalsIgnoreCase(fieldName);
+            boolean isId = "id".equalsIgnoreCase(fieldName);
+
             StringBuilder columnDef = new StringBuilder();
-            columnDef.append("\"").append(field.getFieldName()).append("\" ");
+            columnDef.append("\"").append(fieldName).append("\" ");
+            columnDef.append(mapFieldType(field.getFieldType()));
 
-            // 字段类型映射
-            String columnType = mapFieldType(field.getFieldType());
-            columnDef.append(columnType);
-
-            boolean isParentId = "parent_id".equalsIgnoreCase(field.getFieldName());
-            // 是否必填 - 使用新的枚举值：1-是，0-否
-            if (!isParentId && BooleanStatusEnum.isYes(field.getIsRequired())) {
+            // id 强制 NOT NULL；parent_id 永不加 NOT NULL；其它按 isRequired
+            if (isId) {
+                columnDef.append(" NOT NULL");
+            } else if (!isParentId && BooleanStatusEnum.isYes(field.getIsRequired())) {
                 columnDef.append(" NOT NULL");
             }
 
-            // 默认值
+            // 默认值（忽略空白）
             if (field.getDefaultValue() != null && !field.getDefaultValue().trim().isEmpty()) {
                 columnDef.append(" DEFAULT ").append(field.getDefaultValue());
             }
 
-            // 雪花ID字段设置为主键
-            if (!isParentId && BooleanStatusEnum.isYes(field.getIsSnowflakeId())) {
-                primaryKeyField = field.getFieldName();
+            // 主键候选: 优先使用显式 id；否则记录第一个非 parent_id 且 isSnowflakeId=1 的字段
+            if (isId) {
+                candidatePk = fieldName; // 直接锁定
+            } else if (candidatePk == null && !isParentId && BooleanStatusEnum.isYes(field.getIsSnowflakeId())) {
+                candidatePk = fieldName;
             }
 
             columns.add(columnDef.toString());
         }
 
-        ddl.add("  " + columns.toString());
-
-        // 添加主键约束
-        if (primaryKeyField != null) {
-            ddl.add(",  PRIMARY KEY (\"" + primaryKeyField + "\")");
+        // 如果没有 id 列且没有其它候选 -> 追加一个 id 列
+        if (candidatePk == null) {
+            if (detectedIdField == null) {
+                columns.add("\"id\" BIGINT NOT NULL");
+            }
+            candidatePk = "id"; // 兜底
         }
 
+        ddl.add("  " + columns.toString());
+        ddl.add(",  PRIMARY KEY (\"" + candidatePk + "\")");
         ddl.add(");");
-
-        // 添加表注释
         ddl.add("COMMENT ON TABLE \"" + tableName + "\" IS '业务实体表';");
-
         return ddl.toString();
     }
 
