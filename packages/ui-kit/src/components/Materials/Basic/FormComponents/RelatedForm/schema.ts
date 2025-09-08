@@ -179,6 +179,8 @@ const XRelatedForm: XRelatedFormSchema = {
       name: '标题',
       type: CONFIG_TYPES.LABEL_INPUT
     },
+    ...dataFieldConfig,
+    ...relatedFormdataFieldConfig,
     {
       key: 'placeholder',
       name: '占位符',
@@ -189,8 +191,6 @@ const XRelatedForm: XRelatedFormSchema = {
       name: '描述信息',
       type: CONFIG_TYPES.DESCRIPTION_INPUT
     },
-    ...dataFieldConfig,
-    ...relatedFormdataFieldConfig,
     {
       key: 'tooltip',
       name: '提示文字',

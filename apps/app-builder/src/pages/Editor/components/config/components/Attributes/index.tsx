@@ -20,6 +20,7 @@ import DynamicCarouselConfig from './components/DynamicCarouselConfig';
 import DynamicFieldConfig from './components/DynamicFieldConfig';
 import DynamicOptionsConfig from './components/DynamicOptionsConfig';
 import DynamicRadioConfig from './components/DynamicRadioConfig';
+import DynamicCheckboxConfig from './components/DynamicCheckboxConfig';
 import DynamicRelatedFormConfig from './components/DynamicRelatedFormConfig';
 import DynamicTableConfig from './components/DynamicTableConfig';
 import styles from './index.module.less';
@@ -190,6 +191,7 @@ const Attributes = ({ cpID }: ConfigsProps) => {
               item.type !== CONFIG_TYPES.FIELD_DATA &&
               item.type !== CONFIG_TYPES.RELATED_FORM_DATA &&
               item.type !== CONFIG_TYPES.RADIO_DATA &&
+              item.type !== CONFIG_TYPES.CHECKBOX_DATA &&
               item.type !== CONFIG_TYPES.SELECT_OPTIONS_INPUT &&
               item.type !== CONFIG_TYPES.CAROUSEL
             ) {
@@ -539,6 +541,19 @@ const Attributes = ({ cpID }: ConfigsProps) => {
             if (item.type === CONFIG_TYPES.RADIO_DATA) {
               return (
                 <DynamicRadioConfig
+                  key={index}
+                  id={cpID}
+                  // handleMultiPropsChange={handleMultiPropsChange}
+                  handlePropsChange={handlePropsChange}
+                  item={item}
+                  configs={configs}
+                />
+              );
+            }
+
+            if (item.type === CONFIG_TYPES.CHECKBOX_DATA) {
+              return (
+                <DynamicCheckboxConfig
                   key={index}
                   id={cpID}
                   // handleMultiPropsChange={handleMultiPropsChange}

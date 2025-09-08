@@ -6,7 +6,7 @@ import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import '../index.css';
 import type { XInputPhoneConfig } from './schema';
 
-const XInputPhone = memo((props: XInputPhoneConfig) => {
+const XInputPhone = memo((props: XInputPhoneConfig & { runtime?: boolean }) => {
   const {
     label,
     dataField,
@@ -20,7 +20,8 @@ const XInputPhone = memo((props: XInputPhoneConfig) => {
     color,
     bgColor,
     labelColSpan = 0,
-    description
+    description,
+    runtime = true
   } = props;
 
   const [value, setValue] = useState('');
@@ -48,10 +49,12 @@ const XInputPhone = memo((props: XInputPhoneConfig) => {
       }}
       wrapperCol={{ style: { flex: 1 } }}
       rules={[{ required: verify?.required }]}
+      hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
       style={{
+        margin: 0,
+        padding: 6,
         opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,
-        pointerEvents: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset',
-        margin: '0px'
+        pointerEvents: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset'
       }}
     >
       <Input

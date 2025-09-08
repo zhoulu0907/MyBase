@@ -3,10 +3,10 @@ import { IconPlus } from '@arco-design/web-react/icon';
 import { uploadFile } from '@onebase/platform-center';
 import { memo, useState } from 'react';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
-import './index.css';
 import type { XInputFileUploadConfig } from './schema';
+import '../index.css';
 
-const XFileUpload = memo((props: XInputFileUploadConfig) => {
+const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean }) => {
   const {
     label,
     status,
@@ -17,7 +17,8 @@ const XFileUpload = memo((props: XInputFileUploadConfig) => {
     verify,
     layout,
     labelColSpan = 0,
-    description
+    // description,
+    runtime = true
   } = props;
 
   const [_fileUrl, setFileUrl] = useState<string>('');
@@ -49,12 +50,14 @@ const XFileUpload = memo((props: XInputFileUploadConfig) => {
         style: { width: labelColSpan, flex: 'unset' }
       }}
       wrapperCol={{ style: { flex: 1 } }}
+      hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
       style={{
+        margin: 0,
+        padding: 6,
         opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,
-        pointerEvents: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset',
-        margin: '0px'
+        pointerEvents: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset'
       }}
-    >
+      >
       <Upload
         limit={verify.maxCount === -1 ? undefined : verify.maxCount}
         accept={verify.fileFormat}
