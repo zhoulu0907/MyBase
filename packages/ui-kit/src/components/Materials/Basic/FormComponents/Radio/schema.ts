@@ -103,7 +103,7 @@ export interface XInputRadioConfig extends ICommonBaseType {
   /**
    * 默认值
    */
-  defaultValue?: any;
+  defaultValue: { label: string; value: any; [property: string]: any; }[];
 
   /**
    * 字段宽度
@@ -148,12 +148,12 @@ const XRadio: XInputRadioSchema = {
       name: '标题',
       type: CONFIG_TYPES.LABEL_INPUT
     },
+    ...dataFieldConfig,
     {
       key: 'description',
       name: '描述信息',
       type: CONFIG_TYPES.DESCRIPTION_INPUT
     },
-    ...dataFieldConfig,
     {
       key: 'tooltip',
       name: '提示文字',

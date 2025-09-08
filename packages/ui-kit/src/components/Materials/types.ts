@@ -80,6 +80,12 @@ export interface IRadioDataConfigType {
   type: typeof CONFIG_TYPES.RADIO_DATA;
 }
 
+export interface ICheckboxDataConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.CHECKBOX_DATA;
+}
+
 // TODO(mickey): remove
 // export interface ISearchItemListConfigType {
 //   key: string;

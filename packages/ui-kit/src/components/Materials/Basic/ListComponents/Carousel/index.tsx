@@ -1,10 +1,10 @@
-import { Carousel } from '@arco-design/web-react';
 import { memo } from 'react';
+import { Carousel } from '@arco-design/web-react';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import { type XCarouselConfig } from './schema';
 
-const XCarousel = memo((props: XCarouselConfig) => {
-  const { status } = props;
+const XCarousel = memo((props: XCarouselConfig & { runtime?: boolean }) => {
+  const { status, runtime = true } = props;
 
   const imageSrc = [
     '//p1-arco.byteimg.com/tos-cn-i-uwbnlip3yd/cd7a1aaea8e1c5e3d26fe2591e561798.png~tplv-uwbnlip3yd-webp.webp',
@@ -18,12 +18,15 @@ const XCarousel = memo((props: XCarouselConfig) => {
       style={{
         width: '100%',
         height: '100%',
-        opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1
+        margin: 0,
+        padding: 6,
+        opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,
+        display: runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 'none' : 'unset'
       }}
     >
       {imageSrc.map((src, index) => (
         <div key={index}>
-          <img src={src} style={{ width: '100%' }} />
+          <img src={src} style={{ width: '100%' }} />{runtime}
         </div>
       ))}
     </Carousel>

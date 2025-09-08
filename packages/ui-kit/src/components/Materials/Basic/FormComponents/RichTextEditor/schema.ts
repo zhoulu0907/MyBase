@@ -136,12 +136,12 @@ const XRichText: XRichTextSchema = {
       name: '标题',
       type: CONFIG_TYPES.LABEL_INPUT
     },
+    ...dataFieldConfig,
     {
       key: 'description',
       name: '描述信息',
       type: CONFIG_TYPES.DESCRIPTION_INPUT
     },
-    ...dataFieldConfig,
     {
       key: 'tooltip',
       name: '提示文字',

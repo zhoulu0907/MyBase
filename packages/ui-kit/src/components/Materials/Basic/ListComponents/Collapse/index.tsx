@@ -5,15 +5,18 @@ import { type XCollapseConfig } from './schema';
 
 const CollapseItem = Collapse.Item;
 
-const XCollapse = memo((props: XCollapseConfig) => {
-  const { status } = props;
+const XCollapse = memo((props: XCollapseConfig & { runtime?: boolean }) => {
+  const { status, runtime = true } = props;
 
   return (
     <Collapse
       defaultActiveKey={['1', '2']}
       style={{
         maxWidth: '100%',
-        opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1
+        margin: 0,
+        padding: 6,
+        opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,
+        display: runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 'none' : 'unset'
       }}
     >
       <CollapseItem header="Beijing Toutiao Technology Co., Ltd." name="1">

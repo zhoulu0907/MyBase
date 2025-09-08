@@ -282,7 +282,12 @@ export default function EditorWorkspace() {
                   setShowDeleteButton(true);
                 }}
               >
-                <EditRender cpId={cp.id} cpType={cp.type} pageComponentSchema={pageComponentSchemas[cp.id]} />
+                <EditRender
+                  cpId={cp.id}
+                  cpType={cp.type}
+                  runtime={false}
+                  pageComponentSchema={pageComponentSchemas[cp.id]}
+                />
 
                 {curComponentID === cp.id && showDeleteButton && (
                   <div className={styles.operationArea}>

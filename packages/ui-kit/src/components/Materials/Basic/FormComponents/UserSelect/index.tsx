@@ -5,8 +5,8 @@ import { nanoid } from 'nanoid';
 import { memo, useCallback, useEffect, useState } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
-import './index.css';
 import type { XInputUserSelectConfig } from './schema';
+import '../index.css';
 
 const Option = Select.Option;
 
@@ -80,10 +80,12 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean })
       }}
       wrapperCol={{ style: { flex: 1 } }}
       rules={[{ required: verify?.required }]}
+      hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
       style={{
+        margin: 0,
+        padding: 6,
         opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,
-        pointerEvents: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset',
-        margin: '0px'
+        pointerEvents: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset'
       }}
     >
       <Select

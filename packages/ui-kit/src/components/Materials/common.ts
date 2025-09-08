@@ -25,6 +25,7 @@ import type {
   ILayoutConfigType,
   INumberConfigType,
   IRadioDataConfigType,
+  ICheckboxDataConfigType,
   IRelatedFormDataConfigType,
   ISelectConfigType,
   ISelectOptionsConfigType,
@@ -334,6 +335,12 @@ export const radioDataConfig: IRadioDataConfigType = {
   key: 'radioData',
   name: '自定义选项',
   type: CONFIG_TYPES.RADIO_DATA
+};
+
+export const checkboxDataConfig: ICheckboxDataConfigType = {
+  key: 'radioData',
+  name: '自定义选项',
+  type: CONFIG_TYPES.CHECKBOX_DATA
 };
 
 export const selectOptionsConfig: ISelectOptionsConfigType = {

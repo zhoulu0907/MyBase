@@ -3,14 +3,17 @@ import { memo } from 'react';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import { type XListConfig } from './schema';
 
-const XList = memo((props: XListConfig) => {
-  const { status } = props;
+const XList = memo((props: XListConfig & { runtime?: boolean }) => {
+  const { status, runtime = true } = props;
 
   return (
     <List
       style={{
         width: '100%',
-        opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1
+        margin: 0,
+        padding: 6,
+        opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,
+        display: runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 'none' : 'unset'
       }}
       size="small"
       header="List title"

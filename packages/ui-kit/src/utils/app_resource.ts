@@ -136,7 +136,7 @@ export async function startSavePageSet(params: SavePageSetParams, onSuccess?: Fu
 
   if (res) {
     Message.success('保存成功');
-    onSuccess();
+    onSuccess?.();
   }
 
   return;

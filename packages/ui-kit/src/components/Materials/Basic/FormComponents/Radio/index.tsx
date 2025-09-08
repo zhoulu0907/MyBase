@@ -1,13 +1,14 @@
-import { Form, Radio } from '@arco-design/web-react';
-import { nanoid } from 'nanoid';
 import { memo } from 'react';
+import { nanoid } from 'nanoid';
+import { Form, Radio } from '@arco-design/web-react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
-import './index.css';
 import type { XInputRadioConfig } from './schema';
+import '../index.css';
 
 const RadioGroup = Radio.Group;
-const XRadio = memo((props: XInputRadioConfig) => {
+
+const XRadio = memo((props: XInputRadioConfig & { runtime?: boolean }) => {
   const {
     label,
     dataField,
@@ -18,7 +19,8 @@ const XRadio = memo((props: XInputRadioConfig) => {
     layout,
     labelColSpan = 0,
     direction,
-    description
+    // description,
+    runtime = true
   } = props;
 
   return (
@@ -32,13 +34,15 @@ const XRadio = memo((props: XInputRadioConfig) => {
       }}
       wrapperCol={{ style: { flex: 1 } }}
       rules={[{ required: verify?.required }]}
+      hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
       style={{
+        margin: 0,
+        padding: 6,
         opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,
-        pointerEvents: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset',
-        margin: '0px'
+        pointerEvents: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset'
       }}
     >
-      <RadioGroup direction={direction} options={defaultValue} />
+      <RadioGroup direction={direction} options={defaultValue} defaultValue={defaultValue?.find(op => op.chosen)?.value} />
     </Form.Item>
   );
 });
