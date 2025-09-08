@@ -5,7 +5,6 @@ import {
   CreateMasterChildReqVO,
   CreateRelationReqVO,
   GetEntityPageParams,
-  GetFieldValidationTypesParams,
   UpdateEntityReqVO,
   UpdateFieldReqVO,
   UpdateRelationReqVO
@@ -148,7 +147,7 @@ export const batchSaveFields = (data: object) => {
 
 /**
  * 批量查询字段可选校验类型
- * @returns 
+ * @returns
  */
 export const getFieldCheckTypeApi = (fieldIdList: string[]) => {
   return metadataService.post('/entity-field/validation-types/query', { fieldIdList });
@@ -159,10 +158,6 @@ export const getFieldCheckTypeApi = (fieldIdList: string[]) => {
  */
 export const getFieldTypes = () => {
   return metadataService.post('/entity-field/field-types');
-};
-
-export const getFieldValidationTypes = (params: GetFieldValidationTypesParams) => {
-  return metadataService.post('/entity-field/validation-types/query', params);
 };
 
 /**

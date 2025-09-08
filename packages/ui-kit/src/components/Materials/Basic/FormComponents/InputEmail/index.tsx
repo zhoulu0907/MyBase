@@ -1,12 +1,12 @@
-import { memo, useEffect, useState } from 'react';
-import { nanoid } from 'nanoid';
 import { Form, Input } from '@arco-design/web-react';
-import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
+import { nanoid } from 'nanoid';
+import { memo, useEffect, useState } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
+import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import type { XInputEmailConfig } from './schema';
-import './index.css';
+import '../index.css';
 
-const XInputEmail = memo((props: XInputEmailConfig) => {
+const XInputEmail = memo((props: XInputEmailConfig & { runtime?: boolean }) => {
   const {
     label,
     dataField,
@@ -20,7 +20,8 @@ const XInputEmail = memo((props: XInputEmailConfig) => {
     color,
     bgColor,
     labelColSpan = 0,
-    description
+    // description,
+    runtime = true
   } = props;
 
   const [value, setValue] = useState('');
@@ -58,11 +59,13 @@ const XInputEmail = memo((props: XInputEmailConfig) => {
         //     },
         // },
       ]}
+      hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
       style={{
         flex: 1,
+        margin: 0,
+        padding: 6,
         opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,
-        pointerEvents: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset',
-        margin: '0px'
+        pointerEvents: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset'
       }}
     >
       <Input
@@ -78,7 +81,6 @@ const XInputEmail = memo((props: XInputEmailConfig) => {
         placeholder={placeholder}
         onChange={setValue}
       />
-      <div className='description showEllipsis'>{description}</div>
     </Form.Item>
   );
 });

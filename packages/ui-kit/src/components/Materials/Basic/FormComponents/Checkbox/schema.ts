@@ -6,6 +6,8 @@ import {
     layoutConfig,
     statusConfig,
     widthConfig,
+    directionConfig,
+    checkboxDataConfig,
     type ICommonBaseType,
     type TLayoutSelectKeyType,
     type TStatusSelectKeyType,
@@ -38,7 +40,8 @@ import type {
     TSelectDefaultType,
     TTextAreaDefaultType,
     TTextDefaultType,
-    IVerifyConfigType
+    IVerifyConfigType,
+    ICheckboxDataConfigType
 } from '../../../types';
 
 export interface XInputCheckboxSchema {
@@ -59,6 +62,7 @@ export type TXInputCheckboxEditData = Array<
   | IBooleanConfigType
   | ILayoutConfigType<TLayoutSelectKeyType>
   | IDataFieldConfigType
+  | ICheckboxDataConfigType
   | IVerifyConfigType
 >;
 
@@ -97,7 +101,7 @@ export interface XInputCheckboxConfig extends ICommonBaseType {
   /**
    * 默认值
    */
-  defaultValue?: TTextDefaultType;
+  defaultValue?: { label: string; value: string; [property: string]: any }[];
 
   /**
    * 字段宽度
@@ -130,14 +134,15 @@ export interface XInputCheckboxConfig extends ICommonBaseType {
   saveWithHidden?: TBooleanDefaultType;
 
   /**
-   * 可选项
-   */
-  options: { label: string; value: string }[];
-
-  /**
    * 全选 or 反选
    */
   allChecked?: TBooleanDefaultType;
+
+  /**
+   * 单选框方向：水平（默认）、垂直
+   * 可选值: 'vertical' | 'horizontal'
+   */
+  direction?: TLayoutSelectKeyType;
 }
 
 const XCheckbox: XInputCheckboxSchema = {
@@ -148,24 +153,26 @@ const XCheckbox: XInputCheckboxSchema = {
       name: '标题',
       type: CONFIG_TYPES.LABEL_INPUT
     },
+    ...dataFieldConfig,
     {
       key: 'description',
       name: '描述信息',
       type: CONFIG_TYPES.DESCRIPTION_INPUT
     },
-    ...dataFieldConfig,
     {
       key: 'tooltip',
       name: '提示文字',
       type: CONFIG_TYPES.TOOLTIP_INPUT
     },
-    layoutConfig,
     labelColSpanConfig,
+    layoutConfig,
+    directionConfig,
     {
       key: 'saveWithHidden',
       name: '隐藏时提交数据',
       type: CONFIG_TYPES.SWITCH_INPUT
     },
+    checkboxDataConfig,
     {
       key: 'allChecked',
       name: '全选',
@@ -190,14 +197,14 @@ const XCheckbox: XInputCheckboxSchema = {
     tooltip: '',
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
-    defaultValue: '',
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
+    direction: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
     saveWithHidden: false,
     labelColSpan: 100,
-    options: [
+    defaultValue: [
       {
         label: '选项一',
-        value: '1'
+        value: '1',
       },
       {
         label: '选项二',

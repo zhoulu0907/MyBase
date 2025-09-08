@@ -1,15 +1,15 @@
-import { memo, useState } from 'react';
-import { nanoid } from 'nanoid';
 import { Form, Message, Upload } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
 import { uploadFile } from '@onebase/platform-center';
+import { nanoid } from 'nanoid';
+import { memo, useState } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import type { XInputImgUploadConfig } from './schema';
-import './index.css';
+import '../index.css';
 
-const XImgUpload = memo((props: XInputImgUploadConfig) => {
-  const { label, dataField, status, tooltip, listType, verify, layout, labelColSpan = 0, description } = props;
+const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean }) => {
+  const { label, dataField, status, tooltip, listType, verify, layout, labelColSpan = 0, /* description, */ runtime = true } = props;
 
   const [_imgUrl, setImgUrl] = useState<string>('');
 
@@ -41,10 +41,12 @@ const XImgUpload = memo((props: XInputImgUploadConfig) => {
       }}
       wrapperCol={{ style: { flex: 1 } }}
       rules={[{ required: verify?.required }]}
+      hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
       style={{
+        margin: 0,
+        padding: 6,
         opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,
-        pointerEvents: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset',
-        margin: '0px'
+        pointerEvents: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset'
       }}
     >
       <Upload
@@ -95,7 +97,6 @@ const XImgUpload = memo((props: XInputImgUploadConfig) => {
           </div>
         )}
       </Upload>
-      <div className='description showEllipsis'>{description}</div>
     </Form.Item>
   );
 });

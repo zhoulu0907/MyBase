@@ -148,13 +148,13 @@ const XSelectMutiple: XInputSelectMutipleSchema = {
       name: '标题',
       type: CONFIG_TYPES.LABEL_INPUT
     },
+    ...dataFieldConfig,
+    selectOptionsConfig,
     {
       key: 'description',
       name: '描述信息',
       type: CONFIG_TYPES.DESCRIPTION_INPUT
     },
-    ...dataFieldConfig,
-    selectOptionsConfig,
     {
       key: 'tooltip',
       name: '提示文字',

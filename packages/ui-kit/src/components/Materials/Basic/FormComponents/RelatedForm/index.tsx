@@ -1,15 +1,14 @@
-import { memo, useState } from 'react';
-import { nanoid } from 'nanoid';
 import { Form, Select } from '@arco-design/web-react';
+import { nanoid } from 'nanoid';
+import { memo, useState } from 'react';
 // import { useAppEntityStore } from 'src/store/store_entity';
-import { STATUS_OPTIONS, STATUS_VALUES } from 'src/components/Materials/constants';
 import { dataMethodPage, type AppEntityField, type PageMethodParam } from '@onebase/app';
+import { STATUS_OPTIONS, STATUS_VALUES } from 'src/components/Materials/constants';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { type XRelatedFormConfig } from './schema';
-import './index.css';
+import '../index.css';
 
 const XRelatedForm = memo((props: XRelatedFormConfig & { runtime?: boolean }) => {
-  const { runtime = true } = props;
   //   const { appEntities } = useAppEntityStore();
 
   const {
@@ -26,7 +25,8 @@ const XRelatedForm = memo((props: XRelatedFormConfig & { runtime?: boolean }) =>
     color,
     bgColor,
     labelColSpan = 0,
-    description
+    description,
+    runtime = true
   } = props;
 
   const [options, setOptions] = useState<any[]>([]);
@@ -80,7 +80,9 @@ const XRelatedForm = memo((props: XRelatedFormConfig & { runtime?: boolean }) =>
   return (
     <Form.Item
       label={label.display && label.text}
-      field={dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.RELATED_FORM}_${nanoid()}`}
+      field={
+        dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.RELATED_FORM}_${nanoid()}`
+      }
       layout={layout}
       tooltip={tooltip}
       labelCol={{
@@ -88,10 +90,12 @@ const XRelatedForm = memo((props: XRelatedFormConfig & { runtime?: boolean }) =>
       }}
       wrapperCol={{ style: { flex: 1 } }}
       rules={[{ required: verify?.required }]}
+      hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
       style={{
+        margin: 0,
+        padding: 6,
         opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,
-        pointerEvents: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset',
-        margin: '0px'
+        pointerEvents: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset'
       }}
     >
       <Select
@@ -105,7 +109,6 @@ const XRelatedForm = memo((props: XRelatedFormConfig & { runtime?: boolean }) =>
           backgroundColor: bgColor
         }}
       />
-      <div className='description showEllipsis'>{description}</div>
     </Form.Item>
   );
 });

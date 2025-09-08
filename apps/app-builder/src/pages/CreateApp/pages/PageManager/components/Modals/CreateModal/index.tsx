@@ -2,6 +2,7 @@ import iconEditSVG from '@/assets/images/app_edit_black.svg';
 import MenuComp from '@/components/MenuIcon';
 import { Form, Input, Modal, Select, TreeSelect, Button, type FormInstance } from '@arco-design/web-react';
 import React, { useEffect, useState } from 'react';
+import {RootParentPage} from '@onebase/app';
 import styles from './index.module.less';
 
 interface CreateModalProps {
@@ -67,7 +68,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
           initialValues={{
             pageType: initValue.pageType,
             menuName: initValue.menuName,
-            parentId: form.getFieldValue('parentId')
+            parentId: form.getFieldValue('parentId') || RootParentPage.id
           }}
           style={{
             transform: visibleMenuIcon ? 'translateX(-100%)' : ''
@@ -134,7 +135,6 @@ const CreateModal: React.FC<CreateModalProps> = ({
           <Form.Item label="父级页面" field="parentId">
             <TreeSelect treeData={treeData} placeholder="请选择父级页面" allowClear />
           </Form.Item>
-
           {visibleCreateForm === 'page' && (
             <Form.Item label="业务实体" field="entityId" rules={[{ required: true, message: '请选择业务实体' }]}>
               <Select options={entityListOptions} placeholder="请选择业务实体" allowClear />

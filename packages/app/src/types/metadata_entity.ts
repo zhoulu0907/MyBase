@@ -158,10 +158,6 @@ export interface UpdateRuleReqVO extends CreateRuleReqVO {
 
 export const FilterEntityFields = ['lock_version', 'deleted', 'parent_id'];
 
-export interface GetFieldValidationTypesParams {
-  fieldIdList: string[];
-}
-
 export interface EntityFieldValidationTypes {
   fieldId: string;
   fieldTypeCode: string;
