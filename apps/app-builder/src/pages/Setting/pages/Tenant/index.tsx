@@ -1,5 +1,5 @@
 import { Avatar, Divider, Spin, Typography, Message } from '@arco-design/web-react';
-import { IconEye, IconEyeInvisible } from '@arco-design/web-react/icon';
+import { IconCopy, IconEye, IconEyeInvisible } from '@arco-design/web-react/icon';
 import type { TenantInfo } from '@onebase/platform-center';
 import { getTenantInfo, updateTenant } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
@@ -33,7 +33,7 @@ const TenantPage: React.FC = () => {
 
   const handleNameChange = async (newName: string) => {
     if (!tenantInfo) return;
-    
+
     if (!newName.trim()) {
       Message.error('租户名称不能为空');
       return;
@@ -44,12 +44,12 @@ const TenantPage: React.FC = () => {
         id: tenantInfo.id,
         name: newName
       });
-      
+
       setTenantInfo({
         ...tenantInfo,
         name: newName
       });
-      
+
       Message.success('租户名称更新成功');
     } catch (error) {}
   };
@@ -61,7 +61,7 @@ const TenantPage: React.FC = () => {
       return;
     }
     window.open(link, '_blank');
-  }
+  };
 
   // 生成完整访问地址的函数
   const generateFullUrl = (path: string | null | undefined) => {
@@ -105,7 +105,7 @@ const TenantPage: React.FC = () => {
             <div className={styles.infoCardPrimaryLeft}>
               <div className={styles.avatarSection}>
                 <Avatar size={56} style={{ backgroundColor: '#009E9E', borderRadius: '8px' }}>
-                  <span>{tenantInfo.name?.slice(0,2)}</span>
+                  <span>{tenantInfo.name?.slice(0, 2)}</span>
                 </Avatar>
               </div>
               {/* 名称 & ID */}
@@ -113,12 +113,15 @@ const TenantPage: React.FC = () => {
                 <Title
                   heading={5}
                   style={{ margin: 0 }}
-                  editable={ hasPermission(ACTIONS.UPDATE) ? { onChange: setTenantName,onEnd: handleNameChange } : false }>
+                  editable={
+                    hasPermission(ACTIONS.UPDATE) ? { onChange: setTenantName, onEnd: handleNameChange } : false
+                  }
+                >
                   {tenantName}
                 </Title>
                 <Text copyable>ID：{tenantInfo.id}</Text>
               </div>
-              <div className={styles.section} style={{marginLeft: '2rem'}}>
+              <div className={styles.section} style={{ marginLeft: '2rem' }}>
                 <div className={styles.sectionBody}>
                   <div className={styles.descriptionItem}>
                     <Text type="secondary">创建人：</Text>
@@ -143,7 +146,7 @@ const TenantPage: React.FC = () => {
               </div>
             </div>
           </div>
-        
+
           <div className={styles.infoCard}>
             {/* 访问地址 */}
             <div className={styles.section}>
@@ -151,25 +154,43 @@ const TenantPage: React.FC = () => {
               <div className={styles.sectionBody}>
                 <div className={styles.descriptionItem}>
                   <Text type="secondary">工作台：</Text>
-                  <Text 
-                    type="primary" 
-                    copyable={{ text: fullWebsite || '-' }}
-                    onClick={() => { gotoLink(fullWebsite) }}
+                  <Text
+                    type="primary"
+                    onClick={() => {
+                      gotoLink(fullWebsite);
+                    }}
                     style={{ cursor: 'pointer' }}
                   >
                     {fullWebsite || '-'}
                   </Text>
+                  <IconCopy
+                    className={styles.copyIcon}
+                    onClick={(e) => {
+                      e.stopPropagation(); // 阻止冒泡
+                      navigator.clipboard.writeText(fullWebsite || '-');
+                      Message.success('已复制');
+                    }}
+                  />
                 </div>
                 <div className={styles.descriptionItem}>
                   <Text type="secondary">移动端：</Text>
-                  <Text 
-                    type="primary" 
-                    copyable={{ text: fullWebsiteH5 || '-' }}
-                    onClick={() => { gotoLink(fullWebsiteH5) }}
+                  <Text
+                    type="primary"
+                    onClick={() => {
+                      gotoLink(fullWebsiteH5);
+                    }}
                     style={{ cursor: 'pointer' }}
                   >
                     {fullWebsiteH5 || '-'}
                   </Text>
+                  <IconCopy
+                    className={styles.copyIcon}
+                    onClick={(e) => {
+                      e.stopPropagation(); // 阻止冒泡
+                      navigator.clipboard.writeText(fullWebsiteH5 || '-');
+                      Message.success('已复制');
+                    }}
+                  />
                 </div>
               </div>
             </div>
@@ -181,12 +202,20 @@ const TenantPage: React.FC = () => {
               <div className={styles.sectionBody}>
                 <div className={styles.descriptionItem}>
                   <Text type="secondary">tenantKey：</Text>
-                  <Text copyable>{tenantInfo.tenantKey || '-'}</Text>
+                  <Text>{tenantInfo.tenantKey || '-'}</Text>
+                  <IconCopy
+                    className={styles.copyIcon}
+                    onClick={(e) => {
+                      e.stopPropagation(); // 阻止冒泡
+                      navigator.clipboard.writeText(tenantInfo.tenantKey || '-');
+                      Message.success('已复制');
+                    }}
+                  />
                 </div>
                 <div className={styles.descriptionItem}>
                   <Text type="secondary">tenantSecret：</Text>
                   <span className={styles.secretText || '-'}>
-                    {secretVisible ? tenantInfo.tenantSecret || '-': '•'.repeat(tenantInfo.tenantSecret?.length || 8)}
+                    {secretVisible ? tenantInfo.tenantSecret || '-' : '•'.repeat(tenantInfo.tenantSecret?.length || 8)}
                   </span>
                   <span onClick={() => setSecretVisible(!secretVisible)}>
                     {secretVisible ? <IconEye style={secretIconStyle} /> : <IconEyeInvisible style={secretIconStyle} />}
