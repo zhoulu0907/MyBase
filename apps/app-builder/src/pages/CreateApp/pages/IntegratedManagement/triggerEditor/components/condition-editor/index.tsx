@@ -112,7 +112,7 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({ data, onChange, field
       <div className={styles.item} key={cond.id}>
         <Select
           className={styles.itemSelect}
-          style={{ width: '100px' }}
+          style={{ width: '150px' }}
           value={cond.fieldId || ''}
           onChange={(value) => {
             const newConditions = [...conditions];
@@ -140,7 +140,7 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({ data, onChange, field
 
         <Select
           className={styles.itemSelect}
-          style={{ width: '90px' }}
+          style={{ width: '100px' }}
           value={cond.op || ''}
           onChange={(value) => {
             const newConditions = [...conditions];
@@ -170,7 +170,7 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({ data, onChange, field
 
         <Select
           className={styles.itemSelect}
-          style={{ width: '90px' }}
+          style={{ width: '100px' }}
           value={cond.operatorType || ''}
           onChange={(value) => {
             const newConditions = [...conditions];
@@ -193,7 +193,7 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({ data, onChange, field
         </Select>
 
         <Input
-          style={{ width: '100px', marginRight: '10px', backgroundColor: 'white' }}
+          style={{ width: '170px', marginRight: '10px', backgroundColor: 'white' }}
           value={cond.value?.[0] || ''}
           onChange={(value) => {
             const newConditions = [...conditions];

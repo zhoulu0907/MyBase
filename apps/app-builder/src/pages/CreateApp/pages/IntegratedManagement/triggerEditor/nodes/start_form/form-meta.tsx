@@ -1,7 +1,7 @@
 import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
 
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
-import { Form, Input, Switch } from '@arco-design/web-react';
+import { Checkbox, Form, Input, Select, Switch } from '@arco-design/web-react';
 import type { Condition } from '@onebase/app';
 import {
   getComponentListByPageId,
@@ -16,6 +16,8 @@ import { FormContent, FormHeader, FormOutputs } from '../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../hooks';
 import { type FlowNodeJSON } from '../../typings';
 
+const CheckboxGroup = Checkbox.Group;
+
 export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const isSidebar = useIsSidebar();
   const { node } = useNodeRenderContext();
@@ -29,6 +31,8 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   };
 
   const [payloadForm] = Form.useForm();
+
+  const triggerUserType = Form.useWatch('triggerUserType', payloadForm);
 
   useEffect(() => {
     if (pageId.value) {
@@ -88,7 +92,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             <Form.Item label="节点ID" field="id" initialValue={node.id}>
               <Input disabled />
             </Form.Item>
-            <Form.Item label="过滤条件" field="filterConditions" layout="vertical">
+            <Form.Item label="过滤条件" field="filterCondition" layout="vertical">
               {validationTypes && (
                 <ConditionEditor
                   onChange={onConditionChange}
@@ -99,11 +103,28 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
               )}
             </Form.Item>
 
-            <Form.Item label="忽略空值变更" field="ignoreEmptyChange" layout="vertical" triggerPropName="checked">
+            <Form.Item label="关联子表触发" field="isChildTriggerAllowed" layout="vertical" triggerPropName="checked">
               <Switch />
             </Form.Item>
-            <Form.Item label="关联子表触发" field="relatedSubtableTrigger" layout="vertical" triggerPropName="checked">
-              <Switch />
+
+            <Form.Item label="触发人" field="triggerUserType" layout="vertical">
+              <Select
+                options={[
+                  { label: '创建人', value: 'creator' },
+                  { label: '修改人', value: 'modifier' },
+                  { label: '具体用户', value: 'specific' }
+                ]}
+              />
+            </Form.Item>
+
+            {triggerUserType === 'specific' && (
+              <Form.Item label="指定触发人" field="triggerUserValue" layout="vertical">
+                <Select />
+              </Form.Item>
+            )}
+
+            <Form.Item label="触发事件" field="triggerEvents" layout="vertical">
+              <CheckboxGroup direction="vertical" options={['记录创建', '记录修改', '记录删除']} />
             </Form.Item>
           </Form>
         </FormContent>
