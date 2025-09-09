@@ -62,11 +62,6 @@ public class FlowProcessTriggerFormDO extends TenantBaseDO {
     @Column(name = "filter_condition", length = 2147483647)
     private String filterCondition;
     /**
-     * 数据范围，全部数据、变更数据
-     */
-    @Column(name = "data_scope", length = 64)
-    private String dataScope;
-    /**
      * 是否允许关联子表触发 0/1布尔值
      */
     @Column(name = "is_child_trigger_allowed", length = 5)

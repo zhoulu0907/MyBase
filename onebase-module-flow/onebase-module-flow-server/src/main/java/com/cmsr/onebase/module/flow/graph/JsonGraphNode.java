@@ -1,23 +1,23 @@
 package com.cmsr.onebase.module.flow.graph;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import lombok.Data;
+
 import java.util.List;
-import java.util.Map;
 
 /**
  * @Author：huangjie
  * @Date：2025/9/1 11:01
  */
-@lombok.Data
-public class JsonNode {
+@Data
+public class JsonGraphNode {
 
     private String id;
 
     private String type;
 
-    //TODO 待完善，变成具体的类
-    private Map<String, Object> data;
+    private JsonNode data;
 
-    private List<JsonNode> blocks;
-
+    private List<JsonGraphNode> blocks;
 
 }

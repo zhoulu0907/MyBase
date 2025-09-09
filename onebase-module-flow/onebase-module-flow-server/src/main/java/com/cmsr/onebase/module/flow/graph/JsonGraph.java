@@ -26,13 +26,21 @@ public class JsonGraph {
         return jsonGraph;
     }
 
-    private List<JsonNode> nodes;
+    private List<JsonGraphNode> nodes;
+
+    public JsonGraphNode getStartNode() {
+        JsonGraphNode jsonGraphNode = nodes.get(0);
+        if (!jsonGraphNode.getType().contains("start")) {
+            throw new IllegalArgumentException("第一个节点必须是开始节点");
+        }
+        return jsonGraphNode;
+    }
 
     public String toFlowChain() {
         return blocksNodeDefine(0, nodes);
     }
 
-    private String blocksNodeDefine(int deep, List<JsonNode> blocks) {
+    private String blocksNodeDefine(int deep, List<JsonGraphNode> blocks) {
         if (CollectionUtils.isEmpty(blocks)) {
             throw new IllegalArgumentException("blocks子节点不能为空");
         }
@@ -50,7 +58,7 @@ public class JsonGraph {
     }
 
 
-    private String nodeDefine(int deep, JsonNode node) {
+    private String nodeDefine(int deep, JsonGraphNode node) {
         if (StringUtils.equalsAny(node.getType(),
                 "start", "end", "dataAdd", "dataDelete", "dataUpdate")) {
             return toDefine(node);
@@ -62,7 +70,7 @@ public class JsonGraph {
         throw new IllegalArgumentException("未知的节点类型: " + node.getType());
     }
 
-    private String loopNodeDefine(int deep, JsonNode node) {
+    private String loopNodeDefine(int deep, JsonGraphNode node) {
         StringBuilder define = new StringBuilder();
         define.append("WHILE(").append(toDefine(node)).append(".DO(");
         define.append(NEW_LINE).append(blocksNodeDefine(deep + 1, node.getBlocks()));
@@ -70,16 +78,16 @@ public class JsonGraph {
         return define.toString();
     }
 
-    private String switchNodeDefine(int deep, JsonNode node) {
+    private String switchNodeDefine(int deep, JsonGraphNode node) {
         StringBuilder define = new StringBuilder();
         define.append("SWITCH(").append(toDefine(node)).append(".TO(");
-        for (JsonNode caseDefaultNode : node.getBlocks()) {
+        for (JsonGraphNode caseDefaultNode : node.getBlocks()) {
             if (Objects.equals(caseDefaultNode.getType(), "case")) {
                 define.append(NEW_LINE).append(switchCaseNodeDefine(deep + 1, caseDefaultNode)).append(",");
             }
         }
         define.append(NEW_LINE).append(")");
-        for (JsonNode caseDefaultNode : node.getBlocks()) {
+        for (JsonGraphNode caseDefaultNode : node.getBlocks()) {
             if (Objects.equals(caseDefaultNode.getType(), "caseDefault")) {
                 define.append(switchDefaultNodeDefine(deep + 1, caseDefaultNode));
             }
@@ -87,21 +95,21 @@ public class JsonGraph {
         return define.toString();
     }
 
-    private String switchCaseNodeDefine(int deep, JsonNode caseJsonNode) {
-        String blocksNodeDefine = blocksNodeDefine(deep, caseJsonNode.getBlocks());
-        return String.format("%s.tag(\"%s\")", blocksNodeDefine, caseJsonNode.getId());
+    private String switchCaseNodeDefine(int deep, JsonGraphNode caseJsonGraphNode) {
+        String blocksNodeDefine = blocksNodeDefine(deep, caseJsonGraphNode.getBlocks());
+        return String.format("%s.tag(\"%s\")", blocksNodeDefine, caseJsonGraphNode.getId());
     }
 
-    private String switchDefaultNodeDefine(int deep, JsonNode defaultJsonNode) {
-        String blocksNodeDefine = blocksNodeDefine(deep, defaultJsonNode.getBlocks());
+    private String switchDefaultNodeDefine(int deep, JsonGraphNode defaultJsonGraphNode) {
+        String blocksNodeDefine = blocksNodeDefine(deep, defaultJsonGraphNode.getBlocks());
         StringBuilder define = new StringBuilder();
         define.append(".DEFAULT(");
-        define.append(NEW_LINE).append(blocksNodeDefine).append(".tag(\"").append(defaultJsonNode.getId()).append("\")");
+        define.append(NEW_LINE).append(blocksNodeDefine).append(".tag(\"").append(defaultJsonGraphNode.getId()).append("\")");
         define.append(")");
         return define.toString();
     }
 
-    private String toDefine(JsonNode node) {
+    private String toDefine(JsonGraphNode node) {
         StringBuilder define = new StringBuilder();
         define.append(node.getType()).append(".tag(\"").append(node.getId()).append("\")");
         return define.toString();

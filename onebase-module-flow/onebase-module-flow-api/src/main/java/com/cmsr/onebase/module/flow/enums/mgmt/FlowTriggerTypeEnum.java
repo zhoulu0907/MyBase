@@ -47,7 +47,4 @@ public enum FlowTriggerTypeEnum {
         return null;
     }
 
-    public static boolean isFormTrigger(String triggerType) {
-        return "form".equals(triggerType);
-    }
 }

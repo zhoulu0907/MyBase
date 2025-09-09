@@ -29,8 +29,8 @@ public class FlowProcessTriggerEntityDO extends TenantBaseDO {
     /**
      * 触发事件
      */
-    @Column(name = "trigger_event", length = 64)
-    private String triggerEvent;
+    @Column(name = "trigger_events", length = 64)
+    private String triggerEvents;
     /**
      * 触发实体ID
      */
@@ -39,17 +39,12 @@ public class FlowProcessTriggerEntityDO extends TenantBaseDO {
     /**
      * 触发字段ID,哪些字段变更时才触发
      */
-    @Column(name = "trigger_fields", length = 2147483647)
-    private String triggerFields;
+    @Column(name = "trigger_field_ids", length = 2147483647)
+    private String triggerFieldIds;
     /**
      * 数据过滤条件，金额 > 50000 且 客户等级 = 'VIP
      */
     @Column(name = "filter_condition", length = 2147483647)
     private String filterCondition;
-    /**
-     * 是否允许递归触发
-     */
-    @Column(name = "is_recursion_trigger_allowed", length = 5)
-    private Integer isRecursionTriggerAllowed;
 
 }
