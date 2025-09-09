@@ -18,7 +18,7 @@ import {
   type FilterFieldCheckType,
   type AuthDataGroupVO
 } from '@onebase/app';
-import DataPermissionModal from './components/DataPermissionModal/modal';
+import DataPermissionModal from './components/DataPermissionModal';
 
 import styles from './index.module.less';
 
