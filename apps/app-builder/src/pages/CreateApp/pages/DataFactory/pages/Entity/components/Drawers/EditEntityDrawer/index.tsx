@@ -1,7 +1,7 @@
 import type { EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
 import { Button, Drawer, Message, Tabs } from '@arco-design/web-react';
 import { IconCaretRight } from '@arco-design/web-react/icon';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import NodeEditForm from './tabs/NodeEditForm';
 import DataRules from './tabs/DataRules';
 import DataMethods from './tabs/DataMethods';
@@ -21,7 +21,6 @@ const EditEntityDrawer: React.FC<{
   const [activeTab, setActiveTab] = useState('entity');
 
   useEffect(() => {
-    // 当抽屉关闭时，重置收起状态
     if (!visible) {
       setIsCollapsed(false);
     }
@@ -33,7 +32,6 @@ const EditEntityDrawer: React.FC<{
       onNodeEdit(formData);
       setVisible(false);
       setEditingNode(null);
-      Message.success('节点信息已更新');
       if (successCallback) {
         successCallback();
       }
@@ -46,12 +44,18 @@ const EditEntityDrawer: React.FC<{
   };
 
   // 关闭抽屉
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setVisible(false);
     setIsCollapsed(false);
-  };
+  }, [setVisible]);
 
-  const renderTabContent = () => {
+  const changeTab = useCallback((key: string) => {
+    setActiveTab(key);
+  }, []);
+
+  const renderTabContent = useMemo(() => {
+    if (!editingNode) return null;
+
     switch (activeTab) {
       case 'entity':
         return (
@@ -71,7 +75,7 @@ const EditEntityDrawer: React.FC<{
       default:
         return null;
     }
-  };
+  }, [activeTab, editingNode, handleNodeEdit, handleClose]);
 
   return (
     <>
@@ -92,7 +96,7 @@ const EditEntityDrawer: React.FC<{
       {/* 左侧Tab导航 */}
       {!isCollapsed && visible && !onlyShowEntity && (
         <div className={styles['tab-sidebar']}>
-          <Tabs activeTab={activeTab} onChange={setActiveTab} direction="vertical" className={styles['vertical-tabs']}>
+          <Tabs activeTab={activeTab} onChange={changeTab} direction="vertical" className={styles['vertical-tabs']}>
             <Tabs.TabPane key="entity" title="业务实体" />
             <Tabs.TabPane key="relation" title="关联关系" />
             <Tabs.TabPane key="rule" title="数据规则" />
@@ -114,7 +118,7 @@ const EditEntityDrawer: React.FC<{
         {editingNode && (
           <div className={styles['drawer-container']}>
             {/* 右侧内容区域 */}
-            {renderTabContent()}
+            {renderTabContent}
           </div>
         )}
       </Drawer>

@@ -1,50 +1,52 @@
 import {
-    alignConfig,
-    baseConfig,
-    baseDefault,
-    dataFieldConfig,
-    labelColSpanConfig,
-    layoutConfig,
-    statusConfig,
-    widthConfig,
-    type ICommonBaseType,
-    type TAlignSelectKeyType,
-    type TLayoutSelectKeyType,
-    type TStatusSelectKeyType,
-    type TWidthSelectKeyType
+  alignConfig,
+  baseConfig,
+  baseDefault,
+  dataFieldConfig,
+  labelColSpanConfig,
+  layoutConfig,
+  statusConfig,
+  widthConfig,
+  type ICommonBaseType,
+  type TAlignSelectKeyType,
+  type TLayoutSelectKeyType,
+  type TStatusSelectKeyType,
+  type TWidthSelectKeyType
 } from '../../../common';
 import {
-    ALIGN_OPTIONS,
-    ALIGN_VALUES,
-    CONFIG_TYPES,
-    LAYOUT_OPTIONS,
-    LAYOUT_VALUES,
-    STATUS_OPTIONS,
-    STATUS_VALUES,
-    WIDTH_OPTIONS,
-    WIDTH_VALUES
+  ALIGN_OPTIONS,
+  ALIGN_VALUES,
+  CONFIG_TYPES,
+  LAYOUT_OPTIONS,
+  LAYOUT_VALUES,
+  STATUS_OPTIONS,
+  STATUS_VALUES,
+  WIDTH_OPTIONS,
+  WIDTH_VALUES
 } from '../../../constants';
 import type {
-    IAlignConfigType,
-    IBooleanConfigType,
-    IColorConfigType,
-    IDataFieldConfigType,
-    IDescriptionConfigType,
-    ILabelConfigType,
-    ILayoutConfigType,
-    INumberConfigType,
-    IPlaceholderConfigType,
-    ISelectConfigType,
-    IStatusConfigType,
-    ITextAreaConfigType,
-    ITextConfigType,
-    ITooltipConfigType,
-    IWidthConfigType,
-    TBooleanDefaultType,
-    TNumberDefaultType,
-    TSelectDefaultType,
-    TTextAreaDefaultType,
-    TTextDefaultType
+  IAlignConfigType,
+  IBooleanConfigType,
+  IColorConfigType,
+  IDataFieldConfigType,
+  IDescriptionConfigType,
+  ILabelConfigType,
+  ILayoutConfigType,
+  INumberConfigType,
+  IPlaceholderConfigType,
+  ISelectConfigType,
+  IStatusConfigType,
+  ITextAreaConfigType,
+  ITextConfigType,
+  ITooltipConfigType,
+  IWidthConfigType,
+  TBooleanDefaultType,
+  TNumberDefaultType,
+  TSelectDefaultType,
+  TTextAreaDefaultType,
+  TTextDefaultType,
+  ISecurityConfigType,
+  IVerifyConfigType
 } from '../../../types';
 
 export interface XInputNumberSchema {
@@ -69,13 +71,20 @@ export type TXInputNumberEditData = Array<
   | IAlignConfigType<TAlignSelectKeyType>
   | IColorConfigType
   | IDataFieldConfigType
+  | ISecurityConfigType
+  | IVerifyConfigType
 >;
 
 export interface XInputNumberConfig extends ICommonBaseType {
   /**
    * 输入框标题
+   * text：标题
+   * display：是否显示
    */
-  label: TTextDefaultType;
+  label: {
+    text: TTextDefaultType;
+    display: TBooleanDefaultType;
+  };
 
   /**
    * 数据字段
@@ -114,9 +123,15 @@ export interface XInputNumberConfig extends ICommonBaseType {
   width: TSelectDefaultType<TWidthSelectKeyType>;
 
   /**
-   * 是否必填，未填写时提交报错
+   * required：是否必填，未填写时提交报错
+   * min：最小值，默认：0
+   * max：最大值，默认：100
    */
-  required: TBooleanDefaultType;
+  verify: {
+    required: TBooleanDefaultType;
+    min: TNumberDefaultType;
+    max: TNumberDefaultType;
+  }
 
   /**
    * 表单的布局：水平、垂直（默认）
@@ -141,16 +156,6 @@ export interface XInputNumberConfig extends ICommonBaseType {
   bgColor?: TTextDefaultType;
 
   /**
-   * 最小值：默认0
-   */
-  min: TNumberDefaultType;
-
-  /**
-   * 最大值：默认100
-   */
-  max: TNumberDefaultType;
-
-  /**
    * 数字步长：默认1
    */
   step: TNumberDefaultType;
@@ -161,6 +166,11 @@ export interface XInputNumberConfig extends ICommonBaseType {
   precision: TNumberDefaultType;
 
   /**
+   * 单位
+   */
+  unit: TTextDefaultType;
+
+  /**
    * 隐藏时是否提交数据，开启后隐藏状态仍会保存值
    */
   saveWithHidden?: TBooleanDefaultType;
@@ -169,6 +179,16 @@ export interface XInputNumberConfig extends ICommonBaseType {
    * 标题宽度
    */
   labelColSpan?: TNumberDefaultType;
+
+  /**
+   * 安全
+   * display：开启
+   * type：掩码类型
+   */
+  security: {
+    display: TBooleanDefaultType;
+    type?: TTextDefaultType;
+  };
 }
 
 const XInputNumber: XInputNumberSchema = {
@@ -179,6 +199,7 @@ const XInputNumber: XInputNumberSchema = {
       name: '标题',
       type: CONFIG_TYPES.LABEL_INPUT
     },
+    ...dataFieldConfig,
     {
       key: 'placeholder',
       name: '占位符',
@@ -189,7 +210,6 @@ const XInputNumber: XInputNumberSchema = {
       name: '描述信息',
       type: CONFIG_TYPES.DESCRIPTION_INPUT
     },
-    ...dataFieldConfig,
     {
       key: 'tooltip',
       name: '提示文字',
@@ -197,11 +217,6 @@ const XInputNumber: XInputNumberSchema = {
     },
     layoutConfig,
     labelColSpanConfig,
-    {
-      key: 'required',
-      name: '开启必填',
-      type: CONFIG_TYPES.SWITCH_INPUT
-    },
     {
       key: 'saveWithHidden',
       name: '隐藏时提交数据',
@@ -218,16 +233,6 @@ const XInputNumber: XInputNumberSchema = {
       type: CONFIG_TYPES.COLOR
     },
     {
-      key: 'min',
-      name: '最小值',
-      type: CONFIG_TYPES.NUMBER_INPUT
-    },
-    {
-      key: 'max',
-      name: '最大值',
-      type: CONFIG_TYPES.NUMBER_INPUT
-    },
-    {
       key: 'step',
       name: '数字步长',
       type: CONFIG_TYPES.NUMBER_INPUT
@@ -237,13 +242,31 @@ const XInputNumber: XInputNumberSchema = {
       name: '数字精度',
       type: CONFIG_TYPES.NUMBER_INPUT
     },
+    {
+      key: 'unit',
+      name: '单位',
+      type: CONFIG_TYPES.TEXT_INPUT
+    },
+    {
+      key: 'verify',
+      name: '校验',
+      type: CONFIG_TYPES.VERIFY
+    },
     statusConfig,
+    alignConfig,
+    {
+      key: 'security',
+      name: '安全',
+      type: CONFIG_TYPES.SECURITY
+    },
     widthConfig,
-    alignConfig
   ],
   config: {
     ...baseDefault,
-    label: '数字输入',
+    label: {
+      text: '数字录入',
+      display: true,
+    },
     dataField: [],
     placeholder: '请输入数字',
     description: '',
@@ -251,17 +274,24 @@ const XInputNumber: XInputNumberSchema = {
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     defaultValue: '',
-    required: false,
     align: ALIGN_VALUES[ALIGN_OPTIONS.LEFT],
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
-    min: 0,
-    max: 15,
     step: 1,
     precision: 2,
+    unit: '',
     saveWithHidden: false,
     color: '',
     bgColor: '',
-    labelColSpan: 100
+    labelColSpan: 100,
+    security: {
+      display: false,
+      type: ''
+    },
+    verify: {
+      required: false,
+      min: 0,
+      max: 100,
+    }
   }
 };
 

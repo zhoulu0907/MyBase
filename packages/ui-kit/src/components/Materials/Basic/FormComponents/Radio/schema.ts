@@ -41,7 +41,8 @@ import type {
     TNumberDefaultType,
     TSelectDefaultType,
     TTextAreaDefaultType,
-    TTextDefaultType
+    TTextDefaultType,
+    IVerifyConfigType
 } from '../../../types';
 
 export interface XInputRadioSchema {
@@ -64,13 +65,19 @@ export type TXInputRadioEditData = Array<
   | ILayoutConfigType<TLayoutSelectKeyType>
   | IDataFieldConfigType
   | IRadioDataConfigType
+  | IVerifyConfigType
 >;
 
 export interface XInputRadioConfig extends ICommonBaseType {
   /**
    * 输入框标题
+   * text：标题
+   * display：是否显示
    */
-  label: TTextDefaultType;
+  label: {
+    text: TTextDefaultType;
+    display: TBooleanDefaultType;
+  };
 
   /**
    * 数据字段
@@ -96,7 +103,7 @@ export interface XInputRadioConfig extends ICommonBaseType {
   /**
    * 默认值
    */
-  defaultValue?: any;
+  defaultValue: { label: string; value: any; [property: string]: any; }[];
 
   /**
    * 字段宽度
@@ -104,9 +111,11 @@ export interface XInputRadioConfig extends ICommonBaseType {
   width: TSelectDefaultType<TWidthSelectKeyType>;
 
   /**
-   * 是否必填，未填写时提交报错
+   * required：是否必填，未填写时提交报错
    */
-  required: TBooleanDefaultType;
+  verify: {
+    required: TBooleanDefaultType;
+  }
 
   /**
    * 表单的布局：水平、垂直（默认）
@@ -139,12 +148,12 @@ const XRadio: XInputRadioSchema = {
       name: '标题',
       type: CONFIG_TYPES.LABEL_INPUT
     },
+    ...dataFieldConfig,
     {
       key: 'description',
       name: '描述信息',
       type: CONFIG_TYPES.DESCRIPTION_INPUT
     },
-    ...dataFieldConfig,
     {
       key: 'tooltip',
       name: '提示文字',
@@ -154,22 +163,25 @@ const XRadio: XInputRadioSchema = {
     layoutConfig,
     directionConfig,
     {
-      key: 'required',
-      name: '开启必填',
-      type: CONFIG_TYPES.SWITCH_INPUT
-    },
-    {
       key: 'saveWithHidden',
       name: '隐藏时提交数据',
       type: CONFIG_TYPES.SWITCH_INPUT
     },
     radioDataConfig,
+    {
+      key: 'verify',
+      name: '校验',
+      type: CONFIG_TYPES.VERIFY
+    },
     statusConfig,
     widthConfig
   ],
   config: {
     ...baseDefault,
-    label: '单选框',
+    label: {
+      text: '单选框',
+      display: true,
+    },
     dataField: [],
     description: '',
     tooltip: '',
@@ -189,11 +201,13 @@ const XRadio: XInputRadioSchema = {
         value: '3'
       }
     ],
-    required: false,
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
     labelColSpan: 100,
     saveWithHidden: false,
-    direction: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL]
+    direction: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
+    verify: {
+      required: false
+    }
   }
 };
 

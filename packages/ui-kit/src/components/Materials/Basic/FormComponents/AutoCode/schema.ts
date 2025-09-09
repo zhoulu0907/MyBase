@@ -44,19 +44,20 @@ import type {
     TRadioDefaultType,
     TSelectDefaultType,
     TTextAreaDefaultType,
-    TTextDefaultType
+    TTextDefaultType,
+    IVerifyConfigType
 } from '../../../types';
 
 // 输入框组件的schema
-export interface XAutoNumberSchema {
+export interface XautoCodeSchema {
   // 可配置项
-  editData: TXAutoNumberEditData;
+  editData: TXautoCodeEditData;
   // 默认配置
-  config: XAutoNumberConfig;
+  config: XautoCodeConfig;
 }
 
 // 输入框组件的可配置项
-export type TXAutoNumberEditData = Array<
+export type TXautoCodeEditData = Array<
   | ITextConfigType
   | ILabelConfigType
   | IPlaceholderConfigType
@@ -72,13 +73,19 @@ export type TXAutoNumberEditData = Array<
   | IAlignConfigType<TAlignSelectKeyType>
   | IColorConfigType
   | IDataFieldConfigType
+  | IVerifyConfigType
 >;
 
-export interface XAutoNumberConfig extends ICommonBaseType {
+export interface XautoCodeConfig extends ICommonBaseType {
   /**
    * 输入框标题
+   * text：标题
+   * display：是否显示
    */
-  label: TTextDefaultType;
+  label: {
+    text: TTextDefaultType;
+    display: TBooleanDefaultType;
+  };
 
   /**
    * 数据字段
@@ -117,9 +124,11 @@ export interface XAutoNumberConfig extends ICommonBaseType {
   width: TRadioDefaultType<TWidthSelectKeyType>;
 
   /**
-   * 是否必填，未填写时提交报错
+   * required：是否必填，未填写时提交报错
    */
-  required: TBooleanDefaultType;
+  verify: {
+    required: TBooleanDefaultType;
+  }
 
   /**
    * 表单的布局：水平、垂直（默认）
@@ -159,7 +168,7 @@ export interface XAutoNumberConfig extends ICommonBaseType {
   maxLength?: TNumberDefaultType;
 }
 
-const XAutoNumber: XAutoNumberSchema = {
+const XautoCode: XautoCodeSchema = {
   editData: [
     ...baseConfig,
     {
@@ -167,6 +176,7 @@ const XAutoNumber: XAutoNumberSchema = {
       name: '标题',
       type: CONFIG_TYPES.LABEL_INPUT
     },
+    ...dataFieldConfig,
     // {
     //   key: 'defaultValue',
     //   name: '默认值',
@@ -182,7 +192,6 @@ const XAutoNumber: XAutoNumberSchema = {
       name: '描述信息',
       type: CONFIG_TYPES.DESCRIPTION_INPUT
     },
-    ...dataFieldConfig,
     // {
     //   key: 'tooltip',
     //   name: '提示文字',
@@ -205,13 +214,21 @@ const XAutoNumber: XAutoNumberSchema = {
       name: '背景颜色',
       type: CONFIG_TYPES.COLOR
     },
+    {
+      key: 'verify',
+      name: '校验',
+      type: CONFIG_TYPES.VERIFY
+    },
     statusConfig,
+    alignConfig,
     widthConfig,
-    alignConfig
   ],
   config: {
     ...baseDefault,
-    label: '自动编码',
+    label: {
+      text: '自动编号',
+      display: true,
+    },
     dataField: [],
     placeholder: '',
     description: '',
@@ -219,15 +236,17 @@ const XAutoNumber: XAutoNumberSchema = {
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     defaultValue: '',
-    required: false,
     align: ALIGN_VALUES[ALIGN_OPTIONS.LEFT],
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
     saveWithHidden: false,
     color: '',
     bgColor: '',
     labelColSpan: 100,
-    maxLength: 40
+    maxLength: 40,
+    verify: {
+      required: false
+    }
   }
 };
 
-export default XAutoNumber;
+export default XautoCode;

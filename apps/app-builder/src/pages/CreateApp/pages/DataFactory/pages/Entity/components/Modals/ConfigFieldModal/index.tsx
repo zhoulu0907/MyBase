@@ -7,10 +7,11 @@ import { batchSaveFields, getEntityFields } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import { ENTITY_FIELD_TYPE_LABEL } from '@onebase/ui-kit';
-import { type AutoNumberRule } from './FieldTypeConfig';
+import type { AutoNumberRule } from './types';
 import FieldConfigPopover from './FieldConfigPopover';
 import TableColumns from './TableColumns';
 import styles from './index.module.less';
+import { useFieldStore } from '@/store/store_field';
 
 interface FieldFormValues {
   id?: string;
@@ -26,7 +27,7 @@ interface FieldFormValues {
   isDeleted?: boolean;
   displayName?: string;
   options?: object[];
-  autoNumberRules?: AutoNumberRule[];
+  autoNumber?: AutoNumberRule;
   constraints?: {
     lengthEnabled: number;
     minLength: number;
@@ -49,25 +50,35 @@ interface ConfigFieldModalProps {
 // 需要额外配置的字段类型
 const FIELD_TYPES_NEED_CONFIG = [
   ENTITY_FIELD_TYPE_LABEL.PICKLIST,
-  ENTITY_FIELD_TYPE_LABEL.MULTI_PICKLIST,
-  ENTITY_FIELD_TYPE_LABEL.AUTO_NUMBER
+  ENTITY_FIELD_TYPE_LABEL.MULTI_SELECT,
+  ENTITY_FIELD_TYPE_LABEL.AUTO_CODE
 ];
-
-// 字段类型选项
-const fieldTypeOptions = JSON.parse(localStorage.getItem('fieldTypes') || '[]');
 
 // 自定义表格行组件，支持拖拽
 const SortableTableRow = (props: any) => {
   const { record, children, ...restProps } = props;
-  return <tr {...restProps}>{children}</tr>;
+
+  // 为可拖拽的行添加 data-id 属性
+  const rowProps = {
+    ...restProps,
+    'data-id': record.id
+  };
+
+  return <tr {...rowProps}>{children}</tr>;
 };
 
 const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible, entity, successCallback }) => {
   const { curAppId } = useAppStore();
   const [fields, setFields] = useState<FieldFormValues[]>([]);
+  const [originFields, setOriginFields] = useState<FieldFormValues[]>([]);
   const [loading, setLoading] = useState(false);
   const [configPopoverVisible, setConfigPopoverVisible] = useState<string | null>(null);
   const [constraintsPopoverVisible, setConstraintsPopoverVisible] = useState<string | null>(null);
+
+  const fieldTypeOptions = useFieldStore.getState().fieldTypes.map((item) => ({
+    label: item.displayName,
+    value: item.fieldType
+  }));
 
   useEffect(() => {
     if (visible) {
@@ -79,6 +90,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
             sortOrder: index
           }))
         );
+        setOriginFields(res);
       });
     }
   }, [visible]);
@@ -88,12 +100,12 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
 
   const addField = () => {
     const newField: FieldFormValues = {
-      // id: 'field-' + Date.now(),
+      id: 'field-' + Date.now(),
       fieldCode: '',
       fieldName: '',
       displayName: '',
       description: '',
-      fieldType: 'TEXT',
+      fieldType: ENTITY_FIELD_TYPE_LABEL.TEXT,
       defaultValue: '',
       isUnique: 1,
       allowNull: 1,
@@ -118,7 +130,12 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
       Message.error('系统字段不能删除');
       return;
     }
-    setFields(fields.map((f, i) => (i === index ? { ...f, isDeleted: true } : f)));
+    if (field.id && field.id.startsWith('field-')) {
+      setFields(fields.filter((f, i) => i !== index));
+      return;
+    } else {
+      setFields(fields.map((f, i) => (i === index ? { ...f, isDeleted: true } : f)));
+    }
   };
 
   const updateField = (index: number, updatedField: Partial<FieldFormValues>) => {
@@ -127,10 +144,10 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
 
   // 获取字段在数组中的索引
   const getFieldIndex = (fieldId: string, index: number) => {
-    if (index) {
-      return index;
-    } else {
+    if (fieldId) {
       return fields.findIndex((field) => field.id === fieldId);
+    } else {
+      return index;
     }
   };
 
@@ -163,6 +180,10 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
           Message.error('字段名称不能为空');
           return;
         }
+        if (field.fieldName && !/^[a-z][a-z0-9_]{0,39}$/.test(field.fieldName)) {
+          Message.error('请输入符合规范的字段名称');
+          return;
+        }
         if (!field.fieldType) {
           Message.error('数据类型不能为空');
           return;
@@ -179,7 +200,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
           isDeleted: field.isDeleted || false
         };
 
-        return field.id ? { ...fieldData, id: field.id } : fieldData;
+        return field.id && field.id.startsWith('field-') ? { ...fieldData, id: '' } : { ...fieldData, id: field.id };
       });
 
       const params = {
@@ -209,11 +230,11 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
     let fieldConfig = {};
     switch (fieldType) {
       case ENTITY_FIELD_TYPE_LABEL.PICKLIST:
-      case ENTITY_FIELD_TYPE_LABEL.MULTI_PICKLIST:
+      case ENTITY_FIELD_TYPE_LABEL.MULTI_SELECT:
         fieldConfig = { options: configData };
         break;
-      case ENTITY_FIELD_TYPE_LABEL.AUTO_NUMBER:
-        fieldConfig = { options: configData };
+      case ENTITY_FIELD_TYPE_LABEL.AUTO_CODE:
+        fieldConfig = { autoNumber: configData };
         break;
       case 'CONSTRAINTS':
         fieldConfig = { constraints: configData };
@@ -246,7 +267,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
         fieldType={fieldType}
         fieldId={fieldId}
         field={field}
-        fields={fields}
+        fields={originFields}
         onConfirm={handleConfigConfirm}
         onCancel={handleConfigCancel}
       />
@@ -287,7 +308,6 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
           animation={200}
           handle={`.${styles['drag-handle']}`}
           filter={`.${styles['system-field']}`}
-          tag="tr"
         >
           <Table
             data={activeFields}

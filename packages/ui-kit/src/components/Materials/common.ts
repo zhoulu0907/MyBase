@@ -4,6 +4,8 @@ import {
   CONFIG_TYPES,
   DATE_OPTIONS,
   DATE_VALUES,
+  FILL_OPTIONS,
+  FILL_VALUES,
   LAYOUT_OPTIONS,
   LAYOUT_VALUES,
   PAGINATION_POSITION_OPTIONS,
@@ -13,25 +15,25 @@ import {
   UPLOAD_OPTIONS,
   UPLOAD_VALUES,
   WIDTH_OPTIONS,
-  WIDTH_VALUES,
-  FILL_OPTIONS,
-  FILL_VALUES
+  WIDTH_VALUES
 } from './constants';
 import type {
   IAlignConfigType,
+  ICarouselConfigType,
   IDataFieldConfigType,
   IDateTypeConfigType,
   ILayoutConfigType,
+  INumberConfigType,
+  IRadioDataConfigType,
+  ICheckboxDataConfigType,
   IRelatedFormDataConfigType,
   ISelectConfigType,
+  ISelectOptionsConfigType,
   IStatusConfigType,
   ITableDataConfigType,
   ITextConfigType,
   IWidthConfigType,
-  TTextDefaultType,
-  INumberConfigType,
-  IRadioDataConfigType,
-  ICarouselConfigType,
+  TTextDefaultType
 } from './types';
 
 export interface ICommonBaseType {
@@ -333,6 +335,18 @@ export const radioDataConfig: IRadioDataConfigType = {
   key: 'radioData',
   name: '自定义选项',
   type: CONFIG_TYPES.RADIO_DATA
+};
+
+export const checkboxDataConfig: ICheckboxDataConfigType = {
+  key: 'radioData',
+  name: '自定义选项',
+  type: CONFIG_TYPES.CHECKBOX_DATA
+};
+
+export const selectOptionsConfig: ISelectOptionsConfigType = {
+  key: 'selectOptions',
+  name: '自定义选项',
+  type: CONFIG_TYPES.SELECT_OPTIONS_INPUT
 };
 
 export const carouselConfig: ICarouselConfigType = {

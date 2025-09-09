@@ -6,6 +6,8 @@ import {
     layoutConfig,
     statusConfig,
     widthConfig,
+    directionConfig,
+    checkboxDataConfig,
     type ICommonBaseType,
     type TLayoutSelectKeyType,
     type TStatusSelectKeyType,
@@ -37,7 +39,9 @@ import type {
     TNumberDefaultType,
     TSelectDefaultType,
     TTextAreaDefaultType,
-    TTextDefaultType
+    TTextDefaultType,
+    IVerifyConfigType,
+    ICheckboxDataConfigType
 } from '../../../types';
 
 export interface XInputCheckboxSchema {
@@ -58,13 +62,20 @@ export type TXInputCheckboxEditData = Array<
   | IBooleanConfigType
   | ILayoutConfigType<TLayoutSelectKeyType>
   | IDataFieldConfigType
+  | ICheckboxDataConfigType
+  | IVerifyConfigType
 >;
 
 export interface XInputCheckboxConfig extends ICommonBaseType {
   /**
    * 输入框标题
+   * text：标题
+   * display：是否显示
    */
-  label: TTextDefaultType;
+  label: {
+    text: TTextDefaultType;
+    display: TBooleanDefaultType;
+  };
 
   /**
    * 数据字段
@@ -90,7 +101,7 @@ export interface XInputCheckboxConfig extends ICommonBaseType {
   /**
    * 默认值
    */
-  defaultValue?: TTextDefaultType;
+  defaultValue?: { label: string; value: string; [property: string]: any }[];
 
   /**
    * 字段宽度
@@ -98,9 +109,13 @@ export interface XInputCheckboxConfig extends ICommonBaseType {
   width: TSelectDefaultType<TWidthSelectKeyType>;
 
   /**
-   * 是否必填，未填写时提交报错
+   * required：是否必填，未填写时提交报错
+   * maxChecked：最大选中数量，默认：3
    */
-  required: TBooleanDefaultType;
+  verify: {
+    required: TBooleanDefaultType;
+    maxChecked: TNumberDefaultType;
+  }
 
   /**
    * 表单的布局：水平、垂直（默认）
@@ -119,19 +134,15 @@ export interface XInputCheckboxConfig extends ICommonBaseType {
   saveWithHidden?: TBooleanDefaultType;
 
   /**
-   * 可选项
-   */
-  options: { label: string; value: string }[];
-
-  /**
    * 全选 or 反选
    */
   allChecked?: TBooleanDefaultType;
 
   /**
-   * 最大选中数量
+   * 单选框方向：水平（默认）、垂直
+   * 可选值: 'vertical' | 'horizontal'
    */
-  maxChecked?: TNumberDefaultType;
+  direction?: TLayoutSelectKeyType;
 }
 
 const XCheckbox: XInputCheckboxSchema = {
@@ -142,59 +153,58 @@ const XCheckbox: XInputCheckboxSchema = {
       name: '标题',
       type: CONFIG_TYPES.LABEL_INPUT
     },
+    ...dataFieldConfig,
     {
       key: 'description',
       name: '描述信息',
       type: CONFIG_TYPES.DESCRIPTION_INPUT
     },
-    ...dataFieldConfig,
     {
       key: 'tooltip',
       name: '提示文字',
       type: CONFIG_TYPES.TOOLTIP_INPUT
     },
-    layoutConfig,
     labelColSpanConfig,
-    {
-      key: 'required',
-      name: '开启必填',
-      type: CONFIG_TYPES.SWITCH_INPUT
-    },
+    layoutConfig,
+    directionConfig,
     {
       key: 'saveWithHidden',
       name: '隐藏时提交数据',
       type: CONFIG_TYPES.SWITCH_INPUT
     },
+    checkboxDataConfig,
     {
       key: 'allChecked',
       name: '全选',
       type: CONFIG_TYPES.SWITCH_INPUT
     },
     {
-      key: 'maxChecked',
-      name: '最大选中数量',
-      type: CONFIG_TYPES.NUMBER_INPUT
+      key: 'verify',
+      name: '校验',
+      type: CONFIG_TYPES.VERIFY
     },
     statusConfig,
     widthConfig
   ],
   config: {
     ...baseDefault,
-    label: '复选框',
+    label: {
+      text: '复选框',
+      display: true,
+    },
     dataField: [],
     description: '',
     tooltip: '',
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
-    defaultValue: '',
-    required: false,
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
+    direction: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
     saveWithHidden: false,
     labelColSpan: 100,
-    options: [
+    defaultValue: [
       {
         label: '选项一',
-        value: '1'
+        value: '1',
       },
       {
         label: '选项二',
@@ -206,7 +216,10 @@ const XCheckbox: XInputCheckboxSchema = {
       }
     ],
     allChecked: false,
-    maxChecked: 9
+    verify: {
+      required: false,
+      maxChecked: 3,
+    }
   }
 };
 

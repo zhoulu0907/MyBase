@@ -13,7 +13,7 @@ export const fieldOperatorMapping: { [key: string]: string[] } = {
   布尔值: ['equals', 'not_equals'],
   单选列表: ['equals', 'not_equals'],
   多选列表: ['包含', '不包含', '包含全部', '包含任意', '不包含任意'],
-  自动编码: ['equals', 'not_equals'],
+  自动编号: ['equals', 'not_equals'],
   用户引用: ['equals', 'not_equals'],
   部门引用: ['equals', 'not_equals'],
   数据选择: ['equals', 'not_equals'],

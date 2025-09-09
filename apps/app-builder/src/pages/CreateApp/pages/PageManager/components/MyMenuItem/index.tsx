@@ -1,6 +1,6 @@
-import { Dropdown, Menu, Message, type FormInstance } from '@arco-design/web-react';
-import { IconSettings } from '@arco-design/web-react/icon';
-import { getPageSetId, RootParentPage, type GetPageSetIdReq } from '@onebase/app';
+import { IconSettings, IconEyeInvisible } from '@arco-design/web-react/icon';
+import { Dropdown, Menu, Message, Tooltip, type FormInstance } from '@arco-design/web-react';
+import { getPageSetId, RootParentPage, VisibleType, type GetPageSetIdReq } from '@onebase/app';
 import { EDITOR_TYPES } from '@onebase/ui-kit';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -18,6 +18,7 @@ const MenuItem = Menu.Item;
 interface MenuItemProps {
   showOption: boolean;
   menuID: string;
+  isVisible: number;
   menuCode: string;
   menuName: string;
   label: string;
@@ -27,7 +28,7 @@ interface MenuItemProps {
   triggerCreate: (formType: string) => void;
   triggerRename: () => void;
   triggerCopy: () => void;
-  triggerHide: () => void;
+  triggerHide: (menuID: string, isVisible: number) => void;
   triggerDelete: (menuID: string) => void;
   maxWidth: number;
   renameForm: FormInstance;
@@ -38,7 +39,8 @@ interface MenuItemProps {
 const MyMenuItem: React.FC<MenuItemProps> = ({
   showOption,
   menuID,
-  menuCode,
+  // menuCode,
+  isVisible,
   menuName,
   label,
   menuIcon,
@@ -59,7 +61,7 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
   const [popupVisible, setPopupVisible] = useState(false);
 
   const dropList = (
-    <Menu style={{ padding: '10px 5px' }}>
+    <Menu style={{ padding: '10px 5px', maxHeight: 'none' }}>
       <MenuItem
         key="edit"
         onClick={(e) => {
@@ -78,9 +80,19 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
           renameForm.resetFields();
           renameForm.setFieldValue('menuName', menuName);
           renameForm.setFieldValue('menuId', menuID);
+          renameForm.setFieldValue('menuIcon', menuIcon);
         }}
       >
         {'重命名'}
+      </MenuItem>
+      <MenuItem
+        key="visible"
+        onClick={(e) => {
+          e.stopPropagation();
+          triggerHide(menuID, isVisible);
+        }}
+      >
+        {isVisible === VisibleType.HIDDEN ? '取消隐藏' : '隐藏'}
       </MenuItem>
       {!isGroup && (
         <MenuItem
@@ -157,6 +169,7 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
       return;
     }
 
+    sessionStorage.setItem('EDITOR_PAGE_INFO', JSON.stringify({ id: menuID, name: menuName, icon: menuIcon }));
     navigate(`/onebase/editor/${EDITOR_TYPES.FORM_EDITOR}?pageSetId=${pageSetId}`);
   };
 
@@ -172,15 +185,22 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
       role="menuitem"
       tabIndex={0}
     >
-      <div
-        className={styles.menuName}
-        style={{
-          maxWidth: maxWidth + 'px'
-        }}
-      >
-        <i className={`iconfont ${menuIcon}`} style={{ marginRight: '10px' }} />
-        {label}
-      </div>
+      <Tooltip content={menuName} position="top">
+        <div
+          className={styles.menuName}
+          style={{
+            maxWidth: maxWidth + 'px'
+          }}
+        >
+          <i className={`iconfont ${menuIcon}`} style={{ marginRight: '10px' }} />
+          {label}
+        </div>
+      </Tooltip>
+      {isVisible === VisibleType.HIDDEN && (
+        <div className={styles.eyeVisible}>
+          <IconEyeInvisible />
+        </div>
+      )}
       {showOption && (
         <div className={styles.dropdownContainer}>
           <Dropdown

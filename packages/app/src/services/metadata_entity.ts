@@ -1,15 +1,13 @@
 // 实体管理服务
 import {
-    CreateEntityReqVO,
-    CreateFieldReqVO,
-    CreateMasterChildReqVO,
-    CreateRelationReqVO,
-    CreateRuleReqVO,
-    GetEntityPageParams,
-    UpdateEntityReqVO,
-    UpdateFieldReqVO,
-    UpdateRelationReqVO,
-    UpdateRuleReqVO
+  CreateEntityReqVO,
+  CreateFieldReqVO,
+  CreateMasterChildReqVO,
+  CreateRelationReqVO,
+  GetEntityPageParams,
+  UpdateEntityReqVO,
+  UpdateFieldReqVO,
+  UpdateRelationReqVO
 } from '../types';
 import { metadataService } from './clients';
 
@@ -149,7 +147,7 @@ export const batchSaveFields = (data: object) => {
 
 /**
  * 批量查询字段可选校验类型
- * @returns 
+ * @returns
  */
 export const getFieldCheckTypeApi = (fieldIdList: string[]) => {
   return metadataService.post('/entity-field/validation-types/query', { fieldIdList });
@@ -204,9 +202,8 @@ export const updateRelation = (data: UpdateRelationReqVO) => {
  * @returns 操作结果
  */
 export const deleteRelation = (id: string) => {
-  return metadataService.post('/business-entity/relation/delete', { params: { id } });
+  return metadataService.post('/entity-relationship/delete?id=' + id);
 };
-
 
 /**
  * 根据ID获取关系详细信息

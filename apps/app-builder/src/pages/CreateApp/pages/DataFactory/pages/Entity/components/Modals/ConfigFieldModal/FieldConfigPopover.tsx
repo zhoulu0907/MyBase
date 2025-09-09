@@ -1,6 +1,6 @@
 import React from 'react';
 import { ENTITY_FIELD_TYPE_LABEL } from '@onebase/ui-kit';
-import { PicklistConfig, MultiPicklistConfig, AutoNumberConfig } from './FieldTypeConfig';
+import { PicklistConfig, MultiPicklistConfig, AutoCodeConfig } from './FieldTypeConfig';
 import FieldConstraint from './FieldConstraint';
 import styles from './index.module.less';
 
@@ -32,19 +32,19 @@ const FieldConfigPopover: React.FC<FieldConfigPopoverProps> = ({
         />
       )}
 
-      {fieldType === ENTITY_FIELD_TYPE_LABEL.MULTI_PICKLIST && (
+      {fieldType === ENTITY_FIELD_TYPE_LABEL.MULTI_SELECT && (
         <MultiPicklistConfig
-          onConfirm={(options) => onConfirm(ENTITY_FIELD_TYPE_LABEL.MULTI_PICKLIST, fieldId, options)}
+          onConfirm={(options) => onConfirm(ENTITY_FIELD_TYPE_LABEL.MULTI_SELECT, fieldId, options)}
           initialOptions={field?.options}
-          onCancel={() => onCancel(ENTITY_FIELD_TYPE_LABEL.MULTI_PICKLIST)}
+          onCancel={() => onCancel(ENTITY_FIELD_TYPE_LABEL.MULTI_SELECT)}
         />
       )}
 
-      {fieldType === ENTITY_FIELD_TYPE_LABEL.AUTO_NUMBER && (
-        <AutoNumberConfig
-          onConfirm={(rules) => onConfirm(ENTITY_FIELD_TYPE_LABEL.AUTO_NUMBER, fieldId, rules)}
-          initialRules={field?.autoNumberRules}
-          onCancel={() => onCancel(ENTITY_FIELD_TYPE_LABEL.AUTO_NUMBER)}
+      {fieldType === ENTITY_FIELD_TYPE_LABEL.AUTO_CODE && (
+        <AutoCodeConfig
+          onConfirm={(rules) => onConfirm(ENTITY_FIELD_TYPE_LABEL.AUTO_CODE, fieldId, rules)}
+          initialConfig={field?.autoNumberConfig}
+          onCancel={() => onCancel(ENTITY_FIELD_TYPE_LABEL.AUTO_CODE)}
           fields={fields}
         />
       )}

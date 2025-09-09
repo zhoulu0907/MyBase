@@ -2,11 +2,13 @@ import { IconCopy, IconDelete } from '@arco-design/web-react/icon';
 import { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import { v4 as uuidv4 } from 'uuid';
-import { getComponentSchema } from '@onebase/ui-kit';
+import { STATUS_OPTIONS,STATUS_VALUES } from '@onebase/ui-kit';
 
 import {
   COMPONENT_GROUP_NAME,
   EditRender,
+  ENTITY_COMPONENT_TYPES,
+  getComponentSchema,
   getComponentWidth,
   type GridItem,
   usePageEditorSignal
@@ -19,14 +21,16 @@ import PCIcon from '@/assets/images/pc_icon.svg';
 import PCActiveIcon from '@/assets/images/pc_icon_active.svg';
 
 // import PrevIcon from '@/assets/images/prev_icon.svg';
-import PrevActiveIcon from '@/assets/images/prev_icon_active.svg';
 import NextIcon from '@/assets/images/next_icon.svg';
+import PrevActiveIcon from '@/assets/images/prev_icon_active.svg';
 // import NextActiveIcon from '@/assets/images/next_icon_active.svg';
 
+import { Divider } from '@arco-design/web-react';
+import type { AppEntityField } from '@onebase/app';
 import { useSignals } from '@preact/signals-react/runtime';
 import 'react-grid-layout/css/styles.css';
+import { COMPONENT_MAP } from '../panel/components/metadata/component_map';
 import styles from './index.module.less';
-import { Divider } from '@arco-design/web-react';
 
 export default function EditorWorkspace() {
   const [showEmpty, setShowEmpty] = useState(true);
@@ -139,6 +143,46 @@ export default function EditorWorkspace() {
           id="workspace-content"
           list={components}
           setList={(newList) => {
+            const entityList: GridItem[] = [];
+            newList.forEach((item) => {
+              if (item.type == 'entity') {
+                item.fields
+                  .filter(
+                    (field: AppEntityField) =>
+                      field.fieldName !== 'lock_version' &&
+                      field.fieldName !== 'deleted' &&
+                      field.fieldName !== 'parent_id'
+                  )
+                  .forEach((field: AppEntityField) => {
+                    let cpType = COMPONENT_MAP[field.fieldType];
+                    let cpID = `${cpType}-${uuidv4()}`;
+                    console.log('cpType', cpType, field);
+                    const schema = getComponentSchema(cpType as any);
+
+                    schema.config.cpName = field.displayName;
+                    schema.config.id = cpID;
+                    schema.config.dataField = [item.entityID, field.fieldID];
+                    schema.config.label.text = field.displayName;
+                    const props = {
+                      id: cpID,
+                      type: cpType,
+                      ...schema
+                    };
+
+                    setPageComponentSchemas(cpID!, props);
+                    setCurComponentID(cpID!);
+
+                    setCurComponentSchema(props);
+                    setShowDeleteButton(false);
+
+                    entityList.push({ displayName: field.displayName, id: cpID, type: cpType });
+                  });
+                // 移除当前item
+                newList.splice(newList.indexOf(item), 1);
+              }
+            });
+            newList.push(...entityList);
+
             setComponents(newList);
           }}
           onAdd={(e) => {
@@ -165,34 +209,37 @@ export default function EditorWorkspace() {
                 return;
               }
             }
+            if (itemType === ENTITY_COMPONENT_TYPES.MAIN_ENTITY || itemType === ENTITY_COMPONENT_TYPES.SUB_ENTITY) {
+              console.log('entity id', entityID);
+            } else {
+              const schema = getComponentSchema(itemType as any);
+              schema.config.cpName = itemDisplayName;
+              schema.config.id = cpID;
 
-            const schema = getComponentSchema(itemType as any);
-            console.log('schema', schema);
+              // 系统组件
+              if (entityID && fieldID) {
+                console.log('dataField:    ', entityID, fieldID);
+                schema.config.dataField = [entityID, fieldID];
+                schema.config.status = STATUS_VALUES[STATUS_OPTIONS.READONLY]
+              }
 
-            schema.config.cpName = itemDisplayName;
-            schema.config.id = cpID;
+              if (dataLabel) {
+                console.log(schema);
+                schema.config.label.text = dataLabel;
+              }
 
-            if (entityID && fieldID) {
-              console.log('dataField:    ', entityID, fieldID);
-              schema.config.dataField = [entityID, fieldID];
+              const props = {
+                id: cpID,
+                type: itemType,
+                ...schema
+              };
+
+              setPageComponentSchemas(cpID!, props);
+              setCurComponentID(cpID!);
+
+              setCurComponentSchema(props);
+              setShowDeleteButton(false);
             }
-
-            if (dataLabel) {
-              console.log(schema);
-              schema.config.label = dataLabel;
-            }
-
-            const props = {
-              id: cpID,
-              type: itemType,
-              ...schema
-            };
-
-            setPageComponentSchemas(cpID!, props);
-            setCurComponentID(cpID!);
-
-            setCurComponentSchema(props);
-            setShowDeleteButton(false);
           }}
           group={{ name: COMPONENT_GROUP_NAME }}
           sort={true}
@@ -207,63 +254,69 @@ export default function EditorWorkspace() {
             setShowDeleteButton(true);
           }}
         >
-          {components.map((cp: GridItem) => (
-            <div
-              key={cp.id}
-              data-cp-type={cp.type}
-              data-cp-displayname={cp.displayName}
-              data-cp-id={cp.id}
-              className={styles.componentItem}
-              style={{
-                width: getComponentWidth(pageComponentSchemas[cp.id], cp.type),
-                borderColor: curComponentID === cp.id ? '#009E9E' : '',
-                borderStyle: curComponentID === cp.id ? 'solid' : 'dashed'
-              }}
-              onClick={(e: React.MouseEvent<HTMLDivElement>) => {
-                e.stopPropagation();
-                console.log('点击组件: ', cp.id);
+          {components
+            .filter((cp: GridItem) => cp.type !== 'entity')
+            .map((cp: GridItem) => (
+              <div
+                key={cp.id}
+                data-cp-type={cp.type}
+                data-cp-displayname={cp.displayName}
+                data-cp-id={cp.id}
+                className={styles.componentItem}
+                style={{
+                  width: getComponentWidth(pageComponentSchemas[cp.id], cp.type),
+                  borderColor: curComponentID === cp.id ? '#009E9E' : '',
+                  borderStyle: curComponentID === cp.id ? 'solid' : 'dashed'
+                }}
+                onClick={(e: React.MouseEvent<HTMLDivElement>) => {
+                  e.stopPropagation();
+                  console.log('点击组件: ', cp.id);
 
-                setCurComponentID(cp.id);
+                  setCurComponentID(cp.id);
 
-                const curComponentSchema = pageComponentSchemas[cp.id];
-                setCurComponentSchema(curComponentSchema);
+                  const curComponentSchema = pageComponentSchemas[cp.id];
+                  setCurComponentSchema(curComponentSchema);
 
-                console.log('pageComponentSchemas: ', pageComponentSchemas);
-                console.log('当前组件的ID: ', cp.id);
-                console.log('当前组件的配置: ', curComponentSchema);
-                setShowDeleteButton(true);
-              }}
-            >
-              <EditRender cpId={cp.id} cpType={cp.type} pageComponentSchema={pageComponentSchemas[cp.id]} />
+                  // console.log('当前组件的ID: ', cp.id);
+                  // console.log('当前组件的配置: ', curComponentSchema);
+                  setShowDeleteButton(true);
+                }}
+              >
+                <EditRender
+                  cpId={cp.id}
+                  cpType={cp.type}
+                  runtime={false}
+                  pageComponentSchema={pageComponentSchemas[cp.id]}
+                />
 
-              {curComponentID === cp.id && showDeleteButton && (
-                <div className={styles.operationArea}>
-                  <div
-                    className={styles.copyButton}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      // console.log('复制组件: ', cp);
-                      handleCopyComponent({ ...cp, id: `${cp.type}-${uuidv4()}` });
-                    }}
-                  >
-                    <IconCopy />
+                {curComponentID === cp.id && showDeleteButton && (
+                  <div className={styles.operationArea}>
+                    <div
+                      className={styles.copyButton}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        console.log('复制组件: ', cp);
+                        handleCopyComponent({ ...cp, id: `${cp.type}-${uuidv4()}` });
+                      }}
+                    >
+                      <IconCopy />
+                    </div>
+                    {/* 删除按钮 */}
+                    {/* TODO(mickey): 组件继续封装，和layout中的共用一套 */}
+                    <div
+                      className={styles.deleteButton}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        console.log('删除组件: ', cp.id);
+                        handleDeleteComponent(cp.id);
+                      }}
+                    >
+                      <IconDelete />
+                    </div>
                   </div>
-                  {/* 删除按钮 */}
-                  {/* TODO(mickey): 组件继续封装，和layout中的共用一套 */}
-                  <div
-                    className={styles.deleteButton}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      console.log('删除组件: ', cp.id);
-                      handleDeleteComponent(cp.id);
-                    }}
-                  >
-                    <IconDelete />
-                  </div>
-                </div>
-              )}
-            </div>
-          ))}
+                )}
+              </div>
+            ))}
         </ReactSortable>
 
         {showEmpty && (

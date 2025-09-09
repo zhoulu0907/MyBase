@@ -77,8 +77,13 @@ export type TXStaticTextEditData = Array<
 export interface XStaticTextConfig extends ICommonBaseType {
   /**
    * 输入框标题
+   * text：标题
+   * display：是否显示
    */
-  label: TTextDefaultType;
+  label: {
+    text: TTextDefaultType;
+    display: TBooleanDefaultType;
+  };
 
   /**
    * 数据字段
@@ -115,11 +120,6 @@ export interface XStaticTextConfig extends ICommonBaseType {
    * 字段宽度
    */
   width: TRadioDefaultType<TWidthSelectKeyType>;
-
-  /**
-   * 是否必填，未填写时提交报错
-   */
-  required: TBooleanDefaultType;
 
   /**
    * 表单的布局：水平、垂直（默认）
@@ -167,6 +167,7 @@ const XStaticText: XStaticTextSchema = {
       name: '标题',
       type: CONFIG_TYPES.LABEL_INPUT
     },
+    ...dataFieldConfig,
     {
       key: 'defaultValue',
       name: '默认值',
@@ -182,7 +183,6 @@ const XStaticText: XStaticTextSchema = {
       name: '描述信息',
       type: CONFIG_TYPES.DESCRIPTION_INPUT
     },
-    ...dataFieldConfig,
     {
       key: 'tooltip',
       name: '提示文字',
@@ -194,11 +194,6 @@ const XStaticText: XStaticTextSchema = {
       key: 'maxLength',
       name: '文本最大长度',
       type: CONFIG_TYPES.NUMBER_INPUT
-    },
-    {
-      key: 'required',
-      name: '开启必填',
-      type: CONFIG_TYPES.SWITCH_INPUT
     },
     {
       key: 'saveWithHidden',
@@ -216,12 +211,15 @@ const XStaticText: XStaticTextSchema = {
       type: CONFIG_TYPES.COLOR
     },
     statusConfig,
+    alignConfig,
     widthConfig,
-    alignConfig
   ],
   config: {
     ...baseDefault,
-    label: '静态文本',
+    label: {
+      text: '静态文本',
+      display: true,
+    },
     dataField: [],
     placeholder: '请输入文字',
     description: '',
@@ -229,7 +227,6 @@ const XStaticText: XStaticTextSchema = {
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     defaultValue: '静态文本',
-    required: false,
     align: ALIGN_VALUES[ALIGN_OPTIONS.LEFT],
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
     saveWithHidden: false,

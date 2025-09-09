@@ -1,28 +1,32 @@
-import { STATUS_OPTIONS, STATUS_VALUES } from 'src/components/Materials/constants';
-// import { useAppEntityStore } from 'src/store/store_entity';
 import { Form, Select } from '@arco-design/web-react';
-import { dataMethodPage, type AppEntityField, type PageMethodParam } from '@onebase/app';
+import { nanoid } from 'nanoid';
 import { memo, useState } from 'react';
+// import { useAppEntityStore } from 'src/store/store_entity';
+import { dataMethodPage, type AppEntityField, type PageMethodParam } from '@onebase/app';
+import { STATUS_OPTIONS, STATUS_VALUES } from 'src/components/Materials/constants';
+import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { type XRelatedFormConfig } from './schema';
+import '../index.css';
 
 const XRelatedForm = memo((props: XRelatedFormConfig & { runtime?: boolean }) => {
-  const { runtime = true } = props;
   //   const { appEntities } = useAppEntityStore();
 
   const {
     label,
     dataField,
-    relatedFormDataField,
+    // relatedFormDataField,
     placeholder,
     tooltip,
     status,
-    defaultValue,
-    required,
+    // defaultValue,
+    verify,
     align,
     layout,
     color,
     bgColor,
-    labelColSpan = 0
+    labelColSpan = 0,
+    description,
+    runtime = true
   } = props;
 
   const [options, setOptions] = useState<any[]>([]);
@@ -75,19 +79,23 @@ const XRelatedForm = memo((props: XRelatedFormConfig & { runtime?: boolean }) =>
 
   return (
     <Form.Item
-      label={label}
-      field={dataField.length > 0 ? dataField[dataField.length - 1] : ''}
+      label={label.display && label.text}
+      field={
+        dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.RELATED_FORM}_${nanoid()}`
+      }
       layout={layout}
       tooltip={tooltip}
       labelCol={{
         style: { width: labelColSpan, flex: 'unset' }
       }}
       wrapperCol={{ style: { flex: 1 } }}
-      rules={[{ required }]}
+      rules={[{ required: verify?.required }]}
+      hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
       style={{
+        margin: 0,
+        padding: 6,
         opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,
-        pointerEvents: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset',
-        margin: '0px'
+        pointerEvents: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset'
       }}
     >
       <Select

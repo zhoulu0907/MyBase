@@ -1,3 +1,4 @@
+import editPageNameSVG from '@/assets/images/edit_page_name_icon.svg';
 import activeFormDesignSVG from '@/assets/images/form_design_active_icon.svg';
 import defaultFormDesignSVG from '@/assets/images/form_design_default_icon.svg';
 import activeListDesignSVG from '@/assets/images/list_design_active_icon.svg';
@@ -6,12 +7,13 @@ import activePageSettingSVG from '@/assets/images/page_setting_active_icon.svg';
 import defaultPageSettingSVG from '@/assets/images/page_setting_default_icon.svg';
 import previewSVG from '@/assets/images/preview_icon.svg';
 import { useI18n } from '@/hooks/useI18n';
+import RenameModal from '@/pages/CreateApp/pages/PageManager/components/Modals/RenameModal';
 import { useBasicEditorStore } from '@/store';
 import { useAppStore } from '@/store/store_app';
 import { useAppEntityStore } from '@/store/store_entity';
-import { Breadcrumb, Button, Input, Message, Tabs } from '@arco-design/web-react';
+import { Breadcrumb, Button, Form, Message, Tabs } from '@arco-design/web-react';
 import { IconArrowLeft } from '@arco-design/web-react/icon';
-import { IconEdit } from '@douyinfe/semi-icons';
+
 import {
   AppStatus,
   ENTITY_TYPE,
@@ -19,7 +21,7 @@ import {
   getApplication,
   getEntityFieldsWithChildren,
   getPageSetMetaData,
-  updateApplicationMenuName,
+  updateApplicationMenu,
   type ChildEntity,
   type GetApplicationReq,
   type UpdateApplicationMenuNameReq
@@ -75,6 +77,7 @@ const tabData = [
 
 export default function EditorHeader() {
   const { t } = useI18n();
+  const [renameForm] = Form.useForm();
 
   const { clearCurComponentID } = usePageEditorSignal();
 
@@ -98,7 +101,7 @@ export default function EditorHeader() {
     clearLayoutSubComponents: clearListLayoutSubComponents
   } = useListEditorSignal;
 
-  const { setMainEntity, setAppEntities, setSubEntities } = useAppEntityStore();
+  const { setMainEntity, /* setAppEntities, */ setSubEntities } = useAppEntityStore();
 
   const { curAppId, setCurAppId } = useAppStore();
 
@@ -111,7 +114,8 @@ export default function EditorHeader() {
   const [iconColor, setIconColor] = useState('');
   const [appStatus, setAppStatus] = useState(0);
 
-  const [pageReanme, setPageRename] = useState(false);
+  // 重命名弹窗
+  const [visibleRenameForm, setVisibleRenameForm] = useState(false);
 
   const [partPreviewVisible, setPartPreviewVisible] = useState(false);
 
@@ -138,6 +142,16 @@ export default function EditorHeader() {
       setPageSetId(pageSetId);
     }
   }, []);
+
+  useEffect(() => {
+    if (pageInfo) {
+      renameForm.setFieldsValue({
+        menuId: pageInfo.id,
+        menuName: pageInfo.name,
+        menuIcon: pageInfo.icon
+      });
+    }
+  }, [pageInfo]);
 
   useEffect(() => {
     if (!isEditMode && pageSetId != '') {
@@ -186,6 +200,8 @@ export default function EditorHeader() {
     console.log('mainMetaData: ', mainMetaData);
 
     const entityWithChildren = await getEntityFieldsWithChildren(mainMetaData);
+
+    console.log('entityWithChildren: ', entityWithChildren);
 
     if (entityWithChildren) {
       setMainEntity({
@@ -242,7 +258,7 @@ export default function EditorHeader() {
       listColComponentsMap: { colComponents: new Map(Object.entries(cloneDeep(listLayoutSubComponents.value))) }
     };
 
-    startSavePageSet(savePageSetParams);
+    startSavePageSet(savePageSetParams, setAppStatus(AppStatus.PUBLISHED));
   };
 
   const clearAllData = () => {
@@ -270,17 +286,26 @@ export default function EditorHeader() {
     setPartPreviewVisible(true);
   };
 
-  const handleInputChange = async (e: any) => {
-    const name = e.target.value;
-    try {
-      const params: UpdateApplicationMenuNameReq = {
-        id: pageInfo?.id,
-        menuName: name
-      };
-      await updateApplicationMenuName(params);
-      setPageRename(false);
-      sessionStorage.setItem('EDITOR_PAGE_INFO', JSON.stringify({ ...pageInfo, name }));
-    } catch (error) {}
+  const handleRename = async () => {
+    if (!renameForm.getFieldValue('menuId')) {
+      Message.error('请选择要重命名的菜单');
+      return;
+    }
+    const id = renameForm.getFieldValue('menuID');
+    const menuName = renameForm.getFieldValue('menuName');
+    const menuIcon = renameForm.getFieldValue('menuIcon');
+
+    const req: UpdateApplicationMenuNameReq = {
+      id,
+      menuName,
+      menuIcon
+    };
+    const res = await updateApplicationMenu(req);
+    if (res) {
+      Message.success('重命名成功');
+      sessionStorage.setItem('EDITOR_PAGE_INFO', JSON.stringify({ ...pageInfo, name: menuName, icon: menuIcon }));
+    }
+    setVisibleRenameForm(false);
   };
 
   return (
@@ -296,21 +321,10 @@ export default function EditorHeader() {
         <Breadcrumb>
           <BreadcrumbItem className={styles.appName}>{appName}</BreadcrumbItem>
           <BreadcrumbItem className={styles.pageName}>
-            {pageReanme ? (
-              <Input
-                autoFocus
-                allowClear
-                defaultValue={pageInfo?.name}
-                onPressEnter={handleInputChange}
-                onBlur={() => setPageRename(false)}
-                style={{ width: 150 }}
-              />
-            ) : (
-              <>
-                {pageInfo?.name || '未命名页面'}
-                <IconEdit onClick={() => setPageRename(true)} style={{ marginLeft: 4, cursor: 'pointer' }} />
-              </>
-            )}
+            {pageInfo?.name || '未命名页面'}
+            <div className={styles.editIcon} onClick={() => setVisibleRenameForm(true)}>
+              <img src={editPageNameSVG} alt="edit page name" />
+            </div>
           </BreadcrumbItem>
         </Breadcrumb>
       </div>
@@ -382,6 +396,15 @@ export default function EditorHeader() {
           setVisible={() => setPartPreviewVisible(false)}
         />
       </div>
+
+      {/* 重命名弹窗 */}
+      <RenameModal
+        title={'重命名'}
+        visible={visibleRenameForm}
+        handleRename={handleRename}
+        setVisible={setVisibleRenameForm}
+        form={renameForm}
+      />
     </div>
   );
 }

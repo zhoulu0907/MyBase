@@ -1,4 +1,4 @@
-import { convertEntityListItemToConfigField } from '@/pages/CreateApp/pages/DataFactory/utils/entityConverter';
+import { convertEntityListItemToConfigField } from '@/pages/CreateApp/pages/DataFactory/utils/dataConverter';
 import type { EntityListItem } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
 import { FIELD_TYPE, FIELD_TYPE_LABEL } from '@onebase/ui-kit';
 import { useAppStore } from '@/store/store_app';

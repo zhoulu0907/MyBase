@@ -14,11 +14,9 @@ export const DS_RESOURCE_TYPE_LABEL = {
 
 // 实体字段类型标签
 export const ENTITY_FIELD_TYPE_LABEL = {
-  TEXT: 'VARCHAR',
-  LONG_TEXT: 'TEXT',
-  INTEGER: 'INTEGER',
+  TEXT: 'TEXT',
   BIGINT: 'BIGINT',
-  DECIMAL: 'DECIMAL',
+  LONG_TEXT: 'LONG_TEXT',
   EMAIL: 'EMAIL',
   PHONE: 'PHONE',
   URL: 'URL',
@@ -29,14 +27,14 @@ export const ENTITY_FIELD_TYPE_LABEL = {
   DATETIME: 'DATETIME',
   TIME: 'TIME',
   BOOLEAN: 'BOOLEAN',
-  PICKLIST: 'SINGLE_SELECT',
-  MULTI_PICKLIST: 'MULTI_SELECT',
+  PICKLIST: 'PICKLIST',
+  MULTI_SELECT: 'MULTI_SELECT',
   JSON: 'JSON',
-  AUTO_NUMBER: 'AUTO_NUMBER',
+  AUTO_CODE: 'AUTO_CODE',
   USER: 'USER',
   DEPARTMENT: 'DEPARTMENT',
   DATA_SELECTION: 'DATA_SELECTION',
-  // RELATION: 'RELATION',
+  RELATION: 'RELATION',
   STRUCTURE: 'STRUCTURE',
   ARRAY: 'ARRAY',
   FILE: 'FILE',
@@ -44,13 +42,14 @@ export const ENTITY_FIELD_TYPE_LABEL = {
   GEOGRAPHY: 'GEOGRAPHY',
   PASSWORD: 'PASSWORD',
   ENCRYPTED: 'ENCRYPTED',
-  AGGREGATE: 'AGGREGATE'
+  AGGREGATE: 'AGGREGATE',
+  ID: 'ID'
 };
 
 // 实体字段类型
 export const ENTITY_FIELD_TYPE = {
-  VARCHAR: '常规文本',
-  TEXT: '长文本内容',
+  TEXT: '常规文本',
+  LONG_TEXT: '长文本内容',
   INTEGER: '整数',
   BIGINT: '长整数',
   DECIMAL: '小数',
@@ -64,14 +63,14 @@ export const ENTITY_FIELD_TYPE = {
   DATETIME: '日期时间',
   TIME: '时间',
   BOOLEAN: '布尔值',
-  SINGLE_SELECT: '单选列表',
+  PICKLIST: '单选列表',
   MULTI_SELECT: '多选列表',
   JSON: 'JSON',
-  AUTO_NUMBER: '自动编码',
+  AUTO_CODE: '自动编号',
   USER: '用户引用',
   DEPARTMENT: '部门引用',
   DATA_SELECTION: '数据选择',
-  // RELATION: '关联关系',
+  RELATION: '关联关系',
   STRUCTURE: '结构化对象',
   ARRAY: '数组列表',
   FILE: '文件',
@@ -131,6 +130,9 @@ export const ENTITY_STATUS = {
 
 export type EntityStatus = (typeof ENTITY_STATUS)[keyof typeof ENTITY_STATUS];
 
+export type FieldConstraintLengthEnabled =
+  (typeof FIELD_CONSTRAINT_LENGTH_ENABLED)[keyof typeof FIELD_CONSTRAINT_LENGTH_ENABLED];
+
 // 字段约束 长度 0禁用 1开启
 export const FIELD_CONSTRAINT_LENGTH_ENABLED = {
   DISABLE: 0,
@@ -148,3 +150,6 @@ export const FIELD_CONSTRAINT_LENGTH_PROMPT = {
   DISABLE: 0,
   ENABLE: 1
 } as const;
+
+export type FieldConstraintRegexEnabled =
+  (typeof FIELD_CONSTRAINT_REGEX_ENABLED)[keyof typeof FIELD_CONSTRAINT_REGEX_ENABLED];

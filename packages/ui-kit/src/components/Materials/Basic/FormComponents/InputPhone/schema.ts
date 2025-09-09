@@ -44,7 +44,9 @@ import type {
     TNumberDefaultType,
     TSelectDefaultType,
     TTextAreaDefaultType,
-    TTextDefaultType
+    TTextDefaultType,
+    ISecurityConfigType,
+    IVerifyConfigType
 } from '../../../types';
 
 export interface XInputPhoneSchema {
@@ -69,13 +71,20 @@ export type TXInputPhoneEditData = Array<
   | IAlignConfigType<TAlignSelectKeyType>
   | IColorConfigType
   | IDataFieldConfigType
+  | ISecurityConfigType
+  | IVerifyConfigType
 >;
 
 export interface XInputPhoneConfig extends ICommonBaseType {
   /**
    * 输入框标题
+   * text：标题
+   * display：是否显示
    */
-  label: TTextDefaultType;
+  label: {
+    text: TTextDefaultType;
+    display: TBooleanDefaultType;
+  };
 
   /**
    * 数据字段
@@ -114,9 +123,13 @@ export interface XInputPhoneConfig extends ICommonBaseType {
   width: TSelectDefaultType<TWidthSelectKeyType>;
 
   /**
-   * 是否必填，未填写时提交报错
+   * required：是否必填，未填写时提交报错
+   * noRepeat：是否不允许重复
    */
-  required: TBooleanDefaultType;
+  verify: {
+    required: TBooleanDefaultType;
+    noRepeat?: TBooleanDefaultType;
+  }
 
   /**
    * 表单的布局：水平、垂直（默认）
@@ -149,6 +162,16 @@ export interface XInputPhoneConfig extends ICommonBaseType {
    * 标题宽度
    */
   labelColSpan?: TNumberDefaultType;
+
+  /**
+   * 安全
+   * display：开启
+   * type：掩码类型
+   */
+  security: {
+    display: TBooleanDefaultType;
+    type?: TTextDefaultType;
+  };
 }
 
 const XInputPhone: XInputPhoneSchema = {
@@ -159,6 +182,7 @@ const XInputPhone: XInputPhoneSchema = {
       name: '标题',
       type: CONFIG_TYPES.LABEL_INPUT
     },
+    ...dataFieldConfig,
     {
       key: 'placeholder',
       name: '占位符',
@@ -169,7 +193,6 @@ const XInputPhone: XInputPhoneSchema = {
       name: '描述信息',
       type: CONFIG_TYPES.DESCRIPTION_INPUT
     },
-    ...dataFieldConfig,
     {
       key: 'tooltip',
       name: '提示文字',
@@ -177,11 +200,6 @@ const XInputPhone: XInputPhoneSchema = {
     },
     layoutConfig,
     labelColSpanConfig,
-    {
-      key: 'required',
-      name: '开启必填',
-      type: CONFIG_TYPES.SWITCH_INPUT
-    },
     {
       key: 'saveWithHidden',
       name: '隐藏时提交数据',
@@ -197,13 +215,26 @@ const XInputPhone: XInputPhoneSchema = {
       name: '背景颜色',
       type: CONFIG_TYPES.COLOR
     },
+    {
+      key: 'verify',
+      name: '校验',
+      type: CONFIG_TYPES.VERIFY
+    },
     statusConfig,
+    alignConfig,
+    {
+      key: 'security',
+      name: '安全',
+      type: CONFIG_TYPES.SECURITY
+    },
     widthConfig,
-    alignConfig
   ],
   config: {
     ...baseDefault,
-    label: '手机号输入',
+    label: {
+      text: '电话',
+      display: true,
+    },
     dataField: [],
     placeholder: '请输入手机号',
     description: '',
@@ -211,13 +242,20 @@ const XInputPhone: XInputPhoneSchema = {
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     defaultValue: '',
-    required: false,
     align: ALIGN_VALUES[ALIGN_OPTIONS.LEFT],
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
     saveWithHidden: false,
     color: '',
     bgColor: '',
-    labelColSpan: 100
+    labelColSpan: 100,
+    security: {
+      display: false,
+      type: 'phone'
+    },
+    verify: {
+      required: false,
+      noRepeat: false
+    }
   }
 };
 

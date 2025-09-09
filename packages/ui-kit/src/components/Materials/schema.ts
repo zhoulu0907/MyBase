@@ -25,7 +25,7 @@ const componentSchemaMap: Partial<Record<ComponentType, ComponentSchema>> = {
   [ALL_COMPONENT_TYPES.DEPT_SELECT]: BasicSchema.XDeptSelect,
   [ALL_COMPONENT_TYPES.FILE_UPLOAD]: BasicSchema.XFileUpload,
   [ALL_COMPONENT_TYPES.IMG_UPLOAD]: BasicSchema.XImgUpload,
-  [ALL_COMPONENT_TYPES.AUTO_NUMBER]: BasicSchema.XAutoNumber,
+  [ALL_COMPONENT_TYPES.AUTO_CODE]: BasicSchema.XAutoCode,
   [ALL_COMPONENT_TYPES.RELATED_FORM]: BasicSchema.XRelatedForm,
   [ALL_COMPONENT_TYPES.STATIC_TEXT]: BasicSchema.XStaticText,
   [ALL_COMPONENT_TYPES.DIVIDER]: BasicSchema.XDivider,
@@ -80,22 +80,21 @@ export function hasComponentSchema(componentType: string): componentType is Comp
   return componentType in componentSchemaMap;
 }
 
-
 export function getComponentWidth(schema: any, itemType: string): string {
-    if (!schema || !schema.config || !schema.config.width) {
-      schema = getComponentSchema(itemType as any);
-      // console.log("初始化 schema.config.width", schema.config.width);
-    }
-    return schema.config.width;
+  if (!schema || !schema.config || !schema.config.width) {
+    schema = getComponentSchema(itemType as any);
+    // console.log("初始化 schema.config.width", schema.config.width);
   }
+  return schema.config.width;
+}
 
-  export function getComponentConfig(schema: any, itemType: string): any {
-    if (!schema || !schema.config) {
-      schema = getComponentSchema(itemType as any);
-      // console.log("初始化 schema.config 默认配置", schema.config);
-    }
-    return schema.config;
+export function getComponentConfig(schema: any, itemType: string): any {
+  if (!schema || !schema.config) {
+    schema = getComponentSchema(itemType as any);
+    // console.log("初始化 schema.config 默认配置", schema.config);
   }
+  return schema.config;
+}
 
 export const schema = {
   ...BasicSchema

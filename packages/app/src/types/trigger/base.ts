@@ -17,8 +17,10 @@ export interface Condition {
   op?: string;
   // 操作符code
   opCode?: string;
+  // 对应操作类型
+  operatorType?: string;
   // 操作值
-  operators?: string[];
+  value?: string[];
   // 递归嵌套
   rules?: Condition[];
 }

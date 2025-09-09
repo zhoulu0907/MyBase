@@ -8,6 +8,7 @@ export const CONFIG_TYPES = {
   NUMBER_INPUT: 'NumberInput',
   SWITCH_INPUT: 'SwitchInput',
   DATE_INPUT: 'DateInput',
+  CHECKED: 'Checked',
 
   // 组件标题输入
   LABEL_INPUT: 'LabelInput',
@@ -15,6 +16,8 @@ export const CONFIG_TYPES = {
   PLACEHOLDER_INPUT: 'PlaceholderInput',
   // 组件描述输入
   DESCRIPTION_INPUT: 'DescriptionInput',
+  // 组件选项输入
+  SELECT_OPTIONS_INPUT: 'OptionsInput',
   // 组件提示输入
   TOOLTIP_INPUT: 'TooltipInput',
   // 组件状态选择
@@ -43,6 +46,8 @@ export const CONFIG_TYPES = {
   UPLOAD_SIZE: 'UploadSize',
   // 图片、附件上传数量限制
   UPLOAD_LIMIT: 'UploadLimit',
+  // 图片、附件支持的文件类型
+  // SUPPORT_FILE_TYPE: 'SupportFileType',
   // 图片压缩率
   UPLOAD_COMPRESS: 'UploadCompress',
   // 日期类型
@@ -57,10 +62,16 @@ export const CONFIG_TYPES = {
   COLOR: 'Color',
   // 单选框配置
   RADIO_DATA: 'RadioData',
+  // 复选框配置
+  CHECKBOX_DATA: 'CheckboxData',
   // 轮播图管理
   CAROUSEL: 'Carousel',
   // 图片填充方式
-  FILL_STYLE: 'FillStyle'
+  FILL_STYLE: 'FillStyle',
+  // 安全
+  SECURITY: 'Security',
+  // 校验
+  VERIFY: 'Verify'
 } as const;
 
 // 状态选项常量

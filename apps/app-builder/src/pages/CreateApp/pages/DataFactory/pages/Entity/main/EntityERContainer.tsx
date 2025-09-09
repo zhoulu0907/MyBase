@@ -1,4 +1,4 @@
-import type { EdgeData, EntityERProps, EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
+import type { EdgeData, EntityERProps, EntityNode, Entity } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
 import { useAppStore } from '@/store/store_app';
 import { useResourceStore } from '@/store/store_resource';
 import { Button, Message } from '@arco-design/web-react';
@@ -20,6 +20,14 @@ import {
   DeleteConfirmModal
 } from '../components/Modals';
 import styles from '../index.module.less';
+
+const relationshipTypeMap: Record<string, string> = {
+  ONE_TO_ONE: '1:1',
+  ONE_TO_MANY: '1:N',
+  MANY_TO_ONE: 'N:1',
+  MANY_TO_MANY: 'M:N'
+};
+
 export const EntityERContainer: React.FC<{
   refreshEntityList: boolean;
   setRefreshEntityList: (refresh: boolean) => void;
@@ -62,7 +70,13 @@ export const EntityERContainer: React.FC<{
               positionY: pos?.y || 0
             };
           }) || [],
-        edges: res?.relationships || []
+        edges:
+          res?.relationships.map((item) => {
+            return {
+              ...item,
+              label: relationshipTypeMap[item?.relationshipType || '']
+            };
+          }) || []
       });
     }
   };
@@ -130,6 +144,41 @@ export const EntityERContainer: React.FC<{
     }
   };
 
+  const handleStatusChange = async (data: Partial<EntityNode>) => {
+    console.log('handleStatusChange', data);
+    const params = {
+      id: data.entityId,
+      status: data.status,
+      tableName: data.tableName,
+      displayName: data.entityName,
+      datasourceId: curDataSourceId,
+      appId: curAppId
+    };
+    const res = await updateEntity(params as unknown as UpdateEntityReqVO);
+    if (res) {
+      console.log('实体状态更新成功');
+      handleSuccessCallback();
+    }
+  };
+
+  const editEntityInfo = async (data: Partial<Entity>) => {
+    console.log('editEntityInfo', data);
+    const params = {
+      id: data.id,
+      displayName: data.displayName,
+      tableName: data.tableName,
+      description: data.description,
+      datasourceId: curDataSourceId,
+      appId: curAppId
+    };
+    const res = await updateEntity(params as unknown as UpdateEntityReqVO);
+    if (res) {
+      Message.success('保存成功');
+      console.log('实体信息更新成功');
+      handleSuccessCallback();
+    }
+  };
+
   const confirmDelete = async () => {
     setDeleteLoading(true);
     const res = await deleteEntity(nodeId);
@@ -145,9 +194,8 @@ export const EntityERContainer: React.FC<{
   };
 
   const handleSuccessCallback = async () => {
-    await loadEntityList();
-    setRefreshEntityList(true);
     setOnlyUpdateNode(true);
+    setRefreshEntityList(true);
   };
 
   const createEntityCallback = () => {
@@ -166,25 +214,8 @@ export const EntityERContainer: React.FC<{
     return chartRef.current?.getGraphPositon();
   };
 
-  const handleStatusChange = async (data: Partial<EntityNode>) => {
-    console.log('handleStatusChange', data);
-    const params = {
-      id: data.entityId,
-      status: data.status,
-      tableName: data.tableName,
-      displayName: data.entityName,
-      datasourceId: curDataSourceId,
-      appId: curAppId
-    };
-    const res = await updateEntity(params as unknown as UpdateEntityReqVO);
-    if (res) {
-      console.log('实体状态更新成功');
-      setOnlyUpdateNode(true);
-      loadEntityList();
-    }
-  };
-
   useEffect(() => {
+    console.log('refreshEntityList', refreshEntityList);
     if (refreshEntityList) {
       loadEntityList();
       setRefreshEntityList(false);
@@ -231,7 +262,7 @@ export const EntityERContainer: React.FC<{
         setVisible={setEditDrawerVisible}
         editingNode={editingNode as EntityNode}
         setEditingNode={(node: EntityNode | null) => setEditingNode(node)}
-        onNodeEdit={handleNodeEdit}
+        onNodeEdit={editEntityInfo}
         successCallback={handleSuccessCallback}
       />
       <CreateEntityModal

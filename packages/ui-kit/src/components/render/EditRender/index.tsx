@@ -22,13 +22,15 @@ interface ComponentRenderProps {
   cpType: string;
   /** 组件schema映射 */
   pageComponentSchema: any;
+  /** 组件预览状态 */
+  runtime: boolean;
 }
 
 /**
  * ComponentRender 组件
  * 用于渲染传入的组件，支持适配各类组件
  */
-const ComponentEditRender: React.FC<ComponentRenderProps> = ({ cpId, cpType, pageComponentSchema }) => {
+const ComponentEditRender: React.FC<ComponentRenderProps> = ({ cpId, cpType, pageComponentSchema, runtime }) => {
   // 获取组件配置
   const componentConfig = getComponentConfig(pageComponentSchema, cpType);
 
@@ -36,53 +38,53 @@ const ComponentEditRender: React.FC<ComponentRenderProps> = ({ cpId, cpType, pag
   const renderComponent = () => {
     switch (cpType) {
       case FORM_COMPONENT_TYPES.INPUT_TEXT:
-        return <FormComp.XInputText cpName={cpId} id={cpId} {...componentConfig} />;
+        return <FormComp.XInputText cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case FORM_COMPONENT_TYPES.INPUT_TEXTAREA:
-        return <FormComp.XInputTextArea cpName={cpId} id={cpId} {...componentConfig} />;
+        return <FormComp.XInputTextArea cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case FORM_COMPONENT_TYPES.INPUT_EMAIL:
-        return <FormComp.XInputEmail cpName={cpId} id={cpId} {...componentConfig} />;
+        return <FormComp.XInputEmail cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case FORM_COMPONENT_TYPES.INPUT_PHONE:
-        return <FormComp.XInputPhone cpName={cpId} id={cpId} {...componentConfig} />;
+        return <FormComp.XInputPhone cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case FORM_COMPONENT_TYPES.INPUT_NUMBER:
-        return <FormComp.XInputNumber cpName={cpId} id={cpId} {...componentConfig} />;
+        return <FormComp.XInputNumber cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case FORM_COMPONENT_TYPES.DATE_PICKER:
-        return <FormComp.XDatePicker cpName={cpId} id={cpId} {...componentConfig} />;
+        return <FormComp.XDatePicker cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case FORM_COMPONENT_TYPES.DATE_RANGE_PICKER:
-        return <FormComp.XDateRangePicker cpName={cpId} id={cpId} {...componentConfig} />;
+        return <FormComp.XDateRangePicker cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case FORM_COMPONENT_TYPES.TIME_PICKER:
-        return <FormComp.XTimePicker cpName={cpId} id={cpId} {...componentConfig} />;
+        return <FormComp.XTimePicker cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case FORM_COMPONENT_TYPES.DATE_TIME_PICKER:
-        return <FormComp.XDateTimePicker cpName={cpId} id={cpId} {...componentConfig} />;
+        return <FormComp.XDateTimePicker cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case FORM_COMPONENT_TYPES.SWITCH:
-        return <FormComp.XSwitch cpName={cpId} id={cpId} {...componentConfig} />;
+        return <FormComp.XSwitch cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case FORM_COMPONENT_TYPES.RADIO:
-        return <FormComp.XRadio cpName={cpId} id={cpId} {...componentConfig} />;
+        return <FormComp.XRadio cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case FORM_COMPONENT_TYPES.CHECKBOX:
-        return <FormComp.XCheckbox cpName={cpId} id={cpId} {...componentConfig} />;
+        return <FormComp.XCheckbox cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case FORM_COMPONENT_TYPES.SELECT_ONE:
-        return <FormComp.XSelectOne cpName={cpId} id={cpId} {...componentConfig} />;
+        return <FormComp.XSelectOne cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case FORM_COMPONENT_TYPES.SELECT_MUTIPLE:
-        return <FormComp.XSelectMutiple cpName={cpId} id={cpId} {...componentConfig} />;
+        return <FormComp.XSelectMutiple cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case FORM_COMPONENT_TYPES.USER_SELECT:
-        return <FormComp.XUserSelect cpName={cpId} id={cpId} {...componentConfig} />;
+        return <FormComp.XUserSelect cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case FORM_COMPONENT_TYPES.DEPT_SELECT:
-        return <FormComp.XDeptSelect cpName={cpId} id={cpId} {...componentConfig} />;
+        return <FormComp.XDeptSelect cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case FORM_COMPONENT_TYPES.FILE_UPLOAD:
-        return <FormComp.XFileUpload cpName={cpId} id={cpId} {...componentConfig} />;
+        return <FormComp.XFileUpload cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case FORM_COMPONENT_TYPES.IMG_UPLOAD:
-        return <FormComp.XImgUpload cpName={cpId} id={cpId} {...componentConfig} />;
-      case FORM_COMPONENT_TYPES.AUTO_NUMBER:
-        return <FormComp.XAutoNumber cpName={cpId} id={cpId} {...componentConfig} />;
+        return <FormComp.XImgUpload cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+      case FORM_COMPONENT_TYPES.AUTO_CODE:
+        return <FormComp.XAutoCode cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case FORM_COMPONENT_TYPES.RELATED_FORM:
-        return <FormComp.XRelatedForm cpName={cpId} id={cpId} {...componentConfig} runtime={false} />;
+        return <FormComp.XRelatedForm cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case FORM_COMPONENT_TYPES.STATIC_TEXT:
-        return <FormComp.XStaticText cpName={cpId} id={cpId} {...componentConfig} />;
+        return <FormComp.XStaticText cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case FORM_COMPONENT_TYPES.DIVIDER:
-        return <FormComp.XDIVIDER cpName={cpId} id={cpId} {...componentConfig} />;
+        return <FormComp.XDIVIDER cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case FORM_COMPONENT_TYPES.RICH_TEXT:
-        return <FormComp.XRichText cpName={cpId} id={cpId} {...componentConfig} />;
+        return <FormComp.XRichText cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case FORM_COMPONENT_TYPES.CAROUSEL_F:
-        return <FormComp.XCarousel cpName={cpId} id={cpId} {...componentConfig} />;
+        return <FormComp.XCarousel cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
 
       //  布局组件
       case LAYOUT_COMPONENT_TYPES.COLUMN_LAYOUT:
@@ -90,27 +92,27 @@ const ComponentEditRender: React.FC<ComponentRenderProps> = ({ cpId, cpType, pag
 
       //  列表组件
       case LIST_COMPONENT_TYPES.TABLE:
-        return <ListComp.XTable cpName={cpId} id={cpId} {...componentConfig} />;
+        return <ListComp.XTable cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case LIST_COMPONENT_TYPES.CALENDAR:
-        return <ListComp.XCalendar cpName={cpId} id={cpId} {...componentConfig} />;
+        return <ListComp.XCalendar cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case LIST_COMPONENT_TYPES.TIMELINE:
-        return <ListComp.XTimeline cpName={cpId} id={cpId} {...componentConfig} />;
+        return <ListComp.XTimeline cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case LIST_COMPONENT_TYPES.CAROUSEL:
-        return <ListComp.XCarousel cpName={cpId} id={cpId} {...componentConfig} />;
+        return <ListComp.XCarousel cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case LIST_COMPONENT_TYPES.LIST:
-        return <ListComp.XList cpName={cpId} id={cpId} {...componentConfig} />;
+        return <ListComp.XList cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case LIST_COMPONENT_TYPES.COLLAPSE:
-        return <ListComp.XCollapse cpName={cpId} id={cpId} {...componentConfig} />;
+        return <ListComp.XCollapse cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
 
       //  展示组件
       case SHOW_COMPONENT_TYPES.INFO_NOTICE:
-        return <ShowComp.XInfoNotice cpName={cpId} id={cpId} {...componentConfig} />;
+        return <ShowComp.XInfoNotice cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case SHOW_COMPONENT_TYPES.IMAGE:
-        return <ShowComp.XImage cpName={cpId} id={cpId} {...componentConfig} />;
+        return <ShowComp.XImage cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case SHOW_COMPONENT_TYPES.TEXT:
-        return <ShowComp.XText cpName={cpId} id={cpId} {...componentConfig} />;
+        return <ShowComp.XText cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case SHOW_COMPONENT_TYPES.WEB_VIEW:
-        return <ShowComp.XWebView cpName={cpId} id={cpId} {...componentConfig} />;
+        return <ShowComp.XWebView cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
 
       default:
         return <div>未知组件类型: {cpType}</div>;

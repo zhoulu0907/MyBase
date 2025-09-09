@@ -1,16 +1,34 @@
 import { useI18n } from '@/hooks/useI18n';
-import { ColorPicker, DatePicker, Form, Input, InputNumber, Radio, Switch } from '@arco-design/web-react';
+import {
+  Checkbox,
+  ColorPicker,
+  DatePicker,
+  Form,
+  Input,
+  InputNumber,
+  Radio,
+  Select,
+  Switch,
+  Tooltip,
+  Grid
+} from '@arco-design/web-react';
 import { CONFIG_TYPES, usePageEditorSignal } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import { useEffect, useState } from 'react';
-import DynamicFieldConfig from './components/DynamicFieldConfig';
+import { IconCopy } from '@arco-design/web-react/icon';
 import DynamicCarouselConfig from './components/DynamicCarouselConfig';
+import DynamicFieldConfig from './components/DynamicFieldConfig';
+import DynamicOptionsConfig from './components/DynamicOptionsConfig';
+import DynamicRadioConfig from './components/DynamicRadioConfig';
+import DynamicCheckboxConfig from './components/DynamicCheckboxConfig';
 import DynamicRelatedFormConfig from './components/DynamicRelatedFormConfig';
 import DynamicTableConfig from './components/DynamicTableConfig';
-import DynamicRadioConfig from './components/DynamicRadioConfig';
 import styles from './index.module.less';
 
+const Row = Grid.Row;
+const Col = Grid.Col;
 const FormItem = Form.Item;
+const Option = Select.Option;
 
 /**
  * 属性配置面板组件
@@ -19,6 +37,41 @@ const FormItem = Form.Item;
 interface ConfigsProps {
   cpID: string;
 }
+
+const securityOptions = [
+  {
+    label: '姓名',
+    value: 'name'
+  },
+  {
+    label: '手机号',
+    value: 'phone'
+  },
+  {
+    label: '邮箱',
+    value: 'email'
+  },
+  {
+    label: '金额',
+    value: 'money'
+  },
+  {
+    label: '身份证号',
+    value: 'id'
+  },
+  {
+    label: '住址',
+    value: 'address'
+  },
+  {
+    label: 'IP地址',
+    value: 'ip'
+  },
+  {
+    label: '车牌号',
+    value: 'car_id'
+  }
+];
 
 const Attributes = ({ cpID }: ConfigsProps) => {
   const { t } = useI18n();
@@ -121,7 +174,14 @@ const Attributes = ({ cpID }: ConfigsProps) => {
               span: 5
             }}
           >
-            <div className={styles.cpID}>{cpID}</div>
+            <Input
+              value={cpID}
+              suffix={
+                <Tooltip content="复制">
+                  <IconCopy style={{ cursor: 'pointer' }} />
+                </Tooltip>
+              }
+            />
           </FormItem>
 
           {editData.map((item: any, index: number) => {
@@ -131,22 +191,60 @@ const Attributes = ({ cpID }: ConfigsProps) => {
               item.type !== CONFIG_TYPES.FIELD_DATA &&
               item.type !== CONFIG_TYPES.RELATED_FORM_DATA &&
               item.type !== CONFIG_TYPES.RADIO_DATA &&
+              item.type !== CONFIG_TYPES.CHECKBOX_DATA &&
+              item.type !== CONFIG_TYPES.SELECT_OPTIONS_INPUT &&
               item.type !== CONFIG_TYPES.CAROUSEL
             ) {
               return (
-                <FormItem label={item.name} key={index} className={styles.formItem}>
+                <FormItem
+                  className={styles.formItem}
+                  label={
+                    <>
+                      {item.name}
+                      {item.type === CONFIG_TYPES.LABEL_INPUT && (
+                        <Checkbox
+                          checked={configs[item.key]['display']}
+                          style={{ float: 'right' }}
+                          onChange={(value) => {
+                            handlePropsChange(item.key, { ...configs[item.key], display: value });
+                          }}
+                        >
+                          显示标题
+                        </Checkbox>
+                      )}
+                      {item.type === CONFIG_TYPES.SECURITY && (
+                        <Checkbox
+                          checked={configs[item.key]['display']}
+                          style={{ float: 'right' }}
+                          onChange={(value) => {
+                            handlePropsChange(item.key, { ...configs[item.key], display: value });
+                          }}
+                        >
+                          掩码显示
+                        </Checkbox>
+                      )}
+                    </>
+                  }
+                  key={index}
+                >
                   {(item.type === CONFIG_TYPES.TEXT_INPUT ||
-                    item.type === CONFIG_TYPES.LABEL_INPUT ||
                     item.type === CONFIG_TYPES.TOOLTIP_INPUT ||
                     item.type === CONFIG_TYPES.PLACEHOLDER_INPUT ||
-                    item.type === CONFIG_TYPES.UPLOAD_SIZE ||
-                    item.type === CONFIG_TYPES.UPLOAD_LIMIT ||
                     item.type === CONFIG_TYPES.UPLOAD_COMPRESS) && (
                     <Input
                       placeholder={`请输入${item.name}`}
                       value={configs[item.key]}
                       onChange={(value) => {
                         handlePropsChange(item.key, value);
+                      }}
+                    />
+                  )}
+                  {item.type === CONFIG_TYPES.LABEL_INPUT && (
+                    <Input
+                      placeholder={`请输入${item.name}`}
+                      value={configs[item.key]['text']}
+                      onChange={(value) => {
+                        handlePropsChange(item.key, { ...configs[item.key], text: value });
                       }}
                     />
                   )}
@@ -157,10 +255,22 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                       max={200}
                       min={0}
                       onChange={(value) => {
+                        if (!value) return;
+                        handlePropsChange(item.key, value);
+                      }}
+                      suffix={item.type == CONFIG_TYPES.UPLOAD_SIZE ? 'MB' : ''}
+                    />
+                  )}
+
+                  {/* {item.type === CONFIG_TYPES.SUPPORT_FILE_TYPE && (
+                    <Input
+                      placeholder={`请输入支持文件格式，用英文逗号分隔`}
+                      value={configs[item.key]}
+                      onChange={(value) => {
                         handlePropsChange(item.key, value);
                       }}
                     />
-                  )}
+                  )} */}
                   {item.type === CONFIG_TYPES.DESCRIPTION_INPUT && (
                     <Input.TextArea
                       placeholder={`请输入${item.name}`}
@@ -172,7 +282,7 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                   )}
                   {item.type === CONFIG_TYPES.COLOR && (
                     <ColorPicker
-                      showText
+                      showText={!!configs[item.key]}
                       value={configs[item.key]}
                       onChange={(value) => {
                         handlePropsChange(item.key, value);
@@ -267,6 +377,7 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                       size="large"
                       value={configs[item.key]}
                       onChange={(value) => {
+                        if (!value) return;
                         handlePropsChange(item.key, value);
                       }}
                     />
@@ -282,6 +393,116 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                       }}
                       style={{ width: '100%' }}
                     />
+                  )}
+                  {item.type === CONFIG_TYPES.SECURITY && (
+                    <Select
+                      addBefore="掩码方式"
+                      defaultValue={configs[item.key]['type']}
+                      onChange={(value) => handlePropsChange(item.key, { ...configs[item.key], type: value })}
+                    >
+                      {securityOptions.map((option, index) => (
+                        <Option key={index} value={option.value}>
+                          {option.label}
+                        </Option>
+                      ))}
+                    </Select>
+                  )}
+                  {item.type === CONFIG_TYPES.VERIFY && (
+                    <Row>
+                      <Col flex="auto" style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+                        <Checkbox
+                          checked={configs[item.key]['required']}
+                          onChange={(value) => {
+                            handlePropsChange(item.key, { ...configs[item.key], required: value });
+                          }}
+                        >
+                          必填
+                        </Checkbox>
+                        {typeof configs[item.key]['noRepeat'] === 'boolean' && (
+                          <Checkbox
+                            checked={configs[item.key]['noRepeat']}
+                            onChange={(value) => {
+                              handlePropsChange(item.key, { ...configs[item.key], noRepeat: value });
+                            }}
+                          >
+                            不允许重复
+                          </Checkbox>
+                        )}
+                        {typeof configs[item.key]['min'] === 'number' && (
+                          <InputNumber
+                            defaultValue={0}
+                            value={configs[item.key]['min']}
+                            max={200}
+                            min={0}
+                            prefix="最小值"
+                            onChange={(value) => {
+                              if (!value) return;
+                              handlePropsChange(item.key, { ...configs[item.key], min: value });
+                            }}
+                          />
+                        )}
+                        {typeof configs[item.key]['max'] === 'number' && (
+                          <InputNumber
+                            value={configs[item.key]['max']}
+                            max={200}
+                            min={0}
+                            prefix="最大值"
+                            onChange={(value) => {
+                              if (!value) return;
+                              handlePropsChange(item.key, { ...configs[item.key], max: value });
+                            }}
+                          />
+                        )}
+                        {typeof configs[item.key]['maxChecked'] === 'number' && (
+                          <InputNumber
+                            value={configs[item.key]['maxChecked']}
+                            max={200}
+                            min={0}
+                            prefix="可选数量"
+                            onChange={(value) => {
+                              if (!value) return;
+                              handlePropsChange(item.key, { ...configs[item.key], maxChecked: value });
+                            }}
+                          />
+                        )}
+                        {typeof configs[item.key]['maxCount'] === 'number' && (
+                          <InputNumber
+                            value={configs[item.key]['maxCount']}
+                            max={200}
+                            min={-1}
+                            prefix="最大上传数量"
+                            onChange={(value) => {
+                              if (typeof value !== 'number') return;
+                              handlePropsChange(item.key, { ...configs[item.key], maxCount: value });
+                            }}
+                          />
+                        )}
+                        {typeof configs[item.key]['maxSize'] === 'number' && (
+                          <InputNumber
+                            value={configs[item.key]['maxSize']}
+                            max={200}
+                            min={0}
+                            prefix="最大图片大小（MB）"
+                            onChange={(value) => {
+                              if (!value) return;
+                              handlePropsChange(item.key, { ...configs[item.key], maxSize: value });
+                            }}
+                          />
+                        )}
+                        {typeof configs[item.key]['fileFormat'] === 'string' && (
+                          <Input
+                            value={configs[item.key]['fileFormat']}
+                            max={200}
+                            min={0}
+                            prefix="文件格式"
+                            onChange={(value) => {
+                              if (!value) return;
+                              handlePropsChange(item.key, { ...configs[item.key], fileFormat: value });
+                            }}
+                          />
+                        )}
+                      </Col>
+                    </Row>
                   )}
                 </FormItem>
               );
@@ -323,6 +544,31 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                   key={index}
                   id={cpID}
                   // handleMultiPropsChange={handleMultiPropsChange}
+                  handlePropsChange={handlePropsChange}
+                  item={item}
+                  configs={configs}
+                />
+              );
+            }
+
+            if (item.type === CONFIG_TYPES.CHECKBOX_DATA) {
+              return (
+                <DynamicCheckboxConfig
+                  key={index}
+                  id={cpID}
+                  // handleMultiPropsChange={handleMultiPropsChange}
+                  handlePropsChange={handlePropsChange}
+                  item={item}
+                  configs={configs}
+                />
+              );
+            }
+
+            if (item.type === CONFIG_TYPES.SELECT_OPTIONS_INPUT) {
+              return (
+                <DynamicOptionsConfig
+                  key={index}
+                  id={cpID}
                   handlePropsChange={handlePropsChange}
                   item={item}
                   configs={configs}

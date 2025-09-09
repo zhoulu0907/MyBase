@@ -1,9 +1,12 @@
 import { Form, InputNumber } from '@arco-design/web-react';
+import { nanoid } from 'nanoid';
 import { memo } from 'react';
+import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import type { XInputNumberConfig } from './schema';
+import '../index.css';
 
-const XInputNumber = memo((props: XInputNumberConfig) => {
+const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean }) => {
   const {
     label,
     placeholder,
@@ -11,20 +14,23 @@ const XInputNumber = memo((props: XInputNumberConfig) => {
     tooltip,
     status,
     defaultValue,
-    required,
+    verify,
     align,
-    min,
-    max,
     step,
     precision,
     layout,
-    labelColSpan = 0
+    labelColSpan = 0,
+    // description,
+    unit,
+    runtime = true
   } = props;
 
   return (
     <Form.Item
-      label={label}
-      field={dataField.length > 0 ? dataField[dataField.length - 1] : ''}
+      label={label.display && label.text}
+      field={
+        dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.INPUT_NUMBER}_${nanoid()}`
+      }
       layout={layout}
       tooltip={tooltip}
       labelCol={{
@@ -33,16 +39,18 @@ const XInputNumber = memo((props: XInputNumberConfig) => {
       wrapperCol={{ style: { flex: 1 } }}
       rules={[
         {
-          required,
+          required: verify?.required,
           type: 'number',
-          min,
-          max
+          min: verify.min,
+          max: verify.max
         }
       ]}
+      hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
       style={{
+        margin: 0,
+        padding: 6,
         opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,
-        pointerEvents: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset',
-        margin: '0px'
+        pointerEvents: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset'
       }}
     >
       <InputNumber
@@ -50,13 +58,14 @@ const XInputNumber = memo((props: XInputNumberConfig) => {
         defaultValue={defaultValue}
         placeholder={placeholder}
         step={step}
-        min={min}
-        max={max}
+        min={verify.min}
+        max={verify.max}
         precision={precision}
         style={{
           width: '100%',
           textAlignLast: align
         }}
+        suffix={unit}
       />
     </Form.Item>
   );
