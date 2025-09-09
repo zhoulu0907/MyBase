@@ -3,6 +3,7 @@ import {
   baseDefault,
   labelColSpanConfig,
   layoutConfig,
+  listTypeConfig,
   statusConfig,
   widthConfig,
   type ICommonBaseType,
@@ -194,6 +195,7 @@ const XFileUpload: XInputFileUploadSchema = {
       name: '校验',
       type: CONFIG_TYPES.VERIFY
     },
+    listTypeConfig,
     statusConfig,
     widthConfig,
   ],

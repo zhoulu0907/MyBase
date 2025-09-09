@@ -39,38 +39,40 @@ const XInputPhone = memo((props: XInputPhoneConfig & { runtime?: boolean }) => {
   }, [value]);
 
   return (
-    <Form.Item
-      label={label.display && label.text}
-      field={dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.INPUT_PHONE}_${nanoid()}`}
-      layout={layout}
-      tooltip={tooltip}
-      labelCol={{
-        style: { width: labelColSpan, flex: 'unset' }
-      }}
-      wrapperCol={{ style: { flex: 1 } }}
-      rules={[{ required: verify?.required }]}
-      hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
-      style={{
-        margin: 0,
-        padding: 6,
-        opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,
-        pointerEvents: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset'
-      }}
-    >
-      <Input
-        status={InputStatus}
-        readOnly={status === STATUS_VALUES[STATUS_OPTIONS.READONLY]}
-        defaultValue={defaultValue}
-        style={{
-          width: '100%',
-          color,
-          textAlign: align,
-          backgroundColor: bgColor
+    <div className='formWrapper'>
+      <Form.Item
+        label={label.display && label.text}
+        field={dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.INPUT_PHONE}_${nanoid()}`}
+        layout={layout}
+        tooltip={tooltip}
+        labelCol={{
+          style: { width: labelColSpan, flex: 'unset' }
         }}
-        placeholder={placeholder}
-        onChange={setValue}
-      />
-    </Form.Item>
+        wrapperCol={{ style: { flex: 1 } }}
+        rules={[{ required: verify?.required }]}
+        hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
+        style={{
+          margin: 0,
+          opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,
+          pointerEvents: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset'
+        }}
+      >
+        <Input
+          status={InputStatus}
+          readOnly={status === STATUS_VALUES[STATUS_OPTIONS.READONLY]}
+          defaultValue={defaultValue}
+          style={{
+            width: '100%',
+            color,
+            textAlign: align,
+            backgroundColor: bgColor
+          }}
+          placeholder={placeholder}
+          onChange={setValue}
+        />
+      </Form.Item>
+      <div className='description showEllipsis' style={{marginLeft: labelColSpan}}>{description}</div>
+    </div>
   );
 });
 
