@@ -226,7 +226,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
                   cpId={cp.id}
                   cpType={cp.type}
                   pageComponentSchema={formPageComponentSchemas.value[cp.id]}
-                  runtime={true}
+                  runtime={runtime}
                   toCreatePage={() => {
                     setPageType(EDITOR_TYPES.FORM_EDITOR);
                   }}

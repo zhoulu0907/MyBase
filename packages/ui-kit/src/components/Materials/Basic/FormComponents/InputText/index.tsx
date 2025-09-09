@@ -57,7 +57,7 @@ const XInputText = memo((props: XInputTextConfig & { runtime?: boolean }) => {
           }}
         />
       </Form.Item>
-      <div className='description showEllipsis' style={{marginLeft: labelColSpan}}>{description}</div>
+      <div className='description showEllipsis' style={{ marginLeft: labelColSpan }}>{description}</div>
     </div>
   );
 });

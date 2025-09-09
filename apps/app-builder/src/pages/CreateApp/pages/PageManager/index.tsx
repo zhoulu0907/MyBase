@@ -477,7 +477,7 @@ const PageManagerPage: FC = () => {
                           </Button>
                         </div>
                         <div className={styles.contentBody}>
-                          <PreviewContainer menuId={curMenu?.id} runtime={false} />
+                          <PreviewContainer menuId={curMenu?.id} runtime={true} />
                         </div>
                       </>
                     )}

@@ -42,8 +42,8 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean }) =>
           {
             required: verify?.required,
             type: 'number',
-            min: verify.min,
-            max: verify.max
+            min: verify?.min,
+            max: verify?.max
           }
         ]}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
@@ -58,8 +58,8 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean }) =>
           defaultValue={defaultValue}
           placeholder={placeholder}
           step={step}
-          min={verify.min}
-          max={verify.max}
+          min={verify?.min}
+          max={verify?.max}
           precision={precision}
           style={{
             width: '100%',
@@ -68,7 +68,7 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean }) =>
           suffix={unit}
         />
       </Form.Item>
-      <div className='description showEllipsis' style={{marginLeft: labelColSpan}}>{description}</div>
+      <div className='description showEllipsis' style={{ marginLeft: labelColSpan }}>{description}</div>
     </div>
   );
 });
