@@ -19,11 +19,11 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean }) =
 
     const progressAdapter = onProgress
       ? (progressEvent: ProgressEvent) => {
-          if (progressEvent.lengthComputable) {
-            const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-            onProgress(percent, progressEvent);
-          }
+        if (progressEvent.lengthComputable) {
+          const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          onProgress(percent, progressEvent);
         }
+      }
       : undefined;
 
     const res = await uploadFile(formData, progressAdapter);
@@ -51,11 +51,11 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean }) =
       >
         <Upload
           imagePreview
-          limit={verify.maxCount === -1 ? undefined : verify.maxCount}
+          limit={verify?.maxCount === -1 ? undefined : verify?.maxCount}
           accept="image/*"
           listType={listType}
           beforeUpload={async (file) => {
-            const fileSizeLimit = verify.maxSize * 1024; // 转换为kb;
+            const fileSizeLimit = verify?.maxSize * 1024; // 转换为kb;
             const fileSize = file.size / 1024;
 
             if (fileSize > fileSizeLimit) {
@@ -98,7 +98,7 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean }) =
           )}
         </Upload>
       </Form.Item>
-      <div className='description showEllipsis' style={{marginLeft: labelColSpan}}>{description}</div>
+      <div className='description showEllipsis' style={{ marginLeft: labelColSpan }}>{description}</div>
     </div>
   );
 });

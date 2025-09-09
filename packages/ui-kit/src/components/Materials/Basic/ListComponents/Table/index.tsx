@@ -237,31 +237,33 @@ const XTable = memo((props: XTableConfig & { runtime?: boolean; toCreatePage?: F
           layout={'vertical'}
           style={{
             width: '100%',
+            maxWidth: runtime ? '100%' : `calc(100vw - ${componentMaxWidth}px)`,
             pointerEvents: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset'
           }}
         >
-          <div style={{ width: '100%', maxWidth: runtime ? '100%' : `calc(100vw - ${componentMaxWidth}px)` }}>            <Table
-            scroll={{
-              x: 'max-content'
-            }}
-            border={border}
-            borderCell={borderCell}
-            showHeader={showHeader}
-            stripe={stripe}
-            hover={hover}
-            columns={finalColumns}
-            data={tableData}
-            pagePosition={pagePosition}
-            pagination={{
-              pageSize,
-              showTotal,
-              current: tablePageNo,
-              total: tableTotal,
-              onChange: (pageNo: number) => {
-                setTablePageNo(pageNo);
-              }
-            }}
-          />
+          <div style={{ width: '100%' }}>
+            <Table
+              scroll={{
+                x: 'max-content'
+              }}
+              border={border}
+              borderCell={borderCell}
+              showHeader={showHeader}
+              stripe={stripe}
+              hover={hover}
+              columns={finalColumns}
+              data={tableData}
+              pagePosition={pagePosition}
+              pagination={{
+                pageSize,
+                showTotal,
+                current: tablePageNo,
+                total: tableTotal,
+                onChange: (pageNo: number) => {
+                  setTablePageNo(pageNo);
+                }
+              }}
+            />
           </div>
         </Form.Item>
       </div>

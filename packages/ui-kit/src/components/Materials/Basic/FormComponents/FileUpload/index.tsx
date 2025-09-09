@@ -29,11 +29,11 @@ const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean })
 
     const progressAdapter = onProgress
       ? (progressEvent: ProgressEvent) => {
-          if (progressEvent.lengthComputable) {
-            const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-            onProgress(percent, progressEvent);
-          }
+        if (progressEvent.lengthComputable) {
+          const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          onProgress(percent, progressEvent);
         }
+      }
       : undefined;
 
     const res = await uploadFile(formData, progressAdapter);
@@ -57,13 +57,13 @@ const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean })
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,
           pointerEvents: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset'
         }}
-        >
+      >
         <Upload
-          limit={verify.maxCount === -1 ? undefined : verify.maxCount}
-          accept={verify.fileFormat}
+          limit={verify?.maxCount === -1 ? undefined : verify?.maxCount}
+          accept={verify?.fileFormat}
           listType={listType}
           beforeUpload={async (file) => {
-            const fileSizeLimit = verify.maxSize * 1024; // 转换为kb;
+            const fileSizeLimit = verify?.maxSize * 1024; // 转换为kb;
             const fileSize = file.size / 1024;
 
             if (fileSize > fileSizeLimit) {
@@ -100,13 +100,13 @@ const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean })
               <div className="arco-upload-trigger-picture-text">
                 <IconPlus />
                 <div style={{ marginTop: 10, fontWeight: 600, fontSize: '11px' }}>点击或拖动文件到框内上传</div>
-                <div style={{ marginTop: 5, fontWeight: 600, fontSize: '11px' }}>文件大小不超过{verify.maxSize}MB</div>
+                <div style={{ marginTop: 5, fontWeight: 600, fontSize: '11px' }}>文件大小不超过{verify?.maxSize}MB</div>
               </div>
             </div>
           )}
         </Upload>
       </Form.Item>
-      <div className='description showEllipsis' style={{marginLeft: labelColSpan}}>{description}</div>
+      <div className='description showEllipsis' style={{ marginLeft: labelColSpan }}>{description}</div>
     </div>
   );
 });

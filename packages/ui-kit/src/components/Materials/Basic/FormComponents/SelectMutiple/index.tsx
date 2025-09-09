@@ -17,7 +17,7 @@ const XSelectMutiple = memo((props: XInputSelectMutipleConfig & { runtime?: bool
           style: { width: labelColSpan, flex: 'unset' }
         }}
         wrapperCol={{ style: { flex: 1 } }}
-        rules={[{ required: verify?.required }, { maxLength: verify.maxChecked }]}
+        rules={[{ required: verify?.required }, { maxLength: verify?.maxChecked }]}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{
           margin: 0,
@@ -34,7 +34,7 @@ const XSelectMutiple = memo((props: XInputSelectMutipleConfig & { runtime?: bool
           options={defaultValue}
         />
       </Form.Item>
-      <div className='description showEllipsis' style={{marginLeft: labelColSpan}}>{description}</div>
+      <div className='description showEllipsis' style={{ marginLeft: labelColSpan }}>{description}</div>
     </div>
   );
 });
