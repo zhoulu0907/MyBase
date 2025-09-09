@@ -15,6 +15,11 @@ import { ENTITY_FIELD_TYPE_LABEL } from '../../../../DataFactory/const';
 import './index.css';
 import type { XTableConfig } from './schema';
 
+const leftPanelWidth = 343;
+const rightPanelWidth = 310;
+const canvasPaddingWidth = 40 + 32 + 10;
+const canvasMarginWidth = 10;
+const componentMaxWidth = leftPanelWidth + rightPanelWidth + canvasPaddingWidth + canvasMarginWidth;
 const XTable = memo((props: XTableConfig & { runtime?: boolean; toCreatePage?: Function }) => {
   const { runtime = true, toCreatePage } = props;
 
@@ -235,7 +240,7 @@ const XTable = memo((props: XTableConfig & { runtime?: boolean; toCreatePage?: F
             pointerEvents: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset'
           }}
         >
-          <Table
+          <div style={{ width: '100%', maxWidth: runtime ? '100%' : `calc(100vw - ${componentMaxWidth}px)` }}>            <Table
             scroll={{
               x: 'max-content'
             }}
@@ -257,6 +262,7 @@ const XTable = memo((props: XTableConfig & { runtime?: boolean; toCreatePage?: F
               }
             }}
           />
+          </div>
         </Form.Item>
       </div>
     </div>

@@ -19,31 +19,33 @@ const XRadio = memo((props: XInputRadioConfig & { runtime?: boolean }) => {
     layout,
     labelColSpan = 0,
     direction,
-    // description,
+    description,
     runtime = true
   } = props;
 
   return (
-    <Form.Item
-      label={label.display && label.text}
-      field={dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.RADIO}_${nanoid()}`}
-      layout={layout}
-      tooltip={tooltip}
-      labelCol={{
-        style: { width: labelColSpan, flex: 'unset' }
-      }}
-      wrapperCol={{ style: { flex: 1 } }}
-      rules={[{ required: verify?.required }]}
-      hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
-      style={{
-        margin: 0,
-        padding: 6,
-        opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,
-        pointerEvents: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset'
-      }}
-    >
-      <RadioGroup direction={direction} options={defaultValue} defaultValue={defaultValue?.find(op => op.chosen)?.value} />
-    </Form.Item>
+    <div className='formWrapper'>
+      <Form.Item
+        label={label.display && label.text}
+        field={dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.RADIO}_${nanoid()}`}
+        layout={layout}
+        tooltip={tooltip}
+        labelCol={{
+          style: { width: labelColSpan, flex: 'unset' }
+        }}
+        wrapperCol={{ style: { flex: 1 } }}
+        rules={[{ required: verify?.required }]}
+        hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
+        style={{
+          margin: 0,
+          opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,
+          pointerEvents: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset'
+        }}
+      >
+        <RadioGroup direction={direction} options={defaultValue} defaultValue={defaultValue?.find(op => op.chosen)?.value} />
+      </Form.Item>
+      <div className='description showEllipsis' style={{marginLeft: labelColSpan}}>{description}</div>
+    </div>
   );
 });
 
