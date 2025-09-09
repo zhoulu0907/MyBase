@@ -2,14 +2,16 @@ import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-e
 
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { Checkbox, Form, Input, Select, Switch } from '@arco-design/web-react';
-import type { Condition } from '@onebase/app';
+import type { ComponentConfig, Condition } from '@onebase/app';
 import {
   getComponentListByPageId,
   getFieldCheckTypeApi,
-  type ComponentConfig,
+  getFlowMgmt,
+  getPageListByAppId,
   type ConfitionField,
   type EntityFieldValidationTypes
 } from '@onebase/app';
+import { getHashQueryParam } from '@onebase/common';
 import { useEffect, useState } from 'react';
 import ConditionEditor from '../../components/condition-editor';
 import { FormContent, FormHeader, FormOutputs } from '../../form-components';
@@ -17,12 +19,14 @@ import { useIsSidebar, useNodeRenderContext } from '../../hooks';
 import { type FlowNodeJSON } from '../../typings';
 
 const CheckboxGroup = Checkbox.Group;
+const Option = Select.Option;
 
 export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const isSidebar = useIsSidebar();
   const { node } = useNodeRenderContext();
 
-  const { pageId } = triggerEditorSignal;
+  const [pageList, setPageList] = useState<any[]>();
+
   const [conditionFields, setConditionFields] = useState<ConfitionField[]>([]);
   const [validationTypes, setValidationTypes] = useState<EntityFieldValidationTypes[]>([]);
 
@@ -35,10 +39,32 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const triggerUserType = Form.useWatch('triggerUserType', payloadForm);
 
   useEffect(() => {
-    if (pageId.value) {
-      handleGetComponentList(pageId.value);
+    const appId = getHashQueryParam('appId');
+    if (appId) {
+      handleGetPageList(appId);
     }
-  }, [pageId]);
+
+    const flowId = getHashQueryParam('flowId');
+    if (flowId) {
+      handleGetFlowInfo(flowId);
+    }
+  }, []);
+
+  const handleGetFlowInfo = async (flowId: string) => {
+    const res = await getFlowMgmt(flowId);
+    console.log('res: ', res);
+    if (res && res.triggerConfig && res.triggerConfig.pageId) {
+      console.log('pageId: ', res.triggerConfig.pageId);
+      payloadForm.setFieldsValue({ pageId: res.triggerConfig.pageId });
+      handleGetComponentList(res.triggerConfig.pageId);
+    }
+  };
+
+  const handleGetPageList = async (appId: string) => {
+    const res = await getPageListByAppId({ appId });
+    console.log('res: ', res);
+    setPageList(res.pages);
+  };
 
   const handleGetComponentList = async (id: string) => {
     const res = await getComponentListByPageId({ pageId: id });
@@ -92,6 +118,15 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             <Form.Item label="节点ID" field="id" initialValue={node.id}>
               <Input disabled />
             </Form.Item>
+            <Form.Item label="表单" field="pageId">
+              <Select disabled>
+                {pageList?.map((item) => (
+                  <Option key={item.id} value={item.id}>
+                    {item.pageName}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
             <Form.Item label="过滤条件" field="filterCondition" layout="vertical">
               {validationTypes && (
                 <ConditionEditor
@@ -102,11 +137,9 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                 />
               )}
             </Form.Item>
-
             <Form.Item label="关联子表触发" field="isChildTriggerAllowed" layout="vertical" triggerPropName="checked">
               <Switch />
             </Form.Item>
-
             <Form.Item label="触发人" field="triggerUserType" layout="vertical">
               <Select
                 options={[
@@ -116,13 +149,11 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                 ]}
               />
             </Form.Item>
-
             {triggerUserType === 'specific' && (
               <Form.Item label="指定触发人" field="triggerUserValue" layout="vertical">
                 <Select />
               </Form.Item>
             )}
-
             <Form.Item label="触发事件" field="triggerEvents" layout="vertical">
               <CheckboxGroup direction="vertical" options={['记录创建', '记录修改', '记录删除']} />
             </Form.Item>

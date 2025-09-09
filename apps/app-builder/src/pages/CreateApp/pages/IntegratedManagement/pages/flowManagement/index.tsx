@@ -65,7 +65,7 @@ const FlowManagementPage: React.FC = () => {
   const [pageList, setPageList] = useState<any[]>();
 
   useEffect(() => {
-    curAppId && handlegetPageList();
+    curAppId && handleGetPageList();
   }, [curAppId]);
 
   useEffect(() => {
@@ -101,7 +101,7 @@ const FlowManagementPage: React.FC = () => {
     navigate(`/onebase/create-app/integrated-management/flow-editor?appId=${appId}&flowId=${flowId}`);
   };
 
-  const handlegetPageList = async () => {
+  const handleGetPageList = async () => {
     const res = await getPageListByAppId({ appId: curAppId });
     console.log('res: ', res);
     setPageList(res.pages);
