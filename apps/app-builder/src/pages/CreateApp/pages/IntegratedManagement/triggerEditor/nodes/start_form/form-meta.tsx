@@ -55,7 +55,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     console.log('res: ', res);
     if (res && res.triggerConfig && res.triggerConfig.pageId) {
       console.log('pageId: ', res.triggerConfig.pageId);
-      payloadForm.setFieldsValue({ pageId: res.triggerConfig.pageId });
+      payloadForm.setFieldValue('pageId', res.triggerConfig.pageId);
       handleGetComponentList(res.triggerConfig.pageId);
     }
   };
@@ -101,7 +101,11 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   };
 
   const onConditionChange = (conditions: Condition[]) => {
-    // console.log(conditions);
+    console.log(conditions);
+    handlePropsOnChange({
+      ...triggerEditorSignal.nodeData.value[node.id],
+      filterConditions: conditions
+    });
   };
 
   return (
