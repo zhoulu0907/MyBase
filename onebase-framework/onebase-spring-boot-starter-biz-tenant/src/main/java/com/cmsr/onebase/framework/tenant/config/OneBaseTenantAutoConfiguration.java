@@ -1,6 +1,7 @@
 package com.cmsr.onebase.framework.tenant.config;
 
 import cn.hutool.extra.spring.SpringUtil;
+import com.cmsr.onebase.framework.common.biz.system.license.LicenseCommonApi;
 import com.cmsr.onebase.framework.common.biz.system.tenant.TenantCommonApi;
 import com.cmsr.onebase.framework.common.enums.WebFilterOrderEnum;
 import com.cmsr.onebase.framework.redis.config.OneBaseCacheProperties;
@@ -29,6 +30,7 @@ import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.cache.RedisCacheWriter;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -108,8 +110,10 @@ public class OneBaseTenantAutoConfiguration {
 
     @Bean
     public TenantVisitContextInterceptor tenantVisitContextInterceptor(TenantProperties tenantProperties,
-                                                                       SecurityFrameworkService securityFrameworkService) {
-        return new TenantVisitContextInterceptor(tenantProperties, securityFrameworkService);
+                                                                       SecurityFrameworkService securityFrameworkService,
+                                                                       LicenseCommonApi licenseCommonApi,
+                                                                       StringRedisTemplate stringRedisTemplate) {
+        return new TenantVisitContextInterceptor(tenantProperties, securityFrameworkService, licenseCommonApi, stringRedisTemplate);
     }
 
     @Bean
