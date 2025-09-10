@@ -14,7 +14,8 @@ const FlowEditorPage: React.FC = () => {
 
   const handleSave = async () => {
     const processDefinitionJson = nodes.value.map((item) => {
-      return { ...item, data: nodeData.value[item.id] };
+      const data = {...item.data, ...nodeData.value[item.id]}
+      return { ...item, data };
     });
     console.log('processDefinition', processDefinitionJson);
     const params = {
