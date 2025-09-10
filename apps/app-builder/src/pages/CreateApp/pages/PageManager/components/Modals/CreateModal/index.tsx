@@ -2,7 +2,7 @@ import iconEditSVG from '@/assets/images/app_edit_black.svg';
 import MenuComp from '@/components/MenuIcon';
 import { Form, Input, Modal, Select, TreeSelect, Button, type FormInstance } from '@arco-design/web-react';
 import React, { useEffect, useState } from 'react';
-import {RootParentPage} from '@onebase/app';
+import { RootParentPage } from '@onebase/app';
 import styles from './index.module.less';
 
 interface CreateModalProps {
@@ -35,7 +35,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
     if (menuIcon) {
       form.setFieldValue('menuIcon', menuIcon);
     } else {
-      form.setFieldValue('menuIcon', visibleCreateForm === 'page' ? 'icon-13' : 'icon-folder');
+      form.setFieldValue('menuIcon', visibleCreateForm === 'page' ? 'icon-yemian' : 'icon-wenjianjia_seo-folder');
     }
   }, [menuIcon, visibleCreateForm]);
 
@@ -119,7 +119,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
                   <i className={`iconfont ${menuIcon}`} style={{ fontSize: 16 }} />
                 ) : (
                   <i
-                    className={`iconfont ${visibleCreateForm === 'page' ? 'icon-13' : 'icon-folder'}`}
+                    className={`iconfont ${visibleCreateForm === 'page' ? 'icon-yemian' : 'icon-wenjianjia_seo-folder'}`}
                     style={{ fontSize: 16 }}
                   />
                 )}

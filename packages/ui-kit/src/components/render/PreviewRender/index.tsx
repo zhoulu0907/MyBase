@@ -82,10 +82,12 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({ cpId, cpType, pageCompone
         return <FormComp.XRichText cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case FORM_COMPONENT_TYPES.CAROUSEL_F:
         return <FormComp.XCarousel cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+      case FORM_COMPONENT_TYPES.CHILDREN_TABLE:
+        return <FormComp.XChildrenTable cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
 
       //  布局组件
       case LAYOUT_COMPONENT_TYPES.COLUMN_LAYOUT:
-        return <LayoutComp.XPreviewColumnLayout {...componentConfig} cpName={cpId} id={cpId} />;
+        return <LayoutComp.XPreviewColumnLayout {...componentConfig} cpName={cpId} id={cpId} runtime={runtime} />;
 
       //  列表组件
       case LIST_COMPONENT_TYPES.TABLE:

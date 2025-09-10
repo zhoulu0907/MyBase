@@ -29,7 +29,6 @@ import type {
   IBooleanConfigType,
   IColorConfigType,
   IDataFieldConfigType,
-  IDescriptionConfigType,
   ILabelConfigType,
   ILayoutConfigType,
   INumberConfigType,
@@ -58,7 +57,6 @@ export type TXInputTextAreaEditData = Array<
   | ITextConfigType
   | ILabelConfigType
   | IPlaceholderConfigType
-  | IDescriptionConfigType
   | ITooltipConfigType
   | IStatusConfigType<TStatusSelectKeyType>
   | IWidthConfigType<TWidthSelectKeyType>
@@ -97,14 +95,9 @@ export interface XInputTextAreaConfig extends ICommonBaseType {
   placeholder: TTextDefaultType;
 
   /**
-   * 描述信息（显示在输入框下方，辅助说明）
+   * 描述信息（鼠标悬浮时显示）
    */
-  description: TTextAreaDefaultType;
-
-  /**
-   * 提示文字（鼠标悬浮时显示）
-   */
-  tooltip?: TTextDefaultType;
+  tooltip?: TTextAreaDefaultType;
 
   /**
    * 组件状态：可用、隐藏、只读
@@ -210,14 +203,14 @@ const XInputTextArea: XInputTextAreaSchema = {
       type: CONFIG_TYPES.PLACEHOLDER_INPUT
     },
     {
-      key: 'description',
+      key: 'tooltip',
       name: '描述信息',
-      type: CONFIG_TYPES.DESCRIPTION_INPUT
+      type: CONFIG_TYPES.TOOLTIP_INPUT
     },
     {
-      key: 'tooltip',
-      name: '提示文字',
-      type: CONFIG_TYPES.TOOLTIP_INPUT
+      key: 'defaultValue',
+      name: '默认值',
+      type: CONFIG_TYPES.TEXT_INPUT
     },
     {
       key: 'minLength',
@@ -278,7 +271,6 @@ const XInputTextArea: XInputTextAreaSchema = {
     },
     dataField: [],
     placeholder: '请输入文字',
-    description: '',
     tooltip: '',
     labelColSpan: 100,
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],

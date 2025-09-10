@@ -103,5 +103,6 @@ export const ICON_Map_By_Type: Record<string, React.ReactNode> = {
   'canvas_list_cp.svg': <img src={CanvasListIcon} />,
   XFCarousel: <img src={CalendarIcon} />,
   XRelatedForm: <img src={RelatedFormIcon} />,
-  XRichText: <img src={RichTextIcon} />
+  XRichText: <img src={RichTextIcon} />,
+  XChildrenTable: <img src={RichTextIcon} />
 };

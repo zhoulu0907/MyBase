@@ -26,7 +26,6 @@ const XInputTextArea = memo((props: XInputTextAreaConfig & { runtime?: boolean }
     maxLength = 0,
     minRows,
     maxRows,
-    description,
     runtime = true
   } = props;
   return (
@@ -58,30 +57,31 @@ const XInputTextArea = memo((props: XInputTextAreaConfig & { runtime?: boolean }
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{
           margin: 0,
-          opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,
-          pointerEvents: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset'
+          opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
       >
-        <TextArea
-          readOnly={status === STATUS_VALUES[STATUS_OPTIONS.READONLY]}
-          defaultValue={defaultValue}
-          placeholder={placeholder}
-          maxLength={maxLength}
-          allowClear
-          autoSize={{
-            minRows,
-            maxRows
-          }}
-          showWordLimit
-          style={{
-            width: '100%',
-            color,
-            textAlign: align,
-            backgroundColor: bgColor
-          }}
-        />
-    </Form.Item>
-      <div className='description showEllipsis' style={{marginLeft: labelColSpan}}>{description}</div>
+        {
+          status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? <div>{defaultValue || '--'}</div> :
+            <TextArea
+              defaultValue={defaultValue}
+              placeholder={placeholder}
+              maxLength={maxLength}
+              allowClear
+              autoSize={{
+                minRows,
+                maxRows
+              }}
+              showWordLimit
+              style={{
+                width: '100%',
+                color,
+                textAlign: align,
+                backgroundColor: bgColor,
+                pointerEvents: runtime ? 'unset' : 'none'
+              }}
+            />
+        }
+      </Form.Item>
     </div>
   );
 });

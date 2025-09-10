@@ -17,8 +17,7 @@ const XCarousel = memo((props: XCarouselConfig & { runtime?: boolean }) => {
     interval = 3,
     fillStyle,
     carouselConfig = [],
-    runtime,
-    description
+    runtime
   } = props;
 
   return (
@@ -35,8 +34,7 @@ const XCarousel = memo((props: XCarouselConfig & { runtime?: boolean }) => {
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{
           margin: 0,
-          opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,
-          pointerEvents: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset'
+          opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
       >
         <Carousel
@@ -47,7 +45,7 @@ const XCarousel = memo((props: XCarouselConfig & { runtime?: boolean }) => {
             }
           }
           style={{
-            opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1
+            pointerEvents: runtime ? 'unset' : 'none'
           }}
         >
           {carouselConfig.map((img, index) => (
@@ -58,7 +56,6 @@ const XCarousel = memo((props: XCarouselConfig & { runtime?: boolean }) => {
           ))}
         </Carousel>
       </Form.Item>
-      <div className='description showEllipsis' style={{marginLeft: labelColSpan}}>{description}</div>
     </div>
   );
 });

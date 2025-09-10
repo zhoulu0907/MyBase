@@ -17,7 +17,6 @@ const XautoCode = memo((props: XautoCodeConfig & { runtime?: boolean }) => {
     color,
     bgColor,
     labelColSpan = 0,
-    description,
     runtime = true
   } = props;
 
@@ -35,22 +34,25 @@ const XautoCode = memo((props: XautoCodeConfig & { runtime?: boolean }) => {
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{
           margin: 0,
-          opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1
+          opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
       >
-        <Input
-          readOnly={true}
-          defaultValue={defaultValue}
-          placeholder={placeholder}
-          style={{
-            width: '100%',
-            color,
-            textAlign: align,
-            backgroundColor: bgColor
-          }}
-        />
+        {
+          status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? <div>{defaultValue || '--'}</div> :
+            <Input
+              readOnly={true}
+              defaultValue={defaultValue}
+              placeholder={placeholder}
+              style={{
+                width: '100%',
+                color,
+                textAlign: align,
+                backgroundColor: bgColor,
+                pointerEvents: runtime ? 'unset' : 'none'
+              }}
+            />
+        }
       </Form.Item>
-      <div className='description showEllipsis' style={{marginLeft: labelColSpan}}>{description}</div>
     </div>
   );
 });

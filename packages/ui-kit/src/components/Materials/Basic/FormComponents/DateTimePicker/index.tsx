@@ -7,7 +7,7 @@ import type { XInputDateTimePickerConfig } from './schema';
 import '../index.css';
 
 const XDateTimePicker = memo((props: XInputDateTimePickerConfig & { runtime?: boolean }) => {
-  const { label, dataField, tooltip, status, defaultValue, verify, layout, labelColSpan = 0, runtime = true, description } = props;
+  const { label, dataField, tooltip, status, defaultValue, verify, layout, labelColSpan = 0, runtime = true } = props;
 
   return (
     <div className='formWrapper'>
@@ -24,13 +24,17 @@ const XDateTimePicker = memo((props: XInputDateTimePickerConfig & { runtime?: bo
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{
           margin: 0,
-          opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,
-          pointerEvents: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset'
+          opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
       >
-        <DatePicker showTime defaultValue={defaultValue} style={{ width: '100%' }} />
-      </Form.Item>
-      <div className='description showEllipsis' style={{marginLeft: labelColSpan}}>{description}</div>
+        {
+          status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? <div>{defaultValue || '--'}</div> :
+            <DatePicker showTime defaultValue={defaultValue} style={{
+              width: '100%',
+              pointerEvents: runtime ? 'unset' : 'none'
+            }} />
+        }
+      </Form.Item>11
     </div>
   );
 });

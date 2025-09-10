@@ -28,7 +28,8 @@ export const FORM_COMPONENT_TYPES = {
   STATIC_TEXT: 'XStaticText',
   DIVIDER: 'XDivider',
   RICH_TEXT: 'XRichText',
-  CAROUSEL_F: 'XFCarousel'
+  CAROUSEL_F: 'XFCarousel',
+  CHILDREN_TABLE: 'XChildrenTable'
 } as const;
 
 // 布局组件类型
