@@ -1,6 +1,7 @@
 import {
   baseConfig,
   baseDefault,
+  dataFieldConfig,
   labelColSpanConfig,
   layoutConfig,
   listTypeConfig,
@@ -44,7 +45,8 @@ import type {
   TSelectDefaultType,
   TTextAreaDefaultType,
   TTextDefaultType,
-  IVerifyConfigType
+  IVerifyConfigType,
+  IDataFieldConfigType
 } from '../../../types';
 
 export interface XInputFileUploadSchema {
@@ -70,6 +72,7 @@ export type TXInputFileUploadEditData = Array<
   | IStatusConfigType<TUploadSelectKeyType>
   | ILayoutConfigType<TLayoutSelectKeyType>
   | IVerifyConfigType
+  | IDataFieldConfigType
 >;
 
 export interface XInputFileUploadConfig extends ICommonBaseType {
@@ -82,6 +85,11 @@ export interface XInputFileUploadConfig extends ICommonBaseType {
     text: TTextDefaultType;
     display: TBooleanDefaultType;
   };
+
+  /**
+   * 数据字段
+   */
+  dataField: TTextDefaultType[];
 
   /**
    * 描述信息（显示在输入框下方，辅助说明）
@@ -109,12 +117,12 @@ export interface XInputFileUploadConfig extends ICommonBaseType {
    */
   width: TSelectDefaultType<TWidthSelectKeyType>;
 
- /**
-   * required：是否必填，未填写时提交报错
-   * maxCount：最大上传数量，默认：-1 不限制
-   * maxSize：最大图片大小单位：MB，默认：10，最大100
-   * fileFormat：支持的文件类型，多个类型用逗号分隔，默认不限制
-   */
+  /**
+    * required：是否必填，未填写时提交报错
+    * maxCount：最大上传数量，默认：-1 不限制
+    * maxSize：最大图片大小单位：MB，默认：10，最大100
+    * fileFormat：支持的文件类型，多个类型用逗号分隔，默认不限制
+    */
   verify: {
     required: TBooleanDefaultType;
     maxCount: TNumberDefaultType;
@@ -163,6 +171,7 @@ const XFileUpload: XInputFileUploadSchema = {
       name: '标题',
       type: CONFIG_TYPES.LABEL_INPUT
     },
+    ...dataFieldConfig,
     {
       key: 'description',
       name: '描述信息',
@@ -205,6 +214,7 @@ const XFileUpload: XInputFileUploadSchema = {
       text: '文件上传',
       display: true,
     },
+    dataField: [],
     description: '',
     tooltip: '',
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],

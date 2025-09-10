@@ -4,7 +4,7 @@ import { uploadFile } from '@onebase/platform-center';
 import { nanoid } from 'nanoid';
 import { memo, useState } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
-import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
+import { STATUS_OPTIONS, STATUS_VALUES, LAYOUT_VALUES, LAYOUT_OPTIONS } from '../../../constants';
 import type { XInputImgUploadConfig } from './schema';
 import '../index.css';
 
@@ -98,7 +98,7 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean }) =
           )}
         </Upload>
       </Form.Item>
-      <div className='description showEllipsis' style={{ marginLeft: labelColSpan }}>{description}</div>
+      <div className='description showEllipsis' style={{ marginLeft: layout === LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL] && label.display ? labelColSpan : 0 }}>{description}</div>
     </div>
   );
 });
