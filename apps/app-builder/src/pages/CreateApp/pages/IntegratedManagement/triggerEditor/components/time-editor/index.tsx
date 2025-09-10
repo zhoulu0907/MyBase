@@ -95,7 +95,7 @@ const TimeEditor: React.FC<TimeEditorProps> = ({}) => {
                     <Select
                       options={weeklyOptions}
                       mode="multiple"
-                      maxTagCount={2}
+                      maxTagCount={1}
                       style={{ width: '135px' }}
                       placeholder="请选择日期"
                     />
