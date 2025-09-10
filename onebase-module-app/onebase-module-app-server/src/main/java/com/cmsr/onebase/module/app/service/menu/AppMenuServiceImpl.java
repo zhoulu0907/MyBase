@@ -60,7 +60,8 @@ public class AppMenuServiceImpl implements AppMenuService {
             LinkedList<MenuListRespVO> children = recursiveGetChildren(respVO, menuDOS);
             respVO.setChildren(children);
         }
-        return filterMenuByName(menuListRespList, name);
+        filterMenuByName(menuListRespList, name);
+        return menuListRespList;
     }
 
 
@@ -89,18 +90,15 @@ public class AppMenuServiceImpl implements AppMenuService {
      * @param name
      * @return
      */
-    private List<MenuListRespVO> filterMenuByName(List<MenuListRespVO> menuListRespList, String name) {
+    private void filterMenuByName(List<MenuListRespVO> menuListRespList, String name) {
         // 如果没有过滤条件，直接返回原列表
         if (name == null || name.trim().isEmpty()) {
-            return menuListRespList;
+            return;
         }
-
         // 第一步：根据规则设置 filter 标记
         markMenusForFilter(menuListRespList, name);
-        reMarkMenusForFilter(menuListRespList);
         // 第二步：移除不符合条件的菜单
         removeUnmarkedMenus(menuListRespList);
-        return menuListRespList;
     }
 
     /**
@@ -111,11 +109,12 @@ public class AppMenuServiceImpl implements AppMenuService {
      */
     private void markMenusForFilter(List<MenuListRespVO> menuList, String name) {
         for (MenuListRespVO menu : menuList) {
-            boolean currentMenuMatches = StringUtils.containsIgnoreCase(menu.getMenuName(), name);
-            if (currentMenuMatches) {
+            if (StringUtils.containsIgnoreCase(menu.getMenuName(), name)) {
+                menu.setFilter(true);
+            } else if (MenuTypeEnum.isGroup(menu.getMenuType()) && anyChildrenMatches(menu.getChildren(), name)) {
                 menu.setFilter(true);
             }
-            if (currentMenuMatches && menu.getChildren() != null) {
+            if (menu.isFilter() && menu.getChildren() != null) {
                 markAllChildren(menu.getChildren());
             }
             // 递归处理子菜单
@@ -125,16 +124,23 @@ public class AppMenuServiceImpl implements AppMenuService {
         }
     }
 
-    private void reMarkMenusForFilter(List<MenuListRespVO> menuList) {
-        for (MenuListRespVO menu : menuList) {
-            if (hasMarkedChildren(menu.getChildren())) {
-                menu.setFilter(true);
+    private boolean anyChildrenMatches(LinkedList<MenuListRespVO> children, String name) {
+        if (children == null) {
+            return false;
+        }
+        for (MenuListRespVO child : children) {
+            if (StringUtils.containsIgnoreCase(child.getMenuName(), name)) {
+                return true;
             }
-            if (menu.getChildren() != null && !menu.getChildren().isEmpty()) {
-                reMarkMenusForFilter(menu.getChildren());
+            if (child.getChildren() != null && !child.getChildren().isEmpty()) {
+                if (anyChildrenMatches(child.getChildren(), name)) {
+                    return true;
+                }
             }
         }
+        return false;
     }
+
 
     /**
      * 标记所有子菜单
@@ -148,24 +154,6 @@ public class AppMenuServiceImpl implements AppMenuService {
                 markAllChildren(child.getChildren());
             }
         }
-    }
-
-    /**
-     * 检查是否有子菜单被标记
-     *
-     * @param children 子菜单列表
-     * @return 是否有子菜单被标记
-     */
-    private boolean hasMarkedChildren(List<MenuListRespVO> children) {
-        if (children == null || children.isEmpty()) {
-            return false;
-        }
-        for (MenuListRespVO child : children) {
-            if (child.isFilter() || hasMarkedChildren(child.getChildren())) {
-                return true;
-            }
-        }
-        return false;
     }
 
 
@@ -242,6 +230,15 @@ public class AppMenuServiceImpl implements AppMenuService {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_MENU_TYPE_ERROR);
         }
         return parentId;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updateApplicationMenu(MenuUpdateReqVO updateReqVO) {
+        MenuDO menuDO = appCommonService.validateMenuExist(updateReqVO.getId());
+        menuDO.setMenuName(updateReqVO.getMenuName());
+        menuDO.setMenuIcon(updateReqVO.getMenuIcon());
+        appMenuRepository.update(menuDO);
     }
 
     @Override

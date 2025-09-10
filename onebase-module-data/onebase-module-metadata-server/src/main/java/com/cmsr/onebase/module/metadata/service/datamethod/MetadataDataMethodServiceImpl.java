@@ -193,6 +193,9 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
         return TenantUtils.executeIgnore(() -> {
 
         // 7. 执行插入
+        if (log.isDebugEnabled()) {
+            log.debug("createData -> processedData before insert: {}", processedData);
+        }
         DataRow dataRow = new DataRow(processedData);
         Object insertResult = temporaryService.insert(quoteTableName(entity.getTableName()), dataRow);
         log.info("创建数据成功，实体ID: {}, 表名: {}, 插入结果: {}", reqVO.getEntityId(), entity.getTableName(), insertResult);
@@ -426,7 +429,7 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
                 }
             }
             if (hasDeletedField && !deletedConditionAdded) {
-                configs.and(Compare.EQUAL, "deleted", "0");
+                configs.and(Compare.EQUAL, "deleted", 0);
                 deletedConditionAdded = true;
             }
             Set<String> fieldNames = fields.stream().map(MetadataEntityFieldDO::getFieldName).collect(Collectors.toSet());
@@ -457,7 +460,7 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
                 }
             }
             if (hasDeletedField) {
-                countConfigs.and(Compare.EQUAL, "deleted", "0");
+                countConfigs.and(Compare.EQUAL, "deleted", 0);
             }
             long total = temporaryService.count(quoteTableName(entity.getTableName()), countConfigs);
             DataSet dataSet = temporaryService.querys(quoteTableName(entity.getTableName()), configs);
@@ -549,11 +552,17 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
         // 获取当前时间
         LocalDateTime now = LocalDateTime.now();
 
+        // 仅确定一个实际主键字段名，避免系统字段被误配置为主键导致被赋予雪花ID
+        String realPrimaryKey = getPrimaryKeyFieldName(fields);
+
         for (MetadataEntityFieldDO field : fields) {
             String fieldName = field.getFieldName();
+            if (fieldName == null) {
+                continue;
+            }
             
-            // 处理主键字段 - 使用新的枚举值：1-是，0-否
-            if (BooleanStatusEnum.isYes(field.getIsPrimaryKey())) {
+            // 仅对真实主键字段生成雪花ID，避免误把deleted/lock_version等系统字段当作主键
+            if (fieldName != null && fieldName.equalsIgnoreCase(realPrimaryKey)) {
                 if (!processedData.containsKey(fieldName)) {
                     // 生成雪花ID作为主键
                     processedData.put(fieldName, IdUtil.getSnowflakeNextId());
@@ -573,8 +582,8 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
                         processedData.put(fieldName, now);
                         break;
                     case "deleted":
-                        // 统一使用字符串类型，避免PostgreSQL类型不匹配问题
-                        processedData.put(fieldName, "0");
+                        // deleted字段使用数字类型0，对应数据库中的int8类型
+                        processedData.put(fieldName, 0);
                         break;
                     case "lock_version":
                     case "lockversion":
@@ -677,11 +686,47 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
      * 获取主键字段名
      */
     private String getPrimaryKeyFieldName(List<MetadataEntityFieldDO> fields) {
-        return fields.stream()
-                .filter(field -> BooleanStatusEnum.isYes(field.getIsPrimaryKey()))
-                .map(MetadataEntityFieldDO::getFieldName)
-                .findFirst()
-                .orElse("id");
+    // 1) 只考虑非系统字段中的主键，避免把 deleted/lock_version 等系统字段当作主键
+    List<MetadataEntityFieldDO> pkCandidates = fields.stream()
+        .filter(field -> BooleanStatusEnum.isYes(field.getIsPrimaryKey()))
+        .filter(field -> !BooleanStatusEnum.isYes(field.getIsSystemField()))
+        .collect(Collectors.toList());
+
+    // 2) 在候选中优先选择名字为 id 的字段
+    Optional<String> idNamed = pkCandidates.stream()
+        .map(MetadataEntityFieldDO::getFieldName)
+        .filter(Objects::nonNull)
+        .filter(name -> "id".equalsIgnoreCase(name))
+        .findFirst();
+    if (idNamed.isPresent()) {
+        String pk = idNamed.get();
+        log.debug("检测到非系统主键字段优先为: {}", pk);
+        return pk;
+    }
+
+    // 3) 否则取第一个非系统主键候选
+    Optional<String> firstPk = pkCandidates.stream()
+        .map(MetadataEntityFieldDO::getFieldName)
+        .filter(Objects::nonNull)
+        .findFirst();
+    if (firstPk.isPresent()) {
+        String pk = firstPk.get();
+        log.debug("检测到非系统主键字段: {}", pk);
+        return pk;
+    }
+
+    // 4) 如果未配置主键，则回退到列名为 id（即使它被标记为系统字段，也作为兜底使用）
+    boolean hasId = fields.stream()
+        .map(MetadataEntityFieldDO::getFieldName)
+        .anyMatch(name -> name != null && "id".equalsIgnoreCase(name));
+    if (hasId) {
+        log.debug("未配置主键，回退使用列名 id 作为主键");
+        return "id";
+    }
+
+    // 5) 最终兜底
+    log.warn("未找到主键字段且不存在列名为 id 的字段，使用默认 id 作为主键名称");
+    return "id";
     }
 
     /**
@@ -752,7 +797,7 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
                 .anyMatch(field -> "deleted".equalsIgnoreCase(field.getFieldName()));
         
         if (hasDeletedField) {
-            configStore.and("deleted", "0");
+            configStore.and("deleted", 0);
         }
         
         DataSet dataSet = service.querys(tableName, configStore);

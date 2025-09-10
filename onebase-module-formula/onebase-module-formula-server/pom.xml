@@ -57,6 +57,20 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- 公式引擎相关 -->
+<!--        <dependency>-->
+<!--            <groupId>org.graalvm.polyglot</groupId>-->
+<!--            <artifactId>polyglot</artifactId>-->
+<!--        </dependency>-->
+        <dependency>
+            <groupId>org.graalvm.js</groupId>
+            <artifactId>js</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.graalvm.js</groupId>
+            <artifactId>js-scriptengine</artifactId>
+        </dependency>
+
 
     </dependencies>
     <build>

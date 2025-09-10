@@ -84,6 +84,7 @@ public class MetadataValidationUniqueServiceImpl implements MetadataValidationUn
             groupVO.setValMethod(vo.getValMethod());
             groupVO.setPopPrompt(vo.getPopPrompt());
             groupVO.setPopType(vo.getPopType());
+            groupVO.setValidationType("UNIQUE");
             groupId = ruleGroupService.createValidationRuleGroup(groupVO);
         }
 
@@ -128,6 +129,7 @@ public class MetadataValidationUniqueServiceImpl implements MetadataValidationUn
             groupVO.setValMethod(vo.getValMethod());
             groupVO.setPopPrompt(vo.getPopPrompt());
             groupVO.setPopType(vo.getPopType());
+            groupVO.setValidationType("UNIQUE");
             groupId = ruleGroupService.createValidationRuleGroup(groupVO);
         }
         

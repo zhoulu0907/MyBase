@@ -77,6 +77,8 @@
         <justauth.version>1.16.7</justauth.version>
         <justauth-starter.version>1.4.0</justauth-starter.version>
         <weixin-java.version>4.7.5.B</weixin-java.version>
+        <!-- 公式引擎相关 -->
+        <graalvm.version>23.0.9</graalvm.version>
     </properties>
 
     <dependencyManagement>
@@ -546,6 +548,23 @@
             </dependency>
 
             <!--  其他-->
+
+            <!-- 公式引擎相关 -->
+            <dependency>
+                <groupId>org.graalvm.polyglot</groupId>
+                <artifactId>polyglot</artifactId>
+                <version>${graalvm.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.graalvm.js</groupId>
+                <artifactId>js</artifactId>
+                <version>${graalvm.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.graalvm.js</groupId>
+                <artifactId>js-scriptengine</artifactId>
+                <version>${graalvm.version}</version>
+            </dependency>
 
         </dependencies>
 

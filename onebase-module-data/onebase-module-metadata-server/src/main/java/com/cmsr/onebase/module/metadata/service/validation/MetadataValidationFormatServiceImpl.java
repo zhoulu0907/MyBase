@@ -84,6 +84,7 @@ public class MetadataValidationFormatServiceImpl implements MetadataValidationFo
             groupVO.setValMethod(vo.getValMethod());
             groupVO.setPopPrompt(vo.getPopPrompt());
             groupVO.setPopType(vo.getPopType());
+            groupVO.setValidationType("FORMAT");
             groupId = ruleGroupService.createValidationRuleGroup(groupVO);
         }
 
@@ -131,6 +132,7 @@ public class MetadataValidationFormatServiceImpl implements MetadataValidationFo
             groupVO.setValMethod(vo.getValMethod());
             groupVO.setPopPrompt(vo.getPopPrompt());
             groupVO.setPopType(vo.getPopType());
+            groupVO.setValidationType("FORMAT");
             groupId = ruleGroupService.createValidationRuleGroup(groupVO);
         }
         

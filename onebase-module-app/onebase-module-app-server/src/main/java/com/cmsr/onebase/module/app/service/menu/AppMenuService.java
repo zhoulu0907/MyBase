@@ -18,6 +18,8 @@ public interface AppMenuService {
 
     void updateApplicationMenuName(Long id, String menuName);
 
+    void updateApplicationMenu(MenuUpdateReqVO updateReqVO);
+
     void updateApplicationMenuOrder(MenuOrderUpdateReqVO updateReqVO);
 
     void updateApplicationMenuVisible(Long id, Integer visible);
