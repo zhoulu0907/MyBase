@@ -3,7 +3,7 @@ package com.cmsr.onebase.module.metadata.controller.admin.validation;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.module.metadata.controller.admin.validation.vo.ValidationRuleGroupRespVO;
 import com.cmsr.onebase.module.metadata.controller.admin.validation.vo.ValidationRuleGroupSaveReqVO;
-import com.cmsr.onebase.module.metadata.convert.validation.ValidationRuleGroupConvert;
+import org.modelmapper.ModelMapper;
 import com.cmsr.onebase.module.metadata.dal.dataobject.validation.MetadataValidationRuleGroupDO;
 import com.cmsr.onebase.module.metadata.service.validation.MetadataValidationRuleGroupService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -36,6 +36,9 @@ public class ValidationSelfDefinedController {
 
     @Resource
     private MetadataValidationRuleGroupService validationRuleGroupService;
+    
+    @Resource
+    private ModelMapper modelMapper;
 
     @PostMapping("/create")
     @Operation(summary = "创建自定义校验规则组")
@@ -69,7 +72,7 @@ public class ValidationSelfDefinedController {
     @PreAuthorize("@ss.hasPermission('metadata:validation-self-defined:query')")
     public CommonResult<ValidationRuleGroupRespVO> get(@RequestParam("id") Long id) {
         MetadataValidationRuleGroupDO ruleGroup = validationRuleGroupService.getValidationRuleGroup(id);
-        ValidationRuleGroupRespVO respVO = ValidationRuleGroupConvert.INSTANCE.convert(ruleGroup);
+        ValidationRuleGroupRespVO respVO = modelMapper.map(ruleGroup, ValidationRuleGroupRespVO.class);
         if (respVO != null) {
             respVO.setValueRules(validationRuleGroupService.buildValueRulesStructure(id));
         }

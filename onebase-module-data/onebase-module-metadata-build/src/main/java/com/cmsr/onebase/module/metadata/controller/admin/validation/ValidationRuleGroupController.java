@@ -38,7 +38,10 @@ public class ValidationRuleGroupController {
     @Operation(summary = "获得校验规则分组分页")
     @PreAuthorize("@ss.hasPermission('metadata:validation-rule-group:query')")
     public CommonResult<PageResult<ValidationRuleGroupSimpleRespVO>> getValidationRuleGroupPage(@Valid @RequestBody ValidationRuleGroupPageReqVO pageReqVO) {
-        // TODO: 汇总七种校验类型分页（当前先复用原逻辑）后续可在Service新增聚合方法
+        // TODO: 优化校验规则聚合逻辑
+        // 当前逻辑：分别查询七种校验类型然后合并
+        // 优化方案：在Service层新增聚合方法，一次性查询所有校验类型
+        // 目标：提高查询效率，减少数据库请求次数
         return success(validationRuleGroupService.getValidationRuleGroupPageSimple(pageReqVO));
     }
 

@@ -2,7 +2,8 @@ package com.cmsr.onebase.module.metadata.dal.database;
 
 import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.metadata.controller.admin.validation.vo.ValidationRuleGroupPageReqVO;
+// TODO: Repository层不应该直接依赖VO，应该使用DO或基础类型参数
+// import com.cmsr.onebase.module.metadata.controller.admin.validation.vo.ValidationRuleGroupPageReqVO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.validation.MetadataValidationRuleGroupDO;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.ConfigStore;
@@ -36,25 +37,24 @@ public class MetadataValidationRuleGroupRepository extends DataRepository<Metada
      * @param reqVO 分页查询条件
      * @return 分页结果
      */
-    public PageResult<MetadataValidationRuleGroupDO> selectPage(ValidationRuleGroupPageReqVO reqVO) {
+    // TODO: Repository层方法应该使用基础类型参数而不是VO
+    // public PageResult<MetadataValidationRuleGroupDO> selectPage(ValidationRuleGroupPageReqVO reqVO) {
+    public PageResult<MetadataValidationRuleGroupDO> selectPage(int pageNum, int pageSize, String name) {
         ConfigStore configStore = new DefaultConfigStore();
         
         // 添加查询条件
-        if (StringUtils.hasText(reqVO.getRgName())) {
-            configStore.like("rg_name", reqVO.getRgName());
-        }
-        if (StringUtils.hasText(reqVO.getRgStatus())) {
-            configStore.eq("rg_status", reqVO.getRgStatus());
+        if (StringUtils.hasText(name)) {
+            configStore.like("rg_name", name);
         }
         
         // 添加排序
         configStore.order("create_time", Order.TYPE.DESC);
         
         // 设置分页参数
-        configStore.limit(reqVO.getPageNo(), reqVO.getPageSize());
+        configStore.limit(pageNum, pageSize);
         
         // 执行分页查询
-        return findPageWithConditions(configStore, reqVO.getPageNo(), reqVO.getPageSize());
+        return findPageWithConditions(configStore, pageNum, pageSize);
     }
 
     /**

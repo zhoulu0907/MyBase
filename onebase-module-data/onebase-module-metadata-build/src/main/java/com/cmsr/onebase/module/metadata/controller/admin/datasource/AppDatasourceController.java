@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.metadata.controller.admin.datasource;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.module.metadata.controller.admin.datasource.vo.DatasourceRespVO;
-import com.cmsr.onebase.module.metadata.convert.datasource.DatasourceConvert;
+import org.modelmapper.ModelMapper;
 import com.cmsr.onebase.module.metadata.dal.dataobject.datasource.MetadataDatasourceDO;
 import com.cmsr.onebase.module.metadata.service.datasource.MetadataAppAndDatasourceService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -32,7 +32,7 @@ public class AppDatasourceController {
     @Resource
     private MetadataAppAndDatasourceService appAndDatasourceService;
     @Resource
-    private DatasourceConvert datasourceConvert;
+    private ModelMapper modelMapper;
 
     @PostMapping("/create-relation")
     @Operation(summary = "创建应用与数据源的关联关系")
@@ -72,7 +72,10 @@ public class AppDatasourceController {
             @RequestParam("applicationId") Long applicationId) {
 
         List<MetadataDatasourceDO> datasources = appAndDatasourceService.getDatasourcesByApplicationId(applicationId);
-        return success(datasourceConvert.convertList(datasources));
+        List<DatasourceRespVO> respList = datasources.stream()
+                .map(datasource -> modelMapper.map(datasource, DatasourceRespVO.class))
+                .toList();
+        return success(respList);
     }
 
     @PostMapping("/list-apps-by-datasource")
@@ -107,7 +110,10 @@ public class AppDatasourceController {
             @RequestParam("appUid") String appUid) {
 
         List<MetadataDatasourceDO> datasources = appAndDatasourceService.getDatasourcesByAppUid(appUid);
-        return success(datasourceConvert.convertList(datasources));
+        List<DatasourceRespVO> respList = datasources.stream()
+                .map(datasource -> modelMapper.map(datasource, DatasourceRespVO.class))
+                .toList();
+        return success(respList);
     }
 
     @PostMapping("/delete-relations-by-app")

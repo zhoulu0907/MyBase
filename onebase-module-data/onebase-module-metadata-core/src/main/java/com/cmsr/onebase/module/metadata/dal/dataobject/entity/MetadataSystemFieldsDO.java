@@ -71,7 +71,17 @@ public class MetadataSystemFieldsDO extends BaseDO {
      */
     private Integer isEnabled;
 
-    // TODO: 我在数据库中新加了这个字段。在新建实体时，会默认添加系统字段，会从此表中查询系统字段的信息然后插入到 metadata_entity_field 表中，displayName 的值复用此字段；需要检查实体的新建与修改的逻辑。
+    /**
+     * 系统字段显示名称
+     * 
+     * 业务说明：
+     * 1. 此字段用于在实体创建时设置系统字段的显示名称
+     * 2. 当新建实体时，系统会自动从此表查询系统字段配置
+     * 3. 查询到的displayName值会作为EntityField表中的display_name字段值
+     * 4. 需要在EntityService的创建逻辑中确保此字段值正确传递
+     * 
+     * TODO: 验证实体创建和修改逻辑中是否正确使用此字段
+     */
     /**
      * 对外展示名称
      */

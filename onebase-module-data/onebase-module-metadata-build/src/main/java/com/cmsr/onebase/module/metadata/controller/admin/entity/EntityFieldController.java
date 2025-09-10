@@ -17,7 +17,7 @@ import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldBa
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldBatchSaveRespVO;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldValidationTypesReqVO;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EntityFieldValidationTypesRespVO;
-import com.cmsr.onebase.module.metadata.convert.entity.EntityFieldConvert;
+import org.modelmapper.ModelMapper;
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.service.entity.MetadataEntityFieldService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -47,6 +47,9 @@ public class EntityFieldController {
 
     @Resource
     private MetadataEntityFieldService entityFieldService;
+    
+    @Resource
+    private ModelMapper modelMapper;
 
     @PostMapping("/field-types")
     @Operation(summary = "获取系统支持的字段类型列表")
@@ -83,7 +86,12 @@ public class EntityFieldController {
     @PreAuthorize("@ss.hasPermission('metadata:entity-field:query')")
     public CommonResult<PageResult<EntityFieldRespVO>> getEntityFieldPage(@Valid @RequestBody EntityFieldPageReqVO pageReqVO) {
         PageResult<MetadataEntityFieldDO> pageResult = entityFieldService.getEntityFieldPage(pageReqVO);
-        return success(EntityFieldConvert.INSTANCE.convertPage(pageResult));
+        PageResult<EntityFieldRespVO> convertedResult = new PageResult<>();
+        convertedResult.setTotal(pageResult.getTotal());
+        convertedResult.setList(pageResult.getList().stream()
+                .map(field -> modelMapper.map(field, EntityFieldRespVO.class))
+                .toList());
+        return success(convertedResult);
     }
 
     @PostMapping("/get")

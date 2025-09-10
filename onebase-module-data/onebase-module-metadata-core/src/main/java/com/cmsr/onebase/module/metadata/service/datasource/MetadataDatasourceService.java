@@ -1,85 +1,50 @@
 package com.cmsr.onebase.module.metadata.service.datasource;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.metadata.controller.admin.datasource.vo.ColumnInfoRespVO;
-import com.cmsr.onebase.module.metadata.controller.admin.datasource.vo.DatasourcePageReqVO;
-import com.cmsr.onebase.module.metadata.controller.admin.datasource.vo.DatasourceSaveReqVO;
-import com.cmsr.onebase.module.metadata.controller.admin.datasource.vo.DatasourceTestConnectionReqVO;
-import com.cmsr.onebase.module.metadata.controller.admin.datasource.vo.DatasourceTestConnectionRespVO;
-import com.cmsr.onebase.module.metadata.controller.admin.datasource.vo.DatasourceTypeRespVO;
-import com.cmsr.onebase.module.metadata.controller.admin.datasource.vo.TableInfoRespVO;
-import com.cmsr.onebase.module.metadata.service.datasource.vo.ColumnQueryVO;
-import com.cmsr.onebase.module.metadata.service.datasource.vo.TableQueryVO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.datasource.MetadataDatasourceDO;
 import jakarta.validation.Valid;
 
 import java.util.List;
+import java.util.Map;
 
 /**
- * 数据源 Service 接口
+ * 数据源 Service 接口 - 核心数据层接口
+ * TODO: Controller层应该使用build模块中的DatasourceBuildService，该接口负责VO转换
+ *
+ * @author matianyu
+ * @date 2025-08-20
  */
 public interface MetadataDatasourceService {
 
     /**
-     * 获取所有支持的数据源类型
-     *
-     * @return 数据源类型列表
-     */
-    List<DatasourceTypeRespVO> getDatasourceTypes();
-
-    /**
-     * 根据数据源ID查询表名列表
-     *
-     * @param queryVO 查询条件VO
-     * @return 表信息列表
-     */
-    List<TableInfoRespVO> getTablesByDatasourceId(TableQueryVO queryVO);
-
-    /**
-     * 根据表名查询字段信息
-     *
-     * @param queryVO 查询条件VO
-     * @return 字段信息列表
-     */
-    List<ColumnInfoRespVO> getColumnsByTableName(ColumnQueryVO queryVO);
-
-    /**
      * 创建数据源
      *
-     * @param createReqVO 创建信息
-     * @return 编号
+     * @param datasource 数据源DO
+     * @return 数据源编号
      */
-    Long createDatasource(@Valid DatasourceSaveReqVO createReqVO);
+    Long createDatasource(@Valid MetadataDatasourceDO datasource);
 
     /**
      * 更新数据源
      *
-     * @param updateReqVO 更新信息
+     * @param datasource 数据源DO
      */
-    void updateDatasource(@Valid DatasourceSaveReqVO updateReqVO);
+    void updateDatasource(@Valid MetadataDatasourceDO datasource);
 
     /**
      * 删除数据源
      *
-     * @param id 编号
+     * @param id 数据源编号
      */
     void deleteDatasource(Long id);
 
     /**
      * 获得数据源
      *
-     * @param id 编号
-     * @return 数据源
+     * @param id 数据源编号
+     * @return 数据源DO
      */
     MetadataDatasourceDO getDatasource(Long id);
-
-    /**
-     * 获得数据源分页
-     *
-     * @param pageReqVO 分页查询
-     * @return 数据源分页
-     */
-    PageResult<MetadataDatasourceDO> getDatasourcePage(DatasourcePageReqVO pageReqVO);
 
     /**
      * 获得数据源列表
@@ -89,43 +54,56 @@ public interface MetadataDatasourceService {
     List<MetadataDatasourceDO> getDatasourceList();
 
     /**
-     * 根据应用ID获得数据源列表
+     * 获得数据源分页
      *
-     * @param appId 应用ID
-     * @return 数据源列表
+     * @param pageNum 页码
+     * @param pageSize 页大小
+     * @return 数据源分页
      */
-    List<MetadataDatasourceDO> getDatasourceListByAppId(Long appId);
-
-    /**
-     * 根据条件查询数据源列表
-     *
-     * @param configStore 查询条件
-     * @return 数据源列表
-     */
-    List<MetadataDatasourceDO> findAllByConfig(org.anyline.data.param.init.DefaultConfigStore configStore);
-
-    /**
-     * 根据编码获得数据源
-     *
-     * @param code 编码
-     * @return 数据源
-     */
-    MetadataDatasourceDO getDatasourceByCode(String code);
+    PageResult<MetadataDatasourceDO> getDatasourcePage(int pageNum, int pageSize);
 
     /**
      * 测试数据源连接
      *
-     * @param reqVO 测试连接请求
-     * @return 测试结果
+     * @param config 数据源配置
+     * @return 连接测试结果
      */
-    DatasourceTestConnectionRespVO testConnection(@Valid DatasourceTestConnectionReqVO reqVO);
-    /**
-     * 创建默认数据源，使用配置文件中 default.datasource 配置
-     *
-     * @param appId 应用ID
-     * @param appUid 应用唯一UID，用于建立应用与数据源的关联
-     * @return 数据源编号
-     */
-    Long createDefaultDatasource(Long appId, String appUid);
+    boolean testConnection(Map<String, Object> config);
 
+    /**
+     * 根据数据源ID获取表信息
+     *
+     * @param datasourceId 数据源ID
+     * @param tableName 表名（可选）
+     * @return 表信息列表
+     */
+    List<Map<String, Object>> getTableInfo(Long datasourceId, String tableName);
+
+    /**
+     * 根据数据源ID和表名获取列信息
+     *
+     * @param datasourceId 数据源ID
+     * @param tableName 表名
+     * @return 列信息列表
+     */
+    List<Map<String, Object>> getColumnInfo(Long datasourceId, String tableName);
+
+    /**
+     * 根据数据源编码获取数据源
+     *
+     * @param code 数据源编码
+     * @return 数据源DO
+     */
+    MetadataDatasourceDO getDatasourceByCode(String code);
+
+    // TODO: 以下方法需要在build模块中实现，涉及VO转换
+    /*
+    List<DatasourceTypeRespVO> getDatasourceTypes();
+    List<TableInfoRespVO> getTableInfo(TableQueryVO queryVO);
+    List<ColumnInfoRespVO> getColumnInfo(ColumnQueryVO queryVO);
+    DatasourceTestConnectionRespVO testConnection(DatasourceTestConnectionReqVO reqVO);
+    PageResult<DatasourceRespVO> getDatasourcePage(DatasourcePageReqVO pageReqVO);
+    DatasourceRespVO createDatasourceWithResponse(@Valid DatasourceSaveReqVO reqVO);
+    DatasourceRespVO getDatasourceDetail(Long id);
+    */
 }

@@ -34,7 +34,7 @@ public class DataMethodController {
     @Operation(summary = "查询业务实体的数据方法列表")
     @PreAuthorize("@ss.hasPermission('metadata:data-method:query')")
     public CommonResult<List<DataMethodRespVO>> getDataMethodList(@Valid @RequestBody DataMethodQueryReqVO reqVO) {
-        DataMethodQueryVO queryVO = new DataMethodQueryVO(reqVO.getEntityId(), reqVO.getMethodType(), reqVO.getKeyword());
+        DataMethodQueryVO queryVO = new DataMethodQueryVO(String.valueOf(reqVO.getEntityId()), reqVO.getMethodType(), reqVO.getKeyword());
         List<DataMethodRespVO> methods = dataMethodService.getDataMethodList(queryVO);
         return success(methods);
     }

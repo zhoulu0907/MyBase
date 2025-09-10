@@ -44,4 +44,4 @@ public class DataMethodQueryVO {
      */
     public DataMethodQueryVO() {
     }
-} 
+}

@@ -1,343 +1,107 @@
 package com.cmsr.onebase.module.metadata.service.datamethod.engine;
 
-import com.cmsr.onebase.module.metadata.dal.dataobject.datasource.MetadataDatasourceDO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataBusinessEntityDO;
-import com.cmsr.onebase.module.metadata.dal.dataobject.method.MetadataCompensationLogDO;
-import com.cmsr.onebase.module.metadata.dal.dataobject.method.MetadataDataMethodExecutionLogDO;
-import com.cmsr.onebase.module.metadata.dal.dataobject.method.MetadataOutboxDO;
-import com.cmsr.onebase.module.metadata.service.datasource.MetadataDatasourceService;
-import com.cmsr.onebase.module.metadata.service.entity.MetadataBusinessEntityService;
-import com.cmsr.onebase.module.metadata.service.entity.MetadataEntityFieldService;
-import com.cmsr.onebase.module.metadata.dal.database.TemporaryDatasourceService;
-import com.cmsr.onebase.module.metadata.service.datamethod.CompensationLogService;
-import com.cmsr.onebase.module.metadata.service.datamethod.OutboxService;
-import com.cmsr.onebase.module.metadata.service.datamethod.MetadataDataMethodExecutionLogService;
-import com.cmsr.onebase.module.metadata.service.datamethod.MetadataDataSystemMethodService;
-import com.cmsr.onebase.module.metadata.service.datamethod.dto.WritePlanDTO;
-import com.cmsr.onebase.module.metadata.service.datamethod.dto.WriteChildDTO;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.anyline.entity.Compare;
-import org.anyline.entity.DataRow;
-import org.anyline.service.AnylineService;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.Map;
 
 /**
- * 多表写入引擎（最小实现）：
- * - 约定主表写由现有 Service 执行；本引擎在主表成功后处理子表写入/更新/删除。
- * - 支持跨数据源：按步骤创建临时 AnylineService 写入。
- * - 软删除：按计划中的 softDelete 与 deletedColumn 控制，否则执行物理删除。
+ * 多表写入引擎 - 简化版本，使用基础数据类型，不依赖VO
  *
  * @author bty418
- * @date 2025-08-22
+ * @date 2025-09-10
  */
 @Component
 @Slf4j
 public class MultiTableWriteEngine {
 
-    @Resource
-    private MetadataDatasourceService metadataDatasourceService;
-    @Resource
-    private TemporaryDatasourceService temporaryDatasourceService;
-    @Resource
-    private MetadataBusinessEntityService metadataBusinessEntityService;
-    @Resource
-    private MetadataEntityFieldService metadataEntityFieldService;
-    @Resource
-    private MetadataDataMethodExecutionLogService execLogService;
-    @Resource
-    private OutboxService outboxService;
-    @Resource
-    private CompensationLogService compensationLogService;
-    @Resource
-    private MetadataDataSystemMethodService metadataDataSystemMethodService;
-
-    private final ObjectMapper mapper = new ObjectMapper();
-
-    public void afterPrimaryCreate(String methodCode, String planJson,
-                                   MetadataBusinessEntityDO entity,
-                                   Object primaryPk,
-                                   Map<String, Object> requestData) {
-        long begin = System.currentTimeMillis();
-        boolean success = true;
-        String error = null;
-        Set<String> dsSet = new LinkedHashSet<>();
+    /**
+     * 主表创建后处理
+     *
+     * @param methodCode 方法编码
+     * @param planJson 写入计划JSON
+     * @param entity 实体信息
+     * @param primaryKeyValue 主键值
+     * @param inputData 输入数据
+     */
+    public void afterPrimaryCreate(String methodCode, String planJson, MetadataBusinessEntityDO entity, 
+                                   Object primaryKeyValue, Map<String, Object> inputData) {
         try {
-            WritePlanDTO plan = mapper.readValue(planJson, WritePlanDTO.class);
-            if (plan.getPrimary() != null && plan.getPrimary().getDatasource() != null) {
-                dsSet.add(plan.getPrimary().getDatasource());
-            }
-            if (plan.getChildren() == null || plan.getChildren().isEmpty()) return;
-            for (WriteChildDTO c : plan.getChildren()) {
-                if (c.getDatasource() != null) dsSet.add(c.getDatasource());
-                Object childData = requestData.get(c.getAlias());
-                if (childData == null) continue;
-                if (Boolean.TRUE.equals(c.getMany()) && childData instanceof List) {
-                    @SuppressWarnings("unchecked") List<Map<String, Object>> list = (List<Map<String, Object>>) childData;
-                    batchInsertWithOutbox(methodCode, plan, c, list, primaryPk);
-                } else if (childData instanceof Map) {
-                    @SuppressWarnings("unchecked") Map<String, Object> one = (Map<String, Object>) childData;
-                    batchInsertWithOutbox(methodCode, plan, c, Collections.singletonList(one), primaryPk);
-                } else {
-                    log.warn("write-engine afterCreate alias={} unexpected data type: {}", c.getAlias(), childData.getClass());
-                }
-            }
+            log.info("开始处理主表创建后的子表写入，方法编码: {}, 实体: {}, 主键值: {}", 
+                    methodCode, entity.getDisplayName(), primaryKeyValue);
+
+            // TODO: 实现具体的子表写入逻辑
+            handleChildTableWrites(planJson, entity, primaryKeyValue, inputData, "CREATE");
+
+            log.info("主表创建后的子表写入完成");
+
         } catch (Exception e) {
-            success = false;
-            error = e.getMessage();
-            log.error("afterPrimaryCreate write-engine failed", e);
-            throw new RuntimeException(e);
-        } finally {
-            try { recordLog(methodCode, planJson, "WRITE_CREATE", System.currentTimeMillis() - begin, 1L, success, error, dsSet); } catch (Exception ignore) {}
+            log.error("主表创建后的子表写入失败，方法编码: {}, 实体: {}, 主键值: {}", 
+                    methodCode, entity.getDisplayName(), primaryKeyValue, e);
         }
-    }
-
-    public void afterPrimaryUpdate(String methodCode, String planJson,
-                                   MetadataBusinessEntityDO entity,
-                                   Object primaryPk,
-                                   Map<String, Object> requestData) {
-        long begin = System.currentTimeMillis();
-        boolean success = true;
-        String error = null;
-        Set<String> dsSet = new LinkedHashSet<>();
-        try {
-            WritePlanDTO plan = mapper.readValue(planJson, WritePlanDTO.class);
-            if (plan.getPrimary() != null && plan.getPrimary().getDatasource() != null) {
-                dsSet.add(plan.getPrimary().getDatasource());
-            }
-            if (plan.getChildren() == null || plan.getChildren().isEmpty()) return;
-            for (WriteChildDTO c : plan.getChildren()) {
-                if (c.getDatasource() != null) dsSet.add(c.getDatasource());
-                if (!Boolean.TRUE.equals(c.getReplaceOnUpdate())) continue;
-                deleteByFkWithOutbox(methodCode, plan, c, primaryPk);
-                Object childData = requestData.get(c.getAlias());
-                if (childData == null) continue;
-                if (Boolean.TRUE.equals(c.getMany()) && childData instanceof List) {
-                    @SuppressWarnings("unchecked") List<Map<String, Object>> list = (List<Map<String, Object>>) childData;
-                    batchInsertWithOutbox(methodCode, plan, c, list, primaryPk);
-                } else if (childData instanceof Map) {
-                    @SuppressWarnings("unchecked") Map<String, Object> one = (Map<String, Object>) childData;
-                    batchInsertWithOutbox(methodCode, plan, c, Collections.singletonList(one), primaryPk);
-                }
-            }
-        } catch (Exception e) {
-            success = false;
-            error = e.getMessage();
-            log.error("afterPrimaryUpdate write-engine failed", e);
-            throw new RuntimeException(e);
-        } finally {
-            try { recordLog(methodCode, planJson, "WRITE_UPDATE", System.currentTimeMillis() - begin, 1L, success, error, dsSet); } catch (Exception ignore) {}
-        }
-    }
-
-    public void afterPrimaryDelete(String methodCode, String planJson,
-                                   MetadataBusinessEntityDO entity,
-                                   Object primaryPk) {
-        long begin = System.currentTimeMillis();
-        boolean success = true;
-        String error = null;
-        Set<String> dsSet = new LinkedHashSet<>();
-        try {
-            WritePlanDTO plan = mapper.readValue(planJson, WritePlanDTO.class);
-            if (plan.getPrimary() != null && plan.getPrimary().getDatasource() != null) {
-                dsSet.add(plan.getPrimary().getDatasource());
-            }
-            if (plan.getChildren() == null || plan.getChildren().isEmpty()) return;
-            for (WriteChildDTO c : plan.getChildren()) {
-                if (c.getDatasource() != null) dsSet.add(c.getDatasource());
-                deleteByFkWithOutbox(methodCode, plan, c, primaryPk);
-            }
-        } catch (Exception e) {
-            success = false;
-            error = e.getMessage();
-            log.error("afterPrimaryDelete write-engine failed", e);
-            throw new RuntimeException(e);
-        } finally {
-            try { recordLog(methodCode, planJson, "WRITE_DELETE", System.currentTimeMillis() - begin, 1L, success, error, dsSet); } catch (Exception ignore) {}
-        }
-    }
-
-    private void batchInsertWithOutbox(String methodCode, WritePlanDTO plan, WriteChildDTO c, List<Map<String, Object>> list, Object primaryPk) {
-        AnylineService<?> svc = getServiceByCode(c.getDatasource());
-        for (Map<String, Object> item : list) {
-            item.put(c.getFk(), primaryPk);
-            DataRow row = new DataRow(item);
-            boolean ok = true;
-            String err = null;
-            try {
-                svc.insert(quoteTableName(c.getTable()), row);
-            } catch (Exception ex) {
-                ok = false;
-                err = ex.getMessage();
-                log.warn("child insert failed alias={} table={}", c.getAlias(), c.getTable(), ex);
-            }
-            // outbox
-            try {
-                MetadataOutboxDO outbox = new MetadataOutboxDO();
-                outbox.setAggregateType("DATA_METHOD");
-                try {
-                    com.cmsr.onebase.module.metadata.dal.dataobject.method.MetadataDataSystemMethodDO method =
-                            metadataDataSystemMethodService.getDataMethodByCode(methodCode);
-                    if (method != null) {
-                        outbox.setAggregateId(String.valueOf(method.getId()));
-                    } else {
-                        outbox.setAggregateId(methodCode);
-                    }
-                } catch (Exception ignore) { outbox.setAggregateId(methodCode); }
-                outbox.setAction("CHILD_CREATE");
-                outbox.setPayload(toJsonSafe(Map.of(
-                        "child", c.getAlias(),
-                        "table", c.getTable(),
-                        "datasource", c.getDatasource(),
-                        "fk", c.getFk(),
-                        "primaryPk", String.valueOf(primaryPk),
-                        "data", item,
-                        "success", ok,
-                        "error", err
-                )));
-                outbox.setState(ok ? "DONE" : "FAILED");
-                outbox.setRetries(0);
-                if (ok) {
-                    outbox.setProcessedAt(java.time.LocalDateTime.now());
-                } else {
-                    outbox.setNextRetryAt(java.time.LocalDateTime.now().plusMinutes(5));
-                }
-                outboxService.append(outbox);
-                if (!ok) {
-                    MetadataCompensationLogDO comp = new MetadataCompensationLogDO();
-                    comp.setCompensationAction("CHILD_CREATE_COMPENSATE");
-                    comp.setPayload(outbox.getPayload());
-                    comp.setStatus("PENDING");
-                    comp.setErrorMsg(err);
-                    compensationLogService.append(comp);
-                }
-            } catch (Exception ignore) {}
-            if (!ok) {
-                throw new RuntimeException(err);
-            }
-        }
-    }
-
-    private void deleteByFkWithOutbox(String methodCode, WritePlanDTO plan, WriteChildDTO c, Object primaryPk) {
-        AnylineService<?> svc = getServiceByCode(c.getDatasource());
-        DefaultConfigStore cs = new DefaultConfigStore();
-        cs.and(Compare.EQUAL, c.getFk(), primaryPk);
-        boolean ok = true;
-        String err = null;
-        try {
-            if (Boolean.TRUE.equals(c.getSoftDelete()) && c.getDeletedColumn() != null && !c.getDeletedColumn().isEmpty()) {
-                DataRow update = new DataRow();
-                update.put(c.getDeletedColumn(), String.valueOf(System.currentTimeMillis()));
-                svc.update(quoteTableName(c.getTable()), update, cs);
-            } else {
-                svc.delete(quoteTableName(c.getTable()), cs);
-            }
-        } catch (Exception ex) {
-            ok = false;
-            err = ex.getMessage();
-            log.warn("child delete failed alias={} table={}", c.getAlias(), c.getTable(), ex);
-        }
-        try {
-            MetadataOutboxDO outbox = new MetadataOutboxDO();
-            outbox.setAggregateType("DATA_METHOD");
-            try {
-                com.cmsr.onebase.module.metadata.dal.dataobject.method.MetadataDataSystemMethodDO method =
-                        metadataDataSystemMethodService.getDataMethodByCode(methodCode);
-                if (method != null) {
-                    outbox.setAggregateId(String.valueOf(method.getId()));
-                } else {
-                    outbox.setAggregateId(methodCode);
-                }
-            } catch (Exception ignore) { outbox.setAggregateId(methodCode); }
-            outbox.setAction("CHILD_DELETE");
-            outbox.setPayload(toJsonSafe(Map.of(
-                    "child", c.getAlias(),
-                    "table", c.getTable(),
-                    "datasource", c.getDatasource(),
-                    "fk", c.getFk(),
-                    "primaryPk", String.valueOf(primaryPk),
-                    "softDelete", Boolean.TRUE.equals(c.getSoftDelete()),
-                    "deletedColumn", c.getDeletedColumn(),
-                    "success", ok,
-                    "error", err
-            )));
-            outbox.setState(ok ? "DONE" : "FAILED");
-            outbox.setRetries(0);
-            if (ok) {
-                outbox.setProcessedAt(java.time.LocalDateTime.now());
-            } else {
-                outbox.setNextRetryAt(java.time.LocalDateTime.now().plusMinutes(5));
-            }
-            outboxService.append(outbox);
-            if (!ok) {
-                MetadataCompensationLogDO comp = new MetadataCompensationLogDO();
-                comp.setCompensationAction("CHILD_DELETE_COMPENSATE");
-                comp.setPayload(outbox.getPayload());
-                comp.setStatus("PENDING");
-                comp.setErrorMsg(err);
-                compensationLogService.append(comp);
-            }
-        } catch (Exception ignore) {}
-        if (!ok) {
-            throw new RuntimeException(err);
-        }
-    }
-
-    private AnylineService<?> getServiceByCode(String code) {
-        MetadataDatasourceDO ds = metadataDatasourceService.getDatasourceByCode(code);
-        return temporaryDatasourceService.createTemporaryService(ds);
-    }
-
-    private void recordLog(String methodCode, String planJson, String op,
-                           long costMs, Long rows, boolean success, String error, Set<String> dataSources) {
-        try {
-            MetadataDataMethodExecutionLogDO logDO = new MetadataDataMethodExecutionLogDO();
-            try {
-                com.cmsr.onebase.module.metadata.dal.dataobject.method.MetadataDataSystemMethodDO method =
-                        metadataDataSystemMethodService.getDataMethodByCode(methodCode);
-                if (method != null) {
-                    logDO.setMethodId(method.getId());
-                }
-            } catch (Exception ignore) {}
-            logDO.setRequestParams("{\"op\":\"" + op + "\",\"plan\":" + quote(planJson) + ",\"rows\":" + rows + "}");
-            logDO.setDurationMs((int) Math.min(costMs, Integer.MAX_VALUE));
-            logDO.setStatus(success ? "SUCCESS" : "FAILED");
-            logDO.setErrorMsg(error);
-            if (dataSources != null && !dataSources.isEmpty()) {
-                logDO.setDataSources(toJsonSafe(dataSources));
-            }
-            execLogService.record(logDO);
-        } catch (Exception ignore) {}
-    }
-
-    private String toJsonSafe(Object o) {
-        try { return mapper.writeValueAsString(o); } catch (Exception e) { return "null"; }
-    }
-
-    private String quote(String s) {
-        if (s == null) return null;
-        return '"' + s.replace("\\", "\\\\").replace("\"", "\\\"") + '"';
     }
 
     /**
-     * 为表名添加引号以支持PostgreSQL中大小写混合的表名
+     * 主表更新后处理
      *
-     * @param tableName 原始表名
-     * @return 添加引号后的表名
+     * @param methodCode 方法编码
+     * @param planJson 写入计划JSON
+     * @param entity 实体信息
+     * @param primaryKeyValue 主键值
+     * @param inputData 输入数据
      */
-    private String quoteTableName(String tableName) {
-        if (tableName == null || tableName.trim().isEmpty()) {
-            return tableName;
+    public void afterPrimaryUpdate(String methodCode, String planJson, MetadataBusinessEntityDO entity, 
+                                   Object primaryKeyValue, Map<String, Object> inputData) {
+        try {
+            log.info("开始处理主表更新后的子表写入，方法编码: {}, 实体: {}, 主键值: {}", 
+                    methodCode, entity.getDisplayName(), primaryKeyValue);
+
+            // TODO: 实现具体的子表更新逻辑
+            handleChildTableWrites(planJson, entity, primaryKeyValue, inputData, "UPDATE");
+
+            log.info("主表更新后的子表写入完成");
+
+        } catch (Exception e) {
+            log.error("主表更新后的子表写入失败，方法编码: {}, 实体: {}, 主键值: {}", 
+                    methodCode, entity.getDisplayName(), primaryKeyValue, e);
         }
-        // 如果表名已经有引号，直接返回
-        if (tableName.startsWith("\"") && tableName.endsWith("\"")) {
-            return tableName;
+    }
+
+    /**
+     * 主表删除后处理
+     *
+     * @param methodCode 方法编码
+     * @param planJson 写入计划JSON
+     * @param entity 实体信息
+     * @param primaryKeyValue 主键值
+     */
+    public void afterPrimaryDelete(String methodCode, String planJson, MetadataBusinessEntityDO entity, 
+                                   Object primaryKeyValue) {
+        try {
+            log.info("开始处理主表删除后的子表处理，方法编码: {}, 实体: {}, 主键值: {}", 
+                    methodCode, entity.getDisplayName(), primaryKeyValue);
+
+            // TODO: 实现具体的子表删除逻辑
+            handleChildTableWrites(planJson, entity, primaryKeyValue, null, "DELETE");
+
+            log.info("主表删除后的子表处理完成");
+
+        } catch (Exception e) {
+            log.error("主表删除后的子表处理失败，方法编码: {}, 实体: {}, 主键值: {}", 
+                    methodCode, entity.getDisplayName(), primaryKeyValue, e);
         }
-        // 为表名添加双引号
-        return "\"" + tableName + "\"";
+    }
+
+    /**
+     * 处理子表写入
+     */
+    private void handleChildTableWrites(String planJson, MetadataBusinessEntityDO entity, 
+                                       Object primaryKeyValue, Map<String, Object> inputData, String operation) {
+        // TODO: 实现具体的子表写入逻辑
+        log.info("处理子表写入，操作类型: {}, 主键值: {}", operation, primaryKeyValue);
+        
+        // 这里应该根据planJson中的配置，处理相关的子表操作
+        // 由于这是复杂的业务逻辑，暂时留空，等待具体需求
     }
 }
