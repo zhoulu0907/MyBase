@@ -1,17 +1,16 @@
 import type { EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
-import { FIELD_TYPE } from '@onebase/ui-kit';
 import { useAppStore } from '@/store/store_app';
+import { useFieldStore } from '@/store/store_field';
 import { Button, Message, Modal, Table } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
 import { batchSaveFields, getEntityFields } from '@onebase/app';
+import { ENTITY_FIELD_TYPE, FIELD_TYPE } from '@onebase/ui-kit';
 import React, { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
-import { ENTITY_FIELD_TYPE_LABEL } from '@onebase/ui-kit';
-import type { AutoNumberRule } from './types';
 import FieldConfigPopover from './FieldConfigPopover';
 import TableColumns from './TableColumns';
 import styles from './index.module.less';
-import { useFieldStore } from '@/store/store_field';
+import type { AutoNumberRule } from './types';
 
 interface FieldFormValues {
   id?: string;
@@ -49,9 +48,9 @@ interface ConfigFieldModalProps {
 
 // 需要额外配置的字段类型
 const FIELD_TYPES_NEED_CONFIG = [
-  ENTITY_FIELD_TYPE_LABEL.PICKLIST,
-  ENTITY_FIELD_TYPE_LABEL.MULTI_SELECT,
-  ENTITY_FIELD_TYPE_LABEL.AUTO_CODE
+  ENTITY_FIELD_TYPE.SELECT.VALUE,
+  ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE,
+  ENTITY_FIELD_TYPE.AUTO_CODE.VALUE
 ];
 
 // 自定义表格行组件，支持拖拽
@@ -105,7 +104,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
       fieldName: '',
       displayName: '',
       description: '',
-      fieldType: ENTITY_FIELD_TYPE_LABEL.TEXT,
+      fieldType: ENTITY_FIELD_TYPE.TEXT.VALUE,
       defaultValue: '',
       isUnique: 1,
       allowNull: 1,
@@ -229,11 +228,11 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
 
     let fieldConfig = {};
     switch (fieldType) {
-      case ENTITY_FIELD_TYPE_LABEL.PICKLIST:
-      case ENTITY_FIELD_TYPE_LABEL.MULTI_SELECT:
+      case ENTITY_FIELD_TYPE.SELECT.VALUE:
+      case ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE:
         fieldConfig = { options: configData };
         break;
-      case ENTITY_FIELD_TYPE_LABEL.AUTO_CODE:
+      case ENTITY_FIELD_TYPE.AUTO_CODE.VALUE:
         fieldConfig = { autoNumber: configData };
         break;
       case 'CONSTRAINTS':
