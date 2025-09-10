@@ -1,5 +1,5 @@
-import { Button, Input, Select } from '@arco-design/web-react';
-import { IconClose } from '@douyinfe/semi-icons';
+import { Button, Divider, Input, Select } from '@arco-design/web-react';
+import { IconDelete } from '@arco-design/web-react/icon';
 import type { Condition, ConfitionField, EntityFieldValidationTypes, ValidationTypeItem } from '@onebase/app';
 import { nanoid } from 'nanoid';
 import React, { useEffect, useState } from 'react';
@@ -95,12 +95,14 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({ data, onChange, field
   const renderItemWrapper = (cond: Condition) => {
     return cond.rules && cond.rules.length > 0 ? (
       <div className={styles.items} key={cond.id}>
+        <div className={styles.tag}>且</div>
+
         {cond.rules?.map((item: Condition) => {
           return renderItem(item);
         })}
         {cond.rules && cond.rules.length > 0 && (
-          <Button type="default" onClick={() => addCondition(cond.id)}>
-            + 并且
+          <Button type="text" onClick={() => addCondition(cond.id)}>
+            + 添加且条件
           </Button>
         )}
       </div>
@@ -193,8 +195,9 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({ data, onChange, field
         </Select>
 
         <Input
-          style={{ width: '170px', marginRight: '10px', backgroundColor: 'white' }}
+          style={{ width: '140px', marginRight: '10px' }}
           value={cond.value?.[0] || ''}
+          placeholder="请输入"
           onChange={(value) => {
             const newConditions = [...conditions];
 
@@ -213,7 +216,7 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({ data, onChange, field
           }}
         />
 
-        <IconClose
+        <IconDelete
           style={{ fontSize: '13px', color: '#4E5969' }}
           onClick={() => {
             deleteCondition(cond.id);
@@ -230,13 +233,25 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({ data, onChange, field
           return (
             <div key={item.id}>
               {renderItemWrapper(item)}
-              {index !== (conditions || [])?.length - 1 && <div>或者</div>}
+              {index !== (conditions || [])?.length - 1 && (
+                <Divider
+                  orientation="center"
+                  style={{
+                    marginTop: '5px',
+                    marginBottom: '0px',
+                    marginLeft: '10px',
+                    marginRight: '10px'
+                  }}
+                >
+                  <div className={styles.dividerText}>或</div>
+                </Divider>
+              )}
             </div>
           );
         })}
       </div>
-      <Button type="outline" size="small" onClick={() => addCondition('')}>
-        + 或者
+      <Button type="text" size="small" onClick={() => addCondition('')}>
+        + 添加或条件
       </Button>
     </div>
   );

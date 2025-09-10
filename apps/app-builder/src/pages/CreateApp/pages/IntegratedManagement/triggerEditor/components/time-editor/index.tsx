@@ -58,9 +58,31 @@ const TimeEditor: React.FC<TimeEditorProps> = ({}) => {
         <Grid.Row gutter={8}>
           <Grid.Col span={12}>
             <Form.Item
+              label="开始时间"
+              layout="vertical"
+              field="startTime"
+              rules={[{ required: true, message: '请选择结束时间' }]}
+            >
+              <DatePicker showTime format="YYYY-MM-DD HH:mm:ss " style={{ width: '100%' }} />
+            </Form.Item>
+          </Grid.Col>
+          <Grid.Col span={12}>
+            <Form.Item
+              label="结束时间"
+              layout="vertical"
+              field="endTime"
+              rules={[{ required: true, message: '请选择结束时间' }]}
+            >
+              <DatePicker showTime format="YYYY-MM-DD HH:mm:ss " style={{ width: '100%' }} />
+            </Form.Item>
+          </Grid.Col>
+        </Grid.Row>
+        <Grid.Row gutter={8} align="end">
+          <Grid.Col span={12}>
+            <Form.Item
               label="重复周期"
               field="repeat_type"
-              layout="horizontal"
+              layout="vertical"
               rules={[{ required: true, message: '请选择重复周期' }]}
               labelCol={{ span: 10 }} // 调小 label 占比
               wrapperCol={{ span: 14 }} // 明确 wrapper 占比
@@ -84,29 +106,20 @@ const TimeEditor: React.FC<TimeEditorProps> = ({}) => {
 
             {repeatType === 'daily' && (
               <Form.Item field="triggerTime" rules={[{ required: true, message: '请选择触发时间' }]}>
-                <TimePicker format="HH:mm" />
+                <TimePicker format="HH:mm" style={{ width: '280px' }} />
               </Form.Item>
             )}
 
             {repeatType === 'weekly' && (
-              <Grid.Row>
-                <Grid.Col span={12}>
-                  <Form.Item field="repeat_week">
-                    <Select
-                      options={weeklyOptions}
-                      mode="multiple"
-                      maxTagCount={1}
-                      style={{ width: '135px' }}
-                      placeholder="请选择日期"
-                    />
-                  </Form.Item>
-                </Grid.Col>
-                <Grid.Col span={12}>
-                  <Form.Item field="triggerTime" rules={[{ required: true, message: '请选择触发时间' }]}>
-                    <TimePicker format="HH:mm" style={{ width: '150px' }} />
-                  </Form.Item>
-                </Grid.Col>
-              </Grid.Row>
+              <Form.Item field="repeat_week">
+                <Select
+                  options={weeklyOptions}
+                  mode="multiple"
+                  maxTagCount={3}
+                  style={{ width: '280px' }}
+                  placeholder="请选择日期"
+                />
+              </Form.Item>
             )}
 
             {repeatType === 'monthly' && (
@@ -115,7 +128,7 @@ const TimeEditor: React.FC<TimeEditorProps> = ({}) => {
                   options={monthlyType === 'specified' ? dayOptions : monthlyOptions}
                   placeholder="请选择日期"
                   mode="multiple"
-                  maxTagCount={2}
+                  maxTagCount={3}
                   style={{ width: '280px' }}
                   dropdownRender={(menu) => (
                     <div>
@@ -171,24 +184,17 @@ const TimeEditor: React.FC<TimeEditorProps> = ({}) => {
 
         <Grid.Row gutter={8}>
           {repeatType === 'monthly' ||
-            (repeatType === 'yearly' && (
+            repeatType === 'yearly' ||
+            (repeatType === 'weekly' && (
               <Form.Item
                 label="触发时间"
-                layout="horizontal"
+                layout="vertical"
                 field="triggerTime"
                 rules={[{ required: true, message: '请选择触发时间' }]}
               >
                 <TimePicker format="HH:mm" />
               </Form.Item>
             ))}
-
-          <Form.Item label="开始时间" field="startTime" rules={[{ required: true, message: '请选择结束时间' }]}>
-            <DatePicker showTime format="YYYY-MM-DD HH:mm:ss " />
-          </Form.Item>
-
-          <Form.Item label="结束时间" field="endTime" rules={[{ required: true, message: '请选择结束时间' }]}>
-            <DatePicker showTime format="YYYY-MM-DD HH:mm:ss " />
-          </Form.Item>
         </Grid.Row>
       </Form>
     </div>
