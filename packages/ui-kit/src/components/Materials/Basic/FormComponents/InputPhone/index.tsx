@@ -3,8 +3,8 @@ import { nanoid } from 'nanoid';
 import { memo, useEffect, useState } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
-import '../index.css';
 import type { XInputPhoneConfig } from './schema';
+import '../index.css';
 
 const XInputPhone = memo((props: XInputPhoneConfig & { runtime?: boolean }) => {
   const {
@@ -20,7 +20,6 @@ const XInputPhone = memo((props: XInputPhoneConfig & { runtime?: boolean }) => {
     color,
     bgColor,
     labelColSpan = 0,
-    description,
     runtime = true
   } = props;
 
@@ -53,25 +52,26 @@ const XInputPhone = memo((props: XInputPhoneConfig & { runtime?: boolean }) => {
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{
           margin: 0,
-          opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,
-          pointerEvents: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset'
+          opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
       >
-        <Input
-          status={InputStatus}
-          readOnly={status === STATUS_VALUES[STATUS_OPTIONS.READONLY]}
-          defaultValue={defaultValue}
-          style={{
-            width: '100%',
-            color,
-            textAlign: align,
-            backgroundColor: bgColor
-          }}
-          placeholder={placeholder}
-          onChange={setValue}
-        />
+        {
+          status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? <div>{defaultValue || '--'}</div> :
+            <Input
+              status={InputStatus}
+              defaultValue={defaultValue}
+              style={{
+                width: '100%',
+                color,
+                textAlign: align,
+                backgroundColor: bgColor,
+                pointerEvents: runtime ? 'unset' : 'none'
+              }}
+              placeholder={placeholder}
+              onChange={setValue}
+            />
+        }
       </Form.Item>
-      <div className='description showEllipsis' style={{marginLeft: labelColSpan}}>{description}</div>
     </div>
   );
 });

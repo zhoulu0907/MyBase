@@ -50,6 +50,13 @@
       font-size: 16px;
       font-weight: 500;
       line-height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      img {
+        margin-right: 4px;
+      }
     }
   }
 
@@ -149,13 +156,16 @@
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      background-color: #f7f8fa;
+      border: 1px solid #e5e6eb;
+      background-color: #fff;
+      transition: all 0.1s linear;
 
       &:hover {
         box-sizing: border-box;
+        border-color: transparent;
         outline: 2px solid rgb(var(--primary-6));
-        background-color: #fff;
         box-shadow: 0px 0px 8px 8px rgba(0, 0, 0, 0.05);
+        background: linear-gradient(180deg, rgba(232, 255, 254, 0.45) 0%, rgba(255, 255, 255, 0.45) 100%), #fff;
       }
 
       .myAppCardTop {

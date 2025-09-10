@@ -11,7 +11,7 @@ const XTimeline = memo((props: XTimelineConfig & { runtime?: boolean }) => {
   return (
     <Timeline
       style={{
-        opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,
+        opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1,
         display: runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 'none' : 'unset'
       }}
     >

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { debounce, sample } from 'lodash-es';
 import dayjs from 'dayjs';
 import { Avatar, Divider, Form, Input, Message, Modal, Pagination, Select, Spin, Tag } from '@arco-design/web-react';
-import { IconCheckCircle, IconPlus, IconSearch, IconLeft, IconEmpty } from '@arco-design/web-react/icon';
+import { IconCheckCircle, IconSearch, IconLeft, IconEmpty } from '@arco-design/web-react/icon';
 
 import { useI18n } from '@/hooks/useI18n';
 import { useAppStore } from '@/store/store_app';
@@ -25,8 +25,9 @@ import { PermissionButton as Button } from '@/components/PermissionControl';
 import { TENANT_DEPT_PERMISSION as ACTIONS } from '@/constants/permission';
 import { hasPermission, UserPermissionManager } from '@/utils/permission';
 import appDeleteSVG from '@/assets/images/app_delete.svg';
-import appEditSVG from '@/assets/images/app_edit_black.svg';
+import appEditSVG from '@/assets/images/edit_page_name_icon.svg';
 import emptyApplicationSVG from '@/assets/images/empty_application.svg';
+import plusSVG from '@/assets/images/plus_icon.svg';
 import {
   appOptions,
   avatarBgColor,
@@ -36,6 +37,7 @@ import {
   statusOptions,
   TagColor
 } from './const';
+import { appIcon } from '@/components/CreateApp/const';
 import styles from './index.module.less';
 
 const Option = Select.Option;
@@ -236,7 +238,7 @@ const MyAppPage: React.FC = () => {
           permission={ACTIONS.CREATE}
           type="default"
           size="large"
-          icon={<IconPlus />}
+          icon={<img src={plusSVG} alt='create application' />}
           className={styles.createAppButton}
           onClick={() => setCreateVisible(true)}
           style={{ color: 'rgb(var(--primary-6))' }}
@@ -334,7 +336,7 @@ const MyAppPage: React.FC = () => {
                     <div className={styles.myAppCardHeader}>
                       <div className={styles.myAppName}>
                         <div className={styles.myAppIcon} style={{ backgroundColor: item.iconColor }}>
-                          <i className={`iconfont ${item.iconName || 'icon-box'}`} />
+                          <i className={`iconfont ${item.iconName || appIcon[0]}`} />
                         </div>
                         <div className={styles.myAppCardInfo}>
                           <div className={styles.myAppTitle}>{item.appName}</div>

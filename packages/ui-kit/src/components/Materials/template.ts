@@ -38,6 +38,7 @@ export const COMPONENT_TYPE_DISPLAY_NAME_MAP: Record<string, string> = {
   [FORM_COMPONENT_TYPES.DIVIDER]: '分割线',
   [FORM_COMPONENT_TYPES.RICH_TEXT]: '富文本',
   [FORM_COMPONENT_TYPES.CAROUSEL_F]: '轮播图',
+  [FORM_COMPONENT_TYPES.CHILDREN_TABLE]: '子表单',
 
   // 列表组件
   [LIST_COMPONENT_TYPES.TABLE]: '表格',
@@ -260,6 +261,14 @@ const allTemplate = {
           h: 36,
           w: 118,
           displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.CAROUSEL_F],
+          icon: 'readonly_cp.svg', // todo
+          category: 'base'
+        },
+        {
+          type: FORM_COMPONENT_TYPES.CHILDREN_TABLE,
+          h: 36,
+          w: 118,
+          displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.CHILDREN_TABLE],
           icon: 'readonly_cp.svg', // todo
           category: 'base'
         }
