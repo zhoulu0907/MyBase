@@ -71,7 +71,7 @@ const AddMembers = (props: IProps) => {
 
   return (
     <Modal
-      title={<div style={{ textAlign: 'left' }}>{title}</div>}
+      title={<div style={{ textAlign: 'left' }}>{title === 'specifiedDepartment' ? '指定部门' : title === 'specifiedPerson' ? '指定成员' : title}</div>}
       onOk={onCancel}
       onCancel={handleCancel}
       visible={visible}
@@ -90,7 +90,7 @@ const AddMembers = (props: IProps) => {
           <Button
             type="primary"
             disabled={selectedMembers.length === 0}
-            onClick={() => onConfirm(selectedMembers.map((v) => v.key))}
+            onClick={() => onConfirm(selectedMembers)}
           >
             确定
           </Button>

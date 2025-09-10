@@ -241,6 +241,7 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
         添加权限组
       </Button>
       <DataPermissionModal
+        roleId={roleId}
         initialFormValues={initialFormValues}
         modalVisible={modalVisible}
         status={status}

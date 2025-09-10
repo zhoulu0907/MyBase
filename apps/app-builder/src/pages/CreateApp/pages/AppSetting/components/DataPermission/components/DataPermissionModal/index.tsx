@@ -12,11 +12,16 @@ import {
   type AuthDataPermissionPersonVO,
   type FilterFieldCheckType,
   type GetDeptUserReq
+  // type RoleAddUserReq
 } from '@onebase/app';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { AddMembers } from '@onebase/common';
+import { debounce } from 'lodash-es';
+
 const FormItem = Form.Item;
 
 interface IProps {
+  roleId: string;
   initialFormValues: AuthDataGroupVO;
   modalVisible: boolean;
   status: 'create' | 'edit';
@@ -55,6 +60,7 @@ const fieldValueType = [
 
 const DataPermissionModal = (props: IProps) => {
   const {
+    roleId,
     initialFormValues,
     modalVisible,
     status,
@@ -71,25 +77,23 @@ const DataPermissionModal = (props: IProps) => {
     DataOperationEnum.examine,
     DataOperationEnum.operate
   ]); // 操作权限 是否禁用
-  const [entitySelected, setEntitySelected] = useState<boolean>(false);
-  const [checkAll, setCheckAll] = useState<boolean>(true);
-  const [indeterminate, setIndeterminate] = useState<boolean>(false); // 操作权限
-  const [dataFilters, setDataFilters] = useState<Array<AuthDataFilterVO[]>>(initialFormValues.dataFilters || []);
-  // 部门用户信息
-  const [memberLoading, setMemberLoading] = useState<boolean>(false);
-  const [membersVisible, setMembersVisible] = useState<boolean>(false);
-  const [scopeType, setScopeType] = useState('');
 
   const [form] = Form.useForm();
   const Option = Select.Option;
 
-  // useEffect(() => {
-  //   console.log(' modal appEntityFields:', appEntityFields);
-  //   console.log('modal filterFieldCheckType:', filterFieldCheckType);
-  // }, [appEntityFields, filterFieldCheckType]);
+  const [entitySelected, setEntitySelected] = useState<boolean>(false);
+  const [checkAll, setCheckAll] = useState<boolean>(true);
+  const [indeterminate, setIndeterminate] = useState<boolean>(false); // 操作权限
+  const [dataFilters, setDataFilters] = useState<Array<AuthDataFilterVO[]>>(initialFormValues.dataFilters || []);
+  const [scopeType, setScopeType] = useState('');
+
+  // 部门用户信息
+  const [memberLoading, setMemberLoading] = useState<boolean>(false);
+  const [membersVisible, setMembersVisible] = useState<boolean>(false);
+  const [deptData, setDeptData] = useState<any>();
+
   useEffect(() => {
     // 初始化时检查entity字段是否有值
-    console.log('scopeType:', scopeType);
     const entityValue = form.getFieldValue('scopeFieldId');
     setEntitySelected(!!entityValue);
   }, [scopeType, form]);
@@ -107,7 +111,9 @@ const DataPermissionModal = (props: IProps) => {
   }
 
   // 权限范围选择指定人员/部门
-  const hanleMembersModal = async () => {
+  // 'specifiedDepartment' | 'specifiedPerson' 指定部门/人员
+  const specifiedModalVisible = async (scopeType: 'specifiedDepartment' | 'specifiedPerson') => {
+    console.log('权限范围 指定弹窗 scopeType:', scopeType);
     await getDeptUsers({});
     setMembersVisible(true);
   };
@@ -116,12 +122,13 @@ const DataPermissionModal = (props: IProps) => {
     setMemberLoading(true);
     try {
       const params: GetDeptUserReq = {
-        roleId: roleInfo?.id!,
+        roleId: roleId,
         deptId,
         keywords
       };
       const res = await getDeptUser(params);
       console.log('获取部门用户信息 resq', res);
+      setDeptData(res);
     } catch (error) {
       console.error('获取部门用户信息 error:', error);
     } finally {
@@ -132,6 +139,18 @@ const DataPermissionModal = (props: IProps) => {
   // 展开下级
   const handleExpand = async (deptId: string) => {
     await getDeptUsers({ deptId });
+  };
+
+  const debouncedUpdate = useCallback(
+    debounce((value) => {
+      getDeptUsers({ keywords: value });
+    }, 500),
+    []
+  );
+
+  // 添加成员
+  const handleAddUser = async (selectedMembers: any[]) => {
+    console.log('添加成员 userIds:', selectedMembers);
   };
 
   const handleOk = async () => {
@@ -275,9 +294,7 @@ const DataPermissionModal = (props: IProps) => {
                         <Button
                           type="primary"
                           style={{ width: '100%' }}
-                          onClick={() => {
-                            console.log('添加人员或部门');
-                          }}
+                          onClick={() => specifiedModalVisible(scopeType)}
                         >
                           {scopeType === 'specifiedPerson' ? '添加人员' : '添加部门'}
                         </Button>
@@ -556,6 +573,16 @@ const DataPermissionModal = (props: IProps) => {
           </FormItem>
         </Form>
       </Modal>
+      <AddMembers
+        visible={membersVisible}
+        title={scopeType}
+        data={deptData}
+        loading={memberLoading}
+        onExpand={handleExpand}
+        onSearch={debouncedUpdate}
+        onConfirm={handleAddUser}
+        onCancel={() => setMembersVisible(false)}
+      ></AddMembers>
     </>
   );
 };

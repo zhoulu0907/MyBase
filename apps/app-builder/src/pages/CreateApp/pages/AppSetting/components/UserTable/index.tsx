@@ -89,11 +89,14 @@ const UserMembers = (props: IProps) => {
   };
 
   // 添加成员
-  const handleAddUser = async (userIds: string[]) => {
+  const handleAddUser = async (selectedMembers: any[]) => {
+    console.log('添加成员 selectedMembers:', selectedMembers);
+    const userIds = selectedMembers.map((v) => v.key);
     const params: RoleAddUserReq = {
       roleId: roleInfo?.id!,
       userIds
     };
+    console.log('添加成员 params:', params);
     await roleAddUser(params);
     await getRoleUserList();
     setMembersVisible(false);
