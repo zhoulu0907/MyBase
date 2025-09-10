@@ -31,7 +31,6 @@ import type {
   ILayoutConfigType,
   ITextAreaConfigType,
   ILabelConfigType,
-  IDescriptionConfigType,
   ITooltipConfigType
 } from '../../../types';
 
@@ -53,7 +52,6 @@ export type TXCarouselEditData = Array<
   | ILayoutConfigType<TLayoutSelectKeyType>
   | ITextAreaConfigType
   | ILabelConfigType
-  | IDescriptionConfigType
   | ITooltipConfigType
 >;
 
@@ -73,22 +71,17 @@ export interface XCarouselConfig extends ICommonBaseType {
     text: TTextDefaultType;
     display: TBooleanDefaultType;
   };
-  
+
   /**
    * 组件状态：可用、隐藏、只读
    * 可选值: 'default' | 'hidden' | 'readonly'
    */
   status?: TRadioDefaultType<TStatusSelectKeyType>;
-  
-  /**
-   * 描述信息（显示在输入框下方，辅助说明）
-   */
-  description: TTextAreaDefaultType;
 
   /**
-   * 提示文字（鼠标悬浮时显示）
+   * 描述信息（鼠标悬浮时显示）
    */
-  tooltip?: TTextDefaultType;
+  tooltip?: TTextAreaDefaultType;
 
   /**
    * 字段宽度
@@ -149,13 +142,8 @@ const XCarousel: XCarouselSchema = {
       type: CONFIG_TYPES.LABEL_INPUT
     },
     {
-      key: 'description',
-      name: '描述信息',
-      type: CONFIG_TYPES.DESCRIPTION_INPUT
-    },
-    {
       key: 'tooltip',
-      name: '提示文字',
+      name: '描述信息',
       type: CONFIG_TYPES.TOOLTIP_INPUT
     },
     layoutConfig,
@@ -185,7 +173,6 @@ const XCarousel: XCarouselSchema = {
       text: '轮播图',
       display: true,
     },
-    description: '',
     tooltip: '',
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
     width: WIDTH_VALUES[WIDTH_OPTIONS.FULL],

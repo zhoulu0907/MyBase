@@ -1,52 +1,23 @@
 import '@wangeditor/editor/dist/css/style.css'; // 引入 css
 
-import { Form } from '@arco-design/web-react';
-import { IDomEditor, IEditorConfig, IToolbarConfig } from '@wangeditor/editor';
-import { Editor, Toolbar } from '@wangeditor/editor-for-react';
-import { nanoid } from 'nanoid';
 import { memo, useEffect, useState } from 'react';
+import { Form } from '@arco-design/web-react';
+import { nanoid } from 'nanoid';
+import WangEditor from './editor';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import type { XRichTextConfig } from './schema';
 import '../index.css';
 
 const XRichText = memo((props: XRichTextConfig & { runtime?: boolean }) => {
-  const { label, dataField, tooltip, status, defaultValue, verify, layout, labelColSpan = 0, description, runtime = true } = props;
+  const { label, dataField, tooltip, status, defaultValue, verify, layout, labelColSpan = 0, runtime = true } = props;
 
   // 编辑器内容
   const [html, setHtml] = useState<string>();
-  const [editor, setEditor] = useState<IDomEditor | null>(null);
-
-  // 工具栏配置
-  const toolbarConfig: Partial<IToolbarConfig> = {
-    // modalAppendToBody: true
-  };
-
-  // 编辑器配置
-  const editorConfig: Partial<IEditorConfig> = {
-    placeholder: '请输入内容...'
-  };
 
   useEffect(() => {
     defaultValue && setHtml(defaultValue);
   }, [defaultValue]);
-
-  useEffect(() => {
-    if (editor === null) return;
-    if (status === STATUS_VALUES[STATUS_OPTIONS.READONLY]) {
-      editor?.disable();
-    } else {
-      editor?.enable();
-    }
-  }, [editor, status]);
-
-  useEffect(() => {
-    return () => {
-      if (editor === null) return;
-      editor.destroy();
-      setEditor(null);
-    };
-  }, [editor]);
 
   return (
     <div className='formWrapper'>
@@ -63,28 +34,15 @@ const XRichText = memo((props: XRichTextConfig & { runtime?: boolean }) => {
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{
           margin: 0,
-          opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1
+          opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
       >
-        <div style={{ border: '1px solid #ccc', zIndex: 100 }}>
-          <Toolbar
-            editor={editor}
-            defaultConfig={toolbarConfig}
-            mode="default"
-            style={{ borderBottom: '1px solid #ccc' }}
-          />
-          <Editor
-            defaultConfig={editorConfig}
-            value={html}
-            onCreated={setEditor}
-            onChange={(editor) => setHtml(editor.getHtml())}
-            mode="default"
-            style={{ height: '300px', overflowY: 'hidden' }}
-          />
-        </div>
-        {/* <div style={{ marginTop: '15px' }}>{html}</div> */}
+        {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? <div>{html}</div> : (
+          <WangEditor runtime={runtime} value={html} onChange={(editor) => setHtml(editor.getHtml())} style={{
+            pointerEvents: runtime ? 'unset' : 'none'
+          }} />
+        )}
       </Form.Item>
-      <div className='description showEllipsis' style={{marginLeft: labelColSpan}}>{description}</div>
     </div>
   );
 });

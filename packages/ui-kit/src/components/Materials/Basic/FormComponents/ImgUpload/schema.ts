@@ -27,7 +27,6 @@ import {
 import type {
   IBooleanConfigType,
   IDataFieldConfigType,
-  IDescriptionConfigType,
   ILabelConfigType,
   ILayoutConfigType,
   INumberConfigType,
@@ -57,7 +56,6 @@ export type TXInputImgUploadEditData = Array<
   | ITextConfigType
   | ILabelConfigType
   | IPlaceholderConfigType
-  | IDescriptionConfigType
   | ITooltipConfigType
   | IStatusConfigType<TStatusSelectKeyType>
   | IWidthConfigType<TWidthSelectKeyType>
@@ -90,14 +88,9 @@ export interface XInputImgUploadConfig extends ICommonBaseType {
   dataField: TTextDefaultType[];
 
   /**
-   * 描述信息（显示在输入框下方，辅助说明）
+   * 描述信息（鼠标悬浮时显示）
    */
-  description: TTextAreaDefaultType;
-
-  /**
-   * 提示文字（鼠标悬浮时显示）
-   */
-  tooltip?: TTextDefaultType;
+  tooltip?: TTextAreaDefaultType;
 
   /**
    * 组件状态：可用、隐藏、只读
@@ -164,13 +157,8 @@ const XImgUpload: XInputImgUploadSchema = {
     },
     ...dataFieldConfig,
     {
-      key: 'description',
-      name: '描述信息',
-      type: CONFIG_TYPES.DESCRIPTION_INPUT
-    },
-    {
       key: 'tooltip',
-      name: '提示文字',
+      name: '描述信息',
       type: CONFIG_TYPES.TOOLTIP_INPUT
     },
     layoutConfig,
@@ -201,7 +189,6 @@ const XImgUpload: XInputImgUploadSchema = {
       display: true,
     },
     dataField: [],
-    description: '',
     tooltip: '',
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],

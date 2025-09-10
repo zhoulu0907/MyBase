@@ -20,7 +20,6 @@ const XStaticText = memo((props: XStaticTextConfig & { runtime?: boolean }) => {
     bgColor,
     labelColSpan = 0,
     maxLength,
-    description,
     runtime = true
   } = props;
 
@@ -38,8 +37,7 @@ const XStaticText = memo((props: XStaticTextConfig & { runtime?: boolean }) => {
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{
           margin: 0,
-          opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,
-          pointerEvents: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset'
+          opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
       >
         <Input
@@ -51,11 +49,11 @@ const XStaticText = memo((props: XStaticTextConfig & { runtime?: boolean }) => {
             width: '100%',
             color,
             textAlign: align,
-            backgroundColor: bgColor
+            backgroundColor: bgColor,
+            pointerEvents: runtime ? 'unset' : 'none'
           }}
         />
       </Form.Item>
-      <div className='description showEllipsis' style={{marginLeft: labelColSpan}}>{description}</div>
     </div>
   );
 });
