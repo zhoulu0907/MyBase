@@ -20,10 +20,14 @@ public class BeanUtils {
         MODEL_MAPPER.getConfiguration()
                 .setMatchingStrategy(MatchingStrategies.STRICT)
                 .setAmbiguityIgnored(true)
+                .setSkipNullEnabled(true)
                 .setFieldAccessLevel(Configuration.AccessLevel.PRIVATE);
     }
 
     public static <T> T toBean(Object source, Class<T> targetClass) {
+        if (source == null) {
+            return null;
+        }
         return MODEL_MAPPER.map(source, targetClass);
     }
 

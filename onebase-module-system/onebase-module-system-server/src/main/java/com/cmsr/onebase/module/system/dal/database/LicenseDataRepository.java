@@ -4,11 +4,16 @@ import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.system.controller.admin.license.vo.LicensePageReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.license.LicenseDO;
+import com.cmsr.onebase.module.system.enums.license.LicenseStatusEnum;
+import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Compare;
+import org.anyline.entity.Order;
 import org.springframework.stereotype.Repository;
 
 import cn.hutool.core.util.StrUtil;
+
+import java.util.List;
 
 /**
  * License数据访问层
@@ -73,5 +78,17 @@ public class LicenseDataRepository extends DataRepository<LicenseDO> {
      */
     public java.util.List<LicenseDO> findSimpleList() {
         return findAllByConfig(new DefaultConfigStore());
+    }
+
+    /**
+     * 获取激活的License列表
+     *
+     * @return License列表
+     */
+    public List<LicenseDO> findActiveLicenseList() {
+        ConfigStore config = new DefaultConfigStore()
+                .and(Compare.EQUAL, LicenseDO.STATUS, LicenseStatusEnum.ENABLE.getStatus())
+                .order(LicenseDO.CREATE_TIME, Order.TYPE.DESC);
+        return findAllByConfig(config);
     }
 }
