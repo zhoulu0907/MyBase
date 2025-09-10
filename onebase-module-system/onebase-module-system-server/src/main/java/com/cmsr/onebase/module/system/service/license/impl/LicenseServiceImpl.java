@@ -17,6 +17,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.multipart.MultipartFile;
@@ -25,6 +26,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static com.cmsr.onebase.framework.license.core.handler.LicenseCheckHandler.LICENSE_KEY;
 import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
 import static com.cmsr.onebase.module.system.util.encrypt.SM4Utils.sm4Encrypt;
 
@@ -45,6 +47,9 @@ public class LicenseServiceImpl implements LicenseService {
 
     @Resource
     private LicenseDataRepository licenseDataRepository;
+
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
 
     /**
      * 创建License
@@ -91,6 +96,19 @@ public class LicenseServiceImpl implements LicenseService {
         return licenseDataRepository.findById(id);
     }
 
+    @Override
+    public LicenseDO getLatestActiveLicense() {
+        List<LicenseDO> licenseDOList = licenseDataRepository.findActiveLicenseList();
+        if (CollectionUtils.isEmpty(licenseDOList)) {
+            log.error("error -------------> License为空！！！");
+            return null;
+        }
+        if (licenseDOList.size() > 1) {
+            log.error("error -------------> 存在多个激活的License！！！");
+        }
+        return licenseDOList.get(0);
+    }
+
     /**
      * 根据状态获取License
      *
@@ -110,12 +128,7 @@ public class LicenseServiceImpl implements LicenseService {
      */
     @Override
     public PageResult<LicenseDO> getLicensePage(LicensePageReqVO reqVO) {
-        try {
-            return licenseDataRepository.findPage(reqVO);
-        } catch (Exception e) {
-            log.error("分页查询License失败", e);
-            throw new RuntimeException("分页查询License失败", e);
-        }
+        return licenseDataRepository.findPage(reqVO);
     }
 
     /**
@@ -136,7 +149,7 @@ public class LicenseServiceImpl implements LicenseService {
 
     @Override
     public Long importLicense(MultipartFile file) {
-        
+
         try {
             // 直接从MultipartFile获取字节数据并转换为字符串
             byte[] encryptedBytes = file.getBytes();
@@ -166,6 +179,10 @@ public class LicenseServiceImpl implements LicenseService {
             // 创建License时，将状态设置为ENABLE
             licenseSaveReqVO.setStatus(LicenseStatusEnum.ENABLE.getStatus());
             Long licenseId = createLicense(licenseSaveReqVO);
+
+            // 删除License缓存，确保下次获取License时，会重新从数据库中获取
+            stringRedisTemplate.delete(LICENSE_KEY);
+
             log.info("insert and enable new license ------> {}", licenseId);
             return licenseId;
         } catch (Exception e) {

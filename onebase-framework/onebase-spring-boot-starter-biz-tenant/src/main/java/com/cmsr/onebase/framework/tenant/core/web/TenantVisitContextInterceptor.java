@@ -1,9 +1,7 @@
 package com.cmsr.onebase.framework.tenant.core.web;
 
 import cn.hutool.core.util.ObjUtil;
-import com.cmsr.onebase.framework.common.biz.system.license.LicenseCommonApi;
 import com.cmsr.onebase.framework.common.exception.enums.GlobalErrorCodeConstants;
-import com.cmsr.onebase.framework.common.util.licensecheck.LicenseCheckUtils;
 import com.cmsr.onebase.framework.security.core.LoginUser;
 import com.cmsr.onebase.framework.security.core.service.SecurityFrameworkService;
 import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
@@ -14,10 +12,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.servlet.HandlerInterceptor;
 
-import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception0;
+import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -29,15 +26,8 @@ public class TenantVisitContextInterceptor implements HandlerInterceptor {
 
     private final SecurityFrameworkService securityFrameworkService;
 
-    private final LicenseCommonApi licenseCommonApi;
-
-    private final StringRedisTemplate stringRedisTemplate;
-
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-
-        // 检查平台是否有有效凭证
-        LicenseCheckUtils.checkLicense(licenseCommonApi,stringRedisTemplate);
 
         // 如果和当前租户编号一致，则直接跳过
         Long visitTenantId = WebFrameworkUtils.getVisitTenantId(request);
@@ -55,7 +45,7 @@ public class TenantVisitContextInterceptor implements HandlerInterceptor {
 
         // 校验用户是否可切换租户
         if (!securityFrameworkService.hasAnyPermissions(PERMISSION)) {
-            throw exception0(GlobalErrorCodeConstants.FORBIDDEN.getCode(), "您无权切换租户");
+            throw exception(GlobalErrorCodeConstants.FORBIDDEN.getCode(), "您无权切换租户");
         }
 
         // 【重点】切换租户编号

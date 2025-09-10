@@ -19,20 +19,20 @@ public class ServiceExceptionUtil {
     // ========== 和 ServiceException 的集成 ==========
 
     public static ServiceException exception(ErrorCode errorCode) {
-        return exception0(errorCode.getCode(), errorCode.getMsg());
+        return exception(errorCode.getCode(), errorCode.getMsg());
     }
 
     public static ServiceException exception(ErrorCode errorCode, Object... params) {
-        return exception0(errorCode.getCode(), errorCode.getMsg(), params);
+        return exception(errorCode.getCode(), errorCode.getMsg(), params);
     }
 
-    public static ServiceException exception0(Integer code, String messagePattern, Object... params) {
+    public static ServiceException exception(Integer code, String messagePattern, Object... params) {
         String message = doFormat(code, messagePattern, params);
         return new ServiceException(code, message);
     }
 
     public static ServiceException invalidParamException(String messagePattern, Object... params) {
-        return exception0(GlobalErrorCodeConstants.BAD_REQUEST.getCode(), messagePattern, params);
+        return exception(GlobalErrorCodeConstants.BAD_REQUEST.getCode(), messagePattern, params);
     }
 
     // ========== 格式化方法 ==========

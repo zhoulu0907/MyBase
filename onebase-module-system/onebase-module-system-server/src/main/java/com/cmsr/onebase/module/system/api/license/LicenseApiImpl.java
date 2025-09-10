@@ -20,8 +20,8 @@ public class LicenseApiImpl implements LicenseCommonApi {
     private LicenseService licenseService;
 
     @Override
-    public CommonResult<LicenseRespDTO> getLicenseByStatus(String status) {
-        LicenseDO licenseDO = licenseService.getLicenseByStatus(status);
+    public CommonResult<LicenseRespDTO> getActiveLicense() {
+        LicenseDO licenseDO = licenseService.getLatestActiveLicense();
         return success(BeanUtils.toBean(licenseDO, LicenseRespDTO.class));
     }
 
