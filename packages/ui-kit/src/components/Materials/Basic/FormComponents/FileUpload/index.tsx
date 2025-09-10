@@ -1,14 +1,17 @@
+import { memo, useState } from 'react';
+import { nanoid } from 'nanoid';
 import { Form, Message, Upload } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
 import { uploadFile } from '@onebase/platform-center';
-import { memo, useState } from 'react';
-import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
+import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
+import { STATUS_OPTIONS, STATUS_VALUES, LAYOUT_VALUES, LAYOUT_OPTIONS } from '../../../constants';
 import type { XInputFileUploadConfig } from './schema';
 import '../index.css';
 
 const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean }) => {
   const {
     label,
+    dataField,
     status,
     tooltip,
     // showPreview, // todo
@@ -44,6 +47,7 @@ const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean })
     <div className='formWrapper'>
       <Form.Item
         label={label.display && label.text}
+        field={dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.FILE_UPLOAD}_${nanoid()}`}
         layout={layout}
         tooltip={tooltip}
         rules={[{ required: verify?.required }]}
@@ -106,7 +110,7 @@ const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean })
           )}
         </Upload>
       </Form.Item>
-      <div className='description showEllipsis' style={{ marginLeft: labelColSpan }}>{description}</div>
+      <div className='description showEllipsis' style={{ marginLeft: layout === LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL] && label.display ? labelColSpan : 0 }}>{description}</div>
     </div>
   );
 });
