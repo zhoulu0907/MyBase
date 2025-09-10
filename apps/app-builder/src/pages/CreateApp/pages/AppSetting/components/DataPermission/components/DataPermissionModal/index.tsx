@@ -1,5 +1,5 @@
-import { Modal, Form, Input, Select, Checkbox, Button, Tag } from '@arco-design/web-react';
-import { IconPlus, IconClose } from '@arco-design/web-react/icon';
+import { Modal, Form, Input, Select, Checkbox, Button, Tag, Avatar } from '@arco-design/web-react';
+import { IconPlus, IconClose, IconEdit } from '@arco-design/web-react/icon';
 import styles from './index.module.less';
 import {
   DataOperationEnum,
@@ -15,7 +15,8 @@ import {
   // type RoleAddUserReq
 } from '@onebase/app';
 import { useState, useEffect, useCallback } from 'react';
-import { AddMembers } from '@onebase/common';
+// import { AddMembers } from '@onebase/common';
+import AddMembers from './members';
 import { debounce } from 'lodash-es';
 
 const FormItem = Form.Item;
@@ -91,12 +92,13 @@ const DataPermissionModal = (props: IProps) => {
   const [memberLoading, setMemberLoading] = useState<boolean>(false);
   const [membersVisible, setMembersVisible] = useState<boolean>(false);
   const [deptData, setDeptData] = useState<any>();
+  const [selectedMembers, setSelectedMembers] = useState<any[]>(initialFormValues.scopeLevel?.assignIds || []);
 
   useEffect(() => {
     // 初始化时检查entity字段是否有值
     const entityValue = form.getFieldValue('scopeFieldId');
     setEntitySelected(!!entityValue);
-  }, [scopeType, form]);
+  }, [selectedMembers, scopeType, form]);
   // 操作权限 全选反选
   function onChangeAll(checked: boolean) {
     if (checked) {
@@ -148,9 +150,40 @@ const DataPermissionModal = (props: IProps) => {
     []
   );
 
-  // 添加成员
-  const handleAddUser = async (selectedMembers: any[]) => {
-    console.log('添加成员 userIds:', selectedMembers);
+  // 添加成员/部门
+  const handleAddScope = async (scopeSpecified: any[]) => {
+    console.log('添加成员 userIds:', scopeSpecified);
+    // 更新已选择的成员状态
+    setSelectedMembers(scopeSpecified);
+
+    console.log('setSelectedMembers:', scopeSpecified);
+    // 提取ID数组
+    const ids = scopeSpecified.map((item) => item.key);
+    // 设置表单字段值
+    form.setFieldValue('scopeLevel.assignIds', ids);
+    // 获取当前scopeLevel的值
+    const currentScopeLevel = form.getFieldsValue().scopeLevel || {};
+    // 合并更新scopeLevel对象，保留现有属性
+    form.setFieldsValue({
+      scopeLevel: {
+        ...currentScopeLevel,
+        assignIds: ids
+      }
+    });
+    // 关闭弹窗
+    setMembersVisible(false);
+  };
+
+  const handleTagClose = (id: string) => {
+    console.log('handleTagClose id:', id);
+    // 从 selectedMembers 中移除指定ID的成员
+    const newSelectedMembers = selectedMembers.filter((member) => member.key !== id);
+    setSelectedMembers(newSelectedMembers);
+
+    // 同时更新表单字段值
+    const currentAssignIds = form.getFieldValue('scopeLevel.assignIds') || [];
+    const newAssignIds = currentAssignIds.filter((assignIds: string) => assignIds !== id);
+    form.setFieldValue('scopeLevel.assignIds', newAssignIds);
   };
 
   const handleOk = async () => {
@@ -160,6 +193,7 @@ const DataPermissionModal = (props: IProps) => {
       form.resetFields();
       setScopeType('');
       setDataFilters([]);
+      setSelectedMembers([]);
       setOperatePermission([DataOperationEnum.examine, DataOperationEnum.operate]);
       setCheckAll(true);
       setIndeterminate(false);
@@ -173,6 +207,7 @@ const DataPermissionModal = (props: IProps) => {
     form.resetFields();
     setScopeType('');
     setDataFilters([]);
+    setSelectedMembers([]);
     setOperatePermission([DataOperationEnum.examine, DataOperationEnum.operate]);
     setCheckAll(true);
     setIndeterminate(false);
@@ -198,7 +233,8 @@ const DataPermissionModal = (props: IProps) => {
           layout="vertical"
           className={styles.dataPermissionForm}
           onValuesChange={(changedValues) => {
-            console.log('Form changeValues:', changedValues);
+            console.log(`Form ${Object.keys(changedValues)} changeValues:`, changedValues);
+            // console.log(`Form scopeType changeValues:`, form.getFieldValue('scopeType'));
             // 当scopeFieldId字段值发生变化时，更新entitySelected状态
             if (Object.prototype.hasOwnProperty.call(changedValues, 'scopeFieldId')) {
               setEntitySelected(!!changedValues.scopeFieldId);
@@ -243,9 +279,6 @@ const DataPermissionModal = (props: IProps) => {
                     disabled={!entitySelected}
                     onChange={(value) => {
                       console.log('选择拥有者 value:', value);
-                      // setScopeOwner(value);
-                      // // 同时更新 scopeInfo
-                      // setScopeInfo((prev) => ({ ...prev, owner: value }));
                     }}
                   >
                     {dataPermissionPerson
@@ -267,11 +300,8 @@ const DataPermissionModal = (props: IProps) => {
                     placeholder="本人"
                     disabled={!entitySelected}
                     onChange={(value) => {
-                      console.log('权限范围 类型 value:', value);
                       setScopeType(value);
-                      // setScopeValue(value);
-                      // // 同时更新 scopeInfo
-                      // setScopeInfo((prev) => ({ ...prev, value }));
+                      setSelectedMembers([]);
                     }}
                   >
                     {dataPermissionScope.map((option) => (
@@ -284,22 +314,34 @@ const DataPermissionModal = (props: IProps) => {
               </div>
               {(scopeType === 'specifiedPerson' || scopeType === 'specifiedDepartment') && (
                 <div className={styles.scopeAssign}>
-                  <FormItem field="scopeLevel.assignId" noStyle>
-                    {({ value }) => {
-                      return value && value.length > 0 ? (
-                        <Tag closable onClose={() => form.setFieldValue('scopeLevel.assignId', undefined)}>
-                          {Array.isArray(value) ? value.join(', ') : value.toString()}
-                        </Tag>
-                      ) : (
-                        <Button
-                          type="primary"
-                          style={{ width: '100%' }}
-                          onClick={() => specifiedModalVisible(scopeType)}
-                        >
-                          {scopeType === 'specifiedPerson' ? '添加人员' : '添加部门'}
-                        </Button>
-                      );
-                    }}
+                  <FormItem field="scopeLevel.assignIds" noStyle>
+                    {selectedMembers && selectedMembers.length > 0 ? (
+                      <div className={styles.assignIdTag}>
+                        <div className={styles.tagContainer}>
+                          {selectedMembers.map((member) => (
+                            <Tag
+                              className={styles.tag}
+                              key={member.key}
+                              closable
+                              onClose={(e) => {
+                                e.preventDefault();
+                                handleTagClose(member.key);
+                              }}
+                            >
+                              {/* <Avatar size={16}>
+                                {scopeType === 'specifiedPerson' ? member.name?.slice(0, 1) || 'U' : '部'}
+                              </Avatar> */}
+                              <span>{member.name}</span>
+                            </Tag>
+                          ))}
+                        </div>
+                        <IconEdit className={styles.tagBtn} onClick={() => specifiedModalVisible(scopeType)}></IconEdit>
+                      </div>
+                    ) : (
+                      <Button type="primary" style={{ width: '100%' }} onClick={() => specifiedModalVisible(scopeType)}>
+                        {scopeType === 'specifiedPerson' ? '添加人员' : '添加部门'}
+                      </Button>
+                    )}
                   </FormItem>
                 </div>
               )}
@@ -578,9 +620,10 @@ const DataPermissionModal = (props: IProps) => {
         title={scopeType}
         data={deptData}
         loading={memberLoading}
+        selectedMembers={selectedMembers}
         onExpand={handleExpand}
         onSearch={debouncedUpdate}
-        onConfirm={handleAddUser}
+        onConfirm={handleAddScope}
         onCancel={() => setMembersVisible(false)}
       ></AddMembers>
     </>

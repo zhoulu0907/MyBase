@@ -30,7 +30,7 @@ const initialFormValues: AuthDataGroupVO = {
   scopeLevel: {
     personId: '',
     scopeType: undefined,
-    assignId: ['1', '2']
+    assignIds: []
   },
   dataFilters: [],
   isOperable: 1
