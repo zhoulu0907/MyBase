@@ -66,22 +66,21 @@ export default function EditorWorkspace() {
   }, [components]);
 
   // 复制组件
-  const handleCopyComponent = (comp: any) => {
+  const handleCopyComponent = (comp: any,id:string) => {
     addComponents(comp);
 
     const schema = getComponentSchema(comp.type);
     // console.log('schema', schema);
-
-    schema.config.cpName = comp.displayName;
-    schema.config.id = comp.id;
 
     const props = {
       id: comp.id,
       type: comp.type,
       ...schema
     };
-
-    setPageComponentSchemas(comp.id, props);
+    const data = pageComponentSchemas[id];
+    data.config.cpName = comp.displayName;
+    data.config.id = comp.id
+    setPageComponentSchemas(comp.id, {...props,...data});
     setCurComponentID(comp.id!);
     setCurComponentSchema(props);
     setShowDeleteButton(false);
@@ -296,7 +295,7 @@ export default function EditorWorkspace() {
                       onClick={(e) => {
                         e.stopPropagation();
                         console.log('复制组件: ', cp);
-                        handleCopyComponent({ ...cp, id: `${cp.type}-${uuidv4()}` });
+                        handleCopyComponent({ ...cp, id: `${cp.type}-${uuidv4()}` },cp.id);
                       }}
                     >
                       <IconCopy />
