@@ -61,3 +61,9 @@ export interface RenameFlowMgmtReq {
   id: string;
   processName: string;
 }
+
+export interface UpdateFlowMgmtDefinitionReq {
+  id: string | undefined;
+  processDefinition: string;
+  processStatus: number | string
+}
