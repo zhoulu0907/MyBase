@@ -11,11 +11,14 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class UserSimpleRespVO {
 
-    @Schema(description = "用户编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "1024")
+    @Schema(description = "用户编号", example = "1024")
     private Long id;
 
-    @Schema(description = "用户昵称", requiredMode = Schema.RequiredMode.REQUIRED, example = "onebase")
+    @Schema(description = "用户昵称", example = "昵称")
     private String nickname;
+
+    @Schema(description = "用户账号", example = "onebase")
+    private String username;
 
     @Schema(description = "用户邮箱", example = "a@b.cn")
     private String email;

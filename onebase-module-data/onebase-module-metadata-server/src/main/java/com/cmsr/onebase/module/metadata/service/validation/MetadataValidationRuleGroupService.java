@@ -4,6 +4,7 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.metadata.controller.admin.validation.vo.ValidationRuleDefinitionVO;
 import com.cmsr.onebase.module.metadata.controller.admin.validation.vo.ValidationRuleGroupPageReqVO;
 import com.cmsr.onebase.module.metadata.controller.admin.validation.vo.ValidationRuleGroupSaveReqVO;
+import com.cmsr.onebase.module.metadata.controller.admin.validation.vo.ValidationRuleGroupSimpleRespVO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.validation.MetadataValidationRuleGroupDO;
 import jakarta.validation.Valid;
 
@@ -54,6 +55,14 @@ public interface MetadataValidationRuleGroupService {
      * @return 校验规则分组分页
      */
     PageResult<MetadataValidationRuleGroupDO> getValidationRuleGroupPage(ValidationRuleGroupPageReqVO pageReqVO);
+
+    /**
+     * 获得校验规则分组分页(精简字段，用于前端下拉/选择)
+     *
+     * @param pageReqVO 分页查询
+     * @return 精简展示分页
+     */
+    PageResult<ValidationRuleGroupSimpleRespVO> getValidationRuleGroupPageSimple(ValidationRuleGroupPageReqVO pageReqVO);
 
     /**
      * 构建规则定义的二维数组结构

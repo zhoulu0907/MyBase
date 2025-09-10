@@ -82,6 +82,7 @@ public class MetadataValidationRangeServiceImpl implements MetadataValidationRan
             groupVO.setValMethod(vo.getValMethod());
             groupVO.setPopPrompt(vo.getPopPrompt());
             groupVO.setPopType(vo.getPopType());
+            groupVO.setValidationType("RANGE");
             groupId = ruleGroupService.createValidationRuleGroup(groupVO);
         }
 
@@ -122,6 +123,7 @@ public class MetadataValidationRangeServiceImpl implements MetadataValidationRan
             groupVO.setValMethod(reqVO.getValMethod());
             groupVO.setPopPrompt(reqVO.getPopPrompt());
             groupVO.setPopType(reqVO.getPopType());
+            groupVO.setValidationType("RANGE");
             groupId = ruleGroupService.createValidationRuleGroup(groupVO);
         }
 

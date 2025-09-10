@@ -29,6 +29,7 @@ public class MetadataValidationRuleGroupDO extends TenantBaseDO {
     public static final String VAL_METHOD  = "val_method";
     public static final String POP_PROMPT  = "pop_prompt";
     public static final String POP_TYPE    = "pop_type";
+    public static final String VALIDATION_TYPE = "validation_type";
 
     public MetadataValidationRuleGroupDO setId(Long id) {
         super.setId(id);
@@ -66,5 +67,10 @@ public class MetadataValidationRuleGroupDO extends TenantBaseDO {
      * 弹窗类型，如：短提示弹窗，长提示弹窗等
      */
     private String popType;
+
+    /**
+     * 校验类型：REQUIRED / UNIQUE / LENGTH / RANGE / FORMAT / CHILD_NOT_EMPTY / SELF_DEFINED
+     */
+    private String validationType;
 
 }
