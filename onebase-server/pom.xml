@@ -31,7 +31,12 @@
         </dependency>
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-module-metadata-server</artifactId>
+            <artifactId>onebase-module-metadata-build</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-module-metadata-runtime</artifactId>
             <version>${revision}</version>
         </dependency>
         <dependency>
