@@ -13,13 +13,13 @@ import static com.cmsr.onebase.framework.common.pojo.CommonResult.error;
 
 @Tag(name = "管理后台 - 定时任务")
 @RestController
-@RequestMapping("/infra/job")
+@RequestMapping("/infra/flow")
 @Validated
 public class JobController {
 
     @GetMapping("/page")
     @Operation(summary = "获得定时任务分页")
-    @PreAuthorize("@ss.hasPermission('infra:job:query')")
+    @PreAuthorize("@ss.hasPermission('infra:flow:query')")
     public CommonResult<String> getJobPage() {
         return error(-1, "Cloud 版本使用 XXL-Job 作为定时任务！请参考 https://cloud.cmsr.cn/job/ 文档操作");
     }

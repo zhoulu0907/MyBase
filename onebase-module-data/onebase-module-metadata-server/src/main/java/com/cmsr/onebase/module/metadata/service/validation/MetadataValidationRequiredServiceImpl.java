@@ -84,6 +84,7 @@ public class MetadataValidationRequiredServiceImpl implements MetadataValidation
             groupVO.setValMethod(vo.getValMethod());
             groupVO.setPopPrompt(vo.getPopPrompt());
             groupVO.setPopType(vo.getPopType());
+            groupVO.setValidationType("REQUIRED");
             groupId = ruleGroupService.createValidationRuleGroup(groupVO);
         }
 
@@ -124,6 +125,7 @@ public class MetadataValidationRequiredServiceImpl implements MetadataValidation
             groupVO.setValMethod(reqVO.getValMethod());
             groupVO.setPopPrompt(reqVO.getPopPrompt());
             groupVO.setPopType(reqVO.getPopType());
+            groupVO.setValidationType("REQUIRED");
             groupId = ruleGroupService.createValidationRuleGroup(groupVO);
         }
 

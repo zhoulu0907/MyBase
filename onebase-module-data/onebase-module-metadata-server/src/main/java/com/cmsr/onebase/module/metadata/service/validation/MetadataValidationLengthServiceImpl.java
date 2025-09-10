@@ -84,6 +84,7 @@ public class MetadataValidationLengthServiceImpl implements MetadataValidationLe
             groupVO.setValMethod(vo.getValMethod());
             groupVO.setPopPrompt(vo.getPopPrompt());
             groupVO.setPopType(vo.getPopType());
+            groupVO.setValidationType("LENGTH");
             groupId = ruleGroupService.createValidationRuleGroup(groupVO);
         }
 
@@ -124,6 +125,7 @@ public class MetadataValidationLengthServiceImpl implements MetadataValidationLe
             groupVO.setValMethod(reqVO.getValMethod());
             groupVO.setPopPrompt(reqVO.getPopPrompt());
             groupVO.setPopType(reqVO.getPopType());
+            groupVO.setValidationType("LENGTH");
             groupId = ruleGroupService.createValidationRuleGroup(groupVO);
         }
 

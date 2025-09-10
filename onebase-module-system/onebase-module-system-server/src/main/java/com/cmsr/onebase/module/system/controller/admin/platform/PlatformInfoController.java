@@ -7,13 +7,10 @@ import com.cmsr.onebase.module.system.controller.admin.platform.vo.PlatformInfoR
 import com.cmsr.onebase.module.system.controller.admin.user.vo.user.*;
 import com.cmsr.onebase.module.system.dal.dataobject.license.LicenseDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
-import com.cmsr.onebase.module.system.enums.license.LicenseStatusEnum;
 import com.cmsr.onebase.module.system.enums.permission.AdminTypeEnum;
 import com.cmsr.onebase.module.system.enums.tenant.TenantStatusEnum;
 import com.cmsr.onebase.module.system.enums.user.UserStatusEnum;
 import com.cmsr.onebase.module.system.service.license.LicenseService;
-import com.cmsr.onebase.module.system.service.permission.PermissionService;
-import com.cmsr.onebase.module.system.service.permission.RoleService;
 import com.cmsr.onebase.module.system.service.tenant.TenantService;
 import com.cmsr.onebase.module.system.service.user.AdminUserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -55,7 +52,7 @@ public class PlatformInfoController {
     @PreAuthorize("@ss.hasPermission('system:platform-info:get')")
     public CommonResult<PlatformInfoRespVo> getPlatformInfo() {
 
-        LicenseDO license = licenseService.getLicenseByStatus(LicenseStatusEnum.ENABLE.getStatus());
+        LicenseDO license = licenseService.getLatestActiveLicense();
         PlatformInfoRespVo platformInfoRespVo = BeanUtils.toBean(license, PlatformInfoRespVo.class);
         Integer tenantCount = tenantService.getTenantCountByStatus(TenantStatusEnum.NORMAL.getStatus());
         Integer userCount = userService.getUserCountByStatus(UserStatusEnum.NORMAL.getStatus());

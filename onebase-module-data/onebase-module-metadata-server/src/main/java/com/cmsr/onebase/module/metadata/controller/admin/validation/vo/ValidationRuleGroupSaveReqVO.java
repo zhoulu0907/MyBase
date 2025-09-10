@@ -42,6 +42,9 @@ public class ValidationRuleGroupSaveReqVO {
     @Schema(description = "弹窗类型", example = "SHORT")
     private String popType;
 
+    @Schema(description = "校验类型：REQUIRED / UNIQUE / LENGTH / RANGE / FORMAT / CHILD_NOT_EMPTY / SELF_DEFINED", example = "REQUIRED")
+    private String validationType;
+
     @Schema(description = "规则定义二维数组，外层数组元素间为OR关系，内层数组元素间为AND关系")
     @Valid
     private List<List<ValidationRuleDefinitionVO>> valueRules;
