@@ -2,8 +2,8 @@ package com.cmsr.onebase.module.build.controller.appresource;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.module.app.core.dto.appresource.ComponentDTO;
-import com.cmsr.onebase.module.build.controller.appresource.vo.GetComponentListByPageIdReqVO;
-import com.cmsr.onebase.module.build.controller.appresource.vo.GetComponentPageListByPageIdRespVO;
+import com.cmsr.onebase.module.build.vo.appresource.GetComponentListByPageIdReqVO;
+import com.cmsr.onebase.module.build.vo.appresource.GetComponentPageListByPageIdRespVO;
 import com.cmsr.onebase.module.build.service.appresource.ComponentSerivce;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

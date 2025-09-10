@@ -5,7 +5,7 @@ import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.app.core.dal.database.tag.AppTagRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.tag.TagDO;
 import com.cmsr.onebase.module.app.core.enums.AppErrorCodeConstants;
-import com.cmsr.onebase.module.build.controller.tag.vo.TagRespVO;
+import com.cmsr.onebase.module.build.vo.tag.TagRespVO;
 import jakarta.annotation.Resource;
 import lombok.Setter;
 import org.springframework.stereotype.Service;

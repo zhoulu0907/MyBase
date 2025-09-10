@@ -2,8 +2,8 @@ package com.cmsr.onebase.module.build.controller.auth;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.module.app.core.vo.auth.AuthPermissionReqVO;
-import com.cmsr.onebase.module.build.controller.auth.vo.*;
 import com.cmsr.onebase.module.build.service.auth.AppAuthPermissionService;
+import com.cmsr.onebase.module.build.vo.auth.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;

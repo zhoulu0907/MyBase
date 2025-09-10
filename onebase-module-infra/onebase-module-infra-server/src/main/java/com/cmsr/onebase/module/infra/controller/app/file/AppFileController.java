@@ -21,8 +21,8 @@ import org.springframework.web.multipart.MultipartFile;
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 
 @Tag(name = "用户 App - 文件存储")
-@RestController
-@RequestMapping("/infra/file")
+//@RestController
+//@RequestMapping("/infra/file")
 @Validated
 @Slf4j
 public class AppFileController {

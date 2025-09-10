@@ -11,10 +11,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.module.app.core.dto.appresource.CopyPageSetDTO;
 import com.cmsr.onebase.module.app.core.dto.appresource.CreatePageSetDTO;
-import com.cmsr.onebase.module.build.controller.appresource.vo.DeletePageSetReqVO;
-import com.cmsr.onebase.module.build.controller.appresource.vo.LoadPageSetReqVO;
-import com.cmsr.onebase.module.build.controller.appresource.vo.LoadPageSetRespVO;
-import com.cmsr.onebase.module.build.controller.appresource.vo.SavePageSetReqVO;
+import com.cmsr.onebase.module.build.vo.appresource.DeletePageSetReqVO;
+import com.cmsr.onebase.module.build.vo.appresource.LoadPageSetReqVO;
+import com.cmsr.onebase.module.build.vo.appresource.LoadPageSetRespVO;
+import com.cmsr.onebase.module.build.vo.appresource.SavePageSetReqVO;
 import com.cmsr.onebase.module.build.service.appresource.PageSetService;
 
 import io.swagger.v3.oas.annotations.Operation;

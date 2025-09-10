@@ -2,9 +2,9 @@ package com.cmsr.onebase.module.build.controller.version;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.build.controller.version.vo.VersionCreateReqVO;
-import com.cmsr.onebase.module.build.controller.version.vo.VersionPageReqVo;
-import com.cmsr.onebase.module.build.controller.version.vo.VersionPageRespVO;
+import com.cmsr.onebase.module.build.vo.version.VersionCreateReqVO;
+import com.cmsr.onebase.module.build.vo.version.VersionPageReqVo;
+import com.cmsr.onebase.module.build.vo.version.VersionPageRespVO;
 import com.cmsr.onebase.module.build.service.version.AppVersionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

@@ -10,10 +10,10 @@ import com.cmsr.onebase.module.app.core.dto.appresource.CreatePageSetDTO;
 import com.cmsr.onebase.module.app.core.enums.AppErrorCodeConstants;
 import com.cmsr.onebase.module.app.core.enums.menu.MenuTypeEnum;
 
-import com.cmsr.onebase.module.build.controller.menu.vo.*;
 import com.cmsr.onebase.module.build.service.AppCommonService;
 import com.cmsr.onebase.module.build.service.appresource.PageSetService;
 import com.cmsr.onebase.module.build.util.MenuUtils;
+import com.cmsr.onebase.module.build.vo.menu.*;
 import jakarta.annotation.Resource;
 import lombok.Setter;
 import org.apache.commons.collections4.MapUtils;

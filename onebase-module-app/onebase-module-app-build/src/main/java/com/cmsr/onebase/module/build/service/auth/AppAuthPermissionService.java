@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.build.service.auth;
 
 import com.cmsr.onebase.module.app.core.vo.auth.AuthPermissionReqVO;
-import com.cmsr.onebase.module.build.controller.auth.vo.*;
+import com.cmsr.onebase.module.build.vo.auth.*;
 import jakarta.validation.Valid;
 
 /**

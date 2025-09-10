@@ -1,0 +1,48 @@
+{
+  "nodes": [
+    {
+      "id": "start_0",
+      "type": "start",
+      "data": {
+        "title": "触发节点",
+        "outputs": {
+          "type": "object",
+          "properties": {}
+        }
+      },
+      "blocks": []
+    },
+    {
+      "id": "dataAdd_aDZOjQgQfRTT8spjoPd38",
+      "type": "dataAdd",
+      "data": {
+        "title": "数据新增节点"
+      },
+      "blocks": []
+    },
+    {
+      "id": "dataDelete_Ja0V1nzv7yZBDRnyrZe82",
+      "type": "dataDelete",
+      "data": {
+        "title": "数据删除节点"
+      },
+      "blocks": []
+    },
+    {
+      "id": "dataUpdate_8Sqk3YHYUVr0jU0qtPkDx",
+      "type": "dataUpdate",
+      "data": {
+        "title": "数据更新节点"
+      },
+      "blocks": []
+    },
+    {
+      "id": "end_0",
+      "type": "end",
+      "data": {
+        "title": "结束"
+      },
+      "blocks": []
+    }
+  ]
+}

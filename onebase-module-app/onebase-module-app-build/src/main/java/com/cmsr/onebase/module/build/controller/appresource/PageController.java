@@ -1,8 +1,8 @@
 package com.cmsr.onebase.module.build.controller.appresource;
 
 import com.cmsr.onebase.module.app.core.dto.appresource.PageDTO;
-import com.cmsr.onebase.module.build.controller.appresource.vo.GetFormPageListByAppIdReqVO;
-import com.cmsr.onebase.module.build.controller.appresource.vo.GetFormPageListByAppIdRespVO;
+import com.cmsr.onebase.module.build.vo.appresource.GetFormPageListByAppIdReqVO;
+import com.cmsr.onebase.module.build.vo.appresource.GetFormPageListByAppIdRespVO;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.module.app.core.dto.appresource.UpdatePageNameDTO;
-import com.cmsr.onebase.module.build.controller.appresource.vo.UpdatePageNameReqVO;
+import com.cmsr.onebase.module.build.vo.appresource.UpdatePageNameReqVO;
 import com.cmsr.onebase.module.build.service.appresource.PageService;
 
 import io.swagger.v3.oas.annotations.Operation;

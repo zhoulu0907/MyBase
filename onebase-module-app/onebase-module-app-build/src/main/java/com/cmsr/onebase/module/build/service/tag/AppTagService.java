@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.build.service.tag;
 
-import com.cmsr.onebase.module.build.controller.tag.vo.TagRespVO;
+import com.cmsr.onebase.module.build.vo.tag.TagRespVO;
 
 import java.util.List;
 

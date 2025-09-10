@@ -2,8 +2,8 @@ package com.cmsr.onebase.module.build.controller.auth;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.build.controller.auth.vo.*;
 import com.cmsr.onebase.module.build.service.auth.AppAuthRoleService;
+import com.cmsr.onebase.module.build.vo.auth.*;
 import com.cmsr.onebase.module.system.api.dept.dto.DeptAndUsersRespDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
