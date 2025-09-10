@@ -50,11 +50,11 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     }
   }, []);
 
+  // 根据流程id获取流程详细信息
   const handleGetFlowInfo = async (flowId: string) => {
     const res = await getFlowMgmt(flowId);
     console.log('res: ', res);
     if (res && res.triggerConfig && res.triggerConfig.pageId) {
-      console.log('pageId: ', res.triggerConfig.pageId);
       payloadForm.setFieldValue('pageId', res.triggerConfig.pageId);
       handleGetComponentList(res.triggerConfig.pageId);
     }

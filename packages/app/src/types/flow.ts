@@ -35,6 +35,7 @@ export interface ListFlowMgmtReq {
 
 export interface TriggerConfig {
   pageId?: string;
+  entityId?: string;
 }
 
 export interface CreateFlowMgmtReq {
