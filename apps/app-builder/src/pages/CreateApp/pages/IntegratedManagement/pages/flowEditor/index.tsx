@@ -3,7 +3,7 @@ import { Button, Message } from '@arco-design/web-react';
 import React from 'react';
 import TriggerEditor from '../../triggerEditor';
 import styles from './index.module.less';
-import { updateFlowMgmtDefinition } from '@onebase/app';
+import { ProcessStatus, updateFlowMgmtDefinition } from '@onebase/app';
 
 /**
  * 流程编辑页面
@@ -21,8 +21,7 @@ const FlowEditorPage: React.FC = () => {
     const params = {
       id: flowId || '',
       processDefinition: JSON.stringify(processDefinitionJson),
-      // 0-禁用，1-启用
-      processStatus: 0
+      processStatus: ProcessStatus.DISABLED
     };
     const res = await updateFlowMgmtDefinition(params);
     if (res) {
