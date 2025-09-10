@@ -46,8 +46,7 @@ export const StartFormInitData = {
         title: '界面交互触发节点',
         initialData: {
           id: 'start_form_0',
-          ignoreEmptyChange: false,
-          relatedSubtableTrigger: false
+          isChildTriggerAllowed: false
         },
         outputs: {
           type: 'object',
