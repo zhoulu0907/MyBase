@@ -3,17 +3,19 @@ import { DatePicker, Form } from '@arco-design/web-react';
 import { nanoid } from 'nanoid';
 import { memo } from 'react';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
-import type { XInputDateTimePickerConfig } from './schema';
 import '../index.css';
+import type { XInputDateTimePickerConfig } from './schema';
 
 const XDateTimePicker = memo((props: XInputDateTimePickerConfig & { runtime?: boolean }) => {
   const { label, dataField, tooltip, status, defaultValue, verify, layout, labelColSpan = 0, runtime = true } = props;
 
   return (
-    <div className='formWrapper'>
+    <div className="formWrapper">
       <Form.Item
         label={label.display && label.text}
-        field={dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.INPUT_TEXT}_${nanoid()}`}
+        field={
+          dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.INPUT_TEXT}_${nanoid()}`
+        }
         layout={layout}
         tooltip={tooltip}
         labelCol={{
@@ -27,14 +29,19 @@ const XDateTimePicker = memo((props: XInputDateTimePickerConfig & { runtime?: bo
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
       >
-        {
-          status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? <div>{defaultValue || '--'}</div> :
-            <DatePicker showTime defaultValue={defaultValue} style={{
+        {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? (
+          <div>{defaultValue || '--'}</div>
+        ) : (
+          <DatePicker
+            showTime
+            defaultValue={defaultValue}
+            style={{
               width: '100%',
               pointerEvents: runtime ? 'unset' : 'none'
-            }} />
-        }
-      </Form.Item>11
+            }}
+          />
+        )}
+      </Form.Item>
     </div>
   );
 });
