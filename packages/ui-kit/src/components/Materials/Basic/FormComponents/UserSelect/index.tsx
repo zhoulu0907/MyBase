@@ -11,7 +11,7 @@ import '../index.css';
 const Option = Select.Option;
 
 const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean }) => {
-  const { label, dataField, tooltip, status, verify, layout, labelColSpan = 0, description, runtime } = props;
+  const { label, dataField, tooltip, status, verify, layout, labelColSpan = 0, runtime } = props;
   const [userData, setUserData] = useState<UserVO[]>([]);
   // 分页
   const [pageNo, setPageNo] = useState<number>(1);
@@ -84,8 +84,7 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean })
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{
           margin: 0,
-          opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,
-          pointerEvents: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset'
+          opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
       >
         <Select
@@ -94,8 +93,11 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean })
           filterOption={false}
           onSearch={debouncedSearch}
           onPopupScroll={scrollHandler}
-          style={{ width: '100%' }}
           allowClear
+          style={{
+            width: '100%',
+            pointerEvents: runtime ? 'unset' : 'none'
+          }}
         >
           {userData.map((option) => (
             <Option key={option.id} value={option.id}>
@@ -104,7 +106,6 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean })
           ))}
         </Select>
       </Form.Item>
-      <div className='description showEllipsis' style={{marginLeft: labelColSpan}}>{description}</div>
     </div>
   );
 });

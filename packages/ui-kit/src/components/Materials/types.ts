@@ -119,14 +119,6 @@ export interface IPlaceholderConfigType {
   placeholder?: string;
 }
 
-// 描述配置
-export interface IDescriptionConfigType {
-  key: string;
-  name: string;
-  type: typeof CONFIG_TYPES.DESCRIPTION_INPUT;
-  placeholder?: string;
-}
-
 // 提示配置
 export interface ITooltipConfigType {
   key: string;

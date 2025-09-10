@@ -1,44 +1,43 @@
 import {
-    baseConfig,
-    baseDefault,
-    dataFieldConfig,
-    labelColSpanConfig,
-    layoutConfig,
-    statusConfig,
-    widthConfig,
-    type ICommonBaseType,
-    type TLayoutSelectKeyType,
-    type TStatusSelectKeyType,
-    type TWidthSelectKeyType
+  baseConfig,
+  baseDefault,
+  dataFieldConfig,
+  labelColSpanConfig,
+  layoutConfig,
+  statusConfig,
+  widthConfig,
+  type ICommonBaseType,
+  type TLayoutSelectKeyType,
+  type TStatusSelectKeyType,
+  type TWidthSelectKeyType
 } from '../../../common';
 import {
-    CONFIG_TYPES,
-    LAYOUT_OPTIONS,
-    LAYOUT_VALUES,
-    STATUS_OPTIONS,
-    STATUS_VALUES,
-    WIDTH_OPTIONS,
-    WIDTH_VALUES
+  CONFIG_TYPES,
+  LAYOUT_OPTIONS,
+  LAYOUT_VALUES,
+  STATUS_OPTIONS,
+  STATUS_VALUES,
+  WIDTH_OPTIONS,
+  WIDTH_VALUES
 } from '../../../constants';
 import type {
-    IBooleanConfigType,
-    IDataFieldConfigType,
-    IDescriptionConfigType,
-    ILabelConfigType,
-    ILayoutConfigType,
-    INumberConfigType,
-    IPlaceholderConfigType,
-    IStatusConfigType,
-    ITextAreaConfigType,
-    ITextConfigType,
-    ITooltipConfigType,
-    IWidthConfigType,
-    TBooleanDefaultType,
-    TNumberDefaultType,
-    TSelectDefaultType,
-    TTextAreaDefaultType,
-    TTextDefaultType,
-    IVerifyConfigType
+  IBooleanConfigType,
+  IDataFieldConfigType,
+  ILabelConfigType,
+  ILayoutConfigType,
+  INumberConfigType,
+  IPlaceholderConfigType,
+  IStatusConfigType,
+  ITextAreaConfigType,
+  ITextConfigType,
+  ITooltipConfigType,
+  IWidthConfigType,
+  TBooleanDefaultType,
+  TNumberDefaultType,
+  TSelectDefaultType,
+  TTextAreaDefaultType,
+  TTextDefaultType,
+  IVerifyConfigType
 } from '../../../types';
 
 export interface XRichTextSchema {
@@ -50,7 +49,6 @@ export type TXRichTextEditData = Array<
   | ITextConfigType
   | ILabelConfigType
   | IPlaceholderConfigType
-  | IDescriptionConfigType
   | ITooltipConfigType
   | IStatusConfigType<TStatusSelectKeyType>
   | IWidthConfigType<TWidthSelectKeyType>
@@ -79,14 +77,9 @@ export interface XRichTextConfig extends ICommonBaseType {
   dataField: TTextDefaultType[];
 
   /**
-   * 描述信息（显示在输入框下方，辅助说明）
+   * 描述信息（鼠标悬浮时显示）
    */
-  description: TTextAreaDefaultType;
-
-  /**
-   * 提示文字（鼠标悬浮时显示）
-   */
-  tooltip?: TTextDefaultType;
+  tooltip?: TTextAreaDefaultType;
 
   /**
    * 组件状态：可用、隐藏、只读
@@ -138,14 +131,14 @@ const XRichText: XRichTextSchema = {
     },
     ...dataFieldConfig,
     {
-      key: 'description',
+      key: 'tooltip',
       name: '描述信息',
-      type: CONFIG_TYPES.DESCRIPTION_INPUT
+      type: CONFIG_TYPES.TOOLTIP_INPUT
     },
     {
-      key: 'tooltip',
-      name: '提示文字',
-      type: CONFIG_TYPES.TOOLTIP_INPUT
+      key: 'defaultValue',
+      name: '默认值',
+      type: CONFIG_TYPES.TEXT_INPUT
     },
     layoutConfig,
     labelColSpanConfig,
@@ -169,9 +162,8 @@ const XRichText: XRichTextSchema = {
       display: true,
     },
     dataField: [],
-    description: '',
     tooltip: '',
-    width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
+    width: WIDTH_VALUES[WIDTH_OPTIONS.FULL],
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     defaultValue: '',
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],

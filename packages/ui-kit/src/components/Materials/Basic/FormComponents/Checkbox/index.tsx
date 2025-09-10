@@ -21,7 +21,6 @@ const XCheckbox = memo((props: XInputCheckboxConfig & { runtime?: boolean }) => 
     labelColSpan = 0,
     // allChecked,
     runtime = true,
-    description,
   } = props;
 
   return (
@@ -40,20 +39,22 @@ const XCheckbox = memo((props: XInputCheckboxConfig & { runtime?: boolean }) => 
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{
           margin: 0,
-          opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1
+          opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
       >
-        <CheckboxGroup
-          defaultValue={defaultValue?.filter(op => op.chosen).map(op => op.value)}
-          options={defaultValue}
-          direction={direction}
-          style={{
-            width: '100%',
-            pointerEvents: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset'
-          }}
-        />
+        {
+          status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? <div>{defaultValue?.filter(op => op.chosen).map(op => op.label).join('，') || '--'}</div> :
+            <CheckboxGroup
+              defaultValue={defaultValue?.filter(op => op.chosen).map(op => op.value)}
+              options={defaultValue}
+              direction={direction}
+              style={{
+                width: '100%',
+                pointerEvents: runtime ? 'unset' : 'none'
+              }}
+            />
+        }
       </Form.Item>
-      <div className='description showEllipsis' style={{marginLeft: labelColSpan}}>{description}</div>
     </div>
   );
 });

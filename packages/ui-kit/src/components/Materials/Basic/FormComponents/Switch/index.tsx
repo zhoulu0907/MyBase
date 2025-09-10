@@ -7,7 +7,7 @@ import type { XInputSwitchConfig } from './schema';
 import '../index.css';
 
 const XSwitch = memo((props: XInputSwitchConfig & { runtime?: boolean }) => {
-  const { label, dataField, tooltip, status, defaultValue, layout, labelColSpan = 0, description, runtime = true } = props;
+  const { label, dataField, tooltip, status, defaultValue, layout, labelColSpan = 0, runtime = true } = props;
 
   return (
     <div className='formWrapper'>
@@ -23,13 +23,16 @@ const XSwitch = memo((props: XInputSwitchConfig & { runtime?: boolean }) => {
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{
           margin: 0,
-          opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,
-          pointerEvents: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset'
+          opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
       >
-        <Switch defaultChecked={defaultValue} style={{ marginTop: !!description ? 4 : 0 }} />
+        {
+          status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? <div>{defaultValue ? '开启' : '关闭'}</div> :
+            <Switch defaultChecked={defaultValue} style={{
+              pointerEvents: runtime ? 'unset' : 'none'
+            }} />
+        }
       </Form.Item>
-      <div className='description showEllipsis' style={{marginLeft: labelColSpan}}>{description}</div>
     </div>
   );
 });

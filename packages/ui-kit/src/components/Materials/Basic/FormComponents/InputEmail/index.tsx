@@ -20,7 +20,6 @@ const XInputEmail = memo((props: XInputEmailConfig & { runtime?: boolean }) => {
     color,
     bgColor,
     labelColSpan = 0,
-    description,
     runtime = true
   } = props;
 
@@ -64,25 +63,26 @@ const XInputEmail = memo((props: XInputEmailConfig & { runtime?: boolean }) => {
         style={{
           flex: 1,
           margin: 0,
-          opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,
-          pointerEvents: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset'
+          opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
       >
-        <Input
-          status={InputStatus}
-          readOnly={status === STATUS_VALUES[STATUS_OPTIONS.READONLY]}
-          defaultValue={defaultValue}
-          style={{
-            width: '100%',
-            color,
-            textAlign: align,
-            backgroundColor: bgColor
-          }}
-          placeholder={placeholder}
-          onChange={setValue}
-        />
+        {
+          status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? <div>{defaultValue || '--'}</div> :
+            <Input
+              status={InputStatus}
+              defaultValue={defaultValue}
+              style={{
+                width: '100%',
+                color,
+                textAlign: align,
+                backgroundColor: bgColor,
+                pointerEvents: runtime ? 'unset' : 'none'
+              }}
+              placeholder={placeholder}
+              onChange={setValue}
+            />
+        }
       </Form.Item>
-      <div className='description showEllipsis' style={{marginLeft: labelColSpan}}>{description}</div>
     </div>
   );
 });

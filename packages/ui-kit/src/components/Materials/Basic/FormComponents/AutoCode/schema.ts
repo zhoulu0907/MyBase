@@ -1,51 +1,50 @@
 import {
-    alignConfig,
-    baseConfig,
-    baseDefault,
-    dataFieldConfig,
-    labelColSpanConfig,
-    layoutConfig,
-    statusConfig,
-    widthConfig,
-    type ICommonBaseType,
-    type TAlignSelectKeyType,
-    type TLayoutSelectKeyType,
-    type TStatusSelectKeyType,
-    type TWidthSelectKeyType
+  alignConfig,
+  baseConfig,
+  baseDefault,
+  dataFieldConfig,
+  labelColSpanConfig,
+  layoutConfig,
+  statusConfig,
+  widthConfig,
+  type ICommonBaseType,
+  type TAlignSelectKeyType,
+  type TLayoutSelectKeyType,
+  type TStatusSelectKeyType,
+  type TWidthSelectKeyType
 } from '../../../common';
 import {
-    ALIGN_OPTIONS,
-    ALIGN_VALUES,
-    CONFIG_TYPES,
-    LAYOUT_OPTIONS,
-    LAYOUT_VALUES,
-    STATUS_OPTIONS,
-    STATUS_VALUES,
-    WIDTH_OPTIONS,
-    WIDTH_VALUES
+  ALIGN_OPTIONS,
+  ALIGN_VALUES,
+  CONFIG_TYPES,
+  LAYOUT_OPTIONS,
+  LAYOUT_VALUES,
+  STATUS_OPTIONS,
+  STATUS_VALUES,
+  WIDTH_OPTIONS,
+  WIDTH_VALUES
 } from '../../../constants';
 import type {
-    IAlignConfigType,
-    IBooleanConfigType,
-    IColorConfigType,
-    IDataFieldConfigType,
-    IDescriptionConfigType,
-    ILabelConfigType,
-    ILayoutConfigType,
-    INumberConfigType,
-    IPlaceholderConfigType,
-    IStatusConfigType,
-    ITextAreaConfigType,
-    ITextConfigType,
-    ITooltipConfigType,
-    IWidthConfigType,
-    TBooleanDefaultType,
-    TNumberDefaultType,
-    TRadioDefaultType,
-    TSelectDefaultType,
-    TTextAreaDefaultType,
-    TTextDefaultType,
-    IVerifyConfigType
+  IAlignConfigType,
+  IBooleanConfigType,
+  IColorConfigType,
+  IDataFieldConfigType,
+  ILabelConfigType,
+  ILayoutConfigType,
+  INumberConfigType,
+  IPlaceholderConfigType,
+  IStatusConfigType,
+  ITextAreaConfigType,
+  ITextConfigType,
+  ITooltipConfigType,
+  IWidthConfigType,
+  TBooleanDefaultType,
+  TNumberDefaultType,
+  TRadioDefaultType,
+  TSelectDefaultType,
+  TTextAreaDefaultType,
+  TTextDefaultType,
+  IVerifyConfigType
 } from '../../../types';
 
 // 输入框组件的schema
@@ -61,7 +60,6 @@ export type TXautoCodeEditData = Array<
   | ITextConfigType
   | ILabelConfigType
   | IPlaceholderConfigType
-  | IDescriptionConfigType
   | ITooltipConfigType
   | IStatusConfigType<TStatusSelectKeyType>
   | IWidthConfigType<TWidthSelectKeyType>
@@ -98,14 +96,9 @@ export interface XautoCodeConfig extends ICommonBaseType {
   placeholder: TTextDefaultType;
 
   /**
-   * 描述信息（显示在输入框下方，辅助说明）
+   * 描述信息（鼠标悬浮时显示）
    */
-  description: TTextAreaDefaultType;
-
-  /**
-   * 提示文字（鼠标悬浮时显示）
-   */
-  tooltip?: TTextDefaultType;
+  tooltip?: TTextAreaDefaultType;
 
   /**
    * 组件状态：可用、隐藏、只读
@@ -188,15 +181,10 @@ const XautoCode: XautoCodeSchema = {
     //   type: CONFIG_TYPES.PLACEHOLDER_INPUT
     // },
     {
-      key: 'description',
+      key: 'tooltip',
       name: '描述信息',
-      type: CONFIG_TYPES.DESCRIPTION_INPUT
+      type: CONFIG_TYPES.TOOLTIP_INPUT
     },
-    // {
-    //   key: 'tooltip',
-    //   name: '提示文字',
-    //   type: CONFIG_TYPES.TOOLTIP_INPUT
-    // },
     layoutConfig,
     labelColSpanConfig,
     {
@@ -231,7 +219,6 @@ const XautoCode: XautoCodeSchema = {
     },
     dataField: [],
     placeholder: '',
-    description: '',
     tooltip: '',
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],

@@ -1,44 +1,45 @@
 import {
-    alignConfig,
-    baseConfig,
-    baseDefault,
-    labelColSpanConfig,
-    layoutConfig,
-    statusConfig,
-    widthConfig,
-    type ICommonBaseType,
-    type TAlignSelectKeyType,
-    type TLayoutSelectKeyType,
-    type TStatusSelectKeyType,
-    type TWidthSelectKeyType
+  alignConfig,
+  baseConfig,
+  baseDefault,
+  labelColSpanConfig,
+  layoutConfig,
+  statusConfig,
+  widthConfig,
+  type ICommonBaseType,
+  type TAlignSelectKeyType,
+  type TLayoutSelectKeyType,
+  type TStatusSelectKeyType,
+  type TWidthSelectKeyType
 } from '../../../common';
 import {
-    ALIGN_OPTIONS,
-    ALIGN_VALUES,
-    CONFIG_TYPES,
-    LAYOUT_OPTIONS,
-    LAYOUT_VALUES,
-    STATUS_OPTIONS,
-    STATUS_VALUES,
-    WIDTH_OPTIONS,
-    WIDTH_VALUES
+  ALIGN_OPTIONS,
+  ALIGN_VALUES,
+  CONFIG_TYPES,
+  LAYOUT_OPTIONS,
+  LAYOUT_VALUES,
+  STATUS_OPTIONS,
+  STATUS_VALUES,
+  WIDTH_OPTIONS,
+  WIDTH_VALUES
 } from '../../../constants';
 import type {
-    IAlignConfigType,
-    IBooleanConfigType,
-    ILabelConfigType,
-    ILayoutConfigType,
-    INumberConfigType,
-    IStatusConfigType,
-    ITextAreaConfigType,
-    ITextConfigType,
-    ITooltipConfigType,
-    IWidthConfigType,
-    TNumberDefaultType,
-    TRadioDefaultType,
-    TSelectDefaultType,
-    TTextDefaultType,
-    TBooleanDefaultType
+  IAlignConfigType,
+  IBooleanConfigType,
+  ILabelConfigType,
+  ILayoutConfigType,
+  INumberConfigType,
+  IStatusConfigType,
+  ITextAreaConfigType,
+  ITextConfigType,
+  ITooltipConfigType,
+  IWidthConfigType,
+  TNumberDefaultType,
+  TRadioDefaultType,
+  TSelectDefaultType,
+  TTextDefaultType,
+  TBooleanDefaultType,
+  TTextAreaDefaultType,
 } from '../../../types';
 
 // 输入框组件的schema
@@ -62,6 +63,7 @@ export type TXInputTextEditData = Array<
   | IStatusConfigType<TAlignSelectKeyType>
   | ILayoutConfigType<TLayoutSelectKeyType>
   | IAlignConfigType<TAlignSelectKeyType>
+  | TTextAreaDefaultType
 >;
 
 export interface XDividerConfig extends ICommonBaseType {
@@ -76,9 +78,9 @@ export interface XDividerConfig extends ICommonBaseType {
   };
 
   /**
-   * 提示文字（鼠标悬浮时显示）
+   * 描述信息（鼠标悬浮时显示）
    */
-  tooltip?: TTextDefaultType;
+  tooltip?: TTextAreaDefaultType;
 
   /**
    * 组件状态：可用、隐藏、只读
