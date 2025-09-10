@@ -84,9 +84,11 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
         }
       });
 
-      const newValidationTypes = await getFieldCheckTypeApi(filedIds);
-      console.log('validationTypes: ', newValidationTypes);
-      setValidationTypes(newValidationTypes);
+      if(filedIds?.length){
+        const newValidationTypes = await getFieldCheckTypeApi(filedIds);
+        console.log('validationTypes: ', newValidationTypes);
+        setValidationTypes(newValidationTypes);
+      }
 
       console.log('newConditionFields: ', newConditionFields);
 
