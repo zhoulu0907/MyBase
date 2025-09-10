@@ -37,7 +37,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.cmsr.onebase.framework.common.exception.enums.GlobalErrorCodeConstants.BAD_REQUEST;
-import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception0;
+import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.convertList;
 import static com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils.getLoginUserId;
@@ -106,10 +106,10 @@ public class OAuth2OpenController {
         // 1.1 校验授权类型
         OAuth2GrantTypeEnum grantTypeEnum = OAuth2GrantTypeEnum.getByGrantType(grantType);
         if (grantTypeEnum == null) {
-            throw exception0(BAD_REQUEST.getCode(), StrUtil.format("未知授权类型({})", grantType));
+            throw exception(BAD_REQUEST.getCode(), StrUtil.format("未知授权类型({})", grantType));
         }
         if (grantTypeEnum == OAuth2GrantTypeEnum.IMPLICIT) {
-            throw exception0(BAD_REQUEST.getCode(), "Token 接口不支持 implicit 授权模式");
+            throw exception(BAD_REQUEST.getCode(), "Token 接口不支持 implicit 授权模式");
         }
 
         // 1.2 校验客户端
@@ -258,7 +258,7 @@ public class OAuth2OpenController {
         if (StrUtil.equalsAny(responseType, "token")) {
             return OAuth2GrantTypeEnum.IMPLICIT;
         }
-        throw exception0(BAD_REQUEST.getCode(), "response_type 参数值只允许 code 和 token");
+        throw exception(BAD_REQUEST.getCode(), "response_type 参数值只允许 code 和 token");
     }
 
     private String getImplicitGrantRedirect(Long userId, OAuth2ClientDO client,
@@ -288,7 +288,7 @@ public class OAuth2OpenController {
     private String[] obtainBasicAuthorization(HttpServletRequest request) {
         String[] clientIdAndSecret = HttpUtils.obtainBasicAuthorization(request);
         if (ArrayUtil.isEmpty(clientIdAndSecret) || clientIdAndSecret.length != 2) {
-            throw exception0(BAD_REQUEST.getCode(), "client_id 或 client_secret 未正确传递");
+            throw exception(BAD_REQUEST.getCode(), "client_id 或 client_secret 未正确传递");
         }
         return clientIdAndSecret;
     }

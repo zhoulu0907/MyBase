@@ -28,7 +28,6 @@ import com.cmsr.onebase.module.system.dal.dataobject.permission.UserRoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
 import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantPackageDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
-import com.cmsr.onebase.module.system.enums.license.LicenseStatusEnum;
 import com.cmsr.onebase.module.system.enums.permission.AdminTypeEnum;
 import com.cmsr.onebase.module.system.enums.permission.PackageTypeEnum;
 import com.cmsr.onebase.module.system.enums.permission.RoleCodeEnum;
@@ -119,7 +118,7 @@ public class TenantServiceImpl implements TenantService {
 
     @Override
     public Long getAvailableAccountCount() {
-        LicenseDO license = licenseService.getLicenseByStatus(LicenseStatusEnum.ENABLE.getStatus());
+        LicenseDO license = licenseService.getLatestActiveLicense();
         Integer userCount = userService.getUserCountByStatus(UserStatusEnum.NORMAL.getStatus());
         if (license != null) {
             // 获取license总人数限制
@@ -173,7 +172,7 @@ public class TenantServiceImpl implements TenantService {
             createReqVO.setExpireTime(expireTime);
         }
 
-        LicenseDO license = licenseService.getLicenseByStatus(LicenseStatusEnum.ENABLE.getStatus());
+        LicenseDO license = licenseService.getLatestActiveLicense();
         // 检查分配人员数量是否超过license限制
         if (license != null) {
             // 获取license总租户数限制
@@ -258,7 +257,7 @@ public class TenantServiceImpl implements TenantService {
             validTenantWebsiteDuplicate(updateReqVO.getWebsite(), updateReqVO.getId());
         }
 
-        LicenseDO license = licenseService.getLicenseByStatus(LicenseStatusEnum.ENABLE.getStatus());
+        LicenseDO license = licenseService.getLatestActiveLicense();
         // 检查分配人员数量是否超过license限制
         if (license != null) {
             // 获取license总人数限制

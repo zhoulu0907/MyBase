@@ -49,6 +49,15 @@ public interface LicenseService {
      */
     LicenseDO getLicense(Long id);
 
+
+    /**
+     * 获取最新激活的License
+     *
+     * @return License
+     */
+    LicenseDO getLatestActiveLicense();
+
+
     /**
      * 根据状态获取License
      *
