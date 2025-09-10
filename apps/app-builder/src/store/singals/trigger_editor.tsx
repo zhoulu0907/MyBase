@@ -11,6 +11,9 @@ export const createTriggerEditorSignal = () => {
   const setNodeData = (nodeID: string, data: { [key: string]: any }) => {
     nodeData.value = { ...nodeData.value, [nodeID]: data };
   };
+  const setAllNodeData = (data:object) => {
+    nodeData.value = data;
+  };
   const clearNodeData = () => {
     nodeData.value = {};
   };
@@ -36,6 +39,7 @@ export const createTriggerEditorSignal = () => {
 
     nodeData,
     setNodeData,
+    setAllNodeData,
     clearNodeData,
 
     nodeId,
