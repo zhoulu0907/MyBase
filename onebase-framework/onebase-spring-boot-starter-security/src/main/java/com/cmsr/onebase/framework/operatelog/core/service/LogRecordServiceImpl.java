@@ -49,7 +49,7 @@ public class LogRecordServiceImpl implements ILogRecordService {
     }
 
     private static void fillUserFields(OperateLogCreateReqDTO reqDTO) {
-        // 使用 SecurityFrameworkUtils。因为要考虑，rpc、mq、job，它其实不是 web；
+        // 使用 SecurityFrameworkUtils。因为要考虑，rpc、mq、flow，它其实不是 web；
         LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
         if (loginUser == null) {
             return;

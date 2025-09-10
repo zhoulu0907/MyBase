@@ -41,7 +41,7 @@ tenant-id: {{adminTenantId}}
 GET {{baseUrl}}/system/tenant/page?pageNum=1&pageSize=10
 Content-Type: application/json
 Authorization: Bearer {{token}}
-tenant-id: 15772133531222016
+tenant-id: {{adminTenantId}}
 
 ### 获得租户可分配数量 /admin-api/system/tenant/get-allocatable-count
 GET {{baseUrl}}/system/tenant/get-allocatable-count

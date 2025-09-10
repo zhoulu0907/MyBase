@@ -10,7 +10,9 @@
     <modelVersion>4.0.0</modelVersion>
     <modules>
         <module>onebase-module-flow-api</module>
-        <module>onebase-module-flow-server</module>
+        <module>onebase-module-flow-core</module>
+        <module>onebase-module-flow-build</module>
+        <module>onebase-module-flow-runtime</module>
     </modules>
     <artifactId>onebase-module-flow</artifactId>
     <packaging>pom</packaging>
