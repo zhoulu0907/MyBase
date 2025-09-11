@@ -4,7 +4,7 @@ import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.module.flow.build.event.FlowProcessEventPublisher;
+import com.cmsr.onebase.module.flow.core.event.FlowProcessEventPublisher;
 import com.cmsr.onebase.module.flow.build.vo.mgmt.*;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDO;
