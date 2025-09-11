@@ -1,6 +1,6 @@
-package com.cmsr.onebase.module.flow.core.client;
+package com.cmsr.onebase.module.flow.core.job;
 
-import com.cmsr.onebase.module.flow.core.client.dto.JobCreateUpdateReqDTO;
+import com.cmsr.onebase.module.flow.core.job.dto.JobCreateUpdateReqDTO;
 import org.springframework.stereotype.Component;
 
 /**

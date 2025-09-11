@@ -1,10 +1,11 @@
-package com.cmsr.onebase.module.flow.core.graph;
+package com.cmsr.onebase.module.flow.runtime.graph;
 
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDO;
-import com.cmsr.onebase.module.flow.core.utils.FlowUtils;
+import com.cmsr.onebase.module.flow.core.enums.FlowStatusEnum;
+import com.cmsr.onebase.module.flow.core.graph.JsonGraph;
+import com.cmsr.onebase.module.flow.runtime.utils.FlowUtils;
 import com.yomahub.liteflow.parser.el.ClassXmlFlowELParser;
-
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.dom4j.Document;
@@ -27,13 +28,12 @@ public class GraphFlowELParser extends ClassXmlFlowELParser {
     @Autowired
     private FlowProcessRepository flowProcessRepository;
 
-    public GraphFlowELParser() {
-        super();
-    }
+    @Autowired
+    private GraphFlowCache graphFlowCache;
 
     @Override
     public String parseCustom() {
-        List<FlowProcessDO> flowProcessDOS = flowProcessRepository.findAll();
+        List<FlowProcessDO> flowProcessDOS = flowProcessRepository.findAllByStatus(FlowStatusEnum.ENABLE.getStatus());
         Document document = DocumentHelper.createDocument();
         Element rootElement = document.addElement("flow");
         for (FlowProcessDO flowProcessDO : flowProcessDOS) {
@@ -43,6 +43,8 @@ public class GraphFlowELParser extends ClassXmlFlowELParser {
                 String chainId = FlowUtils.toFlowChainId(flowProcessDO.getId());
                 Element element = rootElement.addElement("chain").addAttribute("name", chainId);
                 element.addCDATA(flowChain);
+                //
+                graphFlowCache.update(flowProcessDO, jsonGraph);
             } catch (Exception e) {
                 log.error("解析流程定义失败：{}", e);
             }

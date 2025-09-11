@@ -24,17 +24,22 @@
 
 ## 三、项目结构规则
 
-- 项目中分多个模块，以onebase-module开头，如onebase-module-app，每个模块内部分为api和server两个子模块，如onebase-module-app-api和onebase-module-app-server。
-- 子模块server用于放置本模块的核心服务和实体类等。
-- 模块分包括：应用管理app、系统管理system、数据管理data等模块。
-- 包结构遵循如下规范：
-  - 控制器: com.cmsr.onebase.module.${moduleName}.controller.${subPackageName}
-  - 视图对象: com.cmsr.onebase.module.${moduleName}.controller.${subPackageName}.vo  
-  - 服务: com.cmsr.onebase.module.${moduleName}.service.${subPackageName}
-  - 数据访问: com.cmsr.onebase.module.${moduleName}.dal.database.${subPackageName}
-  - 实体类: com.cmsr.onebase.module.${moduleName}.dal.dataobject.${subPackageName}
-  - 公共工具: com.cmsr.onebase.module.${moduleName}.util
+- 项目中分多个模块，以onebase-module开头，如onebase-module-app，每个模块内部分为api、core、build、runtime四个子模块，如onebase-module-app-api和onebase-module-app-core等。
+- 子模块core用于放置本模块的核心服务和实体类等,包结构遵循如下规范：
+  - 数据访问: com.cmsr.onebase.module.${moduleName}.core.dal.database.${subPackageName}
+  - 实体类: com.cmsr.onebase.module.${moduleName}.core.dal.dataobject.${subPackageName}
+  - 公共工具: com.cmsr.onebase.module.${moduleName}.core.util
   - 配置: com.cmsr.onebase.module.${moduleName}.config
+- 子模块build用于放置本模块的构建接口服务: 
+  - 控制器: com.cmsr.onebase.module.${moduleName}.build.controller.${subPackageName}
+  - 视图对象: com.cmsr.onebase.module.${moduleName}.build.vo.${subPackageName}
+  - 服务: com.cmsr.onebase.module.${moduleName}.build.service.${subPackageName}
+- 子模块runtime用于放置本模块的允许接口服务:
+  - 控制器: com.cmsr.onebase.module.${moduleName}.runtime.controller.${subPackageName}
+  - 视图对象: com.cmsr.onebase.module.${moduleName}.runtime.vo.${subPackageName}
+  - 服务: com.cmsr.onebase.module.${moduleName}.runtime.service.${subPackageName}
+- 子模块api用于放置本模块的对其他模块提供的接口服务:
+  - 控制器: com.cmsr.onebase.module.${moduleName}.api.${subPackageName}
 
 ---
 

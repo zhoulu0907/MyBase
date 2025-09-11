@@ -1,0 +1,31 @@
+package com.cmsr.onebase.module.flow.runtime.flow;
+
+import com.cmsr.onebase.module.flow.runtime.utils.FlowUtils;
+import com.yomahub.liteflow.core.FlowExecutor;
+import com.yomahub.liteflow.flow.LiteflowResponse;
+import com.yomahub.liteflow.slot.DefaultContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.util.Map;
+
+/**
+ * @Author：huangjie
+ * @Date：2025/9/11 14:32
+ */
+@Component
+public class FlowProcessExecutor {
+
+    @Autowired
+    private FlowExecutor flowExecutor;
+
+    public Map<String, Object> execute(Long processId, Map<String, Object> inputParams) {
+        String chainId = FlowUtils.toFlowChainId(processId);
+        DefaultContext defaultContext = new DefaultContext();
+        defaultContext.setData(FlowUtils.INPUT, inputParams);
+        LiteflowResponse response = flowExecutor.execute2Resp(chainId, "", defaultContext);
+        DefaultContext resultContext = response.getContextBean(DefaultContext.class);
+        return resultContext.getDataMap();
+    }
+
+}

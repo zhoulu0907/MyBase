@@ -1,5 +1,6 @@
-package com.cmsr.onebase.module.flow.core.flow;
+package com.cmsr.onebase.module.flow.runtime.flow.component;
 
+import com.cmsr.onebase.module.flow.runtime.flow.ExecuteContext;
 import com.yomahub.liteflow.core.NodeComponent;
 
 /**

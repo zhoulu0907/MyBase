@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.flow.core.config;
+package com.cmsr.onebase.module.flow.runtime.config;
 
 /**
  * @Author：huangjie

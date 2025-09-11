@@ -4,17 +4,16 @@ import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.module.flow.build.event.FlowProcessEventPublisher;
 import com.cmsr.onebase.module.flow.build.vo.mgmt.*;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDO;
 import com.cmsr.onebase.module.flow.core.enums.FlowErrorCodeConstants;
 import com.cmsr.onebase.module.flow.core.enums.FlowStatusEnum;
-import com.cmsr.onebase.module.flow.core.graph.JsonGraph;
-import com.cmsr.onebase.module.flow.core.graph.JsonGraphNode;
 import com.cmsr.onebase.module.flow.core.vo.mgmt.PageFlowProcessReqVO;
 import lombok.Setter;
 import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,6 +32,9 @@ public class FlowProcessMgmtServiceImpl implements FlowProcessMgmtService {
 
     @Autowired
     private FlowProcessRepository flowProcessRepository;
+
+    @Autowired
+    private FlowProcessEventPublisher flowProcessEventPublisher;
 
     @Override
     public PageResult<FlowProcessVO> pageList(PageFlowProcessReqVO reqVO) {
@@ -88,19 +90,26 @@ public class FlowProcessMgmtServiceImpl implements FlowProcessMgmtService {
         BeanUtils.copyProperties(reqVO, flowProcessDO);
         // 保存更新
         flowProcessRepository.update(flowProcessDO);
+
+        if (FlowStatusEnum.changeToEnable(flowProcessDO.getProcessStatus(), reqVO.getProcessStatus())) {
+            flowProcessEventPublisher.publishProcessUpdate(flowProcessDO.getId());
+        }
     }
 
     @Override
     public void updateProcessDefinition(UpdateProcessDefinitionReqVO reqVO) {
-        JsonGraph jsonGraph = JsonGraph.of(reqVO.getProcessDefinition());
         // 检查流程是否存在
         FlowProcessDO flowProcessDO = validateFlowProcessExist(reqVO.getId());
         // 更新流程定义
         flowProcessDO.setProcessDefinition(reqVO.getProcessDefinition());
-        flowProcessDO.setProcessStatus(reqVO.getProcessStatus());
+        if (reqVO.getProcessStatus() != null) {
+            flowProcessDO.setProcessStatus(reqVO.getProcessStatus());
+        }
         // 保存更新
         flowProcessRepository.update(flowProcessDO);
-        JsonGraphNode startNode = jsonGraph.getStartNode();
+        if (FlowStatusEnum.isEnable(flowProcessDO.getProcessStatus())) {
+            flowProcessEventPublisher.publishProcessUpdate(flowProcessDO.getId());
+        }
     }
 
 
@@ -122,6 +131,7 @@ public class FlowProcessMgmtServiceImpl implements FlowProcessMgmtService {
         // 启用流程
         flowProcessDO.setProcessStatus(FlowStatusEnum.ENABLE.getStatus());
         flowProcessRepository.update(flowProcessDO);
+        flowProcessEventPublisher.publishProcessUpdate(flowProcessDO.getId());
     }
 
     @Override
@@ -132,6 +142,7 @@ public class FlowProcessMgmtServiceImpl implements FlowProcessMgmtService {
         // 关闭流程
         flowProcessDO.setProcessStatus(FlowStatusEnum.DISABLE.getStatus());
         flowProcessRepository.update(flowProcessDO);
+        flowProcessEventPublisher.publishProcessDelete(flowProcessDO.getId());
     }
 
     @Override
@@ -141,6 +152,7 @@ public class FlowProcessMgmtServiceImpl implements FlowProcessMgmtService {
         validateFlowProcessExist(id);
         // 删除流程
         flowProcessRepository.deleteById(id);
+        flowProcessEventPublisher.publishProcessDelete(id);
     }
 
     @Override

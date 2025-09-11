@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.flow.core.flow;
+package com.cmsr.onebase.module.flow.runtime.flow;
 
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;

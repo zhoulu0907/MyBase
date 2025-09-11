@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.flow.core.client.dto;
+package com.cmsr.onebase.module.flow.core.job.dto;
 
 /**
  * @Author：huangjie
