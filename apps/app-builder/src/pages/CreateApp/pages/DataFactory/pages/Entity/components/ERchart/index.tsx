@@ -394,7 +394,7 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
       const positioner = new GridNodePositioner(graphRef.current, {
         startX: 0,
         startY: 0,
-        columns: 3,
+        columns: 5,
         nodeWidth: NODE_WIDTH,
         nodeHeight: 430,
         horizontalSpacing: 50,
