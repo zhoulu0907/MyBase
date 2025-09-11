@@ -1,7 +1,7 @@
+import { STATUS_OPTIONS, STATUS_VALUES } from '@onebase/ui-kit';
 import { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import { v4 as uuidv4 } from 'uuid';
-import { STATUS_OPTIONS, STATUS_VALUES } from '@onebase/ui-kit';
 
 import {
   COMPONENT_GROUP_NAME,
@@ -24,9 +24,9 @@ import NextIcon from '@/assets/images/next_icon.svg';
 import PrevActiveIcon from '@/assets/images/prev_icon_active.svg';
 // import NextActiveIcon from '@/assets/images/next_icon_active.svg';
 
-import CompShowIcon from '@/assets/images/eye_off_icon.svg';
-import CompCopyIcon from '@/assets/images/copy_comp_icon.svg';
 import CompDeleteIcon from '@/assets/images/app_delete.svg';
+import CompCopyIcon from '@/assets/images/copy_comp_icon.svg';
+import CompShowIcon from '@/assets/images/eye_off_icon.svg';
 
 import { Divider } from '@arco-design/web-react';
 import type { AppEntityField } from '@onebase/app';
@@ -233,11 +233,11 @@ export default function EditorWorkspace() {
               schema.config.cpName = itemDisplayName;
               schema.config.id = cpID;
 
-              // 系统组件
+              // 主子表 字段组件
               if (entityID && fieldID) {
                 console.log('dataField:    ', entityID, fieldID);
                 schema.config.dataField = [entityID, fieldID];
-                schema.config.status = STATUS_VALUES[STATUS_OPTIONS.READONLY];
+                schema.config.status = STATUS_VALUES[STATUS_OPTIONS.DEFAULT];
               }
 
               if (dataLabel) {

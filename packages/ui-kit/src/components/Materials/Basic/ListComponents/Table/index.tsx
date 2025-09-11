@@ -11,7 +11,7 @@ import {
   type DeleteMethodParam,
   type PageMethodParam
 } from '@onebase/app';
-import { ENTITY_FIELD_TYPE_LABEL } from '../../../../DataFactory/const';
+import { ENTITY_FIELD_TYPE } from '../../../../DataFactory/const';
 import './index.css';
 import type { XTableConfig } from './schema';
 
@@ -154,7 +154,7 @@ const XTable = memo((props: XTableConfig & { runtime?: boolean; toCreatePage?: F
         // 优化：减少重复查找，提升可读性和性能
         if (Array.isArray(mainMetaData?.parentFields)) {
           const field = mainMetaData.parentFields.find(
-            (field: AppEntityField) => field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE_LABEL.DATE
+            (field: AppEntityField) => field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.DATE.VALUE
           );
           if (field && newItem[key]) {
             // 仅当字段类型为日期且有值时格式化
