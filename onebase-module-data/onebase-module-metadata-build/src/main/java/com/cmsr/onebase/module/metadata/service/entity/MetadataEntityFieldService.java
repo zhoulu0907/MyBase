@@ -120,6 +120,14 @@ public interface MetadataEntityFieldService {
     PageResult<MetadataEntityFieldDO> getEntityFieldPage(EntityFieldPageReqVO pageReqVO);
 
     /**
+     * 获得实体字段分页（含关联数据）
+     *
+     * @param pageReqVO 分页查询
+     * @return 实体字段分页响应VO，包含选项、约束、自动编号等完整信息
+     */
+    PageResult<EntityFieldRespVO> getEntityFieldPageWithRelated(EntityFieldPageReqVO pageReqVO);
+
+    /**
      * 获得实体字段列表
      *
      * @return 实体字段列表

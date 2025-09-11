@@ -85,13 +85,8 @@ public class EntityFieldController {
     @Operation(summary = "分页查询指定实体的字段列表")
     @PreAuthorize("@ss.hasPermission('metadata:entity-field:query')")
     public CommonResult<PageResult<EntityFieldRespVO>> getEntityFieldPage(@Valid @RequestBody EntityFieldPageReqVO pageReqVO) {
-        PageResult<MetadataEntityFieldDO> pageResult = entityFieldService.getEntityFieldPage(pageReqVO);
-        PageResult<EntityFieldRespVO> convertedResult = new PageResult<>();
-        convertedResult.setTotal(pageResult.getTotal());
-        convertedResult.setList(pageResult.getList().stream()
-                .map(field -> modelMapper.map(field, EntityFieldRespVO.class))
-                .toList());
-        return success(convertedResult);
+        PageResult<EntityFieldRespVO> result = entityFieldService.getEntityFieldPageWithRelated(pageReqVO);
+        return success(result);
     }
 
     @PostMapping("/get")
