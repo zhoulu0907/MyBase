@@ -143,6 +143,20 @@ public interface MetadataEntityFieldService {
     List<MetadataEntityFieldDO> getEntityFieldListByEntityId(String entityId);
 
     /**
+     * 根据实体ID获得字段列表（Long 重载）
+     * <p>说明：为兼容核心 datamethod 模块通过 Long 形参调用，避免 NoSuchMethodError。</p>
+     *
+     * @param entityId 实体ID（Long）
+     * @return 字段列表
+     */
+    default List<MetadataEntityFieldDO> getEntityFieldListByEntityId(Long entityId) {
+        if (entityId == null) {
+            return java.util.Collections.emptyList();
+        }
+        return getEntityFieldListByEntityId(String.valueOf(entityId));
+    }
+
+    /**
      * 批量删除实体字段
      *
      * @param entityId 实体ID

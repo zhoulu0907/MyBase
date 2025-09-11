@@ -24,11 +24,7 @@
             <artifactId>onebase-module-metadata-core</artifactId>
             <version>${revision}</version>
         </dependency>
-        <dependency>
-            <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-module-metadata-api</artifactId>
-            <version>${revision}</version>
-        </dependency>
+
         <!-- Web & 安全 & RPC & 注册发现（沿用原 server 的能力，仅在需要时用） -->
         <dependency>
             <groupId>com.cmsr.onebase</groupId>

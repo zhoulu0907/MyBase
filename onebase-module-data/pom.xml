@@ -14,9 +14,9 @@
     <packaging>pom</packaging>
     <modules>
         <module>onebase-module-metadata-api</module>
-    <module>onebase-module-metadata-core</module>
-    <module>onebase-module-metadata-runtime</module>
-    <module>onebase-module-metadata-build</module>
+        <module>onebase-module-metadata-core</module>
+        <module>onebase-module-metadata-runtime</module>
+        <module>onebase-module-metadata-build</module>
     </modules>
 
     <properties>
