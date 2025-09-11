@@ -7,9 +7,16 @@ import { Form, Input, InputNumber, Select } from "@arco-design/web-react";
 import { FormContent, FormHeader, FormOutputs } from "../../../form-components";
 import { useIsSidebar, useNodeRenderContext } from "../../../hooks";
 import { type FlowNodeJSON } from "../../../typings";
-import { getEntityListByApp, getEntityFields } from "@onebase/app";
-import { useState } from "react";
+import {
+  getEntityListByApp,
+  getEntityFields,
+  getFieldCheckTypeApi,
+  type ConfitionField,
+  type EntityFieldValidationTypes
+} from '@onebase/app';
+import { useEffect, useState } from "react";
 import { useAppStore } from "@/store/store_app";
+import ConditionEditor from '../../../components/condition-editor';
 
 interface SelectOption {
   label: string;
@@ -25,6 +32,19 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON["data"]>) => {
   const [entityList, setEntityList] = useState<SelectOption[]>([]);
   // 排序字段下拉列表
   const [fieldList, setFieldList] = useState<SelectOption[]>([]);
+  // 查询条件
+  const [validationTypes, setValidationTypes] = useState<EntityFieldValidationTypes[]>([]);
+  const [conditionFields, setConditionFields] = useState<ConfitionField[]>([]);
+
+  useEffect(() => {
+    const formData = payloadForm.getFieldsValue();
+    if (formData.dataType) {
+      getEntityList(formData.dataType)
+      if (formData.dataSource) {
+        getFieldList(formData.dataType, formData.dataSource)
+      }
+    }
+  }, [])
 
   // 表单项内容变更
   const handlePropsOnChange = (key: string, value: any) => {
@@ -54,19 +74,8 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON["data"]>) => {
     });
     setEntityList([]);
     setFieldList([]);
-    if (value === "business") {
-      // 业务表单
-    } else if (value === "database") {
-      // 数据库表  根据应用ID获取实体列表
-      const res = await getEntityListByApp(curAppId);
-      console.log("数据库表res: ", res);
-      const fieldOptions = res.map((field: any) => ({
-        label: field.entityName,
-        value: field.entityId,
-      }));
-      setEntityList(fieldOptions);
-    } else if (value === "interface") {
-      // API接口
+    if (value) {
+      getEntityList(value);
     }
   };
 
@@ -80,25 +89,63 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON["data"]>) => {
     });
     // 根据数据源重新获取字段列表
     if (value) {
-      const entityId = payloadForm.getFieldValue("dataSource");
       const dataType = payloadForm.getFieldValue("dataType");
-      // 查询指定实体的字段列表
-      // todo 根据不同获取方式走不同接口
-      if (dataType === "business") {
-        // 业务表单
-      } else if (dataType === "database") {
-        // 数据库表 查询指定实体的字段列表
-        const res = await getEntityFields({ entityId });
-        const fieldOptions = res.map((field: any) => ({
-          label: field.displayName,
-          value: field.id,
-        }));
-        setFieldList(fieldOptions);
-      } else if (dataType === "interface") {
-        // API接口
-      }
+      getFieldList(dataType, value)
     }
   };
+  // 获取数据源列表
+  const getEntityList = async (dataType: string) => {
+    if (dataType === "business") {
+      // 业务表单
+    } else if (dataType === "database") {
+      // 数据库表  根据应用ID获取实体列表
+      const res = await getEntityListByApp(curAppId);
+      console.log("数据库表res: ", res);
+      const fieldOptions = res.map((field: any) => ({
+        label: field.entityName,
+        value: field.entityId,
+      }));
+      setEntityList(fieldOptions);
+    } else if (dataType === "interface") {
+      // API接口
+    }
+
+  }
+  // 获取排序字段下拉列表
+  const getFieldList = async (dataType: string, dataSource: string) => {
+    // 根据数据源 查询指定实体的字段列表
+    // todo 根据不同获取方式走不同接口
+    if (dataType === "business") {
+      // 业务表单
+    } else if (dataType === "database") {
+      // 数据库表 查询指定实体的字段列表
+      const res = await getEntityFields({ entityId: dataSource });
+      const filedIds: string[] = [];
+      const newConditionFields: ConfitionField[] = [];
+      const fieldOptions: SelectOption[] = []
+      res.forEach((item: any) => {
+        fieldOptions.push({
+          label: item.displayName,
+          value: item.id,
+        })
+        filedIds.push(item.id);
+        newConditionFields.push({
+          label: item.displayName,
+          value: item.id,
+          fieldType: item.fieldType
+        });
+      });
+      setFieldList(fieldOptions);
+      setConditionFields(newConditionFields);
+      if (filedIds?.length) {
+        const newValidationTypes = await getFieldCheckTypeApi(filedIds);
+        console.log('validationTypes: ', newValidationTypes);
+        setValidationTypes(newValidationTypes);
+      }
+    } else if (dataType === "interface") {
+      // API接口
+    }
+  }
 
   const [payloadForm] = Form.useForm();
 
@@ -121,6 +168,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON["data"]>) => {
         <FormContent>
           <Form
             form={payloadForm}
+            layout='vertical'
             initialValues={{ ...triggerEditorSignal.nodeData.value[node.id] }}
           >
             <Form.Item label="节点ID" field="nodeId " initialValue={node.id}>
@@ -144,7 +192,12 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON["data"]>) => {
               ></Select>
             </Form.Item>
             <Form.Item label="查询条件" field="conditions">
-              <Input onChange={(e) => handlePropsOnChange("conditions", e)} />
+              <ConditionEditor
+                onChange={(e) => handlePropsOnChange('conditions', e)}
+                data={triggerEditorSignal.nodeData.value[node.id]?.conditions || []}
+                fields={conditionFields}
+                entityFieldValidationTypes={validationTypes}
+              />
             </Form.Item>
             <Form.Item label="排序类型" field="sortType">
               <Select
