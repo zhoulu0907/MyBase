@@ -39,12 +39,6 @@
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-spring-boot-starter-security</artifactId>
         </dependency>
-        <!-- 监控 -->
-        <dependency>
-            <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-spring-boot-starter-monitor</artifactId>
-            <version>${revision}</version>
-        </dependency>
         <!-- DB 相关 -->
         <dependency>
             <groupId>com.cmsr.onebase</groupId>

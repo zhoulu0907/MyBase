@@ -12,7 +12,6 @@ import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.util.collection.SetUtils;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
-import com.cmsr.onebase.framework.common.util.monitor.TracerUtils;
 import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
@@ -291,7 +290,6 @@ public class GlobalExceptionHandler {
                     .put("message", ExceptionUtils.getMessage(ex))
                     .put("rootCause", ExceptionUtils.getRootCauseMessage(ex))
                     .put("stackTrace", Arrays.stream(ExceptionUtils.getStackFrames(ex)).map(stackTrace -> stackTrace.replace("\t", "  ")).toArray())
-                    .put("traceId", TracerUtils.getTraceId())
                     .put("timestamp", LocalDateTime.now().toString())
                     .put("path", req.getRequestURI())
                     .put("method", req.getMethod())
@@ -332,7 +330,6 @@ public class GlobalExceptionHandler {
         errorLog.setExceptionMethodName(stackTraceElement.getMethodName());
         errorLog.setExceptionLineNumber(stackTraceElement.getLineNumber());
         // 设置其它字段
-        errorLog.setTraceId(TracerUtils.getTraceId());
         errorLog.setApplicationName(applicationName);
         errorLog.setRequestUrl(request.getRequestURI());
         Map<String, Object> requestParams = MapUtil.<String, Object>builder()
