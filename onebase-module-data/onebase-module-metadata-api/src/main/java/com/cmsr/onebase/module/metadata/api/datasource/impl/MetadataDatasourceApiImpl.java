@@ -27,51 +27,41 @@ public class MetadataDatasourceApiImpl implements MetadataDatasourceApi {
     private final Map<Long, SimpleDs> store = new ConcurrentHashMap<>();
 
     @Override
-    public CommonResult<Long> createDefaultDatasource(DatasourceCreateDefaultReqDTO reqDTO) {
-        try {
-            SimpleDs ds = new SimpleDs();
-            ds.setId(idGen.incrementAndGet());
-            ds.setAppId(reqDTO.getAppId());
-            ds.setAppUid(reqDTO.getAppUid());
-            ds.setName("默认数据源");
-            ds.setCode("default");
-            ds.setDatasourceType("mysql");
-            ds.setConfig("{}");
-            store.put(ds.getId(), ds);
-            return CommonResult.success(ds.getId());
-        } catch (Exception e) {
-            log.error("createDefaultDatasource stub error", e);
-            return CommonResult.error(500, e.getMessage());
-        }
+    public Long createDefaultDatasource(DatasourceCreateDefaultReqDTO reqDTO) {
+        SimpleDs ds = new SimpleDs();
+        ds.setId(idGen.incrementAndGet());
+        ds.setAppId(reqDTO.getAppId());
+        ds.setAppUid(reqDTO.getAppUid());
+        ds.setName("默认数据源");
+        ds.setCode("default");
+        ds.setDatasourceType("mysql");
+        ds.setConfig("{}");
+        store.put(ds.getId(), ds);
+        return ds.getId();
     }
 
     @Override
-    public CommonResult<Long> createDatasource(DatasourceSaveReqDTO reqDTO) {
-        try {
-            SimpleDs ds = new SimpleDs();
-            ds.setId(idGen.incrementAndGet());
-            ds.setAppId(reqDTO.getAppId());
-            ds.setAppUid(reqDTO.getAppUid());
-            ds.setName(reqDTO.getName());
-            ds.setCode(reqDTO.getCode());
-            ds.setDatasourceType(reqDTO.getDatasourceType());
-            ds.setConfig(reqDTO.getConfig());
-            ds.setRemark(reqDTO.getRemark());
-            store.put(ds.getId(), ds);
-            return CommonResult.success(ds.getId());
-        } catch (Exception e) {
-            log.error("createDatasource stub error", e);
-            return CommonResult.error(500, e.getMessage());
-        }
+    public Long createDatasource(DatasourceSaveReqDTO reqDTO) {
+
+        SimpleDs ds = new SimpleDs();
+        ds.setId(idGen.incrementAndGet());
+        ds.setAppId(reqDTO.getAppId());
+        ds.setAppUid(reqDTO.getAppUid());
+        ds.setName(reqDTO.getName());
+        ds.setCode(reqDTO.getCode());
+        ds.setDatasourceType(reqDTO.getDatasourceType());
+        ds.setConfig(reqDTO.getConfig());
+        ds.setRemark(reqDTO.getRemark());
+        store.put(ds.getId(), ds);
+        return ds.getId();
+
     }
 
     @Override
-    public CommonResult<Object> getDatasource(Long id) {
+    public Object getDatasource(Long id) {
         SimpleDs ds = store.get(id);
-        if (ds == null) {
-            return CommonResult.error(404, "datasource not found");
-        }
-        return CommonResult.success(ds);
+
+        return ds;
     }
 
     @Data

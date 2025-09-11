@@ -19,7 +19,7 @@ import jakarta.validation.Valid;
  * @author matianyu
  * @date 2025-09-10
  */
-@FeignClient(name = "onebase-module-metadata-build", path = "/metadata")
+//@FeignClient(name = "onebase-module-metadata-build", path = "/metadata")
 @Tag(name = "数据源管理 API")
 public interface MetadataDatasourceApi {
 
@@ -31,7 +31,7 @@ public interface MetadataDatasourceApi {
      */
     @PostMapping("/datasource/create-default")
     @Operation(summary = "创建默认数据源")
-    CommonResult<Long> createDefaultDatasource(@Valid @RequestBody DatasourceCreateDefaultReqDTO reqDTO);
+    Long createDefaultDatasource(@Valid @RequestBody DatasourceCreateDefaultReqDTO reqDTO);
 
     /**
      * 创建数据源
@@ -41,7 +41,7 @@ public interface MetadataDatasourceApi {
      */
     @PostMapping("/datasource/create")
     @Operation(summary = "创建数据源")
-    CommonResult<Long> createDatasource(@Valid @RequestBody DatasourceSaveReqDTO reqDTO);
+    Long createDatasource(@Valid @RequestBody DatasourceSaveReqDTO reqDTO);
 
     /**
      * 获取数据源信息
@@ -51,5 +51,5 @@ public interface MetadataDatasourceApi {
      */
     @GetMapping("/datasource/{id}")
     @Operation(summary = "获取数据源信息")
-    CommonResult<Object> getDatasource(@PathVariable("id") Long id);
+    Object getDatasource(@PathVariable("id") Long id);
 }

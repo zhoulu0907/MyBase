@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.metadata.controller.admin.datamethod.vo;
+package com.cmsr.onebase.module.metadata.controller.datamethod.vo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
@@ -18,7 +18,7 @@ public class DynamicDataCreateReqVO {
 
     @Schema(description = "实体ID", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotEmpty(message = "实体ID不能为空")
-    private String entityId;
+    private Long entityId;
 
     @Schema(description = "数据内容", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotEmpty(message = "数据内容不能为空")

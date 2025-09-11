@@ -15,7 +15,7 @@ import java.util.List;
  * @author matianyu
  * @date 2025-09-10
  */
-@FeignClient(name = "onebase-module-metadata-build", path = "/metadata")
+//@FeignClient(name = "onebase-module-metadata-build", path = "/metadata")
 @Tag(name = "权限管理 API")
 public interface MetadataPermitApi {
 
@@ -26,5 +26,5 @@ public interface MetadataPermitApi {
      */
     @GetMapping("/permit/ref-otft-list")
     @Operation(summary = "获取权限参考操作类型列表")
-    CommonResult<List<PermitRefOtftRespDTO>> getPermitRefOtftList();
+    List<PermitRefOtftRespDTO> getPermitRefOtftList();
 }

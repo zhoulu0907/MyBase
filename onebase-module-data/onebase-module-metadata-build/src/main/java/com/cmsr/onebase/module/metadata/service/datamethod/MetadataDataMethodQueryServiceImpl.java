@@ -3,7 +3,6 @@ package com.cmsr.onebase.module.metadata.service.datamethod;
 import com.cmsr.onebase.module.metadata.controller.admin.datamethod.vo.DataMethodDetailRespVO;
 import com.cmsr.onebase.module.metadata.controller.admin.datamethod.vo.DataMethodRespVO;
 import com.cmsr.onebase.module.metadata.service.datamethod.vo.DataMethodQueryVO;
-import com.cmsr.onebase.module.metadata.service.datamethod.MetadataDataMethodService;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import lombok.extern.slf4j.Slf4j;
@@ -11,48 +10,80 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.stream.Collectors;
+
+import org.anyline.data.param.init.DefaultConfigStore;
+import org.anyline.entity.Order;
+import org.springframework.util.StringUtils;
+
+import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataBusinessEntityDO;
+import com.cmsr.onebase.module.metadata.dal.dataobject.method.MetadataDataSystemMethodDO;
+import com.cmsr.onebase.module.metadata.service.entity.MetadataBusinessEntityService;
+import com.cmsr.onebase.module.metadata.service.datamethod.vo.DataMethodQueryVO;
+import com.cmsr.onebase.module.metadata.enums.ErrorCodeConstants;
+import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
+import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 
 @Service
 @Slf4j
 public class MetadataDataMethodQueryServiceImpl implements MetadataDataMethodQueryService {
 
     @Resource
-    private MetadataDataMethodService coreDataMethodService;
+    private MetadataDataMethodService coreDataMethodService; // 保留对运行时动态操作依赖
+
+    @Resource
+    private MetadataDataSystemMethodService metadataDataSystemMethodService;
+
+    @Resource
+    private MetadataBusinessEntityService metadataBusinessEntityService;
 
     @Override
     public List<DataMethodRespVO> getDataMethodList(DataMethodQueryVO queryVO) {
-        List<Map<String, Object>> methodList = coreDataMethodService.getEnabledDataMethodList(
-            String.valueOf(queryVO.getEntityId()),
-            queryVO.getMethodType(),
-            queryVO.getKeyword()
-        );
-        
-        List<DataMethodRespVO> methods = new ArrayList<>();
-        for (Map<String, Object> method : methodList) {
-            DataMethodRespVO vo = new DataMethodRespVO();
-            vo.setMethodCode((String) method.get("methodCode"));
-            vo.setMethodName((String) method.get("methodName"));
-            vo.setMethodType((String) method.get("methodType"));
-            vo.setDescription((String) method.get("description"));
-            // TODO: 完善字段映射
-            methods.add(vo);
+        // 校验实体存在
+        MetadataBusinessEntityDO entity = metadataBusinessEntityService.getBusinessEntity(queryVO.getEntityId());
+        if (entity == null) {
+            throw exception(ErrorCodeConstants.BUSINESS_ENTITY_NOT_EXISTS);
         }
-        return methods;
+
+        DefaultConfigStore configStore = new DefaultConfigStore();
+        configStore.and(MetadataDataSystemMethodDO.IS_ENABLED, CommonStatusEnum.ENABLE.getStatus());
+        configStore.and("deleted", 0);
+        if (StringUtils.hasText(queryVO.getMethodType())) {
+            configStore.and(MetadataDataSystemMethodDO.METHOD_TYPE, queryVO.getMethodType());
+        }
+        if (StringUtils.hasText(queryVO.getKeyword())) {
+            configStore.and(MetadataDataSystemMethodDO.METHOD_NAME, "%" + queryVO.getKeyword() + "%", "like");
+        }
+        configStore.order(MetadataDataSystemMethodDO.METHOD_CODE, Order.TYPE.ASC);
+
+        List<MetadataDataSystemMethodDO> methodDOList = metadataDataSystemMethodService.getEnabledDataMethodList();
+        return methodDOList.stream().map(methodDO -> {
+            DataMethodRespVO vo = new DataMethodRespVO();
+            vo.setMethodCode(methodDO.getMethodCode());
+            vo.setMethodName(methodDO.getMethodName());
+            vo.setMethodType(methodDO.getMethodType());
+            vo.setDescription(methodDO.getMethodDescription());
+            return vo;
+        }).collect(Collectors.toList());
     }
 
     @Override
     public DataMethodDetailRespVO getDataMethodDetail(Long entityId, String methodCode) {
-        Map<String, Object> methodData = coreDataMethodService.getDataMethodByCode(
-            String.valueOf(entityId),
-            methodCode
-        );
-        
+        // 校验实体存在
+        MetadataBusinessEntityDO entity = metadataBusinessEntityService.getBusinessEntity(entityId);
+        if (entity == null) {
+            throw exception(ErrorCodeConstants.BUSINESS_ENTITY_NOT_EXISTS);
+        }
+        MetadataDataSystemMethodDO methodDO = metadataDataSystemMethodService.getDataMethodByCode(methodCode);
+        if (methodDO == null) {
+            throw exception(ErrorCodeConstants.DATA_METHOD_NOT_EXISTS);
+        }
         DataMethodDetailRespVO detail = new DataMethodDetailRespVO();
-        detail.setMethodCode((String) methodData.get("methodCode"));
-        detail.setMethodName((String) methodData.get("methodName"));
-        detail.setMethodType((String) methodData.get("methodType"));
-        detail.setDescription((String) methodData.get("description"));
-        // TODO: 完善字段映射和参数处理
+        detail.setMethodCode(methodDO.getMethodCode());
+        detail.setMethodName(methodDO.getMethodName());
+        detail.setMethodType(methodDO.getMethodType());
+        detail.setDescription(methodDO.getMethodDescription());
         return detail;
     }
 }

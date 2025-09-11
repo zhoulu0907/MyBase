@@ -1,8 +1,8 @@
-package com.cmsr.onebase.module.metadata.controller.admin.datamethod;
+package com.cmsr.onebase.module.metadata.controller.datamethod;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.metadata.controller.admin.datamethod.vo.*;
+import com.cmsr.onebase.module.metadata.controller.datamethod.vo.*;
 import com.cmsr.onebase.module.metadata.service.datamethod.RuntimeDataService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
