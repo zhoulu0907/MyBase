@@ -39,6 +39,7 @@ const UserMembers = (props: IProps) => {
   const [userLoading, setUserLoading] = useState<boolean>(false); // 用户列表加载状态
   const [memberLoading, setMemberLoading] = useState<boolean>(false);
   const [membersVisible, setMembersVisible] = useState<boolean>(false);
+  const [selectedMembers, setSelectedMembers] = useState<any[]>([]);
 
   useEffect(() => {
     if (memberList && roleInfo?.id) {
@@ -89,11 +90,14 @@ const UserMembers = (props: IProps) => {
   };
 
   // 添加成员
-  const handleAddUser = async (userIds: string[]) => {
+  const handleAddUser = async (selectedMembers: any[]) => {
+    console.log('添加成员 selectedMembers:', selectedMembers);
+    const userIds = selectedMembers.map((v) => v.key);
     const params: RoleAddUserReq = {
       roleId: roleInfo?.id!,
       userIds
     };
+    console.log('添加成员 params:', params);
     await roleAddUser(params);
     await getRoleUserList();
     setMembersVisible(false);
@@ -170,6 +174,10 @@ const UserMembers = (props: IProps) => {
     return () => debouncedUpdate.cancel();
   }, [debouncedUpdate]);
 
+  const handleUpdateSelectedMembers = useCallback((members: any[]) => {
+    setSelectedMembers(members);
+  }, []);
+
   const handlePageChange = (current: number, pageSize: number) => {
     getRoleUserList(current, pageSize);
   };
@@ -193,10 +201,15 @@ const UserMembers = (props: IProps) => {
         visible={membersVisible}
         data={deptData}
         loading={memberLoading}
+        selectedMembers={selectedMembers || []}
         onExpand={handleExpand}
         onSearch={debouncedUpdate}
         onConfirm={handleAddUser}
-        onCancel={() => setMembersVisible(false)}
+        onUpdateSelectedMembers={handleUpdateSelectedMembers}
+        onCancel={() => {
+          setMembersVisible(false);
+          setSelectedMembers([]);
+        }}
       />
     </div>
   );
