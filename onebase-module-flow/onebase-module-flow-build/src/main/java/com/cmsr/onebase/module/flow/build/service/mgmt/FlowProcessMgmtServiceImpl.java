@@ -1,34 +1,25 @@
 package com.cmsr.onebase.module.flow.build.service.mgmt;
 
-import com.alibaba.druid.util.StringUtils;
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.flow.build.vo.mgmt.*;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessRepository;
-import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessTriggerEntityRepository;
-import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessTriggerFormRepository;
-import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessTriggerTimeRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDO;
-import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessTriggerEntityDO;
-import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessTriggerFormDO;
 import com.cmsr.onebase.module.flow.core.enums.FlowErrorCodeConstants;
-import com.cmsr.onebase.module.flow.core.enums.mgmt.FlowStatusEnum;
-import com.cmsr.onebase.module.flow.core.enums.mgmt.FlowTriggerTypeEnum;
+import com.cmsr.onebase.module.flow.core.enums.FlowStatusEnum;
 import com.cmsr.onebase.module.flow.core.graph.JsonGraph;
 import com.cmsr.onebase.module.flow.core.graph.JsonGraphNode;
-import com.cmsr.onebase.module.flow.core.graph.data.StartEntityNodeData;
-import com.cmsr.onebase.module.flow.core.graph.data.StartFormNodeData;
-import com.cmsr.onebase.module.flow.core.utils.JsonGraphConstant;
 import com.cmsr.onebase.module.flow.core.vo.mgmt.PageFlowProcessReqVO;
 import lombok.Setter;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -42,15 +33,6 @@ public class FlowProcessMgmtServiceImpl implements FlowProcessMgmtService {
 
     @Autowired
     private FlowProcessRepository flowProcessRepository;
-
-    @Autowired
-    private FlowProcessTriggerFormRepository flowProcessTriggerFormRepository;
-
-    @Autowired
-    private FlowProcessTriggerEntityRepository flowProcessTriggerEntityRepository;
-
-    @Autowired
-    private FlowProcessTriggerTimeRepository flowProcessTriggerTimeRepository;
 
     @Override
     public PageResult<FlowProcessVO> pageList(PageFlowProcessReqVO reqVO) {
@@ -74,21 +56,13 @@ public class FlowProcessMgmtServiceImpl implements FlowProcessMgmtService {
             return null;
         }
         FlowProcessVO flowProcessVO = convertToVO(flowProcessDO);
-        Object triggerConfig = getTriggerConfig(flowProcessDO.getId(), flowProcessDO.getTriggerType());
-        flowProcessVO.setTriggerConfig(triggerConfig);
+        if (StringUtils.isNotEmpty(flowProcessDO.getTriggerConfig())) {
+            Map<String, Object> triggerConfig = JsonUtils.parseObject(flowProcessDO.getTriggerConfig(), HashMap.class);
+            flowProcessVO.setTriggerConfig(triggerConfig);
+        }
         return flowProcessVO;
     }
 
-    private Object getTriggerConfig(Long processId, String triggerType) {
-        FlowTriggerTypeEnum flowTriggerTypeEnum = FlowTriggerTypeEnum.getByType(triggerType);
-        if (flowTriggerTypeEnum == FlowTriggerTypeEnum.FORM) {
-            return flowProcessTriggerFormRepository.findByProcessId(processId);
-        } else if (flowTriggerTypeEnum == FlowTriggerTypeEnum.ENTITY) {
-            return flowProcessTriggerEntityRepository.findByProcessId(processId);
-        } else {
-            return Collections.EMPTY_MAP;
-        }
-    }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -96,32 +70,13 @@ public class FlowProcessMgmtServiceImpl implements FlowProcessMgmtService {
         // 转换为DO对象
         FlowProcessDO flowProcessDO = new FlowProcessDO();
         BeanUtils.copyProperties(reqVO, flowProcessDO);
+        if (MapUtils.isNotEmpty(reqVO.getTriggerConfig())) {
+            flowProcessDO.setTriggerConfig(JsonUtils.toJsonString(reqVO.getTriggerConfig()));
+        }
         flowProcessDO.setProcessStatus(FlowStatusEnum.DISABLE.getStatus());
         // 保存到数据库
         FlowProcessDO saved = flowProcessRepository.insert(flowProcessDO);
-        saveTriggerConfig(flowProcessDO.getId(), reqVO.getTriggerType(), reqVO.getTriggerConfig());
         return saved.getId();
-    }
-
-    private void saveTriggerConfig(Long processId, String triggerType, Map<String, Object> triggerConfig) {
-        if (MapUtils.isEmpty(triggerConfig)) {
-            return;
-        }
-        if (FlowTriggerTypeEnum.getByType(triggerType) == FlowTriggerTypeEnum.FORM) {
-            Long pageId = MapUtils.getLong(triggerConfig, JsonGraphConstant.PAGE_ID);
-            Long fieldId = MapUtils.getLong(triggerConfig, JsonGraphConstant.FIELD_ID);
-            FlowProcessTriggerFormDO flowProcessTriggerFormDO = new FlowProcessTriggerFormDO();
-            flowProcessTriggerFormDO.setProcessId(processId);
-            flowProcessTriggerFormDO.setPageId(pageId);
-            flowProcessTriggerFormDO.setFieldId(fieldId);
-            flowProcessTriggerFormRepository.insert(flowProcessTriggerFormDO);
-        } else if (FlowTriggerTypeEnum.getByType(triggerType) == FlowTriggerTypeEnum.ENTITY) {
-            Long entityId = MapUtils.getLong(triggerConfig, JsonGraphConstant.ENTITY_ID);
-            FlowProcessTriggerEntityDO flowProcessTriggerEntityDO = new FlowProcessTriggerEntityDO();
-            flowProcessTriggerEntityDO.setProcessId(processId);
-            flowProcessTriggerEntityDO.setEntityId(entityId);
-            flowProcessTriggerEntityRepository.insert(flowProcessTriggerEntityDO);
-        }
     }
 
     @Override
@@ -146,72 +101,8 @@ public class FlowProcessMgmtServiceImpl implements FlowProcessMgmtService {
         // 保存更新
         flowProcessRepository.update(flowProcessDO);
         JsonGraphNode startNode = jsonGraph.getStartNode();
-        updateProcessTriggerConfig(flowProcessDO.getId(), startNode);
     }
 
-    private void updateProcessTriggerConfig(Long processId, JsonGraphNode startNode) {
-        if (StringUtils.equals(JsonGraphConstant.START_FORM, startNode.getType())) {
-            StartFormNodeData startFormNodeData = JsonUtils.treeToObject(startNode.getData(), StartFormNodeData.class);
-            FlowProcessTriggerFormDO triggerFormDO = flowProcessTriggerFormRepository.findByProcessId(processId);
-
-            boolean isNewRecord = (triggerFormDO == null);
-            if (isNewRecord) {
-                triggerFormDO = new FlowProcessTriggerFormDO();
-            }
-
-            // 设置触发器配置属性
-            populateTriggerFormDO(triggerFormDO, processId, startFormNodeData);
-
-            // 保存或更新记录
-            if (isNewRecord) {
-                flowProcessTriggerFormRepository.insert(triggerFormDO);
-            } else {
-                flowProcessTriggerFormRepository.update(triggerFormDO);
-            }
-        } else if (StringUtils.equals(JsonGraphConstant.START_ENTITY, startNode.getType())) {
-            StartEntityNodeData startEntityNodeData = JsonUtils.treeToObject(startNode.getData(), StartEntityNodeData.class);
-            FlowProcessTriggerEntityDO triggerEntityDO = flowProcessTriggerEntityRepository.findByProcessId(processId);
-
-            boolean isNewRecord = (triggerEntityDO == null);
-            if (isNewRecord) {
-                triggerEntityDO = new FlowProcessTriggerEntityDO();
-            }
-            // 填充对象属性
-            populateTriggerEntityDO(triggerEntityDO, processId, startEntityNodeData);
-            // 保存或更新记录
-            if (isNewRecord) {
-                flowProcessTriggerEntityRepository.insert(triggerEntityDO);
-            } else {
-                flowProcessTriggerEntityRepository.update(triggerEntityDO);
-            }
-        } else if (StringUtils.equals(JsonGraphConstant.START_TIME, startNode.getType())) {
-
-        }
-    }
-
-
-    /**
-     * 填充FlowProcessTriggerFormDO对象属性
-     */
-    private void populateTriggerFormDO(FlowProcessTriggerFormDO triggerFormDO, Long processId, StartFormNodeData startFormNodeData) {
-        triggerFormDO.setProcessId(processId);
-        triggerFormDO.setPageId(startFormNodeData.getPageId());
-        triggerFormDO.setFieldId(startFormNodeData.getFieldId());
-        triggerFormDO.setTriggerScope(startFormNodeData.getTriggerScope());
-        triggerFormDO.setTriggerUserType(startFormNodeData.getTriggerUserType());
-        triggerFormDO.setTriggerUserValue(startFormNodeData.getTriggerUserValue());
-        triggerFormDO.setTriggerEvents(JsonUtils.toJsonString(startFormNodeData.getTriggerEvents()));
-        triggerFormDO.setFilterCondition(JsonUtils.toJsonString(startFormNodeData.getFilterCondition()));
-        triggerFormDO.setIsChildTriggerAllowed(startFormNodeData.getIsChildTriggerAllowed());
-    }
-
-    private void populateTriggerEntityDO(FlowProcessTriggerEntityDO triggerEntityDO, Long processId, StartEntityNodeData startEntityNodeData) {
-        triggerEntityDO.setProcessId(processId);
-        triggerEntityDO.setEntityId(startEntityNodeData.getEntityId());
-        triggerEntityDO.setTriggerEvents(JsonUtils.toJsonString(startEntityNodeData.getTriggerEvents()));
-        triggerEntityDO.setTriggerFieldIds(JsonUtils.toJsonString(startEntityNodeData.getTriggerFieldIds()));
-        triggerEntityDO.setFilterCondition(JsonUtils.toJsonString(startEntityNodeData.getFilterCondition()));
-    }
 
     @Override
     @Transactional(rollbackFor = Exception.class)

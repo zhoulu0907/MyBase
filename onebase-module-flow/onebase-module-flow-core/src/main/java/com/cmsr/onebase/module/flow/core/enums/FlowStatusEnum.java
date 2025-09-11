@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.flow.core.enums.mgmt;
+package com.cmsr.onebase.module.flow.core.enums;
 
 /**
  * @Author：huangjie

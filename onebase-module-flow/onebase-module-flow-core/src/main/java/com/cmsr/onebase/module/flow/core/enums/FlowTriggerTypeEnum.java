@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.flow.core.enums.mgmt;
+package com.cmsr.onebase.module.flow.core.enums;
 
 /**
  * 流程触发类型枚举
