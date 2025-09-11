@@ -82,6 +82,10 @@ const DynamicDataSourceConfig: React.FC<DynamicSelectDataSourceConfigProps> = ({
             <DataSelectionProcessConfig
               visible={selectDataVisible}
               setVisible={() => setSelectDataVisibleVisible(false)}
+              id={id}
+              handlePropsChange={handlePropsChange}
+              item={item}
+              configs={configs}
             />
           </FormItem>
 
