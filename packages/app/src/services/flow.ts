@@ -10,7 +10,7 @@ export const getFlowMgmt = (id: string) => {
 };
 
 export const createFlowMgmt = (params: CreateFlowMgmtReq) => {
-  return flowService.post('/mgmt', params);
+  return flowService.post('/mgmt/create', params);
 };
 
 export const updateFlowMgmt = (params: CreateFlowMgmtReq) => {

@@ -235,7 +235,7 @@ export default function EditorWorkspace() {
 
               // 主子表 字段组件
               if (entityID && fieldID) {
-                console.log('dataField:    ', entityID, fieldID);
+                console.log('dataField:  ', entityID, fieldID);
                 schema.config.dataField = [entityID, fieldID];
                 schema.config.status = STATUS_VALUES[STATUS_OPTIONS.DEFAULT];
               }
