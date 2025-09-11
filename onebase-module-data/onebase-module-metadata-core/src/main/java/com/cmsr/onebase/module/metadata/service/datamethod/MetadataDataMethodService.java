@@ -92,4 +92,5 @@ public interface MetadataDataMethodService {
     PageResult<Map<String, Object>> getDataPage(String entityId, Integer pageNo, Integer pageSize, 
                                                String sortField, String sortDirection, 
                                                Map<String, Object> filters, String methodCode);
+
 }

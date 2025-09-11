@@ -4,30 +4,30 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 /**
- * 返回 DTO - 数据权限 操作符与字段类型关联
+ * 权限参考操作类型响应 DTO
  *
- * 对应列：id, field_type_code, field_type_name, validation_code, validation_name
- *
- * @author bty418
- * @date 2025-08-14
+ * @author matianyu
+ * @date 2025-09-10
  */
+@Schema(description = "权限参考操作类型响应 DTO")
 @Data
 public class PermitRefOtftRespDTO {
 
-    @Schema(description = "主键Id")
+    @Schema(description = "操作类型ID", example = "1")
     private Long id;
 
-    @Schema(description = "字段类型编码")
+    @Schema(description = "操作类型代码", example = "READ")
+    private String operationTypeCode;
+
+    @Schema(description = "操作类型名称", example = "查看")
+    private String operationTypeName;
+
+    @Schema(description = "字段类型代码", example = "STRING")
     private String fieldTypeCode;
 
-    @Schema(description = "字段类型名称")
-    private String fieldTypeName;
+    @Schema(description = "排序", example = "1")
+    private Integer sort;
 
-    @Schema(description = "操作符编码")
-    private String validationCode;
-
-    @Schema(description = "操作符名称")
-    private String validationName;
+    @Schema(description = "备注", example = "查看操作权限")
+    private String remark;
 }
-
-

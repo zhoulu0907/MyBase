@@ -809,5 +809,4 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
         // 为表名添加双引号
         return "\"" + tableName + "\"";
     }
-
 }
