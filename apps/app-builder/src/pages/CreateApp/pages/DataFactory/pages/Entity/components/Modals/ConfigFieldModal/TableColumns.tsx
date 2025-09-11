@@ -115,7 +115,9 @@ const TableColumns = ({
             disabled={record.isSystemField === FIELD_TYPE.SYSTEM}
             style={{ width: 100 }}
             showSearch
-            filterOption={(input, option) => (option?.props?.label ?? '').includes(input)}
+            filterOption={(input, option) => {
+              return option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0;
+            }}
           />
           {record.isSystemField === FIELD_TYPE.CUSTOM && FIELD_TYPES_NEED_CONFIG.includes(value) && (
             <Popover

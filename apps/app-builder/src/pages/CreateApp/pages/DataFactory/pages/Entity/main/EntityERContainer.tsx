@@ -66,8 +66,8 @@ export const EntityERContainer: React.FC<{
             const pos = JSON.parse(item?.displayConfig || '{}');
             return {
               ...item,
-              positionX: pos?.x || 0,
-              positionY: pos?.y || 0
+              positionX: pos?.x, // 新增节点位置信息为undefined
+              positionY: pos?.y
             };
           }) || [],
         edges:
