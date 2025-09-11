@@ -1,4 +1,4 @@
-import { Modal, Form, Input, Select, Checkbox, Button, Tag, Avatar } from '@arco-design/web-react';
+import { Modal, Form, Input, Select, Checkbox, Button, Tag } from '@arco-design/web-react';
 import { IconPlus, IconClose, IconEdit } from '@arco-design/web-react/icon';
 import styles from './index.module.less';
 import {
@@ -15,8 +15,7 @@ import {
   // type RoleAddUserReq
 } from '@onebase/app';
 import { useState, useEffect, useCallback } from 'react';
-// import { AddMembers } from '@onebase/common';
-import AddMembers from './members';
+import { AddMembers } from '@onebase/common';
 import { debounce } from 'lodash-es';
 
 const FormItem = Form.Item;
@@ -184,6 +183,24 @@ const DataPermissionModal = (props: IProps) => {
     const currentAssignIds = form.getFieldValue('scopeLevel.assignIds') || [];
     const newAssignIds = currentAssignIds.filter((assignIds: string) => assignIds !== id);
     form.setFieldValue('scopeLevel.assignIds', newAssignIds);
+  };
+
+  const handleUpdateSelectedMembers = (members: any[]) => {
+    setSelectedMembers(members);
+
+    // 同时更新表单字段值
+    const ids = members.map((item) => item.key);
+    form.setFieldValue('scopeLevel.assignIds', ids);
+
+    // 获取当前scopeLevel的值
+    const currentScopeLevel = form.getFieldsValue().scopeLevel || {};
+    // 合并更新scopeLevel对象，保留现有属性
+    form.setFieldsValue({
+      scopeLevel: {
+        ...currentScopeLevel,
+        assignIds: ids
+      }
+    });
   };
 
   const handleOk = async () => {
@@ -624,6 +641,7 @@ const DataPermissionModal = (props: IProps) => {
         onExpand={handleExpand}
         onSearch={debouncedUpdate}
         onConfirm={handleAddScope}
+        onUpdateSelectedMembers={handleUpdateSelectedMembers}
         onCancel={() => setMembersVisible(false)}
       ></AddMembers>
     </>

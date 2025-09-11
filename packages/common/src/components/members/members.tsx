@@ -1,7 +1,7 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Button, Modal, Input, Space, List, Breadcrumb, Avatar, Typography, Spin } from '@arco-design/web-react';
 import { IconRight, IconClose } from '@arco-design/web-react/icon';
-import { formatDeptAndUsers } from './const.ts';
+import { formatDeptAndUsers } from './const';
 
 interface IData {
   children: IData[];
@@ -13,29 +13,55 @@ interface IProps {
   data: IData;
   loading: boolean;
   visible: boolean;
+  selectedMembers: any[];
   onExpand: (value: string) => void;
   onSearch: (value: string) => void;
   onCancel: () => void;
   onConfirm: (value: any[]) => void;
+  onUpdateSelectedMembers?: (members: any[]) => void;
 }
 
 // 添加成员
 const AddMembers = (props: IProps) => {
-  const { title = '选择成员', width = 800, visible, data, loading, onExpand, onSearch, onCancel, onConfirm } = props;
+  const {
+    title = '选择成员',
+    width = 800,
+    visible,
+    data,
+    loading,
+    selectedMembers,
+    onExpand,
+    onSearch,
+    onCancel,
+    onConfirm,
+    onUpdateSelectedMembers
+  } = props;
 
   const renderData = formatDeptAndUsers(data);
-  const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
-  const [selectedMembers, setSelectedMembers] = useState<any[]>([]);
+  const [selectedKeys, setSelectedKeys] = useState<string[]>(() => {
+    return selectedMembers.map((member) => member.key);
+  });
   const [breadcrumbs, setBreadcrumbs] = useState<{ key?: string; title: string; id?: string }[]>([
     { key: renderData.key || '-', title: renderData.title || '根目录' }
   ]);
   const isSelectDepartment = title === 'specifiedDepartment';
   const isSelectPerson = title === 'specifiedPerson';
 
+  useEffect(() => {
+    if (visible) {
+      // 当弹窗可见且selectedMembers变化时，更新selectedKeys
+      setSelectedKeys(selectedMembers.map((member) => member.key));
+    }
+  }, [selectedMembers, visible]);
+
   const removeMember = (key: string) => {
     const newKeys = selectedKeys.filter((k) => k !== key);
     setSelectedKeys(newKeys);
-    setSelectedMembers(selectedMembers.filter((m) => m.key !== key));
+
+    const newSelectedMembers = selectedMembers.filter((m) => m.key !== key);
+    if (onUpdateSelectedMembers) {
+      onUpdateSelectedMembers(newSelectedMembers);
+    }
   };
 
   // 重置状态函数
@@ -44,8 +70,10 @@ const AddMembers = (props: IProps) => {
     setBreadcrumbs([{ key: renderData.key || '-', title: renderData.title || '根目录' }]);
     // 清空已选中的用户
     setSelectedKeys([]);
-    setSelectedMembers([]);
-  }, [renderData]);
+    if (onUpdateSelectedMembers) {
+      onUpdateSelectedMembers([]);
+    }
+  }, [renderData, onUpdateSelectedMembers]);
 
   // 点击取消时的处理函数
   const handleCancel = () => {
@@ -150,14 +178,17 @@ const AddMembers = (props: IProps) => {
                         const checked = e.target.checked;
                         if (checked) {
                           setSelectedKeys([...selectedKeys, item.key]);
-                          setSelectedMembers([
+                          const newSelectedMembers = [
                             ...selectedMembers,
                             {
                               key: item.key,
                               name: item.title,
                               department: buildDepartmentPath() // 使用构建的完整路径
                             }
-                          ]);
+                          ];
+                          if (onUpdateSelectedMembers) {
+                            onUpdateSelectedMembers(newSelectedMembers);
+                          }
                         } else {
                           removeMember(item.key);
                         }
@@ -188,14 +219,17 @@ const AddMembers = (props: IProps) => {
                           const checked = e.target.checked;
                           if (checked) {
                             setSelectedKeys([...selectedKeys, item.key]);
-                            setSelectedMembers([
+                            const newSelectedMembers = [
                               ...selectedMembers,
                               {
                                 key: item.key,
                                 name: item.title,
                                 department: buildDepartmentPath()
                               }
-                            ]);
+                            ];
+                            if (onUpdateSelectedMembers) {
+                              onUpdateSelectedMembers(newSelectedMembers);
+                            }
                           } else {
                             removeMember(item.key);
                           }
@@ -249,7 +283,9 @@ const AddMembers = (props: IProps) => {
                 type="text"
                 onClick={() => {
                   setSelectedKeys([]);
-                  setSelectedMembers([]);
+                  if (onUpdateSelectedMembers) {
+                    onUpdateSelectedMembers([]);
+                  }
                 }}
               >
                 清空
