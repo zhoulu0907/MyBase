@@ -66,6 +66,10 @@ export const StartEntityInitData = {
       blocks: [],
       data: {
         title: '表单(实体)触发节点',
+        initialData: {
+          id: 'start_entity_0',
+          entityId: ''
+        },
         outputs: {
           type: 'object',
           properties: {}
@@ -84,6 +88,10 @@ export const StartTimeInitData = {
       blocks: [],
       data: {
         title: '定时触发节点',
+        initialData: {
+          id: 'start_time_0',
+          delaySeconds: 0.5
+        },
         outputs: {
           type: 'object',
           properties: {}
