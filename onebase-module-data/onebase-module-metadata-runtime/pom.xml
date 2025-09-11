@@ -54,21 +54,12 @@
     </dependencies>
 
     <build>
-        <finalName>${project.artifactId}</finalName>
-        <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>${spring.boot.version}</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>repackage</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <!-- runtime 可执行打包 -->
-            </plugin>
-        </plugins>
+    <finalName>${project.artifactId}</finalName>
+    <!-- 说明：runtime 模块作为被 onebase-server 聚合引用的普通业务模块，
+         不需要再次使用 spring-boot-maven-plugin 生成可执行 fat jar；
+         否则其产物为嵌套 Boot Jar(类位于内层 BOOT-INF/classes)，
+         被主应用打包后无法直接通过类路径扫描到 Controller，
+         导致 /admin-api/metadata/data-method/data/page 等接口在运行时缺失。
+         因此移除 repackage，仅输出普通依赖 jar。 -->
     </build>
 </project>
