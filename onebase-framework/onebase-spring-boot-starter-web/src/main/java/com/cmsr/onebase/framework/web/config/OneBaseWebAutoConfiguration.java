@@ -20,6 +20,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.modelmapper.ModelMapper;
 
 @AutoConfiguration
 @EnableConfigurationProperties(WebProperties.class)
@@ -66,6 +67,20 @@ public class OneBaseWebAutoConfiguration implements WebMvcConfigurer {
     public WebFrameworkUtils webFrameworkUtils(WebProperties webProperties) {
         // 由于 WebFrameworkUtils 需要使用到 webProperties 属性，所以注册为一个 Bean
         return new WebFrameworkUtils(webProperties);
+    }
+
+    /**
+     * 创建 ModelMapper Bean，用于对象转换
+     */
+    @Bean
+    public ModelMapper modelMapper() {
+        ModelMapper mapper = new ModelMapper();
+        // 配置宽松匹配策略，允许字段名不完全匹配
+        mapper.getConfiguration()
+                .setMatchingStrategy(org.modelmapper.convention.MatchingStrategies.LOOSE)
+                .setFieldMatchingEnabled(true)
+                .setFieldAccessLevel(org.modelmapper.config.Configuration.AccessLevel.PRIVATE);
+        return mapper;
     }
 
     // ========== Filter 相关 ==========
