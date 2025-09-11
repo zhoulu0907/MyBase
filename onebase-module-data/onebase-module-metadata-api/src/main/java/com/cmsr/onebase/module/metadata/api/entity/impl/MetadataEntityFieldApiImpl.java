@@ -1,6 +1,5 @@
 package com.cmsr.onebase.module.metadata.api.entity.impl;
 
-import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.module.metadata.api.entity.MetadataEntityFieldApi;
 import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldQueryReqDTO;
 import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldRespDTO;
@@ -19,8 +18,8 @@ import java.util.List;
 @Primary
 public class MetadataEntityFieldApiImpl implements MetadataEntityFieldApi {
     @Override
-    public CommonResult<List<EntityFieldRespDTO>> getEntityFieldList(EntityFieldQueryReqDTO reqDTO) {
+    public List<EntityFieldRespDTO> getEntityFieldList(EntityFieldQueryReqDTO reqDTO) {
         log.info("Stub getEntityFieldList entityId={} 返回空列表", reqDTO.getEntityId());
-        return CommonResult.success(Collections.emptyList());
+        return Collections.emptyList();
     }
 }
