@@ -19,7 +19,6 @@ const XRadio = memo((props: XInputRadioConfig & { runtime?: boolean }) => {
     layout,
     labelColSpan = 0,
     direction,
-    description,
     runtime = true
   } = props;
 
@@ -38,13 +37,16 @@ const XRadio = memo((props: XInputRadioConfig & { runtime?: boolean }) => {
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{
           margin: 0,
-          opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,
-          pointerEvents: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset'
+          opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
       >
-        <RadioGroup direction={direction} options={defaultValue} defaultValue={defaultValue?.find(op => op.chosen)?.value} />
+        {
+          status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? <div>{defaultValue?.find(op => op.chosen)?.label || '--'}</div> :
+            <RadioGroup direction={direction} options={defaultValue} defaultValue={defaultValue?.find(op => op.chosen)?.value} style={{
+              pointerEvents: runtime ? 'unset' : 'none'
+            }} />
+        }
       </Form.Item>
-      <div className='description showEllipsis' style={{marginLeft: labelColSpan}}>{description}</div>
     </div>
   );
 });

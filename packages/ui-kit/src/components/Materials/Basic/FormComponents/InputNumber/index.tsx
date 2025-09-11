@@ -20,7 +20,6 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean }) =>
     precision,
     layout,
     labelColSpan = 0,
-    description,
     unit,
     runtime = true
   } = props;
@@ -49,26 +48,27 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean }) =>
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{
           margin: 0,
-          opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,
-          pointerEvents: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset'
+          opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
       >
-        <InputNumber
-          readOnly={status === STATUS_VALUES[STATUS_OPTIONS.READONLY]}
-          defaultValue={defaultValue}
-          placeholder={placeholder}
-          step={step}
-          min={verify?.min}
-          max={verify?.max}
-          precision={precision}
-          style={{
-            width: '100%',
-            textAlignLast: align
-          }}
-          suffix={unit}
-        />
+        {
+          status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? <div>{defaultValue || '--'}</div> :
+            <InputNumber
+              defaultValue={defaultValue}
+              placeholder={placeholder}
+              step={step}
+              min={verify?.min}
+              max={verify?.max}
+              precision={precision}
+              style={{
+                width: '100%',
+                textAlignLast: align,
+                pointerEvents: runtime ? 'unset' : 'none'
+              }}
+              suffix={unit}
+            />
+        }
       </Form.Item>
-      <div className='description showEllipsis' style={{ marginLeft: labelColSpan }}>{description}</div>
     </div>
   );
 });

@@ -7,7 +7,7 @@ import type { XInputSelectOneConfig } from './schema';
 import '../index.css';
 
 const XSelectOne = memo((props: XInputSelectOneConfig & { runtime?: boolean }) => {
-  const { label, dataField, tooltip, status, verify, layout, labelColSpan = 0, showSearch, defaultValue, description, runtime = true } = props;
+  const { label, dataField, tooltip, status, verify, layout, labelColSpan = 0, showSearch, defaultValue, runtime = true } = props;
 
   return (
     <div className='formWrapper'>
@@ -24,19 +24,20 @@ const XSelectOne = memo((props: XInputSelectOneConfig & { runtime?: boolean }) =
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{
           margin: 0,
-          opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,
-          pointerEvents: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset'
+          opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
       >
         <Select
           placeholder="请选择"
           showSearch={showSearch}
-          style={{ width: '100%' }}
           allowClear
           options={defaultValue}
+          style={{
+            width: '100%',
+            pointerEvents: runtime ? 'unset' : 'none'
+          }}
         />
       </Form.Item>
-      <div className='description showEllipsis' style={{marginLeft: labelColSpan}}>{description}</div>
     </div>
   );
 });

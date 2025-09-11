@@ -14,8 +14,6 @@ export const CONFIG_TYPES = {
   LABEL_INPUT: 'LabelInput',
   // 组件占位符输入
   PLACEHOLDER_INPUT: 'PlaceholderInput',
-  // 组件描述输入
-  DESCRIPTION_INPUT: 'DescriptionInput',
   // 组件选项输入
   SELECT_OPTIONS_INPUT: 'OptionsInput',
   // 组件提示输入

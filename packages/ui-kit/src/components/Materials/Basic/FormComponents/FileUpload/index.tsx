@@ -1,7 +1,9 @@
+import { memo, useState } from 'react';
+import { nanoid } from 'nanoid';
 import { Form, Message, Upload } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
 import { uploadFile } from '@onebase/platform-center';
-import { memo, useState } from 'react';
+import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import type { XInputFileUploadConfig } from './schema';
 import '../index.css';
@@ -9,6 +11,7 @@ import '../index.css';
 const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean }) => {
   const {
     label,
+    dataField,
     status,
     tooltip,
     // showPreview, // todo
@@ -17,7 +20,6 @@ const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean })
     verify,
     layout,
     labelColSpan = 0,
-    description,
     runtime = true
   } = props;
 
@@ -44,6 +46,7 @@ const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean })
     <div className='formWrapper'>
       <Form.Item
         label={label.display && label.text}
+        field={dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.FILE_UPLOAD}_${nanoid()}`}
         layout={layout}
         tooltip={tooltip}
         rules={[{ required: verify?.required }]}
@@ -54,8 +57,7 @@ const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean })
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{
           margin: 0,
-          opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,
-          pointerEvents: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset'
+          opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
       >
         <Upload
@@ -92,7 +94,8 @@ const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean })
             }
           }}
           style={{
-            width: '100%'
+            width: '100%',
+            pointerEvents: runtime ? 'unset' : 'none'
           }}
         >
           {listType == 'picture-card' && (
@@ -106,7 +109,6 @@ const XFileUpload = memo((props: XInputFileUploadConfig & { runtime?: boolean })
           )}
         </Upload>
       </Form.Item>
-      <div className='description showEllipsis' style={{ marginLeft: labelColSpan }}>{description}</div>
     </div>
   );
 });

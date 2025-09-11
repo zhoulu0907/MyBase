@@ -19,15 +19,15 @@ const XDivider = memo((props: XDividerConfig & { runtime?: boolean }) => {
       style={{
         margin: 0,
         padding: 6,
-        opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,
-        pointerEvents: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset'
+        opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
       }}
     >
       <Divider
         orientation={align}
         type={layout}
         style={{
-          margin: `${margin}px 0`
+          margin: `${margin}px 0`,
+          pointerEvents: runtime ? 'unset' : 'none'
         }}
       >
         {defaultValue}

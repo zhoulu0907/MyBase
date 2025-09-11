@@ -88,9 +88,9 @@
       transition: border-color 0.2s ease;
       position: relative;
 
-      & > div {
-        pointer-events: none !important;
-      }
+      // & > div {
+      //   pointer-events: none !important;
+      // }
 
       & .operationArea {
         pointer-events: auto !important;
@@ -105,7 +105,7 @@
       position: absolute;
       top: -18px;
       right: 16px;
-      width: 49px;
+      // width: 49px;
       height: 24px;
       padding: 4px;
       border: 1px solid #e5e6eb;
@@ -115,8 +115,12 @@
       transition: all 0.2s ease;
       display: flex;
       align-items: center;
-      justify-content: space-evenly;
+      justify-content: space-between;
       z-index: 10;
+
+      .divider {
+        margin: 0 4px;
+      }
 
       // 删除按钮样式
       .copyButton,

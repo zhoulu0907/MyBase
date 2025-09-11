@@ -9,7 +9,7 @@ import type { XInputImgUploadConfig } from './schema';
 import '../index.css';
 
 const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean }) => {
-  const { label, dataField, status, tooltip, listType, verify, layout, labelColSpan = 0, description, runtime = true } = props;
+  const { label, dataField, status, tooltip, listType, verify, layout, labelColSpan = 0, runtime = true } = props;
 
   const [_imgUrl, setImgUrl] = useState<string>('');
 
@@ -45,8 +45,7 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean }) =
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{
           margin: 0,
-          opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,
-          pointerEvents: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset'
+          opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
       >
         <Upload
@@ -85,7 +84,8 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean }) =
           }}
           showUploadList
           style={{
-            width: '100%'
+            width: '100%',
+            pointerEvents: runtime ? 'unset' : 'none'
           }}
         >
           {listType == 'picture-card' && (
@@ -98,7 +98,6 @@ const XImgUpload = memo((props: XInputImgUploadConfig & { runtime?: boolean }) =
           )}
         </Upload>
       </Form.Item>
-      <div className='description showEllipsis' style={{ marginLeft: labelColSpan }}>{description}</div>
     </div>
   );
 });

@@ -1,7 +1,6 @@
-import { ENTITY_FIELD_TYPE } from '@onebase/ui-kit';
-import { FIELD_TYPE, FIELD_TYPE_LABEL } from '@onebase/ui-kit';
 import { Descriptions, Drawer, Empty, Spin, Tag } from '@arco-design/web-react';
 import { getFieldById } from '@onebase/app';
+import { ENTITY_FIELD_TYPE, FIELD_TYPE, FIELD_TYPE_LABEL } from '@onebase/ui-kit';
 import React, { useEffect, useState } from 'react';
 import styles from './FieldDetailDrawer.module.less';
 
@@ -54,7 +53,7 @@ const FieldDetailDrawer: React.FC<FieldDetailDrawerProps> = ({ visible, setVisib
   };
 
   const getFieldTypeLabel = (fieldType: string) => {
-    return ENTITY_FIELD_TYPE[fieldType as keyof typeof ENTITY_FIELD_TYPE] || fieldType;
+    return ENTITY_FIELD_TYPE[fieldType as keyof typeof ENTITY_FIELD_TYPE].LABEL || fieldType;
   };
   const renderFieldTypeTag = (fieldType: string) => {
     const label = getFieldTypeLabel(fieldType);
