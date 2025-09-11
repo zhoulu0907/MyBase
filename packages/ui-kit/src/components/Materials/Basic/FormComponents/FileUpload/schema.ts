@@ -1,8 +1,10 @@
 import {
   baseConfig,
   baseDefault,
+  dataFieldConfig,
   labelColSpanConfig,
   layoutConfig,
+  listTypeConfig,
   statusConfig,
   widthConfig,
   type ICommonBaseType,
@@ -24,14 +26,12 @@ import {
 } from '../../../constants';
 import type {
   IBooleanConfigType,
-  IDescriptionConfigType,
   ILabelConfigType,
   ILayoutConfigType,
   INumberConfigType,
   IPlaceholderConfigType,
   ISelectConfigType,
   IStatusConfigType,
-  // ISupportFileTypeConfigType,
   ITextAreaConfigType,
   ITextConfigType,
   ITooltipConfigType,
@@ -43,7 +43,8 @@ import type {
   TSelectDefaultType,
   TTextAreaDefaultType,
   TTextDefaultType,
-  IVerifyConfigType
+  IVerifyConfigType,
+  IDataFieldConfigType
 } from '../../../types';
 
 export interface XInputFileUploadSchema {
@@ -53,10 +54,8 @@ export interface XInputFileUploadSchema {
 
 export type TXInputFileUploadEditData = Array<
   | ITextConfigType
-  // | ISupportFileTypeConfigType
   | ILabelConfigType
   | IPlaceholderConfigType
-  | IDescriptionConfigType
   | ITooltipConfigType
   | IStatusConfigType<TStatusSelectKeyType>
   | IWidthConfigType<TWidthSelectKeyType>
@@ -69,6 +68,7 @@ export type TXInputFileUploadEditData = Array<
   | IStatusConfigType<TUploadSelectKeyType>
   | ILayoutConfigType<TLayoutSelectKeyType>
   | IVerifyConfigType
+  | IDataFieldConfigType
 >;
 
 export interface XInputFileUploadConfig extends ICommonBaseType {
@@ -83,14 +83,14 @@ export interface XInputFileUploadConfig extends ICommonBaseType {
   };
 
   /**
-   * 描述信息（显示在输入框下方，辅助说明）
+   * 数据字段
    */
-  description: TTextAreaDefaultType;
+  dataField: TTextDefaultType[];
 
   /**
-   * 提示文字（鼠标悬浮时显示）
+   * 描述信息（鼠标悬浮时显示）
    */
-  tooltip?: TTextDefaultType;
+  tooltip?: TTextAreaDefaultType;
 
   /**
    * 组件状态：可用、隐藏、只读
@@ -108,12 +108,12 @@ export interface XInputFileUploadConfig extends ICommonBaseType {
    */
   width: TSelectDefaultType<TWidthSelectKeyType>;
 
- /**
-   * required：是否必填，未填写时提交报错
-   * maxCount：最大上传数量，默认：-1 不限制
-   * maxSize：最大图片大小单位：MB，默认：10，最大100
-   * fileFormat：支持的文件类型，多个类型用逗号分隔，默认不限制
-   */
+  /**
+    * required：是否必填，未填写时提交报错
+    * maxCount：最大上传数量，默认：-1 不限制
+    * maxSize：最大图片大小单位：MB，默认：10，最大100
+    * fileFormat：支持的文件类型，多个类型用逗号分隔，默认不限制
+    */
   verify: {
     required: TBooleanDefaultType;
     maxCount: TNumberDefaultType;
@@ -162,14 +162,10 @@ const XFileUpload: XInputFileUploadSchema = {
       name: '标题',
       type: CONFIG_TYPES.LABEL_INPUT
     },
-    {
-      key: 'description',
-      name: '描述信息',
-      type: CONFIG_TYPES.DESCRIPTION_INPUT
-    },
+    ...dataFieldConfig,
     {
       key: 'tooltip',
-      name: '提示文字',
+      name: '描述信息',
       type: CONFIG_TYPES.TOOLTIP_INPUT
     },
     layoutConfig,
@@ -194,6 +190,7 @@ const XFileUpload: XInputFileUploadSchema = {
       name: '校验',
       type: CONFIG_TYPES.VERIFY
     },
+    listTypeConfig,
     statusConfig,
     widthConfig,
   ],
@@ -203,7 +200,7 @@ const XFileUpload: XInputFileUploadSchema = {
       text: '文件上传',
       display: true,
     },
-    description: '',
+    dataField: [],
     tooltip: '',
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],

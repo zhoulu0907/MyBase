@@ -1,8 +1,7 @@
-import { IconCopy, IconDelete } from '@arco-design/web-react/icon';
+import { STATUS_OPTIONS, STATUS_VALUES } from '@onebase/ui-kit';
 import { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import { v4 as uuidv4 } from 'uuid';
-import { STATUS_OPTIONS,STATUS_VALUES } from '@onebase/ui-kit';
 
 import {
   COMPONENT_GROUP_NAME,
@@ -24,6 +23,10 @@ import PCActiveIcon from '@/assets/images/pc_icon_active.svg';
 import NextIcon from '@/assets/images/next_icon.svg';
 import PrevActiveIcon from '@/assets/images/prev_icon_active.svg';
 // import NextActiveIcon from '@/assets/images/next_icon_active.svg';
+
+import CompDeleteIcon from '@/assets/images/app_delete.svg';
+import CompCopyIcon from '@/assets/images/copy_comp_icon.svg';
+import CompShowIcon from '@/assets/images/eye_off_icon.svg';
 
 import { Divider } from '@arco-design/web-react';
 import type { AppEntityField } from '@onebase/app';
@@ -65,6 +68,21 @@ export default function EditorWorkspace() {
     }
   }, [components]);
 
+  // 取消隐藏组件
+  const handleShowComponent = (componentId: string) => {
+    const schema = pageComponentSchemas[componentId];
+    console.log('schema', pageComponentSchemas[componentId]);
+
+    schema.config.status = STATUS_VALUES[STATUS_OPTIONS.DEFAULT];
+
+    console.log(schema, 'schema');
+
+    setPageComponentSchemas(componentId, schema);
+    setCurComponentID(componentId);
+    setCurComponentSchema(schema);
+    setShowDeleteButton(false);
+  };
+
   // 复制组件
   const handleCopyComponent = (comp: any) => {
     addComponents(comp);
@@ -82,7 +100,7 @@ export default function EditorWorkspace() {
     };
 
     setPageComponentSchemas(comp.id, props);
-    setCurComponentID(comp.id!);
+    setCurComponentID(comp.id);
     setCurComponentSchema(props);
     setShowDeleteButton(false);
   };
@@ -216,11 +234,11 @@ export default function EditorWorkspace() {
               schema.config.cpName = itemDisplayName;
               schema.config.id = cpID;
 
-              // 系统组件
+              // 主子表 字段组件
               if (entityID && fieldID) {
                 console.log('dataField:    ', entityID, fieldID);
                 schema.config.dataField = [entityID, fieldID];
-                schema.config.status = STATUS_VALUES[STATUS_OPTIONS.READONLY]
+                schema.config.status = STATUS_VALUES[STATUS_OPTIONS.DEFAULT];
               }
 
               if (dataLabel) {
@@ -291,6 +309,22 @@ export default function EditorWorkspace() {
 
                 {curComponentID === cp.id && showDeleteButton && (
                   <div className={styles.operationArea}>
+                    {pageComponentSchemas[cp.id].config.status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
+                      <>
+                        <div
+                          className={styles.copyButton}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            console.debug('取消隐藏组件: ', cp);
+                            handleShowComponent(cp.id);
+                          }}
+                        >
+                          <img src={CompShowIcon} alt="component show" />
+                        </div>
+                        <Divider className={styles.divider} type="vertical" />
+                      </>
+                    )}
+
                     <div
                       className={styles.copyButton}
                       onClick={(e) => {
@@ -299,8 +333,9 @@ export default function EditorWorkspace() {
                         handleCopyComponent({ ...cp, id: `${cp.type}-${uuidv4()}` });
                       }}
                     >
-                      <IconCopy />
+                      <img src={CompCopyIcon} alt="component copy" />
                     </div>
+                    <Divider className={styles.divider} type="vertical" />
                     {/* 删除按钮 */}
                     {/* TODO(mickey): 组件继续封装，和layout中的共用一套 */}
                     <div
@@ -311,7 +346,7 @@ export default function EditorWorkspace() {
                         handleDeleteComponent(cp.id);
                       }}
                     >
-                      <IconDelete />
+                      <img src={CompDeleteIcon} alt="component delete" />
                     </div>
                   </div>
                 )}

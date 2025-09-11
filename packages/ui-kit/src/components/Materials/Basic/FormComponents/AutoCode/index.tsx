@@ -17,40 +17,43 @@ const XautoCode = memo((props: XautoCodeConfig & { runtime?: boolean }) => {
     color,
     bgColor,
     labelColSpan = 0,
-    description,
     runtime = true
   } = props;
 
   return (
-    <Form.Item
-      label={label.display && label.text}
-      layout={layout}
-      rules={[{ required: verify?.required }]}
-      tooltip={tooltip}
-      labelCol={{
-        style: { width: labelColSpan, flex: 'unset' }
-      }}
-      wrapperCol={{ style: { flex: 1 } }}
-      hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
-      style={{
-        margin: 0,
-        padding: 6,
-        opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1
-      }}
-    >
-      <Input
-        readOnly={true}
-        defaultValue={defaultValue}
-        placeholder={placeholder}
-        style={{
-          width: '100%',
-          color,
-          textAlign: align,
-          backgroundColor: bgColor
+    <div className='formWrapper'>
+      <Form.Item
+        label={label.display && label.text}
+        layout={layout}
+        rules={[{ required: verify?.required }]}
+        tooltip={tooltip}
+        labelCol={{
+          style: { width: labelColSpan, flex: 'unset' }
         }}
-      />
-      <div className='description showEllipsis'>{description}</div>
-    </Form.Item>
+        wrapperCol={{ style: { flex: 1 } }}
+        hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
+        style={{
+          margin: 0,
+          opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
+        }}
+      >
+        {
+          status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? <div>{defaultValue || '--'}</div> :
+            <Input
+              readOnly={true}
+              defaultValue={defaultValue}
+              placeholder={placeholder}
+              style={{
+                width: '100%',
+                color,
+                textAlign: align,
+                backgroundColor: bgColor,
+                pointerEvents: runtime ? 'unset' : 'none'
+              }}
+            />
+        }
+      </Form.Item>
+    </div>
   );
 });
 

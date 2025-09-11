@@ -1,5 +1,5 @@
-import { Button, Input, Select } from '@arco-design/web-react';
-import { IconClose } from '@douyinfe/semi-icons';
+import { Button, Divider, Input, Select } from '@arco-design/web-react';
+import { IconDelete } from '@arco-design/web-react/icon';
 import type { Condition, ConfitionField, EntityFieldValidationTypes, ValidationTypeItem } from '@onebase/app';
 import { nanoid } from 'nanoid';
 import React, { useEffect, useState } from 'react';
@@ -24,8 +24,8 @@ const opCodeOptions = [
  */
 export interface ConditionEditorProps {
   fields: ConfitionField[];
-  data?: Condition;
-  onChange: (value: Condition) => void;
+  data?: Condition[];
+  onChange: (value: Condition[]) => void;
   entityFieldValidationTypes: EntityFieldValidationTypes[];
 }
 
@@ -35,15 +35,14 @@ export interface ConditionEditorProps {
 const ConditionEditor: React.FC<ConditionEditorProps> = ({ data, onChange, fields, entityFieldValidationTypes }) => {
   const [conditions, setConditions] = useState<Condition[]>([]);
 
-  //   useEffect(() => {
-  //     if (data) {
-  //       setCondition(data);
-  //     }
-  //   }, []);
+  useEffect(() => {
+    if (data) {
+      setConditions(data);
+    }
+  }, []);
 
   useEffect(() => {
-    console.log(conditions);
-    // onChange(conditions);
+    onChange(conditions);
   }, [conditions]);
 
   const addCondition = (pid: string) => {
@@ -96,12 +95,14 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({ data, onChange, field
   const renderItemWrapper = (cond: Condition) => {
     return cond.rules && cond.rules.length > 0 ? (
       <div className={styles.items} key={cond.id}>
+        <div className={styles.tag}>且</div>
+
         {cond.rules?.map((item: Condition) => {
           return renderItem(item);
         })}
         {cond.rules && cond.rules.length > 0 && (
-          <Button type="default" onClick={() => addCondition(cond.id)}>
-            + 并且
+          <Button type="text" onClick={() => addCondition(cond.id)}>
+            + 添加且条件
           </Button>
         )}
       </div>
@@ -113,7 +114,8 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({ data, onChange, field
       <div className={styles.item} key={cond.id}>
         <Select
           className={styles.itemSelect}
-          style={{ width: '100px' }}
+          style={{ width: '150px' }}
+          value={cond.fieldId || ''}
           onChange={(value) => {
             const newConditions = [...conditions];
 
@@ -140,7 +142,8 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({ data, onChange, field
 
         <Select
           className={styles.itemSelect}
-          style={{ width: '90px' }}
+          style={{ width: '100px' }}
+          value={cond.op || ''}
           onChange={(value) => {
             const newConditions = [...conditions];
 
@@ -169,7 +172,8 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({ data, onChange, field
 
         <Select
           className={styles.itemSelect}
-          style={{ width: '90px' }}
+          style={{ width: '100px' }}
+          value={cond.operatorType || ''}
           onChange={(value) => {
             const newConditions = [...conditions];
 
@@ -191,7 +195,9 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({ data, onChange, field
         </Select>
 
         <Input
-          style={{ width: '100px', marginRight: '10px', backgroundColor: 'white' }}
+          style={{ width: '140px', marginRight: '10px' }}
+          value={cond.value?.[0] || ''}
+          placeholder="请输入"
           onChange={(value) => {
             const newConditions = [...conditions];
 
@@ -210,10 +216,9 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({ data, onChange, field
           }}
         />
 
-        <IconClose
+        <IconDelete
           style={{ fontSize: '13px', color: '#4E5969' }}
           onClick={() => {
-            console.log('close', cond.id);
             deleteCondition(cond.id);
           }}
         />
@@ -228,13 +233,25 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({ data, onChange, field
           return (
             <div key={item.id}>
               {renderItemWrapper(item)}
-              {index !== (conditions || [])?.length - 1 && <div>或者</div>}
+              {index !== (conditions || [])?.length - 1 && (
+                <Divider
+                  orientation="center"
+                  style={{
+                    marginTop: '5px',
+                    marginBottom: '0px',
+                    marginLeft: '10px',
+                    marginRight: '10px'
+                  }}
+                >
+                  <div className={styles.dividerText}>或</div>
+                </Divider>
+              )}
             </div>
           );
         })}
       </div>
-      <Button type="outline" size="small" onClick={() => addCondition('')}>
-        + 或者
+      <Button type="text" size="small" onClick={() => addCondition('')}>
+        + 添加或条件
       </Button>
     </div>
   );

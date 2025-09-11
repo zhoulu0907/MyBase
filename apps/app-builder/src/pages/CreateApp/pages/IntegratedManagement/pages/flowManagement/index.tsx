@@ -17,6 +17,7 @@ import { IconApps, IconDown, IconList, IconPlus } from '@arco-design/web-react/i
 import {
   createFlowMgmt,
   deleteFlowMgmt,
+  getEntityListByApp,
   getFlowMgmt,
   getPageListByAppId,
   listFlowMgmt,
@@ -59,13 +60,15 @@ const FlowManagementPage: React.FC = () => {
   const [pageSize, setPageSize] = useState<number>(8);
   const [pageNo, setPageNo] = useState(1);
 
-  const [dataList, setDataList] = useState<any[]>();
+  const [flowMgmtList, setFlowMgmtList] = useState<any[]>();
   const [total, setTotal] = useState(0);
   const { curAppId } = useAppStore();
   const [pageList, setPageList] = useState<any[]>();
+  const [entityList, setEntityList] = useState<any[]>();
 
   useEffect(() => {
-    curAppId && handlegetPageList();
+    curAppId && handleGetPageList();
+    curAppId && handleGetEntityListByApp();
   }, [curAppId]);
 
   useEffect(() => {
@@ -101,9 +104,15 @@ const FlowManagementPage: React.FC = () => {
     navigate(`/onebase/create-app/integrated-management/flow-editor?appId=${appId}&flowId=${flowId}`);
   };
 
-  const handlegetPageList = async () => {
+  const handleGetEntityListByApp = async () => {
+    const res = await getEntityListByApp(curAppId);
+    console.log('entityList: ', res);
+    setEntityList(res);
+  };
+
+  const handleGetPageList = async () => {
     const res = await getPageListByAppId({ appId: curAppId });
-    console.log('res: ', res);
+    console.log('pageList: ', res);
     setPageList(res.pages);
   };
 
@@ -118,7 +127,8 @@ const FlowManagementPage: React.FC = () => {
         processDescription: form.getFieldValue('processDescription') || '',
         triggerType: form.getFieldValue('triggerType'),
         triggerConfig: {
-          pageId: form.getFieldValue('pageId') || undefined
+          pageId: form.getFieldValue('pageId') || undefined,
+          entityId: form.getFieldValue('entityId') || undefined
         }
       };
 
@@ -145,7 +155,9 @@ const FlowManagementPage: React.FC = () => {
     form.setFieldsValue({ processStatus: res.processStatus == ProcessStatus.ENABLED ? true : false });
     form.setFieldsValue({ processDescription: res.processDescription });
     form.setFieldsValue({ triggerType: res.triggerType });
+
     res.triggerConfig && res.triggerConfig.pageId && form.setFieldsValue({ pageId: res.triggerConfig.pageId });
+    res.triggerConfig && res.triggerConfig.entityId && form.setFieldsValue({ entityId: res.triggerConfig.entityId });
 
     setModalVisible('update');
   };
@@ -161,7 +173,8 @@ const FlowManagementPage: React.FC = () => {
         processDescription: form.getFieldValue('processDescription') || '',
         triggerType: form.getFieldValue('triggerType'),
         triggerConfig: {
-          pageId: form.getFieldValue('pageId') || undefined
+          pageId: form.getFieldValue('pageId') || undefined,
+          entityId: form.getFieldValue('entityId') || undefined
         }
       };
 
@@ -197,7 +210,7 @@ const FlowManagementPage: React.FC = () => {
     };
 
     const res = await listFlowMgmt(req);
-    setDataList(res.list || []);
+    setFlowMgmtList(res.list || []);
     setTotal(res.total || 0);
     setLoading(false);
   };
@@ -302,7 +315,7 @@ const FlowManagementPage: React.FC = () => {
           </div>
           <Spin loading={loading} size={40} style={{ width: '100%', height: '100%' }} tip="加载中...">
             <div className={styles.tableContainer}>
-              {dataList?.map((item, index) => (
+              {flowMgmtList?.map((item, index) => (
                 <FlowCard
                   key={index}
                   data={item}
@@ -383,6 +396,21 @@ const FlowManagementPage: React.FC = () => {
               {pageList?.map((item) => (
                 <Option key={item.id} value={item.id}>
                   {item.pageName}
+                </Option>
+              ))}
+            </Select>
+          </FormItem>
+
+          <FormItem
+            label="实体ID"
+            field="entityId"
+            hidden={triggerType != TriggerType.ENTITY}
+            rules={[{ required: true, message: '请选择实体ID' }]}
+          >
+            <Select>
+              {entityList?.map((item) => (
+                <Option key={item.entityId} value={item.entityId}>
+                  {item.entityName}
                 </Option>
               ))}
             </Select>

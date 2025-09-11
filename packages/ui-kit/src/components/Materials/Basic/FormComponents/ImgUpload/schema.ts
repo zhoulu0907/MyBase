@@ -1,50 +1,50 @@
 import {
-    baseConfig,
-    baseDefault,
-    labelColSpanConfig,
-    layoutConfig,
-    listTypeConfig,
-    statusConfig,
-    widthConfig,
-    type ICommonBaseType,
-    type TLayoutSelectKeyType,
-    type TStatusSelectKeyType,
-    type TUploadSelectKeyType,
-    type TWidthSelectKeyType
+  baseConfig,
+  baseDefault,
+  dataFieldConfig,
+  labelColSpanConfig,
+  layoutConfig,
+  listTypeConfig,
+  statusConfig,
+  widthConfig,
+  type ICommonBaseType,
+  type TLayoutSelectKeyType,
+  type TStatusSelectKeyType,
+  type TUploadSelectKeyType,
+  type TWidthSelectKeyType
 } from '../../../common';
 import {
-    CONFIG_TYPES,
-    LAYOUT_OPTIONS,
-    LAYOUT_VALUES,
-    STATUS_OPTIONS,
-    STATUS_VALUES,
-    UPLOAD_OPTIONS,
-    UPLOAD_VALUES,
-    WIDTH_OPTIONS,
-    WIDTH_VALUES
+  CONFIG_TYPES,
+  LAYOUT_OPTIONS,
+  LAYOUT_VALUES,
+  STATUS_OPTIONS,
+  STATUS_VALUES,
+  UPLOAD_OPTIONS,
+  UPLOAD_VALUES,
+  WIDTH_OPTIONS,
+  WIDTH_VALUES
 } from '../../../constants';
 import type {
-    IBooleanConfigType,
-    IDataFieldConfigType,
-    IDescriptionConfigType,
-    ILabelConfigType,
-    ILayoutConfigType,
-    INumberConfigType,
-    IPlaceholderConfigType,
-    ISelectConfigType,
-    IStatusConfigType,
-    ITextAreaConfigType,
-    ITextConfigType,
-    ITooltipConfigType,
-    IUploadCompressConfigType,
-    IUploadSizeConfigType,
-    IWidthConfigType,
-    TBooleanDefaultType,
-    TNumberDefaultType,
-    TSelectDefaultType,
-    TTextAreaDefaultType,
-    TTextDefaultType,
-    IVerifyConfigType
+  IBooleanConfigType,
+  IDataFieldConfigType,
+  ILabelConfigType,
+  ILayoutConfigType,
+  INumberConfigType,
+  IPlaceholderConfigType,
+  ISelectConfigType,
+  IStatusConfigType,
+  ITextAreaConfigType,
+  ITextConfigType,
+  ITooltipConfigType,
+  IUploadCompressConfigType,
+  IUploadSizeConfigType,
+  IWidthConfigType,
+  TBooleanDefaultType,
+  TNumberDefaultType,
+  TSelectDefaultType,
+  TTextAreaDefaultType,
+  TTextDefaultType,
+  IVerifyConfigType,
 } from '../../../types';
 
 export interface XInputImgUploadSchema {
@@ -56,7 +56,6 @@ export type TXInputImgUploadEditData = Array<
   | ITextConfigType
   | ILabelConfigType
   | IPlaceholderConfigType
-  | IDescriptionConfigType
   | ITooltipConfigType
   | IStatusConfigType<TStatusSelectKeyType>
   | IWidthConfigType<TWidthSelectKeyType>
@@ -89,14 +88,9 @@ export interface XInputImgUploadConfig extends ICommonBaseType {
   dataField: TTextDefaultType[];
 
   /**
-   * 描述信息（显示在输入框下方，辅助说明）
+   * 描述信息（鼠标悬浮时显示）
    */
-  description: TTextAreaDefaultType;
-
-  /**
-   * 提示文字（鼠标悬浮时显示）
-   */
-  tooltip?: TTextDefaultType;
+  tooltip?: TTextAreaDefaultType;
 
   /**
    * 组件状态：可用、隐藏、只读
@@ -114,11 +108,11 @@ export interface XInputImgUploadConfig extends ICommonBaseType {
    */
   width: TSelectDefaultType<TWidthSelectKeyType>;
 
- /**
-   * required：是否必填，未填写时提交报错
-   * maxCount：最大上传数量，默认：-1 不限制
-   * maxSize：最大图片大小单位：MB，默认：10，最大100
-   */
+  /**
+    * required：是否必填，未填写时提交报错
+    * maxCount：最大上传数量，默认：-1 不限制
+    * maxSize：最大图片大小单位：MB，默认：10，最大100
+    */
   verify: {
     required: TBooleanDefaultType;
     maxCount: TNumberDefaultType;
@@ -161,14 +155,10 @@ const XImgUpload: XInputImgUploadSchema = {
       name: '标题',
       type: CONFIG_TYPES.LABEL_INPUT
     },
-    {
-      key: 'description',
-      name: '描述信息',
-      type: CONFIG_TYPES.DESCRIPTION_INPUT
-    },
+    ...dataFieldConfig,
     {
       key: 'tooltip',
-      name: '提示文字',
+      name: '描述信息',
       type: CONFIG_TYPES.TOOLTIP_INPUT
     },
     layoutConfig,
@@ -199,7 +189,6 @@ const XImgUpload: XInputImgUploadSchema = {
       display: true,
     },
     dataField: [],
-    description: '',
     tooltip: '',
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],

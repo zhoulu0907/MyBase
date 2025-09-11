@@ -228,17 +228,16 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                   key={index}
                 >
                   {(item.type === CONFIG_TYPES.TEXT_INPUT ||
-                    item.type === CONFIG_TYPES.TOOLTIP_INPUT ||
                     item.type === CONFIG_TYPES.PLACEHOLDER_INPUT ||
                     item.type === CONFIG_TYPES.UPLOAD_COMPRESS) && (
-                    <Input
-                      placeholder={`请输入${item.name}`}
-                      value={configs[item.key]}
-                      onChange={(value) => {
-                        handlePropsChange(item.key, value);
-                      }}
-                    />
-                  )}
+                      <Input
+                        placeholder={`请输入${item.name}`}
+                        value={configs[item.key]}
+                        onChange={(value) => {
+                          handlePropsChange(item.key, value);
+                        }}
+                      />
+                    )}
                   {item.type === CONFIG_TYPES.LABEL_INPUT && (
                     <Input
                       placeholder={`请输入${item.name}`}
@@ -258,7 +257,7 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                         if (!value) return;
                         handlePropsChange(item.key, value);
                       }}
-                      suffix={item.type == CONFIG_TYPES.UPLOAD_SIZE ? 'MB' : ''}
+                    // suffix={item.type == CONFIG_TYPES.UPLOAD_SIZE ? 'MB' : ''}
                     />
                   )}
 
@@ -271,7 +270,7 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                       }}
                     />
                   )} */}
-                  {item.type === CONFIG_TYPES.DESCRIPTION_INPUT && (
+                  {item.type === CONFIG_TYPES.TOOLTIP_INPUT && (
                     <Input.TextArea
                       placeholder={`请输入${item.name}`}
                       value={configs[item.key]}
@@ -310,33 +309,33 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                     item.type === CONFIG_TYPES.DATE_TYPE ||
                     item.type === CONFIG_TYPES.FORM_LAYOUT ||
                     item.type === CONFIG_TYPES.TEXT_ALIGN) && (
-                    <Radio.Group
-                      type="button"
-                      size="default"
-                      value={configs[item.key]}
-                      onChange={(value) => {
-                        handlePropsChange(item.key, value);
-                      }}
-                      style={{
-                        width: '100%',
-                        display: 'flex'
-                      }}
-                    >
-                      {item.range.map((item: any) => (
-                        <Radio
-                          key={item.key}
-                          value={item.value}
-                          style={{
-                            flex: 1,
-                            textAlign: 'center',
-                            whiteSpace: 'nowrap'
-                          }}
-                        >
-                          {item.text && item.text.startsWith('formEditor.') ? t(item.text) : item.text}
-                        </Radio>
-                      ))}
-                    </Radio.Group>
-                  )}
+                      <Radio.Group
+                        type="button"
+                        size="default"
+                        value={configs[item.key]}
+                        onChange={(value) => {
+                          handlePropsChange(item.key, value);
+                        }}
+                        style={{
+                          width: '100%',
+                          display: 'flex'
+                        }}
+                      >
+                        {item.range.map((item: any) => (
+                          <Radio
+                            key={item.key}
+                            value={item.value}
+                            style={{
+                              flex: 1,
+                              textAlign: 'center',
+                              whiteSpace: 'nowrap'
+                            }}
+                          >
+                            {item.text && item.text.startsWith('formEditor.') ? t(item.text) : item.text}
+                          </Radio>
+                        ))}
+                      </Radio.Group>
+                    )}
                   {item.type === CONFIG_TYPES.COLUMN_COUNT_RADIO && (
                     <Radio.Group
                       type="button"
@@ -458,7 +457,7 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                             value={configs[item.key]['maxChecked']}
                             max={200}
                             min={0}
-                            prefix="可选数量"
+                            prefix="可选数量限制"
                             onChange={(value) => {
                               if (!value) return;
                               handlePropsChange(item.key, { ...configs[item.key], maxChecked: value });
@@ -470,7 +469,7 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                             value={configs[item.key]['maxCount']}
                             max={200}
                             min={-1}
-                            prefix="最大上传数量"
+                            prefix="上传数量限制"
                             onChange={(value) => {
                               if (typeof value !== 'number') return;
                               handlePropsChange(item.key, { ...configs[item.key], maxCount: value });
@@ -482,7 +481,8 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                             value={configs[item.key]['maxSize']}
                             max={200}
                             min={0}
-                            prefix="最大图片大小（MB）"
+                            prefix="大小限制"
+                            suffix={configs['verify']['maxSize'] ? 'MB' : ''}
                             onChange={(value) => {
                               if (!value) return;
                               handlePropsChange(item.key, { ...configs[item.key], maxSize: value });
@@ -491,10 +491,8 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                         )}
                         {typeof configs[item.key]['fileFormat'] === 'string' && (
                           <Input
+                            placeholder={`请输入支持文件格式，用英文逗号分隔`}
                             value={configs[item.key]['fileFormat']}
-                            max={200}
-                            min={0}
-                            prefix="文件格式"
                             onChange={(value) => {
                               if (!value) return;
                               handlePropsChange(item.key, { ...configs[item.key], fileFormat: value });

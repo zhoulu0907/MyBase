@@ -13,7 +13,7 @@ import {
 } from '@onebase/app';
 import { debounce } from 'lodash-es';
 import { useCallback, useEffect, useState } from 'react';
-import { AddMembers } from '../members';
+import { AddMembers } from '@onebase/common';
 import styles from './index.module.less';
 
 interface IProps {

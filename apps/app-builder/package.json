@@ -44,6 +44,7 @@
     "@udecode/plate-ui": "^35.0.0",
     "axios": "^1.10.0",
     "class-variance-authority": "^0.7.1",
+    "cron-validator": "^1.4.0",
     "dayjs": "^1.11.13",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
@@ -66,6 +67,7 @@
     "sortablejs": "^1.15.6",
     "styled-components": "^6.1.19",
     "tailwind-scrollbar-hide": "^4.0.0",
+    "ts-cron-validator": "^1.1.5",
     "uuid": "^11.1.0",
     "zustand": "^5.0.6"
   },

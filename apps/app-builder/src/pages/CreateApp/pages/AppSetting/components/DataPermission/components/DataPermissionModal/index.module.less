@@ -5,18 +5,29 @@
   }
   .dataPermissionForm { 
     box-sizing: border-box;
-    // width: 750px;
     padding: 0 65px;
-    // margin: 0 65px;
     .dataPermissionScope {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      .scopeRow {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        &:last-child {
+          margin-bottom: 0;
+        }
+      }
       .scopeRoles {
         width: 150px;
+        margin-bottom: 0;
       }
       .scopePerson {
         width: 360px;
+        margin-bottom: 0;
+      }
+      .scopeAssign {
+        margin-top: 16px;
+        width: 100%;
+        margin-bottom: 0;
+        border-radius: 4px;
       }
     }
     .dataPermissionFilters {
@@ -26,6 +37,10 @@
       padding: 18px;
       overflow: auto;
       max-height: 300px;
+      &::-webkit-scrollbar {
+        display: none;
+      }
+      scrollbar-width: none;
       .dataFilter {
         position: relative;
         display: flex;

@@ -1,8 +1,7 @@
-import { ENTITY_FIELD_TYPE } from '@onebase/ui-kit';
-import { FIELD_TYPE, FIELD_TYPE_LABEL } from '@onebase/ui-kit';
 import { useAppStore } from '@/store/store_app';
 import { Button, Checkbox, Drawer, Form, Input, Message, Select, Space, Spin } from '@arco-design/web-react';
 import { getFieldById, updateField } from '@onebase/app';
+import { ENTITY_FIELD_TYPE, FIELD_TYPE, FIELD_TYPE_LABEL } from '@onebase/ui-kit';
 import React, { useEffect, useState } from 'react';
 import styles from './EditFieldDrawer.module.less';
 
@@ -39,7 +38,7 @@ const EditFieldDrawer: React.FC<EditFieldDrawerProps> = ({ visible, setVisible, 
 
   // 字段类型选项
   const fieldTypeOptions = Object.entries(ENTITY_FIELD_TYPE).map(([key, value]) => ({
-    label: value as string,
+    label: value.LABEL as string,
     value: key
   }));
 

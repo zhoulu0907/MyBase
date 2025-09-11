@@ -1,4 +1,4 @@
-import { Button, Form, Input, Table } from '@arco-design/web-react';
+import { Button, Form, Input, Table, Popconfirm, Message } from '@arco-design/web-react';
 import { IconDelete, IconEdit } from '@arco-design/web-react/icon';
 import { memo, useEffect, useState } from 'react';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
@@ -11,10 +11,15 @@ import {
   type DeleteMethodParam,
   type PageMethodParam
 } from '@onebase/app';
-import { ENTITY_FIELD_TYPE_LABEL } from '../../../../DataFactory/const';
+import { ENTITY_FIELD_TYPE } from '../../../../DataFactory/const';
 import './index.css';
 import type { XTableConfig } from './schema';
 
+const leftPanelWidth = 343;
+const rightPanelWidth = 310;
+const canvasPaddingWidth = 40 + 32 + 10;
+const canvasMarginWidth = 10;
+const componentMaxWidth = leftPanelWidth + rightPanelWidth + canvasPaddingWidth + canvasMarginWidth;
 const XTable = memo((props: XTableConfig & { runtime?: boolean; toCreatePage?: Function }) => {
   const { runtime = true, toCreatePage } = props;
 
@@ -39,6 +44,8 @@ const XTable = memo((props: XTableConfig & { runtime?: boolean; toCreatePage?: F
   } = props;
 
   const [finalColumns, setFinalColumns] = useState<any[]>();
+  // 实际查询用的参数
+  let queryData: object = {};
 
   const [tableData, setTableData] = useState<any[]>([]);
   const [tableTotal, setTableTotal] = useState<number>(0);
@@ -59,14 +66,20 @@ const XTable = memo((props: XTableConfig & { runtime?: boolean; toCreatePage?: F
             handleEdit(record.id);
           }}
         />
-        <Button
-          status="danger"
-          type="text"
-          icon={<IconDelete />}
-          onClick={() => {
+        <Popconfirm
+          focusLock
+          title='确认删除'
+          content='确定要删除这条数据吗？'
+          onOk={() => {
             handleDelete(record.id);
           }}
-        />
+        >
+          <Button
+            status="danger"
+            type="text"
+            icon={<IconDelete />}
+          />
+        </Popconfirm>
       </>
     )
   };
@@ -103,11 +116,29 @@ const XTable = memo((props: XTableConfig & { runtime?: boolean; toCreatePage?: F
     toCreatePage?.();
   };
 
+  // 查询
+  const handleSearch = () => {
+    queryData = form.getFieldsValue();
+    setTablePageNo(1);
+    handlePage()
+  }
+  // 重置
+  const handleReset = () => {
+    form.resetFields();
+    queryData = {};
+    setTablePageNo(1);
+    handlePage()
+  }
+
   const handlePage = async () => {
+    if (!runtime) {
+      return;
+    }
     const req: PageMethodParam = {
       entityId: metaData,
       pageNo: tablePageNo,
-      pageSize: pageSize || 10
+      pageSize: pageSize || 10,
+      filters: queryData
     };
     const res = await dataMethodPage(req);
 
@@ -123,7 +154,7 @@ const XTable = memo((props: XTableConfig & { runtime?: boolean; toCreatePage?: F
         // 优化：减少重复查找，提升可读性和性能
         if (Array.isArray(mainMetaData?.parentFields)) {
           const field = mainMetaData.parentFields.find(
-            (field: AppEntityField) => field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE_LABEL.DATE
+            (field: AppEntityField) => field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.DATE.VALUE
           );
           if (field && newItem[key]) {
             // 仅当字段类型为日期且有值时格式化
@@ -155,8 +186,9 @@ const XTable = memo((props: XTableConfig & { runtime?: boolean; toCreatePage?: F
       id: id
     };
     const res = await dataMethodDelete(req);
-    console.log(res);
-
+    if (res) {
+      Message.success('删除成功');
+    }
     handlePage();
   };
 
@@ -168,19 +200,22 @@ const XTable = memo((props: XTableConfig & { runtime?: boolean; toCreatePage?: F
     toCreatePage?.(id);
   };
 
+  const [form] = Form.useForm();
+
   return (
     <div
       style={{
-        opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,
+        opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1,
         display: runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 'none' : 'unset'
       }}
     >
       <div className="tableHeader">
-        <div className="searchGroup">
+        <Form form={form} className="searchGroup">
           {searchItems?.map((item, idx) => (
             <Form.Item
               key={idx}
               className="searchItem"
+              field={item.value}
               label={
                 <div
                   style={{
@@ -207,11 +242,11 @@ const XTable = memo((props: XTableConfig & { runtime?: boolean; toCreatePage?: F
               <Input placeholder={`请输入${item.label}`} />
             </Form.Item>
           ))}
-        </div>
+        </Form>
 
         <div className="tableHeaderButton">
-          <Button type="primary">查询</Button>
-          <Button type="primary">重置</Button>
+          <Button type="primary" onClick={handleSearch}>查询</Button>
+          <Button type="primary" onClick={handleReset}>重置</Button>
           <Button type="primary" onClick={handleCreate}>
             新增
           </Button>
@@ -232,31 +267,34 @@ const XTable = memo((props: XTableConfig & { runtime?: boolean; toCreatePage?: F
           layout={'vertical'}
           style={{
             width: '100%',
+            maxWidth: runtime ? '100%' : `calc(100vw - ${componentMaxWidth}px)`,
             pointerEvents: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset'
           }}
         >
-          <Table
-            scroll={{
-              x: 'max-content'
-            }}
-            border={border}
-            borderCell={borderCell}
-            showHeader={showHeader}
-            stripe={stripe}
-            hover={hover}
-            columns={finalColumns}
-            data={tableData}
-            pagePosition={pagePosition}
-            pagination={{
-              pageSize,
-              showTotal,
-              current: tablePageNo,
-              total: tableTotal,
-              onChange: (pageNo: number) => {
-                setTablePageNo(pageNo);
-              }
-            }}
-          />
+          <div style={{ width: '100%' }}>
+            <Table
+              scroll={{
+                x: 'max-content'
+              }}
+              border={border}
+              borderCell={borderCell}
+              showHeader={showHeader}
+              stripe={stripe}
+              hover={hover}
+              columns={finalColumns}
+              data={tableData}
+              pagePosition={pagePosition}
+              pagination={{
+                pageSize,
+                showTotal,
+                current: tablePageNo,
+                total: tableTotal,
+                onChange: (pageNo: number) => {
+                  setTablePageNo(pageNo);
+                }
+              }}
+            />
+          </div>
         </Form.Item>
       </div>
     </div>

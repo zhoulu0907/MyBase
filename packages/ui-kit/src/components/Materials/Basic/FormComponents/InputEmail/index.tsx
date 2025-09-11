@@ -20,7 +20,6 @@ const XInputEmail = memo((props: XInputEmailConfig & { runtime?: boolean }) => {
     color,
     bgColor,
     labelColSpan = 0,
-    // description,
     runtime = true
   } = props;
 
@@ -39,49 +38,52 @@ const XInputEmail = memo((props: XInputEmailConfig & { runtime?: boolean }) => {
   }, [value]);
 
   return (
-    <Form.Item
-      label={label.display && label.text}
-      field={dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.INPUT_EMAIL}_${nanoid()}`}
-      layout={layout}
-      tooltip={tooltip}
-      labelCol={{
-        style: { width: labelColSpan, flex: 'unset' }
-      }}
-      wrapperCol={{ style: { flex: 1 } }}
-      rules={[
-        { required: verify?.required }
-        // { type: "email", message: "请输入合法的邮件地址" },
-        // {
-        //     validator: (value) => {
-        //         if (!value) return true;
-        //         const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        //         return regex.test(value);
-        //     },
-        // },
-      ]}
-      hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
-      style={{
-        flex: 1,
-        margin: 0,
-        padding: 6,
-        opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,
-        pointerEvents: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset'
-      }}
-    >
-      <Input
-        status={InputStatus}
-        readOnly={status === STATUS_VALUES[STATUS_OPTIONS.READONLY]}
-        defaultValue={defaultValue}
-        style={{
-          width: '100%',
-          color,
-          textAlign: align,
-          backgroundColor: bgColor
+    <div className='formWrapper'>
+      <Form.Item
+        label={label.display && label.text}
+        field={dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.INPUT_EMAIL}_${nanoid()}`}
+        layout={layout}
+        tooltip={tooltip}
+        labelCol={{
+          style: { width: labelColSpan, flex: 'unset' }
         }}
-        placeholder={placeholder}
-        onChange={setValue}
-      />
-    </Form.Item>
+        wrapperCol={{ style: { flex: 1 } }}
+        rules={[
+          { required: verify?.required }
+          // { type: "email", message: "请输入合法的邮件地址" },
+          // {
+          //     validator: (value) => {
+          //         if (!value) return true;
+          //         const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          //         return regex.test(value);
+          //     },
+          // },
+        ]}
+        hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
+        style={{
+          flex: 1,
+          margin: 0,
+          opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
+        }}
+      >
+        {
+          status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? <div>{defaultValue || '--'}</div> :
+            <Input
+              status={InputStatus}
+              defaultValue={defaultValue}
+              style={{
+                width: '100%',
+                color,
+                textAlign: align,
+                backgroundColor: bgColor,
+                pointerEvents: runtime ? 'unset' : 'none'
+              }}
+              placeholder={placeholder}
+              onChange={setValue}
+            />
+        }
+      </Form.Item>
+    </div>
   );
 });
 

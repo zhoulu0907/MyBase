@@ -31,6 +31,7 @@ const componentSchemaMap: Partial<Record<ComponentType, ComponentSchema>> = {
   [ALL_COMPONENT_TYPES.DIVIDER]: BasicSchema.XDivider,
   [ALL_COMPONENT_TYPES.RICH_TEXT]: BasicSchema.XRichText,
   [ALL_COMPONENT_TYPES.CAROUSEL_F]: BasicSchema.XFCarousel,
+  [ALL_COMPONENT_TYPES.CHILDREN_TABLE]: BasicSchema.XChildrenTable,
 
   [ALL_COMPONENT_TYPES.COLUMN_LAYOUT]: BasicSchema.XColumnLayout,
 

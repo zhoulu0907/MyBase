@@ -114,8 +114,34 @@ export interface AuthDataGroupVO {
   /**
    * 业务实体字段对应的权限范围
    */
-  scopeLevel?: string;
+  scopeLevel?: PermissionScope;
 }
+
+// 权限范围 PermissionScope
+export interface PermissionScope {
+  /**
+   * 权限范围ID
+   */
+  personId?: string;
+  /**
+   * 权限范围类型
+   */
+  scopeType?: ScopeType;
+  /**
+   * 部门/人员id范围
+   */
+  assignId?: string[];
+}
+
+export type ScopeType = 
+  | 'self'
+  | 'selfAndSubordinates'
+  | 'mainDepartment'
+  | 'mainDepartmentAndSubs'
+  | 'specifiedDepartment'
+  | 'specifiedPerson'
+  | 'identityInfo'
+  | 'all';
 
 /**
  * 数据权限范围人员字段 AuthDataFilterPersonVO

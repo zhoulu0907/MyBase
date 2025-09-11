@@ -22,7 +22,7 @@ import { FlowNodeRegistries } from './nodes';
 
 const TriggerEditor = () => {
   const editorProps = useEditorProps(FlowNodeRegistries);
-  const { setNodeId, nodeId, setFlowId, flowId, setPageId, setNodeData } = triggerEditorSignal;
+  const { setNodeId, nodeId, setFlowId, flowId, setPageId, setNodeData, setAllNodeData } = triggerEditorSignal;
   const [initData, setInitData] = useState<FlowDocumentJSON>();
   const sidebarContainerRef = useRef<HTMLDivElement>(null);
 
@@ -52,27 +52,39 @@ const TriggerEditor = () => {
       setPageId(res.triggerConfig.pageId);
     }
 
-    switch (res.triggerType) {
-      case TriggerType.FORM:
-        setInitData(StartFormInitData);
-        setNodeData(StartFormInitData.nodes[0].id, StartFormInitData.nodes[0].data.initialData);
-        setNodeData(StartFormInitData.nodes[1].id, StartFormInitData.nodes[1].data.initialData);
-        break;
-      case TriggerType.ENTITY:
-        setInitData(StartEntityInitData);
-        break;
-      case TriggerType.TIME:
-        setInitData(StartTimeInitData);
-        break;
-      case TriggerType.DATE_FIELD:
-        setInitData(StartDateFieldInitData);
-        break;
-      case TriggerType.API:
-        setInitData(StartApiInitData);
-        break;
-      case TriggerType.BPM:
-        setInitData(StartBpmInitData);
-        break;
+    // 已保存的节点数据回显
+    if (res.processDefinition?.length) {
+      const processDefinitionJson = JSON.parse(res.processDefinition);
+      let data = {};
+      for (let item of processDefinitionJson) {
+        data = { ...data, [item.id]: item.data };
+      }
+      console.log('nodeData',data)
+      setAllNodeData(data);
+      setInitData({nodes:processDefinitionJson});
+    } else {
+      switch (res.triggerType) {
+        case TriggerType.FORM:
+          setInitData(StartFormInitData);
+          setNodeData(StartFormInitData.nodes[0].id, StartFormInitData.nodes[0].data.initialData);
+          setNodeData(StartFormInitData.nodes[1].id, StartFormInitData.nodes[1].data.initialData);
+          break;
+        case TriggerType.ENTITY:
+          setInitData(StartEntityInitData);
+          break;
+        case TriggerType.TIME:
+          setInitData(StartTimeInitData);
+          break;
+        case TriggerType.DATE_FIELD:
+          setInitData(StartDateFieldInitData);
+          break;
+        case TriggerType.API:
+          setInitData(StartApiInitData);
+          break;
+        case TriggerType.BPM:
+          setInitData(StartBpmInitData);
+          break;
+      }
     }
   };
 
@@ -111,7 +123,7 @@ const TriggerEditor = () => {
                 className={styles.sidebarContainer}
                 ref={sidebarContainerRef}
                 style={{
-                  width: nodeId.value ? '440px' : '0px'
+                  width: nodeId.value ? '600px' : '0px'
                 }}
               >
                 <SidebarRenderer refWrapper={sidebarContainerRef} />

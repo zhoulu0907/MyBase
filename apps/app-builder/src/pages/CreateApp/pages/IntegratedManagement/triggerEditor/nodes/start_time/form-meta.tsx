@@ -2,7 +2,7 @@ import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-e
 
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { Form, Input } from '@arco-design/web-react';
-import ConditionEditor from '../../components/condition-editor';
+import TimeEditor from '../../components/time-editor';
 import { FormContent, FormHeader, FormOutputs } from '../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../hooks';
 import { type FlowNodeJSON } from '../../typings';
@@ -11,16 +11,11 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const isSidebar = useIsSidebar();
   const { node } = useNodeRenderContext();
 
-  const handlePropsOnChange = (key: string, value: any) => {
-    const nodeData = triggerEditorSignal.nodeData.value[node.id];
-    triggerEditorSignal.setNodeData(node.id, {
-      ...nodeData,
-      [key]: value
-    });
+  const handlePropsOnChange = (values: any) => {
+    triggerEditorSignal.setNodeData(node.id, values);
   };
 
   const [payloadForm] = Form.useForm();
-  const triggerType = Form.useWatch('triggerType', payloadForm);
 
   return (
     <>
@@ -31,11 +26,9 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             <Form.Item label="节点ID" field="id" initialValue={node.id}>
               <Input disabled />
             </Form.Item>
-            <Form.Item label="节点名称" field="title">
-              <Input onChange={(e) => handlePropsOnChange('title', e)} />
-            </Form.Item>
+
+            <TimeEditor />
           </Form>
-          <ConditionEditor onChange={() => {}} fields={[]} fieldOperatorMapping={{}} />
         </FormContent>
       ) : (
         <FormContent>
