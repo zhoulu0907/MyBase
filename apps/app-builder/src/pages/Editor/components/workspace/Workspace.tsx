@@ -70,13 +70,12 @@ export default function EditorWorkspace() {
 
   // 取消隐藏组件
   const handleShowComponent = (componentId: string) => {
-
     const schema = pageComponentSchemas[componentId];
     console.log('schema', pageComponentSchemas[componentId]);
 
-    schema.config.status = STATUS_VALUES[STATUS_OPTIONS.DEFAULT]
+    schema.config.status = STATUS_VALUES[STATUS_OPTIONS.DEFAULT];
 
-    console.log(schema, 'schema')
+    console.log(schema, 'schema');
 
     setPageComponentSchemas(componentId, schema);
     setCurComponentID(componentId);
@@ -85,7 +84,7 @@ export default function EditorWorkspace() {
   };
 
   // 复制组件
-  const handleCopyComponent = (comp: any,id:string) => {
+  const handleCopyComponent = (comp: any, originId: string) => {
     addComponents(comp);
 
     const schema = getComponentSchema(comp.type);
@@ -96,10 +95,10 @@ export default function EditorWorkspace() {
       type: comp.type,
       ...schema
     };
-    const data = pageComponentSchemas[id];
+    const data = pageComponentSchemas[originId];
     data.config.cpName = comp.displayName;
-    data.config.id = comp.id
-    setPageComponentSchemas(comp.id, {...props,...data});
+    data.config.id = comp.id;
+    setPageComponentSchemas(comp.id, { ...props, ...data });
     setCurComponentID(comp.id!);
     setCurComponentSchema(props);
     setShowDeleteButton(false);
@@ -238,7 +237,7 @@ export default function EditorWorkspace() {
               if (entityID && fieldID) {
                 console.log('dataField:    ', entityID, fieldID);
                 schema.config.dataField = [entityID, fieldID];
-                schema.config.status = STATUS_VALUES[STATUS_OPTIONS.READONLY]
+                schema.config.status = STATUS_VALUES[STATUS_OPTIONS.READONLY];
               }
 
               if (dataLabel) {
@@ -309,35 +308,33 @@ export default function EditorWorkspace() {
 
                 {curComponentID === cp.id && showDeleteButton && (
                   <div className={styles.operationArea}>
-                    {
-                      pageComponentSchemas[cp.id].config.status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
-                        <>
-                          <div
-                            className={styles.copyButton}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              console.debug('取消隐藏组件: ', cp);
-                              handleShowComponent(cp.id);
-                            }}
-                          >
-                            <img src={CompShowIcon} alt='component show' />
-                          </div>
-                          <Divider className={styles.divider} type='vertical' />
-                        </>
-                      )
-                    }
+                    {pageComponentSchemas[cp.id].config.status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
+                      <>
+                        <div
+                          className={styles.copyButton}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            console.debug('取消隐藏组件: ', cp);
+                            handleShowComponent(cp.id);
+                          }}
+                        >
+                          <img src={CompShowIcon} alt="component show" />
+                        </div>
+                        <Divider className={styles.divider} type="vertical" />
+                      </>
+                    )}
 
                     <div
                       className={styles.copyButton}
                       onClick={(e) => {
                         e.stopPropagation();
                         console.log('复制组件: ', cp);
-                        handleCopyComponent({ ...cp, id: `${cp.type}-${uuidv4()}` },cp.id);
+                        handleCopyComponent({ ...cp, id: `${cp.type}-${uuidv4()}` }, cp.id);
                       }}
                     >
-                      <img src={CompCopyIcon} alt='component copy' />
+                      <img src={CompCopyIcon} alt="component copy" />
                     </div>
-                    <Divider className={styles.divider} type='vertical' />
+                    <Divider className={styles.divider} type="vertical" />
                     {/* 删除按钮 */}
                     {/* TODO(mickey): 组件继续封装，和layout中的共用一套 */}
                     <div
@@ -348,7 +345,7 @@ export default function EditorWorkspace() {
                         handleDeleteComponent(cp.id);
                       }}
                     >
-                      <img src={CompDeleteIcon} alt='component delete' />
+                      <img src={CompDeleteIcon} alt="component delete" />
                     </div>
                   </div>
                 )}
