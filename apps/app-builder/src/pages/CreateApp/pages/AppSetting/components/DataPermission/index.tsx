@@ -28,7 +28,7 @@ const initialFormValues: AuthDataGroupVO = {
   description: '',
   scopeFieldId: undefined,
   scopeLevel: {
-    personId: '',
+    personId: undefined,
     scopeType: undefined,
     assignIds: []
   },

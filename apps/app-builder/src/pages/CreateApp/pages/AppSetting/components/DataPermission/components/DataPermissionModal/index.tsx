@@ -203,24 +203,8 @@ const DataPermissionModal = (props: IProps) => {
     });
   };
 
-  const handleOk = async () => {
-    try {
-      const values = await form.validate();
-      console.log('提交数据 values:', values);
-      form.resetFields();
-      setScopeType('');
-      setDataFilters([]);
-      setSelectedMembers([]);
-      setOperatePermission([DataOperationEnum.examine, DataOperationEnum.operate]);
-      setCheckAll(true);
-      setIndeterminate(false);
-      handleModalSubmit(values);
-    } catch (error) {
-      console.log('提交数据失败 error:', error);
-    }
-  };
-
-  const handleCancel = () => {
+  // 重置表单
+  const formReset = () => {
     form.resetFields();
     setScopeType('');
     setDataFilters([]);
@@ -228,6 +212,20 @@ const DataPermissionModal = (props: IProps) => {
     setOperatePermission([DataOperationEnum.examine, DataOperationEnum.operate]);
     setCheckAll(true);
     setIndeterminate(false);
+  };
+
+  const handleOk = async () => {
+    try {
+      const values = await form.validate();
+      console.log('提交数据 values:', values);
+      handleModalSubmit(values);
+    } catch (error) {
+      console.log('提交数据失败 error:', error);
+    }
+  };
+
+  const handleCancel = () => {
+    formReset();
     handleModalCancel();
   };
 
@@ -331,7 +329,21 @@ const DataPermissionModal = (props: IProps) => {
               </div>
               {(scopeType === 'specifiedPerson' || scopeType === 'specifiedDepartment') && (
                 <div className={styles.scopeAssign}>
-                  <FormItem field="scopeLevel.assignIds" noStyle>
+                  <FormItem
+                    field="scopeLevel.assignIds"
+                    noStyle
+                    // rules={[
+                    //   {
+                    //     required: scopeType === 'specifiedPerson' || scopeType === 'specifiedDepartment' ? true : false,
+                    //     message:
+                    //       scopeType === 'specifiedPerson'
+                    //         ? '请添加指定人员'
+                    //         : scopeType === 'specifiedDepartment'
+                    //           ? '请添加指定部门'
+                    //           : '请选择权限范围'
+                    //   }
+                    // ]}
+                  >
                     {selectedMembers && selectedMembers.length > 0 ? (
                       <div className={styles.assignIdTag}>
                         <div className={styles.tagContainer}>
