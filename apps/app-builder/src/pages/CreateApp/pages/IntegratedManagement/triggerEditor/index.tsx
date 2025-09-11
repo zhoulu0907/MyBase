@@ -59,9 +59,9 @@ const TriggerEditor = () => {
       for (let item of processDefinitionJson) {
         data = { ...data, [item.id]: item.data };
       }
-      console.log('nodeData',data)
+      console.log('nodeData', data);
       setAllNodeData(data);
-      setInitData({nodes:processDefinitionJson});
+      setInitData({ nodes: processDefinitionJson });
     } else {
       switch (res.triggerType) {
         case TriggerType.FORM:
@@ -71,9 +71,17 @@ const TriggerEditor = () => {
           break;
         case TriggerType.ENTITY:
           setInitData(StartEntityInitData);
+          const initialData = {
+            ...StartEntityInitData.nodes[0].data.initialData,
+            entityId: res.triggerConfig.entityId
+          };
+          setNodeData(StartEntityInitData.nodes[0].id, initialData);
+          setNodeData(StartEntityInitData.nodes[1].id, StartEntityInitData.nodes[1].data.initialData);
           break;
         case TriggerType.TIME:
           setInitData(StartTimeInitData);
+          setNodeData(StartTimeInitData.nodes[0].id, StartTimeInitData.nodes[0].data.initialData);
+          setNodeData(StartTimeInitData.nodes[1].id, StartTimeInitData.nodes[1].data.initialData);
           break;
         case TriggerType.DATE_FIELD:
           setInitData(StartDateFieldInitData);
