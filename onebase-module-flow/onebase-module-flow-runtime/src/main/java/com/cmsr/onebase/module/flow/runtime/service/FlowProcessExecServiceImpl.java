@@ -1,8 +1,8 @@
 package com.cmsr.onebase.module.flow.runtime.service;
 
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.module.flow.runtime.flow.FlowFilterExecutor;
-import com.cmsr.onebase.module.flow.runtime.utils.FlowUtils;
+import com.cmsr.onebase.module.flow.core.flow.FlowFilterExecutor;
+import com.cmsr.onebase.module.flow.core.utils.FlowUtils;
 import com.cmsr.onebase.module.flow.runtime.vo.FormTriggerReqVO;
 import com.cmsr.onebase.module.flow.runtime.vo.FormTriggerRespVO;
 import com.cmsr.onebase.module.flow.runtime.vo.QueryFormTriggerRespVO;

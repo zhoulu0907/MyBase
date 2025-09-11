@@ -1,0 +1,352 @@
+package com.cmsr.onebase.module.app.build.service.menu;
+
+import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
+import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.module.app.build.vo.menu.*;
+import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
+import com.cmsr.onebase.module.app.core.dal.dataobject.app.ApplicationDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.menu.MenuDO;
+import com.cmsr.onebase.module.app.core.dto.appresource.CopyPageSetDTO;
+import com.cmsr.onebase.module.app.core.dto.appresource.CreatePageSetDTO;
+import com.cmsr.onebase.module.app.core.enums.AppErrorCodeConstants;
+import com.cmsr.onebase.module.app.core.enums.menu.MenuTypeEnum;
+
+import com.cmsr.onebase.module.app.build.service.AppCommonService;
+import com.cmsr.onebase.module.app.build.service.appresource.PageSetService;
+import com.cmsr.onebase.module.app.build.util.MenuUtils;
+import com.cmsr.onebase.module.build.vo.menu.*;
+import jakarta.annotation.Resource;
+import lombok.Setter;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
+
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+
+/**
+ * @Author：huangjie
+ * @Date：2025/7/23 13:40
+ */
+@Setter
+@Service
+@Validated
+public class AppMenuServiceImpl implements AppMenuService {
+
+    @Resource
+    private AppCommonService appCommonService;
+
+    @Resource
+    private AppMenuRepository appMenuRepository;
+
+    @Resource
+    private PageSetService pageSetService;
+
+    @Override
+    public List<MenuListRespVO> listApplicationMenu(Long applicationId, String name) {
+        ApplicationDO applicationDO = appCommonService.validateApplicationExist(applicationId);
+        List<MenuDO> menuDOS = appMenuRepository.findByApplicationId(applicationDO.getId());
+        List<MenuListRespVO> menuListRespList = new ArrayList<>();
+        // 把第一层的菜单添加到列表中
+        LinkedList<MenuListRespVO> levelOneMenus = menuDOS.stream()
+                .filter(v -> MenuUtils.ROOT_MENU_ID.equals(v.getParentId()))
+                .map(v -> BeanUtils.toBean(v, MenuListRespVO.class))
+                .collect(Collectors.toCollection(LinkedList::new));
+        menuListRespList.addAll(levelOneMenus);
+        // 递归实现每个菜单的子菜单
+        for (MenuListRespVO respVO : menuListRespList) {
+            LinkedList<MenuListRespVO> children = recursiveGetChildren(respVO, menuDOS);
+            respVO.setChildren(children);
+        }
+        filterMenuByName(menuListRespList, name);
+        return menuListRespList;
+    }
+
+
+    private LinkedList<MenuListRespVO> recursiveGetChildren(MenuListRespVO parent, List<MenuDO> menuDOS) {
+        LinkedList<MenuListRespVO> children = new LinkedList<>();
+        for (MenuDO menuDO : menuDOS) {
+            if (Objects.equals(menuDO.getParentId(), parent.getId())) {
+                // 只有父菜单的uuid等于当前菜单的父菜单的uuid时，才添加子菜单，继续递归
+                MenuListRespVO child = BeanUtils.toBean(menuDO, MenuListRespVO.class);
+                child.setChildren(recursiveGetChildren(child, menuDOS));
+                children.add(child);
+            }
+        }
+        return children.isEmpty() ? null : children;
+    }
+
+
+    /**
+     * 根据名称过滤菜单
+     * menuType 1 是页面 2是目录
+     * 过滤规则为：
+     * 如果 菜单名称包含name，则此菜单及其父级目录都要展示
+     * 如果 目录名称包含name，则此目录及其子菜单都要展示
+     *
+     * @param menuListRespList
+     * @param name
+     * @return
+     */
+    private void filterMenuByName(List<MenuListRespVO> menuListRespList, String name) {
+        // 如果没有过滤条件，直接返回原列表
+        if (name == null || name.trim().isEmpty()) {
+            return;
+        }
+        // 第一步：根据规则设置 filter 标记
+        markMenusForFilter(menuListRespList, name);
+        // 第二步：移除不符合条件的菜单
+        removeUnmarkedMenus(menuListRespList);
+    }
+
+    /**
+     * 根据过滤规则标记菜单
+     *
+     * @param menuList 菜单列表
+     * @param name     过滤条件
+     */
+    private void markMenusForFilter(List<MenuListRespVO> menuList, String name) {
+        for (MenuListRespVO menu : menuList) {
+            if (StringUtils.containsIgnoreCase(menu.getMenuName(), name)) {
+                menu.setFilter(true);
+            } else if (MenuTypeEnum.isGroup(menu.getMenuType()) && anyChildrenMatches(menu.getChildren(), name)) {
+                menu.setFilter(true);
+            }
+            if (menu.isFilter() && menu.getChildren() != null) {
+                markAllChildren(menu.getChildren());
+            }
+            // 递归处理子菜单
+            if (menu.getChildren() != null && !menu.getChildren().isEmpty()) {
+                markMenusForFilter(menu.getChildren(), name);
+            }
+        }
+    }
+
+    private boolean anyChildrenMatches(LinkedList<MenuListRespVO> children, String name) {
+        if (children == null) {
+            return false;
+        }
+        for (MenuListRespVO child : children) {
+            if (StringUtils.containsIgnoreCase(child.getMenuName(), name)) {
+                return true;
+            }
+            if (child.getChildren() != null && !child.getChildren().isEmpty()) {
+                if (anyChildrenMatches(child.getChildren(), name)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+
+    /**
+     * 标记所有子菜单
+     *
+     * @param children 子菜单列表
+     */
+    private void markAllChildren(List<MenuListRespVO> children) {
+        for (MenuListRespVO child : children) {
+            child.setFilter(true);
+            if (child.getChildren() != null) {
+                markAllChildren(child.getChildren());
+            }
+        }
+    }
+
+
+    /**
+     * 移除未标记的菜单
+     *
+     * @param menuList 菜单列表
+     */
+    private void removeUnmarkedMenus(List<MenuListRespVO> menuList) {
+        // 使用迭代器安全地删除元素
+        Iterator<MenuListRespVO> iterator = menuList.iterator();
+        while (iterator.hasNext()) {
+            MenuListRespVO menu = iterator.next();
+            if (menu.isFilter()) {
+                // 递归处理子菜单
+                if (menu.getChildren() != null && !menu.getChildren().isEmpty()) {
+                    removeUnmarkedMenus(menu.getChildren());
+                    // 如果子菜单全部被删除，设置为null
+                    if (menu.getChildren().isEmpty()) {
+                        menu.setChildren(null);
+                    }
+                }
+            } else {
+                // 删除未标记的菜单
+                iterator.remove();
+            }
+        }
+    }
+
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public MenuCreateRespVO createApplicationMenu(MenuCreateReqVO createReqVO) {
+        // 菜单类型校验
+        MenuTypeEnum.validate(createReqVO.getMenuType());
+        ApplicationDO applicationDO = appCommonService.validateApplicationExist(createReqVO.getApplicationId());
+        // 创建菜单
+        MenuDO menuDO = new MenuDO();
+        menuDO.setApplicationId(createReqVO.getApplicationId());
+        menuDO.setParentId(validateParentMenuId(createReqVO.getParentId()));
+        menuDO.setMenuCode(MenuUtils.generateMenuCode());
+        menuDO.setMenuType(createReqVO.getMenuType());
+        menuDO.setMenuName(createReqVO.getMenuName());
+        menuDO.setMenuIcon(createReqVO.getMenuIcon());
+        menuDO.setMenuSort(generateMenuSort(applicationDO.getId()));
+        menuDO.setIsVisible(NumberUtils.INTEGER_ONE);
+        menuDO.setEntityId(createReqVO.getEntityId());
+        appMenuRepository.insert(menuDO);
+        // 创建页面集
+        CreatePageSetDTO createPageSetDTO = new CreatePageSetDTO();
+        createPageSetDTO.setMenuId(menuDO.getId());
+        createPageSetDTO.setPageSetName(menuDO.getMenuName());
+        createPageSetDTO.setDisplayName(menuDO.getMenuName());
+        createPageSetDTO.setMainMetadata(String.valueOf(createReqVO.getEntityId()));
+        pageSetService.createPageSet(createPageSetDTO);
+        // 返回结果
+        MenuCreateRespVO menuCreateRespVO = BeanUtils.toBean(menuDO, MenuCreateRespVO.class);
+        return menuCreateRespVO;
+    }
+
+    private Integer generateMenuSort(Long applicationId) {
+        return appMenuRepository.countByApplicationId(applicationId) + 1;
+    }
+
+    private Long validateParentMenuId(Long parentId) {
+        if (parentId == null) {
+            return MenuUtils.ROOT_MENU_ID;
+        }
+        MenuDO parentMenu = appCommonService.validateMenuExist(parentId);
+        if (parentMenu == null) {
+            throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_MENU_NOT_EXIST);
+        }
+        if (MenuTypeEnum.isPage(parentMenu.getMenuType())) {
+            throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_MENU_TYPE_ERROR);
+        }
+        return parentId;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updateApplicationMenu(MenuUpdateReqVO updateReqVO) {
+        MenuDO menuDO = appCommonService.validateMenuExist(updateReqVO.getId());
+        menuDO.setMenuName(updateReqVO.getMenuName());
+        menuDO.setMenuIcon(updateReqVO.getMenuIcon());
+        appMenuRepository.update(menuDO);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updateApplicationMenuName(Long id, String menuName) {
+        MenuDO menuDO = appCommonService.validateMenuExist(id);
+        menuDO.setMenuName(menuName);
+        appMenuRepository.update(menuDO);
+    }
+
+    @Override
+    public void updateApplicationMenuOrder(MenuOrderUpdateReqVO updateReqVO) {
+        MenuDO menuDO = appCommonService.validateMenuExist(updateReqVO.getId());
+        menuDO.setParentId(updateReqVO.getParentId());
+        appMenuRepository.update(menuDO);
+        Map<Long, Integer> menuSortMap = toMenuSortMap(updateReqVO.getMenuTree());
+        List<MenuDO> menuDOS = appMenuRepository.findByApplicationId(menuDO.getApplicationId());
+        for (MenuDO menu : menuDOS) {
+            Integer order = MapUtils.getInteger(menuSortMap, menu.getId(), MenuUtils.MENU_SORT_MAX_VALUE);
+            menu.setMenuSort(order);
+            appMenuRepository.update(menu);
+        }
+    }
+
+    /**
+     * 输入的是树结构，需要转换成Map结构。
+     * 返回 Map的Key是菜单的ID，Value是菜单顺序，根据菜单的深度路径查找排序。
+     *
+     * @return
+     */
+    private Map<Long, Integer> toMenuSortMap(List<MenuOrderUpdateReqVO.MenuOrderNode> menuList) {
+        Map<Long, Integer> menuSortMap = new HashMap<>(menuList.size());
+        AtomicInteger sortOrder = new AtomicInteger(1);
+        recursiveBuildMenuSortMap(menuList, menuSortMap, sortOrder);
+        return menuSortMap;
+    }
+
+    /**
+     * 递归构建菜单排序映射
+     *
+     * @param menus       当前层级的菜单列表
+     * @param menuSortMap 菜单排序映射结果
+     * @param sortOrder   当前排序序号
+     */
+    private void recursiveBuildMenuSortMap(List<MenuOrderUpdateReqVO.MenuOrderNode> menus,
+                                           Map<Long, Integer> menuSortMap, AtomicInteger sortOrder) {
+        if (menus == null || menus.isEmpty()) {
+            return;
+        }
+        for (MenuOrderUpdateReqVO.MenuOrderNode menu : menus) {
+            // 按照深度优先遍历的顺序分配序号
+            menuSortMap.put(menu.getId(), sortOrder.getAndIncrement());
+            // 递归处理子菜单
+            if (menu.getChildren() != null && !menu.getChildren().isEmpty()) {
+                recursiveBuildMenuSortMap(menu.getChildren(), menuSortMap, sortOrder);
+            }
+        }
+    }
+
+    @Override
+    public void updateApplicationMenuVisible(Long id, Integer visible) {
+        MenuDO menuDO = appCommonService.validateMenuExist(id);
+        menuDO.setIsVisible(visible);
+        appMenuRepository.update(menuDO);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public MenuCreateRespVO copyApplicationMenu(MenuCopyReqVO copyReqVO) {
+        MenuDO menuDO = appCommonService.validateMenuExist(copyReqVO.getId());
+        if (menuDO.getMenuType() == MenuTypeEnum.GROUP.getValue()) {
+            throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_MENU_GROUP_NOT_ALLOW_COPY);
+        }
+        Long sourceMenuId = menuDO.getId();
+        // 复制菜单
+        menuDO.setId(null);
+        menuDO.setMenuName(copyReqVO.getMenuName());
+        menuDO.setParentId(validateParentMenuId(copyReqVO.getParentId()));
+        menuDO.setMenuCode(MenuUtils.generateMenuCode());
+        appMenuRepository.insert(menuDO);
+        // 复制页面
+        CopyPageSetDTO copyPageSetDTO = new CopyPageSetDTO();
+        copyPageSetDTO.setMenuId(sourceMenuId);
+        copyPageSetDTO.setNewMenuId(menuDO.getId());
+        pageSetService.copyPageSet(copyPageSetDTO);
+        //
+        MenuCreateRespVO menuCreateRespVO = BeanUtils.toBean(menuDO, MenuCreateRespVO.class);
+        return menuCreateRespVO;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteApplicationMenu(Long id) {
+        MenuDO menuDO = appCommonService.validateMenuExist(id);
+        if (menuDO.getMenuType() == MenuTypeEnum.GROUP.getValue()
+                && validateMenuGroupHasChildren(menuDO.getId())) {
+            throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_MENU_GROUP_HAS_CHILDREN);
+        }
+        // 删除菜单
+        appMenuRepository.deleteById(id);
+        // 删除页面
+        pageSetService.deletePageSet(menuDO.getId());
+    }
+
+    private boolean validateMenuGroupHasChildren(Long id) {
+        return appMenuRepository.countByParentId(id) > 0;
+    }
+
+}
