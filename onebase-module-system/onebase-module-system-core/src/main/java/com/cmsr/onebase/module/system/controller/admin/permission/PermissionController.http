@@ -1,0 +1,11 @@
+### 默认环境变量配置（直接使用local环境配置）
+@baseUrl = http://localhost:48080/admin-api
+@adminTenantId = 1
+@token = b47d4590651041a1a106ae3235acf2e5
+@tag = OneBase.local
+
+
+### 请求 /menu/list 接口 => 成功
+GET {{baseUrl}}/system/permission/list-role-menus?roleId=544780755528716288
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}

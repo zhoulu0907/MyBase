@@ -1,0 +1,79 @@
+package com.cmsr.onebase.module.system.controller.admin.tenant.vo.tenant;
+
+import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
+import com.alibaba.excel.annotation.ExcelProperty;
+import com.cmsr.onebase.framework.excel.core.annotations.DictFormat;
+import com.cmsr.onebase.framework.excel.core.convert.DictConvert;
+import com.cmsr.onebase.module.system.enums.DictTypeConstants;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
+
+import java.time.LocalDateTime;
+
+@Schema(description = "管理后台 - 租户 Response VO")
+@Data
+@ExcelIgnoreUnannotated
+public class TenantRespVO {
+
+    @Schema(description = "租户编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "1024")
+    @ExcelProperty("租户编号")
+    private Long id;
+
+    @Schema(description = "租户编码", example = "1")
+    @ExcelProperty("租户编码")
+    private String tenantCode;
+
+    @Schema(description = "租户名", requiredMode = Schema.RequiredMode.REQUIRED, example = "onebase")
+    @ExcelProperty("租户名")
+    private String name;
+
+    @Schema(description = "租户名", requiredMode = Schema.RequiredMode.REQUIRED, example = "onebase")
+    @ExcelProperty("租户名")
+    private Integer adminUserId;
+
+    @Schema(description = "用户昵称", requiredMode = Schema.RequiredMode.REQUIRED, example = "onebase")
+    @ExcelProperty("用户昵称")
+    private String adminNickName;
+
+    @Schema(description = "联系人", requiredMode = Schema.RequiredMode.REQUIRED, example = "onebase")
+    @ExcelProperty("联系人")
+    private String adminUserName;
+
+    @Schema(description = "联系手机", example = "15601691300")
+    @ExcelProperty("联系手机")
+    private String adminMobile;
+
+    @Schema(description = "租户状态", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
+    @ExcelProperty(value = "状态", converter = DictConvert.class)
+    @DictFormat(DictTypeConstants.COMMON_STATUS)
+    private Integer status;
+
+    @Schema(description = "域名", example = "http://cmsr.com")
+    private String website;
+
+    @Schema(description = "域名H5", example = "http://h5.cmsr.com")
+    private String websiteH5;
+
+    @Schema(description = "租户套餐编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "1024")
+    private Long packageId;
+
+    @Schema(description = "过期时间", requiredMode = Schema.RequiredMode.REQUIRED)
+    private LocalDateTime expireTime;
+
+    @Schema(description = "账号数量", requiredMode = Schema.RequiredMode.REQUIRED, example = "1024")
+    private Integer accountCount;
+
+    @Schema(description = "创建时间", requiredMode = Schema.RequiredMode.REQUIRED)
+    @ExcelProperty("创建时间")
+    private LocalDateTime createTime;
+
+    @Schema(description = "key", example = "ket")
+    private String tenantKey;
+
+    @Schema(description = "secret", example = "secret")
+    private String tenantSecret;
+
+    @Schema(description = "应用数量", requiredMode = Schema.RequiredMode.REQUIRED, example = "1024")
+    private Integer appCount;
+
+}
