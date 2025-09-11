@@ -67,7 +67,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             <Form.Item label="节点ID" field="id" initialValue={node.id}>
               <Input disabled />
             </Form.Item>
-            <Form.Item label="实体ID" field="entityId">
+            <Form.Item label="实体" field="entityId">
               <Select disabled={true}>
                 {entityList?.map((item) => (
                   <Option key={item.entityId} value={item.entityId}>

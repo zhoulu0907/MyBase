@@ -46,6 +46,7 @@ export const StartFormInitData = {
         title: '界面交互触发节点',
         initialData: {
           id: 'start_form_0',
+          filterCondition: [],
           isChildTriggerAllowed: false
         },
         outputs: {
@@ -110,6 +111,16 @@ export const StartDateFieldInitData = {
       blocks: [],
       data: {
         title: '日期字段触发节点',
+        initialData: {
+          id: 'start_date_field_0',
+          entityId: '',
+          batchMode: false,
+          batchSize: 100,
+          offsetMode: 0,
+          offsetValue: 0,
+          offsetUnit: 'day',
+          dailyExecTime: '00:00'
+        },
         outputs: {
           type: 'object',
           properties: {}
