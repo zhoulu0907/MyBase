@@ -6,7 +6,6 @@ import com.anji.captcha.model.vo.CaptchaVO;
 import com.anji.captcha.service.CaptchaService;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
-import com.cmsr.onebase.framework.common.util.monitor.TracerUtils;
 import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
 import com.cmsr.onebase.framework.common.util.validation.ValidationUtils;
 import com.cmsr.onebase.module.system.api.logger.dto.LoginLogCreateReqDTO;
@@ -171,7 +170,7 @@ public class AdminAuthServiceImpl implements AdminAuthService {
         // 插入登录日志
         LoginLogCreateReqDTO reqDTO = new LoginLogCreateReqDTO();
         reqDTO.setLogType(logTypeEnum.getType());
-        reqDTO.setTraceId(TracerUtils.getTraceId());
+        reqDTO.setTraceId("n/a");
         reqDTO.setUserId(userId);
         reqDTO.setUserType(getUserType().getValue());
         reqDTO.setUsername(username);
@@ -239,7 +238,7 @@ public class AdminAuthServiceImpl implements AdminAuthService {
     private void createLogoutLog(Long userId, Integer userType, Integer logType) {
         LoginLogCreateReqDTO reqDTO = new LoginLogCreateReqDTO();
         reqDTO.setLogType(logType);
-        reqDTO.setTraceId(TracerUtils.getTraceId());
+        reqDTO.setTraceId("n/a");
         reqDTO.setUserId(userId);
         reqDTO.setUserType(userType);
         if (ObjectUtil.equal(getUserType().getValue(), userType)) {

@@ -1,0 +1,88 @@
+package com.cmsr.onebase.module.metadata.service.entity;
+
+import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataBusinessEntityDO;
+import jakarta.validation.Valid;
+
+import java.util.List;
+
+/**
+ * 业务实体 Service 接口 - 核心数据层接口
+ * TODO: Controller层应该使用build模块中的BusinessEntityBuildService，该接口负责VO转换
+ *
+ * @author matianyu
+ * @date 2025-08-20
+ */
+public interface MetadataBusinessEntityService {
+
+    /**
+     * 创建业务实体
+     *
+     * @param businessEntity 业务实体DO
+     * @return 业务实体编号
+     */
+    Long createBusinessEntity(@Valid MetadataBusinessEntityDO businessEntity);
+
+    /**
+     * 更新业务实体
+     *
+     * @param businessEntity 业务实体DO
+     */
+    void updateBusinessEntity(@Valid MetadataBusinessEntityDO businessEntity);
+
+    /**
+     * 删除业务实体
+     *
+     * @param id 业务实体编号
+     */
+    void deleteBusinessEntity(Long id);
+
+    /**
+     * 获得业务实体
+     *
+     * @param id 业务实体编号
+     * @return 业务实体DO
+     */
+    MetadataBusinessEntityDO getBusinessEntity(Long id);
+
+    /**
+     * 获得业务实体列表
+     *
+     * @return 业务实体列表
+     */
+    List<MetadataBusinessEntityDO> getBusinessEntityList();
+
+    /**
+     * 根据编码获得业务实体
+     *
+     * @param code 编码
+     * @return 业务实体
+     */
+    MetadataBusinessEntityDO getBusinessEntityByCode(String code);
+
+    /**
+     * 根据数据源ID获得业务实体列表
+     *
+     * @param datasourceId 数据源ID
+     * @return 业务实体列表
+     */
+    List<MetadataBusinessEntityDO> getBusinessEntityListByDatasourceId(Long datasourceId);
+
+    /**
+     * 根据条件查询业务实体列表
+     *
+     * @param configStore 查询条件
+     * @return 业务实体列表
+     */
+    List<MetadataBusinessEntityDO> findAllByConfig(org.anyline.data.param.init.DefaultConfigStore configStore);
+
+    // TODO: 以下方法需要在build模块中实现，涉及VO转换
+    /*
+    PageResult<BusinessEntityRespVO> getBusinessEntityPageWithResponse(BusinessEntityPageReqVO pageReqVO);
+    BusinessEntityRespVO createBusinessEntityWithResponse(@Valid BusinessEntitySaveReqVO reqVO);
+    BusinessEntityRespVO getBusinessEntityDetail(Long id);
+    List<BusinessEntityRespVO> getBusinessEntityListByDatasourceIdWithRelationType(Long datasourceId);
+    ERDiagramRespVO getERDiagramByDatasourceId(Long datasourceId);
+    List<SimpleEntityRespVO> getSimpleEntityListByAppId(Long appId);
+    */
+}

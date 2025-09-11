@@ -1,13 +1,11 @@
 package com.cmsr.onebase.module.flow.runtime.service;
 
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.module.flow.runtime.flow.FlowFilterExecutor;
+import com.cmsr.onebase.module.flow.runtime.utils.FlowUtils;
 import com.cmsr.onebase.module.flow.runtime.vo.FormTriggerReqVO;
 import com.cmsr.onebase.module.flow.runtime.vo.FormTriggerRespVO;
 import com.cmsr.onebase.module.flow.runtime.vo.QueryFormTriggerRespVO;
-import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessTriggerFormRepository;
-import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessTriggerFormDO;
-import com.cmsr.onebase.module.flow.core.flow.FlowFilterExecutor;
-import com.cmsr.onebase.module.flow.core.utils.FlowUtils;
 import com.yomahub.liteflow.core.FlowExecutor;
 import com.yomahub.liteflow.flow.LiteflowResponse;
 import com.yomahub.liteflow.slot.DefaultContext;
@@ -27,9 +25,6 @@ import java.util.Map;
 public class FlowProcessExecServiceImpl implements FlowProcessExecService {
 
     @Autowired
-    private FlowProcessTriggerFormRepository flowProcessTriggerFormRepository;
-
-    @Autowired
     private FlowExecutor flowExecutor;
 
     @Autowired
@@ -38,8 +33,7 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
     @Override
     public List<QueryFormTriggerRespVO> queryFormTrigger(Long pageId) {
         // 查询符合条件的表单触发配置
-        List<FlowProcessTriggerFormDO> formTriggerList = flowProcessTriggerFormRepository.findByPageId(pageId);
-        return BeanUtils.toBean(formTriggerList, QueryFormTriggerRespVO.class);
+        return null;
     }
 
 

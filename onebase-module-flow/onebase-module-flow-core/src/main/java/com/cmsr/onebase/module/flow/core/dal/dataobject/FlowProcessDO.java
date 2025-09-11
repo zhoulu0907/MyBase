@@ -47,4 +47,6 @@ public class FlowProcessDO extends TenantBaseDO {
     @Column(name = "trigger_type", length = 64, nullable = false)
     private String triggerType;
 
+    @Column(name = "trigger_config", length = 64, nullable = true)
+    private String triggerConfig;
 }

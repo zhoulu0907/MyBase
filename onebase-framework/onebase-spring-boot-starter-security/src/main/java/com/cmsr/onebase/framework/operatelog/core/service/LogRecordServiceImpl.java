@@ -1,7 +1,6 @@
 package com.cmsr.onebase.framework.operatelog.core.service;
 
 import com.cmsr.onebase.framework.common.biz.system.logger.OperateLogCommonApi;
-import com.cmsr.onebase.framework.common.util.monitor.TracerUtils;
 import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
 import com.cmsr.onebase.framework.security.core.LoginUser;
 import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
@@ -32,7 +31,7 @@ public class LogRecordServiceImpl implements ILogRecordService {
     public void record(LogRecord logRecord) {
         OperateLogCreateReqDTO reqDTO = new OperateLogCreateReqDTO();
         try {
-            reqDTO.setTraceId(TracerUtils.getTraceId());
+            reqDTO.setTraceId("");
             // 补充用户信息
             fillUserFields(reqDTO);
             // 补全模块信息

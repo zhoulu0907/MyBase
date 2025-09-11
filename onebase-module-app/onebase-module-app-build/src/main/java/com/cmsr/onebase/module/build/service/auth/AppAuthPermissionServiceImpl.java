@@ -301,8 +301,8 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
                 .filter(permitRefOtftRespDTO -> permitRefOtftRespDTO.getFieldTypeCode().equalsIgnoreCase(fieldTypeCode))
                 .map(permitRefOtftRespDTO -> {
                     AuthFieldInfoVO.Operator operator = new AuthFieldInfoVO.Operator();
-                    operator.setValue(permitRefOtftRespDTO.getValidationCode());
-                    operator.setLabel(permitRefOtftRespDTO.getValidationName());
+                    operator.setValue(permitRefOtftRespDTO.getOperationTypeCode());
+                    operator.setLabel(permitRefOtftRespDTO.getOperationTypeName());
                     return operator;
                 })
                 .toList();

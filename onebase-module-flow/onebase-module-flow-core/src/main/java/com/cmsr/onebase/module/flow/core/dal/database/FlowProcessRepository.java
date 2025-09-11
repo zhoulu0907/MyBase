@@ -11,6 +11,8 @@ import org.anyline.entity.Order;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 /**
  * @Author：huangjie
  * @Date：2025/8/29 14:35
@@ -38,5 +40,11 @@ public class FlowProcessRepository extends DataRepository<FlowProcessDO> {
         }
         configs.order(BaseDO.UPDATE_TIME, Order.TYPE.DESC);
         return this.findPageWithConditions(configs, reqVO.getPageNo(), reqVO.getPageSize());
+    }
+
+    public List<FlowProcessDO> findAllByStatus(Integer status) {
+        DefaultConfigStore configs = new DefaultConfigStore();
+        configs.eq("process_status", status);
+        return findAllByConfig(configs);
     }
 }
