@@ -90,6 +90,8 @@ const ComponentEditRender: React.FC<ComponentRenderProps> = ({ cpId, cpType, pag
         return <FormComp.XCarousel cpName={cpId} id={cpId} {...componentConfig} {...reset} runtime={runtime} />;
       case FORM_COMPONENT_TYPES.CHILDREN_TABLE:
         return <FormComp.XChildrenTable cpName={cpId} id={cpId} {...componentConfig} {...reset} runtime={runtime} />;
+      case FORM_COMPONENT_TYPES.DATA_SELECT:
+        return <FormComp.XDataSelect cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
 
       //  布局组件
       case LAYOUT_COMPONENT_TYPES.COLUMN_LAYOUT:

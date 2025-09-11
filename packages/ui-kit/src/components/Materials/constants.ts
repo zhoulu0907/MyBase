@@ -69,7 +69,9 @@ export const CONFIG_TYPES = {
   // 安全
   SECURITY: 'Security',
   // 校验
-  VERIFY: 'Verify'
+  VERIFY: 'Verify',
+  // 选择数据源
+  SELECT_DATA_SOURCE: 'SelectDataSource'
 } as const;
 
 // 状态选项常量

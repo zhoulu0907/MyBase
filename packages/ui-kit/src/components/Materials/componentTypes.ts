@@ -29,7 +29,8 @@ export const FORM_COMPONENT_TYPES = {
   DIVIDER: 'XDivider',
   RICH_TEXT: 'XRichText',
   CAROUSEL_F: 'XFCarousel',
-  CHILDREN_TABLE: 'XChildrenTable'
+  CHILDREN_TABLE: 'XChildrenTable',
+  DATA_SELECT: 'XDataSelect'
 } as const;
 
 // 布局组件类型
