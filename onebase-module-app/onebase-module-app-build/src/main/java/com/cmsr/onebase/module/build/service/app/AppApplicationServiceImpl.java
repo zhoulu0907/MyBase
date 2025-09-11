@@ -133,7 +133,7 @@ public class AppApplicationServiceImpl implements AppApplicationService {
     }
 
     private void createDatasource(Long appId, String appUid, DatasourceSaveReqDTO datasourceSaveReq) {
-        if (datasourceSaveReq == null || datasourceSaveReq.getDatasourceName() == null) {
+        if (datasourceSaveReq == null || datasourceSaveReq.getName() == null) {
             DatasourceCreateDefaultReqDTO defaultReq = new DatasourceCreateDefaultReqDTO();
             defaultReq.setAppId(appId);
             defaultReq.setAppUid(appUid);
