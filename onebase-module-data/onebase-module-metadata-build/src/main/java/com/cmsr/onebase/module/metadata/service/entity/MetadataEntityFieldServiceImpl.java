@@ -74,7 +74,11 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
     private MetadataComponentFieldTypeService componentFieldTypeService;
     @Resource
     private AnylineService<?> anylineService;
-    
+    @Resource
+    private com.cmsr.onebase.module.metadata.service.validation.MetadataPermitRefOtftService permitRefOtftService;
+    @Resource
+    private com.cmsr.onebase.module.metadata.service.validation.MetadataValidationTypeService validationTypeService;
+
     @Resource
     private ModelMapper modelMapper;
 
@@ -121,29 +125,80 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
                 return vo;
             }).collect(Collectors.toList());
         }
+        // 2) 多次单表查询 + 组装（使用已有服务与 Anyline 仓储风格接口）
+        // 2.1 查询字段类型（按 code 过滤）
+        DefaultConfigStore typeCs = new DefaultConfigStore();
+        typeCs.and("deleted", 0);
+        typeCs.and(Compare.IN, "field_type_code", new java.util.ArrayList<>(typeCodes));
+        DataSet typeDs = anylineService.querys("metadata_component_field_type", typeCs);
+        Map<Long, String> typeIdToCode = new HashMap<>();
+        for (DataRow row : typeDs) {
+            Long idVal = null;
+            try { idVal = row.getLong("id"); } catch (Exception ignore) {}
+            String codeVal = row.getString("field_type_code");
+            if (idVal != null && codeVal != null && !codeVal.isBlank()) {
+                typeIdToCode.put(idVal, codeVal);
+            }
+        }
 
-        // 2) 一次性联表查询：字段类型 -> 校验类型列表
-        String inClause = typeCodes.stream().map(code -> "'" + code.replace("'", "''") + "'")
-                .collect(Collectors.joining(","));
-    // 说明：不同环境对 status 语义可能不一致（0/1 含义相反），这里不做 status 过滤，仅按 deleted=0 过滤，确保有数据即可返回
-    String sql = "select mcft.field_type_code, mvt.validation_code, mvt.validation_name, mvt.validation_desc, mpo.sort_order " +
-        "from metadata_permit_ref_otft mpo " +
-        "join metadata_component_field_type mcft on mpo.field_type_id = mcft.id " +
-        "join metadata_validation_type mvt on mpo.validation_type_id = mvt.id " +
-        "where mcft.deleted = 0 and mvt.deleted = 0 and mpo.deleted = 0 " +
-        "and mcft.field_type_code in (" + inClause + ") " +
-        "order by mcft.field_type_code, mpo.sort_order";
-
-        DataSet ds = anylineService.querys(sql);
         Map<String, List<EntityFieldValidationTypesRespVO.ValidationTypeItem>> typeToValidation = new HashMap<>();
-        for (DataRow row : ds) {
-            String ftCode = row.getString("field_type_code");
-            EntityFieldValidationTypesRespVO.ValidationTypeItem item = new EntityFieldValidationTypesRespVO.ValidationTypeItem();
-            item.setCode(row.getString("validation_code"));
-            item.setName(row.getString("validation_name"));
-            item.setDescription(row.getString("validation_desc"));
-            item.setSortOrder(row.getInt("sort_order"));
-            typeToValidation.computeIfAbsent(ftCode, k -> new ArrayList<>()).add(item);
+        if (!typeIdToCode.isEmpty()) {
+            // 2.2 查询关联表（字段类型ID -> 校验类型ID + 排序）
+            List<com.cmsr.onebase.module.metadata.dal.dataobject.validation.MetadataPermitRefOtftDO> relations =
+                    permitRefOtftService.listByFieldTypeIds(typeIdToCode.keySet());
+
+            // 收集所有用到的校验类型ID
+            Set<Long> vtIds = new java.util.HashSet<>();
+            for (var rel : relations) {
+                if (rel.getValidationTypeId() != null) {
+                    vtIds.add(rel.getValidationTypeId());
+                }
+            }
+
+            Map<Long, String> vtIdToCode = new HashMap<>();
+            Map<Long, String> vtIdToName = new HashMap<>();
+            Map<Long, String> vtIdToDesc = new HashMap<>();
+
+            if (!vtIds.isEmpty()) {
+                // 2.3 查询校验类型详情
+                Map<Long, com.cmsr.onebase.module.metadata.dal.dataobject.validation.MetadataValidationTypeDO> vtMap =
+                        validationTypeService.getByIds(vtIds);
+                for (var entry : vtMap.entrySet()) {
+                    Long idVal = entry.getKey();
+                    var vo = entry.getValue();
+                    if (idVal != null && vo != null) {
+                        vtIdToCode.put(idVal, vo.getValidationCode());
+                        vtIdToName.put(idVal, vo.getValidationName());
+                        vtIdToDesc.put(idVal, vo.getValidationDesc());
+                    }
+                }
+
+                // 2.4 组装按照字段类型code聚合的校验类型列表
+                for (var rel : relations) {
+                    Long ftId = rel.getFieldTypeId();
+                    Long vtId = rel.getValidationTypeId();
+                    Integer sort = rel.getSortOrder();
+                    String ftCode = ftId != null ? typeIdToCode.get(ftId) : null;
+                    if (ftCode == null || vtId == null) { continue; }
+                    String code = vtIdToCode.get(vtId);
+                    if (code == null) { continue; }
+                    EntityFieldValidationTypesRespVO.ValidationTypeItem item = new EntityFieldValidationTypesRespVO.ValidationTypeItem();
+                    item.setCode(code);
+                    item.setName(vtIdToName.get(vtId));
+                    item.setDescription(vtIdToDesc.get(vtId));
+                    item.setSortOrder(sort);
+                    typeToValidation.computeIfAbsent(ftCode, k -> new ArrayList<>()).add(item);
+                }
+
+                // 2.5 确保每个列表按 sort_order 升序
+                for (List<EntityFieldValidationTypesRespVO.ValidationTypeItem> list : typeToValidation.values()) {
+                    list.sort((a, b) -> {
+                        Integer s1 = a.getSortOrder() != null ? a.getSortOrder() : 0;
+                        Integer s2 = b.getSortOrder() != null ? b.getSortOrder() : 0;
+                        return Integer.compare(s1, s2);
+                    });
+                }
+            }
         }
 
         // 3) 按 fieldId 组装返回
@@ -905,7 +960,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
     public PageResult<EntityFieldRespVO> getEntityFieldPageWithRelated(EntityFieldPageReqVO pageReqVO) {
         // 先获取基础分页数据
         PageResult<MetadataEntityFieldDO> pageResult = getEntityFieldPage(pageReqVO);
-        
+
         // 转换为响应VO并填充关联数据
         List<EntityFieldRespVO> respList = pageResult.getList().stream()
                 .map(field -> {
@@ -914,7 +969,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
                     return vo;
                 })
                 .toList();
-        
+
         // 构建响应
         PageResult<EntityFieldRespVO> result = new PageResult<>();
         result.setTotal(pageResult.getTotal());
@@ -938,6 +993,19 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
         configStore.order(MetadataEntityFieldDO.SORT_ORDER, Order.TYPE.ASC);
         configStore.order("create_time", Order.TYPE.DESC);
         return metadataEntityFieldRepository.findAllByConfig(configStore);
+    }
+
+    /**
+     * Long 重载实现，委派给 String 版本
+     *
+     * @param entityId 实体ID(Long)
+     * @return 字段列表
+     */
+    public List<MetadataEntityFieldDO> getEntityFieldListByEntityId(Long entityId) {
+        if (entityId == null) {
+            return java.util.Collections.emptyList();
+        }
+        return getEntityFieldListByEntityId(String.valueOf(entityId));
     }
 
     @Override
@@ -1123,7 +1191,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
      * @param value 待转义的值
      * @return 转义后的值（将 ' 替换为 ''）
      */
-    
+
 
     /**
      * 修改表中的列
@@ -1355,10 +1423,10 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
     public EntityFieldRespVO createEntityFieldWithRelated(@Valid EntityFieldSaveReqVO reqVO) {
         Long id = createEntityField(reqVO);
         MetadataEntityFieldDO entityField = getEntityField(String.valueOf(id));
-        
+
         // 处理选项、约束和自动编号
         processFieldRelatedData(id, entityField, reqVO.getOptions(), reqVO.getConstraints(), reqVO.getAutoNumber());
-        
+
         // 手动转换并填充关联数据
         EntityFieldRespVO result = convertToEntityFieldRespVO(entityField);
         populateFieldRelatedData(entityField, result);
@@ -1369,15 +1437,15 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
     @Transactional(rollbackFor = Exception.class)
     public Boolean updateEntityFieldWithRelated(@Valid EntityFieldSaveReqVO reqVO) {
         updateEntityField(reqVO);
-        
+
         if (reqVO.getId() != null) {
             Long fieldId = Long.valueOf(reqVO.getId());
             MetadataEntityFieldDO entityField = getEntityField(String.valueOf(fieldId));
-            
+
             // 处理选项、约束和自动编号
             processFieldRelatedData(fieldId, entityField, reqVO.getOptions(), reqVO.getConstraints(), reqVO.getAutoNumber());
         }
-        
+
         return true;
     }
 
@@ -1388,21 +1456,21 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
         List<EntityFieldRespVO> respList = list.stream()
                 .map(this::convertToEntityFieldRespVO)
                 .toList();
-        
+
         // 为每个字段补充选项、约束和自动编号信息
         for (int i = 0; i < list.size(); i++) {
             MetadataEntityFieldDO f = list.get(i);
             EntityFieldRespVO v = respList.get(i);
             populateFieldRelatedData(f, v);
         }
-        
+
         return respList;
     }
 
     @Override
     public EntityFieldDetailRespVO getEntityFieldDetailWithFullConfig(String id) {
         EntityFieldDetailRespVO result = getEntityFieldDetail(id);
-        
+
         // 补充完整的自动编号配置信息
         Long fieldId = Long.valueOf(id);
         MetadataAutoNumberConfigDO config = autoNumberConfigService.getByFieldId(fieldId);
@@ -1416,7 +1484,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
             autoNumberConfig.setRules(ruleVOs);
             result.setAutoNumberConfig(autoNumberConfig);
         }
-        
+
         return result;
     }
 
@@ -1431,7 +1499,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
         if (options != null) {
             fieldOptionService.deleteByFieldId(fieldId);
             for (var opt : options) {
-                com.cmsr.onebase.module.metadata.dal.dataobject.field.MetadataEntityFieldOptionDO d = 
+                com.cmsr.onebase.module.metadata.dal.dataobject.field.MetadataEntityFieldOptionDO d =
                     new com.cmsr.onebase.module.metadata.dal.dataobject.field.MetadataEntityFieldOptionDO();
                 d.setFieldId(fieldId);
                 d.setOptionLabel(opt.getOptionLabel());
@@ -1526,7 +1594,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
     private void processAutoNumberConfig(Long fieldId, MetadataEntityFieldDO entityField, AutoNumberConfigReqVO autoNumber) {
         // 先删除现有配置
         autoNumberConfigService.deleteByFieldId(fieldId);
-        
+
         // 使用新的枚举值：1-启用，0-禁用
         if (autoNumber.getIsEnabled() != null && CommonStatusEnum.isEnabled(autoNumber.getIsEnabled())) {
             // 创建自动编号配置
@@ -1540,9 +1608,9 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
             config.setResetCycle(autoNumber.getResetCycle());
             config.setRunMode(entityField != null && entityField.getRunMode() != null ? entityField.getRunMode() : 0);
             config.setAppId(entityField != null ? entityField.getAppId() : null);
-            
+
             Long configId = autoNumberConfigService.upsert(config);
-            
+
             // 处理规则项
             if (autoNumber.getRules() != null && !autoNumber.getRules().isEmpty()) {
                 for (AutoNumberRuleItemReqVO ruleReq : autoNumber.getRules()) {
@@ -1556,7 +1624,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
                     // 使用新的枚举值：1-启用，0-禁用
                     rule.setIsEnabled(ruleReq.getIsEnabled() != null ? ruleReq.getIsEnabled() : StatusEnumUtil.ENABLED);
                     rule.setAppId(entityField != null ? entityField.getAppId() : null);
-                    
+
                     autoNumberRuleService.add(rule);
                 }
             }
@@ -1568,7 +1636,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
      */
     private void populateFieldRelatedData(MetadataEntityFieldDO field, EntityFieldRespVO vo) {
         // 填充选项信息
-        if ("SINGLE_SELECT".equalsIgnoreCase(field.getFieldType()) || 
+        if ("SINGLE_SELECT".equalsIgnoreCase(field.getFieldType()) ||
             "MULTI_SELECT".equalsIgnoreCase(field.getFieldType()) ||
             "PICKLIST".equalsIgnoreCase(field.getFieldType())) {
             var options = fieldOptionService.listByFieldId(field.getId());

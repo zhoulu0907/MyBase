@@ -2,15 +2,14 @@ package com.cmsr.onebase.module.app.build.service.auth;
 
 import com.cmsr.onebase.framework.common.biz.system.dict.dto.DictDataRespDTO;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.module.app.build.service.AppCommonService;
+import com.cmsr.onebase.module.app.build.util.AuthUtils;
 import com.cmsr.onebase.module.app.build.vo.auth.*;
 import com.cmsr.onebase.module.app.core.dal.database.auth.*;
 import com.cmsr.onebase.module.app.core.dal.dataobject.auth.*;
 import com.cmsr.onebase.module.app.core.dal.dataobject.menu.MenuDO;
 import com.cmsr.onebase.module.app.core.vo.auth.AuthOperationVO;
 import com.cmsr.onebase.module.app.core.vo.auth.AuthPermissionReqVO;
-import com.cmsr.onebase.module.app.build.service.AppCommonService;
-import com.cmsr.onebase.module.app.build.util.AuthUtils;
-import com.cmsr.onebase.module.build.vo.auth.*;
 import com.cmsr.onebase.module.metadata.api.entity.MetadataEntityFieldApi;
 import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldQueryReqDTO;
 import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldRespDTO;
@@ -285,7 +284,7 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
 
     private List<AuthFieldInfoVO> queryFieldsInfo(Long entityId) {
         List<EntityFieldRespDTO> entityFieldRespDTOS = getEntityFieldRespDTOS(entityId);
-        List<PermitRefOtftRespDTO> permitRefOtftRespDTOS = metadataPermitApi.getPermitRefOtftList().getData();
+        List<PermitRefOtftRespDTO> permitRefOtftRespDTOS = metadataPermitApi.getPermitRefOtftList();
         List<AuthFieldInfoVO> authFieldInfoVOS = entityFieldRespDTOS.stream().map(field -> {
             AuthFieldInfoVO authFieldInfoVO = new AuthFieldInfoVO();
             authFieldInfoVO.setFieldId(Long.valueOf(field.getId())); //TODO 强转
@@ -358,7 +357,7 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
         EntityFieldQueryReqDTO reqDTO = new EntityFieldQueryReqDTO();
         reqDTO.setEntityId(entityId);
         reqDTO.setIsSystemField(0);
-        List<EntityFieldRespDTO> entityFieldRespDTOS = metadataEntityFieldApi.getEntityFieldList(reqDTO).getData();
+        List<EntityFieldRespDTO> entityFieldRespDTOS = metadataEntityFieldApi.getEntityFieldList(reqDTO);
         return entityFieldRespDTOS;
     }
 

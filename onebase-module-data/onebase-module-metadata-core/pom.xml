@@ -34,11 +34,6 @@
         <!-- 依赖服务 -->
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-module-metadata-api</artifactId>
-            <version>${revision}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-module-system-api</artifactId>
             <version>${revision}</version>
         </dependency>
@@ -70,6 +65,11 @@
         </dependency>
 
         <!-- HikariCP 连接池 -->
+        <dependency>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+        </dependency>
+
     <!-- 数据源连接池由上层应用提供，这里不直接依赖 HikariCP -->
 
         <dependency>

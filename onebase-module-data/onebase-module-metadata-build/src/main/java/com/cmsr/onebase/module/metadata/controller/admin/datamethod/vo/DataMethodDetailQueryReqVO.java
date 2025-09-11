@@ -17,7 +17,7 @@ public class DataMethodDetailQueryReqVO {
 
     @Schema(description = "实体ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
     @NotNull(message = "实体ID不能为空")
-    private String entityId;
+    private Long entityId;
 
     @Schema(description = "方法代码", requiredMode = Schema.RequiredMode.REQUIRED, example = "getUserList")
     @NotBlank(message = "方法代码不能为空")

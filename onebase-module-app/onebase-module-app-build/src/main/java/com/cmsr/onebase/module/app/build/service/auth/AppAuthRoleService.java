@@ -2,7 +2,6 @@ package com.cmsr.onebase.module.app.build.service.auth;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.app.build.vo.auth.*;
-import com.cmsr.onebase.module.build.vo.auth.*;
 import com.cmsr.onebase.module.system.api.dept.dto.DeptAndUsersRespDTO;
 
 import java.util.List;

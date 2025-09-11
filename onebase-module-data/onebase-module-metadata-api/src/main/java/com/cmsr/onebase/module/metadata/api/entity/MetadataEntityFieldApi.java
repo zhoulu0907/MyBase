@@ -18,7 +18,7 @@ import java.util.List;
  * @author matianyu
  * @date 2025-09-10
  */
-@FeignClient(name = "onebase-module-metadata-build", path = "/metadata")
+//@FeignClient(name = "onebase-module-metadata-build", path = "/metadata")
 @Tag(name = "实体字段管理 API")
 public interface MetadataEntityFieldApi {
 
@@ -30,5 +30,5 @@ public interface MetadataEntityFieldApi {
      */
     @PostMapping("/entity-field/list")
     @Operation(summary = "查询指定实体的字段列表")
-    CommonResult<List<EntityFieldRespDTO>> getEntityFieldList(@Valid @RequestBody EntityFieldQueryReqDTO reqDTO);
+    List<EntityFieldRespDTO> getEntityFieldList(@Valid @RequestBody EntityFieldQueryReqDTO reqDTO);
 }

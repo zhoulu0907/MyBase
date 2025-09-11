@@ -3,7 +3,6 @@ package com.cmsr.onebase.module.app.build.controller.menu;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.module.app.build.service.menu.AppMenuService;
 import com.cmsr.onebase.module.app.build.vo.menu.*;
-import com.cmsr.onebase.module.build.vo.menu.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;

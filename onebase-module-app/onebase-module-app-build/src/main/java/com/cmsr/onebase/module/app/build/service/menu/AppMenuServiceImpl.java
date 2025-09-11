@@ -2,6 +2,9 @@ package com.cmsr.onebase.module.app.build.service.menu;
 
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.module.app.build.service.AppCommonService;
+import com.cmsr.onebase.module.app.build.service.appresource.PageSetService;
+import com.cmsr.onebase.module.app.build.util.MenuUtils;
 import com.cmsr.onebase.module.app.build.vo.menu.*;
 import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.app.ApplicationDO;
@@ -10,11 +13,6 @@ import com.cmsr.onebase.module.app.core.dto.appresource.CopyPageSetDTO;
 import com.cmsr.onebase.module.app.core.dto.appresource.CreatePageSetDTO;
 import com.cmsr.onebase.module.app.core.enums.AppErrorCodeConstants;
 import com.cmsr.onebase.module.app.core.enums.menu.MenuTypeEnum;
-
-import com.cmsr.onebase.module.app.build.service.AppCommonService;
-import com.cmsr.onebase.module.app.build.service.appresource.PageSetService;
-import com.cmsr.onebase.module.app.build.util.MenuUtils;
-import com.cmsr.onebase.module.build.vo.menu.*;
 import jakarta.annotation.Resource;
 import lombok.Setter;
 import org.apache.commons.collections4.MapUtils;
