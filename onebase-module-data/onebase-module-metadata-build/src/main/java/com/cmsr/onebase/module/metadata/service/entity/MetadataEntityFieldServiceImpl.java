@@ -909,7 +909,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
         // 转换为响应VO并填充关联数据
         List<EntityFieldRespVO> respList = pageResult.getList().stream()
                 .map(field -> {
-                    EntityFieldRespVO vo = modelMapper.map(field, EntityFieldRespVO.class);
+                    EntityFieldRespVO vo = convertToEntityFieldRespVO(field);
                     populateFieldRelatedData(field, vo);
                     return vo;
                 })
@@ -1359,7 +1359,10 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
         // 处理选项、约束和自动编号
         processFieldRelatedData(id, entityField, reqVO.getOptions(), reqVO.getConstraints(), reqVO.getAutoNumber());
         
-        return modelMapper.map(entityField, EntityFieldRespVO.class);
+        // 手动转换并填充关联数据
+        EntityFieldRespVO result = convertToEntityFieldRespVO(entityField);
+        populateFieldRelatedData(entityField, result);
+        return result;
     }
 
     @Override
@@ -1383,7 +1386,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
         EntityFieldQueryVO queryVO = modelMapper.map(reqVO, EntityFieldQueryVO.class);
         List<MetadataEntityFieldDO> list = getEntityFieldListByConditions(queryVO);
         List<EntityFieldRespVO> respList = list.stream()
-                .map(field -> modelMapper.map(field, EntityFieldRespVO.class))
+                .map(this::convertToEntityFieldRespVO)
                 .toList();
         
         // 为每个字段补充选项、约束和自动编号信息
@@ -1642,6 +1645,36 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
         vo.setAppId(rule.getAppId());
         vo.setCreateTime(rule.getCreateTime());
         vo.setUpdateTime(rule.getUpdateTime());
+        return vo;
+    }
+
+    /**
+     * 手动转换MetadataEntityFieldDO为EntityFieldRespVO
+     * 避免ModelMapper的复杂嵌套对象映射冲突
+     */
+    private EntityFieldRespVO convertToEntityFieldRespVO(MetadataEntityFieldDO field) {
+        EntityFieldRespVO vo = new EntityFieldRespVO();
+        vo.setId(field.getId() != null ? String.valueOf(field.getId()) : null);
+        vo.setEntityId(field.getEntityId() != null ? String.valueOf(field.getEntityId()) : null);
+        vo.setFieldName(field.getFieldName());
+        vo.setDisplayName(field.getDisplayName());
+        vo.setFieldType(field.getFieldType());
+        vo.setDataLength(field.getDataLength());
+        vo.setDecimalPlaces(field.getDecimalPlaces());
+        vo.setDefaultValue(field.getDefaultValue());
+        vo.setDescription(field.getDescription());
+        vo.setIsSystemField(field.getIsSystemField());
+        vo.setIsPrimaryKey(field.getIsPrimaryKey());
+        vo.setIsRequired(field.getIsRequired());
+        vo.setIsUnique(field.getIsUnique());
+        vo.setAllowNull(field.getAllowNull());
+        vo.setSortOrder(field.getSortOrder());
+        vo.setValidationRulesId(field.getValidationRules());
+        vo.setRunMode(field.getRunMode());
+        vo.setAppId(field.getAppId() != null ? String.valueOf(field.getAppId()) : null);
+        vo.setStatus(field.getStatus());
+        vo.setFieldCode(field.getFieldCode());
+        // 注意：options、constraints、autoNumberConfig 将在 populateFieldRelatedData 中填充
         return vo;
     }
 }
