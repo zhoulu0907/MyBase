@@ -171,7 +171,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON["data"]>) => {
             layout='vertical'
             initialValues={{ ...triggerEditorSignal.nodeData.value[node.id] }}
           >
-            <Form.Item label="节点ID" field="nodeId " initialValue={node.id}>
+            <Form.Item label="节点ID" field="id " initialValue={node.id}>
               <Input disabled />
             </Form.Item>
             <Form.Item label="节点名称" field="nodeName">
