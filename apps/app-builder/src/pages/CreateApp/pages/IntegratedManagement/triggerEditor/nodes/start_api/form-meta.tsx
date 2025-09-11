@@ -42,46 +42,46 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       <FormHeader />
       {isSidebar ? (
         <FormContent>
-          <Form form={payloadForm} layout='vertical' initialValues={{ ...triggerEditorSignal.nodeData.value[node.id], data: {} }}>
+          <Form form={payloadForm} layout='vertical' initialValues={{ ...triggerEditorSignal.nodeData.value[node.id] }}>
             <Form.Item label="节点ID" field="id" initialValue={node.id}>
               <Input disabled />
             </Form.Item>
             <Form.Item label="节点名称" field="nodeName">
               <Input placeholder='请输入节点名称' onChange={(e) => handlePropsOnChange('nodeName', e)} />
             </Form.Item>
-            <Form.Item label="API路径" field="data.urlPath">
-              <Input placeholder='请输入API路径' onChange={(e) => handlePropsOnChange('data.urlPath', e)} />
+            <Form.Item label="API路径" field="urlPath">
+              <Input placeholder='请输入API路径' onChange={(e) => handlePropsOnChange('urlPath', e)} />
             </Form.Item>
-            <Form.Item label="请求方法" field="data.httpMethod">
+            <Form.Item label="请求方法" field="httpMethod">
               <Select
                 placeholder='请选择请求方法'
                 options={httpMethodOptions}
                 allowClear
-                onChange={(e) => handlePropsOnChange("data.httpMethod", e)}
+                onChange={(e) => handlePropsOnChange("httpMethod", e)}
               ></Select>
             </Form.Item>
-            <Form.Item label="认证方式" field="data.authType">
+            <Form.Item label="认证方式" field="authType">
               <Select
                 placeholder='请选择认证方式'
                 options={authTypeOptions}
                 allowClear
-                onChange={(e) => handlePropsOnChange("data.authType", e)}
+                onChange={(e) => handlePropsOnChange("authType", e)}
               ></Select>
             </Form.Item>
-            <Form.Item label="认证Key" field="data.authKey">
-              <Input placeholder='请输入认证Key' onChange={(e) => handlePropsOnChange('data.authKey', e)} />
+            <Form.Item label="认证Key" field="authKey">
+              <Input placeholder='请输入认证Key' onChange={(e) => handlePropsOnChange('authKey', e)} />
             </Form.Item>
-            <Form.Item label="请求参数" field="data.reuqestParamsSchema">
-              <Input.TextArea placeholder='请输入请求参数' onChange={(e) => handlePropsOnChange('data.reuqestParamsSchema', e)} />
+            <Form.Item label="请求参数" field="reuqestParamsSchema">
+              <Input.TextArea placeholder='请输入请求参数' onChange={(e) => handlePropsOnChange('reuqestParamsSchema', e)} />
             </Form.Item>
-            <Form.Item label="成功响应格式" field="data.successResponseSchema">
-              <Input.TextArea placeholder='请输入成功响应格式' onChange={(e) => handlePropsOnChange('data.successResponseSchema', e)} />
+            <Form.Item label="成功响应格式" field="successResponseSchema">
+              <Input.TextArea placeholder='请输入成功响应格式' onChange={(e) => handlePropsOnChange('successResponseSchema', e)} />
             </Form.Item>
-            <Form.Item label="失败响应格式" field="data.failResponseSchema">
-              <Input.TextArea placeholder='请输入失败响应格式' onChange={(e) => handlePropsOnChange('data.failResponseSchema', e)} />
+            <Form.Item label="失败响应格式" field="failResponseSchema">
+              <Input.TextArea placeholder='请输入失败响应格式' onChange={(e) => handlePropsOnChange('failResponseSchema', e)} />
             </Form.Item>
-            <Form.Item label="数据响应格式" field="data.responseMapping">
-              <Input.TextArea placeholder='请输入数据响应格式' onChange={(e) => handlePropsOnChange('data.responseMapping', e)} />
+            <Form.Item label="数据响应格式" field="responseMapping">
+              <Input.TextArea placeholder='请输入数据响应格式' onChange={(e) => handlePropsOnChange('responseMapping', e)} />
             </Form.Item>
           </Form>
         </FormContent>
