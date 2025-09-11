@@ -84,23 +84,22 @@ export default function EditorWorkspace() {
   };
 
   // 复制组件
-  const handleCopyComponent = (comp: any) => {
+  const handleCopyComponent = (comp: any, originId: string) => {
     addComponents(comp);
 
     const schema = getComponentSchema(comp.type);
     // console.log('schema', schema);
-
-    schema.config.cpName = comp.displayName;
-    schema.config.id = comp.id;
 
     const props = {
       id: comp.id,
       type: comp.type,
       ...schema
     };
-
-    setPageComponentSchemas(comp.id, props);
-    setCurComponentID(comp.id);
+    const data = pageComponentSchemas[originId];
+    data.config.cpName = comp.displayName;
+    data.config.id = comp.id;
+    setPageComponentSchemas(comp.id, { ...props, ...data });
+    setCurComponentID(comp.id!);
     setCurComponentSchema(props);
     setShowDeleteButton(false);
   };
@@ -330,7 +329,7 @@ export default function EditorWorkspace() {
                       onClick={(e) => {
                         e.stopPropagation();
                         console.log('复制组件: ', cp);
-                        handleCopyComponent({ ...cp, id: `${cp.type}-${uuidv4()}` });
+                        handleCopyComponent({ ...cp, id: `${cp.type}-${uuidv4()}` }, cp.id);
                       }}
                     >
                       <img src={CompCopyIcon} alt="component copy" />
