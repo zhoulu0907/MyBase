@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.metadata.service.datamethod;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.metadata.controller.admin.datamethod.vo.*;
+import com.cmsr.onebase.module.metadata.controller.datamethod.vo.*;
 
 /**
  * 运行时动态数据操作服务接口

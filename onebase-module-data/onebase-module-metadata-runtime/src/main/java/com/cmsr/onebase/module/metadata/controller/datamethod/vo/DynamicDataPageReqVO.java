@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.metadata.controller.admin.datamethod.vo;
+package com.cmsr.onebase.module.metadata.controller.datamethod.vo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
@@ -18,7 +18,7 @@ public class DynamicDataPageReqVO {
 
     @Schema(description = "实体ID", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotEmpty(message = "实体ID不能为空")
-    private String entityId;
+    private Long entityId;
 
     @Schema(description = "页码", example = "1")
     private Integer pageNo = 1;

@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.metadata.controller.admin.datamethod.vo;
+package com.cmsr.onebase.module.metadata.controller.datamethod.vo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
@@ -16,7 +16,7 @@ import java.util.Map;
 public class DynamicDataRespVO {
 
     @Schema(description = "实体ID")
-    private String entityId;
+    private Long entityId;
 
     @Schema(description = "实体名称")
     private String entityName;
