@@ -323,3 +323,10 @@ export interface ISelectOptionsConfigType {
   type: typeof CONFIG_TYPES.SELECT_OPTIONS_INPUT;
   placeholder?: string;
 }
+
+// 数据选择 数据源
+export interface ISelectDataSourceConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.SELECT_DATA_SOURCE;
+}

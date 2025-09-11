@@ -1,6 +1,7 @@
 import XAutoCode from './AutoCode';
 import XCarousel from './Carousel';
 import XCheckbox from './Checkbox';
+import XDataSelect from './DataSelect';
 import XDatePicker from './DatePicker';
 import XDateRangePicker from './DateRangePicker';
 import XDateTimePicker from './DateTimePicker';
@@ -49,5 +50,6 @@ export const FormComp = {
   XDIVIDER,
   XRichText,
   XCarousel,
-  XChildrenTable
+  XChildrenTable,
+  XDataSelect
 };

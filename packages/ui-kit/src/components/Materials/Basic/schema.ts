@@ -1,6 +1,7 @@
 import XAutoCode from './FormComponents/AutoCode/schema';
 import XFCarousel from './FormComponents/Carousel/schema';
 import XCheckbox from './FormComponents/Checkbox/schema';
+import XDataSelect from './FormComponents/DataSelect/schema';
 import XDatePicker from './FormComponents/DatePicker/schema';
 import XDateRangePicker from './FormComponents/DateRangePicker/schema';
 import XDateTimePicker from './FormComponents/DateTimePicker/schema';
@@ -60,6 +61,7 @@ const baseSchema = {
   XRichText,
   XFCarousel,
   XChildrenTable,
+  XDataSelect,
 
   XTable,
   XCalendar,
