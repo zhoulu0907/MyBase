@@ -58,7 +58,6 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
       getGraphPositon
     }));
 
-    // --- 辅助函数：创建节点 ---
     const createAndAddNode = useCallback(
       (positioner: any, nodeDatas: EntityNode[]) => {
         nodeDatas.forEach((nodeData) => {
@@ -185,9 +184,7 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
       ]
     );
 
-    // --- 辅助函数：创建边 ---
     const createAndAddEdge = (graph: Graph, edgeData: any) => {
-      // 使用 any 或定义更具体的类型
       const edge = graph.createEdge({
         source: { cell: edgeData.sourceEntityId, port: `${edgeData.sourceFieldId}_source` },
         target: { cell: edgeData.targetEntityId, port: `${edgeData.targetFieldId}_target` },
@@ -393,7 +390,7 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
         return;
       }
 
-      // 初始化 positioner
+      // 初始化定位器
       const positioner = new GridNodePositioner(graphRef.current, {
         startX: 0,
         startY: 0,
@@ -416,7 +413,7 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
         data.edges.forEach((edge) => createAndAddEdge(graphRef.current!, edge));
       }
 
-      // 只在首次加载且有节点时进行居中和适配
+      // 是否首次加载且有节点
       const isFirstLoadWithData = !isGraphInitialized.current && data?.nodes && data.nodes.length > 0;
 
       // 首次加载画布内容居中显示
@@ -425,25 +422,10 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
         requestAnimationFrame(() => {
           // 检查内容区域是否有效
           const contentArea = graphRef.current?.getContentArea();
-          const contentBBox = graphRef.current?.getContentBBox();
-
-          console.log('Content area before centering:', contentArea);
-          console.log('Content bbox before centering:', contentBBox);
 
           if (contentArea && (contentArea.width > 0 || contentArea.height > 0)) {
-            // 使用 zoomToFit 确保内容完全显示在视口内，并自动居中
             graphRef?.current?.centerContent();
-
-            // 验证居中结果
-            setTimeout(() => {
-              const afterCenterArea = graphRef.current?.getContentArea();
-              const afterCenterBBox = graphRef.current?.getContentBBox();
-              console.log('Content area after centering:', afterCenterArea);
-              console.log('Content bbox after centering:', afterCenterBBox);
-            }, 100);
-
             isGraphInitialized.current = true;
-            console.log('Graph centered successfully');
           } else {
             console.warn('Content area is empty, cannot center');
           }
