@@ -330,6 +330,7 @@ public class GlobalExceptionHandler {
         errorLog.setExceptionMethodName(stackTraceElement.getMethodName());
         errorLog.setExceptionLineNumber(stackTraceElement.getLineNumber());
         // 设置其它字段
+        errorLog.setTraceId("n/a");
         errorLog.setApplicationName(applicationName);
         errorLog.setRequestUrl(request.getRequestURI());
         Map<String, Object> requestParams = MapUtil.<String, Object>builder()
@@ -341,7 +342,6 @@ public class GlobalExceptionHandler {
         errorLog.setUserIp(JakartaServletUtil.getClientIP(request));
         errorLog.setExceptionTime(LocalDateTime.now());
     }
-
 
 
 }
