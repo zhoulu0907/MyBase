@@ -8,6 +8,7 @@ import lombok.Data;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.Map;
 
 /**
  * 流程管理 - 流程视图对象
@@ -54,5 +55,5 @@ public class FlowProcessVO implements Serializable {
     private LocalDateTime updateTime;
 
     @Schema(description = "触发配置，比如表单触发pageId等")
-    private Object triggerConfig;
+    private Map<String,Object> triggerConfig;
 }
