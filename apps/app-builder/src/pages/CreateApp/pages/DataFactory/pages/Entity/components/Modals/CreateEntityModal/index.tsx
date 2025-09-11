@@ -52,7 +52,6 @@ const CreateEntityModal: React.FC<{
 
     form.validate().then(async (values) => {
       // 获取新节点位置
-      // 获取新节点位置
       const { x, y } = getNewNodePosition();
 
       const params = {
@@ -66,10 +65,6 @@ const CreateEntityModal: React.FC<{
         displayConfig: JSON.stringify({
           x,
           y
-          // x: getGraphPositon().x + 300,
-          // y: getGraphPositon().y
-          // x: position?.x,
-          // y: position?.y
         })
       };
 
