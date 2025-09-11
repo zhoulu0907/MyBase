@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.flow.core.flow;
+package com.cmsr.onebase.module.flow.runtime.job;
 
 import com.aizuda.snailjob.client.job.core.annotation.JobExecutor;
 import com.aizuda.snailjob.client.job.core.dto.JobArgs;

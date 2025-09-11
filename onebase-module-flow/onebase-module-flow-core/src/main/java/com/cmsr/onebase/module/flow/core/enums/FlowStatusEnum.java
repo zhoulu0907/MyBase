@@ -1,5 +1,7 @@
 package com.cmsr.onebase.module.flow.core.enums;
 
+import java.util.Objects;
+
 /**
  * @Author：huangjie
  * @Date：2025/8/29 16:21
@@ -25,12 +27,15 @@ public enum FlowStatusEnum {
         return name;
     }
 
-    public static String getName(Integer status) {
-        for (FlowStatusEnum value : FlowStatusEnum.values()) {
-            if (value.status.equals(status)) {
-                return value.name;
-            }
-        }
-        return null;
+    public static boolean isDisable(Integer status) {
+        return Objects.equals(status, DISABLE.status);
+    }
+
+    public static boolean isEnable(Integer status) {
+        return Objects.equals(status, ENABLE.status);
+    }
+
+    public static boolean changeToEnable(Integer oldStatus, Integer newStatus) {
+        return isDisable(oldStatus) && isEnable(newStatus);
     }
 }
