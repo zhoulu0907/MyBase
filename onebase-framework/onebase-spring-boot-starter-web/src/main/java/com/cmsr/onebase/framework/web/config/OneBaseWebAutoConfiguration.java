@@ -75,11 +75,12 @@ public class OneBaseWebAutoConfiguration implements WebMvcConfigurer {
     @Bean
     public ModelMapper modelMapper() {
         ModelMapper mapper = new ModelMapper();
-        // 配置宽松匹配策略，允许字段名不完全匹配
+        // 配置标准匹配策略，避免过于宽松的匹配导致冲突
         mapper.getConfiguration()
-                .setMatchingStrategy(org.modelmapper.convention.MatchingStrategies.LOOSE)
+                .setMatchingStrategy(org.modelmapper.convention.MatchingStrategies.STANDARD)
                 .setFieldMatchingEnabled(true)
-                .setFieldAccessLevel(org.modelmapper.config.Configuration.AccessLevel.PRIVATE);
+                .setFieldAccessLevel(org.modelmapper.config.Configuration.AccessLevel.PRIVATE)
+                .setAmbiguityIgnored(true); // 忽略歧义映射，避免多个源属性匹配同一个目标属性
         return mapper;
     }
 

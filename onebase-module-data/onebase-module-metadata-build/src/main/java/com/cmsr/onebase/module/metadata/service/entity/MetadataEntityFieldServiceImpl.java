@@ -902,6 +902,27 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
     }
 
     @Override
+    public PageResult<EntityFieldRespVO> getEntityFieldPageWithRelated(EntityFieldPageReqVO pageReqVO) {
+        // 先获取基础分页数据
+        PageResult<MetadataEntityFieldDO> pageResult = getEntityFieldPage(pageReqVO);
+        
+        // 转换为响应VO并填充关联数据
+        List<EntityFieldRespVO> respList = pageResult.getList().stream()
+                .map(field -> {
+                    EntityFieldRespVO vo = modelMapper.map(field, EntityFieldRespVO.class);
+                    populateFieldRelatedData(field, vo);
+                    return vo;
+                })
+                .toList();
+        
+        // 构建响应
+        PageResult<EntityFieldRespVO> result = new PageResult<>();
+        result.setTotal(pageResult.getTotal());
+        result.setList(respList);
+        return result;
+    }
+
+    @Override
     public List<MetadataEntityFieldDO> getEntityFieldList() {
         DefaultConfigStore configStore = new DefaultConfigStore();
         configStore.order(MetadataEntityFieldDO.SORT_ORDER, Order.TYPE.ASC);

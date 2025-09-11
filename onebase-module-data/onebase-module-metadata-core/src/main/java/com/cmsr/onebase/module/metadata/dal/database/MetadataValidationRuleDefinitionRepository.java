@@ -59,12 +59,11 @@ public class MetadataValidationRuleDefinitionRepository extends DataRepository<M
      * 根据规则组ID删除所有规则定义
      *
      * @param groupId 规则组ID
-     * @return 删除的记录数
      */
-    public long deleteByGroupId(Long groupId) {
+    public void deleteByGroupId(Long groupId) {
         ConfigStore configStore = new DefaultConfigStore();
         configStore.eq("group_id", groupId);
-        return deleteByConfig(configStore);
+        deleteByConfig(configStore);
     }
 
     /**
