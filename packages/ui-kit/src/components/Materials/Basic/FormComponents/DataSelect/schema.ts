@@ -16,6 +16,8 @@ import {
     CONFIG_TYPES,
     LAYOUT_OPTIONS,
     LAYOUT_VALUES,
+    PAGINATION_POSITION_OPTIONS,
+    PAGINATION_POSITION_VALUES,
     STATUS_OPTIONS,
     STATUS_VALUES,
     WIDTH_OPTIONS,
@@ -42,6 +44,7 @@ import type {
     IVerifyConfigType,
     ISelectDataSourceConfigType
 } from '../../../types';
+import { XTableConfig } from '../../ListComponents/Table/schema';
 
 export interface XDataSelectSchema {
   editData: TXDataSelectEditData;
@@ -134,7 +137,24 @@ export interface XDataSelectConfig extends ICommonBaseType {
   /**
    * 选择的数据源
    */
-  selectedDataSource?: TTextDefaultType
+  selectedDataSource?: TTextDefaultType;
+
+   /**
+   * 选择的数据源 属性类型待定
+   */
+  isSetted: TBooleanDefaultType;
+  displayFields: TTextDefaultType[];
+  fillFormField: TBooleanDefaultType;
+  selectDataFields: TTextDefaultType[];
+  filterData: TBooleanDefaultType;
+  sortDataRule: TTextDefaultType[];
+  operationAuth: TBooleanDefaultType;
+  fastFilter: TBooleanDefaultType;
+
+  /**
+   * 选择数据过程动态表单配置
+   */
+  dynamicTableConfig: XTableConfig;
 }
 
 const XDataSelect: XDataSelectSchema = {
@@ -186,7 +206,38 @@ const XDataSelect: XDataSelectSchema = {
       required: false,
       noRepeat: false
     },
-    selectedDataSource: ''
+    selectedDataSource: '',
+
+    // 选择数据属性 待定
+    isSetted: false,
+    displayFields: [],
+    fillFormField: false,
+    selectDataFields: [],
+    filterData: false,
+    sortDataRule: [],
+    operationAuth: false,
+    fastFilter: false,
+    dynamicTableConfig: {
+      ...baseDefault,
+        label: '',
+        stripe: true,
+        border: true,
+        borderCell: true,
+        showHeader: true,
+        hover: true,
+        showTotal: true,
+        showOpearate: true,
+        fixedOpearate: true,
+        saveWithHidden: false,
+        width: WIDTH_VALUES[WIDTH_OPTIONS.FULL],
+        status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
+        pagePosition: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.BR],
+        pageSize: 5,
+        metaData: '',
+        labelColSpan: 100,
+        defaultValue: [],
+        columns: [],
+        searchItems: []}
   }
 };
 

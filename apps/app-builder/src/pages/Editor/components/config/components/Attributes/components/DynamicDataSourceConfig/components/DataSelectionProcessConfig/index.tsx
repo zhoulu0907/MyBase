@@ -11,13 +11,13 @@ import {
   Switch,
   Tooltip
 } from '@arco-design/web-react';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import styles from './index.module.less';
 import { IconDragDotVertical, IconQuestionCircleFill, IconEdit } from '@arco-design/web-react/icon';
 import { ReactSortable } from 'react-sortablejs';
 import type { DynamicSelectDataSourceConfigProps } from '../..';
-import DynamicTable from './components/DynamicTable';
+import { ListComp } from '@onebase/ui-kit';
 
 interface DataSelectionProcessConfigProps extends DynamicSelectDataSourceConfigProps {
   visible: boolean;
@@ -26,6 +26,17 @@ interface DataSelectionProcessConfigProps extends DynamicSelectDataSourceConfigP
 
 const FormItem = Form.Item;
 const Option = Select.Option;
+
+const SUB_ATTR_KEY = {
+  DEFAULTVALUE: 'defaultValue',
+  SELECTDATAFIELDS: 'selectDataFields',
+  FILTERDATA: 'filterData',
+  SORTDATARULE: 'sortDataRule',
+  OPERATIONAUTH: 'operationAuth',
+  FASTFILTER: 'fastFilter',
+  DYNAMICTABLECONFIG: 'dynamicTableConfig',
+  COLUMNS: 'columns'
+};
 
 //mockup
 const defaultOptions = [
@@ -54,17 +65,6 @@ const initialDisplayFieldOptions = [
   { label: '更新时间', value: 'updateTime', id: 7 }
 ];
 
-const columns = [
-  { title: '姓名', dataIndex: 'name' },
-  { title: '年龄', dataIndex: 'age' },
-  { title: '城市', dataIndex: 'city' }
-];
-
-const dataSource = [
-  { name: '张三', age: 18, city: '北京' },
-  { name: '李四', age: 22, city: '上海' }
-];
-
 const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
   visible,
   setVisible,
@@ -73,6 +73,8 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
   configs,
   id
 }) => {
+  const tableConfig = configs[SUB_ATTR_KEY.DYNAMICTABLECONFIG];
+
   const [sortFieldOptions, setSortFieldOptions] = useState<any[]>(defaultOptions);
   const [sortOption, setSortOption] = useState<any[]>(sortOptions);
 
@@ -85,9 +87,30 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
     'radioGroup',
     'submitter'
   ]);
+  const [tableHeader, setTableHeader] = useState<any[]>(tableConfig[SUB_ATTR_KEY.COLUMNS]); // table header
+  const [tableDataSource, setTableDataSource] = useState([]); // table data source
+
   const [hovered, setHovered] = useState<string | null>(null);
   const [editIdx, setEditIdx] = useState<number | null>(null);
   const [editLabel, setEditLabel] = useState('');
+
+  useEffect(() => {
+    getTableHeaderArry();
+  }, [displayFieldOptions, selected]);
+
+  const getTableHeaderArry = () => {
+    const header = displayFieldOptions
+      .map((option: any) => {
+        if (selected.includes(option.value)) {
+          return {
+            title: option.label,
+            dataIndex: option.value
+          };
+        }
+      })
+      .filter(Boolean);
+    setTableHeader(header);
+  };
 
   // 编辑弹窗内容
   const renderEditPopover = (idx: number) => (
@@ -110,6 +133,7 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
           type="primary"
           onClick={() => {
             displayFieldOptions[idx].label = editLabel;
+            getTableHeaderArry();
             setEditIdx(null);
           }}
         >
@@ -136,24 +160,16 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
       >
         <div className={styles.container}>
           <div className={styles.leftColumn}>
-            <DynamicTable
-              label="用户列表"
-              columns={columns}
-              dataSource={dataSource}
-              searchItems={[{ label: '姓名', key: 'name' }]}
-              onCreate={() => alert('新增')}
-              onSearch={(values) => alert(JSON.stringify(values))}
-              onReset={() => alert('重置')}
-            />
+            <ListComp.XTable cpName={id} id={id} {...tableConfig} columns={tableHeader} />
           </div>
           <div className={styles.rightColumn}>
             <Form layout="vertical">
               <FormItem label="按钮文字">
                 <Input
                   placeholder="请输入按钮文字"
-                  value={configs['defaultValue']}
+                  value={configs[SUB_ATTR_KEY.DEFAULTVALUE]}
                   onChange={(value) => {
-                    handlePropsChange('defaultValue', value);
+                    handlePropsChange(SUB_ATTR_KEY.DEFAULTVALUE, value);
                   }}
                 />
               </FormItem>
@@ -195,8 +211,12 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
                             style={{
                               background: hovered === opt.value ? '#f2f3f5' : '#fff'
                             }}
-                            onMouseEnter={() => setHovered(opt.value)}
-                            onMouseLeave={() => setHovered(null)}
+                            onMouseEnter={() => {
+                              setHovered(opt.value);
+                            }}
+                            onMouseLeave={() => {
+                              setHovered(null);
+                            }}
                           >
                             <Checkbox
                               checked={selected.includes(opt.value)}
@@ -210,22 +230,24 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
                             <span className={styles.optionSpan}>{opt.label}</span>
                             {hovered === opt.value && (
                               <div className={styles.operationDiv}>
-                                <Popover
-                                  trigger="click"
-                                  position="tr"
-                                  popupVisible={editIdx === idx}
-                                  onVisibleChange={(visible) => {
-                                    if (visible) {
-                                      setEditIdx(idx);
-                                      setEditLabel(opt.label);
-                                    } else {
-                                      setEditIdx(null);
-                                    }
-                                  }}
-                                  content={renderEditPopover(idx)}
-                                >
-                                  <IconEdit className={styles.iconEdit} />
-                                </Popover>
+                                {selected.includes(opt.value) && (
+                                  <Popover
+                                    trigger="click"
+                                    position="tr"
+                                    popupVisible={editIdx === idx}
+                                    onVisibleChange={(visible) => {
+                                      if (visible) {
+                                        setEditIdx(idx);
+                                        setEditLabel(opt.label);
+                                      } else {
+                                        setEditIdx(null);
+                                      }
+                                    }}
+                                    content={renderEditPopover(idx)}
+                                  >
+                                    <IconEdit className={styles.iconEdit} />
+                                  </Popover>
+                                )}
                                 <IconDragDotVertical
                                   className="drag-handle"
                                   style={{ cursor: 'move', marginLeft: 8 }}
