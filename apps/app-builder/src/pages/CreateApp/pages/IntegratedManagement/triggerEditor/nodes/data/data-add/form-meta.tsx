@@ -3,6 +3,7 @@ import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-e
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { Form, Grid, Input, Radio, Select } from '@arco-design/web-react';
 import { useState } from 'react';
+import FieldEditor from '../../../components/field-editor';
 import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
@@ -15,6 +16,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const { node } = useNodeRenderContext();
 
   const [entityList, setEntityList] = useState<any[]>();
+  const [fieldDataList, setFieldDataList] = useState<any[]>([]);
 
   const handlePropsOnChange = (values: any) => {
     triggerEditorSignal.setNodeData(node.id, values);
@@ -29,6 +31,12 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const [payloadForm] = Form.useForm();
 
   const addType = Form.useWatch('addType', payloadForm);
+
+  const handleFieldsChange = (dataList: any[]) => {
+    console.log('dataList: ', dataList);
+    setFieldDataList(dataList);
+    handlePropsOnChange({ ...triggerEditorSignal.nodeData.value[node.id], fields: dataList });
+  };
 
   return (
     <>
@@ -75,9 +83,12 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                 </RadioGroup>
               </Form.Item>
             </Grid.Row>
-            <Grid.Row></Grid.Row>
-            <Grid.Row></Grid.Row>
-            <Grid.Row></Grid.Row>
+
+            <Grid.Row>
+              <Form.Item label="字段设置" field="fields">
+                <FieldEditor fields={[]} dataList={fieldDataList} onChange={handleFieldsChange} />
+              </Form.Item>
+            </Grid.Row>
           </Form>
         </FormContent>
       ) : (
