@@ -63,6 +63,7 @@ public class AnyLineDBInfoListener implements DMListener {
         TENANT_IGNORE_TABLES.add("metadata_data_system_method");
         TENANT_IGNORE_TABLES.add("metadata_validation_type");
         TENANT_IGNORE_TABLES.add("metadata_component_field_type");
+        TENANT_IGNORE_TABLES.add("metadata_permit_ref_otft");
 
         // 可以根据需要添加更多表
     }

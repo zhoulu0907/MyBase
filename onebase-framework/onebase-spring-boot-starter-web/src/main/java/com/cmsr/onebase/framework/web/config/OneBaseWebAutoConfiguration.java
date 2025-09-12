@@ -48,12 +48,10 @@ public class OneBaseWebAutoConfiguration implements WebMvcConfigurer {
      */
     private void configurePathMatch(PathMatchConfigurer configurer, WebProperties.Api api) {
         AntPathMatcher antPathMatcher = new AntPathMatcher(".");
-        configurer.addPathPrefix(api.getPrefix(), clazz -> clazz.isAnnotationPresent(RestController.class)
-                &&
-                (  antPathMatcher.match(api.getController()[0], clazz.getPackage().getName())
-                || antPathMatcher.match(api.getController()[1], clazz.getPackage().getName())
-                )
-        ); // 仅仅匹配 controller 包
+    configurer.addPathPrefix(api.getPrefix(), clazz -> clazz.isAnnotationPresent(RestController.class)
+        && java.util.Arrays.stream(api.getController())
+        .anyMatch(pattern -> antPathMatcher.match(pattern, clazz.getPackage().getName()))
+    ); // 仅仅匹配 controller 包（支持任意数量的包匹配规则）
     }
 
     @Bean
