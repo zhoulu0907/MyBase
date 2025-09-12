@@ -1,6 +1,6 @@
 import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
-import { Form, Input, Select, Switch, InputNumber } from '@arco-design/web-react';
+import { Form, Input, Select, Switch, InputNumber, Radio, Grid } from '@arco-design/web-react';
 import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react';
 import ConditionEditor from '../../../components/condition-editor';
 import {
   DeleteDataType,
+  DeleteMethod,
   getEntityFields,
   getPageListByAppId,
   getFieldCheckTypeApi,
@@ -24,9 +25,15 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const [validationTypes, setValidationTypes] = useState<EntityFieldValidationTypes[]>([]);
   const { curAppId } = useAppStore();
 
+  const [deleteMethod, serDeleteType] = useState<DeleteMethod>(DeleteMethod.MAIN_DATA);
+
   useEffect(() => {
     if (curAppId) {
       handleGetPageList(curAppId);
+    }
+    const formData = payloadForm.getFieldsValue();
+    if (formData.deleteMethod) {
+      serDeleteType(formData.deleteMethod);
     }
   }, []);
 
@@ -46,24 +53,26 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     });
     if (key === 'pageId') {
       pageChange(value);
+    } else if (key === 'deleteMethod') {
+      serDeleteType(value);
     }
   };
 
   // 目标表单变更  更新筛选条件列表，清除已填筛选条件
   const pageChange = (pageId: string) => {
-    payloadForm.clearFields(['filter_condition']);
+    payloadForm.clearFields(['filterCondition']);
     const nodeData = triggerEditorSignal.nodeData.value[node.id];
     triggerEditorSignal.setNodeData(node.id, {
       ...nodeData,
-      filter_condition: [] // null 和 '' 在 Select 中都被认为是值
+      filterCondition: [] // null 和 '' 在 Select 中都被认为是值
     });
     // 重新获取字段列表
     if (pageId) {
-      getFieldList(pageId)
+      getFieldList(pageId);
     }
   };
   // 获取字段下拉列表
-  const getFieldList = async (pageId: string,) => {
+  const getFieldList = async (pageId: string) => {
     // 数据库表 查询指定实体的字段列表
     const res = await getEntityFields({ entityId: pageId });
     const filedIds: string[] = [];
@@ -82,7 +91,12 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       console.log('validationTypes: ', newValidationTypes);
       setValidationTypes(newValidationTypes);
     }
-  }
+  };
+
+  const deleteMethodOptions = [
+    { label: '删除主表数据', value: DeleteMethod.MAIN_DATA },
+    { label: '删除子表数据', value: DeleteMethod.SUB_DATA }
+  ];
 
   const deleteTypeOptions = [
     { label: '软删除', value: DeleteDataType.SOFT_DELETE },
@@ -100,42 +114,80 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             <Form.Item label="节点ID" field="id" initialValue={node.id}>
               <Input disabled />
             </Form.Item>
-            <Form.Item label="节点名称" field="nodeName">
+            <Form.Item label="节点名称" field="nodeName" required>
               <Input placeholder="请输入节点名称" onChange={(e) => handlePropsOnChange('nodeName', e)} />
             </Form.Item>
-            <Form.Item label="目标表单" field="pageId">
-              <Select placeholder="请选择目标表单" allowClear onChange={(e) => handlePropsOnChange('pageId', e)}>
-                {pageList?.map((item) => (
-                  <Select.Option key={item.id} value={item.id}>
-                    {item.pageName}
-                  </Select.Option>
-                ))}
-              </Select>
+            <Form.Item label="删除方式" field="deleteMethod" required>
+              <Radio.Group
+                options={deleteMethodOptions}
+                onChange={(e) => handlePropsOnChange('deleteMethod', e)}
+              ></Radio.Group>
             </Form.Item>
-            <Form.Item label="筛选条件" field="filter_condition">
+            {deleteMethod === DeleteMethod.MAIN_DATA ? (
+              <Form.Item field="pageId">
+                <Grid.Row align="center">
+                  <Grid.Col span={2} style={{ textAlign: 'center' }}>
+                    删除
+                  </Grid.Col>
+                  <Grid.Col span={20}>
+                    <Select placeholder="请选择目标表单" allowClear onChange={(e) => handlePropsOnChange('pageId', e)}>
+                      {pageList?.map((item) => (
+                        <Select.Option key={item.id} value={item.id}>
+                          {item.pageName}
+                        </Select.Option>
+                      ))}
+                    </Select>
+                  </Grid.Col>
+                  <Grid.Col span={2} style={{ textAlign: 'center' }}>
+                    的数据
+                  </Grid.Col>
+                </Grid.Row>
+              </Form.Item>
+            ) : (
+              <Form.Item>
+                <Grid.Row align="center">
+                  <Grid.Col span={2} style={{ textAlign: 'center', marginBottom: '20px' }}>
+                    删除
+                  </Grid.Col>
+                  <Grid.Col span={9}>
+                    <Form.Item field="pageId">
+                      <Select placeholder="请选择主表" allowClear onChange={(e) => handlePropsOnChange('pageId', e)}>
+                        {pageList?.map((item) => (
+                          <Select.Option key={item.id} value={item.id}>
+                            {item.pageName}
+                          </Select.Option>
+                        ))}
+                      </Select>
+                    </Form.Item>
+                  </Grid.Col>
+                  <Grid.Col span={2} style={{ textAlign: 'center', marginBottom: '20px' }}>
+                    中
+                  </Grid.Col>
+                  <Grid.Col span={9}>
+                    <Form.Item field="subPageId">
+                      <Select placeholder="请选择子表" allowClear onChange={(e) => handlePropsOnChange('subPageId', e)}>
+                        {pageList?.map((item) => (
+                          <Select.Option key={item.id} value={item.id}>
+                            {item.pageName}
+                          </Select.Option>
+                        ))}
+                      </Select>
+                    </Form.Item>
+                  </Grid.Col>
+                  <Grid.Col span={2} style={{ textAlign: 'center', marginBottom: '20px' }}>
+                    的数据
+                  </Grid.Col>
+                </Grid.Row>
+              </Form.Item>
+            )}
+
+            <Form.Item label="匹配规则" field="filterCondition" required>
               <ConditionEditor
-                onChange={(e) => handlePropsOnChange('filter_condition', e)}
-                data={triggerEditorSignal.nodeData.value[node.id]?.filter_condition || []}
+                onChange={(e) => handlePropsOnChange('filterCondition', e)}
+                data={triggerEditorSignal.nodeData.value[node.id]?.filterCondition || []}
                 fields={conditionFields}
                 entityFieldValidationTypes={validationTypes}
               />
-            </Form.Item>
-            <Form.Item label="删除方式" field="deleteType">
-              <Select
-                placeholder="请选择删除方式"
-                options={deleteTypeOptions}
-                allowClear
-                onChange={(e) => handlePropsOnChange('deleteType', e)}
-              ></Select>
-            </Form.Item>
-            <Form.Item label="是否批量删除" field="batchDeleteType">
-              <Switch onChange={(e) => handlePropsOnChange('batchDeleteType', e)} />
-            </Form.Item>
-            <Form.Item label="批量删除限制" field="batchDeleteSize">
-              <InputNumber precision={0} onChange={(e) => handlePropsOnChange('batchDeleteSize', e)} />
-            </Form.Item>
-            <Form.Item label="级联删除" field="cascadeDelete">
-              <Switch onChange={(e) => handlePropsOnChange('cascadeDelete', e)} />
             </Form.Item>
           </Form>
         </FormContent>
