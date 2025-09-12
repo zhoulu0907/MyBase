@@ -70,7 +70,8 @@ const TriggerEditor = () => {
           const formInitialData = {
             ...StartFormInitData.nodes[0].data.initialData,
             filterCondition: [],
-            pageId: res.triggerConfig.pageId
+            pageId: res.triggerConfig.pageId,
+            triggerRange: res.triggerConfig.triggerRange
           };
           setNodeData(StartFormInitData.nodes[0].id, formInitialData);
           setNodeData(StartFormInitData.nodes[1].id, StartFormInitData.nodes[1].data.initialData);
