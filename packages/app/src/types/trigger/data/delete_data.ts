@@ -5,10 +5,17 @@ export interface DeleteDataNode extends BaseNode {
 }
 
 export enum DeleteDataType {
-    // 单个删除
-    SOFT_DELETE = 'soft_delete',
-    // 物理删除
-    PHYSICAL_DELETE = 'physical_delete',
+    // 2软删除
+    SOFT_DELETE = 2,
+    // 物理删除/硬删除
+    PHYSICAL_DELETE = 1,
+}
+
+export enum DeleteMethod {
+    // 删除主表数据
+    MAIN_DATA = 1,
+    // 删除子表数据
+    SUB_DATA = 2,
 }
 
 export interface DeleteDataNodePayload {

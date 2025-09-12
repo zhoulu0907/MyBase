@@ -13,6 +13,7 @@ import { DataAddNodeRegistry } from './data/data-add';
 import { DataCalcNodeRegistry } from './data/data-calc';
 import { DataDeleteNodeRegistry } from './data/data-delete';
 import { DataQueryNodeRegistry } from './data/data-query';
+import { DataQueryMultipleNodeRegistry } from './data/data-query-multiple';
 import { DataUpdateNodeRegistry } from './data/data-update';
 import { ModalNodeRegistry } from './interaction/modal';
 import { NagivateNodeRegistry } from './interaction/nagivate';
@@ -55,6 +56,7 @@ export const FlowNodeRegistries: FlowNodeRegistry[] = [
   DataCalcNodeRegistry,
   DataDeleteNodeRegistry,
   DataQueryNodeRegistry,
+  DataQueryMultipleNodeRegistry,
   DataUpdateNodeRegistry,
 
   IpaasNodeRegistry,

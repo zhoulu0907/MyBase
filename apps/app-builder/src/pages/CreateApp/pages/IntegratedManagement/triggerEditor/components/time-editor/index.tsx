@@ -16,21 +16,21 @@ const repeatTypeOptions = [
   { label: '每周', value: 'weekly' },
   { label: '每月', value: 'monthly' },
   { label: '每年', value: 'yearly' },
-  { label: '自定义', value: 'custom' }
+  { label: '自定义', value: 'cron' }
 ];
 
 const weeklyOptions = [
-  { label: '周一', value: 'monday' },
-  { label: '周二', value: 'tuesday' },
-  { label: '周三', value: 'wednesday' },
-  { label: '周四', value: 'thursday' },
-  { label: '周五', value: 'friday' },
-  { label: '周六', value: 'saturday' },
-  { label: '周日', value: 'sunday' }
+  { label: '周一', value: 'MON' },
+  { label: '周二', value: 'TUE' },
+  { label: '周三', value: 'WED' },
+  { label: '周四', value: 'THU' },
+  { label: '周五', value: 'FRI' },
+  { label: '周六', value: 'SAT' },
+  { label: '周日', value: 'SUN' }
 ];
 
 const monthlyOptions = [
-  { label: '第一天', value: 'first' },
+  //   { label: '第一天', value: 'first' },
   { label: '每月最后一天', value: 'last' }
 ];
 
@@ -48,7 +48,7 @@ const dayOptions = [
 const TimeEditor: React.FC<TimeEditorProps> = ({}) => {
   const [form] = Form.useForm();
 
-  const repeatType = Form.useWatch('repeat_type', form);
+  const repeatType = Form.useWatch('repeatType', form);
   const [cronValue, setCronValue] = useState('* * * * *');
   const [monthlyType, setMonthlyType] = useState('specified');
 
@@ -81,7 +81,7 @@ const TimeEditor: React.FC<TimeEditorProps> = ({}) => {
           <Grid.Col span={12}>
             <Form.Item
               label="重复周期"
-              field="repeat_type"
+              field="repeatType"
               layout="vertical"
               rules={[{ required: true, message: '请选择重复周期' }]}
               labelCol={{ span: 10 }} // 调小 label 占比
@@ -92,7 +92,7 @@ const TimeEditor: React.FC<TimeEditorProps> = ({}) => {
                 style={{ width: '100%' }}
                 onChange={(value) => {
                   console.log(value);
-                  form.clearFields(['triggerTime', 'repeat_week', 'repeat_day', 'trigger_date']);
+                  form.clearFields(['triggerTime', 'repeatWeek', 'repeatDay', 'triggerDate']);
                 }}
               />
             </Form.Item>
@@ -111,7 +111,7 @@ const TimeEditor: React.FC<TimeEditorProps> = ({}) => {
             )}
 
             {repeatType === 'weekly' && (
-              <Form.Item field="repeat_week">
+              <Form.Item field="repeatWeek">
                 <Select
                   options={weeklyOptions}
                   mode="multiple"
@@ -123,7 +123,7 @@ const TimeEditor: React.FC<TimeEditorProps> = ({}) => {
             )}
 
             {repeatType === 'monthly' && (
-              <Form.Item field="repeat_day">
+              <Form.Item field="repeatDay">
                 <Select
                   options={monthlyType === 'specified' ? dayOptions : monthlyOptions}
                   placeholder="请选择日期"
@@ -148,7 +148,7 @@ const TimeEditor: React.FC<TimeEditorProps> = ({}) => {
 
             {repeatType === 'yearly' && (
               <>
-                <Form.Item field="trigger_date" rules={[{ required: true, message: '请选择触发时间' }]}>
+                <Form.Item field="triggerDate" rules={[{ required: true, message: '请选择触发时间' }]}>
                   <DatePicker style={{ width: '280px' }} />
                 </Form.Item>
               </>

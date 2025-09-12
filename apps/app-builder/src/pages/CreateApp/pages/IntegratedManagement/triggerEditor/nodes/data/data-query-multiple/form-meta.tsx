@@ -1,6 +1,6 @@
 import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
-import { Form, Input, Select, Radio, Grid } from '@arco-design/web-react';
+import { Form, Input, Select, Radio, Grid, InputNumber } from '@arco-design/web-react';
 import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
@@ -44,7 +44,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   // 数据源选择
   const [entityList, setEntityList] = useState<SelectOption[]>([]);
   const [filterType, setFilterType] = useState<FILTER_TYPE>(0);
-  
+
   // 查询条件
   const [validationTypes, setValidationTypes] = useState<EntityFieldValidationTypes[]>([]);
   const [conditionFields, setConditionFields] = useState<ConfitionField[]>([]);
@@ -57,7 +57,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
         getFieldList(formData.dataType, formData.dataSource);
       }
     }
-    if(formData.filterType){
+    if (formData.filterType) {
       setFilterType(formData.filterType);
     }
   }, []);
@@ -205,7 +205,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
               </Radio.Group>
             </Form.Item>
             <Form.Item field="dataSource">
-              <Grid.Row align='center'>
+              <Grid.Row align="center">
                 <Grid.Col span={1}>从</Grid.Col>
                 <Grid.Col span={19}>
                   <Select
@@ -214,7 +214,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                     onChange={(e) => handlePropsOnChange('dataSource', e)}
                   ></Select>
                 </Grid.Col>
-                <Grid.Col span={4} style={{textAlign:'center'}}>
+                <Grid.Col span={4} style={{ textAlign: 'center' }}>
                   <span>中查询数据</span>
                 </Grid.Col>
               </Grid.Row>
@@ -244,7 +244,19 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                 sortByTypes={sortTypeOptions}
               ></SortByEditor>
             </Form.Item>
-            <div style={{color:'#4e5969'}}>仅查询排序的第一条数据</div>
+            <Form.Item field="number">
+              <Grid.Row align="center">
+                <Grid.Col span={4} style={{ textAlign: 'center' }}>
+                  查询排序前
+                </Grid.Col>
+                <Grid.Col span={5}>
+                  <InputNumber precision={0} onChange={(e) => handlePropsOnChange('number', e)}></InputNumber>
+                </Grid.Col>
+                <Grid.Col span={3} style={{ textAlign: 'center' }}>
+                  条数据
+                </Grid.Col>
+              </Grid.Row>
+            </Form.Item>
           </Form>
         </FormContent>
       ) : (

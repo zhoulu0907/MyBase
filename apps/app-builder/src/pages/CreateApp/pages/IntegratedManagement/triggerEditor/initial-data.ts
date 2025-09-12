@@ -1,3 +1,4 @@
+import { TriggerRange } from './components/const';
 import { type FlowDocumentJSON } from './typings';
 
 export const initialData: FlowDocumentJSON = {
@@ -46,6 +47,7 @@ export const StartFormInitData = {
         title: '界面交互触发节点',
         initialData: {
           id: 'start_form_0',
+          triggerRange: TriggerRange.Record,
           filterCondition: [],
           isChildTriggerAllowed: false
         },
@@ -90,8 +92,7 @@ export const StartTimeInitData = {
       data: {
         title: '定时触发节点',
         initialData: {
-          id: 'start_time_0',
-          delaySeconds: 0.5
+          id: 'start_time_0'
         },
         outputs: {
           type: 'object',
