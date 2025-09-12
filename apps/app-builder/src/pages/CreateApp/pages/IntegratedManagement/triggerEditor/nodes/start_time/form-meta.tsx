@@ -1,7 +1,7 @@
 import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
 
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
-import { Form, Grid, Input, InputNumber } from '@arco-design/web-react';
+import { Form, Grid, Input } from '@arco-design/web-react';
 import TimeEditor from '../../components/time-editor';
 import { FormContent, FormHeader, FormOutputs } from '../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../hooks';
@@ -42,23 +42,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             </Grid.Row>
 
             <TimeEditor />
-
-            <Grid.Row>
-              <Grid.Col span={12}>
-                <Form.Item
-                  label="延迟秒数"
-                  layout="vertical"
-                  field="delaySeconds"
-                  rules={[
-                    { required: true, message: '请输入延迟秒数' },
-                    { type: 'number', min: 0, message: '延迟秒数不能小于0' },
-                    { type: 'number', max: 100, message: '延迟秒数不能大于100' }
-                  ]}
-                >
-                  <InputNumber mode="button" suffix="秒" />
-                </Form.Item>
-              </Grid.Col>
-            </Grid.Row>
           </Form>
         </FormContent>
       ) : (

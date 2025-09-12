@@ -20,17 +20,17 @@ const repeatTypeOptions = [
 ];
 
 const weeklyOptions = [
-  { label: '周一', value: 'monday' },
-  { label: '周二', value: 'tuesday' },
-  { label: '周三', value: 'wednesday' },
-  { label: '周四', value: 'thursday' },
-  { label: '周五', value: 'friday' },
-  { label: '周六', value: 'saturday' },
-  { label: '周日', value: 'sunday' }
+  { label: '周一', value: 'MON' },
+  { label: '周二', value: 'TUE' },
+  { label: '周三', value: 'WED' },
+  { label: '周四', value: 'THU' },
+  { label: '周五', value: 'FRI' },
+  { label: '周六', value: 'SAT' },
+  { label: '周日', value: 'SUN' }
 ];
 
 const monthlyOptions = [
-  { label: '第一天', value: 'first' },
+  //   { label: '第一天', value: 'first' },
   { label: '每月最后一天', value: 'last' }
 ];
 
@@ -81,7 +81,7 @@ const TimeEditor: React.FC<TimeEditorProps> = ({}) => {
           <Grid.Col span={12}>
             <Form.Item
               label="重复周期"
-              field="repeat_type"
+              field="repeatType"
               layout="vertical"
               rules={[{ required: true, message: '请选择重复周期' }]}
               labelCol={{ span: 10 }} // 调小 label 占比
