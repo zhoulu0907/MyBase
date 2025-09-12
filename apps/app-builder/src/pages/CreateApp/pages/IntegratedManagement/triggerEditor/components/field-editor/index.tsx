@@ -4,64 +4,66 @@ import React from 'react';
 import styles from './index.module.less';
 
 export interface FieldEditorProps {
-  fields: { label: string; value: string }[];
-  dataList: { fieldId: string; fieldType: string; fieldValue: string }[];
-  onChange: (dataList: { fieldId: string; fieldType: string; fieldValue: string }[]) => void;
+  fieldList: { label: string; value: string }[];
 }
 
-const valueTypeOptions = [{ label: '值', value: 'value' }];
+const valueTypeOptions = [
+  { label: '值', value: 'value' },
+  { label: '变量', value: 'variable' }
+];
 
-const FieldEditor: React.FC<FieldEditorProps> = ({ fields, dataList, onChange }) => {
-  const [form] = Form.useForm();
-
-  const addFieldItem = () => {
-    console.log(dataList);
-
-    onChange([...dataList, { fieldId: '', fieldType: '', fieldValue: '' }]);
-  };
-
-  const deleteFieldItem = (index: number) => {
-    const newDataList = [...dataList];
-    newDataList.splice(index, 1);
-    onChange(newDataList);
-  };
-
+const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList }) => {
   return (
     <div className={styles.conditionWrapper}>
-      <Form form={form} layout="vertical">
-        {dataList.map((item, index) => {
-          return (
-            <Grid.Row gutter={8}>
-              <Grid.Col span={6}>
-                <Form.Item field="fieldId" initialValue={item.fieldId}>
-                  <Select options={fields} />
-                </Form.Item>
-              </Grid.Col>
-              <Grid.Col span={3}>
-                <div style={{ lineHeight: '32px' }}>的值设为</div>
-              </Grid.Col>
-              <Grid.Col span={5}>
-                <Form.Item field="fieldType" initialValue={item.fieldType}>
-                  <Select options={valueTypeOptions} />
-                </Form.Item>
-              </Grid.Col>
-              <Grid.Col span={8}>
-                <Form.Item field="fieldValue" initialValue={item.fieldValue}>
-                  <Input />
-                </Form.Item>
-              </Grid.Col>
-              <Grid.Col span={2}>
-                <Button type="text" icon={<IconDelete />} onClick={() => deleteFieldItem(index)} />
-              </Grid.Col>
-            </Grid.Row>
-          );
-        })}
-        <Grid.Row>
-          <Button type="dashed" icon={<IconPlus />} onClick={addFieldItem}>
-            添加字段
-          </Button>
-        </Grid.Row>
-      </Form>
+      <Form.Item>
+        <Form.List field="fieldList">
+          {(fields, { add, remove }) => {
+            return (
+              <>
+                {fields.map((item: any, index: number) => {
+                  return (
+                    <Grid.Row gutter={8} key={item.key}>
+                      <Grid.Col span={6}>
+                        <Form.Item field={item.field + '.fieldId'}>
+                          <Select options={fieldList} />
+                        </Form.Item>
+                      </Grid.Col>
+                      <Grid.Col span={3}>
+                        <div style={{ lineHeight: '32px' }}>的值设为</div>
+                      </Grid.Col>
+                      <Grid.Col span={5}>
+                        <Form.Item field={item.field + '.fieldType'}>
+                          <Select options={valueTypeOptions} />
+                        </Form.Item>
+                      </Grid.Col>
+                      <Grid.Col span={8}>
+                        <Form.Item field={item.field + '.fieldValue'}>
+                          <Input />
+                        </Form.Item>
+                      </Grid.Col>
+                      <Grid.Col span={2}>
+                        <Button type="text" icon={<IconDelete />} onClick={() => remove(index)} />
+                      </Grid.Col>
+                    </Grid.Row>
+                  );
+                })}
+
+                <Grid.Row>
+                  <Button
+                    type="dashed"
+                    icon={<IconPlus />}
+                    onClick={() => {
+                      add();
+                    }}
+                  >
+                    添加字段
+                  </Button>
+                </Grid.Row>
+              </>
+            );
+          }}
+        </Form.List>
+      </Form.Item>
     </div>
   );
 };
