@@ -7,13 +7,15 @@ import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.*;
 import com.cmsr.onebase.module.metadata.service.entity.vo.EntityFieldQueryVO;
 import com.cmsr.onebase.module.metadata.service.number.AutoNumberRuleService;
 import com.cmsr.onebase.module.metadata.service.component.MetadataComponentFieldTypeService;
+import com.cmsr.onebase.module.metadata.service.validation.MetadataPermitRefOtftService;
+import com.cmsr.onebase.module.metadata.service.validation.MetadataValidationTypeService;
 import com.cmsr.onebase.module.metadata.util.StatusEnumUtil;
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataBusinessEntityDO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.datasource.MetadataDatasourceDO;
 import com.cmsr.onebase.module.metadata.dal.database.MetadataEntityFieldRepository;
 import com.cmsr.onebase.module.metadata.dal.database.TemporaryDatasourceService;
-import com.cmsr.onebase.module.metadata.service.datasource.MetadataDatasourceService;
+import com.cmsr.onebase.module.metadata.service.datasource.MetadataDatasourceBuildService;
 import com.cmsr.onebase.module.metadata.service.field.MetadataEntityFieldOptionService;
 import com.cmsr.onebase.module.metadata.service.field.MetadataEntityFieldConstraintService;
 import com.cmsr.onebase.module.metadata.service.number.AutoNumberConfigService;
@@ -36,9 +38,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.modelmapper.ModelMapper;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -63,7 +63,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
     @Resource
     private MetadataBusinessEntityService metadataBusinessEntityService;
     @Resource
-    private MetadataDatasourceService metadataDatasourceService;
+    private MetadataDatasourceBuildService metadataDatasourceBuildService;
     @Resource
     private MetadataEntityFieldOptionService fieldOptionService;
     @Resource
@@ -77,9 +77,9 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
     @Resource
     private AnylineService<?> anylineService;
     @Resource
-    private com.cmsr.onebase.module.metadata.service.validation.MetadataPermitRefOtftService permitRefOtftService;
+    private MetadataPermitRefOtftService permitRefOtftService;
     @Resource
-    private com.cmsr.onebase.module.metadata.service.validation.MetadataValidationTypeService validationTypeService;
+    private MetadataValidationTypeService validationTypeService;
 
     @Resource
     private ModelMapper modelMapper;
@@ -235,7 +235,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
 
             if (businessEntity != null && businessEntity.getTableName() != null &&
                 !businessEntity.getTableName().trim().isEmpty()) {
-                datasource = metadataDatasourceService.getDatasource(businessEntity.getDatasourceId());
+                datasource = metadataDatasourceBuildService.getDatasource(businessEntity.getDatasourceId());
                 log.info("获取到数据源: {}, 数据源名称: {}, 数据源类型: {}",
                     datasource != null ? datasource.getId() : "null",
                     datasource != null ? datasource.getDatasourceName() : "null",
@@ -435,7 +435,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
                         businessEntity = metadataBusinessEntityService.getBusinessEntity(firstField.getEntityId());
                         if (businessEntity != null && businessEntity.getTableName() != null &&
                             !businessEntity.getTableName().trim().isEmpty()) {
-                            datasource = metadataDatasourceService.getDatasource(businessEntity.getDatasourceId());
+                            datasource = metadataDatasourceBuildService.getDatasource(businessEntity.getDatasourceId());
                         }
                     }
                 }
@@ -516,7 +516,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
         }
         MetadataDatasourceDO datasource = null;
         if (businessEntity.getTableName() != null && !businessEntity.getTableName().trim().isEmpty()) {
-            datasource = metadataDatasourceService.getDatasource(businessEntity.getDatasourceId());
+            datasource = metadataDatasourceBuildService.getDatasource(businessEntity.getDatasourceId());
         }
 
         // 2. 先删除
@@ -776,7 +776,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
             MetadataBusinessEntityDO businessEntity = metadataBusinessEntityService.getBusinessEntity(Long.valueOf(createReqVO.getEntityId()));
             if (businessEntity != null && businessEntity.getTableName() != null &&
                 !businessEntity.getTableName().trim().isEmpty()) {
-                MetadataDatasourceDO datasource = metadataDatasourceService.getDatasource(businessEntity.getDatasourceId());
+                MetadataDatasourceDO datasource = metadataDatasourceBuildService.getDatasource(businessEntity.getDatasourceId());
                 if (datasource != null) {
                     addColumnToTable(datasource, businessEntity.getTableName(), entityField);
                 }
@@ -821,7 +821,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
             MetadataBusinessEntityDO businessEntity = metadataBusinessEntityService.getBusinessEntity(Long.valueOf(updateReqVO.getEntityId()));
             if (businessEntity != null && businessEntity.getTableName() != null &&
                 !businessEntity.getTableName().trim().isEmpty()) {
-                MetadataDatasourceDO datasource = metadataDatasourceService.getDatasource(businessEntity.getDatasourceId());
+                MetadataDatasourceDO datasource = metadataDatasourceBuildService.getDatasource(businessEntity.getDatasourceId());
                 if (datasource != null) {
                     alterColumnInTable(datasource, businessEntity.getTableName(), updateObj);
                 }
@@ -865,7 +865,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
                 MetadataBusinessEntityDO businessEntity = metadataBusinessEntityService.getBusinessEntity(existingField.getEntityId());
                 if (businessEntity != null && businessEntity.getTableName() != null &&
                     !businessEntity.getTableName().trim().isEmpty()) {
-                    MetadataDatasourceDO datasource = metadataDatasourceService.getDatasource(businessEntity.getDatasourceId());
+                    MetadataDatasourceDO datasource = metadataDatasourceBuildService.getDatasource(businessEntity.getDatasourceId());
                     if (datasource != null) {
                         dropColumnFromTable(datasource, businessEntity.getTableName(), existingField.getFieldName());
                     }
@@ -1025,7 +1025,7 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
             businessEntity = metadataBusinessEntityService.getBusinessEntity(Long.valueOf(entityId));
                             if (businessEntity != null && businessEntity.getTableName() != null &&
                     !businessEntity.getTableName().trim().isEmpty()) {
-                    datasource = metadataDatasourceService.getDatasource(businessEntity.getDatasourceId());
+                    datasource = metadataDatasourceBuildService.getDatasource(businessEntity.getDatasourceId());
                 }
         } catch (Exception e) {
             log.error("获取业务实体信息失败: {}", e.getMessage(), e);
@@ -1487,52 +1487,6 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
             result.setAutoNumberConfig(autoNumberConfig);
         }
 
-        return result;
-    }
-
-    /**
-     * 根据字段ID列表返回对应的JDBC数据类型
-     * 先查 metadata_entity_field 获取字段类型编码，再查 metadata_component_field_type 获取 data_type
-     * 
-     * @param fieldIds 字段ID列表
-     * @return 字段ID到JDBC类型的映射
-     */
-    public Map<Long, String> getFieldJdbcTypes(List<Long> fieldIds) {
-        if (fieldIds == null || fieldIds.isEmpty()) {
-            return Collections.emptyMap();
-        }
-
-        DefaultConfigStore cs = new DefaultConfigStore();
-        cs.and(Compare.IN, "id", fieldIds);
-        cs.and("deleted", 0);
-        List<MetadataEntityFieldDO> fields = metadataEntityFieldRepository.findAllByConfig(cs);
-        if (fields == null || fields.isEmpty()) {
-            return Collections.emptyMap();
-        }
-
-        Map<Long, String> idToTypeCode = fields.stream()
-                .filter(f -> f.getId() != null && f.getFieldType() != null && !f.getFieldType().isBlank())
-                .collect(Collectors.toMap(MetadataEntityFieldDO::getId, MetadataEntityFieldDO::getFieldType, (a,b)->a));
-
-        if (idToTypeCode.isEmpty()) {
-            return Collections.emptyMap();
-        }
-
-        Map<String, String> typeCodeToJdbc = new HashMap<>();
-        for (String code : new HashSet<>(idToTypeCode.values())) {
-            var typeDO = componentFieldTypeService.getByFieldTypeCode(code);
-            if (typeDO != null && typeDO.getDataType() != null && !typeDO.getDataType().isBlank()) {
-                typeCodeToJdbc.put(code, typeDO.getDataType());
-            }
-        }
-
-        Map<Long, String> result = new LinkedHashMap<>();
-        for (Map.Entry<Long, String> e : idToTypeCode.entrySet()) {
-            String jdbc = typeCodeToJdbc.get(e.getValue());
-            if (jdbc != null) {
-                result.put(e.getKey(), jdbc);
-            }
-        }
         return result;
     }
 

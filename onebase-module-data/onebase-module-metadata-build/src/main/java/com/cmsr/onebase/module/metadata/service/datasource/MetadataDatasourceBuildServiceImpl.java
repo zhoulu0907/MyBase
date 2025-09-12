@@ -47,11 +47,14 @@ import org.anyline.entity.Compare;
 import com.cmsr.onebase.module.metadata.dal.dataobject.datasource.MetadataAppAndDatasourceDO;
 
 /**
- * 数据源 Service 实现类
+ * 数据源构建模块服务实现类 - 提供面向VO的业务操作
+ *
+ * @author matianyu
+ * @date 2025-09-12
  */
 @Service
 @Slf4j
-public class MetadataDatasourceServiceImpl implements MetadataDatasourceService {
+public class MetadataDatasourceBuildServiceImpl implements MetadataDatasourceBuildService {
 
     @Resource
     private MetadataConfig metadataConfig;
@@ -63,6 +66,8 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
     private TemporaryDatasourceService temporaryDatasourceService;
     @Resource
     private MetadataAppAndDatasourceService appAndDatasourceService;
+    @Resource
+    private MetadataDatasourceCoreService metadataDatasourceCoreService;
 
     @Override
     public List<DatasourceTypeRespVO> getDatasourceTypes() {
@@ -196,6 +201,12 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
         });
     }
 
+    @Transactional(rollbackFor = Exception.class)
+    public Long createDatasource(@Valid MetadataDatasourceDO datasource) {
+        // 使用 core 模块的基础服务
+        return metadataDatasourceCoreService.createDatasource(datasource);
+    }
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long createDatasource(@Valid DatasourceSaveReqVO createReqVO) {
@@ -204,31 +215,39 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
         Long appId = (createReqVO.getAppId() != null && !createReqVO.getAppId().trim().isEmpty()) ? Long.valueOf(createReqVO.getAppId()) : null;
         validateDatasourceCodeUnique(id, createReqVO.getCode(), appId);
 
-        // 插入数据源（不再设置appId，使用关联表维护关系）
+        // 转换VO为DO
         MetadataDatasourceDO datasource = modelMapper.map(createReqVO, MetadataDatasourceDO.class);
         
-        // 设置创建人和创建时间
-        Long currentUserId = SecurityFrameworkUtils.getLoginUserId();
-        if (currentUserId != null) {
-            datasource.setCreator(currentUserId);
-            datasource.setUpdater(currentUserId);
-        }
-        LocalDateTime now = LocalDateTime.now();
-        datasource.setCreateTime(now);
-        datasource.setUpdateTime(now);
-        
-        metadataDatasourceRepository.insert(datasource);
+        // 使用 core 模块基础服务创建数据源
+        Long datasourceId = createDatasource(datasource);
 
         // 创建应用与数据源的关联关系（使用之前安全转换的appId）
         if (appId == null) {
             throw new IllegalArgumentException("应用ID不能为空");
         }
-        appAndDatasourceService.createRelation(appId, datasource.getId(), 
+        metadataDatasourceCoreService.createAppDatasourceRelation(appId, datasourceId, 
                 datasource.getDatasourceType(), createReqVO.getAppUid());
 
-        log.info("创建数据源成功，ID: {}，应用ID: {}，创建人: {}，创建时间: {}", 
-                datasource.getId(), appId, currentUserId, now);
-        return datasource.getId();
+        log.info("创建数据源成功，ID: {}，应用ID: {}", datasourceId, appId);
+        return datasourceId;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void updateDatasource(@Valid MetadataDatasourceDO datasource) {
+        // 使用 core 模块的基础服务
+        metadataDatasourceCoreService.updateDatasource(datasource);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public Long createDefaultDatasource(Long appId, String appUid, String datasourceType, String configJson) {
+        // 使用 core 模块的基础服务
+        return metadataDatasourceCoreService.createDefaultDatasource(appId, appUid, datasourceType, configJson);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void createAppDatasourceRelation(Long appId, Long datasourceId, String datasourceType, String appUid) {
+        // 使用 core 模块的基础服务
+        metadataDatasourceCoreService.createAppDatasourceRelation(appId, datasourceId, datasourceType, appUid);
     }
 
     @Override
@@ -348,7 +367,8 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
 
     @Override
     public MetadataDatasourceDO getDatasource(Long id) {
-        return metadataDatasourceRepository.findById(id);
+        // 使用 core 模块的基础服务
+        return metadataDatasourceCoreService.getDatasource(id);
     }
 
     @Override
@@ -451,9 +471,8 @@ public class MetadataDatasourceServiceImpl implements MetadataDatasourceService 
 
     @Override
     public MetadataDatasourceDO getDatasourceByCode(String code) {
-        DefaultConfigStore configStore = new DefaultConfigStore();
-        configStore.and(MetadataDatasourceDO.CODE, code);
-        return metadataDatasourceRepository.findOne(configStore);
+        // 使用 core 模块的基础服务
+        return metadataDatasourceCoreService.getDatasourceByCode(code);
     }
 
     @Override

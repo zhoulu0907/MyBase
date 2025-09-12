@@ -15,13 +15,12 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 实体字段管理 API
+ * 实体字段管理 sdk
  *
  * @author matianyu
  * @date 2025-09-10
  */
-@FeignClient(name = "onebase-module-metadata-core", path = "/metadata")
-@Tag(name = "实体字段管理 API")
+@Tag(name = "实体字段管理 sdk")
 public interface MetadataEntityFieldApi {
 
     /**
@@ -30,7 +29,6 @@ public interface MetadataEntityFieldApi {
      * @param reqDTO 查询请求参数
      * @return 字段列表
      */
-    @PostMapping("/entity-field/list")
     @Operation(summary = "查询指定实体的字段列表")
     List<EntityFieldRespDTO> getEntityFieldList(@Valid @RequestBody EntityFieldQueryReqDTO reqDTO);
 
@@ -41,7 +39,6 @@ public interface MetadataEntityFieldApi {
      * @param reqDTO 字段ID列表请求
      * @return 字段ID到JDBC类型的映射
      */
-    @PostMapping("/entity-field/jdbc-types")
     @Operation(summary = "根据字段ID列表返回JDBC数据类型")
     Map<Long, String> getFieldJdbcTypes(@Valid @RequestBody EntityFieldJdbcTypeReqDTO reqDTO);
 }

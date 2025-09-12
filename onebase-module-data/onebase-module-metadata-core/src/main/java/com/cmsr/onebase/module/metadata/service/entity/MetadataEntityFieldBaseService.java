@@ -14,7 +14,7 @@ import java.util.Map;
  * @author matianyu
  * @date 2025-08-20
  */
-public interface MetadataEntityFieldService {
+public interface MetadataEntityFieldBaseService {
 
     /**
      * 创建实体字段

@@ -3,7 +3,7 @@ package com.cmsr.onebase.module.metadata.service.datamethod;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.metadata.controller.datamethod.vo.*;
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataEntityFieldDO;
-import com.cmsr.onebase.module.metadata.service.entity.MetadataEntityFieldService;
+import com.cmsr.onebase.module.metadata.service.entity.MetadataEntityFieldBaseService;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
@@ -25,7 +25,7 @@ public class RuntimeDataServiceImpl implements RuntimeDataService {
     private MetadataDataMethodService coreDataMethodService;
 
     @Resource
-    private MetadataEntityFieldService metadataEntityFieldService;
+    private MetadataEntityFieldBaseService metadataEntityFieldService;
 
     @Override
     public DynamicDataRespVO createData(DynamicDataCreateReqVO reqVO) {

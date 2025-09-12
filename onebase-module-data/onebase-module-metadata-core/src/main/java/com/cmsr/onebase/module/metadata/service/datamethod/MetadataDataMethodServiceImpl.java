@@ -8,8 +8,8 @@ import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataEntityFiel
 import com.cmsr.onebase.module.metadata.dal.dataobject.datasource.MetadataDatasourceDO;
 // MetadataDataSystemMethodDO 已由查询功能迁移至 build 模块，核心仅保留运行时 CRUD
 import com.cmsr.onebase.module.metadata.service.entity.MetadataBusinessEntityService;
-import com.cmsr.onebase.module.metadata.service.entity.MetadataEntityFieldService;
-import com.cmsr.onebase.module.metadata.service.datasource.MetadataDatasourceService;
+import com.cmsr.onebase.module.metadata.service.entity.MetadataEntityFieldBaseService;
+import com.cmsr.onebase.module.metadata.service.datasource.MetadataDatasourceCoreService;
 import com.cmsr.onebase.module.metadata.dal.database.TemporaryDatasourceService;
 import com.cmsr.onebase.module.metadata.service.datamethod.engine.MultiTableQueryEngine;
 import com.cmsr.onebase.module.metadata.service.datamethod.engine.MultiTableWriteEngine;
@@ -52,10 +52,10 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
     private MetadataDataSystemMethodService metadataDataSystemMethodService; // 仍用于多表计划获取
 
     @Resource
-    private MetadataDatasourceService metadataDatasourceService;
+    private MetadataDatasourceCoreService metadataDatasourceCoreService;
 
     @Resource
-    private MetadataEntityFieldService metadataEntityFieldService;
+    private MetadataEntityFieldBaseService metadataEntityFieldService;
 
     @Resource
     private TemporaryDatasourceService temporaryDatasourceService;
@@ -86,7 +86,7 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
         Map<String, Object> processedData = processDataForCreate(data, fields);
 
         // 5. 获取临时数据源服务
-        MetadataDatasourceDO datasource = metadataDatasourceService.getDatasource(entity.getDatasourceId());
+        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceId());
         if (datasource == null) {
             throw exception(DATASOURCE_NOT_EXISTS);
         }
@@ -145,7 +145,7 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
     List<MetadataEntityFieldDO> fields = getEntityFields(entityId);
 
         // 3. 获取临时数据源服务
-        MetadataDatasourceDO datasource = metadataDatasourceService.getDatasource(entity.getDatasourceId());
+        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceId());
         if (datasource == null) {
             throw exception(DATASOURCE_NOT_EXISTS);
         }
@@ -206,7 +206,7 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
     List<MetadataEntityFieldDO> fields = getEntityFields(entityId);
 
         // 3. 获取临时数据源服务
-        MetadataDatasourceDO datasource = metadataDatasourceService.getDatasource(entity.getDatasourceId());
+        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceId());
         if (datasource == null) {
             throw exception(DATASOURCE_NOT_EXISTS);
         }
@@ -273,7 +273,7 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
         // 回落到单表
     MetadataBusinessEntityDO entity = validateEntityExists(entityId);
     List<MetadataEntityFieldDO> fields = getEntityFields(entityId);
-        MetadataDatasourceDO datasource = metadataDatasourceService.getDatasource(entity.getDatasourceId());
+        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceId());
         if (datasource == null) {
             throw exception(DATASOURCE_NOT_EXISTS);
         }
@@ -303,7 +303,7 @@ public class MetadataDataMethodServiceImpl implements MetadataDataMethodService 
         // 回落到原单表分页
     MetadataBusinessEntityDO entity = validateEntityExists(entityId);
     List<MetadataEntityFieldDO> fields = getEntityFields(entityId);
-        MetadataDatasourceDO datasource = metadataDatasourceService.getDatasource(entity.getDatasourceId());
+        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceId());
         if (datasource == null) {
             throw exception(DATASOURCE_NOT_EXISTS);
         }
