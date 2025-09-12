@@ -1,12 +1,11 @@
-import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
-import { Form, Grid, Input, DatePicker, Select, Tabs, TimePicker } from '@arco-design/web-react';
-import TimeEditor from '../../components/time-editor';
+import { DatePicker, Form, Grid, Input, Select, Tabs, TimePicker } from '@arco-design/web-react';
+import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
+import { isValidCron } from 'cron-validator';
+import { useState } from 'react';
 import { FormContent, FormHeader, FormOutputs } from '../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../hooks';
 import { type FlowNodeJSON } from '../../typings';
-import { isValidCron } from 'cron-validator';
-import { useState } from 'react';
 
 const TabPane = Tabs.TabPane;
 const repeatTypeOptions = [

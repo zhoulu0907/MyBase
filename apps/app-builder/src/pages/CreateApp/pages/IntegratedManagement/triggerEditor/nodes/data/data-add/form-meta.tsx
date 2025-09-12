@@ -86,7 +86,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
             <Grid.Row>
               <Form.Item label="字段设置" field="fields">
-                <FieldEditor fields={[]} dataList={fieldDataList} onChange={handleFieldsChange} />
+                <FieldEditor fieldList={[]} />
               </Form.Item>
             </Grid.Row>
           </Form>

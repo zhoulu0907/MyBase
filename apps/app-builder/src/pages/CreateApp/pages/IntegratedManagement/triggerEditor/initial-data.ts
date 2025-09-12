@@ -92,7 +92,14 @@ export const StartTimeInitData = {
       data: {
         title: '定时触发节点',
         initialData: {
-          id: 'start_time_0'
+          id: 'start_time_0',
+          repeatType: 'none',
+          startTime: '',
+          endTime: '',
+          triggerTime: '',
+          repeatWeek: [],
+          repeatDay: [],
+          triggerDate: ''
         },
         outputs: {
           type: 'object',
