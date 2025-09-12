@@ -1,4 +1,4 @@
-import { Graph } from '@antv/x6';
+import { Graph, Node } from '@antv/x6';
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { register } from '@antv/x6-react-shape';
 import { Button, InputNumber } from '@arco-design/web-react';
@@ -58,46 +58,133 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
       getGraphPositon
     }));
 
+    const handleSectionCollapse = (nodeId: string, section: 'system' | 'custom', isCollapsed: boolean) => {
+      console.log('handleSectionCollapse', nodeId, section, isCollapsed);
+      const graph = graphRef.current!;
+      const edges = graph.getEdges();
+
+      // 确定聚合 port ID
+      const aggregatePortId = `${nodeId}_${section}_fields`;
+
+      // 获取该节点的所有字段，用于判断是否属于当前 section
+      const nodeData = data.nodes.find((n) => n.entityId === nodeId);
+      if (!nodeData) return;
+
+      const systemFields = nodeData.fields.filter((f) => f.isSystemField === FIELD_TYPE.SYSTEM);
+      const customFields = nodeData.fields.filter((f) => f.isSystemField === FIELD_TYPE.CUSTOM);
+      const fieldsInThisSection = section === 'system' ? systemFields : customFields;
+
+      // 提取所有该 section 字段对应的 port IDs
+      const portIdsInSection = new Set(
+        fieldsInThisSection.flatMap((field) => [
+          `${field.fieldId || field.fieldName}_source`,
+          `${field.fieldId || field.fieldName}_target`
+        ])
+      );
+
+      edges.forEach((edge) => {
+        const data = edge.getData();
+        const originalSource = data?.originalSource;
+        const originalTarget = data?.originalTarget;
+
+        if (!originalSource || !originalTarget) return;
+
+        const currentSource = edge.getSource();
+        const currentTarget = edge.getTarget();
+
+        // 处理 source 端
+        if (currentSource.cell === nodeId && typeof currentSource.port === 'string') {
+          const isOriginalInSection =
+            portIdsInSection.has(currentSource.port) ||
+            (originalSource.port && portIdsInSection.has(originalSource.port));
+
+          if (isOriginalInSection) {
+            if (isCollapsed) {
+              // 折叠 → 指向聚合 port
+              edge.setSource({ cell: nodeId, port: `${aggregatePortId}_source` });
+            } else {
+              // 展开 → 恢复原始 port
+              edge.setSource(originalSource);
+            }
+          }
+        }
+
+        // 处理 target 端
+        if (currentTarget.cell === nodeId && typeof currentTarget.port === 'string') {
+          const isOriginalInSection =
+            portIdsInSection.has(currentTarget.port) ||
+            (originalTarget.port && portIdsInSection.has(originalTarget.port));
+
+          if (isOriginalInSection) {
+            if (isCollapsed) {
+              edge.setTarget({ cell: nodeId, port: `${aggregatePortId}_target` });
+            } else {
+              edge.setTarget(originalTarget);
+            }
+          }
+        }
+      });
+    };
+
+    const portsItems = (nodeData: EntityNode) => {
+      const items: object[] = [];
+
+      const systemFields = nodeData?.fields.filter((f) => f.isSystemField === FIELD_TYPE.SYSTEM);
+      const customFields = nodeData?.fields.filter((f) => f.isSystemField === FIELD_TYPE.CUSTOM);
+
+      // 系统字段标题行的聚合 port
+      if (systemFields.length > 0) {
+        const systemTitleY = LINE_HEAD_HEIGHT + LINE_TITLE_HEIGHT / 2; // 标题行垂直居中
+        items.push({
+          id: `${nodeData.entityId}_system_fields_source`, // 聚合 source port
+          group: 'right',
+          args: { x: NODE_WIDTH, y: systemTitleY }
+        });
+        items.push({
+          id: `${nodeData.entityId}_system_fields_target`,
+          group: 'left',
+          args: { x: 0, y: systemTitleY }
+        });
+      }
+
+      // 自定义字段标题行的聚合 port
+      if (customFields.length > 0) {
+        const customTitleOffset = systemFields.length > 0 ? LINE_TITLE_HEIGHT : 0;
+        const customTitleY = LINE_HEAD_HEIGHT + customTitleOffset + LINE_TITLE_HEIGHT / 2;
+        items.push({
+          id: `${nodeData.entityId}_custom_fields_source`,
+          group: 'right',
+          args: { x: NODE_WIDTH, y: customTitleY }
+        });
+        items.push({
+          id: `${nodeData.entityId}_custom_fields_target`,
+          group: 'left',
+          args: { x: 0, y: customTitleY }
+        });
+      }
+
+      nodeData?.fields?.forEach((field, index) => {
+        const extraTitleHeight = field.isSystemField === FIELD_TYPE.SYSTEM ? LINE_TITLE_HEIGHT : LINE_TITLE_HEIGHT * 2;
+        const accumulatedHeight = index >= 1 ? index * LINE_HEIGHT : 0;
+        const finalY = LINE_HEAD_HEIGHT + extraTitleHeight + accumulatedHeight + LINE_HEIGHT / 2; // y = 头部高度 + 累积高度 + 额外标题行高度 + 当前字段高度的一半
+
+        items.push({
+          id: `${field.fieldId || field.fieldName}_source`,
+          group: 'right',
+          args: { x: NODE_WIDTH, y: finalY }
+        });
+        items.push({
+          id: `${field.fieldId || field.fieldName}_target`,
+          group: 'left',
+          args: { x: 0, y: finalY }
+        });
+      });
+      return items;
+    };
+
     const createAndAddNode = useCallback(
       (positioner: any, nodeDatas: EntityNode[]) => {
         nodeDatas.forEach((nodeData) => {
-          const portsItems = (nodeData: EntityNode) => {
-            const items: object[] = [];
-            nodeData?.fields?.forEach((field, index) => {
-              const extraTitleHeight =
-                field.isSystemField === FIELD_TYPE.SYSTEM ? LINE_TITLE_HEIGHT : LINE_TITLE_HEIGHT * 2;
-              const accumulatedHeight = index >= 1 ? index * LINE_HEIGHT : 0;
-
-              const leftItem = {
-                id: (field?.fieldId || field.fieldName) + '_target', // 使用字段的唯一 ID 作为 port ID
-                group: 'left', // 指定属于 'left' 组
-                args: {
-                  x: 0,
-                  y: LINE_HEAD_HEIGHT + extraTitleHeight + accumulatedHeight + LINE_HEIGHT / 2 // y = 头部高度 + 累积高度 + 额外标题行高度 + 当前字段高度的一半
-                }
-              };
-              const rightItem = {
-                id: (field?.fieldId || field.fieldName) + '_source', // 使用字段的唯一 ID 作为 port ID
-                group: 'right', // 指定属于 'right' 组
-                args: {
-                  x: NODE_WIDTH,
-                  y: LINE_HEAD_HEIGHT + extraTitleHeight + accumulatedHeight + LINE_HEIGHT / 2 // y = 头部高度 + 累积高度 + 额外标题行高度 + 当前字段高度的一半
-                }, // 传递字段索引，用于布局
-                // 可以自定义 attrs 来覆盖 group 的默认 attrs
-                attrs: {
-                  // circle: {
-                  // fill: field.isSystem ? '#f0f0f0' : '#e6f7ff', // 示例：区分系统和自定义字段
-                  // height: currentFieldHeight,
-                  // width: NODE_WIDTH,
-                  // }
-                }
-              };
-              items.push(leftItem);
-              items.push(rightItem);
-            });
-            return items;
-          };
-
           positioner.addNode({
             id: nodeData.entityId,
             x: nodeData?.positionX,
@@ -115,7 +202,10 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
               onNodeAddRelation,
               onNodeAddMasterDetail,
               onFieldClick,
-              onStatusChange
+              onStatusChange,
+              onUpdatePorts: (nodeId: string, section: 'system' | 'custom', isCollapsed: boolean) => {
+                handleSectionCollapse(nodeId, section, isCollapsed);
+              }
             },
             attrs: {
               body: {
@@ -133,12 +223,6 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
                 left: {
                   attrs: {
                     circle: {
-                      // width: NODE_WIDTH,
-                      // height: LINE_HEIGHT,
-                      // strokeWidth: 1,
-                      // stroke: '#5F95FF',
-                      // fill: '#EFF4FF', // 可以根据需要调整颜色
-                      // magnet: true, // 确保 port 是可以连接的
                       r: 1,
                       magnet: true,
                       stroke: 'transparent',
@@ -148,7 +232,6 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
                   },
                   position: {
                     name: 'absolute'
-                    // args: { x: 0, y: 0 },
                   }
                 },
                 right: {
@@ -196,7 +279,11 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
           }
         },
         connector: { name: 'smooth' },
-        data: edgeData,
+        data: {
+          ...edgeData,
+          originalSource: { cell: edgeData.sourceEntityId, port: `${edgeData.sourceFieldId}_source` },
+          originalTarget: { cell: edgeData.targetEntityId, port: `${edgeData.targetFieldId}_target` }
+        },
         labels: edgeData.label
           ? [
               {
@@ -316,15 +403,6 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
         }
 
         // 事件监听
-        // graphRef.current.on('node:click', ({ node }) => {
-        //   const nodeData = node.getData() as EntityERProps;
-        //   if (nodeData) {
-        //     setSelectedNode(nodeData.data as unknown as EntityNode);
-        //     console.log('node:click', nodeData);
-        //     onNodeEdit?.(nodeData.data as unknown as EntityNode);
-        //   }
-        // });
-
         graphRef.current.on('node:mouseenter', ({ node }) => {
           if (mode === 'edit') {
             node.setAttrs({
