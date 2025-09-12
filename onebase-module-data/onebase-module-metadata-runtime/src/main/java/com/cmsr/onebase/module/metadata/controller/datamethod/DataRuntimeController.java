@@ -23,8 +23,12 @@ import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 @Validated
 public class DataRuntimeController {
 
+
     @Resource
     private RuntimeDataService runtimeDataService;
+
+    //todo 这里的五个接口之前和前端约定入参传的是 filed_name,现在需要统一改成传 field_id，map 中的可以我已经从 String 改成 Long 了，对应的 service 的代码逻辑也需要调整一下，请修改
+
 
     @PostMapping("/insert")
     @Operation(summary = "新增单条数据")

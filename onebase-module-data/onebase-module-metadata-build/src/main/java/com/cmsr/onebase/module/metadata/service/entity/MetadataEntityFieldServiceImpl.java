@@ -36,7 +36,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.modelmapper.ModelMapper;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -1485,6 +1487,52 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
             result.setAutoNumberConfig(autoNumberConfig);
         }
 
+        return result;
+    }
+
+    /**
+     * 根据字段ID列表返回对应的JDBC数据类型
+     * 先查 metadata_entity_field 获取字段类型编码，再查 metadata_component_field_type 获取 data_type
+     * 
+     * @param fieldIds 字段ID列表
+     * @return 字段ID到JDBC类型的映射
+     */
+    public Map<Long, String> getFieldJdbcTypes(List<Long> fieldIds) {
+        if (fieldIds == null || fieldIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        DefaultConfigStore cs = new DefaultConfigStore();
+        cs.and(Compare.IN, "id", fieldIds);
+        cs.and("deleted", 0);
+        List<MetadataEntityFieldDO> fields = metadataEntityFieldRepository.findAllByConfig(cs);
+        if (fields == null || fields.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        Map<Long, String> idToTypeCode = fields.stream()
+                .filter(f -> f.getId() != null && f.getFieldType() != null && !f.getFieldType().isBlank())
+                .collect(Collectors.toMap(MetadataEntityFieldDO::getId, MetadataEntityFieldDO::getFieldType, (a,b)->a));
+
+        if (idToTypeCode.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        Map<String, String> typeCodeToJdbc = new HashMap<>();
+        for (String code : new HashSet<>(idToTypeCode.values())) {
+            var typeDO = componentFieldTypeService.getByFieldTypeCode(code);
+            if (typeDO != null && typeDO.getDataType() != null && !typeDO.getDataType().isBlank()) {
+                typeCodeToJdbc.put(code, typeDO.getDataType());
+            }
+        }
+
+        Map<Long, String> result = new LinkedHashMap<>();
+        for (Map.Entry<Long, String> e : idToTypeCode.entrySet()) {
+            String jdbc = typeCodeToJdbc.get(e.getValue());
+            if (jdbc != null) {
+                result.put(e.getKey(), jdbc);
+            }
+        }
         return result;
     }
 

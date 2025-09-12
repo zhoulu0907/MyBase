@@ -23,11 +23,11 @@ public interface MetadataBackupApi {
 
     String PREFIX = ApiConstants.PREFIX + "/backup";
 
-    @PostMapping(PREFIX + "/backup")
+    //@PostMapping(PREFIX + "/backup")
     @Operation(summary = "备份元数据", description = "根据应用ID备份所有相关的元数据信息")
     MetadataBackupRespDTO backupMetadata(@RequestBody MetadataBackupReqDTO backupReqDTO);
 
-    @PostMapping(PREFIX + "/restore")
+    //@PostMapping(PREFIX + "/restore")
     @Operation(summary = "恢复元数据", description = "将备份的元数据恢复到指定应用中")
     Boolean restoreMetadata(@RequestBody MetadataRestoreReqDTO restoreReqDTO);
 

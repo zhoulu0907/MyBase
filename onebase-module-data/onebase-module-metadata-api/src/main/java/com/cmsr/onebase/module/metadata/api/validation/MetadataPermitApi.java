@@ -24,7 +24,7 @@ public interface MetadataPermitApi {
      *
      * @return 权限参考操作类型列表
      */
-    @GetMapping("/permit/ref-otft-list")
+    //@GetMapping("/permit/ref-otft-list")
     @Operation(summary = "获取权限参考操作类型列表")
     List<PermitRefOtftRespDTO> getPermitRefOtftList();
 }

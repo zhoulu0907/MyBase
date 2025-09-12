@@ -33,7 +33,7 @@ public class DynamicDataPageReqVO {
     private String sortDirection = "desc";
 
     @Schema(description = "过滤条件")
-    private Map<String, Object> filters;
+    private Map<Long, Object> filters;
 
     @Schema(description = "方法编码（可选）")
     private String methodCode;
