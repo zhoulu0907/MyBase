@@ -10,7 +10,9 @@
     <modelVersion>4.0.0</modelVersion>
     <modules>
         <module>onebase-module-infra-api</module>
-        <module>onebase-module-infra-server</module>
+        <module>onebase-module-infra-core</module>
+        <module>onebase-module-infra-build</module>
+        <module>onebase-module-infra-runtime</module>
     </modules>
     <artifactId>onebase-module-infra</artifactId>
     <packaging>pom</packaging>

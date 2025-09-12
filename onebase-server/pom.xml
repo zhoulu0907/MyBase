@@ -41,7 +41,7 @@
         </dependency>
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-module-infra-server</artifactId>
+            <artifactId>onebase-module-infra-core</artifactId>
             <version>${revision}</version>
         </dependency>
         <dependency>
