@@ -2,9 +2,9 @@ package com.cmsr.onebase.module.system.service.dept;
 
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.exception.ServiceException;
-import com.cmsr.onebase.module.system.controller.admin.dept.vo.dept.DeptListReqVO;
-import com.cmsr.onebase.module.system.controller.admin.dept.vo.dept.DeptRespVO;
-import com.cmsr.onebase.module.system.controller.admin.dept.vo.dept.DeptSaveReqVO;
+import com.cmsr.onebase.module.system.vo.dept.DeptListReqVO;
+import com.cmsr.onebase.module.system.vo.dept.DeptRespVO;
+import com.cmsr.onebase.module.system.vo.dept.DeptSaveReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.dal.database.AdminUserDataRepository;

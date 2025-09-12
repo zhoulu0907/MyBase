@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.system.convert.tenant;
 
-import com.cmsr.onebase.module.system.controller.admin.tenant.vo.tenant.TenantRespVO;
-import com.cmsr.onebase.module.system.controller.admin.tenant.vo.tenant.TenantSimpleRespVO;
+import com.cmsr.onebase.module.system.vo.tenant.TenantRespVO;
+import com.cmsr.onebase.module.system.vo.tenant.TenantSimpleRespVO;
 import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;

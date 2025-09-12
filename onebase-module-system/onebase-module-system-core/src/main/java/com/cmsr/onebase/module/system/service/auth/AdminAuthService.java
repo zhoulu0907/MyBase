@@ -1,7 +1,8 @@
 package com.cmsr.onebase.module.system.service.auth;
 
-import com.cmsr.onebase.module.system.controller.admin.auth.vo.*;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
+import com.cmsr.onebase.module.system.vo.auth.*;
+import com.cmsr.onebase.module.system.vo.auth.UserLoginReqVO;
 import jakarta.validation.Valid;
 
 /**

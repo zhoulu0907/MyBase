@@ -1,8 +1,8 @@
 package com.cmsr.onebase.module.system.service.dept;
 
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
-import com.cmsr.onebase.module.system.controller.admin.dept.vo.dept.*;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
+import com.cmsr.onebase.module.system.vo.dept.*;
 
 import java.util.*;
 

@@ -1,9 +1,9 @@
 package com.cmsr.onebase.module.system.service.permission;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.system.controller.admin.permission.vo.role.RolePageReqVO;
-import com.cmsr.onebase.module.system.controller.admin.permission.vo.role.RoleInsertReqVO;
-import com.cmsr.onebase.module.system.controller.admin.permission.vo.role.RoleUpdateReqVO;
+import com.cmsr.onebase.module.system.vo.role.RolePageReqVO;
+import com.cmsr.onebase.module.system.vo.role.RoleInsertReqVO;
+import com.cmsr.onebase.module.system.vo.role.RoleUpdateReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
 
 import jakarta.validation.Valid;

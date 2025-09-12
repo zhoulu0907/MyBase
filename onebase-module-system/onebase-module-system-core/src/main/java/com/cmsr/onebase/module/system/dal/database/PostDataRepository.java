@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.system.dal.database;
 
 import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.system.controller.admin.dept.vo.post.PostPageReqVO;
+import com.cmsr.onebase.module.system.vo.post.PostPageReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.PostDO;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Compare;

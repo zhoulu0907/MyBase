@@ -7,7 +7,7 @@ import com.cmsr.onebase.framework.common.biz.system.logger.dto.OperateLogCreateR
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.system.api.logger.dto.OperateLogPageReqDTO;
-import com.cmsr.onebase.module.system.controller.admin.logger.vo.operatelog.OperateLogPageReqVO;
+import com.cmsr.onebase.module.system.vo.operatelog.OperateLogPageReqVO;
 import com.cmsr.onebase.module.system.dal.database.OperateLogRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.logger.OperateLogDO;
 

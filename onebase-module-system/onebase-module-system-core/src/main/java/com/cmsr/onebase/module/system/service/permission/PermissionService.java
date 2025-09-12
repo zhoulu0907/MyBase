@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.system.service.permission;
 
 import com.cmsr.onebase.framework.common.biz.system.permission.dto.DeptDataPermissionRespDTO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.UserRoleDO;
-import com.cmsr.onebase.module.system.controller.admin.permission.vo.permission.PermissionMenuRespVO;
+import com.cmsr.onebase.module.system.vo.permission.PermissionMenuRespVO;
 
 import java.util.Collection;
 import java.util.List;

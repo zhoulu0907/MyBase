@@ -1,8 +1,8 @@
 package com.cmsr.onebase.module.system.service.sms;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.system.controller.admin.sms.vo.template.SmsTemplatePageReqVO;
-import com.cmsr.onebase.module.system.controller.admin.sms.vo.template.SmsTemplateSaveReqVO;
+import com.cmsr.onebase.module.system.vo.sms.SmsTemplatePageReqVO;
+import com.cmsr.onebase.module.system.vo.sms.SmsTemplateSaveReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.sms.SmsTemplateDO;
 
 import jakarta.validation.Valid;

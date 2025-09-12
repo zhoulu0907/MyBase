@@ -1,8 +1,8 @@
 package com.cmsr.onebase.module.system.service.dict;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.system.controller.admin.dict.vo.type.DictTypePageReqVO;
-import com.cmsr.onebase.module.system.controller.admin.dict.vo.type.DictTypeSaveReqVO;
+import com.cmsr.onebase.module.system.vo.dicttype.DictTypePageReqVO;
+import com.cmsr.onebase.module.system.vo.dicttype.DictTypeSaveReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.dict.DictTypeDO;
 
 import java.util.List;

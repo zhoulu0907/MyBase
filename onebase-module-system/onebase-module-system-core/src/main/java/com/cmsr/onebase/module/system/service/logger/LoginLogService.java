@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.system.service.logger;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.system.api.logger.dto.LoginLogCreateReqDTO;
-import com.cmsr.onebase.module.system.controller.admin.logger.vo.loginlog.LoginLogPageReqVO;
+import com.cmsr.onebase.module.system.vo.loginlog.LoginLogPageReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.logger.LoginLogDO;
 
 import jakarta.validation.Valid;

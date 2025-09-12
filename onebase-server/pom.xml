@@ -21,12 +21,12 @@
     <dependencies>
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-module-formula-core</artifactId>
+            <artifactId>onebase-module-formula-build</artifactId>
             <version>${revision}</version>
         </dependency>
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-module-system-core</artifactId>
+            <artifactId>onebase-module-system-build</artifactId>
             <version>${revision}</version>
         </dependency>
         <dependency>

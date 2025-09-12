@@ -1,8 +1,8 @@
 package com.cmsr.onebase.module.system.convert.license;
 
-import com.cmsr.onebase.module.system.controller.admin.license.vo.LicenseExportRespVO;
-import com.cmsr.onebase.module.system.controller.admin.license.vo.LicensePageRespVO;
-import com.cmsr.onebase.module.system.controller.admin.license.vo.LicenseRespVO;
+import com.cmsr.onebase.module.system.vo.license.LicenseExportRespVO;
+import com.cmsr.onebase.module.system.vo.license.LicensePageRespVO;
+import com.cmsr.onebase.module.system.vo.license.LicenseRespVO;
 import com.cmsr.onebase.module.system.dal.dataobject.license.LicenseDO;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;

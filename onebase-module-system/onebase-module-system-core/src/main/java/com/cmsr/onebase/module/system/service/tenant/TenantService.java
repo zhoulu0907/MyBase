@@ -2,10 +2,10 @@ package com.cmsr.onebase.module.system.service.tenant;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
-import com.cmsr.onebase.module.system.controller.admin.tenant.vo.tenant.TenantPageReqVO;
-import com.cmsr.onebase.module.system.controller.admin.tenant.vo.tenant.TenantInsertReqVO;
-import com.cmsr.onebase.module.system.controller.admin.tenant.vo.tenant.TenantRespVO;
-import com.cmsr.onebase.module.system.controller.admin.tenant.vo.tenant.TenantUpdateReqVO;
+import com.cmsr.onebase.module.system.vo.tenant.TenantPageReqVO;
+import com.cmsr.onebase.module.system.vo.tenant.TenantInsertReqVO;
+import com.cmsr.onebase.module.system.vo.tenant.TenantRespVO;
+import com.cmsr.onebase.module.system.vo.tenant.TenantUpdateReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
 import com.cmsr.onebase.module.system.service.tenant.handler.TenantInfoHandler;
 import com.cmsr.onebase.module.system.service.tenant.handler.TenantMenuHandler;
