@@ -3,7 +3,7 @@ import {
   type FormRenderProps,
 } from "@flowgram.ai/fixed-layout-editor";
 import { triggerEditorSignal } from "@/store/singals/trigger_editor";
-import { Form, Input, InputNumber, Select, Radio } from "@arco-design/web-react";
+import { Form, Input, InputNumber, Select } from "@arco-design/web-react";
 import { FormContent, FormHeader, FormOutputs } from "../../../form-components";
 import { useIsSidebar, useNodeRenderContext } from "../../../hooks";
 import { type FlowNodeJSON } from "../../../typings";
@@ -174,13 +174,15 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON["data"]>) => {
             <Form.Item label="节点ID" field="id " initialValue={node.id}>
               <Input disabled />
             </Form.Item>
-            <Form.Item label="节点名称" field="nodeName" required>
+            <Form.Item label="节点名称" field="nodeName">
               <Input onChange={(e) => handlePropsOnChange("nodeName", e)} />
             </Form.Item>
-            <Form.Item label="查询方式" field="dataType">
-              <Radio.Group direction='vertical' onChange={(e) => handlePropsOnChange("dataType", e)} >
-                {dataTypeOptions.map((item) => <Radio value={item.value}>{item.label}</Radio>)}
-              </Radio.Group>
+            <Form.Item label="获取方式" field="dataType">
+              <Select
+                options={dataTypeOptions}
+                allowClear
+                onChange={(e) => handlePropsOnChange("dataType", e)}
+              ></Select>
             </Form.Item>
             <Form.Item label="数据源" field="dataSource">
               <Select
