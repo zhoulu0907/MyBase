@@ -5,6 +5,7 @@ import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataEntityFiel
 import jakarta.validation.Valid;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 实体字段 Service 接口 - 核心数据层接口
@@ -13,7 +14,7 @@ import java.util.List;
  * @author matianyu
  * @date 2025-08-20
  */
-public interface MetadataEntityFieldService {
+public interface MetadataEntityFieldBaseService {
 
     /**
      * 创建实体字段
@@ -79,6 +80,15 @@ public interface MetadataEntityFieldService {
      * @return 创建的字段数量
      */
     int batchCreateEntityFields(@Valid List<MetadataEntityFieldDO> entityFields);
+
+    /**
+     * 根据字段ID列表返回对应的JDBC数据类型
+     * 先查 metadata_entity_field 获取字段类型编码，再查 metadata_component_field_type 获取 data_type
+     *
+     * @param fieldIds 字段ID列表
+     * @return 字段ID到JDBC类型的映射
+     */
+    Map<Long, String> getFieldJdbcTypes(List<Long> fieldIds);
 
     // TODO: 以下方法需要在build模块中实现，涉及VO转换
     /*

@@ -27,7 +27,7 @@ public class DynamicDataUpdateReqVO {
 
     @Schema(description = "数据内容", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotEmpty(message = "数据内容不能为空")
-    private Map<String, Object> data;
+    private Map<Long, Object> data;
 
     @Schema(description = "方法编码（可选）")
     private String methodCode;

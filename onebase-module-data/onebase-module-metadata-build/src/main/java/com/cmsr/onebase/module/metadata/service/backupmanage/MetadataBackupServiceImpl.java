@@ -3,7 +3,7 @@ package com.cmsr.onebase.module.metadata.service.backupmanage;
 import com.cmsr.onebase.module.metadata.controller.admin.backupmanage.vo.MetadataBackupRespVO;
 import com.cmsr.onebase.module.metadata.controller.admin.backupmanage.vo.MetadataRestoreReqVO;
 import com.cmsr.onebase.module.metadata.service.entity.MetadataBusinessEntityService;
-import com.cmsr.onebase.module.metadata.service.datasource.MetadataDatasourceService;
+import com.cmsr.onebase.module.metadata.service.datasource.MetadataDatasourceBuildService;
 import com.cmsr.onebase.module.metadata.service.entity.MetadataEntityFieldService;
 import com.cmsr.onebase.module.metadata.service.relationship.MetadataEntityRelationshipService;
 import com.cmsr.onebase.module.metadata.service.validation.MetadataValidationRuleService;
@@ -37,7 +37,7 @@ import java.util.List;
 public class MetadataBackupServiceImpl implements MetadataBackupService {
 
     @Resource
-    private MetadataDatasourceService datasourceService;
+    private MetadataDatasourceBuildService datasourceBuildService;
 
     @Resource
     private MetadataBusinessEntityService businessEntityService;
@@ -85,7 +85,7 @@ public class MetadataBackupServiceImpl implements MetadataBackupService {
         DefaultConfigStore datasourceCondition = new DefaultConfigStore();
         datasourceCondition.and(MetadataDatasourceDO.APP_ID, appId);
         datasourceCondition.and("deleted", 0L);
-        List<MetadataDatasourceDO> datasourceList = datasourceService.findAllByConfig(datasourceCondition);
+        List<MetadataDatasourceDO> datasourceList = datasourceBuildService.findAllByConfig(datasourceCondition);
         backupRespVO.setDatasourceList(datasourceList);
         log.info("备份数据源数量: {}", datasourceList.size());
 

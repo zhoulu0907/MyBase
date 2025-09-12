@@ -16,9 +16,13 @@ import jakarta.validation.Valid;
 import java.util.List;
 
 /**
- * 数据源 Service 接口
+ * 数据源构建模块服务接口 - 提供面向VO的业务操作
+ * 独立接口，不继承核心模块接口，避免Bean冲突
+ *
+ * @author matianyu
+ * @date 2025-09-12
  */
-public interface MetadataDatasourceService {
+public interface MetadataDatasourceBuildService {
 
     /**
      * 获取所有支持的数据源类型
