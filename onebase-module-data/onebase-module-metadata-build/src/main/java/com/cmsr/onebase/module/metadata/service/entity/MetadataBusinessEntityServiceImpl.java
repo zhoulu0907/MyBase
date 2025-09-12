@@ -21,7 +21,7 @@ import com.cmsr.onebase.module.metadata.dal.dataobject.datasource.MetadataDataso
 import com.cmsr.onebase.module.metadata.dal.dataobject.relationship.MetadataEntityRelationshipDO;
 import com.cmsr.onebase.module.metadata.enums.BooleanStatusEnum;
 import com.cmsr.onebase.module.metadata.dal.database.MetadataBusinessEntityRepository;
-import com.cmsr.onebase.module.metadata.service.datasource.MetadataDatasourceService;
+import com.cmsr.onebase.module.metadata.service.datasource.MetadataDatasourceBuildService;
 import com.cmsr.onebase.module.metadata.service.datasource.MetadataAppAndDatasourceService;
 import com.cmsr.onebase.module.metadata.service.relationship.MetadataEntityRelationshipService;
 import com.cmsr.onebase.module.metadata.util.StatusEnumUtil;
@@ -61,7 +61,7 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
     @Resource
     private MetadataBusinessEntityRepository metadataBusinessEntityRepository;
     @Resource
-    private MetadataDatasourceService metadataDatasourceService;
+    private MetadataDatasourceBuildService metadataDatasourceBuildService;
     @Resource
     private MetadataSystemFieldsService metadataSystemFieldsService;
     @Resource
@@ -236,7 +236,7 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
                                                              List<MetadataSystemFieldsDO> systemFields) {
         try {
             // 1. 通过数据源 id 获取对应的数据源信息
-            MetadataDatasourceDO datasource = metadataDatasourceService.getDatasource(Long.valueOf(createReqVO.getDatasourceId()));
+            MetadataDatasourceDO datasource = metadataDatasourceBuildService.getDatasource(Long.valueOf(createReqVO.getDatasourceId()));
             if (datasource != null) {
                 // 2. 生成 DDL 并在数据源内建物理表
                 createPhysicalTable(datasource, businessEntity.getTableName(), systemFields);
@@ -673,7 +673,7 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
     @Override
     public ERDiagramRespVO getERDiagramByDatasourceId(Long datasourceId) {
         // 1. 获取数据源信息
-        MetadataDatasourceDO datasource = metadataDatasourceService.getDatasource(datasourceId);
+        MetadataDatasourceDO datasource = metadataDatasourceBuildService.getDatasource(datasourceId);
         if (datasource == null) {
             throw new IllegalArgumentException("数据源不存在，ID: " + datasourceId);
         }

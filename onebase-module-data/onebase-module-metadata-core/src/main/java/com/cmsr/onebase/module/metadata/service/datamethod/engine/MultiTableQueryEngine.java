@@ -5,9 +5,9 @@ import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.module.metadata.dal.dataobject.datasource.MetadataDatasourceDO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataBusinessEntityDO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataEntityFieldDO;
-import com.cmsr.onebase.module.metadata.service.datasource.MetadataDatasourceService;
+import com.cmsr.onebase.module.metadata.service.datasource.MetadataDatasourceCoreService;
 import com.cmsr.onebase.module.metadata.service.entity.MetadataBusinessEntityService;
-import com.cmsr.onebase.module.metadata.service.entity.MetadataEntityFieldService;
+import com.cmsr.onebase.module.metadata.service.entity.MetadataEntityFieldBaseService;
 import com.cmsr.onebase.module.metadata.dal.database.TemporaryDatasourceService;
 import com.cmsr.onebase.module.metadata.service.datamethod.MetadataDataSystemMethodService;
 import com.cmsr.onebase.module.metadata.service.datamethod.dto.QueryPlanDTO;
@@ -46,10 +46,10 @@ public class MultiTableQueryEngine {
     private MetadataBusinessEntityService metadataBusinessEntityService;
 
     @Resource
-    private MetadataEntityFieldService metadataEntityFieldService;
+    private MetadataEntityFieldBaseService metadataEntityFieldService;
 
     @Resource
-    private MetadataDatasourceService metadataDatasourceService;
+    private MetadataDatasourceCoreService metadataDatasourceCoreService;
 
     @Resource
     private TemporaryDatasourceService temporaryDatasourceService;
@@ -154,7 +154,7 @@ public class MultiTableQueryEngine {
         }
 
         // 获取数据源
-        MetadataDatasourceDO datasource = metadataDatasourceService.getDatasource(entity.getDatasourceId());
+        MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceId());
         if (datasource == null) {
             throw exception(DATASOURCE_NOT_EXISTS);
         }

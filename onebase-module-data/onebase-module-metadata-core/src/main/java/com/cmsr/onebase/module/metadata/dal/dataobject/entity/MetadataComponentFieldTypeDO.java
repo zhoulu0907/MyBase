@@ -52,7 +52,7 @@ public class MetadataComponentFieldTypeDO extends BaseDO {
     private String fieldTypeDesc;
 
     /**
-     * 数据类型
+     * jdbc数据类型
      */
     private String dataType;
 

@@ -1,7 +1,10 @@
 package com.cmsr.onebase.module.metadata.controller.admin.datamethod;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
-import com.cmsr.onebase.module.metadata.controller.admin.datamethod.vo.*;
+import com.cmsr.onebase.module.metadata.controller.admin.datamethod.vo.DataMethodDetailQueryReqVO;
+import com.cmsr.onebase.module.metadata.controller.admin.datamethod.vo.DataMethodDetailRespVO;
+import com.cmsr.onebase.module.metadata.controller.admin.datamethod.vo.DataMethodQueryReqVO;
+import com.cmsr.onebase.module.metadata.controller.admin.datamethod.vo.DataMethodRespVO;
 import com.cmsr.onebase.module.metadata.service.datamethod.MetadataDataMethodQueryService;
 import com.cmsr.onebase.module.metadata.service.datamethod.vo.DataMethodQueryVO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -34,7 +37,7 @@ public class DataMethodController {
     @Operation(summary = "查询业务实体的数据方法列表")
     @PreAuthorize("@ss.hasPermission('metadata:data-method:query')")
     public CommonResult<List<DataMethodRespVO>> getDataMethodList(@Valid @RequestBody DataMethodQueryReqVO reqVO) {
-        DataMethodQueryVO queryVO = new DataMethodQueryVO(String.valueOf(reqVO.getEntityId()), reqVO.getMethodType(), reqVO.getKeyword());
+    DataMethodQueryVO queryVO = new DataMethodQueryVO(reqVO.getEntityId(), reqVO.getMethodType(), reqVO.getKeyword());
         List<DataMethodRespVO> methods = dataMethodService.getDataMethodList(queryVO);
         return success(methods);
     }
@@ -43,7 +46,7 @@ public class DataMethodController {
     @Operation(summary = "获取指定数据方法的详细信息")
     @PreAuthorize("@ss.hasPermission('metadata:data-method:query')")
     public CommonResult<DataMethodDetailRespVO> getDataMethodDetail(@Valid @RequestBody DataMethodDetailQueryReqVO reqVO) {
-        DataMethodDetailRespVO detail = dataMethodService.getDataMethodDetail(Long.valueOf(reqVO.getEntityId()), reqVO.getMethodCode());
+    DataMethodDetailRespVO detail = dataMethodService.getDataMethodDetail(reqVO.getEntityId(), reqVO.getMethodCode());
         return success(detail);
     }
 }

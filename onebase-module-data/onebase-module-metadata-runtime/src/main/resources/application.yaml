@@ -10,6 +10,11 @@ spring:
 server:
   port: 48081
 
+# 运行时接口统一前缀，可被外部覆盖
+onebase:
+  web:
+    runtime-path-prefix: /runtime
+
 springdoc:
   api-docs:
     enabled: true

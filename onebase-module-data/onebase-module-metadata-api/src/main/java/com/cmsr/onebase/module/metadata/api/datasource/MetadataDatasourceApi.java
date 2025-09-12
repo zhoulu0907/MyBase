@@ -14,13 +14,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import jakarta.validation.Valid;
 
 /**
- * 数据源管理 API
+ * 数据源管理sdk
  *
  * @author matianyu
  * @date 2025-09-10
  */
-@FeignClient(name = "onebase-module-metadata-build", path = "/metadata")
-@Tag(name = "数据源管理 API")
+@Tag(name = "数据源管理sdk")
 public interface MetadataDatasourceApi {
 
     /**
@@ -29,9 +28,8 @@ public interface MetadataDatasourceApi {
      * @param reqDTO 创建默认数据源请求
      * @return 通用结果
      */
-    @PostMapping("/datasource/create-default")
     @Operation(summary = "创建默认数据源")
-    CommonResult<Long> createDefaultDatasource(@Valid @RequestBody DatasourceCreateDefaultReqDTO reqDTO);
+    Long createDefaultDatasource(@Valid @RequestBody DatasourceCreateDefaultReqDTO reqDTO);
 
     /**
      * 创建数据源
@@ -39,9 +37,8 @@ public interface MetadataDatasourceApi {
      * @param reqDTO 创建数据源请求
      * @return 数据源ID
      */
-    @PostMapping("/datasource/create")
     @Operation(summary = "创建数据源")
-    CommonResult<Long> createDatasource(@Valid @RequestBody DatasourceSaveReqDTO reqDTO);
+    Long createDatasource(@Valid @RequestBody DatasourceSaveReqDTO reqDTO);
 
     /**
      * 获取数据源信息
@@ -49,7 +46,6 @@ public interface MetadataDatasourceApi {
      * @param id 数据源ID
      * @return 数据源信息
      */
-    @GetMapping("/datasource/{id}")
     @Operation(summary = "获取数据源信息")
-    CommonResult<Object> getDatasource(@PathVariable("id") Long id);
+    Object getDatasource(@PathVariable("id") Long id);
 }

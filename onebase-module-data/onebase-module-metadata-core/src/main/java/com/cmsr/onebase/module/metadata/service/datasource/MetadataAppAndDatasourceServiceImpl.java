@@ -25,7 +25,7 @@ public class MetadataAppAndDatasourceServiceImpl implements MetadataAppAndDataso
     private MetadataAppAndDatasourceRepository appAndDatasourceRepository;
 
     @Resource
-    private MetadataDatasourceService datasourceService;
+    private MetadataDatasourceCoreService datasourceCoreService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -56,7 +56,7 @@ public class MetadataAppAndDatasourceServiceImpl implements MetadataAppAndDataso
         // 根据数据源ID列表查询数据源详情
         List<MetadataDatasourceDO> datasources = new ArrayList<>();
         for (Long datasourceId : datasourceIds) {
-            MetadataDatasourceDO datasource = datasourceService.getDatasource(datasourceId);
+            MetadataDatasourceDO datasource = datasourceCoreService.getDatasource(datasourceId);
             if (datasource != null) {
                 datasources.add(datasource);
             }
@@ -106,7 +106,7 @@ public class MetadataAppAndDatasourceServiceImpl implements MetadataAppAndDataso
         // 根据数据源ID列表查询数据源详情
         List<MetadataDatasourceDO> datasources = new ArrayList<>();
         for (Long datasourceId : datasourceIds) {
-            MetadataDatasourceDO datasource = datasourceService.getDatasource(datasourceId);
+            MetadataDatasourceDO datasource = datasourceCoreService.getDatasource(datasourceId);
             if (datasource != null) {
                 datasources.add(datasource);
             }
