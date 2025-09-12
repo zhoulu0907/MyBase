@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.metadata.controller.datamethod.vo;
+package com.cmsr.onebase.module.metadata.controller.app.datamethod.vo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
