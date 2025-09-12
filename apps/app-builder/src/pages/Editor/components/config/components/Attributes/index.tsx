@@ -88,12 +88,8 @@ const Attributes = ({ cpID }: ConfigsProps) => {
       return;
     }
     console.debug('curComponentSchema------', curComponentSchema);
-
-    //去掉组件名称这个项
-    const newEdit = curComponentSchema.editData.filter((item: { key: string; }) => item?.key !== 'cpName');
-    
-    setEditData(newEdit);
-
+  
+    setEditData(curComponentSchema.editData);
     setConfigs(curComponentSchema.config);
   }, [cpID, curComponentSchema]);
 
