@@ -23,7 +23,11 @@ public class FlowProcessExecutor {
         String chainId = FlowUtils.toFlowChainId(processId);
         DefaultContext defaultContext = new DefaultContext();
         defaultContext.setData(FlowUtils.INPUT, inputParams);
-        LiteflowResponse response = flowExecutor.execute2Resp(chainId, "", defaultContext);
+
+        ExecuteContext executeContext = new ExecuteContext();
+        executeContext.setProcessId(processId);
+
+        LiteflowResponse response = flowExecutor.execute2Resp(chainId, "", defaultContext, executeContext);
         DefaultContext resultContext = response.getContextBean(DefaultContext.class);
         return resultContext.getDataMap();
     }
