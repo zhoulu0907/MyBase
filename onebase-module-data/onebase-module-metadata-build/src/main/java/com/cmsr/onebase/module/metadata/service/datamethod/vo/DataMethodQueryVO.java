@@ -18,7 +18,7 @@ public class DataMethodQueryVO {
     /**
      * 实体ID
      */
-    private String entityId;
+    private Long entityId;
 
     /**
      * 方法类型

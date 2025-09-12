@@ -5,7 +5,7 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.metadata.controller.admin.datasource.vo.*;
 import org.modelmapper.ModelMapper;
 import com.cmsr.onebase.module.metadata.dal.dataobject.datasource.MetadataDatasourceDO;
-import com.cmsr.onebase.module.metadata.service.datasource.MetadataDatasourceService;
+import com.cmsr.onebase.module.metadata.service.datasource.MetadataDatasourceBuildService;
 import com.cmsr.onebase.module.metadata.service.datasource.vo.ColumnQueryVO;
 import com.cmsr.onebase.module.metadata.service.datasource.vo.TableQueryVO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -34,14 +34,14 @@ import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 public class DatasourceController {
 
     @Resource
-    private MetadataDatasourceService datasourceService;
+    private MetadataDatasourceBuildService datasourceBuildService;
     @Resource
     private ModelMapper modelMapper;
 
     @PostMapping("/types")
     @Operation(summary = "获取所有支持的数据源类型")
     public CommonResult<List<DatasourceTypeRespVO>> getDatasourceTypes() {
-        List<DatasourceTypeRespVO> types = datasourceService.getDatasourceTypes();
+        List<DatasourceTypeRespVO> types = datasourceBuildService.getDatasourceTypes();
         return success(types);
     }
 
@@ -51,7 +51,7 @@ public class DatasourceController {
     public CommonResult<List<TableInfoRespVO>> getTablesByDatasourceId(@Valid TableQueryReqVO reqVO) {
         // 将Controller层的VO转换为Service层的VO
         TableQueryVO queryVO = new TableQueryVO(reqVO.getDatasourceId(), reqVO.getSchemaName(), reqVO.getKeyword());
-        List<TableInfoRespVO> tables = datasourceService.getTablesByDatasourceId(queryVO);
+        List<TableInfoRespVO> tables = datasourceBuildService.getTablesByDatasourceId(queryVO);
         return success(tables);
     }
 
@@ -61,7 +61,7 @@ public class DatasourceController {
     public CommonResult<List<ColumnInfoRespVO>> getColumnsByTableName(@Valid ColumnQueryReqVO reqVO) {
         // 将Controller层的VO转换为Service层的VO
         ColumnQueryVO queryVO = new ColumnQueryVO(reqVO.getDatasourceId(), reqVO.getTableName(), reqVO.getSchemaName());
-        List<ColumnInfoRespVO> columns = datasourceService.getColumnsByTableName(queryVO);
+        List<ColumnInfoRespVO> columns = datasourceBuildService.getColumnsByTableName(queryVO);
         return success(columns);
     }
 
@@ -69,7 +69,7 @@ public class DatasourceController {
     @Operation(summary = "新增数据源")
     @PreAuthorize("@ss.hasPermission('metadata:datasource:create')")
     public CommonResult<String> createDatasource(@Valid @RequestBody DatasourceSaveReqVO reqVO) {
-        Long id = datasourceService.createDatasource(reqVO);
+        Long id = datasourceBuildService.createDatasource(reqVO);
         return success(id.toString());
     }
 
@@ -77,7 +77,7 @@ public class DatasourceController {
     @Operation(summary = "修改数据源")
     @PreAuthorize("@ss.hasPermission('metadata:datasource:update')")
     public CommonResult<Boolean> updateDatasource(@Valid @RequestBody DatasourceSaveReqVO reqVO) {
-        datasourceService.updateDatasource(reqVO);
+        datasourceBuildService.updateDatasource(reqVO);
         return success(true);
     }
 
@@ -86,7 +86,7 @@ public class DatasourceController {
     @Parameter(name = "id", description = "编号", required = true, example = "1024")
     @PreAuthorize("@ss.hasPermission('metadata:datasource:delete')")
     public CommonResult<Boolean> deleteDatasource(@RequestParam("id") Long id) {
-        datasourceService.deleteDatasource(id);
+        datasourceBuildService.deleteDatasource(id);
         return success(true);
     }
 
@@ -95,7 +95,7 @@ public class DatasourceController {
     @Parameter(name = "id", description = "编号", required = true, example = "1024")
     @PreAuthorize("@ss.hasPermission('metadata:datasource:query')")
     public CommonResult<DatasourceRespVO> getDatasource(@RequestParam("id") Long id) {
-        MetadataDatasourceDO datasource = datasourceService.getDatasource(id);
+        MetadataDatasourceDO datasource = datasourceBuildService.getDatasource(id);
         DatasourceRespVO respVO = modelMapper.map(datasource, DatasourceRespVO.class);
         return success(respVO);
     }
@@ -104,7 +104,7 @@ public class DatasourceController {
     @Operation(summary = "获得数据源分页列表")
     @PreAuthorize("@ss.hasPermission('metadata:datasource:query')")
     public CommonResult<PageResult<DatasourceRespVO>> getDatasourcePage(@Valid @RequestBody DatasourcePageReqVO pageReqVO) {
-        PageResult<MetadataDatasourceDO> pageResult = datasourceService.getDatasourcePage(pageReqVO);
+        PageResult<MetadataDatasourceDO> pageResult = datasourceBuildService.getDatasourcePage(pageReqVO);
         PageResult<DatasourceRespVO> convertedResult = new PageResult<>();
         convertedResult.setTotal(pageResult.getTotal());
         convertedResult.setList(pageResult.getList().stream()
@@ -125,10 +125,10 @@ public class DatasourceController {
         // 根据是否传入appId来决定查询方式
         if (reqVO.getAppId() != null && !reqVO.getAppId().trim().isEmpty()) {
             System.out.println("DEBUG: 使用appId查询，appId: " + reqVO.getAppId());
-            list = datasourceService.getDatasourceListByAppId(Long.valueOf(reqVO.getAppId()));
+            list = datasourceBuildService.getDatasourceListByAppId(Long.valueOf(reqVO.getAppId()));
         } else {
             System.out.println("DEBUG: 查询所有数据源");
-            list = datasourceService.getDatasourceList();
+            list = datasourceBuildService.getDatasourceList();
         }
         
         System.out.println("DEBUG: 查询结果数量: " + list.size());
@@ -143,7 +143,7 @@ public class DatasourceController {
     @Parameter(name = "code", description = "数据源编码", required = true, example = "user_db")
     @PreAuthorize("@ss.hasPermission('metadata:datasource:query')")
     public CommonResult<DatasourceRespVO> getDatasourceByCode(@RequestParam("code") String code) {
-        MetadataDatasourceDO datasource = datasourceService.getDatasourceByCode(code);
+        MetadataDatasourceDO datasource = datasourceBuildService.getDatasourceByCode(code);
         DatasourceRespVO respVO = modelMapper.map(datasource, DatasourceRespVO.class);
         return success(respVO);
     }
@@ -152,7 +152,7 @@ public class DatasourceController {
     @Operation(summary = "测试数据源连接")
     @PreAuthorize("@ss.hasPermission('metadata:datasource:test')")
     public CommonResult<DatasourceTestConnectionRespVO> testConnection(@Valid @RequestBody DatasourceTestConnectionReqVO reqVO) {
-        return success(datasourceService.testConnection(reqVO));
+        return success(datasourceBuildService.testConnection(reqVO));
     }
 
 }
