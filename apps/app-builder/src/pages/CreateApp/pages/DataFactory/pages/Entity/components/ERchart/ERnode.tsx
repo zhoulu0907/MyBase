@@ -183,7 +183,11 @@ const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
             <div className={styles['field-section-header']}>
               <span className={styles['section-title']}>系统字段</span>
               <span className={styles['section-count']}>({systemFields.length})</span>
-              <div className={`${styles['collapse-icon']}`} onClick={(e) => handleToggleSection('system', e)}>
+              <div
+                className={`${styles['collapse-icon']}`}
+                id="collapse-icon"
+                onClick={(e) => handleToggleSection('system', e)}
+              >
                 {nodeCollapsed.system ? <IconCaretDown /> : <IconCaretUp />}
               </div>
             </div>
@@ -212,7 +216,11 @@ const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
             <div className={styles['field-section-header']}>
               <span className={styles['section-title']}>自定义字段</span>
               <span className={styles['section-count']}>({customFields.length})</span>
-              <div className={`${styles['collapse-icon']}`} onClick={(e) => handleToggleSection('custom', e)}>
+              <div
+                className={`${styles['collapse-icon']}`}
+                id="collapse-icon"
+                onClick={(e) => handleToggleSection('custom', e)}
+              >
                 {nodeCollapsed.custom ? <IconCaretDown /> : <IconCaretUp />}
               </div>
             </div>

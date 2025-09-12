@@ -59,7 +59,6 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
     }));
 
     const handleSectionCollapse = (nodeId: string, section: 'system' | 'custom', isCollapsed: boolean) => {
-      console.log('handleSectionCollapse', nodeId, section, isCollapsed);
       const graph = graphRef.current!;
       const edges = graph.getEdges();
 
@@ -435,6 +434,13 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
         });
 
         graphRef.current.on('node:click', ({ e, node }) => {
+          // 阻止折叠图标点击触发
+          console.log('node:click', e.target, e.target.closest('#collapse-icon'));
+          const target = e.target as HTMLElement;
+          if (target.closest('#collapse-icon')) {
+            e.stopPropagation();
+            return;
+          }
           e.preventDefault();
           e.stopPropagation();
           onNodeEdit?.(node.getData().data);
