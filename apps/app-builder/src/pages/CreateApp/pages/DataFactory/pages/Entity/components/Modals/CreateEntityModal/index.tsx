@@ -3,10 +3,11 @@ import { useAppStore } from '@/store/store_app';
 import { useResourceStore } from '@/store/store_resource';
 import { Form, Input, Message, Modal, Radio, Select } from '@arco-design/web-react';
 import { createEntity } from '@onebase/app';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import styles from '../modal.module.less';
 import type { EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
 import { createEntityRules } from '@/pages/CreateApp/pages/DataFactory/utils/rules';
+import { getNewNodePosition } from '../../ERchart/utils/nodePositionCalculator';
 
 interface EntityFormValues {
   source: string;
@@ -33,7 +34,7 @@ const CreateEntityModal: React.FC<{
   successCallback: () => void;
   lastEntity: EntityNode;
   getGraphPositon: () => { x: number; y: number };
-}> = ({ visible, setVisible, successCallback, getGraphPositon, lastEntity }) => {
+}> = ({ visible, setVisible, successCallback, lastEntity }) => {
   const { curDataSourceId } = useResourceStore();
   const { curAppId } = useAppStore();
   const [form] = Form.useForm<EntityFormValues>();
@@ -50,6 +51,9 @@ const CreateEntityModal: React.FC<{
     console.log('lastentity', lastEntity);
 
     form.validate().then(async (values) => {
+      // 获取新节点位置
+      const { x, y } = getNewNodePosition();
+
       const params = {
         displayName: values.displayName,
         tableName: values.tableName,
@@ -59,10 +63,8 @@ const CreateEntityModal: React.FC<{
         datasourceId: curDataSourceId,
         appId: curAppId,
         displayConfig: JSON.stringify({
-          // x: getGraphPositon().x + 300,
-          // y: getGraphPositon().y
-          x: lastEntity?.positionX + 300,
-          y: lastEntity?.positionY
+          x,
+          y
         })
       };
 

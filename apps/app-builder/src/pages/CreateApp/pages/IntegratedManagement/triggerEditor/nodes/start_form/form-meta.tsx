@@ -6,7 +6,6 @@ import type { ComponentConfig, Condition } from '@onebase/app';
 import {
   getComponentListByPageId,
   getFieldCheckTypeApi,
-  getFlowMgmt,
   getPageListByAppId,
   type ConfitionField,
   type EntityFieldValidationTypes
@@ -36,6 +35,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
   const [payloadForm] = Form.useForm();
 
+  const pageId = Form.useWatch('pageId', payloadForm);
   const triggerUserType = Form.useWatch('triggerUserType', payloadForm);
 
   useEffect(() => {
@@ -43,22 +43,13 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     if (appId) {
       handleGetPageList(appId);
     }
-
-    const flowId = getHashQueryParam('flowId');
-    if (flowId) {
-      handleGetFlowInfo(flowId);
-    }
   }, []);
 
-  // 根据流程id获取流程详细信息
-  const handleGetFlowInfo = async (flowId: string) => {
-    const res = await getFlowMgmt(flowId);
-    console.log('res: ', res);
-    if (res && res.triggerConfig && res.triggerConfig.pageId) {
-      payloadForm.setFieldValue('pageId', res.triggerConfig.pageId);
-      handleGetComponentList(res.triggerConfig.pageId);
+  useEffect(() => {
+    if (pageId) {
+      handleGetComponentList(pageId);
     }
-  };
+  }, [pageId]);
 
   const handleGetPageList = async (appId: string) => {
     const res = await getPageListByAppId({ appId });
@@ -84,7 +75,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
         }
       });
 
-      if(filedIds?.length){
+      if (filedIds?.length) {
         const newValidationTypes = await getFieldCheckTypeApi(filedIds);
         console.log('validationTypes: ', newValidationTypes);
         setValidationTypes(newValidationTypes);
@@ -106,7 +97,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     console.log(conditions);
     handlePropsOnChange({
       ...triggerEditorSignal.nodeData.value[node.id],
-      filterConditions: conditions
+      filterCondition: conditions
     });
   };
 
@@ -137,7 +128,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
               {validationTypes && (
                 <ConditionEditor
                   onChange={onConditionChange}
-                  data={triggerEditorSignal.nodeData.value[node.id].filterConditions}
+                  data={triggerEditorSignal.nodeData.value[node.id].filterCondition}
                   fields={conditionFields}
                   entityFieldValidationTypes={validationTypes}
                 />

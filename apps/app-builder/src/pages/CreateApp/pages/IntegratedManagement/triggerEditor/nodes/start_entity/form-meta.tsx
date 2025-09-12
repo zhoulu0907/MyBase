@@ -2,13 +2,7 @@ import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-e
 
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { Form, Input, Select } from '@arco-design/web-react';
-import {
-  getEntityListByApp,
-  getFlowMgmt,
-  type Condition,
-  type ConfitionField,
-  type EntityFieldValidationTypes
-} from '@onebase/app';
+import { getEntityListByApp, type Condition, type ConfitionField, type EntityFieldValidationTypes } from '@onebase/app';
 import { getHashQueryParam } from '@onebase/common';
 import { useEffect, useState } from 'react';
 import { FormContent, FormHeader, FormOutputs } from '../../form-components';
@@ -38,21 +32,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     if (appId) {
       handleGetEntityListByApp(appId);
     }
-
-    const flowId = getHashQueryParam('flowId');
-    if (flowId) {
-      handleGetFlowInfo(flowId);
-    }
   }, []);
-
-  // 根据流程id获取流程详细信息
-  const handleGetFlowInfo = async (flowId: string) => {
-    const res = await getFlowMgmt(flowId);
-    console.log('res: ', res);
-    if (res && res.triggerConfig && res.triggerConfig.entityId) {
-      payloadForm.setFieldValue('entityId', res.triggerConfig.entityId);
-    }
-  };
 
   const handleGetEntityListByApp = async (appId: string) => {
     const res = await getEntityListByApp(appId);
@@ -87,8 +67,8 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             <Form.Item label="节点ID" field="id" initialValue={node.id}>
               <Input disabled />
             </Form.Item>
-            <Form.Item label="实体ID" field="entityId">
-              <Select>
+            <Form.Item label="实体" field="entityId">
+              <Select disabled={true}>
                 {entityList?.map((item) => (
                   <Option key={item.entityId} value={item.entityId}>
                     {item.entityName}

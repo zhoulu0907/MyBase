@@ -130,7 +130,7 @@ export interface PermissionScope {
   /**
    * 部门/人员id范围
    */
-  assignId?: string[];
+  assignIds?: string[];
 }
 
 export type ScopeType = 

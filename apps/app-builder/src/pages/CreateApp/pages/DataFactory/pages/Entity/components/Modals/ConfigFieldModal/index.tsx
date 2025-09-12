@@ -1,8 +1,8 @@
-import type { EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
 import { useAppStore } from '@/store/store_app';
 import { useFieldStore } from '@/store/store_field';
 import { Button, Message, Modal, Table } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
+import type { EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
 import { batchSaveFields, getEntityFields } from '@onebase/app';
 import { ENTITY_FIELD_TYPE, FIELD_TYPE } from '@onebase/ui-kit';
 import React, { useEffect, useState } from 'react';

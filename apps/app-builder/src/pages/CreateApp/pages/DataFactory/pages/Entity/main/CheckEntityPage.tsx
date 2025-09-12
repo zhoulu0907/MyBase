@@ -58,7 +58,7 @@ export const CheckEntityPage: React.FC = () => {
     <div className={styles['entity-page']}>
       <div className={styles['entity-page-header']}>
         <div className={styles['entity-page-header-left']}>
-          <span className={styles['entity-page-header-left-name']}>数据源名称</span>
+          <span className={styles['entity-page-header-left-name']}>{dsData?.datasourceName}</span>
           <Tag className={styles['entity-page-header-left-tag']}>数据源编码：{dsData?.code}</Tag>
           <Tag className={styles['entity-page-header-left-tag']}>创建人：{dsData?.creator}</Tag>
           <Tag className={styles['entity-page-header-left-tag']}>
