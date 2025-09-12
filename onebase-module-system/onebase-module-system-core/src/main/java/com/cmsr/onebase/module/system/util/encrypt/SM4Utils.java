@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.system.util.encrypt;
 
-import com.cmsr.onebase.module.system.controller.admin.license.vo.LicenseExportRespVO;
+import com.cmsr.onebase.module.system.vo.license.LicenseExportRespVO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;

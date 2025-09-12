@@ -1,8 +1,8 @@
 package com.cmsr.onebase.module.system.service.dept;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.system.controller.admin.dept.vo.post.PostPageReqVO;
-import com.cmsr.onebase.module.system.controller.admin.dept.vo.post.PostSaveReqVO;
+import com.cmsr.onebase.module.system.vo.post.PostPageReqVO;
+import com.cmsr.onebase.module.system.vo.post.PostSaveReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.PostDO;
 import org.springframework.lang.Nullable;
 

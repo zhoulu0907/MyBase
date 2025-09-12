@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.system.service.permission;
 
-import com.cmsr.onebase.module.system.controller.admin.permission.vo.menu.SystemMenuListReqVO;
-import com.cmsr.onebase.module.system.controller.admin.permission.vo.menu.SystemMenuSaveVO;
+import com.cmsr.onebase.module.system.vo.menu.SystemMenuListReqVO;
+import com.cmsr.onebase.module.system.vo.menu.SystemMenuSaveVO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.MenuDO;
 
 import java.util.Collection;

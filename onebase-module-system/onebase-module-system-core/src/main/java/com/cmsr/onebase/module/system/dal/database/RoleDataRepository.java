@@ -3,7 +3,7 @@ package com.cmsr.onebase.module.system.dal.database;
 import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.data.base.BaseDO;
-import com.cmsr.onebase.module.system.controller.admin.permission.vo.role.RolePageReqVO;
+import com.cmsr.onebase.module.system.vo.role.RolePageReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;

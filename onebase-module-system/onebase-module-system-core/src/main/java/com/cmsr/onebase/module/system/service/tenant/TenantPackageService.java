@@ -1,8 +1,8 @@
 package com.cmsr.onebase.module.system.service.tenant;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.system.controller.admin.tenant.vo.packages.TenantPackagePageReqVO;
-import com.cmsr.onebase.module.system.controller.admin.tenant.vo.packages.TenantPackageSaveReqVO;
+import com.cmsr.onebase.module.system.vo.tenant.TenantPackagePageReqVO;
+import com.cmsr.onebase.module.system.vo.tenant.TenantPackageSaveReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantPackageDO;
 
 import jakarta.validation.Valid;

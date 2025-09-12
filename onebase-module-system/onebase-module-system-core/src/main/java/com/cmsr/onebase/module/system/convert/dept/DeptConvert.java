@@ -6,10 +6,10 @@ import com.cmsr.onebase.module.system.api.dept.dto.DeptAndUsersReqDTO;
 import com.cmsr.onebase.module.system.api.dept.dto.DeptAndUsersRespDTO;
 import com.cmsr.onebase.module.system.api.dept.dto.DeptRespDTO;
 import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
-import com.cmsr.onebase.module.system.controller.admin.dept.vo.dept.DeptAndUsersReqVO;
-import com.cmsr.onebase.module.system.controller.admin.dept.vo.dept.DeptAndUsersRespVO;
-import com.cmsr.onebase.module.system.controller.admin.dept.vo.dept.DeptRespVO;
-import com.cmsr.onebase.module.system.controller.admin.user.vo.user.UserSimpleRespVO;
+import com.cmsr.onebase.module.system.vo.dept.DeptAndUsersReqVO;
+import com.cmsr.onebase.module.system.vo.dept.DeptAndUsersRespVO;
+import com.cmsr.onebase.module.system.vo.dept.DeptRespVO;
+import com.cmsr.onebase.module.system.vo.user.UserSimpleRespVO;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 

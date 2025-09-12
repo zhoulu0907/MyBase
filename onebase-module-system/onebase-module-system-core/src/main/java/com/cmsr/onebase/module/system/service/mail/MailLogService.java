@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.system.service.mail;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.system.controller.admin.mail.vo.log.MailLogPageReqVO;
+import com.cmsr.onebase.module.system.vo.mail.MailLogPageReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.mail.MailAccountDO;
 import com.cmsr.onebase.module.system.dal.dataobject.mail.MailLogDO;
 import com.cmsr.onebase.module.system.dal.dataobject.mail.MailTemplateDO;

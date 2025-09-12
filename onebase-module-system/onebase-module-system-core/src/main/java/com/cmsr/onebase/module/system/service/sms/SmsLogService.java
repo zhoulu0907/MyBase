@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.system.service.sms;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.system.controller.admin.sms.vo.log.SmsLogPageReqVO;
+import com.cmsr.onebase.module.system.vo.sms.SmsLogPageReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.sms.SmsLogDO;
 import com.cmsr.onebase.module.system.dal.dataobject.sms.SmsTemplateDO;
 

@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.system.dal.database;
 
 import com.cmsr.onebase.framework.aynline.DataRepository;
-import com.cmsr.onebase.module.system.controller.admin.permission.vo.menu.SystemMenuListReqVO;
+import com.cmsr.onebase.module.system.vo.menu.SystemMenuListReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.MenuDO;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Compare;

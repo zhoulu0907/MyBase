@@ -47,10 +47,10 @@
         </dependency>
 
         <!-- Web 相关 -->
-        <dependency>
-            <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-spring-boot-starter-security</artifactId>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.cmsr.onebase</groupId>-->
+<!--            <artifactId>onebase-spring-boot-starter-security</artifactId>-->
+<!--        </dependency>-->
         <!-- DB 相关 -->
         <dependency>
             <groupId>com.cmsr.onebase</groupId>

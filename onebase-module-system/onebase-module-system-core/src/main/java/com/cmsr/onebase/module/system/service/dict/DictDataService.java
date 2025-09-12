@@ -1,9 +1,9 @@
 package com.cmsr.onebase.module.system.service.dict;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.system.controller.admin.dict.vo.data.DictDataInsertReqVO;
-import com.cmsr.onebase.module.system.controller.admin.dict.vo.data.DictDataPageReqVO;
-import com.cmsr.onebase.module.system.controller.admin.dict.vo.data.DictDataUpdateReqVO;
+import com.cmsr.onebase.module.system.vo.dictdata.DictDataInsertReqVO;
+import com.cmsr.onebase.module.system.vo.dictdata.DictDataPageReqVO;
+import com.cmsr.onebase.module.system.vo.dictdata.DictDataUpdateReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.dict.DictDataDO;
 import org.springframework.lang.Nullable;
 

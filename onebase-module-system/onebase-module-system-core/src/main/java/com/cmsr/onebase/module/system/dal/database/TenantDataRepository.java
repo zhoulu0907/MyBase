@@ -3,7 +3,7 @@ package com.cmsr.onebase.module.system.dal.database;
 import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.data.base.BaseDO;
-import com.cmsr.onebase.module.system.controller.admin.tenant.vo.tenant.TenantPageReqVO;
+import com.cmsr.onebase.module.system.vo.tenant.TenantPageReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
 import com.cmsr.onebase.module.system.enums.tenant.TenantCodeEnum;
 import org.anyline.data.param.init.DefaultConfigStore;

@@ -6,7 +6,6 @@ import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.DICT_TYPE_
 import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.DICT_TYPE_NOT_EXISTS;
 import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.DICT_TYPE_TYPE_DUPLICATE;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -14,8 +13,8 @@ import org.springframework.stereotype.Service;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.date.LocalDateTimeUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.module.system.controller.admin.dict.vo.type.DictTypePageReqVO;
-import com.cmsr.onebase.module.system.controller.admin.dict.vo.type.DictTypeSaveReqVO;
+import com.cmsr.onebase.module.system.vo.dicttype.DictTypePageReqVO;
+import com.cmsr.onebase.module.system.vo.dicttype.DictTypeSaveReqVO;
 import com.cmsr.onebase.module.system.dal.database.DictTypeRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.dict.DictTypeDO;
 import com.google.common.annotations.VisibleForTesting;

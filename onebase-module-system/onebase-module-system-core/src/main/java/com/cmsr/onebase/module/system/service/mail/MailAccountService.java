@@ -1,8 +1,8 @@
 package com.cmsr.onebase.module.system.service.mail;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.system.controller.admin.mail.vo.account.MailAccountPageReqVO;
-import com.cmsr.onebase.module.system.controller.admin.mail.vo.account.MailAccountSaveReqVO;
+import com.cmsr.onebase.module.system.vo.mail.MailAccountPageReqVO;
+import com.cmsr.onebase.module.system.vo.mail.MailAccountSaveReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.mail.MailAccountDO;
 
 import jakarta.validation.Valid;

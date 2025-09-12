@@ -3,7 +3,7 @@ package com.cmsr.onebase.module.system.dal.database;
 import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.system.api.logger.dto.OperateLogPageReqDTO;
-import com.cmsr.onebase.module.system.controller.admin.logger.vo.operatelog.OperateLogPageReqVO;
+import com.cmsr.onebase.module.system.vo.operatelog.OperateLogPageReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.logger.OperateLogDO;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Compare;

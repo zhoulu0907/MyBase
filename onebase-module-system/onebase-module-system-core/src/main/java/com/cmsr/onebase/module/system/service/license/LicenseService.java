@@ -1,8 +1,8 @@
 package com.cmsr.onebase.module.system.service.license;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.system.controller.admin.license.vo.LicensePageReqVO;
-import com.cmsr.onebase.module.system.controller.admin.license.vo.LicenseSaveReqVO;
+import com.cmsr.onebase.module.system.vo.license.LicensePageReqVO;
+import com.cmsr.onebase.module.system.vo.license.LicenseSaveReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.license.LicenseDO;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.multipart.MultipartFile;

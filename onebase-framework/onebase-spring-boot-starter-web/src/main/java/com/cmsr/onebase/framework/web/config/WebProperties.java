@@ -21,7 +21,7 @@ public class WebProperties {
     private Api appApi = new Api("/app-api", new String[]{"**.controller.app.**", "**.runtime.controller.**"});
 
     @NotNull(message = "Admin API 不能为空")
-    private Api adminApi = new Api("/admin-api", new String[]{"**.controller.admin.**", "**.build.controller.**", "**.build.controller.**"});
+    private Api adminApi = new Api("/admin-api", new String[]{"**.controller.admin.**", "**.build.controller.**"});
 
     // @NotNull(message = "Admin UI 不能为空")
     private Ui adminUi;

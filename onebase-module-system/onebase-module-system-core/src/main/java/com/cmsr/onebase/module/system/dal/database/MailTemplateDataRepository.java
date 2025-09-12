@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.system.dal.database;
 
 import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.system.controller.admin.mail.vo.template.MailTemplatePageReqVO;
+import com.cmsr.onebase.module.system.vo.template.MailTemplatePageReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.mail.MailTemplateDO;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Compare;

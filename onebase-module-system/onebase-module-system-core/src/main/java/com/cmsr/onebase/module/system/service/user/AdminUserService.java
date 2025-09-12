@@ -3,11 +3,11 @@ package com.cmsr.onebase.module.system.service.user;
 import cn.hutool.core.collection.CollUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
-import com.cmsr.onebase.module.system.controller.admin.auth.vo.AuthRegisterReqVO;
-import com.cmsr.onebase.module.system.controller.admin.user.vo.profile.UserProfileUpdatePasswordReqVO;
-import com.cmsr.onebase.module.system.controller.admin.user.vo.profile.UserProfileUpdateReqVO;
-import com.cmsr.onebase.module.system.controller.admin.user.vo.user.*;
+import com.cmsr.onebase.module.system.vo.auth.AuthRegisterReqVO;
+import com.cmsr.onebase.module.system.vo.user.UserProfileUpdatePasswordReqVO;
+import com.cmsr.onebase.module.system.vo.user.UserProfileUpdateReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
+import com.cmsr.onebase.module.system.vo.user.*;
 import jakarta.validation.Valid;
 
 import java.util.Collection;
