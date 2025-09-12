@@ -57,6 +57,9 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
         getFieldList(formData.dataType, formData.dataSource);
       }
     }
+    if(formData.filterType){
+      setFilterType(formData.filterType);
+    }
   }, []);
 
   // 表单项内容变更
@@ -70,7 +73,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       dataTypeChange(value);
     } else if (key === 'dataSource') {
       dataSourceChange(value);
-    } else if (key === 'filter_type') {
+    } else if (key === 'filterType') {
       setFilterType(value);
     }
   };
@@ -216,8 +219,8 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                 </Grid.Col>
               </Grid.Row>
             </Form.Item>
-            <Form.Item label="查询规则" field="filter_type">
-              <Radio.Group onChange={(e) => handlePropsOnChange('filter_type', e)}>
+            <Form.Item label="查询规则" field="filterType">
+              <Radio.Group onChange={(e) => handlePropsOnChange('filterType', e)}>
                 {quertTypeOptions.map((item) => (
                   <Radio value={item.value}>{item.label}</Radio>
                 ))}
