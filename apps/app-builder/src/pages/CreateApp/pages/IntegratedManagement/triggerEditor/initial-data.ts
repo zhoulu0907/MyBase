@@ -92,8 +92,7 @@ export const StartTimeInitData = {
       data: {
         title: '定时触发节点',
         initialData: {
-          id: 'start_time_0',
-          delaySeconds: 0.5
+          id: 'start_time_0'
         },
         outputs: {
           type: 'object',
