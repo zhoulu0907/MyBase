@@ -17,16 +17,15 @@ const FlowEditorPage: React.FC = () => {
     const processDefinitionJson = nodes.value.map((item) => {
       const { outputs: nodeOutputs, initialData: nodeInitialData, ...restNodeData } = nodeData.value[item.id] || {};
 
-      console.log('item: ', item);
       const data = {
         id: item.id,
-        title: item.data.title,
         type: item.type,
         data: {
-          ...restNodeData
+          ...restNodeData,
+          // 覆写的属性写在后面
+          title: item.data.title
         }
       };
-      console.log(data);
 
       return data;
     });
