@@ -9,8 +9,10 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <modules>
+        <module>onebase-module-system-build</module>
+        <module>onebase-module-system-runtime</module>
         <module>onebase-module-system-api</module>
-        <module>onebase-module-system-server</module>
+        <module>onebase-module-system-core</module>
     </modules>
     <artifactId>onebase-module-system</artifactId>
     <packaging>pom</packaging>

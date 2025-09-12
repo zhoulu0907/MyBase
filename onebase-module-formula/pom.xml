@@ -9,8 +9,10 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <modules>
+        <module>onebase-module-formula-build</module>
+        <module>onebase-module-formula-runtime</module>
         <module>onebase-module-formula-api</module>
-        <module>onebase-module-formula-server</module>
+        <module>onebase-module-formula-core</module>
     </modules>
     <artifactId>onebase-module-formula</artifactId>
     <packaging>pom</packaging>
