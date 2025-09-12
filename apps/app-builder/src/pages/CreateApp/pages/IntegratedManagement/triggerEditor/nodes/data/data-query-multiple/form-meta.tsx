@@ -191,10 +191,10 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON["data"]>) => {
                 onChange={(e) => handlePropsOnChange("dataSource", e)}
               ></Select>
             </Form.Item>
-            <Form.Item label="查询条件" field="filter_condition">
+            <Form.Item label="查询条件" field="filterCondition">
               <ConditionEditor
-                onChange={(e) => handlePropsOnChange('filter_condition', e)}
-                data={triggerEditorSignal.nodeData.value[node.id]?.filter_condition || []}
+                onChange={(e) => handlePropsOnChange('filterCondition', e)}
+                data={triggerEditorSignal.nodeData.value[node.id]?.filterCondition || []}
                 fields={conditionFields}
                 entityFieldValidationTypes={validationTypes}
               />
