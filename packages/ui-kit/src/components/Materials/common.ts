@@ -43,11 +43,11 @@ export interface ICommonBaseType {
 }
 
 export const baseConfig: ITextConfigType[] = [
-  {
-    key: 'cpName',
-    name: '组件名称',
-    type: CONFIG_TYPES.TEXT_INPUT
-  }
+  // {
+  //   key: 'cpName',
+  //   name: '组件名称',
+  //   type: CONFIG_TYPES.TEXT_INPUT
+  // }
 ];
 
 export type TWidthSelectKeyType = (typeof WIDTH_VALUES)[keyof typeof WIDTH_VALUES];
