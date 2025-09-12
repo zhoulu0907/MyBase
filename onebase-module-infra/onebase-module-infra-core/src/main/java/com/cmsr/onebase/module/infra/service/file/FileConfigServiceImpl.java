@@ -15,7 +15,6 @@ import com.cmsr.onebase.module.infra.framework.file.core.client.FileClient;
 import com.cmsr.onebase.module.infra.framework.file.core.client.FileClientConfig;
 import com.cmsr.onebase.module.infra.framework.file.core.client.FileClientFactory;
 import com.cmsr.onebase.module.infra.framework.file.core.enums.FileStorageEnum;
-import com.cmsr.onebase.module.infra.service.file.FileConfigService;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import jakarta.annotation.Resource;

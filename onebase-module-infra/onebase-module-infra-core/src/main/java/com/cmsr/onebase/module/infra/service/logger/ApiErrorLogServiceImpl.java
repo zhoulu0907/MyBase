@@ -10,7 +10,6 @@ import com.cmsr.onebase.module.infra.dal.database.ApiErrorLogDataRepository;
 import com.cmsr.onebase.module.infra.dal.dataobject.logger.ApiErrorLogDO;
 import com.cmsr.onebase.module.infra.dal.vo.logger.apierrorlog.ApiErrorLogPageReqVO;
 import com.cmsr.onebase.module.infra.enums.logger.ApiErrorLogProcessStatusEnum;
-import com.cmsr.onebase.module.infra.service.logger.ApiErrorLogService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

@@ -15,8 +15,6 @@ import com.cmsr.onebase.module.infra.dal.vo.file.file.FilePresignedUrlRespVO;
 import com.cmsr.onebase.module.infra.framework.file.core.client.FileClient;
 import com.cmsr.onebase.module.infra.framework.file.core.client.s3.FilePresignedUrlRespDTO;
 import com.cmsr.onebase.module.infra.framework.file.core.utils.FileTypeUtils;
-import com.cmsr.onebase.module.infra.service.file.FileConfigService;
-import com.cmsr.onebase.module.infra.service.file.FileService;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Resource;
 import lombok.SneakyThrows;

@@ -9,7 +9,6 @@ import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.module.infra.dal.database.ApiAccessLogDataRepository;
 import com.cmsr.onebase.module.infra.dal.dataobject.logger.ApiAccessLogDO;
 import com.cmsr.onebase.module.infra.dal.vo.logger.apiaccesslog.ApiAccessLogPageReqVO;
-import com.cmsr.onebase.module.infra.service.logger.ApiAccessLogService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
