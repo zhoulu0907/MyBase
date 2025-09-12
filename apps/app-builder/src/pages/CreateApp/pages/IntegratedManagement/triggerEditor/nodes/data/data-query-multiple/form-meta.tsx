@@ -3,7 +3,7 @@ import {
   type FormRenderProps,
 } from "@flowgram.ai/fixed-layout-editor";
 import { triggerEditorSignal } from "@/store/singals/trigger_editor";
-import { Form, Input, InputNumber, Select, Radio } from "@arco-design/web-react";
+import { Form, Input, InputNumber, Select } from "@arco-design/web-react";
 import { FormContent, FormHeader, FormOutputs } from "../../../form-components";
 import { useIsSidebar, useNodeRenderContext } from "../../../hooks";
 import { type FlowNodeJSON } from "../../../typings";
@@ -151,11 +151,9 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON["data"]>) => {
 
   // 获取方式  数据查询的来源  业务表单、数据库表、API接口
   const dataTypeOptions = [
-    { label: "从表单中查询", value: "1" },
-    { label: "从数据节点中查询", value: "2" },
-    { label: "从关联表单中查询", value: "3" },
-    { label: "从子表中查询", value: "4" },
-    
+    { label: "业务表单", value: "business" },
+    { label: "数据库表", value: "database" },
+    { label: "API接口", value: "interface" },
   ];
   // 排序类型 1-升序、2-降序
   const sortTypeOptions = [
@@ -176,13 +174,15 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON["data"]>) => {
             <Form.Item label="节点ID" field="id " initialValue={node.id}>
               <Input disabled />
             </Form.Item>
-            <Form.Item label="节点名称" field="nodeName" required>
+            <Form.Item label="节点名称" field="nodeName">
               <Input onChange={(e) => handlePropsOnChange("nodeName", e)} />
             </Form.Item>
-            <Form.Item label="查询方式" field="dataType">
-              <Radio.Group direction='vertical' onChange={(e) => handlePropsOnChange("dataType", e)} >
-                {dataTypeOptions.map((item) => <Radio value={item.value}>{item.label}</Radio>)}
-              </Radio.Group>
+            <Form.Item label="获取方式" field="dataType">
+              <Select
+                options={dataTypeOptions}
+                allowClear
+                onChange={(e) => handlePropsOnChange("dataType", e)}
+              ></Select>
             </Form.Item>
             <Form.Item label="数据源" field="dataSource">
               <Select
