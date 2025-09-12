@@ -3,7 +3,7 @@ package com.cmsr.onebase.module.metadata.controller.datamethod.vo;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
-import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import java.util.Map;
 
 /**
@@ -17,7 +17,7 @@ import java.util.Map;
 public class DynamicDataPageReqVO {
 
     @Schema(description = "实体ID", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotEmpty(message = "实体ID不能为空")
+    @NotNull(message = "实体ID不能为空")
     private Long entityId;
 
     @Schema(description = "页码", example = "1")
@@ -33,7 +33,7 @@ public class DynamicDataPageReqVO {
     private String sortDirection = "desc";
 
     @Schema(description = "过滤条件")
-    private Map<String, Object> filters;
+    private Map<Long, Object> filters;
 
     @Schema(description = "方法编码（可选）")
     private String methodCode;

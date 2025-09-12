@@ -10,13 +10,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import java.util.List;
 
 /**
- * 权限管理 API
+ * 权限管理 sdk
  *
  * @author matianyu
  * @date 2025-09-10
  */
-//@FeignClient(name = "onebase-module-metadata-build", path = "/metadata")
-@Tag(name = "权限管理 API")
+@Tag(name = "权限管理 sdk")
 public interface MetadataPermitApi {
 
     /**
@@ -24,7 +23,6 @@ public interface MetadataPermitApi {
      *
      * @return 权限参考操作类型列表
      */
-    @GetMapping("/permit/ref-otft-list")
     @Operation(summary = "获取权限参考操作类型列表")
     List<PermitRefOtftRespDTO> getPermitRefOtftList();
 }

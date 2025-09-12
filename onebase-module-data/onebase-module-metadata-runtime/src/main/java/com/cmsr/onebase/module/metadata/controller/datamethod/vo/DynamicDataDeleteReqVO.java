@@ -3,7 +3,6 @@ package com.cmsr.onebase.module.metadata.controller.datamethod.vo;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
 /**
@@ -18,10 +17,10 @@ public class DynamicDataDeleteReqVO {
 
     @Schema(description = "数据ID", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "数据ID不能为空")
-    private Object id;
+    private Long id;
 
     @Schema(description = "实体ID", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotEmpty(message = "实体ID不能为空")
+    @NotNull(message = "实体ID不能为空")
     private Long entityId;
 
     @Schema(description = "方法编码（可选）")
