@@ -151,9 +151,11 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON["data"]>) => {
 
   // 获取方式  数据查询的来源  业务表单、数据库表、API接口
   const dataTypeOptions = [
-    { label: "业务表单", value: "business" },
-    { label: "数据库表", value: "database" },
-    { label: "API接口", value: "interface" },
+    { label: "从表单中查询", value: "1" },
+    { label: "从数据节点中查询", value: "2" },
+    { label: "从关联表单中查询", value: "3" },
+    { label: "从子表中查询", value: "4" },
+    
   ];
   // 排序类型 1-升序、2-降序
   const sortTypeOptions = [
