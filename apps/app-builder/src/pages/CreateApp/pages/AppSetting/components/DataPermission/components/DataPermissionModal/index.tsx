@@ -17,6 +17,7 @@ import {
 import { useState, useEffect, useCallback } from 'react';
 import { AddMembers } from '@onebase/common';
 import { debounce } from 'lodash-es';
+import DataFilters from '../DataPermissionFilters';
 
 const FormItem = Form.Item;
 
@@ -110,6 +111,12 @@ const DataPermissionModal = (props: IProps) => {
       setOperatePermission([DataOperationEnum.examine]);
     }
   }
+
+  // 数据过滤
+  const changeDataFilters = (value: AuthDataFilterVO[]) => {
+    console.log('数据过滤 changeDataFilters', value);
+    // setDataFilters(value)
+  };
 
   // 权限范围选择指定人员/部门
   // 'specifiedDepartment' | 'specifiedPerson' 指定部门/人员
@@ -378,7 +385,15 @@ const DataPermissionModal = (props: IProps) => {
           </FormItem>
           {/* 数据过滤 */}
           <FormItem field="dataFilters" label="数据过滤">
-            <div className={styles.dataPermissionFilters}>
+            <DataFilters
+              dataFilters={dataFilters}
+              appEntityFields={appEntityFields}
+              filterFieldCheckType={filterFieldCheckType}
+              getFieldCheckType={getFieldCheckType}
+              onChange={() => changeDataFilters}
+              entitySelected={entitySelected}
+            />
+            {/* <div className={styles.dataPermissionFilters}>
               {dataFilters && dataFilters.length > 0 ? (
                 <>
                   {dataFilters.map((group, index) => {
@@ -613,7 +628,7 @@ const DataPermissionModal = (props: IProps) => {
                   添加条件组
                 </Button>
               )}
-            </div>
+            </div> */}
           </FormItem>
           <FormItem field="isOperable" label="操作权限">
             <div className={styles.dataPermissionOperableBox}>
