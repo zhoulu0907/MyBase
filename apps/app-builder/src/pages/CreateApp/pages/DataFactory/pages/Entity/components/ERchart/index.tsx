@@ -62,10 +62,10 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
       const graph = graphRef.current!;
       const edges = graph.getEdges();
 
-      // 确定聚合 port ID
+      // 确定聚合portID
       const aggregatePortId = `${nodeId}_${section}_fields`;
 
-      // 获取该节点的所有字段，用于判断是否属于当前 section
+      // 获取该节点的所有字段，用于判断是否属于当前section
       const nodeData = data.nodes.find((n) => n.entityId === nodeId);
       if (!nodeData) return;
 
@@ -73,7 +73,7 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
       const customFields = nodeData.fields.filter((f) => f.isSystemField === FIELD_TYPE.CUSTOM);
       const fieldsInThisSection = section === 'system' ? systemFields : customFields;
 
-      // 提取所有该 section 字段对应的 port IDs
+      // 提取所有字段对应的portID
       const portIdsInSection = new Set(
         fieldsInThisSection.flatMap((field) => [
           `${field.fieldId || field.fieldName}_source`,
@@ -435,7 +435,6 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
 
         graphRef.current.on('node:click', ({ e, node }) => {
           // 阻止折叠图标点击触发
-          console.log('node:click', e.target, e.target.closest('#collapse-icon'));
           const target = e.target as HTMLElement;
           if (target.closest('#collapse-icon')) {
             e.stopPropagation();
