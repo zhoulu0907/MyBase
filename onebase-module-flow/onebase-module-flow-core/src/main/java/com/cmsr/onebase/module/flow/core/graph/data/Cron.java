@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.flow.core.graph.data;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -48,8 +49,8 @@ public class Cron {
 
     public void setMinuteAndHour(String triggerTime) {
         String[] split = StringUtils.split(triggerTime, ":");
-        hour = split[0];
-        minute = split[1];
+        hour = String.valueOf(NumberUtils.toInt(split[0]));
+        minute = String.valueOf(NumberUtils.toInt(split[1]));
     }
 
 
