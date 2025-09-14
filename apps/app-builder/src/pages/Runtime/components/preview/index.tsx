@@ -106,7 +106,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     Object.entries(fields).forEach(([key, value]) => {
       const field = (mainMetaDataFields || []).find((f: AppEntityField) => f.fieldID == key);
       if (field) {
-        formData[field.fieldName] = value;
+        formData[field.fieldID] = value;
       }
     });
 
