@@ -1,24 +1,23 @@
 // 实体管理服务
 import { DataMethodParam, DeleteMethodParam, InsertMethodParams, PageMethodParam, UpdateMethodParams } from '../types';
-import { metadataService } from './clients';
-
+import { runtimeMetadataService } from './clients';
 
 export const dataMethodInsert = (params: InsertMethodParams) => {
-    return metadataService.post(`/data-method/insert`, params);
+  return runtimeMetadataService.post(`/data-method/insert`, params);
 };
 
 export const dataMethodPage = (params: PageMethodParam) => {
-    return metadataService.post(`/data-method/data/page`, params);
+  return runtimeMetadataService.post(`/data-method/data/page`, params);
 };
 
 export const dataMethodDelete = (params: DeleteMethodParam) => {
-    return metadataService.post(`/data-method/delete`, params);
+  return runtimeMetadataService.post(`/data-method/delete`, params);
 };
 
 export const dataMethodData = (params: DataMethodParam) => {
-    return metadataService.post(`/data-method/data`, params);
+  return runtimeMetadataService.post(`/data-method/data`, params);
 };
 
 export const dataMethodUpdate = (params: UpdateMethodParams) => {
-    return metadataService.post(`/data-method/update`, params);
+  return runtimeMetadataService.post(`/data-method/update`, params);
 };
