@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.system.vo.template;
+package com.cmsr.onebase.module.system.vo.mail;
 
 import com.cmsr.onebase.framework.common.pojo.PageParam;
 import io.swagger.v3.oas.annotations.media.Schema;

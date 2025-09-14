@@ -6,7 +6,7 @@ import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.system.dal.dataobject.mail.MailTemplateDO;
 import com.cmsr.onebase.module.system.service.mail.MailSendService;
 import com.cmsr.onebase.module.system.service.mail.MailTemplateService;
-import com.cmsr.onebase.module.system.vo.template.*;
+import com.cmsr.onebase.module.system.vo.mail.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;

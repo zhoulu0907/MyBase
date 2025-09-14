@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.system.vo.loginlog;
+package com.cmsr.onebase.module.system.vo.log;
 
 import com.cmsr.onebase.framework.excel.core.annotations.DictFormat;
 import com.cmsr.onebase.framework.excel.core.convert.DictConvert;
