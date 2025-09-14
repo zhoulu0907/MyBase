@@ -9,6 +9,12 @@ import styles from '../../index.module.less';
 const FormItem = Form.Item;
 const Option = Select.Option;
 
+const ATTR_KEY = {
+  IS_SETTED: 'isSetted',
+  DISPLAYFIELDS: 'displayFields',
+  FILLFORMFIELD: 'fillFormField'
+};
+
 export interface DynamicSelectDataSourceConfigProps {
   handlePropsChange: (key: string, value: string | number | boolean | any[]) => void;
   item: any;
@@ -27,7 +33,7 @@ const DynamicDataSourceConfig: React.FC<DynamicSelectDataSourceConfigProps> = ({
   const [selectedDataSource, setSelectedDataSource] = useState(configs[item.key] || null); // 选择的数据源
 
   const [selectDataVisible, setSelectDataVisibleVisible] = useState(false); //数据选择过程 popup
-  const [isSetted, setIsSetted] = useState(false);
+  const [isSetted, setIsSetted] = useState(configs[ATTR_KEY.IS_SETTED]);
 
   useEffect(() => {
     curAppId && getPageList();
@@ -41,7 +47,10 @@ const DynamicDataSourceConfig: React.FC<DynamicSelectDataSourceConfigProps> = ({
 
   const toSetting = () => {
     setSelectDataVisibleVisible(true);
-    !isSetted && setIsSetted(true);
+    if (!isSetted) {
+      setIsSetted(true);
+      handlePropsChange(ATTR_KEY.IS_SETTED, true);
+    }
   };
 
   console.log({
@@ -82,6 +91,10 @@ const DynamicDataSourceConfig: React.FC<DynamicSelectDataSourceConfigProps> = ({
             <DataSelectionProcessConfig
               visible={selectDataVisible}
               setVisible={() => setSelectDataVisibleVisible(false)}
+              id={id}
+              handlePropsChange={handlePropsChange}
+              item={item}
+              configs={configs}
             />
           </FormItem>
 
