@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.system.vo.operatelog;
+package com.cmsr.onebase.module.system.vo.log;
 
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;

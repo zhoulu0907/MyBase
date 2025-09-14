@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.system.vo.template;
+package com.cmsr.onebase.module.system.vo.mail;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;

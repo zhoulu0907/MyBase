@@ -3,7 +3,7 @@ package com.cmsr.onebase.module.system.service.logger;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.biz.system.logger.dto.OperateLogCreateReqDTO;
 import com.cmsr.onebase.module.system.api.logger.dto.OperateLogPageReqDTO;
-import com.cmsr.onebase.module.system.vo.operatelog.OperateLogPageReqVO;
+import com.cmsr.onebase.module.system.vo.log.OperateLogPageReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.logger.OperateLogDO;
 
 /**
