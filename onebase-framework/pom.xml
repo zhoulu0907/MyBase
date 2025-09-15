@@ -11,7 +11,6 @@
     <packaging>pom</packaging>
     <modules>
         <module>onebase-common</module>
-        <module>onebase-spring-boot-starter-monitor</module>
         <module>onebase-spring-boot-starter-orm</module>
         <module>onebase-spring-boot-starter-redis</module>
         <module>onebase-spring-boot-starter-web</module>
@@ -23,6 +22,7 @@
         <module>onebase-spring-boot-starter-test</module>
 
         <module>onebase-spring-boot-starter-biz-tenant</module>
+        <module>onebase-project-base</module>
     </modules>
 
     <artifactId>onebase-framework</artifactId>

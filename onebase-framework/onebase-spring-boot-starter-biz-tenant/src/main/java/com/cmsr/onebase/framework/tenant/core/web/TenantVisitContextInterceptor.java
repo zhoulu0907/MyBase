@@ -14,7 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.servlet.HandlerInterceptor;
 
-import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception0;
+import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -28,6 +28,7 @@ public class TenantVisitContextInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
+
         // 如果和当前租户编号一致，则直接跳过
         Long visitTenantId = WebFrameworkUtils.getVisitTenantId(request);
         if (visitTenantId == null) {
@@ -44,7 +45,7 @@ public class TenantVisitContextInterceptor implements HandlerInterceptor {
 
         // 校验用户是否可切换租户
         if (!securityFrameworkService.hasAnyPermissions(PERMISSION)) {
-            throw exception0(GlobalErrorCodeConstants.FORBIDDEN.getCode(), "您无权切换租户");
+            throw exception(GlobalErrorCodeConstants.FORBIDDEN.getCode(), "您无权切换租户");
         }
 
         // 【重点】切换租户编号

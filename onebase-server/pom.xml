@@ -21,32 +21,47 @@
     <dependencies>
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-module-formula-server</artifactId>
+            <artifactId>onebase-project-base</artifactId>
             <version>${revision}</version>
         </dependency>
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-module-system-server</artifactId>
+            <artifactId>onebase-module-formula-build</artifactId>
             <version>${revision}</version>
         </dependency>
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-module-metadata-server</artifactId>
+            <artifactId>onebase-module-system-build</artifactId>
             <version>${revision}</version>
         </dependency>
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-module-infra-server</artifactId>
+            <artifactId>onebase-module-infra-core</artifactId>
             <version>${revision}</version>
         </dependency>
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-module-app-server</artifactId>
+            <artifactId>onebase-module-metadata-build</artifactId>
             <version>${revision}</version>
         </dependency>
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-module-flow-server</artifactId>
+            <artifactId>onebase-module-metadata-runtime</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-module-infra-build</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-module-app-build</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-module-flow-build</artifactId>
             <version>${revision}</version>
         </dependency>
         <!-- 工作流。默认注释，保证编译速度 -->

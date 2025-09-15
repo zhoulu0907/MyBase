@@ -1,6 +1,7 @@
 package com.cmsr.onebase.framework.web.core.util;
 
 import cn.hutool.core.util.NumberUtil;
+import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.framework.common.enums.RpcConstants;
 import com.cmsr.onebase.framework.common.enums.TerminalEnum;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
@@ -87,27 +88,27 @@ public class WebFrameworkUtils {
         return (Long) request.getAttribute(REQUEST_ATTRIBUTE_LOGIN_USER_ID);
     }
 
-    /**
-     * 获得当前用户的类型
-     * 注意：该方法仅限于 web 相关的 framework 组件使用！！！
+        /**
+     * 获得请求对应的用户类型
      *
      * @param request 请求
-     * @return 用户编号
+     * @return 用户类型
      */
     public static Integer getLoginUserType(HttpServletRequest request) {
-        if (request == null) {
+        // 获得请求的 URI
+        String uri = request.getRequestURI();
+        
+        // 对于runtime metadata相关接口，不进行用户类型检查，允许任何类型用户访问
+        if (StrUtil.startWith(uri, "/runtime/metadata/")) {
             return null;
         }
-        // 1. 优先，从 Attribute 中获取
-        Integer userType = (Integer) request.getAttribute(REQUEST_ATTRIBUTE_LOGIN_USER_TYPE);
-        if (userType != null) {
-            return userType;
-        }
-        // 2. 其次，基于 URL 前缀的约定
-        if (request.getServletPath().startsWith(properties.getAdminApi().getPrefix())) {
+        
+        // 检查 Admin API
+        if (StrUtil.startWith(uri, properties.getAdminApi().getPrefix())) {
             return UserTypeEnum.ADMIN.getValue();
         }
-        if (request.getServletPath().startsWith(properties.getAppApi().getPrefix())) {
+        // 检查 App API
+        if (StrUtil.startWith(uri, properties.getAppApi().getPrefix())) {
             return UserTypeEnum.MEMBER.getValue();
         }
         return null;

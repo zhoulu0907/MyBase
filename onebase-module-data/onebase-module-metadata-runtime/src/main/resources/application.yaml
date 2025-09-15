@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: metadata-runtime
+  profiles:
+    active: local
+  main:
+    allow-circular-references: true
+    allow-bean-definition-overriding: true
+
+server:
+  port: 48081
+
+# 运行时接口统一前缀，可被外部覆盖
+onebase:
+  web:
+    runtime-path-prefix: /runtime
+
+springdoc:
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui
