@@ -3,8 +3,8 @@ package com.cmsr.onebase.module.metadata.api.datasource.impl;
 import com.cmsr.onebase.module.metadata.api.datasource.MetadataDatasourceApi;
 import com.cmsr.onebase.module.metadata.api.datasource.dto.DatasourceCreateDefaultReqDTO;
 import com.cmsr.onebase.module.metadata.api.datasource.dto.DatasourceSaveReqDTO;
-import com.cmsr.onebase.module.metadata.dal.dataobject.datasource.MetadataDatasourceDO;
-import com.cmsr.onebase.module.metadata.service.datasource.MetadataDatasourceCoreService;
+import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataDatasourceDO;
+import com.cmsr.onebase.module.metadata.core.service.datasource.MetadataDatasourceCoreService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
@@ -31,14 +31,14 @@ public class MetadataDatasourceApiImpl implements MetadataDatasourceApi {
     public Long createDefaultDatasource(@Valid @RequestBody DatasourceCreateDefaultReqDTO reqDTO) {
         try {
             // 构造默认数据源配置JSON
-            
+
             String configJson = "{\"host\":\"10.0.104.38\",\"port\":5432,\"database\":\"onebase_business\",\"username\":\"postgres\",\"password\":\"onebase@2025\"}";
-            
+
             // 调用 core 模块的基础服务
             Long datasourceId = metadataDatasourceCoreService.createDefaultDatasource(
-                    reqDTO.getAppId(), 
-                    reqDTO.getAppUid(), 
-                    "postgresql", 
+                    reqDTO.getAppId(),
+                    reqDTO.getAppUid(),
+                    "postgresql",
                     configJson
             );
 
@@ -73,9 +73,9 @@ public class MetadataDatasourceApiImpl implements MetadataDatasourceApi {
 
             // 创建关联关系
             metadataDatasourceCoreService.createAppDatasourceRelation(
-                    reqDTO.getAppId(), 
-                    datasourceId, 
-                    reqDTO.getDatasourceType(), 
+                    reqDTO.getAppId(),
+                    datasourceId,
+                    reqDTO.getDatasourceType(),
                     reqDTO.getAppUid()
             );
 

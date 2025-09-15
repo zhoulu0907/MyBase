@@ -2,9 +2,9 @@ package com.cmsr.onebase.module.metadata.api.validation.impl;
 
 import com.cmsr.onebase.module.metadata.api.validation.MetadataPermitApi;
 import com.cmsr.onebase.module.metadata.api.validation.dto.PermitRefOtftRespDTO;
-import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataComponentFieldTypeDO;
-import com.cmsr.onebase.module.metadata.dal.dataobject.validation.MetadataPermitRefOtftDO;
-import com.cmsr.onebase.module.metadata.dal.dataobject.validation.MetadataValidationTypeDO;
+import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataComponentFieldTypeDO;
+import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataPermitRefOtftDO;
+import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationTypeDO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.init.DefaultConfigStore;
@@ -41,7 +41,7 @@ public class MetadataPermitApiImpl implements MetadataPermitApi {
             fieldTypeCs.order("sort_order", Order.TYPE.ASC);
             DataSet fieldTypeDataSet = anylineService.querys("metadata_component_field_type", fieldTypeCs);
             List<MetadataComponentFieldTypeDO> fieldTypes = fieldTypeDataSet.entity(MetadataComponentFieldTypeDO.class);
-            
+
             if (fieldTypes == null || fieldTypes.isEmpty()) {
                 log.warn("没有找到字段类型配置");
                 return new ArrayList<>();
