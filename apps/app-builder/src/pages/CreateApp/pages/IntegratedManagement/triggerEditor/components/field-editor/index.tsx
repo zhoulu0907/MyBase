@@ -16,7 +16,11 @@ const valueTypeOptions = [
 const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList }) => {
   return (
     <div className={styles.conditionWrapper}>
-      <Form.Item>
+      <Form.Item
+        onChange={(value) => {
+          console.log(value);
+        }}
+      >
         <Form.List field="fieldList">
           {(fields, { add, remove }) => {
             return (
