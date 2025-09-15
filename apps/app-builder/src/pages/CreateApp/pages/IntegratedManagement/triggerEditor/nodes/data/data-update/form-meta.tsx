@@ -33,14 +33,10 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const [validationTypes, setValidationTypes] = useState<EntityFieldValidationTypes[]>([]);
   const [conditionFields, setConditionFields] = useState<ConfitionField[]>([]);
 
-  const handlePropsOnChange = (values: any) => {
-    triggerEditorSignal.setNodeData(node.id, values);
-  };
 
   const onValuesChange = (changeValue: any, values: any) => {
     console.log('onValuesChange: ', changeValue, values);
-
-    handlePropsOnChange(values);
+    triggerEditorSignal.setNodeData(node.id, values);
   };
 
   const [payloadForm] = Form.useForm();
@@ -49,7 +45,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
   useEffect(() => {
     if (updateType) {
-      console.log('updateType: ', updateType);
+      payloadForm.clearFields(['entityId']);
       if (updateType == UPDATE_TYPE.MAIN_ENTITY) {
         console.log('mainEntities.value: ', mainEntities.value);
         setEntityList(mainEntities.value);
