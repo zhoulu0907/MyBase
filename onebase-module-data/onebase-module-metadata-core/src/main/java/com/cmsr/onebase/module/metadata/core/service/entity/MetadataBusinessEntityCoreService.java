@@ -75,6 +75,14 @@ public interface MetadataBusinessEntityCoreService {
      */
     List<MetadataBusinessEntityDO> findAllByConfig(org.anyline.data.param.init.DefaultConfigStore configStore);
 
+    /**
+     * 根据条件统计业务实体数量
+     *
+     * @param configStore 查询条件
+     * @return 业务实体数量
+     */
+    long countByConfig(org.anyline.data.param.init.DefaultConfigStore configStore);
+
     // TODO: 以下方法需要在build模块中实现，涉及VO转换
     /*
     PageResult<BusinessEntityRespVO> getBusinessEntityPageWithResponse(BusinessEntityPageReqVO pageReqVO);
