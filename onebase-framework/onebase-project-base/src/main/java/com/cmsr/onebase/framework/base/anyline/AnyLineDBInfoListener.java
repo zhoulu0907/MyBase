@@ -1,4 +1,4 @@
-package com.cmsr.onebase.server.anyline;
+package com.cmsr.onebase.framework.base.anyline;
 
 import com.cmsr.onebase.framework.common.consts.DeleteConstant;
 import com.cmsr.onebase.framework.common.exception.DatabaseAccessErrorCodes;
