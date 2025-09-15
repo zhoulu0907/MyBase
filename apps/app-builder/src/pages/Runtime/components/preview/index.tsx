@@ -104,9 +104,9 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
 
     const formData = {} as any;
     Object.entries(fields).forEach(([key, value]) => {
-      const field = (mainMetaDataFields || []).find((f: AppEntityField) => f.fieldID == key);
+      const field = (mainMetaDataFields || []).find((f: AppEntityField) => f.fieldId == key);
       if (field) {
-        formData[field.fieldID] = value;
+        formData[field.fieldId] = value;
       }
     });
 
@@ -170,7 +170,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
     if (res && res.data) {
       const fieldIdNameMap: Record<string, string> = {};
       (mainMetaDataFields || []).forEach((field: AppEntityField) => {
-        fieldIdNameMap[field.fieldName] = field.fieldID;
+        fieldIdNameMap[field.fieldName] = field.fieldId;
       });
 
       // 只处理第一个数据对象（通常为单条数据）

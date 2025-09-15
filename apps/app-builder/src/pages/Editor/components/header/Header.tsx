@@ -203,7 +203,7 @@ export default function EditorHeader() {
 
     if (entityWithChildren) {
       setMainEntity({
-        entityID: entityWithChildren.entityId,
+        entityId: entityWithChildren.entityId,
         entityName: entityWithChildren.entityName,
         entityType: ENTITY_TYPE.MAIN,
         fields: entityWithChildren.parentFields
@@ -211,7 +211,7 @@ export default function EditorHeader() {
 
       if (entityWithChildren.childEntities && entityWithChildren.childEntities.length > 0) {
         const subEntities = entityWithChildren.childEntities.map((entity: ChildEntity) => ({
-          entityID: entity.childEntityId,
+          entityId: entity.childEntityId,
           entityName: entity.childEntityName,
           entityType: ENTITY_TYPE.SUB,
           fields: entity.childFields
