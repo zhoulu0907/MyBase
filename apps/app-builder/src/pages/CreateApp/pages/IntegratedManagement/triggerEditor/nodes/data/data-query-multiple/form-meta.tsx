@@ -1,6 +1,6 @@
 import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
-import { Form, Input,InputNumber, Select, Radio, Grid } from '@arco-design/web-react';
+import { Form, Input, InputNumber, Select, Radio, Grid } from '@arco-design/web-react';
 import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
@@ -49,6 +49,10 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   // 查询条件
   const [validationTypes, setValidationTypes] = useState<EntityFieldValidationTypes[]>([]);
   const [conditionFields, setConditionFields] = useState<ConfitionField[]>([]);
+  const [payloadForm] = Form.useForm();
+  const dataType = Form.useWatch('dataType', payloadForm);
+  const dataSource = Form.useWatch('dataSource', payloadForm);
+  const filType = Form.useWatch('filterType', payloadForm);
 
   useEffect(() => {
     const formData = payloadForm.getFieldsValue();
@@ -62,6 +66,21 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       setFilterType(formData.filterType);
     }
   }, []);
+  useEffect(() => {
+    if (dataType) {
+      dataTypeChange(dataType);
+    }
+  }, [dataType]);
+  useEffect(() => {
+    if (dataSource) {
+      dataSourceChange(dataSource);
+    }
+  }, [dataSource]);
+  useEffect(() => {
+    if (filType) {
+      setFilterType(filType);
+    }
+  }, [filType]);
 
   // 表单值改变
   const onValuesChange = (changeValue: any, values: any) => {
@@ -71,17 +90,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       ...nodeData,
       ...values
     });
-    const [key] = Object.keys(changeValue);
-    const value = changeValue[key];
-    if (value) {
-      if (key === 'dataType') {
-        dataTypeChange(value);
-      } else if (key === 'dataSource') {
-        dataSourceChange(value);
-      } else if (key === 'filterType') {
-        setFilterType(value);
-      }
-    }
   };
   /**
    * 获取方式变更
@@ -181,8 +189,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     }
   };
 
-  const [payloadForm] = Form.useForm();
-
   // 获取方式  数据查询的来源
   const dataTypeOptions = [
     { label: '从表单中查询', value: DATA_TYPE.FORM },
@@ -218,25 +224,31 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             <Form.Item label="查询方式" field="dataType" required>
               <Radio.Group direction="vertical">
                 {dataTypeOptions.map((item) => (
-                  <Radio key={item.value} value={item.value}>{item.label}</Radio>
+                  <Radio key={item.value} value={item.value}>
+                    {item.label}
+                  </Radio>
                 ))}
               </Radio.Group>
             </Form.Item>
-            <Form.Item field="dataSource">
-              <Grid.Row align="center">
-                <Grid.Col span={1}>从</Grid.Col>
-                <Grid.Col span={19}>
+            <Grid.Row>
+              <Grid.Col span={1} style={{ textAlign: 'center', lineHeight: '32px' }}>
+                从
+              </Grid.Col>
+              <Grid.Col span={19}>
+                <Form.Item field="dataSource">
                   <Select options={entityList} allowClear></Select>
-                </Grid.Col>
-                <Grid.Col span={4} style={{ textAlign: 'center' }}>
-                  <span>中查询数据</span>
-                </Grid.Col>
-              </Grid.Row>
-            </Form.Item>
+                </Form.Item>
+              </Grid.Col>
+              <Grid.Col span={4} style={{ textAlign: 'center', lineHeight: '32px' }}>
+                <span>中查询数据</span>
+              </Grid.Col>
+            </Grid.Row>
             <Form.Item label="查询规则" field="filterType" required>
               <Radio.Group>
                 {quertTypeOptions.map((item) => (
-                  <Radio key={item.value} value={item.value}>{item.label}</Radio>
+                  <Radio key={item.value} value={item.value}>
+                    {item.label}
+                  </Radio>
                 ))}
               </Radio.Group>
             </Form.Item>
