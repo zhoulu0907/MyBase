@@ -63,6 +63,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     }
   }, []);
 
+  // 表单值改变
   const onValuesChange = (changeValue: any, values: any) => {
     console.log('onValuesChange: ', changeValue, values);
     const nodeData = triggerEditorSignal.nodeData.value[node.id];
@@ -70,21 +71,16 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       ...nodeData,
       ...values
     });
-    // handlePropsOnChange(values);
-  };
-  // 表单项内容变更
-  const handlePropsOnChange = (key: string, value: any) => {
-    const nodeData = triggerEditorSignal.nodeData.value[node.id];
-    triggerEditorSignal.setNodeData(node.id, {
-      ...nodeData,
-      [key]: value
-    });
-    if (key === 'dataType') {
-      dataTypeChange(value);
-    } else if (key === 'dataSource') {
-      dataSourceChange(value);
-    } else if (key === 'filterType') {
-      setFilterType(value);
+    const [key] = Object.keys(changeValue);
+    const value = changeValue[key];
+    if (value) {
+      if (key === 'dataType') {
+        dataTypeChange(value);
+      } else if (key === 'dataSource') {
+        dataSourceChange(value);
+      } else if (key === 'filterType') {
+        setFilterType(value);
+      }
     }
   };
   /**
@@ -220,9 +216,9 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
               <Input disabled />
             </Form.Item>
             <Form.Item label="查询方式" field="dataType" required>
-              <Radio.Group direction="vertical" onChange={(e) => handlePropsOnChange('dataType', e)}>
+              <Radio.Group direction="vertical">
                 {dataTypeOptions.map((item) => (
-                  <Radio value={item.value}>{item.label}</Radio>
+                  <Radio key={item.value} value={item.value}>{item.label}</Radio>
                 ))}
               </Radio.Group>
             </Form.Item>
@@ -240,14 +236,13 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             <Form.Item label="查询规则" field="filterType" required>
               <Radio.Group>
                 {quertTypeOptions.map((item) => (
-                  <Radio value={item.value}>{item.label}</Radio>
+                  <Radio key={item.value} value={item.value}>{item.label}</Radio>
                 ))}
               </Radio.Group>
             </Form.Item>
             {filterType === FILTER_TYPE.CONDITION && (
               <Form.Item field="filterCondition">
                 <ConditionEditor
-                  onChange={(e) => handlePropsOnChange('filterCondition', e)}
                   data={triggerEditorSignal.nodeData.value[node.id]?.filterCondition || []}
                   fields={conditionFields}
                   entityFieldValidationTypes={validationTypes}

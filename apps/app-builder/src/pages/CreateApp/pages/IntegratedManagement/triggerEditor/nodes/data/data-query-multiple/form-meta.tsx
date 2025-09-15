@@ -1,6 +1,6 @@
 import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
-import { Form, Input, Select, Radio, Grid, InputNumber } from '@arco-design/web-react';
+import { Form, Input,InputNumber, Select, Radio, Grid } from '@arco-design/web-react';
 import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
@@ -16,6 +16,7 @@ import { useEffect, useState } from 'react';
 import { useAppStore } from '@/store/store_app';
 import ConditionEditor from '../../../components/condition-editor';
 import SortByEditor from '../../../components/sortby-editor';
+import { getBeforeCurNodes } from '../../../components/data';
 
 interface SelectOption {
   label: string;
@@ -62,19 +63,24 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     }
   }, []);
 
-  // 表单项内容变更
-  const handlePropsOnChange = (key: string, value: any) => {
+  // 表单值改变
+  const onValuesChange = (changeValue: any, values: any) => {
+    console.log('onValuesChange: ', changeValue, values);
     const nodeData = triggerEditorSignal.nodeData.value[node.id];
     triggerEditorSignal.setNodeData(node.id, {
       ...nodeData,
-      [key]: value
+      ...values
     });
-    if (key === 'dataType') {
-      dataTypeChange(value);
-    } else if (key === 'dataSource') {
-      dataSourceChange(value);
-    } else if (key === 'filterType') {
-      setFilterType(value);
+    const [key] = Object.keys(changeValue);
+    const value = changeValue[key];
+    if (value) {
+      if (key === 'dataType') {
+        dataTypeChange(value);
+      } else if (key === 'dataSource') {
+        dataSourceChange(value);
+      } else if (key === 'filterType') {
+        setFilterType(value);
+      }
     }
   };
   /**
@@ -112,6 +118,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   };
   // 获取数据源列表
   const getEntityList = async (dataType: number | string) => {
+    // todo  判断
     if (dataType === DATA_TYPE.FORM) {
       // 从表单中查询  FORM
       const res = await getEntityListByApp(curAppId);
@@ -123,6 +130,14 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       setEntityList(fieldOptions);
     } else if (dataType === DATA_TYPE.DATA_NODE) {
       // 从数据节点中查询  DATA_NODE
+      const nodes = triggerEditorSignal.nodes.value;
+      const newEntityList = getBeforeCurNodes(node.id, nodes);
+
+      setEntityList(
+        newEntityList.map((item) => {
+          return { label: item?.data?.title, value: item.id };
+        })
+      );
     } else if (dataType === DATA_TYPE.ASSOCIA_FORM) {
       // 从关联表单中查询  ASSOCIA_FORM
     } else if (dataType === DATA_TYPE.SUBFORM) {
@@ -185,22 +200,25 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     { label: '降序', value: SortType.DESC }
   ];
 
+  const formDefaultValue = { dataType: DATA_TYPE.FORM, filterType: FILTER_TYPE.ALL };
   return (
     <>
       <FormHeader />
       {isSidebar ? (
         <FormContent>
-          <Form form={payloadForm} layout="vertical" initialValues={{ ...triggerEditorSignal.nodeData.value[node.id] }}>
+          <Form
+            form={payloadForm}
+            layout="vertical"
+            onValuesChange={onValuesChange}
+            initialValues={{ ...formDefaultValue, ...triggerEditorSignal.nodeData.value[node.id] }}
+          >
             <Form.Item label="节点ID" field="id " initialValue={node.id}>
               <Input disabled />
             </Form.Item>
-            <Form.Item label="节点名称" field="nodeName" required>
-              <Input onChange={(e) => handlePropsOnChange('nodeName', e)} />
-            </Form.Item>
-            <Form.Item label="查询方式" field="dataType">
-              <Radio.Group direction="vertical" onChange={(e) => handlePropsOnChange('dataType', e)}>
+            <Form.Item label="查询方式" field="dataType" required>
+              <Radio.Group direction="vertical">
                 {dataTypeOptions.map((item) => (
-                  <Radio value={item.value}>{item.label}</Radio>
+                  <Radio key={item.value} value={item.value}>{item.label}</Radio>
                 ))}
               </Radio.Group>
             </Form.Item>
@@ -208,28 +226,23 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
               <Grid.Row align="center">
                 <Grid.Col span={1}>从</Grid.Col>
                 <Grid.Col span={19}>
-                  <Select
-                    options={entityList}
-                    allowClear
-                    onChange={(e) => handlePropsOnChange('dataSource', e)}
-                  ></Select>
+                  <Select options={entityList} allowClear></Select>
                 </Grid.Col>
                 <Grid.Col span={4} style={{ textAlign: 'center' }}>
                   <span>中查询数据</span>
                 </Grid.Col>
               </Grid.Row>
             </Form.Item>
-            <Form.Item label="查询规则" field="filterType">
-              <Radio.Group onChange={(e) => handlePropsOnChange('filterType', e)}>
+            <Form.Item label="查询规则" field="filterType" required>
+              <Radio.Group>
                 {quertTypeOptions.map((item) => (
-                  <Radio value={item.value}>{item.label}</Radio>
+                  <Radio key={item.value} value={item.value}>{item.label}</Radio>
                 ))}
               </Radio.Group>
             </Form.Item>
             {filterType === FILTER_TYPE.CONDITION && (
               <Form.Item field="filterCondition">
                 <ConditionEditor
-                  onChange={(e) => handlePropsOnChange('filterCondition', e)}
                   data={triggerEditorSignal.nodeData.value[node.id]?.filterCondition || []}
                   fields={conditionFields}
                   entityFieldValidationTypes={validationTypes}
@@ -238,7 +251,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             )}
             <Form.Item label="排序规则" required field="sortBy">
               <SortByEditor
-                onChange={(e) => handlePropsOnChange('sortBy', e)}
                 data={triggerEditorSignal.nodeData.value[node.id]?.sortBy || []}
                 fields={conditionFields}
                 sortByTypes={sortTypeOptions}

@@ -25,7 +25,7 @@ const opCodeOptions = [
 export interface ConditionEditorProps {
   fields: ConfitionField[];
   data?: Condition[];
-  onChange: (value: Condition[]) => void;
+  onChange?: (value: Condition[]) => void;
   entityFieldValidationTypes: EntityFieldValidationTypes[];
 }
 
