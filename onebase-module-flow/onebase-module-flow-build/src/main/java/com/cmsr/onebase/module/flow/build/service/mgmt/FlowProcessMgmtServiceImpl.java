@@ -243,13 +243,13 @@ public class FlowProcessMgmtServiceImpl implements FlowProcessMgmtService {
         FlowProcessTimeDO flowProcessTimeDO = flowProcessTimeRepository.findByProcessId(flowProcessDO.getId());
         String jobId;
         if (flowProcessTimeDO == null) {
-            jobId = jobClient.startJob(flowProcessTimeDO.getProcessId(), startTimeNodeData);
+            jobId = jobClient.startJob(flowProcessDO.getId(), startTimeNodeData);
             flowProcessTimeDO = new FlowProcessTimeDO();
             flowProcessTimeDO.setProcessId(flowProcessDO.getId());
             flowProcessTimeDO.setJobId(jobId);
             flowProcessTimeRepository.insert(flowProcessTimeDO);
         } else {
-            jobId = jobClient.startJob(flowProcessTimeDO.getProcessId(), flowProcessTimeDO.getJobId(), startTimeNodeData);
+            jobId = jobClient.startJob(flowProcessDO.getId(), flowProcessTimeDO.getJobId(), startTimeNodeData);
             flowProcessTimeDO.setJobId(jobId);
             flowProcessTimeRepository.update(flowProcessTimeDO);
         }

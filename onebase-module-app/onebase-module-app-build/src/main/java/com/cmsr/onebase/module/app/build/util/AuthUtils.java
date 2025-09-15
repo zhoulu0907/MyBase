@@ -13,8 +13,6 @@ import java.util.function.BiFunction;
  */
 public class AuthUtils {
 
-    public static final String AUTH_OPERATION_TABLE_NAME = "app_auth_operation";
-
     /**
      * 创建角色编码，编码必须英文开头，且只能包含英文、数字、下划线
      *

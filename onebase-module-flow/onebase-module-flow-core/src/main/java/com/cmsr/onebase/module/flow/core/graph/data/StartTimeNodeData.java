@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.flow.core.graph.data;
 
 import lombok.Data;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -55,11 +56,11 @@ public class StartTimeNodeData {
 
     private String repeatType;
 
-    private String[] repeatMonth;
+    private List<String> repeatMonth;
 
-    private String[] repeatWeek;
+    private List<String> repeatWeek;
 
-    private String[] repeatDay;
+    private List<String> repeatDay;
 
     private String triggerDatetime;
 
@@ -77,9 +78,9 @@ public class StartTimeNodeData {
         this.endTime = (String) data.get("endTime");
         this.delaySeconds = (Integer) data.get("delaySeconds");
         this.repeatType = (String) data.get("repeatType");
-        this.repeatMonth = (String[]) data.get("repeatMonth");
-        this.repeatWeek = (String[]) data.get("repeatWeek");
-        this.repeatDay = (String[]) data.get("repeatDay");
+        this.repeatMonth = (List) data.get("repeatMonth");
+        this.repeatWeek = (List) data.get("repeatWeek");
+        this.repeatDay = (List) data.get("repeatDay");
         this.triggerDatetime = (String) data.get("triggerDatetime");
         this.triggerDate = (String) data.get("triggerDate");
         this.triggerTime = (String) data.get("triggerTime");

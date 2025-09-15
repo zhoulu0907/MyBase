@@ -10,6 +10,7 @@ import com.aizuda.snailjob.common.core.enums.JobBlockStrategyEnum;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.model.response.JobApiResponse;
 import com.cmsr.onebase.module.flow.core.graph.data.StartTimeNodeData;
+import lombok.Setter;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -20,10 +21,11 @@ import java.util.Set;
  * @Author：huangjie
  * @Date：2025/9/3 10:07
  */
+@Setter
 @Component
 public class JobClient {
 
-    private static final String TIME_FLOW_PROCESS_JOB = "timeFlowProcessJob";
+    private static final String JOB_EXECUTOR_INFO = "flow_process_time_job";
 
     private DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
@@ -51,7 +53,7 @@ public class JobClient {
 
     private void settingParams(AbstractParamsHandler clusterJob, StartTimeNodeData timeNodeData) {
         clusterJob.setJobStatus(StatusEnum.YES);
-        clusterJob.setExecutorInfo(TIME_FLOW_PROCESS_JOB);
+        clusterJob.setExecutorInfo(JOB_EXECUTOR_INFO);
 
         if (timeNodeData.getRepeatType().equals(StartTimeNodeData.REPEAT_TYPE_CRON)) {
             clusterJob.setTriggerType(TriggerTypeEnum.CRON);
@@ -77,6 +79,7 @@ public class JobClient {
     }
 
     public void deleteJob(String jobId) {
+        stopJob(jobId);
         SnailJobOpenApi
                 .deleteJob(Set.of(Long.parseLong(jobId)))
                 .execute();

@@ -3,8 +3,8 @@ package com.cmsr.onebase.module.flow.core.graph.data;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 
+import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * @Author：huangjie
@@ -54,12 +54,13 @@ public class Cron {
     }
 
 
-    public void setWeek(String[] repeatWeek) {
-        week = repeatWeek.length == 7 ? "*" : StringUtils.join(repeatWeek, ",");
+    public void setWeek(List<String> repeatWeek) {
+        week = repeatWeek.size() == 7 ? "*" : StringUtils.join(repeatWeek, ",");
+        day = "?";
     }
 
-    public void setDay(String[] repeatDay) {
-        day = Stream.of(repeatDay).map(day -> {
+    public void setDay(List<String> repeatDay) {
+        day = repeatDay.stream().map(day -> {
             if (day.equalsIgnoreCase("last")) {
                 return "L";
             } else if (day.equalsIgnoreCase("first")) {
