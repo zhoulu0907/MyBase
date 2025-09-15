@@ -19,7 +19,7 @@ import { useEffect, useState } from 'react';
 import { useAppStore } from '@/store/store_app';
 import ConditionEditor from '../../../components/condition-editor';
 import SortByEditor from '../../../components/sortby-editor';
-import { getBeforeCurNodes } from '../../../components/data';
+import { getBeforeCurNodes } from '../../../components/utils';
 
 export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const isSidebar = useIsSidebar();
