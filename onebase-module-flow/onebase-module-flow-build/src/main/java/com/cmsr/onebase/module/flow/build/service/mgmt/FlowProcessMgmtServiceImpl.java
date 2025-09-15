@@ -2,23 +2,25 @@ package com.cmsr.onebase.module.flow.build.service.mgmt;
 
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.module.flow.core.event.FlowProcessEventPublisher;
 import com.cmsr.onebase.module.flow.build.vo.mgmt.*;
-import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessRepository;
-import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDO;
+import com.cmsr.onebase.module.flow.core.dal.database.*;
+import com.cmsr.onebase.module.flow.core.dal.dataobject.*;
 import com.cmsr.onebase.module.flow.core.enums.FlowErrorCodeConstants;
 import com.cmsr.onebase.module.flow.core.enums.FlowStatusEnum;
+import com.cmsr.onebase.module.flow.core.enums.FlowTriggerTypeEnum;
+import com.cmsr.onebase.module.flow.core.event.FlowProcessEventPublisher;
+import com.cmsr.onebase.module.flow.core.graph.JsonGraph;
+import com.cmsr.onebase.module.flow.core.graph.data.StartTimeNodeData;
+import com.cmsr.onebase.module.flow.core.job.JobClient;
+import com.cmsr.onebase.module.flow.core.utils.JsonGraphConstant;
 import com.cmsr.onebase.module.flow.core.vo.mgmt.PageFlowProcessReqVO;
 import lombok.Setter;
 import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -34,7 +36,22 @@ public class FlowProcessMgmtServiceImpl implements FlowProcessMgmtService {
     private FlowProcessRepository flowProcessRepository;
 
     @Autowired
+    private FlowProcessFormRepository flowProcessFormRepository;
+
+    @Autowired
+    private FlowProcessEntityRepository flowProcessEntityRepository;
+
+    @Autowired
+    private FlowProcessDateFieldRepository flowProcessDateFieldRepository;
+
+    @Autowired
+    private FlowProcessTimeRepository flowProcessTimeRepository;
+
+    @Autowired
     private FlowProcessEventPublisher flowProcessEventPublisher;
+
+    @Autowired
+    private JobClient jobClient;
 
     @Override
     public PageResult<FlowProcessVO> pageList(PageFlowProcessReqVO reqVO) {
@@ -58,9 +75,16 @@ public class FlowProcessMgmtServiceImpl implements FlowProcessMgmtService {
             return null;
         }
         FlowProcessVO flowProcessVO = convertToVO(flowProcessDO);
-        if (StringUtils.isNotEmpty(flowProcessDO.getTriggerConfig())) {
-            Map<String, Object> triggerConfig = JsonUtils.parseObject(flowProcessDO.getTriggerConfig(), HashMap.class);
-            flowProcessVO.setTriggerConfig(triggerConfig);
+        FlowTriggerTypeEnum triggerTypeEnum = FlowTriggerTypeEnum.getByType(flowProcessDO.getTriggerType());
+        if (triggerTypeEnum == FlowTriggerTypeEnum.FORM) {
+            FlowProcessFormDO flowProcessFormDO = flowProcessFormRepository.findByProcessId(id);
+            flowProcessVO.setTriggerConfig(Map.of(JsonGraphConstant.PAGE_ID, flowProcessFormDO.getPageId()));
+        } else if (triggerTypeEnum == FlowTriggerTypeEnum.ENTITY) {
+            FlowProcessEntityDO flowProcessEntityDO = flowProcessEntityRepository.findByProcessId(id);
+            flowProcessVO.setTriggerConfig(Map.of(JsonGraphConstant.ENTITY_ID, flowProcessEntityDO.getEntityId()));
+        } else if (triggerTypeEnum == FlowTriggerTypeEnum.DATE_FIELD) {
+            FlowProcessDateFieldDO flowProcessDateFieldDO = flowProcessDateFieldRepository.findByProcessId(id);
+            flowProcessVO.setTriggerConfig(Map.of(JsonGraphConstant.ENTITY_ID, flowProcessDateFieldDO.getEntityId()));
         }
         return flowProcessVO;
     }
@@ -72,13 +96,35 @@ public class FlowProcessMgmtServiceImpl implements FlowProcessMgmtService {
         // 转换为DO对象
         FlowProcessDO flowProcessDO = new FlowProcessDO();
         BeanUtils.copyProperties(reqVO, flowProcessDO);
-        if (MapUtils.isNotEmpty(reqVO.getTriggerConfig())) {
-            flowProcessDO.setTriggerConfig(JsonUtils.toJsonString(reqVO.getTriggerConfig()));
-        }
+
         flowProcessDO.setProcessStatus(FlowStatusEnum.DISABLE.getStatus());
         // 保存到数据库
         FlowProcessDO saved = flowProcessRepository.insert(flowProcessDO);
+        saveAdditional(flowProcessDO, reqVO.getTriggerConfig());
         return saved.getId();
+    }
+
+    private void saveAdditional(FlowProcessDO flowProcessDO, Map<String, Object> triggerConfig) {
+        FlowTriggerTypeEnum triggerTypeEnum = FlowTriggerTypeEnum.getByType(flowProcessDO.getTriggerType());
+        if (triggerTypeEnum == FlowTriggerTypeEnum.FORM) {
+            Long pageId = MapUtils.getLong(triggerConfig, JsonGraphConstant.PAGE_ID);
+            FlowProcessFormDO flowProcessFormDO = new FlowProcessFormDO();
+            flowProcessFormDO.setProcessId(flowProcessDO.getId());
+            flowProcessFormDO.setPageId(pageId);
+            flowProcessFormRepository.insert(flowProcessFormDO);
+        } else if (triggerTypeEnum == FlowTriggerTypeEnum.ENTITY) {
+            Long entityId = MapUtils.getLong(triggerConfig, JsonGraphConstant.ENTITY_ID);
+            FlowProcessEntityDO flowProcessEntityDO = new FlowProcessEntityDO();
+            flowProcessEntityDO.setProcessId(flowProcessDO.getId());
+            flowProcessEntityDO.setEntityId(entityId);
+            flowProcessEntityRepository.insert(flowProcessEntityDO);
+        } else if (triggerTypeEnum == FlowTriggerTypeEnum.DATE_FIELD) {
+            Long entityId = MapUtils.getLong(triggerConfig, JsonGraphConstant.ENTITY_ID);
+            FlowProcessDateFieldDO flowProcessDateFieldDO = new FlowProcessDateFieldDO();
+            flowProcessDateFieldDO.setProcessId(flowProcessDO.getId());
+            flowProcessDateFieldDO.setEntityId(entityId);
+            flowProcessDateFieldRepository.insert(flowProcessDateFieldDO);
+        }
     }
 
     @Override
@@ -132,6 +178,8 @@ public class FlowProcessMgmtServiceImpl implements FlowProcessMgmtService {
         flowProcessDO.setProcessStatus(FlowStatusEnum.ENABLE.getStatus());
         flowProcessRepository.update(flowProcessDO);
         flowProcessEventPublisher.publishProcessUpdate(flowProcessDO.getId());
+        //
+        startTimeJob(flowProcessDO);
     }
 
     @Override
@@ -143,17 +191,23 @@ public class FlowProcessMgmtServiceImpl implements FlowProcessMgmtService {
         flowProcessDO.setProcessStatus(FlowStatusEnum.DISABLE.getStatus());
         flowProcessRepository.update(flowProcessDO);
         flowProcessEventPublisher.publishProcessDelete(flowProcessDO.getId());
+        //
+        stopTimeJob(flowProcessDO);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void delete(Long id) {
         // 检查流程是否存在
-        validateFlowProcessExist(id);
+        FlowProcessDO flowProcessDO = validateFlowProcessExist(id);
+        //
+        deleteTimeJob(flowProcessDO);
         // 删除流程
         flowProcessRepository.deleteById(id);
         flowProcessEventPublisher.publishProcessDelete(id);
+
     }
+
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -177,5 +231,44 @@ public class FlowProcessMgmtServiceImpl implements FlowProcessMgmtService {
      */
     private FlowProcessVO convertToVO(FlowProcessDO flowProcessDO) {
         return BeanUtils.toBean(flowProcessDO, FlowProcessVO.class);
+    }
+
+    private void startTimeJob(FlowProcessDO flowProcessDO) {
+        if (!FlowTriggerTypeEnum.isTime(flowProcessDO.getTriggerType())) {
+            return;
+        }
+        JsonGraph jsonGraph = JsonGraph.of(flowProcessDO.getProcessDefinition());
+        Map<String, Object> data = jsonGraph.getStartNode().getData();
+        StartTimeNodeData startTimeNodeData = new StartTimeNodeData(data);
+        FlowProcessTimeDO flowProcessTimeDO = flowProcessTimeRepository.findByProcessId(flowProcessDO.getId());
+        String jobId;
+        if (flowProcessTimeDO == null) {
+            jobId = jobClient.startJob(flowProcessTimeDO.getProcessId(), startTimeNodeData);
+            flowProcessTimeDO = new FlowProcessTimeDO();
+            flowProcessTimeDO.setProcessId(flowProcessDO.getId());
+            flowProcessTimeDO.setJobId(jobId);
+            flowProcessTimeRepository.insert(flowProcessTimeDO);
+        } else {
+            jobId = jobClient.startJob(flowProcessTimeDO.getProcessId(), flowProcessTimeDO.getJobId(), startTimeNodeData);
+            flowProcessTimeDO.setJobId(jobId);
+            flowProcessTimeRepository.update(flowProcessTimeDO);
+        }
+    }
+
+    private void stopTimeJob(FlowProcessDO flowProcessDO) {
+        if (!FlowTriggerTypeEnum.isTime(flowProcessDO.getTriggerType())) {
+            return;
+        }
+        FlowProcessTimeDO flowProcessTimeDO = flowProcessTimeRepository.findByProcessId(flowProcessDO.getId());
+        jobClient.stopJob(flowProcessTimeDO.getJobId());
+    }
+
+
+    private void deleteTimeJob(FlowProcessDO flowProcessDO) {
+        if (!FlowTriggerTypeEnum.isTime(flowProcessDO.getTriggerType())) {
+            return;
+        }
+        FlowProcessTimeDO flowProcessTimeDO = flowProcessTimeRepository.findByProcessId(flowProcessDO.getId());
+        jobClient.deleteJob(flowProcessTimeDO.getJobId());
     }
 }

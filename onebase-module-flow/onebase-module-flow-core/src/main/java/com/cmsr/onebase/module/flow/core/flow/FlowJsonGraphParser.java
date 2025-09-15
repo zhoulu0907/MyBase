@@ -1,8 +1,10 @@
-package com.cmsr.onebase.module.flow.core.graph;
+package com.cmsr.onebase.module.flow.core.flow;
 
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDO;
 import com.cmsr.onebase.module.flow.core.enums.FlowStatusEnum;
+import com.cmsr.onebase.module.flow.core.graph.GraphFlowCache;
+import com.cmsr.onebase.module.flow.core.graph.JsonGraph;
 import com.cmsr.onebase.module.flow.core.utils.FlowUtils;
 import com.yomahub.liteflow.parser.el.ClassXmlFlowELParser;
 import lombok.Setter;
@@ -22,7 +24,7 @@ import java.util.List;
 @Slf4j
 @Setter
 @Component
-public class GraphFlowELParser extends ClassXmlFlowELParser {
+public class FlowJsonGraphParser extends ClassXmlFlowELParser {
 
     @Autowired
     private FlowProcessRepository flowProcessRepository;

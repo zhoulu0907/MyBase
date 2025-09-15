@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.flow.core.dal.database;
 
 import com.cmsr.onebase.framework.aynline.DataRepository;
-import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDO;
+import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessStatDO;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -9,9 +9,10 @@ import org.springframework.stereotype.Repository;
  * @Date：2025/8/29 14:37
  */
 @Repository
-public class FlowProcessStatRepository extends DataRepository<FlowProcessDO> {
+public class FlowProcessStatRepository extends DataRepository<FlowProcessStatDO> {
 
     public FlowProcessStatRepository() {
-        super(FlowProcessDO.class);
+        super(FlowProcessStatDO.class);
     }
+
 }

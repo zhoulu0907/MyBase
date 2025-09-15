@@ -9,7 +9,7 @@ jdbcSettings:
 outputDirectory: d:/tmp/java
 
 # 指定生成 JPA Entity 的包名
-packageName: com.cmsr.onebase.module.flow.dal.dataobject
+packageName: com.cmsr.onebase.module.flow.core.dal.dataobject
 
 tableScanMode: 'RuleBased'
 
