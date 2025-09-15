@@ -4,7 +4,7 @@ import com.cmsr.onebase.module.metadata.api.entity.MetadataEntityFieldApi;
 import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldQueryReqDTO;
 import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldRespDTO;
 import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldJdbcTypeReqDTO;
-import com.cmsr.onebase.module.metadata.service.entity.MetadataEntityFieldBaseService;
+import com.cmsr.onebase.module.metadata.core.service.entity.MetadataEntityFieldCoreService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Service;
@@ -15,7 +15,7 @@ import java.util.Map;
 
 /**
  * 实体字段管理 API 默认实现
- * 
+ *
  * @author matianyu
  * @date 2025-09-12
  */
@@ -23,7 +23,7 @@ import java.util.Map;
 public class MetadataEntityFieldApiImpl implements MetadataEntityFieldApi {
 
     @Resource
-    private MetadataEntityFieldBaseService metadataEntityFieldService;
+    private MetadataEntityFieldCoreService metadataEntityFieldService;
 
     @Override
     public List<EntityFieldRespDTO> getEntityFieldList(@Valid @RequestBody EntityFieldQueryReqDTO reqDTO) {
