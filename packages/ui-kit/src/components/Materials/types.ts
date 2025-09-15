@@ -330,3 +330,10 @@ export interface ISelectDataSourceConfigType {
   name: string;
   type: typeof CONFIG_TYPES.SELECT_DATA_SOURCE;
 }
+
+// 子表子组件配置
+export interface IChildrenTableConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.CHILDREN_TABLE;
+}

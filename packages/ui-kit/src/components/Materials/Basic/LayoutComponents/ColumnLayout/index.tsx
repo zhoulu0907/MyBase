@@ -12,8 +12,8 @@ import { getComponentSchema } from '../../../schema';
 import './index.css';
 import { type XColumnLayoutConfig } from './schema';
 
-const XColumnLayout = (props: XColumnLayoutConfig) => {
-  const { colCount, id } = props;
+const XColumnLayout = (props: XColumnLayoutConfig & { runtime?: boolean }) => {
+  const { colCount, id, runtime = true } = props;
 
   useSignals();
 
@@ -162,7 +162,7 @@ const XColumnLayout = (props: XColumnLayoutConfig) => {
                     setShowDeleteButton(true);
                   }}
                 >
-                  <EditRender cpId={cp.id} cpType={cp.type} pageComponentSchema={pageComponentSchemas[cp.id]} />
+                  <EditRender runtime={runtime} cpId={cp.id} cpType={cp.type} pageComponentSchema={pageComponentSchemas[cp.id]} />
 
                   {/* 删除按钮 */}
                   {curComponentID === cp.id && showDeleteButton && (
