@@ -6,7 +6,7 @@ interface IProps {
   placeholder?: string;
   width?: number;
   onPressEnter: (e: any) => Promise<void>;
-  onBlur?: () => void;
+  onBlur?: (e: any) => void;
 }
 
 // 角色名称编辑
