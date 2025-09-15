@@ -1,18 +1,17 @@
 package com.cmsr.onebase.module.system.service.permission;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.io.LineHandler;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.module.system.vo.menu.SystemMenuListReqVO;
-import com.cmsr.onebase.module.system.vo.menu.SystemMenuSaveVO;
 import com.cmsr.onebase.module.system.dal.database.MenuDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.MenuDO;
 import com.cmsr.onebase.module.system.dal.redis.RedisKeyConstants;
 import com.cmsr.onebase.module.system.enums.permission.MenuTypeEnum;
 import com.cmsr.onebase.module.system.service.tenant.TenantService;
+import com.cmsr.onebase.module.system.vo.menu.SystemMenuListReqVO;
+import com.cmsr.onebase.module.system.vo.menu.SystemMenuSaveVO;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import jakarta.annotation.Resource;
@@ -114,7 +113,6 @@ public class MenuServiceImpl implements MenuService {
         // 查询所有菜单，并过滤掉关闭的节点
         List<MenuDO> menus = getMenuList(reqVO);
         // 开启多租户的情况下，需要过滤掉未开通的菜单
-        LineHandler lineHandler = menuIds -> menus.removeIf(menu -> !CollUtil.contains(Collections.singleton(menuIds), menu.getId()));
         tenantService.handleTenantMenu(menuIds -> menus.removeIf(menu -> !CollUtil.contains(menuIds, menu.getId())));
         return menus;
     }
