@@ -1,5 +1,15 @@
 package com.cmsr.onebase.module.app.build.service.appresource;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.anyline.data.param.ConfigStore;
+import org.anyline.data.param.init.DefaultConfigStore;
+import org.anyline.entity.Compare;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.app.core.dal.database.appresource.AppPageRepository;
@@ -14,14 +24,9 @@ import com.cmsr.onebase.module.app.core.dto.appresource.PageDTO;
 import com.cmsr.onebase.module.app.core.dto.appresource.PageRespDTO;
 import com.cmsr.onebase.module.app.core.dto.appresource.UpdatePageNameDTO;
 import com.cmsr.onebase.module.app.core.enums.appresource.AppResourceErrorCodeConstants;
-import jakarta.annotation.Resource;
-import org.anyline.data.param.ConfigStore;
-import org.anyline.data.param.init.DefaultConfigStore;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import com.esotericsoftware.minlog.Log;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import jakarta.annotation.Resource;
 
 @Service
 public class PageServiceImpl implements PageService {
@@ -83,15 +88,16 @@ public class PageServiceImpl implements PageService {
                 .collect(Collectors.toList());
 
         configs = new DefaultConfigStore();
-        configs.in("menu_id", menuIdList);
-        List<PageSetDO> pagesetDoList = pageSetDataRepository.findAllByConfig(configs);
+        configs.in(Compare.EMPTY_VALUE_SWITCH.BREAK, "menu_id", menuIdList, true, true);
 
-        List<Long> pagesetIdList = pagesetDoList.stream()
+        List<PageSetDO> pageSetDoList = pageSetDataRepository.findAllByConfig(configs);
+
+        List<Long> pageSetIdList = pageSetDoList.stream()
                 .map(PageSetDO::getId)
                 .collect(Collectors.toList());
 
         configs = new DefaultConfigStore();
-        configs.in("pageset_id", pagesetIdList);
+        configs.in(Compare.EMPTY_VALUE_SWITCH.BREAK, "pageset_id", pageSetIdList, true, true);
         configs.eq("page_type", "form");
         List<PageDO> pageDOList = pageDataRepository.findAllByConfig(configs);
 
