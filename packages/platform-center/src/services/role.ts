@@ -34,7 +34,7 @@ export const updateRoleStatus = (data: UpdateStatusForm) => {
 
 // 删除角色
 export const deleteRole = (id: number) => {
-  return systemService.post('/role/delete', { id });
+  return systemService.post(`/role/delete?id=${id}`);
 };
 
 // 批量删除角色
