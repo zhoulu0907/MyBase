@@ -137,4 +137,12 @@ public interface MetadataBusinessEntityService {
      */
     List<BusinessEntityRespVO> getBusinessEntityListByDatasourceIdWithRelationType(Long datasourceId);
 
+    /**
+     * 重新创建业务实体的物理表
+     * 当发现表不存在时，可以调用此方法来重新创建表
+     *
+     * @param entityId 业务实体ID
+     */
+    void recreatePhysicalTable(Long entityId);
+
 }

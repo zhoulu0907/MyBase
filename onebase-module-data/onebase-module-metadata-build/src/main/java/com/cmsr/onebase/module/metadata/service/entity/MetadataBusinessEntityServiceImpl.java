@@ -13,7 +13,6 @@ import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.EREntityVO;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.ERFieldVO;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.ERRelationshipVO;
 import com.cmsr.onebase.module.metadata.controller.admin.entity.vo.SimpleEntityRespVO;
-import org.modelmapper.ModelMapper;
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataBusinessEntityDO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.dal.dataobject.entity.MetadataSystemFieldsDO;
@@ -122,15 +121,26 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
             }
         }
 
+        // 根据实体类型决定是否需要创建物理表
+        if (BusinessEntityTypeEnum.needCreatePhysicalTable(createReqVO.getEntityType())) {
+            // 同步创建物理表，确保事务原子性
+            createPhysicalTableForEntitySync(businessEntity, createReqVO, systemFields);
+        }
+        
+        // 插入业务实体到数据库，如果前面创建物理表失败，这里不会执行
         metadataBusinessEntityRepository.insert(businessEntity);
 
-        // 根据实体类型决定是否创建物理表（在新事务中执行，避免长事务）
-        if (BusinessEntityTypeEnum.needCreatePhysicalTable(createReqVO.getEntityType())) {
-            createPhysicalTableForEntityAsync(businessEntity, createReqVO, systemFields);
-        } else {
+        // 如果需要创建物理表，保存系统字段信息到 metadata_entity_field 表
+        if (BusinessEntityTypeEnum.needCreatePhysicalTable(createReqVO.getEntityType()) && systemFields != null) {
+            saveEntityFields(businessEntity.getId(), systemFields, Long.valueOf(createReqVO.getAppId()));
+        }
+
+        if (!BusinessEntityTypeEnum.needCreatePhysicalTable(createReqVO.getEntityType())) {
             BusinessEntityTypeEnum entityTypeEnum = BusinessEntityTypeEnum.getByCode(createReqVO.getEntityType());
             String typeName = entityTypeEnum != null ? entityTypeEnum.getName() : "未知类型";
             log.info("实体类型为 {} ({}), 跳过物理表创建", createReqVO.getEntityType(), typeName);
+        } else {
+            log.info("成功创建业务实体 {} 及其物理表: {}", businessEntity.getDisplayName(), businessEntity.getTableName());
         }
 
         return businessEntity.getId();
@@ -209,48 +219,33 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
     }
 
     /**
-     * 异步创建物理表，避免阻塞主事务
+     * 同步创建物理表，确保事务原子性
      *
      * @param businessEntity 业务实体
      * @param createReqVO 创建请求VO
      * @param systemFields 系统字段列表
      */
-    private void createPhysicalTableForEntityAsync(MetadataBusinessEntityDO businessEntity, 
-                                                  BusinessEntitySaveReqVO createReqVO, 
-                                                  List<MetadataSystemFieldsDO> systemFields) {
-        // 在新事务中执行物理表创建，避免长事务导致死锁
-        try {
-            createPhysicalTableForEntityInNewTransaction(businessEntity, createReqVO, systemFields);
-        } catch (Exception e) {
-            log.error("异步创建物理表失败，实体ID: {}, 错误: {}", businessEntity.getId(), e.getMessage(), e);
-            // 这里可以考虑将失败信息记录到消息队列或错误表中，后续重试
-        }
-    }
-
-    /**
-     * 在新事务中创建物理表
-     */
-    @Transactional(rollbackFor = Exception.class, propagation = org.springframework.transaction.annotation.Propagation.REQUIRES_NEW)
-    private void createPhysicalTableForEntityInNewTransaction(MetadataBusinessEntityDO businessEntity, 
-                                                             BusinessEntitySaveReqVO createReqVO, 
-                                                             List<MetadataSystemFieldsDO> systemFields) {
+    private void createPhysicalTableForEntitySync(MetadataBusinessEntityDO businessEntity, 
+                                                 BusinessEntitySaveReqVO createReqVO, 
+                                                 List<MetadataSystemFieldsDO> systemFields) {
         try {
             // 1. 通过数据源 id 获取对应的数据源信息
             MetadataDatasourceDO datasource = metadataDatasourceBuildService.getDatasource(Long.valueOf(createReqVO.getDatasourceId()));
-            if (datasource != null) {
-                // 2. 生成 DDL 并在数据源内建物理表
-                createPhysicalTable(datasource, businessEntity.getTableName(), systemFields);
-
-                // 3. 保存实体字段信息到 metadata_entity_field 表
-                saveEntityFields(businessEntity.getId(), systemFields, Long.valueOf(createReqVO.getAppId()));
-
-                log.info("成功为业务实体 {} 创建物理表: {}", businessEntity.getDisplayName(), businessEntity.getTableName());
-            } else {
-                log.warn("未找到数据源ID为 {} 的数据源配置，跳过物理表创建", createReqVO.getDatasourceId());
+            if (datasource == null) {
+                throw new RuntimeException("未找到数据源ID为 " + createReqVO.getDatasourceId() + " 的数据源配置");
             }
+
+            // 2. 生成 DDL 并在数据源内建物理表
+            createPhysicalTable(datasource, businessEntity.getTableName(), systemFields);
+
+            // 3. 预先保存实体字段信息到 metadata_entity_field 表（待实体创建成功后会一起提交）
+            // 注意：这里不能直接调用saveEntityFields，因为它需要实体ID，而此时实体还未保存
+            // 我们将在主方法中处理字段保存
+            
+            log.info("成功为业务实体 {} 创建物理表: {}", businessEntity.getDisplayName(), businessEntity.getTableName());
         } catch (Exception e) {
             log.error("创建业务实体物理表失败: {}", e.getMessage(), e);
-            throw e; // 在新事务中抛出异常不会影响主事务
+            throw new RuntimeException("创建物理表失败: " + e.getMessage(), e);
         }
     }
 
@@ -976,6 +971,49 @@ public class MetadataBusinessEntityServiceImpl implements MetadataBusinessEntity
         }
         
         return result;
+    }
+
+    /**
+     * 重新创建业务实体的物理表
+     * 当发现表不存在时，可以调用此方法来重新创建表
+     *
+     * @param entityId 业务实体ID
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void recreatePhysicalTable(Long entityId) {
+        try {
+            // 1. 获取业务实体信息
+            MetadataBusinessEntityDO entity = getBusinessEntity(entityId);
+            if (entity == null) {
+                throw new RuntimeException("业务实体不存在，ID: " + entityId);
+            }
+
+            // 2. 检查实体类型是否需要创建物理表
+            if (!BusinessEntityTypeEnum.needCreatePhysicalTable(entity.getEntityType())) {
+                log.info("实体类型为 {}, 不需要创建物理表", entity.getEntityType());
+                return;
+            }
+
+            // 3. 获取数据源信息
+            MetadataDatasourceDO datasource = metadataDatasourceBuildService.getDatasource(entity.getDatasourceId());
+            if (datasource == null) {
+                throw new RuntimeException("未找到数据源ID为 " + entity.getDatasourceId() + " 的数据源配置");
+            }
+
+            // 4. 获取系统字段信息
+            List<MetadataSystemFieldsDO> systemFields = getSystemFieldsWithCache();
+
+            // 5. 创建物理表
+            createPhysicalTable(datasource, entity.getTableName(), systemFields);
+
+            // 6. 保存实体字段信息到 metadata_entity_field 表（如果还没有保存的话）
+            saveEntityFields(entityId, systemFields, entity.getAppId());
+
+            log.info("成功重新创建业务实体 {} 的物理表: {}", entity.getDisplayName(), entity.getTableName());
+        } catch (Exception e) {
+            log.error("重新创建物理表失败，实体ID: {}, 错误: {}", entityId, e.getMessage(), e);
+            throw new RuntimeException("重新创建物理表失败: " + e.getMessage(), e);
+        }
     }
 
 }

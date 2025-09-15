@@ -1072,7 +1072,22 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
 
                 // 首先检查表是否存在
                 if (!checkTableExists(service, tableName)) {
-                    throw new RuntimeException("表 " + tableName + " 不存在，请先创建表");
+                    log.warn("表 {} 不存在，尝试重新创建该表", tableName);
+                    // 尝试重新创建表
+                    try {
+                        // 根据表名查找对应的业务实体
+                        MetadataBusinessEntityDO entity = findEntityByTableName(tableName);
+                        if (entity != null) {
+                            // 使用业务实体服务重新创建表
+                            metadataBusinessEntityService.recreatePhysicalTable(entity.getId());
+                            log.info("成功重新创建表: {}", tableName);
+                        } else {
+                            throw new RuntimeException("未找到表名为 " + tableName + " 的业务实体");
+                        }
+                    } catch (Exception createTableException) {
+                        log.error("重新创建表 {} 失败: {}", tableName, createTableException.getMessage(), createTableException);
+                        throw new RuntimeException("表 " + tableName + " 不存在，且重新创建表失败: " + createTableException.getMessage());
+                    }
                 }
 
                 // 检查列是否已存在
@@ -1746,5 +1761,23 @@ public class MetadataEntityFieldServiceImpl implements MetadataEntityFieldServic
         vo.setFieldCode(field.getFieldCode());
         // 注意：options、constraints、autoNumberConfig 将在 populateFieldRelatedData 中填充
         return vo;
+    }
+
+    /**
+     * 根据表名查找对应的业务实体
+     *
+     * @param tableName 表名
+     * @return 业务实体DO，如果找不到则返回null
+     */
+    private MetadataBusinessEntityDO findEntityByTableName(String tableName) {
+        try {
+            DefaultConfigStore configStore = new DefaultConfigStore();
+            configStore.and("table_name", tableName);
+            List<MetadataBusinessEntityDO> entities = metadataBusinessEntityService.findAllByConfig(configStore);
+            return entities.isEmpty() ? null : entities.get(0);
+        } catch (Exception e) {
+            log.error("根据表名 {} 查找业务实体失败: {}", tableName, e.getMessage(), e);
+            return null;
+        }
     }
 }
