@@ -2,7 +2,7 @@ import { EditorRenderer, FixedLayoutEditorProvider, type FlowDocumentJSON } from
 
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import '@flowgram.ai/fixed-layout-editor/index.css';
-import { getFlowMgmt, TriggerType } from '@onebase/app';
+import { ENTITY_TYPE, getAppEntities, getFlowMgmt, TriggerType } from '@onebase/app';
 import { getHashQueryParam } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
 import { useEffect, useRef, useState } from 'react';
@@ -22,7 +22,17 @@ import { FlowNodeRegistries } from './nodes';
 
 const TriggerEditor = () => {
   const editorProps = useEditorProps(FlowNodeRegistries);
-  const { setNodeId, nodeId, setFlowId, flowId, setPageId, setNodeData, setAllNodeData } = triggerEditorSignal;
+  const {
+    setNodeId,
+    nodeId,
+    setFlowId,
+    flowId,
+    setPageId,
+    setNodeData,
+    setAllNodeData,
+    setMainEntities,
+    setSubEntities
+  } = triggerEditorSignal;
   const [initData, setInitData] = useState<FlowDocumentJSON>();
   const sidebarContainerRef = useRef<HTMLDivElement>(null);
 
@@ -33,6 +43,12 @@ const TriggerEditor = () => {
     if (flowId) {
       setFlowId(flowId);
     }
+
+    // 获取应用对应需要用到的实体
+    const appId = getHashQueryParam('appId');
+    if (appId) {
+      handleGetAppEntities(appId);
+    }
   }, [window.location.hash]);
 
   useEffect(() => {
@@ -41,6 +57,19 @@ const TriggerEditor = () => {
       initFlowData(flowId.value);
     }
   }, [flowId]);
+
+  const handleGetAppEntities = async (appId: string) => {
+    const res = await getAppEntities(appId);
+    console.log('res: ', res);
+    if (res && res.entities) {
+      setMainEntities(
+        res.entities.filter(
+          (entity: any) => entity.entityType === ENTITY_TYPE.MAIN || entity.entityType === ENTITY_TYPE.INDEP
+        )
+      );
+      setSubEntities(res.entities.filter((entity: any) => entity.entityType === ENTITY_TYPE.SUB));
+    }
+  };
 
   // 载入初始化数据
   const initFlowData = async (id: string) => {
@@ -57,12 +86,15 @@ const TriggerEditor = () => {
       console.log('res.processDefinition: ', res.processDefinition);
       const processDefinitionJson = JSON.parse(res.processDefinition);
       let data = {};
-      for (let item of processDefinitionJson) {
+      let nodes = processDefinitionJson.nodes || [];
+
+      for (let item of nodes) {
         data = { ...data, [item.id]: item.data };
       }
+
       console.log('nodeData', data);
       setAllNodeData(data);
-      setInitData({ nodes: processDefinitionJson });
+      setInitData({ nodes: nodes });
     } else {
       switch (res.triggerType) {
         case TriggerType.FORM:

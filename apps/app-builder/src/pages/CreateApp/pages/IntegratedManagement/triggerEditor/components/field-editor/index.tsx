@@ -1,10 +1,11 @@
 import { Button, Form, Grid, Input, Select } from '@arco-design/web-react';
 import { IconDelete, IconPlus } from '@arco-design/web-react/icon';
+import type { AppEntityField } from '@onebase/app';
 import React from 'react';
 import styles from './index.module.less';
 
 export interface FieldEditorProps {
-  fieldList: { label: string; value: string }[];
+  fieldList: AppEntityField[];
 }
 
 const valueTypeOptions = [
@@ -15,7 +16,11 @@ const valueTypeOptions = [
 const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList }) => {
   return (
     <div className={styles.conditionWrapper}>
-      <Form.Item>
+      <Form.Item
+        onChange={(value) => {
+          console.log(value);
+        }}
+      >
         <Form.List field="fieldList">
           {(fields, { add, remove }) => {
             return (
@@ -25,7 +30,9 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList }) => {
                     <Grid.Row gutter={8} key={item.key}>
                       <Grid.Col span={6}>
                         <Form.Item field={item.field + '.fieldId'}>
-                          <Select options={fieldList} />
+                          <Select
+                            options={fieldList.map((item) => ({ label: item.displayName, value: item.fieldId }))}
+                          />
                         </Form.Item>
                       </Grid.Col>
                       <Grid.Col span={3}>

@@ -5,8 +5,8 @@ import { memo, useState } from 'react';
 import { dataMethodPage, type AppEntityField, type PageMethodParam } from '@onebase/app';
 import { STATUS_OPTIONS, STATUS_VALUES } from 'src/components/Materials/constants';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
-import { type XRelatedFormConfig } from './schema';
 import '../index.css';
+import { type XRelatedFormConfig } from './schema';
 
 const XRelatedForm = memo((props: XRelatedFormConfig & { runtime?: boolean }) => {
   //   const { appEntities } = useAppEntityStore();
@@ -30,24 +30,6 @@ const XRelatedForm = memo((props: XRelatedFormConfig & { runtime?: boolean }) =>
 
   const [options, setOptions] = useState<any[]>([]);
 
-  //   useEffect(() => {
-  //     console.log('relatedFormDataField: ', relatedFormDataField);
-  //     // console.log('appEntities: ', appEntities);
-
-  //     if (relatedFormDataField.length == 2 && appEntities.entities.length >= 0) {
-  //       const relatedEntity = appEntities.entities.find((entity) => entity.entityID === relatedFormDataField[0]);
-  //       const relatedField = relatedEntity?.fields.find((field) => field.fieldID === relatedFormDataField[1]);
-
-  //       console.log(relatedEntity?.entityID, relatedField);
-  //       if (relatedEntity?.entityID && relatedField) {
-  //         handleGetRelatedData(relatedEntity?.entityID, relatedField);
-  //       }
-
-  //       //   console.log(relatedFormDataField);
-  //       //   console.log(appEntities);
-  //     }
-  //   }, [appEntities, relatedFormDataField]);
-
   const handleGetRelatedData = async (entityId: string, relatedField: AppEntityField) => {
     console.log('runtime: ', runtime);
     if (!runtime) {
@@ -68,7 +50,7 @@ const XRelatedForm = memo((props: XRelatedFormConfig & { runtime?: boolean }) =>
       setOptions([
         ...(res.list || []).map((item: any) => ({
           label: item[relatedField.displayName],
-          value: item[relatedField.fieldID]
+          value: item[relatedField.fieldId]
         })),
         // TODO(mickey): remove
         { label: '牛逼', value: 233333 }
@@ -77,7 +59,7 @@ const XRelatedForm = memo((props: XRelatedFormConfig & { runtime?: boolean }) =>
   };
 
   return (
-    <div className='formWrapper'>
+    <div className="formWrapper">
       <Form.Item
         label={label.display && label.text}
         field={

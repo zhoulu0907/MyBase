@@ -2,11 +2,11 @@ import type { EntityListItem } from '@/pages/CreateApp/pages/DataFactory/utils/i
 import { useAppStore } from '@/store/store_app';
 import { Button, Form, Input, Message, Modal, Radio, Select, Space } from '@arco-design/web-react';
 import { IconDelete, IconPlus } from '@arco-design/web-react/icon';
+import type { ConditionRow } from '@onebase/app';
 import { createRule, getEntityFieldsWithChildren } from '@onebase/app';
 import React, { useState } from 'react';
-import { operatorOptions, valueTypeOptions, validationTypeOptions, formatValidationTypeOptions } from './rule.ts';
 import styles from '../modal.module.less';
-import type { ConditionRow } from '@onebase/app';
+import { formatValidationTypeOptions, operatorOptions, valueTypeOptions } from './rule.ts';
 
 interface RuleFormValues {
   validationType: string;

@@ -2,7 +2,8 @@ import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-e
 
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { Form, Grid, Input, Radio, Select } from '@arco-design/web-react';
-import { useState } from 'react';
+import type { AppEntityField } from '@onebase/app';
+import { useEffect, useState } from 'react';
 import FieldEditor from '../../../components/field-editor';
 import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
@@ -11,12 +12,18 @@ import { type FlowNodeJSON } from '../../../typings';
 const RadioGroup = Radio.Group;
 const Option = Select.Option;
 
+const ADD_TYPE = {
+  MAIN_ENTITY: 'mainEntity',
+  SUB_ENTITY: 'subEntity'
+};
+
 export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const isSidebar = useIsSidebar();
   const { node } = useNodeRenderContext();
+  const { mainEntities, subEntities } = triggerEditorSignal;
 
+  const [fieldDataList, setFieldDataList] = useState<AppEntityField[]>([]);
   const [entityList, setEntityList] = useState<any[]>();
-  const [fieldDataList, setFieldDataList] = useState<any[]>([]);
 
   const handlePropsOnChange = (values: any) => {
     triggerEditorSignal.setNodeData(node.id, values);
@@ -32,11 +39,20 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
   const addType = Form.useWatch('addType', payloadForm);
 
-  const handleFieldsChange = (dataList: any[]) => {
-    console.log('dataList: ', dataList);
-    setFieldDataList(dataList);
-    handlePropsOnChange({ ...triggerEditorSignal.nodeData.value[node.id], fields: dataList });
-  };
+  useEffect(() => {
+    if (addType) {
+      console.log('addType: ', addType);
+      if (addType == ADD_TYPE.MAIN_ENTITY) {
+        console.log('mainEntities.value: ', mainEntities.value);
+        setEntityList(mainEntities.value);
+        payloadForm.clearFields('entityId');
+      } else {
+        console.log('subEntities.value: ', subEntities.value);
+        setEntityList(subEntities.value);
+        payloadForm.clearFields('entityId');
+      }
+    }
+  }, [addType]);
 
   return (
     <>
@@ -58,18 +74,28 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             <Grid.Row>
               <Form.Item label="新增方式" field="addType" rules={[{ required: true, message: '请选择新增方式' }]}>
                 <RadioGroup>
-                  <Radio value="mainEntity">在主表中新增</Radio>
-                  <Radio value="subEntity">在子表中新增</Radio>
+                  <Radio value={ADD_TYPE.MAIN_ENTITY}>在主表中新增</Radio>
+                  <Radio value={ADD_TYPE.SUB_ENTITY}>在子表中新增</Radio>
                 </RadioGroup>
               </Form.Item>
             </Grid.Row>
 
             <Grid.Row>
               <Form.Item field="entityId" rules={[{ required: true, message: '请选择表单' }]} layout="vertical">
-                <Select disabled style={{ width: '100%' }}>
+                <Select
+                  style={{ width: '100%' }}
+                  onChange={(value) => {
+                    console.log('value: ', value);
+                    [...mainEntities.value, ...subEntities.value].forEach((item) => {
+                      if (item.entityId === value) {
+                        setFieldDataList(item.fields);
+                      }
+                    });
+                  }}
+                >
                   {entityList?.map((item) => (
-                    <Option key={item.id} value={item.id}>
-                      {item.pageName}
+                    <Option key={item.entityId} value={item.entityId}>
+                      {item.entityName}
                     </Option>
                   ))}
                 </Select>
@@ -86,7 +112,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
             <Grid.Row>
               <Form.Item label="字段设置" field="fields">
-                <FieldEditor fieldList={[]} />
+                <FieldEditor fieldList={fieldDataList} />
               </Form.Item>
             </Grid.Row>
           </Form>

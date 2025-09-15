@@ -305,11 +305,9 @@ const FlowManagementPage: React.FC = () => {
             >
               <Button type="text">
                 <IconDown />
-                {searchFlowProccessStatus
-                  ? searchFlowProccessStatus === ProcessStatus.ENABLED
-                    ? '启用'
-                    : '禁用'
-                  : '所有状态'}
+                {searchFlowProccessStatus === ProcessStatus.ENABLED && '启用'}
+                {searchFlowProccessStatus === ProcessStatus.DISABLED && '禁用'}
+                {searchFlowProccessStatus === undefined && '所有状态'}
               </Button>
             </Dropdown>
           </div>

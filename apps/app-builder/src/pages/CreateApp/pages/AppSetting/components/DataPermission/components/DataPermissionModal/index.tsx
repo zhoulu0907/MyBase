@@ -13,7 +13,6 @@ import {
   type GetDeptUserReq
   // type RoleAddUserReq
 } from '@onebase/app';
-import { useState, useEffect, useCallback } from 'react';
 import { AddMembers } from '@onebase/common';
 import { debounce } from 'lodash-es';
 // import DataFilters from '../DataPermissionFilters';
@@ -268,9 +267,9 @@ const DataPermissionModal = (props: IProps) => {
               }}
             >
               {appEntities
-                .filter((appEntity: AppEntity) => appEntity.entityID)
+                .filter((appEntity: AppEntity) => appEntity.entityId)
                 .map((appEntity: AppEntity) => (
-                  <Option key={appEntity.entityID} value={appEntity.entityID || ''}>
+                  <Option key={appEntity.entityId} value={appEntity.entityId || ''}>
                     {appEntity.entityName}
                   </Option>
                 ))}
