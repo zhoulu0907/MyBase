@@ -8,13 +8,23 @@ import { useIsSidebar, useNodeRenderContext } from '../../hooks';
 import { type FlowNodeJSON } from '../../typings';
 
 const TabPane = Tabs.TabPane;
+
+const REPEAT_TYPE_OPTIONS = {
+  DAY: 'day',
+  WEEK: 'week',
+  MONTH: 'month',
+  YEAR: 'year',
+  CRON: 'cron',
+  NONE: 'none'
+};
+
 const repeatTypeOptions = [
-  { label: '不重复', value: 'none' },
-  { label: '每天', value: 'daily' },
-  { label: '每周', value: 'weekly' },
-  { label: '每月', value: 'monthly' },
-  { label: '每年', value: 'yearly' },
-  { label: '自定义', value: 'cron' }
+  { label: '不重复', value: REPEAT_TYPE_OPTIONS.NONE },
+  { label: '每天', value: REPEAT_TYPE_OPTIONS.DAY },
+  { label: '每周', value: REPEAT_TYPE_OPTIONS.WEEK },
+  { label: '每月', value: REPEAT_TYPE_OPTIONS.MONTH },
+  { label: '每年', value: REPEAT_TYPE_OPTIONS.YEAR },
+  { label: '自定义', value: REPEAT_TYPE_OPTIONS.CRON }
 ];
 
 const weeklyOptions = [
@@ -121,19 +131,19 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                 </Form.Item>
               </Grid.Col>
               <Grid.Col span={12}>
-                {repeatType === 'none' && (
+                {repeatType === REPEAT_TYPE_OPTIONS.NONE && (
                   <Form.Item field="triggerTime" rules={[{ required: true, message: '请选择触发时间' }]}>
                     <DatePicker showTime format="YYYY-MM-DD HH:mm:ss " />
                   </Form.Item>
                 )}
 
-                {repeatType === 'daily' && (
+                {repeatType === REPEAT_TYPE_OPTIONS.DAY && (
                   <Form.Item field="triggerTime" rules={[{ required: true, message: '请选择触发时间' }]}>
                     <TimePicker format="HH:mm" style={{ width: '280px' }} />
                   </Form.Item>
                 )}
 
-                {repeatType === 'weekly' && (
+                {repeatType === REPEAT_TYPE_OPTIONS.WEEK && (
                   <Form.Item field="repeatWeek">
                     <Select
                       options={weeklyOptions}
@@ -145,7 +155,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                   </Form.Item>
                 )}
 
-                {repeatType === 'monthly' && (
+                {repeatType === REPEAT_TYPE_OPTIONS.MONTH && (
                   <Form.Item field="repeatDay">
                     <Select
                       options={monthlyType === 'specified' ? dayOptions : monthlyOptions}
@@ -169,7 +179,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                   </Form.Item>
                 )}
 
-                {repeatType === 'yearly' && (
+                {repeatType === REPEAT_TYPE_OPTIONS.YEAR && (
                   <>
                     <Form.Item field="triggerDate" rules={[{ required: true, message: '请选择触发时间' }]}>
                       <DatePicker style={{ width: '280px' }} />
@@ -177,7 +187,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                   </>
                 )}
 
-                {repeatType === 'cron' && (
+                {repeatType === REPEAT_TYPE_OPTIONS.CRON && (
                   <Form.Item
                     field="triggerTime"
                     rules={[
@@ -206,18 +216,14 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             </Grid.Row>
 
             <Grid.Row gutter={8}>
-              {repeatType === 'monthly' ||
-                repeatType === 'yearly' ||
-                (repeatType === 'weekly' && (
-                  <Form.Item
-                    label="触发时间"
-                    layout="vertical"
-                    field="triggerTime"
-                    rules={[{ required: true, message: '请选择触发时间' }]}
-                  >
-                    <TimePicker format="HH:mm" />
-                  </Form.Item>
-                ))}
+              <Form.Item
+                label="触发时间"
+                layout="vertical"
+                field="triggerTime"
+                rules={[{ required: true, message: '请选择触发时间' }]}
+              >
+                <TimePicker format="HH:mm" />
+              </Form.Item>
             </Grid.Row>
           </Form>
         </FormContent>

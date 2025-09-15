@@ -5,7 +5,7 @@ import { formMeta } from './form-meta';
 
 export const DataQueryMultipleNodeRegistry: FlowNodeRegistry = {
   type: 'dataQueryMultiple',
-  title: '数据查询多条节点',
+  title: '数据查询节点(多条)',
   category: 'data',
   meta: {
     isStart: false,
@@ -18,7 +18,7 @@ export const DataQueryMultipleNodeRegistry: FlowNodeRegistry = {
   info: {
     icon: iconStart,
     description:
-    '这是数据查询节点，用于查询数据。',
+    '这是数据查询节点(多条)，用于查询数据。',
   },
   /**
    * Render node via formMeta
@@ -32,7 +32,7 @@ export const DataQueryMultipleNodeRegistry: FlowNodeRegistry = {
       id: `dataQueryMultiple_${nanoid()}`,
       type: 'dataQueryMultiple',
       data: {
-        title: '数据查询多条节点',
+        title: '数据查询节点(多条)',
       },
     };
   },

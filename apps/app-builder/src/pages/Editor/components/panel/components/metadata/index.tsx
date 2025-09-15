@@ -27,7 +27,7 @@ interface MetadataContainerProps {
 const MetadataContainer: React.FC<MetadataContainerProps> = ({ childCollapsed, setChildCollapsed }) => {
   const { mainEntity, subEntities } = useAppEntityStore();
 
-  const [activeEntityID, setActiveEntityID] = useState<string>(mainEntity.entityID);
+  const [activeEntityID, setActiveEntityID] = useState<string>(mainEntity.entityId);
   const [showSearchInput, setShowSearchInput] = useState<boolean>(false);
 
   // 现在支持多个 entity，每个 entityId 对应一个字段数组
@@ -50,6 +50,7 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({ childCollapsed, s
         .filter((field: AppEntityField) => !FilterEntityFields.includes(field.fieldName))
         .map((field: AppEntityField, index: number) => {
           let cpType = COMPONENT_MAP[field.fieldType];
+          console.log('cpType:', cpType);
           if (!cpType) {
             cpType = FORM_COMPONENT_TYPES.INPUT_TEXT;
           }
@@ -59,15 +60,15 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({ childCollapsed, s
             displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[cpType] || '',
             label: field.displayName,
             type: cpType,
-            fieldID: field.fieldID,
-            entityID: mainEntity.entityID
+            fieldID: field.fieldId,
+            entityID: mainEntity.entityId
           };
         })
         .filter((item) => item !== null);
 
       setFieldItems((prevFieldItems) => ({
         ...prevFieldItems,
-        [mainEntity.entityID]: newFieldItems
+        [mainEntity.entityId]: newFieldItems
       }));
     }
   }, [mainEntity]);
@@ -91,15 +92,15 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({ childCollapsed, s
             // displayName: field.displayName,
             label: field.displayName,
             type: cpType,
-            fieldID: field.fieldID,
-            entityID: subEntity.entityID
+            fieldID: field.fieldId,
+            entityID: subEntity.entityId
           };
         })
         .filter((item) => item !== null);
 
       setFieldItems((prevFieldItems) => ({
         ...prevFieldItems,
-        [subEntity.entityID]: newFieldItems
+        [subEntity.entityId]: newFieldItems
       }));
     });
   }, [subEntities]);
@@ -147,7 +148,7 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({ childCollapsed, s
                       list={[
                         {
                           ...mainEntity,
-                          id: mainEntity.entityID,
+                          id: mainEntity.entityId,
                           type: 'entity',
                           displayName: 'entity'
                         }
@@ -168,9 +169,9 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({ childCollapsed, s
                     >
                       <div
                         className={styles.mainEntityHeader}
-                        onClick={() => setActiveEntityID(mainEntity.entityID)}
+                        onClick={() => setActiveEntityID(mainEntity.entityId)}
                         data-cp-type={ENTITY_COMPONENT_TYPES.MAIN_ENTITY}
-                        data-entity-id={mainEntity.entityID}
+                        data-entity-id={mainEntity.entityId}
                       >
                         <div className={styles.mainEntityHeaderIcon}>主</div>
                         {mainEntity.entityName || '无'}
@@ -192,7 +193,7 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({ childCollapsed, s
                     list={[
                       ...subEntities.entities.map((subEntity) => ({
                         ...subEntity,
-                        id: subEntity.entityID,
+                        id: subEntity.entityId,
                         type: 'entity',
                         displayName: 'entity'
                       }))
@@ -214,10 +215,10 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({ childCollapsed, s
                     {subEntities.entities.map((subEntity) => (
                       <div
                         className={styles.subEntityHeader}
-                        key={subEntity.entityID}
-                        onClick={() => setActiveEntityID(subEntity.entityID)}
+                        key={subEntity.entityId}
+                        onClick={() => setActiveEntityID(subEntity.entityId)}
                         data-cp-type={ENTITY_COMPONENT_TYPES.SUB_ENTITY}
-                        data-entity-id={subEntity.entityID}
+                        data-entity-id={subEntity.entityId}
                       >
                         <div className={styles.subEntityHeaderIcon}>子</div>
                         {subEntity.entityName || '无'}

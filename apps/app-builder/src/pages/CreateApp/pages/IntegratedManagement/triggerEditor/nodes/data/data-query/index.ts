@@ -5,7 +5,7 @@ import { formMeta } from './form-meta';
 
 export const DataQueryNodeRegistry: FlowNodeRegistry = {
   type: 'dataQuery',
-  title: '数据查询节点',
+  title: '数据查询节点(单条)',
   category: 'data',
   meta: {
     isStart: false,
@@ -18,7 +18,7 @@ export const DataQueryNodeRegistry: FlowNodeRegistry = {
   info: {
     icon: iconStart,
     description:
-    '这是数据查询节点，用于查询数据。',
+    '这是数据查询节点(单条)，用于查询数据。',
   },
   /**
    * Render node via formMeta
@@ -32,7 +32,7 @@ export const DataQueryNodeRegistry: FlowNodeRegistry = {
       id: `dataQuery_${nanoid()}`,
       type: 'dataQuery',
       data: {
-        title: '数据查询节点',
+        title: '数据查询节点(单条)',
       },
     };
   },
