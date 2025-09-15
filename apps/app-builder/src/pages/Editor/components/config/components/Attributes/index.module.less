@@ -13,12 +13,6 @@
     width: 100%;
   }
 
-  .cpID {
-    width: 260px;
-    text-align: left;
-    text-overflow: ellipsis;
-  }
-
   .widthRadio {
     font-size: 10px;
     font-weight: 500;
@@ -77,5 +71,61 @@
     .tableColumnItemButton {
       margin-left: 8px;
     }
+  }
+
+  .imagesTips {
+    color: #525967;
+    font-size: 12px;
+    margin-bottom: 4px;
+  }
+
+  .imagesList {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+
+    .imageBox {
+      width: 132px;
+      height: 80px;
+      overflow: hidden;
+      border-radius: 4px;
+      position: relative;
+      pointer-events: none;
+
+      img {
+        width: 100%;
+        height: 100%;
+        display: block;
+        object-fit: cover;
+      }
+
+      .icon {
+        position: absolute;
+        right: 4px;
+        font-size: 14px;
+        color: #fff;
+        cursor: pointer;
+        border-radius: 4px;
+        padding: 3px;
+        background-color: rgba(0, 0, 0, 0.5);
+        pointer-events: auto;
+      }
+    }
+  }
+
+  .noMarginBottom {
+    margin-bottom: 0;
+  }
+}
+
+.imagesForm {
+  width: 300px;
+
+  .uploadedImage {
+    width: 132px;
+    height: 80px;
+    border-radius: 4px;
+    display: block;
+    object-fit: cover;
   }
 }

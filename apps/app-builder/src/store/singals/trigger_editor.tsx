@@ -1,9 +1,18 @@
+import type { FlowNodeJSON } from '@flowgram.ai/fixed-layout-editor';
 import { signal } from '@preact/signals-react';
 
 export const createTriggerEditorSignal = () => {
+  const nodes = signal<any[]>([]);
+  const setNodes = (newNodes: FlowNodeJSON[]) => {
+    nodes.value = newNodes;
+  };
+
   const nodeData = signal<{ [key: string]: any }>({});
   const setNodeData = (nodeID: string, data: { [key: string]: any }) => {
     nodeData.value = { ...nodeData.value, [nodeID]: data };
+  };
+  const setAllNodeData = (data: object) => {
+    nodeData.value = data;
   };
   const clearNodeData = () => {
     nodeData.value = {};
@@ -14,13 +23,49 @@ export const createTriggerEditorSignal = () => {
     nodeId.value = id;
   };
 
+  const flowId = signal<string>();
+  const setFlowId = (id: string) => {
+    flowId.value = id;
+  };
+
+  const pageId = signal<string>();
+  const setPageId = (id: string) => {
+    pageId.value = id;
+  };
+
+  const mainEntities = signal<any[]>([]);
+  const setMainEntities = (entities: any[]) => {
+    mainEntities.value = entities;
+  };
+
+  const subEntities = signal<any[]>([]);
+  const setSubEntities = (entities: any[]) => {
+    subEntities.value = entities;
+  };
+
   return {
+    nodes,
+    setNodes,
+
     nodeData,
     setNodeData,
+    setAllNodeData,
     clearNodeData,
 
     nodeId,
-    setNodeId
+    setNodeId,
+
+    flowId,
+    setFlowId,
+
+    pageId,
+    setPageId,
+
+    mainEntities,
+    setMainEntities,
+
+    subEntities,
+    setSubEntities
   };
 };
 

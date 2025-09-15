@@ -1,4 +1,3 @@
-
 import { type FlowNodeRegistry } from '../typings';
 import { BreakLoopNodeRegistry } from './control/break-loop';
 import { CaseNodeRegistry } from './control/case';
@@ -14,6 +13,7 @@ import { DataAddNodeRegistry } from './data/data-add';
 import { DataCalcNodeRegistry } from './data/data-calc';
 import { DataDeleteNodeRegistry } from './data/data-delete';
 import { DataQueryNodeRegistry } from './data/data-query';
+import { DataQueryMultipleNodeRegistry } from './data/data-query-multiple';
 import { DataUpdateNodeRegistry } from './data/data-update';
 import { ModalNodeRegistry } from './interaction/modal';
 import { NagivateNodeRegistry } from './interaction/nagivate';
@@ -26,35 +26,48 @@ import { LogNodeRegistry } from './other/log';
 import { MessageNodeRegistry } from './other/message';
 import { ScriptNodeRegistry } from './other/script';
 import { StartNodeRegistry } from './start';
+import { StartApiNodeRegistry } from './start_api';
+import { StartBpmNodeRegistry } from './start_bpm';
+import { StartDateFieldNodeRegistry } from './start_date_field';
+import { StartEntityNodeRegistry } from './start_entity';
+import { StartFormNodeRegistry } from './start_form';
+import { StartTimeNodeRegistry } from './start_time';
 
 export const FlowNodeRegistries: FlowNodeRegistry[] = [
-    CaseNodeRegistry,
-    CaseDefaultNodeRegistry,
-    EndNodeRegistry,
-    StartNodeRegistry,
-    CatchBlockNodeRegistry,
-    IFNodeRegistry,
-    IFBlockNodeRegistry,
-    SwitchNodeRegistry,
-    LoopNodeRegistry,
-    BreakLoopNodeRegistry,
-    TryCatchNodeRegistry,
+  CaseNodeRegistry,
+  CaseDefaultNodeRegistry,
+  EndNodeRegistry,
+  StartNodeRegistry,
+  StartBpmNodeRegistry,
+  StartEntityNodeRegistry,
+  StartApiNodeRegistry,
+  StartDateFieldNodeRegistry,
+  StartTimeNodeRegistry,
+  StartFormNodeRegistry,
+  CatchBlockNodeRegistry,
+  IFNodeRegistry,
+  IFBlockNodeRegistry,
+  SwitchNodeRegistry,
+  LoopNodeRegistry,
+  BreakLoopNodeRegistry,
+  TryCatchNodeRegistry,
 
-    DataAddNodeRegistry,
-    DataCalcNodeRegistry,
-    DataDeleteNodeRegistry,
-    DataQueryNodeRegistry,
-    DataUpdateNodeRegistry,
+  DataAddNodeRegistry,
+  DataCalcNodeRegistry,
+  DataDeleteNodeRegistry,
+  DataQueryNodeRegistry,
+  DataQueryMultipleNodeRegistry,
+  DataUpdateNodeRegistry,
 
-    IpaasNodeRegistry,
-    JsonNodeRegistry,
-    LogNodeRegistry,
-    MessageNodeRegistry,
-    ScriptNodeRegistry,
-    DataMapperNodeRegistry,
+  IpaasNodeRegistry,
+  JsonNodeRegistry,
+  LogNodeRegistry,
+  MessageNodeRegistry,
+  ScriptNodeRegistry,
+  DataMapperNodeRegistry,
 
-    ModalNodeRegistry,
-    NagivateNodeRegistry,
-    RefreshNodeRegistry,
-    TooltipNodeRegistry,
+  ModalNodeRegistry,
+  NagivateNodeRegistry,
+  RefreshNodeRegistry,
+  TooltipNodeRegistry
 ];

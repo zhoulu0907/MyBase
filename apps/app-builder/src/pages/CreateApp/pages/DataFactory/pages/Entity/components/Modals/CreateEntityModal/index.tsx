@@ -3,9 +3,11 @@ import { useAppStore } from '@/store/store_app';
 import { useResourceStore } from '@/store/store_resource';
 import { Form, Input, Message, Modal, Radio, Select } from '@arco-design/web-react';
 import { createEntity } from '@onebase/app';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import styles from '../modal.module.less';
 import type { EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
+import { createEntityRules } from '@/pages/CreateApp/pages/DataFactory/utils/rules';
+import { getNewNodePosition } from '../../ERchart/utils/nodePositionCalculator';
 
 interface EntityFormValues {
   source: string;
@@ -32,7 +34,7 @@ const CreateEntityModal: React.FC<{
   successCallback: () => void;
   lastEntity: EntityNode;
   getGraphPositon: () => { x: number; y: number };
-}> = ({ visible, setVisible, successCallback, getGraphPositon, lastEntity }) => {
+}> = ({ visible, setVisible, successCallback, lastEntity }) => {
   const { curDataSourceId } = useResourceStore();
   const { curAppId } = useAppStore();
   const [form] = Form.useForm<EntityFormValues>();
@@ -49,6 +51,9 @@ const CreateEntityModal: React.FC<{
     console.log('lastentity', lastEntity);
 
     form.validate().then(async (values) => {
+      // 获取新节点位置
+      const { x, y } = getNewNodePosition();
+
       const params = {
         displayName: values.displayName,
         tableName: values.tableName,
@@ -58,10 +63,8 @@ const CreateEntityModal: React.FC<{
         datasourceId: curDataSourceId,
         appId: curAppId,
         displayConfig: JSON.stringify({
-          // x: getGraphPositon().x + 300,
-          // y: getGraphPositon().y
-          x: lastEntity?.positionX + 300,
-          y: lastEntity?.positionY
+          x,
+          y
         })
       };
 
@@ -122,32 +125,15 @@ const CreateEntityModal: React.FC<{
           </>
         )}
 
-        <Form.Item
-          label="业务实体名称"
-          field="tableName"
-          rules={[
-            { required: true, message: '请输入业务实体名称' },
-            { max: 40, message: '业务实体名称不能超过40个字符' }
-          ]}
-        >
-          <Input
-            maxLength={40}
-            placeholder="请输入业务实体名称，由字母、数字、下划线组合，须以字母开头，不超过40个字符"
-          />
+        <Form.Item label="业务实体名称" field="tableName" rules={[...createEntityRules.tableName]}>
+          <Input maxLength={40} placeholder="由小写字母、数字、下划线组成，须以字母开头，不超过40个字符" />
         </Form.Item>
 
-        <Form.Item
-          label="业务展示名称"
-          field="displayName"
-          rules={[
-            { required: true, message: '请输入业务展示名称' },
-            { max: 50, message: '业务展示名称不能超过50个字符' }
-          ]}
-        >
+        <Form.Item label="业务展示名称" field="displayName" rules={[...createEntityRules.displayName]}>
           <Input maxLength={50} placeholder="请输入业务展示名称，不超过50个字符" />
         </Form.Item>
 
-        <Form.Item label="业务实体描述" field="description">
+        <Form.Item label="业务实体描述" field="description" rules={[...createEntityRules.description]}>
           <Input.TextArea placeholder="请输入描述（选填）" rows={4} maxLength={500} showWordLimit />
         </Form.Item>
       </Form>

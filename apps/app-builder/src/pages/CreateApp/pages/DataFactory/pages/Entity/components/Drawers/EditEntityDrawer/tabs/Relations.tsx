@@ -98,7 +98,7 @@ const DataMethods: React.FC<DataMethodsProps> = ({ node }) => {
               >
                 <div className={styles['relation-content']}>
                   {Object.keys(relationKeyMap).map((key) => (
-                    <div className={styles['description-section']}>
+                    <div className={styles['description-section']} key={key}>
                       <div className={styles.label}>{relationKeyMap[key]}:</div>
                       {key === 'relationshipType' ? (
                         <div className={styles.text}>

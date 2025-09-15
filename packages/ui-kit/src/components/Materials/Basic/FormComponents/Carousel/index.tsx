@@ -1,32 +1,62 @@
-import { Carousel } from '@arco-design/web-react';
 import { memo } from 'react';
+import { Carousel, Form } from '@arco-design/web-react';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import { type XCarouselConfig } from './schema';
+import '../index.css';
+import './index.css';
 
-const XCarousel = memo((props: XCarouselConfig) => {
-  const { status } = props;
-
-  const imageSrc = [
-    '//p1-arco.byteimg.com/tos-cn-i-uwbnlip3yd/cd7a1aaea8e1c5e3d26fe2591e561798.png~tplv-uwbnlip3yd-webp.webp',
-    '//p1-arco.byteimg.com/tos-cn-i-uwbnlip3yd/6480dbc69be1b5de95010289787d64f1.png~tplv-uwbnlip3yd-webp.webp',
-    '//p1-arco.byteimg.com/tos-cn-i-uwbnlip3yd/0265a04fddbd77a19602a15d9d55d797.png~tplv-uwbnlip3yd-webp.webp',
-    '//p1-arco.byteimg.com/tos-cn-i-uwbnlip3yd/24e0dd27418d2291b65db1b21aa62254.png~tplv-uwbnlip3yd-webp.webp'
-  ];
+const XCarousel = memo((props: XCarouselConfig & { runtime?: boolean }) => {
+  const {
+    label,
+    status,
+    verify,
+    layout,
+    tooltip,
+    labelColSpan,
+    autoplay,
+    interval = 3,
+    fillStyle,
+    carouselConfig = [],
+    runtime
+  } = props;
 
   return (
-    <Carousel
-      style={{
-        width: '100%',
-        height: '100%',
-        opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1
-      }}
-    >
-      {imageSrc.map((src, index) => (
-        <div key={index}>
-          <img src={src} style={{ width: '100%' }} />
-        </div>
-      ))}
-    </Carousel>
+    <div className='formWrapper'>
+      <Form.Item
+        label={label.display && label.text}
+        layout={layout}
+        tooltip={tooltip}
+        labelCol={{
+          style: { width: labelColSpan, flex: 'unset' }
+        }}
+        wrapperCol={{ style: { flex: 1 } }}
+        rules={[{ required: verify?.required }]}
+        hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
+        style={{
+          margin: 0,
+          opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
+        }}
+      >
+        <Carousel
+          className="carousel"
+          autoPlay={
+            autoplay && {
+              interval: interval * 1000
+            }
+          }
+          style={{
+            pointerEvents: runtime ? 'unset' : 'none'
+          }}
+        >
+          {carouselConfig.map((img, index) => (
+            <div className="imageWrapper" key={index} onClick={() => window.open(img.url)}>
+              <img className="image" src={img.image} style={{ objectFit: fillStyle }} />
+              <div className="text">{img.text}</div>
+            </div>
+          ))}
+        </Carousel>
+      </Form.Item>
+    </div>
   );
 });
 

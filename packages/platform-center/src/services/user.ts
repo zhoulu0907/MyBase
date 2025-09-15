@@ -1,4 +1,4 @@
-import { type PageParam } from '../types/common';
+import { type PageParam, PageResult } from '../types/common';
 import { type UserVO } from '../types/user';
 import { systemService } from './clients';
 
@@ -65,4 +65,10 @@ export const updateUserStatus = (id: number, status: number) => {
 // 获取用户精简信息列表
 export const getSimpleUserList = (): Promise<UserVO[]> => {
   return systemService.get('/user/simple-list');
+};
+
+
+// 分页获取用户精简信息列表
+export const getSimpleUserPage = (params: PageParam): Promise<PageResult<UserVO>> => {
+  return systemService.get('/user/simple-page', params);
 };

@@ -1,6 +1,6 @@
-import { Button, Input, Select } from '@arco-design/web-react';
-import { IconClose } from '@douyinfe/semi-icons';
-import type { Condition } from '@onebase/app';
+import { Button, Divider, Input, Select } from '@arco-design/web-react';
+import { IconDelete } from '@arco-design/web-react/icon';
+import type { Condition, ConfitionField, EntityFieldValidationTypes, ValidationTypeItem } from '@onebase/app';
 import { nanoid } from 'nanoid';
 import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
@@ -23,45 +23,35 @@ const opCodeOptions = [
  * ConditionEditor 组件的 props 类型定义
  */
 export interface ConditionEditorProps {
-  data?: Condition;
-  onChange: (value: Condition) => void;
-  fields: { label: string; value: string; fieldType: string }[];
-  fieldOperatorMapping: { [key: string]: string[] };
+  fields: ConfitionField[];
+  data?: Condition[];
+  onChange: (value: Condition[]) => void;
+  entityFieldValidationTypes: EntityFieldValidationTypes[];
 }
 
 /**
  * 条件编辑器组件初始化
  */
-const ConditionEditor: React.FC<ConditionEditorProps> = ({ data, onChange, fields, fieldOperatorMapping }) => {
-  const [condition, setCondition] = useState<Condition>({
-    id: '',
-    condition: 'and',
-    parentId: '',
-    fieldId: '',
-    op: '',
-    opCode: '',
-    operators: [],
-    rules: []
-  });
-
-  const [fieldOperator, setFieldOperator] = useState<{ [key: string]: string[] }>({});
+const ConditionEditor: React.FC<ConditionEditorProps> = ({ data, onChange, fields, entityFieldValidationTypes }) => {
+  const [conditions, setConditions] = useState<Condition[]>([]);
 
   useEffect(() => {
     if (data) {
-      setCondition(data);
+      setConditions(data);
     }
   }, []);
 
   useEffect(() => {
-    onChange(condition);
-  }, [condition]);
+    onChange(conditions);
+  }, [conditions]);
 
   const addCondition = (pid: string) => {
-    const newCondition = { ...condition };
+    const newConditions = [...conditions];
     if (pid == '') {
-      newCondition.rules?.push({
-        id: nanoid(),
-        parentId: newCondition.id,
+      pid = nanoid();
+      newConditions.push({
+        id: pid,
+        parentId: '',
         rules: [
           {
             id: nanoid(),
@@ -69,37 +59,33 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({ data, onChange, field
           }
         ]
       });
-      setCondition(newCondition);
-      return;
-    }
-
-    if (newCondition.rules) {
-      for (let i = 0; i < newCondition.rules?.length; i++) {
-        const subItem = newCondition.rules[i];
+    } else {
+      for (let i = 0; i < newConditions.length; i++) {
+        const subItem = newConditions[i];
         if (subItem.id === pid) {
           subItem.rules?.push({ id: nanoid(), parentId: pid });
           break;
         }
       }
     }
-    setCondition(newCondition);
+
+    setConditions(newConditions);
+    return;
   };
 
   const deleteCondition = (id: string) => {
-    const newCondition = { ...condition };
-    if (newCondition.rules) {
-      for (let i = 0; i < newCondition.rules?.length; i++) {
-        const subItem = newCondition.rules[i];
-        if (subItem.rules) {
-          for (let j = 0; j < subItem.rules?.length; j++) {
-            if (subItem.rules[j].id === id) {
-              subItem.rules.splice(j, 1);
-              if (subItem.rules.length === 0) {
-                newCondition.rules.splice(i, 1);
-              }
-              setCondition(newCondition);
-              break;
+    const newConditions = [...conditions];
+    for (let i = 0; i < newConditions.length; i++) {
+      const subItem = newConditions[i];
+      if (subItem.rules) {
+        for (let j = 0; j < subItem.rules?.length; j++) {
+          if (subItem.rules[j].id === id) {
+            subItem.rules.splice(j, 1);
+            if (subItem.rules.length === 0) {
+              newConditions.splice(i, 1);
             }
+            setConditions(newConditions);
+            break;
           }
         }
       }
@@ -109,12 +95,14 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({ data, onChange, field
   const renderItemWrapper = (cond: Condition) => {
     return cond.rules && cond.rules.length > 0 ? (
       <div className={styles.items} key={cond.id}>
-        {cond.rules?.map((item) => {
+        <div className={styles.tag}>且</div>
+
+        {cond.rules?.map((item: Condition) => {
           return renderItem(item);
         })}
         {cond.rules && cond.rules.length > 0 && (
-          <Button type="default" onClick={() => addCondition(cond.id)}>
-            + 并且
+          <Button type="text" onClick={() => addCondition(cond.id)}>
+            + 添加且条件
           </Button>
         )}
       </div>
@@ -126,13 +114,23 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({ data, onChange, field
       <div className={styles.item} key={cond.id}>
         <Select
           className={styles.itemSelect}
-          style={{ width: '80px' }}
-          onChange={() => {
-            const newFieldOperator = fieldOperator;
-            const fieldType = fields.find((field) => field.value === cond.fieldId)?.fieldType;
-            newFieldOperator[cond.fieldId!] = fieldOperatorMapping[fieldType!];
+          style={{ width: '150px' }}
+          value={cond.fieldId || ''}
+          onChange={(value) => {
+            const newConditions = [...conditions];
 
-            setFieldOperator(newFieldOperator);
+            for (let i = 0; i < newConditions.length; i++) {
+              const subItem = newConditions[i];
+              if (subItem.rules) {
+                for (let j = 0; j < subItem.rules?.length; j++) {
+                  if (subItem.rules[j].id === cond.id) {
+                    newConditions[i]!.rules![j].fieldId = value;
+                    break;
+                  }
+                }
+              }
+            }
+            setConditions(newConditions);
           }}
         >
           {fields.map((field) => (
@@ -142,24 +140,85 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({ data, onChange, field
           ))}
         </Select>
 
-        <Select className={styles.itemSelect} style={{ width: '80px' }}>
-          {(fieldOperator[cond.fieldId!] || []).map((operator) => (
-            <Option key={operator} value={operator}>
-              {operator}
-            </Option>
-          ))}
+        <Select
+          className={styles.itemSelect}
+          style={{ width: '100px' }}
+          value={cond.op || ''}
+          onChange={(value) => {
+            const newConditions = [...conditions];
+
+            for (let i = 0; i < newConditions.length; i++) {
+              const subItem = newConditions[i];
+              if (subItem.rules) {
+                for (let j = 0; j < subItem.rules?.length; j++) {
+                  if (subItem.rules[j].id === cond.id) {
+                    newConditions[i]!.rules![j].op = value;
+                    break;
+                  }
+                }
+              }
+            }
+            setConditions(newConditions);
+          }}
+        >
+          {(entityFieldValidationTypes.find((item) => item.fieldId === cond.fieldId)?.validationTypes || []).map(
+            (operator: ValidationTypeItem) => (
+              <Option key={operator.code} value={operator.code}>
+                {operator.name}
+              </Option>
+            )
+          )}
         </Select>
 
-        <Select className={styles.itemSelect} style={{ width: '90px' }}>
+        <Select
+          className={styles.itemSelect}
+          style={{ width: '100px' }}
+          value={cond.operatorType || ''}
+          onChange={(value) => {
+            const newConditions = [...conditions];
+
+            for (let i = 0; i < newConditions.length; i++) {
+              const subItem = newConditions[i];
+              if (subItem.rules) {
+                for (let j = 0; j < subItem.rules?.length; j++) {
+                  if (subItem.rules[j].id === cond.id) {
+                    newConditions[i]!.rules![j].operatorType = value;
+                    break;
+                  }
+                }
+              }
+            }
+            setConditions(newConditions);
+          }}
+        >
           {opCodeOptions}
         </Select>
 
-        <Input style={{ width: '100px', marginRight: '10px', backgroundColor: 'white' }} />
+        <Input
+          style={{ width: '140px', marginRight: '10px' }}
+          value={cond.value?.[0] || ''}
+          placeholder="请输入"
+          onChange={(value) => {
+            const newConditions = [...conditions];
 
-        <IconClose
+            for (let i = 0; i < newConditions.length; i++) {
+              const subItem = newConditions[i];
+              if (subItem.rules) {
+                for (let j = 0; j < subItem.rules?.length; j++) {
+                  if (subItem.rules[j].id === cond.id) {
+                    newConditions[i]!.rules![j].value = [value];
+                    break;
+                  }
+                }
+              }
+            }
+            setConditions(newConditions);
+          }}
+        />
+
+        <IconDelete
           style={{ fontSize: '13px', color: '#4E5969' }}
           onClick={() => {
-            console.log('close', cond.id);
             deleteCondition(cond.id);
           }}
         />
@@ -170,17 +229,29 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({ data, onChange, field
   return (
     <div>
       <div className={styles.conditionWrapper}>
-        {condition.rules?.map((item, index) => {
+        {conditions.map((item, index) => {
           return (
             <div key={item.id}>
               {renderItemWrapper(item)}
-              {index !== (condition.rules || [])?.length - 1 && <div>或者</div>}
+              {index !== (conditions || [])?.length - 1 && (
+                <Divider
+                  orientation="center"
+                  style={{
+                    marginTop: '5px',
+                    marginBottom: '0px',
+                    marginLeft: '10px',
+                    marginRight: '10px'
+                  }}
+                >
+                  <div className={styles.dividerText}>或</div>
+                </Divider>
+              )}
             </div>
           );
         })}
       </div>
-      <Button type="outline" onClick={() => addCondition('')}>
-        + 或者
+      <Button type="text" size="small" onClick={() => addCondition('')}>
+        + 添加或条件
       </Button>
     </div>
   );

@@ -29,6 +29,8 @@ import FileUploadIcon from '@/assets/images/cp/upload_file_cp.svg';
 import ImageUploadIcon from '@/assets/images/cp/upload_image_cp.svg';
 import UserSelectIcon from '@/assets/images/cp/user_select_cp.svg';
 import WebComponentIcon from '@/assets/images/cp/web_component_cp.svg';
+import RelatedFormIcon from '@/assets/images/cp/related_form_cp.svg';
+import RichTextIcon from '@/assets/images/cp/rich_text_cp.svg';
 
 export const ICON_Map: Record<string, React.ReactNode> = {
   'text_input_cp.svg': <img src={TextInputIcon} />,
@@ -61,5 +63,47 @@ export const ICON_Map: Record<string, React.ReactNode> = {
   'web_component_cp.svg': <img src={WebComponentIcon} />,
   'list_container_cp.svg': <img src={ListContainerIcon} />,
   'canvas_list_cp.svg': <img src={CanvasListIcon} />,
-  'calendar_cp.svg': <img src={CalendarIcon} />
+  'calendar_cp.svg': <img src={CalendarIcon} />,
+  'related_form_cp.svg': <img src={RelatedFormIcon} />,
+  'rich_text_cp.svg': <img src={RichTextIcon} />
+};
+
+// TODO 图标更新
+export const ICON_Map_By_Type: Record<string, React.ReactNode> = {
+  XInputText: <img src={TextInputIcon} />,
+  XInputTextArea: <img src={TextareaInputIcon} />,
+  XInputNumber: <img src={NumberInputIcon} />,
+  XInputEmail: <img src={EmailInputIcon} />,
+  XInputPhone: <img src={PhoneInputIcon} />,
+  XDatePicker: <img src={DatePickerIcon} />,
+  XDateRangePicker: <img src={DatePickerIcon} />,
+  XTimePicker: <img src={TimePickerIcon} />,
+  XRadio: <img src={RadioIcon} />,
+  XSwitch: <img src={SwitchIcon} />,
+  XCheckbox: <img src={CheckboxIcon} />,
+  XSelectOne: <img src={SelectOneIcon} />,
+  XSelectMutiple: <img src={SelectMutipleIcon} />,
+  XUserSelect: <img src={UserSelectIcon} />,
+  XDeptSelect: <img src={DeptSelectIcon} />,
+  XFileUpload: <img src={FileUploadIcon} />,
+  XImgUpload: <img src={ImageUploadIcon} />,
+  XAutoCode: <img src={ReadonlyIcon} />,
+  XColumnLayout: <img src={ColumnLayoutIcon} />,
+  'canvas_card_cp.svg': <img src={CanvasCardIcon} />,
+  XTable: <img src={TableIcon} />,
+  XTimeline: <img src={TimelineIcon} />,
+  'directory_cp.svg': <img src={DirectoryIcon} />,
+  'kanban_cp.svg': <img src={KanbanIcon} />,
+  XImage: <img src={DisplayImageIcon} />,
+  XInfoNotice: <img src={InfoNoticeIcon} />,
+  'display_text_cp.svg': <img src={DisplayTextIcon} />,
+  'pwd_input_cp.svg': <img src={PwdInputIcon} />,
+  XWebView: <img src={WebComponentIcon} />,
+  XList: <img src={ListContainerIcon} />,
+  'canvas_list_cp.svg': <img src={CanvasListIcon} />,
+  XFCarousel: <img src={CalendarIcon} />,
+  XRelatedForm: <img src={RelatedFormIcon} />,
+  XRichText: <img src={RichTextIcon} />,
+  XChildrenTable: <img src={RichTextIcon} />,
+  XDataSelect: <img src={RichTextIcon} /> // todo
 };

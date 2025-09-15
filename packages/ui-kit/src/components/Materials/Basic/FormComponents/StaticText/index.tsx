@@ -1,9 +1,12 @@
 import { Form, Input } from '@arco-design/web-react';
+import { nanoid } from 'nanoid';
 import { memo } from 'react';
+import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import { type XStaticTextConfig } from './schema';
+import '../index.css';
 
-const XStaticText = memo((props: XStaticTextConfig) => {
+const XStaticText = memo((props: XStaticTextConfig & { runtime?: boolean }) => {
   const {
     label,
     dataField,
@@ -11,45 +14,47 @@ const XStaticText = memo((props: XStaticTextConfig) => {
     tooltip,
     status,
     defaultValue,
-    required,
     align,
     layout,
     color,
     bgColor,
     labelColSpan = 0,
-    maxLength
+    maxLength,
+    runtime = true
   } = props;
 
   return (
-    <Form.Item
-      label={label}
-      field={dataField.length > 0 ? dataField[dataField.length - 1] : ''}
-      layout={layout}
-      tooltip={tooltip}
-      labelCol={{
-        style: { width: labelColSpan, flex: 'unset' }
-      }}
-      wrapperCol={{ style: { flex: 1 } }}
-      rules={[{ required }]}
-      style={{
-        opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,
-        pointerEvents: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset',
-        margin: '0px'
-      }}
-    >
-      <Input
-        readOnly={true}
-        placeholder={placeholder}
-        value={defaultValue}
-        maxLength={maxLength}
-        style={{
-          width: '100%',
-          color,
-          textAlign: align,
-          backgroundColor: bgColor
+    <div className='formWrapper'>
+      <Form.Item
+        label={label.display && label.text}
+        field={dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.STATIC_TEXT}_${nanoid()}`}
+        layout={layout}
+        tooltip={tooltip}
+        labelCol={{
+          style: { width: labelColSpan, flex: 'unset' }
         }}
-      />
-    </Form.Item>
+        wrapperCol={{ style: { flex: 1 } }}
+        hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
+        style={{
+          margin: 0,
+          opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
+        }}
+      >
+        <Input
+          readOnly={true}
+          placeholder={placeholder}
+          value={defaultValue}
+          maxLength={maxLength}
+          style={{
+            width: '100%',
+            color,
+            textAlign: align,
+            backgroundColor: bgColor,
+            pointerEvents: runtime ? 'unset' : 'none'
+          }}
+        />
+      </Form.Item>
+    </div>
   );
 });
 

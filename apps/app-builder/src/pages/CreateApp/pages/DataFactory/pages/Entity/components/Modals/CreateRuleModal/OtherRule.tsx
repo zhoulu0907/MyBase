@@ -175,7 +175,15 @@ const CreateOtherRule: React.FC<CreateRuleModalProps> = ({
         </Form.Item>
 
         <Form.Item label="校验数据项" field="fieldId" rules={[{ required: true, message: '请选择校验数据项' }]}>
-          <Select placeholder="请选择校验数据项" options={fieldOptions} />
+          <Select
+            placeholder="请选择校验数据项"
+            options={fieldOptions}
+            showSearch
+            filterOption={(inputValue, option) =>
+              option.props.value.toLowerCase().indexOf(inputValue.toLowerCase()) >= 0 ||
+              option.props.children.toLowerCase().indexOf(inputValue.toLowerCase()) >= 0
+            }
+          />
         </Form.Item>
 
         <Form.Item label="校验类型" field="validationType" hidden>

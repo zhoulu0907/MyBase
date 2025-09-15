@@ -1,6 +1,6 @@
 import { useAppEntityStore } from '@/store/store_entity';
 import { Cascader, Form } from '@arco-design/web-react';
-import type { AppEntityField } from '@onebase/app';
+import { FilterEntityFields, type AppEntity, type AppEntityField } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
 import styles from '../../index.module.less';
 
@@ -13,7 +13,7 @@ export interface DynamicFieldConfigProps {
 }
 
 const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({ handlePropsChange, item, configs }) => {
-  const { mainEntity } = useAppEntityStore();
+  const { mainEntity, subEntities } = useAppEntityStore();
 
   const [entityTree, setEntityTree] = useState<any[]>([]);
 
@@ -25,19 +25,31 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({ handlePropsChan
   }, [mainEntity]);
 
   const initTreeData = async () => {
-    const newEntityTree = mainEntity.fields
-      .filter((field: AppEntityField) => field.isSystemField == 1)
+    const mainEntityTree = mainEntity.fields
+      .filter((field: AppEntityField) => !FilterEntityFields.includes(field.fieldName))
       .map((field: AppEntityField) => ({
-        value: field.fieldID,
-        label: field.fieldName
+        value: field.fieldId,
+        label: field.displayName
       }));
+
+    const subEntityTree = subEntities.entities.map((entity: AppEntity) => ({
+      value: entity.entityId,
+      label: entity.entityName,
+      children: entity.fields
+        .filter((field: AppEntityField) => !FilterEntityFields.includes(field.fieldName))
+        .map((field: AppEntityField) => ({
+          value: field.fieldId,
+          label: field.displayName
+        }))
+    }));
 
     setEntityTree([
       {
-        value: mainEntity.entityID,
+        value: mainEntity.entityId,
         label: mainEntity.entityName,
-        children: newEntityTree
-      }
+        children: mainEntityTree
+      },
+      ...subEntityTree
     ]);
   };
 

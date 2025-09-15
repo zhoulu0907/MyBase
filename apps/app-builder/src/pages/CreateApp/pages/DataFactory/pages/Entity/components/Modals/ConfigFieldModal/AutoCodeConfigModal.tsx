@@ -2,16 +2,16 @@ import React, { useEffect } from 'react';
 import { Modal, Radio, InputNumber, Checkbox, Select, Form, Tooltip } from '@arco-design/web-react';
 import { IconQuestionCircle } from '@arco-design/web-react/icon';
 import styles from './index.module.less';
-import type { AutoCodeRule } from './FieldTypeConfig';
+import type { AutoNumberRule, AutoNumberRuleResponce } from './types';
 
-interface AutoNumberConfigModalProps {
+interface AutoCodeConfigModalProps {
   visible: boolean;
   onVisibleChange: (visible: boolean) => void;
-  onConfirm: (config: AutoCodeRule['config']) => void;
-  initialConfig?: AutoCodeRule['config'];
+  onConfirm: (config: AutoNumberRule) => void;
+  initialConfig?: AutoNumberRuleResponce;
 }
 
-const AutoNumberConfigModal: React.FC<AutoNumberConfigModalProps> = ({
+const AutoCodeConfigModal: React.FC<AutoCodeConfigModalProps> = ({
   visible,
   onVisibleChange,
   onConfirm,
@@ -21,12 +21,13 @@ const AutoNumberConfigModal: React.FC<AutoNumberConfigModalProps> = ({
   const numberMode = Form.useWatch(['numberMode'], form)?.numberMode;
 
   const initialValues = {
+    isEnabled: 1,
     numberMode: 'FIXED_DIGITS',
     digitWidth: 4,
-    continueIncrement: true,
+    overflowContinue: 1,
     initialValue: 1,
-    nextRecordStartValue: false,
-    resetCycle: 'NONE'
+    resetCycle: 'NONE',
+    rules: []
   };
 
   const handleConfirm = () => {
@@ -43,8 +44,16 @@ const AutoNumberConfigModal: React.FC<AutoNumberConfigModalProps> = ({
 
   // 当弹窗显示时，设置表单初始值
   useEffect(() => {
+    console.log('useEffect', visible, initialConfig, form);
     if (visible && initialConfig) {
-      form.setFieldsValue(initialConfig);
+      const values = {
+        numberMode: initialConfig.mode || 'FIXED_DIGITS',
+        digitWidth: initialConfig.digitWidth || 4,
+        overflowContinue: initialConfig.overflowContinue || 1,
+        resetCycle: initialConfig.resetCycle || 'NONE',
+        nextRecordStartValue: initialConfig?.nextRecordStartValue || 1
+      };
+      form.setFieldsValue(values);
     } else if (visible) {
       // 设置默认值
       form.setFieldsValue(initialValues);
@@ -62,13 +71,7 @@ const AutoNumberConfigModal: React.FC<AutoNumberConfigModalProps> = ({
       className={styles['auto-number-config-modal']}
       style={{ width: 500 }}
     >
-      <Form
-        form={form}
-        layout="horizontal"
-        className={styles['auto-number-config-form']}
-        initialValues={initialValues}
-        labelAlign="left"
-      >
+      <Form form={form} layout="horizontal" className={styles['auto-number-config-form']} labelAlign="left">
         <Form.Item label="编号方式" field="numberMode" rules={[{ required: true, message: '请选择编号方式' }]}>
           <Radio.Group>
             <Radio value="NATURAL">自然数编号</Radio>
@@ -132,4 +135,4 @@ const AutoNumberConfigModal: React.FC<AutoNumberConfigModalProps> = ({
   );
 };
 
-export default AutoNumberConfigModal;
+export default AutoCodeConfigModal;

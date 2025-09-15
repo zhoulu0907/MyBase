@@ -2,9 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { CheckEntityPage } from './main/CheckEntityPage';
 import { EmptyEntityPage } from './main/EmptyEntityPage';
 import { getFieldTypes } from '@onebase/app';
+import { useFieldStore } from '@/store/store_field';
 
 const EntityPage: React.FC = () => {
   const [pageType, setPageType] = useState('check-entity');
+  const { setFieldTypes } = useFieldStore();
   const handlePageType = (type: string) => {
     setPageType(type);
   };
@@ -13,11 +15,7 @@ const EntityPage: React.FC = () => {
     const res = await getFieldTypes();
 
     if (res.length > 0) {
-      const fieldTypes = res.map((item: { displayName: string; fieldType: string }) => ({
-        label: item.displayName,
-        value: item.fieldType
-      }));
-      localStorage.setItem('fieldTypes', JSON.stringify(fieldTypes));
+      setFieldTypes(res);
     }
   };
 

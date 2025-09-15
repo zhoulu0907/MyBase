@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { debounce, sample } from 'lodash-es';
 import dayjs from 'dayjs';
 import { Avatar, Divider, Form, Input, Message, Modal, Pagination, Select, Spin, Tag } from '@arco-design/web-react';
-import { IconCheckCircle, IconPlus, IconSearch, IconLeft, IconEmpty } from '@arco-design/web-react/icon';
+import { IconCheckCircle, IconSearch, IconLeft, IconEmpty } from '@arco-design/web-react/icon';
 
 import { useI18n } from '@/hooks/useI18n';
 import { useAppStore } from '@/store/store_app';
@@ -15,7 +15,7 @@ import {
   type CreateApplicationReq,
   type DeleteApplicationReq,
   type ListApplicationReq,
-  type DatasourceSaveReqVO
+  type DatasourceSaveReqDTO
 } from '@onebase/app';
 
 import CreateApp from '@/components/CreateApp';
@@ -25,8 +25,9 @@ import { PermissionButton as Button } from '@/components/PermissionControl';
 import { TENANT_DEPT_PERMISSION as ACTIONS } from '@/constants/permission';
 import { hasPermission, UserPermissionManager } from '@/utils/permission';
 import appDeleteSVG from '@/assets/images/app_delete.svg';
-import appEditSVG from '@/assets/images/app_edit_black.svg';
+import appEditSVG from '@/assets/images/edit_page_name_icon.svg';
 import emptyApplicationSVG from '@/assets/images/empty_application.svg';
+import plusSVG from '@/assets/images/plus_icon.svg';
 import {
   appOptions,
   avatarBgColor,
@@ -36,6 +37,7 @@ import {
   statusOptions,
   TagColor
 } from './const';
+import { appIcon } from '@/components/CreateApp/const';
 import styles from './index.module.less';
 
 const Option = Select.Option;
@@ -58,7 +60,7 @@ const MyAppPage: React.FC = () => {
   const [appName, setAppName] = useState<string>('');
   const [createType, setCreateType] = useState<'app' | 'datasource'>('app');
   const [deleteApp, setDeleteApp] = useState<Application>();
-  const [datasource, setDdtasource] = useState<DatasourceSaveReqVO>(); // 自有数据源
+  const [datasource, setDdtasource] = useState<DatasourceSaveReqDTO | undefined>(); // 自有数据源
   const [deleteVisible, setDeleteVisible] = useState<boolean>(false);
   const [createVisible, setCreateVisible] = useState<boolean>(false);
   const [createLoading, setCreateLoading] = useState<boolean>(false);
@@ -85,7 +87,7 @@ const MyAppPage: React.FC = () => {
   }, [pageNo, pageSize, name, orderByTime, status, ownerTag]);
 
   useEffect(() => {
-    setDdtasource(null);
+    setDdtasource(undefined);
   }, []);
 
   useEffect(() => {
@@ -236,7 +238,7 @@ const MyAppPage: React.FC = () => {
           permission={ACTIONS.CREATE}
           type="default"
           size="large"
-          icon={<IconPlus />}
+          icon={<img src={plusSVG} alt='create application' />}
           className={styles.createAppButton}
           onClick={() => setCreateVisible(true)}
           style={{ color: 'rgb(var(--primary-6))' }}
@@ -334,7 +336,7 @@ const MyAppPage: React.FC = () => {
                     <div className={styles.myAppCardHeader}>
                       <div className={styles.myAppName}>
                         <div className={styles.myAppIcon} style={{ backgroundColor: item.iconColor }}>
-                          <i className={`iconfont ${item.iconName || 'icon-box'}`} />
+                          <i className={`iconfont ${item.iconName || appIcon[0]}`} />
                         </div>
                         <div className={styles.myAppCardInfo}>
                           <div className={styles.myAppTitle}>{item.appName}</div>
@@ -487,12 +489,12 @@ const MyAppPage: React.FC = () => {
         simple
         unmountOnExit
         footer={
-          <div style={{ textAlign: 'right' }}>
+          <div style={{ textAlign: 'right', visibility: createType === 'app' ? 'visible' : 'hidden' }}>
             <Button type="default" onClick={() => setCreateVisible(false)} style={{ marginRight: 12 }}>
               取消
             </Button>
             <Button type="primary" loading={createLoading} onClick={handleCreateApp}>
-              {createType === 'app' ? '创建' : '保存'}
+              创建
             </Button>
           </div>
         }

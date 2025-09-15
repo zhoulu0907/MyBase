@@ -29,6 +29,7 @@ export interface BasicEditorStore {
 
 export const useBasicEditorStore = create<BasicEditorStore>((set) => ({
   isEditMode: false,
+
   setIsEditMode: (isEditMode: boolean) => set(() => ({ isEditMode })),
   clearIsEditMode: () => set(() => ({ isEditMode: false })),
 

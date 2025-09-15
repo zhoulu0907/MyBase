@@ -1,6 +1,7 @@
 import XAutoCode from './FormComponents/AutoCode/schema';
 import XFCarousel from './FormComponents/Carousel/schema';
 import XCheckbox from './FormComponents/Checkbox/schema';
+import XDataSelect from './FormComponents/DataSelect/schema';
 import XDatePicker from './FormComponents/DatePicker/schema';
 import XDateRangePicker from './FormComponents/DateRangePicker/schema';
 import XDateTimePicker from './FormComponents/DateTimePicker/schema';
@@ -15,13 +16,14 @@ import XInputText from './FormComponents/InputText/schema';
 import XInputTextArea from './FormComponents/InputTextArea/schema';
 import XRadio from './FormComponents/Radio/schema';
 import XRelatedForm from './FormComponents/RelatedForm/schema';
-import XRichText from './FormComponents/RichText/schema';
+import XRichText from './FormComponents/RichTextEditor/schema';
 import XSelectMutiple from './FormComponents/SelectMutiple/schema';
 import XSelectOne from './FormComponents/SelectOne/schema';
 import XStaticText from './FormComponents/StaticText/schema';
 import XSwitch from './FormComponents/Switch/schema';
 import XTimePicker from './FormComponents/TimePicker/schema';
 import XUserSelect from './FormComponents/UserSelect/schema';
+import XChildrenTable from './FormComponents/ChildrenTable/schema';
 import XColumnLayout from './LayoutComponents/ColumnLayout/schema';
 import XCalendar from './ListComponents/Calendar/schema';
 import XCarousel from './ListComponents/Carousel/schema';
@@ -58,6 +60,8 @@ const baseSchema = {
   XDivider,
   XRichText,
   XFCarousel,
+  XChildrenTable,
+  XDataSelect,
 
   XTable,
   XCalendar,

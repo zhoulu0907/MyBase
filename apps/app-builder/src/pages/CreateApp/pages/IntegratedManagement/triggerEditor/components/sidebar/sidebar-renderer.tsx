@@ -7,10 +7,14 @@ import { IsSidebarContext } from '../../context';
 import type { FlowNodeMeta } from '../../typings';
 import { SidebarNodeRenderer } from './sidebar-node-renderer';
 
-export const SidebarRenderer = () => {
+export interface SidebarRendererProps {
+  refWrapper: React.RefObject<HTMLDivElement>;
+}
+
+export const SidebarRenderer = (props: SidebarRendererProps) => {
+  const { refWrapper } = props;
   useSignals();
 
-  // const { nodeId, setNodeId } = useContext(SidebarContext);
   const { nodeId, setNodeId } = triggerEditorSignal;
   const { selection, playground, document } = useClientContext();
   const refresh = useRefresh();
@@ -91,13 +95,14 @@ export const SidebarRenderer = () => {
       visible={visible}
       onCancel={handleClose}
       closable={false}
-      width={450}
+      width={600}
       headerStyle={{
         display: 'none'
       }}
       bodyStyle={{
         padding: 0
       }}
+      getPopupContainer={() => refWrapper && refWrapper?.current!}
       footer={null}
       style={{
         background: 'none',

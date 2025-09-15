@@ -86,7 +86,7 @@ const TableColumns = ({
         ) : (
           <Input
             value={value}
-            placeholder="请输入字段名称"
+            placeholder="由小写字母、数字、下划线组成，须以字母开头，不超过40个字符"
             onChange={(val) => updateField(getFieldIndex(record.id, index), { fieldName: val })}
           />
         )
@@ -99,11 +99,7 @@ const TableColumns = ({
         record.isSystemField === FIELD_TYPE.SYSTEM ? (
           <span className={styles['system-field']}>{value}</span>
         ) : (
-          <Input
-            value={value}
-            placeholder="请输入展示名称"
-            onChange={(val) => updateField(getFieldIndex(record.id, index), { displayName: val })}
-          />
+          <Input value={value} onChange={(val) => updateField(getFieldIndex(record.id, index), { displayName: val })} />
         )
     },
     {
@@ -119,7 +115,9 @@ const TableColumns = ({
             disabled={record.isSystemField === FIELD_TYPE.SYSTEM}
             style={{ width: 100 }}
             showSearch
-            filterOption={(input, option) => (option?.props?.label ?? '').includes(input)}
+            filterOption={(input, option) => {
+              return option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0;
+            }}
           />
           {record.isSystemField === FIELD_TYPE.CUSTOM && FIELD_TYPES_NEED_CONFIG.includes(value) && (
             <Popover
@@ -176,7 +174,6 @@ const TableColumns = ({
         ) : (
           <Input
             value={value}
-            placeholder="请输入默认值"
             onChange={(val) => updateField(getFieldIndex(record.id, index), { defaultValue: val })}
           />
         )

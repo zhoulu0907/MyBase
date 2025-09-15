@@ -28,7 +28,9 @@ export const FORM_COMPONENT_TYPES = {
   STATIC_TEXT: 'XStaticText',
   DIVIDER: 'XDivider',
   RICH_TEXT: 'XRichText',
-  CAROUSEL_F: 'XFCarousel'
+  CAROUSEL_F: 'XFCarousel',
+  CHILDREN_TABLE: 'XChildrenTable',
+  DATA_SELECT: 'XDataSelect'
 } as const;
 
 // 布局组件类型
@@ -55,6 +57,12 @@ export const SHOW_COMPONENT_TYPES = {
   WEB_VIEW: 'XWebView'
 } as const;
 
+// 列表组件类型
+export const ENTITY_COMPONENT_TYPES = {
+  MAIN_ENTITY: 'XMainEntity',
+  SUB_ENTITY: 'XSubEntity'
+} as const;
+
 // 所有组件类型
 export const ALL_COMPONENT_TYPES = {
   ...FORM_COMPONENT_TYPES,
@@ -67,4 +75,6 @@ export const ALL_COMPONENT_TYPES = {
 export const COMPONENT_TYPE_VALUES = Object.values(ALL_COMPONENT_TYPES);
 
 // 组件类型联合类型
-export type ComponentType = (typeof ALL_COMPONENT_TYPES)[keyof typeof ALL_COMPONENT_TYPES];
+export type ComponentType =
+  | (typeof ALL_COMPONENT_TYPES)[keyof typeof ALL_COMPONENT_TYPES]
+  | (typeof ENTITY_COMPONENT_TYPES)[keyof typeof ENTITY_COMPONENT_TYPES];

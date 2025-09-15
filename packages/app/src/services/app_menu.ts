@@ -19,6 +19,10 @@ export const createApplicationMenu = (params: CreateApplicationMenuReq) => {
 
 export const updateApplicationMenuName = (params: UpdateApplicationMenuNameReq) => {
   return appService.post(`/menu/update-name?id=${params.id}&menuName=${params.menuName}`);
+}
+
+export const updateApplicationMenu = (params: UpdateApplicationMenuNameReq) => {
+  return appService.post('/menu/update', params);
 };
 
 export const deleteApplicationMenu = (params: DeleteApplicationMenuReq) => {
@@ -30,7 +34,7 @@ export const updateApplicationMenuOrder = (params: UpdateApplicationMenuOrderReq
 };
 
 export const updateApplicationMenuVisible = (params: UpdateApplicationMenuVisibleReq) => {
-  return appService.post('/menu/update-visible', params);
+  return appService.post(`/menu/update-visible?id=${params.id}&visible=${params.visible}`,);
 };
 
 export const copyApplicationMenu = (params: CopyApplicationMenuReq) => {

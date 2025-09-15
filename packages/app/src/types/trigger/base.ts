@@ -17,8 +17,10 @@ export interface Condition {
   op?: string;
   // 操作符code
   opCode?: string;
+  // 对应操作类型
+  operatorType?: string;
   // 操作值
-  operators?: string[];
+  value?: string[];
   // 递归嵌套
   rules?: Condition[];
 }
@@ -38,4 +40,10 @@ export enum SortType {
   // 升序
   ASC = 'asc',
   DESC = 'desc'
+}
+
+export interface Sort {
+  id: string,
+  sortType: string,
+  sortField: string,
 }

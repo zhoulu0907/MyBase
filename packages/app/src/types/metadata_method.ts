@@ -13,6 +13,7 @@ export interface PageMethodParam {
     entityId: string;
     pageNo: number;
     pageSize: number;
+    filters?: any
 }
 
 export interface DeleteMethodParam {

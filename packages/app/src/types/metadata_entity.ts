@@ -1,7 +1,8 @@
 export const ENTITY_TYPE = {
-    MAIN: '主表',
-    SUB: '子表'
-}
+  MAIN: '主表',
+  SUB: '子表',
+  INDEP: '独立表'
+};
 
 export interface MetadataEntityPair {
   entityId: string;
@@ -10,26 +11,26 @@ export interface MetadataEntityPair {
 }
 
 export interface MetadataEntityField {
-    id: string;
-    entityId: string;
-    fieldName: string;
-    displayName: string;
-    fieldType: string;
-    dataLength: number;
-    decimalPlaces?: number;
-    defaultValue: any;
-    description: string;
-    isSystemField: number;
-    isPrimaryKey: boolean;
-    isRequired: boolean;
-    isUnique: boolean;
-    allowNull: boolean;
-    sortOrder: number;
-    validationRulesId?: string;
-    runMode: number;
-    appId: string;
-    status: number;
-    fieldCode?: string;
+  id: string;
+  entityId: string;
+  fieldName: string;
+  displayName: string;
+  fieldType: string;
+  dataLength: number;
+  decimalPlaces?: number;
+  defaultValue: any;
+  description: string;
+  isSystemField: number;
+  isPrimaryKey: boolean;
+  isRequired: boolean;
+  isUnique: boolean;
+  allowNull: boolean;
+  sortOrder: number;
+  validationRulesId?: string;
+  runMode: number;
+  appId: string;
+  status: number;
+  fieldCode?: string;
 }
 
 export interface AppEntities {
@@ -37,26 +38,38 @@ export interface AppEntities {
 }
 
 export interface AppEntity {
-    entityID: string; // 实体ID
-    entityName: string; // 实体名称
-    entityType: string; // 实体类型，如“主表”、“子表”、“独立表”、“主子表”
-    fields: AppEntityField[];
+  entityId: string; // 实体ID
+  entityName: string; // 实体名称
+  entityType: string; // 实体类型，如“主表”、“子表”、“独立表”、“主子表”
+  fields: AppEntityField[];
+}
+
+export interface ChildEntity {
+  childEntityCode: string;
+  childEntityId: string;
+  childEntityName: string;
+  childFields: AppEntityField[];
+  childTableName: string;
+  relationshipId: string;
+  relationshipType: string;
+  sourceFieldName: string;
+  targetFieldName: string;
 }
 
 export interface AppEntityField {
-    fieldID: string; // 字段ID
-    fieldName: string; // 字段名称
-    fieldType: string; // 字段类型，如 BIGINT、VARCHAR、INT、DECIMAL、TIMESTAMP、TEXT、NUMBER 等
-    isSystemField: number; // 是否是系统字段
-    displayName: string; // 显示名称
+  fieldId: string; // 字段ID
+  fieldName: string; // 字段名称
+  fieldType: string; // 字段类型，如 BIGINT、VARCHAR、INT、DECIMAL、TIMESTAMP、TEXT、NUMBER 等
+  isSystemField: number; // 是否是系统字段
+  displayName: string; // 显示名称
 }
 
 export interface EntityWithChildren {
-    entityId: string;
-    entityName: string;
-    entityCode: string;
-    parentFields: AppEntityField[];
-    childEntities: AppEntity[];
+  entityId: string;
+  entityName: string;
+  entityCode: string;
+  parentFields: AppEntityField[];
+  childEntities: AppEntity[];
 }
 
 // 实体相关接口类型定义
@@ -118,7 +131,6 @@ export interface UpdateRelationReqVO extends CreateRelationReqVO {
   id: string;
 }
 
-
 // 数据规则相关接口
 export interface ConditionRow {
   fieldId: string;
@@ -142,4 +154,19 @@ export interface CreateRuleReqVO {
 
 export interface UpdateRuleReqVO extends CreateRuleReqVO {
   id: string;
+}
+
+export const FilterEntityFields = ['lock_version', 'deleted', 'parent_id'];
+
+export interface EntityFieldValidationTypes {
+  fieldId: string;
+  fieldTypeCode: string;
+  validationTypes: ValidationTypeItem[];
+}
+
+export interface ValidationTypeItem {
+  code: string;
+  name: string;
+  description: string;
+  sortOrder: number;
 }

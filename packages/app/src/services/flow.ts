@@ -1,4 +1,4 @@
-import { CreateFlowMgmtReq, ListFlowMgmtReq, RenameFlowMgmtReq } from '../types/flow';
+import { CreateFlowMgmtReq, ListFlowMgmtReq, RenameFlowMgmtReq, UpdateFlowMgmtDefinitionReq } from '../types/flow';
 import { flowService } from './clients';
 
 export const listFlowMgmt = (params: ListFlowMgmtReq) => {
@@ -6,11 +6,11 @@ export const listFlowMgmt = (params: ListFlowMgmtReq) => {
 };
 
 export const getFlowMgmt = (id: string) => {
-  return flowService.get(`/mgmt/${id}`);
+  return flowService.get(`/mgmt/get?id=${id}`);
 };
 
 export const createFlowMgmt = (params: CreateFlowMgmtReq) => {
-  return flowService.post('/mgmt', params);
+  return flowService.post('/mgmt/create', params);
 };
 
 export const updateFlowMgmt = (params: CreateFlowMgmtReq) => {
@@ -35,4 +35,8 @@ export const disableFlowMgmt = (id: string) => {
 
 export const renameFlowMgmt = (params: RenameFlowMgmtReq) => {
   return flowService.post('/mgmt/rename', params);
+};
+
+export const updateFlowMgmtDefinition = (params: UpdateFlowMgmtDefinitionReq) => {
+  return flowService.post('/mgmt/update-definition', params);
 };

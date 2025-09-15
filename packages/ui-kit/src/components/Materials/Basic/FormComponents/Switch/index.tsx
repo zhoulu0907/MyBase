@@ -1,30 +1,39 @@
-import { Form, Switch } from '@arco-design/web-react';
 import { memo } from 'react';
+import { nanoid } from 'nanoid';
+import { Form, Switch } from '@arco-design/web-react';
+import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import type { XInputSwitchConfig } from './schema';
+import '../index.css';
 
-const XSwitch = memo((props: XInputSwitchConfig) => {
-  const { label, dataField, tooltip, status, defaultValue, required, layout, labelColSpan = 0 } = props;
+const XSwitch = memo((props: XInputSwitchConfig & { runtime?: boolean }) => {
+  const { label, dataField, tooltip, status, defaultValue, layout, labelColSpan = 0, runtime = true } = props;
 
   return (
-    <Form.Item
-      label={label}
-      field={dataField.length > 0 ? dataField[dataField.length - 1] : ''}
-      layout={layout}
-      tooltip={tooltip}
-      labelCol={{
-        style: { width: labelColSpan, flex: 'unset' }
-      }}
-      wrapperCol={{ style: { flex: 1 } }}
-      rules={[{ required }]}
-      style={{
-        opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.5 : 1,
-        pointerEvents: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? 'none' : 'unset',
-        margin: '0px'
-      }}
-    >
-      <Switch defaultChecked={defaultValue === 'true'} />
-    </Form.Item>
+    <div className='formWrapper'>
+      <Form.Item
+        label={label.display && label.text}
+        field={dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.SWITCH}_${nanoid()}`}
+        layout={layout}
+        tooltip={tooltip}
+        labelCol={{
+          style: { width: labelColSpan, flex: 'unset' }
+        }}
+        wrapperCol={{ style: { flex: 1 } }}
+        hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
+        style={{
+          margin: 0,
+          opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
+        }}
+      >
+        {
+          status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? <div>{defaultValue ? '开启' : '关闭'}</div> :
+            <Switch defaultChecked={defaultValue} style={{
+              pointerEvents: runtime ? 'unset' : 'none'
+            }} />
+        }
+      </Form.Item>
+    </div>
   );
 });
 

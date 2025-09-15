@@ -4,6 +4,8 @@ import {
   CONFIG_TYPES,
   DATE_OPTIONS,
   DATE_VALUES,
+  FILL_OPTIONS,
+  FILL_VALUES,
   LAYOUT_OPTIONS,
   LAYOUT_VALUES,
   PAGINATION_POSITION_OPTIONS,
@@ -17,18 +19,22 @@ import {
 } from './constants';
 import type {
   IAlignConfigType,
+  ICarouselConfigType,
   IDataFieldConfigType,
   IDateTypeConfigType,
   ILayoutConfigType,
+  INumberConfigType,
+  IRadioDataConfigType,
+  ICheckboxDataConfigType,
   IRelatedFormDataConfigType,
   ISelectConfigType,
+  ISelectOptionsConfigType,
   IStatusConfigType,
   ITableDataConfigType,
   ITextConfigType,
   IWidthConfigType,
   TTextDefaultType,
-  INumberConfigType,
-  IRadioDataConfigType
+  ISelectDataSourceConfigType
 } from './types';
 
 export interface ICommonBaseType {
@@ -37,11 +43,11 @@ export interface ICommonBaseType {
 }
 
 export const baseConfig: ITextConfigType[] = [
-  {
-    key: 'cpName',
-    name: '组件名称',
-    type: CONFIG_TYPES.TEXT_INPUT
-  }
+  // {
+  //   key: 'cpName',
+  //   name: '组件名称',
+  //   type: CONFIG_TYPES.TEXT_INPUT
+  // }
 ];
 
 export type TWidthSelectKeyType = (typeof WIDTH_VALUES)[keyof typeof WIDTH_VALUES];
@@ -269,6 +275,30 @@ export const pagePositionConfig: ISelectConfigType<TPagePositionSelectKeyType> =
   ]
 };
 
+export type TFillSelectKeyType = (typeof FILL_VALUES)[keyof typeof FILL_VALUES];
+export const fillConfig: IStatusConfigType<TFillSelectKeyType> = {
+  key: 'fillStyle',
+  name: '填充方式',
+  type: CONFIG_TYPES.STATUS_RADIO,
+  range: [
+    {
+      key: FILL_OPTIONS.CONTAIN,
+      text: FILL_OPTIONS.CONTAIN,
+      value: FILL_VALUES[FILL_OPTIONS.CONTAIN]
+    },
+    {
+      key: FILL_OPTIONS.COVER,
+      text: FILL_OPTIONS.COVER,
+      value: FILL_VALUES[FILL_OPTIONS.COVER]
+    },
+    {
+      key: FILL_OPTIONS.FILL,
+      text: FILL_OPTIONS.FILL,
+      value: FILL_VALUES[FILL_OPTIONS.FILL]
+    }
+  ]
+};
+
 export const dataFieldConfig: IDataFieldConfigType[] = [
   {
     key: 'dataField',
@@ -307,3 +337,27 @@ export const radioDataConfig: IRadioDataConfigType = {
   name: '自定义选项',
   type: CONFIG_TYPES.RADIO_DATA
 };
+
+export const checkboxDataConfig: ICheckboxDataConfigType = {
+  key: 'radioData',
+  name: '自定义选项',
+  type: CONFIG_TYPES.CHECKBOX_DATA
+};
+
+export const selectOptionsConfig: ISelectOptionsConfigType = {
+  key: 'selectOptions',
+  name: '自定义选项',
+  type: CONFIG_TYPES.SELECT_OPTIONS_INPUT
+};
+
+export const carouselConfig: ICarouselConfigType = {
+  key: 'carousel',
+  name: '图片',
+  type: CONFIG_TYPES.CAROUSEL
+};
+
+export const selectDataResourceConfig: ISelectDataSourceConfigType = {
+  key: 'selectedDataSource',
+  name: '选择数据源',
+  type: CONFIG_TYPES.SELECT_DATA_SOURCE
+}

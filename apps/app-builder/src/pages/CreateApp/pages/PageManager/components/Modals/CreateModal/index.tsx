@@ -1,7 +1,8 @@
 import iconEditSVG from '@/assets/images/app_edit_black.svg';
 import MenuComp from '@/components/MenuIcon';
-import { Form, Input, Modal, Select, TreeSelect, type FormInstance } from '@arco-design/web-react';
+import { Form, Input, Modal, Select, TreeSelect, Button, type FormInstance } from '@arco-design/web-react';
 import React, { useEffect, useState } from 'react';
+import { RootParentPage } from '@onebase/app';
 import styles from './index.module.less';
 
 interface CreateModalProps {
@@ -34,7 +35,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
     if (menuIcon) {
       form.setFieldValue('menuIcon', menuIcon);
     } else {
-      form.setFieldValue('menuIcon', visibleCreateForm === 'page' ? 'icon-13' : 'icon-folder');
+      form.setFieldValue('menuIcon', visibleCreateForm === 'page' ? 'icon-yemian' : 'icon-wenjianjia_seo-folder');
     }
   }, [menuIcon, visibleCreateForm]);
 
@@ -48,6 +49,16 @@ const CreateModal: React.FC<CreateModalProps> = ({
       focusLock={true}
       unmountOnExit={true}
       className={styles.createModal}
+      footer={
+        <div style={{ textAlign: 'right', visibility: !visibleMenuIcon ? 'visible' : 'hidden' }}>
+          <Button type="default" onClick={onCancel} style={{ marginRight: 12 }}>
+            取消
+          </Button>
+          <Button type="primary" onClick={handleCreate}>
+            创建
+          </Button>
+        </div>
+      }
     >
       <div className={styles.createContainer}>
         <Form
@@ -57,7 +68,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
           initialValues={{
             pageType: initValue.pageType,
             menuName: initValue.menuName,
-            parentId: form.getFieldValue('parentId')
+            parentId: form.getFieldValue('parentId') || RootParentPage.id
           }}
           style={{
             transform: visibleMenuIcon ? 'translateX(-100%)' : ''
@@ -108,7 +119,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
                   <i className={`iconfont ${menuIcon}`} style={{ fontSize: 16 }} />
                 ) : (
                   <i
-                    className={`iconfont ${visibleCreateForm === 'page' ? 'icon-13' : 'icon-folder'}`}
+                    className={`iconfont ${visibleCreateForm === 'page' ? 'icon-yemian' : 'icon-wenjianjia_seo-folder'}`}
                     style={{ fontSize: 16 }}
                   />
                 )}
@@ -124,7 +135,6 @@ const CreateModal: React.FC<CreateModalProps> = ({
           <Form.Item label="父级页面" field="parentId">
             <TreeSelect treeData={treeData} placeholder="请选择父级页面" allowClear />
           </Form.Item>
-
           {visibleCreateForm === 'page' && (
             <Form.Item label="业务实体" field="entityId" rules={[{ required: true, message: '请选择业务实体' }]}>
               <Select options={entityListOptions} placeholder="请选择业务实体" allowClear />

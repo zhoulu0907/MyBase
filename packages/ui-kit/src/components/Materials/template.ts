@@ -16,13 +16,13 @@ export const COMPONENT_TYPE_DISPLAY_NAME_MAP: Record<string, string> = {
   // 表单组件
   [FORM_COMPONENT_TYPES.INPUT_TEXT]: '单行文本',
   [FORM_COMPONENT_TYPES.INPUT_TEXTAREA]: '多行文本',
-  [FORM_COMPONENT_TYPES.INPUT_EMAIL]: '邮箱输入',
-  [FORM_COMPONENT_TYPES.INPUT_PHONE]: '手机号输入',
-  [FORM_COMPONENT_TYPES.INPUT_NUMBER]: '数字输入',
-  [FORM_COMPONENT_TYPES.DATE_PICKER]: '日期选择',
+  [FORM_COMPONENT_TYPES.INPUT_EMAIL]: '邮箱',
+  [FORM_COMPONENT_TYPES.INPUT_PHONE]: '电话',
+  [FORM_COMPONENT_TYPES.INPUT_NUMBER]: '数字录入',
+  [FORM_COMPONENT_TYPES.DATE_PICKER]: '日期',
   [FORM_COMPONENT_TYPES.DATE_RANGE_PICKER]: '日期区间',
   // [FORM_COMPONENT_TYPES.DATE_TIME_PICKER]: '日期时间',
-  [FORM_COMPONENT_TYPES.TIME_PICKER]: '时间选择',
+  [FORM_COMPONENT_TYPES.TIME_PICKER]: '时间',
   [FORM_COMPONENT_TYPES.SWITCH]: '开关',
   [FORM_COMPONENT_TYPES.RADIO]: '单选框',
   [FORM_COMPONENT_TYPES.CHECKBOX]: '复选框',
@@ -32,12 +32,14 @@ export const COMPONENT_TYPE_DISPLAY_NAME_MAP: Record<string, string> = {
   [FORM_COMPONENT_TYPES.DEPT_SELECT]: '部门选择',
   [FORM_COMPONENT_TYPES.FILE_UPLOAD]: '文件上传',
   [FORM_COMPONENT_TYPES.IMG_UPLOAD]: '图片上传',
-  [FORM_COMPONENT_TYPES.AUTO_CODE]: '唯一编码',
+  [FORM_COMPONENT_TYPES.AUTO_CODE]: '自动编号',
   [FORM_COMPONENT_TYPES.RELATED_FORM]: '关联表单',
   [FORM_COMPONENT_TYPES.STATIC_TEXT]: '静态文本',
   [FORM_COMPONENT_TYPES.DIVIDER]: '分割线',
   [FORM_COMPONENT_TYPES.RICH_TEXT]: '富文本',
   [FORM_COMPONENT_TYPES.CAROUSEL_F]: '轮播图',
+  [FORM_COMPONENT_TYPES.CHILDREN_TABLE]: '子表单',
+  [FORM_COMPONENT_TYPES.DATA_SELECT]: '选择数据',
 
   // 列表组件
   [LIST_COMPONENT_TYPES.TABLE]: '表格',
@@ -100,7 +102,7 @@ const allTemplate = {
           h: 36,
           w: 118,
           displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.RICH_TEXT],
-          icon: 'readonly_cp.svg', // todo
+          icon: 'rich_text_cp.svg',
           category: 'base'
         },
         {
@@ -244,7 +246,7 @@ const allTemplate = {
           h: 36,
           w: 118,
           displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.RELATED_FORM],
-          icon: 'readonly_cp.svg',
+          icon: 'related_form_cp.svg',
           category: 'base'
         },
         {
@@ -260,6 +262,22 @@ const allTemplate = {
           h: 36,
           w: 118,
           displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.CAROUSEL_F],
+          icon: 'readonly_cp.svg', // todo
+          category: 'base'
+        },
+        {
+          type: FORM_COMPONENT_TYPES.CHILDREN_TABLE,
+          h: 36,
+          w: 118,
+          displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.CHILDREN_TABLE],
+          icon: 'readonly_cp.svg', // todo
+          category: 'base'
+        },
+        {
+          type: FORM_COMPONENT_TYPES.DATA_SELECT,
+          h: 36,
+          w: 118,
+          displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.DATA_SELECT],
           icon: 'readonly_cp.svg', // todo
           category: 'base'
         }

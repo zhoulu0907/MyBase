@@ -26,9 +26,9 @@ const DynamicRelatedFormConfig: React.FC<DynamicRelatedFormConfigProps> = ({ han
 
   // 初始化实体选项
   const initEntityOptions = async () => {
-    const entityList = appEntities.entities.filter((entity) => entity.entityID !== mainEntity.entityID);
+    const entityList = appEntities.entities?.filter((entity) => entity.entityID !== mainEntity.entityID);
 
-    const newEntityOptions = entityList.map((entity) => ({
+    const newEntityOptions = entityList?.map((entity) => ({
       value: entity.entityID,
       label: entity.entityName
     }));

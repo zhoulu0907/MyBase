@@ -1,10 +1,9 @@
-import { ENTITY_FIELD_TYPE, SYSTEM_FIELD_MAP } from '@onebase/ui-kit';
 import type { EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
-import { ENTITY_STATUS, FIELD_TYPE } from '@onebase/ui-kit';
 import { Node } from '@antv/x6';
 import { Button, Popover, Space, Switch } from '@arco-design/web-react';
 import { IconCaretDown, IconCaretUp, IconSync } from '@arco-design/web-react/icon';
-import React, { useState } from 'react';
+import { ENTITY_FIELD_TYPE, ENTITY_STATUS, FIELD_TYPE, SYSTEM_FIELD_MAP } from '@onebase/ui-kit';
+import React, { useEffect, useState } from 'react';
 import styles from './ERnode.module.less';
 // X6 节点组件接口
 interface X6NodeProps {
@@ -22,15 +21,23 @@ interface NodeData {
   onNodeAddMasterDetail?: (id: string) => void;
   onFieldClick?: (fieldId: string) => void;
   onStatusChange?: (data: Partial<EntityNode>) => void;
+  onUpdatePorts?: (nodeId: string, section: 'system' | 'custom', isCollapsed: boolean) => void;
 }
 
 const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
   const [nodeCollapsed, setNodeCollapsed] = useState({
-    system: false,
+    system: true,
     custom: false
   });
   // 从 node 的 data 中获取节点数据
   const nodeData = (node.getData() as NodeData)?.data;
+
+  useEffect(() => {
+    // 系统字段默认折叠触发边重连
+    if (nodeCollapsed.system === true) {
+      node.getData()?.onUpdatePorts?.(nodeData?.entityId, 'system', nodeCollapsed.system);
+    }
+  }, []);
 
   if (!nodeData) {
     console.error('nodeData is undefined');
@@ -47,10 +54,15 @@ const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
   const handleToggleSection = (sectionType: 'system' | 'custom', e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+
+    const isNowCollapsed = !nodeCollapsed[sectionType];
     setNodeCollapsed({
       ...nodeCollapsed,
-      [sectionType]: !nodeCollapsed[sectionType]
+      [sectionType]: isNowCollapsed
     });
+
+    const data = node.getData() as NodeData;
+    data?.onUpdatePorts?.(data.data?.entityId, sectionType, isNowCollapsed); // 触发边重连
   };
 
   const handleRefresh = (e: React.MouseEvent) => {
@@ -121,17 +133,6 @@ const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
     }
   };
 
-  const handleNodeClick = (e: React.MouseEvent) => {
-    console.log('handleNodeClick', e);
-    e.preventDefault();
-    e.stopPropagation();
-    const data = node.getData() as NodeData;
-    const onNodeEdit = data?.onNodeEdit;
-    if (onNodeEdit && nodeData) {
-      onNodeEdit(nodeData);
-    }
-  };
-
   const handleStatusChange = (checked: boolean, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -143,7 +144,7 @@ const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
   };
 
   return (
-    <div className={styles['node-content']} onClick={handleNodeClick}>
+    <div className={styles['node-content']}>
       {/* 节点头部 */}
       <div className={styles['node-header']}>
         <IconSync className={styles['refresh-icon']} onClick={handleRefresh} />
@@ -182,7 +183,11 @@ const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
             <div className={styles['field-section-header']}>
               <span className={styles['section-title']}>系统字段</span>
               <span className={styles['section-count']}>({systemFields.length})</span>
-              <div className={`${styles['collapse-icon']}`} onClick={(e) => handleToggleSection('system', e)}>
+              <div
+                className={`${styles['collapse-icon']}`}
+                id="collapse-icon"
+                onClick={(e) => handleToggleSection('system', e)}
+              >
                 {nodeCollapsed.system ? <IconCaretDown /> : <IconCaretUp />}
               </div>
             </div>
@@ -197,7 +202,7 @@ const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
                     {SYSTEM_FIELD_MAP[field.fieldName as keyof typeof SYSTEM_FIELD_MAP] || field.fieldName}
                   </span>
                   <span className={styles['field-type']}>
-                    {ENTITY_FIELD_TYPE[field.fieldType as keyof typeof ENTITY_FIELD_TYPE]}
+                    {ENTITY_FIELD_TYPE[field.fieldType as keyof typeof ENTITY_FIELD_TYPE]?.LABEL || field.fieldType}
                   </span>
                 </div>
               ))}
@@ -211,7 +216,11 @@ const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
             <div className={styles['field-section-header']}>
               <span className={styles['section-title']}>自定义字段</span>
               <span className={styles['section-count']}>({customFields.length})</span>
-              <div className={`${styles['collapse-icon']}`} onClick={(e) => handleToggleSection('custom', e)}>
+              <div
+                className={`${styles['collapse-icon']}`}
+                id="collapse-icon"
+                onClick={(e) => handleToggleSection('custom', e)}
+              >
                 {nodeCollapsed.custom ? <IconCaretDown /> : <IconCaretUp />}
               </div>
             </div>
@@ -224,7 +233,7 @@ const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
                 >
                   <span className={styles['field-name']}>{field.displayName}</span>
                   <span className={styles['field-type']}>
-                    {ENTITY_FIELD_TYPE[field.fieldType as keyof typeof ENTITY_FIELD_TYPE] || field.fieldType}
+                    {ENTITY_FIELD_TYPE[field.fieldType as keyof typeof ENTITY_FIELD_TYPE]?.LABEL || field.fieldType}
                   </span>
                 </div>
               ))}

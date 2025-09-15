@@ -1,0 +1,186 @@
+import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
+
+import { triggerEditorSignal } from '@/store/singals/trigger_editor';
+import { Checkbox, Form, Grid, Input, InputNumber, Select, TimePicker } from '@arco-design/web-react';
+import { getEntityFields, getEntityListByApp } from '@onebase/app';
+import { getHashQueryParam } from '@onebase/common';
+import { ENTITY_FIELD_TYPE } from '@onebase/ui-kit';
+import { useEffect, useState } from 'react';
+import { FormContent, FormHeader, FormOutputs } from '../../form-components';
+import { useIsSidebar, useNodeRenderContext } from '../../hooks';
+import { type FlowNodeJSON } from '../../typings';
+
+const Option = Select.Option;
+
+export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
+  const isSidebar = useIsSidebar();
+  const { node } = useNodeRenderContext();
+
+  const handlePropsOnChange = (values: any) => {
+    triggerEditorSignal.setNodeData(node.id, values);
+  };
+
+  const onValuesChange = (changeValue: any, values: any) => {
+    console.log('onValuesChange: ', changeValue, values);
+
+    handlePropsOnChange(values);
+  };
+
+  const [entityList, setEntityList] = useState<any[]>();
+  const [entityFieldList, setEntityFieldList] = useState<any[]>();
+
+  const [payloadForm] = Form.useForm();
+
+  const entityId = Form.useWatch('entityId', payloadForm);
+  const batchMode = Form.useWatch('batchMode', payloadForm);
+
+  useEffect(() => {
+    const appId = getHashQueryParam('appId');
+    if (appId) {
+      handleGetEntityListByApp(appId);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (entityId) {
+      handleGetEntityFieldsById(entityId);
+    }
+  }, [entityId]);
+
+  const handleGetEntityListByApp = async (appId: string) => {
+    const res = await getEntityListByApp(appId);
+    setEntityList(res);
+  };
+
+  const handleGetEntityFieldsById = async (entityId: string) => {
+    const res = await getEntityFields({ entityId });
+    setEntityFieldList(res);
+  };
+
+  return (
+    <>
+      <FormHeader />
+      {isSidebar ? (
+        <FormContent>
+          <Form
+            form={payloadForm}
+            layout="vertical"
+            initialValues={{ ...triggerEditorSignal.nodeData.value[node.id] }}
+            onValuesChange={onValuesChange}
+          >
+            <Form.Item label="节点ID" field="id" initialValue={node.id}>
+              <Input disabled />
+            </Form.Item>
+
+            <Grid.Row gutter={8}>
+              <Grid.Col span={12}>
+                <Form.Item label="实体" field="entityId" rules={[{ required: true, message: '请选择实体' }]}>
+                  <Select disabled={true}>
+                    {entityList?.map((item) => (
+                      <Option key={item.entityId} value={item.entityId}>
+                        {item.entityName}
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              </Grid.Col>
+              <Grid.Col span={12}>
+                <Form.Item
+                  label="基准日期字段"
+                  field="offsetDirection"
+                  rules={[{ required: true, message: '请选择基准日期字段' }]}
+                >
+                  <Select
+                    options={entityFieldList
+                      ?.filter(
+                        (item) =>
+                          item.fieldType == ENTITY_FIELD_TYPE.DATETIME.VALUE ||
+                          item.fieldType == ENTITY_FIELD_TYPE.DATE.VALUE
+                      )
+                      .map((item) => ({
+                        label: item.displayName,
+                        value: item.id
+                      }))}
+                  />
+                </Form.Item>
+              </Grid.Col>
+            </Grid.Row>
+            <Grid.Row gutter={8} align="end">
+              <Grid.Col span={4}>
+                <Form.Item label="偏移模式" field="offsetMode" rules={[{ required: true, message: '请选择偏移模式' }]}>
+                  <Select
+                    options={[
+                      { label: '无', value: 0 },
+                      { label: '提前', value: 1 },
+                      { label: '延后', value: 2 }
+                    ]}
+                  />
+                </Form.Item>
+              </Grid.Col>
+              <Grid.Col span={16}>
+                <Form.Item field="offsetValue">
+                  <InputNumber mode="button" />
+                </Form.Item>
+              </Grid.Col>
+              <Grid.Col span={4}>
+                <Form.Item field="offsetUnit">
+                  <Select
+                    options={[
+                      { label: '天', value: 'day' },
+                      { label: '小时', value: 'hour' },
+                      { label: '分钟', value: 'minute' }
+                    ]}
+                  />
+                </Form.Item>
+              </Grid.Col>
+            </Grid.Row>
+
+            <Grid.Row gutter={8} align="end">
+              <Grid.Col span={4}>
+                <Form.Item label="批处理" field="batchMode" triggerPropName="checked" layout="vertical">
+                  <Checkbox>开启</Checkbox>
+                </Form.Item>
+              </Grid.Col>
+              <Grid.Col span={8}>
+                <Form.Item field="batchSize" layout="horizontal" hidden={batchMode == false}>
+                  <InputNumber mode="button" />
+                </Form.Item>
+              </Grid.Col>
+            </Grid.Row>
+            <Grid.Row>
+              <Grid.Col span={8}>
+                <Form.Item
+                  label="每日触发时间"
+                  layout="vertical"
+                  field="dailyExecTime"
+                  rules={[{ required: true, message: '请选择每日触发时间' }]}
+                >
+                  <TimePicker format="HH:mm" />
+                </Form.Item>
+              </Grid.Col>
+            </Grid.Row>
+          </Form>
+
+          {/* TOOD: 添加条件节点 */}
+          {/* <ConditionEditor onChange={() => {}} fields={[]} fieldOperatorMapping={{}} /> */}
+        </FormContent>
+      ) : (
+        <FormContent>
+          <FormOutputs />
+        </FormContent>
+      )}
+    </>
+  );
+};
+
+export const formMeta: FormMeta<FlowNodeJSON['data']> = {
+  render: renderForm
+  //   validateTrigger: ValidateTrigger.onChange,
+  //   validate: {
+  //     title: ({ value }: { value: string }) => (value ? undefined : 'Title is required')
+  //   },
+  //   effect: {
+  //     title: syncVariableTitle,
+  //     outputs: provideJsonSchemaOutputs
+  //   }
+};

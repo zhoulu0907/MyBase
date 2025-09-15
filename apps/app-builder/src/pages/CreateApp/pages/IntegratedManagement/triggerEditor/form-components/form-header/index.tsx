@@ -1,9 +1,10 @@
 import { useClientContext } from '@flowgram.ai/fixed-layout-editor';
 import { useCallback, useContext, useMemo, useState } from 'react';
 
+import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { Button, Dropdown, Menu } from '@arco-design/web-react';
 import { IconCaretDown, IconCaretLeft, IconClose, IconMore } from '@arco-design/web-react/icon';
-import { NodeRenderContext, SidebarContext } from '../../context';
+import { NodeRenderContext } from '../../context';
 import { useIsSidebar } from '../../hooks';
 import { FlowCommandId } from '../../shortcuts/constants';
 import { type FlowNodeRegistry } from '../../typings';
@@ -70,7 +71,7 @@ export function FormHeader() {
   const { node, expanded, startDrag, toggleExpand, readonly } = useContext(NodeRenderContext);
   const [titleEdit, updateTitleEdit] = useState<boolean>(false);
 
-  const { setNodeId } = useContext(SidebarContext);
+  const { setNodeId } = triggerEditorSignal;
   const isSidebar = useIsSidebar();
   const handleExpand = (e: Event) => {
     toggleExpand();
