@@ -1,8 +1,8 @@
 package com.cmsr.onebase.module.system.service.mail;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.system.vo.template.MailTemplatePageReqVO;
-import com.cmsr.onebase.module.system.vo.template.MailTemplateSaveReqVO;
+import com.cmsr.onebase.module.system.vo.mail.MailTemplatePageReqVO;
+import com.cmsr.onebase.module.system.vo.mail.MailTemplateSaveReqVO;
 import com.cmsr.onebase.module.system.dal.dataobject.mail.MailTemplateDO;
 
 import jakarta.validation.Valid;
