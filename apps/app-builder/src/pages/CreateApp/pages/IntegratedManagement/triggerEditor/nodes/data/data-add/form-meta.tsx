@@ -2,7 +2,7 @@ import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-e
 
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { Form, Grid, Input, Radio, Select } from '@arco-design/web-react';
-import type { AppEntityField } from '@onebase/app';
+import { FLOW_ENTITY_TYPE, type AppEntityField } from '@onebase/app';
 import { useEffect, useState } from 'react';
 import FieldEditor from '../../../components/field-editor';
 import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
@@ -11,11 +11,6 @@ import { type FlowNodeJSON } from '../../../typings';
 
 const RadioGroup = Radio.Group;
 const Option = Select.Option;
-
-const ADD_TYPE = {
-  MAIN_ENTITY: 'mainEntity',
-  SUB_ENTITY: 'subEntity'
-};
 
 export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const isSidebar = useIsSidebar();
@@ -42,7 +37,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   useEffect(() => {
     if (addType) {
       console.log('addType: ', addType);
-      if (addType == ADD_TYPE.MAIN_ENTITY) {
+      if (addType == FLOW_ENTITY_TYPE.MAIN_ENTITY) {
         console.log('mainEntities.value: ', mainEntities.value);
         setEntityList(mainEntities.value);
         payloadForm.clearFields('entityId');
@@ -74,8 +69,8 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             <Grid.Row>
               <Form.Item label="新增方式" field="addType" rules={[{ required: true, message: '请选择新增方式' }]}>
                 <RadioGroup>
-                  <Radio value={ADD_TYPE.MAIN_ENTITY}>在主表中新增</Radio>
-                  <Radio value={ADD_TYPE.SUB_ENTITY}>在子表中新增</Radio>
+                  <Radio value={FLOW_ENTITY_TYPE.MAIN_ENTITY}>在主表中新增</Radio>
+                  <Radio value={FLOW_ENTITY_TYPE.SUB_ENTITY}>在子表中新增</Radio>
                 </RadioGroup>
               </Form.Item>
             </Grid.Row>
