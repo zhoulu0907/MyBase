@@ -85,6 +85,10 @@ const AppPermission: FC = () => {
     }
   };
 
+  // 失焦创建角色
+  // const onBlur = () => {
+  //   handlePressEnter();
+  // };
   // 回车新建自定义角色
   const handlePressEnter = async (e: any) => {
     const name = e.target.value;
@@ -169,7 +173,10 @@ const AppPermission: FC = () => {
                         <InputRoleName
                           defaultValue={role.roleName}
                           onPressEnter={handlePressEnter}
-                          onBlur={() => setUpdateRoleId('')}
+                          onBlur={(e) => {
+                            handlePressEnter(e);
+                            setUpdateRoleId('');
+                          }}
                         />
                       ) : (
                         <>
@@ -198,7 +205,13 @@ const AppPermission: FC = () => {
         </Menu>
         {addRole && (
           <div style={{ padding: '0 8px' }}>
-            <InputRoleName onPressEnter={handlePressEnter} onBlur={() => setAddRole(false)} />
+            <InputRoleName
+              onPressEnter={handlePressEnter}
+              onBlur={(e) => {
+                handlePressEnter(e);
+                setAddRole(false);
+              }}
+            />
           </div>
         )}
         <div
