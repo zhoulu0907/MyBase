@@ -1,0 +1,91 @@
+.functionList {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.searchSection {
+  margin-bottom: 16px;
+
+  .searchInput {
+    :global(.arco-input) {
+      border-radius: 6px;
+    }
+  }
+}
+
+.categorySection {
+  margin-bottom: 16px;
+
+  .categoryHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+
+    .categoryTitle {
+      display: flex;
+      align-items: center;
+      font-size: 14px;
+      font-weight: 500;
+      color: #1d2129;
+
+      .categoryIcon {
+        margin-right: 8px;
+        color: #00b42a;
+        font-size: 16px;
+      }
+    }
+
+    .expandButton {
+      font-size: 12px;
+      color: #86909c;
+      padding: 2px 8px;
+      height: 24px;
+
+      &:hover {
+        color: #1d2129;
+        background-color: #f2f3f5;
+      }
+    }
+  }
+}
+
+.listSection {
+  flex: 1;
+  overflow-y: auto;
+
+  :global(.arco-list-item) {
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+
+    &:hover {
+      background-color: #f2f3f5;
+    }
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  .functionItem {
+    .functionInfo {
+      width: 100%;
+
+      .functionName {
+        font-size: 14px;
+        color: #1d2129;
+        font-weight: 500;
+        margin-bottom: 4px;
+      }
+
+      .functionDesc {
+        font-size: 12px;
+        color: #86909c;
+        line-height: 16px;
+      }
+    }
+  }
+}
