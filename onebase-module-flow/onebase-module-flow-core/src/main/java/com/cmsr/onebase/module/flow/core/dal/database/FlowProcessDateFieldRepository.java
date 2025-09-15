@@ -1,0 +1,25 @@
+package com.cmsr.onebase.module.flow.core.dal.database;
+
+import com.cmsr.onebase.framework.aynline.DataRepository;
+import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDateFieldDO;
+import org.anyline.data.param.ConfigStore;
+import org.anyline.data.param.init.DefaultConfigStore;
+import org.springframework.stereotype.Repository;
+
+/**
+ * @Author：huangjie
+ * @Date：2025/8/29 14:37
+ */
+@Repository
+public class FlowProcessDateFieldRepository extends DataRepository<FlowProcessDateFieldDO> {
+
+    public FlowProcessDateFieldRepository() {
+        super(FlowProcessDateFieldDO.class);
+    }
+
+    public FlowProcessDateFieldDO findByProcessId(Long processId) {
+        ConfigStore configs = new DefaultConfigStore();
+        configs.eq("process_id", processId);
+        return findOne(configs);
+    }
+}

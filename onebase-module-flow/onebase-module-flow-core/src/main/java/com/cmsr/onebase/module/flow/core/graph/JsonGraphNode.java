@@ -1,9 +1,9 @@
 package com.cmsr.onebase.module.flow.core.graph;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Data;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Author：huangjie
@@ -16,7 +16,7 @@ public class JsonGraphNode {
 
     private String type;
 
-    private JsonNode data;
+    private Map<String, Object> data;
 
     private List<JsonGraphNode> blocks;
 
