@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.infra.controller.admin.redis;
+package com.cmsr.onebase.module.infra.build.controller.redis;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.module.infra.convert.redis.RedisConvert;

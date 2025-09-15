@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.infra.controller.admin.config;
+package com.cmsr.onebase.module.infra.build.controller.config;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageParam;

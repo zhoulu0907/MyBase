@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.infra.controller.app.file;
+package com.cmsr.onebase.module.infra.build.controller.app.file;
 
 import cn.hutool.core.io.IoUtil;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;

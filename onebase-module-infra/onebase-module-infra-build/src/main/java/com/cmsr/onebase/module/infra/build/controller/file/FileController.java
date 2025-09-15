@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.infra.controller.admin.file;
+package com.cmsr.onebase.module.infra.build.controller.file;
 
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.StrUtil;
