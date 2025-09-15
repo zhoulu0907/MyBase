@@ -11,13 +11,6 @@ export enum DeleteDataType {
     PHYSICAL_DELETE = 1,
 }
 
-export enum DeleteMethod {
-    // 删除主表数据
-    MAIN_DATA = 1,
-    // 删除子表数据
-    SUB_DATA = 2,
-}
-
 export interface DeleteDataNodePayload {
     // 目标表单
     pageId: string;

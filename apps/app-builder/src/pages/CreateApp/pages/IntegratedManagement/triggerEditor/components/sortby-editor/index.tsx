@@ -1,15 +1,11 @@
 import { Button, Radio, Input, Select, Grid } from '@arco-design/web-react';
 import { IconDelete, IconDragDotVertical } from '@arco-design/web-react/icon';
-import type { Sort, ConfitionField } from '@onebase/app';
+import type { Sort, ConfitionField, SelectOption } from '@onebase/app';
 import { nanoid } from 'nanoid';
 import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
 import { ReactSortable } from 'react-sortablejs';
 
-interface SelectOption {
-  label: string;
-  value: string;
-}
 /**
  * ConditionEditor 组件的 props 类型定义
  */

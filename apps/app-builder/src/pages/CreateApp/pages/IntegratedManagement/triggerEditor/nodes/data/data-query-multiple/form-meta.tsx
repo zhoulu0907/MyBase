@@ -9,6 +9,9 @@ import {
   getEntityListByApp,
   getEntityFields,
   getFieldCheckTypeApi,
+  DATA_SOURCE_TYPE,
+  FILTER_TYPE,
+  type SelectOption,
   type ConfitionField,
   type EntityFieldValidationTypes
 } from '@onebase/app';
@@ -17,25 +20,6 @@ import { useAppStore } from '@/store/store_app';
 import ConditionEditor from '../../../components/condition-editor';
 import SortByEditor from '../../../components/sortby-editor';
 import { getBeforeCurNodes } from '../../../components/data';
-
-interface SelectOption {
-  label: string;
-  value: string;
-}
-
-// 数据源类型
-const enum DATA_TYPE {
-  FORM = 1,
-  DATA_NODE = 2,
-  ASSOCIA_FORM = 3,
-  SUBFORM = 4
-}
-
-// 查询规则
-const enum FILTER_TYPE {
-  ALL = 0,
-  CONDITION = 1
-}
 
 export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const isSidebar = useIsSidebar();
@@ -127,7 +111,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   // 获取数据源列表
   const getEntityList = async (dataType: number | string) => {
     // todo  判断
-    if (dataType === DATA_TYPE.FORM) {
+    if (dataType === DATA_SOURCE_TYPE.FORM) {
       // 从表单中查询  FORM
       const res = await getEntityListByApp(curAppId);
       console.log('数据库表res: ', res);
@@ -136,7 +120,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
         value: field.entityId
       }));
       setEntityList(fieldOptions);
-    } else if (dataType === DATA_TYPE.DATA_NODE) {
+    } else if (dataType === DATA_SOURCE_TYPE.DATA_NODE) {
       // 从数据节点中查询  DATA_NODE
       const nodes = triggerEditorSignal.nodes.value;
       const newEntityList = getBeforeCurNodes(node.id, nodes);
@@ -146,9 +130,9 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
           return { label: item?.data?.title, value: item.id };
         })
       );
-    } else if (dataType === DATA_TYPE.ASSOCIA_FORM) {
+    } else if (dataType === DATA_SOURCE_TYPE.ASSOCIA_FORM) {
       // 从关联表单中查询  ASSOCIA_FORM
-    } else if (dataType === DATA_TYPE.SUBFORM) {
+    } else if (dataType === DATA_SOURCE_TYPE.SUBFORM) {
       // 从子表中查询  SUBFORM
     }
   };
@@ -156,7 +140,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const getFieldList = async (dataType: number | string, dataSource: string) => {
     // 根据数据源 查询指定实体的字段列表
     // todo 根据不同获取方式走不同接口
-    if (dataType === DATA_TYPE.FORM) {
+    if (dataType === DATA_SOURCE_TYPE.FORM) {
       // 从表单中查询  FORM
       const res = await getEntityFields({ entityId: dataSource });
       const filedIds: string[] = [];
@@ -180,21 +164,21 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
         console.log('validationTypes: ', newValidationTypes);
         setValidationTypes(newValidationTypes);
       }
-    } else if (dataType === DATA_TYPE.DATA_NODE) {
+    } else if (dataType === DATA_SOURCE_TYPE.DATA_NODE) {
       // 从数据节点中查询  DATA_NODE
-    } else if (dataType === DATA_TYPE.ASSOCIA_FORM) {
+    } else if (dataType === DATA_SOURCE_TYPE.ASSOCIA_FORM) {
       // 从关联表单中查询  ASSOCIA_FORM
-    } else if (dataType === DATA_TYPE.SUBFORM) {
+    } else if (dataType === DATA_SOURCE_TYPE.SUBFORM) {
       // 从子表中查询  SUBFORM
     }
   };
 
   // 获取方式  数据查询的来源
   const dataTypeOptions = [
-    { label: '从表单中查询', value: DATA_TYPE.FORM },
-    { label: '从数据节点中查询', value: DATA_TYPE.DATA_NODE },
-    { label: '从关联表单中查询', value: DATA_TYPE.ASSOCIA_FORM },
-    { label: '从子表中查询', value: DATA_TYPE.SUBFORM }
+    { label: '从表单中查询', value: DATA_SOURCE_TYPE.FORM },
+    { label: '从数据节点中查询', value: DATA_SOURCE_TYPE.DATA_NODE },
+    { label: '从关联表单中查询', value: DATA_SOURCE_TYPE.ASSOCIA_FORM },
+    { label: '从子表中查询', value: DATA_SOURCE_TYPE.SUBFORM }
   ];
   const quertTypeOptions = [
     { label: '全部数据', value: FILTER_TYPE.ALL },
@@ -206,7 +190,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     { label: '降序', value: SortType.DESC }
   ];
 
-  const formDefaultValue = { dataType: DATA_TYPE.FORM, filterType: FILTER_TYPE.ALL };
+  const formDefaultValue = { dataType: DATA_SOURCE_TYPE.FORM, filterType: FILTER_TYPE.ALL };
   return (
     <>
       <FormHeader />

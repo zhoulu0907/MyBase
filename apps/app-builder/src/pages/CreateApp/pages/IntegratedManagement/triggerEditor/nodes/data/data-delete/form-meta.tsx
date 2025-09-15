@@ -7,7 +7,7 @@ import { type FlowNodeJSON } from '../../../typings';
 import { useEffect, useState } from 'react';
 import ConditionEditor from '../../../components/condition-editor';
 import {
-  DeleteMethod,
+  FLOW_ENTITY_TYPE,
   getEntityFields,
   getFieldCheckTypeApi,
   type ConfitionField,
@@ -31,7 +31,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   useEffect(() => {
     if (deleteMethod) {
       payloadForm.clearFields(['pageId']);
-      if (deleteMethod == DeleteMethod.MAIN_DATA) {
+      if (deleteMethod == FLOW_ENTITY_TYPE.MAIN_ENTITY) {
         console.log('mainEntities.value: ', mainEntities.value);
         setEntityList(mainEntities.value);
         payloadForm.clearFields('entityId');
@@ -93,8 +93,8 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   };
 
   const deleteMethodOptions = [
-    { label: '删除主表数据', value: DeleteMethod.MAIN_DATA },
-    { label: '删除子表数据', value: DeleteMethod.SUB_DATA }
+    { label: '删除主表数据', value: FLOW_ENTITY_TYPE.MAIN_ENTITY },
+    { label: '删除子表数据', value: FLOW_ENTITY_TYPE.SUB_ENTITY }
   ];
 
   return (
