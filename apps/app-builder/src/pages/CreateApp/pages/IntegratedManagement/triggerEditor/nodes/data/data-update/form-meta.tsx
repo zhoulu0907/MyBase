@@ -1,7 +1,12 @@
 import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { Form, Grid, Input, Radio, Select } from '@arco-design/web-react';
-import type { AppEntityField, ConfitionField, EntityFieldValidationTypes } from '@onebase/app';
+import {
+  getFieldCheckTypeApi,
+  type AppEntityField,
+  type ConfitionField,
+  type EntityFieldValidationTypes
+} from '@onebase/app';
 import { useEffect, useState } from 'react';
 import FieldEditor from '../../../components/field-editor';
 import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
@@ -57,6 +62,27 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     }
   }, [updateType]);
 
+  const entityChange = async (value: string) => {
+    console.log('value: ', value);
+    let filedIds: string[] = [];
+    const entities = [...mainEntities.value, ...subEntities.value];
+    entities.forEach((item) => {
+      if (item.entityId === value) {
+        setFieldDataList(item.fields);
+        setConditionFields(
+          item.fields.map((ele: AppEntityField) => {
+            return { label: ele.displayName, value: ele.fieldId };
+          })
+        );
+        filedIds = item.fields.map((ele: AppEntityField) => {
+          return ele.fieldId;
+        });
+      }
+    });
+    const newValidationTypes = await getFieldCheckTypeApi(filedIds);
+    setValidationTypes(newValidationTypes);
+  };
+
   return (
     <>
       <FormHeader />
@@ -85,17 +111,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
             <Grid.Row>
               <Form.Item field="entityId" rules={[{ required: true, message: '请选择表单' }]} layout="vertical">
-                <Select
-                  style={{ width: '100%' }}
-                  onChange={(value) => {
-                    console.log('value: ', value);
-                    [...mainEntities.value, ...subEntities.value].forEach((item) => {
-                      if (item.entityId === value) {
-                        setFieldDataList(item.fields);
-                      }
-                    });
-                  }}
-                >
+                <Select style={{ width: '100%' }} onChange={entityChange}>
                   {entityList?.map((item) => (
                     <Option key={item.entityId} value={item.entityId}>
                       {item.entityName}
@@ -105,7 +121,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
               </Form.Item>
             </Grid.Row>
             <Grid.Row>
-              <Form.Item field="filterCondition" label='匹配规则' required>
+              <Form.Item field="filterCondition" label="匹配规则" required>
                 <ConditionEditor
                   data={triggerEditorSignal.nodeData.value[node.id]?.filterCondition || []}
                   fields={conditionFields}
