@@ -13,11 +13,14 @@ import {
 } from '@arco-design/web-react';
 import React, { useEffect, useState } from 'react';
 
-import styles from './index.module.less';
-import { IconDragDotVertical, IconQuestionCircleFill, IconEdit } from '@arco-design/web-react/icon';
+import { IconQuestionCircleFill } from '@arco-design/web-react/icon';
 import { ReactSortable } from 'react-sortablejs';
-import type { DynamicSelectDataSourceConfigProps } from '../..';
 import { ListComp } from '@onebase/ui-kit';
+
+import styles from '../../index.module.less';
+import SelectOptionDrag from '../DropdownRender';
+import type { DynamicSelectDataSourceConfigProps } from '../..';
+import DropdownRender from '../DropdownRender';
 
 interface DataSelectionProcessConfigProps extends DynamicSelectDataSourceConfigProps {
   visible: boolean;
@@ -62,7 +65,16 @@ const initialDisplayFieldOptions = [
   { label: '多行文本', value: 'multiText', id: 4 },
   { label: '单选按钮组', value: 'radioGroup', id: 5 },
   { label: '提交人', value: 'submitter', id: 6 },
-  { label: '更新时间', value: 'updateTime', id: 7 }
+  { label: '更新时间', value: 'updateTime', id: 7 },
+  {
+    label: '子表单',
+    value: 'subTable',
+    id: 8,
+    children: [
+      { label: '子表单.成员单选', value: 'subTable.member', id: 81 },
+      { label: '子表单.图片', value: 'subTable.image', id: 82 }
+    ]
+  }
 ];
 
 const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
@@ -90,15 +102,11 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
   const [tableHeader, setTableHeader] = useState<any[]>(tableConfig[SUB_ATTR_KEY.COLUMNS]); // table header
   const [tableDataSource, setTableDataSource] = useState([]); // table data source
 
-  const [hovered, setHovered] = useState<string | null>(null);
-  const [editIdx, setEditIdx] = useState<number | null>(null);
-  const [editLabel, setEditLabel] = useState('');
-
   useEffect(() => {
-    getTableHeaderArry();
+    handleOptionsChange();
   }, [displayFieldOptions, selected]);
 
-  const getTableHeaderArry = () => {
+  const handleOptionsChange = () => {
     const header = displayFieldOptions
       .map((option: any) => {
         if (selected.includes(option.value)) {
@@ -111,37 +119,6 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
       .filter(Boolean);
     setTableHeader(header);
   };
-
-  // 编辑弹窗内容
-  const renderEditPopover = (idx: number) => (
-    <div className={styles.popoverContainer}>
-      <div className={styles.popoverContent}>
-        <Space>
-          <span className={styles.contentLabel}>显示名</span>
-          <Input value={editLabel} onChange={setEditLabel} />
-        </Space>
-      </div>
-      <Space>
-        <Button
-          onClick={() => {
-            setEditIdx(null);
-          }}
-        >
-          取消
-        </Button>
-        <Button
-          type="primary"
-          onClick={() => {
-            displayFieldOptions[idx].label = editLabel;
-            getTableHeaderArry();
-            setEditIdx(null);
-          }}
-        >
-          确定
-        </Button>
-      </Space>
-    </div>
-  );
 
   return (
     <>
@@ -190,73 +167,13 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
                   }}
                   dropdownRender={() => (
                     <div className={styles.dropdownRender}>
-                      <Checkbox
-                        checked={selected.length === displayFieldOptions.length}
-                        indeterminate={selected.length > 0 && selected.length < displayFieldOptions.length}
-                        onChange={(checked) => setSelected(checked ? displayFieldOptions.map((opt) => opt.value) : [])}
-                        className={styles.headerCheckbox}
-                      >
-                        全选
-                      </Checkbox>
-                      <ReactSortable
-                        list={displayFieldOptions}
-                        setList={setDisplayFieldOptions}
-                        handle=".drag-handle"
-                        animation={150}
-                      >
-                        {displayFieldOptions.map((opt, idx) => (
-                          <div
-                            key={opt.value}
-                            className={styles.displayFieldOptions}
-                            style={{
-                              background: hovered === opt.value ? '#f2f3f5' : '#fff'
-                            }}
-                            onMouseEnter={() => {
-                              setHovered(opt.value);
-                            }}
-                            onMouseLeave={() => {
-                              setHovered(null);
-                            }}
-                          >
-                            <Checkbox
-                              checked={selected.includes(opt.value)}
-                              onChange={(checked) => {
-                                setSelected((prev) =>
-                                  checked ? [...prev, opt.value] : prev.filter((v) => v !== opt.value)
-                                );
-                              }}
-                              className={styles.childCheckbox}
-                            />
-                            <span className={styles.optionSpan}>{opt.label}</span>
-                            {hovered === opt.value && (
-                              <div className={styles.operationDiv}>
-                                {selected.includes(opt.value) && (
-                                  <Popover
-                                    trigger="click"
-                                    position="tr"
-                                    popupVisible={editIdx === idx}
-                                    onVisibleChange={(visible) => {
-                                      if (visible) {
-                                        setEditIdx(idx);
-                                        setEditLabel(opt.label);
-                                      } else {
-                                        setEditIdx(null);
-                                      }
-                                    }}
-                                    content={renderEditPopover(idx)}
-                                  >
-                                    <IconEdit className={styles.iconEdit} />
-                                  </Popover>
-                                )}
-                                <IconDragDotVertical
-                                  className="drag-handle"
-                                  style={{ cursor: 'move', marginLeft: 8 }}
-                                />
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                      </ReactSortable>
+                      <DropdownRender
+                        selected={selected}
+                        setSelected={setSelected}
+                        displayFieldOptions={displayFieldOptions}
+                        handleOptionsChange={handleOptionsChange}
+                        setDisplayFieldOptions={setDisplayFieldOptions}
+                      />
                     </div>
                   )}
                 />

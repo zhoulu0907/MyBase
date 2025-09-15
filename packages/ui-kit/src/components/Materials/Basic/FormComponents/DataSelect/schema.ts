@@ -143,7 +143,10 @@ export interface XDataSelectConfig extends ICommonBaseType {
    * 选择的数据源 属性类型待定
    */
   isSetted: TBooleanDefaultType;
-  displayFields: TTextDefaultType[];
+  displayFields: {
+    label: TTextDefaultType;
+    value: TTextDefaultType;
+  }[];
   fillFormField: TBooleanDefaultType;
   selectDataFields: TTextDefaultType[];
   filterData: TBooleanDefaultType;
