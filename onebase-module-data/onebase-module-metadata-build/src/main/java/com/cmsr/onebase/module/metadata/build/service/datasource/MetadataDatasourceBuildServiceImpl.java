@@ -16,6 +16,8 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataD
 import com.cmsr.onebase.module.metadata.core.config.MetadataConfig;
 import com.cmsr.onebase.module.metadata.core.enums.DatasourceTypeEnum;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataDatasourceRepository;
+import com.cmsr.onebase.module.metadata.core.service.datasource.MetadataAppAndDatasourceCoreService;
+import com.cmsr.onebase.module.metadata.core.service.datasource.MetadataDatasourceCoreService;
 import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;

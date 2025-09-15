@@ -22,6 +22,7 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.relationship.Metadat
 import com.cmsr.onebase.module.metadata.core.enums.CascadeTypeEnum;
 import com.cmsr.onebase.module.metadata.core.enums.RelationshipTypeEnum;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEntityCoreService;
+import com.cmsr.onebase.module.metadata.build.service.entity.MetadataBusinessEntityBuildService;
 import com.cmsr.onebase.module.metadata.build.service.entity.MetadataEntityFieldBuildService;
 import com.cmsr.onebase.module.metadata.build.service.entity.vo.EntityFieldQueryVO;
 import jakarta.annotation.Resource;
@@ -53,6 +54,9 @@ public class MetadataEntityRelationshipBuildServiceImpl implements MetadataEntit
 
     @Resource
     private MetadataBusinessEntityCoreService businessEntityService;
+
+    @Resource
+    private MetadataBusinessEntityBuildService businessEntityBuildService;
 
     @Resource
     private MetadataEntityFieldBuildService entityFieldService;
@@ -438,7 +442,7 @@ public class MetadataEntityRelationshipBuildServiceImpl implements MetadataEntit
             req.setRunMode(0); // 默认运行模式
         });
 
-        return businessEntityService.createBusinessEntity(entityReqVO);
+        return businessEntityBuildService.createBusinessEntity(entityReqVO);
     }
 
     /**

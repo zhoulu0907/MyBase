@@ -22,6 +22,7 @@ import com.cmsr.onebase.module.metadata.core.enums.BooleanStatusEnum;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataBusinessEntityRepository;
 import com.cmsr.onebase.module.metadata.build.service.datasource.MetadataDatasourceBuildService;
 import com.cmsr.onebase.module.metadata.core.service.datasource.MetadataAppAndDatasourceCoreService;
+import com.cmsr.onebase.module.metadata.core.service.entity.MetadataSystemFieldsCoreService;
 import com.cmsr.onebase.module.metadata.build.service.relationship.MetadataEntityRelationshipBuildService;
 import com.cmsr.onebase.module.metadata.core.util.StatusEnumUtil;
 import com.cmsr.onebase.module.metadata.core.dal.database.TemporaryDatasourceService;

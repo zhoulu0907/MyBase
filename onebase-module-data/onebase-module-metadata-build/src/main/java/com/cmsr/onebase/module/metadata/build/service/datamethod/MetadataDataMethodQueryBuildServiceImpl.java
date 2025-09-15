@@ -17,6 +17,8 @@ import org.springframework.util.StringUtils;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusinessEntityDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.method.MetadataDataSystemMethodDO;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEntityCoreService;
+import com.cmsr.onebase.module.metadata.core.service.datamethod.MetadataDataMethodCoreService;
+import com.cmsr.onebase.module.metadata.core.service.datamethod.MetadataDataSystemMethodCoreService;
 import com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants;
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;

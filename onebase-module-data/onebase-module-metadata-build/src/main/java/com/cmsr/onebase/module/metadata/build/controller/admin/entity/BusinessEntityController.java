@@ -7,7 +7,7 @@ import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.Busines
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.BusinessEntitySaveReqVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.ERDiagramRespVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.SimpleEntityRespVO;
-import com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEntityCoreService;
+import com.cmsr.onebase.module.metadata.build.service.entity.MetadataBusinessEntityBuildService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -36,7 +36,7 @@ import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 public class BusinessEntityController {
 
     @Resource
-    private MetadataBusinessEntityCoreService businessEntityService;
+    private MetadataBusinessEntityBuildService businessEntityService;
 
     @PostMapping("/create")
     @Operation(summary = "创建业务实体")

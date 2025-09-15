@@ -18,6 +18,7 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusin
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataDatasourceDO;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataEntityFieldRepository;
 import com.cmsr.onebase.module.metadata.core.dal.database.TemporaryDatasourceService;
+import com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEntityCoreService;
 import com.cmsr.onebase.module.metadata.build.service.datasource.MetadataDatasourceBuildService;
 import com.cmsr.onebase.module.metadata.build.service.field.MetadataEntityFieldOptionBuildService;
 import com.cmsr.onebase.module.metadata.build.service.field.MetadataEntityFieldConstraintBuildService;
@@ -1076,21 +1077,10 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 // 首先检查表是否存在
                 if (!checkTableExists(service, tableName)) {
                     log.warn("表 {} 不存在，尝试重新创建该表", tableName);
-                    // 尝试重新创建表
-                    try {
-                        // 根据表名查找对应的业务实体
-                        MetadataBusinessEntityDO entity = findEntityByTableName(tableName);
-                        if (entity != null) {
-                            // 使用业务实体服务重新创建表
-                            metadataBusinessEntityCoreService.recreatePhysicalTable(entity.getId());
-                            log.info("成功重新创建表: {}", tableName);
-                        } else {
-                            throw new RuntimeException("未找到表名为 " + tableName + " 的业务实体");
-                        }
-                    } catch (Exception createTableException) {
-                        log.error("重新创建表 {} 失败: {}", tableName, createTableException.getMessage(), createTableException);
-                        throw new RuntimeException("表 " + tableName + " 不存在，且重新创建表失败: " + createTableException.getMessage());
-                    }
+                    // 表不存在，直接抛出异常
+                    String errorMessage = "表 " + tableName + " 不存在，请先创建表。这通常是由于业务实体创建时表创建失败导致的数据不一致问题。";
+                    log.error("添加字段失败: {}", errorMessage);
+                    throw new RuntimeException(errorMessage);
                 }
 
                 // 检查列是否已存在
@@ -1766,21 +1756,4 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         return vo;
     }
 
-    /**
-     * 根据表名查找对应的业务实体
-     *
-     * @param tableName 表名
-     * @return 业务实体DO，如果找不到则返回null
-     */
-    private MetadataBusinessEntityDO findEntityByTableName(String tableName) {
-        try {
-            DefaultConfigStore configStore = new DefaultConfigStore();
-            configStore.and("table_name", tableName);
-            List<MetadataBusinessEntityDO> entities = metadataBusinessEntityCoreService.findAllByConfig(configStore);
-            return entities.isEmpty() ? null : entities.get(0);
-        } catch (Exception e) {
-            log.error("根据表名 {} 查找业务实体失败: {}", tableName, e.getMessage(), e);
-            return null;
-        }
-    }
 }
