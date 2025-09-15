@@ -1,8 +1,8 @@
 ### 默认环境变量配置（直接使用local环境配置）
-@baseUrl = http://localhost:48080/admin-api
-@adminTenantId = 1
-@token = 1952f31dd1564d3e9889dd789d50e27c
-@tag = OneBase.local
+#@baseUrl = http://localhost:48080/admin-api
+#@adminTenantId = 1
+#@token = 1952f31dd1564d3e9889dd789d50e27c
+#@tag = OneBase.local
 
 
 ### /role/create 成功
@@ -38,12 +38,18 @@ tenant-id: {{adminTenantId}}
 roleId=14
 
 ### /role/get 成功
-GET {{baseUrl}}/system/role/get?id=1
+GET {{baseUrl}}/system/role/get?id=46921590018342912
 Content-Type: application/x-www-form-urlencoded
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
-### /role/page 成功
+### /role/page 分页
 GET {{baseUrl}}/system/role/page?pageNo=1&pageSize=10
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+### /role/delete 删除
+POST {{baseUrl}}/system/role/delete?id=46921590018342912
+Content-Type: application/x-www-form-urlencoded
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
