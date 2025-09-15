@@ -33,7 +33,7 @@ const FlowEditorPage: React.FC = () => {
     console.log('processDefinition', processDefinitionJson);
     const params = {
       id: flowId.value || '',
-      processDefinition: JSON.stringify(processDefinitionJson),
+      processDefinition: JSON.stringify({ nodes: processDefinitionJson }),
       processStatus: ProcessStatus.DISABLED
     };
     console.log('params', params);

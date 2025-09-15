@@ -1,23 +1,23 @@
-import { useState, useEffect, type FC } from 'react';
-import { Divider, Tag, Space, Button, Popconfirm } from '@arco-design/web-react';
-import { IconEdit, IconDelete, IconPlusCircle } from '@arco-design/web-react/icon';
+import { Button, Divider, Popconfirm, Space, Tag } from '@arco-design/web-react';
+import { IconDelete, IconEdit, IconPlusCircle } from '@arco-design/web-react/icon';
 import {
-  getDataPermission,
   // updateDataGroupPermission,
   // deleteDataGroup,
   // getEntityFieldsWithChildren
   getAppEntities,
+  getDataPermission,
   getEntityFields,
   getFieldCheckTypeApi,
-  type GetPermissionReq,
   // type UpdateDataGroupPermissionReq,
   type AppEntities,
   type AppEntity,
   type AppEntityField,
+  type AuthDataGroupVO,
   type AuthDataPermissionPersonVO,
   type FilterFieldCheckType,
-  type AuthDataGroupVO
+  type GetPermissionReq
 } from '@onebase/app';
+import { useEffect, useState, type FC } from 'react';
 import DataPermissionModal from './components/DataPermissionModal';
 
 import styles from './index.module.less';
