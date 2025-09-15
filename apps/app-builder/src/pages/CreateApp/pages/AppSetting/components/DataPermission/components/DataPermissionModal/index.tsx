@@ -1,9 +1,8 @@
 import { Modal, Form, Input, Select, Checkbox, Button, Tag } from '@arco-design/web-react';
-import { IconPlus, IconClose, IconEdit } from '@arco-design/web-react/icon';
+import { IconEdit } from '@arco-design/web-react/icon';
 import styles from './index.module.less';
 import {
   DataOperationEnum,
-  FieldValueType,
   getDeptUser,
   type AppEntity,
   type AppEntityField,
@@ -17,7 +16,8 @@ import {
 import { useState, useEffect, useCallback } from 'react';
 import { AddMembers } from '@onebase/common';
 import { debounce } from 'lodash-es';
-import DataFilters from '../DataPermissionFilters';
+// import DataFilters from '../DataPermissionFilters';
+import ConditionEditor from '@/pages/CreateApp/pages/IntegratedManagement/triggerEditor/components/condition-editor';
 
 const FormItem = Form.Item;
 
@@ -47,17 +47,17 @@ const dataPermissionScope = [
   { label: '全部', value: 'all' }
 ];
 
-// 字段值类型
-const fieldValueType = [
-  {
-    label: '静态值',
-    value: FieldValueType.static
-  },
-  {
-    label: '变量',
-    value: FieldValueType.variable
-  }
-];
+// // 字段值类型
+// const fieldValueType = [
+//   {
+//     label: '静态值',
+//     value: FieldValueType.static
+//   },
+//   {
+//     label: '变量',
+//     value: FieldValueType.variable
+//   }
+// ];
 
 const DataPermissionModal = (props: IProps) => {
   const {
@@ -385,250 +385,14 @@ const DataPermissionModal = (props: IProps) => {
           </FormItem>
           {/* 数据过滤 */}
           <FormItem field="dataFilters" label="数据过滤">
-            <DataFilters
-              dataFilters={dataFilters}
-              appEntityFields={appEntityFields}
-              filterFieldCheckType={filterFieldCheckType}
-              getFieldCheckType={getFieldCheckType}
-              onChange={() => changeDataFilters}
-              entitySelected={entitySelected}
-            />
-            {/* <div className={styles.dataPermissionFilters}>
-              {dataFilters && dataFilters.length > 0 ? (
-                <>
-                  {dataFilters.map((group, index) => {
-                    return (
-                      <div key={index}>
-                        {index > 0 && <p style={{ margin: '8px 0', color: '#666', fontSize: 14 }}>或者</p>}
-                        <div className={styles.dataFilter}>
-                          {group.map((item, idx) => (
-                            <div className={styles.dataFilterItem} key={idx}>
-                              <FormItem
-                                field={`dataFilters[${index}][${idx}].fieldId`}
-                                className={styles.dataFilterItemFieldBox}
-                              >
-                                <Select
-                                  placeholder="归档状态"
-                                  className={styles.dataFilterItemField}
-                                  onChange={(value) => {
-                                    console.log('字段 value:', value);
-                                    getFieldCheckType(value);
-                                    // setScopeOwner(value);
-                                  }}
-                                >
-                                  {appEntityFields
-                                    .filter((option) => option.fieldID)
-                                    .map((option) => (
-                                      <Option key={option.fieldID} value={option.fieldID || ''}>
-                                        {option.displayName}
-                                      </Option>
-                                    ))}
-                                </Select>
-                              </FormItem>
-                              <FormItem
-                                field={`dataFilters[${index}][${idx}].fieldOperator`}
-                                className={styles.dataFilterItemBox}
-                              >
-                                <Select placeholder="比较操作" className={styles.dataFilterItem}>
-                                  {filterFieldCheckType?.map((option) => (
-                                    <Option key={option.code} value={option.code || ''}>
-                                      {option.name}
-                                    </Option>
-                                  ))}
-                                </Select>
-                              </FormItem>
-                              <FormItem
-                                field={`dataFilters[${index}][${idx}].fieldValueType`}
-                                className={styles.dataFilterItemBox}
-                              >
-                                <Select
-                                  placeholder="字段类型"
-                                  className={styles.dataFilterItem}
-                                  onChange={(value) => {
-                                    // 更新字段值类型
-                                    const newConditionGroup = [...(dataFilters || [])];
-                                    if (newConditionGroup[index] && newConditionGroup[index][idx]) {
-                                      newConditionGroup[index][idx].fieldValueType = value;
-                                      newConditionGroup[index][idx].fieldValue = ''; // 重置值
-                                      setDataFilters(newConditionGroup);
-                                    }
-                                  }}
-                                >
-                                  {fieldValueType.map((option) => (
-                                    <Option key={option.value} value={option.value}>
-                                      {option.label}
-                                    </Option>
-                                  ))}
-                                </Select>
-                              </FormItem>
-                              {item.fieldValueType === FieldValueType.static ? (
-                                <FormItem
-                                  field={`dataFilters[${index}][${idx}].fieldValue`}
-                                  className={styles.dataFilterItemValueBox}
-                                >
-                                  <Input
-                                    placeholder="请输入值"
-                                    className={styles.dataFilterItemValue}
-                                    value={item.fieldValue || ''}
-                                    onChange={(value) => {
-                                      // 更新静态值
-                                      console.log('输入的变量值', value);
-                                      const newConditionGroup = [...(dataFilters || [])];
-                                      if (newConditionGroup[index] && newConditionGroup[index][idx]) {
-                                        newConditionGroup[index][idx].fieldValue = value;
-                                        setDataFilters(newConditionGroup);
-                                      }
-                                    }}
-                                  />
-                                </FormItem>
-                              ) : (
-                                <FormItem
-                                  field={`dataFilters[${index}][${idx}].fieldValue`}
-                                  className={styles.dataFilterItemValueBox}
-                                >
-                                  <Select
-                                    placeholder="请选择变量"
-                                    className={styles.dataFilterItemValue}
-                                    value={item.fieldValue || undefined}
-                                    onChange={(value) => {
-                                      // 更新变量值
-                                      console.log('现在的变量值:', value);
-                                      const newConditionGroup = [...(dataFilters || [])];
-                                      if (newConditionGroup[index] && newConditionGroup[index][idx]) {
-                                        newConditionGroup[index][idx].fieldValue = value;
-                                        setDataFilters(newConditionGroup);
-                                      }
-                                    }}
-                                  >
-                                    {appEntityFields
-                                      .filter((option) => option.fieldID)
-                                      .map((option) => (
-                                        <Option key={option.fieldID} value={option.fieldName || ''}>
-                                          {option.displayName}
-                                        </Option>
-                                      ))}
-                                  </Select>
-                                </FormItem>
-                              )}
-                              <IconClose
-                                className={styles.dataFilterItemIcon}
-                                onClick={() => {
-                                  // 删除当前条件
-                                  setDataFilters((prev) => {
-                                    console.log('iconClass prev:', prev);
-                                    // 创建新数组避免直接修改原数组
-                                    const newFilters = [...prev];
-
-                                    // 确保索引有效
-                                    if (newFilters[index] && newFilters[index][idx]) {
-                                      // 删除指定条件
-                                      newFilters[index].splice(idx, 1);
-
-                                      // 如果当前组为空，删除该组
-                                      if (newFilters[index].length === 0) {
-                                        newFilters.splice(index, 1);
-                                      }
-
-                                      // 如果所有组都为空，重置为初始状态
-                                      if (newFilters.length === 0) {
-                                        return [];
-                                      }
-                                    }
-
-                                    return newFilters;
-                                  });
-                                }}
-                              />
-                            </div>
-                          ))}
-                          <Button
-                            type="outline"
-                            size="mini"
-                            icon={<IconPlus />}
-                            className={styles.dataFilterAndBtn}
-                            onClick={() => {
-                              // 并且按钮 添加当前的条件
-                              setDataFilters((prev) => {
-                                // 创建新数组避免直接修改原数组
-                                const newFilters = [...prev];
-
-                                // 确保索引有效
-                                if (newFilters[index]) {
-                                  // 向当前组添加新条件
-                                  const newCondition: AuthDataFilterVO = {
-                                    conditionGroup: index + 1,
-                                    conditionOrder: newFilters[index].length + 1,
-                                    fieldId: 0,
-                                    fieldOperator: '',
-                                    fieldValue: '',
-                                    fieldValueType: '',
-                                    id: ''
-                                  };
-
-                                  newFilters[index] = [...newFilters[index], newCondition];
-                                }
-
-                                return newFilters;
-                              });
-                            }}
-                          >
-                            并且
-                          </Button>
-                        </div>
-                      </div>
-                    );
-                  })}
-                  <Button
-                    type="outline"
-                    size="small"
-                    icon={<IconPlus />}
-                    onClick={() => {
-                      setDataFilters((pre) => [
-                        ...(pre || []),
-                        [
-                          {
-                            conditionGroup: (pre?.length || 0) + 1,
-                            conditionOrder: 1,
-                            fieldId: 0,
-                            fieldOperator: '',
-                            fieldValue: '',
-                            fieldValueType: '',
-                            id: ''
-                          }
-                        ]
-                      ]);
-                    }}
-                  >
-                    或者
-                  </Button>
-                </>
-              ) : (
-                <Button
-                  type="outline"
-                  icon={<IconPlus />}
-                  onClick={() => {
-                    setDataFilters((pre) => [
-                      ...(pre || []),
-                      [
-                        {
-                          conditionGroup: (pre?.length || 0) + 1,
-                          conditionOrder: 1,
-                          fieldId: 0,
-                          fieldOperator: '',
-                          fieldValue: '',
-                          fieldValueType: '',
-                          id: ''
-                        }
-                      ]
-                    ]);
-                  }}
-                  // onClick={() => setConditionGroup((pre) => [...(pre || []), [{ ...conditionData }]])}
-                  disabled={!entitySelected}
-                >
-                  添加条件组
-                </Button>
-              )}
-            </div> */}
+            <div className={styles.dataPermissionFilters}>
+              <ConditionEditor
+                data={dataFilters}
+                fields={appEntityFields}
+                entityFieldValidationTypes={filterFieldCheckType}
+                onChange={() => changeDataFilters}
+              />
+            </div>
           </FormItem>
           <FormItem field="isOperable" label="操作权限">
             <div className={styles.dataPermissionOperableBox}>

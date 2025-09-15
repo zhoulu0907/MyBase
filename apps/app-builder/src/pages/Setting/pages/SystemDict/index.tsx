@@ -48,7 +48,7 @@ export default function SystemDictPage() {
   const loadDictList = async () => {
     getAllDictList().then((data) => {
       setDictList(data);
-      if (activeDictId && data.findIndex(item => item.id === activeDictId) > -1) {
+      if (activeDictId && data.findIndex((item) => item.id === activeDictId) > -1) {
         setActiveDictId(activeDictId);
         setActiveDict(dictList.find((t) => t.id === activeDictId));
       } else if (data.length > 0) {
@@ -177,7 +177,7 @@ export default function SystemDictPage() {
       onOk: async () => {
         await deleteDictData(id);
         Message.success('删除成功');
-        setDictList(dictList.filter((t) => t.id !== id));
+        setTableData(tableData.filter((t) => t.id !== id));
       }
     });
   };
@@ -295,26 +295,28 @@ export default function SystemDictPage() {
           )}
         </Content>
       </Layout>
-      { addDictModalVisible && <DictModal
-        visible={addDictModalVisible}
-        loading={modalLoading}
-        initialValues={
-          editDict
-            ? {
-                type: editDict.type,
-                name: editDict.name,
-                remark: editDict.remark,
-                status: editDict.status
-              }
-            : undefined
-        }
-        onOk={handleDictModalOk}
-        onCancel={() => {
-          setAddDictModalVisible(false);
-          setEditDict(null);
-        }}
-        title={editDict ? '编辑数据字典' : '新建数据字典'}
-      />}
+      {addDictModalVisible && (
+        <DictModal
+          visible={addDictModalVisible}
+          loading={modalLoading}
+          initialValues={
+            editDict
+              ? {
+                  type: editDict.type,
+                  name: editDict.name,
+                  remark: editDict.remark,
+                  status: editDict.status
+                }
+              : undefined
+          }
+          onOk={handleDictModalOk}
+          onCancel={() => {
+            setAddDictModalVisible(false);
+            setEditDict(null);
+          }}
+          title={editDict ? '编辑数据字典' : '新建数据字典'}
+        />
+      )}
       <DictDataModal
         visible={dictDataModalVisible}
         loading={dictDataModalLoading}
