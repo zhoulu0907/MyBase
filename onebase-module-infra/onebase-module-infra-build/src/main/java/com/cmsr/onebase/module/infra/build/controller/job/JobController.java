@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.infra.controller.admin.job;
+package com.cmsr.onebase.module.infra.build.controller.job;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import io.swagger.v3.oas.annotations.Operation;

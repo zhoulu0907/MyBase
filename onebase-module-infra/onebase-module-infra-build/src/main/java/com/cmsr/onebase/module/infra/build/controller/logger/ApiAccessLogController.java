@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.infra.controller.admin.logger;
+package com.cmsr.onebase.module.infra.build.controller.logger;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageParam;
