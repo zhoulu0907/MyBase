@@ -12,11 +12,11 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-public class TimeFlowProcessJob {
+public class FlowProcessTimeJob {
 
-    @JobExecutor(name = "timeFlowProcessJob")
+    @JobExecutor(name = "flow_process_time_job")
     public ExecuteResult jobExecute(JobArgs jobArgs) {
-        log.info("TimeFlowProcessJob execute, command: {}", jobArgs.getJobParams());
+        log.info("FlowProcessTimeJob execute, command: {}", jobArgs.getJobParams());
         return ExecuteResult.success("测试成功");
     }
 
