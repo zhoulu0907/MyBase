@@ -13,6 +13,7 @@ import com.cmsr.onebase.framework.tenant.config.TenantProperties;
 import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
+import com.cmsr.onebase.module.system.enums.permission.*;
 import com.cmsr.onebase.module.system.vo.role.RoleInsertReqVO;
 import com.cmsr.onebase.module.system.vo.tenant.TenantInsertReqVO;
 import com.cmsr.onebase.module.system.vo.tenant.TenantPageReqVO;
@@ -28,10 +29,6 @@ import com.cmsr.onebase.module.system.dal.dataobject.permission.UserRoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
 import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantPackageDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
-import com.cmsr.onebase.module.system.enums.permission.AdminTypeEnum;
-import com.cmsr.onebase.module.system.enums.permission.PackageTypeEnum;
-import com.cmsr.onebase.module.system.enums.permission.RoleCodeEnum;
-import com.cmsr.onebase.module.system.enums.permission.RoleTypeEnum;
 import com.cmsr.onebase.module.system.enums.tenant.TenantCodeEnum;
 import com.cmsr.onebase.module.system.enums.tenant.TenantStatusEnum;
 import com.cmsr.onebase.module.system.enums.user.UserStatusEnum;
@@ -553,13 +550,22 @@ public class TenantServiceImpl implements TenantService {
         if (isPlatformTenant(tenant)) { // 系统租户，菜单是全量的
             menuIds = CollectionUtils.convertSet(menuService.getMenuList(), MenuDO::getId);
         } else {
-            menuIds = tenantPackageService.getTenantPackage(tenant.getPackageId()).getMenuIds();
+            TenantPackageDO tenantPackage = tenantPackageService.getTenantPackage(tenant.getPackageId());
+            Set<String> tenantAllPermissions = null;
+            if (PackageTypeEnum.ALL.getCode().equals(tenantPackage.getCode())) {
+                // 若是 PackageTypeEnum.ALL, tenantAllPermissions = tenant、app开头的权限
+                menuIds = menuService.getMenuList().stream().map(MenuDO::getId).collect(Collectors.toSet());
+            } else {
+                // 不是All，tenantAllPermissions = package下写入的所有权限点
+                menuIds = tenantPackage.getMenuIds();
+            }
         }
         // 执行处理器
         handler.handle(menuIds);
     }
 
     private static boolean isPlatformTenant(TenantDO tenant) {
+
         return Objects.equals(tenant.getTenantCode(), TenantCodeEnum.PLATFORM_TENANT.getCode());
     }
 
