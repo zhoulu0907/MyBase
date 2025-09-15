@@ -14,7 +14,7 @@ import lombok.Data;
 public class EntityFieldInfoRespVO {
 
     @Schema(description = "字段ID", example = "1001")
-    private String fieldID;
+    private String fieldId;
 
     @Schema(description = "字段名称", example = "用户名")
     private String fieldName;

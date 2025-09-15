@@ -1,6 +1,10 @@
 package com.cmsr.onebase.module.flow.runtime.service;
 
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessFormRepository;
+import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessRepository;
+import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDO;
+import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessFormDO;
 import com.cmsr.onebase.module.flow.core.flow.FlowFilterExecutor;
 import com.cmsr.onebase.module.flow.core.utils.FlowUtils;
 import com.cmsr.onebase.module.flow.runtime.vo.FormTriggerReqVO;
@@ -30,9 +34,17 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
     @Autowired
     private FlowFilterExecutor flowFilterExecutor;
 
+    @Autowired
+    private FlowProcessRepository flowProcessRepository;
+
+    @Autowired
+    private FlowProcessFormRepository flowProcessFormRepository;
+
     @Override
     public List<QueryFormTriggerRespVO> queryFormTrigger(Long pageId) {
-        // 查询符合条件的表单触发配置
+        List<Long> processIds = flowProcessFormRepository.findByPageId(pageId)
+                .stream().map(FlowProcessFormDO::getProcessId).toList();
+        List<FlowProcessDO> flowProcessDOS = flowProcessRepository.findAllByIds(processIds);
         return null;
     }
 

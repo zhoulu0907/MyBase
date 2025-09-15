@@ -604,7 +604,7 @@ public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRela
      */
     private EntityInfoRespVO convertToEntityInfo(MetadataBusinessEntityDO entityDO) {
         return BeanUtils.toBean(entityDO, EntityInfoRespVO.class, entityInfo -> {
-            entityInfo.setEntityID(String.valueOf(entityDO.getId()));
+            entityInfo.setEntityId(String.valueOf(entityDO.getId()));
             entityInfo.setEntityName(entityDO.getDisplayName());
             // 设置实际表名
             entityInfo.setTableName(entityDO.getTableName());
@@ -674,7 +674,7 @@ public class MetadataEntityRelationshipServiceImpl implements MetadataEntityRela
      */
     private EntityFieldInfoRespVO convertToFieldInfo(MetadataEntityFieldDO fieldDO) {
         return BeanUtils.toBean(fieldDO, EntityFieldInfoRespVO.class, fieldInfo -> {
-            fieldInfo.setFieldID(String.valueOf(fieldDO.getId()));
+            fieldInfo.setFieldId(String.valueOf(fieldDO.getId()));
         });
     }
 

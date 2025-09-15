@@ -46,6 +46,8 @@ import java.util.Optional;
 @Data
 public class ExecuteContext {
 
+    private Long processId;
+
     // 上次执行结束节点
     private Optional<String> previousNodeTag;
 

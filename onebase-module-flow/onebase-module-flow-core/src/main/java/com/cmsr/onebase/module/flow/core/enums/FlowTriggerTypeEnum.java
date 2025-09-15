@@ -47,4 +47,7 @@ public enum FlowTriggerTypeEnum {
         return null;
     }
 
+    public static boolean isTime(String type) {
+        return TIME.type.equals(type);
+    }
 }

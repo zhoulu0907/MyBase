@@ -16,7 +16,7 @@ import java.util.List;
 public class EntityInfoRespVO {
 
     @Schema(description = "实体ID", example = "1001")
-    private String entityID;
+    private String entityId;
 
     @Schema(description = "实体显示名称", example = "用户信息")
     private String entityName;
