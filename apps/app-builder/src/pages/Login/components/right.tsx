@@ -7,8 +7,6 @@ import { useNavigate } from 'react-router-dom';
 import { useI18n } from '../../../hooks/useI18n';
 import { useRememberMe } from '../../../hooks/useRememberMe';
 import styles from '../index.module.less';
-import { UserPermissionManager } from '@/utils/permission';
-import { getPermissionInfo } from '@onebase/platform-center';
 
 const { Paragraph } = Typography;
 const TabPane = Tabs.TabPane;
@@ -99,11 +97,6 @@ const Right: React.FC = () => {
     }
   };
 
-  const getInfo = async () => {
-    const res = await getPermissionInfo();
-    UserPermissionManager.setUserPermissionInfo(res);
-  };
-
   // 账号密码登录
   const handleAccountLogin = async (values: LoginRequest) => {
     setLoading(true);
@@ -151,7 +144,6 @@ const Right: React.FC = () => {
         if (redirectURL) {
           window.location.href = redirectURL;
         } else {
-          await getInfo()
           // 跳转到首页
           navigate('/onebase/my-app');
         }
@@ -176,7 +168,6 @@ const Right: React.FC = () => {
   // 验证码验证成功回调
   const handleCaptchaSuccess = async (token: string) => {
     const values = await form.getFieldsValue();
-    console.log('values:', values);
     handleSubmit({ username: values.username, password: values.password, captchaVerification: token });
   };
 
