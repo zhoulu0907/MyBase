@@ -61,6 +61,7 @@ public class MetadataDatasourceCoreServiceImpl implements MetadataDatasourceCore
                 .description("系统默认数据源")
                 .runMode(1)
                 .datasourceOrigin(0) // 系统默认
+                .appId(appId) // 设置应用ID - 修复数据插入失败问题
                 .build();
 
         // 创建数据源
