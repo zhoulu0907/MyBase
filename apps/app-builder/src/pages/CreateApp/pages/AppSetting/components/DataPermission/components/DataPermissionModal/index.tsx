@@ -1,6 +1,5 @@
-import { Modal, Form, Input, Select, Checkbox, Button, Tag } from '@arco-design/web-react';
-import { IconPlus, IconClose, IconEdit } from '@arco-design/web-react/icon';
-import styles from './index.module.less';
+import { Button, Checkbox, Form, Input, Modal, Select, Tag } from '@arco-design/web-react';
+import { IconClose, IconEdit, IconPlus } from '@arco-design/web-react/icon';
 import {
   DataOperationEnum,
   FieldValueType,
@@ -14,9 +13,10 @@ import {
   type GetDeptUserReq
   // type RoleAddUserReq
 } from '@onebase/app';
-import { useState, useEffect, useCallback } from 'react';
 import { AddMembers } from '@onebase/common';
 import { debounce } from 'lodash-es';
+import { useCallback, useEffect, useState } from 'react';
+import styles from './index.module.less';
 
 const FormItem = Form.Item;
 
@@ -275,9 +275,9 @@ const DataPermissionModal = (props: IProps) => {
               }}
             >
               {appEntities
-                .filter((appEntity: AppEntity) => appEntity.entityID)
+                .filter((appEntity: AppEntity) => appEntity.entityId)
                 .map((appEntity: AppEntity) => (
-                  <Option key={appEntity.entityID} value={appEntity.entityID || ''}>
+                  <Option key={appEntity.entityId} value={appEntity.entityId || ''}>
                     {appEntity.entityName}
                   </Option>
                 ))}
@@ -390,9 +390,9 @@ const DataPermissionModal = (props: IProps) => {
                                   }}
                                 >
                                   {appEntityFields
-                                    .filter((option) => option.fieldID)
+                                    .filter((option) => option.fieldId)
                                     .map((option) => (
-                                      <Option key={option.fieldID} value={option.fieldID || ''}>
+                                      <Option key={option.fieldId} value={option.fieldId || ''}>
                                         {option.displayName}
                                       </Option>
                                     ))}
@@ -474,9 +474,9 @@ const DataPermissionModal = (props: IProps) => {
                                     }}
                                   >
                                     {appEntityFields
-                                      .filter((option) => option.fieldID)
+                                      .filter((option) => option.fieldId)
                                       .map((option) => (
-                                        <Option key={option.fieldID} value={option.fieldName || ''}>
+                                        <Option key={option.fieldId} value={option.fieldName || ''}>
                                           {option.displayName}
                                         </Option>
                                       ))}

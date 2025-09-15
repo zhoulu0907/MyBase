@@ -28,24 +28,24 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({ handlePropsChan
     const mainEntityTree = mainEntity.fields
       .filter((field: AppEntityField) => !FilterEntityFields.includes(field.fieldName))
       .map((field: AppEntityField) => ({
-        value: field.fieldID,
+        value: field.fieldId,
         label: field.displayName
       }));
 
     const subEntityTree = subEntities.entities.map((entity: AppEntity) => ({
-      value: entity.entityID,
+      value: entity.entityId,
       label: entity.entityName,
       children: entity.fields
         .filter((field: AppEntityField) => !FilterEntityFields.includes(field.fieldName))
         .map((field: AppEntityField) => ({
-          value: field.fieldID,
+          value: field.fieldId,
           label: field.displayName
         }))
     }));
 
     setEntityTree([
       {
-        value: mainEntity.entityID,
+        value: mainEntity.entityId,
         label: mainEntity.entityName,
         children: mainEntityTree
       },
