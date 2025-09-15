@@ -20,10 +20,6 @@
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-common</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-spring-boot-starter-biz-tenant</artifactId>
-        </dependency>
 
         <!-- Web 相关 -->
         <dependency>
