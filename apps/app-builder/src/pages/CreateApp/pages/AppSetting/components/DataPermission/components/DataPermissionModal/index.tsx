@@ -15,8 +15,8 @@ import {
 } from '@onebase/app';
 import { AddMembers } from '@onebase/common';
 import { debounce } from 'lodash-es';
-// import DataFilters from '../DataPermissionFilters';
 import ConditionEditor from '@/pages/CreateApp/pages/IntegratedManagement/triggerEditor/components/condition-editor';
+import { useCallback, useEffect, useState } from 'react';
 
 const FormItem = Form.Item;
 
@@ -57,7 +57,7 @@ const DataPermissionModal = (props: IProps) => {
     appEntityFields,
     filterFieldCheckType,
     changeEntity,
-    getFieldCheckType,
+    // getFieldCheckType,
     handleModalSubmit,
     handleModalCancel
   } = props;
