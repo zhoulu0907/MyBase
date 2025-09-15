@@ -2,7 +2,7 @@
 
 .entity-er-container {
   width: 100%;
-  height: 100%;
+  height: calc(100vh - 112px); // 重要：该容器须有明确高度，否则会导致画布居中计算不一致问题
   .flex-column();
 }
 
@@ -26,7 +26,7 @@
   position: relative;
   background: @backgroundColorLight;
   width: 100% !important;
-  height: 100vh;
+  min-height: 0;
 }
 
 // 节点样式

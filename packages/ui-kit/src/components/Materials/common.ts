@@ -33,7 +33,8 @@ import type {
   ITableDataConfigType,
   ITextConfigType,
   IWidthConfigType,
-  TTextDefaultType
+  TTextDefaultType,
+  ISelectDataSourceConfigType
 } from './types';
 
 export interface ICommonBaseType {
@@ -42,11 +43,11 @@ export interface ICommonBaseType {
 }
 
 export const baseConfig: ITextConfigType[] = [
-  {
-    key: 'cpName',
-    name: '组件名称',
-    type: CONFIG_TYPES.TEXT_INPUT
-  }
+  // {
+  //   key: 'cpName',
+  //   name: '组件名称',
+  //   type: CONFIG_TYPES.TEXT_INPUT
+  // }
 ];
 
 export type TWidthSelectKeyType = (typeof WIDTH_VALUES)[keyof typeof WIDTH_VALUES];
@@ -354,3 +355,9 @@ export const carouselConfig: ICarouselConfigType = {
   name: '图片',
   type: CONFIG_TYPES.CAROUSEL
 };
+
+export const selectDataResourceConfig: ISelectDataSourceConfigType = {
+  key: 'selectedDataSource',
+  name: '选择数据源',
+  type: CONFIG_TYPES.SELECT_DATA_SOURCE
+}

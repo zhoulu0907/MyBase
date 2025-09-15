@@ -41,3 +41,9 @@ export enum SortType {
   ASC = 'asc',
   DESC = 'desc'
 }
+
+export interface Sort {
+  id: string,
+  sortType: string,
+  sortField: string,
+}

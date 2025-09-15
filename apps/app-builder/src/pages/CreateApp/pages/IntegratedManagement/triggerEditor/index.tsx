@@ -54,29 +54,50 @@ const TriggerEditor = () => {
 
     // 已保存的节点数据回显
     if (res.processDefinition?.length) {
+      console.log('res.processDefinition: ', res.processDefinition);
       const processDefinitionJson = JSON.parse(res.processDefinition);
       let data = {};
       for (let item of processDefinitionJson) {
         data = { ...data, [item.id]: item.data };
       }
-      console.log('nodeData',data)
+      console.log('nodeData', data);
       setAllNodeData(data);
-      setInitData({nodes:processDefinitionJson});
+      setInitData({ nodes: processDefinitionJson });
     } else {
       switch (res.triggerType) {
         case TriggerType.FORM:
           setInitData(StartFormInitData);
-          setNodeData(StartFormInitData.nodes[0].id, StartFormInitData.nodes[0].data.initialData);
+          const formInitialData = {
+            ...StartFormInitData.nodes[0].data.initialData,
+            filterCondition: [],
+            pageId: res.triggerConfig.pageId,
+            triggerRange: res.triggerConfig.triggerRange
+          };
+          setNodeData(StartFormInitData.nodes[0].id, formInitialData);
           setNodeData(StartFormInitData.nodes[1].id, StartFormInitData.nodes[1].data.initialData);
           break;
         case TriggerType.ENTITY:
           setInitData(StartEntityInitData);
+          const entityInitialData = {
+            ...StartEntityInitData.nodes[0].data.initialData,
+            entityId: res.triggerConfig.entityId
+          };
+          setNodeData(StartEntityInitData.nodes[0].id, entityInitialData);
+          setNodeData(StartEntityInitData.nodes[1].id, StartEntityInitData.nodes[1].data.initialData);
           break;
         case TriggerType.TIME:
           setInitData(StartTimeInitData);
+          setNodeData(StartTimeInitData.nodes[0].id, StartTimeInitData.nodes[0].data.initialData);
+          setNodeData(StartTimeInitData.nodes[1].id, StartTimeInitData.nodes[1].data.initialData);
           break;
         case TriggerType.DATE_FIELD:
           setInitData(StartDateFieldInitData);
+          const dateFieldInitialData = {
+            ...StartDateFieldInitData.nodes[0].data.initialData,
+            entityId: res.triggerConfig.entityId
+          };
+          setNodeData(StartDateFieldInitData.nodes[0].id, dateFieldInitialData);
+          setNodeData(StartDateFieldInitData.nodes[1].id, StartDateFieldInitData.nodes[1].data.initialData);
           break;
         case TriggerType.API:
           setInitData(StartApiInitData);

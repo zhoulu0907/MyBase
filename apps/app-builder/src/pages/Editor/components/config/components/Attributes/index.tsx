@@ -23,6 +23,7 @@ import DynamicRadioConfig from './components/DynamicRadioConfig';
 import DynamicCheckboxConfig from './components/DynamicCheckboxConfig';
 import DynamicRelatedFormConfig from './components/DynamicRelatedFormConfig';
 import DynamicTableConfig from './components/DynamicTableConfig';
+import DynamicDataSourceConfig from './components/DynamicDataSourceConfig';
 import styles from './index.module.less';
 
 const Row = Grid.Row;
@@ -87,6 +88,7 @@ const Attributes = ({ cpID }: ConfigsProps) => {
       return;
     }
     console.debug('curComponentSchema------', curComponentSchema);
+  
     setEditData(curComponentSchema.editData);
     setConfigs(curComponentSchema.config);
   }, [cpID, curComponentSchema]);
@@ -193,7 +195,8 @@ const Attributes = ({ cpID }: ConfigsProps) => {
               item.type !== CONFIG_TYPES.RADIO_DATA &&
               item.type !== CONFIG_TYPES.CHECKBOX_DATA &&
               item.type !== CONFIG_TYPES.SELECT_OPTIONS_INPUT &&
-              item.type !== CONFIG_TYPES.CAROUSEL
+              item.type !== CONFIG_TYPES.CAROUSEL &&
+              item.type !== CONFIG_TYPES.SELECT_DATA_SOURCE
             ) {
               return (
                 <FormItem
@@ -618,6 +621,19 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                     />
                   )}
                 </FormItem>
+              );
+            }
+
+            // 选择数据配置
+            if (item.type === CONFIG_TYPES.SELECT_DATA_SOURCE) {
+              return (
+                <DynamicDataSourceConfig
+                  key={index}
+                  id={cpID}
+                  handlePropsChange={handlePropsChange}
+                  item={item}
+                  configs={configs}
+                />
               );
             }
           })}

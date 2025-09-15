@@ -1,3 +1,4 @@
+import { TriggerRange } from './components/const';
 import { type FlowDocumentJSON } from './typings';
 
 export const initialData: FlowDocumentJSON = {
@@ -46,6 +47,8 @@ export const StartFormInitData = {
         title: '界面交互触发节点',
         initialData: {
           id: 'start_form_0',
+          triggerRange: TriggerRange.Record,
+          filterCondition: [],
           isChildTriggerAllowed: false
         },
         outputs: {
@@ -66,6 +69,10 @@ export const StartEntityInitData = {
       blocks: [],
       data: {
         title: '表单(实体)触发节点',
+        initialData: {
+          id: 'start_entity_0',
+          entityId: ''
+        },
         outputs: {
           type: 'object',
           properties: {}
@@ -84,6 +91,16 @@ export const StartTimeInitData = {
       blocks: [],
       data: {
         title: '定时触发节点',
+        initialData: {
+          id: 'start_time_0',
+          repeatType: 'none',
+          startTime: '',
+          endTime: '',
+          triggerTime: '',
+          repeatWeek: [],
+          repeatDay: [],
+          triggerDate: ''
+        },
         outputs: {
           type: 'object',
           properties: {}
@@ -102,6 +119,16 @@ export const StartDateFieldInitData = {
       blocks: [],
       data: {
         title: '日期字段触发节点',
+        initialData: {
+          id: 'start_date_field_0',
+          entityId: '',
+          batchMode: false,
+          batchSize: 100,
+          offsetMode: 0,
+          offsetValue: 0,
+          offsetUnit: 'day',
+          dailyExecTime: '00:00'
+        },
         outputs: {
           type: 'object',
           properties: {}

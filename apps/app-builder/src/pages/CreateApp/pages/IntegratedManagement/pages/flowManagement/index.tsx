@@ -404,7 +404,7 @@ const FlowManagementPage: React.FC = () => {
           <FormItem
             label="实体ID"
             field="entityId"
-            hidden={triggerType != TriggerType.ENTITY}
+            hidden={triggerType != TriggerType.ENTITY && triggerType != TriggerType.DATE_FIELD}
             rules={[{ required: true, message: '请选择实体ID' }]}
           >
             <Select>

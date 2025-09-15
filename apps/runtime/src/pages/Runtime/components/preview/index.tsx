@@ -108,7 +108,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
       console.log('key: ', key, '   value: ', value);
       const field = (mainMetaDataFields || []).find((f: AppEntityField) => f.fieldID == key);
       if (field) {
-        formData[field.fieldName] = value;
+        console.log('field: ', field);
+        formData[field.fieldID] = value;
       }
     });
 
