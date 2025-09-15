@@ -47,18 +47,6 @@ const dataPermissionScope = [
   { label: '全部', value: 'all' }
 ];
 
-// // 字段值类型
-// const fieldValueType = [
-//   {
-//     label: '静态值',
-//     value: FieldValueType.static
-//   },
-//   {
-//     label: '变量',
-//     value: FieldValueType.variable
-//   }
-// ];
-
 const DataPermissionModal = (props: IProps) => {
   const {
     roleId,
