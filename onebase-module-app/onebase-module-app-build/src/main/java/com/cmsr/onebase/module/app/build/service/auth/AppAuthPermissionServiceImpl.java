@@ -1,6 +1,5 @@
 package com.cmsr.onebase.module.app.build.service.auth;
 
-import com.cmsr.onebase.framework.common.biz.system.dict.dto.DictDataRespDTO;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.app.build.service.AppCommonService;
 import com.cmsr.onebase.module.app.build.util.AuthUtils;
@@ -8,6 +7,7 @@ import com.cmsr.onebase.module.app.build.vo.auth.*;
 import com.cmsr.onebase.module.app.core.dal.database.auth.*;
 import com.cmsr.onebase.module.app.core.dal.dataobject.auth.*;
 import com.cmsr.onebase.module.app.core.dal.dataobject.menu.MenuDO;
+import com.cmsr.onebase.module.app.core.enums.auth.AuthOperationEnum;
 import com.cmsr.onebase.module.app.core.vo.auth.AuthOperationVO;
 import com.cmsr.onebase.module.app.core.vo.auth.AuthPermissionReqVO;
 import com.cmsr.onebase.module.metadata.api.entity.MetadataEntityFieldApi;
@@ -15,7 +15,6 @@ import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldQueryReqDTO;
 import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldRespDTO;
 import com.cmsr.onebase.module.metadata.api.validation.MetadataPermitApi;
 import com.cmsr.onebase.module.metadata.api.validation.dto.PermitRefOtftRespDTO;
-import com.cmsr.onebase.module.system.api.dict.DictDataApi;
 import jakarta.annotation.Resource;
 import lombok.Setter;
 import org.apache.commons.lang3.tuple.Pair;
@@ -53,9 +52,6 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
 
     @Resource
     private AppCommonService appCommonService;
-
-    @Resource
-    private DictDataApi dictDataApi;
 
     @Resource
     private MetadataEntityFieldApi metadataEntityFieldApi;
@@ -245,16 +241,15 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
 
 
     private List<AuthOperationVO> queryAuthOperations(AuthPermissionReqVO reqVO) {
-        List<DictDataRespDTO> dictDataList = dictDataApi.getDictDataList(AuthUtils.AUTH_OPERATION_TABLE_NAME)
-                .getData();
+        List<AuthOperationEnum.Data> dictDataList = AuthOperationEnum.getData();
         List<AuthOperationDO> authOperationDOS = authOperationRepository.findByQuery(reqVO);
-        List<Pair<DictDataRespDTO, AuthOperationDO>> pairs = AuthUtils.leftOuterJoin(dictDataList, authOperationDOS,
-                (dict, authOperationDO) -> dict.getValue().equalsIgnoreCase(authOperationDO.getOperationCode()));
+        List<Pair<AuthOperationEnum.Data, AuthOperationDO>> pairs = AuthUtils.leftOuterJoin(dictDataList, authOperationDOS,
+                (dict, authOperationDO) -> dict.getOperation().equalsIgnoreCase(authOperationDO.getOperationCode()));
 
         return pairs.stream().map(pair -> {
-            DictDataRespDTO dictData = pair.getLeft();
+            AuthOperationEnum.Data dictData = pair.getLeft();
             AuthOperationVO authOperationVO = new AuthOperationVO();
-            authOperationVO.setOperationCode(dictData.getValue());
+            authOperationVO.setOperationCode(dictData.getOperation());
             authOperationVO.setDisplayName(dictData.getLabel());
             AuthOperationDO operationDO = pair.getRight();
             if (operationDO != null) {
