@@ -21,12 +21,12 @@
     <dependencies>
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-module-formula-server</artifactId>
+            <artifactId>onebase-module-formula-runtime</artifactId>
             <version>${revision}</version>
         </dependency>
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-module-system-server</artifactId>
+            <artifactId>onebase-module-system-runtime</artifactId>
             <version>${revision}</version>
         </dependency>
         <dependency>
@@ -41,7 +41,7 @@
         </dependency>
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-module-infra-server</artifactId>
+            <artifactId>onebase-module-infra-runtime</artifactId>
             <version>${revision}</version>
         </dependency>
         <dependency>
@@ -53,50 +53,6 @@
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-module-flow-runtime</artifactId>
             <version>${revision}</version>
-        </dependency>
-        <!-- 工作流。默认注释，保证编译速度 -->
-<!--        <dependency>-->
-<!--            <groupId>com.cmsr.onebase</groupId>-->
-<!--            <artifactId>onebase-module-bpm-server</artifactId>-->
-<!--            <version>${revision}</version>-->
-<!--        </dependency>-->
-
-        <!-- spring boot 配置所需依赖 -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-configuration-processor</artifactId>
-            <optional>true</optional>
-        </dependency>
-
-        <!-- 服务保障相关 -->
-        <dependency>
-            <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-spring-boot-starter-protection</artifactId>
-        </dependency>
-
-        <!-- Registry 注册中心相关 -->
-        <dependency>
-            <groupId>com.alibaba.cloud</groupId>
-            <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
-        </dependency>
-
-        <!-- Config 配置中心相关 -->
-        <dependency>
-            <groupId>com.alibaba.cloud</groupId>
-            <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
-        </dependency>
-
-        <!-- RPC 远程调用相关 -->
-        <dependency>
-            <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-spring-boot-starter-rpc</artifactId>
-            <!-- 目的：onebase-cloud 单体启动，禁用 openfeign -->
-            <exclusions>
-                <exclusion>
-                    <groupId>org.springframework.cloud</groupId>
-                    <artifactId>spring-cloud-starter-openfeign</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
     </dependencies>
