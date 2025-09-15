@@ -89,7 +89,6 @@ const TriggerEditor = () => {
       let nodes = processDefinitionJson.nodes || [];
 
       for (let item of nodes) {
-        console.log('item: ', item);
         data = { ...data, [item.id]: item.data };
       }
 

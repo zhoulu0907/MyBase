@@ -120,7 +120,7 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
       console.log('根据实体ID获取数据字段权限 entityFieldsResq:', entityFieldsResq);
       // entityFieldsResq 返回的数据 是 id 但是 appEntityField 中 是 fieldID
       entityFieldsResq.forEach((field: any) => {
-        field.fieldID = field.id;
+        field.fieldId = field.id;
       });
       setAppEntityFields(entityFieldsResq);
       console.log('setEntityFields', appEntityFields);
