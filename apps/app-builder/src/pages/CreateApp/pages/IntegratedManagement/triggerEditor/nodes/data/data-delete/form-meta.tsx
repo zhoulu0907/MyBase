@@ -26,12 +26,12 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const [payloadForm] = Form.useForm();
 
   const pageId = Form.useWatch('pageId', payloadForm);
-  const deleteMethod = Form.useWatch('deleteMethod', payloadForm);
+  const deleteType = Form.useWatch('deleteType', payloadForm);
 
   useEffect(() => {
-    if (deleteMethod) {
+    if (deleteType) {
       payloadForm.clearFields(['pageId']);
-      if (deleteMethod == FLOW_ENTITY_TYPE.MAIN_ENTITY) {
+      if (deleteType == FLOW_ENTITY_TYPE.MAIN_ENTITY) {
         console.log('mainEntities.value: ', mainEntities.value);
         setEntityList(mainEntities.value);
         payloadForm.clearFields('entityId');
@@ -41,7 +41,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
         payloadForm.clearFields('entityId');
       }
     }
-  }, [deleteMethod]);
+  }, [deleteType]);
   useEffect(() => {
     if (pageId) {
       pageChange(pageId);
@@ -92,7 +92,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     }
   };
 
-  const deleteMethodOptions = [
+  const deleteTypeOptions = [
     { label: '删除主表数据', value: FLOW_ENTITY_TYPE.MAIN_ENTITY },
     { label: '删除子表数据', value: FLOW_ENTITY_TYPE.SUB_ENTITY }
   ];
@@ -114,8 +114,8 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             <Form.Item label="节点名称" field="nodeName" required>
               <Input placeholder="请输入节点名称" />
             </Form.Item>
-            <Form.Item label="删除方式" field="deleteMethod" required>
-              <Radio.Group options={deleteMethodOptions}></Radio.Group>
+            <Form.Item label="删除方式" field="deleteType" required>
+              <Radio.Group options={deleteTypeOptions}></Radio.Group>
             </Form.Item>
             <Grid.Row>
               <Grid.Col span={2} style={{ textAlign: 'center', lineHeight: '32px' }}>

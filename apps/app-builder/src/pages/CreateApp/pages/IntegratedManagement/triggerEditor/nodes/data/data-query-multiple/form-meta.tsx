@@ -325,19 +325,6 @@ export const renderForm = () => {
                 fields={conditionFields}
               ></SortByEditor>
             </Form.Item>
-            <Grid.Row>
-              <Grid.Col span={4} style={{ textAlign: 'center', lineHeight: '32px' }}>
-                查询排序前
-              </Grid.Col>
-              <Grid.Col span={5}>
-                <Form.Item field="number">
-                  <InputNumber precision={0}></InputNumber>
-                </Form.Item>
-              </Grid.Col>
-              <Grid.Col span={3} style={{ textAlign: 'center', lineHeight: '32px' }}>
-                条数据
-              </Grid.Col>
-            </Grid.Row>
           </Form>
         </FormContent>
       ) : (
