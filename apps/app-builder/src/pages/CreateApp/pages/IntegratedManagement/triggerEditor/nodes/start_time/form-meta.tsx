@@ -182,7 +182,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                 {repeatType === REPEAT_TYPE_OPTIONS.YEAR && (
                   <>
                     <Form.Item field="triggerDate" rules={[{ required: true, message: '请选择触发时间' }]}>
-                      <DatePicker style={{ width: '280px' }} />
+                      <DatePicker style={{ width: '280px' }} format="MM-DD" />
                     </Form.Item>
                   </>
                 )}
