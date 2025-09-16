@@ -41,9 +41,6 @@ public class EntityFieldSaveReqVO {
     @NotBlank(message = "字段类型不能为空")
     private String fieldType;
 
-    @Schema(description = "数据长度", example = "50")
-    private Integer dataLength;
-
     @Schema(description = "小数位数", example = "2")
     private Integer decimalPlaces;
 
@@ -67,9 +64,6 @@ public class EntityFieldSaveReqVO {
     @NotNull(message = "应用ID不能为空")
     private String appId;
 
-/*     @Schema(description = "字段编码", example = "USER_NAME")
-    @Size(max = 60, message = "字段编码长度不能超过60个字符")
-    private String fieldCode; */
 
     @Schema(description = "字段选项列表（当字段为单/多选时可传入，若提供则整体替换）")
     private List<FieldOptionRespVO> options;

@@ -31,9 +31,6 @@ public class EntityFieldCreateItemVO {
     @NotBlank(message = "字段类型不能为空")
     private String fieldType;
 
-    @Schema(description = "数据长度", example = "50")
-    private Integer dataLength;
-
     @Schema(description = "描述", example = "系统登录用户名")
     @Size(max = 200, message = "描述长度不能超过200个字符")
     private String description;

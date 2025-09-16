@@ -12,6 +12,7 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataV
 import com.cmsr.onebase.module.metadata.build.service.entity.MetadataEntityFieldBuildService;
 import com.cmsr.onebase.module.metadata.core.util.StatusEnumUtil;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -23,6 +24,7 @@ import org.springframework.util.Assert;
  * @date 2025-08-27
  */
 @Service
+@Slf4j
 public class MetadataValidationUniqueBuildServiceImpl implements MetadataValidationUniqueBuildService {
 
     @Resource private MetadataValidationUniqueRepository uniqueRepository; // 自身仓库
@@ -147,7 +149,7 @@ public class MetadataValidationUniqueBuildServiceImpl implements MetadataValidat
         updateObj.setGroupId(groupId);
 
         // 执行更新
-        uniqueRepository.upsert(updateObj);
+        uniqueRepository.update(updateObj); // 使用update而不是upsert，避免主键冲突
         
         // 同步更新字段的唯一性状态（根据校验规则的启用状态决定）
         boolean isFieldUnique = updateObj.getIsEnabled() != null && updateObj.getIsEnabled() == 1;
@@ -170,10 +172,17 @@ public class MetadataValidationUniqueBuildServiceImpl implements MetadataValidat
      * @param unique 是否唯一
      */
     private void syncFieldUniqueStatus(Long fieldId, boolean unique) {
-        MetadataEntityFieldDO field = entityFieldRepository.findById(fieldId);
-        if (field != null && field.getIsUnique() != (unique ? 1 : 0)) {
-            field.setIsUnique(unique ? 1 : 0);
-            entityFieldRepository.upsert(field);
+        try {
+            MetadataEntityFieldDO field = entityFieldRepository.findById(fieldId);
+            if (field != null && field.getIsUnique() != (unique ? 1 : 0)) {
+                field.setIsUnique(unique ? 1 : 0);
+                // 使用直接更新而不是 upsert，避免主键冲突
+                entityFieldRepository.update(field);
+            }
+        } catch (Exception e) {
+            // 如果更新失败，记录日志但不中断流程
+            // 这种情况通常发生在同一事务中有其他操作正在处理同一字段
+            log.warn("同步字段唯一性状态失败，fieldId: {}, unique: {}, 错误: {}", fieldId, unique, e.getMessage());
         }
     }
 }

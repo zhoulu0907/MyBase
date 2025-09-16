@@ -10,6 +10,7 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntit
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRequiredDO;
 import com.cmsr.onebase.module.metadata.build.service.entity.MetadataEntityFieldBuildService;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -21,6 +22,7 @@ import org.springframework.util.Assert;
  * @date 2025-08-27
  */
 @Service
+@Slf4j
 public class MetadataValidationRequiredBuildServiceImpl implements MetadataValidationRequiredBuildService {
 
     @Resource
@@ -30,7 +32,12 @@ public class MetadataValidationRequiredBuildServiceImpl implements MetadataValid
     private MetadataEntityFieldRepository entityFieldRepository;
 
     @Resource
-    private MetadataEntityFieldBuildService entityFieldService;    @Override
+    private MetadataEntityFieldBuildService entityFieldService;
+
+    @Resource
+    private MetadataValidationRuleGroupBuildService validationRuleGroupService;
+
+    @Override
     public MetadataValidationRequiredDO getByFieldId(Long fieldId) {
         return requiredRepository.findOneByFieldId(fieldId);
     }
@@ -68,9 +75,8 @@ public class MetadataValidationRequiredBuildServiceImpl implements MetadataValid
             throw new IllegalStateException("该字段已存在必填校验规则，同一字段只能有一条必填校验规则");
         }
 
-        // 简化规则组处理：暂时使用固定的默认组ID
-        // TODO: 如需要完整的规则组功能，需要注入相应的规则组服务
-        Long groupId = 1L; // 使用默认规则组ID
+        // 确保字段规则组存在，如果不存在则自动创建
+        Long groupId = validationRuleGroupService.ensureFieldRuleGroup(vo.getFieldId());
 
         // 转换VO为DO并设置必要字段
         MetadataValidationRequiredDO data = BeanUtils.toBean(vo, MetadataValidationRequiredDO.class);
@@ -98,9 +104,8 @@ public class MetadataValidationRequiredBuildServiceImpl implements MetadataValid
         MetadataEntityFieldDO entityFieldDO = entityFieldService.getEntityField(String.valueOf(existingDO.getFieldId()));
         Assert.notNull(entityFieldDO, "字段不存在");
 
-        // 简化规则组处理：使用现有的组ID或默认组ID
-        // TODO: 如需要完整的规则组功能，需要注入相应的规则组服务
-        Long groupId = existingDO.getGroupId() != null ? existingDO.getGroupId() : 1L;
+        // 确保字段规则组存在，如果不存在则自动创建
+        Long groupId = validationRuleGroupService.ensureFieldRuleGroup(existingDO.getFieldId());
 
         // 转换为DO对象并保留必要字段
         MetadataValidationRequiredDO updateDO = BeanUtils.toBean(reqVO, MetadataValidationRequiredDO.class);
@@ -110,7 +115,7 @@ public class MetadataValidationRequiredBuildServiceImpl implements MetadataValid
         updateDO.setGroupId(groupId);
 
         // 执行更新
-        requiredRepository.upsert(updateDO);
+        requiredRepository.update(updateDO); // 使用update而不是upsert，避免主键冲突
         
         // 同步更新字段的必填状态（根据校验规则的启用状态决定）
         boolean isFieldRequired = updateDO.getIsEnabled() != null && updateDO.getIsEnabled() == 1;
@@ -127,7 +132,7 @@ public class MetadataValidationRequiredBuildServiceImpl implements MetadataValid
     }
     
     /**
-     * 同步字段的必填状态
+     * 同步字段的必填状态到字段表
      * 
      * @param fieldId 字段ID
      * @param required 是否必填
@@ -136,7 +141,7 @@ public class MetadataValidationRequiredBuildServiceImpl implements MetadataValid
         MetadataEntityFieldDO field = entityFieldRepository.findById(fieldId);
         if (field != null && field.getIsRequired() != (required ? 1 : 0)) {
             field.setIsRequired(required ? 1 : 0);
-            entityFieldRepository.upsert(field);
+            entityFieldRepository.update(field); // 使用update而不是upsert，避免主键冲突
         }
     }
 }

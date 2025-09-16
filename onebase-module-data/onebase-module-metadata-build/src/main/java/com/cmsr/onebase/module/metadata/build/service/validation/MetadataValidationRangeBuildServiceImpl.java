@@ -135,7 +135,7 @@ public class MetadataValidationRangeBuildServiceImpl implements MetadataValidati
         updateDO.setGroupId(groupId);
 
         // 执行更新
-        rangeRepository.upsert(updateDO);
+        rangeRepository.update(updateDO); // 使用update而不是upsert，避免主键冲突
     }
 
     @Override

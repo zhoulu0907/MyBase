@@ -11,6 +11,7 @@ import com.cmsr.onebase.module.metadata.build.service.validation.MetadataPermitR
 import com.cmsr.onebase.module.metadata.build.service.validation.MetadataValidationTypeBuildService;
 import com.cmsr.onebase.module.metadata.build.service.validation.MetadataValidationRequiredBuildService;
 import com.cmsr.onebase.module.metadata.build.service.validation.MetadataValidationUniqueBuildService;
+import com.cmsr.onebase.module.metadata.build.service.validation.MetadataValidationLengthBuildService;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.field.MetadataEntityFieldOptionDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataPermitRefOtftDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationTypeDO;
@@ -90,6 +91,8 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
     private MetadataValidationRequiredBuildService validationRequiredService;
     @Resource
     private MetadataValidationUniqueBuildService validationUniqueService;
+    @Resource
+    private MetadataValidationLengthBuildService validationLengthService;
 
     @Resource
     private ModelMapper modelMapper;
@@ -265,7 +268,6 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             entityField.setFieldName(fieldItem.getFieldName());
             entityField.setDisplayName(fieldItem.getDisplayName());
             entityField.setFieldType(fieldItem.getFieldType());
-            entityField.setDataLength(fieldItem.getDataLength());
             entityField.setDescription(fieldItem.getDescription());
             // 使用新的枚举值：1-是，0-否
             entityField.setIsRequired(fieldItem.getIsRequired() != null ? fieldItem.getIsRequired() : StatusEnumUtil.NO); // 默认0-不是必填
@@ -469,9 +471,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             if (fieldItem.getIsRequired() != null) {
                 updateObj.setIsRequired(fieldItem.getIsRequired());
             }
-            if (fieldItem.getDataLength() != null) {
-                updateObj.setDataLength(fieldItem.getDataLength());
-            }
+
 
             metadataEntityFieldRepository.update(updateObj);
             successCount++;
@@ -637,6 +637,11 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 if (item.getIsUnique() != null && !item.getIsUnique().equals(origin.getIsUnique())) {
                     processUniqueValidation(fieldId, full);
                 }
+                
+                // 特别处理：如果 dataLength 字段发生了变更，需要额外同步到 MetadataValidationLengthDO
+                if (item.getDataLength() != null && !item.getDataLength().equals(origin.getDataLength())) {
+                    processLengthValidation(fieldId, full);
+                }
             }
         }
 
@@ -707,6 +712,11 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                         processUniqueValidation(fieldId, full);
                     }
                     
+                    // 特别处理：如果 dataLength 字段发生了变更，需要额外同步到 MetadataValidationLengthDO
+                    if (item.getDataLength() != null && !item.getDataLength().equals(existingField.getDataLength())) {
+                        processLengthValidation(fieldId, full);
+                    }
+                    
                     continue; // 跳过新增逻辑
                 }
 
@@ -755,6 +765,11 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 // 特别处理：对于新增字段，如果设置了 isUnique，需要同步到 MetadataValidationUniqueDO
                 if (item.getIsUnique() != null && item.getIsUnique() == 1) {
                     processUniqueValidation(fieldId, toCreate);
+                }
+                
+                // 特别处理：对于新增字段，如果设置了 dataLength，需要同步到 MetadataValidationLengthDO
+                if (item.getDataLength() != null && item.getDataLength() > 0) {
+                    processLengthValidation(fieldId, toCreate);
                 }
             }
         }
@@ -1595,6 +1610,9 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             req.setRunMode(entityField != null && entityField.getRunMode() != null ? entityField.getRunMode() : 0);
             req.setAppId(entityField != null ? entityField.getAppId() : null);
             fieldConstraintService.saveFieldConstraintConfig(req);
+            
+            // 新增：同步到 MetadataValidationLengthDO
+            processLengthValidation(fieldId, entityField);
         }
 
         // 正则 - 只有当正则表达式不为空且启用时才创建REGEX约束
@@ -1798,6 +1816,62 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         vo.setFieldCode(field.getFieldCode());
         // 注意：options、constraints、autoNumberConfig 将在 populateFieldRelatedData 中填充
         return vo;
+    }
+
+    /**
+     * 处理长度校验，同步到 MetadataValidationLengthDO
+     * 根据TODO需求：数据长度除了在MetadataEntityFieldDO中存储相关的信息，还需要在MetadataValidationLengthDO也储存一份
+     * MetadataEntityFieldDO 只存最大程度，如果MetadataValidationLengthDO已经有数据了，那么只需保证maxLength和 MetadataEntityFieldDO中dataLength一致即可
+     * 如果没有数据，那么新增一条记录，新增的时候MetadataValidationRuleGroupDO和MetadataValidationUniqueDO都需要新增数据
+     * rg_name可以用display_name+field_name+长度进行拼接，然后同一个字段只能有一个唯一校验
+     */
+    private void processLengthValidation(Long fieldId, MetadataEntityFieldDO entityField) {
+        try {
+            // 检查是否已存在长度校验规则
+            var existingValidation = validationLengthService.getByFieldIdWithRgName(fieldId);
+            
+            if (entityField.getDataLength() != null && entityField.getDataLength() > 0) {
+                // 需要同步长度校验
+                if (existingValidation != null) {
+                    // 如果已经有数据了，那么只需保证maxLength和 MetadataEntityFieldDO中dataLength一致即可
+                    var updateReqVO = new com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.ValidationLengthUpdateReqVO();
+                    updateReqVO.setId(existingValidation.getId());
+                    updateReqVO.setMaxLength(entityField.getDataLength()); // 最大长度与dataLength保持一致
+                    updateReqVO.setMinLength(existingValidation.getMinLength()); // 保持原有最小长度
+                    updateReqVO.setIsEnabled(1); // 启用长度校验
+                    updateReqVO.setRgName(existingValidation.getRgName()); // 保持原有规则组名称
+                    updateReqVO.setPromptMessage(existingValidation.getPromptMessage()); // 保持原有提示信息
+                    updateReqVO.setTrimBefore(existingValidation.getTrimBefore()); // 保持原有设置
+                    updateReqVO.setRunMode(entityField.getRunMode() != null ? entityField.getRunMode() : 0);
+                    validationLengthService.update(updateReqVO);
+                } else {
+                    // 如果没有数据，那么新增一条记录
+                    var saveReqVO = new com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.ValidationLengthSaveReqVO();
+                    saveReqVO.setFieldId(fieldId);
+                    saveReqVO.setMaxLength(entityField.getDataLength()); // 最大长度与dataLength保持一致
+                    saveReqVO.setMinLength(null); // 最小长度默认为null，允许为空
+                    saveReqVO.setIsEnabled(1); // 启用长度校验
+                    
+                    // rg_name可以用display_name+field_name+长度进行拼接
+                    String rgName = String.format("%s%s长度校验", 
+                        entityField.getDisplayName() != null ? entityField.getDisplayName() : "",
+                        entityField.getFieldName() != null ? entityField.getFieldName() : "");
+                    saveReqVO.setRgName(rgName);
+                    saveReqVO.setPromptMessage(String.format("字段长度不能超过%d个字符", entityField.getDataLength()));
+                    saveReqVO.setRunMode(entityField.getRunMode() != null ? entityField.getRunMode() : 0);
+                    
+                    validationLengthService.create(saveReqVO);
+                }
+            } else {
+                // 不需要长度校验，如果存在则删除
+                if (existingValidation != null) {
+                    validationLengthService.deleteByFieldId(fieldId);
+                }
+            }
+        } catch (Exception e) {
+            // 记录错误但不影响主流程
+            log.warn("处理长度校验时发生异常，字段ID: {}, 错误: {}", fieldId, e.getMessage(), e);
+        }
     }
 
     /**

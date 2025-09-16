@@ -30,7 +30,5 @@ public class EntityFieldUpdateItemVO {
     @Schema(description = "是否必填：0-是，1-不是", example = "0")
     private Integer isRequired;
 
-    @Schema(description = "数据长度", example = "60")
-    private Integer dataLength;
 
 }
