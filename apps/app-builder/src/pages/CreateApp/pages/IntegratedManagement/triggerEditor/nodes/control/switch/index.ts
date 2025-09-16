@@ -13,8 +13,7 @@ export const SwitchNodeRegistry: FlowNodeRegistry = {
   category: 'control',
   info: {
     icon: iconCondition,
-    description:
-      'Connect multiple downstream branches. Only the corresponding branch will be executed if the set conditions are met.'
+    description: '连接多个下游分支。如果满足设定的条件，则仅执行相应的分支。'
   },
   meta: {
     expandable: false // disable expanded

@@ -21,7 +21,7 @@ export const CaseNodeRegistry: FlowNodeRegistry = {
   },
   info: {
     icon: iconCase,
-    description: 'Execute the branch when the condition is met.'
+    description: '满足条件时执行分支。'
   },
   canDelete: (ctx, node) => node.parent!.blocks.length >= 3,
   onAdd(ctx, from) {
@@ -30,18 +30,6 @@ export const CaseNodeRegistry: FlowNodeRegistry = {
       type: 'case',
       data: {
         title: `分支_${id++}`,
-        inputs: {
-          type: 'object',
-          required: ['condition'],
-          inputsValues: {
-            condition: ''
-          },
-          properties: {
-            condition: {
-              type: 'string'
-            }
-          }
-        }
       }
     };
   },
