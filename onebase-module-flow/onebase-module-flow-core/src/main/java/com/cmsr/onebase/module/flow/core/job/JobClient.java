@@ -27,12 +27,15 @@ public class JobClient {
 
     private static final String JOB_EXECUTOR_INFO = "flow_process_time_job";
 
+    public static final String PROCESS_ID = "processId";
+
     private DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public String startJob(Long processId, StartTimeNodeData timeNodeData) {
         ClusterAddHandler clusterJob = SnailJobOpenApi.addClusterJob();
         clusterJob.setJobName(processId.toString());
         settingParams(clusterJob, timeNodeData);
+        clusterJob.addArgsStr(PROCESS_ID, String.valueOf(processId));
         clusterJob.setRouteKey(AllocationAlgorithmEnum.ROUND);
         clusterJob.setBlockStrategy(JobBlockStrategyEnum.OVERLAY);
         return String.valueOf(clusterJob.execute());
@@ -45,8 +48,8 @@ public class JobClient {
         } else {
             ClusterUpdateHandler clusterJob = SnailJobOpenApi.updateClusterJob(jobDetail.getId());
             settingParams(clusterJob, timeNodeData);
+            clusterJob.addArgsStr(PROCESS_ID, String.valueOf(processId));
             clusterJob.execute();
-
             return String.valueOf(jobDetail.getId());
         }
     }
@@ -54,7 +57,6 @@ public class JobClient {
     private void settingParams(AbstractParamsHandler clusterJob, StartTimeNodeData timeNodeData) {
         clusterJob.setJobStatus(StatusEnum.YES);
         clusterJob.setExecutorInfo(JOB_EXECUTOR_INFO);
-
         if (timeNodeData.getRepeatType().equals(StartTimeNodeData.REPEAT_TYPE_CRON)) {
             clusterJob.setTriggerType(TriggerTypeEnum.CRON);
             clusterJob.setTriggerInterval(timeNodeData.getCronExpression());

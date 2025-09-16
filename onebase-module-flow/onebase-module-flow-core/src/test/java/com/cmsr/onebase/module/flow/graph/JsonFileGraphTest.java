@@ -12,7 +12,7 @@ import java.nio.charset.StandardCharsets;
  * @Author：huangjie
  * @Date：2025/9/1 12:11
  */
-class JsonGraphTest {
+public class JsonFileGraphTest {
 
     public void testToFlowChain(String fileName) throws IOException {
         ClassPathResource resource = new ClassPathResource("graphjson/" + fileName);

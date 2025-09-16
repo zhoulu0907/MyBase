@@ -12,9 +12,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
+import org.dom4j.io.OutputFormat;
+import org.dom4j.io.XMLWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
+import java.io.StringWriter;
 import java.util.List;
 
 /**
@@ -26,6 +30,7 @@ import java.util.List;
 @Component
 public class FlowJsonGraphParser extends ClassXmlFlowELParser {
 
+    public static final String LINE_BREAK = "\n";
     @Autowired
     private FlowProcessRepository flowProcessRepository;
 
@@ -37,21 +42,50 @@ public class FlowJsonGraphParser extends ClassXmlFlowELParser {
         List<FlowProcessDO> flowProcessDOS = flowProcessRepository.findAllByStatus(FlowStatusEnum.ENABLE.getStatus());
         Document document = DocumentHelper.createDocument();
         Element rootElement = document.addElement("flow");
+        addNoOpChain(rootElement);
         for (FlowProcessDO flowProcessDO : flowProcessDOS) {
             try {
                 JsonGraph jsonGraph = JsonGraph.of(flowProcessDO.getProcessDefinition());
                 String flowChain = jsonGraph.toFlowChain();
-                String chainId = FlowUtils.toFlowChainId(flowProcessDO.getId());
-                Element element = rootElement.addElement("chain").addAttribute("name", chainId);
-                element.addCDATA(flowChain);
                 //
                 graphFlowCache.update(flowProcessDO, jsonGraph);
+                //
+                String chainId = FlowUtils.toFlowChainId(flowProcessDO.getId());
+                Element element = rootElement.addElement("chain").addAttribute("name", chainId);
+                element.addText(LINE_BREAK + flowChain);
             } catch (Exception e) {
-                log.error("解析流程定义失败：{}", e);
+                log.error("解析流程定义失败: {}", flowProcessDO, e);
             }
         }
-        String xml = document.asXML();
-        log.debug("xml: {}", xml);
+        StringWriter buffer = new StringWriter();
+        OutputFormat format = OutputFormat.createPrettyPrint();
+        format.setEncoding("UTF-8");
+        format.setIndentSize(4);
+        format.setNewlines(true);
+        format.setTrimText(false);
+        format.setExpandEmptyElements(true);
+        XMLWriter writer = new XMLWriter(buffer, format);
+        try {
+            writer.write(document);
+            writer.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        String xml = buffer.toString();//document.asXML();
+        log.info("flow xml: {}", xml);
         return xml;
+    }
+
+    /**
+     * 为避免报错，添加一个空的链
+     * com.yomahub.liteflow.exception.ConfigErrorException:
+     * no valid rule config found in rule path [el_xml:com.cmsr.onebase.module.flow.core.flow.FlowJsonGraphParser]
+     * at com.yomahub.liteflow.core.FlowExecutor.init(FlowExecutor.java:211)
+     *
+     * @param rootElement
+     */
+    private void addNoOpChain(Element rootElement) {
+        Element element = rootElement.addElement("chain").addAttribute("name", "no_op_chain");
+        element.addText(LINE_BREAK + "SER(noop);");
     }
 }
