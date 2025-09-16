@@ -6,11 +6,13 @@ import com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.Val
 import com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.ValidationUniqueSaveReqVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.ValidationUniqueUpdateReqVO;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationUniqueRepository;
+import com.cmsr.onebase.module.metadata.core.dal.database.MetadataEntityFieldRepository;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationUniqueDO;
 import com.cmsr.onebase.module.metadata.build.service.entity.MetadataEntityFieldBuildService;
 import com.cmsr.onebase.module.metadata.core.util.StatusEnumUtil;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -22,9 +24,11 @@ import org.springframework.util.Assert;
  * @date 2025-08-27
  */
 @Service
+@Slf4j
 public class MetadataValidationUniqueBuildServiceImpl implements MetadataValidationUniqueBuildService {
 
     @Resource private MetadataValidationUniqueRepository uniqueRepository; // 自身仓库
+    @Resource private MetadataEntityFieldRepository entityFieldRepository; // 字段仓库
     @Resource private MetadataValidationRuleGroupBuildService ruleGroupService; // 其他服务
     @Resource private MetadataEntityFieldBuildService entityFieldService; // 其他服务
 
@@ -96,6 +100,10 @@ public class MetadataValidationUniqueBuildServiceImpl implements MetadataValidat
 
         // 保存唯一性校验规则
         uniqueRepository.upsert(data);
+        
+        // 同步更新字段的唯一性状态为唯一
+        syncFieldUniqueStatus(vo.getFieldId(), true);
+        
         return data.getId();
     }
 
@@ -141,12 +149,40 @@ public class MetadataValidationUniqueBuildServiceImpl implements MetadataValidat
         updateObj.setGroupId(groupId);
 
         // 执行更新
-        uniqueRepository.upsert(updateObj);
+        uniqueRepository.update(updateObj); // 使用update而不是upsert，避免主键冲突
+        
+        // 同步更新字段的唯一性状态（根据校验规则的启用状态决定）
+        boolean isFieldUnique = updateObj.getIsEnabled() != null && updateObj.getIsEnabled() == 1;
+        syncFieldUniqueStatus(existing.getFieldId(), isFieldUnique);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteByFieldId(Long fieldId) {
         uniqueRepository.deleteByFieldId(fieldId);
+        
+        // 同步更新字段的唯一性状态为非唯一
+        syncFieldUniqueStatus(fieldId, false);
+    }
+    
+    /**
+     * 同步字段的唯一性状态
+     * 
+     * @param fieldId 字段ID
+     * @param unique 是否唯一
+     */
+    private void syncFieldUniqueStatus(Long fieldId, boolean unique) {
+        try {
+            MetadataEntityFieldDO field = entityFieldRepository.findById(fieldId);
+            if (field != null && field.getIsUnique() != (unique ? 1 : 0)) {
+                field.setIsUnique(unique ? 1 : 0);
+                // 使用直接更新而不是 upsert，避免主键冲突
+                entityFieldRepository.update(field);
+            }
+        } catch (Exception e) {
+            // 如果更新失败，记录日志但不中断流程
+            // 这种情况通常发生在同一事务中有其他操作正在处理同一字段
+            log.warn("同步字段唯一性状态失败，fieldId: {}, unique: {}, 错误: {}", fieldId, unique, e.getMessage());
+        }
     }
 }

@@ -35,7 +35,6 @@ public class MetadataEntityFieldDO extends TenantBaseDO {
     public static final String IS_PRIMARY_KEY  = "is_primary_key";
     public static final String IS_REQUIRED     = "is_required";
     public static final String IS_UNIQUE       = "is_unique";
-    public static final String ALLOW_NULL      = "allow_null";
     public static final String SORT_ORDER      = "sort_order";
     public static final String VALIDATION_RULES = "validation_rules";
     public static final String RUN_MODE        = "run_mode";
@@ -111,12 +110,6 @@ public class MetadataEntityFieldDO extends TenantBaseDO {
      * @see BooleanStatusEnum
      */
     private Integer isUnique;
-
-    /**
-     * 是否允许空值：1-是，0-不是
-     * @see BooleanStatusEnum
-     */
-    private Integer allowNull;
 
     /**
      * 排序

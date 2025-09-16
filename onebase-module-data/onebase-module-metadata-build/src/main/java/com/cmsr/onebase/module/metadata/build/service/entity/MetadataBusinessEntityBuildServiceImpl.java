@@ -315,12 +315,11 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
     private void saveEntityFields(Long entityId, List<MetadataSystemFieldsDO> systemFields, Long appId) {
         int sortOrder = 1;
         for (MetadataSystemFieldsDO systemField : systemFields) {
-        // 特殊处理 parent_id：不是主键、不是必填、不是唯一、允许为空
+        // 特殊处理 parent_id：不是主键、不是必填、不是唯一
         boolean isParentId = "parent_id".equalsIgnoreCase(systemField.getFieldName());
         int isPrimaryKey = isParentId ? StatusEnumUtil.NO : BooleanStatusEnum.toStatusValue(systemField.getIsSnowflakeId());
         int isRequired = isParentId ? StatusEnumUtil.NO : BooleanStatusEnum.toStatusValue(systemField.getIsRequired());
         int isUnique = isParentId ? StatusEnumUtil.NO : BooleanStatusEnum.toStatusValue(systemField.getIsSnowflakeId());
-        int allowNull = isParentId ? StatusEnumUtil.YES : BooleanStatusEnum.toInverseStatusValue(systemField.getIsRequired());
         MetadataEntityFieldDO entityField = MetadataEntityFieldDO.builder()
                     .entityId(entityId)
                     .fieldName(systemField.getFieldName())
@@ -336,9 +335,8 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
                     // 使用新的枚举值：1-是，0-否
                     .isSystemField(StatusEnumUtil.YES) // 标记为系统字段：1-是
             .isPrimaryKey(isPrimaryKey) // parent_id 强制不是主键
-            .isRequired(isRequired) // parent_id 强制不是必填
+            .isRequired(isRequired) // parent_id 强制不是必填  
             .isUnique(isUnique) // parent_id 强制不是唯一
-            .allowNull(allowNull) // parent_id 强制允许为空
                     .sortOrder(sortOrder++)
                     .validationRules(null) // 系统字段暂不设置校验规则
                     .runMode(0) // 默认编辑态

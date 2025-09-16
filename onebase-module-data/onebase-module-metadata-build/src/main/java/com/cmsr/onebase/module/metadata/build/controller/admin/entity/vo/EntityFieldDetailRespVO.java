@@ -34,9 +34,6 @@ public class EntityFieldDetailRespVO {
     @Schema(description = "字段类型", example = "VARCHAR")
     private String fieldType;
 
-    @Schema(description = "数据长度", example = "50")
-    private Integer dataLength;
-
     @Schema(description = "小数位数", example = "null")
     private Integer decimalPlaces;
 
@@ -51,9 +48,6 @@ public class EntityFieldDetailRespVO {
 
     @Schema(description = "是否唯一：0-是，1-不是", example = "0")
     private Integer isUnique;
-
-    @Schema(description = "允许空值：0-是，1-不是", example = "1")
-    private Integer allowNull;
 
     @Schema(description = "是否系统字段：0-是，1-不是", example = "1")
     private Integer isSystemField;
