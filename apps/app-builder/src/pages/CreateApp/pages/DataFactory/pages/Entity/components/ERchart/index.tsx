@@ -445,6 +445,10 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
           onNodeEdit?.(node.getData().data);
         });
 
+        graphRef.current.on('scale', ({ sx, sy, ox, oy }) => {
+          setZoom(Number((sx * 100).toFixed(0)));
+        });
+
         // 监听画布平移
         // graphRef.current.on('translate', ({ tx, ty }) => {
         //   console.log('translate', tx, ty);
