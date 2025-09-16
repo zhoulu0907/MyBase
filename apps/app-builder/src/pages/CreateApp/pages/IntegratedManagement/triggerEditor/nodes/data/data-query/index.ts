@@ -13,27 +13,26 @@ export const DataQueryNodeRegistry: FlowNodeRegistry = {
     selectable: true,
     copyDisable: false,
     expandable: false,
-    addDisable: false,
+    addDisable: false
   },
   info: {
     icon: iconStart,
-    description:
-    '这是数据查询节点(单条)，用于查询数据。',
+    description: '这是数据查询节点(单条)，用于查询数据。'
   },
   /**
    * Render node via formMeta
    */
   formMeta,
   canDelete(ctx, node) {
-    return node.parent !== ctx.document.root;
+    return true;
   },
   onAdd(ctx, from) {
     return {
       id: `dataQuery_${nanoid()}`,
       type: 'dataQuery',
       data: {
-        title: '数据查询节点(单条)',
-      },
+        title: '数据查询节点(单条)'
+      }
     };
-  },
+  }
 };
