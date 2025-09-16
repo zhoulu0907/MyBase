@@ -1,7 +1,8 @@
 package com.cmsr.onebase.module.infra.framework.file.core.s3;
 
-import cn.hutool.core.io.resource.ResourceUtil;
-import cn.hutool.core.util.IdUtil;
+
+import com.cmsr.onebase.framework.common.tools.core.io.resource.ResourceUtil;
+import com.cmsr.onebase.framework.common.tools.core.util.IdUtil;
 import com.cmsr.onebase.framework.common.util.validation.ValidationUtils;
 import com.cmsr.onebase.module.infra.framework.file.core.client.s3.S3FileClient;
 import com.cmsr.onebase.module.infra.framework.file.core.client.s3.S3FileClientConfig;

@@ -1,11 +1,11 @@
 package com.cmsr.onebase.framework.common.util.date;
 
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.date.DatePattern;
-import cn.hutool.core.date.LocalDateTimeUtil;
-import cn.hutool.core.lang.Assert;
-import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.framework.common.enums.DateIntervalEnum;
+import com.cmsr.onebase.framework.common.tools.core.collection.CollUtil;
+import com.cmsr.onebase.framework.common.tools.core.date.DatePattern;
+import com.cmsr.onebase.framework.common.tools.core.lang.Assert;
+import com.cmsr.onebase.framework.common.tools.core.date.LocalDateTimeUtil;
+import com.cmsr.onebase.framework.common.tools.core.util.StrUtil;
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;
@@ -15,8 +15,8 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
 
-import static cn.hutool.core.date.DatePattern.UTC_MS_WITH_XXX_OFFSET_PATTERN;
-import static cn.hutool.core.date.DatePattern.createFormatter;
+import static com.cmsr.onebase.framework.common.tools.core.date.DatePattern.UTC_MS_WITH_XXX_OFFSET_PATTERN;
+import static com.cmsr.onebase.framework.common.tools.core.date.DatePattern.createFormatter;
 
 /**
  * 时间工具类，用于 {@link java.time.LocalDateTime}

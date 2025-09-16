@@ -1,6 +1,6 @@
 package com.cmsr.onebase.gateway.util;
 
-import cn.hutool.core.thread.ThreadUtil;
+import com.cmsr.onebase.framework.common.tools.core.thread.ThreadUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;

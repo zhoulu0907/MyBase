@@ -1,8 +1,8 @@
 package com.cmsr.onebase.framework.common.util.collection;
 
-import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.collection.IterUtil;
-import cn.hutool.core.util.ArrayUtil;
+import com.cmsr.onebase.framework.common.tools.core.collection.CollUtil;
+import com.cmsr.onebase.framework.common.tools.core.collection.IterUtil;
+import com.cmsr.onebase.framework.common.tools.core.util.ArrayUtil;
 
 import java.util.Collection;
 import java.util.function.Function;
@@ -20,7 +20,7 @@ public class ArrayUtils {
 
     @SuppressWarnings("unchecked")
     private static <T> T[] toArray(Collection<T> from) {
-        if (CollectionUtil.isEmpty(from)) {
+        if (CollUtil.isEmpty(from)) {
             return (T[]) (new Object[0]);
         }
         return ArrayUtil.toArray(from, (Class<T>) IterUtil.getElementType(from.iterator()));

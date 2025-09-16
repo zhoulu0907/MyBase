@@ -1,6 +1,6 @@
 package com.cmsr.onebase.framework.tenant.core.redis;
 
-import cn.hutool.core.collection.CollUtil;
+import com.cmsr.onebase.framework.common.tools.core.collection.CollUtil;
 import com.cmsr.onebase.framework.redis.core.TimeoutRedisCacheManager;
 import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
 import lombok.extern.slf4j.Slf4j;

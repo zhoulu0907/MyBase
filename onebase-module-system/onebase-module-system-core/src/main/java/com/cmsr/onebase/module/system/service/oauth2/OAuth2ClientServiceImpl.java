@@ -1,10 +1,10 @@
 package com.cmsr.onebase.module.system.service.oauth2;
 
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.tools.core.collection.CollUtil;
+import com.cmsr.onebase.framework.common.tools.core.util.ObjUtil;
+import com.cmsr.onebase.framework.common.tools.core.util.StrUtil;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.common.util.string.StrUtils;
 import com.cmsr.onebase.module.system.vo.oauth.OAuth2ClientPageReqVO;
@@ -96,12 +96,12 @@ public class OAuth2ClientServiceImpl implements OAuth2ClientService {
         if (client == null) {
             throw exception(OAUTH2_CLIENT_NOT_EXISTS);
         }
-        if (ObjectUtil.notEqual(client.getStatus(), CommonStatusEnum.ENABLE.getStatus())) {
+        if (ObjUtil.notEqual(client.getStatus(), CommonStatusEnum.ENABLE.getStatus())) {
             throw exception(OAUTH2_CLIENT_DISABLE);
         }
 
         // 校验客户端密钥
-        if (StrUtil.isNotEmpty(clientSecret) && ObjectUtil.notEqual(client.getSecret(), clientSecret)) {
+        if (StrUtil.isNotEmpty(clientSecret) && ObjUtil.notEqual(client.getSecret(), clientSecret)) {
             throw exception(OAUTH2_CLIENT_CLIENT_SECRET_ERROR);
         }
         // 校验授权方式

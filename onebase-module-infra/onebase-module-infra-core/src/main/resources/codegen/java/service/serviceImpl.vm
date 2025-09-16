@@ -1,6 +1,6 @@
 package ${basePackage}.module.${table.moduleName}.service.${table.businessName};
 
-import cn.hutool.core.collection.CollUtil;
+import com.cmsr.onebase.framework.common.tools.core.collection.CollUtil;
 import org.springframework.stereotype.Service;
 import ${jakartaPackage}.annotation.Resource;
 import org.springframework.validation.annotation.Validated;

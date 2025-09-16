@@ -1,9 +1,9 @@
 package com.cmsr.onebase.framework.security.core.filter;
 
-import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.framework.common.exception.ServiceException;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.framework.common.tools.core.util.ObjUtil;
+import com.cmsr.onebase.framework.common.tools.core.util.StrUtil;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
 import com.cmsr.onebase.framework.security.config.SecurityProperties;
@@ -89,7 +89,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
             // 注意：只有 /admin-api/* 和 /app-api/* 有 userType，才需要比对用户类型
             // 类似 WebSocket 的 /ws/* 连接地址，是不需要比对用户类型的
             if (userType != null
-                    && ObjectUtil.notEqual(accessToken.getUserType(), userType)) {
+                    && ObjUtil.notEqual(accessToken.getUserType(), userType)) {
                 throw new AccessDeniedException("错误的用户类型");
             }
             // 构建登录用户
@@ -141,7 +141,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
             Integer userType = WebFrameworkUtils.getLoginUserType(request);
             if (userType != null
                     && loginUser != null
-                    && ObjectUtil.notEqual(loginUser.getUserType(), userType)) {
+                    && ObjUtil.notEqual(loginUser.getUserType(), userType)) {
                 throw new AccessDeniedException("错误的用户类型");
             }
             return loginUser;

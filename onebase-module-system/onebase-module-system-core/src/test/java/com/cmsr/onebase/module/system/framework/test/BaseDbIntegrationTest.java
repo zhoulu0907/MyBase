@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.system.framework.test;
 
-import cn.hutool.extra.spring.SpringUtil;
+import com.cmsr.onebase.framework.common.tools.extra.spring.SpringUtil;
 import com.cmsr.onebase.framework.redis.config.OneBaseCacheAutoConfiguration;
 import com.cmsr.onebase.framework.redis.config.OneBaseRedisAutoConfiguration;
 import com.cmsr.onebase.framework.test.config.SqlInitializationTestConfiguration;

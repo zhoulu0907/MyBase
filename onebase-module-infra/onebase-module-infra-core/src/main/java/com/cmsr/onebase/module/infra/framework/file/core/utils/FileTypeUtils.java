@@ -1,9 +1,8 @@
 package com.cmsr.onebase.module.infra.framework.file.core.utils;
 
-import cn.hutool.core.io.IoUtil;
-import cn.hutool.core.util.StrUtil;
+import com.cmsr.onebase.framework.common.tools.core.io.IoUtil;
+import com.cmsr.onebase.framework.common.tools.core.util.StrUtil;
 import com.cmsr.onebase.framework.common.util.http.HttpUtils;
-import com.alibaba.ttl.TransmittableThreadLocal;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;

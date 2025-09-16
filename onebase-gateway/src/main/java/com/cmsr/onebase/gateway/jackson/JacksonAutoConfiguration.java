@@ -1,6 +1,6 @@
 package com.cmsr.onebase.gateway.jackson;
 
-import cn.hutool.core.collection.CollUtil;
+import com.cmsr.onebase.framework.common.tools.core.collection.CollUtil;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.common.util.json.databind.TimestampLocalDateTimeDeserializer;
 import com.cmsr.onebase.framework.common.util.json.databind.TimestampLocalDateTimeSerializer;

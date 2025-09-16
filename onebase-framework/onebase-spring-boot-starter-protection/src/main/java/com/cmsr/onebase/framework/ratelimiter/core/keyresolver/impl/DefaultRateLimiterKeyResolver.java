@@ -1,10 +1,11 @@
 package com.cmsr.onebase.framework.ratelimiter.core.keyresolver.impl;
 
-import cn.hutool.core.util.StrUtil;
-import cn.hutool.crypto.SecureUtil;
+import com.cmsr.onebase.framework.common.tools.core.util.StrUtil;
 import com.cmsr.onebase.framework.ratelimiter.core.annotation.RateLimiter;
 import com.cmsr.onebase.framework.ratelimiter.core.keyresolver.RateLimiterKeyResolver;
 import org.aspectj.lang.JoinPoint;
+import org.springframework.util.DigestUtils;
+import java.nio.charset.StandardCharsets;
 
 /**
  * 默认（全局级别）限流 Key 解析器，使用方法名 + 方法参数，组装成一个 Key
@@ -18,7 +19,7 @@ public class DefaultRateLimiterKeyResolver implements RateLimiterKeyResolver {
     public String resolver(JoinPoint joinPoint, RateLimiter rateLimiter) {
         String methodName = joinPoint.getSignature().toString();
         String argsStr = StrUtil.join(",", joinPoint.getArgs());
-        return SecureUtil.md5(methodName + argsStr);
+        return DigestUtils.md5DigestAsHex((methodName + argsStr).getBytes(StandardCharsets.UTF_8));
     }
 
 }

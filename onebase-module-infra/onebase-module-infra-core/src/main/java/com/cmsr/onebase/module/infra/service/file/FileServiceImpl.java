@@ -1,11 +1,11 @@
 package com.cmsr.onebase.module.infra.service.file;
 
-import cn.hutool.core.date.LocalDateTimeUtil;
-import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.lang.Assert;
-import cn.hutool.core.util.StrUtil;
-import cn.hutool.crypto.digest.DigestUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.tools.core.date.LocalDateTimeUtil;
+import com.cmsr.onebase.framework.common.tools.core.io.file.FileNameUtil;
+import com.cmsr.onebase.framework.common.tools.core.lang.Assert;
+import com.cmsr.onebase.framework.common.tools.core.util.StrUtil;
+import com.cmsr.onebase.framework.common.tools.crypto.digest.DigestUtil;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.infra.dal.database.FileDataRepository;
 import com.cmsr.onebase.module.infra.dal.dataobject.file.FileDO;
@@ -20,7 +20,7 @@ import jakarta.annotation.Resource;
 import lombok.SneakyThrows;
 import org.springframework.stereotype.Service;
 
-import static cn.hutool.core.date.DatePattern.PURE_DATE_PATTERN;
+import static com.cmsr.onebase.framework.common.tools.core.date.DatePattern.PURE_DATE_PATTERN;
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.module.infra.enums.ErrorCodeConstants.FILE_NOT_EXISTS;
 
@@ -65,9 +65,9 @@ public class FileServiceImpl implements FileService {
         }
         // 1.2 处理 name 为空的情况
         if (StrUtil.isEmpty(name)) {
-            name = DigestUtil.sha256Hex(content);
+            name = DigestUtil.bytesToHex(content);
         }
-        if (StrUtil.isEmpty(FileUtil.extName(name))) {
+        if (StrUtil.isEmpty(FileNameUtil.extName(name))) {
             // 如果 name 没有后缀 type，则补充后缀
             String extension = FileTypeUtils.getExtension(type);
             if (StrUtil.isNotEmpty(extension)) {
@@ -103,9 +103,9 @@ public class FileServiceImpl implements FileService {
 
         // 2.1 先拼接 suffix 后缀
         if (StrUtil.isNotEmpty(suffix)) {
-            String ext = FileUtil.extName(name);
+            String ext = FileNameUtil.extName(name);
             if (StrUtil.isNotEmpty(ext)) {
-                name = FileUtil.mainName(name) + StrUtil.C_UNDERLINE + suffix + StrUtil.DOT + ext;
+                name = FileNameUtil.mainName(name) + StrUtil.C_UNDERLINE + suffix + StrUtil.DOT + ext;
             } else {
                 name = name + StrUtil.C_UNDERLINE + suffix;
             }

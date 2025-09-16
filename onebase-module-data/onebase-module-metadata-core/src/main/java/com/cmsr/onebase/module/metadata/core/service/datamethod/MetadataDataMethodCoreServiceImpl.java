@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.metadata.core.service.datamethod;
 
-import cn.hutool.core.util.IdUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.tools.core.util.SnowflakeIdWorker;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusinessEntityDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
@@ -465,7 +465,7 @@ public class MetadataDataMethodCoreServiceImpl implements MetadataDataMethodCore
             if (fieldName != null && fieldName.equalsIgnoreCase(realPrimaryKey)) {
                 if (!processedData.containsKey(fieldName)) {
                     // 生成雪花ID作为主键
-                    processedData.put(fieldName, IdUtil.getSnowflakeNextId());
+                    processedData.put(fieldName, SnowflakeIdWorker.nextId());
                 }
                 continue;
             }

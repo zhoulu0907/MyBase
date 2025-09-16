@@ -1,11 +1,10 @@
 package com.cmsr.onebase.module.system.service.permission;
 
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.util.ArrayUtil;
-import cn.hutool.extra.spring.SpringUtil;
 import com.cmsr.onebase.framework.common.biz.system.permission.dto.DeptDataPermissionRespDTO;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
+import com.cmsr.onebase.framework.common.tools.core.collection.CollUtil;
+import com.cmsr.onebase.framework.common.tools.core.util.ArrayUtil;
+import com.cmsr.onebase.framework.common.tools.extra.spring.SpringUtil;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
@@ -272,7 +271,7 @@ public class PermissionServiceImpl implements PermissionService {
         Collection<Long> createRoleIds = CollUtil.subtract(roleIdList, dbRoleIds);
         Collection<Long> deleteRoleIds = CollUtil.subtract(dbRoleIds, roleIdList);
         // 执行新增和删除。对于已经授权的角色，不用做任何处理
-        if (!CollectionUtil.isEmpty(createRoleIds)) {
+        if (!CollUtil.isEmpty(createRoleIds)) {
             userRoleDataRepository.insertBatch(CollectionUtils.convertList(createRoleIds, roleId -> {
                 UserRoleDO entity = new UserRoleDO();
                 entity.setUserId(userId);
@@ -280,7 +279,7 @@ public class PermissionServiceImpl implements PermissionService {
                 return entity;
             }));
         }
-        if (!CollectionUtil.isEmpty(deleteRoleIds)) {
+        if (!CollUtil.isEmpty(deleteRoleIds)) {
             userRoleDataRepository.deleteByUserIdAndRoleIds(userId, deleteRoleIds);
         }
     }

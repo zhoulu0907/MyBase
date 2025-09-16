@@ -1,8 +1,8 @@
 package com.cmsr.onebase.framework.security.core.service;
 
-import cn.hutool.core.collection.CollUtil;
 import com.cmsr.onebase.framework.common.biz.system.permission.PermissionCommonApi;
 import com.cmsr.onebase.framework.common.core.KeyValue;
+import com.cmsr.onebase.framework.common.tools.core.collection.CollUtil;
 import com.cmsr.onebase.framework.security.core.LoginUser;
 import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
 import com.google.common.cache.CacheLoader;

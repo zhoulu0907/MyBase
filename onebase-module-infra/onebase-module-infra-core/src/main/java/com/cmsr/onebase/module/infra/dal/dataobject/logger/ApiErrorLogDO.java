@@ -132,14 +132,14 @@ public class ApiErrorLogDO extends TenantBaseDO {
     /**
      * 异常导致的消息
      *
-     * {@link cn.hutool.core.exceptions.ExceptionUtil#getMessage(Throwable)}
+     * {@link com.cmsr.onebase.framework.common.tools.core.exceptions.ExceptionUtil#getMessage(Throwable)}
      */
     @Column(name = COLUMN_EXCEPTION_MESSAGE)
     private String exceptionMessage;
     /**
      * 异常导致的根消息
      *
-     * {@link cn.hutool.core.exceptions.ExceptionUtil#getRootCauseMessage(Throwable)}
+     * {@link com.cmsr.onebase.framework.common.tools.core.exceptions.ExceptionUtil#getRootCauseMessage(Throwable)}
      */
     @Column(name = COLUMN_EXCEPTION_ROOT_CAUSE_MESSAGE)
     private String exceptionRootCauseMessage;

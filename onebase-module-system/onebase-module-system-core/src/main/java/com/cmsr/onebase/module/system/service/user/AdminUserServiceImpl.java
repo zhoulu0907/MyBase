@@ -1,13 +1,11 @@
 package com.cmsr.onebase.module.system.service.user;
 
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.util.ObjUtil;
-import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.exception.ServiceException;
-import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.tools.core.collection.CollUtil;
+import com.cmsr.onebase.framework.common.tools.core.util.ObjUtil;
+import com.cmsr.onebase.framework.common.tools.core.util.StrUtil;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.common.util.validation.ValidationUtils;
@@ -124,13 +122,13 @@ public class AdminUserServiceImpl implements AdminUserService {
         adminUserDataRepository.insert(user);
 
         // 2.2 插入关联岗位
-        if (CollectionUtil.isNotEmpty(user.getPostIds())) {
+        if (CollUtil.isNotEmpty(user.getPostIds())) {
             userPostDataRepository.insertBatch(convertList(user.getPostIds(),
                     postId -> new UserPostDO().setUserId(user.getId()).setPostId(postId)));
         }
 
         // 2.3 插入用户角色关联
-        if (CollectionUtil.isNotEmpty(createReqVO.getRoleIds())) {
+        if (CollUtil.isNotEmpty(createReqVO.getRoleIds())) {
             permissionService.assignUserRoles(user.getId(), createReqVO.getRoleIds());
         }
 
@@ -244,11 +242,11 @@ public class AdminUserServiceImpl implements AdminUserService {
         Collection<Long> createPostIds = CollUtil.subtract(postIds, dbPostIds);
         Collection<Long> deletePostIds = CollUtil.subtract(dbPostIds, postIds);
         // 执行新增和删除。对于已经授权的岗位，不用做任何处理
-        if (!CollectionUtil.isEmpty(createPostIds)) {
+        if (!CollUtil.isEmpty(createPostIds)) {
             userPostDataRepository.insertBatch(convertList(createPostIds,
                     postId -> new UserPostDO().setUserId(userId).setPostId(postId)));
         }
-        if (!CollectionUtil.isEmpty(deletePostIds)) {
+        if (!CollUtil.isEmpty(deletePostIds)) {
             userPostDataRepository.deleteByUserIdAndPostIds(userId, deletePostIds);
         }
     }

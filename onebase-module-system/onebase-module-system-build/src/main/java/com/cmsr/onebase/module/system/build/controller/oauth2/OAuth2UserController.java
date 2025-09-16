@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.system.build.controller.oauth2;
 
-import cn.hutool.core.collection.CollUtil;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.framework.common.tools.core.collection.CollUtil;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.system.vo.user.OAuth2UserInfoRespVO;
 import com.cmsr.onebase.module.system.vo.user.OAuth2UserUpdateReqVO;

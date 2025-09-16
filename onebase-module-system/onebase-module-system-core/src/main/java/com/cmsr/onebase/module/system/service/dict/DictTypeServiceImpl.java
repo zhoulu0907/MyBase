@@ -8,6 +8,7 @@ import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.DICT_TYPE_
 
 import java.util.List;
 
+import com.cmsr.onebase.framework.common.tools.core.util.StrUtil;
 import org.springframework.stereotype.Service;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
@@ -19,7 +20,6 @@ import com.cmsr.onebase.module.system.dal.database.DictTypeRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.dict.DictTypeDO;
 import com.google.common.annotations.VisibleForTesting;
 
-import cn.hutool.core.util.StrUtil;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 

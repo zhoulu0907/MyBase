@@ -1,6 +1,6 @@
 package com.cmsr.onebase.gateway.util;
 
-import cn.hutool.core.map.MapUtil;
+import com.cmsr.onebase.framework.common.tools.core.map.MapUtil;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.gateway.filter.security.LoginUser;
 import lombok.extern.slf4j.Slf4j;

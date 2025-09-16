@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.infra.runtime.controller.file;
 
-import cn.hutool.core.io.IoUtil;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.framework.common.tools.core.io.IoUtil;
 import com.cmsr.onebase.module.infra.dal.vo.app.AppFileUploadReqVO;
 import com.cmsr.onebase.module.infra.dal.vo.file.file.FileCreateReqVO;
 import com.cmsr.onebase.module.infra.dal.vo.file.file.FilePresignedUrlRespVO;

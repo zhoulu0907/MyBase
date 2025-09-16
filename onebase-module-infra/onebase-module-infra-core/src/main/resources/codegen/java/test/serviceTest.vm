@@ -18,7 +18,7 @@ import org.springframework.context.annotation.Import;
 import java.util.*;
 import java.time.LocalDateTime;
 
-import static cn.hutool.core.util.RandomUtil.*;
+import static com.cmsr.onebase.framework.common.tools.core.util.RandomUtil.*;
 import static ${basePackage}.module.${table.moduleName}.enums.ErrorCodeConstants.*;
 import static ${baseFrameworkPackage}.test.core.util.AssertUtils.*;
 import static ${baseFrameworkPackage}.test.core.util.RandomUtils.*;

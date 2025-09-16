@@ -1,6 +1,5 @@
 package com.cmsr.onebase.framework.redis.config;
 
-import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.framework.redis.core.TimeoutRedisCacheManager;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.cache.CacheProperties;
@@ -15,7 +14,6 @@ import org.springframework.data.redis.cache.RedisCacheWriter;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
-import org.springframework.util.StringUtils;
 
 import java.util.Objects;
 

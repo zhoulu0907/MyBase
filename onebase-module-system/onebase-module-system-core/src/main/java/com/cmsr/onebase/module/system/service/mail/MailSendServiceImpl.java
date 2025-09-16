@@ -1,8 +1,10 @@
 package com.cmsr.onebase.module.system.service.mail;
 
-import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
+import com.cmsr.onebase.framework.common.tools.core.util.StrUtil;
+import com.cmsr.onebase.framework.common.tools.extra.mail.MailAccount;
+import com.cmsr.onebase.framework.common.tools.extra.mail.MailUtil;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.system.dal.dataobject.mail.MailAccountDO;
 import com.cmsr.onebase.module.system.dal.dataobject.mail.MailTemplateDO;
@@ -14,7 +16,6 @@ import com.cmsr.onebase.module.system.service.user.AdminUserService;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.dromara.hutool.extra.mail.*;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 

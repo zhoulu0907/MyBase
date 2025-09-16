@@ -1,7 +1,7 @@
 package com.cmsr.onebase.framework.tenant.core.web;
 
-import cn.hutool.core.util.ObjUtil;
 import com.cmsr.onebase.framework.common.exception.enums.GlobalErrorCodeConstants;
+import com.cmsr.onebase.framework.common.tools.core.util.ObjUtil;
 import com.cmsr.onebase.framework.security.core.LoginUser;
 import com.cmsr.onebase.framework.security.core.service.SecurityFrameworkService;
 import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;

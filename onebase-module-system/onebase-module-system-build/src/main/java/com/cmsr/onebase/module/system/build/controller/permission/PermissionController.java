@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.system.build.controller.permission;
 
-import cn.hutool.core.collection.CollUtil;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.framework.common.tools.core.collection.CollUtil;
 import com.cmsr.onebase.module.system.service.permission.PermissionService;
 import com.cmsr.onebase.module.system.service.tenant.TenantService;
 import com.cmsr.onebase.module.system.vo.permission.*;

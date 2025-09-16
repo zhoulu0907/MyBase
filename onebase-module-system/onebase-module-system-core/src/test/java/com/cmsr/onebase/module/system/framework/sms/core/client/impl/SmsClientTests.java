@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.system.framework.sms.core.client.impl;
 
-import cn.hutool.core.collection.ListUtil;
 import com.cmsr.onebase.framework.common.core.KeyValue;
+import com.cmsr.onebase.framework.common.tools.core.collection.ListUtil;
 import com.cmsr.onebase.module.system.framework.sms.core.client.SmsClient;
 import com.cmsr.onebase.module.system.framework.sms.core.client.dto.SmsSendRespDTO;
 import com.cmsr.onebase.module.system.framework.sms.core.client.dto.SmsTemplateRespDTO;
