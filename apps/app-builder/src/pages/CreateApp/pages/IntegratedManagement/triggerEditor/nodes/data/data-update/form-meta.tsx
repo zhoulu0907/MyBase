@@ -129,7 +129,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
             <Grid.Row>
               <Form.Item label="更新规则" field="fields">
-                <FieldEditor fieldList={fieldDataList} />
+                <FieldEditor fieldList={fieldDataList} form={payloadForm} />
               </Form.Item>
             </Grid.Row>
             <Grid.Row>
