@@ -1,9 +1,10 @@
 import iconCase from '@/assets/flow/icon-case.png';
 import { type FlowNodeRegistry } from '../../../typings';
+import { NodeType } from '../../const';
 import { formMeta } from './form-meta';
 
 export const CaseDefaultNodeRegistry: FlowNodeRegistry = {
-  type: 'caseDefault',
+  type: NodeType.CASE_DEFAULT,
   title: '默认分支节点',
   category: 'control',
   /**
@@ -21,13 +22,13 @@ export const CaseDefaultNodeRegistry: FlowNodeRegistry = {
     draggable: false,
     deleteDisable: true,
     style: {
-      width: 240,
-    },
+      width: 240
+    }
   },
   info: {
     icon: iconCase,
-    description: 'Switch default branch',
+    description: 'Switch default branch'
   },
   canDelete: (ctx, node) => false,
-  formMeta,
+  formMeta
 };

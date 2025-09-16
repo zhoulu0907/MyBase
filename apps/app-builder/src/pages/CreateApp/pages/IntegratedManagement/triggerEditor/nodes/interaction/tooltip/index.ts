@@ -1,10 +1,11 @@
 import iconStart from '@/assets/flow/icon-start.jpg';
 import { nanoid } from 'nanoid';
 import { type FlowNodeRegistry } from '../../../typings';
+import { NodeType } from '../../const';
 import { formMeta } from './form-meta';
 
 export const TooltipNodeRegistry: FlowNodeRegistry = {
-  type: 'tooltip',
+  type: NodeType.TOOLTIP,
   title: '提示节点',
   category: 'interaction',
   meta: {
@@ -13,12 +14,11 @@ export const TooltipNodeRegistry: FlowNodeRegistry = {
     selectable: true,
     copyDisable: false,
     expandable: false,
-    addDisable: false,
+    addDisable: false
   },
   info: {
     icon: iconStart,
-    description:
-    '这是提示节点，用于提示。',
+    description: '这是提示节点，用于提示。'
   },
   /**
    * Render node via formMeta
@@ -32,8 +32,8 @@ export const TooltipNodeRegistry: FlowNodeRegistry = {
       id: `tooltip_${nanoid()}`,
       type: 'tooltip',
       data: {
-        title: '提示节点',
-      },
+        title: '提示节点'
+      }
     };
-  },
+  }
 };

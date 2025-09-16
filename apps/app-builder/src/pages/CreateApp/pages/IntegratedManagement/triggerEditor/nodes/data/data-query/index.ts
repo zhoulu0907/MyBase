@@ -1,10 +1,11 @@
 import iconStart from '@/assets/flow/icon-start.jpg';
 import { nanoid } from 'nanoid';
 import { type FlowNodeRegistry } from '../../../typings';
+import { NodeType } from '../../const';
 import { formMeta } from './form-meta';
 
 export const DataQueryNodeRegistry: FlowNodeRegistry = {
-  type: 'dataQuery',
+  type: NodeType.DATA_QUERY,
   title: '数据查询节点(单条)',
   category: 'data',
   meta: {

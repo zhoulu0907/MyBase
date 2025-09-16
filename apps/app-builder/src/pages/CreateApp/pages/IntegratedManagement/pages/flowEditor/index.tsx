@@ -3,6 +3,7 @@ import { Button, Message } from '@arco-design/web-react';
 import { ProcessStatus, updateFlowMgmtDefinition } from '@onebase/app';
 import React from 'react';
 import TriggerEditor from '../../triggerEditor';
+import { NodeType } from '../../triggerEditor/nodes/const';
 import styles from './index.module.less';
 
 /**
@@ -13,9 +14,15 @@ const FlowEditorPage: React.FC = () => {
   const { nodeData, nodes, flowId } = triggerEditorSignal;
 
   const handleSave = async () => {
+    console.log('nodes: ', nodes.value);
     console.log('nodeData: ', nodeData.value);
     const processDefinitionJson = nodes.value.map((item) => {
+      console.log('item: ', item);
       const { outputs: nodeOutputs, initialData: nodeInitialData, ...restNodeData } = nodeData.value[item.id] || {};
+
+      if (item.type === NodeType.IF) {
+        return item;
+      }
 
       const data = {
         id: item.id,
