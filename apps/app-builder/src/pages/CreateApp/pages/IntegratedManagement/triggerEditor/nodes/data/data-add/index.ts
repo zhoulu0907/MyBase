@@ -1,10 +1,11 @@
 import iconStart from '@/assets/flow/icon-start.jpg';
 import { nanoid } from 'nanoid';
 import { type FlowNodeRegistry } from '../../../typings';
+import { NodeType } from '../../const';
 import { formMeta } from './form-meta';
 
 export const DataAddNodeRegistry: FlowNodeRegistry = {
-  type: 'dataAdd',
+  type: NodeType.DATA_ADD,
   title: '数据新增节点',
   category: 'data',
   meta: {

@@ -1,10 +1,11 @@
 import iconStart from '@/assets/flow/icon-start.jpg';
 import { nanoid } from 'nanoid';
 import { type FlowNodeRegistry } from '../../../typings';
+import { NodeType } from '../../const';
 import { formMeta } from './form-meta';
 
 export const DataCalcNodeRegistry: FlowNodeRegistry = {
-  type: 'dataCalc',
+  type: NodeType.DATA_CALC,
   title: '数据计算节点',
   category: 'data',
   meta: {
