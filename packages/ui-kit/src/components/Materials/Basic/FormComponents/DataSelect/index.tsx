@@ -8,14 +8,7 @@ import { FORM_COMPONENT_TYPES } from '@/components/Materials/componentTypes';
 
 const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean }) => {
     const { label, dataField, tooltip, status, defaultValue, verify, layout, labelColSpan = 0, description, runtime, displayFields } = props;
-const fields = [
-  { label: "单行文本", value: "" },
-  { label: "图片", value: "" },
-  { label: "单选按钮组", value: "" },
-  { label: "提交人", value: "" },
-  { label: "提交时间", value: "" },
-  { label: "更新时间", value: "" },
-];
+
     return (
         <div className='formWrapper'>
             <Form.Item
@@ -42,7 +35,9 @@ const fields = [
             </Form.Item>
             <div style={{marginTop: "16px", background: "#f7f8fa",}}>
                 {displayFields.map((field) => (
-                    <Form.Item label={field.label} 
+                    <Form.Item 
+                        key={field.label}
+                        label={field.label} 
                         labelCol={{style: { width: labelColSpan, flex: "unset" }}}
                         wrapperCol={{ style: { flex: 1 } }}>
                         <span style={{ color: "#c9cdd4"}}>暂无内容</span>

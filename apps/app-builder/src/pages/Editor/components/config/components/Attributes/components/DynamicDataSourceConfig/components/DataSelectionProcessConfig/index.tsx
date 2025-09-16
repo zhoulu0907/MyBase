@@ -1,30 +1,16 @@
-import {
-  Button,
-  Checkbox,
-  Drawer,
-  Form,
-  Grid,
-  Input,
-  Popover,
-  Select,
-  Space,
-  Switch,
-  Tooltip
-} from '@arco-design/web-react';
+import { Button, Checkbox, Drawer, Form, Grid, Input, Select, Switch, Tooltip } from '@arco-design/web-react';
 import React, { useEffect, useState } from 'react';
 
 import { IconQuestionCircleFill } from '@arco-design/web-react/icon';
-import { ReactSortable } from 'react-sortablejs';
 import { ListComp } from '@onebase/ui-kit';
 
 import styles from '../../index.module.less';
-import SelectOptionDrag from '../DropdownRender';
 import type { DynamicSelectDataSourceConfigProps } from '../..';
 import DropdownRender from '../DropdownRender';
 
 interface DataSelectionProcessConfigProps extends DynamicSelectDataSourceConfigProps {
   visible: boolean;
-  setVisible: (visible: boolean) => void;
+  setVisible: any;
 }
 
 const FormItem = Form.Item;
@@ -40,6 +26,18 @@ const SUB_ATTR_KEY = {
   DYNAMICTABLECONFIG: 'dynamicTableConfig',
   COLUMNS: 'columns'
 };
+
+function countSelectedLeaf(selected: string[], options: any[]): number {
+  let count = 0;
+  for (const opt of options) {
+    if (opt.children) {
+      count += countSelectedLeaf(selected, opt.children);
+    } else if (selected.includes(opt.value)) {
+      count += 1;
+    }
+  }
+  return count;
+}
 
 //mockup
 const defaultOptions = [
@@ -71,8 +69,8 @@ const initialDisplayFieldOptions = [
     value: 'subTable',
     id: 8,
     children: [
-      { label: '子表单.成员单选', value: 'subTable.member', id: 81 },
-      { label: '子表单.图片', value: 'subTable.image', id: 82 }
+      { label: '成员单选', value: 'member', id: 81 },
+      { label: '图片', value: 'image', id: 82 }
     ]
   }
 ];
@@ -120,6 +118,9 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
     setTableHeader(header);
   };
 
+  // 获取叶子节点
+  const leafCount = countSelectedLeaf(selected, displayFieldOptions);
+
   return (
     <>
       <Drawer
@@ -131,9 +132,7 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
         title="数据选择过程"
         className={styles.drawerContainer}
         footer={null}
-        onCancel={() => {
-          setVisible(false);
-        }}
+        onCancel={setVisible}
       >
         <div className={styles.container}>
           <div className={styles.leftColumn}>
@@ -152,19 +151,11 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
               </FormItem>
               <FormItem label="选择数据时的显示字段">
                 <Select
-                  mode="multiple"
                   value={selected}
                   onChange={setSelected}
                   placeholder="设置显示字段"
                   getPopupContainer={(node) => node.parentNode as HTMLElement}
-                  renderTag={({}, index, valueList) => {
-                    const tagCount = valueList.length;
-                    if (tagCount > 0) {
-                      return index === 0 ? (
-                        <span className={styles.fieldDisplaySpan}>{`显示 ${tagCount} 个字段`}</span>
-                      ) : null;
-                    }
-                  }}
+                  renderFormat={() => `显示 ${leafCount} 个字段`}
                   dropdownRender={() => (
                     <div className={styles.dropdownRender}>
                       <DropdownRender
@@ -187,7 +178,7 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
                 <Grid.Row gutter={8}>
                   <Grid.Col span={18}>
                     <Select placeholder="请选择" getPopupContainer={(node) => node.parentNode as HTMLElement}>
-                      {sortFieldOptions.map((option) => (
+                      {defaultOptions.map((option) => (
                         <Option key={option.value} value={option.value}>
                           {option.label}
                         </Option>
@@ -196,7 +187,7 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
                   </Grid.Col>
                   <Grid.Col span={6}>
                     <Select placeholder="请选择" getPopupContainer={(node) => node.parentNode as HTMLElement}>
-                      {sortOption.map((option) => (
+                      {sortOptions.map((option) => (
                         <Option key={option.value} value={option.value}>
                           {option.label}
                         </Option>

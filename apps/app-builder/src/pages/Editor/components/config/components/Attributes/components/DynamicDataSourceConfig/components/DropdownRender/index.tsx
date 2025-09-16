@@ -220,7 +220,7 @@ const DropdownRender: React.FC<DropdownRenderProps> = ({
                         onChange={(checked) => handleChildCheck(checked, child, option)}
                         className={styles.childCheckbox}
                       />
-                      <span className={styles.optionSpan}>{child.label}</span>
+                      <span className={styles.optionSpan}>{`${option.label}.${child.label}`}</span>
                       <div className={styles.operationDiv}>
                         {selected.includes(child.value) && hasEditLabel && (
                           <Popover

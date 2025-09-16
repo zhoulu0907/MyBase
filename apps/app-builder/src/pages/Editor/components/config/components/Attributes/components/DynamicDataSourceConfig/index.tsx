@@ -1,13 +1,12 @@
-import { Button, Checkbox, Dropdown, Form, Input, Select } from '@arco-design/web-react';
+import { Button, Form, Select } from '@arco-design/web-react';
 import React, { useEffect, useState } from 'react';
 
 import { useAppStore } from '@/store/store_app';
 import { getPageListByAppId } from '@onebase/app';
 import DataSelectionProcessConfig from './components/DataSelectionProcessConfig';
 import styles from './index.module.less';
-import { ReactSortable } from 'react-sortablejs';
-import SelectOptionDrag from './components/DropdownRender';
 import DropdownRender from './components/DropdownRender';
+import FillingRuleSettings from './components/FillingRuleSettings';
 
 const FormItem = Form.Item;
 const Option = Select.Option;
@@ -17,6 +16,18 @@ const ATTR_KEY = {
   DISPLAYFIELDS: 'displayFields',
   FILLFORMFIELD: 'fillFormField'
 };
+
+function countSelectedLeaf(selected: string[], options: any[]): number {
+  let count = 0;
+  for (const opt of options) {
+    if (opt.children) {
+      count += countSelectedLeaf(selected, opt.children);
+    } else if (selected.includes(opt.value)) {
+      count += 1;
+    }
+  }
+  return count;
+}
 
 // mock up
 const initialDisplayFieldOptions = [
@@ -32,8 +43,8 @@ const initialDisplayFieldOptions = [
     value: 'subTable',
     id: 8,
     children: [
-      { label: '子表单.成员单选', value: 'subTable.member', id: 81 },
-      { label: '子表单.图片', value: 'subTable.image', id: 82 }
+      { label: '成员单选', value: 'member', id: 81 },
+      { label: '图片', value: 'image', id: 82 }
     ]
   }
 ];
@@ -69,6 +80,8 @@ const DynamicDataSourceConfig: React.FC<DynamicSelectDataSourceConfigProps> = ({
     'submitter'
   ]);
 
+  const [ruleSettingVisible, setRuleSettingVisible] = useState(false); //填充规则设置popup
+
   useEffect(() => {
     curAppId && getPageList();
   }, [curAppId]);
@@ -103,8 +116,10 @@ const DynamicDataSourceConfig: React.FC<DynamicSelectDataSourceConfigProps> = ({
       })
       .filter(Boolean);
     handlePropsChange(ATTR_KEY.DISPLAYFIELDS, displayFields);
-    console.log(displayFields);
   };
+
+  // 获取叶子节点
+  const leafCount = countSelectedLeaf(selected, displayFieldOptions);
 
   return (
     <>
@@ -149,19 +164,11 @@ const DynamicDataSourceConfig: React.FC<DynamicSelectDataSourceConfigProps> = ({
             <FormItem layout="vertical" labelAlign="left" label={'数据选择后'} className={styles.formItem}>
               <FormItem layout="vertical" labelAlign="left" label={'显示在表单中'} className={styles.formItem}>
                 <Select
-                  mode="multiple"
                   value={selected}
                   onChange={setSelected}
                   placeholder="设置显示字段"
                   getPopupContainer={(node) => node.parentNode as HTMLElement}
-                  renderTag={({}, index, valueList) => {
-                    const tagCount = valueList.length;
-                    if (tagCount > 0) {
-                      return index === 0 ? (
-                        <span className={styles.fieldDisplaySpan}>{`显示 ${tagCount} 个字段`}</span>
-                      ) : null;
-                    }
-                  }}
+                  renderFormat={() => `显示 ${leafCount} 个字段`}
                   dropdownRender={() => (
                     <div className={styles.dropdownRender}>
                       <DropdownRender
@@ -177,7 +184,14 @@ const DynamicDataSourceConfig: React.FC<DynamicSelectDataSourceConfigProps> = ({
                 />
               </FormItem>
               <FormItem layout="vertical" labelAlign="left" label={'填充到表单字段'} className={styles.noMarginBottom}>
-                <Button long>填充规则设置</Button>
+                <Button long onClick={() => setRuleSettingVisible(true)}>
+                  填充规则设置
+                </Button>
+                <FillingRuleSettings
+                  visible={ruleSettingVisible}
+                  fieldOptions={initialDisplayFieldOptions}
+                  onCancel={() => setRuleSettingVisible(false)}
+                />
               </FormItem>
             </FormItem>
           </div>
