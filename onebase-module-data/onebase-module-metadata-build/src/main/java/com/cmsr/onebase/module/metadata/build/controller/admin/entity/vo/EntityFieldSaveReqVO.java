@@ -60,9 +60,6 @@ public class EntityFieldSaveReqVO {
     @Schema(description = "是否唯一：0-是，1-不是", example = "0")
     private Integer isUnique;
 
-    @Schema(description = "允许空值：0-是，1-不是", example = "1")
-    private Integer allowNull;
-
     @Schema(description = "排序顺序", example = "10")
     private Integer sortOrder;
 

@@ -48,9 +48,6 @@ public class EntityFieldRespDTO {
     @Schema(description = "是否唯一", example = "1")
     private Integer isUnique;
 
-    @Schema(description = "允许为空", example = "0")
-    private Integer allowNull;
-
     @Schema(description = "是否系统字段", example = "0")
     private Integer isSystemField;
 

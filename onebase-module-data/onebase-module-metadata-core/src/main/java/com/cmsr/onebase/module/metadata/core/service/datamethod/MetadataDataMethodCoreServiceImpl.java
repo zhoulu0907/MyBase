@@ -7,13 +7,11 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusin
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataDatasourceDO;
 // MetadataDataSystemMethodDO 已由查询功能迁移至 build 模块，核心仅保留运行时 CRUD
-import com.cmsr.onebase.module.metadata.core.dal.dataobject.method.MetadataMethodExcutePlanDO;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEntityCoreService;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataEntityFieldCoreService;
 import com.cmsr.onebase.module.metadata.core.service.datasource.MetadataDatasourceCoreService;
 import com.cmsr.onebase.module.metadata.core.dal.database.TemporaryDatasourceService;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.engine.MultiTableQueryEngine;
-import com.cmsr.onebase.module.metadata.core.service.datamethod.engine.MultiTableWriteEngine;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
 import com.cmsr.onebase.framework.security.core.util.SecurityFrameworkUtils;
 import jakarta.annotation.Resource;
@@ -62,13 +60,7 @@ public class MetadataDataMethodCoreServiceImpl implements MetadataDataMethodCore
     private TemporaryDatasourceService temporaryDatasourceService;
 
     @Resource
-    private MetadataMethodExcutePlanCoreService methodExcutePlanService;
-
-    @Resource
     private MultiTableQueryEngine multiTableQueryEngine;
-
-    @Resource
-    private MultiTableWriteEngine multiTableWriteEngine;
     // ========== 动态数据操作方法实现 ==========
     // ========== 动态数据操作方法实现 ==========
 
@@ -119,19 +111,7 @@ public class MetadataDataMethodCoreServiceImpl implements MetadataDataMethodCore
 
         Map<String, Object> resultData = queryDataByIdWithService(temporaryService, quoteTableName(entity.getTableName()), primaryKeyValue, fields);
 
-        // 9. 若存在写计划，处理子表写入
-        try {
-            String effectiveMethodCode = (methodCode != null && !methodCode.isEmpty()) ? methodCode : "metadata.data.create";
-            MetadataMethodExcutePlanDO plan = methodExcutePlanService.getEnabledByMethodCode(effectiveMethodCode);
-            if (plan != null && plan.getPlanJson() != null) {
-                Object pkVal = getPrimaryKeyValue(processedData, fields);
-                multiTableWriteEngine.afterPrimaryCreate(effectiveMethodCode, plan.getPlanJson(), entity, pkVal, data);
-            }
-        } catch (Exception ex) {
-            log.warn("multi-table write after create failed, continue to return primary", ex);
-        }
-
-        // 10. 构建响应
+        // 9. 构建响应（移除多表写入逻辑，直接返回结果）
         return buildDataResponse(entity, resultData, fields);
 
         }); // TenantUtils.executeIgnore 闭合
@@ -181,18 +161,7 @@ public class MetadataDataMethodCoreServiceImpl implements MetadataDataMethodCore
         // 11. 查询更新后的完整数据
         Map<String, Object> resultData = queryDataByIdWithService(temporaryService, quoteTableName(entity.getTableName()), id, fields);
 
-        // 12. 若存在写计划，处理子表替换式更新（按计划配置）
-        try {
-            String effectiveMethodCode = (methodCode != null && !methodCode.isEmpty()) ? methodCode : "metadata.data.update";
-            MetadataMethodExcutePlanDO plan = methodExcutePlanService.getEnabledByMethodCode(effectiveMethodCode);
-            if (plan != null && plan.getPlanJson() != null) {
-                multiTableWriteEngine.afterPrimaryUpdate(effectiveMethodCode, plan.getPlanJson(), entity, id, data);
-            }
-        } catch (Exception ex) {
-            log.warn("multi-table write after update failed, continue to return primary", ex);
-        }
-
-        // 13. 构建响应
+        // 12. 构建响应（移除多表写入逻辑，直接返回结果）
         return buildDataResponse(entity, resultData, fields);
 
         }); // TenantUtils.executeIgnore 闭合
@@ -246,34 +215,16 @@ public class MetadataDataMethodCoreServiceImpl implements MetadataDataMethodCore
             }
 
             boolean ok = deleteCount > 0;
-            if (ok) {
-                try {
-                    String effectiveMethodCode = (methodCode != null && !methodCode.isEmpty()) ? methodCode : "metadata.data.delete";
-                    MetadataMethodExcutePlanDO plan = methodExcutePlanService.getEnabledByMethodCode(effectiveMethodCode);
-                    if (plan != null && plan.getPlanJson() != null) {
-                        multiTableWriteEngine.afterPrimaryDelete(effectiveMethodCode, plan.getPlanJson(), entity, id);
-                    }
-                } catch (Exception ex) {
-                    log.warn("multi-table write after delete failed", ex);
-                }
-            }
+            // 移除多表写入逻辑，直接返回删除结果
             return ok;
         }); // TenantUtils.executeIgnore 闭合
     }
 
     @Override
     public Map<String, Object> getData(Long entityId, Object id, String methodCode) {
-        // 如果存在执行计划，则走多表引擎
-        String effectiveMethodCode = (methodCode != null && !methodCode.isEmpty())
-            ? methodCode : "metadata.data.get"; // 兼容占位
-        MetadataMethodExcutePlanDO plan = methodExcutePlanService.getEnabledByMethodCode(effectiveMethodCode);
-        if (plan != null && plan.getPlanJson() != null) {
-            return multiTableQueryEngine.queryOne(effectiveMethodCode, plan.getPlanJson(), String.valueOf(entityId), id, methodCode);
-        }
-
-        // 回落到单表
-    MetadataBusinessEntityDO entity = validateEntityExists(entityId);
-    List<MetadataEntityFieldDO> fields = getEntityFields(entityId);
+        // 移除多表查询逻辑，直接使用单表查询
+        MetadataBusinessEntityDO entity = validateEntityExists(entityId);
+        List<MetadataEntityFieldDO> fields = getEntityFields(entityId);
         MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceId());
         if (datasource == null) {
             throw exception(DATASOURCE_NOT_EXISTS);
@@ -293,17 +244,9 @@ public class MetadataDataMethodCoreServiceImpl implements MetadataDataMethodCore
     public PageResult<Map<String, Object>> getDataPage(Long entityId, Integer pageNo, Integer pageSize,
                                                        String sortField, String sortDirection,
                                                        Map<String, Object> filters, String methodCode) {
-        // 如果存在执行计划，则走多表引擎
-        String effectiveMethodCode = (methodCode != null && !methodCode.isEmpty())
-            ? methodCode : "metadata.data.page"; // 兼容占位
-        MetadataMethodExcutePlanDO plan = methodExcutePlanService.getEnabledByMethodCode(effectiveMethodCode);
-        if (plan != null && plan.getPlanJson() != null) {
-            return multiTableQueryEngine.queryPage(effectiveMethodCode, plan.getPlanJson(), String.valueOf(entityId), pageNo, pageSize, sortField, sortDirection, filters, methodCode);
-        }
-
-        // 回落到原单表分页
-    MetadataBusinessEntityDO entity = validateEntityExists(entityId);
-    List<MetadataEntityFieldDO> fields = getEntityFields(entityId);
+        // 移除多表查询逻辑，直接使用单表分页
+        MetadataBusinessEntityDO entity = validateEntityExists(entityId);
+        List<MetadataEntityFieldDO> fields = getEntityFields(entityId);
         MetadataDatasourceDO datasource = metadataDatasourceCoreService.getDatasource(entity.getDatasourceId());
         if (datasource == null) {
             throw exception(DATASOURCE_NOT_EXISTS);

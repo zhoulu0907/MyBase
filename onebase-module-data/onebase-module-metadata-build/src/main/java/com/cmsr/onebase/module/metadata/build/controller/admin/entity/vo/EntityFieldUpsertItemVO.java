@@ -51,9 +51,6 @@ public class EntityFieldUpsertItemVO {
     @Schema(description = "是否唯一：1-是，0-否", example = "1")
     private Integer isUnique;
 
-    @Schema(description = "允许空值：1-是，0-否", example = "1")
-    private Integer allowNull;
-
     @Schema(description = "排序顺序", example = "10")
     private Integer sortOrder;
 

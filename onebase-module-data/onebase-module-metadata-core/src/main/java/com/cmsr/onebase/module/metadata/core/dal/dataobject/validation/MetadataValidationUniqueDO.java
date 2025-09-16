@@ -38,9 +38,6 @@ public class MetadataValidationUniqueDO extends TenantBaseDO {
     private Long entityId;
     private Long fieldId;
     private Integer isEnabled;
-    private String uniqueScope;
-    private Integer ignoreNull;
-    private Integer caseSensitive;
     private String promptMessage;
     private Integer runMode;
     private Long appId;
