@@ -1,10 +1,11 @@
 import iconStart from '@/assets/flow/icon-start.jpg';
 import { nanoid } from 'nanoid';
 import { type FlowNodeRegistry } from '../../../typings';
+import { NodeType } from '../../const';
 import { formMeta } from './form-meta';
 
 export const ScriptNodeRegistry: FlowNodeRegistry = {
-  type: 'script',
+  type: NodeType.SCRIPT,
   title: '脚本节点',
   category: 'other',
   meta: {
@@ -13,12 +14,11 @@ export const ScriptNodeRegistry: FlowNodeRegistry = {
     selectable: true,
     copyDisable: false,
     expandable: false,
-    addDisable: false,
+    addDisable: false
   },
   info: {
     icon: iconStart,
-    description:
-    '这是脚本节点，用于执行脚本。',
+    description: '这是脚本节点，用于执行脚本。'
   },
   /**
    * Render node via formMeta
@@ -32,8 +32,8 @@ export const ScriptNodeRegistry: FlowNodeRegistry = {
       id: `script_${nanoid()}`,
       type: 'script',
       data: {
-        title: '脚本节点',
-      },
+        title: '脚本节点'
+      }
     };
-  },
+  }
 };

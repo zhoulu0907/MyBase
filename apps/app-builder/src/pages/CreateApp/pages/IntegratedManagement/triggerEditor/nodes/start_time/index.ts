@@ -1,9 +1,10 @@
 import iconStart from '@/assets/flow/icon-start.jpg';
 import { type FlowNodeRegistry } from '../../typings';
+import { NodeType } from '../const';
 import { formMeta } from './form-meta';
 
 export const StartTimeNodeRegistry: FlowNodeRegistry = {
-  type: 'start_time',
+  type: NodeType.START_TIME,
   title: '定时触发节点',
   category: 'trigger',
   meta: {

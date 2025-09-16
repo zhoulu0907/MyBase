@@ -1,5 +1,5 @@
-import { IconSettings, IconEyeInvisible } from '@arco-design/web-react/icon';
 import { Dropdown, Menu, Message, Tooltip, type FormInstance } from '@arco-design/web-react';
+import { IconEyeInvisible, IconSettings } from '@arco-design/web-react/icon';
 import { getPageSetId, RootParentPage, VisibleType, type GetPageSetIdReq } from '@onebase/app';
 import { EDITOR_TYPES } from '@onebase/ui-kit';
 import React, { useState } from 'react';
@@ -62,15 +62,17 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
 
   const dropList = (
     <Menu style={{ padding: '10px 5px', maxHeight: 'none' }}>
-      <MenuItem
-        key="edit"
-        onClick={(e) => {
-          e.stopPropagation();
-          handleEditPageSet();
-        }}
-      >
-        {'编辑'}
-      </MenuItem>
+      {!isGroup && (
+        <MenuItem
+          key="edit"
+          onClick={(e) => {
+            e.stopPropagation();
+            handleEditPageSet();
+          }}
+        >
+          {'编辑'}
+        </MenuItem>
+      )}
       <MenuItem
         key="rename"
         onClick={(e) => {

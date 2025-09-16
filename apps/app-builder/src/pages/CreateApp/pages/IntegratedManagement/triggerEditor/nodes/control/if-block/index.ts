@@ -1,10 +1,10 @@
-
 import iconIf from '@/assets/flow/icon-if.png';
 import { type FlowNodeRegistry } from '../../../typings';
+import { NodeType } from '../../const';
 import { formMeta } from './form-meta';
 
 export const IFBlockNodeRegistry: FlowNodeRegistry = {
-  type: 'ifBlock',
+  type: NodeType.IF_BLOCK,
   title: '条件分支节点',
   category: 'control',
   /**
@@ -20,14 +20,14 @@ export const IFBlockNodeRegistry: FlowNodeRegistry = {
     style: {
       width: 66,
       height: 20,
-      borderRadius: 4,
-    },
+      borderRadius: 4
+    }
   },
   info: {
     icon: iconIf,
-    description: '',
+    description: ''
   },
   canAdd: () => false,
   canDelete: (ctx, node) => false,
-  formMeta,
+  formMeta
 };

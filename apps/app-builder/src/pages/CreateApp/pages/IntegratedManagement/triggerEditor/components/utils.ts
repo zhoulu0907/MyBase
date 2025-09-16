@@ -26,7 +26,7 @@ const getBlockNode = (curNodeId: string, blocks: FlowNodeJSON[]): FlowNodeJSON[]
     if (ele.blocks?.length) {
       const hasCurNode = judge(curNodeId, ele.blocks);
       if (hasCurNode) {
-        if (ele.type === 'dataQuery' || ele.type === 'dataQueryMultiple') {
+        if (ele.type === 'dataQueryMultiple') {
           blockNode.push(ele);
         }
         const newBlocks = getBlockNode(curNodeId, ele.blocks);
@@ -58,7 +58,7 @@ export function getBeforeCurNodes(curNodeId: string, allNodes: FlowNodeJSON[]): 
         nodes.push.apply(nodes, blocks);
       }
     }
-    if (ele.type === 'dataQuery' || ele.type === 'dataQueryMultiple') {
+    if (ele.type === 'dataQueryMultiple') {
       nodes.push(ele);
     }
   }
