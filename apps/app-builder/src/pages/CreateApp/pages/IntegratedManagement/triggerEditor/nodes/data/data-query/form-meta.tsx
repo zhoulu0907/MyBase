@@ -82,13 +82,16 @@ export const renderForm = () => {
 
   // 数据源变更  更新排序字段下拉列表，清除已选择排序字段 判断DATA_SOURCE_TYPE.DATA_NODE 绑定源节点nodeId
   const dataSourceChange = async (value: string) => {
+    // 判断源节点
+    const originNodeData = triggerEditorSignal.nodeData.value[value];
+    const originNodeId = originNodeData?.dataSourceOriginNodeId || value
     payloadForm.clearFields(['sortBy']);
     setConditionFields([]);
     setValidationTypes([]);
     const nodeData = triggerEditorSignal.nodeData.value[node.id];
     triggerEditorSignal.setNodeData(node.id, {
       ...nodeData,
-      dataSourceOriginNodeId: dataType === DATA_SOURCE_TYPE.DATA_NODE ? value : undefined,
+      dataSourceOriginNodeId: dataType === DATA_SOURCE_TYPE.DATA_NODE ? originNodeId : undefined,
       sortBy: [] // 清除已选择排序字段
     });
     // 根据数据源重新获取字段列表
@@ -131,7 +134,7 @@ export const renderForm = () => {
       const newEntityList = getBeforeCurNodes(node.id, nodes);
       setEntityList(
         newEntityList.map((item) => {
-          return { entityName: item?.data?.title, entityId: item.id };
+          return { entityName: item.data?.title, entityId: item.id };
         })
       );
     } else if (dataType === DATA_SOURCE_TYPE.ASSOCIA_FORM) {
@@ -171,6 +174,9 @@ export const renderForm = () => {
     } else if (dataType === DATA_SOURCE_TYPE.DATA_NODE) {
       // 从数据节点中查询  DATA_NODE
       const nodeData = triggerEditorSignal.nodeData.value[dataSource];
+      if(!nodeData.dataSource){
+        return;
+      }
       const res = await getEntityFields({ entityId: nodeData.dataSource });
       const filedIds: string[] = [];
       const newConditionFields: ConfitionField[] = [];
