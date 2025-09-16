@@ -78,8 +78,8 @@ export enum DATA_SOURCE_TYPE {
 
 // 查询规则  全部数据、按条件过滤
 export enum FILTER_TYPE {
-  ALL = 0,
-  CONDITION = 1
+  ALL = 'all',
+  CONDITION = 'condition'
 }
 
 // 表类型  主表 子表
