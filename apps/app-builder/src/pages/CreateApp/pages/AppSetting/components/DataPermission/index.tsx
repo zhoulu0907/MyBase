@@ -11,11 +11,13 @@ import {
   // type UpdateDataGroupPermissionReq,
   type AppEntities,
   type AppEntity,
-  type AppEntityField,
+  // type AppEntityField,
   type AuthDataGroupVO,
   type AuthDataPermissionPersonVO,
-  type FilterFieldCheckType,
-  type GetPermissionReq
+  // type FilterFieldCheckType,
+  type GetPermissionReq,
+  type EntityFieldValidationTypes,
+  type ConfitionField
 } from '@onebase/app';
 import { useEffect, useState, type FC } from 'react';
 import DataPermissionModal from './components/DataPermissionModal';
@@ -60,9 +62,9 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
   // const [form] = Form.useForm();
   const [status, setStatus] = useState<'create' | 'edit'>('create');
   const [appEntities, setAppEntities] = useState<AppEntity[]>([]);
-  const [appEntityFields, setAppEntityFields] = useState<AppEntityField[]>([]);
+  const [appEntityFields, setAppEntityFields] = useState<ConfitionField[]>([]);
   const [dataPermissionPerson, setDataPermissionPerson] = useState<AuthDataPermissionPersonVO[]>([]);
-  const [filterFieldCheckType, setFilterFieldCheckType] = useState<FilterFieldCheckType[]>([]);
+  const [filterFieldCheckType, setFilterFieldCheckType] = useState<EntityFieldValidationTypes[]>([]);
 
   const [modalVisible, setModelVisible] = useState<boolean>(false);
 
@@ -113,7 +115,7 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
     getDataPermissionRoles(params);
   };
 
-  // 获取数据权限数据字典
+  // 获取数据权限数据字段
   const getDataPermissionFields = async (params: { entityId: string }) => {
     try {
       const entityFieldsResq = await getEntityFields({ entityId: params.entityId, isSystemField: 0 });
@@ -122,6 +124,12 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
       entityFieldsResq.forEach((field: any) => {
         field.fieldId = field.id;
       });
+      // 批量获取字段可选校验类型
+      const getFieldCheckTypeParams: string[] = [];
+      entityFieldsResq.forEach((item: any) => {
+        getFieldCheckTypeParams.push(item.fieldId);
+      });
+      getFieldCheckType(getFieldCheckTypeParams);
       setAppEntityFields(entityFieldsResq);
       console.log('setEntityFields', appEntityFields);
     } catch (error) {
@@ -147,11 +155,10 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
       console.error('获取数据权限角色失败', error);
     }
   };
-  // 根据选择字段获取可选校验类型
-  const getFieldCheckType = async (fieldId: string) => {
-    const fieldCheckTypeResq = await getFieldCheckTypeApi([fieldId]);
-    console.log('根据选择字段获取校验类型 fieldCheckTypeResq', fieldCheckTypeResq[0].validationTypes);
-    setFilterFieldCheckType(fieldCheckTypeResq[0].validationTypes);
+  // 批量获取字段可选校验类型
+  const getFieldCheckType = async (fieldIds: string[]) => {
+    const fieldCheckTypeResq = await getFieldCheckTypeApi(fieldIds);
+    setFilterFieldCheckType(fieldCheckTypeResq);
   };
 
   const handleModalSubmit = async (values?: AuthDataGroupVO) => {
@@ -250,7 +257,6 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
         appEntityFields={appEntityFields}
         filterFieldCheckType={filterFieldCheckType}
         changeEntity={changeEntity}
-        getFieldCheckType={getFieldCheckType}
         handleModalSubmit={(values: AuthDataGroupVO) => handleModalSubmit(values)}
         handleModalCancel={() => handleModalCancel()}
       />

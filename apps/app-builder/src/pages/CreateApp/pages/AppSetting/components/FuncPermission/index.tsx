@@ -220,6 +220,7 @@ const FuncPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
           )}
         </div>
       </div>
+      <div></div>
     </Form>
   );
 };

@@ -51,7 +51,9 @@ const TenantPage: React.FC = () => {
       });
 
       Message.success('租户名称更新成功');
-    } catch (error) {}
+    } catch (error) {
+      console.error('更新租户信息失败', error);
+    }
   };
 
   const secretIconStyle = { cursor: 'pointer', marginLeft: '8px', color: 'rgb(78, 89, 105)' };
@@ -125,11 +127,11 @@ const TenantPage: React.FC = () => {
                 <div className={styles.sectionBody}>
                   <div className={styles.descriptionItem}>
                     <Text type="secondary">创建人：</Text>
-                    <Text>{tenantInfo.contactName}</Text>
+                    <Text>{tenantInfo.adminNickName || '-'}</Text>
                   </div>
                   <div className={styles.descriptionItem}>
                     <Text type="secondary">创建时间：</Text>
-                    <Text>{dayjs(tenantInfo.createTime).format('YYYY-MM-DD HH:mm:ss')}</Text>
+                    <Text>{dayjs(tenantInfo.createTime).format('YYYY-MM-DD HH:mm:ss') || '-'}</Text>
                   </div>
                 </div>
               </div>
@@ -138,7 +140,9 @@ const TenantPage: React.FC = () => {
             <div className={styles.statsSection}>
               <div className={styles.statCard}>
                 <div className={styles.statLabel}>用户人数</div>
-                <div className={styles.statValue}>{tenantInfo.accountCount}</div>
+                <div className={styles.statValue}>
+                  {tenantInfo.existUserCount} / {tenantInfo.accountCount}
+                </div>
               </div>
               <div className={styles.statCard}>
                 <div className={styles.statLabel}>应用数量</div>
