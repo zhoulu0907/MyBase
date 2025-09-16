@@ -20,14 +20,6 @@
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-common</artifactId>
         </dependency>
-
-        <!-- Web 相关 -->
-        <dependency>
-            <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-spring-boot-starter-web</artifactId>
-            <scope>provided</scope> <!-- 设置为 provided，只有 OncePerRequestFilter 使用到 -->
-        </dependency>
-
         <!-- Aynline 相关 -->
         <dependency>
             <groupId>org.anyline</groupId>
@@ -48,6 +40,10 @@
         <dependency>
             <groupId>org.anyline</groupId>
             <artifactId>anyline-data-jdbc-h2</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jdbc</artifactId>
         </dependency>
         <!-- DB 相关 -->
         <dependency>
@@ -86,24 +82,7 @@
             <optional>true</optional>
         </dependency>
 
-        <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>druid-spring-boot-3-starter</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.baomidou</groupId>
-            <artifactId>dynamic-datasource-spring-boot3-starter</artifactId> <!-- 多数据源 -->
-            <exclusions>
-                <exclusion>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-starter-undertow</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <!--        <dependency>-->
-        <!--            <groupId>com.fhs-opensource</groupId> &lt;!&ndash; VO 数据翻译 &ndash;&gt;-->
-        <!--            <artifactId>easy-trans-spring-boot-starter</artifactId>-->
-        <!--        </dependency>-->
+
     </dependencies>
 
 </project>
