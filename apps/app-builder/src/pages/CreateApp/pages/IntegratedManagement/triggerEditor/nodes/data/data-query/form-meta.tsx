@@ -141,6 +141,8 @@ export const renderForm = () => {
       // 从关联表单中查询  ASSOCIA_FORM
     } else if (dataType === DATA_SOURCE_TYPE.SUBFORM) {
       // 从子表中查询  SUBFORM
+      const res = await getEntityListByApp(curAppId);
+      setMainEntityList(res);
     }
   };
   // 获取排序字段下拉列表
@@ -203,8 +205,28 @@ export const renderForm = () => {
       // 从关联表单中查询  ASSOCIA_FORM
     } else if (dataType === DATA_SOURCE_TYPE.SUBFORM) {
       // 从子表中查询  SUBFORM
-      const res = await getEntityListByApp(curAppId);
-      setMainEntityList(res);
+      const res = await getEntityFields({ entityId: dataSource });
+      const filedIds: string[] = [];
+      const newConditionFields: ConfitionField[] = [];
+      const fieldOptions: SelectOption[] = [];
+      res.forEach((item: any) => {
+        fieldOptions.push({
+          label: item.displayName,
+          value: item.id
+        });
+        filedIds.push(item.id);
+        newConditionFields.push({
+          label: item.displayName,
+          value: item.id,
+          fieldType: item.fieldType
+        });
+      });
+      setConditionFields(newConditionFields);
+      if (filedIds?.length) {
+        const newValidationTypes = await getFieldCheckTypeApi(filedIds);
+        console.log('validationTypes: ', newValidationTypes);
+        setValidationTypes(newValidationTypes);
+      }
     }
   };
 
