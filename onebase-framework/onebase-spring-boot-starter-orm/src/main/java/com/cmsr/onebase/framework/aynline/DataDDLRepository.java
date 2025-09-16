@@ -19,9 +19,9 @@ import java.util.List;
  */
 @Slf4j
 public class DataDDLRepository {
+
     @Resource
     private AnylineService<?> anylineService;
-
 
     public DataDDLRepository() {
     }

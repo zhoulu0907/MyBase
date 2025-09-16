@@ -72,6 +72,9 @@ public class UserInsertReqVO {
     @DiffLogField(name = "管理员类型")
     private Integer adminType;
 
+    @Schema(description = "状态", example = "1")
+    private Integer status;
+
     @Schema(description = "角色Ids", example = "[1,2]")
     private Set<Long> roleIds;
 
