@@ -22,5 +22,4 @@ public interface DictDataCommonApi {
     @Operation(summary = "获得指定字典类型的字典数据列表")
     @Parameter(name = "dictType", description = "字典类型", example = "SEX", required = true)
     CommonResult<List<DictDataRespDTO>> getDictDataList(@RequestParam("dictType") String dictType);
-
 }
