@@ -41,7 +41,7 @@ const getBlockNode = (curNodeId: string, blocks: FlowNodeJSON[]): FlowNodeJSON[]
   return blockNode;
 };
 
-export function getBeforeCurNodes(curNodeId: string, allNodes: FlowNodeJSON[]): FlowNodeJSON[] {
+export function getBeforeCurQueryNodes(curNodeId: string, allNodes: FlowNodeJSON[]): FlowNodeJSON[] {
   // 获取当前节点前并且是数据查询节点的数据
   // 条件节点  blocks
   let nodes: FlowNodeJSON[] = [];
@@ -57,7 +57,7 @@ export function getBeforeCurNodes(curNodeId: string, allNodes: FlowNodeJSON[]): 
         const blocks = getBlockNode(curNodeId, ele.blocks);
         nodes.push.apply(nodes, blocks);
       } else {
-        const blocks = getBeforeCurNodes(curNodeId, ele.blocks);
+        const blocks = getBeforeCurQueryNodes(curNodeId, ele.blocks);
         nodes.push.apply(nodes, blocks);
       }
     }

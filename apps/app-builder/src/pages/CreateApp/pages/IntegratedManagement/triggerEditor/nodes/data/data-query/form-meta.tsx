@@ -20,7 +20,7 @@ import { useEffect, useState } from 'react';
 import ConditionEditor from '../../../components/condition-editor';
 import SortByEditor from '../../../components/sortby-editor';
 import { useAppStore } from '@/store/store_app';
-import { getBeforeCurNodes } from '../../../components/utils';
+import { getBeforeCurQueryNodes } from '../../../components/utils';
 
 export const renderForm = () => {
   const isSidebar = useIsSidebar();
@@ -131,7 +131,7 @@ export const renderForm = () => {
     } else if (dataType === DATA_SOURCE_TYPE.DATA_NODE) {
       // 从数据节点中查询  DATA_NODE  dataSourceOriginNodeId
       const nodes = triggerEditorSignal.nodes.value;
-      const newEntityList = getBeforeCurNodes(node.id, nodes);
+      const newEntityList = getBeforeCurQueryNodes(node.id, nodes);
       setEntityList(
         newEntityList.map((item) => {
           return { entityName: item.data?.title, entityId: item.id };
