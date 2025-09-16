@@ -10,6 +10,7 @@ import {
   getFieldCheckTypeApi,
   DATA_SOURCE_TYPE,
   FILTER_TYPE,
+  getEntityFieldsWithChildren,
   type SelectOption,
   type MetadataEntityPair,
   type ConfitionField,
@@ -30,9 +31,11 @@ export const renderForm = () => {
   const dataType = Form.useWatch('dataType', payloadForm);
   const dataSource = Form.useWatch('dataSource', payloadForm);
   const filterType = Form.useWatch('filterType', payloadForm);
+  const mainDataSource = Form.useWatch('mainDataSource', payloadForm);
 
   // 数据源选择
   const [entityList, setEntityList] = useState<MetadataEntityPair[]>([]);
+  const [mainEntityList, setMainEntityList] = useState<MetadataEntityPair[]>([]);
   // 查询规则
   const [validationTypes, setValidationTypes] = useState<EntityFieldValidationTypes[]>([]);
   const [conditionFields, setConditionFields] = useState<ConfitionField[]>([]);
@@ -49,13 +52,19 @@ export const renderForm = () => {
       clearDataSourceOriginNodeId();
     }
   }, [dataSource]);
+  useEffect(() => {
+    if (mainDataSource) {
+      mainDataSourceChange(mainDataSource);
+      clearDataSourceOriginNodeId();
+    }
+  }, [mainDataSource]);
 
   /**
    * 获取方式变更
    * 更新数据源下拉列表，清除已选择数据源
    * 清除排序字段下拉列表，清除已选择排序字段
    */
-  const dataTypeChange = async (value: number | string) => {
+  const dataTypeChange = async (value: number) => {
     payloadForm.clearFields(['dataSource', 'sortBy']);
     const nodeData = triggerEditorSignal.nodeData.value[node.id];
     triggerEditorSignal.setNodeData(node.id, {
@@ -65,8 +74,11 @@ export const renderForm = () => {
       sortBy: [] // 清除已选择排序字段
     });
     setEntityList([]);
+    setMainEntityList([]);
+    setConditionFields([]);
+    setValidationTypes([]);
     if (value) {
-      getEntityList(value);
+      getEntityList();
     }
   };
 
@@ -74,6 +86,7 @@ export const renderForm = () => {
   const dataSourceChange = async (value: string) => {
     payloadForm.clearFields(['sortBy']);
     setConditionFields([]);
+    setValidationTypes([]);
     const nodeData = triggerEditorSignal.nodeData.value[node.id];
     triggerEditorSignal.setNodeData(node.id, {
       ...nodeData,
@@ -82,11 +95,32 @@ export const renderForm = () => {
     });
     // 根据数据源重新获取字段列表
     if (value) {
-      getFieldList(dataType, value);
+      getFieldList();
     }
   };
+  const mainDataSourceChange = async (value: string) => {
+    payloadForm.clearFields(['dataSource', 'sortBy']);
+    const nodeData = triggerEditorSignal.nodeData.value[node.id];
+    triggerEditorSignal.setNodeData(node.id, {
+      ...nodeData,
+      dataSource: undefined, // null 和 '' 在 Select 中都被认为是值
+      dataSourceOriginNodeId: undefined,
+      sortBy: [] // 清除已选择排序字段
+    });
+    setEntityList([]);
+    setConditionFields([]);
+    setValidationTypes([]);
+    const res = await getEntityFieldsWithChildren(value);
+    const newEntityList = (res.childEntities || []).map((item: any) => {
+      return {
+        entityId: item.childEntityId,
+        entityName: item.childEntityName
+      };
+    });
+    setEntityList(newEntityList);
+  };
   // 获取数据源列表
-  const getEntityList = async (dataType: number | string) => {
+  const getEntityList = async () => {
     // todo  判断
     if (dataType === DATA_SOURCE_TYPE.FORM) {
       // 从表单中查询  FORM
@@ -108,7 +142,7 @@ export const renderForm = () => {
     }
   };
   // 获取排序字段下拉列表
-  const getFieldList = async (dataType: number | string, dataSource: string) => {
+  const getFieldList = async () => {
     // 根据数据源 查询指定实体的字段列表
     // todo 根据不同获取方式走不同接口
     if (dataType === DATA_SOURCE_TYPE.FORM) {
@@ -164,6 +198,8 @@ export const renderForm = () => {
       // 从关联表单中查询  ASSOCIA_FORM
     } else if (dataType === DATA_SOURCE_TYPE.SUBFORM) {
       // 从子表中查询  SUBFORM
+      const res = await getEntityListByApp(curAppId);
+      setMainEntityList(res);
     }
   };
 
@@ -213,25 +249,61 @@ export const renderForm = () => {
                 <Radio value={DATA_SOURCE_TYPE.SUBFORM}>从子表中查询</Radio>
               </Radio.Group>
             </Form.Item>
-            <Grid.Row>
-              <Grid.Col span={1} style={{ textAlign: 'center', lineHeight: '32px' }}>
-                从
-              </Grid.Col>
-              <Grid.Col span={19}>
-                <Form.Item field="dataSource">
-                  <Select allowClear>
-                    {entityList.map((item) => (
-                      <Select.Option key={item.entityId} value={item.entityId}>
-                        {item.entityName}
-                      </Select.Option>
-                    ))}
-                  </Select>
-                </Form.Item>
-              </Grid.Col>
-              <Grid.Col span={4} style={{ textAlign: 'center', lineHeight: '32px' }}>
-                <span>中查询数据</span>
-              </Grid.Col>
-            </Grid.Row>
+            {dataType === DATA_SOURCE_TYPE.SUBFORM ? (
+              <Grid.Row>
+                <Grid.Col span={1} style={{ textAlign: 'center', lineHeight: '32px' }}>
+                  从
+                </Grid.Col>
+                <Grid.Col span={9}>
+                  <Form.Item field="mainDataSource">
+                    <Select allowClear>
+                      {mainEntityList.map((item) => (
+                        <Select.Option key={item.entityId} value={item.entityId}>
+                          {item.entityName}
+                        </Select.Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                </Grid.Col>
+                <Grid.Col span={1} style={{ textAlign: 'center', lineHeight: '32px' }}>
+                  的
+                </Grid.Col>
+                <Grid.Col span={9}>
+                  <Form.Item field="dataSource">
+                    <Select allowClear>
+                      {entityList.map((item) => (
+                        <Select.Option key={item.entityId} value={item.entityId}>
+                          {item.entityName}
+                        </Select.Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                </Grid.Col>
+                <Grid.Col span={4} style={{ textAlign: 'center', lineHeight: '32px' }}>
+                  <span>中查询数据</span>
+                </Grid.Col>
+              </Grid.Row>
+            ) : (
+              <Grid.Row>
+                <Grid.Col span={1} style={{ textAlign: 'center', lineHeight: '32px' }}>
+                  从
+                </Grid.Col>
+                <Grid.Col span={19}>
+                  <Form.Item field="dataSource">
+                    <Select allowClear>
+                      {entityList.map((item) => (
+                        <Select.Option key={item.entityId} value={item.entityId}>
+                          {item.entityName}
+                        </Select.Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                </Grid.Col>
+                <Grid.Col span={4} style={{ textAlign: 'center', lineHeight: '32px' }}>
+                  <span>中查询数据</span>
+                </Grid.Col>
+              </Grid.Row>
+            )}
             <Form.Item label="查询规则" field="filterType" required>
               <Radio.Group>
                 <Radio value={FILTER_TYPE.ALL}>全部数据</Radio>
