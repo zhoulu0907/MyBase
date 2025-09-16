@@ -1,9 +1,21 @@
-import React, { useCallback, useEffect, useRef, useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { debounce, sample } from 'lodash-es';
+import {
+  Avatar,
+  Button,
+  Divider,
+  Form,
+  Input,
+  Message,
+  Modal,
+  Pagination,
+  Select,
+  Spin,
+  Tag
+} from '@arco-design/web-react';
+import { IconCheckCircle, IconEmpty, IconLeft, IconSearch } from '@arco-design/web-react/icon';
 import dayjs from 'dayjs';
-import { Avatar, Divider, Form, Input, Message, Modal, Pagination, Select, Spin, Tag } from '@arco-design/web-react';
-import { IconCheckCircle, IconSearch, IconLeft, IconEmpty } from '@arco-design/web-react/icon';
+import { debounce, sample } from 'lodash-es';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { useI18n } from '@/hooks/useI18n';
 import { useAppStore } from '@/store/store_app';
@@ -13,21 +25,21 @@ import {
   listApplication,
   type Application,
   type CreateApplicationReq,
+  type DatasourceSaveReqDTO,
   type DeleteApplicationReq,
-  type ListApplicationReq,
-  type DatasourceSaveReqDTO
+  type ListApplicationReq
 } from '@onebase/app';
 
-import CreateApp from '@/components/CreateApp';
-import CreateDataSource, { type DataSourceHandle } from '@/components/CreateDataSource';
-import { type Options } from '@/components/CreateApp/const';
-import { PermissionButton as Button } from '@/components/PermissionControl';
-import { TENANT_DEPT_PERMISSION as ACTIONS } from '@/constants/permission';
-import { hasPermission, UserPermissionManager } from '@/utils/permission';
 import appDeleteSVG from '@/assets/images/app_delete.svg';
 import appEditSVG from '@/assets/images/edit_page_name_icon.svg';
 import emptyApplicationSVG from '@/assets/images/empty_application.svg';
 import plusSVG from '@/assets/images/plus_icon.svg';
+import CreateApp from '@/components/CreateApp';
+import { appIcon, type Options } from '@/components/CreateApp/const';
+import CreateDataSource, { type DataSourceHandle } from '@/components/CreateDataSource';
+import { PermissionButton } from '@/components/PermissionControl';
+import { TENANT_DEPT_PERMISSION as ACTIONS } from '@/constants/permission';
+import { hasPermission, UserPermissionManager } from '@/utils/permission';
 import {
   appOptions,
   avatarBgColor,
@@ -37,7 +49,6 @@ import {
   statusOptions,
   TagColor
 } from './const';
-import { appIcon } from '@/components/CreateApp/const';
 import styles from './index.module.less';
 
 const Option = Select.Option;
@@ -234,17 +245,18 @@ const MyAppPage: React.FC = () => {
           Hi {UserPermissionManager.getUserPermissionInfo()?.user.nickname || '用户'}
           ，您好！
         </div>
-        <Button
+
+        <PermissionButton
           permission={ACTIONS.CREATE}
           type="default"
           size="large"
-          icon={<img src={plusSVG} alt='create application' />}
+          icon={<img src={plusSVG} alt="create application" />}
           className={styles.createAppButton}
           onClick={() => setCreateVisible(true)}
           style={{ color: 'rgb(var(--primary-6))' }}
         >
           {t('myApp.createApp')}
-        </Button>
+        </PermissionButton>
       </div>
 
       <div className={styles.myAppContainer}>
@@ -252,7 +264,7 @@ const MyAppPage: React.FC = () => {
           <div
             className={styles.myAppFilter}
             style={{
-              pointerEvents: applicationEmpty ? 'none' : 'unset'
+              pointerEvents: applicationEmpty ? 'auto' : 'unset'
             }}
           >
             <Input

@@ -40,14 +40,21 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       if (addType == FLOW_ENTITY_TYPE.MAIN_ENTITY) {
         console.log('mainEntities.value: ', mainEntities.value);
         setEntityList(mainEntities.value);
-        payloadForm.clearFields('entityId');
       } else {
-        console.log('subEntities.value: ', subEntities.value);
         setEntityList(subEntities.value);
-        payloadForm.clearFields('entityId');
       }
     }
   }, [addType]);
+
+  useEffect(() => {
+    if (payloadForm.getFieldValue('entityId')) {
+      setFieldDataList(
+        [...mainEntities.value, ...subEntities.value].find(
+          (item) => item.entityId === payloadForm.getFieldValue('entityId')
+        )?.fields || []
+      );
+    }
+  }, [payloadForm]);
 
   return (
     <>
@@ -80,12 +87,13 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                 <Select
                   style={{ width: '100%' }}
                   onChange={(value) => {
-                    console.log('value: ', value);
                     [...mainEntities.value, ...subEntities.value].forEach((item) => {
                       if (item.entityId === value) {
                         setFieldDataList(item.fields);
                       }
                     });
+
+                    payloadForm.clearFields('fieldList');
                   }}
                 >
                   {entityList?.map((item) => (
@@ -96,6 +104,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                 </Select>
               </Form.Item>
             </Grid.Row>
+
             <Grid.Row>
               <Form.Item label="新增数据" field="batchType" rules={[{ required: true, message: '请选择新增数据' }]}>
                 <RadioGroup>
@@ -107,7 +116,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
             <Grid.Row>
               <Form.Item label="字段设置" field="fields">
-                <FieldEditor fieldList={fieldDataList} />
+                <FieldEditor fieldList={fieldDataList} form={payloadForm} />
               </Form.Item>
             </Grid.Row>
           </Form>

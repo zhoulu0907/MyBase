@@ -1,23 +1,23 @@
-
 import { FlowNodeSplitType } from '@flowgram.ai/fixed-layout-editor';
 import { nanoid } from 'nanoid';
 
 import iconCondition from '@/assets/flow/icon-condition.svg';
 import { type FlowNodeRegistry } from '../../../typings';
+import { NodeType } from '../../const';
 import { defaultFormMeta } from '../../default-form-meta';
 
 export const SwitchNodeRegistry: FlowNodeRegistry = {
   extend: FlowNodeSplitType.DYNAMIC_SPLIT,
-  type: 'switch',
+  type: NodeType.SWITCH,
   title: '分支节点',
   category: 'control',
   info: {
     icon: iconCondition,
     description:
-      'Connect multiple downstream branches. Only the corresponding branch will be executed if the set conditions are met.',
+      'Connect multiple downstream branches. Only the corresponding branch will be executed if the set conditions are met.'
   },
   meta: {
-    expandable: false, // disable expanded
+    expandable: false // disable expanded
   },
   formMeta: defaultFormMeta,
   onAdd() {
@@ -25,7 +25,7 @@ export const SwitchNodeRegistry: FlowNodeRegistry = {
       id: `switch_${nanoid(5)}`,
       type: 'switch',
       data: {
-        title: '分支节点',
+        title: '分支节点'
       },
       blocks: [
         {
@@ -34,19 +34,19 @@ export const SwitchNodeRegistry: FlowNodeRegistry = {
           data: {
             title: '分支_0',
             inputsValues: {
-              condition: { type: 'constant', content: '' },
+              condition: { type: 'constant', content: '' }
             },
             inputs: {
               type: 'object',
               required: ['condition'],
               properties: {
                 condition: {
-                  type: 'boolean',
-                },
-              },
-            },
+                  type: 'boolean'
+                }
+              }
+            }
           },
-          blocks: [],
+          blocks: []
         },
         {
           id: nanoid(5),
@@ -54,28 +54,28 @@ export const SwitchNodeRegistry: FlowNodeRegistry = {
           data: {
             title: '分支_1',
             inputsValues: {
-              condition: { type: 'constant', content: '' },
+              condition: { type: 'constant', content: '' }
             },
             inputs: {
               type: 'object',
               required: ['condition'],
               properties: {
                 condition: {
-                  type: 'boolean',
-                },
-              },
-            },
-          },
+                  type: 'boolean'
+                }
+              }
+            }
+          }
         },
         {
           id: nanoid(5),
           type: 'caseDefault',
           data: {
-            title: '默认分支',
+            title: '默认分支'
           },
-          blocks: [],
-        },
-      ],
+          blocks: []
+        }
+      ]
     };
-  },
+  }
 };

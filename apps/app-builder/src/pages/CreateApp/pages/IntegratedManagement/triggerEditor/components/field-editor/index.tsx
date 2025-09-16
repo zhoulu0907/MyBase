@@ -1,10 +1,11 @@
-import { Button, Form, Grid, Input, Select } from '@arco-design/web-react';
+import { Button, Form, Grid, Input, Select, type FormInstance } from '@arco-design/web-react';
 import { IconDelete, IconPlus } from '@arco-design/web-react/icon';
 import type { AppEntityField } from '@onebase/app';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
 
 export interface FieldEditorProps {
+  form: FormInstance;
   fieldList: AppEntityField[];
 }
 
@@ -13,14 +14,16 @@ const valueTypeOptions = [
   { label: '变量', value: 'variable' }
 ];
 
-const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList }) => {
+const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList, form }) => {
+  const [selectedFields, setSelectedFields] = useState<any[]>();
+
+  useEffect(() => {
+    setSelectedFields(form.getFieldValue('fieldList'));
+  }, [form, fieldList]);
+
   return (
     <div className={styles.conditionWrapper}>
-      <Form.Item
-        onChange={(value) => {
-          console.log(value);
-        }}
-      >
+      <Form.Item>
         <Form.List field="fieldList">
           {(fields, { add, remove }) => {
             return (
@@ -31,7 +34,14 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList }) => {
                       <Grid.Col span={6}>
                         <Form.Item field={item.field + '.fieldId'}>
                           <Select
-                            options={fieldList.map((item) => ({ label: item.displayName, value: item.fieldId }))}
+                            options={fieldList.map((field) => ({
+                              label: field.displayName,
+                              value: field.fieldId,
+                              disabled: selectedFields?.some((f) => f?.fieldId === field.fieldId)
+                            }))}
+                            onChange={(_value) => {
+                              setSelectedFields(form.getFieldValue('fieldList'));
+                            }}
                           />
                         </Form.Item>
                       </Grid.Col>
@@ -49,7 +59,14 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList }) => {
                         </Form.Item>
                       </Grid.Col>
                       <Grid.Col span={2}>
-                        <Button type="text" icon={<IconDelete />} onClick={() => remove(index)} />
+                        <Button
+                          type="text"
+                          icon={<IconDelete />}
+                          onClick={() => {
+                            remove(index);
+                            setSelectedFields(form.getFieldValue('fieldList'));
+                          }}
+                        />
                       </Grid.Col>
                     </Grid.Row>
                   );

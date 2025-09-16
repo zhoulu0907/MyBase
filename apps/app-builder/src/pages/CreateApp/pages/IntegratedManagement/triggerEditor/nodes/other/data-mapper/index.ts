@@ -1,10 +1,11 @@
 import iconStart from '@/assets/flow/icon-start.jpg';
 import { nanoid } from 'nanoid';
 import { type FlowNodeRegistry } from '../../../typings';
+import { NodeType } from '../../const';
 import { formMeta } from './form-meta';
 
 export const DataMapperNodeRegistry: FlowNodeRegistry = {
-  type: 'dataMapper',
+  type: NodeType.DATA_MAPPER,
   title: '数据映射节点',
   category: 'other',
   meta: {
@@ -13,12 +14,11 @@ export const DataMapperNodeRegistry: FlowNodeRegistry = {
     selectable: true,
     copyDisable: false,
     expandable: false,
-    addDisable: false,
+    addDisable: false
   },
   info: {
     icon: iconStart,
-    description:
-    '这是数据映射节点，用于映射数据。',
+    description: '这是数据映射节点，用于映射数据。'
   },
   /**
    * Render node via formMeta
@@ -32,8 +32,8 @@ export const DataMapperNodeRegistry: FlowNodeRegistry = {
       id: `dataMapper_${nanoid()}`,
       type: 'dataMapper',
       data: {
-        title: '数据映射节点',
-      },
+        title: '数据映射节点'
+      }
     };
-  },
+  }
 };

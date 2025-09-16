@@ -1,22 +1,22 @@
-
 import { FlowNodeSplitType } from '@flowgram.ai/fixed-layout-editor';
 import { nanoid } from 'nanoid';
 
 import iconIf from '@/assets/flow/icon-if.png';
 import { type FlowNodeRegistry } from '../../../typings';
+import { NodeType } from '../../const';
 import { defaultFormMeta } from '../../default-form-meta';
 
 export const IFNodeRegistry: FlowNodeRegistry = {
   extend: FlowNodeSplitType.STATIC_SPLIT,
-  type: 'if',
+  type: NodeType.IF,
   title: '条件节点',
   category: 'control',
   info: {
     icon: iconIf,
-    description: 'Only the corresponding branch will be executed if the set conditions are met.',
+    description: 'Only the corresponding branch will be executed if the set conditions are met.'
   },
   meta: {
-    expandable: false, // disable expanded
+    expandable: false // disable expanded
   },
   formMeta: defaultFormMeta,
   onAdd() {
@@ -26,35 +26,35 @@ export const IFNodeRegistry: FlowNodeRegistry = {
       data: {
         title: '条件节点',
         inputsValues: {
-          condition: { type: 'constant', content: true },
+          condition: { type: 'constant', content: true }
         },
         inputs: {
           type: 'object',
           required: ['condition'],
           properties: {
             condition: {
-              type: 'boolean',
-            },
-          },
-        },
+              type: 'boolean'
+            }
+          }
+        }
       },
       blocks: [
         {
           id: nanoid(5),
           type: 'ifBlock',
           data: {
-            title: 'true',
+            title: 'true'
           },
-          blocks: [],
+          blocks: []
         },
         {
           id: nanoid(5),
           type: 'ifBlock',
           data: {
-            title: 'false',
-          },
-        },
-      ],
+            title: 'false'
+          }
+        }
+      ]
     };
-  },
+  }
 };
