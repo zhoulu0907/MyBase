@@ -62,7 +62,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
 ### 获得租户详情 /admin-api/system/tenant/get
-GET {{baseUrl}}/system/tenant/get?id=5651146171154432
+GET {{baseUrl}}/system/tenant/get
 Content-Type: application/json
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}

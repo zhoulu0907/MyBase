@@ -68,19 +68,19 @@ public class AdminUserServiceImpl implements AdminUserService {
     static final String USER_REGISTER_ENABLED_KEY = "system.user.register-enabled";
 
     @Resource
-    private DeptService       deptService;
+    private DeptService deptService;
     @Resource
-    private PostService       postService;
+    private PostService postService;
     @Resource
     private PermissionService permissionService;
     @Resource
-    private PasswordEncoder   passwordEncoder;
+    private PasswordEncoder passwordEncoder;
     @Resource
     @Lazy // 延迟，避免循环依赖报错
-    private TenantService     tenantService;
+    private TenantService tenantService;
 
     @Resource
-    private ConfigApi   configApi;
+    private ConfigApi configApi;
     @Lazy
     @Resource
     private RoleService roleService;
@@ -99,15 +99,23 @@ public class AdminUserServiceImpl implements AdminUserService {
     @LogRecord(type = SYSTEM_USER_TYPE, subType = SYSTEM_USER_CREATE_SUB_TYPE, bizNo = "{{#user.id}}",
             success = SYSTEM_USER_CREATE_SUCCESS)
     public Long createUser(UserInsertReqVO createReqVO) {
-        // 1.1 校验账户配合
-        tenantService.handleTenantInfo(tenant -> {
+        // 如果为空，默认为开启状态
+        if (createReqVO.getStatus() == null) {
+            createReqVO.setStatus(CommonStatusEnum.ENABLE.getStatus()); // 默认开启
+        }
+        // 如果是启用状态，校验当前租户下的用户数量有没有超过最大限额
+        if (createReqVO.getStatus() == CommonStatusEnum.ENABLE.getStatus()) {
+            // 1.1 校验账户配合
+            tenantService.handleTenantInfo(tenant -> {
 
-            long count = adminUserDataRepository.countByConfig(new DefaultConfigStore().eq(AdminUserDO.STATUS, UserStatusEnum.NORMAL.getStatus()));
-            log.info(" count user four tenant, count={}", count);
-            if (count >= tenant.getAccountCount()) {
-                throw exception(USER_COUNT_MAX, tenant.getAccountCount());
-            }
-        });
+                long count = adminUserDataRepository.countByConfig(new DefaultConfigStore().eq(AdminUserDO.STATUS,
+                        UserStatusEnum.NORMAL.getStatus()));
+                log.info(" count user four tenant, count={}", count);
+                if (count >= tenant.getAccountCount()) {
+                    throw exception(USER_COUNT_MAX, tenant.getAccountCount());
+                }
+            });
+        }
         // 1.2 校验正确性
         validateUserForCreateOrUpdate(null, createReqVO.getUsername(),
                 createReqVO.getMobile(), createReqVO.getEmail(), createReqVO.getDeptId(), createReqVO.getPostIds());
@@ -116,7 +124,6 @@ public class AdminUserServiceImpl implements AdminUserService {
 
         // 2.1 插入用户
         AdminUserDO user = BeanUtils.toBean(createReqVO, AdminUserDO.class);
-        user.setStatus(CommonStatusEnum.ENABLE.getStatus()); // 默认开启
         user.setPassword(encodePassword(createReqVO.getPassword())); // 加密密码
         if (user.getAdminType() == null) {
             user.setAdminType(AdminTypeEnum.CUSTOM.getType());
@@ -205,7 +212,20 @@ public class AdminUserServiceImpl implements AdminUserService {
                 updateReqVO.getMobile(), updateReqVO.getEmail(), updateReqVO.getDeptId(), updateReqVO.getPostIds());
         // 1.1 校验角色权限
         validateRoleIds(updateReqVO.getRoleIds());
+        if (updateReqVO.getStatus() != null && oldUser != null) {
 
+            if (updateReqVO.getStatus() != oldUser.getStatus() && updateReqVO.getStatus() == CommonStatusEnum.ENABLE.getStatus()) {
+                // 1.1 校验账户配合
+                tenantService.handleTenantInfo(tenant -> {
+                    long count = adminUserDataRepository.countByConfig(new DefaultConfigStore().eq(AdminUserDO.STATUS,
+                            UserStatusEnum.NORMAL.getStatus()));
+                    log.info(" count user four tenant, count={}", count);
+                    if (count >= tenant.getAccountCount()) {
+                        throw exception(USER_COUNT_MAX, tenant.getAccountCount());
+                    }
+                });
+            }
+        }
         // 2.1 更新用户
         AdminUserDO updateObj = BeanUtils.toBean(updateReqVO, AdminUserDO.class);
         adminUserDataRepository.update(updateObj);
@@ -620,10 +640,10 @@ public class AdminUserServiceImpl implements AdminUserService {
         if (platformAdminRole == null) {
             return Collections.emptyList();
         }
-        
+
         // 获取这些用户的角色信息
         List<UserRoleDO> userRoles = new ArrayList<>(userRoleDataRepository.findListByRoleIds(platformAdminRole.getId()));
-        
+
         // 过滤出具有平台管理员角色的用户
         Set<Long> platformAdminUserIds = convertSet(userRoles, UserRoleDO::getUserId);
 
