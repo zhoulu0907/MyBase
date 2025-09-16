@@ -24,8 +24,15 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     triggerEditorSignal.setNodeData(node.id, values);
   };
 
-  const onValuesChange = (changeValue: any, values: any) => {
+  const onValuesChange = async (changeValue: any, values: any) => {
     console.log('onValuesChange: ', changeValue, values);
+    form.setValueIn('invalid', false);
+    try {
+      await payloadForm.validate();
+    } catch (error: any) {
+      console.log('error: ', error.errors);
+      form.setValueIn('invalid', true);
+    }
 
     handlePropsOnChange(values);
   };
@@ -56,6 +63,20 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     }
   }, [payloadForm]);
 
+  useEffect(() => {
+    payloadForm && validatePayloadForm();
+  }, [payloadForm]);
+
+  const validatePayloadForm = async () => {
+    try {
+      form.setValueIn('invalid', false);
+      await payloadForm.validate();
+    } catch (error: any) {
+      console.log('error: ', error.errors);
+      form.setValueIn('invalid', true);
+    }
+  };
+
   return (
     <>
       <FormHeader />
@@ -63,12 +84,28 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
         <FormContent>
           <Form
             form={payloadForm}
-            initialValues={{ ...triggerEditorSignal.nodeData.value[node.id] }}
+            initialValues={{
+              addType: undefined,
+              entityId: undefined,
+              batchType: undefined,
+              fields: undefined,
+              ...triggerEditorSignal.nodeData.value[node.id]
+            }}
             onValuesChange={onValuesChange}
             layout="vertical"
           >
             <Grid.Row>
-              <Form.Item label="节点ID" field="id" initialValue={node.id}>
+              <Form.Item
+                label="节点ID"
+                field="id"
+                initialValue={node.id}
+                rules={[
+                  {
+                    required: true,
+                    message: '请选择节点ID'
+                  }
+                ]}
+              >
                 <Input disabled />
               </Form.Item>
             </Grid.Row>
