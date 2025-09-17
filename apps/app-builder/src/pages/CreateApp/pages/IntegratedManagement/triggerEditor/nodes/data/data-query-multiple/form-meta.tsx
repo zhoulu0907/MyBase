@@ -137,10 +137,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     setConditionFields([]);
     setValidationTypes([]);
 
-    console.log(curDateNodeSource);
-    console.log(triggerEditorSignal.nodes.value);
-    console.log(triggerEditorSignal.nodeData.value);
-
     const nodes = triggerEditorSignal.nodes.value;
 
     const newDataNodeList = Object.values(nodes).filter(
