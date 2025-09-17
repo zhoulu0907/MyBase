@@ -434,8 +434,7 @@ const DragableTable = (props: IProps) => {
                           table.getHeaderGroups()[0].headers[index].getContext())}
                         {/* 操作列左侧阴影，跟随 sticky 列并定位在其左侧 */}
                         {index === columns.length - 1 && showRightStickyShadow && (
-                          <div className='overflowShadow'
-                          />
+                          <div className='overflowShadow' />
                         )}
                       </th>
                     );
@@ -480,9 +479,7 @@ const DragableTable = (props: IProps) => {
                           {flexRender(cell.column.columnDef.cell, cell.getContext())}
                           {/* 操作列左侧阴影，跟随 sticky 列并定位在其左侧 */}
                           {columnIndex === columns.length - 1 && showRightStickyShadow && (
-                            <div className='overflowShadow'
-
-                            />
+                            <div className='overflowShadow' />
                           )}
                         </td>
                       );
@@ -496,6 +493,11 @@ const DragableTable = (props: IProps) => {
             {selectedColumnInfo && (
               <div className='hoverColumn'
                 style={{
+                  position: 'absolute',
+                  top: 0,
+                  height: 'calc(100% - 2px)',
+                  border: '1px solid #009E9E',
+                  pointerEvents: 'none',
                   left: `${selectedColumnInfo.left}px`,
                   width: `${selectedColumnInfo.width}px`,
                   zIndex: 10,
@@ -507,6 +509,11 @@ const DragableTable = (props: IProps) => {
             {hoveredColumnInfo && hoveredColumnId !== selectedColumnId && (
               <div className='hoverColumn'
                 style={{
+                  position: 'absolute',
+                  top: 0,
+                  height: 'calc(100% - 2px)',
+                  border: '1px dashed #009E9E',
+                  pointerEvents: 'none',
                   left: `${hoveredColumnInfo.left}px`,
                   width: `${hoveredColumnInfo.width}px`,
                   zIndex: 5,
@@ -518,6 +525,10 @@ const DragableTable = (props: IProps) => {
             {dropIndicatorLeft !== null && draggedIndex !== null && (
               <div className='hoverColumn'
                 style={{
+                  position: 'absolute',
+                  top: 0,
+                  border: '1px solid #009E9E',
+                  pointerEvents: 'none',
                   left: `${dropIndicatorLeft}px`,
                   width: '2px',
                   height: '100%',
