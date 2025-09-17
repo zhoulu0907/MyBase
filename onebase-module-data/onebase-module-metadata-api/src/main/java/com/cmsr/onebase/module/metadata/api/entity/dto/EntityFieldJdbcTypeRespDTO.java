@@ -16,6 +16,9 @@ public class EntityFieldJdbcTypeRespDTO {
     @Schema(description = "字段ID")
     private Long fieldId;
 
+    @Schema(description = "字段名称")
+    private String fieldName;
+
     @Schema(description = "JDBC数据类型")
     private String jdbcType;
 
