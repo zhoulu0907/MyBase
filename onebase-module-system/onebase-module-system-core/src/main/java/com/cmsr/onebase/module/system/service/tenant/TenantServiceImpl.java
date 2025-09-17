@@ -156,7 +156,10 @@ public class TenantServiceImpl implements TenantService {
         // 校验租户名称是否重复
         validTenantNameDuplicate(createReqVO.getName(), null);
         // 校验租户域名是否重复
-        if (StringUtils.isNotEmpty(createReqVO.getWebsite())) {
+        if (StringUtils.isEmpty(createReqVO.getWebsite())) {
+            throw exception(TENANT_WEBSITE_IS_NULL);
+        }else{
+            // 校验租户域名是否重复
             validTenantWebsiteDuplicate(createReqVO.getWebsite(), null);
         }
         // 根据租户套餐编号获取租户套餐
@@ -388,7 +391,7 @@ public class TenantServiceImpl implements TenantService {
         if (tenant == null) {
             return;
         }
-        // 如果 id 为空，说明不用比较是否为相同名字的租户
+        // 如果 租户id 为空，则报错已存在同网站的租户
         if (id == null) {
             throw exception(TENANT_WEBSITE_DUPLICATE, website);
         }

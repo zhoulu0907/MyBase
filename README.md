@@ -30,26 +30,27 @@ SELECT setval('system_dept_id_seq', (SELECT MAX(id) FROM system_dept));
 
 ## 工程结构和开发约定
 ### 1. 后端工程结构
-#### 通用模块
 ```
-onebase/
+onebase-v3/
 ├── onebase-server/     # 打包服务、统一工程配置
-├── gateway/            # 统一网关
 ├── dependencies/       # 统一管理所有依赖项目
 ├── framework/          # 统一管理common公共能力和各类中间件
-├── module-xxx/         # 各个业务模块
+├── module-infra        # 基础设施，如文件存储、监控等。
+├── module-system       # 系统能力，如空间、租户、用户、角色、权限等。
+├── module-data         # 数据
+    ├── module-data-build    # build，编辑态服务
+    ├── module-data-runtime  # runtime，运行态服务
+    ├── module-data-api      # api，模块间解耦
+    ├── module-data-core     # core，DR/DO/Manager/utils...
+├── module-app          # 应用
+    ├── module-app-build    # build，编辑态服务
+    ├── module-app-runtime  # runtime，运行态服务
+    ├── module-app-api      # api，模块间解耦
+    ├── module-app-core     # core，DR/DO/Manager/utils...
+├── module-flow         # 流程
+├── module-formula      # 公式
+├── module-bpm          # 工作流
 ├── pom.xml             # 主POM
-```
-#### 业务模块
-注意每个模块均是一级module，将来具备独立微服务部署能力
-```
-onebase/
-├── module-infra        # 基础设施模块，例如代码生成、API日志、配置管理、监控中心、文件管理、定时任务等。
-├── module-system       # 系统能力模块，例如租户管理、角色管理、菜单管理、部门管理、字段管理、审计日志等。
-├── module-bpm          # 工作流模块。
-├── module-data         # 元数据和数据管理模块。
-├── module-app          # 应用管理模块。
-├── module-runtime(计划) # 运行态支持，模块流量大，性能要求高。
 ```
 
 ### 2. 前端工程结构
