@@ -8,6 +8,7 @@ import FieldEditor from '../../../components/field-editor';
 import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
+import { validateNodeForm } from '../../utils';
 
 const RadioGroup = Radio.Group;
 const Option = Select.Option;
@@ -26,13 +27,9 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
   const onValuesChange = async (changeValue: any, values: any) => {
     console.log('onValuesChange: ', changeValue, values);
-    form.setValueIn('invalid', false);
-    try {
-      await payloadForm.validate();
-    } catch (error: any) {
-      console.log('error: ', error.errors);
-      form.setValueIn('invalid', true);
-    }
+
+    // 校验表单
+    validateNodeForm(form, payloadForm, false);
 
     handlePropsOnChange(values);
   };
@@ -64,18 +61,8 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   }, [payloadForm]);
 
   useEffect(() => {
-    payloadForm && validatePayloadForm();
+    payloadForm && validateNodeForm(form, payloadForm, true);
   }, [payloadForm]);
-
-  const validatePayloadForm = async () => {
-    try {
-      form.setValueIn('invalid', false);
-      await payloadForm.validate();
-    } catch (error: any) {
-      console.log('error: ', error.errors);
-      form.setValueIn('invalid', true);
-    }
-  };
 
   return (
     <>
@@ -120,7 +107,12 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             </Grid.Row>
 
             <Grid.Row>
-              <Form.Item field="entityId" rules={[{ required: true, message: '请选择表单' }]} layout="vertical">
+              <Form.Item
+                field="entityId"
+                rules={[{ required: true, message: '请选择表单' }]}
+                layout="vertical"
+                disabled={!addType}
+              >
                 <Select
                   style={{ width: '100%' }}
                   onChange={(value) => {
