@@ -89,7 +89,7 @@ const Attributes = ({ cpID }: ConfigsProps) => {
       return;
     }
     console.debug('curComponentSchema------', curComponentSchema);
-  
+
     setEditData(curComponentSchema.editData);
     setConfigs(curComponentSchema.config);
   }, [cpID, curComponentSchema]);

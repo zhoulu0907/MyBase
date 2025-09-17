@@ -1,10 +1,10 @@
 // import { useAppEntityStore } from '@/store/store_entity';
-import { Button, Form, Input, Checkbox, Space, Message } from '@arco-design/web-react';
+import { Button, Form, Input, Space } from '@arco-design/web-react';
 import { IconDelete, IconDragDotVertical, IconPlus } from '@arco-design/web-react/icon';
 // import { type MetadataEntityField, type MetadataEntityPair } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
-import { usePageEditorSignal, getComponentSchema } from '@onebase/ui-kit';
+import { usePageEditorSignal } from '@onebase/ui-kit';
 import styles from '../../index.module.less';
 import { nanoid } from 'nanoid';
 const FormItem = Form.Item;
@@ -33,7 +33,7 @@ const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePro
       setAllComponents(layoutSubComponents[id]?.[0]);
   }, [id, layoutSubComponents, pageComponentSchemas]);
 
-  console.error({
+  console.debug({
     pageComponentSchemas,
     allComponents,
     configs,

@@ -65,6 +65,11 @@ export interface XChildrenTableConfig extends ICommonBaseType {
   };
 
   /**
+   * 数据字段
+   */
+  dataField: TTextDefaultType[];
+
+  /**
    * 描述信息（鼠标悬浮时显示）
    */
   tooltip?: TTextAreaDefaultType;
@@ -172,6 +177,7 @@ const XChildrenTable: XChildrenTableSchema = {
       text: '子表单',
       display: true,
     },
+    dataField: [],
     tooltip: '',
     colCount: COLUMN_COUNT_VALUES[COLUMN_COUNT_OPTIONS.ONE],
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
