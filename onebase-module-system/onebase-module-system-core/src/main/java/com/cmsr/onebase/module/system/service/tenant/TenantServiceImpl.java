@@ -453,8 +453,10 @@ public class TenantServiceImpl implements TenantService {
         TenantDO tenantDO = getTenant(id);
         // 查询当前租户下的已有的正常状态的用户数量
         Integer count = userService.getUserCountByStatus(UserStatusEnum.NORMAL.getStatus());
-        tenantDO.setAccountCount(count);
         TenantRespVO tenantRespVO = TenantConvert.INSTANCE.convert(tenantDO);
+        tenantRespVO.setExistUserCount(count);
+        AdminUserDO user = userService.getUser(tenantDO.getCreator());
+        tenantRespVO.setAdminNickName(user.getNickname());
         CommonResult<Long> appCountResult = appApplicationApi.countApplicationByTenantId(id);
         // Long 转 Integer
         tenantRespVO.setAppCount(appCountResult.getData() != null ? appCountResult.getData().intValue() : 0);
