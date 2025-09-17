@@ -17,7 +17,8 @@ export const CaseNodeRegistry: FlowNodeRegistry = {
   extend: 'block',
   meta: {
     copyDisable: true,
-    addDisable: true
+    addDisable: true,
+    expandable: false // disable expanded
   },
   info: {
     icon: iconCase,
