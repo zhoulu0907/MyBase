@@ -1,7 +1,6 @@
 package com.cmsr.onebase.module.metadata.build.controller.admin.number;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
-import com.cmsr.onebase.module.metadata.build.controller.admin.number.vo.AutoNumberConfigWithRulesRespVO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.number.MetadataAutoNumberConfigDO;
 import com.cmsr.onebase.module.metadata.build.service.number.AutoNumberConfigBuildService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -32,8 +31,8 @@ public class AutoNumberConfigController {
     @PostMapping("/get")
     @Operation(summary = "按字段ID获取自动编号配置与规则")
     @PreAuthorize("@ss.hasPermission('metadata:auto-number:query')")
-    public CommonResult<AutoNumberConfigWithRulesRespVO> get(@RequestParam("fieldId") Long fieldId) {
-        AutoNumberConfigWithRulesRespVO result = configService.getAutoNumberConfigWithRules(fieldId);
+    public CommonResult<Object> get(@RequestParam("fieldId") Long fieldId) {
+        Object result = configService.getAutoNumberConfigWithRules(fieldId);
         return success(result);
     }
 

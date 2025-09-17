@@ -1,43 +1,69 @@
 package com.cmsr.onebase.module.metadata.build.service.number;
 
-import com.cmsr.onebase.module.metadata.build.controller.admin.number.vo.AutoNumberConfigWithRulesRespVO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.number.MetadataAutoNumberConfigDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.number.MetadataAutoNumberRuleItemDO;
 
 import java.util.List;
 
 /**
- * 自动编号-配置 Service
+ * 自动编号配置 Build Service 接口
  *
- * @author matianyu
- * @date 2025-08-20
+ * @author bty418
+ * @date 2025-09-17
  */
 public interface AutoNumberConfigBuildService {
-    MetadataAutoNumberConfigDO getByFieldId(Long fieldId);
 
-    MetadataAutoNumberConfigDO getByConfigId(Long configId);
-
+    /**
+     * 新增或更新自动编号配置
+     *
+     * @param config 配置信息
+     * @return 配置ID
+     */
     Long upsert(MetadataAutoNumberConfigDO config);
 
+    /**
+     * 根据字段ID获取自动编号配置
+     *
+     * @param fieldId 字段ID
+     * @return 配置信息
+     */
+    MetadataAutoNumberConfigDO getByFieldId(Long fieldId);
+
+    /**
+     * 根据字段ID删除自动编号配置
+     *
+     * @param fieldId 字段ID
+     */
     void deleteByFieldId(Long fieldId);
 
+    /**
+     * 根据配置ID获取规则项列表
+     *
+     * @param configId 配置ID
+     * @return 规则项列表
+     */
     List<MetadataAutoNumberRuleItemDO> listRules(Long configId);
 
     /**
-     * 获取自动编号配置与规则
+     * 根据配置ID删除所有规则项
      *
-     * @param fieldId 字段ID
-     * @return 配置与规则响应VO
+     * @param configId 配置ID
      */
-    AutoNumberConfigWithRulesRespVO getAutoNumberConfigWithRules(Long fieldId);
+    void deleteRulesByConfigId(Long configId);
 
     /**
-     * 保存/更新自动编号配置
+     * 获取自动编号配置及其规则项（Controller使用）
      *
-     * @param config 配置对象
+     * @param fieldId 字段ID
+     * @return 配置和规则项的响应VO
+     */
+    Object getAutoNumberConfigWithRules(Long fieldId);
+
+    /**
+     * 保存自动编号配置（Controller使用）
+     *
+     * @param config 配置信息
      * @return 配置ID
      */
     Long saveAutoNumberConfig(MetadataAutoNumberConfigDO config);
 }
-
-

@@ -1544,7 +1544,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             List<AutoNumberRuleItemRespVO> ruleVOs = rules.stream()
                     .map(this::convertToAutoNumberRuleItemRespVO)
                     .toList();
-            autoNumberConfig.setRules(ruleVOs);
+            autoNumberConfig.setRuleItems(ruleVOs);
             result.setAutoNumberConfig(autoNumberConfig);
         }
 
@@ -1685,8 +1685,8 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             Long configId = autoNumberConfigBuildService.upsert(config);
 
             // 处理规则项
-            if (autoNumber.getRules() != null && !autoNumber.getRules().isEmpty()) {
-                for (AutoNumberRuleItemReqVO ruleReq : autoNumber.getRules()) {
+            if (autoNumber.getRuleItems() != null && !autoNumber.getRuleItems().isEmpty()) {
+                for (AutoNumberRuleItemReqVO ruleReq : autoNumber.getRuleItems()) {
                     MetadataAutoNumberRuleItemDO rule = new MetadataAutoNumberRuleItemDO();
                     rule.setConfigId(configId);
                     rule.setItemType(ruleReq.getItemType());
@@ -1745,7 +1745,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         List<AutoNumberRuleItemRespVO> ruleVOs = rules.stream()
             .map(this::convertToAutoNumberRuleItemRespVO)
             .toList();
-        full.setRules(ruleVOs);
+        full.setRuleItems(ruleVOs);
         vo.setAutoNumberConfig(full);
     }
     }
