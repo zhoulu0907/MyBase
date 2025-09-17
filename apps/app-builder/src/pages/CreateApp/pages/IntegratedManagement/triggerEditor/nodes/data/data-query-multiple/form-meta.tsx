@@ -36,6 +36,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const mainDataSource = Form.useWatch('mainDataSource', payloadForm);
   //   const subDataSource = Form.useWatch('subDataSource', payloadForm);
 
+  const [clearSortBy, setClearSortBy] = useState<number>(0);
   // 数据源选择
   const [entityList, setEntityList] = useState<MetadataEntityPair[]>([]);
   const [mainEntityList, setMainEntityList] = useState<MetadataEntityPair[]>([]);
@@ -54,6 +55,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
    */
   const handleDataTypeChange = (curDataType: number) => {
     payloadForm.clearFields(['mainDataSource', 'subDataSource', 'sortBy']);
+    setClearSortBy(clearSortBy + 1);
     const nodeData = triggerEditorSignal.nodeData.value[node.id];
     triggerEditorSignal.setNodeData(node.id, {
       ...nodeData,
@@ -74,6 +76,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
   const handleSubDataSourceChange = (curSubDataSource: string) => {
     payloadForm.clearFields(['sortBy']);
+    setClearSortBy(clearSortBy + 1);
     const originNodeData = triggerEditorSignal.nodeData.value[curSubDataSource];
     const originNodeId = originNodeData?.dataSourceOriginNodeId || curSubDataSource;
     setConditionFields([]);
@@ -94,6 +97,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
   const handleMainDataSourceChange = async (curMainDataSource: string) => {
     payloadForm.clearFields(['dataSource', 'sortBy']);
+    setClearSortBy(clearSortBy + 1);
     const nodeData = triggerEditorSignal.nodeData.value[node.id];
     triggerEditorSignal.setNodeData(node.id, {
       ...nodeData,
@@ -351,6 +355,8 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
               <SortByEditor
                 data={triggerEditorSignal.nodeData.value[node.id]?.sortBy || []}
                 fields={conditionFields}
+                form={payloadForm}
+                clearSortByNum={clearSortBy}
               ></SortByEditor>
             </Form.Item>
           </Form>
