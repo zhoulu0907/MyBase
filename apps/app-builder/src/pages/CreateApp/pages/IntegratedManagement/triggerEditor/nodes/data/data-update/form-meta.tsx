@@ -14,6 +14,7 @@ import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
 import ConditionEditor from '../../../components/condition-editor';
+import { validateNodeForm } from '../../utils';
 
 const RadioGroup = Radio.Group;
 const Option = Select.Option;
@@ -29,9 +30,17 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const [validationTypes, setValidationTypes] = useState<EntityFieldValidationTypes[]>([]);
   const [conditionFields, setConditionFields] = useState<ConfitionField[]>([]);
 
-  const onValuesChange = (changeValue: any, values: any) => {
-    console.log('onValuesChange: ', changeValue, values);
+  const handlePropsOnChange = (values: any) => {
     triggerEditorSignal.setNodeData(node.id, values);
+  };
+
+  const onValuesChange = async (changeValue: any, values: any) => {
+    console.log('onValuesChange: ', changeValue, values);
+
+    // 校验表单
+    validateNodeForm(form, payloadForm, false);
+
+    handlePropsOnChange(values);
   };
 
   const [payloadForm] = Form.useForm();
@@ -49,7 +58,9 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       }
     }
   }, [updateType]);
+
   useEffect(() => {
+    payloadForm && validateNodeForm(form, payloadForm, true);
     if (payloadForm.getFieldValue('entityId')) {
       setFieldDataList(
         [...mainEntities.value, ...subEntities.value].find(
