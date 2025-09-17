@@ -34,7 +34,7 @@ public interface MetadataEntityFieldApi {
      * 先查 metadata_entity_field 获取字段类型编码，再查 metadata_component_field_type 获取 data_type
      *
      * @param reqDTO 字段ID列表请求
-     * @return 字段JDBC类型和字段类型信息列表
+     * @return 字段JDBC类型和字段类型信息列表，包含字段ID、字段名称、JDBC类型和字段类型
      */
     @Operation(summary = "根据字段ID列表返回JDBC数据类型和字段类型")
     List<EntityFieldJdbcTypeRespDTO> getFieldJdbcTypes(@Valid @RequestBody EntityFieldJdbcTypeReqDTO reqDTO);
