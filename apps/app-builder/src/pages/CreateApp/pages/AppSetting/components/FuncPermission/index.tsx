@@ -4,6 +4,9 @@ import {
   getFuncPermission,
   updatePagePermission,
   updateOperationPermission,
+  FunPermissionViewVisit,
+  FunOperationPermission,
+  FunViewPermission,
   type AuthOperationVO,
   type GetPermissionReq,
   type FuncPermissionResponse,
@@ -59,10 +62,10 @@ const FuncPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
 
       // 设置默认值
       const defaultChecked = funcPermission.authOperations
-        .filter((item: AuthOperationVO) => item.isAllowed === 1)
+        .filter((item: AuthOperationVO) => item.isAllowed === FunOperationPermission.canOperateAllowed)
         .map((item: AuthOperationVO) => item.operationCode);
       const viewDefaultChecked = funcPermission.authEntity.authViews
-        ?.filter((item: AuthViewVO) => item.isAllowed === 1)
+        ?.filter((item: AuthViewVO) => item.isAllowed === FunPermissionViewVisit.canVisit)
         .map((item: AuthViewVO) => item.viewId);
       console.log('viewDefaultChecked', viewDefaultChecked);
       form.setFieldsValue({
@@ -119,8 +122,8 @@ const FuncPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
                     updatePagePermission(params);
                   }}
                 >
-                  <Radio value={1}>可访问</Radio>
-                  <Radio value={0}>无权限</Radio>
+                  <Radio value={FunPermissionViewVisit.canVisit}>可访问</Radio>
+                  <Radio value={FunPermissionViewVisit.notVisit}>无权限</Radio>
                 </RadioGroup>
               </Form.Item>
             </div>
@@ -130,7 +133,9 @@ const FuncPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
             <div className={styles.itemHeader}>
               <div className={styles.left}>操作权限</div>
               <div className={styles.right}>
-                {funcPermission?.authOperations.every((op: AuthOperationVO) => op.isAllowed === 1) && '全部可操作'}
+                {funcPermission?.authOperations.every(
+                  (op: AuthOperationVO) => op.isAllowed === FunOperationPermission.canOperateAllowed
+                ) && '全部可操作'}
               </div>
             </div>
             <div className={styles.itemContent}>
@@ -141,7 +146,9 @@ const FuncPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
                   onChange={async (values) => {
                     const updateOperations = funcPermission?.authOperations
                       .map((op: AuthOperationVO) => {
-                        const newIsAllowed = values.includes(op.operationCode) ? 1 : 0;
+                        const newIsAllowed = values.includes(op.operationCode)
+                          ? FunOperationPermission.canOperateAllowed
+                          : FunOperationPermission.notOperateAllowed;
                         return newIsAllowed !== op.isAllowed ? { ...op, isAllowed: newIsAllowed } : null;
                       })
                       .filter(Boolean);
@@ -185,48 +192,49 @@ const FuncPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
                     }
                   }}
                 >
-                  <Radio value={1}>默认所有视图均可访问</Radio>
-                  <Radio value={0}>自定义权限</Radio>
+                  <Radio value={FunViewPermission.AllViewVisitAllowed}>默认所有视图均可访问</Radio>
+                  <Radio value={FunViewPermission.ViewCustomFieldPermission}>自定义权限</Radio>
                 </RadioGroup>
               </Form.Item>
               {/* 当单选为自定义权限时 并且 authViews不为空时 显示 多选框 */}
-              {isAllViewsAllowed === 0 && !!form.getFieldValue('authViews')?.length && (
-                <div className={styles.checkboxGroup}>
-                  {/* 全选框 */}
-                  <Checkbox
-                    style={{ marginBottom: '5px' }}
-                    checked={isCustomAllViewsAllowed}
-                    onChange={(checked) => {
-                      console.log('全选框 onChange:', checked);
-                      // 实现全选/取消全选逻辑
-                      setIsCustomAllViewsAllowed(checked);
-                      if (checked) {
-                        // 全选：选中所有视图权限
-                        const allViewIds = viewPermissionOptions?.map((option) => option.value) || [];
-                        form.setFieldValue('authViews', allViewIds);
-                      } else {
-                        // 取消全选：清空所有视图权限
-                        form.setFieldValue('authViews', []);
-                      }
-                      console.log('form values:', form.getFieldsValue());
-                    }}
-                  >
-                    <span>全选</span>
-                  </Checkbox>
-
-                  {/* 视图权限多选框列表 */}
-                  <Form.Item field="authViews" noStyle>
-                    <CheckboxGroup
-                      direction="vertical"
-                      options={viewPermissionOptions || []}
-                      onChange={(values) => {
-                        console.log('视图权限变更:', values);
-                        setIsCustomAllViewsAllowed(viewPermissionOptions?.length === values.length);
+              {isAllViewsAllowed === FunViewPermission.ViewCustomFieldPermission &&
+                !!form.getFieldValue('authViews')?.length && (
+                  <div className={styles.checkboxGroup}>
+                    {/* 全选框 */}
+                    <Checkbox
+                      style={{ marginBottom: '5px' }}
+                      checked={isCustomAllViewsAllowed}
+                      onChange={(checked) => {
+                        console.log('全选框 onChange:', checked);
+                        // 实现全选/取消全选逻辑
+                        setIsCustomAllViewsAllowed(checked);
+                        if (checked) {
+                          // 全选：选中所有视图权限
+                          const allViewIds = viewPermissionOptions?.map((option) => option.value) || [];
+                          form.setFieldValue('authViews', allViewIds);
+                        } else {
+                          // 取消全选：清空所有视图权限
+                          form.setFieldValue('authViews', []);
+                        }
+                        console.log('form values:', form.getFieldsValue());
                       }}
-                    />
-                  </Form.Item>
-                </div>
-              )}
+                    >
+                      <span>全选</span>
+                    </Checkbox>
+
+                    {/* 视图权限多选框列表 */}
+                    <Form.Item field="authViews" noStyle>
+                      <CheckboxGroup
+                        direction="vertical"
+                        options={viewPermissionOptions || []}
+                        onChange={(values) => {
+                          console.log('视图权限变更:', values);
+                          setIsCustomAllViewsAllowed(viewPermissionOptions?.length === values.length);
+                        }}
+                      />
+                    </Form.Item>
+                  </div>
+                )}
             </div>
           </div>
         </Form>

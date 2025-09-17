@@ -3,6 +3,10 @@ import { Radio, Checkbox, Divider, Grid, Form } from '@arco-design/web-react';
 import {
   getFieldPermission,
   updateFieldPermission,
+  RoleAllFieldPermission,
+  FieldRead,
+  FieldEdit,
+  FieldDownloadable,
   type AuthFieldVO,
   type GetPermissionReq,
   type UpdateFieldPermissionReq
@@ -48,9 +52,9 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
       const formattedFields = fieldPermission.reduce(
         (acc, field) => {
           acc[field.fieldId] = {
-            isCanRead: field.isCanRead === 1,
-            isCanEdit: field.isCanEdit === 1,
-            isCanDownload: field.isCanDownload === 1
+            isCanRead: field.isCanRead === FieldRead.canRead,
+            isCanEdit: field.isCanEdit === FieldEdit.canEdit,
+            isCanDownload: field.isCanDownload === FieldDownloadable.canDownloadable
           };
           return acc;
         },
@@ -76,7 +80,7 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
       ...field
     }));
     setFieldPermission(addDisabled);
-    setIsAllFieldsAllowed(res.isAllFieldsAllowed || 0);
+    setIsAllFieldsAllowed(res.isAllFieldsAllowed || RoleAllFieldPermission.CustomFieldPermission);
   };
 
   /* 更新字段权限 */
@@ -111,10 +115,10 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
 
     const updateFields = fieldPermission?.map((field) => ({
       ...field,
-      isCanRead: field.isCanEdit || +(field.isCanRead === 0)
+      isCanRead: field.isCanEdit || +(field.isCanRead === FieldRead.notRead)
     }));
     setFieldPermission(updateFields);
-    updateFieldsPermission(updateFields || [], isAllFieldsAllowed || 0);
+    updateFieldsPermission(updateFields || [], isAllFieldsAllowed || RoleAllFieldPermission.CustomFieldPermission);
     console.log(fieldPermission, updateFields);
   };
 
@@ -134,10 +138,10 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
     const updateFields = fieldPermission?.map((field) => ({
       ...field,
       isCanEdit: +checked,
-      isCanRead: +checked || +(field.isCanRead === 0)
+      isCanRead: +checked || +(field.isCanRead === FieldRead.notRead)
     }));
     setFieldPermission(updateFields);
-    updateFieldsPermission(updateFields || [], isAllFieldsAllowed || 0);
+    updateFieldsPermission(updateFields || [], isAllFieldsAllowed || RoleAllFieldPermission.CustomFieldPermission);
     console.log(fieldPermission, updateFields);
   };
 
@@ -189,7 +193,7 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
               setFieldPermission(updateField);
 
               const modifiedField = updateField?.filter((field) => field.fieldId === getChangeFieldName[1]) || [];
-              updateFieldsPermission(modifiedField, isAllFieldsAllowed || 0);
+              updateFieldsPermission(modifiedField, isAllFieldsAllowed || RoleAllFieldPermission.CustomFieldPermission);
 
               // 更新单个字段
               form.setFieldValue(getChangeFieldKey + '', changeField[1]);
@@ -204,8 +208,8 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
                 updateFieldsPermission(fieldPermission || [], value);
               }}
             >
-              <Radio value={1}>所有字段内容可操作</Radio>
-              <Radio value={0}>自定义权限</Radio>
+              <Radio value={RoleAllFieldPermission.AllFieldPermissionAllow}>所有字段内容可操作</Radio>
+              <Radio value={RoleAllFieldPermission.CustomFieldPermission}>自定义权限</Radio>
             </RadioGroup>
 
             <Form.Item
@@ -213,7 +217,10 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
               label="字段内容权限"
               layout="vertical"
               shouldUpdate
-              style={{ marginTop: 12, visibility: isAllFieldsAllowed === 0 ? 'visible' : 'hidden' }}
+              style={{
+                marginTop: 12,
+                visibility: isAllFieldsAllowed === RoleAllFieldPermission.CustomFieldPermission ? 'visible' : 'hidden'
+              }}
             >
               <div className={styles.table}>
                 <Row>
@@ -254,7 +261,7 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
                           triggerPropName="checked"
                           noStyle
                         >
-                          <Checkbox disabled={field.isCanEdit === 1} />
+                          <Checkbox disabled={field.isCanEdit === FieldEdit.canEdit} />
                         </Form.Item>
                       </Col>
 
@@ -262,7 +269,7 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
                       <Col span={4}>
                         <Form.Item field={`authFields.${field.fieldId}.isCanEdit`} triggerPropName="checked" noStyle>
                           <Checkbox
-                            className={`${field.isCanRead === 0 ? styles.checkboxGray : ''} ${field.isCanEdit === 1 ? styles.checkboxGreen : ''}`}
+                            className={`${field.isCanRead === FieldRead.notRead ? styles.checkboxGray : ''} ${field.isCanEdit === FieldEdit.canEdit ? styles.checkboxGreen : ''}`}
                           />
                           {/* field.editDisabled */}
                         </Form.Item>
