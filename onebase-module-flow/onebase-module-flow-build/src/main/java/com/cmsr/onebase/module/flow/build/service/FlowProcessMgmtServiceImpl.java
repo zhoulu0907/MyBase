@@ -1,9 +1,9 @@
-package com.cmsr.onebase.module.flow.build.service.mgmt;
+package com.cmsr.onebase.module.flow.build.service;
 
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.module.flow.build.vo.mgmt.*;
+import com.cmsr.onebase.module.flow.build.vo.*;
 import com.cmsr.onebase.module.flow.core.dal.database.*;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.*;
 import com.cmsr.onebase.module.flow.core.enums.FlowErrorCodeConstants;
@@ -14,7 +14,7 @@ import com.cmsr.onebase.module.flow.core.event.FlowProcessEventPublisher;
 import com.cmsr.onebase.module.flow.core.graph.JsonGraph;
 import com.cmsr.onebase.module.flow.core.graph.data.StartTimeNodeData;
 import com.cmsr.onebase.module.flow.core.job.JobClient;
-import com.cmsr.onebase.module.flow.core.vo.mgmt.PageFlowProcessReqVO;
+import com.cmsr.onebase.module.flow.core.vo.PageFlowProcessReqVO;
 import lombok.Setter;
 import org.apache.commons.collections4.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -148,7 +148,7 @@ public class FlowProcessMgmtServiceImpl implements FlowProcessMgmtService {
         FlowProcessDO flowProcessDO = validateFlowProcessExist(reqVO.getId());
         // 更新流程定义
         flowProcessDO.setProcessDefinition(reqVO.getProcessDefinition());
-        if (reqVO.getProcessStatus() != null) {
+        if (reqVO.getProcessStatus() != null && reqVO.getProcessStatus().intValue() >= 0) {
             flowProcessDO.setProcessStatus(reqVO.getProcessStatus());
         }
         // 保存更新

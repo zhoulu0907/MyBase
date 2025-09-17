@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.flow.build.vo.mgmt;
+package com.cmsr.onebase.module.flow.build.vo;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

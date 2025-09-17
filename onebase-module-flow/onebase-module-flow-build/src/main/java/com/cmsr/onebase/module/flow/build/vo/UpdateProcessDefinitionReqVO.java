@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.flow.build.vo.mgmt;
+package com.cmsr.onebase.module.flow.build.vo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;

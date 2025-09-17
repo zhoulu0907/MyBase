@@ -13,15 +13,24 @@ spring:
     hikari:
       minimum-idle: 1
       maximum-pool-size: 20
-
-  # Redis 配置。Redisson 默认的配置足够使用，一般不需要进行调优
+  redis:
+    redisson:
+      config: |
+        singleServerConfig:
+          address: "redis://10.0.104.38:6379"
+          subscriptionConnectionMinimumIdleSize: 1
+          subscriptionConnectionPoolSize: 5
+          connectionMinimumIdleSize: 2
+          connectionPoolSize: 5
+          database: 0
+  # Redis 配置。
   data:
     redis:
       host: 10.0.104.38 # 地址
       #host: 127.0.0.1 # 地址
       port: 6379 # 端口
       database: 0 # 数据库索引
-  #    password: dev # 密码，建议生产环境开启
+#      password: dev # 密码，建议生产环境开启
 #      timeout: 30000ms # 超时时间
 #      connect-timeout: 30000 # 连接超时时间
 #      lettuce:
@@ -85,8 +94,8 @@ wx:
 
 snail-job:
   server:
-    host: 10.0.104.38
-    port: 17888
+#    host: 10.0.104.38
+#    port: 17888
   namespace: 764d604ec6fc45f68cd92514c40e9e1a
   group: flow-process
   token: SJ_Wyz3dmsdbDOkDujOTSSoBjGQP1BMsVnj
