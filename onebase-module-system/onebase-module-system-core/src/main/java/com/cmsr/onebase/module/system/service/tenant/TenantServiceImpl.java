@@ -453,6 +453,9 @@ public class TenantServiceImpl implements TenantService {
     @Override
     public TenantRespVO getTenantWithAppCount(Long id) {
         TenantDO tenantDO = getTenant(id);
+        // 查询当前租户下的已有的正常状态的用户数量
+        Integer count = userService.getUserCountByStatus(UserStatusEnum.NORMAL.getStatus());
+        tenantDO.setAccountCount(count);
         TenantRespVO tenantRespVO = TenantConvert.INSTANCE.convert(tenantDO);
         Long appCountResult = appApplicationApi.countApplicationByTenantId(id);
         // Long 转 Integer

@@ -81,7 +81,7 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
 
         // 更新校验规则分组
         MetadataValidationRuleGroupDO updateObj = BeanUtils.toBean(updateReqVO, MetadataValidationRuleGroupDO.class);
-        validationRuleGroupRepository.upsert(updateObj);
+        validationRuleGroupRepository.update(updateObj); // 使用update而不是upsert，避免主键冲突
 
         // 处理规则定义：仅当前端传入了新的规则结构时，才删除重建；
         // 否则保留原有规则，便于只更新valMethod/popPrompt/popType等基础信息。

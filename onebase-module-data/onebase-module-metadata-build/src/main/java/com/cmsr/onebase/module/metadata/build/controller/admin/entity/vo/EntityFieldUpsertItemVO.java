@@ -6,6 +6,8 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 import java.util.List;
 
+import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
+
 /**
  * 管理后台 - 字段批量保存（增/改/删）项 VO
  */
@@ -51,9 +53,6 @@ public class EntityFieldUpsertItemVO {
     @Schema(description = "是否唯一：1-是，0-否", example = "1")
     private Integer isUnique;
 
-    @Schema(description = "允许空值：1-是，0-否", example = "1")
-    private Integer allowNull;
-
     @Schema(description = "排序顺序", example = "10")
     private Integer sortOrder;
 
@@ -66,7 +65,7 @@ public class EntityFieldUpsertItemVO {
 
     @Schema(description = "字段选项列表（当字段为单/多选时可传入，若提供则整体替换）")
     private List<FieldOptionRespVO> options;
-
+    
     @Schema(description = "字段约束配置（长度/正则，若提供则整体替换）")
     private FieldConstraintRespVO constraints;
 

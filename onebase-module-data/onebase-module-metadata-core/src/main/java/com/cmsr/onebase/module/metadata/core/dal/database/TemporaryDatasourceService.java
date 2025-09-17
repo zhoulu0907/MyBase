@@ -98,16 +98,15 @@ public class TemporaryDatasourceService {
             log.info("构建的JDBC URL: {}", url);
             log.info("用户名: {}", username);
             log.info("数据库类型: {}", datasourceType);
-
-            // 创建数据源配置 - 使用Druid连接池
+            // 创建数据源配置 - 使用com.zaxxer.hikari.HikariDataSource连接池
             Map<String, Object> dsConfig = new HashMap<>();
             dsConfig.put("url", url);
             dsConfig.put("username", username != null ? username : "");
             dsConfig.put("password", password != null ? password : "");
             dsConfig.put("driver", getDriverByType(datasourceType));
-            // 指定连接池类型，使用Druid
-            dsConfig.put("pool", "com.alibaba.druid.pool.DruidDataSource");
-            // 添加Druid连接池配置
+            // 指定连接池类型，使用com.zaxxer.hikari.HikariDataSource
+            dsConfig.put("pool", "com.zaxxer.hikari.HikariDataSource");
+            // 添加com.zaxxer.hikari.HikariDataSource连接池配置
             dsConfig.put("initial-size", 1);
             dsConfig.put("max-active", 10);
             dsConfig.put("min-idle", 1);
