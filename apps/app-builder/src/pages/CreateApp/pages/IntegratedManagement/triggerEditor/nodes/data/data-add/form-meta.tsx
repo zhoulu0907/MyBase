@@ -99,7 +99,11 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
             <Grid.Row>
               <Form.Item label="新增方式" field="addType" rules={[{ required: true, message: '请选择新增方式' }]}>
-                <RadioGroup>
+                <RadioGroup
+                  onChange={(_value) => {
+                    payloadForm.setFieldValue('entityId', undefined);
+                  }}
+                >
                   <Radio value={FLOW_ENTITY_TYPE.MAIN_ENTITY}>在主表中新增</Radio>
                   <Radio value={FLOW_ENTITY_TYPE.SUB_ENTITY}>在子表中新增</Radio>
                 </RadioGroup>
