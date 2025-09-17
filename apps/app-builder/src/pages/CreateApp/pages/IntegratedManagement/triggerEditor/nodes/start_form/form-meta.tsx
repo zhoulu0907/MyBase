@@ -128,7 +128,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                 label="节点ID"
                 field="id"
                 initialValue={node.id}
-                rules={[{ required: true, message: '请选择表单' }]}
+                rules={[{ required: true, message: '请选择' }]}
               >
                 <Input disabled />
               </Form.Item>

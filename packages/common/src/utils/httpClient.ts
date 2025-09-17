@@ -41,12 +41,12 @@ export abstract class BaseClient {
  * @returns HttpClient 实例
  */
 export function createClient(prefix: string, baseURL?: string): any {
-    class DynamicClient extends BaseClient {
-      protected getPrefix(): string {
-        return prefix;
-      }
+  class DynamicClient extends BaseClient {
+    protected getPrefix(): string {
+      return prefix;
     }
+  }
 
-    const client = new DynamicClient(baseURL);
-    return client.getHttpClient();
+  const client = new DynamicClient(baseURL);
+  return client.getHttpClient();
 }

@@ -36,20 +36,14 @@ export function FormulaInput({
   const editorRef = useRef<any>(null);
   const [errors, setErrors] = useState<FormulaError[]>([]);
 
-  // const placeholderMatcher = new MatchDecorator({
-  //   regexp: /\[\[(\w+)\]\]/g,
-  //   decoration: (match) =>
-  //     Decoration.replace({
-  //       widget: new PlaceholderWidget(match[1])
-  //     })
-  // });
-
   // 插入内容到指定位置, 使用[[${id}.${label}]]的格式
   const insertAtPosition = useCallback(
     (text: string, type?: string, position?: number) => {
       if (!editorRef.current) return;
 
       const editor = editorRef.current;
+      const { view, state } = editor;
+      const [range] = state?.selection?.ranges || [];
       console.log('editor', editor);
 
       // 根据类型插入不同格式的内容
@@ -62,13 +56,24 @@ export function FormulaInput({
       //   insertText = `{{${text}}}`;
       // }
 
-      if (editor.insertAtCursor) {
-        // 如果有光标，在光标位置插入
-        editor.insertAtCursor(insertText);
-      } else {
-        // 否则在末尾插入
-        onChange(value + insertText);
-      }
+      // if (view.insertAtCursor) {
+      //   // 如果有光标，在光标位置插入
+      //   editor.insertAtCursor(insertText);
+      // } else {
+      //   // 否则在末尾插入
+      //   onChange(value + insertText);
+      // }
+      view.focus();
+      view.dispatch({
+        changes: {
+          from: range.from,
+          to: range.to,
+          insert: text
+        },
+        selection: {
+          anchor: range.from + text.length
+        }
+      });
     },
     [onChange, value]
   );
@@ -112,7 +117,7 @@ export function FormulaInput({
     });
 
     // 检查不支持的函数
-    const unsupportedFunctions = ['sum', 'SUM', 'Sum'];
+    const unsupportedFunctions = ['sum'];
     unsupportedFunctions.forEach((funcName) => {
       const regex = new RegExp(`\\b${funcName}\\s*\\(`, 'g');
       let match;

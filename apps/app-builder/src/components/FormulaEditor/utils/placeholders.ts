@@ -13,10 +13,8 @@ export const placeholdersPlugin = (
 
     constructor(text: string) {
       super();
-      console.log('text', text, mode);
       if (text) {
         const [textId, ...texts] = text.split('.');
-        console.log('textId', textId, texts);
         if (textId && texts.length) {
           this.text = texts.map((t) => t.split(':')[mode === 'code' ? 1 : 0]).join('.');
           this.textId = textId;
@@ -55,32 +53,80 @@ export const placeholdersPlugin = (
     }
   }
 
-  const placeholderMatcher = new MatchDecorator({
-    regexp: /\[\[(.+?)\]\]/g,
+  class FormulaWidget extends WidgetType {
+    text = '';
+
+    constructor(text: string) {
+      super();
+      if(text) {
+        const [textId, texts] = text.split('.');
+        if (textId && texts) {
+          this.text = texts.split('(')[0];
+        }
+      }
+    }
+
+    eq(other: FormulaWidget) {
+      return this.text === other.text;
+    }
+
+    toDOM() {
+      const elt = document.createElement('span');
+      if (!this.text) return elt;
+
+      elt.style.cssText = `
+        color: #ff69b4;
+        font-size: 12px;
+        padding: 2px 4px;
+        user-select: none;
+        margin: 0 2px;
+      `;
+      elt.textContent = this.text;
+      return elt;
+    }
+
+    ignoreEvent() {
+      return true;
+    }
+  }
+
+  const combinedMatcher = new MatchDecorator({
+    regexp: /(\[\[.+?\]\]|\{\{.+?\}\})/g,
     decoration: (match) => {
-      console.log('match', match);
-      return Decoration.replace({
-        widget: new PlaceholderWidget(match[1])
-      });
+      const text = match[1];
+      if (text.startsWith('[[') && text.endsWith(']]')) {
+        return Decoration.replace({
+          widget: new PlaceholderWidget(text.slice(2, -2))
+        });
+      } else if (text.startsWith('{{') && text.endsWith('}}')) {
+        return Decoration.replace({
+          widget: new FormulaWidget(text.slice(2, -2))
+        });
+      }
+      return Decoration.mark({});
     }
   });
 
   return ViewPlugin.fromClass(
     class {
-      placeholders: DecorationSet;
+      decorations: DecorationSet;
 
       constructor(view: EditorView) {
-        this.placeholders = placeholderMatcher.createDeco(view);
-        console.log('view', view, this.placeholders);
+        this.decorations = combinedMatcher.createDeco(view);
+        console.log('view', view, this.decorations);
       }
 
       update(update: ViewUpdate) {
-        this.placeholders = placeholderMatcher.updateDeco(update, this.placeholders);
+        this.decorations = combinedMatcher.updateDeco(update, this.decorations);
       }
     },
     {
-      decorations: (instance) => instance.placeholders,
-      provide: (plugin) => EditorView.atomicRanges.of((view) => view.plugin(plugin)?.placeholders || Decoration.none)
+      decorations: (instance) => instance.decorations,
+      provide: (plugin) =>
+        EditorView.atomicRanges.of((view) => {
+          const instance = view.plugin(plugin);
+          return instance?.decorations || Decoration.none;
+        })
     }
   );
 };

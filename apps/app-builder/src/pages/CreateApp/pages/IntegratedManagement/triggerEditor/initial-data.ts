@@ -41,7 +41,7 @@ export const StartFormInitData = {
   nodes: [
     {
       id: 'start_form_0',
-      type: 'start_form',
+      type: 'startForm',
       blocks: [],
       data: {
         title: '界面交互触发节点',
@@ -65,7 +65,7 @@ export const StartEntityInitData = {
   nodes: [
     {
       id: 'start_entity_0',
-      type: 'start_entity',
+      type: 'startEntity',
       blocks: [],
       data: {
         title: '表单(实体)触发节点',
@@ -87,13 +87,19 @@ export const StartTimeInitData = {
   nodes: [
     {
       id: 'start_time_0',
-      type: 'start_time',
+      type: 'startTime',
       blocks: [],
       data: {
         title: '定时触发节点',
         initialData: {
           id: 'start_time_0',
-          delaySeconds: 0.5
+          repeatType: 'none',
+          startTime: '',
+          endTime: '',
+          triggerTime: '',
+          repeatWeek: [],
+          repeatDay: [],
+          triggerDate: ''
         },
         outputs: {
           type: 'object',
@@ -109,7 +115,7 @@ export const StartDateFieldInitData = {
   nodes: [
     {
       id: 'start_date_field_0',
-      type: 'start_date_field',
+      type: 'startDateField',
       blocks: [],
       data: {
         title: '日期字段触发节点',
@@ -137,7 +143,7 @@ export const StartApiInitData = {
   nodes: [
     {
       id: 'start_api_0',
-      type: 'start_api',
+      type: 'startAPI',
       blocks: [],
       data: {
         title: 'API触发节点',
@@ -155,7 +161,7 @@ export const StartBpmInitData = {
   nodes: [
     {
       id: 'start_bpm_0',
-      type: 'start_bpm',
+      type: 'startBPM',
       blocks: [],
       data: {
         title: '子流程触发节点',

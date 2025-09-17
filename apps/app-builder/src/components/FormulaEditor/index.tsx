@@ -1,29 +1,9 @@
 import { Modal, Button, Space, Message } from '@arco-design/web-react';
-import { useState, useCallback, useMemo, useRef } from 'react';
-
+import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { VariableList, FunctionList, InfoPanel, FormulaInput } from './components';
+import { getFormulaFunctionSimpleList, getFormulaById } from '@onebase/app';
+import type { Variable, FunctionItem, FormulaEditorProps, info } from './utils/types';
 import styles from './index.module.less';
-
-export interface FormulaEditorProps {
-  visible: boolean;
-  onCancel: () => void;
-  onConfirm: (formula: string) => void;
-  initialFormula?: string;
-}
-
-export interface Variable {
-  value: string;
-  name: string;
-  type: string;
-  category: string;
-}
-
-export interface FunctionItem {
-  value: string;
-  name: string;
-  description: string;
-  category: string;
-}
 
 // 模拟数据
 const mockVariables: Variable[] = [
@@ -36,22 +16,30 @@ const mockVariables: Variable[] = [
   { value: '7', name: '发货地址', type: '地址', category: '订单管理' }
 ];
 
-const mockFunctions: FunctionItem[] = [
-  { value: '1', name: 'SUM', description: '求和', category: '常用函数' },
-  { value: '2', name: 'AVERAGE', description: '平均值', category: '常用函数' },
-  { value: '3', name: 'IF', description: '条件判断', category: '常用函数' },
-  { value: '4', name: 'AND', description: '与', category: '常用函数' },
-  { value: '5', name: 'OR', description: '或', category: '常用函数' },
-  { value: '6', name: 'NOT', description: '非', category: '常用函数' },
-  { value: '7', name: 'CONCATENATE', description: '合并', category: '常用函数' },
-  { value: '8', name: 'TODAY', description: '今天', category: '常用函数' }
-];
+// const mockFunctions: FunctionItem[] = [
+//   { id: '1', name: 'SUM', summary: '求和', type: '常用函数' },
+//   { id: '2', name: 'AVERAGE', summary: '平均值', type: '常用函数' },
+//   { id: '3', name: 'IF', summary: '条件判断', type: '常用函数' },
+//   { id: '4', name: 'AND', summary: '与', type: '常用函数' },
+//   { id: '5', name: 'OR', summary: '或', type: '常用函数' },
+//   { id: '6', name: 'NOT', summary: '非', type: '常用函数' },
+//   { id: '7', name: 'CONCATENATE', summary: '合并', type: '常用函数' },
+//   { id: '8', name: 'TODAY', summary: '今天', type: '常用函数' }
+// ];
 
 export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '' }: FormulaEditorProps) {
   const [formula, setFormula] = useState(initialFormula);
   const [variableSearch, setVariableSearch] = useState('');
   const [functionSearch, setFunctionSearch] = useState('');
+  const [funcList, setFuncList] = useState<FunctionItem[]>([]);
   const editorRef = useRef<{ insertAtPosition: (text: string, type: string, position?: number) => void } | null>(null);
+  const [info, setInfo] = useState<info>();
+  const getFuncList = async () => {
+    const res = await getFormulaFunctionSimpleList();
+    if (res) {
+      setFuncList(res);
+    }
+  };
 
   // 过滤变量和函数
   const filteredVariables = useMemo(() => {
@@ -64,11 +52,11 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
   }, [variableSearch]);
 
   const filteredFunctions = useMemo(() => {
-    if (!functionSearch) return mockFunctions;
-    return mockFunctions.filter(
+    if (!functionSearch) return funcList;
+    return funcList.filter(
       (f) =>
         f.name.toLowerCase().includes(functionSearch.toLowerCase()) ||
-        f.description.toLowerCase().includes(functionSearch.toLowerCase())
+        f.summary.toLowerCase().includes(functionSearch.toLowerCase())
     );
   }, [functionSearch]);
 
@@ -83,11 +71,24 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
     }
   }, []);
 
-  // 插入函数到公式
-  const handleInsertFunction = useCallback((func: FunctionItem) => {
+  const getFormulaInfo = (id: string) => {
+    getFormulaById(id).then((res) => {
+      if (res) {
+        setInfo(res);
+      }
+    });
+  };
+
+  // 点击函数
+  const handleChooseFunction = useCallback((func: FunctionItem) => {
+    getFormulaInfo(func.id);
+
+    console.log('editorRef', editorRef);
+
+    // 插入函数到公式
     if (editorRef.current) {
       // 使用编辑器的插入方法，支持光标定位
-      editorRef.current.insertAtPosition(`{{${func.value}.${func.name}}}`, 'fn');
+      editorRef.current.insertAtPosition(`{{${func.id}.${func.expression}}}()`, 'fn');
     } else {
       // 降级处理：直接添加到末尾
       setFormula((prev) => prev + func.name + '()');
@@ -119,6 +120,11 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
     },
     []
   );
+
+  useEffect(() => {
+    if (!visible) return;
+    getFuncList();
+  }, [visible]);
 
   return (
     <Modal
@@ -166,16 +172,16 @@ export function FormulaEditor({ visible, onCancel, onConfirm, initialFormula = '
         {/* 函数列表 */}
         <div className={styles.panel}>
           <FunctionList
-            functions={filteredFunctions}
+            functions={functionSearch ? filteredFunctions : funcList}
             searchValue={functionSearch}
             onSearchChange={setFunctionSearch}
-            onInsertFunction={handleInsertFunction}
+            onChooseFunction={handleChooseFunction}
           />
         </div>
 
         {/* 说明面板 */}
         <div className={styles.panel}>
-          <InfoPanel />
+          <InfoPanel info={info} />
         </div>
       </div>
 

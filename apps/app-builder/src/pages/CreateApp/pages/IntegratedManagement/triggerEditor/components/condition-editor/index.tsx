@@ -25,7 +25,7 @@ const opCodeOptions = [
 export interface ConditionEditorProps {
   fields: ConfitionField[];
   data?: Condition[];
-  onChange: (value: Condition[]) => void;
+  onChange?: (value: Condition[]) => void;
   entityFieldValidationTypes: EntityFieldValidationTypes[];
 }
 
@@ -42,7 +42,9 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({ data, onChange, field
   }, []);
 
   useEffect(() => {
-    onChange(conditions);
+    if(onChange){
+      onChange(conditions);
+    }
   }, [conditions]);
 
   const addCondition = (pid: string) => {

@@ -1,12 +1,10 @@
 import { Typography } from '@arco-design/web-react';
 import styles from './InfoPanel.module.less';
-
-export function InfoPanel() {
+import type { info } from '../utils/types';
+export function InfoPanel({ info }: { info: info }) {
   return (
     <div className={styles.infoPanel}>
-      <Typography.Title level={5} className={styles.title}>
-        使用说明
-      </Typography.Title>
+      <Typography.Title className={styles.title}>使用说明</Typography.Title>
 
       <div className={styles.instructions}>
         <div className={styles.instructionItem}>
@@ -19,14 +17,17 @@ export function InfoPanel() {
         </div>
       </div>
 
-      <div className={styles.example}>
-        <span className={styles.exampleFunction}>AVERAGE</span>
-        <span className={styles.exampleText}>(</span>
-        <span className={styles.exampleVariable}>语文成绩</span>
+      {info?.example && (
+        <div className={styles.example}>
+          <span className={styles.exampleFunction}>{info?.example?.split('(')[0]}</span>
+          <span className={styles.exampleText}>(</span>
+          <span className={styles.exampleVariable}>{info?.example?.match(/(?<=\()(.+?)(?=\))/g)}</span>
+          {/* <span className={styles.exampleVariable}>语文成绩</span>
         <span className={styles.exampleText}>,</span>
-        <span className={styles.exampleVariable}>数学成绩</span>
-        <span className={styles.exampleText}>)</span>
-      </div>
+        <span className={styles.exampleVariable}>数学成绩</span> */}
+          <span className={styles.exampleText}>)</span>
+        </div>
+      )}
 
       <div className={styles.tips}>
         <Typography.Text type="secondary" className={styles.tipText}>

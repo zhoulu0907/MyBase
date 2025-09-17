@@ -2,11 +2,12 @@ import { nanoid } from 'nanoid';
 
 import iconCase from '@/assets/flow/icon-case.png';
 import { type FlowNodeRegistry } from '../../../typings';
+import { NodeType } from '../../const';
 import { formMeta } from './form-meta';
 
 let id = 2;
 export const CaseNodeRegistry: FlowNodeRegistry = {
-  type: 'case',
+  type: NodeType.CASE,
   title: '分支节点',
   category: 'control',
   /**
@@ -17,10 +18,11 @@ export const CaseNodeRegistry: FlowNodeRegistry = {
   meta: {
     copyDisable: true,
     addDisable: true,
+    expandable: false // disable expanded
   },
   info: {
     icon: iconCase,
-    description: 'Execute the branch when the condition is met.',
+    description: '满足条件时执行分支。'
   },
   canDelete: (ctx, node) => node.parent!.blocks.length >= 3,
   onAdd(ctx, from) {
@@ -29,20 +31,8 @@ export const CaseNodeRegistry: FlowNodeRegistry = {
       type: 'case',
       data: {
         title: `分支_${id++}`,
-        inputs: {
-          type: 'object',
-          required: ['condition'],
-          inputsValues: {
-            condition: '',
-          },
-          properties: {
-            condition: {
-              type: 'string',
-            },
-          },
-        },
-      },
+      }
     };
   },
-  formMeta,
+  formMeta
 };

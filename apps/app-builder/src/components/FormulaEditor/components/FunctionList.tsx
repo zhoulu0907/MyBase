@@ -2,18 +2,19 @@ import { Input, List, Button } from '@arco-design/web-react';
 import { IconSearch, IconCheck, IconDown } from '@arco-design/web-react/icon';
 import { useCallback, useState } from 'react';
 
-import type { FunctionItem } from '../index';
+import type { FunctionItem } from '../utils/types';
 import styles from './FunctionList.module.less';
 
 interface FunctionListProps {
   functions: FunctionItem[];
   searchValue: string;
   onSearchChange: (value: string) => void;
-  onInsertFunction: (func: FunctionItem) => void;
+  onChooseFunction: (func: FunctionItem) => void;
 }
 
-export function FunctionList({ functions, searchValue, onSearchChange, onInsertFunction }: FunctionListProps) {
+export function FunctionList({ functions, searchValue, onSearchChange, onChooseFunction }: FunctionListProps) {
   const [isExpanded, setIsExpanded] = useState(true);
+  const [selectedFunctionId, setSelectedFunctionId] = useState<string | null>(null);
 
   const handleSearchChange = useCallback(
     (value: string) => {
@@ -24,9 +25,10 @@ export function FunctionList({ functions, searchValue, onSearchChange, onInsertF
 
   const handleFunctionClick = useCallback(
     (func: FunctionItem) => {
-      onInsertFunction(func);
+      setSelectedFunctionId(func.id);
+      onChooseFunction(func);
     },
-    [onInsertFunction]
+    [onChooseFunction]
   );
 
   const toggleExpanded = useCallback(() => {
@@ -38,7 +40,7 @@ export function FunctionList({ functions, searchValue, onSearchChange, onInsertF
       <div className={styles.searchSection}>
         <Input
           prefix={<IconSearch />}
-          placeholder="Q 搜索函数"
+          placeholder="搜索函数"
           value={searchValue}
           onChange={handleSearchChange}
           className={styles.searchInput}
@@ -49,7 +51,8 @@ export function FunctionList({ functions, searchValue, onSearchChange, onInsertF
         <div className={styles.categoryHeader}>
           <div className={styles.categoryTitle}>
             <IconCheck className={styles.categoryIcon} />
-            <span>常用函数</span>
+            {/* TODO: 需要根据类型显示 */}
+            <span>{functions[0]?.type}</span>
           </div>
           <Button
             type="text"
@@ -66,10 +69,14 @@ export function FunctionList({ functions, searchValue, onSearchChange, onInsertF
           <List
             dataSource={functions}
             render={(func) => (
-              <List.Item key={func.value} className={styles.functionItem} onClick={() => handleFunctionClick(func)}>
+              <List.Item
+                key={func.id}
+                className={`${styles.functionItem} ${selectedFunctionId === func.id ? styles.selected : ''}`}
+                onClick={() => handleFunctionClick(func)}
+              >
                 <div className={styles.functionInfo}>
                   <div className={styles.functionName}>{func.name}</div>
-                  <div className={styles.functionDesc}>{func.description}</div>
+                  <div className={styles.functionDesc}>{func.summary}</div>
                 </div>
               </List.Item>
             )}

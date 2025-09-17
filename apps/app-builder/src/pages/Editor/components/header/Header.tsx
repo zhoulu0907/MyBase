@@ -190,8 +190,6 @@ export default function EditorHeader() {
       }
     }
     console.log('appResp: ', appResp);
-
-    // handleGetAppEntities(appId);
   };
 
   // 获取主表对应的主实体信息
@@ -205,7 +203,7 @@ export default function EditorHeader() {
 
     if (entityWithChildren) {
       setMainEntity({
-        entityID: entityWithChildren.entityId,
+        entityId: entityWithChildren.entityId,
         entityName: entityWithChildren.entityName,
         entityType: ENTITY_TYPE.MAIN,
         fields: entityWithChildren.parentFields
@@ -213,7 +211,7 @@ export default function EditorHeader() {
 
       if (entityWithChildren.childEntities && entityWithChildren.childEntities.length > 0) {
         const subEntities = entityWithChildren.childEntities.map((entity: ChildEntity) => ({
-          entityID: entity.childEntityId,
+          entityId: entity.childEntityId,
           entityName: entity.childEntityName,
           entityType: ENTITY_TYPE.SUB,
           fields: entity.childFields
@@ -225,25 +223,6 @@ export default function EditorHeader() {
       }
     }
   };
-
-  //   const handleGetAppEntities = async (appId: string) => {
-  //     const res = await getAppEntities(appId);
-  //     console.log('appEntities: ', res);
-  //     if (res) {
-  //       setAppEntities(res.entities);
-  //       const mainEntity = res.entities.filter(
-  //         (entity: AppEntity) => entity.entityType === ENTITY_TYPE.MAIN || entity.entityType === ENTITY_TYPE.INDEP
-  //       );
-  //       if (mainEntity.length > 0) {
-  //         setMainEntity(mainEntity[0]);
-  //       }
-  //       const subEntities = res.entities.filter((entity: AppEntity) => entity.entityType === ENTITY_TYPE.SUB);
-  //       if (subEntities.length > 0) {
-  //         setSubEntities({ entities: subEntities });
-  //       }
-  //     }
-  //     return res;
-  //   };
 
   const handleSavePageSet = async () => {
     console.log(`save appid: ${curAppId}, pageSetId: ${pageSetId}`);
@@ -258,7 +237,7 @@ export default function EditorHeader() {
       listColComponentsMap: { colComponents: new Map(Object.entries(cloneDeep(listLayoutSubComponents.value))) }
     };
 
-    startSavePageSet(savePageSetParams, setAppStatus(AppStatus.PUBLISHED));
+    startSavePageSet(savePageSetParams, () => setAppStatus(AppStatus.PUBLISHED));
   };
 
   const clearAllData = () => {

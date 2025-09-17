@@ -1,9 +1,10 @@
 import iconStart from '@/assets/flow/icon-start.jpg';
 import { type FlowNodeRegistry } from '../../typings';
+import { NodeType } from '../const';
 import { formMeta } from './form-meta';
 
 export const StartEntityNodeRegistry: FlowNodeRegistry = {
-  type: 'start_entity',
+  type: NodeType.START_ENTITY,
   title: '表单(实体)触发节点',
   category: 'trigger',
   meta: {

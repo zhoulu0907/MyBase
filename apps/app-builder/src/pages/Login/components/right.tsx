@@ -168,7 +168,6 @@ const Right: React.FC = () => {
   // 验证码验证成功回调
   const handleCaptchaSuccess = async (token: string) => {
     const values = await form.getFieldsValue();
-    console.log('values:', values);
     handleSubmit({ username: values.username, password: values.password, captchaVerification: token });
   };
 

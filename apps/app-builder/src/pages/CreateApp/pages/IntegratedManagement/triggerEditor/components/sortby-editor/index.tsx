@@ -1,260 +1,116 @@
-import { Button, Divider, Input, Select } from '@arco-design/web-react';
-import { IconDelete } from '@arco-design/web-react/icon';
-import type { Condition, ConfitionField, EntityFieldValidationTypes, ValidationTypeItem } from '@onebase/app';
+import { Button, Radio, Input, Select, Grid } from '@arco-design/web-react';
+import { IconDelete, IconDragDotVertical } from '@arco-design/web-react/icon';
+import  { SortType, type Sort, type ConfitionField } from '@onebase/app';
 import { nanoid } from 'nanoid';
 import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
-
-const Option = Select.Option;
-
-const opCodeOptions = [
-  <Option key="formula" value="formula">
-    公式
-  </Option>,
-  <Option key="value" value="value">
-    静态值
-  </Option>,
-  <Option key="variable" value="variable">
-    变量
-  </Option>
-];
+import { ReactSortable } from 'react-sortablejs';
 
 /**
  * ConditionEditor 组件的 props 类型定义
  */
 export interface ConditionEditorProps {
   fields: ConfitionField[];
-  data?: Condition[];
-  onChange: (value: Condition[]) => void;
-  entityFieldValidationTypes: EntityFieldValidationTypes[];
+  data?: Sort[];
+  onChange?: (value: Sort[]) => void;
 }
 
 /**
  * 条件编辑器组件初始化
  */
-const ConditionEditor: React.FC<ConditionEditorProps> = ({ data, onChange, fields, entityFieldValidationTypes }) => {
-  const [conditions, setConditions] = useState<Condition[]>([]);
+const SortByEditor: React.FC<ConditionEditorProps> = ({ data, onChange, fields }) => {
+  // 数据
+  const [sortList, setSortList] = useState<Sort[]>([]);
 
   useEffect(() => {
     if (data) {
-      setConditions(data);
+      setSortList(data);
     }
   }, []);
-
   useEffect(() => {
-    onChange(conditions);
-  }, [conditions]);
-
-  const addCondition = (pid: string) => {
-    const newConditions = [...conditions];
-    if (pid == '') {
-      pid = nanoid();
-      newConditions.push({
-        id: pid,
-        parentId: '',
-        rules: [
-          {
-            id: nanoid(),
-            parentId: pid
-          }
-        ]
-      });
-    } else {
-      for (let i = 0; i < newConditions.length; i++) {
-        const subItem = newConditions[i];
-        if (subItem.id === pid) {
-          subItem.rules?.push({ id: nanoid(), parentId: pid });
-          break;
-        }
-      }
+    if(onChange){
+      onChange(sortList);
     }
+  }, [sortList]);
 
-    setConditions(newConditions);
-    return;
+  const addSort = () => {
+    const pid = nanoid();
+    const newSortList = [...sortList];
+    newSortList.push({
+      id: pid,
+      sortField: '',
+      sortType: ''
+    });
+    setSortList(newSortList);
+  };
+  const deleteSort = (id: string) => {
+    const newSortList = [...sortList];
+    const index = newSortList.findIndex((ele) => ele.id === id);
+    newSortList.splice(index, 1);
+    setSortList(newSortList);
   };
 
-  const deleteCondition = (id: string) => {
-    const newConditions = [...conditions];
-    for (let i = 0; i < newConditions.length; i++) {
-      const subItem = newConditions[i];
-      if (subItem.rules) {
-        for (let j = 0; j < subItem.rules?.length; j++) {
-          if (subItem.rules[j].id === id) {
-            subItem.rules.splice(j, 1);
-            if (subItem.rules.length === 0) {
-              newConditions.splice(i, 1);
-            }
-            setConditions(newConditions);
-            break;
-          }
-        }
+  // 内容改变
+  const handleOnChange = (item: Sort, field: string, value: any) => {
+    const newSortList = sortList.map((ele)=>{
+      if (ele.id === item.id) {
+        return { ...ele, [field]: value };
       }
-    }
+      return ele;
+    });
+    setSortList(newSortList);
   };
-
-  const renderItemWrapper = (cond: Condition) => {
-    return cond.rules && cond.rules.length > 0 ? (
-      <div className={styles.items} key={cond.id}>
-        <div className={styles.tag}>且</div>
-
-        {cond.rules?.map((item: Condition) => {
-          return renderItem(item);
-        })}
-        {cond.rules && cond.rules.length > 0 && (
-          <Button type="text" onClick={() => addCondition(cond.id)}>
-            + 添加且条件
-          </Button>
-        )}
-      </div>
-    ) : null;
-  };
-
-  const renderItem = (cond: Condition) => {
-    return (
-      <div className={styles.item} key={cond.id}>
-        <Select
-          className={styles.itemSelect}
-          style={{ width: '150px' }}
-          value={cond.fieldId || ''}
-          onChange={(value) => {
-            const newConditions = [...conditions];
-
-            for (let i = 0; i < newConditions.length; i++) {
-              const subItem = newConditions[i];
-              if (subItem.rules) {
-                for (let j = 0; j < subItem.rules?.length; j++) {
-                  if (subItem.rules[j].id === cond.id) {
-                    newConditions[i]!.rules![j].fieldId = value;
-                    break;
-                  }
-                }
-              }
-            }
-            setConditions(newConditions);
-          }}
-        >
-          {fields.map((field) => (
-            <Option key={field.value} value={field.value}>
-              {field.label}
-            </Option>
-          ))}
-        </Select>
-
-        <Select
-          className={styles.itemSelect}
-          style={{ width: '100px' }}
-          value={cond.op || ''}
-          onChange={(value) => {
-            const newConditions = [...conditions];
-
-            for (let i = 0; i < newConditions.length; i++) {
-              const subItem = newConditions[i];
-              if (subItem.rules) {
-                for (let j = 0; j < subItem.rules?.length; j++) {
-                  if (subItem.rules[j].id === cond.id) {
-                    newConditions[i]!.rules![j].op = value;
-                    break;
-                  }
-                }
-              }
-            }
-            setConditions(newConditions);
-          }}
-        >
-          {(entityFieldValidationTypes.find((item) => item.fieldId === cond.fieldId)?.validationTypes || []).map(
-            (operator: ValidationTypeItem) => (
-              <Option key={operator.code} value={operator.code}>
-                {operator.name}
-              </Option>
-            )
-          )}
-        </Select>
-
-        <Select
-          className={styles.itemSelect}
-          style={{ width: '100px' }}
-          value={cond.operatorType || ''}
-          onChange={(value) => {
-            const newConditions = [...conditions];
-
-            for (let i = 0; i < newConditions.length; i++) {
-              const subItem = newConditions[i];
-              if (subItem.rules) {
-                for (let j = 0; j < subItem.rules?.length; j++) {
-                  if (subItem.rules[j].id === cond.id) {
-                    newConditions[i]!.rules![j].operatorType = value;
-                    break;
-                  }
-                }
-              }
-            }
-            setConditions(newConditions);
-          }}
-        >
-          {opCodeOptions}
-        </Select>
-
-        <Input
-          style={{ width: '140px', marginRight: '10px' }}
-          value={cond.value?.[0] || ''}
-          placeholder="请输入"
-          onChange={(value) => {
-            const newConditions = [...conditions];
-
-            for (let i = 0; i < newConditions.length; i++) {
-              const subItem = newConditions[i];
-              if (subItem.rules) {
-                for (let j = 0; j < subItem.rules?.length; j++) {
-                  if (subItem.rules[j].id === cond.id) {
-                    newConditions[i]!.rules![j].value = [value];
-                    break;
-                  }
-                }
-              }
-            }
-            setConditions(newConditions);
-          }}
-        />
-
-        <IconDelete
-          style={{ fontSize: '13px', color: '#4E5969' }}
-          onClick={() => {
-            deleteCondition(cond.id);
-          }}
-        />
-      </div>
-    );
+  // 排序改变
+  const handleSort = (newSortList: Sort[]) => {
+    console.log('handleSort', newSortList);
+    setSortList(newSortList);
   };
 
   return (
     <div>
-      <div className={styles.conditionWrapper}>
-        {conditions.map((item, index) => {
-          return (
-            <div key={item.id}>
-              {renderItemWrapper(item)}
-              {index !== (conditions || [])?.length - 1 && (
-                <Divider
-                  orientation="center"
-                  style={{
-                    marginTop: '5px',
-                    marginBottom: '0px',
-                    marginLeft: '10px',
-                    marginRight: '10px'
-                  }}
-                >
-                  <div className={styles.dividerText}>或</div>
-                </Divider>
-              )}
-            </div>
-          );
-        })}
-      </div>
-      <Button type="text" size="small" onClick={() => addCondition('')}>
-        + 添加或条件
+      {sortList && (
+        <ReactSortable list={sortList} setList={handleSort} animation={200} handle=".sortby-item-handle">
+          {sortList.map((item) => {
+            return (
+              <Grid.Row key={item.id} align="center" gutter={8} className={styles.sortRow}>
+                <Grid.Col span={1} className={styles.sortCol}>
+                  <IconDragDotVertical
+                    // 支持拖拽的图标
+                    className="sortby-item-handle"
+                    style={{
+                      cursor: 'move',
+                      color: '#555'
+                    }}
+                  />
+                </Grid.Col>
+                <Grid.Col span={13}>
+                  <Select onChange={(e) => handleOnChange(item, 'sortField', e)} options={fields}></Select>
+                </Grid.Col>
+                <Grid.Col span={8} className={styles.sortCol}>
+                  <Radio.Group onChange={(e) => handleOnChange(item, 'sortType', e)}>
+                    <Radio value={SortType.ASC}>升序</Radio>
+                    <Radio value={SortType.DESC}>降序</Radio>
+                  </Radio.Group>
+                </Grid.Col>
+                <Grid.Col span={2} className={styles.sortCol}>
+                  <Button
+                    type="text"
+                    onClick={() => {
+                      deleteSort(item.id);
+                    }}
+                    icon={<IconDelete style={{ color: '#4E5969' }} />}
+                  />
+                </Grid.Col>
+              </Grid.Row>
+            );
+          })}
+        </ReactSortable>
+      )}
+      <Button type="text" size="small" onClick={addSort}>
+        + 添加排序字段
       </Button>
     </div>
   );
 };
 
-export default ConditionEditor;
+export default SortByEditor;

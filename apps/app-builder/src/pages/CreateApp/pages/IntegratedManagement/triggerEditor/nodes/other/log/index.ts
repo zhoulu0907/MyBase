@@ -1,10 +1,11 @@
 import iconStart from '@/assets/flow/icon-start.jpg';
 import { nanoid } from 'nanoid';
 import { type FlowNodeRegistry } from '../../../typings';
+import { NodeType } from '../../const';
 import { formMeta } from './form-meta';
 
 export const LogNodeRegistry: FlowNodeRegistry = {
-  type: 'log',
+  type: NodeType.LOG,
   title: '日志节点',
   category: 'other',
   meta: {
@@ -13,12 +14,11 @@ export const LogNodeRegistry: FlowNodeRegistry = {
     selectable: true,
     copyDisable: false,
     expandable: false,
-    addDisable: false,
+    addDisable: false
   },
   info: {
     icon: iconStart,
-    description:
-    '这是日志节点，用于记录日志。',
+    description: '这是日志节点，用于记录日志。'
   },
   /**
    * Render node via formMeta
@@ -32,8 +32,8 @@ export const LogNodeRegistry: FlowNodeRegistry = {
       id: `log_${nanoid()}`,
       type: 'log',
       data: {
-        title: '日志节点',
-      },
+        title: '日志节点'
+      }
     };
-  },
+  }
 };

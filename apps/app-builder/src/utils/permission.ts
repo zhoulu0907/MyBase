@@ -1,7 +1,5 @@
 import type { MenuInfo, UserInfo } from '@onebase/platform-center';
-import {
-    ALL_PERMISSION_CODE,
-} from '../constants/permission';
+import { ALL_PERMISSION_CODE } from '../constants/permission';
 
 export interface UserPermissionInfo {
   user: UserInfo; // 用户信息
@@ -16,13 +14,12 @@ export class UserPermissionManager {
 
   static setUserPermissionInfo(userPermissionInfo: UserPermissionInfo): void {
     // permissions存为map，提高查询效率
-    userPermissionInfo.permissionMap = Array.isArray(userPermissionInfo.permissions) ?
-      userPermissionInfo.permissions.reduce((acc: Record<string, boolean>, cur:string) => {
-        acc[cur] = true;
-        return acc;
-      }, {})
-      :
-      {};
+    userPermissionInfo.permissionMap = Array.isArray(userPermissionInfo.permissions)
+      ? userPermissionInfo.permissions.reduce((acc: Record<string, boolean>, cur: string) => {
+          acc[cur] = true;
+          return acc;
+        }, {})
+      : {};
     Reflect.deleteProperty(userPermissionInfo.permissionMap, '');
     localStorage.setItem(this.USER_PERMISSION_INFO_KEY, JSON.stringify(userPermissionInfo));
   }
@@ -85,13 +82,13 @@ export class UserPermissionManager {
 
 export const hasPermission = (permission: string): boolean => {
   return UserPermissionManager.hasPermission(permission);
-}
+};
 export const hasAnyPermission = (permissions: string[]): boolean => {
   return UserPermissionManager.hasAnyPermission(permissions);
-}
+};
 export const hasAllPermissions = (permissions: string[]): boolean => {
   return UserPermissionManager.hasAllPermissions(permissions);
-}
+};
 export const hasMenu = (menu: string): boolean => {
   return UserPermissionManager.hasMenu(menu);
-}
+};

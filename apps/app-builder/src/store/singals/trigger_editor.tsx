@@ -11,9 +11,14 @@ export const createTriggerEditorSignal = () => {
   const setNodeData = (nodeID: string, data: { [key: string]: any }) => {
     nodeData.value = { ...nodeData.value, [nodeID]: data };
   };
-  const setAllNodeData = (data:object) => {
+  const setAllNodeData = (data: object) => {
     nodeData.value = data;
   };
+  const deleteNodeData = (nodeID: string) => {
+    const { [nodeID]: _, ...rest } = nodeData.value;
+    nodeData.value = rest;
+  };
+
   const clearNodeData = () => {
     nodeData.value = {};
   };
@@ -33,6 +38,16 @@ export const createTriggerEditorSignal = () => {
     pageId.value = id;
   };
 
+  const mainEntities = signal<any[]>([]);
+  const setMainEntities = (entities: any[]) => {
+    mainEntities.value = entities;
+  };
+
+  const subEntities = signal<any[]>([]);
+  const setSubEntities = (entities: any[]) => {
+    subEntities.value = entities;
+  };
+
   return {
     nodes,
     setNodes,
@@ -40,6 +55,7 @@ export const createTriggerEditorSignal = () => {
     nodeData,
     setNodeData,
     setAllNodeData,
+    deleteNodeData,
     clearNodeData,
 
     nodeId,
@@ -49,7 +65,13 @@ export const createTriggerEditorSignal = () => {
     setFlowId,
 
     pageId,
-    setPageId
+    setPageId,
+
+    mainEntities,
+    setMainEntities,
+
+    subEntities,
+    setSubEntities
   };
 };
 
