@@ -276,7 +276,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                   从
                 </Grid.Col>
                 <Grid.Col span={9}>
-                  <Form.Item field="mainDataSource">
+                  <Form.Item field="mainDataSource" disabled={!dataType}>
                     <Select allowClear>
                       {mainEntityList.map((item) => (
                         <Select.Option key={item.entityId} value={item.entityId}>
@@ -290,7 +290,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                   的
                 </Grid.Col>
                 <Grid.Col span={9}>
-                  <Form.Item field="dataSource">
+                  <Form.Item field="dataSource" disabled={!mainDataSource}>
                     <Select allowClear>
                       {entityList.map((item) => (
                         <Select.Option key={item.entityId} value={item.entityId}>
@@ -310,7 +310,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                   从
                 </Grid.Col>
                 <Grid.Col span={19}>
-                  <Form.Item field="dataSource">
+                  <Form.Item field="dataSource" disabled={!dataType}>
                     <Select allowClear>
                       {entityList.map((item) => (
                         <Select.Option key={item.entityId} value={item.entityId}>
