@@ -90,6 +90,15 @@ public interface MetadataEntityFieldCoreService {
      */
     Map<Long, String> getFieldJdbcTypes(List<Long> fieldIds);
 
+    /**
+     * 根据字段ID列表返回对应的JDBC数据类型和字段类型信息
+     * 先查 metadata_entity_field 获取字段类型编码，再查 metadata_component_field_type 获取 data_type
+     *
+     * @param fieldIds 字段ID列表
+     * @return 字段JDBC类型和字段类型信息映射
+     */
+    Map<Long, Map<String, String>> getFieldJdbcTypesWithFieldType(List<Long> fieldIds);
+
     // TODO: 以下方法需要在build模块中实现，涉及VO转换
     /*
     List<FieldTypeConfigRespVO> getFieldTypeConfigs();
