@@ -2,19 +2,19 @@ import { nanoid } from 'nanoid';
 
 import iconLoop from '@/assets/flow/icon-loop.svg';
 import { type FlowNodeRegistry } from '../../../typings';
+import { NodeType } from '../../const';
 import { formMeta } from './form-meta';
 
 export const LoopNodeRegistry: FlowNodeRegistry = {
-  type: 'loop',
+  type: NodeType.LOOP,
   title: '循环节点',
   category: 'control',
   info: {
     icon: iconLoop,
-    description:
-      'Used to repeatedly execute a series of tasks by setting the number of iterations and logic',
+    description: 'Used to repeatedly execute a series of tasks by setting the number of iterations and logic'
   },
   meta: {
-    expandable: false, // disable expanded
+    expandable: false // disable expanded
   },
   formMeta,
   onAdd() {
@@ -22,8 +22,8 @@ export const LoopNodeRegistry: FlowNodeRegistry = {
       id: `loop_${nanoid(5)}`,
       type: 'loop',
       data: {
-        title: '循环节点',
-      },
+        title: '循环节点'
+      }
     };
-  },
+  }
 };

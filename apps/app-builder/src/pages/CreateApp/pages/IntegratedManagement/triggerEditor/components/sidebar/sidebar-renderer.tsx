@@ -2,7 +2,7 @@ import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { Drawer } from '@arco-design/web-react';
 import { PlaygroundEntityContext, useClientContext, useRefresh } from '@flowgram.ai/fixed-layout-editor';
 import { useSignals } from '@preact/signals-react/runtime';
-import { startTransition, useCallback, useEffect, useMemo } from 'react';
+import { startTransition, useEffect, useMemo } from 'react';
 import { IsSidebarContext } from '../../context';
 import type { FlowNodeMeta } from '../../typings';
 import { SidebarNodeRenderer } from './sidebar-node-renderer';
@@ -18,12 +18,14 @@ export const SidebarRenderer = (props: SidebarRendererProps) => {
   const { nodeId, setNodeId } = triggerEditorSignal;
   const { selection, playground, document } = useClientContext();
   const refresh = useRefresh();
-  const handleClose = useCallback(() => {
+
+  const handleClose = () => {
+    console.log('handleClose Node: ', nodeId.value);
     // Sidebar delayed closing
     startTransition(() => {
       setNodeId(undefined);
     });
-  }, []);
+  };
 
   const node = nodeId.value ? document.getNode(nodeId.value) : undefined;
 
@@ -59,13 +61,12 @@ export const SidebarRenderer = (props: SidebarRendererProps) => {
    */
   useEffect(() => {
     console.log('Node disposed: ', node?.id);
-    if (node) {
+    if (node?.id) {
       const toDispose = node.onDispose(() => {
         setNodeId(undefined);
       });
       return () => toDispose.dispose();
     }
-    return () => {};
   }, [node]);
 
   const visible = useMemo(() => {

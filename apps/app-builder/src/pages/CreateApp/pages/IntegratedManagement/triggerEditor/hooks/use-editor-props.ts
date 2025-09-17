@@ -100,8 +100,8 @@ export function useEditorProps(
        * Style config
        */
       constants: {
-        // [ConstantKeys.NODE_SPACING]: 24,
-        // [ConstantKeys.BRANCH_SPACING]: 20,
+        [ConstantKeys.NODE_SPACING]: 24,
+        [ConstantKeys.BRANCH_SPACING]: 20,
         // [ConstantKeys.INLINE_SPACING_BOTTOM]: 24,
         // [ConstantKeys.INLINE_BLOCKS_INLINE_SPACING_BOTTOM]: 13,
         // [ConstantKeys.ROUNDED_LINE_X_RADIUS]: 8,

@@ -3,22 +3,22 @@ import { nanoid } from 'nanoid';
 
 import iconEnd from '@/assets/flow/icon-end.jpg';
 import { type FlowNodeRegistry } from '../../../typings';
+import { NodeType } from '../../const';
 import { formMeta } from './form-meta';
 
 export const EndNodeRegistry: FlowNodeRegistry = {
-  type: 'end',
+  type: NodeType.END,
   title: '结束节点',
   category: 'control',
   meta: {
     isNodeEnd: true, // Mark as end
     selectable: false, // End node cannot select
     copyDisable: true, // End node canot copy
-    expandable: false, // disable expanded
+    expandable: false // disable expanded
   },
   info: {
     icon: iconEnd,
-    description:
-      '工作流的最后一个节点，用于在工作流运行结束后返回结果信息。',
+    description: '工作流的最后一个节点，用于在工作流运行结束后返回结果信息。'
   },
   /**
    * Render node via formMeta
@@ -68,11 +68,11 @@ export const EndNodeRegistry: FlowNodeRegistry = {
           type: 'object',
           properties: {
             result: {
-              type: 'string',
-            },
-          },
-        },
-      },
+              type: 'string'
+            }
+          }
+        }
+      }
     };
-  },
+  }
 };

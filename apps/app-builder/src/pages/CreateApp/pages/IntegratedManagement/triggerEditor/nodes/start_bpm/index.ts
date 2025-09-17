@@ -1,9 +1,10 @@
 import iconStart from '@/assets/flow/icon-start.jpg';
 import { type FlowNodeRegistry } from '../../typings';
+import { NodeType } from '../const';
 import { formMeta } from './form-meta';
 
 export const StartBpmNodeRegistry: FlowNodeRegistry = {
-  type: 'start_bpm',
+  type: NodeType.START_BPM,
   title: '子流程触发节点',
   category: 'trigger',
   meta: {

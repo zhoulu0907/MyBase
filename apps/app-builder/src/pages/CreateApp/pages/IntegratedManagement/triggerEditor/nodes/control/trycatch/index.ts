@@ -2,18 +2,19 @@ import { nanoid } from 'nanoid';
 
 import iconTryCatch from '@/assets/flow/icon-trycatch.svg';
 import { type FlowNodeRegistry } from '../../../typings';
+import { NodeType } from '../../const';
 import { formMeta } from './form-meta';
 
 export const TryCatchNodeRegistry: FlowNodeRegistry = {
-  type: 'tryCatch',
+  type: NodeType.TRY_CATCH,
   title: '异常处理节点',
   category: 'control',
   info: {
     icon: iconTryCatch,
-    description: 'try catch.',
+    description: 'try catch.'
   },
   meta: {
-    expandable: false, // disable expanded
+    expandable: false // disable expanded
   },
   formMeta,
   onAdd() {
@@ -21,13 +22,13 @@ export const TryCatchNodeRegistry: FlowNodeRegistry = {
       id: `tryCatch${nanoid(5)}`,
       type: 'tryCatch',
       data: {
-        title: '异常处理',
+        title: '异常处理'
       },
       blocks: [
         {
           id: `tryBlock${nanoid(5)}`,
           type: 'tryBlock',
-          blocks: [],
+          blocks: []
         },
         {
           id: `catchBlock${nanoid(5)}`,
@@ -36,20 +37,20 @@ export const TryCatchNodeRegistry: FlowNodeRegistry = {
           data: {
             title: '异常捕获_1',
             inputsValues: {
-              condition: '',
+              condition: ''
             },
             inputs: {
               type: 'object',
               required: ['condition'],
               properties: {
                 condition: {
-                  type: 'boolean',
-                },
-              },
-            },
-          },
-        },
-      ],
+                  type: 'boolean'
+                }
+              }
+            }
+          }
+        }
+      ]
     };
-  },
+  }
 };

@@ -1,6 +1,6 @@
 import { Button, Radio, Input, Select, Grid } from '@arco-design/web-react';
 import { IconDelete, IconDragDotVertical } from '@arco-design/web-react/icon';
-import type { Sort, ConfitionField, SelectOption } from '@onebase/app';
+import  { SortType, type Sort, type ConfitionField } from '@onebase/app';
 import { nanoid } from 'nanoid';
 import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
@@ -12,14 +12,13 @@ import { ReactSortable } from 'react-sortablejs';
 export interface ConditionEditorProps {
   fields: ConfitionField[];
   data?: Sort[];
-  sortByTypes: SelectOption[];
   onChange?: (value: Sort[]) => void;
 }
 
 /**
  * 条件编辑器组件初始化
  */
-const SortByEditor: React.FC<ConditionEditorProps> = ({ data, onChange, fields, sortByTypes }) => {
+const SortByEditor: React.FC<ConditionEditorProps> = ({ data, onChange, fields }) => {
   // 数据
   const [sortList, setSortList] = useState<Sort[]>([]);
 
@@ -89,9 +88,8 @@ const SortByEditor: React.FC<ConditionEditorProps> = ({ data, onChange, fields, 
                 </Grid.Col>
                 <Grid.Col span={8} className={styles.sortCol}>
                   <Radio.Group onChange={(e) => handleOnChange(item, 'sortType', e)}>
-                    {sortByTypes.map((ele) => (
-                      <Radio key={ele.value}  value={ele.value}>{ele.label}</Radio>
-                    ))}
+                    <Radio value={SortType.ASC}>升序</Radio>
+                    <Radio value={SortType.DESC}>降序</Radio>
                   </Radio.Group>
                 </Grid.Col>
                 <Grid.Col span={2} className={styles.sortCol}>
