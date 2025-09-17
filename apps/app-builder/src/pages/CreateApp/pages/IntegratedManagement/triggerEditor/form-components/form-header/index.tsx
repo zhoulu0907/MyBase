@@ -28,6 +28,7 @@ function DropdownContent(props: { updateTitleEdit: (editing: boolean) => void })
 
   const handleDelete = useCallback(
     (e: React.MouseEvent) => {
+      triggerEditorSignal.deleteNodeData(node.id);
       deleteNode();
       e.stopPropagation(); // Disable clicking prevents the sidebar from opening
     },
