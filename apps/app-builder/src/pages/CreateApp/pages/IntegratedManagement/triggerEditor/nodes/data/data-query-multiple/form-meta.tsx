@@ -21,8 +21,9 @@ import ConditionEditor from '../../../components/condition-editor';
 import SortByEditor from '../../../components/sortby-editor';
 import { useAppStore } from '@/store/store_app';
 import { getBeforeCurQueryNodes } from '../../../components/utils';
+import { validateNodeForm } from '../../utils';
 
-export const renderForm = () => {
+export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const isSidebar = useIsSidebar();
   const { node } = useNodeRenderContext();
   // 当前页应用id
@@ -40,6 +41,9 @@ export const renderForm = () => {
   const [validationTypes, setValidationTypes] = useState<EntityFieldValidationTypes[]>([]);
   const [conditionFields, setConditionFields] = useState<ConfitionField[]>([]);
 
+  useEffect(() => {
+    payloadForm && validateNodeForm(form, payloadForm, true);
+  }, [payloadForm]);
   useEffect(() => {
     if (dataType) {
       dataTypeChange(dataType);
@@ -249,9 +253,17 @@ export const renderForm = () => {
   };
 
   // 表单内容改变
-  const onValuesChange = (changeValue: any, values: any) => {
-    console.log('onValuesChange: ', changeValue, values);
+  const handlePropsOnChange = (values: any) => {
     triggerEditorSignal.setNodeData(node.id, values);
+  };
+
+  const onValuesChange = async (changeValue: any, values: any) => {
+    console.log('onValuesChange: ', changeValue, values);
+
+    // 校验表单
+    validateNodeForm(form, payloadForm, false);
+
+    handlePropsOnChange(values);
   };
 
   return (
@@ -268,7 +280,7 @@ export const renderForm = () => {
             <Form.Item label="节点ID" field="id " initialValue={node.id}>
               <Input disabled />
             </Form.Item>
-            <Form.Item label="查询方式" field="dataType" required>
+            <Form.Item label="查询方式" field="dataType" rules={[{ required: true, message: '请选择查询方式' }]}>
               <Radio.Group direction="vertical">
                 <Radio value={DATA_SOURCE_TYPE.FORM}>从表单中查询</Radio>
                 <Radio value={DATA_SOURCE_TYPE.DATA_NODE}>从数据节点中查询</Radio>
@@ -282,7 +294,7 @@ export const renderForm = () => {
                   从
                 </Grid.Col>
                 <Grid.Col span={9}>
-                  <Form.Item field="mainDataSource">
+                  <Form.Item field="mainDataSource" disabled={!dataType}>
                     <Select allowClear>
                       {mainEntityList.map((item) => (
                         <Select.Option key={item.entityId} value={item.entityId}>
@@ -296,7 +308,7 @@ export const renderForm = () => {
                   的
                 </Grid.Col>
                 <Grid.Col span={9}>
-                  <Form.Item field="dataSource">
+                  <Form.Item field="dataSource" disabled={!mainDataSource}>
                     <Select allowClear>
                       {entityList.map((item) => (
                         <Select.Option key={item.entityId} value={item.entityId}>
@@ -316,7 +328,7 @@ export const renderForm = () => {
                   从
                 </Grid.Col>
                 <Grid.Col span={19}>
-                  <Form.Item field="dataSource">
+                  <Form.Item field="dataSource" disabled={!dataType}>
                     <Select allowClear>
                       {entityList.map((item) => (
                         <Select.Option key={item.entityId} value={item.entityId}>
@@ -331,7 +343,7 @@ export const renderForm = () => {
                 </Grid.Col>
               </Grid.Row>
             )}
-            <Form.Item label="查询规则" field="filterType" required>
+            <Form.Item label="查询规则" field="filterType" rules={[{ required: true, message: '请选择查询规则' }]}>
               <Radio.Group>
                 <Radio value={FILTER_TYPE.ALL}>全部数据</Radio>
                 <Radio value={FILTER_TYPE.CONDITION}>按条件过滤</Radio>
@@ -346,7 +358,7 @@ export const renderForm = () => {
                 />
               </Form.Item>
             )}
-            <Form.Item label="排序规则" required field="sortBy">
+            <Form.Item label="排序规则" rules={[{ required: true, message: '请选择排序规则' }]} field="sortBy">
               <SortByEditor
                 data={triggerEditorSignal.nodeData.value[node.id]?.sortBy || []}
                 fields={conditionFields}
