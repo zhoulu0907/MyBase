@@ -340,6 +340,33 @@ export interface AuthViewVO {
 }
 
 /**
+ * 枚举 页面访问权限
+ * @enum
+ */
+export enum FunPermissionViewVisit {
+  notVisit,
+  canVisit
+}
+
+/**
+ * 枚举 操作权限
+ * @enum
+ */
+export enum FunOperationPermission {
+  notOperateAllowed,
+  canOperateAllowed
+}
+
+/**
+ * 枚举 视图权限
+ * @enum
+ */
+export enum FunViewPermission {
+  ViewCustomFieldPermission,
+  AllViewVisitAllowed
+}
+
+/**
  * 枚举 数据操作权限
  * @enum
  */
@@ -367,4 +394,41 @@ export enum FieldValueType {
    * 变量
    */
   variable = 'variable',
+}
+
+
+/**
+ * 枚举 字段权限
+ * @enum
+ */
+export enum RoleAllFieldPermission {
+  FieldCustomFieldPermission,
+  AllFieldPermissionAllow
+}
+
+/**
+ * 枚举 字段阅读权限
+ * @enum
+ */
+export enum FieldRead {
+  notRead,
+  canRead
+}
+
+/**
+ * 枚举 字段编辑权限
+ * @enum
+ */
+export enum FieldEdit {
+  notEdit,
+  canEdit
+}
+
+/**
+ * 枚举 字段下载权限
+ * @enum
+ */
+export enum FieldDownloadable {
+  notDownloadable,
+  canDownloadable
 }
