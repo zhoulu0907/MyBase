@@ -32,18 +32,6 @@ export const SwitchNodeRegistry: FlowNodeRegistry = {
           type: 'case',
           data: {
             title: '分支_0',
-            inputsValues: {
-              condition: { type: 'constant', content: '' }
-            },
-            inputs: {
-              type: 'object',
-              required: ['condition'],
-              properties: {
-                condition: {
-                  type: 'boolean'
-                }
-              }
-            }
           },
           blocks: []
         },
@@ -52,18 +40,6 @@ export const SwitchNodeRegistry: FlowNodeRegistry = {
           type: 'case',
           data: {
             title: '分支_1',
-            inputsValues: {
-              condition: { type: 'constant', content: '' }
-            },
-            inputs: {
-              type: 'object',
-              required: ['condition'],
-              properties: {
-                condition: {
-                  type: 'boolean'
-                }
-              }
-            }
           }
         },
         {

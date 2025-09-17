@@ -24,22 +24,7 @@ export const IFNodeRegistry: FlowNodeRegistry = {
       id: `if_${nanoid(5)}`,
       type: 'if',
       data: {
-        title: '条件节点',
-        // inputsValues: {
-        //   condition: { type: 'constant', content: true }
-        // },
-        // inputs: {
-        //   type: 'object',
-        //   required: ['condition'],
-        //   properties: {
-        //     condition: {
-        //       type: 'boolean'
-        //     }
-        //   }
-        // }
-        data:{
-          condition: { type: 'constant', content: true }
-        }
+        title: '条件节点'
       },
       blocks: [
         {
