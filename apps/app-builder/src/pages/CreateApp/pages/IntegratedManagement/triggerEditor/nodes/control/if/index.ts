@@ -4,7 +4,7 @@ import { nanoid } from 'nanoid';
 import iconIf from '@/assets/flow/icon-if.png';
 import { type FlowNodeRegistry } from '../../../typings';
 import { NodeType } from '../../const';
-import { defaultFormMeta } from '../../default-form-meta';
+import { formMeta } from './form-meta';
 
 export const IFNodeRegistry: FlowNodeRegistry = {
   extend: FlowNodeSplitType.STATIC_SPLIT,
@@ -13,37 +13,25 @@ export const IFNodeRegistry: FlowNodeRegistry = {
   category: 'control',
   info: {
     icon: iconIf,
-    description: 'Only the corresponding branch will be executed if the set conditions are met.'
+    description: '只会执行满足设定条件相应的分支。'
   },
   meta: {
     expandable: false // disable expanded
   },
-  formMeta: defaultFormMeta,
+  formMeta: formMeta,
   onAdd() {
     return {
       id: `if_${nanoid(5)}`,
       type: 'if',
       data: {
-        title: '条件节点',
-        inputsValues: {
-          condition: { type: 'constant', content: true }
-        },
-        inputs: {
-          type: 'object',
-          required: ['condition'],
-          properties: {
-            condition: {
-              type: 'boolean'
-            }
-          }
-        }
+        title: '条件节点'
       },
       blocks: [
         {
           id: nanoid(5),
           type: 'ifBlock',
           data: {
-            title: 'true'
+            title: '通过'
           },
           blocks: []
         },
@@ -51,7 +39,7 @@ export const IFNodeRegistry: FlowNodeRegistry = {
           id: nanoid(5),
           type: 'ifBlock',
           data: {
-            title: 'false'
+            title: '不通过'
           }
         }
       ]

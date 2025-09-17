@@ -8,6 +8,7 @@ import { FIELD_TYPE } from '@onebase/ui-kit';
 import EntityNodeComponent from './ERnode';
 import styles from './index.module.less';
 import { GridNodePositioner } from './utils/nodePositioner';
+import { performAutoLayout } from './utils/autoLayout';
 
 const LINE_HEAD_HEIGHT = 48;
 const LINE_HEIGHT = 34.8;
@@ -445,6 +446,10 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
           onNodeEdit?.(node.getData().data);
         });
 
+        graphRef.current.on('scale', ({ sx }) => {
+          setZoom(Number((sx * 100).toFixed(0)));
+        });
+
         // 监听画布平移
         // graphRef.current.on('translate', ({ tx, ty }) => {
         //   console.log('translate', tx, ty);
@@ -522,6 +527,48 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
       graphRef?.current?.zoomTo(value / 100);
     };
 
+    // 自动布局
+    const handleAutoLayout = () => {
+      if (!graphRef.current || !data?.nodes || data.nodes.length === 0) {
+        console.warn('Graph not ready or no nodes to layout');
+        return;
+      }
+
+      try {
+        // 执行自动布局算法
+        const newPositions = performAutoLayout(data.nodes, data.edges || [], {
+          nodeWidth: NODE_WIDTH,
+          horizontalSpacing: 50,
+          verticalSpacing: 100,
+          startX: 100,
+          startY: 100
+        });
+
+        // 更新节点位置
+        newPositions.forEach(({ id, x, y }) => {
+          const node = graphRef.current?.getCellById(id);
+          if (node) {
+            node.position(x, y);
+
+            // 同步更新数据
+            const nodeData = data.nodes.find((n) => n.entityId === id);
+            if (nodeData && updateEntityPosition) {
+              updateEntityPosition(nodeData, x, y);
+            }
+          }
+        });
+
+        // 居中显示
+        setTimeout(() => {
+          graphRef.current?.centerContent();
+        }, 100);
+
+        console.log('Auto layout completed');
+      } catch (error) {
+        console.error('Auto layout failed:', error);
+      }
+    };
+
     return (
       <div className={styles['entity-er-container']}>
         <div ref={containerRef} className={styles['graph-container']} />
@@ -542,6 +589,9 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
           />
           <Button type="outline" size="mini" onClick={() => changeZoom(90)}>
             重置
+          </Button>
+          <Button type="primary" size="mini" onClick={handleAutoLayout}>
+            自动布局
           </Button>
         </div>
 

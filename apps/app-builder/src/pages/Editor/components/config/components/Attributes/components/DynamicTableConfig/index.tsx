@@ -61,14 +61,14 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
     const newEntityList = [];
     if (mainEntity) {
       newEntityList.push({
-        entityId: mainEntity.entityID,
+        entityId: mainEntity.entityId,
         entityName: mainEntity.entityName
       });
     }
     if (subEntities) {
       newEntityList.push(
         ...subEntities.entities.map((entity) => ({
-          entityId: entity.entityID,
+          entityId: entity.entityId,
           entityName: entity.entityName
         }))
       );
@@ -115,7 +115,8 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
       title:
         configs[columnsKey].find((col: any) => col.dataIndex === item.fieldName && configs.metaData === entityId)
           ?.title || item.displayName,
-      dataIndex: item.fieldName
+      dataIndex: item.fieldName,
+      id: item.id,
     }));
 
     // console.log('configs[columnsKey]: ', configs[columnsKey]);
@@ -372,7 +373,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
                         )
                         .map((item: any) => ({
                           label: item.title,
-                          value: item.dataIndex
+                          value: item.id
                         }))}
                     />
                     <Button
@@ -409,7 +410,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
                         <Menu.Item
                           key={item.fieldName}
                           onClick={() => {
-                            const newList = [...searchItemsConfig, { label: item.displayName, value: item.fieldName }];
+                            const newList = [...searchItemsConfig, { label: item.displayName, value: item.id }];
                             console.log('newList: ', newList);
                             add({ label: item.displayName, value: item.fieldName });
                             setSearchItemsConfig(newList);

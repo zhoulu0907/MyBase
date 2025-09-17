@@ -15,7 +15,7 @@ export const BreakLoopNodeRegistry: FlowNodeRegistry = {
   extend: 'end',
   info: {
     icon: iconBreak,
-    description: 'Break in current Loop.'
+    description: '中断当前循环'
   },
   meta: {
     style: {
@@ -38,7 +38,7 @@ export const BreakLoopNodeRegistry: FlowNodeRegistry = {
       id: `break_${nanoid()}`,
       type: 'breakLoop',
       data: {
-        title: 'BreakLoop'
+        title: '中断循环'
       }
     };
   }

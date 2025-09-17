@@ -100,8 +100,8 @@ export function useEditorProps(
        * Style config
        */
       constants: {
-        // [ConstantKeys.NODE_SPACING]: 24,
-        // [ConstantKeys.BRANCH_SPACING]: 20,
+        [ConstantKeys.NODE_SPACING]: 24,
+        [ConstantKeys.BRANCH_SPACING]: 20,
         // [ConstantKeys.INLINE_SPACING_BOTTOM]: 24,
         // [ConstantKeys.INLINE_BLOCKS_INLINE_SPACING_BOTTOM]: 13,
         // [ConstantKeys.ROUNDED_LINE_X_RADIUS]: 8,
@@ -185,11 +185,11 @@ export function useEditorProps(
         },
         renderDefaultNode: BaseNode, // node render
         renderTexts: {
-          'loop-end-text': 'Loop End',
-          'loop-traverse-text': 'Loop',
-          'try-start-text': 'Try Start',
-          'try-end-text': 'Try End',
-          'catch-text': 'Catch Error'
+          'loop-end-text': '循环结束',
+          'loop-traverse-text': '循环',
+          'try-start-text': '尝试开始',
+          'try-end-text': '尝试结束',
+          'catch-text': '捕获错误'
         }
       },
       /**

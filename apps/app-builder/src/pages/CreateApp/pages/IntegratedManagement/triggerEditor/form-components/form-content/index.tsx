@@ -1,9 +1,8 @@
 import React from 'react';
 
 import { FlowNodeRegistry } from '@flowgram.ai/fixed-layout-editor';
-
 import { useIsSidebar, useNodeRenderContext } from '../../hooks';
-import { FormTitleDescription, FormWrapper } from './styles';
+import styles from './index.module.less';
 
 /**
  * @param props
@@ -15,11 +14,11 @@ export function FormContent(props: { children?: React.ReactNode }) {
   const registry = node.getNodeRegistry<FlowNodeRegistry>();
 
   return (
-    <FormWrapper>
+    <div className={styles.formWrapper}>
       <>
-        {isSidebar && <FormTitleDescription>{registry.info?.description}</FormTitleDescription>}
+        {isSidebar && <div className={styles.formTitleDescription}>{registry.info?.description}</div>}
         {(expanded || isSidebar) && props.children}
       </>
-    </FormWrapper>
+    </div>
   );
 }

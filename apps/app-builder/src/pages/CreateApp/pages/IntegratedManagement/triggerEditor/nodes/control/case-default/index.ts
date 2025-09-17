@@ -27,7 +27,7 @@ export const CaseDefaultNodeRegistry: FlowNodeRegistry = {
   },
   info: {
     icon: iconCase,
-    description: 'Switch default branch'
+    description: '默认分支'
   },
   canDelete: (ctx, node) => false,
   formMeta

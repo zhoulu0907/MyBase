@@ -23,7 +23,7 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList, form }) => {
 
   return (
     <div className={styles.conditionWrapper}>
-      <Form.Item>
+      <Form.Item validateTrigger={['onChange']}>
         <Form.List field="fieldList">
           {(fields, { add, remove }) => {
             return (
@@ -32,7 +32,7 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList, form }) => {
                   return (
                     <Grid.Row gutter={8} key={item.key}>
                       <Grid.Col span={6}>
-                        <Form.Item field={item.field + '.fieldId'}>
+                        <Form.Item field={item.field + '.fieldId'} rules={[{ required: true, message: '请选择字段' }]}>
                           <Select
                             options={fieldList.map((field) => ({
                               label: field.displayName,
@@ -79,6 +79,7 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList, form }) => {
                     onClick={() => {
                       add();
                     }}
+                    disabled={(selectedFields || [])?.length >= fieldList?.length}
                   >
                     添加字段
                   </Button>

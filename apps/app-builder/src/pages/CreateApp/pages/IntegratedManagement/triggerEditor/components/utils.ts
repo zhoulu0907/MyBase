@@ -1,4 +1,6 @@
+import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import type { FlowNodeJSON } from '@flowgram.ai/fixed-layout-editor';
+import { NodeType } from '../nodes/const';
 
 // 判断bolcks 是否包含当前节点
 const judge = (curNodeId: string, blocks: FlowNodeJSON[]): boolean => {
@@ -26,7 +28,12 @@ const getBlockNode = (curNodeId: string, blocks: FlowNodeJSON[]): FlowNodeJSON[]
     if (ele.blocks?.length) {
       const hasCurNode = judge(curNodeId, ele.blocks);
       if (hasCurNode) {
-        if (ele.type === 'dataQueryMultiple') {
+        const nodeData = triggerEditorSignal.nodeData.value[ele.id];
+        if (
+          ele.type === 'dataQueryMultiple'
+          //   nodeData.dataSource &&
+          //   nodeData.dataType !== DATA_SOURCE_TYPE.DATA_NODE
+        ) {
           blockNode.push(ele);
         }
         const newBlocks = getBlockNode(curNodeId, ele.blocks);
@@ -38,7 +45,7 @@ const getBlockNode = (curNodeId: string, blocks: FlowNodeJSON[]): FlowNodeJSON[]
   return blockNode;
 };
 
-export function getBeforeCurNodes(curNodeId: string, allNodes: FlowNodeJSON[]): FlowNodeJSON[] {
+export function getBeforeCurQueryNodes(curNodeId: string, allNodes: FlowNodeJSON[]): FlowNodeJSON[] {
   // 获取当前节点前并且是数据查询节点的数据
   // 条件节点  blocks
   let nodes: FlowNodeJSON[] = [];
@@ -54,11 +61,16 @@ export function getBeforeCurNodes(curNodeId: string, allNodes: FlowNodeJSON[]): 
         const blocks = getBlockNode(curNodeId, ele.blocks);
         nodes.push.apply(nodes, blocks);
       } else {
-        const blocks = getBeforeCurNodes(curNodeId, ele.blocks);
+        const blocks = getBeforeCurQueryNodes(curNodeId, ele.blocks);
         nodes.push.apply(nodes, blocks);
       }
     }
-    if (ele.type === 'dataQueryMultiple') {
+    // const nodeData = triggerEditorSignal.nodeData.value[ele.id];
+    if (
+      ele.type === NodeType.DATA_QUERY_MULTIPLE
+      // nodeData.dataSource &&
+      //   nodeData.dataType !== DATA_SOURCE_TYPE.DATA_NODE
+    ) {
       nodes.push(ele);
     }
   }

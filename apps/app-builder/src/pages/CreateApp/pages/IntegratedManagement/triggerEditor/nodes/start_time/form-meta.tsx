@@ -215,16 +215,18 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
               </Grid.Col>
             </Grid.Row>
 
-            <Grid.Row gutter={8}>
-              <Form.Item
-                label="触发时间"
-                layout="vertical"
-                field="triggerTime"
-                rules={[{ required: true, message: '请选择触发时间' }]}
-              >
-                <TimePicker format="HH:mm" />
-              </Form.Item>
-            </Grid.Row>
+            {repeatType !== REPEAT_TYPE_OPTIONS.DAY && repeatType !== REPEAT_TYPE_OPTIONS.NONE && (
+              <Grid.Row gutter={8}>
+                <Form.Item
+                  label="触发时间"
+                  layout="vertical"
+                  field="triggerTime"
+                  rules={[{ required: true, message: '请选择触发时间' }]}
+                >
+                  <TimePicker format="HH:mm" />
+                </Form.Item>
+              </Grid.Row>
+            )}
           </Form>
         </FormContent>
       ) : (
