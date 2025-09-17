@@ -29,6 +29,10 @@ const SortByEditor: React.FC<ConditionEditorProps> = ({ data, onChange, fields, 
       onChange(sortList);
     }
   }, [sortList]);
+  useEffect(()=>{
+    setSortList([]);
+    form.clearFields(['sortList'])
+  },[clearSortByNum])
 
   return (
     <ReactSortable list={sortList} setList={handleSort} animation={200} handle=".sortby-item-handle">
