@@ -266,7 +266,7 @@ public class FormulaExeWithParamDemo {
                 "IF(base > 50, '大于50', '不大于50')"
             };
 
-            int iterations = 1000;
+            int iterations = 100;
             long startTime = System.currentTimeMillis();
 
             for (int i = 0; i < iterations; i++) {
@@ -299,7 +299,7 @@ public class FormulaExeWithParamDemo {
 
         try {
             // 相同结果的不同实现方式对比
-            int iterations = 500;
+            int iterations = 100;
 
             // 方式1：直接使用executeFormula
             long startTime1 = System.currentTimeMillis();
