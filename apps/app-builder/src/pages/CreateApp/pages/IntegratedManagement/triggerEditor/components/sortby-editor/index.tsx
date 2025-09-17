@@ -1,115 +1,112 @@
-import { Button, Radio, Input, Select, Grid } from '@arco-design/web-react';
-import { IconDelete, IconDragDotVertical } from '@arco-design/web-react/icon';
-import  { SortType, type Sort, type ConfitionField } from '@onebase/app';
-import { nanoid } from 'nanoid';
+import { Button, Form, Grid, Select, Radio, type FormInstance } from '@arco-design/web-react';
+import { IconDelete, IconPlus, IconDragDotVertical } from '@arco-design/web-react/icon';
+import { SortType, type Sort, type ConfitionField } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
-import styles from './index.module.less';
 import { ReactSortable } from 'react-sortablejs';
+import styles from './index.module.less';
+import { nanoid } from 'nanoid';
 
-/**
- * ConditionEditor 组件的 props 类型定义
- */
 export interface ConditionEditorProps {
   fields: ConfitionField[];
   data?: Sort[];
   onChange?: (value: Sort[]) => void;
+  form: FormInstance;
+  clearSortByNum?: number;
 }
 
-/**
- * 条件编辑器组件初始化
- */
-const SortByEditor: React.FC<ConditionEditorProps> = ({ data, onChange, fields }) => {
-  // 数据
+const SortByEditor: React.FC<ConditionEditorProps> = ({ data, onChange, fields, form, clearSortByNum }) => {
   const [sortList, setSortList] = useState<Sort[]>([]);
 
+  // 排序改变
+  const handleSort = (newSortList: Sort[]) => {
+    console.log('handleSort', newSortList);
+    setSortList(newSortList || []);
+    form.setFieldValue('sortList', newSortList || []);
+  };
+
   useEffect(() => {
-    if (data) {
-      setSortList(data);
-    }
-  }, []);
-  useEffect(() => {
-    if(onChange){
+    if (onChange) {
       onChange(sortList);
     }
   }, [sortList]);
 
-  const addSort = () => {
-    const pid = nanoid();
-    const newSortList = [...sortList];
-    newSortList.push({
-      id: pid,
-      sortField: '',
-      sortType: ''
-    });
-    setSortList(newSortList);
-  };
-  const deleteSort = (id: string) => {
-    const newSortList = [...sortList];
-    const index = newSortList.findIndex((ele) => ele.id === id);
-    newSortList.splice(index, 1);
-    setSortList(newSortList);
-  };
-
-  // 内容改变
-  const handleOnChange = (item: Sort, field: string, value: any) => {
-    const newSortList = sortList.map((ele)=>{
-      if (ele.id === item.id) {
-        return { ...ele, [field]: value };
-      }
-      return ele;
-    });
-    setSortList(newSortList);
-  };
-  // 排序改变
-  const handleSort = (newSortList: Sort[]) => {
-    console.log('handleSort', newSortList);
-    setSortList(newSortList);
-  };
-
   return (
-    <div>
-      {sortList && (
-        <ReactSortable list={sortList} setList={handleSort} animation={200} handle=".sortby-item-handle">
-          {sortList.map((item) => {
+    <ReactSortable list={sortList} setList={handleSort} animation={200} handle=".sortby-item-handle">
+      <Form.Item noStyle validateTrigger={['onChange']}>
+        <Form.List field="sortList" initialValue={data}>
+          {(field, { add, remove }) => {
             return (
-              <Grid.Row key={item.id} align="center" gutter={8} className={styles.sortRow}>
-                <Grid.Col span={1} className={styles.sortCol}>
-                  <IconDragDotVertical
-                    // 支持拖拽的图标
-                    className="sortby-item-handle"
-                    style={{
-                      cursor: 'move',
-                      color: '#555'
-                    }}
-                  />
-                </Grid.Col>
-                <Grid.Col span={13}>
-                  <Select onChange={(e) => handleOnChange(item, 'sortField', e)} options={fields}></Select>
-                </Grid.Col>
-                <Grid.Col span={8} className={styles.sortCol}>
-                  <Radio.Group onChange={(e) => handleOnChange(item, 'sortType', e)}>
-                    <Radio value={SortType.ASC}>升序</Radio>
-                    <Radio value={SortType.DESC}>降序</Radio>
-                  </Radio.Group>
-                </Grid.Col>
-                <Grid.Col span={2} className={styles.sortCol}>
-                  <Button
-                    type="text"
-                    onClick={() => {
-                      deleteSort(item.id);
-                    }}
-                    icon={<IconDelete style={{ color: '#4E5969' }} />}
-                  />
-                </Grid.Col>
-              </Grid.Row>
+              <>
+                {field.map((item: any, index: number) => {
+                  return (
+                    <Grid.Row key={item.key} gutter={8} className={styles.sortRow}>
+                      <Grid.Col span={1} className={styles.sortCol}>
+                        <IconDragDotVertical
+                          // 支持拖拽的图标
+                          className="sortby-item-handle"
+                          style={{
+                            cursor: 'move',
+                            color: '#555'
+                          }}
+                        />
+                      </Grid.Col>
+                      <Grid.Col span={13} className={styles.sortCol}>
+                        <Form.Item field={item.field + '.sortField'} noStyle>
+                          <Select
+                            onChange={() => {
+                              setSortList(form.getFieldValue('sortList'));
+                            }}
+                            options={fields}
+                          ></Select>
+                        </Form.Item>
+                      </Grid.Col>
+                      <Grid.Col span={8} className={styles.sortCol}>
+                        <Form.Item field={item.field + '.sortType'} noStyle>
+                          <Radio.Group
+                            onChange={() => {
+                              setSortList(form.getFieldValue('sortList'));
+                            }}
+                          >
+                            <Radio value={SortType.ASC}>升序</Radio>
+                            <Radio value={SortType.DESC}>降序</Radio>
+                          </Radio.Group>
+                        </Form.Item>
+                      </Grid.Col>
+                      <Grid.Col span={2} className={styles.sortCol}>
+                        <Button
+                          type="text"
+                          onClick={() => {
+                            remove(index);
+                            setSortList(form.getFieldValue('sortList'));
+                          }}
+                          icon={<IconDelete style={{ color: '#4E5969' }} />}
+                        />
+                      </Grid.Col>
+                    </Grid.Row>
+                  );
+                })}
+
+                <Button
+                  type="dashed"
+                  icon={<IconPlus />}
+                  onClick={() => {
+                    const temp = {
+                      id: nanoid(),
+                      sortField: '',
+                      sortType: ''
+                    };
+                    add(temp);
+                    setSortList((prev) => [...prev, temp]);
+                  }}
+                >
+                  添加字段
+                </Button>
+              </>
             );
-          })}
-        </ReactSortable>
-      )}
-      <Button type="text" size="small" onClick={addSort}>
-        + 添加排序字段
-      </Button>
-    </div>
+          }}
+        </Form.List>
+      </Form.Item>
+    </ReactSortable>
   );
 };
 

@@ -362,6 +362,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
               <SortByEditor
                 data={triggerEditorSignal.nodeData.value[node.id]?.sortBy || []}
                 fields={conditionFields}
+                form={payloadForm}
               ></SortByEditor>
             </Form.Item>
           </Form>

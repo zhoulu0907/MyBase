@@ -34,6 +34,8 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const filterType = Form.useWatch('filterType', payloadForm);
   const mainDataSource = Form.useWatch('mainDataSource', payloadForm);
 
+  const [clearSortBy, setClearSortBy] = useState<number>(0);
+
   // 数据源选择
   const [entityList, setEntityList] = useState<MetadataEntityPair[]>([]);
   const [mainEntityList, setMainEntityList] = useState<MetadataEntityPair[]>([]);
@@ -68,6 +70,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
    */
   const dataTypeChange = async (value: number) => {
     payloadForm.clearFields(['dataSource', 'sortBy']);
+    setClearSortBy(clearSortBy + 1);
     const nodeData = triggerEditorSignal.nodeData.value[node.id];
     triggerEditorSignal.setNodeData(node.id, {
       ...nodeData,
@@ -88,8 +91,9 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const dataSourceChange = async (value: string) => {
     // 判断源节点
     const originNodeData = triggerEditorSignal.nodeData.value[value];
-    const originNodeId = originNodeData?.dataSourceOriginNodeId || value
+    const originNodeId = originNodeData?.dataSourceOriginNodeId || value;
     payloadForm.clearFields(['sortBy']);
+    setClearSortBy(clearSortBy + 1);
     setConditionFields([]);
     setValidationTypes([]);
     const nodeData = triggerEditorSignal.nodeData.value[node.id];
@@ -105,6 +109,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   };
   const mainDataSourceChange = async (value: string) => {
     payloadForm.clearFields(['dataSource', 'sortBy']);
+    setClearSortBy(clearSortBy + 1);
     const nodeData = triggerEditorSignal.nodeData.value[node.id];
     triggerEditorSignal.setNodeData(node.id, {
       ...nodeData,
@@ -124,7 +129,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     });
     setEntityList(newEntityList);
   };
-  
+
   // 获取数据源列表
   const getEntityList = async () => {
     // todo  判断
@@ -180,7 +185,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     } else if (dataType === DATA_SOURCE_TYPE.DATA_NODE) {
       // 从数据节点中查询  DATA_NODE
       const nodeData = triggerEditorSignal.nodeData.value[dataSource];
-      if(!nodeData.dataSource){
+      if (!nodeData.dataSource) {
         return;
       }
       const res = await getEntityFields({ entityId: nodeData.dataSource });
@@ -344,6 +349,8 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
               <SortByEditor
                 data={triggerEditorSignal.nodeData.value[node.id]?.sortBy || []}
                 fields={conditionFields}
+                form={payloadForm}
+                clearSortByNum={clearSortBy}
               ></SortByEditor>
             </Form.Item>
             <div style={{ color: '#4e5969' }}>仅查询排序的第一条数据</div>
