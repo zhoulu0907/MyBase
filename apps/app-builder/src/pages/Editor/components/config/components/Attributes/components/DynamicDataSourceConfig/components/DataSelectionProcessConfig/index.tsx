@@ -1,12 +1,36 @@
-import { Button, Checkbox, Drawer, Form, Grid, Input, Select, Switch, Tooltip } from '@arco-design/web-react';
+import {
+  Alert,
+  Button,
+  Checkbox,
+  Drawer,
+  Dropdown,
+  Form,
+  Grid,
+  Input,
+  Menu,
+  Message,
+  Radio,
+  Select,
+  Switch,
+  Tooltip,
+  Tree
+} from '@arco-design/web-react';
 import React, { useEffect, useState } from 'react';
 
-import { IconQuestionCircleFill } from '@arco-design/web-react/icon';
+import {
+  IconCaretDown,
+  IconDelete,
+  IconDragDotVertical,
+  IconPlus,
+  IconQuestionCircleFill
+} from '@arco-design/web-react/icon';
 import { ListComp } from '@onebase/ui-kit';
 
 import styles from '../../index.module.less';
 import type { DynamicSelectDataSourceConfigProps } from '../..';
 import DropdownRender from '../DropdownRender';
+import FilterDataModal from '../FilterDataModal';
+import { ReactSortable } from 'react-sortablejs';
 
 interface DataSelectionProcessConfigProps extends DynamicSelectDataSourceConfigProps {
   visible: boolean;
@@ -15,6 +39,7 @@ interface DataSelectionProcessConfigProps extends DynamicSelectDataSourceConfigP
 
 const FormItem = Form.Item;
 const Option = Select.Option;
+const RadioGroup = Radio.Group;
 
 const SUB_ATTR_KEY = {
   DEFAULTVALUE: 'defaultValue',
@@ -75,6 +100,30 @@ const initialDisplayFieldOptions = [
   }
 ];
 
+const fastFilterOptions = [
+  { label: '单选按钮组', value: 'radioGroup' },
+  { label: '单行文本', value: 'singleText' },
+  { label: '提交时间', value: 'submitTime' },
+  { label: '多行文本', value: 'multiText' },
+  { label: '提交人', value: 'submitPerson' },
+  { label: '更新时间', value: 'updateDate' }
+];
+
+const treeData = [
+  {
+    title: '全部',
+    key: '0-0',
+    // selectable: false, // 父节点不可选
+    children: [
+      {
+        key: 'ciki',
+        title: 'Ciki',
+        icon: <IconCaretDown />
+      }
+    ]
+  }
+];
+
 const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
   visible,
   setVisible,
@@ -84,9 +133,13 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
   id
 }) => {
   const tableConfig = configs[SUB_ATTR_KEY.DYNAMICTABLECONFIG];
+  const [filterDataVisible, setFilterDataVisible] = useState(false); //添加过滤条件popup
 
-  const [sortFieldOptions, setSortFieldOptions] = useState<any[]>(defaultOptions);
-  const [sortOption, setSortOption] = useState<any[]>(sortOptions);
+  const [sortFieldValue, setSortFieldValue] = useState<number>();
+  const [sortValue, setSortValue] = useState<number>(1);
+
+  const [isFastFilter, setIsFastFilter] = useState<boolean>(false);
+  const [fastFilters, setFastFilters] = useState<any[]>([]);
 
   const [displayFieldOptions, setDisplayFieldOptions] = useState(initialDisplayFieldOptions);
   const [selected, setSelected] = useState([
@@ -99,6 +152,18 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
   ]);
   const [tableHeader, setTableHeader] = useState<any[]>(tableConfig[SUB_ATTR_KEY.COLUMNS]); // table header
   const [tableDataSource, setTableDataSource] = useState([]); // table data source
+
+  const sortType = 'normal';
+
+  const droplist = (
+    <Menu className={styles.hideScrollbarCommon} onClickMenuItem={(key) => handleSelectFastFilter(key)}>
+      {fastFilterOptions.map((opt) => (
+        <Menu.Item key={opt.value} disabled={fastFilters.includes(opt)}>
+          {opt.label}
+        </Menu.Item>
+      ))}
+    </Menu>
+  );
 
   useEffect(() => {
     handleOptionsChange();
@@ -121,6 +186,18 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
   // 获取叶子节点
   const leafCount = countSelectedLeaf(selected, displayFieldOptions);
 
+  const handleSelectFastFilter = (key: any) => {
+    if (fastFilters.length === 3) {
+      Message.warning('最多添加三个分组字段');
+    } else {
+      const obj: any = fastFilterOptions.find((opt) => opt.value === key);
+      if (obj?.label !== '提交人') {
+        obj.sortType = 'normal';
+      }
+      setFastFilters([...fastFilters, obj]);
+    }
+  };
+
   return (
     <>
       <Drawer
@@ -136,7 +213,14 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
       >
         <div className={styles.container}>
           <div className={styles.leftColumn}>
-            <ListComp.XTable cpName={id} id={id} {...tableConfig} columns={tableHeader} />
+            {fastFilters.length > 0 && (
+              <div className={styles.leftTree}>
+                <Tree treeData={treeData}></Tree>
+              </div>
+            )}
+            <div className={styles.rightFlexTable}>
+              <ListComp.XTable cpName={id} id={id} {...tableConfig} columns={tableHeader} />
+            </div>
           </div>
           <div className={styles.rightColumn}>
             <Form layout="vertical">
@@ -170,14 +254,21 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
                 />
               </FormItem>
               <FormItem label="数据过滤">
-                <Button type="secondary" long>
+                <Button type="secondary" long onClick={() => setFilterDataVisible(true)}>
                   添加过滤条件
                 </Button>
+                <FilterDataModal visible={filterDataVisible} onCancel={() => setFilterDataVisible(false)} />
               </FormItem>
               <FormItem label="数据排序规则">
                 <Grid.Row gutter={8}>
-                  <Grid.Col span={18}>
-                    <Select placeholder="请选择" getPopupContainer={(node) => node.parentNode as HTMLElement}>
+                  <Grid.Col span={sortFieldValue ? 18 : 24}>
+                    <Select
+                      defaultValue={sortFieldValue}
+                      onChange={setSortFieldValue}
+                      placeholder="请选择"
+                      getPopupContainer={(node) => node.parentNode as HTMLElement}
+                      allowClear
+                    >
                       {defaultOptions.map((option) => (
                         <Option key={option.value} value={option.value}>
                           {option.label}
@@ -185,15 +276,22 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
                       ))}
                     </Select>
                   </Grid.Col>
-                  <Grid.Col span={6}>
-                    <Select placeholder="请选择" getPopupContainer={(node) => node.parentNode as HTMLElement}>
-                      {sortOptions.map((option) => (
-                        <Option key={option.value} value={option.value}>
-                          {option.label}
-                        </Option>
-                      ))}
-                    </Select>
-                  </Grid.Col>
+                  {sortFieldValue && (
+                    <Grid.Col span={6}>
+                      <Select
+                        defaultValue={sortValue}
+                        onChange={setSortValue}
+                        placeholder="请选择"
+                        getPopupContainer={(node) => node.parentNode as HTMLElement}
+                      >
+                        {sortOptions.map((option) => (
+                          <Option key={option.value} value={option.value}>
+                            {option.label}
+                          </Option>
+                        ))}
+                      </Select>
+                    </Grid.Col>
+                  )}
                 </Grid.Row>
               </FormItem>
               <FormItem label="操作权限">
@@ -203,9 +301,61 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
                 </Tooltip>
               </FormItem>
               <FormItem label="快捷筛选" layout="horizontal" className={styles.switchLabel}>
-                <Switch className={styles.switchButton} />
+                <Switch className={styles.switchButton} onChange={(value) => setIsFastFilter(value)} />
               </FormItem>
-              <div className={styles.tip}>开启后可添加筛选字段，表格左侧会显示字段值供成员快速选择。</div>
+              {!isFastFilter ? (
+                <div className={styles.tip}>开启后可添加筛选字段，表格左侧会显示字段值供成员快速选择。</div>
+              ) : (
+                <FormItem>
+                  <Dropdown droplist={droplist} trigger="click">
+                    <Button type="text" style={{ paddingLeft: 0 }}>
+                      <IconPlus />
+                      添加筛选字段
+                    </Button>
+                  </Dropdown>
+
+                  <ReactSortable list={fastFilters} setList={setFastFilters} handle=".drag-handle" animation={150}>
+                    {fastFilters.map((filter, index) => (
+                      <div key={filter.value} style={{ marginBottom: 8 }}>
+                        <div className={styles.fastFilterDiv}>
+                          <span className={styles.filterLabel}>{filter.label}</span>
+                          <IconDragDotVertical style={{ marginRight: 8, cursor: 'move' }} className="drag-handle" />
+                          <IconDelete
+                            style={{ cursor: 'pointer' }}
+                            onClick={() => setFastFilters(fastFilters.filter((_, i) => i !== index))}
+                          />
+                        </div>
+                        {filter?.sortType === 'normal' ? (
+                          <RadioGroup
+                            type="button"
+                            name="lang"
+                            defaultValue={1}
+                            style={{ width: '100%', display: 'flex' }}
+                          >
+                            {sortOptions.map((sort) => (
+                              <Radio
+                                key={sort.label}
+                                value={sort.value}
+                                style={{
+                                  flex: 1,
+                                  textAlign: 'center',
+                                  whiteSpace: 'nowrap'
+                                }}
+                              >
+                                {sort.label}
+                              </Radio>
+                            ))}
+                          </RadioGroup>
+                        ) : (
+                          <Button type="outline" style={{ width: '100%' }}>
+                            按相同值排序
+                          </Button>
+                        )}
+                      </div>
+                    ))}
+                  </ReactSortable>
+                </FormItem>
+              )}
             </Form>
           </div>
         </div>

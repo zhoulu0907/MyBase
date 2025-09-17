@@ -4,7 +4,7 @@ import { Button, Checkbox, Dropdown, Input, Menu, Modal, Select, Space } from '@
 import styles from '../../index.module.less';
 import { IconDelete, IconPlus } from '@arco-design/web-react/icon';
 
-interface FillingRuleSettingsProps {
+interface FillingRuleSettingsModalProps {
   visible: boolean;
   fieldOptions: Array<any>;
   onCancel: any;
@@ -46,11 +46,12 @@ const fillToOptions = [
   }
 ];
 
-const FillingRuleSettings: React.FC<FillingRuleSettingsProps> = ({ visible, fieldOptions, onCancel }) => {
+const FillingRuleSettingsModal: React.FC<FillingRuleSettingsModalProps> = ({ visible, fieldOptions, onCancel }) => {
   const [selected, setSelected] = useState<string[]>([]);
   const [fillOption, setFillOption] = useState<number>(1);
   const [isToNextStep, setIsToNextStep] = useState<boolean>(false);
 
+  // todo
   useEffect(() => {
     if (visible) {
       setSelected([]);
@@ -90,7 +91,7 @@ const FillingRuleSettings: React.FC<FillingRuleSettingsProps> = ({ visible, fiel
   return (
     <>
       <Modal
-        className={styles.fillingRuleSettingsPopup}
+        className={styles.fillingRuleSettingsModal}
         title={<span className={styles.modalTitleLeft}>填充规则设置</span>}
         visible={visible}
         onCancel={onCancel}
@@ -208,4 +209,4 @@ const FillingRuleSettings: React.FC<FillingRuleSettingsProps> = ({ visible, fiel
   );
 };
 
-export default FillingRuleSettings;
+export default FillingRuleSettingsModal;

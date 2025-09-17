@@ -6,7 +6,7 @@ import { getPageListByAppId } from '@onebase/app';
 import DataSelectionProcessConfig from './components/DataSelectionProcessConfig';
 import styles from './index.module.less';
 import DropdownRender from './components/DropdownRender';
-import FillingRuleSettings from './components/FillingRuleSettings';
+import FillingRuleSettingsModal from './components/FillingRuleSettingsModal';
 
 const FormItem = Form.Item;
 const Option = Select.Option;
@@ -187,7 +187,7 @@ const DynamicDataSourceConfig: React.FC<DynamicSelectDataSourceConfigProps> = ({
                 <Button long onClick={() => setRuleSettingVisible(true)}>
                   填充规则设置
                 </Button>
-                <FillingRuleSettings
+                <FillingRuleSettingsModal
                   visible={ruleSettingVisible}
                   fieldOptions={initialDisplayFieldOptions}
                   onCancel={() => setRuleSettingVisible(false)}
