@@ -1,61 +1,54 @@
-import { Field, type FlowNodeJSON, type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
-import { BatchVariableSelector, type IFlowRefValue, provideBatchInputEffect } from '@flowgram.ai/form-materials';
-
-import { Feedback, FormContent, FormHeader, FormItem, FormOutputs } from '../../../form-components';
+import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
+import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
+import { type FlowNodeJSON } from '../../../typings';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
+import { Form } from '@arco-design/web-react';
+import { triggerEditorSignal } from '@/store/singals/trigger_editor';
+import ConditionEditor from '../../../components/condition-editor';
+import { type ConfitionField, type EntityFieldValidationTypes } from '@onebase/app';
+import { useEffect, useState } from 'react';
 
-interface LoopNodeJSON extends FlowNodeJSON {
-  data: {
-    loopFor: IFlowRefValue;
-  };
-}
-
-export const LoopFormRender = ({ form }: FormRenderProps<LoopNodeJSON>) => {
+export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const isSidebar = useIsSidebar();
-  const { readonly } = useNodeRenderContext();
+  const { node } = useNodeRenderContext();
+  const [payloadForm] = Form.useForm();
+  const [validationTypes, setValidationTypes] = useState<EntityFieldValidationTypes[]>([]);
+  const [conditionFields, setConditionFields] = useState<ConfitionField[]>([]);
 
-  const loopFor = (
-    <Field<IFlowRefValue> name={`loopFor`}>
-      {({ field, fieldState }) => (
-        <FormItem name={'loopFor'} type={'array'} required>
-          <BatchVariableSelector
-            style={{ width: '100%' }}
-            value={field.value?.content}
-            onChange={(val) => field.onChange({ type: 'ref', content: val })}
-            readonly={readonly}
-            hasError={Object.keys(fieldState?.errors || {}).length > 0}
-          />
-          <Feedback errors={fieldState?.errors} />
-        </FormItem>
-      )}
-    </Field>
-  );
+  const onValuesChange = (changeValue: any, values: any) => {
+    console.log('onValuesChange: ', changeValue, values);
+    triggerEditorSignal.setNodeData(node.id, values);
+  };
 
-  if (isSidebar) {
-    return (
-      <>
-        <FormHeader />
-        <FormContent>
-          {loopFor}
-          <FormOutputs />
-        </FormContent>
-      </>
-    );
-  }
   return (
     <>
       <FormHeader />
-      <FormContent>
-        {loopFor}
-        <FormOutputs />
-      </FormContent>
+      {isSidebar ? (
+        <FormContent>
+          <Form
+            form={payloadForm}
+            initialValues={{ ...triggerEditorSignal.nodeData.value[node.id] }}
+            onValuesChange={onValuesChange}
+            layout="vertical"
+          >
+            <Form.Item field="filterCondition" label="条件" required>
+              <ConditionEditor
+                data={triggerEditorSignal.nodeData.value[node.id]?.filterCondition || []}
+                fields={conditionFields}
+                entityFieldValidationTypes={validationTypes}
+              />
+            </Form.Item>
+          </Form>
+        </FormContent>
+      ) : (
+        <FormContent>
+          <FormOutputs />
+        </FormContent>
+      )}
     </>
   );
 };
 
-export const formMeta: FormMeta<LoopNodeJSON['data']> = {
-  render: LoopFormRender,
-  effect: {
-    loopFor: provideBatchInputEffect
-  }
+export const formMeta: FormMeta<FlowNodeJSON['data']> = {
+  render: renderForm
 };
