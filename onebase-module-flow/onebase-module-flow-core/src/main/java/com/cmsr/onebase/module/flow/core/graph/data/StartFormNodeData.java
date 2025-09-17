@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.flow.core.graph.data;
 import com.cmsr.onebase.module.flow.core.rule.ConditionItem;
 import lombok.Data;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -24,4 +25,8 @@ public class StartFormNodeData {
 
     private List<ConditionItem> filterCondition;
 
+    /**
+     * 缓存的表达式
+     */
+    private Serializable compiledExpression;
 }

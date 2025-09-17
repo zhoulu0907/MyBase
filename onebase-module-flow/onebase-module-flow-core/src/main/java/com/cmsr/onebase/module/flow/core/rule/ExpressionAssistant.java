@@ -45,44 +45,36 @@ public class ExpressionAssistant {
      * 根据Condition类的注释：条件项之间是OR关系
      * 根据ConditionItem类的注释：规则项之间是AND关系
      *
-     * @param condition 条件对象
-     * @param context   上下文数据
+     * @param compiled 条件对象
+     * @param context  上下文数据
      * @return 评估结果
      */
-    public Boolean evaluate(Condition condition, Map<String, Object> context) {
-        if (condition == null || condition.getConditions() == null || condition.getConditions().isEmpty()) {
-            return true;
-        }
+    public boolean evaluate(Serializable compiled, Map<String, Object> context) {
         try {
-            Serializable compiled = condition.getCompiledExpression();
-            if (compiled == null) {
-                // 构建完整的条件表达式
-                String fullExpression = buildConditionExpression(condition);
-                log.debug("完整条件表达式: {}", fullExpression);
-                compiled = MVEL.compileExpression(fullExpression, parserContext);
-                condition.setCompiledExpression(compiled);
-            }
             // 一次性执行整个表达式
             Object result = MVEL.executeExpression(compiled, context);
             return result instanceof Boolean ? (Boolean) result : Boolean.FALSE;
-
         } catch (Exception e) {
-            log.error("条件评估失败: {}", condition, e);
+            log.error("条件评估失败: {}", compiled, e);
             return false;
         }
+    }
+
+    public Serializable compileExpression(List<ConditionItem> conditionItems) {
+        String fullExpression = buildConditionExpression(conditionItems);
+        return MVEL.compileExpression(fullExpression, parserContext);
     }
 
     /**
      * 构建完整的条件表达式
      * 将整个Condition转换成一个表达式字符串
      *
-     * @param condition 条件对象
      * @return 表达式字符串
      */
-    private String buildConditionExpression(Condition condition) {
+    private String buildConditionExpression(List<ConditionItem> conditionItems) {
         List<String> conditionExpressions = new ArrayList<>();
         // 遍历所有条件项
-        for (ConditionItem conditionItem : condition.getConditions()) {
+        for (ConditionItem conditionItem : conditionItems) {
             String conditionItemExpression = buildConditionItemExpression(conditionItem);
             if (conditionItemExpression != null && !conditionItemExpression.trim().isEmpty()) {
                 conditionExpressions.add("(" + conditionItemExpression + ")");

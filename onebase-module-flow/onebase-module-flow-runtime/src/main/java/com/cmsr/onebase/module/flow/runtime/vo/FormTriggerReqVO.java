@@ -19,6 +19,6 @@ public class FormTriggerReqVO {
     private String executionUuid;
 
     @Schema(description = "输入参数")
-    private Map<String, String> inputParams;
+    private Map<Long, String> inputParams;
 
 }

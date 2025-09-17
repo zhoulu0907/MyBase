@@ -5,7 +5,9 @@ import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessFormRepository;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDO;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessFormDO;
-import com.cmsr.onebase.module.flow.core.flow.FlowFilterExecutor;
+import com.cmsr.onebase.module.flow.core.graph.GraphFlowCache;
+import com.cmsr.onebase.module.flow.core.graph.data.StartFormNodeData;
+import com.cmsr.onebase.module.flow.core.rule.ExpressionAssistant;
 import com.cmsr.onebase.module.flow.core.utils.FlowUtils;
 import com.cmsr.onebase.module.flow.runtime.vo.FormTriggerReqVO;
 import com.cmsr.onebase.module.flow.runtime.vo.FormTriggerRespVO;
@@ -17,6 +19,7 @@ import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
@@ -32,13 +35,19 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
     private FlowExecutor flowExecutor;
 
     @Autowired
-    private FlowFilterExecutor flowFilterExecutor;
-
-    @Autowired
     private FlowProcessRepository flowProcessRepository;
 
     @Autowired
     private FlowProcessFormRepository flowProcessFormRepository;
+
+    @Autowired
+    private FieldAssistant fieldAssistant;
+
+    @Autowired
+    private GraphFlowCache graphFlowCache;
+
+    @Autowired
+    private ExpressionAssistant expressionAssistant;
 
     @Override
     public List<QueryFormTriggerRespVO> queryFormTrigger(Long pageId) {
@@ -51,10 +60,18 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
 
     @Override
     public FormTriggerRespVO triggerForm(FormTriggerReqVO reqVO) {
-        //TODO 输入参数要转换为实际对象
-        Map<String, Object> inputMap = null;//BeanUtils.toMap(reqVO.getInputParams());
-        if (!flowFilterExecutor.filter(reqVO.getProcessId(), inputMap)) {
-            return null;
+        Map<String, Object> inputMap = fieldAssistant.convertInputParamsData(reqVO.getInputParams());
+        StartFormNodeData startFormNodeData = graphFlowCache.getStartFormNodeData(reqVO.getProcessId());
+        fieldAssistant.fillFilterFieldData(startFormNodeData.getFilterCondition());
+        if (startFormNodeData.getCompiledExpression() == null) {
+            Serializable compileExpression = expressionAssistant.compileExpression(startFormNodeData.getFilterCondition());
+            startFormNodeData.setCompiledExpression(compileExpression);
+        }
+        boolean isTrigger = expressionAssistant.evaluate(startFormNodeData.getCompiledExpression(), inputMap);
+        if (!isTrigger) {
+            FormTriggerRespVO respVO = new FormTriggerRespVO();
+            respVO.setTriggered(0);
+
         }
         String chainId = FlowUtils.toFlowChainId(reqVO.getProcessId());
         DefaultContext defaultContext = new DefaultContext();

@@ -30,6 +30,16 @@
                 "value": [
                   "年级"
                 ]
+              },
+              {
+                "id": "vNF9QzuXY_-X1l_Lc5dB9",
+                "parentId": "20MYhPzV-zSchPjNWHKPm",
+                "fieldId": "50028191407505411",
+                "op": "RANGE",
+                "operatorType": "value",
+                "value": [
+                  "12"
+                ]
               }
             ]
           },
@@ -52,7 +62,7 @@
                 "parentId": "49Eyf1qkTP0fTMdpVfpq5",
                 "fieldId": "46999569445519360",
                 "op": "CONTAINS",
-                "operatorType": "value",
+                "operatorType": "formula",
                 "value": [
                   "年级"
                 ]
