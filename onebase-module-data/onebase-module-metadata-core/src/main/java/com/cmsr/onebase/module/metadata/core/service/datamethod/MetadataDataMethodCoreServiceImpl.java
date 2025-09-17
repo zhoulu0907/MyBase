@@ -267,7 +267,8 @@ public class MetadataDataMethodCoreServiceImpl implements MetadataDataMethodCore
                         continue;
                     }
                     if (fieldValue != null && names.contains(fieldName)) {
-                        configs.and(Compare.EQUAL, fieldName, fieldValue);
+                        // 使用模糊查询
+                        configs.and(Compare.LIKE, fieldName, fieldValue);
                     }
                 }
             }
@@ -298,7 +299,8 @@ public class MetadataDataMethodCoreServiceImpl implements MetadataDataMethodCore
                         continue;
                     }
                     if (fieldValue != null && existingFieldNames.contains(fieldName)) {
-                        countConfigs.and(Compare.EQUAL, fieldName, fieldValue);
+                        // 使用模糊查询保持与分页查询一致
+                        countConfigs.and(Compare.LIKE, fieldName, fieldValue);
                     }
                 }
             }
