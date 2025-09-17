@@ -20,7 +20,6 @@ export const SidebarRenderer = (props: SidebarRendererProps) => {
   const refresh = useRefresh();
 
   const handleClose = () => {
-    console.log('handleClose Node: ', nodeId.value);
     // Sidebar delayed closing
     startTransition(() => {
       setNodeId(undefined);

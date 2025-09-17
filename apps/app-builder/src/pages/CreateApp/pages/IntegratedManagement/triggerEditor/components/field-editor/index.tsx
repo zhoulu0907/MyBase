@@ -79,6 +79,7 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList, form }) => {
                     onClick={() => {
                       add();
                     }}
+                    disabled={(selectedFields || [])?.length >= fieldList?.length}
                   >
                     添加字段
                   </Button>
