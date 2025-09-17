@@ -44,9 +44,11 @@ public class MetadataEntityFieldApiImpl implements MetadataEntityFieldApi {
             Map<String, String> typeInfo = entry.getValue();
             String jdbcType = typeInfo.get("jdbcType");
             String fieldType = typeInfo.get("fieldType");
+            String fieldName = typeInfo.get("fieldName");
             
             EntityFieldJdbcTypeRespDTO dto = new EntityFieldJdbcTypeRespDTO();
             dto.setFieldId(fieldId);
+            dto.setFieldName(fieldName);
             dto.setJdbcType(jdbcType);
             dto.setFieldType(fieldType);
             result.add(dto);
