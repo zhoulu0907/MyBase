@@ -185,11 +185,11 @@ export function useEditorProps(
         },
         renderDefaultNode: BaseNode, // node render
         renderTexts: {
-          'loop-end-text': 'Loop End',
-          'loop-traverse-text': 'Loop',
-          'try-start-text': 'Try Start',
-          'try-end-text': 'Try End',
-          'catch-text': 'Catch Error'
+          'loop-end-text': '循环结束',
+          'loop-traverse-text': '循环',
+          'try-start-text': '尝试开始',
+          'try-end-text': '尝试结束',
+          'catch-text': '捕获错误'
         }
       },
       /**

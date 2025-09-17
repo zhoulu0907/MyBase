@@ -11,7 +11,7 @@ export const TryCatchNodeRegistry: FlowNodeRegistry = {
   category: 'control',
   info: {
     icon: iconTryCatch,
-    description: 'try catch.'
+    description: '异常捕获'
   },
   meta: {
     expandable: false // disable expanded
@@ -36,18 +36,6 @@ export const TryCatchNodeRegistry: FlowNodeRegistry = {
           blocks: [],
           data: {
             title: '异常捕获_1',
-            inputsValues: {
-              condition: ''
-            },
-            inputs: {
-              type: 'object',
-              required: ['condition'],
-              properties: {
-                condition: {
-                  type: 'boolean'
-                }
-              }
-            }
           }
         }
       ]
