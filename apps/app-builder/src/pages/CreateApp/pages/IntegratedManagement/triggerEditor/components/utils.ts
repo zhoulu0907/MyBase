@@ -1,6 +1,6 @@
-import type { FlowNodeJSON } from '@flowgram.ai/fixed-layout-editor';
-import {DATA_SOURCE_TYPE} from '@onebase/app';
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
+import type { FlowNodeJSON } from '@flowgram.ai/fixed-layout-editor';
+import { NodeType } from '../nodes/const';
 
 // 判断bolcks 是否包含当前节点
 const judge = (curNodeId: string, blocks: FlowNodeJSON[]): boolean => {
@@ -28,8 +28,12 @@ const getBlockNode = (curNodeId: string, blocks: FlowNodeJSON[]): FlowNodeJSON[]
     if (ele.blocks?.length) {
       const hasCurNode = judge(curNodeId, ele.blocks);
       if (hasCurNode) {
-        const nodeData = triggerEditorSignal.nodeData.value[ele.id]
-        if (ele.type === 'dataQueryMultiple'&& nodeData.dataSource && nodeData.dataType !== DATA_SOURCE_TYPE.DATA_NODE) {
+        const nodeData = triggerEditorSignal.nodeData.value[ele.id];
+        if (
+          ele.type === 'dataQueryMultiple'
+          //   nodeData.dataSource &&
+          //   nodeData.dataType !== DATA_SOURCE_TYPE.DATA_NODE
+        ) {
           blockNode.push(ele);
         }
         const newBlocks = getBlockNode(curNodeId, ele.blocks);
@@ -61,8 +65,12 @@ export function getBeforeCurQueryNodes(curNodeId: string, allNodes: FlowNodeJSON
         nodes.push.apply(nodes, blocks);
       }
     }
-    const nodeData = triggerEditorSignal.nodeData.value[ele.id]
-    if (ele.type === 'dataQueryMultiple'&& nodeData.dataSource && nodeData.dataType !== DATA_SOURCE_TYPE.DATA_NODE) {
+    // const nodeData = triggerEditorSignal.nodeData.value[ele.id];
+    if (
+      ele.type === NodeType.DATA_QUERY_MULTIPLE
+      // nodeData.dataSource &&
+      //   nodeData.dataType !== DATA_SOURCE_TYPE.DATA_NODE
+    ) {
       nodes.push(ele);
     }
   }
