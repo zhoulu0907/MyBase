@@ -13,10 +13,8 @@ import styles from './index.module.less';
 const FlowEditorPage: React.FC = () => {
   const { nodeData, nodes, flowId } = triggerEditorSignal;
 
-  const handleSave = async () => {
-    console.log('nodes: ', nodes.value);
-    console.log('nodeData: ', nodeData.value);
-    const processDefinitionJson = nodes.value.map((item) => {
+  const dealProcessDefinition = (newNodes: any[]): any[] => {
+    const processDefinitionJson = newNodes.map((item) => {
       console.log('item: ', item);
       const { outputs: nodeOutputs, initialData: nodeInitialData, ...restNodeData } = nodeData.value[item.id] || {};
 
@@ -24,38 +22,58 @@ const FlowEditorPage: React.FC = () => {
         return item;
       }
 
-      const data = {
-        id: item.id,
-        type: item.type,
-        data: {
-          ...restNodeData,
-          // 覆写的属性写在后面
-          title: item.data.title
-        }
-      };
-
-      return data;
+      if (item.blocks?.length) {
+        const blocks = dealProcessDefinition(item.blocks);
+        const data = {
+          id: item.id,
+          type: item.type,
+          blocks,
+          data: {
+            ...restNodeData,
+            // 覆写的属性写在后面
+            title: item.data.title
+          }
+        };
+        return data;
+      } else {
+        const data = {
+          id: item.id,
+          type: item.type,
+          data: {
+            ...restNodeData,
+            // 覆写的属性写在后面
+            title: item.data.title
+          }
+        };
+        return data;
+      }
     });
-
+    return processDefinitionJson;
+  };
+  const handleSaveAndRelease = async (type: string) => {
+    const processDefinitionJson = dealProcessDefinition(nodes.value);
     console.log('processDefinition', processDefinitionJson);
     const params = {
       id: flowId.value || '',
       processDefinition: JSON.stringify({ nodes: processDefinitionJson }),
-      processStatus: ProcessStatus.DISABLED
+      processStatus: type === 'save' ? ProcessStatus.ORIGINAL : ProcessStatus.ENABLED
     };
     console.log('params', params);
 
     const res = await updateFlowMgmtDefinition(params);
     if (res) {
-      Message.success('保存成功');
+      Message.success(`${type === 'save' ? '保存' : '发布'}成功`);
     }
   };
 
   return (
     <div className={styles.flowEditorPage}>
       <div className={styles.header}>
-        <Button type="primary" onClick={handleSave}>
+        <Button type="primary" onClick={() => handleSaveAndRelease('save')}>
           保存
+        </Button>
+        <Button type="outline" style={{ marginLeft: '12px' }} onClick={() => handleSaveAndRelease('release')}>
+          发布
         </Button>
       </div>
       <div className={styles.body}>
