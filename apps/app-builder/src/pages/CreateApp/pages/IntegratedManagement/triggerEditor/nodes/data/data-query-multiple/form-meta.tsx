@@ -1,7 +1,7 @@
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { useAppStore } from '@/store/store_app';
 import { Form, Grid, Input, Radio, Select } from '@arco-design/web-react';
-import { type FormMeta } from '@flowgram.ai/fixed-layout-editor';
+import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
 import {
   DATA_SOURCE_TYPE,
   FILTER_TYPE,
@@ -14,15 +14,16 @@ import {
   type MetadataEntityPair,
   type SelectOption
 } from '@onebase/app';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import ConditionEditor from '../../../components/condition-editor';
 import SortByEditor from '../../../components/sortby-editor';
 import { getBeforeCurQueryNodes } from '../../../components/utils';
 import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
+import { validateNodeForm } from '../../utils';
 
-export const renderForm = () => {
+export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const isSidebar = useIsSidebar();
   const { node } = useNodeRenderContext();
   // 当前页应用id
@@ -41,6 +42,10 @@ export const renderForm = () => {
   // 查询规则
   const [validationTypes, setValidationTypes] = useState<EntityFieldValidationTypes[]>([]);
   const [conditionFields, setConditionFields] = useState<ConfitionField[]>([]);
+
+  useEffect(() => {
+    payloadForm && validateNodeForm(form, payloadForm, true);
+  }, [payloadForm]);
 
   /**
    * 获取方式变更
@@ -237,9 +242,17 @@ export const renderForm = () => {
   };
 
   // 表单内容改变
-  const onValuesChange = (changeValue: any, values: any) => {
-    console.log('onValuesChange: ', changeValue, values);
+  const handlePropsOnChange = (values: any) => {
     triggerEditorSignal.setNodeData(node.id, values);
+  };
+
+  const onValuesChange = async (changeValue: any, values: any) => {
+    console.log('onValuesChange: ', changeValue, values);
+
+    // 校验表单
+    validateNodeForm(form, payloadForm, false);
+
+    handlePropsOnChange(values);
   };
 
   return (
@@ -319,7 +332,7 @@ export const renderForm = () => {
                 </Grid.Col>
               </Grid.Row>
             )}
-            <Form.Item label="查询规则" field="filterType" required>
+            <Form.Item label="查询规则" field="filterType" rules={[{ required: true, message: '请选择查询规则' }]}>
               <Radio.Group>
                 <Radio value={FILTER_TYPE.ALL}>全部数据</Radio>
                 <Radio value={FILTER_TYPE.CONDITION}>按条件过滤</Radio>
@@ -334,7 +347,7 @@ export const renderForm = () => {
                 />
               </Form.Item>
             )}
-            <Form.Item label="排序规则" required field="sortBy">
+            <Form.Item label="排序规则" rules={[{ required: true, message: '请选择排序规则' }]} field="sortBy">
               <SortByEditor
                 data={triggerEditorSignal.nodeData.value[node.id]?.sortBy || []}
                 fields={conditionFields}

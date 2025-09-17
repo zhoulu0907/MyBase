@@ -10,6 +10,7 @@ export interface FlowMgmt {
 }
 
 export enum ProcessStatus {
+  ORIGINAL = -1,
   DISABLED = 0,
   ENABLED = 1
 }
