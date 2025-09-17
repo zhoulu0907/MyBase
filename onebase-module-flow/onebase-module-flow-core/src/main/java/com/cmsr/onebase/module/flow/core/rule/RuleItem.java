@@ -1,0 +1,30 @@
+package com.cmsr.onebase.module.flow.core.rule;
+
+import lombok.Data;
+
+import java.util.List;
+
+/**
+ * @Author：huangjie
+ * @Date：2025/9/16 21:08
+ */
+@Data
+public class RuleItem {
+
+    private Long filterId;
+
+    private String op;
+
+    private String operatorType;
+
+    private List<String> value;
+
+    //查询到内容
+    private String fieldName;
+
+    private String fieldJdbcType;
+
+    //根据字段类型，转换实际的值，比如Integer、Date等
+    private Object fieldValue;
+
+}

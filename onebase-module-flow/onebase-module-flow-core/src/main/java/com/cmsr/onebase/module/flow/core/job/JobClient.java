@@ -9,12 +9,12 @@ import com.aizuda.snailjob.client.job.core.openapi.SnailJobOpenApi;
 import com.aizuda.snailjob.common.core.enums.JobBlockStrategyEnum;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.model.response.JobApiResponse;
+import com.cmsr.onebase.module.flow.core.enums.JsonGraphConstant;
 import com.cmsr.onebase.module.flow.core.graph.data.StartTimeNodeData;
 import lombok.Setter;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Set;
 
 /**
@@ -27,15 +27,11 @@ public class JobClient {
 
     private static final String JOB_EXECUTOR_INFO = "flow_process_time_job";
 
-    public static final String PROCESS_ID = "processId";
-
-    private DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
     public String startJob(Long processId, StartTimeNodeData timeNodeData) {
         ClusterAddHandler clusterJob = SnailJobOpenApi.addClusterJob();
         clusterJob.setJobName(processId.toString());
         settingParams(clusterJob, timeNodeData);
-        clusterJob.addArgsStr(PROCESS_ID, String.valueOf(processId));
+        clusterJob.addArgsStr(JsonGraphConstant.PROCESS_ID, String.valueOf(processId));
         clusterJob.setRouteKey(AllocationAlgorithmEnum.ROUND);
         clusterJob.setBlockStrategy(JobBlockStrategyEnum.OVERLAY);
         return String.valueOf(clusterJob.execute());
@@ -48,7 +44,7 @@ public class JobClient {
         } else {
             ClusterUpdateHandler clusterJob = SnailJobOpenApi.updateClusterJob(jobDetail.getId());
             settingParams(clusterJob, timeNodeData);
-            clusterJob.addArgsStr(PROCESS_ID, String.valueOf(processId));
+            clusterJob.addArgsStr(JsonGraphConstant.PROCESS_ID, String.valueOf(processId));
             clusterJob.execute();
             return String.valueOf(jobDetail.getId());
         }
@@ -62,7 +58,7 @@ public class JobClient {
             clusterJob.setTriggerInterval(timeNodeData.getCronExpression());
         } else if (timeNodeData.getRepeatType().equals(StartTimeNodeData.REPEAT_TYPE_NONE)) {
             clusterJob.setTriggerType(TriggerTypeEnum.POINT_IN_TIME);
-            LocalDateTime localDateTime = LocalDateTime.parse(timeNodeData.getTriggerDatetime(), dateTimeFormatter);
+            LocalDateTime localDateTime = LocalDateTime.parse(timeNodeData.getTriggerDatetime(), JsonGraphConstant.DATE_TIME_FORMATTER);
             clusterJob.setTriggerTime(Set.of(localDateTime));
         } else {
             clusterJob.setTriggerType(TriggerTypeEnum.CRON);

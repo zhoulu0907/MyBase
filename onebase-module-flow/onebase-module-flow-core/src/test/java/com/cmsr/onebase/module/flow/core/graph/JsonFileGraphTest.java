@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.flow.graph;
 
+import com.cmsr.onebase.module.flow.core.graph.GraphFlowCache;
 import com.cmsr.onebase.module.flow.core.graph.JsonGraph;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
@@ -20,6 +21,9 @@ public class JsonFileGraphTest {
 
         JsonGraph jsonGraph = JsonGraph.of(json);
         System.out.println(jsonGraph.toFlowChain());
+
+        GraphFlowCache graphFlowCache = new GraphFlowCache();
+        graphFlowCache.update(1L, jsonGraph);
     }
 
     @Test

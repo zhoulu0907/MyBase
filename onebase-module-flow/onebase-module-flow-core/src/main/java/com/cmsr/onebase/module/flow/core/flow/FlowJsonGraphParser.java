@@ -48,7 +48,7 @@ public class FlowJsonGraphParser extends ClassXmlFlowELParser {
                 JsonGraph jsonGraph = JsonGraph.of(flowProcessDO.getProcessDefinition());
                 String flowChain = jsonGraph.toFlowChain();
                 //
-                graphFlowCache.update(flowProcessDO, jsonGraph);
+                graphFlowCache.update(flowProcessDO.getId(), jsonGraph);
                 //
                 String chainId = FlowUtils.toFlowChainId(flowProcessDO.getId());
                 Element element = rootElement.addElement("chain").addAttribute("name", chainId);

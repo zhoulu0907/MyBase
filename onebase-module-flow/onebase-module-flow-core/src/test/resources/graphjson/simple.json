@@ -1,16 +1,73 @@
 {
   "nodes": [
     {
-      "id": "start_time_0",
-      "type": "startTime",
+      "id": "start_form_0",
+      "type": "startForm",
       "data": {
-        "id": "start_time_0",
-        "repeatType": "year",
-        "startTime": "",
-        "endTime": "",
-        "triggerTime": "08:00",
-        "triggerDate": "09-10",
-        "title": "定时触发节点"
+        "id": "start_form_0",
+        "triggerRange": "record",
+        "filterCondition": [
+          {
+            "id": "20MYhPzV-zSchPjNWHKPm",
+            "parentId": "",
+            "rules": [
+              {
+                "id": "LJRgx8xcNnTTWgNbtYbTo",
+                "parentId": "20MYhPzV-zSchPjNWHKPm",
+                "fieldId": "46999569445519360",
+                "op": "EQUALS",
+                "operatorType": "value",
+                "value": [
+                  "四年级5班"
+                ]
+              },
+              {
+                "id": "epToeF2ll84xUMwiBjv7Y",
+                "parentId": "20MYhPzV-zSchPjNWHKPm",
+                "fieldId": "46999569445519360",
+                "op": "CONTAINS",
+                "operatorType": "value",
+                "value": [
+                  "年级"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "49Eyf1qkTP0fTMdpVfpq5",
+            "parentId": "",
+            "rules": [
+              {
+                "id": "TwChZoL_K2OW3MMFje4Fn",
+                "parentId": "49Eyf1qkTP0fTMdpVfpq5",
+                "fieldId": "46999569445519360",
+                "op": "EQUALS",
+                "operatorType": "value",
+                "value": [
+                  "四年级3班"
+                ]
+              },
+              {
+                "id": "3cZA8gi8zE0oy7YWKjyeB",
+                "parentId": "49Eyf1qkTP0fTMdpVfpq5",
+                "fieldId": "46999569445519360",
+                "op": "CONTAINS",
+                "operatorType": "value",
+                "value": [
+                  "年级"
+                ]
+              }
+            ]
+          }
+        ],
+        "isChildTriggerAllowed": false,
+        "pageId": "47012574606491650",
+        "triggerEvents": [
+          "create",
+          "update",
+          "delete"
+        ],
+        "title": "界面交互触发节点"
       }
     },
     {

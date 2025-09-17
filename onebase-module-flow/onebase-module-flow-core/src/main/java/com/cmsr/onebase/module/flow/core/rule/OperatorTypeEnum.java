@@ -1,0 +1,28 @@
+package com.cmsr.onebase.module.flow.core.rule;
+
+/**
+ * @Author：huangjie
+ * @Date：2025/9/16 21:34
+ */
+public enum OperatorTypeEnum {
+    
+    VALUE("value", "值"),
+    VARIABLE("variable", "变量"),
+    FORMULA("formula", "公式");
+    
+    private final String code;
+    private final String desc;
+    
+    OperatorTypeEnum(String code, String desc) {
+        this.code = code;
+        this.desc = desc;
+    }
+    
+    public String getCode() {
+        return code;
+    }
+    
+    public String getDesc() {
+        return desc;
+    }
+}

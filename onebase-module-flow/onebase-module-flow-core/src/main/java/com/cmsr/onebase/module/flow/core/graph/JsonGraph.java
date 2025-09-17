@@ -1,12 +1,12 @@
 package com.cmsr.onebase.module.flow.core.graph;
 
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
-import lombok.Data;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.NotNull;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
  * @Author：huangjie
  * @Date：2025/9/1 11:06
  */
-@Data
 public class JsonGraph {
 
     private static final String NEW_LINE = "\n";
@@ -28,12 +27,8 @@ public class JsonGraph {
 
     private List<JsonGraphNode> nodes;
 
-    public JsonGraphNode getStartNode() {
-        JsonGraphNode jsonGraphNode = nodes.get(0);
-        if (!jsonGraphNode.getType().contains("start")) {
-            throw new IllegalArgumentException("第一个节点必须是开始节点");
-        }
-        return jsonGraphNode;
+    public void setNodes(List<JsonGraphNode> nodes) {
+        this.nodes = nodes;
     }
 
     public String toFlowChain() {
@@ -116,7 +111,6 @@ public class JsonGraph {
         return define.toString();
     }
 
-    @NotNull
     private static String repeatIndent(int deep) {
         if (deep <= 0) {
             return "";
@@ -134,5 +128,28 @@ public class JsonGraph {
     private static String repeatIndent(int deep, String content) {
         String collect = content.lines().map(line -> repeatIndent(deep) + line).collect(Collectors.joining(NEW_LINE));
         return collect;
+    }
+
+    public JsonGraphNode getStartNode() {
+        JsonGraphNode jsonGraphNode = nodes.get(0);
+        if (!jsonGraphNode.getType().contains("start")) {
+            throw new IllegalArgumentException("第一个节点必须是开始节点");
+        }
+        return jsonGraphNode;
+    }
+
+    public Map<String, Map<String, Object>> getNodeData() {
+        Map<String, Map<String, Object>> result = new HashMap<>();
+        recursiveNode(result, nodes);
+        return result;
+    }
+
+    private void recursiveNode(Map<String, Map<String, Object>> result, List<JsonGraphNode> nodes) {
+        for (JsonGraphNode node : nodes) {
+            result.put(node.getId(), node.getData());
+            if (node.getBlocks() != null && node.getBlocks().size() > 0) {
+                recursiveNode(result, node.getBlocks());
+            }
+        }
     }
 }

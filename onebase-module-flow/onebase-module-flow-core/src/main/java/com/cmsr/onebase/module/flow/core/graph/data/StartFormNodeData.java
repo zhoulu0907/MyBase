@@ -1,6 +1,9 @@
 package com.cmsr.onebase.module.flow.core.graph.data;
 
+import com.cmsr.onebase.module.flow.core.rule.ConditionItem;
 import lombok.Data;
+
+import java.util.List;
 
 /**
  * @Author：huangjie
@@ -8,8 +11,6 @@ import lombok.Data;
  */
 @Data
 public class StartFormNodeData {
-
-    private String triggerScope;
 
     private String triggerUserType;
 
@@ -19,9 +20,8 @@ public class StartFormNodeData {
 
     private Long fieldId;
 
-    private String[] triggerEvents;
+    private List<String> triggerEvents;
 
-    private String[][] filterCondition;
+    private List<ConditionItem> filterCondition;
 
-    private Integer isChildTriggerAllowed;
 }
