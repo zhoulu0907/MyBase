@@ -8,6 +8,7 @@ import FieldEditor from '../../../components/field-editor';
 import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
+import { validateNodeForm } from '../../utils';
 
 const RadioGroup = Radio.Group;
 const Option = Select.Option;
@@ -24,8 +25,11 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     triggerEditorSignal.setNodeData(node.id, values);
   };
 
-  const onValuesChange = (changeValue: any, values: any) => {
+  const onValuesChange = async (changeValue: any, values: any) => {
     console.log('onValuesChange: ', changeValue, values);
+
+    // 校验表单
+    validateNodeForm(form, payloadForm, false);
 
     handlePropsOnChange(values);
   };
@@ -56,6 +60,10 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     }
   }, [payloadForm]);
 
+  useEffect(() => {
+    payloadForm && validateNodeForm(form, payloadForm, true);
+  }, [payloadForm]);
+
   return (
     <>
       <FormHeader />
@@ -63,19 +71,39 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
         <FormContent>
           <Form
             form={payloadForm}
-            initialValues={{ ...triggerEditorSignal.nodeData.value[node.id] }}
+            initialValues={{
+              addType: undefined,
+              entityId: undefined,
+              batchType: undefined,
+              fields: undefined,
+              ...triggerEditorSignal.nodeData.value[node.id]
+            }}
             onValuesChange={onValuesChange}
             layout="vertical"
           >
             <Grid.Row>
-              <Form.Item label="节点ID" field="id" initialValue={node.id}>
+              <Form.Item
+                label="节点ID"
+                field="id"
+                initialValue={node.id}
+                rules={[
+                  {
+                    required: true,
+                    message: '请选择节点ID'
+                  }
+                ]}
+              >
                 <Input disabled />
               </Form.Item>
             </Grid.Row>
 
             <Grid.Row>
               <Form.Item label="新增方式" field="addType" rules={[{ required: true, message: '请选择新增方式' }]}>
-                <RadioGroup>
+                <RadioGroup
+                  onChange={(_value) => {
+                    payloadForm.setFieldValue('entityId', undefined);
+                  }}
+                >
                   <Radio value={FLOW_ENTITY_TYPE.MAIN_ENTITY}>在主表中新增</Radio>
                   <Radio value={FLOW_ENTITY_TYPE.SUB_ENTITY}>在子表中新增</Radio>
                 </RadioGroup>
@@ -83,7 +111,12 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             </Grid.Row>
 
             <Grid.Row>
-              <Form.Item field="entityId" rules={[{ required: true, message: '请选择表单' }]} layout="vertical">
+              <Form.Item
+                field="entityId"
+                rules={[{ required: true, message: '请选择表单' }]}
+                layout="vertical"
+                disabled={!addType}
+              >
                 <Select
                   style={{ width: '100%' }}
                   onChange={(value) => {

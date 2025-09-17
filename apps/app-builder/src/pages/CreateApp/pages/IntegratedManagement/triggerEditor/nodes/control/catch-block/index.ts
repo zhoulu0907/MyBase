@@ -12,11 +12,12 @@ export const CatchBlockNodeRegistry: FlowNodeRegistry = {
   category: 'control',
   meta: {
     copyDisable: true,
-    addDisable: true
+    addDisable: true,
+    expandable: false // disable expanded
   },
   info: {
     icon: iconCase,
-    description: 'Execute the catch branch when the condition is met.'
+    description: '满足条件时尝试执行分支'
   },
   canAdd: () => false,
   canDelete: (ctx, node) => node.parent!.blocks.length >= 2,
@@ -26,18 +27,6 @@ export const CatchBlockNodeRegistry: FlowNodeRegistry = {
       type: 'catchBlock',
       data: {
         title: `Catch Block ${id++}`,
-        inputs: {
-          type: 'object',
-          required: ['condition'],
-          inputsValues: {
-            condition: ''
-          },
-          properties: {
-            condition: {
-              type: 'string'
-            }
-          }
-        }
       }
     };
   },

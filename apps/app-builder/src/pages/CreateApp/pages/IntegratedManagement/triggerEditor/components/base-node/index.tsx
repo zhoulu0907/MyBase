@@ -5,7 +5,8 @@ import { FlowNodeEntity, useNodeRender } from '@flowgram.ai/fixed-layout-editor'
 
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { NodeRenderContext, SidebarContext } from '../../context';
-import { BaseNodeStyle, ErrorIcon } from './styles';
+import styles from './index.module.less';
+import { ErrorIcon } from './styles';
 
 export const BaseNode = ({ node }: { node: FlowNodeEntity }) => {
   /**
@@ -33,15 +34,19 @@ export const BaseNode = ({ node }: { node: FlowNodeEntity }) => {
 
   return (
     <ConfigProvider getPopupContainer={getPopupContainer}>
-      {form?.state.invalid && <ErrorIcon />}
-      <BaseNodeStyle
+      {form?.getValueIn('invalid') && <ErrorIcon />}
+      <div
         /*
          * onMouseEnter is added to a fixed layout node primarily to listen for hover highlighting of branch lines
          * onMouseEnter 加到固定布局节点主要是为了监听 分支线条的 hover 高亮
          **/
         onMouseEnter={nodeRender.onMouseEnter}
         onMouseLeave={nodeRender.onMouseLeave}
-        className={nodeRender.activated ? 'activated' : ''}
+        className={
+          nodeRender.activated && !form?.getValueIn('invalid')
+            ? `${styles.baseNodeStyle} ${styles.activated}`
+            : styles.baseNodeStyle
+        }
         onClick={() => {
           if (nodeRender.dragging) {
             return;
@@ -60,11 +65,11 @@ export const BaseNode = ({ node }: { node: FlowNodeEntity }) => {
           ...(nodeRender.isBlockOrderIcon || nodeRender.isBlockIcon ? {} : {}),
           ...nodeRender.node.getNodeRegistry().meta.style,
           opacity: nodeRender.dragging ? 0.3 : 1,
-          outline: form?.state.invalid ? '1px solid red' : 'none'
+          outline: form?.getValueIn('invalid') ? '1px solid red' : 'none'
         }}
       >
         <NodeRenderContext.Provider value={nodeRender}>{form?.render()}</NodeRenderContext.Provider>
-      </BaseNodeStyle>
+      </div>
     </ConfigProvider>
   );
 };

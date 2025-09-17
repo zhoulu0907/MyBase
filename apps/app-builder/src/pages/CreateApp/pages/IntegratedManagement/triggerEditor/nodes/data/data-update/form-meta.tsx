@@ -3,6 +3,7 @@ import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { Form, Grid, Input, Radio, Select } from '@arco-design/web-react';
 import {
   getFieldCheckTypeApi,
+  FLOW_ENTITY_TYPE,
   type AppEntityField,
   type ConfitionField,
   type EntityFieldValidationTypes
@@ -13,14 +14,10 @@ import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
 import ConditionEditor from '../../../components/condition-editor';
+import { validateNodeForm } from '../../utils';
 
 const RadioGroup = Radio.Group;
 const Option = Select.Option;
-
-const UPDATE_TYPE = {
-  MAIN_ENTITY: 'mainEntity',
-  SUB_ENTITY: 'subEntity'
-};
 
 export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const isSidebar = useIsSidebar();
@@ -33,10 +30,17 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const [validationTypes, setValidationTypes] = useState<EntityFieldValidationTypes[]>([]);
   const [conditionFields, setConditionFields] = useState<ConfitionField[]>([]);
 
-
-  const onValuesChange = (changeValue: any, values: any) => {
-    console.log('onValuesChange: ', changeValue, values);
+  const handlePropsOnChange = (values: any) => {
     triggerEditorSignal.setNodeData(node.id, values);
+  };
+
+  const onValuesChange = async (changeValue: any, values: any) => {
+    console.log('onValuesChange: ', changeValue, values);
+
+    // 校验表单
+    validateNodeForm(form, payloadForm, false);
+
+    handlePropsOnChange(values);
   };
 
   const [payloadForm] = Form.useForm();
@@ -45,18 +49,26 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
   useEffect(() => {
     if (updateType) {
-      payloadForm.clearFields(['entityId']);
-      if (updateType == UPDATE_TYPE.MAIN_ENTITY) {
+      console.log('updateType: ', updateType);
+      if (updateType == FLOW_ENTITY_TYPE.MAIN_ENTITY) {
         console.log('mainEntities.value: ', mainEntities.value);
         setEntityList(mainEntities.value);
-        payloadForm.clearFields('entityId');
       } else {
-        console.log('subEntities.value: ', subEntities.value);
         setEntityList(subEntities.value);
-        payloadForm.clearFields('entityId');
       }
     }
   }, [updateType]);
+
+  useEffect(() => {
+    payloadForm && validateNodeForm(form, payloadForm, true);
+    if (payloadForm.getFieldValue('entityId')) {
+      setFieldDataList(
+        [...mainEntities.value, ...subEntities.value].find(
+          (item) => item.entityId === payloadForm.getFieldValue('entityId')
+        )?.fields || []
+      );
+    }
+  }, [payloadForm]);
 
   const entityChange = async (value: string) => {
     console.log('value: ', value);
@@ -99,14 +111,14 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             <Grid.Row>
               <Form.Item label="更新方式" field="updateType" rules={[{ required: true, message: '请选择更新方式' }]}>
                 <RadioGroup>
-                  <Radio value={UPDATE_TYPE.MAIN_ENTITY}>更新主表数据</Radio>
-                  <Radio value={UPDATE_TYPE.SUB_ENTITY}>更新子表数据</Radio>
+                  <Radio value={FLOW_ENTITY_TYPE.MAIN_ENTITY}>更新主表数据</Radio>
+                  <Radio value={FLOW_ENTITY_TYPE.SUB_ENTITY}>更新子表数据</Radio>
                 </RadioGroup>
               </Form.Item>
             </Grid.Row>
 
             <Grid.Row>
-              <Form.Item field="entityId" rules={[{ required: true, message: '请选择表单' }]} layout="vertical">
+              <Form.Item field="entityId" rules={[{ required: true, message: '请选择表单' }]} disabled={!updateType}>
                 <Select style={{ width: '100%' }} onChange={entityChange}>
                   {entityList?.map((item) => (
                     <Option key={item.entityId} value={item.entityId}>
@@ -117,7 +129,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
               </Form.Item>
             </Grid.Row>
             <Grid.Row>
-              <Form.Item field="filterCondition" label="匹配规则" required>
+              <Form.Item field="filterCondition" label="匹配规则" rules={[{ required: true, message: '请选择匹配规则' }]}>
                 <ConditionEditor
                   data={triggerEditorSignal.nodeData.value[node.id]?.filterCondition || []}
                   fields={conditionFields}
@@ -128,7 +140,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
             <Grid.Row>
               <Form.Item label="更新规则" field="fields">
-                <FieldEditor fieldList={fieldDataList} />
+                <FieldEditor fieldList={fieldDataList} form={payloadForm} />
               </Form.Item>
             </Grid.Row>
             <Grid.Row>
