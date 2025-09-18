@@ -4,6 +4,7 @@ import { useCallback, useContext, useMemo, useState } from 'react';
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { Button, Dropdown, Menu } from '@arco-design/web-react';
 import { IconCaretDown, IconCaretLeft, IconClose, IconMore } from '@arco-design/web-react/icon';
+import { clearDataOriginNodeId } from '../../components';
 import { NodeRenderContext } from '../../context';
 import { useIsSidebar } from '../../hooks';
 import { FlowCommandId } from '../../shortcuts/constants';
@@ -28,6 +29,8 @@ function DropdownContent(props: { updateTitleEdit: (editing: boolean) => void })
 
   const handleDelete = useCallback(
     (e: React.MouseEvent) => {
+      // 删除相关应用的节点配置
+      clearDataOriginNodeId(node.id);
       triggerEditorSignal.deleteNodeData(node.id);
       deleteNode();
       e.stopPropagation(); // Disable clicking prevents the sidebar from opening

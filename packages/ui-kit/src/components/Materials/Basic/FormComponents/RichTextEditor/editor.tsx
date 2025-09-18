@@ -1,4 +1,4 @@
-import React, { useState, useEffect, CSSProperties } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, CSSProperties } from 'react';
 import { Editor, Toolbar } from '@wangeditor/editor-for-react';
 // 引入 wangEditor 的类型
 import { IDomEditor, IEditorConfig, IToolbarConfig } from '@wangeditor/editor';
@@ -9,8 +9,6 @@ import { IDomEditor, IEditorConfig, IToolbarConfig } from '@wangeditor/editor';
 interface WangEditorProps {
   value?: string; // Form.Item 注入的 value
   onChange?: (html: any) => void; // Form.Item 注入的 onChange
-  // 你也可以添加其他自定义 props，例如 height
-  height?: number;
   runtime?: boolean;
   style?: CSSProperties;
 }
@@ -25,14 +23,20 @@ const toolbarConfig: Partial<IToolbarConfig> = {};
 const editorConfig: Partial<IEditorConfig> = {
   placeholder: '请输入内容...',
   MENU_CONF: {},
+  scroll: true
 };
 
 
 // ----------------- 封装的组件 -----------------
 
-const WangEditorWrapper: React.FC<WangEditorProps> = ({ value = '', onChange, height = 350, runtime, style }) => {
+const WangEditorWrapper: React.FC<WangEditorProps> = ({ value = '', onChange, runtime, style }) => {
   // 2. 为 useState 添加类型注解
   const [editor, setEditor] = useState<IDomEditor | null>(null);
+
+  // 使用 useCallback 确保 onChange 函数引用稳定
+  const stableOnChange = useCallback((html: string) => {
+    onChange?.(html);
+  }, [onChange]);
 
   // 同步外部的 value 到编辑器
   useEffect(() => {
@@ -42,27 +46,33 @@ const WangEditorWrapper: React.FC<WangEditorProps> = ({ value = '', onChange, he
     }
   }, [value, editor]);
 
+  // 控制编辑器的启用/禁用状态
   useEffect(() => {
-    runtime ? editor?.enable() : editor?.disable();
-  }, [runtime]);
+    if (editor) {
+      runtime ? editor.enable() : editor.disable();
+    }
+  }, [runtime, editor]);
 
   // 组件销毁时销毁 editor 实例
   useEffect(() => {
     return () => {
       if (editor == null) return;
+      console.debug('销毁编辑器');
       editor.destroy();
       setEditor(null);
     };
   }, [editor]);
 
-  // 编辑器内容变化时的回调
-  const handleEditorChange = (currentEditor: IDomEditor) => {
-    const newHtml = currentEditor.getHtml();
-    // 只有当内容真正变化时才调用 onChange，并使用可选链操作符确保 onChange 存在
-    if (newHtml !== value) {
-      onChange?.(newHtml);
-    }
-  };
+  // 使用 useMemo 缓存编辑器变化的回调函数
+  const handleEditorChange = useMemo(() => {
+    return (currentEditor: IDomEditor) => {
+      const newHtml = currentEditor.getHtml();
+      // 只有当内容真正变化时才调用 onChange
+      if (newHtml !== value) {
+        stableOnChange(newHtml);
+      }
+    };
+  }, [value, stableOnChange]);
 
   return (
     <div style={{ border: '1px solid #ccc', zIndex: 100, ...style }}>
@@ -77,7 +87,7 @@ const WangEditorWrapper: React.FC<WangEditorProps> = ({ value = '', onChange, he
         onCreated={setEditor}
         onChange={handleEditorChange}
         mode="default"
-        style={{ minHeight: `${height}px`, overflowY: 'auto' }}
+        style={{ height: 400, overflowY: 'auto' }}
       />
     </div>
   );

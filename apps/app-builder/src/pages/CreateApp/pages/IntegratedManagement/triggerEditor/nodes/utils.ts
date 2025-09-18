@@ -9,7 +9,7 @@ export async function validateNodeForm(form: any, payloadForm: any, validateOnly
     form.setValueIn('invalid', false);
     await payloadForm.validate({ validateOnly });
   } catch (error: any) {
-    console.warn('validateNodeForm error: ', error.errors);
+    // console.warn('validateNodeForm error: ', error.errors);
     // 捕获校验错误并设置 invalid
     form.setValueIn('invalid', true);
   }

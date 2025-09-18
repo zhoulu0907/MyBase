@@ -29,7 +29,7 @@ export const FORM_COMPONENT_TYPES = {
   DIVIDER: 'XDivider',
   RICH_TEXT: 'XRichText',
   CAROUSEL_F: 'XFCarousel',
-  CHILDREN_TABLE: 'XChildrenTable',
+  SUB_TABLE: 'XSubTable',
   DATA_SELECT: 'XDataSelect'
 } as const;
 

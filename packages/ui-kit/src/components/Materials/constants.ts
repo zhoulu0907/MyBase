@@ -71,7 +71,9 @@ export const CONFIG_TYPES = {
   // 校验
   VERIFY: 'Verify',
   // 选择数据源
-  SELECT_DATA_SOURCE: 'SelectDataSource'
+  SELECT_DATA_SOURCE: 'SelectDataSource',
+  // 子表单组件
+  SUB_TABLE: 'SubTable'
 } as const;
 
 // 状态选项常量
