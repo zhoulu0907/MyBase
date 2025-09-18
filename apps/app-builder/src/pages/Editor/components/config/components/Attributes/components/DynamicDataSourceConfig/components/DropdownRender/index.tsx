@@ -182,14 +182,20 @@ const DropdownRender: React.FC<DropdownRenderProps> = ({
                     <IconEdit
                       className={styles.iconEdit}
                       style={{
-                        visibility: hovered === option.value ? 'visible' : 'hidden'
+                        visibility: hovered === option.value ? 'visible' : 'hidden',
+                        color: '#838892'
                       }}
                     />
                   </Popover>
                 )}
                 <IconDragDotVertical
                   className="drag-handle"
-                  style={{ cursor: 'move', marginLeft: 8, visibility: hovered === option.value ? 'visible' : 'hidden' }}
+                  style={{
+                    cursor: 'move',
+                    marginLeft: 8,
+                    visibility: hovered === option.value ? 'visible' : 'hidden',
+                    color: '#838892'
+                  }}
                 />
               </div>
             </div>

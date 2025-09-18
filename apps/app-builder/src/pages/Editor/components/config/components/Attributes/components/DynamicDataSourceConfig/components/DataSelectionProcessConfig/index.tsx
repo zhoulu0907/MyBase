@@ -316,12 +316,15 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
 
                   <ReactSortable list={fastFilters} setList={setFastFilters} handle=".drag-handle" animation={150}>
                     {fastFilters.map((filter, index) => (
-                      <div key={filter.value} style={{ marginBottom: 8 }}>
-                        <div className={styles.fastFilterDiv}>
+                      <div key={filter.value} className={styles.fastFilterDiv}>
+                        <div className={styles.fastFilterContent}>
                           <span className={styles.filterLabel}>{filter.label}</span>
-                          <IconDragDotVertical style={{ marginRight: 8, cursor: 'move' }} className="drag-handle" />
+                          <IconDragDotVertical
+                            style={{ marginRight: 8, cursor: 'move', color: '#838892' }}
+                            className="drag-handle"
+                          />
                           <IconDelete
-                            style={{ cursor: 'pointer' }}
+                            className={styles.deleteBtn}
                             onClick={() => setFastFilters(fastFilters.filter((_, i) => i !== index))}
                           />
                         </div>

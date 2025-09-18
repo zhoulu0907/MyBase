@@ -1,3 +1,6 @@
+@IconColor: #838892;
+@DelIconHoverColor: red;
+
 .dataSourceContainer {
   .noMarginBottom {
     margin-bottom: 0;
@@ -74,13 +77,31 @@
     }
 
     .fastFilterDiv {
-      display: flex;
-      align-items: center;
       margin-bottom: 8px;
+      padding: 4px;
 
-      .filterLabel {
-        flex: 1;
+      .fastFilterContent {
+        display: flex;
+        align-items: center;
+        margin-bottom: 8px;
+
+        .filterLabel {
+          flex: 1;
+        }
+
+        .deleteBtn {
+          cursor: pointer;
+          color: @IconColor;
+
+          :hover {
+            color: @DelIconHoverColor;
+          }
+        }
       }
+    }
+    .fastFilterDiv:hover {
+      background-color: #eaedf4;
+      border-radius: 6px;
     }
   }
 
@@ -192,7 +213,7 @@
 
       .tipSpan {
         font-size: 12px;
-        color: #838892;
+        color: @IconColor;
       }
     }
   }
@@ -202,7 +223,7 @@
 
     .titleSpan {
       .titleSpanCommon;
-      color: #838892;
+      color: @IconColor;
     }
 
     .fieldItemDiv {
@@ -230,7 +251,7 @@
       color: #165dff;
 
       :hover {
-        color: red;
+        color: @DelIconHoverColor;
       }
     }
   }
@@ -251,12 +272,11 @@
   }
 
   .popupContainer {
-    // display: flex;
     min-height: 320px;
 
     .titleSpan {
       .titleSpanCommon;
-      color: #838892;
+      color: @IconColor;
       font-size: 16px;
     }
   }
