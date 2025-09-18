@@ -32,7 +32,7 @@ const SortByEditor: React.FC<ConditionEditorProps> = ({ data, onChange, fields, 
   return (
     <ReactSortable list={sortList} setList={handleSort} animation={200} handle=".sortby-item-handle">
       <Form.Item noStyle validateTrigger={['onChange']}>
-        <Form.List field="sortList" initialValue={data}>
+        <Form.List field="sortBy">
           {(field, { add, remove }) => {
             return (
               <>
