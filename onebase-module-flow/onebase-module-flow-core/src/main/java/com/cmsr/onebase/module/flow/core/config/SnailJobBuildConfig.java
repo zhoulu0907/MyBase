@@ -1,10 +1,13 @@
-package com.cmsr.onebase.module.flow.build.config;
+package com.cmsr.onebase.module.flow.core.config;
 
 
 import com.aizuda.snailjob.client.common.config.SnailJobProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
+
+
 
 /**
  * @Author：huangjie
@@ -12,6 +15,7 @@ import org.springframework.context.annotation.Configuration;
  */
 @Slf4j
 @Configuration
+@Conditional(FlowBuildCondition.class)
 @EnableConfigurationProperties({SnailJobProperties.class})
 public class SnailJobBuildConfig {
 
