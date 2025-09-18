@@ -18,22 +18,22 @@ import com.cmsr.onebase.module.system.enums.logger.LoginLogTypeEnum;
 import com.cmsr.onebase.module.system.enums.logger.LoginResultEnum;
 import com.cmsr.onebase.module.system.enums.oauth2.OAuth2ClientConstants;
 import com.cmsr.onebase.module.system.enums.sms.SmsSceneEnum;
+import com.cmsr.onebase.module.system.enums.tenant.TenantCodeEnum;
 import com.cmsr.onebase.module.system.service.logger.LoginLogService;
 import com.cmsr.onebase.module.system.service.member.MemberService;
 import com.cmsr.onebase.module.system.service.oauth2.OAuth2TokenService;
 import com.cmsr.onebase.module.system.service.permission.PermissionService;
 import com.cmsr.onebase.module.system.service.tenant.TenantService;
 import com.cmsr.onebase.module.system.service.user.AdminUserService;
-import com.cmsr.onebase.module.system.vo.*;
+import com.cmsr.onebase.module.system.vo.CaptchaVerificationReqVO;
 import com.cmsr.onebase.module.system.vo.auth.*;
-import com.cmsr.onebase.module.system.vo.auth.UserLoginReqVO;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Resource;
 import jakarta.validation.Validator;
 import lombok.Setter;
-import org.springframework.cloud.context.config.annotation.RefreshScope;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,28 +52,33 @@ import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
 public class AdminAuthServiceImpl implements AdminAuthService {
 
     @Resource
-    private AdminUserService   userService;
+    private AdminUserService userService;
     @Resource
-    private LoginLogService    loginLogService;
+    private LoginLogService loginLogService;
     @Resource
     private OAuth2TokenService oauth2TokenService;
     @Resource
-    private MemberService      memberService;
+    private MemberService memberService;
     @Resource
-    private Validator          validator;
+    private Validator validator;
     @Resource
-    private CaptchaService     captchaService;
+    private CaptchaService captchaService;
     @Resource
-    private SmsCodeApi         smsCodeApi;
-
+    private SmsCodeApi smsCodeApi;
     /**
      * 验证码的开关，默认为 true
      */
     @Value("${onebase.captcha.enable:true}")
     @Setter // 为了单测：开启或者关闭验证码
-    private Boolean       captchaEnable;
+    private Boolean captchaEnable;
+    /**
+     * 平台租户验证开关，默认为 true
+     */
+    @Value("${onebase.platform-tenant.enable:true}")
+    @Setter // 为了单测：开启或者关闭验证码
+    private Boolean platformTenantEnable;
     @Resource
-    private TenantService     tenantService;
+    private TenantService tenantService;
     @Resource
     private PermissionService permissionService;
 
@@ -109,7 +114,7 @@ public class AdminAuthServiceImpl implements AdminAuthService {
 
         // 3. 校验是否是平台管理员
         boolean isAdmin = permissionService.isPlatformSuperAdmin(user.getId());
-        if(!isAdmin){
+        if (!isAdmin) {
             throw exception(AUTH_LOGIN_USER_NOT_ADMIN_ERROR);
         }
 
@@ -121,7 +126,14 @@ public class AdminAuthServiceImpl implements AdminAuthService {
     public AuthLoginRespVO login(AuthLoginReqVO reqVO) {
         // 校验验证码
         validateCaptcha(reqVO);
-
+        if (platformTenantEnable) {
+            // 校验当前用户绑定的租户是否为平台租户，是则不允许登录
+            tenantService.handleTenantInfo(tenant -> {
+                if (tenant.getTenantCode().equals(TenantCodeEnum.PLATFORM_TENANT.getCode())) {
+                    throw exception(AUTH_LOGIN_PLATFORM_TENANT_ERROR);
+                }
+            });
+        }
         // 使用账号密码，进行登录
         AdminUserDO user = authenticate(reqVO.getUsername(), reqVO.getPassword());
 

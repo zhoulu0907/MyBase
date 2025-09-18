@@ -76,4 +76,7 @@ public class TenantRespVO {
     @Schema(description = "应用数量", requiredMode = Schema.RequiredMode.REQUIRED, example = "1024")
     private Integer appCount;
 
+    @Schema(description = "已存在用户数量", requiredMode = Schema.RequiredMode.REQUIRED, example = "1024")
+    private Integer existUserCount;
+
 }

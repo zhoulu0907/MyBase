@@ -4,9 +4,26 @@
 - 始终使用中文回复用户
 
 ## 二、本项目特别指定的规则（important! 重要！强制！请务必要遵守！）
-1. 项目中凡是以onebase-module开头的的一级模块均为可独立部署的微服务模块，每个模块内部分为module-api和module-server两个子模块；
-2. module-api用于放置跨模块、跨微服务调用的Api类（使用open feign定义和访问）和DTO类（用于模块间数据传输）。凡是跨module模块调用的（除去对公共模块如onebase-framework的调用之外）必须在这里定义相关Api和相关DTO；
-3. module-server用于放置本模块的核心服务和实体类等。模块内部的不同类别/领域间服务通过Service层调用，避免跨领域直接调用其他领域的Mapper层，如不可以在UserService中调用RoleMapper；
+1. 项目工程结构介绍：
+   onebase-v3-be/
+   ├── onebase-server/     # 打包服务、统一工程配置
+   ├── onebase-dependencies/       # 统一管理所有依赖项目
+   ├── onebase-framework/          # 统一管理common公共能力和各类中间件
+   ├── onebase-module-infra        # 基础设施，如文件存储、监控等。
+   ├── onebase-module-system       # 系统能力，如空间、租户、用户、角色、权限等。
+   ├── onebase-module-data         # 数据模块
+   ├── onebase-module-app          # 应用模块
+   ├── onebase-module-flow         # 流程模块
+   ├── onebase-module-formula      # 公式模块
+   ├── onebase-module-bpm          # 工作流模块
+   ├── pom.xml             # 项目主POM
+注意： 项目中凡是以onebase-module开头的的一级模块均为一级业务相关模块，也是支持独立部署的微服务模块，每个模块由分为下面四个子模块：
+   onebase-module-app-build    # build，存放编辑态服务；
+   onebase-module-app-runtime  # runtime，存放运行态服务；
+   onebase-module-app-api      # api，用于模块间依赖和解耦；
+   onebase-module-app-core     # core，存放底层通用逻辑，如各类DataRepository/各类DO/公共服务Manager管理器/utils等；
+2. onebase-module-xxx模块间调用，通过依赖其他一级模块的子模块onebase-module-xxx-api来实现，该子模块用于放置跨模块、跨微服务调用的Api类（使用open feign定义和访问）和DTO类（用于模块间数据传输），凡是跨module调用的必须在这里定义相关Api和相关DTO；
+3. onebase-module-xxx模块内部调用，不同领域间服务通过Service层调用，避免跨领域直接调用其他领域的Data/Dal层，如不可以在UserService中调用RoleDatarepository，而应该在UserService中调用RoleService，RoleService中调用RoleDataRepository；
 4. 带@RestController注解的Controller类统一作为前端访问入口，要注意带上@PreAuthorize权限管控，Controller中不要写业务逻辑，保持轻量、清晰；
 5. Controller和Service方法大于2个入参优先使用VO，后期增删参数方便 只改VO一处，否则方法都要改签名；
 6. 带@FeignClient注解的Api类统一作为跨module调用的API入口，一般无需权限控制，给内部其他module提供服务；
