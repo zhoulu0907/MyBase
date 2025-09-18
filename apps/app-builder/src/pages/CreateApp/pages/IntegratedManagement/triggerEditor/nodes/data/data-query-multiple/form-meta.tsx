@@ -104,6 +104,9 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       };
     });
     setEntityList(newEntityList);
+    if (dataType !== DATA_SOURCE_TYPE.SUBFORM && curMainDataSource) {
+      getFieldList(curMainDataSource);
+    }
 
     clearDataOriginNodeId(node.id);
   };
@@ -147,6 +150,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     setDataNodeList(newDataNodeList);
 
     clearDataOriginNodeId(node.id);
+    getFieldList(dataNodeId);
   };
 
   // 获取各类数据源列表，不传值获取全部(用于初始化)
@@ -208,10 +212,22 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       // 从数据节点中查询  DATA_NODE
       // TODO(mickey) 根据数据节点查询数据
       const nodeData = triggerEditorSignal.nodeData.value[dataSource];
-      if (!nodeData.dataSource) {
+      const originDataType = nodeData.dataType;
+      if (!originDataType) {
         return;
       }
-      const res = await getEntityFields({ entityId: nodeData.dataSource });
+      let originDataSource: string = '';
+      if (originDataType === DATA_SOURCE_TYPE.FORM) {
+        // 节点来源是主表单
+        originDataSource = nodeData.mainDataSource;
+      } else if (originDataType === DATA_SOURCE_TYPE.SUBFORM) {
+        // 子表单
+        originDataSource = nodeData.subDataSource;
+      } else if (originDataType === DATA_SOURCE_TYPE.DATA_NODE) {
+        // 数据节点 dataNodeId
+        originDataSource = getDataNodeSource(nodeData.dataNodeId);
+      }
+      const res = await getEntityFields({ entityId: originDataSource });
       const filedIds: string[] = [];
       const newConditionFields: ConfitionField[] = [];
       const fieldOptions: SelectOption[] = [];
@@ -260,6 +276,26 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
         setValidationTypes(newValidationTypes);
       }
     }
+  };
+
+  const getDataNodeSource = (nodeId: string): string => {
+    const nodeData = triggerEditorSignal.nodeData.value;
+    for (let ele in nodeData) {
+      const item = nodeData[ele];
+      if (item.id === nodeId) {
+        if (item.dataType === DATA_SOURCE_TYPE.FORM) {
+          // 节点来源是主表单
+          return item.mainDataSource;
+        } else if (item.dataType === DATA_SOURCE_TYPE.SUBFORM) {
+          // 子表单
+          return item.subDataSource;
+        } else if (item.dataType === DATA_SOURCE_TYPE.DATA_NODE) {
+          // 数据节点 dataNodeId
+          return getDataNodeSource(item.dataNodeId);
+        }
+      }
+    }
+    return '';
   };
 
   // 表单内容改变

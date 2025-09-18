@@ -21,8 +21,8 @@ import SortByEditor from '../../../components/sortby-editor';
 import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
-import { validateNodeForm } from '../../utils';
 import { getBeforeCurQueryNodes } from '../../utils';
+import { validateNodeForm } from '../../utils';
 
 export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   useSignals();
@@ -36,6 +36,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const dataType = Form.useWatch('dataType', payloadForm);
 
   const filterType = Form.useWatch('filterType', payloadForm);
+
   // 数据源选择
   const [entityList, setEntityList] = useState<MetadataEntityPair[]>([]);
   const [mainEntityList, setMainEntityList] = useState<MetadataEntityPair[]>([]);
@@ -100,6 +101,9 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       };
     });
     setEntityList(newEntityList);
+    if (dataType !== DATA_SOURCE_TYPE.SUBFORM && curMainDataSource) {
+      getFieldList(curMainDataSource);
+    }
   };
 
   const handleSubDataSourceChange = (curSubDataSource: string) => {
@@ -137,6 +141,8 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
     const newDataNodeList = getBeforeCurQueryNodes(node.id, nodes);
     setDataNodeList(newDataNodeList);
+
+    getFieldList(dataNodeId);
   };
 
   // 获取各类数据源列表，不传值获取全部(用于初始化)
@@ -161,6 +167,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       const nodes = triggerEditorSignal.nodes.value;
       // 过滤掉当前节点,过滤blocks,并且只能选当前节点之前的节点
       const newDataNodeList = getBeforeCurQueryNodes(node.id, nodes);
+
       setDataNodeList(newDataNodeList);
     }
   };
@@ -197,10 +204,22 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       // 从数据节点中查询  DATA_NODE
       // TODO(mickey) 根据数据节点查询数据
       const nodeData = triggerEditorSignal.nodeData.value[dataSource];
-      if (!nodeData.dataSource) {
+      const originDataType = nodeData.dataType;
+      if (!originDataType) {
         return;
       }
-      const res = await getEntityFields({ entityId: nodeData.dataSource });
+      let originDataSource: string = '';
+      if (originDataType === DATA_SOURCE_TYPE.FORM) {
+        // 节点来源是主表单
+        originDataSource = nodeData.mainDataSource;
+      } else if (originDataType === DATA_SOURCE_TYPE.SUBFORM) {
+        // 子表单
+        originDataSource = nodeData.subDataSource;
+      } else if (originDataType === DATA_SOURCE_TYPE.DATA_NODE) {
+        // 数据节点 dataNodeId
+        originDataSource = getDataNodeSource(nodeData.dataNodeId);
+      }
+      const res = await getEntityFields({ entityId: originDataSource });
       const filedIds: string[] = [];
       const newConditionFields: ConfitionField[] = [];
       const fieldOptions: SelectOption[] = [];
@@ -249,6 +268,26 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
         setValidationTypes(newValidationTypes);
       }
     }
+  };
+
+  const getDataNodeSource = (nodeId: string): string => {
+    const nodeData = triggerEditorSignal.nodeData.value;
+    for (let ele in nodeData) {
+      const item = nodeData[ele];
+      if (item.id === nodeId) {
+        if (item.dataType === DATA_SOURCE_TYPE.FORM) {
+          // 节点来源是主表单
+          return item.mainDataSource;
+        } else if (item.dataType === DATA_SOURCE_TYPE.SUBFORM) {
+          // 子表单
+          return item.subDataSource;
+        } else if (item.dataType === DATA_SOURCE_TYPE.DATA_NODE) {
+          // 数据节点 dataNodeId
+          return getDataNodeSource(item.dataNodeId);
+        }
+      }
+    }
+    return '';
   };
 
   // 表单内容改变
@@ -395,7 +434,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                 form={payloadForm}
               ></SortByEditor>
             </Form.Item>
-            <div style={{ color: '#4e5969' }}>仅查询排序的第一条数据</div>
           </Form>
         </FormContent>
       ) : (
