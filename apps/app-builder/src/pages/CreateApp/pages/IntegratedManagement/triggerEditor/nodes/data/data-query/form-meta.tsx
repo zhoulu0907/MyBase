@@ -1,26 +1,26 @@
-import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
-import { type FlowNodeJSON } from '../../../typings';
-import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
-import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
-import { Form, Input, Select, Radio, Grid } from '@arco-design/web-react';
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
+import { useAppStore } from '@/store/store_app';
+import { Form, Grid, Input, Radio, Select } from '@arco-design/web-react';
+import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
 import {
-  getEntityListByApp,
-  getEntityFields,
-  getFieldCheckTypeApi,
   DATA_SOURCE_TYPE,
   FILTER_TYPE,
+  getEntityFields,
   getEntityFieldsWithChildren,
-  type SelectOption,
-  type MetadataEntityPair,
+  getEntityListByApp,
+  getFieldCheckTypeApi,
   type ConfitionField,
-  type EntityFieldValidationTypes
+  type EntityFieldValidationTypes,
+  type MetadataEntityPair,
+  type SelectOption
 } from '@onebase/app';
 import { useEffect, useState } from 'react';
 import ConditionEditor from '../../../components/condition-editor';
 import SortByEditor from '../../../components/sortby-editor';
-import { useAppStore } from '@/store/store_app';
-import { NodeType } from '../../const';
+import { getBeforeCurQueryNodes } from '../../../components/utils';
+import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
+import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
+import { type FlowNodeJSON } from '../../../typings';
 import { validateNodeForm } from '../../utils';
 
 export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
