@@ -2,14 +2,15 @@ package com.cmsr.onebase.module.system.build.controller.license;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.module.system.convert.license.LicenseConvert;
+import com.cmsr.onebase.module.system.dal.dataobject.license.LicenseDO;
+import com.cmsr.onebase.module.system.service.license.LicenseService;
 import com.cmsr.onebase.module.system.vo.license.LicensePageReqVO;
 import com.cmsr.onebase.module.system.vo.license.LicensePageRespVO;
 import com.cmsr.onebase.module.system.vo.license.LicenseRespVO;
 import com.cmsr.onebase.module.system.vo.license.LicenseSaveReqVO;
-import com.cmsr.onebase.module.system.convert.license.LicenseConvert;
-import com.cmsr.onebase.module.system.dal.dataobject.license.LicenseDO;
-import com.cmsr.onebase.module.system.service.license.LicenseService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -61,10 +62,10 @@ public class LicenseController {
      */
     @PostMapping("/createLicenseFile")
     @PreAuthorize("@ss.hasPermission('system:license:create')")
-    // @PreAuthorize("@ss.hasPermission('system:license:query')")
     @Operation(summary = "创建License文件")
-    public void createLicenseFile(@RequestBody LicenseSaveReqVO reqVO,HttpServletResponse response) {
-        licenseService.createLicenseFile(reqVO,response);
+    public void createLicenseFile(@RequestBody String reqVO,HttpServletResponse response) {
+        LicenseSaveReqVO licenseSaveReqVO = JsonUtils.parseObject(reqVO, LicenseSaveReqVO.class);
+        licenseService.createLicenseFile(licenseSaveReqVO,response);
     }
 
     /**
