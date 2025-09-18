@@ -4,7 +4,7 @@ import { useCallback, useContext, useMemo, useState } from 'react';
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { Button, Dropdown, Menu } from '@arco-design/web-react';
 import { IconCaretDown, IconCaretLeft, IconClose, IconMore } from '@arco-design/web-react/icon';
-import { clearDataOriginNodeId } from '../../components';
+import { clearDataOriginNodeId } from '../../nodes/utils';
 import { NodeRenderContext } from '../../context';
 import { useIsSidebar } from '../../hooks';
 import { FlowCommandId } from '../../shortcuts/constants';

@@ -16,7 +16,7 @@ import {
 } from '@onebase/app';
 import { useSignals } from '@preact/signals-react/runtime';
 import { useEffect, useState } from 'react';
-import { clearDataOriginNodeId } from '../../../components';
+import { clearDataOriginNodeId } from '../../utils';
 import ConditionEditor from '../../../components/condition-editor';
 import SortByEditor from '../../../components/sortby-editor';
 import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
