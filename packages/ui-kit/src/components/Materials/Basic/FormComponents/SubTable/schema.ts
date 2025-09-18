@@ -1,5 +1,5 @@
 import {
-  baseConfig, baseDefault, widthConfig, statusConfig, layoutConfig, childrenTableConfig, labelColSpanConfig, type ICommonBaseType,
+  baseConfig, baseDefault, widthConfig, statusConfig, layoutConfig, subTableConfig, labelColSpanConfig, type ICommonBaseType,
   type TStatusSelectKeyType,
   type TLayoutSelectKeyType,
 
@@ -32,7 +32,7 @@ import type {
   ILayoutConfigType,
   ITooltipConfigType,
   INumberConfigType,
-  IChildrenTableConfigType,
+  ISubTableConfigType,
 } from '../../../types';
 
 export type TColumnCountSelectKeyType = (typeof COLUMN_COUNT_OPTIONS)[keyof typeof COLUMN_COUNT_OPTIONS];
@@ -50,10 +50,10 @@ export type TColumnLayoutEditData = Array<
   | ILayoutConfigType<TLayoutSelectKeyType>
   | ITooltipConfigType
   | INumberConfigType
-  | IChildrenTableConfigType
+  | ISubTableConfigType
 >;
 
-export interface XChildrenTableConfig extends ICommonBaseType {
+export interface XSubTableConfig extends ICommonBaseType {
   /**
    * 输入框标题
    * text：标题
@@ -115,12 +115,12 @@ export interface XChildrenTableConfig extends ICommonBaseType {
   layout?: TLayoutSelectKeyType;
 }
 
-export interface XChildrenTableSchema {
+export interface XSubTableSchema {
   editData: TColumnLayoutEditData;
-  config: XChildrenTableConfig;
+  config: XSubTableConfig;
 }
 
-const XChildrenTable: XChildrenTableSchema = {
+const XSubTable: XSubTableSchema = {
   editData: [
     ...baseConfig,
     {
@@ -133,7 +133,7 @@ const XChildrenTable: XChildrenTableSchema = {
       name: '描述信息',
       type: CONFIG_TYPES.TOOLTIP_INPUT
     },
-    childrenTableConfig,
+    subTableConfig,
     labelColSpanConfig,
     layoutConfig,
     {
@@ -193,4 +193,4 @@ const XChildrenTable: XChildrenTableSchema = {
   }
 };
 
-export default XChildrenTable;
+export default XSubTable;

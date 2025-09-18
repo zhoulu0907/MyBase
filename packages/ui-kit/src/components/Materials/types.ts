@@ -332,8 +332,8 @@ export interface ISelectDataSourceConfigType {
 }
 
 // 子表子组件配置
-export interface IChildrenTableConfigType {
+export interface ISubTableConfigType {
   key: string;
   name: string;
-  type: typeof CONFIG_TYPES.CHILDREN_TABLE;
+  type: typeof CONFIG_TYPES.SUB_TABLE;
 }

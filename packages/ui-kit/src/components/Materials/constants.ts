@@ -73,7 +73,7 @@ export const CONFIG_TYPES = {
   // 选择数据源
   SELECT_DATA_SOURCE: 'SelectDataSource',
   // 子表单组件
-  CHILDREN_TABLE: 'ChildrenTable'
+  SUB_TABLE: 'SubTable'
 } as const;
 
 // 状态选项常量

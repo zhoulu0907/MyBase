@@ -24,7 +24,7 @@ import DynamicCheckboxConfig from './components/DynamicCheckboxConfig';
 import DynamicRelatedFormConfig from './components/DynamicRelatedFormConfig';
 import DynamicTableConfig from './components/DynamicTableConfig';
 import DynamicDataSourceConfig from './components/DynamicDataSourceConfig';
-import DynamicChildrenTableConfig from './components/DynamicChildrenTableConfig';
+import DynamicSubTableConfig from './components/DynamicSubTableConfig';
 import styles from './index.module.less';
 
 const Row = Grid.Row;
@@ -198,7 +198,7 @@ const Attributes = ({ cpID }: ConfigsProps) => {
               item.type !== CONFIG_TYPES.SELECT_OPTIONS_INPUT &&
               item.type !== CONFIG_TYPES.CAROUSEL &&
               item.type !== CONFIG_TYPES.SELECT_DATA_SOURCE &&
-              item.type !== CONFIG_TYPES.CHILDREN_TABLE
+              item.type !== CONFIG_TYPES.SUB_TABLE
             ) {
               return (
                 <FormItem
@@ -640,9 +640,9 @@ const Attributes = ({ cpID }: ConfigsProps) => {
             }
 
             // 选择数据配置
-            if (item.type === CONFIG_TYPES.CHILDREN_TABLE) {
+            if (item.type === CONFIG_TYPES.SUB_TABLE) {
               return (
-                <DynamicChildrenTableConfig
+                <DynamicSubTableConfig
                   key={index}
                   id={cpID}
                   handlePropsChange={handlePropsChange}

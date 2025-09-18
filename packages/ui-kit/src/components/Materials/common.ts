@@ -35,7 +35,7 @@ import type {
   IWidthConfigType,
   TTextDefaultType,
   ISelectDataSourceConfigType,
-  IChildrenTableConfigType
+  ISubTableConfigType
 } from './types';
 
 export interface ICommonBaseType {
@@ -363,8 +363,8 @@ export const selectDataResourceConfig: ISelectDataSourceConfigType = {
   type: CONFIG_TYPES.SELECT_DATA_SOURCE
 }
 
-export const childrenTableConfig: IChildrenTableConfigType = {
-  key: 'childrenTable',
+export const subTableConfig: ISubTableConfigType = {
+  key: 'subTable',
   name: '子组件选项',
-  type: CONFIG_TYPES.CHILDREN_TABLE
+  type: CONFIG_TYPES.SUB_TABLE
 };

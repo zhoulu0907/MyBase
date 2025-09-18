@@ -13,7 +13,7 @@ import { COMPONENT_GROUP_NAME } from 'src/utils/const';
 import { STATUS_OPTIONS, STATUS_VALUES, LAYOUT_VALUES, LAYOUT_OPTIONS } from '../../../constants';
 import { ALL_COMPONENT_TYPES, FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { getComponentSchema } from '../../../schema';
-import { type XChildrenTableConfig } from './schema';
+import { type XSubTableConfig } from './schema';
 import './index.css';
 
 const leftPanelWidth = 343;
@@ -22,7 +22,7 @@ const canvasPaddingWidth = 40 + 32 + 10;
 const canvasMarginWidth = 10;
 const componentMaxWidth = leftPanelWidth + rightPanelWidth + canvasPaddingWidth + canvasMarginWidth;
 
-const XChildrenTable = (props: XChildrenTableConfig & { runtime?: boolean }) => {
+const XSubTable = (props: XSubTableConfig & { runtime?: boolean }) => {
   const { colCount, id, runtime = true, label, layout, tooltip, labelColSpan = 100, status, verify } = props;
 
   useSignals();
@@ -107,9 +107,12 @@ const XChildrenTable = (props: XChildrenTableConfig & { runtime?: boolean }) => 
           label: {
             ...schema.config.label,
             display: false
-          }
+          },
+          status
         },
       };
+
+      console.log(props, 'props')
 
       setPageComponentSchemas(cpID, props);
 
@@ -125,11 +128,6 @@ const XChildrenTable = (props: XChildrenTableConfig & { runtime?: boolean }) => 
         });
       }
 
-      const label = {
-        text: displayName,
-        display: false
-      };
-
       return {
         ...comp,
         id: comp.id,
@@ -139,7 +137,7 @@ const XChildrenTable = (props: XChildrenTableConfig & { runtime?: boolean }) => 
         width: 200,
         render: (_: any, _record: any) => (
           <div key={comp.id}>
-            <EditRender runtime={runtime} cpId={comp.id} cpType={comp.type} pageComponentSchema={props} reset={{ label }} />
+            <EditRender runtime={runtime} cpId={comp.id} cpType={comp.type} pageComponentSchema={props} />
           </div>
         )
       }
@@ -147,7 +145,7 @@ const XChildrenTable = (props: XChildrenTableConfig & { runtime?: boolean }) => 
 
     const newColumns = [index, ...customData, operation];
     setColumns(newColumns);
-  }, [colComponents[0], runtime]);
+  }, [colComponents[0], runtime, status]);
 
   // 如果列数变了，就重新初始化列
   useEffect(() => {
@@ -176,7 +174,7 @@ const XChildrenTable = (props: XChildrenTableConfig & { runtime?: boolean }) => 
   };
 
   return (
-    <Layout className="XChildrenTable">
+    <Layout className="XSubTable">
       {colComponents.map((_colComponents, index) => (
         <Grid.Row key={index} className="item">
           <ReactSortable
@@ -223,7 +221,7 @@ const XChildrenTable = (props: XChildrenTableConfig & { runtime?: boolean }) => 
 
               setPageComponentSchemas(cpID!, props);
 
-              const containerType = FORM_COMPONENT_TYPES.CHILDREN_TABLE;
+              const containerType = FORM_COMPONENT_TYPES.SUB_TABLE;
 
               const containerSchemaConfig = getComponentConfig(pageComponentSchemas[id], containerType);
               const containerSchema = getComponentSchema(containerType);
@@ -267,7 +265,7 @@ const XChildrenTable = (props: XChildrenTableConfig & { runtime?: boolean }) => 
           >
             <Form.Item
               label={label.display && label.text}
-              // field={dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.CHILDREN_TABLE}_${nanoid()}`}
+              // field={dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.SUB_TABLE}_${nanoid()}`}
               layout={layout}
               tooltip={tooltip}
               labelCol={{
@@ -292,7 +290,7 @@ const XChildrenTable = (props: XChildrenTableConfig & { runtime?: boolean }) => 
               }}>
                 {
                   runtime ? <Table columns={columns} data={tableData} scroll={{ x: 'max-content' }} /> :
-                    <DragableTable id={id} columns={columns} data={tableData} runtime={runtime} setColumns={setColumns} />
+                    <DragableTable id={id} status={status} columns={columns} data={tableData} runtime={runtime} setColumns={setColumns} />
                 }
               </div>
               <Button type='outline' icon={<IconPlus />} style={{ pointerEvents: runtime ? 'unset' : 'none', marginTop: 10 }} onClick={handleAdd}>新增一项</Button>
@@ -305,4 +303,4 @@ const XChildrenTable = (props: XChildrenTableConfig & { runtime?: boolean }) => 
   );
 };
 
-export default XChildrenTable;
+export default XSubTable;

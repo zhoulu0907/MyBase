@@ -17,7 +17,7 @@ export interface DynamicCheckboxConfigProps {
 }
 
 const DynamicCheckboxConfig: React.FC<DynamicCheckboxConfigProps> = ({ handlePropsChange, item, configs, id }) => {
-  const componentKey = 'childrenTable';
+  const componentKey = 'subTable';
 
   const {
     pageComponentSchemas,

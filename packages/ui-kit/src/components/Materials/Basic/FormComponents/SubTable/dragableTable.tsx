@@ -11,18 +11,21 @@ import { getComponentConfig } from 'src/components/Materials/schema';
 import EditRender from 'src/components/render/EditRender';
 import { usePageEditorSignal } from 'src/hooks/useSignal';
 import { getComponentSchema } from '../../../schema';
+import { TRadioDefaultType } from '@/components/Materials/types';
+import { TStatusSelectKeyType } from '@/components/Materials/common';
 import './index.css';
 
 interface IProps {
   id: string;
   columns: any[]; // 列数据
   data: any; // table数据
+  status?: TRadioDefaultType<TStatusSelectKeyType>;
   runtime?: boolean;
   setColumns: (data: any) => void;
 }
 
 const DragableTable = (props: IProps) => {
-  const { id, columns = [], data = [], runtime = true, setColumns } = props;
+  const { id, columns = [], data = [], status, runtime = true, setColumns } = props;
 
   useSignals();
 
@@ -87,6 +90,14 @@ const DragableTable = (props: IProps) => {
       );
     }
 
+    const schame = {
+      ...pageComponentSchemas[col.id],
+      config: {
+        ...pageComponentSchemas[col.id].config,
+        status,
+      }
+    }
+
     return (
       <div
         style={{
@@ -96,7 +107,7 @@ const DragableTable = (props: IProps) => {
           alignItems: 'center',
         }}
       >
-        <EditRender runtime={runtime} cpId={col.id} cpType={col.type} pageComponentSchema={pageComponentSchemas[col.id]} />
+        <EditRender runtime={runtime} cpId={col.id} cpType={col.type} pageComponentSchema={schame} />
       </div>
     );
   };

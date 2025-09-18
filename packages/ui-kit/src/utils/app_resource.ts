@@ -187,7 +187,7 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
       }
 
       // 载入布局组件的列数初始化
-      if (component.componentType === LAYOUT_COMPONENT_TYPES.COLUMN_LAYOUT || component.componentType === FORM_COMPONENT_TYPES.CHILDREN_TABLE) {
+      if (component.componentType === LAYOUT_COMPONENT_TYPES.COLUMN_LAYOUT || component.componentType === FORM_COMPONENT_TYPES.SUB_TABLE) {
         const config = JSON.parse(component.config);
         const colCount = config.colCount;
         const columns: any[][] = [];

@@ -23,7 +23,7 @@ import XStaticText from './StaticText';
 import XSwitch from './Switch';
 import XTimePicker from './TimePicker';
 import XUserSelect from './UserSelect';
-import XChildrenTable from './ChildrenTable';
+import XSubTable from './SubTable';
 
 export const FormComp = {
   XInputText,
@@ -50,6 +50,6 @@ export const FormComp = {
   XDIVIDER,
   XRichText,
   XCarousel,
-  XChildrenTable,
+  XSubTable,
   XDataSelect
 };
