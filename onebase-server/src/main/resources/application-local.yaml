@@ -61,8 +61,8 @@ debug: false
 onebase:
   captcha:
     enable: false # 本地环境，暂时关闭图片验证码，方便登录等接口的测试；
-  platform-tenant-app:
-    app-enable: true # 测试环境，开启平台租户登录，方便登录接口测试；
+  platform-tenant:
+    enable-create-app: true # 测试环境，暂时允许平台租户创建应用，方便登录接口测试；
   security:
     mock-enable: false
   access-log: # 访问日志的配置项
