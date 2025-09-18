@@ -20,7 +20,6 @@ import { useEffect, useState } from 'react';
 import ConditionEditor from '../../../components/condition-editor';
 import SortByEditor from '../../../components/sortby-editor';
 import { useAppStore } from '@/store/store_app';
-import { getBeforeCurQueryNodes } from '../../../components/utils';
 import { NodeType } from '../../const';
 import { validateNodeForm } from '../../utils';
 
@@ -280,7 +279,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             onValuesChange={onValuesChange}
             initialValues={{ ...triggerEditorSignal.nodeData.value[node.id] }}
           >
-            <Form.Item label="节点ID" field="id " initialValue={node.id}>
+            <Form.Item label="节点ID" field="id" initialValue={node.id}>
               <Input disabled />
             </Form.Item>
             <Form.Item label="查询方式" field="dataType" rules={[{ required: true, message: '请选择查询方式' }]}>
