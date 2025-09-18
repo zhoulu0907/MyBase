@@ -1,8 +1,8 @@
 import {
-    FORM_COMPONENT_TYPES,
-    LAYOUT_COMPONENT_TYPES,
-    LIST_COMPONENT_TYPES,
-    SHOW_COMPONENT_TYPES
+  FORM_COMPONENT_TYPES,
+  LAYOUT_COMPONENT_TYPES,
+  LIST_COMPONENT_TYPES,
+  SHOW_COMPONENT_TYPES
 } from './componentTypes';
 
 /**
@@ -38,7 +38,7 @@ export const COMPONENT_TYPE_DISPLAY_NAME_MAP: Record<string, string> = {
   [FORM_COMPONENT_TYPES.DIVIDER]: '分割线',
   [FORM_COMPONENT_TYPES.RICH_TEXT]: '富文本',
   [FORM_COMPONENT_TYPES.CAROUSEL_F]: '轮播图',
-  [FORM_COMPONENT_TYPES.CHILDREN_TABLE]: '子表单',
+  [FORM_COMPONENT_TYPES.SUB_TABLE]: '子表单',
   [FORM_COMPONENT_TYPES.DATA_SELECT]: '选择数据',
 
   // 列表组件
@@ -266,10 +266,10 @@ const allTemplate = {
           category: 'base'
         },
         {
-          type: FORM_COMPONENT_TYPES.CHILDREN_TABLE,
+          type: FORM_COMPONENT_TYPES.SUB_TABLE,
           h: 36,
           w: 118,
-          displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.CHILDREN_TABLE],
+          displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.SUB_TABLE],
           icon: 'readonly_cp.svg', // todo
           category: 'base'
         },

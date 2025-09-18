@@ -23,7 +23,7 @@ import XStaticText from './FormComponents/StaticText/schema';
 import XSwitch from './FormComponents/Switch/schema';
 import XTimePicker from './FormComponents/TimePicker/schema';
 import XUserSelect from './FormComponents/UserSelect/schema';
-import XChildrenTable from './FormComponents/ChildrenTable/schema';
+import XSubTable from './FormComponents/SubTable/schema';
 import XColumnLayout from './LayoutComponents/ColumnLayout/schema';
 import XCalendar from './ListComponents/Calendar/schema';
 import XCarousel from './ListComponents/Carousel/schema';
@@ -60,7 +60,7 @@ const baseSchema = {
   XDivider,
   XRichText,
   XFCarousel,
-  XChildrenTable,
+  XSubTable,
   XDataSelect,
 
   XTable,

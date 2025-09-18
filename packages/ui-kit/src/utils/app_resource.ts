@@ -7,7 +7,7 @@ import {
   type PageSet,
   type SavePageSetReq
 } from '@onebase/app';
-import { COMPONENT_TYPE_DISPLAY_NAME_MAP, EditConfig, LAYOUT_COMPONENT_TYPES } from 'src/components';
+import { COMPONENT_TYPE_DISPLAY_NAME_MAP, EditConfig, LAYOUT_COMPONENT_TYPES, FORM_COMPONENT_TYPES } from 'src/components';
 import { useFormEditorSignal, useListEditorSignal } from 'src/signals';
 
 export interface SavePageSetParams {
@@ -71,7 +71,6 @@ export async function startSavePageSet(params: SavePageSetParams, onSuccess?: Fu
         console.log(parentCode, ': cols: ', cols);
 
         cols &&
-          cols &&
           cols.forEach((col: any[], index: number) => {
             col.forEach((component: any, colIndex: number) => {
               colComponents.push({
@@ -188,7 +187,7 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
       }
 
       // 载入布局组件的列数初始化
-      if (component.componentType === LAYOUT_COMPONENT_TYPES.COLUMN_LAYOUT) {
+      if (component.componentType === LAYOUT_COMPONENT_TYPES.COLUMN_LAYOUT || component.componentType === FORM_COMPONENT_TYPES.SUB_TABLE) {
         const config = JSON.parse(component.config);
         const colCount = config.colCount;
         const columns: any[][] = [];

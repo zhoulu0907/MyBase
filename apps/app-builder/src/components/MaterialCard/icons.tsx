@@ -104,6 +104,6 @@ export const ICON_Map_By_Type: Record<string, React.ReactNode> = {
   XFCarousel: <img src={CalendarIcon} />,
   XRelatedForm: <img src={RelatedFormIcon} />,
   XRichText: <img src={RichTextIcon} />,
-  XChildrenTable: <img src={RichTextIcon} />,
+  XSubTable: <img src={RichTextIcon} />,
   XDataSelect: <img src={RichTextIcon} /> // todo
 };
