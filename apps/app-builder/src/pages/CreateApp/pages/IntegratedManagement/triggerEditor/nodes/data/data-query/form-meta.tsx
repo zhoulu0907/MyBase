@@ -383,7 +383,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             )}
 
             <Form.Item label="排序规则" rules={[{ required: true, message: '请选择排序规则' }]}>
-              <SortByEditor fields={conditionFields} form={payloadForm}></SortByEditor>
+              <SortByEditor data={triggerEditorSignal.nodeData.value[node.id]?.sortBy || []} fields={conditionFields} form={payloadForm}></SortByEditor>
             </Form.Item>
             <div style={{ color: '#4e5969' }}>仅查询排序的第一条数据</div>
           </Form>
