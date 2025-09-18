@@ -28,6 +28,13 @@ public interface LicenseService {
     Long createLicense(LicenseSaveReqVO reqVO);
 
     /**
+     * 创建License文件
+     *
+     * @param reqVO License创建请求参数
+     * @param response HttpServletResponse
+     */
+    void createLicenseFile(LicenseSaveReqVO reqVO, HttpServletResponse  response);
+    /**
      * 更新License
      *
      * @param reqVO License更新请求参数

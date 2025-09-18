@@ -47,10 +47,24 @@ public class LicenseController {
      * @return License主键ID
      */
     @PostMapping("/create")
-    @PreAuthorize("ss.hasAuthority('system:license:create')")
+    @PreAuthorize("@ss.hasPermission('system:license:create')")
     @Operation(summary = "创建License")
     public Long createLicense(@RequestBody LicenseSaveReqVO reqVO) {
         return licenseService.createLicense(reqVO);
+    }
+
+    /**
+     * 创建License
+     *
+     * @param reqVO License创建请求参数
+     * @return License主键ID
+     */
+    @PostMapping("/createLicenseFile")
+    @PreAuthorize("@ss.hasPermission('system:license:create')")
+    // @PreAuthorize("@ss.hasPermission('system:license:query')")
+    @Operation(summary = "创建License文件")
+    public void createLicenseFile(@RequestBody LicenseSaveReqVO reqVO,HttpServletResponse response) {
+        licenseService.createLicenseFile(reqVO,response);
     }
 
     /**
@@ -59,7 +73,7 @@ public class LicenseController {
      * @param reqVO License更新请求参数
      */
     @PostMapping("/update")
-    @PreAuthorize("ss.hasAuthority('system:license:update')")
+    @PreAuthorize("@ss.hasPermission('system:license:update')")
     @Operation(summary = "更新License")
     public void updateLicense(@RequestBody LicenseSaveReqVO reqVO) {
         licenseService.updateLicense(reqVO);
@@ -71,7 +85,7 @@ public class LicenseController {
      * @param id License主键ID
      */
     @PostMapping("/delete")
-    @PreAuthorize("ss.hasAuthority('system:license:delete')")
+    @PreAuthorize("@ss.hasPermission('system:license:delete')")
     @Operation(summary = "删除License")
     public void deleteLicense(@RequestParam("id") Long id) {
         licenseService.deleteLicense(id);
