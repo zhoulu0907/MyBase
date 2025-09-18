@@ -153,6 +153,11 @@ public class MetadataEntityFieldCoreServiceImpl implements MetadataEntityFieldCo
                 .filter(f -> f.getId() != null && f.getFieldType() != null && !f.getFieldType().isBlank())
                 .collect(Collectors.toMap(MetadataEntityFieldDO::getId, MetadataEntityFieldDO::getFieldType, (a,b)->a));
 
+        // 同时构建 id 到 fieldName 的映射
+        Map<Long, String> idToFieldName = fields.stream()
+                .filter(f -> f.getId() != null && f.getFieldName() != null && !f.getFieldName().isBlank())
+                .collect(Collectors.toMap(MetadataEntityFieldDO::getId, MetadataEntityFieldDO::getFieldName, (a,b)->a));
+
         if (idToTypeCode.isEmpty()) {
             return Collections.emptyMap();
         }
@@ -173,6 +178,11 @@ public class MetadataEntityFieldCoreServiceImpl implements MetadataEntityFieldCo
                 Map<String, String> typeInfo = new HashMap<>();
                 typeInfo.put("jdbcType", jdbc);
                 typeInfo.put("fieldType", e.getValue());
+                // 添加字段名称
+                String fieldName = idToFieldName.get(e.getKey());
+                if (fieldName != null) {
+                    typeInfo.put("fieldName", fieldName);
+                }
                 result.put(e.getKey(), typeInfo);
             }
         }

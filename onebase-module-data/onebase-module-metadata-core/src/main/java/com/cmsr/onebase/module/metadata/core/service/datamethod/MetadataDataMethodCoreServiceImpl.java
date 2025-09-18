@@ -21,6 +21,8 @@ import org.anyline.entity.DataSet;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.entity.Compare;
+import org.anyline.entity.PageNavi;
+import org.anyline.entity.DefaultPageNavi;
 import org.anyline.service.AnylineService;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -244,6 +246,10 @@ public class MetadataDataMethodCoreServiceImpl implements MetadataDataMethodCore
     public PageResult<Map<String, Object>> getDataPage(Long entityId, Integer pageNo, Integer pageSize,
                                                        String sortField, String sortDirection,
                                                        Map<String, Object> filters, String methodCode) {
+        // 添加调试日志
+        log.info("核心服务分页查询参数 - entityId: {}, pageNo: {}, pageSize: {}, pageSize类型: {}", 
+                 entityId, pageNo, pageSize, pageSize != null ? pageSize.getClass().getSimpleName() : "null");
+                 
         // 移除多表查询逻辑，直接使用单表分页
         MetadataBusinessEntityDO entity = validateEntityExists(entityId);
         List<MetadataEntityFieldDO> fields = getEntityFields(entityId);
@@ -267,7 +273,8 @@ public class MetadataDataMethodCoreServiceImpl implements MetadataDataMethodCore
                         continue;
                     }
                     if (fieldValue != null && names.contains(fieldName)) {
-                        configs.and(Compare.EQUAL, fieldName, fieldValue);
+                        // 使用模糊查询
+                        configs.and(Compare.LIKE, fieldName, fieldValue);
                     }
                 }
             }
@@ -285,8 +292,9 @@ public class MetadataDataMethodCoreServiceImpl implements MetadataDataMethodCore
                 configs.order(primaryKeyField + " DESC");
             }
             if (pageNo != null && pageSize != null) {
-                int offset = (pageNo - 1) * pageSize;
-                configs.scope(offset, pageSize);
+                PageNavi page = new DefaultPageNavi(pageNo, pageSize);
+                configs.setPageNavi(page);
+                log.info("设置分页参数 - pageNo: {}, pageSize: {}", pageNo, pageSize);
             }
             ConfigStore countConfigs = new DefaultConfigStore();
             if (filters != null && !filters.isEmpty()) {
@@ -298,7 +306,8 @@ public class MetadataDataMethodCoreServiceImpl implements MetadataDataMethodCore
                         continue;
                     }
                     if (fieldValue != null && existingFieldNames.contains(fieldName)) {
-                        countConfigs.and(Compare.EQUAL, fieldName, fieldValue);
+                        // 使用模糊查询保持与分页查询一致
+                        countConfigs.and(Compare.LIKE, fieldName, fieldValue);
                     }
                 }
             }

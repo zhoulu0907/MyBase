@@ -14,12 +14,12 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
 {
-  "name": "租户guan1",
-  "accountCount": "10",
+  "name": "租户Test1",
+  "accountCount": "2",
   "adminUserName": "test21",
   "adminMobile": "13800000003",
   "adminNickName": "租户guan1",
-  "website": "tenant_20250811184255",
+  "website": "tenant_test1",
   "status": 1
 }
 

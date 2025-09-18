@@ -64,7 +64,12 @@ public class AnyLineDBInfoListener implements DMListener {
         TENANT_IGNORE_TABLES.add("metadata_validation_type");
         TENANT_IGNORE_TABLES.add("metadata_component_field_type");
         TENANT_IGNORE_TABLES.add("metadata_permit_ref_otft");
-
+        TENANT_IGNORE_TABLES.add("flow_process");
+        TENANT_IGNORE_TABLES.add("flow_process_date_field");
+        TENANT_IGNORE_TABLES.add("flow_process_entity");
+        TENANT_IGNORE_TABLES.add("flow_process_form");
+        TENANT_IGNORE_TABLES.add("flow_process_stat");
+        TENANT_IGNORE_TABLES.add("flow_process_time");
         // 可以根据需要添加更多表
     }
 
