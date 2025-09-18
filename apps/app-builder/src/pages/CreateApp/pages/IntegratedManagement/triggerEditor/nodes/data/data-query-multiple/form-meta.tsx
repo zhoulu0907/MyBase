@@ -181,76 +181,38 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
     const nodeData = triggerEditorSignal.nodeData.value[node.id];
     if (nodeData.dataType === DATA_SOURCE_TYPE.FORM && nodeData.mainDataSource) {
-      const res = await getEntityFields({ entityId: nodeData.mainDataSource });
-      const filedIds: string[] = [];
-      const newConditionFields: ConfitionField[] = [];
-      const fieldOptions: SelectOption[] = [];
-      res.forEach((item: any) => {
-        fieldOptions.push({
-          label: item.displayName,
-          value: item.id
-        });
-        filedIds.push(item.id);
-        newConditionFields.push({
-          label: item.displayName,
-          value: item.id,
-          fieldType: item.fieldType
-        });
-      });
-      setConditionFields(newConditionFields);
-      if (filedIds?.length) {
-        const newValidationTypes = await getFieldCheckTypeApi(filedIds);
-        console.log('validationTypes: ', newValidationTypes);
-        setValidationTypes(newValidationTypes);
-      }
+      getEntityFieldList(nodeData.mainDataSource);
     } else if (nodeData.dataType === DATA_SOURCE_TYPE.DATA_NODE && nodeData.dataNodeId) {
-      let originDataSource: string = getDataNodeSource(nodeData.dataNodeId);
-      const res = await getEntityFields({ entityId: originDataSource });
-      const filedIds: string[] = [];
-      const newConditionFields: ConfitionField[] = [];
-      const fieldOptions: SelectOption[] = [];
-      res.forEach((item: any) => {
-        fieldOptions.push({
-          label: item.displayName,
-          value: item.id
-        });
-        filedIds.push(item.id);
-        newConditionFields.push({
-          label: item.displayName,
-          value: item.id,
-          fieldType: item.fieldType
-        });
-      });
-      setConditionFields(newConditionFields);
-      if (filedIds?.length) {
-        const newValidationTypes = await getFieldCheckTypeApi(filedIds);
-        console.log('validationTypes: ', newValidationTypes);
-        setValidationTypes(newValidationTypes);
-      }
+      const originDataSource = getDataNodeSource(nodeData.dataNodeId);
+      getEntityFieldList(originDataSource);
     } else if (nodeData.dataType === DATA_SOURCE_TYPE.SUBFORM && nodeData.subDataSource) {
       // 从子表中查询  SUBFORM
-      const res = await getEntityFields({ entityId: nodeData.subDataSource });
-      const filedIds: string[] = [];
-      const newConditionFields: ConfitionField[] = [];
-      const fieldOptions: SelectOption[] = [];
-      res.forEach((item: any) => {
-        fieldOptions.push({
-          label: item.displayName,
-          value: item.id
-        });
-        filedIds.push(item.id);
-        newConditionFields.push({
-          label: item.displayName,
-          value: item.id,
-          fieldType: item.fieldType
-        });
+      getEntityFieldList(nodeData.subDataSource);
+    }
+  };
+
+  const getEntityFieldList = async (dataSource: string) => {
+    const res = await getEntityFields({ entityId: dataSource });
+    const filedIds: string[] = [];
+    const newConditionFields: ConfitionField[] = [];
+    const fieldOptions: SelectOption[] = [];
+    res.forEach((item: any) => {
+      fieldOptions.push({
+        label: item.displayName,
+        value: item.id
       });
-      setConditionFields(newConditionFields);
-      if (filedIds?.length) {
-        const newValidationTypes = await getFieldCheckTypeApi(filedIds);
-        console.log('validationTypes: ', newValidationTypes);
-        setValidationTypes(newValidationTypes);
-      }
+      filedIds.push(item.id);
+      newConditionFields.push({
+        label: item.displayName,
+        value: item.id,
+        fieldType: item.fieldType
+      });
+    });
+    setConditionFields(newConditionFields);
+    if (filedIds?.length) {
+      const newValidationTypes = await getFieldCheckTypeApi(filedIds);
+      console.log('validationTypes: ', newValidationTypes);
+      setValidationTypes(newValidationTypes);
     }
   };
 
@@ -258,97 +220,15 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const getFieldList = async (dataSource: string) => {
     // 根据数据源 查询指定实体的字段列表
     // 根据不同获取方式走不同接口
-    if (dataType === DATA_SOURCE_TYPE.FORM) {
-      // 从主表中查询  FORM
-      const res = await getEntityFields({ entityId: dataSource });
-      const filedIds: string[] = [];
-      const newConditionFields: ConfitionField[] = [];
-      const fieldOptions: SelectOption[] = [];
-      res.forEach((item: any) => {
-        fieldOptions.push({
-          label: item.displayName,
-          value: item.id
-        });
-        filedIds.push(item.id);
-        newConditionFields.push({
-          label: item.displayName,
-          value: item.id,
-          fieldType: item.fieldType
-        });
-      });
-      setConditionFields(newConditionFields);
-      if (filedIds?.length) {
-        const newValidationTypes = await getFieldCheckTypeApi(filedIds);
-        console.log('validationTypes: ', newValidationTypes);
-        setValidationTypes(newValidationTypes);
-      }
+    if (dataType === DATA_SOURCE_TYPE.FORM || dataType === DATA_SOURCE_TYPE.SUBFORM) {
+      // 从主表中查询/从子表中查询
+      getEntityFieldList(dataSource);
     } else if (dataType === DATA_SOURCE_TYPE.DATA_NODE) {
       // 从数据节点中查询  DATA_NODE
-      // TODO(mickey) 根据数据节点查询数据
-      const nodeData = triggerEditorSignal.nodeData.value[dataSource];
-      const originDataType = nodeData.dataType;
-      if (!originDataType) {
-        return;
-      }
-      let originDataSource: string = '';
-      if (originDataType === DATA_SOURCE_TYPE.FORM) {
-        // 节点来源是主表单
-        originDataSource = nodeData.mainDataSource;
-      } else if (originDataType === DATA_SOURCE_TYPE.SUBFORM) {
-        // 子表单
-        originDataSource = nodeData.subDataSource;
-      } else if (originDataType === DATA_SOURCE_TYPE.DATA_NODE) {
-        // 数据节点 dataNodeId
-        originDataSource = getDataNodeSource(nodeData.dataNodeId);
-      }
-      const res = await getEntityFields({ entityId: originDataSource });
-      const filedIds: string[] = [];
-      const newConditionFields: ConfitionField[] = [];
-      const fieldOptions: SelectOption[] = [];
-      res.forEach((item: any) => {
-        fieldOptions.push({
-          label: item.displayName,
-          value: item.id
-        });
-        filedIds.push(item.id);
-        newConditionFields.push({
-          label: item.displayName,
-          value: item.id,
-          fieldType: item.fieldType
-        });
-      });
-      setConditionFields(newConditionFields);
-      if (filedIds?.length) {
-        const newValidationTypes = await getFieldCheckTypeApi(filedIds);
-        console.log('validationTypes: ', newValidationTypes);
-        setValidationTypes(newValidationTypes);
-      }
+      const originDataSource = getDataNodeSource(dataSource);
+      getEntityFieldList(originDataSource);
     } else if (dataType === DATA_SOURCE_TYPE.ASSOCIA_FORM) {
       // 从关联表单中查询  ASSOCIA_FORM
-    } else if (dataType === DATA_SOURCE_TYPE.SUBFORM) {
-      // 从子表中查询  SUBFORM
-      const res = await getEntityFields({ entityId: dataSource });
-      const filedIds: string[] = [];
-      const newConditionFields: ConfitionField[] = [];
-      const fieldOptions: SelectOption[] = [];
-      res.forEach((item: any) => {
-        fieldOptions.push({
-          label: item.displayName,
-          value: item.id
-        });
-        filedIds.push(item.id);
-        newConditionFields.push({
-          label: item.displayName,
-          value: item.id,
-          fieldType: item.fieldType
-        });
-      });
-      setConditionFields(newConditionFields);
-      if (filedIds?.length) {
-        const newValidationTypes = await getFieldCheckTypeApi(filedIds);
-        console.log('validationTypes: ', newValidationTypes);
-        setValidationTypes(newValidationTypes);
-      }
     }
   };
 
