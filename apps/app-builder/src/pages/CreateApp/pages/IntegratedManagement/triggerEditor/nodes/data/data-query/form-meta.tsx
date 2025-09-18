@@ -34,7 +34,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const [payloadForm] = Form.useForm();
 
   const dataType = Form.useWatch('dataType', payloadForm);
-
+  const mainDataSource = Form.useWatch('mainDataSource', payloadForm);
   const filterType = Form.useWatch('filterType', payloadForm);
 
   // 数据源选择
@@ -289,7 +289,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                   从
                 </Grid.Col>
                 <Grid.Col span={19}>
-                  <Form.Item field="mainDataSource">
+                  <Form.Item field="mainDataSource" disabled={!dataType}>
                     <Select onChange={handleMainDataSourceChange} allowClear>
                       {entityList.map((item) => (
                         <Select.Option key={item.entityId} value={item.entityId}>
@@ -312,7 +312,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                   从
                 </Grid.Col>
                 <Grid.Col span={9}>
-                  <Form.Item field="mainDataSource">
+                  <Form.Item field="mainDataSource" disabled={!dataType}>
                     <Select allowClear onChange={handleMainDataSourceChange}>
                       {mainEntityList.map((item) => (
                         <Select.Option key={item.entityId} value={item.entityId}>
@@ -326,7 +326,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                   的
                 </Grid.Col>
                 <Grid.Col span={9}>
-                  <Form.Item field="subDataSource">
+                  <Form.Item field="subDataSource" disabled={!mainDataSource}>
                     <Select allowClear onChange={handleSubDataSourceChange}>
                       {entityList.map((item) => (
                         <Select.Option key={item.entityId} value={item.entityId}>
@@ -349,7 +349,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                   从
                 </Grid.Col>
                 <Grid.Col span={19}>
-                  <Form.Item field="dataNodeId">
+                  <Form.Item field="dataNodeId" disabled={!dataType}>
                     <Select onChange={handleDateNodeSourceChange} allowClear>
                       {dataNodeList.map((item) => (
                         <Select.Option key={item.id} value={item.id}>
