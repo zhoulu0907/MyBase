@@ -2,6 +2,21 @@ import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import type { FlowNodeJSON } from '@flowgram.ai/fixed-layout-editor';
 import { NodeType } from '../nodes/const';
 
+// 清除数据节点依赖关系
+export const clearDataOriginNodeId = (nodeId: string) => {
+  const nodeData = triggerEditorSignal.nodeData.value;
+  const keys = Object.keys(triggerEditorSignal.nodeData.value);
+  for (let key of keys) {
+    if (nodeData[key].dataNodeId === nodeId) {
+      triggerEditorSignal.setNodeData(nodeData[key].id, {
+        ...nodeData[key],
+        dataNodeId: undefined,
+        sortBy: [] // 清除已选择排序字段
+      });
+    }
+  }
+};
+
 // 判断bolcks 是否包含当前节点
 const judge = (curNodeId: string, blocks: FlowNodeJSON[]): boolean => {
   let status: boolean = false;
