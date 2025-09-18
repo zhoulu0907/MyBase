@@ -180,18 +180,21 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     }
 
     const nodeData = triggerEditorSignal.nodeData.value[node.id];
-    if (nodeData.dataType === DATA_SOURCE_TYPE.FORM && nodeData.mainDataSource) {
+    if (nodeData.dataType === DATA_SOURCE_TYPE.FORM) {
       getEntityFieldList(nodeData.mainDataSource);
-    } else if (nodeData.dataType === DATA_SOURCE_TYPE.DATA_NODE && nodeData.dataNodeId) {
+    } else if (nodeData.dataType === DATA_SOURCE_TYPE.DATA_NODE) {
       const originDataSource = getDataNodeSource(nodeData.dataNodeId);
       getEntityFieldList(originDataSource);
-    } else if (nodeData.dataType === DATA_SOURCE_TYPE.SUBFORM && nodeData.subDataSource) {
+    } else if (nodeData.dataType === DATA_SOURCE_TYPE.SUBFORM) {
       // 从子表中查询  SUBFORM
       getEntityFieldList(nodeData.subDataSource);
     }
   };
 
   const getEntityFieldList = async (dataSource: string) => {
+    if (!!dataSource) {
+      return;
+    }
     const res = await getEntityFields({ entityId: dataSource });
     const filedIds: string[] = [];
     const newConditionFields: ConfitionField[] = [];
