@@ -88,10 +88,12 @@ public class StartTimeNodeData {
         this.triggerDate = (String) data.get("triggerDate");
         this.triggerTime = (String) data.get("triggerTime");
 
-        if (StringUtils.isNotBlank(startTime)) {
+        startTime = StringUtils.trimToNull(startTime);
+        if (StringUtils.isNotEmpty(startTime)) {
             startLocalDateTime = LocalDateTime.parse(startTime, JsonGraphConstant.DATE_TIME_FORMATTER);
         }
-        if (StringUtils.isNotBlank(endTime)) {
+        endTime = StringUtils.trimToNull(endTime);
+        if (StringUtils.isNotEmpty(endTime)) {
             endLocalDateTime = LocalDateTime.parse(endTime, JsonGraphConstant.DATE_TIME_FORMATTER);
         }
     }

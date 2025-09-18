@@ -162,6 +162,7 @@ public class FieldAssistant {
         if (!hasValidValue(rule) || fieldInfo.getJdbcType() == null) {
             return;
         }
+        // TODO 这里只处理了OperatorTypeEnum类型为value，并且没有根据OpEnum去校验值的多少
         if (rule.getValue().size() == 1) {
             String firstValue = rule.getValue().get(0);
             Object convertedValue = JdbcTypeConvertor.convert(fieldInfo.getJdbcType(), firstValue);
