@@ -74,6 +74,10 @@ wx:
       key-prefix: wa # Redis Key 的前缀
     http-client-type: HttpClient # 采用 HttpClient 请求微信公众号平台
 
+liteflow:
+  enable: true
+  print-banner: true
+  rule-source: el_xml:com.cmsr.onebase.module.flow.core.flow.FlowJsonGraphParser
 snail-job:
   server:
     host: localhost #10.0.104.38
@@ -86,8 +90,3 @@ snail-job:
     host: 10.0.104.38
     port: 19088
     https: false
-
-liteflow:
-  enable: true
-  print-banner: true
-  rule-source: el_xml:com.cmsr.onebase.module.flow.core.flow.FlowJsonGraphParser
