@@ -178,6 +178,80 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
       setDataNodeList(newDataNodeList);
     }
+
+    const nodeData = triggerEditorSignal.nodeData.value[node.id];
+    if (nodeData.dataType === DATA_SOURCE_TYPE.FORM && nodeData.mainDataSource) {
+      const res = await getEntityFields({ entityId: nodeData.mainDataSource });
+      const filedIds: string[] = [];
+      const newConditionFields: ConfitionField[] = [];
+      const fieldOptions: SelectOption[] = [];
+      res.forEach((item: any) => {
+        fieldOptions.push({
+          label: item.displayName,
+          value: item.id
+        });
+        filedIds.push(item.id);
+        newConditionFields.push({
+          label: item.displayName,
+          value: item.id,
+          fieldType: item.fieldType
+        });
+      });
+      setConditionFields(newConditionFields);
+      if (filedIds?.length) {
+        const newValidationTypes = await getFieldCheckTypeApi(filedIds);
+        console.log('validationTypes: ', newValidationTypes);
+        setValidationTypes(newValidationTypes);
+      }
+    } else if (nodeData.dataType === DATA_SOURCE_TYPE.DATA_NODE && nodeData.dataNodeId) {
+      let originDataSource: string = getDataNodeSource(nodeData.dataNodeId);
+      const res = await getEntityFields({ entityId: originDataSource });
+      const filedIds: string[] = [];
+      const newConditionFields: ConfitionField[] = [];
+      const fieldOptions: SelectOption[] = [];
+      res.forEach((item: any) => {
+        fieldOptions.push({
+          label: item.displayName,
+          value: item.id
+        });
+        filedIds.push(item.id);
+        newConditionFields.push({
+          label: item.displayName,
+          value: item.id,
+          fieldType: item.fieldType
+        });
+      });
+      setConditionFields(newConditionFields);
+      if (filedIds?.length) {
+        const newValidationTypes = await getFieldCheckTypeApi(filedIds);
+        console.log('validationTypes: ', newValidationTypes);
+        setValidationTypes(newValidationTypes);
+      }
+    } else if (nodeData.dataType === DATA_SOURCE_TYPE.SUBFORM && nodeData.subDataSource) {
+      // 从子表中查询  SUBFORM
+      const res = await getEntityFields({ entityId: nodeData.subDataSource });
+      const filedIds: string[] = [];
+      const newConditionFields: ConfitionField[] = [];
+      const fieldOptions: SelectOption[] = [];
+      res.forEach((item: any) => {
+        fieldOptions.push({
+          label: item.displayName,
+          value: item.id
+        });
+        filedIds.push(item.id);
+        newConditionFields.push({
+          label: item.displayName,
+          value: item.id,
+          fieldType: item.fieldType
+        });
+      });
+      setConditionFields(newConditionFields);
+      if (filedIds?.length) {
+        const newValidationTypes = await getFieldCheckTypeApi(filedIds);
+        console.log('validationTypes: ', newValidationTypes);
+        setValidationTypes(newValidationTypes);
+      }
+    }
   };
 
   // 获取排序字段下拉列表
@@ -435,10 +509,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
               </Form.Item>
             )}
             <Form.Item label="排序规则" rules={[{ required: true, message: '请选择排序规则' }]}>
-              <SortByEditor
-                fields={conditionFields}
-                form={payloadForm}
-              ></SortByEditor>
+              <SortByEditor fields={conditionFields} form={payloadForm}></SortByEditor>
             </Form.Item>
           </Form>
         </FormContent>
