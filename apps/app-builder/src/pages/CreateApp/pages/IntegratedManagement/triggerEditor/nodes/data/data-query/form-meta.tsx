@@ -36,8 +36,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const dataType = Form.useWatch('dataType', payloadForm);
 
   const filterType = Form.useWatch('filterType', payloadForm);
-
-  const [clearSortBy, setClearSortBy] = useState<number>(0);
   // 数据源选择
   const [entityList, setEntityList] = useState<MetadataEntityPair[]>([]);
   const [mainEntityList, setMainEntityList] = useState<MetadataEntityPair[]>([]);
@@ -62,7 +60,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
    */
   const handleDataTypeChange = (curDataType: DATA_SOURCE_TYPE) => {
     payloadForm.clearFields(['mainDataSource', 'subDataSource', 'sortBy']);
-    setClearSortBy(clearSortBy + 1);
     const nodeData = triggerEditorSignal.nodeData.value[node.id];
     triggerEditorSignal.setNodeData(node.id, {
       ...nodeData,
@@ -84,7 +81,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
   const handleMainDataSourceChange = async (curMainDataSource: string) => {
     payloadForm.clearFields(['subDataSource', 'dataNodeId', 'sortBy']);
-    setClearSortBy(clearSortBy + 1);
     const nodeData = triggerEditorSignal.nodeData.value[node.id];
     triggerEditorSignal.setNodeData(node.id, {
       ...nodeData,
@@ -110,7 +106,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
   const handleSubDataSourceChange = (curSubDataSource: string) => {
     payloadForm.clearFields(['dataNodeId', 'sortBy']);
-    setClearSortBy(clearSortBy + 1);
     setConditionFields([]);
     setValidationTypes([]);
 
@@ -406,7 +401,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                 data={triggerEditorSignal.nodeData.value[node.id]?.sortBy || []}
                 fields={conditionFields}
                 form={payloadForm}
-                clearSortByNum={clearSortBy}
               ></SortByEditor>
             </Form.Item>
             <div style={{ color: '#4e5969' }}>仅查询排序的第一条数据</div>
