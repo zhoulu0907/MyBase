@@ -21,8 +21,8 @@ import SortByEditor from '../../../components/sortby-editor';
 import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
-import { NodeType } from '../../const';
 import { validateNodeForm } from '../../utils';
+import { getBeforeCurQueryNodes } from '../../utils';
 
 export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   useSignals();
@@ -76,7 +76,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     setValidationTypes([]);
 
     getEntityAndDataNodeList(curDataType);
-
   };
 
   const handleMainDataSourceChange = async (curMainDataSource: string) => {
@@ -101,7 +100,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       };
     });
     setEntityList(newEntityList);
-
   };
 
   const handleSubDataSourceChange = (curSubDataSource: string) => {
@@ -119,7 +117,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     if (curSubDataSource) {
       getFieldList(curSubDataSource);
     }
-
   };
 
   const handleDateNodeSourceChange = async (dataNodeId: string) => {
@@ -138,11 +135,8 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
     const nodes = triggerEditorSignal.nodes.value;
 
-    const newDataNodeList = Object.values(nodes).filter(
-      (item: any) => item.type === NodeType.DATA_QUERY_MULTIPLE && item.id !== dataNodeId
-    );
+    const newDataNodeList = getBeforeCurQueryNodes(node.id, nodes);
     setDataNodeList(newDataNodeList);
-
   };
 
   // 获取各类数据源列表，不传值获取全部(用于初始化)
@@ -165,10 +159,8 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     if (curDateType === DATA_SOURCE_TYPE.DATA_NODE || curDateType === undefined) {
       // 从上游数据节点查询
       const nodes = triggerEditorSignal.nodes.value;
-      // TODO(mickey) 过滤掉当前节点,过滤blocks,并且只能选当前节点之前的节点
-      const newDataNodeList = Object.values(nodes).filter(
-        (item: any) => item.type === NodeType.DATA_QUERY_MULTIPLE && item.id !== node.id
-      );
+      // 过滤掉当前节点,过滤blocks,并且只能选当前节点之前的节点
+      const newDataNodeList = getBeforeCurQueryNodes(node.id, nodes);
       setDataNodeList(newDataNodeList);
     }
   };
@@ -176,7 +168,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   // 获取排序字段下拉列表
   const getFieldList = async (dataSource: string) => {
     // 根据数据源 查询指定实体的字段列表
-    // todo 根据不同获取方式走不同接口
+    // 根据不同获取方式走不同接口
     if (dataType === DATA_SOURCE_TYPE.FORM) {
       // 从主表中查询  FORM
       const res = await getEntityFields({ entityId: dataSource });
