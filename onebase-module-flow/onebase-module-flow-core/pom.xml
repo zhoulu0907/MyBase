@@ -43,11 +43,11 @@
         </dependency>
         
         <!-- SnailJob任务调度 -->
-        <dependency>
+       <!-- <dependency>
             <groupId>com.aizuda</groupId>
             <artifactId>snail-job-client-starter</artifactId>
             <version>1.7.2</version>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>com.aizuda</groupId>
             <artifactId>snail-job-client-job-core</artifactId>

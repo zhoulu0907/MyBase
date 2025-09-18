@@ -94,6 +94,8 @@ wx:
       key-prefix: wa # Redis Key 的前缀
     http-client-type: HttpClient # 采用 HttpClient 请求微信公众号平台
 
+liteflow:
+  enable: false
 snail-job:
   server:
     host: 10.0.104.38

@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.flow.core.flow;
 
+import com.cmsr.onebase.module.flow.core.config.FlowRuntimeCondition;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDO;
 import com.cmsr.onebase.module.flow.core.enums.FlowStatusEnum;
@@ -15,6 +16,7 @@ import org.dom4j.Element;
 import org.dom4j.io.OutputFormat;
 import org.dom4j.io.XMLWriter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -28,6 +30,7 @@ import java.util.List;
 @Slf4j
 @Setter
 @Component
+@Conditional(FlowRuntimeCondition.class)
 public class FlowJsonGraphParser extends ClassXmlFlowELParser {
 
     public static final String LINE_BREAK = "\n";
