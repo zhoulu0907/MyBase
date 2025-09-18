@@ -30,45 +30,49 @@ public class JdbcTypeConvertor {
      *
      * <p>转换规则示例：</p>
      * <ul>
-     *     <li>输入 jdbcType=Types.TIMESTAMP, value="2025-09-08 17:24:00" → 输出 java.time.LocalDateTime</li>
-     *     <li>输入 jdbcType=Types.VARCHAR, value="abc" → 输出 java.lang.String</li>
-     *     <li>输入 jdbcType=Types.BIGINT, value="1234567890" → 输出 java.lang.Long</li>
-     *     <li>输入 jdbcType=Types.BOOLEAN, value="true" → 输出 java.lang.Boolean</li>
-     *     <li>输入 jdbcType=Types.DATE, value="2025-09-08" → 输出 java.time.LocalDate</li>
-     *     <li>输入 jdbcType=Types.DECIMAL, value="123.45" → 输出 java.math.BigDecimal</li>
-     *     <li>输入 jdbcType=Types.LONGVARCHAR, value="long string" → 输出 java.lang.String</li>
-     *     <li>输入 jdbcType=Types.NUMERIC, value="123.45" → 输出 java.math.BigDecimal</li>
-     *     <li>输入 jdbcType=Types.ARRAY, value=[1,2,3] → 输出 java.sql.Array 或转换后的Java数组</li>
+     *     <li>输入 jdbcType="TIMESTAMP", value="2025-09-08 17:24:00" → 输出 java.time.LocalDateTime</li>
+     *     <li>输入 jdbcType="VARCHAR", value="abc" → 输出 java.lang.String</li>
+     *     <li>输入 jdbcType="BIGINT", value="1234567890" → 输出 java.lang.Long</li>
+     *     <li>输入 jdbcType="BOOLEAN", value="true" → 输出 java.lang.Boolean</li>
+     *     <li>输入 jdbcType="DATE", value="2025-09-08" → 输出 java.time.LocalDate</li>
+     *     <li>输入 jdbcType="DECIMAL", value="123.45" → 输出 java.math.BigDecimal</li>
+     *     <li>输入 jdbcType="LONGVARCHAR", value="long string" → 输出 java.lang.String</li>
+     *     <li>输入 jdbcType="NUMERIC", value="123.45" → 输出 java.math.BigDecimal</li>
+     *     <li>输入 jdbcType="ARRAY", value=[1,2,3] → 输出 java.sql.Array 或转换后的Java数组</li>
      * </ul>
      *
-     * @param jdbcType 数据库类型常量，对应java.sql.Types中的常量值
+     * @param jdbcType 数据库类型字符串，如"TIMESTAMP"、"VARCHAR"等
      * @param value    待转换的值，通常为字符串形式的数据库值
      * @return 转换后的Java对象，类型根据jdbcType和value内容确定
      * @throws UnsupportedOperationException 当不支持的数据库类型传入时抛出
      */
-    public static Object convert(int jdbcType, Object value) {
+    public static Object convert(String jdbcType, Object value) {
         if (value == null) {
             return null;
         }
 
-        switch (jdbcType) {
-            case Types.TIMESTAMP:
+        if (jdbcType == null) {
+            throw new IllegalArgumentException("jdbcType 不能为空");
+        }
+
+        switch (jdbcType.toUpperCase()) {
+            case "TIMESTAMP":
                 return convertTimestamp(value);
-            case Types.VARCHAR:
+            case "VARCHAR":
                 return convertVarchar(value);
-            case Types.BIGINT:
+            case "BIGINT":
                 return convertBigInt(value);
-            case Types.BOOLEAN:
+            case "BOOLEAN":
                 return convertBoolean(value);
-            case Types.DATE:
+            case "DATE":
                 return convertDate(value);
-            case Types.DECIMAL:
+            case "DECIMAL":
                 return convertDecimal(value);
-            case Types.LONGVARCHAR:
+            case "LONGVARCHAR":
                 return convertLongVarchar(value);
-            case Types.NUMERIC:
+            case "NUMERIC":
                 return convertNumeric(value);
-            case Types.ARRAY:
+            case "ARRAY":
                 return convertArray(value);
             default:
                 throw new UnsupportedOperationException("不支持的数据库类型: " + jdbcType);

@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.flow.graph;
 
+import com.cmsr.onebase.module.flow.core.graph.GraphFlowCache;
 import com.cmsr.onebase.module.flow.core.graph.JsonGraph;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
@@ -12,7 +13,7 @@ import java.nio.charset.StandardCharsets;
  * @Author：huangjie
  * @Date：2025/9/1 12:11
  */
-class JsonGraphTest {
+public class JsonFileGraphTest {
 
     public void testToFlowChain(String fileName) throws IOException {
         ClassPathResource resource = new ClassPathResource("graphjson/" + fileName);
@@ -20,6 +21,9 @@ class JsonGraphTest {
 
         JsonGraph jsonGraph = JsonGraph.of(json);
         System.out.println(jsonGraph.toFlowChain());
+
+        GraphFlowCache graphFlowCache = new GraphFlowCache();
+        graphFlowCache.update(1L, jsonGraph);
     }
 
     @Test

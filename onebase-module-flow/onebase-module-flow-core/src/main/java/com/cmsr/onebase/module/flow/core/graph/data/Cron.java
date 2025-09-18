@@ -72,7 +72,7 @@ public class Cron {
     }
 
     public void setDay(String triggerDate) {
-        String[] split = StringUtils.split(triggerDate, ":");
+        String[] split = StringUtils.split(triggerDate, "-");
         month = split[0];
         day = split[1];
     }

@@ -4,8 +4,8 @@ import com.cmsr.onebase.module.flow.core.utils.FlowUtils;
 import com.yomahub.liteflow.core.FlowExecutor;
 import com.yomahub.liteflow.flow.LiteflowResponse;
 import com.yomahub.liteflow.slot.DefaultContext;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -14,9 +14,8 @@ import java.util.Map;
  * @Author：huangjie
  * @Date：2025/9/11 14:32
  */
+@Setter
 @Component
-//@ConditionalOnProperty(name = "liteflow.rule-source")
-@ConditionalOnBean(FlowExecutor.class)
 public class FlowProcessExecutor {
 
     @Autowired

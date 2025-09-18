@@ -1,8 +1,8 @@
-package com.cmsr.onebase.module.flow.build.service.mgmt;
+package com.cmsr.onebase.module.flow.build.service;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.flow.build.vo.mgmt.*;
-import com.cmsr.onebase.module.flow.core.vo.mgmt.PageFlowProcessReqVO;
+import com.cmsr.onebase.module.flow.build.vo.*;
+import com.cmsr.onebase.module.flow.core.vo.PageFlowProcessReqVO;
 import jakarta.validation.Valid;
 
 import java.util.List;
