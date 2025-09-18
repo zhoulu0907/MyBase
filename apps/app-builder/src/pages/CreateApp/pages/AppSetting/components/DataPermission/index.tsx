@@ -1,5 +1,5 @@
 import { Button, Divider, Popconfirm, Space, Tag } from '@arco-design/web-react';
-import { IconDelete, IconEdit, IconPlusCircle } from '@arco-design/web-react/icon';
+import { IconDelete, IconEdit, IconEmpty, IconPlusCircle } from '@arco-design/web-react/icon';
 import {
   // updateDataGroupPermission,
   // deleteDataGroup,
@@ -11,11 +11,13 @@ import {
   // type UpdateDataGroupPermissionReq,
   type AppEntities,
   type AppEntity,
-  type AppEntityField,
+  // type AppEntityField,
   type AuthDataGroupVO,
   type AuthDataPermissionPersonVO,
-  type FilterFieldCheckType,
-  type GetPermissionReq
+  // type FilterFieldCheckType,
+  type GetPermissionReq,
+  type EntityFieldValidationTypes,
+  type ConfitionField
 } from '@onebase/app';
 import { useEffect, useState, type FC } from 'react';
 import DataPermissionModal from './components/DataPermissionModal';
@@ -60,9 +62,9 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
   // const [form] = Form.useForm();
   const [status, setStatus] = useState<'create' | 'edit'>('create');
   const [appEntities, setAppEntities] = useState<AppEntity[]>([]);
-  const [appEntityFields, setAppEntityFields] = useState<AppEntityField[]>([]);
+  const [appEntityFields, setAppEntityFields] = useState<ConfitionField[]>([]);
   const [dataPermissionPerson, setDataPermissionPerson] = useState<AuthDataPermissionPersonVO[]>([]);
-  const [filterFieldCheckType, setFilterFieldCheckType] = useState<FilterFieldCheckType[]>([]);
+  const [filterFieldCheckType, setFilterFieldCheckType] = useState<EntityFieldValidationTypes[]>([]);
 
   const [modalVisible, setModelVisible] = useState<boolean>(false);
 
@@ -70,6 +72,7 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
     if (appId && menuId && roleId) {
       getFieldsPermission();
     }
+    console.log(' 数据权限 menuId:', menuId);
   }, [appId, menuId, roleId]);
 
   /* 获取权限信息 */
@@ -113,7 +116,7 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
     getDataPermissionRoles(params);
   };
 
-  // 获取数据权限数据字典
+  // 获取数据权限数据字段
   const getDataPermissionFields = async (params: { entityId: string }) => {
     try {
       const entityFieldsResq = await getEntityFields({ entityId: params.entityId, isSystemField: 0 });
@@ -122,6 +125,12 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
       entityFieldsResq.forEach((field: any) => {
         field.fieldId = field.id;
       });
+      // 批量获取字段可选校验类型
+      const getFieldCheckTypeParams: string[] = [];
+      entityFieldsResq.forEach((item: any) => {
+        getFieldCheckTypeParams.push(item.fieldId);
+      });
+      getFieldCheckType(getFieldCheckTypeParams);
       setAppEntityFields(entityFieldsResq);
       console.log('setEntityFields', appEntityFields);
     } catch (error) {
@@ -147,11 +156,10 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
       console.error('获取数据权限角色失败', error);
     }
   };
-  // 根据选择字段获取可选校验类型
-  const getFieldCheckType = async (fieldId: string) => {
-    const fieldCheckTypeResq = await getFieldCheckTypeApi([fieldId]);
-    console.log('根据选择字段获取校验类型 fieldCheckTypeResq', fieldCheckTypeResq[0].validationTypes);
-    setFilterFieldCheckType(fieldCheckTypeResq[0].validationTypes);
+  // 批量获取字段可选校验类型
+  const getFieldCheckType = async (fieldIds: string[]) => {
+    const fieldCheckTypeResq = await getFieldCheckTypeApi(fieldIds);
+    setFilterFieldCheckType(fieldCheckTypeResq);
   };
 
   const handleModalSubmit = async (values?: AuthDataGroupVO) => {
@@ -162,99 +170,107 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
     setModelVisible(false);
   };
   return (
-    <div className={styles.dataPermission}>
-      {permission.map((perm, index) => (
-        <div className={styles.permItem} key={index}>
-          <div className={styles.top}>
-            <div className={styles.left}>
-              <div className={styles.title}>{perm.name}</div>
-              <div className={styles.subtitle}>{perm.subTitle}</div>
-            </div>
-            <div className={styles.right}>
-              <IconEdit
-                style={{ fontSize: 20, color: '#4E5969', cursor: 'pointer' }}
-                onClick={() => {
-                  handleModal('edit', perm.id);
-                }}
-              />
-              <Popconfirm
-                focusLock
-                title="删除数据权限"
-                content="确定要删除这条数据吗？"
-                onOk={() => {
-                  console.log('确认删除');
-                }}
-                onCancel={() => {
-                  console.log('取消删除');
-                }}
-              >
-                <IconDelete
-                  style={{
-                    fontSize: 20,
-                    color: '#F53F3F',
-                    marginLeft: 10,
-                    cursor: 'pointer'
-                  }}
-                />
-              </Popconfirm>
-            </div>
-          </div>
-          <Divider />
-          <div className={styles.bottom}>
-            <span className={styles.name}>操作权限：</span>
-            <span className={styles.desc}>
-              <Space wrap>
-                当前角色可
-                <Tag color="#F2F3F5" style={{ color: '#1D2129' }}>
-                  查看
-                </Tag>
-                <Tag color="#F2F3F5" style={{ color: '#1D2129' }}>
-                  操作
-                </Tag>
-                <Tag color="#E8F3FF" style={{ color: '#3C7EFF' }}>
-                  拥有者
-                </Tag>
-                是
-                <Tag color="#FFF7E8" style={{ color: '#FF7D00' }}>
-                  本人
-                </Tag>
-                且
-                <Tag color="#E8FFEA" style={{ color: '#00B42A' }}>
-                  归档状态 等于 已归档
-                </Tag>
-                <Tag color="#E8FFEA" style={{ color: '#00B42A' }}>
-                  归档人 等于 巫炘
-                </Tag>
-                的数据
-              </Space>
-            </span>
-          </div>
+    <>
+      {!menuId ? (
+        <div className={styles.permissionEmpty}>
+          <IconEmpty fontSize={50} />
+          暂无页面权限权限，请先添加页面
         </div>
-      ))}
-      <Button
-        type="outline"
-        size="large"
-        icon={<IconPlusCircle fontSize={20} />}
-        style={{ display: 'flex', alignItems: 'center' }}
-        onClick={() => handleModal('create')}
-      >
-        添加权限组
-      </Button>
-      <DataPermissionModal
-        roleId={roleId}
-        initialFormValues={initialFormValues}
-        modalVisible={modalVisible}
-        status={status}
-        appEntities={appEntities}
-        dataPermissionPerson={dataPermissionPerson}
-        appEntityFields={appEntityFields}
-        filterFieldCheckType={filterFieldCheckType}
-        changeEntity={changeEntity}
-        getFieldCheckType={getFieldCheckType}
-        handleModalSubmit={(values: AuthDataGroupVO) => handleModalSubmit(values)}
-        handleModalCancel={() => handleModalCancel()}
-      />
-    </div>
+      ) : (
+        <div className={styles.dataPermission}>
+          {permission.map((perm, index) => (
+            <div className={styles.permItem} key={index}>
+              <div className={styles.top}>
+                <div className={styles.left}>
+                  <div className={styles.title}>{perm.name}</div>
+                  <div className={styles.subtitle}>{perm.subTitle}</div>
+                </div>
+                <div className={styles.right}>
+                  <IconEdit
+                    style={{ fontSize: 20, color: '#4E5969', cursor: 'pointer' }}
+                    onClick={() => {
+                      handleModal('edit', perm.id);
+                    }}
+                  />
+                  <Popconfirm
+                    focusLock
+                    title="删除数据权限"
+                    content="确定要删除这条数据吗？"
+                    onOk={() => {
+                      console.log('确认删除');
+                    }}
+                    onCancel={() => {
+                      console.log('取消删除');
+                    }}
+                  >
+                    <IconDelete
+                      style={{
+                        fontSize: 20,
+                        color: '#F53F3F',
+                        marginLeft: 10,
+                        cursor: 'pointer'
+                      }}
+                    />
+                  </Popconfirm>
+                </div>
+              </div>
+              <Divider />
+              <div className={styles.bottom}>
+                <span className={styles.name}>操作权限：</span>
+                <span className={styles.desc}>
+                  <Space wrap>
+                    当前角色可
+                    <Tag color="#F2F3F5" style={{ color: '#1D2129' }}>
+                      查看
+                    </Tag>
+                    <Tag color="#F2F3F5" style={{ color: '#1D2129' }}>
+                      操作
+                    </Tag>
+                    <Tag color="#E8F3FF" style={{ color: '#3C7EFF' }}>
+                      拥有者
+                    </Tag>
+                    是
+                    <Tag color="#FFF7E8" style={{ color: '#FF7D00' }}>
+                      本人
+                    </Tag>
+                    且
+                    <Tag color="#E8FFEA" style={{ color: '#00B42A' }}>
+                      归档状态 等于 已归档
+                    </Tag>
+                    <Tag color="#E8FFEA" style={{ color: '#00B42A' }}>
+                      归档人 等于 巫炘
+                    </Tag>
+                    的数据
+                  </Space>
+                </span>
+              </div>
+            </div>
+          ))}
+          <Button
+            type="outline"
+            size="large"
+            icon={<IconPlusCircle fontSize={20} />}
+            style={{ display: 'flex', alignItems: 'center' }}
+            onClick={() => handleModal('create')}
+          >
+            添加权限组
+          </Button>
+          <DataPermissionModal
+            roleId={roleId}
+            initialFormValues={initialFormValues}
+            modalVisible={modalVisible}
+            status={status}
+            appEntities={appEntities}
+            dataPermissionPerson={dataPermissionPerson}
+            appEntityFields={appEntityFields}
+            filterFieldCheckType={filterFieldCheckType}
+            changeEntity={changeEntity}
+            handleModalSubmit={(values: AuthDataGroupVO) => handleModalSubmit(values)}
+            handleModalCancel={() => handleModalCancel()}
+          />
+        </div>
+      )}
+    </>
   );
 };
 

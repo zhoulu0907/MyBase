@@ -1,5 +1,5 @@
 import InfoPanel from '@/components/InfoPanel';
-import { Divider, Empty, Layout, Message, Space, Tabs } from '@arco-design/web-react';
+import { Divider, Empty, Layout, Message, Popconfirm, Space, Tabs } from '@arco-design/web-react';
 import { createRole, deleteRole, updateRole } from '@onebase/platform-center/src/services/role';
 import type { RoleVO } from '@onebase/platform-center/src/types/role';
 import { useCallback, useMemo, useRef, useState } from 'react';
@@ -57,32 +57,34 @@ export default function RolePage() {
   );
 
   // 保存角色
-  const handleSaveRole = useCallback(async (values: Partial<RoleVO>) => {
-    setModalLoading(true);
-    try {
-      if (editRole?.id) {
-        await updateRole({
-          ...values,
-          id: editRole.id
-        });
-        setActiveRole(prev => ({
-          ...prev,
-          ...values
-        }));
-        roleListRef.current?.refreshRoleById?.(editRole.id, values);
-      } else {
-        await createRole(values);
-        roleListRef.current?.refresh?.();
+  const handleSaveRole = useCallback(
+    async (values: Partial<RoleVO>) => {
+      setModalLoading(true);
+      try {
+        if (editRole?.id) {
+          await updateRole({
+            ...values,
+            id: editRole.id
+          });
+          setActiveRole((prev) => ({
+            ...prev,
+            ...values
+          }));
+          roleListRef.current?.refreshRoleById?.(editRole.id, values);
+        } else {
+          await createRole(values);
+          roleListRef.current?.refresh?.();
+        }
+        Message.success('保存成功');
+        setRoleModalVisible(false);
+      } catch (error) {
+        console.error('保存失败');
+      } finally {
+        setModalLoading(false);
       }
-      Message.success('保存成功');
-      setRoleModalVisible(false);
-      
-    } catch (error) {
-      console.error('保存失败');
-    } finally {
-      setModalLoading(false);
-    }
-  }, [editRole?.id]);
+    },
+    [editRole?.id]
+  );
 
   const openRoleModal = useCallback((role: Partial<RoleVO> | null) => {
     setEditRole(role);
@@ -105,20 +107,23 @@ export default function RolePage() {
         <Button permission={ACTIONS.UPDATE} type="secondary" onClick={() => openRoleModal(activeRole || null)}>
           编辑
         </Button>
-        <Button
-          type="secondary"
-          permission={ACTIONS.DELETE}
-          onClick={() => {
+        <Popconfirm
+          focusLock
+          title="移除成员"
+          content="确定要移除这个成员吗？"
+          onOk={() => {
             if (activeRole?.id) {
               handleDeleteRole(activeRole.id).then(() => {
                 roleListRef.current?.refresh?.();
               });
             }
           }}
-          disabled={activeRole?.type === RoleType.SYSTEM}
+          style={{ backgroundColor: '#ccc' }}
         >
-          删除
-        </Button>
+          <Button type="secondary" permission={ACTIONS.DELETE} disabled={activeRole?.type === RoleType.SYSTEM}>
+            删除
+          </Button>
+        </Popconfirm>
       </Space>
     ),
     [activeRole, openRoleModal, handleDeleteRole]

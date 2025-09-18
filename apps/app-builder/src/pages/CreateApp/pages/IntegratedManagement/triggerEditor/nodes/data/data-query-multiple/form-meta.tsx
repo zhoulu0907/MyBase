@@ -17,10 +17,10 @@ import {
 import { useEffect, useState } from 'react';
 import ConditionEditor from '../../../components/condition-editor';
 import SortByEditor from '../../../components/sortby-editor';
-import { getBeforeCurQueryNodes } from '../../../components/utils';
 import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
+import { NodeType } from '../../const';
 import { validateNodeForm } from '../../utils';
 
 export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
@@ -33,16 +33,20 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const dataType = Form.useWatch('dataType', payloadForm);
 
   const filterType = Form.useWatch('filterType', payloadForm);
-  const mainDataSource = Form.useWatch('mainDataSource', payloadForm);
-  //   const subDataSource = Form.useWatch('subDataSource', payloadForm);
 
   const [clearSortBy, setClearSortBy] = useState<number>(0);
   // 数据源选择
   const [entityList, setEntityList] = useState<MetadataEntityPair[]>([]);
   const [mainEntityList, setMainEntityList] = useState<MetadataEntityPair[]>([]);
+  const [dataNodeList, setDataNodeList] = useState<any[]>([]);
+
   // 查询规则
   const [validationTypes, setValidationTypes] = useState<EntityFieldValidationTypes[]>([]);
   const [conditionFields, setConditionFields] = useState<ConfitionField[]>([]);
+
+  useEffect(() => {
+    getEntityAndDataNodeList();
+  }, []);
 
   useEffect(() => {
     payloadForm && validateNodeForm(form, payloadForm, true);
@@ -53,7 +57,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
    * 更新数据源下拉列表，清除已选择数据源
    * 清除排序字段下拉列表，清除已选择排序字段
    */
-  const handleDataTypeChange = (curDataType: number) => {
+  const handleDataTypeChange = (curDataType: DATA_SOURCE_TYPE) => {
     payloadForm.clearFields(['mainDataSource', 'subDataSource', 'sortBy']);
     setClearSortBy(clearSortBy + 1);
     const nodeData = triggerEditorSignal.nodeData.value[node.id];
@@ -66,10 +70,11 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
     setEntityList([]);
     setMainEntityList([]);
+    setDataNodeList([]);
     setConditionFields([]);
     setValidationTypes([]);
 
-    getEntityList(curDataType);
+    getEntityAndDataNodeList(curDataType);
 
     clearDataSourceOriginNodeId();
   };
@@ -106,8 +111,10 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       sortBy: [] // 清除已选择排序字段
     });
     setEntityList([]);
+    setDataNodeList([]);
     setConditionFields([]);
     setValidationTypes([]);
+    console.log(curMainDataSource);
     const res = await getEntityFieldsWithChildren(curMainDataSource);
     const newEntityList = (res.childEntities || []).map((item: any) => {
       return {
@@ -120,27 +127,55 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     clearDataSourceOriginNodeId();
   };
 
-  // 获取数据源列表
-  const getEntityList = async (curDateType: number) => {
-    if (curDateType === DATA_SOURCE_TYPE.FORM) {
+  const handleDateNodeSourceChange = async (curDateNodeSource: string) => {
+    payloadForm.clearFields(['dataSource', 'sortBy']);
+    const nodeData = triggerEditorSignal.nodeData.value[node.id];
+    triggerEditorSignal.setNodeData(node.id, {
+      ...nodeData,
+      dataSource: undefined, // null 和 '' 在 Select 中都被认为是值
+      dataSourceOriginNodeId: undefined,
+      sortBy: [] // 清除已选择排序字段
+    });
+    setEntityList([]);
+    setDataNodeList([]);
+    setConditionFields([]);
+    setValidationTypes([]);
+
+    const nodes = triggerEditorSignal.nodes.value;
+
+    const newDataNodeList = Object.values(nodes).filter(
+      (item: any) => item.type === NodeType.DATA_QUERY_MULTIPLE && item.id !== curDateNodeSource
+    );
+    setDataNodeList(newDataNodeList);
+
+    clearDataSourceOriginNodeId();
+  };
+
+  // 获取各类数据源列表，不传值获取全部(用于初始化)
+  const getEntityAndDataNodeList = async (curDateType?: DATA_SOURCE_TYPE) => {
+    if (curDateType === DATA_SOURCE_TYPE.FORM || curDateType === undefined) {
       // 从主表中查询  FORM
       const res = await getEntityListByApp(curAppId);
       setEntityList(res);
-    } else if (curDateType === DATA_SOURCE_TYPE.DATA_NODE) {
-      // 从数据节点中查询  DATA_NODE  dataSourceOriginNodeId
-      const nodes = triggerEditorSignal.nodes.value;
-      const newEntityList = getBeforeCurQueryNodes(node.id, nodes);
-      setEntityList(
-        newEntityList.map((item) => {
-          return { entityName: item?.data?.title, entityId: item.id };
-        })
-      );
-    } else if (curDateType === DATA_SOURCE_TYPE.ASSOCIA_FORM) {
+    }
+    if (curDateType === DATA_SOURCE_TYPE.ASSOCIA_FORM || curDateType === undefined) {
       // 从关联表单中查询  ASSOCIA_FORM
-    } else if (curDateType === DATA_SOURCE_TYPE.SUBFORM) {
+    }
+
+    if (curDateType === DATA_SOURCE_TYPE.SUBFORM || curDateType === undefined) {
       // 从子表中查询  SUBFORM
       const res = await getEntityListByApp(curAppId);
       setMainEntityList(res);
+    }
+
+    if (curDateType === DATA_SOURCE_TYPE.DATA_NODE || curDateType === undefined) {
+      // 从上游数据节点查询
+      const nodes = triggerEditorSignal.nodes.value;
+      // TODO(mickey) 过滤掉当前节点,过滤blocks,并且只能选当前节点之前的节点
+      const newDataNodeList = Object.values(nodes).filter(
+        (item: any) => item.type === NodeType.DATA_QUERY_MULTIPLE && item.id !== node.id
+      );
+      setDataNodeList(newDataNodeList);
     }
   };
 
@@ -273,6 +308,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             <Form.Item label="节点ID" field="id " initialValue={node.id}>
               <Input disabled />
             </Form.Item>
+
             <Form.Item label="查询方式" field="dataType" required>
               <Radio.Group direction="vertical" onChange={handleDataTypeChange}>
                 <Radio value={DATA_SOURCE_TYPE.FORM}>从主表中查询</Radio>
@@ -281,7 +317,9 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                 {/* <Radio value={DATA_SOURCE_TYPE.ASSOCIA_FORM}>从关联表单中查询</Radio> */}
               </Radio.Group>
             </Form.Item>
-            {dataType === DATA_SOURCE_TYPE.SUBFORM ? (
+
+            {/* 从子表中查询 */}
+            {dataType === DATA_SOURCE_TYPE.SUBFORM && (
               <Grid.Row>
                 <Grid.Col span={1} style={{ textAlign: 'center', lineHeight: '32px' }}>
                   从
@@ -315,7 +353,10 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                   <span>中查询数据</span>
                 </Grid.Col>
               </Grid.Row>
-            ) : (
+            )}
+
+            {/* 从主表中查询 */}
+            {dataType === DATA_SOURCE_TYPE.FORM && (
               <Grid.Row>
                 <Grid.Col span={1} style={{ textAlign: 'center', lineHeight: '32px' }}>
                   从
@@ -336,12 +377,37 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                 </Grid.Col>
               </Grid.Row>
             )}
+
+            {/* 从主数据节点中查询 */}
+            {dataType === DATA_SOURCE_TYPE.DATA_NODE && (
+              <Grid.Row>
+                <Grid.Col span={1} style={{ textAlign: 'center', lineHeight: '32px' }}>
+                  从
+                </Grid.Col>
+                <Grid.Col span={19}>
+                  <Form.Item field="mainDataSource">
+                    <Select onChange={handleDateNodeSourceChange} allowClear>
+                      {dataNodeList.map((item) => (
+                        <Select.Option key={item.id} value={item.id}>
+                          {item.data.title}
+                        </Select.Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                </Grid.Col>
+                <Grid.Col span={4} style={{ textAlign: 'center', lineHeight: '32px' }}>
+                  <span>中查询数据</span>
+                </Grid.Col>
+              </Grid.Row>
+            )}
+
             <Form.Item label="查询规则" field="filterType" rules={[{ required: true, message: '请选择查询规则' }]}>
               <Radio.Group>
                 <Radio value={FILTER_TYPE.ALL}>全部数据</Radio>
                 <Radio value={FILTER_TYPE.CONDITION}>按条件过滤</Radio>
               </Radio.Group>
             </Form.Item>
+
             {filterType === FILTER_TYPE.CONDITION && (
               <Form.Item field="filterCondition">
                 <ConditionEditor
@@ -351,6 +417,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                 />
               </Form.Item>
             )}
+
             <Form.Item label="排序规则" rules={[{ required: true, message: '请选择排序规则' }]} field="sortBy">
               <SortByEditor
                 data={triggerEditorSignal.nodeData.value[node.id]?.sortBy || []}
