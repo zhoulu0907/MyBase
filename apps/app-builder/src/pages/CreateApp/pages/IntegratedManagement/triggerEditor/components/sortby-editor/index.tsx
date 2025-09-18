@@ -11,10 +11,9 @@ export interface ConditionEditorProps {
   data?: Sort[];
   onChange?: (value: Sort[]) => void;
   form: FormInstance;
-  clearSortByNum?: number;
 }
 
-const SortByEditor: React.FC<ConditionEditorProps> = ({ data, onChange, fields, form, clearSortByNum }) => {
+const SortByEditor: React.FC<ConditionEditorProps> = ({ data, onChange, fields, form }) => {
   const [sortList, setSortList] = useState<Sort[]>([]);
 
   // 排序改变
@@ -29,10 +28,6 @@ const SortByEditor: React.FC<ConditionEditorProps> = ({ data, onChange, fields, 
       onChange(sortList);
     }
   }, [sortList]);
-  useEffect(()=>{
-    setSortList([]);
-    form.clearFields(['sortList'])
-  },[clearSortByNum])
 
   return (
     <ReactSortable list={sortList} setList={handleSort} animation={200} handle=".sortby-item-handle">
