@@ -112,8 +112,6 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean }) => {
         },
       };
 
-      console.log(props, 'props')
-
       setPageComponentSchemas(cpID, props);
 
       if (tableData.length === 0) {
