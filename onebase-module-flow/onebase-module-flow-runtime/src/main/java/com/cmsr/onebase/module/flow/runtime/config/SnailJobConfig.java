@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.flow.runtime;
+package com.cmsr.onebase.module.flow.runtime.config;
 
 import com.aizuda.snailjob.client.starter.EnableSnailJob;
 import org.springframework.context.annotation.Configuration;
