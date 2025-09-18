@@ -70,13 +70,13 @@ public class AdminAuthServiceImpl implements AdminAuthService {
      */
     @Value("${onebase.captcha.enable:true}")
     @Setter // 为了单测：开启或者关闭验证码
-    private Boolean captchaEnable;
+    private Boolean       captchaEnable;
     /**
-     * 平台租户验证开关，默认为 true
+     * 平台租户验证开关，默认为 false
      */
-    @Value("${onebase.platform-tenant.enable:true}")
+    @Value("${onebase.platform-tenant.enable-create-app:false}")
     @Setter // 为了单测：开启或者关闭验证码
-    private Boolean platformTenantEnable;
+    private Boolean       platformTenantEnableCreateApp;
     @Resource
     private TenantService tenantService;
     @Resource
@@ -126,7 +126,7 @@ public class AdminAuthServiceImpl implements AdminAuthService {
     public AuthLoginRespVO login(AuthLoginReqVO reqVO) {
         // 校验验证码
         validateCaptcha(reqVO);
-        if (platformTenantEnable) {
+        if (!platformTenantEnableCreateApp) {
             // 校验当前用户绑定的租户是否为平台租户，是则不允许登录
             tenantService.handleTenantInfo(tenant -> {
                 if (tenant.getTenantCode().equals(TenantCodeEnum.PLATFORM_TENANT.getCode())) {
