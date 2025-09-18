@@ -130,7 +130,7 @@ public class ExpressionAssistant {
             String expression = buildExpression(
                     fieldName, operator, ruleItem.getFieldValue());
 
-            log.debug("构建规则表达式: filterId={} -> {}", ruleItem.getFilterId(), expression);
+            log.debug("构建规则表达式: fieldId={} -> {}", ruleItem.getFieldId(), expression);
 
             return expression;
 

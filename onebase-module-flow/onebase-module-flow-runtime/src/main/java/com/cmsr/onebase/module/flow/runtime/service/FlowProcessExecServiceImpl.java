@@ -1,20 +1,17 @@
 package com.cmsr.onebase.module.flow.runtime.service;
 
-import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessFormRepository;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDO;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessFormDO;
+import com.cmsr.onebase.module.flow.core.flow.FlowProcessExecutor;
 import com.cmsr.onebase.module.flow.core.graph.GraphFlowCache;
 import com.cmsr.onebase.module.flow.core.graph.data.StartFormNodeData;
 import com.cmsr.onebase.module.flow.core.rule.ExpressionAssistant;
-import com.cmsr.onebase.module.flow.core.utils.FlowUtils;
 import com.cmsr.onebase.module.flow.runtime.vo.FormTriggerReqVO;
 import com.cmsr.onebase.module.flow.runtime.vo.FormTriggerRespVO;
 import com.cmsr.onebase.module.flow.runtime.vo.QueryFormTriggerRespVO;
 import com.yomahub.liteflow.core.FlowExecutor;
-import com.yomahub.liteflow.flow.LiteflowResponse;
-import com.yomahub.liteflow.slot.DefaultContext;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -49,6 +46,9 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
     @Autowired
     private ExpressionAssistant expressionAssistant;
 
+    @Autowired
+    private FlowProcessExecutor flowProcessExecutor;
+
     @Override
     public List<QueryFormTriggerRespVO> queryFormTrigger(Long pageId) {
         List<Long> processIds = flowProcessFormRepository.findByPageId(pageId)
@@ -71,13 +71,13 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
         if (!isTrigger) {
             FormTriggerRespVO respVO = new FormTriggerRespVO();
             respVO.setTriggered(0);
-
+            return respVO;
+        } else {
+            Map<String, Object> outputMap = flowProcessExecutor.execute(reqVO.getProcessId(), inputMap);
+            FormTriggerRespVO respVO = new FormTriggerRespVO();
+            respVO.setTriggered(1);
+            respVO.setResult(outputMap);
+            return respVO;
         }
-        String chainId = FlowUtils.toFlowChainId(reqVO.getProcessId());
-        DefaultContext defaultContext = new DefaultContext();
-        defaultContext.setData(FlowUtils.INPUT, inputMap);
-        LiteflowResponse response = flowExecutor.execute2Resp(chainId, "", defaultContext);
-        DefaultContext resultContext = response.getContextBean(DefaultContext.class);
-        return BeanUtils.toBean(resultContext.getDataMap(), FormTriggerRespVO.class);
     }
 }

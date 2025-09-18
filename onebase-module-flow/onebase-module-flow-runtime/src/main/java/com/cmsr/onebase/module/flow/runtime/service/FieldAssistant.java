@@ -50,7 +50,7 @@ public class FieldAssistant {
     }
 
     /**
-     * 1、根据filterId设置RuleItem对象的 fieldName 和  fieldJdbcType。
+     * 1、根据fieldId设置RuleItem对象的 fieldName 和  fieldJdbcType。
      * 2、根据fieldJdbcType，设置 fieldValue 的值。
      * com.cmsr.onebase.module.metadata.api.entity.MetadataEntityFieldApi#getFieldJdbcTypes(com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldJdbcTypeReqDTO)
      *
@@ -83,8 +83,8 @@ public class FieldAssistant {
     private List<Long> collectFieldIdsFromConditions(List<ConditionItem> conditions) {
         return conditions.stream()
                 .flatMap(condition -> condition.getRules().stream())
-                .map(RuleItem::getFilterId)
-                .filter(filterId -> filterId != null)
+                .map(RuleItem::getFieldId)
+                .filter(fieldId -> fieldId != null)
                 .distinct()
                 .collect(Collectors.toList());
     }
@@ -143,14 +143,14 @@ public class FieldAssistant {
      * 填充单个规则项的字段数据
      */
     private void fillSingleRuleItem(RuleItem rule, Map<Long, EntityFieldJdbcTypeRespDTO> fieldInfoMap) {
-        Long filterId = rule.getFilterId();
-        if (filterId == null) {
+        Long fieldId = rule.getFieldId();
+        if (fieldId == null) {
             return;
         }
 
-        EntityFieldJdbcTypeRespDTO fieldInfo = fieldInfoMap.get(filterId);
+        EntityFieldJdbcTypeRespDTO fieldInfo = fieldInfoMap.get(fieldId);
         if (fieldInfo == null) {
-            log.warn("找不到字段ID为 {} 的字段信息", filterId);
+            log.warn("找不到字段ID为 {} 的字段信息", fieldId);
             return;
         }
 

@@ -18,7 +18,7 @@ import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 public class WebProperties {
 
     @NotNull(message = "APP API 不能为空")
-    private Api appApi = new Api("/app-api", new String[]{"**.controller.app.**", "**.runtime.controller.**"});
+    private Api appApi = new Api("/runtime", new String[]{"**.controller.app.**", "**.runtime.controller.**"});
 
     @NotNull(message = "Admin API 不能为空")
     private Api adminApi = new Api("/admin-api", new String[]{

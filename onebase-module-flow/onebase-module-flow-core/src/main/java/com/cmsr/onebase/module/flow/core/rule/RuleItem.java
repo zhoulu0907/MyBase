@@ -11,7 +11,7 @@ import java.util.List;
 @Data
 public class RuleItem {
 
-    private Long filterId;
+    private Long fieldId;
 
     private String op;
 
