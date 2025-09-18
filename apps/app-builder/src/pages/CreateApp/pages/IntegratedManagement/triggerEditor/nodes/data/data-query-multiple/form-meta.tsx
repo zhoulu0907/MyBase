@@ -192,7 +192,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   };
 
   const getEntityFieldList = async (dataSource: string) => {
-    if (!!dataSource) {
+    if (!dataSource) {
       return;
     }
     const res = await getEntityFields({ entityId: dataSource });
