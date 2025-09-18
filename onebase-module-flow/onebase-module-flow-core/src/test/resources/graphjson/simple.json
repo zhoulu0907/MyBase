@@ -1,48 +1,91 @@
 {
   "nodes": [
     {
-      "id": "start_0",
-      "type": "start",
+      "id": "start_form_0",
+      "type": "startForm",
       "data": {
-        "title": "触发节点",
-        "outputs": {
-          "type": "object",
-          "properties": {}
-        }
-      },
-      "blocks": []
-    },
-    {
-      "id": "dataAdd_aDZOjQgQfRTT8spjoPd38",
-      "type": "dataAdd",
-      "data": {
-        "title": "数据新增节点"
-      },
-      "blocks": []
-    },
-    {
-      "id": "dataDelete_Ja0V1nzv7yZBDRnyrZe82",
-      "type": "dataDelete",
-      "data": {
-        "title": "数据删除节点"
-      },
-      "blocks": []
-    },
-    {
-      "id": "dataUpdate_8Sqk3YHYUVr0jU0qtPkDx",
-      "type": "dataUpdate",
-      "data": {
-        "title": "数据更新节点"
-      },
-      "blocks": []
+        "id": "start_form_0",
+        "triggerRange": "record",
+        "filterCondition": [
+          {
+            "id": "20MYhPzV-zSchPjNWHKPm",
+            "parentId": "",
+            "rules": [
+              {
+                "id": "LJRgx8xcNnTTWgNbtYbTo",
+                "parentId": "20MYhPzV-zSchPjNWHKPm",
+                "fieldId": "46999569445519360",
+                "op": "EQUALS",
+                "operatorType": "value",
+                "value": [
+                  "四年级5班"
+                ]
+              },
+              {
+                "id": "epToeF2ll84xUMwiBjv7Y",
+                "parentId": "20MYhPzV-zSchPjNWHKPm",
+                "fieldId": "46999569445519360",
+                "op": "CONTAINS",
+                "operatorType": "value",
+                "value": [
+                  "年级"
+                ]
+              },
+              {
+                "id": "vNF9QzuXY_-X1l_Lc5dB9",
+                "parentId": "20MYhPzV-zSchPjNWHKPm",
+                "fieldId": "50028191407505411",
+                "op": "RANGE",
+                "operatorType": "value",
+                "value": [
+                  "12"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "49Eyf1qkTP0fTMdpVfpq5",
+            "parentId": "",
+            "rules": [
+              {
+                "id": "TwChZoL_K2OW3MMFje4Fn",
+                "parentId": "49Eyf1qkTP0fTMdpVfpq5",
+                "fieldId": "46999569445519360",
+                "op": "EQUALS",
+                "operatorType": "value",
+                "value": [
+                  "四年级3班"
+                ]
+              },
+              {
+                "id": "3cZA8gi8zE0oy7YWKjyeB",
+                "parentId": "49Eyf1qkTP0fTMdpVfpq5",
+                "fieldId": "46999569445519360",
+                "op": "CONTAINS",
+                "operatorType": "formula",
+                "value": [
+                  "年级"
+                ]
+              }
+            ]
+          }
+        ],
+        "isChildTriggerAllowed": false,
+        "pageId": "47012574606491650",
+        "triggerEvents": [
+          "create",
+          "update",
+          "delete"
+        ],
+        "title": "界面交互触发节点"
+      }
     },
     {
       "id": "end_0",
       "type": "end",
       "data": {
         "title": "结束"
-      },
-      "blocks": []
+      }
     }
   ]
 }

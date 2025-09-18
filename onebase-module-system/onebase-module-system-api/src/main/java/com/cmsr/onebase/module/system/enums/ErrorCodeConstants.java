@@ -17,6 +17,7 @@ public interface ErrorCodeConstants {
     ErrorCode AUTH_MOBILE_NOT_EXISTS = new ErrorCode(1_002_000_007, "手机号不存在");
     ErrorCode AUTH_REGISTER_CAPTCHA_CODE_ERROR = new ErrorCode(1_002_000_008, "验证码不正确，原因：{}");
     ErrorCode AUTH_LOGIN_USER_NOT_ADMIN_ERROR = new ErrorCode(1_002_000_009, "登录失败，仅平台管理员可登录。");
+    ErrorCode AUTH_LOGIN_PLATFORM_TENANT_ERROR = new ErrorCode(1_002_000_010, "登录失败，平台租户不可登录。");
 
     // ========== 菜单模块 1-002-001-000 ==========
     ErrorCode MENU_NAME_DUPLICATE = new ErrorCode(1_002_001_000, "已经存在该名字的菜单");

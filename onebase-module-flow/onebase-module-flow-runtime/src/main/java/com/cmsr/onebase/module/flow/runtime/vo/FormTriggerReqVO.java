@@ -3,7 +3,7 @@ package com.cmsr.onebase.module.flow.runtime.vo;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
-import java.util.List;
+import java.util.Map;
 
 /**
  * @Author：huangjie
@@ -19,6 +19,6 @@ public class FormTriggerReqVO {
     private String executionUuid;
 
     @Schema(description = "输入参数")
-    private List<InputParam> inputParams;
+    private Map<Long, String> inputParams;
 
 }

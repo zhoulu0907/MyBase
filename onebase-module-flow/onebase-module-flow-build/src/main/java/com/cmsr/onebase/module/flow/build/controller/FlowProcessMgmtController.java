@@ -1,11 +1,11 @@
-package com.cmsr.onebase.module.flow.build.controller.mgmt;
+package com.cmsr.onebase.module.flow.build.controller;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.module.flow.build.service.mgmt.FlowProcessMgmtService;
-import com.cmsr.onebase.module.flow.build.vo.mgmt.*;
+import com.cmsr.onebase.module.flow.build.service.FlowProcessMgmtService;
+import com.cmsr.onebase.module.flow.build.vo.*;
 import com.cmsr.onebase.module.flow.core.enums.FlowErrorCodeConstants;
-import com.cmsr.onebase.module.flow.core.vo.mgmt.PageFlowProcessReqVO;
+import com.cmsr.onebase.module.flow.core.vo.PageFlowProcessReqVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
