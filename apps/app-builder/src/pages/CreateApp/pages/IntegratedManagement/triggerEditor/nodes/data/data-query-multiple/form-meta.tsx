@@ -16,14 +16,12 @@ import {
 } from '@onebase/app';
 import { useSignals } from '@preact/signals-react/runtime';
 import { useEffect, useState } from 'react';
-import { clearDataOriginNodeId } from '../../utils';
 import ConditionEditor from '../../../components/condition-editor';
 import SortByEditor from '../../../components/sortby-editor';
 import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
-import { getBeforeCurQueryNodes } from '../../utils';
-import { validateNodeForm } from '../../utils';
+import { clearDataOriginNodeId, getBeforeCurQueryNodes, validateNodeForm } from '../../utils';
 
 export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   useSignals();
