@@ -434,6 +434,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                 form={payloadForm}
               ></SortByEditor>
             </Form.Item>
+            <div style={{ color: '#4e5969' }}>仅查询排序的第一条数据</div>
           </Form>
         </FormContent>
       ) : (
