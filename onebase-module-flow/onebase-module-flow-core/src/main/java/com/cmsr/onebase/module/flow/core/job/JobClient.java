@@ -12,6 +12,7 @@ import com.aizuda.snailjob.model.response.JobApiResponse;
 import com.cmsr.onebase.module.flow.core.enums.JsonGraphConstant;
 import com.cmsr.onebase.module.flow.core.graph.data.StartTimeNodeData;
 import lombok.Setter;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -38,6 +39,10 @@ public class JobClient {
     }
 
     public String startJob(Long processId, String jobId, StartTimeNodeData timeNodeData) {
+        Long jobIdLong = NumberUtils.toLong(jobId, 0);
+        if (jobIdLong == 0) {
+            return startJob(processId, timeNodeData);
+        }
         JobApiResponse jobDetail = SnailJobOpenApi.getJobDetail(Long.parseLong(jobId)).execute();
         if (jobDetail.getId() == null) {
             return startJob(processId, timeNodeData);
@@ -74,14 +79,9 @@ public class JobClient {
                 .updateClusterJob(Long.parseLong(jobId))
                 .setJobStatus(StatusEnum.NO)
                 .execute();
-    }
-
-    public void deleteJob(String jobId) {
-        stopJob(jobId);
         SnailJobOpenApi
                 .deleteJob(Set.of(Long.parseLong(jobId)))
                 .execute();
     }
-
 
 }

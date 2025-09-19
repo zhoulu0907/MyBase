@@ -3,7 +3,8 @@ package com.cmsr.onebase.module.flow.core.flow;
 import com.cmsr.onebase.module.flow.core.config.FlowRuntimeCondition;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDO;
-import com.cmsr.onebase.module.flow.core.enums.FlowStatusEnum;
+import com.cmsr.onebase.module.flow.core.enums.FlowEnableStatusEnum;
+import com.cmsr.onebase.module.flow.core.enums.FlowPublishStatusEnum;
 import com.cmsr.onebase.module.flow.core.graph.GraphFlowCache;
 import com.cmsr.onebase.module.flow.core.graph.JsonGraph;
 import com.cmsr.onebase.module.flow.core.utils.FlowUtils;
@@ -42,7 +43,7 @@ public class FlowJsonGraphParser extends ClassXmlFlowELParser {
 
     @Override
     public String parseCustom() {
-        List<FlowProcessDO> flowProcessDOS = flowProcessRepository.findAllByStatus(FlowStatusEnum.ENABLE.getStatus());
+        List<FlowProcessDO> flowProcessDOS = flowProcessRepository.findAllByPublishStatus(FlowPublishStatusEnum.ONLINE.getStatus());
         Document document = DocumentHelper.createDocument();
         Element rootElement = document.addElement("flow");
         addNoOpChain(rootElement);
