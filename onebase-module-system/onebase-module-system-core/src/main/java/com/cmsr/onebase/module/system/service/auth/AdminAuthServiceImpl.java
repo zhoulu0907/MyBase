@@ -70,7 +70,7 @@ public class AdminAuthServiceImpl implements AdminAuthService {
      */
     @Value("${onebase.captcha.enable:true}")
     @Setter // 为了单测：开启或者关闭验证码
-    private Boolean       captchaEnable;
+    private Boolean captchaEnable;
     /**
      * 平台租户验证开关，默认为 false
      */

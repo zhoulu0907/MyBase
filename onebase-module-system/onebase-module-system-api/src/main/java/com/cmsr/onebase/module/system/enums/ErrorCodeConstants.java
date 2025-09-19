@@ -180,5 +180,6 @@ public interface ErrorCodeConstants {
     ErrorCode LICENSE_IMPORT_ERROR = new ErrorCode(1_002_029_001, "License凭证导入失败");
     ErrorCode LICENSE_EXPORT_ERROR = new ErrorCode(1_002_029_002, "License凭证导出失败");
     ErrorCode LICENSE_DECRYPT_ERROR = new ErrorCode(1_002_029_003, "文件解析失败，文件可能已损坏或不是有效的凭证文件");
+    ErrorCode LICENSE_CREATE_ERROR = new ErrorCode(1_002_029_004, "License凭证生成失败");
 
 }

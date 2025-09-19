@@ -2,14 +2,15 @@ package com.cmsr.onebase.module.system.build.controller.license;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.module.system.convert.license.LicenseConvert;
+import com.cmsr.onebase.module.system.dal.dataobject.license.LicenseDO;
+import com.cmsr.onebase.module.system.service.license.LicenseService;
 import com.cmsr.onebase.module.system.vo.license.LicensePageReqVO;
 import com.cmsr.onebase.module.system.vo.license.LicensePageRespVO;
 import com.cmsr.onebase.module.system.vo.license.LicenseRespVO;
 import com.cmsr.onebase.module.system.vo.license.LicenseSaveReqVO;
-import com.cmsr.onebase.module.system.convert.license.LicenseConvert;
-import com.cmsr.onebase.module.system.dal.dataobject.license.LicenseDO;
-import com.cmsr.onebase.module.system.service.license.LicenseService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -47,10 +48,23 @@ public class LicenseController {
      * @return License主键ID
      */
     @PostMapping("/create")
-    @PreAuthorize("ss.hasAuthority('system:license:create')")
+    @PreAuthorize("@ss.hasPermission('system:license:create')")
     @Operation(summary = "创建License")
     public Long createLicense(@RequestBody LicenseSaveReqVO reqVO) {
         return licenseService.createLicense(reqVO);
+    }
+
+    /**
+     * 创建License
+     *
+     * @param reqVO License创建请求参数
+     * @return License主键ID
+     */
+    @PostMapping("/createLicenseFile")
+    @PreAuthorize("@ss.hasPermission('system:license:create')")
+    @Operation(summary = "创建License文件")
+    public void createLicenseFile(@RequestBody String reqVO, HttpServletResponse response) {
+        licenseService.createLicenseFile(JsonUtils.parseObject(reqVO, LicenseSaveReqVO.class), response);
     }
 
     /**
@@ -59,7 +73,7 @@ public class LicenseController {
      * @param reqVO License更新请求参数
      */
     @PostMapping("/update")
-    @PreAuthorize("ss.hasAuthority('system:license:update')")
+    @PreAuthorize("@ss.hasPermission('system:license:update')")
     @Operation(summary = "更新License")
     public void updateLicense(@RequestBody LicenseSaveReqVO reqVO) {
         licenseService.updateLicense(reqVO);
@@ -71,7 +85,7 @@ public class LicenseController {
      * @param id License主键ID
      */
     @PostMapping("/delete")
-    @PreAuthorize("ss.hasAuthority('system:license:delete')")
+    @PreAuthorize("@ss.hasPermission('system:license:delete')")
     @Operation(summary = "删除License")
     public void deleteLicense(@RequestParam("id") Long id) {
         licenseService.deleteLicense(id);
@@ -123,7 +137,7 @@ public class LicenseController {
     @Operation(summary = "导入凭证")
     @Parameter(name = "file", description = "加密的license.lic.sm4文件", required = true)
     @PreAuthorize("@ss.hasPermission('system:license:query')")
-    public CommonResult<Long> importLicense(@RequestParam("file") MultipartFile file){
+    public CommonResult<Long> importLicense(@RequestParam("file") MultipartFile file) {
         Long licenseId = licenseService.importLicense(file);
         return CommonResult.success(licenseId);
     }

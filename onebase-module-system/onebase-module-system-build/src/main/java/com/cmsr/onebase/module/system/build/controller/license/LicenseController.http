@@ -17,7 +17,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
 ### 导出凭证
-GET {{baseUrl}}/system/license/export?id=545790779306676224
+GET {{baseUrl}}/system/license/export?id=49906575113453568
 Content-Type: application/json
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
@@ -32,5 +32,13 @@ Content-Type: multipart/form-data; boundary=WebAppBoundary
 Content-Disposition: form-data; name="file"; filename="license.lic.sm4"
 Content-Type: application/octet-stream
 
-< ./license.lic-3.sm4
+< ./license.lic-2.sm4
 --WebAppBoundary--
+
+### 创建凭证
+POST {{baseUrl}}/system/license/createLicenseFile
+Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+{"expireTime":1764547308000,"tenantLimit":"300","userLimit":"500"}
