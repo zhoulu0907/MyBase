@@ -30,7 +30,7 @@ export const DataQueryMultipleNodeRegistry: FlowNodeRegistry = {
   onAdd(ctx, from) {
     return {
       id: `dataQueryMultiple_${nanoid()}`,
-      type: 'dataQueryMultiple',
+      type: NodeType.DATA_QUERY_MULTIPLE,
       data: {
         title: '数据查询节点(多条)'
       }

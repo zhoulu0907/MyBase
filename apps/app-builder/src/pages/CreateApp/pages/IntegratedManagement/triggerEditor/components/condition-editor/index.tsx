@@ -39,11 +39,12 @@ export interface ConditionEditorProps {
 const ConditionEditor: React.FC<ConditionEditorProps> = ({ data, onChange, fields, entityFieldValidationTypes }) => {
   const [conditions, setConditions] = useState<Condition[]>([]);
 
+  //   TODO(mickey): 添加触发清空的逻辑
   useEffect(() => {
     if (data) {
       setConditions(data);
     }
-  }, [data]);
+  }, []);
 
   useEffect(() => {
     if (onChange) {

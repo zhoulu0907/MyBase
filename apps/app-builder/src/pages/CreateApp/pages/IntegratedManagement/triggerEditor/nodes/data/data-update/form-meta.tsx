@@ -1,29 +1,32 @@
-import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
+import { useAppStore } from '@/store/store_app';
 import { Form, Grid, Input, Radio, Select } from '@arco-design/web-react';
+import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
 import {
   FLOW_ENTITY_TYPE,
-  getEntityListByApp,
   getEntityFields,
   getEntityFieldsWithChildren,
+  getEntityListByApp,
   getFieldCheckTypeApi,
-  type ConfitionField,
   type AppEntityField,
+  type ConfitionField,
   type EntityFieldValidationTypes,
   type MetadataEntityPair
 } from '@onebase/app';
+import { useSignals } from '@preact/signals-react/runtime';
 import { useEffect, useState } from 'react';
 import ConditionEditor from '../../../components/condition-editor';
+import FieldEditor from '../../../components/field-editor';
 import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
 import { validateNodeForm } from '../../utils';
-import { useAppStore } from '@/store/store_app';
-import FieldEditor from '../../../components/field-editor';
 
 const RadioGroup = Radio.Group;
 
 export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
+  useSignals();
+
   const isSidebar = useIsSidebar();
   const { node } = useNodeRenderContext();
   // 当前页应用id
@@ -90,7 +93,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
   // 方式变更
   const handleDataTypeChange = (curUpdateType: FLOW_ENTITY_TYPE) => {
-    payloadForm.clearFields(['mainDataSource', 'subDataSource', 'filterCondition','fields']);
+    payloadForm.clearFields(['mainDataSource', 'subDataSource', 'filterCondition', 'fields']);
     const nodeData = triggerEditorSignal.nodeData.value[node.id];
     triggerEditorSignal.setNodeData(node.id, {
       ...nodeData,
@@ -122,7 +125,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   };
   // 主表数据变更
   const handleMainDataSourceChange = async (curMainDataSource: string) => {
-    payloadForm.clearFields(['subDataSource', 'filterCondition','fields']);
+    payloadForm.clearFields(['subDataSource', 'filterCondition', 'fields']);
     const nodeData = triggerEditorSignal.nodeData.value[node.id];
     triggerEditorSignal.setNodeData(node.id, {
       ...nodeData,
@@ -150,12 +153,12 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   };
   // 子表数据变更
   const handleSubDataSourceChange = (curSubDataSource: string) => {
-    payloadForm.clearFields(['filterCondition','fields']);
+    payloadForm.clearFields(['filterCondition', 'fields']);
     const nodeData = triggerEditorSignal.nodeData.value[node.id];
     triggerEditorSignal.setNodeData(node.id, {
       ...nodeData,
       filterCondition: [],
-      fields:[]
+      fields: []
     });
     setConditionFields([]);
     setFieldDataList([]);

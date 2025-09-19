@@ -28,9 +28,9 @@ export const CaseNodeRegistry: FlowNodeRegistry = {
   onAdd(ctx, from) {
     return {
       id: `Case_${nanoid(5)}`,
-      type: 'case',
+      type: NodeType.CASE,
       data: {
-        title: `分支_${id++}`,
+        title: `分支_${id++}`
       }
     };
   },

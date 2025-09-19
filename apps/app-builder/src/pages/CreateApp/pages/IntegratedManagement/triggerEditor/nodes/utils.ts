@@ -45,7 +45,7 @@ const getBlockNode = (curNodeId: string, blocks: FlowNodeJSON[]): FlowNodeJSON[]
       if (hasCurNode) {
         const nodeData = triggerEditorSignal.nodeData.value[ele.id];
         if (
-          ele.type === 'dataQueryMultiple'
+          ele.type === NodeType.DATA_QUERY_MULTIPLE
           //   nodeData.dataSource &&
           //   nodeData.dataType !== DATA_SOURCE_TYPE.DATA_NODE
         ) {
