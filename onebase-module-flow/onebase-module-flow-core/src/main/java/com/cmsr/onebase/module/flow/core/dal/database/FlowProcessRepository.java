@@ -42,9 +42,24 @@ public class FlowProcessRepository extends DataRepository<FlowProcessDO> {
         return this.findPageWithConditions(configs, reqVO.getPageNo(), reqVO.getPageSize());
     }
 
-    public List<FlowProcessDO> findAllByStatus(Integer status) {
+    public List<FlowProcessDO> findAllByPublishStatus(Integer status) {
         DefaultConfigStore configs = new DefaultConfigStore();
         configs.eq("process_status", status);
         return findAllByConfig(configs);
     }
+
+    public List<FlowProcessDO> findByApplicationId(Long applicationId) {
+        DefaultConfigStore configs = new DefaultConfigStore();
+        configs.eq("application_id", applicationId);
+        return findAllByConfig(configs);
+    }
+
+    public List<FlowProcessDO> findByApplicationIdAndStatus(Long applicationId, Integer   status) {
+        DefaultConfigStore configs = new DefaultConfigStore();
+        configs.eq("application_id", applicationId);
+        configs.eq("process_status", status);
+        return findAllByConfig(configs);
+    }
+
+
 }

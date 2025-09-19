@@ -10,7 +10,7 @@ public class JsonGraphConstant {
 
     public static final String START_FORM = "startForm";
 
-    public static final String START_ENTITY = "startEntity ";
+    public static final String START_ENTITY = "startEntity";
 
     public static final String START_TIME = "startTime";
 

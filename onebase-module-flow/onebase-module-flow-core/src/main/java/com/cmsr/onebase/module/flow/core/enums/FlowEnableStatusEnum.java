@@ -6,7 +6,7 @@ import java.util.Objects;
  * @Author：huangjie
  * @Date：2025/8/29 16:21
  */
-public enum FlowStatusEnum {
+public enum FlowEnableStatusEnum {
 
     DISABLE(0, "禁用"),
     ENABLE(1, "启用");
@@ -14,7 +14,7 @@ public enum FlowStatusEnum {
     private final Integer status;
     private final String name;
 
-    FlowStatusEnum(Integer status, String name) {
+    FlowEnableStatusEnum(Integer status, String name) {
         this.status = status;
         this.name = name;
     }

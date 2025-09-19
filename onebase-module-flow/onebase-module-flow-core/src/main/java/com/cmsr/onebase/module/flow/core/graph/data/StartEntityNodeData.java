@@ -1,6 +1,10 @@
 package com.cmsr.onebase.module.flow.core.graph.data;
 
+import com.cmsr.onebase.module.flow.core.rule.ConditionItem;
 import lombok.Data;
+
+import java.io.Serializable;
+import java.util.List;
 
 /**
  * @Author：huangjie
@@ -9,12 +13,18 @@ import lombok.Data;
 @Data
 public class StartEntityNodeData {
 
+    private Long processId;
+
     private Long entityId;
 
-    private String[] triggerEvents;
+    private List<String> triggerEvents;
 
-    private Long[] triggerFieldIds;
+    private List<Long> triggerFieldIds;
 
-    private String[][] filterCondition;
+    private List<ConditionItem> filterCondition;
 
+    /**
+     * 缓存的表达式
+     */
+    private Serializable compiledExpression;
 }

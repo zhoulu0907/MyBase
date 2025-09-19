@@ -27,11 +27,6 @@ public class FlowProcessDO extends BaseDO {
     @Column(name = "process_name", length = 128, nullable = false)
     private String processName;
     /**
-     * 状态（编辑、发布）
-     */
-    @Column(name = "process_status", length = 5, nullable = false)
-    private Integer processStatus;
-    /**
      * 描述
      */
     @Column(name = "process_description", length = 1024)
@@ -41,6 +36,16 @@ public class FlowProcessDO extends BaseDO {
      */
     @Column(name = "process_definition", length = 2147483647, nullable = false)
     private String processDefinition;
+    /**
+     * 启用状态（编辑、发布）
+     */
+    @Column(name = "enable_status", nullable = false)
+    private Integer enableStatus;
+    /**
+     * 发布状态（编辑、发布）
+     */
+    @Column(name = "publish_status", nullable = false)
+    private Integer publishStatus;
     /**
      * 流程类型，如表达触发，定时触发，API触发等
      */

@@ -5,15 +5,14 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.flow.build.vo.*;
 import com.cmsr.onebase.module.flow.core.dal.database.*;
-import com.cmsr.onebase.module.flow.core.dal.dataobject.*;
+import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDO;
+import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDateFieldDO;
+import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessEntityDO;
+import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessFormDO;
 import com.cmsr.onebase.module.flow.core.enums.FlowErrorCodeConstants;
-import com.cmsr.onebase.module.flow.core.enums.FlowStatusEnum;
+import com.cmsr.onebase.module.flow.core.enums.FlowEnableStatusEnum;
 import com.cmsr.onebase.module.flow.core.enums.FlowTriggerTypeEnum;
 import com.cmsr.onebase.module.flow.core.enums.JsonGraphConstant;
-import com.cmsr.onebase.module.flow.core.event.FlowProcessEventPublisher;
-import com.cmsr.onebase.module.flow.core.graph.JsonGraph;
-import com.cmsr.onebase.module.flow.core.graph.data.StartTimeNodeData;
-import com.cmsr.onebase.module.flow.core.job.JobClient;
 import com.cmsr.onebase.module.flow.core.vo.PageFlowProcessReqVO;
 import lombok.Setter;
 import org.apache.commons.collections4.MapUtils;
@@ -46,12 +45,6 @@ public class FlowProcessMgmtServiceImpl implements FlowProcessMgmtService {
 
     @Autowired
     private FlowProcessTimeRepository flowProcessTimeRepository;
-
-    @Autowired
-    private FlowProcessEventPublisher flowProcessEventPublisher;
-
-    @Autowired
-    private JobClient jobClient;
 
     @Override
     public PageResult<FlowProcessVO> pageList(PageFlowProcessReqVO reqVO) {
@@ -96,8 +89,8 @@ public class FlowProcessMgmtServiceImpl implements FlowProcessMgmtService {
         // 转换为DO对象
         FlowProcessDO flowProcessDO = new FlowProcessDO();
         BeanUtils.copyProperties(reqVO, flowProcessDO);
-
-        flowProcessDO.setProcessStatus(FlowStatusEnum.DISABLE.getStatus());
+        // 禁用
+        flowProcessDO.setEnableStatus(FlowEnableStatusEnum.DISABLE.getStatus());
         // 保存到数据库
         FlowProcessDO saved = flowProcessRepository.insert(flowProcessDO);
         saveAdditional(flowProcessDO, reqVO.getTriggerConfig());
@@ -136,10 +129,6 @@ public class FlowProcessMgmtServiceImpl implements FlowProcessMgmtService {
         BeanUtils.copyProperties(reqVO, flowProcessDO);
         // 保存更新
         flowProcessRepository.update(flowProcessDO);
-
-        if (FlowStatusEnum.changeToEnable(flowProcessDO.getProcessStatus(), reqVO.getProcessStatus())) {
-            flowProcessEventPublisher.publishProcessUpdate(flowProcessDO.getId());
-        }
     }
 
     @Override
@@ -149,13 +138,10 @@ public class FlowProcessMgmtServiceImpl implements FlowProcessMgmtService {
         // 更新流程定义
         flowProcessDO.setProcessDefinition(reqVO.getProcessDefinition());
         if (reqVO.getProcessStatus() != null && reqVO.getProcessStatus().intValue() >= 0) {
-            flowProcessDO.setProcessStatus(reqVO.getProcessStatus());
+            flowProcessDO.setEnableStatus(reqVO.getProcessStatus());
         }
         // 保存更新
         flowProcessRepository.update(flowProcessDO);
-        if (FlowStatusEnum.isEnable(flowProcessDO.getProcessStatus())) {
-            flowProcessEventPublisher.publishProcessUpdate(flowProcessDO.getId());
-        }
     }
 
 
@@ -175,11 +161,8 @@ public class FlowProcessMgmtServiceImpl implements FlowProcessMgmtService {
         // 检查流程是否存在
         FlowProcessDO flowProcessDO = validateFlowProcessExist(id);
         // 启用流程
-        flowProcessDO.setProcessStatus(FlowStatusEnum.ENABLE.getStatus());
+        flowProcessDO.setEnableStatus(FlowEnableStatusEnum.ENABLE.getStatus());
         flowProcessRepository.update(flowProcessDO);
-        flowProcessEventPublisher.publishProcessUpdate(flowProcessDO.getId());
-        //
-        startTimeJob(flowProcessDO);
     }
 
     @Override
@@ -188,24 +171,17 @@ public class FlowProcessMgmtServiceImpl implements FlowProcessMgmtService {
         // 检查流程是否存在
         FlowProcessDO flowProcessDO = validateFlowProcessExist(id);
         // 关闭流程
-        flowProcessDO.setProcessStatus(FlowStatusEnum.DISABLE.getStatus());
+        flowProcessDO.setEnableStatus(FlowEnableStatusEnum.DISABLE.getStatus());
         flowProcessRepository.update(flowProcessDO);
-        flowProcessEventPublisher.publishProcessDelete(flowProcessDO.getId());
-        //
-        stopTimeJob(flowProcessDO);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void delete(Long id) {
         // 检查流程是否存在
-        FlowProcessDO flowProcessDO = validateFlowProcessExist(id);
-        //
-        deleteTimeJob(flowProcessDO);
+        validateFlowProcessExist(id);
         // 删除流程
         flowProcessRepository.deleteById(id);
-        flowProcessEventPublisher.publishProcessDelete(id);
-
     }
 
 
@@ -233,42 +209,4 @@ public class FlowProcessMgmtServiceImpl implements FlowProcessMgmtService {
         return BeanUtils.toBean(flowProcessDO, FlowProcessVO.class);
     }
 
-    private void startTimeJob(FlowProcessDO flowProcessDO) {
-        if (!FlowTriggerTypeEnum.isTime(flowProcessDO.getTriggerType())) {
-            return;
-        }
-        JsonGraph jsonGraph = JsonGraph.of(flowProcessDO.getProcessDefinition());
-        Map<String, Object> data = jsonGraph.getStartNode().getData();
-        StartTimeNodeData startTimeNodeData = new StartTimeNodeData(data);
-        FlowProcessTimeDO flowProcessTimeDO = flowProcessTimeRepository.findByProcessId(flowProcessDO.getId());
-        String jobId;
-        if (flowProcessTimeDO == null) {
-            jobId = jobClient.startJob(flowProcessDO.getId(), startTimeNodeData);
-            flowProcessTimeDO = new FlowProcessTimeDO();
-            flowProcessTimeDO.setProcessId(flowProcessDO.getId());
-            flowProcessTimeDO.setJobId(jobId);
-            flowProcessTimeRepository.insert(flowProcessTimeDO);
-        } else {
-            jobId = jobClient.startJob(flowProcessDO.getId(), flowProcessTimeDO.getJobId(), startTimeNodeData);
-            flowProcessTimeDO.setJobId(jobId);
-            flowProcessTimeRepository.update(flowProcessTimeDO);
-        }
-    }
-
-    private void stopTimeJob(FlowProcessDO flowProcessDO) {
-        if (!FlowTriggerTypeEnum.isTime(flowProcessDO.getTriggerType())) {
-            return;
-        }
-        FlowProcessTimeDO flowProcessTimeDO = flowProcessTimeRepository.findByProcessId(flowProcessDO.getId());
-        jobClient.stopJob(flowProcessTimeDO.getJobId());
-    }
-
-
-    private void deleteTimeJob(FlowProcessDO flowProcessDO) {
-        if (!FlowTriggerTypeEnum.isTime(flowProcessDO.getTriggerType())) {
-            return;
-        }
-        FlowProcessTimeDO flowProcessTimeDO = flowProcessTimeRepository.findByProcessId(flowProcessDO.getId());
-        jobClient.deleteJob(flowProcessTimeDO.getJobId());
-    }
 }
