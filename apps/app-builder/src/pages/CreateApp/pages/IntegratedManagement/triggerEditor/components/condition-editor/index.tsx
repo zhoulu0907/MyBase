@@ -23,9 +23,13 @@ const opCodeOptions = [
  * ConditionEditor 组件的 props 类型定义
  */
 export interface ConditionEditorProps {
+  // 可以下拉选择的字段列表
   fields: ConfitionField[];
+  // 具体值
   data?: Condition[];
+  // 字段变更回调函数
   onChange?: (value: Condition[]) => void;
+  // 字段验证类型列表
   entityFieldValidationTypes: EntityFieldValidationTypes[];
 }
 
@@ -42,11 +46,12 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({ data, onChange, field
   }, []);
 
   useEffect(() => {
-    if(onChange){
+    if (onChange) {
       onChange(conditions);
     }
   }, [conditions]);
 
+  // 新增条件
   const addCondition = (pid: string) => {
     const newConditions = [...conditions];
     if (pid == '') {
@@ -62,38 +67,35 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({ data, onChange, field
         ]
       });
     } else {
-      for (let i = 0; i < newConditions.length; i++) {
-        const subItem = newConditions[i];
-        if (subItem.id === pid) {
-          subItem.rules?.push({ id: nanoid(), parentId: pid });
-          break;
-        }
-      }
+      const target = newConditions.find((item) => item.id === pid);
+      target?.rules?.push({ id: nanoid(), parentId: pid });
     }
 
     setConditions(newConditions);
+
     return;
   };
 
+  // 删除条件
   const deleteCondition = (id: string) => {
     const newConditions = [...conditions];
     for (let i = 0; i < newConditions.length; i++) {
       const subItem = newConditions[i];
       if (subItem.rules) {
-        for (let j = 0; j < subItem.rules?.length; j++) {
-          if (subItem.rules[j].id === id) {
-            subItem.rules.splice(j, 1);
-            if (subItem.rules.length === 0) {
-              newConditions.splice(i, 1);
-            }
-            setConditions(newConditions);
-            break;
+        const ruleIndex = subItem.rules.findIndex((rule) => rule.id === id);
+        if (ruleIndex !== -1) {
+          subItem.rules.splice(ruleIndex, 1);
+          if (subItem.rules.length === 0) {
+            newConditions.splice(i, 1);
           }
+          setConditions(newConditions);
+          break;
         }
       }
     }
   };
 
+  // 渲染条件组
   const renderItemWrapper = (cond: Condition) => {
     return cond.rules && cond.rules.length > 0 ? (
       <div className={styles.items} key={cond.id}>
@@ -111,6 +113,74 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({ data, onChange, field
     ) : null;
   };
 
+  const handleFieldIdChange = (value: string, cond: Condition) => {
+    const newConditions = [...conditions];
+    for (let i = 0; i < newConditions.length; i++) {
+      const subItem = newConditions[i];
+      if (subItem.rules) {
+        for (let j = 0; j < subItem.rules?.length; j++) {
+          if (subItem.rules[j].id === cond.id) {
+            newConditions[i]!.rules![j].fieldId = value;
+            break;
+          }
+        }
+      }
+    }
+    setConditions(newConditions);
+  };
+
+  const handleOpChange = (value: string, cond: Condition) => {
+    const newConditions = [...conditions];
+
+    for (let i = 0; i < newConditions.length; i++) {
+      const subItem = newConditions[i];
+      if (subItem.rules) {
+        for (let j = 0; j < subItem.rules?.length; j++) {
+          if (subItem.rules[j].id === cond.id) {
+            newConditions[i]!.rules![j].op = value;
+            break;
+          }
+        }
+      }
+    }
+    setConditions(newConditions);
+  };
+
+  const handleOperatorTypeChange = (value: string, cond: Condition) => {
+    const newConditions = [...conditions];
+
+    for (let i = 0; i < newConditions.length; i++) {
+      const subItem = newConditions[i];
+      if (subItem.rules) {
+        for (let j = 0; j < subItem.rules?.length; j++) {
+          if (subItem.rules[j].id === cond.id) {
+            newConditions[i]!.rules![j].operatorType = value;
+            break;
+          }
+        }
+      }
+    }
+    setConditions(newConditions);
+  };
+
+  const handleValueChange = (value: string, cond: Condition) => {
+    const newConditions = [...conditions];
+
+    for (let i = 0; i < newConditions.length; i++) {
+      const subItem = newConditions[i];
+      if (subItem.rules) {
+        for (let j = 0; j < subItem.rules?.length; j++) {
+          if (subItem.rules[j].id === cond.id) {
+            newConditions[i]!.rules![j].value = [value];
+            break;
+          }
+        }
+      }
+    }
+    setConditions(newConditions);
+  };
+
+  //   渲染条件
   const renderItem = (cond: Condition) => {
     return (
       <div className={styles.item} key={cond.id}>
@@ -119,20 +189,7 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({ data, onChange, field
           style={{ width: '150px' }}
           value={cond.fieldId || ''}
           onChange={(value) => {
-            const newConditions = [...conditions];
-
-            for (let i = 0; i < newConditions.length; i++) {
-              const subItem = newConditions[i];
-              if (subItem.rules) {
-                for (let j = 0; j < subItem.rules?.length; j++) {
-                  if (subItem.rules[j].id === cond.id) {
-                    newConditions[i]!.rules![j].fieldId = value;
-                    break;
-                  }
-                }
-              }
-            }
-            setConditions(newConditions);
+            handleFieldIdChange(value, cond);
           }}
         >
           {fields.map((field) => (
@@ -147,20 +204,7 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({ data, onChange, field
           style={{ width: '100px' }}
           value={cond.op || ''}
           onChange={(value) => {
-            const newConditions = [...conditions];
-
-            for (let i = 0; i < newConditions.length; i++) {
-              const subItem = newConditions[i];
-              if (subItem.rules) {
-                for (let j = 0; j < subItem.rules?.length; j++) {
-                  if (subItem.rules[j].id === cond.id) {
-                    newConditions[i]!.rules![j].op = value;
-                    break;
-                  }
-                }
-              }
-            }
-            setConditions(newConditions);
+            handleOpChange(value, cond);
           }}
         >
           {(entityFieldValidationTypes.find((item) => item.fieldId === cond.fieldId)?.validationTypes || []).map(
@@ -177,20 +221,7 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({ data, onChange, field
           style={{ width: '100px' }}
           value={cond.operatorType || ''}
           onChange={(value) => {
-            const newConditions = [...conditions];
-
-            for (let i = 0; i < newConditions.length; i++) {
-              const subItem = newConditions[i];
-              if (subItem.rules) {
-                for (let j = 0; j < subItem.rules?.length; j++) {
-                  if (subItem.rules[j].id === cond.id) {
-                    newConditions[i]!.rules![j].operatorType = value;
-                    break;
-                  }
-                }
-              }
-            }
-            setConditions(newConditions);
+            handleOperatorTypeChange(value, cond);
           }}
         >
           {opCodeOptions}
@@ -201,20 +232,7 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({ data, onChange, field
           value={cond.value?.[0] || ''}
           placeholder="请输入"
           onChange={(value) => {
-            const newConditions = [...conditions];
-
-            for (let i = 0; i < newConditions.length; i++) {
-              const subItem = newConditions[i];
-              if (subItem.rules) {
-                for (let j = 0; j < subItem.rules?.length; j++) {
-                  if (subItem.rules[j].id === cond.id) {
-                    newConditions[i]!.rules![j].value = [value];
-                    break;
-                  }
-                }
-              }
-            }
-            setConditions(newConditions);
+            handleValueChange(value, cond);
           }}
         />
 
