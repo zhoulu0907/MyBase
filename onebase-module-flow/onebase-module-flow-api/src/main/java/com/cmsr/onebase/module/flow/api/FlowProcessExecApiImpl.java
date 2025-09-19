@@ -9,6 +9,7 @@ import com.cmsr.onebase.module.flow.core.graph.data.StartEntityNodeData;
 import com.cmsr.onebase.module.flow.core.rule.ExpressionAssistant;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -73,10 +74,13 @@ public class FlowProcessExecApiImpl implements FlowProcessExecApi {
      * @return
      */
     private boolean triggerEventContains(List<String> triggerEvents, TriggerEventEnum triggerEvent) {
-        if (triggerEvents == null || triggerEvent == null) {
+        if (triggerEvents == null) {
             return false;
         }
-        String eventName = triggerEvent.name();
+        if (triggerEvent == null) {
+            return false;
+        }
+        String eventName = triggerEvent.getCode();
         return triggerEvents.stream().anyMatch(event -> event.equalsIgnoreCase(eventName));
     }
 
@@ -88,7 +92,10 @@ public class FlowProcessExecApiImpl implements FlowProcessExecApi {
      * @return
      */
     private boolean triggerFieldIdsContained(List<Long> triggerFieldIds, List<Long> changedFieldIds) {
-        if (triggerFieldIds == null || changedFieldIds == null) {
+        if (CollectionUtils.isEmpty(triggerFieldIds)) {
+            return true;
+        }
+        if (CollectionUtils.isNotEmpty(triggerFieldIds) && CollectionUtils.isEmpty(changedFieldIds)) {
             return false;
         }
         return changedFieldIds.stream().allMatch(changedId -> triggerFieldIds.contains(changedId));

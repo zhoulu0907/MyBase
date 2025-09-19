@@ -18,7 +18,6 @@ import org.springframework.stereotype.Component;
 @Setter
 @Slf4j
 @Component
-@Conditional(FlowBuildCondition.class)
 public class RedisFlowProcessEventPublisher implements FlowProcessEventPublisher {
 
     /**

@@ -44,7 +44,7 @@ public class FlowProcessRepository extends DataRepository<FlowProcessDO> {
 
     public List<FlowProcessDO> findAllByPublishStatus(Integer status) {
         DefaultConfigStore configs = new DefaultConfigStore();
-        configs.eq("process_status", status);
+        configs.eq("publish_status", status);
         return findAllByConfig(configs);
     }
 
@@ -54,10 +54,10 @@ public class FlowProcessRepository extends DataRepository<FlowProcessDO> {
         return findAllByConfig(configs);
     }
 
-    public List<FlowProcessDO> findByApplicationIdAndStatus(Long applicationId, Integer   status) {
+    public List<FlowProcessDO> findByApplicationIdAndEnableStatus(Long applicationId, Integer status) {
         DefaultConfigStore configs = new DefaultConfigStore();
         configs.eq("application_id", applicationId);
-        configs.eq("process_status", status);
+        configs.eq("enable_status", status);
         return findAllByConfig(configs);
     }
 

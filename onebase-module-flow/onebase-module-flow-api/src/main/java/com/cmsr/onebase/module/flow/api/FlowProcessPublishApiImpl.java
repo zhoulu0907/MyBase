@@ -40,7 +40,7 @@ public class FlowProcessPublishApiImpl implements FlowProcessPublishApi {
 
     @Override
     public void onlineApplicationFlowProcess(Long applicationId) {
-        List<FlowProcessDO> flowProcessDOS = flowProcessRepository.findByApplicationIdAndStatus(applicationId, FlowEnableStatusEnum.ENABLE.getStatus());
+        List<FlowProcessDO> flowProcessDOS = flowProcessRepository.findByApplicationIdAndEnableStatus(applicationId, FlowEnableStatusEnum.ENABLE.getStatus());
         for (FlowProcessDO flowProcessDO : flowProcessDOS) {
             startTimeJob(flowProcessDO);
             flowProcessDO.setPublishStatus(FlowPublishStatusEnum.ONLINE.getStatus());
