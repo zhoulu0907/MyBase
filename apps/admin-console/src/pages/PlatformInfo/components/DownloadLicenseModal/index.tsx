@@ -19,8 +19,8 @@ const DownloadLicenseModal = (props: DownloadLicenseModal) => {
       console.log('onSubmit values.expireTime:', values.expireTime);
       // 将日期转换为时间戳
       if (values.expireTime) {
-        const date = new Date(values.expireTime + 'T00:00:00Z').getTime();
-        values.expireTime = date;
+        const timestamp = new Date(values.expireTime).getTime();
+        values.expireTime = timestamp;
       }
       handleSubmit(values);
     } catch (error) {
