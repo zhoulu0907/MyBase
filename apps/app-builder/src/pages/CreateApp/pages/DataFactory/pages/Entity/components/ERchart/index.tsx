@@ -9,6 +9,7 @@ import EntityNodeComponent from './ERnode';
 import styles from './index.module.less';
 import { GridNodePositioner } from './utils/nodePositioner';
 import { performAutoLayout } from './utils/autoLayout';
+import { useNewNodeStore } from '@/store/store_entity';
 
 const LINE_HEAD_HEIGHT = 48;
 const LINE_HEIGHT = 34.8;
@@ -39,6 +40,7 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
     },
     ref
   ) => {
+    const { newNodes } = useNewNodeStore();
     const [selectedNode, setSelectedNode] = useState<EntityNode | null>(null);
     const [drawerVisible, setDrawerVisible] = useState(false);
     const [zoom, setZoom] = useState(90);
@@ -207,6 +209,7 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
                 handleSectionCollapse(nodeId, section, isCollapsed);
               }
             },
+            zIndex: newNodes.includes(nodeData.entityId) ? newNodes.length : 0,
             attrs: {
               body: {
                 fill: '#fff',
