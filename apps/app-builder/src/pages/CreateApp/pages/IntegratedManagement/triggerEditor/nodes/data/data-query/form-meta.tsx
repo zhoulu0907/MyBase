@@ -12,7 +12,6 @@ import {
   type ConfitionField,
   type EntityFieldValidationTypes,
   type MetadataEntityPair,
-  type SelectOption
 } from '@onebase/app';
 import { useSignals } from '@preact/signals-react/runtime';
 import { useEffect, useState } from 'react';
@@ -194,12 +193,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     const res = await getEntityFields({ entityId: dataSource });
     const filedIds: string[] = [];
     const newConditionFields: ConfitionField[] = [];
-    const fieldOptions: SelectOption[] = [];
     res.forEach((item: any) => {
-      fieldOptions.push({
-        label: item.displayName,
-        value: item.id
-      });
       filedIds.push(item.id);
       newConditionFields.push({
         label: item.displayName,

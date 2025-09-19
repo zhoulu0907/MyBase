@@ -2,33 +2,37 @@ import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-e
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { Form, Grid, Input, Radio, Select } from '@arco-design/web-react';
 import {
-  getFieldCheckTypeApi,
   FLOW_ENTITY_TYPE,
-  type AppEntityField,
+  getEntityListByApp,
+  getEntityFields,
+  getEntityFieldsWithChildren,
+  getFieldCheckTypeApi,
   type ConfitionField,
-  type EntityFieldValidationTypes
+  type AppEntityField,
+  type EntityFieldValidationTypes,
+  type MetadataEntityPair
 } from '@onebase/app';
 import { useEffect, useState } from 'react';
-import FieldEditor from '../../../components/field-editor';
+import ConditionEditor from '../../../components/condition-editor';
 import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
-import ConditionEditor from '../../../components/condition-editor';
 import { validateNodeForm } from '../../utils';
+import { useAppStore } from '@/store/store_app';
+import FieldEditor from '../../../components/field-editor';
 
 const RadioGroup = Radio.Group;
-const Option = Select.Option;
 
 export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const isSidebar = useIsSidebar();
   const { node } = useNodeRenderContext();
-  const { mainEntities, subEntities } = triggerEditorSignal;
-
-  const [fieldDataList, setFieldDataList] = useState<AppEntityField[]>([]);
-  const [entityList, setEntityList] = useState<any[]>();
-
-  const [validationTypes, setValidationTypes] = useState<EntityFieldValidationTypes[]>([]);
+  // 当前页应用id
+  const { curAppId } = useAppStore();
+  const [mainEntityList, setMainEntityList] = useState<MetadataEntityPair[]>([]);
+  const [entityList, setEntityList] = useState<MetadataEntityPair[]>([]);
   const [conditionFields, setConditionFields] = useState<ConfitionField[]>([]);
+  const [validationTypes, setValidationTypes] = useState<EntityFieldValidationTypes[]>([]);
+  const [fieldDataList, setFieldDataList] = useState<AppEntityField[]>([]);
 
   const handlePropsOnChange = (values: any) => {
     triggerEditorSignal.setNodeData(node.id, values);
@@ -46,49 +50,153 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const [payloadForm] = Form.useForm();
 
   const updateType = Form.useWatch('updateType', payloadForm);
-
-  useEffect(() => {
-    if (updateType) {
-      console.log('updateType: ', updateType);
-      if (updateType == FLOW_ENTITY_TYPE.MAIN_ENTITY) {
-        console.log('mainEntities.value: ', mainEntities.value);
-        setEntityList(mainEntities.value);
-      } else {
-        setEntityList(subEntities.value);
-      }
-    }
-  }, [updateType]);
+  const mainDataSource = Form.useWatch('mainDataSource', payloadForm);
 
   useEffect(() => {
     payloadForm && validateNodeForm(form, payloadForm, true);
-    if (payloadForm.getFieldValue('entityId')) {
-      setFieldDataList(
-        [...mainEntities.value, ...subEntities.value].find(
-          (item) => item.entityId === payloadForm.getFieldValue('entityId')
-        )?.fields || []
-      );
-    }
   }, [payloadForm]);
 
-  const entityChange = async (value: string) => {
-    console.log('value: ', value);
-    let filedIds: string[] = [];
-    const entities = [...mainEntities.value, ...subEntities.value];
-    entities.forEach((item) => {
-      if (item.entityId === value) {
-        setFieldDataList(item.fields);
-        setConditionFields(
-          item.fields.map((ele: AppEntityField) => {
-            return { label: ele.displayName, value: ele.fieldId };
-          })
-        );
-        filedIds = item.fields.map((ele: AppEntityField) => {
-          return ele.fieldId;
-        });
+  useEffect(() => {
+    init();
+  }, []);
+
+  const init = async () => {
+    const nodeData = triggerEditorSignal.nodeData.value[node.id];
+    if (nodeData) {
+      if (nodeData.updateType === FLOW_ENTITY_TYPE.MAIN_ENTITY) {
+        // 在主表中
+        const res = await getEntityListByApp(curAppId);
+        setEntityList(res);
+        getFieldList(nodeData?.mainDataSource);
       }
+      if (nodeData.updateType === FLOW_ENTITY_TYPE.SUB_ENTITY) {
+        // 在子表中
+        const res = await getEntityListByApp(curAppId);
+        setMainEntityList(res);
+        if (nodeData?.mainDataSource) {
+          const res = await getEntityFieldsWithChildren(nodeData.mainDataSource);
+          const newEntityList = (res.childEntities || []).map((item: any) => {
+            return {
+              entityId: item.childEntityId,
+              entityName: item.childEntityName
+            };
+          });
+          setEntityList(newEntityList);
+          getFieldList(nodeData.subDataSource);
+        }
+      }
+    }
+  };
+
+  // 方式变更
+  const handleDataTypeChange = (curUpdateType: FLOW_ENTITY_TYPE) => {
+    payloadForm.clearFields(['mainDataSource', 'subDataSource', 'filterCondition','fields']);
+    const nodeData = triggerEditorSignal.nodeData.value[node.id];
+    triggerEditorSignal.setNodeData(node.id, {
+      ...nodeData,
+      mainDataSource: undefined,
+      subDataSource: undefined,
+      filterCondition: [],
+      fields: []
     });
-    const newValidationTypes = await getFieldCheckTypeApi(filedIds);
-    setValidationTypes(newValidationTypes);
+    setEntityList([]);
+    setConditionFields([]);
+    setFieldDataList([]);
+    setValidationTypes([]);
+    setMainEntityList([]);
+    getEntityList(curUpdateType);
+  };
+  const getEntityList = async (curUpdateType?: FLOW_ENTITY_TYPE) => {
+    const nodeData = triggerEditorSignal.nodeData.value[node.id];
+    if (curUpdateType === FLOW_ENTITY_TYPE.MAIN_ENTITY || curUpdateType === undefined) {
+      // 从主表中
+      const res = await getEntityListByApp(curAppId);
+      setEntityList(res);
+      getFieldList(nodeData?.mainDataSource);
+    }
+    if (curUpdateType === FLOW_ENTITY_TYPE.SUB_ENTITY) {
+      // 从子表中
+      const res = await getEntityListByApp(curAppId);
+      setMainEntityList(res);
+    }
+  };
+  // 主表数据变更
+  const handleMainDataSourceChange = async (curMainDataSource: string) => {
+    payloadForm.clearFields(['subDataSource', 'filterCondition','fields']);
+    const nodeData = triggerEditorSignal.nodeData.value[node.id];
+    triggerEditorSignal.setNodeData(node.id, {
+      ...nodeData,
+      subDataSource: undefined,
+      filterCondition: [],
+      fields: []
+    });
+    setConditionFields([]);
+    setFieldDataList([]);
+    setValidationTypes([]);
+    if (updateType === FLOW_ENTITY_TYPE.MAIN_ENTITY) {
+      getFieldList(curMainDataSource);
+    }
+    if (updateType === FLOW_ENTITY_TYPE.SUB_ENTITY) {
+      setEntityList([]);
+      const res = await getEntityFieldsWithChildren(curMainDataSource);
+      const newEntityList = (res.childEntities || []).map((item: any) => {
+        return {
+          entityId: item.childEntityId,
+          entityName: item.childEntityName
+        };
+      });
+      setEntityList(newEntityList);
+    }
+  };
+  // 子表数据变更
+  const handleSubDataSourceChange = (curSubDataSource: string) => {
+    payloadForm.clearFields(['filterCondition','fields']);
+    const nodeData = triggerEditorSignal.nodeData.value[node.id];
+    triggerEditorSignal.setNodeData(node.id, {
+      ...nodeData,
+      filterCondition: [],
+      fields:[]
+    });
+    setConditionFields([]);
+    setFieldDataList([]);
+    setValidationTypes([]);
+    getFieldList(curSubDataSource);
+  };
+  // 获取字段下拉列表
+  const getFieldList = async (dataSource: string) => {
+    if (!dataSource) {
+      return;
+    }
+    const res = await getEntityFields({ entityId: dataSource });
+    const filedIds: string[] = [];
+    const newConditionFields: ConfitionField[] = [];
+    res.forEach((item: any) => {
+      item.fieldId = item.id;
+      filedIds.push(item.id);
+      newConditionFields.push({
+        label: item.displayName,
+        value: item.id,
+        fieldType: item.fieldType
+      });
+    });
+    setConditionFields(newConditionFields);
+    setValidationTypes([]);
+    setFieldDataList(res);
+    if (filedIds?.length) {
+      const newValidationTypes = await getFieldCheckTypeApi(filedIds);
+      console.log('validationTypes: ', newValidationTypes);
+      setValidationTypes(newValidationTypes);
+    }
+  };
+
+  const filterConditionChange = (e: any[]) => {
+    const nodeData = triggerEditorSignal.nodeData.value[node.id];
+    triggerEditorSignal.setNodeData(node.id, {
+      ...nodeData,
+      subDataSource: undefined,
+      filterCondition: e || []
+    });
+    payloadForm.setFieldValue('filterCondition', e);
   };
 
   return (
@@ -103,37 +211,97 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             layout="vertical"
           >
             <Grid.Row>
-              <Form.Item label="节点ID" field="id" initialValue={node.id}>
+              <Form.Item
+                label="节点ID"
+                field="id"
+                initialValue={node.id}
+                rules={[
+                  {
+                    required: true,
+                    message: '请选择节点ID'
+                  }
+                ]}
+              >
                 <Input disabled />
               </Form.Item>
             </Grid.Row>
 
             <Grid.Row>
               <Form.Item label="更新方式" field="updateType" rules={[{ required: true, message: '请选择更新方式' }]}>
-                <RadioGroup>
+                <RadioGroup onChange={handleDataTypeChange}>
                   <Radio value={FLOW_ENTITY_TYPE.MAIN_ENTITY}>更新主表数据</Radio>
                   <Radio value={FLOW_ENTITY_TYPE.SUB_ENTITY}>更新子表数据</Radio>
                 </RadioGroup>
               </Form.Item>
             </Grid.Row>
 
+            {/* 从主表中 */}
+            {updateType === FLOW_ENTITY_TYPE.MAIN_ENTITY && (
+              <Grid.Row>
+                <Grid.Col span={2} style={{ textAlign: 'center', lineHeight: '32px' }}>
+                  更新
+                </Grid.Col>
+                <Grid.Col span={19}>
+                  <Form.Item field="mainDataSource" disabled={!updateType}>
+                    <Select onChange={handleMainDataSourceChange} allowClear>
+                      {entityList.map((item) => (
+                        <Select.Option key={item.entityId} value={item.entityId}>
+                          {item.entityName}
+                        </Select.Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                </Grid.Col>
+                <Grid.Col span={3} style={{ textAlign: 'center', lineHeight: '32px' }}>
+                  的数据
+                </Grid.Col>
+              </Grid.Row>
+            )}
+
+            {/* 从子表中 */}
+            {updateType === FLOW_ENTITY_TYPE.SUB_ENTITY && (
+              <Grid.Row>
+                <Grid.Col span={2} style={{ textAlign: 'center', lineHeight: '32px' }}>
+                  更新
+                </Grid.Col>
+                <Grid.Col span={9}>
+                  <Form.Item field="mainDataSource" disabled={!updateType}>
+                    <Select allowClear onChange={handleMainDataSourceChange}>
+                      {mainEntityList.map((item) => (
+                        <Select.Option key={item.entityId} value={item.entityId}>
+                          {item.entityName}
+                        </Select.Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                </Grid.Col>
+                <Grid.Col span={1} style={{ textAlign: 'center', lineHeight: '32px' }}>
+                  的
+                </Grid.Col>
+                <Grid.Col span={9}>
+                  <Form.Item field="subDataSource" disabled={!mainDataSource}>
+                    <Select allowClear onChange={handleSubDataSourceChange}>
+                      {entityList.map((item) => (
+                        <Select.Option key={item.entityId} value={item.entityId}>
+                          {item.entityName}
+                        </Select.Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                </Grid.Col>
+                <Grid.Col span={3} style={{ textAlign: 'center', lineHeight: '32px' }}>
+                  的数据
+                </Grid.Col>
+              </Grid.Row>
+            )}
+
             <Grid.Row>
-              <Form.Item field="entityId" rules={[{ required: true, message: '请选择表单' }]} disabled={!updateType}>
-                <Select style={{ width: '100%' }} onChange={entityChange}>
-                  {entityList?.map((item) => (
-                    <Option key={item.entityId} value={item.entityId}>
-                      {item.entityName}
-                    </Option>
-                  ))}
-                </Select>
-              </Form.Item>
-            </Grid.Row>
-            <Grid.Row>
-              <Form.Item field="filterCondition" label="匹配规则" rules={[{ required: true, message: '请选择匹配规则' }]}>
+              <Form.Item label="匹配规则" field="filterCondition" required>
                 <ConditionEditor
                   data={triggerEditorSignal.nodeData.value[node.id]?.filterCondition || []}
                   fields={conditionFields}
                   entityFieldValidationTypes={validationTypes}
+                  onChange={filterConditionChange}
                 />
               </Form.Item>
             </Grid.Row>
@@ -143,6 +311,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                 <FieldEditor fieldList={fieldDataList} form={payloadForm} />
               </Form.Item>
             </Grid.Row>
+
             <Grid.Row>
               <Form.Item label="未匹配到数据时" field="noData">
                 <RadioGroup defaultValue="skip">

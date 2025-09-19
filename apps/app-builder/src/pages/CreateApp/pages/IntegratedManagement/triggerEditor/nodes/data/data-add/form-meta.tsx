@@ -1,25 +1,32 @@
 import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
-
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { Form, Grid, Input, Radio, Select } from '@arco-design/web-react';
-import { FLOW_ENTITY_TYPE, type AppEntityField } from '@onebase/app';
+import {
+  FLOW_ENTITY_TYPE,
+  getEntityListByApp,
+  getEntityFields,
+  getEntityFieldsWithChildren,
+  type AppEntityField,
+  type MetadataEntityPair
+} from '@onebase/app';
 import { useEffect, useState } from 'react';
 import FieldEditor from '../../../components/field-editor';
 import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
 import { validateNodeForm } from '../../utils';
+import { useAppStore } from '@/store/store_app';
 
 const RadioGroup = Radio.Group;
-const Option = Select.Option;
 
 export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const isSidebar = useIsSidebar();
   const { node } = useNodeRenderContext();
-  const { mainEntities, subEntities } = triggerEditorSignal;
-
+  // 当前页应用id
+  const { curAppId } = useAppStore();
   const [fieldDataList, setFieldDataList] = useState<AppEntityField[]>([]);
-  const [entityList, setEntityList] = useState<any[]>();
+  const [mainEntityList, setMainEntityList] = useState<MetadataEntityPair[]>([]);
+  const [entityList, setEntityList] = useState<MetadataEntityPair[]>([]);
 
   const handlePropsOnChange = (values: any) => {
     triggerEditorSignal.setNodeData(node.id, values);
@@ -37,32 +44,118 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const [payloadForm] = Form.useForm();
 
   const addType = Form.useWatch('addType', payloadForm);
-
-  useEffect(() => {
-    if (addType) {
-      console.log('addType: ', addType);
-      if (addType == FLOW_ENTITY_TYPE.MAIN_ENTITY) {
-        console.log('mainEntities.value: ', mainEntities.value);
-        setEntityList(mainEntities.value);
-      } else {
-        setEntityList(subEntities.value);
-      }
-    }
-  }, [addType]);
-
-  useEffect(() => {
-    if (payloadForm.getFieldValue('entityId')) {
-      setFieldDataList(
-        [...mainEntities.value, ...subEntities.value].find(
-          (item) => item.entityId === payloadForm.getFieldValue('entityId')
-        )?.fields || []
-      );
-    }
-  }, [payloadForm]);
+  const mainDataSource = Form.useWatch('mainDataSource', payloadForm);
 
   useEffect(() => {
     payloadForm && validateNodeForm(form, payloadForm, true);
   }, [payloadForm]);
+
+  useEffect(() => {
+    init();
+  }, []);
+
+  const init = async () => {
+    const nodeData = triggerEditorSignal.nodeData.value[node.id];
+    if (nodeData) {
+      if (nodeData.addType === FLOW_ENTITY_TYPE.MAIN_ENTITY) {
+        // 在主表中
+        const res = await getEntityListByApp(curAppId);
+        setEntityList(res);
+        getFieldList(nodeData?.mainDataSource);
+      }
+      if (nodeData.addType === FLOW_ENTITY_TYPE.SUB_ENTITY) {
+        // 在子表中
+        const res = await getEntityListByApp(curAppId);
+        setMainEntityList(res);
+        if (nodeData?.mainDataSource) {
+          const res = await getEntityFieldsWithChildren(nodeData.mainDataSource);
+          const newEntityList = (res.childEntities || []).map((item: any) => {
+            return {
+              entityId: item.childEntityId,
+              entityName: item.childEntityName
+            };
+          });
+          setEntityList(newEntityList);
+          getFieldList(nodeData.subDataSource);
+        }
+      }
+    }
+  };
+
+  // 新增方式变更
+  const handleDataTypeChange = (curAddType: FLOW_ENTITY_TYPE) => {
+    payloadForm.clearFields(['mainDataSource', 'subDataSource', 'fields']);
+    const nodeData = triggerEditorSignal.nodeData.value[node.id];
+    triggerEditorSignal.setNodeData(node.id, {
+      ...nodeData,
+      mainDataSource: undefined,
+      subDataSource: undefined,
+      fields: []
+    });
+    setEntityList([]);
+    setFieldDataList([]);
+    setMainEntityList([]);
+    getEntityList(curAddType);
+  };
+  const getEntityList = async (curAddType?: FLOW_ENTITY_TYPE) => {
+    const nodeData = triggerEditorSignal.nodeData.value[node.id];
+    if (curAddType === FLOW_ENTITY_TYPE.MAIN_ENTITY || curAddType === undefined) {
+      // 从主表中
+      const res = await getEntityListByApp(curAppId);
+      setEntityList(res);
+      getFieldList(nodeData?.mainDataSource);
+    }
+    if (curAddType === FLOW_ENTITY_TYPE.SUB_ENTITY) {
+      // 从子表中
+      const res = await getEntityListByApp(curAppId);
+      setMainEntityList(res);
+    }
+  };
+  // 主表数据变更
+  const handleMainDataSourceChange = async (curMainDataSource: string) => {
+    payloadForm.clearFields(['subDataSource', 'fields']);
+    const nodeData = triggerEditorSignal.nodeData.value[node.id];
+    triggerEditorSignal.setNodeData(node.id, {
+      ...nodeData,
+      subDataSource: undefined,
+      fields: []
+    });
+    if (addType === FLOW_ENTITY_TYPE.MAIN_ENTITY) {
+      getFieldList(curMainDataSource);
+    }
+    if (addType === FLOW_ENTITY_TYPE.SUB_ENTITY) {
+      setEntityList([]);
+      const res = await getEntityFieldsWithChildren(curMainDataSource);
+      const newEntityList = (res.childEntities || []).map((item: any) => {
+        return {
+          entityId: item.childEntityId,
+          entityName: item.childEntityName
+        };
+      });
+      setEntityList(newEntityList);
+    }
+  };
+  // 子表数据变更
+  const handleSubDataSourceChange = (curSubDataSource: string) => {
+    payloadForm.clearFields(['fields']);
+    const nodeData = triggerEditorSignal.nodeData.value[node.id];
+    triggerEditorSignal.setNodeData(node.id, {
+      ...nodeData,
+      fields: []
+    });
+    getFieldList(curSubDataSource);
+  };
+  // 获取字段下拉列表
+  const getFieldList = async (dataSource: string) => {
+    if (!dataSource) {
+      return;
+    }
+    const res = await getEntityFields({ entityId: dataSource });
+    res.forEach((item: any) => {
+      item.fieldId = item.id;
+    });
+    setFieldDataList(res);
+  };
 
   return (
     <>
@@ -71,13 +164,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
         <FormContent>
           <Form
             form={payloadForm}
-            initialValues={{
-              addType: undefined,
-              entityId: undefined,
-              batchType: undefined,
-              fields: undefined,
-              ...triggerEditorSignal.nodeData.value[node.id]
-            }}
+            initialValues={{ ...triggerEditorSignal.nodeData.value[node.id] }}
             onValuesChange={onValuesChange}
             layout="vertical"
           >
@@ -99,44 +186,72 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
             <Grid.Row>
               <Form.Item label="新增方式" field="addType" rules={[{ required: true, message: '请选择新增方式' }]}>
-                <RadioGroup
-                  onChange={(_value) => {
-                    payloadForm.setFieldValue('entityId', undefined);
-                  }}
-                >
+                <RadioGroup onChange={handleDataTypeChange}>
                   <Radio value={FLOW_ENTITY_TYPE.MAIN_ENTITY}>在主表中新增</Radio>
                   <Radio value={FLOW_ENTITY_TYPE.SUB_ENTITY}>在子表中新增</Radio>
                 </RadioGroup>
               </Form.Item>
             </Grid.Row>
 
-            <Grid.Row>
-              <Form.Item
-                field="entityId"
-                rules={[{ required: true, message: '请选择表单' }]}
-                layout="vertical"
-                disabled={!addType}
-              >
-                <Select
-                  style={{ width: '100%' }}
-                  onChange={(value) => {
-                    [...mainEntities.value, ...subEntities.value].forEach((item) => {
-                      if (item.entityId === value) {
-                        setFieldDataList(item.fields);
-                      }
-                    });
+            {/* 从主表中查询 */}
+            {addType === FLOW_ENTITY_TYPE.MAIN_ENTITY && (
+              <Grid.Row>
+                <Grid.Col span={1} style={{ textAlign: 'center', lineHeight: '32px' }}>
+                  从
+                </Grid.Col>
+                <Grid.Col span={19}>
+                  <Form.Item field="mainDataSource" disabled={!addType}>
+                    <Select onChange={handleMainDataSourceChange} allowClear>
+                      {entityList.map((item) => (
+                        <Select.Option key={item.entityId} value={item.entityId}>
+                          {item.entityName}
+                        </Select.Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                </Grid.Col>
+                <Grid.Col span={4} style={{ textAlign: 'center', lineHeight: '32px' }}>
+                  <span>中查询数据</span>
+                </Grid.Col>
+              </Grid.Row>
+            )}
 
-                    payloadForm.clearFields('fieldList');
-                  }}
-                >
-                  {entityList?.map((item) => (
-                    <Option key={item.entityId} value={item.entityId}>
-                      {item.entityName}
-                    </Option>
-                  ))}
-                </Select>
-              </Form.Item>
-            </Grid.Row>
+            {/* 从子表中查询 */}
+            {addType === FLOW_ENTITY_TYPE.SUB_ENTITY && (
+              <Grid.Row>
+                <Grid.Col span={1} style={{ textAlign: 'center', lineHeight: '32px' }}>
+                  从
+                </Grid.Col>
+                <Grid.Col span={9}>
+                  <Form.Item field="mainDataSource" disabled={!addType}>
+                    <Select allowClear onChange={handleMainDataSourceChange}>
+                      {mainEntityList.map((item) => (
+                        <Select.Option key={item.entityId} value={item.entityId}>
+                          {item.entityName}
+                        </Select.Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                </Grid.Col>
+                <Grid.Col span={1} style={{ textAlign: 'center', lineHeight: '32px' }}>
+                  的
+                </Grid.Col>
+                <Grid.Col span={9}>
+                  <Form.Item field="subDataSource" disabled={!mainDataSource}>
+                    <Select allowClear onChange={handleSubDataSourceChange}>
+                      {entityList.map((item) => (
+                        <Select.Option key={item.entityId} value={item.entityId}>
+                          {item.entityName}
+                        </Select.Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                </Grid.Col>
+                <Grid.Col span={4} style={{ textAlign: 'center', lineHeight: '32px' }}>
+                  <span>中查询数据</span>
+                </Grid.Col>
+              </Grid.Row>
+            )}
 
             <Grid.Row>
               <Form.Item label="新增数据" field="batchType" rules={[{ required: true, message: '请选择新增数据' }]}>
@@ -148,7 +263,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             </Grid.Row>
 
             <Grid.Row>
-              <Form.Item label="字段设置" field="fields">
+              <Form.Item label="字段设置">
                 <FieldEditor fieldList={fieldDataList} form={payloadForm} />
               </Form.Item>
             </Grid.Row>

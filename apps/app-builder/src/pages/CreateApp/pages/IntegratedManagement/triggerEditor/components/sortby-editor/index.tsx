@@ -60,7 +60,10 @@ const SortByEditor: React.FC<ConditionEditorProps> = ({ data, onChange, fields, 
                             onChange={() => {
                               setSortList(form.getFieldValue('sortBy'));
                             }}
-                            options={fields}
+                            options={fields.map((field) => {
+                              const disabled = sortList?.some((f) => f?.sortField === field.value);
+                              return {...field, disabled}
+                            })}
                           ></Select>
                         </Form.Item>
                       </Grid.Col>
@@ -93,6 +96,7 @@ const SortByEditor: React.FC<ConditionEditorProps> = ({ data, onChange, fields, 
                 <Button
                   type="dashed"
                   icon={<IconPlus />}
+                  disabled={(sortList || [])?.length >= fields?.length}
                   onClick={() => {
                     const temp = {
                       id: nanoid(),
