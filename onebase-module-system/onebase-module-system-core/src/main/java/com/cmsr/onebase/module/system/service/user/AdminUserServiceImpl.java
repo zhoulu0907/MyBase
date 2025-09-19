@@ -42,6 +42,7 @@ import jakarta.annotation.Resource;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.init.DefaultConfigStore;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -151,8 +152,10 @@ public class AdminUserServiceImpl implements AdminUserService {
             success = SYSTEM_USER_CREATE_SUCCESS)
     @Override
     public Long createPlatformUser(UserInsertReqVO createReqVO) {
-        // 设置平台管理员默认名称
-        createReqVO.setNickname(RoleCodeEnum.SUPER_ADMIN.getName());
+        // 如果前端没传管理员昵称，设置平台管理员默认名称
+        if (StringUtils.isBlank(createReqVO.getNickname())) {
+            createReqVO.setNickname(RoleCodeEnum.SUPER_ADMIN.getName());
+        }
         //  校验正确性
         validateUserForCreateOrUpdate(null, createReqVO.getUsername(),
                 createReqVO.getMobile(), createReqVO.getEmail(), createReqVO.getDeptId(), createReqVO.getPostIds());

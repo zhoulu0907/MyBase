@@ -63,9 +63,8 @@ public class LicenseController {
     @PostMapping("/createLicenseFile")
     @PreAuthorize("@ss.hasPermission('system:license:create')")
     @Operation(summary = "创建License文件")
-    public void createLicenseFile(@RequestBody String reqVO,HttpServletResponse response) {
-        LicenseSaveReqVO licenseSaveReqVO = JsonUtils.parseObject(reqVO, LicenseSaveReqVO.class);
-        licenseService.createLicenseFile(licenseSaveReqVO,response);
+    public void createLicenseFile(@RequestBody String reqVO, HttpServletResponse response) {
+        licenseService.createLicenseFile(JsonUtils.parseObject(reqVO, LicenseSaveReqVO.class), response);
     }
 
     /**
@@ -138,7 +137,7 @@ public class LicenseController {
     @Operation(summary = "导入凭证")
     @Parameter(name = "file", description = "加密的license.lic.sm4文件", required = true)
     @PreAuthorize("@ss.hasPermission('system:license:query')")
-    public CommonResult<Long> importLicense(@RequestParam("file") MultipartFile file){
+    public CommonResult<Long> importLicense(@RequestParam("file") MultipartFile file) {
         Long licenseId = licenseService.importLicense(file);
         return CommonResult.success(licenseId);
     }

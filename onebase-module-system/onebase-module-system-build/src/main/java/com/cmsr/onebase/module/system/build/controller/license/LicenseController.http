@@ -41,8 +41,4 @@ Content-Type: application/json
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
-{
-  "expireTime" : 1764547308000,
-  "tenantLimit" : "300",
-  "userLimit" : "500"
-}
+{"expireTime":1764547308000,"tenantLimit":"300","userLimit":"500"}
