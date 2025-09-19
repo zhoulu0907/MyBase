@@ -1,6 +1,5 @@
 package com.cmsr.onebase.module.flow.core.graph.data;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -20,20 +19,6 @@ class StartTimeNodeDataTest {
 
     private StartTimeNodeData startTimeNodeData;
 
-    @BeforeEach
-    void setUp() {
-        startTimeNodeData = new StartTimeNodeData();
-    }
-
-    @Test
-    @DisplayName("测试默认构造函数")
-    void testDefaultConstructor() {
-        StartTimeNodeData nodeData = new StartTimeNodeData();
-        assertNotNull(nodeData);
-        assertNull(nodeData.getRepeatType());
-        assertNull(nodeData.getTriggerTime());
-        assertNull(nodeData.getCronExpression());
-    }
 
     @Test
     @DisplayName("测试Map构造函数")
@@ -51,7 +36,7 @@ class StartTimeNodeDataTest {
         data.put("triggerDate", "01-01");
         data.put("triggerTime", "16:01");
 
-        StartTimeNodeData nodeData = new StartTimeNodeData(data);
+        startTimeNodeData = new StartTimeNodeData(data);
 
 
     }

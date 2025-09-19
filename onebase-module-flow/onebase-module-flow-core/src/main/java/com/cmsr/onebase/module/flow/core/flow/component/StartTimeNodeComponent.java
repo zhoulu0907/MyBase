@@ -1,6 +1,5 @@
-package com.cmsr.onebase.module.flow.core.flow.component.logic;
+package com.cmsr.onebase.module.flow.core.flow.component;
 
-import com.cmsr.onebase.module.flow.core.flow.component.NormalNodeComponent;
 import com.yomahub.liteflow.annotation.LiteflowComponent;
 import lombok.extern.slf4j.Slf4j;
 
