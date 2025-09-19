@@ -547,12 +547,17 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 // 实体是否允许改表结构
                 validateEntityAllowModifyStructure(existing.getEntityId());
 
-                // 先删子配置（选项、约束、自动编号）
+                // 先删子配置（选项、约束、自动编号、校验规则）
                 if (existing != null) {
                     try {
                         fieldOptionService.deleteByFieldId(existing.getId());
                         fieldConstraintService.deleteByFieldId(existing.getId());
                         autoNumberConfigBuildService.deleteByFieldId(existing.getId());
+                        
+                        // 删除校验规则
+                        validationRequiredService.deleteByFieldId(existing.getId());
+                        validationUniqueService.deleteByFieldId(existing.getId());
+                        validationLengthService.deleteByFieldId(existing.getId());
                     } catch (Exception ignore) {}
                 }
 
@@ -1544,7 +1549,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             List<AutoNumberRuleItemRespVO> ruleVOs = rules.stream()
                     .map(this::convertToAutoNumberRuleItemRespVO)
                     .toList();
-            autoNumberConfig.setRules(ruleVOs);
+            autoNumberConfig.setRuleItems(ruleVOs);
             result.setAutoNumberConfig(autoNumberConfig);
         }
 
@@ -1685,8 +1690,8 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             Long configId = autoNumberConfigBuildService.upsert(config);
 
             // 处理规则项
-            if (autoNumber.getRules() != null && !autoNumber.getRules().isEmpty()) {
-                for (AutoNumberRuleItemReqVO ruleReq : autoNumber.getRules()) {
+            if (autoNumber.getRuleItems() != null && !autoNumber.getRuleItems().isEmpty()) {
+                for (AutoNumberRuleItemReqVO ruleReq : autoNumber.getRuleItems()) {
                     MetadataAutoNumberRuleItemDO rule = new MetadataAutoNumberRuleItemDO();
                     rule.setConfigId(configId);
                     rule.setItemType(ruleReq.getItemType());
@@ -1745,7 +1750,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         List<AutoNumberRuleItemRespVO> ruleVOs = rules.stream()
             .map(this::convertToAutoNumberRuleItemRespVO)
             .toList();
-        full.setRules(ruleVOs);
+        full.setRuleItems(ruleVOs);
         vo.setAutoNumberConfig(full);
     }
     }
@@ -1857,7 +1862,10 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                         entityField.getDisplayName() != null ? entityField.getDisplayName() : "",
                         entityField.getFieldName() != null ? entityField.getFieldName() : "");
                     saveReqVO.setRgName(rgName);
-                    saveReqVO.setPromptMessage(String.format("字段长度不能超过%d个字符", entityField.getDataLength()));
+                    String promptMsg = String.format("字段长度不能超过%d个字符", entityField.getDataLength());
+                    saveReqVO.setPromptMessage(promptMsg);
+                    // 设置popPrompt确保errorMessage字段能正确返回
+                    saveReqVO.setPopPrompt(promptMsg);
                     saveReqVO.setRunMode(entityField.getRunMode() != null ? entityField.getRunMode() : 0);
                     
                     validationLengthService.create(saveReqVO);
@@ -1904,7 +1912,10 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                         entityField.getDisplayName() != null ? entityField.getDisplayName() : "",
                         entityField.getFieldName() != null ? entityField.getFieldName() : "");
                     saveReqVO.setRgName(rgName);
-                    saveReqVO.setPromptMessage("此字段为必填项");
+                    String promptMsg = "此字段为必填项";
+                    saveReqVO.setPromptMessage(promptMsg);
+                    // 设置popPrompt确保errorMessage字段能正确返回
+                    saveReqVO.setPopPrompt(promptMsg);
                     
                     validationRequiredService.create(saveReqVO);
                 }
@@ -1950,7 +1961,10 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                         entityField.getDisplayName() != null ? entityField.getDisplayName() : "",
                         entityField.getFieldName() != null ? entityField.getFieldName() : "");
                     saveReqVO.setRgName(rgName);
-                    saveReqVO.setPromptMessage("此字段值必须唯一");
+                    String promptMsg = "此字段值必须唯一";
+                    saveReqVO.setPromptMessage(promptMsg);
+                    // 设置popPrompt确保errorMessage字段能正确返回
+                    saveReqVO.setPopPrompt(promptMsg);
                     
                     validationUniqueService.create(saveReqVO);
                 }

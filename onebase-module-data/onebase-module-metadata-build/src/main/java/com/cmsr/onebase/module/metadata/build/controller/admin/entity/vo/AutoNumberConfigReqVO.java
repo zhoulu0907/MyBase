@@ -1,6 +1,11 @@
 package com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.util.List;
@@ -8,30 +13,42 @@ import java.util.List;
 /**
  * 自动编号配置请求VO
  *
- * @author matianyu
- * @date 2025-01-25
+ * @author bty418
+ * @date 2025-09-17
  */
-@Schema(description = "自动编号配置请求VO")
 @Data
+@Schema(description = "自动编号配置请求VO")
 public class AutoNumberConfigReqVO {
-    @Schema(description = "是否启用：1-启用，0-禁用", example = "0")
-    private Integer isEnabled;
 
-    @Schema(description = "编号模式：NATURAL（自然递增）/FIXED_DIGITS（固定位数）", example = "FIXED_DIGITS")
+    @Schema(description = "编号方式", requiredMode = Schema.RequiredMode.REQUIRED, example = "NATURAL")
+    @NotBlank(message = "编号方式不能为空")
     private String numberMode;
 
-    @Schema(description = "固定位数（当模式为FIXED_DIGITS时有效）", example = "6")
+    @Schema(description = "指定位数(2-5位)", example = "4")
+    @Min(value = 2, message = "位数不能小于2")
+    @Max(value = 5, message = "位数不能大于5")
     private Short digitWidth;
 
-    @Schema(description = "溢出时继续：1-是，0-否", example = "0")
+    @Schema(description = "超出位数后继续递增(1-是, 0-否)", example = "1")
     private Integer overflowContinue;
 
-    @Schema(description = "初始值", example = "1")
+    @Schema(description = "初始值", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
+    @NotNull(message = "初始值不能为空")
+    @Min(value = 1, message = "初始值不能小于1")
     private Long initialValue;
 
-    @Schema(description = "重置周期：NONE（不重置）/DAILY（每日）/MONTHLY（每月）/YEARLY（每年）", example = "MONTHLY")
+    @Schema(description = "重置周期", requiredMode = Schema.RequiredMode.REQUIRED, example = "NEVER")
+    @NotBlank(message = "重置周期不能为空")
     private String resetCycle;
 
-    @Schema(description = "自动编号规则项列表（若提供则整体替换）")
-    private List<AutoNumberRuleItemReqVO> rules;
+    @Schema(description = "是否启用(1-启用, 0-禁用)", example = "1")
+    private Integer isEnabled;
+
+    @Schema(description = "运行模式", example = "1")
+    private Integer runMode;
+
+    @Schema(description = "规则项列表", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Valid
+    @NotNull(message = "规则项列表不能为空")
+    private List<AutoNumberRuleItemReqVO> ruleItems;
 }

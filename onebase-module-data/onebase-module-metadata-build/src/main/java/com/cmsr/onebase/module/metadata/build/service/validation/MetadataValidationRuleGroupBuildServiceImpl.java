@@ -46,6 +46,25 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
     @Resource
     private ModelMapper modelMapper;
 
+    // 注入各种校验类型的Service
+    @Resource
+    private MetadataValidationLengthBuildService lengthService;
+    
+    @Resource
+    private MetadataValidationRangeBuildService rangeService;
+    
+    @Resource
+    private MetadataValidationRequiredBuildService requiredService;
+    
+    @Resource
+    private MetadataValidationUniqueBuildService uniqueService;
+    
+    @Resource
+    private MetadataValidationFormatBuildService formatService;
+    
+    @Resource
+    private MetadataValidationChildNotEmptyBuildService childNotEmptyService;
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long createValidationRuleGroup(@Valid ValidationRuleGroupSaveReqVO createReqVO) {
@@ -248,9 +267,14 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
      * @return 二维数组结构的规则定义列表，外层数组元素间为OR关系，内层数组元素间为AND关系
      */
     public List<List<ValidationRuleDefinitionVO>> buildValueRulesStructure(Long groupId) {
+        log.info("构建规则结构，groupId: {}", groupId);
+        
         // 获取该规则组下的所有规则定义
         List<MetadataValidationRuleDefinitionDO> allRules = validationRuleDefinitionService.getByGroupId(groupId);
+        log.info("从数据库获取到规则定义数量: {}", allRules != null ? allRules.size() : 0);
+        
         if (CollectionUtils.isEmpty(allRules)) {
+            log.info("规则组 {} 下没有规则定义，返回空列表", groupId);
             return new ArrayList<>();
         }
 
@@ -307,58 +331,33 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
 
     /**
      * 为精简VO构建派生字段
-     * validationType : 取第一条条件规则的 fieldCode
-     * validationItems : 每个OR分组转可读表达式(内部AND用 AND 连接)
+     * validationType : 从规则组的validation_type字段获取
+     * validationItems : 暂时返回空数组，后续根据需要完善
      * errorMessage : 复用 popPrompt
      */
     private void buildDerivedFieldsForSimpleVO(ValidationRuleGroupSimpleRespVO vo, Long groupId, String popPrompt) {
-        List<List<ValidationRuleDefinitionVO>> valueRules = buildValueRulesStructure(groupId);
+        log.info("开始构建派生字段，groupId: {}, popPrompt: {}", groupId, popPrompt);
+        
+        // 设置错误消息，直接使用popPrompt，可能为null
         vo.setErrorMessage(popPrompt);
-        if (valueRules == null || valueRules.isEmpty()) {
+        
+        // 获取规则组详细信息
+        MetadataValidationRuleGroupDO ruleGroup = validationRuleGroupRepository.findById(groupId);
+        if (ruleGroup == null) {
+            log.info("规则组 {} 不存在，返回空值", groupId);
+            vo.setValidationType(null);
             vo.setValidationItems(new ArrayList<>());
             return;
         }
-        // validationType
-        outer: for (List<ValidationRuleDefinitionVO> andGroup : valueRules) {
-            if (andGroup == null) continue;
-            for (ValidationRuleDefinitionVO rule : andGroup) {
-                if ("CONDITION".equalsIgnoreCase(rule.getLogicType())) {
-                    vo.setValidationType(rule.getFieldCode());
-                    break outer;
-                }
-            }
-        }
-        // items
-        List<String> items = new ArrayList<>();
-        for (List<ValidationRuleDefinitionVO> andGroup : valueRules) {
-            if (andGroup == null || andGroup.isEmpty()) continue;
-            StringBuilder sb = new StringBuilder();
-            boolean first = true;
-            for (ValidationRuleDefinitionVO rule : andGroup) {
-                if (!"CONDITION".equalsIgnoreCase(rule.getLogicType())) continue;
-                String left = rule.getFieldCode() != null ? rule.getFieldCode() : "";
-                String op = rule.getOperator() != null ? rule.getOperator() : "";
-                String v1 = rule.getFieldValue() != null ? String.valueOf(rule.getFieldValue()) : "";
-                String v2 = rule.getFieldValue2() != null ? String.valueOf(rule.getFieldValue2()) : null;
-                String expr;
-                if ("BETWEEN".equalsIgnoreCase(op) && v2 != null) {
-                    expr = left + " BETWEEN " + v1 + " AND " + v2;
-                } else if ("IN".equalsIgnoreCase(op) || "NOT IN".equalsIgnoreCase(op)) {
-                    expr = left + " " + op + " (" + v1 + ")"; // 这里假设v1包含逗号分隔值
-                } else {
-                    expr = left + " " + op + " " + v1;
-                }
-                if (!first) {
-                    sb.append(" AND ");
-                }
-                sb.append(expr.trim());
-                first = false;
-            }
-            if (sb.length() > 0) {
-                items.add(sb.toString());
-            }
-        }
-        vo.setValidationItems(items);
+        
+        String validationType = ruleGroup.getValidationType();
+        vo.setValidationType(validationType);
+        log.info("设置validationType: {}", validationType);
+        
+        // 暂时返回空数组，因为对应的专门表数据可能已被删除
+        // 后续根据实际需要可以完善此逻辑
+        vo.setValidationItems(new ArrayList<>());
+        log.info("设置validationItems为空数组");
     }
 
 
