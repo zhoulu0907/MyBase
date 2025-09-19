@@ -57,7 +57,7 @@ const SortByEditor: React.FC<ConditionEditorProps> = ({ data, onChange, fields, 
                         <Form.Item field={item.field + '.sortField'} noStyle>
                           <Select
                             onChange={() => {
-                              setSortList(form.getFieldValue('sortList'));
+                              setSortList(form.getFieldValue('sortBy'));
                             }}
                             options={fields}
                           ></Select>
@@ -67,7 +67,7 @@ const SortByEditor: React.FC<ConditionEditorProps> = ({ data, onChange, fields, 
                         <Form.Item field={item.field + '.sortType'} noStyle>
                           <Radio.Group
                             onChange={() => {
-                              setSortList(form.getFieldValue('sortList'));
+                              setSortList(form.getFieldValue('sortBy'));
                             }}
                           >
                             <Radio value={SortType.ASC}>升序</Radio>
@@ -80,7 +80,7 @@ const SortByEditor: React.FC<ConditionEditorProps> = ({ data, onChange, fields, 
                           type="text"
                           onClick={() => {
                             remove(index);
-                            setSortList(form.getFieldValue('sortList'));
+                            setSortList(form.getFieldValue('sortBy'));
                           }}
                           icon={<IconDelete style={{ color: '#4E5969' }} />}
                         />
