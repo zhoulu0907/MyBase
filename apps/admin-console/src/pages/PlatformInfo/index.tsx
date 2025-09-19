@@ -141,7 +141,6 @@ const PlatformInfo: React.FC = () => {
 
   // 处理文件上传变化
   const handleFileUploadChange = async (fileList: any[]) => {
-    console.log('File uploaded:', fileList);
     
     // 防止重复上传
     if (isUploading) {
@@ -151,7 +150,6 @@ const PlatformInfo: React.FC = () => {
     // 只处理最新上传的文件，不累积处理
     if (fileList.length > 0) {
       const latestFile = fileList[fileList.length - 1];
-      console.log('latestFile:', latestFile);
       
       // 获取原始文件对象 - 关键修正
       let file = null;
@@ -166,8 +164,6 @@ const PlatformInfo: React.FC = () => {
       } else if (latestFile.raw) {
         file = latestFile.raw;
       }
-      
-      console.log("获取到的文件对象:", file);
       
       // 验证文件对象
       if (file && (file instanceof File || file instanceof Blob)) {
@@ -242,7 +238,6 @@ const PlatformInfo: React.FC = () => {
   };
 
   const handleSubmit = async (value: CreateLicenseFileReq) => { 
-    console.log('创建license value:', value);
     try {
       // 获取存储在localStorage或cookie中的token
       const authorizationHeader = TokenManager.getAuthorizationHeader();
@@ -257,7 +252,6 @@ const PlatformInfo: React.FC = () => {
           },
           body: JSON.stringify(value)
         });
-        console.log('fetch response:', response);
         if (response.ok) {
           const blob = await response.blob();
           downloadFile(blob, 'license.lic.sm4');

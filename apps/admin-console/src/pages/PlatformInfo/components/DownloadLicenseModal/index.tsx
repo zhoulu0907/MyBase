@@ -16,10 +16,14 @@ const DownloadLicenseModal = (props: DownloadLicenseModal) => {
   const onSubmit = async () => {
     try {
       const values = await form.validate();
-      console.log('onSubmit values.expireTime:', values.expireTime);
-      // 将日期转换为时间戳
+      // 将日期转换为时间戳（第二天的0点）
       if (values.expireTime) {
-        const timestamp = new Date(values.expireTime).getTime();
+        // 创建一个Date对象
+        const date = new Date(values.expireTime);
+        // 设置为第二天的0点（即当天的24:00:00）
+        date.setDate(date.getDate() + 1);
+        date.setHours(0, 0, 0, 0);
+        const timestamp = date.getTime();
         values.expireTime = timestamp;
       }
       handleSubmit(values);
