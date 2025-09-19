@@ -75,7 +75,6 @@ const TriggerEditor = () => {
   const initFlowData = async (id: string) => {
     const res = await getFlowMgmt(id);
     console.log('res: ', res);
-    console.log(res.triggerType);
 
     if (res.triggerConfig && res.triggerConfig.pageId) {
       setPageId(res.triggerConfig.pageId);
