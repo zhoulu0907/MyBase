@@ -47,19 +47,6 @@ public class LicenseController {
      * @param reqVO License创建请求参数
      * @return License主键ID
      */
-    @PostMapping("/create")
-    @PreAuthorize("@ss.hasPermission('system:license:create')")
-    @Operation(summary = "创建License")
-    public Long createLicense(@RequestBody LicenseSaveReqVO reqVO) {
-        return licenseService.createLicense(reqVO);
-    }
-
-    /**
-     * 创建License
-     *
-     * @param reqVO License创建请求参数
-     * @return License主键ID
-     */
     @PostMapping("/createLicenseFile")
     @PreAuthorize("@ss.hasPermission('system:license:create')")
     @Operation(summary = "创建License文件")
@@ -67,29 +54,29 @@ public class LicenseController {
         licenseService.createLicenseFile(JsonUtils.parseObject(reqVO, LicenseSaveReqVO.class), response);
     }
 
-    /**
-     * 更新License
-     *
-     * @param reqVO License更新请求参数
-     */
-    @PostMapping("/update")
-    @PreAuthorize("@ss.hasPermission('system:license:update')")
-    @Operation(summary = "更新License")
-    public void updateLicense(@RequestBody LicenseSaveReqVO reqVO) {
-        licenseService.updateLicense(reqVO);
-    }
+    // /**
+    //  * 更新License
+    //  *
+    //  * @param reqVO License更新请求参数
+    //  */
+    // @PostMapping("/update")
+    // @PreAuthorize("@ss.hasPermission('system:license:update')")
+    // @Operation(summary = "更新License")
+    // public void updateLicense(@RequestBody LicenseSaveReqVO reqVO) {
+    //     licenseService.updateLicense(reqVO);
+    // }
 
-    /**
-     * 删除License
-     *
-     * @param id License主键ID
-     */
-    @PostMapping("/delete")
-    @PreAuthorize("@ss.hasPermission('system:license:delete')")
-    @Operation(summary = "删除License")
-    public void deleteLicense(@RequestParam("id") Long id) {
-        licenseService.deleteLicense(id);
-    }
+    // /**
+    //  * 删除License
+    //  *
+    //  * @param id License主键ID
+    //  */
+    // @PostMapping("/delete")
+    // @PreAuthorize("@ss.hasPermission('system:license:delete')")
+    // @Operation(summary = "删除License")
+    // public void deleteLicense(@RequestParam("id") Long id) {
+    //     licenseService.deleteLicense(id);
+    // }
 
     /**
      * 获取License详情
@@ -140,16 +127,6 @@ public class LicenseController {
     public CommonResult<Long> importLicense(@RequestParam("file") MultipartFile file) {
         Long licenseId = licenseService.importLicense(file);
         return CommonResult.success(licenseId);
-    }
-
-    /**
-     * 导出凭证
-     */
-    @GetMapping("/export")
-    @Operation(summary = "导出加密凭证")
-    @PreAuthorize("@ss.hasPermission('system:license:query')")
-    public void exportLicense(@RequestParam("id") Long id, HttpServletResponse response) {
-        licenseService.exportLicense(id, response);
     }
 
 }
