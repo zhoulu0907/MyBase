@@ -180,7 +180,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
             <Grid.Row>
               <Form.Item label="触发字段" field="triggerFieldIds" layout="vertical">
-                <Select options={triggerFieldList} />
+                <Select options={triggerFieldList} mode="multiple" />
               </Form.Item>
             </Grid.Row>
 
