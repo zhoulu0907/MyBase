@@ -154,7 +154,6 @@ const Right: React.FC = () => {
       }
     } catch (error: any) {
       console.error('登录失败:', error);
-      Message.error(error.message || t('auth.invalidCredentials'));
     } finally {
       setLoading(false);
     }

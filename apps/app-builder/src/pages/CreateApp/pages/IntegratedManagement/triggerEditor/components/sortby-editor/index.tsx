@@ -20,7 +20,7 @@ const SortByEditor: React.FC<ConditionEditorProps> = ({ data, onChange, fields, 
   const handleSort = (newSortList: Sort[]) => {
     console.log('handleSort', newSortList);
     setSortList(newSortList || []);
-    form.setFieldValue('sortList', newSortList || []);
+    form.setFieldValue('sortBy', newSortList || []);
   };
 
   useEffect(() => {
@@ -28,11 +28,15 @@ const SortByEditor: React.FC<ConditionEditorProps> = ({ data, onChange, fields, 
       onChange(sortList);
     }
   }, [sortList]);
+  useEffect(() => {
+    setSortList(data || []);
+    form.setFieldValue('sortBy', data || []);
+  }, []);
 
   return (
     <ReactSortable list={sortList} setList={handleSort} animation={200} handle=".sortby-item-handle">
       <Form.Item noStyle validateTrigger={['onChange']}>
-        <Form.List field="sortList" initialValue={data}>
+        <Form.List field="sortBy">
           {(field, { add, remove }) => {
             return (
               <>
