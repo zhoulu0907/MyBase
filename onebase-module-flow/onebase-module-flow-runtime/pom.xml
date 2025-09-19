@@ -28,7 +28,11 @@
             <artifactId>onebase-module-flow-core</artifactId>
             <version>${revision}</version>
         </dependency>
-
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-module-metadata-api</artifactId>
+            <version>${revision}</version>
+        </dependency>
         <!-- 业务组件 -->
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
@@ -79,6 +83,12 @@
             <groupId>org.dom4j</groupId>
             <artifactId>dom4j</artifactId>
             <version>${dom4j.version}</version>
+        </dependency>
+        <!-- SnailJob任务调度 -->
+        <dependency>
+            <groupId>com.aizuda</groupId>
+            <artifactId>snail-job-client-starter</artifactId>
+            <version>1.7.2</version>
         </dependency>
         <!-- snail job -->
         <dependency>

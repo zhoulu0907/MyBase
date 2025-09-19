@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.flow.core.dal.dataobject;
 
-import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
+import com.cmsr.onebase.framework.data.base.BaseDO;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
@@ -9,7 +9,7 @@ import lombok.Data;
 @Data
 @Entity
 @Table(name = "flow_process")
-public class FlowProcessDO extends TenantBaseDO {
+public class FlowProcessDO extends BaseDO {
 
     /**
      * 主键ID

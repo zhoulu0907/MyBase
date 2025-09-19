@@ -17,7 +17,6 @@
     </description>
 
     <dependencies>
-
         <!-- 依赖服务 -->
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
@@ -34,17 +33,16 @@
             <artifactId>onebase-module-metadata-api</artifactId>
             <version>${revision}</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-api</artifactId>
+        </dependency>
         <!-- 业务组件 -->
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-spring-boot-starter-biz-tenant</artifactId>
         </dependency>
-        <!-- Web 相关 -->
-        <dependency>
-            <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-spring-boot-starter-security</artifactId>
-        </dependency>
+
         <!-- DB 相关 -->
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
@@ -54,19 +52,6 @@
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-spring-boot-starter-redis</artifactId>
         </dependency>
-
-        <!-- RPC 远程调用相关 -->
-        <dependency>
-            <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-spring-boot-starter-rpc</artifactId>
-        </dependency>
-
-        <!-- 服务保障相关 TODO 开发者：暂时去掉 -->
-<!--        <dependency>-->
-<!--            <groupId>com.cmsr.onebase</groupId>-->
-<!--            <artifactId>onebase-spring-boot-starter-protection</artifactId>-->
-<!--        </dependency>-->
-
         <!-- Test 测试相关 -->
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
