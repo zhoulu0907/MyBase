@@ -65,18 +65,20 @@ const DataRules: React.FC<DataRulesProps> = ({ entity, activeTab }) => {
     },
     {
       title: '校验数据项',
-      dataIndex: 'fieldName',
-      key: 'fieldName'
+      dataIndex: 'validationItems',
+      key: 'validationItems',
+      render: (validationItems: string[]) => validationItems.join(',')
     },
-    {
-      title: '条件设置',
-      dataIndex: 'validationCondition',
-      key: 'validationCondition'
-    },
+    // 暂时隐藏
+    // {
+    //   title: '条件设置',
+    //   dataIndex: 'validationCondition',
+    //   key: 'validationCondition'
+    // },
     {
       title: '验证失败提示语',
-      dataIndex: 'popPrompt',
-      key: 'popPrompt'
+      dataIndex: 'errorMessage',
+      key: 'errorMessage'
     },
     // {
     //   title: '状态',

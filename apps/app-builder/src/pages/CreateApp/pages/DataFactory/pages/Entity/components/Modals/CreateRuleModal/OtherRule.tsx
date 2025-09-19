@@ -11,7 +11,7 @@ import {
 } from '@onebase/app';
 import React, { useState } from 'react';
 import { useAppStore } from '@/store/store_app';
-import { validationTypeMap, ruleTip, validationTypeOptions } from './rule.ts';
+import { validationTypeMap, ruleTip, validationTypeList, VALIDATION_TYPES } from './rule.ts';
 import styles from '../modal.module.less';
 
 interface RuleFormValues {
@@ -20,7 +20,7 @@ interface RuleFormValues {
   formatValidationType?: string;
   rgName: string;
   fieldId: string;
-  promptMessage: string;
+  popPrompt: string;
   popType: string;
 }
 
@@ -67,25 +67,18 @@ const CreateOtherRule: React.FC<CreateRuleModalProps> = ({
 
       let res;
 
-      switch (ruleType) {
-        case 'required':
-          res = await createRequiredRule(params);
-          break;
-        case 'unique':
-          res = await createUniqueRule(params);
-          break;
-        case 'length':
-          res = await createLengthRule(params);
-          break;
-        case 'range':
-          res = await createRangeRule(params);
-          break;
-        case 'format':
-          res = await createFormatRule(params);
-          break;
-        case 'subtable_empty':
-          res = await createChildNotEmptyRule(params);
-          break;
+      const ruleHandlers = {
+        [VALIDATION_TYPES.REQUIRED]: createRequiredRule,
+        [VALIDATION_TYPES.UNIQUE]: createUniqueRule,
+        [VALIDATION_TYPES.LENGTH]: createLengthRule,
+        [VALIDATION_TYPES.RANGE]: createRangeRule,
+        [VALIDATION_TYPES.FORMAT]: createFormatRule,
+        [VALIDATION_TYPES.SUBTABLE_EMPTY]: createChildNotEmptyRule
+      };
+
+      const handler = ruleHandlers[ruleType as keyof typeof ruleHandlers];
+      if (handler) {
+        res = await handler(params);
       }
 
       console.log('createRule', res);
@@ -178,7 +171,7 @@ const CreateOtherRule: React.FC<CreateRuleModalProps> = ({
 
         <Form.Item label="校验类型" field="validationType" hidden>
           <Select onChange={handleValidationTypeChange} placeholder="请选择校验类型" disabled>
-            {validationTypeOptions.map((option) => (
+            {validationTypeList.map((option) => (
               <Select.Option key={option.value} value={option.value}>
                 {option.label}
               </Select.Option>
@@ -228,7 +221,7 @@ const CreateOtherRule: React.FC<CreateRuleModalProps> = ({
         )}
 
         {/* 验证失败提示语 */}
-        <Form.Item field="promptMessage" label="验证失败提示语">
+        <Form.Item field="popPrompt" label="验证失败提示语">
           <Input placeholder={ruleTip[ruleType]} maxLength={40} />
         </Form.Item>
       </Form>
