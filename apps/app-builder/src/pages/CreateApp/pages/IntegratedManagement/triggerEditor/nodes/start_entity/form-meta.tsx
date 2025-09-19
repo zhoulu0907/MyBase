@@ -67,7 +67,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       res.forEach((item: MetadataEntityField) => {
         filedIds.push(item.id);
         fieldList.push({
-          label: item.fieldName,
+          label: item.displayName,
           value: item.id
         });
 
