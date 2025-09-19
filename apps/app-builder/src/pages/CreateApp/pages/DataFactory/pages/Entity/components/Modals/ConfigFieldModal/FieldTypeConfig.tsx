@@ -208,6 +208,10 @@ export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({
   };
 
   const removeRule = (id: string) => {
+    // 至少保留一条规则
+    if (rules.length === 1) {
+      return;
+    }
     setRules(rules.filter((rule) => rule.id !== id));
   };
 
@@ -245,6 +249,14 @@ export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({
               className={styles['rule-input']}
               suffix={<IconEdit onClick={() => editRule(rule.id || '')} className={styles['edit-btn']} />}
             />
+            <Button
+              type="text"
+              status="danger"
+              icon={<IconDelete />}
+              onClick={() => removeRule(rule.id!)}
+              disabled={rules.length === 1}
+              className={styles['rule-action-btn']}
+            />
           </div>
         );
       }
@@ -270,6 +282,7 @@ export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({
               status="danger"
               icon={<IconDelete />}
               onClick={() => removeRule(rule.id!)}
+              disabled={rules.length === 1}
               className={styles['rule-action-btn']}
             />
           </div>
@@ -291,6 +304,7 @@ export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({
               status="danger"
               icon={<IconDelete />}
               onClick={() => removeRule(rule.id!)}
+              disabled={rules.length === 1}
               className={styles['rule-action-btn']}
             />
           </div>
@@ -314,6 +328,7 @@ export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({
               status="danger"
               icon={<IconDelete />}
               onClick={() => removeRule(rule.id!)}
+              disabled={rules.length === 1}
               className={styles['rule-action-btn']}
             />
           </div>
