@@ -11,17 +11,16 @@ export interface ConditionEditorProps {
   data?: Sort[];
   onChange?: (value: Sort[]) => void;
   form: FormInstance;
-  clearSortByNum?: number;
 }
 
-const SortByEditor: React.FC<ConditionEditorProps> = ({ data, onChange, fields, form, clearSortByNum }) => {
+const SortByEditor: React.FC<ConditionEditorProps> = ({ data, onChange, fields, form }) => {
   const [sortList, setSortList] = useState<Sort[]>([]);
 
   // 排序改变
   const handleSort = (newSortList: Sort[]) => {
     console.log('handleSort', newSortList);
     setSortList(newSortList || []);
-    form.setFieldValue('sortList', newSortList || []);
+    form.setFieldValue('sortBy', newSortList || []);
   };
 
   useEffect(() => {
@@ -29,15 +28,15 @@ const SortByEditor: React.FC<ConditionEditorProps> = ({ data, onChange, fields, 
       onChange(sortList);
     }
   }, [sortList]);
-  useEffect(()=>{
-    setSortList([]);
-    form.clearFields(['sortList'])
-  },[clearSortByNum])
+  useEffect(() => {
+    setSortList(data || []);
+    form.setFieldValue('sortBy', data || []);
+  }, []);
 
   return (
     <ReactSortable list={sortList} setList={handleSort} animation={200} handle=".sortby-item-handle">
       <Form.Item noStyle validateTrigger={['onChange']}>
-        <Form.List field="sortList" initialValue={data}>
+        <Form.List field="sortBy">
           {(field, { add, remove }) => {
             return (
               <>

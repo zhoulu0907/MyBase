@@ -20,13 +20,12 @@ interface MaterialConfigerProps {
 const MaterialConfiger = ({ cpID }: MaterialConfigerProps) => {
   const { t } = useI18n();
 
-  const { curComponentSchema, components } = usePageEditorSignal();
-  const curComp = components?.find((comp) => comp.id === curComponentSchema.config?.id);
+  const { curComponentSchema } = usePageEditorSignal();
 
   return (
     <div className={styles.configs}>
       <div className={styles.componentName}>
-        <div className={styles.icon}>{ICON_Map_By_Type[curComp?.type]}</div>
+        <div className={styles.icon}>{ICON_Map_By_Type[curComponentSchema?.type]}</div>
         {curComponentSchema.config?.cpName}
       </div>
       <div className={styles.componentInfo}>

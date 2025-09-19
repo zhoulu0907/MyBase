@@ -34,7 +34,8 @@ import type {
   ITextConfigType,
   IWidthConfigType,
   TTextDefaultType,
-  ISelectDataSourceConfigType
+  ISelectDataSourceConfigType,
+  ISubTableConfigType
 } from './types';
 
 export interface ICommonBaseType {
@@ -339,7 +340,7 @@ export const radioDataConfig: IRadioDataConfigType = {
 };
 
 export const checkboxDataConfig: ICheckboxDataConfigType = {
-  key: 'radioData',
+  key: 'checkboxData',
   name: '自定义选项',
   type: CONFIG_TYPES.CHECKBOX_DATA
 };
@@ -361,3 +362,9 @@ export const selectDataResourceConfig: ISelectDataSourceConfigType = {
   name: '选择数据源',
   type: CONFIG_TYPES.SELECT_DATA_SOURCE
 }
+
+export const subTableConfig: ISubTableConfigType = {
+  key: 'subTable',
+  name: '子组件选项',
+  type: CONFIG_TYPES.SUB_TABLE
+};
