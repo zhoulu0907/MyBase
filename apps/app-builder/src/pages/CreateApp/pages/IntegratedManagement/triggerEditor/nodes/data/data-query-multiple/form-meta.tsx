@@ -178,6 +178,9 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     }
 
     const nodeData = triggerEditorSignal.nodeData.value[node.id];
+    if(!nodeData){
+      return;
+    }
     if (nodeData.dataType === DATA_SOURCE_TYPE.FORM) {
       getEntityFieldList(nodeData.mainDataSource);
     } else if (nodeData.dataType === DATA_SOURCE_TYPE.DATA_NODE) {
