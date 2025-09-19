@@ -66,7 +66,8 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       mainDataSource: undefined,
       subDataSource: undefined,
       dataNodeId: undefined,
-      sortBy: [] // 清除已选择排序字段
+      sortBy: [], // 清除已选择排序字段
+      filterCondition: []
     });
 
     setEntityList([]);
@@ -87,7 +88,8 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       ...nodeData,
       subDataSource: undefined,
       dataNodeId: undefined,
-      sortBy: [] // 清除已选择排序字段
+      sortBy: [], // 清除已选择排序字段
+      filterCondition: []
     });
     setEntityList([]);
     setDataNodeList([]);
@@ -118,7 +120,8 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     triggerEditorSignal.setNodeData(node.id, {
       ...nodeData,
       dataNodeId: undefined,
-      sortBy: [] // 清除已选择排序字段
+      sortBy: [], // 清除已选择排序字段
+      filterCondition: []
     });
     // 根据数据源重新获取字段列表
     if (curSubDataSource) {
@@ -135,7 +138,8 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       ...nodeData,
       mainDataSource: undefined,
       subDataSource: undefined,
-      sortBy: [] // 清除已选择排序字段
+      sortBy: [], // 清除已选择排序字段
+      filterCondition: []
     });
     setEntityList([]);
     setDataNodeList([]);
@@ -178,7 +182,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     }
 
     const nodeData = triggerEditorSignal.nodeData.value[node.id];
-    if(!nodeData){
+    if (!nodeData) {
       return;
     }
     if (nodeData.dataType === DATA_SOURCE_TYPE.FORM) {
@@ -393,7 +397,11 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
               </Form.Item>
             )}
             <Form.Item label="排序规则" rules={[{ required: true, message: '请选择排序规则' }]}>
-              <SortByEditor data={triggerEditorSignal.nodeData.value[node.id]?.sortBy || []} fields={conditionFields} form={payloadForm}></SortByEditor>
+              <SortByEditor
+                data={triggerEditorSignal.nodeData.value[node.id]?.sortBy || []}
+                fields={conditionFields}
+                form={payloadForm}
+              ></SortByEditor>
             </Form.Item>
           </Form>
         </FormContent>

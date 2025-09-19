@@ -43,7 +43,7 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({ data, onChange, field
     if (data) {
       setConditions(data);
     }
-  }, []);
+  }, [data]);
 
   useEffect(() => {
     if (onChange) {
