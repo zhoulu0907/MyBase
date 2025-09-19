@@ -5,8 +5,9 @@ import { ReactSortable } from 'react-sortablejs';
 import MaterialCard from '@/components/MaterialCard';
 import { useI18n } from '@/hooks/useI18n';
 import { allTemplate, COMPONENT_GROUP_NAME, EDITOR_TYPES, type EditorType } from '@onebase/ui-kit';
-import IconCollapsed from '@/assets/images/collapsed.svg';
+import IconCollapsed from '@/assets/images/collapsed_left_icon.svg';
 import IconSearchForm from '@/assets/images/search_form_icon.svg';
+import IconCollapsedDown from '@/assets/images/collapse_down_icon.svg';
 import styles from './index.module.less';
 
 const Sider = Layout.Sider;
@@ -74,7 +75,7 @@ const MaterialContainer: React.FC<MaterialContainerProps> = ({ activeTab, childC
 
   return (
     <div>
-      <Sider collapsed={!childCollapsed} collapsible collapsedWidth={0} trigger={null} width={295}>
+      <Sider collapsed={!childCollapsed} collapsible collapsedWidth={0} trigger={null} width={270}>
         <div className={styles.rightHeader}>
           <div className={styles.title}>{t('editor.material')}</div>
 
@@ -118,7 +119,7 @@ const MaterialContainer: React.FC<MaterialContainerProps> = ({ activeTab, childC
           </div>
           <div className={styles.componentList}>
             {activeComponentTab === 'base-component' && (
-              <Collapse defaultActiveKey={baseCategories.map((c) => c.key)} accordion={false} bordered={false}>
+              <Collapse defaultActiveKey={baseCategories.map((c) => c.key)} accordion={false} bordered={false} expandIconPosition='right' expandIcon={<img src={IconCollapsedDown} alt='' />}>
                 {baseCategories.map((cat) => {
                   if (activeTab === EDITOR_TYPES.LIST_EDITOR && cat.key === 'form') {
                     return null;
@@ -133,7 +134,7 @@ const MaterialContainer: React.FC<MaterialContainerProps> = ({ activeTab, childC
                       name={cat.key}
                       key={cat.key}
                       style={{ border: 'none' }}
-                      contentStyle={{ backgroundColor: '#fff', border: 'none' }}
+                      contentStyle={{ backgroundColor: '#fff', border: 'none', paddingLeft: 13 }}
                     >
                       <div>
                         {cat.items.length === 0 ? (
@@ -141,7 +142,7 @@ const MaterialContainer: React.FC<MaterialContainerProps> = ({ activeTab, childC
                         ) : (
                           <ReactSortable
                             list={baseItems.find((c) => c.key === cat.key)?.items || []}
-                            setList={() => {}}
+                            setList={() => { }}
                             group={{
                               name: COMPONENT_GROUP_NAME,
                               pull: 'clone',
@@ -164,11 +165,11 @@ const MaterialContainer: React.FC<MaterialContainerProps> = ({ activeTab, childC
                                 prev.map((c) =>
                                   c.key === cat.key
                                     ? {
-                                        ...c,
-                                        items: c.items.map((item) =>
-                                          item.type === cpType ? { ...item, id: `${e.item.id}` } : item
-                                        )
-                                      }
+                                      ...c,
+                                      items: c.items.map((item) =>
+                                        item.type === cpType ? { ...item, id: `${e.item.id}` } : item
+                                      )
+                                    }
                                     : c
                                 )
                               );
