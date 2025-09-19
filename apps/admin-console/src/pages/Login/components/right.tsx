@@ -34,7 +34,7 @@ const Right: React.FC = () => {
   // 组件初始化时设置保存的账号
   useState(() => {
     if (savedAccount) {
-      form.setFieldValue('username', savedAccount);
+      accountForm.setFieldValue('username', savedAccount);
     }
 
     // 如果已经登录了就自动跳转到首页
