@@ -1,6 +1,6 @@
 package com.cmsr.onebase.framework.web.core.filter;
 
-import cn.hutool.core.util.StrUtil;
+import com.cmsr.onebase.framework.common.tools.core.util.StrUtil;
 import com.cmsr.onebase.framework.web.config.WebProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.filter.OncePerRequestFilter;

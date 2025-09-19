@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.infra.framework.file.core.enums;
 
-import cn.hutool.core.util.ArrayUtil;
+import com.cmsr.onebase.framework.common.tools.core.util.ArrayUtil;
 import com.cmsr.onebase.module.infra.framework.file.core.client.FileClient;
 import com.cmsr.onebase.module.infra.framework.file.core.client.FileClientConfig;
 import com.cmsr.onebase.module.infra.framework.file.core.client.db.DBFileClient;

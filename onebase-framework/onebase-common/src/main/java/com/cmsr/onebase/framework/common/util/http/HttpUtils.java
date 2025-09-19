@@ -1,9 +1,9 @@
 package com.cmsr.onebase.framework.common.util.http;
 
-import cn.hutool.core.codec.Base64;
-import cn.hutool.core.util.StrUtil;
-import cn.hutool.http.HttpRequest;
-import cn.hutool.http.HttpResponse;
+import com.cmsr.onebase.framework.common.tools.core.codec.Base64;
+import com.cmsr.onebase.framework.common.tools.core.util.StrUtil;
+import com.cmsr.onebase.framework.common.tools.http.HttpRequest;
+import com.cmsr.onebase.framework.common.tools.http.HttpResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriComponents;
@@ -145,7 +145,7 @@ public class HttpUtils {
 
     /**
      * 使用 unirest 替代
-     * HTTP post 请求，基于 {@link cn.hutool.http.HttpUtil} 实现
+     * HTTP post 请求，基于 {@link com.cmsr.onebase.framework.common.tools.http.HttpUtil} 实现
      * <p>
      * 为什么要封装该方法，因为 HttpUtil 默认封装的方法，没有允许传递 headers 参数
      *
@@ -166,7 +166,7 @@ public class HttpUtils {
 
     /**
      * 使用 unirest 替代
-     * HTTP get 请求，基于 {@link cn.hutool.http.HttpUtil} 实现
+     * HTTP get 请求，基于 {@link com.cmsr.onebase.framework.common.tools.http.HttpUtil} 实现
      * <p>
      * 为什么要封装该方法，因为 HttpUtil 默认封装的方法，没有允许传递 headers 参数
      *

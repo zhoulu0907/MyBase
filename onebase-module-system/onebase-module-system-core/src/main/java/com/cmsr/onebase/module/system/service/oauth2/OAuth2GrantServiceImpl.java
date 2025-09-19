@@ -1,9 +1,9 @@
 package com.cmsr.onebase.module.system.service.oauth2;
 
-import cn.hutool.core.lang.Assert;
-import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
+import com.cmsr.onebase.framework.common.tools.core.lang.Assert;
+import com.cmsr.onebase.framework.common.tools.core.util.ObjUtil;
+import com.cmsr.onebase.framework.common.tools.core.util.StrUtil;
 import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2AccessTokenDO;
 import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2CodeDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
@@ -93,7 +93,7 @@ public class OAuth2GrantServiceImpl implements OAuth2GrantService {
     public boolean revokeToken(String clientId, String accessToken) {
         // 先查询，保证 clientId 时匹配的
         OAuth2AccessTokenDO accessTokenDO = oauth2TokenService.getAccessToken(accessToken);
-        if (accessTokenDO == null || ObjectUtil.notEqual(clientId, accessTokenDO.getClientId())) {
+        if (accessTokenDO == null || ObjUtil.notEqual(clientId, accessTokenDO.getClientId())) {
             return false;
         }
         // 再删除

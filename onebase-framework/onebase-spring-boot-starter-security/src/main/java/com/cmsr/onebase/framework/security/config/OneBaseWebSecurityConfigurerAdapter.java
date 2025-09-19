@@ -1,6 +1,6 @@
 package com.cmsr.onebase.framework.security.config;
 
-import cn.hutool.core.collection.CollUtil;
+import com.cmsr.onebase.framework.common.tools.core.collection.CollUtil;
 import com.cmsr.onebase.framework.security.core.filter.TokenAuthenticationFilter;
 import com.cmsr.onebase.framework.web.config.WebProperties;
 import com.google.common.collect.HashMultimap;

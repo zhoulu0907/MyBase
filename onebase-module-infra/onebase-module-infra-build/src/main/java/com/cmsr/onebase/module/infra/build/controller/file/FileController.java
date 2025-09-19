@@ -1,10 +1,10 @@
 package com.cmsr.onebase.module.infra.build.controller.file;
 
-import cn.hutool.core.io.IoUtil;
-import cn.hutool.core.util.StrUtil;
-import cn.hutool.core.util.URLUtil;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.tools.core.io.IoUtil;
+import com.cmsr.onebase.framework.common.tools.core.util.StrUtil;
+import com.cmsr.onebase.framework.common.tools.core.util.URLUtil;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.infra.dal.dataobject.file.FileDO;

@@ -1,7 +1,7 @@
 package com.cmsr.onebase.gateway.handler;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
-import cn.hutool.core.exceptions.ExceptionUtil;
+import com.cmsr.onebase.framework.common.tools.core.exceptions.ExceptionUtil;
 import com.cmsr.onebase.gateway.util.WebFrameworkUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.web.reactive.error.ErrorWebExceptionHandler;

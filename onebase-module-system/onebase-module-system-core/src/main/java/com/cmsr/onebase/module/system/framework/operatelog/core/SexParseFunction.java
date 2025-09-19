@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.system.framework.operatelog.core;
 
-import cn.hutool.core.util.StrUtil;
+import com.cmsr.onebase.framework.common.tools.core.util.StrUtil;
 import com.cmsr.onebase.framework.dict.core.DictFrameworkUtils;
 import com.cmsr.onebase.module.system.enums.DictTypeConstants;
 import com.mzt.logapi.service.IParseFunction;

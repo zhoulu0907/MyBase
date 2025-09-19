@@ -1,8 +1,7 @@
 package com.cmsr.onebase;
 
-import cn.hutool.core.io.FileTypeUtil;
-import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.util.StrUtil;
+import com.cmsr.onebase.framework.common.tools.core.io.FileUtil;
+import com.cmsr.onebase.framework.common.tools.core.util.StrUtil;
 import com.cmsr.onebase.framework.common.util.collection.SetUtils;
 import lombok.extern.slf4j.Slf4j;
 
@@ -140,6 +139,6 @@ public class ProjectReactor {
     }
 
     private static String getFileType(File file) {
-        return file.length() > 0 ? FileTypeUtil.getType(file) : "";
+        return file.length() > 0 ? FileUtil.getFileType(file) : "";
     }
 }

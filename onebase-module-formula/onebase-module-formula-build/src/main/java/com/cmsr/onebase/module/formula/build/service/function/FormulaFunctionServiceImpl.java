@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.formula.build.service.function;
 
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.util.ObjectUtil;
+import com.cmsr.onebase.framework.common.tools.core.collection.CollUtil;
+import com.cmsr.onebase.framework.common.tools.core.util.ObjUtil;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
@@ -155,7 +155,7 @@ public class FormulaFunctionServiceImpl implements FormulaFunctionService {
         if (id == null) {
             throw exception(FUNCTION_NAME_DUPLICATE, name);
         }
-        if (ObjectUtil.notEqual(function.getId(), id)) {
+        if (ObjUtil.notEqual(function.getId(), id)) {
             throw exception(FUNCTION_NAME_DUPLICATE, name);
         }
     }

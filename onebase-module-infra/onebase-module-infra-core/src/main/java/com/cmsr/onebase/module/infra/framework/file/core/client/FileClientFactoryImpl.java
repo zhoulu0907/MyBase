@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.infra.framework.file.core.client;
 
-import cn.hutool.core.lang.Assert;
-import cn.hutool.core.util.ReflectUtil;
+import com.cmsr.onebase.framework.common.tools.core.lang.Assert;
+import com.cmsr.onebase.framework.common.tools.core.util.ReflectUtil;
 import com.cmsr.onebase.module.infra.dal.database.FileContentDataRepository;
 import com.cmsr.onebase.module.infra.framework.file.core.client.db.DBFileClient;
 import com.cmsr.onebase.module.infra.framework.file.core.client.db.DBFileClientConfig;

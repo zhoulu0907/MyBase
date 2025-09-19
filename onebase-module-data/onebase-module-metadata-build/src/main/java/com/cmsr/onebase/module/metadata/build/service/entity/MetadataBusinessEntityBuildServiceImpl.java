@@ -1,9 +1,9 @@
 package com.cmsr.onebase.module.metadata.build.service.entity;
 
-import cn.hutool.core.text.CharSequenceUtil;
-import cn.hutool.core.util.IdUtil;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.tools.core.text.CharSequenceUtil;
+import com.cmsr.onebase.framework.common.tools.core.util.IdUtil;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.BusinessEntityPageReqVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.BusinessEntityRespVO;
@@ -324,7 +324,7 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
                     .entityId(entityId)
                     .fieldName(systemField.getFieldName())
             // 优先使用系统字段的显示名称，为空则回退为字段名
-            .displayName(cn.hutool.core.text.CharSequenceUtil.isNotEmpty(systemField.getDisplayName())
+            .displayName(CharSequenceUtil.isNotEmpty(systemField.getDisplayName())
                 ? systemField.getDisplayName()
                 : systemField.getFieldName())
                     .fieldType(systemField.getFieldType())

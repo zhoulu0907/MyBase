@@ -1,7 +1,7 @@
 package com.cmsr.onebase.framework.redis.core;
 
-import cn.hutool.core.util.NumberUtil;
-import cn.hutool.core.util.StrUtil;
+import com.cmsr.onebase.framework.common.tools.core.util.NumberUtil;
+import com.cmsr.onebase.framework.common.tools.core.util.StrUtil;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.cache.RedisCache;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;

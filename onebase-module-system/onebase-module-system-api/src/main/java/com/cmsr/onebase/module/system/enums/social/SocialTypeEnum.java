@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.system.enums.social;
 
-import cn.hutool.core.util.ArrayUtil;
 import com.cmsr.onebase.framework.common.core.ArrayValuable;
+import com.cmsr.onebase.framework.common.tools.core.util.ArrayUtil;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

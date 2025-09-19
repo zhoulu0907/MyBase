@@ -1,11 +1,13 @@
 package com.cmsr.onebase.framework.ratelimiter.core.keyresolver.impl;
 
-import cn.hutool.core.util.StrUtil;
-import cn.hutool.crypto.SecureUtil;
+import com.cmsr.onebase.framework.common.tools.core.util.StrUtil;
 import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
 import com.cmsr.onebase.framework.ratelimiter.core.annotation.RateLimiter;
 import com.cmsr.onebase.framework.ratelimiter.core.keyresolver.RateLimiterKeyResolver;
 import org.aspectj.lang.JoinPoint;
+import org.springframework.util.DigestUtils;
+
+import java.nio.charset.StandardCharsets;
 
 /**
  * IP 级别的限流 Key 解析器，使用方法名 + 方法参数 + IP，组装成一个 Key
@@ -20,7 +22,7 @@ public class ClientIpRateLimiterKeyResolver implements RateLimiterKeyResolver {
         String methodName = joinPoint.getSignature().toString();
         String argsStr = StrUtil.join(",", joinPoint.getArgs());
         String clientIp = ServletUtils.getClientIP();
-        return SecureUtil.md5(methodName + argsStr + clientIp);
+        return DigestUtils.md5DigestAsHex((methodName + argsStr + clientIp).getBytes(StandardCharsets.UTF_8));
     }
 
 }

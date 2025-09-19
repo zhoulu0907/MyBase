@@ -17,10 +17,10 @@
 
 package com.cmsr.onebase.module.system.framework.justauth.core;
 
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.util.EnumUtil;
-import cn.hutool.core.util.ReflectUtil;
-import cn.hutool.core.util.StrUtil;
+import com.cmsr.onebase.framework.common.tools.core.collection.CollUtil;
+import com.cmsr.onebase.framework.common.tools.core.util.EnumUtil;
+import com.cmsr.onebase.framework.common.tools.core.util.ReflectUtil;
+import com.cmsr.onebase.framework.common.tools.core.util.StrUtil;
 import com.xkcoding.http.config.HttpConfig;
 import com.xkcoding.justauth.autoconfigure.ExtendProperties;
 import com.xkcoding.justauth.autoconfigure.JustAuthProperties;

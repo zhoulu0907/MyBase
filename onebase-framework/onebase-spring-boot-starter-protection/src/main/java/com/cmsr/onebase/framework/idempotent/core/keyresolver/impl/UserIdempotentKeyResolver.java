@@ -1,11 +1,13 @@
 package com.cmsr.onebase.framework.idempotent.core.keyresolver.impl;
 
-import cn.hutool.core.util.StrUtil;
-import cn.hutool.crypto.SecureUtil;
+import com.cmsr.onebase.framework.common.tools.core.util.StrUtil;
 import com.cmsr.onebase.framework.idempotent.core.annotation.Idempotent;
 import com.cmsr.onebase.framework.idempotent.core.keyresolver.IdempotentKeyResolver;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
 import org.aspectj.lang.JoinPoint;
+import org.springframework.util.DigestUtils;
+
+import java.nio.charset.StandardCharsets;
 
 /**
  * 用户级别的幂等 Key 解析器，使用方法名 + 方法参数 + userId + userType，组装成一个 Key
@@ -21,7 +23,7 @@ public class UserIdempotentKeyResolver implements IdempotentKeyResolver {
         String argsStr = StrUtil.join(",", joinPoint.getArgs());
         Long userId = WebFrameworkUtils.getLoginUserId();
         Integer userType = WebFrameworkUtils.getLoginUserType();
-        return SecureUtil.md5(methodName + argsStr + userId + userType);
+        return DigestUtils.md5DigestAsHex((methodName + argsStr + userId + userType).getBytes(StandardCharsets.UTF_8));
     }
 
 }

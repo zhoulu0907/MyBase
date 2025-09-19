@@ -1,8 +1,8 @@
 package com.cmsr.onebase.gateway.util;
 
-import cn.hutool.core.net.NetUtil;
-import cn.hutool.core.util.IdUtil;
-import cn.hutool.core.util.StrUtil;
+import com.cmsr.onebase.framework.common.tools.core.net.NetUtil;
+import com.cmsr.onebase.framework.common.tools.core.util.IdUtil;
+import com.cmsr.onebase.framework.common.tools.core.util.StrUtil;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.http.HttpHeaders;
 
