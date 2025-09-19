@@ -170,10 +170,10 @@ public class MetadataEntityRelationshipBuildServiceImpl implements MetadataEntit
             log.info("查询实体相关关系，实体ID: {}，找到 {} 条相关记录", pageReqVO.getEntityId(), existingRelations.size());
         } else {
             // 如果没有传入 entityId，则使用精确的源实体ID和目标实体ID查询
-            if (pageReqVO.getSourceEntityId() != null) {
+            if (StringUtils.hasText(pageReqVO.getSourceEntityId())) {
                 configStore.and(MetadataEntityRelationshipDO.SOURCE_ENTITY_ID, Long.valueOf(pageReqVO.getSourceEntityId()));
             }
-            if (pageReqVO.getTargetEntityId() != null) {
+            if (StringUtils.hasText(pageReqVO.getTargetEntityId())) {
                 configStore.and(MetadataEntityRelationshipDO.TARGET_ENTITY_ID, Long.valueOf(pageReqVO.getTargetEntityId()));
             }
         }
@@ -353,7 +353,7 @@ public class MetadataEntityRelationshipBuildServiceImpl implements MetadataEntit
      * @return 字段名称
      */
     private String getFieldNameById(String fieldId) {
-        if (fieldId == null) {
+        if (!StringUtils.hasText(fieldId)) {
             return null;
         }
 
@@ -378,7 +378,7 @@ public class MetadataEntityRelationshipBuildServiceImpl implements MetadataEntit
 
         // 1. 获取或创建子表实体
         Long childEntityId;
-        if (createReqVO.getChildEntityId() != null) {
+        if (StringUtils.hasText(createReqVO.getChildEntityId())) {
             // 选择已有的子表
             childEntityId = Long.valueOf(createReqVO.getChildEntityId());
             log.info("使用已有子表，实体ID: {}", childEntityId);
