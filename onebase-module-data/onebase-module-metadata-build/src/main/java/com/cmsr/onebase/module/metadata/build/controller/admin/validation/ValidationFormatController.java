@@ -26,10 +26,18 @@ public class ValidationFormatController {
 
     @PostMapping("/get-regex-by-field")
     @Operation(summary = "根据字段ID获取正则格式校验")
-    @Parameter(name = "fieldId", required = true)
+    @Parameter(name = "id", description = "字段ID", required = true)
     @PreAuthorize("@ss.hasPermission('metadata:validation-format:query')")
-    public CommonResult<ValidationFormatRespVO> getRegexByField(@RequestParam("fieldId") Long fieldId) {
-        return success(formatService.getRegexByFieldIdWithRgName(fieldId));
+    public CommonResult<ValidationFormatRespVO> getRegexByField(@RequestParam("id") Long id) {
+        return success(formatService.getRegexByFieldIdWithRgName(id));
+    }
+
+    @GetMapping("/get")
+    @Operation(summary = "根据主键ID获取格式校验")
+    @Parameter(name = "id", description = "校验规则ID", required = true)
+    @PreAuthorize("@ss.hasPermission('metadata:validation-format:query')")
+    public CommonResult<ValidationFormatRespVO> get(@RequestParam("id") Long id) {
+        return success(formatService.getById(id));
     }
 
     @PostMapping("/create")
@@ -49,10 +57,19 @@ public class ValidationFormatController {
 
     @PostMapping("/delete-by-field")
     @Operation(summary = "按字段删除格式校验")
-    @Parameter(name = "fieldId", required = true)
+    @Parameter(name = "id", description = "字段ID", required = true)
     @PreAuthorize("@ss.hasPermission('metadata:validation-format:delete')")
-    public CommonResult<Boolean> deleteByField(@RequestParam("fieldId") Long fieldId) {
-        formatService.deleteByFieldId(fieldId);
+    public CommonResult<Boolean> deleteByField(@RequestParam("id") Long id) {
+        formatService.deleteByFieldId(id);
+        return success(true);
+    }
+
+    @DeleteMapping("/delete")
+    @Operation(summary = "根据主键ID删除格式校验")
+    @Parameter(name = "id", description = "校验规则ID", required = true)
+    @PreAuthorize("@ss.hasPermission('metadata:validation-format:delete')")
+    public CommonResult<Boolean> delete(@RequestParam("id") Long id) {
+        formatService.deleteById(id);
         return success(true);
     }
 }

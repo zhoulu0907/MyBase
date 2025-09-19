@@ -31,4 +31,11 @@ public class MetadataValidationFormatRepository extends DataRepository<MetadataV
     public void deleteByFieldId(Long fieldId) {
         for (var item : findByFieldId(fieldId)) { deleteById(item.getId()); }
     }
+
+    public List<MetadataValidationFormatDO> findByGroupId(Long groupId) {
+        DefaultConfigStore cs = new DefaultConfigStore();
+        cs.and("group_id", groupId);
+        cs.and("deleted", 0);
+        return findAllByConfig(cs);
+    }
 }

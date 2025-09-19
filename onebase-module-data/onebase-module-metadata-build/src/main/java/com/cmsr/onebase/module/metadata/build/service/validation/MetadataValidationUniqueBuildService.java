@@ -17,4 +17,19 @@ public interface MetadataValidationUniqueBuildService {
     Long create(ValidationUniqueSaveReqVO vo);
     void update(ValidationUniqueUpdateReqVO vo);
     void deleteByFieldId(Long fieldId);
+
+    /**
+     * 按主键ID查询唯一性校验配置（包含规则组名称）
+     *
+     * @param id 唯一性校验规则主键ID
+     * @return 唯一性校验VO，可能为null
+     */
+    ValidationUniqueRespVO getById(Long id);
+
+    /**
+     * 按主键ID删除唯一性校验配置
+     *
+     * @param id 唯一性校验规则主键ID
+     */
+    void deleteById(Long id);
 }
