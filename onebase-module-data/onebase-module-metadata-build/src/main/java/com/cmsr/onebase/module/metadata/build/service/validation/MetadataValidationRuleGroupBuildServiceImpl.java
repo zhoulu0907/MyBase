@@ -7,6 +7,13 @@ import com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.Val
 import com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.ValidationRuleGroupSaveReqVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.ValidationRuleGroupSimpleRespVO;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationRuleGroupRepository;
+import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationRequiredRepository;
+import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationLengthRepository;
+import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationUniqueRepository;
+import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationRangeRepository;
+import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationFormatRepository;
+import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationChildNotEmptyRepository;
+import com.cmsr.onebase.module.metadata.core.dal.database.MetadataEntityFieldRepository;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRuleDefinitionDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRuleGroupDO;
 import jakarta.annotation.Resource;
@@ -64,6 +71,28 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
     
     @Resource
     private MetadataValidationChildNotEmptyBuildService childNotEmptyService;
+
+    // 注入各种校验Repository用于查询
+    @Resource
+    private MetadataValidationRequiredRepository requiredRepository;
+    
+    @Resource
+    private MetadataValidationLengthRepository lengthRepository;
+    
+    @Resource
+    private MetadataValidationUniqueRepository uniqueRepository;
+    
+    @Resource
+    private MetadataValidationRangeRepository rangeRepository;
+    
+    @Resource
+    private MetadataValidationFormatRepository formatRepository;
+    
+    @Resource
+    private MetadataValidationChildNotEmptyRepository childNotEmptyRepository;
+    
+    @Resource
+    private MetadataEntityFieldRepository entityFieldRepository;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -160,6 +189,20 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long ensureFieldRuleGroup(Long fieldId) {
+        // 调用重载方法，使用默认参数
+        return ensureFieldRuleGroup(fieldId, null, null);
+    }
+
+    /**
+     * 确保存在指定字段专属规则组，支持设置校验类型和提示信息
+     *
+     * @param fieldId 字段ID
+     * @param validationType 校验类型，如果为null则不设置
+     * @param popPrompt 提示信息，如果为null则不设置
+     * @return 规则组ID
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public Long ensureFieldRuleGroup(Long fieldId, String validationType, String popPrompt) {
         String rgName = "RG_FIELD_" + fieldId;
         MetadataValidationRuleGroupDO group = validationRuleGroupRepository.selectByRgName(rgName, null);
         if (group == null) {
@@ -167,7 +210,28 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
             group.setRgName(rgName);
             group.setRgDesc("字段" + fieldId + "的规则组");
             group.setRgStatus(StatusEnumUtil.ACTIVE);
+            // 设置校验类型和提示信息（如果提供）
+            if (validationType != null) {
+                group.setValidationType(validationType);
+            }
+            if (popPrompt != null) {
+                group.setPopPrompt(popPrompt);
+            }
             validationRuleGroupRepository.insert(group);
+        } else {
+            // 如果组已存在但缺少validation_type或pop_prompt，则更新
+            boolean needUpdate = false;
+            if (validationType != null && group.getValidationType() == null) {
+                group.setValidationType(validationType);
+                needUpdate = true;
+            }
+            if (popPrompt != null && group.getPopPrompt() == null) {
+                group.setPopPrompt(popPrompt);
+                needUpdate = true;
+            }
+            if (needUpdate) {
+                validationRuleGroupRepository.update(group);
+            }
         }
         return group.getId();
     }
@@ -273,7 +337,7 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
         List<MetadataValidationRuleDefinitionDO> allRules = validationRuleDefinitionService.getByGroupId(groupId);
         log.info("从数据库获取到规则定义数量: {}", allRules != null ? allRules.size() : 0);
         
-        if (CollectionUtils.isEmpty(allRules)) {
+        if (allRules == null || allRules.isEmpty()) {
             log.info("规则组 {} 下没有规则定义，返回空列表", groupId);
             return new ArrayList<>();
         }
@@ -332,7 +396,7 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
     /**
      * 为精简VO构建派生字段
      * validationType : 从规则组的validation_type字段获取
-     * validationItems : 暂时返回空数组，后续根据需要完善
+     * validationItems : 根据校验类型查询关联的字段名称
      * errorMessage : 复用 popPrompt
      */
     private void buildDerivedFieldsForSimpleVO(ValidationRuleGroupSimpleRespVO vo, Long groupId, String popPrompt) {
@@ -354,10 +418,78 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
         vo.setValidationType(validationType);
         log.info("设置validationType: {}", validationType);
         
-        // 暂时返回空数组，因为对应的专门表数据可能已被删除
-        // 后续根据实际需要可以完善此逻辑
-        vo.setValidationItems(new ArrayList<>());
-        log.info("设置validationItems为空数组");
+        // 根据校验类型获取关联的字段名称
+        List<String> fieldNames = getFieldNamesByValidationType(groupId, validationType);
+        vo.setValidationItems(fieldNames);
+        log.info("设置validationItems: {}", fieldNames);
+    }
+
+    /**
+     * 根据校验类型和规则组ID获取关联的字段名称
+     */
+    private List<String> getFieldNamesByValidationType(Long groupId, String validationType) {
+        List<String> fieldNames = new ArrayList<>();
+        
+        if (validationType == null) {
+            return fieldNames;
+        }
+        
+        log.info("查询字段名称：groupId={}, validationType={}", groupId, validationType);
+        
+        try {
+            switch (validationType) {
+                case "REQUIRED":
+                    // 查询必填校验关联的字段
+                    var requiredFields = requiredRepository.findByGroupId(groupId);
+                    log.info("查询到必填校验字段数量：{}", requiredFields != null ? requiredFields.size() : 0);
+                    if (requiredFields != null) {
+                        for (var field : requiredFields) {
+                            log.info("处理字段ID：{}", field.getFieldId());
+                            String fieldName = getFieldNameById(field.getFieldId());
+                            log.info("获取到字段名称：{}", fieldName);
+                            if (fieldName != null) {
+                                fieldNames.add(fieldName);
+                            }
+                        }
+                    }
+                    break;
+                    
+                case "LENGTH":
+                case "UNIQUE":
+                case "RANGE":
+                case "FORMAT":
+                case "CHILD_NOT_EMPTY":
+                    // 其他类型暂时返回空，等需要时再实现
+                    log.debug("校验类型 {} 暂未实现字段名称查询", validationType);
+                    break;
+                    
+                default:
+                    log.warn("未知的校验类型: {}", validationType);
+            }
+        } catch (Exception e) {
+            log.error("获取字段名称时发生错误，groupId: {}, validationType: {}", groupId, validationType, e);
+        }
+        
+        log.info("最终返回字段名称列表：{}", fieldNames);
+        return fieldNames;
+    }
+
+    /**
+     * 根据字段ID获取字段名称
+     */
+    private String getFieldNameById(Long fieldId) {
+        if (fieldId == null) {
+            return null;
+        }
+        
+        try {
+            // 使用 entityFieldRepository 查询字段信息
+            var fieldDO = entityFieldRepository.findById(fieldId);
+            return fieldDO != null ? fieldDO.getFieldName() : null;
+        } catch (Exception e) {
+            log.error("根据字段ID获取字段名称失败，fieldId: {}", fieldId, e);
+            return null;
+        }
     }
 
 
