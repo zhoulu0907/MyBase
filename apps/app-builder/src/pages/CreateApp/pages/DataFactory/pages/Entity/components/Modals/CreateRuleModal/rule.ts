@@ -76,13 +76,13 @@ export const valueTypeOptions = [
 
 // 校验类型选项
 export const validationTypeMap: Record<string, string> = {
-  required: '必填校验',
+  REQUIRED: '必填校验',
   unique: '唯一校验',
-  length: '长度校验',
-  range: '范围校验',
-  format: '格式校验',
-  subtable_empty: '子表空行校验',
-  custom: '自定义校验'
+  LENGTH: '长度校验',
+  RANGE: '范围校验',
+  FORMAT: '格式校验',
+  SUBTABLE_EMPTY: '子表空行校验',
+  CUSTOM: '自定义校验'
 };
 
 export const validationTypeOptions = Object.entries(validationTypeMap).map(([key, value]) => ({
@@ -101,10 +101,10 @@ export const formatValidationTypeOptions = [
 
 // 提示语
 export const ruleTip: Record<string, string> = {
-  required: '请输入校验不通过后的弹窗提示语，例如“XXX必填”',
-  unique: '请输入校验不通过后的弹窗提示语，例如“XXX不可重复”',
-  length: '请输入校验不通过后的弹窗提示语，例如“XXX长度范围需在XX~XX之间”',
-  range: '请输入校验不通过后的弹窗提示语，例如“XXX范围需在XX~XX之间”',
-  format: '请输入校验不通过后的弹窗提示语，例如“请输入有效的手机号码”',
-  subtable_empty: '请输入校验不通过后的弹窗提示语，例如“子表存在空行”'
+  REQUIRED: '请输入校验不通过后的弹窗提示语，例如“XXX必填”',
+  UNIQUE: '请输入校验不通过后的弹窗提示语，例如“XXX不可重复”',
+  LENGTH: '请输入校验不通过后的弹窗提示语，例如“XXX长度范围需在XX~XX之间”',
+  RANGE: '请输入校验不通过后的弹窗提示语，例如“XXX范围需在XX~XX之间”',
+  FORMAT: '请输入校验不通过后的弹窗提示语，例如“请输入有效的手机号码”',
+  SUBTABLE_EMPTY: '请输入校验不通过后的弹窗提示语，例如“子表存在空行”'
 };

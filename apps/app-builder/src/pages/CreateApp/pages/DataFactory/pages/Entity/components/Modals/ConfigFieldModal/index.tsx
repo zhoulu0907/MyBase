@@ -3,7 +3,7 @@ import { useFieldStore } from '@/store/store_field';
 import { Button, Message, Modal, Table } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
 import type { EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
-import { batchSaveFields, getEntityFields } from '@onebase/app';
+import { batchSaveFields, getEntityFields, getEntityFieldsWithChildren } from '@onebase/app';
 import { ENTITY_FIELD_TYPE, FIELD_TYPE } from '@onebase/ui-kit';
 import React, { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
@@ -81,18 +81,45 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
 
   useEffect(() => {
     if (visible) {
-      getEntityFields({ entityId: entity.entityId }).then((res: any) => {
-        console.log('getEntityFields', res);
-        setFields(
-          res.map((field: object, index: number) => ({
-            ...field,
-            sortOrder: index
-          }))
-        );
-        setOriginFields(res);
-      });
+      // 获取实体字段列表
+      loadEntityFields();
+
+      // 获取实体字段配置列表
+      loadEntityFieldsWithChildren();
     }
   }, [visible]);
+
+  const loadEntityFields = () => {
+    getEntityFields({ entityId: entity.entityId }).then((res: any) => {
+      console.log('getEntityFields', res);
+      setFields(
+        res.map((field: object, index: number) => ({
+          ...field,
+          sortOrder: index
+        }))
+      );
+    });
+  };
+
+  const loadEntityFieldsWithChildren = () => {
+    getEntityFieldsWithChildren(entity.entityId).then((res: any) => {
+      const transformEntity = (entity: any, isChild = false) => ({
+        label: isChild ? entity.childEntityName : entity.entityName,
+        value: isChild ? entity.childEntityId : entity.entityId,
+        children: (isChild ? entity?.childFields || [] : entity?.parentFields || []).map((field: any) => ({
+          label: field.displayName,
+          value: field.fieldId
+        }))
+      });
+
+      const entities = [
+        transformEntity(res),
+        ...(res.childEntities || []).map((child: any) => transformEntity(child, true))
+      ];
+
+      setOriginFields(entities);
+    });
+  };
 
   // 过滤掉已删除的字段和系统字段
   const activeFields = fields.filter((field) => !field.isDeleted && field.isSystemField === FIELD_TYPE.CUSTOM);

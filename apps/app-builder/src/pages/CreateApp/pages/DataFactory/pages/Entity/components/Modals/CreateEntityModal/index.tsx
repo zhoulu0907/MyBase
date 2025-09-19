@@ -8,6 +8,7 @@ import styles from '../modal.module.less';
 import type { EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
 import { createEntityRules } from '@/pages/CreateApp/pages/DataFactory/utils/rules';
 import { getNewNodePosition } from '../../ERchart/utils/nodePositionCalculator';
+import { useNewNodeStore } from '@/store/store_entity';
 
 interface EntityFormValues {
   source: string;
@@ -37,6 +38,7 @@ const CreateEntityModal: React.FC<{
 }> = ({ visible, setVisible, successCallback, lastEntity }) => {
   const { curDataSourceId } = useResourceStore();
   const { curAppId } = useAppStore();
+  const { newNodes, setNewNodes } = useNewNodeStore();
   const [form] = Form.useForm<EntityFormValues>();
   const [dsResource, setDsResource] = useState<string>(DS_RESOURCE_TYPE.EXTERNAL); // 数据源来源：内部数据源、外部数据源、外部数据源中引用自有数据源已有资产
 
@@ -71,10 +73,13 @@ const CreateEntityModal: React.FC<{
       const res = await createEntity(params);
       console.log('createEntity', res);
 
-      form.resetFields();
-      Message.success('保存成功');
-      successCallback();
-      setVisible(false);
+      if (res) {
+        setNewNodes([...newNodes, res.id]);
+        form.resetFields();
+        Message.success('保存成功');
+        successCallback();
+        setVisible(false);
+      }
     });
   };
 
@@ -85,13 +90,18 @@ const CreateEntityModal: React.FC<{
     form.setFieldValue('dsTable', '');
   };
 
+  const handleCancel = () => {
+    form.resetFields();
+    setVisible(false);
+  };
+
   return (
     <Modal
       className={styles['create-entity-modal']}
       title="创建业务实体"
       visible={visible}
       onOk={handleFinish}
-      onCancel={() => setVisible(false)}
+      onCancel={handleCancel}
       okText="创建"
       cancelText="取消"
     >
