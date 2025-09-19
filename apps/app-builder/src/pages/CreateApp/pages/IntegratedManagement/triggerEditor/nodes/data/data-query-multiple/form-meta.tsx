@@ -11,7 +11,7 @@ import {
   getFieldCheckTypeApi,
   type ConfitionField,
   type EntityFieldValidationTypes,
-  type MetadataEntityPair,
+  type MetadataEntityPair
 } from '@onebase/app';
 import { useSignals } from '@preact/signals-react/runtime';
 import { useEffect, useState } from 'react';
@@ -351,7 +351,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
               </Grid.Row>
             )}
 
-            {/* 从主数据节点中查询 */}
+            {/* 从数据节点中查询 */}
             {dataType === DATA_SOURCE_TYPE.DATA_NODE && (
               <Grid.Row>
                 <Grid.Col span={1} style={{ textAlign: 'center', lineHeight: '32px' }}>

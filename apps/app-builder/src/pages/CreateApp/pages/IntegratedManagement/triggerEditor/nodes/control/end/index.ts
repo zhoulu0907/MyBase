@@ -61,7 +61,7 @@ export const EndNodeRegistry: FlowNodeRegistry = {
   onAdd(ctx, from) {
     return {
       id: `end_${nanoid()}`,
-      type: 'end',
+      type: NodeType.END,
       data: {
         title: '结束节点',
         outputs: {
