@@ -52,6 +52,10 @@ public class LicenseServiceImpl implements LicenseService {
     @Resource
     private StringRedisTemplate stringRedisTemplate;
 
+    private static final String ENTER_PRISE_NAME = "上海移动有限公司";
+    private static final String ENTERP_RISE_CODE = "F200090910001";
+    private static final String ENTERP_RISE_ADDRESS = "上海市浦东金桥开发区";
+    private static final String PLATFORM_TYPE = "私有化部署";
     /**
      * 创建License
      *
@@ -74,10 +78,10 @@ public class LicenseServiceImpl implements LicenseService {
     public void createLicenseFile(LicenseSaveReqVO reqVO, HttpServletResponse response) {
 
         try {
-            reqVO.setEnterpriseName("上海移动有限公司");
-            reqVO.setEnterpriseCode("F200090910001");
-            reqVO.setEnterpriseAddress("上海市浦东金桥开发区");
-            reqVO.setPlatformType("私有化部署");
+            reqVO.setEnterpriseName(ENTER_PRISE_NAME);
+            reqVO.setEnterpriseCode(ENTERP_RISE_CODE);
+            reqVO.setEnterpriseAddress(ENTERP_RISE_ADDRESS);
+            reqVO.setPlatformType(PLATFORM_TYPE);
             // 设置响应头，返回加密文件
             response.setContentType("application/octet-stream");
             response.setCharacterEncoding("UTF-8");
