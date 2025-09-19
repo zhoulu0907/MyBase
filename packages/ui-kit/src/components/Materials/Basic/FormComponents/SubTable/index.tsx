@@ -174,7 +174,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean }) => {
   return (
     <Layout className="XSubTable">
       {colComponents.map((_colComponents, index) => (
-        <Grid.Row key={index} className="item">
+        <div key={index} className="item">
           <ReactSortable
             id={`workspace-content-${id}-${index}`}
             list={colComponents[index]}
@@ -267,7 +267,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean }) => {
               layout={layout}
               tooltip={tooltip}
               labelCol={{
-                style: { width: labelColSpan, flex: 'unset' }
+                style: { width: labelColSpan, flex: 'none' }
               }}
               wrapperCol={{ style: { flex: 1 } }}
               rules={[{ required: verify?.required }]}
@@ -275,6 +275,8 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean }) => {
               style={{
                 margin: 0,
                 width: '100%',
+                flexDirection: 'row',
+                flexWrap: 'nowrap',
                 display: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL] === layout ? 'flex' : 'unset',
                 opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
               }}
@@ -284,10 +286,10 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean }) => {
                 minHeight: 130,
                 display: 'flex',
                 alignItems: 'center',
-                maxWidth: runtime ? '100%' : `calc(100vw - ${componentMaxWidth + labelColSpan + 2}px)`,
+                maxWidth: runtime ? '100%' : `calc(100vw - ${componentMaxWidth + (LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL] === layout ? labelColSpan : 0) + 2}px)`,
               }}>
                 {
-                  runtime ? <Table columns={columns} data={tableData} scroll={{ x: 'max-content' }} /> :
+                  runtime ? <Table columns={columns} data={tableData} scroll={{ x: 'max-content' }} style={{ width: `calc(100% - ${LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL] === layout ? labelColSpan : 0}px)` }} /> :
                     <DragableTable id={id} status={status} columns={columns} data={tableData} runtime={runtime} setColumns={setColumns} />
                 }
               </div>
@@ -295,7 +297,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean }) => {
             </Form.Item>
 
           </ReactSortable>
-        </Grid.Row>
+        </div>
       ))}
     </Layout>
   );
