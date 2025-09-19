@@ -72,7 +72,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
         });
 
         newConditionFields.push({
-          label: item.fieldName,
+          label: item.displayName,
           value: item.id,
           fieldType: item.fieldType
         });
