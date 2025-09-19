@@ -14,7 +14,8 @@ const TabPane = Tabs.TabPane;
 
 const Right: React.FC = () => {
   const navigate = useNavigate();
-  const [form] = Form.useForm();
+  const [accountForm] = Form.useForm();
+  const [mobileForm] = Form.useForm();
   const { t } = useI18n();
   const sliderCaptchaRef = useRef<SliderCaptchaRef>(null);
 
@@ -45,14 +46,14 @@ const Right: React.FC = () => {
 
   // 处理记住我状态变化
   const handleRememberMeChange = (checked: boolean) => {
-    const username = form.getFieldValue('username') || '';
+    const username = accountForm.getFieldValue('username') || '';
     saveRememberMe(username, checked);
   };
 
   // 发送短信验证码
   const sendSmsCode = async () => {
     try {
-      const mobile = form.getFieldValue('mobile');
+      const mobile = mobileForm.getFieldValue('mobile');
       if (!mobile) {
         Message.error('请先输入手机号');
         return;
@@ -144,7 +145,7 @@ const Right: React.FC = () => {
   // 验证码验证成功回调
   const handleCaptchaSuccess = async (token: string) => {
     // 验证码通过后重新提交表单
-    const values = await form.getFieldsValue();
+    const values = await accountForm.getFieldsValue();
     handleSubmit({username: values.username, password: values.password, captchaVerification: token});
   };
 
@@ -152,13 +153,13 @@ const Right: React.FC = () => {
   const handleLoginClick = async () => {
     try {
       // 先验证表单
-      await form.validate();
+      await accountForm.validate();
 
-      if (form.getFieldValue('captchaVerification')) {
+      if (accountForm.getFieldValue('captchaVerification')) {
         handleAccountLogin({
-          username: form.getFieldValue('username'),
-          password: form.getFieldValue('password'),
-          captchaVerification: form.getFieldValue('captchaVerification')
+          username: accountForm.getFieldValue('username'),
+          password: accountForm.getFieldValue('password'),
+          captchaVerification: accountForm.getFieldValue('captchaVerification')
         });
         return;
       }
@@ -180,7 +181,7 @@ const Right: React.FC = () => {
       <div className={styles.loginFormContainer}>
         <Tabs activeTab={loginType} onChange={(key) => setLoginType(key as 'account' | 'mobile')} type="text">
           <TabPane key="account" title={t('auth.accountLogin')}>
-            <Form form={form} layout="vertical" onSubmit={handleLoginClick} autoComplete="off" className={styles.loginForm}>
+            <Form form={accountForm} layout="vertical" onSubmit={handleLoginClick} autoComplete="off" className={styles.loginForm}>
               <Form.Item
                 field="username"
                 initialValue=""
@@ -231,7 +232,7 @@ const Right: React.FC = () => {
           </TabPane>
 
           <TabPane key="mobile" title={t('auth.smsLogin')}>
-            <Form form={form} layout="vertical" onSubmit={handleLoginClick} autoComplete="off" className={styles.loginForm}>
+            <Form form={mobileForm} layout="vertical" onSubmit={handleLoginClick} autoComplete="off" className={styles.loginForm}>
               <Form.Item
                 field="mobile"
                 rules={[
