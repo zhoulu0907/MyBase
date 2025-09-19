@@ -27,6 +27,13 @@ public class MetadataValidationRequiredRepository extends DataRepository<Metadat
         return findAllByConfig(cs);
     }
 
+    public List<MetadataValidationRequiredDO> findByGroupId(Long groupId) {
+        DefaultConfigStore cs = new DefaultConfigStore();
+        cs.and("group_id", groupId);
+        cs.and("deleted", 0);
+        return findAllByConfig(cs);
+    }
+
     public void deleteByFieldId(Long fieldId) {
         for (var item : findByFieldId(fieldId)) { deleteById(item.getId()); }
     }

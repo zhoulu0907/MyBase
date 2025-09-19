@@ -46,9 +46,6 @@ public class EntityFieldRespVO {
     @Schema(description = "是否唯一：0-是，1-不是", example = "0")
     private Integer isUnique;
 
-    @Schema(description = "是否允许空值：0-是，1-不是", example = "1")
-    private Integer allowNull;
-
     @Schema(description = "排序", example = "1")
     private Integer sortOrder;
 

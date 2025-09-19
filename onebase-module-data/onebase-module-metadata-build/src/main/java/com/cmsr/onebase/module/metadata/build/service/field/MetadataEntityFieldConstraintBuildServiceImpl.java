@@ -116,20 +116,22 @@ public class MetadataEntityFieldConstraintBuildServiceImpl implements MetadataEn
         } else if ("REQUIRED".equalsIgnoreCase(type)) {
             // 同步必填到 required 表
             MetadataValidationRequiredDO exist = requiredService.getByFieldId(req.getFieldId());
-            MetadataValidationRequiredDO d = new MetadataValidationRequiredDO();
-            if (exist != null) { d.setId(exist.getId()); }
-            d.setFieldId(req.getFieldId());
-            d.setIsEnabled(req.getIsEnabled());
-            d.setPromptMessage(req.getPromptMessage());
-            d.setRunMode(req.getRunMode());
-            if (d.getId() == null) {
-                // 将DO转换为VO
-                ValidationRequiredSaveReqVO requiredVO = BeanUtils.toBean(d, ValidationRequiredSaveReqVO.class);
+            if (exist == null) {
+                // 直接创建VO对象，避免DO到VO的转换问题
+                ValidationRequiredSaveReqVO requiredVO = new ValidationRequiredSaveReqVO();
+                requiredVO.setFieldId(req.getFieldId());
+                requiredVO.setIsEnabled(req.getIsEnabled());
+                requiredVO.setPromptMessage(req.getPromptMessage());
+                requiredVO.setRunMode(req.getRunMode());
                 requiredVO.setRgName("字段约束-" + req.getFieldId()); // 设置规则组名称
                 requiredService.create(requiredVO);
             } else {
-                // 将DO转换为UpdateReqVO
-                ValidationRequiredUpdateReqVO requiredUpdateVO = BeanUtils.toBean(d, ValidationRequiredUpdateReqVO.class);
+                // 直接创建UpdateReqVO对象，避免DO到VO的转换问题
+                ValidationRequiredUpdateReqVO requiredUpdateVO = new ValidationRequiredUpdateReqVO();
+                requiredUpdateVO.setId(exist.getId());
+                requiredUpdateVO.setIsEnabled(req.getIsEnabled());
+                requiredUpdateVO.setPromptMessage(req.getPromptMessage());
+                requiredUpdateVO.setRunMode(req.getRunMode());
                 requiredUpdateVO.setRgName("字段约束-" + req.getFieldId()); // 设置规则组名称
                 requiredService.update(requiredUpdateVO);
             }

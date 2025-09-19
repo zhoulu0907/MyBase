@@ -9,6 +9,9 @@ import com.cmsr.onebase.module.metadata.build.service.number.AutoNumberRuleBuild
 import com.cmsr.onebase.module.metadata.build.service.component.MetadataComponentFieldTypeBuildService;
 import com.cmsr.onebase.module.metadata.build.service.validation.MetadataPermitRefOtftBuildService;
 import com.cmsr.onebase.module.metadata.build.service.validation.MetadataValidationTypeBuildService;
+import com.cmsr.onebase.module.metadata.build.service.validation.MetadataValidationRequiredBuildService;
+import com.cmsr.onebase.module.metadata.build.service.validation.MetadataValidationUniqueBuildService;
+import com.cmsr.onebase.module.metadata.build.service.validation.MetadataValidationLengthBuildService;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.field.MetadataEntityFieldOptionDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataPermitRefOtftDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationTypeDO;
@@ -84,6 +87,12 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
     private MetadataPermitRefOtftBuildService permitRefOtftService;
     @Resource
     private MetadataValidationTypeBuildService validationTypeService;
+    @Resource
+    private MetadataValidationRequiredBuildService validationRequiredService;
+    @Resource
+    private MetadataValidationUniqueBuildService validationUniqueService;
+    @Resource
+    private MetadataValidationLengthBuildService validationLengthService;
 
     @Resource
     private ModelMapper modelMapper;
@@ -259,12 +268,11 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             entityField.setFieldName(fieldItem.getFieldName());
             entityField.setDisplayName(fieldItem.getDisplayName());
             entityField.setFieldType(fieldItem.getFieldType());
-            entityField.setDataLength(fieldItem.getDataLength());
             entityField.setDescription(fieldItem.getDescription());
             // 使用新的枚举值：1-是，0-否
             entityField.setIsRequired(fieldItem.getIsRequired() != null ? fieldItem.getIsRequired() : StatusEnumUtil.NO); // 默认0-不是必填
             entityField.setIsUnique(fieldItem.getIsUnique() != null ? fieldItem.getIsUnique() : StatusEnumUtil.NO); // 默认0-不是唯一
-            entityField.setAllowNull(fieldItem.getAllowNull() != null ? fieldItem.getAllowNull() : StatusEnumUtil.YES); // 默认1-是允许空值
+            entityField.setIsRequired(fieldItem.getIsRequired() != null ? fieldItem.getIsRequired() : StatusEnumUtil.NO); // 默认0-非必填
             entityField.setDefaultValue(fieldItem.getDefaultValue());
             entityField.setSortOrder(fieldItem.getSortOrder() != null ? fieldItem.getSortOrder() : 0);
             entityField.setIsSystemField(StatusEnumUtil.NO); // 0-不是系统字段
@@ -463,9 +471,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             if (fieldItem.getIsRequired() != null) {
                 updateObj.setIsRequired(fieldItem.getIsRequired());
             }
-            if (fieldItem.getDataLength() != null) {
-                updateObj.setDataLength(fieldItem.getDataLength());
-            }
+
 
             metadataEntityFieldRepository.update(updateObj);
             successCount++;
@@ -541,12 +547,17 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 // 实体是否允许改表结构
                 validateEntityAllowModifyStructure(existing.getEntityId());
 
-                // 先删子配置（选项、约束、自动编号）
+                // 先删子配置（选项、约束、自动编号、校验规则）
                 if (existing != null) {
                     try {
                         fieldOptionService.deleteByFieldId(existing.getId());
                         fieldConstraintService.deleteByFieldId(existing.getId());
                         autoNumberConfigBuildService.deleteByFieldId(existing.getId());
+                        
+                        // 删除校验规则
+                        validationRequiredService.deleteByFieldId(existing.getId());
+                        validationUniqueService.deleteByFieldId(existing.getId());
+                        validationLengthService.deleteByFieldId(existing.getId());
                     } catch (Exception ignore) {}
                 }
 
@@ -591,7 +602,6 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 if (item.getDescription() != null) upd.setDescription(item.getDescription());
                 if (item.getIsRequired() != null) upd.setIsRequired(item.getIsRequired());
                 if (item.getIsUnique() != null) upd.setIsUnique(item.getIsUnique());
-                if (item.getAllowNull() != null) upd.setAllowNull(item.getAllowNull());
                 if (item.getSortOrder() != null) upd.setSortOrder(item.getSortOrder());
                 // fieldCode字段已注释，不再处理
                 // if (item.getFieldCode() != null) upd.setFieldCode(item.getFieldCode());
@@ -622,6 +632,21 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 // 同步选项、约束和自动编号（整体替换）
                 Long fieldId = origin.getId();
                 processFieldRelatedData(fieldId, full, item.getOptions(), item.getConstraints(), item.getAutoNumber());
+                
+                // 特别处理：如果 isRequired 字段发生了变更，需要额外同步到 MetadataValidationRequiredDO
+                if (item.getIsRequired() != null && !item.getIsRequired().equals(origin.getIsRequired())) {
+                    processRequiredValidation(fieldId, full);
+                }
+                
+                // 特别处理：如果 isUnique 字段发生了变更，需要额外同步到 MetadataValidationUniqueDO
+                if (item.getIsUnique() != null && !item.getIsUnique().equals(origin.getIsUnique())) {
+                    processUniqueValidation(fieldId, full);
+                }
+                
+                // 特别处理：如果 dataLength 字段发生了变更，需要额外同步到 MetadataValidationLengthDO
+                if (item.getDataLength() != null && !item.getDataLength().equals(origin.getDataLength())) {
+                    processLengthValidation(fieldId, full);
+                }
             }
         }
 
@@ -651,7 +676,6 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                     if (item.getDescription() != null) upd.setDescription(item.getDescription());
                     if (item.getIsRequired() != null) upd.setIsRequired(item.getIsRequired());
                     if (item.getIsUnique() != null) upd.setIsUnique(item.getIsUnique());
-                    if (item.getAllowNull() != null) upd.setAllowNull(item.getAllowNull());
                     if (item.getSortOrder() != null) upd.setSortOrder(item.getSortOrder());
                     // fieldCode字段已注释，不再处理
                     // if (item.getFieldCode() != null) upd.setFieldCode(item.getFieldCode());
@@ -678,6 +702,26 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                         alterColumnInTable(datasource, businessEntity.getTableName(), full);
                     }
                     resp.getUpdatedIds().add(existingField.getId().toString());
+                    
+                    // 同步选项、约束和自动编号（整体替换）
+                    Long fieldId = existingField.getId();
+                    processFieldRelatedData(fieldId, full, item.getOptions(), item.getConstraints(), item.getAutoNumber());
+                    
+                    // 特别处理：如果 isRequired 字段发生了变更，需要额外同步到 MetadataValidationRequiredDO
+                    if (item.getIsRequired() != null && !item.getIsRequired().equals(existingField.getIsRequired())) {
+                        processRequiredValidation(fieldId, full);
+                    }
+                    
+                    // 特别处理：如果 isUnique 字段发生了变更，需要额外同步到 MetadataValidationUniqueDO
+                    if (item.getIsUnique() != null && !item.getIsUnique().equals(existingField.getIsUnique())) {
+                        processUniqueValidation(fieldId, full);
+                    }
+                    
+                    // 特别处理：如果 dataLength 字段发生了变更，需要额外同步到 MetadataValidationLengthDO
+                    if (item.getDataLength() != null && !item.getDataLength().equals(existingField.getDataLength())) {
+                        processLengthValidation(fieldId, full);
+                    }
+                    
                     continue; // 跳过新增逻辑
                 }
 
@@ -698,7 +742,6 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 toCreate.setDescription(item.getDescription());
                 toCreate.setIsRequired(item.getIsRequired());
                 toCreate.setIsUnique(item.getIsUnique());
-                toCreate.setAllowNull(item.getAllowNull());
                 toCreate.setSortOrder(item.getSortOrder());
                 // fieldCode字段已注释，自动生成
                 toCreate.setFieldCode(generateFieldCode(item.getFieldName()));
@@ -718,6 +761,21 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 // 同步选项、约束和自动编号（整体替换）
                 Long fieldId = toCreate.getId();
                 processFieldRelatedData(fieldId, toCreate, item.getOptions(), item.getConstraints(), item.getAutoNumber());
+                
+                // 特别处理：对于新增字段，如果设置了 isRequired，需要同步到 MetadataValidationRequiredDO
+                if (item.getIsRequired() != null && item.getIsRequired() == 1) {
+                    processRequiredValidation(fieldId, toCreate);
+                }
+                
+                // 特别处理：对于新增字段，如果设置了 isUnique，需要同步到 MetadataValidationUniqueDO
+                if (item.getIsUnique() != null && item.getIsUnique() == 1) {
+                    processUniqueValidation(fieldId, toCreate);
+                }
+                
+                // 特别处理：对于新增字段，如果设置了 dataLength，需要同步到 MetadataValidationLengthDO
+                if (item.getDataLength() != null && item.getDataLength() > 0) {
+                    processLengthValidation(fieldId, toCreate);
+                }
             }
         }
 
@@ -1491,7 +1549,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             List<AutoNumberRuleItemRespVO> ruleVOs = rules.stream()
                     .map(this::convertToAutoNumberRuleItemRespVO)
                     .toList();
-            autoNumberConfig.setRules(ruleVOs);
+            autoNumberConfig.setRuleItems(ruleVOs);
             result.setAutoNumberConfig(autoNumberConfig);
         }
 
@@ -1557,6 +1615,9 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             req.setRunMode(entityField != null && entityField.getRunMode() != null ? entityField.getRunMode() : 0);
             req.setAppId(entityField != null ? entityField.getAppId() : null);
             fieldConstraintService.saveFieldConstraintConfig(req);
+            
+            // 新增：同步到 MetadataValidationLengthDO
+            processLengthValidation(fieldId, entityField);
         }
 
         // 正则 - 只有当正则表达式不为空且启用时才创建REGEX约束
@@ -1575,6 +1636,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
 
         // 必填（与 isRequired 联动）
         if (entityField != null && entityField.getIsRequired() != null) {
+            // 原有的字段约束逻辑
             FieldConstraintSaveReqVO req = new FieldConstraintSaveReqVO();
             req.setFieldId(fieldId);
             req.setConstraintType("REQUIRED");
@@ -1583,6 +1645,9 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             req.setRunMode(entityField.getRunMode() != null ? entityField.getRunMode() : 0);
             req.setAppId(entityField.getAppId());
             fieldConstraintService.saveFieldConstraintConfig(req);
+            
+            // 新增：同步到 MetadataValidationRequiredDO
+            processRequiredValidation(fieldId, entityField);
         }
 
         // 唯一（与 isUnique 联动）
@@ -1595,6 +1660,9 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             req.setRunMode(entityField.getRunMode() != null ? entityField.getRunMode() : 0);
             req.setAppId(entityField.getAppId());
             fieldConstraintService.saveFieldConstraintConfig(req);
+            
+            // 新增：同步到 MetadataValidationUniqueDO
+            processUniqueValidation(fieldId, entityField);
         }
     }
 
@@ -1622,8 +1690,8 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             Long configId = autoNumberConfigBuildService.upsert(config);
 
             // 处理规则项
-            if (autoNumber.getRules() != null && !autoNumber.getRules().isEmpty()) {
-                for (AutoNumberRuleItemReqVO ruleReq : autoNumber.getRules()) {
+            if (autoNumber.getRuleItems() != null && !autoNumber.getRuleItems().isEmpty()) {
+                for (AutoNumberRuleItemReqVO ruleReq : autoNumber.getRuleItems()) {
                     MetadataAutoNumberRuleItemDO rule = new MetadataAutoNumberRuleItemDO();
                     rule.setConfigId(configId);
                     rule.setItemType(ruleReq.getItemType());
@@ -1682,7 +1750,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         List<AutoNumberRuleItemRespVO> ruleVOs = rules.stream()
             .map(this::convertToAutoNumberRuleItemRespVO)
             .toList();
-        full.setRules(ruleVOs);
+        full.setRuleItems(ruleVOs);
         vo.setAutoNumberConfig(full);
     }
     }
@@ -1745,7 +1813,6 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         vo.setIsPrimaryKey(field.getIsPrimaryKey());
         vo.setIsRequired(field.getIsRequired());
         vo.setIsUnique(field.getIsUnique());
-        vo.setAllowNull(field.getAllowNull());
         vo.setSortOrder(field.getSortOrder());
         vo.setValidationRulesId(field.getValidationRules());
         vo.setRunMode(field.getRunMode());
@@ -1754,6 +1821,163 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         vo.setFieldCode(field.getFieldCode());
         // 注意：options、constraints、autoNumberConfig 将在 populateFieldRelatedData 中填充
         return vo;
+    }
+
+    /**
+     * 处理长度校验，同步到 MetadataValidationLengthDO
+     * 根据TODO需求：数据长度除了在MetadataEntityFieldDO中存储相关的信息，还需要在MetadataValidationLengthDO也储存一份
+     * MetadataEntityFieldDO 只存最大程度，如果MetadataValidationLengthDO已经有数据了，那么只需保证maxLength和 MetadataEntityFieldDO中dataLength一致即可
+     * 如果没有数据，那么新增一条记录，新增的时候MetadataValidationRuleGroupDO和MetadataValidationUniqueDO都需要新增数据
+     * rg_name可以用display_name+field_name+长度进行拼接，然后同一个字段只能有一个唯一校验
+     */
+    private void processLengthValidation(Long fieldId, MetadataEntityFieldDO entityField) {
+        try {
+            // 检查是否已存在长度校验规则
+            var existingValidation = validationLengthService.getByFieldIdWithRgName(fieldId);
+            
+            if (entityField.getDataLength() != null && entityField.getDataLength() > 0) {
+                // 需要同步长度校验
+                if (existingValidation != null) {
+                    // 如果已经有数据了，那么只需保证maxLength和 MetadataEntityFieldDO中dataLength一致即可
+                    var updateReqVO = new com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.ValidationLengthUpdateReqVO();
+                    updateReqVO.setId(existingValidation.getId());
+                    updateReqVO.setMaxLength(entityField.getDataLength()); // 最大长度与dataLength保持一致
+                    updateReqVO.setMinLength(existingValidation.getMinLength()); // 保持原有最小长度
+                    updateReqVO.setIsEnabled(1); // 启用长度校验
+                    updateReqVO.setRgName(existingValidation.getRgName()); // 保持原有规则组名称
+                    updateReqVO.setPromptMessage(existingValidation.getPromptMessage()); // 保持原有提示信息
+                    updateReqVO.setTrimBefore(existingValidation.getTrimBefore()); // 保持原有设置
+                    updateReqVO.setRunMode(entityField.getRunMode() != null ? entityField.getRunMode() : 0);
+                    validationLengthService.update(updateReqVO);
+                } else {
+                    // 如果没有数据，那么新增一条记录
+                    var saveReqVO = new com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.ValidationLengthSaveReqVO();
+                    saveReqVO.setFieldId(fieldId);
+                    saveReqVO.setMaxLength(entityField.getDataLength()); // 最大长度与dataLength保持一致
+                    saveReqVO.setMinLength(null); // 最小长度默认为null，允许为空
+                    saveReqVO.setIsEnabled(1); // 启用长度校验
+                    
+                    // rg_name可以用display_name+field_name+长度进行拼接
+                    String rgName = String.format("%s%s长度校验", 
+                        entityField.getDisplayName() != null ? entityField.getDisplayName() : "",
+                        entityField.getFieldName() != null ? entityField.getFieldName() : "");
+                    saveReqVO.setRgName(rgName);
+                    String promptMsg = String.format("字段长度不能超过%d个字符", entityField.getDataLength());
+                    saveReqVO.setPromptMessage(promptMsg);
+                    // 设置popPrompt确保errorMessage字段能正确返回
+                    saveReqVO.setPopPrompt(promptMsg);
+                    saveReqVO.setRunMode(entityField.getRunMode() != null ? entityField.getRunMode() : 0);
+                    
+                    validationLengthService.create(saveReqVO);
+                }
+            } else {
+                // 不需要长度校验，如果存在则删除
+                if (existingValidation != null) {
+                    validationLengthService.deleteByFieldId(fieldId);
+                }
+            }
+        } catch (Exception e) {
+            // 记录错误但不影响主流程
+            log.warn("处理长度校验时发生异常，字段ID: {}, 错误: {}", fieldId, e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 处理必填校验，同步到 MetadataValidationRequiredDO
+     * 根据TODO需求：除了在MetadataEntityFieldDO中存储相关的信息，还需要在MetadataValidationRequiredDO也储存一份
+     */
+    private void processRequiredValidation(Long fieldId, MetadataEntityFieldDO entityField) {
+        try {
+            // 检查是否已存在必填校验规则
+            var existingValidation = validationRequiredService.getByFieldIdWithRgName(fieldId);
+            
+            if (entityField.getIsRequired() != null && entityField.getIsRequired() == 1) {
+                // 需要启用必填校验
+                if (existingValidation != null) {
+                    // 如果已经有数据了，那么只需保证is_enabled和 MetadataEntityFieldDO中isRequired一致即可
+                    var updateReqVO = new com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.ValidationRequiredUpdateReqVO();
+                    updateReqVO.setId(existingValidation.getId());
+                    updateReqVO.setIsEnabled(entityField.getIsRequired());
+                    updateReqVO.setRgName(existingValidation.getRgName()); // 保持原有规则组名称
+                    updateReqVO.setPromptMessage(existingValidation.getPromptMessage()); // 保持原有提示信息
+                    validationRequiredService.update(updateReqVO);
+                } else {
+                    // 如果没有数据，那么新增一条记录
+                    var saveReqVO = new com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.ValidationRequiredSaveReqVO();
+                    saveReqVO.setFieldId(fieldId);
+                    saveReqVO.setIsEnabled(entityField.getIsRequired());
+                    
+                    // rg_name可以用display_name+field_name+必填校验进行拼接
+                    String rgName = String.format("%s%s必填校验", 
+                        entityField.getDisplayName() != null ? entityField.getDisplayName() : "",
+                        entityField.getFieldName() != null ? entityField.getFieldName() : "");
+                    saveReqVO.setRgName(rgName);
+                    String promptMsg = "此字段为必填项";
+                    saveReqVO.setPromptMessage(promptMsg);
+                    // 设置popPrompt确保errorMessage字段能正确返回
+                    saveReqVO.setPopPrompt(promptMsg);
+                    
+                    validationRequiredService.create(saveReqVO);
+                }
+            } else {
+                // 不需要必填校验，如果存在则删除
+                if (existingValidation != null) {
+                    validationRequiredService.deleteByFieldId(fieldId);
+                }
+            }
+        } catch (Exception e) {
+            // 记录错误但不影响主流程
+            log.warn("处理必填校验时发生异常，字段ID: {}, 错误: {}", fieldId, e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 处理唯一性校验，同步到 MetadataValidationUniqueDO
+     * 除了在MetadataEntityFieldDO中存储相关的信息，还需要在MetadataValidationUniqueDO也储存一份
+     */
+    private void processUniqueValidation(Long fieldId, MetadataEntityFieldDO entityField) {
+        try {
+            // 检查是否已存在唯一性校验规则
+            var existingValidation = validationUniqueService.getByFieldIdWithRgName(fieldId);
+            
+            if (entityField.getIsUnique() != null && entityField.getIsUnique() == 1) {
+                // 需要启用唯一性校验
+                if (existingValidation != null) {
+                    // 如果已经有数据了，那么只需保证is_enabled和 MetadataEntityFieldDO中isUnique一致即可
+                    var updateReqVO = new com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.ValidationUniqueUpdateReqVO();
+                    updateReqVO.setId(existingValidation.getId());
+                    updateReqVO.setIsEnabled(entityField.getIsUnique());
+                    updateReqVO.setRgName(existingValidation.getRgName()); // 保持原有规则组名称
+                    updateReqVO.setPromptMessage(existingValidation.getPromptMessage()); // 保持原有提示信息
+                    validationUniqueService.update(updateReqVO);
+                } else {
+                    // 如果没有数据，那么新增一条记录
+                    var saveReqVO = new com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.ValidationUniqueSaveReqVO();
+                    saveReqVO.setFieldId(fieldId);
+                    saveReqVO.setIsEnabled(entityField.getIsUnique());
+                    
+                    // rg_name可以用display_name+field_name+唯一校验进行拼接
+                    String rgName = String.format("%s%s唯一校验", 
+                        entityField.getDisplayName() != null ? entityField.getDisplayName() : "",
+                        entityField.getFieldName() != null ? entityField.getFieldName() : "");
+                    saveReqVO.setRgName(rgName);
+                    String promptMsg = "此字段值必须唯一";
+                    saveReqVO.setPromptMessage(promptMsg);
+                    // 设置popPrompt确保errorMessage字段能正确返回
+                    saveReqVO.setPopPrompt(promptMsg);
+                    
+                    validationUniqueService.create(saveReqVO);
+                }
+            } else {
+                // 不需要唯一性校验，如果存在则删除
+                if (existingValidation != null) {
+                    validationUniqueService.deleteByFieldId(fieldId);
+                }
+            }
+        } catch (Exception e) {
+            // 记录错误但不影响主流程
+            log.warn("处理唯一性校验时发生异常，字段ID: {}, 错误: {}", fieldId, e.getMessage(), e);
+        }
     }
 
 }

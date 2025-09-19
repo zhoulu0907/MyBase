@@ -6,14 +6,18 @@ import com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.Val
 import com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.ValidationLengthUpdateReqVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.ValidationRuleGroupSaveReqVO;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationLengthRepository;
+import com.cmsr.onebase.module.metadata.core.dal.database.MetadataEntityFieldRepository;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationLengthDO;
 import com.cmsr.onebase.module.metadata.build.service.entity.MetadataEntityFieldBuildService;
 import com.cmsr.onebase.module.metadata.core.util.StatusEnumUtil;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
+
+import java.util.List;
 
 /**
  * 长度校验 Service 实现
@@ -22,11 +26,13 @@ import org.springframework.util.Assert;
  * @date 2025-08-27
  */
 @Service
+@Slf4j
 public class MetadataValidationLengthBuildServiceImpl implements MetadataValidationLengthBuildService {
 
     @Resource private MetadataValidationLengthRepository lengthRepository; // 自身仓库
     @Resource private MetadataValidationRuleGroupBuildService ruleGroupService; // 其他服务
     @Resource private MetadataEntityFieldBuildService entityFieldService; // 其他服务
+    @Resource private MetadataEntityFieldRepository entityFieldRepository; // 字段仓库，用于同步数据
 
     @Override
     public MetadataValidationLengthDO getByFieldId(Long fieldId) {
@@ -96,6 +102,10 @@ public class MetadataValidationLengthBuildServiceImpl implements MetadataValidat
 
         // 保存长度校验规则
         lengthRepository.upsert(data);
+        
+        // 同步到MetadataEntityFieldDO：如果设置了maxLength，则同步到dataLength字段
+        syncToEntityField(vo.getFieldId(), data.getMaxLength());
+        
         return data.getId();
     }
 
@@ -137,12 +147,79 @@ public class MetadataValidationLengthBuildServiceImpl implements MetadataValidat
         updateDO.setGroupId(groupId);
 
         // 执行更新
-        lengthRepository.upsert(updateDO);
+        lengthRepository.update(updateDO); // 使用update而不是upsert，避免主键冲突
+        
+        // 同步到MetadataEntityFieldDO：更新dataLength字段
+        syncToEntityField(existingDO.getFieldId(), updateDO.getMaxLength());
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteByFieldId(Long fieldId) {
+        // 先获取要删除的记录，以便后续删除关联的校验规则分组
+        List<MetadataValidationLengthDO> recordsToDelete = lengthRepository.findByFieldId(fieldId);
+        
+        // 删除长度校验记录
         lengthRepository.deleteByFieldId(fieldId);
+        
+        // 删除关联的校验规则分组（如果没有其他记录引用）
+        for (MetadataValidationLengthDO record : recordsToDelete) {
+            if (record.getGroupId() != null) {
+                deleteRuleGroupIfNotReferenced(record.getGroupId());
+            }
+        }
+        
+        // 同步到MetadataEntityFieldDO：清空dataLength字段
+        syncToEntityField(fieldId, null);
+    }
+    
+    /**
+     * 同步长度校验到MetadataEntityFieldDO
+     * 根据TODO需求：如果调用了ValidationLengthController增删改接口，也需要将信息同步到metadataEntityFieldDO中
+     */
+    private void syncToEntityField(Long fieldId, Integer maxLength) {
+        try {
+            // 获取字段信息
+            MetadataEntityFieldDO field = entityFieldService.getEntityField(String.valueOf(fieldId));
+            if (field != null) {
+                // 创建更新对象，只更新dataLength字段
+                MetadataEntityFieldDO updateField = new MetadataEntityFieldDO();
+                updateField.setId(fieldId);
+                updateField.setDataLength(maxLength); // 将maxLength同步到dataLength
+                
+                // 直接使用字段仓库进行更新
+                entityFieldRepository.update(updateField);
+            }
+        } catch (Exception e) {
+            // 记录错误但不影响主流程
+            log.warn("同步长度校验到字段时发生异常，字段ID: {}, maxLength: {}, 错误: {}", fieldId, maxLength, e.getMessage(), e);
+        }
+    }
+    
+    /**
+     * 删除校验规则分组（如果没有其他记录引用）
+     */
+    private void deleteRuleGroupIfNotReferenced(Long groupId) {
+        try {
+            // 检查是否还有其他校验记录引用这个分组
+            boolean hasOtherReferences = false;
+            
+            // 检查长度校验表
+            List<MetadataValidationLengthDO> lengthRecords = lengthRepository.findByGroupId(groupId);
+            if (!lengthRecords.isEmpty()) {
+                hasOtherReferences = true;
+            }
+            
+            // TODO: 如果需要，可以检查其他校验类型表（Required、Unique、Range等）
+            
+            // 如果没有其他引用，删除规则分组
+            if (!hasOtherReferences) {
+                ruleGroupService.deleteValidationRuleGroup(groupId);
+                log.info("删除了无引用的校验规则分组: {}", groupId);
+            }
+        } catch (Exception e) {
+            // 记录错误但不影响主流程
+            log.warn("删除校验规则分组时发生异常，分组ID: {}, 错误: {}", groupId, e.getMessage(), e);
+        }
     }
 }

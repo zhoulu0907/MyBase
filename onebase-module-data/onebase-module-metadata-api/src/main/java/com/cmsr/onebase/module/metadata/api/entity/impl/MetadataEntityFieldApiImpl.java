@@ -4,12 +4,14 @@ import com.cmsr.onebase.module.metadata.api.entity.MetadataEntityFieldApi;
 import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldQueryReqDTO;
 import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldRespDTO;
 import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldJdbcTypeReqDTO;
+import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldJdbcTypeRespDTO;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataEntityFieldCoreService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -32,8 +34,26 @@ public class MetadataEntityFieldApiImpl implements MetadataEntityFieldApi {
     }
 
     @Override
-    public Map<Long, String> getFieldJdbcTypes(@Valid @RequestBody EntityFieldJdbcTypeReqDTO reqDTO) {
+    public List<EntityFieldJdbcTypeRespDTO> getFieldJdbcTypes(@Valid @RequestBody EntityFieldJdbcTypeReqDTO reqDTO) {
         List<Long> fieldIds = reqDTO != null ? reqDTO.getFieldIds() : null;
-        return metadataEntityFieldService.getFieldJdbcTypes(fieldIds);
+        Map<Long, Map<String, String>> fieldTypeInfo = metadataEntityFieldService.getFieldJdbcTypesWithFieldType(fieldIds);
+        
+        List<EntityFieldJdbcTypeRespDTO> result = new ArrayList<>();
+        for (Map.Entry<Long, Map<String, String>> entry : fieldTypeInfo.entrySet()) {
+            Long fieldId = entry.getKey();
+            Map<String, String> typeInfo = entry.getValue();
+            String jdbcType = typeInfo.get("jdbcType");
+            String fieldType = typeInfo.get("fieldType");
+            String fieldName = typeInfo.get("fieldName");
+            
+            EntityFieldJdbcTypeRespDTO dto = new EntityFieldJdbcTypeRespDTO();
+            dto.setFieldId(fieldId);
+            dto.setFieldName(fieldName);
+            dto.setJdbcType(jdbcType);
+            dto.setFieldType(fieldType);
+            result.add(dto);
+        }
+        
+        return result;
     }
 }

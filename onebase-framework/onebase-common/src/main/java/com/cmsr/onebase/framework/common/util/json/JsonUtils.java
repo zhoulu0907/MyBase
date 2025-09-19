@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * JSON 工具类
@@ -198,6 +199,15 @@ public class JsonUtils {
             return objectMapper.treeToValue(jsonNode, toValueType);
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    public static <T> T updateBean(T bean, Map<String, Object> properties) {
+        try {
+            T newBean = objectMapper.updateValue(bean, properties);
+            return newBean;
+        } catch (Exception e) {
+            throw new RuntimeException("更新对象属性异常: " + bean.getClass().getName() + ", properties: " + properties, e);
         }
     }
 

@@ -32,7 +32,7 @@ public class DynamicDataPageReqVO {
     @Schema(description = "排序方向", example = "desc")
     private String sortDirection = "desc";
 
-    @Schema(description = "过滤条件")
+    @Schema(description = "过滤条件（模糊查询）")
     private Map<Long, Object> filters;
 
     @Schema(description = "方法编码（可选）")

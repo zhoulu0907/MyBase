@@ -54,9 +54,6 @@ public class MetadataEntityFieldDTO {
     @Schema(description = "是否唯一")
     private Boolean isUnique;
 
-    @Schema(description = "是否允许空值")
-    private Boolean allowNull;
-
     @Schema(description = "排序")
     private Integer sortOrder;
 

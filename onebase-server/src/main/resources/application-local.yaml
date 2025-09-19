@@ -13,7 +13,16 @@ spring:
     hikari:
       minimum-idle: 1
       maximum-pool-size: 20
-
+  redis:
+    redisson:
+      config: |
+        singleServerConfig:
+          address: "redis://10.0.104.38:6379"
+          subscriptionConnectionMinimumIdleSize: 1
+          subscriptionConnectionPoolSize: 5
+          connectionMinimumIdleSize: 2
+          connectionPoolSize: 5
+          database: 0
   # Redis 配置。Redisson 默认的配置足够使用，一般不需要进行调优
   data:
     redis:
@@ -27,8 +36,8 @@ spring:
       lettuce:
         pool:
           max-active: 24    # 最大连接数，与错误信息中的24保持一致
-          max-idle: 24      # 最大空闲连接
-          min-idle: 8       # 最小空闲连接
+          max-idle: 2      # 最大空闲连接
+          min-idle: 2       # 最小空闲连接
           max-wait: 10000ms # 最大等待时间
           time-between-eviction-runs: 30s # 空闲连接检查间隔
 
@@ -52,6 +61,8 @@ debug: false
 onebase:
   captcha:
     enable: false # 本地环境，暂时关闭图片验证码，方便登录等接口的测试；
+  platform-tenant:
+    enable-create-app: true # 测试环境，暂时允许平台租户创建应用，方便登录接口测试；
   security:
     mock-enable: false
   access-log: # 访问日志的配置项
@@ -83,6 +94,8 @@ wx:
       key-prefix: wa # Redis Key 的前缀
     http-client-type: HttpClient # 采用 HttpClient 请求微信公众号平台
 
+liteflow:
+  enable: false
 snail-job:
   server:
     host: 10.0.104.38

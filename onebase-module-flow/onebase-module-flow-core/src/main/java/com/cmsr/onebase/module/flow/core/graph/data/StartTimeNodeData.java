@@ -1,7 +1,10 @@
 package com.cmsr.onebase.module.flow.core.graph.data;
 
+import com.cmsr.onebase.module.flow.core.enums.JsonGraphConstant;
 import lombok.Data;
+import org.apache.commons.lang3.StringUtils;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -68,9 +71,9 @@ public class StartTimeNodeData {
 
     private String triggerTime;
 
-    public StartTimeNodeData() {
-
-    }
+    //
+    private LocalDateTime startLocalDateTime;
+    private LocalDateTime endLocalDateTime;
 
     public StartTimeNodeData(Map<String, Object> data) {
         this.cronExpression = (String) data.get("cronExpression");
@@ -84,6 +87,15 @@ public class StartTimeNodeData {
         this.triggerDatetime = (String) data.get("triggerDatetime");
         this.triggerDate = (String) data.get("triggerDate");
         this.triggerTime = (String) data.get("triggerTime");
+
+        startTime = StringUtils.trimToNull(startTime);
+        if (StringUtils.isNotEmpty(startTime)) {
+            startLocalDateTime = LocalDateTime.parse(startTime, JsonGraphConstant.DATE_TIME_FORMATTER);
+        }
+        endTime = StringUtils.trimToNull(endTime);
+        if (StringUtils.isNotEmpty(endTime)) {
+            endLocalDateTime = LocalDateTime.parse(endTime, JsonGraphConstant.DATE_TIME_FORMATTER);
+        }
     }
 
     public String createCronExpression() {

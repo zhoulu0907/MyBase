@@ -16,7 +16,9 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -36,6 +38,11 @@ public class TemporaryDatasourceService {
      * 用于缓存已创建的临时服务，避免重复创建
      */
     private final Map<String, AnylineService<?>> serviceCache = new ConcurrentHashMap<>();
+    
+    /**
+     * 用于缓存数据源实例，便于管理连接池生命周期
+     */
+    private final Map<String, DataSource> datasourceCache = new ConcurrentHashMap<>();
 
     /**
      * 根据数据源DO对象创建临时的AnylineService用于数据库操作
@@ -62,11 +69,20 @@ public class TemporaryDatasourceService {
         // 生成数据源的唯一标识，用于缓存
         String cacheKey = generateCacheKey(datasourceConfig);
 
-        // 先从缓存中获取
+        // 先从缓存中获取，但需要检查连接池状态
         AnylineService<?> cachedService = serviceCache.get(cacheKey);
-        if (cachedService != null) {
-            log.debug("从缓存中获取临时数据源服务: {}", cacheKey);
-            return cachedService;
+        DataSource cachedDataSource = datasourceCache.get(cacheKey);
+        
+        if (cachedService != null && cachedDataSource != null) {
+            // 检查连接池是否仍然活跃
+            if (isDataSourceActive(cachedDataSource)) {
+                log.debug("从缓存中获取临时数据源服务: {}", cacheKey);
+                return cachedService;
+            } else {
+                log.warn("缓存的数据源连接池已关闭，移除缓存并重新创建: {}", cacheKey);
+                serviceCache.remove(cacheKey);
+                datasourceCache.remove(cacheKey);
+            }
         }
 
         try {
@@ -98,36 +114,35 @@ public class TemporaryDatasourceService {
             log.info("构建的JDBC URL: {}", url);
             log.info("用户名: {}", username);
             log.info("数据库类型: {}", datasourceType);
-
-            // 创建数据源配置 - 使用Druid连接池
+            
+            // 创建数据源配置 - 使用更稳定的HikariDataSource连接池配置
             Map<String, Object> dsConfig = new HashMap<>();
             dsConfig.put("url", url);
             dsConfig.put("username", username != null ? username : "");
             dsConfig.put("password", password != null ? password : "");
             dsConfig.put("driver", getDriverByType(datasourceType));
-            // 指定连接池类型，使用Druid
-            dsConfig.put("pool", "com.alibaba.druid.pool.DruidDataSource");
-            // 添加Druid连接池配置
-            dsConfig.put("initial-size", 1);
-            dsConfig.put("max-active", 10);
-            dsConfig.put("min-idle", 1);
-            dsConfig.put("max-wait", 30000);
-            dsConfig.put("validation-query", "SELECT 1");
-            dsConfig.put("test-on-borrow", false);
-            dsConfig.put("test-on-return", false);
-            dsConfig.put("test-while-idle", true);
-            dsConfig.put("time-between-eviction-runs-millis", 60000);
-
-            // 关键配置：限制连接失败重试次数，避免无限重试死循环
-            dsConfig.put("connection-error-retry-attempts", 5); // 连接失败重试次数上限为5次
-            dsConfig.put("break-after-acquire-failure", true);  // 获取连接失败后中断，避免死循环
-            dsConfig.put("connect-timeout", 10000);             // 连接超时时间10秒
-            dsConfig.put("socket-timeout", 30000);              // Socket超时时间30秒
-            dsConfig.put("fail-fast", true);                    // 快速失败，不无限等待
+            // 指定连接池类型，使用com.zaxxer.hikari.HikariDataSource
+            dsConfig.put("pool", "com.zaxxer.hikari.HikariDataSource");
+            
+            // 优化HikariCP连接池配置，提高稳定性
+            dsConfig.put("minimum-idle", 1);              // 最小空闲连接数
+            dsConfig.put("maximum-pool-size", 5);         // 最大连接池大小，避免过多连接
+            dsConfig.put("connection-timeout", 30000);    // 连接超时30秒
+            dsConfig.put("idle-timeout", 300000);         // 空闲超时5分钟
+            dsConfig.put("max-lifetime", 1800000);        // 连接最大生命周期30分钟
+            dsConfig.put("leak-detection-threshold", 60000); // 连接泄露检测阈值1分钟
+            
+            // 连接有效性检查配置
+            dsConfig.put("connection-test-query", "SELECT 1");
+            dsConfig.put("validation-timeout", 5000);     // 验证超时5秒
+            
+            // 移除可能导致问题的配置
+            // dsConfig.put("fail-fast", true);          // 移除快速失败，避免过早关闭
+            // dsConfig.put("break-after-acquire-failure", true); // 移除，避免获取失败后立即中断
 
             log.info("临时数据源配置: {}", dsConfig);
 
-            // 创建数据源和临时服务 - 增加超时控制和快速失败机制
+            // 创建数据源和临时服务 - 增强错误处理和连接验证
             DataSource dataSource = null;
             try {
                 log.info("开始创建数据源，URL: {}", url);
@@ -150,8 +165,9 @@ public class TemporaryDatasourceService {
 
                 AnylineService<?> service = ServiceProxy.temporary(dataSource);
 
-                // 缓存创建的服务
+                // 缓存创建的服务和数据源
                 serviceCache.put(cacheKey, service);
+                datasourceCache.put(cacheKey, dataSource);
 
                 log.info("临时服务创建成功，Service实例: {}", service.getClass().getName());
                 log.info("=== 创建临时数据源调试信息结束 ===");
@@ -160,7 +176,18 @@ public class TemporaryDatasourceService {
             } catch (Exception e) {
                 log.error("数据源连接创建或测试失败，URL: {}, 错误: {}", url, e.getMessage());
 
-                // 如果是连接超时或网络不可达，快速抛出异常
+                // 清理可能创建的资源
+                if (dataSource != null) {
+                    try {
+                        if (dataSource instanceof com.zaxxer.hikari.HikariDataSource) {
+                            ((com.zaxxer.hikari.HikariDataSource) dataSource).close();
+                        }
+                    } catch (Exception closeEx) {
+                        log.warn("关闭失败的数据源时发生异常: {}", closeEx.getMessage());
+                    }
+                }
+
+                // 如果是连接超时或网络不可达，提供更详细的错误信息
                 String errorMsg = e.getMessage();
                 if (errorMsg != null) {
                     if (errorMsg.contains("Connection refused") ||
@@ -170,6 +197,9 @@ public class TemporaryDatasourceService {
                         errorMsg.contains("connect timed out")) {
                         throw new RuntimeException("数据源网络不可达或连接超时，请检查数据源配置: " + errorMsg, e);
                     }
+                    if (errorMsg.contains("HikariDataSource") && errorMsg.contains("has been closed")) {
+                        throw new RuntimeException("数据源连接池已关闭，请重试或检查连接池配置: " + errorMsg, e);
+                    }
                 }
                 throw e; // 其他异常直接抛出
             }
@@ -177,6 +207,70 @@ public class TemporaryDatasourceService {
             log.error("创建数据库连接失败: {}", e.getMessage(), e);
             throw new RuntimeException("创建数据库连接失败: " + e.getMessage(), e);
         }
+    }
+
+    /**
+     * 检查数据源是否仍然活跃
+     *
+     * @param dataSource 数据源实例
+     * @return 是否活跃
+     */
+    private boolean isDataSourceActive(DataSource dataSource) {
+        if (dataSource == null) {
+            return false;
+        }
+        
+        try {
+            // 检查HikariDataSource是否已关闭
+            if (dataSource instanceof com.zaxxer.hikari.HikariDataSource) {
+                com.zaxxer.hikari.HikariDataSource hikariDataSource = (com.zaxxer.hikari.HikariDataSource) dataSource;
+                if (hikariDataSource.isClosed()) {
+                    return false;
+                }
+            }
+            
+            // 尝试获取连接并快速测试
+            try (Connection testConn = dataSource.getConnection()) {
+                return testConn != null && !testConn.isClosed();
+            }
+        } catch (Exception e) {
+            log.debug("数据源活跃性检查失败: {}", e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * 清理缓存中的失效数据源
+     */
+    public synchronized void cleanupInactiveDataSources() {
+        log.debug("开始清理失效的数据源缓存");
+        Set<String> keysToRemove = new HashSet<>();
+        
+        for (Map.Entry<String, DataSource> entry : datasourceCache.entrySet()) {
+            String key = entry.getKey();
+            DataSource dataSource = entry.getValue();
+            
+            if (!isDataSourceActive(dataSource)) {
+                keysToRemove.add(key);
+                try {
+                    // 尝试关闭失效的数据源
+                    if (dataSource instanceof com.zaxxer.hikari.HikariDataSource) {
+                        ((com.zaxxer.hikari.HikariDataSource) dataSource).close();
+                    }
+                } catch (Exception e) {
+                    log.warn("关闭失效数据源时发生异常: {}", e.getMessage());
+                }
+            }
+        }
+        
+        // 移除失效的缓存项
+        for (String key : keysToRemove) {
+            serviceCache.remove(key);
+            datasourceCache.remove(key);
+            log.debug("移除失效的数据源缓存: {}", key);
+        }
+        
+        log.debug("数据源缓存清理完成，移除了 {} 个失效项", keysToRemove.size());
     }
 
     /**

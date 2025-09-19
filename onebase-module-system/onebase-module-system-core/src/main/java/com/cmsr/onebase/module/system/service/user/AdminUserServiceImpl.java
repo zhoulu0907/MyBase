@@ -210,7 +210,7 @@ public class AdminUserServiceImpl implements AdminUserService {
                 updateReqVO.getMobile(), updateReqVO.getEmail(), updateReqVO.getDeptId(), updateReqVO.getPostIds());
         // 1.1 校验角色权限
         validateRoleIds(updateReqVO.getRoleIds());
-        if (updateReqVO.getStatus() != null && oldUser != null) {
+        if (updateReqVO.getStatus() != null) {
 
             if (updateReqVO.getStatus() != oldUser.getStatus() && updateReqVO.getStatus() == CommonStatusEnum.ENABLE.getStatus()) {
                 // 1.1 校验账户配合

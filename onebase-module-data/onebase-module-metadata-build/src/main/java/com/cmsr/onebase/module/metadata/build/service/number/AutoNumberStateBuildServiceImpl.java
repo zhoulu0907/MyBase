@@ -24,7 +24,7 @@ public class AutoNumberStateBuildServiceImpl implements AutoNumberStateBuildServ
     @Override
     @Transactional(rollbackFor = Exception.class)
     public long nextNumber(Long configId, java.time.LocalDateTime now) {
-        MetadataAutoNumberConfigDO cfg = configService.getByConfigId(configId);
+        MetadataAutoNumberConfigDO cfg = configService.getByFieldId(configId);
         // 使用新的枚举值：1-启用，0-禁用
         if (cfg == null || cfg.getIsEnabled() == null || !CommonStatusEnum.isEnabled(cfg.getIsEnabled())) {
             throw new IllegalStateException("自动编号未启用");

@@ -134,4 +134,58 @@ public class MetadataEntityFieldCoreServiceImpl implements MetadataEntityFieldCo
         }
         return result;
     }
+
+    @Override
+    public Map<Long, Map<String, String>> getFieldJdbcTypesWithFieldType(List<Long> fieldIds) {
+        if (fieldIds == null || fieldIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        DefaultConfigStore cs = new DefaultConfigStore();
+        cs.and(Compare.IN, "id", fieldIds);
+        cs.and("deleted", 0);
+        List<MetadataEntityFieldDO> fields = metadataEntityFieldRepository.findAllByConfig(cs);
+        if (fields == null || fields.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        Map<Long, String> idToTypeCode = fields.stream()
+                .filter(f -> f.getId() != null && f.getFieldType() != null && !f.getFieldType().isBlank())
+                .collect(Collectors.toMap(MetadataEntityFieldDO::getId, MetadataEntityFieldDO::getFieldType, (a,b)->a));
+
+        // 同时构建 id 到 fieldName 的映射
+        Map<Long, String> idToFieldName = fields.stream()
+                .filter(f -> f.getId() != null && f.getFieldName() != null && !f.getFieldName().isBlank())
+                .collect(Collectors.toMap(MetadataEntityFieldDO::getId, MetadataEntityFieldDO::getFieldName, (a,b)->a));
+
+        if (idToTypeCode.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        // 直接使用 core 模块的 Repository 查询字段类型映射，避免循环依赖
+        Map<String, String> typeCodeToJdbc = new HashMap<>();
+        for (String code : new HashSet<>(idToTypeCode.values())) {
+            MetadataComponentFieldTypeDO typeDO = metadataComponentFieldTypeRepository.findByFieldTypeCode(code);
+            if (typeDO != null && typeDO.getDataType() != null && !typeDO.getDataType().isBlank()) {
+                typeCodeToJdbc.put(code, typeDO.getDataType());
+            }
+        }
+
+        Map<Long, Map<String, String>> result = new LinkedHashMap<>();
+        for (Map.Entry<Long, String> e : idToTypeCode.entrySet()) {
+            String jdbc = typeCodeToJdbc.get(e.getValue());
+            if (jdbc != null) {
+                Map<String, String> typeInfo = new HashMap<>();
+                typeInfo.put("jdbcType", jdbc);
+                typeInfo.put("fieldType", e.getValue());
+                // 添加字段名称
+                String fieldName = idToFieldName.get(e.getKey());
+                if (fieldName != null) {
+                    typeInfo.put("fieldName", fieldName);
+                }
+                result.put(e.getKey(), typeInfo);
+            }
+        }
+        return result;
+    }
 }

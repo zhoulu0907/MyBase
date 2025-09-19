@@ -6,6 +6,7 @@ import com.cmsr.onebase.module.metadata.core.service.datamethod.MetadataDataMeth
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataEntityFieldCoreService;
 import com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.vo.*;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,6 +21,7 @@ import java.util.stream.Collectors;
  * @date 2025-09-10
  */
 @Service
+@Slf4j
 public class RuntimeDataServiceImpl implements RuntimeDataService {
 
     @Resource
@@ -86,6 +88,11 @@ public class RuntimeDataServiceImpl implements RuntimeDataService {
 
     @Override
     public PageResult<DynamicDataRespVO> getDataPage(DynamicDataPageReqVO reqVO) {
+        // 添加调试日志
+        log.info("分页查询参数 - entityId: {}, pageNo: {}, pageSize: {}, pageSize类型: {}", 
+                 reqVO.getEntityId(), reqVO.getPageNo(), reqVO.getPageSize(), 
+                 reqVO.getPageSize() != null ? reqVO.getPageSize().getClass().getSimpleName() : "null");
+        
         // 将 filters 的 field_id -> value 转换为 field_name -> value
         Map<String, Object> filtersByName = convertIdKeyMapToNameKeyMap(reqVO.getEntityId(), reqVO.getFilters());
 

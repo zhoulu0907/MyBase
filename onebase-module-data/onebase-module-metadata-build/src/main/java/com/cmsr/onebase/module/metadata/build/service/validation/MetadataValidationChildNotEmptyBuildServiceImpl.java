@@ -141,7 +141,7 @@ public class MetadataValidationChildNotEmptyBuildServiceImpl implements Metadata
         updateObj.setGroupId(groupId);
 
         // 执行更新
-        childNotEmptyRepository.upsert(updateObj);
+        childNotEmptyRepository.update(updateObj); // 使用update而不是upsert，避免主键冲突
     }
 
     @Override

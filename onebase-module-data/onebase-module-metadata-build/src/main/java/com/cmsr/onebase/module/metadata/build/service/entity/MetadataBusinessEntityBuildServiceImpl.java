@@ -315,12 +315,11 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
     private void saveEntityFields(Long entityId, List<MetadataSystemFieldsDO> systemFields, Long appId) {
         int sortOrder = 1;
         for (MetadataSystemFieldsDO systemField : systemFields) {
-        // 特殊处理 parent_id：不是主键、不是必填、不是唯一、允许为空
+        // 特殊处理 parent_id：不是主键、不是必填、不是唯一
         boolean isParentId = "parent_id".equalsIgnoreCase(systemField.getFieldName());
         int isPrimaryKey = isParentId ? StatusEnumUtil.NO : BooleanStatusEnum.toStatusValue(systemField.getIsSnowflakeId());
         int isRequired = isParentId ? StatusEnumUtil.NO : BooleanStatusEnum.toStatusValue(systemField.getIsRequired());
         int isUnique = isParentId ? StatusEnumUtil.NO : BooleanStatusEnum.toStatusValue(systemField.getIsSnowflakeId());
-        int allowNull = isParentId ? StatusEnumUtil.YES : BooleanStatusEnum.toInverseStatusValue(systemField.getIsRequired());
         MetadataEntityFieldDO entityField = MetadataEntityFieldDO.builder()
                     .entityId(entityId)
                     .fieldName(systemField.getFieldName())
@@ -336,9 +335,8 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
                     // 使用新的枚举值：1-是，0-否
                     .isSystemField(StatusEnumUtil.YES) // 标记为系统字段：1-是
             .isPrimaryKey(isPrimaryKey) // parent_id 强制不是主键
-            .isRequired(isRequired) // parent_id 强制不是必填
+            .isRequired(isRequired) // parent_id 强制不是必填  
             .isUnique(isUnique) // parent_id 强制不是唯一
-            .allowNull(allowNull) // parent_id 强制允许为空
                     .sortOrder(sortOrder++)
                     .validationRules(null) // 系统字段暂不设置校验规则
                     .runMode(0) // 默认编辑态
@@ -401,36 +399,78 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
      * 创建物理表
      */
     private void createPhysicalTable(MetadataDatasourceDO datasource, String tableName, List<MetadataSystemFieldsDO> systemFields) {
-        try {
-            log.info("=== 开始创建物理表调试信息 ===");
-            log.info("目标表名: {}", tableName);
-            log.info("数据源配置: {}", datasource.getConfig());
-            log.info("数据源类型: {}", datasource.getDatasourceType());
-
-            // 创建 AnylineService 实例 - 使用新的TemporaryDatasourceService
-            AnylineService<?> service = temporaryDatasourceService.createTemporaryService(datasource);
-
-            // 生成建表 DDL
-            String createTableDDL = generateCreateTableDDL(tableName, systemFields);
-            log.info("生成的DDL语句: \n{}", createTableDDL);
-
-            // 验证服务连接的数据库
+        int maxRetries = 3;
+        Exception lastException = null;
+        
+        for (int attempt = 1; attempt <= maxRetries; attempt++) {
             try {
-                String currentDatabase = service.query("SELECT current_database()").toString();
-                log.info("当前连接的数据库: {}", currentDatabase);
+                log.info("=== 开始创建物理表调试信息 (尝试 {}/{}) ===", attempt, maxRetries);
+                log.info("目标表名: {}", tableName);
+                log.info("数据源配置: {}", datasource.getConfig());
+                log.info("数据源类型: {}", datasource.getDatasourceType());
+
+                // 如果不是第一次尝试，先清理失效的连接池缓存
+                if (attempt > 1) {
+                    log.info("第{}次重试，清理失效的数据源缓存", attempt);
+                    temporaryDatasourceService.cleanupInactiveDataSources();
+                }
+
+                // 创建 AnylineService 实例 - 使用新的TemporaryDatasourceService
+                AnylineService<?> service = temporaryDatasourceService.createTemporaryService(datasource);
+
+                // 生成建表 DDL
+                String createTableDDL = generateCreateTableDDL(tableName, systemFields);
+                log.info("生成的DDL语句: \n{}", createTableDDL);
+
+                // 验证服务连接的数据库
+                try {
+                    String currentDatabase = service.query("SELECT current_database()").toString();
+                    log.info("当前连接的数据库: {}", currentDatabase);
+                } catch (Exception e) {
+                    log.warn("无法获取当前数据库信息: {}", e.getMessage());
+                }
+
+                // 执行建表语句
+                service.execute(createTableDDL);
+
+                log.info("=== 物理表创建完成 ===");
+                log.info("成功创建物理表: {}", tableName);
+                return; // 成功创建，直接返回
+                
             } catch (Exception e) {
-                log.warn("无法获取当前数据库信息: {}", e.getMessage());
+                lastException = e;
+                String errorMsg = e.getMessage();
+                log.error("创建物理表失败 (尝试 {}/{}): {}", attempt, maxRetries, errorMsg, e);
+                
+                // 检查是否是连接池关闭错误
+                boolean isConnectionPoolError = errorMsg != null && 
+                    (errorMsg.contains("HikariDataSource") && errorMsg.contains("has been closed") ||
+                     errorMsg.contains("connection pool") ||
+                     errorMsg.contains("Connection is not available") ||
+                     errorMsg.contains("Pool not open"));
+                
+                if (isConnectionPoolError && attempt < maxRetries) {
+                    log.warn("检测到连接池相关错误，将进行第{}次重试", attempt + 1);
+                    // 短暂等待后重试
+                    try {
+                        Thread.sleep(1000 * attempt); // 递增等待时间
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                        throw new RuntimeException("创建物理表过程被中断", ie);
+                    }
+                    continue; // 继续重试
+                } else if (attempt >= maxRetries) {
+                    break; // 达到最大重试次数，退出循环
+                } else {
+                    // 非连接池错误，直接抛出
+                    throw new RuntimeException("创建物理表失败", e);
+                }
             }
-
-            // 执行建表语句
-            service.execute(createTableDDL);
-
-            log.info("=== 物理表创建完成 ===");
-            log.info("成功创建物理表: {}", tableName);
-        } catch (Exception e) {
-            log.error("创建物理表失败: {}", e.getMessage(), e);
-            throw new RuntimeException("创建物理表失败", e);
         }
+        
+        // 所有重试都失败了
+        log.error("创建物理表在{}次尝试后仍然失败", maxRetries);
+        throw new RuntimeException("创建物理表失败，已重试" + maxRetries + "次", lastException);
     }
 
     /**
