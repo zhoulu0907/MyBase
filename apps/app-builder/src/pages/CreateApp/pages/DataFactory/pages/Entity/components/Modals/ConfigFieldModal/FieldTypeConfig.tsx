@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button, Input, Select, Dropdown, Menu } from '@arco-design/web-react';
+import { Button, Input, Select, Dropdown, Menu, Cascader } from '@arco-design/web-react';
 import { IconDelete, IconDragDotVertical, IconPlus, IconEdit } from '@arco-design/web-react/icon';
 import { ReactSortable } from 'react-sortablejs';
 import styles from './index.module.less';
@@ -112,7 +112,7 @@ interface AutoCodeConfigProps {
   onConfirm: (config: AutoNumberRule) => void;
   initialConfig?: AutoNumberRule;
   onCancel?: () => void; // 新增：取消回调
-  fields: Record<string, unknown>[];
+  fields: { label: string; value: string }[];
 }
 
 const dataOptions = [
@@ -301,13 +301,14 @@ export const AutoCodeConfig: React.FC<AutoCodeConfigProps> = ({
           <div className={styles['rule-content']}>
             <IconDragDotVertical className={styles['drag-handle']} />
             <span className={styles['rule-label']}>表单字段:</span>
-            <Select
-              value={(rule.config.fieldName as string) || ''}
+            <Cascader
               placeholder="请选择字段"
-              onChange={(value) => updateRule(rule.id!, { config: { ...rule.config, fieldName: value } })}
               className={styles['rule-input']}
-              options={fields.map((field) => ({ label: field.displayName, value: field.fieldName }))}
-            ></Select>
+              options={fields}
+              onChange={(value) =>
+                updateRule(rule.id!, { config: { ...rule.config, fieldName: value[value.length - 1] } })
+              }
+            />
             <Button
               type="text"
               status="danger"

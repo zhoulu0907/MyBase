@@ -153,33 +153,23 @@ const CreateCustomRule: React.FC<CreateRuleModalProps> = ({ visible, setVisible,
   // 加载字段选项
   const loadFieldOptions = async () => {
     const res = await getEntityFieldsWithChildren(entity.id);
-    console.log('字段选项:', res);
-    let allFields: object[] = [];
-    let parentFields: object[] = [];
-    let allChildFields: object[] = [];
+    // 处理主表字段
+    const parentFields = (res?.parentFields || []).map((item: { displayName: string; fieldId: string }) => ({
+      label: item.displayName,
+      value: item.fieldId,
+      isParent: true
+    }));
 
-    if (res?.parentFields?.length > 0) {
-      parentFields = res.parentFields.map((item: { displayName: string; fieldId: string }) => ({
+    // 处理子表字段
+    const childFields = (res?.childEntities || [])
+      .flatMap((entity: { childFields: { displayName: string; fieldId: string }[] }) => entity?.childFields || [])
+      .map((item: { displayName: string; fieldId: string }) => ({
         label: item.displayName,
-        value: item.fieldId,
-        isParent: true // 增加主表标识
+        value: item.fieldId
       }));
-    }
-    if (res?.childEntities?.length > 0) {
-      res.childEntities.forEach((item: { childFields: { displayName: string; fieldId: string }[] }) => {
-        if (item?.childFields?.length > 0) {
-          const childFields = item?.childFields?.map((item: { displayName: string; fieldId: string }) => ({
-            label: item.displayName,
-            value: item.fieldId
-          }));
-          allChildFields = allChildFields.concat(childFields);
-        }
-      });
-    }
-    allFields = [...parentFields, ...allChildFields];
-    // console.log('allFields', allFields, parentFields, childFields);
+    const allFields = [...parentFields, ...childFields];
     setLeftFieldOptions(allFields);
-    setRightFieldOptions(allChildFields);
+    setRightFieldOptions(childFields);
   };
 
   // 初始化表单数据
