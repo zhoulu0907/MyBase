@@ -1,6 +1,7 @@
 import type { EdgeData, EntityERProps, EntityNode, Entity } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
 import { useAppStore } from '@/store/store_app';
 import { useResourceStore } from '@/store/store_resource';
+import { useNewNodeStore } from '@/store/store_entity';
 import { Button, Message } from '@arco-design/web-react';
 import React, { useEffect, useRef, useState } from 'react';
 import EditEntityDrawer from '../components/Drawers/EditEntityDrawer';
@@ -36,6 +37,7 @@ export const EntityERContainer: React.FC<{
 }> = ({ refreshEntityList, setRefreshEntityList, onlyUpdateNode, setOnlyUpdateNode }) => {
   const { curAppId } = useAppStore();
   const { curDataSourceId } = useResourceStore();
+  const { clearNewNodes } = useNewNodeStore();
   // const [mode, setMode] = useState<'view' | 'edit'>('view');
   const [data, setData] = useState<EntityERProps['data']>({ nodes: [], edges: [] });
   const [editDrawerVisible, setEditDrawerVisible] = useState(false);
@@ -66,7 +68,7 @@ export const EntityERContainer: React.FC<{
             const pos = JSON.parse(item?.displayConfig || '{}');
             return {
               ...item,
-              positionX: pos?.x, // 新增节点位置信息为undefined
+              positionX: pos?.x,
               positionY: pos?.y
             };
           }) || [],
@@ -225,6 +227,7 @@ export const EntityERContainer: React.FC<{
   useEffect(() => {
     if (curDataSourceId) {
       loadEntityList();
+      clearNewNodes();
     }
   }, [curDataSourceId]);
 

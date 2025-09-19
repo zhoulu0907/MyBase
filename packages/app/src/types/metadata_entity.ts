@@ -158,6 +158,7 @@ export interface UpdateRuleReqVO extends CreateRuleReqVO {
 
 export const FilterEntityFields = ['lock_version', 'deleted', 'parent_id'];
 
+// 字段验证类型(大于、小于、等于、包含 ...)
 export interface EntityFieldValidationTypes {
   fieldId: string;
   fieldTypeCode: string;
