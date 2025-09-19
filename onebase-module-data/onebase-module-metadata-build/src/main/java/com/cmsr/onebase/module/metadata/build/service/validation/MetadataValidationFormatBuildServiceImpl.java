@@ -53,6 +53,38 @@ public class MetadataValidationFormatBuildServiceImpl implements MetadataValidat
     }
 
     @Override
+    public ValidationFormatRespVO getById(Long id) {
+        MetadataValidationFormatDO formatDO = formatRepository.findById(id);
+        if (formatDO == null) {
+            return null;
+        }
+
+        // 转换DO为VO
+        ValidationFormatRespVO respVO = BeanUtils.toBean(formatDO, ValidationFormatRespVO.class);
+
+        // 获取规则组名称
+        var ruleGroup = ruleGroupService.getValidationRuleGroup(formatDO.getGroupId());
+        if (ruleGroup != null) {
+            respVO.setRgName(ruleGroup.getRgName());
+        }
+
+        return respVO;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteById(Long id) {
+        // 先校验记录是否存在
+        MetadataValidationFormatDO existing = formatRepository.findById(id);
+        if (existing == null) {
+            throw new IllegalArgumentException("格式校验规则不存在，ID: " + id);
+        }
+        
+        // 执行删除
+        formatRepository.deleteById(id);
+    }
+
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public Long create(ValidationFormatSaveReqVO vo) {
         Assert.notNull(vo, "vo不能为空");

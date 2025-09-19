@@ -172,6 +172,53 @@ public class MetadataValidationLengthBuildServiceImpl implements MetadataValidat
         // 同步到MetadataEntityFieldDO：清空dataLength字段
         syncToEntityField(fieldId, null);
     }
+
+    @Override
+    public ValidationLengthRespVO getById(Long id) {
+        MetadataValidationLengthDO lengthDO = lengthRepository.findById(id);
+        if (lengthDO == null) {
+            return null;
+        }
+
+        // 转换DO为VO
+        ValidationLengthRespVO respVO = BeanUtils.toBean(lengthDO, ValidationLengthRespVO.class);
+
+        // 查询并设置规则组名称
+        if (lengthDO.getGroupId() != null) {
+            var ruleGroup = ruleGroupService.getValidationRuleGroup(lengthDO.getGroupId());
+            if (ruleGroup != null) {
+                respVO.setRgName(ruleGroup.getRgName());
+            }
+        }
+
+        return respVO;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteById(Long id) {
+        // 先获取要删除的记录
+        MetadataValidationLengthDO lengthDO = lengthRepository.findById(id);
+        if (lengthDO == null) {
+            return; // 记录不存在，直接返回
+        }
+
+        Long groupId = lengthDO.getGroupId();
+        Long fieldId = lengthDO.getFieldId();
+
+        // 删除长度校验记录
+        lengthRepository.deleteById(id);
+
+        // 删除关联的校验规则分组（如果没有其他记录引用）
+        if (groupId != null) {
+            deleteRuleGroupIfNotReferenced(groupId);
+        }
+
+        // 同步到MetadataEntityFieldDO：清空dataLength字段
+        if (fieldId != null) {
+            syncToEntityField(fieldId, null);
+        }
+    }
     
     /**
      * 同步长度校验到MetadataEntityFieldDO

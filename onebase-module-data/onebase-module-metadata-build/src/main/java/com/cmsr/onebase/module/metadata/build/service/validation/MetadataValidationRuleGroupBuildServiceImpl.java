@@ -455,12 +455,83 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
                     break;
                     
                 case "LENGTH":
+                    // 查询长度校验关联的字段
+                    var lengthFields = lengthRepository.findByGroupId(groupId);
+                    log.info("查询到长度校验字段数量：{}", lengthFields != null ? lengthFields.size() : 0);
+                    if (lengthFields != null) {
+                        for (var field : lengthFields) {
+                            log.info("处理长度校验字段ID：{}", field.getFieldId());
+                            String fieldName = getFieldNameById(field.getFieldId());
+                            log.info("获取到长度校验字段名称：{}", fieldName);
+                            if (fieldName != null) {
+                                fieldNames.add(fieldName);
+                            }
+                        }
+                    }
+                    break;
+                    
                 case "UNIQUE":
+                    // 查询唯一性校验关联的字段
+                    var uniqueFields = uniqueRepository.findByGroupId(groupId);
+                    log.info("查询到唯一性校验字段数量：{}", uniqueFields != null ? uniqueFields.size() : 0);
+                    if (uniqueFields != null) {
+                        for (var field : uniqueFields) {
+                            log.info("处理唯一性校验字段ID：{}", field.getFieldId());
+                            String fieldName = getFieldNameById(field.getFieldId());
+                            log.info("获取到唯一性校验字段名称：{}", fieldName);
+                            if (fieldName != null) {
+                                fieldNames.add(fieldName);
+                            }
+                        }
+                    }
+                    break;
+                    
                 case "RANGE":
+                    // 查询范围校验关联的字段
+                    var rangeFields = rangeRepository.findByGroupId(groupId);
+                    log.info("查询到范围校验字段数量：{}", rangeFields != null ? rangeFields.size() : 0);
+                    if (rangeFields != null) {
+                        for (var field : rangeFields) {
+                            log.info("处理范围校验字段ID：{}", field.getFieldId());
+                            String fieldName = getFieldNameById(field.getFieldId());
+                            log.info("获取到范围校验字段名称：{}", fieldName);
+                            if (fieldName != null) {
+                                fieldNames.add(fieldName);
+                            }
+                        }
+                    }
+                    break;
+                    
                 case "FORMAT":
+                    // 查询格式校验关联的字段
+                    var formatFields = formatRepository.findByGroupId(groupId);
+                    log.info("查询到格式校验字段数量：{}", formatFields != null ? formatFields.size() : 0);
+                    if (formatFields != null) {
+                        for (var field : formatFields) {
+                            log.info("处理格式校验字段ID：{}", field.getFieldId());
+                            String fieldName = getFieldNameById(field.getFieldId());
+                            log.info("获取到格式校验字段名称：{}", fieldName);
+                            if (fieldName != null) {
+                                fieldNames.add(fieldName);
+                            }
+                        }
+                    }
+                    break;
+                    
                 case "CHILD_NOT_EMPTY":
-                    // 其他类型暂时返回空，等需要时再实现
-                    log.debug("校验类型 {} 暂未实现字段名称查询", validationType);
+                    // 查询子表非空校验关联的字段
+                    var childNotEmptyFields = childNotEmptyRepository.findByGroupId(groupId);
+                    log.info("查询到子表非空校验字段数量：{}", childNotEmptyFields != null ? childNotEmptyFields.size() : 0);
+                    if (childNotEmptyFields != null) {
+                        for (var field : childNotEmptyFields) {
+                            log.info("处理子表非空校验字段ID：{}", field.getFieldId());
+                            String fieldName = getFieldNameById(field.getFieldId());
+                            log.info("获取到子表非空校验字段名称：{}", fieldName);
+                            if (fieldName != null) {
+                                fieldNames.add(fieldName);
+                            }
+                        }
+                    }
                     break;
                     
                 default:

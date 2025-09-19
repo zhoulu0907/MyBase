@@ -26,10 +26,10 @@ public class ValidationRangeController {
 
     @PostMapping("/get-by-field")
     @Operation(summary = "根据字段ID获取范围校验")
-    @Parameter(name = "fieldId", required = true)
+    @Parameter(name = "id", description = "字段ID", required = true)
     @PreAuthorize("@ss.hasPermission('metadata:validation-range:query')")
-    public CommonResult<ValidationRangeRespVO> getByField(@RequestParam("fieldId") Long fieldId) {
-        return success(rangeService.getByFieldIdWithRgName(fieldId));
+    public CommonResult<ValidationRangeRespVO> getByField(@RequestParam("id") Long id) {
+        return success(rangeService.getByFieldIdWithRgName(id));
     }
 
     @PostMapping("/create")
@@ -49,10 +49,27 @@ public class ValidationRangeController {
 
     @PostMapping("/delete-by-field")
     @Operation(summary = "按字段删除范围校验")
-    @Parameter(name = "fieldId", required = true)
+    @Parameter(name = "id", description = "字段ID", required = true)
     @PreAuthorize("@ss.hasPermission('metadata:validation-range:delete')")
-    public CommonResult<Boolean> deleteByField(@RequestParam("fieldId") Long fieldId) {
-        rangeService.deleteByFieldId(fieldId);
+    public CommonResult<Boolean> deleteByField(@RequestParam("id") Long id) {
+        rangeService.deleteByFieldId(id);
+        return success(true);
+    }
+
+    @GetMapping("/get")
+    @Operation(summary = "根据主键ID获取范围校验")
+    @Parameter(name = "id", description = "范围校验规则主键ID", required = true)
+    @PreAuthorize("@ss.hasPermission('metadata:validation-range:query')")
+    public CommonResult<ValidationRangeRespVO> get(@RequestParam("id") Long id) {
+        return success(rangeService.getById(id));
+    }
+
+    @DeleteMapping("/delete")
+    @Operation(summary = "按主键ID删除范围校验")
+    @Parameter(name = "id", description = "范围校验规则主键ID", required = true)
+    @PreAuthorize("@ss.hasPermission('metadata:validation-range:delete')")
+    public CommonResult<Boolean> delete(@RequestParam("id") Long id) {
+        rangeService.deleteById(id);
         return success(true);
     }
 }

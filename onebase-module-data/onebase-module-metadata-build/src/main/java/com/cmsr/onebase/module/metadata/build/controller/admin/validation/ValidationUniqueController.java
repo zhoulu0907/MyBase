@@ -26,10 +26,10 @@ public class ValidationUniqueController {
 
     @PostMapping("/get-by-field")
     @Operation(summary = "根据字段ID获取唯一性校验")
-    @Parameter(name = "fieldId", required = true)
+    @Parameter(name = "id", description = "字段ID", required = true)
     @PreAuthorize("@ss.hasPermission('metadata:validation-unique:query')")
-    public CommonResult<ValidationUniqueRespVO> getByField(@RequestParam("fieldId") Long fieldId) {
-        return success(uniqueService.getByFieldIdWithRgName(fieldId));
+    public CommonResult<ValidationUniqueRespVO> getByField(@RequestParam("id") Long id) {
+        return success(uniqueService.getByFieldIdWithRgName(id));
     }
     @PostMapping("/create")
     @Operation(summary = "创建唯一性校验")
@@ -48,10 +48,27 @@ public class ValidationUniqueController {
 
     @PostMapping("/delete-by-field")
     @Operation(summary = "按字段删除唯一性校验")
-    @Parameter(name = "fieldId", required = true)
+    @Parameter(name = "id", description = "字段ID", required = true)
     @PreAuthorize("@ss.hasPermission('metadata:validation-unique:delete')")
-    public CommonResult<Boolean> deleteByField(@RequestParam("fieldId") Long fieldId) {
-        uniqueService.deleteByFieldId(fieldId);
+    public CommonResult<Boolean> deleteByField(@RequestParam("id") Long id) {
+        uniqueService.deleteByFieldId(id);
+        return success(true);
+    }
+
+    @GetMapping("/get")
+    @Operation(summary = "根据主键ID获取唯一性校验")
+    @Parameter(name = "id", description = "唯一性校验规则主键ID", required = true)
+    @PreAuthorize("@ss.hasPermission('metadata:validation-unique:query')")
+    public CommonResult<ValidationUniqueRespVO> get(@RequestParam("id") Long id) {
+        return success(uniqueService.getById(id));
+    }
+
+    @DeleteMapping("/delete")
+    @Operation(summary = "按主键ID删除唯一性校验")
+    @Parameter(name = "id", description = "唯一性校验规则主键ID", required = true)
+    @PreAuthorize("@ss.hasPermission('metadata:validation-unique:delete')")
+    public CommonResult<Boolean> delete(@RequestParam("id") Long id) {
+        uniqueService.deleteById(id);
         return success(true);
     }
 }

@@ -164,6 +164,47 @@ public class MetadataValidationUniqueBuildServiceImpl implements MetadataValidat
         // 同步更新字段的唯一性状态为非唯一
         syncFieldUniqueStatus(fieldId, false);
     }
+
+    @Override
+    public ValidationUniqueRespVO getById(Long id) {
+        MetadataValidationUniqueDO uniqueDO = uniqueRepository.findById(id);
+        if (uniqueDO == null) {
+            return null;
+        }
+
+        // 转换DO为VO
+        ValidationUniqueRespVO respVO = BeanUtils.toBean(uniqueDO, ValidationUniqueRespVO.class);
+
+        // 查询并设置规则组名称
+        if (uniqueDO.getGroupId() != null) {
+            var ruleGroup = ruleGroupService.getValidationRuleGroup(uniqueDO.getGroupId());
+            if (ruleGroup != null) {
+                respVO.setRgName(ruleGroup.getRgName());
+            }
+        }
+
+        return respVO;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteById(Long id) {
+        // 先获取要删除的记录
+        MetadataValidationUniqueDO uniqueDO = uniqueRepository.findById(id);
+        if (uniqueDO == null) {
+            return; // 记录不存在，直接返回
+        }
+
+        Long fieldId = uniqueDO.getFieldId();
+
+        // 删除唯一性校验记录
+        uniqueRepository.deleteById(id);
+
+        // 同步更新字段的唯一性状态为非唯一
+        if (fieldId != null) {
+            syncFieldUniqueStatus(fieldId, false);
+        }
+    }
     
     /**
      * 同步字段的唯一性状态

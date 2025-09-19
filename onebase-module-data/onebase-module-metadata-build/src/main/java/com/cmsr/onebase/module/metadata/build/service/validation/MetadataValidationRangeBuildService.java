@@ -17,4 +17,19 @@ public interface MetadataValidationRangeBuildService {
     Long create(ValidationRangeSaveReqVO vo);
     void update(ValidationRangeUpdateReqVO reqVO);
     void deleteByFieldId(Long fieldId);
+
+    /**
+     * 按主键ID查询范围校验配置（包含规则组名称）
+     *
+     * @param id 范围校验规则主键ID
+     * @return 范围校验VO，可能为null
+     */
+    ValidationRangeRespVO getById(Long id);
+
+    /**
+     * 按主键ID删除范围校验配置
+     *
+     * @param id 范围校验规则主键ID
+     */
+    void deleteById(Long id);
 }
