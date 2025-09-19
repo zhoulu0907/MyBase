@@ -4,11 +4,14 @@ import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.ValidationRequiredRespVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.ValidationRequiredSaveReqVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.ValidationRequiredUpdateReqVO;
+import com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.ValidationRuleGroupSaveReqVO;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationRequiredRepository;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataEntityFieldRepository;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRequiredDO;
+import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRuleGroupDO;
 import com.cmsr.onebase.module.metadata.build.service.entity.MetadataEntityFieldBuildService;
+import com.cmsr.onebase.module.metadata.core.util.StatusEnumUtil;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -75,8 +78,24 @@ public class MetadataValidationRequiredBuildServiceImpl implements MetadataValid
             throw new IllegalStateException("该字段已存在必填校验规则，同一字段只能有一条必填校验规则");
         }
 
-        // 确保字段规则组存在，如果不存在则自动创建
-        Long groupId = validationRuleGroupService.ensureFieldRuleGroup(vo.getFieldId());
+        // 处理规则组：先查找，不存在则创建
+        Long groupId;
+        MetadataValidationRuleGroupDO existingGroup = validationRuleGroupService.getByName(vo.getRgName());
+        if (existingGroup != null) {
+            groupId = existingGroup.getId();
+        } else {
+            // 创建新的规则组
+            ValidationRuleGroupSaveReqVO groupVO = new ValidationRuleGroupSaveReqVO();
+            groupVO.setRgName(vo.getRgName());
+            groupVO.setRgDesc("自动创建的规则组：" + vo.getRgName());
+            groupVO.setRgStatus(StatusEnumUtil.ACTIVE);
+            // 透传可选的组级提示配置
+            groupVO.setValMethod(vo.getValMethod());
+            groupVO.setPopPrompt(vo.getPopPrompt());
+            groupVO.setPopType(vo.getPopType());
+            groupVO.setValidationType("REQUIRED");
+            groupId = validationRuleGroupService.createValidationRuleGroup(groupVO);
+        }
 
         // 转换VO为DO并设置必要字段
         MetadataValidationRequiredDO data = BeanUtils.toBean(vo, MetadataValidationRequiredDO.class);
