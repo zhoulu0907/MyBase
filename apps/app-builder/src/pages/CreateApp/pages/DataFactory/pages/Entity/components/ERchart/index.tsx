@@ -437,7 +437,7 @@ const ERchart = forwardRef<ERchartRef, EntityERProps>(
         graphRef.current.on('node:click', ({ e, node }) => {
           // 阻止折叠图标点击触发
           const target = e.target as HTMLElement;
-          if (target.closest('#collapse-icon')) {
+          if (target.closest('#collapse-icon') || target.closest('#status-change-icon')) {
             e.stopPropagation();
             return;
           }

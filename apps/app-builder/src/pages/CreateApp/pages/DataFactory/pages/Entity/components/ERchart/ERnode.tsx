@@ -159,6 +159,7 @@ const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
           onChange={(value, e) => handleStatusChange(value, e)}
           checkedText="已启用"
           uncheckedText="已禁用"
+          id="status-change-icon"
         />
         {/* 改为点击节点打开编辑弹窗 */}
         {/* <Popover
