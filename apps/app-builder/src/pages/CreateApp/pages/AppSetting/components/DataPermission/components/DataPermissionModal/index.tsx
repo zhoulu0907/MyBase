@@ -9,8 +9,11 @@ import {
   type AuthDataFilterVO,
   type AuthDataGroupVO,
   type AuthDataPermissionPersonVO,
-  type FilterFieldCheckType,
-  type GetDeptUserReq
+  // type FilterFieldCheckType,
+  type GetDeptUserReq,
+  type Condition,
+  type ConfitionField,
+  type EntityFieldValidationTypes
   // type RoleAddUserReq
 } from '@onebase/app';
 import { AddMembers } from '@onebase/common';
@@ -28,9 +31,8 @@ interface IProps {
   appEntities: AppEntity[];
   dataPermissionPerson: AuthDataPermissionPersonVO[];
   appEntityFields: AppEntityField[];
-  filterFieldCheckType: FilterFieldCheckType[];
+  filterFieldCheckType: EntityFieldValidationTypes[];
   changeEntity: (params: { entityId: string }) => void;
-  getFieldCheckType: (fieldId: string) => void;
   handleModalSubmit: (values: AuthDataGroupVO) => void;
   handleModalCancel: () => void;
 }
@@ -57,7 +59,6 @@ const DataPermissionModal = (props: IProps) => {
     appEntityFields,
     filterFieldCheckType,
     changeEntity,
-    // getFieldCheckType,
     handleModalSubmit,
     handleModalCancel
   } = props;
@@ -73,6 +74,8 @@ const DataPermissionModal = (props: IProps) => {
   const [checkAll, setCheckAll] = useState<boolean>(true);
   const [indeterminate, setIndeterminate] = useState<boolean>(false); // 操作权限
   const [dataFilters, setDataFilters] = useState<Array<AuthDataFilterVO[]>>(initialFormValues.dataFilters || []);
+  const [conditionData, setConditionData] = useState<Condition[]>([]);
+  const [conditionFields, setConditionFields] = useState<ConfitionField[]>([]);
   const [scopeType, setScopeType] = useState('');
 
   // 部门用户信息
@@ -86,6 +89,22 @@ const DataPermissionModal = (props: IProps) => {
     const entityValue = form.getFieldValue('scopeFieldId');
     setEntitySelected(!!entityValue);
   }, [selectedMembers, scopeType, form]);
+
+  useEffect(() => {
+    // 将 appEntityFields 转换为 ConditionField 格式
+    const convertedFields = appEntityFields.map((field) => ({
+      label: field.displayName,
+      value: field.fieldId,
+      fieldType: field.fieldType
+    }));
+    setConditionFields(convertedFields);
+
+    // 将 dataFilters 转换为 Condition 格式
+    // 注意：这里需要根据实际业务逻辑进行转换
+    const convertedConditions: Condition[] = [];
+    // 这里只是示例，实际转换逻辑需要根据业务需求实现
+    setDataFilters(dataFilters);
+  }, [appEntityFields, dataFilters]);
   // 操作权限 全选反选
   function onChangeAll(checked: boolean) {
     if (checked) {
@@ -100,9 +119,13 @@ const DataPermissionModal = (props: IProps) => {
   }
 
   // 数据过滤
-  const changeDataFilters = (value: AuthDataFilterVO[]) => {
+  const changeDataFilters = (value: any[]) => {
     console.log('数据过滤 changeDataFilters', value);
-    // setDataFilters(value)
+    // 将 Condition 格式转换回 AuthDataFilterVO[][] 格式
+    // 注意：这里需要根据实际业务逻辑进行转换
+    setDataFilters(dataFilters);
+    // 同时更新表单字段值
+    form.setFieldValue('dataFilters', value);
   };
 
   // 权限范围选择指定人员/部门
@@ -261,6 +284,18 @@ const DataPermissionModal = (props: IProps) => {
               placeholder="请选择业务实体"
               onChange={(value) => {
                 console.log('业务实体 change value:', value);
+                // 清空数据过滤条件
+                form.setFieldValue('dataFilters', []);
+                setDataFilters([]);
+                setConditionData([]);
+
+                // 清空权限范围相关字段
+                form.setFieldValue('scopeLevel.personId', undefined);
+                form.setFieldValue('scopeLevel.scopeType', undefined);
+                form.setFieldValue('scopeLevel.assignIds', []);
+                setScopeType('');
+                setSelectedMembers([]);
+
                 if (typeof changeEntity === 'function') {
                   changeEntity({ entityId: value });
                 }
@@ -323,21 +358,7 @@ const DataPermissionModal = (props: IProps) => {
               </div>
               {(scopeType === 'specifiedPerson' || scopeType === 'specifiedDepartment') && (
                 <div className={styles.scopeAssign}>
-                  <FormItem
-                    field="scopeLevel.assignIds"
-                    noStyle
-                    // rules={[
-                    //   {
-                    //     required: scopeType === 'specifiedPerson' || scopeType === 'specifiedDepartment' ? true : false,
-                    //     message:
-                    //       scopeType === 'specifiedPerson'
-                    //         ? '请添加指定人员'
-                    //         : scopeType === 'specifiedDepartment'
-                    //           ? '请添加指定部门'
-                    //           : '请选择权限范围'
-                    //   }
-                    // ]}
-                  >
+                  <FormItem field="scopeLevel.assignIds" noStyle>
                     {selectedMembers && selectedMembers.length > 0 ? (
                       <div className={styles.assignIdTag}>
                         <div className={styles.tagContainer}>
@@ -351,9 +372,6 @@ const DataPermissionModal = (props: IProps) => {
                                 handleTagClose(member.key);
                               }}
                             >
-                              {/* <Avatar size={16}>
-                                {scopeType === 'specifiedPerson' ? member.name?.slice(0, 1) || 'U' : '部'}
-                              </Avatar> */}
                               <span>{member.name}</span>
                             </Tag>
                           ))}
@@ -372,14 +390,12 @@ const DataPermissionModal = (props: IProps) => {
           </FormItem>
           {/* 数据过滤 */}
           <FormItem field="dataFilters" label="数据过滤">
-            <div className={styles.dataPermissionFilters}>
-              <ConditionEditor
-                data={dataFilters}
-                fields={appEntityFields}
-                entityFieldValidationTypes={filterFieldCheckType}
-                onChange={() => changeDataFilters}
-              />
-            </div>
+            <ConditionEditor
+              data={conditionData}
+              fields={conditionFields}
+              entityFieldValidationTypes={filterFieldCheckType}
+              onChange={changeDataFilters}
+            />
           </FormItem>
           <FormItem field="isOperable" label="操作权限">
             <div className={styles.dataPermissionOperableBox}>

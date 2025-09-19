@@ -373,7 +373,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
                         )
                         .map((item: any) => ({
                           label: item.title,
-                          value: item.dataIndex
+                          value: item.id
                         }))}
                     />
                     <Button
@@ -410,7 +410,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
                         <Menu.Item
                           key={item.fieldName}
                           onClick={() => {
-                            const newList = [...searchItemsConfig, { label: item.displayName, value: item.fieldName,id: item.id }];
+                            const newList = [...searchItemsConfig, { label: item.displayName, value: item.id }];
                             console.log('newList: ', newList);
                             add({ label: item.displayName, value: item.fieldName });
                             setSearchItemsConfig(newList);

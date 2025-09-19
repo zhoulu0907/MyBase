@@ -66,15 +66,15 @@ export interface RenameFlowMgmtReq {
 export interface UpdateFlowMgmtDefinitionReq {
   id: string | undefined;
   processDefinition: string;
-  processStatus: number | string
+  processStatus: number | string;
 }
 
 // 数据源类型   表单、数据节点、关联表、子表
 export enum DATA_SOURCE_TYPE {
   FORM = 1,
-  DATA_NODE = 2,
-  ASSOCIA_FORM = 3,
-  SUBFORM = 4
+  SUBFORM = 2,
+  DATA_NODE = 3,
+  ASSOCIA_FORM = 4
 }
 
 // 查询规则  全部数据、按条件过滤
@@ -85,8 +85,8 @@ export enum FILTER_TYPE {
 
 // 表类型  主表 子表
 export enum FLOW_ENTITY_TYPE {
-  MAIN_ENTITY= 'mainEntity',
-  SUB_ENTITY= 'subEntity'
+  MAIN_ENTITY = 'mainEntity',
+  SUB_ENTITY = 'subEntity'
 }
 export interface SelectOption {
   label: string;

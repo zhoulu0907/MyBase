@@ -82,8 +82,8 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({ cpId, cpType, pageCompone
         return <FormComp.XRichText cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case FORM_COMPONENT_TYPES.CAROUSEL_F:
         return <FormComp.XCarousel cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
-      case FORM_COMPONENT_TYPES.CHILDREN_TABLE:
-        return <FormComp.XChildrenTable cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+      case FORM_COMPONENT_TYPES.SUB_TABLE:
+        return <FormComp.XSubTable cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case FORM_COMPONENT_TYPES.DATA_SELECT:
         return <FormComp.XDataSelect cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
 

@@ -1,5 +1,5 @@
 import {
-  baseConfig, baseDefault, widthConfig, statusConfig, layoutConfig, labelColSpanConfig, type ICommonBaseType,
+  baseConfig, baseDefault, widthConfig, statusConfig, layoutConfig, subTableConfig, labelColSpanConfig, type ICommonBaseType,
   type TStatusSelectKeyType,
   type TLayoutSelectKeyType,
 
@@ -32,6 +32,7 @@ import type {
   ILayoutConfigType,
   ITooltipConfigType,
   INumberConfigType,
+  ISubTableConfigType,
 } from '../../../types';
 
 export type TColumnCountSelectKeyType = (typeof COLUMN_COUNT_OPTIONS)[keyof typeof COLUMN_COUNT_OPTIONS];
@@ -49,9 +50,10 @@ export type TColumnLayoutEditData = Array<
   | ILayoutConfigType<TLayoutSelectKeyType>
   | ITooltipConfigType
   | INumberConfigType
+  | ISubTableConfigType
 >;
 
-export interface XChildrenTableConfig extends ICommonBaseType {
+export interface XSubTableConfig extends ICommonBaseType {
   /**
    * 输入框标题
    * text：标题
@@ -61,6 +63,11 @@ export interface XChildrenTableConfig extends ICommonBaseType {
     text: TTextDefaultType;
     display: TBooleanDefaultType;
   };
+
+  /**
+   * 数据字段
+   */
+  dataField: TTextDefaultType[];
 
   /**
    * 描述信息（鼠标悬浮时显示）
@@ -108,12 +115,12 @@ export interface XChildrenTableConfig extends ICommonBaseType {
   layout?: TLayoutSelectKeyType;
 }
 
-export interface XChildrenTableSchema {
+export interface XSubTableSchema {
   editData: TColumnLayoutEditData;
-  config: XChildrenTableConfig;
+  config: XSubTableConfig;
 }
 
-const XChildrenTable: XChildrenTableSchema = {
+const XSubTable: XSubTableSchema = {
   editData: [
     ...baseConfig,
     {
@@ -126,6 +133,7 @@ const XChildrenTable: XChildrenTableSchema = {
       name: '描述信息',
       type: CONFIG_TYPES.TOOLTIP_INPUT
     },
+    subTableConfig,
     labelColSpanConfig,
     layoutConfig,
     {
@@ -169,6 +177,7 @@ const XChildrenTable: XChildrenTableSchema = {
       text: '子表单',
       display: true,
     },
+    dataField: [],
     tooltip: '',
     colCount: COLUMN_COUNT_VALUES[COLUMN_COUNT_OPTIONS.ONE],
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
@@ -184,4 +193,4 @@ const XChildrenTable: XChildrenTableSchema = {
   }
 };
 
-export default XChildrenTable;
+export default XSubTable;

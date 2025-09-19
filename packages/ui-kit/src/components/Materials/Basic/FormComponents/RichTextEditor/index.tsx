@@ -1,6 +1,6 @@
 import '@wangeditor/editor/dist/css/style.css'; // 引入 css
 
-import { memo, useEffect, useState } from 'react';
+import { memo } from 'react';
 import { Form } from '@arco-design/web-react';
 import { nanoid } from 'nanoid';
 import WangEditor from './editor';
@@ -10,14 +10,7 @@ import type { XRichTextConfig } from './schema';
 import '../index.css';
 
 const XRichText = memo((props: XRichTextConfig & { runtime?: boolean }) => {
-  const { label, dataField, tooltip, status, defaultValue, verify, layout, labelColSpan = 0, runtime = true } = props;
-
-  // 编辑器内容
-  const [html, setHtml] = useState<string>();
-
-  useEffect(() => {
-    defaultValue && setHtml(defaultValue);
-  }, [defaultValue]);
+  const { label, dataField, tooltip, status, defaultValue = '', verify, layout, labelColSpan = 0, runtime = true } = props;
 
   return (
     <div className='formWrapper'>
@@ -37,8 +30,8 @@ const XRichText = memo((props: XRichTextConfig & { runtime?: boolean }) => {
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
       >
-        {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? <div>{html}</div> : (
-          <WangEditor runtime={runtime} value={html} onChange={(editor) => setHtml(editor.getHtml())} style={{
+        {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ? <div dangerouslySetInnerHTML={{ __html: defaultValue }}></div> : (
+          <WangEditor runtime={runtime} style={{
             pointerEvents: runtime ? 'unset' : 'none'
           }} />
         )}

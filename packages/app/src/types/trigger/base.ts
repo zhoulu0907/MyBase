@@ -15,8 +15,6 @@ export interface Condition {
 
   // 操作符
   op?: string;
-  // 操作符code
-  opCode?: string;
   // 对应操作类型
   operatorType?: string;
   // 操作值
@@ -43,7 +41,7 @@ export enum SortType {
 }
 
 export interface Sort {
-  id: string,
-  sortType: string,
-  sortField: string,
+  id: string;
+  sortType: string;
+  sortField: string;
 }

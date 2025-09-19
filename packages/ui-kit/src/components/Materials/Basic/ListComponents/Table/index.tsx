@@ -118,20 +118,7 @@ const XTable = memo((props: XTableConfig & { runtime?: boolean; toCreatePage?: F
 
   // 查询
   const handleSearch = () => {
-    const formData = form.getFieldsValue();
-    const keys  = Object.keys(formData);
-    for(let key of keys){
-      if(formData[key]){
-        if(searchItems){
-          for(let item of searchItems){
-            if(item.value === key){
-              queryData = {...queryData,[item.id]:formData[key]}
-            }
-          }
-        }
-        
-      }
-    }
+    queryData = form.getFieldsValue();
     setTablePageNo(1);
     handlePage()
   }
