@@ -1,11 +1,13 @@
 package com.cmsr.onebase.module.flow.core.flow;
 
+import com.cmsr.onebase.module.flow.core.config.FlowRuntimeCondition;
 import com.cmsr.onebase.module.flow.core.utils.FlowUtils;
 import com.yomahub.liteflow.core.FlowExecutor;
 import com.yomahub.liteflow.flow.LiteflowResponse;
 import com.yomahub.liteflow.slot.DefaultContext;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -16,9 +18,10 @@ import java.util.Map;
  */
 @Setter
 @Component
+@Conditional(FlowRuntimeCondition.class)
 public class FlowProcessExecutor {
 
-    @Autowired
+    @Autowired(required = false)
     private FlowExecutor flowExecutor;
 
     public Map<String, Object> execute(Long processId, Map<String, Object> inputParams) {

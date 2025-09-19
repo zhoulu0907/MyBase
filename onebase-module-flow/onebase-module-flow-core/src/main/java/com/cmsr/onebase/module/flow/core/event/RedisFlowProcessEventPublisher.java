@@ -1,10 +1,12 @@
 package com.cmsr.onebase.module.flow.core.event;
 
+import com.cmsr.onebase.module.flow.core.config.FlowBuildCondition;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.redisson.Redisson;
 import org.redisson.api.RTopic;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
 
 /**
@@ -13,8 +15,10 @@ import org.springframework.stereotype.Component;
  *
  * @author huangjie
  */
+@Setter
 @Slf4j
 @Component
+@Conditional(FlowBuildCondition.class)
 public class RedisFlowProcessEventPublisher implements FlowProcessEventPublisher {
 
     /**
@@ -37,7 +41,6 @@ public class RedisFlowProcessEventPublisher implements FlowProcessEventPublisher
         RTopic topic = redissonClient.getTopic(TOPIC_PROCESS_DELETE);
         topic.publish(processId);
     }
-
 
 
 }

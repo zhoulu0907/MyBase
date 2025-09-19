@@ -63,6 +63,9 @@ public class MetadataDataMethodCoreServiceImpl implements MetadataDataMethodCore
 
     @Resource
     private MultiTableQueryEngine multiTableQueryEngine;
+
+    @Resource
+    private com.cmsr.onebase.module.metadata.core.service.number.AutoNumberService autoNumberService;
     // ========== 动态数据操作方法实现 ==========
     // ========== 动态数据操作方法实现 ==========
 
@@ -507,6 +510,9 @@ public class MetadataDataMethodCoreServiceImpl implements MetadataDataMethodCore
             }
         }
 
+        // 处理自动编号字段
+        processAutoNumberFields(fields, processedData);
+
         return processedData;
     }
 
@@ -671,6 +677,42 @@ public class MetadataDataMethodCoreServiceImpl implements MetadataDataMethodCore
      *
      * @param tableName 原始表名
      * @return 添加引号后的表名
+     */
+    private void processAutoNumberFields(List<MetadataEntityFieldDO> fields, Map<String, Object> processedData) {
+        for (MetadataEntityFieldDO field : fields) {
+            try {
+                // 检查字段是否配置了自动编号
+                if (autoNumberService.hasAutoNumber(field.getId())) {
+                    String fieldName = field.getFieldName();
+                    
+                    // 如果用户没有提供值，则生成自动编号
+                    if (!processedData.containsKey(fieldName) || processedData.get(fieldName) == null) {
+                        // 准备上下文数据，将当前的processedData作为上下文传递
+                        Map<String, Object> contextData = new HashMap<>(processedData);
+                        
+                        // 为字段引用规则准备数据，使用字段ID作为key
+                        for (MetadataEntityFieldDO f : fields) {
+                            if (f.getFieldName() != null && processedData.containsKey(f.getFieldName())) {
+                                contextData.put("field_" + f.getId(), processedData.get(f.getFieldName()));
+                            }
+                        }
+                        
+                        // 生成自动编号
+                        String autoNumber = autoNumberService.generateNumber(field.getId(), contextData);
+                        processedData.put(fieldName, autoNumber);
+                        
+                        log.info("为字段 {} 生成自动编号: {}", fieldName, autoNumber);
+                    }
+                }
+            } catch (Exception e) {
+                // 自动编号生成失败不应该阻塞整个数据创建过程，记录警告日志
+                log.warn("为字段 {} 生成自动编号失败: {}", field.getFieldName(), e.getMessage(), e);
+            }
+        }
+    }
+
+    /**
+     * 为表名添加双引号以处理PostgreSQL的大小写敏感性
      */
     private String quoteTableName(String tableName) {
         if (tableName == null || tableName.trim().isEmpty()) {

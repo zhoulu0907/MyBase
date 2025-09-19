@@ -2,9 +2,11 @@ package com.cmsr.onebase.module.flow.core.graph;
 
 
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
+import com.cmsr.onebase.module.flow.core.config.FlowRuntimeCondition;
 import com.cmsr.onebase.module.flow.core.enums.JsonGraphConstant;
 import com.cmsr.onebase.module.flow.core.graph.data.StartFormNodeData;
 import com.cmsr.onebase.module.flow.core.graph.data.StartTimeNodeData;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -15,6 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @Date：2025/9/4 18:16
  */
 @Component
+@Conditional(FlowRuntimeCondition.class)
 public class GraphFlowCache {
 
     private ConcurrentHashMap<Long, Map<String, Map<String, Object>>> flowNodeDataCache = new ConcurrentHashMap<>();

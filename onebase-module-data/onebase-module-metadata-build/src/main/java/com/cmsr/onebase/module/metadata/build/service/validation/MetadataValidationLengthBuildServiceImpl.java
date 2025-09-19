@@ -17,6 +17,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
+import java.util.List;
+
 /**
  * 长度校验 Service 实现
  *
@@ -154,7 +156,18 @@ public class MetadataValidationLengthBuildServiceImpl implements MetadataValidat
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteByFieldId(Long fieldId) {
+        // 先获取要删除的记录，以便后续删除关联的校验规则分组
+        List<MetadataValidationLengthDO> recordsToDelete = lengthRepository.findByFieldId(fieldId);
+        
+        // 删除长度校验记录
         lengthRepository.deleteByFieldId(fieldId);
+        
+        // 删除关联的校验规则分组（如果没有其他记录引用）
+        for (MetadataValidationLengthDO record : recordsToDelete) {
+            if (record.getGroupId() != null) {
+                deleteRuleGroupIfNotReferenced(record.getGroupId());
+            }
+        }
         
         // 同步到MetadataEntityFieldDO：清空dataLength字段
         syncToEntityField(fieldId, null);
@@ -180,6 +193,33 @@ public class MetadataValidationLengthBuildServiceImpl implements MetadataValidat
         } catch (Exception e) {
             // 记录错误但不影响主流程
             log.warn("同步长度校验到字段时发生异常，字段ID: {}, maxLength: {}, 错误: {}", fieldId, maxLength, e.getMessage(), e);
+        }
+    }
+    
+    /**
+     * 删除校验规则分组（如果没有其他记录引用）
+     */
+    private void deleteRuleGroupIfNotReferenced(Long groupId) {
+        try {
+            // 检查是否还有其他校验记录引用这个分组
+            boolean hasOtherReferences = false;
+            
+            // 检查长度校验表
+            List<MetadataValidationLengthDO> lengthRecords = lengthRepository.findByGroupId(groupId);
+            if (!lengthRecords.isEmpty()) {
+                hasOtherReferences = true;
+            }
+            
+            // TODO: 如果需要，可以检查其他校验类型表（Required、Unique、Range等）
+            
+            // 如果没有其他引用，删除规则分组
+            if (!hasOtherReferences) {
+                ruleGroupService.deleteValidationRuleGroup(groupId);
+                log.info("删除了无引用的校验规则分组: {}", groupId);
+            }
+        } catch (Exception e) {
+            // 记录错误但不影响主流程
+            log.warn("删除校验规则分组时发生异常，分组ID: {}, 错误: {}", groupId, e.getMessage(), e);
         }
     }
 }

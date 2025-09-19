@@ -127,14 +127,24 @@ public class AdminAuthServiceImpl implements AdminAuthService {
     public AuthLoginRespVO login(AuthLoginReqVO reqVO) {
         // 校验验证码
         validateCaptcha(reqVO);
-        if (!platformTenantEnableCreateApp) {
+
+        // 增加日志输出，便于调试
+        log.debug("platformTenantEnableCreateApp配置值: {}", platformTenantEnableCreateApp);
+
+        // 确保配置值不为null，并且为false时才执行校验
+        if (Boolean.FALSE.equals(platformTenantEnableCreateApp)) {
+            log.info("平台租户创建应用功能已禁用，开始校验租户信息");
             // 校验当前用户绑定的租户是否为平台租户，是则不允许登录
             tenantService.handleTenantInfo(tenant -> {
                 if (tenant.getTenantCode().equals(TenantCodeEnum.PLATFORM_TENANT.getCode())) {
+                    log.warn("平台租户用户尝试登录，但平台租户创建应用功能已禁用");
                     throw exception(AUTH_LOGIN_PLATFORM_TENANT_ERROR);
                 }
             });
+        } else {
+            log.debug("平台租户创建应用功能已启用，跳过租户校验");
         }
+
         // 使用账号密码，进行登录
         AdminUserDO user = authenticate(reqVO.getUsername(), reqVO.getPassword());
 
