@@ -68,6 +68,16 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     setPageList(res.pages);
   };
 
+  const handleTriggerRangeChange = (value: string) => {
+    payloadForm.clearFields(['fieldId', 'triggerEvents']);
+    const nodeData = triggerEditorSignal.nodeData.value[node.id];
+    triggerEditorSignal.setNodeData(node.id, {
+      ...nodeData,
+      triggerEvents: undefined,
+      filterCondition: []
+    });
+  };
+
   const handleGetComponentList = async (id: string) => {
     const res = await getComponentListByPageId({ pageId: id });
     if (res && res.list) {
@@ -136,7 +146,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
             <Grid.Row>
               <Form.Item label="触发范围" field="triggerRange" rules={[{ required: true, message: '请选择触发范围' }]}>
-                <RadioGroup>
+                <RadioGroup onChange={handleTriggerRangeChange}>
                   <Radio value={TriggerRange.Record}>整表</Radio>
                   <Radio value={TriggerRange.Field}>特定字段</Radio>
                 </RadioGroup>

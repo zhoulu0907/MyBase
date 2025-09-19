@@ -21,8 +21,7 @@ import SortByEditor from '../../../components/sortby-editor';
 import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
-import { getBeforeCurQueryNodes } from '../../utils';
-import { validateNodeForm } from '../../utils';
+import { getBeforeCurQueryNodes, validateNodeForm } from '../../utils';
 
 export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   useSignals();
@@ -67,7 +66,8 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       mainDataSource: undefined,
       subDataSource: undefined,
       dataNodeId: undefined,
-      sortBy: [] // 清除已选择排序字段
+      sortBy: [],
+      filterCondition: []
     });
 
     setEntityList([]);
@@ -86,7 +86,8 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       ...nodeData,
       subDataSource: undefined,
       dataNodeId: undefined,
-      sortBy: [] // 清除已选择排序字段
+      sortBy: [],
+      filterCondition: []
     });
     setEntityList([]);
     setDataNodeList([]);
@@ -115,7 +116,8 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     triggerEditorSignal.setNodeData(node.id, {
       ...nodeData,
       dataNodeId: undefined,
-      sortBy: [] // 清除已选择排序字段
+      sortBy: [],
+      filterCondition: []
     });
     // 根据数据源重新获取字段列表
     if (curSubDataSource) {
@@ -130,7 +132,8 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       ...nodeData,
       mainDataSource: undefined,
       subDataSource: undefined,
-      sortBy: [] // 清除已选择排序字段
+      sortBy: [],
+      filterCondition: []
     });
     setEntityList([]);
     setDataNodeList([]);
@@ -171,7 +174,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       setDataNodeList(newDataNodeList);
     }
     const nodeData = triggerEditorSignal.nodeData.value[node.id];
-    if(!nodeData){
+    if (!nodeData) {
       return;
     }
     if (nodeData.dataType === DATA_SOURCE_TYPE.FORM) {
@@ -386,7 +389,11 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             )}
 
             <Form.Item label="排序规则" rules={[{ required: true, message: '请选择排序规则' }]}>
-              <SortByEditor data={triggerEditorSignal.nodeData.value[node.id]?.sortBy || []} fields={conditionFields} form={payloadForm}></SortByEditor>
+              <SortByEditor
+                data={triggerEditorSignal.nodeData.value[node.id]?.sortBy || []}
+                fields={conditionFields}
+                form={payloadForm}
+              ></SortByEditor>
             </Form.Item>
             <div style={{ color: '#4e5969' }}>仅查询排序的第一条数据</div>
           </Form>

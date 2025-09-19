@@ -9,3 +9,4 @@ export * from './data/get_data';
 export * from './data/update_data';
 
 export * from './condition_editor';
+export * from './sort';
