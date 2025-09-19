@@ -15,10 +15,12 @@ import {
   type TableColumnProps
 } from '@arco-design/web-react';
 import {
+  createLicenseFileApi,
   downloadPlatformLicenseApi,
   getPlatFormInfoListApi,
   getPlatformInfoApi,
   uploadPlatformLicenseApi,
+  type CreateLicenseFileReq,
   type LicenseInfo,
   type LicenseInfoList
 } from '@onebase/platform-center';
@@ -26,13 +28,15 @@ import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
 import { downloadFile } from '@/utils/download';
 import { getBackendURL, TokenManager } from '@onebase/common';
-// import { systemService } from './clients';
+import LicenseDetailModal from './components/LicenseDetailModal/index.tsx';
+import DownloadLicenseModal from './components/DownloadLicenseModal/index.tsx';
 
 const { Title, Text } = Typography;
 
 const PlatformInfo: React.FC = () => {
   const { t } = useI18n();
-  const [visible, setVisible] = useState(false);
+  const [licenseDetailVisible, setLicenseDetailVisible] = useState(false);
+  const [downloadLicenseVisible, setDownloadLicenseVisible] = useState(false);
   const [licenseInfoList, setLicenseInfoList] = useState<LicenseInfoList[]>([]);
   const [licenseInfo, setLicenseInfo] = useState<LicenseInfo | null>(null);
   const [selectedLicenseInfo, setSelectedLicenseInfo] = useState<LicenseInfo | null>(null);
@@ -125,7 +129,7 @@ const PlatformInfo: React.FC = () => {
             onClick={(e) => {
               e.preventDefault();
               setSelectedLicenseInfo(record);
-              setVisible(true);
+              setLicenseDetailVisible(true);
             }}
           >
             {t('platformInfo.check')}
@@ -202,32 +206,7 @@ const PlatformInfo: React.FC = () => {
 
   // 下载认证
   const downloadLicense = async () => {
-    try {
-      // 获取存储在localStorage或cookie中的token
-      const authorizationHeader = TokenManager.getAuthorizationHeader();
-        try {
-          const url = getBackendURL();
-          // 创建带有token的请求
-          const response = await fetch(`${url}/system/license/export?id=1`, {
-            method: 'GET',
-            headers: {
-              'Authorization': authorizationHeader,
-            }
-          });
-          console.log('fetch response:', response);
-          if (response.ok) {
-            const blob = await response.blob();
-            downloadFile(blob, 'license.lic.sm4');
-          } else {
-            Message.error('下载失败');
-          }
-        } catch (e) {
-          console.error('解析BASE_URL失败:', e);
-        }
-    } catch (error) {
-      console.error('下载失败:', error);
-      Message.error('下载失败');
-    }    
+    setDownloadLicenseVisible(true);
   };
 
   // 分页器
@@ -259,6 +238,38 @@ const PlatformInfo: React.FC = () => {
       console.error('分页加载失败:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSubmit = async (value: CreateLicenseFileReq) => { 
+    console.log('创建license value:', value);
+    try {
+      // 获取存储在localStorage或cookie中的token
+      const authorizationHeader = TokenManager.getAuthorizationHeader();
+        // fetch 请求
+      try {
+        const url = getBackendURL();
+        // 创建带有token的请求
+        const response = await fetch(`${url}/system/license/createLicenseFile`, {
+          method: 'POST',
+          headers: {
+            'Authorization': authorizationHeader,
+          },
+          body: JSON.stringify(value)
+        });
+        console.log('fetch response:', response);
+        if (response.ok) {
+          const blob = await response.blob();
+          downloadFile(blob, 'license.lic.sm4');
+          setDownloadLicenseVisible(false)
+        } else {
+          Message.error('下载失败');
+        }
+      } catch (e) {
+        console.error('解析BASE_URL失败:', e);
+      }
+    } catch (error) {
+      console.error('创建license失败:', error);
     }
   };
 
@@ -366,46 +377,17 @@ const PlatformInfo: React.FC = () => {
           />
         </Space>
       </Spin>
-      <Modal
-        title={t('platformInfo.licenseDetail')}
-        visible={visible}
-        onCancel={() => setVisible(false)}
-        footer={null}
-        className={styles.licenseModal}
-      >
-        {selectedLicenseInfo && (
-          <Descriptions
-            column={1}
-            data={[
-              {
-                label: t('platformInfo.enterpriseName'),
-                value: selectedLicenseInfo.enterpriseName
-              },
-              {
-                label: t('platformInfo.certificationContent'),
-                value: (
-                  <div>
-                    租户数量：{selectedLicenseInfo.tenantLimit}，用户数量：{selectedLicenseInfo.userLimit}
-                  </div>
-                )
-              },
-              {
-                label: t('platformInfo.status'),
-                value: (
-                  <Tag color={selectedLicenseInfo?.status === 'enable' ? 'green' : 'red'}>
-                    {selectedLicenseInfo?.status === 'enable' ? '已启用' : '已失效'}
-                  </Tag>
-                )
-              },
-              {
-                label: t('platformInfo.expireTime'),
-                value: formatTimestamp(selectedLicenseInfo.expireTime)
-              }
-            ]}
-            labelStyle={{ fontWeight: 'bold', width: '100px' }}
-          />
-        )}
-      </Modal>
+
+      <DownloadLicenseModal
+        visible={downloadLicenseVisible}
+        handleCancel={() => setDownloadLicenseVisible(false)}
+        handleSubmit={(value) => handleSubmit(value)}
+      />
+      <LicenseDetailModal
+        visible={licenseDetailVisible}
+        selectedLicenseInfo={selectedLicenseInfo}
+        cancelDetailModal={() => setLicenseDetailVisible(false)}
+      />
     </div>
   );
 };
