@@ -1,10 +1,10 @@
-import { Button, Form, Grid, Select, Radio, type FormInstance } from '@arco-design/web-react';
-import { IconDelete, IconPlus, IconDragDotVertical } from '@arco-design/web-react/icon';
-import { SortType, type Sort, type ConfitionField } from '@onebase/app';
+import { Button, Form, Grid, Radio, Select, type FormInstance } from '@arco-design/web-react';
+import { IconDelete, IconDragDotVertical, IconPlus } from '@arco-design/web-react/icon';
+import { SortType, type ConfitionField, type Sort } from '@onebase/app';
+import { nanoid } from 'nanoid';
 import React, { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import styles from './index.module.less';
-import { nanoid } from 'nanoid';
 
 export interface ConditionEditorProps {
   fields: ConfitionField[];
@@ -28,6 +28,7 @@ const SortByEditor: React.FC<ConditionEditorProps> = ({ data, onChange, fields, 
       onChange(sortList);
     }
   }, [sortList]);
+
   useEffect(() => {
     setSortList(data || []);
     form.setFieldValue('sortBy', data || []);
