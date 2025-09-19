@@ -101,7 +101,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     console.log(conditions);
     handlePropsOnChange({
       ...triggerEditorSignal.nodeData.value[node.id],
-      filterConditions: conditions
+      filterCondition: conditions
     });
   };
 
