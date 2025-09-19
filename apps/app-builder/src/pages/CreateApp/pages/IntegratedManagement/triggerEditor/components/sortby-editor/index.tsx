@@ -1,27 +1,26 @@
-import { Button, Form, Grid, Select, Radio, type FormInstance } from '@arco-design/web-react';
-import { IconDelete, IconPlus, IconDragDotVertical } from '@arco-design/web-react/icon';
-import { SortType, type Sort, type ConfitionField } from '@onebase/app';
+import { Button, Form, Grid, Radio, Select, type FormInstance } from '@arco-design/web-react';
+import { IconDelete, IconDragDotVertical, IconPlus } from '@arco-design/web-react/icon';
+import { SortType, type ConfitionField, type Sort } from '@onebase/app';
+import { nanoid } from 'nanoid';
 import React, { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import styles from './index.module.less';
-import { nanoid } from 'nanoid';
 
 export interface ConditionEditorProps {
   fields: ConfitionField[];
   data?: Sort[];
   onChange?: (value: Sort[]) => void;
   form: FormInstance;
-  clearSortByNum?: number;
 }
 
-const SortByEditor: React.FC<ConditionEditorProps> = ({ data, onChange, fields, form, clearSortByNum }) => {
+const SortByEditor: React.FC<ConditionEditorProps> = ({ data, onChange, fields, form }) => {
   const [sortList, setSortList] = useState<Sort[]>([]);
 
   // 排序改变
   const handleSort = (newSortList: Sort[]) => {
     console.log('handleSort', newSortList);
     setSortList(newSortList || []);
-    form.setFieldValue('sortList', newSortList || []);
+    form.setFieldValue('sortBy', newSortList || []);
   };
 
   useEffect(() => {
@@ -29,15 +28,16 @@ const SortByEditor: React.FC<ConditionEditorProps> = ({ data, onChange, fields, 
       onChange(sortList);
     }
   }, [sortList]);
-  useEffect(()=>{
-    setSortList([]);
-    form.clearFields(['sortList'])
-  },[clearSortByNum])
+
+  useEffect(() => {
+    setSortList(data || []);
+    form.setFieldValue('sortBy', data || []);
+  }, []);
 
   return (
     <ReactSortable list={sortList} setList={handleSort} animation={200} handle=".sortby-item-handle">
       <Form.Item noStyle validateTrigger={['onChange']}>
-        <Form.List field="sortList" initialValue={data}>
+        <Form.List field="sortBy">
           {(field, { add, remove }) => {
             return (
               <>
@@ -58,9 +58,12 @@ const SortByEditor: React.FC<ConditionEditorProps> = ({ data, onChange, fields, 
                         <Form.Item field={item.field + '.sortField'} noStyle>
                           <Select
                             onChange={() => {
-                              setSortList(form.getFieldValue('sortList'));
+                              setSortList(form.getFieldValue('sortBy'));
                             }}
-                            options={fields}
+                            options={fields.map((field) => {
+                              const disabled = sortList?.some((f) => f?.sortField === field.value);
+                              return {...field, disabled}
+                            })}
                           ></Select>
                         </Form.Item>
                       </Grid.Col>
@@ -68,7 +71,7 @@ const SortByEditor: React.FC<ConditionEditorProps> = ({ data, onChange, fields, 
                         <Form.Item field={item.field + '.sortType'} noStyle>
                           <Radio.Group
                             onChange={() => {
-                              setSortList(form.getFieldValue('sortList'));
+                              setSortList(form.getFieldValue('sortBy'));
                             }}
                           >
                             <Radio value={SortType.ASC}>升序</Radio>
@@ -81,7 +84,7 @@ const SortByEditor: React.FC<ConditionEditorProps> = ({ data, onChange, fields, 
                           type="text"
                           onClick={() => {
                             remove(index);
-                            setSortList(form.getFieldValue('sortList'));
+                            setSortList(form.getFieldValue('sortBy'));
                           }}
                           icon={<IconDelete style={{ color: '#4E5969' }} />}
                         />
@@ -93,6 +96,7 @@ const SortByEditor: React.FC<ConditionEditorProps> = ({ data, onChange, fields, 
                 <Button
                   type="dashed"
                   icon={<IconPlus />}
+                  disabled={(sortList || [])?.length >= fields?.length}
                   onClick={() => {
                     const temp = {
                       id: nanoid(),

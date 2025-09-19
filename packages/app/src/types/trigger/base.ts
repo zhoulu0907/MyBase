@@ -15,8 +15,6 @@ export interface Condition {
 
   // 操作符
   op?: string;
-  // 操作符code
-  opCode?: string;
   // 对应操作类型
   operatorType?: string;
   // 操作值
@@ -32,18 +30,4 @@ export enum FieldType {
   FIELD = 'field',
   // 公式
   EXPRESSION = 'expression'
-}
-
-export enum SortType {
-  // 不排序
-  NONE = 'none',
-  // 升序
-  ASC = 'asc',
-  DESC = 'desc'
-}
-
-export interface Sort {
-  id: string,
-  sortType: string,
-  sortField: string,
 }

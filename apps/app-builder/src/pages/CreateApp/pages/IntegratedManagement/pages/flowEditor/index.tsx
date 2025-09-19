@@ -48,11 +48,13 @@ const FlowEditorPage: React.FC = () => {
   const handleSaveAndRelease = async (type: string) => {
     const processDefinitionJson = dealProcessDefinition(nodes.value);
     console.log('processDefinition', processDefinitionJson);
+
     const params = {
       id: flowId.value || '',
       processDefinition: JSON.stringify({ nodes: processDefinitionJson }),
       processStatus: type === 'save' ? ProcessStatus.ORIGINAL : ProcessStatus.ENABLED
     };
+
     console.log('params', params);
 
     const res = await updateFlowMgmtDefinition(params);

@@ -13,7 +13,8 @@ const TabPane = Tabs.TabPane;
 
 const Right: React.FC = () => {
   const navigate = useNavigate();
-  const [form] = Form.useForm();
+  const [accountForm] = Form.useForm();
+  const [mobileForm] = Form.useForm();
   const { t } = useI18n();
   const sliderCaptchaRef = useRef<SliderCaptchaRef>(null);
 
@@ -32,7 +33,7 @@ const Right: React.FC = () => {
   // 组件初始化时设置保存的账号
   useEffect(() => {
     if (savedAccount) {
-      form.setFieldValue('account', savedAccount);
+      accountForm.setFieldValue('account', savedAccount);
     }
 
     // 如果已经登录了就自动跳转到首页
@@ -49,14 +50,14 @@ const Right: React.FC = () => {
 
   // 处理记住我状态变化
   const handleRememberMeChange = (checked: boolean) => {
-    const account = form.getFieldValue('account') || '';
+    const account = accountForm.getFieldValue('account') || '';
     saveRememberMe(account, checked);
   };
 
   // 发送短信验证码
   const sendSmsCode = async () => {
     try {
-      const mobile = form.getFieldValue('mobile');
+      const mobile = mobileForm.getFieldValue('mobile');
       if (!mobile) {
         Message.error('请先输入手机号');
         return;
@@ -154,7 +155,6 @@ const Right: React.FC = () => {
       }
     } catch (error: any) {
       console.error('登录失败:', error);
-      Message.error(error.message || t('auth.invalidCredentials'));
     } finally {
       setLoading(false);
     }
@@ -167,7 +167,7 @@ const Right: React.FC = () => {
 
   // 验证码验证成功回调
   const handleCaptchaSuccess = async (token: string) => {
-    const values = await form.getFieldsValue();
+    const values = await accountForm.getFieldsValue();
     handleSubmit({ username: values.username, password: values.password, captchaVerification: token });
   };
 
@@ -175,13 +175,13 @@ const Right: React.FC = () => {
   const handleLoginClick = async () => {
     try {
       // 先验证表单
-      await form.validate();
+      await accountForm.validate();
 
-      if (form.getFieldValue('captchaVerification')) {
+      if (accountForm.getFieldValue('captchaVerification')) {
         handleAccountLogin({
-          username: form.getFieldValue('username'),
-          password: form.getFieldValue('password'),
-          captchaVerification: form.getFieldValue('captchaVerification')
+          username: accountForm.getFieldValue('username'),
+          password: accountForm.getFieldValue('password'),
+          captchaVerification: accountForm.getFieldValue('captchaVerification')
         });
         return;
       }
@@ -203,7 +203,7 @@ const Right: React.FC = () => {
         <Tabs activeTab={loginType} onChange={(key) => setLoginType(key as 'account' | 'mobile')} type="text">
           <TabPane key="account" title={t('auth.accountLogin')}>
             <Form
-              form={form}
+              form={accountForm}
               layout="vertical"
               onSubmit={handleLoginClick}
               autoComplete="off"
@@ -263,7 +263,7 @@ const Right: React.FC = () => {
 
           <TabPane key="mobile" title={t('auth.smsLogin')}>
             <Form
-              form={form}
+              form={mobileForm}
               layout="vertical"
               onSubmit={handleLoginClick}
               autoComplete="off"

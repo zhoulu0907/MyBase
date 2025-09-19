@@ -135,6 +135,7 @@ const MyAppPage: React.FC = () => {
   const debouncedUpdate = useCallback(
     debounce((value) => {
       setName(value);
+      setPageNo(1);
     }, 500),
     []
   );

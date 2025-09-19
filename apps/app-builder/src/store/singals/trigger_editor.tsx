@@ -2,11 +2,13 @@ import type { FlowNodeJSON } from '@flowgram.ai/fixed-layout-editor';
 import { signal } from '@preact/signals-react';
 
 export const createTriggerEditorSignal = () => {
+  // 节点列表
   const nodes = signal<any[]>([]);
   const setNodes = (newNodes: FlowNodeJSON[]) => {
     nodes.value = newNodes;
   };
 
+  // 节点配置
   const nodeData = signal<{ [key: string]: any }>({});
   const setNodeData = (nodeID: string, data: { [key: string]: any }) => {
     nodeData.value = { ...nodeData.value, [nodeID]: data };
@@ -33,10 +35,10 @@ export const createTriggerEditorSignal = () => {
     flowId.value = id;
   };
 
-  const pageId = signal<string>();
-  const setPageId = (id: string) => {
-    pageId.value = id;
-  };
+  //   const pageId = signal<string>();
+  //   const setPageId = (id: string) => {
+  //     pageId.value = id;
+  //   };
 
   const mainEntities = signal<any[]>([]);
   const setMainEntities = (entities: any[]) => {
@@ -64,8 +66,8 @@ export const createTriggerEditorSignal = () => {
     flowId,
     setFlowId,
 
-    pageId,
-    setPageId,
+    // pageId,
+    // setPageId,
 
     mainEntities,
     setMainEntities,
