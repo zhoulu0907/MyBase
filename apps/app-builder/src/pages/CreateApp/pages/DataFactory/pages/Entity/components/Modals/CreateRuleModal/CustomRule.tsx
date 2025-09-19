@@ -159,18 +159,18 @@ const CreateCustomRule: React.FC<CreateRuleModalProps> = ({ visible, setVisible,
     let allChildFields: object[] = [];
 
     if (res?.parentFields?.length > 0) {
-      parentFields = res.parentFields.map((item: { displayName: string; fieldID: string }) => ({
+      parentFields = res.parentFields.map((item: { displayName: string; fieldId: string }) => ({
         label: item.displayName,
-        value: item.fieldID,
+        value: item.fieldId,
         isParent: true // 增加主表标识
       }));
     }
     if (res?.childEntities?.length > 0) {
-      res.childEntities.forEach((item: { childFields: { displayName: string; fieldID: string }[] }) => {
+      res.childEntities.forEach((item: { childFields: { displayName: string; fieldId: string }[] }) => {
         if (item?.childFields?.length > 0) {
-          const childFields = item?.childFields?.map((item: { displayName: string; fieldID: string }) => ({
+          const childFields = item?.childFields?.map((item: { displayName: string; fieldId: string }) => ({
             label: item.displayName,
-            value: item.fieldID
+            value: item.fieldId
           }));
           allChildFields = allChildFields.concat(childFields);
         }
