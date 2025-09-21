@@ -39,8 +39,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   };
 
   const onValuesChange = async (changeValue: any, values: any) => {
-    console.log('onValuesChange: ', changeValue, values);
-
     // 校验表单
     validateNodeForm(form, payloadForm, false);
 
@@ -184,7 +182,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     const nodeData = triggerEditorSignal.nodeData.value[node.id];
     triggerEditorSignal.setNodeData(node.id, {
       ...nodeData,
-      subDataSource: undefined,
       filterCondition: e || []
     });
     payloadForm.setFieldValue('filterCondition', e);

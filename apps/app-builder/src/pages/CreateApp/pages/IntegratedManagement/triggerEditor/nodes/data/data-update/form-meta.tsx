@@ -9,6 +9,7 @@ import {
   getEntityListByApp,
   getFieldCheckTypeApi,
   type AppEntityField,
+  type Condition,
   type ConfitionField,
   type EntityFieldValidationTypes,
   type MetadataEntityPair
@@ -42,8 +43,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   };
 
   const onValuesChange = async (changeValue: any, values: any) => {
-    console.log('onValuesChange: ', changeValue, values);
-
     // 校验表单
     validateNodeForm(form, payloadForm, false);
 
@@ -192,14 +191,11 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     }
   };
 
-  const filterConditionChange = (e: any[]) => {
-    const nodeData = triggerEditorSignal.nodeData.value[node.id];
-    triggerEditorSignal.setNodeData(node.id, {
-      ...nodeData,
-      subDataSource: undefined,
-      filterCondition: e || []
+  const onConditionChange = (conditions: Condition[]) => {
+    handlePropsOnChange({
+      ...triggerEditorSignal.nodeData.value[node.id],
+      filterCondition: conditions
     });
-    payloadForm.setFieldValue('filterCondition', e);
   };
 
   return (
@@ -304,7 +300,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                   data={triggerEditorSignal.nodeData.value[node.id]?.filterCondition || []}
                   fields={conditionFields}
                   entityFieldValidationTypes={validationTypes}
-                  onChange={filterConditionChange}
+                  onChange={onConditionChange}
                 />
               </Form.Item>
             </Grid.Row>

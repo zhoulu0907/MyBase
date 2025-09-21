@@ -26,9 +26,9 @@ export interface ConditionEditorProps {
   // 可以下拉选择的字段列表
   fields: ConfitionField[];
   // 具体值
-  data?: Condition[];
+  data: Condition[];
   // 字段变更回调函数
-  onChange?: (value: Condition[]) => void;
+  onChange: (value: Condition[]) => void;
   // 字段验证类型列表
   entityFieldValidationTypes: EntityFieldValidationTypes[];
 }
@@ -37,14 +37,14 @@ export interface ConditionEditorProps {
  * 条件编辑器组件初始化
  */
 const ConditionEditor: React.FC<ConditionEditorProps> = ({ data, onChange, fields, entityFieldValidationTypes }) => {
-  const [conditions, setConditions] = useState<Condition[]>([]);
+  const [conditions, setConditions] = useState<Condition[]>(data);
 
-  //   TODO(mickey): 添加触发清空的逻辑
   useEffect(() => {
+    console.log('data: ', data);
     if (data) {
       setConditions(data);
     }
-  }, []);
+  }, [data]);
 
   useEffect(() => {
     if (onChange) {
