@@ -9,6 +9,7 @@ import {
   getEntityFieldsWithChildren,
   getEntityListByApp,
   getFieldCheckTypeApi,
+  type Condition,
   type ConfitionField,
   type EntityFieldValidationTypes,
   type MetadataEntityPair
@@ -268,6 +269,13 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     handlePropsOnChange(values);
   };
 
+  const onConditionChange = (conditions: Condition[]) => {
+    handlePropsOnChange({
+      ...triggerEditorSignal.nodeData.value[node.id],
+      filterCondition: conditions
+    });
+  };
+
   const getInitData = () => {
     return { ...triggerEditorSignal.nodeData.value[node.id] };
   };
@@ -384,6 +392,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             {filterType === FILTER_TYPE.CONDITION && (
               <Form.Item field="filterCondition">
                 <ConditionEditor
+                  onChange={onConditionChange}
                   data={triggerEditorSignal.nodeData.value[node.id]?.filterCondition || []}
                   fields={conditionFields}
                   entityFieldValidationTypes={validationTypes}

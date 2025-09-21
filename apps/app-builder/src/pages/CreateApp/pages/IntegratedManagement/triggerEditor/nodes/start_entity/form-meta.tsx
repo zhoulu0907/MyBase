@@ -136,13 +136,10 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   };
 
   const onValuesChange = (changeValue: any, values: any) => {
-    console.log('onValuesChange: ', changeValue, values);
-
     handlePropsOnChange(values);
   };
 
   const onConditionChange = (conditions: Condition[]) => {
-    console.log(conditions);
     handlePropsOnChange({
       ...triggerEditorSignal.nodeData.value[node.id],
       filterCondition: conditions

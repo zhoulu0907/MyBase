@@ -6,7 +6,7 @@ export enum SortType {
   DESC = 'desc'
 }
 
-export interface Sort {
+export interface SortData {
   id: string;
   sortType: string;
   sortField: string;
