@@ -120,7 +120,6 @@ const DataPermissionModal = (props: IProps) => {
 
   // 数据过滤
   const changeDataFilters = (value: any[]) => {
-    console.log('数据过滤 changeDataFilters', value);
     // 将 Condition 格式转换回 AuthDataFilterVO[][] 格式
     // 注意：这里需要根据实际业务逻辑进行转换
     setDataFilters(dataFilters);
@@ -266,7 +265,6 @@ const DataPermissionModal = (props: IProps) => {
           className={styles.dataPermissionForm}
           onValuesChange={(changedValues) => {
             console.log(`Form ${Object.keys(changedValues)} changeValues:`, changedValues);
-            // console.log(`Form scopeType changeValues:`, form.getFieldValue('scopeType'));
             // 当scopeFieldId字段值发生变化时，更新entitySelected状态
             if (Object.prototype.hasOwnProperty.call(changedValues, 'scopeFieldId')) {
               setEntitySelected(!!changedValues.scopeFieldId);
@@ -328,7 +326,7 @@ const DataPermissionModal = (props: IProps) => {
                     {dataPermissionPerson
                       .filter((option) => option.PersonId)
                       .map((option) => (
-                        <Option key={option.PersonId} value={option.fieldName || ''}>
+                        <Option key={option.PersonId} value={option.PersonId || ''}>
                           {option.displayName}
                         </Option>
                       ))}

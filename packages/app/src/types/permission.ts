@@ -114,24 +114,28 @@ export interface AuthDataGroupVO {
   /**
    * 业务实体字段对应的权限范围
    */
-  scopeLevel?: PermissionScope;
+  scopeLevel?: string;
+  /**
+   * 业务实体字段对应的权限范围值
+   */
+  scopeValue?: string;
 }
 
-// 权限范围 PermissionScope
-export interface PermissionScope {
-  /**
-   * 权限范围ID
-   */
-  personId?: string;
-  /**
-   * 权限范围类型
-   */
-  scopeType?: ScopeType;
-  /**
-   * 部门/人员id范围
-   */
-  assignIds?: string[];
-}
+// // 权限范围 PermissionScope
+// export interface PermissionScope {
+//   /**
+//    * 权限范围ID
+//    */
+//   personId?: string;
+//   /**
+//    * 权限范围类型
+//    */
+//   scopeType?: ScopeType;
+//   /**
+//    * 部门/人员id范围
+//    */
+//   assignIds?: string[];
+// }
 
 export type ScopeType = 
   | 'self'

@@ -27,6 +27,7 @@ export default function RolePage() {
   const [roleModalVisible, setRoleModalVisible] = useState(false);
   const [modalLoading, setModalLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('user');
+  const [forceRefresh, setForceRefresh] = useState(false);
 
   const roleListRef = useRef<any>(null);
 
@@ -47,6 +48,8 @@ export default function RolePage() {
           setActiveRoleId(undefined);
           setActiveRole(undefined);
         }
+
+        setForceRefresh((prev) => !prev);
 
         return true;
       } catch (error) {
@@ -148,7 +151,7 @@ export default function RolePage() {
           />
         </Sider>
         <Layout className={styles.rightPanel}>
-          {!activeRoleId ? (
+          {!activeRoleId || forceRefresh ? (
             <Empty />
           ) : (
             <>

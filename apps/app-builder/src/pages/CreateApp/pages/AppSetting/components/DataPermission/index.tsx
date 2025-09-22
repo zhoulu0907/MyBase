@@ -1,14 +1,14 @@
 import { Button, Divider, Popconfirm, Space, Tag } from '@arco-design/web-react';
 import { IconDelete, IconEdit, IconEmpty, IconPlusCircle } from '@arco-design/web-react/icon';
 import {
-  // updateDataGroupPermission,
+  updateDataGroupPermission,
   // deleteDataGroup,
   // getEntityFieldsWithChildren
   getAppEntities,
   getDataPermission,
   getEntityFields,
   getFieldCheckTypeApi,
-  // type UpdateDataGroupPermissionReq,
+  type UpdateDataGroupPermissionReq,
   type AppEntities,
   type AppEntity,
   // type AppEntityField,
@@ -17,7 +17,8 @@ import {
   // type FilterFieldCheckType,
   type GetPermissionReq,
   type EntityFieldValidationTypes,
-  type ConfitionField
+  // type ConfitionField,
+  type AppEntityField
 } from '@onebase/app';
 import { useEffect, useState, type FC } from 'react';
 import DataPermissionModal from './components/DataPermissionModal';
@@ -62,7 +63,7 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
   // const [form] = Form.useForm();
   const [status, setStatus] = useState<'create' | 'edit'>('create');
   const [appEntities, setAppEntities] = useState<AppEntity[]>([]);
-  const [appEntityFields, setAppEntityFields] = useState<ConfitionField[]>([]);
+  const [appEntityFields, setAppEntityFields] = useState<AppEntityField[]>([]);
   const [dataPermissionPerson, setDataPermissionPerson] = useState<AuthDataPermissionPersonVO[]>([]);
   const [filterFieldCheckType, setFilterFieldCheckType] = useState<EntityFieldValidationTypes[]>([]);
 
@@ -72,7 +73,6 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
     if (appId && menuId && roleId) {
       getFieldsPermission();
     }
-    console.log(' 数据权限 menuId:', menuId);
   }, [appId, menuId, roleId]);
 
   /* 获取权限信息 */
@@ -103,7 +103,7 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
   const GetModelInitData = async () => {
     try {
       const entitiesResq: AppEntities = await getAppEntities(appId);
-      console.log('业务实体 entitiesResq:', entitiesResq);
+      // console.log('业务实体 entitiesResq:', entitiesResq);
       setAppEntities(entitiesResq.entities);
     } catch (error) {
       console.error('获取权限信息失败', error);
@@ -132,7 +132,7 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
       });
       getFieldCheckType(getFieldCheckTypeParams);
       setAppEntityFields(entityFieldsResq);
-      console.log('setEntityFields', appEntityFields);
+      console.log('setAppEntityFields', appEntityFields);
     } catch (error) {
       console.error('获取权限信息失败', error);
     }
@@ -164,6 +164,44 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
 
   const handleModalSubmit = async (values?: AuthDataGroupVO) => {
     console.log('handleModalSubmit values:', values);
+
+    if (!values) return;
+
+    // 创建符合后端要求的数据结构
+    const submitData = { ...values };
+
+    // 处理权限范围数据以满足后端要求
+    if (values.scopeLevel && typeof values.scopeLevel === 'object') {
+      // 将选择的personId给scopeLevel
+      submitData.scopeLevel = values.scopeLevel.personId;
+
+      // 如果选择的是指定成员或者指定部门，将数据转为JSON字符串给scopeValue
+      if (values.scopeLevel.scopeType === 'specifiedPerson' || values.scopeLevel.scopeType === 'specifiedDepartment') {
+        if (values.scopeLevel.assignIds && values.scopeLevel.assignIds.length > 0) {
+          submitData.scopeValue = JSON.stringify(values.scopeLevel.assignIds);
+        }
+      }
+    }
+
+    // 构造完整的请求参数
+    const requestData: UpdateDataGroupPermissionReq = {
+      authDataGroup: submitData,
+      permissionReq: {
+        applicationId: appId,
+        menuId: menuId || '',
+        roleId: roleId || ''
+      }
+    };
+
+    console.log('处理后的提交数据:', requestData);
+    // 调用后端API提交数据
+    try {
+      await updateDataGroupPermission(requestData);
+      // 提交成功后刷新数据或关闭模态框
+      setModelVisible(false);
+    } catch (error) {
+      console.error('提交数据权限失败:', error);
+    }
   };
   const handleModalCancel = () => {
     console.log('取消创建数据权限');
