@@ -35,9 +35,7 @@
         <jakarta.persistence-api.version>3.2.0</jakarta.persistence-api.version>
         <jakarta.validation-api.version>3.1.1</jakarta.validation-api.version>
         <!-- RPC 相关 -->
-        <!-- Config 配置中心相关 -->
-        <!-- Job 定时任务相关 -->
-        <xxl-job.version>2.4.0</xxl-job.version>
+
         <!-- 服务保障相关 -->
         <lock4j.version>2.2.7</lock4j.version>
         <!-- Test 测试相关 -->
@@ -51,6 +49,7 @@
         <lombok.version>1.18.36</lombok.version>
         <mapstruct.version>1.6.3</mapstruct.version>
         <modelmapper.version>3.2.4</modelmapper.version>
+        <mvel2.version>2.4.14.Final</mvel2.version>
 <!--        <hutool-5.version>5.8.35</hutool-5.version>-->
 <!--        <hutool-6.version>6.0.0-M19</hutool-6.version>-->
         <easyexcel.version>4.0.3</easyexcel.version>
@@ -372,7 +371,11 @@
                 <artifactId>commons-collections4</artifactId>
                 <version>${commons-collections4.version}</version>
             </dependency>
-
+            <dependency>
+                <groupId>org.mvel</groupId>
+                <artifactId>mvel2</artifactId>
+                <version>${mvel2.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.apache.tika</groupId>
                 <artifactId>tika-core</artifactId> <!-- 文件类型的识别 -->
