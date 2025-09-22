@@ -18,4 +18,6 @@ public class FlowProcessDateFieldDO extends BaseDO {
     @Column(name = "entity_id", length = 19, nullable = false)
     private Long entityId;
 
+    @Column(name = "job_id", length = 64)
+    private String jobId;
 }
