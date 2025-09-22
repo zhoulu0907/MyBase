@@ -119,6 +119,8 @@ public class MetadataValidationChildNotEmptyBuildServiceImpl implements Metadata
             groupVO.setPopPrompt(vo.getPopPrompt());
             groupVO.setPopType(vo.getPopType());
             groupVO.setValidationType("CHILD_NOT_EMPTY");
+            // 修复：同步entityId到规则组
+            groupVO.setEntityId(field.getEntityId());
             groupId = ruleGroupService.createValidationRuleGroup(groupVO);
         }
 

@@ -94,6 +94,8 @@ public class MetadataValidationRequiredBuildServiceImpl implements MetadataValid
             groupVO.setPopPrompt(vo.getPopPrompt());
             groupVO.setPopType(vo.getPopType());
             groupVO.setValidationType("REQUIRED");
+            // 修复：同步entityId到规则组
+            groupVO.setEntityId(field.getEntityId());
             groupId = validationRuleGroupService.createValidationRuleGroup(groupVO);
         }
 
