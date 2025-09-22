@@ -20,7 +20,7 @@ import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
 import { NodeType } from '../../const';
-import { getBeforeCurQueryNodes, validateNodeForm } from '../../utils';
+import { getBeforeCurQueryNodes, getDataNodeSource, validateNodeForm } from '../../utils';
 
 const ALLOW_DATANODE_TYPES = [NodeType.DATA_ADD, NodeType.DATA_UPDATE, NodeType.DATA_QUERY];
 
@@ -217,26 +217,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     } else if (dataType === DATA_SOURCE_TYPE.ASSOCIA_FORM) {
       // 从关联表单中查询  ASSOCIA_FORM
     }
-  };
-
-  const getDataNodeSource = (nodeId: string): string => {
-    const nodeData = triggerEditorSignal.nodeData.value;
-    for (let ele in nodeData) {
-      const item = nodeData[ele];
-      if (item.id === nodeId) {
-        if (item.dataType === DATA_SOURCE_TYPE.FORM) {
-          // 节点来源是主表单
-          return item.mainDataSource;
-        } else if (item.dataType === DATA_SOURCE_TYPE.SUBFORM) {
-          // 子表单
-          return item.subDataSource;
-        } else if (item.dataType === DATA_SOURCE_TYPE.DATA_NODE) {
-          // 数据节点 dataNodeId
-          return getDataNodeSource(item.dataNodeId);
-        }
-      }
-    }
-    return '';
   };
 
   // 表单内容改变
