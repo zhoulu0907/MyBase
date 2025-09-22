@@ -31,6 +31,9 @@ public class AuthDataGroupVO {
     @Schema(description = "业务实体字段对应的权限范围")
     private String scopeLevel;
 
+    @Schema(description = "业务实体字段对应的权限范围值")
+    private String scopeValue;
+
     @Schema(description = "是否可以操作")
     private Integer isOperable;
 
