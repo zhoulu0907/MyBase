@@ -14,20 +14,6 @@ const DownloadLicenseModal = (props: DownloadLicenseModal) => {
   const { visible, handleCancel, handleSubmit } = props;
   const [form] = Form.useForm();
 
-  useEffect(() => {
-    if (visible) {
-      form.setFieldsValue({
-        enterpriseName: "上海移动有限公司",
-        enterpriseCode: "F200090910001",
-        enterpriseAddress: "上海市浦东金桥开发区",
-        platformType: '私有化部署',
-        tenantLimit: 3000,
-        userLimit: 1000,
-        expireTime: formatTimestamp(new Date().getTime())
-      });
-    }
-  }, [visible, form])
-
   const platformTypeOptions = [
     { value: "私有化部署", label: "私有化部署" }
   ];
