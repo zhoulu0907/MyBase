@@ -17,6 +17,7 @@ import com.cmsr.onebase.module.metadata.api.validation.MetadataPermitApi;
 import com.cmsr.onebase.module.metadata.api.validation.dto.PermitRefOtftRespDTO;
 import jakarta.annotation.Resource;
 import lombok.Setter;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -178,8 +179,14 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
             BeanUtils.copyProperties(reqVO.getAuthDataGroup(), authDataGroupDO);
             authDataGroupRepository.insert(authDataGroupDO);
             List<AuthDataFilterVO> authDataFilterVOS = formatAuthDataFilterVO(reqVO.getAuthDataGroup().getDataFilters());
-            List<AuthDataFilterDO> dataFilterDOS = authDataFilterVOS.stream().map(v -> BeanUtils.toBean(v, AuthDataFilterDO.class)).toList();
-            authDataFilterRepository.insertBatch(dataFilterDOS);
+            if (CollectionUtils.isNotEmpty(authDataFilterVOS)) {
+                List<AuthDataFilterDO> dataFilterDOS = authDataFilterVOS.stream().map(v -> {
+                    AuthDataFilterDO filterDO = BeanUtils.toBean(v, AuthDataFilterDO.class);
+                    filterDO.setGroupId(authDataGroupDO.getId());
+                    return filterDO;
+                }).toList();
+                authDataFilterRepository.insertBatch(dataFilterDOS);
+            }
         } else {
             AuthDataGroupDO authDataGroupDO = authDataGroupRepository.findById(dataGroupId);
             BeanUtils.copyProperties(reqVO.getAuthDataGroup(), authDataGroupDO);
@@ -383,7 +390,7 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
     }
 
     private void copyFields(Long groupId, AuthDataFilterVO authDataFilterVO, AuthDataFilterDO authDataFilterDO) {
-        authDataFilterDO.setFieldId(groupId);
+        authDataFilterDO.setGroupId(groupId);
         authDataFilterDO.setConditionGroup(authDataFilterVO.getConditionGroup());
         authDataFilterDO.setConditionOrder(authDataFilterVO.getConditionOrder());
         authDataFilterDO.setFieldId(authDataFilterVO.getFieldId());
