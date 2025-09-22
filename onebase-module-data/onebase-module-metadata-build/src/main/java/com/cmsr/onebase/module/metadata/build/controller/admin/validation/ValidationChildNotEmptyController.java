@@ -64,7 +64,7 @@ public class ValidationChildNotEmptyController {
         return success(true);
     }
 
-    @DeleteMapping("/delete")
+    @PostMapping("/delete")
     @Operation(summary = "根据主键ID删除子表非空校验")
     @Parameter(name = "id", description = "校验规则ID", required = true)
     @PreAuthorize("@ss.hasPermission('metadata:validation-child-not-empty:delete')")

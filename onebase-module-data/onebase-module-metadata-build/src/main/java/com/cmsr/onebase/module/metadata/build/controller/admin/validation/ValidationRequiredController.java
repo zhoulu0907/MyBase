@@ -64,7 +64,7 @@ public class ValidationRequiredController {
         return success(requiredService.getById(id));
     }
 
-    @DeleteMapping("/delete")
+    @PostMapping("/delete")
     @Operation(summary = "按主键ID删除必填校验")
     @Parameter(name = "id", description = "必填校验规则主键ID", required = true)
     @PreAuthorize("@ss.hasPermission('metadata:validation-required:delete')")

@@ -170,7 +170,16 @@ public class MetadataValidationRangeBuildServiceImpl implements MetadataValidati
     public ValidationRangeRespVO getById(Long id) {
         MetadataValidationRangeDO rangeDO = rangeRepository.findById(id);
         if (rangeDO == null) {
-            return null;
+            var group = ruleGroupService.getValidationRuleGroup(id);
+            if (group != null) {
+                var list = rangeRepository.findByGroupId(group.getId());
+                if (!list.isEmpty()) {
+                    rangeDO = list.get(0);
+                }
+            }
+            if (rangeDO == null) {
+                return null;
+            }
         }
 
         // 转换DO为VO

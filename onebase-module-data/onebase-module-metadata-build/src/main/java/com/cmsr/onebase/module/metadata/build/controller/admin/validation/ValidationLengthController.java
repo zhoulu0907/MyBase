@@ -64,7 +64,7 @@ public class ValidationLengthController {
         return success(lengthService.getById(id));
     }
 
-    @DeleteMapping("/delete")
+    @PostMapping("/delete")
     @Operation(summary = "按主键ID删除长度校验")
     @Parameter(name = "id", description = "长度校验规则主键ID", required = true)
     @PreAuthorize("@ss.hasPermission('metadata:validation-length:delete')")

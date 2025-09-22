@@ -56,7 +56,16 @@ public class MetadataValidationFormatBuildServiceImpl implements MetadataValidat
     public ValidationFormatRespVO getById(Long id) {
         MetadataValidationFormatDO formatDO = formatRepository.findById(id);
         if (formatDO == null) {
-            return null;
+            var group = ruleGroupService.getValidationRuleGroup(id);
+            if (group != null) {
+                var list = formatRepository.findByGroupId(group.getId());
+                if (!list.isEmpty()) {
+                    formatDO = list.get(0);
+                }
+            }
+            if (formatDO == null) {
+                return null;
+            }
         }
 
         // 转换DO为VO

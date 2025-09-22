@@ -193,7 +193,16 @@ public class MetadataValidationUniqueBuildServiceImpl implements MetadataValidat
     public ValidationUniqueRespVO getById(Long id) {
         MetadataValidationUniqueDO uniqueDO = uniqueRepository.findById(id);
         if (uniqueDO == null) {
-            return null;
+            var group = ruleGroupService.getValidationRuleGroup(id);
+            if (group != null) {
+                var list = uniqueRepository.findByGroupId(group.getId());
+                if (!list.isEmpty()) {
+                    uniqueDO = list.get(0);
+                }
+            }
+            if (uniqueDO == null) {
+                return null;
+            }
         }
 
         // 转换DO为VO

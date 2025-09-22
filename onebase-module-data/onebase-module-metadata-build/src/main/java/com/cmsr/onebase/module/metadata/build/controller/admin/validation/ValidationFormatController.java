@@ -64,7 +64,7 @@ public class ValidationFormatController {
         return success(true);
     }
 
-    @DeleteMapping("/delete")
+    @PostMapping("/delete")
     @Operation(summary = "根据主键ID删除格式校验")
     @Parameter(name = "id", description = "校验规则ID", required = true)
     @PreAuthorize("@ss.hasPermission('metadata:validation-format:delete')")

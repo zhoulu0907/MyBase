@@ -64,7 +64,7 @@ public class ValidationRangeController {
         return success(rangeService.getById(id));
     }
 
-    @DeleteMapping("/delete")
+    @PostMapping("/delete")
     @Operation(summary = "按主键ID删除范围校验")
     @Parameter(name = "id", description = "范围校验规则主键ID", required = true)
     @PreAuthorize("@ss.hasPermission('metadata:validation-range:delete')")

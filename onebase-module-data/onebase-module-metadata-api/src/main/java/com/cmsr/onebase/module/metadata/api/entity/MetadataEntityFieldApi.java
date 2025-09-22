@@ -2,6 +2,8 @@ package com.cmsr.onebase.module.metadata.api.entity;
 
 import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldQueryReqDTO;
 import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldRespDTO;
+import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldDataReqDTO;
+import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldDataRespDTO;
 import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldJdbcTypeReqDTO;
 import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldJdbcTypeRespDTO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -38,4 +40,13 @@ public interface MetadataEntityFieldApi {
      */
     @Operation(summary = "根据字段ID列表返回JDBC数据类型和字段类型")
     List<EntityFieldJdbcTypeRespDTO> getFieldJdbcTypes(@Valid @RequestBody EntityFieldJdbcTypeReqDTO reqDTO);
+
+    /**
+     * 根据条件查询实体字段数据
+     *
+     * @param reqDTO 查询请求参数
+     * @return 字段数据列表
+     */
+    @Operation(summary = "根据条件查询实体字段数据")
+    List<EntityFieldDataRespDTO> getDataByCondition(@Valid @RequestBody EntityFieldDataReqDTO reqDTO);
 }
