@@ -49,4 +49,10 @@ public class ValidationRuleGroupSaveReqVO {
     @Valid
     private List<List<ValidationRuleDefinitionVO>> valueRules;
 
+    /**
+     * 业务实体ID
+     */
+    @Schema(description = "业务实体ID", example = "51515658843258880")
+    private Long entityId;
+
 }

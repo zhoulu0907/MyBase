@@ -74,4 +74,9 @@ public class MetadataValidationRuleGroupDO extends TenantBaseDO {
      */
     private String validationType;
 
+    /**
+     * 实体 id
+     * 
+     */
+    private Long entityId;
 }

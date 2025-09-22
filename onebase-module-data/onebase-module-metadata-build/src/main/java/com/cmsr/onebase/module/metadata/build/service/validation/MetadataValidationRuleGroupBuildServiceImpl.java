@@ -163,12 +163,22 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
 
     @Override
     public PageResult<MetadataValidationRuleGroupDO> getValidationRuleGroupPage(ValidationRuleGroupPageReqVO pageReqVO) {
-        return validationRuleGroupRepository.selectPage(pageReqVO.getPageNo(), pageReqVO.getPageSize(), pageReqVO.getRgName());
+        return validationRuleGroupRepository.selectPage(
+                pageReqVO.getPageNo(),
+                pageReqVO.getPageSize(),
+                pageReqVO.getRgName(),
+                pageReqVO.getEntityId()
+        );
     }
 
     @Override
     public PageResult<ValidationRuleGroupSimpleRespVO> getValidationRuleGroupPageSimple(ValidationRuleGroupPageReqVO pageReqVO) {
-        PageResult<MetadataValidationRuleGroupDO> page = validationRuleGroupRepository.selectPage(pageReqVO.getPageNo(), pageReqVO.getPageSize(), pageReqVO.getRgName());
+        PageResult<MetadataValidationRuleGroupDO> page = validationRuleGroupRepository.selectPage(
+                pageReqVO.getPageNo(),
+                pageReqVO.getPageSize(),
+                pageReqVO.getRgName(),
+                pageReqVO.getEntityId()
+        );
         List<ValidationRuleGroupSimpleRespVO> list = new ArrayList<>();
         for (MetadataValidationRuleGroupDO groupDO : page.getList()) {
             ValidationRuleGroupSimpleRespVO vo = new ValidationRuleGroupSimpleRespVO();
