@@ -33,7 +33,7 @@ const judge = (curNodeId: string, blocks: FlowNodeJSON[]): boolean => {
 };
 
 // 只有存在当前节点的支线才可以使用
-const getBlockNode = (curNodeId: string, blocks: FlowNodeJSON[]): FlowNodeJSON[] => {
+const getBlockNode = (curNodeId: string, blocks: FlowNodeJSON[], nodeTypes: NodeType[]): FlowNodeJSON[] => {
   let blockNode: FlowNodeJSON[] = [];
   for (let ele of blocks) {
     if (ele.id === curNodeId) {
@@ -43,15 +43,10 @@ const getBlockNode = (curNodeId: string, blocks: FlowNodeJSON[]): FlowNodeJSON[]
     if (ele.blocks?.length) {
       const hasCurNode = judge(curNodeId, ele.blocks);
       if (hasCurNode) {
-        const nodeData = triggerEditorSignal.nodeData.value[ele.id];
-        if (
-          ele.type === NodeType.DATA_QUERY_MULTIPLE
-          //   nodeData.dataSource &&
-          //   nodeData.dataType !== DATA_SOURCE_TYPE.DATA_NODE
-        ) {
+        if (nodeTypes.includes(ele.type as NodeType)) {
           blockNode.push(ele);
         }
-        const newBlocks = getBlockNode(curNodeId, ele.blocks);
+        const newBlocks = getBlockNode(curNodeId, ele.blocks, nodeTypes);
         blockNode.push.apply(blockNode, newBlocks);
       }
     }
@@ -77,7 +72,7 @@ export function getBeforeCurQueryNodes(
       // 判断是否包含当前节点
       const hasCurNode = judge(curNodeId, ele.blocks);
       if (hasCurNode) {
-        const blocks = getBlockNode(curNodeId, ele.blocks);
+        const blocks = getBlockNode(curNodeId, ele.blocks, nodeTypes);
         nodes.push.apply(nodes, blocks);
       } else {
         const blocks = getBeforeCurQueryNodes(curNodeId, ele.blocks, nodeTypes);
