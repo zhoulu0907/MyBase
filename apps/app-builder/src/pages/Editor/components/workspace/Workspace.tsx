@@ -2,6 +2,7 @@ import { STATUS_OPTIONS, STATUS_VALUES } from '@onebase/ui-kit';
 import { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import { v4 as uuidv4 } from 'uuid';
+import { cloneDeep } from 'lodash-es';
 
 import {
   COMPONENT_GROUP_NAME,
@@ -9,6 +10,7 @@ import {
   ENTITY_COMPONENT_TYPES,
   getComponentSchema,
   getComponentWidth,
+  getComponentConfig,
   type GridItem,
   usePageEditorSignal
 } from '@onebase/ui-kit';
@@ -31,8 +33,8 @@ import CompShowIcon from '@/assets/images/eye_off_icon.svg';
 import { Divider } from '@arco-design/web-react';
 import type { AppEntityField } from '@onebase/app';
 import { useSignals } from '@preact/signals-react/runtime';
-import 'react-grid-layout/css/styles.css';
 import { COMPONENT_MAP } from '../panel/components/metadata/component_map';
+import 'react-grid-layout/css/styles.css';
 import styles from './index.module.less';
 
 export default function EditorWorkspace() {
@@ -54,7 +56,8 @@ export default function EditorWorkspace() {
     delComponents,
     showDeleteButton,
     setShowDeleteButton,
-
+    layoutSubComponents,
+    setLayoutSubComponents,
     delLayoutSubComponents
   } = usePageEditorSignal();
 
@@ -71,11 +74,7 @@ export default function EditorWorkspace() {
   // 取消隐藏组件
   const handleShowComponent = (componentId: string) => {
     const schema = pageComponentSchemas[componentId];
-    console.log('schema', pageComponentSchemas[componentId]);
-
     schema.config.status = STATUS_VALUES[STATUS_OPTIONS.DEFAULT];
-
-    console.log(schema, 'schema');
 
     setPageComponentSchemas(componentId, schema);
     setCurComponentID(componentId);
@@ -87,18 +86,48 @@ export default function EditorWorkspace() {
   const handleCopyComponent = (comp: any, originId: string) => {
     addComponents(comp);
 
+    const schemaConfig = cloneDeep(
+      getComponentConfig(pageComponentSchemas[originId], comp.type!)
+    );
     const schema = getComponentSchema(comp.type);
-    // console.log('schema', schema);
+
+    schema.config = schemaConfig;
+    schema.config.cpName = comp.displayName;
+    schema.config.id = comp.id;
 
     const props = {
       id: comp.id,
       type: comp.type,
       ...schema
     };
-    const data = pageComponentSchemas[originId];
-    data.config.cpName = comp.displayName;
-    data.config.id = comp.id;
-    setPageComponentSchemas(comp.id, { ...props, ...data });
+
+    const uniqueIdChildrenComp = layoutSubComponents[originId].map(row => row.map(it => {
+      const newId = `${it.type}-${uuidv4()}`;
+
+      const schemaConfig = cloneDeep(
+        getComponentConfig(pageComponentSchemas[it.id], it.type)
+      );
+      const schema = getComponentSchema(it.type);
+
+      schema.config = schemaConfig;
+      schema.config.cpName = it.displayName;
+      schema.config.id = newId;
+
+      const props = {
+        id: newId,
+        type: it.type,
+        ...schema
+      };
+
+      setPageComponentSchemas(newId, props);
+      return props;
+    }));
+
+    // 同步复制子组件
+    setPageComponentSchemas(comp.id, props);
+    setLayoutSubComponents(comp.id, uniqueIdChildrenComp);
+
+
     setCurComponentID(comp.id!);
     setCurComponentSchema(props);
     setShowDeleteButton(false);
@@ -110,6 +139,19 @@ export default function EditorWorkspace() {
     delComponents(componentId);
     delPageComponentSchemas(componentId);
     delLayoutSubComponents(componentId);
+
+    if (layoutSubComponents[componentId]) {
+
+      const temp2Ids = new Set(Object.keys(pageComponentSchemas));
+
+      layoutSubComponents[componentId].forEach(row => {
+        row.forEach(({ id }) => {
+          if (temp2Ids.has(id)) {
+            delPageComponentSchemas(id);
+          }
+        });
+      });
+    }
 
     // 如果删除的是当前选中的组件，清除选中状态
     if (curComponentID === componentId) {
