@@ -81,7 +81,14 @@ public class MetadataValidationRequiredBuildServiceImpl implements MetadataValid
         // 处理规则组：先查找，不存在则创建
         Long groupId;
         MetadataValidationRuleGroupDO existingGroup = validationRuleGroupService.getByName(vo.getRgName());
+        boolean canReuse = false;
         if (existingGroup != null) {
+            var groupRequiredList = requiredRepository.findByGroupId(existingGroup.getId());
+            if (groupRequiredList.isEmpty() || (groupRequiredList.size() == 1 && groupRequiredList.get(0).getFieldId().equals(vo.getFieldId()))) {
+                canReuse = true;
+            }
+        }
+        if (existingGroup != null && canReuse) {
             groupId = existingGroup.getId();
         } else {
             // 创建新的规则组

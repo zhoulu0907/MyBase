@@ -6,7 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 
 /**
  * @Author：huangjie
@@ -72,30 +72,36 @@ public class StartTimeNodeData {
     private String triggerTime;
 
     //
-    private LocalDateTime startLocalDateTime;
-    private LocalDateTime endLocalDateTime;
+    private Optional<LocalDateTime> startLocalDateTime;
+    private Optional<LocalDateTime> endLocalDateTime;
 
-    public StartTimeNodeData(Map<String, Object> data) {
-        this.cronExpression = (String) data.get("cronExpression");
-        this.startTime = (String) data.get("startTime");
-        this.endTime = (String) data.get("endTime");
-        this.delaySeconds = (Integer) data.get("delaySeconds");
-        this.repeatType = (String) data.get("repeatType");
-        this.repeatMonth = (List) data.get("repeatMonth");
-        this.repeatWeek = (List) data.get("repeatWeek");
-        this.repeatDay = (List) data.get("repeatDay");
-        this.triggerDatetime = (String) data.get("triggerDatetime");
-        this.triggerDate = (String) data.get("triggerDate");
-        this.triggerTime = (String) data.get("triggerTime");
-
+    private void init() {
+        if (startLocalDateTime != null || endLocalDateTime != null) {
+            return;
+        }
         startTime = StringUtils.trimToNull(startTime);
         if (StringUtils.isNotEmpty(startTime)) {
-            startLocalDateTime = LocalDateTime.parse(startTime, JsonGraphConstant.DATE_TIME_FORMATTER);
+            startLocalDateTime = Optional.of(LocalDateTime.parse(startTime, JsonGraphConstant.DATE_TIME_FORMATTER));
+        } else {
+            startLocalDateTime = Optional.empty();
         }
         endTime = StringUtils.trimToNull(endTime);
         if (StringUtils.isNotEmpty(endTime)) {
-            endLocalDateTime = LocalDateTime.parse(endTime, JsonGraphConstant.DATE_TIME_FORMATTER);
+            endLocalDateTime = Optional.of(LocalDateTime.parse(endTime, JsonGraphConstant.DATE_TIME_FORMATTER));
+        } else {
+            endLocalDateTime = Optional.empty();
         }
+    }
+
+    public boolean isCurrentTimeInRange() {
+        init();
+        if (startLocalDateTime.isPresent() && LocalDateTime.now().isBefore(startLocalDateTime.get())) {
+            return false;
+        }
+        if (endLocalDateTime.isPresent() && LocalDateTime.now().isAfter(endLocalDateTime.get())) {
+            return false;
+        }
+        return true;
     }
 
     public String createCronExpression() {

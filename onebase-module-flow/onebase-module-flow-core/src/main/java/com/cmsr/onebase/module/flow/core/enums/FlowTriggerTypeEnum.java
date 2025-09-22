@@ -21,6 +21,8 @@ public enum FlowTriggerTypeEnum {
     }
 
 
+
+
     public String getType() {
         return type;
     }
@@ -49,5 +51,9 @@ public enum FlowTriggerTypeEnum {
 
     public static boolean isTime(String type) {
         return TIME.type.equals(type);
+    }
+
+    public static boolean isDateField(String triggerType) {
+        return DATE_FIELD.type.equals(triggerType);
     }
 }

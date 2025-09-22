@@ -39,7 +39,8 @@ public class GraphFlowCache {
         flowNodeDataCache.put(processId, flowNodeData);
         JsonGraphNode startNode = jsonGraph.getStartNode();
         if (startNode.getType().equalsIgnoreCase(JsonGraphConstant.START_TIME)) {
-            StartTimeNodeData startTimeNodeData = new StartTimeNodeData(startNode.getData());
+            StartTimeNodeData startTimeNodeData = new StartTimeNodeData();
+            JsonUtils.updateBean(startTimeNodeData, startNode.getData());
             startTimeNodeDataCache.put(processId, startTimeNodeData);
         } else if (startNode.getType().equals(JsonGraphConstant.START_FORM)) {
             StartFormNodeData startFormNodeData = new StartFormNodeData();
@@ -60,7 +61,9 @@ public class GraphFlowCache {
 
     public void delete(Long processId) {
         flowNodeDataCache.remove(processId);
+        startTimeNodeDataCache.remove(processId);
         startFormNodeDataCache.remove(processId);
+        startDateFieldNodeDataCache.remove(processId);
         startEntityNodeDataCache.removeIf(startEntityNodeData -> startEntityNodeData.getEntityId().equals(processId));
     }
 
