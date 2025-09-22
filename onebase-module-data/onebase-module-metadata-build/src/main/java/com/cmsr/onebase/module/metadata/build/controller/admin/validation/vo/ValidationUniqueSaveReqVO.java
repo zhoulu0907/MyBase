@@ -14,6 +14,13 @@ import lombok.Data;
 @Data
 public class ValidationUniqueSaveReqVO {
 
+    /**
+     * 业务实体ID
+     */
+    @Schema(description = "业务实体ID", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotNull(message = "业务实体ID不能为空")
+    private Long entityId;
+
     @Schema(description = "字段ID", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "字段ID不能为空")
     private Long fieldId;
