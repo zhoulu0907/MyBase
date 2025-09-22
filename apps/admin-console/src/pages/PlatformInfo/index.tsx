@@ -15,28 +15,21 @@ import {
   type TableColumnProps
 } from '@arco-design/web-react';
 import {
-  createLicenseFileApi,
-  downloadPlatformLicenseApi,
   getPlatFormInfoListApi,
   getPlatformInfoApi,
   uploadPlatformLicenseApi,
-  type CreateLicenseFileReq,
   type LicenseInfo,
   type LicenseInfoList
 } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
-import { downloadFile } from '@/utils/download';
-import { getBackendURL, TokenManager } from '@onebase/common';
 import LicenseDetailModal from './components/LicenseDetailModal/index.tsx';
-import DownloadLicenseModal from './components/DownloadLicenseModal/index.tsx';
 
 const { Title, Text } = Typography;
 
 const PlatformInfo: React.FC = () => {
   const { t } = useI18n();
   const [licenseDetailVisible, setLicenseDetailVisible] = useState(false);
-  const [downloadLicenseVisible, setDownloadLicenseVisible] = useState(false);
   const [licenseInfoList, setLicenseInfoList] = useState<LicenseInfoList[]>([]);
   const [licenseInfo, setLicenseInfo] = useState<LicenseInfo | null>(null);
   const [selectedLicenseInfo, setSelectedLicenseInfo] = useState<LicenseInfo | null>(null);
@@ -200,11 +193,6 @@ const PlatformInfo: React.FC = () => {
     }
   };
 
-  // 下载认证
-  const downloadLicense = async () => {
-    setDownloadLicenseVisible(true);
-  };
-
   // 分页器
   const [pagination, setPagination] = useState({
     showTotal: true,
@@ -234,36 +222,6 @@ const PlatformInfo: React.FC = () => {
       console.error('分页加载失败:', error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleSubmit = async (value: CreateLicenseFileReq) => { 
-    try {
-      // 获取存储在localStorage或cookie中的token
-      const authorizationHeader = TokenManager.getAuthorizationHeader();
-        // fetch 请求
-      try {
-        const url = getBackendURL();
-        // 创建带有token的请求
-        const response = await fetch(`${url}/system/license/createLicenseFile`, {
-          method: 'POST',
-          headers: {
-            'Authorization': authorizationHeader,
-          },
-          body: JSON.stringify(value)
-        });
-        if (response.ok) {
-          const blob = await response.blob();
-          downloadFile(blob, 'license.lic.sm4');
-          setDownloadLicenseVisible(false)
-        } else {
-          Message.error('下载失败');
-        }
-      } catch (e) {
-        console.error('解析BASE_URL失败:', e);
-      }
-    } catch (error) {
-      console.error('创建license失败:', error);
     }
   };
 
@@ -341,7 +299,6 @@ const PlatformInfo: React.FC = () => {
           <div className={styles.authRecord}>
             <Text>{t('platformInfo.authRecord')}</Text>
             <span>
-              <Text className={styles.downloadBtn} onClick={downloadLicense}>{t('platformInfo.downloadAuth')}</Text>
               <Upload
                 className={styles.uploadAuth}
                 showUploadList={false}
@@ -372,11 +329,6 @@ const PlatformInfo: React.FC = () => {
         </Space>
       </Spin>
 
-      <DownloadLicenseModal
-        visible={downloadLicenseVisible}
-        handleCancel={() => setDownloadLicenseVisible(false)}
-        handleSubmit={(value) => handleSubmit(value)}
-      />
       <LicenseDetailModal
         visible={licenseDetailVisible}
         selectedLicenseInfo={selectedLicenseInfo}
