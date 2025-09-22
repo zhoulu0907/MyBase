@@ -56,7 +56,7 @@ public class JsonGraph {
     private String nodeDefine(int deep, JsonGraphNode node) {
         if (StringUtils.equalsAny(node.getType(),
                 "startForm", "startEntity", "startTime", "startDateField", "startAPI", "startBPM",
-                "end", "dataAdd", "dataDelete", "dataUpdate")) {
+                "end", "dataQuery", "dataAdd", "dataDelete", "dataUpdate")) {
             return toDefine(node);
         } else if (Objects.equals(node.getType(), "loop")) {
             return loopNodeDefine(deep, node);

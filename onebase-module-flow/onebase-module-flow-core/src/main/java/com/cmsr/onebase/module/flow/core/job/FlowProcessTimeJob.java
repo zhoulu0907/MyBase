@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Map;
 
@@ -48,7 +47,7 @@ public class FlowProcessTimeJob {
         Long processId = NumberUtils.toLong(MapUtils.getString(jobParamsMap, JsonGraphConstant.PROCESS_ID));
         StartTimeNodeData startTimeNodeData = graphFlowCache.getStartTimeNodeData(processId);
         // 检查当前时间是否在设定的时间范围内
-        if (!isCurrentTimeInRange(startTimeNodeData)) {
+        if (!startTimeNodeData.isCurrentTimeInRange()) {
             log.info("当前时间不在设定的时间范围内，跳过执行");
             return ExecuteResult.success("当前时间不在设定的时间范围内，跳过执行");
         } else {
@@ -57,27 +56,4 @@ public class FlowProcessTimeJob {
         }
     }
 
-    /**
-     * 判断当前时间是否在开始和结束时间范围内
-     *
-     * @param startTimeNodeData 时间节点数据
-     * @return 如果在时间范围内返回true，否则返回false
-     */
-    private boolean isCurrentTimeInRange(StartTimeNodeData startTimeNodeData) {
-        LocalDateTime startLocalDateTime = startTimeNodeData.getStartLocalDateTime();
-        LocalDateTime endLocalDateTime = startTimeNodeData.getEndLocalDateTime();
-        LocalDateTime now = LocalDateTime.now();
-
-        // 如果开始时间为空，则没有开始时间限制
-        if (startLocalDateTime != null && now.isBefore(startLocalDateTime)) {
-            return false;
-        }
-
-        // 如果结束时间为空，则没有结束时间限制
-        if (endLocalDateTime != null && now.isAfter(endLocalDateTime)) {
-            return false;
-        }
-
-        return true;
-    }
 }
