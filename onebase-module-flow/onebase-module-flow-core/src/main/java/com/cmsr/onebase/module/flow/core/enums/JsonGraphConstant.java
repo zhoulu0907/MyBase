@@ -14,6 +14,8 @@ public class JsonGraphConstant {
 
     public static final String START_TIME = "startTime";
 
+    public static final String START_DATE_FIELD = "startDateField";
+
     public static final String PAGE_ID = "pageId";
 
     public static final String ENTITY_ID = "entityId";

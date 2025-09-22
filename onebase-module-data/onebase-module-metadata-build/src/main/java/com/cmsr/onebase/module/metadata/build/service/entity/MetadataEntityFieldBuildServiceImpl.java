@@ -22,6 +22,7 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataD
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataEntityFieldRepository;
 import com.cmsr.onebase.module.metadata.core.dal.database.TemporaryDatasourceService;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEntityCoreService;
+import com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.metadata.build.service.datasource.MetadataDatasourceBuildService;
 import com.cmsr.onebase.module.metadata.build.service.field.MetadataEntityFieldOptionBuildService;
 import com.cmsr.onebase.module.metadata.build.service.field.MetadataEntityFieldConstraintBuildService;
@@ -39,6 +40,10 @@ import org.anyline.entity.Order;
 import org.anyline.entity.Compare;
 import org.anyline.entity.DataSet;
 import org.anyline.entity.DataRow;
+
+import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.BUSINESS_ENTITY_NOT_EXISTS;
+
 import org.anyline.service.AnylineService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -1465,7 +1470,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         // 获取业务实体信息
         MetadataBusinessEntityDO businessEntity = metadataBusinessEntityCoreService.getBusinessEntity(Long.valueOf(entityId));
         if (businessEntity == null) {
-            throw new IllegalArgumentException("业务实体不存在");
+            throw exception(BUSINESS_ENTITY_NOT_EXISTS);
         }
 
         // 检查实体类型是否允许修改表结构
