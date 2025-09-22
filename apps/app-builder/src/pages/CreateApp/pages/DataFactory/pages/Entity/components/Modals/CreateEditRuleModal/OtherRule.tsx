@@ -1,20 +1,6 @@
 import type { EntityListItem } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
 import { Form, Grid, Input, Message, Modal, Select } from '@arco-design/web-react';
-import {
-  createLengthRule,
-  createRequiredRule,
-  createRangeRule,
-  createFormatRule,
-  createUniqueRule,
-  getEntityFieldsWithChildren,
-  createChildNotEmptyRule,
-  updateRequiredRule,
-  updateUniqueRule,
-  updateLengthRule,
-  updateRangeRule,
-  updateFormatRule,
-  updateChildNotEmptyRule
-} from '@onebase/app';
+import * as ruleService from '@onebase/app';
 import React, { useEffect, useState } from 'react';
 import { useAppStore } from '@/store/store_app';
 import { validationTypeMap, ruleTip, validationTypeList, VALIDATION_TYPES } from './rule.ts';
@@ -59,6 +45,26 @@ const CreateOtherRule: React.FC<CreateRuleModalProps> = ({
     }
   };
 
+  const handleGetRuleById = async (id: string) => {
+    const ruleHandlers = {
+      [VALIDATION_TYPES.REQUIRED]: ruleService.getRequiredRuleById,
+      [VALIDATION_TYPES.UNIQUE]: ruleService.getUniqueRuleById,
+      [VALIDATION_TYPES.LENGTH]: ruleService.getLengthRuleById,
+      [VALIDATION_TYPES.RANGE]: ruleService.getRangeRuleById,
+      [VALIDATION_TYPES.FORMAT]: ruleService.getFormatRuleById,
+      [VALIDATION_TYPES.SUBTABLE_EMPTY]: ruleService.getChildNotEmptyRuleById
+    };
+    const handler = ruleHandlers[ruleType as keyof typeof ruleHandlers];
+    if (handler) {
+      const res = await handler(id);
+      // TODO 回显
+      console.log('getRuleById', res);
+      if (res) {
+        form.setFieldsValue(res);
+      }
+    }
+  };
+
   const handleCreateRule = async (values: RuleFormValues) => {
     const params = {
       ...values,
@@ -69,12 +75,12 @@ const CreateOtherRule: React.FC<CreateRuleModalProps> = ({
     let res;
 
     const ruleHandlers = {
-      [VALIDATION_TYPES.REQUIRED]: createRequiredRule,
-      [VALIDATION_TYPES.UNIQUE]: createUniqueRule,
-      [VALIDATION_TYPES.LENGTH]: createLengthRule,
-      [VALIDATION_TYPES.RANGE]: createRangeRule,
-      [VALIDATION_TYPES.FORMAT]: createFormatRule,
-      [VALIDATION_TYPES.SUBTABLE_EMPTY]: createChildNotEmptyRule
+      [VALIDATION_TYPES.REQUIRED]: ruleService.createRequiredRule,
+      [VALIDATION_TYPES.UNIQUE]: ruleService.createUniqueRule,
+      [VALIDATION_TYPES.LENGTH]: ruleService.createLengthRule,
+      [VALIDATION_TYPES.RANGE]: ruleService.createRangeRule,
+      [VALIDATION_TYPES.FORMAT]: ruleService.createFormatRule,
+      [VALIDATION_TYPES.SUBTABLE_EMPTY]: ruleService.createChildNotEmptyRule
     };
 
     const handler = ruleHandlers[ruleType as keyof typeof ruleHandlers];
@@ -104,12 +110,12 @@ const CreateOtherRule: React.FC<CreateRuleModalProps> = ({
     };
 
     const ruleHandlers = {
-      [VALIDATION_TYPES.REQUIRED]: updateRequiredRule,
-      [VALIDATION_TYPES.UNIQUE]: updateUniqueRule,
-      [VALIDATION_TYPES.LENGTH]: updateLengthRule,
-      [VALIDATION_TYPES.RANGE]: updateRangeRule,
-      [VALIDATION_TYPES.FORMAT]: updateFormatRule,
-      [VALIDATION_TYPES.SUBTABLE_EMPTY]: updateChildNotEmptyRule
+      [VALIDATION_TYPES.REQUIRED]: ruleService.updateRequiredRule,
+      [VALIDATION_TYPES.UNIQUE]: ruleService.updateUniqueRule,
+      [VALIDATION_TYPES.LENGTH]: ruleService.updateLengthRule,
+      [VALIDATION_TYPES.RANGE]: ruleService.updateRangeRule,
+      [VALIDATION_TYPES.FORMAT]: ruleService.updateFormatRule,
+      [VALIDATION_TYPES.SUBTABLE_EMPTY]: ruleService.updateChildNotEmptyRule
     };
     const handler = ruleHandlers[ruleType as keyof typeof ruleHandlers];
     if (handler) {
@@ -153,7 +159,7 @@ const CreateOtherRule: React.FC<CreateRuleModalProps> = ({
 
   // 加载字段选项
   const loadFieldOptions = async () => {
-    const res = await getEntityFieldsWithChildren(entity.id);
+    const res = await ruleService.getEntityFieldsWithChildren(entity.id);
     // 处理主表字段
     const parentFields = (res?.parentFields || []).map((item: { displayName: string; fieldId: string }) => ({
       label: item.displayName,
@@ -178,17 +184,7 @@ const CreateOtherRule: React.FC<CreateRuleModalProps> = ({
       loadFieldOptions();
       form.setFieldValue('validationType', ruleType);
       if (editRule) {
-        const rule = {
-          ...editRule,
-          fieldId: editRule?.validationItems[0],
-          popPrompt: editRule?.errorMessage,
-          popType: editRule?.popType,
-          formatValidationType: editRule?.formatValidationType,
-          minLength: editRule?.minLength,
-          maxLength: editRule?.maxLength,
-          range: editRule?.range
-        };
-        form.setFieldsValue(rule);
+        handleGetRuleById(editRule?.id || '');
       }
     }
   }, [visible, editRule]);

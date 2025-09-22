@@ -49,10 +49,18 @@ export const updateRequiredRule = (data: object) => {
 };
 
 /**
+ * 根据ID获取必填校验
+ * @param data 数据规则信息
+ */
+export const getRequiredRuleById = (id: string) => {
+  return metadataService.get('/validation/required/get?id=' + id);
+};
+
+/**
  * 删除必填校验
  */
 export const deleteRequiredRule = (id: string) => {
-  return metadataService.post('/validation/required/delete-by-field?id=' + id);
+  return metadataService.post('/validation/required/delete?id=' + id);
 };
 
 /**
@@ -72,11 +80,18 @@ export const updateUniqueRule = (data: object) => {
 };
 
 /**
+ * 根据ID获取唯一校验
+ */
+export const getUniqueRuleById = (id: string) => {
+  return metadataService.get('/validation/unique/get?id=' + id);
+};
+
+/**
  * 删除唯一校验
  * @param id 唯一校验ID
  */
 export const deleteUniqueRule = (id: string) => {
-  return metadataService.post('/validation/unique/delete-by-field?id=' + id);
+  return metadataService.post('/validation/unique/delete?id=' + id);
 };
 
 /**
@@ -96,11 +111,18 @@ export const updateLengthRule = (data: object) => {
 };
 
 /**
+ * 根据ID获取长度校验
+ */
+export const getLengthRuleById = (id: string) => {
+  return metadataService.get('/validation/length/get?id=' + id);
+};
+
+/**
  * 删除长度校验
  * @param id 长度校验ID
  */
 export const deleteLengthRule = (id: string) => {
-  return metadataService.post('/validation/length/delete-by-field?id=' + id);
+  return metadataService.post('/validation/length/delete?id=' + id);
 };
 
 /**
@@ -120,6 +142,21 @@ export const updateFormatRule = (data: object) => {
 };
 
 /**
+ * 根据ID获取格式校验
+ */
+export const getFormatRuleById = (id: string) => {
+  return metadataService.get('/validation/format/get?id=' + id);
+};
+
+/**
+ * 删除格式校验
+ * @param id 格式校验ID
+ */
+export const deleteFormatRule = (id: string) => {
+  return metadataService.post('/validation/format/delete?id=' + id);
+};
+
+/**
  * 创建范围校验
  * @param data 数据规则信息
  */
@@ -136,11 +173,18 @@ export const updateRangeRule = (data: object) => {
 };
 
 /**
+ * 根据ID获取范围校验
+ */
+export const getRangeRuleById = (id: string) => {
+  return metadataService.get('/validation/range/get?id=' + id);
+};
+
+/**
  * 删除范围校验
  * @param id 范围校验ID
  */
 export const deleteRangeRule = (id: string) => {
-  return metadataService.post('/validation/range/delete-by-field?id=' + id);
+  return metadataService.post('/validation/range/delete?id=' + id);
 };
 
 /**
@@ -160,11 +204,18 @@ export const updateChildNotEmptyRule = (data: object) => {
 };
 
 /**
+ * 根据ID获取子表空行校验
+ */
+export const getChildNotEmptyRuleById = (id: string) => {
+  return metadataService.get('/validation/child-not-empty/get?id=' + id);
+};
+
+/**
  * 删除子表空行校验
  * @param id 子表空行校验ID
  */
 export const deleteChildNotEmptyRule = (id: string) => {
-  return metadataService.post('/validation/child-not-empty/delete-by-field?id=' + id);
+  return metadataService.post('/validation/child-not-empty/delete?id=' + id);
 };
 
 /**
