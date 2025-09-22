@@ -1,12 +1,12 @@
-import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
-import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
-import { type FlowNodeJSON } from '../../../typings';
-import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
-import { Form } from '@arco-design/web-react';
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
+import { Form } from '@arco-design/web-react';
+import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
+import { type Condition, type ConfitionField, type EntityFieldValidationTypes } from '@onebase/app';
+import { useState } from 'react';
 import ConditionEditor from '../../../components/condition-editor';
-import { type ConfitionField, type EntityFieldValidationTypes } from '@onebase/app';
-import { useEffect, useState } from 'react';
+import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
+import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
+import { type FlowNodeJSON } from '../../../typings';
 
 export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const isSidebar = useIsSidebar();
@@ -16,8 +16,18 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const [conditionFields, setConditionFields] = useState<ConfitionField[]>([]);
 
   const onValuesChange = (changeValue: any, values: any) => {
-    console.log('onValuesChange: ', changeValue, values);
+    handlePropsOnChange(values);
+  };
+
+  const handlePropsOnChange = (values: any) => {
     triggerEditorSignal.setNodeData(node.id, values);
+  };
+
+  const onConditionChange = (conditions: Condition[]) => {
+    handlePropsOnChange({
+      ...triggerEditorSignal.nodeData.value[node.id],
+      filterCondition: conditions
+    });
   };
 
   return (
@@ -36,6 +46,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                 data={triggerEditorSignal.nodeData.value[node.id]?.filterCondition || []}
                 fields={conditionFields}
                 entityFieldValidationTypes={validationTypes}
+                onChange={onConditionChange}
               />
             </Form.Item>
           </Form>

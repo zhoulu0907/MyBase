@@ -1,9 +1,8 @@
-import React, { useEffect } from 'react';
 import { Modal } from '@arco-design/web-react';
+import React, { useEffect } from 'react';
 
-import styles from '../../index.module.less';
-import ConditionEditor from '@/pages/CreateApp/pages/IntegratedManagement/triggerEditor/components/condition-editor';
 import type { ConfitionField, EntityFieldValidationTypes } from '@onebase/app';
+import styles from '../../index.module.less';
 
 interface FilterDataModalProps {
   visible: boolean;
@@ -49,11 +48,11 @@ const FilterDataModal: React.FC<FilterDataModalProps> = ({ visible, onCancel }) 
         <div className={styles.popupContainer}>
           <span className={styles.titleSpan}>添加过滤条件来限定可选数据范围</span>
           {/* 添加过滤条件 */}
-          <ConditionEditor
+          {/* <ConditionEditor
             fields={dataFilters}
             // fields={appEntityFields}
             entityFieldValidationTypes={filterFieldCheckType}
-          />
+          /> */}
         </div>
       </Modal>
     </>

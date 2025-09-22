@@ -22,7 +22,7 @@ export const SwitchNodeRegistry: FlowNodeRegistry = {
   onAdd() {
     return {
       id: `switch_${nanoid(5)}`,
-      type: 'switch',
+      type: NodeType.SWITCH,
       data: {
         title: '分支节点'
       },
@@ -31,7 +31,7 @@ export const SwitchNodeRegistry: FlowNodeRegistry = {
           id: nanoid(5),
           type: 'case',
           data: {
-            title: '分支_0',
+            title: '分支_0'
           },
           blocks: []
         },
@@ -39,7 +39,7 @@ export const SwitchNodeRegistry: FlowNodeRegistry = {
           id: nanoid(5),
           type: 'case',
           data: {
-            title: '分支_1',
+            title: '分支_1'
           }
         },
         {

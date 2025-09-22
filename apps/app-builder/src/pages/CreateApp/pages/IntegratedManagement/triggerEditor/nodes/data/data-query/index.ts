@@ -30,7 +30,7 @@ export const DataQueryNodeRegistry: FlowNodeRegistry = {
   onAdd(ctx, from) {
     return {
       id: `dataQuery_${nanoid()}`,
-      type: 'dataQuery',
+      type: NodeType.DATA_QUERY,
       data: {
         title: '数据查询节点(单条)'
       }

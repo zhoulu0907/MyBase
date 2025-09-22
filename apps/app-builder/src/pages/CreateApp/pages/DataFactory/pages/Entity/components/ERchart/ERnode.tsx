@@ -5,6 +5,7 @@ import { IconCaretDown, IconCaretUp, IconSync } from '@arco-design/web-react/ico
 import { ENTITY_FIELD_TYPE, ENTITY_STATUS, FIELD_TYPE, SYSTEM_FIELD_MAP } from '@onebase/ui-kit';
 import React, { useEffect, useState } from 'react';
 import styles from './ERnode.module.less';
+import { useNewNodeStore } from '@/store/store_entity';
 // X6 节点组件接口
 interface X6NodeProps {
   node: Node;
@@ -31,6 +32,7 @@ const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
   });
   // 从 node 的 data 中获取节点数据
   const nodeData = (node.getData() as NodeData)?.data;
+  const { newNodes } = useNewNodeStore();
 
   useEffect(() => {
     // 系统字段默认折叠触发边重连
@@ -148,12 +150,16 @@ const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
       {/* 节点头部 */}
       <div className={styles['node-header']}>
         <IconSync className={styles['refresh-icon']} onClick={handleRefresh} />
-        <span className={styles['node-title']}>{nodeData.entityName || '未命名实体'}</span>
+        <span className={styles['node-title']}>
+          {nodeData.entityName || '未命名实体'}
+          {newNodes.includes(nodeData.entityId) && <span className={styles['node-isNew']} />}
+        </span>
         <Switch
           checked={nodeData.status === ENTITY_STATUS.ENABLE}
           onChange={(value, e) => handleStatusChange(value, e)}
           checkedText="已启用"
           uncheckedText="已禁用"
+          id="status-change-icon"
         />
         {/* 改为点击节点打开编辑弹窗 */}
         {/* <Popover

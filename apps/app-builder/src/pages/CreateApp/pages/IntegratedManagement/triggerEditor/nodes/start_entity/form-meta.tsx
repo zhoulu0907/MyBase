@@ -1,7 +1,7 @@
 import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
 
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
-import { Checkbox, Form, Grid, Input, Select } from '@arco-design/web-react';
+import { Checkbox, Form, Grid, Input, Radio, Select } from '@arco-design/web-react';
 import {
   getEntityFields,
   getEntityListByApp,
@@ -20,6 +20,37 @@ import { type FlowNodeJSON } from '../../typings';
 
 const Option = Select.Option;
 const CheckboxGroup = Checkbox.Group;
+const RadioGroup = Radio.Group;
+
+const beforeTriggerEvents = [
+  {
+    label: '创建前',
+    value: 'beforeCreate'
+  },
+  {
+    label: '修改前',
+    value: 'beforeUpdate'
+  },
+  {
+    label: '删除前',
+    value: 'beforeDelete'
+  }
+];
+
+const afterTriggerEvents = [
+  {
+    label: '创建后',
+    value: 'afterCreate'
+  },
+  {
+    label: '修改后',
+    value: 'afterUpdate'
+  },
+  {
+    label: '删除后',
+    value: 'afterDelete'
+  }
+];
 
 export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const isSidebar = useIsSidebar();
@@ -31,6 +62,8 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
   const [payloadForm] = Form.useForm();
 
+  const updateTriggerEvents = Form.useWatch('updateTriggerEvents', payloadForm);
+
   const [conditionFields, setConditionFields] = useState<ConfitionField[]>([]);
   const [validationTypes, setValidationTypes] = useState<EntityFieldValidationTypes[]>([]);
 
@@ -38,6 +71,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const [triggerFieldList, setTriggerFieldList] = useState<any[]>();
 
   const entityId = Form.useWatch('entityId', payloadForm);
+  const triggerType = Form.useWatch('triggerType', payloadForm);
 
   useEffect(() => {
     const appId = getHashQueryParam('appId');
@@ -51,6 +85,16 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       handleGetEntityFieldList(entityId);
     }
   }, [entityId]);
+
+  useEffect(() => {
+    if (triggerType) {
+      payloadForm.clearFields('triggerEvents');
+      handlePropsOnChange({
+        ...triggerEditorSignal.nodeData.value[node.id],
+        triggerEvents: []
+      });
+    }
+  }, [triggerType]);
 
   const handleGetEntityListByApp = async (appId: string) => {
     const res = await getEntityListByApp(appId);
@@ -72,7 +116,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
         });
 
         newConditionFields.push({
-          label: item.fieldName,
+          label: item.displayName,
           value: item.id,
           fieldType: item.fieldType
         });
@@ -92,16 +136,13 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   };
 
   const onValuesChange = (changeValue: any, values: any) => {
-    console.log('onValuesChange: ', changeValue, values);
-
     handlePropsOnChange(values);
   };
 
   const onConditionChange = (conditions: Condition[]) => {
-    console.log(conditions);
     handlePropsOnChange({
       ...triggerEditorSignal.nodeData.value[node.id],
-      filterConditions: conditions
+      filterCondition: conditions
     });
   };
 
@@ -141,48 +182,50 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
             <Grid.Row>
               <Form.Item
-                label="事件类型"
-                field="triggerEvents"
+                label="触发类型"
+                field="triggerType"
                 layout="vertical"
                 rules={[{ required: true, message: '请选择触发类型' }]}
               >
-                <CheckboxGroup
+                <RadioGroup
                   direction="horizontal"
                   options={[
                     {
-                      label: '创建前',
-                      value: 'beforeCreate'
+                      label: '前置',
+                      value: 'before'
                     },
                     {
-                      label: '创建后',
-                      value: 'afterCreate'
-                    },
-                    {
-                      label: '修改前',
-                      value: 'beforeUpdate'
-                    },
-                    {
-                      label: '修改后',
-                      value: 'afterUpdate'
-                    },
-                    {
-                      label: '删除前',
-                      value: 'beforeDelete'
-                    },
-                    {
-                      label: '删除后',
-                      value: 'afterDelete'
+                      label: '后置',
+                      value: 'after'
                     }
                   ]}
                 />
               </Form.Item>
             </Grid.Row>
 
-            <Grid.Row>
-              <Form.Item label="触发字段" field="triggerFieldIds" layout="vertical">
-                <Select options={triggerFieldList} mode="multiple" />
-              </Form.Item>
-            </Grid.Row>
+            {triggerType && (
+              <Grid.Row align="end">
+                <Form.Item
+                  label="事件类型"
+                  field="triggerEvents"
+                  layout="vertical"
+                  rules={[{ required: true, message: '请选择触发类型' }]}
+                >
+                  <CheckboxGroup
+                    direction="horizontal"
+                    options={triggerType === 'before' ? beforeTriggerEvents : afterTriggerEvents}
+                  />
+                </Form.Item>
+              </Grid.Row>
+            )}
+
+            {updateTriggerEvents && (
+              <Grid.Row>
+                <Form.Item label="触发字段" field="triggerFieldIds" layout="vertical">
+                  <Select options={triggerFieldList} mode="multiple" />
+                </Form.Item>
+              </Grid.Row>
+            )}
 
             <Grid.Row>
               <Form.Item label="过滤条件" field="filterCondition" layout="vertical">

@@ -71,10 +71,10 @@ export interface UpdateFlowMgmtDefinitionReq {
 
 // 数据源类型   表单、数据节点、关联表、子表
 export enum DATA_SOURCE_TYPE {
-  FORM = 1,
-  SUBFORM = 2,
-  DATA_NODE = 3,
-  ASSOCIA_FORM = 4
+  FORM = 1, // 主表
+  SUBFORM = 2, // 子表
+  DATA_NODE = 3, // 数据节点
+  ASSOCIA_FORM = 4 // 关联表
 }
 
 // 查询规则  全部数据、按条件过滤

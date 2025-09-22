@@ -18,13 +18,13 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList, form }) => {
   const [selectedFields, setSelectedFields] = useState<any[]>();
 
   useEffect(() => {
-    setSelectedFields(form.getFieldValue('fieldList'));
+    setSelectedFields(form.getFieldValue('fields'));
   }, [form, fieldList]);
 
   return (
     <div className={styles.conditionWrapper}>
       <Form.Item validateTrigger={['onChange']}>
-        <Form.List field="fieldList">
+        <Form.List field="fields">
           {(fields, { add, remove }) => {
             return (
               <>
@@ -40,7 +40,7 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList, form }) => {
                               disabled: selectedFields?.some((f) => f?.fieldId === field.fieldId)
                             }))}
                             onChange={(_value) => {
-                              setSelectedFields(form.getFieldValue('fieldList'));
+                              setSelectedFields(form.getFieldValue('fields'));
                             }}
                           />
                         </Form.Item>
@@ -64,7 +64,7 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList, form }) => {
                           icon={<IconDelete />}
                           onClick={() => {
                             remove(index);
-                            setSelectedFields(form.getFieldValue('fieldList'));
+                            setSelectedFields(form.getFieldValue('fields'));
                           }}
                         />
                       </Grid.Col>

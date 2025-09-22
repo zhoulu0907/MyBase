@@ -1,4 +1,4 @@
-import IconCollapsed from '@/assets/images/collapsed.svg';
+import IconCollapsed from '@/assets/images/collapsed_left_icon.svg';
 import IconSearchForm from '@/assets/images/search_form_icon.svg';
 import FieldCard from '@/components/FieldCard';
 import { useAppEntityStore } from '@/store/store_entity';
@@ -153,7 +153,7 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({ childCollapsed, s
                           displayName: 'entity'
                         }
                       ]}
-                      setList={() => {}}
+                      setList={() => { }}
                       group={{
                         name: COMPONENT_GROUP_NAME,
                         pull: 'clone',
@@ -198,7 +198,7 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({ childCollapsed, s
                         displayName: 'entity'
                       }))
                     ]}
-                    setList={() => {}}
+                    setList={() => { }}
                     group={{
                       name: COMPONENT_GROUP_NAME,
                       pull: 'clone',
@@ -254,7 +254,7 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({ childCollapsed, s
           <div className={styles.fieldList}>
             <ReactSortable
               list={fieldItems[activeEntityID] || []}
-              setList={() => {}}
+              setList={() => { }}
               group={{
                 name: COMPONENT_GROUP_NAME,
                 pull: 'clone',
