@@ -53,6 +53,40 @@ public class MetadataValidationChildNotEmptyBuildServiceImpl implements Metadata
     }
 
     @Override
+    public ValidationChildNotEmptyRespVO getById(Long id) {
+        MetadataValidationChildNotEmptyDO validationDO = childNotEmptyRepository.findById(id);
+        if (validationDO == null) {
+            return null;
+        }
+
+        // 转换为 VO
+        ValidationChildNotEmptyRespVO respVO = BeanUtils.toBean(validationDO, ValidationChildNotEmptyRespVO.class);
+
+        // 获取规则组名称
+        if (validationDO.getGroupId() != null) {
+            MetadataValidationRuleGroupDO ruleGroup = ruleGroupService.getValidationRuleGroup(validationDO.getGroupId());
+            if (ruleGroup != null) {
+                respVO.setRgName(ruleGroup.getRgName());
+            }
+        }
+
+        return respVO;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteById(Long id) {
+        // 先校验记录是否存在
+        MetadataValidationChildNotEmptyDO existing = childNotEmptyRepository.findById(id);
+        if (existing == null) {
+            throw new IllegalArgumentException("子表非空校验规则不存在，ID: " + id);
+        }
+        
+        // 执行删除
+        childNotEmptyRepository.deleteById(id);
+    }
+
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public Long create(ValidationChildNotEmptySaveReqVO vo) {
         Assert.notNull(vo, "vo不能为空");

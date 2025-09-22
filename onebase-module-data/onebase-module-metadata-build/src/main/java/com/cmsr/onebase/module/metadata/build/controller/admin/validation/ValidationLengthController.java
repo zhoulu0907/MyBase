@@ -26,10 +26,10 @@ public class ValidationLengthController {
 
     @PostMapping("/get-by-field")
     @Operation(summary = "根据字段ID获取长度校验")
-    @Parameter(name = "fieldId", required = true)
+    @Parameter(name = "id", description = "字段ID", required = true)
     @PreAuthorize("@ss.hasPermission('metadata:validation-length:query')")
-    public CommonResult<ValidationLengthRespVO> getByFieldId(@RequestParam("fieldId") Long fieldId) {
-        return success(lengthService.getByFieldIdWithRgName(fieldId));
+    public CommonResult<ValidationLengthRespVO> getByFieldId(@RequestParam("id") Long id) {
+        return success(lengthService.getByFieldIdWithRgName(id));
     }
 
     @PostMapping("/create")
@@ -49,10 +49,27 @@ public class ValidationLengthController {
 
     @PostMapping("/delete-by-field")
     @Operation(summary = "按字段删除长度校验")
-    @Parameter(name = "fieldId", required = true)
+    @Parameter(name = "id", description = "字段ID", required = true)
     @PreAuthorize("@ss.hasPermission('metadata:validation-length:delete')")
-    public CommonResult<Boolean> deleteByField(@RequestParam("fieldId") Long fieldId) {
-        lengthService.deleteByFieldId(fieldId);
+    public CommonResult<Boolean> deleteByField(@RequestParam("id") Long id) {
+        lengthService.deleteByFieldId(id);
+        return success(true);
+    }
+
+    @GetMapping("/get")
+    @Operation(summary = "根据主键ID获取长度校验")
+    @Parameter(name = "id", description = "长度校验规则主键ID", required = true)
+    @PreAuthorize("@ss.hasPermission('metadata:validation-length:query')")
+    public CommonResult<ValidationLengthRespVO> get(@RequestParam("id") Long id) {
+        return success(lengthService.getById(id));
+    }
+
+    @DeleteMapping("/delete")
+    @Operation(summary = "按主键ID删除长度校验")
+    @Parameter(name = "id", description = "长度校验规则主键ID", required = true)
+    @PreAuthorize("@ss.hasPermission('metadata:validation-length:delete')")
+    public CommonResult<Boolean> delete(@RequestParam("id") Long id) {
+        lengthService.deleteById(id);
         return success(true);
     }
 }

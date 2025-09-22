@@ -8,18 +8,28 @@ import java.util.List;
 
 /**
  * @Author：huangjie
- * @Date：2025/9/9 13:46
+ * @Date：2025/9/22 9:24
  */
 @Data
-public class StartEntityNodeData {
+public class StartDateFieldNodeData {
 
     private Long processId;
 
     private Long entityId;
 
-    private List<String> triggerEvents;
+    private Long offsetFiledId;
 
-    private List<Long> triggerFieldIds;
+    private String offsetMode;
+
+    private Integer offsetValue;
+
+    private String offsetUnit;
+
+    private String dailyExecTime;
+
+    private boolean batchMode;
+
+    private Integer batchSize;
 
     /**
      * 过滤条件
@@ -30,4 +40,11 @@ public class StartEntityNodeData {
      * 过滤条件缓存的表达式
      */
     private Serializable compiledExpression;
+
+
+    public String createCronExpression() {
+        Cron cron = new Cron();
+        cron.setMinuteAndHour(dailyExecTime);
+        return cron.toCron();
+    }
 }

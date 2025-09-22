@@ -11,6 +11,11 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataV
 public interface MetadataValidationChildNotEmptyBuildService {
     MetadataValidationChildNotEmptyDO getByFieldId(Long fieldId);
     ValidationChildNotEmptyRespVO getByFieldIdWithRgName(Long fieldId);
+    
+    // 新增：通过主键ID操作的方法
+    ValidationChildNotEmptyRespVO getById(Long id);
+    void deleteById(Long id);
+    
     Long create(ValidationChildNotEmptySaveReqVO vo);
     void update(ValidationChildNotEmptyUpdateReqVO vo);
     void deleteByFieldId(Long fieldId);

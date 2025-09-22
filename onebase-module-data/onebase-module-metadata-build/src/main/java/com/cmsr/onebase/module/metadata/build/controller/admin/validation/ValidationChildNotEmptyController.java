@@ -26,10 +26,18 @@ public class ValidationChildNotEmptyController {
 
     @PostMapping("/get-by-field")
     @Operation(summary = "根据字段ID获取子表非空校验")
-    @Parameter(name = "fieldId", required = true)
+    @Parameter(name = "id", description = "字段ID", required = true)
     @PreAuthorize("@ss.hasPermission('metadata:validation-child-not-empty:query')")
-    public CommonResult<ValidationChildNotEmptyRespVO> getByField(@RequestParam("fieldId") Long fieldId) {
-        return success(childNotEmptyService.getByFieldIdWithRgName(fieldId));
+    public CommonResult<ValidationChildNotEmptyRespVO> getByField(@RequestParam("id") Long id) {
+        return success(childNotEmptyService.getByFieldIdWithRgName(id));
+    }
+
+    @GetMapping("/get")
+    @Operation(summary = "根据主键ID获取子表非空校验")
+    @Parameter(name = "id", description = "校验规则ID", required = true)
+    @PreAuthorize("@ss.hasPermission('metadata:validation-child-not-empty:query')")
+    public CommonResult<ValidationChildNotEmptyRespVO> get(@RequestParam("id") Long id) {
+        return success(childNotEmptyService.getById(id));
     }
 
     @PostMapping("/create")
@@ -49,10 +57,19 @@ public class ValidationChildNotEmptyController {
 
     @PostMapping("/delete-by-field")
     @Operation(summary = "按字段删除子表非空校验")
-    @Parameter(name = "fieldId", required = true)
+    @Parameter(name = "id", description = "字段ID", required = true)
     @PreAuthorize("@ss.hasPermission('metadata:validation-child-not-empty:delete')")
-    public CommonResult<Boolean> deleteByField(@RequestParam("fieldId") Long fieldId) {
-        childNotEmptyService.deleteByFieldId(fieldId);
+    public CommonResult<Boolean> deleteByField(@RequestParam("id") Long id) {
+        childNotEmptyService.deleteByFieldId(id);
+        return success(true);
+    }
+
+    @DeleteMapping("/delete")
+    @Operation(summary = "根据主键ID删除子表非空校验")
+    @Parameter(name = "id", description = "校验规则ID", required = true)
+    @PreAuthorize("@ss.hasPermission('metadata:validation-child-not-empty:delete')")
+    public CommonResult<Boolean> delete(@RequestParam("id") Long id) {
+        childNotEmptyService.deleteById(id);
         return success(true);
     }
 }

@@ -149,6 +149,47 @@ public class MetadataValidationRequiredBuildServiceImpl implements MetadataValid
         // 同步更新字段的必填状态为非必填
         syncFieldRequiredStatus(fieldId, false);
     }
+
+    @Override
+    public ValidationRequiredRespVO getById(Long id) {
+        MetadataValidationRequiredDO requiredDO = requiredRepository.findById(id);
+        if (requiredDO == null) {
+            return null;
+        }
+
+        // 转换DO为VO
+        ValidationRequiredRespVO respVO = BeanUtils.toBean(requiredDO, ValidationRequiredRespVO.class);
+
+        // 查询并设置规则组名称
+        if (requiredDO.getGroupId() != null) {
+            var ruleGroup = validationRuleGroupService.getValidationRuleGroup(requiredDO.getGroupId());
+            if (ruleGroup != null) {
+                respVO.setRgName(ruleGroup.getRgName());
+            }
+        }
+
+        return respVO;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteById(Long id) {
+        // 先获取要删除的记录
+        MetadataValidationRequiredDO requiredDO = requiredRepository.findById(id);
+        if (requiredDO == null) {
+            return; // 记录不存在，直接返回
+        }
+
+        Long fieldId = requiredDO.getFieldId();
+
+        // 删除必填校验记录
+        requiredRepository.deleteById(id);
+
+        // 同步更新字段的必填状态为非必填
+        if (fieldId != null) {
+            syncFieldRequiredStatus(fieldId, false);
+        }
+    }
     
     /**
      * 同步字段的必填状态到字段表

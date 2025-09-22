@@ -143,4 +143,38 @@ public class MetadataValidationRangeBuildServiceImpl implements MetadataValidati
     public void deleteByFieldId(Long fieldId) {
         rangeRepository.deleteByFieldId(fieldId);
     }
+
+    @Override
+    public ValidationRangeRespVO getById(Long id) {
+        MetadataValidationRangeDO rangeDO = rangeRepository.findById(id);
+        if (rangeDO == null) {
+            return null;
+        }
+
+        // 转换DO为VO
+        ValidationRangeRespVO respVO = BeanUtils.toBean(rangeDO, ValidationRangeRespVO.class);
+
+        // 查询并设置规则组名称
+        if (rangeDO.getGroupId() != null) {
+            var ruleGroup = ruleGroupService.getValidationRuleGroup(rangeDO.getGroupId());
+            if (ruleGroup != null) {
+                respVO.setRgName(ruleGroup.getRgName());
+            }
+        }
+
+        return respVO;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteById(Long id) {
+        // 先获取要删除的记录
+        MetadataValidationRangeDO rangeDO = rangeRepository.findById(id);
+        if (rangeDO == null) {
+            return; // 记录不存在，直接返回
+        }
+
+        // 删除范围校验记录
+        rangeRepository.deleteById(id);
+    }
 }

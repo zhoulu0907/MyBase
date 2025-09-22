@@ -52,4 +52,19 @@ public interface MetadataValidationLengthBuildService {
      * @param fieldId 字段ID
      */
     void deleteByFieldId(Long fieldId);
+
+    /**
+     * 按主键ID查询长度校验配置（包含规则组名称）
+     *
+     * @param id 长度校验规则主键ID
+     * @return 长度校验VO，可能为null
+     */
+    ValidationLengthRespVO getById(Long id);
+
+    /**
+     * 按主键ID删除长度校验配置
+     *
+     * @param id 长度校验规则主键ID
+     */
+    void deleteById(Long id);
 }
