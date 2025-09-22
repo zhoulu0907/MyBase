@@ -46,7 +46,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                 data={triggerEditorSignal.nodeData.value[node.id]?.filterCondition || []}
                 fields={conditionFields}
                 entityFieldValidationTypes={validationTypes}
-                onChange={onConditionChange}
+                onConditionChange={onConditionChange}
               />
             </Form.Item>
           </Form>

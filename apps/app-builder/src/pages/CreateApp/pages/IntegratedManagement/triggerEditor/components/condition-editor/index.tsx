@@ -28,7 +28,7 @@ export interface ConditionEditorProps {
   // 具体值
   data: Condition[];
   // 字段变更回调函数
-  onChange: (value: Condition[]) => void;
+  onConditionChange?: (value: Condition[]) => void;
   // 字段验证类型列表
   entityFieldValidationTypes: EntityFieldValidationTypes[];
 }
@@ -36,7 +36,12 @@ export interface ConditionEditorProps {
 /**
  * 条件编辑器组件初始化
  */
-const ConditionEditor: React.FC<ConditionEditorProps> = ({ data, onChange, fields, entityFieldValidationTypes }) => {
+const ConditionEditor: React.FC<ConditionEditorProps> = ({
+  data,
+  onConditionChange,
+  fields,
+  entityFieldValidationTypes
+}) => {
   const [conditions, setConditions] = useState<Condition[]>(data);
 
   useEffect(() => {
@@ -47,9 +52,8 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({ data, onChange, field
   }, [data]);
 
   useEffect(() => {
-    if (onChange) {
-      onChange(conditions);
-    }
+    console.log(conditions);
+    onConditionChange && onConditionChange(conditions);
   }, [conditions]);
 
   // 新增条件
