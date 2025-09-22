@@ -1,13 +1,16 @@
-import { memo } from 'react'
+import { memo, useState } from 'react'
 import { nanoid } from 'nanoid';
 import { Button, Form} from '@arco-design/web-react';
 
 import { XDataSelectConfig } from './schema'
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import { FORM_COMPONENT_TYPES } from '@/components/Materials/componentTypes';
+import PreviewDataSelectModal from './previewDataSelectModal';
 
 const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean }) => {
     const { label, dataField, tooltip, status, defaultValue, verify, layout, labelColSpan = 0, description, runtime, displayFields } = props;
+
+    const [previewDataSelectVisible, setPreviewDataSelectVisible] = useState(false); //预览数据选择popup
 
     return (
         <div className='formWrapper'>
@@ -29,9 +32,14 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean }) => {
                     margin: "0px",
             }}
             >
-                <Button type="secondary" long>
+                <Button type="secondary" long 
+                    style={{
+                        pointerEvents: runtime ? 'unset' : 'none'
+                    }}
+                    onClick={() => setPreviewDataSelectVisible(true)}>
                     {defaultValue}
                 </Button>
+                <PreviewDataSelectModal visible={previewDataSelectVisible} onCancel={() => setPreviewDataSelectVisible(false)} tableConfig={props.dynamicTableConfig}/>
             </Form.Item>
             <div style={{marginTop: "16px", background: "#f7f8fa",}}>
                 {displayFields.map((field) => (
