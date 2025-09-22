@@ -1,6 +1,6 @@
-import { Modal, Form, Input, Select, Checkbox, Button, Tag } from '@arco-design/web-react';
+import ConditionEditor from '@/pages/CreateApp/pages/IntegratedManagement/triggerEditor/components/condition-editor';
+import { Button, Checkbox, Form, Input, Modal, Select, Tag } from '@arco-design/web-react';
 import { IconEdit } from '@arco-design/web-react/icon';
-import styles from './index.module.less';
 import {
   DataOperationEnum,
   getDeptUser,
@@ -9,17 +9,17 @@ import {
   type AuthDataFilterVO,
   type AuthDataGroupVO,
   type AuthDataPermissionPersonVO,
-  // type FilterFieldCheckType,
-  type GetDeptUserReq,
   type Condition,
   type ConfitionField,
-  type EntityFieldValidationTypes
+  type EntityFieldValidationTypes,
   // type RoleAddUserReq
+  // type FilterFieldCheckType,
+  type GetDeptUserReq
 } from '@onebase/app';
 import { AddMembers } from '@onebase/common';
 import { debounce } from 'lodash-es';
-import ConditionEditor from '@/pages/CreateApp/pages/IntegratedManagement/triggerEditor/components/condition-editor';
 import { useCallback, useEffect, useState } from 'react';
+import styles from './index.module.less';
 
 const FormItem = Form.Item;
 
@@ -394,7 +394,7 @@ const DataPermissionModal = (props: IProps) => {
               data={conditionData}
               fields={conditionFields}
               entityFieldValidationTypes={filterFieldCheckType}
-              onChange={changeDataFilters}
+              onConditionChange={changeDataFilters}
             />
           </FormItem>
           <FormItem field="isOperable" label="操作权限">

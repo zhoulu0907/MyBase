@@ -2,13 +2,21 @@ import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-e
 
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { Checkbox, Form, Grid, Input, InputNumber, Select, TimePicker } from '@arco-design/web-react';
-import { getEntityFields, getEntityListByApp } from '@onebase/app';
+import {
+  getEntityFields,
+  getEntityListByApp,
+  type Condition,
+  type ConfitionField,
+  type EntityFieldValidationTypes
+} from '@onebase/app';
 import { getHashQueryParam } from '@onebase/common';
 import { ENTITY_FIELD_TYPE } from '@onebase/ui-kit';
 import { useEffect, useState } from 'react';
+import ConditionEditor from '../../components/condition-editor';
 import { FormContent, FormHeader, FormOutputs } from '../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../hooks';
 import { type FlowNodeJSON } from '../../typings';
+import { getEntityFieldList } from '../utils';
 
 const Option = Select.Option;
 
@@ -16,16 +24,12 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const isSidebar = useIsSidebar();
   const { node } = useNodeRenderContext();
 
-  const handlePropsOnChange = (values: any) => {
-    triggerEditorSignal.setNodeData(node.id, values);
-  };
-
-  const onValuesChange = (changeValue: any, values: any) => {
-    handlePropsOnChange(values);
-  };
-
   const [entityList, setEntityList] = useState<any[]>();
   const [entityFieldList, setEntityFieldList] = useState<any[]>();
+
+  // 查询规则
+  const [validationTypes, setValidationTypes] = useState<EntityFieldValidationTypes[]>([]);
+  const [conditionFields, setConditionFields] = useState<ConfitionField[]>([]);
 
   const [payloadForm] = Form.useForm();
 
@@ -42,6 +46,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   useEffect(() => {
     if (entityId) {
       handleGetEntityFieldsById(entityId);
+      getEntityFieldList(entityId, setConditionFields, setValidationTypes);
     }
   }, [entityId]);
 
@@ -53,6 +58,21 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const handleGetEntityFieldsById = async (entityId: string) => {
     const res = await getEntityFields({ entityId });
     setEntityFieldList(res);
+  };
+
+  const handlePropsOnChange = (values: any) => {
+    triggerEditorSignal.setNodeData(node.id, values);
+  };
+
+  const onValuesChange = (changeValue: any, values: any) => {
+    handlePropsOnChange(values);
+  };
+
+  const onConditionChange = (conditions: Condition[]) => {
+    handlePropsOnChange({
+      ...triggerEditorSignal.nodeData.value[node.id],
+      filterCondition: conditions
+    });
   };
 
   return (
@@ -159,8 +179,16 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             </Grid.Row>
           </Form>
 
-          {/* TOOD: 添加条件节点 */}
-          {/* <ConditionEditor onChange={() => {}} fields={[]} fieldOperatorMapping={{}} /> */}
+          <Form.Item label="匹配规则" field="filterCondition" layout="vertical">
+            {validationTypes && (
+              <ConditionEditor
+                onConditionChange={onConditionChange}
+                data={triggerEditorSignal.nodeData.value[node.id]?.filterCondition || []}
+                fields={conditionFields}
+                entityFieldValidationTypes={validationTypes}
+              />
+            )}
+          </Form.Item>
         </FormContent>
       ) : (
         <FormContent>
