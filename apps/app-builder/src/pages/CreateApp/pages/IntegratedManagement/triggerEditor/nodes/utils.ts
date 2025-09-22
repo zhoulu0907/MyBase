@@ -60,7 +60,11 @@ const getBlockNode = (curNodeId: string, blocks: FlowNodeJSON[]): FlowNodeJSON[]
   return blockNode;
 };
 
-export function getBeforeCurQueryNodes(curNodeId: string, allNodes: FlowNodeJSON[]): FlowNodeJSON[] {
+export function getBeforeCurQueryNodes(
+  curNodeId: string,
+  allNodes: FlowNodeJSON[],
+  nodeTypes: NodeType[]
+): FlowNodeJSON[] {
   // 获取当前节点前并且是数据查询节点的数据
   // 条件节点  blocks
   let nodes: FlowNodeJSON[] = [];
@@ -76,16 +80,12 @@ export function getBeforeCurQueryNodes(curNodeId: string, allNodes: FlowNodeJSON
         const blocks = getBlockNode(curNodeId, ele.blocks);
         nodes.push.apply(nodes, blocks);
       } else {
-        const blocks = getBeforeCurQueryNodes(curNodeId, ele.blocks);
+        const blocks = getBeforeCurQueryNodes(curNodeId, ele.blocks, nodeTypes);
         nodes.push.apply(nodes, blocks);
       }
     }
     // const nodeData = triggerEditorSignal.nodeData.value[ele.id];
-    if (
-      ele.type === NodeType.DATA_QUERY_MULTIPLE
-      // nodeData.dataSource &&
-      //   nodeData.dataType !== DATA_SOURCE_TYPE.DATA_NODE
-    ) {
+    if (nodeTypes.includes(ele.type as NodeType)) {
       nodes.push(ele);
     }
   }

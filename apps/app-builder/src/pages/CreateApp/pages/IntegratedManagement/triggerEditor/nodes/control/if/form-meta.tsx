@@ -3,6 +3,7 @@ import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { Form, Grid, Input, Radio, Select } from '@arco-design/web-react';
 import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
 import {
+  type Condition,
   type ConfitionField,
   DATA_SOURCE_TYPE,
   type EntityFieldValidationTypes,
@@ -18,7 +19,10 @@ import ConditionEditor from '../../../components/condition-editor';
 import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
+import { NodeType } from '../../const';
 import { clearDataOriginNodeId, getBeforeCurQueryNodes, validateNodeForm } from '../../utils';
+
+const ALLOW_DATANODE_TYPES = [NodeType.DATA_ADD, NodeType.DATA_UPDATE, NodeType.DATA_QUERY];
 
 export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   useSignals();
@@ -135,7 +139,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
     const nodes = triggerEditorSignal.nodes.value;
 
-    const newDataNodeList = getBeforeCurQueryNodes(node.id, nodes);
+    const newDataNodeList = getBeforeCurQueryNodes(node.id, nodes, ALLOW_DATANODE_TYPES);
     setDataNodeList(newDataNodeList);
 
     clearDataOriginNodeId(node.id);
@@ -163,7 +167,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       // 从上游数据节点查询
       const nodes = triggerEditorSignal.nodes.value;
       // 过滤掉当前节点,过滤blocks,并且只能选当前节点之前的节点
-      const newDataNodeList = getBeforeCurQueryNodes(node.id, nodes);
+      const newDataNodeList = getBeforeCurQueryNodes(node.id, nodes, ALLOW_DATANODE_TYPES);
 
       setDataNodeList(newDataNodeList);
     }
@@ -248,8 +252,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   };
 
   const onValuesChange = async (changeValue: any, values: any) => {
-    // console.log('onValuesChange: ', changeValue, values);
-
     // 校验表单
     validateNodeForm(form, payloadForm, false);
 
@@ -260,14 +262,11 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     return { ...triggerEditorSignal.nodeData.value[node.id] };
   };
 
-  const filterConditionChange = (e: any[]) => {
-    const nodeData = triggerEditorSignal.nodeData.value[node.id];
-    triggerEditorSignal.setNodeData(node.id, {
-      ...nodeData,
-      subDataSource: undefined,
-      filterCondition: e || []
+  const onConditionChange = (conditions: Condition[]) => {
+    handlePropsOnChange({
+      ...triggerEditorSignal.nodeData.value[node.id],
+      filterCondition: conditions
     });
-    payloadForm.setFieldValue('filterCondition', e);
   };
 
   return (
@@ -378,10 +377,10 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
             <Form.Item field="filterCondition" label="条件" required>
               <ConditionEditor
+                onChange={onConditionChange}
                 data={triggerEditorSignal.nodeData.value[node.id]?.filterCondition || []}
                 fields={conditionFields}
                 entityFieldValidationTypes={validationTypes}
-                onChange={filterConditionChange}
               />
             </Form.Item>
           </Form>
