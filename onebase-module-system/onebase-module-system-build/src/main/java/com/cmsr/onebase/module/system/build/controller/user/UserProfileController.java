@@ -1,7 +1,7 @@
 package com.cmsr.onebase.module.system.build.controller.user;
 
-import cn.hutool.core.collection.CollUtil;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.framework.common.tools.core.collection.CollUtil;
 import com.cmsr.onebase.module.system.vo.user.UserProfileRespVO;
 import com.cmsr.onebase.module.system.vo.user.UserProfileUpdatePasswordReqVO;
 import com.cmsr.onebase.module.system.vo.user.UserProfileUpdateReqVO;

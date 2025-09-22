@@ -49,7 +49,7 @@ public class FtpFileClientConfig implements FileClientConfig {
     /**
      * 连接模式
      *
-     * 使用 {@link  cn.hutool.extra.ftp.FtpMode} 对应的字符串
+     * 使用 {@link  com.cmsr.onebase.framework.common.tools.extra.ftp.FtpMode} 对应的字符串
      */
     @NotEmpty(message = "连接模式不能为空")
     private String mode;

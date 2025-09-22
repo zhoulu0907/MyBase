@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.flow.core.dal.dataobject;
 
-import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
+import com.cmsr.onebase.framework.data.base.BaseDO;
 import jakarta.persistence.Column;
 import jakarta.persistence.Table;
 import lombok.Data;
@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 @Data
 @Table(name = "flow_process_stat")
-public class FlowProcessStatDO extends TenantBaseDO {
+public class FlowProcessStatDO extends BaseDO {
     /**
      * 主键ID
      */

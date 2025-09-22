@@ -1,15 +1,13 @@
 package com.cmsr.onebase.module.system.framework.sms.core.client.impl;
 
-import cn.hutool.core.date.format.FastDateFormat;
-import cn.hutool.core.lang.Assert;
-import cn.hutool.core.util.HexUtil;
-import cn.hutool.core.util.StrUtil;
-import cn.hutool.crypto.digest.DigestUtil;
-import cn.hutool.crypto.digest.HmacAlgorithm;
-import cn.hutool.json.JSONArray;
-import cn.hutool.json.JSONObject;
-import cn.hutool.json.JSONUtil;
 import com.cmsr.onebase.framework.common.core.KeyValue;
+import com.cmsr.onebase.framework.common.tools.core.date.format.FastDateFormat;
+import com.cmsr.onebase.framework.common.tools.core.lang.Assert;
+import com.cmsr.onebase.framework.common.tools.core.util.HexUtil;
+import com.cmsr.onebase.framework.common.tools.core.util.StrUtil;
+import com.cmsr.onebase.framework.common.tools.json.JSONArray;
+import com.cmsr.onebase.framework.common.tools.json.JSONObject;
+import com.cmsr.onebase.framework.common.tools.json.JSONUtil;
 import com.cmsr.onebase.framework.common.util.collection.ArrayUtils;
 import com.cmsr.onebase.framework.common.util.http.HttpUtils;
 import com.cmsr.onebase.module.system.framework.sms.core.client.dto.SmsReceiveRespDTO;
@@ -19,10 +17,12 @@ import com.cmsr.onebase.module.system.framework.sms.core.enums.SmsTemplateAuditS
 import com.cmsr.onebase.module.system.framework.sms.core.property.SmsChannelProperties;
 import com.google.common.annotations.VisibleForTesting;
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-import static cn.hutool.crypto.digest.DigestUtil.sha256Hex;
+import static com.cmsr.onebase.framework.common.tools.crypto.digest.DigestUtil.sha256Hex;
 import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.convertList;
 
 /**
@@ -195,7 +195,14 @@ public class TencentSmsClient extends AbstractSmsClient {
     }
 
     private static byte[] hmac256(byte[] key, String msg) {
-        return DigestUtil.hmac(HmacAlgorithm.HmacSHA256, key).digest(msg);
+        try {
+            Mac mac = Mac.getInstance("HmacSHA256");
+            SecretKeySpec secretKeySpec = new SecretKeySpec(key, "HmacSHA256");
+            mac.init(secretKeySpec);
+            return mac.doFinal(msg.getBytes(StandardCharsets.UTF_8));
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to calculate HMAC-SHA256", e);
+        }
     }
 
 }

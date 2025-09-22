@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.flow.core.dal.dataobject;
 
-import com.cmsr.onebase.framework.tenant.core.db.TenantBaseDO;
+import com.cmsr.onebase.framework.data.base.BaseDO;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
@@ -9,7 +9,7 @@ import lombok.Data;
 @Data
 @Entity
 @Table(name = "flow_process")
-public class FlowProcessDO extends TenantBaseDO {
+public class FlowProcessDO extends BaseDO {
 
     /**
      * 主键ID
@@ -27,11 +27,6 @@ public class FlowProcessDO extends TenantBaseDO {
     @Column(name = "process_name", length = 128, nullable = false)
     private String processName;
     /**
-     * 状态（编辑、发布）
-     */
-    @Column(name = "process_status", length = 5, nullable = false)
-    private Integer processStatus;
-    /**
      * 描述
      */
     @Column(name = "process_description", length = 1024)
@@ -41,6 +36,16 @@ public class FlowProcessDO extends TenantBaseDO {
      */
     @Column(name = "process_definition", length = 2147483647, nullable = false)
     private String processDefinition;
+    /**
+     * 启用状态（编辑、发布）
+     */
+    @Column(name = "enable_status", nullable = false)
+    private Integer enableStatus;
+    /**
+     * 发布状态（编辑、发布）
+     */
+    @Column(name = "publish_status", nullable = false)
+    private Integer publishStatus;
     /**
      * 流程类型，如表达触发，定时触发，API触发等
      */

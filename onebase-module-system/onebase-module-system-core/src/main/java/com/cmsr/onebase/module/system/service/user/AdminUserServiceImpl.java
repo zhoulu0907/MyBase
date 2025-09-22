@@ -1,12 +1,11 @@
 package com.cmsr.onebase.module.system.service.user;
 
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.util.ObjUtil;
-import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.exception.ServiceException;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.tools.core.collection.CollUtil;
+import com.cmsr.onebase.framework.common.tools.core.util.ObjUtil;
+import com.cmsr.onebase.framework.common.tools.core.util.StrUtil;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.common.util.validation.ValidationUtils;
@@ -41,6 +40,7 @@ import jakarta.annotation.Resource;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.data.param.init.DefaultConfigStore;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -67,19 +67,19 @@ public class AdminUserServiceImpl implements AdminUserService {
     static final String USER_REGISTER_ENABLED_KEY = "system.user.register-enabled";
 
     @Resource
-    private DeptService       deptService;
+    private DeptService deptService;
     @Resource
-    private PostService       postService;
+    private PostService postService;
     @Resource
     private PermissionService permissionService;
     @Resource
-    private PasswordEncoder   passwordEncoder;
+    private PasswordEncoder passwordEncoder;
     @Resource
     @Lazy // 延迟，避免循环依赖报错
-    private TenantService     tenantService;
+    private TenantService tenantService;
 
     @Resource
-    private ConfigApi   configApi;
+    private ConfigApi configApi;
     @Lazy
     @Resource
     private RoleService roleService;
@@ -98,15 +98,23 @@ public class AdminUserServiceImpl implements AdminUserService {
     @LogRecord(type = SYSTEM_USER_TYPE, subType = SYSTEM_USER_CREATE_SUB_TYPE, bizNo = "{{#user.id}}",
             success = SYSTEM_USER_CREATE_SUCCESS)
     public Long createUser(UserInsertReqVO createReqVO) {
-        // 1.1 校验账户配合
-        tenantService.handleTenantInfo(tenant -> {
+        // 如果为空，默认为开启状态
+        if (createReqVO.getStatus() == null) {
+            createReqVO.setStatus(CommonStatusEnum.ENABLE.getStatus()); // 默认开启
+        }
+        // 如果是启用状态，校验当前租户下的用户数量有没有超过最大限额
+        if (createReqVO.getStatus() == CommonStatusEnum.ENABLE.getStatus()) {
+            // 1.1 校验账户配合
+            tenantService.handleTenantInfo(tenant -> {
 
-            long count = adminUserDataRepository.countByConfig(new DefaultConfigStore().eq(AdminUserDO.STATUS, UserStatusEnum.NORMAL.getStatus()));
-            log.info(" count user four tenant, count={}", count);
-            if (count >= tenant.getAccountCount()) {
-                throw exception(USER_COUNT_MAX, tenant.getAccountCount());
-            }
-        });
+                long count = adminUserDataRepository.countByConfig(new DefaultConfigStore().eq(AdminUserDO.STATUS,
+                        UserStatusEnum.NORMAL.getStatus()));
+                log.info(" count user four tenant, count={}", count);
+                if (count >= tenant.getAccountCount()) {
+                    throw exception(USER_COUNT_MAX, tenant.getAccountCount());
+                }
+            });
+        }
         // 1.2 校验正确性
         validateUserForCreateOrUpdate(null, createReqVO.getUsername(),
                 createReqVO.getMobile(), createReqVO.getEmail(), createReqVO.getDeptId(), createReqVO.getPostIds());
@@ -115,7 +123,6 @@ public class AdminUserServiceImpl implements AdminUserService {
 
         // 2.1 插入用户
         AdminUserDO user = BeanUtils.toBean(createReqVO, AdminUserDO.class);
-        user.setStatus(CommonStatusEnum.ENABLE.getStatus()); // 默认开启
         user.setPassword(encodePassword(createReqVO.getPassword())); // 加密密码
         if (user.getAdminType() == null) {
             user.setAdminType(AdminTypeEnum.CUSTOM.getType());
@@ -123,13 +130,13 @@ public class AdminUserServiceImpl implements AdminUserService {
         adminUserDataRepository.insert(user);
 
         // 2.2 插入关联岗位
-        if (CollectionUtil.isNotEmpty(user.getPostIds())) {
+        if (CollUtil.isNotEmpty(user.getPostIds())) {
             userPostDataRepository.insertBatch(convertList(user.getPostIds(),
                     postId -> new UserPostDO().setUserId(user.getId()).setPostId(postId)));
         }
 
         // 2.3 插入用户角色关联
-        if (CollectionUtil.isNotEmpty(createReqVO.getRoleIds())) {
+        if (CollUtil.isNotEmpty(createReqVO.getRoleIds())) {
             permissionService.assignUserRoles(user.getId(), createReqVO.getRoleIds());
         }
 
@@ -143,8 +150,10 @@ public class AdminUserServiceImpl implements AdminUserService {
             success = SYSTEM_USER_CREATE_SUCCESS)
     @Override
     public Long createPlatformUser(UserInsertReqVO createReqVO) {
-        // 设置平台管理员默认名称
-        createReqVO.setNickname(RoleCodeEnum.SUPER_ADMIN.getName());
+        // 如果前端没传管理员昵称，设置平台管理员默认名称
+        if (StringUtils.isBlank(createReqVO.getNickname())) {
+            createReqVO.setNickname(RoleCodeEnum.SUPER_ADMIN.getName());
+        }
         //  校验正确性
         validateUserForCreateOrUpdate(null, createReqVO.getUsername(),
                 createReqVO.getMobile(), createReqVO.getEmail(), createReqVO.getDeptId(), createReqVO.getPostIds());
@@ -204,7 +213,20 @@ public class AdminUserServiceImpl implements AdminUserService {
                 updateReqVO.getMobile(), updateReqVO.getEmail(), updateReqVO.getDeptId(), updateReqVO.getPostIds());
         // 1.1 校验角色权限
         validateRoleIds(updateReqVO.getRoleIds());
+        if (updateReqVO.getStatus() != null) {
 
+            if (updateReqVO.getStatus() != oldUser.getStatus() && updateReqVO.getStatus() == CommonStatusEnum.ENABLE.getStatus()) {
+                // 1.1 校验账户配合
+                tenantService.handleTenantInfo(tenant -> {
+                    long count = adminUserDataRepository.countByConfig(new DefaultConfigStore().eq(AdminUserDO.STATUS,
+                            UserStatusEnum.NORMAL.getStatus()));
+                    log.info(" count user four tenant, count={}", count);
+                    if (count >= tenant.getAccountCount()) {
+                        throw exception(USER_COUNT_MAX, tenant.getAccountCount());
+                    }
+                });
+            }
+        }
         // 2.1 更新用户
         AdminUserDO updateObj = BeanUtils.toBean(updateReqVO, AdminUserDO.class);
         adminUserDataRepository.update(updateObj);
@@ -243,11 +265,11 @@ public class AdminUserServiceImpl implements AdminUserService {
         Collection<Long> createPostIds = CollUtil.subtract(postIds, dbPostIds);
         Collection<Long> deletePostIds = CollUtil.subtract(dbPostIds, postIds);
         // 执行新增和删除。对于已经授权的岗位，不用做任何处理
-        if (!CollectionUtil.isEmpty(createPostIds)) {
+        if (!CollUtil.isEmpty(createPostIds)) {
             userPostDataRepository.insertBatch(convertList(createPostIds,
                     postId -> new UserPostDO().setUserId(userId).setPostId(postId)));
         }
-        if (!CollectionUtil.isEmpty(deletePostIds)) {
+        if (!CollUtil.isEmpty(deletePostIds)) {
             userPostDataRepository.deleteByUserIdAndPostIds(userId, deletePostIds);
         }
     }
@@ -619,10 +641,10 @@ public class AdminUserServiceImpl implements AdminUserService {
         if (platformAdminRole == null) {
             return Collections.emptyList();
         }
-        
+
         // 获取这些用户的角色信息
         List<UserRoleDO> userRoles = new ArrayList<>(userRoleDataRepository.findListByRoleIds(platformAdminRole.getId()));
-        
+
         // 过滤出具有平台管理员角色的用户
         Set<Long> platformAdminUserIds = convertSet(userRoles, UserRoleDO::getUserId);
 

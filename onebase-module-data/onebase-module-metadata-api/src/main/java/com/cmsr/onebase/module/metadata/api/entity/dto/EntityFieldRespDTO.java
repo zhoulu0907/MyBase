@@ -30,9 +30,6 @@ public class EntityFieldRespDTO {
     @Schema(description = "字段类型", example = "STRING")
     private String fieldType;
 
-    @Schema(description = "数据长度", example = "50")
-    private Integer dataLength;
-
     @Schema(description = "小数位数", example = "2")
     private Integer decimalPlaces;
 
@@ -47,9 +44,6 @@ public class EntityFieldRespDTO {
 
     @Schema(description = "是否唯一", example = "1")
     private Integer isUnique;
-
-    @Schema(description = "允许为空", example = "0")
-    private Integer allowNull;
 
     @Schema(description = "是否系统字段", example = "0")
     private Integer isSystemField;

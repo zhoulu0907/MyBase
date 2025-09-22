@@ -1,7 +1,8 @@
 package com.cmsr.onebase.framework.common.util.string;
 
-import cn.hutool.core.util.ArrayUtil;
-import cn.hutool.core.util.StrUtil;
+
+import com.cmsr.onebase.framework.common.tools.core.util.ArrayUtil;
+import com.cmsr.onebase.framework.common.tools.core.util.StrUtil;
 
 import java.util.Collection;
 

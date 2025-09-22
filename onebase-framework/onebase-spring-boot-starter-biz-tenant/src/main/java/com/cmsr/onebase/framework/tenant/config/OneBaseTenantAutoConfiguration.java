@@ -1,8 +1,8 @@
 package com.cmsr.onebase.framework.tenant.config;
 
-import cn.hutool.extra.spring.SpringUtil;
 import com.cmsr.onebase.framework.common.biz.system.tenant.TenantCommonApi;
 import com.cmsr.onebase.framework.common.enums.WebFilterOrderEnum;
+import com.cmsr.onebase.framework.common.tools.extra.spring.SpringUtil;
 import com.cmsr.onebase.framework.redis.config.OneBaseCacheProperties;
 import com.cmsr.onebase.framework.security.core.service.SecurityFrameworkService;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;

@@ -1,6 +1,6 @@
 package com.cmsr.onebase.framework.common.util.spring;
 
-import cn.hutool.extra.spring.SpringUtil;
+import com.cmsr.onebase.framework.common.tools.extra.spring.SpringUtil;
 
 import java.util.Objects;
 

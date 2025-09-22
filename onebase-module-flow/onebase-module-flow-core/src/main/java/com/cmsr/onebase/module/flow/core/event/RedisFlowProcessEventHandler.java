@@ -1,11 +1,13 @@
 package com.cmsr.onebase.module.flow.core.event;
 
-import jakarta.annotation.PostConstruct;
+import com.cmsr.onebase.module.flow.core.config.FlowRuntimeCondition;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.redisson.Redisson;
 import org.redisson.api.RTopic;
+import org.redisson.api.RedissonClient;
 import org.redisson.api.listener.MessageListener;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
 
 /**
@@ -14,8 +16,10 @@ import org.springframework.stereotype.Component;
  *
  * @author huangjie
  */
+@Setter
 @Slf4j
 @Component
+@Conditional(FlowRuntimeCondition.class)
 public class RedisFlowProcessEventHandler extends FlowProcessEventHandler {
 
     /**
@@ -25,15 +29,14 @@ public class RedisFlowProcessEventHandler extends FlowProcessEventHandler {
     private static final String TOPIC_PROCESS_DELETE = "flow:process:delete";
 
     @Autowired
-    private Redisson redisson;
+    private RedissonClient redissonClient;
 
     /**
      * 初始化 Redis 消息监听器
      */
-    @PostConstruct
     public void initListeners() {
         // 监听流程更新事件
-        RTopic updateTopic = redisson.getTopic(TOPIC_PROCESS_UPDATE);
+        RTopic updateTopic = redissonClient.getTopic(TOPIC_PROCESS_UPDATE);
         updateTopic.addListener(Long.class, new MessageListener<Long>() {
             @Override
             public void onMessage(CharSequence channel, Long processId) {
@@ -42,7 +45,7 @@ public class RedisFlowProcessEventHandler extends FlowProcessEventHandler {
             }
         });
         // 监听流程删除事件
-        RTopic deleteTopic = redisson.getTopic(TOPIC_PROCESS_DELETE);
+        RTopic deleteTopic = redissonClient.getTopic(TOPIC_PROCESS_DELETE);
         deleteTopic.addListener(Long.class, new MessageListener<Long>() {
             @Override
             public void onMessage(CharSequence channel, Long processId) {

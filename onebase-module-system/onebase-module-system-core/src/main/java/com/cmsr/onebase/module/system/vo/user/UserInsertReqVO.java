@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.system.vo.user;
 
-import cn.hutool.core.util.ObjectUtil;
+import com.cmsr.onebase.framework.common.tools.core.util.ObjUtil;
 import com.cmsr.onebase.framework.common.validation.Mobile;
 import com.cmsr.onebase.module.system.framework.operatelog.core.DeptParseFunction;
 import com.cmsr.onebase.module.system.framework.operatelog.core.PostParseFunction;
@@ -72,6 +72,9 @@ public class UserInsertReqVO {
     @DiffLogField(name = "管理员类型")
     private Integer adminType;
 
+    @Schema(description = "状态", example = "1")
+    private Integer status;
+
     @Schema(description = "角色Ids", example = "[1,2]")
     private Set<Long> roleIds;
 
@@ -84,7 +87,7 @@ public class UserInsertReqVO {
     @JsonIgnore
     public boolean isPasswordValid() {
         return id != null // 修改时，不需要传递
-                || (ObjectUtil.isAllNotEmpty(password)); // 新增时，必须都传递 password
+                || (ObjUtil.isAllNotEmpty(password)); // 新增时，必须都传递 password
     }
 
 }

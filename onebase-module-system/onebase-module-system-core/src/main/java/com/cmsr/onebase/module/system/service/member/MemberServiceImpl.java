@@ -1,8 +1,8 @@
 package com.cmsr.onebase.module.system.service.member;
 
-import cn.hutool.core.util.ClassUtil;
-import cn.hutool.core.util.ReflectUtil;
-import cn.hutool.extra.spring.SpringUtil;
+import com.cmsr.onebase.framework.common.tools.core.util.ClassUtil;
+import com.cmsr.onebase.framework.common.tools.core.util.ReflectUtil;
+import com.cmsr.onebase.framework.common.tools.extra.spring.SpringUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 

@@ -1,15 +1,14 @@
 package com.cmsr.onebase.module.system.framework.sms.core.client.impl;
 
-import cn.hutool.core.collection.CollStreamUtil;
-import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.date.LocalDateTimeUtil;
-import cn.hutool.core.lang.Assert;
-import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.crypto.SecureUtil;
-import cn.hutool.crypto.digest.HmacAlgorithm;
-import cn.hutool.json.JSONObject;
-import cn.hutool.json.JSONUtil;
 import com.cmsr.onebase.framework.common.core.KeyValue;
+import com.cmsr.onebase.framework.common.tools.core.collection.CollStreamUtil;
+import com.cmsr.onebase.framework.common.tools.core.date.DateUtil;
+import com.cmsr.onebase.framework.common.tools.core.date.LocalDateTimeUtil;
+import com.cmsr.onebase.framework.common.tools.core.lang.Assert;
+import com.cmsr.onebase.framework.common.tools.core.util.ObjUtil;
+import com.cmsr.onebase.framework.common.tools.crypto.SecureUtil;
+import com.cmsr.onebase.framework.common.tools.json.JSONObject;
+import com.cmsr.onebase.framework.common.tools.json.JSONUtil;
 import com.cmsr.onebase.framework.common.util.http.HttpUtils;
 import com.cmsr.onebase.module.system.framework.sms.core.client.dto.SmsReceiveRespDTO;
 import com.cmsr.onebase.module.system.framework.sms.core.client.dto.SmsSendRespDTO;
@@ -53,7 +52,7 @@ public class QiniuSmsClient extends AbstractSmsClient {
         JSONObject response = request("POST", body, "/v1/message/single");
 
         // 2. 解析请求
-        if (ObjectUtil.isNotEmpty(response.getStr("error"))) {
+        if (ObjUtil.isNotEmpty(response.getStr("error"))) {
             // 短信请求失败
             return new SmsSendRespDTO().setSuccess(false)
                     .setApiCode(response.getStr("error"))
@@ -99,11 +98,10 @@ public class QiniuSmsClient extends AbstractSmsClient {
                 .append("\n").append("Content-Type").append(": ").append("application/json")
                 .append("\n").append("X-Qiniu-Date").append(": ").append(signDate)
                 .append("\n\n");
-        if (ObjectUtil.isNotEmpty(body)) {
+        if (ObjUtil.isNotEmpty(body)) {
             dataToSign.append(body);
         }
-        String signature = SecureUtil.hmac(HmacAlgorithm.HmacSHA1, properties.getApiSecret())
-                .digestBase64(dataToSign.toString(), true);
+        String signature = SecureUtil.hmacSha1Base64(properties.getApiSecret(), dataToSign.toString());
         return "Qiniu " + properties.getApiKey() + ":" + signature;
     }
 

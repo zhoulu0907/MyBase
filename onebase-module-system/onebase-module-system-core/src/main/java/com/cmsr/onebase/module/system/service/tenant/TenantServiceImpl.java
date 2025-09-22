@@ -1,11 +1,10 @@
 package com.cmsr.onebase.module.system.service.tenant;
 
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.lang.Assert;
-import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
-import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.tools.core.collection.CollUtil;
+import com.cmsr.onebase.framework.common.tools.core.lang.Assert;
+import com.cmsr.onebase.framework.common.tools.core.util.StrUtil;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import com.cmsr.onebase.framework.common.util.date.DateUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
@@ -13,13 +12,6 @@ import com.cmsr.onebase.framework.tenant.config.TenantProperties;
 import com.cmsr.onebase.framework.tenant.core.context.TenantContextHolder;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
-import com.cmsr.onebase.module.system.enums.permission.*;
-import com.cmsr.onebase.module.system.vo.role.RoleInsertReqVO;
-import com.cmsr.onebase.module.system.vo.tenant.TenantInsertReqVO;
-import com.cmsr.onebase.module.system.vo.tenant.TenantPageReqVO;
-import com.cmsr.onebase.module.system.vo.tenant.TenantRespVO;
-import com.cmsr.onebase.module.system.vo.tenant.TenantUpdateReqVO;
-import com.cmsr.onebase.module.system.vo.user.UserInsertReqVO;
 import com.cmsr.onebase.module.system.convert.tenant.TenantConvert;
 import com.cmsr.onebase.module.system.dal.database.TenantDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.license.LicenseDO;
@@ -29,6 +21,10 @@ import com.cmsr.onebase.module.system.dal.dataobject.permission.UserRoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
 import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantPackageDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
+import com.cmsr.onebase.module.system.enums.permission.AdminTypeEnum;
+import com.cmsr.onebase.module.system.enums.permission.PackageTypeEnum;
+import com.cmsr.onebase.module.system.enums.permission.RoleCodeEnum;
+import com.cmsr.onebase.module.system.enums.permission.RoleTypeEnum;
 import com.cmsr.onebase.module.system.enums.tenant.TenantCodeEnum;
 import com.cmsr.onebase.module.system.enums.tenant.TenantStatusEnum;
 import com.cmsr.onebase.module.system.enums.user.UserStatusEnum;
@@ -39,6 +35,12 @@ import com.cmsr.onebase.module.system.service.permission.RoleService;
 import com.cmsr.onebase.module.system.service.tenant.handler.TenantInfoHandler;
 import com.cmsr.onebase.module.system.service.tenant.handler.TenantMenuHandler;
 import com.cmsr.onebase.module.system.service.user.AdminUserService;
+import com.cmsr.onebase.module.system.vo.role.RoleInsertReqVO;
+import com.cmsr.onebase.module.system.vo.tenant.TenantInsertReqVO;
+import com.cmsr.onebase.module.system.vo.tenant.TenantPageReqVO;
+import com.cmsr.onebase.module.system.vo.tenant.TenantRespVO;
+import com.cmsr.onebase.module.system.vo.tenant.TenantUpdateReqVO;
+import com.cmsr.onebase.module.system.vo.user.UserInsertReqVO;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -78,17 +80,17 @@ public class TenantServiceImpl implements TenantService {
     private TenantPackageService tenantPackageService;
     @Resource
     @Lazy // 延迟，避免循环依赖报错
-    private AdminUserService     userService;
+    private AdminUserService userService;
     @Resource
-    private RoleService          roleService;
+    private RoleService roleService;
     @Resource
-    private MenuService          menuService;
+    private MenuService menuService;
     @Resource
-    private PermissionService    permissionService;
+    private PermissionService permissionService;
     @Resource
-    private LicenseService       licenseService;
+    private LicenseService licenseService;
     @Resource
-    private AppApplicationApi    appApplicationApi;
+    private AppApplicationApi appApplicationApi;
 
     @Resource
     private TenantDataRepository tenantDataRepository;
@@ -156,7 +158,10 @@ public class TenantServiceImpl implements TenantService {
         // 校验租户名称是否重复
         validTenantNameDuplicate(createReqVO.getName(), null);
         // 校验租户域名是否重复
-        if (StringUtils.isNotEmpty(createReqVO.getWebsite())) {
+        if (StringUtils.isEmpty(createReqVO.getWebsite())) {
+            throw exception(TENANT_WEBSITE_IS_NULL);
+        } else {
+            // 校验租户域名是否重复
             validTenantWebsiteDuplicate(createReqVO.getWebsite(), null);
         }
         // 根据租户套餐编号获取租户套餐
@@ -388,7 +393,7 @@ public class TenantServiceImpl implements TenantService {
         if (tenant == null) {
             return;
         }
-        // 如果 id 为空，说明不用比较是否为相同名字的租户
+        // 如果 租户id 为空，则报错已存在同网站的租户
         if (id == null) {
             throw exception(TENANT_WEBSITE_DUPLICATE, website);
         }
@@ -451,10 +456,15 @@ public class TenantServiceImpl implements TenantService {
     @Override
     public TenantRespVO getTenantWithAppCount(Long id) {
         TenantDO tenantDO = getTenant(id);
+        // 查询当前租户下的已有的正常状态的用户数量
+        Integer count = userService.getUserCountByStatus(UserStatusEnum.NORMAL.getStatus());
         TenantRespVO tenantRespVO = TenantConvert.INSTANCE.convert(tenantDO);
-        CommonResult<Long> appCountResult = appApplicationApi.countApplicationByTenantId(id);
+        tenantRespVO.setExistUserCount(count);
+        AdminUserDO user = userService.getUser(tenantDO.getCreator());
+        tenantRespVO.setAdminNickName(user.getNickname());
+        Long appCountResult = appApplicationApi.countApplicationByTenantId(id);
         // Long 转 Integer
-        tenantRespVO.setAppCount(appCountResult.getData() != null ? appCountResult.getData().intValue() : 0);
+        tenantRespVO.setAppCount(appCountResult != null ? appCountResult.intValue() : 0);
         return tenantRespVO;
     }
 

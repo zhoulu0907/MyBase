@@ -1,13 +1,11 @@
 package com.cmsr.onebase.module.system.framework.sms.core.client.impl;
 
-import cn.hutool.core.codec.Base64;
-import cn.hutool.core.lang.Assert;
-import cn.hutool.core.map.MapUtil;
-import cn.hutool.core.util.StrUtil;
-import cn.hutool.crypto.digest.DigestUtil;
-import cn.hutool.crypto.digest.HmacAlgorithm;
-import cn.hutool.http.HttpUtil;
 import com.cmsr.onebase.framework.common.core.KeyValue;
+import com.cmsr.onebase.framework.common.tools.core.lang.Assert;
+import com.cmsr.onebase.framework.common.tools.core.map.MapUtil;
+import com.cmsr.onebase.framework.common.tools.core.util.IdUtil;
+import com.cmsr.onebase.framework.common.tools.crypto.SecureUtil;
+import com.cmsr.onebase.framework.common.tools.http.HttpUtil;
 import com.cmsr.onebase.framework.common.util.collection.MapUtils;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.module.system.framework.sms.core.client.dto.SmsReceiveRespDTO;
@@ -50,7 +48,7 @@ public class DebugDingTalkSmsClient extends AbstractSmsClient {
         // 解析结果
         Map<?, ?> responseObj = JsonUtils.parseObject(responseText, Map.class);
         String errorCode = MapUtil.getStr(responseObj, "errcode");
-        return new SmsSendRespDTO().setSuccess(Objects.equals(errorCode, "0")).setSerialNo(StrUtil.uuid())
+        return new SmsSendRespDTO().setSuccess(Objects.equals(errorCode, "0")).setSerialNo(IdUtil.randomUUID())
                 .setApiCode(errorCode).setApiMsg(MapUtil.getStr(responseObj, "errorMsg"));
     }
 
@@ -69,8 +67,8 @@ public class DebugDingTalkSmsClient extends AbstractSmsClient {
         // 生成 sign
         String secret = properties.getApiSecret();
         String stringToSign = timestamp + "\n" + secret;
-        byte[] signData = DigestUtil.hmac(HmacAlgorithm.HmacSHA256, StrUtil.bytes(secret)).digest(stringToSign);
-        String sign = Base64.encode(signData);
+        // 使用原生 Java 替换 Hutool 的 HMAC-SHA256 实现
+        String sign = SecureUtil.hmacSha256Base64(stringToSign, secret);
         // 构建最终 URL
         return String.format("https://oapi.dingtalk.com/%s?access_token=%s&timestamp=%d&sign=%s",
                 path, properties.getApiKey(), timestamp, sign);

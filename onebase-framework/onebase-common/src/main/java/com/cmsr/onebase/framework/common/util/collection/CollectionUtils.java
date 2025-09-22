@@ -1,17 +1,16 @@
 package com.cmsr.onebase.framework.common.util.collection;
 
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.util.ArrayUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.tools.core.util.ArrayUtil;
 import com.google.common.collect.ImmutableMap;
+import com.cmsr.onebase.framework.common.tools.core.collection.CollUtil;
 
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static cn.hutool.core.convert.Convert.toCollection;
+import static com.cmsr.onebase.framework.common.tools.core.convert.Convert.toCollection;
 import static java.util.Arrays.asList;
 
 /**
@@ -25,7 +24,7 @@ public class CollectionUtils {
     }
 
     public static boolean isAnyEmpty(Collection<?>... collections) {
-        return Arrays.stream(collections).anyMatch(CollectionUtil::isEmpty);
+        return Arrays.stream(collections).anyMatch(CollUtil::isEmpty);
     }
 
     public static <T> boolean anyMatch(Collection<T> from, Predicate<T> predicate) {
@@ -266,7 +265,7 @@ public class CollectionUtils {
     }
 
     public static <T> T getFirst(List<T> from) {
-        return !CollectionUtil.isEmpty(from) ? from.get(0) : null;
+        return !CollUtil.isEmpty(from) ? from.get(0) : null;
     }
 
     public static <T> T findFirst(Collection<T> from, Predicate<T> predicate) {

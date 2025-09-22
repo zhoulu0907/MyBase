@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.infra.framework.file.core.client.local;
 
-import cn.hutool.core.io.FileUtil;
+import com.cmsr.onebase.framework.common.tools.core.io.FileUtil;
 import com.cmsr.onebase.module.infra.framework.file.core.client.AbstractFileClient;
 
 import java.io.File;

@@ -1,8 +1,8 @@
 package com.cmsr.onebase.module.system.api.user;
 
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.util.ObjUtil;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.framework.common.tools.core.collection.CollUtil;
+import com.cmsr.onebase.framework.common.tools.core.util.ObjUtil;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
 import com.cmsr.onebase.module.system.convert.user.UserConvert;

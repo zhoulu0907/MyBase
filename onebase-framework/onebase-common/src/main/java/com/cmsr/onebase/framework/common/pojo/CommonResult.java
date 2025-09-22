@@ -1,10 +1,10 @@
 package com.cmsr.onebase.framework.common.pojo;
 
-import cn.hutool.core.lang.Assert;
 import com.cmsr.onebase.framework.common.exception.ErrorCode;
 import com.cmsr.onebase.framework.common.exception.ServiceException;
 import com.cmsr.onebase.framework.common.exception.enums.GlobalErrorCodeConstants;
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
+import com.cmsr.onebase.framework.common.tools.core.lang.Assert;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 

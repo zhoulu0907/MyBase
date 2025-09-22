@@ -1,8 +1,8 @@
 package com.cmsr.onebase.framework.common.util.json;
 
-import cn.hutool.core.util.ArrayUtil;
-import cn.hutool.core.util.StrUtil;
-import cn.hutool.json.JSONUtil;
+import com.cmsr.onebase.framework.common.tools.core.util.ArrayUtil;
+import com.cmsr.onebase.framework.common.tools.core.util.StrUtil;
+import com.cmsr.onebase.framework.common.tools.json.JSONUtil;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * JSON 工具类
@@ -198,6 +199,15 @@ public class JsonUtils {
             return objectMapper.treeToValue(jsonNode, toValueType);
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    public static <T> T updateBean(T bean, Map<String, Object> properties) {
+        try {
+            T newBean = objectMapper.updateValue(bean, properties);
+            return newBean;
+        } catch (Exception e) {
+            throw new RuntimeException("更新对象属性异常: " + bean.getClass().getName() + ", properties: " + properties, e);
         }
     }
 

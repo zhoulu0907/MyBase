@@ -1,7 +1,7 @@
 package com.cmsr.onebase.framework.dict.core;
 
-import cn.hutool.core.collection.CollUtil;
 import com.cmsr.onebase.framework.common.biz.system.dict.DictDataCommonApi;
+import com.cmsr.onebase.framework.common.tools.core.collection.CollUtil;
 import com.cmsr.onebase.framework.common.util.cache.CacheUtils;
 import com.cmsr.onebase.framework.common.biz.system.dict.dto.DictDataRespDTO;
 import com.google.common.cache.CacheLoader;

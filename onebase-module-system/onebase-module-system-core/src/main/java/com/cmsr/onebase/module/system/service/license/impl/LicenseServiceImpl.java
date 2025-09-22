@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
@@ -51,6 +52,10 @@ public class LicenseServiceImpl implements LicenseService {
     @Resource
     private StringRedisTemplate stringRedisTemplate;
 
+    private static final String ENTER_PRISE_NAME = "上海移动有限公司";
+    private static final String ENTERP_RISE_CODE = "F200090910001";
+    private static final String ENTERP_RISE_ADDRESS = "上海市浦东金桥开发区";
+    private static final String PLATFORM_TYPE = "私有化部署";
     /**
      * 创建License
      *
@@ -62,6 +67,35 @@ public class LicenseServiceImpl implements LicenseService {
         LicenseDO license = BeanUtils.toBean(reqVO, LicenseDO.class);
         licenseDataRepository.insert(license);
         return license.getId();
+    }
+    /**
+     * 创建License文件
+     *
+     * @param reqVO License创建请求参数
+     * @param response HttpServletResponse
+     */
+    @Override
+    public void createLicenseFile(LicenseSaveReqVO reqVO, HttpServletResponse response) {
+
+        try {
+            reqVO.setEnterpriseName(ENTER_PRISE_NAME);
+            reqVO.setEnterpriseCode(ENTERP_RISE_CODE);
+            reqVO.setEnterpriseAddress(ENTERP_RISE_ADDRESS);
+            reqVO.setPlatformType(PLATFORM_TYPE);
+            // 设置响应头，返回加密文件
+            response.setContentType("application/octet-stream");
+            response.setCharacterEncoding("UTF-8");
+            response.setHeader("Content-Disposition", "attachment; filename=\"license.lic.sm4\"");
+            // 将license信息写入json字符串
+            String jsonContent = JsonUtils.toJsonString(reqVO);
+            // 使用SM4加密字符串,将加密后的内容写入响应输出流
+            String sm4Encrypt = sm4Encrypt(jsonContent, LICENSE_SECRET_KEY);
+            response.getOutputStream().write(sm4Encrypt.getBytes());
+            response.getOutputStream().flush();
+        } catch (IOException e) {
+            log.error("导出License失败", e);
+            throw exception(LICENSE_CREATE_ERROR);
+        }
     }
 
     /**

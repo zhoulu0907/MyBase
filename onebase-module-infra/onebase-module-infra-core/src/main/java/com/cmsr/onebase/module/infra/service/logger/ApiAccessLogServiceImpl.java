@@ -36,6 +36,12 @@ public class ApiAccessLogServiceImpl implements ApiAccessLogService {
         ApiAccessLogDO apiAccessLog = BeanUtils.toBean(createDTO, ApiAccessLogDO.class);
         apiAccessLog.setRequestParams(StrUtils.maxLength(apiAccessLog.getRequestParams(), REQUEST_PARAMS_MAX_LENGTH));
         apiAccessLog.setResultMsg(StrUtils.maxLength(apiAccessLog.getResultMsg(), RESULT_MSG_MAX_LENGTH));
+        
+        // 设置默认租户ID为0，确保不违反数据库约束
+        if (apiAccessLog.getTenantId() == null) {
+            apiAccessLog.setTenantId(0L);
+        }
+        
         if (TenantContextHolder.getTenantId() != null) {
             apiAccessLogDataRepository.insert(apiAccessLog);
         } else {

@@ -1,7 +1,7 @@
 package com.cmsr.onebase.framework.security.core;
 
-import cn.hutool.core.map.MapUtil;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
+import com.cmsr.onebase.framework.common.tools.core.map.MapUtil;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 

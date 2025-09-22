@@ -17,6 +17,7 @@ public interface ErrorCodeConstants {
     ErrorCode AUTH_MOBILE_NOT_EXISTS = new ErrorCode(1_002_000_007, "手机号不存在");
     ErrorCode AUTH_REGISTER_CAPTCHA_CODE_ERROR = new ErrorCode(1_002_000_008, "验证码不正确，原因：{}");
     ErrorCode AUTH_LOGIN_USER_NOT_ADMIN_ERROR = new ErrorCode(1_002_000_009, "登录失败，仅平台管理员可登录。");
+    ErrorCode AUTH_LOGIN_PLATFORM_TENANT_ERROR = new ErrorCode(1_002_000_010, "登录失败，平台租户不可登录。");
 
     // ========== 菜单模块 1-002-001-000 ==========
     ErrorCode MENU_NAME_DUPLICATE = new ErrorCode(1_002_001_000, "已经存在该名字的菜单");
@@ -48,7 +49,7 @@ public interface ErrorCodeConstants {
     ErrorCode USER_MOBILE_NOT_EXISTS = new ErrorCode(1_002_003_010, "该手机号尚未注册");
     ErrorCode USER_REGISTER_DISABLED = new ErrorCode(1_002_003_011, "注册功能已关闭");
     ErrorCode USER_PASSWORD_NOT_ALLOW_DEL = new ErrorCode(1_002_003_012, "内置用户不允许删除，只允许修改密码");
-    ErrorCode LICENSE_USER_COUNT_NOT_ENOUGH = new ErrorCode(1_002_003_013, "可分配人员数量不足，license总人数是({}), 剩余({})");
+    ErrorCode LICENSE_USER_COUNT_NOT_ENOUGH = new ErrorCode(1_002_003_013, "可分配人员数量不足，人员上限是{}, 剩余{}");
     ErrorCode LICENSE_TENANT_COUNT_NOT_ENOUGH = new ErrorCode(1_002_003_014, "租户数量已达上限");
     ErrorCode LENANT_ALLOCATE_PERSON_COUNT_LESS_THEN_ALLOCATED = new ErrorCode(1_002_003_014, "租户内已使用用户数量为({})，分配的用户数量不能低于此数量");
 
@@ -113,7 +114,8 @@ public interface ErrorCodeConstants {
     ErrorCode TENANT_EXPIRE = new ErrorCode(1_002_015_002, "名字为【{}】的租户已过期");
     ErrorCode TENANT_CAN_NOT_UPDATE_SYSTEM = new ErrorCode(1_002_015_003, "系统租户不能进行修改、删除等操作！");
     ErrorCode TENANT_NAME_DUPLICATE = new ErrorCode(1_002_015_004, "名字为【{}】的租户已存在");
-    ErrorCode TENANT_WEBSITE_DUPLICATE = new ErrorCode(1_002_015_005, "域名为【{}】的租户已存在");
+    ErrorCode TENANT_WEBSITE_DUPLICATE = new ErrorCode(1_002_015_005, "租户域名为【{}】的租户已存在");
+    ErrorCode TENANT_WEBSITE_IS_NULL = new ErrorCode(1_002_015_006, "租户域名不可为空");
 
     // ========== 租户套餐 1-002-016-000 ==========
     ErrorCode TENANT_PACKAGE_NOT_EXISTS = new ErrorCode(1_002_016_000, "租户套餐不存在");
@@ -178,5 +180,6 @@ public interface ErrorCodeConstants {
     ErrorCode LICENSE_IMPORT_ERROR = new ErrorCode(1_002_029_001, "License凭证导入失败");
     ErrorCode LICENSE_EXPORT_ERROR = new ErrorCode(1_002_029_002, "License凭证导出失败");
     ErrorCode LICENSE_DECRYPT_ERROR = new ErrorCode(1_002_029_003, "文件解析失败，文件可能已损坏或不是有效的凭证文件");
+    ErrorCode LICENSE_CREATE_ERROR = new ErrorCode(1_002_029_004, "License凭证生成失败");
 
 }

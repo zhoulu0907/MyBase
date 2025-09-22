@@ -1,8 +1,8 @@
 package com.cmsr.onebase.module.system.api.dept;
 
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.map.MapUtil;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.framework.common.tools.core.collection.CollUtil;
+import com.cmsr.onebase.framework.common.tools.core.map.MapUtil;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import com.cmsr.onebase.module.system.api.dept.dto.PostRespDTO;
 import com.cmsr.onebase.module.system.enums.ApiConstants;

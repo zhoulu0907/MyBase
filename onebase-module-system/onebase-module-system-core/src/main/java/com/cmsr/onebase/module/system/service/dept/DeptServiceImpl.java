@@ -1,9 +1,9 @@
 package com.cmsr.onebase.module.system.service.dept;
 
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
+import com.cmsr.onebase.framework.common.tools.core.collection.CollUtil;
+import com.cmsr.onebase.framework.common.tools.core.util.ObjUtil;
+import com.cmsr.onebase.framework.common.tools.core.util.StrUtil;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.system.vo.dept.*;
 import com.cmsr.onebase.module.system.vo.user.UserSimpleRespVO;
@@ -166,7 +166,7 @@ public class DeptServiceImpl implements DeptService {
         if (id == null) {
             throw exception(DEPT_NAME_DUPLICATE);
         }
-        if (ObjectUtil.notEqual(dept.getId(), id)) {
+        if (ObjUtil.notEqual(dept.getId(), id)) {
             throw exception(DEPT_NAME_DUPLICATE);
         }
     }

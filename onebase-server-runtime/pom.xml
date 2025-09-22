@@ -26,6 +26,11 @@
         </dependency>
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-module-bpm-runtime</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-module-formula-runtime</artifactId>
             <version>${revision}</version>
         </dependency>
@@ -47,6 +52,11 @@
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-module-app-runtime</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-module-flow-api</artifactId>
             <version>${revision}</version>
         </dependency>
         <dependency>
@@ -100,6 +110,12 @@
                     <artifactId>spring-cloud-starter-openfeign</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

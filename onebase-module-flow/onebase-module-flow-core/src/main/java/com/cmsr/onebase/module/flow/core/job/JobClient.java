@@ -9,12 +9,13 @@ import com.aizuda.snailjob.client.job.core.openapi.SnailJobOpenApi;
 import com.aizuda.snailjob.common.core.enums.JobBlockStrategyEnum;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.model.response.JobApiResponse;
+import com.cmsr.onebase.module.flow.core.enums.JsonGraphConstant;
 import com.cmsr.onebase.module.flow.core.graph.data.StartTimeNodeData;
 import lombok.Setter;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Set;
 
 /**
@@ -27,26 +28,29 @@ public class JobClient {
 
     private static final String JOB_EXECUTOR_INFO = "flow_process_time_job";
 
-    private DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
     public String startJob(Long processId, StartTimeNodeData timeNodeData) {
         ClusterAddHandler clusterJob = SnailJobOpenApi.addClusterJob();
         clusterJob.setJobName(processId.toString());
         settingParams(clusterJob, timeNodeData);
+        clusterJob.addArgsStr(JsonGraphConstant.PROCESS_ID, String.valueOf(processId));
         clusterJob.setRouteKey(AllocationAlgorithmEnum.ROUND);
         clusterJob.setBlockStrategy(JobBlockStrategyEnum.OVERLAY);
         return String.valueOf(clusterJob.execute());
     }
 
     public String startJob(Long processId, String jobId, StartTimeNodeData timeNodeData) {
+        Long jobIdLong = NumberUtils.toLong(jobId, 0);
+        if (jobIdLong == 0) {
+            return startJob(processId, timeNodeData);
+        }
         JobApiResponse jobDetail = SnailJobOpenApi.getJobDetail(Long.parseLong(jobId)).execute();
         if (jobDetail.getId() == null) {
             return startJob(processId, timeNodeData);
         } else {
             ClusterUpdateHandler clusterJob = SnailJobOpenApi.updateClusterJob(jobDetail.getId());
             settingParams(clusterJob, timeNodeData);
+            clusterJob.addArgsStr(JsonGraphConstant.PROCESS_ID, String.valueOf(processId));
             clusterJob.execute();
-
             return String.valueOf(jobDetail.getId());
         }
     }
@@ -54,13 +58,12 @@ public class JobClient {
     private void settingParams(AbstractParamsHandler clusterJob, StartTimeNodeData timeNodeData) {
         clusterJob.setJobStatus(StatusEnum.YES);
         clusterJob.setExecutorInfo(JOB_EXECUTOR_INFO);
-
         if (timeNodeData.getRepeatType().equals(StartTimeNodeData.REPEAT_TYPE_CRON)) {
             clusterJob.setTriggerType(TriggerTypeEnum.CRON);
             clusterJob.setTriggerInterval(timeNodeData.getCronExpression());
         } else if (timeNodeData.getRepeatType().equals(StartTimeNodeData.REPEAT_TYPE_NONE)) {
             clusterJob.setTriggerType(TriggerTypeEnum.POINT_IN_TIME);
-            LocalDateTime localDateTime = LocalDateTime.parse(timeNodeData.getTriggerDatetime(), dateTimeFormatter);
+            LocalDateTime localDateTime = LocalDateTime.parse(timeNodeData.getTriggerDatetime(), JsonGraphConstant.DATE_TIME_FORMATTER);
             clusterJob.setTriggerTime(Set.of(localDateTime));
         } else {
             clusterJob.setTriggerType(TriggerTypeEnum.CRON);
@@ -76,14 +79,9 @@ public class JobClient {
                 .updateClusterJob(Long.parseLong(jobId))
                 .setJobStatus(StatusEnum.NO)
                 .execute();
-    }
-
-    public void deleteJob(String jobId) {
-        stopJob(jobId);
         SnailJobOpenApi
                 .deleteJob(Set.of(Long.parseLong(jobId)))
                 .execute();
     }
-
 
 }

@@ -1,9 +1,8 @@
 package com.cmsr.onebase.gateway.util;
 
-import cn.hutool.core.net.NetUtil;
-import cn.hutool.core.util.ArrayUtil;
-import cn.hutool.core.util.NumberUtil;
-import cn.hutool.extra.servlet.ServletUtil;
+import com.cmsr.onebase.framework.common.tools.core.net.NetUtil;
+import com.cmsr.onebase.framework.common.tools.core.util.ArrayUtil;
+import com.cmsr.onebase.framework.common.tools.core.util.NumberUtil;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.route.Route;
@@ -74,7 +73,6 @@ public class WebFrameworkUtils {
     /**
      * 获得客户端 IP
      *
-     * 参考 {@link ServletUtil} 的 getClientIP 方法
      *
      * @param exchange 请求
      * @param otherHeaderNames 其它 header 名字的数组

@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.system.vo.oauth;
 
-import cn.hutool.core.util.StrUtil;
+import com.cmsr.onebase.framework.common.tools.core.util.StrUtil;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;

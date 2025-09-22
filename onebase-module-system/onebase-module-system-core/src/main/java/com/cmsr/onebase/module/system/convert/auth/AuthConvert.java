@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.system.convert.auth;
 
-import cn.hutool.core.collection.CollUtil;
+import com.cmsr.onebase.framework.common.tools.core.collection.CollUtil;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.system.api.sms.dto.code.SmsCodeSendReqDTO;
 import com.cmsr.onebase.module.system.api.sms.dto.code.SmsCodeUseReqDTO;

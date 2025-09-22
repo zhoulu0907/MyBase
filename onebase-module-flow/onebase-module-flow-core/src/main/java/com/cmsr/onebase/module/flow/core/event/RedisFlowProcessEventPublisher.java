@@ -1,9 +1,12 @@
 package com.cmsr.onebase.module.flow.core.event;
 
+import com.cmsr.onebase.module.flow.core.config.FlowBuildCondition;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.redisson.Redisson;
 import org.redisson.api.RTopic;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
 
 /**
@@ -12,6 +15,7 @@ import org.springframework.stereotype.Component;
  *
  * @author huangjie
  */
+@Setter
 @Slf4j
 @Component
 public class RedisFlowProcessEventPublisher implements FlowProcessEventPublisher {
@@ -23,20 +27,19 @@ public class RedisFlowProcessEventPublisher implements FlowProcessEventPublisher
     private static final String TOPIC_PROCESS_DELETE = "flow:process:delete";
 
     @Autowired
-    private Redisson redisson;
+    private RedissonClient redissonClient;
 
     public void publishProcessUpdate(Long processId) {
         log.info("发布流程更新事件到 Redis，ProcessId: {}", processId);
-        RTopic topic = redisson.getTopic(TOPIC_PROCESS_UPDATE);
+        RTopic topic = redissonClient.getTopic(TOPIC_PROCESS_UPDATE);
         topic.publish(processId);
     }
 
     public void publishProcessDelete(Long processId) {
         log.info("发布流程删除事件到 Redis，ProcessId: {}", processId);
-        RTopic topic = redisson.getTopic(TOPIC_PROCESS_DELETE);
+        RTopic topic = redissonClient.getTopic(TOPIC_PROCESS_DELETE);
         topic.publish(processId);
     }
-
 
 
 }

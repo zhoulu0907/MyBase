@@ -1,8 +1,8 @@
 package com.cmsr.onebase.module.infra.framework.file.core.client.s3;
 
-import cn.hutool.core.io.IoUtil;
-import cn.hutool.core.util.StrUtil;
-import cn.hutool.http.HttpUtil;
+import com.cmsr.onebase.framework.common.tools.core.io.IoUtil;
+import com.cmsr.onebase.framework.common.tools.core.util.StrUtil;
+import com.cmsr.onebase.framework.common.tools.http.HttpUtil;
 import com.cmsr.onebase.module.infra.framework.file.core.client.AbstractFileClient;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;

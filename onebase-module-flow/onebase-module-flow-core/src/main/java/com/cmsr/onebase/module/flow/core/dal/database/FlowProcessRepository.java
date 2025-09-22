@@ -4,7 +4,7 @@ import com.cmsr.onebase.framework.aynline.DataRepository;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.data.base.BaseDO;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDO;
-import com.cmsr.onebase.module.flow.core.vo.mgmt.PageFlowProcessReqVO;
+import com.cmsr.onebase.module.flow.core.vo.PageFlowProcessReqVO;
 import org.anyline.data.param.ConfigStore;
 import org.anyline.data.param.init.DefaultConfigStore;
 import org.anyline.entity.Order;
@@ -42,9 +42,24 @@ public class FlowProcessRepository extends DataRepository<FlowProcessDO> {
         return this.findPageWithConditions(configs, reqVO.getPageNo(), reqVO.getPageSize());
     }
 
-    public List<FlowProcessDO> findAllByStatus(Integer status) {
+    public List<FlowProcessDO> findAllByPublishStatus(Integer status) {
         DefaultConfigStore configs = new DefaultConfigStore();
-        configs.eq("process_status", status);
+        configs.eq("publish_status", status);
         return findAllByConfig(configs);
     }
+
+    public List<FlowProcessDO> findByApplicationId(Long applicationId) {
+        DefaultConfigStore configs = new DefaultConfigStore();
+        configs.eq("application_id", applicationId);
+        return findAllByConfig(configs);
+    }
+
+    public List<FlowProcessDO> findByApplicationIdAndEnableStatus(Long applicationId, Integer status) {
+        DefaultConfigStore configs = new DefaultConfigStore();
+        configs.eq("application_id", applicationId);
+        configs.eq("enable_status", status);
+        return findAllByConfig(configs);
+    }
+
+
 }
