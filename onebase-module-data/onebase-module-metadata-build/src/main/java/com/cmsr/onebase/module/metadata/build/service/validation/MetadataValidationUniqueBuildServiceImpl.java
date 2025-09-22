@@ -89,6 +89,8 @@ public class MetadataValidationUniqueBuildServiceImpl implements MetadataValidat
             groupVO.setPopPrompt(vo.getPopPrompt());
             groupVO.setPopType(vo.getPopType());
             groupVO.setValidationType("UNIQUE");
+            // 修复：同步entityId到规则组
+            groupVO.setEntityId(field.getEntityId());
             groupId = ruleGroupService.createValidationRuleGroup(groupVO);
         }
 
