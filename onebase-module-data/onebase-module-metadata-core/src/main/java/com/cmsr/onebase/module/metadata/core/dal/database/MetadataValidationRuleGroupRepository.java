@@ -39,12 +39,24 @@ public class MetadataValidationRuleGroupRepository extends DataRepository<Metada
      */
     // TODO: Repository层方法应该使用基础类型参数而不是VO
     // public PageResult<MetadataValidationRuleGroupDO> selectPage(ValidationRuleGroupPageReqVO reqVO) {
-    public PageResult<MetadataValidationRuleGroupDO> selectPage(int pageNum, int pageSize, String name) {
+    /**
+     * 分页查询校验规则分组，支持按名称和业务实体ID过滤
+     *
+     * @param pageNum 页码
+     * @param pageSize 每页数量
+     * @param name 规则组名称
+     * @param entityId 业务实体ID，可为null
+     * @return 分页结果
+     */
+    public PageResult<MetadataValidationRuleGroupDO> selectPage(int pageNum, int pageSize, String name, Long entityId) {
         ConfigStore configStore = new DefaultConfigStore();
 
         // 添加查询条件
         if (StringUtils.hasText(name)) {
             configStore.like("rg_name", name);
+        }
+        if (entityId != null) {
+            configStore.eq("entity_id", entityId);
         }
 
         // 添加排序

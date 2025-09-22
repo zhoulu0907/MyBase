@@ -1852,6 +1852,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 } else {
                     // 如果没有数据，那么新增一条记录
                     var saveReqVO = new com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.ValidationLengthSaveReqVO();
+                    saveReqVO.setEntityId(entityField.getEntityId());
                     saveReqVO.setFieldId(fieldId);
                     saveReqVO.setMaxLength(entityField.getDataLength()); // 最大长度与dataLength保持一致
                     saveReqVO.setMinLength(null); // 最小长度默认为null，允许为空
@@ -1904,6 +1905,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 } else {
                     // 如果没有数据，那么新增一条记录
                     var saveReqVO = new com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.ValidationRequiredSaveReqVO();
+                    saveReqVO.setEntityId(entityField.getEntityId());
                     saveReqVO.setFieldId(fieldId);
                     saveReqVO.setIsEnabled(entityField.getIsRequired());
                     
@@ -1953,6 +1955,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 } else {
                     // 如果没有数据，那么新增一条记录
                     var saveReqVO = new com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.ValidationUniqueSaveReqVO();
+                    saveReqVO.setEntityId(entityField.getEntityId());
                     saveReqVO.setFieldId(fieldId);
                     saveReqVO.setIsEnabled(entityField.getIsUnique());
                     

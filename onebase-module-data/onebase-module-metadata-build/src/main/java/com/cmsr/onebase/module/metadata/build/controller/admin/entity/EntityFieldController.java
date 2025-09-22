@@ -134,6 +134,7 @@ public class EntityFieldController {
     @Operation(summary = "批量保存实体字段（增删改）")
     @PreAuthorize("@ss.hasPermission('metadata:entity-field:update')")
     public CommonResult<EntityFieldBatchSaveRespVO> batchSave(@Valid @RequestBody EntityFieldBatchSaveReqVO reqVO) {
+        // TODO: 批量保存字段时，后续需确保entityId同步到metadata_validation_rule_group
         EntityFieldBatchSaveRespVO resp = entityFieldService.batchSaveEntityFields(reqVO);
         return success(resp);
     }

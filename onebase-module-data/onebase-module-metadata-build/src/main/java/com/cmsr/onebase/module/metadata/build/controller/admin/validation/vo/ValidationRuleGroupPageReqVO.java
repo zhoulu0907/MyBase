@@ -25,4 +25,10 @@ public class ValidationRuleGroupPageReqVO extends PageParam {
     @Schema(description = "校验类型：REQUIRED / UNIQUE / LENGTH / RANGE / FORMAT / CHILD_NOT_EMPTY / SELF_DEFINED", example = "REQUIRED")
     private String validationType;
 
+    /**
+     * 业务实体ID，用于过滤该实体下的规则组
+     */
+    @Schema(description = "业务实体ID", example = "51515658843258880")
+    private Long entityId;
+
 }
