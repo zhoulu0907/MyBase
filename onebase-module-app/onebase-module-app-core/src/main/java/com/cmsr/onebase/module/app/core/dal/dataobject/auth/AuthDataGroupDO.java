@@ -37,6 +37,9 @@ public class AuthDataGroupDO extends TenantBaseDO {
     @Column(name = "scope_level", nullable = false, length = 32, comment = "字段对应的权限范围")
     private String scopeLevel;
 
+    @Column(name = "scope_value", length = 256, comment = "字段对应的权限范围值")
+    private String scopeValue;
+
     @Column(name = "is_operable", nullable = false, comment = "是否可以操作")
     private Integer isOperable;
 

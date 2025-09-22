@@ -4,6 +4,7 @@ package com.cmsr.onebase.module.flow.core.graph;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.module.flow.core.config.FlowRuntimeCondition;
 import com.cmsr.onebase.module.flow.core.enums.JsonGraphConstant;
+import com.cmsr.onebase.module.flow.core.graph.data.StartDateFieldNodeData;
 import com.cmsr.onebase.module.flow.core.graph.data.StartEntityNodeData;
 import com.cmsr.onebase.module.flow.core.graph.data.StartFormNodeData;
 import com.cmsr.onebase.module.flow.core.graph.data.StartTimeNodeData;
@@ -31,6 +32,8 @@ public class GraphFlowCache {
 
     private CopyOnWriteArrayList<StartEntityNodeData> startEntityNodeDataCache = new CopyOnWriteArrayList<>();
 
+    private ConcurrentHashMap<Long, StartDateFieldNodeData> startDateFieldNodeDataCache = new ConcurrentHashMap<>();
+
     public void update(Long processId, JsonGraph jsonGraph) {
         Map<String, Map<String, Object>> flowNodeData = jsonGraph.getNodeData();
         flowNodeDataCache.put(processId, flowNodeData);
@@ -47,6 +50,11 @@ public class GraphFlowCache {
             JsonUtils.updateBean(startEntityNodeData, startNode.getData());
             startEntityNodeData.setProcessId(processId);
             startEntityNodeDataCache.add(startEntityNodeData);
+        } else if (startNode.getType().equals(JsonGraphConstant.START_DATE_FIELD)) {
+            StartDateFieldNodeData startDateFieldNodeData = new StartDateFieldNodeData();
+            JsonUtils.updateBean(startDateFieldNodeData, startNode.getData());
+            startDateFieldNodeData.setProcessId(processId);
+            startDateFieldNodeDataCache.put(processId, startDateFieldNodeData);
         }
     }
 
