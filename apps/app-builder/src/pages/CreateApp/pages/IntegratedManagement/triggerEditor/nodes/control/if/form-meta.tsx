@@ -7,10 +7,8 @@ import {
   type ConfitionField,
   DATA_SOURCE_TYPE,
   type EntityFieldValidationTypes,
-  getEntityFields,
   getEntityFieldsWithChildren,
   getEntityListByApp,
-  getFieldCheckTypeApi,
   type MetadataEntityPair
 } from '@onebase/app';
 import { useSignals } from '@preact/signals-react/runtime';
@@ -20,9 +18,15 @@ import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
 import { NodeType } from '../../const';
-import { clearDataOriginNodeId, getBeforeCurQueryNodes, validateNodeForm } from '../../utils';
+import {
+  clearDataOriginNodeId,
+  getBeforeCurQueryNodes,
+  getDataNodeSource,
+  getEntityFieldList,
+  validateNodeForm
+} from '../../utils';
 
-const ALLOW_DATANODE_TYPES = [NodeType.DATA_ADD, NodeType.DATA_UPDATE, NodeType.DATA_QUERY];
+const ALLOW_DATANODE_TYPES = [NodeType.DATA_ADD, NodeType.DATA_UPDATE, NodeType.DATA_QUERY, NodeType.START_ENTITY];
 
 export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   useSignals();
@@ -54,7 +58,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   }, [payloadForm]);
 
   const handleDataTypeChange = (curDataType: DATA_SOURCE_TYPE) => {
-    payloadForm.clearFields(['mainDataSource', 'subDataSource']);
+    payloadForm.clearFields(['mainDataSource', 'subDataSource', 'dataNodeId']);
     const nodeData = triggerEditorSignal.nodeData.value[node.id];
     triggerEditorSignal.setNodeData(node.id, {
       ...nodeData,
@@ -177,36 +181,13 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       return;
     }
     if (nodeData.dataType === DATA_SOURCE_TYPE.FORM) {
-      getEntityFieldList(nodeData.mainDataSource);
+      getEntityFieldList(nodeData.mainDataSource, setConditionFields, setValidationTypes);
     } else if (nodeData.dataType === DATA_SOURCE_TYPE.DATA_NODE) {
       const originDataSource = getDataNodeSource(nodeData.dataNodeId);
-      getEntityFieldList(originDataSource);
+      getEntityFieldList(originDataSource, setConditionFields, setValidationTypes);
     } else if (nodeData.dataType === DATA_SOURCE_TYPE.SUBFORM) {
       // 从子表中查询  SUBFORM
-      getEntityFieldList(nodeData.subDataSource);
-    }
-  };
-
-  const getEntityFieldList = async (dataSource: string) => {
-    if (!dataSource) {
-      return;
-    }
-    const res = await getEntityFields({ entityId: dataSource });
-    const filedIds: string[] = [];
-    const newConditionFields: ConfitionField[] = [];
-    res.forEach((item: any) => {
-      filedIds.push(item.id);
-      newConditionFields.push({
-        label: item.displayName,
-        value: item.id,
-        fieldType: item.fieldType
-      });
-    });
-    setConditionFields(newConditionFields);
-    if (filedIds?.length) {
-      const newValidationTypes = await getFieldCheckTypeApi(filedIds);
-      console.log('validationTypes: ', newValidationTypes);
-      setValidationTypes(newValidationTypes);
+      getEntityFieldList(nodeData.subDataSource, setConditionFields, setValidationTypes);
     }
   };
 
@@ -216,34 +197,14 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     // 根据不同获取方式走不同接口
     if (dataType === DATA_SOURCE_TYPE.FORM || dataType === DATA_SOURCE_TYPE.SUBFORM) {
       // 从主表中查询/从子表中查询
-      getEntityFieldList(dataSource);
+      getEntityFieldList(dataSource, setConditionFields, setValidationTypes);
     } else if (dataType === DATA_SOURCE_TYPE.DATA_NODE) {
       // 从数据节点中查询  DATA_NODE
       const originDataSource = getDataNodeSource(dataSource);
-      getEntityFieldList(originDataSource);
+      getEntityFieldList(originDataSource, setConditionFields, setValidationTypes);
     } else if (dataType === DATA_SOURCE_TYPE.ASSOCIA_FORM) {
       // 从关联表单中查询  ASSOCIA_FORM
     }
-  };
-
-  const getDataNodeSource = (nodeId: string): string => {
-    const nodeData = triggerEditorSignal.nodeData.value;
-    for (let ele in nodeData) {
-      const item = nodeData[ele];
-      if (item.id === nodeId) {
-        if (item.dataType === DATA_SOURCE_TYPE.FORM) {
-          // 节点来源是主表单
-          return item.mainDataSource;
-        } else if (item.dataType === DATA_SOURCE_TYPE.SUBFORM) {
-          // 子表单
-          return item.subDataSource;
-        } else if (item.dataType === DATA_SOURCE_TYPE.DATA_NODE) {
-          // 数据节点 dataNodeId
-          return getDataNodeSource(item.dataNodeId);
-        }
-      }
-    }
-    return '';
   };
 
   // 表单内容改变

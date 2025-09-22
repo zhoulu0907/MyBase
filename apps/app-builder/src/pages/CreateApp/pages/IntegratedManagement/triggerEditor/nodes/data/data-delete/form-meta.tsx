@@ -173,7 +173,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     setConditionFields(newConditionFields);
     if (filedIds?.length) {
       const newValidationTypes = await getFieldCheckTypeApi(filedIds);
-      console.log('validationTypes: ', newValidationTypes);
       setValidationTypes(newValidationTypes);
     }
   };
