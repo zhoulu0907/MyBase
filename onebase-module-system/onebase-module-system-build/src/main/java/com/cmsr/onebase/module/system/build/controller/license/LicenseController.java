@@ -50,8 +50,8 @@ public class LicenseController {
     @PostMapping("/createLicenseFile")
     @PreAuthorize("@ss.hasPermission('system:license:create')")
     @Operation(summary = "创建License文件")
-    public void createLicenseFile(@RequestBody String reqVO, HttpServletResponse response) {
-        licenseService.createLicenseFile(JsonUtils.parseObject(reqVO, LicenseSaveReqVO.class), response);
+    public void createLicenseFile(@RequestBody LicenseSaveReqVO reqVO, HttpServletResponse response) {
+        licenseService.createLicenseFile(reqVO, response);
     }
 
     // /**
