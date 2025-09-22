@@ -21,6 +21,7 @@ import SortByEditor from '../../../components/sortby-editor';
 import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
+import { NodeType } from '../../const';
 import { getBeforeCurQueryNodes, validateNodeForm } from '../../utils';
 
 export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
@@ -142,7 +143,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
     const nodes = triggerEditorSignal.nodes.value;
 
-    const newDataNodeList = getBeforeCurQueryNodes(node.id, nodes);
+    const newDataNodeList = getBeforeCurQueryNodes(node.id, nodes, [NodeType.DATA_QUERY_MULTIPLE]);
     setDataNodeList(newDataNodeList);
 
     getFieldList(dataNodeId);
@@ -169,7 +170,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       // 从上游数据节点查询
       const nodes = triggerEditorSignal.nodes.value;
       // 过滤掉当前节点,过滤blocks,并且只能选当前节点之前的节点
-      const newDataNodeList = getBeforeCurQueryNodes(node.id, nodes);
+      const newDataNodeList = getBeforeCurQueryNodes(node.id, nodes, [NodeType.DATA_QUERY_MULTIPLE]);
 
       setDataNodeList(newDataNodeList);
     }
@@ -252,8 +253,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   };
 
   const onValuesChange = async (changeValue: any, values: any) => {
-    // console.log('onValuesChange: ', changeValue, values);
-
     // 校验表单
     validateNodeForm(form, payloadForm, false);
 
