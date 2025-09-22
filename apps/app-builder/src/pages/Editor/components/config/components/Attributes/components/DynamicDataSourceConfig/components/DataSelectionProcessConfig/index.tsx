@@ -1,5 +1,4 @@
 import {
-  Alert,
   Button,
   Checkbox,
   Drawer,
@@ -24,13 +23,13 @@ import {
   IconPlus,
   IconQuestionCircleFill
 } from '@arco-design/web-react/icon';
+import { ReactSortable } from 'react-sortablejs';
 import { ListComp } from '@onebase/ui-kit';
 
 import styles from '../../index.module.less';
 import type { DynamicSelectDataSourceConfigProps } from '../..';
 import DropdownRender from '../DropdownRender';
 import FilterDataModal from '../FilterDataModal';
-import { ReactSortable } from 'react-sortablejs';
 
 interface DataSelectionProcessConfigProps extends DynamicSelectDataSourceConfigProps {
   visible: boolean;
@@ -40,6 +39,7 @@ interface DataSelectionProcessConfigProps extends DynamicSelectDataSourceConfigP
 const FormItem = Form.Item;
 const Option = Select.Option;
 const RadioGroup = Radio.Group;
+const maxFastFilterCount = 3;
 
 const SUB_ATTR_KEY = {
   DEFAULTVALUE: 'defaultValue',
@@ -181,13 +181,15 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
       })
       .filter(Boolean);
     setTableHeader(header);
+    tableConfig.columns = header;
+    handlePropsChange(SUB_ATTR_KEY.DYNAMICTABLECONFIG, tableConfig);
   };
 
   // 获取叶子节点
   const leafCount = countSelectedLeaf(selected, displayFieldOptions);
 
   const handleSelectFastFilter = (key: any) => {
-    if (fastFilters.length === 3) {
+    if (fastFilters.length === maxFastFilterCount) {
       Message.warning('最多添加三个分组字段');
     } else {
       const obj: any = fastFilterOptions.find((opt) => opt.value === key);
