@@ -3,6 +3,8 @@ package com.cmsr.onebase.module.metadata.api.entity.impl;
 import com.cmsr.onebase.module.metadata.api.entity.MetadataEntityFieldApi;
 import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldQueryReqDTO;
 import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldRespDTO;
+import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldDataReqDTO;
+import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldDataRespDTO;
 import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldJdbcTypeReqDTO;
 import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldJdbcTypeRespDTO;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataEntityFieldCoreService;
@@ -55,5 +57,11 @@ public class MetadataEntityFieldApiImpl implements MetadataEntityFieldApi {
         }
         
         return result;
+    }
+
+    @Override
+    public List<EntityFieldDataRespDTO> getDataByCondition(@Valid EntityFieldDataReqDTO reqDTO) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getDataByCondition'");
     }
 }
