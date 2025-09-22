@@ -28,7 +28,7 @@ export interface ConditionEditorProps {
   // 具体值
   data: Condition[];
   // 字段变更回调函数
-  onConditionChange?: (value: Condition[]) => void;
+  onConditionChange: (value: Condition[]) => void;
   // 字段验证类型列表
   entityFieldValidationTypes: EntityFieldValidationTypes[];
 }
