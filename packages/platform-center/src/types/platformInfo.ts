@@ -88,3 +88,21 @@ export interface LicenseInfo {
 export interface LicenseInfoList extends LicenseInfo { 
   id: string
 }
+
+/**
+ * 创建凭证请求参数
+ */
+export interface CreateLicenseFileReq { 
+  /**
+   * 凭证有效期
+   */
+  expireTime: number;
+  /**
+   * 租户数量上限
+   */
+  tenantLimit: string;
+  /**
+   * 用户数量上限
+   */
+  userLimit: string;
+}

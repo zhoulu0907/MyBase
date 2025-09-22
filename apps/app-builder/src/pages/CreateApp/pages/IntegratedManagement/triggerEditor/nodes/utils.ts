@@ -1,5 +1,13 @@
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import type { FlowNodeJSON } from '@flowgram.ai/fixed-layout-editor';
+import {
+  DATA_SOURCE_TYPE,
+  FLOW_ENTITY_TYPE,
+  getEntityFields,
+  getFieldCheckTypeApi,
+  type ConfitionField,
+  type EntityFieldValidationTypes
+} from '@onebase/app';
 import { NodeType } from './const';
 
 // 清除数据节点依赖关系
@@ -45,7 +53,7 @@ const getBlockNode = (curNodeId: string, blocks: FlowNodeJSON[]): FlowNodeJSON[]
       if (hasCurNode) {
         const nodeData = triggerEditorSignal.nodeData.value[ele.id];
         if (
-          ele.type === 'dataQueryMultiple'
+          ele.type === NodeType.DATA_QUERY_MULTIPLE
           //   nodeData.dataSource &&
           //   nodeData.dataType !== DATA_SOURCE_TYPE.DATA_NODE
         ) {
@@ -60,7 +68,11 @@ const getBlockNode = (curNodeId: string, blocks: FlowNodeJSON[]): FlowNodeJSON[]
   return blockNode;
 };
 
-export function getBeforeCurQueryNodes(curNodeId: string, allNodes: FlowNodeJSON[]): FlowNodeJSON[] {
+export function getBeforeCurQueryNodes(
+  curNodeId: string,
+  allNodes: FlowNodeJSON[],
+  nodeTypes: NodeType[]
+): FlowNodeJSON[] {
   // 获取当前节点前并且是数据查询节点的数据
   // 条件节点  blocks
   let nodes: FlowNodeJSON[] = [];
@@ -76,16 +88,12 @@ export function getBeforeCurQueryNodes(curNodeId: string, allNodes: FlowNodeJSON
         const blocks = getBlockNode(curNodeId, ele.blocks);
         nodes.push.apply(nodes, blocks);
       } else {
-        const blocks = getBeforeCurQueryNodes(curNodeId, ele.blocks);
+        const blocks = getBeforeCurQueryNodes(curNodeId, ele.blocks, nodeTypes);
         nodes.push.apply(nodes, blocks);
       }
     }
     // const nodeData = triggerEditorSignal.nodeData.value[ele.id];
-    if (
-      ele.type === NodeType.DATA_QUERY_MULTIPLE
-      // nodeData.dataSource &&
-      //   nodeData.dataType !== DATA_SOURCE_TYPE.DATA_NODE
-    ) {
+    if (nodeTypes.includes(ele.type as NodeType)) {
       nodes.push(ele);
     }
   }
@@ -108,3 +116,89 @@ export async function validateNodeForm(form: any, payloadForm: any, validateOnly
     form.setValueIn('invalid', true);
   }
 }
+
+export const getDataNodeSource = (nodeId: string): string => {
+  const nodeData = triggerEditorSignal.nodeData.value[nodeId];
+  const node = triggerEditorSignal.nodes.value.find((item: any) => item.id === nodeId);
+
+  if (nodeData && node) {
+    console.log('node: ', node);
+    console.log('nodeData: ', nodeData);
+
+    switch (node.type) {
+      case NodeType.START_ENTITY:
+        return nodeData.entityId;
+      case NodeType.DATA_ADD:
+        if (nodeData.addType === FLOW_ENTITY_TYPE.MAIN_ENTITY) {
+          return nodeData.mainDataSource;
+        }
+        if (nodeData.addType === FLOW_ENTITY_TYPE.SUB_ENTITY) {
+          return nodeData.subDataSource;
+        }
+        break;
+      case NodeType.DATA_UPDATE:
+        if (nodeData.updateType === FLOW_ENTITY_TYPE.MAIN_ENTITY) {
+          return nodeData.mainDataSource;
+        }
+        if (nodeData.updateType === FLOW_ENTITY_TYPE.SUB_ENTITY) {
+          return nodeData.subDataSource;
+        }
+        break;
+
+      case NodeType.DATA_QUERY:
+        if (nodeData.dataType === DATA_SOURCE_TYPE.FORM) {
+          return nodeData.mainDataSource;
+        }
+        if (nodeData.dataType === DATA_SOURCE_TYPE.SUBFORM) {
+          return nodeData.subDataSource;
+        }
+        if (nodeData.dataType === DATA_SOURCE_TYPE.DATA_NODE) {
+          return getDataNodeSource(nodeData.dataNodeId);
+        }
+        break;
+
+      case NodeType.DATA_QUERY_MULTIPLE:
+        if (nodeData.dataType === DATA_SOURCE_TYPE.FORM) {
+          return nodeData.mainDataSource;
+        }
+        if (nodeData.dataType === DATA_SOURCE_TYPE.SUBFORM) {
+          return nodeData.subDataSource;
+        }
+        if (nodeData.dataType === DATA_SOURCE_TYPE.DATA_NODE) {
+          return getDataNodeSource(nodeData.dataNodeId);
+        }
+        break;
+
+      default:
+        return '';
+    }
+  }
+
+  return '';
+};
+
+export const getEntityFieldList = async (
+  dataSource: string,
+  setConditionFields: (fields: ConfitionField[]) => void,
+  setValidationTypes: (types: EntityFieldValidationTypes[]) => void
+) => {
+  if (!dataSource) {
+    return;
+  }
+  const res = await getEntityFields({ entityId: dataSource });
+  const filedIds: string[] = [];
+  const newConditionFields: ConfitionField[] = [];
+  res.forEach((item: any) => {
+    filedIds.push(item.id);
+    newConditionFields.push({
+      label: item.displayName,
+      value: item.id,
+      fieldType: item.fieldType
+    });
+  });
+  setConditionFields(newConditionFields);
+  if (filedIds?.length) {
+    const newValidationTypes = await getFieldCheckTypeApi(filedIds);
+    setValidationTypes(newValidationTypes);
+  }
+};

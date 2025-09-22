@@ -21,8 +21,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   };
 
   const onValuesChange = (changeValue: any, values: any) => {
-    console.log('onValuesChange: ', changeValue, values);
-
     handlePropsOnChange(values);
   };
 
@@ -87,7 +85,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
               <Grid.Col span={12}>
                 <Form.Item
                   label="基准日期字段"
-                  field="offsetDirection"
+                  field="offsetFiledId"
                   rules={[{ required: true, message: '请选择基准日期字段' }]}
                 >
                   <Select
@@ -110,9 +108,9 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                 <Form.Item label="偏移模式" field="offsetMode" rules={[{ required: true, message: '请选择偏移模式' }]}>
                   <Select
                     options={[
-                      { label: '无', value: 0 },
-                      { label: '提前', value: 1 },
-                      { label: '延后', value: 2 }
+                      { label: '无', value: 'none' },
+                      { label: '提前', value: 'before' },
+                      { label: '延后', value: 'after' }
                     ]}
                   />
                 </Form.Item>

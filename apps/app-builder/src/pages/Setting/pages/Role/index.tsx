@@ -13,6 +13,7 @@ import PlaceholderPanel from '@/components/PlaceholderPanel';
 import { PermissionButton as Button } from '@/components/PermissionControl';
 import { hasPermission } from '@/utils/permission';
 import { RoleType } from '@onebase/platform-center';
+import { divide } from 'lodash-es';
 
 const Sider = Layout.Sider;
 const Header = Layout.Header;
@@ -108,9 +109,15 @@ export default function RolePage() {
           编辑
         </Button>
         <Popconfirm
+          position="br"
           focusLock
-          title="移除成员"
-          content="确定要移除这个成员吗？"
+          title={<div style={{ fontWeight: '700' }}>"移除成员"</div>}
+          content={
+            <>
+              <div>确定要移除这个成员吗？</div>
+              <div>该角色下关联的用户将失去该角色赋予的权限!</div>
+            </>
+          }
           onOk={() => {
             if (activeRole?.id) {
               handleDeleteRole(activeRole.id).then(() => {

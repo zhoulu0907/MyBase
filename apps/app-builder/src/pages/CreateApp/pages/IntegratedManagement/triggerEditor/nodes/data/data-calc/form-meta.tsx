@@ -29,9 +29,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             <Form.Item label="节点ID" field="id" initialValue={node.id}>
               <Input disabled />
             </Form.Item>
-            <Form.Item label="节点名称" field="title">
-              <Input onChange={(e) => handlePropsOnChange('title', e)} />
-            </Form.Item>
           </Form>
         </FormContent>
       ) : (

@@ -1,79 +1,165 @@
-import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
-import { Form, Input, Select, Radio, Grid } from '@arco-design/web-react';
-import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
-import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
-import { type FlowNodeJSON } from '../../../typings';
-import { useEffect, useState } from 'react';
-import ConditionEditor from '../../../components/condition-editor';
+import { useAppStore } from '@/store/store_app';
+import { Form, Grid, Input, Radio, Select } from '@arco-design/web-react';
+import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
 import {
   FLOW_ENTITY_TYPE,
   getEntityFields,
+  getEntityFieldsWithChildren,
+  getEntityListByApp,
   getFieldCheckTypeApi,
   type ConfitionField,
-  type EntityFieldValidationTypes
+  type EntityFieldValidationTypes,
+  type MetadataEntityPair
 } from '@onebase/app';
+import { useSignals } from '@preact/signals-react/runtime';
+import { useEffect, useState } from 'react';
+import ConditionEditor from '../../../components/condition-editor';
+import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
+import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
+import { type FlowNodeJSON } from '../../../typings';
+import { validateNodeForm } from '../../utils';
+
+const RadioGroup = Radio.Group;
 
 export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
+  useSignals();
+
   const isSidebar = useIsSidebar();
   const { node } = useNodeRenderContext();
-  const [entityList, setEntityList] = useState<any[]>([]);
+  // 当前页应用id
+  const { curAppId } = useAppStore();
+  const [mainEntityList, setMainEntityList] = useState<MetadataEntityPair[]>([]);
+  const [entityList, setEntityList] = useState<MetadataEntityPair[]>([]);
   const [conditionFields, setConditionFields] = useState<ConfitionField[]>([]);
   const [validationTypes, setValidationTypes] = useState<EntityFieldValidationTypes[]>([]);
 
-  const { mainEntities, subEntities } = triggerEditorSignal;
+  const handlePropsOnChange = (values: any) => {
+    triggerEditorSignal.setNodeData(node.id, values);
+  };
+
+  const onValuesChange = async (changeValue: any, values: any) => {
+    // 校验表单
+    validateNodeForm(form, payloadForm, false);
+
+    handlePropsOnChange(values);
+  };
 
   const [payloadForm] = Form.useForm();
 
-  const pageId = Form.useWatch('pageId', payloadForm);
   const deleteType = Form.useWatch('deleteType', payloadForm);
+  const mainDataSource = Form.useWatch('mainDataSource', payloadForm);
 
   useEffect(() => {
-    if (deleteType) {
-      payloadForm.clearFields(['pageId']);
-      if (deleteType == FLOW_ENTITY_TYPE.MAIN_ENTITY) {
-        console.log('mainEntities.value: ', mainEntities.value);
-        setEntityList(mainEntities.value);
-        payloadForm.clearFields('entityId');
-      } else {
-        console.log('subEntities.value: ', subEntities.value);
-        setEntityList(subEntities.value);
-        payloadForm.clearFields('entityId');
+    payloadForm && validateNodeForm(form, payloadForm, true);
+  }, [payloadForm]);
+
+  useEffect(() => {
+    init();
+  }, []);
+
+  const init = async () => {
+    const nodeData = triggerEditorSignal.nodeData.value[node.id];
+    if (nodeData) {
+      if (nodeData.deleteType === FLOW_ENTITY_TYPE.MAIN_ENTITY) {
+        // 在主表中
+        const res = await getEntityListByApp(curAppId);
+        setEntityList(res);
+        getFieldList(nodeData?.mainDataSource);
+      }
+      if (nodeData.deleteType === FLOW_ENTITY_TYPE.SUB_ENTITY) {
+        // 在子表中
+        const res = await getEntityListByApp(curAppId);
+        setMainEntityList(res);
+        if (nodeData?.mainDataSource) {
+          const res = await getEntityFieldsWithChildren(nodeData.mainDataSource);
+          const newEntityList = (res.childEntities || []).map((item: any) => {
+            return {
+              entityId: item.childEntityId,
+              entityName: item.childEntityName
+            };
+          });
+          setEntityList(newEntityList);
+          getFieldList(nodeData.subDataSource);
+        }
       }
     }
-  }, [deleteType]);
-  useEffect(() => {
-    if (pageId) {
-      pageChange(pageId);
-    }
-  }, [pageId]);
+  };
 
-  const onValuesChange = (changeValue: any, values: any) => {
-    console.log('onValuesChange: ', changeValue, values);
+  // 方式变更
+  const handleDataTypeChange = (curDeleteType: FLOW_ENTITY_TYPE) => {
+    payloadForm.clearFields(['mainDataSource', 'subDataSource', 'filterCondition']);
     const nodeData = triggerEditorSignal.nodeData.value[node.id];
     triggerEditorSignal.setNodeData(node.id, {
       ...nodeData,
-      ...values
+      mainDataSource: undefined,
+      subDataSource: undefined,
+      filterCondition: []
     });
+    setEntityList([]);
+    setConditionFields([]);
+    setValidationTypes([]);
+    setMainEntityList([]);
+    getEntityList(curDeleteType);
   };
-
-  // 目标表单变更  更新筛选条件列表，清除已填筛选条件
-  const pageChange = (pageId: string) => {
+  const getEntityList = async (curDeleteType?: FLOW_ENTITY_TYPE) => {
+    const nodeData = triggerEditorSignal.nodeData.value[node.id];
+    if (curDeleteType === FLOW_ENTITY_TYPE.MAIN_ENTITY || curDeleteType === undefined) {
+      // 从主表中
+      const res = await getEntityListByApp(curAppId);
+      setEntityList(res);
+      getFieldList(nodeData?.mainDataSource);
+    }
+    if (curDeleteType === FLOW_ENTITY_TYPE.SUB_ENTITY) {
+      // 从子表中
+      const res = await getEntityListByApp(curAppId);
+      setMainEntityList(res);
+    }
+  };
+  // 主表数据变更
+  const handleMainDataSourceChange = async (curMainDataSource: string) => {
+    payloadForm.clearFields(['subDataSource', 'filterCondition']);
+    const nodeData = triggerEditorSignal.nodeData.value[node.id];
+    triggerEditorSignal.setNodeData(node.id, {
+      ...nodeData,
+      subDataSource: undefined,
+      filterCondition: []
+    });
+    setConditionFields([]);
+    setValidationTypes([]);
+    if (deleteType === FLOW_ENTITY_TYPE.MAIN_ENTITY) {
+      getFieldList(curMainDataSource);
+    }
+    if (deleteType === FLOW_ENTITY_TYPE.SUB_ENTITY) {
+      setEntityList([]);
+      const res = await getEntityFieldsWithChildren(curMainDataSource);
+      const newEntityList = (res.childEntities || []).map((item: any) => {
+        return {
+          entityId: item.childEntityId,
+          entityName: item.childEntityName
+        };
+      });
+      setEntityList(newEntityList);
+    }
+  };
+  // 子表数据变更
+  const handleSubDataSourceChange = (curSubDataSource: string) => {
     payloadForm.clearFields(['filterCondition']);
     const nodeData = triggerEditorSignal.nodeData.value[node.id];
     triggerEditorSignal.setNodeData(node.id, {
       ...nodeData,
-      filterCondition: [] // null 和 '' 在 Select 中都被认为是值
+      filterCondition: []
     });
-    // 重新获取字段列表
-    if (pageId) {
-      getFieldList(pageId);
-    }
+    setConditionFields([]);
+    setValidationTypes([]);
+    getFieldList(curSubDataSource);
   };
   // 获取字段下拉列表
-  const getFieldList = async (pageId: string) => {
-    // 数据库表 查询指定实体的字段列表
-    const res = await getEntityFields({ entityId: pageId });
+  const getFieldList = async (dataSource: string) => {
+    if (!dataSource) {
+      return;
+    }
+    const res = await getEntityFields({ entityId: dataSource });
     const filedIds: string[] = [];
     const newConditionFields: ConfitionField[] = [];
     res.forEach((item: any) => {
@@ -87,15 +173,18 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     setConditionFields(newConditionFields);
     if (filedIds?.length) {
       const newValidationTypes = await getFieldCheckTypeApi(filedIds);
-      console.log('validationTypes: ', newValidationTypes);
       setValidationTypes(newValidationTypes);
     }
   };
 
-  const deleteTypeOptions = [
-    { label: '删除主表数据', value: FLOW_ENTITY_TYPE.MAIN_ENTITY },
-    { label: '删除子表数据', value: FLOW_ENTITY_TYPE.SUB_ENTITY }
-  ];
+  const filterConditionChange = (e: any[]) => {
+    const nodeData = triggerEditorSignal.nodeData.value[node.id];
+    triggerEditorSignal.setNodeData(node.id, {
+      ...nodeData,
+      filterCondition: e || []
+    });
+    payloadForm.setFieldValue('filterCondition', e);
+  };
 
   return (
     <>
@@ -104,46 +193,105 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
         <FormContent>
           <Form
             form={payloadForm}
-            layout="vertical"
-            onValuesChange={onValuesChange}
             initialValues={{ ...triggerEditorSignal.nodeData.value[node.id] }}
+            onValuesChange={onValuesChange}
+            layout="vertical"
           >
-            <Form.Item label="节点ID" field="id" initialValue={node.id}>
-              <Input disabled />
-            </Form.Item>
-            <Form.Item label="节点名称" field="nodeName" required>
-              <Input placeholder="请输入节点名称" />
-            </Form.Item>
-            <Form.Item label="删除方式" field="deleteType" required>
-              <Radio.Group options={deleteTypeOptions}></Radio.Group>
-            </Form.Item>
             <Grid.Row>
-              <Grid.Col span={2} style={{ textAlign: 'center', lineHeight: '32px' }}>
-                删除
-              </Grid.Col>
-              <Grid.Col span={20}>
-                <Form.Item field="pageId">
-                  <Select placeholder="请选择目标表单" allowClear>
-                    {entityList?.map((item) => (
-                      <Select.Option key={item.entityId} value={item.entityId}>
-                        {item.entityName}
-                      </Select.Option>
-                    ))}
-                  </Select>
-                </Form.Item>
-              </Grid.Col>
-              <Grid.Col span={2} style={{ textAlign: 'center', lineHeight: '32px' }}>
-                的数据
-              </Grid.Col>
+              <Form.Item
+                label="节点ID"
+                field="id"
+                initialValue={node.id}
+                rules={[
+                  {
+                    required: true,
+                    message: '请选择节点ID'
+                  }
+                ]}
+              >
+                <Input disabled />
+              </Form.Item>
             </Grid.Row>
 
-            <Form.Item label="匹配规则" field="filterCondition" required>
-              <ConditionEditor
-                data={triggerEditorSignal.nodeData.value[node.id]?.filterCondition || []}
-                fields={conditionFields}
-                entityFieldValidationTypes={validationTypes}
-              />
-            </Form.Item>
+            <Grid.Row>
+              <Form.Item label="删除方式" field="deleteType" rules={[{ required: true, message: '请选择删除方式' }]}>
+                <RadioGroup onChange={handleDataTypeChange}>
+                  <Radio value={FLOW_ENTITY_TYPE.MAIN_ENTITY}>删除主表数据</Radio>
+                  <Radio value={FLOW_ENTITY_TYPE.SUB_ENTITY}>删除子表数据</Radio>
+                </RadioGroup>
+              </Form.Item>
+            </Grid.Row>
+
+            {/* 从主表中 */}
+            {deleteType === FLOW_ENTITY_TYPE.MAIN_ENTITY && (
+              <Grid.Row>
+                <Grid.Col span={2} style={{ textAlign: 'center', lineHeight: '32px' }}>
+                  删除
+                </Grid.Col>
+                <Grid.Col span={19}>
+                  <Form.Item field="mainDataSource" disabled={!deleteType}>
+                    <Select onChange={handleMainDataSourceChange} allowClear>
+                      {entityList.map((item) => (
+                        <Select.Option key={item.entityId} value={item.entityId}>
+                          {item.entityName}
+                        </Select.Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                </Grid.Col>
+                <Grid.Col span={3} style={{ textAlign: 'center', lineHeight: '32px' }}>
+                  的数据
+                </Grid.Col>
+              </Grid.Row>
+            )}
+
+            {/* 从子表中 */}
+            {deleteType === FLOW_ENTITY_TYPE.SUB_ENTITY && (
+              <Grid.Row>
+                <Grid.Col span={2} style={{ textAlign: 'center', lineHeight: '32px' }}>
+                  删除
+                </Grid.Col>
+                <Grid.Col span={9}>
+                  <Form.Item field="mainDataSource" disabled={!deleteType}>
+                    <Select allowClear onChange={handleMainDataSourceChange}>
+                      {mainEntityList.map((item) => (
+                        <Select.Option key={item.entityId} value={item.entityId}>
+                          {item.entityName}
+                        </Select.Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                </Grid.Col>
+                <Grid.Col span={1} style={{ textAlign: 'center', lineHeight: '32px' }}>
+                  的
+                </Grid.Col>
+                <Grid.Col span={9}>
+                  <Form.Item field="subDataSource" disabled={!mainDataSource}>
+                    <Select allowClear onChange={handleSubDataSourceChange}>
+                      {entityList.map((item) => (
+                        <Select.Option key={item.entityId} value={item.entityId}>
+                          {item.entityName}
+                        </Select.Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                </Grid.Col>
+                <Grid.Col span={3} style={{ textAlign: 'center', lineHeight: '32px' }}>
+                  的数据
+                </Grid.Col>
+              </Grid.Row>
+            )}
+
+            <Grid.Row>
+              <Form.Item label="匹配规则" field="filterCondition" required>
+                <ConditionEditor
+                  data={triggerEditorSignal.nodeData.value[node.id]?.filterCondition || []}
+                  fields={conditionFields}
+                  entityFieldValidationTypes={validationTypes}
+                  onChange={filterConditionChange}
+                />
+              </Form.Item>
+            </Grid.Row>
           </Form>
         </FormContent>
       ) : (
