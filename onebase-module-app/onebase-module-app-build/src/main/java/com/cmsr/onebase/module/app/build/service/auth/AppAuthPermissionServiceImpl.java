@@ -180,7 +180,11 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
             authDataGroupRepository.insert(authDataGroupDO);
             List<AuthDataFilterVO> authDataFilterVOS = formatAuthDataFilterVO(reqVO.getAuthDataGroup().getDataFilters());
             if (CollectionUtils.isNotEmpty(authDataFilterVOS)) {
-                List<AuthDataFilterDO> dataFilterDOS = authDataFilterVOS.stream().map(v -> BeanUtils.toBean(v, AuthDataFilterDO.class)).toList();
+                List<AuthDataFilterDO> dataFilterDOS = authDataFilterVOS.stream().map(v -> {
+                    AuthDataFilterDO filterDO = BeanUtils.toBean(v, AuthDataFilterDO.class);
+                    filterDO.setGroupId(authDataGroupDO.getId());
+                    return filterDO;
+                }).toList();
                 authDataFilterRepository.insertBatch(dataFilterDOS);
             }
         } else {
@@ -386,7 +390,7 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
     }
 
     private void copyFields(Long groupId, AuthDataFilterVO authDataFilterVO, AuthDataFilterDO authDataFilterDO) {
-        authDataFilterDO.setFieldId(groupId);
+        authDataFilterDO.setGroupId(groupId);
         authDataFilterDO.setConditionGroup(authDataFilterVO.getConditionGroup());
         authDataFilterDO.setConditionOrder(authDataFilterVO.getConditionOrder());
         authDataFilterDO.setFieldId(authDataFilterVO.getFieldId());
