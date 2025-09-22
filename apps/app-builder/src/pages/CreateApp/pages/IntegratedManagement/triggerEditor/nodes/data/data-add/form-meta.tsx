@@ -1,11 +1,12 @@
-import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
+import { useAppStore } from '@/store/store_app';
 import { Form, Grid, Input, Radio, Select } from '@arco-design/web-react';
+import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
 import {
   FLOW_ENTITY_TYPE,
-  getEntityListByApp,
   getEntityFields,
   getEntityFieldsWithChildren,
+  getEntityListByApp,
   type AppEntityField,
   type MetadataEntityPair
 } from '@onebase/app';
@@ -15,7 +16,6 @@ import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
 import { validateNodeForm } from '../../utils';
-import { useAppStore } from '@/store/store_app';
 
 const RadioGroup = Radio.Group;
 
@@ -33,8 +33,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   };
 
   const onValuesChange = async (changeValue: any, values: any) => {
-    console.log('onValuesChange: ', changeValue, values);
-
     // 校验表单
     validateNodeForm(form, payloadForm, false);
 

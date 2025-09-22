@@ -20,7 +20,7 @@ export const LoopNodeRegistry: FlowNodeRegistry = {
   onAdd() {
     return {
       id: `loop_${nanoid(5)}`,
-      type: 'loop',
+      type: NodeType.LOOP,
       data: {
         title: '循环节点'
       }

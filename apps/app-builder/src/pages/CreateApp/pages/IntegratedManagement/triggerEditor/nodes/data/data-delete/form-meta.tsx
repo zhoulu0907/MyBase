@@ -1,27 +1,30 @@
-import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
+import { useAppStore } from '@/store/store_app';
 import { Form, Grid, Input, Radio, Select } from '@arco-design/web-react';
+import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
 import {
   FLOW_ENTITY_TYPE,
-  getEntityListByApp,
   getEntityFields,
   getEntityFieldsWithChildren,
+  getEntityListByApp,
   getFieldCheckTypeApi,
   type ConfitionField,
   type EntityFieldValidationTypes,
-  type MetadataEntityPair,
+  type MetadataEntityPair
 } from '@onebase/app';
+import { useSignals } from '@preact/signals-react/runtime';
 import { useEffect, useState } from 'react';
 import ConditionEditor from '../../../components/condition-editor';
 import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
 import { validateNodeForm } from '../../utils';
-import { useAppStore } from '@/store/store_app';
 
 const RadioGroup = Radio.Group;
 
 export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
+  useSignals();
+
   const isSidebar = useIsSidebar();
   const { node } = useNodeRenderContext();
   // 当前页应用id
@@ -36,8 +39,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   };
 
   const onValuesChange = async (changeValue: any, values: any) => {
-    console.log('onValuesChange: ', changeValue, values);
-
     // 校验表单
     validateNodeForm(form, payloadForm, false);
 
@@ -181,7 +182,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     const nodeData = triggerEditorSignal.nodeData.value[node.id];
     triggerEditorSignal.setNodeData(node.id, {
       ...nodeData,
-      subDataSource: undefined,
       filterCondition: e || []
     });
     payloadForm.setFieldValue('filterCondition', e);

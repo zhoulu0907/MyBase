@@ -28,7 +28,7 @@ export const BreakLoopNodeRegistry: FlowNodeRegistry = {
   formMeta,
   canAdd(ctx, from) {
     while (from.parent) {
-      if (from.parent.flowNodeType === 'loop') return true;
+      if (from.parent.flowNodeType === NodeType.LOOP) return true;
       from = from.parent;
     }
     return false;
@@ -36,7 +36,7 @@ export const BreakLoopNodeRegistry: FlowNodeRegistry = {
   onAdd(ctx, from) {
     return {
       id: `break_${nanoid()}`,
-      type: 'breakLoop',
+      type: NodeType.BREAK_LOOP,
       data: {
         title: '中断循环'
       }
