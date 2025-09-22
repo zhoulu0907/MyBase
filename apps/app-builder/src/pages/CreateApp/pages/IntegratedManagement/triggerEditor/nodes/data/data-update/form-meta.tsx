@@ -186,7 +186,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     setFieldDataList(res);
     if (filedIds?.length) {
       const newValidationTypes = await getFieldCheckTypeApi(filedIds);
-      console.log('validationTypes: ', newValidationTypes);
       setValidationTypes(newValidationTypes);
     }
   };
@@ -300,7 +299,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                   data={triggerEditorSignal.nodeData.value[node.id]?.filterCondition || []}
                   fields={conditionFields}
                   entityFieldValidationTypes={validationTypes}
-                  onChange={onConditionChange}
+                  onConditionChange={onConditionChange}
                 />
               </Form.Item>
             </Grid.Row>

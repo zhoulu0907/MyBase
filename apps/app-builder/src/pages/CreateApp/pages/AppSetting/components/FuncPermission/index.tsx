@@ -42,7 +42,6 @@ const FuncPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
     if (appId && menuId && roleId) {
       getApplicationPermission();
     }
-    console.log(' 功能权限 menuId:', menuId);
   }, [appId, menuId, roleId]);
 
   useEffect(() => {
@@ -67,7 +66,6 @@ const FuncPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
       const viewDefaultChecked = funcPermission.authEntity.authViews
         ?.filter((item: AuthViewVO) => item.isAllowed === FunPermissionViewVisit.canVisit)
         .map((item: AuthViewVO) => item.viewId);
-      console.log('viewDefaultChecked', viewDefaultChecked);
       form.setFieldsValue({
         isPageAllowed: funcPermission.isPageAllowed,
         authOperations: defaultChecked,
@@ -86,7 +84,6 @@ const FuncPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
       roleId
     };
     const res = await getFuncPermission(params);
-    console.log('获取权限信息', res);
     setFuncPermission(res);
   };
 
@@ -111,7 +108,6 @@ const FuncPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
         return newIsAllowed !== op.isAllowed ? { ...op, isAllowed: newIsAllowed } : null;
       })
       .filter(Boolean);
-    console.log(values, updateOperations);
     const params: UpdateOperationPermissionReq = {
       authOperations: updateOperations,
       permissionReq: {
@@ -135,7 +131,6 @@ const FuncPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
   };
 
   const changeAllViewPermission = (checked: any) => {
-    console.log('全选框 onChange:', checked);
     // 实现全选/取消全选逻辑
     setIsCustomAllViewsAllowed(checked);
     if (checked) {
@@ -146,7 +141,6 @@ const FuncPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
       // 取消全选：清空所有视图权限
       form.setFieldValue('authViews', []);
     }
-    console.log('form values:', form.getFieldsValue());
   };
 
   return (
@@ -231,7 +225,6 @@ const FuncPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
                         direction="vertical"
                         options={viewPermissionOptions || []}
                         onChange={(values) => {
-                          console.log('视图权限变更:', values);
                           setIsCustomAllViewsAllowed(viewPermissionOptions?.length === values.length);
                         }}
                       />
