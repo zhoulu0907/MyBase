@@ -163,7 +163,16 @@ public class MetadataValidationRequiredBuildServiceImpl implements MetadataValid
     public ValidationRequiredRespVO getById(Long id) {
         MetadataValidationRequiredDO requiredDO = requiredRepository.findById(id);
         if (requiredDO == null) {
-            return null;
+            var group = validationRuleGroupService.getValidationRuleGroup(id);
+            if (group != null) {
+                var list = requiredRepository.findByGroupId(group.getId());
+                if (!list.isEmpty()) {
+                    requiredDO = list.get(0);
+                }
+            }
+            if (requiredDO == null) {
+                return null;
+            }
         }
 
         // 转换DO为VO

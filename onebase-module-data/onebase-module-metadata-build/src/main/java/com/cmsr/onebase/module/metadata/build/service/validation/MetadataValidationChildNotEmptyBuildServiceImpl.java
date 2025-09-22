@@ -56,7 +56,16 @@ public class MetadataValidationChildNotEmptyBuildServiceImpl implements Metadata
     public ValidationChildNotEmptyRespVO getById(Long id) {
         MetadataValidationChildNotEmptyDO validationDO = childNotEmptyRepository.findById(id);
         if (validationDO == null) {
-            return null;
+            var group = ruleGroupService.getValidationRuleGroup(id);
+            if (group != null) {
+                var list = childNotEmptyRepository.findByGroupId(group.getId());
+                if (!list.isEmpty()) {
+                    validationDO = list.get(0);
+                }
+            }
+            if (validationDO == null) {
+                return null;
+            }
         }
 
         // 转换为 VO

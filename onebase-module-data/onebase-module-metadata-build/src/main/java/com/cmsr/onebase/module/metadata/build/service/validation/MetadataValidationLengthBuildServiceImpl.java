@@ -193,9 +193,21 @@ public class MetadataValidationLengthBuildServiceImpl implements MetadataValidat
 
     @Override
     public ValidationLengthRespVO getById(Long id) {
+        // 先按规则ID查询
         MetadataValidationLengthDO lengthDO = lengthRepository.findById(id);
+
+        // 若未查到，则将入参视为规则组ID：先查组，再用 groupId 查规则
         if (lengthDO == null) {
-            return null;
+            var group = ruleGroupService.getValidationRuleGroup(id);
+            if (group != null) {
+                List<MetadataValidationLengthDO> list = lengthRepository.findByGroupId(group.getId());
+                if (!list.isEmpty()) {
+                    lengthDO = list.get(0);
+                }
+            }
+            if (lengthDO == null) {
+                return null;
+            }
         }
 
         // 转换DO为VO
