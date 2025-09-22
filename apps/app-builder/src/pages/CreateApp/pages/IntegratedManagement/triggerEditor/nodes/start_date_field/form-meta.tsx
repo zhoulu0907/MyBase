@@ -5,7 +5,6 @@ import { Checkbox, Form, Grid, Input, InputNumber, Select, TimePicker } from '@a
 import {
   getEntityFields,
   getEntityListByApp,
-  type Condition,
   type ConfitionField,
   type EntityFieldValidationTypes
 } from '@onebase/app';
@@ -66,13 +65,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
   const onValuesChange = (changeValue: any, values: any) => {
     handlePropsOnChange(values);
-  };
-
-  const onConditionChange = (conditions: Condition[]) => {
-    handlePropsOnChange({
-      ...triggerEditorSignal.nodeData.value[node.id],
-      filterCondition: conditions
-    });
   };
 
   return (
@@ -179,16 +171,15 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             </Grid.Row>
           </Form>
 
-          <Form.Item label="匹配规则" field="filterCondition" layout="vertical">
-            {validationTypes && (
-              <ConditionEditor
-                onConditionChange={onConditionChange}
-                data={triggerEditorSignal.nodeData.value[node.id]?.filterCondition || []}
-                fields={conditionFields}
-                entityFieldValidationTypes={validationTypes}
-              />
-            )}
-          </Form.Item>
+          {validationTypes && (
+            <ConditionEditor
+              label="匹配规则"
+              required
+              fields={conditionFields}
+              entityFieldValidationTypes={validationTypes}
+              form={payloadForm}
+            />
+          )}
         </FormContent>
       ) : (
         <FormContent>

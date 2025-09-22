@@ -125,27 +125,27 @@ export const getDataNodeSource = (nodeId: string): string => {
         return nodeData.entityId;
       case NodeType.DATA_ADD:
         if (nodeData.addType === FLOW_ENTITY_TYPE.MAIN_ENTITY) {
-          return nodeData.mainDataSource;
+          return nodeData.mainEntityId;
         }
         if (nodeData.addType === FLOW_ENTITY_TYPE.SUB_ENTITY) {
-          return nodeData.subDataSource;
+          return nodeData.subEntityId;
         }
         break;
       case NodeType.DATA_UPDATE:
         if (nodeData.updateType === FLOW_ENTITY_TYPE.MAIN_ENTITY) {
-          return nodeData.mainDataSource;
+          return nodeData.mainEntityId;
         }
         if (nodeData.updateType === FLOW_ENTITY_TYPE.SUB_ENTITY) {
-          return nodeData.subDataSource;
+          return nodeData.subEntityId;
         }
         break;
 
       case NodeType.DATA_QUERY:
         if (nodeData.dataType === DATA_SOURCE_TYPE.FORM) {
-          return nodeData.mainDataSource;
+          return nodeData.mainEntityId;
         }
         if (nodeData.dataType === DATA_SOURCE_TYPE.SUBFORM) {
-          return nodeData.subDataSource;
+          return nodeData.subEntityId;
         }
         if (nodeData.dataType === DATA_SOURCE_TYPE.DATA_NODE) {
           return getDataNodeSource(nodeData.dataNodeId);
@@ -154,10 +154,10 @@ export const getDataNodeSource = (nodeId: string): string => {
 
       case NodeType.DATA_QUERY_MULTIPLE:
         if (nodeData.dataType === DATA_SOURCE_TYPE.FORM) {
-          return nodeData.mainDataSource;
+          return nodeData.mainEntityId;
         }
         if (nodeData.dataType === DATA_SOURCE_TYPE.SUBFORM) {
-          return nodeData.subDataSource;
+          return nodeData.subEntityId;
         }
         if (nodeData.dataType === DATA_SOURCE_TYPE.DATA_NODE) {
           return getDataNodeSource(nodeData.dataNodeId);

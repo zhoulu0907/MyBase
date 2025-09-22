@@ -30,7 +30,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   // 当前页应用id
   const { curAppId } = useAppStore();
   const [mainEntityList, setMainEntityList] = useState<MetadataEntityPair[]>([]);
-  const [entityList, setEntityList] = useState<MetadataEntityPair[]>([]);
+  const [subEntityList, setSubEntityList] = useState<MetadataEntityPair[]>([]);
   const [conditionFields, setConditionFields] = useState<ConfitionField[]>([]);
   const [validationTypes, setValidationTypes] = useState<EntityFieldValidationTypes[]>([]);
 
@@ -48,7 +48,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const [payloadForm] = Form.useForm();
 
   const deleteType = Form.useWatch('deleteType', payloadForm);
-  const mainDataSource = Form.useWatch('mainDataSource', payloadForm);
+  const mainEntityId = Form.useWatch('mainEntityId', payloadForm);
 
   useEffect(() => {
     payloadForm && validateNodeForm(form, payloadForm, true);
@@ -64,23 +64,23 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       if (nodeData.deleteType === FLOW_ENTITY_TYPE.MAIN_ENTITY) {
         // 在主表中
         const res = await getEntityListByApp(curAppId);
-        setEntityList(res);
-        getFieldList(nodeData?.mainDataSource);
+        setMainEntityList(res);
+        getFieldList(nodeData?.mainEntityId);
       }
       if (nodeData.deleteType === FLOW_ENTITY_TYPE.SUB_ENTITY) {
         // 在子表中
         const res = await getEntityListByApp(curAppId);
         setMainEntityList(res);
-        if (nodeData?.mainDataSource) {
-          const res = await getEntityFieldsWithChildren(nodeData.mainDataSource);
+        if (nodeData?.mainEntityId) {
+          const res = await getEntityFieldsWithChildren(nodeData.mainEntityId);
           const newEntityList = (res.childEntities || []).map((item: any) => {
             return {
               entityId: item.childEntityId,
               entityName: item.childEntityName
             };
           });
-          setEntityList(newEntityList);
-          getFieldList(nodeData.subDataSource);
+          setSubEntityList(newEntityList);
+          getFieldList(nodeData.subEntityId);
         }
       }
     }
@@ -88,27 +88,30 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
   // 方式变更
   const handleDataTypeChange = (curDeleteType: FLOW_ENTITY_TYPE) => {
-    payloadForm.clearFields(['mainDataSource', 'subDataSource', 'filterCondition']);
+    payloadForm.clearFields(['mainEntityId', 'subEntityId', 'filterCondition']);
     const nodeData = triggerEditorSignal.nodeData.value[node.id];
     triggerEditorSignal.setNodeData(node.id, {
       ...nodeData,
-      mainDataSource: undefined,
-      subDataSource: undefined,
+      mainEntityId: undefined,
+      subEntityId: undefined,
       filterCondition: []
     });
-    setEntityList([]);
+    setMainEntityList([]);
+    setSubEntityList([]);
+    setSubEntityList;
     setConditionFields([]);
     setValidationTypes([]);
     setMainEntityList([]);
     getEntityList(curDeleteType);
   };
+
   const getEntityList = async (curDeleteType?: FLOW_ENTITY_TYPE) => {
     const nodeData = triggerEditorSignal.nodeData.value[node.id];
     if (curDeleteType === FLOW_ENTITY_TYPE.MAIN_ENTITY || curDeleteType === undefined) {
       // 从主表中
       const res = await getEntityListByApp(curAppId);
-      setEntityList(res);
-      getFieldList(nodeData?.mainDataSource);
+      setMainEntityList(res);
+      getFieldList(nodeData?.mainEntityId);
     }
     if (curDeleteType === FLOW_ENTITY_TYPE.SUB_ENTITY) {
       // 从子表中
@@ -117,33 +120,33 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     }
   };
   // 主表数据变更
-  const handleMainDataSourceChange = async (curMainDataSource: string) => {
-    payloadForm.clearFields(['subDataSource', 'filterCondition']);
+  const handleMainEntityIdChange = async (curMainEntityId: string) => {
+    payloadForm.clearFields(['subEntityId', 'filterCondition']);
     const nodeData = triggerEditorSignal.nodeData.value[node.id];
     triggerEditorSignal.setNodeData(node.id, {
       ...nodeData,
-      subDataSource: undefined,
+      subEntityId: undefined,
       filterCondition: []
     });
     setConditionFields([]);
     setValidationTypes([]);
     if (deleteType === FLOW_ENTITY_TYPE.MAIN_ENTITY) {
-      getFieldList(curMainDataSource);
+      getFieldList(curMainEntityId);
     }
     if (deleteType === FLOW_ENTITY_TYPE.SUB_ENTITY) {
-      setEntityList([]);
-      const res = await getEntityFieldsWithChildren(curMainDataSource);
+      setSubEntityList([]);
+      const res = await getEntityFieldsWithChildren(curMainEntityId);
       const newEntityList = (res.childEntities || []).map((item: any) => {
         return {
           entityId: item.childEntityId,
           entityName: item.childEntityName
         };
       });
-      setEntityList(newEntityList);
+      setSubEntityList(newEntityList);
     }
   };
   // 子表数据变更
-  const handleSubDataSourceChange = (curSubDataSource: string) => {
+  const handleSubEntityIdChange = (curSubEntityId: string) => {
     payloadForm.clearFields(['filterCondition']);
     const nodeData = triggerEditorSignal.nodeData.value[node.id];
     triggerEditorSignal.setNodeData(node.id, {
@@ -152,7 +155,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     });
     setConditionFields([]);
     setValidationTypes([]);
-    getFieldList(curSubDataSource);
+    getFieldList(curSubEntityId);
   };
   // 获取字段下拉列表
   const getFieldList = async (dataSource: string) => {
@@ -175,15 +178,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       const newValidationTypes = await getFieldCheckTypeApi(filedIds);
       setValidationTypes(newValidationTypes);
     }
-  };
-
-  const filterConditionChange = (e: any[]) => {
-    const nodeData = triggerEditorSignal.nodeData.value[node.id];
-    triggerEditorSignal.setNodeData(node.id, {
-      ...nodeData,
-      filterCondition: e || []
-    });
-    payloadForm.setFieldValue('filterCondition', e);
   };
 
   return (
@@ -229,9 +223,9 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                   删除
                 </Grid.Col>
                 <Grid.Col span={19}>
-                  <Form.Item field="mainDataSource" disabled={!deleteType}>
-                    <Select onChange={handleMainDataSourceChange} allowClear>
-                      {entityList.map((item) => (
+                  <Form.Item field="mainEntityId" disabled={!deleteType}>
+                    <Select onChange={handleMainEntityIdChange} allowClear>
+                      {mainEntityList.map((item) => (
                         <Select.Option key={item.entityId} value={item.entityId}>
                           {item.entityName}
                         </Select.Option>
@@ -252,8 +246,8 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                   删除
                 </Grid.Col>
                 <Grid.Col span={9}>
-                  <Form.Item field="mainDataSource" disabled={!deleteType}>
-                    <Select allowClear onChange={handleMainDataSourceChange}>
+                  <Form.Item field="mainEntityId" disabled={!deleteType}>
+                    <Select allowClear onChange={handleMainEntityIdChange}>
                       {mainEntityList.map((item) => (
                         <Select.Option key={item.entityId} value={item.entityId}>
                           {item.entityName}
@@ -266,9 +260,9 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                   的
                 </Grid.Col>
                 <Grid.Col span={9}>
-                  <Form.Item field="subDataSource" disabled={!mainDataSource}>
-                    <Select allowClear onChange={handleSubDataSourceChange}>
-                      {entityList.map((item) => (
+                  <Form.Item field="subEntityId" disabled={!mainEntityId}>
+                    <Select allowClear onChange={handleSubEntityIdChange}>
+                      {subEntityList.map((item) => (
                         <Select.Option key={item.entityId} value={item.entityId}>
                           {item.entityName}
                         </Select.Option>
@@ -283,14 +277,13 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             )}
 
             <Grid.Row>
-              <Form.Item label="匹配规则" field="filterCondition" required>
-                <ConditionEditor
-                  data={triggerEditorSignal.nodeData.value[node.id]?.filterCondition || []}
-                  fields={conditionFields}
-                  entityFieldValidationTypes={validationTypes}
-                  onConditionChange={filterConditionChange}
-                />
-              </Form.Item>
+              <ConditionEditor
+                label="匹配规则"
+                required
+                fields={conditionFields}
+                entityFieldValidationTypes={validationTypes}
+                form={payloadForm}
+              />
             </Grid.Row>
           </Form>
         </FormContent>
