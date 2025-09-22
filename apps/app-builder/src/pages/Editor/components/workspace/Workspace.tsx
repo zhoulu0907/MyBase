@@ -97,9 +97,9 @@ export default function EditorWorkspace() {
       const originalComp = pageComponentSchemas[oldId];
       if (!originalComp) return;
 
-      const schemaConfig = JSON.parse(JSON.stringify(
+      const schemaConfig = cloneDeep(
         getComponentConfig(pageComponentSchemas[oldId], originalComp.type)
-      ));
+      );
       const schema = getComponentSchema(originalComp.type);
 
       schema.config = schemaConfig;
