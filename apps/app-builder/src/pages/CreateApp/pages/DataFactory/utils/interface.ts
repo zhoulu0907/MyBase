@@ -6,6 +6,7 @@ export interface EntityNode {
   code?: string;
   entityName: string;
   tableName: string;
+  displayName: string;
   description: string;
   fields: Array<EntityField>;
   positionX: number;
