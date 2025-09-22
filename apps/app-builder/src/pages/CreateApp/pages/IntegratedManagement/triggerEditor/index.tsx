@@ -27,7 +27,7 @@ const TriggerEditor = () => {
     nodeId,
     setFlowId,
     flowId,
-    setPageId,
+    // setPageId,
     setNodeData,
     setAllNodeData,
     setMainEntities,
@@ -76,9 +76,9 @@ const TriggerEditor = () => {
     const res = await getFlowMgmt(id);
     console.log('res: ', res);
 
-    if (res.triggerConfig && res.triggerConfig.pageId) {
-      setPageId(res.triggerConfig.pageId);
-    }
+    // if (res.triggerConfig && res.triggerConfig.pageId) {
+    //   setPageId(res.triggerConfig.pageId);
+    // }
 
     // 已保存的节点数据回显
     if (res.processDefinition?.length) {

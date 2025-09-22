@@ -30,7 +30,7 @@ export const DataUpdateNodeRegistry: FlowNodeRegistry = {
   onAdd(ctx, from) {
     return {
       id: `dataUpdate_${nanoid()}`,
-      type: 'dataUpdate',
+      type: NodeType.DATA_UPDATE,
       data: {
         title: '数据更新节点'
       }

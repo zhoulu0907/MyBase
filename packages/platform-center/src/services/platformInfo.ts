@@ -1,4 +1,4 @@
-import { PlatformInfoReq } from '../types/platformInfo';
+import { CreateLicenseFileReq, PlatformInfoReq } from '../types/platformInfo';
 import { systemService } from './clients';
 
 // 获取平台信息
@@ -19,3 +19,8 @@ export const uploadPlatformLicenseApi = (data: any) => systemService.post('/lice
 export const downloadPlatformLicenseApi = (id: number = 1) => {
   return systemService.get(`/license/export?id=${id}`)
 }
+
+// 创建凭证文件
+export const createLicenseFileApi = (data: CreateLicenseFileReq) => systemService.post('/license/createLicenseFile', data, {
+  responseType: 'blob'
+})

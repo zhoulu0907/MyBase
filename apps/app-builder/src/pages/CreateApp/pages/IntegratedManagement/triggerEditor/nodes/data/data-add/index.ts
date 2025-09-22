@@ -30,7 +30,7 @@ export const DataAddNodeRegistry: FlowNodeRegistry = {
   onAdd(ctx, from) {
     return {
       id: `dataAdd_${nanoid()}`,
-      type: 'dataAdd',
+      type: NodeType.DATA_ADD,
       data: {
         title: '数据新增节点'
       }

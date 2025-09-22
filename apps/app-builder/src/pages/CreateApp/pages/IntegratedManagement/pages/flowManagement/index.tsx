@@ -222,7 +222,7 @@ const FlowManagementPage: React.FC = () => {
       { label: '时间触发', value: TriggerType.TIME },
       { label: '日期字段触发', value: TriggerType.DATE_FIELD },
       { label: 'API触发', value: TriggerType.API },
-      { label: '子流程触发', value: TriggerType.BPM }
+      // { label: '子流程触发', value: TriggerType.BPM }
     ];
   };
 
