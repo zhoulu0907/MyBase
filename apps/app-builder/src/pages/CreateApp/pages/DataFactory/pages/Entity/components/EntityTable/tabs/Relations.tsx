@@ -141,7 +141,7 @@ const Relations: React.FC<RelationsProps> = ({ entity, activeTab }) => {
       };
       const response = await getEntityRelations(params);
       console.log('getEntityRelations', response);
-      if (response?.list?.length > 0) {
+      if (response?.list) {
         setRelations(response.list);
         setTotal(response.total || 0);
       }

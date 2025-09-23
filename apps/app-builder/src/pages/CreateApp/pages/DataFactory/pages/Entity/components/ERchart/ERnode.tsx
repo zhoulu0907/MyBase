@@ -249,7 +249,7 @@ const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
       </div>
 
       {/* 节点底部 */}
-      <div className={styles['node-footer']}>
+      <div id="node-footer">
         <Button type="text" onClick={handleAddField} className={styles['node-footer-button']}>
           字段配置
         </Button>
