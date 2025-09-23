@@ -18,12 +18,14 @@ import {
   getComponentWidth,
   PreviewRender,
   startLoadPageSet,
+  STATUS_OPTIONS,
+  STATUS_VALUES,
   useFormEditorSignal,
   useListEditorSignal,
   type GridItem
 } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
-import React, { useEffect, useState } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import styles from './index.module.less';
 
 interface PreviewProps {
@@ -198,43 +200,49 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime }) => {
       <div className={styles.content}>
         {pageType === EDITOR_TYPES.LIST_EDITOR &&
           listComponents.value.map((cp: GridItem) => (
-            <div
-              key={cp.id}
-              className={styles.componentItem}
-              style={{
-                width: getComponentWidth(listPageComponentSchemas.value[cp.id], cp.type)
-              }}
-            >
-              <PreviewRender
-                cpId={cp.id}
-                cpType={cp.type}
-                pageComponentSchema={listPageComponentSchemas.value[cp.id]}
-                runtime={runtime}
-                toCreatePage={toCreatePage}
-              />
-            </div>
+            <Fragment key={cp.id}>
+              {listPageComponentSchemas.value[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] &&
+                <div
+                  key={cp.id}
+                  className={styles.componentItem}
+                  style={{
+                    width: getComponentWidth(listPageComponentSchemas.value[cp.id], cp.type)
+                  }}
+                >
+                  <PreviewRender
+                    cpId={cp.id}
+                    cpType={cp.type}
+                    pageComponentSchema={listPageComponentSchemas.value[cp.id]}
+                    runtime={runtime}
+                    toCreatePage={toCreatePage}
+                  />
+                </div>}
+            </Fragment>
           ))}
 
         {pageType == EDITOR_TYPES.FORM_EDITOR && (
           <Form layout="inline" form={form}>
             {formComponents.value.map((cp: GridItem) => (
-              <div
-                key={cp.id}
-                className={styles.componentItem}
-                style={{
-                  width: getComponentWidth(formPageComponentSchemas.value[cp.id], cp.type)
-                }}
-              >
-                <PreviewRender
-                  cpId={cp.id}
-                  cpType={cp.type}
-                  pageComponentSchema={formPageComponentSchemas.value[cp.id]}
-                  runtime={true}
-                  toCreatePage={() => {
-                    setPageType(EDITOR_TYPES.FORM_EDITOR);
-                  }}
-                />
-              </div>
+              <Fragment key={cp.id}>
+                {formPageComponentSchemas.value[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] &&
+                  <div
+                    key={cp.id}
+                    className={styles.componentItem}
+                    style={{
+                      width: getComponentWidth(formPageComponentSchemas.value[cp.id], cp.type)
+                    }}
+                  >
+                    <PreviewRender
+                      cpId={cp.id}
+                      cpType={cp.type}
+                      pageComponentSchema={formPageComponentSchemas.value[cp.id]}
+                      runtime={true}
+                      toCreatePage={() => {
+                        setPageType(EDITOR_TYPES.FORM_EDITOR);
+                      }}
+                    />
+                  </div>}
+              </Fragment>
             ))}
 
             <div className={styles.footer}>
