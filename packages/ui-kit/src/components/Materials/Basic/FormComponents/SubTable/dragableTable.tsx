@@ -30,6 +30,7 @@ const DragableTable = (props: IProps) => {
   useSignals();
 
   const {
+    curComponentID,
     setCurComponentID,
     setCurComponentSchema,
     pageComponentSchemas,
@@ -211,9 +212,9 @@ const DragableTable = (props: IProps) => {
     };
 
     setCurComponentID(cpID);
+    setSelectedColumnId(cpID);
     setCurComponentSchema(props);
     setPageComponentSchemas(cpID, props);
-    setSelectedColumnId(cpID === selectedColumnId ? null : cpID);
   };
 
   // 获取列的位置和宽度
@@ -501,7 +502,7 @@ const DragableTable = (props: IProps) => {
             </table>
 
             {/* 选中列边框覆盖层 */}
-            {selectedColumnInfo && (
+            {selectedColumnInfo && curComponentID === selectedColumnId && (
               <div className='hoverColumn'
                 style={{
                   position: 'absolute',
