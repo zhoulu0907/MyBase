@@ -34,6 +34,8 @@ public interface GlobalErrorCodeConstants {
     ErrorCode LICENSE_IS_EXPIRED    = new ErrorCode(505, "凭证已过期");
     ErrorCode LICENSE_GET_ERROR     = new ErrorCode(505, "获取凭证失败");
 
+    ErrorCode APP_PERM_CHECK_ERROR     = new ErrorCode(506, "应用权限校验异常");
+
 
     // ========== 自定义错误段 ==========
     ErrorCode REPEATED_REQUESTS = new ErrorCode(900, "重复请求，请稍后重试"); // 重复请求

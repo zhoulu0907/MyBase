@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.metadata.api.entity.dto;
+package com.cmsr.onebase.module.metadata.api.datamethod.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;

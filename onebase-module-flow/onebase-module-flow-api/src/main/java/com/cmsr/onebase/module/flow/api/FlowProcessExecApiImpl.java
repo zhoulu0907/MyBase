@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * @Author：huangjie
@@ -37,12 +36,21 @@ public class FlowProcessExecApiImpl implements FlowProcessExecApi {
 
     @Override
     public EntityTriggerRespDTO entityTrigger(EntityTriggerReqDTO entityTriggerReqDTO) {
-        Optional<StartEntityNodeData> nodeDataOptional = graphFlowCache.getStartEntityNodeData(entityTriggerReqDTO.getEntityId());
-        if (!nodeDataOptional.isPresent()) {
+        List<StartEntityNodeData> entityNodeDataList = graphFlowCache.getStartEntityNodeData(entityTriggerReqDTO.getEntityId());
+        if (CollectionUtils.isEmpty(entityNodeDataList)) {
             return EntityTriggerRespDTO.SUCCESS;
         }
+        for (StartEntityNodeData startEntityNodeData : entityNodeDataList) {
+            EntityTriggerRespDTO entityTriggerRespDTO = entityTrigger(entityTriggerReqDTO, startEntityNodeData);
+            if (!entityTriggerRespDTO.isSuccess()) {
+                return entityTriggerRespDTO;
+            }
+        }
+        return EntityTriggerRespDTO.SUCCESS;
+    }
+
+    private EntityTriggerRespDTO entityTrigger(EntityTriggerReqDTO entityTriggerReqDTO, StartEntityNodeData startEntityNodeData) {
         try {
-            StartEntityNodeData startEntityNodeData = nodeDataOptional.get();
             if (!triggerEventContains(startEntityNodeData.getTriggerEvents(), entityTriggerReqDTO.getTriggerEvent())) {
                 return EntityTriggerRespDTO.SUCCESS;
             }
@@ -60,11 +68,10 @@ public class FlowProcessExecApiImpl implements FlowProcessExecApi {
             flowProcessExecutor.execute(startEntityNodeData.getProcessId(), entityTriggerReqDTO.getFieldData());
             return EntityTriggerRespDTO.SUCCESS;
         } catch (Exception e) {
-            log.error("entityTrigger failed, {}, {}", nodeDataOptional, entityTriggerReqDTO, e);
+            log.error("entityTrigger failed, {}, {}", entityTriggerReqDTO, startEntityNodeData, e);
             return new EntityTriggerRespDTO(false, e);
         }
     }
-
 
     /**
      * 检查 triggerEvents 列表是否包含 triggerEvent 的名称（忽略大小写）

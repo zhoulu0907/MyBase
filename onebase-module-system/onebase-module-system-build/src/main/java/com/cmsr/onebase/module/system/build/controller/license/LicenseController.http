@@ -41,4 +41,12 @@ Content-Type: application/json
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
-{"expireTime":1764547308000,"tenantLimit":"300","userLimit":"500"}
+{
+  "enterpriseName": "上海移动有限公司",
+  "enterpriseCode": "F200090910001",
+  "enterpriseAddress": "上海市浦东金桥开发区",
+  "platformType": "私有化部署",
+  "expireTime": 1764547308000,
+  "tenantLimit": "3000",
+  "userLimit": "1000"
+}

@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.system.service.license.impl;
 
+import com.cmsr.onebase.framework.common.exception.enums.GlobalErrorCodeConstants;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
@@ -19,11 +20,14 @@ import org.anyline.data.param.init.DefaultConfigStore;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
@@ -52,10 +56,6 @@ public class LicenseServiceImpl implements LicenseService {
     @Resource
     private StringRedisTemplate stringRedisTemplate;
 
-    private static final String ENTER_PRISE_NAME = "上海移动有限公司";
-    private static final String ENTERP_RISE_CODE = "F200090910001";
-    private static final String ENTERP_RISE_ADDRESS = "上海市浦东金桥开发区";
-    private static final String PLATFORM_TYPE = "私有化部署";
     /**
      * 创建License
      *
@@ -78,10 +78,6 @@ public class LicenseServiceImpl implements LicenseService {
     public void createLicenseFile(LicenseSaveReqVO reqVO, HttpServletResponse response) {
 
         try {
-            reqVO.setEnterpriseName(ENTER_PRISE_NAME);
-            reqVO.setEnterpriseCode(ENTERP_RISE_CODE);
-            reqVO.setEnterpriseAddress(ENTERP_RISE_ADDRESS);
-            reqVO.setPlatformType(PLATFORM_TYPE);
             // 设置响应头，返回加密文件
             response.setContentType("application/octet-stream");
             response.setCharacterEncoding("UTF-8");
@@ -182,6 +178,7 @@ public class LicenseServiceImpl implements LicenseService {
     }
 
     @Override
+    @Transactional
     public Long importLicense(MultipartFile file) {
 
         try {
@@ -209,6 +206,15 @@ public class LicenseServiceImpl implements LicenseService {
             }
             // 在插入新的 License
             LicenseSaveReqVO licenseSaveReqVO = JsonUtils.parseObject(decryptedContent, LicenseSaveReqVO.class);
+            LocalDateTime expireTime = licenseSaveReqVO.getExpireTime();
+            if (expireTime.isBefore(LocalDateTime.now())) {
+                // 定义时间格式
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                // 转换为指定格式的字符串
+                String formattedTime = expireTime.format(formatter);
+                log.error("License 过期：{}", formattedTime);
+                throw exception(GlobalErrorCodeConstants.LICENSE_IS_EXPIRED);
+            }
             licenseSaveReqVO.setLicenseFile(encryptedContent);
             // 创建License时，将状态设置为ENABLE
             licenseSaveReqVO.setStatus(LicenseStatusEnum.ENABLE.getStatus());

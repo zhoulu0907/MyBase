@@ -16,6 +16,6 @@ public class AuthDetailDataPermissionVO {
     @Schema(description = "数据访问权限")
     private List<AuthDataGroupVO> authDataGroups;
 
-    private List<AuthFieldInfoVO> fieldInfo;
+    //private List<AuthFieldInfoVO> fieldInfo;
 
 }
