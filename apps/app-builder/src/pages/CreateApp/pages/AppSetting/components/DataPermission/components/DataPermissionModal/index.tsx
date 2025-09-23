@@ -13,7 +13,8 @@ import {
   type GetDeptUserReq,
   type Condition,
   type ConfitionField,
-  type EntityFieldValidationTypes
+  type EntityFieldValidationTypes,
+  type ScopeTypeOption
   // type RoleAddUserReq
 } from '@onebase/app';
 import { AddMembers } from '@onebase/common';
@@ -28,25 +29,15 @@ interface IProps {
   initialFormValues: AuthDataGroupVO;
   modalVisible: boolean;
   status: 'create' | 'edit';
-  appEntities: AppEntity[];
+  appEntity: AppEntity;
   dataPermissionPerson: AuthDataPermissionPersonVO[];
   appEntityFields: AppEntityField[];
   filterFieldCheckType: EntityFieldValidationTypes[];
-  changeEntity: (params: { entityId: string }) => void;
+  dataPermissionScope: ScopeTypeOption[];
   handleModalSubmit: (values: AuthDataGroupVO) => void;
   handleModalCancel: () => void;
+  // changeEntity: (params: { entityId: string }) => void;
 }
-
-const dataPermissionScope = [
-  { label: '本人', value: 'self' },
-  { label: '本人及下属员工', value: 'selfAndSubordinates' },
-  { label: '当前员工所在主部门', value: 'mainDepartment' },
-  { label: '当前员工所在主部门及下级部门', value: 'mainDepartmentAndSubs' },
-  { label: '指定部门', value: 'specifiedDepartment' },
-  { label: '指定人员', value: 'specifiedPerson' },
-  { label: '当前人员身份信息', value: 'identityInfo' },
-  { label: '全部', value: 'all' }
-];
 
 const DataPermissionModal = (props: IProps) => {
   const {
@@ -54,11 +45,11 @@ const DataPermissionModal = (props: IProps) => {
     initialFormValues,
     modalVisible,
     status,
-    appEntities,
+    appEntity,
     dataPermissionPerson,
     appEntityFields,
     filterFieldCheckType,
-    changeEntity,
+    dataPermissionScope,
     handleModalSubmit,
     handleModalCancel
   } = props;
@@ -70,7 +61,7 @@ const DataPermissionModal = (props: IProps) => {
   const [form] = Form.useForm();
   const Option = Select.Option;
 
-  const [entitySelected, setEntitySelected] = useState<boolean>(false);
+  // const [entitySelected, setEntitySelected] = useState<boolean>(false);
   const [checkAll, setCheckAll] = useState<boolean>(true);
   const [indeterminate, setIndeterminate] = useState<boolean>(false); // 操作权限
   const [dataFilters, setDataFilters] = useState<Array<AuthDataFilterVO[]>>(initialFormValues.dataFilters || []);
@@ -82,13 +73,7 @@ const DataPermissionModal = (props: IProps) => {
   const [memberLoading, setMemberLoading] = useState<boolean>(false);
   const [membersVisible, setMembersVisible] = useState<boolean>(false);
   const [deptData, setDeptData] = useState<any>();
-  const [selectedMembers, setSelectedMembers] = useState<any[]>(initialFormValues.scopeLevel?.assignIds || []);
-
-  useEffect(() => {
-    // 初始化时检查entity字段是否有值
-    const entityValue = form.getFieldValue('scopeFieldId');
-    setEntitySelected(!!entityValue);
-  }, [selectedMembers, scopeType, form]);
+  const [selectedMembers, setSelectedMembers] = useState<any[]>(initialFormValues.scopeValue || []);
 
   useEffect(() => {
     // 将 appEntityFields 转换为 ConditionField 格式
@@ -99,10 +84,6 @@ const DataPermissionModal = (props: IProps) => {
     }));
     setConditionFields(convertedFields);
 
-    // 将 dataFilters 转换为 Condition 格式
-    // 注意：这里需要根据实际业务逻辑进行转换
-    const convertedConditions: Condition[] = [];
-    // 这里只是示例，实际转换逻辑需要根据业务需求实现
     setDataFilters(dataFilters);
   }, [appEntityFields, dataFilters]);
   // 操作权限 全选反选
@@ -120,8 +101,6 @@ const DataPermissionModal = (props: IProps) => {
 
   // 数据过滤
   const changeDataFilters = (value: any[]) => {
-    // 将 Condition 格式转换回 AuthDataFilterVO[][] 格式
-    // 注意：这里需要根据实际业务逻辑进行转换
     setDataFilters(dataFilters);
     // 同时更新表单字段值
     form.setFieldValue('dataFilters', value);
@@ -172,19 +151,9 @@ const DataPermissionModal = (props: IProps) => {
     setSelectedMembers(scopeSpecified);
 
     console.log('setSelectedMembers:', scopeSpecified);
-    // 提取ID数组
+    // 提取ID数组并设置为scopeValue
     const ids = scopeSpecified.map((item) => item.key);
-    // 设置表单字段值
-    form.setFieldValue('scopeLevel.assignIds', ids);
-    // 获取当前scopeLevel的值
-    const currentScopeLevel = form.getFieldsValue().scopeLevel || {};
-    // 合并更新scopeLevel对象，保留现有属性
-    form.setFieldsValue({
-      scopeLevel: {
-        ...currentScopeLevel,
-        assignIds: ids
-      }
-    });
+    form.setFieldValue('scopeValue', ids);
     // 关闭弹窗
     setMembersVisible(false);
   };
@@ -195,28 +164,17 @@ const DataPermissionModal = (props: IProps) => {
     const newSelectedMembers = selectedMembers.filter((member) => member.key !== id);
     setSelectedMembers(newSelectedMembers);
 
-    // 同时更新表单字段值
-    const currentAssignIds = form.getFieldValue('scopeLevel.assignIds') || [];
-    const newAssignIds = currentAssignIds.filter((assignIds: string) => assignIds !== id);
-    form.setFieldValue('scopeLevel.assignIds', newAssignIds);
+    // 同时更新scopeValue字段
+    const newScopeValue = newSelectedMembers.map((member) => member.key);
+    form.setFieldValue('scopeValue', newScopeValue);
   };
 
   const handleUpdateSelectedMembers = (members: any[]) => {
     setSelectedMembers(members);
 
-    // 同时更新表单字段值
+    // 同时更新scopeValue字段
     const ids = members.map((item) => item.key);
-    form.setFieldValue('scopeLevel.assignIds', ids);
-
-    // 获取当前scopeLevel的值
-    const currentScopeLevel = form.getFieldsValue().scopeLevel || {};
-    // 合并更新scopeLevel对象，保留现有属性
-    form.setFieldsValue({
-      scopeLevel: {
-        ...currentScopeLevel,
-        assignIds: ids
-      }
-    });
+    form.setFieldValue('scopeValue', ids);
   };
 
   // 重置表单
@@ -265,10 +223,6 @@ const DataPermissionModal = (props: IProps) => {
           className={styles.dataPermissionForm}
           onValuesChange={(changedValues) => {
             console.log(`Form ${Object.keys(changedValues)} changeValues:`, changedValues);
-            // 当scopeFieldId字段值发生变化时，更新entitySelected状态
-            if (Object.prototype.hasOwnProperty.call(changedValues, 'scopeFieldId')) {
-              setEntitySelected(!!changedValues.scopeFieldId);
-            }
           }}
         >
           <FormItem field="groupName" label="权限组名称" rules={[{ required: true, message: '请输入权限组名称' }]}>
@@ -277,48 +231,19 @@ const DataPermissionModal = (props: IProps) => {
           <FormItem field="description" label="说明">
             <Input placeholder="请输入权限组说明" />
           </FormItem>
-          <FormItem field="scopeFieldId" label="业务实体" rules={[{ required: true, message: '请选择业务实体' }]}>
-            <Select
-              placeholder="请选择业务实体"
-              onChange={(value) => {
-                console.log('业务实体 change value:', value);
-                // 清空数据过滤条件
-                form.setFieldValue('dataFilters', []);
-                setDataFilters([]);
-                setConditionData([]);
-
-                // 清空权限范围相关字段
-                form.setFieldValue('scopeLevel.personId', undefined);
-                form.setFieldValue('scopeLevel.scopeType', undefined);
-                form.setFieldValue('scopeLevel.assignIds', []);
-                setScopeType('');
-                setSelectedMembers([]);
-
-                if (typeof changeEntity === 'function') {
-                  changeEntity({ entityId: value });
-                }
-              }}
-            >
-              {appEntities
-                .filter((appEntity: AppEntity) => appEntity.entityId)
-                .map((appEntity: AppEntity) => (
-                  <Option key={appEntity.entityId} value={appEntity.entityId || ''}>
-                    {appEntity.entityName}
-                  </Option>
-                ))}
-            </Select>
+          <FormItem label="业务实体" rules={[{ required: true, message: '请选择业务实体' }]}>
+            <Input value={appEntity?.entityName} readOnly />
           </FormItem>
           <FormItem label="权限范围" rules={[{ required: true, message: '请选择权限范围' }]}>
             <div className={styles.dataPermissionScope}>
               <div className={styles.scopeRow}>
                 <FormItem
-                  field="scopeLevel.personId"
+                  field="scopeFieldId"
                   className={styles.scopeRoles}
                   rules={[{ required: true, message: '请选择权限范围' }]}
                 >
                   <Select
                     placeholder="选择拥有者"
-                    disabled={!entitySelected}
                     onChange={(value) => {
                       console.log('选择拥有者 value:', value);
                     }}
@@ -334,16 +259,17 @@ const DataPermissionModal = (props: IProps) => {
                 </FormItem>
                 是
                 <FormItem
-                  field="scopeLevel.scopeType"
+                  field="scopeLevel"
                   className={styles.scopePerson}
                   rules={[{ required: true, message: '请选择权限范围' }]}
                 >
                   <Select
                     placeholder="本人"
-                    disabled={!entitySelected}
                     onChange={(value) => {
                       setScopeType(value);
                       setSelectedMembers([]);
+                      // 同时更新scopeValue字段
+                      form.setFieldValue('scopeValue', value);
                     }}
                   >
                     {dataPermissionScope.map((option) => (
@@ -356,7 +282,7 @@ const DataPermissionModal = (props: IProps) => {
               </div>
               {(scopeType === 'specifiedPerson' || scopeType === 'specifiedDepartment') && (
                 <div className={styles.scopeAssign}>
-                  <FormItem field="scopeLevel.assignIds" noStyle>
+                  <FormItem field="scopeValue" noStyle>
                     {selectedMembers && selectedMembers.length > 0 ? (
                       <div className={styles.assignIdTag}>
                         <div className={styles.tagContainer}>
