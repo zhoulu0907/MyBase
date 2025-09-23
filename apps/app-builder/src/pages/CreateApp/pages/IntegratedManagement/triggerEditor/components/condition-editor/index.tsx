@@ -335,9 +335,9 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
                                               )}
 
                                               {form.getFieldValue(item.field + '.operatorType') ==
-                                              (
+                                                FieldType.FORMULA && (
                                                 <Form.Item field={item.field + '.value'}>
-                                                  FieldType.FORMULA && <Input placeholder="请输入公式" />
+                                                  <Input placeholder="请输入公式" />
                                                 </Form.Item>
                                               )}
                                             </Grid.Col>
