@@ -11,6 +11,7 @@ import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.common.util.validation.ValidationUtils;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.infra.api.config.ConfigApi;
+import com.cmsr.onebase.module.system.enums.tenant.TenantCodeEnum;
 import com.cmsr.onebase.module.system.vo.auth.AuthRegisterReqVO;
 import com.cmsr.onebase.module.system.vo.user.UserProfileUpdatePasswordReqVO;
 import com.cmsr.onebase.module.system.vo.user.UserProfileUpdateReqVO;
@@ -106,12 +107,14 @@ public class AdminUserServiceImpl implements AdminUserService {
         if (createReqVO.getStatus() == CommonStatusEnum.ENABLE.getStatus()) {
             // 1.1 校验账户配合
             tenantService.handleTenantInfo(tenant -> {
-
-                long count = adminUserDataRepository.countByConfig(new DefaultConfigStore().eq(AdminUserDO.STATUS,
-                        UserStatusEnum.NORMAL.getStatus()));
-                log.info(" count user four tenant, count={}", count);
-                if (count >= tenant.getAccountCount()) {
-                    throw exception(USER_COUNT_MAX, tenant.getAccountCount());
+                // 如果用户的租户不是平台租户，则校验租户用户最大限额
+                if (!tenant.getTenantCode().equals(TenantCodeEnum.PLATFORM_TENANT.getCode())) {
+                    long count = adminUserDataRepository.countByConfig(new DefaultConfigStore().eq(AdminUserDO.STATUS,
+                            UserStatusEnum.NORMAL.getStatus()));
+                    log.info(" count user four tenant, count={}", count);
+                    if (count >= tenant.getAccountCount()) {
+                        throw exception(USER_COUNT_MAX, tenant.getAccountCount());
+                    }
                 }
             });
         }
@@ -218,11 +221,14 @@ public class AdminUserServiceImpl implements AdminUserService {
             if (updateReqVO.getStatus() != oldUser.getStatus() && updateReqVO.getStatus() == CommonStatusEnum.ENABLE.getStatus()) {
                 // 1.1 校验账户配合
                 tenantService.handleTenantInfo(tenant -> {
-                    long count = adminUserDataRepository.countByConfig(new DefaultConfigStore().eq(AdminUserDO.STATUS,
-                            UserStatusEnum.NORMAL.getStatus()));
-                    log.info(" count user four tenant, count={}", count);
-                    if (count >= tenant.getAccountCount()) {
-                        throw exception(USER_COUNT_MAX, tenant.getAccountCount());
+                    // 如果用户的租户不是平台租户，则校验租户用户最大限额
+                    if (!tenant.getTenantCode().equals(TenantCodeEnum.PLATFORM_TENANT.getCode())) {
+                        long count = adminUserDataRepository.countByConfig(new DefaultConfigStore().eq(AdminUserDO.STATUS,
+                                UserStatusEnum.NORMAL.getStatus()));
+                        log.info(" count user four tenant, count={}", count);
+                        if (count >= tenant.getAccountCount()) {
+                            throw exception(USER_COUNT_MAX, tenant.getAccountCount());
+                        }
                     }
                 });
             }
