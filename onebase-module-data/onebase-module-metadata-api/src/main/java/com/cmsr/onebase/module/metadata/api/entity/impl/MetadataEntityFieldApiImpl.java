@@ -7,7 +7,10 @@ import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldDataReqDTO;
 import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldDataRespDTO;
 import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldJdbcTypeReqDTO;
 import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldJdbcTypeRespDTO;
+import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusinessEntityDO;
+import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataEntityFieldCoreService;
+import com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEntityCoreService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Service;
@@ -29,10 +32,88 @@ public class MetadataEntityFieldApiImpl implements MetadataEntityFieldApi {
     @Resource
     private MetadataEntityFieldCoreService metadataEntityFieldService;
 
+    @Resource
+    private MetadataBusinessEntityCoreService metadataBusinessEntityCoreService;
+
     @Override
     public List<EntityFieldRespDTO> getEntityFieldList(@Valid @RequestBody EntityFieldQueryReqDTO reqDTO) {
-        // TODO: 这里需要实现查询逻辑，包括DO到DTO的转换
-        throw new UnsupportedOperationException("此方法需要在后续实现");
+        Long entityId = reqDTO.getEntityId();
+        List<MetadataEntityFieldDO> fields = metadataEntityFieldService.getEntityFieldListByEntityId(entityId);
+        if (fields == null || fields.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        // 预取实体信息，用于补充 entityDisplayName 与 tableName
+        MetadataBusinessEntityDO entity = metadataBusinessEntityCoreService.getBusinessEntity(entityId);
+        String entityDisplayName = entity != null ? entity.getDisplayName() : null;
+        String tableName = entity != null ? entity.getTableName() : null;
+
+        // 按请求条件过滤（与 build 层保持语义一致的简化实现）
+        List<MetadataEntityFieldDO> filtered = new ArrayList<>();
+        for (MetadataEntityFieldDO f : fields) {
+            // isSystemField 过滤
+            if (reqDTO.getIsSystemField() != null) {
+                Integer sys = f.getIsSystemField();
+                if (sys == null || !reqDTO.getIsSystemField().equals(sys)) {
+                    continue;
+                }
+            }
+            // keyword 模糊匹配 field_name 或 display_name
+            if (reqDTO.getKeyword() != null && !reqDTO.getKeyword().trim().isEmpty()) {
+                String kw = reqDTO.getKeyword().trim().toLowerCase();
+                String name = f.getFieldName() != null ? f.getFieldName().toLowerCase() : "";
+                String dname = f.getDisplayName() != null ? f.getDisplayName().toLowerCase() : "";
+                if (!(name.contains(kw) || dname.contains(kw))) {
+                    continue;
+                }
+            }
+            // fieldCode 模糊匹配
+            if (reqDTO.getFieldCode() != null && !reqDTO.getFieldCode().trim().isEmpty()) {
+                String codeFilter = reqDTO.getFieldCode().trim().toLowerCase();
+                String code = f.getFieldCode() != null ? f.getFieldCode().toLowerCase() : "";
+                if (!code.contains(codeFilter)) {
+                    continue;
+                }
+            }
+            // isPerson=1 时，仅保留人员字段（字段类型 USER）
+            if (reqDTO.getIsPerson() != null && reqDTO.getIsPerson() == 1) {
+                String type = f.getFieldType();
+                if (type == null || !"USER".equalsIgnoreCase(type)) {
+                    continue;
+                }
+            }
+
+            filtered.add(f);
+        }
+
+        // DO -> DTO 映射，并补充 entityDisplayName 与 tableName
+        List<EntityFieldRespDTO> result = new ArrayList<>(filtered.size());
+        for (MetadataEntityFieldDO f : filtered) {
+            EntityFieldRespDTO dto = new EntityFieldRespDTO();
+            dto.setId(f.getId());
+            dto.setEntityId(f.getEntityId());
+            dto.setEntityDisplayName(entityDisplayName);
+            dto.setTableName(tableName);
+            dto.setFieldName(f.getFieldName());
+            dto.setDisplayName(f.getDisplayName());
+            dto.setFieldType(f.getFieldType());
+            dto.setDecimalPlaces(f.getDecimalPlaces());
+            dto.setDefaultValue(f.getDefaultValue());
+            dto.setDescription(f.getDescription());
+            dto.setIsRequired(f.getIsRequired());
+            dto.setIsUnique(f.getIsUnique());
+            dto.setIsSystemField(f.getIsSystemField());
+            dto.setIsPrimaryKey(f.getIsPrimaryKey());
+            dto.setSortOrder(f.getSortOrder());
+            dto.setFieldCode(f.getFieldCode());
+            dto.setRunMode(f.getRunMode());
+            dto.setAppId(f.getAppId());
+            dto.setCreateTime(f.getCreateTime());
+            dto.setUpdateTime(f.getUpdateTime());
+            result.add(dto);
+        }
+
+        return result;
     }
 
     @Override
@@ -59,9 +140,4 @@ public class MetadataEntityFieldApiImpl implements MetadataEntityFieldApi {
         return result;
     }
 
-    @Override
-    public List<EntityFieldDataRespDTO> getDataByCondition(@Valid EntityFieldDataReqDTO reqDTO) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getDataByCondition'");
-    }
 }
