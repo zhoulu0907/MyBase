@@ -74,7 +74,8 @@ export enum DATA_SOURCE_TYPE {
   FORM = 1, // 主表
   SUBFORM = 2, // 子表
   DATA_NODE = 3, // 数据节点
-  ASSOCIA_FORM = 4 // 关联表
+  ASSOCIA_FORM = 4, // 关联表
+  LOOP = 5 // 循环体
 }
 
 // 查询规则  全部数据、按条件过滤
