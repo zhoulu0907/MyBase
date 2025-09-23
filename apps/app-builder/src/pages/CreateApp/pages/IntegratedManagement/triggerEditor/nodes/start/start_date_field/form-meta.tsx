@@ -43,6 +43,8 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   }, []);
 
   useEffect(() => {
+    console.log('entityId: ', entityId);
+
     if (entityId) {
       handleGetEntityFieldsById(entityId);
       getEntityFieldList(entityId, setConditionFields, setValidationTypes);
@@ -169,17 +171,16 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                 </Form.Item>
               </Grid.Col>
             </Grid.Row>
+            <Grid.Row>
+              <ConditionEditor
+                label="匹配规则"
+                required
+                fields={conditionFields}
+                entityFieldValidationTypes={validationTypes}
+                form={payloadForm}
+              />
+            </Grid.Row>
           </Form>
-
-          {validationTypes && (
-            <ConditionEditor
-              label="匹配规则"
-              required
-              fields={conditionFields}
-              entityFieldValidationTypes={validationTypes}
-              form={payloadForm}
-            />
-          )}
         </FormContent>
       ) : (
         <FormContent>
