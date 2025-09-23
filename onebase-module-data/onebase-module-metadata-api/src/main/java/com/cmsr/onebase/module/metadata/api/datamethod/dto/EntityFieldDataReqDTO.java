@@ -1,5 +1,7 @@
 package com.cmsr.onebase.module.metadata.api.datamethod.dto;
 
+import java.util.List;
+
 import lombok.Data;
 
 @Data
@@ -15,7 +17,7 @@ public class EntityFieldDataReqDTO {
     /**
      * 排序信息
      */
-    private OrderDto orderDto;
+    private List<OrderDto> orderDtos;
     /**
      * 查询数量 用于拼接 limit
      */
