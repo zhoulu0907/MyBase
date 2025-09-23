@@ -63,7 +63,7 @@ public class ValidationUniqueController {
         return success(uniqueService.getById(id));
     }
 
-    @DeleteMapping("/delete")
+    @PostMapping("/delete")
     @Operation(summary = "按主键ID删除唯一性校验")
     @Parameter(name = "id", description = "唯一性校验规则主键ID", required = true)
     @PreAuthorize("@ss.hasPermission('metadata:validation-unique:delete')")

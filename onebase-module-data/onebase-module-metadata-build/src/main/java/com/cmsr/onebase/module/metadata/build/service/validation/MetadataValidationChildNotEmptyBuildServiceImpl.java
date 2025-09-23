@@ -56,7 +56,16 @@ public class MetadataValidationChildNotEmptyBuildServiceImpl implements Metadata
     public ValidationChildNotEmptyRespVO getById(Long id) {
         MetadataValidationChildNotEmptyDO validationDO = childNotEmptyRepository.findById(id);
         if (validationDO == null) {
-            return null;
+            var group = ruleGroupService.getValidationRuleGroup(id);
+            if (group != null) {
+                var list = childNotEmptyRepository.findByGroupId(group.getId());
+                if (!list.isEmpty()) {
+                    validationDO = list.get(0);
+                }
+            }
+            if (validationDO == null) {
+                return null;
+            }
         }
 
         // 转换为 VO
@@ -103,12 +112,22 @@ public class MetadataValidationChildNotEmptyBuildServiceImpl implements Metadata
             throw new IllegalStateException("该字段已存在子表非空校验规则，同一字段只能有一条子表非空校验规则");
         }
 
-        // 处理规则组：先查找，不存在则创建
-        Long groupId;
+        // 处理规则组：先查找，不存在则创建；存在但已被其他字段复用则新建
+        Long groupId = null;
         var existingGroup = ruleGroupService.getByName(vo.getRgName());
+        boolean needCreateGroup = false;
         if (existingGroup != null) {
-            groupId = existingGroup.getId();
+            var groupList = childNotEmptyRepository.findByGroupId(existingGroup.getId());
+            boolean reused = groupList.stream().anyMatch(u -> !u.getFieldId().equals(vo.getFieldId()));
+            if (reused) {
+                needCreateGroup = true;
+            } else {
+                groupId = existingGroup.getId();
+            }
         } else {
+            needCreateGroup = true;
+        }
+        if (needCreateGroup) {
             // 创建新的规则组
             ValidationRuleGroupSaveReqVO groupVO = new ValidationRuleGroupSaveReqVO();
             groupVO.setRgName(vo.getRgName());
@@ -150,24 +169,34 @@ public class MetadataValidationChildNotEmptyBuildServiceImpl implements Metadata
         MetadataEntityFieldDO field = entityFieldService.getEntityField(String.valueOf(existing.getFieldId()));
         Assert.notNull(field, "字段不存在");
 
-        // 处理规则组：先查找，不存在则创建
-        Long groupId;
+        // 处理规则组：先查找，不存在则创建；若存在但被其他字段复用，则新建
+        Long groupId = null;
         var existingGroup = ruleGroupService.getByName(vo.getRgName());
+        boolean needCreateGroup = false;
         if (existingGroup != null) {
-            groupId = existingGroup.getId();
+            var groupList = childNotEmptyRepository.findByGroupId(existingGroup.getId());
+            boolean reused = groupList.stream().anyMatch(u -> !u.getFieldId().equals(existing.getFieldId()));
+            if (reused) {
+                needCreateGroup = true;
+            } else {
+                groupId = existingGroup.getId();
+            }
         } else {
-            // 创建新的规则组
+            needCreateGroup = true;
+        }
+        if (needCreateGroup) {
             ValidationRuleGroupSaveReqVO groupVO = new ValidationRuleGroupSaveReqVO();
             groupVO.setRgName(vo.getRgName());
             groupVO.setRgDesc("自动创建的规则组：" + vo.getRgName());
             groupVO.setRgStatus(StatusEnumUtil.ACTIVE);
-            // 透传可选的组级提示配置
             groupVO.setValMethod(vo.getValMethod());
             groupVO.setPopPrompt(vo.getPopPrompt());
             groupVO.setPopType(vo.getPopType());
             groupVO.setValidationType("CHILD_NOT_EMPTY");
+            groupVO.setEntityId(field.getEntityId());
             groupId = ruleGroupService.createValidationRuleGroup(groupVO);
         }
+        Assert.notNull(groupId, "规则组ID未正确生成");
 
         // 将 VO 转换为 DO 并设置必要字段
         MetadataValidationChildNotEmptyDO updateObj = BeanUtils.toBean(vo, MetadataValidationChildNotEmptyDO.class);

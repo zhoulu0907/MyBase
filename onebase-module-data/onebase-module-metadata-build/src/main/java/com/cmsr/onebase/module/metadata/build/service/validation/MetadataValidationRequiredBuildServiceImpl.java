@@ -81,7 +81,14 @@ public class MetadataValidationRequiredBuildServiceImpl implements MetadataValid
         // 处理规则组：先查找，不存在则创建
         Long groupId;
         MetadataValidationRuleGroupDO existingGroup = validationRuleGroupService.getByName(vo.getRgName());
+        boolean canReuse = false;
         if (existingGroup != null) {
+            var groupRequiredList = requiredRepository.findByGroupId(existingGroup.getId());
+            if (groupRequiredList.isEmpty() || (groupRequiredList.size() == 1 && groupRequiredList.get(0).getFieldId().equals(vo.getFieldId()))) {
+                canReuse = true;
+            }
+        }
+        if (existingGroup != null && canReuse) {
             groupId = existingGroup.getId();
         } else {
             // 创建新的规则组
@@ -156,7 +163,16 @@ public class MetadataValidationRequiredBuildServiceImpl implements MetadataValid
     public ValidationRequiredRespVO getById(Long id) {
         MetadataValidationRequiredDO requiredDO = requiredRepository.findById(id);
         if (requiredDO == null) {
-            return null;
+            var group = validationRuleGroupService.getValidationRuleGroup(id);
+            if (group != null) {
+                var list = requiredRepository.findByGroupId(group.getId());
+                if (!list.isEmpty()) {
+                    requiredDO = list.get(0);
+                }
+            }
+            if (requiredDO == null) {
+                return null;
+            }
         }
 
         // 转换DO为VO

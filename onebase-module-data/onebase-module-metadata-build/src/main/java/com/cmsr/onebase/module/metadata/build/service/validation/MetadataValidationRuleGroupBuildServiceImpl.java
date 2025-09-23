@@ -220,6 +220,11 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
             group.setRgName(rgName);
             group.setRgDesc("字段" + fieldId + "的规则组");
             group.setRgStatus(StatusEnumUtil.ACTIVE);
+            // 同步entityId
+            var fieldDO = entityFieldRepository.findById(fieldId);
+            if (fieldDO != null) {
+                group.setEntityId(fieldDO.getEntityId());
+            }
             // 设置校验类型和提示信息（如果提供）
             if (validationType != null) {
                 group.setValidationType(validationType);

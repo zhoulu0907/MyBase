@@ -75,10 +75,18 @@ public class MetadataValidationLengthBuildServiceImpl implements MetadataValidat
             throw new IllegalStateException("该字段已存在长度校验规则，同一字段只能有一条长度校验规则");
         }
 
-        // 处理规则组：先查找，不存在则创建
+        // 处理规则组：先查找，不存在则创建，且禁止不同字段复用同一group_id
         Long groupId;
         var existingGroup = ruleGroupService.getByName(vo.getRgName());
+        boolean canReuse = false;
         if (existingGroup != null) {
+            // 检查该group_id下是否已存在其他字段的长度校验
+            var groupLengthList = lengthRepository.findByGroupId(existingGroup.getId());
+            if (groupLengthList.isEmpty() || (groupLengthList.size() == 1 && groupLengthList.get(0).getFieldId().equals(vo.getFieldId()))) {
+                canReuse = true;
+            }
+        }
+        if (existingGroup != null && canReuse) {
             groupId = existingGroup.getId();
         } else {
             // 创建新的规则组
@@ -122,10 +130,17 @@ public class MetadataValidationLengthBuildServiceImpl implements MetadataValidat
         MetadataEntityFieldDO entityFieldDO = entityFieldService.getEntityField(String.valueOf(existingDO.getFieldId()));
         Assert.notNull(entityFieldDO, "字段不存在");
 
-        // 处理规则组：先查找，不存在则创建
+        // 处理规则组：先查找，不存在则创建，且禁止不同字段复用同一group_id
         Long groupId;
         var existingGroup = ruleGroupService.getByName(reqVO.getRgName());
+        boolean canReuse = false;
         if (existingGroup != null) {
+            var groupLengthList = lengthRepository.findByGroupId(existingGroup.getId());
+            if (groupLengthList.isEmpty() || (groupLengthList.size() == 1 && groupLengthList.get(0).getFieldId().equals(existingDO.getFieldId()))) {
+                canReuse = true;
+            }
+        }
+        if (existingGroup != null && canReuse) {
             groupId = existingGroup.getId();
         } else {
             // 创建新的规则组
@@ -138,6 +153,7 @@ public class MetadataValidationLengthBuildServiceImpl implements MetadataValidat
             groupVO.setPopPrompt(reqVO.getPopPrompt());
             groupVO.setPopType(reqVO.getPopType());
             groupVO.setValidationType("LENGTH");
+            groupVO.setEntityId(entityFieldDO.getEntityId());
             groupId = ruleGroupService.createValidationRuleGroup(groupVO);
         }
 
@@ -177,9 +193,21 @@ public class MetadataValidationLengthBuildServiceImpl implements MetadataValidat
 
     @Override
     public ValidationLengthRespVO getById(Long id) {
+        // 先按规则ID查询
         MetadataValidationLengthDO lengthDO = lengthRepository.findById(id);
+
+        // 若未查到，则将入参视为规则组ID：先查组，再用 groupId 查规则
         if (lengthDO == null) {
-            return null;
+            var group = ruleGroupService.getValidationRuleGroup(id);
+            if (group != null) {
+                List<MetadataValidationLengthDO> list = lengthRepository.findByGroupId(group.getId());
+                if (!list.isEmpty()) {
+                    lengthDO = list.get(0);
+                }
+            }
+            if (lengthDO == null) {
+                return null;
+            }
         }
 
         // 转换DO为VO
