@@ -11,11 +11,11 @@ import {
 import { getHashQueryParam } from '@onebase/common';
 import { ENTITY_FIELD_TYPE } from '@onebase/ui-kit';
 import { useEffect, useState } from 'react';
-import ConditionEditor from '../../components/condition-editor';
-import { FormContent, FormHeader, FormOutputs } from '../../form-components';
-import { useIsSidebar, useNodeRenderContext } from '../../hooks';
-import { type FlowNodeJSON } from '../../typings';
-import { getEntityFieldList } from '../utils';
+import ConditionEditor from '../../../components/condition-editor';
+import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
+import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
+import { type FlowNodeJSON } from '../../../typings';
+import { getEntityFieldList } from '../../utils';
 
 const Option = Select.Option;
 

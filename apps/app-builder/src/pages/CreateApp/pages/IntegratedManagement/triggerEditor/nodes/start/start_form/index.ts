@@ -1,11 +1,11 @@
 import iconStart from '@/assets/flow/icon-start.jpg';
-import { type FlowNodeRegistry } from '../../typings';
-import { NodeType } from '../const';
+import { type FlowNodeRegistry } from '../../../typings';
+import { NodeType } from '../../const';
 import { formMeta } from './form-meta';
 
-export const StartApiNodeRegistry: FlowNodeRegistry = {
-  type: NodeType.START_API,
-  title: 'API触发节点',
+export const StartFormNodeRegistry: FlowNodeRegistry = {
+  type: NodeType.START_FORM,
+  title: '界面交互触发节点',
   category: 'trigger',
   meta: {
     isStart: true, // Mark as start
@@ -18,7 +18,7 @@ export const StartApiNodeRegistry: FlowNodeRegistry = {
   },
   info: {
     icon: iconStart,
-    description: '这是API触发节点，用于设置启动工作流所需的信息。'
+    description: '这是界面交互触发节点，用于设置启动工作流所需的信息。'
   },
   /**
    * Render node via formMeta
