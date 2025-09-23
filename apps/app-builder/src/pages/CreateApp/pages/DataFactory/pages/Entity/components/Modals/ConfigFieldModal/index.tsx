@@ -6,9 +6,10 @@ import type { EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/inter
 import { batchSaveFields, getEntityFields, getEntityFieldsWithChildren } from '@onebase/app';
 import { ENTITY_FIELD_TYPE, FIELD_TYPE } from '@onebase/ui-kit';
 import React, { useEffect, useState } from 'react';
-import { ReactSortable } from 'react-sortablejs';
+// import { ReactSortable } from 'react-sortablejs';
 import FieldConfigPopover from './FieldConfigPopover';
 import TableColumns from './TableColumns';
+import SortableTable from './SortableTable';
 import styles from './index.module.less';
 import type { AutoNumberRule } from './types';
 
@@ -54,17 +55,17 @@ const FIELD_TYPES_NEED_CONFIG = [
 ];
 
 // 自定义表格行组件，支持拖拽
-const SortableTableRow = (props: any) => {
-  const { record, children, ...restProps } = props;
+// const SortableTableRow = (props: any) => {
+//   const { record, children, ...restProps } = props;
 
-  // 为可拖拽的行添加 data-id 属性
-  const rowProps = {
-    ...restProps,
-    'data-id': record.id
-  };
+//   // 为可拖拽的行添加 data-id 属性
+//   const rowProps = {
+//     ...restProps,
+//     'data-id': record.id
+//   };
 
-  return <tr {...rowProps}>{children}</tr>;
-};
+//   return <tr {...rowProps}>{children}</tr>;
+// };
 
 const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible, entity, successCallback }) => {
   const { curAppId } = useAppStore();
@@ -179,15 +180,15 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
 
   const handleSort = (newFields: FieldFormValues[]) => {
     console.log('handleSort', newFields);
-    const allFields = [...fields];
-    const visibleFields = newFields.map((field, index) => ({ ...field, sortOrder: index }));
+    // const allFields = [...fields];
+    // const visibleFields = newFields.map((field, index) => ({ ...field, sortOrder: index }));
 
-    setFields(
-      allFields.map((field) => {
-        const visibleField = visibleFields.find((vf) => vf.id === field.id);
-        return visibleField ? { ...field, sortOrder: visibleField.sortOrder } : field;
-      })
-    );
+    // setFields(
+    //   allFields.map((field) => {
+    //     const visibleField = visibleFields.find((vf) => vf.id === field.id);
+    //     return visibleField ? { ...field, sortOrder: visibleField.sortOrder } : field;
+    //   })
+    // );
   };
 
   const handleFinish = async () => {
@@ -328,7 +329,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
       style={{ width: 1400 }}
     >
       <div className={styles['field-config-container']}>
-        <ReactSortable
+        {/* <ReactSortable
           list={activeFields}
           setList={handleSort}
           animation={200}
@@ -350,7 +351,18 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
               }
             }}
           />
-        </ReactSortable>
+        </ReactSortable> */}
+
+        <SortableTable
+          data={activeFields}
+          columns={columns}
+          rowKey="id"
+          onSort={(newData) => {
+            setFields(newData);
+          }}
+          pagination={false}
+          disabledRowKeys={activeFields.filter((r) => r.isSystemField === FIELD_TYPE.SYSTEM).map((r) => r.id || '')}
+        />
 
         <div className={styles['add-field-section']}>
           <Button type="dashed" icon={<IconPlus />} onClick={addField} className={styles['add-field-button']}>

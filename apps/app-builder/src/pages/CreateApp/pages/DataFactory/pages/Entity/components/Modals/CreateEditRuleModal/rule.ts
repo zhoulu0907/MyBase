@@ -74,18 +74,29 @@ export const valueTypeOptions = [
   // { label: '系统字段', value: 'fixed' } //  后期放开
 ];
 
+// 校验类型常量
+export const VALIDATION_TYPES = {
+  REQUIRED: 'REQUIRED',
+  UNIQUE: 'UNIQUE',
+  LENGTH: 'LENGTH',
+  RANGE: 'RANGE',
+  FORMAT: 'FORMAT',
+  SUBTABLE_EMPTY: 'SUBTABLE_EMPTY',
+  CUSTOM: 'CUSTOM'
+} as const;
+
 // 校验类型选项
 export const validationTypeMap: Record<string, string> = {
-  REQUIRED: '必填校验',
-  unique: '唯一校验',
-  LENGTH: '长度校验',
-  RANGE: '范围校验',
-  FORMAT: '格式校验',
-  SUBTABLE_EMPTY: '子表空行校验',
-  CUSTOM: '自定义校验'
+  [VALIDATION_TYPES.REQUIRED]: '必填校验',
+  [VALIDATION_TYPES.UNIQUE]: '唯一校验',
+  [VALIDATION_TYPES.LENGTH]: '长度校验',
+  [VALIDATION_TYPES.RANGE]: '范围校验',
+  [VALIDATION_TYPES.FORMAT]: '格式校验',
+  [VALIDATION_TYPES.SUBTABLE_EMPTY]: '子表空行校验',
+  [VALIDATION_TYPES.CUSTOM]: '自定义校验'
 };
 
-export const validationTypeOptions = Object.entries(validationTypeMap).map(([key, value]) => ({
+export const validationTypeList = Object.entries(validationTypeMap).map(([key, value]) => ({
   label: value,
   value: key
 }));

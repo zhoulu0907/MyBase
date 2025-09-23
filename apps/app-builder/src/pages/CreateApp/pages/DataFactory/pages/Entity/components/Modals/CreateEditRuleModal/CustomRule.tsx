@@ -5,8 +5,9 @@ import { IconDelete, IconPlus } from '@arco-design/web-react/icon';
 import type { ConditionRow } from '@onebase/app';
 import { createRule, getEntityFieldsWithChildren } from '@onebase/app';
 import React, { useState } from 'react';
-import styles from '../modal.module.less';
 import { formatValidationTypeOptions, operatorOptions, valueTypeOptions } from './rule.ts';
+import ConditionEditor from '../../../../../../IntegratedManagement/triggerEditor/components/condition-editor/index.tsx';
+import styles from '../modal.module.less';
 
 interface RuleFormValues {
   validationType: string;
@@ -23,9 +24,16 @@ interface CreateRuleModalProps {
   setVisible: (visible: boolean) => void;
   entity: EntityListItem;
   successCallback: () => void;
+  editRule: Partial<RuleFormValues> | null;
 }
 
-const CreateCustomRule: React.FC<CreateRuleModalProps> = ({ visible, setVisible, successCallback, entity }) => {
+const CreateCustomRule: React.FC<CreateRuleModalProps> = ({
+  visible,
+  setVisible,
+  successCallback,
+  entity,
+  editRule
+}) => {
   const { curAppId } = useAppStore();
   const [form] = Form.useForm<RuleFormValues>();
   const [loading, setLoading] = useState(false);
@@ -191,7 +199,7 @@ const CreateCustomRule: React.FC<CreateRuleModalProps> = ({ visible, setVisible,
       okText="创建"
       cancelText="取消"
       confirmLoading={loading}
-      style={{ width: 800 }}
+      style={{ width: 610 }}
     >
       <Form form={form} layout="vertical" className={styles['rule-form']}>
         <Form.Item
@@ -216,7 +224,7 @@ const CreateCustomRule: React.FC<CreateRuleModalProps> = ({ visible, setVisible,
         </Form.Item> */}
 
         {/* 格式校验类型 - 条件显示 */}
-        <Form.Item noStyle shouldUpdate>
+        {/* <Form.Item noStyle shouldUpdate>
           {(values) => {
             if (values.validationType === 'format') {
               return (
@@ -235,10 +243,19 @@ const CreateCustomRule: React.FC<CreateRuleModalProps> = ({ visible, setVisible,
             }
             return null;
           }}
+        </Form.Item> */}
+
+        <Form.Item label="条件设置" field="valueRules">
+          <ConditionEditor
+            data={form.getFieldValue('valueRules') || []}
+            fields={leftFieldOptions}
+            entityFieldValidationTypes={[]}
+            onChange={(value) => form.setFieldValue('valueRules', value)}
+          />
         </Form.Item>
 
         {/* 条件设置 */}
-        <Form.Item noStyle shouldUpdate>
+        {/* <Form.Item noStyle shouldUpdate>
           {(values) => {
             if (isConditionSettingVisible()) {
               const valueRules = values.valueRules || [];
@@ -258,7 +275,6 @@ const CreateCustomRule: React.FC<CreateRuleModalProps> = ({ visible, setVisible,
                           {group.map((condition, conditionIndex) => (
                             <div key={conditionIndex} className={styles['condition-row']}>
                               <Space size="small" align="start">
-                                {/* 字段选择 */}
                                 <Select
                                   placeholder="请选择字段"
                                   value={condition.fieldId}
@@ -267,7 +283,6 @@ const CreateCustomRule: React.FC<CreateRuleModalProps> = ({ visible, setVisible,
                                   options={leftFieldOptions}
                                 />
 
-                                {/* 操作符 */}
                                 <Select
                                   placeholder="请选择操作符"
                                   value={condition.operator}
@@ -284,7 +299,6 @@ const CreateCustomRule: React.FC<CreateRuleModalProps> = ({ visible, setVisible,
                                   options={operatorOptions}
                                 />
 
-                                {/* 值类型 */}
                                 <Select
                                   placeholder="请选择值类型"
                                   value={condition.valueType}
@@ -295,8 +309,6 @@ const CreateCustomRule: React.FC<CreateRuleModalProps> = ({ visible, setVisible,
                                   options={valueTypeOptions}
                                 />
 
-                                {/* 值输入 */}
-                                {/* 静态值 */}
                                 {condition.valueType === 'custom' && (
                                   <Input
                                     placeholder="请输入值"
@@ -307,7 +319,7 @@ const CreateCustomRule: React.FC<CreateRuleModalProps> = ({ visible, setVisible,
                                     style={{ width: 150 }}
                                   />
                                 )}
-                                {/* 变量 */}
+
                                 {condition.valueType === 'fieldId' && (
                                   <Select
                                     placeholder="请选择字段"
@@ -320,7 +332,6 @@ const CreateCustomRule: React.FC<CreateRuleModalProps> = ({ visible, setVisible,
                                   />
                                 )}
 
-                                {/* 删除按钮 */}
                                 <Button
                                   type="text"
                                   status="danger"
@@ -333,7 +344,6 @@ const CreateCustomRule: React.FC<CreateRuleModalProps> = ({ visible, setVisible,
                             </div>
                           ))}
 
-                          {/* 添加AND条件按钮 */}
                           <div className={styles['add-condition-buttons']}>
                             <Button
                               type="dashed"
@@ -349,7 +359,6 @@ const CreateCustomRule: React.FC<CreateRuleModalProps> = ({ visible, setVisible,
                       </div>
                     ))}
 
-                    {/* 添加OR条件按钮 */}
                     <div className={styles['add-or-button-container']}>
                       <Button
                         type="dashed"
@@ -367,7 +376,7 @@ const CreateCustomRule: React.FC<CreateRuleModalProps> = ({ visible, setVisible,
             }
             return null;
           }}
-        </Form.Item>
+        </Form.Item> */}
 
         {/* 验证失败提示语 */}
         <Form.Item label="验证失败提示语" field="popType">

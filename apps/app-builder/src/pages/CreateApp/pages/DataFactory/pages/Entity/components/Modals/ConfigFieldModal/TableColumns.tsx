@@ -65,17 +65,17 @@ const TableColumns = ({
   fields
 }: TableColumnsProps): ColumnConfig[] => {
   return [
-    {
-      title: '',
-      dataIndex: 'sortOrder',
-      width: 40,
-      render: (value: number, record: FieldFormValues) => {
-        if (record.isSystemField === FIELD_TYPE.SYSTEM) {
-          return null;
-        }
-        return <IconDragDotVertical className={styles['drag-handle']} />;
-      }
-    },
+    // {
+    //   title: '',
+    //   dataIndex: 'sortOrder',
+    //   width: 40,
+    //   render: (value: number, record: FieldFormValues) => {
+    //     if (record.isSystemField === FIELD_TYPE.SYSTEM) {
+    //       return null;
+    //     }
+    //     return <IconDragDotVertical className={styles['drag-handle']} />;
+    //   }
+    // },
     {
       title: '字段名称',
       dataIndex: 'fieldName',
@@ -88,6 +88,9 @@ const TableColumns = ({
             value={value}
             placeholder="由小写字母、数字、下划线组成，须以字母开头，不超过40个字符"
             onChange={(val) => updateField(getFieldIndex(record.id, index), { fieldName: val })}
+            onPointerDown={(e) => e.stopPropagation()}
+            onMouseDown={(e) => e.stopPropagation()}
+            onTouchStart={(e) => e.stopPropagation()}
           />
         )
     },

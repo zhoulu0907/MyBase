@@ -62,7 +62,7 @@ export interface ListApplicationReq {
   pageNo: number;
   pageSize: number;
   name: string;
-  ownerTag?: boolean;
+  ownerTag?: 0 | 1;
   orderByTime?: 'create' | 'update';
   status?: number | null;
 }

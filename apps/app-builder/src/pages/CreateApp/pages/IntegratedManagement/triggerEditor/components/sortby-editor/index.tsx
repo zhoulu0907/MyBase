@@ -48,8 +48,9 @@ const SortByEditor: React.FC<SortByEditorProps> = ({ data, fields, form }) => {
                         />
                       </Grid.Col>
                       <Grid.Col span={13} className={styles.sortCol}>
-                        <Form.Item field={item.field + '.sortField'} noStyle>
+                        <Form.Item field={item.field + '.sortField'} noStyle rules={[{ required: true, message: '请选择排序字段' }]}>
                           <Select
+                            allowClear
                             onChange={() => {
                               setSortList(form.getFieldValue('sortBy'));
                             }}
@@ -61,7 +62,7 @@ const SortByEditor: React.FC<SortByEditorProps> = ({ data, fields, form }) => {
                         </Form.Item>
                       </Grid.Col>
                       <Grid.Col span={8} className={styles.sortCol}>
-                        <Form.Item field={item.field + '.sortType'} noStyle>
+                        <Form.Item field={item.field + '.sortType'} noStyle rules={[{ required: true, message: '请选择排序规则' }]}>
                           <Radio.Group
                             onChange={() => {
                               setSortList(form.getFieldValue('sortBy'));

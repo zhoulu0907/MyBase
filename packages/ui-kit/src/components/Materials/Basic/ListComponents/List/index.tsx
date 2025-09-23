@@ -13,7 +13,7 @@ const XList = memo((props: XListConfig & { runtime?: boolean }) => {
         margin: 0,
         padding: 6,
         opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1,
-        display: runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 'none' : 'unset'
+        display: runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 'none' : 'block'
       }}
       size="small"
       header="List title"

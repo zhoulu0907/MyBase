@@ -49,7 +49,7 @@ const NodeEditForm: React.FC<NodeEditFormProps> = ({ node, onCancel, onSave, suc
       id: node.entityId || '',
       code: node.code || '',
       tableName: node.tableName || '',
-      displayName: node.entityName || '',
+      displayName: node.entityName || node.displayName || '',
       description: node.description || '',
       systemFields: {
         creator: node?.fields?.find(

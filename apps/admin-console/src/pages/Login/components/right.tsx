@@ -8,7 +8,6 @@ import { useI18n } from '../../../hooks/useI18n';
 import { useRememberMe } from '../../../hooks/useRememberMe';
 import styles from '../index.module.less';
 
-
 const { Paragraph } = Typography;
 const TabPane = Tabs.TabPane;
 
@@ -119,17 +118,14 @@ const Right: React.FC = () => {
             accessToken: loginResp.accessToken,
             refreshToken: loginResp.refreshToken,
             expiresTime: loginResp.expiresTime,
-            tenantId: loginResp.tenantWebsite,
+            tenantId: loginResp.tenantWebsite
           },
           rememberMe
         );
         navigate('/onebase/platform-info');
-      } else {
-        Message.error(t('auth.loginFailed'));
       }
     } catch (error: any) {
       console.error('登录error:', error);
-      Message.error(error.message || t('auth.loginFailed'));
     } finally {
       setLoading(false);
     }
@@ -138,18 +134,16 @@ const Right: React.FC = () => {
   // 表单提交处理
   const handleSubmit = async (_values: LoginRequest) => {
     handleAccountLogin(_values);
-
-
   };
 
   // 验证码验证成功回调
   const handleCaptchaSuccess = async (token: string) => {
     // 验证码通过后重新提交表单
     const values = await accountForm.getFieldsValue();
-    handleSubmit({username: values.username, password: values.password, captchaVerification: token});
+    handleSubmit({ username: values.username, password: values.password, captchaVerification: token });
   };
 
-   // 登录按钮点击事件 - 先验证滑块验证码
+  // 登录按钮点击事件 - 先验证滑块验证码
   const handleLoginClick = async () => {
     try {
       // 先验证表单
@@ -181,7 +175,13 @@ const Right: React.FC = () => {
       <div className={styles.loginFormContainer}>
         <Tabs activeTab={loginType} onChange={(key) => setLoginType(key as 'account' | 'mobile')} type="text">
           <TabPane key="account" title={t('auth.accountLogin')}>
-            <Form form={accountForm} layout="vertical" onSubmit={handleLoginClick} autoComplete="off" className={styles.loginForm}>
+            <Form
+              form={accountForm}
+              layout="vertical"
+              onSubmit={handleLoginClick}
+              autoComplete="off"
+              className={styles.loginForm}
+            >
               <Form.Item
                 field="username"
                 initialValue=""
@@ -232,7 +232,13 @@ const Right: React.FC = () => {
           </TabPane>
 
           <TabPane key="mobile" title={t('auth.smsLogin')}>
-            <Form form={mobileForm} layout="vertical" onSubmit={handleLoginClick} autoComplete="off" className={styles.loginForm}>
+            <Form
+              form={mobileForm}
+              layout="vertical"
+              onSubmit={handleLoginClick}
+              autoComplete="off"
+              className={styles.loginForm}
+            >
               <Form.Item
                 field="mobile"
                 rules={[
