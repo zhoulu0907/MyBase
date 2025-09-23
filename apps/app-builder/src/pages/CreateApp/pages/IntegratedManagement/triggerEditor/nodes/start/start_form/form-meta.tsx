@@ -101,8 +101,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
         setValidationTypes(newValidationTypes);
       }
 
-      console.log('newConditionFields: ', newConditionFields);
-
       setConditionFields(newConditionFields);
     }
   };
