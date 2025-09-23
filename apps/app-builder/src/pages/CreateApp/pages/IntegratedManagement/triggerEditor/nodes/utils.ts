@@ -41,7 +41,7 @@ const judge = (curNodeId: string, blocks: FlowNodeJSON[]): boolean => {
 };
 
 // 只有存在当前节点的支线才可以使用
-const getBlockNode = (curNodeId: string, blocks: FlowNodeJSON[]): FlowNodeJSON[] => {
+const getBlockNode = (curNodeId: string, blocks: FlowNodeJSON[], nodeTypes: NodeType[]): FlowNodeJSON[] => {
   let blockNode: FlowNodeJSON[] = [];
   for (let ele of blocks) {
     if (ele.id === curNodeId) {
@@ -51,15 +51,10 @@ const getBlockNode = (curNodeId: string, blocks: FlowNodeJSON[]): FlowNodeJSON[]
     if (ele.blocks?.length) {
       const hasCurNode = judge(curNodeId, ele.blocks);
       if (hasCurNode) {
-        const nodeData = triggerEditorSignal.nodeData.value[ele.id];
-        if (
-          ele.type === NodeType.DATA_QUERY_MULTIPLE
-          //   nodeData.dataSource &&
-          //   nodeData.dataType !== DATA_SOURCE_TYPE.DATA_NODE
-        ) {
+        if (nodeTypes.includes(ele.type as NodeType)) {
           blockNode.push(ele);
         }
-        const newBlocks = getBlockNode(curNodeId, ele.blocks);
+        const newBlocks = getBlockNode(curNodeId, ele.blocks, nodeTypes);
         blockNode.push.apply(blockNode, newBlocks);
       }
     }
@@ -85,7 +80,7 @@ export function getBeforeCurQueryNodes(
       // 判断是否包含当前节点
       const hasCurNode = judge(curNodeId, ele.blocks);
       if (hasCurNode) {
-        const blocks = getBlockNode(curNodeId, ele.blocks);
+        const blocks = getBlockNode(curNodeId, ele.blocks, nodeTypes);
         nodes.push.apply(nodes, blocks);
       } else {
         const blocks = getBeforeCurQueryNodes(curNodeId, ele.blocks, nodeTypes);
@@ -130,27 +125,27 @@ export const getDataNodeSource = (nodeId: string): string => {
         return nodeData.entityId;
       case NodeType.DATA_ADD:
         if (nodeData.addType === FLOW_ENTITY_TYPE.MAIN_ENTITY) {
-          return nodeData.mainDataSource;
+          return nodeData.mainEntityId;
         }
         if (nodeData.addType === FLOW_ENTITY_TYPE.SUB_ENTITY) {
-          return nodeData.subDataSource;
+          return nodeData.subEntityId;
         }
         break;
       case NodeType.DATA_UPDATE:
         if (nodeData.updateType === FLOW_ENTITY_TYPE.MAIN_ENTITY) {
-          return nodeData.mainDataSource;
+          return nodeData.mainEntityId;
         }
         if (nodeData.updateType === FLOW_ENTITY_TYPE.SUB_ENTITY) {
-          return nodeData.subDataSource;
+          return nodeData.subEntityId;
         }
         break;
 
       case NodeType.DATA_QUERY:
         if (nodeData.dataType === DATA_SOURCE_TYPE.FORM) {
-          return nodeData.mainDataSource;
+          return nodeData.mainEntityId;
         }
         if (nodeData.dataType === DATA_SOURCE_TYPE.SUBFORM) {
-          return nodeData.subDataSource;
+          return nodeData.subEntityId;
         }
         if (nodeData.dataType === DATA_SOURCE_TYPE.DATA_NODE) {
           return getDataNodeSource(nodeData.dataNodeId);
@@ -159,10 +154,10 @@ export const getDataNodeSource = (nodeId: string): string => {
 
       case NodeType.DATA_QUERY_MULTIPLE:
         if (nodeData.dataType === DATA_SOURCE_TYPE.FORM) {
-          return nodeData.mainDataSource;
+          return nodeData.mainEntityId;
         }
         if (nodeData.dataType === DATA_SOURCE_TYPE.SUBFORM) {
-          return nodeData.subDataSource;
+          return nodeData.subEntityId;
         }
         if (nodeData.dataType === DATA_SOURCE_TYPE.DATA_NODE) {
           return getDataNodeSource(nodeData.dataNodeId);

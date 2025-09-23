@@ -2,7 +2,6 @@ import { Modal } from '@arco-design/web-react';
 import React, { useEffect } from 'react';
 
 import type { ConfitionField, EntityFieldValidationTypes } from '@onebase/app';
-import ConditionEditor from '@/pages/CreateApp/pages/IntegratedManagement/triggerEditor/components/condition-editor';
 import styles from '../../index.module.less';
 
 interface FilterDataModalProps {
@@ -25,10 +24,6 @@ const filterFieldCheckType: EntityFieldValidationTypes[] = [
   { fieldId: 'c', fieldTypeCode: 'c', validationTypes: [] },
   { fieldId: 'd', fieldTypeCode: 'd', validationTypes: [] }
 ];
-
-const changeDataFilters = (value: any[]) => {
-  console.log('changeDataFilters', value);
-};
 
 const FilterDataModal: React.FC<FilterDataModalProps> = ({ visible, onCancel }) => {
   // todo
@@ -53,12 +48,11 @@ const FilterDataModal: React.FC<FilterDataModalProps> = ({ visible, onCancel }) 
         <div className={styles.popupContainer}>
           <span className={styles.titleSpan}>添加过滤条件来限定可选数据范围</span>
           {/* 添加过滤条件 */}
-          <ConditionEditor
-            onChange={changeDataFilters}
+          {/* <ConditionEditor
             data={[]}
             fields={dataFilters}
             entityFieldValidationTypes={filterFieldCheckType}
-          />
+          /> */}
         </div>
       </Modal>
     </>
