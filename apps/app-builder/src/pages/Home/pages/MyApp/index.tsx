@@ -122,7 +122,7 @@ const MyAppPage: React.FC = () => {
       pageNo,
       pageSize: pageSize || 8,
       name,
-      ownerTag: ownerTag === 1 ? true : false,
+      ownerTag,
       orderByTime,
       status: status === '' ? null : Number(status)
     };

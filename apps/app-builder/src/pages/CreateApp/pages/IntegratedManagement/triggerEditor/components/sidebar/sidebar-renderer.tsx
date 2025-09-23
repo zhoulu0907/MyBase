@@ -96,7 +96,7 @@ export const SidebarRenderer = (props: SidebarRendererProps) => {
       onCancel={handleClose}
       closable={false}
       unmountOnExit={true}
-      width={600}
+      width={800}
       headerStyle={{
         display: 'none'
       }}
