@@ -21,6 +21,12 @@ public class EntityFieldRespDTO {
     @Schema(description = "实体ID", example = "1")
     private Long entityId;
 
+    @Schema(description = "实体名称", example = "用户")
+    private String entityDisplayName;
+
+    @Schema(description = "实体表名", example = " user_info")
+    private String tableName;
+
     @Schema(description = "字段名称", example = "username")
     private String fieldName;
 
