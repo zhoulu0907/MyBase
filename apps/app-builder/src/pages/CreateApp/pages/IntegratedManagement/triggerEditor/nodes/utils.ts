@@ -191,9 +191,11 @@ export const getEntityFieldList = async (
       fieldType: item.fieldType
     });
   });
+  console.log('newConditionFields: ', newConditionFields);
   setConditionFields(newConditionFields);
   if (filedIds?.length) {
     const newValidationTypes = await getFieldCheckTypeApi(filedIds);
+    console.log('newValidationTypes: ', newValidationTypes);
     setValidationTypes(newValidationTypes);
   }
 };
