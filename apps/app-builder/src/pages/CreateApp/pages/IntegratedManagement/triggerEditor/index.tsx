@@ -175,7 +175,7 @@ const TriggerEditor = () => {
                 className={styles.sidebarContainer}
                 ref={sidebarContainerRef}
                 style={{
-                  width: nodeId.value ? '600px' : '0px'
+                  width: nodeId.value ? '800px' : '0px'
                 }}
               >
                 <SidebarRenderer refWrapper={sidebarContainerRef} />

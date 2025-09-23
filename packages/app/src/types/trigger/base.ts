@@ -26,8 +26,9 @@ export interface Condition {
 export enum FieldType {
   // 值
   VALUE = 'value',
-  // 字段
-  FIELD = 'field',
+  // 变量
+  VARIABLES = 'variables',
+
   // 公式
-  EXPRESSION = 'expression'
+  FORMULA = 'formula'
 }
