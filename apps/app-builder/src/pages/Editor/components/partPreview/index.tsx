@@ -3,11 +3,13 @@ import {
   EDITOR_TYPES,
   getComponentWidth,
   PreviewRender,
+  STATUS_OPTIONS,
+  STATUS_VALUES,
   useFormEditorSignal,
   useListEditorSignal,
   type GridItem
 } from '@onebase/ui-kit';
-import React from 'react';
+import React, { Fragment } from 'react';
 import styles from './index.module.less';
 
 interface PartPreviewProps {
@@ -39,39 +41,45 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
         <div className={styles.content}>
           {pageType == EDITOR_TYPES.LIST_EDITOR &&
             listComponents.value.map((cp: GridItem) => (
-              <div
-                key={cp.id}
-                className={styles.componentItem}
-                style={{
-                  width: getComponentWidth(listPageComponentSchemas.value[cp.id], cp.type)
-                }}
-              >
-                <PreviewRender
-                  cpId={cp.id}
-                  cpType={cp.type}
-                  pageComponentSchema={listPageComponentSchemas.value[cp.id]}
-                  runtime={true}
-                />
-              </div>
+              <Fragment key={cp.id}>
+                {listPageComponentSchemas.value[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] &&
+                  <div
+                    key={cp.id}
+                    className={styles.componentItem}
+                    style={{
+                      width: getComponentWidth(listPageComponentSchemas.value[cp.id], cp.type)
+                    }}
+                  >
+                    <PreviewRender
+                      cpId={cp.id}
+                      cpType={cp.type}
+                      pageComponentSchema={listPageComponentSchemas.value[cp.id]}
+                      runtime={true}
+                    />
+                  </div>}
+              </Fragment>
             ))}
 
           {pageType == EDITOR_TYPES.FORM_EDITOR && (
             <Form layout="inline">
               {formComponents.value.map((cp: GridItem) => (
-                <div
-                  key={cp.id}
-                  className={styles.componentItem}
-                  style={{
-                    width: getComponentWidth(formPageComponentSchemas.value[cp.id], cp.type)
-                  }}
-                >
-                  <PreviewRender
-                    cpId={cp.id}
-                    cpType={cp.type}
-                    pageComponentSchema={formPageComponentSchemas.value[cp.id]}
-                    runtime={true}
-                  />
-                </div>
+                <Fragment key={cp.id}>
+                  {formPageComponentSchemas.value[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] &&
+                    <div
+                      key={cp.id}
+                      className={styles.componentItem}
+                      style={{
+                        width: getComponentWidth(formPageComponentSchemas.value[cp.id], cp.type)
+                      }}
+                    >
+                      <PreviewRender
+                        cpId={cp.id}
+                        cpType={cp.type}
+                        pageComponentSchema={formPageComponentSchemas.value[cp.id]}
+                        runtime={true}
+                      />
+                    </div>}
+                </Fragment>
               ))}
 
               <div className={styles.footer}>

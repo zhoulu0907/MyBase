@@ -1,13 +1,14 @@
 import { Layout } from '@arco-design/web-react';
 import { useSignals } from '@preact/signals-react/runtime';
-import { useEffect } from 'react';
+import { Fragment, useEffect } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import { getComponentWidth } from 'src/components/Materials/schema';
 import PreviewRender from 'src/components/render/PreviewRender';
 import { usePageEditorSignal } from 'src/hooks/useSignal';
 import { COMPONENT_GROUP_NAME, type GridItem } from 'src/utils/const';
-import './index.css';
 import { type XColumnLayoutConfig } from './schema';
+import { STATUS_VALUES, STATUS_OPTIONS } from '@/components/Materials/constants';
+import './index.css';
 
 const XPreviewColumnLayout = (props: XColumnLayoutConfig) => {
   const { colCount, id } = props;
@@ -55,32 +56,36 @@ const XPreviewColumnLayout = (props: XColumnLayoutConfig) => {
           >
             {colComponents[index] &&
               colComponents[index].map((cp: GridItem) => (
-                <div
-                  key={cp.id}
-                  data-cp-type={cp.type}
-                  data-cp-displayname={cp.displayName}
-                  data-cp-id={cp.id}
-                  className="componentItem"
-                  style={{
-                    width: getComponentWidth(pageComponentSchemas[cp.id], cp.type)
-                  }}
-                  onClick={(e: React.MouseEvent<HTMLDivElement>) => {
-                    e.stopPropagation();
-                    console.log('点击组件: ', cp.id);
-                    setCurComponentID(cp.id);
+                <Fragment key={cp.id}>
+                  {pageComponentSchemas[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] &&
+                    <div
+                      key={cp.id}
+                      data-cp-type={cp.type}
+                      data-cp-displayname={cp.displayName}
+                      data-cp-id={cp.id}
+                      className="componentItem"
+                      style={{
+                        width: getComponentWidth(pageComponentSchemas[cp.id], cp.type)
+                      }}
+                      onClick={(e: React.MouseEvent<HTMLDivElement>) => {
+                        e.stopPropagation();
+                        console.log('点击组件: ', cp.id);
+                        setCurComponentID(cp.id);
 
-                    const curComponentSchema = pageComponentSchemas[cp.id];
-                    setCurComponentSchema(curComponentSchema);
-                    setShowDeleteButton(true);
-                  }}
-                >
-                  <PreviewRender
-                    cpId={cp.id}
-                    cpType={cp.type}
-                    pageComponentSchema={pageComponentSchemas[cp.id]}
-                    runtime={true}
-                  />
-                </div>
+                        const curComponentSchema = pageComponentSchemas[cp.id];
+                        setCurComponentSchema(curComponentSchema);
+                        setShowDeleteButton(true);
+                      }}
+                    >
+                      <PreviewRender
+                        cpId={cp.id}
+                        cpType={cp.type}
+                        pageComponentSchema={pageComponentSchemas[cp.id]}
+                        runtime={true}
+                      />
+                    </div>
+                  }
+                </Fragment>
               ))}
           </ReactSortable>
         </div>
