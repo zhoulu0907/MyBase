@@ -5,8 +5,10 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.cmsr.onebase.module.metadata.api.datamethod.DataMethodApi;
+import com.cmsr.onebase.module.metadata.api.datamethod.dto.DeleteDataReqDTO;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.EntityFieldDataReqDTO;
 import com.cmsr.onebase.module.metadata.api.datamethod.dto.EntityFieldDataRespDTO;
+import com.cmsr.onebase.module.metadata.api.datamethod.dto.InsertDataReqDTO;
 
 import jakarta.validation.Valid;
 @Service
@@ -20,5 +22,17 @@ public class DataMethodApiImpl implements DataMethodApi {
 
 
         throw new UnsupportedOperationException("Unimplemented method 'getDataByCondition'");
+    }
+
+    @Override
+    public Integer deleteDataByCondition(@Valid DeleteDataReqDTO reqDTO) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'deleteDataByCondition'");
+    }
+
+    @Override
+    public Integer insertData(@Valid InsertDataReqDTO reqDTO) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'insertData'");
     }
 }
