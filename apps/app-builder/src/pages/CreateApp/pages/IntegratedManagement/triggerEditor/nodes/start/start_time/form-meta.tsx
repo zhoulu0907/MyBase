@@ -3,9 +3,9 @@ import { DatePicker, Form, Grid, Input, Select, Tabs, TimePicker } from '@arco-d
 import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
 import { isValidCron } from 'cron-validator';
 import { useState } from 'react';
-import { FormContent, FormHeader, FormOutputs } from '../../form-components';
-import { useIsSidebar, useNodeRenderContext } from '../../hooks';
-import { type FlowNodeJSON } from '../../typings';
+import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
+import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
+import { type FlowNodeJSON } from '../../../typings';
 
 const TabPane = Tabs.TabPane;
 
