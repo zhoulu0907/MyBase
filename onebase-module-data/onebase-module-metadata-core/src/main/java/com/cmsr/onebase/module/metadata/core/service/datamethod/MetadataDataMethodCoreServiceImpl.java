@@ -1,8 +1,8 @@
 package com.cmsr.onebase.module.metadata.core.service.datamethod;
 
 import com.cmsr.onebase.framework.common.pojo.PageResult;
-import com.cmsr.onebase.framework.common.tools.core.util.SnowflakeIdWorker;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
+import com.cmsr.onebase.framework.uid.UidGenerator;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusinessEntityDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataDatasourceDO;
@@ -63,6 +63,9 @@ public class MetadataDataMethodCoreServiceImpl implements MetadataDataMethodCore
 
     @Resource
     private MultiTableQueryEngine multiTableQueryEngine;
+
+    @Resource
+    private UidGenerator uidGenerator;
 
     @Resource
     private com.cmsr.onebase.module.metadata.core.service.number.AutoNumberService autoNumberService;
@@ -420,7 +423,7 @@ public class MetadataDataMethodCoreServiceImpl implements MetadataDataMethodCore
             if (fieldName != null && fieldName.equalsIgnoreCase(realPrimaryKey)) {
                 if (!processedData.containsKey(fieldName)) {
                     // 生成雪花ID作为主键
-                    processedData.put(fieldName, SnowflakeIdWorker.nextId());
+                    processedData.put(fieldName, uidGenerator.getUID());
                 }
                 continue;
             }
