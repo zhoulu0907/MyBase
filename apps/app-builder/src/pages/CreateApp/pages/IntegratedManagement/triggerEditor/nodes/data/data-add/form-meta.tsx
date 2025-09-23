@@ -26,7 +26,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const { curAppId } = useAppStore();
   const [fieldDataList, setFieldDataList] = useState<AppEntityField[]>([]);
   const [mainEntityList, setMainEntityList] = useState<MetadataEntityPair[]>([]);
-  const [entityList, setEntityList] = useState<MetadataEntityPair[]>([]);
+  const [subEntityList, setSubEntityList] = useState<MetadataEntityPair[]>([]);
 
   const handlePropsOnChange = (values: any) => {
     triggerEditorSignal.setNodeData(node.id, values);
@@ -42,7 +42,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const [payloadForm] = Form.useForm();
 
   const addType = Form.useWatch('addType', payloadForm);
-  const mainDataSource = Form.useWatch('mainDataSource', payloadForm);
+  const mainEntityId = Form.useWatch('mainEntityId', payloadForm);
 
   useEffect(() => {
     payloadForm && validateNodeForm(form, payloadForm, true);
@@ -58,23 +58,23 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       if (nodeData.addType === FLOW_ENTITY_TYPE.MAIN_ENTITY) {
         // 在主表中
         const res = await getEntityListByApp(curAppId);
-        setEntityList(res);
-        getFieldList(nodeData?.mainDataSource);
+        setMainEntityList(res);
+        getFieldList(nodeData?.mainEntityId);
       }
       if (nodeData.addType === FLOW_ENTITY_TYPE.SUB_ENTITY) {
         // 在子表中
         const res = await getEntityListByApp(curAppId);
         setMainEntityList(res);
-        if (nodeData?.mainDataSource) {
-          const res = await getEntityFieldsWithChildren(nodeData.mainDataSource);
+        if (nodeData?.mainEntityId) {
+          const res = await getEntityFieldsWithChildren(nodeData.mainEntityId);
           const newEntityList = (res.childEntities || []).map((item: any) => {
             return {
               entityId: item.childEntityId,
               entityName: item.childEntityName
             };
           });
-          setEntityList(newEntityList);
-          getFieldList(nodeData.subDataSource);
+          setSubEntityList(newEntityList);
+          getFieldList(nodeData.subEntityId);
         }
       }
     }
@@ -82,26 +82,28 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
   // 新增方式变更
   const handleDataTypeChange = (curAddType: FLOW_ENTITY_TYPE) => {
-    payloadForm.clearFields(['mainDataSource', 'subDataSource', 'fields']);
+    payloadForm.clearFields(['mainEntityId', 'subEntityId', 'fields']);
     const nodeData = triggerEditorSignal.nodeData.value[node.id];
     triggerEditorSignal.setNodeData(node.id, {
       ...nodeData,
-      mainDataSource: undefined,
-      subDataSource: undefined,
+      mainEntityId: undefined,
+      subEntityId: undefined,
       fields: []
     });
-    setEntityList([]);
+    setMainEntityList([]);
+    setSubEntityList([]);
     setFieldDataList([]);
     setMainEntityList([]);
     getEntityList(curAddType);
   };
+
   const getEntityList = async (curAddType?: FLOW_ENTITY_TYPE) => {
     const nodeData = triggerEditorSignal.nodeData.value[node.id];
     if (curAddType === FLOW_ENTITY_TYPE.MAIN_ENTITY || curAddType === undefined) {
       // 从主表中
       const res = await getEntityListByApp(curAppId);
-      setEntityList(res);
-      getFieldList(nodeData?.mainDataSource);
+      setMainEntityList(res);
+      getFieldList(nodeData?.mainEntityId);
     }
     if (curAddType === FLOW_ENTITY_TYPE.SUB_ENTITY) {
       // 从子表中
@@ -110,38 +112,38 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     }
   };
   // 主表数据变更
-  const handleMainDataSourceChange = async (curMainDataSource: string) => {
-    payloadForm.clearFields(['subDataSource', 'fields']);
+  const handleMainEntityIdChange = async (curMainEntityId: string) => {
+    payloadForm.clearFields(['subEntityId', 'fields']);
     const nodeData = triggerEditorSignal.nodeData.value[node.id];
     triggerEditorSignal.setNodeData(node.id, {
       ...nodeData,
-      subDataSource: undefined,
+      subEntityId: undefined,
       fields: []
     });
     if (addType === FLOW_ENTITY_TYPE.MAIN_ENTITY) {
-      getFieldList(curMainDataSource);
+      getFieldList(curMainEntityId);
     }
     if (addType === FLOW_ENTITY_TYPE.SUB_ENTITY) {
-      setEntityList([]);
-      const res = await getEntityFieldsWithChildren(curMainDataSource);
+      setSubEntityList([]);
+      const res = await getEntityFieldsWithChildren(curMainEntityId);
       const newEntityList = (res.childEntities || []).map((item: any) => {
         return {
           entityId: item.childEntityId,
           entityName: item.childEntityName
         };
       });
-      setEntityList(newEntityList);
+      setSubEntityList(newEntityList);
     }
   };
   // 子表数据变更
-  const handleSubDataSourceChange = (curSubDataSource: string) => {
+  const handleSubEntityIdChange = (curSubEntityId: string) => {
     payloadForm.clearFields(['fields']);
     const nodeData = triggerEditorSignal.nodeData.value[node.id];
     triggerEditorSignal.setNodeData(node.id, {
       ...nodeData,
       fields: []
     });
-    getFieldList(curSubDataSource);
+    getFieldList(curSubEntityId);
   };
   // 获取字段下拉列表
   const getFieldList = async (dataSource: string) => {
@@ -191,16 +193,16 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
               </Form.Item>
             </Grid.Row>
 
-            {/* 从主表中查询 */}
+            {/* 从主表中插入 */}
             {addType === FLOW_ENTITY_TYPE.MAIN_ENTITY && (
               <Grid.Row>
                 <Grid.Col span={1} style={{ textAlign: 'center', lineHeight: '32px' }}>
-                  从
+                  向
                 </Grid.Col>
                 <Grid.Col span={19}>
-                  <Form.Item field="mainDataSource" disabled={!addType}>
-                    <Select onChange={handleMainDataSourceChange} allowClear>
-                      {entityList.map((item) => (
+                  <Form.Item field="mainEntityId" disabled={!addType}>
+                    <Select onChange={handleMainEntityIdChange} allowClear>
+                      {mainEntityList.map((item) => (
                         <Select.Option key={item.entityId} value={item.entityId}>
                           {item.entityName}
                         </Select.Option>
@@ -209,7 +211,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                   </Form.Item>
                 </Grid.Col>
                 <Grid.Col span={4} style={{ textAlign: 'center', lineHeight: '32px' }}>
-                  <span>中查询数据</span>
+                  <span>中插入数据</span>
                 </Grid.Col>
               </Grid.Row>
             )}
@@ -218,11 +220,11 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             {addType === FLOW_ENTITY_TYPE.SUB_ENTITY && (
               <Grid.Row>
                 <Grid.Col span={1} style={{ textAlign: 'center', lineHeight: '32px' }}>
-                  从
+                  向
                 </Grid.Col>
                 <Grid.Col span={9}>
-                  <Form.Item field="mainDataSource" disabled={!addType}>
-                    <Select allowClear onChange={handleMainDataSourceChange}>
+                  <Form.Item field="mainEntityId" disabled={!addType}>
+                    <Select allowClear onChange={handleMainEntityIdChange}>
                       {mainEntityList.map((item) => (
                         <Select.Option key={item.entityId} value={item.entityId}>
                           {item.entityName}
@@ -235,9 +237,9 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                   的
                 </Grid.Col>
                 <Grid.Col span={9}>
-                  <Form.Item field="subDataSource" disabled={!mainDataSource}>
-                    <Select allowClear onChange={handleSubDataSourceChange}>
-                      {entityList.map((item) => (
+                  <Form.Item field="subEntityId" disabled={!mainEntityId}>
+                    <Select allowClear onChange={handleSubEntityIdChange}>
+                      {subEntityList.map((item) => (
                         <Select.Option key={item.entityId} value={item.entityId}>
                           {item.entityName}
                         </Select.Option>
@@ -246,7 +248,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                   </Form.Item>
                 </Grid.Col>
                 <Grid.Col span={4} style={{ textAlign: 'center', lineHeight: '32px' }}>
-                  <span>中查询数据</span>
+                  <span>中插入数据</span>
                 </Grid.Col>
               </Grid.Row>
             )}

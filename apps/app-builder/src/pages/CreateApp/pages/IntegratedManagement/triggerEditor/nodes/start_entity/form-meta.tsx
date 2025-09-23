@@ -6,7 +6,6 @@ import {
   getEntityFields,
   getEntityListByApp,
   getFieldCheckTypeApi,
-  type Condition,
   type ConfitionField,
   type EntityFieldValidationTypes,
   type MetadataEntityField
@@ -17,6 +16,7 @@ import ConditionEditor from '../../components/condition-editor';
 import { FormContent, FormHeader, FormOutputs } from '../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../hooks';
 import { type FlowNodeJSON } from '../../typings';
+import { validateNodeForm } from '../utils';
 
 const Option = Select.Option;
 const CheckboxGroup = Checkbox.Group;
@@ -135,14 +135,10 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   };
 
   const onValuesChange = (changeValue: any, values: any) => {
-    handlePropsOnChange(values);
-  };
+    // 校验表单
+    validateNodeForm(form, payloadForm, false);
 
-  const onConditionChange = (conditions: Condition[]) => {
-    handlePropsOnChange({
-      ...triggerEditorSignal.nodeData.value[node.id],
-      filterCondition: conditions
-    });
+    handlePropsOnChange(values);
   };
 
   return (
@@ -227,16 +223,13 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             )}
 
             <Grid.Row>
-              <Form.Item label="过滤条件" field="filterCondition" layout="vertical">
-                {validationTypes && (
-                  <ConditionEditor
-                    onConditionChange={onConditionChange}
-                    data={triggerEditorSignal.nodeData.value[node.id].filterCondition}
-                    fields={conditionFields}
-                    entityFieldValidationTypes={validationTypes}
-                  />
-                )}
-              </Form.Item>
+              <ConditionEditor
+                label="过滤条件"
+                required
+                fields={conditionFields}
+                entityFieldValidationTypes={validationTypes}
+                form={payloadForm}
+              />
             </Grid.Row>
           </Form>
         </FormContent>
