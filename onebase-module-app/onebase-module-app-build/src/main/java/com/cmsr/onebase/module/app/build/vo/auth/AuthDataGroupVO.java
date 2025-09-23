@@ -25,6 +25,12 @@ public class AuthDataGroupVO {
     @Schema(description = "数据权限组描述")
     private String description;
 
+    @Schema(description = "业务实体Id")
+    private Long entityId;
+
+    @Schema(description = "业务实体名称")
+    private String entityName;
+
     @Schema(description = "业务实体字段名称")
     private Long scopeFieldId;
 

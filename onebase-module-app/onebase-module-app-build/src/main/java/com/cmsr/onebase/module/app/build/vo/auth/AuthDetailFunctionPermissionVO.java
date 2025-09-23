@@ -21,6 +21,6 @@ public class AuthDetailFunctionPermissionVO {
     private List<AuthOperationVO> authOperations;
 
     @Schema(description = "实体访问权限")
-    private AuthDetailViewVO authEntity;
+    private AuthDetailViewVO authViewVO;
 
 }

@@ -8,14 +8,18 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
+import lombok.Setter;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * @Author：huangjie
  * @Date：2025/8/7 8:57
  */
 @Tag(name = "应用管理-权限管理")
+@Setter
 @RestController
 @RequestMapping("/app/auth-permission")
 @Validated
@@ -23,6 +27,12 @@ public class AppAuthPermissionController {
 
     @Resource
     private AppAuthPermissionService authPermissionService;
+
+    @GetMapping("/get-permission-scope")
+    @Operation(summary = "获取可配置的权限范围")
+    public CommonResult<List<AuthPermissionScope>> getPermissionScope() {
+        return CommonResult.success(authPermissionService.getPermissionScope());
+    }
 
     /**
      * 获取角色-菜单的功能权限
