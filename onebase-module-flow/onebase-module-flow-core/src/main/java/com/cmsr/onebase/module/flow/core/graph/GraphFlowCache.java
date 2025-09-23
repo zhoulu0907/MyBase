@@ -11,8 +11,8 @@ import com.cmsr.onebase.module.flow.core.graph.data.StartTimeNodeData;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -80,13 +80,10 @@ public class GraphFlowCache {
         return startFormNodeDataCache.get(processId);
     }
 
-    public Optional<StartEntityNodeData> getStartEntityNodeData(Long entityId) {
-        for (StartEntityNodeData startEntityNodeData : startEntityNodeDataCache) {
-            if (startEntityNodeData.getEntityId().equals(entityId)) {
-                return Optional.of(startEntityNodeData);
-            }
-        }
-        return Optional.empty();
+    public List<StartEntityNodeData> getStartEntityNodeData(Long entityId) {
+        return startEntityNodeDataCache.stream()
+                .filter(startEntityNodeData -> startEntityNodeData.getEntityId().equals(entityId))
+                .toList();
     }
 
 }

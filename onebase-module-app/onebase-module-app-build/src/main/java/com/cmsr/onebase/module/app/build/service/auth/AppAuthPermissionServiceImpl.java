@@ -5,9 +5,11 @@ import com.cmsr.onebase.module.app.build.service.AppCommonService;
 import com.cmsr.onebase.module.app.build.util.AuthUtils;
 import com.cmsr.onebase.module.app.build.vo.auth.*;
 import com.cmsr.onebase.module.app.core.dal.database.auth.*;
+import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.auth.*;
 import com.cmsr.onebase.module.app.core.dal.dataobject.menu.MenuDO;
 import com.cmsr.onebase.module.app.core.enums.auth.AuthOperationEnum;
+import com.cmsr.onebase.module.app.core.enums.auth.AuthPermissionScopeEnum;
 import com.cmsr.onebase.module.app.core.vo.auth.AuthOperationVO;
 import com.cmsr.onebase.module.app.core.vo.auth.AuthPermissionReqVO;
 import com.cmsr.onebase.module.metadata.api.entity.MetadataEntityFieldApi;
@@ -60,6 +62,9 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
     @Resource
     private MetadataPermitApi metadataPermitApi;
 
+    @Resource
+    private AppMenuRepository appMenuRepository;
+
     @Override
     public AuthDetailFunctionPermissionVO getFunctionPermission(AuthPermissionReqVO reqVO) {
         appCommonService.validateApplicationExist(reqVO.getApplicationId());
@@ -80,7 +85,7 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
             authDetailViewVO.setIsAllViewsAllowed(authPermissionDO.getIsAllViewsAllowed());
         }
         authDetailViewVO.setAuthViews(queryAuthViews(reqVO));
-        functionPermissionVO.setAuthEntity(authDetailViewVO);
+        functionPermissionVO.setAuthViewVO(authDetailViewVO);
         return functionPermissionVO;
     }
 
@@ -95,8 +100,8 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
         List<AuthDataGroupVO> authDataGroupVOS = queryAuthDataGroups(reqVO);
         dataPermissionVO.setAuthDataGroups(authDataGroupVOS);
         //字段辅助信息
-        List<AuthFieldInfoVO> authFieldInfoVOS = queryFieldsInfo(menuDO.getEntityId());
-        dataPermissionVO.setFieldInfo(authFieldInfoVOS);
+//        List<AuthFieldInfoVO> authFieldInfoVOS = queryFieldsInfo(menuDO.getEntityId());
+//        dataPermissionVO.setFieldInfo(authFieldInfoVOS);
         return dataPermissionVO;
     }
 
@@ -219,6 +224,16 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
         }
     }
 
+    @Override
+    public List<AuthPermissionScope> getPermissionScope() {
+        return Arrays.stream(AuthPermissionScopeEnum.values()).map(v -> {
+            AuthPermissionScope scope = new AuthPermissionScope();
+            scope.setLabel(v.getLabel());
+            scope.setValue(v.getValue());
+            return scope;
+        }).toList();
+    }
+
     private void upsetAuthField(AuthUpdateFieldReqVO reqVO, AuthFieldVO authField) {
         AuthFieldDO authFieldDO = null;
         if (authField.getId() != null) {
@@ -268,14 +283,17 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
     }
 
     private List<AuthViewVO> queryAuthViews(AuthPermissionReqVO reqVO) {
-        List<AuthViewDO> authViewDOS = authEntityRepository.findByQuery(reqVO);
-        return BeanUtils.toBean(authViewDOS, AuthViewVO.class);
+        return Collections.emptyList();
     }
 
     private List<AuthDataGroupVO> queryAuthDataGroups(AuthPermissionReqVO reqVO) {
         List<AuthDataGroupDO> authDataGroupDOS = authDataGroupRepository.findByQuery(reqVO);
         List<AuthDataGroupVO> authDataGroupVOS = BeanUtils.toBean(authDataGroupDOS, AuthDataGroupVO.class);
         for (AuthDataGroupVO authDataGroupVO : authDataGroupVOS) {
+            MenuDO menuDO = appMenuRepository.findById(reqVO.getMenuId());
+            authDataGroupVO.setEntityId(menuDO.getEntityId());
+            //TODO 获取实体名称
+            authDataGroupVO.setEntityName("");
             List<AuthDataFilterDO> dataFilterDOS = authDataFilterRepository.findByGroupId(authDataGroupVO.getId());
             List<AuthDataFilterVO> dataFilterVOS = BeanUtils.toBean(dataFilterDOS, AuthDataFilterVO.class);
             List<List<AuthDataFilterVO>> dataFilters = groupAndOrder(dataFilterVOS);
@@ -284,19 +302,19 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
         return authDataGroupVOS;
     }
 
-    private List<AuthFieldInfoVO> queryFieldsInfo(Long entityId) {
-        List<EntityFieldRespDTO> entityFieldRespDTOS = getEntityFieldRespDTOS(entityId);
-        List<PermitRefOtftRespDTO> permitRefOtftRespDTOS = metadataPermitApi.getPermitRefOtftList();
-        List<AuthFieldInfoVO> authFieldInfoVOS = entityFieldRespDTOS.stream().map(field -> {
-            AuthFieldInfoVO authFieldInfoVO = new AuthFieldInfoVO();
-            authFieldInfoVO.setFieldId(Long.valueOf(field.getId())); //TODO 强转
-            authFieldInfoVO.setFieldDisplayName(field.getDisplayName());
-            authFieldInfoVO.setFieldType(field.getFieldType());
-            authFieldInfoVO.setOperatorMap(queryAuthFieldInfoVOOperator(field.getFieldType(), permitRefOtftRespDTOS));
-            return authFieldInfoVO;
-        }).toList();
-        return authFieldInfoVOS;
-    }
+//    private List<AuthFieldInfoVO> queryFieldsInfo(Long entityId) {
+//        List<EntityFieldRespDTO> entityFieldRespDTOS = getEntityFieldRespDTOS(entityId);
+//        List<PermitRefOtftRespDTO> permitRefOtftRespDTOS = metadataPermitApi.getPermitRefOtftList();
+//        List<AuthFieldInfoVO> authFieldInfoVOS = entityFieldRespDTOS.stream().map(field -> {
+//            AuthFieldInfoVO authFieldInfoVO = new AuthFieldInfoVO();
+//            authFieldInfoVO.setFieldId(Long.valueOf(field.getId())); //TODO 强转
+//            authFieldInfoVO.setFieldDisplayName(field.getDisplayName());
+//            authFieldInfoVO.setFieldType(field.getFieldType());
+//            authFieldInfoVO.setOperatorMap(queryAuthFieldInfoVOOperator(field.getFieldType(), permitRefOtftRespDTOS));
+//            return authFieldInfoVO;
+//        }).toList();
+//        return authFieldInfoVOS;
+//    }
 
     private List<AuthFieldInfoVO.Operator> queryAuthFieldInfoVOOperator(String fieldTypeCode, List<PermitRefOtftRespDTO> permitRefOtftRespDTOS) {
         return permitRefOtftRespDTOS.stream()
