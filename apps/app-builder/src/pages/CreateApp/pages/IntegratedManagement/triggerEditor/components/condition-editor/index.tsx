@@ -80,7 +80,7 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
   }, []);
 
   useEffect(() => {
-    console.log('entityFieldValidationTypes:  ', entityFieldValidationTypes);
+    // console.log('entityFieldValidationTypes:  ', entityFieldValidationTypes);
   }, [entityFieldValidationTypes]);
 
   useEffect(() => {

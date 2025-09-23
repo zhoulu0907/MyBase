@@ -1,4 +1,5 @@
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
+import { triggerNodeOutputSignal } from '@/store/singals/trigger_node_output';
 import { useAppStore } from '@/store/store_app';
 import { Form, Grid, Input, Radio, Select } from '@arco-design/web-react';
 import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
@@ -33,17 +34,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const [subEntityList, setSubEntityList] = useState<MetadataEntityPair[]>([]);
   const [conditionFields, setConditionFields] = useState<ConfitionField[]>([]);
   const [validationTypes, setValidationTypes] = useState<EntityFieldValidationTypes[]>([]);
-
-  const handlePropsOnChange = (values: any) => {
-    triggerEditorSignal.setNodeData(node.id, values);
-  };
-
-  const onValuesChange = async (changeValue: any, values: any) => {
-    // 校验表单
-    validateNodeForm(form, payloadForm, false);
-
-    handlePropsOnChange(values);
-  };
 
   const [payloadForm] = Form.useForm();
 
@@ -178,6 +168,25 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       const newValidationTypes = await getFieldCheckTypeApi(filedIds);
       setValidationTypes(newValidationTypes);
     }
+  };
+
+  const handlePropsOnChange = (values: any) => {
+    triggerEditorSignal.setNodeData(node.id, values);
+  };
+
+  const onValuesChange = async (changeValue: any, values: any) => {
+    // 校验表单
+    validateNodeForm(form, payloadForm, false);
+
+    updateOutputs(values);
+
+    handlePropsOnChange(values);
+  };
+
+  const updateOutputs = (values: any) => {
+    const outputs = {};
+
+    triggerNodeOutputSignal.addTriggerNodeOutput(node.id, outputs);
   };
 
   return (

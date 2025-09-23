@@ -1,6 +1,7 @@
 import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
 
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
+import { triggerNodeOutputSignal } from '@/store/singals/trigger_node_output';
 import { Checkbox, Form, Grid, Input, Radio, Select } from '@arco-design/web-react';
 import {
   getEntityFields,
@@ -136,7 +137,18 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     // 校验表单
     validateNodeForm(form, payloadForm, false);
 
+    // 更新节点输出配置
+    updateOutputs(values);
+
     handlePropsOnChange(values);
+  };
+
+  const updateOutputs = (values: any) => {
+    const outputs = {
+      entityId: values.entityId
+    };
+
+    triggerNodeOutputSignal.addTriggerNodeOutput(node.id, outputs);
   };
 
   return (

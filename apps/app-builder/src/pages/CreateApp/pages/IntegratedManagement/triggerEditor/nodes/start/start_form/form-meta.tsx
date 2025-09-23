@@ -1,6 +1,7 @@
 import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
 
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
+import { triggerNodeOutputSignal } from '@/store/singals/trigger_node_output';
 import { Checkbox, Form, Grid, Input, Radio, Select } from '@arco-design/web-react';
 import type { ComponentConfig } from '@onebase/app';
 import {
@@ -106,7 +107,21 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   };
 
   const onValuesChange = (changeValue: any, values: any) => {
+    console.log('nodeID: ', node.id, '  values: ', values);
+
+    updateOutputs(values);
+
     handlePropsOnChange(values);
+  };
+
+  const updateOutputs = (values: any) => {
+    const outputs = {
+      pageId: values.pageId,
+      fieldId: values.fieldId,
+      triggerRange: values.triggerRange
+    };
+
+    triggerNodeOutputSignal.addTriggerNodeOutput(node.id, outputs);
   };
 
   return (
