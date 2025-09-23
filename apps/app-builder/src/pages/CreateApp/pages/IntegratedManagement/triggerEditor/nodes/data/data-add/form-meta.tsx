@@ -15,7 +15,8 @@ import FieldEditor from '../../../components/field-editor';
 import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
-import { validateNodeForm } from '../../utils';
+import { NodeType } from '../../const';
+import { getBeforeCurQueryNodes, validateNodeForm } from '../../utils';
 
 const RadioGroup = Radio.Group;
 
@@ -27,6 +28,8 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const [fieldDataList, setFieldDataList] = useState<AppEntityField[]>([]);
   const [mainEntityList, setMainEntityList] = useState<MetadataEntityPair[]>([]);
   const [subEntityList, setSubEntityList] = useState<MetadataEntityPair[]>([]);
+
+  const [dataNodeList, setDataNodeList] = useState<any[]>([]);
 
   const handlePropsOnChange = (values: any) => {
     triggerEditorSignal.setNodeData(node.id, values);
@@ -43,6 +46,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
   const addType = Form.useWatch('addType', payloadForm);
   const mainEntityId = Form.useWatch('mainEntityId', payloadForm);
+  const batchType = Form.useWatch('batchType', payloadForm);
 
   useEffect(() => {
     payloadForm && validateNodeForm(form, payloadForm, true);
@@ -78,11 +82,15 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
         }
       }
     }
+
+    const nodes = triggerEditorSignal.nodes.value;
+    const newDataNodeList = getBeforeCurQueryNodes(node.id, nodes, [NodeType.DATA_QUERY_MULTIPLE, NodeType.DATA_QUERY]);
+    setDataNodeList(newDataNodeList);
   };
 
   // 新增方式变更
   const handleDataTypeChange = (curAddType: FLOW_ENTITY_TYPE) => {
-    payloadForm.clearFields(['mainEntityId', 'subEntityId', 'fields']);
+    payloadForm.clearFields(['mainEntityId', 'subEntityId', 'dataNodeId', 'fields']);
     const nodeData = triggerEditorSignal.nodeData.value[node.id];
     triggerEditorSignal.setNodeData(node.id, {
       ...nodeData,
@@ -113,7 +121,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   };
   // 主表数据变更
   const handleMainEntityIdChange = async (curMainEntityId: string) => {
-    payloadForm.clearFields(['subEntityId', 'fields']);
+    payloadForm.clearFields(['subEntityId', 'dataNodeId', 'fields']);
     const nodeData = triggerEditorSignal.nodeData.value[node.id];
     triggerEditorSignal.setNodeData(node.id, {
       ...nodeData,
@@ -137,7 +145,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   };
   // 子表数据变更
   const handleSubEntityIdChange = (curSubEntityId: string) => {
-    payloadForm.clearFields(['fields']);
+    payloadForm.clearFields(['dataNodeId', 'fields']);
     const nodeData = triggerEditorSignal.nodeData.value[node.id];
     triggerEditorSignal.setNodeData(node.id, {
       ...nodeData,
@@ -145,6 +153,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     });
     getFieldList(curSubEntityId);
   };
+
   // 获取字段下拉列表
   const getFieldList = async (dataSource: string) => {
     if (!dataSource) {
@@ -155,6 +164,10 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       item.fieldId = item.id;
     });
     setFieldDataList(res);
+  };
+
+  const handleBatchTypeChange = (value: boolean) => {
+    payloadForm.clearFields(['dataNodeId', 'fields']);
   };
 
   return (
@@ -255,18 +268,32 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
             <Grid.Row>
               <Form.Item label="新增数据" field="batchType" rules={[{ required: true, message: '请选择新增数据' }]}>
-                <RadioGroup>
+                <RadioGroup onChange={handleBatchTypeChange}>
                   <Radio value={false}>新增单条数据</Radio>
                   <Radio value={true}>新增多条数据</Radio>
                 </RadioGroup>
               </Form.Item>
             </Grid.Row>
 
-            <Grid.Row>
-              <Form.Item label="字段设置">
-                <FieldEditor fieldList={fieldDataList} form={payloadForm} />
-              </Form.Item>
-            </Grid.Row>
+            {batchType ? (
+              <Grid.Row>
+                <Form.Item label="数据源" field="dataNodeId">
+                  <Select allowClear>
+                    {dataNodeList.map((item) => (
+                      <Select.Option key={item.id} value={item.id}>
+                        {item.data.title}
+                      </Select.Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              </Grid.Row>
+            ) : (
+              <Grid.Row>
+                <Form.Item label="字段设置">
+                  <FieldEditor fieldList={fieldDataList} form={payloadForm} />
+                </Form.Item>
+              </Grid.Row>
+            )}
           </Form>
         </FormContent>
       ) : (
