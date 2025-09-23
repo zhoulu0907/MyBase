@@ -125,7 +125,8 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
                         second !== null &&
                         second <= first
                       ) {
-                        callback('第二个值必须大于第一个值');
+                        // callback('第二个值必须大于第一个值');
+                        callback();
                         return;
                       }
                     }
