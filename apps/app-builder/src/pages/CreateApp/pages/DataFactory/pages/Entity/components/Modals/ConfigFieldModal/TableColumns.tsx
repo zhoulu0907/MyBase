@@ -60,7 +60,6 @@ const TableColumns = ({
   setConfigPopoverVisible,
   setConstraintsPopoverVisible,
   renderFieldConfigContent,
-  updateField,
   getFieldIndex,
   deleteField,
   fields
@@ -70,6 +69,7 @@ const TableColumns = ({
       title: '字段名称',
       dataIndex: 'fieldName',
       width: 180,
+      align: 'center',
       render: (value: string, record: FieldFormValues, index: number) =>
         record.isSystemField === FIELD_TYPE.SYSTEM ? (
           <span className={styles['system-field']}>{value}</span>
@@ -87,6 +87,7 @@ const TableColumns = ({
       title: '展示名称',
       dataIndex: 'displayName',
       width: 180,
+      align: 'center',
       render: (value: string, record: FieldFormValues, index: number) =>
         record.isSystemField === FIELD_TYPE.SYSTEM ? (
           <span className={styles['system-field']}>{value}</span>
@@ -104,11 +105,13 @@ const TableColumns = ({
       title: '数据类型',
       dataIndex: 'fieldType',
       width: 140,
+      align: 'center',
       render: (value: string, record: FieldFormValues, index: number) => (
         <Space>
           <Form.Item
             field={`fields.${getFieldIndex(record.id, index)}.fieldType`}
             rules={[{ required: true, message: '数据类型不能为空' }]}
+            className={styles['field-form-item']}
           >
             <Select
               options={fieldTypeOptions}
@@ -144,12 +147,16 @@ const TableColumns = ({
       title: '字段描述',
       dataIndex: 'description',
       width: 200,
+      align: 'center',
       ellipsis: true,
       render: (value: string, record: FieldFormValues, index: number) =>
         record.isSystemField === 1 ? (
           <span className={styles['system-field']}>{value}</span>
         ) : (
-          <Form.Item field={`fields.${getFieldIndex(record.id, index)}.description`}>
+          <Form.Item
+            field={`fields.${getFieldIndex(record.id, index)}.description`}
+            className={styles['field-form-item']}
+          >
             <Input placeholder="请输入字段描述" />
           </Form.Item>
         )
@@ -158,6 +165,7 @@ const TableColumns = ({
       title: '字段类型',
       dataIndex: 'isSystemField',
       width: 110,
+      align: 'center',
       ellipsis: true,
       render: (value: number) => (
         <span className={styles['system-field']}>{FIELD_TYPE_LABEL[value as keyof typeof FIELD_TYPE_LABEL]}</span>
@@ -167,11 +175,15 @@ const TableColumns = ({
       title: '默认值',
       dataIndex: 'defaultValue',
       width: 120,
+      align: 'center',
       render: (value: string, record: FieldFormValues, index: number) =>
         record.isSystemField === FIELD_TYPE.SYSTEM ? (
           <span className={styles['system-field']}>-</span>
         ) : (
-          <Form.Item field={`fields.${getFieldIndex(record.id, index)}.defaultValue`}>
+          <Form.Item
+            field={`fields.${getFieldIndex(record.id, index)}.defaultValue`}
+            className={styles['field-form-item']}
+          >
             <Input />
           </Form.Item>
         )
@@ -180,11 +192,12 @@ const TableColumns = ({
       title: '唯一',
       dataIndex: 'isUnique',
       width: 60,
+      align: 'center',
       render: (value: number, record: FieldFormValues, index: number) =>
         record.isSystemField === FIELD_TYPE.SYSTEM ? (
           <span className={styles['system-field']}>-</span>
         ) : (
-          <Form.Item field={`fields.${getFieldIndex(record.id, index)}.isUnique`}>
+          <Form.Item field={`fields.${getFieldIndex(record.id, index)}.isUnique`} className={styles['field-form-item']}>
             <Checkbox />
           </Form.Item>
         )
@@ -193,11 +206,15 @@ const TableColumns = ({
       title: '允许空值',
       dataIndex: 'allowNull',
       width: 100,
+      align: 'center',
       render: (value: number, record: FieldFormValues, index: number) =>
         record.isSystemField === FIELD_TYPE.SYSTEM ? (
           <span className={styles['system-field']}>-</span>
         ) : (
-          <Form.Item field={`fields.${getFieldIndex(record.id, index)}.allowNull`}>
+          <Form.Item
+            field={`fields.${getFieldIndex(record.id, index)}.allowNull`}
+            className={styles['field-form-item']}
+          >
             <Checkbox />
           </Form.Item>
         )
@@ -206,6 +223,7 @@ const TableColumns = ({
       title: '字段约束',
       dataIndex: 'constraints',
       width: 120,
+      align: 'center',
       render: (value: any, record: FieldFormValues, index: number) =>
         record.isSystemField === FIELD_TYPE.SYSTEM ? (
           <span className={styles['system-field']}>-</span>
@@ -226,6 +244,7 @@ const TableColumns = ({
       title: '操作',
       dataIndex: 'operation',
       width: 80,
+      align: 'center',
       render: (value: unknown, record: FieldFormValues) => {
         const fieldIndex = fields.findIndex((f) => f.id === record.id);
         return (

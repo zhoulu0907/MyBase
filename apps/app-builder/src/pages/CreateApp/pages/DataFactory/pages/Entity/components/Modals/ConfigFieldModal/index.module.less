@@ -30,15 +30,6 @@
         }
       }
     }
-
-    :global(.arco-table-cell) {
-      padding: 20px 16px 0 !important;
-      vertical-align: text-top !important;
-    }
-
-    :global(.arco-table-cell .arco-table-cell-wrap-value > .arco-space) {
-      align-items: start !important;
-    }
   }
 
   .drag-handle {
@@ -115,6 +106,13 @@
 
 /* 字段表单项样式 */
 .field-form-item {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 56px;
   .arco-form-item-wrapper > .arco-form-message {
     white-space: nowrap !important;
   }

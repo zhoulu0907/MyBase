@@ -5,7 +5,7 @@ import { IconDragDotVertical } from '@arco-design/web-react/icon';
 import styles from './index.module.less';
 
 // 拖拽手柄组件
-const DragHandle = SortableHandle(() => <IconDragDotVertical className="drag-handle" />);
+const DragHandle = SortableHandle(() => <IconDragDotVertical className={styles['drag-handle']} />);
 
 // 可排序的表格行组件
 const SortableTableRow = SortableElement(({ children, ...props }: { children: React.ReactNode; [key: string]: unknown }) => {
@@ -79,6 +79,7 @@ const SortableTable: React.FC<SortableTableProps> = ({ data, columns, onSort }) 
       className={styles['field-config-table']}
       rowKey="id"
       components={components}
+      align="center"
     />
   );
 };
