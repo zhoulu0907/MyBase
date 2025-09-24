@@ -15,7 +15,10 @@ import {
   UPLOAD_OPTIONS,
   UPLOAD_VALUES,
   WIDTH_OPTIONS,
-  WIDTH_VALUES
+  WIDTH_VALUES,
+  TABS_TYPE_OPTIONS,
+  TABS_POSITION_OPTIONS,
+  TABS_POSITION_VALUES
 } from './constants';
 import type {
   IAlignConfigType,
@@ -35,7 +38,11 @@ import type {
   IWidthConfigType,
   TTextDefaultType,
   ISelectDataSourceConfigType,
-  ISubTableConfigType
+  ISubTableConfigType,
+  ITabsTypeConfigType,
+  ITabsPositionConfigType,
+  IImageConfigType,
+  IFileConfigType
 } from './types';
 
 export interface ICommonBaseType {
@@ -367,4 +374,85 @@ export const subTableConfig: ISubTableConfigType = {
   key: 'subTable',
   name: '子组件选项',
   type: CONFIG_TYPES.SUB_TABLE
+};
+
+// 页签样式
+export type TTabsTypeSelectKeyType = (typeof TABS_TYPE_OPTIONS)[keyof typeof TABS_TYPE_OPTIONS];
+export const tabsTypeConfig: ITabsTypeConfigType<TTabsTypeSelectKeyType> = {
+  key: 'type',
+  name: '页签样式',
+  type: CONFIG_TYPES.TABS_TYPE,
+  range: [
+    {
+      key: TABS_TYPE_OPTIONS.LINE,
+      label: TABS_TYPE_OPTIONS.LINE,
+      value: TABS_TYPE_OPTIONS.LINE
+    },
+    {
+      key: TABS_TYPE_OPTIONS.CARD,
+      label: TABS_TYPE_OPTIONS.CARD,
+      value: TABS_TYPE_OPTIONS.CARD
+    },
+    {
+      key: TABS_TYPE_OPTIONS.CARD_GUTTER,
+      label: TABS_TYPE_OPTIONS.CARD_GUTTER,
+      value: TABS_TYPE_OPTIONS.CARD_GUTTER
+    },
+    {
+      key: TABS_TYPE_OPTIONS.TEXT,
+      label: TABS_TYPE_OPTIONS.TEXT,
+      value: TABS_TYPE_OPTIONS.TEXT
+    },
+    {
+      key: TABS_TYPE_OPTIONS.ROUNDED,
+      label: TABS_TYPE_OPTIONS.ROUNDED,
+      value: TABS_TYPE_OPTIONS.ROUNDED
+    },
+    {
+      key: TABS_TYPE_OPTIONS.CAPSULE,
+      label: TABS_TYPE_OPTIONS.CAPSULE,
+      value: TABS_TYPE_OPTIONS.CAPSULE
+    }
+  ]
+};
+// 页签位置
+export type TTabsPositionSelectKeyType = (typeof TABS_POSITION_VALUES)[keyof typeof TABS_POSITION_VALUES];
+export const tabsPositionConfig: ITabsPositionConfigType<TTabsPositionSelectKeyType> = {
+  key: 'tabPosition',
+  name: '页签位置',
+  type: CONFIG_TYPES.TABS_POSITION,
+  range: [
+    {
+      key: TABS_POSITION_OPTIONS.LEFT,
+      label: TABS_POSITION_OPTIONS.LEFT,
+      value: TABS_POSITION_VALUES[TABS_POSITION_OPTIONS.LEFT]
+    },
+    {
+      key: TABS_POSITION_OPTIONS.TOP,
+      label: TABS_POSITION_OPTIONS.TOP,
+      value: TABS_POSITION_VALUES[TABS_POSITION_OPTIONS.TOP]
+    },
+    {
+      key: TABS_POSITION_OPTIONS.BOTTOM,
+      label: TABS_POSITION_OPTIONS.BOTTOM,
+      value: TABS_POSITION_VALUES[TABS_POSITION_OPTIONS.BOTTOM]
+    },
+    {
+      key: TABS_POSITION_OPTIONS.RIGHT,
+      label: TABS_POSITION_OPTIONS.RIGHT,
+      value: TABS_POSITION_VALUES[TABS_POSITION_OPTIONS.RIGHT]
+    }
+  ]
+};
+// 
+export const imageCofig: IImageConfigType = {
+  key: 'image',
+  name: '图片',
+  type: CONFIG_TYPES.IMAGE
+};
+
+export const fileCofig: IFileConfigType = {
+  key: 'file',
+  name: '图片',
+  type: CONFIG_TYPES.FILE
 };

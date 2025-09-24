@@ -89,16 +89,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   }, [entityId]);
 
   useEffect(() => {
-    if (triggerType) {
-      payloadForm.clearFields('triggerEvents');
-      handlePropsOnChange({
-        ...triggerEditorSignal.nodeData.value[node.id],
-        triggerEvents: []
-      });
-    }
-  }, [triggerType]);
-
-  useEffect(() => {
     if (triggerEvents) {
       console.log('triggerEvents: ', triggerEvents);
     }
@@ -150,6 +140,15 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     handlePropsOnChange(values);
   };
 
+  // 触发类型
+  const handleTriggerTypeChange = ()=>{
+    payloadForm.clearFields('triggerEvents');
+    handlePropsOnChange({
+      ...triggerEditorSignal.nodeData.value[node.id],
+      triggerEvents: []
+    });
+  }
+
   return (
     <>
       <FormHeader />
@@ -191,7 +190,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                 layout="vertical"
                 rules={[{ required: true, message: '请选择触发类型' }]}
               >
-                <RadioGroup
+                <RadioGroup onChange={handleTriggerTypeChange}
                   direction="horizontal"
                   options={[
                     {

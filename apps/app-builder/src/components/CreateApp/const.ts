@@ -3,21 +3,12 @@ export const appThemeColor = ['#4FAE7B', '#81C1C1', '#6439C1', '#E1BD5E', '#D889
 
 // 应用图标
 export const appIcon: string[] = [
-  'icon-niu_cattle',
-  'icon-xiong_bear',
-  'icon-hudie_butterfly',
   'icon-yasuo_compression',
-  'icon-gou_dog',
-  'icon-lu_deer',
   'icon-wendangshibai_doc-fail',
   'icon-shanchu_delete-one',
   'icon-lunboshipin_carousel-video',
-  'icon-niao_bird',
-  'icon-bianfu_bat',
-  'icon-mifeng_bee',
   'icon-quanbu_all-application',
   'icon-faan_bill',
-  'icon-haitun_dolphin'
 ];
 
 // 图标背景色

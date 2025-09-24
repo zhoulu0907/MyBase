@@ -22,6 +22,7 @@ export const COMPONENT_TYPE_DISPLAY_NAME_MAP: Record<string, string> = {
   [FORM_COMPONENT_TYPES.DATE_PICKER]: '日期',
   [FORM_COMPONENT_TYPES.DATE_RANGE_PICKER]: '日期区间',
   // [FORM_COMPONENT_TYPES.DATE_TIME_PICKER]: '日期时间',
+  [FORM_COMPONENT_TYPES.STATIC_TEXT]: '静态文本',
   [FORM_COMPONENT_TYPES.TIME_PICKER]: '时间',
   [FORM_COMPONENT_TYPES.SWITCH]: '开关',
   [FORM_COMPONENT_TYPES.RADIO]: '单选框',
@@ -34,12 +35,11 @@ export const COMPONENT_TYPE_DISPLAY_NAME_MAP: Record<string, string> = {
   [FORM_COMPONENT_TYPES.IMG_UPLOAD]: '图片上传',
   [FORM_COMPONENT_TYPES.AUTO_CODE]: '自动编号',
   [FORM_COMPONENT_TYPES.RELATED_FORM]: '关联表单',
-  [FORM_COMPONENT_TYPES.STATIC_TEXT]: '静态文本',
-  [FORM_COMPONENT_TYPES.DIVIDER]: '分割线',
   [FORM_COMPONENT_TYPES.RICH_TEXT]: '富文本',
   [FORM_COMPONENT_TYPES.CAROUSEL_F]: '轮播图',
   [FORM_COMPONENT_TYPES.SUB_TABLE]: '子表单',
   [FORM_COMPONENT_TYPES.DATA_SELECT]: '选择数据',
+  [FORM_COMPONENT_TYPES.TABS]: '页签组件',
 
   // 列表组件
   [LIST_COMPONENT_TYPES.TABLE]: '表格',
@@ -50,10 +50,13 @@ export const COMPONENT_TYPE_DISPLAY_NAME_MAP: Record<string, string> = {
   [LIST_COMPONENT_TYPES.LIST]: '画布列表',
 
   // 展示组件
+  [SHOW_COMPONENT_TYPES.DIVIDER]: '分隔符',
   [SHOW_COMPONENT_TYPES.INFO_NOTICE]: '信息公告',
-  [SHOW_COMPONENT_TYPES.TEXT]: '展示文本',
-  [SHOW_COMPONENT_TYPES.IMAGE]: '展示图片',
-  [SHOW_COMPONENT_TYPES.WEB_VIEW]: '网页组件'
+  [SHOW_COMPONENT_TYPES.TEXT]: '静态文本',
+  [SHOW_COMPONENT_TYPES.IMAGE]: '静态图片',
+  [SHOW_COMPONENT_TYPES.FILE]: '静态文件',
+  [SHOW_COMPONENT_TYPES.WEB_VIEW]: '网页组件',
+  [SHOW_COMPONENT_TYPES.PLACEHOLDER]: '占位符',
 };
 
 const allTemplate = {
@@ -250,14 +253,6 @@ const allTemplate = {
           category: 'base'
         },
         {
-          type: FORM_COMPONENT_TYPES.DIVIDER,
-          h: 36,
-          w: 118,
-          displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.DIVIDER],
-          icon: 'readonly_cp.svg', // todo
-          category: 'base'
-        },
-        {
           type: FORM_COMPONENT_TYPES.CAROUSEL_F,
           h: 36,
           w: 118,
@@ -278,6 +273,14 @@ const allTemplate = {
           h: 36,
           w: 118,
           displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.DATA_SELECT],
+          icon: 'readonly_cp.svg', // todo
+          category: 'base'
+        },
+        {
+          type: FORM_COMPONENT_TYPES.TABS,
+          h: 36,
+          w: 118,
+          displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[FORM_COMPONENT_TYPES.TABS],
           icon: 'readonly_cp.svg', // todo
           category: 'base'
         }
@@ -381,13 +384,37 @@ const allTemplate = {
           category: 'base'
         },
         {
+          type: SHOW_COMPONENT_TYPES.FILE,
+          h: 48,
+          w: 68,
+          displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[SHOW_COMPONENT_TYPES.FILE],
+          icon: 'display_image_cp.svg',
+          category: 'base'
+        },
+        {
           type: SHOW_COMPONENT_TYPES.WEB_VIEW,
           h: 48,
           w: 68,
           displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[SHOW_COMPONENT_TYPES.WEB_VIEW],
           icon: 'web_component_cp.svg',
           category: 'base'
-        }
+        },
+        {
+          type: SHOW_COMPONENT_TYPES.DIVIDER,
+          h: 36,
+          w: 118,
+          displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[SHOW_COMPONENT_TYPES.DIVIDER],
+          icon: 'divider_cp.svg',
+          category: 'base'
+        },
+        {
+          type: SHOW_COMPONENT_TYPES.PLACEHOLDER,
+          h: 36,
+          w: 118,
+          displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[SHOW_COMPONENT_TYPES.PLACEHOLDER],
+          icon: 'divider_cp.svg',
+          category: 'base'
+        },
       ]
     }
   ]

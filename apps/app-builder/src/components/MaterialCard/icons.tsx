@@ -31,6 +31,7 @@ import UserSelectIcon from '@/assets/images/cp/user_select_cp.svg';
 import WebComponentIcon from '@/assets/images/cp/web_component_cp.svg';
 import RelatedFormIcon from '@/assets/images/cp/related_form_cp.svg';
 import RichTextIcon from '@/assets/images/cp/rich_text_cp.svg';
+import DividerIcon from '@/assets/images/cp/divider_cp.svg';
 
 export const ICON_Map: Record<string, React.ReactNode> = {
   'text_input_cp.svg': <img src={TextInputIcon} />,
@@ -65,7 +66,8 @@ export const ICON_Map: Record<string, React.ReactNode> = {
   'canvas_list_cp.svg': <img src={CanvasListIcon} />,
   'calendar_cp.svg': <img src={CalendarIcon} />,
   'related_form_cp.svg': <img src={RelatedFormIcon} />,
-  'rich_text_cp.svg': <img src={RichTextIcon} />
+  'rich_text_cp.svg': <img src={RichTextIcon} />,
+  'divider_cp.svg': <img src={DividerIcon} />
 };
 
 // TODO 图标更新
@@ -95,6 +97,7 @@ export const ICON_Map_By_Type: Record<string, React.ReactNode> = {
   'directory_cp.svg': <img src={DirectoryIcon} />,
   'kanban_cp.svg': <img src={KanbanIcon} />,
   XImage: <img src={DisplayImageIcon} />,
+  XFile: <img src={DisplayImageIcon} />,
   XInfoNotice: <img src={InfoNoticeIcon} />,
   'display_text_cp.svg': <img src={DisplayTextIcon} />,
   'pwd_input_cp.svg': <img src={PwdInputIcon} />,
@@ -105,5 +108,6 @@ export const ICON_Map_By_Type: Record<string, React.ReactNode> = {
   XRelatedForm: <img src={RelatedFormIcon} />,
   XRichText: <img src={RichTextIcon} />,
   XSubTable: <img src={RichTextIcon} />,
-  XDataSelect: <img src={RichTextIcon} /> // todo
+  XDataSelect: <img src={RichTextIcon} />,
+  XDivider: <img src={DividerIcon} />
 };

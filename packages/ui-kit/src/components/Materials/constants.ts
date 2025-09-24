@@ -73,7 +73,14 @@ export const CONFIG_TYPES = {
   // 选择数据源
   SELECT_DATA_SOURCE: 'SelectDataSource',
   // 子表单组件
-  SUB_TABLE: 'SubTable'
+  SUB_TABLE: 'SubTable',
+  // 子表单组件
+  TABS_TYPE: 'TabsType',
+  // 子表单组件
+  TABS_POSITION: 'TabsPosition',
+  // 静态文件
+  IMAGE: 'Image',
+  FILE: 'File',
 } as const;
 
 // 状态选项常量
@@ -205,4 +212,29 @@ export const FILL_VALUES = {
   [FILL_OPTIONS.CONTAIN]: 'contain',
   [FILL_OPTIONS.COVER]: 'cover',
   [FILL_OPTIONS.FILL]: 'fill'
+} as const;
+
+// 页签样式常量
+export const TABS_TYPE_OPTIONS = {
+  LINE: 'line',
+  CARD: 'card',
+  CARD_GUTTER: 'card-gutter',
+  TEXT: 'text',
+  ROUNDED: 'rounded',
+  CAPSULE: 'capsule',
+} as const;
+
+// 页签位置常量
+export const TABS_POSITION_OPTIONS = {
+  LEFT: '左',
+  TOP: '上',
+  BOTTOM: '下',
+  RIGHT: '右'
+} as const;
+
+export const TABS_POSITION_VALUES = {
+  [TABS_POSITION_OPTIONS.LEFT]: 'left',
+  [TABS_POSITION_OPTIONS.TOP]: 'top',
+  [TABS_POSITION_OPTIONS.BOTTOM]: 'bottom',
+  [TABS_POSITION_OPTIONS.RIGHT]: 'right'
 } as const;
