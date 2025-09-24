@@ -331,6 +331,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
             <Grid.Row>
               <ConditionEditor
+                nodeId={node.id}
                 label="条件"
                 required
                 fields={conditionFields}

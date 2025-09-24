@@ -17,6 +17,7 @@ import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
 import { NodeType } from '../../const';
 import { getBeforeCurQueryNodes, validateNodeForm } from '../../utils';
+import { updateDataAddOutputs } from './output';
 
 const RadioGroup = Radio.Group;
 
@@ -30,17 +31,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const [subEntityList, setSubEntityList] = useState<MetadataEntityPair[]>([]);
 
   const [dataNodeList, setDataNodeList] = useState<any[]>([]);
-
-  const handlePropsOnChange = (values: any) => {
-    triggerEditorSignal.setNodeData(node.id, values);
-  };
-
-  const onValuesChange = async (changeValue: any, values: any) => {
-    // 校验表单
-    validateNodeForm(form, payloadForm, false);
-
-    handlePropsOnChange(values);
-  };
 
   const [payloadForm] = Form.useForm();
 
@@ -168,6 +158,19 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
   const handleBatchTypeChange = (value: boolean) => {
     payloadForm.clearFields(['dataNodeId', 'fields']);
+  };
+
+  const handlePropsOnChange = (values: any) => {
+    triggerEditorSignal.setNodeData(node.id, values);
+  };
+
+  const onValuesChange = async (changeValue: any, values: any) => {
+    // 校验表单
+    validateNodeForm(form, payloadForm, false);
+
+    updateDataAddOutputs(node.id, values, fieldDataList);
+
+    handlePropsOnChange(values);
   };
 
   return (

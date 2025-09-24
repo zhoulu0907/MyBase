@@ -14,7 +14,6 @@ const FlowEditorPage: React.FC = () => {
 
   const dealProcessDefinition = (newNodes: any[]): any[] => {
     const processDefinitionJson = newNodes.map((item) => {
-      console.log('item: ', item);
       const { outputs: nodeOutputs, initialData: nodeInitialData, ...restNodeData } = nodeData.value[item.id] || {};
 
       if (item.blocks?.length) {

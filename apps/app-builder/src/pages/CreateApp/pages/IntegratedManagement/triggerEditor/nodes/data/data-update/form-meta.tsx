@@ -21,6 +21,7 @@ import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
 import { validateNodeForm } from '../../utils';
+import { updateDataUpdateOutputs } from './output';
 
 const RadioGroup = Radio.Group;
 
@@ -36,17 +37,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const [conditionFields, setConditionFields] = useState<ConfitionField[]>([]);
   const [validationTypes, setValidationTypes] = useState<EntityFieldValidationTypes[]>([]);
   const [fieldDataList, setFieldDataList] = useState<AppEntityField[]>([]);
-
-  const handlePropsOnChange = (values: any) => {
-    triggerEditorSignal.setNodeData(node.id, values);
-  };
-
-  const onValuesChange = async (changeValue: any, values: any) => {
-    // 校验表单
-    validateNodeForm(form, payloadForm, false);
-
-    handlePropsOnChange(values);
-  };
 
   const [payloadForm] = Form.useForm();
 
@@ -190,6 +180,19 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     }
   };
 
+  const handlePropsOnChange = (values: any) => {
+    triggerEditorSignal.setNodeData(node.id, values);
+  };
+
+  const onValuesChange = async (changeValue: any, values: any) => {
+    // 校验表单
+    validateNodeForm(form, payloadForm, false);
+
+    updateDataUpdateOutputs(node.id, values);
+
+    handlePropsOnChange(values);
+  };
+
   return (
     <>
       <FormHeader />
@@ -288,6 +291,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
             <Grid.Row>
               <ConditionEditor
+                nodeId={node.id}
                 label="匹配规则"
                 required
                 fields={conditionFields}

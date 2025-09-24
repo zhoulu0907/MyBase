@@ -1,32 +1,6 @@
 import { TriggerRange } from './components/const';
 import { type FlowDocumentJSON } from './typings';
 
-export const initialData: FlowDocumentJSON = {
-  nodes: [
-    {
-      id: 'start_0',
-      type: 'start',
-      blocks: [],
-      data: {
-        title: '触发节点',
-        outputs: {
-          type: 'object',
-          properties: {}
-        }
-      }
-    },
-
-    {
-      id: 'end_0',
-      type: 'end',
-      blocks: [],
-      data: {
-        title: '结束'
-      }
-    }
-  ]
-};
-
 export const EndInitData = {
   id: 'end_0',
   type: 'end',
@@ -37,7 +11,7 @@ export const EndInitData = {
   }
 };
 
-export const StartFormInitData = {
+export const StartFormInitData: FlowDocumentJSON = {
   nodes: [
     {
       id: 'start_form_0',
@@ -59,9 +33,9 @@ export const StartFormInitData = {
     },
     EndInitData
   ]
-} as FlowDocumentJSON;
+};
 
-export const StartEntityInitData = {
+export const StartEntityInitData: FlowDocumentJSON = {
   nodes: [
     {
       id: 'start_entity_0',
@@ -81,9 +55,9 @@ export const StartEntityInitData = {
     },
     EndInitData
   ]
-} as FlowDocumentJSON;
+};
 
-export const StartTimeInitData = {
+export const StartTimeInitData: FlowDocumentJSON = {
   nodes: [
     {
       id: 'start_time_0',
@@ -109,9 +83,9 @@ export const StartTimeInitData = {
     },
     EndInitData
   ]
-} as FlowDocumentJSON;
+};
 
-export const StartDateFieldInitData = {
+export const StartDateFieldInitData: FlowDocumentJSON = {
   nodes: [
     {
       id: 'start_date_field_0',
@@ -124,7 +98,7 @@ export const StartDateFieldInitData = {
           entityId: '',
           batchMode: false,
           batchSize: 100,
-          offsetMode: 0,
+          offsetMode: 'none',
           offsetValue: 0,
           offsetUnit: 'day',
           dailyExecTime: '00:00'
@@ -137,9 +111,9 @@ export const StartDateFieldInitData = {
     },
     EndInitData
   ]
-} as FlowDocumentJSON;
+};
 
-export const StartApiInitData = {
+export const StartApiInitData: FlowDocumentJSON = {
   nodes: [
     {
       id: 'start_api_0',
@@ -155,9 +129,9 @@ export const StartApiInitData = {
     },
     EndInitData
   ]
-} as FlowDocumentJSON;
+};
 
-export const StartBpmInitData = {
+export const StartBpmInitData: FlowDocumentJSON = {
   nodes: [
     {
       id: 'start_bpm_0',
@@ -173,4 +147,4 @@ export const StartBpmInitData = {
     },
     EndInitData
   ]
-} as FlowDocumentJSON;
+};
