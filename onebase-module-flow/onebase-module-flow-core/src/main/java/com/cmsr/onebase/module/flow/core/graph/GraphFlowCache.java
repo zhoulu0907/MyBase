@@ -67,9 +67,8 @@ public class GraphFlowCache {
         startEntityNodeDataCache.removeIf(startEntityNodeData -> startEntityNodeData.getEntityId().equals(processId));
     }
 
-    public Map<String, Object> getNodeData(Long processId, String nodeId) {
-        Map<String, Map<String, Object>> flowNodeData = flowNodeDataCache.get(processId);
-        return flowNodeData.get(nodeId);
+    public Map<String, Map<String, Object>> getNodeData(Long processId) {
+        return flowNodeDataCache.get(processId);
     }
 
     public StartTimeNodeData getStartTimeNodeData(Long processId) {

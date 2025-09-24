@@ -3,19 +3,19 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    
+
     <parent>
         <groupId>com.cmsr.onebase</groupId>
         <artifactId>onebase-module-flow</artifactId>
         <version>${revision}</version>
     </parent>
-    
+
     <artifactId>onebase-module-flow-core</artifactId>
     <packaging>jar</packaging>
-    
+
     <name>${project.artifactId}</name>
     <description>流程模块核心实现</description>
-    
+
     <dependencies>
         <!-- OneBase框架依赖 -->
         <dependency>
@@ -28,32 +28,31 @@
         </dependency>
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-spring-boot-starter-express</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-spring-boot-starter-redis</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-api</artifactId>
         </dependency>
-        
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-module-flow-context</artifactId>
+            <version>${revision}</version>
+        </dependency>
         <!-- LiteFlow流程引擎 -->
         <dependency>
             <groupId>com.yomahub</groupId>
             <artifactId>liteflow-spring-boot-starter</artifactId>
-            <version>2.13.2.1</version>
         </dependency>
-        
         <!-- SnailJob任务调度 -->
         <dependency>
             <groupId>com.aizuda</groupId>
             <artifactId>snail-job-client-job-core</artifactId>
-            <version>1.7.2</version>
-        </dependency>
-
-        <!-- MVEL表达式引擎 -->
-        <dependency>
-            <groupId>org.mvel</groupId>
-            <artifactId>mvel2</artifactId>
-            <version>2.4.14.Final</version>
         </dependency>
         <!-- 测试依赖 -->
         <dependency>
@@ -61,7 +60,5 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-        
-
     </dependencies>
 </project>

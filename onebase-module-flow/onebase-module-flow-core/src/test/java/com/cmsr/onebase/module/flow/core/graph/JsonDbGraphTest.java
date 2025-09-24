@@ -1,4 +1,4 @@
-package com.cmsr.onebase.module.flow.graph;
+package com.cmsr.onebase.module.flow.core.graph;
 
 import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDO;
