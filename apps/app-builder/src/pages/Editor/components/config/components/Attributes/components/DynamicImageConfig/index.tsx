@@ -1,12 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { Form, Input, Upload, Message, Popover } from '@arco-design/web-react';
-import { IconEdit, IconDelete } from '@arco-design/web-react/icon';
+import React, { useState } from 'react';
+import { Form, Upload, Message } from '@arco-design/web-react';
+import { IconDelete } from '@arco-design/web-react/icon';
 import { uploadFile } from '@onebase/platform-center';
-// import { useAppEntityStore } from '@/store/store_entity';
-// import { type MetadataEntityField, type MetadataEntityPair } from '@onebase/app';
 import styles from '../../index.module.less';
-
-const FormItem = Form.Item;
 
 export interface DynamicImageConfigProps {
   handlePropsChange: (key: string, value: string | number | boolean | any[]) => void;
@@ -42,7 +38,7 @@ const DynamicImageConfig: React.FC<DynamicImageConfigProps> = ({ handlePropsChan
   };
 
   return (
-    <FormItem layout="vertical" labelAlign="left" label={'图片配置'} className={styles.formItem}>
+    <Form.Item layout="vertical" labelAlign="left" label={'图片配置'} className={styles.formItem}>
       <div className={styles.imagesTips}>支持jpg、jpeg、png、gif格式，单张{maxSizeMB}MB以内。</div>
 
       <div className={styles.imagesList}>
@@ -110,7 +106,7 @@ const DynamicImageConfig: React.FC<DynamicImageConfigProps> = ({ handlePropsChan
           </div>
         )}
       </div>
-    </FormItem>
+    </Form.Item>
   );
 };
 

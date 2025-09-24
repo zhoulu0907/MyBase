@@ -1,12 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { Form, Input, Upload, Message, Popover } from '@arco-design/web-react';
-import { IconEdit, IconDelete } from '@arco-design/web-react/icon';
+import React, { useState } from 'react';
+import { Form, Upload, Message } from '@arco-design/web-react';
+import { IconDelete } from '@arco-design/web-react/icon';
 import { uploadFile } from '@onebase/platform-center';
-// import { useAppEntityStore } from '@/store/store_entity';
-// import { type MetadataEntityField, type MetadataEntityPair } from '@onebase/app';
 import styles from '../../index.module.less';
-
-const FormItem = Form.Item;
 
 export interface DynamicFileConfigProps {
   handlePropsChange: (key: string, value: string | number | boolean | any[]) => void;
@@ -39,7 +35,7 @@ const DynamicFileConfig: React.FC<DynamicFileConfigProps> = ({ handlePropsChange
   };
 
   return (
-    <FormItem layout="vertical" labelAlign="left" label={'文件配置'} className={styles.formItem}>
+    <Form.Item layout="vertical" labelAlign="left" label={'文件配置'} className={styles.formItem}>
       <div>支持{maxSizeMB}MB以内。</div>
 
       <div className={styles.fileList}>
@@ -108,7 +104,7 @@ const DynamicFileConfig: React.FC<DynamicFileConfigProps> = ({ handlePropsChange
           </div>
         ))}
       </div>
-    </FormItem>
+    </Form.Item>
   );
 };
 
