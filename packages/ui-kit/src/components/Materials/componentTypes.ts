@@ -26,11 +26,11 @@ export const FORM_COMPONENT_TYPES = {
   AUTO_CODE: 'XAutoCode',
   RELATED_FORM: 'XRelatedForm',
   STATIC_TEXT: 'XStaticText',
-  DIVIDER: 'XDivider',
   RICH_TEXT: 'XRichText',
   CAROUSEL_F: 'XFCarousel',
   SUB_TABLE: 'XSubTable',
-  DATA_SELECT: 'XDataSelect'
+  DATA_SELECT: 'XDataSelect',
+  TABS: 'XTabs',
 } as const;
 
 // 布局组件类型
@@ -54,7 +54,9 @@ export const SHOW_COMPONENT_TYPES = {
   INFO_NOTICE: 'XInfoNotice',
   IMAGE: 'XImage',
   TEXT: 'XText',
-  WEB_VIEW: 'XWebView'
+  WEB_VIEW: 'XWebView',
+  DIVIDER: 'XDivider',
+  PLACEHOLDER: 'XPlaceholder'
 } as const;
 
 // 列表组件类型
