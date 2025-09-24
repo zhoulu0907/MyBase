@@ -22,6 +22,7 @@
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-common</artifactId>
         </dependency>
+
         
         <!-- 依赖 Core 模块获得默认实现 -->
         <dependency>

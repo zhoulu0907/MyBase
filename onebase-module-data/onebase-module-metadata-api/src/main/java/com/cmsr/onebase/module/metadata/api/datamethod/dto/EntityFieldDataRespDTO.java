@@ -16,5 +16,5 @@ public class EntityFieldDataRespDTO {
     @Schema(description = "JDBC类型", example = "VARCHAR")
     private String jdbcType;
     @Schema(description = "字段值", example = "张三")
-    private String fieldValue;
+    private Object fieldValue;
 }
