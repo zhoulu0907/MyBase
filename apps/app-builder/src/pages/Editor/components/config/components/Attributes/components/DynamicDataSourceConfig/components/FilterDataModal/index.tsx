@@ -49,8 +49,8 @@ const FilterDataModal: React.FC<FilterDataModalProps> = ({ visible, onCancel }) 
           <span className={styles.titleSpan}>添加过滤条件来限定可选数据范围</span>
           {/* 添加过滤条件 */}
           {/* <ConditionEditor
+            data={[]}
             fields={dataFilters}
-            // fields={appEntityFields}
             entityFieldValidationTypes={filterFieldCheckType}
           /> */}
         </div>

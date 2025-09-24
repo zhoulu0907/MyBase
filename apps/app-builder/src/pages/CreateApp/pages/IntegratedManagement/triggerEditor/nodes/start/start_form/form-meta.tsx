@@ -2,7 +2,7 @@ import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-e
 
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { Checkbox, Form, Grid, Input, Radio, Select } from '@arco-design/web-react';
-import type { ComponentConfig, Condition } from '@onebase/app';
+import type { ComponentConfig } from '@onebase/app';
 import {
   getComponentListByPageId,
   getFieldCheckTypeApi,
@@ -12,11 +12,11 @@ import {
 } from '@onebase/app';
 import { getHashQueryParam } from '@onebase/common';
 import { useEffect, useState } from 'react';
-import ConditionEditor from '../../components/condition-editor';
-import { TriggerRange } from '../../components/const';
-import { FormContent, FormHeader, FormOutputs } from '../../form-components';
-import { useIsSidebar, useNodeRenderContext } from '../../hooks';
-import { type FlowNodeJSON } from '../../typings';
+import ConditionEditor from '../../../components/condition-editor';
+import { TriggerRange } from '../../../components/const';
+import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
+import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
+import { type FlowNodeJSON } from '../../../typings';
 
 const CheckboxGroup = Checkbox.Group;
 const Option = Select.Option;
@@ -98,11 +98,8 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
       if (filedIds?.length) {
         const newValidationTypes = await getFieldCheckTypeApi(filedIds);
-        console.log('validationTypes: ', newValidationTypes);
         setValidationTypes(newValidationTypes);
       }
-
-      console.log('newConditionFields: ', newConditionFields);
 
       setConditionFields(newConditionFields);
     }
@@ -110,14 +107,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
   const onValuesChange = (changeValue: any, values: any) => {
     handlePropsOnChange(values);
-  };
-
-  const onConditionChange = (conditions: Condition[]) => {
-    console.log(conditions);
-    handlePropsOnChange({
-      ...triggerEditorSignal.nodeData.value[node.id],
-      filterCondition: conditions
-    });
   };
 
   return (
@@ -254,16 +243,15 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             </Grid.Row>
 
             <Grid.Row>
-              <Form.Item label="过滤条件" field="filterCondition" layout="vertical">
-                {validationTypes && (
-                  <ConditionEditor
-                    onChange={onConditionChange}
-                    data={triggerEditorSignal.nodeData.value[node.id].filterCondition}
-                    fields={conditionFields}
-                    entityFieldValidationTypes={validationTypes}
-                  />
-                )}
-              </Form.Item>
+              {validationTypes && (
+                <ConditionEditor
+                  label="过滤条件"
+                  required
+                  fields={conditionFields}
+                  entityFieldValidationTypes={validationTypes}
+                  form={payloadForm}
+                />
+              )}
             </Grid.Row>
           </Form>
         </FormContent>

@@ -1,7 +1,7 @@
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { Form } from '@arco-design/web-react';
 import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
-import { type Condition, type ConfitionField, type EntityFieldValidationTypes } from '@onebase/app';
+import { type ConfitionField, type EntityFieldValidationTypes } from '@onebase/app';
 import { useState } from 'react';
 import ConditionEditor from '../../../components/condition-editor';
 import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
@@ -23,13 +23,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     triggerEditorSignal.setNodeData(node.id, values);
   };
 
-  const onConditionChange = (conditions: Condition[]) => {
-    handlePropsOnChange({
-      ...triggerEditorSignal.nodeData.value[node.id],
-      filterCondition: conditions
-    });
-  };
-
   return (
     <>
       <FormHeader />
@@ -41,14 +34,15 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             onValuesChange={onValuesChange}
             layout="vertical"
           >
-            <Form.Item field="filterCondition" label="条件" required>
+            <Grid.Row>
               <ConditionEditor
-                data={triggerEditorSignal.nodeData.value[node.id]?.filterCondition || []}
+                label="条件"
+                required
                 fields={conditionFields}
                 entityFieldValidationTypes={validationTypes}
-                onChange={onConditionChange}
+                form={payloadForm}
               />
-            </Form.Item>
+            </Grid.Row>
           </Form>
         </FormContent>
       ) : (

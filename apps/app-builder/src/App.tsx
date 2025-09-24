@@ -1,3 +1,4 @@
+import { Message } from '@arco-design/web-react';
 import '@arco-design/web-react/dist/css/arco.css';
 import '@arco-themes/react-cyansu-ob03/index.less';
 import { NotFoundPage } from '@onebase/common';
@@ -18,6 +19,12 @@ function AppContent() {
   //   if (isChecking) {
   //     return <LoadingScreen />;
   //   }
+
+  Message.config({
+    duration: 3000,
+    maxCount: 1,
+    getContainer: () => document.body
+  });
 
   return (
     <Routes>

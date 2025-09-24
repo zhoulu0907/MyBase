@@ -115,6 +115,7 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
   // 获取页面数据实体
   const getViewDataEntity = async () => {
     // const dataEntityResq = await getViewDataEntityApi();
+    // 暂时没有获取页面表单绑定主实体的接口 mock数据
     const dataEntityResq = {
       entityId: '16935056057237504',
       entityName: '尝试创建页面',

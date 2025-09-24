@@ -8,6 +8,7 @@ interface FillingRuleSettingsModalProps {
   visible: boolean;
   fieldOptions: Array<any>;
   onCancel: any;
+  onOk: any;
 }
 
 const Option = Select.Option;
@@ -46,7 +47,12 @@ const fillToOptions = [
   }
 ];
 
-const FillingRuleSettingsModal: React.FC<FillingRuleSettingsModalProps> = ({ visible, fieldOptions, onCancel }) => {
+const FillingRuleSettingsModal: React.FC<FillingRuleSettingsModalProps> = ({
+  visible,
+  fieldOptions,
+  onCancel,
+  onOk
+}) => {
   const [selected, setSelected] = useState<string[]>([]);
   const [fillOption, setFillOption] = useState<number>(1);
   const [isToNextStep, setIsToNextStep] = useState<boolean>(false);
@@ -54,9 +60,9 @@ const FillingRuleSettingsModal: React.FC<FillingRuleSettingsModalProps> = ({ vis
   // todo
   useEffect(() => {
     if (visible) {
-      setSelected([]);
-      setFillOption(1);
-      setIsToNextStep(false);
+      // setSelected([]);
+      // setFillOption(1);
+      // setIsToNextStep(false);
     }
   }, [visible]);
 
@@ -82,9 +88,9 @@ const FillingRuleSettingsModal: React.FC<FillingRuleSettingsModalProps> = ({ vis
 
   const onSubmit = () => {
     if (fillOption === 1) {
-      onCancel(); // todo
+      onOk(selected);
     } else {
-      !isToNextStep ? setIsToNextStep(true) : onCancel(); //todo
+      !isToNextStep ? setIsToNextStep(true) : onOk(selected); //todo
     }
   };
 

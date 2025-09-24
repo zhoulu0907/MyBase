@@ -81,6 +81,7 @@ const DynamicDataSourceConfig: React.FC<DynamicSelectDataSourceConfigProps> = ({
   ]);
 
   const [ruleSettingVisible, setRuleSettingVisible] = useState(false); //填充规则设置popup
+  const [selectRule, setSelectRule] = useState([]);
 
   useEffect(() => {
     curAppId && getPageList();
@@ -120,6 +121,12 @@ const DynamicDataSourceConfig: React.FC<DynamicSelectDataSourceConfigProps> = ({
 
   // 获取叶子节点
   const leafCount = countSelectedLeaf(selected, displayFieldOptions);
+
+  const handleOKModal = (values: any) => {
+    console.log(values);
+    setSelectRule(values);
+    setRuleSettingVisible(false);
+  };
 
   return (
     <>
@@ -185,12 +192,13 @@ const DynamicDataSourceConfig: React.FC<DynamicSelectDataSourceConfigProps> = ({
               </FormItem>
               <FormItem layout="vertical" labelAlign="left" label={'填充到表单字段'} className={styles.noMarginBottom}>
                 <Button long onClick={() => setRuleSettingVisible(true)}>
-                  填充规则设置
+                  {selectRule.length > 0 ? '已设置填充规则' : '填充规则设置'}
                 </Button>
                 <FillingRuleSettingsModal
                   visible={ruleSettingVisible}
                   fieldOptions={initialDisplayFieldOptions}
                   onCancel={() => setRuleSettingVisible(false)}
+                  onOk={(values: any) => handleOKModal(values)}
                 />
               </FormItem>
             </FormItem>

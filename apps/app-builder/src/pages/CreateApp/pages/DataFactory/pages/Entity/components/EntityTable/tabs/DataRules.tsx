@@ -5,7 +5,7 @@ import { Button, Dropdown, Menu, Message, Space, Table, Tag } from '@arco-design
 import { getEntityRules } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
 import { CreateCustomRule, CreateOtherRule } from '../../Modals';
-import { validationTypeOptions, validationTypeMap } from '../../Modals/CreateRuleModal/rule';
+import { VALIDATION_TYPES, validationTypeList, validationTypeMap } from '../../Modals/CreateEditRuleModal/rule';
 import styles from './tabs.module.less';
 
 interface DataRulesProps {
@@ -22,6 +22,7 @@ const DataRules: React.FC<DataRulesProps> = ({ entity, activeTab }) => {
   const [createCustomRuleModalVisible, setCreateCustomRuleModalVisible] = useState(false);
   const [createOtherRuleModalVisible, setCreateOtherRuleModalVisible] = useState(false);
   const [ruleType, setRuleType] = useState('');
+  const [editRule, setEditRule] = useState(null);
   const loadRules = async () => {
     try {
       setLoading(true);
@@ -45,6 +46,22 @@ const DataRules: React.FC<DataRulesProps> = ({ entity, activeTab }) => {
     }
   };
 
+  const handleEdit = (record: any) => {
+    console.log('handleEdit', record);
+    setRuleType(record.validationType);
+    setEditRule(record);
+
+    if (record.validationType === VALIDATION_TYPES.CUSTOM) {
+      setCreateCustomRuleModalVisible(true);
+    } else {
+      setCreateOtherRuleModalVisible(true);
+    }
+  };
+
+  const handleDelete = (record: any) => {
+    console.log('handleDelete', record);
+  };
+
   const columns: TableColumnProps[] = [
     {
       title: '序号',
@@ -65,42 +82,36 @@ const DataRules: React.FC<DataRulesProps> = ({ entity, activeTab }) => {
     },
     {
       title: '校验数据项',
-      dataIndex: 'fieldName',
-      key: 'fieldName'
+      dataIndex: 'validationItems',
+      key: 'validationItems',
+      render: (validationItems: string[]) => validationItems.join(',')
     },
-    {
-      title: '条件设置',
-      dataIndex: 'validationCondition',
-      key: 'validationCondition'
-    },
+    // 暂时隐藏
+    // {
+    //   title: '条件设置',
+    //   dataIndex: 'validationCondition',
+    //   key: 'validationCondition'
+    // },
     {
       title: '验证失败提示语',
-      dataIndex: 'popPrompt',
-      key: 'popPrompt'
+      dataIndex: 'errorMessage',
+      key: 'errorMessage'
     },
-    // {
-    //   title: '状态',
-    //   dataIndex: 'status',
-    //   key: 'status',
-    //   render: (status: string) => (
-    //     <Tag color={status === 'active' ? 'green' : 'red'}>
-    //       {status === 'active' ? '启用' : '禁用'}
-    //     </Tag>
-    //   ),
-    // },
     {
       title: '操作',
       key: 'operation',
-      render: () => (
-        <Space>
-          <Button type="text" size="mini">
-            编辑
-          </Button>
-          <Button type="text" size="mini" status="danger">
-            删除
-          </Button>
-        </Space>
-      )
+      render: (col, record) => {
+        return (
+          <Space>
+            <Button type="text" size="mini" onClick={() => handleEdit(record)}>
+              编辑
+            </Button>
+            <Button type="text" size="mini" status="danger" onClick={() => handleDelete(record)}>
+              删除
+            </Button>
+          </Space>
+        );
+      }
     }
   ];
 
@@ -111,8 +122,9 @@ const DataRules: React.FC<DataRulesProps> = ({ entity, activeTab }) => {
   }, [entity, activeTab, page]);
 
   const handleClickMenu = (value: string) => {
+    setEditRule(null);
     setRuleType(value);
-    if (value === 'custom') {
+    if (value === VALIDATION_TYPES.CUSTOM) {
       // 自定义校验
       setCreateCustomRuleModalVisible(true);
     } else {
@@ -127,7 +139,7 @@ const DataRules: React.FC<DataRulesProps> = ({ entity, activeTab }) => {
         <Dropdown
           droplist={
             <Menu>
-              {validationTypeOptions.map((item) => (
+              {validationTypeList.map((item) => (
                 <Menu.Item key={item.value} onClick={() => handleClickMenu(item.value)}>
                   {item.label}
                 </Menu.Item>
@@ -160,6 +172,7 @@ const DataRules: React.FC<DataRulesProps> = ({ entity, activeTab }) => {
         setVisible={setCreateCustomRuleModalVisible}
         successCallback={loadRules}
         entity={entity}
+        editRule={editRule}
       />
       <CreateOtherRule
         visible={createOtherRuleModalVisible}
@@ -167,6 +180,7 @@ const DataRules: React.FC<DataRulesProps> = ({ entity, activeTab }) => {
         successCallback={loadRules}
         entity={entity}
         ruleType={ruleType}
+        editRule={editRule}
       />
     </div>
   );
