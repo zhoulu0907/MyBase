@@ -53,6 +53,7 @@ export const LIST_COMPONENT_TYPES = {
 export const SHOW_COMPONENT_TYPES = {
   INFO_NOTICE: 'XInfoNotice',
   IMAGE: 'XImage',
+  FILE: 'XFile',
   TEXT: 'XText',
   WEB_VIEW: 'XWebView',
   DIVIDER: 'XDivider',

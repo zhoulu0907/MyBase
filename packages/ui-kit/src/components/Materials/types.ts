@@ -139,6 +139,17 @@ export interface IStatusConfigType<KeyType> {
   }>;
 }
 
+export interface IImageConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.IMAGE;
+}
+export interface IFileConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.FILE;
+}
+
 // 宽度配置
 export interface IWidthConfigType<KeyType> {
   key: string;

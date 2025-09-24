@@ -4,7 +4,7 @@ import {
   statusConfig,
   widthConfig,
   fillConfig,
-  imageCofig,
+  fileCofig,
   type ICommonBaseType,
   type TStatusSelectKeyType,
   type TWidthSelectKeyType,
@@ -19,26 +19,26 @@ import type {
   TNumberDefaultType,
   TRadioDefaultType,
   TSelectDefaultType,
-  IImageConfigType
+  IFileConfigType
 } from '../../../types';
 
-export interface XImageSchema {
-  editData: TXImageEditData;
-  config: XImageConfig;
+export interface XFileSchema {
+  editData: TXFileEditData;
+  config: XFileConfig;
 }
 
-export type TXImageEditData = Array<
+export type TXFileEditData = Array<
   ITextConfigType | IWidthConfigType<TWidthSelectKeyType> | IStatusConfigType<TStatusSelectKeyType> | IBooleanConfigType |
-  IStatusConfigType<TFillSelectKeyType> | IImageConfigType
+  IStatusConfigType<TFillSelectKeyType> | IFileConfigType
 >;
 
-interface Images {
+interface Files {
   image: string;
   text?: string;
   url?: string;
 }
 
-export interface XImageConfig extends ICommonBaseType {
+export interface XFileConfig extends ICommonBaseType {
   /**
    * 组件状态：可用、隐藏、只读
    * 可选值: 'default' | 'hidden' | 'readonly'
@@ -59,21 +59,19 @@ export interface XImageConfig extends ICommonBaseType {
    * 最大限制高度（px）
    */
   maxHeight?: TNumberDefaultType;
-  imageCofig: Images[];
-  imageUrl: string;
+  fileCofig: Files[];
 }
 
-const XImage: XImageSchema = {
-  editData: [...baseConfig, imageCofig, fillConfig, widthConfig, statusConfig],
+const XFile: XFileSchema = {
+  editData: [...baseConfig, fileCofig, fillConfig, widthConfig, statusConfig],
   config: {
     ...baseDefault,
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     fillStyle: FILL_VALUES[FILL_OPTIONS.COVER],
-    imageCofig:[],
-    imageUrl: '',
+    fileCofig:[],
     maxHeight: undefined
   }
 };
 
-export default XImage;
+export default XFile;

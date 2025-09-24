@@ -113,6 +113,8 @@ const ComponentEditRender: React.FC<ComponentRenderProps> = ({ cpId, cpType, pag
         return <ShowComp.XInfoNotice cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case SHOW_COMPONENT_TYPES.IMAGE:
         return <ShowComp.XImage cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+      case SHOW_COMPONENT_TYPES.FILE:
+        return <ShowComp.XFile cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case SHOW_COMPONENT_TYPES.TEXT:
         return <ShowComp.XText cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case SHOW_COMPONENT_TYPES.WEB_VIEW:
