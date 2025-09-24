@@ -2,6 +2,7 @@ import { memo } from 'react';
 import { Image } from '@arco-design/web-react';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import { type XImageConfig } from './schema';
+import '../index.css';
 import './index.css';
 
 const XImage = memo((props: XImageConfig & { runtime?: boolean }) => {
