@@ -1,5 +1,4 @@
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
-import { triggerNodeOutputSignal } from '@/store/singals/trigger_node_output';
 import { useAppStore } from '@/store/store_app';
 import { Form, Grid, Input, Radio, Select } from '@arco-design/web-react';
 import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
@@ -18,6 +17,7 @@ import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
 import { NodeType } from '../../const';
 import { getBeforeCurQueryNodes, validateNodeForm } from '../../utils';
+import { updateDataAddOutputs } from './output';
 
 const RadioGroup = Radio.Group;
 
@@ -168,20 +168,9 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     // 校验表单
     validateNodeForm(form, payloadForm, false);
 
-    updateOutputs(values);
+    updateDataAddOutputs(node.id, values, fieldDataList);
 
     handlePropsOnChange(values);
-  };
-
-  const updateOutputs = (values: any) => {
-    const outputs = {
-      mainEntityId: values.mainEntityId,
-      subEntityId: values.subEntityId,
-      dataNodeId: values.dataNodeId,
-      fields: values.fields
-    };
-
-    triggerNodeOutputSignal.addTriggerNodeOutput(node.id, outputs);
   };
 
   return (

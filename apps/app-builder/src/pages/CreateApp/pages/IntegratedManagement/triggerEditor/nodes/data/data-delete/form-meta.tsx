@@ -1,5 +1,4 @@
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
-import { triggerNodeOutputSignal } from '@/store/singals/trigger_node_output';
 import { useAppStore } from '@/store/store_app';
 import { Form, Grid, Input, Radio, Select } from '@arco-design/web-react';
 import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
@@ -20,6 +19,7 @@ import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
 import { validateNodeForm } from '../../utils';
+import { updateDataDeleteOutputs } from './output';
 
 const RadioGroup = Radio.Group;
 
@@ -178,15 +178,9 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     // 校验表单
     validateNodeForm(form, payloadForm, false);
 
-    updateOutputs(values);
+    updateDataDeleteOutputs(node.id);
 
     handlePropsOnChange(values);
-  };
-
-  const updateOutputs = (values: any) => {
-    const outputs = {};
-
-    triggerNodeOutputSignal.addTriggerNodeOutput(node.id, outputs);
   };
 
   return (
@@ -287,6 +281,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
             <Grid.Row>
               <ConditionEditor
+                nodeId={node.id}
                 label="匹配规则"
                 required
                 fields={conditionFields}

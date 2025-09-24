@@ -1,7 +1,6 @@
 import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
 
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
-import { triggerNodeOutputSignal } from '@/store/singals/trigger_node_output';
 import { Checkbox, Form, Grid, Input, InputNumber, Select, TimePicker } from '@arco-design/web-react';
 import {
   getEntityFields,
@@ -17,6 +16,7 @@ import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
 import { getEntityFieldList } from '../../utils';
+import { updateStartDateFieldOutputs } from './output';
 
 const Option = Select.Option;
 
@@ -24,8 +24,8 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const isSidebar = useIsSidebar();
   const { node } = useNodeRenderContext();
 
-  const [entityList, setEntityList] = useState<any[]>();
-  const [entityFieldList, setEntityFieldList] = useState<any[]>();
+  const [entityList, setEntityList] = useState<any[]>([]);
+  const [entityFieldList, setEntityFieldList] = useState<any[]>([]);
 
   // 查询规则
   const [validationTypes, setValidationTypes] = useState<EntityFieldValidationTypes[]>([]);
@@ -67,17 +67,9 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   };
 
   const onValuesChange = (changeValue: any, values: any) => {
-    updateOutputs(values);
+    updateStartDateFieldOutputs(node.id, values, entityList);
 
     handlePropsOnChange(values);
-  };
-
-  const updateOutputs = (values: any) => {
-    const outputs = {
-      entityId: values.entityId
-    };
-
-    triggerNodeOutputSignal.addTriggerNodeOutput(node.id, outputs);
   };
 
   return (
@@ -184,6 +176,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             </Grid.Row>
             <Grid.Row>
               <ConditionEditor
+                nodeId={node.id}
                 label="匹配规则"
                 required
                 fields={conditionFields}

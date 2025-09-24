@@ -1,5 +1,4 @@
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
-import { triggerNodeOutputSignal } from '@/store/singals/trigger_node_output';
 import { useAppStore } from '@/store/store_app';
 import { Form, Grid, Input, Radio, Select } from '@arco-design/web-react';
 import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
@@ -21,6 +20,7 @@ import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
 import { NodeType } from '../../const';
 import { getBeforeCurQueryNodes, getDataNodeSource, getEntityFieldList, validateNodeForm } from '../../utils';
+import { updateDataQueryOutputs } from './output';
 
 export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   useSignals();
@@ -214,20 +214,9 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     // 校验表单
     validateNodeForm(form, payloadForm, false);
 
-    updateOutputs(values);
+    updateDataQueryOutputs(node.id, values, conditionFields);
 
     handlePropsOnChange(values);
-  };
-
-  const updateOutputs = (values: any) => {
-    const outputs = {
-      dataType: values.dataType,
-      mainEntityId: values.mainEntityId,
-      subEntityId: values.subEntityId,
-      dataNodeId: values.dataNodeId
-    };
-
-    triggerNodeOutputSignal.addTriggerNodeOutput(node.id, outputs);
   };
 
   const getInitData = () => {
@@ -348,6 +337,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             {filterType === FILTER_TYPE.CONDITION && (
               <Grid.Row>
                 <ConditionEditor
+                  nodeId={node.id}
                   label="条件"
                   required
                   fields={conditionFields}
