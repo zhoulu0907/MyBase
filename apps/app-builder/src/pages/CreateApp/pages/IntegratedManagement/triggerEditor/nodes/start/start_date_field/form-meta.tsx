@@ -66,7 +66,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     triggerEditorSignal.setNodeData(node.id, values);
   };
 
-  const onValuesChange = (changeValue: any, values: any) => {
+  const onValuesChange = (values: any) => {
     updateStartDateFieldOutputs(node.id, values, entityList);
 
     handlePropsOnChange(values);
@@ -81,7 +81,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             form={payloadForm}
             layout="vertical"
             initialValues={{ ...triggerEditorSignal.nodeData.value[node.id] }}
-            onValuesChange={onValuesChange}
+            onChange={onValuesChange}
           >
             <Form.Item label="节点ID" field="id" initialValue={node.id}>
               <Input disabled />

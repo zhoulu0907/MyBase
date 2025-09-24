@@ -1,10 +1,10 @@
 import { triggerNodeOutputSignal } from '@/store/singals/trigger_node_output';
-import type { AppEntityField } from '@onebase/app';
+import type { ConfitionField } from '@onebase/app';
 
-export const updateDataAddOutputs = (nodeID: string, values: any, fieldList: AppEntityField[]) => {
+export const updateDataAddOutputs = (nodeID: string, values: any, conditionFields: ConfitionField[]) => {
   const outputs = {
     fields: values.fields,
-    fieldList: fieldList
+    conditionFields: conditionFields
   };
 
   triggerNodeOutputSignal.addTriggerNodeOutput(nodeID, outputs);

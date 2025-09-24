@@ -214,7 +214,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     triggerEditorSignal.setNodeData(node.id, values);
   };
 
-  const onValuesChange = async (changeValue: any, values: any) => {
+  const onValuesChange = async (values: any) => {
     // 校验表单
     validateNodeForm(form, payloadForm, false);
 
@@ -230,7 +230,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       <FormHeader />
       {isSidebar ? (
         <FormContent>
-          <Form form={payloadForm} initialValues={getInitData()} onValuesChange={onValuesChange} layout="vertical">
+          <Form form={payloadForm} initialValues={getInitData()} onChange={onValuesChange} layout="vertical">
             <Grid.Row>
               <Form.Item label="节点ID" field="id" initialValue={node.id}>
                 <Input disabled />

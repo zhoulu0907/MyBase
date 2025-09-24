@@ -1,11 +1,9 @@
 import { triggerNodeOutputSignal } from '@/store/singals/trigger_node_output';
+import type { ConfitionField } from '@onebase/app';
 
-export const updateDataQueryMultipleOutputs = (nodeID: string, values: any) => {
+export const updateDataQueryMultipleOutputs = (nodeID: string, values: any, conditionFields: ConfitionField[]) => {
   const outputs = {
-    dataType: values.dataType,
-    mainEntityId: values.mainEntityId,
-    subEntityId: values.subEntityId,
-    dataNodeId: values.dataNodeId
+    conditionFields: conditionFields
   };
 
   triggerNodeOutputSignal.addTriggerNodeOutput(nodeID, outputs);

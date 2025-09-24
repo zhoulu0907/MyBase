@@ -254,46 +254,58 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
     ];
 
     const nodes = getBeforeCurQueryNodes(nodeId, triggerEditorSignal.nodes.value, nodeTypes);
-    console.log('nodes: ', nodes);
+    // console.log('nodes: ', nodes);
 
     const options: TreeSelectDataType[] = [];
 
     nodes.forEach((node) => {
       const nodeOutput = triggerNodeOutputSignal.getTriggerNodeOutput(node.id);
 
-      console.log('nodeOutput: ', nodeOutput);
+      //   console.log('nodeOutput: ', nodeOutput);
 
       const treeNode = {
         key: node.id,
         title: node.data?.title,
+        disabled: true,
+        // TODO(mickey): add icon
         children: [] as TreeSelectDataType[]
       };
 
       switch (node.type) {
         case NodeType.START_FORM:
+          // TODO(mickey): 改
           if (nodeOutput.triggerRange === TriggerRange.Record) {
             treeNode.children.push({
               key: `${node.id}.${nodeOutput.pageId}`,
               title: nodeOutput.pageName
             });
+
+            options.push(treeNode);
           }
           if (nodeOutput.triggerRange === TriggerRange.Field) {
             treeNode.children.push({
               key: `${node.id}.${nodeOutput.fieldId}`,
               title: nodeOutput.fieldName
             });
+
+            options.push(treeNode);
           }
-          options.push(treeNode);
 
           break;
         case NodeType.START_ENTITY:
-          if (nodeOutput.entityId && nodeOutput.entityName) {
-            treeNode.children.push({
-              key: `${node.id}.${nodeOutput.entityId}`,
-              title: nodeOutput.entityName
+          const startEntityFields = nodeOutput.conditionFields;
+
+          startEntityFields &&
+            startEntityFields.forEach((field: any) => {
+              treeNode.children.push({
+                key: `${node.id}.${field.value}`,
+                title: field.label
+              });
             });
+
+          if (treeNode.children.length > 0) {
+            options.push(treeNode);
           }
-          options.push(treeNode);
 
           break;
         case NodeType.START_TIME:
@@ -305,7 +317,10 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
               title: nodeOutput.entityName
             });
           }
-          options.push(treeNode);
+
+          if (treeNode.children.length > 0) {
+            options.push(treeNode);
+          }
 
           break;
         case NodeType.START_API:
@@ -313,41 +328,68 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
         case NodeType.START_BPM:
           break;
         case NodeType.DATA_ADD:
-          const dataAddFields = nodeOutput.fields;
-          const fieldList = nodeOutput.fieldList;
-          dataAddFields.forEach((field: any) => {
-            const targetField = fieldList.find((item: any) => item.fieldId === field.fieldId);
-            treeNode.children.push({
-              key: `${node.id}.${targetField.fieldId}`,
-              title: targetField.displayName
+          const dataAddFields = nodeOutput.conditionFields;
+          dataAddFields &&
+            dataAddFields.forEach((field: any) => {
+              treeNode.children.push({
+                key: `${node.id}.${field.value}`,
+                title: field.label
+              });
             });
-          });
 
-          options.push(treeNode);
+          if (treeNode.children.length > 0) {
+            options.push(treeNode);
+          }
+
           break;
         case NodeType.DATA_DELETE:
           break;
         case NodeType.DATA_QUERY:
           const dataQueryFields = nodeOutput.conditionFields;
-          dataQueryFields.forEach((field: any) => {
-            treeNode.children.push({
-              key: `${node.id}.${field.value}`,
-              title: field.label
+          dataQueryFields &&
+            dataQueryFields.forEach((field: any) => {
+              treeNode.children.push({
+                key: `${node.id}.${field.value}`,
+                title: field.label
+              });
             });
-          });
 
-          options.push(treeNode);
+          if (treeNode.children.length > 0) {
+            options.push(treeNode);
+          }
           break;
         case NodeType.DATA_QUERY_MULTIPLE:
+          const dataQueryMultipleFields = nodeOutput.conditionFields;
+          dataQueryMultipleFields &&
+            dataQueryMultipleFields.forEach((field: any) => {
+              treeNode.children.push({
+                key: `${node.id}.${field.value}`,
+                title: field.label
+              });
+            });
+
+          if (treeNode.children.length > 0) {
+            options.push(treeNode);
+          }
           break;
         case NodeType.DATA_UPDATE:
+          const dataUpdateFields = nodeOutput.conditionFields;
+          dataUpdateFields &&
+            dataUpdateFields.forEach((field: any) => {
+              treeNode.children.push({
+                key: `${node.id}.${field.value}`,
+                title: field.label
+              });
+            });
+
+          if (treeNode.children.length > 0) {
+            options.push(treeNode);
+          }
           break;
         case NodeType.DATA_CALC:
           break;
       }
     });
-
-    console.log('options: ', options);
 
     return options;
   };

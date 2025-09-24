@@ -130,24 +130,25 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     }
   };
 
-  const onValuesChange = (changeValue: any, values: any) => {
+  const onValuesChange = (values: any) => {
     // 校验表单
     validateNodeForm(form, payloadForm, false);
 
     // 更新节点输出配置
-    updateStartEntityOutputs(node.id, values, entityList);
+    console.log('更新节点输出配置: ', conditionFields);
+    updateStartEntityOutputs(node.id, values, conditionFields);
 
     handlePropsOnChange(values);
   };
 
   // 触发类型
-  const handleTriggerTypeChange = ()=>{
+  const handleTriggerTypeChange = () => {
     payloadForm.clearFields('triggerEvents');
     handlePropsOnChange({
       ...triggerEditorSignal.nodeData.value[node.id],
       triggerEvents: []
     });
-  }
+  };
 
   return (
     <>
@@ -158,7 +159,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             form={payloadForm}
             initialValues={{ ...triggerEditorSignal.nodeData.value[node.id] }}
             layout="vertical"
-            onValuesChange={onValuesChange}
+            onChange={onValuesChange}
           >
             <Grid.Row>
               <Form.Item
@@ -190,7 +191,8 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                 layout="vertical"
                 rules={[{ required: true, message: '请选择触发类型' }]}
               >
-                <RadioGroup onChange={handleTriggerTypeChange}
+                <RadioGroup
+                  onChange={handleTriggerTypeChange}
                   direction="horizontal"
                   options={[
                     {
