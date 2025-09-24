@@ -80,37 +80,6 @@ export interface UpdateDataGroupPermissionReq {
   permissionReq: GetPermissionReq;
 }
 
-export interface AuthDataGroupForm { 
-  dataFilters?: Array<AuthDataFilterVO[]>;
-  /**
-   * 数据权限组描述
-   */
-  description?: string;
-  /**
-   * 数据权限组名称
-   */
-  groupName?: string;
-  /**
-   * 数据权限组排序
-   */
-  groupOrder?: number;
-  /**
-   * 主键Id
-   */
-  id?: string;
-  /**
-   * 是否可以操作
-   */
-  isOperable?: number;
-  /**
-   * 权限范围字段名称
-   */
-  scopeFieldId?: number;
-  /**
-   * 业务实体字段对应的权限范围
-   */
-  scopeLevel?: PermissionScope;
-}
 /**
  * 数据访问
  *
@@ -135,6 +104,14 @@ export interface AuthDataGroupVO {
    */
   id?: string;
   /**
+   * 页面主业务实体id
+   */
+  entityId?: string;
+  /**
+   * 页面主业务实体名称
+   */
+  entityName?: string;
+  /**
    * 是否可以操作
    */
   isOperable?: number;
@@ -150,22 +127,6 @@ export interface AuthDataGroupVO {
    * 业务实体字段对应的权限范围值
    */
   scopeValue?: string;
-}
-
-// 权限范围 PermissionScope
-export interface PermissionScope {
-  /**
-   * 权限范围ID
-   */
-  personId?: string;
-  /**
-   * 权限范围类型
-   */
-  scopeType?: ScopeType;
-  /**
-   * 部门/人员id范围
-   */
-  assignIds?: string[];
 }
 
 export type ScopeType = 

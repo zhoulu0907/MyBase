@@ -99,12 +99,12 @@ const DataPermissionModal = (props: IProps) => {
     }
   }
 
-  // 数据过滤
-  const changeDataFilters = (value: any[]) => {
-    setDataFilters(dataFilters);
-    // 同时更新表单字段值
-    form.setFieldValue('dataFilters', value);
-  };
+  // // 数据过滤
+  // const changeDataFilters = (value: any[]) => {
+  //   setDataFilters(dataFilters);
+  //   // 同时更新表单字段值
+  //   form.setFieldValue('dataFilters', value);
+  // };
 
   // 权限范围选择指定人员/部门
   // 'specifiedDepartment' | 'specifiedPerson' 指定部门/人员
@@ -313,14 +313,17 @@ const DataPermissionModal = (props: IProps) => {
             </div>
           </FormItem>
           {/* 数据过滤 */}
-          <FormItem field="dataFilters" label="数据过滤">
-            <ConditionEditor
-              data={conditionData}
-              fields={conditionFields}
-              entityFieldValidationTypes={filterFieldCheckType}
-              onChange={changeDataFilters}
-            />
-          </FormItem>
+          {/* <FormItem field="dataFilters" label="数据过滤"> */}
+          <ConditionEditor
+            form={form}
+            label="数据过滤"
+            required={true}
+            // data={conditionData}
+            fields={conditionFields}
+            entityFieldValidationTypes={filterFieldCheckType}
+            // onChange={changeDataFilters}
+          />
+          {/* </FormItem> */}
           <FormItem field="isOperable" label="操作权限">
             <div className={styles.dataPermissionOperableBox}>
               <Checkbox onChange={onChangeAll} checked={checkAll} indeterminate={indeterminate}>
