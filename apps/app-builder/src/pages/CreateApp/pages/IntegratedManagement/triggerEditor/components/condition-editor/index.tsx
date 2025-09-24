@@ -253,7 +253,7 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
     ];
 
     const nodes = getBeforeCurQueryNodes(nodeId, triggerEditorSignal.nodes.value, nodeTypes);
-    console.log('nodes: ', nodes);
+    // console.log('nodes: ', nodes);
 
     const options: TreeSelectDataType[] = [];
 
