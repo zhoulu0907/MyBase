@@ -1,5 +1,4 @@
 import {
-  alignConfig,
   baseConfig,
   baseDefault,
   labelColSpanConfig,
@@ -7,14 +6,11 @@ import {
   statusConfig,
   widthConfig,
   type ICommonBaseType,
-  type TAlignSelectKeyType,
   type TLayoutSelectKeyType,
   type TStatusSelectKeyType,
   type TWidthSelectKeyType
 } from '../../../common';
 import {
-  ALIGN_OPTIONS,
-  ALIGN_VALUES,
   CONFIG_TYPES,
   LAYOUT_OPTIONS,
   LAYOUT_VALUES,
@@ -24,49 +20,48 @@ import {
   WIDTH_VALUES
 } from '../../../constants';
 import type {
-  IAlignConfigType,
   IBooleanConfigType,
   ILabelConfigType,
   ILayoutConfigType,
   INumberConfigType,
+  IPlaceholderConfigType,
+  ISelectConfigType,
   IStatusConfigType,
   ITextAreaConfigType,
   ITextConfigType,
   ITooltipConfigType,
   IWidthConfigType,
-  TNumberDefaultType,
-  TRadioDefaultType,
-  TSelectDefaultType,
-  TTextDefaultType,
   TBooleanDefaultType,
+  TNumberDefaultType,
+  TSelectDefaultType,
   TTextAreaDefaultType,
+  TTextDefaultType,
+  ISecurityConfigType,
+  IVerifyConfigType
 } from '../../../types';
 
-// 输入框组件的schema
-export interface XInputTextSchema {
-  // 可配置项
-  editData: TXInputTextEditData;
-  // 默认配置
-  config: XDividerConfig;
+export interface XCollapseSchema {
+  editData: XCollapseEditData;
+  config: XCollapseConfig;
 }
 
-// 输入框组件的可配置项
-export type TXInputTextEditData = Array<
+export type XCollapseEditData = Array<
   | ITextConfigType
   | ILabelConfigType
+  | IPlaceholderConfigType
   | ITooltipConfigType
   | IStatusConfigType<TStatusSelectKeyType>
   | IWidthConfigType<TWidthSelectKeyType>
   | INumberConfigType
+  | ISelectConfigType<TWidthSelectKeyType | TStatusSelectKeyType>
   | ITextAreaConfigType
   | IBooleanConfigType
-  | IStatusConfigType<TAlignSelectKeyType>
   | ILayoutConfigType<TLayoutSelectKeyType>
-  | IAlignConfigType<TAlignSelectKeyType>
-  | TTextAreaDefaultType
+  | ISecurityConfigType
+  | IVerifyConfigType
 >;
 
-export interface XDividerConfig extends ICommonBaseType {
+export interface XCollapseConfig extends ICommonBaseType {
   /**
    * 输入框标题
    * text：标题
@@ -86,17 +81,17 @@ export interface XDividerConfig extends ICommonBaseType {
    * 组件状态：可用、隐藏、只读
    * 可选值: 'default' | 'hidden' | 'readonly'
    */
-  status?: TRadioDefaultType<TStatusSelectKeyType>;
+  status?: TSelectDefaultType<TStatusSelectKeyType>;
 
   /**
-   * 分割线文案
+   * 默认值
    */
-  defaultValue?: TTextDefaultType;
+  defaultValue?: TBooleanDefaultType;
 
   /**
    * 字段宽度
    */
-  width: TRadioDefaultType<TWidthSelectKeyType>;
+  width: TSelectDefaultType<TWidthSelectKeyType>;
 
   /**
    * 表单的布局：水平、垂直（默认）
@@ -105,23 +100,27 @@ export interface XDividerConfig extends ICommonBaseType {
   layout?: TLayoutSelectKeyType;
 
   /**
-   * 内容对齐方式：左、中、右
-   * 可选值: 'left' | 'center' | 'right'
-   */
-  align?: TSelectDefaultType<TAlignSelectKeyType>;
-
-  /**
    * 标题宽度
    */
   labelColSpan?: TNumberDefaultType;
 
   /**
-   * 上下间距
+   * 隐藏时是否提交数据，开启后隐藏状态仍会保存值
    */
-  margin?: TNumberDefaultType;
+  saveWithHidden?: TBooleanDefaultType;
+
+  /**
+   * 安全
+   * display：开启
+   * type：掩码类型
+   */
+  security: {
+    display: TBooleanDefaultType;
+    type?: TTextDefaultType;
+  };
 }
 
-const XInputText: XInputTextSchema = {
+const XCollapse: XCollapseSchema = {
   editData: [
     ...baseConfig,
     {
@@ -130,41 +129,48 @@ const XInputText: XInputTextSchema = {
       type: CONFIG_TYPES.LABEL_INPUT
     },
     {
-      key: 'defaultValue',
-      name: '分割线文案',
-      type: CONFIG_TYPES.TEXT_INPUT
+      key: 'tooltip',
+      name: '描述信息',
+      type: CONFIG_TYPES.TOOLTIP_INPUT
     },
     {
-      key: 'tooltip',
-      name: '提示文字',
-      type: CONFIG_TYPES.TOOLTIP_INPUT
+      key: 'defaultValue',
+      name: '默认值',
+      type: CONFIG_TYPES.SWITCH_INPUT
     },
     layoutConfig,
     labelColSpanConfig,
     {
-      key: 'margin',
-      name: '上下间距',
-      type: CONFIG_TYPES.NUMBER_INPUT
+      key: 'saveWithHidden',
+      name: '隐藏时提交数据',
+      type: CONFIG_TYPES.SWITCH_INPUT
     },
-    alignConfig,
     statusConfig,
-    widthConfig,
+    {
+      key: 'security',
+      name: '安全',
+      type: CONFIG_TYPES.SECURITY
+    },
+    widthConfig
   ],
   config: {
     ...baseDefault,
     label: {
-      text: '分割线',
+      text: '开关',
       display: true,
     },
     tooltip: '',
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
-    defaultValue: '',
-    align: ALIGN_VALUES[ALIGN_OPTIONS.CENTER],
+    defaultValue: false,
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
     labelColSpan: 100,
-    margin: 0
+    saveWithHidden: false,
+    security: {
+      display: false,
+      type: ''
+    },
   }
 };
 
-export default XInputText;
+export default XCollapse;

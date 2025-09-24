@@ -124,7 +124,7 @@ const MaterialContainer: React.FC<MaterialContainerProps> = ({ activeTab, childC
                   if (activeTab === EDITOR_TYPES.LIST_EDITOR && cat.key === 'form') {
                     return null;
                   }
-                  if (activeTab === EDITOR_TYPES.FORM_EDITOR && (cat.key === 'list' || cat.key === 'show')) {
+                  if (activeTab === EDITOR_TYPES.FORM_EDITOR && (cat.key === 'list')) {
                     return null;
                   }
 

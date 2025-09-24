@@ -337,3 +337,27 @@ export interface ISubTableConfigType {
   name: string;
   type: typeof CONFIG_TYPES.SUB_TABLE;
 }
+
+// 页签组件类型
+export interface ITabsTypeConfigType<KeyType> {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.TABS_TYPE;
+  range: Array<{
+    key: string;
+    label: string;
+    value: KeyType;
+  }>;
+}
+
+// 页签组件位置
+export interface ITabsPositionConfigType<KeyType> {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.TABS_POSITION;
+  range: Array<{
+    key: string;
+    label: string;
+    value: KeyType;
+  }>;
+}

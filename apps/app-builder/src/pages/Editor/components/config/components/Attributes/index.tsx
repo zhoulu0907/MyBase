@@ -10,7 +10,8 @@ import {
   Select,
   Switch,
   Tooltip,
-  Grid
+  Grid,
+  Tabs
 } from '@arco-design/web-react';
 import { CONFIG_TYPES, usePageEditorSignal } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
@@ -31,6 +32,7 @@ const Row = Grid.Row;
 const Col = Grid.Col;
 const FormItem = Form.Item;
 const Option = Select.Option;
+const TabPane = Tabs.TabPane;
 
 /**
  * 属性配置面板组件
@@ -310,6 +312,37 @@ const Attributes = ({ cpID }: ConfigsProps) => {
                       ))}
                     </Radio.Group>
                   )}
+                  {item.type === CONFIG_TYPES.TABS_TYPE && (
+                    <>
+                      <Select
+                        defaultValue={configs[item.key]}
+                        onChange={(value) => handlePropsChange(item.key, value)}
+                      >
+                        {item.range.map((item: any) => (
+                          <Option key={item.key} value={(item.value)}>
+                            <Tabs defaultActiveTab='1' type={item.value} style={{ pointerEvents: 'none' }}>
+                              <TabPane key='1' title='标签页1' />
+                              <TabPane key='2' title='标签页2' />
+                            </Tabs>
+                          </Option>
+                        ))}
+                      </Select>
+                    </>
+                  )}
+
+                  {item.type === CONFIG_TYPES.TABS_POSITION && (
+                    <Select
+                      defaultValue={configs[item.key]}
+                      onChange={(value) => handlePropsChange(item.key, value)}
+                    >
+                      {item.range.map((item: any) => (
+                        <Option key={item.key} value={item.value}>
+                          {item.label}
+                        </Option>
+                      ))}
+                    </Select>
+                  )}
+
                   {(item.type === CONFIG_TYPES.STATUS_RADIO ||
                     item.type === CONFIG_TYPES.DATE_TYPE ||
                     item.type === CONFIG_TYPES.FORM_LAYOUT ||
