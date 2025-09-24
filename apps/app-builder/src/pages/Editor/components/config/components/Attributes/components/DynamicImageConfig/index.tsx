@@ -20,7 +20,7 @@ const allowedFormats = ['image/jpeg', 'image/png', 'image/gif'];
 
 const DynamicImageConfig: React.FC<DynamicImageConfigProps> = ({ handlePropsChange, item, configs, id }) => {
   const imageKey = 'imageConfig';
-  const [imageConfig, setImageConfig] = useState<any[]>(configs[imageKey] || []);
+  const [imageConfig, setImageConfig] = useState<string>(configs[imageKey] || '');
   const maxSizeMB = configs.verify?.maxSize || 5;
   const maxCount = 1;
 
@@ -46,7 +46,7 @@ const DynamicImageConfig: React.FC<DynamicImageConfigProps> = ({ handlePropsChan
       <div className={styles.imagesTips}>支持jpg、jpeg、png、gif格式，单张{maxSizeMB}MB以内。</div>
 
       <div className={styles.imagesList}>
-        {imageConfig.length < maxCount && (
+        {!imageConfig ? (
           <div className={styles.imageBox}>
             <Upload
               limit={maxCount}
@@ -66,18 +66,13 @@ const DynamicImageConfig: React.FC<DynamicImageConfigProps> = ({ handlePropsChan
               }}
               customRequest={async (option) => {
                 const { onProgress, onError, onSuccess, file } = option;
+                
                 try {
                   const uploadImgUrl = await handleUpload(file, onProgress);
                   if (uploadImgUrl !== '') {
-                    const newImageInfo = {
-                      image: uploadImgUrl,
-                      tetx: file.name,
-                      url: ''
-                    };
-                    setImageConfig((prev) => [...prev, newImageInfo]);
-                    handlePropsChange(imageKey, [...imageConfig, newImageInfo]);
-                    handlePropsChange('imageUrl', newImageInfo.image);
-                    onSuccess(uploadImgUrl);
+                    setImageConfig(uploadImgUrl);
+                    handlePropsChange(imageKey, uploadImgUrl);
+                    onSuccess();
                   } else {
                     onError({
                       status: 'error',
@@ -98,25 +93,22 @@ const DynamicImageConfig: React.FC<DynamicImageConfigProps> = ({ handlePropsChan
               }}
             />
           </div>
-        )}
-
-        {imageConfig.map((item, index) => (
-          <div className={styles.imageBox} key={index}>
-            <img src={item.image} />
+        ) : (
+          <div className={styles.imageBox}>
+            <img src={imageConfig} />
             <IconDelete
               className={styles.icon}
               style={{
                 top: 4
               }}
               onClick={() => {
-                setImageConfig((prev) => prev.filter((v) => v.image !== item.image));
-                handlePropsChange(imageKey, []);
-                handlePropsChange('imageUrl', '');
+                setImageConfig('');
+                handlePropsChange(imageKey, '');
                 Message.info(`删除成功`);
               }}
             />
           </div>
-        ))}
+        )}
       </div>
     </FormItem>
   );

@@ -59,8 +59,7 @@ export interface XImageConfig extends ICommonBaseType {
    * 最大限制高度（px）
    */
   maxHeight?: TNumberDefaultType;
-  imageCofig: Images[];
-  imageUrl: string;
+  imageCofig: string;
   verify: {
     required: boolean;
     maxSize: TNumberDefaultType;
@@ -74,8 +73,7 @@ const XImage: XImageSchema = {
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     fillStyle: FILL_VALUES[FILL_OPTIONS.COVER],
-    imageCofig:[],
-    imageUrl: '',
+    imageCofig: '',
     maxHeight: undefined,
     verify: {
       required: false,
