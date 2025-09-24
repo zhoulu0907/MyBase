@@ -4,15 +4,12 @@ import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigDecimal;
-import java.sql.Array;
-import java.sql.SQLException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.Arrays;
 
 /**
  * @Author：huangjie
@@ -25,7 +22,7 @@ public class JdbcTypeConvertor {
 
     /**
      * 将数据库类型转换为对应的Java类型
-     * 支持的数据库类型包括：ARRAY, BIGINT, BOOLEAN, DATE, DECIMAL, LONGVARCHAR, NUMERIC, TIMESTAMP, VARCHAR
+     * 支持的数据库类型包括：BIGINT, BOOLEAN, DATE, DECIMAL, LONGVARCHAR, NUMERIC, TIMESTAMP, VARCHAR
      *
      * <p>转换规则示例：</p>
      * <ul>
@@ -37,7 +34,6 @@ public class JdbcTypeConvertor {
      *     <li>输入 jdbcType="DECIMAL", value="123.45" → 输出 java.math.BigDecimal</li>
      *     <li>输入 jdbcType="LONGVARCHAR", value="long string" → 输出 java.lang.String</li>
      *     <li>输入 jdbcType="NUMERIC", value="123.45" → 输出 java.math.BigDecimal</li>
-     *     <li>输入 jdbcType="ARRAY", value=[1,2,3] → 输出 java.sql.Array 或转换后的Java数组</li>
      * </ul>
      *
      * @param jdbcType 数据库类型字符串，如"TIMESTAMP"、"VARCHAR"等
@@ -71,8 +67,6 @@ public class JdbcTypeConvertor {
                 return convertLongVarchar(value);
             case "NUMERIC":
                 return convertNumeric(value);
-            case "ARRAY":
-                return convertArray(value);
             default:
                 throw new UnsupportedOperationException("不支持的数据库类型: " + jdbcType);
         }
@@ -160,36 +154,5 @@ public class JdbcTypeConvertor {
     private static Object convertNumeric(Object value) {
         // NUMERIC和DECIMAL处理方式相同
         return convertDecimal(value);
-    }
-
-    private static Object convertArray(Object value) {
-        if (value instanceof Array) {
-            try {
-                return ((Array) value).getArray();
-            } catch (SQLException e) {
-                throw new IllegalArgumentException("无法转换ARRAY类型", e);
-            }
-        } else if (value instanceof String) {
-            // 处理字符串形式的数组，如"[1,2,3]"
-            String stringValue = (String) value;
-            // 移除首尾的括号
-            stringValue = stringValue.replaceAll("^\\[|\\]$", "");
-            // 分割元素
-            String[] elements = stringValue.split(",");
-            // 尝试转换为整数数组
-            try {
-                int[] intArray = Arrays.stream(elements)
-                        .map(String::trim)
-                        .mapToInt(Integer::parseInt)
-                        .toArray();
-                return intArray;
-            } catch (NumberFormatException e) {
-                // 如果转换整数失败，返回字符串数组
-                return Arrays.stream(elements)
-                        .map(String::trim)
-                        .toArray(String[]::new);
-            }
-        }
-        throw new IllegalArgumentException("无效的ARRAY类型: " + value.getClass().getName());
     }
 }
