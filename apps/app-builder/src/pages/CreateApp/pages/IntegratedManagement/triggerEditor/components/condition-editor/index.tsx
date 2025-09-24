@@ -254,23 +254,26 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
     ];
 
     const nodes = getBeforeCurQueryNodes(nodeId, triggerEditorSignal.nodes.value, nodeTypes);
-    console.log('nodes: ', nodes);
+    // console.log('nodes: ', nodes);
 
     const options: TreeSelectDataType[] = [];
 
     nodes.forEach((node) => {
       const nodeOutput = triggerNodeOutputSignal.getTriggerNodeOutput(node.id);
 
-      console.log('nodeOutput: ', nodeOutput);
+      //   console.log('nodeOutput: ', nodeOutput);
 
       const treeNode = {
         key: node.id,
         title: node.data?.title,
+        disabled: true,
+        // TODO(mickey): add icon
         children: [] as TreeSelectDataType[]
       };
 
       switch (node.type) {
         case NodeType.START_FORM:
+          // TODO(mickey): 改
           if (nodeOutput.triggerRange === TriggerRange.Record) {
             treeNode.children.push({
               key: `${node.id}.${nodeOutput.pageId}`,
@@ -299,7 +302,10 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
                 title: field.label
               });
             });
-          options.push(treeNode);
+
+          if (treeNode.children.length > 0) {
+            options.push(treeNode);
+          }
 
           break;
         case NodeType.START_TIME:
@@ -311,7 +317,10 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
               title: nodeOutput.entityName
             });
           }
-          options.push(treeNode);
+
+          if (treeNode.children.length > 0) {
+            options.push(treeNode);
+          }
 
           break;
         case NodeType.START_API:
@@ -328,7 +337,9 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
               });
             });
 
-          options.push(treeNode);
+          if (treeNode.children.length > 0) {
+            options.push(treeNode);
+          }
 
           break;
         case NodeType.DATA_DELETE:
@@ -343,7 +354,9 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
               });
             });
 
-          options.push(treeNode);
+          if (treeNode.children.length > 0) {
+            options.push(treeNode);
+          }
           break;
         case NodeType.DATA_QUERY_MULTIPLE:
           const dataQueryMultipleFields = nodeOutput.conditionFields;
@@ -355,7 +368,9 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
               });
             });
 
-          options.push(treeNode);
+          if (treeNode.children.length > 0) {
+            options.push(treeNode);
+          }
           break;
         case NodeType.DATA_UPDATE:
           const dataUpdateFields = nodeOutput.conditionFields;
@@ -367,14 +382,14 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
               });
             });
 
-          options.push(treeNode);
+          if (treeNode.children.length > 0) {
+            options.push(treeNode);
+          }
           break;
         case NodeType.DATA_CALC:
           break;
       }
     });
-
-    console.log('options: ', options);
 
     return options;
   };

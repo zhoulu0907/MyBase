@@ -63,7 +63,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     triggerEditorSignal.setNodeData(node.id, values);
   };
 
-  const onValuesChange = (changeValue: any, values: any) => {
+  const onValuesChange = (values: any) => {
     handlePropsOnChange(values);
   };
 
@@ -75,7 +75,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
           <Form
             form={payloadForm}
             initialValues={{ ...triggerEditorSignal.nodeData.value[node.id] }}
-            onValuesChange={onValuesChange}
+            onChange={onValuesChange}
             layout="vertical"
           >
             <Grid.Row>

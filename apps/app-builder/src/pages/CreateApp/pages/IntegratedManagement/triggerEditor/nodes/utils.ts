@@ -9,12 +9,6 @@ import {
   type EntityFieldValidationTypes
 } from '@onebase/app';
 import { NodeType } from './const';
-import { updateDataAddOutputs } from './data/data-add/output';
-import { updateDataQueryMultipleOutputs } from './data/data-query-multiple/output';
-import { updateDataQueryOutputs } from './data/data-query/output';
-import { updateDataUpdateOutputs } from './data/data-update/output';
-import { updateStartDateFieldOutputs } from './start/start_date_field/output';
-import { updateStartEntityOutputs } from './start/start_entity/output';
 
 // 清除数据节点依赖关系
 export const clearDataOriginNodeId = (nodeId: string) => {
@@ -201,46 +195,5 @@ export const getEntityFieldList = async (
   if (filedIds?.length) {
     const newValidationTypes = await getFieldCheckTypeApi(filedIds);
     setValidationTypes(newValidationTypes);
-  }
-};
-
-export const setNodesOutput = (nodes: any[]) => {
-  for (let item of nodes) {
-    console.log('item: ', item);
-
-    switch (item.type) {
-      case NodeType.START_FORM:
-        // updateStartFormOutputs(item.id, item.data, []);
-        break;
-      case NodeType.START_ENTITY:
-        updateStartEntityOutputs(item.id, item.data, []);
-        break;
-      case NodeType.START_TIME:
-        break;
-      case NodeType.START_DATE_FIELD:
-        updateStartDateFieldOutputs(item.id, item.data, []);
-        break;
-      case NodeType.START_API:
-        break;
-      case NodeType.START_BPM:
-        break;
-
-      case NodeType.DATA_QUERY:
-        updateDataQueryOutputs(item.id, item.data, []);
-        break;
-      case NodeType.DATA_QUERY_MULTIPLE:
-        updateDataQueryMultipleOutputs(item.id, item.data, []);
-        break;
-      case NodeType.DATA_UPDATE:
-        updateDataUpdateOutputs(item.id, item.data, []);
-        break;
-      case NodeType.DATA_ADD:
-        updateDataAddOutputs(item.id, item.data, []);
-        break;
-      case NodeType.DATA_DELETE:
-        break;
-      case NodeType.DATA_CALC:
-        break;
-    }
   }
 };

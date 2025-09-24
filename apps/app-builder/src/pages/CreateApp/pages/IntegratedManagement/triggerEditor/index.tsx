@@ -1,6 +1,7 @@
 import { EditorRenderer, FixedLayoutEditorProvider, type FlowDocumentJSON } from '@flowgram.ai/fixed-layout-editor';
 
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
+import { triggerNodeOutputSignal } from '@/store/singals/trigger_node_output';
 import '@flowgram.ai/fixed-layout-editor/index.css';
 import { ENTITY_TYPE, getAppEntities, getFlowMgmt, TriggerType } from '@onebase/app';
 import { getHashQueryParam } from '@onebase/common';
@@ -19,7 +20,6 @@ import {
   StartTimeInitData
 } from './initial-data';
 import { FlowNodeRegistries } from './nodes';
-import { setNodesOutput } from './nodes/utils';
 
 const TriggerEditor = () => {
   const editorProps = useEditorProps(FlowNodeRegistries);
@@ -45,6 +45,7 @@ const TriggerEditor = () => {
     const flowId = getHashQueryParam('flowId');
     if (flowId) {
       setFlowId(flowId);
+      initFlowData(flowId);
     }
 
     // 获取应用对应需要用到的实体
@@ -53,14 +54,6 @@ const TriggerEditor = () => {
       handleGetAppEntities(appId);
     }
   }, [window.location.hash]);
-
-  useEffect(() => {
-    // 获取到工作流id，开始载入数据
-    if (flowId.value) {
-      console.log('flowId: ', flowId.value);
-      initFlowData(flowId.value);
-    }
-  }, [flowId]);
 
   const handleGetAppEntities = async (appId: string) => {
     const res = await getAppEntities(appId);
@@ -95,13 +88,17 @@ const TriggerEditor = () => {
 
       for (let item of nodes) {
         data = { ...data, [item.id]: item.data };
+        // 初始化输出节点
+        console.log('item.id: ', item.id);
+        if (item.output) {
+          console.log('item.output: ', item.output);
+          triggerNodeOutputSignal.addTriggerNodeOutput(item.id, item.output);
+        }
       }
 
       console.log('nodeData', data);
       setAllNodeData(data);
       setInitData({ nodes: nodes });
-      //   初始化输出节点
-      setNodesOutput(nodes);
     } else {
       switch (res.triggerType) {
         case TriggerType.FORM:

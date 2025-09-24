@@ -1,6 +1,6 @@
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { useAppStore } from '@/store/store_app';
-import { Form, Grid, Input, Radio, Select } from '@arco-design/web-react';
+import { Form, Grid, Input, InputNumber, Radio, Select } from '@arco-design/web-react';
 import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
 import {
   DATA_SOURCE_TYPE,
@@ -225,7 +225,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     triggerEditorSignal.setNodeData(node.id, values);
   };
 
-  const onValuesChange = async (changeValue: any, values: any) => {
+  const onValuesChange = async (values: any) => {
     // 校验表单
     validateNodeForm(form, payloadForm, false);
 
@@ -235,7 +235,11 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   };
 
   const getInitData = () => {
-    return { ...triggerEditorSignal.nodeData.value[node.id] };
+    return {
+      // 初始值写前面,覆写放后面
+      maxCount: 500,
+      ...triggerEditorSignal.nodeData.value[node.id]
+    };
   };
 
   return (
@@ -243,7 +247,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       <FormHeader />
       {isSidebar ? (
         <FormContent>
-          <Form form={payloadForm} layout="vertical" onValuesChange={onValuesChange} initialValues={getInitData()}>
+          <Form form={payloadForm} layout="vertical" onChange={onValuesChange} initialValues={getInitData()}>
             <Form.Item label="节点ID" field="id" initialValue={node.id}>
               <Input disabled />
             </Form.Item>
@@ -370,6 +374,20 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                   form={payloadForm}
                 ></SortByEditor>
               </Form.Item>
+            </Grid.Row>
+
+            <Grid.Row gutter={8} align="center">
+              <Grid.Col span={6} style={{ color: 'grey' }}>
+                按排序规则，获取过滤后的前
+              </Grid.Col>
+              <Grid.Col span={3}>
+                <Form.Item field="maxCount" style={{ marginTop: '20px' }}>
+                  <InputNumber min={1} max={500} />
+                </Form.Item>
+              </Grid.Col>
+              <Grid.Col span={4} style={{ color: 'grey' }}>
+                条数据
+              </Grid.Col>
             </Grid.Row>
           </Form>
         </FormContent>
