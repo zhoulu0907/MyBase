@@ -1,8 +1,9 @@
 import { triggerNodeOutputSignal } from '@/store/singals/trigger_node_output';
+import type { ConfitionField } from '@onebase/app';
 
-export const updateStartDateFieldOutputs = (nodeID: string, values: any, entityList: any[]) => {
+export const updateStartDateFieldOutputs = (nodeID: string, conditionFields: ConfitionField[]) => {
   const outputs = {
-    entityName: entityList.find((item) => item.entityId === values.entityId)?.entityName
+    conditionFields: conditionFields
   };
 
   triggerNodeOutputSignal.addTriggerNodeOutput(nodeID, outputs);

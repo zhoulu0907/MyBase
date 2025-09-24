@@ -89,9 +89,9 @@ const TriggerEditor = () => {
       for (let item of nodes) {
         data = { ...data, [item.id]: item.data };
         // 初始化输出节点
-        // console.log('item.id: ', item.id);
+        console.log('item.id: ', item.id);
         if (item.output) {
-          //   console.log('item.output: ', item.output);
+          console.log('item.output: ', item.output);
           triggerNodeOutputSignal.addTriggerNodeOutput(item.id, item.output);
         }
       }

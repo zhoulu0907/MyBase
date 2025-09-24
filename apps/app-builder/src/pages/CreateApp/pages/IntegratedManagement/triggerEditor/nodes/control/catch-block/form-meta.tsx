@@ -15,7 +15,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const [validationTypes, setValidationTypes] = useState<EntityFieldValidationTypes[]>([]);
   const [conditionFields, setConditionFields] = useState<ConfitionField[]>([]);
 
-  const onValuesChange = (values: any) => {
+  const onValuesChange = (changeValue: any, values: any) => {
     handlePropsOnChange(values);
   };
 
@@ -31,7 +31,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
           <Form
             form={payloadForm}
             initialValues={{ ...triggerEditorSignal.nodeData.value[node.id] }}
-            onChange={onValuesChange}
+            onValuesChange={onValuesChange}
             layout="vertical"
           >
             <Grid.Row>

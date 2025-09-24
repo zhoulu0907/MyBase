@@ -194,13 +194,13 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       return;
     }
     if (nodeData.dataType === DATA_SOURCE_TYPE.FORM) {
-      getEntityFieldList(nodeData.mainEntityId, setConditionFields, setValidationTypes);
+      getEntityFieldList(nodeData.mainEntityId, handleSetConditionFields, setValidationTypes);
     } else if (nodeData.dataType === DATA_SOURCE_TYPE.DATA_NODE) {
       const originDataSource = getDataNodeSource(nodeData.dataNodeId);
-      getEntityFieldList(originDataSource, setConditionFields, setValidationTypes);
+      getEntityFieldList(originDataSource, handleSetConditionFields, setValidationTypes);
     } else if (nodeData.dataType === DATA_SOURCE_TYPE.SUBFORM) {
       // 从子表中查询  SUBFORM
-      getEntityFieldList(nodeData.subEntityId, setConditionFields, setValidationTypes);
+      getEntityFieldList(nodeData.subEntityId, handleSetConditionFields, setValidationTypes);
     }
   };
 
@@ -210,14 +210,19 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     // 根据不同获取方式走不同接口
     if (dataType === DATA_SOURCE_TYPE.FORM || dataType === DATA_SOURCE_TYPE.SUBFORM) {
       // 从主表中查询/从子表中查询
-      getEntityFieldList(dataSource, setConditionFields, setValidationTypes);
+      getEntityFieldList(dataSource, handleSetConditionFields, setValidationTypes);
     } else if (dataType === DATA_SOURCE_TYPE.DATA_NODE) {
       // 从数据节点中查询  DATA_NODE
       const originDataSource = getDataNodeSource(dataSource);
-      getEntityFieldList(originDataSource, setConditionFields, setValidationTypes);
+      getEntityFieldList(originDataSource, handleSetConditionFields, setValidationTypes);
     } else if (dataType === DATA_SOURCE_TYPE.ASSOCIA_FORM) {
       // 从关联表单中查询  ASSOCIA_FORM
     }
+  };
+
+  const handleSetConditionFields = (conditionFields: ConfitionField[]) => {
+    setConditionFields(conditionFields);
+    updateDataQueryMultipleOutputs(node.id, conditionFields);
   };
 
   // 表单内容改变
@@ -225,11 +230,9 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     triggerEditorSignal.setNodeData(node.id, values);
   };
 
-  const onValuesChange = async (values: any) => {
+  const onValuesChange = async (changeValue: any, values: any) => {
     // 校验表单
     validateNodeForm(form, payloadForm, false);
-
-    updateDataQueryMultipleOutputs(node.id, values, conditionFields);
 
     handlePropsOnChange(values);
   };
@@ -247,7 +250,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       <FormHeader />
       {isSidebar ? (
         <FormContent>
-          <Form form={payloadForm} layout="vertical" onChange={onValuesChange} initialValues={getInitData()}>
+          <Form form={payloadForm} layout="vertical" onValuesChange={onValuesChange} initialValues={getInitData()}>
             <Form.Item label="节点ID" field="id" initialValue={node.id}>
               <Input disabled />
             </Form.Item>
