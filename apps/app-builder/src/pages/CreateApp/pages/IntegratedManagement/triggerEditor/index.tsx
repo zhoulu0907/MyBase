@@ -19,9 +19,11 @@ import {
   StartTimeInitData
 } from './initial-data';
 import { FlowNodeRegistries } from './nodes';
+import { setNodesOutput } from './nodes/utils';
 
 const TriggerEditor = () => {
   const editorProps = useEditorProps(FlowNodeRegistries);
+
   const {
     setNodeId,
     nodeId,
@@ -33,6 +35,7 @@ const TriggerEditor = () => {
     setMainEntities,
     setSubEntities
   } = triggerEditorSignal;
+
   const [initData, setInitData] = useState<FlowDocumentJSON>();
   const sidebarContainerRef = useRef<HTMLDivElement>(null);
 
@@ -52,6 +55,7 @@ const TriggerEditor = () => {
   }, [window.location.hash]);
 
   useEffect(() => {
+    // 获取到工作流id，开始载入数据
     if (flowId.value) {
       console.log('flowId: ', flowId.value);
       initFlowData(flowId.value);
@@ -87,6 +91,8 @@ const TriggerEditor = () => {
       let data = {};
       let nodes = processDefinitionJson.nodes || [];
 
+      console.log('nodes: ', nodes);
+
       for (let item of nodes) {
         data = { ...data, [item.id]: item.data };
       }
@@ -94,6 +100,8 @@ const TriggerEditor = () => {
       console.log('nodeData', data);
       setAllNodeData(data);
       setInitData({ nodes: nodes });
+      //   初始化输出节点
+      setNodesOutput(nodes);
     } else {
       switch (res.triggerType) {
         case TriggerType.FORM:

@@ -276,23 +276,29 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
               key: `${node.id}.${nodeOutput.pageId}`,
               title: nodeOutput.pageName
             });
+
+            options.push(treeNode);
           }
           if (nodeOutput.triggerRange === TriggerRange.Field) {
             treeNode.children.push({
               key: `${node.id}.${nodeOutput.fieldId}`,
               title: nodeOutput.fieldName
             });
+
+            options.push(treeNode);
           }
-          options.push(treeNode);
 
           break;
         case NodeType.START_ENTITY:
-          if (nodeOutput.entityId && nodeOutput.entityName) {
-            treeNode.children.push({
-              key: `${node.id}.${nodeOutput.entityId}`,
-              title: nodeOutput.entityName
+          const startEntityFields = nodeOutput.conditionFields;
+
+          startEntityFields &&
+            startEntityFields.forEach((field: any) => {
+              treeNode.children.push({
+                key: `${node.id}.${field.value}`,
+                title: field.label
+              });
             });
-          }
           options.push(treeNode);
 
           break;
@@ -313,34 +319,55 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
         case NodeType.START_BPM:
           break;
         case NodeType.DATA_ADD:
-          const dataAddFields = nodeOutput.fields;
-          const fieldList = nodeOutput.fieldList;
-          dataAddFields.forEach((field: any) => {
-            const targetField = fieldList.find((item: any) => item.fieldId === field.fieldId);
-            treeNode.children.push({
-              key: `${node.id}.${targetField.fieldId}`,
-              title: targetField.displayName
+          const dataAddFields = nodeOutput.conditionFields;
+          dataAddFields &&
+            dataAddFields.forEach((field: any) => {
+              treeNode.children.push({
+                key: `${node.id}.${field.value}`,
+                title: field.label
+              });
             });
-          });
 
           options.push(treeNode);
+
           break;
         case NodeType.DATA_DELETE:
           break;
         case NodeType.DATA_QUERY:
           const dataQueryFields = nodeOutput.conditionFields;
-          dataQueryFields.forEach((field: any) => {
-            treeNode.children.push({
-              key: `${node.id}.${field.value}`,
-              title: field.label
+          dataQueryFields &&
+            dataQueryFields.forEach((field: any) => {
+              treeNode.children.push({
+                key: `${node.id}.${field.value}`,
+                title: field.label
+              });
             });
-          });
 
           options.push(treeNode);
           break;
         case NodeType.DATA_QUERY_MULTIPLE:
+          const dataQueryMultipleFields = nodeOutput.conditionFields;
+          dataQueryMultipleFields &&
+            dataQueryMultipleFields.forEach((field: any) => {
+              treeNode.children.push({
+                key: `${node.id}.${field.value}`,
+                title: field.label
+              });
+            });
+
+          options.push(treeNode);
           break;
         case NodeType.DATA_UPDATE:
+          const dataUpdateFields = nodeOutput.conditionFields;
+          dataUpdateFields &&
+            dataUpdateFields.forEach((field: any) => {
+              treeNode.children.push({
+                key: `${node.id}.${field.value}`,
+                title: field.label
+              });
+            });
+
+          options.push(treeNode);
           break;
         case NodeType.DATA_CALC:
           break;

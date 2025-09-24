@@ -145,7 +145,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     validateNodeForm(form, payloadForm, false);
 
     // 更新节点输出配置
-    updateStartEntityOutputs(node.id, values, entityList);
+    updateStartEntityOutputs(node.id, values, conditionFields);
 
     handlePropsOnChange(values);
   };

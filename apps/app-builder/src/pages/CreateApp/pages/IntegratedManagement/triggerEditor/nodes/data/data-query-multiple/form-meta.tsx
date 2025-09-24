@@ -229,7 +229,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     // 校验表单
     validateNodeForm(form, payloadForm, false);
 
-    updateDataQueryMultipleOutputs(node.id, values);
+    updateDataQueryMultipleOutputs(node.id, values, conditionFields);
 
     handlePropsOnChange(values);
   };
