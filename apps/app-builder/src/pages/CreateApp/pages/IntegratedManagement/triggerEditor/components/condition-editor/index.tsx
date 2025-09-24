@@ -27,7 +27,6 @@ import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect } from 'react';
 import { NodeType } from '../../nodes/const';
 import { getBeforeCurQueryNodes } from '../../nodes/utils';
-import { TriggerRange } from '../const';
 import styles from './index.module.less';
 
 const Option = Select.Option;
@@ -273,21 +272,17 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
 
       switch (node.type) {
         case NodeType.START_FORM:
-          // TODO(mickey): 改
-          if (nodeOutput.triggerRange === TriggerRange.Record) {
-            treeNode.children.push({
-              key: `${node.id}.${nodeOutput.pageId}`,
-              title: nodeOutput.pageName
+          const startFormFields = nodeOutput.conditionFields;
+
+          startFormFields &&
+            startFormFields.forEach((field: any) => {
+              treeNode.children.push({
+                key: `${node.id}.${field.value}`,
+                title: field.label
+              });
             });
 
-            options.push(treeNode);
-          }
-          if (nodeOutput.triggerRange === TriggerRange.Field) {
-            treeNode.children.push({
-              key: `${node.id}.${nodeOutput.fieldId}`,
-              title: nodeOutput.fieldName
-            });
-
+          if (treeNode.children.length > 0) {
             options.push(treeNode);
           }
 
@@ -311,12 +306,15 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
         case NodeType.START_TIME:
           break;
         case NodeType.START_DATE_FIELD:
-          if (nodeOutput.entityId && nodeOutput.entityName) {
-            treeNode.children.push({
-              key: `${node.id}.${nodeOutput.entityId}`,
-              title: nodeOutput.entityName
+          const startDateFields = nodeOutput.conditionFields;
+
+          startDateFields &&
+            startDateFields.forEach((field: any) => {
+              treeNode.children.push({
+                key: `${node.id}.${field.value}`,
+                title: field.label
+              });
             });
-          }
 
           if (treeNode.children.length > 0) {
             options.push(treeNode);
@@ -392,6 +390,20 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
     });
 
     return options;
+  };
+
+  const showTriggerElement = (params: any, options: TreeSelectDataType[]) => {
+    // console.log(params.value);
+
+    if (params.value) {
+      const parentId = params.value.split('.')[0];
+      const parentNode = options.find((item) => item.key == parentId);
+
+      const childrenName = parentNode?.children?.find((item) => item.key == params.value)?.title;
+      return `${parentNode?.title} - ${childrenName}`;
+    }
+
+    return '';
   };
 
   return (
@@ -496,7 +508,17 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
                                               {form.getFieldValue(item.field + '.operatorType') ==
                                                 FieldType.VARIABLES && (
                                                 <Form.Item field={item.field + '.value'}>
-                                                  <TreeSelect treeData={getVariableOptions(nodeId)} />
+                                                  <TreeSelect
+                                                    treeData={getVariableOptions(nodeId)}
+                                                    triggerElement={(params) => {
+                                                      return (
+                                                        <Input
+                                                          readOnly
+                                                          value={showTriggerElement(params, getVariableOptions(nodeId))}
+                                                        ></Input>
+                                                      );
+                                                    }}
+                                                  />
                                                 </Form.Item>
                                               )}
 

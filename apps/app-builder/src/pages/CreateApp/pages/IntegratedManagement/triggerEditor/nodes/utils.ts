@@ -191,6 +191,7 @@ export const getEntityFieldList = async (
       fieldType: item.fieldType
     });
   });
+
   setConditionFields(newConditionFields);
   if (filedIds?.length) {
     const newValidationTypes = await getFieldCheckTypeApi(filedIds);

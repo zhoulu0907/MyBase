@@ -103,12 +103,12 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       }
 
       setConditionFields(newConditionFields);
+
+      updateStartFormOutputs(node.id, newConditionFields);
     }
   };
 
-  const onValuesChange = (values: any) => {
-    updateStartFormOutputs(node.id, values, pageList, conditionFields);
-
+  const onValuesChange = (changeValue: any, values: any) => {
     handlePropsOnChange(values);
   };
 
@@ -119,9 +119,11 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
         <FormContent>
           <Form
             form={payloadForm}
-            initialValues={{ ...triggerEditorSignal.nodeData.value[node.id] }}
+            initialValues={{
+              ...triggerEditorSignal.nodeData.value[node.id]
+            }}
             layout="vertical"
-            onChange={onValuesChange}
+            onValuesChange={onValuesChange}
           >
             <Grid.Row>
               <Form.Item

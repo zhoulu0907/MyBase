@@ -171,6 +171,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     });
 
     setConditionFields(newConditionFields);
+    updateDataAddOutputs(node.id, newConditionFields);
     setFieldDataList(res);
   };
 
@@ -182,11 +183,9 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     triggerEditorSignal.setNodeData(node.id, values);
   };
 
-  const onValuesChange = async (values: any) => {
+  const onValuesChange = async (changeValue: any, values: any) => {
     // 校验表单
     validateNodeForm(form, payloadForm, false);
-
-    updateDataAddOutputs(node.id, values, conditionFields);
 
     handlePropsOnChange(values);
   };
@@ -199,7 +198,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
           <Form
             form={payloadForm}
             initialValues={{ ...triggerEditorSignal.nodeData.value[node.id] }}
-            onChange={onValuesChange}
+            onValuesChange={onValuesChange}
             layout="vertical"
           >
             <Grid.Row>

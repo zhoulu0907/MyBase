@@ -48,9 +48,14 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
     if (entityId) {
       handleGetEntityFieldsById(entityId);
-      getEntityFieldList(entityId, setConditionFields, setValidationTypes);
+      getEntityFieldList(entityId, handleSetConditionFields, setValidationTypes);
     }
   }, [entityId]);
+
+  const handleSetConditionFields = (conditionFields: ConfitionField[]) => {
+    setConditionFields(conditionFields);
+    updateStartDateFieldOutputs(node.id, conditionFields);
+  };
 
   const handleGetEntityListByApp = async (appId: string) => {
     const res = await getEntityListByApp(appId);
@@ -66,9 +71,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     triggerEditorSignal.setNodeData(node.id, values);
   };
 
-  const onValuesChange = (values: any) => {
-    updateStartDateFieldOutputs(node.id, values, entityList);
-
+  const onValuesChange = (changeValue: any, values: any) => {
     handlePropsOnChange(values);
   };
 
@@ -81,7 +84,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             form={payloadForm}
             layout="vertical"
             initialValues={{ ...triggerEditorSignal.nodeData.value[node.id] }}
-            onChange={onValuesChange}
+            onValuesChange={onValuesChange}
           >
             <Form.Item label="节点ID" field="id" initialValue={node.id}>
               <Input disabled />
