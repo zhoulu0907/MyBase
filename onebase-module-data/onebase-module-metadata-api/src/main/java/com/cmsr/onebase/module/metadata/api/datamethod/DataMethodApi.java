@@ -24,7 +24,7 @@ public interface DataMethodApi {
      * @return 字段数据列表
      */
     @Operation(summary = "根据条件查询实体字段数据")
-    List<EntityFieldDataRespDTO> getDataByCondition(@Valid @RequestBody EntityFieldDataReqDTO reqDTO);
+    List<List<EntityFieldDataRespDTO>> getDataByCondition(@Valid @RequestBody EntityFieldDataReqDTO reqDTO);
     
     /**
      * 根据条件删除实体字段数据
@@ -38,15 +38,15 @@ public interface DataMethodApi {
      * 插入实体字段数据
      *
      * @param reqDTO 插入请求参数
-     * @return 插入成功的数量
+     * @return 返回插入的数据对象
      */
-    Integer insertData(@Valid @RequestBody InsertDataReqDTO reqDTO);
+    List<List<EntityFieldDataRespDTO>> insertData(@Valid @RequestBody InsertDataReqDTO reqDTO);
 
     /**
      * 更新实体字段数据
      *
      * @param reqDTO 插入请求参数
-     * @return 插入成功的数量
+     * @return 返回修改后的数据对象
      */
-    Integer updateData(@Valid @RequestBody UpdateDataReqDTO reqDTO);
+    List<List<EntityFieldDataRespDTO>> updateData(@Valid @RequestBody UpdateDataReqDTO reqDTO);
 }
