@@ -10,11 +10,46 @@ import com.cmsr.onebase.framework.common.tools.core.lang.Assert;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
+import java.net.URI;
 import java.net.URL;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.time.temporal.TemporalAccessor;
+import java.util.Date;
+import java.util.Locale;
 
 public class ClassUtil {
+
+    /**
+     * 是否为简单值类型<br>
+     * 包括：
+     * <pre>
+     *     原始类型
+     *     String、other CharSequence
+     *     Number
+     *     Date
+     *     URI
+     *     URL
+     *     Locale
+     *     Class
+     * </pre>
+     *
+     * @param clazz 类
+     * @return 是否为简单值类型
+     */
+    public static boolean isSimpleValueType(Class<?> clazz) {
+        return isBasicType(clazz) //
+                || clazz.isEnum() //
+                || CharSequence.class.isAssignableFrom(clazz) //
+                || Number.class.isAssignableFrom(clazz) //
+                || Date.class.isAssignableFrom(clazz) //
+                || clazz.equals(URI.class) //
+                || clazz.equals(URL.class) //
+                || clazz.equals(Locale.class) //
+                || clazz.equals(Class.class)//
+                // jdk8 date object
+                || TemporalAccessor.class.isAssignableFrom(clazz); //
+    }
 
     /**
      * 是否为JDK中定义的类或接口，判断依据：
