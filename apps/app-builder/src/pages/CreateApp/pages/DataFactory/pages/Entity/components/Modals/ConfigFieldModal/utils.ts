@@ -122,6 +122,7 @@ const arrayMoveMutate = (array: any[], from: number, to: number) => {
 
   if (startIndex >= 0 && startIndex < array.length) {
     const item = array.splice(from, 1)[0];
+    console.log('item', item);
     array.splice(startIndex, 0, item);
   }
 };
@@ -129,5 +130,9 @@ const arrayMoveMutate = (array: any[], from: number, to: number) => {
 export const arrayMove = (array: any[], from: number, to: number) => {
   array = [...array];
   arrayMoveMutate(array, from, to);
-  return array.map((item, index) => ({ ...item, sortOrder: index + systemFieldsLength + 1 }));
+
+  return array.map((item, index) => ({
+    ...item,
+    sortOrder: index + systemFieldsLength + 1
+  }));
 };

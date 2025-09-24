@@ -1,52 +1,29 @@
-import React, { forwardRef } from 'react';
+import React from 'react';
 import { Table } from '@arco-design/web-react';
 import { SortableContainer, SortableElement, SortableHandle } from 'react-sortable-hoc';
 import { IconDragDotVertical } from '@arco-design/web-react/icon';
+import styles from './index.module.less';
 
 // 拖拽手柄组件
 const DragHandle = SortableHandle(() => <IconDragDotVertical className="drag-handle" />);
 
 // 可排序的表格行组件
-const SortableTableRow = SortableElement(({ children, ...props }: any) => {
+const SortableTableRow = SortableElement(({ children, ...props }: { children: React.ReactNode; [key: string]: unknown }) => {
   return <tr {...props}>{children}</tr>;
 });
 
 // 可排序的表格体组件
-const SortableTableBody = SortableContainer(
-  forwardRef<HTMLTableSectionElement, any>((props, ref) => {
-    return <tbody ref={ref} {...props} />;
-  })
-);
+const SortableTableBody = SortableContainer((props: { children: React.ReactNode; [key: string]: unknown }) => {
+  return <tbody {...props} />;
+});
 
 interface SortableTableProps {
   data: any[];
   columns: any[];
-  onSort: (newData: any[]) => void;
-  className?: string;
-  pagination?: boolean | object;
-  rowKey?: string;
-  rowClassName?: (record: any) => string;
+  onSort: ({ oldIndex, newIndex }: { oldIndex: number; newIndex: number }) => void;
 }
 
-const SortableTable: React.FC<SortableTableProps> = ({
-  data,
-  columns,
-  onSort,
-  className,
-  pagination = false,
-  rowKey = 'id',
-  rowClassName
-}) => {
-  // 处理拖拽排序
-  const handleSort = ({ oldIndex, newIndex }: { oldIndex: number; newIndex: number }) => {
-    if (oldIndex !== newIndex) {
-      const newData = [...data];
-      const [removed] = newData.splice(oldIndex, 1);
-      newData.splice(newIndex, 0, removed);
-      onSort(newData);
-    }
-  };
-
+const SortableTable: React.FC<SortableTableProps> = ({ data, columns, onSort }) => {
   // 表格组件配置
   const components = {
     header: {
@@ -70,15 +47,20 @@ const SortableTable: React.FC<SortableTableProps> = ({
           width: 40
         }
       ],
-      tbody: (props: any) => (
+      tbody: (props: { children: React.ReactNode; [key: string]: unknown }) => (
         <SortableTableBody
           useDragHandle
-          onSortEnd={handleSort}
-          helperContainer={() => document.querySelector('.field-table table tbody')}
+          onSortEnd={onSort}
+          helperContainer={() => {
+            let container: Element | null = null;
+            container = document.querySelector(`#field-config-container table tbody`);
+            return (container as HTMLElement) || document.body;
+          }}
+          helperClass="sortable-helper"
           {...props}
         />
       ),
-      row: (props: any) => {
+      row: (props: { index: number; children: React.ReactNode; [key: string]: unknown }) => {
         const { index, children, ...rest } = props;
         return (
           <SortableTableRow index={index} {...rest}>
@@ -93,10 +75,9 @@ const SortableTable: React.FC<SortableTableProps> = ({
     <Table
       data={data}
       columns={columns}
-      pagination={pagination}
-      className={className}
-      rowKey={rowKey}
-      rowClassName={rowClassName}
+      pagination={false}
+      className={styles['field-config-table']}
+      rowKey="id"
       components={components}
     />
   );

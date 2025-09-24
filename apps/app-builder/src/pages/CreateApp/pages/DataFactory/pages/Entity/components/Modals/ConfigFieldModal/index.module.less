@@ -7,7 +7,7 @@
   }
 }
 
-/* 字段配置容器 */
+/* 字段配置列表 */
 .field-config-container {
   .field-table {
     margin-bottom: 16px;
@@ -30,6 +30,15 @@
         }
       }
     }
+
+    :global(.arco-table-cell) {
+      padding: 20px 16px 0 !important;
+      vertical-align: text-top !important;
+    }
+
+    :global(.arco-table-cell .arco-table-cell-wrap-value > .arco-space) {
+      align-items: start !important;
+    }
   }
 
   .drag-handle {
@@ -38,6 +47,26 @@
 
     &:hover {
       color: #666;
+    }
+  }
+
+  // 拖拽时的样式
+  .sortable-helper {
+    display: table !important;
+    background: #fff !important;
+    border: 1px solid #e5e5e5 !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+    z-index: 9999 !important;
+    opacity: 0.9 !important;
+    
+    tr {
+      display: table-row !important;
+    }
+    
+    td {
+      display: table-cell !important;
+      padding: 8px 12px !important;
+      border-right: 1px solid #e5e5e5 !important;
     }
   }
 
@@ -81,6 +110,13 @@
     margin: 0;
     color: #666;
     font-size: 12px;
+  }
+}
+
+/* 字段表单项样式 */
+.field-form-item {
+  .arco-form-item-wrapper > .arco-form-message {
+    white-space: nowrap !important;
   }
 }
 
