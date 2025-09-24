@@ -115,14 +115,11 @@ export const convertAutoNumberRuleToAutoCodeComp = (autoNumberRule: AutoNumberRu
   return rules;
 };
 
-const systemFieldsLength = 10; // 用于计算自定义字段index
-
 const arrayMoveMutate = (array: any[], from: number, to: number) => {
   const startIndex = to < 0 ? array.length + to : to;
 
   if (startIndex >= 0 && startIndex < array.length) {
     const item = array.splice(from, 1)[0];
-    console.log('item', item);
     array.splice(startIndex, 0, item);
   }
 };
@@ -132,7 +129,6 @@ export const arrayMove = (array: any[], from: number, to: number) => {
   arrayMoveMutate(array, from, to);
 
   return array.map((item, index) => ({
-    ...item,
-    sortOrder: index + systemFieldsLength + 1
+    ...item
   }));
 };

@@ -55,6 +55,9 @@ const FIELD_TYPES_NEED_CONFIG = [
   ENTITY_FIELD_TYPE.AUTO_CODE.VALUE
 ];
 
+// 用于计算自定义字段index
+const systemFieldsLength = 10;
+
 const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible, entity, successCallback }) => {
   const { curAppId } = useAppStore();
   const [form] = Form.useForm();
@@ -297,15 +300,25 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
 
   // 处理拖拽排序
   const handleSort = ({ oldIndex, newIndex }: { oldIndex: number; newIndex: number }) => {
-    // 获取表单的最新值
-    const formValues = form.getFieldsValue();
-    const formFields = formValues.fields || [];
+    // 仅对自定义且未删除字段进行排序
+    const active = fields.filter((f) => !f.isDeleted && f.isSystemField === FIELD_TYPE.CUSTOM);
+    const reorderedActive = arrayMove([...active], oldIndex, newIndex);
 
-    const newData = arrayMove([...formFields], oldIndex, newIndex);
-    const tableData = getCurrentTableData(newData);
+    const newFields = [...fields];
+    let pointer = 0;
+    for (let i = 0; i < newFields.length; i += 1) {
+      const cur = newFields[i];
+      if (!cur.isDeleted && cur.isSystemField === FIELD_TYPE.CUSTOM) {
+        newFields[i] = {
+          ...reorderedActive[pointer],
+          sortOrder: pointer + systemFieldsLength + 1
+        } as FieldFormValues;
+        pointer += 1;
+      }
+    }
 
-    setFields(tableData);
-    form.setFieldsValue({ fields: newData });
+    setFields(newFields);
+    form.setFieldsValue({ fields: newFields });
   };
 
   // 将表单数据转换为表格数据
@@ -318,7 +331,8 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
           ...formField,
           id: originalField.id,
           isSystemField: originalField.isSystemField,
-          isDeleted: originalField.isDeleted
+          isDeleted: originalField.isDeleted,
+          sortOrder: index + systemFieldsLength + 1
         };
       }
       return originalField;
