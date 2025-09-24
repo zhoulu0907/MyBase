@@ -33,9 +33,9 @@ public class AnyLineDBInfoListener implements DMListener {
 
 
     // 需要忽略租户过滤的表名列表
-    private static final Set<String>  TENANT_IGNORE_TABLES = new HashSet<>();
+    private static final Set<String> TENANT_IGNORE_TABLES = new HashSet<>();
     @Resource
-    private              UidGenerator uidGenerator;
+    private UidGenerator uidGenerator;
 
     static {
         // 添加不需要租户过滤的表
@@ -214,7 +214,7 @@ public class AnyLineDBInfoListener implements DMListener {
 
         // 只有在不忽略租户的情况下才添加租户条件
         // 检查当前查询的表是否需要忽略租户过滤
-        boolean shouldIgnore = isTableTenantIgnored(prepare);
+        boolean shouldIgnore = isTableTenantIgnored(prepare) || TenantContextHolder.isIgnore();
         log.info("prepareQuery--------------> isTableTenantIgnored: {}", shouldIgnore);
         if (!shouldIgnore) {
             configs.and("tenant_id = " + TenantContextHolder.getRequiredTenantId());

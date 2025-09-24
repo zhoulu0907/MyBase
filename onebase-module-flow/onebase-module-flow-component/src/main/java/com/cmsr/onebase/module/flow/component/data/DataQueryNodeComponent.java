@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.flow.component.data;
 
+import com.cmsr.onebase.framework.express.JdbcTypeConvertor;
 import com.cmsr.onebase.module.flow.component.NormalNodeComponent;
 import com.cmsr.onebase.module.flow.context.ExecuteContext;
 import com.cmsr.onebase.module.flow.context.VariableContext;
@@ -41,7 +42,7 @@ public class DataQueryNodeComponent extends NormalNodeComponent {
     private Map<String, Object> convert(List<EntityFieldDataRespDTO> fieldDataRespDTOS) {
         Map<String, Object> map = new HashMap<>();
         for (EntityFieldDataRespDTO fieldDataRespDTO : fieldDataRespDTOS) {
-            map.put(fieldDataRespDTO.getFieldName(), fieldDataRespDTO.getFieldValue());
+            map.put(fieldDataRespDTO.getFieldName(), JdbcTypeConvertor.convert(fieldDataRespDTO.getJdbcType(), fieldDataRespDTO.getFieldValue()));
         }
         return map;
     }
