@@ -337,29 +337,36 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
               </Grid.Row>
             )}
 
-            <Form.Item label="查询规则" field="filterType" rules={[{ required: true, message: '请选择查询规则' }]}>
-              <Radio.Group>
-                <Radio value={FILTER_TYPE.ALL}>全部数据</Radio>
-                <Radio value={FILTER_TYPE.CONDITION}>按条件过滤</Radio>
-              </Radio.Group>
-            </Form.Item>
+            <Grid.Row>
+              <Form.Item label="查询规则" field="filterType" rules={[{ required: true, message: '请选择查询规则' }]}>
+                <Radio.Group>
+                  <Radio value={FILTER_TYPE.ALL}>全部数据</Radio>
+                  <Radio value={FILTER_TYPE.CONDITION}>按条件过滤</Radio>
+                </Radio.Group>
+              </Form.Item>
+            </Grid.Row>
 
             {filterType === FILTER_TYPE.CONDITION && (
-              <ConditionEditor
-                label="条件"
-                required
-                fields={conditionFields}
-                entityFieldValidationTypes={validationTypes}
-                form={payloadForm}
-              />
+              <Grid.Row>
+                <ConditionEditor
+                  label="条件"
+                  required
+                  fields={conditionFields}
+                  entityFieldValidationTypes={validationTypes}
+                  form={payloadForm}
+                />
+              </Grid.Row>
             )}
-            <Form.Item label="排序规则" rules={[{ required: true, message: '请选择排序规则' }]}>
-              <SortByEditor
-                data={triggerEditorSignal.nodeData.value[node.id]?.sortBy || []}
-                fields={conditionFields}
-                form={payloadForm}
-              ></SortByEditor>
-            </Form.Item>
+
+            <Grid.Row>
+              <Form.Item label="排序规则" rules={[{ required: true, message: '请选择排序规则' }]}>
+                <SortByEditor
+                  data={triggerEditorSignal.nodeData.value[node.id]?.sortBy || []}
+                  fields={conditionFields}
+                  form={payloadForm}
+                ></SortByEditor>
+              </Form.Item>
+            </Grid.Row>
           </Form>
         </FormContent>
       ) : (

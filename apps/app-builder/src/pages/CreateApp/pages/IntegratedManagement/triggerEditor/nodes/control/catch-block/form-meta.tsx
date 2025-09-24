@@ -34,13 +34,15 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             onValuesChange={onValuesChange}
             layout="vertical"
           >
-            <ConditionEditor
-              label="条件"
-              required
-              fields={conditionFields}
-              entityFieldValidationTypes={validationTypes}
-              form={payloadForm}
-            />
+            <Grid.Row>
+              <ConditionEditor
+                label="条件"
+                required
+                fields={conditionFields}
+                entityFieldValidationTypes={validationTypes}
+                form={payloadForm}
+              />
+            </Grid.Row>
           </Form>
         </FormContent>
       ) : (

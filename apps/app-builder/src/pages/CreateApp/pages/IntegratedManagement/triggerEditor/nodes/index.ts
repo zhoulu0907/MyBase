@@ -25,19 +25,17 @@ import { JsonNodeRegistry } from './other/json';
 import { LogNodeRegistry } from './other/log';
 import { MessageNodeRegistry } from './other/message';
 import { ScriptNodeRegistry } from './other/script';
-import { StartNodeRegistry } from './start';
-import { StartApiNodeRegistry } from './start_api';
-import { StartBpmNodeRegistry } from './start_bpm';
-import { StartDateFieldNodeRegistry } from './start_date_field';
-import { StartEntityNodeRegistry } from './start_entity';
-import { StartFormNodeRegistry } from './start_form';
-import { StartTimeNodeRegistry } from './start_time';
+import { StartApiNodeRegistry } from './start/start_api';
+import { StartBpmNodeRegistry } from './start/start_bpm';
+import { StartDateFieldNodeRegistry } from './start/start_date_field';
+import { StartEntityNodeRegistry } from './start/start_entity';
+import { StartFormNodeRegistry } from './start/start_form';
+import { StartTimeNodeRegistry } from './start/start_time';
 
 export const FlowNodeRegistries: FlowNodeRegistry[] = [
   CaseNodeRegistry,
   CaseDefaultNodeRegistry,
   EndNodeRegistry,
-  StartNodeRegistry,
   StartBpmNodeRegistry,
   StartEntityNodeRegistry,
   StartApiNodeRegistry,

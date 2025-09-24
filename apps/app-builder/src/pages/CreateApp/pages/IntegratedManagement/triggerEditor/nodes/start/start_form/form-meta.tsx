@@ -12,11 +12,11 @@ import {
 } from '@onebase/app';
 import { getHashQueryParam } from '@onebase/common';
 import { useEffect, useState } from 'react';
-import ConditionEditor from '../../components/condition-editor';
-import { TriggerRange } from '../../components/const';
-import { FormContent, FormHeader, FormOutputs } from '../../form-components';
-import { useIsSidebar, useNodeRenderContext } from '../../hooks';
-import { type FlowNodeJSON } from '../../typings';
+import ConditionEditor from '../../../components/condition-editor';
+import { TriggerRange } from '../../../components/const';
+import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
+import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
+import { type FlowNodeJSON } from '../../../typings';
 
 const CheckboxGroup = Checkbox.Group;
 const Option = Select.Option;
@@ -100,8 +100,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
         const newValidationTypes = await getFieldCheckTypeApi(filedIds);
         setValidationTypes(newValidationTypes);
       }
-
-      console.log('newConditionFields: ', newConditionFields);
 
       setConditionFields(newConditionFields);
     }

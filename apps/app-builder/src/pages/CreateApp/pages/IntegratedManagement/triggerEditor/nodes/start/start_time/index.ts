@@ -1,11 +1,11 @@
 import iconStart from '@/assets/flow/icon-start.jpg';
-import { type FlowNodeRegistry } from '../../typings';
-import { NodeType } from '../const';
+import { type FlowNodeRegistry } from '../../../typings';
+import { NodeType } from '../../const';
 import { formMeta } from './form-meta';
 
-export const StartEntityNodeRegistry: FlowNodeRegistry = {
-  type: NodeType.START_ENTITY,
-  title: '表单(实体)触发节点',
+export const StartTimeNodeRegistry: FlowNodeRegistry = {
+  type: NodeType.START_TIME,
+  title: '定时触发节点',
   category: 'trigger',
   meta: {
     isStart: true, // Mark as start
@@ -18,7 +18,7 @@ export const StartEntityNodeRegistry: FlowNodeRegistry = {
   },
   info: {
     icon: iconStart,
-    description: '这是表单(实体)触发节点，用于设置启动工作流所需的信息。'
+    description: '这是定时触发节点，用于设置启动工作流所需的信息。'
   },
   /**
    * Render node via formMeta
