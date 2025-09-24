@@ -1,17 +1,17 @@
+import { batchSaveFields, getEntityFields, getEntityFieldsWithChildren } from '@onebase/app';
+import React, { useEffect, useState } from 'react';
+import type { EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
+import { FIELD_TYPE } from '@onebase/ui-kit';
 import { useAppStore } from '@/store/store_app';
 import { useFieldStore } from '@/store/store_field';
-import { Button, Message, Modal, Table } from '@arco-design/web-react';
+import { Button, Message, Modal } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
-import type { EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
-import { batchSaveFields, getEntityFields, getEntityFieldsWithChildren } from '@onebase/app';
-import { ENTITY_FIELD_TYPE, FIELD_TYPE } from '@onebase/ui-kit';
-import React, { useEffect, useState } from 'react';
-// import { ReactSortable } from 'react-sortablejs';
+import { ENTITY_FIELD_TYPE } from '@onebase/ui-kit';
+import type { AutoNumberRule } from './types';
 import FieldConfigPopover from './FieldConfigPopover';
 import TableColumns from './TableColumns';
 import SortableTable from './SortableTable';
 import styles from './index.module.less';
-import type { AutoNumberRule } from './types';
 
 interface FieldFormValues {
   id?: string;
@@ -91,6 +91,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
   }, [visible]);
 
   const loadEntityFields = () => {
+    if (!entity.entityId) return;
     getEntityFields({ entityId: entity.entityId }).then((res: any) => {
       console.log('getEntityFields', res);
       setFields(
@@ -103,6 +104,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
   };
 
   const loadEntityFieldsWithChildren = () => {
+    if (!entity.entityId) return;
     getEntityFieldsWithChildren(entity.entityId).then((res: any) => {
       const transformEntity = (entity: any, isChild = false) => ({
         label: isChild ? entity.childEntityName : entity.entityName,
@@ -146,7 +148,7 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
         regexPrompt: ''
       },
       isSystemField: FIELD_TYPE.CUSTOM,
-      sortOrder: activeFields.length
+      sortOrder: fields.length + 1
     };
     setFields([...activeFields, newField]);
   };
@@ -161,34 +163,28 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
       setFields(fields.filter((f, i) => i !== index));
       return;
     } else {
-      setFields(fields.map((f, i) => (i === index ? { ...f, isDeleted: true } : f)));
+      setFields(fields.map((field, i) => (i === index ? { ...field, isDeleted: true } : field)));
     }
   };
 
   const updateField = (index: number, updatedField: Partial<FieldFormValues>) => {
+    console.log('updateField', index, updatedField, fields);
     setFields((prevFields) => prevFields.map((field, i) => (i === index ? { ...field, ...updatedField } : field)));
   };
 
   // 获取字段在数组中的索引
   const getFieldIndex = (fieldId: string, index: number) => {
     if (fieldId) {
+      console.log(
+        'getFieldIndex',
+        fieldId,
+        index,
+        fields.findIndex((field) => field.id === fieldId)
+      );
       return fields.findIndex((field) => field.id === fieldId);
     } else {
       return index;
     }
-  };
-
-  const handleSort = (newFields: FieldFormValues[]) => {
-    console.log('handleSort', newFields);
-    // const allFields = [...fields];
-    // const visibleFields = newFields.map((field, index) => ({ ...field, sortOrder: index }));
-
-    // setFields(
-    //   allFields.map((field) => {
-    //     const visibleField = visibleFields.find((vf) => vf.id === field.id);
-    //     return visibleField ? { ...field, sortOrder: visibleField.sortOrder } : field;
-    //   })
-    // );
   };
 
   const handleFinish = async () => {
@@ -316,6 +312,11 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
     fields
   });
 
+  // 处理拖拽排序
+  const handleSort = (newData: FieldFormValues[]) => {
+    setFields(newData);
+  };
+
   return (
     <Modal
       className={styles['config-field-modal']}
@@ -329,39 +330,16 @@ const ConfigFieldModal: React.FC<ConfigFieldModalProps> = ({ visible, setVisible
       style={{ width: 1400 }}
     >
       <div className={styles['field-config-container']}>
-        {/* <ReactSortable
-          list={activeFields}
-          setList={handleSort}
-          animation={200}
-          handle={`.${styles['drag-handle']}`}
-          filter={`.${styles['system-field']}`}
-        >
-          <Table
-            data={activeFields}
-            columns={columns}
-            pagination={false}
-            className={styles['field-table']}
-            rowClassName={(record) =>
-              record.isSystemField === FIELD_TYPE.SYSTEM ? styles['system-field-row'] : styles['custom-field-row']
-            }
-            rowKey="id"
-            components={{
-              body: {
-                row: SortableTableRow
-              }
-            }}
-          />
-        </ReactSortable> */}
-
         <SortableTable
           data={activeFields}
           columns={columns}
-          rowKey="id"
-          onSort={(newData) => {
-            setFields(newData);
-          }}
+          onSort={handleSort}
           pagination={false}
-          disabledRowKeys={activeFields.filter((r) => r.isSystemField === FIELD_TYPE.SYSTEM).map((r) => r.id || '')}
+          className="field-table"
+          rowClassName={(record) =>
+            record.isSystemField === FIELD_TYPE.SYSTEM ? styles['system-field-row'] : styles['custom-field-row']
+          }
+          rowKey="id"
         />
 
         <div className={styles['add-field-section']}>
