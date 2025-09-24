@@ -79,16 +79,12 @@ const DynamicImageConfig: React.FC<DynamicImageConfigProps> = ({ handlePropsChan
                     handlePropsChange('imageUrl', newImageInfo.image);
                     onSuccess(uploadImgUrl);
                   } else {
-                    handlePropsChange(imageKey, []);
-                    handlePropsChange('imageUrl', '');
                     onError({
                       status: 'error',
                       msg: '上传失败'
                     });
                   }
                 } catch (error) {
-                  handlePropsChange(imageKey, []);
-                  handlePropsChange('imageUrl', '');
                   onError({
                     status: 'error',
                     msg: '上传失败'
