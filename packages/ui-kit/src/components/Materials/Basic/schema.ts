@@ -34,6 +34,7 @@ import XTable from './ListComponents/Table/schema';
 import XTimeline from './ListComponents/Timeline/schema';
 
 import XImage from './ShowComponents/Image/schema';
+import XFile from './ShowComponents/File/schema';
 import XInfoNotice from './ShowComponents/InfoNotice/schema';
 import XText from './ShowComponents/Text/schema';
 import XWebView from './ShowComponents/WebView/schema';
@@ -78,6 +79,7 @@ const baseSchema = {
 
   XInfoNotice,
   XImage,
+  XFile,
   XText,
   XWebView,
   XDivider,

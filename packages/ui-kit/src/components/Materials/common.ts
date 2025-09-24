@@ -40,7 +40,9 @@ import type {
   ISelectDataSourceConfigType,
   ISubTableConfigType,
   ITabsTypeConfigType,
-  ITabsPositionConfigType
+  ITabsPositionConfigType,
+  IImageConfigType,
+  IFileConfigType
 } from './types';
 
 export interface ICommonBaseType {
@@ -441,4 +443,16 @@ export const tabsPositionConfig: ITabsPositionConfigType<TTabsPositionSelectKeyT
       value: TABS_POSITION_VALUES[TABS_POSITION_OPTIONS.RIGHT]
     }
   ]
+};
+// 
+export const imageCofig: IImageConfigType = {
+  key: 'image',
+  name: '图片',
+  type: CONFIG_TYPES.IMAGE
+};
+
+export const fileCofig: IFileConfigType = {
+  key: 'file',
+  name: '图片',
+  type: CONFIG_TYPES.FILE
 };

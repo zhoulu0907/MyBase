@@ -45,6 +45,7 @@ const componentSchemaMap: Partial<Record<ComponentType, ComponentSchema>> = {
 
   [ALL_COMPONENT_TYPES.INFO_NOTICE]: BasicSchema.XInfoNotice,
   [ALL_COMPONENT_TYPES.IMAGE]: BasicSchema.XImage,
+  [ALL_COMPONENT_TYPES.FILE]: BasicSchema.XFile,
   [ALL_COMPONENT_TYPES.TEXT]: BasicSchema.XText,
   [ALL_COMPONENT_TYPES.WEB_VIEW]: BasicSchema.XWebView,
   [ALL_COMPONENT_TYPES.DIVIDER]: BasicSchema.XDivider,

@@ -54,6 +54,7 @@ export const COMPONENT_TYPE_DISPLAY_NAME_MAP: Record<string, string> = {
   [SHOW_COMPONENT_TYPES.INFO_NOTICE]: '信息公告',
   [SHOW_COMPONENT_TYPES.TEXT]: '静态文本',
   [SHOW_COMPONENT_TYPES.IMAGE]: '静态图片',
+  [SHOW_COMPONENT_TYPES.FILE]: '静态文件',
   [SHOW_COMPONENT_TYPES.WEB_VIEW]: '网页组件',
   [SHOW_COMPONENT_TYPES.PLACEHOLDER]: '占位符',
 };
@@ -379,6 +380,14 @@ const allTemplate = {
           h: 48,
           w: 68,
           displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[SHOW_COMPONENT_TYPES.IMAGE],
+          icon: 'display_image_cp.svg',
+          category: 'base'
+        },
+        {
+          type: SHOW_COMPONENT_TYPES.FILE,
+          h: 48,
+          w: 68,
+          displayName: COMPONENT_TYPE_DISPLAY_NAME_MAP[SHOW_COMPONENT_TYPES.FILE],
           icon: 'display_image_cp.svg',
           category: 'base'
         },

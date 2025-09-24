@@ -97,6 +97,7 @@ export const ICON_Map_By_Type: Record<string, React.ReactNode> = {
   'directory_cp.svg': <img src={DirectoryIcon} />,
   'kanban_cp.svg': <img src={KanbanIcon} />,
   XImage: <img src={DisplayImageIcon} />,
+  XFile: <img src={DisplayImageIcon} />,
   XInfoNotice: <img src={InfoNoticeIcon} />,
   'display_text_cp.svg': <img src={DisplayTextIcon} />,
   'pwd_input_cp.svg': <img src={PwdInputIcon} />,

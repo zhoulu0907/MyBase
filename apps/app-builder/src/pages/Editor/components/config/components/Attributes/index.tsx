@@ -18,6 +18,8 @@ import { useSignals } from '@preact/signals-react/runtime';
 import { useEffect, useState } from 'react';
 import { IconCopy } from '@arco-design/web-react/icon';
 import DynamicCarouselConfig from './components/DynamicCarouselConfig';
+import DynamicImageConfig from './components/DynamicImageConfig';
+import DynamicFileConfig from './components/DynamicFileConfig';
 import DynamicFieldConfig from './components/DynamicFieldConfig';
 import DynamicOptionsConfig from './components/DynamicOptionsConfig';
 import DynamicRadioConfig from './components/DynamicRadioConfig';
@@ -97,7 +99,7 @@ const Attributes = ({ cpID }: ConfigsProps) => {
   }, [cpID, curComponentSchema]);
 
   const handlePropsChange = (key: string, value: string | number | boolean | any[]) => {
-    console.log(`更新了属性: ${key} 值为: ${value}`);
+    console.log(`更新了属性: ${key} 值为: `,value);
 
     const newCurComponentSchema = {
       id: cpID,
@@ -200,7 +202,9 @@ const Attributes = ({ cpID }: ConfigsProps) => {
               item.type !== CONFIG_TYPES.SELECT_OPTIONS_INPUT &&
               item.type !== CONFIG_TYPES.CAROUSEL &&
               item.type !== CONFIG_TYPES.SELECT_DATA_SOURCE &&
-              item.type !== CONFIG_TYPES.SUB_TABLE
+              item.type !== CONFIG_TYPES.SUB_TABLE &&
+              item.type !== CONFIG_TYPES.IMAGE &&
+              item.type !== CONFIG_TYPES.FILE
             ) {
               return (
                 <FormItem
@@ -676,6 +680,28 @@ const Attributes = ({ cpID }: ConfigsProps) => {
             if (item.type === CONFIG_TYPES.SUB_TABLE) {
               return (
                 <DynamicSubTableConfig
+                  key={index}
+                  id={cpID}
+                  handlePropsChange={handlePropsChange}
+                  item={item}
+                  configs={configs}
+                />
+              );
+            }
+            if (item.type === CONFIG_TYPES.IMAGE) {
+              return (
+                <DynamicImageConfig
+                  key={index}
+                  id={cpID}
+                  handlePropsChange={handlePropsChange}
+                  item={item}
+                  configs={configs}
+                />
+              );
+            }
+            if (item.type === CONFIG_TYPES.FILE) {
+              return (
+                <DynamicFileConfig
                   key={index}
                   id={cpID}
                   handlePropsChange={handlePropsChange}

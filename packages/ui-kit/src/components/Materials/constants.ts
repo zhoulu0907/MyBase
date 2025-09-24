@@ -77,7 +77,10 @@ export const CONFIG_TYPES = {
   // 子表单组件
   TABS_TYPE: 'TabsType',
   // 子表单组件
-  TABS_POSITION: 'TabsPosition'
+  TABS_POSITION: 'TabsPosition',
+  // 静态文件
+  IMAGE: 'Image',
+  FILE: 'File',
 } as const;
 
 // 状态选项常量
