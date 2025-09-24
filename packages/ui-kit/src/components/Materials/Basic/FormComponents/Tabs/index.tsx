@@ -2,7 +2,7 @@ import { memo } from 'react';
 import { Form, Tabs } from '@arco-design/web-react';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import type { XTabsConfig } from './schema';
-import '../index.css';
+// import '../index.css';
 
 const TabPane = Tabs.TabPane;
 

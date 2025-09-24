@@ -1,4 +1,5 @@
 import { memo } from 'react';
+import '../index.css';
 
 const XPlaceholder = memo(() => {
 
