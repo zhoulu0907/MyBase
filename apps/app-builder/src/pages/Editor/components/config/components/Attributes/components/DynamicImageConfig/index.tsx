@@ -71,7 +71,7 @@ const DynamicImageConfig: React.FC<DynamicImageConfigProps> = ({ handlePropsChan
                   if (uploadImgUrl !== '') {
                     const newImageInfo = {
                       image: uploadImgUrl,
-                      tetx: '',
+                      tetx: file.name,
                       url: ''
                     };
                     setImageConfig((prev) => [...prev, newImageInfo]);
