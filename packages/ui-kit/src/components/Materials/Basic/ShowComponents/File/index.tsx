@@ -1,6 +1,5 @@
-import { memo, useState } from 'react';
-import { Image, Space } from '@arco-design/web-react';
-import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
+import { memo } from 'react';
+import { Space } from '@arco-design/web-react';
 import { type XFileConfig } from './schema';
 import { IconDownload } from '@arco-design/web-react/icon';
 

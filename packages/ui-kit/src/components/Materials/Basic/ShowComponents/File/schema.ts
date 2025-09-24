@@ -60,6 +60,11 @@ export interface XFileConfig extends ICommonBaseType {
    */
   maxHeight?: TNumberDefaultType;
   fileCofig: Files[];
+  verify: {
+    required: boolean;
+    maxCount: TNumberDefaultType;
+    maxSize: TNumberDefaultType;
+  }
 }
 
 const XFile: XFileSchema = {
@@ -70,7 +75,12 @@ const XFile: XFileSchema = {
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     fillStyle: FILL_VALUES[FILL_OPTIONS.COVER],
     fileCofig:[],
-    maxHeight: undefined
+    maxHeight: undefined,
+    verify: {
+      required: false,
+      maxSize: 5,
+      maxCount: 10
+    }
   }
 };
 

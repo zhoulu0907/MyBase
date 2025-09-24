@@ -25,21 +25,21 @@ const DynamicImageConfig: React.FC<DynamicImageConfigProps> = ({ handlePropsChan
   const maxCount = 1;
 
   const handleUpload = async (file: File, onProgress?: (percent: number, event?: ProgressEvent) => void) => {
-      const formData = new FormData();
-      formData.append('file', file);
-  
-      const progressAdapter = onProgress
-        ? (progressEvent: ProgressEvent) => {
-            if (progressEvent.lengthComputable) {
-              const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-              onProgress(percent, progressEvent);
-            }
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const progressAdapter = onProgress
+      ? (progressEvent: ProgressEvent) => {
+          if (progressEvent.lengthComputable) {
+            const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            onProgress(percent, progressEvent);
           }
-        : undefined;
-  
-      const res = await uploadFile(formData, progressAdapter);
-      return res;
-    };
+        }
+      : undefined;
+
+    const res = await uploadFile(formData, progressAdapter);
+    return res;
+  };
 
   return (
     <FormItem layout="vertical" labelAlign="left" label={'图片配置'} className={styles.formItem}>
@@ -79,12 +79,16 @@ const DynamicImageConfig: React.FC<DynamicImageConfigProps> = ({ handlePropsChan
                     handlePropsChange('imageUrl', newImageInfo.image);
                     onSuccess(uploadImgUrl);
                   } else {
+                    handlePropsChange(imageKey, []);
+                    handlePropsChange('imageUrl', '');
                     onError({
                       status: 'error',
                       msg: '上传失败'
                     });
                   }
                 } catch (error) {
+                  handlePropsChange(imageKey, []);
+                  handlePropsChange('imageUrl', '');
                   onError({
                     status: 'error',
                     msg: '上传失败'
