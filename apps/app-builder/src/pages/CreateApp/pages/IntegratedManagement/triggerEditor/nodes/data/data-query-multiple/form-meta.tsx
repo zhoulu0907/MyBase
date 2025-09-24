@@ -26,6 +26,7 @@ import {
   getEntityFieldList,
   validateNodeForm
 } from '../../utils';
+import { updateDataQueryMultipleOutputs } from './output';
 
 export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   useSignals();
@@ -228,6 +229,8 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     // 校验表单
     validateNodeForm(form, payloadForm, false);
 
+    updateDataQueryMultipleOutputs(node.id, values);
+
     handlePropsOnChange(values);
   };
 
@@ -349,6 +352,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             {filterType === FILTER_TYPE.CONDITION && (
               <Grid.Row>
                 <ConditionEditor
+                  nodeId={node.id}
                   label="条件"
                   required
                   fields={conditionFields}
