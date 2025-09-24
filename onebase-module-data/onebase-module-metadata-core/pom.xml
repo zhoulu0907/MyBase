@@ -55,6 +55,13 @@
             <artifactId>onebase-spring-boot-starter-biz-tenant</artifactId>
         </dependency>
 
+        <!-- 表达式引擎 -->
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-spring-boot-starter-express</artifactId>
+            <version>${revision}</version>
+        </dependency>
+
         <!-- Web 相关 -->
     <!-- core 为纯库模块，不需要 web/security 运行期依赖 -->
 
