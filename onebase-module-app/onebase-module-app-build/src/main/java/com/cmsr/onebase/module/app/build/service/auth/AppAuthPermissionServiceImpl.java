@@ -418,6 +418,9 @@ public class AppAuthPermissionServiceImpl implements AppAuthPermissionService {
     }
 
     private List<AuthDataFilterVO> formatAuthDataFilterVO(List<List<AuthDataFilterVO>> authDataFilters) {
+        if (CollectionUtils.isEmpty(authDataFilters)) {
+            return Collections.emptyList();
+        }
         for (int i = 0; i < authDataFilters.size(); i++) {
             List<AuthDataFilterVO> authDataFilterVOS = authDataFilters.get(i);
             for (int j = 0; j < authDataFilterVOS.size(); j++) {

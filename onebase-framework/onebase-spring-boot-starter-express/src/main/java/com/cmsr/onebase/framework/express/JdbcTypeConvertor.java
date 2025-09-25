@@ -76,6 +76,9 @@ public class JdbcTypeConvertor {
         if (value instanceof LocalDateTime) {
             return value;
         }
+        if (value instanceof java.sql.Timestamp) {
+            return ((java.sql.Timestamp) value).toLocalDateTime();
+        }
         String stringValue = value.toString().trim();
         if (StringUtils.isEmpty(stringValue)) {
             return null;
@@ -131,6 +134,9 @@ public class JdbcTypeConvertor {
     private static Object convertDate(Object value) {
         if (value instanceof LocalDate) {
             return value;
+        }
+        if(value instanceof java.sql.Date){
+            return ((java.sql.Date) value).toLocalDate();
         }
         String stringValue = value.toString();
         try {
