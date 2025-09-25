@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.flow.component.data;
 
 import com.cmsr.onebase.framework.express.JdbcTypeConvertor;
+import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.module.flow.component.NormalNodeComponent;
 import com.cmsr.onebase.module.flow.context.ExecuteContext;
 import com.cmsr.onebase.module.flow.context.VariableContext;
@@ -10,6 +11,7 @@ import com.cmsr.onebase.module.metadata.api.datamethod.dto.EntityFieldDataRespDT
 import com.yomahub.liteflow.annotation.LiteflowComponent;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.HashMap;
@@ -34,9 +36,12 @@ public class DataQueryNodeComponent extends NormalNodeComponent {
         ExecuteContext executeContext = this.getContextBean(ExecuteContext.class);
         Map<String, Object> nodeData = executeContext.getNodeData(this.getTag());
         EntityFieldDataReqDTO reqDTO = DataMethodApiUtils.convert(nodeData);
-        List<EntityFieldDataRespDTO> fieldDataRespDTOS = dataMethodApi.getDataByCondition(reqDTO);
+        reqDTO.setNum(1);
+        List<List<EntityFieldDataRespDTO>> fieldDataRespDTOS = TenantUtils.executeIgnore(() -> dataMethodApi.getDataByCondition(reqDTO));
         VariableContext variableContext = this.getContextBean(VariableContext.class);
-        variableContext.getNodeVariables().put(this.getTag(), convert(fieldDataRespDTOS));
+        if (CollectionUtils.isNotEmpty(fieldDataRespDTOS)) {
+            variableContext.putNodeVariables(this.getTag(), convert(fieldDataRespDTOS.get(0)));
+        }
     }
 
     private Map<String, Object> convert(List<EntityFieldDataRespDTO> fieldDataRespDTOS) {
