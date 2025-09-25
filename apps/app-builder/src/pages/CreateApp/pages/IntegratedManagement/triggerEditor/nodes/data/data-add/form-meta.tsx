@@ -295,7 +295,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
               </Form.Item>
             </Grid.Row>
 
-            {batchType ? (
+            {batchType && (
               <Grid.Row>
                 <Form.Item label="数据源" field="dataNodeId">
                   <Select allowClear>
@@ -307,13 +307,13 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                   </Select>
                 </Form.Item>
               </Grid.Row>
-            ) : (
-              <Grid.Row>
-                <Form.Item label="字段设置">
-                  <FieldEditor fieldList={fieldDataList} form={payloadForm} />
-                </Form.Item>
-              </Grid.Row>
             )}
+
+            <Grid.Row>
+              <Form.Item label="字段设置">
+                <FieldEditor nodeId={node.id} fieldList={fieldDataList} form={payloadForm} />
+              </Form.Item>
+            </Grid.Row>
           </Form>
         </FormContent>
       ) : (
