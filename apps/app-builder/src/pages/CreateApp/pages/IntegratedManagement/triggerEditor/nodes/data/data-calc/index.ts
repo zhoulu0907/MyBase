@@ -1,7 +1,7 @@
 import iconStart from '@/assets/flow/icon-start.jpg';
-import { nanoid } from 'nanoid';
 import { type FlowNodeRegistry } from '../../../typings';
 import { NodeType } from '../../const';
+import { generateNodeId } from '../../utils';
 import { formMeta } from './form-meta';
 
 export const DataCalcNodeRegistry: FlowNodeRegistry = {
@@ -29,7 +29,7 @@ export const DataCalcNodeRegistry: FlowNodeRegistry = {
   },
   onAdd(ctx, from) {
     return {
-      id: `dataCalc_${nanoid()}`,
+      id: generateNodeId(NodeType.DATA_CALC),
       type: NodeType.DATA_CALC,
       data: {
         title: '数据计算节点'

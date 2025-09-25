@@ -1,7 +1,7 @@
 import iconStart from '@/assets/flow/icon-start.jpg';
-import { nanoid } from 'nanoid';
 import { type FlowNodeRegistry } from '../../../typings';
 import { NodeType } from '../../const';
+import { generateNodeId } from '../../utils';
 import { formMeta } from './form-meta';
 
 export const RefreshNodeRegistry: FlowNodeRegistry = {
@@ -29,8 +29,8 @@ export const RefreshNodeRegistry: FlowNodeRegistry = {
   },
   onAdd(ctx, from) {
     return {
-      id: `refresh_${nanoid()}`,
-      type: 'refresh',
+      id: generateNodeId(NodeType.REFRESH),
+      type: NodeType.REFRESH,
       data: {
         title: '刷新节点'
       }

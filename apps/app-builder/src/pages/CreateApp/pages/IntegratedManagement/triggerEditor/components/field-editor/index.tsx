@@ -280,7 +280,7 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList, form, nodeId }) =>
                         </Form.Item>
                       </Grid.Col>
 
-                      <Grid.Col span={3}>
+                      <Grid.Col span={2}>
                         <div style={{ lineHeight: '32px' }}>的值设为</div>
                       </Grid.Col>
 

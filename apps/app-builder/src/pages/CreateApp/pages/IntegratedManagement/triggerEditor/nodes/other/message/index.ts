@@ -1,7 +1,7 @@
 import iconStart from '@/assets/flow/icon-start.jpg';
-import { nanoid } from 'nanoid';
 import { type FlowNodeRegistry } from '../../../typings';
 import { NodeType } from '../../const';
+import { generateNodeId } from '../../utils';
 import { formMeta } from './form-meta';
 
 export const MessageNodeRegistry: FlowNodeRegistry = {
@@ -29,8 +29,8 @@ export const MessageNodeRegistry: FlowNodeRegistry = {
   },
   onAdd(ctx, from) {
     return {
-      id: `message_${nanoid()}`,
-      type: 'message',
+      id: generateNodeId(NodeType.MESSAGE),
+      type: NodeType.MESSAGE,
       data: {
         title: '消息节点'
       }

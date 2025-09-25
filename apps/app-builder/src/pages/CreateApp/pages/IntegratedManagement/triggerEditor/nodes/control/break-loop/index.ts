@@ -1,10 +1,8 @@
-import { nanoid } from 'nanoid';
-
 import iconBreak from '@/assets/flow/icon-break.svg';
 import { type FlowNodeRegistry } from '../../../typings';
 import { NodeType } from '../../const';
+import { generateNodeId } from '../../utils';
 import { formMeta } from './form-meta';
-
 /**
  * Break 节点用于在 loop 中根据条件终止并跳出
  */
@@ -35,7 +33,7 @@ export const BreakLoopNodeRegistry: FlowNodeRegistry = {
   },
   onAdd(ctx, from) {
     return {
-      id: `break_${nanoid()}`,
+      id: generateNodeId(NodeType.BREAK_LOOP),
       type: NodeType.BREAK_LOOP,
       data: {
         title: '中断循环'
