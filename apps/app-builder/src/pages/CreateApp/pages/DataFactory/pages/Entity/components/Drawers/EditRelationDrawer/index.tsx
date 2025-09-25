@@ -181,7 +181,6 @@ const EditRelationDrawer: React.FC<EditRelationDrawerProps> = ({ visible, setVis
       }
     } catch (error) {
       console.error('删除关联关系失败:', error);
-      setDeleteModalVisible(false);
     } finally {
       setDeleteLoading(false);
     }

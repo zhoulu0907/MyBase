@@ -57,7 +57,6 @@ const CreateOtherRule: React.FC<CreateRuleModalProps> = ({
     const handler = ruleHandlers[ruleType as keyof typeof ruleHandlers];
     if (handler) {
       const res = await handler(id);
-      // TODO 回显
       console.log('getRuleById', res);
       if (res) {
         form.setFieldsValue(res);
