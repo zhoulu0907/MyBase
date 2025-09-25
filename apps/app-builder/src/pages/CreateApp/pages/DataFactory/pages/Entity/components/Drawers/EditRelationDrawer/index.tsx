@@ -22,7 +22,7 @@ interface RelationFormValues {
   targetEntityId?: string;
   targetFieldId?: string;
   relationName?: string;
-  relationshipId?: string;
+  id?: string;
   target?: { cell: string; port: string };
   source?: { cell: string; port: string };
 }
@@ -140,7 +140,7 @@ const EditRelationDrawer: React.FC<EditRelationDrawerProps> = ({ visible, setVis
       setSubmitting(true);
 
       const updateData = {
-        id: relationData?.relationshipId,
+        id: relationData?.id,
         ...values,
         appId: curAppId
       };
@@ -168,14 +168,22 @@ const EditRelationDrawer: React.FC<EditRelationDrawerProps> = ({ visible, setVis
 
   const handleDelete = async () => {
     setDeleteLoading(true);
-    const res = await deleteRelation(relationData?.relationshipId || '');
-    console.log('deleteRelation', res);
-    setDeleteLoading(false);
-    setDeleteModalVisible(false);
-    if (res) {
-      Message.success('删除成功');
-      handleClose();
-      onSuccess?.();
+
+    try {
+      const res = await deleteRelation(relationData?.id || '');
+      console.log('deleteRelation', res);
+
+      setDeleteModalVisible(false);
+      if (res) {
+        Message.success('删除成功');
+        handleClose();
+        onSuccess?.();
+      }
+    } catch (error) {
+      console.error('删除关联关系失败:', error);
+      setDeleteModalVisible(false);
+    } finally {
+      setDeleteLoading(false);
     }
   };
 
