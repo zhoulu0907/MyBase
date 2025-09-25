@@ -215,6 +215,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   };
 
   const onValuesChange = async (changeValue: any, values: any) => {
+    console.log('values: ', values);
     // 校验表单
     validateNodeForm(form, payloadForm, false);
 
@@ -333,6 +334,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
             <Grid.Row>
               <ConditionEditor
+                nodeId={node.id}
                 label="条件"
                 required
                 fields={conditionFields}

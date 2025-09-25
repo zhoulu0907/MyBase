@@ -6,7 +6,6 @@ import XDatePicker from './FormComponents/DatePicker/schema';
 import XDateRangePicker from './FormComponents/DateRangePicker/schema';
 import XDateTimePicker from './FormComponents/DateTimePicker/schema';
 import XDeptSelect from './FormComponents/DeptSelect/schema';
-import XDivider from './FormComponents/Divider/schema';
 import XFileUpload from './FormComponents/FileUpload/schema';
 import XImgUpload from './FormComponents/ImgUpload/schema';
 import XInputEmail from './FormComponents/InputEmail/schema';
@@ -24,6 +23,8 @@ import XSwitch from './FormComponents/Switch/schema';
 import XTimePicker from './FormComponents/TimePicker/schema';
 import XUserSelect from './FormComponents/UserSelect/schema';
 import XSubTable from './FormComponents/SubTable/schema';
+import XTabs from './FormComponents/Tabs/schema';
+
 import XColumnLayout from './LayoutComponents/ColumnLayout/schema';
 import XCalendar from './ListComponents/Calendar/schema';
 import XCarousel from './ListComponents/Carousel/schema';
@@ -31,10 +32,14 @@ import XCollapse from './ListComponents/Collapse/schema';
 import XList from './ListComponents/List/schema';
 import XTable from './ListComponents/Table/schema';
 import XTimeline from './ListComponents/Timeline/schema';
+
 import XImage from './ShowComponents/Image/schema';
+import XFile from './ShowComponents/File/schema';
 import XInfoNotice from './ShowComponents/InfoNotice/schema';
 import XText from './ShowComponents/Text/schema';
 import XWebView from './ShowComponents/WebView/schema';
+import XDivider from './ShowComponents/Divider/schema';
+import XPlaceholder from './ShowComponents/Placeholder/schema';
 
 const baseSchema = {
   XInputText,
@@ -57,11 +62,11 @@ const baseSchema = {
   XImgUpload,
   XRelatedForm,
   XStaticText,
-  XDivider,
   XRichText,
   XFCarousel,
   XSubTable,
   XDataSelect,
+  XTabs,
 
   XTable,
   XCalendar,
@@ -74,8 +79,11 @@ const baseSchema = {
 
   XInfoNotice,
   XImage,
+  XFile,
   XText,
-  XWebView
+  XWebView,
+  XDivider,
+  XPlaceholder
 };
 
 export default baseSchema;

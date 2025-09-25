@@ -17,6 +17,7 @@ import { TriggerRange } from '../../../components/const';
 import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
+import { updateStartFormOutputs } from './output';
 
 const CheckboxGroup = Checkbox.Group;
 const Option = Select.Option;
@@ -26,7 +27,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const isSidebar = useIsSidebar();
   const { node } = useNodeRenderContext();
 
-  const [pageList, setPageList] = useState<any[]>();
+  const [pageList, setPageList] = useState<any[]>([]);
 
   const [conditionFields, setConditionFields] = useState<ConfitionField[]>([]);
   const [validationTypes, setValidationTypes] = useState<EntityFieldValidationTypes[]>([]);
@@ -102,6 +103,8 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       }
 
       setConditionFields(newConditionFields);
+
+      updateStartFormOutputs(node.id, newConditionFields);
     }
   };
 
@@ -116,7 +119,9 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
         <FormContent>
           <Form
             form={payloadForm}
-            initialValues={{ ...triggerEditorSignal.nodeData.value[node.id] }}
+            initialValues={{
+              ...triggerEditorSignal.nodeData.value[node.id]
+            }}
             layout="vertical"
             onValuesChange={onValuesChange}
           >
@@ -245,6 +250,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             <Grid.Row>
               {validationTypes && (
                 <ConditionEditor
+                  nodeId={node.id}
                   label="过滤条件"
                   required
                   fields={conditionFields}

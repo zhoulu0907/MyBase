@@ -1,3 +1,5 @@
+import { triggerEditorSignal } from '@/store/singals/trigger_editor';
+import { triggerNodeOutputSignal } from '@/store/singals/trigger_node_output';
 import {
   Button,
   DatePicker,
@@ -8,8 +10,10 @@ import {
   InputNumber,
   Select,
   Switch,
+  TreeSelect,
   type FormInstance
 } from '@arco-design/web-react';
+import type { TreeSelectDataType } from '@arco-design/web-react/es/TreeSelect/interface';
 import { IconDelete } from '@arco-design/web-react/icon';
 import {
   FieldType,
@@ -19,7 +23,10 @@ import {
   type ValidationTypeItem
 } from '@onebase/app';
 import { ENTITY_FIELD_TYPE } from '@onebase/ui-kit';
+import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect } from 'react';
+import { NodeType } from '../../nodes/const';
+import { getBeforeCurQueryNodes } from '../../nodes/utils';
 import styles from './index.module.less';
 
 const Option = Select.Option;
@@ -43,7 +50,7 @@ const opCodeOptions = [
  * ConditionEditor 组件的 props 类型定义
  */
 export interface ConditionEditorProps {
-  // 可以下拉选择的字段列表
+  nodeId: string;
   label: string;
   required: boolean;
   fields: ConfitionField[];
@@ -55,12 +62,15 @@ export interface ConditionEditorProps {
  * 条件编辑器组件初始化
  */
 const ConditionEditor: React.FC<ConditionEditorProps> = ({
+  nodeId,
   fields,
   entityFieldValidationTypes,
   form,
   label,
   required
 }) => {
+  useSignals();
+
   const filterCondition = Form.useWatch('filterCondition', form);
 
   // 过滤为空的条件
@@ -80,7 +90,7 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
   }, []);
 
   useEffect(() => {
-    console.log('entityFieldValidationTypes:  ', entityFieldValidationTypes);
+    // console.log('entityFieldValidationTypes:  ', entityFieldValidationTypes);
   }, [entityFieldValidationTypes]);
 
   useEffect(() => {
@@ -228,6 +238,174 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
     );
   };
 
+  const getVariableOptions = (nodeId: string): TreeSelectDataType[] => {
+    const nodeTypes = [
+      NodeType.DATA_QUERY,
+      NodeType.DATA_QUERY_MULTIPLE,
+      NodeType.DATA_UPDATE,
+      NodeType.DATA_ADD,
+      NodeType.START_FORM,
+      NodeType.START_ENTITY,
+      NodeType.START_TIME,
+      NodeType.START_DATE_FIELD,
+      NodeType.START_API,
+      NodeType.START_BPM
+    ];
+
+    const nodes = getBeforeCurQueryNodes(nodeId, triggerEditorSignal.nodes.value, nodeTypes);
+    // console.log('nodes: ', nodes);
+
+    const options: TreeSelectDataType[] = [];
+
+    nodes.forEach((node) => {
+      const nodeOutput = triggerNodeOutputSignal.getTriggerNodeOutput(node.id);
+
+      //   console.log('nodeOutput: ', nodeOutput);
+
+      const treeNode = {
+        key: node.id,
+        title: node.data?.title,
+        disabled: true,
+        // TODO(mickey): add icon
+        children: [] as TreeSelectDataType[]
+      };
+
+      switch (node.type) {
+        case NodeType.START_FORM:
+          const startFormFields = nodeOutput.conditionFields;
+
+          startFormFields &&
+            startFormFields.forEach((field: any) => {
+              treeNode.children.push({
+                key: `${node.id}.${field.value}`,
+                title: field.label
+              });
+            });
+
+          if (treeNode.children.length > 0) {
+            options.push(treeNode);
+          }
+
+          break;
+        case NodeType.START_ENTITY:
+          const startEntityFields = nodeOutput.conditionFields;
+
+          startEntityFields &&
+            startEntityFields.forEach((field: any) => {
+              treeNode.children.push({
+                key: `${node.id}.${field.value}`,
+                title: field.label
+              });
+            });
+
+          if (treeNode.children.length > 0) {
+            options.push(treeNode);
+          }
+
+          break;
+        case NodeType.START_TIME:
+          break;
+        case NodeType.START_DATE_FIELD:
+          const startDateFields = nodeOutput.conditionFields;
+
+          startDateFields &&
+            startDateFields.forEach((field: any) => {
+              treeNode.children.push({
+                key: `${node.id}.${field.value}`,
+                title: field.label
+              });
+            });
+
+          if (treeNode.children.length > 0) {
+            options.push(treeNode);
+          }
+
+          break;
+        case NodeType.START_API:
+          break;
+        case NodeType.START_BPM:
+          break;
+        case NodeType.DATA_ADD:
+          const dataAddFields = nodeOutput.conditionFields;
+          dataAddFields &&
+            dataAddFields.forEach((field: any) => {
+              treeNode.children.push({
+                key: `${node.id}.${field.value}`,
+                title: field.label
+              });
+            });
+
+          if (treeNode.children.length > 0) {
+            options.push(treeNode);
+          }
+
+          break;
+        case NodeType.DATA_DELETE:
+          break;
+        case NodeType.DATA_QUERY:
+          const dataQueryFields = nodeOutput.conditionFields;
+          dataQueryFields &&
+            dataQueryFields.forEach((field: any) => {
+              treeNode.children.push({
+                key: `${node.id}.${field.value}`,
+                title: field.label
+              });
+            });
+
+          if (treeNode.children.length > 0) {
+            options.push(treeNode);
+          }
+          break;
+        case NodeType.DATA_QUERY_MULTIPLE:
+          const dataQueryMultipleFields = nodeOutput.conditionFields;
+          dataQueryMultipleFields &&
+            dataQueryMultipleFields.forEach((field: any) => {
+              treeNode.children.push({
+                key: `${node.id}.${field.value}`,
+                title: field.label
+              });
+            });
+
+          if (treeNode.children.length > 0) {
+            options.push(treeNode);
+          }
+          break;
+        case NodeType.DATA_UPDATE:
+          const dataUpdateFields = nodeOutput.conditionFields;
+          dataUpdateFields &&
+            dataUpdateFields.forEach((field: any) => {
+              treeNode.children.push({
+                key: `${node.id}.${field.value}`,
+                title: field.label
+              });
+            });
+
+          if (treeNode.children.length > 0) {
+            options.push(treeNode);
+          }
+          break;
+        case NodeType.DATA_CALC:
+          break;
+      }
+    });
+
+    return options;
+  };
+
+  const showTriggerElement = (params: any, options: TreeSelectDataType[]) => {
+    // console.log(params.value);
+
+    if (params.value) {
+      const parentId = params.value.split('.')[0];
+      const parentNode = options.find((item) => item.key == parentId);
+
+      const childrenName = parentNode?.children?.find((item) => item.key == params.value)?.title;
+      return `${parentNode?.title} - ${childrenName}`;
+    }
+
+    return '';
+  };
+
   return (
     <div className={styles.conditionWrapper}>
       <Form.Item label={label} required={required}>
@@ -330,7 +508,17 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
                                               {form.getFieldValue(item.field + '.operatorType') ==
                                                 FieldType.VARIABLES && (
                                                 <Form.Item field={item.field + '.value'}>
-                                                  <Select placeholder="请选择变量"></Select>
+                                                  <TreeSelect
+                                                    treeData={getVariableOptions(nodeId)}
+                                                    triggerElement={(params) => {
+                                                      return (
+                                                        <Input
+                                                          readOnly
+                                                          value={showTriggerElement(params, getVariableOptions(nodeId))}
+                                                        ></Input>
+                                                      );
+                                                    }}
+                                                  />
                                                 </Form.Item>
                                               )}
 

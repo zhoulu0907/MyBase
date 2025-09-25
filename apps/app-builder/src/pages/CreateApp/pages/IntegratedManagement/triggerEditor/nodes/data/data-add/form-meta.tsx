@@ -8,6 +8,7 @@ import {
   getEntityFieldsWithChildren,
   getEntityListByApp,
   type AppEntityField,
+  type ConfitionField,
   type MetadataEntityPair
 } from '@onebase/app';
 import { useEffect, useState } from 'react';
@@ -17,6 +18,7 @@ import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
 import { NodeType } from '../../const';
 import { getBeforeCurQueryNodes, validateNodeForm } from '../../utils';
+import { updateDataAddOutputs } from './output';
 
 const RadioGroup = Radio.Group;
 
@@ -28,19 +30,9 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const [fieldDataList, setFieldDataList] = useState<AppEntityField[]>([]);
   const [mainEntityList, setMainEntityList] = useState<MetadataEntityPair[]>([]);
   const [subEntityList, setSubEntityList] = useState<MetadataEntityPair[]>([]);
+  const [conditionFields, setConditionFields] = useState<ConfitionField[]>([]);
 
   const [dataNodeList, setDataNodeList] = useState<any[]>([]);
-
-  const handlePropsOnChange = (values: any) => {
-    triggerEditorSignal.setNodeData(node.id, values);
-  };
-
-  const onValuesChange = async (changeValue: any, values: any) => {
-    // 校验表单
-    validateNodeForm(form, payloadForm, false);
-
-    handlePropsOnChange(values);
-  };
 
   const [payloadForm] = Form.useForm();
 
@@ -100,6 +92,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     });
     setMainEntityList([]);
     setSubEntityList([]);
+    setConditionFields([]);
     setFieldDataList([]);
     setMainEntityList([]);
     getEntityList(curAddType);
@@ -128,6 +121,10 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       subEntityId: undefined,
       fields: []
     });
+
+    setConditionFields([]);
+    setFieldDataList([]);
+
     if (addType === FLOW_ENTITY_TYPE.MAIN_ENTITY) {
       getFieldList(curMainEntityId);
     }
@@ -151,6 +148,8 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       ...nodeData,
       fields: []
     });
+    setConditionFields([]);
+    setFieldDataList([]);
     getFieldList(curSubEntityId);
   };
 
@@ -160,14 +159,35 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       return;
     }
     const res = await getEntityFields({ entityId: dataSource });
+    const newConditionFields: ConfitionField[] = [];
     res.forEach((item: any) => {
       item.fieldId = item.id;
+
+      newConditionFields.push({
+        label: item.displayName,
+        value: item.id,
+        fieldType: item.fieldType
+      });
     });
+
+    setConditionFields(newConditionFields);
+    updateDataAddOutputs(node.id, newConditionFields);
     setFieldDataList(res);
   };
 
   const handleBatchTypeChange = (value: boolean) => {
     payloadForm.clearFields(['dataNodeId', 'fields']);
+  };
+
+  const handlePropsOnChange = (values: any) => {
+    triggerEditorSignal.setNodeData(node.id, values);
+  };
+
+  const onValuesChange = async (changeValue: any, values: any) => {
+    // 校验表单
+    validateNodeForm(form, payloadForm, false);
+
+    handlePropsOnChange(values);
   };
 
   return (

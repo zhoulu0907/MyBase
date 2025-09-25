@@ -1,4 +1,5 @@
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
+import { triggerNodeOutputSignal } from '@/store/singals/trigger_node_output';
 import { Button, Message } from '@arco-design/web-react';
 import { ProcessStatus, updateFlowMgmtDefinition } from '@onebase/app';
 import React from 'react';
@@ -11,14 +12,16 @@ import styles from './index.module.less';
  */
 const FlowEditorPage: React.FC = () => {
   const { nodeData, nodes, flowId } = triggerEditorSignal;
+  const { getTriggerNodeOutput } = triggerNodeOutputSignal;
 
   const dealProcessDefinition = (newNodes: any[]): any[] => {
     const processDefinitionJson = newNodes.map((item) => {
-      console.log('item: ', item);
       const { outputs: nodeOutputs, initialData: nodeInitialData, ...restNodeData } = nodeData.value[item.id] || {};
 
+      const output = getTriggerNodeOutput(item.id);
       if (item.blocks?.length) {
         const blocks = dealProcessDefinition(item.blocks);
+
         const data = {
           id: item.id,
           type: item.type,
@@ -27,7 +30,8 @@ const FlowEditorPage: React.FC = () => {
             ...restNodeData,
             // 覆写的属性写在后面
             title: item.data.title
-          }
+          },
+          output: output
         };
         return data;
       } else {
@@ -38,13 +42,15 @@ const FlowEditorPage: React.FC = () => {
             ...restNodeData,
             // 覆写的属性写在后面
             title: item.data.title
-          }
+          },
+          output: output
         };
         return data;
       }
     });
     return processDefinitionJson;
   };
+
   const handleSaveAndRelease = async (type: string) => {
     const processDefinitionJson = dealProcessDefinition(nodes.value);
     console.log('processDefinition', processDefinitionJson);

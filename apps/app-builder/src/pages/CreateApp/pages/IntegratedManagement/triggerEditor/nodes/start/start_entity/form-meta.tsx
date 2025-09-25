@@ -17,6 +17,7 @@ import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
 import { validateNodeForm } from '../../utils';
+import { updateStartEntityOutputs } from './output';
 
 const Option = Select.Option;
 const CheckboxGroup = Checkbox.Group;
@@ -67,11 +68,12 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const [conditionFields, setConditionFields] = useState<ConfitionField[]>([]);
   const [validationTypes, setValidationTypes] = useState<EntityFieldValidationTypes[]>([]);
 
-  const [entityList, setEntityList] = useState<any[]>();
-  const [triggerFieldList, setTriggerFieldList] = useState<any[]>();
+  const [entityList, setEntityList] = useState<any[]>([]);
+  const [triggerFieldList, setTriggerFieldList] = useState<any[]>([]);
 
   const entityId = Form.useWatch('entityId', payloadForm);
   const triggerType = Form.useWatch('triggerType', payloadForm);
+  const triggerEvents = Form.useWatch('triggerEvents', payloadForm);
 
   useEffect(() => {
     const appId = getHashQueryParam('appId');
@@ -87,14 +89,10 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   }, [entityId]);
 
   useEffect(() => {
-    if (triggerType) {
-      payloadForm.clearFields('triggerEvents');
-      handlePropsOnChange({
-        ...triggerEditorSignal.nodeData.value[node.id],
-        triggerEvents: []
-      });
+    if (triggerEvents) {
+      console.log('triggerEvents: ', triggerEvents);
     }
-  }, [triggerType]);
+  }, [triggerEvents]);
 
   const handleGetEntityListByApp = async (appId: string) => {
     const res = await getEntityListByApp(appId);
@@ -128,6 +126,10 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       }
 
       setConditionFields(newConditionFields);
+
+      // 更新节点输出配置
+      updateStartEntityOutputs(node.id, newConditionFields);
+
       setTriggerFieldList(fieldList);
     }
   };
@@ -137,6 +139,15 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     validateNodeForm(form, payloadForm, false);
 
     handlePropsOnChange(values);
+  };
+
+  // 触发类型
+  const handleTriggerTypeChange = () => {
+    payloadForm.clearFields('triggerEvents');
+    handlePropsOnChange({
+      ...triggerEditorSignal.nodeData.value[node.id],
+      triggerEvents: []
+    });
   };
 
   return (
@@ -181,6 +192,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                 rules={[{ required: true, message: '请选择触发类型' }]}
               >
                 <RadioGroup
+                  onChange={handleTriggerTypeChange}
                   direction="horizontal"
                   options={[
                     {
@@ -202,10 +214,12 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                   label="事件类型"
                   field="triggerEvents"
                   layout="vertical"
+                  triggerPropName="checked"
                   rules={[{ required: true, message: '请选择触发类型' }]}
                 >
                   <CheckboxGroup
                     direction="horizontal"
+                    defaultValue={triggerEvents}
                     options={triggerType === 'before' ? beforeTriggerEvents : afterTriggerEvents}
                   />
                 </Form.Item>
@@ -222,6 +236,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
             <Grid.Row>
               <ConditionEditor
+                nodeId={node.id}
                 label="过滤条件"
                 required
                 fields={conditionFields}

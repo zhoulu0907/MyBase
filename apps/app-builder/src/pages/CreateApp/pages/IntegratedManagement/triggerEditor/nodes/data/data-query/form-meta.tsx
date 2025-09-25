@@ -20,6 +20,7 @@ import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
 import { NodeType } from '../../const';
 import { getBeforeCurQueryNodes, getDataNodeSource, getEntityFieldList, validateNodeForm } from '../../utils';
+import { updateDataQueryOutputs } from './output';
 
 export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   useSignals();
@@ -178,13 +179,13 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       return;
     }
     if (nodeData.dataType === DATA_SOURCE_TYPE.FORM) {
-      getEntityFieldList(nodeData.mainEntityId, setConditionFields, setValidationTypes);
+      getEntityFieldList(nodeData.mainEntityId, handleSetConditionFields, setValidationTypes);
     } else if (nodeData.dataType === DATA_SOURCE_TYPE.DATA_NODE) {
       const originDataSource = getDataNodeSource(nodeData.dataNodeId);
-      getEntityFieldList(originDataSource, setConditionFields, setValidationTypes);
+      getEntityFieldList(originDataSource, handleSetConditionFields, setValidationTypes);
     } else if (nodeData.dataType === DATA_SOURCE_TYPE.SUBFORM) {
       // 从子表中查询  SUBFORM
-      getEntityFieldList(nodeData.subEntityId, setConditionFields, setValidationTypes);
+      getEntityFieldList(nodeData.subEntityId, handleSetConditionFields, setValidationTypes);
     }
   };
 
@@ -194,14 +195,19 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     // 根据不同获取方式走不同接口
     if (dataType === DATA_SOURCE_TYPE.FORM || dataType === DATA_SOURCE_TYPE.SUBFORM) {
       // 从主表中查询/从子表中查询
-      getEntityFieldList(dataSource, setConditionFields, setValidationTypes);
+      getEntityFieldList(dataSource, handleSetConditionFields, setValidationTypes);
     } else if (dataType === DATA_SOURCE_TYPE.DATA_NODE) {
       // 从数据节点中查询  DATA_NODE
       const originDataSource = getDataNodeSource(dataSource);
-      getEntityFieldList(originDataSource, setConditionFields, setValidationTypes);
+      getEntityFieldList(originDataSource, handleSetConditionFields, setValidationTypes);
     } else if (dataType === DATA_SOURCE_TYPE.ASSOCIA_FORM) {
       // 从关联表单中查询  ASSOCIA_FORM
     }
+  };
+
+  const handleSetConditionFields = (conditionFields: ConfitionField[]) => {
+    setConditionFields(conditionFields);
+    updateDataQueryOutputs(node.id, conditionFields);
   };
 
   // 表单内容改变
@@ -334,6 +340,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             {filterType === FILTER_TYPE.CONDITION && (
               <Grid.Row>
                 <ConditionEditor
+                  nodeId={node.id}
                   label="条件"
                   required
                   fields={conditionFields}

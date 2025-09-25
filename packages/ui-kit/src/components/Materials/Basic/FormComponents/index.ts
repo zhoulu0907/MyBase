@@ -6,7 +6,6 @@ import XDatePicker from './DatePicker';
 import XDateRangePicker from './DateRangePicker';
 import XDateTimePicker from './DateTimePicker';
 import XDeptSelect from './DeptSelect';
-import XDIVIDER from './Divider';
 import XFileUpload from './FileUpload';
 import XImgUpload from './ImgUpload';
 import XInputEmail from './InputEmail';
@@ -24,6 +23,8 @@ import XSwitch from './Switch';
 import XTimePicker from './TimePicker';
 import XUserSelect from './UserSelect';
 import XSubTable from './SubTable';
+import XCollapse from './Collapse';
+import XTabs from './Tabs';
 
 export const FormComp = {
   XInputText,
@@ -47,9 +48,10 @@ export const FormComp = {
   XAutoCode,
   XRelatedForm,
   XStaticText,
-  XDIVIDER,
   XRichText,
   XCarousel,
   XSubTable,
-  XDataSelect
+  XDataSelect,
+  XCollapse,
+  XTabs
 };

@@ -1,27 +1,28 @@
 import {
-    baseConfig,
-    baseDefault,
-    statusConfig,
-    widthConfig,
-    type ICommonBaseType,
-    type TStatusSelectKeyType,
-    type TWidthSelectKeyType
+  baseConfig,
+  baseDefault,
+  statusConfig,
+  widthConfig,
+  type ICommonBaseType,
+  type TStatusSelectKeyType,
+  type TWidthSelectKeyType
 } from '../../../common';
 import {
-    CONFIG_TYPES,
-    STATUS_OPTIONS,
-    STATUS_VALUES,
-    WIDTH_OPTIONS,
-    WIDTH_VALUES
+  CONFIG_TYPES,
+  STATUS_OPTIONS,
+  STATUS_VALUES,
+  WIDTH_OPTIONS,
+  WIDTH_VALUES
 } from '../../../constants';
 import type {
-    IBooleanConfigType,
-    IStatusConfigType,
-    ITextConfigType,
-    IWidthConfigType,
-    TRadioDefaultType,
-    TSelectDefaultType,
-    TTextDefaultType
+  IBooleanConfigType,
+  IStatusConfigType,
+  ITextConfigType,
+  IWidthConfigType,
+  TRadioDefaultType,
+  TSelectDefaultType,
+  TTextDefaultType,
+  IColorConfigType
 } from '../../../types';
 
 export interface XTextSchema {
@@ -30,7 +31,7 @@ export interface XTextSchema {
 }
 
 export type TXTextEditData = Array<
-  ITextConfigType | IWidthConfigType<TWidthSelectKeyType> | IStatusConfigType<TStatusSelectKeyType> | IBooleanConfigType
+  ITextConfigType | IWidthConfigType<TWidthSelectKeyType> | IStatusConfigType<TStatusSelectKeyType> | IBooleanConfigType | IColorConfigType
 >;
 
 export interface XTextConfig extends ICommonBaseType {
@@ -49,6 +50,11 @@ export interface XTextConfig extends ICommonBaseType {
    * 文本内容
    */
   content: TTextDefaultType;
+
+  /**
+   * 文本颜色
+   */
+  color?: TTextDefaultType;
 }
 
 const XText: XTextSchema = {
@@ -59,15 +65,21 @@ const XText: XTextSchema = {
       name: '文本内容',
       type: CONFIG_TYPES.TEXT_INPUT
     },
+    {
+      key: 'color',
+      name: '文本颜色',
+      type: CONFIG_TYPES.COLOR
+    },
     widthConfig,
     statusConfig
     // TODO(mickey): 补充颜色 背景色配置
   ],
   config: {
     ...baseDefault,
-    content: '展示文本内容',
+    content: '静态文本内容',
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
-    status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT]
+    status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
+    color: ''
   }
 };
 

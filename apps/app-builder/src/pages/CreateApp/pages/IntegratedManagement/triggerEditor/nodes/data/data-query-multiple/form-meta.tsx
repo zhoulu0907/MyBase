@@ -1,6 +1,6 @@
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { useAppStore } from '@/store/store_app';
-import { Form, Grid, Input, Radio, Select } from '@arco-design/web-react';
+import { Form, Grid, Input, InputNumber, Radio, Select } from '@arco-design/web-react';
 import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
 import {
   DATA_SOURCE_TYPE,
@@ -26,6 +26,7 @@ import {
   getEntityFieldList,
   validateNodeForm
 } from '../../utils';
+import { updateDataQueryMultipleOutputs } from './output';
 
 export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   useSignals();
@@ -193,13 +194,13 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       return;
     }
     if (nodeData.dataType === DATA_SOURCE_TYPE.FORM) {
-      getEntityFieldList(nodeData.mainEntityId, setConditionFields, setValidationTypes);
+      getEntityFieldList(nodeData.mainEntityId, handleSetConditionFields, setValidationTypes);
     } else if (nodeData.dataType === DATA_SOURCE_TYPE.DATA_NODE) {
       const originDataSource = getDataNodeSource(nodeData.dataNodeId);
-      getEntityFieldList(originDataSource, setConditionFields, setValidationTypes);
+      getEntityFieldList(originDataSource, handleSetConditionFields, setValidationTypes);
     } else if (nodeData.dataType === DATA_SOURCE_TYPE.SUBFORM) {
       // 从子表中查询  SUBFORM
-      getEntityFieldList(nodeData.subEntityId, setConditionFields, setValidationTypes);
+      getEntityFieldList(nodeData.subEntityId, handleSetConditionFields, setValidationTypes);
     }
   };
 
@@ -209,14 +210,19 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     // 根据不同获取方式走不同接口
     if (dataType === DATA_SOURCE_TYPE.FORM || dataType === DATA_SOURCE_TYPE.SUBFORM) {
       // 从主表中查询/从子表中查询
-      getEntityFieldList(dataSource, setConditionFields, setValidationTypes);
+      getEntityFieldList(dataSource, handleSetConditionFields, setValidationTypes);
     } else if (dataType === DATA_SOURCE_TYPE.DATA_NODE) {
       // 从数据节点中查询  DATA_NODE
       const originDataSource = getDataNodeSource(dataSource);
-      getEntityFieldList(originDataSource, setConditionFields, setValidationTypes);
+      getEntityFieldList(originDataSource, handleSetConditionFields, setValidationTypes);
     } else if (dataType === DATA_SOURCE_TYPE.ASSOCIA_FORM) {
       // 从关联表单中查询  ASSOCIA_FORM
     }
+  };
+
+  const handleSetConditionFields = (conditionFields: ConfitionField[]) => {
+    setConditionFields(conditionFields);
+    updateDataQueryMultipleOutputs(node.id, conditionFields);
   };
 
   // 表单内容改变
@@ -232,7 +238,11 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   };
 
   const getInitData = () => {
-    return { ...triggerEditorSignal.nodeData.value[node.id] };
+    return {
+      // 初始值写前面,覆写放后面
+      maxCount: 500,
+      ...triggerEditorSignal.nodeData.value[node.id]
+    };
   };
 
   return (
@@ -349,6 +359,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             {filterType === FILTER_TYPE.CONDITION && (
               <Grid.Row>
                 <ConditionEditor
+                  nodeId={node.id}
                   label="条件"
                   required
                   fields={conditionFields}
@@ -366,6 +377,20 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                   form={payloadForm}
                 ></SortByEditor>
               </Form.Item>
+            </Grid.Row>
+
+            <Grid.Row gutter={8} align="center">
+              <Grid.Col span={6} style={{ color: 'grey' }}>
+                按排序规则，获取过滤后的前
+              </Grid.Col>
+              <Grid.Col span={3}>
+                <Form.Item field="maxCount" style={{ marginTop: '20px' }}>
+                  <InputNumber min={1} max={500} />
+                </Form.Item>
+              </Grid.Col>
+              <Grid.Col span={4} style={{ color: 'grey' }}>
+                条数据
+              </Grid.Col>
             </Grid.Row>
           </Form>
         </FormContent>
