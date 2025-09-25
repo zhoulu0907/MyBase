@@ -45,6 +45,7 @@ const CollectFields: React.FC<CollectFieldsProps> = ({ form }) => {
       title: '字段类型',
       dataIndex: 'fieldType',
       render: (_: any, record: field, index: number) => {
+        // todo  select
         return (
           <Form.Item field={`fields[${index}].fieldType`} noStyle>
             <Input placeholder="请输入"></Input>
