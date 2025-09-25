@@ -46,7 +46,7 @@ const NodeEditForm: React.FC<NodeEditFormProps> = ({ node, onCancel, onSave, suc
   const getInitialValues = (node: EntityNode) => {
     console.log('getInitialValues', node);
     return {
-      id: node.entityId || '',
+      id: node.entityId || node.id || '',
       code: node.code || '',
       tableName: node.tableName || '',
       displayName: node.entityName || node.displayName || '',
