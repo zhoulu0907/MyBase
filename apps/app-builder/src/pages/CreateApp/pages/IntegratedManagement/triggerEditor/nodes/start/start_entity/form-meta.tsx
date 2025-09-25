@@ -73,7 +73,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
   const entityId = Form.useWatch('entityId', payloadForm);
   const triggerType = Form.useWatch('triggerType', payloadForm);
-  const triggerEvents = Form.useWatch('triggerEvents', payloadForm);
 
   useEffect(() => {
     const appId = getHashQueryParam('appId');
@@ -87,12 +86,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       handleGetEntityFieldList(entityId);
     }
   }, [entityId]);
-
-  useEffect(() => {
-    if (triggerEvents) {
-      console.log('triggerEvents: ', triggerEvents);
-    }
-  }, [triggerEvents]);
 
   const handleGetEntityListByApp = async (appId: string) => {
     const res = await getEntityListByApp(appId);
@@ -214,12 +207,10 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                   label="事件类型"
                   field="triggerEvents"
                   layout="vertical"
-                  triggerPropName="checked"
                   rules={[{ required: true, message: '请选择触发类型' }]}
                 >
                   <CheckboxGroup
                     direction="horizontal"
-                    defaultValue={triggerEvents}
                     options={triggerType === 'before' ? beforeTriggerEvents : afterTriggerEvents}
                   />
                 </Form.Item>
