@@ -118,6 +118,10 @@ export interface AuthDataGroupVO {
   /**
    * 权限范围字段名称
    */
+  scopeFieldName?: string;
+  /**
+   * 权限范围字段对应的id
+   */
   scopeFieldId?: number;
   /**
    * 业务实体字段对应的权限范围
@@ -181,6 +185,10 @@ export interface AuthDataFilterVO {
    * 字段id
    */
   fieldId?: number;
+  /**
+   * 字段名称
+   */
+  fieldName?: string;
   /**
    * 比较操作符号
    */

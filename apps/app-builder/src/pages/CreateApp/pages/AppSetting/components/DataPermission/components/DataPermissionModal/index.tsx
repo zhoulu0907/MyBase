@@ -29,7 +29,8 @@ interface IProps {
   initialFormValues: AuthDataGroupVO;
   modalVisible: boolean;
   status: 'create' | 'edit';
-  appEntity: AppEntity;
+  // appEntity: AppEntity;
+  dataPermissionEntityName: string;
   dataPermissionPerson: AuthDataPermissionPersonVO[];
   appEntityFields: AppEntityField[];
   filterFieldCheckType: EntityFieldValidationTypes[];
@@ -45,7 +46,8 @@ const DataPermissionModal = (props: IProps) => {
     initialFormValues,
     modalVisible,
     status,
-    appEntity,
+    // appEntity,
+    dataPermissionEntityName,
     dataPermissionPerson,
     appEntityFields,
     filterFieldCheckType,
@@ -53,6 +55,7 @@ const DataPermissionModal = (props: IProps) => {
     handleModalSubmit,
     handleModalCancel
   } = props;
+
   const [operatePermission, setOperatePermission] = useState<DataOperationEnum[]>([
     DataOperationEnum.examine,
     DataOperationEnum.operate
@@ -65,7 +68,7 @@ const DataPermissionModal = (props: IProps) => {
   const [checkAll, setCheckAll] = useState<boolean>(true);
   const [indeterminate, setIndeterminate] = useState<boolean>(false); // 操作权限
   const [dataFilters, setDataFilters] = useState<Array<AuthDataFilterVO[]>>(initialFormValues.dataFilters || []);
-  const [conditionData, setConditionData] = useState<Condition[]>([]);
+  // const [conditionData, setConditionData] = useState<Condition[]>([]);
   const [conditionFields, setConditionFields] = useState<ConfitionField[]>([]);
   const [scopeType, setScopeType] = useState('');
 
@@ -88,15 +91,9 @@ const DataPermissionModal = (props: IProps) => {
   }, [appEntityFields, dataFilters]);
   // 操作权限 全选反选
   function onChangeAll(checked: boolean) {
-    if (checked) {
-      setIndeterminate(false);
-      setCheckAll(true);
-      setOperatePermission([DataOperationEnum.examine, DataOperationEnum.operate]);
-    } else {
-      setIndeterminate(true);
-      setCheckAll(false);
-      setOperatePermission([DataOperationEnum.examine]);
-    }
+    setCheckAll(checked);
+    form.setFieldValue('isOperable', checked ? 1 : 0);
+    console.log("onChangeAll form.getFieldValue('isOperable')", form.getFieldValue('isOperable'));
   }
 
   // // 数据过滤
@@ -183,7 +180,6 @@ const DataPermissionModal = (props: IProps) => {
     setScopeType('');
     setDataFilters([]);
     setSelectedMembers([]);
-    setOperatePermission([DataOperationEnum.examine, DataOperationEnum.operate]);
     setCheckAll(true);
     setIndeterminate(false);
   };
@@ -211,7 +207,7 @@ const DataPermissionModal = (props: IProps) => {
         visible={modalVisible}
         autoFocus={false}
         focusLock={true}
-        okText="创建"
+        okText={status === 'create' ? '创建' : '编辑'}
         onOk={handleOk}
         onCancel={handleCancel}
         unmountOnExit={true}
@@ -232,7 +228,7 @@ const DataPermissionModal = (props: IProps) => {
             <Input placeholder="请输入权限组说明" />
           </FormItem>
           <FormItem label="业务实体" rules={[{ required: true, message: '请选择业务实体' }]}>
-            <Input value={appEntity?.entityName} readOnly />
+            <Input value={dataPermissionEntityName} readOnly />
           </FormItem>
           <FormItem label="权限范围" rules={[{ required: true, message: '请选择权限范围' }]}>
             <div className={styles.dataPermissionScope}>
@@ -313,20 +309,20 @@ const DataPermissionModal = (props: IProps) => {
             </div>
           </FormItem>
           {/* 数据过滤 */}
-          {/* <FormItem field="dataFilters" label="数据过滤"> */}
           <ConditionEditor
+            nodeId="10" // 问问：这个值从哪里来？
             form={form}
             label="数据过滤"
-            required={true}
+            required={false}
             // data={conditionData}
             fields={conditionFields}
             entityFieldValidationTypes={filterFieldCheckType}
             // onChange={changeDataFilters}
           />
-          {/* </FormItem> */}
-          <FormItem field="isOperable" label="操作权限">
+          <FormItem field="isOperable" noStyle />
+          <FormItem label="操作权限">
             <div className={styles.dataPermissionOperableBox}>
-              <Checkbox onChange={onChangeAll} checked={checkAll} indeterminate={indeterminate}>
+              <Checkbox onChange={onChangeAll} checked={checkAll} indeterminate={!checkAll}>
                 操作权限
               </Checkbox>
             </div>
@@ -334,19 +330,7 @@ const DataPermissionModal = (props: IProps) => {
               <Checkbox checked={true} disabled>
                 可查看
               </Checkbox>
-              <Checkbox
-                checked={operatePermission.includes(DataOperationEnum.operate)}
-                onChange={(checked) => {
-                  if (checked) {
-                    setOperatePermission([DataOperationEnum.examine, DataOperationEnum.operate]);
-                  } else {
-                    setOperatePermission([DataOperationEnum.examine]);
-                  }
-                  // 更新全选状态
-                  setCheckAll(checked);
-                  setIndeterminate(!checked); // 当只选中"可查看"时为部分选中状态
-                }}
-              >
+              <Checkbox checked={checkAll} onChange={onChangeAll}>
                 可操作
               </Checkbox>
             </div>
