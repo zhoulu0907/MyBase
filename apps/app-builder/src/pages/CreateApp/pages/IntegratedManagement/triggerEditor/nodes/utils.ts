@@ -8,7 +8,13 @@ import {
   type ConfitionField,
   type EntityFieldValidationTypes
 } from '@onebase/app';
+import { v4 as uuidv4 } from 'uuid';
 import { NodeType } from './const';
+
+export const generateNodeId = (nodeType: NodeType) => {
+  const uuid = uuidv4().replaceAll('-', '');
+  return `${nodeType}_${uuid}`;
+};
 
 // 清除数据节点依赖关系
 export const clearDataOriginNodeId = (nodeId: string) => {

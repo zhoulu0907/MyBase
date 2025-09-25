@@ -19,6 +19,7 @@ export enum NodeType {
   LOOP = 'loop',
   BREAK_LOOP = 'breakLoop',
   TRY_CATCH = 'tryCatch',
+  TRY_BLOCK = 'tryBlock',
   CATCH_BLOCK = 'catchBlock',
 
   DATA_ADD = 'dataAdd',

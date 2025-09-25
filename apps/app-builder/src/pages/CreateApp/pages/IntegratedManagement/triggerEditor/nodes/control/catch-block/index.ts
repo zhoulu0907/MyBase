@@ -1,7 +1,7 @@
 import iconCase from '@/assets/flow/icon-case.png';
-import { v4 as uuidv4 } from 'uuid';
 import { type FlowNodeRegistry } from '../../../typings';
 import { NodeType } from '../../const';
+import { generateNodeId } from '../../utils';
 import { formMeta } from './form-meta';
 
 let id = 3;
@@ -22,8 +22,8 @@ export const CatchBlockNodeRegistry: FlowNodeRegistry = {
   canDelete: (ctx, node) => node.parent!.blocks.length >= 2,
   onAdd(ctx, from) {
     return {
-      id: `Catch_${uuidv4()}`,
-      type: 'catchBlock',
+      id: generateNodeId(NodeType.CATCH_BLOCK),
+      type: NodeType.CATCH_BLOCK,
       data: {
         title: `Catch Block ${id++}`
       }

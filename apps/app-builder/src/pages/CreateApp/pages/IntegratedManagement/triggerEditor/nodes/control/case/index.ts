@@ -1,7 +1,7 @@
 import iconCase from '@/assets/flow/icon-case.png';
-import { v4 as uuidv4 } from 'uuid';
 import { type FlowNodeRegistry } from '../../../typings';
 import { NodeType } from '../../const';
+import { generateNodeId } from '../../utils';
 import { formMeta } from './form-meta';
 
 let id = 2;
@@ -26,7 +26,7 @@ export const CaseNodeRegistry: FlowNodeRegistry = {
   canDelete: (ctx, node) => node.parent!.blocks.length >= 3,
   onAdd(ctx, from) {
     return {
-      id: `Case_${uuidv4()}`,
+      id: generateNodeId(NodeType.CASE),
       type: NodeType.CASE,
       data: {
         title: `分支_${id++}`

@@ -1,10 +1,10 @@
 import { FlowNodeSplitType } from '@flowgram.ai/fixed-layout-editor';
 
 import iconCondition from '@/assets/flow/icon-condition.svg';
-import { v4 as uuidv4 } from 'uuid';
 import { type FlowNodeRegistry } from '../../../typings';
 import { NodeType } from '../../const';
 import { defaultFormMeta } from '../../default-form-meta';
+import { generateNodeId } from '../../utils';
 
 export const SwitchNodeRegistry: FlowNodeRegistry = {
   extend: FlowNodeSplitType.DYNAMIC_SPLIT,
@@ -21,30 +21,30 @@ export const SwitchNodeRegistry: FlowNodeRegistry = {
   formMeta: defaultFormMeta,
   onAdd() {
     return {
-      id: `switch_${uuidv4()}`,
+      id: generateNodeId(NodeType.SWITCH),
       type: NodeType.SWITCH,
       data: {
         title: '分支节点'
       },
       blocks: [
         {
-          id: uuidv4(),
-          type: 'case',
+          id: generateNodeId(NodeType.CASE),
+          type: NodeType.CASE,
           data: {
             title: '分支_0'
           },
           blocks: []
         },
         {
-          id: uuidv4(),
-          type: 'case',
+          id: generateNodeId(NodeType.CASE),
+          type: NodeType.CASE,
           data: {
             title: '分支_1'
           }
         },
         {
-          id: uuidv4(),
-          type: 'caseDefault',
+          id: generateNodeId(NodeType.CASE_DEFAULT),
+          type: NodeType.CASE_DEFAULT,
           data: {
             title: '默认分支'
           },

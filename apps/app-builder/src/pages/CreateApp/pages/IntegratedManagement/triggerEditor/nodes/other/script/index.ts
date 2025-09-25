@@ -1,7 +1,7 @@
 import iconStart from '@/assets/flow/icon-start.jpg';
-import { v4 as uuidv4 } from 'uuid';
 import { type FlowNodeRegistry } from '../../../typings';
 import { NodeType } from '../../const';
+import { generateNodeId } from '../../utils';
 import { formMeta } from './form-meta';
 
 export const ScriptNodeRegistry: FlowNodeRegistry = {
@@ -29,8 +29,8 @@ export const ScriptNodeRegistry: FlowNodeRegistry = {
   },
   onAdd(ctx, from) {
     return {
-      id: `script_${uuidv4()}`,
-      type: 'script',
+      id: generateNodeId(NodeType.SCRIPT),
+      type: NodeType.SCRIPT,
       data: {
         title: '脚本节点'
       }

@@ -1,8 +1,8 @@
 import iconEnd from '@/assets/flow/icon-end.jpg';
 import { FlowNodeBaseType } from '@flowgram.ai/fixed-layout-editor';
-import { v4 as uuidv4 } from 'uuid';
 import { type FlowNodeRegistry } from '../../../typings';
 import { NodeType } from '../../const';
+import { generateNodeId } from '../../utils';
 import { formMeta } from './form-meta';
 
 export const EndNodeRegistry: FlowNodeRegistry = {
@@ -59,7 +59,7 @@ export const EndNodeRegistry: FlowNodeRegistry = {
   },
   onAdd(ctx, from) {
     return {
-      id: `end_${uuidv4()}`,
+      id: generateNodeId(NodeType.END),
       type: NodeType.END,
       data: {
         title: '结束节点',

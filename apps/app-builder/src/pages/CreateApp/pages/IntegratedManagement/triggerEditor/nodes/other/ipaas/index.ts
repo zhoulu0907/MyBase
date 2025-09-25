@@ -1,7 +1,7 @@
 import iconStart from '@/assets/flow/icon-start.jpg';
-import { v4 as uuidv4 } from 'uuid';
 import { type FlowNodeRegistry } from '../../../typings';
 import { NodeType } from '../../const';
+import { generateNodeId } from '../../utils';
 import { formMeta } from './form-meta';
 
 export const IpaasNodeRegistry: FlowNodeRegistry = {
@@ -29,8 +29,8 @@ export const IpaasNodeRegistry: FlowNodeRegistry = {
   },
   onAdd(ctx, from) {
     return {
-      id: `ipaas_${uuidv4()}`,
-      type: 'ipaas',
+      id: generateNodeId(NodeType.IPAAS),
+      type: NodeType.IPAAS,
       data: {
         title: '连接器节点'
       }
