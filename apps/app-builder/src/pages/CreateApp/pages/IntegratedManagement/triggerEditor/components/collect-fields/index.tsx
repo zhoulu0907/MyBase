@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button, Form, Input, Select, Table, type FormInstance } from '@arco-design/web-react';
 import { IconDelete, IconDragDotVertical, IconPlusCircle } from '@arco-design/web-react/icon';
 import { SortableContainer, SortableElement, SortableHandle } from 'react-sortable-hoc';
 import { nanoid } from 'nanoid';
 import styles from './index.module.less';
+import { getFieldTypes } from '@onebase/app';
 
 interface field {
   id: string;
@@ -26,6 +27,11 @@ export interface CollectFieldsProps {
   form: FormInstance;
 }
 
+interface FieldType {
+  displayName: string;
+  fieldType: string;
+}
+
 const CollectFields: React.FC<CollectFieldsProps> = ({ form }) => {
   const [tableData, setTableData] = useState<field[]>([]);
 
@@ -33,6 +39,7 @@ const CollectFields: React.FC<CollectFieldsProps> = ({ form }) => {
     {
       title: '字段名称',
       dataIndex: 'fieldName',
+      width:'45%',
       render: (_: any, record: field, index: number) => {
         return (
           <Form.Item field={`fields[${index}].fieldName`} noStyle>
@@ -44,11 +51,19 @@ const CollectFields: React.FC<CollectFieldsProps> = ({ form }) => {
     {
       title: '字段类型',
       dataIndex: 'fieldType',
+      width:'45%',
       render: (_: any, record: field, index: number) => {
         // todo  select
         return (
           <Form.Item field={`fields[${index}].fieldType`} noStyle>
-            <Input placeholder="请输入"></Input>
+            <Select
+              options={fieldTypeOptions}
+              style={{ width: '100%' }}
+              showSearch
+              filterOption={(input, option) => {
+                return option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0;
+              }}
+            />
           </Form.Item>
         );
       }
@@ -61,9 +76,26 @@ const CollectFields: React.FC<CollectFieldsProps> = ({ form }) => {
       }
     }
   ];
+
+  const [fieldTypeOptions, setFieldTypeOptions] = useState<FieldType[]>([]);
+
+  useEffect(() => {
+    init();
+  }, []);
+
+  const init = async () => {
+    const res = await getFieldTypes();
+    setFieldTypeOptions(
+      res.map((item: any) => ({
+        label: item.displayName,
+        value: item.fieldType
+      }))
+    );
+  };
+
   // 删除
   const removeRow = (id: string) => {
-    const newtableData = tableData.filter((item: field) => item.id !== id)
+    const newtableData = tableData.filter((item: field) => item.id !== id);
     setTableData(newtableData);
     form.setFieldValue('fields', newtableData);
   };
@@ -82,7 +114,7 @@ const CollectFields: React.FC<CollectFieldsProps> = ({ form }) => {
   // 排序处理
   const onSortEnd = ({ oldIndex, newIndex }: { oldIndex: number; newIndex: number }) => {
     if (oldIndex !== newIndex) {
-      const newtableData = form.getFieldValue('fields')
+      const newtableData = form.getFieldValue('fields');
       const newData = arrayMove([...newtableData], oldIndex, newIndex).filter((el) => !!el);
       console.log('New Data: ', newData);
       setTableData(newData);
@@ -151,7 +183,7 @@ const CollectFields: React.FC<CollectFieldsProps> = ({ form }) => {
     }
   };
   return (
-    <Form.Item field="fields" className={styles.collectFields} id='collect-field-config'>
+    <Form.Item field="fields" className={styles.collectFields} id="collect-field-config">
       <Table
         className={styles.collectTable}
         rowKey="id"
