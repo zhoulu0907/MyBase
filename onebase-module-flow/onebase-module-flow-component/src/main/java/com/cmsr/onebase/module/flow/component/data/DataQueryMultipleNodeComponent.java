@@ -12,6 +12,7 @@ import com.yomahub.liteflow.annotation.LiteflowComponent;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
@@ -31,16 +32,19 @@ public class DataQueryMultipleNodeComponent extends NormalNodeComponent {
     @Autowired
     private DataMethodApi dataMethodApi;
 
+    @Autowired
+    private DataMethodApiHelper dataMethodApiHelper;
+
     @Override
     public void process() throws Exception {
         log.info("DataQueryMultipleNodeComponent process");
         ExecuteContext executeContext = this.getContextBean(ExecuteContext.class);
-        Map<String, Object> nodeData = executeContext.getNodeData(this.getTag());
-        EntityFieldDataReqDTO reqDTO = DataMethodApiUtils.convert(nodeData);
-        //暂时写死
-        reqDTO.setNum(100);
-        List<List<EntityFieldDataRespDTO>> fieldDataRespDTOSS = TenantUtils.executeIgnore(() -> dataMethodApi.getDataByCondition(reqDTO));
         VariableContext variableContext = this.getContextBean(VariableContext.class);
+        Map<String, Object> nodeData = executeContext.getNodeData(this.getTag());
+        // 转换成数据方法参数
+        EntityFieldDataReqDTO reqDTO = dataMethodApiHelper.convert(nodeData, variableContext);
+        reqDTO.setNum(MapUtils.getInteger(nodeData, "maxCount", 500));
+        List<List<EntityFieldDataRespDTO>> fieldDataRespDTOSS = TenantUtils.executeIgnore(() -> dataMethodApi.getDataByCondition(reqDTO));
         if (CollectionUtils.isNotEmpty(fieldDataRespDTOSS)) {
             variableContext.putNodeVariables(this.getTag(), convert(fieldDataRespDTOSS));
         }

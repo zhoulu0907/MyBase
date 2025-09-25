@@ -1,5 +1,8 @@
 package com.cmsr.onebase.module.flow.context;
 
+import org.mvel2.MVEL;
+
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -10,22 +13,24 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class VariableContext {
 
-    private Map<String, Object> inputParams;
+    private Map<String, Object> inputParams = Collections.emptyMap();
 
     private Map<String, Object> nodeVariables = new ConcurrentHashMap<>();
 
-    private Map<String, Object> outputParams;
+    private Map<String, Object> outputParams = Collections.emptyMap();
 
     public void setInputParams(Map<String, Object> inputParams) {
-        this.inputParams = inputParams;
+        if (inputParams != null) {
+            this.inputParams = inputParams;
+        }
     }
 
     public Map<String, Object> getInputParams() {
-        return this.inputParams;
+        return Collections.unmodifiableMap(this.inputParams);
     }
 
     public Map<String, Object> getOutputParams() {
-        return this.outputParams;
+        return Collections.unmodifiableMap(this.outputParams);
     }
 
     public void putNodeVariables(String tag, Map<String, Object> data) {
@@ -37,10 +42,11 @@ public class VariableContext {
     }
 
     public void putInputVariables(String tag) {
-        if (inputParams != null) {
-            nodeVariables.put(tag, inputParams);
-        }
+        nodeVariables.put(tag, inputParams);
     }
 
+    public Object getVariableByExpression(String expression) {
+        return MVEL.eval(expression, nodeVariables);
+    }
 
 }

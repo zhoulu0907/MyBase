@@ -34,6 +34,9 @@ public class AuthDataGroupVO {
     @Schema(description = "业务实体字段名称")
     private Long scopeFieldId;
 
+    @Schema(description = "业务实体字段名称")
+    private String scopeFieldName;
+
     @Schema(description = "业务实体字段对应的权限范围")
     private String scopeLevel;
 
@@ -43,6 +46,7 @@ public class AuthDataGroupVO {
     @Schema(description = "是否可以操作")
     private Integer isOperable;
 
+    @Schema(description = "数据权限组对应的数据过滤条件")
     private List<List<AuthDataFilterVO>> dataFilters;
 
 }

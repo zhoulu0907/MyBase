@@ -22,11 +22,10 @@
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-common</artifactId>
         </dependency>
-        <!-- LiteFlow流程引擎 -->
+        <!-- MVEL表达式引擎 -->
         <dependency>
-            <groupId>com.yomahub</groupId>
-            <artifactId>liteflow-spring-boot-starter</artifactId>
-            <version>2.13.2.1</version>
+            <groupId>org.mvel</groupId>
+            <artifactId>mvel2</artifactId>
         </dependency>
         <!-- 测试依赖 -->
         <dependency>

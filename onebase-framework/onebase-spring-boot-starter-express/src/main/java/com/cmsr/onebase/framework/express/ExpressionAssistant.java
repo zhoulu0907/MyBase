@@ -1,6 +1,7 @@
 package com.cmsr.onebase.framework.express;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.mvel2.MVEL;
 import org.mvel2.ParserContext;
 import org.springframework.stereotype.Component;
@@ -72,6 +73,9 @@ public class ExpressionAssistant {
      * @return 表达式字符串
      */
     private String buildConditionExpression(List<ConditionItem> conditionItems) {
+        if (CollectionUtils.isEmpty(conditionItems)) {
+            return "true";
+        }
         List<String> conditionExpressions = new ArrayList<>();
         // 遍历所有条件项
         for (ConditionItem conditionItem : conditionItems) {

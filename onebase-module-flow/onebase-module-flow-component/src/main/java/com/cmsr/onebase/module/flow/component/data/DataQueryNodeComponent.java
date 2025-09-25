@@ -30,15 +30,20 @@ public class DataQueryNodeComponent extends NormalNodeComponent {
     @Autowired
     private DataMethodApi dataMethodApi;
 
+    @Autowired
+    private DataMethodApiHelper dataMethodApiHelper;
+
+
     @Override
     public void process() throws Exception {
         log.info("DataQueryNodeComponent process");
         ExecuteContext executeContext = this.getContextBean(ExecuteContext.class);
+        VariableContext variableContext = this.getContextBean(VariableContext.class);
         Map<String, Object> nodeData = executeContext.getNodeData(this.getTag());
-        EntityFieldDataReqDTO reqDTO = DataMethodApiUtils.convert(nodeData);
+        // 转换成数据方法参数
+        EntityFieldDataReqDTO reqDTO = dataMethodApiHelper.convert(nodeData, variableContext);
         reqDTO.setNum(1);
         List<List<EntityFieldDataRespDTO>> fieldDataRespDTOS = TenantUtils.executeIgnore(() -> dataMethodApi.getDataByCondition(reqDTO));
-        VariableContext variableContext = this.getContextBean(VariableContext.class);
         if (CollectionUtils.isNotEmpty(fieldDataRespDTOS)) {
             variableContext.putNodeVariables(this.getTag(), convert(fieldDataRespDTOS.get(0)));
         }
@@ -47,7 +52,9 @@ public class DataQueryNodeComponent extends NormalNodeComponent {
     private Map<String, Object> convert(List<EntityFieldDataRespDTO> fieldDataRespDTOS) {
         Map<String, Object> map = new HashMap<>();
         for (EntityFieldDataRespDTO fieldDataRespDTO : fieldDataRespDTOS) {
-            map.put(fieldDataRespDTO.getFieldName(), JdbcTypeConvertor.convert(fieldDataRespDTO.getJdbcType(), fieldDataRespDTO.getFieldValue()));
+            String key = String.valueOf(fieldDataRespDTO.getFieldId());
+            Object value = JdbcTypeConvertor.convert(fieldDataRespDTO.getJdbcType(), fieldDataRespDTO.getFieldValue());
+            map.put(key, value);
         }
         return map;
     }
