@@ -1,37 +1,141 @@
 import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
-
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
-import { Form, Input } from '@arco-design/web-react';
+import { Form, Input, Select, Radio, Grid, Switch, Tooltip } from '@arco-design/web-react';
 import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
+import { MODAL_TYPE } from '@onebase/app';
+import { validateNodeForm } from '../../utils';
+import { useEffect } from 'react';
+import { IconQuestionCircle } from '@arco-design/web-react/icon';
 
 export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const isSidebar = useIsSidebar();
   const { node } = useNodeRenderContext();
+  const [payloadForm] = Form.useForm();
+  const modalType = Form.useWatch('modalType', payloadForm);
 
-  const handlePropsOnChange = (key: string, value: any) => {
+  useEffect(() => {
+    payloadForm && validateNodeForm(form, payloadForm, true);
+  }, [payloadForm]);
+
+  const onValuesChange = async (changeValue: any, values: any) => {
+    // 校验表单
+    validateNodeForm(form, payloadForm, false);
+    handlePropsOnChange(values);
+  };
+  // 表单内容改变
+  const handlePropsOnChange = (values: any) => {
+    triggerEditorSignal.setNodeData(node.id, values);
+  };
+
+  // 弹窗类型改变
+  const modalTypeChange = (value: string) => {
+    payloadForm.clearFields(['fieldConfig', 'arrange']);
     const nodeData = triggerEditorSignal.nodeData.value[node.id];
     triggerEditorSignal.setNodeData(node.id, {
       ...nodeData,
-      [key]: value
+      fieldConfig: [],
+      arrange: undefined
     });
   };
-
-  const [payloadForm] = Form.useForm();
 
   return (
     <>
       <FormHeader />
       {isSidebar ? (
         <FormContent>
-          <Form form={payloadForm} initialValues={{ ...triggerEditorSignal.nodeData.value[node.id] }}>
+          <Form
+            form={payloadForm}
+            layout="vertical"
+            onValuesChange={onValuesChange}
+            initialValues={{ ...triggerEditorSignal.nodeData.value[node.id] }}
+          >
             <Form.Item label="节点ID" field="id" initialValue={node.id}>
               <Input disabled />
             </Form.Item>
-            <Form.Item label="节点名称" field="title">
-              <Input onChange={(e) => handlePropsOnChange('title', e)} />
+
+            <Form.Item label="弹窗标题" field="modalTitle" rules={[{ required: true, message: '请输入弹窗标题' }]}>
+              <Input placeholder="请输入" />
             </Form.Item>
+
+            <Form.Item label="弹窗类型" field="modalType" rules={[{ required: true, message: '请选择弹窗类型' }]}>
+              <Select placeholder="请选择" onChange={modalTypeChange}>
+                <Select.Option value={MODAL_TYPE.CONFIRM}>二次确认</Select.Option>
+                <Select.Option value={MODAL_TYPE.INFOR}>收集信息</Select.Option>
+                {/* <Select.Option value={MODAL_TYPE.CUSTOM}>自定义弹窗</Select.Option> */}
+              </Select>
+            </Form.Item>
+
+            {modalType === MODAL_TYPE.INFOR && (
+              <>
+                {/* todo 写出组件可拖拽排序 */}
+                <Form.Item label="收集字段配置" field="fields">
+                  <Input placeholder="请输入" />
+                </Form.Item>
+                <Form.Item label="收集字段排列方式" field="arrange">
+                  <Radio.Group>
+                    <Radio value={1}>一列</Radio>
+                    <Radio value={2}>两列</Radio>
+                  </Radio.Group>
+                </Form.Item>
+              </>
+            )}
+
+            <Form.Item label="提示文字" field="prompt">
+              <Input.TextArea placeholder="请输入" rows={4} />
+            </Form.Item>
+
+            <Grid.Row gutter={24}>
+              <Grid.Col span={12}>
+                <Form.Item
+                  label="确定按钮文字"
+                  field="okText"
+                  rules={[{ required: true, message: '请输入确定按钮文字' }]}
+                >
+                  <Input placeholder="请输入" />
+                </Form.Item>
+              </Grid.Col>
+              <Grid.Col span={12}>
+                <Form.Item
+                  label="取消按钮文字"
+                  field="cancelText"
+                  rules={[{ required: true, message: '请输入取消按钮文字' }]}
+                >
+                  <Input placeholder="请输入" />
+                </Form.Item>
+              </Grid.Col>
+            </Grid.Row>
+
+            <Form.Item label="弹窗取消后" field="afterCancel">
+              <Radio.Group>
+                <Radio value={0}>事件终止</Radio>
+                <Radio value={1}>事件继续执行</Radio>
+              </Radio.Group>
+            </Form.Item>
+
+            <Grid.Row gutter={24}>
+              <Grid.Col span={12}>
+                <Form.Item
+                  label={
+                    <>
+                      <span>关闭默认终止提醒</span>
+                      <Tooltip disabled content="todo">
+                        <IconQuestionCircle />
+                      </Tooltip>
+                    </>
+                  }
+                  field="closeWarn"
+                >
+                  <Switch />
+                </Form.Item>
+              </Grid.Col>
+              <Grid.Col span={12}>
+                <Form.Item label="弹窗取消后提醒" field="cancelWarn">
+                  <Switch />
+                </Form.Item>
+              </Grid.Col>
+            </Grid.Row>
           </Form>
         </FormContent>
       ) : (
