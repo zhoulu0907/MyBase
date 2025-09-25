@@ -153,10 +153,10 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       return;
     }
     const res = await getEntityFields({ entityId: dataSource });
-    const filedIds: string[] = [];
+    const fieldIds: string[] = [];
     const newConditionFields: ConfitionField[] = [];
     res.forEach((item: any) => {
-      filedIds.push(item.id);
+      fieldIds.push(item.id);
       newConditionFields.push({
         label: item.displayName,
         value: item.id,
@@ -166,8 +166,8 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     setConditionFields(newConditionFields);
     updateDataDeleteOutputs(node.id);
 
-    if (filedIds?.length) {
-      const newValidationTypes = await getFieldCheckTypeApi(filedIds);
+    if (fieldIds?.length) {
+      const newValidationTypes = await getFieldCheckTypeApi(fieldIds);
       setValidationTypes(newValidationTypes);
     }
   };

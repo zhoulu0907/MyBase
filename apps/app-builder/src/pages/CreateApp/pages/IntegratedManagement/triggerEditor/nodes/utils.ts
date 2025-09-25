@@ -186,10 +186,10 @@ export const getEntityFieldList = async (
     return;
   }
   const res = await getEntityFields({ entityId: dataSource });
-  const filedIds: string[] = [];
+  const fieldIds: string[] = [];
   const newConditionFields: ConfitionField[] = [];
   res.forEach((item: any) => {
-    filedIds.push(item.id);
+    fieldIds.push(item.id);
     newConditionFields.push({
       label: item.displayName,
       value: item.id,
@@ -198,8 +198,8 @@ export const getEntityFieldList = async (
   });
 
   setConditionFields(newConditionFields);
-  if (filedIds?.length) {
-    const newValidationTypes = await getFieldCheckTypeApi(filedIds);
+  if (fieldIds?.length) {
+    const newValidationTypes = await getFieldCheckTypeApi(fieldIds);
     setValidationTypes(newValidationTypes);
   }
 };
