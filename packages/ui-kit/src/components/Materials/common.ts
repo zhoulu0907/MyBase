@@ -445,13 +445,13 @@ export const tabsPositionConfig: ITabsPositionConfigType<TTabsPositionSelectKeyT
   ]
 };
 // 
-export const imageCofig: IImageConfigType = {
+export const imageConfig: IImageConfigType = {
   key: 'image',
   name: '图片',
   type: CONFIG_TYPES.IMAGE
 };
 
-export const fileCofig: IFileConfigType = {
+export const fileConfig: IFileConfigType = {
   key: 'file',
   name: '图片',
   type: CONFIG_TYPES.FILE

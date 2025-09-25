@@ -1,7 +1,7 @@
 import iconStart from '@/assets/flow/icon-start.jpg';
-import { nanoid } from 'nanoid';
 import { type FlowNodeRegistry } from '../../../typings';
 import { NodeType } from '../../const';
+import { generateNodeId } from '../../utils';
 import { formMeta } from './form-meta';
 
 export const TooltipNodeRegistry: FlowNodeRegistry = {
@@ -29,8 +29,8 @@ export const TooltipNodeRegistry: FlowNodeRegistry = {
   },
   onAdd(ctx, from) {
     return {
-      id: `tooltip_${nanoid()}`,
-      type: 'tooltip',
+      id: generateNodeId(NodeType.TOOLTIP),
+      type: NodeType.TOOLTIP,
       data: {
         title: '提示节点'
       }

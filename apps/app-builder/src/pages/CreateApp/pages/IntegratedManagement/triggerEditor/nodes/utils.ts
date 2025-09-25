@@ -2,13 +2,18 @@ import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import type { FlowNodeJSON } from '@flowgram.ai/fixed-layout-editor';
 import {
   DATA_SOURCE_TYPE,
-  FLOW_ENTITY_TYPE,
   getEntityFields,
   getFieldCheckTypeApi,
   type ConfitionField,
   type EntityFieldValidationTypes
 } from '@onebase/app';
+import { v4 as uuidv4 } from 'uuid';
 import { NodeType } from './const';
+
+export const generateNodeId = (nodeType: NodeType) => {
+  const uuid = uuidv4().replaceAll('-', '');
+  return `${nodeType}_${uuid}`;
+};
 
 // 清除数据节点依赖关系
 export const clearDataOriginNodeId = (nodeId: string) => {
@@ -124,18 +129,18 @@ export const getDataNodeSource = (nodeId: string): string => {
       case NodeType.START_ENTITY:
         return nodeData.entityId;
       case NodeType.DATA_ADD:
-        if (nodeData.addType === FLOW_ENTITY_TYPE.MAIN_ENTITY) {
+        if (nodeData.addType === DATA_SOURCE_TYPE.FORM) {
           return nodeData.mainEntityId;
         }
-        if (nodeData.addType === FLOW_ENTITY_TYPE.SUB_ENTITY) {
+        if (nodeData.addType === DATA_SOURCE_TYPE.SUBFORM) {
           return nodeData.subEntityId;
         }
         break;
       case NodeType.DATA_UPDATE:
-        if (nodeData.updateType === FLOW_ENTITY_TYPE.MAIN_ENTITY) {
+        if (nodeData.updateType === DATA_SOURCE_TYPE.FORM) {
           return nodeData.mainEntityId;
         }
-        if (nodeData.updateType === FLOW_ENTITY_TYPE.SUB_ENTITY) {
+        if (nodeData.updateType === DATA_SOURCE_TYPE.SUBFORM) {
           return nodeData.subEntityId;
         }
         break;

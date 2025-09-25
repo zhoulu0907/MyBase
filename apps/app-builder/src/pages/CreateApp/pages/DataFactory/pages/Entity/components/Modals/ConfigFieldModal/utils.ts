@@ -114,3 +114,21 @@ export const convertAutoNumberRuleToAutoCodeComp = (autoNumberRule: AutoNumberRu
 
   return rules;
 };
+
+const arrayMoveMutate = (array: any[], from: number, to: number) => {
+  const startIndex = to < 0 ? array.length + to : to;
+
+  if (startIndex >= 0 && startIndex < array.length) {
+    const item = array.splice(from, 1)[0];
+    array.splice(startIndex, 0, item);
+  }
+};
+
+export const arrayMove = (array: any[], from: number, to: number) => {
+  array = [...array];
+  arrayMoveMutate(array, from, to);
+
+  return array.map((item, index) => ({
+    ...item
+  }));
+};

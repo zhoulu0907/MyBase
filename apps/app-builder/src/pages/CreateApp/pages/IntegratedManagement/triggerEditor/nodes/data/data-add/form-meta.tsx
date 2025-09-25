@@ -3,7 +3,7 @@ import { useAppStore } from '@/store/store_app';
 import { Form, Grid, Input, Radio, Select } from '@arco-design/web-react';
 import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
 import {
-  FLOW_ENTITY_TYPE,
+  DATA_SOURCE_TYPE,
   getEntityFields,
   getEntityFieldsWithChildren,
   getEntityListByApp,
@@ -22,6 +22,8 @@ import { updateDataAddOutputs } from './output';
 
 const RadioGroup = Radio.Group;
 
+const ALLOW_DATANODE_TYPES = [NodeType.DATA_QUERY_MULTIPLE, NodeType.DATA_QUERY];
+
 export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const isSidebar = useIsSidebar();
   const { node } = useNodeRenderContext();
@@ -30,7 +32,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const [fieldDataList, setFieldDataList] = useState<AppEntityField[]>([]);
   const [mainEntityList, setMainEntityList] = useState<MetadataEntityPair[]>([]);
   const [subEntityList, setSubEntityList] = useState<MetadataEntityPair[]>([]);
-  const [conditionFields, setConditionFields] = useState<ConfitionField[]>([]);
 
   const [dataNodeList, setDataNodeList] = useState<any[]>([]);
 
@@ -51,13 +52,13 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const init = async () => {
     const nodeData = triggerEditorSignal.nodeData.value[node.id];
     if (nodeData) {
-      if (nodeData.addType === FLOW_ENTITY_TYPE.MAIN_ENTITY) {
+      if (nodeData.addType === DATA_SOURCE_TYPE.FORM) {
         // 在主表中
         const res = await getEntityListByApp(curAppId);
         setMainEntityList(res);
         getFieldList(nodeData?.mainEntityId);
       }
-      if (nodeData.addType === FLOW_ENTITY_TYPE.SUB_ENTITY) {
+      if (nodeData.addType === DATA_SOURCE_TYPE.SUBFORM) {
         // 在子表中
         const res = await getEntityListByApp(curAppId);
         setMainEntityList(res);
@@ -76,12 +77,12 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     }
 
     const nodes = triggerEditorSignal.nodes.value;
-    const newDataNodeList = getBeforeCurQueryNodes(node.id, nodes, [NodeType.DATA_QUERY_MULTIPLE, NodeType.DATA_QUERY]);
+    const newDataNodeList = getBeforeCurQueryNodes(node.id, nodes, ALLOW_DATANODE_TYPES);
     setDataNodeList(newDataNodeList);
   };
 
   // 新增方式变更
-  const handleDataTypeChange = (curAddType: FLOW_ENTITY_TYPE) => {
+  const handleDataTypeChange = (curAddType: DATA_SOURCE_TYPE) => {
     payloadForm.clearFields(['mainEntityId', 'subEntityId', 'dataNodeId', 'fields']);
     const nodeData = triggerEditorSignal.nodeData.value[node.id];
     triggerEditorSignal.setNodeData(node.id, {
@@ -92,21 +93,20 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     });
     setMainEntityList([]);
     setSubEntityList([]);
-    setConditionFields([]);
     setFieldDataList([]);
     setMainEntityList([]);
     getEntityList(curAddType);
   };
 
-  const getEntityList = async (curAddType?: FLOW_ENTITY_TYPE) => {
+  const getEntityList = async (curAddType?: DATA_SOURCE_TYPE) => {
     const nodeData = triggerEditorSignal.nodeData.value[node.id];
-    if (curAddType === FLOW_ENTITY_TYPE.MAIN_ENTITY || curAddType === undefined) {
+    if (curAddType === DATA_SOURCE_TYPE.FORM || curAddType === undefined) {
       // 从主表中
       const res = await getEntityListByApp(curAppId);
       setMainEntityList(res);
       getFieldList(nodeData?.mainEntityId);
     }
-    if (curAddType === FLOW_ENTITY_TYPE.SUB_ENTITY) {
+    if (curAddType === DATA_SOURCE_TYPE.SUBFORM) {
       // 从子表中
       const res = await getEntityListByApp(curAppId);
       setMainEntityList(res);
@@ -122,13 +122,12 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       fields: []
     });
 
-    setConditionFields([]);
     setFieldDataList([]);
 
-    if (addType === FLOW_ENTITY_TYPE.MAIN_ENTITY) {
+    if (addType === DATA_SOURCE_TYPE.FORM) {
       getFieldList(curMainEntityId);
     }
-    if (addType === FLOW_ENTITY_TYPE.SUB_ENTITY) {
+    if (addType === DATA_SOURCE_TYPE.SUBFORM) {
       setSubEntityList([]);
       const res = await getEntityFieldsWithChildren(curMainEntityId);
       const newEntityList = (res.childEntities || []).map((item: any) => {
@@ -148,7 +147,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       ...nodeData,
       fields: []
     });
-    setConditionFields([]);
+
     setFieldDataList([]);
     getFieldList(curSubEntityId);
   };
@@ -170,7 +169,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       });
     });
 
-    setConditionFields(newConditionFields);
     updateDataAddOutputs(node.id, newConditionFields);
     setFieldDataList(res);
   };
@@ -220,14 +218,14 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             <Grid.Row>
               <Form.Item label="新增方式" field="addType" rules={[{ required: true, message: '请选择新增方式' }]}>
                 <RadioGroup onChange={handleDataTypeChange}>
-                  <Radio value={FLOW_ENTITY_TYPE.MAIN_ENTITY}>在主表中新增</Radio>
-                  <Radio value={FLOW_ENTITY_TYPE.SUB_ENTITY}>在子表中新增</Radio>
+                  <Radio value={DATA_SOURCE_TYPE.FORM}>在主表中新增</Radio>
+                  <Radio value={DATA_SOURCE_TYPE.SUBFORM}>在子表中新增</Radio>
                 </RadioGroup>
               </Form.Item>
             </Grid.Row>
 
             {/* 从主表中插入 */}
-            {addType === FLOW_ENTITY_TYPE.MAIN_ENTITY && (
+            {addType === DATA_SOURCE_TYPE.FORM && (
               <Grid.Row>
                 <Grid.Col span={1} style={{ textAlign: 'center', lineHeight: '32px' }}>
                   向
@@ -250,7 +248,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             )}
 
             {/* 从子表中查询 */}
-            {addType === FLOW_ENTITY_TYPE.SUB_ENTITY && (
+            {addType === DATA_SOURCE_TYPE.SUBFORM && (
               <Grid.Row>
                 <Grid.Col span={1} style={{ textAlign: 'center', lineHeight: '32px' }}>
                   向
@@ -295,7 +293,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
               </Form.Item>
             </Grid.Row>
 
-            {batchType ? (
+            {batchType && (
               <Grid.Row>
                 <Form.Item label="数据源" field="dataNodeId">
                   <Select allowClear>
@@ -307,13 +305,13 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
                   </Select>
                 </Form.Item>
               </Grid.Row>
-            ) : (
-              <Grid.Row>
-                <Form.Item label="字段设置">
-                  <FieldEditor fieldList={fieldDataList} form={payloadForm} />
-                </Form.Item>
-              </Grid.Row>
             )}
+
+            <Grid.Row>
+              <Form.Item label="字段设置">
+                <FieldEditor nodeId={node.id} fieldList={fieldDataList} form={payloadForm} />
+              </Form.Item>
+            </Grid.Row>
           </Form>
         </FormContent>
       ) : (
