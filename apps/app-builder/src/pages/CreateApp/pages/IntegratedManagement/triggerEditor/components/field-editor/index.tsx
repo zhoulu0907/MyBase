@@ -89,7 +89,7 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList, form, nodeId, data
     if (targetField?.fieldType == ENTITY_FIELD_TYPE.DATETIME.VALUE) {
       return (
         <Form.Item field={fieldName}>
-          <DatePicker showTime placeholder="请输入静态值" />
+          <DatePicker showTime placeholder="请输入静态值" style={{ width: '100%' }} />
         </Form.Item>
       );
     }
@@ -266,7 +266,7 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList, form, nodeId, data
               <>
                 {fields.map((item: any, index: number) => {
                   return (
-                    <Grid.Row gutter={8} key={item.key}>
+                    <Grid.Row gutter={8} key={item.key} align="center">
                       <Grid.Col span={6}>
                         <Form.Item field={item.field + '.fieldId'} rules={[{ required: true, message: '请选择字段' }]}>
                           <Select
@@ -283,7 +283,7 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList, form, nodeId, data
                       </Grid.Col>
 
                       <Grid.Col span={2}>
-                        <div style={{ lineHeight: '32px' }}>的值设为</div>
+                        <div style={{ marginBottom: '15px' }}>的值设为</div>
                       </Grid.Col>
 
                       <Grid.Col span={5}>
@@ -323,9 +323,8 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList, form, nodeId, data
                       </Grid.Col>
 
                       <Grid.Col span={2}>
-                        <Button
-                          type="text"
-                          icon={<IconDelete />}
+                        <IconDelete
+                          style={{ fontSize: '15px', color: '#4E5969', marginBottom: '15px' }}
                           onClick={() => {
                             remove(index);
                             setSelectedFields(form.getFieldValue('fields'));
