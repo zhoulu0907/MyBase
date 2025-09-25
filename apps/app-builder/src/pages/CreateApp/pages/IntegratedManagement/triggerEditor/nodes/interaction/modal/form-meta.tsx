@@ -8,6 +8,7 @@ import { MODAL_TYPE } from '@onebase/app';
 import { validateNodeForm } from '../../utils';
 import { useEffect } from 'react';
 import { IconQuestionCircle } from '@arco-design/web-react/icon';
+import CollectFields from '../../../components/collect-fields';
 
 export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const isSidebar = useIsSidebar();
@@ -20,6 +21,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   }, [payloadForm]);
 
   const onValuesChange = async (changeValue: any, values: any) => {
+    console.log('变更了',values)
     // 校验表单
     validateNodeForm(form, payloadForm, false);
     handlePropsOnChange(values);
@@ -31,11 +33,11 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
   // 弹窗类型改变
   const modalTypeChange = (value: string) => {
-    payloadForm.clearFields(['fieldConfig', 'arrange']);
+    payloadForm.clearFields(['fields', 'arrange']);
     const nodeData = triggerEditorSignal.nodeData.value[node.id];
     triggerEditorSignal.setNodeData(node.id, {
       ...nodeData,
-      fieldConfig: [],
+      fields: [],
       arrange: undefined
     });
   };
@@ -70,9 +72,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
             {modalType === MODAL_TYPE.INFOR && (
               <>
                 {/* todo 写出组件可拖拽排序 */}
-                <Form.Item label="收集字段配置" field="fields">
-                  <Input placeholder="请输入" />
-                </Form.Item>
+                <CollectFields form={payloadForm} />
                 <Form.Item label="收集字段排列方式" field="arrange">
                   <Radio.Group>
                     <Radio value={1}>一列</Radio>
