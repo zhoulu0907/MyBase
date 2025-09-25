@@ -1,6 +1,5 @@
-import { nanoid } from 'nanoid';
-
 import iconLoop from '@/assets/flow/icon-loop.svg';
+import { v4 as uuidv4 } from 'uuid';
 import { type FlowNodeRegistry } from '../../../typings';
 import { NodeType } from '../../const';
 import { formMeta } from './form-meta';
@@ -19,7 +18,7 @@ export const LoopNodeRegistry: FlowNodeRegistry = {
   formMeta,
   onAdd() {
     return {
-      id: `loop_${nanoid(5)}`,
+      id: `loop_${uuidv4()}`,
       type: NodeType.LOOP,
       data: {
         title: '循环节点'

@@ -1,6 +1,5 @@
-import { nanoid } from 'nanoid';
-
 import iconCase from '@/assets/flow/icon-case.png';
+import { v4 as uuidv4 } from 'uuid';
 import { type FlowNodeRegistry } from '../../../typings';
 import { NodeType } from '../../const';
 import { formMeta } from './form-meta';
@@ -23,10 +22,10 @@ export const CatchBlockNodeRegistry: FlowNodeRegistry = {
   canDelete: (ctx, node) => node.parent!.blocks.length >= 2,
   onAdd(ctx, from) {
     return {
-      id: `Catch_${nanoid(5)}`,
+      id: `Catch_${uuidv4()}`,
       type: 'catchBlock',
       data: {
-        title: `Catch Block ${id++}`,
+        title: `Catch Block ${id++}`
       }
     };
   },

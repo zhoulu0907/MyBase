@@ -1,6 +1,5 @@
-import { nanoid } from 'nanoid';
-
 import iconTryCatch from '@/assets/flow/icon-trycatch.svg';
+import { v4 as uuidv4 } from 'uuid';
 import { type FlowNodeRegistry } from '../../../typings';
 import { NodeType } from '../../const';
 import { formMeta } from './form-meta';
@@ -19,19 +18,19 @@ export const TryCatchNodeRegistry: FlowNodeRegistry = {
   formMeta,
   onAdd() {
     return {
-      id: `tryCatch${nanoid(5)}`,
+      id: `tryCatch${uuidv4()}`,
       type: NodeType.TRY_CATCH,
       data: {
         title: '异常处理'
       },
       blocks: [
         {
-          id: `tryBlock${nanoid(5)}`,
+          id: `tryBlock${uuidv4()}`,
           type: 'tryBlock',
           blocks: []
         },
         {
-          id: `catchBlock${nanoid(5)}`,
+          id: `catchBlock${uuidv4()}`,
           type: 'catchBlock',
           blocks: [],
           data: {

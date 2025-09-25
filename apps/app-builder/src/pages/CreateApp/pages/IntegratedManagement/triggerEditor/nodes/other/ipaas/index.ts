@@ -1,5 +1,5 @@
 import iconStart from '@/assets/flow/icon-start.jpg';
-import { nanoid } from 'nanoid';
+import { v4 as uuidv4 } from 'uuid';
 import { type FlowNodeRegistry } from '../../../typings';
 import { NodeType } from '../../const';
 import { formMeta } from './form-meta';
@@ -29,7 +29,7 @@ export const IpaasNodeRegistry: FlowNodeRegistry = {
   },
   onAdd(ctx, from) {
     return {
-      id: `ipaas_${nanoid()}`,
+      id: `ipaas_${uuidv4()}`,
       type: 'ipaas',
       data: {
         title: '连接器节点'

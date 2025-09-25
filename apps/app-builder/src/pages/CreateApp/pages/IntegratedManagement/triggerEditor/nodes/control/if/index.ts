@@ -1,7 +1,7 @@
+import iconIf from '@/assets/flow/icon-if.png';
 import { FlowNodeSplitType } from '@flowgram.ai/fixed-layout-editor';
 import { nanoid } from 'nanoid';
-
-import iconIf from '@/assets/flow/icon-if.png';
+import { v4 as uuidv4 } from 'uuid';
 import { type FlowNodeRegistry } from '../../../typings';
 import { NodeType } from '../../const';
 import { formMeta } from './form-meta';
@@ -21,7 +21,7 @@ export const IFNodeRegistry: FlowNodeRegistry = {
   formMeta: formMeta,
   onAdd() {
     return {
-      id: `if_${nanoid(5)}`,
+      id: `if_${uuidv4()}`,
       type: NodeType.IF,
       data: {
         title: '条件节点'
