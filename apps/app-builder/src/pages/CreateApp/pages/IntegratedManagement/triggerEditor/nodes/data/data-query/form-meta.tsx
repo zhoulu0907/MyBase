@@ -22,6 +22,8 @@ import { NodeType } from '../../const';
 import { getBeforeCurQueryNodes, getDataNodeSource, getEntityFieldList, validateNodeForm } from '../../utils';
 import { updateDataQueryOutputs } from './output';
 
+const ALLOW_DATANODE_TYPES = [NodeType.DATA_QUERY_MULTIPLE];
+
 export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   useSignals();
 
@@ -78,6 +80,42 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
     getEntityAndDataNodeList(curDataType);
   };
 
+  useEffect(() => {
+    init();
+  }, []);
+
+  const init = async () => {
+    const nodeData = triggerEditorSignal.nodeData.value[node.id];
+    if (nodeData) {
+      if (nodeData.dataType === DATA_SOURCE_TYPE.FORM) {
+        // 在主表中
+        const res = await getEntityListByApp(curAppId);
+        setMainEntityList(res);
+        getFieldList(nodeData?.mainEntityId);
+      }
+      if (nodeData.dataType === DATA_SOURCE_TYPE.SUBFORM) {
+        // 在子表中
+        const res = await getEntityListByApp(curAppId);
+        setMainEntityList(res);
+        if (nodeData?.mainEntityId) {
+          const res = await getEntityFieldsWithChildren(nodeData.mainEntityId);
+          const newEntityList = (res.childEntities || []).map((item: any) => {
+            return {
+              entityId: item.childEntityId,
+              entityName: item.childEntityName
+            };
+          });
+          setSubEntityList(newEntityList);
+          getFieldList(nodeData.subEntityId);
+        }
+      }
+    }
+
+    const nodes = triggerEditorSignal.nodes.value;
+    const newDataNodeList = getBeforeCurQueryNodes(node.id, nodes, ALLOW_DATANODE_TYPES);
+    setDataNodeList(newDataNodeList);
+  };
+
   const handleMainEntityIdChange = async (curMainEntityId: string) => {
     payloadForm.clearFields(['subEntityId', 'dataNodeId', 'filterCondition', 'sortBy']);
     const nodeData = triggerEditorSignal.nodeData.value[node.id];
@@ -100,6 +138,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
         entityName: item.childEntityName
       };
     });
+
     setSubEntityList(newEntityList);
     if (dataType !== DATA_SOURCE_TYPE.SUBFORM && curMainEntityId) {
       getFieldList(curMainEntityId);
@@ -143,7 +182,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
 
     const nodes = triggerEditorSignal.nodes.value;
 
-    const newDataNodeList = getBeforeCurQueryNodes(node.id, nodes, [NodeType.DATA_QUERY_MULTIPLE]);
+    const newDataNodeList = getBeforeCurQueryNodes(node.id, nodes, ALLOW_DATANODE_TYPES);
     setDataNodeList(newDataNodeList);
 
     getFieldList(dataNodeId);
@@ -170,7 +209,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
       // 从上游数据节点查询
       const nodes = triggerEditorSignal.nodes.value;
       // 过滤掉当前节点,过滤blocks,并且只能选当前节点之前的节点
-      const newDataNodeList = getBeforeCurQueryNodes(node.id, nodes, [NodeType.DATA_QUERY_MULTIPLE]);
+      const newDataNodeList = getBeforeCurQueryNodes(node.id, nodes, ALLOW_DATANODE_TYPES);
 
       setDataNodeList(newDataNodeList);
     }

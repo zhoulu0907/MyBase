@@ -44,8 +44,6 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   }, []);
 
   useEffect(() => {
-    console.log('entityId: ', entityId);
-
     if (entityId) {
       handleGetEntityFieldsById(entityId);
       getEntityFieldList(entityId, handleSetConditionFields, setValidationTypes);

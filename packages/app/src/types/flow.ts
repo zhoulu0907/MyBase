@@ -71,11 +71,11 @@ export interface UpdateFlowMgmtDefinitionReq {
 
 // 数据源类型   表单、数据节点、关联表、子表
 export enum DATA_SOURCE_TYPE {
-  FORM = 1, // 主表
-  SUBFORM = 2, // 子表
-  DATA_NODE = 3, // 数据节点
-  ASSOCIA_FORM = 4, // 关联表
-  LOOP = 5 // 循环体
+  FORM = 'mainEntity', // 主表
+  SUBFORM = 'subEntity', // 子表
+  DATA_NODE = 'dataNode', // 数据节点
+  ASSOCIA_FORM = 'associaForm', // 关联表
+  LOOP = 'loop' // 循环体
 }
 
 // 查询规则  全部数据、按条件过滤
@@ -84,11 +84,6 @@ export enum FILTER_TYPE {
   CONDITION = 'condition'
 }
 
-// 表类型  主表 子表
-export enum FLOW_ENTITY_TYPE {
-  MAIN_ENTITY = 'mainEntity',
-  SUB_ENTITY = 'subEntity'
-}
 export interface SelectOption {
   label: string;
   value: string;
