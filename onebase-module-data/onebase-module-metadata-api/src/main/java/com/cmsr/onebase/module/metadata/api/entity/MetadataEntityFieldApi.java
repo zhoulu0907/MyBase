@@ -4,6 +4,7 @@ import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldQueryReqDTO;
 import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldRespDTO;
 import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldJdbcTypeReqDTO;
 import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldJdbcTypeRespDTO;
+import com.cmsr.onebase.module.metadata.api.entity.dto.EntityFieldIdsReqDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,6 +20,17 @@ import java.util.List;
  */
 @Tag(name = "实体字段管理 sdk")
 public interface MetadataEntityFieldApi {
+
+    /**
+     * 根据字段ID列表返回对应的字段完整信息(来自 metadata_entity_field 表的主要字段)
+     *
+     * @param reqDTO 字段ID列表请求
+     * @return 字段信息列表
+     */
+    @Operation(summary = "根据字段ID列表查询字段完整信息")
+    List<EntityFieldRespDTO> getEntityFieldsByIds(@Valid @RequestBody EntityFieldIdsReqDTO reqDTO);
+
+
 
     /**
      * 查询指定实体的字段列表

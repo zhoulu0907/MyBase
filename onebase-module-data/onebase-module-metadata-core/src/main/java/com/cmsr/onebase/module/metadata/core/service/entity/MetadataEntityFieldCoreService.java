@@ -55,6 +55,14 @@ public interface MetadataEntityFieldCoreService {
     List<MetadataEntityFieldDO> getEntityFieldListByEntityId(Long entityId);
 
     /**
+     * 根据字段ID列表批量获取实体字段
+     *
+     * @param fieldIds 字段ID列表
+     * @return 实体字段列表
+     */
+    List<MetadataEntityFieldDO> getEntityFieldListByIds(List<Long> fieldIds);
+
+    /**
      * 获得实体字段分页
      *
      * @param pageNum 页码
