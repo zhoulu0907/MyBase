@@ -294,10 +294,6 @@ const FieldEditor: React.FC<FieldEditorProps> = ({ fieldList, form, nodeId }) =>
                       </Grid.Col>
 
                       <Grid.Col span={8}>
-                        {/* <Form.Item field={item.field + '.fieldValue'}>
-                          <Input />
-                        </Form.Item> */}
-
                         {form.getFieldValue(item.field + '.operatorType') == undefined && (
                           <Form.Item field={item.field + '.fieldValue'}>
                             <Input placeholder="请输入" disabled />

@@ -28,6 +28,8 @@ import {
 } from '../../utils';
 import { updateDataQueryMultipleOutputs } from './output';
 
+const ALLOW_DATANODE_TYPES = [NodeType.DATA_QUERY_MULTIPLE, NodeType.DATA_QUERY];
+
 export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   useSignals();
 
@@ -57,6 +59,42 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   useEffect(() => {
     payloadForm && validateNodeForm(form, payloadForm, true);
   }, [payloadForm]);
+
+  useEffect(() => {
+    init();
+  }, []);
+
+  const init = async () => {
+    const nodeData = triggerEditorSignal.nodeData.value[node.id];
+    if (nodeData) {
+      if (nodeData.dataType === DATA_SOURCE_TYPE.FORM) {
+        // 在主表中
+        const res = await getEntityListByApp(curAppId);
+        setMainEntityList(res);
+        getFieldList(nodeData?.mainEntityId);
+      }
+      if (nodeData.dataType === DATA_SOURCE_TYPE.SUBFORM) {
+        // 在子表中
+        const res = await getEntityListByApp(curAppId);
+        setMainEntityList(res);
+        if (nodeData?.mainEntityId) {
+          const res = await getEntityFieldsWithChildren(nodeData.mainEntityId);
+          const newEntityList = (res.childEntities || []).map((item: any) => {
+            return {
+              entityId: item.childEntityId,
+              entityName: item.childEntityName
+            };
+          });
+          setSubEntityList(newEntityList);
+          getFieldList(nodeData.subEntityId);
+        }
+      }
+    }
+
+    const nodes = triggerEditorSignal.nodes.value;
+    const newDataNodeList = getBeforeCurQueryNodes(node.id, nodes, ALLOW_DATANODE_TYPES);
+    setDataNodeList(newDataNodeList);
+  };
 
   /**
    * 获取方式变更

@@ -2,7 +2,6 @@ import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import type { FlowNodeJSON } from '@flowgram.ai/fixed-layout-editor';
 import {
   DATA_SOURCE_TYPE,
-  FLOW_ENTITY_TYPE,
   getEntityFields,
   getFieldCheckTypeApi,
   type ConfitionField,
@@ -130,18 +129,18 @@ export const getDataNodeSource = (nodeId: string): string => {
       case NodeType.START_ENTITY:
         return nodeData.entityId;
       case NodeType.DATA_ADD:
-        if (nodeData.addType === FLOW_ENTITY_TYPE.MAIN_ENTITY) {
+        if (nodeData.addType === DATA_SOURCE_TYPE.FORM) {
           return nodeData.mainEntityId;
         }
-        if (nodeData.addType === FLOW_ENTITY_TYPE.SUB_ENTITY) {
+        if (nodeData.addType === DATA_SOURCE_TYPE.SUBFORM) {
           return nodeData.subEntityId;
         }
         break;
       case NodeType.DATA_UPDATE:
-        if (nodeData.updateType === FLOW_ENTITY_TYPE.MAIN_ENTITY) {
+        if (nodeData.updateType === DATA_SOURCE_TYPE.FORM) {
           return nodeData.mainEntityId;
         }
-        if (nodeData.updateType === FLOW_ENTITY_TYPE.SUB_ENTITY) {
+        if (nodeData.updateType === DATA_SOURCE_TYPE.SUBFORM) {
           return nodeData.subEntityId;
         }
         break;
