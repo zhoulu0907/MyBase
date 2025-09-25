@@ -40,6 +40,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
   const addType = Form.useWatch('addType', payloadForm);
   const mainEntityId = Form.useWatch('mainEntityId', payloadForm);
   const batchType = Form.useWatch('batchType', payloadForm);
+  const dataNodeId = Form.useWatch('dataNodeId', payloadForm);
 
   useEffect(() => {
     payloadForm && validateNodeForm(form, payloadForm, true);
@@ -293,25 +294,37 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
               </Form.Item>
             </Grid.Row>
 
-            {batchType && (
+            {batchType ? (
+              <>
+                <Grid.Row>
+                  <Form.Item label="数据源" field="dataNodeId">
+                    <Select allowClear>
+                      {dataNodeList.map((item) => (
+                        <Select.Option key={item.id} value={item.id}>
+                          {item.data.title}
+                        </Select.Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                </Grid.Row>
+                <Grid.Row>
+                  <Form.Item label="字段设置">
+                    <FieldEditor
+                      nodeId={node.id}
+                      fieldList={fieldDataList}
+                      form={payloadForm}
+                      dataNodeId={dataNodeId}
+                    />
+                  </Form.Item>
+                </Grid.Row>
+              </>
+            ) : (
               <Grid.Row>
-                <Form.Item label="数据源" field="dataNodeId">
-                  <Select allowClear>
-                    {dataNodeList.map((item) => (
-                      <Select.Option key={item.id} value={item.id}>
-                        {item.data.title}
-                      </Select.Option>
-                    ))}
-                  </Select>
+                <Form.Item label="字段设置">
+                  <FieldEditor nodeId={node.id} fieldList={fieldDataList} form={payloadForm} />
                 </Form.Item>
               </Grid.Row>
             )}
-
-            <Grid.Row>
-              <Form.Item label="字段设置">
-                <FieldEditor nodeId={node.id} fieldList={fieldDataList} form={payloadForm} />
-              </Form.Item>
-            </Grid.Row>
           </Form>
         </FormContent>
       ) : (
