@@ -64,6 +64,25 @@ public class MetadataEntityFieldCoreServiceImpl implements MetadataEntityFieldCo
     }
 
     @Override
+    public List<MetadataEntityFieldDO> getEntityFieldListByIds(List<Long> fieldIds) {
+        if (fieldIds == null || fieldIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+        DefaultConfigStore cs = new DefaultConfigStore();
+        cs.and(Compare.IN, "id", fieldIds);
+        cs.and("deleted", 0);
+        // 不强制排序按传入顺序，仍按 sort_order + create_time 保持与实体字段列表接口一致
+        cs.order("sort_order", "ASC");
+        cs.order("create_time", "DESC");
+        List<MetadataEntityFieldDO> list = metadataEntityFieldRepository.findAllByConfig(cs);
+        if (list == null || list.isEmpty()) {
+            return Collections.emptyList();
+        }
+        // 为了按照入参顺序返回，可进行一次稳定排序(可选)。此处保留原有排序语义，不再调整顺序。
+        return list;
+    }
+
+    @Override
     public PageResult<MetadataEntityFieldDO> getEntityFieldPage(int pageNum, int pageSize, Long entityId) {
         DefaultConfigStore configStore = new DefaultConfigStore();
         if (entityId != null) {
