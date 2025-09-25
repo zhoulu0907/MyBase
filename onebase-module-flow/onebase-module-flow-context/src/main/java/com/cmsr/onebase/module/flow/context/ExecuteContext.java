@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.flow.context;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 
@@ -66,7 +67,7 @@ public class ExecuteContext {
     }
 
     public Map<String, Object> getNodeData(String nodeTag) {
-        return nodeDataMap.get(nodeTag);
+        return Collections.unmodifiableMap(nodeDataMap.get(nodeTag));
     }
 
 }
