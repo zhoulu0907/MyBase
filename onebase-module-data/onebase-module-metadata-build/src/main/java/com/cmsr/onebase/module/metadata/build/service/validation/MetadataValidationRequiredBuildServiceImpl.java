@@ -124,28 +124,31 @@ public class MetadataValidationRequiredBuildServiceImpl implements MetadataValid
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void update(ValidationRequiredUpdateReqVO reqVO) {
-        // 查询是否存在
-        MetadataValidationRequiredDO existingDO = requiredRepository.findById(reqVO.getId());
-        Assert.notNull(existingDO, "当前必填校验规则不存在");
+        // 约定：reqVO.id 为 groupId
+        Long groupIdParam = reqVO.getId();
+        Assert.notNull(groupIdParam, "规则组ID不能为空");
+        var list = requiredRepository.findByGroupId(groupIdParam);
+        Assert.notEmpty(list, "当前必填校验规则不存在(组ID=" + groupIdParam + ")");
+        if (list.size() > 1) {
+            throw new IllegalStateException("数据异常：同一组存在多条必填校验规则(组ID=" + groupIdParam + ")");
+        }
+        MetadataValidationRequiredDO existingDO = list.get(0);
 
         // 查询字段信息
         MetadataEntityFieldDO entityFieldDO = entityFieldService.getEntityField(String.valueOf(existingDO.getFieldId()));
         Assert.notNull(entityFieldDO, "字段不存在");
 
-        // 确保字段规则组存在，如果不存在则自动创建
-        Long groupId = validationRuleGroupService.ensureFieldRuleGroup(existingDO.getFieldId());
+        // 如果需要根据 rgName 变化调整组，这里简单保留原 groupId，不做跨字段复用（必填校验每字段唯一）
+        Long targetGroupId = groupIdParam;
 
-        // 转换为DO对象并保留必要字段
         MetadataValidationRequiredDO updateDO = BeanUtils.toBean(reqVO, MetadataValidationRequiredDO.class);
+        updateDO.setId(existingDO.getId());
         updateDO.setFieldId(existingDO.getFieldId());
         updateDO.setEntityId(existingDO.getEntityId());
         updateDO.setAppId(existingDO.getAppId());
-        updateDO.setGroupId(groupId);
+        updateDO.setGroupId(targetGroupId);
+        requiredRepository.update(updateDO);
 
-        // 执行更新
-        requiredRepository.update(updateDO); // 使用update而不是upsert，避免主键冲突
-        
-        // 同步更新字段的必填状态（根据校验规则的启用状态决定）
         boolean isFieldRequired = updateDO.getIsEnabled() != null && updateDO.getIsEnabled() == 1;
         syncFieldRequiredStatus(existingDO.getFieldId(), isFieldRequired);
     }
@@ -161,52 +164,26 @@ public class MetadataValidationRequiredBuildServiceImpl implements MetadataValid
 
     @Override
     public ValidationRequiredRespVO getById(Long id) {
-        MetadataValidationRequiredDO requiredDO = requiredRepository.findById(id);
-        if (requiredDO == null) {
-            var group = validationRuleGroupService.getValidationRuleGroup(id);
-            if (group != null) {
-                var list = requiredRepository.findByGroupId(group.getId());
-                if (!list.isEmpty()) {
-                    requiredDO = list.get(0);
-                }
-            }
-            if (requiredDO == null) {
-                return null;
-            }
-        }
-
-        // 转换DO为VO
+        var list = requiredRepository.findByGroupId(id);
+        if (list.isEmpty()) { return null; }
+        if (list.size() > 1) { throw new IllegalStateException("数据异常：同一组存在多条必填校验规则(组ID=" + id + ")"); }
+        MetadataValidationRequiredDO requiredDO = list.get(0);
         ValidationRequiredRespVO respVO = BeanUtils.toBean(requiredDO, ValidationRequiredRespVO.class);
-
-        // 查询并设置规则组名称
-        if (requiredDO.getGroupId() != null) {
-            var ruleGroup = validationRuleGroupService.getValidationRuleGroup(requiredDO.getGroupId());
-            if (ruleGroup != null) {
-                respVO.setRgName(ruleGroup.getRgName());
-            }
-        }
-
+        var ruleGroup = validationRuleGroupService.getValidationRuleGroup(requiredDO.getGroupId());
+        if (ruleGroup != null) { respVO.setRgName(ruleGroup.getRgName()); }
         return respVO;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteById(Long id) {
-        // 先获取要删除的记录
-        MetadataValidationRequiredDO requiredDO = requiredRepository.findById(id);
-        if (requiredDO == null) {
-            return; // 记录不存在，直接返回
-        }
-
+        var list = requiredRepository.findByGroupId(id);
+        if (list.isEmpty()) { return; }
+        if (list.size() > 1) { throw new IllegalStateException("数据异常：同一组存在多条必填校验规则(组ID=" + id + ")"); }
+        MetadataValidationRequiredDO requiredDO = list.get(0);
         Long fieldId = requiredDO.getFieldId();
-
-        // 删除必填校验记录
-        requiredRepository.deleteById(id);
-
-        // 同步更新字段的必填状态为非必填
-        if (fieldId != null) {
-            syncFieldRequiredStatus(fieldId, false);
-        }
+        requiredRepository.deleteById(requiredDO.getId());
+        if (fieldId != null) { syncFieldRequiredStatus(fieldId, false); }
     }
     
     /**

@@ -158,55 +158,22 @@ public class MetadataValidationChildNotEmptyBuildServiceImpl implements Metadata
     @Transactional(rollbackFor = Exception.class)
     public void update(ValidationChildNotEmptyUpdateReqVO vo) {
         Assert.notNull(vo, "vo不能为空");
-        Assert.notNull(vo.getId(), "id不能为空");
-        Assert.hasText(vo.getRgName(), "规则组名称不能为空");
-
-        // 查询现有记录获取完整信息
-        MetadataValidationChildNotEmptyDO existing = childNotEmptyRepository.findById(vo.getId());
-        Assert.notNull(existing, "记录不存在");
-
-        // 获取字段信息
+        Assert.notNull(vo.getId(), "groupId不能为空");
+        Long groupIdParam = vo.getId();
+        var list = childNotEmptyRepository.findByGroupId(groupIdParam);
+        Assert.notEmpty(list, "当前子表非空校验规则不存在(组ID=" + groupIdParam + ")");
+        if (list.size() > 1) { throw new IllegalStateException("数据异常：同一组存在多条子表非空校验规则(组ID=" + groupIdParam + ")"); }
+        MetadataValidationChildNotEmptyDO existing = list.get(0);
         MetadataEntityFieldDO field = entityFieldService.getEntityField(String.valueOf(existing.getFieldId()));
         Assert.notNull(field, "字段不存在");
-
-        // 处理规则组：先查找，不存在则创建；若存在但被其他字段复用，则新建
-        Long groupId = null;
-        var existingGroup = ruleGroupService.getByName(vo.getRgName());
-        boolean needCreateGroup = false;
-        if (existingGroup != null) {
-            var groupList = childNotEmptyRepository.findByGroupId(existingGroup.getId());
-            boolean reused = groupList.stream().anyMatch(u -> !u.getFieldId().equals(existing.getFieldId()));
-            if (reused) {
-                needCreateGroup = true;
-            } else {
-                groupId = existingGroup.getId();
-            }
-        } else {
-            needCreateGroup = true;
-        }
-        if (needCreateGroup) {
-            ValidationRuleGroupSaveReqVO groupVO = new ValidationRuleGroupSaveReqVO();
-            groupVO.setRgName(vo.getRgName());
-            groupVO.setRgDesc("自动创建的规则组：" + vo.getRgName());
-            groupVO.setRgStatus(StatusEnumUtil.ACTIVE);
-            groupVO.setValMethod(vo.getValMethod());
-            groupVO.setPopPrompt(vo.getPopPrompt());
-            groupVO.setPopType(vo.getPopType());
-            groupVO.setValidationType("CHILD_NOT_EMPTY");
-            groupVO.setEntityId(field.getEntityId());
-            groupId = ruleGroupService.createValidationRuleGroup(groupVO);
-        }
-        Assert.notNull(groupId, "规则组ID未正确生成");
-
-        // 将 VO 转换为 DO 并设置必要字段
+        Long targetGroupId = groupIdParam;
         MetadataValidationChildNotEmptyDO updateObj = BeanUtils.toBean(vo, MetadataValidationChildNotEmptyDO.class);
+        updateObj.setId(existing.getId());
         updateObj.setFieldId(existing.getFieldId());
         updateObj.setEntityId(existing.getEntityId());
         updateObj.setAppId(existing.getAppId());
-        updateObj.setGroupId(groupId);
-
-        // 执行更新
-        childNotEmptyRepository.update(updateObj); // 使用update而不是upsert，避免主键冲突
+        updateObj.setGroupId(targetGroupId);
+        childNotEmptyRepository.update(updateObj);
     }
 
     @Override
