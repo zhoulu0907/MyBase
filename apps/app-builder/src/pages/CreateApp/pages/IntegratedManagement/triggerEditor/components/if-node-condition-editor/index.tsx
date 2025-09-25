@@ -75,7 +75,7 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
   const [fieldOptions, setFieldOptions] = useState<TreeSelectDataType[]>([]);
   const [entityFieldValidationTypes, setEntityFieldValidationTypes] = useState<EntityFieldValidationTypes[]>([]);
 
-  // 过滤为空的条件
+  // 过滤为空的条件和field字段不存在的条件
   useEffect(() => {
     console.log('filterCondition:  ', filterCondition);
     if (Array.isArray(filterCondition)) {
@@ -479,12 +479,9 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
   };
 
   const showTriggerElement = (params: any, options: TreeSelectDataType[]) => {
-    // console.log(params.value);
-
     if (params.value) {
       const parentId = params.value.split('.')[0];
       const parentNode = options.find((item) => item.key == parentId);
-
       const childrenName = parentNode?.children?.find((item) => item.key == params.value)?.title;
       return `${parentNode?.title} - ${childrenName}`;
     }
