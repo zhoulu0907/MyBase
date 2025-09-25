@@ -3,6 +3,9 @@ package com.cmsr.onebase.module.formula.demo;
 import com.cmsr.onebase.module.formula.build.config.FormulaEngineProperties;
 import com.cmsr.onebase.module.formula.build.service.engine.FormulaEngineServiceImpl;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * 简单的FormulaJS测试程序
  * 用于验证FormulaJS v4.5.3集成是否正确工作
@@ -51,6 +54,18 @@ public class SimpleFormulaTest {
             String formula4 = "ROUND(3.14159, 2)";
             Object result4 = formulaEngineService.executeFormula(formula4);
             System.out.println("公式: " + formula4 + " = " + result4);
+
+            // 测试自定义函数
+            System.out.println("\n测试自定义函数:");
+
+            // 混合参数测试
+            Map<String, Object> params5 = new HashMap<>();
+            params5.put("name", "张三");
+            params5.put("score1", 85.5);
+            String formula5 = "GETUSER('hello')";
+            Object result5 = formulaEngineService.executeFormulaWithParams(formula5, params5);
+            System.out.println("公式: " + formula5 + " = " + result5);
+
 
             System.out.println("\n=== 测试完成，FormulaJS集成成功！ ===");
 
