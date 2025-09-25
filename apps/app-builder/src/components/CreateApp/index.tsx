@@ -19,9 +19,8 @@ import formSVG from '@/assets/images/form_icon.svg';
 import themeSelectedSVG from '@/assets/images/theme_selected_icon.svg';
 import tickSVG from '@/assets/images/tick_icon.svg';
 import previewSVG from '@/assets/images/app_preview.svg';
-import { appIcon, appIconColor, appThemeColor, type Options } from './const';
+import { appIcon, appIconColor, appIconPathMapping, appThemeColor, type Options } from './const';
 import styles from './index.module.less';
-import IconPark from '@/components/Iconpark';
 
 type AppStatus = 'create' | 'update';
 interface IProps {
@@ -128,6 +127,12 @@ const CreateApp = (props: IProps) => {
     form.setFieldsValue({ tagIds: normalized });
   };
 
+  /* 根据mapping获取相应的svg路径*/
+  const getIconName = (iconName: string) => {
+    const selectedIconResult = appIconPathMapping.filter(item => item.icon === iconName);
+    return selectedIconResult?.[0]?.path || ""
+  }
+
   return (
     <div className={styles.createApp} style={style}>
       <div className={styles.preview} style={{ backgroundColor: previewBgColor }}>
@@ -196,7 +201,7 @@ const CreateApp = (props: IProps) => {
                 background: iconColor
               }}
             >
-              {iconName && <IconPark iconName={iconName}/>}
+              {iconName && <img src={getIconName(iconName)} />}
               <Popconfirm
                 icon={null}
                 title={null}
@@ -213,18 +218,20 @@ const CreateApp = (props: IProps) => {
                   setIconName('');
                   setIconColor('');
                 }}
+                style={{maxWidth:"381px"}}
                 content={
                   <>
                     <div className={styles.avatarWrapper}>
-                      {appIcon.map((icon, index) => (
+                      {appIconPathMapping.map((item, index) => (
                         <div
                           className={styles.avatar}
                           key={index}
-                          style={{ backgroundColor: icon === iconName ? iconColor : '#d9d9d9' }}
-                          onClick={() => setIconName(icon)}
+                          style={{ backgroundColor: item.icon === iconName ? iconColor : '#d9d9d9' }}
+                          onClick={() => setIconName(item.icon)}
                         >
                           {/* <i className={`iconfont ${icon}`} /> */}
-                          <IconPark iconName={icon}/>
+                          {/* <IconPark iconName={icon}/> */}
+                          <img src={item.path} />
                         </div>
                       ))}
                     </div>
