@@ -31,6 +31,8 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({ cpId, cpType, pageCompone
   // 获取组件配置
   const componentConfig = getComponentConfig(pageComponentSchema, cpType);
 
+  console.log('componentConfig',componentConfig)
+
   // 渲染对应的组件
   const renderComponent = () => {
     switch (cpType) {

@@ -59,8 +59,8 @@ const DynamicFileConfig: React.FC<DynamicFileConfigProps> = ({ handlePropsChange
                   if (uploadImgUrl !== '') {
                     const newFileInfo = {
                       file: uploadImgUrl,
-                      tetx: file.name,
-                      url: ''
+                      name: file.name,
+                      url: uploadImgUrl
                     };
                     setFileConfig((prev) => [...prev, newFileInfo]);
                     handlePropsChange(fileKey, [...fileConfig, newFileInfo]);
@@ -96,8 +96,9 @@ const DynamicFileConfig: React.FC<DynamicFileConfigProps> = ({ handlePropsChange
                 top: 4
               }}
               onClick={() => {
-                setFileConfig((prev) => prev.filter((v) => v.file !== item.file));
-                handlePropsChange(fileKey, []);
+                const newFileConfig = fileConfig.filter((v) => v.file !== item.file)
+                setFileConfig(newFileConfig);
+                handlePropsChange(fileKey, newFileConfig);
                 Message.info(`删除成功`);
               }}
             />
