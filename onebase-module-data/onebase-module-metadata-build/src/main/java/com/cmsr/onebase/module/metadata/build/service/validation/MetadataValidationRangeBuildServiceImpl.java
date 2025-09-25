@@ -121,7 +121,22 @@ public class MetadataValidationRangeBuildServiceImpl implements MetadataValidati
         MetadataValidationRangeDO existingDO = list.get(0);
         MetadataEntityFieldDO entityFieldDO = entityFieldService.getEntityField(String.valueOf(existingDO.getFieldId()));
         Assert.notNull(entityFieldDO, "字段不存在");
-        Long targetGroupId = groupIdParam; // 简化：不迁移组
+        Long targetGroupId = groupIdParam; // 不迁移组，但同步组配置
+        var groupDO = ruleGroupService.getValidationRuleGroup(groupIdParam);
+        if (groupDO != null) {
+            boolean needGroupUpdate = false;
+            ValidationRuleGroupSaveReqVO updateGroupVO = new ValidationRuleGroupSaveReqVO();
+            updateGroupVO.setId(groupDO.getId());
+            updateGroupVO.setRgName(groupDO.getRgName());
+            updateGroupVO.setRgDesc(groupDO.getRgDesc());
+            updateGroupVO.setRgStatus(groupDO.getRgStatus());
+            updateGroupVO.setValidationType(groupDO.getValidationType());
+            updateGroupVO.setEntityId(groupDO.getEntityId());
+            if (reqVO.getPopPrompt() != null && !reqVO.getPopPrompt().equals(groupDO.getPopPrompt())) { updateGroupVO.setPopPrompt(reqVO.getPopPrompt()); needGroupUpdate = true; }
+            if (reqVO.getValMethod() != null && !reqVO.getValMethod().equals(groupDO.getValMethod())) { updateGroupVO.setValMethod(reqVO.getValMethod()); needGroupUpdate = true; }
+            if (reqVO.getPopType() != null && !reqVO.getPopType().equals(groupDO.getPopType())) { updateGroupVO.setPopType(reqVO.getPopType()); needGroupUpdate = true; }
+            if (needGroupUpdate) { ruleGroupService.updateValidationRuleGroup(updateGroupVO); }
+        }
         MetadataValidationRangeDO updateDO = BeanUtils.toBean(reqVO, MetadataValidationRangeDO.class);
         updateDO.setId(existingDO.getId());
         updateDO.setFieldId(existingDO.getFieldId());
@@ -156,6 +171,8 @@ public class MetadataValidationRangeBuildServiceImpl implements MetadataValidati
         if (list.isEmpty()) { return; }
         if (list.size() > 1) { throw new IllegalStateException("数据异常：同一组存在多条范围校验规则(组ID=" + id + ")"); }
         MetadataValidationRangeDO rangeDO = list.get(0);
+        Long groupId = rangeDO.getGroupId();
         rangeRepository.deleteById(rangeDO.getId());
+        if (groupId != null) { ruleGroupService.safeDeleteGroupDirect(groupId); }
     }
 }

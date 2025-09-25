@@ -157,6 +157,16 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void safeDeleteGroupDirect(Long groupId) {
+        if (groupId == null) { return; }
+        MetadataValidationRuleGroupDO group = validationRuleGroupRepository.findById(groupId);
+        if (group == null) { return; }
+        validationRuleDefinitionService.deleteByGroupId(groupId);
+        validationRuleGroupRepository.deleteById(groupId);
+    }
+
+    @Override
     public MetadataValidationRuleGroupDO getValidationRuleGroup(Long id) {
         return validationRuleGroupRepository.findById(id);
     }

@@ -92,7 +92,9 @@ public class MetadataValidationChildNotEmptyBuildServiceImpl implements Metadata
         }
         
         // 执行删除
+        Long groupId = existing.getGroupId();
         childNotEmptyRepository.deleteById(id);
+        if (groupId != null) { ruleGroupService.safeDeleteGroupDirect(groupId); }
     }
 
     @Override
@@ -167,6 +169,21 @@ public class MetadataValidationChildNotEmptyBuildServiceImpl implements Metadata
         MetadataEntityFieldDO field = entityFieldService.getEntityField(String.valueOf(existing.getFieldId()));
         Assert.notNull(field, "字段不存在");
         Long targetGroupId = groupIdParam;
+        var groupDO = ruleGroupService.getValidationRuleGroup(groupIdParam);
+        if (groupDO != null) {
+            boolean needGroupUpdate = false;
+            ValidationRuleGroupSaveReqVO updateGroupVO = new ValidationRuleGroupSaveReqVO();
+            updateGroupVO.setId(groupDO.getId());
+            updateGroupVO.setRgName(groupDO.getRgName());
+            updateGroupVO.setRgDesc(groupDO.getRgDesc());
+            updateGroupVO.setRgStatus(groupDO.getRgStatus());
+            updateGroupVO.setValidationType(groupDO.getValidationType());
+            updateGroupVO.setEntityId(groupDO.getEntityId());
+            if (vo.getPopPrompt() != null && !vo.getPopPrompt().equals(groupDO.getPopPrompt())) { updateGroupVO.setPopPrompt(vo.getPopPrompt()); needGroupUpdate = true; }
+            if (vo.getValMethod() != null && !vo.getValMethod().equals(groupDO.getValMethod())) { updateGroupVO.setValMethod(vo.getValMethod()); needGroupUpdate = true; }
+            if (vo.getPopType() != null && !vo.getPopType().equals(groupDO.getPopType())) { updateGroupVO.setPopType(vo.getPopType()); needGroupUpdate = true; }
+            if (needGroupUpdate) { ruleGroupService.updateValidationRuleGroup(updateGroupVO); }
+        }
         MetadataValidationChildNotEmptyDO updateObj = BeanUtils.toBean(vo, MetadataValidationChildNotEmptyDO.class);
         updateObj.setId(existing.getId());
         updateObj.setFieldId(existing.getFieldId());

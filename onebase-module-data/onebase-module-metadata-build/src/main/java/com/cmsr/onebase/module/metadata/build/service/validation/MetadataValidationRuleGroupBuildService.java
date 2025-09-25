@@ -88,4 +88,10 @@ public interface MetadataValidationRuleGroupBuildService {
      */
     Long ensureFieldRuleGroup(Long fieldId);
 
+    /**
+     * 直接物理删除规则组（调用方需保证无其他类型引用）。
+     * @param groupId 规则组ID
+     */
+    void safeDeleteGroupDirect(Long groupId);
+
 }

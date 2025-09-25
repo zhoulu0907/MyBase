@@ -71,7 +71,9 @@ public class MetadataValidationFormatBuildServiceImpl implements MetadataValidat
         if (list.isEmpty()) { return; }
         if (list.size() > 1) { throw new IllegalStateException("数据异常：同一组存在多条格式校验规则(组ID=" + id + ")"); }
         MetadataValidationFormatDO existing = list.get(0);
+        Long groupId = existing.getGroupId();
         formatRepository.deleteById(existing.getId());
+        if (groupId != null) { ruleGroupService.safeDeleteGroupDirect(groupId); }
     }
 
     @Override
@@ -149,6 +151,21 @@ public class MetadataValidationFormatBuildServiceImpl implements MetadataValidat
         MetadataEntityFieldDO field = entityFieldService.getEntityField(String.valueOf(existing.getFieldId()));
         Assert.notNull(field, "字段不存在");
         Long targetGroupId = groupIdParam;
+        var groupDO = ruleGroupService.getValidationRuleGroup(groupIdParam);
+        if (groupDO != null) {
+            boolean needGroupUpdate = false;
+            ValidationRuleGroupSaveReqVO updateGroupVO = new ValidationRuleGroupSaveReqVO();
+            updateGroupVO.setId(groupDO.getId());
+            updateGroupVO.setRgName(groupDO.getRgName());
+            updateGroupVO.setRgDesc(groupDO.getRgDesc());
+            updateGroupVO.setRgStatus(groupDO.getRgStatus());
+            updateGroupVO.setValidationType(groupDO.getValidationType());
+            updateGroupVO.setEntityId(groupDO.getEntityId());
+            if (vo.getPopPrompt() != null && !vo.getPopPrompt().equals(groupDO.getPopPrompt())) { updateGroupVO.setPopPrompt(vo.getPopPrompt()); needGroupUpdate = true; }
+            if (vo.getValMethod() != null && !vo.getValMethod().equals(groupDO.getValMethod())) { updateGroupVO.setValMethod(vo.getValMethod()); needGroupUpdate = true; }
+            if (vo.getPopType() != null && !vo.getPopType().equals(groupDO.getPopType())) { updateGroupVO.setPopType(vo.getPopType()); needGroupUpdate = true; }
+            if (needGroupUpdate) { ruleGroupService.updateValidationRuleGroup(updateGroupVO); }
+        }
         MetadataValidationFormatDO updateObj = BeanUtils.toBean(vo, MetadataValidationFormatDO.class);
         updateObj.setId(existing.getId());
         updateObj.setFieldId(existing.getFieldId());
