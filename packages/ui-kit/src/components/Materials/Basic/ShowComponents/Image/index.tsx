@@ -6,15 +6,15 @@ import '../index.css';
 import './index.css';
 
 const XImage = memo((props: XImageConfig & { runtime?: boolean }) => {
-  const { status, fillStyle, maxHeight, runtime = true, imageCofig } = props;
-  console.log('imageCofig:',imageCofig)
+  const { status, fillStyle, maxHeight, runtime = true, imageConfig } = props;
+  console.log('imageConfig:',imageConfig)
   return (
      <Image
         className='formWrapper imageStyle'
         width={'100%'}
         height={300}
         preview={runtime}
-        src={imageCofig}
+        src={imageConfig}
         style={{
           '--fit': fillStyle,
           '--maxHeight': maxHeight,
