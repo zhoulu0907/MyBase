@@ -21,6 +21,7 @@ import tickSVG from '@/assets/images/tick_icon.svg';
 import previewSVG from '@/assets/images/app_preview.svg';
 import { appIcon, appIconColor, appThemeColor, type Options } from './const';
 import styles from './index.module.less';
+import IconPark from '@/components/Iconpark';
 
 type AppStatus = 'create' | 'update';
 interface IProps {
@@ -195,7 +196,7 @@ const CreateApp = (props: IProps) => {
                 background: iconColor
               }}
             >
-              {iconName && <i className={`iconfont ${iconName}`} />}
+              {iconName && <IconPark iconName={iconName}/>}
               <Popconfirm
                 icon={null}
                 title={null}
@@ -222,7 +223,8 @@ const CreateApp = (props: IProps) => {
                           style={{ backgroundColor: icon === iconName ? iconColor : '#d9d9d9' }}
                           onClick={() => setIconName(icon)}
                         >
-                          <i className={`iconfont ${icon}`} />
+                          {/* <i className={`iconfont ${icon}`} /> */}
+                          <IconPark iconName={icon}/>
                         </div>
                       ))}
                     </div>
